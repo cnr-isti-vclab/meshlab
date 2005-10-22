@@ -26,7 +26,7 @@
 #include <QMainWindow>
 #include <QWorkspace>
 #include <QStringList>
-#include "MeshModel.h"
+#include "meshmodel.h"
 
 class QAction;
 class QActionGroup;
