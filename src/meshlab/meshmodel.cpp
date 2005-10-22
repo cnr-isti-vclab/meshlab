@@ -1,4 +1,4 @@
-#include "MeshModel.h"
+#include "meshmodel.h"
 #include<vcg/complex/trimesh/update/bounding.h>
 
 bool MeshModel::Open(const char *filename)

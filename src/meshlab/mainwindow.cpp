@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.2  2005/10/22 10:23:28  mariolatronico
+on meshlab.pro added a lib dependency , on other files modified #include directive to allow compilation on case sensitive o.s.
+
 Revision 1.1  2005/10/18 10:38:02  cignoni
 First rough version. It simply load a mesh.
 
@@ -31,7 +34,7 @@ First rough version. It simply load a mesh.
 
 
 #include <QtGui>
-#include <QToolBAr>
+#include <QToolBar>
 
 
 #include "interfaces.h"
