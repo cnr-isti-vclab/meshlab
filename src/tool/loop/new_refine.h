@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.2  2005/10/24 13:58:22  mariolatronico
+Added a preliminary version of EvenPointLoop function of Loop's alghoritm
+
 Revision 1.1  2005/10/24 11:41:54  giec
 Creata la sottocartella test/loop con dentro un progetto da cui iniziare per implementare l'algoritmo di Loop
 
@@ -109,7 +112,7 @@ template<class MESH_TYPE>
 struct MidPoint : public   std::unary_function<face::Pos<typename MESH_TYPE::FaceType> ,  typename MESH_TYPE::CoordType >
 {
 	void operator()(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType>  ep){
-		nv.P()=   (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
+		nv.P()=   (ep.f->V(ep.z)->P() + ep.f->V1(ep.z)->P())/2.0;
 
 		if( MESH_TYPE::HasPerVertexNormal())
 			nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
@@ -672,20 +675,41 @@ d5------d1------d2	->	d5--e5--d1--e2--d2			 l--M--r
 		d6------d7							d6------d7					
 
 *******************************************************
-// Nuovi punti (e.g. midpoint)
+
+*/
+
+// Nuovi punti (e.g. midpoint), ossia odd vertices
+// 
 template<class MESH_TYPE>
 struct OddPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::FaceType> , typename MESH_TYPE::CoordType>
 {
+	void operator()(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType>  ep)	{	
+		face::Pos<typename MESH_TYPE::FaceType> he(ep.f,ep.z,ep.f->V(ep.z));
+		typename MESH_TYPE::CoordType *l,*r,*u,*d;
+		l = &he.v->P();
+		he.FlipV();
+		r = &he.v->P();
+		he.FlipE();	he.FlipV();
+		u = &he.v->P();
+		he.FlipV();	he.FlipE();
+		assert(&he.v->P()== r); // back to r
+		he.FlipF();	he.FlipE();	he.FlipV();
+		d = &he.v->P();
 
+		// abbiamo i punti l,r,u e d per ottenere M in maniera pesata
+	
+		nv.P()=((*l)*(3.0/8.0)+(*r)*(3.0/8.0)+(*d)*(1.0/8.0)+(*u)*(1.0/8.0));
+		// dovrebbe pigliare il vertice medio
+	}
 
 }
 
-// vecchi punti
+// vecchi punti, ossia even vertices
 template<class MESH_TYPE>
 struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::FaceType> , typename MESH_TYPE::CoordType>
 {
 }
-*/
+
 
 template<class MESH_TYPE>
 struct MidPointPlane : public std::unary_function<face::Pos<typename MESH_TYPE::FaceType> , typename MESH_TYPE::CoordType>
