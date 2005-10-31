@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2005/10/31 17:17:47  cignoni
+Sketched the interface  of the odd/even refine function
+
 Revision 1.2  2005/10/22 10:23:28  mariolatronico
 on meshlab.pro added a lib dependency , on other files modified #include directive to allow compilation on case sensitive o.s.
 
@@ -40,7 +43,7 @@ First rough version. It simply load a mesh.
 #include "interfaces.h"
 #include "mainwindow.h"
 #include "glarea.h"
-//#include "plugindialog.h"
+#include "plugindialog.h"
 
 MainWindow::MainWindow()
 {

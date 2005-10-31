@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.4  2005/10/31 17:17:47  cignoni
+Sketched the interface  of the odd/even refine function
+
 Revision 1.3  2005/10/26 14:43:32  mariolatronico
 on OddPointLoop added control on border case
 
@@ -135,6 +138,15 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 {
 	
 };
+
+
+template<class MESH_TYPE, class EVEN_VERT, class ODD_VERT, class EDGEPRED>
+bool RefineOddEvenE(MESH_TYPE &m, EVEN_VERT even, ODD_VERT odd, EDGEPRED ep,bool RefineSelected=false)
+{
+  1) calcola nuova pos vertici old e memorizza in un vett ausiliairio
+  2) invoca RefineE e crea i nuovi vertici nella giusta posizione
+  3) assegna ai vecchi vertici (i primi n) le posizioni calcolate al punto 1
+}
 
 
 
