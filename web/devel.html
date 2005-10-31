@@ -2,28 +2,42 @@
 <html>
 <head>
 
+
+  
   <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
+
+  
+
+
+  
   <title>Meshlab Development</title>
-
-
   <meta name="author" content="Paolo Cignoni">
 
+
+  
   <meta name="keywords" content="mesh 3d processing meshlab scanning">
 
+
+  
   <meta name="description" content="Course Web page">
 
+
+  
   <meta name="robots" content="all">
 
-  <link media="all" rel="stylesheet" href="style.css" type="text/css">
 
+  
+  <link media="all" rel="stylesheet" href="style.css" type="text/css">
 </head>
 
 
 <body>
 
+
 <div id="leftcontent">
 <h1>MeshLab:
 Development page</h1>
+
 
 <p class="body"> This page is devoted to some internal
 development notes. Given the
@@ -31,61 +45,84 @@ linguistic coherency among developers they will be only&nbsp;in
 italian. Sorry.
 </p>
 
+
 <h2>CVS&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 &nbsp;</h2>
+
 
 <p class="body"> Al solito mi raccomando di seguire tutte
 le solite pratiche del bravo programmatore: <br>
 
+
 </p>
 
+
 <ul>
+
 
   <li>Fate update ogni volta che vi mettete a lavorare, non solo
 del repository di MeshLab, ma anche di quello di VCG</li>
 
+
   <li>Fate edit delle cose che iniziate a cambiare,</li>
+
 
   <li>Prima di fare edit controllate che non l'abbia in edit
 qualcun altro,</li>
 
+
   <li>Non lasciate in edit le cose per troppo tempo,</li>
+
 
   <li>Non committate mai cose che non compilano o che non fanno
 funzionare le cose degli altri,</li>
 
+
   <li>Committate spesso (compatibilmente con quanto di cui sopra).</li>
+
 
   <li>Commentate <span style="font-weight: bold; font-style: italic;">SEMPRE </span>ogni
 vostro commit (in inglese please) </li>
 
+
 </ul>
 
+
 <h2>Web</h2>
+
 
 <p class="body"> Le paginette web di sourceforge sono
 tenute anche loro in cvs. <br>
 
+
 Quindi se fate modifiche fatele sul vostro file system, committatele e
 poi a mano fate update tramite ftp.<br>
+
 
 (in alternativa qualcuno che ha voglia potrebbe settare un task cron
 sulla shell di sf che aggiorni la copia in public_html direttamente via
 cvs update una volta al giorno). Il comando da dare su shell.sf.net una
 volta dentro la dir meshlab/htdocs e'</p>
 
+
 <p class="body"> cvs -d
 :pserver:anonymous@cvs1:/cvsroot/meshlab update</p>
 
+
 <p class="body"></p>
+
 
 <h3>Note di Compilazione</h3>
 
+
 <p class="body">Si assume che&nbsp;</p>
+
 
 <ol>
 
+
   <li>QT 4.0 sia installato</li>
+
 
   <li>il modulo cvs meshlab e quello di vcg siano allo stesso
 livello e
@@ -94,7 +131,9 @@ dir chiamata sf. (ad
 es. dovreste avere qualcosa tipo \doc\sf\vcg\space\point3.h e
 \doc\meshlab\src\meshlab\meshlab.pro )</li>
 
+
 </ol>
+
 
 <p class="body">
 La libreria VCG, pagina ufficiale <a href="http://vcg.sourceforge.net">vcg.sf.net</a>,&nbsp;e'
@@ -102,47 +141,64 @@ scaricabile in cvs
 anonimo
 </p>
 
+
 <div style="text-align: center;">&nbsp;:ext:anonymous@cvs.sourceforge.net:/cvsroot/vcg<br>
 
+
 </div>
+
 
 <p class="body"> Gli esempi di base della libreria li
 trovate sotto sf/apps/sample.
 Lasciate perdere la roba sotto test.
 </p>
 
+
 <h2>Task</h2>
+
 
 <p class="body"> I vari task che vi sono assegnati sono registrati come task dei
 rispettivi <a href="https://sourceforge.net/pm/?group_id=149444">sottoprogetti</a>
 che fanno parte di MeshLab&nbsp; </p>
 
+
 <h3><a href="https://sourceforge.net/pm/task.php?group_project_id=44906&amp;group_id=149444&amp;func=browse">Gruppo
 Filtering</a></h3>
 
+
 <span style="font-style: italic;">Latronico, Venturi </span><br style="font-style: italic;">
+
 
 <br>
 
+
 <ol>
+
 
   <li><a href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120436&amp;group_id=149444&amp;group_project_id=44906">LOOP</a>
 Implementare la tecnica di subdivision surface di Loop.<br>
 
+
 Vi consiglio di partire da un sorgente di sf/apps/sample, copiarlo
 &nbsp;nella dir meshlab/src/test/loop/ e lavorare li' dentro<br>
 
+
   </li>
 
+
 </ol>
+
 
 <h3><a href="https://sourceforge.net/pm/task.php?group_project_id=44908&amp;group_id=149444&amp;func=browse">Gruppo
 Interface Framework</a></h3>
 
+
 <span style="font-style: italic;">Mochi, Vacca, Portelli<br>
+
 
 </span>
 <ol>
+
 
   <li><a href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120441&amp;group_id=149444&amp;group_project_id=44908">Release</a>:
 Iniziate a prendere confidenza con il meccanismo di release di SF e
@@ -155,50 +211,78 @@ ambiente linux e compilate anche anche per qualche distrib. Fate un
 solo package (chiamato MeshLab) e tre file al suo interno (binari win
 linux e src). </li>
 
+
 </ol>
+
 
 <h3><a href="https://sourceforge.net/pm/task.php?group_project_id=44907&amp;group_id=149444&amp;func=browse">Gruppo
 Rendering</a>&nbsp;</h3>
 
+
 <span style="font-style: italic;">Vannini, Gangemi, Pirro<br>
+
 
 </span>
 <ol>
 
+
   <li><a href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120438&amp;group_id=149444&amp;group_project_id=44907">CURVATURE</a>
 Implementare il calcolo delle curvature principali gaussiane e media
-per una mesh. Inizialmente fate una dir meshlab/src/curvature e fate
+per una mesh. Inizialmente fate una dir meshlab/src/test/curvature e fate
 esperimenti li' dentro prendendo spunto come stile dagli esempi che
 trovate sotto sf/apps/sample. Inizialmente partite aggiungendo ad un
 vostro tipo vertice un membro di tipo curvature con tutto quello che vi
 serve. Poi se tutto funge come si deve lo si aggiunge come componente.</li>
 
+
 </ol>
 
-<h3>Gruppo Selection and IO</h3>
 
-<span style="font-style: italic;">Buzzelli&nbsp;</span>
+<h3><a href="https://sourceforge.net/pm/task.php?group_project_id=44909&amp;group_id=149444&amp;func=browse">Gruppo Selection and IO</a></h3>
+
+
+<span style="font-style: italic;">Buzzelli, Mazzanti</span>
+<ol>
+  <li><a href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120762&amp;group_id=149444&amp;group_project_id=44909">Obj file format</a> input
+		Aggiungere il supporto del formato obj, come documentazione del formato 3d partite da:<br>
+    <a href="http://www.csit.fsu.edu/%7Eburkardt/data/obj/obj.html">http://www.csit.fsu.edu/~burkardt/data/obj/obj.html</a><br>
+    <a href="http://www.dcs.ed.ac.uk/home/mxr/gfx/3d/OBJ.spec">http://www.dcs.ed.ac.uk/home/mxr/gfx/3d/OBJ.spec</a><br>
+Raccogliete anche un po di modelli 3d obj liberi che esemplifichino i
+vari tipi di attributi che possono comparire nei modelli. </li>
+</ol>
+
+		<span style="font-style: italic;"><br>
+&nbsp;&nbsp;&nbsp; </span>
 <dl>
+
 
 </dl>
 
+
 </div>
+
 
 <div id="rightcontent">
 <a href="https://sourceforge.net/projects/meshlab/"><img src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2" alt="SourceForge.net Logo" border="0" height="37" width="125"></a>
 <p class="menu"><a href="http://meshlab.sourceforge.net">Main
 Page&nbsp;</a></p>
 
+
 <p class="menu"><a href="https://sourceforge.net/project/showfiles.php?group_id=149444">Download</a></p>
+
 
 <p class="menu"><a href="http://cvs.sourceforge.net/viewcvs.py/meshlab/">CVS</a></p>
 
+
 <p class="menu"><a href="https://sourceforge.net/pm/?group_id=149444">TASK</a></p>
+
 
 <p class="menu"><a href="https://sourceforge.net/projects/meshlab/">SF project
 page</a></p>
 
+
 </div>
+
 
 </body>
 </html>
