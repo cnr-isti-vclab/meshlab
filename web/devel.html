@@ -105,11 +105,20 @@ cvs update una volta al giorno). Il comando da dare su shell.sf.net una
 volta dentro la dir meshlab/htdocs e'</p>
 
 
-<p class="body"> cvs -d
+<p style="font-family: monospace;" class="body"> cvs -d
 :pserver:anonymous@cvs1:/cvsroot/meshlab update</p>
 
 
-<p class="body"></p>
+<h2>Mailing List</h2>
+<p>C'e' una mailing list su sourceforge cui siete pregati di iscrivervi tutti:
+</p>
+<p><a class="moz-txt-link-freetext" href="http://lists.sourceforge.net/lists/listinfo/meshlab-devel">http://lists.sourceforge.net/lists/listinfo/meshlab-devel</a></p>
+<p>La lista la useremo per tutte le comunicazioni semi-urgenti (e.g. quelle 
+che uno si aspetta vengano recepite entro un giorno) che riguardano 
+soprattutto lo sviluppo di MeshLab. Ad esempio per essere sicuri che 
+tutti sappiano cosa succede nel caso di cambi significativi di 
+interfacce comuni...
+</p>
 
 
 <h3>Note di Compilazione</h3>
@@ -180,7 +189,7 @@ Implementare la tecnica di subdivision surface di Loop.<br>
 
 
 Vi consiglio di partire da un sorgente di sf/apps/sample, copiarlo
-&nbsp;nella dir meshlab/src/test/loop/ e lavorare li' dentro<br>
+&nbsp;nella dir <span style="text-decoration: underline; font-style: italic;">meshlab/src/test/loop</span> e lavorare li' dentro<br>
 
 
   </li>
@@ -205,7 +214,7 @@ Iniziate a prendere confidenza con il meccanismo di release di SF e
 fate la prima rel dei binari e dei src di MeshLab. Aggiungete una dir
 "docs" dove mettete i readme che accompagnano la release. Suggerisco di
 scegliere subito un naming preciso per le release (e per i file che
-compongono la release) copiate da altri progetti (ad es metro di vcg) e
+compongono la release) copiate da altri progetti (ad es <span style="font-style: italic;">metro</span> di vcg) e
 scrivete le vostre scelte da qualche parte. Procuratevi anche un
 ambiente linux e compilate anche anche per qualche distrib. Fate un
 solo package (chiamato MeshLab) e tre file al suo interno (binari win
@@ -228,7 +237,7 @@ Rendering</a>&nbsp;</h3>
 
   <li><a href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120438&amp;group_id=149444&amp;group_project_id=44907">CURVATURE</a>
 Implementare il calcolo delle curvature principali gaussiane e media
-per una mesh. Inizialmente fate una dir meshlab/src/test/curvature e fate
+per una mesh. Inizialmente fate una dir <span style="font-style: italic;">meshlab/src/test/curvature</span> e fate
 esperimenti li' dentro prendendo spunto come stile dagli esempi che
 trovate sotto sf/apps/sample. Inizialmente partite aggiungendo ad un
 vostro tipo vertice un membro di tipo curvature con tutto quello che vi
