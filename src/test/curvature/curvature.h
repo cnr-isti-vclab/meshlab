@@ -7,7 +7,7 @@ namespace vcg {
 		template <class T> class EmptyCurvature: public T {
 		public:
 			typedef float CurvatureType;
-			CurvatureType &Curv() { return CurvatureType(0.0f); }
+			CurvatureType &Curv() { assert(0); return CurvatureType(0.0f); }
 			static bool HasCurvature()   { return false; }
 		};
 
