@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.2  2005/11/09 11:01:10  buzzelli
+OBJ file importing mechanism extended for faces with more than four vertices.
+
 Revision 1.1  2005/11/08 17:45:26  buzzelli
 Added first working implementation of OBJ file importer.
 
@@ -154,16 +157,42 @@ static int OpenAscii( OpenMeshType &m, const char * filename, CallBackPos *cb=0)
 				(*fi).V(2) = &(m.vert[ v3_index ]);
 				
 				int vertexesPerFace = tokens.size() -1;
-				if (vertexesPerFace == 4)  // add the other triangle
+				//if (vertexesPerFace > 3)  // add the other triangle
+				int iVertex = 3;
+				while (iVertex < vertexesPerFace)  // add other triangles
 				{
-					int v4_index = atoi(tokens[4].c_str());
-					
+					int v4_index = atoi(tokens[++iVertex].c_str());
+						
 					if (v4_index < 0) v4_index += numVertices; else v4_index--;
-	
+		
 					fi=Allocator<OpenMeshType>::AddFaces(m,1);
 					(*fi).V(0) = &(m.vert[ v1_index ]);
 					(*fi).V(1) = &(m.vert[ v3_index ]);
 					(*fi).V(2) = &(m.vert[ v4_index ]);
+
+					// La faccia composta da piu' di tre vertici viene suddivisa in triangoli
+					// secondo lo schema seguente:
+					//                     v5
+					//                    /  \
+					//                   /    \
+					//                  /      \ 
+					//                 v1------v4 
+					//                 |\      /
+					//                 | \    /
+					//                 |  \  /
+					//                v2---v3
+					//
+					// Nell'esempio in figura, il poligono di 5 vertici (v1,v2,v3,v4,v5)
+					// viene suddiviso nei triangoli (v1,v2,v3), (v1,v3,v4) e (v1,v4,v5).
+					// In questo modo il vertice v1 diventa il vertice comune di tutti i
+					// triangoli in cui il poligono originale viene suddiviso, e questo
+					// puo' portare alla generazione di triangoli molto 'sottili' (tuttavia
+					// con questo metodo si ha la garanzia che tutti i triangoli generati
+					// conservino la stessa orientazione).
+					// TODO: provare a suddividere il poligono in triangoli in maniera piu'
+					// uniforme...
+
+					v3_index = v4_index;
 				}
 				// TODO: verticesPerFace may be more than 4..
 				// TODO: gestire opportunamente presenza di errori nel file
