@@ -25,12 +25,11 @@
   History
 
  $Log$
+ Revision 1.4  2005/11/10 00:06:43  fmazzant
+ Added comment code
+
  Revision 1.3  2005/11/10 00:01:50  fmazzant
  Added comment revision
-
-
- Revision 1.3  2005/11/09 01:36:10  fmazzant
-Added comment revision
 
 Revision 1.2  2005/11/09 23:36:10  fmazzant
 Up to date method Save
@@ -61,8 +60,8 @@ namespace vcg
 				
 				static bool Save(SaveMeshType &m, const char * filename , bool binary =true, const char *objectname=0)	
 				{
-					if(m.vert.size() == 0)return false;
-					if(m.face.size() == 0)return false;
+					//controlla se il numero dei vertici e quello delle facce sono diversi da zero.
+					if(m.vert.size() == 0|m.face.size() == 0)return false;
 
 					if(binary)
 					{
