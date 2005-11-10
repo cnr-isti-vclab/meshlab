@@ -24,6 +24,20 @@
 /****************************************************************************
   History
 
+ $Log$
+ Revision 1.3  2005/11/10 00:01:50  fmazzant
+ Added comment revision
+
+
+ Revision 1.3  2005/11/09 01:36:10  fmazzant
+Added comment revision
+
+Revision 1.2  2005/11/09 23:36:10  fmazzant
+Up to date method Save
+
+Revision 1.1  2005/11/08 17:45:26  fmazzant
+Added  implementation of OBJ file exporter.
+
 ****************************************************************************/
 
 #ifndef __VCGLIB_EXPORT_OBJ
@@ -89,7 +103,7 @@ namespace vcg
 					}
 				}
 				/*
-					restituisce l'indece del vertice, aggiunto di una unita'.
+					restituisce l'indice del vertice, aggiunto di una unita'.
 				*/
 				static int GetIndexVertex(SaveMeshType &m,Point3f p)
 				{
