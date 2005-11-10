@@ -25,11 +25,9 @@
   History
 
  $Log$
- Revision 1.2  2005/11/10 00:13:48  fmazzant
- Added main method for testing import_obj.h and export_obj.h //old
- Added comment code
- Added History Log CVS
-
+ Revision 1.3  2005/11/10 00:15:15  fmazzant
+ bug-fix History
+ 
 
  *****************************************************************************/
 
