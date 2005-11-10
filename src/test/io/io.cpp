@@ -1,3 +1,37 @@
+/****************************************************************************
+* VCGLib                                                            o o     *
+* Visual and Computer Graphics Library                            o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2004                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
+/****************************************************************************
+  History
+
+ $Log$
+ Revision 1.2  2005/11/10 00:13:48  fmazzant
+ Added main method for testing import_obj.h and export_obj.h //old
+ Added comment code
+ Added History Log CVS
+
+
+ *****************************************************************************/
 
 // mesh definition 
 #include <vcg/simplex/vertex/with/vn.h>
@@ -25,12 +59,20 @@ struct MyMesh: public vcg::tri::TriMesh< vector<MyVertex>, vector<MyFace> >{};
 int main(int argc, char **argv)
 {
 	if(argc < 3){return 0;}
+	
 	MyMesh m;
-
-
+	
+	//open file OBJ 
 	vcg::tri::io::ImporterOBJ<MyMesh>::OpenAscii(m,argv[1],0); 
+
+	//write copy file OBJ
 	bool result = vcg::tri::io::ExporterOBJ<MyMesh>::Save(m,argv[2],false,0);
-	if(result){std::cout << "file is copied!" << std::endl;}else{std::cout << " file is not copied!" << std::endl;}
+
+	//print result
+	if(result)
+		std::cout << "file is copied!" << std::endl;
+	else
+		std::cout << " file is not copied!" << std::endl;
 
     return 0;
 }
