@@ -85,7 +85,10 @@ int  main(int argc, char **argv)
     switch(RefMode){
 			case FLAT:      Refine<MyMesh, MidPoint<MyMesh> >(m,MidPoint<MyMesh>(),length); 					break;
 			case BUTTERFLY: Refine<MyMesh, MidPointButterfly<MyMesh> >(m,MidPointButterfly<MyMesh>(),length); break;
-			case LOOP: Refine<MyMesh, OddPointLoop<MyMesh> >(m,OddPointLoop<MyMesh>(),length); break;
+ 			case LOOP: RefineOddEvenE<MyMesh, OddPointLoop<MyMesh>, EvenPointLoop<MyMesh> >(m,OddPointLoop<MyMesh>(), EvenPointLoop<MyMesh>(),length); break;
+				
+
+//			case LOOP: Refine<MyMesh, EvenPointLoop<MyMesh> >(m, EvenPointLoop<MyMesh>(),length); break;
     }					
   }
   
