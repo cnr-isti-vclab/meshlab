@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.3  2005/11/15 00:01:34  giec
+Implemented a loop for reserch the odd vertex to call on his the evenPointLoop function for smoothing the mesh.
+Only one problem: the marker function are not implemented on vertexplus,that are a condition for use that algorithm.
+
 Revision 1.2  2005/11/14 15:59:19  mariolatronico
 work in progress on RefineEvenOddE for Loop alghoritm
 
@@ -116,9 +120,8 @@ struct OddPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::F
 		d = &he.v->P();
 
 		// abbiamo i punti l,r,u e d per ottenere M in maniera pesata
-	
-		nv.P()=((*l)*(3.0/8.0)+(*r)*(3.0/8.0)+(*d)*(1.0/8.0)+(*u)*(1.0/8.0));
 		
+		nv.P()=((*l)*(3.0/8.0)+(*r)*(3.0/8.0)+(*d)*(1.0/8.0)+(*u)*(1.0/8.0));
 		}
 		
 	}
@@ -237,17 +240,57 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 		oldVertVec.push_back((*vi));
 
 	}
+
+/// inizializzo la funzione di marcamento dei vertici
+//	m.InitVertexIMark ();
+///
+
 	// refine degli odd vertici
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
 
-// 	for (
+	
+/// prova ///
+///varibili d'appoggio
+	int nOcc =0; //numero occorrenze
+	typename MESH_TYPE::VertexType a,b; //per testare l'ugualianza tra vertici
+	typename MESH_TYPE::VertexIterator old; //iteratore per i vertici vecchi
+	typename MESH_TYPE::FaceIterator fi; //iteratore di facce della mesh
 
-// 	for (vector<vertType>::size_t i = oldVertVec.begin();
-// 			 i <= oldVertVec.size();
-// 			 i++) {
-		
-		
-		
+//	m.InitVertexIMark(); //inizializzo il marcatore per vertice (funzionasse!!!)
+
+	for(old = oldVertVec.begin();old != oldVertVec.end(); ++old)
+	{
+	 	for (fi = m.face.begin();fi != m.face.end(); ++fi) 
+		{
+      a = (*old);
+			for(int j=0;j<3;++j)
+			{
+				b = *(*fi).V(j);
+				//funzionassero i marcatori dovrebbe funzionare
+				if((a.P() == b.P()))//(se funzionassero) && ( !m.IsMarked(&b) ))
+				{	//se lo trovo lo marco come trovato
+					
+					//m.Mark(&b); //come sopra
+					nOcc++;
+					std::cout << "trovato! " << nOcc << '\n';
+					//devo marcarli ne sto trovando un po troppi!!!
+					
+					//Dovrebbe essere la chiamata alla evengiusta
+					//even<typename MESH_TYPE::VertexType, face::Pos<typename MESH_TYPE::FaceType> >(b, face::Pos<typename MESH_TYPE::FaceType>( (*fi),j));
+					
+
+					//
+					break;
+				}
+			}
+		}
+	}
+	std::cout << n << '\n';
+/// fine prova ///
+
+ 	//for (vector<vertType>::size_t i = oldVertVec.begin();
+ 	//		 i <= oldVertVec.size();
+ 	//		 i++) {
 // 	}
 
 //  	typename MESH_TYPE::FaceIterator fin;
