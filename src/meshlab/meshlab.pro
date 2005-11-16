@@ -17,7 +17,7 @@ SOURCES        = main.cpp \
 RESOURCES     = meshlab.qrc
 QT           += opengl
 
-INCLUDEPATH += . ../../../sf
+INCLUDEPATH += . ../../../sf C:\code\glew\include
 CONFIG += stl
 win32:LIBS	+= C:\code\glew\lib\glew32.lib 
 unix:LIBS	+= -lGLEW
