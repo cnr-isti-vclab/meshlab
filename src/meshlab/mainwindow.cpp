@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.4  2005/11/16 23:18:54  cignoni
+Added plugins management
+
 Revision 1.3  2005/10/31 17:17:47  cignoni
 Sketched the interface  of the odd/even refine function
 
@@ -62,18 +65,29 @@ MainWindow::MainWindow()
 
     //QTimer::singleShot(500, this, SLOT(aboutPlugins()));
 
-    if(QCoreApplication::instance ()->argc()>0)
-    {
+    if(QCoreApplication::instance ()->argc()>1)
       open(QCoreApplication::instance ()->argv()[1]);
-    }
+    else 
+      QTimer::singleShot(500, this, SLOT(open()));
 
+    loadPlugins();
 }
 
 void MainWindow::open(QString fileName)
 {
 
-    if (fileName.isEmpty()) fileName = QFileDialog::getOpenFileName(this,
-                                    tr("Open File"), QDir::currentPath());
+    if (fileName.isEmpty()) 
+    {
+      /*QStringList types << 
+                       << "Text files (*.txt)"
+                       << "Any files (*)";
+      QFileDialog fd = new QFileDialog( this );
+      fd->setFilters( types );
+      fd->show();*/
+
+      fileName = QFileDialog::getOpenFileName(this,
+                                    tr("Open File"), QDir::currentPath(),"Mesh files (*.ply *.off *.stl)");
+    }
     if (!fileName.isEmpty()) {
         MeshModel *nm= new MeshModel();
         if(!nm->Open(fileName.toAscii())){
@@ -89,9 +103,9 @@ void MainWindow::open(QString fileName)
             VM.push_back(nm);
             GLArea *gla=new GLArea(workspace);
             gla->mm=nm;
+            gla->setWindowTitle(fileName);   
             workspace->addWindow(gla);
             gla->showMaximized();
-            gla->setWindowTitle(fileName);   
             return;
         }
     }
@@ -161,6 +175,9 @@ void MainWindow::createMenus()
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
+    filterMenu = menuBar()->addMenu(tr("&Filter"));
+
+
     menuBar()->addSeparator();
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -183,32 +200,21 @@ void MainWindow::loadPlugins()
 #endif
     pluginsDir.cd("plugins");
 
-  /*  foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+    foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
         QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
         QObject *plugin = loader.instance();
         if (plugin) {
-            BrushInterface *iBrush = qobject_cast<BrushInterface *>(plugin);
-            if (iBrush)
-                addToMenu(plugin, iBrush->brushes(), brushMenu,
-                          SLOT(changeBrush()), brushActionGroup);
-
-            ShapeInterface *iShape = qobject_cast<ShapeInterface *>(plugin);
-            if (iShape)
-                addToMenu(plugin, iShape->shapes(), shapesMenu,
-                          SLOT(insertShape()));
-
-            FilterInterface *iFilter = qobject_cast<FilterInterface *>(plugin);
+            MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
             if (iFilter)
-                addToMenu(plugin, iFilter->filters(), filterMenu,
-                          SLOT(applyFilter()));
-
+                addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));                
+          
             pluginFileNames += fileName;
         }
     }
 
-    brushMenu->setEnabled(!brushActionGroup->actions().isEmpty());
-    shapesMenu->setEnabled(!shapesMenu->actions().isEmpty());
-    filterMenu->setEnabled(!filterMenu->actions().isEmpty());*/
+//    brushMenu->setEnabled(!brushActionGroup->actions().isEmpty());
+// shapesMenu->setEnabled(!shapesMenu->actions().isEmpty());
+    filterMenu->setEnabled(!filterMenu->actions().isEmpty());
 }
 
 void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,
@@ -225,4 +231,13 @@ void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,
             actionGroup->addAction(action);
         }
     }
+}
+
+void MainWindow::applyFilter()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    MeshFilterInterface *iFilter =
+            qobject_cast<MeshFilterInterface *>(action->parent());
+
+    iFilter->applyFilter(action->text(), *(((GLArea *)(workspace->activeWindow()))->mm ), this);
 }

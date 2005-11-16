@@ -29,7 +29,7 @@ class QPoint;
 class QRect;
 class QString;
 class QStringList;
-
+class MeshModel;
 class MeshIOInterface
 {
 public:
@@ -42,8 +42,8 @@ class MeshFilterInterface
 {
 public:
     virtual ~MeshFilterInterface() {}
-
-    virtual QStringList filter() const = 0;
+    virtual bool applyFilter(const QString &filter, MeshModel &m, QWidget *parent) = 0;
+    virtual QStringList filters() const = 0;
 };
 
 class MeshRenderInterface
@@ -55,10 +55,10 @@ public:
 };
 
 Q_DECLARE_INTERFACE(MeshIOInterface,
-                    "com.trolltech.meshlab.MeshIOInterface/1.0")
+                    "vcg.meshlab.MeshIOInterface/1.0")
 Q_DECLARE_INTERFACE(MeshFilterInterface,
-                    "com.trolltech.meshlab.MeshFilterInterface/1.0")
+                    "vcg.meshlab.MeshFilterInterface/1.0")
 Q_DECLARE_INTERFACE(MeshRenderInterface,
-                    "com.trolltech.meshlab.MeshRenderInterface/1.0")
+                    "vcg.meshlab.MeshRenderInterface/1.0")
 
 #endif

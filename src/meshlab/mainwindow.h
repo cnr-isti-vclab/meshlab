@@ -47,6 +47,7 @@ private slots:
     
     void about();
     void aboutPlugins();
+    void applyFilter();
 
 private:
     void createActions();
@@ -67,6 +68,7 @@ private:
     QToolBar *renderToolBar;
     
     QMenu *fileMenu;
+    QMenu *filterMenu;
     QMenu *helpMenu;
     QAction *openAct;
     QAction *saveAsAct;
