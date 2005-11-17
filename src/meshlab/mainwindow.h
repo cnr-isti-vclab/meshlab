@@ -48,6 +48,7 @@ private slots:
     void about();
     void aboutPlugins();
     void applyFilter();
+	void viewInTile();
 
 private:
     void createActions();
@@ -69,6 +70,7 @@ private:
     
     QMenu *fileMenu;
     QMenu *filterMenu;
+	QMenu *viewMenu;
     QMenu *helpMenu;
     QAction *openAct;
     QAction *saveAsAct;
@@ -76,6 +78,7 @@ private:
     QAction *aboutAct;
     QAction *aboutQtAct;
 	QAction *aboutPluginsAct;
+	QAction *viewInTileAct;
 };
 
 #endif

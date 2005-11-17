@@ -24,8 +24,11 @@
   History
 
 $Log$
+Revision 1.6  2005/11/17 22:15:52  davide_portelli
+Added menu View->Tile
+
 Revision 1.5  2005/11/17 20:51:00  davide_portelli
-Aggiunta Help->About Plugins
+Added Help->About Plugins
 
 Revision 1.4  2005/11/16 23:18:54  cignoni
 Added plugins management
@@ -164,6 +167,9 @@ void MainWindow::createActions()
 	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
     connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
 
+	viewInTileAct = new QAction(tr("&Tile"), this);
+    connect(viewInTileAct, SIGNAL(triggered()), this, SLOT(viewInTile()));
+
 }
 
 void MainWindow::createToolBars()
@@ -182,6 +188,9 @@ void MainWindow::createMenus()
     fileMenu->addAction(exitAct);
 
     filterMenu = menuBar()->addMenu(tr("&Filter"));
+	
+	viewMenu = menuBar()->addMenu(tr("&View"));
+	viewMenu->addAction(viewInTileAct);
 
     menuBar()->addSeparator();
 
@@ -246,4 +255,8 @@ void MainWindow::applyFilter()
             qobject_cast<MeshFilterInterface *>(action->parent());
 
     iFilter->applyFilter(action->text(), *(((GLArea *)(workspace->activeWindow()))->mm ), this);
+}
+
+void MainWindow::viewInTile(){
+	workspace->tile();
 }
