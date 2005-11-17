@@ -24,12 +24,16 @@
   History
 
 $Log$
+Revision 1.2  2005/11/17 14:54:27  glvertex
+Some little changes to allow differents rendering modes (not working yet)
+
 Revision 1.1  2005/10/18 10:38:02  cignoni
 First rough version. It simply load a mesh.
 
 ****************************************************************************/
 #ifndef GLAREA_H
 #define GLAREA_H
+#include <wrap/gl/trimesh.h>
 #include <wrap/gui/trackball.h>
 
 #include <QGLWidget>
@@ -39,6 +43,8 @@ First rough version. It simply load a mesh.
 #include <QPainterPath>
 #include <QWidget>
 #include <QGLWidget>
+
+
 
 class BrushInterface;
 class MeshModel;
@@ -66,6 +72,8 @@ protected:
   
 
 private:
+	vcg::GLW::DrawMode	renderMode;
+	vcg::GLW::ColorMode	renderColor;
 };
 
 #endif

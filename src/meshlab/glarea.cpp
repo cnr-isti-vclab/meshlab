@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.2  2005/11/17 14:54:27  glvertex
+Some little changes to allow differents rendering modes (not working yet)
+
 Revision 1.1  2005/10/18 10:38:02  cignoni
 First rough version. It simply load a mesh.
 
@@ -61,17 +64,32 @@ void GLArea::initializeGL()
     glShadeModel(GL_FLAT);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+
+		renderMode	= GLW::DMPoints;
+		renderColor = GLW::CMNone;
 }
 
 void GLArea::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	  glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(60, float(width())/float(height()), 1, 100);
-	  glMatrixMode(GL_MODELVIEW);
 	  glLoadIdentity();
-	  gluLookAt(0,0,3,   0,0,0,   0,1,0);        
+
+		// Draws a smooth background
+		// Why drops so slow??
+
+		//glDisable(GL_DEPTH_TEST);
+		//glShadeModel(GL_SMOOTH);
+		//glBegin(GL_TRIANGLE_STRIP);
+		//	glColor3f(0.f,0.f,0.f);	glVertex3f(-1.f, 1.f,-1.f);
+		//	glColor3f(.2f,.2f,.4f);	glVertex3f(-1.f,-1.f,-1.f);
+		//	glColor3f(0.f,0.f,0.f);	glVertex3f( 1.f, 1.f,-1.f);
+		//	glColor3f(.2f,.2f,.4f);	glVertex3f( 1.f,-1.f,-1.f);
+		//glEnd();
+		//glShadeModel(GL_FLAT);
+		//glEnable(GL_DEPTH_TEST);
+
+		glColor3f(1.f,1.f,1.f);
+		gluLookAt(0,0,3,   0,0,0,   0,1,0);        
     
     trackball.center=Point3f(0, 0, 0);
     trackball.radius= 1;
@@ -83,12 +101,19 @@ void GLArea::paintGL()
     float d=1.0f/mm->cm.bbox.Diag();
     glScale(d);
     glTranslate(-mm->cm.bbox.Center());
-    mm->Render(GLW::DMPoints,GLW::CMNone);
+
+
+		mm->Render(renderMode,renderColor);
 }
 
 void GLArea::resizeGL(int _width, int _height)
 {
     //int side = qMin(width, height);
+	  glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60, float(_width)/float(_height), 1, 100);
+	  glMatrixMode(GL_MODELVIEW);
+
     glViewport(0,0, _width, _height);
 }
 
