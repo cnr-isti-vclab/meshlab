@@ -42,9 +42,9 @@ public:
     MainWindow();
 
 private slots:
-  void open(QString fileName=QString());
-    bool saveAs();
     
+	void open(QString fileName=QString());
+    bool saveAs();
     void about();
     void aboutPlugins();
     void applyFilter();
@@ -75,6 +75,7 @@ private:
     QAction *exitAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
+	QAction *aboutPluginsAct;
 };
 
 #endif

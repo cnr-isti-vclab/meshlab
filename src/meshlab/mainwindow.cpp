@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.5  2005/11/17 20:51:00  davide_portelli
+Aggiunta Help->About Plugins
+
 Revision 1.4  2005/11/16 23:18:54  cignoni
 Added plugins management
 
@@ -133,8 +136,8 @@ void MainWindow::about()
 
 void MainWindow::aboutPlugins()
 {
-    //PluginDialog dialog(pluginsDir.path(), pluginFileNames, this);
-    //dialog.exec();
+    PluginDialog dialog(pluginsDir.path(), pluginFileNames, this);
+    dialog.exec();
 }
 
 void MainWindow::createActions()
@@ -158,6 +161,9 @@ void MainWindow::createActions()
     aboutQtAct = new QAction(tr("About &Qt"), this);
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
+	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
+    connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
+
 }
 
 void MainWindow::createToolBars()
@@ -177,12 +183,12 @@ void MainWindow::createMenus()
 
     filterMenu = menuBar()->addMenu(tr("&Filter"));
 
-
     menuBar()->addSeparator();
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
     helpMenu->addAction(aboutQtAct);
+	helpMenu->addAction(aboutPluginsAct);
 }
 
 void MainWindow::loadPlugins()
@@ -212,7 +218,7 @@ void MainWindow::loadPlugins()
         }
     }
 
-//    brushMenu->setEnabled(!brushActionGroup->actions().isEmpty());
+// brushMenu->setEnabled(!brushActionGroup->actions().isEmpty());
 // shapesMenu->setEnabled(!shapesMenu->actions().isEmpty());
     filterMenu->setEnabled(!filterMenu->actions().isEmpty());
 }
