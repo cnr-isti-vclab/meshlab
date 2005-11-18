@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.10  2005/11/18 18:25:35  alemochi
+Rename function in glArea.h
+
 Revision 1.9  2005/11/18 18:10:28  alemochi
 Aggiunto slot cambiare la modalita' di rendering
 
@@ -324,33 +327,33 @@ void MainWindow::viewToolbar(){
 
 void MainWindow::RenderPoint()
 {
-	gla->SetMode(vcg::GLW::DMPoints);
+	gla->SetRenderMode(vcg::GLW::DMPoints);
 
 }
 
 void MainWindow::RenderWire()
 {
-	gla->SetMode(vcg::GLW::DMWire);
+	gla->SetRenderMode(vcg::GLW::DMWire);
 
 }
 
 void MainWindow::RenderFlat()
 {
 //	paintArea->SetMode(GLW::CHFace);
-	gla->SetMode(vcg::GLW::DMFlat);
+	gla->SetRenderMode(vcg::GLW::DMFlat);
 
 }
 
 void MainWindow::RenderSmooth()
 {
 //	paintArea->SetMode(vcg::GLW::DrawMode::DMWire);
-	gla->SetMode(vcg::GLW::DMSmooth);
+	gla->SetRenderMode(vcg::GLW::DMSmooth);
 	
 }
 
 void MainWindow::RenderFlatLine()
 {
-	gla->SetMode(vcg::GLW::DMFlatWire);
+	gla->SetRenderMode(vcg::GLW::DMFlatWire);
 
 }
 

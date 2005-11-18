@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.4  2005/11/18 18:25:35  alemochi
+Rename function in glArea.h
+
 Revision 1.3  2005/11/18 18:10:28  alemochi
 Aggiunto slot cambiare la modalita' di rendering
 
@@ -163,7 +166,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
 }
 
 
-void GLArea::SetMode(vcg::GLW::DrawMode mode)
+void GLArea::SetRenderMode(vcg::GLW::DrawMode mode)
 {
 	this->renderMode=mode;
 	updateGL();
