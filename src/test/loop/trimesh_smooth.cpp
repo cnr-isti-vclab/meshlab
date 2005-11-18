@@ -1,8 +1,8 @@
 
 	
 // mesh definition 
-#include <vcg/simplex/vertex/with/vn.h>
-#include <vcg/simplex/face/with/af.h>
+#include <vcg/simplex/vertex/with/afvn.h>
+#include <vcg/simplex/face/with/afav.h>
 #include <vcg/complex/trimesh/base.h>
 
 #include <vcg/complex/trimesh/update/topology.h>
@@ -24,8 +24,8 @@ using namespace std;
 
 struct MyFace;
 struct MyEdge;
-struct MyVertex: public VertexVN<float,MyEdge,MyFace>{};
-struct MyFace: public FaceAF<MyVertex,MyEdge,MyFace>{};
+struct MyVertex: public VertexAFVN<float,MyEdge,MyFace>{};
+struct MyFace: public FaceAFAV<MyVertex,MyEdge,MyFace>{};
 struct MyMesh: public tri::TriMesh< vector<MyVertex>, vector<MyFace> >{};
 
 #define FLAT	0
@@ -76,6 +76,7 @@ int  main(int argc, char **argv)
   vcg::tri::UpdateTopology<MyMesh>::FaceFace(m);
 	vcg::tri::UpdateFlags<MyMesh>::FaceBorderFromFF(m);
 	vcg::tri::UpdateNormals<MyMesh>::PerVertexNormalized(m);
+	vcg::tri::UpdateTopology<MyMesh>::VertexFace(m);
   printf("Input mesh  vn:%i fn:%i\n",m.vn,m.fn);
 	
   n_steps=atoi(argv[3]);
