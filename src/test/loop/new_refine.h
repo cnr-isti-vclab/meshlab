@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.4  2005/11/18 10:59:09  mariolatronico
+cleaned RefineEvenOddE. It doesn't work because missed deleted flags
+
 Revision 1.3  2005/11/15 00:01:34  giec
 Implemented a loop for reserch the odd vertex to call on his the evenPointLoop function for smoothing the mesh.
 Only one problem: the marker function are not implemented on vertexplus,that are a condition for use that algorithm.
@@ -177,8 +180,8 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 				he.FlipV();
 				he.FlipE();	he.FlipF();
 				k++;
-			}	//while(he.f!=heStart.f || he.z!=heStart.z || he.v!=heStart.v);
-			while(he != heStart);
+			}	while(he.f!=heStart.f || he.z!=heStart.z || he.v!=heStart.v);
+			//			while(he != heStart);
 	
 			float beta = 3.0 / 16.0;
 			if(k > 3 )
@@ -219,119 +222,32 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 template<class MESH_TYPE,class ODD_VERT, class EVEN_VERT>
 bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, bool RefineSelected=false)
 {	 
-	EdgeLen <float> ep;
-	ep.thr2=length; // metto uguale a 0 per comodita'
 	
-
 	typedef face::Pos<typename MESH_TYPE::FaceType> faceType;
-	typedef MESH_TYPE::VertexType vertType;
+	//	typedef MESH_TYPE::VertexType vertType;
+	
 	// vettore per prendere i vecchi vertici
-	std::vector<vertType> oldVertVec(m.vn);
+	std::vector<MESH_TYPE::VertexType> oldVertVec(m.vn);
 	
 	//memorizzo il numero iniziale di vertici
 	int n = m.vn;
-	//EdgeLen<float> trashOld = length; //non serve!!!
-	// refine dei vecchi vertici su una mesh di appoggio app
- 
 
+	// memorizzo i vertici nel vettore
 	typename MESH_TYPE::VertexIterator vi;
 	for ( vi = m.vert.begin(); vi != m.vert.end(); ++vi) {
-		// dovremmo avere tutti i vertici della mesh nel vettore
 		oldVertVec.push_back((*vi));
-
 	}
 
-/// inizializzo la funzione di marcamento dei vertici
-//	m.InitVertexIMark ();
-///
-
-	// refine degli odd vertici
+	// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
-
 	
-/// prova ///
-///varibili d'appoggio
-	int nOcc =0; //numero occorrenze
-	typename MESH_TYPE::VertexType a,b; //per testare l'ugualianza tra vertici
-	typename MESH_TYPE::VertexIterator old; //iteratore per i vertici vecchi
-	typename MESH_TYPE::FaceIterator fi; //iteratore di facce della mesh
-
-//	m.InitVertexIMark(); //inizializzo il marcatore per vertice (funzionasse!!!)
-
-	for(old = oldVertVec.begin();old != oldVertVec.end(); ++old)
-	{
-	 	for (fi = m.face.begin();fi != m.face.end(); ++fi) 
+	for (int i = 0 ; i < n; ++i) 
 		{
-      a = (*old);
-			for(int j=0;j<3;++j)
-			{
-				b = *(*fi).V(j);
-				//funzionassero i marcatori dovrebbe funzionare
-				if((a.P() == b.P()))//(se funzionassero) && ( !m.IsMarked(&b) ))
-				{	//se lo trovo lo marco come trovato
-					
-					//m.Mark(&b); //come sopra
-					nOcc++;
-					std::cout << "trovato! " << nOcc << '\n';
-					//devo marcarli ne sto trovando un po troppi!!!
-					
-					//Dovrebbe essere la chiamata alla evengiusta
-					//even<typename MESH_TYPE::VertexType, face::Pos<typename MESH_TYPE::FaceType> >(b, face::Pos<typename MESH_TYPE::FaceType>( (*fi),j));
-					
-
-					//
-					break;
-				}
-			}
+			
+			even(m.vert[i],  face::Pos<typename MESH_TYPE::FaceType>((oldVertVec[i].VFp()),1));
+			
 		}
-	}
-	std::cout << n << '\n';
-/// fine prova ///
-
- 	//for (vector<vertType>::size_t i = oldVertVec.begin();
- 	//		 i <= oldVertVec.size();
- 	//		 i++) {
-// 	}
-
-//  	typename MESH_TYPE::FaceIterator fin;
-// 	typename MESH_TYPE::FaceIterator fout;
-// 	fin= app.face.begin();
-// 	int aux=0;
-//  	for(fout = m.face.begin(); fout != m.face.end(); ++fout) {
-//  		if(!(*fout).IsD()) {
-// 			++aux;
-// 			for(int vit=0;vit<3;++vit)
-// 				{
-// 					(*fout).V(vit)= even( face::Pos<typename MESH_TYPE::FaceType> ((&fin[aux]),vit) );
-// 				}
-// 	//mid( (*lastv), face::Pos<typename MESH_TYPE::FaceType> (&*fi,j));
-// 			//(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType>
-// 		}
-// 		}
-// 	std::vector<faceType> oldPosVec(m.vn), newPosVec(m.vn);
-
-// 	// si scorre su tutta la mesh
-
-
-// 			for(int j = 0; j < 3; j++){
-// 				// si memorizzano le posizioni dei vertici vecchi
-// 				oldPosVec.push_back(&*fi);
-// 				//				odd((*fi).V(j)->P(), face::Pos<typename MESH_TYPE::FaceType> (&*fi,j));
-
-// 			}
-// 		}
-// 	}
-// 	std::vector<faceType>::iterator iterb;
-// 	int i=0;
-// 	for( iterb = oldPosVec.begin(); iterb != oldPosVec.end(); iterb++,i++ ) {
-// 		//even((*iter) face::Pos<typename MESH_TYPE::FaceType> (&*iter,j));
-// 		odd((*iterb).V((i%3))->P(), faceType(&*iterb,(i%3)));
-// 	}
-// 	i=0;
-// 	std::vector<faceType>::iterator iter;
-// 	for( iter = oldPosVec.begin(); iter != oldPosVec.end(); iter++,i++) {
-// 		even((*iter), faceType(&*iter,(i%3)));
-// 	}
+	
 	
 	//    1) calcola nuova pos vertici old e memorizza in un vett ausiliairio 
 	//    2) invoca RefineE e crea i nuovi vertici nella giusta posizione 
