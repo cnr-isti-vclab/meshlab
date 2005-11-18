@@ -36,50 +36,59 @@ class GLArea;
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    MainWindow();
+	MainWindow();
 
 private slots:
-    
+
 	void open(QString fileName=QString());
-    bool saveAs();
-    void about();
-    void aboutPlugins();
-    void applyFilter();
+	bool saveAs();
+	void about();
+	void aboutPlugins();
+	void applyFilter();
 	void windowsTile();
 	void windowsCascade();
 	void viewToolbar();
 
 private:
-    void createActions();
-    void createMenus();
-    void createToolBars();
-    void loadPlugins();
-    void addToMenu(QObject *plugin, const QStringList &texts, QMenu *menu,
-                   const char *member, QActionGroup *actionGroup = 0);
+	void createActions();
+	void createMenus();
+	void createToolBars();
+	void loadPlugins();
+	void addToMenu(QObject *plugin, const QStringList &texts, QMenu *menu,
+		const char *member, QActionGroup *actionGroup = 0);
 
-    QWorkspace *workspace;
+	QWorkspace *workspace;
 
-    vector<MeshModel *> VM;
-    GLArea *paintArea;
-    QScrollArea *scrollArea;
-    QDir pluginsDir;
-    QStringList pluginFileNames;
-    QToolBar *mainToolBar;
-    //QToolBar *renderToolBar;
-    
-    QMenu *fileMenu;
-    QMenu *filterMenu;
+	vector<MeshModel *> VM;
+	GLArea *paintArea;
+	QScrollArea *scrollArea;
+	QDir pluginsDir;
+	QStringList pluginFileNames;
+	QToolBar *mainToolBar;
+	QToolBar *renderToolBar;
+
+	QMenu *fileMenu;
+	QMenu *filterMenu;
 	QMenu *viewMenu;
 	QMenu *windowsMenu;
-    QMenu *helpMenu;
-    QAction *openAct;
-    QAction *saveAsAct;
-    QAction *exitAct;
-    QAction *aboutAct;
-    QAction *aboutQtAct;
+	QMenu *helpMenu;
+	
+	QAction *openAct;
+	QAction *saveAsAct;
+	
+	QAction *viewModePoints;
+	QAction *viewModeWire;
+	QAction *viewModeLines;
+	QAction *viewModeFlatLines;
+	QAction *viewModeFlat;
+	QAction *viewModeSmooth;
+	
+	QAction *exitAct;
+	QAction *aboutAct;
+	QAction *aboutQtAct;
 	QAction *aboutPluginsAct;
 	QAction *viewToolbarAct;
 	QAction *windowsTileAct;

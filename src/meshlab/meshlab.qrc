@@ -1,6 +1,13 @@
-<!DOCTYPE RCC><RCC version="1.0">
-    <qresource prefix="" >
-        <file>images/open.png</file>
-        <file>images/save.png</file>
+<RCC>
+    <qresource prefix="/" >
+        <file>images\backlines.png</file>
+        <file>images\flat.png</file>
+        <file>images\flatlines.png</file>
+        <file>images\info.png</file>
+        <file>images\open.png</file>
+        <file>images\points.png</file>
+        <file>images\save.png</file>
+        <file>images\smooth.png</file>
+        <file>images\wire.png</file>
     </qresource>
 </RCC>
