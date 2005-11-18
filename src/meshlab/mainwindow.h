@@ -48,7 +48,9 @@ private slots:
     void about();
     void aboutPlugins();
     void applyFilter();
-	void viewInTile();
+	void windowsTile();
+	void windowsCascade();
+	void viewToolbar();
 
 private:
     void createActions();
@@ -66,11 +68,12 @@ private:
     QDir pluginsDir;
     QStringList pluginFileNames;
     QToolBar *mainToolBar;
-    QToolBar *renderToolBar;
+    //QToolBar *renderToolBar;
     
     QMenu *fileMenu;
     QMenu *filterMenu;
 	QMenu *viewMenu;
+	QMenu *windowsMenu;
     QMenu *helpMenu;
     QAction *openAct;
     QAction *saveAsAct;
@@ -78,7 +81,9 @@ private:
     QAction *aboutAct;
     QAction *aboutQtAct;
 	QAction *aboutPluginsAct;
-	QAction *viewInTileAct;
+	QAction *viewToolbarAct;
+	QAction *windowsTileAct;
+	QAction *windowsCascadeAct;
 };
 
 #endif

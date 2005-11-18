@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.7  2005/11/18 00:36:50  davide_portelli
+Added View->Toolbar and Windows->Tile and Windows->Cascade
+
 Revision 1.6  2005/11/17 22:15:52  davide_portelli
 Added menu View->Tile
 
@@ -67,7 +70,7 @@ MainWindow::MainWindow()
     //addToolBar(renderToolBar);
     
 
-    setWindowTitle(tr("MeshLab"));
+    setWindowTitle(tr("MeshLab 1.0"));
 
     //QTimer::singleShot(500, this, SLOT(aboutPlugins()));
 
@@ -91,8 +94,7 @@ void MainWindow::open(QString fileName)
       fd->setFilters( types );
       fd->show();*/
 
-      fileName = QFileDialog::getOpenFileName(this,
-                                    tr("Open File"), QDir::currentPath(),"Mesh files (*.ply *.off *.stl)");
+      fileName = QFileDialog::getOpenFileName(this,tr("Open File"),"../sample","Mesh files (*.ply *.off *.stl)");
     }
     if (!fileName.isEmpty()) {
         MeshModel *nm= new MeshModel();
@@ -167,8 +169,14 @@ void MainWindow::createActions()
 	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
     connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
 
-	viewInTileAct = new QAction(tr("&Tile"), this);
-    connect(viewInTileAct, SIGNAL(triggered()), this, SLOT(viewInTile()));
+	viewToolbarAct = new QAction (tr("&Toolbar"), this);
+	connect(viewToolbarAct, SIGNAL(triggered()), this, SLOT(viewToolbar()));
+
+	windowsTileAct = new QAction(tr("&Tile"), this);
+    connect(windowsTileAct, SIGNAL(triggered()), this, SLOT(windowsTile()));
+
+	windowsCascadeAct = new QAction(tr("&Cascade"), this);
+    connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
 
 }
 
@@ -188,9 +196,13 @@ void MainWindow::createMenus()
     fileMenu->addAction(exitAct);
 
     filterMenu = menuBar()->addMenu(tr("&Filter"));
-	
+
 	viewMenu = menuBar()->addMenu(tr("&View"));
-	viewMenu->addAction(viewInTileAct);
+	viewMenu->addAction(viewToolbarAct);
+	
+	windowsMenu = menuBar()->addMenu(tr("&Windows"));
+	windowsMenu->addAction(windowsTileAct);
+	windowsMenu->addAction(windowsCascadeAct);
 
     menuBar()->addSeparator();
 
@@ -232,8 +244,7 @@ void MainWindow::loadPlugins()
     filterMenu->setEnabled(!filterMenu->actions().isEmpty());
 }
 
-void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,
-                           QMenu *menu, const char *member,
+void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu, const char *member,
                            QActionGroup *actionGroup)
 {
     foreach (QString text, texts) {
@@ -251,12 +262,22 @@ void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,
 void MainWindow::applyFilter()
 {
     QAction *action = qobject_cast<QAction *>(sender());
-    MeshFilterInterface *iFilter =
-            qobject_cast<MeshFilterInterface *>(action->parent());
-
+    MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
     iFilter->applyFilter(action->text(), *(((GLArea *)(workspace->activeWindow()))->mm ), this);
 }
 
-void MainWindow::viewInTile(){
+
+void MainWindow::windowsTile(){
 	workspace->tile();
+}
+
+void MainWindow::windowsCascade(){
+	workspace->cascade();
+}
+void MainWindow::viewToolbar(){
+	if(mainToolBar->isVisible()){
+		mainToolBar->hide();
+	}else{
+		mainToolBar->show();
+	}
 }
