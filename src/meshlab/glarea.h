@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2005/11/18 18:10:28  alemochi
+Aggiunto slot cambiare la modalita' di rendering
+
 Revision 1.2  2005/11/17 14:54:27  glvertex
 Some little changes to allow differents rendering modes (not working yet)
 
@@ -59,7 +62,8 @@ public:
      vcg::Trackball trackball;
      QSize minimumSizeHint() const;
      QSize sizeHint() const;
-    
+		 void SetMode(vcg::GLW::DrawMode mode);
+		
 protected:
     void initializeGL();
     void paintGL();

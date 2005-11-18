@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2005/11/18 18:10:28  alemochi
+Aggiunto slot cambiare la modalita' di rendering
+
 Revision 1.2  2005/11/17 14:54:27  glvertex
 Some little changes to allow differents rendering modes (not working yet)
 
@@ -48,7 +51,7 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
     : QGLWidget(parent)
 {
-    
+	
 }
 
 QSize GLArea::minimumSizeHint() const {
@@ -61,19 +64,19 @@ QSize GLArea::sizeHint() const {
 
 void GLArea::initializeGL()
 {
-    glShadeModel(GL_FLAT);
+    glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-
-		renderMode	= GLW::DMPoints;
-		renderColor = GLW::CMNone;
+		glEnable(GL_CULL_FACE);
+		
+		//renderMode	= GLW::DrawMode::DMSmooth;
+		renderMode	= vcg::GLW::DrawMode::DMSmooth;
+		renderColor = vcg::GLW::CMNone;
 }
 
 void GLArea::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	  glLoadIdentity();
-
 		// Draws a smooth background
 		// Why drops so slow??
 
@@ -99,10 +102,11 @@ void GLArea::paintGL()
     Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
     glBoxWire(bb);
     float d=1.0f/mm->cm.bbox.Diag();
-    glScale(d);
+    //float d=1;
+		glScale(d);
     glTranslate(-mm->cm.bbox.Center());
 
-
+	
 		mm->Render(renderMode,renderColor);
 }
 
@@ -156,4 +160,13 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	const int WHEEL_DELTA =120;
 	trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA) );
 	update();
+}
+
+
+void GLArea::SetMode(vcg::GLW::DrawMode mode)
+{
+	this->renderMode=mode;
+	updateGL();
+
+
 }

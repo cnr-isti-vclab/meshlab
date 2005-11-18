@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.9  2005/11/18 18:10:28  alemochi
+Aggiunto slot cambiare la modalita' di rendering
+
 Revision 1.8  2005/11/18 02:12:04  glvertex
 - Added icons to the project file [meshlab.qrc]
 - Enabled renderToolbar with icons
@@ -60,11 +63,11 @@ First rough version. It simply load a mesh.
 #include "mainwindow.h"
 #include "glarea.h"
 #include "plugindialog.h"
-
+				
 MainWindow::MainWindow()
 {
 	workspace = new QWorkspace(this);
-
+	
 	setCentralWidget(workspace);
 	createActions();
 	createMenus();
@@ -74,6 +77,8 @@ MainWindow::MainWindow()
 	addToolBar(renderToolBar);
 
 	setWindowTitle(tr("MeshLab v0.1"));
+
+	
 
 	//QTimer::singleShot(500, this, SLOT(aboutPlugins()));
 
@@ -112,7 +117,7 @@ void MainWindow::open(QString fileName)
 		{
 			//QMessageBox::information(this, tr("MeshLab"), tr("Opened Mesh of %1. triangles").arg(nm->cm.fn));
 			VM.push_back(nm);
-			GLArea *gla=new GLArea(workspace);
+			gla=new GLArea(workspace);
 			gla->mm=nm;
 			gla->setWindowTitle(fileName);   
 			workspace->addWindow(gla);
@@ -186,6 +191,20 @@ void MainWindow::createActions()
 
 	windowsCascadeAct = new QAction(tr("&Cascade"), this);
 	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
+	
+	connect(viewModeWire, SIGNAL(triggered()), this, SLOT(RenderWire()));
+	connect(viewModePoints, SIGNAL(triggered()), this, SLOT(RenderPoint()));
+	connect(viewModeFlat, SIGNAL(triggered()), this, SLOT(RenderFlat()));
+	connect(viewModeSmooth, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
+	connect(viewModeFlatLines, SIGNAL(triggered()), this, SLOT(RenderFlatLine()));
+	connect(viewModeLines, SIGNAL(triggered()), this, SLOT(RenderHiddenLines()));
+
+	
+	/*connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
+	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
+	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));*/
+
+	
 
 }
 
@@ -299,4 +318,44 @@ void MainWindow::viewToolbar(){
 	}else{
 		mainToolBar->show();
 	}
+}
+
+
+
+void MainWindow::RenderPoint()
+{
+	gla->SetMode(vcg::GLW::DMPoints);
+
+}
+
+void MainWindow::RenderWire()
+{
+	gla->SetMode(vcg::GLW::DMWire);
+
+}
+
+void MainWindow::RenderFlat()
+{
+//	paintArea->SetMode(GLW::CHFace);
+	gla->SetMode(vcg::GLW::DMFlat);
+
+}
+
+void MainWindow::RenderSmooth()
+{
+//	paintArea->SetMode(vcg::GLW::DrawMode::DMWire);
+	gla->SetMode(vcg::GLW::DMSmooth);
+	
+}
+
+void MainWindow::RenderFlatLine()
+{
+	gla->SetMode(vcg::GLW::DMFlatWire);
+
+}
+
+void MainWindow::RenderHiddenLines()
+{
+	//gla->SetMode(vcg::GLW::DMHidden);
+
 }

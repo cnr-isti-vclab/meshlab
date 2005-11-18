@@ -51,6 +51,13 @@ private slots:
 	void windowsTile();
 	void windowsCascade();
 	void viewToolbar();
+	void RenderPoint();
+	void RenderWire();
+	void RenderFlat();
+	void RenderFlatLine();
+	void RenderHiddenLines();
+	void RenderSmooth();
+	
 
 private:
 	void createActions();
@@ -61,9 +68,9 @@ private:
 		const char *member, QActionGroup *actionGroup = 0);
 
 	QWorkspace *workspace;
-
+	GLArea *gla;
 	vector<MeshModel *> VM;
-	GLArea *paintArea;
+	//GLArea *paintArea;
 	QScrollArea *scrollArea;
 	QDir pluginsDir;
 	QStringList pluginFileNames;
