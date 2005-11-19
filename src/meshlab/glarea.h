@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.5  2005/11/19 12:14:20  glvertex
+Some cleanup and renaming
+
 Revision 1.4  2005/11/18 18:25:35  alemochi
 Rename function in glArea.h
 
@@ -42,45 +45,37 @@ First rough version. It simply load a mesh.
 #include <wrap/gl/trimesh.h>
 #include <wrap/gui/trackball.h>
 
-#include <QGLWidget>
-
-#include <QColor>
-#include <QImage>
-#include <QPainterPath>
 #include <QWidget>
 #include <QGLWidget>
 
 
-
-class BrushInterface;
 class MeshModel;
 class GLArea : public QGLWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-     GLArea(QWidget *parent = 0);
-    ~GLArea(){}
-     MeshModel *mm;
-     vcg::Trackball trackball;
-     QSize minimumSizeHint() const;
-     QSize sizeHint() const;
-		 void SetRenderMode(vcg::GLW::DrawMode mode);
-		
+	GLArea(QWidget *parent = 0);
+	~GLArea(){}
+	MeshModel *mm;
+	vcg::Trackball trackball;
+	QSize minimumSizeHint() const;
+	QSize sizeHint() const;
+	void setDrawMode(vcg::GLW::DrawMode mode);
+
 protected:
-    void initializeGL();
-    void paintGL();
-    void resizeGL(int width, int height);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent*e);
-  
-  
+	void initializeGL();
+	void paintGL();
+	void resizeGL(int width, int height);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
+	void wheelEvent(QWheelEvent*e);
+
 
 private:
-	vcg::GLW::DrawMode	renderMode;
-	vcg::GLW::ColorMode	renderColor;
+	vcg::GLW::DrawMode	drawMode;
+	vcg::GLW::ColorMode	drawColor;
 };
 
 #endif

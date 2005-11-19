@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.12  2005/11/19 12:14:20  glvertex
+Some cleanup and renaming
+
 Revision 1.11  2005/11/19 04:59:12  davide_portelli
 I have added the modifications to the menù view and to the menu windows:
 - View->Toolbar->File ToolBar
@@ -228,6 +231,7 @@ void MainWindow::createActions()
 
 	viewModeLines		  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"), this);
 	connect(viewModeLines, SIGNAL(triggered()), this, SLOT(RenderHiddenLines()));
+	viewModeLines->setDisabled(true);
 
 	viewModeFlatLines = new QAction(QIcon(":/images/flatlines.png"),tr("Flat &Lines"), this);
 	connect(viewModeFlatLines, SIGNAL(triggered()), this, SLOT(RenderFlatLine()));
@@ -367,41 +371,34 @@ void MainWindow::viewToolbarRender(){
 
 void MainWindow::RenderPoint()
 {
-	gla->SetRenderMode(vcg::GLW::DMPoints);
-
+	gla->setDrawMode(vcg::GLW::DMPoints);
 }
 
 void MainWindow::RenderWire()
 {
-	gla->SetRenderMode(vcg::GLW::DMWire);
-
+	gla->setDrawMode(vcg::GLW::DMWire);
 }
 
 void MainWindow::RenderFlat()
 {
-//	paintArea->SetMode(GLW::CHFace);
-	gla->SetRenderMode(vcg::GLW::DMFlat);
-
+	gla->setDrawMode(vcg::GLW::DMFlat);
 }
 
 void MainWindow::RenderSmooth()
 {
-//	paintArea->SetMode(vcg::GLW::DrawMode::DMWire);
-	gla->SetRenderMode(vcg::GLW::DMSmooth);
-	
+	gla->setDrawMode(vcg::GLW::DMSmooth);
 }
 
 void MainWindow::RenderFlatLine()
 {
-	gla->SetRenderMode(vcg::GLW::DMFlatWire);
-
+	gla->setDrawMode(vcg::GLW::DMFlatWire);
 }
 
 void MainWindow::RenderHiddenLines()
 {
-	//gla->SetMode(vcg::GLW::DMHidden);
-
+	gla->setDrawMode(vcg::GLW::DMHidden);
 }
+
 void MainWindow::updateWindowMenu(){
 	windowsMenu->clear();
 	windowsMenu->addAction(closeAct);

@@ -68,17 +68,17 @@ private:
 	void createToolBars();
 	void loadPlugins();
 	void addToMenu(QObject *plugin, const QStringList &texts, QMenu *menu,
-		const char *member, QActionGroup *actionGroup = 0);
+								const char *member, QActionGroup *actionGroup = 0);
 
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
 
 	GLArea *gla;
 	vector<MeshModel *> VM;
-	//GLArea *paintArea;
 	QScrollArea *scrollArea;
 	QDir pluginsDir;
 	QStringList pluginFileNames;
+	
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;
 

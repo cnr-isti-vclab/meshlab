@@ -21,9 +21,12 @@
 *                                                                           *
 ****************************************************************************/
 /****************************************************************************
-  History
+History
 
 $Log$
+Revision 1.5  2005/11/19 12:14:20  glvertex
+Some cleanup and renaming
+
 Revision 1.4  2005/11/18 18:25:35  alemochi
 Rename function in glArea.h
 
@@ -52,76 +55,74 @@ First rough version. It simply load a mesh.
 
 using namespace vcg; 
 GLArea::GLArea(QWidget *parent)
-    : QGLWidget(parent)
+: QGLWidget(parent)
 {
-	
+
 }
 
 QSize GLArea::minimumSizeHint() const {
-  return QSize(100,100);
+	return QSize(100,100);
 }
 
 QSize GLArea::sizeHint() const {
-  return QSize(100,100);
+	return QSize(100,100);
 }
 
 void GLArea::initializeGL()
 {
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		
-		//renderMode	= GLW::DrawMode::DMSmooth;
-		renderMode	= vcg::GLW::DrawMode::DMSmooth;
-		renderColor = vcg::GLW::CMNone;
+	glShadeModel(GL_SMOOTH);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	drawMode	= GLW::DrawMode::DMSmooth;
+	drawColor = GLW::CMNone;
 }
 
 void GLArea::paintGL()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	  glLoadIdentity();
-		// Draws a smooth background
-		// Why drops so slow??
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
+	// Draws a smooth background
+	// Why drops so slow??
 
-		//glDisable(GL_DEPTH_TEST);
-		//glShadeModel(GL_SMOOTH);
-		//glBegin(GL_TRIANGLE_STRIP);
-		//	glColor3f(0.f,0.f,0.f);	glVertex3f(-1.f, 1.f,-1.f);
-		//	glColor3f(.2f,.2f,.4f);	glVertex3f(-1.f,-1.f,-1.f);
-		//	glColor3f(0.f,0.f,0.f);	glVertex3f( 1.f, 1.f,-1.f);
-		//	glColor3f(.2f,.2f,.4f);	glVertex3f( 1.f,-1.f,-1.f);
-		//glEnd();
-		//glShadeModel(GL_FLAT);
-		//glEnable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
+	//glShadeModel(GL_SMOOTH);
+	//glBegin(GL_TRIANGLE_STRIP);
+	//	glColor3f(0.f,0.f,0.f);	glVertex3f(-1.f, 1.f,-1.f);
+	//	glColor3f(.2f,.2f,.4f);	glVertex3f(-1.f,-1.f,-1.f);
+	//	glColor3f(0.f,0.f,0.f);	glVertex3f( 1.f, 1.f,-1.f);
+	//	glColor3f(.2f,.2f,.4f);	glVertex3f( 1.f,-1.f,-1.f);
+	//glEnd();
+	//glShadeModel(GL_FLAT);
+	//glEnable(GL_DEPTH_TEST);
 
-		glColor3f(1.f,1.f,1.f);
-		gluLookAt(0,0,3,   0,0,0,   0,1,0);        
-    
-    trackball.center=Point3f(0, 0, 0);
-    trackball.radius= 1;
-    trackball.GetView();
-    trackball.Apply();
-        
-    Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
-    glBoxWire(bb);
-    float d=1.0f/mm->cm.bbox.Diag();
-    //float d=1;
-		glScale(d);
-    glTranslate(-mm->cm.bbox.Center());
+	glColor3f(1.f,1.f,1.f);
+	gluLookAt(0,0,3,   0,0,0,   0,1,0);        
 
-	
-		mm->Render(renderMode,renderColor);
+	trackball.center=Point3f(0, 0, 0);
+	trackball.radius= 1;
+	trackball.GetView();
+	trackball.Apply();
+
+	Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
+	glBoxWire(bb);
+	float d=1.0f/mm->cm.bbox.Diag();
+	//float d=1;
+	glScale(d);
+	glTranslate(-mm->cm.bbox.Center());
+
+	mm->Render(drawMode,drawColor);
 }
 
 void GLArea::resizeGL(int _width, int _height)
 {
-    //int side = qMin(width, height);
-	  glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(60, float(_width)/float(_height), 1, 100);
-	  glMatrixMode(GL_MODELVIEW);
+	//int side = qMin(width, height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60, float(_width)/float(_height), 1, 100);
+	glMatrixMode(GL_MODELVIEW);
 
-    glViewport(0,0, _width, _height);
+	glViewport(0,0, _width, _height);
 }
 
 Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
@@ -166,10 +167,8 @@ void GLArea::wheelEvent(QWheelEvent*e)
 }
 
 
-void GLArea::SetRenderMode(vcg::GLW::DrawMode mode)
+void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 {
-	this->renderMode=mode;
+	drawMode = mode;
 	updateGL();
-
-
 }
