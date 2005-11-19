@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.6  2005/11/19 18:15:20  glvertex
+- Some bug removed.
+- Interface more friendly.
+- Background.
+
 Revision 1.5  2005/11/19 12:14:20  glvertex
 Some cleanup and renaming
 
@@ -72,10 +77,12 @@ void GLArea::initializeGL()
 {
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
+	//glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHT0);
 
 	drawMode	= GLW::DrawMode::DMSmooth;
-	drawColor = GLW::CMNone;
+	drawColor = GLW::CMPerMesh;
 }
 
 void GLArea::paintGL()
@@ -85,16 +92,17 @@ void GLArea::paintGL()
 	// Draws a smooth background
 	// Why drops so slow??
 
-	//glDisable(GL_DEPTH_TEST);
-	//glShadeModel(GL_SMOOTH);
-	//glBegin(GL_TRIANGLE_STRIP);
-	//	glColor3f(0.f,0.f,0.f);	glVertex3f(-1.f, 1.f,-1.f);
-	//	glColor3f(.2f,.2f,.4f);	glVertex3f(-1.f,-1.f,-1.f);
-	//	glColor3f(0.f,0.f,0.f);	glVertex3f( 1.f, 1.f,-1.f);
-	//	glColor3f(.2f,.2f,.4f);	glVertex3f( 1.f,-1.f,-1.f);
-	//glEnd();
-	//glShadeModel(GL_FLAT);
-	//glEnable(GL_DEPTH_TEST);
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glBegin(GL_TRIANGLE_STRIP);
+		glColor3f(0.f,0.f,0.f);	glVertex3f(-1.f, 1.f,-1.f);
+		glColor3f(.2f,.2f,.4f);	glVertex3f(-1.f,-1.f,-1.f);
+		glColor3f(0.f,0.f,0.f);	glVertex3f( 1.f, 1.f,-1.f);
+		glColor3f(.2f,.2f,.4f);	glVertex3f( 1.f,-1.f,-1.f);
+	glEnd();
+	glPopAttrib();
+
 
 	glColor3f(1.f,1.f,1.f);
 	gluLookAt(0,0,3,   0,0,0,   0,1,0);        

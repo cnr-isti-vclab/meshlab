@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.13  2005/11/19 18:15:20  glvertex
+- Some bug removed.
+- Interface more friendly.
+- Background.
+
 Revision 1.12  2005/11/19 12:14:20  glvertex
 Some cleanup and renaming
 
@@ -94,6 +99,9 @@ MainWindow::MainWindow()
 
 	setWindowTitle(tr("MeshLab v0.1"));
 
+	loadPlugins();
+
+
 	
 
 	//QTimer::singleShot(500, this, SLOT(aboutPlugins()));
@@ -102,8 +110,6 @@ MainWindow::MainWindow()
 		open(QCoreApplication::instance ()->argv()[1]);
 	else 
 		QTimer::singleShot(500, this, SLOT(open()));
-
-	loadPlugins();
 }
 
 void MainWindow::open(QString fileName)
@@ -135,7 +141,7 @@ void MainWindow::open(QString fileName)
 			VM.push_back(nm);
 			gla=new GLArea(workspace);
 			gla->mm=nm;
-			gla->setWindowTitle(fileName);   
+			gla->setWindowTitle(QFileInfo(fileName).fileName());   
 			workspace->addWindow(gla);
 			gla->showMaximized();
 			return;
@@ -185,12 +191,12 @@ void MainWindow::createActions()
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
-	viewToolbarFileAct = new QAction (tr("&File Toolbar"), this);
-	viewToolbarFileAct->setCheckable(true);
-	viewToolbarFileAct->setChecked(true);
-	connect(viewToolbarFileAct, SIGNAL(triggered()), this, SLOT(viewToolbarFile()));
+	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
+	viewToolbarStandardAct->setCheckable(true);
+	viewToolbarStandardAct->setChecked(true);
+	connect(viewToolbarStandardAct, SIGNAL(triggered()), this, SLOT(viewToolbarFile()));
 
-	viewToolbarRenderAct = new QAction (tr("&Render Toolbar"), this);
+	viewToolbarRenderAct = new QAction (tr("&Render"), this);
 	viewToolbarRenderAct->setCheckable(true);
 	viewToolbarRenderAct->setChecked(true);
 	connect(viewToolbarRenderAct, SIGNAL(triggered()), this, SLOT(viewToolbarRender()));
@@ -245,12 +251,12 @@ void MainWindow::createActions()
 
 void MainWindow::createToolBars()
 {
-	mainToolBar = addToolBar(tr("File ToolBar"));
+	mainToolBar = addToolBar(tr("Standard"));
 	mainToolBar->setIconSize(QSize(32,32));
 	mainToolBar->addAction(openAct);
 	mainToolBar->addAction(saveAsAct);
 
-	renderToolBar = addToolBar(tr("Render ToolBar"));
+	renderToolBar = addToolBar(tr("Render"));
 	renderToolBar->setIconSize(QSize(32,32));
 	renderToolBar->addAction(viewModePoints);
 	renderToolBar->addAction(viewModeWire);
@@ -271,8 +277,8 @@ void MainWindow::createMenus()
 	filterMenu = menuBar()->addMenu(tr("&Filter"));
 
 	viewMenu		= menuBar()->addMenu(tr("&View"));
-	toolBarMenu	= viewMenu->addMenu(tr("&ToolBar"));
-	toolBarMenu->addAction(viewToolbarFileAct);
+	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
+	toolBarMenu->addAction(viewToolbarStandardAct);
 	toolBarMenu->addAction(viewToolbarRenderAct);
 
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
@@ -351,10 +357,10 @@ void MainWindow::windowsCascade(){
 void MainWindow::viewToolbarFile(){
 	if(mainToolBar->isVisible()){
 		mainToolBar->hide();
-		viewToolbarFileAct->setChecked(false);
+		viewToolbarStandardAct->setChecked(false);
 	}else{
 		mainToolBar->show();
-		viewToolbarFileAct->setChecked(true);
+		viewToolbarStandardAct->setChecked(true);
 	}
 }
 void MainWindow::viewToolbarRender(){
@@ -368,53 +374,68 @@ void MainWindow::viewToolbarRender(){
 }
 
 
-
 void MainWindow::RenderPoint()
 {
-	gla->setDrawMode(vcg::GLW::DMPoints);
+	// Set render type just on active window!
+	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMPoints);
 }
 
 void MainWindow::RenderWire()
 {
-	gla->setDrawMode(vcg::GLW::DMWire);
+	// Set render type just on active window!
+	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMWire);
 }
 
 void MainWindow::RenderFlat()
 {
-	gla->setDrawMode(vcg::GLW::DMFlat);
+	// Set render type just on active window!
+	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMFlat);
 }
 
 void MainWindow::RenderSmooth()
 {
-	gla->setDrawMode(vcg::GLW::DMSmooth);
+	// Set render type just on active window!
+	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMSmooth);
 }
 
 void MainWindow::RenderFlatLine()
 {
-	gla->setDrawMode(vcg::GLW::DMFlatWire);
+	// Set render type just on active window!
+	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMFlatWire);
 }
 
 void MainWindow::RenderHiddenLines()
 {
-	gla->setDrawMode(vcg::GLW::DMHidden);
+	// Set render type just on active window!
+	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMHidden);
 }
 
-void MainWindow::updateWindowMenu(){
+void MainWindow::updateWindowMenu()
+{
 	windowsMenu->clear();
 	windowsMenu->addAction(closeAct);
 	windowsMenu->addAction(closeAllAct);
 	windowsMenu->addSeparator();
 	windowsMenu->addAction(windowsTileAct);
 	windowsMenu->addAction(windowsCascadeAct);
-	windowsMenu->addSeparator();
+
 	QWidgetList windows = workspace->windowList();
-	for (int i = 0; i < windows.size(); ++i) {
-		QString text = tr("&%1. %2").arg(i + 1).arg(windows.at(i)->windowTitle());
+
+	if(windows.size() > 0)
+			windowsMenu->addSeparator();
+
+	int i=0;
+	foreach(QWidget *w,windows)
+	{
+		QString text = tr("&%1. %2").arg(i+1).arg(QFileInfo(w->windowTitle()).fileName());
+		
 		QAction *action  = windowsMenu->addAction(text);
 		action->setCheckable(true);
-		action ->setChecked(windows.at(i)->isActiveWindow());
-		connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
-		windowMapper->setMapping(action, windows.at(i));
+		action->setChecked(w == workspace->activeWindow());
 
+		// Connect the signal to activate the selected window
+		connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
+		windowMapper->setMapping(action, w);
+		++i;
 	}
 }

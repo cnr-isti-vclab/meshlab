@@ -103,7 +103,7 @@ private:
 	QAction *aboutAct;
 	QAction *aboutQtAct;
 	QAction *aboutPluginsAct;
-	QAction *viewToolbarFileAct;
+	QAction *viewToolbarStandardAct;
 	QAction *viewToolbarRenderAct;
 	QAction *windowsTileAct;
 	QAction *windowsCascadeAct;
