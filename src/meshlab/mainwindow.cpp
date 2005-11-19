@@ -24,6 +24,14 @@
 History
 
 $Log$
+Revision 1.11  2005/11/19 04:59:12  davide_portelli
+I have added the modifications to the menù view and to the menu windows:
+- View->Toolbar->File ToolBar
+- View->Toolbar->Render ToolBar
+- windows->Close
+- windows->Close All
+- windows->and the list of the open windows
+
 Revision 1.10  2005/11/18 18:25:35  alemochi
 Rename function in glArea.h
 
@@ -72,6 +80,8 @@ MainWindow::MainWindow()
 	workspace = new QWorkspace(this);
 	
 	setCentralWidget(workspace);
+	windowMapper = new QSignalMapper(this);
+	connect(windowMapper, SIGNAL(mapped(QWidget *)),workspace, SLOT(setActiveWindow(QWidget *)));
 	createActions();
 	createMenus();
 	createToolBars();
@@ -158,25 +168,32 @@ void MainWindow::aboutPlugins()
 
 void MainWindow::createActions()
 {
-	openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
+	//////////////Action Menu File //////////////////////////////////////////////////////////////
+  openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
 	openAct->setShortcut(tr("Ctrl+O"));
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
 	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("&Save As..."), this);
 	saveAsAct->setShortcut(tr("Ctrl+S"));
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-
-	viewModePoints	= new QAction(QIcon(":/images/points.png"),tr("&Points"), this);
-	viewModeWire		= new QAction(QIcon(":/images/wire.png"),tr("&Wireframe"), this);
-	viewModeLines		= new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"), this);
-	viewModeFlatLines = new QAction(QIcon(":/images/flatlines.png"),tr("Flat &Lines"), this);
-	viewModeFlat		= new QAction(QIcon(":/images/flat.png"),tr("&Flat"), this);
-	viewModeSmooth	= new QAction(QIcon(":/images/smooth.png"),tr("&Smooth"), this);
-
+	
 	exitAct = new QAction(tr("E&xit"), this);
 	exitAct->setShortcut(tr("Ctrl+Q"));
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
+	//////////////Action Menu View /////////////////////////////////////////////////////////////
+	viewToolbarFileAct = new QAction (tr("&File Toolbar"), this);
+	viewToolbarFileAct->setCheckable(true);
+	viewToolbarFileAct->setChecked(true);
+	connect(viewToolbarFileAct, SIGNAL(triggered()), this, SLOT(viewToolbarFile()));
+
+	viewToolbarRenderAct = new QAction (tr("&Render Toolbar"), this);
+	viewToolbarRenderAct->setCheckable(true);
+	viewToolbarRenderAct->setChecked(true);
+	connect(viewToolbarRenderAct, SIGNAL(triggered()), this, SLOT(viewToolbarRender()));
+
+
+	//////////////Action Menu About ////////////////////////////////////////////////////////////
 	aboutAct = new QAction(tr("&About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
@@ -186,39 +203,50 @@ void MainWindow::createActions()
 	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
 	connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
 
-	viewToolbarAct = new QAction (tr("&Toolbar"), this);
-	connect(viewToolbarAct, SIGNAL(triggered()), this, SLOT(viewToolbar()));
-
+	//////////////Action Menu Windows /////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
 	connect(windowsTileAct, SIGNAL(triggered()), this, SLOT(windowsTile()));
 
 	windowsCascadeAct = new QAction(tr("&Cascade"), this);
 	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
-	
-	connect(viewModeWire, SIGNAL(triggered()), this, SLOT(RenderWire()));
+
+	closeAct = new QAction(tr("Cl&ose"), this);
+	closeAct->setShortcut(tr("Ctrl+F4"));
+	closeAct->setStatusTip(tr("Close the active window"));
+	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
+
+	closeAllAct = new QAction(tr("Close &All"), this);
+	closeAllAct->setStatusTip(tr("Close all the windows"));
+	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
+
+	//////////////Action Toolbar Render//////////////////////////////////////////////////////////
+	viewModePoints	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), this);
 	connect(viewModePoints, SIGNAL(triggered()), this, SLOT(RenderPoint()));
-	connect(viewModeFlat, SIGNAL(triggered()), this, SLOT(RenderFlat()));
-	connect(viewModeSmooth, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
-	connect(viewModeFlatLines, SIGNAL(triggered()), this, SLOT(RenderFlatLine()));
+
+	viewModeWire		  = new QAction(QIcon(":/images/wire.png"),tr("&Wireframe"), this);
+	connect(viewModeWire, SIGNAL(triggered()), this, SLOT(RenderWire()));
+
+	viewModeLines		  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"), this);
 	connect(viewModeLines, SIGNAL(triggered()), this, SLOT(RenderHiddenLines()));
 
-	
-	/*connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
-	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
-	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));*/
+	viewModeFlatLines = new QAction(QIcon(":/images/flatlines.png"),tr("Flat &Lines"), this);
+	connect(viewModeFlatLines, SIGNAL(triggered()), this, SLOT(RenderFlatLine()));
 
-	
+	viewModeFlat		  = new QAction(QIcon(":/images/flat.png"),tr("&Flat"), this);
+	connect(viewModeFlat, SIGNAL(triggered()), this, SLOT(RenderFlat()));
 
+	viewModeSmooth	  = new QAction(QIcon(":/images/smooth.png"),tr("&Smooth"), this);
+	connect(viewModeSmooth, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
 }
 
 void MainWindow::createToolBars()
 {
-	mainToolBar = new QToolBar(this);
+	mainToolBar = addToolBar(tr("File ToolBar"));
 	mainToolBar->setIconSize(QSize(32,32));
 	mainToolBar->addAction(openAct);
 	mainToolBar->addAction(saveAsAct);
 
-	renderToolBar = new QToolBar(this);
+	renderToolBar = addToolBar(tr("Render ToolBar"));
 	renderToolBar->setIconSize(QSize(32,32));
 	renderToolBar->addAction(viewModePoints);
 	renderToolBar->addAction(viewModeWire);
@@ -238,12 +266,13 @@ void MainWindow::createMenus()
 
 	filterMenu = menuBar()->addMenu(tr("&Filter"));
 
-	viewMenu = menuBar()->addMenu(tr("&View"));
-	viewMenu->addAction(viewToolbarAct);
+	viewMenu		= menuBar()->addMenu(tr("&View"));
+	toolBarMenu	= viewMenu->addMenu(tr("&ToolBar"));
+	toolBarMenu->addAction(viewToolbarFileAct);
+	toolBarMenu->addAction(viewToolbarRenderAct);
 
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
-	windowsMenu->addAction(windowsTileAct);
-	windowsMenu->addAction(windowsCascadeAct);
+	connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
 
 	menuBar()->addSeparator();
 
@@ -315,11 +344,22 @@ void MainWindow::windowsTile(){
 void MainWindow::windowsCascade(){
 	workspace->cascade();
 }
-void MainWindow::viewToolbar(){
+void MainWindow::viewToolbarFile(){
 	if(mainToolBar->isVisible()){
 		mainToolBar->hide();
+		viewToolbarFileAct->setChecked(false);
 	}else{
 		mainToolBar->show();
+		viewToolbarFileAct->setChecked(true);
+	}
+}
+void MainWindow::viewToolbarRender(){
+	if(renderToolBar->isVisible()){
+		renderToolBar->hide();
+		viewToolbarRenderAct->setChecked(false);
+	}else{
+		renderToolBar->show();
+		viewToolbarRenderAct->setChecked(true);
 	}
 }
 
@@ -361,4 +401,23 @@ void MainWindow::RenderHiddenLines()
 {
 	//gla->SetMode(vcg::GLW::DMHidden);
 
+}
+void MainWindow::updateWindowMenu(){
+	windowsMenu->clear();
+	windowsMenu->addAction(closeAct);
+	windowsMenu->addAction(closeAllAct);
+	windowsMenu->addSeparator();
+	windowsMenu->addAction(windowsTileAct);
+	windowsMenu->addAction(windowsCascadeAct);
+	windowsMenu->addSeparator();
+	QWidgetList windows = workspace->windowList();
+	for (int i = 0; i < windows.size(); ++i) {
+		QString text = tr("&%1. %2").arg(i + 1).arg(windows.at(i)->windowTitle());
+		QAction *action  = windowsMenu->addAction(text);
+		action->setCheckable(true);
+		action ->setChecked(windows.at(i)->isActiveWindow());
+		connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
+		windowMapper->setMapping(action, windows.at(i));
+
+	}
 }

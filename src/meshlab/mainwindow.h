@@ -33,6 +33,7 @@ class QActionGroup;
 class QMenu;
 class QScrollArea;
 class GLArea;
+class QSignalMapper;
 
 class MainWindow : public QMainWindow
 {
@@ -50,7 +51,9 @@ private slots:
 	void applyFilter();
 	void windowsTile();
 	void windowsCascade();
-	void viewToolbar();
+	void updateWindowMenu();
+	void viewToolbarFile();
+	void viewToolbarRender();
 	void RenderPoint();
 	void RenderWire();
 	void RenderFlat();
@@ -68,6 +71,8 @@ private:
 		const char *member, QActionGroup *actionGroup = 0);
 
 	QWorkspace *workspace;
+	QSignalMapper *windowMapper;
+
 	GLArea *gla;
 	vector<MeshModel *> VM;
 	//GLArea *paintArea;
@@ -80,6 +85,7 @@ private:
 	QMenu *fileMenu;
 	QMenu *filterMenu;
 	QMenu *viewMenu;
+	QMenu *toolBarMenu;
 	QMenu *windowsMenu;
 	QMenu *helpMenu;
 	
@@ -97,9 +103,13 @@ private:
 	QAction *aboutAct;
 	QAction *aboutQtAct;
 	QAction *aboutPluginsAct;
-	QAction *viewToolbarAct;
+	QAction *viewToolbarFileAct;
+	QAction *viewToolbarRenderAct;
 	QAction *windowsTileAct;
 	QAction *windowsCascadeAct;
+	QAction *closeAct;
+	QAction *closeAllAct;
+
 };
 
 #endif
