@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.9  2005/11/20 19:30:50  glvertex
+- Added lighting parameters (still working on...)
+- Added logging events
+
 Revision 1.8  2005/11/20 14:28:26  glvertex
 GLW::DrawMode::DMxxx -> GLW::DMxxx in order to compile under gcc 3.3
 
@@ -84,8 +88,13 @@ void GLArea::initializeGL()
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_LIGHTING);
+	glEnable(GL_NORMALIZE);
+
+	GLfloat p[] = {0,0,1,0};
+
+	glLightfv(GL_LIGHT0,GL_POSITION,p);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
 
 	drawMode	= GLW::DMSmooth;
 	drawColor = GLW::CMNone;
@@ -107,15 +116,14 @@ void GLArea::paintGL()
 	glEnd();
 	glPopAttrib();
 
-
-	glColor3f(1.f,1.f,1.f);
-	gluLookAt(0,0,3,   0,0,0,   0,1,0);        
+	gluLookAt(0,0,3,   0,0,0,   0,1,0);
 
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
 	trackball.Apply();
 
+	glColor3f(1.f,1.f,1.f);
 	Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
 	glBoxWire(bb);
 	float d=1.0f/mm->cm.bbox.Diag();
@@ -124,6 +132,11 @@ void GLArea::paintGL()
 	glTranslate(-mm->cm.bbox.Center());
 
 	mm->Render(drawMode,drawColor);
+
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
+		log.glDraw(this,0,3);
+	glPopAttrib();
 }
 
 void GLArea::resizeGL(int _width, int _height)

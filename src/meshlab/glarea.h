@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.6  2005/11/20 19:30:50  glvertex
+- Added lighting parameters (still working on...)
+- Added logging events
+
 Revision 1.5  2005/11/19 12:14:20  glvertex
 Some cleanup and renaming
 
@@ -48,6 +52,8 @@ First rough version. It simply load a mesh.
 #include <QWidget>
 #include <QGLWidget>
 
+#include "GLLogStream.h"
+
 
 class MeshModel;
 class GLArea : public QGLWidget
@@ -57,8 +63,11 @@ class GLArea : public QGLWidget
 public:
 	GLArea(QWidget *parent = 0);
 	~GLArea(){}
+	
 	MeshModel *mm;
 	vcg::Trackball trackball;
+	GLLogStream log;
+
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 	void setDrawMode(vcg::GLW::DrawMode mode);
