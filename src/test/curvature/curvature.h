@@ -1,8 +1,7 @@
-#include <vcg\simplex\vertexplus\component.h>
+#include <vcg/simplex/vertexplus/component.h>
 
 namespace vcg {
 	namespace vert {
-
 
 		template <class T> class EmptyCurvature: public T {
 		public:
