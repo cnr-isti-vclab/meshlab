@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.15  2005/11/20 17:57:26  davide_portelli
+Modification the menu:
+- Menu disable when not there is active windows
+- Menu enable when there is active windows
+
 Revision 1.14  2005/11/20 04:34:34  davide_portelli
 Adding in the file menù, the list of the last open file (Recent File).
 
@@ -93,15 +98,15 @@ MainWindow::MainWindow()
 	setCentralWidget(workspace);
 	windowMapper = new QSignalMapper(this);
 	connect(windowMapper, SIGNAL(mapped(QWidget *)),workspace, SLOT(setActiveWindow(QWidget *)));
+	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateMenus()));
+
 	createActions();
 	createMenus();
 	createToolBars();
-
+	updateMenus();
 	addToolBar(mainToolBar);
 	addToolBar(renderToolBar);
-
 	setWindowTitle(tr("MeshLab v0.1"));
-
 	loadPlugins();
 
 
@@ -494,4 +499,24 @@ void MainWindow::setCurrentFile(const QString &fileName)
 		MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
 		if (mainWin) mainWin->updateRecentFileActions();
 	}
+}
+
+void MainWindow::updateMenus()
+{
+	bool active = workspace->activeWindow();
+	//////////////////////////////////////////
+	saveAsAct->setEnabled(active);
+	//////////////////////////////////////////
+	windowsTileAct->setEnabled(active);
+	windowsCascadeAct->setEnabled(active);
+	closeAct->setEnabled(active);
+	closeAllAct->setEnabled(active);
+	/////////////////////////////////////////
+  viewModePoints->setEnabled(active);
+	viewModeWire->setEnabled(active);
+	viewModeLines->setEnabled(active);
+	viewModeFlatLines->setEnabled(active);
+	viewModeFlat->setEnabled(active);
+	viewModeSmooth->setEnabled(active);
+	//////////////////////////////////////////
 }

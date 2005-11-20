@@ -55,6 +55,7 @@ private slots:
 	void windowsTile();
 	void windowsCascade();
 	void updateWindowMenu();
+	void updateMenus();
 	void viewToolbarFile();
 	void viewToolbarRender();
 	void RenderPoint();
