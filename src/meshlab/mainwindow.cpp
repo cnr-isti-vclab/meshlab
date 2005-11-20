@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.17  2005/11/20 19:33:09  glvertex
+Logging filters events (still working on...)
+
 Revision 1.16  2005/11/20 18:54:33  davide_portelli
 Improved menu behavior
 
@@ -376,7 +379,9 @@ void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-	iFilter->applyFilter(action->text(), *(((GLArea *)(workspace->activeWindow()))->mm ), this);
+	
+	if (iFilter->applyFilter(action->text(), *(((GLArea *)(workspace->activeWindow()))->mm ), this))
+		qobject_cast<GLArea *>(workspace->activeWindow())->log.Log(0,"Applied filter %s",action->text().data());
 }
 
 
