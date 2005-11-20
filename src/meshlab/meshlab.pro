@@ -1,4 +1,5 @@
 HEADERS        = interfaces.h \
+		 GLLogStream.h \
                  mainwindow.h \
                  meshmodel.h \
                  glarea.h \
@@ -9,6 +10,7 @@ HEADERS        = interfaces.h \
 SOURCES        = main.cpp \
                  mainwindow.cpp \
                  meshmodel.cpp \
+		 GLLogStream.cpp \
                  glarea.cpp \
                  plugindialog.cpp \
                  ../../../sf/wrap/ply/plylib.cpp\
