@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.14  2005/11/20 04:34:34  davide_portelli
+Adding in the file menù, the list of the last open file (Recent File).
+
 Revision 1.13  2005/11/19 18:15:20  glvertex
 - Some bug removed.
 - Interface more friendly.
@@ -144,9 +147,16 @@ void MainWindow::open(QString fileName)
 			gla->setWindowTitle(QFileInfo(fileName).fileName());   
 			workspace->addWindow(gla);
 			gla->showMaximized();
+			setCurrentFile(fileName);
 			return;
 		}
 	}
+}
+
+void MainWindow::openRecentFile()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+	if (action)	open(action->data().toString());
 }
 
 bool MainWindow::saveAs()
@@ -185,6 +195,12 @@ void MainWindow::createActions()
 	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("&Save As..."), this);
 	saveAsAct->setShortcut(tr("Ctrl+S"));
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+
+	for (int i = 0; i < MAXRECENTFILES; ++i) {
+		recentFileActs[i] = new QAction(this);
+		recentFileActs[i]->setVisible(false);
+		connect(recentFileActs[i], SIGNAL(triggered()),this, SLOT(openRecentFile()));
+	}
 	
 	exitAct = new QAction(tr("E&xit"), this);
 	exitAct->setShortcut(tr("Ctrl+Q"));
@@ -268,24 +284,35 @@ void MainWindow::createToolBars()
 
 void MainWindow::createMenus()
 {
+	//////////////////// Menu File ////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(openAct);
 	fileMenu->addAction(saveAsAct);
+	separatorAct = fileMenu->addSeparator();
+	for (int i = 0; i < MAXRECENTFILES; ++i) fileMenu->addAction(recentFileActs[i]);
+	updateRecentFileActions();
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
+	
 
+	//////////////////// Menu Filter //////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("&Filter"));
+	
 
+	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(viewToolbarStandardAct);
 	toolBarMenu->addAction(viewToolbarRenderAct);
+	
 
+	//////////////////// Menu Windows /////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
-
 	menuBar()->addSeparator();
+	
 
+	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAct);
 	helpMenu->addAction(aboutQtAct);
@@ -428,14 +455,43 @@ void MainWindow::updateWindowMenu()
 	foreach(QWidget *w,windows)
 	{
 		QString text = tr("&%1. %2").arg(i+1).arg(QFileInfo(w->windowTitle()).fileName());
-		
 		QAction *action  = windowsMenu->addAction(text);
 		action->setCheckable(true);
 		action->setChecked(w == workspace->activeWindow());
-
 		// Connect the signal to activate the selected window
 		connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
 		windowMapper->setMapping(action, w);
 		++i;
+	}
+}
+void MainWindow::updateRecentFileActions()
+{
+	QSettings settings("Recent Files");
+	QStringList files = settings.value("recentFileList").toStringList();
+	int numRecentFiles = qMin(files.size(), (int)MAXRECENTFILES);
+	for (int i = 0; i < numRecentFiles; ++i) {
+		QString text = tr("&%1 %2").arg(i + 1).arg(QFileInfo(files[i]).fileName());
+		recentFileActs[i]->setText(text);
+		recentFileActs[i]->setData(files[i]);
+		recentFileActs[i]->setVisible(true);
+	}
+	for (int j = numRecentFiles; j < MAXRECENTFILES; ++j)	recentFileActs[j]->setVisible(false);
+	separatorAct->setVisible(numRecentFiles > 0);
+}
+
+void MainWindow::setCurrentFile(const QString &fileName)
+{
+	QSettings settings("Recent Files");
+	QStringList files = settings.value("recentFileList").toStringList();
+	files.removeAll(fileName);
+	files.prepend(fileName);
+	while (files.size() > MAXRECENTFILES)
+		files.removeLast();
+
+	settings.setValue("recentFileList", files);
+
+	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+		MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
+		if (mainWin) mainWin->updateRecentFileActions();
 	}
 }

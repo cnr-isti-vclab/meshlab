@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.7  2005/11/20 04:34:34  davide_portelli
+Adding in the file menù, the list of the last open file (Recent File).
+
 Revision 1.6  2005/11/19 18:15:20  glvertex
 - Some bug removed.
 - Interface more friendly.
@@ -77,12 +80,12 @@ void GLArea::initializeGL()
 {
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	//glEnable(GL_LIGHTING);
 	//glEnable(GL_LIGHT0);
 
 	drawMode	= GLW::DrawMode::DMSmooth;
-	drawColor = GLW::CMPerMesh;
+	drawColor = GLW::CMNone;
 }
 
 void GLArea::paintGL()

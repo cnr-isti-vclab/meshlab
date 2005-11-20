@@ -28,6 +28,8 @@
 #include <QStringList>
 #include "meshmodel.h"
 
+#define MAXRECENTFILES 4
+
 class QAction;
 class QActionGroup;
 class QMenu;
@@ -45,6 +47,7 @@ public:
 private slots:
 
 	void open(QString fileName=QString());
+	void openRecentFile();							
 	bool saveAs();
 	void about();
 	void aboutPlugins();
@@ -67,6 +70,8 @@ private:
 	void createMenus();
 	void createToolBars();
 	void loadPlugins();
+	void updateRecentFileActions();				
+	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QObject *plugin, const QStringList &texts, QMenu *menu,
 								const char *member, QActionGroup *actionGroup = 0);
 
@@ -109,7 +114,8 @@ private:
 	QAction *windowsCascadeAct;
 	QAction *closeAct;
 	QAction *closeAllAct;
-
+	QAction *recentFileActs[MAXRECENTFILES];		
+	QAction *separatorAct;										
 };
 
 #endif
