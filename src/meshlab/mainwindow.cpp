@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.16  2005/11/20 18:54:33  davide_portelli
+Improved menu behavior
+
 Revision 1.15  2005/11/20 17:57:26  davide_portelli
 Modification the menu:
 - Menu disable when not there is active windows
@@ -350,10 +353,8 @@ void MainWindow::loadPlugins()
 			pluginFileNames += fileName;
 		}
 	}
-
-	// brushMenu->setEnabled(!brushActionGroup->actions().isEmpty());
-	// shapesMenu->setEnabled(!shapesMenu->actions().isEmpty());
 	filterMenu->setEnabled(!filterMenu->actions().isEmpty());
+	
 }
 
 void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu, const char *member,
@@ -507,10 +508,9 @@ void MainWindow::updateMenus()
 	//////////////////////////////////////////
 	saveAsAct->setEnabled(active);
 	//////////////////////////////////////////
-	windowsTileAct->setEnabled(active);
-	windowsCascadeAct->setEnabled(active);
-	closeAct->setEnabled(active);
-	closeAllAct->setEnabled(active);
+	filterMenu->setEnabled(active);
+	//////////////////////////////////////////
+  windowsMenu->setEnabled(active);
 	/////////////////////////////////////////
   viewModePoints->setEnabled(active);
 	viewModeWire->setEnabled(active);
