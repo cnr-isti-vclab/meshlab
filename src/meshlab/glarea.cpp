@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.8  2005/11/20 14:28:26  glvertex
+GLW::DrawMode::DMxxx -> GLW::DMxxx in order to compile under gcc 3.3
+
 Revision 1.7  2005/11/20 04:34:34  davide_portelli
 Adding in the file menù, the list of the last open file (Recent File).
 
@@ -81,10 +84,10 @@ void GLArea::initializeGL()
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	//glEnable(GL_LIGHTING);
-	//glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
 
-	drawMode	= GLW::DrawMode::DMSmooth;
+	drawMode	= GLW::DMSmooth;
 	drawColor = GLW::CMNone;
 }
 
@@ -92,8 +95,6 @@ void GLArea::paintGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	// Draws a smooth background
-	// Why drops so slow??
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
