@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.10  2005/11/20 23:40:23  alemochi
+Added updating normalperface
+
 Revision 1.9  2005/11/20 19:30:50  glvertex
 - Added lighting parameters (still working on...)
 - Added logging events
@@ -90,7 +93,7 @@ void GLArea::initializeGL()
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_NORMALIZE);
 
-	GLfloat p[] = {0,0,1,0};
+	GLfloat p[] = {0,1,0,0};
 
 	glLightfv(GL_LIGHT0,GL_POSITION,p);
 	glEnable(GL_LIGHT0);
