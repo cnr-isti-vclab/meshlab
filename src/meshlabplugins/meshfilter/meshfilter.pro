@@ -1,6 +1,6 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf C:\code\glew\include
+INCLUDEPATH  += ../.. ../../../../sf ../../../code/lib/glew/include
 HEADERS       = meshfilter.h
 SOURCES       = meshfilter.cpp
 TARGET        = meshfilter
