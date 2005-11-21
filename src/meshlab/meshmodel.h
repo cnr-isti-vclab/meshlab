@@ -1,9 +1,32 @@
-/*
-model
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+  History
+$Log$
+Revision 1.5  2005/11/21 12:09:33  cignoni
+Added copyright info
 
-i dati relativi ad un singolo oggetto.
-Ogni oggetto si sa caricare e contiene una mesh
-*/
+****************************************************************************/
 
 #include <stdio.h>
 #include <time.h>
@@ -38,6 +61,12 @@ class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, ve
 class CFaceO    : public FaceSimp2< CVertexO, CEdge, CFaceO, face::InfoOcf, face::FFAdjOcf, face::WedgeTexture2f, face::VertexRef, face::BitFlags, face::Normal3f > {};
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
 
+/*
+  MeshModel Class
+
+contiene i dati relativi ad un singolo oggetto.
+Ogni oggetto si sa caricare e contiene una mesh
+*/
 
 class MeshModel
 {
