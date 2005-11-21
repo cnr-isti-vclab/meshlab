@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.18  2005/11/21 22:08:25  cignoni
+added a cast to a 8bit char from unicode using locale
+
 Revision 1.17  2005/11/20 19:33:09  glvertex
 Logging filters events (still working on...)
 
@@ -381,7 +384,7 @@ void MainWindow::applyFilter()
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 	
 	if (iFilter->applyFilter(action->text(), *(((GLArea *)(workspace->activeWindow()))->mm ), this))
-		qobject_cast<GLArea *>(workspace->activeWindow())->log.Log(0,"Applied filter %s",action->text().data());
+		qobject_cast<GLArea *>(workspace->activeWindow())->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
 }
 
 
