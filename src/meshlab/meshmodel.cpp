@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2005/11/21 22:09:35  cignoni
+added missing enablenormal
+
 Revision 1.7  2005/11/21 12:12:54  cignoni
 Added copyright info
 
@@ -48,6 +51,7 @@ bool MeshModel::Open(const char *filename)
   qDebug("FAce 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
 	vcg::tri::UpdateBounding<CMeshO>::Box(cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertex(cm);
+  cm.face.EnableNormal();
 	vcg::tri::UpdateNormals<CMeshO>::PerFace(cm);
 	
   
