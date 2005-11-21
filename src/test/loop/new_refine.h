@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.5  2005/11/21 16:02:28  mariolatronico
+work in progress on even iterations
+
 Revision 1.4  2005/11/18 10:59:09  mariolatronico
 cleaned RefineEvenOddE. It doesn't work because missed deleted flags
 
@@ -76,7 +79,7 @@ first working version
 #include<vcg/complex/trimesh/refine.h>
 #include <iostream>
 #include <math.h>
-
+#include <QtGlobal>
 #define PI 3.14159265
 namespace vcg{
 
@@ -150,7 +153,7 @@ struct OddPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::F
 template<class MESH_TYPE>
 struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::FaceType> , typename MESH_TYPE::CoordType>
 {
-	void operator()(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType>  ep)	{	
+	void operator()(typename MESH_TYPE::CoordType &nP, face::Pos<typename MESH_TYPE::FaceType>  ep)	{	
 
 		face::Pos<typename MESH_TYPE::FaceType> he(ep.f,ep.z,ep.f->V(ep.z));
 		typename MESH_TYPE::CoordType *r, *l,  *curr;
@@ -166,7 +169,7 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 			if (&he.v->P() == curr)
 				he.FlipV();
 			l = &he.v->P();
-			nv.P() = ( *(curr) * (3.0)/(4.0)  + (*l)*(1.0/8.0) + (*r)*(1.0/8.0));
+			nP = ( *(curr) * (3.0)/(4.0)  + (*l)*(1.0/8.0) + (*r)*(1.0/8.0));
 		}
 		else {
 			// compute valence of this vertex
@@ -195,7 +198,7 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 				*curr = *curr + (*iter) * beta;
 
 			}
-			nv.P() = *curr;
+			nP = *curr;
 		}
 	} // end of operator()
 
@@ -227,26 +230,66 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 	//	typedef MESH_TYPE::VertexType vertType;
 	
 	// vettore per prendere i vecchi vertici
-	std::vector<MESH_TYPE::VertexType> oldVertVec(m.vn);
+	std::vector<MESH_TYPE::CoordType> oldVertVec(m.vert.size());
 	
-	//memorizzo il numero iniziale di vertici
-	int n = m.vn;
-
 	// memorizzo i vertici nel vettore
 	typename MESH_TYPE::VertexIterator vi;
-	for ( vi = m.vert.begin(); vi != m.vert.end(); ++vi) {
-		oldVertVec.push_back((*vi));
+	int j = 0;
+	int i = 0;
+	for (vi = m.vert.begin(); vi != m.vert.end(); vi++, i++) {
+		typename MESH_TYPE::FaceType *fc = (*vi).VFp();
+		if ((*vi) == *(fc->V(0)))
+			j = 0;
+		if ((*vi) == *(fc->V(1)))
+			j = 1;
+		if ((*vi) == *(fc->V(2)))
+			j = 2;
+// 		if (m.vert[i] == fc.V(0))
+// 			j = 0;
+// 		if (m.vert[i] == fc.V(1))
+// 			j = 1;
+// 		if (m.vert[i] == fc.V(2))
+// 			j = 2;
+
+		face::Pos<typename MESH_TYPE::FaceType>aux (fc,j);
+
+		even(oldVertVec[i], aux );
+
 	}
 
+	
+	for ( vi = m.vert.begin(); vi != m.vert.end(); ++vi) {
+		oldVertVec.push_back(((*vi).P()));
+	}
+	
 	// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
-	
-	for (int i = 0 ; i < n; ++i) 
-		{
+
+	vcg::tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
+	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+
+	for (int i = 0; i < oldVertVec.size(); i++) {
+
+		m.vert[i].P() = oldVertVec[i];
+
+	}
+
+// 	for (int i = 0 ; i < n; ++i) 
+// 		{
 			
-			even(m.vert[i],  face::Pos<typename MESH_TYPE::FaceType>((oldVertVec[i].VFp()),1));
+ 			
+// //						even(m.vert[i], face::Pos<typename MESH_TYPE::FaceType>(m.vert[i].VFp(),1));
+// 			//		if (m.vert[i].VFp() && !m.vert[i].VFp()->IsD()) {
+// 			qDebug("%p", oldVertVec[i].VFp());
+// 			//even(m.vert[i], face::Pos<typename MESH_TYPE::FaceType>(m.vert[i].VFp(),1));
+// 			//			even(oldVertVec[i], face::Pos<typename MESH_TYPE::FaceType>(m.vert[i].VFp(),1));
+// 			if (! oldVertVec[i].VFp()->IsD())
+// 				even(oldVertVec[i], face::Pos<typename MESH_TYPE::FaceType>(oldVertVec[i].VFp(),1));
+
+// 			m.vert[i] = oldVertVec[i];
 			
-		}
+// 				//}
+// 		}
 	
 	
 	//    1) calcola nuova pos vertici old e memorizza in un vett ausiliairio 
