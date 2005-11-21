@@ -19,9 +19,9 @@ SOURCES        = main.cpp \
 RESOURCES     = meshlab.qrc
 QT           += opengl
 
-INCLUDEPATH += . ../../../sf C:\code\glew\include
+INCLUDEPATH += . ../../../sf ../../../code/lib/glew/include
 CONFIG += stl
-win32:LIBS	+= C:\code\glew\lib\glew32.lib 
+win32:LIBS	+= ../../../code/lib/glew/lib/glew32.lib 
 unix:LIBS	+= -lGLEW
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/tools/plugandpaint
