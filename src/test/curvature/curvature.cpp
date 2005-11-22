@@ -146,13 +146,13 @@ int main(int , char **)
 	#ifdef _SHOW_A_MESH
 		MyMesh mesh;
 		cout << "Opening sample mesh...";
-		bool res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"..\..\sample\bunny10k.ply");
+		int res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"bunny10k.ply");
 
 		if (res)
 		{
-			cout << "ok" << endl;
+			cout <<  vcg::tri::io::ImporterPLY<MyMesh>::ErrorMsg(res) << endl;
 		} else {
-			cout << "error" << endl;
+			cout << "ok" << endl;
 		}
 
 		vcg::tri::UpdateBounding<MyMesh>::Box(mesh);

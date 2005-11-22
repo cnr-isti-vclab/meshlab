@@ -24,11 +24,8 @@
   History
 
 $Log$
-Revision 1.1  2005/11/22 17:03:18  vannini
-importato visualizzatore sdl
-
-Revision 1.1  2005/11/09 11:04:56  buzzelli
-Added sample project used to test OBJ importer class.
+Revision 1.2  2005/11/22 17:47:54  vannini
+fixato caricamento della mesh
 
 Revision 1.1  2005/09/21 10:29:33  cignoni
 Initial Relase
@@ -59,8 +56,8 @@ Revision 1.1  2005/03/15 07:00:54  ganovell
 #include <wrap/gui/trackball.h>
 
 bool fullscreen = false, quit = false,keepdrawing = true;
-int width =800;
-int height = 600;
+int width =1024;
+int height = 768;
 int x,y;
 
 vcg::GlTrimesh<MyMesh> glWrap;
@@ -104,7 +101,7 @@ bool init(const std::string &str) {
   glHint( GL_FOG_HINT, GL_NICEST );
   glEnable(GL_DEPTH_TEST);
   glDepthFunc( GL_LEQUAL );
-  glDisable(GL_LIGHTING);
+  glDisable(GL_LIGHTING); 
 
   glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -128,7 +125,7 @@ void display(){
 
 		track.GetView();
     track.Apply();
-    //track.DrawCircle();
+    track.Draw();
 
 		
 #ifdef _SHOW_A_MESH			
