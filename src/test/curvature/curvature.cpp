@@ -21,7 +21,7 @@ class qVertex : public VertexSimp2<qVertex, CEdge, CFace, vert::Coord3f, vert::N
 class CFace: public FaceAF<qVertex,CEdge,CFace>{};
 class MyMesh: public tri::TriMesh< vector<qVertex>, vector<CFace> >{};
 
-static void Gaussian(MyMesh m){
+static void Gaussian(MyMesh &m){
 	
 	assert(m.HasPerVertexQuality());
 
