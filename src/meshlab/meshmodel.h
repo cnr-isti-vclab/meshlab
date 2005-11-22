@@ -23,12 +23,18 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2005/11/22 16:16:35  glvertex
+Added preprocessor intructions to prevent multiple inclusion
+
 Revision 1.6  2005/11/21 22:06:47  cignoni
 Reinserted optional normals (now working)
 
 Revision 1.5  2005/11/21 12:09:33  cignoni
 Added copyright info
 ****************************************************************************/
+
+#ifndef MESHMODEL_H
+#define MESHMODEL_H
 
 #include <stdio.h>
 #include <time.h>
@@ -80,3 +86,5 @@ public:
   bool Open(const char* filename);
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm);
 };
+
+#endif
