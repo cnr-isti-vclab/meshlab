@@ -29,19 +29,36 @@
 #include <meshlab/interfaces.h>
 #include <meshlab/meshmodel.h>
 
-#include "mfRemove.h"
-
-class ExtraMeshFilterPlugin : public QObject, public MeshFilterListInterface
+class MFPlugin_UnifyVertex : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
-    Q_INTERFACES(MeshFilterListInterface)
+    Q_INTERFACES(MeshFilterInterface)
 
-		std::vector<MeshFilterInterface*> filterList;
+		QString name;	// Filter Descriptor String
+//		int id;				// Filter ID (current position in the Filters Menu)
 
 public:
-		ExtraMeshFilterPlugin();
-    QStringList filters() const;
-    bool applyFilter(int filter, MeshModel &m, QWidget *parent) ;
+		MFPlugin_UnifyVertex() : name("Unify Vertexes") {}
+		int filterID() const;
+    QString filterName() const;
+    bool applyFilter(MeshModel &m, QWidget *parent);
+};
+
+
+
+class MFPlugin_RemoveUnref : public QObject, public MeshFilterInterface
+{
+    Q_OBJECT
+    Q_INTERFACES(MeshFilterInterface)
+
+		QString name;	// Filter Descriptor String
+//		int id;							// Filter ID (current position in the Filters Menu)
+
+public:
+		MFPlugin_RemoveUnref() : name("Remove Unreferenced Vertexes") {}
+		int filterID()const;
+    QString filterName() const;
+    bool applyFilter(MeshModel &m, QWidget *parent);
 };
 
 #endif

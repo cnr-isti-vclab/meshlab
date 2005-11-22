@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2005/11/22 17:10:53  glvertex
+MeshFilter Plugin STRONGLY reviewed and changed
+
 Revision 1.3  2005/11/21 12:07:56  cignoni
 Added copyright info
 
@@ -40,6 +43,7 @@ class QRect;
 class QString;
 class QStringList;
 class MeshModel;
+
 class MeshIOInterface
 {
 public:
@@ -48,13 +52,24 @@ public:
     virtual QStringList format() const = 0;
 };
 
+
 class MeshFilterInterface
 {
 public:
     virtual ~MeshFilterInterface() {}
-    virtual bool applyFilter(const QString &filter, MeshModel &m, QWidget *parent) = 0;
+    virtual bool apply(MeshModel &m, QWidget *parent) = 0;
+    virtual QString filterName() const = 0;
+};
+
+
+class MeshFilterListInterface
+{
+public:
+    virtual ~MeshFilterListInterface() {}
+    virtual bool applyFilter(int filter,MeshModel &m, QWidget *parent) = 0;
     virtual QStringList filters() const = 0;
 };
+
 
 class MeshRenderInterface
 {
@@ -66,8 +81,10 @@ public:
 
 Q_DECLARE_INTERFACE(MeshIOInterface,
                     "vcg.meshlab.MeshIOInterface/1.0")
-Q_DECLARE_INTERFACE(MeshFilterInterface,
-                    "vcg.meshlab.MeshFilterInterface/1.0")
+Q_DECLARE_INTERFACE(MeshFilterListInterface,
+                    "vcg.meshlab.MeshFilterListInterface/1.0")
+//Q_DECLARE_INTERFACE(MeshFilterInterface,
+//                    "vcg.meshlab.MeshFilterInterface/1.0")
 Q_DECLARE_INTERFACE(MeshRenderInterface,
                     "vcg.meshlab.MeshRenderInterface/1.0")
 

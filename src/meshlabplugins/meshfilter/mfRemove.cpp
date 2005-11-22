@@ -24,41 +24,18 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
+
+#include "mfRemove.h"
 
 using namespace vcg;
 
+// ****************** Remove Ureferenced Vertexes ******************
 
-// Constructor
-//
-// Adds at compile time the available plugins
-ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
+QString MFPlugin_RemoveUnref::filterName() const {return name;}
+
+bool MFPlugin_RemoveUnref::apply(MeshModel &m, QWidget *parent) 
 {
-	filterList.push_back(new MFPlugin_RemoveUnref);
-}
-
-QStringList ExtraMeshFilterPlugin::filters() const
-{ 
-	QStringList listName;
-
-	for(int i=0; i<filterList.size(); ++i)
-		listName << filterList[i]->filterName();
-
-	return listName;
-}
-
-bool ExtraMeshFilterPlugin::applyFilter(int filter, MeshModel &m, QWidget *parent) 
-{
-	QMessageBox::information(parent, tr("Filter Plugins"),tr("Selected %1").arg(filterList[filter]->filterName()));
-
-	filterList[filter]->apply(m,parent);
-
-       //if(filter == tr("Remove Unreferenced Vertexes")){
-       //  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-       //  QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
-       //}
+	int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
   return true;
 }
-
-Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)

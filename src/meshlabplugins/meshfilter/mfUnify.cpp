@@ -26,39 +26,33 @@
 
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
-
 using namespace vcg;
 
+// ****************** Remove Ureferenced Vertexes ******************
 
-// Constructor
-//
-// Adds at compile time the available plugins
-ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
+//int MFPlugin_RemoveUnref::filterID() const {return id;}
+
+QString MFPlugin_RemoveUnref::filterName() const {return name;}
+
+bool MFPlugin_RemoveUnref::applyFilter(MeshModel &m, QWidget *parent) 
 {
-	filterList.push_back(new MFPlugin_RemoveUnref);
-}
+       //QMessageBox::information(parent, tr("Filter Plugins"),
+       //                              tr("Trying to apply filter 2'%1.'").arg(filter));
 
-QStringList ExtraMeshFilterPlugin::filters() const
-{ 
-	QStringList listName;
-
-	for(int i=0; i<filterList.size(); ++i)
-		listName << filterList[i]->filterName();
-
-	return listName;
-}
-
-bool ExtraMeshFilterPlugin::applyFilter(int filter, MeshModel &m, QWidget *parent) 
-{
-	QMessageBox::information(parent, tr("Filter Plugins"),tr("Selected %1").arg(filterList[filter]->filterName()));
-
-	filterList[filter]->apply(m,parent);
-
-       //if(filter == tr("Remove Unreferenced Vertexes")){
-       //  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-       //  QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
-       //}
+	int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+  //       QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+  //     }
   return true;
 }
 
-Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
+// ****************** Unify Vertexes ******************
+
+QString MFPlugin_UnifyVertex::filterName() const {return name;}
+
+bool MFPlugin_UnifyVertex::applyFilter(MeshModel &m, QWidget *parent) 
+{
+	return false;
+}
+
+
+Q_EXPORT_PLUGIN(MFPlugin_RemoveUnref)

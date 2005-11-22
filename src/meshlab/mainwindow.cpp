@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.21  2005/11/22 17:10:53  glvertex
+MeshFilter Plugin STRONGLY reviewed and changed
+
 Revision 1.20  2005/11/22 01:22:45  davide_portelli
 Added the render menu.
 I have rename the following variable:
@@ -376,9 +379,9 @@ void MainWindow::loadPlugins()
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
 		if (plugin) {
-			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-			if (iFilter)
-				addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));                
+			MeshFilterListInterface *iFilterList = qobject_cast<MeshFilterListInterface *>(plugin);
+			if (iFilterList)
+				addToMenu(plugin, iFilterList->filters(), filterMenu, SLOT(applyFilter()));                
 
 			pluginFileNames += fileName;
 		}
@@ -405,10 +408,11 @@ void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu
 void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
-	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-	
-	if (iFilter->applyFilter(action->text(), *(((GLArea *)(workspace->activeWindow()))->mm ), this))
-		qobject_cast<GLArea *>(workspace->activeWindow())->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
+	MeshFilterListInterface *iFilterList = qobject_cast<MeshFilterListInterface *>(action->parent());
+	QAction *c = filterMenu->activeAction();
+
+	iFilterList->applyFilter(0,*(((GLArea *)(workspace->activeWindow()))->mm ), this);
+		//qobject_cast<GLArea *>(workspace->activeWindow())->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
 }
 
 
