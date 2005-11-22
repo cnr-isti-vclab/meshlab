@@ -106,7 +106,6 @@ static void Gaussian(MyMesh &m){
 
 }
 
-
 int main(int , char **)
 {
 	MyMesh mesh_old,mesh_new;
@@ -115,12 +114,12 @@ int main(int , char **)
 
 	tri::Dodecahedron(mesh_old);
 	tri::Dodecahedron(mesh_new);
-	
+
 	Gaussian(mesh_new);
 	tri::UpdateCurvature<MyMesh>::Gaussian(mesh_old);
 
 	for(vi_old=mesh_old.vert.begin(),vi_new=mesh_new.vert.begin(); vi_old!=mesh_old.vert.end(); ++vi_old,++vi_new) {
-		cout << "VERT:" << i++ << " NEW:" << (*vi_old).Q() << " OLD:" << (*vi_new).Q() << endl;
+		cout << "VERT:" << i++ << " NEW:" << (*vi_old).Q() << " LIB:" << (*vi_new).Q() << endl;
 	}
 
 	char r;
