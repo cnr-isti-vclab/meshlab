@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2005/11/22 11:40:14  glvertex
+Now using a single method to compute normals (PerVertePerFace instead PerVertex then PerFace)
+
 Revision 1.8  2005/11/21 22:09:35  cignoni
 added missing enablenormal
 
@@ -34,12 +37,13 @@ Added copyright info
 #include "meshmodel.h"
 #include<vcg/complex/trimesh/update/bounding.h>
 #include <QtGlobal>
+
 bool MeshModel::Open(const char *filename)
 {
   int mask;
   vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename, mask);
-  if(mask&ply::PLYMask::PM_VERTQUALITY) printf("Has Vertex Quality\n");
-  if(mask&ply::PLYMask::PM_FACEQUALITY) printf("Has Face Quality\n");
+  if(mask&ply::PLYMask::PM_VERTQUALITY) qDebug("Has Vertex Quality\n");
+  if(mask&ply::PLYMask::PM_FACEQUALITY) qDebug("Has Face Quality\n");
   if(mask&ply::PLYMask::PM_FACECOLOR) qDebug("Has Face Color\n");
   if(mask&ply::PLYMask::PM_VERTCOLOR) qDebug("Has Vertex Color\n");
   if(mask&ply::PLYMask::PM_WEDGTEXCOORD) 
@@ -47,14 +51,15 @@ bool MeshModel::Open(const char *filename)
     qDebug("Has Wedge Text Coords\n");
     cm.face.EnableWedgeTex();
   }
-  int ret=vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename);
-  qDebug("FAce 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
-	vcg::tri::UpdateBounding<CMeshO>::Box(cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertex(cm);
-  cm.face.EnableNormal();
-	vcg::tri::UpdateNormals<CMeshO>::PerFace(cm);
-	
+
+	cm.face.EnableNormal();
   
+	int ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename);
+  
+	qDebug("Face 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
+	
+	vcg::tri::UpdateBounding<CMeshO>::Box(cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(cm);
 
   return ret==::vcg::ply::E_NOERROR;
 }
