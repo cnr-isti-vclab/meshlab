@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.19  2005/11/22 00:03:21  davide_portelli
+Correct a little bug in menu filter
+
 Revision 1.18  2005/11/21 22:08:25  cignoni
 added a cast to a 8bit char from unicode using locale
 
@@ -112,17 +115,12 @@ MainWindow::MainWindow()
 	createActions();
 	createMenus();
 	createToolBars();
-	updateMenus();
+	loadPlugins();
 	addToolBar(mainToolBar);
 	addToolBar(renderToolBar);
 	setWindowTitle(tr("MeshLab v0.1"));
-	loadPlugins();
-
-
-	
-
+	updateMenus();
 	//QTimer::singleShot(500, this, SLOT(aboutPlugins()));
-
 	if(QCoreApplication::instance ()->argc()>1)
 		open(QCoreApplication::instance ()->argv()[1]);
 	else 
@@ -512,7 +510,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
 
 void MainWindow::updateMenus()
 {
-	bool active = workspace->activeWindow();
+	bool active = (bool)workspace->activeWindow();
 	//////////////////////////////////////////
 	saveAsAct->setEnabled(active);
 	//////////////////////////////////////////
