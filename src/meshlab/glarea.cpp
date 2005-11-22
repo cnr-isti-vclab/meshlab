@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.12  2005/11/22 21:51:53  alemochi
+Changed frustum values.
+
 Revision 1.11  2005/11/20 23:48:01  alemochi
 *** empty log message ***
 
@@ -130,8 +133,8 @@ void GLArea::paintGL()
 	trackball.Apply();
 
 	glColor3f(1.f,1.f,1.f);
-	Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
-	glBoxWire(bb);
+	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
+	//glBoxWire(bb);
 	float d=1.0f/mm->cm.bbox.Diag();
 	//float d=1;
 	glScale(d);
@@ -150,7 +153,7 @@ void GLArea::resizeGL(int _width, int _height)
 	//int side = qMin(width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60, float(_width)/float(_height), 1, 100);
+	gluPerspective(60, float(_width)/float(_height), 0.2, 5);
 	glMatrixMode(GL_MODELVIEW);
 
 	glViewport(0,0, _width, _height);
