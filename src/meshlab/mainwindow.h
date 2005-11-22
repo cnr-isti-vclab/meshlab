@@ -90,6 +90,7 @@ private:
 
 	QMenu *fileMenu;
 	QMenu *filterMenu;
+	QMenu *RenderMenu;
 	QMenu *viewMenu;
 	QMenu *toolBarMenu;
 	QMenu *windowsMenu;
@@ -98,12 +99,12 @@ private:
 	QAction *openAct;
 	QAction *saveAsAct;
 	
-	QAction *viewModePoints;
-	QAction *viewModeWire;
-	QAction *viewModeLines;
-	QAction *viewModeFlatLines;
-	QAction *viewModeFlat;
-	QAction *viewModeSmooth;
+	QAction *viewModePointsAct;
+	QAction *viewModeWireAct;
+	QAction *viewModeHiddenLinesAct;
+	QAction *viewModeFlatLinesAct;
+	QAction *viewModeFlatAct;
+	QAction *viewModeSmoothAct;
 	
 	QAction *exitAct;
 	QAction *aboutAct;
