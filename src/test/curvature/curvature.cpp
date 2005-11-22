@@ -42,10 +42,10 @@ static void Gaussian(MyMesh &m){
 	
 	assert(m.HasPerVertexQuality());
 
-	MyMesh::VertexIterator vi;   // iteratore vertice
-	MyMesh::FaceIterator fi;     // iteratore facce
-	double *area;                  // areamix vector
-	int i;												 // index
+	MyMesh::VertexIterator vi;		// iteratore vertice
+	MyMesh::FaceIterator fi;		// iteratore facce
+	double *area;					// areamix vector
+	int i;							// index
 	double area0, area1, area2;
 	double angle0, angle1, angle2; 
 	
@@ -146,7 +146,7 @@ int main(int , char **)
 	#ifdef _SHOW_A_MESH
 		MyMesh mesh;
 		cout << "Opening sample mesh...";
-		int res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"bunny10k.ply");
+		int res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/bunny10k.ply");
 
 		if (res)
 		{

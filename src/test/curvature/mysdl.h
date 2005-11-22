@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2005/11/22 18:02:36  vannini
+modificato sample sdl
+
 Revision 1.2  2005/11/22 17:47:54  vannini
 fixato caricamento della mesh
 
@@ -125,7 +128,7 @@ void display(){
 
 		track.GetView();
     track.Apply();
-    track.Draw();
+//  track.Draw();
 
 		
 #ifdef _SHOW_A_MESH			
