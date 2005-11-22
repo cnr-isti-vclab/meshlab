@@ -1,13 +1,31 @@
 #include <iostream>
-#include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertex/with/vn.h>
-#include <vcg/simplex/face/with/af.h>
-#include <vcg/complex/trimesh/base.h>
+
+//#include <vcg/simplex/vertexplus/base.h>
+//#include <vcg/simplex/vertex/with/vn.h>
+//#include <vcg/simplex/vertex/with/afvn.h>
+
+//#include <vcg/simplex/face/with/af.h>
+//#include <vcg/complex/trimesh/base.h>
+
+//#include <vcg/math/base.h>
+
 #include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/math/base.h>
 #include <vcg/complex/trimesh/update/curvature.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <wrap/io_trimesh/import_ply.h>
 
 //#include "curvature.h"
+
+#include "mysdl.h"
+
+#ifdef _SHOW_A_MESH
+	#include "mesh_type.h"
+	#include <vcg/complex/trimesh/create/platonic.h>
+	#include <vcg/complex/trimesh/update/bounding.h>
+	#include <vcg/complex/trimesh/update/normal.h>
+	#include <wrap/io_trimesh/import_ply.h>
+#endif
 
 using namespace vcg;
 using namespace std;
@@ -16,10 +34,9 @@ class CEdge;
 class CFace;
 
 //class CVertex : public VertexSimp2<CVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Curvaturef >{};
-class qVertex : public VertexSimp2<qVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Qualityf >{};
-
-class CFace: public FaceAF<qVertex,CEdge,CFace>{};
-class MyMesh: public tri::TriMesh< vector<qVertex>, vector<CFace> >{};
+//class qVertex : public VertexSimp2<qVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Qualityf >{};
+//class CFace: public FaceAF<qVertex,CEdge,CFace>{};
+//class MyMesh: public tri::TriMesh< vector<qVertex>, vector<CFace> >{};
 
 static void Gaussian(MyMesh &m){
 	
@@ -106,14 +123,17 @@ static void Gaussian(MyMesh &m){
 
 }
 
+
 int main(int , char **)
 {
-	MyMesh mesh_old,mesh_new;
+	/*MyMesh mesh_old, mesh_new;
+	
 	MyMesh::VertexIterator vi_old,vi_new;
 	int i = 0;
 
 	tri::Dodecahedron(mesh_old);
 	tri::Dodecahedron(mesh_new);
+
 
 	Gaussian(mesh_new);
 	tri::UpdateCurvature<MyMesh>::Gaussian(mesh_old);
@@ -121,9 +141,38 @@ int main(int , char **)
 	for(vi_old=mesh_old.vert.begin(),vi_new=mesh_new.vert.begin(); vi_old!=mesh_old.vert.end(); ++vi_old,++vi_new) {
 		cout << "VERT:" << i++ << " NEW:" << (*vi_old).Q() << " LIB:" << (*vi_new).Q() << endl;
 	}
+	*/
 
-	char r;
-	cin >> r;
+	#ifdef _SHOW_A_MESH
+		MyMesh mesh;
+		cout << "Opening sample mesh...";
+		bool res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"..\..\sample\bunny10k.ply");
 
-	return 1;
+		if (res)
+		{
+			cout << "ok" << endl;
+		} else {
+			cout << "error" << endl;
+		}
+
+		vcg::tri::UpdateBounding<MyMesh>::Box(mesh);
+		vcg::tri::UpdateNormals<MyMesh>::PerVertex(mesh);
+		glWrap.m = &mesh;
+	#endif
+
+	if(!init("SDL_minimal_viewer")) {
+		std::cerr << "Could not init SDL window\n";
+		return -1;
+	}
+
+	glClearColor(0, 0, 0, 0); 
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_CULL_FACE);
+ 
+	sdl_idle();
+	exit(0);
+
 }

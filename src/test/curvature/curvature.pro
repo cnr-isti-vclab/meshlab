@@ -5,10 +5,16 @@
 #  env MINGW_IN_SHELL=1 qmake -spec win32-g++ 
 
 TARGET = curvature
-LIBPATH += 
+DEFINES+= _SHOW_A_MESH
+LIBPATH += ../../../../code/lib/glew/lib/ ../../../../code/lib/SDL/lib/ ../../../../code/lib/glut/lib/
+win32:LIBS += SDL.lib SDLmain.lib opengl32.lib glu32.lib glew32s.lib glew32.lib glut32.lib
 DEPENDPATH += . 
-INCLUDEPATH += . ../../../../sf/
+INCLUDEPATH += . ../../../../sf/ 
+INCLUDEPATH += ../../../../code/lib/glew/include/ 
+INCLUDEPATH += ../../../../code/lib/SDL/include/
+INCLUDEPATH += ../../../../code/lib/glut/include/
+
 CONFIG += console stl
 TEMPLATE = app
 HEADERS += curvature.h
-SOURCES += curvature.cpp
+SOURCES += curvature.cpp ../../../../sf/wrap/ply/plylib.cpp ../../../../sf/wrap/gui/trackball.cpp ../../../../sf/wrap/gui/trackmode.cpp
