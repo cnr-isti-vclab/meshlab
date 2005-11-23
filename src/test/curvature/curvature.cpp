@@ -1,12 +1,24 @@
 #include <iostream>
 
 #include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertex/with/vn.h>
-#include <vcg/simplex/vertex/with/afvn.h>
-#include <vcg/simplex/face/with/af.h>
+#include <vcg/simplex/vertexplus/component.h>
+
+#include <vcg/simplex/faceplus/base.h>
+#include <vcg/simplex/faceplus/component.h>
+//old style vertex and face
+//#include <vcg/simplex/vertex/with/vn.h>
+//#include <vcg/simplex/vertex/with/afvn.h>
+//#include <vcg/simplex/face/with/af.h>
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/color.h>
+#include <vcg/complex/trimesh/update/curvature.h>
+
+//#include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/math/histogram.h>
+
+
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/gl/trimesh.h>
 #include <wrap/gui/trackball.h>
@@ -21,14 +33,16 @@ class CEdge;
 class CFace;
 
 //class CVertex : public VertexSimp2<CVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Curvaturef >{};
-class qVertex : public VertexSimp2<qVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Qualityf >{};
-class CFace: public FaceAF<qVertex,CEdge,CFace>{};
-class MyMesh: public tri::TriMesh< vector<qVertex>, vector<CFace> >{};
+//class CFace: public FaceAF<qVertex,CEdge,CFace>{}; old style
+
+class qVertex:  public VertexSimp2<qVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Qualityf, vert::Color4b >{};
+class CFace:		public FaceSimp2<qVertex,CEdge,CFace, face::VertexRef, face::FFAdj, face::Color4b, face::Normal3f >{};
+class MyMesh:		public tri::TriMesh< vector<qVertex>, vector<CFace> >{};
 
 MyMesh mesh;
 vcg::GlTrimesh<MyMesh> glWrap;
 vcg::Trackball track;
-int drawMode;
+int drawMode = 0;
 int width = 800;
 int height = 600;
 
@@ -93,12 +107,12 @@ void display(){
 		// the trimesh drawing calls
 		switch(drawMode)
 		{
-		  case 0: glWrap.Draw<vcg::GLW::DMSmooth,   vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-		  case 1: glWrap.Draw<vcg::GLW::DMPoints,   vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-		  case 2: glWrap.Draw<vcg::GLW::DMWire,     vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-		  case 3: glWrap.Draw<vcg::GLW::DMFlatWire, vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-		  case 4: glWrap.Draw<vcg::GLW::DMHidden,   vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-		  case 5: glWrap.Draw<vcg::GLW::DMFlat,     vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
+			case 0: glWrap.Draw<vcg::GLW::DMSmooth,		vcg::GLW::CMPerVert,vcg::GLW::TMNone> ();break;
+		  case 1: glWrap.Draw<vcg::GLW::DMPoints,   vcg::GLW::CMPerVert,vcg::GLW::TMNone> ();break;
+		  case 2: glWrap.Draw<vcg::GLW::DMWire,     vcg::GLW::CMPerVert,vcg::GLW::TMNone> ();break;
+		  case 3: glWrap.Draw<vcg::GLW::DMFlatWire, vcg::GLW::CMPerVert,vcg::GLW::TMNone> ();break;
+		  case 4: glWrap.Draw<vcg::GLW::DMHidden,   vcg::GLW::CMPerVert,vcg::GLW::TMNone> ();break;
+		  case 5: glWrap.Draw<vcg::GLW::DMFlat,     vcg::GLW::CMPerVert,vcg::GLW::TMNone> ();break;
 		  default: break;
 		}
     SDL_GL_SwapBuffers();
@@ -156,6 +170,9 @@ int sdl_idle() {
 
 static void Gaussian(MyMesh &m){
 	
+	float min, max = 0.0;
+	vcg::Histogram<float> histo;
+
 	assert(m.HasPerVertexQuality());
 
 	MyMesh::VertexIterator vi;		// iteratore vertice
@@ -188,21 +205,27 @@ static void Gaussian(MyMesh &m){
 			float e20 = SquaredDistance( (*fi).V(0)->P() , (*fi).V(2)->P() );
 			
 			// voronoi area v[0]
-			area0 = ( e01*(1/tan(angle2)) + e20*(1/tan(angle1)) ) /8;
+			area0 = ( e01*(1.0/tan(angle2)) + e20*(1.0/tan(angle1)) ) /8;
 			// voronoi area v[1]
-			area1 = ( e01*(1/tan(angle2)) + e12*(1/tan(angle0)) ) /8;
+			area1 = ( e01*(1.0/tan(angle2)) + e12*(1.0/tan(angle0)) ) /8;
 			// voronoi area v[2]
-			area2 = ( e20*(1/tan(angle1)) + e20*(1/tan(angle0)) ) /8;
+			area2 = ( e20*(1.0/tan(angle1)) + e20*(1.0/tan(angle0)) ) /8;
 			
 			(*fi).V(0)->Q()  += area0;
 			(*fi).V(1)->Q()  += area1;
 			(*fi).V(2)->Q()  += area2;
 		}
 		else // triangolo ottuso
-		{  
+		{ 
+			/* .Area() is no more defined in faceplus/base.h
 			(*fi).V(0)->Q() += (*fi).Area() / 3;
 			(*fi).V(1)->Q() += (*fi).Area() / 3;
 			(*fi).V(2)->Q() += (*fi).Area() / 3;            
+			*/
+			(*fi).V(0)->Q() += vcg::Area<CFace>((*fi)) / 3.0;
+			(*fi).V(1)->Q() += vcg::Area<CFace>((*fi)) / 3.0;
+			(*fi).V(2)->Q() += vcg::Area<CFace>((*fi)) / 3.0;      
+
 		}
 	}
 
@@ -225,12 +248,33 @@ static void Gaussian(MyMesh &m){
 		(*fi).V(1)->Q() -= angle1;
 		(*fi).V(2)->Q() -= angle2;
 	}
+	
+	for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
+	{	
+		if ((*vi).Q() < min) min = (*vi).Q();
+		if ((*vi).Q() > max) max = (*vi).Q();
+	}
+
+	cout << "min = " << min << " , max = " << max << endl;
+
+	histo.SetRange(min, max, 1000);
+
+	for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
+	{	
+		histo.Add((*vi).Q());
+	}
+	
+	min = histo.Percentile(0.2);
+	max = histo.Percentile(0.8);
+
+	cout << "min = " << min << " , max = " << max << endl;
+
 	i=0;
 	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi,++i) if(!(*vi).IsD())
 	{
 		(*vi).Q() /= area[i];
-		(*vi).Q()=math::Clamp((*vi).Q(),-0.050f,0.050f);
-		
+		(*vi).Q()=math::Clamp((*vi).Q(),min,max);
+		if(area[i]==0) (*vi).Q()=0;
 	}
 	
 	//--- DeInit
@@ -243,7 +287,7 @@ static void Gaussian(MyMesh &m){
 int main(int argc, char *argv[]) 
 {	
 	cout << "Opening sample mesh...";
-	int res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/bunny10k.ply");
+	int res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/bunny2.ply");
 
 	if (res!=0)
 	{
@@ -252,8 +296,40 @@ int main(int argc, char *argv[])
 		cout << "ok" << endl;
 	}
 
+	//vcg::tri::Octahedron<MyMesh>(mesh);
+
 	vcg::tri::UpdateBounding<MyMesh>::Box(mesh);
 	vcg::tri::UpdateNormals<MyMesh>::PerVertex(mesh);
+	
+	Gaussian(mesh);
+	MyMesh::VertexIterator vi;
+	MyMesh::FaceIterator fi;
+
+
+	int i=0;
+	//for(vi=mesh.vert.begin();vi!=mesh.vert.end();++vi) if(!(*vi).IsD())
+	//{
+	//	cout << "vertex " << i++ << " quality : " << (*vi).Q() << " " << endl;
+	//}
+
+	/*i=0;
+	for(fi=mesh.face.begin();fi!=mesh.face.end();++fi) if(!(*fi).IsD())
+	{
+		vcg::Color4b color = (*fi).C();
+		cout << "face " << i++ << ": " << color.X() << " " << color.Y() << " " << color.Z() << " " << endl;
+	}*/
+	
+
+	vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh);
+	/*cout << "DOPO IL FILTRO" << endl;
+	i=0;
+	for(fi=mesh.face.begin();fi!=mesh.face.end();++fi) if(!(*fi).IsD())
+	{
+		vcg::Color4b color = (*fi).C();
+		cout << "face " << i++ << color.X() << " " << color.Y() << " " << color.Z() << " " << endl;
+	}*/
+
+	if (mesh.HasPerFaceColor()) cout << "per_face_color enabled" << endl;
 
 	glWrap.m = &mesh;
 	glWrap.Update();
