@@ -99,12 +99,13 @@ private:
 	QAction *openAct;
 	QAction *saveAsAct;
 	
-	QAction *viewModePointsAct;
-	QAction *viewModeWireAct;
-	QAction *viewModeHiddenLinesAct;
-	QAction *viewModeFlatLinesAct;
-	QAction *viewModeFlatAct;
-	QAction *viewModeSmoothAct;
+	QActionGroup *renderModeGroup;
+	QAction *renderModePointsAct;
+	QAction *renderModeWireAct;
+	QAction *renderModeHiddenLinesAct;
+	QAction *renderModeFlatLinesAct;
+	QAction *renderModeFlatAct;
+	QAction *renderModeSmoothAct;
 	
 	QAction *exitAct;
 	QAction *aboutAct;
