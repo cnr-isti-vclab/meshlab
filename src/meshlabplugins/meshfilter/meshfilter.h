@@ -24,24 +24,18 @@
 
 #include <QObject>
 #include <QStringList>
-#include <QImage>
 
 #include <meshlab/interfaces.h>
 #include <meshlab/meshmodel.h>
 
-#include "mfRemove.h"
-
-class ExtraMeshFilterPlugin : public QObject, public MeshFilterListInterface
+class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
-    Q_INTERFACES(MeshFilterListInterface)
-
-		std::vector<MeshFilterInterface*> filterList;
+    Q_INTERFACES(MeshFilterInterface)
 
 public:
-		ExtraMeshFilterPlugin();
     QStringList filters() const;
-    bool applyFilter(int filter, MeshModel &m, QWidget *parent) ;
+    bool applyFilter(QString &filter, MeshModel &m, QWidget *parent) ;
 };
 
 #endif

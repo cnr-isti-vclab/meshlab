@@ -30,35 +30,20 @@
 using namespace vcg;
 
 
-// Constructor
-//
-// Adds at compile time the available plugins
-ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
-{
-	filterList.push_back(new MFPlugin_RemoveUnref);
-}
-
 QStringList ExtraMeshFilterPlugin::filters() const
 { 
-	QStringList listName;
-
-	for(int i=0; i<filterList.size(); ++i)
-		listName << filterList[i]->filterName();
-
-	return listName;
+	return QStringList() << tr("Remove Unreferenced Vertexes");
 }
 
-bool ExtraMeshFilterPlugin::applyFilter(int filter, MeshModel &m, QWidget *parent) 
+bool ExtraMeshFilterPlugin::applyFilter(QString &filter, MeshModel &m, QWidget *parent) 
 {
-	QMessageBox::information(parent, tr("Filter Plugins"),tr("Selected %1").arg(filterList[filter]->filterName()));
-
-	filterList[filter]->apply(m,parent);
-
-       //if(filter == tr("Remove Unreferenced Vertexes")){
-       //  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-       //  QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
-       //}
-  return true;
+	if(filter == tr("Remove Unreferenced Vertexes"))
+	{
+	  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+	  QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+	}
+  
+	return true;
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
