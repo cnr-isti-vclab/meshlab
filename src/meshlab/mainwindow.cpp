@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.22  2005/11/23 00:03:10  cignoni
+Changed names view->render, added renderModeGroup to implement radio styles menu entries
+
 Revision 1.21  2005/11/22 17:10:53  glvertex
 MeshFilter Plugin STRONGLY reviewed and changed
 
@@ -171,8 +174,9 @@ void MainWindow::open(QString fileName)
 			gla->mm=nm;
 			gla->setWindowTitle(QFileInfo(fileName).fileName());   
 			workspace->addWindow(gla);
-			gla->showMaximized();
-			setCurrentFile(fileName);
+			if(workspace->isVisible()) gla->showMaximized();
+			else QTimer::singleShot(00, gla, SLOT(showMaximized()));
+      setCurrentFile(fileName);
 			return;
 		}
 	}
@@ -269,32 +273,33 @@ void MainWindow::createActions()
 	closeAllAct->setStatusTip(tr("Close all the windows"));
 	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
 
-	//////////////Action Toolbar Render and Menu Render /////////////////////////////////////////
-	viewModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), this);
-	viewModePointsAct->setCheckable(true);
-	connect(viewModePointsAct, SIGNAL(triggered()), this, SLOT(RenderPoint()));
+	//////////////Render Actions Toolbar and Menu /////////////////////////////////////////
+  
+  renderModeGroup = new QActionGroup(this);
+	renderModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), renderModeGroup);
+	renderModePointsAct->setCheckable(true);
+	connect(renderModePointsAct, SIGNAL(triggered()), this, SLOT(RenderPoint()));
 
-	viewModeWireAct		  = new QAction(QIcon(":/images/wire.png"),tr("&Wireframe"), this);
-	viewModeWireAct->setCheckable(true);
-	connect(viewModeWireAct, SIGNAL(triggered()), this, SLOT(RenderWire()));
+	renderModeWireAct		  = new QAction(QIcon(":/images/wire.png"),tr("&Wireframe"), renderModeGroup);
+	renderModeWireAct->setCheckable(true);
+	connect(renderModeWireAct, SIGNAL(triggered()), this, SLOT(RenderWire()));
 
-	viewModeHiddenLinesAct		  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"), this);
-	viewModeHiddenLinesAct->setCheckable(true);
-	viewModeHiddenLinesAct->setDisabled(true);
-	connect(viewModeHiddenLinesAct, SIGNAL(triggered()), this, SLOT(RenderHiddenLines()));
+	renderModeHiddenLinesAct		  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"), renderModeGroup);
+	renderModeHiddenLinesAct->setCheckable(true);
+	connect(renderModeHiddenLinesAct, SIGNAL(triggered()), this, SLOT(RenderHiddenLines()));
 
-	viewModeFlatLinesAct = new QAction(QIcon(":/images/flatlines.png"),tr("Flat &Lines"), this);
-	viewModeFlatLinesAct->setCheckable(true);
-	connect(viewModeFlatLinesAct, SIGNAL(triggered()), this, SLOT(RenderFlatLine()));
+	renderModeFlatLinesAct = new QAction(QIcon(":/images/flatlines.png"),tr("Flat &Lines"), renderModeGroup);
+	renderModeFlatLinesAct->setCheckable(true);
+	connect(renderModeFlatLinesAct, SIGNAL(triggered()), this, SLOT(RenderFlatLine()));
 
-	viewModeFlatAct		  = new QAction(QIcon(":/images/flat.png"),tr("&Flat"), this);
-	viewModeFlatAct->setCheckable(true);
-	connect(viewModeFlatAct, SIGNAL(triggered()), this, SLOT(RenderFlat()));
+	renderModeFlatAct		  = new QAction(QIcon(":/images/flat.png"),tr("&Flat"), renderModeGroup);
+	renderModeFlatAct->setCheckable(true);
+	connect(renderModeFlatAct, SIGNAL(triggered()), this, SLOT(RenderFlat()));
 
-	viewModeSmoothAct	  = new QAction(QIcon(":/images/smooth.png"),tr("&Smooth"), this);
-	viewModeSmoothAct->setCheckable(true);
-	viewModeSmoothAct->setChecked(true);
-	connect(viewModeSmoothAct, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
+	renderModeSmoothAct	  = new QAction(QIcon(":/images/smooth.png"),tr("&Smooth"), renderModeGroup);
+	renderModeSmoothAct->setCheckable(true);
+	renderModeSmoothAct->setChecked(true);
+	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
 }
 
 void MainWindow::createToolBars()
@@ -306,12 +311,7 @@ void MainWindow::createToolBars()
 
 	renderToolBar = addToolBar(tr("Render"));
 	renderToolBar->setIconSize(QSize(32,32));
-	renderToolBar->addAction(viewModePointsAct);
-	renderToolBar->addAction(viewModeWireAct);
-	renderToolBar->addAction(viewModeHiddenLinesAct);
-	renderToolBar->addAction(viewModeFlatLinesAct);
-	renderToolBar->addAction(viewModeFlatAct);
-	renderToolBar->addAction(viewModeSmoothAct);
+	renderToolBar->addActions(renderModeGroup->actions() );
 }
 
 void MainWindow::createMenus()
@@ -333,13 +333,8 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////
 	RenderMenu		= menuBar()->addMenu(tr("&Render"));
-	RenderMenu->addAction(viewModePointsAct);
-	RenderMenu->addAction(viewModeWireAct);
-	RenderMenu->addAction(viewModeHiddenLinesAct);
-	RenderMenu->addAction(viewModeFlatLinesAct);
-	RenderMenu->addAction(viewModeFlatAct);
-	RenderMenu->addAction(viewModeSmoothAct);
-
+  RenderMenu->addActions(renderModeGroup->actions());
+ 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
@@ -442,80 +437,12 @@ void MainWindow::viewToolbarRender(){
 	}
 }
 
-
-void MainWindow::RenderPoint()
-{
-	// Set render type just on active window!
-	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMPoints);
-	viewModePointsAct->setChecked(true);
-	viewModeWireAct->setChecked(false);
-	viewModeHiddenLinesAct->setChecked(false);
-	viewModeFlatLinesAct->setChecked(false);
-	viewModeFlatAct->setChecked(false);
-	viewModeSmoothAct->setChecked(false);
-}
-
-void MainWindow::RenderWire()
-{
-	// Set render type just on active window!
-	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMWire);
-	viewModePointsAct->setChecked(false);
-	viewModeWireAct->setChecked(true);
-	viewModeHiddenLinesAct->setChecked(false);
-	viewModeFlatLinesAct->setChecked(false);
-	viewModeFlatAct->setChecked(false);
-	viewModeSmoothAct->setChecked(false);
-}
-
-void MainWindow::RenderFlat()
-{
-	// Set render type just on active window!
-	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMFlat);
-	viewModePointsAct->setChecked(false);
-	viewModeWireAct->setChecked(false);
-	viewModeHiddenLinesAct->setChecked(false);
-	viewModeFlatLinesAct->setChecked(false);
-	viewModeFlatAct->setChecked(true);
-	viewModeSmoothAct->setChecked(false);	
-}
-
-void MainWindow::RenderSmooth()
-{
-	// Set render type just on active window!
-	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMSmooth);
-	viewModePointsAct->setChecked(false);
-	viewModeWireAct->setChecked(false);
-	viewModeHiddenLinesAct->setChecked(false);
-	viewModeFlatLinesAct->setChecked(false);
-	viewModeFlatAct->setChecked(false);
-	viewModeSmoothAct->setChecked(true);
-
-}
-
-void MainWindow::RenderFlatLine()
-{
-	// Set render type just on active window!
-	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMFlatWire);
-	viewModePointsAct->setChecked(false);
-	viewModeWireAct->setChecked(false);
-	viewModeHiddenLinesAct->setChecked(false);
-	viewModeFlatLinesAct->setChecked(true);
-	viewModeFlatAct->setChecked(false);
-	viewModeSmoothAct->setChecked(false);
-
-}
-
-void MainWindow::RenderHiddenLines()
-{
-	// Set render type just on active window!
-	qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMHidden);
-	viewModePointsAct->setChecked(false);
-	viewModeWireAct->setChecked(false);
-	viewModeHiddenLinesAct->setChecked(true);
-	viewModeFlatLinesAct->setChecked(false);
-	viewModeFlatAct->setChecked(false);
-	viewModeSmoothAct->setChecked(false);
-}
+void MainWindow::RenderPoint()       { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMPoints  ); }
+void MainWindow::RenderWire()        { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMWire    ); }
+void MainWindow::RenderFlat()        { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMFlat    ); }
+void MainWindow::RenderSmooth()      { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMSmooth  ); }
+void MainWindow::RenderFlatLine()    { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMFlatWire);}
+void MainWindow::RenderHiddenLines() { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMHidden  ); }
 
 void MainWindow::updateWindowMenu()
 {
