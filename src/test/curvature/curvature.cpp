@@ -269,6 +269,8 @@ static void Gaussian(MyMesh &m){
 
 	cout << "min = " << min << " , max = " << max << endl;
 
+	histo.FileWrite("histo.txt");
+
 	i=0;
 	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi,++i) if(!(*vi).IsD())
 	{
@@ -286,49 +288,29 @@ static void Gaussian(MyMesh &m){
 
 int main(int argc, char *argv[]) 
 {	
+
+	int res;
+	
 	cout << "Opening sample mesh...";
-	int res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/bunny2.ply");
+	if (argc > 1) 
+		res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,argv[1]);
+	else 
+		res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/bunny2.ply");
 
 	if (res!=0)
-	{
 		cout <<  vcg::tri::io::ImporterPLY<MyMesh>::ErrorMsg(res) << endl;
-	} else {
+	else 
 		cout << "ok" << endl;
-	}
-
-	//vcg::tri::Octahedron<MyMesh>(mesh);
-
+	
 	vcg::tri::UpdateBounding<MyMesh>::Box(mesh);
 	vcg::tri::UpdateNormals<MyMesh>::PerVertex(mesh);
 	
 	Gaussian(mesh);
 	MyMesh::VertexIterator vi;
 	MyMesh::FaceIterator fi;
-
-
-	int i=0;
-	//for(vi=mesh.vert.begin();vi!=mesh.vert.end();++vi) if(!(*vi).IsD())
-	//{
-	//	cout << "vertex " << i++ << " quality : " << (*vi).Q() << " " << endl;
-	//}
-
-	/*i=0;
-	for(fi=mesh.face.begin();fi!=mesh.face.end();++fi) if(!(*fi).IsD())
-	{
-		vcg::Color4b color = (*fi).C();
-		cout << "face " << i++ << ": " << color.X() << " " << color.Y() << " " << color.Z() << " " << endl;
-	}*/
 	
-
 	vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh);
-	/*cout << "DOPO IL FILTRO" << endl;
-	i=0;
-	for(fi=mesh.face.begin();fi!=mesh.face.end();++fi) if(!(*fi).IsD())
-	{
-		vcg::Color4b color = (*fi).C();
-		cout << "face " << i++ << color.X() << " " << color.Y() << " " << color.Z() << " " << endl;
-	}*/
-
+	
 	if (mesh.HasPerFaceColor()) cout << "per_face_color enabled" << endl;
 
 	glWrap.m = &mesh;
