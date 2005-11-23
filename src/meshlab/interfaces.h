@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/11/23 00:25:06  glvertex
+Reverted plugin interface to prev version
+
 Revision 1.4  2005/11/22 17:10:53  glvertex
 MeshFilter Plugin STRONGLY reviewed and changed
 
@@ -52,21 +55,11 @@ public:
     virtual QStringList format() const = 0;
 };
 
-
 class MeshFilterInterface
 {
 public:
     virtual ~MeshFilterInterface() {}
-    virtual bool apply(MeshModel &m, QWidget *parent) = 0;
-    virtual QString filterName() const = 0;
-};
-
-
-class MeshFilterListInterface
-{
-public:
-    virtual ~MeshFilterListInterface() {}
-    virtual bool applyFilter(int filter,MeshModel &m, QWidget *parent) = 0;
+    virtual bool applyFilter(QString &filter,MeshModel &m, QWidget *parent) = 0;
     virtual QStringList filters() const = 0;
 };
 
@@ -81,10 +74,8 @@ public:
 
 Q_DECLARE_INTERFACE(MeshIOInterface,
                     "vcg.meshlab.MeshIOInterface/1.0")
-Q_DECLARE_INTERFACE(MeshFilterListInterface,
-                    "vcg.meshlab.MeshFilterListInterface/1.0")
-//Q_DECLARE_INTERFACE(MeshFilterInterface,
-//                    "vcg.meshlab.MeshFilterInterface/1.0")
+Q_DECLARE_INTERFACE(MeshFilterInterface,
+                    "vcg.meshlab.MeshFilterInterface/1.0")
 Q_DECLARE_INTERFACE(MeshRenderInterface,
                     "vcg.meshlab.MeshRenderInterface/1.0")
 

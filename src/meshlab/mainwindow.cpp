@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.23  2005/11/23 00:25:06  glvertex
+Reverted plugin interface to prev version
+
 Revision 1.22  2005/11/23 00:03:10  cignoni
 Changed names view->render, added renderModeGroup to implement radio styles menu entries
 
@@ -374,9 +377,9 @@ void MainWindow::loadPlugins()
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
 		if (plugin) {
-			MeshFilterListInterface *iFilterList = qobject_cast<MeshFilterListInterface *>(plugin);
-			if (iFilterList)
-				addToMenu(plugin, iFilterList->filters(), filterMenu, SLOT(applyFilter()));                
+			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+			if (iFilter)
+				addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));                
 
 			pluginFileNames += fileName;
 		}
@@ -403,11 +406,10 @@ void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu
 void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
-	MeshFilterListInterface *iFilterList = qobject_cast<MeshFilterListInterface *>(action->parent());
-	QAction *c = filterMenu->activeAction();
+	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 
-	iFilterList->applyFilter(0,*(((GLArea *)(workspace->activeWindow()))->mm ), this);
-		//qobject_cast<GLArea *>(workspace->activeWindow())->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
+	iFilter->applyFilter(action->text(),*(((GLArea *)(workspace->activeWindow()))->mm ), this);
+	qobject_cast<GLArea *>(workspace->activeWindow())->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
 }
 
 
