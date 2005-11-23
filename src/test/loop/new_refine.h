@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.6  2005/11/23 15:56:03  mariolatronico
+new version of RefineOddEvenE.
+Does not aborts or segfaults but gives incorrect faces.
+
 Revision 1.5  2005/11/21 16:02:28  mariolatronico
 work in progress on even iterations
 
@@ -142,7 +146,7 @@ struct OddPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::F
 	TCoord2<FL_TYPE,1> WedgeInterp(TCoord2<FL_TYPE,1> &t0, TCoord2<FL_TYPE,1> &t1)
 	{
 		TCoord2<FL_TYPE,1> tmp;
-		assert(t0.n()== t1.n());
+		//	 	assert(t0.n()== t1.n());
 		tmp.n()=t0.n(); 
 		tmp.t()=(t0.t()+t1.t())/2.0;
 		return tmp;
@@ -212,7 +216,7 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 	TCoord2<FL_TYPE,1> WedgeInterp(TCoord2<FL_TYPE,1> &t0, TCoord2<FL_TYPE,1> &t1)
 	{
 		TCoord2<FL_TYPE,1> tmp;
-		assert(t0.n()== t1.n());
+		// assert(t0.n()== t1.n());
 		tmp.n()=t0.n(); 
 		tmp.t()=(t0.t()+t1.t())/2.0;
 		return tmp;
@@ -227,70 +231,39 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 {	 
 	
 	typedef face::Pos<typename MESH_TYPE::FaceType> faceType;
-	//	typedef MESH_TYPE::VertexType vertType;
 	
 	// vettore per prendere i vecchi vertici
-	std::vector<MESH_TYPE::CoordType> oldVertVec(m.vert.size());
-	
+	std::vector<typename MESH_TYPE::CoordType> oldVertVec(m.vert.size());
 	// memorizzo i vertici nel vettore
 	typename MESH_TYPE::VertexIterator vi;
-	int j = 0;
-	int i = 0;
-	for (vi = m.vert.begin(); vi != m.vert.end(); vi++, i++) {
-		typename MESH_TYPE::FaceType *fc = (*vi).VFp();
-		if ((*vi) == *(fc->V(0)))
-			j = 0;
-		if ((*vi) == *(fc->V(1)))
-			j = 1;
-		if ((*vi) == *(fc->V(2)))
-			j = 2;
-// 		if (m.vert[i] == fc.V(0))
-// 			j = 0;
-// 		if (m.vert[i] == fc.V(1))
-// 			j = 1;
-// 		if (m.vert[i] == fc.V(2))
-// 			j = 2;
-
-		face::Pos<typename MESH_TYPE::FaceType>aux (fc,j);
-
-		even(oldVertVec[i], aux );
+	typename MESH_TYPE::FaceIterator fi;
+	typename MESH_TYPE::CoordType tempCoord;
+	// EVEN memorizzata su un vettore di temporanei oldVertVec
+	for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
+		for (int i = 0; i < 3; i++) { //itero vert
+			if (! (*fi).V(i)->IsS()) { // se non e' stato selezionato si fa il calcolo
+				face::Pos<typename MESH_TYPE::FaceType>aux (&(*fi),i);
+				even(tempCoord, aux);
+				oldVertVec.push_back(tempCoord);
+				(*fi).V(i)->SetS();
+			}
+		}
 
 	}
 
-	
-	for ( vi = m.vert.begin(); vi != m.vert.end(); ++vi) {
-		oldVertVec.push_back(((*vi).P()));
-	}
 	
 	// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
 
-	vcg::tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
-	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+	//vcg::tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
+ 	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 
 	for (int i = 0; i < oldVertVec.size(); i++) {
 
-		m.vert[i].P() = oldVertVec[i];
+ 		m.vert[i].P() = oldVertVec[i];
 
-	}
+ 	}
 
-// 	for (int i = 0 ; i < n; ++i) 
-// 		{
-			
- 			
-// //						even(m.vert[i], face::Pos<typename MESH_TYPE::FaceType>(m.vert[i].VFp(),1));
-// 			//		if (m.vert[i].VFp() && !m.vert[i].VFp()->IsD()) {
-// 			qDebug("%p", oldVertVec[i].VFp());
-// 			//even(m.vert[i], face::Pos<typename MESH_TYPE::FaceType>(m.vert[i].VFp(),1));
-// 			//			even(oldVertVec[i], face::Pos<typename MESH_TYPE::FaceType>(m.vert[i].VFp(),1));
-// 			if (! oldVertVec[i].VFp()->IsD())
-// 				even(oldVertVec[i], face::Pos<typename MESH_TYPE::FaceType>(oldVertVec[i].VFp(),1));
-
-// 			m.vert[i] = oldVertVec[i];
-			
-// 				//}
-// 		}
-	
 	
 	//    1) calcola nuova pos vertici old e memorizza in un vett ausiliairio 
 	//    2) invoca RefineE e crea i nuovi vertici nella giusta posizione 
