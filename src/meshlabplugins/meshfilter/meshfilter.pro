@@ -1,10 +1,8 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = meshfilter.h\
-								mfRemove.h
-SOURCES       = meshfilter.cpp\
-								mfRemove.cpp
+HEADERS       = meshfilter.h
+SOURCES       = meshfilter.cpp
 TARGET        = meshfilter
 DESTDIR       = ../../meshlab/plugins
 
