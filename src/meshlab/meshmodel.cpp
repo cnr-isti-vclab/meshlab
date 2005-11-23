@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2005/11/23 00:04:03  cignoni
+added hint for better hiddenline
+
 Revision 1.9  2005/11/22 11:40:14  glvertex
 Now using a single method to compute normals (PerVertePerFace instead PerVertex then PerFace)
 
@@ -67,6 +70,8 @@ bool MeshModel::Open(const char *filename)
 
 bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm)
 {
+  glw.SetHintParamf(GLW::HNPZTwist,0.0005f); //
+  glColor3f(.8f,.8f,.8f);
   glw.Draw(dm,cm,GLW::TMNone);
   return true;
 }
