@@ -35,7 +35,7 @@ class CFace;
 //class CVertex : public VertexSimp2<CVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Curvaturef >{};
 //class CFace: public FaceAF<qVertex,CEdge,CFace>{}; old style
 
-class qVertex:  public VertexSimp2<qVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Qualityf, vert::Color4b >{};
+class qVertex:		public VertexSimp2<qVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Qualityf, vert::Color4b >{};
 class CFace:		public FaceSimp2<qVertex,CEdge,CFace, face::VertexRef, face::FFAdj, face::Color4b, face::Normal3f >{};
 class MyMesh:		public tri::TriMesh< vector<qVertex>, vector<CFace> >{};
 
@@ -43,8 +43,14 @@ MyMesh mesh;
 vcg::GlTrimesh<MyMesh> glWrap;
 vcg::Trackball track;
 int drawMode = 0;
-int width = 800;
-int height = 600;
+int width = 640;
+int height = 480;
+
+float gauss_clamp=1000.0f;
+int histo_range=100;
+bool use_histo = false;
+
+static void Gaussian(MyMesh &m);
 
 /*
 	code from "trimesh_sdl.cpp" 
@@ -97,7 +103,7 @@ void display(){
     track.center=Point3f(0, 0, 0);
     track.radius= 1;
 
-		track.GetView();
+	track.GetView();
     track.Apply();
     
     float d=1.0f/mesh.bbox.Diag();
@@ -130,7 +136,16 @@ int sdl_idle() {
 			  switch(event.key.keysym.sym) {
 			    case SDLK_RCTRL:
 			    case SDLK_LCTRL: track.ButtonDown(vcg::Trackball::KEY_CTRL); break;
-			    case SDLK_q: exit(0); break;	
+			    case SDLK_q: exit(0); break;
+				
+				case SDLK_a: {gauss_clamp+=100; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
+				case SDLK_z: {gauss_clamp-=100; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
+				
+				case SDLK_s: {histo_range+=100; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
+				case SDLK_x: {histo_range-=100; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
+				
+				case SDLK_m: {use_histo=!use_histo; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
+
 			    case SDLK_SPACE: drawMode=((drawMode+1)%6); printf("Current Mode %i\n",drawMode); break;	
 			  }  break;
       case SDL_KEYUP: 
@@ -255,28 +270,44 @@ static void Gaussian(MyMesh &m){
 		if ((*vi).Q() > max) max = (*vi).Q();
 	}
 
-	cout << "min = " << min << " , max = " << max << endl;
-
-	histo.SetRange(min, max, 1000);
-
+	cout << "Curvature: min = " << min << " , max = " << max << endl;
+	
+	histo.SetRange(min, max, histo_range);
+	
 	for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
 	{	
 		histo.Add((*vi).Q());
 	}
 	
-	min = histo.Percentile(0.2);
-	max = histo.Percentile(0.8);
-
-	cout << "min = " << min << " , max = " << max << endl;
+	min = histo.Percentile(0.2f);
+	max = histo.Percentile(0.8f);
 
 	histo.FileWrite("histo.txt");
+
+	cout << "Histo percentile: min = " << min << " , max = " << max << endl;
+	cout << "Histo range value: " << histo_range << endl; 
+	cout << "Curvature clamp value: " << gauss_clamp << endl; 
+	
+	if (use_histo)
+			cout << "Clamp to histogram percentile" << endl;
+	else
+			cout << "Clamp to manual value" << endl;
 
 	i=0;
 	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi,++i) if(!(*vi).IsD())
 	{
-		(*vi).Q() /= area[i];
-		(*vi).Q()=math::Clamp((*vi).Q(),min,max);
-		if(area[i]==0) (*vi).Q()=0;
+		if(area[i]==0) 
+			(*vi).Q()=0;
+		else
+			(*vi).Q() /= area[i];
+
+		if (use_histo)
+			(*vi).Q() = math::Clamp((*vi).Q(), min, max);
+		else
+			(*vi).Q() = math::Clamp((*vi).Q(), -gauss_clamp, gauss_clamp);
+		
+		//cout << "V: " << i << " Q:" << (*vi).Q() << endl;
+
 	}
 	
 	//--- DeInit
@@ -295,7 +326,7 @@ int main(int argc, char *argv[])
 	if (argc > 1) 
 		res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,argv[1]);
 	else 
-		res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/bunny2.ply");
+		res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/bunny10k.ply");
 
 	if (res!=0)
 		cout <<  vcg::tri::io::ImporterPLY<MyMesh>::ErrorMsg(res) << endl;
@@ -306,8 +337,8 @@ int main(int argc, char *argv[])
 	vcg::tri::UpdateNormals<MyMesh>::PerVertex(mesh);
 	
 	Gaussian(mesh);
-	MyMesh::VertexIterator vi;
-	MyMesh::FaceIterator fi;
+	//MyMesh::VertexIterator vi;
+	//MyMesh::FaceIterator fi;
 	
 	vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh);
 	
