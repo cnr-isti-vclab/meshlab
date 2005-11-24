@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.7  2005/11/24 20:23:01  giec
+fixed setting even vertex loop
+
 Revision 1.6  2005/11/23 15:56:03  mariolatronico
 new version of RefineOddEvenE.
 Does not aborts or segfaults but gives incorrect faces.
@@ -248,7 +251,6 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 				(*fi).V(i)->SetS();
 			}
 		}
-
 	}
 
 	
@@ -258,12 +260,23 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 	//vcg::tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
  	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 
-	for (int i = 0; i < oldVertVec.size(); i++) {
+	std::vector<typename MESH_TYPE::CoordType>::iterator oldi;
 
- 		m.vert[i].P() = oldVertVec[i];
+	oldi = oldVertVec.begin();
 
- 	}
+	for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
+		for (int i = 0; i < 3; i++) { //itero vert
+			if ((*fi).V(i)->IsS()) { // se non e' stato selezionato si fa il calcolo
+//				(*fi).V(i)->P() = oldVertVec.back();
+//				oldVertVec.pop_back();
 
+				(*fi).V(i)->P() = (*oldi);
+				oldi++;
+				(*fi).V(i)->ClearS();
+			}
+		}
+	}
+	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 	
 	//    1) calcola nuova pos vertici old e memorizza in un vett ausiliairio 
 	//    2) invoca RefineE e crea i nuovi vertici nella giusta posizione 
