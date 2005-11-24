@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.27  2005/11/24 15:46:57  davide_portelli
+Added the check icon for menu Render->Show Normals
+
 Revision 1.26  2005/11/24 14:59:31  davide_portelli
 Correct a little bug in menu filter
 
@@ -253,7 +256,7 @@ void MainWindow::createActions()
 	exitAct->setShortcut(tr("Ctrl+Q"));
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-	//////////////Render Actions Toolbar and Menu /////////////////////////////////////////
+	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////
 	renderModeGroup = new QActionGroup(this);
 	renderModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), renderModeGroup);
 	renderModePointsAct->setCheckable(true);
@@ -343,11 +346,9 @@ void MainWindow::createMenus()
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
 	
-
 	//////////////////// Menu Filter //////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("&Filter"));
 	
-
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
   renderMenu->addActions(renderModeGroup->actions());
@@ -357,13 +358,11 @@ void MainWindow::createMenus()
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(viewToolbarStandardAct);
 	toolBarMenu->addAction(viewToolbarRenderAct);
-	
 
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
 	menuBar()->addSeparator();
-	
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -402,7 +401,6 @@ void MainWindow::loadPlugins()
 		}
 	}
 	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && workspace->activeWindow());
-	
 }
 
 void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu, const char *member,
@@ -411,6 +409,7 @@ void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu
 	foreach (QString text, texts) {
 		QAction *action = new QAction(text, plugin);
 		connect(action, SIGNAL(triggered()), this, member);
+		action->setCheckable(true);
 		menu->addAction(action);
 
 		if (actionGroup) {
@@ -438,10 +437,12 @@ void MainWindow::applyRenderMode()
   {
     GLA()->iRender=0;
 	  GLA()->log.Log(0,"Disabled Render mode %s",GLA()->iRenderString.toLocal8Bit().constData());// .data());
+		action->setChecked(false);
   } else  {
     GLA()->iRender = iRender;
     GLA()->iRenderString =action->text();
 	  GLA()->log.Log(0,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
+		action->setChecked(true);
   }
 }
 
