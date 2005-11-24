@@ -38,7 +38,7 @@ using namespace vcg;
 QStringList ExtraMeshFilterPlugin::filters() const
 { 
 	QStringList filterList;
-	//filterList << tr("Loop Subdivision Surface");
+	filterList << tr("Loop Subdivision Surface");
 	filterList << tr("Butterfly Subdivision Surface");
 	//	filterList << tr("Remove Unreferenced Vertexes");
 	return filterList;
@@ -46,11 +46,17 @@ QStringList ExtraMeshFilterPlugin::filters() const
 
 bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWidget *parent) 
 {
-	//	if(filter == tr("Loop Subdivision Surface") )
-	//{
-		//  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-	  //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
-	//}
+	if(filter == tr("Loop Subdivision Surface") )
+	{
+		vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+		// TODO : length 0 by default, need a dialog ?
+		vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
+			(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f);
+																																				 
+	}
 	if(filter == tr("Butterfly Subdivision Surface") )
 	{
 		vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
