@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.26  2005/11/24 14:59:31  davide_portelli
+Correct a little bug in menu filter
+
 Revision 1.25  2005/11/24 09:48:37  cignoni
 changed invocation of applyfilter
 
@@ -141,11 +144,11 @@ MainWindow::MainWindow()
 	createActions();
 	createMenus();
 	createToolBars();
-	loadPlugins();
+	updateMenus();
 	addToolBar(mainToolBar);
 	addToolBar(renderToolBar);
 	setWindowTitle(tr("MeshLab v0.1"));
-	updateMenus();
+	loadPlugins();
 	//QTimer::singleShot(500, this, SLOT(aboutPlugins()));
 	if(QCoreApplication::instance ()->argc()>1)
 		open(QCoreApplication::instance ()->argv()[1]);
@@ -250,47 +253,8 @@ void MainWindow::createActions()
 	exitAct->setShortcut(tr("Ctrl+Q"));
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-	//////////////Action Menu View /////////////////////////////////////////////////////////////
-	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
-	viewToolbarStandardAct->setCheckable(true);
-	viewToolbarStandardAct->setChecked(true);
-	connect(viewToolbarStandardAct, SIGNAL(triggered()), this, SLOT(viewToolbarFile()));
-
-	viewToolbarRenderAct = new QAction (tr("&Render"), this);
-	viewToolbarRenderAct->setCheckable(true);
-	viewToolbarRenderAct->setChecked(true);
-	connect(viewToolbarRenderAct, SIGNAL(triggered()), this, SLOT(viewToolbarRender()));
-
-
-	//////////////Action Menu About ////////////////////////////////////////////////////////////
-	aboutAct = new QAction(tr("&About"), this);
-	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-
-	aboutQtAct = new QAction(tr("About &Qt"), this);
-	connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-
-	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
-	connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
-
-	//////////////Action Menu Windows /////////////////////////////////////////////////////////
-	windowsTileAct = new QAction(tr("&Tile"), this);
-	connect(windowsTileAct, SIGNAL(triggered()), this, SLOT(windowsTile()));
-
-	windowsCascadeAct = new QAction(tr("&Cascade"), this);
-	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
-
-	closeAct = new QAction(tr("Cl&ose"), this);
-	closeAct->setShortcut(tr("Ctrl+F4"));
-	closeAct->setStatusTip(tr("Close the active window"));
-	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
-
-	closeAllAct = new QAction(tr("Close &All"), this);
-	closeAllAct->setStatusTip(tr("Close all the windows"));
-	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
-
 	//////////////Render Actions Toolbar and Menu /////////////////////////////////////////
-  
-  renderModeGroup = new QActionGroup(this);
+	renderModeGroup = new QActionGroup(this);
 	renderModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), renderModeGroup);
 	renderModePointsAct->setCheckable(true);
 	connect(renderModePointsAct, SIGNAL(triggered()), this, SLOT(RenderPoint()));
@@ -315,6 +279,44 @@ void MainWindow::createActions()
 	renderModeSmoothAct->setCheckable(true);
 	renderModeSmoothAct->setChecked(true);
 	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
+
+
+	//////////////Action Menu View /////////////////////////////////////////////////////////////
+	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
+	viewToolbarStandardAct->setCheckable(true);
+	viewToolbarStandardAct->setChecked(true);
+	connect(viewToolbarStandardAct, SIGNAL(triggered()), this, SLOT(viewToolbarFile()));
+
+	viewToolbarRenderAct = new QAction (tr("&Render"), this);
+	viewToolbarRenderAct->setCheckable(true);
+	viewToolbarRenderAct->setChecked(true);
+	connect(viewToolbarRenderAct, SIGNAL(triggered()), this, SLOT(viewToolbarRender()));
+
+	//////////////Action Menu Windows /////////////////////////////////////////////////////////
+	windowsTileAct = new QAction(tr("&Tile"), this);
+	connect(windowsTileAct, SIGNAL(triggered()), this, SLOT(windowsTile()));
+
+	windowsCascadeAct = new QAction(tr("&Cascade"), this);
+	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
+
+	closeAct = new QAction(tr("Cl&ose"), this);
+	closeAct->setShortcut(tr("Ctrl+F4"));
+	closeAct->setStatusTip(tr("Close the active window"));
+	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
+
+	closeAllAct = new QAction(tr("Close &All"), this);
+	closeAllAct->setStatusTip(tr("Close all the windows"));
+	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
+
+	//////////////Action Menu About ////////////////////////////////////////////////////////////
+	aboutAct = new QAction(tr("&About"), this);
+	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+	aboutQtAct = new QAction(tr("About &Qt"), this);
+	connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
+	connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
 }
 
 void MainWindow::createToolBars()
@@ -399,7 +401,7 @@ void MainWindow::loadPlugins()
 			pluginFileNames += fileName;
 		}
 	}
-	filterMenu->setEnabled(!filterMenu->actions().isEmpty());
+	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && workspace->activeWindow());
 	
 }
 
@@ -542,7 +544,7 @@ void MainWindow::updateMenus()
 	//////////////////////////////////////////
 	saveAsAct->setEnabled(active);
 	//////////////////////////////////////////
-	filterMenu->setEnabled(active);
+	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
 	//////////////////////////////////////////
 	renderMenu->setEnabled(active);
 	//////////////////////////////////////////
