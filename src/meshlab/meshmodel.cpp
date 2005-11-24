@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2005/11/24 01:45:28  cignoni
+commented line 62. dangerous unuseful debug line.
+
 Revision 1.11  2005/11/24 01:38:36  cignoni
 Added new plugins intefaces, tested with shownormal render mode
 
@@ -62,7 +65,7 @@ bool MeshModel::Open(const char *filename)
   
 	int ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename);
   
-	qDebug("Face 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
+	//qDebug("Face 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
 	
 	vcg::tri::UpdateBounding<CMeshO>::Box(cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(cm);
