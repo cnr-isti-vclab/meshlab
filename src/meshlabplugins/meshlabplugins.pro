@@ -1,5 +1,6 @@
 TEMPLATE      = subdirs
-SUBDIRS       = meshfilter
+SUBDIRS       = meshfilter \
+				meshrender
 
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/tools/plugandpaintplugins

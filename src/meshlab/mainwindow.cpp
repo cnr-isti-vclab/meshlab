@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.24  2005/11/24 01:38:36  cignoni
+Added new plugins intefaces, tested with shownormal render mode
+
 Revision 1.23  2005/11/23 00:25:06  glvertex
 Reverted plugin interface to prev version
 
@@ -117,6 +120,7 @@ First rough version. It simply load a mesh.
 #include <QToolBar>
 
 
+#include "meshmodel.h"
 #include "interfaces.h"
 #include "mainwindow.h"
 #include "glarea.h"
@@ -165,7 +169,7 @@ void MainWindow::open(QString fileName)
 		if(!nm->Open(fileName.toAscii())){
 			QMessageBox::information(this, tr("Plug & Paint"),
 				tr("Cannot load %1.").arg(fileName));
-
+    
 			delete nm;
 			return;
 		}
@@ -180,6 +184,11 @@ void MainWindow::open(QString fileName)
 			if(workspace->isVisible()) gla->showMaximized();
 			else QTimer::singleShot(00, gla, SLOT(showMaximized()));
       setCurrentFile(fileName);
+      if(!gla->mm->cm.textures.empty()) 
+      {
+        QMessageBox::information(this, tr("Plug & Paint"),
+				tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
+      }
 			return;
 		}
 	}
@@ -335,8 +344,8 @@ void MainWindow::createMenus()
 	
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////
-	RenderMenu		= menuBar()->addMenu(tr("&Render"));
-  RenderMenu->addActions(renderModeGroup->actions());
+	renderMenu		= menuBar()->addMenu(tr("&Render"));
+  renderMenu->addActions(renderModeGroup->actions());
  
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
@@ -380,6 +389,9 @@ void MainWindow::loadPlugins()
 			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
 				addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));                
+			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+			if (iRender)
+				addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()));                
 
 			pluginFileNames += fileName;
 		}
@@ -408,8 +420,23 @@ void MainWindow::applyFilter()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 
-	iFilter->applyFilter(action->text(),*(((GLArea *)(workspace->activeWindow()))->mm ), this);
-	qobject_cast<GLArea *>(workspace->activeWindow())->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
+	iFilter->applyFilter(action->text(),*(GLA()->mm ), this);
+	GLA()->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
+}
+
+void MainWindow::applyRenderMode()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+	MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(action->parent());
+  if(iRender==GLA()->iRender && GLA()->iRenderString ==action->text())
+  {
+    GLA()->iRender=0;
+	  GLA()->log.Log(0,"Disabled Render mode %s",GLA()->iRenderString.toLocal8Bit().constData());// .data());
+  } else  {
+    GLA()->iRender = iRender;
+    GLA()->iRenderString =action->text();
+	  GLA()->log.Log(0,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
+  }
 }
 
 
@@ -513,7 +540,7 @@ void MainWindow::updateMenus()
 	//////////////////////////////////////////
 	filterMenu->setEnabled(active);
 	//////////////////////////////////////////
-	RenderMenu->setEnabled(active);
+	renderMenu->setEnabled(active);
 	//////////////////////////////////////////
   windowsMenu->setEnabled(active);
 	/////////////////////////////////////////

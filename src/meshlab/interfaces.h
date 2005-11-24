@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2005/11/24 01:38:36  cignoni
+Added new plugins intefaces, tested with shownormal render mode
+
 Revision 1.5  2005/11/23 00:25:06  glvertex
 Reverted plugin interface to prev version
 
@@ -43,9 +46,11 @@ class QPainter;
 class QPainterPath;
 class QPoint;
 class QRect;
+class QIcon;
 class QString;
 class QStringList;
 class MeshModel;
+class RenderMode;
 
 class MeshIOInterface
 {
@@ -53,23 +58,58 @@ public:
     virtual ~MeshIOInterface() {}
 
     virtual QStringList format() const = 0;
+    
+    virtual bool open(
+      QString &filter, // "OBJ"
+      MeshModel &m, 
+      int mask,
+      CallBackPos *cb=0,
+      QWidget *parent=0);
+    
+  virtual bool save(
+      QString &filter, // "OBJ"
+      MeshModel &m, 
+      int mask,
+      vcg::CallBackPos *cb=0,
+      QWidget *parent= 0) ; // prima istanza il dialogo di opzioni viene sempre.
 };
 
 class MeshFilterInterface
 {
 public:
     virtual ~MeshFilterInterface() {}
-    virtual bool applyFilter(QString &filter,MeshModel &m, QWidget *parent) = 0;
+    virtual QIcon *getIcon(QString &filter, QWidget *parent) {return 0;};
+    virtual bool applyFilter(QString &filter, MeshModel &m, QWidget *parent) = 0;
     virtual QStringList filters() const = 0;
 };
+/*
+Serve per customizzare totalmente il processo di rendering
+Viene invocata al posto del rendering standard della mesh.
+- Con che stato opengl gia settato per quanto riguarda:
+    - Matrici proj e model
+    - Lighting (dir e tipo luci) 
+    - Bf cull ecc e tutto lo stato classico
 
+*/
 
 class MeshRenderInterface
 {
 public:
     virtual ~MeshRenderInterface() {}
 
-    virtual QStringList mode() const = 0;
+    virtual void Init(    QString &mode, MeshModel &m, QWidget *parent){};
+    virtual void Render(  QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent) =0;
+    virtual void Finalize(QString &mode, MeshModel &m, QWidget *parent){};
+
+    virtual QStringList modes() const = 0;
+};
+
+class MeshColorizeInterface
+{
+    virtual void Compute( QString &mode, MeshModel &m, QWidget *parent){};
+    virtual void Show(QString &mode, bool show, MeshModel &m, QWidget *parent) {};
+    virtual void Finalize(QString &mode, MeshModel &m, QWidget *parent){};
+    virtual QStringList colorsFrom() const = 0;
 };
 
 Q_DECLARE_INTERFACE(MeshIOInterface,

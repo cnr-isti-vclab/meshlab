@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2005/11/24 01:38:36  cignoni
+Added new plugins intefaces, tested with shownormal render mode
+
 Revision 1.2  2005/11/21 12:12:54  cignoni
 Added copyright info
 
@@ -30,6 +33,7 @@ Added copyright info
 
 #include <QtGui>
 
+#include "meshmodel.h"
 #include "interfaces.h"
 #include "plugindialog.h"
 

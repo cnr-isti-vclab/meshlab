@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.13  2005/11/24 01:38:36  cignoni
+Added new plugins intefaces, tested with shownormal render mode
+
 Revision 1.12  2005/11/22 21:51:53  alemochi
 Changed frustum values.
 
@@ -73,15 +76,15 @@ First rough version. It simply load a mesh.
 #include <GL/glew.h>
 #include <wrap/gl/space.h>
 
+#include "meshmodel.h"
 #include "interfaces.h"
 #include "glarea.h"
-#include "meshmodel.h"
 
 using namespace vcg; 
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
-
+ iRender=0;
 }
 
 QSize GLArea::minimumSizeHint() const {
@@ -105,8 +108,8 @@ void GLArea::initializeGL()
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
 
-	drawMode	= GLW::DMSmooth;
-	drawColor = GLW::CMNone;
+	rm.drawMode	= GLW::DMSmooth;
+	rm.drawColor = GLW::CMNone;
 }
 
 void GLArea::paintGL()
@@ -140,8 +143,9 @@ void GLArea::paintGL()
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
 
-	mm->Render(drawMode,drawColor);
-
+	mm->Render(rm.drawMode,rm.drawColor);
+  if(iRender)
+    iRender->Render(iRenderString,*mm,rm,this);
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 		log.glDraw(this,0,3);
@@ -203,6 +207,6 @@ void GLArea::wheelEvent(QWheelEvent*e)
 
 void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 {
-	drawMode = mode;
+	rm.drawMode = mode;
 	updateGL();
 }

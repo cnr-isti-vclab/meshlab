@@ -27,6 +27,7 @@
 #include <QWorkspace>
 #include <QStringList>
 #include "meshmodel.h"
+#include "glarea.h"
 
 #define MAXRECENTFILES 4
 
@@ -34,7 +35,6 @@ class QAction;
 class QActionGroup;
 class QMenu;
 class QScrollArea;
-class GLArea;
 class QSignalMapper;
 
 class MainWindow : public QMainWindow
@@ -52,6 +52,8 @@ private slots:
 	void about();
 	void aboutPlugins();
 	void applyFilter();
+  void applyRenderMode();
+
 	void windowsTile();
 	void windowsCascade();
 	void updateWindowMenu();
@@ -78,7 +80,7 @@ private:
 
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
-
+  GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }
 	GLArea *gla;
 	vector<MeshModel *> VM;
 	QScrollArea *scrollArea;
@@ -90,7 +92,7 @@ private:
 
 	QMenu *fileMenu;
 	QMenu *filterMenu;
-	QMenu *RenderMenu;
+	QMenu *renderMenu;
 	QMenu *viewMenu;
 	QMenu *toolBarMenu;
 	QMenu *windowsMenu;

@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.7  2005/11/24 01:38:36  cignoni
+Added new plugins intefaces, tested with shownormal render mode
+
 Revision 1.6  2005/11/20 19:30:50  glvertex
 - Added lighting parameters (still working on...)
 - Added logging events
@@ -54,6 +57,24 @@ First rough version. It simply load a mesh.
 
 #include "GLLogStream.h"
 
+#include "meshmodel.h"
+#include "interfaces.h"
+
+class RenderMode
+{
+public:
+  	vcg::GLW::DrawMode	drawMode;
+  	vcg::GLW::ColorMode	drawColor;
+  	vcg::GLW::TextureMode	drawTexture;
+
+    bool Lighting;
+    bool BackFaceCull;
+    bool DoubleSideLighting;  
+    bool FancyLighting;
+    bool CastShadow;
+    vcg::Point3f LightDir;
+};
+
 
 class MeshModel;
 class GLArea : public QGLWidget
@@ -72,6 +93,8 @@ public:
 	QSize sizeHint() const;
 	void setDrawMode(vcg::GLW::DrawMode mode);
 
+  MeshRenderInterface *iRender; 
+  QString iRenderString;
 protected:
 	void initializeGL();
 	void paintGL();
@@ -81,10 +104,11 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *event);
 	void wheelEvent(QWheelEvent*e);
 
-
+  
 private:
-	vcg::GLW::DrawMode	drawMode;
-	vcg::GLW::ColorMode	drawColor;
+  RenderMode rm;
+
 };
+
 
 #endif

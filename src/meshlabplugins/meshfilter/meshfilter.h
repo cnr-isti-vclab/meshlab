@@ -25,8 +25,8 @@
 #include <QObject>
 #include <QStringList>
 
-#include <meshlab/interfaces.h>
 #include <meshlab/meshmodel.h>
+#include <meshlab/interfaces.h>
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
