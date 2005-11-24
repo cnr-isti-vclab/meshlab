@@ -5,19 +5,12 @@
 
 #include <vcg/simplex/faceplus/base.h>
 #include <vcg/simplex/faceplus/component.h>
-//old style vertex and face
-//#include <vcg/simplex/vertex/with/vn.h>
-//#include <vcg/simplex/vertex/with/afvn.h>
-//#include <vcg/simplex/face/with/af.h>
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/curvature.h>
-
-//#include <vcg/complex/trimesh/create/platonic.h>
 #include <vcg/math/histogram.h>
-
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/gl/trimesh.h>
@@ -32,9 +25,6 @@ using namespace std;
 class CEdge;
 class CFace;
 
-//class CVertex : public VertexSimp2<CVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Curvaturef >{};
-//class CFace: public FaceAF<qVertex,CEdge,CFace>{}; old style
-
 class qVertex:		public VertexSimp2<qVertex, CEdge, CFace, vert::Coord3f, vert::Normal3f, vert::Qualityf, vert::Color4b >{};
 class CFace:		public FaceSimp2<qVertex,CEdge,CFace, face::VertexRef, face::FFAdj, face::Color4b, face::Normal3f >{};
 class MyMesh:		public tri::TriMesh< vector<qVertex>, vector<CFace> >{};
@@ -43,12 +33,11 @@ MyMesh mesh;
 vcg::GlTrimesh<MyMesh> glWrap;
 vcg::Trackball track;
 int drawMode = 0;
-int width = 640;
-int height = 480;
+int width = 320;
+int height = 240;
 
-float gauss_clamp=1000.0f;
-int histo_range=100;
-bool use_histo = false;
+float histo_frac = 0.15f;
+int histo_range=1000;
 
 static void Gaussian(MyMesh &m);
 
@@ -138,14 +127,12 @@ int sdl_idle() {
 			    case SDLK_LCTRL: track.ButtonDown(vcg::Trackball::KEY_CTRL); break;
 			    case SDLK_q: exit(0); break;
 				
-				case SDLK_a: {gauss_clamp+=100; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
-				case SDLK_z: {gauss_clamp-=100; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
-				
 				case SDLK_s: {histo_range+=100; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
 				case SDLK_x: {histo_range-=100; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
 				
-				case SDLK_m: {use_histo=!use_histo; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
-
+				case SDLK_d: {histo_frac+=0.001f; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
+				case SDLK_c: {histo_frac-=0.001f; Gaussian(mesh); vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh); glWrap.Update(); break; }
+				
 			    case SDLK_SPACE: drawMode=((drawMode+1)%6); printf("Current Mode %i\n",drawMode); break;	
 			  }  break;
       case SDL_KEYUP: 
@@ -232,15 +219,9 @@ static void Gaussian(MyMesh &m){
 		}
 		else // triangolo ottuso
 		{ 
-			/* .Area() is no more defined in faceplus/base.h
-			(*fi).V(0)->Q() += (*fi).Area() / 3;
-			(*fi).V(1)->Q() += (*fi).Area() / 3;
-			(*fi).V(2)->Q() += (*fi).Area() / 3;            
-			*/
 			(*fi).V(0)->Q() += vcg::Area<CFace>((*fi)) / 3.0;
 			(*fi).V(1)->Q() += vcg::Area<CFace>((*fi)) / 3.0;
 			(*fi).V(2)->Q() += vcg::Area<CFace>((*fi)) / 3.0;      
-
 		}
 	}
 
@@ -250,6 +231,8 @@ static void Gaussian(MyMesh &m){
 		area[i] = (*vi).Q();
 		(*vi).Q() = (float)(2.0 * M_PI);
 	}
+	
+	//cout << "Vertex count: " << i << endl;
 
 	for(fi=m.face.begin();fi!=m.face.end();++fi)  if(!(*fi).IsD())
 	{
@@ -264,52 +247,38 @@ static void Gaussian(MyMesh &m){
 		(*fi).V(2)->Q() -= angle2;
 	}
 	
-	for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
-	{	
-		if ((*vi).Q() < min) min = (*vi).Q();
-		if ((*vi).Q() > max) max = (*vi).Q();
-	}
-
-	cout << "Curvature: min = " << min << " , max = " << max << endl;
-	
-	histo.SetRange(min, max, histo_range);
-	
-	for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
-	{	
-		histo.Add((*vi).Q());
-	}
-	
-	min = histo.Percentile(0.2f);
-	max = histo.Percentile(0.8f);
-
-	histo.FileWrite("histo.txt");
-
-	cout << "Histo percentile: min = " << min << " , max = " << max << endl;
-	cout << "Histo range value: " << histo_range << endl; 
-	cout << "Curvature clamp value: " << gauss_clamp << endl; 
-	
-	if (use_histo)
-			cout << "Clamp to histogram percentile" << endl;
-	else
-			cout << "Clamp to manual value" << endl;
-
 	i=0;
 	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi,++i) if(!(*vi).IsD())
 	{
 		if(area[i]==0) 
-			(*vi).Q()=0;
+			(*vi).Q() = 0;
 		else
 			(*vi).Q() /= area[i];
-
-		if (use_histo)
-			(*vi).Q() = math::Clamp((*vi).Q(), min, max);
-		else
-			(*vi).Q() = math::Clamp((*vi).Q(), -gauss_clamp, gauss_clamp);
-		
-		//cout << "V: " << i << " Q:" << (*vi).Q() << endl;
+	
+		if ((*vi).Q() < min) min = (*vi).Q();
+		if ((*vi).Q() > max) max = (*vi).Q();
 
 	}
+
+	//cout << "min:" << min << " max:" << max << endl;
+
+	histo.SetRange(min, max, histo_range);
 	
+	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if(!(*vi).IsD())
+	{
+		histo.Add((*vi).Q());
+	} 
+
+	min = histo.Percentile(histo_frac);
+	max = histo.Percentile(1.0f-histo_frac);
+
+	cout << "Histo: frac=" << histo_frac << " pmin=" << min << " pmax=" << max << "  range=" << histo_range << endl;
+	
+	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if(!(*vi).IsD())
+	{
+		(*vi).Q() = math::Clamp((*vi).Q(), min, max);
+	}
+
 	//--- DeInit
 	
 	delete[] area;
@@ -326,20 +295,17 @@ int main(int argc, char *argv[])
 	if (argc > 1) 
 		res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,argv[1]);
 	else 
-		res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/bunny10k.ply");
+		res = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,"../../sample/screwdriver.ply");
 
 	if (res!=0)
 		cout <<  vcg::tri::io::ImporterPLY<MyMesh>::ErrorMsg(res) << endl;
 	else 
 		cout << "ok" << endl;
 	
+
 	vcg::tri::UpdateBounding<MyMesh>::Box(mesh);
 	vcg::tri::UpdateNormals<MyMesh>::PerVertex(mesh);
-	
-	Gaussian(mesh);
-	//MyMesh::VertexIterator vi;
-	//MyMesh::FaceIterator fi;
-	
+	Gaussian(mesh);	
 	vcg::tri::UpdateColor<MyMesh>::VertexQuality(mesh);
 	
 	if (mesh.HasPerFaceColor()) cout << "per_face_color enabled" << endl;
