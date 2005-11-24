@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2005/11/24 10:54:37  cignoni
+Yet another test to compile under linux: added a const before QString in applyfilter...
+
 Revision 1.6  2005/11/24 01:38:36  cignoni
 Added new plugins intefaces, tested with shownormal render mode
 
@@ -79,7 +82,7 @@ class MeshFilterInterface
 public:
     virtual ~MeshFilterInterface() {}
     virtual QIcon *getIcon(QString &filter, QWidget *parent) {return 0;};
-    virtual bool applyFilter(QString &filter, MeshModel &m, QWidget *parent) = 0;
+    virtual bool applyFilter(const QString &filter, MeshModel &m, QWidget *parent) = 0;
     virtual QStringList filters() const = 0;
 };
 /*

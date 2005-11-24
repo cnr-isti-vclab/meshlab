@@ -35,7 +35,7 @@ QStringList ExtraMeshFilterPlugin::filters() const
 	return QStringList() << tr("Remove Unreferenced Vertexes");
 }
 
-bool ExtraMeshFilterPlugin::applyFilter(QString &filter, MeshModel &m, QWidget *parent) 
+bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWidget *parent) 
 {
 	if(filter == tr("Remove Unreferenced Vertexes"))
 	{
