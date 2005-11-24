@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.2  2005/11/24 01:43:25  cignoni
+Ho committato la versione come si era sistemata a lezione.
+Se non va bene sovrascrivetela pure...
+
 Revision 1.1  2005/11/09 11:04:56  buzzelli
 Added sample project used to test OBJ importer class.
 
@@ -46,9 +50,24 @@ Revision 1.1  2005/03/15 07:00:54  ganovell
 #include <vcg/complex/trimesh/update/normal.h>
 
 //#include <wrap/io_trimesh/import_ply.h>
-#include "import_obj.h"
 
 #endif //_SHOW_A_MESH
+
+#include "import_obj.h"
+
+bool callback(const int pos, const char * str)
+{
+	printf("\r%s - Stato avanzamento: %d%% ", str, pos);
+	int i = 0;
+	while (i < pos)
+	{
+		i += 10;
+		printf(".");
+	}
+	printf("                         ");
+	return true;
+}
+
 
 int main(int argc, char *argv[]) {
   int level = 0;
@@ -59,11 +78,35 @@ int main(int argc, char *argv[]) {
 #ifdef _SHOW_A_MESH
 	// declare the mesh
 	MyMesh mesh;
-	MyMesh::VertexIterator vi;
+
+	if (argc == 1)
+	{
+		printf("Usage: trimesh_sdl modelname.obj");
+		return -1;
+	}
+
+	char* filename = argv[1];
+
+	int mask;
+	vcg::tri::io::ObjInfo oi;
+	vcg::tri::io::ImporterOBJ<MyMesh>::LoadMask(filename, mask, oi);
+	oi.cb = (vcg::CallBackPos*) &callback;
+
+	if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
+  {
+    printf("Model has wedge text coords\n");
+    mesh.face.EnableWedgeTex();
+  }
+	mesh.face.EnableNormal();
 
 	// load from disk
-	vcg::tri::io::ImporterOBJ<MyMesh>::Open(mesh,argv[1]);
+	int result = vcg::tri::io::ImporterOBJ<MyMesh>::Open(mesh, filename, oi);
 	//vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,argv[1]);
+	if (result != vcg::tri::io::ImporterOBJ<MyMesh>::OBJError::E_NOERROR)
+	{
+		printf("Error encountered while loading file %s: %s", argv[1], vcg::tri::io::ImporterOBJ<MyMesh>::ErrorMsg(result));
+		return -1;
+	}
 
 	// update bounding box
 	vcg::tri::UpdateBounding<MyMesh>::Box(mesh);

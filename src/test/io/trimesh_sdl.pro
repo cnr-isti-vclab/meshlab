@@ -4,13 +4,13 @@
 
 TARGET = trimesh_sdl
 DEFINES+= _SHOW_A_MESH
-LIBPATH += c:/code/SDL/lib
-LIBPATH += c:/code/glew/lib
+LIBPATH += ../../../../code/lib/SDL/lib
+LIBPATH += ../../../../code/lib/glew/lib/glew32.lib 
 win32:LIBS += SDL.lib SDLmain.lib opengl32.lib glu32.lib glew32s.lib glew32.lib 
 DEPENDPATH += . 
 INCLUDEPATH += . ../../../../sf
-INCLUDEPATH += . c:/code/glew/include
-INCLUDEPATH += . c:/code/SDL/include
+INCLUDEPATH += . ../../../../code/lib/glew/include
+INCLUDEPATH += . ../../../../code/lib/SDL/include/SDL
 CONFIG += console stl 
 TEMPLATE = app
 SOURCES += trimesh_sdl.cpp ../../../../sf/wrap/ply/plylib.cpp ../../../../sf/wrap/gui/trackball.cpp ../../../../sf/wrap/gui/trackmode.cpp 

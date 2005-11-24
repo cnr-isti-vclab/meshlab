@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.2  2005/11/24 01:43:25  cignoni
+Ho committato la versione come si era sistemata a lezione.
+Se non va bene sovrascrivetela pure...
+
 Revision 1.1  2005/11/09 11:04:56  buzzelli
 Added sample project used to test OBJ importer class.
 
@@ -55,6 +59,7 @@ Revision 1.1  2005/03/15 07:00:54  ganovell
 
 #include <wrap/gui/trackball.h>
 
+bool additionalLightingON = false;
 bool fullscreen = false, quit = false,keepdrawing = true;
 int width =800;
 int height = 600;
@@ -101,6 +106,7 @@ bool init(const std::string &str) {
   glHint( GL_FOG_HINT, GL_NICEST );
   glEnable(GL_DEPTH_TEST);
   glDepthFunc( GL_LEQUAL );
+	
   glDisable(GL_LIGHTING);
 
   glEnableClientState(GL_VERTEX_ARRAY);
@@ -141,16 +147,33 @@ void display(){
 						doPick=false;
 					}
 				
+					if (additionalLightingON)
+					{
+						glEnable(GL_LIGHT1);
+						float diffuse[4]	= { .0f,  .9f,  .9f, 1.0f};
+						float specular[4] = { .0f, 1.0f, 1.0f, 1.0f};
+						float position[4] = {2.0f,10.0f, 1.0f, 1.0f};
+						glLightfv(GL_LIGHT1, GL_POSITION, position);
+						glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse);
+						glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
+						glEnable(GL_LIGHTING);
+					}
+
 				// the trimesh drawing calls
 				switch(drawMode)
 				{
-				case 0: glWrap.Draw<vcg::GLW::DMSmooth,vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-				case 1: glWrap.Draw<vcg::GLW::DMPoints,vcg::GLW::CMNone,vcg::GLW::TMNone> (); break;
-				case 2: glWrap.Draw<vcg::GLW::DMWire,vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-				case 3: glWrap.Draw<vcg::GLW::DMFlatWire,vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-				case 4: glWrap.Draw<vcg::GLW::DMHidden,vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
-				case 5: glWrap.Draw<vcg::GLW::DMFlat,vcg::GLW::CMNone,vcg::GLW::TMNone> ();break;
+				case 0: glWrap.Draw<vcg::GLW::DMSmooth,vcg::GLW::CMNone,vcg::GLW::TMPerWedge> ();break;
+				case 1: glWrap.Draw<vcg::GLW::DMPoints,vcg::GLW::CMNone,vcg::GLW::TMPerWedge> (); break;
+				case 2: glWrap.Draw<vcg::GLW::DMWire,vcg::GLW::CMNone,vcg::GLW::TMPerWedge> ();break;
+				case 3: glWrap.Draw<vcg::GLW::DMFlatWire,vcg::GLW::CMNone,vcg::GLW::TMPerWedge> ();break;
+				case 4: glWrap.Draw<vcg::GLW::DMHidden,vcg::GLW::CMNone,vcg::GLW::TMPerWedge> ();break;
+				case 5: glWrap.Draw<vcg::GLW::DMFlat,vcg::GLW::CMNone,vcg::GLW::TMPerWedge> ();break;
 				case 6: break;
+				}
+
+				if (additionalLightingON)
+				{
+					glDisable(GL_LIGHT1);
 				}
 #endif
 
@@ -175,18 +198,20 @@ int sdl_idle() {
       switch( event.type ) {
       case SDL_QUIT:  quit = 1; break;      
       case SDL_KEYDOWN:                                        
-			switch(event.key.keysym.sym) {
-			case SDLK_RCTRL:
-			case SDLK_LCTRL: track.ButtonDown(vcg::Trackball::KEY_CTRL); break;
-			case SDLK_q: exit(0); break;	
-			}
-	break;
-      case SDL_KEYUP: 
-			switch(event.key.keysym.sym) {
-			case SDLK_RCTRL:
-			case SDLK_LCTRL:
-				track.ButtonUp(vcg::Trackball::KEY_CTRL); break;
-			}
+				switch(event.key.keysym.sym) {
+				case SDLK_RCTRL:
+				case SDLK_LCTRL: track.ButtonDown(vcg::Trackball::KEY_CTRL); break;
+				case SDLK_q: exit(0); break;
+				case SDLK_l: additionalLightingON = !additionalLightingON; break;
+				}
+				if ((event.key.keysym.sym > 48) && (event.key.keysym.sym < 58))
+					drawMode = event.key.keysym.sym - 49;
+	    case SDL_KEYUP: 
+				switch(event.key.keysym.sym) {
+				case SDLK_RCTRL:
+				case SDLK_LCTRL:
+					track.ButtonUp(vcg::Trackball::KEY_CTRL); break;
+				}
 	break;
       case SDL_MOUSEBUTTONDOWN:   
 	x = event.button.x;
