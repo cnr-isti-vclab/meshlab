@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2005/11/24 10:35:05  mariolatronico
+removed _WINDOWS define and changed <qgl.h> in <QGLWidget> to correctly compile in non windows platforms
+
 Revision 1.1  2005/11/16 23:19:22  cignoni
 Initial Draft release; still to be adapted to our needs.
 
@@ -60,10 +63,8 @@ Initial Commit
 #ifndef LOGSTREAM_H
 #define LOGSTREAM_H
 
-#ifdef _WINDOWS
 #include <GL/glew.h>
-#include <qgl.h> 
-#endif //_WINDOWS
+#include <QGLWidget> 
 
 
 class LogStream 
@@ -73,9 +74,9 @@ public:
   
 	virtual void Log(int Level, const char * f, ... ) = 0;
 
-#ifdef _WINDOWS
+
 	virtual void glDraw(QGLWidget *qgl, int Level, int nlines) = 0;
-#endif
+
 };
 
 #endif
