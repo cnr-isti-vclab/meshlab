@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.25  2005/11/24 09:48:37  cignoni
+changed invocation of applyfilter
+
 Revision 1.24  2005/11/24 01:38:36  cignoni
 Added new plugins intefaces, tested with shownormal render mode
 
@@ -419,8 +422,9 @@ void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-
-	iFilter->applyFilter(action->text(),*(GLA()->mm ), this);
+	
+	//iFilter->applyFilter(action->text(),*(GLA()->mm ),this);
+	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA());
 	GLA()->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
 }
 
