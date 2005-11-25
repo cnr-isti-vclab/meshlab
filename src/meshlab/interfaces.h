@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2005/11/25 21:57:51  mariolatronico
+changed signature of MeshColorizeInterface::Compute to allow gcc compilation
+
 Revision 1.9  2005/11/25 19:29:01  buzzelli
 small changes to signature of MeshIOInterface methods
 
@@ -118,7 +121,7 @@ public:
 class MeshColorizeInterface
 {
 public:
-    virtual void Compute( QString &mode, MeshModel &m, QWidget *parent){};
+    virtual void Compute(const QString &mode, MeshModel &m, QWidget *parent){};
     virtual void Show(QString &mode, bool show, MeshModel &m, QWidget *parent) {};
     virtual void Finalize(QString &mode, MeshModel &m, QWidget *parent){};
     virtual QStringList colorsFrom() const = 0;
