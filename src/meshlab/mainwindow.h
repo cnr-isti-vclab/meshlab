@@ -111,7 +111,7 @@ private:
 	QAction *renderModeFlatLinesAct;
 	QAction *renderModeFlatAct;
 	QAction *renderModeSmoothAct;
-	QAction *setLightOnAct; 
+	QAction *setLightAct; 
 	
 	QAction *exitAct;
 	QAction *aboutAct;

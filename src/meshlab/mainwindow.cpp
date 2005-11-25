@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.32  2005/11/25 14:49:41  alemochi
+Changed action name
+
 Revision 1.31  2005/11/25 14:46:44  alemochi
 Added rendering of bounding box and new icon
 
@@ -287,10 +290,10 @@ void MainWindow::createActions()
 	renderModeSmoothAct->setChecked(true);
 	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
 
-	setLightOnAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"), renderModeGroup);
+	setLightAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"), renderModeGroup);
 	//setLightOnAct->setCheckable(true);
-	setLightOnAct->setChecked(true);
-	connect(setLightOnAct, SIGNAL(triggered()), this, SLOT(SetLight()));
+	setLightAct->setChecked(true);
+	connect(setLightAct, SIGNAL(triggered()), this, SLOT(SetLight()));
 
 
 
@@ -502,11 +505,11 @@ void MainWindow::SetLight()
 		{
 			
 			GLA()->setLight(false);
-			setLightOnAct->setIcon(QIcon(":/images/lightoff.png"));
+			setLightAct->setIcon(QIcon(":/images/lightoff.png"));
 		}
 		else 
 		{
-			setLightOnAct->setIcon(QIcon(":/images/lighton.png"));
+			setLightAct->setIcon(QIcon(":/images/lighton.png"));
 			GLA()->setLight(true);
 		}
 	}
