@@ -22,9 +22,9 @@
 #ifndef EXTRAIOPLUGIN_H
 #define EXTRAIOPLUGIN_H
 
-#include <Qt/QObject>
-#include <Qt/QStringList>
-#include <Qt/QString>
+#include <QObject>
+#include <QStringList>
+#include <QString>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -34,11 +34,24 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
   Q_OBJECT
   Q_INTERFACES(MeshIOInterface)
   
- public:
-  QStringList format() const;
-  bool open(QString &filter, MeshModel &m, int mask, CallBackPos *cb=0, QWidget *parent=0);  
-  // prima istanza il dialogo di opzioni viene sempre.
-  bool save(QString &filter, MeshModel &m, int mask, CallBackPos *cb=0, QWidget *parent=0); 
+public:
+  QStringList formats() const;
+
+	virtual bool open(
+      QString &format,
+			QString fileName,
+      MeshModel &m, 
+      int& mask,
+      CallBackPos *cb=0,
+      QWidget *parent=0);
+    
+  virtual bool save(
+      QString &format,
+			QString fileName,
+      MeshModel &m, 
+      int mask,
+      vcg::CallBackPos *cb=0,
+      QWidget *parent= 0);
 };
 
 #endif

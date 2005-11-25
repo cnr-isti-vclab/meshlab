@@ -18,24 +18,81 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
 #include "meshio.h"
+// temporaneamente prendo la versione corrente dalla cartella test
+#include "../../test/io/import_obj.h"
+#include<vcg/complex/trimesh/update/bounding.h>
+
+#include <QMessageBox>
+#include <QFileDialog>
 
 using namespace vcg;
 
-QStringList format() 
+QStringList ExtraMeshIOPlugin::formats() const
 {
-  QStringList ioList;
-  ioList << "Open OBJ File";
-  ioList << "Save OBJ File";
-  return ioList;
+  return QStringList() << tr("Import OBJ")
+											 << tr("Export OBJ");
 }
 
-bool open(QString &filter, MeshModel &m, int mask, CallBackPos *cb=0, QWidget *parent=0)
+bool ExtraMeshIOPlugin::open(
+      QString &format,
+			QString fileName,
+      MeshModel &m, 
+      int& mask,
+      CallBackPos *cb,
+			QWidget *parent)
 {
-  return false;
+	if (fileName.isEmpty())
+		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
+	
+	if (!fileName.isEmpty())
+	{
+		QString errorMsgFormat = "Error encountered while loading file %s: %s";
+
+		if (format == tr("Import OBJ"))
+		{
+			const char *filename = fileName.toAscii();
+
+			vcg::tri::io::ObjInfo oi;
+			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename, mask, oi);
+			oi.cb = cb;
+
+			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
+			{
+				QMessageBox::information(parent, tr("OBJ Opening"), tr("Model has wedge text coords"));
+				m.cm.face.EnableWedgeTex();
+			}
+			m.cm.face.EnableNormal();
+
+			// load from disk
+			int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename, oi);
+			if (result != vcg::tri::io::ImporterOBJ<CMeshO>::OBJError::E_NOERROR)
+			{
+				QMessageBox::warning(parent, tr("OBJ Opening"), errorMsgFormat.arg(filename, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+				return false;
+			}
+		}
+
+		// update bounding box
+		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+
+		// update normals
+		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);
+
+		return true;
+	}
+
+	return false;
 }
 
-bool save(QString &filter, MeshModel &m, int mask, CallBackPos *cb=0, QWidget *parent=0)
+bool ExtraMeshIOPlugin::save(
+      QString &format,
+			QString fileName,
+      MeshModel &m, 
+      int mask,
+      vcg::CallBackPos *cb,
+      QWidget *parent)
 {
   return false;
 }
