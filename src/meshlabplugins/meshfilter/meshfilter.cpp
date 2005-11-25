@@ -55,6 +55,7 @@ bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWi
 		// TODO : length 0 by default, need a dialog ?
 		vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
 			(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f);
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 																																				 
 	}
 	if(filter == tr("Butterfly Subdivision Surface") )
@@ -65,6 +66,7 @@ bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWi
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 		
 		vcg::Refine<CMeshO, MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),0);
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 		
 		//  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 	  //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
