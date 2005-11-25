@@ -82,7 +82,7 @@ private:
 	QSignalMapper *windowMapper;
   GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }
 	GLArea *gla;
-	vector<MeshModel *> VM;
+	//vector<MeshModel *> VM;
 	QScrollArea *scrollArea;
 	QDir pluginsDir;
 	QStringList pluginFileNames;

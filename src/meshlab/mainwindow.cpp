@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.28  2005/11/25 02:47:18  davide_portelli
+Some cleanup
+
 Revision 1.27  2005/11/24 15:46:57  davide_portelli
 Added the check icon for menu Render->Show Normals
 
@@ -138,7 +141,6 @@ First rough version. It simply load a mesh.
 MainWindow::MainWindow()
 {
 	workspace = new QWorkspace(this);
-	
 	setCentralWidget(workspace);
 	windowMapper = new QSignalMapper(this);
 	connect(windowMapper, SIGNAL(mapped(QWidget *)),workspace, SLOT(setActiveWindow(QWidget *)));
@@ -152,53 +154,39 @@ MainWindow::MainWindow()
 	addToolBar(renderToolBar);
 	setWindowTitle(tr("MeshLab v0.1"));
 	loadPlugins();
-	//QTimer::singleShot(500, this, SLOT(aboutPlugins()));
-	if(QCoreApplication::instance ()->argc()>1)
+	if(QCoreApplication::instance ()->argc()>1){
 		open(QCoreApplication::instance ()->argv()[1]);
-	else 
+	}
+	else{ 
 		QTimer::singleShot(500, this, SLOT(open()));
+	}
 }
 
 void MainWindow::open(QString fileName)
 {
-
-	if (fileName.isEmpty()) 
-	{
-		/*QStringList types << 
-		<< "Text files (*.txt)"
-		<< "Any files (*)";
-		QFileDialog fd = new QFileDialog( this );
-		fd->setFilters( types );
-		fd->show();*/
-
+	if (fileName.isEmpty()){
 		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),"../sample","Mesh files (*.ply *.off *.stl)");
 	}
 	if (!fileName.isEmpty()) {
 		MeshModel *nm= new MeshModel();
 		if(!nm->Open(fileName.toAscii())){
-			QMessageBox::information(this, tr("Plug & Paint"),
-				tr("Cannot load %1.").arg(fileName));
-    
-			delete nm;
-			return;
+			QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
+    	delete nm;
+			//return;
 		}
-		else
-		{
-			//QMessageBox::information(this, tr("MeshLab"), tr("Opened Mesh of %1. triangles").arg(nm->cm.fn));
-			VM.push_back(nm);
+		else{
+			//VM.push_back(nm);
 			gla=new GLArea(workspace);
 			gla->mm=nm;
 			gla->setWindowTitle(QFileInfo(fileName).fileName());   
 			workspace->addWindow(gla);
 			if(workspace->isVisible()) gla->showMaximized();
 			else QTimer::singleShot(00, gla, SLOT(showMaximized()));
-      setCurrentFile(fileName);
-      if(!gla->mm->cm.textures.empty()) 
-      {
-        QMessageBox::information(this, tr("Plug & Paint"),
-				tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
+      //setCurrentFile(fileName);
+      if(!gla->mm->cm.textures.empty()){
+        QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
       }
-			return;
+			//return;
 		}
 	}
 }
@@ -473,12 +461,12 @@ void MainWindow::viewToolbarRender(){
 	}
 }
 
-void MainWindow::RenderPoint()       { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMPoints  ); }
-void MainWindow::RenderWire()        { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMWire    ); }
-void MainWindow::RenderFlat()        { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMFlat    ); }
-void MainWindow::RenderSmooth()      { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMSmooth  ); }
-void MainWindow::RenderFlatLine()    { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMFlatWire);}
-void MainWindow::RenderHiddenLines() { qobject_cast<GLArea *>(workspace->activeWindow())->setDrawMode(GLW::DMHidden  ); }
+void MainWindow::RenderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
+void MainWindow::RenderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
+void MainWindow::RenderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
+void MainWindow::RenderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
+void MainWindow::RenderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
+void MainWindow::RenderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
 
 void MainWindow::updateWindowMenu()
 {
