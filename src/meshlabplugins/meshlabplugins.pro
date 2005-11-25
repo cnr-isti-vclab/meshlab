@@ -1,7 +1,8 @@
 TEMPLATE      = subdirs
 SUBDIRS       = meshfilter \
 		meshrender \
-		meshio
+		meshio \
+		meshcurvature
 
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/tools/plugandpaintplugins
