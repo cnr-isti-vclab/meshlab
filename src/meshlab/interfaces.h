@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2005/11/25 00:10:08  glvertex
+added Q_DECLARE_INTERFACE for MeshColorizeInterface
+
 Revision 1.7  2005/11/24 10:54:37  cignoni
 Yet another test to compile under linux: added a const before QString in applyfilter...
 
@@ -109,6 +112,7 @@ public:
 
 class MeshColorizeInterface
 {
+public:
     virtual void Compute( QString &mode, MeshModel &m, QWidget *parent){};
     virtual void Show(QString &mode, bool show, MeshModel &m, QWidget *parent) {};
     virtual void Finalize(QString &mode, MeshModel &m, QWidget *parent){};
@@ -121,5 +125,7 @@ Q_DECLARE_INTERFACE(MeshFilterInterface,
                     "vcg.meshlab.MeshFilterInterface/1.0")
 Q_DECLARE_INTERFACE(MeshRenderInterface,
                     "vcg.meshlab.MeshRenderInterface/1.0")
+Q_DECLARE_INTERFACE(MeshColorizeInterface,
+                    "vcg.meshlab.MeshColorizeInterface/1.0")
 
 #endif
