@@ -24,11 +24,8 @@
 History
 
 $Log$
-Revision 1.32  2005/11/25 14:49:41  alemochi
-Changed action name
-
-Revision 1.31  2005/11/25 14:46:44  alemochi
-Added rendering of bounding box and new icon
+Revision 1.33  2005/11/25 16:02:28  davide_portelli
+Added consistency of toolbar and menu with openGL
 
 Revision 1.30  2005/11/25 12:58:58  alemochi
 Added new icon that represent the changing of lighting state and modified function.
@@ -290,14 +287,10 @@ void MainWindow::createActions()
 	renderModeSmoothAct->setChecked(true);
 	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
 
-	setLightAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"), renderModeGroup);
-	//setLightOnAct->setCheckable(true);
+	setLightAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"),this);
+	setLightAct->setCheckable(true);
 	setLightAct->setChecked(true);
 	connect(setLightAct, SIGNAL(triggered()), this, SLOT(SetLight()));
-
-
-
-
 
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
 	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
@@ -346,7 +339,8 @@ void MainWindow::createToolBars()
 
 	renderToolBar = addToolBar(tr("Render"));
 	renderToolBar->setIconSize(QSize(32,32));
-	renderToolBar->addActions(renderModeGroup->actions() );
+	renderToolBar->addActions(renderModeGroup->actions());
+	renderToolBar->addAction(setLightAct);
 }
 
 void MainWindow::createMenus()
@@ -367,6 +361,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
   renderMenu->addActions(renderModeGroup->actions());
+	renderMenu->addAction(setLightAct);
  
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
@@ -503,14 +498,15 @@ void MainWindow::SetLight()
 		const RenderMode &rm=GLA()->getRenderState();
 		if (rm.Lighting)
 		{
-			
 			GLA()->setLight(false);
 			setLightAct->setIcon(QIcon(":/images/lightoff.png"));
+			setLightAct->setChecked(false);
 		}
 		else 
 		{
-			setLightAct->setIcon(QIcon(":/images/lighton.png"));
 			GLA()->setLight(true);
+			setLightAct->setIcon(QIcon(":/images/lighton.png"));
+			setLightAct->setChecked(true);
 		}
 	}
 };
@@ -578,15 +574,44 @@ void MainWindow::setCurrentFile(const QString &fileName)
 void MainWindow::updateMenus()
 {
 	bool active = (bool)workspace->activeWindow();
-	//////////////////////////////////////////
 	saveAsAct->setEnabled(active);
-	//////////////////////////////////////////
 	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
-	//////////////////////////////////////////
 	renderMenu->setEnabled(active);
-	//////////////////////////////////////////
   windowsMenu->setEnabled(active);
-	/////////////////////////////////////////
 	renderToolBar->setEnabled(active);
-	//////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
+	if(active){
+		const RenderMode &rm=GLA()->getRenderState();
+		switch (rm.drawMode) {
+			case GLW::DMBox:
+				renderBboxAct->setChecked(true);
+			break;
+			case GLW::DMPoints:
+				renderModePointsAct->setChecked(true);
+			break;
+			case GLW::DMWire:
+				renderModeWireAct->setChecked(true);
+			break;
+			case GLW::DMFlat:
+				renderModeFlatAct->setChecked(true);
+			break;
+			case GLW::DMSmooth:
+				renderModeSmoothAct->setChecked(true);
+			break;
+			case GLW::DMFlatWire:
+				renderModeFlatLinesAct->setChecked(true);
+			break;
+			case GLW::DMHidden:
+				renderModeHiddenLinesAct->setChecked(true);
+			break;
+		}
+		if (rm.Lighting){
+			setLightAct->setIcon(QIcon(":/images/lighton.png"));
+			setLightAct->setChecked(true);
+		}else{
+			setLightAct->setIcon(QIcon(":/images/lightoff.png"));
+			setLightAct->setChecked(false);
+
+		}
+	}
 }
