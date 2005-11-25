@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2005/11/25 16:25:35  ggangemi
+Added vert::Color4b, vert::Qualityf components to CVertexO: required by MeshColorizeInterface plugins
+
 Revision 1.7  2005/11/22 16:16:35  glvertex
 Added preprocessor intructions to prevent multiple inclusion
 
@@ -65,7 +68,7 @@ class CVertexO;
 
 // Opt stuff
 
-class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Normal3f, vert::BitFlags >{};
+class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Color4b, vert::Normal3f, vert::Qualityf, vert::BitFlags  >{};
 class CFaceO    : public FaceSimp2< CVertexO, CEdge, CFaceO, face::InfoOcf, face::FFAdjOcf, face::WedgeTexture2f, face::VertexRef, face::BitFlags, face::Normal3fOcf > {};
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
 
