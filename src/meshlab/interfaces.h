@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2005/11/25 19:29:01  buzzelli
+small changes to signature of MeshIOInterface methods
+
 Revision 1.8  2005/11/25 00:10:08  glvertex
 added Q_DECLARE_INTERFACE for MeshColorizeInterface
 
@@ -63,17 +66,19 @@ class MeshIOInterface
 public:
     virtual ~MeshIOInterface() {}
 
-    virtual QStringList format() const = 0;
+    virtual QStringList formats() const = 0;
     
     virtual bool open(
-      QString &filter, // "OBJ"
+      QString &format, // "OBJ"
+			QString fileName,
       MeshModel &m, 
-      int mask,
+      int &mask,
       CallBackPos *cb=0,
       QWidget *parent=0);
     
   virtual bool save(
-      QString &filter, // "OBJ"
+      QString &format, // "OBJ"
+			QString fileName,
       MeshModel &m, 
       int mask,
       vcg::CallBackPos *cb=0,
