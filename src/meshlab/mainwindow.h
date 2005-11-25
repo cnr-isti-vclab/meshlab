@@ -97,6 +97,12 @@ private:
 	QMenu *fileMenu;
 	QMenu *filterMenu;
 	QMenu *renderMenu;
+	QMenu *renderModeMenu;
+	QMenu *lightingModeMenu;
+	QMenu *textureModeMenu;
+	QMenu *colorModeMenu;
+
+
 	QMenu *viewMenu;
 	QMenu *toolBarMenu;
 	QMenu *windowsMenu;
@@ -106,6 +112,9 @@ private:
 	QAction *saveAsAct;
 	
 	QActionGroup *renderModeGroup;
+	
+	
+
 	QAction *renderBboxAct;
 	QAction *renderModePointsAct;
 	QAction *renderModeWireAct;

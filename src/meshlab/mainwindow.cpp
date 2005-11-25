@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.35  2005/11/25 17:41:52  alemochi
+Added categorization to render menu
+
 Revision 1.34  2005/11/25 16:23:02  ggangemi
 Added MeshColorizeInterface plugins support code
 
@@ -259,6 +262,8 @@ void MainWindow::createActions()
 	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////
 	renderModeGroup = new QActionGroup(this);
 	
+	
+
 	renderBboxAct	  = new QAction(QIcon(":/images/bbox.png"),tr("&Bounding box"), renderModeGroup);
 	renderBboxAct->setCheckable(true);
 	renderBboxAct->setChecked(true);
@@ -363,14 +368,30 @@ void MainWindow::createMenus()
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
-  renderMenu->addActions(renderModeGroup->actions());
-	renderMenu->addAction(setLightAct);
- 
+  //renderMenu->addActions(renderModeGroup->actions());
+	//renderMenu->addAction(setLightAct);
+//  renderMenu->addAction(renderModeAct);
+//  renderMenu->addAction(lightingModeAct);
+//	lightingModeAct->addAction(setLightAct);
+	renderModeMenu=renderMenu->addMenu(tr("Render Mode"));
+	renderModeMenu->addActions(renderModeGroup->actions());
+	
+	lightingModeMenu=renderMenu->addMenu(tr("Lighting"));
+	lightingModeMenu->addAction(setLightAct);
+
+	textureModeMenu=renderMenu->addMenu(tr("Texture"));
+	colorModeMenu=renderMenu->addMenu(tr("Color"));
+	
+
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(viewToolbarStandardAct);
 	toolBarMenu->addAction(viewToolbarRenderAct);
+	
+
+	
+
 
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
