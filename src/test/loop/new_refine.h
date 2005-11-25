@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.8  2005/11/25 17:34:52  mariolatronico
+changed vector declaration from oldVertVec(m.vert.size()) to oldVertVec.
+
 Revision 1.7  2005/11/24 20:23:01  giec
 fixed setting even vertex loop
 
@@ -236,7 +239,8 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 	typedef face::Pos<typename MESH_TYPE::FaceType> faceType;
 	
 	// vettore per prendere i vecchi vertici
-	std::vector<typename MESH_TYPE::CoordType> oldVertVec(m.vert.size());
+	//	std::vector<typename MESH_TYPE::CoordType> oldVertVec(m.vert.size());
+	std::vector<typename MESH_TYPE::CoordType> oldVertVec;
 	// memorizzo i vertici nel vettore
 	typename MESH_TYPE::VertexIterator vi;
 	typename MESH_TYPE::FaceIterator fi;
