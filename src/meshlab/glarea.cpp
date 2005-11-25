@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.14  2005/11/25 11:55:59  alemochi
+Added function to Enable/Disable lighting (work in progress)
+
 Revision 1.13  2005/11/24 01:38:36  cignoni
 Added new plugins intefaces, tested with shownormal render mode
 
@@ -143,6 +146,9 @@ void GLArea::paintGL()
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
 
+	if (rm.Lighting) glEnable(GL_LIGHTING);
+	else glDisable(GL_LIGHTING);
+
 	mm->Render(rm.drawMode,rm.drawColor);
   if(iRender)
     iRender->Render(iRenderString,*mm,rm,this);
@@ -209,4 +215,17 @@ void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 {
 	rm.drawMode = mode;
 	updateGL();
+}
+
+void GLArea::setLight(bool state)
+{
+	rm.Lighting=state;
+	updateGL();
+
+}
+
+const RenderMode& GLArea::getRenderState()
+{
+	return rm;
+
 }

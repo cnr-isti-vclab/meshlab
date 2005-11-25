@@ -8,6 +8,7 @@
         <file>images/points.png</file>
         <file>images/save.png</file>
         <file>images/smooth.png</file>
-        <file>images/wire.png</file>
+        <file>images/wire.png</file>  
+        <file>images/lighton.png</file>            
     </qresource>
 </RCC>

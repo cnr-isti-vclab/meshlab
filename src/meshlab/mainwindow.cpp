@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.29  2005/11/25 11:55:59  alemochi
+Added function to Enable/Disable lighting (work in progress)
+
 Revision 1.28  2005/11/25 02:47:18  davide_portelli
 Some cleanup
 
@@ -271,6 +274,14 @@ void MainWindow::createActions()
 	renderModeSmoothAct->setChecked(true);
 	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
 
+	setLightOnAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"), renderModeGroup);
+	//setLightOnAct->setCheckable(true);
+	setLightOnAct->setChecked(true);
+	connect(setLightOnAct, SIGNAL(triggered()), this, SLOT(SetLight()));
+
+
+
+
 
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
 	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
@@ -467,6 +478,17 @@ void MainWindow::RenderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
 void MainWindow::RenderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
 void MainWindow::RenderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
 void MainWindow::RenderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
+
+void MainWindow::SetLight()			     
+{ 
+	if (GLA()!=NULL)
+	{
+		const RenderMode &rm=GLA()->getRenderState();
+		if (rm.Lighting) GLA()->setLight(false);
+		else GLA()->setLight(true);
+	}
+};
+
 
 void MainWindow::updateWindowMenu()
 {

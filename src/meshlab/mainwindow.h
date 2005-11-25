@@ -66,6 +66,7 @@ private slots:
 	void RenderFlatLine();
 	void RenderHiddenLines();
 	void RenderSmooth();
+	void SetLight();
 	
 
 private:
@@ -108,6 +109,7 @@ private:
 	QAction *renderModeFlatLinesAct;
 	QAction *renderModeFlatAct;
 	QAction *renderModeSmoothAct;
+	QAction *setLightOnAct; 
 	
 	QAction *exitAct;
 	QAction *aboutAct;

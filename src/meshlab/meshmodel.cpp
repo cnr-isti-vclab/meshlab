@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2005/11/25 11:55:59  alemochi
+Added function to Enable/Disable lighting (work in progress)
+
 Revision 1.12  2005/11/24 01:45:28  cignoni
 commented line 62. dangerous unuseful debug line.
 
@@ -69,7 +72,7 @@ bool MeshModel::Open(const char *filename)
 	
 	vcg::tri::UpdateBounding<CMeshO>::Box(cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(cm);
-
+	
   return ret==::vcg::ply::E_NOERROR;
 }
 

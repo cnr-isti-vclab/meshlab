@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.8  2005/11/25 11:55:59  alemochi
+Added function to Enable/Disable lighting (work in progress)
+
 Revision 1.7  2005/11/24 01:38:36  cignoni
 Added new plugins intefaces, tested with shownormal render mode
 
@@ -91,11 +94,15 @@ public:
 
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
+	
+	const RenderMode & getRenderState();
 	void setDrawMode(vcg::GLW::DrawMode mode);
-
-  MeshRenderInterface *iRender; 
+	void setLight(bool state);
+  
+	MeshRenderInterface *iRender; 
   QString iRenderString;
 protected:
+	
 	void initializeGL();
 	void paintGL();
 	void resizeGL(int width, int height);
