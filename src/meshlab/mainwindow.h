@@ -59,7 +59,8 @@ private slots:
 	void updateWindowMenu();
 	void updateMenus();
 	void viewToolbarFile();
-	void viewToolbarRender();
+  void viewToolbarRender();
+	void RenderBbox();
 	void RenderPoint();
 	void RenderWire();
 	void RenderFlat();
@@ -103,6 +104,7 @@ private:
 	QAction *saveAsAct;
 	
 	QActionGroup *renderModeGroup;
+	QAction *renderBboxAct;
 	QAction *renderModePointsAct;
 	QAction *renderModeWireAct;
 	QAction *renderModeHiddenLinesAct;

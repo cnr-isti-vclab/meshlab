@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.31  2005/11/25 14:46:44  alemochi
+Added rendering of bounding box and new icon
+
 Revision 1.30  2005/11/25 12:58:58  alemochi
 Added new icon that represent the changing of lighting state and modified function.
 
@@ -252,6 +255,13 @@ void MainWindow::createActions()
 
 	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////
 	renderModeGroup = new QActionGroup(this);
+	
+	renderBboxAct	  = new QAction(QIcon(":/images/bbox.png"),tr("&Bounding box"), renderModeGroup);
+	renderBboxAct->setCheckable(true);
+	renderBboxAct->setChecked(true);
+	connect(renderBboxAct, SIGNAL(triggered()), this, SLOT(RenderBbox()));
+	
+	
 	renderModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), renderModeGroup);
 	renderModePointsAct->setCheckable(true);
 	connect(renderModePointsAct, SIGNAL(triggered()), this, SLOT(RenderPoint()));
@@ -475,6 +485,7 @@ void MainWindow::viewToolbarRender(){
 	}
 }
 
+void MainWindow::RenderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
 void MainWindow::RenderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
 void MainWindow::RenderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
 void MainWindow::RenderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
