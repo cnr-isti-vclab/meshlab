@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.36  2005/11/25 18:15:10  ggangemi
+Moved MeshColorizeInterface menu entries under "Color" sub-menu
+
 Revision 1.35  2005/11/25 17:41:52  alemochi
 Added categorization to render menu
 
@@ -434,7 +437,7 @@ void MainWindow::loadPlugins()
 			// MeshColorizeInterface test 
 			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
 			if (iColor)
-				addToMenu(plugin, iColor->colorsFrom(), renderMenu, SLOT(applyColorMode()));     
+				addToMenu(plugin, iColor->colorsFrom(), colorModeMenu, SLOT(applyColorMode()));     
 
 			pluginFileNames += fileName;
 		}
