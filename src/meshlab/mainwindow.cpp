@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.30  2005/11/25 12:58:58  alemochi
+Added new icon that represent the changing of lighting state and modified function.
+
 Revision 1.29  2005/11/25 11:55:59  alemochi
 Added function to Enable/Disable lighting (work in progress)
 
@@ -484,8 +487,17 @@ void MainWindow::SetLight()
 	if (GLA()!=NULL)
 	{
 		const RenderMode &rm=GLA()->getRenderState();
-		if (rm.Lighting) GLA()->setLight(false);
-		else GLA()->setLight(true);
+		if (rm.Lighting)
+		{
+			
+			GLA()->setLight(false);
+			setLightOnAct->setIcon(QIcon(":/images/lightoff.png"));
+		}
+		else 
+		{
+			setLightOnAct->setIcon(QIcon(":/images/lighton.png"));
+			GLA()->setLight(true);
+		}
 	}
 };
 

@@ -9,6 +9,7 @@
         <file>images/save.png</file>
         <file>images/smooth.png</file>
         <file>images/wire.png</file>  
-        <file>images/lighton.png</file>            
+        <file>images/lighton.png</file>   
+        <file>images/lightoff.png</file>            
     </qresource>
 </RCC>
