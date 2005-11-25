@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.34  2005/11/25 16:23:02  ggangemi
+Added MeshColorizeInterface plugins support code
+
 Revision 1.33  2005/11/25 16:02:28  davide_portelli
 Added consistency of toolbar and menu with openGL
 
@@ -406,6 +409,11 @@ void MainWindow::loadPlugins()
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 			if (iRender)
 				addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()));                
+			
+			// MeshColorizeInterface test 
+			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
+			if (iColor)
+				addToMenu(plugin, iColor->colorsFrom(), renderMenu, SLOT(applyColorMode()));     
 
 			pluginFileNames += fileName;
 		}
@@ -454,6 +462,15 @@ void MainWindow::applyRenderMode()
 	  GLA()->log.Log(0,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
 		action->setChecked(true);
   }
+}
+
+// MeshColorizeInterface test 
+void MainWindow::applyColorMode()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+	MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(action->parent());
+	iColor->Compute(action->text(),*(GLA()->mm ), GLA());
+	GLA()->log.Log(0,"Applied colorize %s",action->text().toLocal8Bit().constData());// .data());
 }
 
 
