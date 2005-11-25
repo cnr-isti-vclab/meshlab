@@ -53,6 +53,8 @@ private slots:
 	void aboutPlugins();
 	void applyFilter();
   void applyRenderMode();
+	
+	void applyColorMode();
 
 	void windowsTile();
 	void windowsCascade();
