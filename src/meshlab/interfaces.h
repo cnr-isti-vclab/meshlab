@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2005/11/26 23:57:04  cignoni
+made io filters to appear into file menu.
+
 Revision 1.11  2005/11/26 23:29:08  cignoni
 Commented out names of unused parameters to remove boring warnings
 
@@ -80,7 +83,7 @@ public:
       MeshModel &m, 
       int &mask,
       CallBackPos *cb=0,
-      QWidget *parent=0);
+      QWidget *parent=0)=0;
     
   virtual bool save(
       QString &format, // "OBJ"
@@ -88,7 +91,7 @@ public:
       MeshModel &m, 
       int mask,
       vcg::CallBackPos *cb=0,
-      QWidget *parent= 0) ; // prima istanza il dialogo di opzioni viene sempre.
+      QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
 };
 
 class MeshFilterInterface

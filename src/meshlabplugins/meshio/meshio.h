@@ -37,7 +37,7 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
 public:
   QStringList formats() const;
 
-	virtual bool open(
+	 bool open(
       QString &format,
 			QString fileName,
       MeshModel &m, 
@@ -45,7 +45,7 @@ public:
       CallBackPos *cb=0,
       QWidget *parent=0);
     
-  virtual bool save(
+   bool save(
       QString &format,
 			QString fileName,
       MeshModel &m, 

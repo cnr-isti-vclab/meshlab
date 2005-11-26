@@ -18,6 +18,7 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+#include <QtGui>
 
 #include "meshio.h"
 // temporaneamente prendo la versione corrente dalla cartella test
@@ -97,4 +98,5 @@ bool ExtraMeshIOPlugin::save(
   return false;
 }
 
-//Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)
+Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)
+
