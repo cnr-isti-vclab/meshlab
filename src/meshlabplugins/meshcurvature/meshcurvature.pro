@@ -1,10 +1,14 @@
 TEMPLATE      = lib
 CONFIG       += plugin
+CONFIG += stl
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = meshcurvature.h
 SOURCES       = meshcurvature.cpp
 TARGET        = meshcurvature
 DESTDIR       = ../../meshlab/plugins
+# the following line is needed to avoid mismatch between 
+# the awful min/max macros of windows and the limits max
+win32:DEFINES += NOMINMAX
 
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {

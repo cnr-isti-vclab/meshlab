@@ -5,6 +5,9 @@ HEADERS       = meshfilter.h ../../test/loop/new_refine.h
 SOURCES       = meshfilter.cpp
 TARGET        = meshfilter
 DESTDIR       = ../../meshlab/plugins
+# the following line is needed to avoid mismatch between 
+# the awful min/max macros of windows and the limits max
+win32:DEFINES += NOMINMAX
 
 unix{
 	QMAKE_CC	 = gcc-3.3

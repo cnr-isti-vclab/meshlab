@@ -7,7 +7,7 @@ TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
-win32:DEFINES += NO_MINMAX
+win32:DEFINES += NOMINMAX
 
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {

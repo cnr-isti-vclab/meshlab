@@ -20,7 +20,7 @@ RESOURCES     = meshlab.qrc
 QT           += opengl
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
-win32:DEFINES += NO_MINMAX
+win32:DEFINES += NOMINMAX
 
 INCLUDEPATH += . ../../../sf ../../../code/lib/glew/include
 CONFIG += stl
