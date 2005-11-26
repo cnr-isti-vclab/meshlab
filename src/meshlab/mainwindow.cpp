@@ -24,7 +24,7 @@
 History
 
 $Log$
-Revision 1.38  2005/11/26 16:55:34  glvertex
+Revision 1.39  2005/11/26 17:05:13  glvertex
 Optimized SetLight method
 Now using Log constants instead of int values in logging lines
 
