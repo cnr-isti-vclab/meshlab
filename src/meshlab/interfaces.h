@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2005/11/26 23:29:08  cignoni
+Commented out names of unused parameters to remove boring warnings
+
 Revision 1.10  2005/11/25 21:57:51  mariolatronico
 changed signature of MeshColorizeInterface::Compute to allow gcc compilation
 
@@ -92,8 +95,8 @@ class MeshFilterInterface
 {
 public:
     virtual ~MeshFilterInterface() {}
-    virtual QIcon *getIcon(QString &filter, QWidget *parent) {return 0;};
-    virtual bool applyFilter(const QString &filter, MeshModel &m, QWidget *parent) = 0;
+    virtual QIcon *getIcon(QString &/*filter*/, QWidget * /*parent*/) {return 0;};
+    virtual bool applyFilter(const QString &/*filter*/, MeshModel &/*m*/, QWidget * /*parent*/) = 0;
     virtual QStringList filters() const = 0;
 };
 /*
@@ -111,9 +114,9 @@ class MeshRenderInterface
 public:
     virtual ~MeshRenderInterface() {}
 
-    virtual void Init(    QString &mode, MeshModel &m, QWidget *parent){};
-    virtual void Render(  QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent) =0;
-    virtual void Finalize(QString &mode, MeshModel &m, QWidget *parent){};
+    virtual void Init(    QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
+    virtual void Render(  QString &/*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QWidget * /*parent*/) =0;
+    virtual void Finalize(QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
 
     virtual QStringList modes() const = 0;
 };
@@ -121,9 +124,9 @@ public:
 class MeshColorizeInterface
 {
 public:
-    virtual void Compute(const QString &mode, MeshModel &m, QWidget *parent){};
-    virtual void Show(QString &mode, bool show, MeshModel &m, QWidget *parent) {};
-    virtual void Finalize(QString &mode, MeshModel &m, QWidget *parent){};
+    virtual void Compute(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
+    virtual void Show(QString &/*mode*/, bool /*show*/, MeshModel &/*m*/, QWidget * /*parent*/) {};
+    virtual void Finalize(QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
     virtual QStringList colorsFrom() const = 0;
 };
 
