@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.15  2005/11/26 14:09:15  alemochi
+Added double side lighting and fancy lighting (working only double side+fancy)
+
 Revision 1.14  2005/11/25 11:55:59  alemochi
 Added function to Enable/Disable lighting (work in progress)
 
@@ -102,15 +105,22 @@ void GLArea::initializeGL()
 {
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_NORMALIZE);
 
-	GLfloat p[] = {0,0,1,0};
+	GLfloat pfront[] = {0,0,1,0};
+	GLfloat pback[]  = {0,0,-1,0};
 
-	glLightfv(GL_LIGHT0,GL_POSITION,p);
+	GLfloat l_diffuseFancy[]={1.0 ,1.0,1.0 ,0.0};
+	
+	glLightfv(GL_LIGHT0,GL_POSITION,pfront);
 	glEnable(GL_LIGHT0);
+	
+	glLightfv(GL_LIGHT1,GL_POSITION,pback);
+	glLightfv(GL_LIGHT1,GL_DIFFUSE,l_diffuseFancy);
 	glEnable(GL_LIGHTING);
 
+ 
 	rm.drawMode	= GLW::DMSmooth;
 	rm.drawColor = GLW::CMNone;
 }
@@ -137,7 +147,7 @@ void GLArea::paintGL()
 	trackball.radius= 1;
 	trackball.GetView();
 	trackball.Apply();
-
+	
 	glColor3f(1.f,1.f,1.f);
 	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
 	//glBoxWire(bb);
@@ -146,8 +156,9 @@ void GLArea::paintGL()
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
 
-	if (rm.Lighting) glEnable(GL_LIGHTING);
-	else glDisable(GL_LIGHTING);
+	
+	RenderLight();
+
 
 	mm->Render(rm.drawMode,rm.drawColor);
   if(iRender)
@@ -222,6 +233,70 @@ void GLArea::setLight(bool state)
 	rm.Lighting=state;
 	updateGL();
 
+}
+
+void GLArea::setLightMode(bool state,LightingModel lmode)
+{
+		switch(lmode) 
+		{
+		case LDOUBLE:
+			if (state) rm.DoubleSideLighting=true;
+			else rm.DoubleSideLighting=false;
+			break;
+		case LFANCY:
+			if (state) rm.FancyLighting=true;
+			else rm.FancyLighting=false;
+			break;
+		}
+	updateGL();
+}
+
+
+
+inline void GLArea::RenderLight()
+{
+	if (rm.Lighting) 
+	{
+		glEnable(GL_LIGHTING);
+		// Double Model Lighting
+		if (rm.DoubleSideLighting) 
+		{
+			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+			GLfloat m_doublefront[]={1.0,1.0,1.0,1.0};
+			GLfloat m_doubleback[]={1.0,1.0,1.0,1.0};
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_doublefront);
+			glMaterialfv(GL_BACK, GL_DIFFUSE, m_doubleback);
+			//glEnable(GL_LIGHT1);
+		}
+		else
+		{
+			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+			GLfloat standard_front[]={1.0,1.0,1.0,1.0};
+			GLfloat standard_back[]={0.0,0.0,0.0,1.0};
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
+			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
+			//glDisable(GL_LIGHT1);
+		}
+
+		// Fancy Model Lighting
+		if (rm.FancyLighting) 
+		{
+			GLfloat m_diffuseFancyBack[]={0.81,0.61,0.61,1.0};
+			GLfloat m_diffuseFancyFront[]={0.71,0.71,0.95,1.0};
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
+			glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
+			glEnable(GL_LIGHT1);
+		}
+		else 
+		{
+		  GLfloat standard_front[]={1.0,1.0,1.0,1.0};
+			GLfloat standard_back[]={0.0,0.0,0.0,1.0};
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
+			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
+			glDisable(GL_LIGHT1);
+		}
+	}
+	else glDisable(GL_LIGHTING);
 }
 
 const RenderMode& GLArea::getRenderState()

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.37  2005/11/26 14:09:15  alemochi
+Added double side lighting and fancy lighting (working only double side+fancy)
+
 Revision 1.36  2005/11/25 18:15:10  ggangemi
 Moved MeshColorizeInterface menu entries under "Color" sub-menu
 
@@ -303,6 +306,20 @@ void MainWindow::createActions()
 	setLightAct->setChecked(true);
 	connect(setLightAct, SIGNAL(triggered()), this, SLOT(SetLight()));
 
+	setDoubleLightingAct= new QAction(tr("&Double side lighting"),this);
+	setDoubleLightingAct->setCheckable(true);
+	setDoubleLightingAct->setChecked(false);
+	connect(setDoubleLightingAct, SIGNAL(triggered()), this, SLOT(SetDoubleLighting()));
+
+	setFancyLightingAct	  = new QAction(tr("&Fancy Lighting"),this);
+	setFancyLightingAct->setCheckable(true);
+	setFancyLightingAct->setChecked(false);
+	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(SetFancyLighting()));
+
+	
+
+
+
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
 	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
 	viewToolbarStandardAct->setCheckable(true);
@@ -381,6 +398,9 @@ void MainWindow::createMenus()
 	
 	lightingModeMenu=renderMenu->addMenu(tr("Lighting"));
 	lightingModeMenu->addAction(setLightAct);
+	lightingModeMenu->addAction(setDoubleLightingAct);
+	lightingModeMenu->addAction(setFancyLightingAct);
+
 
 	textureModeMenu=renderMenu->addMenu(tr("Texture"));
 	colorModeMenu=renderMenu->addMenu(tr("Color"));
@@ -531,6 +551,24 @@ void MainWindow::RenderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
 void MainWindow::RenderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
 void MainWindow::RenderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
 void MainWindow::RenderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
+
+
+
+
+
+void MainWindow::SetFancyLighting()
+{
+	const RenderMode &rm=GLA()->getRenderState();
+	if (rm.FancyLighting) GLA()->setLightMode(false,LFANCY);
+	else GLA()->setLightMode(true,LFANCY);
+}
+
+void MainWindow::SetDoubleLighting()
+{
+	const RenderMode &rm=GLA()->getRenderState();
+	if (rm.DoubleSideLighting) GLA()->setLightMode(false,LDOUBLE);
+	else GLA()->setLightMode(true,LDOUBLE);
+}
 
 void MainWindow::SetLight()			     
 { 

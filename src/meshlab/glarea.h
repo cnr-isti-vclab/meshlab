@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.9  2005/11/26 14:09:15  alemochi
+Added double side lighting and fancy lighting (working only double side+fancy)
+
 Revision 1.8  2005/11/25 11:55:59  alemochi
 Added function to Enable/Disable lighting (work in progress)
 
@@ -63,6 +66,9 @@ First rough version. It simply load a mesh.
 #include "meshmodel.h"
 #include "interfaces.h"
 
+
+enum LightingModel{LDOUBLE,LFANCY};
+
 class RenderMode
 {
 public:
@@ -76,7 +82,17 @@ public:
     bool FancyLighting;
     bool CastShadow;
     vcg::Point3f LightDir;
+		RenderMode()
+		{
+			Lighting=true;
+			BackFaceCull=false;
+			DoubleSideLighting=false;
+			FancyLighting=false;
+			CastShadow=false;
+    }
 };
+
+
 
 
 class MeshModel;
@@ -98,8 +114,9 @@ public:
 	const RenderMode & getRenderState();
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setLight(bool state);
-  
-	MeshRenderInterface *iRender; 
+	void setLightMode(bool state,LightingModel lmode);
+  inline void RenderLight();
+  MeshRenderInterface *iRender; 
   QString iRenderString;
 protected:
 	
