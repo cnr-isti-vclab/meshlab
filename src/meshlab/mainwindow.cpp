@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.38  2005/11/26 16:55:34  glvertex
+Optimized SetLight method
+Now using Log constants instead of int values in logging lines
+
 Revision 1.37  2005/11/26 14:09:15  alemochi
 Added double side lighting and fancy lighting (working only double side+fancy)
 
@@ -268,11 +272,9 @@ void MainWindow::createActions()
 	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////
 	renderModeGroup = new QActionGroup(this);
 	
-	
-
 	renderBboxAct	  = new QAction(QIcon(":/images/bbox.png"),tr("&Bounding box"), renderModeGroup);
 	renderBboxAct->setCheckable(true);
-	renderBboxAct->setChecked(true);
+	//renderBboxAct->setChecked(true);
 	connect(renderBboxAct, SIGNAL(triggered()), this, SLOT(RenderBbox()));
 	
 	
@@ -447,17 +449,28 @@ void MainWindow::loadPlugins()
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
 		if (plugin) {
+
 			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
-				addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));                
+				addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));
+
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 			if (iRender)
-				addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()));                
-			
+				addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()));
+
 			// MeshColorizeInterface test 
 			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
 			if (iColor)
 				addToMenu(plugin, iColor->colorsFrom(), colorModeMenu, SLOT(applyColorMode()));     
+
+			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+			if (iIO)
+			{
+				fileMenu->addSeparator();
+				addToMenu(plugin, iIO->formats(), fileMenu, SLOT(applyImportExport()));
+				fileMenu->addSeparator();
+			}
+
 
 			pluginFileNames += fileName;
 		}
@@ -488,7 +501,7 @@ void MainWindow::applyFilter()
 	
 	//iFilter->applyFilter(action->text(),*(GLA()->mm ),this);
 	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA());
-	GLA()->log.Log(0,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
+	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
 }
 
 void MainWindow::applyRenderMode()
@@ -498,12 +511,12 @@ void MainWindow::applyRenderMode()
   if(iRender==GLA()->iRender && GLA()->iRenderString ==action->text())
   {
     GLA()->iRender=0;
-	  GLA()->log.Log(0,"Disabled Render mode %s",GLA()->iRenderString.toLocal8Bit().constData());// .data());
+	  GLA()->log.Log(GLLogStream::Info,"Disabled Render mode %s",GLA()->iRenderString.toLocal8Bit().constData());// .data());
 		action->setChecked(false);
   } else  {
     GLA()->iRender = iRender;
     GLA()->iRenderString =action->text();
-	  GLA()->log.Log(0,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
+	  GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
 		action->setChecked(true);
   }
 }
@@ -514,7 +527,19 @@ void MainWindow::applyColorMode()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(action->parent());
 	iColor->Compute(action->text(),*(GLA()->mm ), GLA());
-	GLA()->log.Log(0,"Applied colorize %s",action->text().toLocal8Bit().constData());// .data());
+	GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());// .data());
+}
+
+void MainWindow::applyImportExport()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+	MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(action->parent());
+
+	// **** FIX **** FIX **** FIX 
+	iIO->save(action->text(),NULL,*(GLA()->mm ),0,NULL,GLA());
+	// **** FIX **** FIX **** FIX 
+
+	GLA()->log.Log(GLLogStream::Info,"Saved as %s",action->text().toLocal8Bit().constData());
 }
 
 
@@ -553,41 +578,28 @@ void MainWindow::RenderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
 void MainWindow::RenderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
 
 
-
-
-
 void MainWindow::SetFancyLighting()
 {
-	const RenderMode &rm=GLA()->getRenderState();
+	const RenderMode &rm=GLA()->getCurrentRenderMode();
 	if (rm.FancyLighting) GLA()->setLightMode(false,LFANCY);
 	else GLA()->setLightMode(true,LFANCY);
 }
 
 void MainWindow::SetDoubleLighting()
 {
-	const RenderMode &rm=GLA()->getRenderState();
+	const RenderMode &rm=GLA()->getCurrentRenderMode();
 	if (rm.DoubleSideLighting) GLA()->setLightMode(false,LDOUBLE);
 	else GLA()->setLightMode(true,LDOUBLE);
 }
 
 void MainWindow::SetLight()			     
-{ 
-	if (GLA()!=NULL)
-	{
-		const RenderMode &rm=GLA()->getRenderState();
-		if (rm.Lighting)
-		{
-			GLA()->setLight(false);
-			setLightAct->setIcon(QIcon(":/images/lightoff.png"));
-			setLightAct->setChecked(false);
-		}
-		else 
-		{
-			GLA()->setLight(true);
-			setLightAct->setIcon(QIcon(":/images/lighton.png"));
-			setLightAct->setChecked(true);
-		}
-	}
+{
+// Is this check needed???
+//	if (!GLA())
+//		return;
+
+	GLA()->setLight(!GLA()->getCurrentRenderMode().Lighting);
+	updateMenus();
 };
 
 
@@ -660,7 +672,7 @@ void MainWindow::updateMenus()
 	renderToolBar->setEnabled(active);
 	////////////////////////////////////////////////////////////////////
 	if(active){
-		const RenderMode &rm=GLA()->getRenderState();
+		const RenderMode &rm=GLA()->getCurrentRenderMode();
 		switch (rm.drawMode) {
 			case GLW::DMBox:
 				renderBboxAct->setChecked(true);
@@ -684,13 +696,10 @@ void MainWindow::updateMenus()
 				renderModeHiddenLinesAct->setChecked(true);
 			break;
 		}
-		if (rm.Lighting){
-			setLightAct->setIcon(QIcon(":/images/lighton.png"));
-			setLightAct->setChecked(true);
-		}else{
-			setLightAct->setIcon(QIcon(":/images/lightoff.png"));
-			setLightAct->setChecked(false);
+		setLightAct->setIcon(rm.Lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
+		setLightAct->setChecked(rm.Lighting);
 
-		}
+		setFancyLightingAct->setChecked(rm.FancyLighting);
+		setDoubleLightingAct->setChecked(rm.DoubleSideLighting);
 	}
 }

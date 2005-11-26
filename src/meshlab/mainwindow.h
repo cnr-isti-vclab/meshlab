@@ -50,11 +50,16 @@ private slots:
 	void openRecentFile();							
 	bool saveAs();
 	void about();
+	
+	// Plugin Slots ///////////
 	void aboutPlugins();
+	
 	void applyFilter();
   void applyRenderMode();
-	
 	void applyColorMode();
+	void applyImportExport();
+  ///////////////////////////
+
 
 	void windowsTile();
 	void windowsCascade();
