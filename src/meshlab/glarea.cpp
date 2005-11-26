@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.17  2005/11/26 21:47:37  alemochi
+Solved problems about fancy lighting and double side lighting
+
 Revision 1.16  2005/11/26 16:53:54  glvertex
 getRenderState --> getCurrentRenderMode
 
@@ -119,8 +122,8 @@ void GLArea::initializeGL()
 	glLightfv(GL_LIGHT0,GL_POSITION,pfront);
 	glEnable(GL_LIGHT0);
 	
-	glLightfv(GL_LIGHT1,GL_POSITION,pback);
-	glLightfv(GL_LIGHT1,GL_DIFFUSE,l_diffuseFancy);
+	/*glLightfv(GL_LIGHT1,GL_POSITION,pback);
+	glLightfv(GL_LIGHT1,GL_DIFFUSE,l_diffuseFancy);*/
 	glEnable(GL_LIGHTING);
 
  
@@ -262,41 +265,35 @@ inline void GLArea::RenderLight()
 	{
 		glEnable(GL_LIGHTING);
 		// Double Model Lighting
-		if (rm.DoubleSideLighting) 
+		if (rm.DoubleSideLighting && rm.FancyLighting) 
 		{
 			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-			GLfloat m_doublefront[]={1.0,1.0,1.0,1.0};
-			GLfloat m_doubleback[]={1.0,1.0,1.0,1.0};
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_doublefront);
-			glMaterialfv(GL_BACK, GL_DIFFUSE, m_doubleback);
-			//glEnable(GL_LIGHT1);
-		}
-		else
-		{
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-			GLfloat standard_front[]={1.0,1.0,1.0,1.0};
-			GLfloat standard_back[]={0.0,0.0,0.0,1.0};
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
-			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
-			//glDisable(GL_LIGHT1);
-		}
-
-		// Fancy Model Lighting
-		if (rm.FancyLighting) 
-		{
 			GLfloat m_diffuseFancyBack[]={0.81,0.61,0.61,1.0};
 			GLfloat m_diffuseFancyFront[]={0.71,0.71,0.95,1.0};
 			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
 			glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
-			glEnable(GL_LIGHT1);
+		}
+		else if (rm.FancyLighting)
+		{
+			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+			GLfloat standard_front[]={0.71,0.71,0.95,1.0};
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
+		}
+		else if (rm.DoubleSideLighting) 
+		{
+			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+			GLfloat standard_front[]={1.0,1.0,1.0,1.0};
+			GLfloat standard_back[]={1.0,1.0,1.0,1.0};
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
+			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
 		}
 		else 
 		{
+			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 		  GLfloat standard_front[]={1.0,1.0,1.0,1.0};
 			GLfloat standard_back[]={0.0,0.0,0.0,1.0};
       glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
 			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
-			glDisable(GL_LIGHT1);
 		}
 	}
 	else glDisable(GL_LIGHTING);
