@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2005/11/26 18:24:00  glvertex
+Added method [print] that writes the log entries ina QStringList
+
 Revision 1.3  2005/11/21 12:12:54  cignoni
 Added copyright info
 
@@ -34,6 +37,15 @@ Added copyright info
 #include "GLLogStream.h"
 
 using namespace std;
+
+void GLLogStream::print(QStringList &l)
+{
+	list<pair <int,string> > ::iterator li;
+	
+	for(li=S.begin();;li!=S.end();++li)
+		l << (*li).second.c_str();
+}
+
 void GLLogStream::Log(int Level, const char * f, ... )
 {
 	char buf[4096];

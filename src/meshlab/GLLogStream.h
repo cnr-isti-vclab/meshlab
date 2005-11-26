@@ -24,6 +24,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2005/11/26 18:24:00  glvertex
+Added method [print] that writes the log entries ina QStringList
+
 Revision 1.1  2005/11/16 23:19:22  cignoni
 Initial Draft release; still to be adapted to our needs.
 
@@ -56,6 +59,7 @@ Initial Commit
 class GLLogStream : public LogStream
 {
 public:
+	void print(QStringList &list);		// Fills a QStringList with the log entries 
   void glDraw(QGLWidget *qgl, int Level, int nlines);
   void Save(int Level, const char *filename);
   void Clear() {S.clear();}
