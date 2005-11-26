@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/11/26 18:50:56  alemochi
+correct syntax error
+
 Revision 1.4  2005/11/26 18:24:00  glvertex
 Added method [print] that writes the log entries ina QStringList
 
@@ -42,7 +45,7 @@ void GLLogStream::print(QStringList &l)
 {
 	list<pair <int,string> > ::iterator li;
 	
-	for(li=S.begin();;li!=S.end();++li)
+	for(li=S.begin();li!=S.end();++li)
 		l << (*li).second.c_str();
 }
 
