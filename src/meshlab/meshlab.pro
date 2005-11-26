@@ -22,7 +22,13 @@ QT           += opengl
 INCLUDEPATH += . ../../../sf ../../../code/lib/glew/include
 CONFIG += stl
 win32:LIBS	+= ../../../code/lib/glew/lib/glew32.lib 
-unix:LIBS	+= -lGLEW
+unix{
+	LIBS		+= -lGLEW
+	QMAKE_CC	 = gcc-3.3
+	QMAKE_CXX	 = g++-3.3
+	QMAKE_LINK	 = gcc-3.3
+	CONFIG		+= debug
+}
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/tools/plugandpaint
 sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS plugandpaint.pro
