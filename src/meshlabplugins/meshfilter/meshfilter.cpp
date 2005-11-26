@@ -26,7 +26,7 @@
 // TODO : test directory, need to be moved ...
 #include <../../test/loop/new_refine.h>
 #include "meshfilter.h"
-//#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/clean.h>
 
 using namespace vcg;
 
@@ -40,7 +40,8 @@ QStringList ExtraMeshFilterPlugin::filters() const
 	QStringList filterList;
 	filterList << tr("Loop Subdivision Surface");
 	filterList << tr("Butterfly Subdivision Surface");
-	//	filterList << tr("Remove Unreferenced Vertexes");
+	filterList << tr("Remove Unreferenced Vertexes");
+	filterList << tr("Remove Duplicated Vertexes");
 	return filterList;
 }
 
@@ -48,34 +49,42 @@ bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWi
 {
 	if(filter == tr("Loop Subdivision Surface") )
 	{
-		vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+    if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
+    if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 		// TODO : length 0 by default, need a dialog ?
 		vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
 			(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
-																																				 
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
 	}
 	if(filter == tr("Butterfly Subdivision Surface") )
 	{
-		vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+    if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
+    if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 		
 		vcg::Refine<CMeshO, MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),0);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		
 		//  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 	  //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 	}
-	// 	if(filter == tr("Remove Unreferenced Vertexes"))
-// 	{
-		//  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-	  //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
-// 	}
+  if(filter == tr("Remove Unreferenced Vertexes"))
+ 	{
+  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+	//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+ 	}
+  if(filter == tr("Remove Duplicated Vertexes"))
+ 	{
+  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+	//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+ 	}
   
 	return true;
 }
