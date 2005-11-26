@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.10  2005/11/26 16:53:54  glvertex
+getRenderState --> getCurrentRenderMode
+
 Revision 1.9  2005/11/26 14:09:15  alemochi
 Added double side lighting and fancy lighting (working only double side+fancy)
 
@@ -111,7 +114,7 @@ public:
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 	
-	const RenderMode & getRenderState();
+	const RenderMode & getCurrentRenderMode();
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);

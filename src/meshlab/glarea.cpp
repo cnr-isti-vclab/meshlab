@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.16  2005/11/26 16:53:54  glvertex
+getRenderState --> getCurrentRenderMode
+
 Revision 1.15  2005/11/26 14:09:15  alemochi
 Added double side lighting and fancy lighting (working only double side+fancy)
 
@@ -299,8 +302,4 @@ inline void GLArea::RenderLight()
 	else glDisable(GL_LIGHTING);
 }
 
-const RenderMode& GLArea::getRenderState()
-{
-	return rm;
-
-}
+const RenderMode& GLArea::getCurrentRenderMode() {return rm;}
