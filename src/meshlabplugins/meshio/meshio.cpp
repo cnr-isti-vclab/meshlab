@@ -38,7 +38,7 @@ QStringList ExtraMeshIOPlugin::formats() const
 
 bool ExtraMeshIOPlugin::open(
       QString &format,
-			QString fileName,
+			QString &fileName,
       MeshModel &m, 
       int& mask,
       CallBackPos *cb,
@@ -89,7 +89,7 @@ bool ExtraMeshIOPlugin::open(
 
 bool ExtraMeshIOPlugin::save(
       QString &format,
-			QString fileName,
+			QString &fileName,
       MeshModel &m, 
       int mask,
       vcg::CallBackPos *cb,

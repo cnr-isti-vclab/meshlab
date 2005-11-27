@@ -39,7 +39,7 @@ public:
 
 	 bool open(
       QString &format,
-			QString fileName,
+			QString &fileName,
       MeshModel &m, 
       int& mask,
       CallBackPos *cb=0,
@@ -47,7 +47,7 @@ public:
     
    bool save(
       QString &format,
-			QString fileName,
+			QString &fileName,
       MeshModel &m, 
       int mask,
       vcg::CallBackPos *cb=0,
