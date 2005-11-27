@@ -49,14 +49,14 @@ bool ExtraMeshIOPlugin::open(
 	
 	if (!fileName.isEmpty())
 	{
-		QString errorMsgFormat = "Error encountered while loading file %s: %s";
+		QString errorMsgFormat = "Error encountered while loading file %1: %2";
 
 		if (format == tr("Import OBJ"))
 		{
-			const char *filename = fileName.toAscii();
+			string filename = fileName.toUtf8();
 
 			vcg::tri::io::ObjInfo oi;
-			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename, mask, oi);
+			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
 			oi.cb = cb;
 
 			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
@@ -67,10 +67,10 @@ bool ExtraMeshIOPlugin::open(
 			m.cm.face.EnableNormal();
 
 			// load from disk
-			int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename, oi);
+			int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
 			if (result != vcg::tri::io::ImporterOBJ<CMeshO>::OBJError::E_NOERROR)
 			{
-				QMessageBox::warning(parent, tr("OBJ Opening"), errorMsgFormat.arg(filename, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+				QMessageBox::warning(parent, tr("OBJ Opening"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
 				return false;
 			}
 		}
