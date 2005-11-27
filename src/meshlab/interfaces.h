@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2005/11/27 18:36:58  buzzelli
+changed applyImportExport method in order to handle correctly the case of no opened subwindows
+
 Revision 1.12  2005/11/26 23:57:04  cignoni
 made io filters to appear into file menu.
 
@@ -79,7 +82,7 @@ public:
     
     virtual bool open(
       QString &format, // "OBJ"
-			QString fileName,
+			QString &fileName,
       MeshModel &m, 
       int &mask,
       CallBackPos *cb=0,
@@ -87,7 +90,7 @@ public:
     
   virtual bool save(
       QString &format, // "OBJ"
-			QString fileName,
+			QString &fileName,
       MeshModel &m, 
       int mask,
       vcg::CallBackPos *cb=0,

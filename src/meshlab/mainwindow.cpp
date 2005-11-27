@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.41  2005/11/27 18:36:58  buzzelli
+changed applyImportExport method in order to handle correctly the case of no opened subwindows
+
 Revision 1.40  2005/11/27 04:09:53  glvertex
 - Added full support for import/export plugins
 - Added ViewLog Action and Slot (not working as well)
@@ -557,19 +560,51 @@ void MainWindow::applyImportExport()
 
 	if(action->text().contains("Export"))
 	{
-		if(iIO->save(action->text(),NULL,*(GLA()->mm ),0,NULL,GLA()) )
+		QString fileName;
+		if(iIO->save(action->text(),fileName,*(GLA()->mm ),0,NULL,GLA()) )
 		GLA()->log.Log(GLLogStream::Info,"File saved correctly");
 	}
 
 	if(action->text().contains("Import"))
 	{
 		int mask;
-		// ** BUG ** BUG ** BUG **
-		// Se non c'e' nessuna finestra aperta nel workspace
-		// la chiamata a open non puo' accedere a mm
-		// ** BUG ** BUG ** BUG **
-		if( iIO->open(action->text(),NULL,*(GLA()->mm ),mask,NULL,GLA()) )
-			GLA()->log.Log(GLLogStream::Info,"File loaded correctly");
+
+		if (GLA() == NULL)
+		{
+			MeshModel *mm= new MeshModel();
+			gla = new GLArea(workspace);
+		
+			QString fileName;
+			if( iIO->open(action->text(), fileName, *mm ,mask,NULL,gla ) )
+			{
+				gla->mm=mm;	
+				gla->setWindowTitle(QFileInfo(fileName).fileName());   
+				workspace->addWindow(gla);
+				
+				if(workspace->isVisible()) gla->showMaximized();
+				else QTimer::singleShot(00, gla, SLOT(showMaximized()));
+		  
+				if(!mm->cm.textures.empty())
+					QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
+
+				//GLA()->log.Log(GLLogStream::Info,"File loaded correctly");		
+			}
+			else
+			{
+				QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
+    		delete mm;
+			}
+		}
+		else{
+			QString fileName;
+			if( iIO->open(action->text(), fileName,*(GLA()->mm ),mask,NULL,GLA()) )
+			{	
+				GLA()->log.Log(GLLogStream::Info,"File loaded correctly");
+				if(!GLA()->mm->cm.textures.empty())
+					QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
+
+			}
+		}
 	}
 }
 
