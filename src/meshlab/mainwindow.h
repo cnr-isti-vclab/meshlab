@@ -67,6 +67,7 @@ private slots:
 	void updateMenus();
 	void viewToolbarFile();
   void viewToolbarRender();
+	void viewLog();
 	void RenderBbox();
 	void RenderPoint();
 	void RenderWire();
@@ -86,7 +87,7 @@ private:
 	void updateRecentFileActions();				
 	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QObject *plugin, const QStringList &texts, QMenu *menu,
-								const char *member, QActionGroup *actionGroup = 0);
+								const char *member, QActionGroup *actionGroup = 0,bool chackable = false);
 
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
@@ -142,7 +143,8 @@ private:
 	QAction *windowsCascadeAct;
 	QAction *closeAct;
 	QAction *closeAllAct;
-	QAction *recentFileActs[MAXRECENTFILES];		
+	QAction *recentFileActs[MAXRECENTFILES];
+	QAction *viewLogAct;
 	QAction *separatorAct;										
 };
 

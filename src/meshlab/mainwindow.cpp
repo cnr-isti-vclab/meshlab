@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.40  2005/11/27 04:09:53  glvertex
+- Added full support for import/export plugins
+- Added ViewLog Action and Slot (not working as well)
+- Minor changes and clean up
+
 Revision 1.39  2005/11/26 17:05:13  glvertex
 Optimized SetLight method
 Now using Log constants instead of int values in logging lines
@@ -168,7 +173,11 @@ MainWindow::MainWindow()
 	workspace = new QWorkspace(this);
 	setCentralWidget(workspace);
 	windowMapper = new QSignalMapper(this);
+	
+	// Permette di passare da una finestra all'altra e tenere aggiornato il workspace
 	connect(windowMapper, SIGNAL(mapped(QWidget *)),workspace, SLOT(setActiveWindow(QWidget *)));
+	
+	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateMenus()));
 
 	createActions();
@@ -319,9 +328,6 @@ void MainWindow::createActions()
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(SetFancyLighting()));
 
 	
-
-
-
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
 	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
 	viewToolbarStandardAct->setCheckable(true);
@@ -332,6 +338,12 @@ void MainWindow::createActions()
 	viewToolbarRenderAct->setCheckable(true);
 	viewToolbarRenderAct->setChecked(true);
 	connect(viewToolbarRenderAct, SIGNAL(triggered()), this, SLOT(viewToolbarRender()));
+
+	viewLogAct= new QAction (tr("View &Log"), this);
+	viewLogAct->setCheckable(true);
+	viewLogAct->setChecked(false);
+	connect(viewLogAct, SIGNAL(triggered()), this, SLOT(viewLog()));
+
 
 	//////////////Action Menu Windows /////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
@@ -410,13 +422,11 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
+	viewMenu->addAction(viewLogAct);
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(viewToolbarStandardAct);
 	toolBarMenu->addAction(viewToolbarRenderAct);
 	
-
-	
-
 
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
@@ -428,6 +438,11 @@ void MainWindow::createMenus()
 	helpMenu->addAction(aboutAct);
 	helpMenu->addAction(aboutQtAct);
 	helpMenu->addAction(aboutPluginsAct);
+}
+
+void MainWindow::viewLog()
+{
+
 }
 
 void MainWindow::loadPlugins()
@@ -456,19 +471,19 @@ void MainWindow::loadPlugins()
 
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 			if (iRender)
-				addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()));
+				addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()),0,true);
 
 			// MeshColorizeInterface test 
 			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
 			if (iColor)
-				addToMenu(plugin, iColor->colorsFrom(), colorModeMenu, SLOT(applyColorMode()));     
+				addToMenu(plugin, iColor->colorsFrom(), colorModeMenu, SLOT(applyColorMode()),0,true);     
 
 			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
 			if (iIO)
 			{
 				fileMenu->addSeparator();
 				addToMenu(plugin, iIO->formats(), fileMenu, SLOT(applyImportExport()));
-				fileMenu->addSeparator();
+				//fileMenu->addSeparator();
 			}
 
 
@@ -479,12 +494,12 @@ void MainWindow::loadPlugins()
 }
 
 void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu, const char *member,
-													 QActionGroup *actionGroup)
+													 QActionGroup *actionGroup,bool chackable)
 {
 	foreach (QString text, texts) {
 		QAction *action = new QAction(text, plugin);
 		connect(action, SIGNAL(triggered()), this, member);
-		action->setCheckable(true);
+		action->setCheckable(chackable);
 		menu->addAction(action);
 
 		if (actionGroup) {
@@ -527,6 +542,11 @@ void MainWindow::applyColorMode()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(action->parent());
 	iColor->Compute(action->text(),*(GLA()->mm ), GLA());
+	
+	// when apply colorize we have to switch to a different color mode!!
+	// Still not working
+	//	GLA()->setColorMode(GLW::CMPerFace);
+
 	GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());// .data());
 }
 
@@ -535,11 +555,22 @@ void MainWindow::applyImportExport()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(action->parent());
 
-	// **** FIX **** FIX **** FIX 
-	iIO->save(action->text(),NULL,*(GLA()->mm ),0,NULL,GLA());
-	// **** FIX **** FIX **** FIX 
+	if(action->text().contains("Export"))
+	{
+		if(iIO->save(action->text(),NULL,*(GLA()->mm ),0,NULL,GLA()) )
+		GLA()->log.Log(GLLogStream::Info,"File saved correctly");
+	}
 
-	GLA()->log.Log(GLLogStream::Info,"Saved as %s",action->text().toLocal8Bit().constData());
+	if(action->text().contains("Import"))
+	{
+		int mask;
+		// ** BUG ** BUG ** BUG **
+		// Se non c'e' nessuna finestra aperta nel workspace
+		// la chiamata a open non puo' accedere a mm
+		// ** BUG ** BUG ** BUG **
+		if( iIO->open(action->text(),NULL,*(GLA()->mm ),mask,NULL,GLA()) )
+			GLA()->log.Log(GLLogStream::Info,"File loaded correctly");
+	}
 }
 
 
