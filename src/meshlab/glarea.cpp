@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.19  2005/11/27 04:04:38  glvertex
+Changed literal double values to literal float to avoid conversion warnings
+
 Revision 1.18  2005/11/27 03:50:58  glvertex
 - Added method setColorMode
 - Now getCurrentRenderMode is inline method
@@ -280,30 +283,30 @@ inline void GLArea::RenderLight()
 		if (rm.DoubleSideLighting && rm.FancyLighting) 
 		{
 			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-			GLfloat m_diffuseFancyBack[]={0.81,0.61,0.61,1.0};
-			GLfloat m_diffuseFancyFront[]={0.71,0.71,0.95,1.0};
+			GLfloat m_diffuseFancyBack[]={.81f,.61f,.61f,1.f};
+			GLfloat m_diffuseFancyFront[]={.71f,.71f,.95f,1.f};
 			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
 			glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
 		}
 		else if (rm.FancyLighting)
 		{
 			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-			GLfloat standard_front[]={0.71,0.71,0.95,1.0};
+			GLfloat standard_front[]={.71f,.71f,.95f,1.f};
 			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
 		}
 		else if (rm.DoubleSideLighting) 
 		{
 			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-			GLfloat standard_front[]={1.0,1.0,1.0,1.0};
-			GLfloat standard_back[]={1.0,1.0,1.0,1.0};
+			GLfloat standard_front[]={1.f,1.f,1.f,1.f};
+			GLfloat standard_back[]={1.f,1.f,1.f,1.f};
 			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
 			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
 		}
 		else 
 		{
 			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-		  GLfloat standard_front[]={1.0,1.0,1.0,1.0};
-			GLfloat standard_back[]={0.0,0.0,0.0,1.0};
+		  GLfloat standard_front[]={1.f,1.f,1.f,1.f};
+			GLfloat standard_back[]={.0f,.0f,.0f,1.f};
       glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
 			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
 		}
