@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.11  2005/11/27 03:50:58  glvertex
+- Added method setColorMode
+- Now getCurrentRenderMode is inline method
+
 Revision 1.10  2005/11/26 16:53:54  glvertex
 getRenderState --> getCurrentRenderMode
 
@@ -114,8 +118,9 @@ public:
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 	
-	const RenderMode & getCurrentRenderMode();
+	const RenderMode & getCurrentRenderMode()	{return rm;}
 	void setDrawMode(vcg::GLW::DrawMode mode);
+	void setColorMode(vcg::GLW::ColorMode mode);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
   inline void RenderLight();

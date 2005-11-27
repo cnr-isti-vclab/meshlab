@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.18  2005/11/27 03:50:58  glvertex
+- Added method setColorMode
+- Now getCurrentRenderMode is inline method
+
 Revision 1.17  2005/11/26 21:47:37  alemochi
 Solved problems about fancy lighting and double side lighting
 
@@ -234,6 +238,14 @@ void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 	updateGL();
 }
 
+
+void GLArea::setColorMode(vcg::GLW::ColorMode mode)
+{
+	rm.drawColor = mode;
+	updateGL();
+}
+
+
 void GLArea::setLight(bool state)
 {
 	rm.Lighting=state;
@@ -298,5 +310,3 @@ inline void GLArea::RenderLight()
 	}
 	else glDisable(GL_LIGHTING);
 }
-
-const RenderMode& GLArea::getCurrentRenderMode() {return rm;}
