@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.20  2005/11/27 12:18:58  alemochi
+deleted unused variables
+
 Revision 1.19  2005/11/27 04:04:38  glvertex
 Changed literal double values to literal float to avoid conversion warnings
 
@@ -122,9 +125,6 @@ void GLArea::initializeGL()
 	glEnable(GL_NORMALIZE);
 
 	GLfloat pfront[] = {0,0,1,0};
-	GLfloat pback[]  = {0,0,-1,0};
-
-	GLfloat l_diffuseFancy[]={1.0 ,1.0,1.0 ,0.0};
 	
 	glLightfv(GL_LIGHT0,GL_POSITION,pfront);
 	glEnable(GL_LIGHT0);
