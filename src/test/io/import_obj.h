@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.4  2005/11/27 16:46:13  buzzelli
+Added test of callback with null
+
 Revision 1.3  2005/11/24 01:43:25  cignoni
 Ho committato la versione come si era sistemata a lezione.
 Se non va bene sovrascrivetela pure...
@@ -188,7 +191,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 				// TODO. sistemare, per ora solo per prova
         
-				if (((numVertices%100)==0) && !(*cb)(100.0 * (float)numVertices/(float)oi.numVertexes, "Lettura vertici"))
+				if ((cb !=NULL) && ((numVertices%100)==0) && !(*cb)(100.0 * (float)numVertices/(float)oi.numVertexes, "Lettura vertici"))
 					return E_ABORTED;
 			}
 			else if (header.compare("vt")==0)
@@ -332,7 +335,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 				++numFaces;
 				// TODO. sistemare, per ora solo per prova
-				if (((numFaces%100)==0) && !(*cb)(100.0 * (float)numFaces/(float)oi.numFaces, "Lettura facce"))
+				if ((cb !=NULL) && ((numFaces%100)==0) && !(*cb)(100.0 * (float)numFaces/(float)oi.numFaces, "Lettura facce"))
 					return E_ABORTED;
 			}
 			// for now, we simply ignore other situations
