@@ -26,6 +26,7 @@
 #include <QMainWindow>
 #include <QWorkspace>
 #include <QStringList>
+#include <QColorDialog>
 #include "meshmodel.h"
 #include "glarea.h"
 
@@ -75,8 +76,9 @@ private slots:
 	void RenderFlatLine();
 	void RenderHiddenLines();
 	void RenderSmooth();
+	void SetBackground();
 	void SetLight();
-	void SetDoubleLighting();
+  void SetDoubleLighting();
 	void SetFancyLighting();
 
 private:
@@ -104,11 +106,13 @@ private:
 	QMenu *fileMenu;
 	QMenu *filterMenu;
 	QMenu *renderMenu;
+	QMenu *preferencesMenu; 
+
 	QMenu *renderModeMenu;
 	QMenu *lightingModeMenu;
 	QMenu *textureModeMenu;
 	QMenu *colorModeMenu;
-
+	
 
 	QMenu *viewMenu;
 	QMenu *toolBarMenu;
@@ -129,9 +133,10 @@ private:
 	QAction *renderModeFlatLinesAct;
 	QAction *renderModeFlatAct;
 	QAction *renderModeSmoothAct;
-	QAction *setLightAct; 
 	QAction *setDoubleLightingAct;
 	QAction *setFancyLightingAct;
+	QAction *setBackgroundAct;
+	QAction *setLightAct; 
 
 	QAction *exitAct;
 	QAction *aboutAct;

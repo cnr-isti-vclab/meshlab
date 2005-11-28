@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.43  2005/11/28 21:05:37  alemochi
+Added menu preferences and configurable background
+
 Revision 1.42  2005/11/28 01:06:04  davide_portelli
 Now GLA contains a list of RenderMode, instead of a single RenderMode.
 Thus it is possible to have more active RenderMode (MeshRenderInterface)
@@ -336,6 +339,9 @@ void MainWindow::createActions()
 	setFancyLightingAct->setChecked(false);
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(SetFancyLighting()));
 
+	setBackgroundAct	  = new QAction(tr("&Background"),this);
+	connect(setBackgroundAct, SIGNAL(triggered()), this, SLOT(SetBackground()));
+
 	
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
 	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
@@ -441,6 +447,11 @@ void MainWindow::createMenus()
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
 	menuBar()->addSeparator();
+
+
+	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////
+	preferencesMenu=menuBar()->addMenu(tr("&Preferences"));
+	preferencesMenu->addAction(setBackgroundAct);
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -683,6 +694,14 @@ void MainWindow::SetLight()
 	GLA()->setLight(!GLA()->getCurrentRenderMode().Lighting);
 	updateMenus();
 };
+
+
+void MainWindow::SetBackground()
+{
+	QColor backColor=QColorDialog::getColor(QColor(255,255,255,255),this);
+	GLA()->setBackground(backColor);
+	
+}
 
 
 void MainWindow::updateWindowMenu()

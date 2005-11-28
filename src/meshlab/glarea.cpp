@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.22  2005/11/28 21:05:37  alemochi
+Added menu preferences and configurable background
+
 Revision 1.21  2005/11/28 01:06:04  davide_portelli
 Now GLA contains a list of RenderMode, instead of a single RenderMode.
 Thus it is possible to have more active RenderMode (MeshRenderInterface)
@@ -112,7 +115,8 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
- iRendersList=0;
+	iRendersList=0;
+	bColor=Point3f(0.2,0.2,0.4);	
 }
 
 QSize GLArea::minimumSizeHint() const {
@@ -153,10 +157,10 @@ void GLArea::paintGL()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glBegin(GL_TRIANGLE_STRIP);
-		glColor3f(0.f,0.f,0.f);	glVertex3f(-1.f, 1.f,-1.f);
-		glColor3f(.2f,.2f,.4f);	glVertex3f(-1.f,-1.f,-1.f);
-		glColor3f(0.f,0.f,0.f);	glVertex3f( 1.f, 1.f,-1.f);
-		glColor3f(.2f,.2f,.4f);	glVertex3f( 1.f,-1.f,-1.f);
+	glColor3f(0.f,0.f,0.f);													glVertex3f(-1.f, 1.f,-1.f);
+	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f(-1.f,-1.f,-1.f);
+	glColor3f(0.f,0.f,0.f);													glVertex3f( 1.f, 1.f,-1.f);
+	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f( 1.f,-1.f,-1.f);
 	glEnd();
 	glPopAttrib();
 
@@ -320,4 +324,14 @@ inline void GLArea::RenderLight()
 		}
 	}
 	else glDisable(GL_LIGHTING);
+}
+
+
+void GLArea::setBackground(const QColor & bcolor)
+{
+	bColor.V(0)=(GLfloat)bcolor.red()/255;
+	bColor.V(1)=(GLfloat)bcolor.green()/255;
+	bColor.V(2)=(GLfloat)bcolor.blue()/255;
+	updateGL();
+	
 }

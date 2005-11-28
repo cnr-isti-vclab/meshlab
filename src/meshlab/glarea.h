@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.13  2005/11/28 21:05:37  alemochi
+Added menu preferences and configurable background
+
 Revision 1.12  2005/11/28 01:06:04  davide_portelli
 Now GLA contains a list of RenderMode, instead of a single RenderMode.
 Thus it is possible to have more active RenderMode (MeshRenderInterface)
@@ -125,6 +128,7 @@ public:
 	QSize sizeHint() const;
 	
 	const RenderMode & getCurrentRenderMode()	{return rm;}
+	void setBackground(const QColor & bcolor);
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setColorMode(vcg::GLW::ColorMode mode);
 	void setLight(bool state);
@@ -144,6 +148,7 @@ protected:
   
 private:
   RenderMode rm;
+	Point3f bColor;
 
 };
 
