@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2005/11/28 15:36:41  mariolatronico
+changed again interface on MeshIO (filename not const on save / open)
+
 Revision 1.14  2005/11/28 15:21:07  mariolatronico
 added const on various methods to comply C++ standard on reference variable
 
@@ -85,7 +88,7 @@ public:
     
     virtual bool open(
       const QString &format, // "OBJ"
-			const QString &fileName,
+			QString &fileName,
       MeshModel &m, 
       int &mask,
       CallBackPos *cb=0,
@@ -93,7 +96,7 @@ public:
     
   virtual bool save(
       const QString &format, // "OBJ"
-			const QString &fileName,
+			QString &fileName,
       MeshModel &m, 
       int mask,
       vcg::CallBackPos *cb=0,
