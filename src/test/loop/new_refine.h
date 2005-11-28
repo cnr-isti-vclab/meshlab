@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.9  2005/11/28 11:38:07  mariolatronico
+first working version
+
 Revision 1.8  2005/11/25 17:34:52  mariolatronico
 changed vector declaration from oldVertVec(m.vert.size()) to oldVertVec.
 
@@ -235,7 +238,11 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 template<class MESH_TYPE,class ODD_VERT, class EVEN_VERT>
 bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, bool RefineSelected=false)
 {	 
-	
+
+		// refine dei vertici odd, crea dei nuovi vertici in coda
+	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
+	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+
 	typedef face::Pos<typename MESH_TYPE::FaceType> faceType;
 	
 	// vettore per prendere i vecchi vertici
@@ -250,36 +257,22 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 		for (int i = 0; i < 3; i++) { //itero vert
 			if (! (*fi).V(i)->IsS()) { // se non e' stato selezionato si fa il calcolo
 				face::Pos<typename MESH_TYPE::FaceType>aux (&(*fi),i);
-				even(tempCoord, aux);
-				oldVertVec.push_back(tempCoord);
+				even((*fi).V(i)->P(), aux);
+				//oldVertVec.push_back(tempCoord);
 				(*fi).V(i)->SetS();
 			}
 		}
 	}
 
-	
-	// refine dei vertici odd, crea dei nuovi vertici in coda
-	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
-
-	//vcg::tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
- 	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-
-	std::vector<typename MESH_TYPE::CoordType>::iterator oldi;
-
-	oldi = oldVertVec.begin();
-
+	//tolgo il Set sui vertici su cui ho fatto la even
 	for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
 		for (int i = 0; i < 3; i++) { //itero vert
 			if ((*fi).V(i)->IsS()) { // se non e' stato selezionato si fa il calcolo
-//				(*fi).V(i)->P() = oldVertVec.back();
-//				oldVertVec.pop_back();
-
-				(*fi).V(i)->P() = (*oldi);
-				oldi++;
 				(*fi).V(i)->ClearS();
 			}
 		}
 	}
+
 	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 	
 	//    1) calcola nuova pos vertici old e memorizza in un vett ausiliairio 
@@ -296,3 +289,4 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 
 
 #endif
+
