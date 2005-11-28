@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2005/11/28 15:21:07  mariolatronico
+added const on various methods to comply C++ standard on reference variable
+
 Revision 1.13  2005/11/27 18:36:58  buzzelli
 changed applyImportExport method in order to handle correctly the case of no opened subwindows
 
@@ -81,16 +84,16 @@ public:
     virtual QStringList formats() const = 0;
     
     virtual bool open(
-      QString &format, // "OBJ"
-			QString &fileName,
+      const QString &format, // "OBJ"
+			const QString &fileName,
       MeshModel &m, 
       int &mask,
       CallBackPos *cb=0,
       QWidget *parent=0)=0;
     
   virtual bool save(
-      QString &format, // "OBJ"
-			QString &fileName,
+      const QString &format, // "OBJ"
+			const QString &fileName,
       MeshModel &m, 
       int mask,
       vcg::CallBackPos *cb=0,
@@ -101,7 +104,7 @@ class MeshFilterInterface
 {
 public:
     virtual ~MeshFilterInterface() {}
-    virtual QIcon *getIcon(QString &/*filter*/, QWidget * /*parent*/) {return 0;};
+    virtual QIcon *getIcon(const QString &/*filter*/, QWidget * /*parent*/) {return 0;};
     virtual bool applyFilter(const QString &/*filter*/, MeshModel &/*m*/, QWidget * /*parent*/) = 0;
     virtual QStringList filters() const = 0;
 };
@@ -120,9 +123,9 @@ class MeshRenderInterface
 public:
     virtual ~MeshRenderInterface() {}
 
-    virtual void Init(    QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
-    virtual void Render(  QString &/*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QWidget * /*parent*/) =0;
-    virtual void Finalize(QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
+    virtual void Init(   const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
+    virtual void Render( const QString &/*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QWidget * /*parent*/) =0;
+    virtual void Finalize(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
 
     virtual QStringList modes() const = 0;
 };
@@ -131,8 +134,8 @@ class MeshColorizeInterface
 {
 public:
     virtual void Compute(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
-    virtual void Show(QString &/*mode*/, bool /*show*/, MeshModel &/*m*/, QWidget * /*parent*/) {};
-    virtual void Finalize(QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
+    virtual void Show(const QString &/*mode*/, bool /*show*/, MeshModel &/*m*/, QWidget * /*parent*/) {};
+    virtual void Finalize(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
     virtual QStringList colorsFrom() const = 0;
 };
 
