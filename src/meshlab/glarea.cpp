@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.21  2005/11/28 01:06:04  davide_portelli
+Now GLA contains a list of RenderMode, instead of a single RenderMode.
+Thus it is possible to have more active RenderMode (MeshRenderInterface)
+at the same time, and when there are many opened windows, the menù of rendering
+is consisting.
+
 Revision 1.20  2005/11/27 12:18:58  alemochi
 deleted unused variables
 
@@ -106,7 +112,7 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
- iRender=0;
+ iRendersList=0;
 }
 
 QSize GLArea::minimumSizeHint() const {
@@ -174,8 +180,10 @@ void GLArea::paintGL()
 
 
 	mm->Render(rm.drawMode,rm.drawColor);
-  if(iRender)
-    iRender->Render(iRenderString,*mm,rm,this);
+	if(iRendersList){
+		pair<QAction *,MeshRenderInterface *> p;
+		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
+	}
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 		log.glDraw(this,0,3);

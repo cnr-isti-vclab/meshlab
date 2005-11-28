@@ -24,6 +24,12 @@
   History
 
 $Log$
+Revision 1.12  2005/11/28 01:06:04  davide_portelli
+Now GLA contains a list of RenderMode, instead of a single RenderMode.
+Thus it is possible to have more active RenderMode (MeshRenderInterface)
+at the same time, and when there are many opened windows, the menù of rendering
+is consisting.
+
 Revision 1.11  2005/11/27 03:50:58  glvertex
 - Added method setColorMode
 - Now getCurrentRenderMode is inline method
@@ -124,8 +130,7 @@ public:
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
   inline void RenderLight();
-  MeshRenderInterface *iRender; 
-  QString iRenderString;
+  list<pair<QAction *,MeshRenderInterface *> > *iRendersList;
 protected:
 	
 	void initializeGL();

@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.42  2005/11/28 01:06:04  davide_portelli
+Now GLA contains a list of RenderMode, instead of a single RenderMode.
+Thus it is possible to have more active RenderMode (MeshRenderInterface)
+at the same time, and when there are many opened windows, the menù of rendering
+is consisting.
+
 Revision 1.41  2005/11/27 18:36:58  buzzelli
 changed applyImportExport method in order to handle correctly the case of no opened subwindows
 
@@ -501,6 +507,7 @@ void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu
 {
 	foreach (QString text, texts) {
 		QAction *action = new QAction(text, plugin);
+		TotalRenderList.push_back(action);
 		connect(action, SIGNAL(triggered()), this, member);
 		action->setCheckable(chackable);
 		menu->addAction(action);
@@ -525,19 +532,28 @@ void MainWindow::applyFilter()
 void MainWindow::applyRenderMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
-	MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(action->parent());
-  if(iRender==GLA()->iRender && GLA()->iRenderString ==action->text())
-  {
-    GLA()->iRender=0;
-	  GLA()->log.Log(GLLogStream::Info,"Disabled Render mode %s",GLA()->iRenderString.toLocal8Bit().constData());// .data());
-		action->setChecked(false);
-  } else  {
-    GLA()->iRender = iRender;
-    GLA()->iRenderString =action->text();
-	  GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
-		action->setChecked(true);
-  }
+	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
+	if(GLA()->iRendersList==0){
+		GLA()->iRendersList= new list<pair<QAction *,MeshRenderInterface *> >;
+		GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
+		GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
+	}else{
+		bool found=false;
+		pair<QAction *,MeshRenderInterface *> p;
+		foreach(p,*GLA()->iRendersList){
+			if(iRenderTemp==p.second && p.first->text()==action->text()){
+				GLA()->iRendersList->remove(p);
+				GLA()->log.Log(0,"Disabled Render mode %s",action->text().toLocal8Bit().constData());// .data());
+				found=true;
+			} 
+		}
+		if(!found){
+			GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
+			GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
+		}
+	}
 }
+
 
 // MeshColorizeInterface test 
 void MainWindow::applyColorMode()
@@ -767,5 +783,11 @@ void MainWindow::updateMenus()
 
 		setFancyLightingAct->setChecked(rm.FancyLighting);
 		setDoubleLightingAct->setChecked(rm.DoubleSideLighting);
+
+		foreach (QAction *a,TotalRenderList){a->setChecked(false);}
+		if(GLA()->iRendersList){
+			pair<QAction *,MeshRenderInterface *> p;
+			foreach (p,*GLA()->iRendersList){p.first->setChecked(true);}
+		}
 	}
 }

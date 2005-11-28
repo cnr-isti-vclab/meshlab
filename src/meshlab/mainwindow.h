@@ -146,6 +146,7 @@ private:
 	QAction *recentFileActs[MAXRECENTFILES];
 	QAction *viewLogAct;
 	QAction *separatorAct;										
+	vector<QAction *> TotalRenderList;
 };
 
 #endif
