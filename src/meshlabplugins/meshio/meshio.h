@@ -38,7 +38,7 @@ public:
   QStringList formats() const;
 
 	 bool open(
-      QString &format,
+      const QString &format,
 			QString &fileName,
       MeshModel &m, 
       int& mask,
@@ -46,7 +46,7 @@ public:
       QWidget *parent=0);
     
    bool save(
-      QString &format,
+      const QString &format,
 			QString &fileName,
       MeshModel &m, 
       int mask,
