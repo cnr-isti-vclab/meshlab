@@ -35,7 +35,9 @@ class ExtraMeshRenderPlugin : public QObject, public MeshRenderInterface
 
 public:
     QStringList modes() const;
-    virtual void Render(  QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent);
+   
+
+    virtual void Render(const  QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent);
 
 };
 

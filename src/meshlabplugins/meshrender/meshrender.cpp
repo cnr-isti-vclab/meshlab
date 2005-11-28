@@ -33,7 +33,7 @@ QStringList ExtraMeshRenderPlugin::modes() const
 { 
 	return QStringList() << tr("Show Normals");
 }
-void ExtraMeshRenderPlugin::Render(QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent) 
+void ExtraMeshRenderPlugin::Render(const QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent) 
 {
 	if(mode == tr("Show Normals"))
 	{
