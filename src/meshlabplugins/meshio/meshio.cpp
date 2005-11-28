@@ -37,7 +37,7 @@ QStringList ExtraMeshIOPlugin::formats() const
 }
 
 bool ExtraMeshIOPlugin::open(
-      QString &format,
+      const QString &format,
 			QString &fileName,
       MeshModel &m, 
       int& mask,
@@ -53,7 +53,7 @@ bool ExtraMeshIOPlugin::open(
 
 		if (format == tr("Import OBJ"))
 		{
-			string filename = fileName.toUtf8();
+			string filename = fileName.toUtf8().data();
 
 			vcg::tri::io::ObjInfo oi;
 			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
@@ -68,7 +68,7 @@ bool ExtraMeshIOPlugin::open(
 
 			// load from disk
 			int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
-			if (result != vcg::tri::io::ImporterOBJ<CMeshO>::OBJError::E_NOERROR)
+			if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 			{
 				QMessageBox::warning(parent, tr("OBJ Opening"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
 				return false;
@@ -88,7 +88,7 @@ bool ExtraMeshIOPlugin::open(
 }
 
 bool ExtraMeshIOPlugin::save(
-      QString &format,
+      const QString &format,
 			QString &fileName,
       MeshModel &m, 
       int mask,
