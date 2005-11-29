@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.23  2005/11/29 11:22:23  vannini
+Added experimental snapshot saving function
+
 Revision 1.22  2005/11/28 21:05:37  alemochi
 Added menu preferences and configurable background
 
@@ -146,6 +149,7 @@ void GLArea::initializeGL()
  
 	rm.drawMode	= GLW::DMSmooth;
 	rm.drawColor = GLW::CMNone;
+	
 }
 
 void GLArea::paintGL()
@@ -203,6 +207,41 @@ void GLArea::resizeGL(int _width, int _height)
 	glMatrixMode(GL_MODELVIEW);
 
 	glViewport(0,0, _width, _height);
+}
+
+bool GLArea::saveSnapshot(QString path)
+{
+	std::vector<Color4b> snap;
+	int vp[4];
+	int p;
+
+	glGetIntegerv( GL_VIEWPORT,vp );		// Lettura viewport
+	glPixelStorei( GL_PACK_ROW_LENGTH, 0);
+	glPixelStorei( GL_PACK_ALIGNMENT, 1);
+	
+	snap.resize(vp[2] * vp[3]);
+
+	glReadPixels(vp[0],vp[1],vp[2],vp[3],GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid *)&snap[0]);
+	
+	FILE * fp = fopen(path.toLocal8Bit(),"wb");
+	if (fp==0) return false;
+
+	fprintf(fp,"P6\n%d %d\n255\n",vp[2],vp[3]);
+	int j=0;
+
+	for(int py=vp[3]-1; py >= 0; --py)
+	{
+		for(int px=0; px < vp[2]; ++px)
+		{
+			p=py * vp[2] + px;
+			fwrite(&(snap[p]),3,1,fp);
+			//printf("%d %d\n",px, py);
+		}
+	}
+	
+	fclose(fp);
+
+	return true;
 }
 
 Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)

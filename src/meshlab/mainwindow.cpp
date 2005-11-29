@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.44  2005/11/29 11:22:23  vannini
+Added experimental snapshot saving function
+
 Revision 1.43  2005/11/28 21:05:37  alemochi
 Added menu preferences and configurable background
 
@@ -256,6 +259,19 @@ bool MainWindow::saveAs()
 	}
 }
 
+bool MainWindow::saveSnapshot()
+{
+	QString snapshotPath = "snapshot.ppm";
+
+	bool ret=GLA()->saveSnapshot(snapshotPath);
+
+	if (ret) 
+		GLA()->log.Log(GLLogStream::Info,"Snapshot saved to %s",snapshotPath.toLocal8Bit().constData());
+	else
+		GLA()->log.Log(GLLogStream::Error,"Error saving snapshot %s",snapshotPath.toLocal8Bit().constData());
+
+	return ret;
+}
 void MainWindow::about()
 {
 	QMessageBox::about(this, tr("About Plug & Paint"),
@@ -279,6 +295,11 @@ void MainWindow::createActions()
 	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("&Save As..."), this);
 	saveAsAct->setShortcut(tr("Ctrl+S"));
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+
+	saveSnapshotAct = new QAction(QIcon(":/images/save.png"),tr("&Save snapshot"), this);
+	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
+
+
 
 	for (int i = 0; i < MAXRECENTFILES; ++i) {
 		recentFileActs[i] = new QAction(this);
@@ -393,6 +414,7 @@ void MainWindow::createToolBars()
 	mainToolBar->setIconSize(QSize(32,32));
 	mainToolBar->addAction(openAct);
 	mainToolBar->addAction(saveAsAct);
+	mainToolBar->addAction(saveSnapshotAct);
 
 	renderToolBar = addToolBar(tr("Render"));
 	renderToolBar->setIconSize(QSize(32,32));
@@ -406,6 +428,8 @@ void MainWindow::createMenus()
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(openAct);
 	fileMenu->addAction(saveAsAct);
+	fileMenu->addAction(saveSnapshotAct);
+
 	separatorAct = fileMenu->addSeparator();
 	for (int i = 0; i < MAXRECENTFILES; ++i) fileMenu->addAction(recentFileActs[i]);
 	updateRecentFileActions();
@@ -767,6 +791,7 @@ void MainWindow::updateMenus()
 {
 	bool active = (bool)workspace->activeWindow();
 	saveAsAct->setEnabled(active);
+	saveSnapshotAct->setEnabled(active);
 	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
 	renderMenu->setEnabled(active);
   windowsMenu->setEnabled(active);

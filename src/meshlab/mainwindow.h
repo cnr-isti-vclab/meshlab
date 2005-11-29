@@ -50,6 +50,7 @@ private slots:
 	void open(QString fileName=QString());
 	void openRecentFile();							
 	bool saveAs();
+	bool saveSnapshot();
 	void about();
 	
 	// Plugin Slots ///////////
@@ -121,6 +122,7 @@ private:
 	
 	QAction *openAct;
 	QAction *saveAsAct;
+	QAction *saveSnapshotAct;
 	
 	QActionGroup *renderModeGroup;
 	

@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.14  2005/11/29 11:22:23  vannini
+Added experimental snapshot saving function
+
 Revision 1.13  2005/11/28 21:05:37  alemochi
 Added menu preferences and configurable background
 
@@ -133,6 +136,7 @@ public:
 	void setColorMode(vcg::GLW::ColorMode mode);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
+	bool saveSnapshot(QString path);
   inline void RenderLight();
   list<pair<QAction *,MeshRenderInterface *> > *iRendersList;
 protected:
@@ -145,7 +149,8 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *event);
 	void wheelEvent(QWheelEvent*e);
 
-  
+	
+
 private:
   RenderMode rm;
 	Point3f bColor;
