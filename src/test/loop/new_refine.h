@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.10  2005/11/29 10:57:20  mariolatronico
+correct line ending
+
 Revision 1.9  2005/11/28 11:38:07  mariolatronico
 first working version
 
@@ -241,6 +244,7 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 
 		// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
+	
 	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 
 	typedef face::Pos<typename MESH_TYPE::FaceType> faceType;
