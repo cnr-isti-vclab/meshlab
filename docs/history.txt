@@ -1,0 +1,84 @@
+==============================================================================
+
+  VCGLib  http://vcg.sf.net
+  Visual and Computer Graphics Library
+
+  MeshLab   http://meshlab.sourceforge.net/                         o o
+  An extendible mesh processor                                    o     o   
+                                                                 _   O  _   
+  Copyright(C) 2005, 2006                                          \/)\/    
+  Visual Computing Lab                                            /\/|      
+  ISTI - Italian National Research Council                           |      
+                                                                     \      
+  All rights reserved.                                                      
+                                                                           
+  This program is free software; you can redistribute it and/or modify      
+  it under the terms of the GNU General Public License as published by      
+  the Free Software Foundation; either version 2 of the License, or         
+  (at your option) any later version.                                       
+                                                                           
+  This program is distributed in the hope that it will be useful,           
+  but WITHOUT ANY WARRANTY; without even the implied warranty of            
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             
+  GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          
+  for more details.                                                         
+  
+  All rights reserved.                                                    
+   
+==============================================================================
+
+------------------------------------------------------------------------------
+- Meshlab v0.2
+------------------------------------------------------------------------------
+
+  ** NEW FEATURES **
+
+* Added Plugin Support
+  - Rendering: Normals
+  - Color: Gaussian Curvature
+  - Filtering: Butterfly and Loop Subdivision surface
+  - Filtering: Remove duplicate and unreferenced vertexes
+  - Import/Export: Obj file format
+
+* User Interface
+  - Logging
+  - MRU File List
+  - Toolbars & Menus
+  - Availables renderModes:
+      BoundingBox
+      Points
+      Wireframe
+      Hidden lines
+      Lines + Flat shading
+      Flat shading
+      Smooth shading
+  - Lighting Modes:
+      One/Double Side
+      Fancy Lights
+      None
+
+
+  ** KNOWN BUGS/MISSING FEATURES **
+
+* Plugin:
+  - Gaussian Curvature color mode not showed at all
+  - Import/Export Obj doesn't work as well
+
+* User interface
+  - Logging still rough
+  - Fancy Lighting not work properly
+  - No texture mode under menu Render->Texture
+  - Clipping issues
+  - Messy trackball 
+  - About Dialog contains trash infos!!
+  - About Plugins Dialog still working on
+
+
+
+
+------------------------------------------------------------------------------
+- Meshlab v0.1
+------------------------------------------------------------------------------
+
+* 2005/11/15 First draft
+
