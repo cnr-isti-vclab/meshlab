@@ -4,6 +4,7 @@ HEADERS        = interfaces.h \
                  meshmodel.h \
                  glarea.h \
                  plugindialog.h \
+                 customDialog.h \
                  ../../../sf/wrap/gui/trackball.h\
                  ../../../sf/wrap/gui/trackmode.h\
                  ../../../sf/wrap/gl/trimesh.h
@@ -13,6 +14,7 @@ SOURCES        = main.cpp \
 		 GLLogStream.cpp \
                  glarea.cpp \
                  plugindialog.cpp \
+                 customDialog.cpp \
                  ../../../sf/wrap/ply/plylib.cpp\
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp

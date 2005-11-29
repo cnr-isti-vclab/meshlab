@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.24  2005/11/29 18:32:55  alemochi
+Added customize menu to change colors of environment
+
 Revision 1.23  2005/11/29 11:22:23  vannini
 Added experimental snapshot saving function
 
@@ -119,7 +122,7 @@ GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
 	iRendersList=0;
-	bColor=Point3f(0.2,0.2,0.4);	
+	
 }
 
 QSize GLArea::minimumSizeHint() const {
@@ -161,10 +164,16 @@ void GLArea::paintGL()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glBegin(GL_TRIANGLE_STRIP);
-	glColor3f(0.f,0.f,0.f);													glVertex3f(-1.f, 1.f,-1.f);
+	/*glColor3f(0.f,0.f,0.f);													glVertex3f(-1.f, 1.f,-1.f);
 	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f(-1.f,-1.f,-1.f);
 	glColor3f(0.f,0.f,0.f);													glVertex3f( 1.f, 1.f,-1.f);
-	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f( 1.f,-1.f,-1.f);
+	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f( 1.f,-1.f,-1.f);*/
+
+	glColor(cs.bColorTop);  	glVertex3f(-1.f, 1.f,-1.f);
+	glColor(cs.bColorBottom);	glVertex3f(-1.f,-1.f,-1.f);
+	glColor(cs.bColorTop);		glVertex3f( 1.f, 1.f,-1.f);
+	glColor(cs.bColorBottom);	glVertex3f( 1.f,-1.f,-1.f);
+
 	glEnd();
 	glPopAttrib();
 
@@ -194,8 +203,11 @@ void GLArea::paintGL()
 	}
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+		glColor3f(cs.lColor.V(0),cs.lColor.V(1),cs.lColor.V(2));
 		log.glDraw(this,0,3);
 	glPopAttrib();
+
 }
 
 void GLArea::resizeGL(int _width, int _height)
@@ -366,11 +378,12 @@ inline void GLArea::RenderLight()
 }
 
 
-void GLArea::setBackground(const QColor & bcolor)
+void GLArea::setCustomSetting(const ColorSetting & s)
 {
-	bColor.V(0)=(GLfloat)bcolor.red()/255;
-	bColor.V(1)=(GLfloat)bcolor.green()/255;
-	bColor.V(2)=(GLfloat)bcolor.blue()/255;
+	cs.bColorBottom=s.bColorBottom;
+	cs.bColorTop=s.bColorTop;
+	cs.lColor=s.lColor;
+
 	updateGL();
 	
 }

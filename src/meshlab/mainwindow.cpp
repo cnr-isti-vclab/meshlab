@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.45  2005/11/29 18:32:56  alemochi
+Added customize menu to change colors of environment
+
 Revision 1.44  2005/11/29 11:22:23  vannini
 Added experimental snapshot saving function
 
@@ -182,7 +185,8 @@ First rough version. It simply load a mesh.
 #include "mainwindow.h"
 #include "glarea.h"
 #include "plugindialog.h"
-				
+#include "customDialog.h"				
+
 MainWindow::MainWindow()
 {
 	workspace = new QWorkspace(this);
@@ -360,8 +364,8 @@ void MainWindow::createActions()
 	setFancyLightingAct->setChecked(false);
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(SetFancyLighting()));
 
-	setBackgroundAct	  = new QAction(tr("&Background"),this);
-	connect(setBackgroundAct, SIGNAL(triggered()), this, SLOT(SetBackground()));
+	setCustomizeAct	  = new QAction(tr("&Customize Colors"),this);
+	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(SetCustomize()));
 
 	
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
@@ -475,7 +479,7 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Preferences"));
-	preferencesMenu->addAction(setBackgroundAct);
+	preferencesMenu->addAction(setCustomizeAct);
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -720,10 +724,20 @@ void MainWindow::SetLight()
 };
 
 
-void MainWindow::SetBackground()
+void MainWindow::SetCustomize()
 {
-	QColor backColor=QColorDialog::getColor(QColor(255,255,255,255),this);
-	GLA()->setBackground(backColor);
+	/*QColor backColor=QColorDialog::getColor(QColor(255,255,255,255),this);
+	GLA()->setBackground(backColor);*/
+	CustomDialog dialog(this);
+	ColorSetting cs=GLA()->getCustomSetting();
+	dialog.LoadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor);
+	if (dialog.exec()==QDialog::Accepted) 
+	{
+		cs.bColorBottom=dialog.GetBackgroundBottomColor();
+		cs.bColorTop=dialog.GetBackgroundTopColor();
+		cs.lColor=dialog.GetLogColor();
+    GLA()->setCustomSetting(cs);	
+	}
 	
 }
 

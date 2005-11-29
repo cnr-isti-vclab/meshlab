@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.15  2005/11/29 18:32:56  alemochi
+Added customize menu to change colors of environment
+
 Revision 1.14  2005/11/29 11:22:23  vannini
 Added experimental snapshot saving function
 
@@ -112,6 +115,24 @@ public:
 };
 
 
+class ColorSetting
+{
+public:
+	Color4b bColorBottom;
+	Color4b bColorTop;
+	Color4b lColor;
+	ColorSetting()
+	{
+		bColorBottom=Color4b(0,0,255,1);	
+		bColorTop=Color4b(0,0,0,1);
+		lColor=Color4b(255,0,0,1);
+	};
+
+
+};
+
+
+
 
 
 class MeshModel;
@@ -130,8 +151,9 @@ public:
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 	
-	const RenderMode & getCurrentRenderMode()	{return rm;}
-	void setBackground(const QColor & bcolor);
+  const RenderMode &  getCurrentRenderMode()const	{return rm;}
+	const	ColorSetting& getCustomSetting()const			{return cs;}
+	void setCustomSetting(const ColorSetting & s);
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setColorMode(vcg::GLW::ColorMode mode);
 	void setLight(bool state);
@@ -153,7 +175,8 @@ protected:
 
 private:
   RenderMode rm;
-	Point3f bColor;
+	ColorSetting cs;
+
 
 };
 

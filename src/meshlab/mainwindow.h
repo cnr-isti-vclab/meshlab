@@ -77,7 +77,7 @@ private slots:
 	void RenderFlatLine();
 	void RenderHiddenLines();
 	void RenderSmooth();
-	void SetBackground();
+	void SetCustomize();
 	void SetLight();
   void SetDoubleLighting();
 	void SetFancyLighting();
@@ -137,7 +137,7 @@ private:
 	QAction *renderModeSmoothAct;
 	QAction *setDoubleLightingAct;
 	QAction *setFancyLightingAct;
-	QAction *setBackgroundAct;
+	QAction *setCustomizeAct;
 	QAction *setLightAct; 
 
 	QAction *exitAct;
