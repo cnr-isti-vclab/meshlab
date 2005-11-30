@@ -18,7 +18,18 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+/****************************************************************************
+  History
 
+ $Log$
+ Revision 1.6  2005/11/30 01:06:59  fmazzant
+ added support Export OBJ(base)
+ added comment line history
+ deleted bug-fix in meshio.pro in unix{ ... }
+
+  
+
+ *****************************************************************************/
 #ifndef EXTRAIOPLUGIN_H
 #define EXTRAIOPLUGIN_H
 

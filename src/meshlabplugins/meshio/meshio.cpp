@@ -18,11 +18,26 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+i/****************************************************************************
+  History
+
+ $Log$
+ Revision 1.7  2005/11/30 01:06:59  fmazzant
+ added support Export OBJ(base)
+ added comment line history
+ deleted bug-fix in meshio.pro in unix{ ... }
+
+  
+
+ *****************************************************************************/
+
 #include <QtGui>
 
 #include "meshio.h"
 // temporaneamente prendo la versione corrente dalla cartella test
 #include "../../test/io/import_obj.h"
+#include "../../test/io/export_obj.h"
+
 #include<vcg/complex/trimesh/update/bounding.h>
 
 #include <QMessageBox>
@@ -87,15 +102,16 @@ bool ExtraMeshIOPlugin::open(
 	return false;
 }
 
-bool ExtraMeshIOPlugin::save(
-      const QString &format,
-			QString &fileName,
-      MeshModel &m, 
-      int mask,
-      vcg::CallBackPos *cb,
-      QWidget *parent)
+bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel &m, int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-  return false;
+	//TODO: aggiungere la possibilita' di selezionare la maschera
+	//TODO: trattare i casi di errore aprendo una dialog
+	//TODO: ed antro ancora.....:)
+	if(format == tr("Export OBJ"))
+	{
+		return result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m,"La_Prova.obj",false,mask,cb);
+	}
+	return false;
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)
