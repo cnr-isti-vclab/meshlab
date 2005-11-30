@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.11  2005/11/30 08:48:07  mariolatronico
+loop seem now to work !!!
+
 Revision 1.10  2005/11/29 10:57:20  mariolatronico
 correct line ending
 
@@ -180,7 +183,6 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 			r = &he.v->P();
 			he.FlipV();
 			assert(&he.v->P()== curr); // back to curr
-			// ATTENZIONE !!!! FORSE E' SBAGLIATO
 			he.NextB();
 			if (&he.v->P() == curr)
 				he.FlipV();
@@ -246,43 +248,18 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
 	
 	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-
-	typedef face::Pos<typename MESH_TYPE::FaceType> faceType;
 	
-	// vettore per prendere i vecchi vertici
-	//	std::vector<typename MESH_TYPE::CoordType> oldVertVec(m.vert.size());
-	std::vector<typename MESH_TYPE::CoordType> oldVertVec;
-	// memorizzo i vertici nel vettore
 	typename MESH_TYPE::VertexIterator vi;
 	typename MESH_TYPE::FaceIterator fi;
-	typename MESH_TYPE::CoordType tempCoord;
-	// EVEN memorizzata su un vettore di temporanei oldVertVec
 	for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
 		for (int i = 0; i < 3; i++) { //itero vert
-			if (! (*fi).V(i)->IsS()) { // se non e' stato selezionato si fa il calcolo
 				face::Pos<typename MESH_TYPE::FaceType>aux (&(*fi),i);
 				even((*fi).V(i)->P(), aux);
-				//oldVertVec.push_back(tempCoord);
-				(*fi).V(i)->SetS();
-			}
-		}
-	}
-
-	//tolgo il Set sui vertici su cui ho fatto la even
-	for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
-		for (int i = 0; i < 3; i++) { //itero vert
-			if ((*fi).V(i)->IsS()) { // se non e' stato selezionato si fa il calcolo
-				(*fi).V(i)->ClearS();
-			}
 		}
 	}
 
 	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-	
-	//    1) calcola nuova pos vertici old e memorizza in un vett ausiliairio 
-	//    2) invoca RefineE e crea i nuovi vertici nella giusta posizione 
-	//    3) assegna ai vecchi vertici (i primi n) le posizioni calcolate al punto 1 
-	return false;
+	return true;
 }
 
 
