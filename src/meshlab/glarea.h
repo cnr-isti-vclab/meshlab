@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.17  2005/11/30 00:43:19  alemochi
+FPS modified (not work correctly)
+
 Revision 1.16  2005/11/30 00:21:07  alemochi
 Added function to display fps
 
@@ -152,7 +155,7 @@ private slots:
 
 public:
 	GLArea(QWidget *parent = 0);
-	~GLArea(){}
+	~GLArea(){timerFPS->stop();timerIdle->stop();}
 	
 	MeshModel *mm;
 	vcg::Trackball trackball;

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.26  2005/11/30 00:43:19  alemochi
+FPS modified (not work correctly)
+
 Revision 1.25  2005/11/30 00:21:07  alemochi
 Added function to display fps
 
@@ -426,17 +429,4 @@ void GLArea::updateFps()
 {
 	lfps=cfps;
 	cfps=0;
-
-	static int LastTimes[10]={0,0,0,0,0,0,0,0,0,0};
-	static int c=0;
-	int i;
-	float average=0;
-	c=(c+1)%10;
-	LastTimes[c]=lfps;
-
-	for(i=0;i<10;i++)
-		average+=LastTimes[i];
-
-	lfps=(int) average/10;
-	
 }
