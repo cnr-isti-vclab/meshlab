@@ -13,7 +13,7 @@ unix{
 	QMAKE_CC	 = gcc-3.3
 	QMAKE_CXX	 = g++-3.3
 	QMAKE_LINK	 = gcc-3.3
-	CONFIG		+= debug
+	CONFIG		+= warn_off
 }
 
 contains(TEMPLATE,lib) {
@@ -25,8 +25,3 @@ contains(TEMPLATE,lib) {
 
 
 
-# install
-target.path = $$[QT_INSTALL_EXAMPLES]/tools/plugandpaint/plugins
-sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS extrafilters.pro
-sources.path = $$[QT_INSTALL_EXAMPLES]/tools/plugandpaintplugins/extrafilters
-INSTALLS += target sources
