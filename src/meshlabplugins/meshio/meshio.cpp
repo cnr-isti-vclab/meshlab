@@ -1,35 +1,39 @@
 /****************************************************************************
-**
-** Copyright (C) 2005-2005 Trolltech AS. All rights reserved.
-**
-** This file is part of the example classes of the Qt Toolkit.
-**
-** Licensees holding valid Qt Commercial licenses may use this file in
-** accordance with the Qt Commercial License Agreement provided with the
-** Software.
-**
-** See http://www.trolltech.com/pricing.html or email sales@trolltech.com for
-** information about Qt Commercial License Agreements.
-**
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005, 2006                                          \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
 ****************************************************************************/
-i/****************************************************************************
+/****************************************************************************
   History
 
  $Log$
+ Revision 1.8  2005/11/30 08:34:33  cignoni
+ Removed spurious 'i' before the comment header.
+ Corrected small error in save.
+
  Revision 1.7  2005/11/30 01:06:59  fmazzant
  added support Export OBJ(base)
  added comment line history
  deleted bug-fix in meshio.pro in unix{ ... }
 
-  
-
- *****************************************************************************/
+*****************************************************************************/
 
 #include <QtGui>
 
@@ -109,7 +113,8 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 	//TODO: ed antro ancora.....:)
 	if(format == tr("Export OBJ"))
 	{
-		return result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m,"La_Prova.obj",false,mask,cb);
+		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,"La_Prova.obj",false,mask,cb);
+    return true;
 	}
 	return false;
 }
