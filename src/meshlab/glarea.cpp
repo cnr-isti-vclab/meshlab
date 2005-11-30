@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.25  2005/11/30 00:21:07  alemochi
+Added function to display fps
+
 Revision 1.24  2005/11/29 18:32:55  alemochi
 Added customize menu to change colors of environment
 
@@ -112,7 +115,6 @@ First rough version. It simply load a mesh.
 #include <vcg/space/box3.h>
 #include <GL/glew.h>
 #include <wrap/gl/space.h>
-
 #include "meshmodel.h"
 #include "interfaces.h"
 #include "glarea.h"
@@ -122,7 +124,17 @@ GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
 	iRendersList=0;
-	
+	timerFPS=new QTimer(this);
+	connect(timerFPS, SIGNAL(timeout()), this, SLOT(updateFps()));
+	timerFPS->start(1000);
+	timerIdle=new QTimer(this);
+	timerIdle->start(10);
+	connect(timerIdle,SIGNAL(timeout()),this,SLOT(redraw()));
+	cfps=0;
+	lfps=0;
+	currentHeight=100;
+	currentWidth=200;
+
 }
 
 QSize GLArea::minimumSizeHint() const {
@@ -164,7 +176,7 @@ void GLArea::paintGL()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glBegin(GL_TRIANGLE_STRIP);
-	/*glColor3f(0.f,0.f,0.f);													glVertex3f(-1.f, 1.f,-1.f);
+	/*glColor3f(0.f,0.f,0.f);												glVertex3f(-1.f, 1.f,-1.f);
 	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f(-1.f,-1.f,-1.f);
 	glColor3f(0.f,0.f,0.f);													glVertex3f( 1.f, 1.f,-1.f);
 	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f( 1.f,-1.f,-1.f);*/
@@ -184,6 +196,8 @@ void GLArea::paintGL()
 	trackball.GetView();
 	trackball.Apply();
 	
+	
+
 	glColor3f(1.f,1.f,1.f);
 	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
 	//glBoxWire(bb);
@@ -205,14 +219,20 @@ void GLArea::paintGL()
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
 		glColor3f(cs.lColor.V(0),cs.lColor.V(1),cs.lColor.V(2));
+		renderFps();
 		log.glDraw(this,0,3);
+		
 	glPopAttrib();
+
+	cfps++;
 
 }
 
 void GLArea::resizeGL(int _width, int _height)
 {
 	//int side = qMin(width, height);
+	currentWidth=_width;
+	currentHeight=_height;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60, float(_width)/float(_height), 0.2, 5);
@@ -378,12 +398,45 @@ inline void GLArea::RenderLight()
 }
 
 
+
+void GLArea::renderFps()
+{
+	static QFont q("Times New Roman",12);
+	QString strInfo("FPS ");
+	QString fps;
+	fps.setNum((int)lfps,10);
+	strInfo+=fps;
+	renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo,q);
+
+
+}
+
+
 void GLArea::setCustomSetting(const ColorSetting & s)
 {
 	cs.bColorBottom=s.bColorBottom;
 	cs.bColorTop=s.bColorTop;
 	cs.lColor=s.lColor;
 
-	updateGL();
+	
+	
+}
+
+void GLArea::updateFps()
+{
+	lfps=cfps;
+	cfps=0;
+
+	static int LastTimes[10]={0,0,0,0,0,0,0,0,0,0};
+	static int c=0;
+	int i;
+	float average=0;
+	c=(c+1)%10;
+	LastTimes[c]=lfps;
+
+	for(i=0;i<10;i++)
+		average+=LastTimes[i];
+
+	lfps=(int) average/10;
 	
 }

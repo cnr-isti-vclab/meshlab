@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.16  2005/11/30 00:21:07  alemochi
+Added function to display fps
+
 Revision 1.15  2005/11/29 18:32:56  alemochi
 Added customize menu to change colors of environment
 
@@ -79,7 +82,7 @@ First rough version. It simply load a mesh.
 #define GLAREA_H
 #include <wrap/gl/trimesh.h>
 #include <wrap/gui/trackball.h>
-
+#include <QTimer>
 #include <QWidget>
 #include <QGLWidget>
 
@@ -140,6 +143,13 @@ class GLArea : public QGLWidget
 {
 	Q_OBJECT
 
+private slots:
+	void updateFps();
+	void redraw()
+	{
+		updateGL();
+	};
+
 public:
 	GLArea(QWidget *parent = 0);
 	~GLArea(){}
@@ -148,11 +158,15 @@ public:
 	vcg::Trackball trackball;
 	GLLogStream log;
 
+	int currentWidth;
+	int currentHeight;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
+
 	
   const RenderMode &  getCurrentRenderMode()const	{return rm;}
 	const	ColorSetting& getCustomSetting()const			{return cs;}
+	void renderFps();
 	void setCustomSetting(const ColorSetting & s);
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setColorMode(vcg::GLW::ColorMode mode);
@@ -173,9 +187,14 @@ protected:
 
 	
 
+
 private:
   RenderMode rm;
 	ColorSetting cs;
+	QTimer *timerFPS;
+	QTimer *timerIdle;
+	int cfps;
+	int lfps;
 
 
 };
