@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.9  2005/11/30 08:58:57  mariolatronico
+ temporary remove of ExportOBJ (in save)
+
  Revision 1.8  2005/11/30 08:34:33  cignoni
  Removed spurious 'i' before the comment header.
  Corrected small error in save.
@@ -113,7 +116,7 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 	//TODO: ed antro ancora.....:)
 	if(format == tr("Export OBJ"))
 	{
-		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,"La_Prova.obj",false,mask,cb);
+		//	int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,"La_Prova.obj",false,mask,cb);
     return true;
 	}
 	return false;
