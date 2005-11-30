@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.27  2005/11/30 16:26:56  cignoni
+All the modification, restructuring seen during the 30/12 lesson...
+
 Revision 1.26  2005/11/30 00:43:19  alemochi
 FPS modified (not work correctly)
 
@@ -210,9 +213,10 @@ void GLArea::paintGL()
 	glTranslate(-mm->cm.bbox.Center());
 
 	
-	RenderLight();
+	SetLightModel();
 
-
+  glEnable(GL_COLOR_MATERIAL);
+  glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	mm->Render(rm.drawMode,rm.drawColor);
 	if(iRendersList){
 		pair<QAction *,MeshRenderInterface *> p;
@@ -360,42 +364,27 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 
 
 
-inline void GLArea::RenderLight()
+inline void GLArea::SetLightModel()
 {
+  static GLfloat standard_front[]={1.f,1.f,1.f,1.f};
+  static GLfloat standard_back[]={1.f,1.f,1.f,1.f};
+  static GLfloat m_diffuseFancyBack[]={.81f,.61f,.61f,1.f};
+  static GLfloat m_diffuseFancyFront[]={.71f,.71f,.95f,1.f};
+			
 	if (rm.Lighting) 
 	{
-		glEnable(GL_LIGHTING);
-		// Double Model Lighting
-		if (rm.DoubleSideLighting && rm.FancyLighting) 
-		{
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-			GLfloat m_diffuseFancyBack[]={.81f,.61f,.61f,1.f};
-			GLfloat m_diffuseFancyFront[]={.71f,.71f,.95f,1.f};
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
-			glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
-		}
-		else if (rm.FancyLighting)
-		{
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-			GLfloat standard_front[]={.71f,.71f,.95f,1.f};
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
-		}
-		else if (rm.DoubleSideLighting) 
-		{
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-			GLfloat standard_front[]={1.f,1.f,1.f,1.f};
-			GLfloat standard_back[]={1.f,1.f,1.f,1.f};
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
-			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
-		}
-		else 
-		{
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-		  GLfloat standard_front[]={1.f,1.f,1.f,1.f};
-			GLfloat standard_back[]={.0f,.0f,.0f,1.f};
-      glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
-			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
-		}
+		  glEnable(GL_LIGHTING);
+      glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, rm.DoubleSideLighting);
+      if(rm.FancyLighting)
+      {
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
+			  glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
+		  }
+       else
+		  {
+			  glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
+			  glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
+		  }
 	}
 	else glDisable(GL_LIGHTING);
 }

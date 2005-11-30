@@ -45,12 +45,12 @@ QStringList ExtraMeshFilterPlugin::filters() const
 	return filterList;
 }
 
-bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWidget *parent) 
+bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb) 
 {
 	if(filter == tr("Loop Subdivision Surface") )
 	{
 		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
-    if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
+    //if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
     if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
@@ -63,7 +63,7 @@ bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWi
 	if(filter == tr("Butterfly Subdivision Surface") )
 	{
 		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
-    if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
+    //if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
     if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);

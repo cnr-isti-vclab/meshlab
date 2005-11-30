@@ -37,6 +37,7 @@ class QActionGroup;
 class QMenu;
 class QScrollArea;
 class QSignalMapper;
+class QProgressBar;
 
 class MainWindow : public QMainWindow
 {
@@ -44,7 +45,8 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow();
-
+  static bool QCallBack(const int pos, const char * str);
+  
 private slots:
 
 	void open(QString fileName=QString());
@@ -91,7 +93,7 @@ private:
 	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QObject *plugin, const QStringList &texts, QMenu *menu,
 								const char *member, QActionGroup *actionGroup = 0,bool chackable = false);
-
+  static QProgressBar *qb;
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
   GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.16  2005/11/30 16:26:56  cignoni
+All the modification, restructuring seen during the 30/12 lesson...
+
 Revision 1.15  2005/11/28 15:36:41  mariolatronico
 changed again interface on MeshIO (filename not const on save / open)
 
@@ -91,7 +94,7 @@ public:
 			QString &fileName,
       MeshModel &m, 
       int &mask,
-      CallBackPos *cb=0,
+      vcg::CallBackPos *cb=0,
       QWidget *parent=0)=0;
     
   virtual bool save(
@@ -108,7 +111,7 @@ class MeshFilterInterface
 public:
     virtual ~MeshFilterInterface() {}
     virtual QIcon *getIcon(const QString &/*filter*/, QWidget * /*parent*/) {return 0;};
-    virtual bool applyFilter(const QString &/*filter*/, MeshModel &/*m*/, QWidget * /*parent*/) = 0;
+    virtual bool applyFilter(const QString &/*filter*/, MeshModel &/*m*/, QWidget * /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
     virtual QStringList filters() const = 0;
 };
 /*

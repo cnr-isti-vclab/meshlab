@@ -22,6 +22,9 @@
   History
 
  $Log$
+ Revision 1.7  2005/11/30 16:26:56  cignoni
+ All the modification, restructuring seen during the 30/12 lesson...
+
  Revision 1.6  2005/11/30 01:06:59  fmazzant
  added support Export OBJ(base)
  added comment line history
@@ -53,7 +56,7 @@ public:
 			QString &fileName,
       MeshModel &m, 
       int& mask,
-      CallBackPos *cb=0,
+      vcg::CallBackPos *cb=0,
       QWidget *parent=0);
     
    bool save(

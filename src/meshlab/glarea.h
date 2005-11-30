@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.18  2005/11/30 16:26:56  cignoni
+All the modification, restructuring seen during the 30/12 lesson...
+
 Revision 1.17  2005/11/30 00:43:19  alemochi
 FPS modified (not work correctly)
 
@@ -176,7 +179,7 @@ public:
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
 	bool saveSnapshot(QString path);
-  inline void RenderLight();
+  void SetLightModel();
   list<pair<QAction *,MeshRenderInterface *> > *iRendersList;
 protected:
 	

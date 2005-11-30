@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.46  2005/11/30 16:26:56  cignoni
+All the modification, restructuring seen during the 30/12 lesson...
+
 Revision 1.45  2005/11/29 18:32:56  alemochi
 Added customize menu to change colors of environment
 
@@ -178,6 +181,7 @@ First rough version. It simply load a mesh.
 
 #include <QtGui>
 #include <QToolBar>
+#include <QProgressBar>
 
 
 #include "meshmodel.h"
@@ -186,6 +190,9 @@ First rough version. It simply load a mesh.
 #include "glarea.h"
 #include "plugindialog.h"
 #include "customDialog.h"				
+
+
+QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
 {
@@ -213,6 +220,10 @@ MainWindow::MainWindow()
 	else{ 
 		QTimer::singleShot(500, this, SLOT(open()));
 	}
+  qb=new QProgressBar(this);
+  qb->setMaximum(100);
+  qb->setMinimum(0);
+  qb->hide();
 }
 
 void MainWindow::open(QString fileName)
@@ -562,10 +573,21 @@ void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-	
+	qb->show();
 	//iFilter->applyFilter(action->text(),*(GLA()->mm ),this);
-	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA());
+	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA(),QCallBack);
 	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
+  qb->hide();
+}
+
+
+bool MainWindow::QCallBack(const int pos, const char * str)
+{
+  if(qb==0) return true;
+  qb->setWindowTitle (str);
+  qb->setValue(pos);
+  qb->update();
+  return true;
 }
 
 void MainWindow::applyRenderMode()
@@ -603,7 +625,7 @@ void MainWindow::applyColorMode()
 	
 	// when apply colorize we have to switch to a different color mode!!
 	// Still not working
-	//	GLA()->setColorMode(GLW::CMPerFace);
+	GLA()->setColorMode(GLW::CMPerVert);
 
 	GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());// .data());
 }
@@ -623,14 +645,14 @@ void MainWindow::applyImportExport()
 	if(action->text().contains("Import"))
 	{
 		int mask;
-
+    qb->show();
 		if (GLA() == NULL)
 		{
 			MeshModel *mm= new MeshModel();
 			gla = new GLArea(workspace);
 		
 			QString fileName;
-			if( iIO->open(action->text(), fileName, *mm ,mask,NULL,gla ) )
+			if( iIO->open(action->text(), fileName, *mm ,mask,QCallBack,gla ) )
 			{
 				gla->mm=mm;	
 				gla->setWindowTitle(QFileInfo(fileName).fileName());   
@@ -641,7 +663,7 @@ void MainWindow::applyImportExport()
 		  
 				if(!mm->cm.textures.empty())
 					QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
-
+        qb->hide();
 				//GLA()->log.Log(GLLogStream::Info,"File loaded correctly");		
 			}
 			else
@@ -672,14 +694,10 @@ void MainWindow::windowsCascade(){
 	workspace->cascade();
 }
 void MainWindow::viewToolbarFile(){
-	if(mainToolBar->isVisible()){
-		mainToolBar->hide();
-		viewToolbarStandardAct->setChecked(false);
-	}else{
-		mainToolBar->show();
-		viewToolbarStandardAct->setChecked(true);
-	}
+		mainToolBar->setVisible(!mainToolBar->isVisible());
+		viewToolbarStandardAct->setChecked(mainToolBar->isVisible());
 }
+
 void MainWindow::viewToolbarRender(){
 	if(renderToolBar->isVisible()){
 		renderToolBar->hide();

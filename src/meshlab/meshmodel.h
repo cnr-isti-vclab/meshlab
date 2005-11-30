@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2005/11/30 16:26:56  cignoni
+All the modification, restructuring seen during the 30/12 lesson...
+
 Revision 1.9  2005/11/26 00:14:17  cignoni
 Cleaned up mesh types
 
@@ -72,7 +75,7 @@ class CVertexO;
 // Opt stuff
 
 class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Color4b, vert::Normal3f, vert::Qualityf, vert::BitFlags  >{};
-class CFaceO    : public FaceSimp2< CVertexO, CEdge, CFaceO, face::InfoOcf, face::FFAdjOcf, face::WedgeTexturefOcf, face::VertexRef, face::BitFlags, face::Normal3fOcf > {};
+class CFaceO    : public FaceSimp2< CVertexO, CEdge, CFaceO, face::InfoOcf, face::FFAdj, face::WedgeTexturefOcf, face::VertexRef, face::BitFlags, face::Normal3fOcf > {};
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
 
 /*
@@ -88,7 +91,7 @@ public:
 
   CMeshO cm;
   GlTrimesh<CMeshO> glw;
-  MeshModel() {glw.m=&cm;}
+  MeshModel() {glw.m=&cm; cm.face.EnableWedgeTex();}
   bool Open(const char* filename);
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm);
 };
