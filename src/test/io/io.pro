@@ -3,13 +3,13 @@
 ######################################################################
 
 
-TEMPLATE      = lib
+TEMPLATE      = app 
 CONFIG       += plugin
 INCLUDEPATH  += . ../../../../sf
 HEADERS += export_obj.h import_obj.h
 SOURCES += io.cpp
-TARGET        = io
-DESTDIR       = ../../meshlab/plugins
+TARGET        = io_debug
+DESTDIR       = .
                                                                                                                            
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {
