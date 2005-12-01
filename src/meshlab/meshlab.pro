@@ -18,8 +18,14 @@ SOURCES        = main.cpp \
                  ../../../sf/wrap/ply/plylib.cpp\
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp
+
+FORMS          = ui/custom.ui
+
+
 RESOURCES     = meshlab.qrc
+
 QT           += opengl
+
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
@@ -34,8 +40,3 @@ unix{
 	QMAKE_LINK	 = gcc-3.3
 	CONFIG		+= debug
 }
-# install
-target.path = $$[QT_INSTALL_EXAMPLES]/tools/plugandpaint
-sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS plugandpaint.pro
-sources.path = $$[QT_INSTALL_EXAMPLES]/tools/plugandpaint
-INSTALLS += target sources
