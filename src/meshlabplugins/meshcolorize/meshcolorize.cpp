@@ -24,7 +24,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "meshcurvature.h"
+#include "meshcolorize.h"
 
 using namespace vcg;
 
