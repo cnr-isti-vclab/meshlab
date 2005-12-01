@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.29  2005/12/01 04:06:13  glvertex
+Now the log area is a percentage of the window height
+
 Revision 1.28  2005/12/01 03:27:33  glvertex
 - Cleaned lighting code
 - Minimum size now is (400,300)
@@ -243,13 +246,13 @@ void GLArea::paintGL()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 
-	cs.lColor.V(3) = 128;	// set half alpha
+	cs.lColor.V(3) = 128;	// set half alpha value
 	glColor(cs.lColor);
-	
+	float h = ((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
 	glBegin(GL_TRIANGLE_STRIP);
-		glVertex3f(-1.f,-.43f,-1.f);
+		glVertex3f(-1.f,h,-1.f);
 		glVertex3f(-1.f,-1.f, -1.f);
-		glVertex3f( 1.f,-.43f,-1.f);
+		glVertex3f( 1.f,h,-1.f);
 		glVertex3f( 1.f,-1.f, -1.f);
 	glEnd();
 
