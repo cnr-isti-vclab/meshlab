@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.28  2005/12/01 03:27:33  glvertex
+- Cleaned lighting code
+- Minimum size now is (400,300)
+- Added rendering log area on the bottom of the screen
+- Solved zBuff conflicts during rendering texts
+
 Revision 1.27  2005/11/30 16:26:56  cignoni
 All the modification, restructuring seen during the 30/12 lesson...
 
@@ -140,15 +146,14 @@ GLArea::GLArea(QWidget *parent)
 	lfps=0;
 	currentHeight=100;
 	currentWidth=200;
-
 }
 
 QSize GLArea::minimumSizeHint() const {
-	return QSize(100,100);
+	return QSize(400,300);
 }
 
 QSize GLArea::sizeHint() const {
-	return QSize(100,100);
+	return QSize(400,300);
 }
 
 void GLArea::initializeGL()
@@ -178,15 +183,11 @@ void GLArea::paintGL()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
+// == Backround
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glBegin(GL_TRIANGLE_STRIP);
-	/*glColor3f(0.f,0.f,0.f);												glVertex3f(-1.f, 1.f,-1.f);
-	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f(-1.f,-1.f,-1.f);
-	glColor3f(0.f,0.f,0.f);													glVertex3f( 1.f, 1.f,-1.f);
-	glColor3f(bColor.V(0),bColor.V(1),bColor.V(2));	glVertex3f( 1.f,-1.f,-1.f);*/
-
 	glColor(cs.bColorTop);  	glVertex3f(-1.f, 1.f,-1.f);
 	glColor(cs.bColorBottom);	glVertex3f(-1.f,-1.f,-1.f);
 	glColor(cs.bColorTop);		glVertex3f( 1.f, 1.f,-1.f);
@@ -194,16 +195,16 @@ void GLArea::paintGL()
 
 	glEnd();
 	glPopAttrib();
+// ==
 
 	gluLookAt(0,0,3,   0,0,0,   0,1,0);
+
 
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
 	trackball.Apply();
 	
-	
-
 	glColor3f(1.f,1.f,1.f);
 	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
 	//glBoxWire(bb);
@@ -212,27 +213,59 @@ void GLArea::paintGL()
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
 
-	
 	SetLightModel();
 
-  glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+	// Set proper colorMode
+	glDisable(GL_COLOR_MATERIAL);
+	if(rm.drawColor != GLW::CMNone)
+	{
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+	}
+
 	mm->Render(rm.drawMode,rm.drawColor);
+
+
 	if(iRendersList){
 		pair<QAction *,MeshRenderInterface *> p;
 		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
 	}
+	
+// ==============================	
+// Draw the log area background
+// on the bottom of the glArea
 	glPushAttrib(GL_ENABLE_BIT);
+	glPushMatrix();
+	glLoadIdentity();
+
 	glDisable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-		glColor3f(cs.lColor.V(0),cs.lColor.V(1),cs.lColor.V(2));
-		renderFps();
-		log.glDraw(this,0,3);
-		
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
+
+	cs.lColor.V(3) = 128;	// set half alpha
+	glColor(cs.lColor);
+	
+	glBegin(GL_TRIANGLE_STRIP);
+		glVertex3f(-1.f,-.43f,-1.f);
+		glVertex3f(-1.f,-1.f, -1.f);
+		glVertex3f( 1.f,-.43f,-1.f);
+		glVertex3f( 1.f,-1.f, -1.f);
+	glEnd();
+
+	// Now print out the infos
+	glColor4f(1,1,1,1);
+	renderFps();
+	log.glDraw(this,0,3);
+	// More info to add.....
+
 	glPopAttrib();
+	glPopMatrix();
+
+// ==============================
+
 
 	cfps++;
-
 }
 
 void GLArea::resizeGL(int _width, int _height)
@@ -341,24 +374,20 @@ void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 
 void GLArea::setLight(bool state)
 {
-	rm.Lighting=state;
+	rm.Lighting = state;
 	updateGL();
-
 }
 
 void GLArea::setLightMode(bool state,LightingModel lmode)
 {
-		switch(lmode) 
-		{
-		case LDOUBLE:
-			if (state) rm.DoubleSideLighting=true;
-			else rm.DoubleSideLighting=false;
-			break;
-		case LFANCY:
-			if (state) rm.FancyLighting=true;
-			else rm.FancyLighting=false;
-			break;
-		}
+	switch(lmode)
+	{
+	case LDOUBLE:		rm.DoubleSideLighting = state;
+									break;
+	
+	case LFANCY:		rm.FancyLighting = state;
+									break;
+	}
 	updateGL();
 }
 
@@ -370,37 +399,36 @@ inline void GLArea::SetLightModel()
   static GLfloat standard_back[]={1.f,1.f,1.f,1.f};
   static GLfloat m_diffuseFancyBack[]={.81f,.61f,.61f,1.f};
   static GLfloat m_diffuseFancyFront[]={.71f,.71f,.95f,1.f};
-			
+	
+	glDisable(GL_LIGHTING);
 	if (rm.Lighting) 
 	{
-		  glEnable(GL_LIGHTING);
-      glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, rm.DoubleSideLighting);
-      if(rm.FancyLighting)
-      {
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
-			  glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
-		  }
-       else
-		  {
-			  glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
-			  glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
-		  }
+		glEnable(GL_LIGHTING);
+		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, rm.DoubleSideLighting);
+		if(rm.FancyLighting)
+		{
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
+			glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
+		}
+		else
+		{
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
+			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
+		}
 	}
-	else glDisable(GL_LIGHTING);
 }
 
 
 
 void GLArea::renderFps()
 {
-	static QFont q("Times New Roman",12);
-	QString strInfo("FPS ");
+	static QFont q("Times",12);
+	
+	QString strInfo("FPS: ");
 	QString fps;
 	fps.setNum((int)lfps,10);
 	strInfo+=fps;
 	renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo,q);
-
-
 }
 
 
@@ -409,9 +437,6 @@ void GLArea::setCustomSetting(const ColorSetting & s)
 	cs.bColorBottom=s.bColorBottom;
 	cs.bColorTop=s.bColorTop;
 	cs.lColor=s.lColor;
-
-	
-	
 }
 
 void GLArea::updateFps()

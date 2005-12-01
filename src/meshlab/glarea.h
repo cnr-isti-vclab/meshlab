@@ -24,6 +24,12 @@
   History
 
 $Log$
+Revision 1.19  2005/12/01 03:27:33  glvertex
+- Cleaned lighting code
+- Minimum size now is (400,300)
+- Added rendering log area on the bottom of the screen
+- Solved zBuff conflicts during rendering texts
+
 Revision 1.18  2005/11/30 16:26:56  cignoni
 All the modification, restructuring seen during the 30/12 lesson...
 
@@ -132,9 +138,9 @@ public:
 	Color4b lColor;
 	ColorSetting()
 	{
-		bColorBottom=Color4b(0,0,255,1);	
+		bColorBottom=Color4b(64,64,128,1);	
 		bColorTop=Color4b(0,0,0,1);
-		lColor=Color4b(255,0,0,1);
+		lColor=Color4b(128,16,16,1);
 	};
 
 
