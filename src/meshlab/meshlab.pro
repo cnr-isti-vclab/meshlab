@@ -9,7 +9,8 @@ HEADERS        = interfaces.h \
                  ../../../sf/wrap/gui/trackmode.h\
                  ../../../sf/wrap/gl/trimesh.h
 SOURCES        = main.cpp \
-                 mainwindow.cpp \
+                 mainwindow_Init.cpp \
+                 mainwindow_RunTime.cpp\
                  meshmodel.cpp \
 		 GLLogStream.cpp \
                  glarea.cpp \

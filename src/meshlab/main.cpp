@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2005/12/01 02:24:50  davide_portelli
+Mainwindow Splitted----->[ mainwindow_Init.cpp ]&&[ mainwindow_RunTime.cpp ]
+
 Revision 1.2  2005/11/21 12:12:54  cignoni
 Added copyright info
 
@@ -35,6 +38,6 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     MainWindow window;
-    window.show();
+    window.showMaximized();
     return app.exec();
 }

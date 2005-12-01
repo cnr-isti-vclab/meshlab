@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.1  2005/12/01 02:24:50  davide_portelli
+Mainwindow Splitted----->[ mainwindow_Init.cpp ]&&[ mainwindow_RunTime.cpp ]
+
 Revision 1.46  2005/11/30 16:26:56  cignoni
 All the modification, restructuring seen during the 30/12 lesson...
 
@@ -212,7 +215,7 @@ MainWindow::MainWindow()
 	updateMenus();
 	addToolBar(mainToolBar);
 	addToolBar(renderToolBar);
-	setWindowTitle(tr("MeshLab v0.1"));
+	setWindowTitle(tr("MeshLab v0.3"));
 	loadPlugins();
 	if(QCoreApplication::instance ()->argc()>1){
 		open(QCoreApplication::instance ()->argv()[1]);
@@ -224,80 +227,6 @@ MainWindow::MainWindow()
   qb->setMaximum(100);
   qb->setMinimum(0);
   qb->hide();
-}
-
-void MainWindow::open(QString fileName)
-{
-	if (fileName.isEmpty()){
-		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),"../sample","Mesh files (*.ply *.off *.stl)");
-	}
-	if (!fileName.isEmpty()) {
-		MeshModel *nm= new MeshModel();
-		if(!nm->Open(fileName.toAscii())){
-			QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
-    	delete nm;
-			//return;
-		}
-		else{
-			//VM.push_back(nm);
-			gla=new GLArea(workspace);
-			gla->mm=nm;
-			gla->setWindowTitle(QFileInfo(fileName).fileName());   
-			workspace->addWindow(gla);
-			if(workspace->isVisible()) gla->showMaximized();
-			else QTimer::singleShot(00, gla, SLOT(showMaximized()));
-      //setCurrentFile(fileName);
-      if(!gla->mm->cm.textures.empty()){
-        QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
-      }
-			//return;
-		}
-	}
-}
-
-void MainWindow::openRecentFile()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	if (action)	open(action->data().toString());
-}
-
-bool MainWindow::saveAs()
-{
-	QString initialPath = QDir::currentPath() + "/untitled.png";
-
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"), initialPath);
-	if (fileName.isEmpty()) {
-		return false;
-	} else {
-		//       return paintArea->saveImage(fileName, "png");
-		return true;
-	}
-}
-
-bool MainWindow::saveSnapshot()
-{
-	QString snapshotPath = "snapshot.ppm";
-
-	bool ret=GLA()->saveSnapshot(snapshotPath);
-
-	if (ret) 
-		GLA()->log.Log(GLLogStream::Info,"Snapshot saved to %s",snapshotPath.toLocal8Bit().constData());
-	else
-		GLA()->log.Log(GLLogStream::Error,"Error saving snapshot %s",snapshotPath.toLocal8Bit().constData());
-
-	return ret;
-}
-void MainWindow::about()
-{
-	QMessageBox::about(this, tr("About Plug & Paint"),
-		tr("The <b>Plug & Paint</b> example demonstrates how to write Qt "
-		"applications that can be extended through plugins."));
-}
-
-void MainWindow::aboutPlugins()
-{
-	PluginDialog dialog(pluginsDir.path(), pluginFileNames, this);
-	dialog.exec();
 }
 
 void MainWindow::createActions()
@@ -437,6 +366,7 @@ void MainWindow::createToolBars()
 	renderToolBar->addAction(setLightAct);
 }
 
+
 void MainWindow::createMenus()
 {
 	//////////////////// Menu File ////////////////////////////////////////////////////////////////
@@ -497,11 +427,6 @@ void MainWindow::createMenus()
 	helpMenu->addAction(aboutAct);
 	helpMenu->addAction(aboutQtAct);
 	helpMenu->addAction(aboutPluginsAct);
-}
-
-void MainWindow::viewLog()
-{
-
 }
 
 void MainWindow::loadPlugins()
@@ -569,239 +494,6 @@ void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu
 	}
 }
 
-void MainWindow::applyFilter()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-	qb->show();
-	//iFilter->applyFilter(action->text(),*(GLA()->mm ),this);
-	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA(),QCallBack);
-	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
-  qb->hide();
-}
-
-
-bool MainWindow::QCallBack(const int pos, const char * str)
-{
-  if(qb==0) return true;
-  qb->setWindowTitle (str);
-  qb->setValue(pos);
-  qb->update();
-  return true;
-}
-
-void MainWindow::applyRenderMode()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	if(GLA()->iRendersList==0){
-		GLA()->iRendersList= new list<pair<QAction *,MeshRenderInterface *> >;
-		GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
-		GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
-	}else{
-		bool found=false;
-		pair<QAction *,MeshRenderInterface *> p;
-		foreach(p,*GLA()->iRendersList){
-			if(iRenderTemp==p.second && p.first->text()==action->text()){
-				GLA()->iRendersList->remove(p);
-				GLA()->log.Log(0,"Disabled Render mode %s",action->text().toLocal8Bit().constData());// .data());
-				found=true;
-			} 
-		}
-		if(!found){
-			GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
-			GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
-		}
-	}
-}
-
-
-// MeshColorizeInterface test 
-void MainWindow::applyColorMode()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(action->parent());
-	iColor->Compute(action->text(),*(GLA()->mm ), GLA());
-	
-	// when apply colorize we have to switch to a different color mode!!
-	// Still not working
-	GLA()->setColorMode(GLW::CMPerVert);
-
-	GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());// .data());
-}
-
-void MainWindow::applyImportExport()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(action->parent());
-
-	if(action->text().contains("Export"))
-	{
-		QString fileName;
-		if(iIO->save(action->text(),fileName,*(GLA()->mm ),0,NULL,GLA()) )
-		GLA()->log.Log(GLLogStream::Info,"File saved correctly");
-	}
-
-	if(action->text().contains("Import"))
-	{
-		int mask;
-    qb->show();
-		if (GLA() == NULL)
-		{
-			MeshModel *mm= new MeshModel();
-			gla = new GLArea(workspace);
-		
-			QString fileName;
-			if( iIO->open(action->text(), fileName, *mm ,mask,QCallBack,gla ) )
-			{
-				gla->mm=mm;	
-				gla->setWindowTitle(QFileInfo(fileName).fileName());   
-				workspace->addWindow(gla);
-				
-				if(workspace->isVisible()) gla->showMaximized();
-				else QTimer::singleShot(00, gla, SLOT(showMaximized()));
-		  
-				if(!mm->cm.textures.empty())
-					QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
-        qb->hide();
-				//GLA()->log.Log(GLLogStream::Info,"File loaded correctly");		
-			}
-			else
-			{
-				QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
-    		delete mm;
-			}
-		}
-		else{
-			QString fileName;
-			if( iIO->open(action->text(), fileName,*(GLA()->mm ),mask,NULL,GLA()) )
-			{	
-				GLA()->log.Log(GLLogStream::Info,"File loaded correctly");
-				if(!GLA()->mm->cm.textures.empty())
-					QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
-
-			}
-		}
-	}
-}
-
-
-void MainWindow::windowsTile(){
-	workspace->tile();
-}
-
-void MainWindow::windowsCascade(){
-	workspace->cascade();
-}
-void MainWindow::viewToolbarFile(){
-		mainToolBar->setVisible(!mainToolBar->isVisible());
-		viewToolbarStandardAct->setChecked(mainToolBar->isVisible());
-}
-
-void MainWindow::viewToolbarRender(){
-	if(renderToolBar->isVisible()){
-		renderToolBar->hide();
-		viewToolbarRenderAct->setChecked(false);
-	}else{
-		renderToolBar->show();
-		viewToolbarRenderAct->setChecked(true);
-	}
-}
-
-void MainWindow::RenderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
-void MainWindow::RenderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
-void MainWindow::RenderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
-void MainWindow::RenderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
-void MainWindow::RenderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
-void MainWindow::RenderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
-void MainWindow::RenderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
-
-
-void MainWindow::SetFancyLighting()
-{
-	const RenderMode &rm=GLA()->getCurrentRenderMode();
-	if (rm.FancyLighting) GLA()->setLightMode(false,LFANCY);
-	else GLA()->setLightMode(true,LFANCY);
-}
-
-void MainWindow::SetDoubleLighting()
-{
-	const RenderMode &rm=GLA()->getCurrentRenderMode();
-	if (rm.DoubleSideLighting) GLA()->setLightMode(false,LDOUBLE);
-	else GLA()->setLightMode(true,LDOUBLE);
-}
-
-void MainWindow::SetLight()			     
-{
-// Is this check needed???
-//	if (!GLA())
-//		return;
-
-	GLA()->setLight(!GLA()->getCurrentRenderMode().Lighting);
-	updateMenus();
-};
-
-
-void MainWindow::SetCustomize()
-{
-	/*QColor backColor=QColorDialog::getColor(QColor(255,255,255,255),this);
-	GLA()->setBackground(backColor);*/
-	CustomDialog dialog(this);
-	ColorSetting cs=GLA()->getCustomSetting();
-	dialog.LoadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor);
-	if (dialog.exec()==QDialog::Accepted) 
-	{
-		cs.bColorBottom=dialog.GetBackgroundBottomColor();
-		cs.bColorTop=dialog.GetBackgroundTopColor();
-		cs.lColor=dialog.GetLogColor();
-    GLA()->setCustomSetting(cs);	
-	}
-	
-}
-
-
-void MainWindow::updateWindowMenu()
-{
-	windowsMenu->clear();
-	windowsMenu->addAction(closeAct);
-	windowsMenu->addAction(closeAllAct);
-	windowsMenu->addSeparator();
-	windowsMenu->addAction(windowsTileAct);
-	windowsMenu->addAction(windowsCascadeAct);
-
-	QWidgetList windows = workspace->windowList();
-
-	if(windows.size() > 0)
-			windowsMenu->addSeparator();
-
-	int i=0;
-	foreach(QWidget *w,windows)
-	{
-		QString text = tr("&%1. %2").arg(i+1).arg(QFileInfo(w->windowTitle()).fileName());
-		QAction *action  = windowsMenu->addAction(text);
-		action->setCheckable(true);
-		action->setChecked(w == workspace->activeWindow());
-		// Connect the signal to activate the selected window
-		connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
-		windowMapper->setMapping(action, w);
-		++i;
-	}
-}
-void MainWindow::updateRecentFileActions()
-{
-	QSettings settings("Recent Files");
-	QStringList files = settings.value("recentFileList").toStringList();
-	int numRecentFiles = qMin(files.size(), (int)MAXRECENTFILES);
-	for (int i = 0; i < numRecentFiles; ++i) {
-		QString text = tr("&%1 %2").arg(i + 1).arg(QFileInfo(files[i]).fileName());
-		recentFileActs[i]->setText(text);
-		recentFileActs[i]->setData(files[i]);
-		recentFileActs[i]->setVisible(true);
-	}
-	for (int j = numRecentFiles; j < MAXRECENTFILES; ++j)	recentFileActs[j]->setVisible(false);
-	separatorAct->setVisible(numRecentFiles > 0);
-}
-
 void MainWindow::setCurrentFile(const QString &fileName)
 {
 	QSettings settings("Recent Files");
@@ -819,51 +511,3 @@ void MainWindow::setCurrentFile(const QString &fileName)
 	}
 }
 
-void MainWindow::updateMenus()
-{
-	bool active = (bool)workspace->activeWindow();
-	saveAsAct->setEnabled(active);
-	saveSnapshotAct->setEnabled(active);
-	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
-	renderMenu->setEnabled(active);
-  windowsMenu->setEnabled(active);
-	renderToolBar->setEnabled(active);
-	////////////////////////////////////////////////////////////////////
-	if(active){
-		const RenderMode &rm=GLA()->getCurrentRenderMode();
-		switch (rm.drawMode) {
-			case GLW::DMBox:
-				renderBboxAct->setChecked(true);
-			break;
-			case GLW::DMPoints:
-				renderModePointsAct->setChecked(true);
-			break;
-			case GLW::DMWire:
-				renderModeWireAct->setChecked(true);
-			break;
-			case GLW::DMFlat:
-				renderModeFlatAct->setChecked(true);
-			break;
-			case GLW::DMSmooth:
-				renderModeSmoothAct->setChecked(true);
-			break;
-			case GLW::DMFlatWire:
-				renderModeFlatLinesAct->setChecked(true);
-			break;
-			case GLW::DMHidden:
-				renderModeHiddenLinesAct->setChecked(true);
-			break;
-		}
-		setLightAct->setIcon(rm.Lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
-		setLightAct->setChecked(rm.Lighting);
-
-		setFancyLightingAct->setChecked(rm.FancyLighting);
-		setDoubleLightingAct->setChecked(rm.DoubleSideLighting);
-
-		foreach (QAction *a,TotalRenderList){a->setChecked(false);}
-		if(GLA()->iRendersList){
-			pair<QAction *,MeshRenderInterface *> p;
-			foreach (p,*GLA()->iRendersList){p.first->setChecked(true);}
-		}
-	}
-}

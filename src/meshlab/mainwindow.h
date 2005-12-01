@@ -49,29 +49,15 @@ public:
   
 private slots:
 
+	//////////// Slot Menu File //////////////////////
 	void open(QString fileName=QString());
 	void openRecentFile();							
 	bool saveAs();
 	bool saveSnapshot();
-	void about();
-	
-	// Plugin Slots ///////////
-	void aboutPlugins();
-	
-	void applyFilter();
-  void applyRenderMode();
-	void applyColorMode();
 	void applyImportExport();
-  ///////////////////////////
-
-
-	void windowsTile();
-	void windowsCascade();
-	void updateWindowMenu();
-	void updateMenus();
-	void viewToolbarFile();
-  void viewToolbarRender();
-	void viewLog();
+	///////////Slot Menu Filter ////////////////////////
+	void applyFilter();
+	/////////// Slot Menu Render /////////////////////
 	void RenderBbox();
 	void RenderPoint();
 	void RenderWire();
@@ -79,10 +65,28 @@ private slots:
 	void RenderFlatLine();
 	void RenderHiddenLines();
 	void RenderSmooth();
-	void SetCustomize();
 	void SetLight();
-  void SetDoubleLighting();
+	void SetDoubleLighting();
 	void SetFancyLighting();
+	void applyRenderMode();
+	void applyColorMode();
+	///////////Slot Menu View ////////////////////////
+	void viewToolbarFile();
+	void viewToolbarRender();
+	void viewLog();
+	///////////Slot Menu Windows /////////////////////
+	void windowsTile();
+	void windowsCascade();
+	void updateWindowMenu();
+	void updateMenus();
+	///////////Slot Menu Preferences /////////////////
+	void SetCustomize();
+	///////////Slot Menu Help ////////////////////////
+	void about();
+	void aboutPlugins();	
+
+
+
 
 private:
 	void createActions();
@@ -93,43 +97,52 @@ private:
 	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QObject *plugin, const QStringList &texts, QMenu *menu,
 								const char *member, QActionGroup *actionGroup = 0,bool chackable = false);
-  static QProgressBar *qb;
+ 
+
+
+	
+	static QProgressBar *qb;
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
   GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }
 	GLArea *gla;
-	//vector<MeshModel *> VM;
 	QScrollArea *scrollArea;
 	QDir pluginsDir;
 	QStringList pluginFileNames;
 	
+	
+	////////ToolBar//////////////
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;
 
+
+	///////// Menu /////////////
 	QMenu *fileMenu;
 	QMenu *filterMenu;
+	//Render Menu and SubMenu ///
 	QMenu *renderMenu;
-	QMenu *preferencesMenu; 
-
 	QMenu *renderModeMenu;
 	QMenu *lightingModeMenu;
 	QMenu *textureModeMenu;
 	QMenu *colorModeMenu;
-	
-
+	//View Menu and SubMenu /////
 	QMenu *viewMenu;
 	QMenu *toolBarMenu;
+	////////////////////////
 	QMenu *windowsMenu;
+	QMenu *preferencesMenu; 
 	QMenu *helpMenu;
-	
+
+
+	//////////// Action Menu File //////////////////////
 	QAction *openAct;
 	QAction *saveAsAct;
 	QAction *saveSnapshotAct;
-	
+	QAction *recentFileActs[MAXRECENTFILES];
+	QAction *separatorAct;										
+	QAction *exitAct;
+	/////////// Action Menu Render /////////////////////
 	QActionGroup *renderModeGroup;
-	
-	
-
 	QAction *renderBboxAct;
 	QAction *renderModePointsAct;
 	QAction *renderModeWireAct;
@@ -139,23 +152,25 @@ private:
 	QAction *renderModeSmoothAct;
 	QAction *setDoubleLightingAct;
 	QAction *setFancyLightingAct;
-	QAction *setCustomizeAct;
-	QAction *setLightAct; 
-
-	QAction *exitAct;
-	QAction *aboutAct;
-	QAction *aboutQtAct;
-	QAction *aboutPluginsAct;
+	QAction *setLightAct;
+	///////////Action Menu View ////////////////////////
 	QAction *viewToolbarStandardAct;
 	QAction *viewToolbarRenderAct;
+	QAction *viewLogAct;
+	///////////Action Menu Windows /////////////////////
 	QAction *windowsTileAct;
 	QAction *windowsCascadeAct;
 	QAction *closeAct;
 	QAction *closeAllAct;
-	QAction *recentFileActs[MAXRECENTFILES];
-	QAction *viewLogAct;
-	QAction *separatorAct;										
+	///////////Action Menu Preferences /////////////////
+	QAction *setCustomizeAct;
+	///////////Action Menu Help ////////////////////////
+	QAction *aboutAct;
+	QAction *aboutQtAct;
+	QAction *aboutPluginsAct;
+	/////////////////////////////////////////////
 	vector<QAction *> TotalRenderList;
+	////////////////////////////////////////////
 };
 
 #endif
