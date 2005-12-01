@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.30  2005/12/01 17:20:48  vannini
+Added basic tiled rendering functions
+saveSnapshot saves a 4x resolution snapshot
+
 Revision 1.29  2005/12/01 04:06:13  glvertex
 Now the log area is a percentage of the window height
 
@@ -284,34 +288,145 @@ void GLArea::resizeGL(int _width, int _height)
 	glViewport(0,0, _width, _height);
 }
 
-bool GLArea::saveSnapshot(QString path)
+void GLArea::renderSnapTile(std::vector<Color4b> &snap, bool tbVisible, bool bgVisible, GLdouble fovy, GLdouble zNear, GLdouble zFar, int totalRows, int totalCols, int currentRow, int currentCol)
 {
-	std::vector<Color4b> snap;
 	int vp[4];
-	int p;
-
-	glGetIntegerv( GL_VIEWPORT,vp );		// Lettura viewport
-	glPixelStorei( GL_PACK_ROW_LENGTH, 0);
-	glPixelStorei( GL_PACK_ALIGNMENT, 1);
 	
-	snap.resize(vp[2] * vp[3]);
+	GLint old_matrixMode;
+	GLdouble aspect, vpx, vpy;
+	GLdouble fLeft, fRight, fBottom, fTop;			// frustum
+	GLdouble tLeft, tRight, tBottom, tTop;			// tile
+	GLdouble xDim, yDim, xOff, yOff, tDimX, tDimY;
+    
+	assert( (totalRows>0) && (currentRow>=0 ) && (currentRow<totalRows) );
+	assert( (totalCols>0) && (currentCol>=0 ) && (currentCol<totalCols) );
 
-	glReadPixels(vp[0],vp[1],vp[2],vp[3],GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid *)&snap[0]);
+	glGetIntegerv(GL_VIEWPORT, vp);
+	vpx=vp[2];
+	vpy=vp[3];
+	aspect=vpx / vpy;
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	glLoadIdentity();
+
+	gluLookAt(0,0,3,   0,0,0,   0,1,0);
+	
+	trackball.center=Point3f(0, 0, 0);
+	trackball.radius= 1;
+	trackball.GetView();
+	trackball.Apply(false);
+	
+	glColor3f(1.f,1.f,1.f);
+
+	float d=1.0f/mm->cm.bbox.Diag();
+	glScale(d);
+	glTranslate(-mm->cm.bbox.Center());
+	
+	////////
+	
+ 	glGetIntegerv(GL_MATRIX_MODE, &old_matrixMode);
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+
+	glLoadIdentity();
+
+	// Calcola frustum
+	fTop = zNear * tan(fovy * M_PI / 360.0);
+	fLeft = -fTop * aspect;
+	fBottom = -fTop;
+	fRight = -fLeft;
+
+	// Dimensione totale
+	xDim = abs(fLeft * 2);
+	yDim = abs(fTop * 2);
+	
+	// Dimensione di un tile
+	tDimX = xDim / totalCols;
+	tDimY = yDim / totalRows; 
+	
+	// Offset del tile
+	yOff = tDimY * currentRow;
+    xOff = tDimX * currentCol;
+
+	// Nuovo frustum
+	tLeft = fLeft + xOff;
+	tRight = fLeft + xOff + tDimX;
+	tBottom = fTop - yOff - tDimY;
+	tTop = fTop - yOff;
+	glFrustum(tLeft, tRight, tBottom, tTop, zNear, zFar);
+	  
+	////////
+
+	SetLightModel();
+
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+	mm->Render(rm.drawMode,rm.drawColor);
+	
+	if(iRendersList){
+		pair<QAction *,MeshRenderInterface *> p;
+		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
+	}
+	
+	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	
+	snap.resize(vpx * vpy);
+	glReadPixels(0, 0, vpx, vpy, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *) &snap[0]);
+
+	// Restore state
+	glPopMatrix();
+	glMatrixMode(old_matrixMode);
+
+}
+
+bool GLArea::saveSnapshot(QString path)
+{ 
+	int tc,tr;
+	int vp[4];
+	int q;
+	int bufferOffset;
+
+	std::vector<Color4b> tile;
+	std::vector<Color4b> buffer;
+	
+	glGetIntegerv(GL_VIEWPORT, vp);
+	int vpx=vp[2];
+	int vpy=vp[3];
+	
+	tc=tr=6;
+	
+	buffer.resize(vpx * tc * vpy * tr);
+		
+	for (int r=0; r < tr; ++r)
+		for (int c=0; c < tc; ++c)
+		{
+			renderSnapTile(tile, false, false, 60, 0.2, 5, tr ,tc ,r ,c);
+		
+			bufferOffset=(vpx * vpy * (tc * r)) + (vpx * c); //offset della tile nel buffer
+			q=(vpy-1) * vpx;
+			for (int y=0; y < vpy; ++y)
+			{
+				for (int x=0; x < vpx; ++x)
+				{
+					buffer[bufferOffset]=tile[q];
+					q++;
+					bufferOffset++;
+				}
+				q-=(vpx*2);
+				bufferOffset+=(vpx * (tc-1));
+			}
+		}
+    
 	FILE * fp = fopen(path.toLocal8Bit(),"wb");
 	if (fp==0) return false;
 
-	fprintf(fp,"P6\n%d %d\n255\n",vp[2],vp[3]);
-	int j=0;
+	fprintf(fp,"P6\n%d %d\n255\n",vpx * tc, vpy * tr);
 
-	for(int py=vp[3]-1; py >= 0; --py)
+	for(int t=0; t < (vpx * tc * vpy * tr); ++t)
 	{
-		for(int px=0; px < vp[2]; ++px)
-		{
-			p=py * vp[2] + px;
-			fwrite(&(snap[p]),3,1,fp);
-			//printf("%d %d\n",px, py);
-		}
+		fwrite(&(buffer[t]),3,1,fp);
 	}
 	
 	fclose(fp);

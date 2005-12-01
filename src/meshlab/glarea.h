@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.20  2005/12/01 17:20:48  vannini
+Added basic tiled rendering functions
+saveSnapshot saves a 4x resolution snapshot
+
 Revision 1.19  2005/12/01 03:27:33  glvertex
 - Cleaned lighting code
 - Minimum size now is (400,300)
@@ -196,10 +200,7 @@ protected:
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void wheelEvent(QWheelEvent*e);
-
 	
-
-
 private:
   RenderMode rm;
 	ColorSetting cs;
@@ -207,6 +208,7 @@ private:
 	QTimer *timerIdle;
 	int cfps;
 	int lfps;
+	void renderSnapTile(std::vector<Color4b> &snap, bool tbVisible, bool bgVisible, GLdouble fovy, GLdouble zNear, GLdouble zFar, int totalRows, int totalCols, int currentRow, int currentCol);
 
 
 };
