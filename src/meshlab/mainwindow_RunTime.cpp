@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.2  2005/12/02 00:53:18  cignoni
+Added a change of dir of the app for the subsequent texture loading.
+
 Revision 1.1  2005/12/01 02:24:50  davide_portelli
 Mainwindow Splitted----->[ mainwindow_Init.cpp ]&&[ mainwindow_RunTime.cpp ]
 
@@ -432,8 +435,13 @@ void MainWindow::SetFancyLighting()
 void MainWindow::open(QString fileName)
 {
 	if (fileName.isEmpty()){
-		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),"../sample","Mesh files (*.ply *.off *.stl)");
+		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".","Mesh files (*.ply *.off *.stl)");
 	}
+
+  // this change of dir is needed for subsequent texture loading
+  QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
+  QDir::setCurrent(FileNameDir);
+    
 	if (!fileName.isEmpty()) {
 		MeshModel *nm= new MeshModel();
 		if(!nm->Open(fileName.toAscii())){
@@ -450,9 +458,7 @@ void MainWindow::open(QString fileName)
 			if(workspace->isVisible()) gla->showMaximized();
 			else QTimer::singleShot(00, gla, SLOT(showMaximized()));
       //setCurrentFile(fileName);
-      if(!gla->mm->cm.textures.empty()){
-        QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
-      }
+      
 			//return;
 		}
 	}
