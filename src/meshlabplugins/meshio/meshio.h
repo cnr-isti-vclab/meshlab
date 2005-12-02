@@ -22,6 +22,9 @@
   History
 
  $Log$
+ Revision 1.9  2005/12/02 23:36:52  fmazzant
+ update to the new interface of MeshIOInterface
+
  Revision 1.8  2005/12/02 17:41:33  fmazzant
  added support obj dialog exporter
 
@@ -52,23 +55,11 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
   Q_INTERFACES(MeshIOInterface)
   
 public:
-  QStringList formats() const;
-
-	 bool open(
-      const QString &format,
-			QString &fileName,
-      MeshModel &m, 
-      int& mask,
-      vcg::CallBackPos *cb=0,
-      QWidget *parent=0);
-    
-   bool save(
-      const QString &format,
-			QString &fileName,
-      MeshModel &m, 
-      int mask,
-      vcg::CallBackPos *cb=0,
-      QWidget *parent= 0);
+	QStringList formats() const; //obsoleto!!!!!!!
+	
+	bool open(QAction *format, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	bool save(QAction *format, QString &fileName, MeshModel &m,int mask,vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	std::vector<QAction *> actions() const;
 };
 
 #endif

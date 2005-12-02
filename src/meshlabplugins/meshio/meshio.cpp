@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.12  2005/12/02 23:36:52  fmazzant
+ update to the new interface of MeshIOInterface
+
  Revision 1.11  2005/12/02 17:41:33  fmazzant
  added support obj dialog exporter
 
@@ -62,18 +65,13 @@
 
 using namespace vcg;
 
-QStringList ExtraMeshIOPlugin::formats() const
+
+QStringList ExtraMeshIOPlugin::formats() const //devenuto obsoleto!!!!!da eliminare!!!!!
 {
   return QStringList() << tr("Import OBJ") << tr("Export OBJ");
 }
 
-bool ExtraMeshIOPlugin::open(
-      const QString &format,
-			QString &fileName,
-      MeshModel &m, 
-      int& mask,
-      CallBackPos *cb,
-			QWidget *parent)
+bool ExtraMeshIOPlugin::open(QAction *format,QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
 {
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
@@ -82,7 +80,7 @@ bool ExtraMeshIOPlugin::open(
 	{
 		QString errorMsgFormat = "Error encountered while loading file %1: %2";
 
-		if (format == tr("Import OBJ"))
+		if(format->text() == tr("Import OBJ")) //if (format == tr("Import OBJ"))
 		{
 			string filename = fileName.toUtf8().data();
 
@@ -118,9 +116,9 @@ bool ExtraMeshIOPlugin::open(
 	return false;
 }
 
-bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel &m, int mask, vcg::CallBackPos *cb, QWidget *parent)
+bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	if(format == tr("Export OBJ"))
+	if(format->text() == tr("Export OBJ")) ////if (format == tr("Export OBJ"))
 	{
 		SaveMaskDialog dialog(parent);
 		
@@ -145,6 +143,20 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 		return result;
 	}
 	return false;
+}
+
+/*
+	implementato per rendere possibile la COMPILAZIONE!!!!!!!!!!!
+	da aggiustare per renderlo piu' bello!!!! :)
+*/
+std::vector<QAction *> ExtraMeshIOPlugin::actions() const
+{
+	std::vector<QAction *> v;
+	QAction *import = new QAction("Import OBJ",new QObject());
+	QAction *export = new QAction("Export OBJ",new QObject());
+	v.insert(v.end(),import);
+	v.insert(v.end(),export);
+	return v;
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)
