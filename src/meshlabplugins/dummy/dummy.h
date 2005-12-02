@@ -24,31 +24,30 @@
 
 #include <QObject>
 #include <QAction>
-#include <QString>
+#include <QList>
 
-#include <meshlab/glArea.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+
 
 class DummyPlugin : public QObject, public MeshRenderInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshRenderInterface)
 
-	QList<QAction *> actionList;
+	QList <QAction *> actionList;
   
 public:
-	ExtraMeshIOPlugin()
+	DummyPlugin()
 	{
-		actionList<<new QAction(QString("action 1"),this);
-		actionList<<new QAction(QString("action 2"),this);
-		actionList<<new QAction(QString("action 3"),this);
+		actionList << new QAction(QString("action 1"),this);
+		actionList << new QAction(QString("action 2"),this);
+		actionList << new QAction(QString("action 3"),this);
 	}
 
-	QList<QAction *> actions () {return actionList;}
+	QList<QAction *> actions () const {return actionList;}
 
-	virtual void Render(QAction *, MeshModel &, RenderMode &, GLArea *);
-
+	void Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
 };
 
 #endif

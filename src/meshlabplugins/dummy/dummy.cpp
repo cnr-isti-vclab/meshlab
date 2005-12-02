@@ -18,6 +18,7 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+#include <QtGui>
 
 #include "dummy.h"
 
@@ -27,6 +28,4 @@ void DummyPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla)
 {
 }
 
-
 Q_EXPORT_PLUGIN(DummyPlugin)
-
