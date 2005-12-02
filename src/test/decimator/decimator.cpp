@@ -61,8 +61,10 @@ int  main(int argc, char **argv)
 
   printf("Input mesh  vn:%i fn:%i\n",m.vn,m.fn);
 	
-	Decimator<class MyMesh>(m,10);
-
+	Decimator<class MyMesh>(m,5);
+	vcg::tri::UpdateTopology<MyMesh>::VertexFace(m);
+	//	vcg::tri::UpdateTopology<MyMesh>::FaceFace(m);
+  
 	printf("Output mesh vn:%i fn:%i\n",m.vn,m.fn);
 	
   vcg::tri::io::PlyInfo pi;
