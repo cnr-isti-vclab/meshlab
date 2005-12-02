@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.35  2005/12/02 15:40:18  alemochi
+removed unused variable
+
 Revision 1.34  2005/12/02 15:30:36  alemochi
 Changed fps, added a control
 
@@ -204,8 +207,6 @@ void GLArea::initializeGL()
 
 void GLArea::paintGL()
 {
-	static int nFrame=0;
-	nFrame++;
 	lastTime=time.elapsed();
   initTexture();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -288,18 +289,13 @@ void GLArea::paintGL()
 			log.glDraw(this,0,3);
 			// More info to add.....
 
-		glFinish();
-		
 		glPopAttrib();
 		glPopMatrix();
-		
-		updateFps();
-		
-		if ((cfps>0) && (cfps<100)) renderFps();
-		
+
 		currentTime=time.elapsed();
 		deltaTime=currentTime-lastTime;
-
+		updateFps();
+		if ((cfps>0) && (cfps<200)) renderFps();
 	}
 
 // ==============================
@@ -626,5 +622,4 @@ void GLArea::updateFps()
 	j=(j+1) % 10;
 	for (int i=0;i<10;i++) averageFps+=fpsVector[i];
 	cfps=1000.0f/(averageFps/10);
-	//lastTime=currentTime;
 }
