@@ -22,6 +22,9 @@
   History
 
  $Log$
+ Revision 1.8  2005/12/02 17:41:33  fmazzant
+ added support obj dialog exporter
+
  Revision 1.7  2005/11/30 16:26:56  cignoni
  All the modification, restructuring seen during the 30/12 lesson...
 
@@ -30,7 +33,7 @@
  added comment line history
  deleted bug-fix in meshio.pro in unix{ ... }
 
-  
+   
 
  *****************************************************************************/
 #ifndef EXTRAIOPLUGIN_H

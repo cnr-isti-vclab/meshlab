@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.11  2005/12/02 17:41:33  fmazzant
+ added support obj dialog exporter
+
  Revision 1.10  2005/11/30 16:26:56  cignoni
  All the modification, restructuring seen during the 30/12 lesson...
 
@@ -40,13 +43,17 @@
  deleted bug-fix in meshio.pro in unix{ ... }
 
 *****************************************************************************/
-
+#include <Qt>
 #include <QtGui>
 
 #include "meshio.h"
+#include "savemaskdialog.h"
+
 // temporaneamente prendo la versione corrente dalla cartella test
 #include "../../test/io/import_obj.h"
 #include "../../test/io/export_obj.h"
+
+
 
 #include<vcg/complex/trimesh/update/bounding.h>
 
@@ -57,8 +64,7 @@ using namespace vcg;
 
 QStringList ExtraMeshIOPlugin::formats() const
 {
-  return QStringList() << tr("Import OBJ")
-											 << tr("Export OBJ");
+  return QStringList() << tr("Import OBJ") << tr("Export OBJ");
 }
 
 bool ExtraMeshIOPlugin::open(
@@ -114,16 +120,31 @@ bool ExtraMeshIOPlugin::open(
 
 bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel &m, int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	//TODO: aggiungere la possibilita' di selezionare la maschera
-	//TODO: trattare i casi di errore aprendo una dialog
-	//TODO: ed antro ancora.....:)
 	if(format == tr("Export OBJ"))
 	{
-		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,"La_Prova.obj",false,mask,cb);
-    return true;
+		SaveMaskDialog dialog(parent);
+		
+		while(!dialog.ReadMask())
+		{
+			dialog.exec();
+		}
+		
+		fileName = QFileDialog::getSaveFileName(parent,tr("Save file"),".","Obj files (*.obj)");
+		if(fileName.isEmpty())
+			return false;
+
+		QStringList sl = fileName.split(".");
+		if(!(sl.size() == 2 && sl[1] == "obj"))
+			fileName = fileName.append(".obj");
+		string filename = fileName.toUtf8().data();
+
+		Mask mymask = SaveMaskDialog::GetMask();
+		mask = SaveMaskDialog::MaskToInt(&mymask);
+
+		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),(bool)mymask.binary,mask,cb);//false va in base a Mask.binary!!!
+		return result;
 	}
 	return false;
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)
-
