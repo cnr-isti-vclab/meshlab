@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.34  2005/12/02 15:30:36  alemochi
+Changed fps, added a control
+
 Revision 1.33  2005/12/02 13:51:43  alemochi
 Changed fps (problem with initialization fps)
 
@@ -201,6 +204,8 @@ void GLArea::initializeGL()
 
 void GLArea::paintGL()
 {
+	static int nFrame=0;
+	nFrame++;
 	lastTime=time.elapsed();
   initTexture();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -283,15 +288,18 @@ void GLArea::paintGL()
 			log.glDraw(this,0,3);
 			// More info to add.....
 
-		currentTime=time.elapsed();
-		static bool firstTime=true;
-		deltaTime=currentTime-lastTime;
+		glFinish();
 		
-		updateFps();
-		renderFps();
-
 		glPopAttrib();
 		glPopMatrix();
+		
+		updateFps();
+		
+		if ((cfps>0) && (cfps<100)) renderFps();
+		
+		currentTime=time.elapsed();
+		deltaTime=currentTime-lastTime;
+
 	}
 
 // ==============================
@@ -371,7 +379,7 @@ void GLArea::renderSnapTile(std::vector<Color4b> &snap, bool tbVisible, bool bgV
 	
 	// Offset del tile
 	yOff = tDimY * currentRow;
-    xOff = tDimX * currentCol;
+  xOff = tDimX * currentCol;
 
 	// Nuovo frustum
 	tLeft = fLeft + xOff;
@@ -596,6 +604,7 @@ void GLArea::renderFps()
 	
 	QString strInfo("FPS: ");
 	QString fps;
+	QString delta;
 	fps.setNum((int)cfps,10);
 	strInfo+=fps;
 	renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo,q);
@@ -613,15 +622,9 @@ void GLArea::updateFps()
 {
 	static int j=0;
 	float averageFps=0;
-	static firstTime=true;
-	if (firstTime)
-	{
-		for (int i=0;i<10;i++) fpsVector[i]=cfps;
-		firstTime=false;
-	}
 	if (deltaTime>0) fpsVector[j]=deltaTime;
 	j=(j+1) % 10;
 	for (int i=0;i<10;i++) averageFps+=fpsVector[i];
-	cfps=(int)1000/(averageFps/10);
-	lastTime=currentTime;
+	cfps=1000.0f/(averageFps/10);
+	//lastTime=currentTime;
 }

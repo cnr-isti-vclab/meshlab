@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.24  2005/12/02 15:30:36  alemochi
+Changed fps, added a control
+
 Revision 1.23  2005/12/02 13:51:43  alemochi
 Changed fps (problem with initialization fps)
 
@@ -225,7 +228,7 @@ private:
 	bool	trackBallVisible;	// Draws the trackball ?
 	RenderMode rm;
 	ColorSetting cs;
-  int cfps;
+  float cfps;
 	QTime time;
 	int deltaTime;
   int lastTime;
