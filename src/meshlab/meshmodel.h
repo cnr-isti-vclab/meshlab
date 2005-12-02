@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2005/12/02 00:54:13  cignoni
+Added TextureMode in render
+
 Revision 1.10  2005/11/30 16:26:56  cignoni
 All the modification, restructuring seen during the 30/12 lesson...
 
@@ -93,7 +96,7 @@ public:
   GlTrimesh<CMeshO> glw;
   MeshModel() {glw.m=&cm; cm.face.EnableWedgeTex();}
   bool Open(const char* filename);
-  bool Render(GLW::DrawMode dm, GLW::ColorMode cm);
+  bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
 };
 
 #endif

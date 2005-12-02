@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2005/12/02 00:54:13  cignoni
+Added TextureMode in render
+
 Revision 1.13  2005/11/25 11:55:59  alemochi
 Added function to Enable/Disable lighting (work in progress)
 
@@ -77,10 +80,10 @@ bool MeshModel::Open(const char *filename)
 }
 
 
-bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm)
+bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm)
 {
   glw.SetHintParamf(GLW::HNPZTwist,0.0005f); //
   glColor3f(.8f,.8f,.8f);
-  glw.Draw(dm,cm,GLW::TMNone);
+  glw.Draw(dm,cm,tm);
   return true;
 }
