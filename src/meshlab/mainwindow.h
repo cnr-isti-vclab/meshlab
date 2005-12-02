@@ -71,9 +71,11 @@ private slots:
 	void applyRenderMode();
 	void applyColorMode();
 	///////////Slot Menu View ////////////////////////
-	void viewToolbarFile();
-	void viewToolbarRender();
-	void viewLog();
+	void showToolbarFile();
+	void showToolbarRender();
+	void showLog();
+	void showInfoPane();
+	void showTrackBall();
 	///////////Slot Menu Windows /////////////////////
 	void windowsTile();
 	void windowsCascade();
@@ -106,7 +108,6 @@ private:
 	QSignalMapper *windowMapper;
   GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }
 	GLArea *gla;
-	QScrollArea *scrollArea;
 	QDir pluginsDir;
 	QStringList pluginFileNames;
 	
@@ -154,9 +155,11 @@ private:
 	QAction *setFancyLightingAct;
 	QAction *setLightAct;
 	///////////Action Menu View ////////////////////////
-	QAction *viewToolbarStandardAct;
-	QAction *viewToolbarRenderAct;
-	QAction *viewLogAct;
+	QAction *showToolbarStandardAct;
+	QAction *showToolbarRenderAct;
+	QAction *showLogAct;
+	QAction *showInfoPaneAct;
+	QAction *showTrackBallAct;
 	///////////Action Menu Windows /////////////////////
 	QAction *windowsTileAct;
 	QAction *windowsCascadeAct;

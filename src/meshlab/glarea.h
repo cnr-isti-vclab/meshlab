@@ -24,6 +24,12 @@
   History
 
 $Log$
+Revision 1.22  2005/12/02 11:57:59  glvertex
+- show log
+- show info area
+- show trackball
+- some renaming
+
 Revision 1.21  2005/12/02 00:52:10  cignoni
 Added support for textures
 
@@ -185,6 +191,15 @@ public:
   const RenderMode &  getCurrentRenderMode()const	{return rm;}
 	const	ColorSetting& getCustomSetting()const			{return cs;}
 	void renderFps();
+	
+	void showLog(bool b)				{logVisible = b; updateGL();}
+	void showInfoArea(bool b)		{infoAreaVisible = b; updateGL();}
+	void showTrackBall(bool b)	{trackBallVisible = b; updateGL();}
+	bool isLogVisible()					{return logVisible;}
+	bool isInfoAreaVisible()		{return infoAreaVisible;}
+	bool isTrackBallVisible()		{return trackBallVisible;}
+
+
 	void setCustomSetting(const ColorSetting & s);
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setColorMode(vcg::GLW::ColorMode mode);
@@ -206,7 +221,10 @@ protected:
 	void wheelEvent(QWheelEvent*e);
 	
 private:
-  RenderMode rm;
+  bool	logVisible;				// Prints out log infos ?
+	bool	infoAreaVisible;	// Draws the lower info area ?
+	bool	trackBallVisible;	// Draws the trackball ?
+	RenderMode rm;
 	ColorSetting cs;
 	QTimer *timerFPS;
 	QTimer *timerIdle;

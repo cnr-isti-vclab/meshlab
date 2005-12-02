@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.32  2005/12/02 11:57:59  glvertex
+- show log
+- show info area
+- show trackball
+- some renaming
+
 Revision 1.31  2005/12/02 00:52:10  cignoni
 Added support for textures
 
@@ -156,6 +162,9 @@ GLArea::GLArea(QWidget *parent)
 	lfps=0;
 	currentHeight=100;
 	currentWidth=200;
+	logVisible = false;
+	infoAreaVisible = false;
+	trackBallVisible = true;
 }
 
 QSize GLArea::minimumSizeHint() const {
@@ -184,8 +193,7 @@ void GLArea::initializeGL()
 
  
 	rm.drawMode	= GLW::DMSmooth;
-	rm.drawColor = GLW::CMNone;
-	
+	rm.drawColor = GLW::CMNone;	
 }
 
 void GLArea::paintGL()
@@ -213,7 +221,7 @@ void GLArea::paintGL()
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
-	trackball.Apply();
+	trackball.Apply(trackBallVisible);
 	
 	glColor3f(1.f,1.f,1.f);
 	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
@@ -244,33 +252,38 @@ void GLArea::paintGL()
 // ==============================	
 // Draw the log area background
 // on the bottom of the glArea
-	glPushAttrib(GL_ENABLE_BIT);
-	glPushMatrix();
-	glLoadIdentity();
+	if(infoAreaVisible)
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glPushMatrix();
+		glLoadIdentity();
 
-	glDisable(GL_LIGHTING);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 
-	cs.lColor.V(3) = 128;	// set half alpha value
-	glColor(cs.lColor);
-	float h = ((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
-	glBegin(GL_TRIANGLE_STRIP);
-		glVertex3f(-1.f,h,-1.f);
-		glVertex3f(-1.f,-1.f, -1.f);
-		glVertex3f( 1.f,h,-1.f);
-		glVertex3f( 1.f,-1.f, -1.f);
-	glEnd();
+		cs.lColor.V(3) = 128;	// set half alpha value
+		glColor(cs.lColor);
+		float h = ((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
+		glBegin(GL_TRIANGLE_STRIP);
+			glVertex3f(-1.f,h,-1.f);
+			glVertex3f(-1.f,-1.f, -1.f);
+			glVertex3f( 1.f,h,-1.f);
+			glVertex3f( 1.f,-1.f, -1.f);
+		glEnd();
 
-	// Now print out the infos
-	glColor4f(1,1,1,1);
-	renderFps();
-	log.glDraw(this,0,3);
-	// More info to add.....
+		// Now print out the infos
+		glColor4f(1,1,1,1);
+		renderFps();
 
-	glPopAttrib();
-	glPopMatrix();
+		if(logVisible)
+			log.glDraw(this,0,3);
+			// More info to add.....
+
+		glPopAttrib();
+		glPopMatrix();
+	}
 
 // ==============================
 

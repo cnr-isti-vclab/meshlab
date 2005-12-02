@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.2  2005/12/02 11:57:59  glvertex
+- show log
+- show info area
+- show trackball
+- some renaming
+
 Revision 1.1  2005/12/01 02:24:50  davide_portelli
 Mainwindow Splitted----->[ mainwindow_Init.cpp ]&&[ mainwindow_RunTime.cpp ]
 
@@ -309,21 +315,29 @@ void MainWindow::createActions()
 
 	
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
-	viewToolbarStandardAct = new QAction (tr("&Standard"), this);
-	viewToolbarStandardAct->setCheckable(true);
-	viewToolbarStandardAct->setChecked(true);
-	connect(viewToolbarStandardAct, SIGNAL(triggered()), this, SLOT(viewToolbarFile()));
+	showToolbarStandardAct = new QAction (tr("&Standard"), this);
+	showToolbarStandardAct->setCheckable(true);
+	showToolbarStandardAct->setChecked(true);
+	connect(showToolbarStandardAct, SIGNAL(triggered()), this, SLOT(showToolbarFile()));
 
-	viewToolbarRenderAct = new QAction (tr("&Render"), this);
-	viewToolbarRenderAct->setCheckable(true);
-	viewToolbarRenderAct->setChecked(true);
-	connect(viewToolbarRenderAct, SIGNAL(triggered()), this, SLOT(viewToolbarRender()));
+	showToolbarRenderAct = new QAction (tr("&Render"), this);
+	showToolbarRenderAct->setCheckable(true);
+	showToolbarRenderAct->setChecked(true);
+	connect(showToolbarRenderAct, SIGNAL(triggered()), this, SLOT(showToolbarRender()));
 
-	viewLogAct= new QAction (tr("View &Log"), this);
-	viewLogAct->setCheckable(true);
-	viewLogAct->setChecked(false);
-	connect(viewLogAct, SIGNAL(triggered()), this, SLOT(viewLog()));
+	showLogAct= new QAction (tr("Show &Infos"), this);
+	showLogAct->setCheckable(true);
+	connect(showLogAct, SIGNAL(triggered()), this, SLOT(showLog()));
 
+	showInfoPaneAct= new QAction (tr("Show Info &Pane"), this);
+	showInfoPaneAct->setCheckable(true);
+	connect(showInfoPaneAct, SIGNAL(triggered()), this, SLOT(showInfoPane()));
+
+
+	showTrackBallAct = new QAction (tr("Show &Trackball"), this);
+	showTrackBallAct->setCheckable(true);
+	showTrackBallAct->setChecked(true);
+	connect(showTrackBallAct, SIGNAL(triggered()), this, SLOT(showTrackBall()));
 
 	//////////////Action Menu Windows /////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
@@ -406,10 +420,14 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
-	viewMenu->addAction(viewLogAct);
+	viewMenu->addAction(showTrackBallAct);
+	
+	QMenu *logMenu = viewMenu->addMenu(tr("&Info"));
+	logMenu->addAction(showInfoPaneAct);
+	logMenu->addAction(showLogAct);
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
-	toolBarMenu->addAction(viewToolbarStandardAct);
-	toolBarMenu->addAction(viewToolbarRenderAct);
+	toolBarMenu->addAction(showToolbarStandardAct);
+	toolBarMenu->addAction(showToolbarRenderAct);
 	
 
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////

@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.3  2005/12/02 11:57:59  glvertex
+- show log
+- show info area
+- show trackball
+- some renaming
+
 Revision 1.2  2005/12/02 00:53:18  cignoni
 Added a change of dir of the app for the subsequent texture loading.
 
@@ -277,6 +283,10 @@ void MainWindow::updateMenus()
 				renderModeHiddenLinesAct->setChecked(true);
 			break;
 		}
+		showLogAct->setChecked(GLA()->isLogVisible());
+		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
+		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
+		
 		setLightAct->setIcon(rm.Lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
 		setLightAct->setChecked(rm.Lighting);
 
@@ -516,25 +526,19 @@ void MainWindow::windowsTile(){
 void MainWindow::windowsCascade(){
 	workspace->cascade();
 }
-void MainWindow::viewToolbarFile(){
+void MainWindow::showToolbarFile(){
 		mainToolBar->setVisible(!mainToolBar->isVisible());
-		viewToolbarStandardAct->setChecked(mainToolBar->isVisible());
+		showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 }
 
-void MainWindow::viewToolbarRender(){
-	if(renderToolBar->isVisible()){
-		renderToolBar->hide();
-		viewToolbarRenderAct->setChecked(false);
-	}else{
-		renderToolBar->show();
-		viewToolbarRenderAct->setChecked(true);
-	}
+void MainWindow::showToolbarRender(){
+	renderToolBar->setVisible(!renderToolBar->isVisible());
+	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
 }
 
-void MainWindow::viewLog()
-{
-
-}
+void MainWindow::showLog()			{GLA()->showLog(!GLA()->isLogVisible());}
+void MainWindow::showInfoPane() {GLA()->showInfoArea(!GLA()->isInfoAreaVisible());}
+void MainWindow::showTrackBall(){GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 
 void MainWindow::SetCustomize()
 {
