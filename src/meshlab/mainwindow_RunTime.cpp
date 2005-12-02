@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.5  2005/12/02 17:39:07  glvertex
+modified plugin import code. old plugins have been disabled cause of new interface.
+
 Revision 1.4  2005/12/02 15:18:38  glvertex
 added checks before setting visible some features
 
@@ -310,7 +313,7 @@ void MainWindow::applyFilter()
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 	qb->show();
 	//iFilter->applyFilter(action->text(),*(GLA()->mm ),this);
-	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA(),QCallBack);
+// OLD VERSION	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA(),QCallBack);
 	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
   qb->hide();
 }
@@ -346,7 +349,7 @@ void MainWindow::applyColorMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(action->parent());
-	iColor->Compute(action->text(),*(GLA()->mm ), GLA());
+// OLD VERSION	iColor->Compute(action->text(),*(GLA()->mm ), GLA());
 	
 	// when apply colorize we have to switch to a different color mode!!
 	// Still not working
@@ -363,7 +366,7 @@ void MainWindow::applyImportExport()
 	if(action->text().contains("Export"))
 	{
 		QString fileName;
-		if(iIO->save(action->text(),fileName,*(GLA()->mm ),0,NULL,GLA()) )
+// OLD VERSION		if(iIO->save(action->text(),fileName,*(GLA()->mm ),0,NULL,GLA()) )
 		GLA()->log.Log(GLLogStream::Info,"File saved correctly");
 	}
 
@@ -377,35 +380,36 @@ void MainWindow::applyImportExport()
 			gla = new GLArea(workspace);
 		
 			QString fileName;
-			if( iIO->open(action->text(), fileName, *mm ,mask,QCallBack,gla ) )
-			{
-				gla->mm=mm;	
-				gla->setWindowTitle(QFileInfo(fileName).fileName());   
-				workspace->addWindow(gla);
-				
-				if(workspace->isVisible()) gla->showMaximized();
-				else QTimer::singleShot(00, gla, SLOT(showMaximized()));
-		  
-				if(!mm->cm.textures.empty())
-					QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
-        qb->hide();
-				//GLA()->log.Log(GLLogStream::Info,"File loaded correctly");		
-			}
-			else
-			{
-				QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
-    		delete mm;
-			}
-		}
-		else{
-			QString fileName;
-			if( iIO->open(action->text(), fileName,*(GLA()->mm ),mask,NULL,GLA()) )
-			{	
-				GLA()->log.Log(GLLogStream::Info,"File loaded correctly");
-				if(!GLA()->mm->cm.textures.empty())
-					QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
+		// OLD VERSION
+		//	if( iIO->open(action->text(), fileName, *mm ,mask,QCallBack,gla ) )
+		//	{
+		//		gla->mm=mm;	
+		//		gla->setWindowTitle(QFileInfo(fileName).fileName());   
+		//		workspace->addWindow(gla);
+		//		
+		//		if(workspace->isVisible()) gla->showMaximized();
+		//		else QTimer::singleShot(00, gla, SLOT(showMaximized()));
+		//  
+		//		if(!mm->cm.textures.empty())
+		//			QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
+  //      qb->hide();
+		//		//GLA()->log.Log(GLLogStream::Info,"File loaded correctly");		
+		//	}
+		//	else
+		//	{
+		//		QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
+  //  		delete mm;
+		//	}
+		//}
+		//else{
+		//	QString fileName;
+		//	if( iIO->open(action->text(), fileName,*(GLA()->mm ),mask,NULL,GLA()) )
+		//	{	
+		//		GLA()->log.Log(GLLogStream::Info,"File loaded correctly");
+		//		if(!GLA()->mm->cm.textures.empty())
+		//			QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
 
-			}
+		//	}
 		}
 	}
 }

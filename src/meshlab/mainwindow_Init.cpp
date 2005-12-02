@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.3  2005/12/02 17:39:07  glvertex
+modified plugin import code. old plugins have been disabled cause of new interface.
+
 Revision 1.2  2005/12/02 11:57:59  glvertex
 - show log
 - show info area
@@ -467,26 +470,33 @@ void MainWindow::loadPlugins()
 		QObject *plugin = loader.instance();
 		if (plugin) {
 
-			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-			if (iFilter)
-				addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));
+// OLD VERSION
+			//MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+			//if (iFilter)
+			//	addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));
 
-			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
-			if (iRender)
-				addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()),0,true);
+			//MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+			//if (iRender)
+			//	addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()),0,true);
 
-			// MeshColorizeInterface test 
-			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
-			if (iColor)
-				addToMenu(plugin, iColor->colorsFrom(), colorModeMenu, SLOT(applyColorMode()),0,true);     
+			//// MeshColorizeInterface test 
+			//MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
+			//if (iColor)
+			//	addToMenu(plugin, iColor->colorsFrom(), colorModeMenu, SLOT(applyColorMode()),0,true);     
 
-			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			if (iIO)
-			{
-				fileMenu->addSeparator();
-				addToMenu(plugin, iIO->formats(), fileMenu, SLOT(applyImportExport()));
-				//fileMenu->addSeparator();
-			}
+			//MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+			//if (iIO)
+			//{
+			//	fileMenu->addSeparator();
+			//	addToMenu(plugin, iIO->formats(), fileMenu, SLOT(applyImportExport()));
+			//	//fileMenu->addSeparator();
+			//
+			//}
+// NEW VERSION
+			MeshRenderInterface *iDummy = qobject_cast<MeshRenderInterface *>(plugin);
+			if(iDummy)
+				renderMenu->addActions(iDummy->actions());
+
 
 
 			pluginFileNames += fileName;
