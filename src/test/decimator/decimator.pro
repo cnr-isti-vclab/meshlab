@@ -6,6 +6,6 @@ TARGET = decimator
 LIBPATH += 
 DEPENDPATH += . 
 INCLUDEPATH += . ../../../../sf/
-CONFIG += console stl 
+CONFIG += debug console stl 
 TEMPLATE = app
 SOURCES += decimator.h decimator.cpp ../../../../sf/wrap/ply/plylib.cpp
