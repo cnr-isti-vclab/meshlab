@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.23  2005/12/02 13:51:43  alemochi
+Changed fps (problem with initialization fps)
+
 Revision 1.22  2005/12/02 11:57:59  glvertex
 - show log
 - show info area
@@ -110,6 +113,7 @@ First rough version. It simply load a mesh.
 #include <QTimer>
 #include <QWidget>
 #include <QGLWidget>
+#include <QTime>
 
 #include "GLLogStream.h"
 
@@ -167,16 +171,10 @@ class GLArea : public QGLWidget
 {
 	Q_OBJECT
 
-private slots:
-	void updateFps();
-	void redraw()
-	{
-		updateGL();
-	};
 
 public:
 	GLArea(QWidget *parent = 0);
-	~GLArea(){timerFPS->stop();timerIdle->stop();}
+	~GLArea(){}
 	
 	MeshModel *mm;
 	vcg::Trackball trackball;
@@ -190,6 +188,7 @@ public:
 	
   const RenderMode &  getCurrentRenderMode()const	{return rm;}
 	const	ColorSetting& getCustomSetting()const			{return cs;}
+	void updateFps();
 	void renderFps();
 	
 	void showLog(bool b)				{logVisible = b; updateGL();}
@@ -226,10 +225,12 @@ private:
 	bool	trackBallVisible;	// Draws the trackball ?
 	RenderMode rm;
 	ColorSetting cs;
-	QTimer *timerFPS;
-	QTimer *timerIdle;
-	int cfps;
-	int lfps;
+  int cfps;
+	QTime time;
+	int deltaTime;
+  int lastTime;
+	int currentTime;
+	float fpsVector[10];
 	void renderSnapTile(std::vector<Color4b> &snap, bool tbVisible, bool bgVisible, GLdouble fovy, GLdouble zNear, GLdouble zFar, int totalRows, int totalCols, int currentRow, int currentCol);
 
 

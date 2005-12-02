@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.33  2005/12/02 13:51:43  alemochi
+Changed fps (problem with initialization fps)
+
 Revision 1.32  2005/12/02 11:57:59  glvertex
 - show log
 - show info area
@@ -148,23 +151,23 @@ First rough version. It simply load a mesh.
 #include "glarea.h"
 
 using namespace vcg; 
+
+
+
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
 	iRendersList=0;
-	timerFPS=new QTimer(this);
-	connect(timerFPS, SIGNAL(timeout()), this, SLOT(updateFps()));
-	timerFPS->start(1000);
-	timerIdle=new QTimer(this);
-	timerIdle->start(10);
-	connect(timerIdle,SIGNAL(timeout()),this,SLOT(redraw()));
+	currentTime=0;
+	lastTime=0;
+	deltaTime=0;
 	cfps=0;
-	lfps=0;
 	currentHeight=100;
 	currentWidth=200;
 	logVisible = false;
 	infoAreaVisible = false;
 	trackBallVisible = true;
+	time.start();
 }
 
 QSize GLArea::minimumSizeHint() const {
@@ -198,6 +201,7 @@ void GLArea::initializeGL()
 
 void GLArea::paintGL()
 {
+	lastTime=time.elapsed();
   initTexture();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -275,11 +279,16 @@ void GLArea::paintGL()
 
 		// Now print out the infos
 		glColor4f(1,1,1,1);
-		renderFps();
-
 		if(logVisible)
 			log.glDraw(this,0,3);
 			// More info to add.....
+
+		currentTime=time.elapsed();
+		static bool firstTime=true;
+		deltaTime=currentTime-lastTime;
+		
+		updateFps();
+		renderFps();
 
 		glPopAttrib();
 		glPopMatrix();
@@ -288,7 +297,6 @@ void GLArea::paintGL()
 // ==============================
 
 
-	cfps++;
 }
 
 void GLArea::resizeGL(int _width, int _height)
@@ -550,6 +558,7 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 									break;
 	}
 	updateGL();
+
 }
 
 
@@ -587,7 +596,7 @@ void GLArea::renderFps()
 	
 	QString strInfo("FPS: ");
 	QString fps;
-	fps.setNum((int)lfps,10);
+	fps.setNum((int)cfps,10);
 	strInfo+=fps;
 	renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo,q);
 }
@@ -602,6 +611,17 @@ void GLArea::setCustomSetting(const ColorSetting & s)
 
 void GLArea::updateFps()
 {
-	lfps=cfps;
-	cfps=0;
+	static int j=0;
+	float averageFps=0;
+	static firstTime=true;
+	if (firstTime)
+	{
+		for (int i=0;i<10;i++) fpsVector[i]=cfps;
+		firstTime=false;
+	}
+	if (deltaTime>0) fpsVector[j]=deltaTime;
+	j=(j+1) % 10;
+	for (int i=0;i<10;i++) averageFps+=fpsVector[i];
+	cfps=(int)1000/(averageFps/10);
+	lastTime=currentTime;
 }
