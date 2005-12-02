@@ -2,4 +2,6 @@ TEMPLATE      = subdirs
 SUBDIRS       = meshfilter \
 		meshrender \
 		meshio \
-		meshcolorize
+		meshcolorize \
+		meshdecorate \
+		dummy
