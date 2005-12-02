@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.4  2005/12/02 15:18:38  glvertex
+added checks before setting visible some features
+
 Revision 1.3  2005/12/02 11:57:59  glvertex
 - show log
 - show info area
@@ -536,9 +539,9 @@ void MainWindow::showToolbarRender(){
 	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
 }
 
-void MainWindow::showLog()			{GLA()->showLog(!GLA()->isLogVisible());}
-void MainWindow::showInfoPane() {GLA()->showInfoArea(!GLA()->isInfoAreaVisible());}
-void MainWindow::showTrackBall(){GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
+void MainWindow::showLog()			{if(GLA() != 0)		GLA()->showLog(!GLA()->isLogVisible());}
+void MainWindow::showInfoPane() {if(GLA() != 0)		GLA()->showInfoArea(!GLA()->isInfoAreaVisible());}
+void MainWindow::showTrackBall(){if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 
 void MainWindow::SetCustomize()
 {
