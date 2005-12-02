@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.6  2005/12/02 17:49:27  fmazzant
+ added support for the rescue of the normal per vertex
+
  Revision 1.5  2005/11/30 00:44:07  fmazzant
  added:
  1. save TCoord2 with struct map
@@ -82,8 +85,16 @@ namespace io {
 
 			if (stream.fail())
 				return false; 
+			
+			stream << "#" << std::endl;
+			stream << "#FILE  : " << filename << std::endl;
+			stream << "#TYPE  : Obj File Format" << std::endl;
+			stream << "#AUTHOR: Meshlab" << std::endl;
+			stream << "#" << std::endl;
+			stream << "#Computer Science from the University of Pisa" << std::endl;
+			stream << "#" << std::endl;
 
-			//vertici
+			//vertexs
 			VertexIterator vi;
 			if(true)//controllare maschera(mask)
 			{	
@@ -91,6 +102,7 @@ namespace io {
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
 				{
 					stream << "v " << (*vi).P()[0] << " " << (*vi).P()[1] << " " << (*vi).P()[2] << std::endl;
+
 					if (cb !=NULL)
 						(*cb)(100.0 * (float)++numvert/(float)m.vert.size(), "writing vertices ");
 				}
@@ -98,20 +110,20 @@ namespace io {
 				stream << std::endl;
 			}
 			
-			//texture coord	
+			//texture coords
 			FaceIterator fi;
 			std::map<vcg::TCoord2<float>,int> CoordIndexTexture;
-			int value = 1;
-			if(false)//controllare maschera(mask)
+			if(true)//controllare maschera(mask)
 			{
 				int numface = 0;
+				int value = 1;
 				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 				{
 					for(unsigned int k=0;k<3;k++)
 					{
 						if(AddNewTextureCoord(CoordIndexTexture,(*fi).WT(k),value))
 						{
-							stream << "vt " << (*fi).WT(k).u() << " " << (*fi).WT(k).v() << std::endl;
+							stream << "vt " << (*fi).WT(k).u() << " " << (*fi).WT(k).v() << " " << (*fi).WT(k).n() << std::endl;
 							value++;//incrementa il numero di valore da associare alle texture
 						}
 					}
@@ -121,8 +133,28 @@ namespace io {
 				stream << "# " << CoordIndexTexture.size() << " vertices texture" << std::endl;//stampa numero di vert di coord di text
 				stream << std::endl;
 			}
-						
-			//facce
+				
+			//vertexs normal
+			std::map<Point3f,int> NormalVertex;
+			if(true)//controllare maschera(mask)
+			{
+				int numvert = 0;
+				int value = 1;
+				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
+				{
+					if(AddNewNormalVertex(NormalVertex,(*vi).N(),value))
+					{
+						stream << "vn " << (*vi).N()[0] << " " << (*vi).N()[1] << " " << (*vi).N()[2] << std::endl;
+						value++;
+					}
+					if (cb !=NULL)
+						(*cb)(100.0 * (float)++numvert/(float)m.vert.size(), "writing vertices normal");					
+				}
+				stream << "# " << NormalVertex.size() << " normals per vertex " << std::endl;//stampa numero di vert di coord di text
+				stream << std::endl;
+			}
+			
+			//faces
 			if(true)//controllare maschera(mask)
 			{
 				int numface = 0;
@@ -136,10 +168,10 @@ namespace io {
 						v = GetIndexVertex(m, (*fi).V(k)->P());//considera i vertici per faccia
 						
 						int vt = -1;
-						//vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
+						vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
 
 						int vn = -1;
-						vn = GetIndexVertexNormal();//considera le normali per faccia per ora non va considerato.
+						vn = GetIndexVertexNormal(m, NormalVertex, v);//considera le normali per faccia per ora non va considerato.
 
 						//scrive elementi sul file obj
 						WriteFacesElement(stream,v,vt,vn);
@@ -162,6 +194,7 @@ namespace io {
 
 		static bool SaveBinary(SaveMeshType &m, const char * filename, ObjInfo &oi)
 		{
+			//TODO: implementare un eventuale salvataggio in binario!
 			return Save(m,filename,oi);
 		}
 
@@ -182,8 +215,6 @@ namespace io {
 			ObjInfo oi;
 			oi.cb=cb;
 
-			//TODO: la maschera prende qualsiasi cosa....cioe' deve salvare tutto
-
 			if(binary)
 				return SaveBinary(m,filename,oi);
 			else 
@@ -201,7 +232,6 @@ namespace io {
 				return SaveASCII(m,filename,oi);
 		}
 
-
 		
 		/*
 			restituisce l'indice del vertice, aggiunto di una unita'.
@@ -210,9 +240,9 @@ namespace io {
 		{
 			for(unsigned int i=0;i<m.vert.size();i++)
 				if(m.vert[i].P() == p)
-				return ++i;
+					return ++i;
 			return-1;
-		}		
+		}
 		
 		/*
 			restituisce l'indice della coordinata di texture.
@@ -224,13 +254,14 @@ namespace io {
 			return -1;
 		}
 
-		
 		/*
 			restituisce l'indice della normale.
 		*/
-		inline static int GetIndexVertexNormal()
+		inline static int GetIndexVertexNormal(SaveMeshType &m, std::map<Point3f,int> &ma, unsigned int iv )
 		{
-			return -1;					
+			int index = ma[m.vert[iv].N()];
+			if(index!=0){return index;}
+			return -1;	
 		}
 
 		
@@ -245,9 +276,10 @@ namespace io {
 				stream << "/" << vt;
 				if(vn!=-1) stream << "/" << vn;
 			}
-
-			if(vn!=-1) 
-				stream << "//" << vn;
+			else
+			{
+				if(vn!=-1) stream << "//" << vn;
+			}
 		}
 		
 		/*
@@ -257,11 +289,20 @@ namespace io {
 		inline static bool AddNewTextureCoord(std::map<vcg::TCoord2<float>,int> &m, const vcg::TCoord2<float> &wt,int value)
 		{
 			int index = m[wt];
-			if(index == 0){m[wt]=value;return true;}
+			if(index==0){m[wt]=value;return true;}
 			return false;
 		}
 
-
+		
+		/*
+			aggiunge una normal restituendo true nel caso dell'insirimento e false in caso contrario
+		*/
+		inline static bool AddNewNormalVertex(std::map<Point3f,int> &m, Point3f &n ,int value)
+		{
+			int index = m[n];
+			if(index==0){m[n]=value;return true;}
+			return false;
+		}
 		
 	}; // end class
 
