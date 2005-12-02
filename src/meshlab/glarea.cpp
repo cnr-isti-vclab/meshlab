@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.36  2005/12/02 17:51:17  glvertex
+removed some old plugin code to testing new interfaces
+
 Revision 1.35  2005/12/02 15:40:18  alemochi
 removed unused variable
 
@@ -253,11 +256,11 @@ void GLArea::paintGL()
   
   mm->Render(rm.drawMode,rm.drawColor,rm.drawTexture);
 
-
-	if(iRendersList){
-		pair<QAction *,MeshRenderInterface *> p;
-		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
-	}
+// OLD VERSION
+//	if(iRendersList){
+//		pair<QAction *,MeshRenderInterface *> p;
+//		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
+//	}
 	
 // ==============================	
 // Draw the log area background
@@ -391,11 +394,12 @@ void GLArea::renderSnapTile(std::vector<Color4b> &snap, bool tbVisible, bool bgV
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	mm->Render(rm.drawMode,rm.drawColor,rm.drawTexture);
-	
-	if(iRendersList){
-		pair<QAction *,MeshRenderInterface *> p;
-		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
-	}
+
+// OLD VERSION
+//	if(iRendersList){
+//		pair<QAction *,MeshRenderInterface *> p;
+//		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
+//	}
 	
 	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
