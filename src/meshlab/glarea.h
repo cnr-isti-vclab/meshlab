@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.21  2005/12/02 00:52:10  cignoni
+Added support for textures
+
 Revision 1.20  2005/12/01 17:20:48  vannini
 Added basic tiled rendering functions
 saveSnapshot saves a 4x resolution snapshot
@@ -125,6 +128,7 @@ public:
     vcg::Point3f LightDir;
 		RenderMode()
 		{
+      drawTexture=GLW::TMNone;
 			Lighting=true;
 			BackFaceCull=false;
 			DoubleSideLighting=false;
@@ -146,8 +150,6 @@ public:
 		bColorTop=Color4b(0,0,0,1);
 		lColor=Color4b(128,16,16,1);
 	};
-
-
 };
 
 
@@ -186,6 +188,7 @@ public:
 	void setCustomSetting(const ColorSetting & s);
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setColorMode(vcg::GLW::ColorMode mode);
+	void setTextureMode(vcg::GLW::TextureMode mode);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
 	bool saveSnapshot(QString path);
@@ -194,6 +197,7 @@ public:
 protected:
 	
 	void initializeGL();
+  void initTexture();
 	void paintGL();
 	void resizeGL(int width, int height);
 	void mousePressEvent(QMouseEvent *event);

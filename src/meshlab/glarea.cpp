@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.31  2005/12/02 00:52:10  cignoni
+Added support for textures
+
 Revision 1.30  2005/12/01 17:20:48  vannini
 Added basic tiled rendering functions
 saveSnapshot saves a 4x resolution snapshot
@@ -187,19 +190,19 @@ void GLArea::initializeGL()
 
 void GLArea::paintGL()
 {
+  initTexture();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
 // == Backround
 	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_DEPTH_TEST);
+ 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glBegin(GL_TRIANGLE_STRIP);
 	glColor(cs.bColorTop);  	glVertex3f(-1.f, 1.f,-1.f);
 	glColor(cs.bColorBottom);	glVertex3f(-1.f,-1.f,-1.f);
 	glColor(cs.bColorTop);		glVertex3f( 1.f, 1.f,-1.f);
 	glColor(cs.bColorBottom);	glVertex3f( 1.f,-1.f,-1.f);
-
 	glEnd();
 	glPopAttrib();
 // ==
@@ -216,7 +219,6 @@ void GLArea::paintGL()
 	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
 	//glBoxWire(bb);
 	float d=1.0f/mm->cm.bbox.Diag();
-	//float d=1;
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
 
@@ -229,8 +231,9 @@ void GLArea::paintGL()
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
-
-	mm->Render(rm.drawMode,rm.drawColor);
+	
+  
+  mm->Render(rm.drawMode,rm.drawColor,rm.drawTexture);
 
 
 	if(iRendersList){
@@ -362,7 +365,7 @@ void GLArea::renderSnapTile(std::vector<Color4b> &snap, bool tbVisible, bool bgV
 
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-	mm->Render(rm.drawMode,rm.drawColor);
+	mm->Render(rm.drawMode,rm.drawColor,rm.drawTexture);
 	
 	if(iRendersList){
 		pair<QAction *,MeshRenderInterface *> p;
@@ -489,7 +492,34 @@ void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 	updateGL();
 }
 
-
+// Texture loading done during the first paint.
+void GLArea::initTexture()
+{
+  if(!mm->cm.textures.empty() && mm->glw.TMId.empty()){
+        for(unsigned int i =0; i< mm->cm.textures.size();++i){
+          QImage img, imgGL;
+          bool ret=img.load(mm->cm.textures[i].c_str());
+          imgGL=convertToGLFormat(img);
+          qDebug("loaded texture %s. in %i w %i  h %i",mm->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
+          mm->glw.TMId.push_back(0);
+          glEnable(GL_TEXTURE_2D);
+          glGenTextures( 1, &(mm->glw.TMId.back()) );
+          glBindTexture( GL_TEXTURE_2D, mm->glw.TMId.back() );
+          glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
+          glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+          glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
+          glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	
+          qDebug("loaded texture  %s. in %i",mm->cm.textures[i].c_str(),i);
+        }
+        setTextureMode(GLW::TMPerWedge);
+      }
+}
+void GLArea::setTextureMode(vcg::GLW::TextureMode mode)
+{
+	rm.drawTexture = mode;
+	updateGL();
+}
 void GLArea::setLight(bool state)
 {
 	rm.Lighting = state;
