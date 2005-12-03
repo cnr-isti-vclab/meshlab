@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.26  2005/12/03 16:26:45  vannini
+New code for snapshot and tiled rendering (disabled by default because not fully functional)
+
 Revision 1.25  2005/12/03 16:05:18  glvertex
 solved some compatilbility issues
 
@@ -168,10 +171,6 @@ public:
 	};
 };
 
-
-
-
-
 class MeshModel;
 class GLArea : public QGLWidget
 {
@@ -237,8 +236,6 @@ private:
   int lastTime;
 	int currentTime;
 	float fpsVector[10];
-	void renderSnapTile(std::vector<Color4b> &snap, bool tbVisible, bool bgVisible, GLdouble fovy, GLdouble zNear, GLdouble zFar, int totalRows, int totalCols, int currentRow, int currentCol);
-
 
 };
 

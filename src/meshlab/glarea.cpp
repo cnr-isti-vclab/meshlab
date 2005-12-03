@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.38  2005/12/03 16:26:45  vannini
+New code for snapshot and tiled rendering (disabled by default because not fully functional)
+
 Revision 1.37  2005/12/03 15:41:21  glvertex
 showLog initial value set to true
 
@@ -164,7 +167,11 @@ First rough version. It simply load a mesh.
 
 using namespace vcg; 
 
-
+// Tiled rendering vars
+static std::vector<Color4b> tileData;
+static std::vector<Color4b> snapshotData;
+static bool takeSnapTile=false;
+static int vpWidth, vpHeight, tileCol, tileRow, totalCols, totalRows;
 
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
@@ -211,33 +218,114 @@ void GLArea::initializeGL()
 	rm.drawColor = GLW::CMNone;	
 }
 
+bool pasteTile()
+{
+	int bufferOffset,q; 
+
+	bufferOffset=(vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol); 
+	q=(vpHeight-1) * vpWidth;
+	
+	for (int y=0; y < vpHeight; ++y)
+	{
+		for (int x=0; x < vpWidth; ++x)
+		{
+			snapshotData[bufferOffset]=tileData[q];
+			q++;
+			bufferOffset++;
+		}
+		q-=(vpWidth*2);
+		bufferOffset+=(vpWidth * (totalCols-1));
+	}
+
+	
+	tileCol++;
+
+	if (tileCol >= totalCols)
+	{
+		tileCol=0;
+		tileRow++;
+
+		if (tileRow >= totalRows)
+		{
+			takeSnapTile=false;
+			QString path="snapshot.ppm";
+
+			FILE * fp = fopen(path.toLocal8Bit(),"wb");
+			if (fp==0) return false;
+
+			fprintf(fp,"P6\n%d %d\n255\n", vpWidth * totalCols, vpHeight * totalRows);
+
+			for(int t=0; t < (vpWidth * totalCols * vpHeight * totalRows); ++t)
+			{
+				fwrite(&(snapshotData[t]),3,1,fp);
+			}
+			
+			fclose(fp);    	
+		}
+	}
+}
+
+void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+{
+	GLdouble fLeft, fRight, fBottom, fTop, left, right, bottom, top, xDim, yDim, xOff, yOff, tDimX, tDimY;
+	
+	fTop = zNear * tan(fovy * M_PI / 360.0);
+	fLeft = -fTop * aspect;
+	fBottom = -fTop;
+	fRight = -fLeft;
+	
+	// Dimensione totale
+	xDim = abs(fLeft * 2);
+	yDim = abs(fTop * 2);
+	
+	// Dimensione di un tile
+	tDimX = xDim / totalCols;
+	tDimY = yDim / totalRows; 
+	
+	// Offset del tile
+	yOff = tDimY * tileRow;
+	xOff = tDimX * tileCol;
+
+	// Nuovo frustum
+	left = fLeft + xOff;
+	right = fLeft + xOff + tDimX;
+	bottom = fTop - yOff - tDimY;
+	top = fTop - yOff;
+
+	glFrustum(left, right, bottom, top, zNear, zFar);
+
+}
+
 void GLArea::paintGL()
 {
+	GLint old_matrixMode;
 	lastTime=time.elapsed();
-  initTexture();
+	initTexture();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-
-// == Backround
-	glPushAttrib(GL_ENABLE_BIT);
- 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glBegin(GL_TRIANGLE_STRIP);
-	glColor(cs.bColorTop);  	glVertex3f(-1.f, 1.f,-1.f);
-	glColor(cs.bColorBottom);	glVertex3f(-1.f,-1.f,-1.f);
-	glColor(cs.bColorTop);		glVertex3f( 1.f, 1.f,-1.f);
-	glColor(cs.bColorBottom);	glVertex3f( 1.f,-1.f,-1.f);
-	glEnd();
-	glPopAttrib();
-// ==
+	
+	if (!takeSnapTile)
+	{
+		// == Backround
+		glPushAttrib(GL_ENABLE_BIT);
+ 		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glBegin(GL_TRIANGLE_STRIP);
+		glColor(cs.bColorTop);  	glVertex3f(-1.f, 1.f,-1.f);
+		glColor(cs.bColorBottom);	glVertex3f(-1.f,-1.f,-1.f);
+		glColor(cs.bColorTop);		glVertex3f( 1.f, 1.f,-1.f);
+		glColor(cs.bColorBottom);	glVertex3f( 1.f,-1.f,-1.f);
+		glEnd();
+		glPopAttrib();
+		// ==
+	}
 
 	gluLookAt(0,0,3,   0,0,0,   0,1,0);
-
 
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
-	trackball.Apply(trackBallVisible);
+	trackball.Apply(trackBallVisible && !takeSnapTile);
 	
 	glColor3f(1.f,1.f,1.f);
 	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
@@ -248,6 +336,16 @@ void GLArea::paintGL()
 
 	SetLightModel();
 
+	// Modify frustum... 
+	if (takeSnapTile)
+	{
+		glGetIntegerv(GL_MATRIX_MODE, &old_matrixMode);
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		myGluPerspective(60, (GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
+	}
+
 	// Set proper colorMode
 	glDisable(GL_COLOR_MATERIAL);
 	if(rm.drawColor != GLW::CMNone)
@@ -256,8 +354,19 @@ void GLArea::paintGL()
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
 	
-  
-  mm->Render(rm.drawMode,rm.drawColor,rm.drawTexture);
+	mm->Render(rm.drawMode,rm.drawColor,rm.drawTexture);
+
+  	// ...and take a snapshot
+	if (takeSnapTile)
+	{
+		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		tileData.resize(vpWidth * vpHeight);
+		glReadPixels(0, 0, vpWidth, vpHeight, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *) &tileData[0]);
+		glPopMatrix();
+		glMatrixMode(old_matrixMode);
+		pasteTile();
+	}
 
 // OLD VERSION
 //	if(iRendersList){
@@ -322,149 +431,25 @@ void GLArea::resizeGL(int _width, int _height)
 	glViewport(0,0, _width, _height);
 }
 
-void GLArea::renderSnapTile(std::vector<Color4b> &snap, bool tbVisible, bool bgVisible, GLdouble fovy, GLdouble zNear, GLdouble zFar, int totalRows, int totalCols, int currentRow, int currentCol)
-{
-	int vp[4];
-	
-	GLint old_matrixMode;
-	GLdouble aspect, vpx, vpy;
-	GLdouble fLeft, fRight, fBottom, fTop;			// frustum
-	GLdouble tLeft, tRight, tBottom, tTop;			// tile
-	GLdouble xDim, yDim, xOff, yOff, tDimX, tDimY;
-    
-	assert( (totalRows>0) && (currentRow>=0 ) && (currentRow<totalRows) );
-	assert( (totalCols>0) && (currentCol>=0 ) && (currentCol<totalCols) );
-
-	glGetIntegerv(GL_VIEWPORT, vp);
-	vpx=vp[2];
-	vpy=vp[3];
-	aspect=vpx / vpy;
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	glLoadIdentity();
-
-	gluLookAt(0,0,3,   0,0,0,   0,1,0);
-	
-	trackball.center=Point3f(0, 0, 0);
-	trackball.radius= 1;
-	trackball.GetView();
-	trackball.Apply(false);
-	
-	glColor3f(1.f,1.f,1.f);
-
-	float d=1.0f/mm->cm.bbox.Diag();
-	glScale(d);
-	glTranslate(-mm->cm.bbox.Center());
-	
-	////////
-	
- 	glGetIntegerv(GL_MATRIX_MODE, &old_matrixMode);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-
-	glLoadIdentity();
-
-	// Calcola frustum
-	fTop = zNear * tan(fovy * M_PI / 360.0);
-	fLeft = -fTop * aspect;
-	fBottom = -fTop;
-	fRight = -fLeft;
-
-	// Dimensione totale
-	xDim = abs(fLeft * 2);
-	yDim = abs(fTop * 2);
-	
-	// Dimensione di un tile
-	tDimX = xDim / totalCols;
-	tDimY = yDim / totalRows; 
-	
-	// Offset del tile
-	yOff = tDimY * currentRow;
-  xOff = tDimX * currentCol;
-
-	// Nuovo frustum
-	tLeft = fLeft + xOff;
-	tRight = fLeft + xOff + tDimX;
-	tBottom = fTop - yOff - tDimY;
-	tTop = fTop - yOff;
-	glFrustum(tLeft, tRight, tBottom, tTop, zNear, zFar);
-	  
-	////////
-
-	SetLightModel();
-
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-	mm->Render(rm.drawMode,rm.drawColor,rm.drawTexture);
-
-// OLD VERSION
-//	if(iRendersList){
-//		pair<QAction *,MeshRenderInterface *> p;
-//		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
-//	}
-	
-	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	
-	snap.resize(vpx * vpy);
-	glReadPixels(0, 0, vpx, vpy, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *) &snap[0]);
-
-	// Restore state
-	glPopMatrix();
-	glMatrixMode(old_matrixMode);
-
-}
-
 bool GLArea::saveSnapshot(QString path)
 { 
-	int tc,tr;
 	int vp[4];
 	int q;
 	int bufferOffset;
-
-	std::vector<Color4b> tile;
-	std::vector<Color4b> buffer;
 	
+	return false;
+
+	totalCols=totalRows=2;
+	tileRow=tileCol=0;
+
 	glGetIntegerv(GL_VIEWPORT, vp);
-	int vpx=vp[2];
-	int vpy=vp[3];
 	
-	tc=tr=6;
+	vpWidth=vp[2];
+	vpHeight=vp[3];
 	
-	buffer.resize(vpx * tc * vpy * tr);
-		
-	for (int r=0; r < tr; ++r)
-		for (int c=0; c < tc; ++c)
-		{
-			renderSnapTile(tile, false, false, 60, 0.2, 5, tr ,tc ,r ,c);
-		
-			bufferOffset=(vpx * vpy * (tc * r)) + (vpx * c); //offset della tile nel buffer
-			q=(vpy-1) * vpx;
-			for (int y=0; y < vpy; ++y)
-			{
-				for (int x=0; x < vpx; ++x)
-				{
-					buffer[bufferOffset]=tile[q];
-					q++;
-					bufferOffset++;
-				}
-				q-=(vpx*2);
-				bufferOffset+=(vpx * (tc-1));
-			}
-		}
-    
-	FILE * fp = fopen(path.toLocal8Bit(),"wb");
-	if (fp==0) return false;
+	snapshotData.resize(vpWidth * vpHeight * totalCols * totalRows);
 
-	fprintf(fp,"P6\n%d %d\n255\n",vpx * tc, vpy * tr);
-
-	for(int t=0; t < (vpx * tc * vpy * tr); ++t)
-	{
-		fwrite(&(buffer[t]),3,1,fp);
-	}
-	
-	fclose(fp);
+	takeSnapTile=true;
 
 	return true;
 }
