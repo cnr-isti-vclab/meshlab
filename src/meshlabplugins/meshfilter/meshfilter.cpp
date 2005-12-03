@@ -35,19 +35,30 @@ using namespace vcg;
 //class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
 
 
-QStringList ExtraMeshFilterPlugin::filters() const
-{ 
-	QStringList filterList;
+ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	filterList << tr("Loop Subdivision Surface");
 	filterList << tr("Butterfly Subdivision Surface");
 	filterList << tr("Remove Unreferenced Vertexes");
 	filterList << tr("Remove Duplicated Vertexes");
+	actionList << new QAction("Loop Subdivision Surface", this);
+	actionList << new QAction("Butterfly Subdivision Surface", this);
+
+}
+
+QStringList ExtraMeshFilterPlugin::filters() const
+{ 
 	return filterList;
 }
 
-bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb) 
+QList<QAction *> ExtraMeshFilterPlugin::actions() const {
+	return actionList;
+
+}
+
+bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb) 
 {
-	if(filter == tr("Loop Subdivision Surface") )
+	qDebug("%d " , filter->text());
+	if(filter->text() == tr("Loop Subdivision Surface") )
 	{
 		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
     //if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
@@ -60,7 +71,7 @@ bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWi
 			(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
 	}
-	if(filter == tr("Butterfly Subdivision Surface") )
+	if(filter->text() == tr("Butterfly Subdivision Surface") )
 	{
 		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
     //if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
@@ -75,18 +86,17 @@ bool ExtraMeshFilterPlugin::applyFilter(const QString &filter, MeshModel &m, QWi
 		//  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 	  //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 	}
-  if(filter == tr("Remove Unreferenced Vertexes"))
+  if(filter->text() == tr("Remove Unreferenced Vertexes"))
  	{
-  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+		int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 	//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
  	}
-  if(filter == tr("Remove Duplicated Vertexes"))
+  if(filter->text() == tr("Remove Duplicated Vertexes"))
  	{
-  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 	//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
  	}
   
 	return true;
 }
-
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)

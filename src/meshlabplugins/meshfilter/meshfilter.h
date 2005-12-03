@@ -24,18 +24,26 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QList>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshFilterInterface)
+	Q_OBJECT
+	Q_INTERFACES(MeshFilterInterface)
+		
+		public:
+	ExtraMeshFilterPlugin();
 
-public:
-    QStringList filters() const;
-    bool applyFilter(const QString &filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;
+	QStringList filters() const;
+	virtual QList<QAction *> actions() const;
+	bool applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;
+
+protected:
+	QList <QAction *> actionList;
+	QStringList filterList;
 };
 
 #endif
