@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.37  2005/12/03 15:41:21  glvertex
+showLog initial value set to true
+
 Revision 1.36  2005/12/02 17:51:17  glvertex
 removed some old plugin code to testing new interfaces
 
@@ -173,7 +176,7 @@ GLArea::GLArea(QWidget *parent)
 	cfps=0;
 	currentHeight=100;
 	currentWidth=200;
-	logVisible = false;
+	logVisible = true;
 	infoAreaVisible = false;
 	trackBallVisible = true;
 	time.start();
