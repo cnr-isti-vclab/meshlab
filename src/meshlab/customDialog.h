@@ -1,4 +1,4 @@
-#include "ui/ui_custom.h"
+#include "ui_custom.h"
 #include <QColor>
 #include <QDialog>
 #include <QColorDialog>
@@ -24,7 +24,7 @@ private slots:
 	void SetBackgroundTopColor();
 		
 private:
-	Ui::CDialogCustom ui;
+	Ui::Dialog ui;
 	Color4b cBackgroundBottom;
 	Color4b cBackgroundTop;
 	Color4b cLog;
