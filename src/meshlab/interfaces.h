@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.18  2005/12/03 16:05:18  glvertex
+solved some compatilbility issues
+
 Revision 1.17  2005/12/02 17:39:07  glvertex
 modified plugin import code. old plugins have been disabled cause of new interface.
 
@@ -77,7 +80,7 @@ Added copyright info
 class QWidget;
 class QIcon;
 class QString;
-class QList;
+//class QList;
 class QAction;
 class MeshModel;
 class RenderMode;

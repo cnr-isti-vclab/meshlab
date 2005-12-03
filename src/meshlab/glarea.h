@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.25  2005/12/03 16:05:18  glvertex
+solved some compatilbility issues
+
 Revision 1.24  2005/12/02 15:30:36  alemochi
 Changed fps, added a control
 
@@ -189,8 +192,8 @@ public:
 	QSize sizeHint() const;
 
 	
-  const RenderMode &  getCurrentRenderMode()const	{return rm;}
-	const	ColorSetting& getCustomSetting()const			{return cs;}
+  RenderMode &  getCurrentRenderMode()	{return rm;}
+	const ColorSetting& getCustomSetting()			const {return cs;}
 	void updateFps();
 	void renderFps();
 	
