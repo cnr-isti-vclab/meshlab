@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.13  2005/12/03 09:45:42  fmazzant
+ adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
+
  Revision 1.12  2005/12/02 23:36:52  fmazzant
  update to the new interface of MeshIOInterface
 
@@ -139,7 +142,7 @@ bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, in
 		Mask mymask = SaveMaskDialog::GetMask();
 		mask = SaveMaskDialog::MaskToInt(&mymask);
 
-		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),(bool)mymask.binary,mask,cb);//false va in base a Mask.binary!!!
+		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),(bool)mymask.binary,mask,cb);
 		return result;
 	}
 	return false;

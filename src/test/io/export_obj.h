@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.7  2005/12/03 09:45:43  fmazzant
+ adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
+
  Revision 1.6  2005/12/02 17:49:27  fmazzant
  added support for the rescue of the normal per vertex
 
@@ -76,10 +79,9 @@ namespace io {
 		static bool SaveASCII(SaveMeshType &m, const char * filename, ObjInfo &oi)	
 		{
 			CallBackPos *cb = oi.cb;
-
-			//TODO: aggiungere la maschera per salvare il file(o meglio che cosa dobbiamo salvare sul file)
+			
 			//TODO: avere la possibilita' di salvare il colore per vertice
-			//TODO: rendere effettivo il salvataggio delle coordinate di texture.
+			//TODO: salvare il materiale.
 
 			std::ofstream stream(filename);
 
@@ -96,7 +98,7 @@ namespace io {
 
 			//vertexs
 			VertexIterator vi;
-			if(true)//controllare maschera(mask)
+			if(oi.mask & vcg::ply::PLYMask::PM_VERTQUALITY)
 			{	
 				int numvert = 0;
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
@@ -113,7 +115,7 @@ namespace io {
 			//texture coords
 			FaceIterator fi;
 			std::map<vcg::TCoord2<float>,int> CoordIndexTexture;
-			if(true)//controllare maschera(mask)
+			if(oi.mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD)//controllare maschera(mask)
 			{
 				int numface = 0;
 				int value = 1;
@@ -136,7 +138,7 @@ namespace io {
 				
 			//vertexs normal
 			std::map<Point3f,int> NormalVertex;
-			if(true)//controllare maschera(mask)
+			if(oi.mask & vcg::ply::PLYMask::PM_WEDGNORMAL)//controllare maschera(mask)
 			{
 				int numvert = 0;
 				int value = 1;
@@ -155,7 +157,7 @@ namespace io {
 			}
 			
 			//faces
-			if(true)//controllare maschera(mask)
+			if(oi.mask & vcg::ply::PLYMask::PM_FACEQUALITY)//controllare maschera(mask)
 			{
 				int numface = 0;
 				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )

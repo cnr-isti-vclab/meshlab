@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2005/12/03 09:45:42  fmazzant
+ adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
+
  Revision 1.1  2005/12/02 17:40:26  fmazzant
  added dialog obj exporter.
 
@@ -31,6 +34,7 @@
 *****************************************************************************/
 
 #include "savemaskdialog.h"
+#include <wrap/ply/io_mask.h>
 #include <QMessageBox>
 #include <fstream>
 #include <iostream>
@@ -138,7 +142,16 @@ bool SaveMaskDialog::WriteMask(Mask *mask)
 	out.close();
 	return true;
 }
-int SaveMaskDialog::MaskToInt(Mask *mask)
+int SaveMaskDialog::MaskToInt(Mask *mymask)
 {
-	return -1;
+	int mask;
+	
+	if(mymask->texture)	{mask |= vcg::ply::PLYMask::PM_WEDGTEXCOORD;}
+	if(mymask->normal)	{mask |= vcg::ply::PLYMask::PM_WEDGNORMAL;}
+	if(mymask->colorV)	{mask |= vcg::ply::PLYMask::PM_VERTCOLOR; mask |= vcg::ply::PLYMask::PM_FACECOLOR;}
+	if(mymask->faces)	{mask |= vcg::ply::PLYMask::PM_FACEQUALITY;}
+	if(mymask->material){;}//non so!!!
+	if(mymask->vertexs)	{mask |= vcg::ply::PLYMask::PM_VERTQUALITY;}
+
+	return mask;
 }
