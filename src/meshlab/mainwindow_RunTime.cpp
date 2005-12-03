@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.12  2005/12/03 23:53:27  cignoni
+Re added filter and io plugins
+
 Revision 1.11  2005/12/03 23:40:31  davide_portelli
 Added FullScreen menu and TrackBall->Reset trackBall
 
@@ -332,7 +335,7 @@ void MainWindow::applyFilter()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 	qb->show();
-	//iFilter->applyFilter(action->text(),*(GLA()->mm ),this);
+	iFilter->applyFilter(action,*(GLA()->mm ),this,QCallBack);
 // OLD VERSION	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA(),QCallBack);
 	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
   qb->hide();

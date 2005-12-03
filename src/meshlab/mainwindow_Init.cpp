@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.9  2005/12/03 23:53:27  cignoni
+Re added filter and io plugins
+
 Revision 1.8  2005/12/03 23:40:31  davide_portelli
 Added FullScreen menu and TrackBall->Reset trackBall
 
@@ -528,6 +531,19 @@ void MainWindow::loadPlugins()
 			MeshRenderInterface *iDummy = qobject_cast<MeshRenderInterface *>(plugin);
 			if(iDummy)
 				addToMenu(iDummy->actions(),renderMenu,SLOT(applyRenderMode()));
+
+		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+			if (iFilter)
+				addToMenu(iFilter->actions(), filterMenu, SLOT(applyFilter()));
+
+		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+			if (iIO)
+			{
+				fileMenu->addSeparator();
+				addToMenu(iIO->formats(), fileMenu, SLOT(applyImportExport()));
+			  fileMenu->addSeparator();
+			}
+
 
 			pluginFileNames += fileName;
 		}
