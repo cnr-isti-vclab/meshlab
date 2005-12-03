@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.19  2005/12/03 23:50:15  cignoni
+changed io interface to return a list instead of a vector
+
 Revision 1.18  2005/12/03 16:05:18  glvertex
 solved some compatilbility issues
 
@@ -91,7 +94,7 @@ class MeshIOInterface
 public:
     virtual ~MeshIOInterface() {}
 
-		virtual std::vector<QAction *> actions() const = 0;
+		virtual QList<QAction *> formats() const = 0;
     
  virtual bool open(
       QAction *format, // "OBJ"
