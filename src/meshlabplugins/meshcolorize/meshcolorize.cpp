@@ -23,14 +23,14 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2005/12/03 23:23:37  ggangemi
+new interface
+
 Revision 1.3  2005/12/03 22:49:46  cignoni
 Added copyright info
 
 ****************************************************************************/
 #include <QtGui>
-
-#include <math.h>
-#include <stdlib.h>
 
 #include "meshcolorize.h"
 
@@ -152,19 +152,28 @@ static void Gaussian(CMeshO &m){
 
 }
 
-
-
-QStringList MeshColorCurvaturePlugin::colorsFrom() const{
-	return QStringList() << tr("Gaussian Curvature");
-}
-
-void MeshColorCurvaturePlugin::Compute(const QString &mode, MeshModel &m, QWidget *parent){
-	if(mode == tr("Gaussian Curvature"))
+void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, GLArea *parent){
+	if(mode->text() == tr("Gaussian Curvature"))
 	{
 		Gaussian(m.cm);
 		vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
+		return;
 	}
-};
-
+	if(mode->text() == tr("None"))
+	{
+		//parent->setColorMode(GLW::CMNone);
+		return;
+	}
+	if(mode->text() == tr("Per Face"))
+	{
+		//parent->setColorMode(GLW::CMPerFace);
+		return;
+	}
+	if(mode->text() == tr("Per Vertex"))
+	{
+		//parent->setColorMode(GLW::CMPerVert);
+		return;
+	}
+}
 
 Q_EXPORT_PLUGIN(MeshColorCurvaturePlugin)

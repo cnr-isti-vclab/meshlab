@@ -23,10 +23,14 @@
 #define EXTRACURVATUREPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
+#include <QAction>
+#include <QList>
 
+#include <math.h>
+//#include <stdlib.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <meshlab/glarea.h>
 
 #include <vcg/math/base.h>
 #include <vcg/math/histogram.h>
@@ -38,11 +42,21 @@ class MeshColorCurvaturePlugin : public QObject, public MeshColorizeInterface
     Q_OBJECT
     Q_INTERFACES(MeshColorizeInterface)
 
+		QList <QAction *> actionList;
+
 public:
-    virtual void Compute(const QString &mode, MeshModel &m, QWidget *parent);
-    //virtual void Show(QString &mode, bool show, MeshModel &m, QWidget *parent) {};
-    //virtual void Finalize(QString &mode, MeshModel &m, QWidget *parent){};
-    QStringList colorsFrom() const;
+
+		MeshColorCurvaturePlugin()
+		{
+			actionList << new QAction(QString("None"),this);
+			actionList << new QAction(QString("Per Face"),this);
+			actionList << new QAction(QString("Per Vertex"),this);
+			actionList << new QAction(QString("Gaussian Curvature"),this);
+		}
+    
+		void Compute(QAction * mode, MeshModel &m, GLArea *parent);
+    
+		QList<QAction *> actions() const { return actionList; }
 
 };
 
