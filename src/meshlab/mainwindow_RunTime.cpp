@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.9  2005/12/03 21:29:34  davide_portelli
+Correct bug
+
 Revision 1.8  2005/12/03 19:05:39  davide_portelli
 Added About menu.
 
@@ -502,7 +505,7 @@ void MainWindow::open(QString fileName)
 			workspace->addWindow(gla);
 			if(workspace->isVisible()) gla->showMaximized();
 			else QTimer::singleShot(00, gla, SLOT(showMaximized()));
-      //setCurrentFile(fileName);
+      setCurrentFile(fileName);
       
 			//return;
 		}
