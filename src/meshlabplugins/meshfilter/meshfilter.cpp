@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2005/12/03 23:46:11  cignoni
+Cleaned up a little and added a remove null faces filter
+
 Revision 1.11  2005/12/03 22:50:06  cignoni
 Added copyright info
 
@@ -44,18 +47,11 @@ using namespace vcg;
 
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
-	filterList << tr("Loop Subdivision Surface");
-	filterList << tr("Butterfly Subdivision Surface");
-	filterList << tr("Remove Unreferenced Vertexes");
-	filterList << tr("Remove Duplicated Vertexes");
 	actionList << new QAction("Loop Subdivision Surface", this);
-	actionList << new QAction("Butterfly Subdivision Surface", this);
-
-}
-
-QStringList ExtraMeshFilterPlugin::filters() const
-{ 
-	return filterList;
+	actionList << new QAction("Loop Subdivision Surface", this);
+	actionList << new QAction("Remove Unreferenced Vertexes", this);
+	actionList << new QAction("Remove Duplicated Vertexes", this);
+	actionList << new QAction("Remove Null Faces", this);
 }
 
 QList<QAction *> ExtraMeshFilterPlugin::actions() const {
@@ -102,9 +98,16 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
   if(filter->text() == tr("Remove Duplicated Vertexes"))
  	{
 		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-	//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+      cb(100,tr("Removed vertices : %1.").arg(delvert).toLocal8Bit());
+	   //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
  	}
-  
+   if(filter->text() == tr("Remove Null Faces"))
+ 	{
+		  int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
+      cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
+	   //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+ 	}
+
 	return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)

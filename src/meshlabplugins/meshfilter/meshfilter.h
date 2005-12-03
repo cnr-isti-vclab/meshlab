@@ -37,13 +37,11 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 		public:
 	ExtraMeshFilterPlugin();
 
-	QStringList filters() const;
 	virtual QList<QAction *> actions() const;
 	bool applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;
 
 protected:
 	QList <QAction *> actionList;
-	QStringList filterList;
 };
 
 #endif
