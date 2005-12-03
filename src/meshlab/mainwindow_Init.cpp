@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.5  2005/12/03 17:04:34  glvertex
+Added backface culling action and slots
+Added shortcuts for fancy and double lighting
+
 Revision 1.4  2005/12/03 16:07:14  glvertex
 Added samples for core-plugin calls
 
@@ -309,12 +313,21 @@ void MainWindow::createActions()
 	setDoubleLightingAct= new QAction(tr("&Double side lighting"),this);
 	setDoubleLightingAct->setCheckable(true);
 	setDoubleLightingAct->setChecked(false);
+	setDoubleLightingAct->setShortcut(tr("Ctrl+D"));
 	connect(setDoubleLightingAct, SIGNAL(triggered()), this, SLOT(SetDoubleLighting()));
 
 	setFancyLightingAct	  = new QAction(tr("&Fancy Lighting"),this);
 	setFancyLightingAct->setCheckable(true);
 	setFancyLightingAct->setChecked(false);
+	setFancyLightingAct->setShortcut(tr("Ctrl+F"));
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(SetFancyLighting()));
+
+	backFaceCullAct 	  = new QAction(tr("&BackFace Culling"),this);
+	backFaceCullAct->setCheckable(true);
+	backFaceCullAct->setChecked(false);
+	backFaceCullAct->setShortcut(tr("Ctrl+K"));
+	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
+
 
 	setCustomizeAct	  = new QAction(tr("&Customize Colors"),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(SetCustomize()));
@@ -413,6 +426,7 @@ void MainWindow::createMenus()
 //  renderMenu->addAction(lightingModeAct);
 //	lightingModeAct->addAction(setLightAct);
 	renderModeMenu=renderMenu->addMenu(tr("Render Mode"));
+	renderModeMenu->addAction(backFaceCullAct);
 	renderModeMenu->addActions(renderModeGroup->actions());
 	
 	lightingModeMenu=renderMenu->addMenu(tr("Lighting"));

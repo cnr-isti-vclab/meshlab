@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.39  2005/12/03 17:04:34  glvertex
+Added backface culling action and slots
+Added shortcuts for fancy and double lighting
+
 Revision 1.38  2005/12/03 16:26:45  vannini
 New code for snapshot and tiled rendering (disabled by default because not fully functional)
 
@@ -557,9 +561,18 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 
 }
 
+void GLArea::setBackFaceCulling(bool enabled)
+{
+	glDisable(GL_CULL_FACE);
+	if(enabled)
+		glEnable(GL_CULL_FACE);
 
+	rm.BackFaceCull = enabled;
 
-inline void GLArea::SetLightModel()
+	updateGL();
+}
+
+void GLArea::SetLightModel()
 {
   static GLfloat standard_front[]={1.f,1.f,1.f,1.f};
   static GLfloat standard_back[]={1.f,1.f,1.f,1.f};

@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.7  2005/12/03 17:04:34  glvertex
+Added backface culling action and slots
+Added shortcuts for fancy and double lighting
+
 Revision 1.6  2005/12/03 16:07:14  glvertex
 Added samples for core-plugin calls
 
@@ -295,6 +299,7 @@ void MainWindow::updateMenus()
 		showLogAct->setChecked(GLA()->isLogVisible());
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
+		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().BackFaceCull);
 		
 		setLightAct->setIcon(rm.Lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
 		setLightAct->setChecked(rm.Lighting);
@@ -460,6 +465,13 @@ void MainWindow::SetFancyLighting()
 	const RenderMode &rm=GLA()->getCurrentRenderMode();
 	if (rm.FancyLighting) GLA()->setLightMode(false,LFANCY);
 	else GLA()->setLightMode(true,LFANCY);
+}
+
+void MainWindow::toggleBackFaceCulling()
+{
+	RenderMode &rm = GLA()->getCurrentRenderMode();
+
+	GLA()->setBackFaceCulling(!rm.BackFaceCull);
 }
 
 void MainWindow::open(QString fileName)

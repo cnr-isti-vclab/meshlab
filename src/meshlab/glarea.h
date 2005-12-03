@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.27  2005/12/03 17:04:34  glvertex
+Added backface culling action and slots
+Added shortcuts for fancy and double lighting
+
 Revision 1.26  2005/12/03 16:26:45  vannini
 New code for snapshot and tiled rendering (disabled by default because not fully functional)
 
@@ -204,6 +208,7 @@ public:
 	bool isTrackBallVisible()		{return trackBallVisible;}
 
 
+	void setBackFaceCulling(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setColorMode(vcg::GLW::ColorMode mode);

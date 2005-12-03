@@ -70,6 +70,7 @@ private slots:
 	void SetFancyLighting();
 	void applyRenderMode();
 	void applyColorMode();
+	void toggleBackFaceCulling();
 	///////////Slot Menu View ////////////////////////
 	void showToolbarFile();
 	void showToolbarRender();
@@ -153,6 +154,7 @@ private:
 	QAction *setDoubleLightingAct;
 	QAction *setFancyLightingAct;
 	QAction *setLightAct;
+	QAction *backFaceCullAct;
 	///////////Action Menu View ////////////////////////
 	QAction *showToolbarStandardAct;
 	QAction *showToolbarRenderAct;
