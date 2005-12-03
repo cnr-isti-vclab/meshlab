@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.10  2005/12/03 23:25:40  ggangemi
+re-added meshcolorizeplugin support
+
 Revision 1.9  2005/12/03 21:29:34  davide_portelli
 Correct bug
 
@@ -373,13 +376,14 @@ void MainWindow::applyColorMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(action->parent());
-// OLD VERSION	iColor->Compute(action->text(),*(GLA()->mm ), GLA());
-	
-	// when apply colorize we have to switch to a different color mode!!
-	// Still not working
-	GLA()->setColorMode(GLW::CMPerVert);
-
-	GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());// .data());
+  iColor->Compute(action,*(GLA()->mm ), GLA());
+	if (action->isChecked()) {
+		action->setChecked(true);
+    GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
+	} else {
+		action->setChecked(false);
+		GLA()->log.Log(GLLogStream::Info,"Turning off colorize %s",action->text().toLocal8Bit().constData());
+	}
 }
 
 void MainWindow::applyImportExport()

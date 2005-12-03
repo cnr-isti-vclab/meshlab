@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.7  2005/12/03 23:25:10  ggangemi
+re-added meshcolorizeplugin support
+
 Revision 1.6  2005/12/03 19:05:39  davide_portelli
 Added About menu.
 
@@ -510,6 +513,12 @@ void MainWindow::loadPlugins()
 			//
 			//}
 // NEW VERSION
+
+			
+			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
+			if (iColor)
+			addToMenu(iColor->actions(), colorModeMenu, SLOT(applyColorMode()));
+			
 			MeshRenderInterface *iDummy = qobject_cast<MeshRenderInterface *>(plugin);
 			if(iDummy)
 				addToMenu(iDummy->actions(),renderMenu,SLOT(applyRenderMode()));
@@ -525,6 +534,7 @@ void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char 
 	foreach (QAction *a, actionList)
 	{
 		connect(a,SIGNAL(triggered()),this,slot);
+		a->setCheckable(true);
 		menu->addAction(a);
 	}
 // OLD LOOP CORE		
