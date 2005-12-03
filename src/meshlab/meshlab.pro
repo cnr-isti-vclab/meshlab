@@ -20,7 +20,8 @@ SOURCES        = main.cpp \
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp
 
-FORMS          = ui/custom.ui
+FORMS          = ui/custom.ui\
+								 ui/aboutForm.ui
 
 
 RESOURCES     = meshlab.qrc

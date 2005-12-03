@@ -170,7 +170,6 @@ private:
 	QAction *setCustomizeAct;
 	///////////Action Menu Help ////////////////////////
 	QAction *aboutAct;
-	QAction *aboutQtAct;
 	QAction *aboutPluginsAct;
 	/////////////////////////////////////////////
 	vector<QAction *> TotalRenderList;

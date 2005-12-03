@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.6  2005/12/03 19:05:39  davide_portelli
+Added About menu.
+
 Revision 1.5  2005/12/03 17:04:34  glvertex
 Added backface culling action and slots
 Added shortcuts for fancy and double lighting
@@ -379,9 +382,6 @@ void MainWindow::createActions()
 	aboutAct = new QAction(tr("&About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-	aboutQtAct = new QAction(tr("About &Qt"), this);
-	connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-
 	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
 	connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
 }
@@ -464,7 +464,6 @@ void MainWindow::createMenus()
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAct);
-	helpMenu->addAction(aboutQtAct);
 	helpMenu->addAction(aboutPluginsAct);
 }
 

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.8  2005/12/03 19:05:39  davide_portelli
+Added About menu.
+
 Revision 1.7  2005/12/03 17:04:34  glvertex
 Added backface culling action and slots
 Added shortcuts for fancy and double lighting
@@ -215,7 +218,7 @@ First rough version. It simply load a mesh.
 #include "glarea.h"
 #include "plugindialog.h"
 #include "customDialog.h"		
-
+#include "ui_aboutForm.h"
 //QProgressBar *MainWindow::qb;
 
 void MainWindow::updateRecentFileActions()
@@ -540,9 +543,10 @@ bool MainWindow::saveSnapshot()
 }
 void MainWindow::about()
 {
-	QMessageBox::about(this, tr("About Plug & Paint"),
-		tr("The <b>Plug & Paint</b> example demonstrates how to write Qt "
-		"applications that can be extended through plugins."));
+	QDialog *about_dialog = new QDialog();
+	Ui::aboutDialog temp;
+	temp.setupUi(about_dialog);
+	about_dialog->show();
 }
 
 void MainWindow::aboutPlugins()
