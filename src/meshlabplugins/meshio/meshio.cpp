@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.14  2005/12/03 23:46:56  cignoni
+ Adapted to the new plugin interface in a more standard way
+
  Revision 1.13  2005/12/03 09:45:42  fmazzant
  adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
 
@@ -69,12 +72,12 @@
 using namespace vcg;
 
 
-QStringList ExtraMeshIOPlugin::formats() const //devenuto obsoleto!!!!!da eliminare!!!!!
-{
-  return QStringList() << tr("Import OBJ") << tr("Export OBJ");
-}
+//QStringList ExtraMeshIOPlugin::formats() const //devenuto obsoleto!!!!!da eliminare!!!!!
+//{
+//  return QStringList() << tr("Import OBJ") << tr("Export OBJ");
+//}
 
-bool ExtraMeshIOPlugin::open(QAction *format,QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
+bool ExtraMeshIOPlugin::open(QAction *format, QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
 {
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
@@ -152,14 +155,14 @@ bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, in
 	implementato per rendere possibile la COMPILAZIONE!!!!!!!!!!!
 	da aggiustare per renderlo piu' bello!!!! :)
 */
-std::vector<QAction *> ExtraMeshIOPlugin::actions() const
+QList<QAction *> ExtraMeshIOPlugin::formats() const
 {
-	std::vector<QAction *> v;
-	QAction *import = new QAction("Import OBJ",new QObject());
-	QAction *export = new QAction("Export OBJ",new QObject());
-	v.insert(v.end(),import);
-	v.insert(v.end(),export);
-	return v;
+  return actionList;
+}
+
+ExtraMeshIOPlugin::ExtraMeshIOPlugin() {
+  actionList << new QAction("Import OBJ", this);
+	actionList << new QAction("Export OBJ", this);
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)

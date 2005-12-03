@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.11  2005/12/03 23:46:56  cignoni
+ Adapted to the new plugin interface in a more standard way
+
  Revision 1.10  2005/12/03 22:50:06  cignoni
  Added copyright info
 
@@ -58,13 +61,18 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshIOInterface)
+
   
 public:
-	QStringList formats() const; //obsoleto!!!!!!!
+	//QStringList formats() const; //obsoleto!!!!!!!
+	ExtraMeshIOPlugin();
 	
 	bool open(QAction *format, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(QAction *format, QString &fileName, MeshModel &m,int mask,vcg::CallBackPos *cb=0, QWidget *parent= 0);
-	std::vector<QAction *> actions() const;
+	QList<QAction *> formats() const;
+  protected:
+	QList <QAction *> actionList;
+
 };
 
 #endif
