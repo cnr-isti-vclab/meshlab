@@ -39,5 +39,5 @@ unix{
 	QMAKE_CC	 = gcc-3.3
 	QMAKE_CXX	 = g++-3.3
 	QMAKE_LINK	 = gcc-3.3
-	CONFIG		+= debug
+	CONFIG		+= warn_off debug
 }
