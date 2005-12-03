@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.4  2005/12/03 16:07:14  glvertex
+Added samples for core-plugin calls
+
 Revision 1.3  2005/12/02 17:39:07  glvertex
 modified plugin import code. old plugins have been disabled cause of new interface.
 
@@ -330,6 +333,7 @@ void MainWindow::createActions()
 
 	showLogAct= new QAction (tr("Show &Infos"), this);
 	showLogAct->setCheckable(true);
+	showLogAct->setChecked(true);
 	connect(showLogAct, SIGNAL(triggered()), this, SLOT(showLog()));
 
 	showInfoPaneAct= new QAction (tr("Show Info &Pane"), this);
@@ -495,9 +499,7 @@ void MainWindow::loadPlugins()
 // NEW VERSION
 			MeshRenderInterface *iDummy = qobject_cast<MeshRenderInterface *>(plugin);
 			if(iDummy)
-				renderMenu->addActions(iDummy->actions());
-
-
+				addToMenu(iDummy->actions(),renderMenu,SLOT(applyRenderMode()));
 
 			pluginFileNames += fileName;
 		}
@@ -505,21 +507,24 @@ void MainWindow::loadPlugins()
 	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && workspace->activeWindow());
 }
 
-void MainWindow::addToMenu(QObject *plugin, const QStringList &texts,QMenu *menu, const char *member,
-													 QActionGroup *actionGroup,bool chackable)
+void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
 {
-	foreach (QString text, texts) {
-		QAction *action = new QAction(text, plugin);
-		TotalRenderList.push_back(action);
-		connect(action, SIGNAL(triggered()), this, member);
-		action->setCheckable(chackable);
-		menu->addAction(action);
-
-		if (actionGroup) {
-			action->setCheckable(true);
-			actionGroup->addAction(action);
-		}
+	foreach (QAction *a, actionList)
+	{
+		connect(a,SIGNAL(triggered()),this,slot);
+		menu->addAction(a);
 	}
+// OLD LOOP CORE		
+//		QAction *action = new QAction(text, plugin);
+//		TotalRenderList.push_back(action);
+//		connect(action, SIGNAL(triggered()), this, member);
+//		action->setCheckable(chackable);
+//		menu->addAction(action);
+//
+//		if (actionGroup) {
+//			action->setCheckable(true);
+//			actionGroup->addAction(action);
+//		}
 }
 
 void MainWindow::setCurrentFile(const QString &fileName)

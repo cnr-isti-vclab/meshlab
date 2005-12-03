@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.6  2005/12/03 16:07:14  glvertex
+Added samples for core-plugin calls
+
 Revision 1.5  2005/12/02 17:39:07  glvertex
 modified plugin import code. old plugins have been disabled cause of new interface.
 
@@ -321,27 +324,37 @@ void MainWindow::applyFilter()
 
 void MainWindow::applyRenderMode()
 {
-	QAction *action = qobject_cast<QAction *>(sender());
+	// NEW VERSION
+	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal 
+
+	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	if(GLA()->iRendersList==0){
-		GLA()->iRendersList= new list<pair<QAction *,MeshRenderInterface *> >;
-		GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
-		GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
-	}else{
-		bool found=false;
-		pair<QAction *,MeshRenderInterface *> p;
-		foreach(p,*GLA()->iRendersList){
-			if(iRenderTemp==p.second && p.first->text()==action->text()){
-				GLA()->iRendersList->remove(p);
-				GLA()->log.Log(0,"Disabled Render mode %s",action->text().toLocal8Bit().constData());// .data());
-				found=true;
-			} 
-		}
-		if(!found){
-			GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
-			GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
-		}
-	}
+	iRenderTemp->Render(action,*(GLA()->mm),GLA()->getCurrentRenderMode(),GLA());
+
+	GLA()->log.Log(GLLogStream::Info,"%s",action->text().toLocal8Bit().constData());	// Prints out action name
+	
+	// OLD VERSION
+	//QAction *action = qobject_cast<QAction *>(sender());
+	//MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
+	//if(GLA()->iRendersList==0){
+	//	GLA()->iRendersList= new list<pair<QAction *,MeshRenderInterface *> >;
+	//	GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
+	//	GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
+	//}else{
+	//	bool found=false;
+	//	pair<QAction *,MeshRenderInterface *> p;
+	//	foreach(p,*GLA()->iRendersList){
+	//		if(iRenderTemp==p.second && p.first->text()==action->text()){
+	//			GLA()->iRendersList->remove(p);
+	//			GLA()->log.Log(0,"Disabled Render mode %s",action->text().toLocal8Bit().constData());// .data());
+	//			found=true;
+	//		} 
+	//	}
+	//	if(!found){
+	//		GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
+	//		GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
+	//	}
+	//}
 }
 
 

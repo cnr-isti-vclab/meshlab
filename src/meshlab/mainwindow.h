@@ -97,8 +97,7 @@ private:
 	void loadPlugins();
 	void updateRecentFileActions();				
 	void setCurrentFile(const QString &fileName);			
-	void addToMenu(QObject *plugin, const QStringList &texts, QMenu *menu,
-								const char *member, QActionGroup *actionGroup = 0,bool chackable = false);
+	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
  
 
 
