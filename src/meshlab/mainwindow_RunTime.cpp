@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.11  2005/12/03 23:40:31  davide_portelli
+Added FullScreen menu and TrackBall->Reset trackBall
+
 Revision 1.10  2005/12/03 23:25:40  ggangemi
 re-added meshcolorizeplugin support
 
@@ -452,7 +455,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	return true;
 }
 
-void MainWindow::SetLight()			     
+void MainWindow::setLight()			     
 {
 // Is this check needed???
 //	if (!GLA())
@@ -463,14 +466,14 @@ void MainWindow::SetLight()
 };
 
 
-void MainWindow::SetDoubleLighting()
+void MainWindow::setDoubleLighting()
 {
 	const RenderMode &rm=GLA()->getCurrentRenderMode();
 	if (rm.DoubleSideLighting) GLA()->setLightMode(false,LDOUBLE);
 	else GLA()->setLightMode(true,LDOUBLE);
 }
 
-void MainWindow::SetFancyLighting()
+void MainWindow::setFancyLighting()
 {
 	const RenderMode &rm=GLA()->getCurrentRenderMode();
 	if (rm.FancyLighting) GLA()->setLightMode(false,LFANCY);
@@ -579,11 +582,11 @@ void MainWindow::showToolbarRender(){
 	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
 }
 
-void MainWindow::showLog()			{if(GLA() != 0)		GLA()->showLog(!GLA()->isLogVisible());}
-void MainWindow::showInfoPane() {if(GLA() != 0)		GLA()->showInfoArea(!GLA()->isInfoAreaVisible());}
-void MainWindow::showTrackBall(){if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
-
-void MainWindow::SetCustomize()
+void MainWindow::showLog()			 {if(GLA() != 0)	GLA()->showLog(!GLA()->isLogVisible());}
+void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->showInfoArea(!GLA()->isInfoAreaVisible());}
+void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
+void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->trackball.Reset();}
+void MainWindow::setCustomize()
 {
 	/*QColor backColor=QColorDialog::getColor(QColor(255,255,255,255),this);
 	GLA()->setBackground(backColor);*/
@@ -600,10 +603,31 @@ void MainWindow::SetCustomize()
 	
 }
 
-void MainWindow::RenderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
-void MainWindow::RenderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
-void MainWindow::RenderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
-void MainWindow::RenderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
-void MainWindow::RenderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
-void MainWindow::RenderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
-void MainWindow::RenderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
+void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
+void MainWindow::renderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
+void MainWindow::renderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
+void MainWindow::renderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
+void MainWindow::renderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
+void MainWindow::renderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
+void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
+void MainWindow::fullScreen(){
+	menuBar()->hide();
+	mainToolBar->hide();
+	renderToolBar->hide();
+	showFullScreen();
+	bool found=true;
+	//Caso di piu' finestre aperte in tile:
+	if((workspace->windowList()).size()>0){
+		foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
+		if (found){workspace->tile();}
+	}
+}
+void MainWindow::keyPressEvent(QKeyEvent *e){
+	if(e->key()==Qt::Key_Escape && isFullScreen()){
+		menuBar()->show();
+		mainToolBar->show();
+		renderToolBar->show();
+		showNormal();
+		fullScreenAct->setChecked(false);
+	}
+}

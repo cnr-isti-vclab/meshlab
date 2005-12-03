@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.8  2005/12/03 23:40:31  davide_portelli
+Added FullScreen menu and TrackBall->Reset trackBall
+
 Revision 1.7  2005/12/03 23:25:10  ggangemi
 re-added meshcolorizeplugin support
 
@@ -278,68 +281,64 @@ void MainWindow::createActions()
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////
-	renderModeGroup = new QActionGroup(this);
+	renderModeGroupAct = new QActionGroup(this);
 	
-	renderBboxAct	  = new QAction(QIcon(":/images/bbox.png"),tr("&Bounding box"), renderModeGroup);
+	renderBboxAct	  = new QAction(QIcon(":/images/bbox.png"),tr("&Bounding box"), renderModeGroupAct);
 	renderBboxAct->setCheckable(true);
-	//renderBboxAct->setChecked(true);
-	connect(renderBboxAct, SIGNAL(triggered()), this, SLOT(RenderBbox()));
+	connect(renderBboxAct, SIGNAL(triggered()), this, SLOT(renderBbox()));
 	
 	
-	renderModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), renderModeGroup);
+	renderModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), renderModeGroupAct);
 	renderModePointsAct->setCheckable(true);
-	connect(renderModePointsAct, SIGNAL(triggered()), this, SLOT(RenderPoint()));
+	connect(renderModePointsAct, SIGNAL(triggered()), this, SLOT(renderPoint()));
 
-	renderModeWireAct		  = new QAction(QIcon(":/images/wire.png"),tr("&Wireframe"), renderModeGroup);
+	renderModeWireAct		  = new QAction(QIcon(":/images/wire.png"),tr("&Wireframe"), renderModeGroupAct);
 	renderModeWireAct->setCheckable(true);
-	connect(renderModeWireAct, SIGNAL(triggered()), this, SLOT(RenderWire()));
+	connect(renderModeWireAct, SIGNAL(triggered()), this, SLOT(renderWire()));
 
-	renderModeHiddenLinesAct		  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"), renderModeGroup);
+	renderModeHiddenLinesAct		  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"), renderModeGroupAct);
 	renderModeHiddenLinesAct->setCheckable(true);
-	connect(renderModeHiddenLinesAct, SIGNAL(triggered()), this, SLOT(RenderHiddenLines()));
+	connect(renderModeHiddenLinesAct, SIGNAL(triggered()), this, SLOT(renderHiddenLines()));
 
-	renderModeFlatLinesAct = new QAction(QIcon(":/images/flatlines.png"),tr("Flat &Lines"), renderModeGroup);
+	renderModeFlatLinesAct = new QAction(QIcon(":/images/flatlines.png"),tr("Flat &Lines"), renderModeGroupAct);
 	renderModeFlatLinesAct->setCheckable(true);
-	connect(renderModeFlatLinesAct, SIGNAL(triggered()), this, SLOT(RenderFlatLine()));
+	connect(renderModeFlatLinesAct, SIGNAL(triggered()), this, SLOT(renderFlatLine()));
 
-	renderModeFlatAct		  = new QAction(QIcon(":/images/flat.png"),tr("&Flat"), renderModeGroup);
+	renderModeFlatAct		  = new QAction(QIcon(":/images/flat.png"),tr("&Flat"), renderModeGroupAct);
 	renderModeFlatAct->setCheckable(true);
-	connect(renderModeFlatAct, SIGNAL(triggered()), this, SLOT(RenderFlat()));
+	connect(renderModeFlatAct, SIGNAL(triggered()), this, SLOT(renderFlat()));
 
-	renderModeSmoothAct	  = new QAction(QIcon(":/images/smooth.png"),tr("&Smooth"), renderModeGroup);
+	renderModeSmoothAct	  = new QAction(QIcon(":/images/smooth.png"),tr("&Smooth"), renderModeGroupAct);
 	renderModeSmoothAct->setCheckable(true);
 	renderModeSmoothAct->setChecked(true);
-	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(RenderSmooth()));
+	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(renderSmooth()));
 
 	setLightAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"),this);
 	setLightAct->setCheckable(true);
 	setLightAct->setChecked(true);
-	connect(setLightAct, SIGNAL(triggered()), this, SLOT(SetLight()));
+	connect(setLightAct, SIGNAL(triggered()), this, SLOT(setLight()));
 
 	setDoubleLightingAct= new QAction(tr("&Double side lighting"),this);
 	setDoubleLightingAct->setCheckable(true);
-	setDoubleLightingAct->setChecked(false);
 	setDoubleLightingAct->setShortcut(tr("Ctrl+D"));
-	connect(setDoubleLightingAct, SIGNAL(triggered()), this, SLOT(SetDoubleLighting()));
+	connect(setDoubleLightingAct, SIGNAL(triggered()), this, SLOT(setDoubleLighting()));
 
 	setFancyLightingAct	  = new QAction(tr("&Fancy Lighting"),this);
 	setFancyLightingAct->setCheckable(true);
-	setFancyLightingAct->setChecked(false);
 	setFancyLightingAct->setShortcut(tr("Ctrl+F"));
-	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(SetFancyLighting()));
+	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(setFancyLighting()));
 
 	backFaceCullAct 	  = new QAction(tr("&BackFace Culling"),this);
 	backFaceCullAct->setCheckable(true);
-	backFaceCullAct->setChecked(false);
 	backFaceCullAct->setShortcut(tr("Ctrl+K"));
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
-
-
-	setCustomizeAct	  = new QAction(tr("&Customize Colors"),this);
-	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(SetCustomize()));
-
 	
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
+	fullScreenAct = new QAction (tr("&FullScreen"), this);
+	fullScreenAct->setCheckable(true);
+	fullScreenAct->setChecked(false);
+	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(fullScreen()));
+
 	showToolbarStandardAct = new QAction (tr("&Standard"), this);
 	showToolbarStandardAct->setCheckable(true);
 	showToolbarStandardAct->setChecked(true);
@@ -352,7 +351,6 @@ void MainWindow::createActions()
 
 	showLogAct= new QAction (tr("Show &Infos"), this);
 	showLogAct->setCheckable(true);
-	showLogAct->setChecked(true);
 	connect(showLogAct, SIGNAL(triggered()), this, SLOT(showLog()));
 
 	showInfoPaneAct= new QAction (tr("Show Info &Pane"), this);
@@ -365,6 +363,9 @@ void MainWindow::createActions()
 	showTrackBallAct->setChecked(true);
 	connect(showTrackBallAct, SIGNAL(triggered()), this, SLOT(showTrackBall()));
 
+	resetTrackBallAct = new QAction (tr("Reset &Trackball"), this);
+	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
+
 	//////////////Action Menu Windows /////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
 	connect(windowsTileAct, SIGNAL(triggered()), this, SLOT(windowsTile()));
@@ -373,13 +374,14 @@ void MainWindow::createActions()
 	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
 
 	closeAct = new QAction(tr("Cl&ose"), this);
-	closeAct->setShortcut(tr("Ctrl+F4"));
-	closeAct->setStatusTip(tr("Close the active window"));
 	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
 
 	closeAllAct = new QAction(tr("Close &All"), this);
-	closeAllAct->setStatusTip(tr("Close all the windows"));
 	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
+	
+	//////////////Action Menu Preferences //////////////////////////////////////////////////////
+	setCustomizeAct	  = new QAction(tr("&Customize Colors"),this);
+	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
 
 	//////////////Action Menu About ////////////////////////////////////////////////////////////
 	aboutAct = new QAction(tr("&About"), this);
@@ -399,7 +401,7 @@ void MainWindow::createToolBars()
 
 	renderToolBar = addToolBar(tr("Render"));
 	renderToolBar->setIconSize(QSize(32,32));
-	renderToolBar->addActions(renderModeGroup->actions());
+	renderToolBar->addActions(renderModeGroupAct->actions());
 	renderToolBar->addAction(setLightAct);
 }
 
@@ -423,14 +425,14 @@ void MainWindow::createMenus()
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
-  //renderMenu->addActions(renderModeGroup->actions());
+  //renderMenu->addActions(renderModeGroupAct->actions());
 	//renderMenu->addAction(setLightAct);
 //  renderMenu->addAction(renderModeAct);
 //  renderMenu->addAction(lightingModeAct);
 //	lightingModeAct->addAction(setLightAct);
 	renderModeMenu=renderMenu->addMenu(tr("Render Mode"));
 	renderModeMenu->addAction(backFaceCullAct);
-	renderModeMenu->addActions(renderModeGroup->actions());
+	renderModeMenu->addActions(renderModeGroupAct->actions());
 	
 	lightingModeMenu=renderMenu->addMenu(tr("Lighting"));
 	lightingModeMenu->addAction(setLightAct);
@@ -444,11 +446,16 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
-	viewMenu->addAction(showTrackBallAct);
+	viewMenu->addAction(fullScreenAct);
+
+	trackBallMenu = viewMenu->addMenu(tr("&TrackBall"));
+	trackBallMenu->addAction(showTrackBallAct);
+	trackBallMenu->addAction(resetTrackBallAct);
 	
-	QMenu *logMenu = viewMenu->addMenu(tr("&Info"));
+	logMenu = viewMenu->addMenu(tr("&Info"));
 	logMenu->addAction(showInfoPaneAct);
 	logMenu->addAction(showLogAct);
+
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(showToolbarStandardAct);
 	toolBarMenu->addAction(showToolbarRenderAct);
@@ -458,7 +465,6 @@ void MainWindow::createMenus()
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
 	menuBar()->addSeparator();
-
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Preferences"));

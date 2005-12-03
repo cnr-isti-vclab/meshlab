@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.37  2005/12/03 23:40:31  davide_portelli
+Added FullScreen menu and TrackBall->Reset trackBall
+
 Revision 1.36  2005/12/03 22:49:46  cignoni
 Added copyright info
 
@@ -66,32 +69,34 @@ private slots:
 	///////////Slot Menu Filter ////////////////////////
 	void applyFilter();
 	/////////// Slot Menu Render /////////////////////
-	void RenderBbox();
-	void RenderPoint();
-	void RenderWire();
-	void RenderFlat();
-	void RenderFlatLine();
-	void RenderHiddenLines();
-	void RenderSmooth();
-	void SetLight();
-	void SetDoubleLighting();
-	void SetFancyLighting();
+	void renderBbox();
+	void renderPoint();
+	void renderWire();
+	void renderFlat();
+	void renderFlatLine();
+	void renderHiddenLines();
+	void renderSmooth();
+	void setLight();
+	void setDoubleLighting();
+	void setFancyLighting();
 	void applyRenderMode();
 	void applyColorMode();
 	void toggleBackFaceCulling();
 	///////////Slot Menu View ////////////////////////
+	void fullScreen();
 	void showToolbarFile();
 	void showToolbarRender();
 	void showLog();
 	void showInfoPane();
 	void showTrackBall();
+	void resetTrackBall();
 	///////////Slot Menu Windows /////////////////////
 	void windowsTile();
 	void windowsCascade();
 	void updateWindowMenu();
 	void updateMenus();
 	///////////Slot Menu Preferences /////////////////
-	void SetCustomize();
+	void setCustomize();
 	///////////Slot Menu Help ////////////////////////
 	void about();
 	void aboutPlugins();	
@@ -104,6 +109,7 @@ private:
 	void createMenus();
 	void createToolBars();
 	void loadPlugins();
+	void keyPressEvent(QKeyEvent *);
 	void updateRecentFileActions();				
 	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
@@ -136,6 +142,8 @@ private:
 	QMenu *colorModeMenu;
 	//View Menu and SubMenu /////
 	QMenu *viewMenu;
+	QMenu *trackBallMenu;
+	QMenu *logMenu;
 	QMenu *toolBarMenu;
 	////////////////////////
 	QMenu *windowsMenu;
@@ -151,7 +159,7 @@ private:
 	QAction *separatorAct;										
 	QAction *exitAct;
 	/////////// Action Menu Render /////////////////////
-	QActionGroup *renderModeGroup;
+	QActionGroup *renderModeGroupAct;
 	QAction *renderBboxAct;
 	QAction *renderModePointsAct;
 	QAction *renderModeWireAct;
@@ -164,11 +172,13 @@ private:
 	QAction *setLightAct;
 	QAction *backFaceCullAct;
 	///////////Action Menu View ////////////////////////
+	QAction *fullScreenAct;
 	QAction *showToolbarStandardAct;
 	QAction *showToolbarRenderAct;
 	QAction *showLogAct;
 	QAction *showInfoPaneAct;
 	QAction *showTrackBallAct;
+	QAction *resetTrackBallAct;
 	///////////Action Menu Windows /////////////////////
 	QAction *windowsTileAct;
 	QAction *windowsCascadeAct;
