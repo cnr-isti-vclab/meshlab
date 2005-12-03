@@ -1,9 +1,10 @@
 TEMPLATE      = lib
-CONFIG       += plugin
+CONFIG       += qt plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include 
 HEADERS       = dummy.h
 SOURCES       = dummy.cpp
 TARGET        = dummy
+QT           += opengl
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max

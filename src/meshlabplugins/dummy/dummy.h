@@ -28,6 +28,7 @@
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <meshlab/glarea.h>
 
 
 class DummyPlugin : public QObject, public MeshRenderInterface

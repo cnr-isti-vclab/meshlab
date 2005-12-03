@@ -20,12 +20,34 @@
 ****************************************************************************/
 #include <QtGui>
 
+#include <meshlab/meshmodel.h>
+#include <meshlab/interfaces.h>
+#include <meshlab/glarea.h>
+
 #include "dummy.h"
 
 using namespace vcg;
 
 void DummyPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla)
 {
+	if(a->text() == "action 1")
+	{
+		rm.drawColor = GLW::CMNone;
+		return;
+	}
+	
+	if(a->text() == "action 2")
+	{
+		rm.drawColor = GLW::CMPerVert;
+		return;
+	}
+
+	if(a->text() == "action 2")
+	{
+		rm.drawColor = GLW::CMPerFace;
+		return;
+	}
+
 }
 
 Q_EXPORT_PLUGIN(DummyPlugin)
