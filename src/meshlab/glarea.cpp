@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.42  2005/12/04 11:59:48  vannini
+Tiled rendering now works.
+By default "save snapshot" saves a (X*Y)*2 pixels PPM (4 tiles) where X is the glarea width and Y the glarea height
+
 Revision 1.41  2005/12/04 11:49:39  glvertex
 solved some little bugs
 now texture button works (not always correct: TO FIX)
@@ -375,6 +379,7 @@ void GLArea::paintGL()
 		glPopMatrix();
 		glMatrixMode(old_matrixMode);
 		pasteTile();
+		update();
 	}
 
 // OLD VERSION
@@ -426,7 +431,6 @@ void GLArea::paintGL()
 
 // ==============================
 
-
 }
 
 void GLArea::resizeGL(int _width, int _height)
@@ -448,19 +452,18 @@ bool GLArea::saveSnapshot(QString path)
 	int q;
 	int bufferOffset;
 	
-	return false;
-
-	totalCols=totalRows=2;
+	totalCols=totalRows=4;
 	tileRow=tileCol=0;
 
 	glGetIntegerv(GL_VIEWPORT, vp);
-	
 	vpWidth=vp[2];
 	vpHeight=vp[3];
 	
 	snapshotData.resize(vpWidth * vpHeight * totalCols * totalRows);
 
 	takeSnapTile=true;
+
+	update();
 
 	return true;
 }
