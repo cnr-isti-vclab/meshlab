@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.43  2005/12/04 17:00:56  vannini
+Code optimization
+
 Revision 1.42  2005/12/04 11:59:48  vannini
 Tiled rendering now works.
 By default "save snapshot" saves a (X*Y)*2 pixels PPM (4 tiles) where X is the glarea width and Y the glarea height
@@ -183,8 +186,8 @@ First rough version. It simply load a mesh.
 using namespace vcg; 
 
 // Tiled rendering vars
-static std::vector<Color4b> tileData;
-static std::vector<Color4b> snapshotData;
+static char *snapBuffer;
+static char *tileBuffer;
 static bool takeSnapTile=false;
 static int vpWidth, vpHeight, tileCol, tileRow, totalCols, totalRows;
 
@@ -229,26 +232,67 @@ void GLArea::initializeGL()
 	glEnable(GL_LIGHTING);
 }
 
+//bool pasteTile()
+//{
+//	int bufferOffset,q; 
+//
+//	bufferOffset=(vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol); 
+//	q=(vpHeight-1) * vpWidth;
+//	
+//	for (int y=0; y < vpHeight; ++y)
+//	{
+//		for (int x=0; x < vpWidth; ++x)
+//		{
+//			snapshotData[bufferOffset]=tileData[q];
+//			q++;
+//			bufferOffset++;
+//		}
+//		q-=(vpWidth*2);
+//		bufferOffset+=(vpWidth * (totalCols-1));
+//	}
+//
+//	
+//	tileCol++;
+//
+//	if (tileCol >= totalCols)
+//	{
+//		tileCol=0;
+//		tileRow++;
+//
+//		if (tileRow >= totalRows)
+//		{
+//			takeSnapTile=false;
+//			QString path="snapshot.ppm";
+//
+//			FILE * fp = fopen(path.toLocal8Bit(),"wb");
+//			if (fp==0) return false;
+//
+//			fprintf(fp,"P6\n%d %d\n255\n", vpWidth * totalCols, vpHeight * totalRows);
+//
+//			for(int t=0; t < (vpWidth * totalCols * vpHeight * totalRows); ++t)
+//			{
+//				fwrite(&(snapshotData[t]),3,1,fp);
+//			}
+//			
+//			fclose(fp);    	
+//		}
+//	}
+//}
 bool pasteTile()
 {
-	int bufferOffset,q; 
+	int snapBufferOffset, q; 
+	int vpLineSize=vpWidth * 4;
 
-	bufferOffset=(vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol); 
-	q=(vpHeight-1) * vpWidth;
+	snapBufferOffset=4 * ((vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol)); 
+	q=vpLineSize * (vpHeight-1);
 	
 	for (int y=0; y < vpHeight; ++y)
 	{
-		for (int x=0; x < vpWidth; ++x)
-		{
-			snapshotData[bufferOffset]=tileData[q];
-			q++;
-			bufferOffset++;
-		}
-		q-=(vpWidth*2);
-		bufferOffset+=(vpWidth * (totalCols-1));
+		memcpy((void*) &snapBuffer[snapBufferOffset], (void*) &tileBuffer[q], vpLineSize);
+		q-=vpLineSize;
+		snapBufferOffset+=vpLineSize * totalCols;
 	}
 
-	
 	tileCol++;
 
 	if (tileCol >= totalCols)
@@ -259,6 +303,7 @@ bool pasteTile()
 		if (tileRow >= totalRows)
 		{
 			takeSnapTile=false;
+			
 			QString path="snapshot.ppm";
 
 			FILE * fp = fopen(path.toLocal8Bit(),"wb");
@@ -266,16 +311,21 @@ bool pasteTile()
 
 			fprintf(fp,"P6\n%d %d\n255\n", vpWidth * totalCols, vpHeight * totalRows);
 
-			for(int t=0; t < (vpWidth * totalCols * vpHeight * totalRows); ++t)
+			for(int t=0; t < (vpLineSize * totalCols * vpHeight * totalRows); t+=4)
 			{
-				fwrite(&(snapshotData[t]),3,1,fp);
+				fwrite(&(snapBuffer[t]),3,1,fp);
 			}
 			
 			fclose(fp);    	
+
+			delete(tileBuffer);
+			delete(snapBuffer);
+
 		}
 	}
-}
 
+	return true;
+}
 void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
 	GLdouble fLeft, fRight, fBottom, fTop, left, right, bottom, top, xDim, yDim, xOff, yOff, tDimX, tDimY;
@@ -334,7 +384,6 @@ void GLArea::paintGL()
 
 	gluLookAt(0,0,3,   0,0,0,   0,1,0);
 
-
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
@@ -374,8 +423,7 @@ void GLArea::paintGL()
 	{
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		tileData.resize(vpWidth * vpHeight);
-		glReadPixels(0, 0, vpWidth, vpHeight, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *) &tileData[0]);
+		glReadPixels(0, 0, vpWidth, vpHeight, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *) tileBuffer);
 		glPopMatrix();
 		glMatrixMode(old_matrixMode);
 		pasteTile();
@@ -449,8 +497,6 @@ void GLArea::resizeGL(int _width, int _height)
 bool GLArea::saveSnapshot(QString path)
 { 
 	int vp[4];
-	int q;
-	int bufferOffset;
 	
 	totalCols=totalRows=4;
 	tileRow=tileCol=0;
@@ -459,10 +505,10 @@ bool GLArea::saveSnapshot(QString path)
 	vpWidth=vp[2];
 	vpHeight=vp[3];
 	
-	snapshotData.resize(vpWidth * vpHeight * totalCols * totalRows);
+    snapBuffer = new char[vpWidth * vpHeight * totalCols * totalRows * 4];
+	tileBuffer = new char[vpWidth * vpHeight * 4];
 
 	takeSnapTile=true;
-
 	update();
 
 	return true;
