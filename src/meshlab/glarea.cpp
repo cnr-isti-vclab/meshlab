@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.45  2005/12/04 22:19:47  alemochi
+Added in Info Pane number of triangles and vertices
+
 Revision 1.44  2005/12/04 17:47:18  davide_portelli
 Added menu windows->Next and Shortcut "CTRL+PageDown"
 Added reset trackbal Shortcut "CTRL+H"
@@ -212,6 +215,23 @@ GLArea::GLArea(QWidget *parent)
 	time.start();
 }
 
+
+
+void GLArea::DisplayModelInfo()
+{
+
+	QString strMessage;
+	QString strVertex="Vertex   "+QString("").setNum(mm->cm.vert.size(),10);
+	QString strTriangle="Triangle "+QString("").setNum(mm->cm.face.size(),10);
+  //strVertex+=strVertex.setNum(mm->cm.vert.size(),10);
+	//strTriangle.setNum(mm->cm.face.size(),10);
+  renderText(currentWidth-currentWidth*0.15,currentHeight-20,strVertex);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-35,strTriangle);
+
+
+}
+
+
 QSize GLArea::minimumSizeHint() const {
 	return QSize(400,300);
 }
@@ -219,6 +239,7 @@ QSize GLArea::minimumSizeHint() const {
 QSize GLArea::sizeHint() const {
 	return QSize(400,300);
 }
+
 
 void GLArea::initializeGL()
 {
@@ -475,6 +496,7 @@ void GLArea::paintGL()
 		deltaTime=currentTime-lastTime;
 		updateFps();
 		if ((cfps>0) && (cfps<200)) renderFps();
+		DisplayModelInfo();
 
 
 		glPopAttrib();

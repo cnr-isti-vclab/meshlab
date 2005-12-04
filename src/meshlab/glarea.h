@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.30  2005/12/04 22:19:48  alemochi
+Added in Info Pane number of triangles and vertices
+
 Revision 1.29  2005/12/04 17:47:18  davide_portelli
 Added menu windows->Next and Shortcut "CTRL+PageDown"
 Added reset trackbal Shortcut "CTRL+H"
@@ -236,6 +239,7 @@ protected:
 	
 	void initializeGL();
   void initTexture();
+	void DisplayModelInfo();
 	void paintGL();
 	void resizeGL(int width, int height);
 	void mousePressEvent(QMouseEvent *event);
@@ -255,6 +259,7 @@ private:
   int lastTime;
 	int currentTime;
 	float fpsVector[10];
+
 
 };
 
