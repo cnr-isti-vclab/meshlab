@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2005/12/04 16:50:15  glvertex
+Removed [using namespace] directive form .h
+Renaming in QT style
+Adapted method behavior to the new ui interface
+
 Revision 1.3  2005/12/03 22:49:46  cignoni
 Added copyright info
 
@@ -38,10 +43,8 @@ Added copyright info
 #include <QColor>
 #include <QDialog>
 #include <QColorDialog>
-#include <wrap/gl/trimesh.h>
-
-using namespace std;
-using namespace vcg;
+//#include <wrap/gl/trimesh.h>
+#include <vcg/space/color4.h>
 
 class CustomDialog : public QDialog
 {
@@ -49,19 +52,21 @@ Q_OBJECT
 public:
 	CustomDialog(QWidget *parent = 0);
 
-	void	 LoadCurrentSetting(const Color4b& bb,const Color4b& bt,const Color4b& l);
-  Color4b GetBackgroundBottomColor(){ return cBackgroundBottom; };
-	Color4b GetBackgroundTopColor(){ return cBackgroundTop; };
-	Color4b GetLogColor(){ return cLog; };
+	void loadCurrentSetting(const vcg::Color4b& bkgBottom,const vcg::Color4b& bkgTop,const vcg::Color4b& logArea);
+  
+	vcg::Color4b getBkgBottomColor()	{ return bkgBottomColor;}
+	vcg::Color4b getBkgTopColor()			{ return bkgTopColor;		}
+	vcg::Color4b getLogAreaColor()		{ return logAreaColor;	}
 
 private slots:
-	void SetBackgroundBottomColor();
-	void SetLogColor();
-	void SetBackgroundTopColor();
+	void setBkgBottomColor();
+	void setBkgTopColor();
+	void setLogAreaColor();
 		
 private:
 	Ui::Dialog ui;
-	Color4b cBackgroundBottom;
-	Color4b cBackgroundTop;
-	Color4b cLog;
+
+	vcg::Color4b bkgBottomColor;
+	vcg::Color4b bkgTopColor;
+	vcg::Color4b logAreaColor;
 };

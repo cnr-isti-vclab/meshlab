@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2005/12/04 16:50:15  glvertex
+Removed [using namespace] directive form .h
+Renaming in QT style
+Adapted method behavior to the new ui interface
+
 Revision 1.2  2005/12/03 22:49:46  cignoni
 Added copyright info
 
@@ -31,7 +36,7 @@ Added copyright info
 #include "customDialog.h"
 #include <QPalette>
 
-
+using namespace vcg;
 
 CustomDialog::CustomDialog(QWidget * parent)
 		:QDialog(parent)
@@ -39,53 +44,56 @@ CustomDialog::CustomDialog(QWidget * parent)
 	ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(accept()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-	connect(ui.ButtonBCB,SIGNAL(clicked()),this,SLOT(SetBackgroundBottomColor()));
-	connect(ui.ButtonBCT,SIGNAL(clicked()),this,SLOT(SetBackgroundTopColor()));
-	connect(ui.ButtonLC,SIGNAL(clicked()),this,SLOT(SetLogColor()));
-	setFixedSize(200,120);
+	connect(ui.pushButtonBottomBg,SIGNAL(clicked()),this,SLOT(setBkgBottomColor()));
+	connect(ui.pushButtonTopBg,SIGNAL(clicked()),this,SLOT(setBkgTopColor()));
+	connect(ui.pushButtonLogArea,SIGNAL(clicked()),this,SLOT(setLogAreaColor()));
+	setFixedSize(260,155);
 }
 
 
-void CustomDialog::LoadCurrentSetting(const Color4b& bb,const Color4b& bt,const Color4b& l)
+void CustomDialog::loadCurrentSetting(const Color4b& bb,const Color4b& bt,const Color4b& l)
 {
-	cBackgroundBottom=bb;
-	cBackgroundTop=bt;
- 	cLog=l;
+	bkgBottomColor=bb;
+	bkgTopColor=bt;
+ 	logAreaColor=l;
+
+	// Changes the palette in the labels
 	QPalette pbb(QColor(bb.V(0),bb.V(1),bb.V(2)));
 	QPalette pbt(QColor(bt.V(0),bt.V(1),bt.V(2)));
 	QPalette pl(QColor(l.V(0),l.V(1),l.V(2)));
-	ui.ButtonBCB->setPalette(pbb);
-	ui.ButtonBCT->setPalette(pbt);
-	ui.ButtonLC->setPalette(pl);
+	
+	ui.labelBottmBg->setPalette(pbb);
+	ui.labelTopBg->setPalette(pbt);
+	ui.labelLogArea->setPalette(pl);
 }
 
-void CustomDialog::SetBackgroundBottomColor()
+
+void CustomDialog::setBkgBottomColor()
 {
 	QColor bb=QColorDialog::getColor(QColor(255,255,255,255),this);
 	QPalette palette(bb);
-	ui.ButtonBCB->setPalette(palette);
-	cBackgroundBottom.V(0)=bb.red();
-	cBackgroundBottom.V(1)=bb.green();
-	cBackgroundBottom.V(2)=bb.blue();
-	
+	ui.labelBottmBg->setPalette(palette);
+	bkgBottomColor.V(0)=bb.red();
+	bkgBottomColor.V(1)=bb.green();
+	bkgBottomColor.V(2)=bb.blue();
 }
 
-void CustomDialog::SetBackgroundTopColor()
+void CustomDialog::setBkgTopColor()
 {
 	QColor bt=QColorDialog::getColor(QColor(255,255,255,255),this);
 	QPalette palette(bt);
-	ui.ButtonBCT->setPalette(palette);
-	cBackgroundTop.V(0)=bt.red();
-	cBackgroundTop.V(1)=bt.green();
-	cBackgroundTop.V(2)=bt.blue();
+	ui.labelTopBg->setPalette(palette);
+	bkgTopColor.V(0)=bt.red();
+	bkgTopColor.V(1)=bt.green();
+	bkgTopColor.V(2)=bt.blue();
 }
 
-void CustomDialog::SetLogColor()
+void CustomDialog::setLogAreaColor()
 {
 	QColor l=QColorDialog::getColor(QColor(255,255,255,255),this);
 	QPalette palette(l);
-	ui.ButtonLC->setPalette(palette);
-	cLog.V(0)=l.red();
-	cLog.V(1)=l.green();
-	cLog.V(2)=l.blue();
+	ui.labelLogArea->setPalette(palette);
+	logAreaColor.V(0)=l.red();
+	logAreaColor.V(1)=l.green();
+	logAreaColor.V(2)=l.blue();
 }
