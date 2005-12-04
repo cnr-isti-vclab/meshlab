@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.16  2005/12/04 14:45:30  glvertex
+gla now is a local variable used only if needed
+texture button now works properly
+
 Revision 1.15  2005/12/04 11:49:40  glvertex
 solved some little bugs
 now texture button works (not always correct: TO FIX)
@@ -329,6 +333,7 @@ void MainWindow::updateMenus()
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().BackFaceCull);
+		renderModeTextureAct->setEnabled(!GLA()->mm->cm.textures.empty());
 		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
 		
 		setLightAct->setIcon(rm.Lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
@@ -426,7 +431,7 @@ void MainWindow::applyImportExport()
 		if (GLA() == NULL)
 		{
 			MeshModel *mm= new MeshModel();
-			gla = new GLArea(workspace);
+			GLArea *gla = new GLArea(workspace);
 		
 			QString fileName;
 		// OLD VERSION
@@ -525,19 +530,31 @@ void MainWindow::open(QString fileName)
 			//return;
 		}
 		else{
+			GLArea *gla;
+
 			//VM.push_back(nm);
 			gla=new GLArea(workspace);
 			gla->mm=nm;
 			gla->setWindowTitle(QFileInfo(fileName).fileName());   
 			workspace->addWindow(gla);
 			if(workspace->isVisible()) gla->showMaximized();
-			else QTimer::singleShot(00, gla, SLOT(showMaximized()));
+			//else QTimer::singleShot(0, gla, SLOT(showMaximized()));
       setCurrentFile(fileName);
       
 			//return;
 		}
 	qb->hide();
   }
+
+	// Is this the correct place??
+	renderModeTextureAct->setChecked(false);
+	renderModeTextureAct->setEnabled(false);
+	if(!GLA()->mm->cm.textures.empty())
+	{
+		renderModeTextureAct->setChecked(true);
+		renderModeTextureAct->setEnabled(true);
+		GLA()->setTextureMode(GLW::TMPerWedge);
+	}
 }
 
 void MainWindow::openRecentFile()

@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.12  2005/12/04 14:45:30  glvertex
+gla now is a local variable used only if needed
+texture button now works properly
+
 Revision 1.11  2005/12/04 02:44:39  davide_portelli
 Added texture icon in toolbar
 
@@ -324,7 +328,7 @@ void MainWindow::createActions()
 
 	renderModeTextureAct  = new QAction(QIcon(":/images/textures.png"),tr("&Texture"),this);
 	renderModeTextureAct->setCheckable(true);
-	renderModeTextureAct->setChecked(true);
+	renderModeTextureAct->setChecked(false);
 	connect(renderModeTextureAct, SIGNAL(triggered()), this, SLOT(renderTexture()));
 
 	setLightAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"),this);

@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.40  2005/12/04 14:45:30  glvertex
+gla now is a local variable used only if needed
+texture button now works properly
+
 Revision 1.39  2005/12/04 02:44:39  davide_portelli
 Added texture icon in toolbar
 
@@ -128,7 +132,6 @@ private:
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
   GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }
-	GLArea *gla;
 	QDir pluginsDir;
 	QStringList pluginFileNames;
 	
