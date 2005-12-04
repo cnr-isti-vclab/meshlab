@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.15  2005/12/04 11:49:40  glvertex
+solved some little bugs
+now texture button works (not always correct: TO FIX)
+
 Revision 1.14  2005/12/04 02:44:39  davide_portelli
 Added texture icon in toolbar
 
@@ -325,6 +329,7 @@ void MainWindow::updateMenus()
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().BackFaceCull);
+		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
 		
 		setLightAct->setIcon(rm.Lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
 		setLightAct->setChecked(rm.Lighting);
@@ -626,9 +631,14 @@ void MainWindow::renderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
 void MainWindow::renderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
 void MainWindow::renderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
 void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
-void MainWindow::renderTexture(){
-	updateMenus();
+void MainWindow::renderTexture()
+{
+	QAction *a = qobject_cast<QAction* >(sender());
+	GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedge);	
+	//updateMenus();
 }
+
+
 void MainWindow::fullScreen(){
 	menuBar()->hide();
 	mainToolBar->hide();

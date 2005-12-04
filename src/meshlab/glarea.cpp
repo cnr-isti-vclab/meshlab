@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.41  2005/12/04 11:49:39  glvertex
+solved some little bugs
+now texture button works (not always correct: TO FIX)
+
 Revision 1.40  2005/12/04 10:43:45  glvertex
 Some cleanup and renaming
 
@@ -304,6 +308,7 @@ void GLArea::paintGL()
 	GLint old_matrixMode;
 	lastTime=time.elapsed();
 	initTexture();
+	glDisable(GL_TEXTURE_2D); // FIX FIX FIX to move in trimesh.h
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 	
@@ -324,6 +329,7 @@ void GLArea::paintGL()
 	}
 
 	gluLookAt(0,0,3,   0,0,0,   0,1,0);
+
 
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
@@ -359,7 +365,7 @@ void GLArea::paintGL()
 	
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
-  	// ...and take a snapshot
+	// ...and take a snapshot
 	if (takeSnapTile)
 	{
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
