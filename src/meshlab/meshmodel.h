@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2005/12/04 00:22:46  cignoni
+Switched from progresBar widget to progressbar dialog
+
 Revision 1.11  2005/12/02 00:54:13  cignoni
 Added TextureMode in render
 
@@ -95,7 +98,7 @@ public:
   CMeshO cm;
   GlTrimesh<CMeshO> glw;
   MeshModel() {glw.m=&cm; cm.face.EnableWedgeTex();}
-  bool Open(const char* filename);
+  bool Open(const char* filename, CallBackPos *cb=0);
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
 };
 

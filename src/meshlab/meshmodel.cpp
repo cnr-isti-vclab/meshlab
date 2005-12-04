@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2005/12/04 00:22:46  cignoni
+Switched from progresBar widget to progressbar dialog
+
 Revision 1.14  2005/12/02 00:54:13  cignoni
 Added TextureMode in render
 
@@ -53,7 +56,7 @@ Added copyright info
 #include<vcg/complex/trimesh/update/bounding.h>
 #include <QtGlobal>
 
-bool MeshModel::Open(const char *filename)
+bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
 {
   int mask;
   vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename, mask);
@@ -69,7 +72,7 @@ bool MeshModel::Open(const char *filename)
 
 	cm.face.EnableNormal();
   
-	int ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename);
+	int ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename,cb);
   
 	//qDebug("Face 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
 	

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.10  2005/12/04 00:22:46  cignoni
+Switched from progresBar widget to progressbar dialog
+
 Revision 1.9  2005/12/03 23:53:27  cignoni
 Re added filter and io plugins
 
@@ -223,7 +226,7 @@ First rough version. It simply load a mesh.
 #include "customDialog.h"				
 
 
-QProgressBar *MainWindow::qb;
+QProgressDialog *MainWindow::qb;
 
 MainWindow::MainWindow()
 {
@@ -251,7 +254,7 @@ MainWindow::MainWindow()
 	else{ 
 		QTimer::singleShot(500, this, SLOT(open()));
 	}
-  qb=new QProgressBar(this);
+  qb=new QProgressDialog(this);
   qb->setMaximum(100);
   qb->setMinimum(0);
   qb->hide();

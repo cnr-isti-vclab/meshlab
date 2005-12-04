@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.13  2005/12/04 00:22:46  cignoni
+Switched from progresBar widget to progressbar dialog
+
 Revision 1.12  2005/12/03 23:53:27  cignoni
 Re added filter and io plugins
 
@@ -454,6 +457,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	if(qb==0) return true;
 	qb->setWindowTitle (str);
 	qb->setValue(pos);
+  //qb->setProgress(pos);
 	qb->update();
 	return true;
 }
@@ -502,7 +506,8 @@ void MainWindow::open(QString fileName)
     
 	if (!fileName.isEmpty()) {
 		MeshModel *nm= new MeshModel();
-		if(!nm->Open(fileName.toAscii())){
+    qb->show();
+		if(!nm->Open(fileName.toAscii(),QCallBack)){
 			QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
     	delete nm;
 			//return;
@@ -519,7 +524,8 @@ void MainWindow::open(QString fileName)
       
 			//return;
 		}
-	}
+	qb->hide();
+  }
 }
 
 void MainWindow::openRecentFile()

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.38  2005/12/04 00:22:46  cignoni
+Switched from progresBar widget to progressbar dialog
+
 Revision 1.37  2005/12/03 23:40:31  davide_portelli
 Added FullScreen menu and TrackBall->Reset trackBall
 
@@ -48,7 +51,7 @@ class QActionGroup;
 class QMenu;
 class QScrollArea;
 class QSignalMapper;
-class QProgressBar;
+class QProgressDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -117,7 +120,7 @@ private:
 
 
 	
-	static QProgressBar *qb;
+	static QProgressDialog *qb;
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
   GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }
