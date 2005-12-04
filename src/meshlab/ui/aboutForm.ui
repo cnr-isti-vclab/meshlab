@@ -8,20 +8,53 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>429</height>
+    <width>421</width>
+    <height>356</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>About</string>
   </property>
-  <widget class="QLabel" name="label_2" >
+  <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
-     <x>160</x>
-     <y>240</y>
+     <x>10</x>
+     <y>10</y>
      <width>431</width>
-     <height>111</height>
+     <height>341</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QWidget" name="widget" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4" >
+   <property name="geometry" >
+    <rect>
+     <x>200</x>
+     <y>20</y>
+     <width>198</width>
+     <height>140</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;span style=&quot; font-weight:600;&quot;>MeshLab v0.3&lt;/span>&lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>http://meshlab.sourceforge.net/ &lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>All rights reserved.&lt;/p>&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;span style=&quot; font-weight:600;&quot;>VCGLib&lt;/span>   http://vcg.sf.net &lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Visual and Computer Graphics Library&lt;/p>&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Copyright(C) 2005-2006&lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Visual Computing Lab http://vcg.isti.cnr.it &lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>ISTI - Italian National Research Council&lt;/p>&lt;/body>&lt;/html></string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2_2" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>180</y>
+     <width>397</width>
+     <height>112</height>
     </rect>
    </property>
    <property name="text" >
@@ -31,8 +64,8 @@
   <widget class="QPushButton" name="okButton" >
    <property name="geometry" >
     <rect>
-     <x>250</x>
-     <y>390</y>
+     <x>180</x>
+     <y>320</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -41,22 +74,27 @@
     <string>OK</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label" >
+  <widget class="QLabel" name="label_3_2" >
    <property name="geometry" >
     <rect>
-     <x>360</x>
-     <y>30</y>
-     <width>231</width>
-     <height>171</height>
+     <x>40</x>
+     <y>60</y>
+     <width>102</width>
+     <height>72</height>
     </rect>
    </property>
    <property name="text" >
-    <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>VCGLib http://vcg.sf.net &lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Visual and Computer Graphics Library&lt;/p>&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Copyright(C) 2005-2006&lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Visual Computing Lab http://vcg.isti.cnr.it &lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>ISTI - Italian National Research Council&lt;/p>&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;span style=&quot; font-weight:600;&quot;>MeshLab&lt;/span> v0.3&lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>http://meshlab.sourceforge.net/ &lt;/p>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>All rights reserved.&lt;/p>&lt;/body>&lt;/html></string>
+    <string/>
+   </property>
+   <property name="pixmap" >
+    <pixmap resource="..\meshlab.qrc" >:/images/logo.png</pixmap>
    </property>
   </widget>
  </widget>
  <pixmapfunction></pixmapfunction>
- <resources/>
+ <resources>
+  <include location="..\meshlab.qrc" />
+ </resources>
  <connections>
   <connection>
    <sender>okButton</sender>
@@ -65,12 +103,12 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>251</x>
-     <y>266</y>
+     <x>217</x>
+     <y>331</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>96</x>
-     <y>254</y>
+     <x>210</x>
+     <y>177</y>
     </hint>
    </hints>
   </connection>
