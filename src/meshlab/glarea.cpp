@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.40  2005/12/04 10:43:45  glvertex
+Some cleanup and renaming
+
 Revision 1.39  2005/12/03 17:04:34  glvertex
 Added backface culling action and slots
 Added shortcuts for fancy and double lighting
@@ -216,10 +219,6 @@ void GLArea::initializeGL()
 	/*glLightfv(GL_LIGHT1,GL_POSITION,pback);
 	glLightfv(GL_LIGHT1,GL_DIFFUSE,l_diffuseFancy);*/
 	glEnable(GL_LIGHTING);
-
- 
-	rm.drawMode	= GLW::DMSmooth;
-	rm.drawColor = GLW::CMNone;	
 }
 
 bool pasteTile()
@@ -352,13 +351,13 @@ void GLArea::paintGL()
 
 	// Set proper colorMode
 	glDisable(GL_COLOR_MATERIAL);
-	if(rm.drawColor != GLW::CMNone)
+	if(rm.colorMode != GLW::CMNone)
 	{
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
 	
-	mm->Render(rm.drawMode,rm.drawColor,rm.drawTexture);
+	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
   	// ...and take a snapshot
 	if (takeSnapTile)
@@ -408,13 +407,15 @@ void GLArea::paintGL()
 			log.glDraw(this,0,3);
 			// More info to add.....
 
-		glPopAttrib();
-		glPopMatrix();
-
 		currentTime=time.elapsed();
 		deltaTime=currentTime-lastTime;
 		updateFps();
 		if ((cfps>0) && (cfps<200)) renderFps();
+
+
+		glPopAttrib();
+		glPopMatrix();
+
 	}
 
 // ==============================
@@ -509,7 +510,7 @@ void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 
 void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 {
-	rm.drawColor = mode;
+	rm.colorMode = mode;
 	updateGL();
 }
 
@@ -536,11 +537,13 @@ void GLArea::initTexture()
         setTextureMode(GLW::TMPerWedge);
       }
 }
+
 void GLArea::setTextureMode(vcg::GLW::TextureMode mode)
 {
-	rm.drawTexture = mode;
+	rm.textureMode = mode;
 	updateGL();
 }
+
 void GLArea::setLight(bool state)
 {
 	rm.Lighting = state;

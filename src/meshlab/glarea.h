@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.28  2005/12/04 10:43:45  glvertex
+Some cleanup and renaming
+
 Revision 1.27  2005/12/03 17:04:34  glvertex
 Added backface culling action and slots
 Added shortcuts for fancy and double lighting
@@ -140,8 +143,8 @@ class RenderMode
 {
 public:
   	vcg::GLW::DrawMode	drawMode;
-  	vcg::GLW::ColorMode	drawColor;
-  	vcg::GLW::TextureMode	drawTexture;
+  	vcg::GLW::ColorMode	colorMode;
+  	vcg::GLW::TextureMode	textureMode;
 
     bool Lighting;
     bool BackFaceCull;
@@ -149,14 +152,19 @@ public:
     bool FancyLighting;
     bool CastShadow;
     vcg::Point3f LightDir;
+		
+		
 		RenderMode()
 		{
-      drawTexture=GLW::TMNone;
-			Lighting=true;
-			BackFaceCull=false;
-			DoubleSideLighting=false;
-			FancyLighting=false;
-			CastShadow=false;
+      drawMode	= GLW::DMSmooth;
+			colorMode = GLW::CMNone;
+			textureMode = GLW::TMNone;
+
+			Lighting = true;
+			BackFaceCull = false;
+			DoubleSideLighting = false;
+			FancyLighting = false;
+			CastShadow = false;
     }
 };
 
