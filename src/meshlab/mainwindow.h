@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.39  2005/12/04 02:44:39  davide_portelli
+Added texture icon in toolbar
+
 Revision 1.38  2005/12/04 00:22:46  cignoni
 Switched from progresBar widget to progressbar dialog
 
@@ -79,6 +82,7 @@ private slots:
 	void renderFlatLine();
 	void renderHiddenLines();
 	void renderSmooth();
+	void renderTexture();
 	void setLight();
 	void setDoubleLighting();
 	void setFancyLighting();
@@ -170,6 +174,7 @@ private:
 	QAction *renderModeFlatLinesAct;
 	QAction *renderModeFlatAct;
 	QAction *renderModeSmoothAct;
+	QAction *renderModeTextureAct;
 	QAction *setDoubleLightingAct;
 	QAction *setFancyLightingAct;
 	QAction *setLightAct;

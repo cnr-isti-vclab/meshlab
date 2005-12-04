@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.11  2005/12/04 02:44:39  davide_portelli
+Added texture icon in toolbar
+
 Revision 1.10  2005/12/04 00:22:46  cignoni
 Switched from progresBar widget to progressbar dialog
 
@@ -319,6 +322,11 @@ void MainWindow::createActions()
 	renderModeSmoothAct->setChecked(true);
 	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(renderSmooth()));
 
+	renderModeTextureAct  = new QAction(QIcon(":/images/textures.png"),tr("&Texture"),this);
+	renderModeTextureAct->setCheckable(true);
+	renderModeTextureAct->setChecked(true);
+	connect(renderModeTextureAct, SIGNAL(triggered()), this, SLOT(renderTexture()));
+
 	setLightAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"),this);
 	setLightAct->setCheckable(true);
 	setLightAct->setChecked(true);
@@ -408,6 +416,7 @@ void MainWindow::createToolBars()
 	renderToolBar = addToolBar(tr("Render"));
 	renderToolBar->setIconSize(QSize(32,32));
 	renderToolBar->addActions(renderModeGroupAct->actions());
+	renderToolBar->addAction(renderModeTextureAct);
 	renderToolBar->addAction(setLightAct);
 }
 
@@ -445,10 +454,9 @@ void MainWindow::createMenus()
 	lightingModeMenu->addAction(setDoubleLightingAct);
 	lightingModeMenu->addAction(setFancyLightingAct);
 
-
 	textureModeMenu=renderMenu->addMenu(tr("Texture"));
+
 	colorModeMenu=renderMenu->addMenu(tr("Color"));
-	
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2005/12/04 02:44:39  davide_portelli
+Added texture icon in toolbar
+
 Revision 1.3  2005/11/24 01:38:36  cignoni
 Added new plugins intefaces, tested with shownormal render mode
 
@@ -80,17 +83,11 @@ void PluginDialog::populateTreeWidget(const QString &path,
                                       const QStringList &fileNames)
 {
     if (fileNames.isEmpty()) {
-        label->setText(tr("Plug & Paint couldn't find any plugins in the %1 "
-                          "directory.")
-                       .arg(QDir::convertSeparators(path)));
+        label->setText(tr("Can't find any plugins in the %1 " "directory.").arg(QDir::convertSeparators(path)));
         treeWidget->hide();
     } else {
-        label->setText(tr("Plug & Paint found the following plugins in the %1 "
-                          "directory:")
-                       .arg(QDir::convertSeparators(path)));
-
+        label->setText(tr("Found the following plugins in the %1 " "directory:").arg(QDir::convertSeparators(path)));
         QDir dir(path);
-
         foreach (QString fileName, fileNames) {
             QPluginLoader loader(dir.absoluteFilePath(fileName));
             QObject *plugin = loader.instance();

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.14  2005/12/04 02:44:39  davide_portelli
+Added texture icon in toolbar
+
 Revision 1.13  2005/12/04 00:22:46  cignoni
 Switched from progresBar widget to progressbar dialog
 
@@ -285,6 +288,9 @@ void MainWindow::updateMenus()
 	saveSnapshotAct->setEnabled(active);
 	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
 	renderMenu->setEnabled(active);
+	fullScreenAct->setEnabled(active);
+	trackBallMenu->setEnabled(active);
+	logMenu->setEnabled(active);
   windowsMenu->setEnabled(active);
 	preferencesMenu->setEnabled(active);
 	renderToolBar->setEnabled(active);
@@ -294,26 +300,27 @@ void MainWindow::updateMenus()
 		switch (rm.drawMode) {
 			case GLW::DMBox:
 				renderBboxAct->setChecked(true);
-			break;
+				break;
 			case GLW::DMPoints:
 				renderModePointsAct->setChecked(true);
-			break;
+				break;
 			case GLW::DMWire:
 				renderModeWireAct->setChecked(true);
-			break;
+				break;
 			case GLW::DMFlat:
 				renderModeFlatAct->setChecked(true);
-			break;
+				break;
 			case GLW::DMSmooth:
 				renderModeSmoothAct->setChecked(true);
-			break;
+				break;
 			case GLW::DMFlatWire:
 				renderModeFlatLinesAct->setChecked(true);
-			break;
+				break;
 			case GLW::DMHidden:
 				renderModeHiddenLinesAct->setChecked(true);
-			break;
+				break;
 		}
+
 		showLogAct->setChecked(GLA()->isLogVisible());
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
@@ -619,6 +626,9 @@ void MainWindow::renderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
 void MainWindow::renderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
 void MainWindow::renderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
 void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
+void MainWindow::renderTexture(){
+	updateMenus();
+}
 void MainWindow::fullScreen(){
 	menuBar()->hide();
 	mainToolBar->hide();
