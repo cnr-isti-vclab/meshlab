@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.14  2005/12/04 16:51:57  glvertex
+Changed some action accelerator keys
+Renamed preference menu and dialog
+
 Revision 1.13  2005/12/04 15:25:22  glvertex
 added texture action in menu render
 
@@ -349,7 +353,7 @@ void MainWindow::createActions()
 	setFancyLightingAct->setShortcut(tr("Ctrl+F"));
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(setFancyLighting()));
 
-	backFaceCullAct 	  = new QAction(tr("&BackFace Culling"),this);
+	backFaceCullAct 	  = new QAction(tr("BackFace &Culling"),this);
 	backFaceCullAct->setCheckable(true);
 	backFaceCullAct->setShortcut(tr("Ctrl+K"));
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
@@ -401,7 +405,7 @@ void MainWindow::createActions()
 	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
 	
 	//////////////Action Menu Preferences //////////////////////////////////////////////////////
-	setCustomizeAct	  = new QAction(tr("&Customize Colors"),this);
+	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
 
 	//////////////Action Menu About ////////////////////////////////////////////////////////////
@@ -489,7 +493,7 @@ void MainWindow::createMenus()
 	menuBar()->addSeparator();
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////
-	preferencesMenu=menuBar()->addMenu(tr("&Preferences"));
+	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
 	preferencesMenu->addAction(setCustomizeAct);
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////

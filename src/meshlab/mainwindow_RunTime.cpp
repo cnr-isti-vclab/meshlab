@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.17  2005/12/04 16:51:57  glvertex
+Changed some action accelerator keys
+Renamed preference menu and dialog
+
 Revision 1.16  2005/12/04 14:45:30  glvertex
 gla now is a local variable used only if needed
 texture button now works properly
@@ -517,34 +521,35 @@ void MainWindow::open(QString fileName)
 		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".","Mesh files (*.ply *.off *.stl)");
 	}
 
-  // this change of dir is needed for subsequent texture loading
-  QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
-  QDir::setCurrent(FileNameDir);
-    
-	if (!fileName.isEmpty()) {
-		MeshModel *nm= new MeshModel();
-    qb->show();
-		if(!nm->Open(fileName.toAscii(),QCallBack)){
-			QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
-    	delete nm;
-			//return;
-		}
-		else{
-			GLArea *gla;
+	// this change of dir is needed for subsequent texture loading
+	QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
+	QDir::setCurrent(FileNameDir);
 
-			//VM.push_back(nm);
-			gla=new GLArea(workspace);
-			gla->mm=nm;
-			gla->setWindowTitle(QFileInfo(fileName).fileName());   
-			workspace->addWindow(gla);
-			if(workspace->isVisible()) gla->showMaximized();
-			//else QTimer::singleShot(0, gla, SLOT(showMaximized()));
-      setCurrentFile(fileName);
-      
-			//return;
-		}
+	if (fileName.isEmpty())
+		return;
+	
+	MeshModel *nm= new MeshModel();
+	qb->show();
+	if(!nm->Open(fileName.toAscii(),QCallBack)){
+		QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
+		delete nm;
+		//return;
+	}
+	else{
+		GLArea *gla;
+
+		//VM.push_back(nm);
+		gla=new GLArea(workspace);
+		gla->mm=nm;
+		gla->setWindowTitle(QFileInfo(fileName).fileName());   
+		workspace->addWindow(gla);
+		if(workspace->isVisible()) gla->showMaximized();
+		//else QTimer::singleShot(0, gla, SLOT(showMaximized()));
+		setCurrentFile(fileName);
+
+		//return;
+	}
 	qb->hide();
-  }
 
 	// Is this the correct place??
 	renderModeTextureAct->setChecked(false);
@@ -630,12 +635,14 @@ void MainWindow::setCustomize()
 	GLA()->setBackground(backColor);*/
 	CustomDialog dialog(this);
 	ColorSetting cs=GLA()->getCustomSetting();
-	dialog.LoadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor);
+	dialog.loadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor);
 	if (dialog.exec()==QDialog::Accepted) 
 	{
-		cs.bColorBottom=dialog.GetBackgroundBottomColor();
-		cs.bColorTop=dialog.GetBackgroundTopColor();
-		cs.lColor=dialog.GetLogColor();
+		// If press Ok set the selected colors in glArea
+		cs.bColorBottom=dialog.getBkgBottomColor();
+		cs.bColorTop=dialog.getBkgTopColor();
+		cs.lColor=dialog.getLogAreaColor();
+
     GLA()->setCustomSetting(cs);	
 	}
 	
