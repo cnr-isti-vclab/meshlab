@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/12/04 10:51:30  glvertex
+Minor changes
+
 Revision 1.4  2005/12/03 22:49:46  cignoni
 Added copyright info
 
@@ -41,19 +44,19 @@ void DummyPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla)
 {
 	if(a->text() == "action 1")
 	{
-		rm.drawColor = GLW::CMNone;
+		rm.colorMode = GLW::CMNone;
 		return;
 	}
 	
 	if(a->text() == "action 2")
 	{
-		rm.drawColor = GLW::CMPerVert;
+		rm.colorMode = GLW::CMPerVert;
 		return;
 	}
 
-	if(a->text() == "action 2")
+	if(a->text() == "action 3")
 	{
-		rm.drawColor = GLW::CMPerFace;
+		rm.colorMode = GLW::CMPerFace;
 		return;
 	}
 
