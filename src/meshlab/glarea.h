@@ -24,6 +24,11 @@
   History
 
 $Log$
+Revision 1.29  2005/12/04 17:47:18  davide_portelli
+Added menu windows->Next and Shortcut "CTRL+PageDown"
+Added reset trackbal Shortcut "CTRL+H"
+Optimize fullscreen
+
 Revision 1.28  2005/12/04 10:43:45  glvertex
 Some cleanup and renaming
 
@@ -225,6 +230,7 @@ public:
 	void setLightMode(bool state,LightingModel lmode);
 	bool saveSnapshot(QString path);
   void SetLightModel();
+	void resetTrackBall();
   list<pair<QAction *,MeshRenderInterface *> > *iRendersList;
 protected:
 	

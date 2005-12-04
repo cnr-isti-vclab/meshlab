@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.15  2005/12/04 17:47:18  davide_portelli
+Added menu windows->Next and Shortcut "CTRL+PageDown"
+Added reset trackbal Shortcut "CTRL+H"
+Optimize fullscreen
+
 Revision 1.14  2005/12/04 16:51:57  glvertex
 Changed some action accelerator keys
 Renamed preference menu and dialog
@@ -389,14 +394,20 @@ void MainWindow::createActions()
 	connect(showTrackBallAct, SIGNAL(triggered()), this, SLOT(showTrackBall()));
 
 	resetTrackBallAct = new QAction (tr("Reset &Trackball"), this);
+	resetTrackBallAct->setShortcut(tr("Ctrl+H"));
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
 	//////////////Action Menu Windows /////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
-	connect(windowsTileAct, SIGNAL(triggered()), this, SLOT(windowsTile()));
+	connect(windowsTileAct, SIGNAL(triggered()), workspace, SLOT(tile()));
 
 	windowsCascadeAct = new QAction(tr("&Cascade"), this);
-	connect(windowsCascadeAct, SIGNAL(triggered()), this, SLOT(windowsCascade()));
+	connect(windowsCascadeAct, SIGNAL(triggered()), workspace, SLOT(cascade()));
+
+	windowsNextAct = new QAction(tr("&Next"), this);
+	windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_PageDown);
+	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
+
 
 	closeAct = new QAction(tr("Cl&ose"), this);
 	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
@@ -474,7 +485,7 @@ void MainWindow::createMenus()
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(fullScreenAct);
 
-	trackBallMenu = viewMenu->addMenu(tr("&TrackBall"));
+	trackBallMenu = viewMenu->addMenu(tr("&Trackball"));
 	trackBallMenu->addAction(showTrackBallAct);
 	trackBallMenu->addAction(resetTrackBallAct);
 	

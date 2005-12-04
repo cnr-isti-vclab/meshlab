@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.44  2005/12/04 17:47:18  davide_portelli
+Added menu windows->Next and Shortcut "CTRL+PageDown"
+Added reset trackbal Shortcut "CTRL+H"
+Optimize fullscreen
+
 Revision 1.43  2005/12/04 17:00:56  vannini
 Code optimization
 
@@ -686,3 +691,4 @@ void GLArea::updateFps()
 	for (int i=0;i<10;i++) averageFps+=fpsVector[i];
 	cfps=1000.0f/(averageFps/10);
 }
+void GLArea::resetTrackBall(){trackball.Reset();updateGL();}

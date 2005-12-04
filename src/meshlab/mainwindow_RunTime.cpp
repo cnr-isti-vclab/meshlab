@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.18  2005/12/04 17:47:18  davide_portelli
+Added menu windows->Next and Shortcut "CTRL+PageDown"
+Added reset trackbal Shortcut "CTRL+H"
+Optimize fullscreen
+
 Revision 1.17  2005/12/04 16:51:57  glvertex
 Changed some action accelerator keys
 Renamed preference menu and dialog
@@ -274,6 +279,7 @@ void MainWindow::updateWindowMenu()
 	windowsMenu->addSeparator();
 	windowsMenu->addAction(windowsTileAct);
 	windowsMenu->addAction(windowsCascadeAct);
+	windowsMenu->addAction(windowsNextAct);
 
 	QWidgetList windows = workspace->windowList();
 
@@ -607,14 +613,6 @@ void MainWindow::aboutPlugins()
 	PluginDialog dialog(pluginsDir.path(), pluginFileNames, this);
 	dialog.exec();
 }
-
-void MainWindow::windowsTile(){
-	workspace->tile();
-}
-
-void MainWindow::windowsCascade(){
-	workspace->cascade();
-}
 void MainWindow::showToolbarFile(){
 		mainToolBar->setVisible(!mainToolBar->isVisible());
 		showToolbarStandardAct->setChecked(mainToolBar->isVisible());
@@ -628,7 +626,7 @@ void MainWindow::showToolbarRender(){
 void MainWindow::showLog()			 {if(GLA() != 0)	GLA()->showLog(!GLA()->isLogVisible());}
 void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->showInfoArea(!GLA()->isInfoAreaVisible());}
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
-void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->trackball.Reset();}
+void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
 void MainWindow::setCustomize()
 {
 	/*QColor backColor=QColorDialog::getColor(QColor(255,255,255,255),this);
@@ -667,12 +665,19 @@ void MainWindow::fullScreen(){
 	menuBar()->hide();
 	mainToolBar->hide();
 	renderToolBar->hide();
-	showFullScreen();
+	this->setWindowState(this->windowState()^Qt::WindowFullScreen);
 	bool found=true;
 	//Caso di piu' finestre aperte in tile:
 	if((workspace->windowList()).size()>0){
 		foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
-		if (found){workspace->tile();}
+		if (found){
+			/*
+			foreach(QWidget *w,workspace->windowList()){
+				w->setWindowFlags(Qt::FramelessWindowHint);
+			}
+			*/
+			workspace->tile();
+		}
 	}
 }
 void MainWindow::keyPressEvent(QKeyEvent *e){
@@ -680,7 +685,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 		menuBar()->show();
 		mainToolBar->show();
 		renderToolBar->show();
-		showNormal();
+		this->setWindowState(this->windowState()^ Qt::WindowFullScreen);
 		fullScreenAct->setChecked(false);
 	}
 }
