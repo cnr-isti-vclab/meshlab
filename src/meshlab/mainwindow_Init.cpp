@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.18  2005/12/05 18:09:42  ggangemi
+Added MeshRenderInterface and shader support
+
 Revision 1.17  2005/12/05 12:18:37  ggangemi
 Added support for MeshDecorateInterface Plugins
 
@@ -590,6 +593,9 @@ void MainWindow::loadPlugins()
 			if (iDecorator)
 			addToMenu(iDecorator->actions(), renderMenu, SLOT(applyDecorateMode()));
 
+			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+			if (iRender)
+			addToMenu(iRender->actions(), renderMenu, SLOT(applyRenderMode()));
 
 			pluginFileNames += fileName;
 		}

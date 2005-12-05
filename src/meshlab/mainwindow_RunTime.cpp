@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.22  2005/12/05 18:09:42  ggangemi
+Added MeshRenderInterface and shader support
+
 Revision 1.21  2005/12/05 12:18:58  ggangemi
 Added support for MeshDecorateInterface Plugins
 
@@ -388,32 +391,15 @@ void MainWindow::applyRenderMode()
 
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	iRenderTemp->Render(action,*(GLA()->mm),GLA()->getCurrentRenderMode(),GLA());
+	iRenderTemp->Init(action,*(GLA()->mm),GLA());
 
+	if(iRenderTemp->isSupported()) {
+		GLA()->setRender(iRenderTemp);
+	} else {
+		GLA()->setRender(0); //vertex and fragment programs not supported
+	}
 	GLA()->log.Log(GLLogStream::Info,"%s",action->text().toLocal8Bit().constData());	// Prints out action name
 	
-	// OLD VERSION
-	//QAction *action = qobject_cast<QAction *>(sender());
-	//MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	//if(GLA()->iRendersList==0){
-	//	GLA()->iRendersList= new list<pair<QAction *,MeshRenderInterface *> >;
-	//	GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
-	//	GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
-	//}else{
-	//	bool found=false;
-	//	pair<QAction *,MeshRenderInterface *> p;
-	//	foreach(p,*GLA()->iRendersList){
-	//		if(iRenderTemp==p.second && p.first->text()==action->text()){
-	//			GLA()->iRendersList->remove(p);
-	//			GLA()->log.Log(0,"Disabled Render mode %s",action->text().toLocal8Bit().constData());// .data());
-	//			found=true;
-	//		} 
-	//	}
-	//	if(!found){
-	//		GLA()->iRendersList->push_back(make_pair(action,iRenderTemp));
-	//		GLA()->log.Log(GLLogStream::Info,"Enable Render mode %s",action->text().toLocal8Bit().constData());// .data());
-	//	}
-	//}
 }
 
 
