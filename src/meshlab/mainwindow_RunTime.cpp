@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.23  2005/12/05 18:15:27  vannini
+Added snapshot save dialog (not used yet)
+
 Revision 1.22  2005/12/05 18:09:42  ggangemi
 Added MeshRenderInterface and shader support
 
@@ -265,7 +268,9 @@ First rough version. It simply load a mesh.
 #include "glarea.h"
 #include "plugindialog.h"
 #include "customDialog.h"		
+#include "saveSnapshotDialog.h"
 #include "ui_aboutForm.h"
+
 //QProgressBar *MainWindow::qb;
 
 void MainWindow::updateRecentFileActions()
@@ -619,7 +624,8 @@ bool MainWindow::saveSnapshot()
 	else
 		GLA()->log.Log(GLLogStream::Error,"Error saving snapshot %s",snapshotPath.toLocal8Bit().constData());
 
-	return ret;
+
+	return true;
 }
 void MainWindow::about()
 {

@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.34  2005/12/05 18:15:27  vannini
+Added snapshot save dialog (not used yet)
+
 Revision 1.33  2005/12/05 18:09:08  ggangemi
 added:
 MeshRenderInterface *iRender;
@@ -204,6 +207,20 @@ public:
 	};
 };
 
+class SnapshotSetting
+{
+public:
+	QString outdir;
+	QString basename;
+	int counter;
+	int resolution;
+		
+	SnapshotSetting()
+	{
+	
+	};
+};
+
 class MeshModel;
 class GLArea : public QGLWidget
 {
@@ -223,8 +240,9 @@ public:
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 	
-	RenderMode &  getCurrentRenderMode()	{return rm;}
-	const ColorSetting& getCustomSetting()			const {return cs;}
+	RenderMode &  getCurrentRenderMode()		{return rm;}
+	const ColorSetting& getCustomSetting()		const {return cs;}
+	const SnapshotSetting& getSnapshotSetting()	const {return ss;}
 	void updateFps();
 	void renderFps();
 	
@@ -237,6 +255,7 @@ public:
 
 	void setBackFaceCulling(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
+	void setSnapshotSetting(const SnapshotSetting & s);
 	void setDrawMode(vcg::GLW::DrawMode mode);
 	void setColorMode(vcg::GLW::ColorMode mode);
 	void setTextureMode(vcg::GLW::TextureMode mode);
@@ -272,6 +291,7 @@ private:
 	bool	trackBallVisible;		// Draws the trackball ?
 	RenderMode rm;
 	ColorSetting cs;
+	SnapshotSetting ss;
 	float cfps;
 	QTime time;
 	int deltaTime;

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.49  2005/12/05 18:15:27  vannini
+Added snapshot save dialog (not used yet)
+
 Revision 1.48  2005/12/05 18:09:08  ggangemi
 added:
 MeshRenderInterface *iRender;
@@ -485,7 +488,7 @@ bool GLArea::saveSnapshot(QString path)
 { 
 	int vp[4];
 	
-	totalCols=totalRows=1;
+	totalCols=totalRows=4;
 	tileRow=tileCol=0;
 
 	glGetIntegerv(GL_VIEWPORT, vp);
@@ -662,6 +665,13 @@ void GLArea::setCustomSetting(const ColorSetting & s)
 	cs.bColorBottom=s.bColorBottom;
 	cs.bColorTop=s.bColorTop;
 	cs.lColor=s.lColor;
+}
+void GLArea::setSnapshotSetting(const SnapshotSetting & s)
+{
+	ss.basename=s.basename;
+	ss.basename=s.counter;
+	ss.outdir=s.outdir;
+	ss.resolution=s.resolution;
 }
 
 void GLArea::updateFps()

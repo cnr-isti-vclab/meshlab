@@ -5,6 +5,7 @@ HEADERS        = interfaces.h \
                  glarea.h \
                  plugindialog.h \
                  customDialog.h \
+                 saveSnapshotDialog.h \
                  ../../../sf/wrap/gui/trackball.h\
                  ../../../sf/wrap/gui/trackmode.h\
                  ../../../sf/wrap/gl/trimesh.h
@@ -16,12 +17,13 @@ SOURCES        = main.cpp \
                  glarea.cpp \
                  plugindialog.cpp \
                  customDialog.cpp \
+                 saveSnapshotDialog.cpp \
                  ../../../sf/wrap/ply/plylib.cpp\
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp
 
 FORMS          = ui/custom.ui\
-								 ui/aboutForm.ui
+ui/savesnapshot.ui\						 ui/aboutForm.ui
 
 
 RESOURCES     = meshlab.qrc

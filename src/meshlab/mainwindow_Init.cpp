@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.19  2005/12/05 18:15:27  vannini
+Added snapshot save dialog (not used yet)
+
 Revision 1.18  2005/12/05 18:09:42  ggangemi
 Added MeshRenderInterface and shader support
 
@@ -251,7 +254,8 @@ First rough version. It simply load a mesh.
 #include "mainwindow.h"
 #include "glarea.h"
 #include "plugindialog.h"
-#include "customDialog.h"				
+#include "customDialog.h"	
+#include "saveSnapshotDialog.h"	
 
 
 QProgressDialog *MainWindow::qb;
