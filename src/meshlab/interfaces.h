@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.21  2005/12/05 12:17:09  ggangemi
+Added MeshDecorateInterface
+
 Revision 1.20  2005/12/05 11:38:52  ggangemi
 workaround: added RenderMode parameter to MeshColorizePlugin::compute
 
@@ -170,6 +173,26 @@ public:
 		virtual QList<QAction *> actions() const = 0;
 };
 
+
+
+class MeshDecorateInterface
+{
+public:
+    virtual ~MeshDecorateInterface() {}
+
+    //virtual void Init(   const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
+		virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+
+    //virtual void Render( const QString &/*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QWidget * /*parent*/) =0;
+		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
+    
+		//virtual void Finalize(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
+		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+
+    //virtual QStringList modes() const = 0;
+		virtual QList<QAction *> actions() const = 0;
+};
+
 Q_DECLARE_INTERFACE(MeshIOInterface,
                     "vcg.meshlab.MeshIOInterface/1.0")
 Q_DECLARE_INTERFACE(MeshFilterInterface,
@@ -178,5 +201,7 @@ Q_DECLARE_INTERFACE(MeshRenderInterface,
                     "vcg.meshlab.MeshRenderInterface/1.0")
 Q_DECLARE_INTERFACE(MeshColorizeInterface,
                     "vcg.meshlab.MeshColorizeInterface/1.0")
+Q_DECLARE_INTERFACE(MeshDecorateInterface,
+                    "vcg.meshlab.MeshDecorateInterface/1.0")
 
 #endif
