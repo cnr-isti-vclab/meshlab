@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2005/12/05 18:47:08  mariolatronico
+first try with correct Set and User bit
+
 Revision 1.2  2005/12/02 21:34:21  mariolatronico
 correct bounding box coordinate and indexes (idx, idy and idz).
 Doesn't work yet, work in progress. Need to check UpdateBoundingBox
@@ -65,13 +68,12 @@ namespace vcg{
     Point3f Vett[n][n][n];
     typename MESH_TYPE::CoordType Cmin,Cmax;
 		Cmin.Zero(); Cmax.Zero();
-    int i,j,k;
     //inizializzo a zero gli elementi
-     	for(i = 0 ; i < n ; ++i)
-				for(j = 0 ; j < n ; ++j)
-					for(k = 0 ; k < n ; ++k)
+     	for(int i = 0 ; i < n ; ++i)
+				for(int j = 0 ; j < n ; ++j)
+					for(int k = 0 ; k < n ; ++k)
      				Vett[i][j][k].Zero();
-
+		
 		typename MESH_TYPE::VertexIterator vi;
     for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
       {
@@ -114,6 +116,7 @@ namespace vcg{
 
   	
     int idx,idy,idz;
+		int referredBit = MESH_TYPE::VertexType::NewBitFlag();
     //int id;
     //calcolo i nuovi vertici dalla media di quelli di ogni cella
     for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
@@ -123,24 +126,22 @@ namespace vcg{
 				Point3f app = (*vi).P();
 				app = (app + tras);
 				
-				idx = ((app[0]) / Px)+1;
-				idy = ((app[1]) / Py)+1;
-				idz = ((app[2]) / Pz)+1;
-
-				// 		idx = (int) (*vi).P()/ Px;
-				// 		idy = (int) (*vi).P() / Px;
-				// 		idz = (int) (*vi).P() / Px;
-				//id = idx + (idy * n)+ (idz * n * n);
-// 			 	std::cout << (*vi).P().X() << " " 
-//  									<< (*vi).P().Y() << " " 
-//  									<< (*vi).P().Z() << " " << endl;
+				idx = ((app[0]) / Px);
+				idy = ((app[1]) / Py);
+				idz = ((app[2]) / Pz);
+				
+				// 			 	std::cout << (*vi).P().X() << " " 
+				//  									<< (*vi).P().Y() << " " 
+				//  									<< (*vi).P().Z() << " " << endl;
 				//			std::cout <<  idx << " " << idy <<" "  << idz <<std::endl;
 
 		
-				//		Vett[id] = (Vett[id] + (*vi).P())/2;
 					Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (*vi).P())/2;
+					(*vi).ClearUserBit(referredBit);
+					//(*vi).SetUserBit(referredBit);
+					//cout << (*vi).Flags() << endl;
       }
-		//	std::cout << "Puppa -------------------------" << endl;
+		//		std::cout << "Puppa -------------------------" << endl;
     typename MESH_TYPE::FaceIterator fi;
     //reimposto i vertici con la media di quelli che cadevano nel suo quadrante
     for(fi = m.face.begin(); fi != m.face.end(); ++fi)
@@ -148,26 +149,26 @@ namespace vcg{
 				static int sdfsdf = 0;
 				if(!(*fi).IsD())
 					{//se non devo cancellare la faccia
-						for(i = 0; i < 3; ++i)
+						for(int i = 0; i < 3; ++i)
 							{//per ogni vertice del triangolo
-								//if(! (*fi).V(i)->IsS())
-								if ((*fi).V(i)->Flags() != 32)
+								if(!(*fi).V(i)->IsUserBit(referredBit))
+								//if ((*fi).V(i)->Flags() != 32)
 									{//se non l'ho gia cambiato
-										//					id = idx + (idy * n)+ (idz * 2 * n);
 										
 										Point3f app = (*fi).V(i)->P();
 										app = (app + tras);
 										
-										idx = ((app[0]) / Px)+1;
-										idy = ((app[1]) / Py)+1;
-										idz = ((app[2]) / Pz)+1;
+										idx = ((app[0]) / Px);
+										idy = ((app[1]) / Py);
+										idz = ((app[2]) / Pz);
 										//lo aggiorno
 										//		std::cout << idx << " " << idy <<" "  << idz <<std::endl;
-										//										std::cout << sdfsdf++ << endl;
+										std::cout << sdfsdf++ << endl;
 										
 										(*fi).V(i)->P() = Vett[idx][idy][idz];
-										(*fi).V(i)->SetS();
-										cout << (*fi).V(i)->Flags() << endl;
+										//									 	(*fi).V(i)->SetR();
+										(*fi).V(i)->SetUserBit(referredBit);
+										//cout << (*fi).V(i)->Flags() << endl;
 
 									}
 							}
@@ -178,28 +179,27 @@ namespace vcg{
 						float p = (a + b + c)/2;
 						float area = sqrt( p * (p - a) * (p - b) * (p - c));
 						if(abs(area)  < 0.00000001f ) {
-							(*fi).SetD();
-		
-						}
+								(*fi).SetD();
+							}
 					}
       }
 
-		std::vector<typename MESH_TYPE::FaceType> fv;
-		for ( fi = m.face.begin(); fi != m.face.end(); ++fi) {
-			static int aa = 0;
-			if (! (*fi).IsD()) {
-				cout << aa++ << " " << fv.size() << endl;
-				fv.push_back(*fi);
-			}
+		// std::vector<typename MESH_TYPE::FaceType> fv;
+// 		for ( fi = m.face.begin(); fi != m.face.end(); ++fi) {
+// 			static int aa = 0;
+// 			if (! (*fi).IsD()) {
+// 				cout << aa++ << " " << fv.size() << endl;
+// 				fv.push_back(*fi);
+// 			}
 			
-		}
+// 		}
 
-		m.face.clear();
-		for ( fi = fv.begin(); fi != fv.end(); ++fi) {
+// 		m.face.clear();
+// 		for ( fi = fv.begin(); fi != fv.end(); ++fi) {
 
-			m.face.push_back(*fi);
+// 			m.face.push_back(*fi);
 
-		}
+// 		}
 		
 		
     return true;
