@@ -1,9 +1,9 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = meshrender.h
-SOURCES       = meshrender.cpp
-TARGET        = meshrender
+HEADERS       = meshdecorate.h
+SOURCES       = meshdecorate.cpp
+TARGET        = meshdecorate
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max

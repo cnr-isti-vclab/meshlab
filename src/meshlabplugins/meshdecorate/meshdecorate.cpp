@@ -24,18 +24,13 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "meshrender.h"
+#include "meshdecorate.h"
 
 using namespace vcg;
 
-
-QStringList ExtraMeshRenderPlugin::modes() const
-{ 
-	return QStringList() << tr("Show Normals");
-}
-void ExtraMeshRenderPlugin::Render(const QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent) 
+void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla) 
 {
-	if(mode == tr("Show Normals"))
+	if(a->text() == tr("Show Normals"))
 	{
     float LineLen = m.cm.bbox.Diag()/20.0;
     CMeshO::VertexIterator vi;
@@ -52,4 +47,4 @@ void ExtraMeshRenderPlugin::Render(const QString &mode, MeshModel &m, RenderMode
 	}
 }
 
-Q_EXPORT_PLUGIN(ExtraMeshRenderPlugin)
+Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)

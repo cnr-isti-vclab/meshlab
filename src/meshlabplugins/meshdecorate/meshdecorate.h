@@ -19,25 +19,33 @@
 **
 ****************************************************************************/
 
-#ifndef EXTRAFILTERSPLUGIN_H
-#define EXTRAFILTERSPLUGIN_H
+#ifndef EXTRADECORATEPLUGIN_H
+#define EXTRADECORATEPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
+#include <QAction>
+#include <QList>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-class ExtraMeshRenderPlugin : public QObject, public MeshRenderInterface
+class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshRenderInterface)
+  Q_OBJECT
+  Q_INTERFACES(MeshDecorateInterface)
+
+	QList <QAction *> actionList;
 
 public:
-    QStringList modes() const;
-   
+     
+	ExtraMeshDecoratePlugin()
+	{
+		actionList << new QAction(QString("Show Normals"),this);
+	}
 
-    virtual void Render(const  QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent);
+	QList<QAction *> actions () const {return actionList;}
+
+  virtual void Decorate(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
 
 };
 
