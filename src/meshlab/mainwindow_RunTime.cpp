@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.21  2005/12/05 12:18:58  ggangemi
+Added support for MeshDecorateInterface Plugins
+
 Revision 1.20  2005/12/05 11:38:39  ggangemi
 workaround: added RenderMode parameter to MeshColorizePlugin::compute
 
@@ -359,9 +362,9 @@ void MainWindow::updateMenus()
 		setDoubleLightingAct->setChecked(rm.DoubleSideLighting);
 
 		foreach (QAction *a,TotalRenderList){a->setChecked(false);}
-		if(GLA()->iRendersList){
-			pair<QAction *,MeshRenderInterface *> p;
-			foreach (p,*GLA()->iRendersList){p.first->setChecked(true);}
+		if(GLA()->iDecoratorsList){
+			pair<QAction *,MeshDecorateInterface *> p;
+			foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
 		}
 	}
 }
@@ -417,14 +420,40 @@ void MainWindow::applyRenderMode()
 void MainWindow::applyColorMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
-	MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(action->parent());
-  iColor->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
+	MeshColorizeInterface *iColorTemp = qobject_cast<MeshColorizeInterface *>(action->parent());
+  iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
 	if (action->isChecked()) {
 		action->setChecked(true);
     GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
 	} else {
 		action->setChecked(false);
 		GLA()->log.Log(GLLogStream::Info,"Turning off colorize %s",action->text().toLocal8Bit().constData());
+	}
+}
+
+void MainWindow::applyDecorateMode()
+{
+	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal 
+
+	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
+	if(GLA()->iDecoratorsList==0){
+		GLA()->iDecoratorsList= new list<pair<QAction *,MeshDecorateInterface *> >;
+		GLA()->iDecoratorsList->push_back(make_pair(action,iDecorateTemp));
+		GLA()->log.Log(GLLogStream::Info,"Enable Decorate mode %s",action->text().toLocal8Bit().constData());
+	}else{
+		bool found=false;
+		pair<QAction *,MeshDecorateInterface *> p;
+		foreach(p,*GLA()->iDecoratorsList){
+			if(iDecorateTemp==p.second && p.first->text()==action->text()){
+				GLA()->iDecoratorsList->remove(p);
+				GLA()->log.Log(0,"Disabled Decorate mode %s",action->text().toLocal8Bit().constData());
+				found=true;
+			} 
+		}
+		if(!found){
+			GLA()->iDecoratorsList->push_back(make_pair(action,iDecorateTemp));
+			GLA()->log.Log(GLLogStream::Info,"Enable Decorate mode %s",action->text().toLocal8Bit().constData());
+		}
 	}
 }
 

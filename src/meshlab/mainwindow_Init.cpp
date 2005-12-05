@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.17  2005/12/05 12:18:37  ggangemi
+Added support for MeshDecorateInterface Plugins
+
 Revision 1.16  2005/12/05 03:59:20  davide_portelli
 Correct a little bug in windows menu.
 
@@ -582,6 +585,10 @@ void MainWindow::loadPlugins()
 				addToMenu(iIO->formats(), fileMenu, SLOT(applyImportExport()));
 			  fileMenu->addSeparator();
 			}
+
+			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
+			if (iDecorator)
+			addToMenu(iDecorator->actions(), renderMenu, SLOT(applyDecorateMode()));
 
 
 			pluginFileNames += fileName;
