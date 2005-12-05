@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <QAction>
+#include <QActionGroup>
 #include <QList>
 
 #include <math.h>
@@ -48,13 +49,14 @@ public:
 
 		MeshColorCurvaturePlugin()
 		{
+			//QActionGroup * ag = new QActionGroup(this);
 			actionList << new QAction(QString("None"),this);
 			actionList << new QAction(QString("Per Face"),this);
 			actionList << new QAction(QString("Per Vertex"),this);
 			actionList << new QAction(QString("Gaussian Curvature"),this);
 		}
     
-		void Compute(QAction * mode, MeshModel &m, GLArea *parent);
+		void Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent);
     
 		QList<QAction *> actions() const { return actionList; }
 

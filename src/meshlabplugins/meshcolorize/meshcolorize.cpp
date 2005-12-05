@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/12/05 11:37:13  ggangemi
+workaround: added rendermode to compute method
+
 Revision 1.4  2005/12/03 23:23:37  ggangemi
 new interface
 
@@ -152,25 +155,29 @@ static void Gaussian(CMeshO &m){
 
 }
 
-void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, GLArea *parent){
+void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent){
 	if(mode->text() == tr("Gaussian Curvature"))
 	{
 		Gaussian(m.cm);
 		vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
+		rm.colorMode = GLW::CMPerVert;
 		return;
 	}
 	if(mode->text() == tr("None"))
 	{
+		rm.colorMode = GLW::CMNone;
 		//parent->setColorMode(GLW::CMNone);
 		return;
 	}
 	if(mode->text() == tr("Per Face"))
 	{
+		rm.colorMode = GLW::CMPerFace;
 		//parent->setColorMode(GLW::CMPerFace);
 		return;
 	}
 	if(mode->text() == tr("Per Vertex"))
 	{
+		rm.colorMode = GLW::CMPerVert;
 		//parent->setColorMode(GLW::CMPerVert);
 		return;
 	}
