@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.46  2005/12/05 10:27:38  vannini
+Snapshot in png format instead of ppm
+
 Revision 1.45  2005/12/04 22:19:47  alemochi
 Added in Info Pane number of triangles and vertices
 
@@ -193,12 +196,6 @@ First rough version. It simply load a mesh.
 
 using namespace vcg; 
 
-// Tiled rendering vars
-static char *snapBuffer;
-static char *tileBuffer;
-static bool takeSnapTile=false;
-static int vpWidth, vpHeight, tileCol, tileRow, totalCols, totalRows;
-
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
@@ -210,6 +207,7 @@ GLArea::GLArea(QWidget *parent)
 	currentHeight=100;
 	currentWidth=200;
 	logVisible = true;
+	takeSnapTile=false;
 	infoAreaVisible = false;
 	trackBallVisible = true;
 	time.start();
@@ -258,59 +256,14 @@ void GLArea::initializeGL()
 	glEnable(GL_LIGHTING);
 }
 
-//bool pasteTile()
-//{
-//	int bufferOffset,q; 
-//
-//	bufferOffset=(vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol); 
-//	q=(vpHeight-1) * vpWidth;
-//	
-//	for (int y=0; y < vpHeight; ++y)
-//	{
-//		for (int x=0; x < vpWidth; ++x)
-//		{
-//			snapshotData[bufferOffset]=tileData[q];
-//			q++;
-//			bufferOffset++;
-//		}
-//		q-=(vpWidth*2);
-//		bufferOffset+=(vpWidth * (totalCols-1));
-//	}
-//
-//	
-//	tileCol++;
-//
-//	if (tileCol >= totalCols)
-//	{
-//		tileCol=0;
-//		tileRow++;
-//
-//		if (tileRow >= totalRows)
-//		{
-//			takeSnapTile=false;
-//			QString path="snapshot.ppm";
-//
-//			FILE * fp = fopen(path.toLocal8Bit(),"wb");
-//			if (fp==0) return false;
-//
-//			fprintf(fp,"P6\n%d %d\n255\n", vpWidth * totalCols, vpHeight * totalRows);
-//
-//			for(int t=0; t < (vpWidth * totalCols * vpHeight * totalRows); ++t)
-//			{
-//				fwrite(&(snapshotData[t]),3,1,fp);
-//			}
-//			
-//			fclose(fp);    	
-//		}
-//	}
-//}
-bool pasteTile()
+
+bool GLArea::pasteTile()
 {
 	int snapBufferOffset, q; 
-	int vpLineSize=vpWidth * 4;
+	int vpLineSize=vpWidth * SSHOT_BYTES_PER_PIXEL;
 
-	snapBufferOffset=4 * ((vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol)); 
-	q=vpLineSize * (vpHeight-1);
+	snapBufferOffset=SSHOT_BYTES_PER_PIXEL * ((vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol)); 
+	q=vpLineSize * (vpHeight - 1);
 	
 	for (int y=0; y < vpHeight; ++y)
 	{
@@ -330,29 +283,19 @@ bool pasteTile()
 		{
 			takeSnapTile=false;
 			
-			QString path="snapshot.ppm";
+			QImage img = QImage((uchar*) &snapBuffer[0], vpWidth * totalCols, vpHeight * totalRows, QImage::Format_ARGB32);
 
-			FILE * fp = fopen(path.toLocal8Bit(),"wb");
-			if (fp==0) return false;
-
-			fprintf(fp,"P6\n%d %d\n255\n", vpWidth * totalCols, vpHeight * totalRows);
-
-			for(int t=0; t < (vpLineSize * totalCols * vpHeight * totalRows); t+=4)
-			{
-				fwrite(&(snapBuffer[t]),3,1,fp);
-			}
-			
-			fclose(fp);    	
+            bool ret = img.save("snapshot.png","PNG");		
 
 			delete(tileBuffer);
 			delete(snapBuffer);
-
+			return ret;
 		}
 	}
 
 	return true;
 }
-void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
 	GLdouble fLeft, fRight, fBottom, fTop, left, right, bottom, top, xDim, yDim, xOff, yOff, tDimX, tDimY;
 	
@@ -449,7 +392,7 @@ void GLArea::paintGL()
 	{
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, vpWidth, vpHeight, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid *) tileBuffer);
+		glReadPixels(0, 0, vpWidth, vpHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (GLvoid *) tileBuffer);
 		glPopMatrix();
 		glMatrixMode(old_matrixMode);
 		pasteTile();
@@ -525,15 +468,15 @@ bool GLArea::saveSnapshot(QString path)
 { 
 	int vp[4];
 	
-	totalCols=totalRows=4;
+	totalCols=totalRows=1;
 	tileRow=tileCol=0;
 
 	glGetIntegerv(GL_VIEWPORT, vp);
 	vpWidth=vp[2];
 	vpHeight=vp[3];
 	
-    snapBuffer = new char[vpWidth * vpHeight * totalCols * totalRows * 4];
-	tileBuffer = new char[vpWidth * vpHeight * 4];
+	snapBuffer = new char[vpWidth * vpHeight * totalCols * totalRows * SSHOT_BYTES_PER_PIXEL];
+	tileBuffer = new char[vpWidth * vpHeight * SSHOT_BYTES_PER_PIXEL];
 
 	takeSnapTile=true;
 	update();

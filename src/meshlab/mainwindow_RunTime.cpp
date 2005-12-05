@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.19  2005/12/05 10:27:39  vannini
+Snapshot in png format instead of ppm
+
 Revision 1.18  2005/12/04 17:47:18  davide_portelli
 Added menu windows->Next and Shortcut "CTRL+PageDown"
 Added reset trackbal Shortcut "CTRL+H"
@@ -589,7 +592,7 @@ bool MainWindow::saveAs()
 
 bool MainWindow::saveSnapshot()
 {
-	QString snapshotPath = "snapshot.ppm";
+	QString snapshotPath = "snapshot.png";
 
 	bool ret=GLA()->saveSnapshot(snapshotPath);
 

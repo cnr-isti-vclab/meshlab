@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.31  2005/12/05 10:27:39  vannini
+Snapshot in png format instead of ppm
+
 Revision 1.30  2005/12/04 22:19:48  alemochi
 Added in Info Pane number of triangles and vertices
 
@@ -144,6 +147,7 @@ First rough version. It simply load a mesh.
 #include "meshmodel.h"
 #include "interfaces.h"
 
+#define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
 
@@ -209,20 +213,18 @@ public:
 	int currentHeight;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
-
 	
-  RenderMode &  getCurrentRenderMode()	{return rm;}
+	RenderMode &  getCurrentRenderMode()	{return rm;}
 	const ColorSetting& getCustomSetting()			const {return cs;}
 	void updateFps();
 	void renderFps();
 	
-	void showLog(bool b)				{logVisible = b; updateGL();}
+	void showLog(bool b)			{logVisible = b; updateGL();}
 	void showInfoArea(bool b)		{infoAreaVisible = b; updateGL();}
-	void showTrackBall(bool b)	{trackBallVisible = b; updateGL();}
-	bool isLogVisible()					{return logVisible;}
+	void showTrackBall(bool b)		{trackBallVisible = b; updateGL();}
+	bool isLogVisible()				{return logVisible;}
 	bool isInfoAreaVisible()		{return infoAreaVisible;}
 	bool isTrackBallVisible()		{return trackBallVisible;}
-
 
 	void setBackFaceCulling(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
@@ -232,13 +234,13 @@ public:
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
 	bool saveSnapshot(QString path);
-  void SetLightModel();
+	void SetLightModel();
 	void resetTrackBall();
-  list<pair<QAction *,MeshRenderInterface *> > *iRendersList;
+	list<pair<QAction *,MeshRenderInterface *> > *iRendersList;
+
 protected:
-	
 	void initializeGL();
-  void initTexture();
+	void initTexture();
 	void DisplayModelInfo();
 	void paintGL();
 	void resizeGL(int width, int height);
@@ -248,18 +250,25 @@ protected:
 	void wheelEvent(QWheelEvent*e);
 	
 private:
-  bool	logVisible;				// Prints out log infos ?
-	bool	infoAreaVisible;	// Draws the lower info area ?
-	bool	trackBallVisible;	// Draws the trackball ?
+	bool pasteTile();
+	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
+    
+	bool	logVisible;				// Prints out log infos ?
+	bool	infoAreaVisible;		// Draws the lower info area ?
+	bool	trackBallVisible;		// Draws the trackball ?
 	RenderMode rm;
 	ColorSetting cs;
-  float cfps;
+	float cfps;
 	QTime time;
 	int deltaTime;
-  int lastTime;
+	int lastTime;
 	int currentTime;
 	float fpsVector[10];
-
+	
+	char *snapBuffer;
+	char *tileBuffer;
+	bool takeSnapTile;
+	int vpWidth, vpHeight, tileCol, tileRow, totalCols, totalRows;
 
 };
 
