@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.16  2005/12/05 03:59:20  davide_portelli
+Correct a little bug in windows menu.
+
 Revision 1.15  2005/12/04 17:47:18  davide_portelli
 Added menu windows->Next and Shortcut "CTRL+PageDown"
 Added reset trackbal Shortcut "CTRL+H"
@@ -258,6 +261,7 @@ MainWindow::MainWindow()
 	
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateMenus()));
+	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateWindowMenu()));
 
 	createActions();
 	createMenus();
@@ -367,6 +371,7 @@ void MainWindow::createActions()
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
 	fullScreenAct->setCheckable(true);
 	fullScreenAct->setChecked(false);
+	fullScreenAct->setShortcut(Qt::ALT+Qt::Key_Enter);
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(fullScreen()));
 
 	showToolbarStandardAct = new QAction (tr("&Standard"), this);
@@ -405,7 +410,7 @@ void MainWindow::createActions()
 	connect(windowsCascadeAct, SIGNAL(triggered()), workspace, SLOT(cascade()));
 
 	windowsNextAct = new QAction(tr("&Next"), this);
-	windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_PageDown);
+	windowsNextAct->setShortcut(Qt::Key_PageDown);
 	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
 
 
