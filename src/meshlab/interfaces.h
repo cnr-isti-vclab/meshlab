@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.22  2005/12/05 18:08:21  ggangemi
+added MeshRenderInterface::isSupported() method
+
 Revision 1.21  2005/12/05 12:17:09  ggangemi
 Added MeshDecorateInterface
 
@@ -154,6 +157,7 @@ public:
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 
     //virtual QStringList modes() const = 0;
+		virtual bool isSupported() = 0;
 		virtual QList<QAction *> actions() const = 0;
 };
 
