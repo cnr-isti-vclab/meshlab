@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.32  2005/12/05 12:16:46  ggangemi
+iRendersList -> iDecoratorsList
+
 Revision 1.31  2005/12/05 10:27:39  vannini
 Snapshot in png format instead of ppm
 
@@ -236,7 +239,7 @@ public:
 	bool saveSnapshot(QString path);
 	void SetLightModel();
 	void resetTrackBall();
-	list<pair<QAction *,MeshRenderInterface *> > *iRendersList;
+	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
 
 protected:
 	void initializeGL();

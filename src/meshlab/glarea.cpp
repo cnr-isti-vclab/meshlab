@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.47  2005/12/05 12:16:46  ggangemi
+iRendersList -> iDecoratorsList
+
 Revision 1.46  2005/12/05 10:27:38  vannini
 Snapshot in png format instead of ppm
 
@@ -199,7 +202,7 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
-	iRendersList=0;
+	iDecoratorsList=0;
 	currentTime=0;
 	lastTime=0;
 	deltaTime=0;
@@ -387,6 +390,11 @@ void GLArea::paintGL()
 	
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
+	if(iDecoratorsList){
+		pair<QAction *,MeshDecorateInterface *> p;
+		foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm,rm,this);}
+	}
+
 	// ...and take a snapshot
 	if (takeSnapTile)
 	{
@@ -398,12 +406,6 @@ void GLArea::paintGL()
 		pasteTile();
 		update();
 	}
-
-// OLD VERSION
-//	if(iRendersList){
-//		pair<QAction *,MeshRenderInterface *> p;
-//		foreach(p,*iRendersList){p.second->Render(p.first->text(),*mm,rm,this);}
-//	}
 	
 // ==============================	
 // Draw the log area background
