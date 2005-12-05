@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/12/05 18:10:05  ggangemi
+Added isSupported method definition
+
 Revision 1.4  2005/12/03 22:49:46  cignoni
 Added copyright info
 
@@ -55,6 +58,7 @@ public:
 		actionList << new QAction(QString("action 3"),this);
 	}
 
+	virtual bool isSupported() {return false;}
 	QList<QAction *> actions () const {return actionList;}
 
 	void Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
