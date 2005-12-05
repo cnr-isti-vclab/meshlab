@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.20  2005/12/05 11:38:52  ggangemi
+workaround: added RenderMode parameter to MeshColorizePlugin::compute
+
 Revision 1.19  2005/12/03 23:50:15  cignoni
 changed io interface to return a list instead of a vector
 
@@ -155,7 +158,7 @@ class MeshColorizeInterface
 {
 public:
     //virtual void Compute(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
-		virtual void Compute(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+		virtual void Compute(QAction * /*mode*/, MeshModel &/*m*/,  RenderMode &/*rm*/, GLArea * /*parent*/){};
     
 		//virtual void Show(const QString &/*mode*/, bool /*show*/, MeshModel &/*m*/, QWidget * /*parent*/) {};
 		virtual void Show(QAction * /*mode*/, bool /*show*/, MeshModel &/*m*/, GLArea * /*parent*/) {};

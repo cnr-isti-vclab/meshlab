@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.20  2005/12/05 11:38:39  ggangemi
+workaround: added RenderMode parameter to MeshColorizePlugin::compute
+
 Revision 1.19  2005/12/05 10:27:39  vannini
 Snapshot in png format instead of ppm
 
@@ -415,7 +418,7 @@ void MainWindow::applyColorMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(action->parent());
-  iColor->Compute(action,*(GLA()->mm ), GLA());
+  iColor->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
 	if (action->isChecked()) {
 		action->setChecked(true);
     GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
