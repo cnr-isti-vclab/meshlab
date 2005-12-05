@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.42  2005/12/05 12:17:45  ggangemi
+Added void applyDecorateMode();
+
 Revision 1.41  2005/12/04 17:47:18  davide_portelli
 Added menu windows->Next and Shortcut "CTRL+PageDown"
 Added reset trackbal Shortcut "CTRL+H"
@@ -98,6 +101,7 @@ private slots:
 	void applyRenderMode();
 	void applyColorMode();
 	void toggleBackFaceCulling();
+	void applyDecorateMode();
 	///////////Slot Menu View ////////////////////////
 	void fullScreen();
 	void showToolbarFile();
