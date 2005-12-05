@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/12/05 18:11:28  ggangemi
+Added toon shader example
+
 Revision 1.4  2005/12/05 16:52:57  ggangemi
 new interfaces
 
@@ -38,6 +41,7 @@ Added copyright info
 #include <QAction>
 #include <QList>
 
+#include <gl/glew.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
@@ -46,17 +50,30 @@ class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
   Q_OBJECT
   Q_INTERFACES(MeshRenderInterface)
 
+	GLhandleARB p;
+	GLhandleARB v;
+	GLhandleARB f;
+
+	GLint edge;  
+	GLint phong; 
+	GLint diffuseColor;
+	GLint phongColor;
+
+	bool supported;
 	QList <QAction *> actionList;
 
 public:
      
 	MeshShaderRenderPlugin()
 	{
+		supported = false;
 		actionList << new QAction(QString("Toon Shader"),this);
 	}
 
 	QList<QAction *> actions () const {return actionList;}
 
+	virtual bool isSupported() {return supported;}
+	virtual void Init(QAction *a, MeshModel &m, GLArea *gla);
   virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
 
 };

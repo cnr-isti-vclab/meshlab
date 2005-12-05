@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/12/05 18:11:28  ggangemi
+Added toon shader example
+
 Revision 1.4  2005/12/05 16:52:57  ggangemi
 new interfaces
 
@@ -39,12 +42,51 @@ Added copyright info
 
 using namespace vcg;
 
+void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla) 
+{
+	if(a->text() == tr("Toon Shader"))
+	{
+		GLenum err = glewInit();
+		if (GLEW_OK == err)
+		{
+			if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program)
+			{
+				v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+				f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+				char *fs = "uniform vec3 DiffuseColor;uniform vec3 PhongColor;uniform float Edge;uniform float Phong;varying vec3 Normal;void main (void){vec3 color = DiffuseColor;float f = dot(vec3(0,0,1),Normal);if (abs(f) < Edge)color = vec3(0);if (f > Phong)color = PhongColor;gl_FragColor = vec4(color, 1);}";
+				char *vs = "varying vec3 Normal;void main(void){Normal = normalize(gl_NormalMatrix * gl_Normal);gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;}";
+				const char * vv = vs;
+				const char * ff = fs;
+				glShaderSourceARB(v, 1, &vv,NULL);
+				glShaderSourceARB(f, 1, &ff,NULL);
+				
+				glCompileShaderARB(v);
+				glCompileShaderARB(f);
+				p = glCreateProgramObjectARB();
+				glAttachObjectARB(p,v);
+				glAttachObjectARB(p,f);
+				glLinkProgramARB(p);
+
+				edge =				 glGetUniformLocationARB(p, "Edge");
+				phong =				 glGetUniformLocationARB(p, "Phong");
+				diffuseColor = glGetUniformLocationARB(p, "DiffuseColor");
+				phongColor =	 glGetUniformLocationARB(p, "PhongColor");
+				supported = true;
+			}
+		}	
+    return;
+	}
+}
 
 void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla) 
 {
 	if(a->text() == tr("Toon Shader"))
 	{
-		//todo
+		glUseProgramObjectARB(p);
+		glUniform1fARB(edge, 0.64f);
+		glUniform1fARB(phong, 0.9540001f);
+		glUniform3fARB(diffuseColor, 0.0f, 0.25f, 1.0f);
+		glUniform3fARB(phongColor, 0.75f, 0.75f, 1.0f);
     return;
 	}
 }
