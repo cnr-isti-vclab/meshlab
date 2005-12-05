@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2005/12/05 14:51:03  mariolatronico
+second action from "Loop" to "Butterfly"
+
 Revision 1.12  2005/12/03 23:46:11  cignoni
 Cleaned up a little and added a remove null faces filter
 
@@ -48,7 +51,7 @@ using namespace vcg;
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction("Loop Subdivision Surface", this);
-	actionList << new QAction("Loop Subdivision Surface", this);
+	actionList << new QAction("Butterfly Subdivision Surface", this);
 	actionList << new QAction("Remove Unreferenced Vertexes", this);
 	actionList << new QAction("Remove Duplicated Vertexes", this);
 	actionList << new QAction("Remove Null Faces", this);
@@ -103,8 +106,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
  	}
    if(filter->text() == tr("Remove Null Faces"))
  	{
-		  int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
-      cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
+		//int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
+		// cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
 	   //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
  	}
 
