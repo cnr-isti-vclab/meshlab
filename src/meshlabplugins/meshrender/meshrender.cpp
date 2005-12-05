@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2005/12/05 16:52:57  ggangemi
+new interfaces
+
 Revision 1.3  2005/12/03 22:50:06  cignoni
 Added copyright info
 
@@ -37,27 +40,13 @@ Added copyright info
 using namespace vcg;
 
 
-QStringList ExtraMeshRenderPlugin::modes() const
-{ 
-	return QStringList() << tr("Show Normals");
-}
-void ExtraMeshRenderPlugin::Render(const QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent) 
+void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla) 
 {
-	if(mode == tr("Show Normals"))
+	if(a->text() == tr("Toon Shader"))
 	{
-    float LineLen = m.cm.bbox.Diag()/20.0;
-    CMeshO::VertexIterator vi;
-    glPushAttrib(GL_ENABLE_BIT );
-    glDisable(GL_LIGHTING);
-    glBegin(GL_LINES);
-    for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-    {
-      glVertex((*vi).P());
-      glVertex((*vi).P()+(*vi).N()*LineLen);
-    }
-    glEnd();
-    glPopAttrib();
+		//todo
+    return;
 	}
 }
 
-Q_EXPORT_PLUGIN(ExtraMeshRenderPlugin)
+Q_EXPORT_PLUGIN(MeshShaderRenderPlugin)

@@ -23,31 +23,43 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2005/12/05 16:52:57  ggangemi
+new interfaces
+
 Revision 1.3  2005/12/03 22:50:06  cignoni
 Added copyright info
 
 ****************************************************************************/
 
-#ifndef EXTRAFILTERSPLUGIN_H
-#define EXTRAFILTERSPLUGIN_H
+#ifndef SHADERRENDERPLUGIN_H
+#define SHADERRENDERPLUGIN_H
 
 #include <QObject>
-#include <QStringList>
+#include <QAction>
+#include <QList>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-class ExtraMeshRenderPlugin : public QObject, public MeshRenderInterface
+class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshRenderInterface)
+  Q_OBJECT
+  Q_INTERFACES(MeshRenderInterface)
+
+	QList <QAction *> actionList;
 
 public:
-    QStringList modes() const;
-   
+     
+	MeshShaderRenderPlugin()
+	{
+		actionList << new QAction(QString("Toon Shader"),this);
+	}
 
-    virtual void Render(const  QString &mode, MeshModel &m, RenderMode &rm, QWidget *parent);
+	QList<QAction *> actions () const {return actionList;}
+
+  virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
 
 };
 
 #endif
+
