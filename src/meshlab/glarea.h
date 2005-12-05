@@ -24,6 +24,12 @@
   History
 
 $Log$
+Revision 1.33  2005/12/05 18:09:08  ggangemi
+added:
+MeshRenderInterface *iRender;
+void setRender(MeshRenderInterface *);
+MeshRenderInterface * getRender();
+
 Revision 1.32  2005/12/05 12:16:46  ggangemi
 iRendersList -> iDecoratorsList
 
@@ -240,6 +246,11 @@ public:
 	void SetLightModel();
 	void resetTrackBall();
 	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
+
+	//shader support
+	MeshRenderInterface *iRender;
+	void setRender(MeshRenderInterface *);
+	MeshRenderInterface * getRender();
 
 protected:
 	void initializeGL();

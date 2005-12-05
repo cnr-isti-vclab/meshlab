@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.48  2005/12/05 18:09:08  ggangemi
+added:
+MeshRenderInterface *iRender;
+void setRender(MeshRenderInterface *);
+MeshRenderInterface * getRender();
+
 Revision 1.47  2005/12/05 12:16:46  ggangemi
 iRendersList -> iDecoratorsList
 
@@ -202,6 +208,7 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
+	iRender=0; //MeshRender support
 	iDecoratorsList=0;
 	currentTime=0;
 	lastTime=0;
@@ -388,7 +395,15 @@ void GLArea::paintGL()
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
 	
+	if(iRender) {
+		iRender->Render(new QAction("Toon Shader", this), *mm, rm, this); 
+	}
+
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+
+	if(iRender) {
+		glUseProgramObjectARB(0);
+	}
 
 	if(iDecoratorsList){
 		pair<QAction *,MeshDecorateInterface *> p;
@@ -659,3 +674,6 @@ void GLArea::updateFps()
 	cfps=1000.0f/(averageFps/10);
 }
 void GLArea::resetTrackBall(){trackball.Reset();updateGL();}
+
+void GLArea::setRender(MeshRenderInterface * rend) {	iRender = rend; }
+MeshRenderInterface * GLArea::getRender() { return iRender; }
