@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.20  2005/12/06 16:38:28  ggangemi
+Commented "setCheckable(true)" for each QAction
+
 Revision 1.19  2005/12/05 18:15:27  vannini
 Added snapshot save dialog (not used yet)
 
@@ -612,7 +615,7 @@ void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char 
 	foreach (QAction *a, actionList)
 	{
 		connect(a,SIGNAL(triggered()),this,slot);
-		a->setCheckable(true);
+		//a->setCheckable(true);
 		menu->addAction(a);
 	}
 // OLD LOOP CORE		
