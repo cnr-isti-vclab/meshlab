@@ -40,7 +40,9 @@ public:
      
 	ExtraMeshDecoratePlugin()
 	{
-		actionList << new QAction(QString("Show Normals"),this);
+		QAction * qa = new QAction(QString("Show Normals"),this);
+		qa->setCheckable(true);
+		actionList << qa;
 	}
 
 	QList<QAction *> actions () const {return actionList;}
