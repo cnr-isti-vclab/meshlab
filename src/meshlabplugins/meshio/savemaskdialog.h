@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2005/12/06 15:54:59  fmazzant
+ update dialog export obj
+
  Revision 1.1  2005/12/02 17:40:26  fmazzant
  added dialog obj exporter.
 
@@ -39,8 +42,7 @@ struct Mask
 	int normal;//salva le normali 1, non li salva 0
 	int binary;//salva in binario 1, salva in ascii 0
 	int colorV;//salva colore vertici 1, non li salva 0
-	int material;//salva il materiale 1, non lo salva 0
-	const static int args = 7;
+	const static int args = 6;
 };
 
 class SaveMaskDialog : public QDialog

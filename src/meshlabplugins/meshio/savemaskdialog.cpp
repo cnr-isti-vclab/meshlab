@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2005/12/06 15:54:59  fmazzant
+ update dialog export obj
+
  Revision 1.2  2005/12/03 09:45:42  fmazzant
  adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
 
@@ -56,7 +59,6 @@ void SaveMaskDialog::SlotOkButton()
 	mymask.texture = SaveMaskDialog::ui.textureCheck->isChecked();
 	mymask.vertexs = SaveMaskDialog::ui.vertexCheck->isChecked();
 	mymask.colorV = SaveMaskDialog::ui.vertexCheck->isChecked();
-	mymask.material = SaveMaskDialog::ui.vertexCheck->isChecked();
 	if(WriteMask(&mymask))
 		accept();
 	else
@@ -67,8 +69,6 @@ void SaveMaskDialog::SlotCancelButton()
 {
 	
 }
-
-
 
 //member
 bool SaveMaskDialog::ReadMask()
@@ -88,7 +88,6 @@ bool SaveMaskDialog::ReadMask()
 		mask.texture = QString(line.at(3)).toInt(&ok, 10); 
 		mask.vertexs = QString(line.at(4)).toInt(&ok, 10);
 		mask.colorV = QString(line.at(5)).toInt(&ok, 10);
-		mask.material = QString(line.at(6)).toInt(&ok, 10);
 	}
 	else
 	{
@@ -98,7 +97,6 @@ bool SaveMaskDialog::ReadMask()
 		mask.texture = 0;
 		mask.vertexs = 0;
 		mask.colorV = 0;
-		mask.material = 0;
 	}
 
 	SaveMaskDialog::ui.binaryButton->setChecked((bool)mask.binary);
@@ -108,7 +106,6 @@ bool SaveMaskDialog::ReadMask()
 	SaveMaskDialog::ui.textureCheck->setChecked((bool)mask.texture);
 	SaveMaskDialog::ui.vertexCheck->setChecked((bool)mask.vertexs);
 	SaveMaskDialog::ui.colorVertexCheck->setChecked((bool)mask.colorV);
-	SaveMaskDialog::ui.materialCheck->setChecked((bool)mask.material);
 
 	in.close();
 	return true;
@@ -130,7 +127,6 @@ Mask SaveMaskDialog::GetMask()
 	mask.texture = QString(line.at(3)).toInt(&ok, 10); 
 	mask.vertexs = QString(line.at(4)).toInt(&ok, 10); 
 	mask.colorV = QString(line.at(5)).toInt(&ok, 10);
-	mask.material = QString(line.at(6)).toInt(&ok, 10);
 	return mask;
 }
 
@@ -138,7 +134,7 @@ bool SaveMaskDialog::WriteMask(Mask *mask)
 {
 	std::ofstream out("./mask.ini");
 	if (out.fail()){return false;}
-	out << mask->binary << mask->faces << mask->normal << mask->texture << mask->vertexs << mask->colorV << mask->material << std::endl;
+	out << mask->binary << mask->faces << mask->normal << mask->texture << mask->vertexs << mask->colorV << std::endl;
 	out.close();
 	return true;
 }
@@ -150,7 +146,6 @@ int SaveMaskDialog::MaskToInt(Mask *mymask)
 	if(mymask->normal)	{mask |= vcg::ply::PLYMask::PM_WEDGNORMAL;}
 	if(mymask->colorV)	{mask |= vcg::ply::PLYMask::PM_VERTCOLOR; mask |= vcg::ply::PLYMask::PM_FACECOLOR;}
 	if(mymask->faces)	{mask |= vcg::ply::PLYMask::PM_FACEQUALITY;}
-	if(mymask->material){;}//non so!!!
 	if(mymask->vertexs)	{mask |= vcg::ply::PLYMask::PM_VERTQUALITY;}
 
 	return mask;

@@ -8,63 +8,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>357</width>
-    <height>150</height>
+    <width>359</width>
+    <height>152</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="horizontalLayout" >
-   <property name="geometry" >
-    <rect>
-     <x>20</x>
-     <y>150</y>
-     <width>361</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="layoutWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>20</x>
-     <y>250</y>
-     <width>351</width>
-     <height>33</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>341</width>
-     <height>241</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget_2" >
-   <property name="geometry" >
-    <rect>
-     <x>11</x>
-     <y>94</y>
-     <width>339</width>
-     <height>125</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget_3" >
-   <property name="geometry" >
-    <rect>
-     <x>11</x>
-     <y>225</y>
-     <width>339</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QPushButton" name="okButton" >
    <property name="geometry" >
     <rect>
@@ -145,34 +95,6 @@
     <property name="spacing" >
      <number>6</number>
     </property>
-    <item row="2" column="1" >
-     <widget class="QCheckBox" name="faceCheck" >
-      <property name="text" >
-       <string>Faces</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0" >
-     <widget class="QCheckBox" name="normalCheck" >
-      <property name="text" >
-       <string>Normals Vertex</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1" >
-     <widget class="QCheckBox" name="materialCheck" >
-      <property name="text" >
-       <string>Materials</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1" >
-     <widget class="QCheckBox" name="textureCheck" >
-      <property name="text" >
-       <string>Texture Coords</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="0" >
      <widget class="QCheckBox" name="vertexCheck" >
       <property name="text" >
@@ -180,10 +102,31 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0" >
+    <item row="2" column="0" >
      <widget class="QCheckBox" name="colorVertexCheck" >
       <property name="text" >
-       <string>Vertexs Color</string>
+       <string>Color Faces</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" >
+     <widget class="QCheckBox" name="textureCheck" >
+      <property name="text" >
+       <string>Texture Coords</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" >
+     <widget class="QCheckBox" name="faceCheck" >
+      <property name="text" >
+       <string>Faces</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" >
+     <widget class="QCheckBox" name="normalCheck" >
+      <property name="text" >
+       <string>Normals Vertex</string>
       </property>
      </widget>
     </item>
