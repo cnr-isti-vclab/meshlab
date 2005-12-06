@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.52  2005/12/06 20:54:53  alemochi
+Added more space between property displayed
+
 Revision 1.51  2005/12/06 15:13:23  glvertex
 Disabled textures during print info
 
@@ -242,8 +245,8 @@ void GLArea::DisplayModelInfo()
 	QString strTriangle="Triangle "+QString("").setNum(mm->cm.face.size(),10);
   //strVertex+=strVertex.setNum(mm->cm.vert.size(),10);
 	//strTriangle.setNum(mm->cm.face.size(),10);
-  renderText(currentWidth-currentWidth*0.15,currentHeight-20,strVertex);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-35,strTriangle);
+  renderText(currentWidth-currentWidth*0.15,currentHeight-25,strVertex);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-45,strTriangle);
 
 
 }
