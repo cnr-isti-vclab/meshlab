@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.5  2005/12/06 05:07:39  buzzelli
+Object file importer now performs also materials and texture names loading
+
 Revision 1.4  2005/11/27 16:46:13  buzzelli
 Added test of callback with null
 
@@ -50,7 +53,7 @@ First working version (for simplest objects)
 #include <wrap/callback.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include "io_obj.h"
-#include<wrap/ply/io_mask.h>
+#include <wrap/ply/io_mask.h>
 
 #include <fstream>
 #include <string>
@@ -78,21 +81,49 @@ typedef typename OpenMeshType::VertexIterator VertexIterator;
 typedef typename OpenMeshType::FaceIterator FaceIterator;
 
 
-class OBJFacet
+struct OBJFacet
 {
-public:
   Point3f n;
 	Point3f t;
   Point3f v[3];
-//  short attr;
+
+	short attr;  // material index
 };
 
-class TexCoord
+struct TexCoord
 {
-public:
 	float u;
 	float v;
-	// float w; // per ora non usata
+	// float w; // not used for now
+};
+
+struct Material
+{
+	Material()
+	{
+		strcpy(name, "default_material");
+		ambient		= Point3f( .2f,  .2f,  .2f);
+		diffuse		= Point3f(1.0f, 1.0f, 1.0f);
+		specular	= Point3f(1.0f, 1.0f, 1.0f);
+		
+		shininess =		 0;
+		alpha			= 1.0f;
+		
+		strcpy(textureFileName, "");
+	};
+
+  char		name[FILENAME_MAX];
+
+  Point3f ambient;
+  Point3f diffuse;
+  Point3f specular;
+
+  int			shininess;
+  float		alpha;
+
+  bool		bSpecular;
+
+  char		textureFileName[FILENAME_MAX];
 };
 
 enum OBJError {
@@ -147,30 +178,34 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	m.Clear();
 	
 	CallBackPos *cb = oi.cb;
-	if (oi.mask == -1)  // LoadMask has not been called yet
+	// if LoadMask has not been called yet, we call it here
+	if (oi.mask == -1)
 	{
 		int mask;
 		LoadMask(filename, mask, oi);
 	}
 
-	//bool bNormalDefined				= false;
-	//bool bColorDefined				= false;
-	//bool btexCoordDefined			= false;
-	//bool bHasNormalPerWedge		= false;
-	//bool bHasTexCoordPerWedge = false;
-
+	// creating an input file stream
 	std::ifstream stream(filename);
 	if (stream.fail())
 		return E_CANTOPEN;
 
-	std::vector<TexCoord> texCoords;
+	std::vector<Material>	materials;  // materials vector
+	std::vector<TexCoord>	texCoords;  // texture coordinates
 
 	std::vector< std::string > tokens;
-	std::string header;
+	std::string	header;
+
+	short currentMaterialIdx = 0;
+	Material defaultMaterial;
+	materials.push_back(defaultMaterial);
 
 	int numVertices = 0;  // stores the number of vertices been read till now
 	int numFaces		= 0;  // stores the number of faces been read till now
 
+	// vertexes allocation is done once a time
+	VertexIterator vi = Allocator<OpenMeshType>::AddVertices(m,oi.numVertexes);
+	
 	while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
 	{
 		tokens.clear();
@@ -181,37 +216,38 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			header.clear();
 			header = tokens[0];
 
-			if (header.compare("v")==0)
+			if (header.compare("v")==0)	// vertex
 			{
-				VertexIterator vi = Allocator<OpenMeshType>::AddVertices(m,1);
 				(*vi).P()[0] = (ScalarType) atof(tokens[1].c_str());
 				(*vi).P()[1] = (ScalarType) atof(tokens[2].c_str());
 				(*vi).P()[2] = (ScalarType) atof(tokens[3].c_str());
 				++numVertices;
+				
+				++vi;  // move to next vertex iterator
 
-				// TODO. sistemare, per ora solo per prova
-        
+				// callback invocation, abort loading process if result is false
 				if ((cb !=NULL) && ((numVertices%100)==0) && !(*cb)(100.0 * (float)numVertices/(float)oi.numVertexes, "Lettura vertici"))
 					return E_ABORTED;
 			}
-			else if (header.compare("vt")==0)
+			else if (header.compare("vt")==0)	// vertex texture coords
 			{
 				TexCoord t;
 				t.u = (ScalarType) atof(tokens[1].c_str());
 				t.v = (ScalarType) atof(tokens[2].c_str());
-				//t.w = (ScalarType) atof(tokens[3].c_str());
+				//t.w = (ScalarType) atof(tokens[3].c_str());	
 				texCoords.push_back(t);
-				// TODO: da controllare
 			}
-			else if (header.compare("vn")==0)
+			else if (header.compare("vn")==0)  // vertex normal
 			{
 				// do nothing (for now)
 			}
-			else if (header.compare("f")==0)
+			else if (header.compare("f")==0)  // face
 			{
 				int v1_index, v2_index, v3_index;
 				int vt1_index, vt2_index, vt3_index;
 				
+				// note that, due to face triangulation, real number of triangular faces
+				// may be greater than the number of faces been read by loadmask, 
 				FaceIterator fi = Allocator<OpenMeshType>::AddFaces(m,1);
 				if( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
 				{
@@ -262,6 +298,24 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				(*fi).V(1) = &(m.vert[ v2_index ]);
 				(*fi).V(2) = &(m.vert[ v3_index ]);
 				
+				
+				Color4b faceColor;	// declare it outside code block since other triangles
+														// of this face will share the same color
+				//TODO: da usare
+				//if( oi.mask & ply::PLYMask::PM_FACECOLOR)
+				{
+					Material material = materials[currentMaterialIdx];
+					Point3f diffuseColor = material.diffuse;
+					unsigned char r = (unsigned char) (diffuseColor[0] * 255.0);
+					unsigned char g = (unsigned char) (diffuseColor[1] * 255.0);
+					unsigned char b = (unsigned char) (diffuseColor[2] * 255.0);
+					unsigned char alpha = (unsigned char) (material.alpha * 255.0);
+					faceColor = Color4b(r, g, b, alpha);
+					(*fi).C()[0] = faceColor[0];
+					(*fi).C()[1] = faceColor[1];
+					(*fi).C()[2] = faceColor[2];
+					(*fi).C()[3] = faceColor[3];
+				}
 
 				int vertexesPerFace = tokens.size() -1;
 				int iVertex = 3;
@@ -307,6 +361,15 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					(*fi).V(1) = &(m.vert[ v3_index ]);
 					(*fi).V(2) = &(m.vert[ v4_index ]);
 
+					//TODO: da usare
+					//if( oi.mask & ply::PLYMask::PM_FACECOLOR)
+					{
+						(*fi).C()[0] = faceColor[0];
+						(*fi).C()[1] = faceColor[1];
+						(*fi).C()[2] = faceColor[2];
+						(*fi).C()[3] = faceColor[3];
+					}
+
 					// La faccia composta da piu' di tre vertici viene suddivisa in triangoli
 					// secondo lo schema seguente:
 					//                     v5
@@ -334,21 +397,63 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				// TODO: gestire opportunamente presenza di errori nel file
 
 				++numFaces;
-				// TODO. sistemare, per ora solo per prova
+				// callback invocation, abort loading process if result is false
 				if ((cb !=NULL) && ((numFaces%100)==0) && !(*cb)(100.0 * (float)numFaces/(float)oi.numFaces, "Lettura facce"))
 					return E_ABORTED;
+			}
+			else if (header.compare("mtllib")==0)	// material library
+			{
+				// obtain the name of the file  containing materials library
+				std::string materialFileName = tokens[1];
+				LoadMaterials( materialFileName.c_str(), materials );
+			}
+			else if (header.compare("usemtl")==0)	// material usage
+			{
+				std::string materialName = tokens[1];
+				bool found = false;
+				unsigned i = 0;
+				while (!found && (i < materials.size()))
+				{
+					std::string currentMaterialName = materials[i].name;
+					if (currentMaterialName == materialName)
+					{
+						currentMaterialIdx = i;
+						found = true;
+					}
+					++i;
+				}
 			}
 			// for now, we simply ignore other situations
 		}
 	}
 
-
+	// populating vector of texture names stored into the model
+	for (unsigned i=0; i< materials.size(); ++i)
+	{
+		std::string textureName = materials[i].textureFileName;
+		if (!textureName.empty())
+		{
+			// avoid adding the same name twice
+			bool found = false;
+			unsigned j = 0;
+			while (!found && (j < m.textures.size()))
+			{
+				if (textureName.compare(m.textures[j])==0)
+					found = true;
+				++j;
+			}
+			if (!found)
+				m.textures.push_back(textureName);
+		}
+	}
+	
   return E_NOERROR;
-} // end Open
+} // end of Open
 
 
 	/*!
-	* Read the next valid line and parses it into "tokens", allowing the tokens to be read one at a time.
+	* Read the next valid line and parses it into "tokens", allowing
+	*	the tokens to be read one at a time.
 	* \param stream	The object providing the input stream
 	*	\param tokens	The "tokens" in the next line
 	*/
@@ -409,7 +514,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				++to;
 			}
 		}
-	}
+	}	// end of SplitVVTToken
 
 	inline static const void SplitVVNToken(std::string token, std::string &vertex, std::string &normal)
 	{
@@ -439,7 +544,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				++to;
 			}
 		}
-	}
+	}	// end of SplitVVNToken
 
 	inline static const void SplitVVTVNToken(std::string token, std::string &vertex, std::string &texcoord, std::string &normal)
 	{
@@ -475,7 +580,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				++to;
 			}
 		}
-	}
+	}	// end of SplitVVTVNToken
+
 
 	inline static const void GetNextLineHeader(std::ifstream &stream, std::string &header, std::string &remainingText)
 	{	
@@ -510,140 +616,232 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				++to;
 			}
 		}
-	} // end GetNextLineHeader
+	} // end of GetNextLineHeader
 
 
-	// Da preferire la versione che prende in ingresso la struttura ObjInfo
-	// e ne riempie i campi
+	// Da preferire nell'utilizzo la versione che prende come parametro
+	// di ingresso anche una struttura ObjInfo di cui riempira' i campi
 	static bool LoadMask(const char * filename, int &mask)
-{
-  ObjInfo oi;
-  return LoadMask(filename, mask,oi);
-}
-
-	// TODO: da usare (modificandola)
-static bool LoadMask(const char * filename, int &mask, ObjInfo &oi)
-{
-	std::ifstream stream(filename);
-	if (stream.fail())
-		return E_CANTOPEN;
-
-	bool bHasPerWedgeTexCoord = false;
-	bool bHasPerWedgeNormal		= false;
-	
-	std::string header;
-	std::string remainingText;
-	
-	int numVertexes = 0;  // stores the number of vertexes been read till now
-	int numFaces = 0;			// stores the number of faces been read till now
-
-	// cycle till we encounter first face
-	while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
 	{
-		header.clear();
-		remainingText.clear();
-		GetNextLineHeader(stream, header, remainingText);
+		ObjInfo oi;
+		return LoadMask(filename, mask,oi);
+	}
+
+	
+	static bool LoadMask(const char * filename, int &mask, ObjInfo &oi)
+	{
+		std::ifstream stream(filename);
+		if (stream.fail())
+			return false;
+
+		bool bHasPerWedgeTexCoord = false;
+		bool bHasPerWedgeNormal		= false;
 		
-		if (header.compare("v")==0)
-			++numVertexes;
-		//else if (header.compare("vt")==0)
-		//{	
-		//}
-		//else if (header.compare("vn")==0)
-		//{
-		//}
-		else if (header.compare("f")==0)
+		std::string header;
+		std::string remainingText;
+		
+		int numVertexes = 0;  // stores the number of vertexes been read till now
+		int numFaces = 0;			// stores the number of faces been read till now
+
+		// cycle till we encounter first face
+		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
 		{
-			numFaces++;
+			header.clear();
+			remainingText.clear();
+			GetNextLineHeader(stream, header, remainingText);
 			
-			// we base our assumption on the fact that the way vertex data is
-			// referenced into faces must be consistent among the entire file
-			int charIdx = 0;
-			size_t length = remainingText.size();
-			char c;
-			while((charIdx != length) && ((c = remainingText[charIdx])!='/') && (c != ' '))
-				++charIdx;
-
-			if (c == '/')
+			if (header.compare("v")==0)
+				++numVertexes;
+			//else if (header.compare("vt")==0)
+			//{	
+			//}
+			//else if (header.compare("vn")==0)
+			//{
+			//}
+			else if (header.compare("f")==0)
 			{
-				++charIdx;
-				if ((charIdx != length) && ((c = remainingText[charIdx])!='/'))
-				{
-					bHasPerWedgeTexCoord = true;
-
+				numFaces++;
+				
+				// we base our assumption on the fact that the way vertex data is
+				// referenced into faces must be consistent among the entire file
+				int charIdx = 0;
+				size_t length = remainingText.size();
+				char c;
+				while((charIdx != length) && ((c = remainingText[charIdx])!='/') && (c != ' '))
 					++charIdx;
-					while((charIdx != length) && ((c = remainingText[charIdx])!='/') && (c != ' '))
-						++charIdx;
-					
-					if (c == '/')
-						bHasPerWedgeNormal   = true;
-					break;
-				}
-				else
+
+				if (c == '/')
 				{
-					bHasPerWedgeNormal   = true;
-					break;
-				}					
+					++charIdx;
+					if ((charIdx != length) && ((c = remainingText[charIdx])!='/'))
+					{
+						bHasPerWedgeTexCoord = true;
+
+						++charIdx;
+						while((charIdx != length) && ((c = remainingText[charIdx])!='/') && (c != ' '))
+							++charIdx;
+						
+						if (c == '/')
+							bHasPerWedgeNormal   = true;
+						break;
+					}
+					else
+					{
+						bHasPerWedgeNormal   = true;
+						break;
+					}					
+				}
 			}
 		}
-	}
 
-	// after the encounter of first face we avoid to do additional tests
-	while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
-	{
-		header.clear();
-		remainingText.clear();
-		GetNextLineHeader(stream, header, remainingText);
+		// after the encounter of first face we avoid to do additional tests
+		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
+		{
+			header.clear();
+			remainingText.clear();
+			GetNextLineHeader(stream, header, remainingText);
+			
+			if (header.compare("v")==0)
+				++numVertexes;
+			//else if (header.compare("vt")==0)
+			//{	
+			//}
+			//else if (header.compare("vn")==0)
+			//{
+			//}
+			else if (header.compare("f")==0)
+				numFaces++;
+		}
+
+
+		mask=0;
 		
-		if (header.compare("v")==0)
-			++numVertexes;
-		//else if (header.compare("vt")==0)
-		//{	
-		//}
-		//else if (header.compare("vn")==0)
-		//{
-		//}
-		else if (header.compare("f")==0)
-			numFaces++;
+		if (bHasPerWedgeTexCoord)
+			mask |= ply::PLYMask::PM_WEDGTEXCOORD;
+		if (bHasPerWedgeNormal)
+			mask |= ply::PLYMask::PM_WEDGNORMAL;
+		// TODO: AGGIUNGERE
+		// mask |= ply::PLYMask::PM_FACECOLOR
+
+		oi.mask = mask;
+		oi.numVertexes = numVertexes;
+		oi.numFaces = numFaces;
+
+		/*if( pf.AddToRead(VertDesc(0))!=-1 && 
+				pf.AddToRead(VertDesc(1))!=-1 && 
+				pf.AddToRead(VertDesc(2))!=-1 )   mask |= ply::PLYMask::PM_VERTCOORD;
+
+		if( pf.AddToRead(VertDesc(3))!=-1 )		mask |= ply::PLYMask::PM_VERTFLAGS;
+		if( pf.AddToRead(VertDesc(4))!=-1 )		mask |= ply::PLYMask::PM_VERTQUALITY;
+		if( pf.AddToRead(VertDesc(8))!=-1 )		mask |= ply::PLYMask::PM_VERTQUALITY;
+		if( ( pf.AddToRead(VertDesc(5))!=-1 ) && 
+				( pf.AddToRead(VertDesc(6))!=-1 ) &&
+				( pf.AddToRead(VertDesc(7))!=-1 )  )  mask |= ply::PLYMask::PM_VERTCOLOR;
+		
+		if( pf.AddToRead(FaceDesc(0))!=-1 ) mask |= ply::PLYMask::PM_FACEINDEX;
+		if( pf.AddToRead(FaceDesc(1))!=-1 ) mask |= ply::PLYMask::PM_FACEFLAGS;
+
+		if( pf.AddToRead(FaceDesc(2))!=-1 ) mask |= ply::PLYMask::PM_FACEQUALITY;
+		if( pf.AddToRead(FaceDesc(3))!=-1 ) mask |= ply::PLYMask::PM_WEDGTEXCOORD;
+		if( pf.AddToRead(FaceDesc(5))!=-1 ) mask |= ply::PLYMask::PM_WEDGTEXMULTI;
+		if( pf.AddToRead(FaceDesc(4))!=-1 ) mask |= ply::PLYMask::PM_WEDGCOLOR;
+		if( ( pf.AddToRead(FaceDesc(6))!=-1 ) && 
+				( pf.AddToRead(FaceDesc(7))!=-1 ) &&
+				( pf.AddToRead(FaceDesc(8))!=-1 )  )  mask |= ply::PLYMask::PM_FACECOLOR;
+		*/
+
+		return true;
 	}
 
 
-	mask=0;
+	static bool LoadMaterials(const char * filename, std::vector<Material> &materials)
+	{
+		// nel chiamante garantire che ci si trovi nella directory giusta 
+
+		std::ifstream stream(filename);
+		if (stream.fail())
+			return false;
+    
+		std::vector< std::string > tokens;
+		std::string	header;
 	
-	if (bHasPerWedgeTexCoord)
-		mask |= ply::PLYMask::PM_WEDGTEXCOORD;
-	if (bHasPerWedgeNormal)
-		mask |= ply::PLYMask::PM_WEDGNORMAL;
+		materials.clear();
+		Material currentMaterial;
+		
+		bool first = true;
+		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
+		{
+			tokens.clear();
+			TokenizeNextLine(stream, tokens);
+		
+			if (tokens.size() > 0)
+			{
+				header.clear();
+				header = tokens[0];
 
-	oi.mask = mask;
-	oi.numVertexes = numVertexes;
-	oi.numFaces = numFaces;
+				if (header.compare("newmtl")==0)
+				{
+					if (!first)
+					{
+						materials.push_back(currentMaterial);
+						currentMaterial = Material();
+					}
+					else
+						first = false;
 
-	/*if( pf.AddToRead(VertDesc(0))!=-1 && 
-	    pf.AddToRead(VertDesc(1))!=-1 && 
-	    pf.AddToRead(VertDesc(2))!=-1 )   mask |= ply::PLYMask::PM_VERTCOORD;
+					strcpy(currentMaterial.name, tokens[1].c_str());
+				}
+				else if (header.compare("Ka")==0)
+				{
+					float r = atof(tokens[1].c_str());
+					float g = atof(tokens[2].c_str());
+					float b = atof(tokens[3].c_str());
 
-	if( pf.AddToRead(VertDesc(3))!=-1 )		mask |= ply::PLYMask::PM_VERTFLAGS;
-	if( pf.AddToRead(VertDesc(4))!=-1 )		mask |= ply::PLYMask::PM_VERTQUALITY;
-	if( pf.AddToRead(VertDesc(8))!=-1 )		mask |= ply::PLYMask::PM_VERTQUALITY;
-	if( ( pf.AddToRead(VertDesc(5))!=-1 ) && 
-		  ( pf.AddToRead(VertDesc(6))!=-1 ) &&
-			( pf.AddToRead(VertDesc(7))!=-1 )  )  mask |= ply::PLYMask::PM_VERTCOLOR;
-	
-	if( pf.AddToRead(FaceDesc(0))!=-1 ) mask |= ply::PLYMask::PM_FACEINDEX;
-	if( pf.AddToRead(FaceDesc(1))!=-1 ) mask |= ply::PLYMask::PM_FACEFLAGS;
+					currentMaterial.ambient = Point3f(r, g, b); 
+				}
+				else if (header.compare("Kd")==0)
+				{
+					float r = atof(tokens[1].c_str());
+					float g = atof(tokens[2].c_str());
+					float b = atof(tokens[3].c_str());
 
-	if( pf.AddToRead(FaceDesc(2))!=-1 ) mask |= ply::PLYMask::PM_FACEQUALITY;
-	if( pf.AddToRead(FaceDesc(3))!=-1 ) mask |= ply::PLYMask::PM_WEDGTEXCOORD;
-	if( pf.AddToRead(FaceDesc(5))!=-1 ) mask |= ply::PLYMask::PM_WEDGTEXMULTI;
-	if( pf.AddToRead(FaceDesc(4))!=-1 ) mask |= ply::PLYMask::PM_WEDGCOLOR;
-	if( ( pf.AddToRead(FaceDesc(6))!=-1 ) && 
-		  ( pf.AddToRead(FaceDesc(7))!=-1 ) &&
-			( pf.AddToRead(FaceDesc(8))!=-1 )  )  mask |= ply::PLYMask::PM_FACECOLOR;
-	*/
+          currentMaterial.diffuse = Point3f(r, g, b); 
+				}
+				else if (header.compare("Ks")==0)
+				{
+					float r = atof(tokens[1].c_str());
+					float g = atof(tokens[2].c_str());
+					float b = atof(tokens[3].c_str());
 
- return true;
-}
+          currentMaterial.specular = Point3f(r, g, b); 
+				}
+				else if (	(header.compare("d")==0) ||
+									(header.compare("Tr")==0)	)	// alpha
+				{
+          currentMaterial.alpha = atof(tokens[1].c_str());
+				}
+				else if (header.compare("Ns")==0)  // shininess        
+				{
+					currentMaterial.shininess = atoi(tokens[1].c_str());
+				}
+				else if (header.compare("illum")==0)	// specular illumination on/off
+				{
+					int illumination = atoi(tokens[1].c_str());
+          currentMaterial.bSpecular = (illumination == 2);
+				}
+				else if (header.compare("map_Kd")==0)	// texture name
+				{
+					strcpy(currentMaterial.textureFileName, tokens[1].c_str());
+				}
+				// for now, we simply ignore other situations
+			}
+		}
+		materials.push_back(currentMaterial);  // add last read material
+
+		stream.close();
+
+		return true;
+	}
 
 }; // end class
 } // end Namespace tri
