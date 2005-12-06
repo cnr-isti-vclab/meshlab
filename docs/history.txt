@@ -28,6 +28,54 @@
 ==============================================================================
 
 ------------------------------------------------------------------------------
+- Meshlab v0.3
+------------------------------------------------------------------------------
+
+  ** NEW FEATURES ** 
+
+* Plugin System
+  - Complete restyling of plugin architecture
+  - Color: None, Per Vertex, Per Face
+  - Color: Support for shaders (wow!). Provided toon shader sample.
+  - Filtering: Remove Null Faces
+  - Filtering: Butterfly & Loop optimized
+  - Decorize: New plugin class
+  - Import/Export: Obj file format integrated on standard user interface
+
+* User Interface
+  - Info Panel:
+      Showing some mesh info (numTri&numFaces)
+      Showing fps
+  - Shortcut for some frequently used actions
+  - Trackball hidable
+  - Option dialog:
+      Background colors (Top&Bottom)
+      Log Area color
+  - Progress bar
+  - RenderModes: Textures
+  - Fullscreen
+  - Cycle thru opened windows with Next button
+  - About dialog
+
+
+  ** KNOWN BUGS/MISSING FEATURES **
+
+* Plugin:
+  - Loop & Butterfly don't work for every file
+  - ProgressBar synchronization
+ 
+
+* User Interface
+  - Improve logging features
+  - Font resizing
+  - No action under menu Render->Texture
+  - Clipping issues
+  - About Plugins Dialog still working on
+  - Buggy proggressbar and trackball
+  - OpenGL bugs on Flat Lines render mode
+
+
+------------------------------------------------------------------------------
 - Meshlab v0.2
 ------------------------------------------------------------------------------
 

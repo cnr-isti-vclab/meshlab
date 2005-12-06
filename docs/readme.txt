@@ -59,5 +59,5 @@ Dave Brondsema,
 Christian Ehrlicher,
 Ralf Habacker
 
-for their Unofficial patches for Qt4 ( http://sourceforge.net/projects/qtwin ).
+for their Unofficial patche for Qt4 ( http://sourceforge.net/projects/qtwin ).
 
