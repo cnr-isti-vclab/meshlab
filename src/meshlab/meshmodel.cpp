@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.16  2005/12/06 16:27:43  fmazzant
+added obj file in generic open dialog
+
 Revision 1.15  2005/12/04 00:22:46  cignoni
 Switched from progresBar widget to progressbar dialog
 
@@ -53,13 +56,20 @@ Added copyright info
 ****************************************************************************/
 
 #include "meshmodel.h"
-#include<vcg/complex/trimesh/update/bounding.h>
+
+#include <vcg/complex/trimesh/update/bounding.h>
+#include "../test/io/import_obj.h"
+#include <QString>
 #include <QtGlobal>
 
 bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
 {
   int mask;
-  vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename, mask);
+  QString f = QString(filename);
+
+  if(f.endsWith(".ply",Qt::CaseInsensitive))
+	vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename, mask); 
+  
   if(mask&ply::PLYMask::PM_VERTQUALITY) qDebug("Has Vertex Quality\n");
   if(mask&ply::PLYMask::PM_FACEQUALITY) qDebug("Has Face Quality\n");
   if(mask&ply::PLYMask::PM_FACECOLOR) qDebug("Has Face Color\n");
@@ -71,9 +81,15 @@ bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
   }
 
 	cm.face.EnableNormal();
-  
-	int ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename,cb);
-  
+	
+
+	int ret;
+	if(f.endsWith(".ply",Qt::CaseInsensitive))
+		ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename,cb);
+	
+	if(f.endsWith(".obj",Qt::CaseInsensitive))
+		ret = vcg::tri::io::ImporterOBJ<CMeshO>::Open(cm,filename,mask,cb);
+	
 	//qDebug("Face 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
 	
 	vcg::tri::UpdateBounding<CMeshO>::Box(cm);

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.25  2005/12/06 16:27:43  fmazzant
+added obj file in generic open dialog
+
 Revision 1.24  2005/12/06 10:42:03  vannini
 Snapshot dialog now works
 
@@ -553,7 +556,7 @@ void MainWindow::toggleBackFaceCulling()
 void MainWindow::open(QString fileName)
 {
 	if (fileName.isEmpty()){
-		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".","Mesh files (*.ply *.off *.stl)");
+		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".","Mesh files (*.ply *.off *.stl *.obj)");
 	}
 
 	// this change of dir is needed for subsequent texture loading
