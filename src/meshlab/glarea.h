@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.35  2005/12/06 10:42:03  vannini
+Snapshot dialog now works
+
 Revision 1.34  2005/12/05 18:15:27  vannini
 Added snapshot save dialog (not used yet)
 
@@ -214,10 +217,15 @@ public:
 	QString basename;
 	int counter;
 	int resolution;
+	int dx,dy;
 		
 	SnapshotSetting()
 	{
-	
+		outdir=".";
+		basename="snapshot";
+		counter=0;
+		resolution=1;
+		dx=dy=0;
 	};
 };
 
@@ -242,7 +250,7 @@ public:
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 	const ColorSetting& getCustomSetting()		const {return cs;}
-	const SnapshotSetting& getSnapshotSetting()	const {return ss;}
+	const SnapshotSetting& getSnapshotSetting()	{ss.dx=vpWidth; ss.dy=vpHeight; return ss;}
 	void updateFps();
 	void renderFps();
 	
@@ -261,7 +269,7 @@ public:
 	void setTextureMode(vcg::GLW::TextureMode mode);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
-	bool saveSnapshot(QString path);
+	void saveSnapshot();
 	void SetLightModel();
 	void resetTrackBall();
 	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
@@ -283,7 +291,7 @@ protected:
 	void wheelEvent(QWheelEvent*e);
 	
 private:
-	bool pasteTile();
+	void pasteTile();
 	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
     
 	bool	logVisible;				// Prints out log infos ?
@@ -291,7 +299,6 @@ private:
 	bool	trackBallVisible;		// Draws the trackball ?
 	RenderMode rm;
 	ColorSetting cs;
-	SnapshotSetting ss;
 	float cfps;
 	QTime time;
 	int deltaTime;
@@ -299,6 +306,7 @@ private:
 	int currentTime;
 	float fpsVector[10];
 	
+	SnapshotSetting ss;
 	char *snapBuffer;
 	char *tileBuffer;
 	bool takeSnapTile;

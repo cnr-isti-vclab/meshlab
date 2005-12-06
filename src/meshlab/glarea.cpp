@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.50  2005/12/06 10:42:03  vannini
+Snapshot dialog now works
+
 Revision 1.49  2005/12/05 18:15:27  vannini
 Added snapshot save dialog (not used yet)
 
@@ -270,7 +273,7 @@ void GLArea::initializeGL()
 }
 
 
-bool GLArea::pasteTile()
+void GLArea::pasteTile()
 {
 	int snapBufferOffset, q; 
 	int vpLineSize=vpWidth * SSHOT_BYTES_PER_PIXEL;
@@ -294,19 +297,45 @@ bool GLArea::pasteTile()
 
 		if (tileRow >= totalRows)
 		{
-			takeSnapTile=false;
-			
+						
 			QImage img = QImage((uchar*) &snapBuffer[0], vpWidth * totalCols, vpHeight * totalRows, QImage::Format_ARGB32);
+			
+			QString outfile=ss.outdir;
+			outfile.append("/");
+			outfile.append(ss.basename);
+			
+			QString cnt;
+			cnt.setNum(ss.counter);
 
-            bool ret = img.save("snapshot.png","PNG");		
+			if (ss.counter<10)
+				cnt.prepend("0");
+			if (ss.counter<100)
+				cnt.prepend("0");
 
+			outfile.append(cnt);
+			outfile.append(".png");			
+				
+			bool ret = img.save(outfile,"PNG");		
+
+			if (ret)
+			{
+				ss.counter++;
+				if (ss.counter>999)
+					ss.counter=0;
+                log.Log(GLLogStream::Info,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
+			}
+			else
+			{
+			    log.Log(GLLogStream::Error,"Error saving %s",outfile.toLocal8Bit().constData());
+			}
+
+			takeSnapTile=false;
 			delete(tileBuffer);
 			delete(snapBuffer);
-			return ret;
+
 		}
 	}
 
-	return true;
 }
 void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
@@ -484,11 +513,11 @@ void GLArea::resizeGL(int _width, int _height)
 	glViewport(0,0, _width, _height);
 }
 
-bool GLArea::saveSnapshot(QString path)
+void GLArea::saveSnapshot()
 { 
 	int vp[4];
 	
-	totalCols=totalRows=4;
+	totalCols=totalRows=ss.resolution;
 	tileRow=tileCol=0;
 
 	glGetIntegerv(GL_VIEWPORT, vp);
@@ -501,7 +530,6 @@ bool GLArea::saveSnapshot(QString path)
 	takeSnapTile=true;
 	update();
 
-	return true;
 }
 
 Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
@@ -668,10 +696,7 @@ void GLArea::setCustomSetting(const ColorSetting & s)
 }
 void GLArea::setSnapshotSetting(const SnapshotSetting & s)
 {
-	ss.basename=s.basename;
-	ss.basename=s.counter;
-	ss.outdir=s.outdir;
-	ss.resolution=s.resolution;
+	ss=s;
 }
 
 void GLArea::updateFps()

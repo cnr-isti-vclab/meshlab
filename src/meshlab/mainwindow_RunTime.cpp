@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.24  2005/12/06 10:42:03  vannini
+Snapshot dialog now works
+
 Revision 1.23  2005/12/05 18:15:27  vannini
 Added snapshot save dialog (not used yet)
 
@@ -615,17 +618,21 @@ bool MainWindow::saveAs()
 
 bool MainWindow::saveSnapshot()
 {
-	QString snapshotPath = "snapshot.png";
 
-	bool ret=GLA()->saveSnapshot(snapshotPath);
+	SaveSnapshotDialog dialog(this);
+	
+	SnapshotSetting ss = GLA()->getSnapshotSetting();
+	dialog.setValues(ss);
 
-	if (ret) 
-		GLA()->log.Log(GLLogStream::Info,"Snapshot saved to %s",snapshotPath.toLocal8Bit().constData());
-	else
-		GLA()->log.Log(GLLogStream::Error,"Error saving snapshot %s",snapshotPath.toLocal8Bit().constData());
+	if (dialog.exec()==QDialog::Accepted) 
+	{
+		ss=dialog.getValues();
+		GLA()->setSnapshotSetting(ss);
+		GLA()->saveSnapshot();
+		return true;
+	}
 
-
-	return true;
+	return false;
 }
 void MainWindow::about()
 {

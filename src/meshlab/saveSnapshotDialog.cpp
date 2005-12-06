@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2005/12/06 10:42:03  vannini
+Snapshot dialog now works
+
 Revision 1.1  2005/12/05 18:15:27  vannini
 Added snapshot save dialog (not used yet)
 
@@ -31,10 +34,45 @@ Added snapshot save dialog (not used yet)
 
 #include "saveSnapshotDialog.h"
 
-SaveSnapshotDialog::SaveSnapshotDialog(QWidget * parent)
-		:QDialog(parent)
+SaveSnapshotDialog::SaveSnapshotDialog(QWidget * parent):QDialog(parent)
 {
 	SaveSnapshotDialog::ui.setupUi(this);
+	connect(ui.saveButton, SIGNAL(clicked()), this, SLOT(accept()));
+	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+	connect(ui.browseDir, SIGNAL(clicked()),this, SLOT(browseDir()));
+	ui.outDirLineEdit->setReadOnly(true);
+	setFixedSize(250,130);
 }
 
+void SaveSnapshotDialog::setValues(const SnapshotSetting& ss)
+{
+	settings=ss;
+	ui.baseNameLineEdit->setText(settings.basename);
+    ui.outDirLineEdit->setText(settings.outdir);
+	ui.resolutionSpinBox->setValue(settings.resolution);
+	ui.counterSpinBox->setValue(settings.counter);		
+}
 
+SnapshotSetting SaveSnapshotDialog::getValues()
+{
+	settings.basename=ui.baseNameLineEdit->text();
+	settings.outdir=ui.outDirLineEdit->text();
+	settings.counter=ui.counterSpinBox->value();
+	settings.resolution=ui.resolutionSpinBox->value();
+
+	return settings;
+}
+
+void SaveSnapshotDialog::browseDir()
+{
+	QFileDialog fd(0,"Choose output directory");
+	fd.setFileMode(QFileDialog::DirectoryOnly);
+
+	QStringList selection;
+	if (fd.exec())
+	{
+		selection = fd.selectedFiles();
+		ui.outDirLineEdit->setText(selection.at(0));;	
+	}
+
+}
