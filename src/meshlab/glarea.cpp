@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.51  2005/12/06 15:13:23  glvertex
+Disabled textures during print info
+
 Revision 1.50  2005/12/06 10:42:03  vannini
 Snapshot dialog now works
 
@@ -373,7 +376,7 @@ void GLArea::paintGL()
 	GLint old_matrixMode;
 	lastTime=time.elapsed();
 	initTexture();
-	glDisable(GL_TEXTURE_2D); // FIX FIX FIX to move in trimesh.h
+	glDisable(GL_TEXTURE_2D); // FIX FIX FIX to move in trimesh.h ?
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 	
@@ -463,6 +466,7 @@ void GLArea::paintGL()
 		glPushMatrix();
 		glLoadIdentity();
 
+		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
