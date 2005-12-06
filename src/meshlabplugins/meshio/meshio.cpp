@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.15  2005/12/06 05:16:54  buzzelli
+ added code to grant that material files will be searched into the right directory
+
  Revision 1.14  2005/12/03 23:46:56  cignoni
  Adapted to the new plugin interface in a more standard way
 
@@ -84,6 +87,10 @@ bool ExtraMeshIOPlugin::open(QAction *format, QString &fileName,MeshModel &m, in
 	
 	if (!fileName.isEmpty())
 	{
+		// this change of dir is needed for subsequent texture/material loading
+		QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
+		QDir::setCurrent(FileNameDir);
+
 		QString errorMsgFormat = "Error encountered while loading file %1: %2";
 
 		if(format->text() == tr("Import OBJ")) //if (format == tr("Import OBJ"))
