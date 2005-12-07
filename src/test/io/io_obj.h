@@ -50,7 +50,7 @@ public:
   CallBackPos *cb;
 
   /// number of vertexes
-  int numVertexes;
+  int numVertices;
   
 	/// number of faces
   int numFaces;

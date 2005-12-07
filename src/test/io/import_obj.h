@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.6  2005/12/07 17:42:38  buzzelli
+Progress bar counter unified for both vertices and faces
+
 Revision 1.5  2005/12/06 05:07:39  buzzelli
 Object file importer now performs also materials and texture names loading
 
@@ -178,6 +181,9 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	m.Clear();
 	
 	CallBackPos *cb = oi.cb;
+	if (cb !=NULL)
+		(*cb)(0, "Starting...");
+
 	// if LoadMask has not been called yet, we call it here
 	if (oi.mask == -1)
 	{
@@ -203,8 +209,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	int numVertices = 0;  // stores the number of vertices been read till now
 	int numFaces		= 0;  // stores the number of faces been read till now
 
+	int numVerticesPlusFaces = oi.numVertices + oi.numFaces;
+
 	// vertexes allocation is done once a time
-	VertexIterator vi = Allocator<OpenMeshType>::AddVertices(m,oi.numVertexes);
+	VertexIterator vi = Allocator<OpenMeshType>::AddVertices(m,oi.numVertices);
 	
 	while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
 	{
@@ -226,7 +234,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				++vi;  // move to next vertex iterator
 
 				// callback invocation, abort loading process if result is false
-				if ((cb !=NULL) && ((numVertices%100)==0) && !(*cb)(100.0 * (float)numVertices/(float)oi.numVertexes, "Lettura vertici"))
+				if ((cb !=NULL) && (((numFaces + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numFaces + numVertices)/(float)numVerticesPlusFaces, "Vertex Loading"))
 					return E_ABORTED;
 			}
 			else if (header.compare("vt")==0)	// vertex texture coords
@@ -398,7 +406,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 				++numFaces;
 				// callback invocation, abort loading process if result is false
-				if ((cb !=NULL) && ((numFaces%100)==0) && !(*cb)(100.0 * (float)numFaces/(float)oi.numFaces, "Lettura facce"))
+				if ((cb !=NULL) && (((numFaces + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numFaces + numVertices)/(float)numVerticesPlusFaces, "Face Loading"))
 					return E_ABORTED;
 			}
 			else if (header.compare("mtllib")==0)	// material library
@@ -640,8 +648,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		std::string header;
 		std::string remainingText;
 		
-		int numVertexes = 0;  // stores the number of vertexes been read till now
-		int numFaces = 0;			// stores the number of faces been read till now
+		int numVertices = 0;  // stores the number of vertexes been read till now
+		int numFaces		= 0;			// stores the number of faces been read till now
 
 		// cycle till we encounter first face
 		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
@@ -651,7 +659,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			GetNextLineHeader(stream, header, remainingText);
 			
 			if (header.compare("v")==0)
-				++numVertexes;
+				++numVertices;
 			//else if (header.compare("vt")==0)
 			//{	
 			//}
@@ -702,7 +710,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			GetNextLineHeader(stream, header, remainingText);
 			
 			if (header.compare("v")==0)
-				++numVertexes;
+				++numVertices;
 			//else if (header.compare("vt")==0)
 			//{	
 			//}
@@ -724,7 +732,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		// mask |= ply::PLYMask::PM_FACECOLOR
 
 		oi.mask = mask;
-		oi.numVertexes = numVertexes;
+		oi.numVertices = numVertices;
 		oi.numFaces = numFaces;
 
 		/*if( pf.AddToRead(VertDesc(0))!=-1 && 
