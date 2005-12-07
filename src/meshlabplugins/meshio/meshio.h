@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.13  2005/12/07 07:52:25  fmazzant
+ export obj generic(base)
+
  Revision 1.12  2005/12/07 01:11:18  fmazzant
  bug-fix(sorry)
 
@@ -71,7 +74,7 @@ public:
 	ExtraMeshIOPlugin();
 	
 	bool open(QAction *format, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(QAction *format, QString &fileName, MeshModel &m,int mask,vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	bool save(QAction *format, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 	QList<QAction *> formats() const;
   protected:
 	QList <QAction *> actionList;

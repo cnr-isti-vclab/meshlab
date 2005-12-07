@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2005/12/07 07:52:25  fmazzant
+ export obj generic(base)
+
  Revision 1.2  2005/12/06 15:54:59  fmazzant
  update dialog export obj
 
@@ -33,7 +36,7 @@
 
 *****************************************************************************/
 
-#include "ui_savemask.h"
+#include "generatedfiles/ui_savemask.h"
 struct Mask
 {
 	int vertexs;//salva i vertici 1, non li salva 0

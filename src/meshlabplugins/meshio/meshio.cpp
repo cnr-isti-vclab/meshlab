@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.17  2005/12/07 07:52:25  fmazzant
+ export obj generic(base)
+
  Revision 1.16  2005/12/07 00:56:40  fmazzant
  added support for exporter generic obj file (level base)
 
@@ -86,7 +89,7 @@ using namespace vcg;
 bool ExtraMeshIOPlugin::open(QAction *format, QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
 {
 	if (fileName.isEmpty())
-		fileName = QFileDialog::getOpenFileName(new QWidget(),tr("Open File"),"../sample","Obj files (*.obj)");
+		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
 	
 	if (!fileName.isEmpty())
 	{
@@ -132,7 +135,7 @@ bool ExtraMeshIOPlugin::open(QAction *format, QString &fileName,MeshModel &m, in
 	return false;
 }
 
-bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, int mask, vcg::CallBackPos *cb, QWidget *parent)
+bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	if(format->text() == tr("Export OBJ")) ////if (format == tr("Export OBJ"))
 	{
@@ -142,6 +145,7 @@ bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, in
 		{
 			dialog.exec();
 		}
+		dialog.exec();
 		
 		fileName = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Obj files (*.obj)");
 		if(fileName.isEmpty())
@@ -154,7 +158,7 @@ bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, in
 
 		Mask mymask = SaveMaskDialog::GetMask();
 		mask = SaveMaskDialog::MaskToInt(&mymask);
-
+		
 		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),(bool)mymask.binary,mask,cb);
 		return result;
 	}

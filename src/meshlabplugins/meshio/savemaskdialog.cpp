@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2005/12/07 07:52:25  fmazzant
+ export obj generic(base)
+
  Revision 1.3  2005/12/06 15:54:59  fmazzant
  update dialog export obj
 
@@ -58,7 +61,7 @@ void SaveMaskDialog::SlotOkButton()
 	mymask.normal = SaveMaskDialog::ui.normalCheck->isChecked();
 	mymask.texture = SaveMaskDialog::ui.textureCheck->isChecked();
 	mymask.vertexs = SaveMaskDialog::ui.vertexCheck->isChecked();
-	mymask.colorV = SaveMaskDialog::ui.vertexCheck->isChecked();
+	mymask.colorV = SaveMaskDialog::ui.colorVertexCheck->isChecked();
 	if(WriteMask(&mymask))
 		accept();
 	else
@@ -101,10 +104,10 @@ bool SaveMaskDialog::ReadMask()
 
 	SaveMaskDialog::ui.binaryButton->setChecked((bool)mask.binary);
 	SaveMaskDialog::ui.asciiButton->setChecked(!((bool)mask.binary));
-	SaveMaskDialog::ui.faceCheck->setChecked((bool)mask.faces);
+	SaveMaskDialog::ui.faceCheck->setChecked(true);
 	SaveMaskDialog::ui.normalCheck->setChecked((bool)mask.normal);
 	SaveMaskDialog::ui.textureCheck->setChecked((bool)mask.texture);
-	SaveMaskDialog::ui.vertexCheck->setChecked((bool)mask.vertexs);
+	SaveMaskDialog::ui.vertexCheck->setChecked(true);
 	SaveMaskDialog::ui.colorVertexCheck->setChecked((bool)mask.colorV);
 
 	in.close();
@@ -121,7 +124,7 @@ Mask SaveMaskDialog::GetMask()
 	std::string line;
 	std::getline(in, line, '\n');
 	bool ok = false;
-	mask.binary = QString(line.at(0)).toInt(&ok, 10); 
+	mask.binary = QString(line.at(0)).toInt(&ok, 10);
 	mask.faces = QString(line.at(1)).toInt(&ok, 10); 
 	mask.normal = QString(line.at(2)).toInt(&ok, 10); 
 	mask.texture = QString(line.at(3)).toInt(&ok, 10); 
@@ -141,10 +144,10 @@ bool SaveMaskDialog::WriteMask(Mask *mask)
 int SaveMaskDialog::MaskToInt(Mask *mymask)
 {
 	int mask;
-	
+
 	if(mymask->texture)	{mask |= vcg::ply::PLYMask::PM_WEDGTEXCOORD;}
 	if(mymask->normal)	{mask |= vcg::ply::PLYMask::PM_WEDGNORMAL;}
-	if(mymask->colorV)	{mask |= vcg::ply::PLYMask::PM_VERTCOLOR; mask |= vcg::ply::PLYMask::PM_FACECOLOR;}
+	if(mymask->colorV)	{mask |= vcg::ply::PLYMask::PM_VERTCOLOR;}
 	if(mymask->faces)	{mask |= vcg::ply::PLYMask::PM_FACEQUALITY;}
 	if(mymask->vertexs)	{mask |= vcg::ply::PLYMask::PM_VERTQUALITY;}
 
