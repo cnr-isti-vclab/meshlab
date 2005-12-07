@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.21  2005/12/07 16:57:57  buzzelli
+io related menu items removed from File menu
+
 Revision 1.20  2005/12/06 16:38:28  ggangemi
 Commented "setCheckable(true)" for each QAction
 
@@ -589,12 +592,12 @@ void MainWindow::loadPlugins()
 				addToMenu(iFilter->actions(), filterMenu, SLOT(applyFilter()));
 
 		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			if (iIO)
-			{
-				fileMenu->addSeparator();
-				addToMenu(iIO->formats(), fileMenu, SLOT(applyImportExport()));
-			  fileMenu->addSeparator();
-			}
+			//if (iIO)
+			//{
+			//	fileMenu->addSeparator();
+			//	addToMenu(iIO->formats(), fileMenu, SLOT(applyImportExport()));
+			//  fileMenu->addSeparator();
+			//}
 
 			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
 			if (iDecorator)
