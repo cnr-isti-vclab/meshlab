@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.12  2005/12/07 01:11:18  fmazzant
+ bug-fix(sorry)
+
  Revision 1.11  2005/12/03 23:46:56  cignoni
  Adapted to the new plugin interface in a more standard way
 
@@ -54,8 +57,8 @@
 #include <QStringList>
 #include <QString>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include "../../meshlab/meshmodel.h"
+#include "../../meshlab/interfaces.h"
 
 class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
 {
