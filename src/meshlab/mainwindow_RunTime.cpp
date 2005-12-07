@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.27  2005/12/07 08:01:09  fmazzant
+exporter obj temporany
+
 Revision 1.26  2005/12/07 00:56:40  fmazzant
 added support for exporter generic obj file (level base)
 
@@ -466,10 +469,11 @@ void MainWindow::applyImportExport()
 
 	if(action->text().contains("Export"))
 	{
+		int mask;
 		QString fileName;
 // OLD VERSION		if(iIO->save(action->text(),fileName,*(GLA()->mm ),0,NULL,GLA()) )
 		qb->show();
-		if(iIO->save(action,fileName,*(GLA()->mm ),0,QCallBack,GLA()) )
+		if(iIO->save(action,fileName,*(GLA()->mm ),mask,QCallBack,GLA()) )
 			GLA()->log.Log(GLLogStream::Info,"File saved correctly");
 		qb->hide();
 	}

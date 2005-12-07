@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.8  2005/12/07 08:01:09  fmazzant
+ exporter obj temporany
+
  Revision 1.7  2005/12/03 09:45:43  fmazzant
  adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
 
@@ -61,6 +64,7 @@ Added  implementation of OBJ file exporter.
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <QMessageBox>
 
 namespace vcg {
 namespace tri {
@@ -99,7 +103,7 @@ namespace io {
 			//vertexs
 			VertexIterator vi;
 			if(oi.mask & vcg::ply::PLYMask::PM_VERTQUALITY)
-			{	
+			{
 				int numvert = 0;
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi)
 				{
@@ -149,8 +153,7 @@ namespace io {
 						stream << "vn " << (*vi).N()[0] << " " << (*vi).N()[1] << " " << (*vi).N()[2] << std::endl;
 						value++;
 					}
-					if (cb !=NULL)
-						(*cb)(100.0 * (float)++numvert/(float)m.vert.size(), "writing vertices normal");					
+					if (cb !=NULL)(*cb)(100.0 * (float)++numvert/(float)m.vert.size(), "writing normal");			
 				}
 				stream << "# " << NormalVertex.size() << " normals per vertex " << std::endl;//stampa numero di vert di coord di text
 				stream << std::endl;

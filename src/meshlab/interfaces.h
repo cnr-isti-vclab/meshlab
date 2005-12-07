@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.23  2005/12/07 08:01:09  fmazzant
+exporter obj temporany
+
 Revision 1.22  2005/12/05 18:08:21  ggangemi
 added MeshRenderInterface::isSupported() method
 
@@ -117,7 +120,7 @@ public:
       QAction *format, // "OBJ"
 			QString &fileName,
       MeshModel &m, 
-      int mask,
+      int &mask,
       vcg::CallBackPos *cb=0,
       QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
 };
