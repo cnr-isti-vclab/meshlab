@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2005/12/07 00:56:40  fmazzant
+added support for exporter generic obj file (level base)
+
 Revision 1.12  2005/12/04 00:22:46  cignoni
 Switched from progresBar widget to progressbar dialog
 
@@ -99,6 +102,7 @@ public:
   GlTrimesh<CMeshO> glw;
   MeshModel() {glw.m=&cm; cm.face.EnableWedgeTex();}
   bool Open(const char* filename, CallBackPos *cb=0);
+  bool Save(const char* filename, CallBackPos *cb=0);
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
 };
 

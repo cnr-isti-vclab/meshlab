@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.26  2005/12/07 00:56:40  fmazzant
+added support for exporter generic obj file (level base)
+
 Revision 1.25  2005/12/06 16:27:43  fmazzant
 added obj file in generic open dialog
 
@@ -276,6 +279,8 @@ First rough version. It simply load a mesh.
 #include "customDialog.h"		
 #include "saveSnapshotDialog.h"
 #include "ui_aboutForm.h"
+#include "../meshlabplugins/meshio/meshio.h"
+//#include "../meshlabplugins/meshio/savemaskdialog.h"
 
 //QProgressBar *MainWindow::qb;
 
@@ -463,13 +468,16 @@ void MainWindow::applyImportExport()
 	{
 		QString fileName;
 // OLD VERSION		if(iIO->save(action->text(),fileName,*(GLA()->mm ),0,NULL,GLA()) )
-		GLA()->log.Log(GLLogStream::Info,"File saved correctly");
+		qb->show();
+		if(iIO->save(action,fileName,*(GLA()->mm ),0,QCallBack,GLA()) )
+			GLA()->log.Log(GLLogStream::Info,"File saved correctly");
+		qb->hide();
 	}
 
 	if(action->text().contains("Import"))
 	{
 		int mask;
-    qb->show();
+		//qb->show();
 		if (GLA() == NULL)
 		{
 			MeshModel *mm= new MeshModel();
@@ -608,14 +616,19 @@ void MainWindow::openRecentFile()
 
 bool MainWindow::saveAs()
 {
-	QString initialPath = QDir::currentPath() + "/untitled.png";
+	//QString initialPath = QDir::currentPath() + "/untitled.png";
 
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"), initialPath);
+	QString fileName = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Save files (*.obj *.ply)");//QFileDialog::getSaveFileName(this, tr("Save As"), initialPath);
+	
 	if (fileName.isEmpty()) {
 		return false;
 	} else {
 		//       return paintArea->saveImage(fileName, "png");
-		return true;
+		qb->show();
+		bool ret = false;
+		ret = this->GLA()->mm->Save(fileName.toStdString().c_str(),QCallBack);
+		qb->hide();
+		return ret;
 	}
 }
 

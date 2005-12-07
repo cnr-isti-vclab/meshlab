@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.17  2005/12/07 00:56:40  fmazzant
+added support for exporter generic obj file (level base)
+
 Revision 1.16  2005/12/06 16:27:43  fmazzant
 added obj file in generic open dialog
 
@@ -59,6 +62,7 @@ Added copyright info
 
 #include <vcg/complex/trimesh/update/bounding.h>
 #include "../test/io/import_obj.h"
+#include "../test/io/export_obj.h"
 #include <QString>
 #include <QtGlobal>
 
@@ -98,6 +102,18 @@ bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
   return ret==::vcg::ply::E_NOERROR;
 }
 
+bool MeshModel::Save(const char *filename,CallBackPos *cb)
+{
+	QString fileName(filename);
+
+	if(fileName.endsWith(".obj",Qt::CaseInsensitive))
+		return vcg::tri::io::ExporterOBJ<CMeshO>::Save(this->cm,filename,cb);
+
+	if(fileName.endsWith(".ply",Qt::CaseInsensitive))
+		return vcg::tri::io::ExporterPLY<CMeshO>::Save(this->cm,filename,cb);
+
+	return false;
+}
 
 bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm)
 {

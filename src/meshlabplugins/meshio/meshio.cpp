@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.16  2005/12/07 00:56:40  fmazzant
+ added support for exporter generic obj file (level base)
+
  Revision 1.15  2005/12/06 05:16:54  buzzelli
  added code to grant that material files will be searched into the right directory
 
@@ -83,7 +86,7 @@ using namespace vcg;
 bool ExtraMeshIOPlugin::open(QAction *format, QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
 {
 	if (fileName.isEmpty())
-		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
+		fileName = QFileDialog::getOpenFileName(new QWidget(),tr("Open File"),"../sample","Obj files (*.obj)");
 	
 	if (!fileName.isEmpty())
 	{
@@ -133,14 +136,14 @@ bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, in
 {
 	if(format->text() == tr("Export OBJ")) ////if (format == tr("Export OBJ"))
 	{
-		SaveMaskDialog dialog(parent);
+		SaveMaskDialog dialog(new QWidget());
 		
 		while(!dialog.ReadMask())
 		{
 			dialog.exec();
 		}
 		
-		fileName = QFileDialog::getSaveFileName(parent,tr("Save file"),".","Obj files (*.obj)");
+		fileName = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Obj files (*.obj)");
 		if(fileName.isEmpty())
 			return false;
 
