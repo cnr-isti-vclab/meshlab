@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2005/12/08 13:52:01  mariolatronico
+added preliminary version of callback. Now it counts only even point on RefineOddEven
+
 Revision 1.13  2005/12/05 14:51:03  mariolatronico
 second action from "Loop" to "Butterfly"
 
@@ -38,7 +41,7 @@ Added copyright info
 #include <math.h>
 #include <stdlib.h>
 // TODO : test directory, need to be moved ...
-#include <../../test/loop/new_refine.h>
+#include "refine_loop.h"
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
 
@@ -64,7 +67,6 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 
 bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb) 
 {
-	qDebug("%d " , filter->text());
 	if(filter->text() == tr("Loop Subdivision Surface") )
 	{
 		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
@@ -75,7 +77,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 		// TODO : length 0 by default, need a dialog ?
 		vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
-			(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f);
+			(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f, false, cb);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
 	}
 	if(filter->text() == tr("Butterfly Subdivision Surface") )
@@ -90,8 +92,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		vcg::Refine<CMeshO, MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),0);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		
-		//  int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-	  //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+		
 	}
   if(filter->text() == tr("Remove Unreferenced Vertexes"))
  	{
@@ -106,8 +107,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
  	}
    if(filter->text() == tr("Remove Null Faces"))
  	{
-		//int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
-		// cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
+		int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
+		 cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
 	   //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
  	}
 

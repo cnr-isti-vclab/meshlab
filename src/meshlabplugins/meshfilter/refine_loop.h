@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.2  2005/12/08 13:52:01  mariolatronico
+added preliminary version of callback. Now it counts only even point on RefineOddEven
+
 Revision 1.1  2005/12/05 15:25:41  mariolatronico
 comment out old (and working) version, commented new (and not working) versione
 
@@ -99,6 +102,8 @@ first working version
 #define __VCGLIB_REFINE_LOOP
 
 #include<vcg/complex/trimesh/refine.h>
+#include<wrap/callback.h>
+
 #include <iostream>
 #include <math.h>
 #include <QtGlobal>
@@ -243,22 +248,28 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 
 };
 
-typedef struct {
-	float sum;
+template<class MESH_TYPE> struct EvenParam {
+	typename MESH_TYPE::CoordType sum;
 	bool border;
 	int n;
-} evenParam
+} ;
 
 
 template<class MESH_TYPE,class ODD_VERT, class EVEN_VERT>
-bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, bool RefineSelected=false)
+bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, 
+										bool RefineSelected=false, CallBackPos *cb = 0)
 {	 
 
 	int n = m.vn;
 		// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
 	
-	
+	/*std::vector<EvenParam<MESH_TYPE> > paramVec;		
+	for (int i = 0; i < m.face.size(); i++) {
+
+		
+
+	}*/
 // 	std::vector<EvenPointLoop::evenParam> paramVec;
 // 	typename MESH_TYPE::FacePointer fpStart, fpEnd; 
 // 	for (int i = 0; i < n; i++) {
@@ -271,11 +282,16 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length, boo
 // 	}
 
 	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+	int j = 0;
 	typename MESH_TYPE::VertexIterator vi;
 		typename MESH_TYPE::FaceIterator fi;
 		for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
 			for (int i = 0; i < 3; i++) { //itero vert
 					face::Pos<typename MESH_TYPE::FaceType>aux (&(*fi),i);
+					if (cb) {
+						(*cb)(100 * (float)j / (float)m.fn,"Refinying");
+						j++;
+					}
 					even((*fi).V(i)->P(), aux);
 			}
 		}
