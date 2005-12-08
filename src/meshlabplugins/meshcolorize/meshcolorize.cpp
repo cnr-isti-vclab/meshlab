@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2005/12/08 22:52:50  cignoni
+Added safer min max search
+
 Revision 1.5  2005/12/05 11:37:13  ggangemi
 workaround: added rendermode to compute method
 
@@ -36,40 +39,37 @@ Added copyright info
 #include <QtGui>
 
 #include "meshcolorize.h"
+#include <limits>
 
 using namespace vcg;
 
 static void Gaussian(CMeshO &m){
-	float min, max = 0.0;
-	float histo_frac = 0.10f;
-	int histo_range=1000;
-	vcg::Histogram<float> histo;
-
+	
 	assert(m.HasPerVertexQuality());
 
 	CMeshO::VertexIterator vi;		// iteratore vertice
 	CMeshO::FaceIterator fi;		// iteratore facce
-	double *area;					// areamix vector
+	float *area;					// areamix vector
 	int i;							// index
-	double area0, area1, area2;
-	double angle0, angle1, angle2; 
+	float area0, area1, area2;
+	float angle0, angle1, angle2; 
 	
 	//--- Initialization
-	area = new double[m.vn];
+	area = new float[m.vn];
 
 	//reset the values to 0
 	for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
 		(*vi).Q() = 0.0;
-
+    
 	//--- compute Areamix
 	for(fi=m.face.begin();fi!=m.face.end();++fi) if(!(*fi).IsD())
 	{
 		
 		// angles
-			 angle0 = math::Abs(Angle(	(*fi).V(1)->P()-(*fi).V(0)->P(),(*fi).V(2)->P()-(*fi).V(0)->P() ));
-			 angle1 = math::Abs(Angle(	(*fi).V(0)->P()-(*fi).V(1)->P(),(*fi).V(2)->P()-(*fi).V(1)->P() ));
+			 angle0 = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
+			 angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
  			 angle2 = M_PI-(angle0+angle1);
-		
+		 
 		if((angle0 < M_PI/2) || (angle1 < M_PI/2) || (angle2 < M_PI/2))  // triangolo non ottuso
 		{ 
 			float e01 = SquaredDistance( (*fi).V(1)->P() , (*fi).V(0)->P() );
@@ -86,7 +86,7 @@ static void Gaussian(CMeshO &m){
 			(*fi).V(0)->Q()  += area0;
 			(*fi).V(1)->Q()  += area1;
 			(*fi).V(2)->Q()  += area2;
-		}
+      }
 		else // triangolo ottuso
 		{ 
 			(*fi).V(0)->Q() += vcg::Area<CFaceO>((*fi)) / 3.0;
@@ -107,9 +107,9 @@ static void Gaussian(CMeshO &m){
 	for(fi=m.face.begin();fi!=m.face.end();++fi)  if(!(*fi).IsD())
 	{
 		float angle0 = math::Abs(Angle(
-			(*fi).V(1)->P()-(*fi).V(0)->P(),(*fi).V(2)->P()-(*fi).V(0)->P() ));
+			(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
 		float angle1 = math::Abs(Angle(
-			(*fi).V(0)->P()-(*fi).V(1)->P(),(*fi).V(2)->P()-(*fi).V(1)->P() ));
+			(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
 		float angle2 = M_PI-(angle0+angle1);
 		
 		(*fi).V(0)->Q() -= angle0;
@@ -118,35 +118,40 @@ static void Gaussian(CMeshO &m){
 	}
 	
 	i=0;
-	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi,++i) if(!(*vi).IsD())
+	float histo_frac = 0.1f;
+	int histo_range=100000;
+	vcg::Histogram<float> histo;
+  float minQ =  std::numeric_limits<float>::max(),
+        maxQ = -std::numeric_limits<float>::max();
+  for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi,++i) if(!(*vi).IsD())
 	{
-		if(area[i]==0) 
+    if(area[i]<=std::numeric_limits<float>::epsilon()) 
 			(*vi).Q() = 0;
 		else
 			(*vi).Q() /= area[i];
 	
-		if ((*vi).Q() < min) min = (*vi).Q();
-		if ((*vi).Q() > max) max = (*vi).Q();
+		if ((*vi).Q() < minQ) minQ = (*vi).Q();
+		if ((*vi).Q() > maxQ) maxQ = (*vi).Q();
 
 	}
 
 	//cout << "min:" << min << " max:" << max << endl;
 
-	histo.SetRange(min, max, histo_range);
+	histo.SetRange(minQ, maxQ, histo_range);
 	
 	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if(!(*vi).IsD())
 	{
 		histo.Add((*vi).Q());
 	} 
 
-	min = histo.Percentile(histo_frac);
-	max = histo.Percentile(1.0f-histo_frac);
+	minQ = histo.Percentile(histo_frac);
+	maxQ = histo.Percentile(1.0f-histo_frac);
 
 	//cout << "Histo: frac=" << histo_frac << " pmin=" << min << " pmax=" << max << "  range=" << histo_range << endl;
 	
 	for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if(!(*vi).IsD())
 	{
-		(*vi).Q() = math::Clamp((*vi).Q(), min, max);
+		(*vi).Q() = math::Clamp((*vi).Q(), minQ, maxQ);
 	}
 
 	//--- DeInit
