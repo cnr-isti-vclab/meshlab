@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2005/12/08 22:46:44  cignoni
+Added Laplacian Smooth
+
 Revision 1.14  2005/12/08 13:52:01  mariolatronico
 added preliminary version of callback. Now it counts only even point on RefineOddEven
 
@@ -44,6 +47,7 @@ Added copyright info
 #include "refine_loop.h"
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/smooth.h>
 
 using namespace vcg;
 
@@ -58,6 +62,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction("Remove Unreferenced Vertexes", this);
 	actionList << new QAction("Remove Duplicated Vertexes", this);
 	actionList << new QAction("Remove Null Faces", this);
+	actionList << new QAction("Laplacian Smooth", this);
 }
 
 QList<QAction *> ExtraMeshFilterPlugin::actions() const {
@@ -110,6 +115,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
 		 cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
 	   //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+ 	}
+   if(filter->text() == tr("Laplacian Smooth"))
+ 	{
+		LaplacianSmooth(m.cm,1);
+		 cb(100,tr("smoothed mesh").toLocal8Bit());
+	  //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
  	}
 
 	return true;
