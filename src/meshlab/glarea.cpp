@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.54  2005/12/08 22:53:11  cignoni
+added missing glclearcolor
+
 Revision 1.53  2005/12/08 18:21:56  vannini
 Rewritten tiled rendering functions. Now we use grabFrameBuffer() instead of glReadPixels.
 
@@ -449,6 +452,7 @@ void GLArea::paintGL()
 	lastTime=time.elapsed();
 	initTexture();
 	glDisable(GL_TEXTURE_2D); // FIX FIX FIX to move in trimesh.h ?
+  glClearColor(1.0,1.0,1.0,1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 	
