@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.8  2005/12/08 15:48:51  buzzelli
+Added correct calculation of texture indexes
+
 Revision 1.7  2005/12/08 02:28:36  buzzelli
 solved a bug into LoadMask function, since now texture loading begins to work properly
 
@@ -116,6 +119,7 @@ struct Material
 		alpha			= 1.0f;
 		
 		strcpy(textureFileName, "");
+		textureIdx = -1;
 	};
 
   char		name[FILENAME_MAX];
@@ -130,6 +134,7 @@ struct Material
   bool		bSpecular;
 
   char		textureFileName[FILENAME_MAX];
+	short		textureIdx;
 };
 
 enum OBJError {
@@ -277,21 +282,22 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					v3_index = atoi(vertex.c_str());
 					vt3_index = atoi(texcoord.c_str());
 
+					Material material = materials[currentMaterialIdx];
 					// also texcoord index starts from 1 instead of 0, so we decrement it by 1
 					TexCoord t = texCoords[--vt1_index];
 					(*fi).WT(0).u() = t.u;
 					(*fi).WT(0).v() = t.v;
-					/*if(multit) */(*fi).WT(0).n() = 0;  // TODO: fill with the right texture idx
+					/*if(multit) */(*fi).WT(0).n() = material.textureIdx;  // TODO: fill with the right texture idx
 
 					t = texCoords[--vt2_index];
 					(*fi).WT(1).u() = t.u;
 					(*fi).WT(1).v() = t.v;
-					/*if(multit) */(*fi).WT(1).n() = 0;  // TODO: fill with the right texture idx
+					/*if(multit) */(*fi).WT(1).n() = material.textureIdx;  // TODO: fill with the right texture idx
 
 					t = texCoords[--vt3_index];
 					(*fi).WT(2).u() = t.u;
 					(*fi).WT(2).v() = t.v;
-					/*if(multit) */(*fi).WT(2).n() = 0;  // TODO: fill with the right texture idx
+					/*if(multit) */(*fi).WT(2).n() = material.textureIdx;  // TODO: fill with the right texture idx
 				}
 				else
 				{
@@ -345,21 +351,22 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						v4_index	= atoi(vertex.c_str());
 						vt4_index = atoi(texcoord.c_str());
 
+						Material material = materials[currentMaterialIdx];
 						// also texcoord index starts from 1 instead of 0, so we decrement it by 1
 						TexCoord t = texCoords[vt1_index];
 						(*fi).WT(0).u() = t.u;
 						(*fi).WT(0).v() = t.v;
-						/*if(multit) */(*fi).WT(0).n() = 0;  // TODO: fill with the right texture idx
+						/*if(multit) */(*fi).WT(0).n() = material.textureIdx;  // TODO: fill with the right texture idx
 
 						t = texCoords[vt3_index];
 						(*fi).WT(1).u() = t.u;
 						(*fi).WT(1).v() = t.v;
-						/*if(multit) */(*fi).WT(1).n() = 0;  // TODO: fill with the right texture idx
+						/*if(multit) */(*fi).WT(1).n() = material.textureIdx;  // TODO: fill with the right texture idx
 
 						t = texCoords[--vt4_index];
 						(*fi).WT(2).u() = t.u;
 						(*fi).WT(2).v() = t.v;
-						/*if(multit) */(*fi).WT(2).n() = 0;  // TODO: fill with the right texture idx
+						/*if(multit) */(*fi).WT(2).n() = material.textureIdx;  // TODO: fill with the right texture idx
 
 						vt3_index = vt4_index;
 					}
@@ -416,7 +423,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			{
 				// obtain the name of the file  containing materials library
 				std::string materialFileName = tokens[1];
-				LoadMaterials( materialFileName.c_str(), materials );
+				LoadMaterials( materialFileName.c_str(), materials, m.textures);
 			}
 			else if (header.compare("usemtl")==0)	// material usage
 			{
@@ -435,26 +442,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				}
 			}
 			// for now, we simply ignore other situations
-		}
-	}
-
-	// populating vector of texture names stored into the model
-	for (unsigned i=0; i< materials.size(); ++i)
-	{
-		std::string textureName = materials[i].textureFileName;
-		if (!textureName.empty())
-		{
-			// avoid adding the same name twice
-			bool found = false;
-			unsigned j = 0;
-			while (!found && (j < m.textures.size()))
-			{
-				if (textureName.compare(m.textures[j])==0)
-					found = true;
-				++j;
-			}
-			if (!found)
-				m.textures.push_back(textureName);
 		}
 	}
 	
@@ -766,7 +753,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	}
 
 
-	static bool LoadMaterials(const char * filename, std::vector<Material> &materials)
+	static bool LoadMaterials(const char * filename, std::vector<Material> &materials, std::vector<std::string> &textures)
 	{
 		// nel chiamante garantire che ci si trovi nella directory giusta 
 
@@ -805,32 +792,32 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				}
 				else if (header.compare("Ka")==0)
 				{
-					float r = atof(tokens[1].c_str());
-					float g = atof(tokens[2].c_str());
-					float b = atof(tokens[3].c_str());
+					float r = (float) atof(tokens[1].c_str());
+					float g = (float) atof(tokens[2].c_str());
+					float b = (float) atof(tokens[3].c_str());
 
 					currentMaterial.ambient = Point3f(r, g, b); 
 				}
 				else if (header.compare("Kd")==0)
 				{
-					float r = atof(tokens[1].c_str());
-					float g = atof(tokens[2].c_str());
-					float b = atof(tokens[3].c_str());
+					float r = (float) atof(tokens[1].c_str());
+					float g = (float) atof(tokens[2].c_str());
+					float b = (float) atof(tokens[3].c_str());
 
           currentMaterial.diffuse = Point3f(r, g, b); 
 				}
 				else if (header.compare("Ks")==0)
 				{
-					float r = atof(tokens[1].c_str());
-					float g = atof(tokens[2].c_str());
-					float b = atof(tokens[3].c_str());
+					float r = (float) atof(tokens[1].c_str());
+					float g = (float) atof(tokens[2].c_str());
+					float b = (float) atof(tokens[3].c_str());
 
           currentMaterial.specular = Point3f(r, g, b); 
 				}
 				else if (	(header.compare("d")==0) ||
 									(header.compare("Tr")==0)	)	// alpha
 				{
-          currentMaterial.alpha = atof(tokens[1].c_str());
+          currentMaterial.alpha = (float) atof(tokens[1].c_str());
 				}
 				else if (header.compare("Ns")==0)  // shininess        
 				{
@@ -843,7 +830,28 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				}
 				else if (header.compare("map_Kd")==0)	// texture name
 				{
-					strcpy(currentMaterial.textureFileName, tokens[1].c_str());
+					std::string textureName = tokens[1];
+					strcpy(currentMaterial.textureFileName, textureName.c_str());
+					
+					// adding texture name into textures vector (if not already present)
+					// avoid adding the same name twice
+					bool found = false;
+					unsigned size = textures.size();
+					unsigned j = 0;
+					while (!found && (j < size))
+					{
+						if (textureName.compare(textures[j])==0)
+						{
+							currentMaterial.textureIdx = (int)j;
+							found = true;
+						}
+						++j;
+					}
+					if (!found)
+					{
+						textures.push_back(textureName);
+						currentMaterial.textureIdx = (int)size;
+					}
 				}
 				// for now, we simply ignore other situations
 			}
