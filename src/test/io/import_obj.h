@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.7  2005/12/08 02:28:36  buzzelli
+solved a bug into LoadMask function, since now texture loading begins to work properly
+
 Revision 1.6  2005/12/07 17:42:38  buzzelli
 Progress bar counter unified for both vertices and faces
 
@@ -278,17 +281,17 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					TexCoord t = texCoords[--vt1_index];
 					(*fi).WT(0).u() = t.u;
 					(*fi).WT(0).v() = t.v;
-					//if(multit) (*fi).WT(0).n() = fa.tcoordind;
+					/*if(multit) */(*fi).WT(0).n() = 0;  // TODO: fill with the right texture idx
 
 					t = texCoords[--vt2_index];
 					(*fi).WT(1).u() = t.u;
 					(*fi).WT(1).v() = t.v;
-					//if(multit) (*fi).WT(1).n() = fa.tcoordind;
+					/*if(multit) */(*fi).WT(1).n() = 0;  // TODO: fill with the right texture idx
 
 					t = texCoords[--vt3_index];
 					(*fi).WT(2).u() = t.u;
 					(*fi).WT(2).v() = t.v;
-					//if(multit) (*fi).WT(2).n() = fa.tcoordind;
+					/*if(multit) */(*fi).WT(2).n() = 0;  // TODO: fill with the right texture idx
 				}
 				else
 				{
@@ -346,17 +349,17 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						TexCoord t = texCoords[vt1_index];
 						(*fi).WT(0).u() = t.u;
 						(*fi).WT(0).v() = t.v;
-						//if(multit) (*fi).WT(0).n() = fa.tcoordind;
+						/*if(multit) */(*fi).WT(0).n() = 0;  // TODO: fill with the right texture idx
 
 						t = texCoords[vt3_index];
 						(*fi).WT(1).u() = t.u;
 						(*fi).WT(1).v() = t.v;
-						//if(multit) (*fi).WT(1).n() = fa.tcoordind;
+						/*if(multit) */(*fi).WT(1).n() = 0;  // TODO: fill with the right texture idx
 
 						t = texCoords[--vt4_index];
 						(*fi).WT(2).u() = t.u;
 						(*fi).WT(2).v() = t.v;
-						//if(multit) (*fi).WT(2).n() = fa.tcoordind;
+						/*if(multit) */(*fi).WT(2).n() = 0;  // TODO: fill with the right texture idx
 
 						vt3_index = vt4_index;
 					}
@@ -617,8 +620,9 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				header.push_back(c);
 				++to;
 			}
-			++to;
-			while (to!=length && ((c = line[to]) !=' '))
+			while (to!=length && (line[to]==' '))
+				++to;
+			while (to!=length && ((c = line[to]) !='\n'))
 			{
 				remainingText.push_back(c);
 				++to;
@@ -649,7 +653,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		std::string remainingText;
 		
 		int numVertices = 0;  // stores the number of vertexes been read till now
-		int numFaces		= 0;			// stores the number of faces been read till now
+		int numFaces		= 0;	// stores the number of faces been read till now
 
 		// cycle till we encounter first face
 		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
@@ -732,8 +736,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		// mask |= ply::PLYMask::PM_FACECOLOR
 
 		oi.mask = mask;
-		oi.numVertices = numVertices;
-		oi.numFaces = numFaces;
+		oi.numVertices	= numVertices;
+		oi.numFaces			= numFaces;
 
 		/*if( pf.AddToRead(VertDesc(0))!=-1 && 
 				pf.AddToRead(VertDesc(1))!=-1 && 
