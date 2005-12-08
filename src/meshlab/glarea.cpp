@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.53  2005/12/08 18:21:56  vannini
+Rewritten tiled rendering functions. Now we use grabFrameBuffer() instead of glReadPixels.
+
+Known bug:
+when in wireframe mode, there is a 1 pixel space between tiles on the final image...
+
 Revision 1.52  2005/12/06 20:54:53  alemochi
 Added more space between property displayed
 
@@ -279,20 +285,87 @@ void GLArea::initializeGL()
 }
 
 
+//void GLArea::pasteTile()
+//{
+//	int snapBufferOffset, q; 
+//	int vpLineSize=vpWidth * SSHOT_BYTES_PER_PIXEL;
+//
+//	snapBufferOffset=SSHOT_BYTES_PER_PIXEL * ((vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol)); 
+//	q=vpLineSize * (vpHeight - 1);
+//	
+//	for (int y=0; y < vpHeight; ++y)
+//	{
+//		memcpy((void*) &snapBuffer[snapBufferOffset], (void*) &tileBuffer[q], vpLineSize);
+//		q-=vpLineSize;
+//		snapBufferOffset+=vpLineSize * totalCols;
+//	}
+//
+//	tileCol++;
+//
+//	if (tileCol >= totalCols)
+//	{
+//		tileCol=0;
+//		tileRow++;
+//
+//		if (tileRow >= totalRows)
+//		{
+//						
+//			QImage img = QImage((uchar*) &snapBuffer[0], vpWidth * totalCols, vpHeight * totalRows, QImage::Format_ARGB32);
+//			
+//			QString outfile=ss.outdir;
+//			outfile.append("/");
+//			outfile.append(ss.basename);
+//			
+//			QString cnt;
+//			cnt.setNum(ss.counter);
+//
+//			if (ss.counter<10)
+//				cnt.prepend("0");
+//			if (ss.counter<100)
+//				cnt.prepend("0");
+//
+//			outfile.append(cnt);
+//			outfile.append(".png");			
+//				
+//			bool ret = img.save(outfile,"PNG");		
+//
+//			if (ret)
+//			{
+//				ss.counter++;
+//				if (ss.counter>999)
+//					ss.counter=0;
+//                log.Log(GLLogStream::Info,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
+//			}
+//			else
+//			{
+//			    log.Log(GLLogStream::Error,"Error saving %s",outfile.toLocal8Bit().constData());
+//			}
+//
+//			takeSnapTile=false;
+//			delete(tileBuffer);
+//			delete(snapBuffer);
+//
+//		}
+//	}
+//
+//}
+
 void GLArea::pasteTile()
 {
-	int snapBufferOffset, q; 
-	int vpLineSize=vpWidth * SSHOT_BYTES_PER_PIXEL;
+	if (snapBuffer.isNull())
+		snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
 
-	snapBufferOffset=SSHOT_BYTES_PER_PIXEL * ((vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol)); 
-	q=vpLineSize * (vpHeight - 1);
-	
-	for (int y=0; y < vpHeight; ++y)
+	uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.numBytes());
+	uchar *tilePtr = tileBuffer.bits();
+    
+	for (int y=0; y < tileBuffer.height(); y++)
 	{
-		memcpy((void*) &snapBuffer[snapBufferOffset], (void*) &tileBuffer[q], vpLineSize);
-		q-=vpLineSize;
-		snapBufferOffset+=vpLineSize * totalCols;
+		memcpy((void*) snapPtr, (void*) tilePtr, tileBuffer.bytesPerLine());		
+		snapPtr+=tileBuffer.bytesPerLine() * totalCols;
+		tilePtr+=tileBuffer.bytesPerLine();
 	}
+
+	tileBuffer=QImage();
 
 	tileCol++;
 
@@ -302,10 +375,7 @@ void GLArea::pasteTile()
 		tileRow++;
 
 		if (tileRow >= totalRows)
-		{
-						
-			QImage img = QImage((uchar*) &snapBuffer[0], vpWidth * totalCols, vpHeight * totalRows, QImage::Format_ARGB32);
-			
+		{				
 			QString outfile=ss.outdir;
 			outfile.append("/");
 			outfile.append(ss.basename);
@@ -321,7 +391,7 @@ void GLArea::pasteTile()
 			outfile.append(cnt);
 			outfile.append(".png");			
 				
-			bool ret = img.save(outfile,"PNG");		
+			bool ret = snapBuffer.save(outfile,"PNG");		
 
 			if (ret)
 			{
@@ -336,13 +406,12 @@ void GLArea::pasteTile()
 			}
 
 			takeSnapTile=false;
-			delete(tileBuffer);
-			delete(snapBuffer);
-
+			snapBuffer=QImage();
 		}
 	}
-
 }
+
+
 void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
 	GLdouble fLeft, fRight, fBottom, fTop, left, right, bottom, top, xDim, yDim, xOff, yOff, tDimX, tDimY;
@@ -423,6 +492,7 @@ void GLArea::paintGL()
 		glPushMatrix();
 		glLoadIdentity();
 		myGluPerspective(60, (GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
+		
 	}
 
 	// Set proper colorMode
@@ -453,7 +523,7 @@ void GLArea::paintGL()
 	{
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, vpWidth, vpHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (GLvoid *) tileBuffer);
+		tileBuffer=grabFrameBuffer(true);
 		glPopMatrix();
 		glMatrixMode(old_matrixMode);
 		pasteTile();
@@ -516,7 +586,8 @@ void GLArea::resizeGL(int _width, int _height)
 	glLoadIdentity();
 	gluPerspective(60, float(_width)/float(_height), 0.2, 5);
 	glMatrixMode(GL_MODELVIEW);
-
+	vpWidth=_width;
+	vpHeight=_height;
 	glViewport(0,0, _width, _height);
 }
 
@@ -526,13 +597,6 @@ void GLArea::saveSnapshot()
 	
 	totalCols=totalRows=ss.resolution;
 	tileRow=tileCol=0;
-
-	glGetIntegerv(GL_VIEWPORT, vp);
-	vpWidth=vp[2];
-	vpHeight=vp[3];
-	
-	snapBuffer = new char[vpWidth * vpHeight * totalCols * totalRows * SSHOT_BYTES_PER_PIXEL];
-	tileBuffer = new char[vpWidth * vpHeight * SSHOT_BYTES_PER_PIXEL];
 
 	takeSnapTile=true;
 	update();

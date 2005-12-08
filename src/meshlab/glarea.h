@@ -24,6 +24,12 @@
   History
 
 $Log$
+Revision 1.36  2005/12/08 18:21:56  vannini
+Rewritten tiled rendering functions. Now we use grabFrameBuffer() instead of glReadPixels.
+
+Known bug:
+when in wireframe mode, there is a 1 pixel space between tiles on the final image...
+
 Revision 1.35  2005/12/06 10:42:03  vannini
 Snapshot dialog now works
 
@@ -156,6 +162,7 @@ First rough version. It simply load a mesh.
 #include <QWidget>
 #include <QGLWidget>
 #include <QTime>
+#include <QtGui>
 
 #include "GLLogStream.h"
 
@@ -217,7 +224,6 @@ public:
 	QString basename;
 	int counter;
 	int resolution;
-	int dx,dy;
 		
 	SnapshotSetting()
 	{
@@ -225,7 +231,6 @@ public:
 		basename="snapshot";
 		counter=0;
 		resolution=1;
-		dx=dy=0;
 	};
 };
 
@@ -250,7 +255,7 @@ public:
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 	const ColorSetting& getCustomSetting()		const {return cs;}
-	const SnapshotSetting& getSnapshotSetting()	{ss.dx=vpWidth; ss.dy=vpHeight; return ss;}
+	const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
 	void updateFps();
 	void renderFps();
 	
@@ -307,8 +312,8 @@ private:
 	float fpsVector[10];
 	
 	SnapshotSetting ss;
-	char *snapBuffer;
-	char *tileBuffer;
+	QImage snapBuffer;
+	QImage tileBuffer;
 	bool takeSnapTile;
 	int vpWidth, vpHeight, tileCol, tileRow, totalCols, totalRows;
 
