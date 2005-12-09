@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.29  2005/12/09 03:05:49  davide_portelli
+A little change in fullScreen and KeyPressEvent
+
 Revision 1.28  2005/12/09 00:26:25  buzzelli
 io importing mechanism adapted in order to be fully transparent towards the user
 
@@ -775,17 +778,13 @@ void MainWindow::fullScreen(){
 	menuBar()->hide();
 	mainToolBar->hide();
 	renderToolBar->hide();
-	this->setWindowState(this->windowState()^Qt::WindowFullScreen);
+	setWindowState(windowState()^Qt::WindowFullScreen);
 	bool found=true;
 	//Caso di piu' finestre aperte in tile:
-	if((workspace->windowList()).size()>0){
+	if((workspace->windowList()).size()>1){
 		foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
 		if (found){
-			/*
-			foreach(QWidget *w,workspace->windowList()){
-				w->setWindowFlags(Qt::FramelessWindowHint);
-			}
-			*/
+			//foreach(QWidget *w,workspace->windowList()){w->setWindowFlags(Qt::FramelessWindowHint);}
 			workspace->tile();
 		}
 	}
@@ -795,7 +794,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 		menuBar()->show();
 		mainToolBar->show();
 		renderToolBar->show();
-		this->setWindowState(this->windowState()^ Qt::WindowFullScreen);
+		setWindowState(windowState()^ Qt::WindowFullScreen);
 		fullScreenAct->setChecked(false);
 	}
 }
