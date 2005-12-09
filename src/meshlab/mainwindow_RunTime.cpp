@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.30  2005/12/09 03:50:40  davide_portelli
+A little change
+
 Revision 1.29  2005/12/09 03:05:49  davide_portelli
 A little change in fullScreen and KeyPressEvent
 
@@ -795,6 +798,14 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 		mainToolBar->show();
 		renderToolBar->show();
 		setWindowState(windowState()^ Qt::WindowFullScreen);
+		bool found=true;
+		//Caso di piu' finestre aperte in tile:
+		if((workspace->windowList()).size()>1){
+			foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
+			if (found){
+				workspace->tile();
+			}
+		}
 		fullScreenAct->setChecked(false);
 	}
 }

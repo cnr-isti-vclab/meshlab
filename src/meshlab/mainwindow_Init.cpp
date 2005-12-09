@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.23  2005/12/09 03:50:40  davide_portelli
+A little change
+
 Revision 1.22  2005/12/09 00:26:25  buzzelli
 io importing mechanism adapted in order to be fully transparent towards the user
 
@@ -288,7 +291,7 @@ MainWindow::MainWindow()
 	updateMenus();
 	addToolBar(mainToolBar);
 	addToolBar(renderToolBar);
-	setWindowTitle(tr("MeshLab v0.3"));
+	setWindowTitle(tr("MeshLab v0.4"));
 	loadPlugins();
 	if(QCoreApplication::instance ()->argc()>1){
 		open(QCoreApplication::instance ()->argv()[1]);
