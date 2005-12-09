@@ -1,28 +1,31 @@
 /****************************************************************************
-* MeshLab                                                           o o     *
-* A versatile mesh processing toolbox                             o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+ * MeshLab                                                           o o     *
+ * A versatile mesh processing toolbox                             o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2005                                                \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *   
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
 /****************************************************************************
   History
 $Log$
+Revision 1.16  2005/12/09 18:28:34  mariolatronico
+added commented code for Decimator
+
 Revision 1.15  2005/12/08 22:46:44  cignoni
 Added Laplacian Smooth
 
@@ -43,11 +46,11 @@ Added copyright info
 
 #include <math.h>
 #include <stdlib.h>
-// TODO : test directory, need to be moved ...
 #include "refine_loop.h"
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/smooth.h>
+//#include "../../test/decimator/decimator.h"
 
 using namespace vcg;
 
@@ -63,6 +66,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction("Remove Duplicated Vertexes", this);
 	actionList << new QAction("Remove Null Faces", this);
 	actionList << new QAction("Laplacian Smooth", this);
+	//	actionList << new QAction("Decimator", this);
 }
 
 QList<QAction *> ExtraMeshFilterPlugin::actions() const {
@@ -73,56 +77,59 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb) 
 {
 	if(filter->text() == tr("Loop Subdivision Surface") )
-	{
-		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
-    //if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
-    if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
-		// TODO : length 0 by default, need a dialog ?
-		vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
-			(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f, false, cb);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
-	}
+		{
+			//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+			//if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
+			if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+			// TODO : length 0 by default, need a dialog ?
+			vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
+				(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f, false, cb);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
+		}
 	if(filter->text() == tr("Butterfly Subdivision Surface") )
-	{
-		//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
-    //if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
-    if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+	  {
+			//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+			//if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
+			if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 		
-		vcg::Refine<CMeshO, MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),0);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+			vcg::Refine<CMeshO, MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),0);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		
 		
-	}
+		}
   if(filter->text() == tr("Remove Unreferenced Vertexes"))
- 	{
-		int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-	//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
- 	}
+		{
+			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+		}
   if(filter->text() == tr("Remove Duplicated Vertexes"))
- 	{
+		{
 		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
       cb(100,tr("Removed vertices : %1.").arg(delvert).toLocal8Bit());
-	   //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
- 	}
-   if(filter->text() == tr("Remove Null Faces"))
- 	{
-		int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
-		 cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
-	   //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
- 	}
-   if(filter->text() == tr("Laplacian Smooth"))
- 	{
-		LaplacianSmooth(m.cm,1);
-		 cb(100,tr("smoothed mesh").toLocal8Bit());
-	  //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
- 	}
-
+			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+		}
+	if(filter->text() == tr("Remove Null Faces"))
+		{
+			int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
+			cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
+			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+		}
+	if(filter->text() == tr("Laplacian Smooth"))
+		{
+			LaplacianSmooth(m.cm,1);
+			cb(100,tr("smoothed mesh").toLocal8Bit());
+			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+		}
+// 	if(filter->text() == tr("Decimator"))
+// 		{
+// 			Decimator<CMeshO>(m.cm,10);
+// 		}
 	return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
