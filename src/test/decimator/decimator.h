@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.6  2005/12/09 20:53:49  giec
+Change vetor<vetor<vetor<Point3f>>> to Point3f***.
+Semplify the mesh but with a litter error.
+
 Revision 1.5  2005/12/09 18:26:13  mariolatronico
 code cleaning and added floor() to calculate indexes (idx, idy, idz)
 
@@ -73,15 +77,32 @@ namespace vcg{
     //int n3 = n*n*n;
     //std::vector <typename MESH_TYPE::CoordType > Vett(n3);
 		const int p = n;
-	
-		std::vector< std::vector< std::vector<typename MESH_TYPE::CoordType> > > Vett(n); 	
-		 	for(int i = 0 ; i < n ; ++i)
-				for(int j = 0 ; j < n ; ++j) {
-						Vett[i].resize(n);	
-						Vett[i][j].resize(n);
-				}
 
-		//Point3f Vett[n][n][n];// = new Point3f[n][n][n];
+		Point3f ***Vett;
+		Vett = new Point3f**[n];
+		for(int i = 0; i < n; ++i)
+		{
+			Vett[i] = new Point3f*[n];
+				for(int j = 0; j < n; ++j)
+			{
+				Vett[i][j] = new Point3f[n];
+				for(int z = 0;z < n; ++z)
+					Vett[i][j][z].Zero();
+			}
+		}
+
+		//std::vector< std::vector< std::vector<typename MESH_TYPE::CoordType> > > Vett(n); 	
+		// 	for(int i = 0 ; i < n ; ++i)
+		//		for(int j = 0 ; j < n ; ++j) {
+		//				Vett[i].resize(n);	
+		//				Vett[i][j].resize(n);
+		//		}
+		////inizializzo a zero gli elementi
+		//	for(int i = 0 ; i < n ; ++i)
+		//		for(int j = 0 ; j < n ; ++j)
+		//			for(int k = 0 ; k < n ; ++k)
+		//   				Vett[i][j][k].Zero();
+	
     typename MESH_TYPE::CoordType Cmin,Cmax;
 		Cmin.Zero(); Cmax.Zero();
 		for (int i = 0; i < 3; i++) {
@@ -91,11 +112,7 @@ namespace vcg{
 			Cmax[i] = -10000.0f;
 		}
 
-		//inizializzo a zero gli elementi
-     	for(int i = 0 ; i < n ; ++i)
-				for(int j = 0 ; j < n ; ++j)
-					for(int k = 0 ; k < n ; ++k)
-     				Vett[i][j][k].Zero();
+
 		
 		typename MESH_TYPE::VertexIterator vi;
     for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
@@ -135,6 +152,7 @@ namespace vcg{
 
   	
     int idx,idy,idz;
+		float x=0.0f,y=0.0f,z=0.0f;
 		int referredBit = MESH_TYPE::VertexType::NewBitFlag();
     //calcolo i nuovi vertici dalla media di quelli di ogni cella
     for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
@@ -143,26 +161,30 @@ namespace vcg{
 				//calcolo l'indice della cella in cui cade il vertice
 				Point3f app = (*vi).P();
 				app = (app + tras);
+				x=app[0];
+				y=app[1];
+				z=app[2];
 				
-				idx = (floor(app[0]) / Px);
-				idy = (floor(app[1]) / Py);
-				idz = (floor(app[2]) / Pz);
+				idx = (floor(x / Px));
+				idy = (floor(y / Py));
+				idz = (floor(z / Pz));
 				
-					Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (app - tras))/2;
+				if(idx > 9)idx=9;
+				if(idy > 9)idy=9;
+				if(idz > 9)idz=9;
+
+				Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (app - tras))/2;
 				(*vi).ClearUserBit(referredBit);
       }
-		cout << "PRE ----------------- " << endl;
-
-    for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-      {
-				cout << " X: "<< (*vi).P().X()
-						 << " Y: "<< (*vi).P().Y()
-						 << " Z: "<< (*vi).P().Z() << endl;
-				
-
-				
-			}
-		
+		//cout << "PRE ----------------- " << endl;
+		//
+		// for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+		// {
+		//	cout << " X: "<< (*vi).P().X()
+		//			 << " Y: "<< (*vi).P().Y()
+		//			 << " Z: "<< (*vi).P().Z() << endl;
+		//}
+		float area = -0.00000001f;
     typename MESH_TYPE::FaceIterator fi;
     //reimposto i vertici con la media di quelli che cadevano nel suo quadrante
     for(fi = m.face.begin(); fi != m.face.end(); ++fi)
@@ -172,15 +194,21 @@ namespace vcg{
 						for(int i = 0; i < 3; ++i)
 							{//per ogni vertice del triangolo
 								if(!(*fi).V(i)->IsUserBit(referredBit))
-							
 									{//se non l'ho gia cambiato
 										
 										Point3f app = (*fi).V(i)->P();
 										app = (app + tras);
-										
-										idx = (floor(app[0]) / Px);
-										idy = (floor(app[1]) / Py);
-										idz = (floor(app[2]) / Pz);
+				x=app[0];
+				y=app[1];
+				z=app[2];
+				
+				idx = (floor(x / Px));
+				idy = (floor(y / Py));
+				idz = (floor(z / Pz));
+				
+				if(idx > 9)idx=9;
+				if(idy > 9)idy=9;
+				if(idz > 9)idz=9;
 										
 										(*fi).V(i)->P() = Vett[idx][idy][idz];
 
@@ -188,26 +216,27 @@ namespace vcg{
 
 									}
 							}
-						float area = Area(*fi);
-						if( area  < // numeric_limits<float>::epsilon()
-							 0.0000000001f ) {
+						area = Area(*fi);
+						if( area  <  0.0000000001f ) {// numeric_limits<float>::epsilon()
 							(*fi).SetD();
 							}
 					}
 			}
-	cout << "DOPO ----------------- " << endl;
-    for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-      {
-				cout << " X: "<< (*vi).P().X()
-						 << " Y: "<< (*vi).P().Y()
-						 << " Z: "<< (*vi).P().Z() << endl;
-				
+	//cout << "DOPO ----------------- " << endl;
+ //   for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+ //     {
+	//			cout << " X: "<< (*vi).P().X()
+	//					 << " Y: "<< (*vi).P().Y()
+	//					 << " Z: "<< (*vi).P().Z() << endl;
+	//		}
 
-				
-			}
-
-		//tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
+		tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
 		//tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+
+
+
+		delete(Vett);
+
 
 
     return true;
