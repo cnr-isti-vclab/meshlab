@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.5  2005/12/09 18:26:13  mariolatronico
+code cleaning and added floor() to calculate indexes (idx, idy, idz)
+
 Revision 1.4  2005/12/08 14:53:36  mariolatronico
 changed implementation of Vett type (from array [] [] [] to 3 std::vector nested)
 
@@ -46,6 +49,8 @@ Test program for clustering decimator.
 #define __VCGLIB_DECIMATOR
 
 #include<vcg/complex/trimesh/base.h>
+#include<vcg/space/triangle3.h>
+#include<vcg/complex/trimesh/update/topology.h>
 
 #include <iostream>
 #include <math.h>
@@ -68,9 +73,8 @@ namespace vcg{
     //int n3 = n*n*n;
     //std::vector <typename MESH_TYPE::CoordType > Vett(n3);
 		const int p = n;
-		std::vector<MESH_TYPE::CoordType> primaDim(n);
-		
-		std::vector< std::vector< std::vector< MESH_TYPE::CoordType> > > Vett(n); 	
+	
+		std::vector< std::vector< std::vector<typename MESH_TYPE::CoordType> > > Vett(n); 	
 		 	for(int i = 0 ; i < n ; ++i)
 				for(int j = 0 ; j < n ; ++j) {
 						Vett[i].resize(n);	
@@ -79,12 +83,12 @@ namespace vcg{
 
 		//Point3f Vett[n][n][n];// = new Point3f[n][n][n];
     typename MESH_TYPE::CoordType Cmin,Cmax;
-	//	Cmin.Zero(); Cmax.Zero();
+		Cmin.Zero(); Cmax.Zero();
 		for (int i = 0; i < 3; i++) {
-			Cmin[i] = numeric_limits<float>::max();
-			Cmax[i] = numeric_limits<float>::min();
-	
-
+			//			Cmin[i] = numeric_limits< float >::max();
+			//Cmax[i] = -numeric_limits< float >::max();
+			Cmin[i] = 10000.0f;
+			Cmax[i] = -10000.0f;
 		}
 
 		//inizializzo a zero gli elementi
@@ -105,10 +109,6 @@ namespace vcg{
 
 			}		
 		
-
-		//    Cmin = /*Point3f(-0.1,-0.1,-0.1);*/m.bbox.min;
-		//    Cmax = /*Point3f(0.1,0.1,0.1);*/m.bbox.max;
-	
 
     if(Cmin > Cmax)
       {
@@ -136,7 +136,6 @@ namespace vcg{
   	
     int idx,idy,idz;
 		int referredBit = MESH_TYPE::VertexType::NewBitFlag();
-    //int id;
     //calcolo i nuovi vertici dalla media di quelli di ogni cella
     for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
       {
@@ -145,27 +144,29 @@ namespace vcg{
 				Point3f app = (*vi).P();
 				app = (app + tras);
 				
-				idx = ((app[0]) / Px);
-				idy = ((app[1]) / Py);
-				idz = ((app[2]) / Pz);
+				idx = (floor(app[0]) / Px);
+				idy = (floor(app[1]) / Py);
+				idz = (floor(app[2]) / Pz);
 				
-				// 			 	std::cout << (*vi).P().X() << " " 
-				//  									<< (*vi).P().Y() << " " 
-				//  									<< (*vi).P().Z() << " " << endl;
-				//			std::cout <<  idx << " " << idy <<" "  << idz <<std::endl;
-
-		
-					Vett[idx][idy][idz] = (Vett[idx][idy][idz] + app)/2;
-					(*vi).ClearUserBit(referredBit);
-					//(*vi).SetUserBit(referredBit);
-					//cout << (*vi).Flags() << endl;
+					Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (app - tras))/2;
+				(*vi).ClearUserBit(referredBit);
       }
+		cout << "PRE ----------------- " << endl;
+
+    for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+      {
+				cout << " X: "<< (*vi).P().X()
+						 << " Y: "<< (*vi).P().Y()
+						 << " Z: "<< (*vi).P().Z() << endl;
+				
+
+				
+			}
 		
     typename MESH_TYPE::FaceIterator fi;
     //reimposto i vertici con la media di quelli che cadevano nel suo quadrante
     for(fi = m.face.begin(); fi != m.face.end(); ++fi)
       {
-				static int sdfsdf = 0;
 				if(!(*fi).IsD())
 					{//se non devo cancellare la faccia
 						for(int i = 0; i < 3; ++i)
@@ -177,50 +178,38 @@ namespace vcg{
 										Point3f app = (*fi).V(i)->P();
 										app = (app + tras);
 										
-										idx = ((app[0]) / Px);
-										idy = ((app[1]) / Py);
-										idz = ((app[2]) / Pz);
-										//lo aggiorno
-										//		std::cout << idx << " " << idy <<" "  << idz <<std::endl;
-										std::cout << sdfsdf++ << endl;
+										idx = (floor(app[0]) / Px);
+										idy = (floor(app[1]) / Py);
+										idz = (floor(app[2]) / Pz);
 										
 										(*fi).V(i)->P() = Vett[idx][idy][idz];
-										//									 	(*fi).V(i)->SetR();
+
 										(*fi).V(i)->SetUserBit(referredBit);
-										//cout << (*fi).V(i)->Flags() << endl;
 
 									}
 							}
-						//calcolo l'area e controllo se uguale a 0
-						float a = (*fi).V(0) - (*fi).V(1);
-						float b = (*fi).V(1) - (*fi).V(2);
-						float c = (*fi).V(2) - (*fi).V(0);
-						float p = (a + b + c)/2;
-						float area = sqrt( p * (p - a) * (p - b) * (p - c));
-						if(abs(area)  < numeric_limits<float>::epsilon() ) {
-								(*fi).SetD();
+						float area = Area(*fi);
+						if( area  < // numeric_limits<float>::epsilon()
+							 0.0000000001f ) {
+							(*fi).SetD();
 							}
 					}
 			}
+	cout << "DOPO ----------------- " << endl;
+    for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+      {
+				cout << " X: "<< (*vi).P().X()
+						 << " Y: "<< (*vi).P().Y()
+						 << " Z: "<< (*vi).P().Z() << endl;
+				
 
-		// std::vector<typename MESH_TYPE::FaceType> fv;
-// 		for ( fi = m.face.begin(); fi != m.face.end(); ++fi) {
-// 			static int aa = 0;
-// 			if (! (*fi).IsD()) {
-// 				cout << aa++ << " " << fv.size() << endl;
-// 				fv.push_back(*fi);
-// 			}
-			
-// 		}
+				
+			}
 
-// 		m.face.clear();
-// 		for ( fi = fv.begin(); fi != fv.end(); ++fi) {
+		//tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
+		//tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 
-// 			m.face.push_back(*fi);
 
-// 		}
-		
-//		delete[] Vett;		
     return true;
 
   }
