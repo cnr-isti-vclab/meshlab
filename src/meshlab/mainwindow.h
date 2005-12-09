@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.45  2005/12/09 16:43:51  fmazzant
+added tools -> save mask obj file II
+
 Revision 1.44  2005/12/09 10:43:04  fmazzant
 added tools -> set mask obj file
 
@@ -64,6 +67,7 @@ Added copyright info
 #include <QColorDialog>
 #include "meshmodel.h"
 #include "glarea.h"
+#include "../meshlabplugins/meshio/savemaskdialog.h"
 
 #define MAXRECENTFILES 4
 
@@ -80,7 +84,9 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow();
-  static bool QCallBack(const int pos, const char * str);
+   static bool QCallBack(const int pos, const char * str);
+   MaskObj maskobj;
+   
   
 private slots:
 

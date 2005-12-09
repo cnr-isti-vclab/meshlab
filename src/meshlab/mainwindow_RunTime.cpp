@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.32  2005/12/09 16:43:51  fmazzant
+added tools -> save mask obj file II
+
 Revision 1.31  2005/12/09 10:43:04  fmazzant
 added tools -> set mask obj file
 
@@ -294,8 +297,6 @@ First rough version. It simply load a mesh.
 #include "customDialog.h"		
 #include "saveSnapshotDialog.h"
 #include "ui_aboutForm.h"
-#include "../meshlabplugins/meshio/meshio.h"
-//#include "../meshlabplugins/meshio/savemaskdialog.h"
 
 //QProgressBar *MainWindow::qb;
 
@@ -695,6 +696,7 @@ bool MainWindow::saveAs()
 	{
 		qb->show();
 		bool ret = false;
+		
 		ret = this->GLA()->mm->Save(fileName.toStdString().c_str(),QCallBack);
 		qb->hide();
 		return ret;
@@ -766,7 +768,9 @@ void MainWindow::setCustomize()
 
 void MainWindow::setSaveMaskObj()
 {
-	QMessageBox::warning(new QWidget(),"","");
+	SaveMaskDialog objdialog(&maskobj,new QWidget());
+	objdialog.ReadMask();
+	objdialog.exec();
 }
 
 void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }

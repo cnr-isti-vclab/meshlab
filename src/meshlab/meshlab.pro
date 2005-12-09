@@ -6,6 +6,8 @@ HEADERS        = interfaces.h \
                  plugindialog.h \
                  customDialog.h \
                  saveSnapshotDialog.h \
+                 ../meshlabplugins/meshio/savemaskdialog.h\
+                 ../meshlabplugins/meshio/maskobj.h\
                  ../../../sf/wrap/gui/trackball.h\
                  ../../../sf/wrap/gui/trackmode.h\
                  ../../../sf/wrap/gl/trimesh.h
@@ -18,6 +20,8 @@ SOURCES        = main.cpp \
                  plugindialog.cpp \
                  customDialog.cpp \
                  saveSnapshotDialog.cpp \
+                 ../meshlabplugins/meshio/savemaskdialog.cpp\
+                 ../meshlabplugins/meshio/maskobj.cpp\
                  ../../../sf/wrap/ply/plylib.cpp\
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.25  2005/12/09 16:43:51  fmazzant
+added tools -> save mask obj file II
+
 Revision 1.24  2005/12/09 10:43:04  fmazzant
 added tools -> set mask obj file
 
@@ -272,11 +275,12 @@ First rough version. It simply load a mesh.
 #include "customDialog.h"	
 #include "saveSnapshotDialog.h"	
 
-
 QProgressDialog *MainWindow::qb;
 
 MainWindow::MainWindow()
 {
+	maskobj = MaskObj();
+
 	workspace = new QWorkspace(this);
 	setCentralWidget(workspace);
 	windowMapper = new QSignalMapper(this);
