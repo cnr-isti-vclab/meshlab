@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.9  2005/12/09 18:16:14  fmazzant
+ added generic obj save with plugin arch.
+
  Revision 1.8  2005/12/07 08:01:09  fmazzant
  exporter obj temporany
 
@@ -153,7 +156,8 @@ namespace io {
 						stream << "vn " << (*vi).N()[0] << " " << (*vi).N()[1] << " " << (*vi).N()[2] << std::endl;
 						value++;
 					}
-					if (cb !=NULL)(*cb)(100.0 * (float)++numvert/(float)m.vert.size(), "writing normal");			
+					if (cb !=NULL)
+						(*cb)(100.0 * (float)++numvert/(float)m.vert.size(), "writing normal");			
 				}
 				stream << "# " << NormalVertex.size() << " normals per vertex " << std::endl;//stampa numero di vert di coord di text
 				stream << std::endl;

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.19  2005/12/09 18:16:12  fmazzant
+added generic obj save with plugin arch.
+
 Revision 1.18  2005/12/09 00:26:25  buzzelli
 io importing mechanism adapted in order to be fully transparent towards the user
 
@@ -102,15 +105,14 @@ bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
 
 bool MeshModel::Save(const char *filename,CallBackPos *cb)
 {
+	int mask;
 	QString fileName(filename);
+	
+	
+	bool ret;
+	ret = vcg::tri::io::ExporterPLY<CMeshO>::Save(this->cm,filename,cb);
 
-	if(fileName.endsWith(".obj",Qt::CaseInsensitive))
-		return vcg::tri::io::ExporterOBJ<CMeshO>::Save(this->cm,filename,cb);
-
-	if(fileName.endsWith(".ply",Qt::CaseInsensitive))
-		return vcg::tri::io::ExporterPLY<CMeshO>::Save(this->cm,filename,cb);
-
-	return false;
+	return ret;
 }
 
 bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm)

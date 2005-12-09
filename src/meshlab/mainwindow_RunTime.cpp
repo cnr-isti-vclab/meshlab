@@ -24,8 +24,8 @@
 History
 
 $Log$
-Revision 1.32  2005/12/09 16:43:51  fmazzant
-added tools -> save mask obj file II
+Revision 1.33  2005/12/09 18:16:12  fmazzant
+added generic obj save with plugin arch.
 
 Revision 1.31  2005/12/09 10:43:04  fmazzant
 added tools -> set mask obj file
@@ -686,21 +686,79 @@ void MainWindow::openRecentFile()
 
 bool MainWindow::saveAs()
 {
-	QString fileName = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Save files (*.obj *.ply)");
+	// Opening files in a transparent form (IO plugins contribution is hidden to user)
+	const QString defaultFilter = tr("Mesh files (*.ply *.off *.stl)");
+	const QString allFilter = tr("All Mesh (*.*)");
 	
-	if (fileName.isEmpty())
+	QStringList filters;
+	filters	<< defaultFilter;
+	
+	QString selectedFilter;
+
+	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
+	for (; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin)  // cycle among loaded IO plugins
 	{
-		return false;
-	} 
-	else 
-	{
-		qb->show();
-		bool ret = false;
+		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
+
+		QString currentDescription;
+		QStringList currentFormats = pMeshIOPlugin->formats(currentDescription);
+
+		QString currentFilterEntry = currentDescription + " (*.";
+		QStringListIterator itFormat(currentFormats);
+		if (itFormat.hasNext())
+			currentFilterEntry.append(itFormat.next().toLower());
+		while (itFormat.hasNext())
+		{
+			currentFilterEntry.append(',');
+			currentFilterEntry.append(itFormat.next().toLower());
+		}
+		currentFilterEntry.append(')');
 		
-		ret = this->GLA()->mm->Save(fileName.toStdString().c_str(),QCallBack);
-		qb->hide();
-		return ret;
+		filters.append(currentFilterEntry);
 	}
+
+	filters << allFilter;
+	QString fileName;// = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Save files (*.ply)");
+
+	if (fileName.isEmpty())
+		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"), &selectedFilter);
+	
+	bool ret = false;
+	if (!fileName.isEmpty())
+	{
+		QStringListIterator itFilter(filters);
+		int idx = 0;
+		while (itFilter.hasNext() && (itFilter.next() != selectedFilter))
+			++idx;
+		--idx;  // subtracting 1 since first filter was the default one
+		if ((idx > -1) && (idx < (int)meshIOPlugins.size()))
+		{
+			if(fileName.endsWith(".obj",Qt::CaseInsensitive))
+			{
+				if(maskobj.isfirst)
+				{
+					SaveMaskDialog dialog(&maskobj,new QWidget());
+					dialog.ReadMask();
+					dialog.exec();
+				}
+
+				int mask = maskobj.MaskObjToInt();
+				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
+				qb->show();
+				ret = pCurrentIOPlugin->save("OBJ", fileName, *this->GLA()->mm ,mask,QCallBack,this);
+				qb->hide();
+			}
+			
+			if(fileName.endsWith(".ply",Qt::CaseInsensitive))
+			{
+				qb->show();
+				ret = this->GLA()->mm->Save(fileName.toStdString().c_str(),QCallBack);
+				qb->hide();
+			}
+		}
+	}	
+
+	return ret;
 }
 
 bool MainWindow::saveSnapshot()

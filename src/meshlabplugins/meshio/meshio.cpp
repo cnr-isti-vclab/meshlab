@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.20  2005/12/09 18:16:14  fmazzant
+ added generic obj save with plugin arch.
+
  Revision 1.19  2005/12/09 16:37:20  fmazzant
  maskobj for select element to save
 
@@ -144,21 +147,12 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 {
 	if(format.toUpper() == tr("OBJ")) ////if (format == tr("Export OBJ"))
 	{
-		SaveMaskDialog dialog(new QWidget());
-		dialog.ReadMask();
-		dialog.exec();
-		
-		fileName = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Obj files (*.obj)");
-		if(fileName.isEmpty())
-			return false;
-
 		QStringList sl = fileName.split(".");
 		if(!(sl.size() == 2 && sl[1] == "obj"))
 			fileName = fileName.append(".obj");
 		string filename = fileName.toUtf8().data();
 		
-
-		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);
+		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
 		return result;
 	}
 	return false;
