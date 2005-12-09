@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.31  2005/12/09 10:43:04  fmazzant
+added tools -> set mask obj file
+
 Revision 1.30  2005/12/09 03:50:40  davide_portelli
 A little change
 
@@ -682,14 +685,14 @@ void MainWindow::openRecentFile()
 
 bool MainWindow::saveAs()
 {
-	//QString initialPath = QDir::currentPath() + "/untitled.png";
-
-	QString fileName = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Save files (*.obj *.ply)");//QFileDialog::getSaveFileName(this, tr("Save As"), initialPath);
+	QString fileName = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Save files (*.obj *.ply)");
 	
-	if (fileName.isEmpty()) {
+	if (fileName.isEmpty())
+	{
 		return false;
-	} else {
-		//       return paintArea->saveImage(fileName, "png");
+	} 
+	else 
+	{
 		qb->show();
 		bool ret = false;
 		ret = this->GLA()->mm->Save(fileName.toStdString().c_str(),QCallBack);
@@ -758,8 +761,12 @@ void MainWindow::setCustomize()
 		cs.lColor=dialog.getLogAreaColor();
 
     GLA()->setCustomSetting(cs);	
-	}
-	
+	}	
+}
+
+void MainWindow::setSaveMaskObj()
+{
+	QMessageBox::warning(new QWidget(),"","");
 }
 
 void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.24  2005/12/09 10:43:04  fmazzant
+added tools -> set mask obj file
+
 Revision 1.23  2005/12/09 03:50:40  davide_portelli
 A little change
 
@@ -446,6 +449,9 @@ void MainWindow::createActions()
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
 
+	setSaveMaskObjAct = new QAction(tr("&Options Save Obj"),this);
+	connect(setSaveMaskObjAct, SIGNAL(triggered()), this, SLOT(setSaveMaskObj()));
+
 	//////////////Action Menu About ////////////////////////////////////////////////////////////
 	aboutAct = new QAction(tr("&About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
@@ -533,6 +539,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
 	preferencesMenu->addAction(setCustomizeAct);
+	preferencesMenu->addAction(setSaveMaskObjAct);
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));

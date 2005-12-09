@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.44  2005/12/09 10:43:04  fmazzant
+added tools -> set mask obj file
+
 Revision 1.43  2005/12/09 00:26:25  buzzelli
 io importing mechanism adapted in order to be fully transparent towards the user
 
@@ -117,6 +120,7 @@ private slots:
 	void updateMenus();
 	///////////Slot Menu Preferences /////////////////
 	void setCustomize();
+	void setSaveMaskObj();
 	///////////Slot Menu Help ////////////////////////
 	void about();
 	void aboutPlugins();	
@@ -208,6 +212,7 @@ private:
 	QAction *closeAllAct;
 	///////////Action Menu Preferences /////////////////
 	QAction *setCustomizeAct;
+	QAction *setSaveMaskObjAct;
 	///////////Action Menu Help ////////////////////////
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;
