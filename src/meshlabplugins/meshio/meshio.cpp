@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.18  2005/12/09 00:34:31  buzzelli
+ io importing mechanism adapted in order to be fully transparent towards the user
+
  Revision 1.17  2005/12/07 07:52:25  fmazzant
  export obj generic(base)
 
@@ -81,25 +84,24 @@
 using namespace vcg;
 
 
-//QStringList ExtraMeshIOPlugin::formats() const //devenuto obsoleto!!!!!da eliminare!!!!!
-//{
-//  return QStringList() << tr("Import OBJ") << tr("Export OBJ");
-//}
-
-bool ExtraMeshIOPlugin::open(QAction *format, QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
+bool ExtraMeshIOPlugin::open(const QString &format, QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
 {
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
 	
 	if (!fileName.isEmpty())
 	{
+		// initializing progress bar status
+		if (cb != NULL)
+		(*cb)(0, "Starting...");
+
 		// this change of dir is needed for subsequent texture/material loading
 		QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
 		QDir::setCurrent(FileNameDir);
 
 		QString errorMsgFormat = "Error encountered while loading file %1: %2";
 
-		if(format->text() == tr("Import OBJ")) //if (format == tr("Import OBJ"))
+		if(format.toUpper() == tr("OBJ")) //if (format == tr("Import OBJ"))
 		{
 			string filename = fileName.toUtf8().data();
 
@@ -109,7 +111,7 @@ bool ExtraMeshIOPlugin::open(QAction *format, QString &fileName,MeshModel &m, in
 
 			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
 			{
-				QMessageBox::information(parent, tr("OBJ Opening"), tr("Model has wedge text coords"));
+				//QMessageBox::information(parent, tr("OBJ Opening"), tr("Model has wedge text coords"));
 				m.cm.face.EnableWedgeTex();
 			}
 			m.cm.face.EnableNormal();
@@ -135,9 +137,9 @@ bool ExtraMeshIOPlugin::open(QAction *format, QString &fileName,MeshModel &m, in
 	return false;
 }
 
-bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
+bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	if(format->text() == tr("Export OBJ")) ////if (format == tr("Export OBJ"))
+	if(format.toUpper() == tr("OBJ")) ////if (format == tr("Export OBJ"))
 	{
 		SaveMaskDialog dialog(new QWidget());
 		
@@ -165,18 +167,14 @@ bool ExtraMeshIOPlugin::save(QAction *format,QString &fileName, MeshModel &m, in
 	return false;
 }
 
-/*
-	implementato per rendere possibile la COMPILAZIONE!!!!!!!!!!!
-	da aggiustare per renderlo piu' bello!!!! :)
-*/
-QList<QAction *> ExtraMeshIOPlugin::formats() const
+QStringList ExtraMeshIOPlugin::formats(QString & description) const
 {
-  return actionList;
-}
+	QStringList formatList;
+	formatList << tr("OBJ");
+	description = "Alias Wavefront Object";
 
-ExtraMeshIOPlugin::ExtraMeshIOPlugin() {
-  actionList << new QAction("Import OBJ", this);
-	actionList << new QAction("Export OBJ", this);
-}
+	return formatList;
+};
+
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)
