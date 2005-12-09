@@ -2,8 +2,8 @@
  <author></author>
  <comment></comment>
  <exportmacro></exportmacro>
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog" >
+ <class>SaveMaskObjDialog</class>
+ <widget class="QDialog" name="SaveMaskObjDialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -151,7 +151,7 @@
   <connection>
    <sender>cancelButton</sender>
    <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SaveMaskObjDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
@@ -167,7 +167,7 @@
   <connection>
    <sender>okButton</sender>
    <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SaveMaskObjDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >

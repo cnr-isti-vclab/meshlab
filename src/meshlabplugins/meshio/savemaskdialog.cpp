@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.5  2005/12/09 16:37:20  fmazzant
+ maskobj for select element to save
+
  Revision 1.4  2005/12/07 07:52:25  fmazzant
  export obj generic(base)
 
@@ -45,7 +48,14 @@
 #include <fstream>
 #include <iostream>
 
-SaveMaskDialog::SaveMaskDialog(QWidget *parent): QDialog(parent)
+SaveMaskDialog::SaveMaskDialog(QWidget *parent): mask(new MaskObj()), QDialog(parent)
+{
+	SaveMaskDialog::ui.setupUi(this);
+	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
+	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
+}
+
+SaveMaskDialog::SaveMaskDialog(MaskObj *mask, QWidget *parent): mask(mask), QDialog(parent)
 {
 	SaveMaskDialog::ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
@@ -55,17 +65,12 @@ SaveMaskDialog::SaveMaskDialog(QWidget *parent): QDialog(parent)
 //slot
 void SaveMaskDialog::SlotOkButton()
 {
-	Mask mymask;
-	mymask.binary = SaveMaskDialog::ui.binaryButton->isChecked();
-	mymask.faces = SaveMaskDialog::ui.faceCheck->isChecked();
-	mymask.normal = SaveMaskDialog::ui.normalCheck->isChecked();
-	mymask.texture = SaveMaskDialog::ui.textureCheck->isChecked();
-	mymask.vertexs = SaveMaskDialog::ui.vertexCheck->isChecked();
-	mymask.colorV = SaveMaskDialog::ui.colorVertexCheck->isChecked();
-	if(WriteMask(&mymask))
-		accept();
-	else
-		QMessageBox::warning(new QWidget(),"Error","Parameters not valid!");
+	mask->isfirst = false;
+	mask->binary = ui.binaryButton->isChecked();
+	mask->normal = ui.normalCheck->isChecked();
+	mask->texture = ui.textureCheck->isChecked();
+	mask->colorV = ui.colorVertexCheck->isChecked();
+	accept();
 }
 
 void SaveMaskDialog::SlotCancelButton()
@@ -73,83 +78,20 @@ void SaveMaskDialog::SlotCancelButton()
 	
 }
 
-//member
+
 bool SaveMaskDialog::ReadMask()
 {
-	Mask mask;
-	std::ifstream in("./mask.ini");
-	if (in.fail()){return false;} 
-	std::string line;
-	std::getline(in, line, '\n');	
-	bool ok = false;
-
-	if(line.size()==Mask::args)
-	{
-		mask.binary = QString(line.at(0)).toInt(&ok, 10); 
-		mask.faces = QString(line.at(1)).toInt(&ok, 10); 
-		mask.normal = QString(line.at(2)).toInt(&ok, 10); 
-		mask.texture = QString(line.at(3)).toInt(&ok, 10); 
-		mask.vertexs = QString(line.at(4)).toInt(&ok, 10);
-		mask.colorV = QString(line.at(5)).toInt(&ok, 10);
-	}
+	if(mask->binary)
+		ui.binaryButton->setChecked(true);
 	else
-	{
-		mask.binary = 0;
-		mask.faces = 0;
-		mask.normal = 0;
-		mask.texture = 0;
-		mask.vertexs = 0;
-		mask.colorV = 0;
-	}
+		ui.asciiButton->setChecked(true);
+	
+	ui.faceCheck->setChecked(true);
+	ui.vertexCheck->setChecked(true);
 
-	SaveMaskDialog::ui.binaryButton->setChecked((bool)mask.binary);
-	SaveMaskDialog::ui.asciiButton->setChecked(!((bool)mask.binary));
-	SaveMaskDialog::ui.faceCheck->setChecked(true);
-	SaveMaskDialog::ui.normalCheck->setChecked((bool)mask.normal);
-	SaveMaskDialog::ui.textureCheck->setChecked((bool)mask.texture);
-	SaveMaskDialog::ui.vertexCheck->setChecked(true);
-	SaveMaskDialog::ui.colorVertexCheck->setChecked((bool)mask.colorV);
+	ui.normalCheck->setChecked(mask->normal);
+	ui.textureCheck->setChecked(mask->texture);
+	ui.colorVertexCheck->setChecked(mask->colorV);
 
-	in.close();
 	return true;
-}
-
-
-//static
-Mask SaveMaskDialog::GetMask()
-{
-	Mask mask;
-	std::ifstream in("./mask.ini");
-	if (in.fail()){return mask;} 
-	std::string line;
-	std::getline(in, line, '\n');
-	bool ok = false;
-	mask.binary = QString(line.at(0)).toInt(&ok, 10);
-	mask.faces = QString(line.at(1)).toInt(&ok, 10); 
-	mask.normal = QString(line.at(2)).toInt(&ok, 10); 
-	mask.texture = QString(line.at(3)).toInt(&ok, 10); 
-	mask.vertexs = QString(line.at(4)).toInt(&ok, 10); 
-	mask.colorV = QString(line.at(5)).toInt(&ok, 10);
-	return mask;
-}
-
-bool SaveMaskDialog::WriteMask(Mask *mask)
-{
-	std::ofstream out("./mask.ini");
-	if (out.fail()){return false;}
-	out << mask->binary << mask->faces << mask->normal << mask->texture << mask->vertexs << mask->colorV << std::endl;
-	out.close();
-	return true;
-}
-int SaveMaskDialog::MaskToInt(Mask *mymask)
-{
-	int mask;
-
-	if(mymask->texture)	{mask |= vcg::ply::PLYMask::PM_WEDGTEXCOORD;}
-	if(mymask->normal)	{mask |= vcg::ply::PLYMask::PM_WEDGNORMAL;}
-	if(mymask->colorV)	{mask |= vcg::ply::PLYMask::PM_VERTCOLOR;}
-	if(mymask->faces)	{mask |= vcg::ply::PLYMask::PM_FACEQUALITY;}
-	if(mymask->vertexs)	{mask |= vcg::ply::PLYMask::PM_VERTQUALITY;}
-
-	return mask;
 }

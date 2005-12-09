@@ -24,37 +24,37 @@
   History
 
  $Log$
- Revision 1.4  2005/12/09 16:37:20  fmazzant
+ Revision 1.1  2005/12/09 16:37:20  fmazzant
  maskobj for select element to save
 
- Revision 1.3  2005/12/07 07:52:25  fmazzant
- export obj generic(base)
-
- Revision 1.2  2005/12/06 15:54:59  fmazzant
- update dialog export obj
-
- Revision 1.1  2005/12/02 17:40:26  fmazzant
- added dialog obj exporter.
-
-
+ 
 *****************************************************************************/
-#include "ui_savemask.h"
+
+
 #include "maskobj.h"
+#include <wrap/ply/io_mask.h>
 
-class SaveMaskDialog : public QDialog
+MaskObj::MaskObj()
 {
-	Q_OBJECT
-public:
-	SaveMaskDialog(QWidget *parent);
-	SaveMaskDialog(MaskObj *mask, QWidget *parent);
-	bool ReadMask();
+	this->isfirst=true;
 
-private slots:
-	void SlotOkButton();
-	void SlotCancelButton();
+	this->faces = true;
+	this->vertexs = true;
 
-private:
-	Ui::SaveMaskObjDialog ui;
-	MaskObj *mask;
-	
-};
+	this->binary = false;
+	this->colorV = false;
+	this->normal = false;
+	this->texture = false;
+}
+
+MaskObj::MaskObjToInt()
+{
+	int mask;
+	if(faces)	{mask |= vcg::ply::PLYMask::PM_FACEQUALITY;}
+	if(vertexs)	{mask |= vcg::ply::PLYMask::PM_VERTQUALITY;}
+	if(colorV)	{mask |= vcg::ply::PLYMask::PM_VERTCOLOR;}
+	if(normal)	{mask |= vcg::ply::PLYMask::PM_WEDGNORMAL;}
+	if(texture)	{mask |= vcg::ply::PLYMask::PM_WEDGTEXCOORD;}
+	//if(colorF){}
+	return mask;
+}

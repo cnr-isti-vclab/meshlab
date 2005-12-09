@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.19  2005/12/09 16:37:20  fmazzant
+ maskobj for select element to save
+
  Revision 1.18  2005/12/09 00:34:31  buzzelli
  io importing mechanism adapted in order to be fully transparent towards the user
 
@@ -142,11 +145,7 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 	if(format.toUpper() == tr("OBJ")) ////if (format == tr("Export OBJ"))
 	{
 		SaveMaskDialog dialog(new QWidget());
-		
-		while(!dialog.ReadMask())
-		{
-			dialog.exec();
-		}
+		dialog.ReadMask();
 		dialog.exec();
 		
 		fileName = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Obj files (*.obj)");
@@ -157,11 +156,9 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 		if(!(sl.size() == 2 && sl[1] == "obj"))
 			fileName = fileName.append(".obj");
 		string filename = fileName.toUtf8().data();
-
-		Mask mymask = SaveMaskDialog::GetMask();
-		mask = SaveMaskDialog::MaskToInt(&mymask);
 		
-		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),(bool)mymask.binary,mask,cb);
+
+		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);
 		return result;
 	}
 	return false;
