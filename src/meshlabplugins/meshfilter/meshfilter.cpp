@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.17  2005/12/09 20:56:16  giec
+Added the call to cluster algorithm
+
 Revision 1.16  2005/12/09 18:28:34  mariolatronico
 added commented code for Decimator
 
@@ -50,8 +53,9 @@ Added copyright info
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/smooth.h>
-//#include "../../test/decimator/decimator.h"
-
+/////////////
+#include "../../test/decimator/decimator.h"
+////////////
 using namespace vcg;
 
 //class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Normal3f, vert::BitFlags >{};
@@ -66,7 +70,9 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction("Remove Duplicated Vertexes", this);
 	actionList << new QAction("Remove Null Faces", this);
 	actionList << new QAction("Laplacian Smooth", this);
-	//	actionList << new QAction("Decimator", this);
+	/////////////
+	actionList << new QAction("Decimator", this);
+	////////////
 }
 
 QList<QAction *> ExtraMeshFilterPlugin::actions() const {
@@ -126,10 +132,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			cb(100,tr("smoothed mesh").toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
-// 	if(filter->text() == tr("Decimator"))
-// 		{
-// 			Decimator<CMeshO>(m.cm,10);
-// 		}
+		
+ 	if(filter->text() == tr("Decimator"))
+ 		{
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+ 			Decimator<CMeshO>(m.cm,10);
+ 		}
+		
 	return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
