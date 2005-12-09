@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.28  2005/12/09 00:26:25  buzzelli
+io importing mechanism adapted in order to be fully transparent towards the user
+
 Revision 1.27  2005/12/07 08:01:09  fmazzant
 exporter obj temporany
 
@@ -462,7 +465,9 @@ void MainWindow::applyDecorateMode()
 	}
 }
 
-void MainWindow::applyImportExport()
+
+// TODO: to remove
+/*void MainWindow::applyImportExport()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(action->parent());
@@ -520,7 +525,7 @@ void MainWindow::applyImportExport()
 		//	}
 		}
 	}
-}
+}*/
 
 
 bool MainWindow::QCallBack(const int pos, const char * str)
@@ -567,49 +572,100 @@ void MainWindow::toggleBackFaceCulling()
 
 void MainWindow::open(QString fileName)
 {
-	if (fileName.isEmpty()){
-		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".","Mesh files (*.ply *.off *.stl *.obj)");
+	// Opening files in a transparent form (IO plugins contribution is hidden to user)
+	const QString defaultFilter = tr("Mesh files (*.ply *.off *.stl)");
+	QStringList filters;
+  filters	<< defaultFilter;
+	
+	QString selectedFilter;
+
+	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
+	for (; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin)  // cycle among loaded IO plugins
+	{
+		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
+
+		QString currentDescription;
+		QStringList currentFormats = pMeshIOPlugin->formats(currentDescription);
+
+		QString currentFilterEntry = currentDescription + " (*.";
+		QStringListIterator itFormat(currentFormats);
+		if (itFormat.hasNext())
+			currentFilterEntry.append(itFormat.next().toLower());
+		while (itFormat.hasNext())
+		{
+			currentFilterEntry.append(',');
+			currentFilterEntry.append(itFormat.next().toLower());
+		}
+		currentFilterEntry.append(')');
+		
+		filters.append(currentFilterEntry);
 	}
 
-	// this change of dir is needed for subsequent texture loading
-	QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
-	QDir::setCurrent(FileNameDir);
+	if (fileName.isEmpty())
+		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".", filters.join("\n"), &selectedFilter);
 
 	if (fileName.isEmpty())
 		return;
+
+	// this change of dir is needed for subsequent texture loading
+	QString fileNameDir = fileName.left(fileName.lastIndexOf("/")); 
+	QDir::setCurrent(fileNameDir);
+
 	
-	MeshModel *nm= new MeshModel();
+	MeshModel *mm= new MeshModel();	
 	qb->show();
-	if(!nm->Open(fileName.toAscii(),QCallBack)){
+
+	QString extension = fileName;
+	extension.remove(0, fileName.lastIndexOf('.')+1);
+	
+	bool result = false;
+	if (extension.toUpper() == tr("PLY"))	// default format
+		result = mm->Open(fileName.toAscii(),QCallBack);
+	else																	// additional formats supported via plugin
+	{
+		// an alternative solution could delegate the opening stuff to the first plugin
+		// in the vector which is able to treats that format, in current implementation
+		// I use the plugin corresponding to the respective item in the combo
+		QStringListIterator itFilter(filters);
+		int idx = 0;
+		while (itFilter.hasNext() && (itFilter.next() != selectedFilter))
+			++idx;
+		--idx;  // subtracting 1 since first filter was the default one
+		if ((idx > -1) && (idx < (int)meshIOPlugins.size()))
+		{
+			// since at 0 position we have the default filter string
+			MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
+			int mask = -1;
+			result = pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla?*/);
+		}
+	}
+
+	if (!result)
+	{
 		QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
-		delete nm;
-		//return;
+    delete mm;
 	}
 	else{
 		GLArea *gla;
 
-		//VM.push_back(nm);
 		gla=new GLArea(workspace);
-		gla->mm=nm;
+		gla->mm=mm;
 		gla->setWindowTitle(QFileInfo(fileName).fileName());   
 		workspace->addWindow(gla);
 		if(workspace->isVisible()) gla->showMaximized();
-		//else QTimer::singleShot(0, gla, SLOT(showMaximized()));
 		setCurrentFile(fileName);
 
-		//return;
+		renderModeTextureAct->setChecked(false);
+		renderModeTextureAct->setEnabled(false);
+		if(!GLA()->mm->cm.textures.empty())
+		{
+			renderModeTextureAct->setChecked(true);
+			renderModeTextureAct->setEnabled(true);
+			GLA()->setTextureMode(GLW::TMPerWedge);
+		}
 	}
-	qb->hide();
 
-	// Is this the correct place??
-	renderModeTextureAct->setChecked(false);
-	renderModeTextureAct->setEnabled(false);
-	if(!GLA()->mm->cm.textures.empty())
-	{
-		renderModeTextureAct->setChecked(true);
-		renderModeTextureAct->setEnabled(true);
-		GLA()->setTextureMode(GLW::TMPerWedge);
-	}
+	qb->hide();
 }
 
 void MainWindow::openRecentFile()

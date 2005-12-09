@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.43  2005/12/09 00:26:25  buzzelli
+io importing mechanism adapted in order to be fully transparent towards the user
+
 Revision 1.42  2005/12/05 12:17:45  ggangemi
 Added void applyDecorateMode();
 
@@ -83,7 +86,6 @@ private slots:
 	void openRecentFile();							
 	bool saveAs();
 	bool saveSnapshot();
-	void applyImportExport();
 	///////////Slot Menu Filter ////////////////////////
 	void applyFilter();
 	/////////// Slot Menu Render /////////////////////
@@ -141,6 +143,7 @@ private:
   GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }
 	QDir pluginsDir;
 	QStringList pluginFileNames;
+	std::vector<MeshIOInterface*> meshIOPlugins;
 	
 	
 	////////ToolBar//////////////

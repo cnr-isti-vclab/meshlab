@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.22  2005/12/09 00:26:25  buzzelli
+io importing mechanism adapted in order to be fully transparent towards the user
+
 Revision 1.21  2005/12/07 16:57:57  buzzelli
 io related menu items removed from File menu
 
@@ -592,12 +595,8 @@ void MainWindow::loadPlugins()
 				addToMenu(iFilter->actions(), filterMenu, SLOT(applyFilter()));
 
 		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			//if (iIO)
-			//{
-			//	fileMenu->addSeparator();
-			//	addToMenu(iIO->formats(), fileMenu, SLOT(applyImportExport()));
-			//  fileMenu->addSeparator();
-			//}
+			if (iIO)
+				meshIOPlugins.push_back(iIO);
 
 			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
 			if (iDecorator)

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.18  2005/12/09 00:26:25  buzzelli
+io importing mechanism adapted in order to be fully transparent towards the user
+
 Revision 1.17  2005/12/07 00:56:40  fmazzant
 added support for exporter generic obj file (level base)
 
@@ -71,7 +74,6 @@ bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
   int mask;
   QString f = QString(filename);
 
-  if(f.endsWith(".ply",Qt::CaseInsensitive))
 	vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename, mask); 
   
   if(mask&ply::PLYMask::PM_VERTQUALITY) qDebug("Has Vertex Quality\n");
@@ -88,11 +90,7 @@ bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
 	
 
 	int ret;
-	if(f.endsWith(".ply",Qt::CaseInsensitive))
-		ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename,cb);
-	
-	if(f.endsWith(".obj",Qt::CaseInsensitive))
-		ret = vcg::tri::io::ImporterOBJ<CMeshO>::Open(cm,filename,mask,cb);
+	ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename,cb);
 	
 	//qDebug("Face 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
 	

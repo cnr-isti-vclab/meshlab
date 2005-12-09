@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.24  2005/12/09 00:26:25  buzzelli
+io importing mechanism adapted in order to be fully transparent towards the user
+
 Revision 1.23  2005/12/07 08:01:09  fmazzant
 exporter obj temporany
 
@@ -106,10 +109,11 @@ class MeshIOInterface
 public:
     virtual ~MeshIOInterface() {}
 
-		virtual QList<QAction *> formats() const = 0;
+		//virtual QList<QAction *> formats() const = 0;
+    virtual QStringList formats(QString &description) const = 0;
     
  virtual bool open(
-      QAction *format, // "OBJ"
+      const QString &format, // "OBJ"
 			QString &fileName,
       MeshModel &m, 
       int &mask,
@@ -117,7 +121,7 @@ public:
       QWidget *parent=0)=0;
     
   virtual bool save(
-      QAction *format, // "OBJ"
+      const QString &format, // "OBJ"
 			QString &fileName,
       MeshModel &m, 
       int &mask,
