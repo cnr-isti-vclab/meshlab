@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.26  2005/12/10 06:09:56  davide_portelli
+A little change
+
 Revision 1.25  2005/12/09 16:43:51  fmazzant
 added tools -> save mask obj file II
 
@@ -316,11 +319,11 @@ void MainWindow::createActions()
 {
 	//////////////Action Menu File //////////////////////////////////////////////////////////////
   openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
-	openAct->setShortcut(tr("Ctrl+O"));
+	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
 	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("&Save As..."), this);
-	saveAsAct->setShortcut(tr("Ctrl+S"));
+	saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
 	saveSnapshotAct = new QAction(QIcon(":/images/save.png"),tr("&Save snapshot"), this);
@@ -335,7 +338,7 @@ void MainWindow::createActions()
 	}
 	
 	exitAct = new QAction(tr("E&xit"), this);
-	exitAct->setShortcut(tr("Ctrl+Q"));
+	exitAct->setShortcut(Qt::CTRL+Qt::Key_Q);
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////
@@ -368,38 +371,34 @@ void MainWindow::createActions()
 
 	renderModeSmoothAct	  = new QAction(QIcon(":/images/smooth.png"),tr("&Smooth"), renderModeGroupAct);
 	renderModeSmoothAct->setCheckable(true);
-	renderModeSmoothAct->setChecked(true);
 	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(renderSmooth()));
 
 	renderModeTextureAct  = new QAction(QIcon(":/images/textures.png"),tr("&Texture"),this);
 	renderModeTextureAct->setCheckable(true);
-	renderModeTextureAct->setChecked(false);
 	connect(renderModeTextureAct, SIGNAL(triggered()), this, SLOT(renderTexture()));
 
 	setLightAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"),this);
 	setLightAct->setCheckable(true);
-	setLightAct->setChecked(true);
 	connect(setLightAct, SIGNAL(triggered()), this, SLOT(setLight()));
 
 	setDoubleLightingAct= new QAction(tr("&Double side lighting"),this);
 	setDoubleLightingAct->setCheckable(true);
-	setDoubleLightingAct->setShortcut(tr("Ctrl+D"));
+	setDoubleLightingAct->setShortcut(Qt::CTRL+Qt::Key_D);
 	connect(setDoubleLightingAct, SIGNAL(triggered()), this, SLOT(setDoubleLighting()));
 
 	setFancyLightingAct	  = new QAction(tr("&Fancy Lighting"),this);
 	setFancyLightingAct->setCheckable(true);
-	setFancyLightingAct->setShortcut(tr("Ctrl+F"));
+	setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_F);
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(setFancyLighting()));
 
 	backFaceCullAct 	  = new QAction(tr("BackFace &Culling"),this);
 	backFaceCullAct->setCheckable(true);
-	backFaceCullAct->setShortcut(tr("Ctrl+K"));
+	backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
 	
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
 	fullScreenAct->setCheckable(true);
-	fullScreenAct->setChecked(false);
 	fullScreenAct->setShortcut(Qt::ALT+Qt::Key_Enter);
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(fullScreen()));
 
@@ -424,11 +423,10 @@ void MainWindow::createActions()
 
 	showTrackBallAct = new QAction (tr("Show &Trackball"), this);
 	showTrackBallAct->setCheckable(true);
-	showTrackBallAct->setChecked(true);
 	connect(showTrackBallAct, SIGNAL(triggered()), this, SLOT(showTrackBall()));
 
 	resetTrackBallAct = new QAction (tr("Reset &Trackball"), this);
-	resetTrackBallAct->setShortcut(tr("Ctrl+H"));
+	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
 	//////////////Action Menu Windows /////////////////////////////////////////////////////////
@@ -439,11 +437,12 @@ void MainWindow::createActions()
 	connect(windowsCascadeAct, SIGNAL(triggered()), workspace, SLOT(cascade()));
 
 	windowsNextAct = new QAction(tr("&Next"), this);
-	windowsNextAct->setShortcut(Qt::Key_PageDown);
+	windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_Tab);
 	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
 
 
 	closeAct = new QAction(tr("Cl&ose"), this);
+	closeAct->setShortcut(Qt::CTRL+Qt::Key_F4);
 	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
 
 	closeAllAct = new QAction(tr("Close &All"), this);
@@ -495,7 +494,7 @@ void MainWindow::createMenus()
 	fileMenu->addAction(exitAct);
 	
 	//////////////////// Menu Filter //////////////////////////////////////////////////////////////
-	filterMenu = menuBar()->addMenu(tr("&Filter"));
+	filterMenu = menuBar()->addMenu(tr("F&ilter"));
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));

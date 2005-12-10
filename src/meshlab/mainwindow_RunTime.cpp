@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.34  2005/12/10 06:09:56  davide_portelli
+A little change
+
 Revision 1.33  2005/12/09 18:16:12  fmazzant
 added generic obj save with plugin arch.
 
@@ -324,6 +327,7 @@ void MainWindow::updateWindowMenu()
 	windowsMenu->addAction(windowsTileAct);
 	windowsMenu->addAction(windowsCascadeAct);
 	windowsMenu->addAction(windowsNextAct);
+	windowsNextAct->setEnabled(workspace->windowList().size()>1);
 
 	QWidgetList windows = workspace->windowList();
 
@@ -657,14 +661,13 @@ void MainWindow::open(QString fileName)
 	}
 	else{
 		GLArea *gla;
-
 		gla=new GLArea(workspace);
 		gla->mm=mm;
-		gla->setWindowTitle(QFileInfo(fileName).fileName());   
+		gla->setWindowTitle(QFileInfo(fileName).fileName());
+		gla->showInfoArea(true);
 		workspace->addWindow(gla);
 		if(workspace->isVisible()) gla->showMaximized();
 		setCurrentFile(fileName);
-
 		renderModeTextureAct->setChecked(false);
 		renderModeTextureAct->setEnabled(false);
 		if(!GLA()->mm->cm.textures.empty())
@@ -674,7 +677,6 @@ void MainWindow::open(QString fileName)
 			GLA()->setTextureMode(GLW::TMPerWedge);
 		}
 	}
-
 	qb->hide();
 }
 
@@ -794,12 +796,10 @@ void MainWindow::aboutPlugins()
 }
 void MainWindow::showToolbarFile(){
 		mainToolBar->setVisible(!mainToolBar->isVisible());
-		showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 }
 
 void MainWindow::showToolbarRender(){
 	renderToolBar->setVisible(!renderToolBar->isVisible());
-	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
 }
 
 void MainWindow::showLog()			 {if(GLA() != 0)	GLA()->showLog(!GLA()->isLogVisible());}
@@ -847,6 +847,7 @@ void MainWindow::renderTexture()
 
 
 void MainWindow::fullScreen(){
+	toolbarState = saveState();
 	menuBar()->hide();
 	mainToolBar->hide();
 	renderToolBar->hide();
@@ -864,8 +865,7 @@ void MainWindow::fullScreen(){
 void MainWindow::keyPressEvent(QKeyEvent *e){
 	if(e->key()==Qt::Key_Escape && isFullScreen()){
 		menuBar()->show();
-		mainToolBar->show();
-		renderToolBar->show();
+		restoreState(toolbarState);
 		setWindowState(windowState()^ Qt::WindowFullScreen);
 		bool found=true;
 		//Caso di piu' finestre aperte in tile:

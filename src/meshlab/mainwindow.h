@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.46  2005/12/10 06:09:56  davide_portelli
+A little change
+
 Revision 1.45  2005/12/09 16:43:51  fmazzant
 added tools -> save mask obj file II
 
@@ -143,7 +146,6 @@ private:
 	void updateRecentFileActions();				
 	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
- 
 
 
 	
@@ -154,6 +156,7 @@ private:
 	QDir pluginsDir;
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
+	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 	
 	
 	////////ToolBar//////////////
