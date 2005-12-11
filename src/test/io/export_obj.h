@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.10  2005/12/11 08:33:57  fmazzant
+ deleted method.
+
  Revision 1.9  2005/12/09 18:16:14  fmazzant
  added generic obj save with plugin arch.
 
@@ -213,17 +216,6 @@ namespace io {
 		}
 		static bool Save(SaveMeshType &m, const char * filename, bool binary, ObjInfo &oi)
 		{
-			if(binary)
-				return SaveBinary(m,filename,oi);
-			else 
-				return SaveASCII(m,filename,oi);
-		}
-
-		static bool Save(SaveMeshType &m, const char * filename, bool binary, CallBackPos *cb=0)
-		{
-			ObjInfo oi;
-			oi.cb=cb;
-
 			if(binary)
 				return SaveBinary(m,filename,oi);
 			else 
