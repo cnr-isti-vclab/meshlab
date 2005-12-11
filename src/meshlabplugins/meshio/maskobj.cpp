@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2005/12/11 00:34:22  fmazzant
+ bug-fix: added the type of return of the MaskObj method::MaskObjToInt()
+
  Revision 1.1  2005/12/09 16:37:20  fmazzant
  maskobj for select element to save
 
@@ -47,7 +50,7 @@ MaskObj::MaskObj()
 	this->texture = false;
 }
 
-MaskObj::MaskObjToInt()
+int MaskObj::MaskObjToInt()
 {
 	int mask;
 	if(faces)	{mask |= vcg::ply::PLYMask::PM_FACEQUALITY;}
