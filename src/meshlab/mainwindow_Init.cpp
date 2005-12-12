@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.28  2005/12/12 11:21:08  cignoni
+Changed the default of the progress bar dialog.
+
 Revision 1.27  2005/12/12 01:17:19  davide_portelli
 A little change in shortkey
 
@@ -315,6 +318,8 @@ MainWindow::MainWindow()
   qb=new QProgressDialog(this);
   qb->setMaximum(100);
   qb->setMinimum(0);
+  qb->setAutoClose(false);
+  qb->setMinimumDuration(0);
   qb->hide();
 }
 
