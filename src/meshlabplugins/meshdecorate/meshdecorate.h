@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/12/12 22:47:35  cignoni
+Added plugin info methods
+
 Revision 1.4  2005/12/12 11:19:41  cignoni
 Added bbox corners and axis,
 cleaned up the identification between by string of decorations
@@ -42,7 +45,9 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
-
+  virtual const ActionInfo &Info(QAction *);
+  virtual const PluginInfo &Info();
+  
 	QList <QAction *> actionList;
   enum {
     DP_SHOW_NORMALS = 1,

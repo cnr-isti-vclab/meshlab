@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2005/12/12 22:48:42  cignoni
+Added plugin info methods
+
 Revision 1.3  2005/12/12 11:19:41  cignoni
 Added bbox corners and axis,
 cleaned up the identification between by string of decorations
@@ -37,7 +40,20 @@ cleaned up the identification between by string of decorations
 #include "meshdecorate.h"
 
 using namespace vcg;
+const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *) 
+ {
+   ActionInfo ai; 
+   ai.Help=tr("Generic Help for an action");
+   return ai;
+ }
 
+ const PluginInfo &ExtraMeshDecoratePlugin::Info() 
+{
+   PluginInfo ai; 
+   ai.Date=tr("__DATE__");
+   return ai;
+ }
+ 
 const QString ExtraMeshDecoratePlugin::ST(int id) const
 {
   switch(id)

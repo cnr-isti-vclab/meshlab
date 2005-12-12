@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2005/12/12 22:48:42  cignoni
+Added plugin info methods
+
 Revision 1.6  2005/12/08 22:52:50  cignoni
 Added safer min max search
 
@@ -42,6 +45,21 @@ Added copyright info
 #include <limits>
 
 using namespace vcg;
+
+
+const ActionInfo &MeshColorCurvaturePlugin::Info(QAction *) 
+ {
+   ActionInfo ai; 
+   ai.Help=tr("Generic Help for an action");
+   return ai;
+ }
+
+ const PluginInfo &MeshColorCurvaturePlugin::Info() 
+{
+   PluginInfo ai; 
+   ai.Date=tr("__DATE__");
+   return ai;
+ }
 
 static void Gaussian(CMeshO &m){
 	

@@ -36,6 +36,8 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 		
 		public:
 	ExtraMeshFilterPlugin();
+    virtual const ActionInfo &Info(QAction *);
+    virtual const PluginInfo &Info();
 
 	virtual QList<QAction *> actions() const;
 	bool applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;

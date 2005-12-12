@@ -46,7 +46,9 @@ class MeshColorCurvaturePlugin : public QObject, public MeshColorizeInterface
 		QList <QAction *> actionList;
 
 public:
-
+    virtual const ActionInfo &Info(QAction *);
+    virtual const PluginInfo &Info();
+  
 		MeshColorCurvaturePlugin()
 		{
 			QAction *qa; 

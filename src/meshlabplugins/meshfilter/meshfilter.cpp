@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.18  2005/12/12 22:48:42  cignoni
+Added plugin info methods
+
 Revision 1.17  2005/12/09 20:56:16  giec
 Added the call to cluster algorithm
 
@@ -77,8 +80,23 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 
 QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 	return actionList;
-
 }
+
+
+ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *) 
+ {
+   ActionInfo ai; 
+   ai.Help=tr("Generic Help for an action");
+   return ai;
+ }
+
+ const PluginInfo &ExtraMeshFilterPlugin::Info() 
+{
+   PluginInfo ai; 
+   ai.Date=tr("__DATE__");
+   return ai;
+ }
+ 
 
 bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb) 
 {
