@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.37  2005/12/12 11:31:15  cignoni
+removed an unuseful update of the progress dialog
+
 Revision 1.36  2005/12/12 00:31:22  buzzelli
 applyImportExport method removed (not used anymore)
 
@@ -491,7 +494,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	qb->setWindowTitle (str);
 	qb->setValue(pos);
   //qb->setProgress(pos);
-	qb->update();
+	//qb->update();
 	return true;
 }
 
