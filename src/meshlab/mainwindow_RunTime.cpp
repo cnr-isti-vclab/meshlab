@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.36  2005/12/12 00:31:22  buzzelli
+applyImportExport method removed (not used anymore)
+
 Revision 1.35  2005/12/12 00:03:05  buzzelli
 now open method provides also a generic "All Files" filter
 
@@ -481,69 +484,6 @@ void MainWindow::applyDecorateMode()
 		}
 	}
 }
-
-
-// TODO: to remove
-/*void MainWindow::applyImportExport()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(action->parent());
-
-	if(action->text().contains("Export"))
-	{
-		int mask;
-		QString fileName;
-// OLD VERSION		if(iIO->save(action->text(),fileName,*(GLA()->mm ),0,NULL,GLA()) )
-		qb->show();
-		if(iIO->save(action,fileName,*(GLA()->mm ),mask,QCallBack,GLA()) )
-			GLA()->log.Log(GLLogStream::Info,"File saved correctly");
-		qb->hide();
-	}
-
-	if(action->text().contains("Import"))
-	{
-		int mask;
-		//qb->show();
-		if (GLA() == NULL)
-		{
-			MeshModel *mm= new MeshModel();
-			GLArea *gla = new GLArea(workspace);
-		
-			QString fileName;
-		// OLD VERSION
-		//	if( iIO->open(action->text(), fileName, *mm ,mask,QCallBack,gla ) )
-		//	{
-		//		gla->mm=mm;	
-		//		gla->setWindowTitle(QFileInfo(fileName).fileName());   
-		//		workspace->addWindow(gla);
-		//		
-		//		if(workspace->isVisible()) gla->showMaximized();
-		//		else QTimer::singleShot(00, gla, SLOT(showMaximized()));
-		//  
-		//		if(!mm->cm.textures.empty())
-		//			QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
-  //      qb->hide();
-		//		//GLA()->log.Log(GLLogStream::Info,"File loaded correctly");		
-		//	}
-		//	else
-		//	{
-		//		QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
-  //  		delete mm;
-		//	}
-		//}
-		//else{
-		//	QString fileName;
-		//	if( iIO->open(action->text(), fileName,*(GLA()->mm ),mask,NULL,GLA()) )
-		//	{	
-		//		GLA()->log.Log(GLLogStream::Info,"File loaded correctly");
-		//		if(!GLA()->mm->cm.textures.empty())
-		//			QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(gla->mm->cm.textures[0].c_str()));
-
-		//	}
-		}
-	}
-}*/
-
 
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
