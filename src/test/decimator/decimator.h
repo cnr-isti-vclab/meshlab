@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.7  2005/12/12 20:26:52  giec
+new version with real average point
+
 Revision 1.6  2005/12/09 20:53:49  giec
 Change vetor<vetor<vetor<Point3f>>> to Point3f***.
 Semplify the mesh but with a litter error.
@@ -74,20 +77,28 @@ namespace vcg{
   template<class MESH_TYPE>
   bool Decimator(MESH_TYPE &m, int n)
   {	 
+		typedef struct media_struct
+		{
+			Point3f accum;
+			int num;//numero di vertici sommati
+		}structMedia;
     //int n3 = n*n*n;
     //std::vector <typename MESH_TYPE::CoordType > Vett(n3);
-		const int p = n;
+//		const int p = n;
 
-		Point3f ***Vett;
-		Vett = new Point3f**[n];
+		structMedia ***Vett;
+		Vett = new structMedia **[n];
 		for(int i = 0; i < n; ++i)
 		{
-			Vett[i] = new Point3f*[n];
+			Vett[i] = new structMedia *[n];
 				for(int j = 0; j < n; ++j)
 			{
-				Vett[i][j] = new Point3f[n];
-				for(int z = 0;z < n; ++z)
-					Vett[i][j][z].Zero();
+				Vett[i][j] = new structMedia[n];
+				for(int z = 0 ; z < n ; ++z)
+				{
+					Vett[i][j][z].accum.Zero();
+					Vett[i][j][z].num = 0;
+				}
 			}
 		}
 
@@ -173,17 +184,14 @@ namespace vcg{
 				if(idy > 9)idy=9;
 				if(idz > 9)idz=9;
 
-				Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (app - tras))/2;
+				//Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (app - tras))/2;
+				Vett[idx][idy][idz].accum += (app - tras);
+				Vett[idx][idy][idz].num++;
+				
 				(*vi).ClearUserBit(referredBit);
-      }
-		//cout << "PRE ----------------- " << endl;
-		//
-		// for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-		// {
-		//	cout << " X: "<< (*vi).P().X()
-		//			 << " Y: "<< (*vi).P().Y()
-		//			 << " Z: "<< (*vi).P().Z() << endl;
-		//}
+
+			}
+
 		float area = -0.00000001f;
     typename MESH_TYPE::FaceIterator fi;
     //reimposto i vertici con la media di quelli che cadevano nel suo quadrante
@@ -198,37 +206,30 @@ namespace vcg{
 										
 										Point3f app = (*fi).V(i)->P();
 										app = (app + tras);
-				x=app[0];
-				y=app[1];
-				z=app[2];
-				
-				idx = (floor(x / Px));
-				idy = (floor(y / Py));
-				idz = (floor(z / Pz));
-				
-				if(idx > 9)idx=9;
-				if(idy > 9)idy=9;
-				if(idz > 9)idz=9;
+										x=app[0];
+										y=app[1];
+										z=app[2];
 										
-										(*fi).V(i)->P() = Vett[idx][idy][idz];
+										idx = (floor(x / Px));
+										idy = (floor(y / Py));
+										idz = (floor(z / Pz));
+										//
+										if(idx > (n - 1)) idx = n - 1;
+										if(idy > (n - 1)) idy = n - 1;
+										if(idz > (n - 1)) idz = n - 1;
+																
+										(*fi).V(i)->P() = (Vett[idx][idy][idz].accum / Vett[idx][idy][idz].num);
 
-										(*fi).V(i)->SetUserBit(referredBit);
+										//(*fi).V(i)->SetUserBit(referredBit);
 
 									}
 							}
 						area = Area(*fi);
-						if( area  <  0.0000000001f ) {// numeric_limits<float>::epsilon()
+						if( area  <  0.0000000001f ) {// numeric_limits<float>::epsilon() ){
 							(*fi).SetD();
 							}
 					}
 			}
-	//cout << "DOPO ----------------- " << endl;
- //   for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
- //     {
-	//			cout << " X: "<< (*vi).P().X()
-	//					 << " Y: "<< (*vi).P().Y()
-	//					 << " Z: "<< (*vi).P().Z() << endl;
-	//		}
 
 		tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
 		//tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
@@ -236,8 +237,7 @@ namespace vcg{
 
 
 		delete(Vett);
-
-
+	
 
     return true;
 
