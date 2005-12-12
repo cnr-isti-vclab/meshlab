@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.25  2005/12/12 22:46:05  cignoni
+Cleaned up and added info functions
+
 Revision 1.24  2005/12/09 00:26:25  buzzelli
 io importing mechanism adapted in order to be fully transparent towards the user
 
@@ -108,8 +111,6 @@ class MeshIOInterface
 {
 public:
     virtual ~MeshIOInterface() {}
-
-		//virtual QList<QAction *> formats() const = 0;
     virtual QStringList formats(QString &description) const = 0;
     
  virtual bool open(
@@ -129,15 +130,31 @@ public:
       QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
 };
 
+class ActionInfo
+{
+public:
+  QString Help;
+  QString ShortHelp;
+};
+
+class PluginInfo
+{
+public:
+  QString Date;
+  QString Version;
+  QString Author;
+};
+
+
 class MeshFilterInterface
 {
 public:
     virtual ~MeshFilterInterface() {}
 		virtual QList<QAction *> actions() const = 0;
-    //virtual QIcon *getIcon(const QString &/*filter*/, QWidget * /*parent*/) {return 0;};
-    //virtual bool applyFilter(const QString &/*filter*/, MeshModel &/*m*/, QWidget * /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
+    virtual const ActionInfo &Info(QAction *)=0;
+    virtual const PluginInfo &Info()=0;
+    
 		virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, QWidget * /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
-    //virtual QStringList filters() const = 0;
 };
 /*
 Serve per customizzare totalmente il processo di rendering
@@ -146,7 +163,6 @@ Viene invocata al posto del rendering standard della mesh.
     - Matrici proj e model
     - Lighting (dir e tipo luci) 
     - Bf cull ecc e tutto lo stato classico
-
 */
 
 class MeshRenderInterface
@@ -154,16 +170,9 @@ class MeshRenderInterface
 public:
     virtual ~MeshRenderInterface() {}
 
-    //virtual void Init(   const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
-		virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-
-    //virtual void Render( const QString &/*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QWidget * /*parent*/) =0;
+    virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
-    
-		//virtual void Finalize(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-
-    //virtual QStringList modes() const = 0;
 		virtual bool isSupported() = 0;
 		virtual QList<QAction *> actions() const = 0;
 };
@@ -171,16 +180,12 @@ public:
 class MeshColorizeInterface
 {
 public:
-    //virtual void Compute(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
-		virtual void Compute(QAction * /*mode*/, MeshModel &/*m*/,  RenderMode &/*rm*/, GLArea * /*parent*/){};
+    virtual const ActionInfo &Info(QAction *)=0;
+    virtual const PluginInfo &Info()=0;
     
-		//virtual void Show(const QString &/*mode*/, bool /*show*/, MeshModel &/*m*/, QWidget * /*parent*/) {};
-		virtual void Show(QAction * /*mode*/, bool /*show*/, MeshModel &/*m*/, GLArea * /*parent*/) {};
-    
-		//virtual void Finalize(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
+		virtual void Compute(QAction * /*mode*/, MeshModel &/*m*/,  RenderMode &/*rm*/, GLArea * /*parent*/){};    
+		virtual void Show(QAction * /*mode*/, bool /*show*/, MeshModel &/*m*/, GLArea * /*parent*/) {};    
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-
-    //virtual QStringList colorsFrom() const = 0;
 		virtual QList<QAction *> actions() const = 0;
 };
 
@@ -191,28 +196,19 @@ class MeshDecorateInterface
 public:
     virtual ~MeshDecorateInterface() {}
 
-    //virtual void Init(   const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
-		virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    virtual const ActionInfo &Info(QAction *)=0;
+    virtual const PluginInfo &Info()=0;
 
-    //virtual void Render( const QString &/*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QWidget * /*parent*/) =0;
+    virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
-    
-		//virtual void Finalize(const QString &/*mode*/, MeshModel &/*m*/, QWidget * /*parent*/){};
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-
-    //virtual QStringList modes() const = 0;
 		virtual QList<QAction *> actions() const = 0;
 };
 
-Q_DECLARE_INTERFACE(MeshIOInterface,
-                    "vcg.meshlab.MeshIOInterface/1.0")
-Q_DECLARE_INTERFACE(MeshFilterInterface,
-                    "vcg.meshlab.MeshFilterInterface/1.0")
-Q_DECLARE_INTERFACE(MeshRenderInterface,
-                    "vcg.meshlab.MeshRenderInterface/1.0")
-Q_DECLARE_INTERFACE(MeshColorizeInterface,
-                    "vcg.meshlab.MeshColorizeInterface/1.0")
-Q_DECLARE_INTERFACE(MeshDecorateInterface,
-                    "vcg.meshlab.MeshDecorateInterface/1.0")
+Q_DECLARE_INTERFACE(MeshIOInterface,       "vcg.meshlab.MeshIOInterface/1.0")
+Q_DECLARE_INTERFACE(MeshFilterInterface,   "vcg.meshlab.MeshFilterInterface/1.0")
+Q_DECLARE_INTERFACE(MeshRenderInterface,   "vcg.meshlab.MeshRenderInterface/1.0")
+Q_DECLARE_INTERFACE(MeshColorizeInterface, "vcg.meshlab.MeshColorizeInterface/1.0")
+Q_DECLARE_INTERFACE(MeshDecorateInterface, "vcg.meshlab.MeshDecorateInterface/1.0")
 
 #endif
