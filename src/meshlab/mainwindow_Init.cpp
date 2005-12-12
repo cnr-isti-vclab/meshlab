@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.27  2005/12/12 01:17:19  davide_portelli
+A little change in shortkey
+
 Revision 1.26  2005/12/10 06:09:56  davide_portelli
 A little change
 
@@ -319,10 +322,12 @@ void MainWindow::createActions()
 {
 	//////////////Action Menu File //////////////////////////////////////////////////////////////
   openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
+	openAct->setShortcutContext(Qt::ApplicationShortcut);
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
 	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("&Save As..."), this);
+	saveAsAct->setShortcutContext(Qt::ApplicationShortcut);
 	saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
@@ -383,23 +388,26 @@ void MainWindow::createActions()
 
 	setDoubleLightingAct= new QAction(tr("&Double side lighting"),this);
 	setDoubleLightingAct->setCheckable(true);
+	setDoubleLightingAct->setShortcutContext(Qt::ApplicationShortcut);
 	setDoubleLightingAct->setShortcut(Qt::CTRL+Qt::Key_D);
 	connect(setDoubleLightingAct, SIGNAL(triggered()), this, SLOT(setDoubleLighting()));
 
 	setFancyLightingAct	  = new QAction(tr("&Fancy Lighting"),this);
 	setFancyLightingAct->setCheckable(true);
+	setFancyLightingAct->setShortcutContext(Qt::ApplicationShortcut);
 	setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_F);
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(setFancyLighting()));
 
 	backFaceCullAct 	  = new QAction(tr("BackFace &Culling"),this);
 	backFaceCullAct->setCheckable(true);
+	backFaceCullAct->setShortcutContext(Qt::ApplicationShortcut);
 	backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
 	
 	//////////////Action Menu View /////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
 	fullScreenAct->setCheckable(true);
-	fullScreenAct->setShortcut(Qt::ALT+Qt::Key_Enter);
+	fullScreenAct->setShortcut(Qt::ALT+Qt::Key_Return);
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(fullScreen()));
 
 	showToolbarStandardAct = new QAction (tr("&Standard"), this);
@@ -426,6 +434,7 @@ void MainWindow::createActions()
 	connect(showTrackBallAct, SIGNAL(triggered()), this, SLOT(showTrackBall()));
 
 	resetTrackBallAct = new QAction (tr("Reset &Trackball"), this);
+	resetTrackBallAct->setShortcutContext(Qt::ApplicationShortcut);
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
@@ -437,12 +446,16 @@ void MainWindow::createActions()
 	connect(windowsCascadeAct, SIGNAL(triggered()), workspace, SLOT(cascade()));
 
 	windowsNextAct = new QAction(tr("&Next"), this);
-	windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_Tab);
+	windowsNextAct->setShortcutContext(Qt::ApplicationShortcut);
+	windowsNextAct->setShortcut(Qt::Key_Tab);
+	//windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_Tab);
 	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
 
 
 	closeAct = new QAction(tr("Cl&ose"), this);
-	closeAct->setShortcut(Qt::CTRL+Qt::Key_F4);
+	closeAct->setShortcutContext(Qt::ApplicationShortcut);
+	closeAct->setShortcut(Qt::Key_F4);
+	//closeAct->setShortcut(Qt::CTRL+Qt::Key_F4);
 	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
 
 	closeAllAct = new QAction(tr("Close &All"), this);
