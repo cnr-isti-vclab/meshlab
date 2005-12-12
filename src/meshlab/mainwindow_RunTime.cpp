@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.38  2005/12/12 17:57:39  buzzelli
+"All Files" filter replaced with "All known formats" filter
+
 Revision 1.37  2005/12/12 11:31:15  cignoni
 removed an unuseful update of the progress dialog
 
@@ -565,14 +568,21 @@ void MainWindow::open(QString fileName)
 			QString currentFormat = itFormat.next().toLower();
 			if (!allKnownFormats.contains(currentFormat))
 				allKnownFormats.insert(currentFormat, i);
-			currentFilterEntry.append(',');
+			currentFilterEntry.append(tr(" *."));
 			currentFilterEntry.append(currentFormat);
 		}
 		currentFilterEntry.append(')');
 		
 		filters.append(currentFilterEntry);
 	}
-	const QString allKnownFormatsFilter  = tr("All files (*.*)"); 
+	QString allKnownFormatsFilter = tr("All known formats (*.ply"); 
+	QHash<QString, int>::iterator itHash = allKnownFormats.begin();
+	for(; itHash != allKnownFormats.end(); ++itHash)
+	{
+		allKnownFormatsFilter.append(tr(" *."));
+		allKnownFormatsFilter.append(itHash.key());
+	}
+	allKnownFormatsFilter.append(')');
 	filters << allKnownFormatsFilter;
 
 	if (fileName.isEmpty())
