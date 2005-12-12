@@ -49,11 +49,11 @@ public:
   // it returns the current position, and formats a string with a description of what th efunction is doing (loading vertexes, faces...)
   CallBackPos *cb;
 
-  /// number of vertexes
+  /// number of vertices
   int numVertices;
-  
-	/// number of faces
-  int numFaces;
+ 
+	/// number of triangles
+	int numTriangles;
 
 }; // end class
 } // end namespace tri

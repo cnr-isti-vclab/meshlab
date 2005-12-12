@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.9  2005/12/12 17:10:13  buzzelli
+face loading process speeded up
+
 Revision 1.8  2005/12/08 15:48:51  buzzelli
 Added correct calculation of texture indexes
 
@@ -214,14 +217,15 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	Material defaultMaterial;
 	materials.push_back(defaultMaterial);
 
-	int numVertices = 0;  // stores the number of vertices been read till now
-	int numFaces		= 0;  // stores the number of faces been read till now
+	int numVertices  = 0;  // stores the number of vertices been read till now
+	int numTriangles = 0;  // stores the number of faces been read till now
 
-	int numVerticesPlusFaces = oi.numVertices + oi.numFaces;
+	int numVerticesPlusFaces = oi.numVertices + oi.numTriangles;
 
 	// vertexes allocation is done once a time
 	VertexIterator vi = Allocator<OpenMeshType>::AddVertices(m,oi.numVertices);
-	
+	FaceIterator   fi = Allocator<OpenMeshType>::AddFaces(m,oi.numTriangles);
+
 	while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
 	{
 		tokens.clear();
@@ -242,7 +246,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				++vi;  // move to next vertex iterator
 
 				// callback invocation, abort loading process if result is false
-				if ((cb !=NULL) && (((numFaces + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numFaces + numVertices)/(float)numVerticesPlusFaces, "Vertex Loading"))
+				if ((cb !=NULL) && (((numTriangles + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numTriangles + numVertices)/(float)numVerticesPlusFaces, "Vertex Loading"))
 					return E_ABORTED;
 			}
 			else if (header.compare("vt")==0)	// vertex texture coords
@@ -262,9 +266,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				int v1_index, v2_index, v3_index;
 				int vt1_index, vt2_index, vt3_index;
 				
-				// note that, due to face triangulation, real number of triangular faces
-				// may be greater than the number of faces been read by loadmask, 
-				FaceIterator fi = Allocator<OpenMeshType>::AddFaces(m,1);
 				if( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
 				{
 					std::string vertex;
@@ -334,6 +335,9 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					(*fi).C()[3] = faceColor[3];
 				}
 
+				++fi;
+				++numTriangles;
+
 				int vertexesPerFace = tokens.size() -1;
 				int iVertex = 3;
 				while (iVertex < vertexesPerFace)  // add other triangles
@@ -341,7 +345,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					int v4_index;
 					int vt4_index;
 
-					fi=Allocator<OpenMeshType>::AddFaces(m,1);
 					if( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
 					{
 						std::string vertex;
@@ -410,13 +413,15 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					// TODO: provare a suddividere il poligono in triangoli in maniera piu'
 					// uniforme...
 
+					++fi;
+					++numTriangles;
+
 					v3_index = v4_index;
 				}
 				// TODO: gestire opportunamente presenza di errori nel file
 
-				++numFaces;
 				// callback invocation, abort loading process if result is false
-				if ((cb !=NULL) && (((numFaces + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numFaces + numVertices)/(float)numVerticesPlusFaces, "Face Loading"))
+				if ((cb !=NULL) && (((numTriangles + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numTriangles + numVertices)/(float)numVerticesPlusFaces, "Face Loading"))
 					return E_ABORTED;
 			}
 			else if (header.compare("mtllib")==0)	// material library
@@ -581,43 +586,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	}	// end of SplitVVTVNToken
 
 
-	inline static const void GetNextLineHeader(std::ifstream &stream, std::string &header, std::string &remainingText)
-	{	
-		std::string line;
-		do
-			std::getline(stream, line, '\n');
-		while ((line[0] == '#' || line.length()==0) && !stream.eof());  // skip comments and empty lines
-		
-		if ((line[0] == '#') || (line.length() == 0))  // can be true only on last line of file
-			return;
-
-		size_t from		= 0; 
-		size_t to			= 0;
-		size_t length = line.size();
-		
-		char c = line[from];
-		while (line[from]==' ' && from!=length)
-			from++;
-    if(from!=length)
-    {
-			to = from+1;
-			header.push_back(c);
-			while (to!=length && ((c = line[to]) !=' '))
-			{
-				header.push_back(c);
-				++to;
-			}
-			while (to!=length && (line[to]==' '))
-				++to;
-			while (to!=length && ((c = line[to]) !='\n'))
-			{
-				remainingText.push_back(c);
-				++to;
-			}
-		}
-	} // end of GetNextLineHeader
-
-
 	// Da preferire nell'utilizzo la versione che prende come parametro
 	// di ingresso anche una struttura ObjInfo di cui riempira' i campi
 	static bool LoadMask(const char * filename, int &mask)
@@ -637,58 +605,64 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		bool bHasPerWedgeNormal		= false;
 		
 		std::string header;
-		std::string remainingText;
+		std::vector<std::string> tokens;
 		
-		int numVertices = 0;  // stores the number of vertexes been read till now
-		int numFaces		= 0;	// stores the number of faces been read till now
+		int numVertices		= 0;  // stores the number of vertexes been read till now
+		int numTriangles	= 0;	// stores the number of triangular faces been read till now
 
 		// cycle till we encounter first face
 		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
 		{
+			tokens.clear();
 			header.clear();
-			remainingText.clear();
-			GetNextLineHeader(stream, header, remainingText);
+			TokenizeNextLine(stream, tokens);
 			
-			if (header.compare("v")==0)
-				++numVertices;
-			//else if (header.compare("vt")==0)
-			//{	
-			//}
-			//else if (header.compare("vn")==0)
-			//{
-			//}
-			else if (header.compare("f")==0)
+			if (tokens.size() > 0)
 			{
-				numFaces++;
-				
-				// we base our assumption on the fact that the way vertex data is
-				// referenced into faces must be consistent among the entire file
-				int charIdx = 0;
-				size_t length = remainingText.size();
-				char c;
-				while((charIdx != length) && ((c = remainingText[charIdx])!='/') && (c != ' '))
-					++charIdx;
+				header = tokens[0];
 
-				if (c == '/')
+				if (header.compare("v")==0)
+					++numVertices;
+				//else if (header.compare("vt")==0)
+				//{	
+				//}
+				//else if (header.compare("vn")==0)
+				//{
+				//}
+				else if (header.compare("f")==0)
 				{
-					++charIdx;
-					if ((charIdx != length) && ((c = remainingText[charIdx])!='/'))
-					{
-						bHasPerWedgeTexCoord = true;
-
+					numTriangles += (tokens.size() - 3);
+					std::string remainingText = tokens[1];
+					
+					// we base our assumption on the fact that the way vertex data is
+					// referenced into faces must be consistent among the entire file
+					int charIdx = 0;
+					size_t length = remainingText.size();
+					char c;
+					while((charIdx != length) && ((c = remainingText[charIdx])!='/') && (c != ' '))
 						++charIdx;
-						while((charIdx != length) && ((c = remainingText[charIdx])!='/') && (c != ' '))
-							++charIdx;
-						
-						if (c == '/')
-							bHasPerWedgeNormal   = true;
-						break;
-					}
-					else
+
+					if (c == '/')
 					{
-						bHasPerWedgeNormal   = true;
-						break;
-					}					
+						++charIdx;
+						if ((charIdx != length) && ((c = remainingText[charIdx])!='/'))
+						{
+							bHasPerWedgeTexCoord = true;
+
+							++charIdx;
+							while((charIdx != length) && ((c = remainingText[charIdx])!='/') && (c != ' '))
+								++charIdx;
+							
+							if (c == '/')
+								bHasPerWedgeNormal   = true;
+							break;
+						}
+						else
+						{
+							bHasPerWedgeNormal   = true;
+							break;
+						}					
+					}
 				}
 			}
 		}
@@ -696,22 +670,28 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		// after the encounter of first face we avoid to do additional tests
 		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
 		{
+			tokens.clear();
 			header.clear();
-			remainingText.clear();
-			GetNextLineHeader(stream, header, remainingText);
 			
-			if (header.compare("v")==0)
-				++numVertices;
-			//else if (header.compare("vt")==0)
-			//{	
-			//}
-			//else if (header.compare("vn")==0)
-			//{
-			//}
-			else if (header.compare("f")==0)
-				numFaces++;
+			//GetNextLineHeader(stream, header, remainingText);
+			TokenizeNextLine(stream, tokens);
+			
+			if (tokens.size() > 0)
+			{
+				header = tokens[0];
+				
+				if (header.compare("v")==0)
+					++numVertices;
+				//else if (header.compare("vt")==0)
+				//{	
+				//}
+				//else if (header.compare("vn")==0)
+				//{
+				//}
+				else if (header.compare("f")==0)
+					numTriangles += (tokens.size() - 3);
+			}
 		}
-
 
 		mask=0;
 		
@@ -724,7 +704,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 		oi.mask = mask;
 		oi.numVertices	= numVertices;
-		oi.numFaces			= numFaces;
+		oi.numTriangles = numTriangles;
 
 		/*if( pf.AddToRead(VertDesc(0))!=-1 && 
 				pf.AddToRead(VertDesc(1))!=-1 && 
