@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2005/12/12 11:22:19  cignoni
+commented a parameter name to remove a warning
+
 Revision 1.5  2005/12/04 10:51:30  glvertex
 Minor changes
 
@@ -40,7 +43,7 @@ Added copyright info
 
 using namespace vcg;
 
-void DummyPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla)
+void DummyPlugin::Render(QAction *a, MeshModel &/*m*/, RenderMode &rm, GLArea * /*gla*/)
 {
 	if(a->text() == "action 1")
 	{
