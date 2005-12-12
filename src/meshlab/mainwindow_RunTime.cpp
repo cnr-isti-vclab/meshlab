@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.35  2005/12/12 00:03:05  buzzelli
+now open method provides also a generic "All Files" filter
+
 Revision 1.34  2005/12/10 06:09:56  davide_portelli
 A little change
 
@@ -587,14 +590,18 @@ void MainWindow::toggleBackFaceCulling()
 void MainWindow::open(QString fileName)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
-	const QString defaultFilter = tr("Mesh files (*.ply *.off *.stl)");
+	const QString defaultFilter					= tr("Mesh files (*.ply *.off *.stl)");
 	QStringList filters;
-  filters	<< defaultFilter;
 	
-	QString selectedFilter;
-
+	filters	<< defaultFilter;
+	
+	// HashTable storing all supported formats, preserving for each
+	// of them, the index of first plugin which is able to open it
+	QHash<QString, int> allKnownFormats;
+	
+	QString selectedFilter;  // this will be filled with actual selected filter
 	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
-	for (; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin)  // cycle among loaded IO plugins
+	for (int i = 0; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin, ++i)  // cycle among loaded IO plugins
 	{
 		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
 
@@ -604,19 +611,30 @@ void MainWindow::open(QString fileName)
 		QString currentFilterEntry = currentDescription + " (*.";
 		QStringListIterator itFormat(currentFormats);
 		if (itFormat.hasNext())
-			currentFilterEntry.append(itFormat.next().toLower());
+		{
+			QString currentFormat = itFormat.next().toLower();
+			if (!allKnownFormats.contains(currentFormat))
+				allKnownFormats.insert(currentFormat, i);
+			currentFilterEntry.append(currentFormat);
+		}
 		while (itFormat.hasNext())
 		{
+			QString currentFormat = itFormat.next().toLower();
+			if (!allKnownFormats.contains(currentFormat))
+				allKnownFormats.insert(currentFormat, i);
 			currentFilterEntry.append(',');
-			currentFilterEntry.append(itFormat.next().toLower());
+			currentFilterEntry.append(currentFormat);
 		}
 		currentFilterEntry.append(')');
 		
 		filters.append(currentFilterEntry);
 	}
+	const QString allKnownFormatsFilter  = tr("All files (*.*)"); 
+	filters << allKnownFormatsFilter;
 
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".", filters.join("\n"), &selectedFilter);
+	else selectedFilter = allKnownFormatsFilter;
 
 	if (fileName.isEmpty())
 		return;
@@ -632,9 +650,9 @@ void MainWindow::open(QString fileName)
 	QString extension = fileName;
 	extension.remove(0, fileName.lastIndexOf('.')+1);
 	
-	bool result = false;
+	bool success = false;
 	if (extension.toUpper() == tr("PLY"))	// default format
-		result = mm->Open(fileName.toAscii(),QCallBack);
+		success = mm->Open(fileName.toAscii(),QCallBack);
 	else																	// additional formats supported via plugin
 	{
 		// an alternative solution could delegate the opening stuff to the first plugin
@@ -645,18 +663,30 @@ void MainWindow::open(QString fileName)
 		while (itFilter.hasNext() && (itFilter.next() != selectedFilter))
 			++idx;
 		--idx;  // subtracting 1 since first filter was the default one
-		if ((idx > -1) && (idx < (int)meshIOPlugins.size()))
+		if ((idx > -1) && (idx <= (int)meshIOPlugins.size()))
 		{
-			// since at 0 position we have the default filter string
+			if (idx == (int)meshIOPlugins.size())  // "All files" filter was selected
+			{
+				QString lowerCaseExt = extension.toLower();
+				if (allKnownFormats.contains(lowerCaseExt))
+					idx = allKnownFormats[lowerCaseExt];
+				else
+				{
+					QMessageBox::warning(this, tr("Open File"), tr("Unknown file format"));
+					delete mm;
+					qb->hide();
+					return;
+				}
+			}
 			MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
 			int mask = -1;
-			result = pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla?*/);
+			success = pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla?*/);
 		}
 	}
 
-	if (!result)
+	if (!success)
 	{
-		QMessageBox::information(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
+		QMessageBox::warning(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
     delete mm;
 	}
 	else{
