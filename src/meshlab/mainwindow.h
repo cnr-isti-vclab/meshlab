@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.47  2005/12/13 00:31:23  davide_portelli
+Cleaned commented code, and dummy code.
+
 Revision 1.46  2005/12/10 06:09:56  davide_portelli
 A little change
 
@@ -159,32 +162,31 @@ private:
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 	
 	
-	////////ToolBar//////////////
+	////////ToolBar///////////////
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;
 
 
-	///////// Menu /////////////
+	///////// Menu ///////////////
 	QMenu *fileMenu;
 	QMenu *filterMenu;
-	//Render Menu and SubMenu ///
+	//Render Menu and SubMenu ////
 	QMenu *renderMenu;
 	QMenu *renderModeMenu;
 	QMenu *lightingModeMenu;
-	QMenu *textureModeMenu;
 	QMenu *colorModeMenu;
-	//View Menu and SubMenu /////
+	//View Menu and SubMenu //////
 	QMenu *viewMenu;
 	QMenu *trackBallMenu;
 	QMenu *logMenu;
 	QMenu *toolBarMenu;
-	////////////////////////
+	//////////////////////////////
 	QMenu *windowsMenu;
 	QMenu *preferencesMenu; 
 	QMenu *helpMenu;
 
 
-	//////////// Action Menu File //////////////////////
+	//////////// Action Menu File ///////////////////////
 	QAction *openAct;
 	QAction *saveAsAct;
 	QAction *saveSnapshotAct;
@@ -225,9 +227,9 @@ private:
 	///////////Action Menu Help ////////////////////////
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;
-	/////////////////////////////////////////////
+	////////////////////////////////////////////////////
 	vector<QAction *> TotalRenderList;
-	////////////////////////////////////////////
+	////////////////////////////////////////////////////
 };
 
 #endif

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.29  2005/12/13 00:31:23  davide_portelli
+Cleaned commented code, and dummy code.
+
 Revision 1.28  2005/12/12 11:21:08  cignoni
 Changed the default of the progress bar dialog.
 
@@ -292,11 +295,9 @@ MainWindow::MainWindow()
 
 	workspace = new QWorkspace(this);
 	setCentralWidget(workspace);
-	windowMapper = new QSignalMapper(this);
-	
+	windowMapper = new QSignalMapper(this);	
 	// Permette di passare da una finestra all'altra e tenere aggiornato il workspace
 	connect(windowMapper, SIGNAL(mapped(QWidget *)),workspace, SLOT(setActiveWindow(QWidget *)));
-	
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateMenus()));
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateWindowMenu()));
@@ -325,7 +326,7 @@ MainWindow::MainWindow()
 
 void MainWindow::createActions()
 {
-	//////////////Action Menu File //////////////////////////////////////////////////////////////
+	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
   openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
 	openAct->setShortcutContext(Qt::ApplicationShortcut);
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
@@ -339,8 +340,6 @@ void MainWindow::createActions()
 	saveSnapshotAct = new QAction(QIcon(":/images/save.png"),tr("&Save snapshot"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
 
-
-
 	for (int i = 0; i < MAXRECENTFILES; ++i) {
 		recentFileActs[i] = new QAction(this);
 		recentFileActs[i]->setVisible(false);
@@ -351,7 +350,7 @@ void MainWindow::createActions()
 	exitAct->setShortcut(Qt::CTRL+Qt::Key_Q);
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////
+	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////////////////////
 	renderModeGroupAct = new QActionGroup(this);
 	
 	renderBboxAct	  = new QAction(QIcon(":/images/bbox.png"),tr("&Bounding box"), renderModeGroupAct);
@@ -367,7 +366,7 @@ void MainWindow::createActions()
 	renderModeWireAct->setCheckable(true);
 	connect(renderModeWireAct, SIGNAL(triggered()), this, SLOT(renderWire()));
 
-	renderModeHiddenLinesAct		  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"), renderModeGroupAct);
+	renderModeHiddenLinesAct  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"),renderModeGroupAct);
 	renderModeHiddenLinesAct->setCheckable(true);
 	connect(renderModeHiddenLinesAct, SIGNAL(triggered()), this, SLOT(renderHiddenLines()));
 
@@ -409,7 +408,7 @@ void MainWindow::createActions()
 	backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
 	
-	//////////////Action Menu View /////////////////////////////////////////////////////////////
+	//////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
 	fullScreenAct->setCheckable(true);
 	fullScreenAct->setShortcut(Qt::ALT+Qt::Key_Return);
@@ -443,7 +442,7 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
-	//////////////Action Menu Windows /////////////////////////////////////////////////////////
+	//////////////Action Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
 	connect(windowsTileAct, SIGNAL(triggered()), workspace, SLOT(tile()));
 
@@ -453,27 +452,24 @@ void MainWindow::createActions()
 	windowsNextAct = new QAction(tr("&Next"), this);
 	windowsNextAct->setShortcutContext(Qt::ApplicationShortcut);
 	windowsNextAct->setShortcut(Qt::Key_Tab);
-	//windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_Tab);
 	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
-
 
 	closeAct = new QAction(tr("Cl&ose"), this);
 	closeAct->setShortcutContext(Qt::ApplicationShortcut);
 	closeAct->setShortcut(Qt::Key_F4);
-	//closeAct->setShortcut(Qt::CTRL+Qt::Key_F4);
 	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
 
 	closeAllAct = new QAction(tr("Close &All"), this);
 	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
 	
-	//////////////Action Menu Preferences //////////////////////////////////////////////////////
+	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
 
 	setSaveMaskObjAct = new QAction(tr("&Options Save Obj"),this);
 	connect(setSaveMaskObjAct, SIGNAL(triggered()), this, SLOT(setSaveMaskObj()));
 
-	//////////////Action Menu About ////////////////////////////////////////////////////////////
+	//////////////Action Menu About ///////////////////////////////////////////////////////////////////////////
 	aboutAct = new QAction(tr("&About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
@@ -499,7 +495,7 @@ void MainWindow::createToolBars()
 
 void MainWindow::createMenus()
 {
-	//////////////////// Menu File ////////////////////////////////////////////////////////////////
+	//////////////////// Menu File ////////////////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(openAct);
 	fileMenu->addAction(saveAsAct);
@@ -511,31 +507,25 @@ void MainWindow::createMenus()
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
 	
-	//////////////////// Menu Filter //////////////////////////////////////////////////////////////
+	//////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("F&ilter"));
 	
-	//////////////////// Menu Render //////////////////////////////////////////////////////////////
+	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
-  //renderMenu->addActions(renderModeGroupAct->actions());
-	//renderMenu->addAction(setLightAct);
-//  renderMenu->addAction(renderModeAct);
-//  renderMenu->addAction(lightingModeAct);
-//	lightingModeAct->addAction(setLightAct);
+
 	renderModeMenu=renderMenu->addMenu(tr("Render Mode"));
 	renderModeMenu->addAction(backFaceCullAct);
 	renderModeMenu->addActions(renderModeGroupAct->actions());
 	renderModeMenu->addAction(renderModeTextureAct);
-	
+
 	lightingModeMenu=renderMenu->addMenu(tr("Lighting"));
 	lightingModeMenu->addAction(setLightAct);
 	lightingModeMenu->addAction(setDoubleLightingAct);
 	lightingModeMenu->addAction(setFancyLightingAct);
 
-	textureModeMenu=renderMenu->addMenu(tr("Texture"));
-
 	colorModeMenu=renderMenu->addMenu(tr("Color"));
 
-	//////////////////// Menu View ////////////////////////////////////////////////////////////////
+	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(fullScreenAct);
 
@@ -551,13 +541,12 @@ void MainWindow::createMenus()
 	toolBarMenu->addAction(showToolbarStandardAct);
 	toolBarMenu->addAction(showToolbarRenderAct);
 	
-
-	//////////////////// Menu Windows /////////////////////////////////////////////////////////////
+	//////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
 	menuBar()->addSeparator();
 
-	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////
+	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
 	preferencesMenu->addAction(setCustomizeAct);
 	preferencesMenu->addAction(setSaveMaskObjAct);
@@ -586,41 +575,12 @@ void MainWindow::loadPlugins()
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
-		if (plugin) {
-
-// OLD VERSION
-			//MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-			//if (iFilter)
-			//	addToMenu(plugin, iFilter->filters(), filterMenu, SLOT(applyFilter()));
-
-			//MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
-			//if (iRender)
-			//	addToMenu(plugin, iRender->modes(), renderMenu, SLOT(applyRenderMode()),0,true);
-
-			//// MeshColorizeInterface test 
-			//MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
-			//if (iColor)
-			//	addToMenu(plugin, iColor->colorsFrom(), colorModeMenu, SLOT(applyColorMode()),0,true);     
-
-			//MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			//if (iIO)
-			//{
-			//	fileMenu->addSeparator();
-			//	addToMenu(plugin, iIO->formats(), fileMenu, SLOT(applyImportExport()));
-			//	//fileMenu->addSeparator();
-			//
-			//}
-// NEW VERSION
-
-			
+		
+		if (plugin) {		
 			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
 			if (iColor)
 			addToMenu(iColor->actions(), colorModeMenu, SLOT(applyColorMode()));
 			
-			MeshRenderInterface *iDummy = qobject_cast<MeshRenderInterface *>(plugin);
-			if(iDummy)
-				addToMenu(iDummy->actions(),renderMenu,SLOT(applyRenderMode()));
-
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
 				addToMenu(iFilter->actions(), filterMenu, SLOT(applyFilter()));
@@ -648,20 +608,8 @@ void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char 
 	foreach (QAction *a, actionList)
 	{
 		connect(a,SIGNAL(triggered()),this,slot);
-		//a->setCheckable(true);
 		menu->addAction(a);
 	}
-// OLD LOOP CORE		
-//		QAction *action = new QAction(text, plugin);
-//		TotalRenderList.push_back(action);
-//		connect(action, SIGNAL(triggered()), this, member);
-//		action->setCheckable(chackable);
-//		menu->addAction(action);
-//
-//		if (actionGroup) {
-//			action->setCheckable(true);
-//			actionGroup->addAction(action);
-//		}
 }
 
 void MainWindow::setCurrentFile(const QString &fileName)

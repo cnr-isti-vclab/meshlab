@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.39  2005/12/13 00:31:23  davide_portelli
+Cleaned commented code, and dummy code.
+
 Revision 1.38  2005/12/12 17:57:39  buzzelli
 "All Files" filter replaced with "All known formats" filter
 
@@ -313,7 +316,7 @@ First rough version. It simply load a mesh.
 #include "saveSnapshotDialog.h"
 #include "ui_aboutForm.h"
 
-//QProgressBar *MainWindow::qb;
+
 
 void MainWindow::updateRecentFileActions()
 {
@@ -372,7 +375,6 @@ void MainWindow::updateMenus()
   windowsMenu->setEnabled(active);
 	preferencesMenu->setEnabled(active);
 	renderToolBar->setEnabled(active);
-	////////////////////////////////////////////////////////////////////
 	if(active){
 		const RenderMode &rm=GLA()->getCurrentRenderMode();
 		switch (rm.drawMode) {
@@ -426,17 +428,14 @@ void MainWindow::applyFilter()
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 	qb->show();
 	iFilter->applyFilter(action,*(GLA()->mm ),this,QCallBack);
-// OLD VERSION	iFilter->applyFilter(action->text(),*(GLA()->mm ), GLA(),QCallBack);
-	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());// .data());
+	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());
   qb->hide();
 }
 
 
 void MainWindow::applyRenderMode()
 {
-	// NEW VERSION
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal 
-
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
 	iRenderTemp->Init(action,*(GLA()->mm),GLA());
@@ -447,7 +446,6 @@ void MainWindow::applyRenderMode()
 		GLA()->setRender(0); //vertex and fragment programs not supported
 	}
 	GLA()->log.Log(GLLogStream::Info,"%s",action->text().toLocal8Bit().constData());	// Prints out action name
-	
 }
 
 
@@ -496,17 +494,11 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	if(qb==0) return true;
 	qb->setWindowTitle (str);
 	qb->setValue(pos);
-  //qb->setProgress(pos);
-	//qb->update();
 	return true;
 }
 
 void MainWindow::setLight()			     
 {
-// Is this check needed???
-//	if (!GLA())
-//		return;
-
 	GLA()->setLight(!GLA()->getCurrentRenderMode().Lighting);
 	updateMenus();
 };
@@ -703,7 +695,7 @@ bool MainWindow::saveAs()
 	}
 
 	filters << allFilter;
-	QString fileName;// = QFileDialog::getSaveFileName(new QWidget(),tr("Save file"),".","Save files (*.ply)");
+	QString fileName;
 
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"), &selectedFilter);
@@ -791,8 +783,6 @@ void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->i
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
 void MainWindow::setCustomize()
 {
-	/*QColor backColor=QColorDialog::getColor(QColor(255,255,255,255),this);
-	GLA()->setBackground(backColor);*/
 	CustomDialog dialog(this);
 	ColorSetting cs=GLA()->getCustomSetting();
 	dialog.loadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor);
@@ -802,7 +792,6 @@ void MainWindow::setCustomize()
 		cs.bColorBottom=dialog.getBkgBottomColor();
 		cs.bColorTop=dialog.getBkgTopColor();
 		cs.lColor=dialog.getLogAreaColor();
-
     GLA()->setCustomSetting(cs);	
 	}	
 }
@@ -825,7 +814,6 @@ void MainWindow::renderTexture()
 {
 	QAction *a = qobject_cast<QAction* >(sender());
 	GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedge);	
-	//updateMenus();
 }
 
 
@@ -839,10 +827,7 @@ void MainWindow::fullScreen(){
 	//Caso di piu' finestre aperte in tile:
 	if((workspace->windowList()).size()>1){
 		foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
-		if (found){
-			//foreach(QWidget *w,workspace->windowList()){w->setWindowFlags(Qt::FramelessWindowHint);}
-			workspace->tile();
-		}
+		if (found)workspace->tile();
 	}
 }
 void MainWindow::keyPressEvent(QKeyEvent *e){
@@ -854,9 +839,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 		//Caso di piu' finestre aperte in tile:
 		if((workspace->windowList()).size()>1){
 			foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
-			if (found){
-				workspace->tile();
-			}
+			if (found){workspace->tile();}
 		}
 		fullScreenAct->setChecked(false);
 	}
