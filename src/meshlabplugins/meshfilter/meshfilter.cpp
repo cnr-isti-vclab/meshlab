@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.19  2005/12/13 09:23:39  mariolatronico
+added Information on plugins
+
 Revision 1.18  2005/12/12 22:48:42  cignoni
 Added plugin info methods
 
@@ -61,11 +64,6 @@ Added copyright info
 ////////////
 using namespace vcg;
 
-//class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Normal3f, vert::BitFlags >{};
-//class CFaceO    : public FaceSimp2< CVertexO, CEdge, CFaceO, face::InfoOcf, face::FFAdjOcf, face::WedgeTexture2f, face::VertexRef, face::BitFlags, face::Normal3fOcf > {};
-//class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
-
-
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction("Loop Subdivision Surface", this);
 	actionList << new QAction("Butterfly Subdivision Surface", this);
@@ -83,10 +81,54 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 }
 
 
- const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *) 
+ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action) 
  {
    ActionInfo ai; 
-   ai.Help=tr("Generic Help for an action");
+  
+	if( action->text() == tr("Loop Subdivision Surface") )
+		{
+			ai.Help = tr("Apply Loop's Subdivision Surface algorithm, it is an approximate method");
+			ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
+		}
+	if( action->text() == tr("Butterfly Subdivision Surface") )
+	  {
+			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm, it is an interpolated method");
+			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
+			
+		
+		}
+  if( action->text() == tr("Remove Unreferenced Vertexes"))
+		{
+			ai.Help = tr("Remove Unreferenced Vertexes");
+			ai.ShortHelp = tr("Remove Unreferenced Vertexes");
+
+			}
+  if( action->text() == tr("Remove Duplicated Vertexes"))
+		{
+			ai.Help = tr("Remove Duplicated Vertexes");
+			ai.ShortHelp = tr("Remove Duplicated Vertexes");
+
+			}
+	if(action->text() == tr("Remove Null Faces"))
+		{
+			ai.Help = tr("Remove Null Faces");
+			ai.ShortHelp = tr("Remove Null Faces");
+	
+		}
+	if(action->text() == tr("Laplacian Smooth"))
+		{
+			ai.Help = tr("Laplacian Smooth: Smooth the mesh surface");
+			ai.ShortHelp = tr("Smooth the mesh surface");
+	
+		}
+		
+ 	if(action->text() == tr("Decimator"))
+ 		{
+			ai.Help = tr("Decimator tries to elminate triangles by clustering method by Rossignac");
+			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
+			
+ 		}
+//	 ai.Help=tr("Generic Help for an action");
    return ai;
  }
 
@@ -94,6 +136,8 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 {
    PluginInfo ai; 
    ai.Date=tr("__DATE__");
+	 ai.Version = tr("0.4");
+	 ai.Author = ("Paolo Cignoni, Mario Latronico, Andrea Venturi");
    return ai;
  }
  
