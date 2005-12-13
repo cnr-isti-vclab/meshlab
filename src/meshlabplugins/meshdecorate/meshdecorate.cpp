@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/12/13 11:02:56  cignoni
+made info structs static
+
 Revision 1.4  2005/12/12 22:48:42  cignoni
 Added plugin info methods
 
@@ -42,14 +45,14 @@ cleaned up the identification between by string of decorations
 using namespace vcg;
 const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *) 
  {
-   ActionInfo ai; 
+   static ActionInfo ai; 
    ai.Help=tr("Generic Help for an action");
    return ai;
  }
 
  const PluginInfo &ExtraMeshDecoratePlugin::Info() 
 {
-   PluginInfo ai; 
+   static PluginInfo ai; 
    ai.Date=tr("__DATE__");
    return ai;
  }
