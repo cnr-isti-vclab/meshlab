@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2005/12/13 14:02:50  fmazzant
+ added the rescue of the materials of the obj
+
  Revision 1.1  2005/12/09 16:37:20  fmazzant
  maskobj for select element to save
 
@@ -44,4 +47,5 @@ public:
 	bool normal;
 	bool binary;
 	bool colorV;
+	bool colorF;
 };

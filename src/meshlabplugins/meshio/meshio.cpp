@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.21  2005/12/13 14:02:50  fmazzant
+ added the rescue of the materials of the obj
+
  Revision 1.20  2005/12/09 18:16:14  fmazzant
  added generic obj save with plugin arch.
 
@@ -145,7 +148,7 @@ bool ExtraMeshIOPlugin::open(const QString &format, QString &fileName,MeshModel 
 
 bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	if(format.toUpper() == tr("OBJ")) ////if (format == tr("Export OBJ"))
+	if(format.toUpper() == tr("OBJ"))
 	{
 		QStringList sl = fileName.split(".");
 		if(!(sl.size() == 2 && sl[1] == "obj"))
@@ -153,6 +156,12 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 		string filename = fileName.toUtf8().data();
 		
 		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
+		return result;
+	}
+
+	if(format.toUpper() == tr("PLY"))
+	{
+		bool result = false;
 		return result;
 	}
 	return false;

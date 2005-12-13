@@ -109,7 +109,7 @@
      </widget>
     </item>
     <item row="2" column="0" >
-     <widget class="QCheckBox" name="colorVertexCheck" >
+     <widget class="QCheckBox" name="colorFaceCheck" >
       <property name="text" >
        <string>Color Faces</string>
       </property>

@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.6  2005/12/13 14:02:50  fmazzant
+ added the rescue of the materials of the obj
+
  Revision 1.5  2005/12/09 16:37:20  fmazzant
  maskobj for select element to save
 
@@ -69,7 +72,7 @@ void SaveMaskDialog::SlotOkButton()
 	mask->binary = ui.binaryButton->isChecked();
 	mask->normal = ui.normalCheck->isChecked();
 	mask->texture = ui.textureCheck->isChecked();
-	mask->colorV = ui.colorVertexCheck->isChecked();
+	mask->colorF = ui.colorFaceCheck->isChecked();
 	accept();
 }
 
@@ -91,7 +94,7 @@ bool SaveMaskDialog::ReadMask()
 
 	ui.normalCheck->setChecked(mask->normal);
 	ui.textureCheck->setChecked(mask->texture);
-	ui.colorVertexCheck->setChecked(mask->colorV);
+	ui.colorFaceCheck->setChecked(mask->colorF);
 
 	return true;
 }
