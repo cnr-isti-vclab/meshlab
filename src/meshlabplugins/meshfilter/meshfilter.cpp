@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.20  2005/12/13 11:01:57  cignoni
+Added callback management in standard refine
+
 Revision 1.19  2005/12/13 09:23:39  mariolatronico
 added Information on plugins
 
@@ -134,7 +137,7 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 
  const PluginInfo &ExtraMeshFilterPlugin::Info() 
 {
-   PluginInfo ai; 
+   static PluginInfo ai; 
    ai.Date=tr("__DATE__");
 	 ai.Version = tr("0.4");
 	 ai.Author = ("Paolo Cignoni, Mario Latronico, Andrea Venturi");
@@ -166,10 +169,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 		
-			vcg::Refine<CMeshO, MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),0);
+			vcg::Refine<CMeshO, MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),0, false, cb);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		
-		
 		}
   if(filter->text() == tr("Remove Unreferenced Vertexes"))
 		{

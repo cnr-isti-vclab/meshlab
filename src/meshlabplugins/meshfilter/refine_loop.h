@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2005/12/13 11:01:57  cignoni
+Added callback management in standard refine
+
 Revision 1.2  2005/12/08 13:52:01  mariolatronico
 added preliminary version of callback. Now it counts only even point on RefineOddEven
 
@@ -102,7 +105,6 @@ first working version
 #define __VCGLIB_REFINE_LOOP
 
 #include<vcg/complex/trimesh/refine.h>
-#include<wrap/callback.h>
 
 #include <iostream>
 #include <math.h>
