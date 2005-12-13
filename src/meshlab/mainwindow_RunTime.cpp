@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.40  2005/12/13 14:31:51  alemochi
+Changed names of member functions.
+
 Revision 1.39  2005/12/13 00:31:23  davide_portelli
 Cleaned commented code, and dummy code.
 
@@ -404,15 +407,15 @@ void MainWindow::updateMenus()
 		showLogAct->setChecked(GLA()->isLogVisible());
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
-		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().BackFaceCull);
+		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
 		renderModeTextureAct->setEnabled(!GLA()->mm->cm.textures.empty());
 		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
 		
-		setLightAct->setIcon(rm.Lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
-		setLightAct->setChecked(rm.Lighting);
+		setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
+		setLightAct->setChecked(rm.lighting);
 
-		setFancyLightingAct->setChecked(rm.FancyLighting);
-		setDoubleLightingAct->setChecked(rm.DoubleSideLighting);
+		setFancyLightingAct->setChecked(rm.fancyLighting);
+		setDoubleLightingAct->setChecked(rm.doubleSideLighting);
 
 		foreach (QAction *a,TotalRenderList){a->setChecked(false);}
 		if(GLA()->iDecoratorsList){
@@ -499,7 +502,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 
 void MainWindow::setLight()			     
 {
-	GLA()->setLight(!GLA()->getCurrentRenderMode().Lighting);
+	GLA()->setLight(!GLA()->getCurrentRenderMode().lighting);
 	updateMenus();
 };
 
@@ -507,14 +510,14 @@ void MainWindow::setLight()
 void MainWindow::setDoubleLighting()
 {
 	const RenderMode &rm=GLA()->getCurrentRenderMode();
-	if (rm.DoubleSideLighting) GLA()->setLightMode(false,LDOUBLE);
+	if (rm.doubleSideLighting) GLA()->setLightMode(false,LDOUBLE);
 	else GLA()->setLightMode(true,LDOUBLE);
 }
 
 void MainWindow::setFancyLighting()
 {
 	const RenderMode &rm=GLA()->getCurrentRenderMode();
-	if (rm.FancyLighting) GLA()->setLightMode(false,LFANCY);
+	if (rm.fancyLighting) GLA()->setLightMode(false,LFANCY);
 	else GLA()->setLightMode(true,LFANCY);
 }
 
@@ -522,7 +525,7 @@ void MainWindow::toggleBackFaceCulling()
 {
 	RenderMode &rm = GLA()->getCurrentRenderMode();
 
-	GLA()->setBackFaceCulling(!rm.BackFaceCull);
+	GLA()->setBackFaceCulling(!rm.backFaceCull);
 }
 
 void MainWindow::open(QString fileName)

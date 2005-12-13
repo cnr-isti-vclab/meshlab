@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.37  2005/12/13 14:31:51  alemochi
+Changed names of member functions.
+
 Revision 1.36  2005/12/08 18:21:56  vannini
 Rewritten tiled rendering functions. Now we use grabFrameBuffer() instead of glReadPixels.
 
@@ -180,12 +183,12 @@ public:
   	vcg::GLW::ColorMode	colorMode;
   	vcg::GLW::TextureMode	textureMode;
 
-    bool Lighting;
-    bool BackFaceCull;
-    bool DoubleSideLighting;  
-    bool FancyLighting;
-    bool CastShadow;
-    vcg::Point3f LightDir;
+    bool lighting;
+    bool backFaceCull;
+    bool doubleSideLighting;  
+    bool fancyLighting;
+    bool castShadow;
+    vcg::Point3f lightDir;
 		
 		
 		RenderMode()
@@ -194,11 +197,11 @@ public:
 			colorMode = GLW::CMNone;
 			textureMode = GLW::TMNone;
 
-			Lighting = true;
-			BackFaceCull = false;
-			DoubleSideLighting = false;
-			FancyLighting = false;
-			CastShadow = false;
+			lighting = true;
+			backFaceCull = false;
+			doubleSideLighting = false;
+			fancyLighting = false;
+			castShadow = false;
     }
 };
 
@@ -275,7 +278,7 @@ public:
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
 	void saveSnapshot();
-	void SetLightModel();
+	void setLightModel();
 	void resetTrackBall();
 	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
 
@@ -287,7 +290,7 @@ public:
 protected:
 	void initializeGL();
 	void initTexture();
-	void DisplayModelInfo();
+	void displayModelInfo();
 	void paintGL();
 	void resizeGL(int width, int height);
 	void mousePressEvent(QMouseEvent *event);

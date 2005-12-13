@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.55  2005/12/13 14:31:51  alemochi
+Changed names of member functions.
+
 Revision 1.54  2005/12/08 22:53:11  cignoni
 added missing glclearcolor
 
@@ -246,7 +249,7 @@ GLArea::GLArea(QWidget *parent)
 
 
 
-void GLArea::DisplayModelInfo()
+void GLArea::displayModelInfo()
 {
 
 	QString strMessage;
@@ -486,7 +489,7 @@ void GLArea::paintGL()
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
 
-	SetLightModel();
+	setLightModel();
 
 	// Modify frustum... 
 	if (takeSnapTile)
@@ -569,7 +572,7 @@ void GLArea::paintGL()
 		deltaTime=currentTime-lastTime;
 		updateFps();
 		if ((cfps>0) && (cfps<200)) renderFps();
-		DisplayModelInfo();
+		displayModelInfo();
 
 
 		glPopAttrib();
@@ -694,7 +697,7 @@ void GLArea::setTextureMode(vcg::GLW::TextureMode mode)
 
 void GLArea::setLight(bool state)
 {
-	rm.Lighting = state;
+	rm.lighting = state;
 	updateGL();
 }
 
@@ -702,10 +705,10 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 {
 	switch(lmode)
 	{
-	case LDOUBLE:		rm.DoubleSideLighting = state;
+	case LDOUBLE:		rm.doubleSideLighting = state;
 									break;
 	
-	case LFANCY:		rm.FancyLighting = state;
+	case LFANCY:		rm.fancyLighting = state;
 									break;
 	}
 	updateGL();
@@ -718,12 +721,12 @@ void GLArea::setBackFaceCulling(bool enabled)
 	if(enabled)
 		glEnable(GL_CULL_FACE);
 
-	rm.BackFaceCull = enabled;
+	rm.backFaceCull = enabled;
 
 	updateGL();
 }
 
-void GLArea::SetLightModel()
+void GLArea::setLightModel()
 {
   static GLfloat standard_front[]={1.f,1.f,1.f,1.f};
   static GLfloat standard_back[]={1.f,1.f,1.f,1.f};
@@ -731,11 +734,11 @@ void GLArea::SetLightModel()
   static GLfloat m_diffuseFancyFront[]={.71f,.71f,.95f,1.f};
 	
 	glDisable(GL_LIGHTING);
-	if (rm.Lighting) 
+	if (rm.lighting) 
 	{
 		glEnable(GL_LIGHTING);
-		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, rm.DoubleSideLighting);
-		if(rm.FancyLighting)
+		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, rm.doubleSideLighting);
+		if(rm.fancyLighting)
 		{
 			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
 			glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
