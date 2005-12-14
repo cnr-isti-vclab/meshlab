@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.17  2005/12/14 22:21:49  cignoni
+ Changed GetIndexVertex from O(n) to O(1)
+
  Revision 1.16  2005/12/14 18:08:24  fmazzant
  added generic save of all type define obj, ply, off, stl
 
@@ -117,6 +120,7 @@ namespace io {
 	public:	
 		typedef typename SaveMeshType::FaceIterator FaceIterator;
 		typedef typename SaveMeshType::VertexIterator VertexIterator;
+		typedef typename SaveMeshType::VertexType VertexType;
 	
 		/*
 			salva la Mesh in formato Obj File.
@@ -261,7 +265,7 @@ namespace io {
 					for(unsigned int k=0;k<MAX;k++)
 					{
 						int v = -1; 
-						v = GetIndexVertex(m, (*fi).V(k)->P());//considera i vertici per faccia
+						v = GetIndexVertex(m, (*fi).V(k));//considera i vertici per faccia
 						
 						int vt = -1;
 						vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
@@ -314,12 +318,13 @@ namespace io {
 		/*
 			restituisce l'indice del vertice, aggiunto di una unita'.
 		*/
-		inline static int GetIndexVertex(SaveMeshType &m,Point3f p)
+    inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
 		{
-			for(unsigned int i=0;i<m.vert.size();i++)
+	/*		for(unsigned int i=0;i<m.vert.size();i++)
 				if(m.vert[i].P() == p)
 					return ++i;
-			return-1;
+			return-1;*/
+      return p-&*(m.vert.begin());
 		}
 		
 		/*
