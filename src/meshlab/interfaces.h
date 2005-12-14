@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.26  2005/12/14 22:24:14  cignoni
+Added preliminary supprot for editing/selection plugins.
+
 Revision 1.25  2005/12/12 22:46:05  cignoni
 Cleaned up and added info functions
 
@@ -101,6 +104,7 @@ Added copyright info
 class QWidget;
 class QIcon;
 class QString;
+class QMouseEvent;
 //class QList;
 class QAction;
 class MeshModel;
@@ -205,10 +209,31 @@ public:
 		virtual QList<QAction *> actions() const = 0;
 };
 
+
+class MeshEditInterface
+{
+public:
+    virtual ~MeshEditInterface() {}
+
+    virtual const ActionInfo &Info(QAction *)=0;
+    virtual const PluginInfo &Info()=0;
+
+    virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+		virtual void Edit(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
+		virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
+    virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	  virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	  virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+//	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
+		virtual QList<QAction *> actions() const = 0;
+};
+
 Q_DECLARE_INTERFACE(MeshIOInterface,       "vcg.meshlab.MeshIOInterface/1.0")
 Q_DECLARE_INTERFACE(MeshFilterInterface,   "vcg.meshlab.MeshFilterInterface/1.0")
 Q_DECLARE_INTERFACE(MeshRenderInterface,   "vcg.meshlab.MeshRenderInterface/1.0")
 Q_DECLARE_INTERFACE(MeshColorizeInterface, "vcg.meshlab.MeshColorizeInterface/1.0")
 Q_DECLARE_INTERFACE(MeshDecorateInterface, "vcg.meshlab.MeshDecorateInterface/1.0")
+Q_DECLARE_INTERFACE(MeshEditInterface,     "vcg.meshlab.MeshEditInterface/1.0")
 
 #endif

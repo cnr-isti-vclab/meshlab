@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.30  2005/12/14 22:24:14  cignoni
+Added preliminary supprot for editing/selection plugins.
+
 Revision 1.29  2005/12/13 00:31:23  davide_portelli
 Cleaned commented code, and dummy code.
 
@@ -508,6 +511,9 @@ void MainWindow::createMenus()
 	fileMenu->addAction(exitAct);
 	
 	//////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
+	editMenu = menuBar()->addMenu(tr("&Edit"));
+	
+  //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("F&ilter"));
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
@@ -579,7 +585,7 @@ void MainWindow::loadPlugins()
 		if (plugin) {		
 			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
 			if (iColor)
-			addToMenu(iColor->actions(), colorModeMenu, SLOT(applyColorMode()));
+			  addToMenu(iColor->actions(), colorModeMenu, SLOT(applyColorMode()));
 			
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
@@ -591,13 +597,17 @@ void MainWindow::loadPlugins()
 
 			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
 			if (iDecorator)
-			addToMenu(iDecorator->actions(), renderMenu, SLOT(applyDecorateMode()));
+			  addToMenu(iDecorator->actions(), renderMenu, SLOT(applyDecorateMode()));
 
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 			if (iRender)
-			addToMenu(iRender->actions(), renderMenu, SLOT(applyRenderMode()));
+			  addToMenu(iRender->actions(), renderMenu, SLOT(applyRenderMode()));
 
-			pluginFileNames += fileName;
+			MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
+			if (iEdit)
+			  addToMenu(iEdit->actions(), renderMenu, SLOT(applyEditMode()));
+
+      pluginFileNames += fileName;
 		}
 	}
 	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && workspace->activeWindow());

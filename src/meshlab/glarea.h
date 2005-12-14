@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.38  2005/12/14 22:25:26  cignoni
+Added preliminary supprot for editing/selection plugins.
+
 Revision 1.37  2005/12/13 14:31:51  alemochi
 Changed names of member functions.
 
@@ -284,8 +287,10 @@ public:
 
 	//shader support
 	MeshRenderInterface *iRender;
-	void setRender(MeshRenderInterface *);
-	MeshRenderInterface * getRender();
+	void setRender(MeshRenderInterface *rend){	iRender = rend; }
+	MeshRenderInterface * getRender() { return iRender; }
+	MeshEditInterface *iEdit;
+	void setEdit(MeshEditInterface *edit){	iEdit = edit; }
 
 protected:
 	void initializeGL();

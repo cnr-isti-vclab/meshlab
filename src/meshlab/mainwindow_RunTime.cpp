@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.44  2005/12/14 22:24:14  cignoni
+Added preliminary supprot for editing/selection plugins.
+
 Revision 1.43  2005/12/14 18:08:22  fmazzant
 added generic save of all type define obj, ply, off, stl
 
@@ -444,6 +447,13 @@ void MainWindow::applyFilter()
   qb->hide();
 }
 
+void MainWindow::applyEditMode()
+{
+	QAction *action = qobject_cast<QAction *>(sender());
+	MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
+  GLA()->setEdit(iEdit);
+	GLA()->log.Log(GLLogStream::Info,"Started Mode %s",action->text().toLocal8Bit().constData());
+}
 
 void MainWindow::applyRenderMode()
 {

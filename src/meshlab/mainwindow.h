@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.48  2005/12/14 22:24:14  cignoni
+Added preliminary supprot for editing/selection plugins.
+
 Revision 1.47  2005/12/13 00:31:23  davide_portelli
 Cleaned commented code, and dummy code.
 
@@ -117,6 +120,7 @@ private slots:
 	void setFancyLighting();
 	void applyRenderMode();
 	void applyColorMode();
+  void applyEditMode();
 	void toggleBackFaceCulling();
 	void applyDecorateMode();
 	///////////Slot Menu View ////////////////////////
@@ -170,6 +174,7 @@ private:
 	///////// Menu ///////////////
 	QMenu *fileMenu;
 	QMenu *filterMenu;
+	QMenu *editMenu;
 	//Render Menu and SubMenu ////
 	QMenu *renderMenu;
 	QMenu *renderModeMenu;
