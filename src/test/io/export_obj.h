@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.13  2005/12/14 01:21:15  fmazzant
+ bug-fix
+
  Revision 1.12  2005/12/14 00:06:19  fmazzant
  deleted bug meterial index usemtl.
 
@@ -394,7 +397,7 @@ namespace io {
 			mtl.Ns = ns;
 			mtl.illum = illum;//illumination
 			
-			if( (*fi).WT(0).n() != NULL )//texture name
+			if((*fi).WT(0).n() >= 0)
 				mtl.map_Kd = m.textures[(*fi).WT(0).n()];
 			else
 				mtl.map_Kd = "";
