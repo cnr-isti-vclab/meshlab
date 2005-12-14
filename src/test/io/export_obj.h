@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.16  2005/12/14 18:08:24  fmazzant
+ added generic save of all type define obj, ply, off, stl
+
  Revision 1.15  2005/12/14 10:49:00  mariolatronico
  check on textures size [ with Federico Mazzanti supervision ]
 
@@ -122,7 +125,6 @@ namespace io {
 		{
 			CallBackPos *cb = oi.cb;
 			
-
 			int current = 0;
 			int max = m.vert.size()+ m.face.size();
 			if(oi.mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD){max+=m.face.size();}

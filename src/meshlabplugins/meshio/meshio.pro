@@ -1,8 +1,8 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include 
-HEADERS       = meshio.h savemaskdialog.h maskobj.h
-SOURCES       = meshio.cpp savemaskdialog.cpp maskobj.cpp
+HEADERS       = meshio.h savemaskdialog.h maskobj.h ../../../../sf/wrap/ply/plylib.h
+SOURCES       = meshio.cpp savemaskdialog.cpp maskobj.cpp ../../../../sf/wrap/ply/plylib.cpp
 FORMS		  = ui/savemask.ui
 TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins

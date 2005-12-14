@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.23  2005/12/14 18:08:24  fmazzant
+ added generic save of all type define obj, ply, off, stl
+
  Revision 1.22  2005/12/14 00:11:33  fmazzant
  update method SaveAs  for a using generic (not still optimized)
 
@@ -165,7 +168,7 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 	if(format.toUpper() == tr("PLY")|format.toUpper() == tr("OFF")|format.toUpper() == tr("STL"))
 	{
 		string filename = fileName.toUtf8().data();
-		bool result = false;//vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
+		bool result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
 		return result;
 	}
 	return false;
@@ -175,7 +178,10 @@ QStringList ExtraMeshIOPlugin::formats(QString & description) const
 {
 	QStringList formatList;
 	formatList << tr("OBJ");
-	description = "Alias Wavefront Object";
+	formatList << tr("PLY");
+	formatList << tr("OFF");
+	formatList << tr("STL");
+	description = "Mesh files ";
 
 	return formatList;
 };

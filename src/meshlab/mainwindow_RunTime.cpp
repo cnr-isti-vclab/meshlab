@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.43  2005/12/14 18:08:22  fmazzant
+added generic save of all type define obj, ply, off, stl
+
 Revision 1.42  2005/12/14 00:25:51  cignoni
 completed multiple texture support
 
@@ -676,7 +679,11 @@ bool MainWindow::saveAs()
 	QString selectedFilter;
 
 	//************************************** mettere in una funzione ****************************
+	std::map<QString,int>ext_map;
+	int nplagin = 0;
 	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
+
+	QString alltype = "All Mesh Files Known (";
 	for (; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin)  // cycle among loaded IO plugins
 	{
 		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
@@ -685,23 +692,21 @@ bool MainWindow::saveAs()
 		QStringList currentFormats = pMeshIOPlugin->formats(currentDescription);
 		QString currentFilterEntry;
 		QStringListIterator itFormat(currentFormats);
-		QString alltype = "All Mesh Files Known (";
-
+		
 		while (itFormat.hasNext())
 		{
 			currentFilterEntry = "Mesh Files (*.";
 			QString ex = itFormat.next().toLower();
 			currentFilterEntry.append(ex);
-			alltype.append("*.*"); //+ex+" ");//costruisce la stringa per gli All Mesh files support!
+			alltype.append("*."+ex+" ");//costruisce la stringa per gli All Mesh files support!
 			currentFilterEntry.append(")");
 			filters.append(currentFilterEntry);
-		}
-		
-		filters << tr("Mesh files (*.ply *.off *.stl)");
-
-		alltype.append(")");//aggiunge l'ultima parentesi 
-		filters.insert(0,alltype);
+			if(ext_map[ex]==0){ext_map[ex]=nplagin;}
+		}	
+		nplagin++;
 	}
+	alltype.append(")");//aggiunge l'ultima parentesi 
+	filters.insert(0,alltype);
 	//************************************ fine ***********************************************
 
 	QString fileName;
@@ -716,39 +721,24 @@ bool MainWindow::saveAs()
 		QString extension = fileName;
 		extension.remove(0, fileName.lastIndexOf('.')+1);
 	
-		if (extension.toUpper() == tr("PLY"))
+		QStringListIterator itFilter(filters);
+		
+		if(extension.toUpper() == tr("OBJ"))
 		{
-			qb->show();
-			ret = this->GLA()->mm->Save(fileName.toStdString().c_str(),QCallBack);
-			qb->hide();
-		}
-		else													
-		{
-			QStringListIterator itFilter(filters);
-			int idx = 0;
-			while (itFilter.hasNext() && (itFilter.next() != selectedFilter))
-				++idx;
-			--idx;  // subtracting 1 since first filter was the default one
-			if ((idx > -1) && (idx < (int)meshIOPlugins.size()))
+			if(maskobj.isfirst)
 			{
-				if(extension.toUpper() == tr("OBJ"))
-				{
-					if(maskobj.isfirst)
-					{
-						SaveMaskDialog dialog(&maskobj,new QWidget());
-						dialog.ReadMask();
-						dialog.exec();
-					}
-				}
-
-				int mask = maskobj.MaskObjToInt();
-				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
-				qb->show();
-				ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
-				qb->hide();
-				
+				SaveMaskDialog dialog(&maskobj,new QWidget());
+				dialog.ReadMask();
+				dialog.exec();
 			}
 		}
+		
+		int mask = maskobj.MaskObjToInt();
+		int idx = ext_map[extension];
+		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
+		qb->show();
+		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
+		qb->hide();
 	}	
 
 	return ret;
