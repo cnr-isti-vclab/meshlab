@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.42  2005/12/14 00:25:51  cignoni
+completed multiple texture support
+
 Revision 1.41  2005/12/14 00:11:32  fmazzant
 update method SaveAs  for a using generic (not still optimized)
 
@@ -655,7 +658,7 @@ void MainWindow::open(QString fileName)
 		{
 			renderModeTextureAct->setChecked(true);
 			renderModeTextureAct->setEnabled(true);
-			GLA()->setTextureMode(GLW::TMPerWedge);
+			GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 		}
 	}
 	qb->hide();
@@ -826,7 +829,7 @@ void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
 void MainWindow::renderTexture()
 {
 	QAction *a = qobject_cast<QAction* >(sender());
-	GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedge);	
+	GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);	
 }
 
 

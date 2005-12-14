@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.56  2005/12/14 00:25:50  cignoni
+completed multiple texture support
+
 Revision 1.55  2005/12/13 14:31:51  alemochi
 Changed names of member functions.
 
@@ -513,9 +516,9 @@ void GLArea::paintGL()
 	if(iRender) {
 		iRender->Render(new QAction("Toon Shader", this), *mm, rm, this); 
 	}
-
+          
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-
+          
 	if(iRender) {
 		glUseProgramObjectARB(0);
 	}
@@ -671,9 +674,9 @@ void GLArea::initTexture()
   if(!mm->cm.textures.empty() && mm->glw.TMId.empty()){
         for(unsigned int i =0; i< mm->cm.textures.size();++i){
           QImage img, imgGL;
-          bool ret=img.load(mm->cm.textures[i].c_str());
+          img.load(mm->cm.textures[i].c_str());
           imgGL=convertToGLFormat(img);
-          qDebug("loaded texture %s. in %i w %i  h %i",mm->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
+          qDebug("loaded texture %s. with id %i w %i  h %i",mm->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
           mm->glw.TMId.push_back(0);
           glEnable(GL_TEXTURE_2D);
           glGenTextures( 1, &(mm->glw.TMId.back()) );
@@ -683,9 +686,8 @@ void GLArea::initTexture()
           glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
           glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	
-          qDebug("loaded texture  %s. in %i",mm->cm.textures[i].c_str(),i);
+          qDebug("loaded texture  %s. in %i",mm->cm.textures[i].c_str(),mm->glw.TMId[i]);
         }
-        setTextureMode(GLW::TMPerWedge);
       }
 }
 
@@ -781,8 +783,10 @@ void GLArea::updateFps()
 {
 	static int j=0;
 	float averageFps=0;
-	if (deltaTime>0) fpsVector[j]=deltaTime;
-	j=(j+1) % 10;
+  if (deltaTime>0) {
+    fpsVector[j]=deltaTime;
+	  j=(j+1) % 10;
+  }
 	for (int i=0;i<10;i++) averageFps+=fpsVector[i];
 	cfps=1000.0f/(averageFps/10);
 }
