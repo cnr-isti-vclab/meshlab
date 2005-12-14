@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.57  2005/12/14 22:25:57  cignoni
+minor formatting changes
+
 Revision 1.56  2005/12/14 00:25:50  cignoni
 completed multiple texture support
 
@@ -254,7 +257,6 @@ GLArea::GLArea(QWidget *parent)
 
 void GLArea::displayModelInfo()
 {
-
 	QString strMessage;
 	QString strVertex="Vertex   "+QString("").setNum(mm->cm.vert.size(),10);
 	QString strTriangle="Triangle "+QString("").setNum(mm->cm.face.size(),10);
@@ -262,8 +264,6 @@ void GLArea::displayModelInfo()
 	//strTriangle.setNum(mm->cm.face.size(),10);
   renderText(currentWidth-currentWidth*0.15,currentHeight-25,strVertex);
 	renderText(currentWidth-currentWidth*0.15,currentHeight-45,strTriangle);
-
-
 }
 
 
@@ -488,7 +488,7 @@ void GLArea::paintGL()
 	glColor3f(1.f,1.f,1.f);
 	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
 	//glBoxWire(bb);
-	float d=1.0f/mm->cm.bbox.Diag();
+	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
 
@@ -758,13 +758,8 @@ void GLArea::setLightModel()
 void GLArea::renderFps()
 {
 	static QFont q("Times",12);
-	
-	QString strInfo("FPS: ");
-	QString fps;
-	QString delta;
-	fps.setNum((int)cfps,10);
-	strInfo+=fps;
-	renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo,q);
+	QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
+  renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo,q);
 }
 
 
@@ -792,5 +787,3 @@ void GLArea::updateFps()
 }
 void GLArea::resetTrackBall(){trackball.Reset();updateGL();}
 
-void GLArea::setRender(MeshRenderInterface * rend) {	iRender = rend; }
-MeshRenderInterface * GLArea::getRender() { return iRender; }
