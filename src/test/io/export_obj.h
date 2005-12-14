@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.15  2005/12/14 10:49:00  mariolatronico
+ check on textures size [ with Federico Mazzanti supervision ]
+
  Revision 1.14  2005/12/14 08:38:55  fmazzant
  bugfix
 
@@ -402,8 +405,11 @@ namespace io {
 			mtl.Ns = ns;
 			mtl.illum = illum;//illumination
 			
-			if((*fi).WT(0).n() >= 0)
+			if(m.textures.size() && (*fi).WT(0).n() >=0 ) {
+				
 				mtl.map_Kd = m.textures[(*fi).WT(0).n()];
+			}
+
 			else
 				mtl.map_Kd = "";
 			
