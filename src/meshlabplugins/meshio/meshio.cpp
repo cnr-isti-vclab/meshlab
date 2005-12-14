@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.22  2005/12/14 00:11:33  fmazzant
+ update method SaveAs  for a using generic (not still optimized)
+
  Revision 1.21  2005/12/13 14:02:50  fmazzant
  added the rescue of the materials of the obj
 
@@ -83,9 +86,9 @@
 #include "../../test/io/import_obj.h"
 #include "../../test/io/export_obj.h"
 
-
-
 #include<vcg/complex/trimesh/update/bounding.h>
+#include <wrap/io_trimesh/export.h>
+#include <wrap/ply/plylib.h>
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -159,9 +162,10 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 		return result;
 	}
 
-	if(format.toUpper() == tr("PLY"))
+	if(format.toUpper() == tr("PLY")|format.toUpper() == tr("OFF")|format.toUpper() == tr("STL"))
 	{
-		bool result = false;
+		string filename = fileName.toUtf8().data();
+		bool result = false;//vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
 		return result;
 	}
 	return false;

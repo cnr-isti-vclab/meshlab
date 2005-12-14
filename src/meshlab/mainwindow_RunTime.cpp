@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.41  2005/12/14 00:11:32  fmazzant
+update method SaveAs  for a using generic (not still optimized)
+
 Revision 1.40  2005/12/13 14:31:51  alemochi
 Changed names of member functions.
 
@@ -665,16 +668,11 @@ void MainWindow::openRecentFile()
 }
 
 bool MainWindow::saveAs()
-{
-	// Opening files in a transparent form (IO plugins contribution is hidden to user)
-	const QString defaultFilter = tr("Mesh files (*.ply *.off *.stl)");
-	const QString allFilter = tr("All Mesh (*.*)");
-	
+{	
 	QStringList filters;
-	filters	<< defaultFilter;
-	
 	QString selectedFilter;
 
+	//************************************** mettere in una funzione ****************************
 	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
 	for (; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin)  // cycle among loaded IO plugins
 	{
@@ -682,58 +680,70 @@ bool MainWindow::saveAs()
 
 		QString currentDescription;
 		QStringList currentFormats = pMeshIOPlugin->formats(currentDescription);
-
-		QString currentFilterEntry = currentDescription + " (*.";
+		QString currentFilterEntry;
 		QStringListIterator itFormat(currentFormats);
-		if (itFormat.hasNext())
-			currentFilterEntry.append(itFormat.next().toLower());
+		QString alltype = "All Mesh Files Known (";
+
 		while (itFormat.hasNext())
 		{
-			currentFilterEntry.append(',');
-			currentFilterEntry.append(itFormat.next().toLower());
+			currentFilterEntry = "Mesh Files (*.";
+			QString ex = itFormat.next().toLower();
+			currentFilterEntry.append(ex);
+			alltype.append("*.*"); //+ex+" ");//costruisce la stringa per gli All Mesh files support!
+			currentFilterEntry.append(")");
+			filters.append(currentFilterEntry);
 		}
-		currentFilterEntry.append(')');
 		
-		filters.append(currentFilterEntry);
-	}
+		filters << tr("Mesh files (*.ply *.off *.stl)");
 
-	filters << allFilter;
+		alltype.append(")");//aggiunge l'ultima parentesi 
+		filters.insert(0,alltype);
+	}
+	//************************************ fine ***********************************************
+
 	QString fileName;
 
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"), &selectedFilter);
 	
 	bool ret = false;
+
 	if (!fileName.isEmpty())
 	{
-		QStringListIterator itFilter(filters);
-		int idx = 0;
-		while (itFilter.hasNext() && (itFilter.next() != selectedFilter))
-			++idx;
-		--idx;  // subtracting 1 since first filter was the default one
-		if ((idx > -1) && (idx < (int)meshIOPlugins.size()))
+		QString extension = fileName;
+		extension.remove(0, fileName.lastIndexOf('.')+1);
+	
+		if (extension.toUpper() == tr("PLY"))
 		{
-			if(fileName.endsWith(".obj",Qt::CaseInsensitive))
+			qb->show();
+			ret = this->GLA()->mm->Save(fileName.toStdString().c_str(),QCallBack);
+			qb->hide();
+		}
+		else													
+		{
+			QStringListIterator itFilter(filters);
+			int idx = 0;
+			while (itFilter.hasNext() && (itFilter.next() != selectedFilter))
+				++idx;
+			--idx;  // subtracting 1 since first filter was the default one
+			if ((idx > -1) && (idx < (int)meshIOPlugins.size()))
 			{
-				if(maskobj.isfirst)
+				if(extension.toUpper() == tr("OBJ"))
 				{
-					SaveMaskDialog dialog(&maskobj,new QWidget());
-					dialog.ReadMask();
-					dialog.exec();
+					if(maskobj.isfirst)
+					{
+						SaveMaskDialog dialog(&maskobj,new QWidget());
+						dialog.ReadMask();
+						dialog.exec();
+					}
 				}
 
 				int mask = maskobj.MaskObjToInt();
 				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
 				qb->show();
-				ret = pCurrentIOPlugin->save("OBJ", fileName, *this->GLA()->mm ,mask,QCallBack,this);
+				ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
 				qb->hide();
-			}
-			
-			if(fileName.endsWith(".ply",Qt::CaseInsensitive))
-			{
-				qb->show();
-				ret = this->GLA()->mm->Save(fileName.toStdString().c_str(),QCallBack);
-				qb->hide();
+				
 			}
 		}
 	}	
