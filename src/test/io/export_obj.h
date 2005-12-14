@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.12  2005/12/14 00:06:19  fmazzant
+ deleted bug meterial index usemtl.
+
  Revision 1.11  2005/12/13 14:02:51  fmazzant
  added the rescue of the materials of the obj
 
@@ -222,10 +225,11 @@ namespace io {
 				{
 					if(oi.mask & ply::PLYMask::PM_FACECOLOR)
 					{
-						int index = CreateNewMaterial(m,materials,&material_num,fi);
+						int index = CreateNewMaterial(m,materials,material_num,fi);
 						
 						if(index == materials.size())//inserted a new element material
 						{
+							material_num++;
 							stream << "usemtl material_" << materials[index-1].index << std::endl;
 							mem_index = index-1;
 						}
@@ -367,7 +371,7 @@ namespace io {
 		/*
 			gestione del file material.
 		*/
-		inline static int CreateNewMaterial(SaveMeshType &m, std::vector<Material> &materials, unsigned int *index, FaceIterator &fi)
+		inline static int CreateNewMaterial(SaveMeshType &m, std::vector<Material> &materials, unsigned int index, FaceIterator &fi)
 		{			
 			unsigned char r = (*fi).C()[0];
 			unsigned char g = (*fi).C()[1];
@@ -382,7 +386,7 @@ namespace io {
 
 			Material mtl;
 
-			mtl.index = (*index);//index of materials
+			mtl.index = index;//index of materials
 			mtl.Ka = Point3f(0.2,0.2,0.2);//ambient
 			mtl.Kd = diffuse;//diffuse
 			mtl.Ks = Point3f(1.0,1.0,1.0);//specular
@@ -398,7 +402,6 @@ namespace io {
 			int i = -1;
 			if((i = MaterialsCompare(materials,mtl)) == -1)
 			{
-				++index;
 				materials.push_back(mtl);
 				return materials.size();
 			}
