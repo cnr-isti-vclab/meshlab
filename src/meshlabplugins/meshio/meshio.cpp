@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.26  2005/12/15 09:24:23  fmazzant
+ added base support (very base) 3ds & cleaned code
+
  Revision 1.25  2005/12/15 08:10:51  fmazzant
  added OFF & STL in formats(...)
 
@@ -187,20 +190,34 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	if(formatName.toUpper() == tr("OBJ"))
 	{
 		QStringList sl = fileName.split(".");
-		if(!(sl.size() == 2 && sl[1] == "obj"))
-			fileName = fileName.append(".obj");
 		string filename = fileName.toUtf8().data();
 		
 		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
+		if(!result)
+			QMessageBox::warning(parent, "", "File not saved!");
 		return result;
 	}
 
 	if(formatName.toUpper() == tr("PLY")|formatName.toUpper() == tr("OFF")|formatName.toUpper() == tr("STL"))
 	{
 		string filename = fileName.toUtf8().data();
+
 		bool result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
+		if(!result)
+			QMessageBox::warning(parent, "", "File not saved!");
 		return result;
 	}
+
+	if(formatName.toUpper() == tr("3DS"))
+	{
+		string filename = fileName.toUtf8().data();
+		bool result = false;
+		if(!result)
+			QMessageBox::warning(parent,"Error","3DS not support");
+		//QMessageBox::warning(parent, title.c_str(), errorMsgFormat.arg(fileName));
+		return result;
+	}
+
 	return false;
 }
 
@@ -224,10 +241,15 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::formats() const
 	stl.desctiption = "STL File Format";
 	stl.extensions << tr("STL");
 
+	Format _3ds;
+	_3ds.desctiption = "3D-Studio File Format";
+	_3ds.extensions << tr("3DS");
+
 	formatList << ply;
 	formatList << obj;
 	formatList << off;
 	formatList << stl;
+	//formatList << _3ds;
 	
 	return formatList;
 };
