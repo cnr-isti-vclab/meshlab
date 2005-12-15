@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.28  2005/12/15 12:27:57  fmazzant
+ first commit 3ds
+
  Revision 1.27  2005/12/15 09:50:53  fmazzant
  3ds
 
@@ -101,7 +104,7 @@
 #include "../../test/io/import_obj.h"
 #include "../../test/io/export_obj.h"
 
-//#include "../../test/io/export_3ds.h"
+#include "../../test/io/export_3ds.h"
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/export_ply.h>
@@ -213,7 +216,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{
-		bool result = false;//vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true);
+		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true);
 		if(!result)
 			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
 		return result;
@@ -250,7 +253,7 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::formats() const
 	formatList << obj;
 	formatList << off;
 	formatList << stl;
-	//formatList << _3ds;
+	formatList << _3ds;
 	
 	return formatList;
 };
