@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.49  2005/12/15 01:13:02  buzzelli
+common code of open and save methods factorized into LoadKnownFilters method
+
 Revision 1.48  2005/12/14 22:24:14  cignoni
 Added preliminary supprot for editing/selection plugins.
 
@@ -153,6 +156,7 @@ private:
 	void updateRecentFileActions();				
 	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
+	void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats);
 
 
 	

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.45  2005/12/15 01:13:03  buzzelli
+common code of open and save methods factorized into LoadKnownFilters method
+
 Revision 1.44  2005/12/14 22:24:14  cignoni
 Added preliminary supprot for editing/selection plugins.
 
@@ -547,61 +550,59 @@ void MainWindow::toggleBackFaceCulling()
 	GLA()->setBackFaceCulling(!rm.backFaceCull);
 }
 
-void MainWindow::open(QString fileName)
+
+void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats)
 {
-	// Opening files in a transparent form (IO plugins contribution is hidden to user)
-	const QString defaultFilter					= tr("Mesh files (*.ply *.off *.stl)");
-	QStringList filters;
-	
-	filters	<< defaultFilter;
-	
-	// HashTable storing all supported formats, preserving for each
-	// of them, the index of first plugin which is able to open it
-	QHash<QString, int> allKnownFormats;
-	
-	QString selectedFilter;  // this will be filled with actual selected filter
+	QString allKnownFormatsFilter = tr("All known formats ("); 
 	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
 	for (int i = 0; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin, ++i)  // cycle among loaded IO plugins
 	{
 		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
 
-		QString currentDescription;
-		QStringList currentFormats = pMeshIOPlugin->formats(currentDescription);
+		QList<MeshIOInterface::Format> currentFormats = pMeshIOPlugin->formats();
+		QList<MeshIOInterface::Format>::iterator itFormat = currentFormats.begin();
+		while(itFormat != currentFormats.end())
+		{
+			MeshIOInterface::Format currentFormat = *itFormat;
+			
+			QString currentFilterEntry = currentFormat.desctiption + " (";
+			
+			QStringListIterator itExtension(currentFormat.extensions);
+			while (itExtension.hasNext())
+			{
+				QString currentExtension = itExtension.next().toLower();
+				if (!allKnownFormats.contains(currentExtension))
+				{
+					allKnownFormats.insert(currentExtension, i);
+					allKnownFormatsFilter.append(tr(" *."));
+					allKnownFormatsFilter.append(currentExtension);
+				}
+				currentFilterEntry.append(tr(" *."));
+				currentFilterEntry.append(currentExtension);
+			}
+			currentFilterEntry.append(')');
+			filters.append(currentFilterEntry);
 
-		QString currentFilterEntry = currentDescription + " (*.";
-		QStringListIterator itFormat(currentFormats);
-		if (itFormat.hasNext())
-		{
-			QString currentFormat = itFormat.next().toLower();
-			if (!allKnownFormats.contains(currentFormat))
-				allKnownFormats.insert(currentFormat, i);
-			currentFilterEntry.append(currentFormat);
+			++itFormat;
 		}
-		while (itFormat.hasNext())
-		{
-			QString currentFormat = itFormat.next().toLower();
-			if (!allKnownFormats.contains(currentFormat))
-				allKnownFormats.insert(currentFormat, i);
-			currentFilterEntry.append(tr(" *."));
-			currentFilterEntry.append(currentFormat);
-		}
-		currentFilterEntry.append(')');
-		
-		filters.append(currentFilterEntry);
-	}
-	QString allKnownFormatsFilter = tr("All known formats (*.ply"); 
-	QHash<QString, int>::iterator itHash = allKnownFormats.begin();
-	for(; itHash != allKnownFormats.end(); ++itHash)
-	{
-		allKnownFormatsFilter.append(tr(" *."));
-		allKnownFormatsFilter.append(itHash.key());
 	}
 	allKnownFormatsFilter.append(')');
-	filters << allKnownFormatsFilter;
+	filters.push_front(allKnownFormatsFilter);
+}
+
+void MainWindow::open(QString fileName)
+{
+	// Opening files in a transparent form (IO plugins contribution is hidden to user)
+	QStringList filters;
+	
+	// HashTable storing all supported formats, preserving for each
+	// of them, the index of first plugin which is able to open it
+	QHash<QString, int> allKnownFormats;
+	
+	LoadKnownFilters(filters, allKnownFormats);
 
 	if (fileName.isEmpty())
-		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".", filters.join("\n"), &selectedFilter);
-	else selectedFilter = allKnownFormatsFilter;
+		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".", filters.join("\n"));
 
 	if (fileName.isEmpty())
 		return;
@@ -618,38 +619,14 @@ void MainWindow::open(QString fileName)
 	extension.remove(0, fileName.lastIndexOf('.')+1);
 	
 	bool success = false;
-	if (extension.toUpper() == tr("PLY"))	// default format
-		success = mm->Open(fileName.toAscii(),QCallBack);
-	else																	// additional formats supported via plugin
-	{
-		// an alternative solution could delegate the opening stuff to the first plugin
-		// in the vector which is able to treats that format, in current implementation
-		// I use the plugin corresponding to the respective item in the combo
-		QStringListIterator itFilter(filters);
-		int idx = 0;
-		while (itFilter.hasNext() && (itFilter.next() != selectedFilter))
-			++idx;
-		--idx;  // subtracting 1 since first filter was the default one
-		if ((idx > -1) && (idx <= (int)meshIOPlugins.size()))
-		{
-			if (idx == (int)meshIOPlugins.size())  // "All files" filter was selected
-			{
-				QString lowerCaseExt = extension.toLower();
-				if (allKnownFormats.contains(lowerCaseExt))
-					idx = allKnownFormats[lowerCaseExt];
-				else
-				{
-					QMessageBox::warning(this, tr("Open File"), tr("Unknown file format"));
-					delete mm;
-					qb->hide();
-					return;
-				}
-			}
-			MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
-			int mask = -1;
-			success = pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla?*/);
-		}
-	}
+	
+	int idx = allKnownFormats[extension.toLower()];
+
+	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
+	
+	int mask = -1;
+	success = pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla?*/);
+
 
 	if (!success)
 	{
@@ -685,11 +662,18 @@ void MainWindow::openRecentFile()
 
 bool MainWindow::saveAs()
 {	
+// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
-	QString selectedFilter;
+	
+	// HashTable storing all supported formats, preserving for each
+	// of them, the index of first plugin which is able to open it
+	QHash<QString, int> allKnownFormats;
+	
+	LoadKnownFilters(filters, allKnownFormats);
+
 
 	//************************************** mettere in una funzione ****************************
-	std::map<QString,int>ext_map;
+	/*std::map<QString,int>ext_map;
 	int nplagin = 0;
 	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
 
@@ -699,14 +683,17 @@ bool MainWindow::saveAs()
 		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
 
 		QString currentDescription;
-		QStringList currentFormats = pMeshIOPlugin->formats(currentDescription);
+		QStringList currentFormats = pMeshIOPlugin->formats();
+		//QList<MeshIOInterface::Format> currentFormats = pMeshIOPlugin->formats();
 		QString currentFilterEntry;
 		QStringListIterator itFormat(currentFormats);
 		
 		while (itFormat.hasNext())
 		{
+			MeshIOInterface::Format currentFormat = itFormat.next();
 			currentFilterEntry = "Mesh Files (*.";
-			QString ex = itFormat.next().toLower();
+			//QString ex = itFormat.next().toLower();
+			QString ex = currentFormat.extensions.first().toLower();
 			currentFilterEntry.append(ex);
 			alltype.append("*."+ex+" ");//costruisce la stringa per gli All Mesh files support!
 			currentFilterEntry.append(")");
@@ -718,11 +705,12 @@ bool MainWindow::saveAs()
 	alltype.append(")");//aggiunge l'ultima parentesi 
 	filters.insert(0,alltype);
 	//************************************ fine ***********************************************
+*/
 
 	QString fileName;
 
 	if (fileName.isEmpty())
-		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"), &selectedFilter);
+		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
 	
 	bool ret = false;
 
@@ -744,7 +732,8 @@ bool MainWindow::saveAs()
 		}
 		
 		int mask = maskobj.MaskObjToInt();
-		int idx = ext_map[extension];
+		//int idx = ext_map[extension];
+		int idx = allKnownFormats[extension.toLower()];
 		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
