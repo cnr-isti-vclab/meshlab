@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.15  2005/12/15 01:20:28  buzzelli
+ formats method adapted in order to fit with recent changes in MeshIOInterface
+
  Revision 1.14  2005/12/09 00:34:31  buzzelli
  io importing mechanism adapted in order to be fully transparent towards the user
 
@@ -73,11 +76,10 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
 
   
 public:
-	//ExtraMeshIOPlugin();
-	QStringList formats(QString &description) const;
+	QList<Format> formats() const;
 
-	bool open(const QString &format, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &format, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	bool save(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 };
 
 #endif

@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.24  2005/12/15 01:20:28  buzzelli
+ formats method adapted in order to fit with recent changes in MeshIOInterface
+
  Revision 1.23  2005/12/14 18:08:24  fmazzant
  added generic save of all type define obj, ply, off, stl
 
@@ -89,6 +92,9 @@
 #include "../../test/io/import_obj.h"
 #include "../../test/io/export_obj.h"
 
+#include <wrap/io_trimesh/import_ply.h>
+#include <wrap/io_trimesh/export_ply.h>
+
 #include<vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
 #include <wrap/ply/plylib.h>
@@ -99,7 +105,7 @@
 using namespace vcg;
 
 
-bool ExtraMeshIOPlugin::open(const QString &format, QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
+bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
 {
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
@@ -115,11 +121,10 @@ bool ExtraMeshIOPlugin::open(const QString &format, QString &fileName,MeshModel 
 		QDir::setCurrent(FileNameDir);
 
 		QString errorMsgFormat = "Error encountered while loading file %1: %2";
+		string filename = fileName.toUtf8().data();
 
-		if(format.toUpper() == tr("OBJ")) //if (format == tr("Import OBJ"))
+		if(formatName.toUpper() == tr("OBJ")) //if (format == tr("Import OBJ"))
 		{
-			string filename = fileName.toUtf8().data();
-
 			vcg::tri::io::ObjInfo oi;
 			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
 			oi.cb = cb;
@@ -139,6 +144,28 @@ bool ExtraMeshIOPlugin::open(const QString &format, QString &fileName,MeshModel 
 				return false;
 			}
 		}
+		else if (formatName.toUpper() == tr("PLY"))
+		{
+			vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
+		  
+			if(mask&ply::PLYMask::PM_VERTQUALITY) qDebug("Has Vertex Quality\n");
+			if(mask&ply::PLYMask::PM_FACEQUALITY) qDebug("Has Face Quality\n");
+			if(mask&ply::PLYMask::PM_FACECOLOR)		qDebug("Has Face Color\n");
+			if(mask&ply::PLYMask::PM_VERTCOLOR)		qDebug("Has Vertex Color\n");
+			if(mask&ply::PLYMask::PM_WEDGTEXCOORD) 
+			{
+				qDebug("Has Wedge Text Coords\n");
+				m.cm.face.EnableWedgeTex();
+			}
+			m.cm.face.EnableNormal();
+			
+			int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm,filename.c_str(),cb);
+			if (result != ::vcg::ply::E_NOERROR)
+			{
+				// print error msg
+				return false;
+			}
+		}
 
 		// update bounding box
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
@@ -152,9 +179,9 @@ bool ExtraMeshIOPlugin::open(const QString &format, QString &fileName,MeshModel 
 	return false;
 }
 
-bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
+bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	if(format.toUpper() == tr("OBJ"))
+	if(formatName.toUpper() == tr("OBJ"))
 	{
 		QStringList sl = fileName.split(".");
 		if(!(sl.size() == 2 && sl[1] == "obj"))
@@ -165,7 +192,7 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 		return result;
 	}
 
-	if(format.toUpper() == tr("PLY")|format.toUpper() == tr("OFF")|format.toUpper() == tr("STL"))
+	if(formatName.toUpper() == tr("PLY")|formatName.toUpper() == tr("OFF")|formatName.toUpper() == tr("STL"))
 	{
 		string filename = fileName.toUtf8().data();
 		bool result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
@@ -174,15 +201,21 @@ bool ExtraMeshIOPlugin::save(const QString &format,QString &fileName, MeshModel 
 	return false;
 }
 
-QStringList ExtraMeshIOPlugin::formats(QString & description) const
+QList<MeshIOInterface::Format> ExtraMeshIOPlugin::formats() const
 {
-	QStringList formatList;
-	formatList << tr("OBJ");
-	formatList << tr("PLY");
-	formatList << tr("OFF");
-	formatList << tr("STL");
-	description = "Mesh files ";
+	QList<Format> formatList;
 
+	Format ply;
+	ply.desctiption = "Stanford Polygon File Format";
+	ply.extensions <<  tr("PLY");
+	
+	Format obj;
+	obj.desctiption = "Alias Wavefront Object";
+	obj.extensions <<  tr("OBJ");
+	
+	formatList << ply;
+	formatList << obj;
+	
 	return formatList;
 };
 
