@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.46  2005/12/15 09:03:05  fmazzant
+deleted comments & cleaning code in saveAs
+
 Revision 1.45  2005/12/15 01:13:03  buzzelli
 common code of open and save methods factorized into LoadKnownFilters method
 
@@ -662,50 +665,11 @@ void MainWindow::openRecentFile()
 
 bool MainWindow::saveAs()
 {	
-// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
 	
-	// HashTable storing all supported formats, preserving for each
-	// of them, the index of first plugin which is able to open it
 	QHash<QString, int> allKnownFormats;
 	
 	LoadKnownFilters(filters, allKnownFormats);
-
-
-	//************************************** mettere in una funzione ****************************
-	/*std::map<QString,int>ext_map;
-	int nplagin = 0;
-	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
-
-	QString alltype = "All Mesh Files Known (";
-	for (; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin)  // cycle among loaded IO plugins
-	{
-		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
-
-		QString currentDescription;
-		QStringList currentFormats = pMeshIOPlugin->formats();
-		//QList<MeshIOInterface::Format> currentFormats = pMeshIOPlugin->formats();
-		QString currentFilterEntry;
-		QStringListIterator itFormat(currentFormats);
-		
-		while (itFormat.hasNext())
-		{
-			MeshIOInterface::Format currentFormat = itFormat.next();
-			currentFilterEntry = "Mesh Files (*.";
-			//QString ex = itFormat.next().toLower();
-			QString ex = currentFormat.extensions.first().toLower();
-			currentFilterEntry.append(ex);
-			alltype.append("*."+ex+" ");//costruisce la stringa per gli All Mesh files support!
-			currentFilterEntry.append(")");
-			filters.append(currentFilterEntry);
-			if(ext_map[ex]==0){ext_map[ex]=nplagin;}
-		}	
-		nplagin++;
-	}
-	alltype.append(")");//aggiunge l'ultima parentesi 
-	filters.insert(0,alltype);
-	//************************************ fine ***********************************************
-*/
 
 	QString fileName;
 
@@ -722,24 +686,20 @@ bool MainWindow::saveAs()
 		QStringListIterator itFilter(filters);
 		
 		if(extension.toUpper() == tr("OBJ"))
-		{
 			if(maskobj.isfirst)
 			{
 				SaveMaskDialog dialog(&maskobj,new QWidget());
 				dialog.ReadMask();
 				dialog.exec();
 			}
-		}
 		
 		int mask = maskobj.MaskObjToInt();
-		//int idx = ext_map[extension];
 		int idx = allKnownFormats[extension.toLower()];
 		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
 		qb->hide();
 	}	
-
 	return ret;
 }
 
