@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.27  2005/12/15 09:50:53  fmazzant
+ 3ds
+
  Revision 1.26  2005/12/15 09:24:23  fmazzant
  added base support (very base) 3ds & cleaned code
 
@@ -97,6 +100,8 @@
 // temporaneamente prendo la versione corrente dalla cartella test
 #include "../../test/io/import_obj.h"
 #include "../../test/io/export_obj.h"
+
+//#include "../../test/io/export_3ds.h"
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/export_ply.h>
@@ -187,34 +192,30 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 
 bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
+	string filename = fileName.toUtf8().data();
+	string ex = formatName.toUtf8().data();
+
 	if(formatName.toUpper() == tr("OBJ"))
-	{
-		QStringList sl = fileName.split(".");
-		string filename = fileName.toUtf8().data();
-		
+	{	
 		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
 		if(!result)
-			QMessageBox::warning(parent, "", "File not saved!");
+			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
 		return result;
 	}
 
 	if(formatName.toUpper() == tr("PLY")|formatName.toUpper() == tr("OFF")|formatName.toUpper() == tr("STL"))
 	{
-		string filename = fileName.toUtf8().data();
-
 		bool result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
 		if(!result)
-			QMessageBox::warning(parent, "", "File not saved!");
+			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
 		return result;
 	}
 
 	if(formatName.toUpper() == tr("3DS"))
 	{
-		string filename = fileName.toUtf8().data();
-		bool result = false;
+		bool result = false;//vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true);
 		if(!result)
-			QMessageBox::warning(parent,"Error","3DS not support");
-		//QMessageBox::warning(parent, title.c_str(), errorMsgFormat.arg(fileName));
+			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
 		return result;
 	}
 
