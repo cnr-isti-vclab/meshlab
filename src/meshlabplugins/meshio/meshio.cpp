@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.25  2005/12/15 08:10:51  fmazzant
+ added OFF & STL in formats(...)
+
  Revision 1.24  2005/12/15 01:20:28  buzzelli
  formats method adapted in order to fit with recent changes in MeshIOInterface
 
@@ -213,8 +216,18 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::formats() const
 	obj.desctiption = "Alias Wavefront Object";
 	obj.extensions <<  tr("OBJ");
 	
+	Format off;
+	off.desctiption = "Object File Format";
+	off.extensions << tr("OFF");
+
+	Format stl;
+	stl.desctiption = "STL File Format";
+	stl.extensions << tr("STL");
+
 	formatList << ply;
 	formatList << obj;
+	formatList << off;
+	formatList << stl;
 	
 	return formatList;
 };
