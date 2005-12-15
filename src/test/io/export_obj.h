@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.18  2005/12/15 01:00:51  fmazzant
+ added the +1 to the value of return from function GetIndexVertex(m, (*fi).V(k))
+
  Revision 1.17  2005/12/14 22:21:49  cignoni
  Changed GetIndexVertex from O(n) to O(1)
 
@@ -265,7 +268,8 @@ namespace io {
 					for(unsigned int k=0;k<MAX;k++)
 					{
 						int v = -1; 
-						v = GetIndexVertex(m, (*fi).V(k));//considera i vertici per faccia
+						//il +1 perche' gli obj considerano i vertici a partire da 1 e non da 0.
+						v = GetIndexVertex(m, (*fi).V(k)) + 1;//considera i vertici per faccia
 						
 						int vt = -1;
 						vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
