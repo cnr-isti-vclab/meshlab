@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.27  2005/12/15 01:15:07  buzzelli
+minor changes into MeshIOInterface
+
 Revision 1.26  2005/12/14 22:24:14  cignoni
 Added preliminary supprot for editing/selection plugins.
 
@@ -114,8 +117,14 @@ class GLArea;
 class MeshIOInterface
 {
 public:
+   struct Format
+		{
+			QString desctiption;
+			QStringList extensions;
+		};
+
     virtual ~MeshIOInterface() {}
-    virtual QStringList formats(QString &description) const = 0;
+    virtual QList<Format> formats() const = 0;
     
  virtual bool open(
       const QString &format, // "OBJ"
