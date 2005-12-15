@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2005/12/15 15:26:33  fmazzant
+ update lib3ds
+
  Revision 1.1  2005/12/15 12:27:58  fmazzant
  first commit 3ds
 
@@ -38,6 +41,7 @@
 #include <wrap/callback.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <wrap/ply/io_mask.h>
+#include <QMessageBox>
 
 namespace vcg {
 namespace tri {
@@ -54,18 +58,22 @@ namespace io {
 	
 		static bool SaveASCII(SaveMeshType &m, const char * filename)	
 		{
+			QMessageBox::warning(new QWidget(),"Warning","Save not define!");
 			return false;
 		}
 
 		static bool SaveBinary(SaveMeshType &m, const char * filename)
 		{
+			QMessageBox::warning(new QWidget(),"Warning","Save not define!");
 			return false;
 		}
 		
 		static bool Save(SaveMeshType &m, const char * filename, bool binary)
 		{
-			if(binary) return SaveBinary(m,filename);
-			else return SaveASCII(m,filename);
+			if(binary) 
+				return SaveBinary(m,filename);
+			else 
+				return SaveASCII(m,filename);
 		}
 
 	}; // end class

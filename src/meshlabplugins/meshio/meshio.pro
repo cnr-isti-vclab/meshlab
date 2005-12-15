@@ -1,11 +1,13 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include 
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/lib3ds-1.2.0
 HEADERS       = meshio.h savemaskdialog.h maskobj.h ../../../../sf/wrap/ply/plylib.h
 SOURCES       = meshio.cpp savemaskdialog.cpp maskobj.cpp ../../../../sf/wrap/ply/plylib.cpp
 FORMS		  = ui/savemask.ui
 TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins
+
+win32:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds-120s.lib
 
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
