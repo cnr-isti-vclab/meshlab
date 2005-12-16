@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.5  2005/12/16 15:30:17  fmazzant
+ added in Save 3ds vertexs & faces
+
  Revision 1.4  2005/12/16 13:04:04  fmazzant
  update method SaveBinary. generete empty file 3ds.
 
@@ -74,30 +77,58 @@ namespace io {
 
 		static bool SaveBinary(SaveMeshType &m, const char * filename, CallBackPos *cb=0)
 		{
-			Lib3dsMesh *mesh = lib3ds_mesh_new(filename);
+			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");
 
 			int current = 0;
 			int max = m.vert.size()+m.face.size();
 			
+			lib3ds_mesh_new_point_list(mesh, m.vert.size());//definisce il numero di vertici
+			int v_index = 0;
 			VertexIterator vi;
 			for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 			{
+				Lib3dsPoint point;
+				point.pos[0] = (*vi).P()[0];
+				point.pos[1] = (*vi).P()[1];
+				point.pos[2] = (*vi).P()[2];
+
+				mesh->pointL[v_index] = point;
+
 				if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+				v_index++;
 			}
-
+			
+			lib3ds_mesh_new_face_list (mesh, m.face.size());
+			int f_index = 0;
 			FaceIterator fi;
 			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 			{
+				int v0 = GetIndexVertex(m, (*fi).V(0));
+				int v1 = GetIndexVertex(m, (*fi).V(1));
+				int v2 = GetIndexVertex(m, (*fi).V(2));
+
+				Lib3dsFace face;
+				face.points[0] = v0;
+				face.points[1] = v1;
+				face.points[2] = v2;
+				face.flags = 0;
+				face.smoothing = 0;
+				face.normal[0] = (*fi).N()[0];
+				face.normal[1] = (*fi).N()[1];
+				face.normal[2] = (*fi).N()[2];
+
+				mesh->faceL[f_index]=face;
+
 				if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
+				f_index++;
 			}
 			
 			//salva la mesh in 3ds
 			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
 			lib3ds_file_insert_mesh (file, mesh);//inserisce la mesh al file
 			bool result = lib3ds_file_save(file, filename); //salva il file
-			lib3ds_file_free(file);//libera lo spazio file.
 
 			return result;
 		}
@@ -105,6 +136,14 @@ namespace io {
 		static bool Save(SaveMeshType &m, const char * filename, bool binary,CallBackPos *cb=0)
 		{
 			return SaveBinary(m,filename,cb);	
+		}
+
+		/*
+			restituisce l'indice del vertice, aggiunto di una unita'.
+		*/
+		inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
+		{
+			return p-&*(m.vert.begin());
 		}
 	}; // end class
 
