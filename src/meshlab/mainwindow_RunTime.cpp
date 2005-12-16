@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.47  2005/12/16 17:14:41  fmazzant
+added control file's extension
+
 Revision 1.46  2005/12/15 09:03:05  fmazzant
 deleted comments & cleaning code in saveAs
 
@@ -677,6 +680,17 @@ bool MainWindow::saveAs()
 		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
 	
 	bool ret = false;
+
+	QStringList fs = fileName.split(".");
+	do 
+	{
+		if(fs.size() < 2)
+		{
+			QMessageBox::warning(new QWidget(),"Save Error","you must specify the file's extension!!");
+			fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));	
+		}
+	}
+	while(!(fs.size() < 2));
 
 	if (!fileName.isEmpty())
 	{

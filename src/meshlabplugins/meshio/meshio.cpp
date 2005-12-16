@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.30  2005/12/16 17:14:42  fmazzant
+ added control file's extension
+
  Revision 1.29  2005/12/16 00:37:30  fmazzant
  update base export_3ds.h + callback
 
@@ -224,6 +227,8 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
 		return result;
 	}
+
+	QMessageBox::warning(parent, "Unknow type", "file's extension not supported!!!");
 
 	return false;
 }
