@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.6  2005/12/16 17:26:05  fmazzant
+ cleaned up code
+
  Revision 1.5  2005/12/16 15:30:17  fmazzant
  added in Save 3ds vertexs & faces
 
@@ -95,7 +98,9 @@ namespace io {
 				mesh->pointL[v_index] = point;
 
 				if (cb !=NULL)
-						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+					(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+				else
+					return false;
 				v_index++;
 			}
 			
@@ -104,24 +109,25 @@ namespace io {
 			FaceIterator fi;
 			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 			{
-				int v0 = GetIndexVertex(m, (*fi).V(0));
-				int v1 = GetIndexVertex(m, (*fi).V(1));
-				int v2 = GetIndexVertex(m, (*fi).V(2));
-
 				Lib3dsFace face;
-				face.points[0] = v0;
-				face.points[1] = v1;
-				face.points[2] = v2;
+				face.points[0] = GetIndexVertex(m, (*fi).V(0));
+				face.points[1] = GetIndexVertex(m, (*fi).V(1));
+				face.points[2] = GetIndexVertex(m, (*fi).V(2));
 				face.flags = 0;
-				face.smoothing = 0;
+				face.smoothing = 10;//da modificare.
 				face.normal[0] = (*fi).N()[0];
 				face.normal[1] = (*fi).N()[1];
 				face.normal[2] = (*fi).N()[2];
 
 				mesh->faceL[f_index]=face;
+				
+				//SALVARE COORDINATE TEXTURE
+				//SALVARE MATERIALE.
 
 				if (cb !=NULL)
-						(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
+					(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
+				else 
+					return false;
 				f_index++;
 			}
 			
@@ -139,7 +145,7 @@ namespace io {
 		}
 
 		/*
-			restituisce l'indice del vertice, aggiunto di una unita'.
+			restituisce l'indice del vertice.
 		*/
 		inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
 		{
