@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.19  2005/12/16 14:58:28  fmazzant
+ deleted old code
+
  Revision 1.18  2005/12/15 01:00:51  fmazzant
  added the +1 to the value of return from function GetIndexVertex(m, (*fi).V(k))
 
@@ -322,13 +325,9 @@ namespace io {
 		/*
 			restituisce l'indice del vertice, aggiunto di una unita'.
 		*/
-    inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
+		inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
 		{
-	/*		for(unsigned int i=0;i<m.vert.size();i++)
-				if(m.vert[i].P() == p)
-					return ++i;
-			return-1;*/
-      return p-&*(m.vert.begin());
+			return p-&*(m.vert.begin());
 		}
 		
 		/*
