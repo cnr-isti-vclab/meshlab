@@ -25,13 +25,14 @@
   History
 
  $Log$
+ Revision 1.3  2005/12/16 00:37:31  fmazzant
+ update base export_3ds.h + callback
+
  Revision 1.2  2005/12/15 15:26:33  fmazzant
  update lib3ds
 
  Revision 1.1  2005/12/15 12:27:58  fmazzant
  first commit 3ds
-
- 
 
 ****************************************************************************/
 
@@ -41,6 +42,7 @@
 #include <wrap/callback.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <wrap/ply/io_mask.h>
+
 #include <QMessageBox>
 
 namespace vcg {
@@ -58,24 +60,44 @@ namespace io {
 	
 		static bool SaveASCII(SaveMeshType &m, const char * filename)	
 		{
-			QMessageBox::warning(new QWidget(),"Warning","Save not define!");
+			QMessageBox::warning(new QWidget(),"Warning","Save not implemented!");
 			return false;
 		}
 
-		static bool SaveBinary(SaveMeshType &m, const char * filename)
+		static bool SaveBinary(SaveMeshType &m, const char * filename, CallBackPos *cb=0)
 		{
-			QMessageBox::warning(new QWidget(),"Warning","Save not define!");
-			return false;
+			int current = 0;
+			int max = m.vert.size()+m.face.size();
+
+			VertexIterator vi;
+			for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
+			{
+				//salvare i vertici
+				//salvare le normali per vertice
+				//salvare colore per vertice
+
+				if (cb !=NULL)
+						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+			}
+
+			FaceIterator fi;
+			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
+			{
+				//salvare le facce
+				//salvare le normali per faccia
+				//salvare il materiale
+
+				if (cb !=NULL)
+						(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
+			}
+
+			return true;
 		}
 		
-		static bool Save(SaveMeshType &m, const char * filename, bool binary)
+		static bool Save(SaveMeshType &m, const char * filename, bool binary,CallBackPos *cb=0)
 		{
-			if(binary) 
-				return SaveBinary(m,filename);
-			else 
-				return SaveASCII(m,filename);
+			return SaveBinary(m,filename,cb);	
 		}
-
 	}; // end class
 
 } // end Namespace tri

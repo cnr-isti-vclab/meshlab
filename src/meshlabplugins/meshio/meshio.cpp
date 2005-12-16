@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.29  2005/12/16 00:37:30  fmazzant
+ update base export_3ds.h + callback
+
  Revision 1.28  2005/12/15 12:27:57  fmazzant
  first commit 3ds
 
@@ -216,7 +219,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{
-		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true);
+		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,cb);
 		if(!result)
 			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
 		return result;
