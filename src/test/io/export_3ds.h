@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.4  2005/12/16 13:04:04  fmazzant
+ update method SaveBinary. generete empty file 3ds.
+
  Revision 1.3  2005/12/16 00:37:31  fmazzant
  update base export_3ds.h + callback
 
@@ -42,6 +45,11 @@
 #include <wrap/callback.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include <wrap/ply/io_mask.h>
+
+#include <lib3ds/file.h>
+#include <lib3ds/io.h>
+#include <lib3ds/mesh.h>
+#include <lib3ds/types.h>
 
 #include <QMessageBox>
 
@@ -66,16 +74,14 @@ namespace io {
 
 		static bool SaveBinary(SaveMeshType &m, const char * filename, CallBackPos *cb=0)
 		{
+			Lib3dsMesh *mesh = lib3ds_mesh_new(filename);
+
 			int current = 0;
 			int max = m.vert.size()+m.face.size();
-
+			
 			VertexIterator vi;
 			for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 			{
-				//salvare i vertici
-				//salvare le normali per vertice
-				//salvare colore per vertice
-
 				if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
 			}
@@ -83,15 +89,17 @@ namespace io {
 			FaceIterator fi;
 			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 			{
-				//salvare le facce
-				//salvare le normali per faccia
-				//salvare il materiale
-
 				if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
 			}
+			
+			//salva la mesh in 3ds
+			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
+			lib3ds_file_insert_mesh (file, mesh);//inserisce la mesh al file
+			bool result = lib3ds_file_save(file, filename); //salva il file
+			lib3ds_file_free(file);//libera lo spazio file.
 
-			return true;
+			return result;
 		}
 		
 		static bool Save(SaveMeshType &m, const char * filename, bool binary,CallBackPos *cb=0)
