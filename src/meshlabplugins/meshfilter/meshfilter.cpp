@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.21  2005/12/17 13:33:19  mariolatronico
+added refine dialog (preliminary code). Actually parameters are not used
+
 Revision 1.20  2005/12/13 11:01:57  cignoni
 Added callback management in standard refine
 
@@ -67,6 +70,11 @@ Added copyright info
 ////////////
 using namespace vcg;
 
+
+
+
+
+
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction("Loop Subdivision Surface", this);
 	actionList << new QAction("Butterfly Subdivision Surface", this);
@@ -77,6 +85,12 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	/////////////
 	actionList << new QAction("Decimator", this);
 	////////////
+	refineDialog = new RefineDialog();
+	refineDialog->hide();
+}
+
+ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
+	delete refineDialog;
 }
 
 QList<QAction *> ExtraMeshFilterPlugin::actions() const {
@@ -155,6 +169,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+			refineDialog->show();
 			// TODO : length 0 by default, need a dialog ?
 			vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
 				(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f, false, cb);
