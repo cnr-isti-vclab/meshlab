@@ -1,7 +1,7 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = meshfilter.h refine_loop.h
+HEADERS       = meshfilter.h refine_loop.h refinedialog.h
 SOURCES       = meshfilter.cpp
 TARGET        = meshfilter
 DESTDIR       = ../../meshlab/plugins
