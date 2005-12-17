@@ -28,6 +28,7 @@
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include "refinedialog.h"
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
@@ -36,6 +37,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 		
 		public:
 	ExtraMeshFilterPlugin();
+	~ExtraMeshFilterPlugin();
     virtual const ActionInfo &Info(QAction *);
     virtual const PluginInfo &Info();
 
@@ -44,6 +46,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 
 protected:
 	QList <QAction *> actionList;
+	RefineDialog *refineDialog;
 };
 
 #endif
