@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.22  2005/12/18 15:01:05  mariolatronico
+- added slot for threshold refine and "refine only selected vertices"
+
 Revision 1.21  2005/12/17 13:33:19  mariolatronico
 added refine dialog (preliminary code). Actually parameters are not used
 
@@ -98,9 +101,9 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 }
 
 
- const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action) 
- {
-   ActionInfo ai; 
+const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action) 
+{
+	ActionInfo ai; 
   
 	if( action->text() == tr("Loop Subdivision Surface") )
 		{
@@ -112,25 +115,25 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm, it is an interpolated method");
 			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
 			
-		
+			
 		}
   if( action->text() == tr("Remove Unreferenced Vertexes"))
 		{
 			ai.Help = tr("Remove Unreferenced Vertexes");
 			ai.ShortHelp = tr("Remove Unreferenced Vertexes");
-
-			}
+			
+		}
   if( action->text() == tr("Remove Duplicated Vertexes"))
 		{
 			ai.Help = tr("Remove Duplicated Vertexes");
 			ai.ShortHelp = tr("Remove Duplicated Vertexes");
-
-			}
+			
+		}
 	if(action->text() == tr("Remove Null Faces"))
 		{
 			ai.Help = tr("Remove Null Faces");
 			ai.ShortHelp = tr("Remove Null Faces");
-	
+			
 		}
 	if(action->text() == tr("Laplacian Smooth"))
 		{
@@ -169,10 +172,15 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
-			refineDialog->show();
+			int continueValue = refineDialog->exec();
+			if (continueValue == QDialog::Rejected)
+				return false; // don't continue, user pressed Cancel
+			
+			double threshold = refineDialog->getThreshold();
+			bool selected = refineDialog->isSelected();
 			// TODO : length 0 by default, need a dialog ?
 			vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
-				(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),0.0f, false, cb);
+				(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),threshold, selected, cb);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
 		}
 	if(filter->text() == tr("Butterfly Subdivision Surface") )
@@ -183,8 +191,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+			
+			int continueValue = refineDialog->exec();
+			if (continueValue == QDialog::Rejected)
+				return false; // don't continue, user pressed Cancel
+			double threshold = refineDialog->getThreshold();
+			bool selected = refineDialog->isSelected();
 		
-			vcg::Refine<CMeshO, MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),0, false, cb);
+			vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),threshold, selected, cb);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
   if(filter->text() == tr("Remove Unreferenced Vertexes"))
@@ -210,13 +224,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			cb(100,tr("smoothed mesh").toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
-		
+	
  	if(filter->text() == tr("Decimator"))
  		{
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
  			Decimator<CMeshO>(m.cm,10);
  		}
-		
+	
 	return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)

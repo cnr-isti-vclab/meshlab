@@ -14,7 +14,33 @@ public:
   {
     setupUi( this );
   }
+public slots:
 
+void on_refineSelectedCB_stateChanged(int selected) {
+	
+  this->selected = selected;
+
+	
+}
+
+	void on_thresholdSB_valueChanged(double threshold) {
+		this->threshold = threshold;
+	}
+
+	inline double getThreshold() {
+		return threshold;
+	}
+
+	inline bool isSelected() {
+		return selected;
+	}
+
+
+private:
+  // affect only selected vertices ?
+  int selected;
+  // threshold value for refine
+	int threshold;
 
 };
 
