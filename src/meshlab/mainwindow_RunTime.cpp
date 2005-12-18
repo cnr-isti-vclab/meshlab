@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.48  2005/12/18 19:18:45  fmazzant
+deleted bug when pess cancel on dialog (save as).
+
 Revision 1.47  2005/12/16 17:14:41  fmazzant
 added control file's extension
 
@@ -684,13 +687,14 @@ bool MainWindow::saveAs()
 	QStringList fs = fileName.split(".");
 	do 
 	{
-		if(fs.size() < 2)
+		if(fs.size() < 2 & !fileName.isEmpty())
 		{
 			QMessageBox::warning(new QWidget(),"Save Error","you must specify the file's extension!!");
-			fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));	
+			fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
+			fs = fileName.split(".");
 		}
 	}
-	while(!(fs.size() < 2));
+	while(!(fs.size() < 2) & !(fileName.isEmpty()));
 
 	if (!fileName.isEmpty())
 	{
