@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.23  2005/12/19 15:11:49  mariolatronico
+added decimator dialog
+
 Revision 1.22  2005/12/18 15:01:05  mariolatronico
 - added slot for threshold refine and "refine only selected vertices"
 
@@ -90,6 +93,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	////////////
 	refineDialog = new RefineDialog();
 	refineDialog->hide();
+	decimatorDialog = new DecimatorDialog();
+	decimatorDialog->hide();
 }
 
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
@@ -197,7 +202,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 				return false; // don't continue, user pressed Cancel
 			double threshold = refineDialog->getThreshold();
 			bool selected = refineDialog->isSelected();
-		
 			vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),threshold, selected, cb);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
@@ -227,8 +231,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	
  	if(filter->text() == tr("Decimator"))
  		{
+			int continueValue = decimatorDialog->exec();
+			if (continueValue == QDialog::Rejected)
+				return false; // don't continue, user pressed Cancel
+			int step = decimatorDialog->getStep();
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
- 			Decimator<CMeshO>(m.cm,10);
+ 			Decimator<CMeshO>(m.cm,step);
  		}
 	
 	return true;

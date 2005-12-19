@@ -29,6 +29,8 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include "refinedialog.h"
+#include "decimatordialog.h"
+
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
@@ -47,6 +49,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 protected:
 	QList <QAction *> actionList;
 	RefineDialog *refineDialog;
+	DecimatorDialog *decimatorDialog;
 };
 
 #endif

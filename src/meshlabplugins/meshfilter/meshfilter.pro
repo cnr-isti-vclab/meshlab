@@ -1,14 +1,14 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = meshfilter.h refine_loop.h refinedialog.h
+HEADERS       = meshfilter.h refine_loop.h refinedialog.h decimatordialog.h
 SOURCES       = meshfilter.cpp
 TARGET        = meshfilter
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
-FORMS         = refine.ui
+FORMS         = refine.ui decimator.ui
 unix{
 	QMAKE_CC	 = gcc-3.3
 	QMAKE_CXX	 = g++-3.3
