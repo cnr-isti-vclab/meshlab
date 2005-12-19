@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.49  2005/12/19 12:22:13  fmazzant
+deleted bug when press Save on dialog(saveAs)
+
 Revision 1.48  2005/12/18 19:18:45  fmazzant
 deleted bug when pess cancel on dialog (save as).
 
@@ -687,14 +690,14 @@ bool MainWindow::saveAs()
 	QStringList fs = fileName.split(".");
 	do 
 	{
-		if(fs.size() < 2 & !fileName.isEmpty())
+		if((fs.size() < 2) & !(fileName.isEmpty()))
 		{
 			QMessageBox::warning(new QWidget(),"Save Error","you must specify the file's extension!!");
 			fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
 			fs = fileName.split(".");
 		}
 	}
-	while(!(fs.size() < 2) & !(fileName.isEmpty()));
+	while(!(fs.size() < 2) | !(fileName.isEmpty()));
 
 	if (!fileName.isEmpty())
 	{
