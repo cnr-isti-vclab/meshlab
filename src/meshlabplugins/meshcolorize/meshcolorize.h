@@ -74,6 +74,9 @@ public:
 			actionList << qa; 
 
 			actionList << new QAction(QString("Gaussian Curvature"),this);
+			actionList << new QAction(QString("Self Intersections"),this);
+			actionList << new QAction(QString("Border"),this);
+      
 		}
     
 		void Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent);

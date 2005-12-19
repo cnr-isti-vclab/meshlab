@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2005/12/19 16:49:14  cignoni
+Added SelfIntersection and Border colorization methods
+
 Revision 1.7  2005/12/12 22:48:42  cignoni
 Added plugin info methods
 
@@ -43,6 +46,7 @@ Added copyright info
 
 #include "meshcolorize.h"
 #include <limits>
+#include <vcg/complex/trimesh/clean.h>
 
 using namespace vcg;
 
@@ -186,7 +190,29 @@ void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode 
 		rm.colorMode = GLW::CMPerVert;
 		return;
 	}
-	if(mode->text() == tr("None"))
+	if(mode->text() == tr("Self Intersections"))
+	{
+    vector<CFaceO *> IntersFace;
+    tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
+    
+    vector<CFaceO *>::iterator fpi;
+    for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
+        (*fpi)->C()=Color4b::Red;
+
+		rm.colorMode = GLW::CMPerFace;
+		return;
+	}
+  if(mode->text() == tr("Border"))
+	{
+    vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+    vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+    vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace (m.cm);
+    vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
+		rm.colorMode = GLW::CMPerVert;
+		return;
+	}
+
+  if(mode->text() == tr("None"))
 	{
 		rm.colorMode = GLW::CMNone;
 		//parent->setColorMode(GLW::CMNone);
