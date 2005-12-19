@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2005/12/19 16:22:30  davide_portelli
+Now "Toon Shader" plugin is checkable
+
 Revision 1.5  2005/12/05 18:11:28  ggangemi
 Added toon shader example
 
@@ -67,7 +70,9 @@ public:
 	MeshShaderRenderPlugin()
 	{
 		supported = false;
-		actionList << new QAction(QString("Toon Shader"),this);
+		QAction * qa= new QAction(QString("Toon Shader"),this);
+		qa->setCheckable(true);
+		actionList << qa;
 	}
 
 	QList<QAction *> actions () const {return actionList;}
