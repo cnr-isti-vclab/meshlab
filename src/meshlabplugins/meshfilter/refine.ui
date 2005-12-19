@@ -49,7 +49,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="thresholdSB" />
+        <widget class="QDoubleSpinBox" name="thresholdSB" >
+         <property name="singleStep" >
+          <double>0.1</double>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

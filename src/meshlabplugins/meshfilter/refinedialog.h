@@ -13,12 +13,17 @@ public:
   RefineDialog() : QDialog()
   {
     setupUi( this );
+		threshold = 0.0;
+		selected = false;
   }
 public slots:
 
 void on_refineSelectedCB_stateChanged(int selected) {
 	
-  this->selected = selected;
+	if (selected == Qt::Checked)
+		this->selected = true;
+	else
+		this->selected = false;
 
 	
 }
@@ -26,6 +31,8 @@ void on_refineSelectedCB_stateChanged(int selected) {
 	void on_thresholdSB_valueChanged(double threshold) {
 		this->threshold = threshold;
 	}
+
+public:
 
 	inline double getThreshold() {
 		return threshold;
@@ -38,9 +45,9 @@ void on_refineSelectedCB_stateChanged(int selected) {
 
 private:
   // affect only selected vertices ?
-  int selected;
+  bool selected;
   // threshold value for refine
-	int threshold;
+	double threshold;
 
 };
 
