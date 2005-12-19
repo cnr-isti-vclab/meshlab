@@ -24,6 +24,11 @@
   History
 
 $Log$
+Revision 1.8  2005/12/19 16:10:35  mariolatronico
+slightly changed the algorithm , inserted some debug information (IsComplexManifold).
+
+WARNING: the Decimator procedure gives non 2-manfiold meshes actually
+
 Revision 1.7  2005/12/12 20:26:52  giec
 new version with real average point
 
@@ -56,6 +61,7 @@ Test program for clustering decimator.
 #define __VCGLIB_DECIMATOR
 
 #include<vcg/complex/trimesh/base.h>
+#include <vcg/complex/trimesh/clean.h>
 #include<vcg/space/triangle3.h>
 #include<vcg/complex/trimesh/update/topology.h>
 
@@ -79,13 +85,12 @@ namespace vcg{
   {	 
 		typedef struct media_struct
 		{
+			bool init; // true se trovo il puntatore vp
 			Point3f accum;
 			int num;//numero di vertici sommati
+			typename MESH_TYPE::VertexType *vp; // puntatore al vertice 
 		}structMedia;
-    //int n3 = n*n*n;
-    //std::vector <typename MESH_TYPE::CoordType > Vett(n3);
-//		const int p = n;
-
+    
 		structMedia ***Vett;
 		Vett = new structMedia **[n];
 		for(int i = 0; i < n; ++i)
@@ -98,23 +103,14 @@ namespace vcg{
 				{
 					Vett[i][j][z].accum.Zero();
 					Vett[i][j][z].num = 0;
+					Vett[i][j][z].init = false;
+					Vett[i][j][z].vp = 0;
+
 				}
 			}
 		}
 
-		//std::vector< std::vector< std::vector<typename MESH_TYPE::CoordType> > > Vett(n); 	
-		// 	for(int i = 0 ; i < n ; ++i)
-		//		for(int j = 0 ; j < n ; ++j) {
-		//				Vett[i].resize(n);	
-		//				Vett[i][j].resize(n);
-		//		}
-		////inizializzo a zero gli elementi
-		//	for(int i = 0 ; i < n ; ++i)
-		//		for(int j = 0 ; j < n ; ++j)
-		//			for(int k = 0 ; k < n ; ++k)
-		//   				Vett[i][j][k].Zero();
-	
-    typename MESH_TYPE::CoordType Cmin,Cmax;
+	  typename MESH_TYPE::CoordType Cmin,Cmax;
 		Cmin.Zero(); Cmax.Zero();
 		for (int i = 0; i < 3; i++) {
 			//			Cmin[i] = numeric_limits< float >::max();
@@ -180,9 +176,9 @@ namespace vcg{
 				idy = (floor(y / Py));
 				idz = (floor(z / Pz));
 				
-				if(idx > 9)idx=9;
-				if(idy > 9)idy=9;
-				if(idz > 9)idz=9;
+				if(idx > n-1)idx=n-1;
+				if(idy > n-1)idy=n-1;
+				if(idz > n-1)idz=n-1;
 
 				//Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (app - tras))/2;
 				Vett[idx][idy][idz].accum += (app - tras);
@@ -218,25 +214,50 @@ namespace vcg{
 										if(idy > (n - 1)) idy = n - 1;
 										if(idz > (n - 1)) idz = n - 1;
 																
-										(*fi).V(i)->P() = (Vett[idx][idy][idz].accum / Vett[idx][idy][idz].num);
 
-										//(*fi).V(i)->SetUserBit(referredBit);
+										if(Vett[idx][idy][idz].init)
+										{
+											(*fi).V(i)=(Vett[idx][idy][idz].vp);
+										}
+										else
+										{
+											(*fi).V(i)->P() = (Vett[idx][idy][idz].accum / Vett[idx][idy][idz].num);
+											Vett[idx][idy][idz].vp = (*fi).V(i);
+											Vett[idx][idy][idz].init = true;
+										}
+										(*fi).V(i)->SetUserBit(referredBit);
 
 									}
 							}
-						area = Area(*fi);
-						if( area  <  0.0000000001f ) {// numeric_limits<float>::epsilon() ){
-							(*fi).SetD();
-							}
+						//area = Area(*fi);
+						//if( area  <  0.0000000001f ) {// numeric_limits<float>::epsilon() ){
+						//	(*fi).SetD();
+						//	}
+						for(int idf =0 ;idf <3;++idf)
+						{
+							if(((*fi).V(idf) == (*fi).V1(idf)) || ((*fi).V(idf) == (*fi).V2(idf)))
+								(*fi).SetD();
+						}
 					}
 			}
-
+		qDebug("eliminate %d vertici",tri::Clean<CMeshO>::RemoveUnreferencedVertex(m));
+		tri::Clean<CMeshO>::RemoveZeroAreaFace(m);
 		tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
-		//tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+		tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+		if (tri::Clean<CMeshO>::IsComplexManifold(m))
+			qDebug("E' 2manifold");
+		else
+			qDebug("NON E' 2manifold");
+		for(int i = 0; i < n; ++i)
+		{
+			for(int j = 0; j < n; ++j)
+			{
+				delete[] Vett[i][j];
+			}
+			delete[] Vett[i];
+		}
 
-
-
-		delete(Vett);
+		delete[] Vett;
 	
 
     return true;
