@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.31  2005/12/19 19:03:31  davide_portelli
+Now decorations in render menu are consistent when we have tiled windows.
+
 Revision 1.30  2005/12/14 22:24:14  cignoni
 Added preliminary supprot for editing/selection plugins.
 
@@ -596,8 +599,10 @@ void MainWindow::loadPlugins()
 				meshIOPlugins.push_back(iIO);
 
 			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
-			if (iDecorator)
-			  addToMenu(iDecorator->actions(), renderMenu, SLOT(applyDecorateMode()));
+			if (iDecorator){
+				TotalDecoratorsList=iDecorator->actions();
+				addToMenu(iDecorator->actions(), renderMenu, SLOT(applyDecorateMode()));
+			}
 
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 			if (iRender)

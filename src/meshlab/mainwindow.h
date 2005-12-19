@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.50  2005/12/19 19:03:06  davide_portelli
+Now decorations in render menu are consistent when we have tiled windows.
+
 Revision 1.49  2005/12/15 01:13:02  buzzelli
 common code of open and save methods factorized into LoadKnownFilters method
 
@@ -237,7 +240,7 @@ private:
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;
 	////////////////////////////////////////////////////
-	vector<QAction *> TotalRenderList;
+	QList<QAction *> TotalDecoratorsList;
 	////////////////////////////////////////////////////
 };
 

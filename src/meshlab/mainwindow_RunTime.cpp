@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.51  2005/12/19 19:05:53  davide_portelli
+Now decorations in render menu are consistent when we have tiled windows.
+
 Revision 1.50  2005/12/19 18:08:25  fmazzant
 bug-fix
 
@@ -447,7 +450,7 @@ void MainWindow::updateMenus()
 		setFancyLightingAct->setChecked(rm.fancyLighting);
 		setDoubleLightingAct->setChecked(rm.doubleSideLighting);
 
-		foreach (QAction *a,TotalRenderList){a->setChecked(false);}
+		foreach (QAction *a,TotalDecoratorsList){a->setChecked(false);}
 		if(GLA()->iDecoratorsList){
 			pair<QAction *,MeshDecorateInterface *> p;
 			foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
