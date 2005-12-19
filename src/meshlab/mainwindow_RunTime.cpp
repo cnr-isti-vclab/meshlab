@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.50  2005/12/19 18:08:25  fmazzant
+bug-fix
+
 Revision 1.49  2005/12/19 12:22:13  fmazzant
 deleted bug when press Save on dialog(saveAs)
 
@@ -688,16 +691,12 @@ bool MainWindow::saveAs()
 	bool ret = false;
 
 	QStringList fs = fileName.split(".");
-	do 
+	
+	if(!fileName.isEmpty() && fs.size() < 2)
 	{
-		if((fs.size() < 2) & !(fileName.isEmpty()))
-		{
-			QMessageBox::warning(new QWidget(),"Save Error","you must specify the file's extension!!");
-			fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
-			fs = fileName.split(".");
-		}
+		QMessageBox::warning(new QWidget(),"Save Error","you must specify the file's extension!!");
+		return ret;
 	}
-	while(!(fs.size() < 2) | !(fileName.isEmpty()));
 
 	if (!fileName.isEmpty())
 	{
