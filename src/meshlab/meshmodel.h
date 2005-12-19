@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2005/12/19 16:50:30  cignoni
+Added Mark component (needed for self-intersection)
+
 Revision 1.13  2005/12/07 00:56:40  fmazzant
 added support for exporter generic obj file (level base)
 
@@ -84,7 +87,7 @@ class CVertexO;
 // Opt stuff
 
 class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Color4b, vert::Normal3f, vert::Qualityf, vert::BitFlags  >{};
-class CFaceO    : public FaceSimp2< CVertexO, CEdge, CFaceO, face::InfoOcf, face::FFAdj, face::WedgeTexturefOcf, face::VertexRef, face::BitFlags, face::Normal3fOcf > {};
+class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,  face::InfoOcf, face::Color4b, face::FFAdj, face::WedgeTexturefOcf, face::VertexRef, face::BitFlags, face::Normal3fOcf, face::Mark > {};
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
 
 /*
