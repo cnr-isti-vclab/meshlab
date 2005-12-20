@@ -13,7 +13,7 @@ public:
   RefineDialog() : QDialog()
   {
     setupUi( this );
-		threshold = 0.0;
+		threshold = 0.00;
 		selected = false;
   }
 public slots:

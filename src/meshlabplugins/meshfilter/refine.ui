@@ -50,8 +50,14 @@
        </item>
        <item>
         <widget class="QDoubleSpinBox" name="thresholdSB" >
+         <property name="decimals" >
+          <number>3</number>
+         </property>
+         <property name="maximum" >
+          <double>99.999</double>
+         </property>
          <property name="singleStep" >
-          <double>0.1</double>
+          <double>0.001</double>
          </property>
         </widget>
        </item>
