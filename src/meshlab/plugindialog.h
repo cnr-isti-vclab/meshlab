@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2005/12/20 03:33:16  davide_portelli
+Modified PluginDialog.
+
 Revision 1.2  2005/12/03 22:49:46  cignoni
 Added copyright info
 
@@ -45,19 +48,17 @@ class PluginDialog : public QDialog
     Q_OBJECT
 
 public:
-    PluginDialog(const QString &path, const QStringList &fileNames,
-                 QWidget *parent = 0);
+  PluginDialog(const QString &path, const QStringList &fileNames,QWidget *parent = 0);
 
 private:
-    void populateTreeWidget(const QString &path, const QStringList &fileNames);
-    void addItems(QTreeWidgetItem *pluginItem, const char *interfaceName,
-                  const QStringList &features);
+  void populateTreeWidget(const QString &path, const QStringList &fileNames);
+  void addItems(QTreeWidgetItem *pluginItem, const QStringList &features);
 
-    QLabel *label;
-    QTreeWidget *treeWidget;
-    QPushButton *okButton;
-    QIcon interfaceIcon;
-    QIcon featureIcon;
+  QLabel *label;
+  QTreeWidget *treeWidget;
+  QPushButton *okButton;
+  QIcon interfaceIcon;
+  QIcon featureIcon;
 };
 
 #endif

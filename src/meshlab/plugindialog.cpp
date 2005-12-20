@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2005/12/20 03:33:16  davide_portelli
+Modified PluginDialog.
+
 Revision 1.4  2005/12/04 02:44:39  davide_portelli
 Added texture icon in toolbar
 
@@ -35,14 +38,12 @@ Added copyright info
 ****************************************************************************/
 
 #include <QtGui>
-
+#include <QStringList>
 #include "meshmodel.h"
 #include "interfaces.h"
 #include "plugindialog.h"
 
-PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,
-                           QWidget *parent)
-    : QDialog(parent)
+PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWidget *parent): QDialog(parent)
 {
     label = new QLabel;
     label->setWordWrap(true);
@@ -52,7 +53,6 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,
 
     treeWidget = new QTreeWidget;
     treeWidget->setAlternatingRowColors(false);
-    treeWidget->setSelectionMode(QAbstractItemView::NoSelection);
     treeWidget->setHeaderLabels(headerLabels);
     treeWidget->header()->hide();
 
@@ -69,18 +69,15 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,
     mainLayout->addWidget(okButton, 2, 1);
     setLayout(mainLayout);
 
-    interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),
-                            QIcon::Normal, QIcon::On);
-    interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),
-                            QIcon::Normal, QIcon::Off);
+    interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),QIcon::Normal, QIcon::On);
+    interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),QIcon::Normal, QIcon::Off);
     featureIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
 
     setWindowTitle(tr("Plugin Information"));
     populateTreeWidget(path, fileNames);
 }
 
-void PluginDialog::populateTreeWidget(const QString &path,
-                                      const QStringList &fileNames)
+void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fileNames)
 {
     if (fileNames.isEmpty()) {
         label->setText(tr("Can't find any plugins in the %1 " "directory.").arg(QDir::convertSeparators(path)));
@@ -94,7 +91,8 @@ void PluginDialog::populateTreeWidget(const QString &path,
 
             QTreeWidgetItem *pluginItem = new QTreeWidgetItem(treeWidget);
             pluginItem->setText(0, fileName);
-            treeWidget->setItemExpanded(pluginItem, true);
+						pluginItem->setIcon(0, interfaceIcon);
+            treeWidget->setItemExpanded(pluginItem, false);
 
             QFont boldFont = pluginItem->font(0);
             boldFont.setBold(true);
@@ -102,35 +100,51 @@ void PluginDialog::populateTreeWidget(const QString &path,
 
             if (plugin) {
                 MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
-             /*   if (iMeshIO)
-                    addItems(pluginItem, "MeshIOInterface", iMeshIO->brushes());
-
-                MeshFilterInterface *iShape = qobject_cast<MeshFilterInterface *>(plugin);
-                if (iShape)
-                    addItems(pluginItem, "MeshFilterInterface", iShape->shapes());
-
-                FilterInterface *iFilter =
-                        qobject_cast<FilterInterface *>(plugin);
-                if (iFilter)
-                    addItems(pluginItem, "FilterInterface", iFilter->filters());
-  */          }
+								if (iMeshIO){
+									QStringList Templist;
+									foreach(const MeshIOInterface::Format f,iMeshIO->formats()){Templist.push_back(f.desctiption);}
+                  addItems(pluginItem,Templist);
+								}
+                MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
+								if (iDecorate){
+									QStringList Templist;
+									foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
+									addItems(pluginItem,Templist);
+								}
+								MeshColorizeInterface *iColorize = qobject_cast<MeshColorizeInterface *>(plugin);
+								if (iColorize){
+									QStringList Templist;
+									foreach(QAction *a,iColorize->actions()){Templist.push_back(a->text());}
+									addItems(pluginItem,Templist);
+								}
+								MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+								if (iFilter){
+									QStringList Templist;
+									foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
+									addItems(pluginItem,Templist);
+								}
+								MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+								if (iRender){
+									QStringList Templist;
+									foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
+									addItems(pluginItem,Templist);
+								}
+								MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
+								if (iEdit){
+									QStringList Templist;
+									foreach(QAction *a,iEdit->actions()){Templist.push_back(a->text());}
+									addItems(pluginItem,Templist);
+								}
+           }
         }
     }
 }
 
-void PluginDialog::addItems(QTreeWidgetItem *pluginItem,
-                            const char *interfaceName,
-                            const QStringList &features)
-{
-    QTreeWidgetItem *interfaceItem = new QTreeWidgetItem(pluginItem);
-    interfaceItem->setText(0, interfaceName);
-    interfaceItem->setIcon(0, interfaceIcon);
+void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &features){
 
-    foreach (QString feature, features) {
-        if (feature.endsWith("..."))
-            feature.chop(3);
-        QTreeWidgetItem *featureItem = new QTreeWidgetItem(interfaceItem);
-        featureItem->setText(0, feature);
-        featureItem->setIcon(0, featureIcon);
-    }
+	foreach (QString feature, features) {
+		QTreeWidgetItem *featureItem = new QTreeWidgetItem(pluginItem);
+    featureItem->setText(0, feature);
+    featureItem->setIcon(0, featureIcon);
+  }
 }
