@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.10  2005/12/21 00:42:32  buzzelli
+Better handling of errors inside opened file
+
 Revision 1.9  2005/12/12 17:10:13  buzzelli
 face loading process speeded up
 
@@ -141,24 +144,36 @@ struct Material
 };
 
 enum OBJError {
-	E_NOERROR,				// 0
-		// Errori di open
-	E_CANTOPEN,				// 1
-	E_UNESPECTEDEOF,	// 2
-	E_ABORTED					// 3
+		// Successfull opening
+	E_NOERROR,								// 0
+		// Opening Errors
+	E_CANTOPEN,								// 1
+	E_UNESPECTEDEOF,					// 2
+	E_ABORTED,								// 3
+
+	E_NO_VERTEX,							// 4
+	E_NO_FACE,								// 5
+	E_LESS_THAN_3VERTINFACE,	// 6
+	E_BAD_VERT_INDEX,					// 7
+	E_BAD_TEX_VERT_INDEX 			// 8
 };
 
 static const char* ErrorMsg(int error)
 {
   static const char* obj_error_msg[] =
   {
-		"No errors",
-		"Can't open file",
-		"Premature End of file",
-		"File opening aborted"
+		"No errors",												// 0
+		"Can't open file",									// 1
+		"Premature End of file",						// 2
+		"File opening aborted",							// 3
+		"No vertex field found",						// 4
+		"No face field found",							// 5
+		"Face with less than 3 vertices",		// 6
+		"Bad vertex index in face",					// 7
+		"Bad texture index in face"					// 8
 	};
 
-  if(error>2 || error<0) return "Unknown error";
+  if(error>8 || error<0) return "Unknown error";
   else return obj_error_msg[error];
 };
 
@@ -197,10 +212,13 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 	// if LoadMask has not been called yet, we call it here
 	if (oi.mask == -1)
-	{
-		int mask;
-		LoadMask(filename, mask, oi);
-	}
+		LoadMask(filename, oi.mask, oi);
+
+	if (oi.numVertices == 0)
+		return E_NO_VERTEX;
+
+	if (oi.numTriangles == 0)
+		return E_NO_FACE;
 
 	// creating an input file stream
 	std::ifstream stream(filename);
@@ -222,7 +240,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 	int numVerticesPlusFaces = oi.numVertices + oi.numTriangles;
 
-	// vertexes allocation is done once a time
+	// performing vertices and faces allocation once a time
 	VertexIterator vi = Allocator<OpenMeshType>::AddVertices(m,oi.numVertices);
 	FaceIterator   fi = Allocator<OpenMeshType>::AddFaces(m,oi.numTriangles);
 
@@ -231,7 +249,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		tokens.clear();
 		TokenizeNextLine(stream, tokens);
 		
-		if (tokens.size() > 0)
+		unsigned numTokens = tokens.size();
+		if (numTokens > 0)
 		{
 			header.clear();
 			header = tokens[0];
@@ -263,6 +282,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			}
 			else if (header.compare("f")==0)  // face
 			{
+				if (numTokens < 4) return E_LESS_THAN_3VERTINFACE;
+				
 				int v1_index, v2_index, v3_index;
 				int vt1_index, vt2_index, vt3_index;
 				
@@ -307,9 +328,17 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					v3_index = atoi(tokens[3].c_str());
 				}
 
-				if (v1_index < 0) v1_index += numVertices; else v1_index--;  // since index start from 1
-				if (v2_index < 0) v2_index += numVertices; else v2_index--;  // instead of 0, as stored
-				if (v3_index < 0) v3_index += numVertices; else v3_index--;  // int the vertices vector
+				if (v1_index < 0) v1_index += numVertices;
+				else if (v1_index > numVertices)	return E_BAD_VERT_INDEX;
+				else v1_index--;  // since index start from 1
+
+				if (v2_index < 0) v2_index += numVertices;
+				else if (v2_index > numVertices)	return E_BAD_VERT_INDEX;
+				else v2_index--;  // instead of 0, as stored
+
+				if (v3_index < 0) v3_index += numVertices;
+				else if (v3_index > numVertices)	return E_BAD_VERT_INDEX;
+				else v3_index--;  // int the vertices vector
 			
 
 				(*fi).V(0) = &(m.vert[ v1_index ]);
@@ -376,8 +405,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					else
 						v4_index	= atoi(tokens[++iVertex].c_str());
 						
-					if (v4_index < 0) v4_index += numVertices; else v4_index--;
-			
+					if (v4_index < 0) v4_index += numVertices;
+					else if (v4_index > numVertices)	return E_BAD_VERT_INDEX;
+					else v4_index--;
+
 					(*fi).V(0) = &(m.vert[ v1_index ]);
 					(*fi).V(1) = &(m.vert[ v3_index ]);
 					(*fi).V(2) = &(m.vert[ v4_index ]);
@@ -418,8 +449,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 					v3_index = v4_index;
 				}
-				// TODO: gestire opportunamente presenza di errori nel file
-
+				
 				// callback invocation, abort loading process if result is false
 				if ((cb !=NULL) && (((numTriangles + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numTriangles + numVertices)/(float)numVerticesPlusFaces, "Face Loading"))
 					return E_ABORTED;
