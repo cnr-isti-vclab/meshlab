@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.52  2005/12/21 01:16:15  buzzelli
+Better handling of errors residing inside opened file
+
 Revision 1.51  2005/12/19 19:05:53  davide_portelli
 Now decorations in render menu are consistent when we have tiled windows.
 
@@ -613,17 +616,16 @@ void MainWindow::open(QString fileName)
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
 	
-	// HashTable storing all supported formats, preserving for each
-	// of them, the index of first plugin which is able to open it
+	// HashTable storing all supported formats togheter with
+	// the index of first plugin which is able to open it
 	QHash<QString, int> allKnownFormats;
 	
 	LoadKnownFilters(filters, allKnownFormats);
 
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".", filters.join("\n"));
-
-	if (fileName.isEmpty())
-		return;
+	
+	if (fileName.isEmpty())	return;
 
 	// this change of dir is needed for subsequent texture loading
 	QString fileNameDir = fileName.left(fileName.lastIndexOf("/")); 
@@ -636,21 +638,13 @@ void MainWindow::open(QString fileName)
 	QString extension = fileName;
 	extension.remove(0, fileName.lastIndexOf('.')+1);
 	
-	bool success = false;
-	
+	// retrieving corresponding IO plugin
 	int idx = allKnownFormats[extension.toLower()];
-
 	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
 	
 	int mask = -1;
-	success = pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla?*/);
-
-
-	if (!success)
-	{
-		QMessageBox::warning(this, tr("Error"),tr("Cannot load %1.").arg(fileName));
-    delete mm;
-	}
+	if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla*/))
+		delete mm;
 	else{
 		GLArea *gla;
 		gla=new GLArea(workspace);
@@ -669,6 +663,7 @@ void MainWindow::open(QString fileName)
 			GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 		}
 	}
+
 	qb->hide();
 }
 

@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.31  2005/12/21 01:17:05  buzzelli
+ Better handling of errors residing inside opened file
+
  Revision 1.30  2005/12/16 17:14:42  fmazzant
  added control file's extension
 
@@ -140,7 +143,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
 		QDir::setCurrent(FileNameDir);
 
-		QString errorMsgFormat = "Error encountered while loading file %1: %2";
+		QString errorMsgFormat = "Error encountered while loading file %1:\n%2";
 		string filename = fileName.toUtf8().data();
 
 		if(formatName.toUpper() == tr("OBJ")) //if (format == tr("Import OBJ"))
@@ -151,16 +154,15 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 
 			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
 			{
-				//QMessageBox::information(parent, tr("OBJ Opening"), tr("Model has wedge text coords"));
+				qDebug("Has Wedge Text Coords\n");
 				m.cm.face.EnableWedgeTex();
 			}
 			m.cm.face.EnableNormal();
 
-			// load from disk
 			int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
 			if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 			{
-				QMessageBox::warning(parent, tr("OBJ Opening"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+				QMessageBox::warning(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
 				return false;
 			}
 		}
@@ -182,16 +184,22 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm,filename.c_str(),cb);
 			if (result != ::vcg::ply::E_NOERROR)
 			{
-				// print error msg
+				QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
 				return false;
 			}
 		}
+		else if (formatName.toUpper() == tr("OFF"))
+		{
+		}
+		else if (formatName.toUpper() == tr("STL"))
+		{
+		}
+		else if (formatName.toUpper() == tr("3DS"))
+		{
+		}
 
-		// update bounding box
-		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-
-		// update normals
-		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);
+		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);				// update bounding box
+		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// update normals
 
 		return true;
 	}
