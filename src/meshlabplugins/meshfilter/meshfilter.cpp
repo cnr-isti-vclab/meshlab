@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.24  2005/12/21 11:02:14  mariolatronico
+refactored subdivision surfaces code
+
 Revision 1.23  2005/12/19 15:11:49  mariolatronico
 added decimator dialog
 
@@ -119,8 +122,6 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 	  {
 			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm, it is an interpolated method");
 			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
-			
-			
 		}
   if( action->text() == tr("Remove Unreferenced Vertexes"))
 		{
@@ -132,7 +133,6 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 		{
 			ai.Help = tr("Remove Duplicated Vertexes");
 			ai.ShortHelp = tr("Remove Duplicated Vertexes");
-			
 		}
 	if(action->text() == tr("Remove Null Faces"))
 		{
@@ -169,10 +169,10 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 
 bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb) 
 {
-	if(filter->text() == tr("Loop Subdivision Surface") )
-		{
-			//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
-			//if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
+	double threshold = 0.0;
+	bool selected = false;
+
+	if( filter->text().contains(tr("Subdivision Surface")) ) {
 			if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
@@ -180,29 +180,22 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			int continueValue = refineDialog->exec();
 			if (continueValue == QDialog::Rejected)
 				return false; // don't continue, user pressed Cancel
-			
-			double threshold = refineDialog->getThreshold();
-			bool selected = refineDialog->isSelected();
-			// TODO : length 0 by default, need a dialog ?
+			double threshold = refineDialog->getThreshold(); // threshold for refinying
+			bool selected = refineDialog->isSelected(); // refine only selected faces
+	}
+
+	if(filter->text() == tr("Loop Subdivision Surface") )
+		{
 			vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
 				(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),threshold, selected, cb);
+
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
 		}
 	if(filter->text() == tr("Butterfly Subdivision Surface") )
 	  {
-			//vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
-			//if(!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
-			if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
-			
-			int continueValue = refineDialog->exec();
-			if (continueValue == QDialog::Rejected)
-				return false; // don't continue, user pressed Cancel
-			double threshold = refineDialog->getThreshold();
-			bool selected = refineDialog->isSelected();
-			vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >(m.cm,vcg::MidPointButterfly<CMeshO>(),threshold, selected, cb);
+			vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >
+				(m.cm,vcg::MidPointButterfly<CMeshO>(),threshold, selected, cb);
+
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
   if(filter->text() == tr("Remove Unreferenced Vertexes"))
