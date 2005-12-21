@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.32  2005/12/21 14:22:58  buzzelli
+ First steps in STL and OFF files importing
+
  Revision 1.31  2005/12/21 01:17:05  buzzelli
  Better handling of errors residing inside opened file
 
@@ -118,6 +121,9 @@
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/export_ply.h>
 
+#include <wrap/io_trimesh/import_stl.h>
+#include <wrap/io_trimesh/import_off.h>
+
 #include<vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
 #include <wrap/ply/plylib.h>
@@ -181,7 +187,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			}
 			m.cm.face.EnableNormal();
 			
-			int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm,filename.c_str(),cb);
+			int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), cb);
 			if (result != ::vcg::ply::E_NOERROR)
 			{
 				QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
@@ -190,12 +196,28 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		}
 		else if (formatName.toUpper() == tr("OFF"))
 		{
+			m.cm.face.EnableNormal();
+			int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str());
+			if (result != 0)  // OFFCodes enum is protected
+			{
+				QMessageBox::warning(parent, tr("OFF Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
+				return false;
+			}
 		}
 		else if (formatName.toUpper() == tr("STL"))
 		{
+			m.cm.face.EnableNormal();
+			int result = vcg::tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), cb);
+			if (result != vcg::tri::io::ImporterSTL<CMeshO>::E_NOERROR)
+			{
+				QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
+				return false;
+			}
 		}
 		else if (formatName.toUpper() == tr("3DS"))
 		{
+			// TODO: still to implement
+			return false;
 		}
 
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);				// update bounding box
