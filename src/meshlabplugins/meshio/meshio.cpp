@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.33  2005/12/21 23:28:56  buzzelli
+ code cleaning
+
  Revision 1.32  2005/12/21 14:22:58  buzzelli
  First steps in STL and OFF files importing
 
@@ -139,11 +142,12 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
 	
+	
 	if (!fileName.isEmpty())
 	{
 		// initializing progress bar status
 		if (cb != NULL)
-		(*cb)(0, "Starting...");
+			(*cb)(0, "Loading...");
 
 		// this change of dir is needed for subsequent texture/material loading
 		QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
@@ -154,9 +158,9 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 
 		if(formatName.toUpper() == tr("OBJ")) //if (format == tr("Import OBJ"))
 		{
-			vcg::tri::io::ObjInfo oi;
-			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
+			vcg::tri::io::ObjInfo oi;	
 			oi.cb = cb;
+			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
 
 			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
 			{
