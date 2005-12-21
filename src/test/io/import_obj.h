@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.11  2005/12/21 23:23:33  buzzelli
+code cleaning
+
 Revision 1.10  2005/12/21 00:42:32  buzzelli
 Better handling of errors inside opened file
 
@@ -109,7 +112,7 @@ struct TexCoord
 {
 	float u;
 	float v;
-	// float w; // not used for now
+	// float w; // not used
 };
 
 struct Material
@@ -179,36 +182,30 @@ static const char* ErrorMsg(int error)
 
 static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 {
-	// obj file should be in ascii format
 	return OpenAscii(m, filename, oi);
 }
 
-static int Open( OpenMeshType &m, const char * filename, CallBackPos *cb=0)
-{
-	ObjInfo oi;
-  oi.cb=cb; 
-	// obj file should be in ascii format
-  return OpenAscii(m, filename, oi);
-}
-
-// here mask is an out parameter
 static int Open( OpenMeshType &m, const char * filename, int &mask, CallBackPos *cb=0)
 {
 	ObjInfo oi;
   oi.cb=cb; 
-	// obj file should be in ascii format
-  int result = OpenAscii(m, filename, oi);
+	int result = OpenAscii(m, filename, oi);
 	mask = oi.mask;
 	return result;
 }
 
+/*!
+* Opens an object file (in ascii format) and populates the mesh passed as first
+* accordingly to read data
+* \param m The mesh model to be populated with data stored into the file
+* \param filename The name of the file to open
+* \param oi A structure containing infos about the object to be opened
+*/
 static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 {
 	m.Clear();
 	
 	CallBackPos *cb = oi.cb;
-	if (cb !=NULL)
-		(*cb)(0, "Starting...");
 
 	// if LoadMask has not been called yet, we call it here
 	if (oi.mask == -1)
@@ -220,7 +217,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	if (oi.numTriangles == 0)
 		return E_NO_FACE;
 
-	// creating an input file stream
 	std::ifstream stream(filename);
 	if (stream.fail())
 		return E_CANTOPEN;
@@ -231,8 +227,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	std::vector< std::string > tokens;
 	std::string	header;
 
-	short currentMaterialIdx = 0;
-	Material defaultMaterial;
+	short currentMaterialIdx = 0;			// index of current material into materials vector
+	Material defaultMaterial;					// default material: white
 	materials.push_back(defaultMaterial);
 
 	int numVertices  = 0;  // stores the number of vertices been read till now
@@ -240,11 +236,12 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 	int numVerticesPlusFaces = oi.numVertices + oi.numTriangles;
 
-	// performing vertices and faces allocation once a time
+	// vertices and faces allocatetion
 	VertexIterator vi = Allocator<OpenMeshType>::AddVertices(m,oi.numVertices);
 	FaceIterator   fi = Allocator<OpenMeshType>::AddFaces(m,oi.numTriangles);
 
-	while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
+	// parsing file
+	while (!stream.eof())
 	{
 		tokens.clear();
 		TokenizeNextLine(stream, tokens);
@@ -264,7 +261,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				
 				++vi;  // move to next vertex iterator
 
-				// callback invocation, abort loading process if result is false
+				// callback invocation, abort loading process if the call returns false
 				if ((cb !=NULL) && (((numTriangles + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numTriangles + numVertices)/(float)numVerticesPlusFaces, "Vertex Loading"))
 					return E_ABORTED;
 			}
@@ -309,17 +306,17 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					TexCoord t = texCoords[--vt1_index];
 					(*fi).WT(0).u() = t.u;
 					(*fi).WT(0).v() = t.v;
-					/*if(multit) */(*fi).WT(0).n() = material.textureIdx;  // TODO: fill with the right texture idx
+					/*if(multit) */(*fi).WT(0).n() = material.textureIdx;
 
 					t = texCoords[--vt2_index];
 					(*fi).WT(1).u() = t.u;
 					(*fi).WT(1).v() = t.v;
-					/*if(multit) */(*fi).WT(1).n() = material.textureIdx;  // TODO: fill with the right texture idx
+					/*if(multit) */(*fi).WT(1).n() = material.textureIdx;
 
 					t = texCoords[--vt3_index];
 					(*fi).WT(2).u() = t.u;
 					(*fi).WT(2).v() = t.v;
-					/*if(multit) */(*fi).WT(2).n() = material.textureIdx;  // TODO: fill with the right texture idx
+					/*if(multit) */(*fi).WT(2).n() = material.textureIdx;
 				}
 				else
 				{
@@ -330,15 +327,15 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 				if (v1_index < 0) v1_index += numVertices;
 				else if (v1_index > numVertices)	return E_BAD_VERT_INDEX;
-				else v1_index--;  // since index start from 1
+				else v1_index--;  // since index starts from 1 instead of 0
 
 				if (v2_index < 0) v2_index += numVertices;
 				else if (v2_index > numVertices)	return E_BAD_VERT_INDEX;
-				else v2_index--;  // instead of 0, as stored
+				else v2_index--;  // since index starts from 1 instead of 0
 
 				if (v3_index < 0) v3_index += numVertices;
 				else if (v3_index > numVertices)	return E_BAD_VERT_INDEX;
-				else v3_index--;  // int the vertices vector
+				else v3_index--;	// since index starts from 1 instead of 0
 			
 
 				(*fi).V(0) = &(m.vert[ v1_index ]);
@@ -384,21 +381,21 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						vt4_index = atoi(texcoord.c_str());
 
 						Material material = materials[currentMaterialIdx];
-						// also texcoord index starts from 1 instead of 0, so we decrement it by 1
 						TexCoord t = texCoords[vt1_index];
 						(*fi).WT(0).u() = t.u;
 						(*fi).WT(0).v() = t.v;
-						/*if(multit) */(*fi).WT(0).n() = material.textureIdx;  // TODO: fill with the right texture idx
+						/*if(multit) */(*fi).WT(0).n() = material.textureIdx;
 
 						t = texCoords[vt3_index];
 						(*fi).WT(1).u() = t.u;
 						(*fi).WT(1).v() = t.v;
-						/*if(multit) */(*fi).WT(1).n() = material.textureIdx;  // TODO: fill with the right texture idx
+						/*if(multit) */(*fi).WT(1).n() = material.textureIdx;
 
+						// also texcoord index starts from 1 instead of 0, so we decrement it by 1
 						t = texCoords[--vt4_index];
 						(*fi).WT(2).u() = t.u;
 						(*fi).WT(2).v() = t.v;
-						/*if(multit) */(*fi).WT(2).n() = material.textureIdx;  // TODO: fill with the right texture idx
+						/*if(multit) */(*fi).WT(2).n() = material.textureIdx;
 
 						vt3_index = vt4_index;
 					}
@@ -407,7 +404,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						
 					if (v4_index < 0) v4_index += numVertices;
 					else if (v4_index > numVertices)	return E_BAD_VERT_INDEX;
-					else v4_index--;
+					else v4_index--;	// since index starts from 1 instead of 0
 
 					(*fi).V(0) = &(m.vert[ v1_index ]);
 					(*fi).V(1) = &(m.vert[ v3_index ]);
@@ -441,8 +438,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					// puo' portare alla generazione di triangoli molto 'sottili' (tuttavia
 					// con questo metodo si ha la garanzia che tutti i triangoli generati
 					// conservino la stessa orientazione).
-					// TODO: provare a suddividere il poligono in triangoli in maniera piu'
-					// uniforme...
 
 					++fi;
 					++numTriangles;
@@ -450,13 +445,13 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					v3_index = v4_index;
 				}
 				
-				// callback invocation, abort loading process if result is false
+				// callback invocation, abort loading process if the call returns false
 				if ((cb !=NULL) && (((numTriangles + numVertices)%100)==0) && !(*cb)(100.0 * (float)(numTriangles + numVertices)/(float)numVerticesPlusFaces, "Face Loading"))
 					return E_ABORTED;
 			}
 			else if (header.compare("mtllib")==0)	// material library
 			{
-				// obtain the name of the file  containing materials library
+				// obtain the name of the file containing materials library
 				std::string materialFileName = tokens[1];
 				LoadMaterials( materialFileName.c_str(), materials, m.textures);
 			}
@@ -476,7 +471,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					++i;
 				}
 			}
-			// for now, we simply ignore other situations
+			// we simply ignore other situations
 		}
 	}
 	
@@ -616,8 +611,11 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	}	// end of SplitVVTVNToken
 
 
-	// Da preferire nell'utilizzo la versione che prende come parametro
-	// di ingresso anche una struttura ObjInfo di cui riempira' i campi
+	/*!
+	* Retrieves kind of data stored into the file and fills a mask appropriately
+	* \param filename The name of the file to open
+	*	\param mask	A mask which will be filled according to type of data found in the object
+	*/
 	static bool LoadMask(const char * filename, int &mask)
 	{
 		ObjInfo oi;
@@ -625,6 +623,12 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	}
 
 	
+	/*!
+	* Retrieves kind of data stored into the file and fills a mask appropriately
+	* \param filename The name of the file to open
+	*	\param mask	A mask which will be filled according to type of data found in the object
+	* \param oi A structure which will be filled with infos about the object to be opened
+	*/
 	static bool LoadMask(const char * filename, int &mask, ObjInfo &oi)
 	{
 		std::ifstream stream(filename);
@@ -641,7 +645,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		int numTriangles	= 0;	// stores the number of triangular faces been read till now
 
 		// cycle till we encounter first face
-		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
+		while (!stream.eof())
 		{
 			tokens.clear();
 			header.clear();
@@ -653,12 +657,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 				if (header.compare("v")==0)
 					++numVertices;
-				//else if (header.compare("vt")==0)
-				//{	
-				//}
-				//else if (header.compare("vn")==0)
-				//{
-				//}
 				else if (header.compare("f")==0)
 				{
 					numTriangles += (tokens.size() - 3);
@@ -698,12 +696,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		}
 
 		// after the encounter of first face we avoid to do additional tests
-		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
+		while (!stream.eof())
 		{
 			tokens.clear();
 			header.clear();
-			
-			//GetNextLineHeader(stream, header, remainingText);
 			TokenizeNextLine(stream, tokens);
 			
 			if (tokens.size() > 0)
@@ -712,12 +708,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				
 				if (header.compare("v")==0)
 					++numVertices;
-				//else if (header.compare("vt")==0)
-				//{	
-				//}
-				//else if (header.compare("vn")==0)
-				//{
-				//}
 				else if (header.compare("f")==0)
 					numTriangles += (tokens.size() - 3);
 			}
@@ -751,7 +741,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		if( pf.AddToRead(FaceDesc(1))!=-1 ) mask |= ply::PLYMask::PM_FACEFLAGS;
 
 		if( pf.AddToRead(FaceDesc(2))!=-1 ) mask |= ply::PLYMask::PM_FACEQUALITY;
-		if( pf.AddToRead(FaceDesc(3))!=-1 ) mask |= ply::PLYMask::PM_WEDGTEXCOORD;
 		if( pf.AddToRead(FaceDesc(5))!=-1 ) mask |= ply::PLYMask::PM_WEDGTEXMULTI;
 		if( pf.AddToRead(FaceDesc(4))!=-1 ) mask |= ply::PLYMask::PM_WEDGCOLOR;
 		if( ( pf.AddToRead(FaceDesc(6))!=-1 ) && 
@@ -778,7 +767,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		Material currentMaterial;
 		
 		bool first = true;
-		while (!stream.eof())  // same as !( stream.rdstate( ) & ios::eofbit )
+		while (!stream.eof())
 		{
 			tokens.clear();
 			TokenizeNextLine(stream, tokens);
@@ -863,7 +852,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						currentMaterial.textureIdx = (int)size;
 					}
 				}
-				// for now, we simply ignore other situations
+				// we simply ignore other situations
 			}
 		}
 		materials.push_back(currentMaterial);  // add last read material
