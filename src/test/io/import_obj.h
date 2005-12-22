@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.14  2005/12/22 23:37:26  buzzelli
+storing per wedge normals into model when opened file provides them
+
 Revision 1.13  2005/12/22 22:10:18  buzzelli
 using face::ComputeNormalizedNormal to compute face normal when no per wedge normal is provided
 
@@ -409,6 +412,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					n.Normalize();
 
 					(*fi).N() = n;
+
+					(*fi).WN(0) = normals[vn1_index];
+					(*fi).WN(1) = normals[vn2_index];
+					(*fi).WN(2) = normals[vn3_index];
 				}
 				else	// computing face normal from position of face vertices
 					face::ComputeNormalizedNormal(*fi);
@@ -519,6 +526,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						n.Normalize();
 
 						(*fi).N() = n;
+
+						(*fi).WN(0) = normals[vn1_index];
+						(*fi).WN(1) = normals[vn3_index];
+						(*fi).WN(2) = normals[vn4_index];
 
 						vn3_index = vn4_index;
 					}
