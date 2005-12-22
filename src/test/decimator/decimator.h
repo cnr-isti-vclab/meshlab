@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.9  2005/12/22 14:17:44  mariolatronico
+Decimator returned the number of eliminated vertices
+
 Revision 1.8  2005/12/19 16:10:35  mariolatronico
 slightly changed the algorithm , inserted some debug information (IsComplexManifold).
 
@@ -81,7 +84,7 @@ namespace vcg{
     Metodo di clustering
   */
   template<class MESH_TYPE>
-  bool Decimator(MESH_TYPE &m, int n)
+  int Decimator(MESH_TYPE &m, int n)
   {	 
 		typedef struct media_struct
 		{
@@ -240,7 +243,8 @@ namespace vcg{
 						}
 					}
 			}
-		qDebug("eliminate %d vertici",tri::Clean<CMeshO>::RemoveUnreferencedVertex(m));
+		//		qDebug("eliminate %d vertici",tri::Clean<CMeshO>::RemoveUnreferencedVertex(m));
+		int vertexDeleted = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m);
 		tri::Clean<CMeshO>::RemoveZeroAreaFace(m);
 		tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
 		tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
@@ -260,7 +264,7 @@ namespace vcg{
 		delete[] Vett;
 	
 
-    return true;
+    return vertexDeleted;
 
   }
 
