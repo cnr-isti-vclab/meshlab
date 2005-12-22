@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.12  2005/12/22 02:23:11  buzzelli
+added face normals computation
+
 Revision 1.11  2005/12/21 23:23:33  buzzelli
 code cleaning
 
@@ -223,6 +226,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 	std::vector<Material>	materials;  // materials vector
 	std::vector<TexCoord>	texCoords;  // texture coordinates
+	std::vector<Point3f>  normals;		// vertex normals
 
 	std::vector< std::string > tokens;
 	std::string	header;
@@ -275,7 +279,11 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			}
 			else if (header.compare("vn")==0)  // vertex normal
 			{
-				// do nothing (for now)
+				Point3f n;
+				n[0] = (ScalarType) atof(tokens[1].c_str());
+				n[1] = (ScalarType) atof(tokens[2].c_str());
+				n[2] = (ScalarType) atof(tokens[3].c_str());	
+				normals.push_back(n);
 			}
 			else if (header.compare("f")==0)  // face
 			{
@@ -283,8 +291,31 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				
 				int v1_index, v2_index, v3_index;
 				int vt1_index, vt2_index, vt3_index;
-				
-				if( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
+				int vn1_index, vn2_index, vn3_index;
+
+				if (( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD ) &&
+						( oi.mask & ply::PLYMask::PM_WEDGNORMAL ) )
+				{
+					std::string vertex;
+					std::string texcoord;
+					std::string normal;
+
+					SplitVVTVNToken(tokens[1], vertex, texcoord, normal);
+					v1_index = atoi(vertex.c_str());
+					vt1_index = atoi(texcoord.c_str());
+					vn1_index = atoi(normal.c_str());		--vn1_index;
+
+					SplitVVTVNToken(tokens[2], vertex, texcoord, normal);
+					v2_index = atoi(vertex.c_str());
+					vt2_index = atoi(texcoord.c_str());
+					vn2_index = atoi(normal.c_str());		--vn2_index;
+
+					SplitVVTVNToken(tokens[3], vertex, texcoord, normal);
+					v3_index = atoi(vertex.c_str());
+					vt3_index = atoi(texcoord.c_str());
+					vn3_index = atoi(normal.c_str());		--vn3_index;
+				}
+				else if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
 				{
 					std::string vertex;
 					std::string texcoord;
@@ -300,7 +331,34 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					SplitVVTToken(tokens[3], vertex, texcoord);
 					v3_index = atoi(vertex.c_str());
 					vt3_index = atoi(texcoord.c_str());
+				}
+				else if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
+				{
+					std::string vertex;
+					std::string normal;
+					
+					SplitVVNToken(tokens[1], vertex, normal);
+					v1_index = atoi(vertex.c_str());
+					vn1_index = atoi(normal.c_str());		--vn1_index;
 
+					SplitVVNToken(tokens[2], vertex, normal);
+					v2_index = atoi(vertex.c_str());
+					vn2_index = atoi(normal.c_str());		--vn2_index;
+					
+					SplitVVNToken(tokens[3], vertex, normal);
+					v3_index = atoi(vertex.c_str());
+					vn3_index = atoi(normal.c_str());		--vn3_index;
+				}
+				else
+				{
+					v1_index = atoi(tokens[1].c_str());
+					v2_index = atoi(tokens[2].c_str());
+					v3_index = atoi(tokens[3].c_str());
+				}
+			
+				// assigning wedge texture coordinates
+				if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
+				{
 					Material material = materials[currentMaterialIdx];
 					// also texcoord index starts from 1 instead of 0, so we decrement it by 1
 					TexCoord t = texCoords[--vt1_index];
@@ -318,12 +376,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					(*fi).WT(2).v() = t.v;
 					/*if(multit) */(*fi).WT(2).n() = material.textureIdx;
 				}
-				else
-				{
-					v1_index = atoi(tokens[1].c_str());
-					v2_index = atoi(tokens[2].c_str());
-					v3_index = atoi(tokens[3].c_str());
-				}
+				
 
 				if (v1_index < 0) v1_index += numVertices;
 				else if (v1_index > numVertices)	return E_BAD_VERT_INDEX;
@@ -337,12 +390,35 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				else if (v3_index > numVertices)	return E_BAD_VERT_INDEX;
 				else v3_index--;	// since index starts from 1 instead of 0
 			
-
+				// assigning face vertices
+				// -----------------------
 				(*fi).V(0) = &(m.vert[ v1_index ]);
 				(*fi).V(1) = &(m.vert[ v2_index ]);
 				(*fi).V(2) = &(m.vert[ v3_index ]);
 				
-				
+				// assigning face normal
+				// -----------------------
+				if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
+				{
+					// face normal is computed as an average of wedge normals
+					Point3f n = (normals[vn1_index] + normals[vn2_index] + normals[vn3_index]);
+					n.Normalize();
+
+					(*fi).N() = n;
+				}
+				else
+				{
+					// face normal is computed by simple cross product					
+					Point3f v0v1 = (*(*fi).V(1)).P() - (*(*fi).V(0)).P();
+					Point3f v0v2 = (*(*fi).V(2)).P() - (*(*fi).V(0)).P();
+					Point3f n = v0v1 ^ v0v2;
+					n.Normalize();
+
+					(*fi).N() = n;
+				}
+
+				// assigning face color
+				// -----------------------
 				Color4b faceColor;	// declare it outside code block since other triangles
 														// of this face will share the same color
 				//TODO: da usare
@@ -370,8 +446,21 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				{
 					int v4_index;
 					int vt4_index;
+					int vn4_index;
 
-					if( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
+					if (( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD ) &&
+							( oi.mask & ply::PLYMask::PM_WEDGNORMAL ) )
+					{
+						std::string vertex;
+						std::string texcoord;
+						std::string normal;
+
+						SplitVVTVNToken(tokens[++iVertex], vertex, texcoord, normal);
+						v4_index	= atoi(vertex.c_str());
+						vt4_index = atoi(texcoord.c_str());
+						vn4_index = atoi(normal.c_str());		--vn4_index;
+					}
+					else if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
 					{
 						std::string vertex;
 						std::string texcoord;
@@ -379,7 +468,21 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						SplitVVTToken(tokens[++iVertex], vertex, texcoord);
 						v4_index	= atoi(vertex.c_str());
 						vt4_index = atoi(texcoord.c_str());
+					}
+					else if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
+					{
+						std::string vertex;
+						std::string normal;
+						
+						SplitVVNToken(tokens[++iVertex], vertex, normal);
+						v4_index = atoi(vertex.c_str());
+						vn4_index = atoi(normal.c_str());		--vn4_index;
+					}
+					else
+						v4_index	= atoi(tokens[++iVertex].c_str());
 
+					if( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
+					{
 						Material material = materials[currentMaterialIdx];
 						TexCoord t = texCoords[vt1_index];
 						(*fi).WT(0).u() = t.u;
@@ -399,17 +502,42 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 						vt3_index = vt4_index;
 					}
-					else
-						v4_index	= atoi(tokens[++iVertex].c_str());
 						
 					if (v4_index < 0) v4_index += numVertices;
 					else if (v4_index > numVertices)	return E_BAD_VERT_INDEX;
 					else v4_index--;	// since index starts from 1 instead of 0
 
+					// assigning face vertices
+					// -----------------------
 					(*fi).V(0) = &(m.vert[ v1_index ]);
 					(*fi).V(1) = &(m.vert[ v3_index ]);
 					(*fi).V(2) = &(m.vert[ v4_index ]);
 
+					// assigning face normal
+					// -----------------------
+					if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
+					{
+						// face normal is computed as an average of wedge normals
+						Point3f n = (normals[vn1_index] + normals[vn3_index] + normals[vn4_index]);
+						n.Normalize();
+
+						(*fi).N() = n;
+
+						vn3_index = vn4_index;
+					}
+					else
+					{
+						// face normal is computed by simple cross product
+						Point3f v0v1 = (*(*fi).V(1)).P() - (*(*fi).V(0)).P();
+						Point3f v0v2 = (*(*fi).V(2)).P() - (*(*fi).V(0)).P();
+						Point3f n = v0v1 ^ v0v2;
+						n.Normalize();
+
+						(*fi).N() = n;
+					}
+
+					// assigning face color
+					// -----------------------
 					//TODO: da usare
 					//if( oi.mask & ply::PLYMask::PM_FACECOLOR)
 					{
@@ -555,18 +683,18 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		
 		if(from!=length)
     {
-			char c = line[from];
+			char c = token[from];
 			vertex.push_back(c);
 
 			to = from+1;
-			while (to!=length && ((c = line[to]) !='/'))
+			while (to!=length && ((c = token[to]) !='/'))
 			{
 				vertex.push_back(c);
 				++to;
 			}
 			++to;
 			++to;  // should be the second '/'
-			while (to!=length && ((c = line[to]) !=' '))
+			while (to!=length && ((c = token[to]) !=' '))
 			{
 				normal.push_back(c);
 				++to;
@@ -586,23 +714,23 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		
 		if(from!=length)
     {
-			char c = line[from];
+			char c = token[from];
 			vertex.push_back(c);
 
 			to = from+1;
-			while (to!=length && ((c = line[to]) !='/'))
+			while (to!=length && ((c = token[to]) !='/'))
 			{
 				vertex.push_back(c);
 				++to;
 			}
 			++to;
-			while (to!=length && ((c = line[to]) !='/'))
+			while (to!=length && ((c = token[to]) !='/'))
 			{
 				texcoord.push_back(c);
 				++to;
 			}
 			++to;
-			while (to!=length && ((c = line[to]) !=' '))
+			while (to!=length && ((c = token[to]) !=' '))
 			{
 				normal.push_back(c);
 				++to;
