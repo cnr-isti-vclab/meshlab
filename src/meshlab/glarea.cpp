@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.58  2005/12/22 10:33:37  vannini
+Removed old code
+On SaveSnapshotDialog, "Save" button is default
+
 Revision 1.57  2005/12/14 22:25:57  cignoni
 minor formatting changes
 
@@ -294,70 +298,6 @@ void GLArea::initializeGL()
 }
 
 
-//void GLArea::pasteTile()
-//{
-//	int snapBufferOffset, q; 
-//	int vpLineSize=vpWidth * SSHOT_BYTES_PER_PIXEL;
-//
-//	snapBufferOffset=SSHOT_BYTES_PER_PIXEL * ((vpWidth * vpHeight * (totalCols * tileRow)) + (vpWidth * tileCol)); 
-//	q=vpLineSize * (vpHeight - 1);
-//	
-//	for (int y=0; y < vpHeight; ++y)
-//	{
-//		memcpy((void*) &snapBuffer[snapBufferOffset], (void*) &tileBuffer[q], vpLineSize);
-//		q-=vpLineSize;
-//		snapBufferOffset+=vpLineSize * totalCols;
-//	}
-//
-//	tileCol++;
-//
-//	if (tileCol >= totalCols)
-//	{
-//		tileCol=0;
-//		tileRow++;
-//
-//		if (tileRow >= totalRows)
-//		{
-//						
-//			QImage img = QImage((uchar*) &snapBuffer[0], vpWidth * totalCols, vpHeight * totalRows, QImage::Format_ARGB32);
-//			
-//			QString outfile=ss.outdir;
-//			outfile.append("/");
-//			outfile.append(ss.basename);
-//			
-//			QString cnt;
-//			cnt.setNum(ss.counter);
-//
-//			if (ss.counter<10)
-//				cnt.prepend("0");
-//			if (ss.counter<100)
-//				cnt.prepend("0");
-//
-//			outfile.append(cnt);
-//			outfile.append(".png");			
-//				
-//			bool ret = img.save(outfile,"PNG");		
-//
-//			if (ret)
-//			{
-//				ss.counter++;
-//				if (ss.counter>999)
-//					ss.counter=0;
-//                log.Log(GLLogStream::Info,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
-//			}
-//			else
-//			{
-//			    log.Log(GLLogStream::Error,"Error saving %s",outfile.toLocal8Bit().constData());
-//			}
-//
-//			takeSnapTile=false;
-//			delete(tileBuffer);
-//			delete(snapBuffer);
-//
-//		}
-//	}
-//
-//}
 
 void GLArea::pasteTile()
 {
@@ -458,7 +398,7 @@ void GLArea::paintGL()
 	lastTime=time.elapsed();
 	initTexture();
 	glDisable(GL_TEXTURE_2D); // FIX FIX FIX to move in trimesh.h ?
-  glClearColor(1.0,1.0,1.0,1.0);
+  glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 	
@@ -502,7 +442,6 @@ void GLArea::paintGL()
 		glPushMatrix();
 		glLoadIdentity();
 		myGluPerspective(60, (GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
-		
 	}
 
 	// Set proper colorMode
@@ -603,14 +542,11 @@ void GLArea::resizeGL(int _width, int _height)
 
 void GLArea::saveSnapshot()
 { 
-	int vp[4];
-	
 	totalCols=totalRows=ss.resolution;
 	tileRow=tileCol=0;
 
 	takeSnapTile=true;
 	update();
-
 }
 
 Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
