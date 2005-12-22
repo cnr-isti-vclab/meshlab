@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.35  2005/12/22 23:39:21  buzzelli
+ UpdateNormals is now called only when needed
+
  Revision 1.34  2005/12/22 21:05:43  cignoni
  Removed Optional Face Normal and added some initalization after opening
 
@@ -159,7 +162,9 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		QString errorMsgFormat = "Error encountered while loading file %1:\n%2";
 		string filename = fileName.toUtf8().data();
 
-		if(formatName.toUpper() == tr("OBJ")) //if (format == tr("Import OBJ"))
+		bool bUpdatedNormals = false;
+
+		if(formatName.toUpper() == tr("OBJ"))
 		{
 			vcg::tri::io::ObjInfo oi;	
 			oi.cb = cb;
@@ -177,6 +182,9 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				QMessageBox::warning(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
 				return false;
 			}
+
+			if(mask & vcg::ply::PLYMask::PM_WEDGNORMAL)
+				bUpdatedNormals = true;
 		}
 		else if (formatName.toUpper() == tr("PLY"))
 		{
@@ -219,12 +227,13 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		}
 		else if (formatName.toUpper() == tr("3DS"))
 		{
-			// TODO: still to implement
+			// TODO: still to be implemented
 			return false;
 		}
 
-		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);				// update bounding box
-		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// update normals
+		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+		if (!bUpdatedNormals) 
+			vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
 		return true;
 	}
