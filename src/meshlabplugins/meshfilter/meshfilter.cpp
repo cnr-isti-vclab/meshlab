@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.27  2005/12/22 15:19:22  mariolatronico
+changed normal cast to dynamic_cast for GLArea
+
 Revision 1.26  2005/12/22 14:16:00  mariolatronico
 added log information through glArea->log object
 
@@ -239,9 +242,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
   if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 		{
 		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-      GLArea *glArea = (GLArea*) parent;
+      GLArea *glArea = dynamic_cast<GLArea*>(parent);
 			if (glArea) {
-				glArea->log.Log(0, "Removed %d vertices", delvert);
+				glArea->log.Log(GLLogStream::Info, "Removed %d vertices", delvert);
 			}
 			//cb(100,tr("Removed vertices : %1.").arg(delvert).toLocal8Bit());
 			
@@ -250,9 +253,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	if(filter->text() == ST(FP_REMOVE_NULL_FACES) ) 
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
-      GLArea *glArea = (GLArea*) parent;
+      GLArea *glArea = dynamic_cast<GLArea*> (parent);
 			if (glArea) {
-				glArea->log.Log(0, "Removed %d null faces", delvert);
+				glArea->log.Log(GLLogStream::Info, "Removed %d null faces", delvert);
 			}
 			//			cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
@@ -272,9 +275,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			int step = decimatorDialog->getStep();
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
  			int delvert = Decimator<CMeshO>(m.cm,step);
-      GLArea *glArea = (GLArea*) parent;
+      GLArea *glArea = dynamic_cast<GLArea*> ( parent );
 			if (glArea) {
-				glArea->log.Log(0, "Decimated %d vertices", delvert);
+				glArea->log.Log(GLLogStream::Info, "Decimated %d vertices", delvert);
 
 			}
 		}
