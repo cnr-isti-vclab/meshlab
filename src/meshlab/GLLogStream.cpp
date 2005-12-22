@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2005/12/22 20:05:09  glvertex
+Fixed starting position
+
 Revision 1.5  2005/11/26 18:50:56  alemochi
 correct syntax error
 
@@ -73,7 +76,7 @@ void GLLogStream::Save(int Level, const char * filename )
 void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines)
 {
 	static QFont qf("Helvetica",8);
-	const int LineWidth=15;
+	const int LineHeight=15;
 
 	list<pair <int,string> > ::iterator li;
 	li=S.end();
@@ -83,12 +86,12 @@ void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines)
 	if(li==S.end())
 		li=S.begin();
 
-	int StartLine = qgl->height() - (nlines+1) * LineWidth;
+	int StartLine = qgl->height() - nlines * LineHeight;
 
 	for(;li!=S.end();++li)
 	{
 		qgl->renderText(20,StartLine,(*li).second.c_str(),qf);
 
-		StartLine+=LineWidth;
+		StartLine+=LineHeight;
 	}
 }
