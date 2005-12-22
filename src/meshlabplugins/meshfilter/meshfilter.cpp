@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.26  2005/12/22 14:16:00  mariolatronico
+added log information through glArea->log object
+
 Revision 1.25  2005/12/22 13:32:20  mariolatronico
 changed name conventions of plugin, now use ST and enum FilterType
 
@@ -80,6 +83,9 @@ Added copyright info
 #include <vcg/complex/trimesh/update/color.h>
 /////////////
 #include "../../test/decimator/decimator.h"
+#include "../../meshlab/GLLogStream.h"
+#include "../../meshlab/LogStream.h"
+#include "../../meshlab/glarea.h"
 ////////////
 using namespace vcg;
 
@@ -227,24 +233,34 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
   if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+			
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
-  if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) );
+  if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 		{
 		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-      cb(100,tr("Removed vertices : %1.").arg(delvert).toLocal8Bit());
+      GLArea *glArea = (GLArea*) parent;
+			if (glArea) {
+				glArea->log.Log(0, "Removed %d vertices", delvert);
+			}
+			//cb(100,tr("Removed vertices : %1.").arg(delvert).toLocal8Bit());
+			
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
 	if(filter->text() == ST(FP_REMOVE_NULL_FACES) ) 
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
-			cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
+      GLArea *glArea = (GLArea*) parent;
+			if (glArea) {
+				glArea->log.Log(0, "Removed %d null faces", delvert);
+			}
+			//			cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
 		{
 			LaplacianSmooth(m.cm,1);
-			cb(100,tr("smoothed mesh").toLocal8Bit());
+			//cb(100,tr("smoothed mesh").toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
 	
@@ -255,8 +271,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 				return false; // don't continue, user pressed Cancel
 			int step = decimatorDialog->getStep();
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
- 			Decimator<CMeshO>(m.cm,step);
- 		}
+ 			int delvert = Decimator<CMeshO>(m.cm,step);
+      GLArea *glArea = (GLArea*) parent;
+			if (glArea) {
+				glArea->log.Log(0, "Decimated %d vertices", delvert);
+
+			}
+		}
 	
 	return true;
 }
