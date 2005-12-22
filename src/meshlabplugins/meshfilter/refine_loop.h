@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.4  2005/12/22 10:45:59  mariolatronico
+Added interpolation between colors
+
 Revision 1.3  2005/12/13 11:01:57  cignoni
 Added callback management in standard refine
 
@@ -104,8 +107,8 @@ first working version
 #ifndef __VCGLIB_REFINE_LOOP
 #define __VCGLIB_REFINE_LOOP
 
-#include<vcg/complex/trimesh/refine.h>
-
+#include <vcg/complex/trimesh/refine.h>
+#include <vcg/space/color4.h>
 #include <iostream>
 #include <math.h>
 #include <QtGlobal>
@@ -147,26 +150,26 @@ struct OddPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::F
 
 		}
 		else {
-		he.FlipE();	he.FlipV();
-		u = &he.v->P();
-		he.FlipV();	he.FlipE();
-		assert(&he.v->P()== r); // back to r
-		he.FlipF();	he.FlipE();	he.FlipV();
-		d = &he.v->P();
-
-		// abbiamo i punti l,r,u e d per ottenere M in maniera pesata
-		
-		nv.P()=((*l)*(3.0/8.0)+(*r)*(3.0/8.0)+(*d)*(1.0/8.0)+(*u)*(1.0/8.0));
+			he.FlipE();	he.FlipV();
+			u = &he.v->P();
+			he.FlipV();	he.FlipE();
+			assert(&he.v->P()== r); // back to r
+			he.FlipF();	he.FlipE();	he.FlipV();
+			d = &he.v->P();
+			
+			// abbiamo i punti l,r,u e d per ottenere M in maniera pesata
+			
+			nv.P()=((*l)*(3.0/8.0)+(*r)*(3.0/8.0)+(*d)*(1.0/8.0)+(*u)*(1.0/8.0));
 		}
 		
 	}
-
+	
 	Color4<typename MESH_TYPE::ScalarType> WedgeInterp(Color4<typename MESH_TYPE::ScalarType> &c0, Color4<typename MESH_TYPE::ScalarType> &c1)
 	{
 		Color4<typename MESH_TYPE::ScalarType> cc;
 		return cc.lerp(c0,c1,0.5f);
 	}
-
+	
 	template<class FL_TYPE>
 	TCoord2<FL_TYPE,1> WedgeInterp(TCoord2<FL_TYPE,1> &t0, TCoord2<FL_TYPE,1> &t1)
 	{
@@ -236,6 +239,11 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 		Color4<typename MESH_TYPE::ScalarType> cc;
 		return cc.lerp(c0,c1,0.5f);
 	}
+	Color4b WedgeInterp(Color4b &c0, Color4b &c1)
+	{
+		Color4b cc;
+		cc.lerp(c0,c1,0.5f);
+	}
 
 	template<class FL_TYPE>
 	TCoord2<FL_TYPE,1> WedgeInterp(TCoord2<FL_TYPE,1> &t0, TCoord2<FL_TYPE,1> &t1)
@@ -246,7 +254,6 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 		tmp.t()=(t0.t()+t1.t())/2.0;
 		return tmp;
 	}
-
 
 };
 
@@ -263,43 +270,35 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 {	 
 
 	int n = m.vn;
-		// refine dei vertici odd, crea dei nuovi vertici in coda
+	// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length);
 	
-	/*std::vector<EvenParam<MESH_TYPE> > paramVec;		
-	for (int i = 0; i < m.face.size(); i++) {
-
-		
-
-	}*/
-// 	std::vector<EvenPointLoop::evenParam> paramVec;
-// 	typename MESH_TYPE::FacePointer fpStart, fpEnd; 
-// 	for (int i = 0; i < n; i++) {
-// 		fpStart = m.vert[i].cVFp();
-// 		fpEnd = fpStart;
-// 		do {
-			
-
-// 		} while (fpEnd != fpStart);
-// 	}
 
 	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 	int j = 0;
+	typename MESH_TYPE::FaceType::ColorType color[6];  // per ogni faccia sono al piu' tre i nuovi valori 
+		// di texture per wedge (uno per ogni edge) 
+
 	typename MESH_TYPE::VertexIterator vi;
-		typename MESH_TYPE::FaceIterator fi;
-		for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
-			for (int i = 0; i < 3; i++) { //itero vert
-					face::Pos<typename MESH_TYPE::FaceType>aux (&(*fi),i);
-					if (cb) {
-						(*cb)(100 * (float)j / (float)m.fn,"Refinying");
-						j++;
-					}
-					even((*fi).V(i)->P(), aux);
+	typename MESH_TYPE::FaceIterator fi;
+	for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
+		for (int i = 0; i < 3; i++) { //itero vert
+			face::Pos<typename MESH_TYPE::FaceType>aux (&(*fi),i);
+			if( MESH_TYPE::HasPerVertexColor() ) {
+				(*fi).V(i)->C().lerp((*fi).V0(i)->C() , (*fi).V1(i)->C(),0.5f);
 			}
+			
+			if (cb) {
+				(*cb)(100 * (float)j / (float)m.fn,"Refinying");
+				j++;
+			}
+			even((*fi).V(i)->P(), aux);
 		}
+	}
 	
-		vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-		return true;
+	
+	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+	return true;
 }
 
 
