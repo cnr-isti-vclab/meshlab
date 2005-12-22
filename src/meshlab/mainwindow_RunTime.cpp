@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.53  2005/12/22 15:18:19  mariolatronico
+passed GLA() to applyFilter in order to use log
+
 Revision 1.52  2005/12/21 01:16:15  buzzelli
 Better handling of errors residing inside opened file
 
@@ -466,7 +469,7 @@ void MainWindow::applyFilter()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 	qb->show();
-	iFilter->applyFilter(action,*(GLA()->mm ),this,QCallBack);
+	iFilter->applyFilter(action,*(GLA()->mm ),GLA(),QCallBack);
 	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());
   qb->hide();
 }
