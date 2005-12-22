@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.13  2005/12/22 22:10:18  buzzelli
+using face::ComputeNormalizedNormal to compute face normal when no per wedge normal is provided
+
 Revision 1.12  2005/12/22 02:23:11  buzzelli
 added face normals computation
 
@@ -302,17 +305,17 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 					SplitVVTVNToken(tokens[1], vertex, texcoord, normal);
 					v1_index = atoi(vertex.c_str());
-					vt1_index = atoi(texcoord.c_str());
+					vt1_index = atoi(texcoord.c_str());	--vt1_index;
 					vn1_index = atoi(normal.c_str());		--vn1_index;
 
 					SplitVVTVNToken(tokens[2], vertex, texcoord, normal);
 					v2_index = atoi(vertex.c_str());
-					vt2_index = atoi(texcoord.c_str());
+					vt2_index = atoi(texcoord.c_str());	--vt2_index;
 					vn2_index = atoi(normal.c_str());		--vn2_index;
 
 					SplitVVTVNToken(tokens[3], vertex, texcoord, normal);
 					v3_index = atoi(vertex.c_str());
-					vt3_index = atoi(texcoord.c_str());
+					vt3_index = atoi(texcoord.c_str());	--vt3_index;
 					vn3_index = atoi(normal.c_str());		--vn3_index;
 				}
 				else if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
@@ -322,15 +325,15 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					
 					SplitVVTToken(tokens[1], vertex, texcoord);
 					v1_index = atoi(vertex.c_str());
-					vt1_index = atoi(texcoord.c_str());
+					vt1_index = atoi(texcoord.c_str());		--vt1_index;
 
 					SplitVVTToken(tokens[2], vertex, texcoord);
 					v2_index = atoi(vertex.c_str());
-					vt2_index = atoi(texcoord.c_str());
+					vt2_index = atoi(texcoord.c_str());		--vt2_index;
 					
 					SplitVVTToken(tokens[3], vertex, texcoord);
 					v3_index = atoi(vertex.c_str());
-					vt3_index = atoi(texcoord.c_str());
+					vt3_index = atoi(texcoord.c_str());		--vt3_index;
 				}
 				else if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
 				{
@@ -357,21 +360,22 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				}
 			
 				// assigning wedge texture coordinates
+				// -----------------------------------
 				if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
 				{
 					Material material = materials[currentMaterialIdx];
-					// also texcoord index starts from 1 instead of 0, so we decrement it by 1
-					TexCoord t = texCoords[--vt1_index];
+					
+					TexCoord t = texCoords[vt1_index];
 					(*fi).WT(0).u() = t.u;
 					(*fi).WT(0).v() = t.v;
 					/*if(multit) */(*fi).WT(0).n() = material.textureIdx;
 
-					t = texCoords[--vt2_index];
+					t = texCoords[vt2_index];
 					(*fi).WT(1).u() = t.u;
 					(*fi).WT(1).v() = t.v;
 					/*if(multit) */(*fi).WT(1).n() = material.textureIdx;
 
-					t = texCoords[--vt3_index];
+					t = texCoords[vt3_index];
 					(*fi).WT(2).u() = t.u;
 					(*fi).WT(2).v() = t.v;
 					/*if(multit) */(*fi).WT(2).n() = material.textureIdx;
@@ -397,7 +401,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				(*fi).V(2) = &(m.vert[ v3_index ]);
 				
 				// assigning face normal
-				// -----------------------
+				// ---------------------
 				if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
 				{
 					// face normal is computed as an average of wedge normals
@@ -406,19 +410,11 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 					(*fi).N() = n;
 				}
-				else
-				{
-					// face normal is computed by simple cross product					
-					Point3f v0v1 = (*(*fi).V(1)).P() - (*(*fi).V(0)).P();
-					Point3f v0v2 = (*(*fi).V(2)).P() - (*(*fi).V(0)).P();
-					Point3f n = v0v1 ^ v0v2;
-					n.Normalize();
-
-					(*fi).N() = n;
-				}
+				else	// computing face normal from position of face vertices
+					face::ComputeNormalizedNormal(*fi);
 
 				// assigning face color
-				// -----------------------
+				// --------------------
 				Color4b faceColor;	// declare it outside code block since other triangles
 														// of this face will share the same color
 				//TODO: da usare
@@ -457,7 +453,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 						SplitVVTVNToken(tokens[++iVertex], vertex, texcoord, normal);
 						v4_index	= atoi(vertex.c_str());
-						vt4_index = atoi(texcoord.c_str());
+						vt4_index = atoi(texcoord.c_str()); --vt4_index;
 						vn4_index = atoi(normal.c_str());		--vn4_index;
 					}
 					else if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
@@ -467,7 +463,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						
 						SplitVVTToken(tokens[++iVertex], vertex, texcoord);
 						v4_index	= atoi(vertex.c_str());
-						vt4_index = atoi(texcoord.c_str());
+						vt4_index = atoi(texcoord.c_str());	--vt4_index;
 					}
 					else if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
 					{
@@ -481,6 +477,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					else
 						v4_index	= atoi(tokens[++iVertex].c_str());
 
+					// assigning wedge texture coordinates
+					// -----------------------------------
 					if( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
 					{
 						Material material = materials[currentMaterialIdx];
@@ -494,8 +492,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						(*fi).WT(1).v() = t.v;
 						/*if(multit) */(*fi).WT(1).n() = material.textureIdx;
 
-						// also texcoord index starts from 1 instead of 0, so we decrement it by 1
-						t = texCoords[--vt4_index];
+						t = texCoords[vt4_index];
 						(*fi).WT(2).u() = t.u;
 						(*fi).WT(2).v() = t.v;
 						/*if(multit) */(*fi).WT(2).n() = material.textureIdx;
@@ -514,7 +511,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					(*fi).V(2) = &(m.vert[ v4_index ]);
 
 					// assigning face normal
-					// -----------------------
+					// ---------------------
 					if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
 					{
 						// face normal is computed as an average of wedge normals
@@ -525,19 +522,11 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 						vn3_index = vn4_index;
 					}
-					else
-					{
-						// face normal is computed by simple cross product
-						Point3f v0v1 = (*(*fi).V(1)).P() - (*(*fi).V(0)).P();
-						Point3f v0v2 = (*(*fi).V(2)).P() - (*(*fi).V(0)).P();
-						Point3f n = v0v1 ^ v0v2;
-						n.Normalize();
-
-						(*fi).N() = n;
-					}
+					else	// computing face normal from position of face vertices
+						face::ComputeNormalizedNormal(*fi);
 
 					// assigning face color
-					// -----------------------
+					// --------------------
 					//TODO: da usare
 					//if( oi.mask & ply::PLYMask::PM_FACECOLOR)
 					{
