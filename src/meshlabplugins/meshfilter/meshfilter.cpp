@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.25  2005/12/22 13:32:20  mariolatronico
+changed name conventions of plugin, now use ST and enum FilterType
+
 Revision 1.24  2005/12/21 11:02:14  mariolatronico
 refactored subdivision surfaces code
 
@@ -74,30 +77,51 @@ Added copyright info
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/smooth.h>
+#include <vcg/complex/trimesh/update/color.h>
 /////////////
 #include "../../test/decimator/decimator.h"
 ////////////
 using namespace vcg;
 
-
-
-
-
-
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
-	actionList << new QAction("Loop Subdivision Surface", this);
-	actionList << new QAction("Butterfly Subdivision Surface", this);
-	actionList << new QAction("Remove Unreferenced Vertexes", this);
-	actionList << new QAction("Remove Duplicated Vertexes", this);
-	actionList << new QAction("Remove Null Faces", this);
-	actionList << new QAction("Laplacian Smooth", this);
+	actionList << new QAction(ST(FP_LOOP_SS), this);
+	actionList << new QAction(ST(FP_BUTTERFLY_SS), this);
+	actionList << new QAction(ST(FP_REMOVE_UNREFERENCED_VERTEX), this);
+	actionList << new QAction(ST(FP_REMOVE_DUPLICATED_VERTEX), this);
+	actionList << new QAction(ST(FP_REMOVE_NULL_FACES), this);
+	actionList << new QAction(ST(FP_LAPLACIAN_SMOOTH), this);
 	/////////////
-	actionList << new QAction("Decimator", this);
+	actionList << new QAction(ST(FP_DECIMATOR), this);
 	////////////
 	refineDialog = new RefineDialog();
 	refineDialog->hide();
 	decimatorDialog = new DecimatorDialog();
 	decimatorDialog->hide();
+}
+
+const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
+
+ switch(filter)
+  {
+	case FP_LOOP_SS : 
+		return QString("Loop Subdivision Surfaces");
+	case FP_BUTTERFLY_SS : 
+		return QString("Butterfly Subdivision Surfaces");
+	case FP_REMOVE_UNREFERENCED_VERTEX : 
+		return QString("Remove Unreferenced Vertex");
+	case FP_REMOVE_DUPLICATED_VERTEX : 
+		return QString("Remove Duplicated Vertex");
+	case FP_REMOVE_NULL_FACES : 
+		return QString("Remove Null Faces");
+	case FP_LAPLACIAN_SMOOTH : 
+		return QString("Laplacian Smooth");
+	case FP_DECIMATOR : 
+		return QString("Decimator");
+	
+	default: assert(0);
+  }
+  return QString("error!");
+
 }
 
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
@@ -173,56 +197,58 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	bool selected = false;
 
 	if( filter->text().contains(tr("Subdivision Surface")) ) {
-			if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
-			int continueValue = refineDialog->exec();
-			if (continueValue == QDialog::Rejected)
-				return false; // don't continue, user pressed Cancel
-			double threshold = refineDialog->getThreshold(); // threshold for refinying
-			bool selected = refineDialog->isSelected(); // refine only selected faces
+		if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
+		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+		int continueValue = refineDialog->exec();
+		if (continueValue == QDialog::Rejected)
+			return false; // don't continue, user pressed Cancel
+		double threshold = refineDialog->getThreshold(); // threshold for refinying
+		bool selected = refineDialog->isSelected(); // refine only selected faces
 	}
-
-	if(filter->text() == tr("Loop Subdivision Surface") )
+	
+	if(filter->text() == ST(FP_LOOP_SS) )
 		{
 			vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
 				(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),threshold, selected, cb);
-
+			
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
+			
+			
 		}
-	if(filter->text() == tr("Butterfly Subdivision Surface") )
+	if(filter->text() == ST(FP_BUTTERFLY_SS) )
 	  {
 			vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >
 				(m.cm,vcg::MidPointButterfly<CMeshO>(),threshold, selected, cb);
 
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
-  if(filter->text() == tr("Remove Unreferenced Vertexes"))
+  if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
-  if(filter->text() == tr("Remove Duplicated Vertexes"))
+  if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) );
 		{
 		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
       cb(100,tr("Removed vertices : %1.").arg(delvert).toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
-	if(filter->text() == tr("Remove Null Faces"))
+	if(filter->text() == ST(FP_REMOVE_NULL_FACES) ) 
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
 			cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
-	if(filter->text() == tr("Laplacian Smooth"))
+	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
 		{
 			LaplacianSmooth(m.cm,1);
 			cb(100,tr("smoothed mesh").toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
 	
- 	if(filter->text() == tr("Decimator"))
+ 	if(filter->text() == ST(FP_DECIMATOR)) 
  		{
 			int continueValue = decimatorDialog->exec();
 			if (continueValue == QDialog::Rejected)

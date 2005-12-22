@@ -38,15 +38,26 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 		
 		public:
+	/* naming convention : 
+		 - FP -> Filter Plugin
+		 - name of the plugin separated by _
+	*/
+	enum FilterType { FP_LOOP_SS, FP_BUTTERFLY_SS, FP_REMOVE_UNREFERENCED_VERTEX, 
+				 FP_REMOVE_DUPLICATED_VERTEX, FP_REMOVE_NULL_FACES, 
+				 FP_LAPLACIAN_SMOOTH, FP_DECIMATOR } ;
+	const QString ST(FilterType filter);
+
+
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin();
-    virtual const ActionInfo &Info(QAction *);
-    virtual const PluginInfo &Info();
-
+	virtual const ActionInfo &Info(QAction *);
+	virtual const PluginInfo &Info();
+	
 	virtual QList<QAction *> actions() const;
 	bool applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;
-
+	
 protected:
+
 	QList <QAction *> actionList;
 	RefineDialog *refineDialog;
 	DecimatorDialog *decimatorDialog;
