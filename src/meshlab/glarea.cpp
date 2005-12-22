@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.59  2005/12/22 20:01:23  glvertex
+- Added support for more than one shader
+- Some methods renamed
+- Adjusted some accelerators keys
+- Fixed up minor visual issues
+
 Revision 1.58  2005/12/22 10:33:37  vannini
 Removed old code
 On SaveSnapshotDialog, "Save" button is default
@@ -242,7 +248,7 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
-	iRender=0; //MeshRender support
+	iRenderer=0; //Shader support
 	iDecoratorsList=0;
 	currentTime=0;
 	lastTime=0;
@@ -254,6 +260,7 @@ GLArea::GLArea(QWidget *parent)
 	takeSnapTile=false;
 	infoAreaVisible = false;
 	trackBallVisible = true;
+	currentSharder = NULL;
 	time.start();
 }
 
@@ -262,12 +269,12 @@ GLArea::GLArea(QWidget *parent)
 void GLArea::displayModelInfo()
 {
 	QString strMessage;
-	QString strVertex="Vertex   "+QString("").setNum(mm->cm.vert.size(),10);
-	QString strTriangle="Triangle "+QString("").setNum(mm->cm.face.size(),10);
+	QString strVertex="Vertices   "+QString("").setNum(mm->cm.vert.size(),10);
+	QString strTriangle="Faces "+QString("").setNum(mm->cm.face.size(),10);
   //strVertex+=strVertex.setNum(mm->cm.vert.size(),10);
 	//strTriangle.setNum(mm->cm.face.size(),10);
-  renderText(currentWidth-currentWidth*0.15,currentHeight-25,strVertex);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-45,strTriangle);
+  renderText(currentWidth-currentWidth*0.15,currentHeight-45,strVertex);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-30,strTriangle);
 }
 
 
@@ -284,16 +291,12 @@ void GLArea::initializeGL()
 {
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
 	glEnable(GL_NORMALIZE);
 
 	GLfloat pfront[] = {0,0,1,0};
 	
 	glLightfv(GL_LIGHT0,GL_POSITION,pfront);
 	glEnable(GL_LIGHT0);
-	
-	/*glLightfv(GL_LIGHT1,GL_POSITION,pback);
-	glLightfv(GL_LIGHT1,GL_DIFFUSE,l_diffuseFancy);*/
 	glEnable(GL_LIGHTING);
 }
 
@@ -397,7 +400,6 @@ void GLArea::paintGL()
 	GLint old_matrixMode;
 	lastTime=time.elapsed();
 	initTexture();
-	glDisable(GL_TEXTURE_2D); // FIX FIX FIX to move in trimesh.h ?
   glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -426,8 +428,6 @@ void GLArea::paintGL()
 	trackball.Apply(trackBallVisible && !takeSnapTile);
 	
 	glColor3f(1.f,1.f,1.f);
-	//Box3f bb(Point3f(-.5,-.5,-.5),Point3f(.5,.5,.5));
-	//glBoxWire(bb);
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
@@ -452,13 +452,15 @@ void GLArea::paintGL()
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
 	
-	if(iRender) {
-		iRender->Render(new QAction("Toon Shader", this), *mm, rm, this); 
+	if(iRenderer && currentSharder) {
+		//iRender->Render(new QAction("Toon Shader", this), *mm, rm, this); 
+		iRenderer->Render(currentSharder, *mm, rm, this); 
+
 	}
           
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
           
-	if(iRender) {
+	if(iRenderer) {
 		glUseProgramObjectARB(0);
 	}
 
@@ -508,22 +510,19 @@ void GLArea::paintGL()
 		glColor4f(1,1,1,1);
 		if(logVisible)
 			log.glDraw(this,0,3);
-			// More info to add.....
+
+		displayModelInfo();
 
 		currentTime=time.elapsed();
 		deltaTime=currentTime-lastTime;
 		updateFps();
 		if ((cfps>0) && (cfps<200)) renderFps();
-		displayModelInfo();
-
 
 		glPopAttrib();
 		glPopMatrix();
 
 	}
-
 // ==============================
-
 }
 
 void GLArea::resizeGL(int _width, int _height)
@@ -608,23 +607,25 @@ void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 void GLArea::initTexture()
 {
   if(!mm->cm.textures.empty() && mm->glw.TMId.empty()){
-        for(unsigned int i =0; i< mm->cm.textures.size();++i){
-          QImage img, imgGL;
-          img.load(mm->cm.textures[i].c_str());
-          imgGL=convertToGLFormat(img);
-          qDebug("loaded texture %s. with id %i w %i  h %i",mm->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
-          mm->glw.TMId.push_back(0);
-          glEnable(GL_TEXTURE_2D);
-          glGenTextures( 1, &(mm->glw.TMId.back()) );
-          glBindTexture( GL_TEXTURE_2D, mm->glw.TMId.back() );
-          glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
-          glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-          glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
-          glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	
-          qDebug("loaded texture  %s. in %i",mm->cm.textures[i].c_str(),mm->glw.TMId[i]);
-        }
-      }
+		glEnable(GL_TEXTURE_2D);
+		for(unsigned int i =0; i< mm->cm.textures.size();++i){
+			QImage img, imgGL;
+			img.load(mm->cm.textures[i].c_str());
+			imgGL=convertToGLFormat(img);
+			qDebug("loaded texture %s. with id %i w %i  h %i",mm->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
+			mm->glw.TMId.push_back(0);
+
+			glGenTextures( 1, &(mm->glw.TMId.back()) );
+			glBindTexture( GL_TEXTURE_2D, mm->glw.TMId.back() );
+			glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+			qDebug("loaded texture  %s. in %i",mm->cm.textures[i].c_str(),mm->glw.TMId[i]);
+		}
+	}
+	glDisable(GL_TEXTURE_2D);
 }
 
 void GLArea::setTextureMode(vcg::GLW::TextureMode mode)

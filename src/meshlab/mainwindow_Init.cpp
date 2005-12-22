@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.32  2005/12/22 20:01:23  glvertex
+- Added support for more than one shader
+- Some methods renamed
+- Adjusted some accelerators keys
+- Fixed up minor visual issues
+
 Revision 1.31  2005/12/19 19:03:31  davide_portelli
 Now decorations in render menu are consistent when we have tiled windows.
 
@@ -343,7 +349,7 @@ void MainWindow::createActions()
 	saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-	saveSnapshotAct = new QAction(QIcon(":/images/save.png"),tr("&Save snapshot"), this);
+	saveSnapshotAct = new QAction(QIcon(":/images/save.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
 
 	for (int i = 0; i < MAXRECENTFILES; ++i) {
@@ -472,7 +478,7 @@ void MainWindow::createActions()
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
 
-	setSaveMaskObjAct = new QAction(tr("&Options Save Obj"),this);
+	setSaveMaskObjAct = new QAction(tr("Ob&j saving options..."),this);
 	connect(setSaveMaskObjAct, SIGNAL(triggered()), this, SLOT(setSaveMaskObj()));
 
 	//////////////Action Menu About ///////////////////////////////////////////////////////////////////////////
@@ -532,7 +538,9 @@ void MainWindow::createMenus()
 	lightingModeMenu->addAction(setDoubleLightingAct);
 	lightingModeMenu->addAction(setFancyLightingAct);
 
-	colorModeMenu=renderMenu->addMenu(tr("Color"));
+	colorModeMenu = renderMenu->addMenu(tr("Color"));
+	shadersMenu = renderMenu->addMenu(tr("Shaders"));
+	shadersMenu->addAction("None",this,SLOT(applyRenderMode()));
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
@@ -606,7 +614,7 @@ void MainWindow::loadPlugins()
 
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 			if (iRender)
-			  addToMenu(iRender->actions(), renderMenu, SLOT(applyRenderMode()));
+			  addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 
 			MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
 			if (iEdit)

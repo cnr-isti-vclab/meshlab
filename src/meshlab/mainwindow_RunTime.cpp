@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.54  2005/12/22 20:01:23  glvertex
+- Added support for more than one shader
+- Some methods renamed
+- Adjusted some accelerators keys
+- Fixed up minor visual issues
+
 Revision 1.53  2005/12/22 15:18:19  mariolatronico
 passed GLA() to applyFilter in order to use log
 
@@ -485,16 +491,29 @@ void MainWindow::applyEditMode()
 void MainWindow::applyRenderMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal 
+	
+	if(action->text() == tr("None"))
+	{
+		GLA()->log.Log(GLLogStream::Info,"No Shader");
+		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
+		return;
+	}
+	
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
 	iRenderTemp->Init(action,*(GLA()->mm),GLA());
 
-	if(iRenderTemp->isSupported()) {
-		GLA()->setRender(iRenderTemp);
-	} else {
-		GLA()->setRender(0); //vertex and fragment programs not supported
+	if(iRenderTemp->isSupported())
+	{
+		GLA()->setRenderer(iRenderTemp,action);
+		GLA()->log.Log(GLLogStream::Info,"%s",action->text().toLocal8Bit().constData());	// Prints out action name
 	}
-	GLA()->log.Log(GLLogStream::Info,"%s",action->text().toLocal8Bit().constData());	// Prints out action name
+	else
+	{
+		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
+		GLA()->log.Log(GLLogStream::Warning,"Shader not supported!");
+	}
+	
 }
 
 
@@ -504,10 +523,10 @@ void MainWindow::applyColorMode()
 	MeshColorizeInterface *iColorTemp = qobject_cast<MeshColorizeInterface *>(action->parent());
   iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
 	if (action->isChecked()) {
-		action->setChecked(true);
+		//action->setChecked(true);
     GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
 	} else {
-		action->setChecked(false);
+		//action->setChecked(false);
 		GLA()->log.Log(GLLogStream::Info,"Turning off colorize %s",action->text().toLocal8Bit().constData());
 	}
 }
@@ -556,15 +575,13 @@ void MainWindow::setLight()
 void MainWindow::setDoubleLighting()
 {
 	const RenderMode &rm=GLA()->getCurrentRenderMode();
-	if (rm.doubleSideLighting) GLA()->setLightMode(false,LDOUBLE);
-	else GLA()->setLightMode(true,LDOUBLE);
+	GLA()->setLightMode(!rm.doubleSideLighting,LDOUBLE);
 }
 
 void MainWindow::setFancyLighting()
 {
 	const RenderMode &rm=GLA()->getCurrentRenderMode();
-	if (rm.fancyLighting) GLA()->setLightMode(false,LFANCY);
-	else GLA()->setLightMode(true,LFANCY);
+	GLA()->setLightMode(!rm.fancyLighting,LFANCY);
 }
 
 void MainWindow::toggleBackFaceCulling()

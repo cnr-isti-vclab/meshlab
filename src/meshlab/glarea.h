@@ -24,6 +24,12 @@
   History
 
 $Log$
+Revision 1.39  2005/12/22 20:01:23  glvertex
+- Added support for more than one shader
+- Some methods renamed
+- Adjusted some accelerators keys
+- Fixed up minor visual issues
+
 Revision 1.38  2005/12/14 22:25:26  cignoni
 Added preliminary supprot for editing/selection plugins.
 
@@ -285,11 +291,9 @@ public:
 	void resetTrackBall();
 	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
 
-	//shader support
-	MeshRenderInterface *iRender;
-	void setRender(MeshRenderInterface *rend){	iRender = rend; }
-	MeshRenderInterface * getRender() { return iRender; }
-	MeshEditInterface *iEdit;
+	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentSharder = shader;}
+	MeshRenderInterface * getRenderer() { return iRenderer; }
+
 	void setEdit(MeshEditInterface *edit){	iEdit = edit; }
 
 protected:
@@ -310,6 +314,14 @@ private:
 	bool	logVisible;				// Prints out log infos ?
 	bool	infoAreaVisible;		// Draws the lower info area ?
 	bool	trackBallVisible;		// Draws the trackball ?
+	
+	//shader support
+	MeshRenderInterface *iRenderer;
+	QAction *currentSharder;
+
+	// Editing support
+	MeshEditInterface *iEdit;
+
 	RenderMode rm;
 	ColorSetting cs;
 	float cfps;
@@ -324,7 +336,6 @@ private:
 	QImage tileBuffer;
 	bool takeSnapTile;
 	int vpWidth, vpHeight, tileCol, tileRow, totalCols, totalRows;
-
 };
 
 

@@ -23,6 +23,12 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.51  2005/12/22 20:01:23  glvertex
+- Added support for more than one shader
+- Some methods renamed
+- Adjusted some accelerators keys
+- Fixed up minor visual issues
+
 Revision 1.50  2005/12/19 19:03:06  davide_portelli
 Now decorations in render menu are consistent when we have tiled windows.
 
@@ -183,6 +189,7 @@ private:
 	QMenu *filterMenu;
 	QMenu *editMenu;
 	//Render Menu and SubMenu ////
+	QMenu *shadersMenu;
 	QMenu *renderMenu;
 	QMenu *renderModeMenu;
 	QMenu *lightingModeMenu;
