@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.34  2005/12/22 21:05:43  cignoni
+ Removed Optional Face Normal and added some initalization after opening
+
  Revision 1.33  2005/12/21 23:28:56  buzzelli
  code cleaning
 
@@ -167,7 +170,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				qDebug("Has Wedge Text Coords\n");
 				m.cm.face.EnableWedgeTex();
 			}
-			m.cm.face.EnableNormal();
 
 			int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
 			if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
@@ -189,7 +191,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				qDebug("Has Wedge Text Coords\n");
 				m.cm.face.EnableWedgeTex();
 			}
-			m.cm.face.EnableNormal();
 			
 			int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), cb);
 			if (result != ::vcg::ply::E_NOERROR)
@@ -200,7 +201,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		}
 		else if (formatName.toUpper() == tr("OFF"))
 		{
-			m.cm.face.EnableNormal();
 			int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str());
 			if (result != 0)  // OFFCodes enum is protected
 			{
@@ -210,7 +210,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		}
 		else if (formatName.toUpper() == tr("STL"))
 		{
-			m.cm.face.EnableNormal();
 			int result = vcg::tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), cb);
 			if (result != vcg::tri::io::ImporterSTL<CMeshO>::E_NOERROR)
 			{

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2005/12/22 21:05:43  cignoni
+Removed Optional Face Normal and added some initalization after opening
+
 Revision 1.14  2005/12/19 16:50:30  cignoni
 Added Mark component (needed for self-intersection)
 
@@ -87,7 +90,7 @@ class CVertexO;
 // Opt stuff
 
 class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Color4b, vert::Normal3f, vert::Qualityf, vert::BitFlags  >{};
-class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,  face::InfoOcf, face::Color4b, face::FFAdj, face::WedgeTexturefOcf, face::VertexRef, face::BitFlags, face::Normal3fOcf, face::Mark > {};
+class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,  face::InfoOcf, face::Color4b, face::FFAdj, face::WedgeTexturefOcf, face::VertexRef, face::BitFlags, face::Normal3f, face::Mark > {};
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
 
 /*

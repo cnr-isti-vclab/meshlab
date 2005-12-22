@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.55  2005/12/22 21:05:42  cignoni
+Removed Optional Face Normal and added some initalization after opening
+
 Revision 1.54  2005/12/22 20:01:23  glvertex
 - Added support for more than one shader
 - Some methods renamed
@@ -682,6 +685,7 @@ void MainWindow::open(QString fileName)
 			renderModeTextureAct->setEnabled(true);
 			GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 		}
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
 	}
 
 	qb->hide();

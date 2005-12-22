@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.20  2005/12/22 21:05:43  cignoni
+Removed Optional Face Normal and added some initalization after opening
+
 Revision 1.19  2005/12/09 18:16:12  fmazzant
 added generic obj save with plugin arch.
 
@@ -88,9 +91,6 @@ bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
     qDebug("Has Wedge Text Coords\n");
     cm.face.EnableWedgeTex();
   }
-
-	cm.face.EnableNormal();
-	
 
 	int ret;
 	ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename,cb);
