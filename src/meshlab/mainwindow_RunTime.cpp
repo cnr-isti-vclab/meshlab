@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.56  2005/12/23 02:18:05  buzzelli
+setting color mode according to kind of data found into opened file
+
 Revision 1.55  2005/12/22 21:05:42  cignoni
 Removed Optional Face Normal and added some initalization after opening
 
@@ -677,6 +680,13 @@ void MainWindow::open(QString fileName)
 		workspace->addWindow(gla);
 		if(workspace->isVisible()) gla->showMaximized();
 		setCurrentFile(fileName);
+		if( mask & ply::PLYMask::PM_VERTCOLOR)
+			gla->setColorMode(GLW::CMPerVert);
+		else if( mask & ply::PLYMask::PM_FACECOLOR)
+			gla->setColorMode(GLW::CMPerFace);
+		else
+			gla->setColorMode(GLW::CMNone);
+		//updateMenus();
 		renderModeTextureAct->setChecked(false);
 		renderModeTextureAct->setEnabled(false);
 		if(!GLA()->mm->cm.textures.empty())
