@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.15  2005/12/23 02:31:28  buzzelli
+mask is filled also with infos about used colouring method (per vertex, per face)
+
 Revision 1.14  2005/12/22 23:37:26  buzzelli
 storing per wedge normals into model when opened file provides them
 
@@ -269,6 +272,23 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				(*vi).P()[2] = (ScalarType) atof(tokens[3].c_str());
 				++numVertices;
 				
+				// assigning vertex color
+				// ----------------------
+				if( oi.mask & ply::PLYMask::PM_VERTCOLOR)
+				{
+					Material material = materials[currentMaterialIdx];
+					Point3f diffuseColor = material.diffuse;
+					unsigned char r = (unsigned char) (diffuseColor[0] * 255.0);
+					unsigned char g = (unsigned char) (diffuseColor[1] * 255.0);
+					unsigned char b = (unsigned char) (diffuseColor[2] * 255.0);
+					unsigned char alpha = (unsigned char) (material.alpha * 255.0);
+					Color4b vertexColor = Color4b(r, g, b, alpha);
+					(*vi).C()[0] = vertexColor[0];
+					(*vi).C()[1] = vertexColor[1];
+					(*vi).C()[2] = vertexColor[2];
+					(*vi).C()[3] = vertexColor[3];
+				}
+
 				++vi;  // move to next vertex iterator
 
 				// callback invocation, abort loading process if the call returns false
@@ -424,8 +444,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				// --------------------
 				Color4b faceColor;	// declare it outside code block since other triangles
 														// of this face will share the same color
-				//TODO: da usare
-				//if( oi.mask & ply::PLYMask::PM_FACECOLOR)
+				if( oi.mask & ply::PLYMask::PM_FACECOLOR)
 				{
 					Material material = materials[currentMaterialIdx];
 					Point3f diffuseColor = material.diffuse;
@@ -538,8 +557,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 					// assigning face color
 					// --------------------
-					//TODO: da usare
-					//if( oi.mask & ply::PLYMask::PM_FACECOLOR)
+					if( oi.mask & ply::PLYMask::PM_FACECOLOR)
 					{
 						(*fi).C()[0] = faceColor[0];
 						(*fi).C()[1] = faceColor[1];
@@ -765,7 +783,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 		bool bHasPerWedgeTexCoord = false;
 		bool bHasPerWedgeNormal		= false;
-		
+		bool bUsingMaterial				= false;
+		bool bHasPerVertexColor		= false;
+		bool bHasPerFaceColor			= false;
+
 		std::string header;
 		std::vector<std::string> tokens;
 		
@@ -784,7 +805,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				header = tokens[0];
 
 				if (header.compare("v")==0)
+				{
 					++numVertices;
+					if (bUsingMaterial)	bHasPerVertexColor = true;
+				}
 				else if (header.compare("f")==0)
 				{
 					numTriangles += (tokens.size() - 3);
@@ -819,7 +843,11 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 							break;
 						}					
 					}
+
+					if (bUsingMaterial)	bHasPerFaceColor = true;
 				}
+				else if (header.compare("usemtl")==0)
+					bUsingMaterial = true;
 			}
 		}
 
@@ -835,9 +863,17 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				header = tokens[0];
 				
 				if (header.compare("v")==0)
+				{
 					++numVertices;
+					if (bUsingMaterial)	bHasPerVertexColor = true;
+				}
 				else if (header.compare("f")==0)
+				{
 					numTriangles += (tokens.size() - 3);
+					if (bUsingMaterial)	bHasPerFaceColor = true;
+				}
+				else if (header.compare("usemtl")==0)
+					bUsingMaterial = true;
 			}
 		}
 
@@ -847,9 +883,11 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			mask |= ply::PLYMask::PM_WEDGTEXCOORD;
 		if (bHasPerWedgeNormal)
 			mask |= ply::PLYMask::PM_WEDGNORMAL;
-		// TODO: AGGIUNGERE
-		// mask |= ply::PLYMask::PM_FACECOLOR
-
+		if (bHasPerVertexColor)
+			mask |= ply::PLYMask::PM_VERTCOLOR;
+		if (bHasPerFaceColor)
+			mask |= ply::PLYMask::PM_FACECOLOR;
+		
 		oi.mask = mask;
 		oi.numVertices	= numVertices;
 		oi.numTriangles = numTriangles;
