@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.20  2005/12/23 10:12:51  fmazzant
+ deleted bug to save a face
+
  Revision 1.19  2005/12/16 14:58:28  fmazzant
  deleted old code
 
@@ -275,10 +278,12 @@ namespace io {
 						v = GetIndexVertex(m, (*fi).V(k)) + 1;//considera i vertici per faccia
 						
 						int vt = -1;
-						vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
+						if(oi.mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD)
+							vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
 
 						int vn = -1;
-						vn = GetIndexVertexNormal(m, NormalVertex, v);//considera le normali per faccia per ora non va considerato.
+						if(oi.mask & vcg::ply::PLYMask::PM_WEDGNORMAL) 
+							vn = GetIndexVertexNormal(m, NormalVertex, v);//considera le normali per faccia per ora non va considerato.
 
 						//scrive elementi sul file obj
 						WriteFacesElement(stream,v,vt,vn);
