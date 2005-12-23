@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.28  2005/12/23 10:02:43  giec
+added two filter: Midpoint and  Reoriented
+
 Revision 1.27  2005/12/22 15:19:22  mariolatronico
 changed normal cast to dynamic_cast for GLArea
 
@@ -95,13 +98,19 @@ using namespace vcg;
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_LOOP_SS), this);
 	actionList << new QAction(ST(FP_BUTTERFLY_SS), this);
+
+	actionList << new QAction(ST(FP_MIDPOINT), this);
+
 	actionList << new QAction(ST(FP_REMOVE_UNREFERENCED_VERTEX), this);
 	actionList << new QAction(ST(FP_REMOVE_DUPLICATED_VERTEX), this);
 	actionList << new QAction(ST(FP_REMOVE_NULL_FACES), this);
 	actionList << new QAction(ST(FP_LAPLACIAN_SMOOTH), this);
-	/////////////
+
+	actionList << new QAction(ST(FP_REORIENT), this);
+
 	actionList << new QAction(ST(FP_DECIMATOR), this);
-	////////////
+
+
 	refineDialog = new RefineDialog();
 	refineDialog->hide();
 	decimatorDialog = new DecimatorDialog();
@@ -126,7 +135,12 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 		return QString("Laplacian Smooth");
 	case FP_DECIMATOR : 
 		return QString("Decimator");
-	
+	case FP_MIDPOINT : 
+		return QString("Midpoint Subdivision Surfaces");
+	case FP_REORIENT : 
+		return QString("Re-oriented");	
+
+
 	default: assert(0);
   }
   return QString("error!");
@@ -186,6 +200,20 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
 			
  		}
+
+		 	if(action->text() == tr("Midpoint Subdivision Surfaces"))
+ 		{
+			ai.Help = tr("Apply Midpoint's Subdivision Surface algorithm");
+			ai.ShortHelp = tr("Apply Midpoint's Subdivision Surface algorithm");
+			
+ 		}
+
+		 	if(action->text() == tr("Re-oriented"))
+ 		{
+			ai.Help = tr("Re-oriented the  adjacencies of the face of the mesh");
+			ai.ShortHelp = tr("Re-oriented the face");
+			
+ 		}
 //	 ai.Help=tr("Generic Help for an action");
    return ai;
  }
@@ -194,7 +222,7 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 {
    static PluginInfo ai; 
    ai.Date=tr("__DATE__");
-	 ai.Version = tr("0.4");
+	 ai.Version = tr("0.5");
 	 ai.Author = ("Paolo Cignoni, Mario Latronico, Andrea Venturi");
    return ai;
  }
@@ -223,9 +251,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 				(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),threshold, selected, cb);
 			
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
-			
-			
 		}
+
 	if(filter->text() == ST(FP_BUTTERFLY_SS) )
 	  {
 			vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >
@@ -233,12 +260,22 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
+
+		if(filter->text() == ST(FP_MIDPOINT) )
+	  {
+			vcg::Refine<CMeshO,MidPoint<CMeshO> >
+				(m.cm,vcg::MidPoint<CMeshO>(),threshold, selected, cb);
+
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		}
+
   if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
+
   if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 		{
 		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
@@ -250,6 +287,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
+
 	if(filter->text() == ST(FP_REMOVE_NULL_FACES) ) 
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
@@ -260,11 +298,17 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			//			cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
+
+	if(filter->text() == ST(FP_REORIENT) ) 
+		{
+			bool or = true;
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+			tri::Clean<CMeshO>::IsOrientedMesh(m.cm, or,or);
+		}
+
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
 		{
 			LaplacianSmooth(m.cm,1);
-			//cb(100,tr("smoothed mesh").toLocal8Bit());
-			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
 	
  	if(filter->text() == ST(FP_DECIMATOR)) 
@@ -278,8 +322,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
       GLArea *glArea = dynamic_cast<GLArea*> ( parent );
 			if (glArea) {
 				glArea->log.Log(GLLogStream::Info, "Decimated %d vertices", delvert);
-
 			}
+
 		}
 	
 	return true;
