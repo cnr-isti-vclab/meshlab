@@ -54,24 +54,6 @@ public:
 			QAction *qa; 
 			QActionGroup * ag; 
 
-			ag = new QActionGroup(this); 
-			ag->setExclusive(true); 
-
-			qa = new QAction(QString("None"),this); 
-			qa->setActionGroup(ag); 
-			qa->setCheckable(true);
-			qa->setChecked(true); 
-			actionList << qa; 
-
-			qa = new QAction(QString("Per Face"),this); 
-			qa->setActionGroup(ag); 
-			qa->setCheckable(true);
-			actionList << qa; 
-
-			qa = new QAction(QString("Per Vertex"),this); 
-			qa->setActionGroup(ag); 
-			qa->setCheckable(true);
-			actionList << qa; 
 
 			actionList << new QAction(QString("Gaussian Curvature"),this);
 			actionList << new QAction(QString("Self Intersections"),this);

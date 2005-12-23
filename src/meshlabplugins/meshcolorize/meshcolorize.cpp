@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2005/12/23 19:34:09  glvertex
+Removed ColorModes (none,pervert,perface)
+
 Revision 1.8  2005/12/19 16:49:14  cignoni
 Added SelfIntersection and Border colorization methods
 
@@ -209,25 +212,6 @@ void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode 
     vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace (m.cm);
     vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
 		rm.colorMode = GLW::CMPerVert;
-		return;
-	}
-
-  if(mode->text() == tr("None"))
-	{
-		rm.colorMode = GLW::CMNone;
-		//parent->setColorMode(GLW::CMNone);
-		return;
-	}
-	if(mode->text() == tr("Per Face"))
-	{
-		rm.colorMode = GLW::CMPerFace;
-		//parent->setColorMode(GLW::CMPerFace);
-		return;
-	}
-	if(mode->text() == tr("Per Vertex"))
-	{
-		rm.colorMode = GLW::CMPerVert;
-		//parent->setColorMode(GLW::CMPerVert);
 		return;
 	}
 }
