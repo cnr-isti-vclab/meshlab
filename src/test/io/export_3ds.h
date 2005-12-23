@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.7  2005/12/23 10:24:37  fmazzant
+ added base save 3ds materials
+
  Revision 1.6  2005/12/16 17:26:05  fmazzant
  cleaned up code
 
@@ -56,6 +59,10 @@
 #include <lib3ds/io.h>
 #include <lib3ds/mesh.h>
 #include <lib3ds/types.h>
+#include <lib3ds/material.h>
+
+#include <iostream>
+#include <fstream>
 
 #include <QMessageBox>
 
@@ -80,7 +87,10 @@ namespace io {
 
 		static bool SaveBinary(SaveMeshType &m, const char * filename, CallBackPos *cb=0)
 		{
-			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");
+			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
+			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//crea una nuova mesh con nome mesh
+
+			std::vector<Material> materials;
 
 			int current = 0;
 			int max = m.vert.size()+m.face.size();
@@ -118,11 +128,25 @@ namespace io {
 				face.normal[0] = (*fi).N()[0];
 				face.normal[1] = (*fi).N()[1];
 				face.normal[2] = (*fi).N()[2];
+				
+				if(CreateNewMaterial(m, materials, 0, fi) == materials.size())
+				{
+					Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
+					material->name[0] = 'm';
+					material->name[1] = '1';
+					
+					//crea il materiale.
+					
+					lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
+					face.material[0] = 'm';//associa alla faccia il materiale.
+					face.material[1] = '1';//l'idice del materiale...
+				}
+				else
+				{
+					//cerca l'indice del materiale e ne prende il nome.
+				}
 
 				mesh->faceL[f_index]=face;
-				
-				//SALVARE COORDINATE TEXTURE
-				//SALVARE MATERIALE.
 
 				if (cb !=NULL)
 					(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
@@ -132,10 +156,9 @@ namespace io {
 			}
 			
 			//salva la mesh in 3ds
-			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
-			lib3ds_file_insert_mesh (file, mesh);//inserisce la mesh al file
+			lib3ds_file_insert_mesh(file, mesh);//inserisce la mesh al file
 			bool result = lib3ds_file_save(file, filename); //salva il file
-
+			
 			return result;
 		}
 		
@@ -150,6 +173,68 @@ namespace io {
 		inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
 		{
 			return p-&*(m.vert.begin());
+		}
+
+		/*
+			crea un nuovo materiale
+		*/
+		inline static int CreateNewMaterial(SaveMeshType &m, std::vector<Material> &materials, unsigned int index, FaceIterator &fi)
+		{			
+			unsigned char r = (*fi).C()[0];
+			unsigned char g = (*fi).C()[1];
+			unsigned char b = (*fi).C()[2];
+			unsigned char alpha = (*fi).C()[3];
+			
+			Point3f diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);
+			float Tr = (float)alpha/255.0;
+			
+			int illum = 2; //default not use Ks!
+			float ns = 0.0; //default
+
+			Material mtl;
+
+			mtl.index = index;//index of materials
+			mtl.Ka = Point3f(0.2,0.2,0.2);//ambient
+			mtl.Kd = diffuse;//diffuse
+			mtl.Ks = Point3f(1.0,1.0,1.0);//specular
+			mtl.Tr = Tr;//alpha
+			mtl.Ns = ns;
+			mtl.illum = illum;//illumination
+			
+			if(m.textures.size() && (*fi).WT(0).n() >=0 ) {
+				
+				mtl.map_Kd = m.textures[(*fi).WT(0).n()];
+			}
+
+			else
+				mtl.map_Kd = "";
+			
+			int i = -1;
+			if((i = MaterialsCompare(materials,mtl)) == -1)
+			{
+				materials.push_back(mtl);
+				index++;
+				return materials.size();
+			}
+			return i;
+		}
+		/*
+			compara il materiale.
+		*/
+		inline static int MaterialsCompare(std::vector<Material> &materials, Material mtl)
+		{
+			for(int i=0;i<materials.size();i++)
+			{
+				bool ka = materials[i].Ka == mtl.Ka;
+				bool kd = materials[i].Kd == mtl.Kd;
+				bool ks = materials[i].Ks == mtl.Ks;
+				bool tr = materials[i].Tr == mtl.Tr;
+				bool illum = materials[i].illum == mtl.illum;
+				bool ns = materials[i].Ns == mtl.Ns;
+				bool map = materials[i].map_Kd == mtl.map_Kd;
+				if(ka & kd & ks & tr & illum & ns & map){return i;}
+			}
+			return -1;
 		}
 	}; // end class
 
