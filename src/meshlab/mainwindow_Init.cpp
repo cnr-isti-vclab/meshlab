@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.33  2005/12/23 20:21:16  glvertex
+- Added ColorModes
+- ColorModes consistency between different windows
+
 Revision 1.32  2005/12/22 20:01:23  glvertex
 - Added support for more than one shader
 - Some methods renamed
@@ -528,18 +532,41 @@ void MainWindow::createMenus()
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
 
-	renderModeMenu=renderMenu->addMenu(tr("Render Mode"));
+	renderModeMenu=renderMenu->addMenu(tr("Render &Mode"));
 	renderModeMenu->addAction(backFaceCullAct);
 	renderModeMenu->addActions(renderModeGroupAct->actions());
 	renderModeMenu->addAction(renderModeTextureAct);
 
-	lightingModeMenu=renderMenu->addMenu(tr("Lighting"));
+	lightingModeMenu=renderMenu->addMenu(tr("&Lighting"));
 	lightingModeMenu->addAction(setLightAct);
 	lightingModeMenu->addAction(setDoubleLightingAct);
 	lightingModeMenu->addAction(setFancyLightingAct);
 
-	colorModeMenu = renderMenu->addMenu(tr("Color"));
-	shadersMenu = renderMenu->addMenu(tr("Shaders"));
+	// Color SUBmenu
+	colorModeMenu = renderMenu->addMenu(tr("&Color"));
+	
+	colorModeGroupAct = new QActionGroup(this);	colorModeGroupAct->setExclusive(true); 
+
+	colorModeNoneAct = new QAction(QString("&None"),colorModeGroupAct);
+	colorModeNoneAct->setCheckable(true);
+	colorModeNoneAct->setChecked(true);
+
+	colorModePerVertexAct = new QAction(QString("Per &Vertex"),colorModeGroupAct);
+	colorModePerVertexAct->setCheckable(true);
+
+	colorModePerFaceAct = new QAction(QString("Per &Face"),colorModeGroupAct); 
+	colorModePerFaceAct->setCheckable(true);
+	
+
+	colorModeMenu->addAction(colorModeNoneAct);
+	colorModeMenu->addAction(colorModePerVertexAct);
+	colorModeMenu->addAction(colorModePerFaceAct);
+
+	connect(colorModeGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(setColorMode(QAction *)));
+
+
+	// Shaders SUBmenu
+	shadersMenu = renderMenu->addMenu(tr("&Shaders"));
 	shadersMenu->addAction("None",this,SLOT(applyRenderMode()));
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////

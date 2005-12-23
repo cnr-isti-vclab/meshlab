@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.52  2005/12/23 20:21:16  glvertex
+- Added ColorModes
+- ColorModes consistency between different windows
+
 Revision 1.51  2005/12/22 20:01:23  glvertex
 - Added support for more than one shader
 - Some methods renamed
@@ -130,6 +134,7 @@ private slots:
 	void setLight();
 	void setDoubleLighting();
 	void setFancyLighting();
+	void setColorMode(QAction *qa);
 	void applyRenderMode();
 	void applyColorMode();
   void applyEditMode();
@@ -226,6 +231,11 @@ private:
 	QAction *setFancyLightingAct;
 	QAction *setLightAct;
 	QAction *backFaceCullAct;
+
+	QActionGroup *colorModeGroupAct;
+	QAction *colorModeNoneAct;
+	QAction *colorModePerVertexAct;
+	QAction *colorModePerFaceAct;
 	///////////Action Menu View ////////////////////////
 	QAction *fullScreenAct;
 	QAction *showToolbarStandardAct;

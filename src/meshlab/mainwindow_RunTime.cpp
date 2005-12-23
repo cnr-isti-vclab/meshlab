@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.57  2005/12/23 20:21:16  glvertex
+- Added ColorModes
+- ColorModes consistency between different windows
+
 Revision 1.56  2005/12/23 02:18:05  buzzelli
 setting color mode according to kind of data found into opened file
 
@@ -416,6 +420,14 @@ void MainWindow::updateWindowMenu()
 		++i;
 	}
 }
+
+void MainWindow::setColorMode(QAction *qa)
+{
+	if(qa->text() == tr("&None"))					GLA()->setColorMode(GLW::CMNone);
+	if(qa->text() == tr("Per &Vertex"))		GLA()->setColorMode(GLW::CMPerVert);
+	if(qa->text() == tr("Per &Face"))			GLA()->setColorMode(GLW::CMPerFace);
+}
+
 void MainWindow::updateMenus()
 {
 	bool active = (bool)workspace->activeWindow();
@@ -454,6 +466,14 @@ void MainWindow::updateMenus()
 				renderModeHiddenLinesAct->setChecked(true);
 				break;
 		}
+
+		switch (rm.colorMode)
+		{
+			case GLW::CMNone:			colorModeNoneAct->setChecked(true);	break;
+			case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true); break;
+			case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true); break;
+		}
+
 
 		showLogAct->setChecked(GLA()->isLogVisible());
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
@@ -519,7 +539,6 @@ void MainWindow::applyRenderMode()
 		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
 		GLA()->log.Log(GLLogStream::Warning,"Shader not supported!");
 	}
-	
 }
 
 
