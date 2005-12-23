@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.36  2005/12/23 00:56:42  buzzelli
+ Face normals computed also for STL and OFF files.
+ Solved (hopefully) bug with progressbar.
+
  Revision 1.35  2005/12/22 23:39:21  buzzelli
  UpdateNormals is now called only when needed
 
@@ -215,6 +219,10 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				QMessageBox::warning(parent, tr("OFF Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
 				return false;
 			}
+
+			CMeshO::FaceIterator fi = m.cm.face.begin();
+			for (; fi != m.cm.face.end(); ++fi)
+				face::ComputeNormalizedNormal(*fi);
 		}
 		else if (formatName.toUpper() == tr("STL"))
 		{
@@ -224,6 +232,10 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
 				return false;
 			}
+
+			CMeshO::FaceIterator fi = m.cm.face.begin();
+			for (; fi != m.cm.face.end(); ++fi)
+				face::ComputeNormalizedNormal(*fi);
 		}
 		else if (formatName.toUpper() == tr("3DS"))
 		{
@@ -234,6 +246,9 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 		if (!bUpdatedNormals) 
 			vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
+
+		if (cb != NULL)
+			(*cb)(100, "Done");
 
 		return true;
 	}
