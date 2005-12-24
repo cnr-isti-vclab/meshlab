@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.58  2005/12/24 04:16:12  ggangemi
+few changes in applyColorMode()
+
 Revision 1.57  2005/12/23 20:21:16  glvertex
 - Added ColorModes
 - ColorModes consistency between different windows
@@ -547,13 +550,7 @@ void MainWindow::applyColorMode()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshColorizeInterface *iColorTemp = qobject_cast<MeshColorizeInterface *>(action->parent());
   iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
-	if (action->isChecked()) {
-		//action->setChecked(true);
-    GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
-	} else {
-		//action->setChecked(false);
-		GLA()->log.Log(GLLogStream::Info,"Turning off colorize %s",action->text().toLocal8Bit().constData());
-	}
+  GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
 }
 
 void MainWindow::applyDecorateMode()
