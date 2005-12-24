@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2005/12/24 04:18:46  ggangemi
+Added generic .gdp shaders support
+
 Revision 1.5  2005/12/05 18:11:28  ggangemi
 Added toon shader example
 
@@ -44,50 +47,84 @@ using namespace vcg;
 
 void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla) 
 {
-	if(a->text() == tr("Toon Shader"))
-	{
-		GLenum err = glewInit();
-		if (GLEW_OK == err)
-		{
-			if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program)
-			{
+	GLenum err = glewInit();
+	if (GLEW_OK == err) {
+		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
+			supported = true;
+			if (shaders.find(a->text()) != shaders.end()) {
+				
 				v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
 				f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-				char *fs = "uniform vec3 DiffuseColor;uniform vec3 PhongColor;uniform float Edge;uniform float Phong;varying vec3 Normal;void main (void){vec3 color = DiffuseColor;float f = dot(vec3(0,0,1),Normal);if (abs(f) < Edge)color = vec3(0);if (f > Phong)color = PhongColor;gl_FragColor = vec4(color, 1);}";
-				char *vs = "varying vec3 Normal;void main(void){Normal = normalize(gl_NormalMatrix * gl_Normal);gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;}";
+
+
+				QDir shadersDir = QDir(qApp->applicationDirPath());
+			#if defined(Q_OS_WIN)
+				if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release")
+					shadersDir.cdUp();
+			#elif defined(Q_OS_MAC)
+				if (shadersDir.dirName() == "MacOS") {
+					shadersDir.cdUp();
+					shadersDir.cdUp();
+					shadersDir.cdUp();
+				}
+			#endif
+				shadersDir.cd("shaders");
+				
+				char *fs = textFileRead(shadersDir.absoluteFilePath(shaders[a->text()].fpFile).toLocal8Bit().data());
+				char *vs = textFileRead(shadersDir.absoluteFilePath(shaders[a->text()].vpFile).toLocal8Bit().data());
+				
 				const char * vv = vs;
 				const char * ff = fs;
-				glShaderSourceARB(v, 1, &vv,NULL);
-				glShaderSourceARB(f, 1, &ff,NULL);
-				
+				glShaderSourceARB(v, 1, &vv, NULL);
+				glShaderSourceARB(f, 1, &ff, NULL);
+						
 				glCompileShaderARB(v);
 				glCompileShaderARB(f);
-				p = glCreateProgramObjectARB();
-				glAttachObjectARB(p,v);
-				glAttachObjectARB(p,f);
-				glLinkProgramARB(p);
 
-				edge =				 glGetUniformLocationARB(p, "Edge");
-				phong =				 glGetUniformLocationARB(p, "Phong");
-				diffuseColor = glGetUniformLocationARB(p, "DiffuseColor");
-				phongColor =	 glGetUniformLocationARB(p, "PhongColor");
-				supported = true;
+				shaders[a->text()].shaderProg = glCreateProgramObjectARB();
+				glAttachObjectARB(shaders[a->text()].shaderProg,v);
+				glAttachObjectARB(shaders[a->text()].shaderProg,f);
+				glLinkProgramARB(shaders[a->text()].shaderProg);
+
+				map<QString, UniformVariable>::iterator i = shaders[a->text()].uniformVars.begin();
+				while (i != shaders[a->text()].uniformVars.end()) {
+					(shaders[a->text()].uniformVars[i->first]).location = glGetUniformLocationARB(shaders[a->text()].shaderProg, (i->first).toLocal8Bit().data());
+					++i;
+				}
 			}
-		}	
-    return;
+		}
 	}
 }
 
 void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla) 
 {
-	if(a->text() == tr("Toon Shader"))
-	{
-		glUseProgramObjectARB(p);
-		glUniform1fARB(edge, 0.64f);
-		glUniform1fARB(phong, 0.9540001f);
-		glUniform3fARB(diffuseColor, 0.0f, 0.25f, 1.0f);
-		glUniform3fARB(phongColor, 0.75f, 0.75f, 1.0f);
-    return;
+	if (shaders.find(a->text()) != shaders.end()) {
+		ShaderInfo si = shaders[a->text()];
+
+		glUseProgramObjectARB(si.shaderProg);
+
+		map<QString, UniformVariable>::iterator i = si.uniformVars.begin();
+    while (i != si.uniformVars.end()) {
+			switch(i->second.type) {
+				case SINGLE_INT: {
+						glUniform1fARB((i->second.location), i->second.val);
+								} break;
+				case SINGLE_FLOAT: {
+					glUniform1fARB((i->second.location), i->second.val);
+								} break;
+				case ARRAY_2_FLOAT: {
+					glUniform2fARB((i->second).location, i->second.val2[0], i->second.val2[1]);
+								} break;
+				case ARRAY_3_FLOAT: {
+					glUniform3fARB((i->second).location, i->second.val3[0], i->second.val3[1], i->second.val3[2]);
+								} break;
+				case ARRAY_4_FLOAT: {
+					glUniform4fARB((i->second).location, i->second.val4[0], i->second.val4[1], i->second.val4[2], i->second.val4[3]);
+								} break;
+				default: {} break;
+			}
+			++i;
+    }
 	}
 }
 

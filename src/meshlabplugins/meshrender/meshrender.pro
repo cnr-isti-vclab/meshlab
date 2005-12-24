@@ -2,14 +2,14 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 LIBPATH			 += ../../../../code/lib/glew/lib/
-HEADERS       = meshrender.h
-SOURCES       = meshrender.cpp
+HEADERS       = meshrender.h textfile.h
+SOURCES       = meshrender.cpp textfile.cpp
 TARGET        = meshrender
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
-win32:LIBS += glew32.lib
+win32:LIBS += glew32.lib QtXml4.lib
 
 unix{
 	QMAKE_CC	 = gcc-3.3
