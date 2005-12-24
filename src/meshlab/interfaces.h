@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.28  2005/12/24 04:16:12  ggangemi
+removed "const" from RenderInterface Actions() method
+
 Revision 1.27  2005/12/15 01:15:07  buzzelli
 minor changes into MeshIOInterface
 
@@ -187,7 +190,7 @@ public:
 		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual bool isSupported() = 0;
-		virtual QList<QAction *> actions() const = 0;
+		virtual QList<QAction *> actions() = 0;
 };
 
 class MeshColorizeInterface
