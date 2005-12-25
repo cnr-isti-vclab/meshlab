@@ -28,6 +28,54 @@
 ==============================================================================
 
 ------------------------------------------------------------------------------
+- Meshlab v0.4
+------------------------------------------------------------------------------
+
+  ** NEW FEATURES ** 
+
+This is a maintenance version. No feature were added but improved existing ones.
+
+* Plugin System
+  - Improved PluginSystem
+  - Improved shaders support (based on Typhoon Labs shaders)
+  - Filtering: Customizable filters thru dialogs
+  - Filters:
+      Laplacian smooth
+      MidPoint Subdivision
+      Re-orient
+      Decimator
+  - Editing (No editing tools available)
+  - Colorize:
+      Self intersection
+      Border
+  - Import/Export:
+      obj File Format (Customizable export thru dialog)
+      off File Format
+      stl File Format
+      3ds File Format
+  - Decoration:
+      Show Axis
+      Show Box Corners
+
+* User Interface
+  - Bugless progress bar
+  - About Plugin dialog
+  - Logging
+
+
+  ** KNOWN BUGS/MISSING FEATURES **
+
+* Plugin:
+  - No texture support in shaders
+  - No Editing tools
+  - Info in shader Plugin
+ 
+* User Interface
+  - Font resizing
+  - Clipping issues
+  - CTRL + Shortcuts doesn't work properly
+
+------------------------------------------------------------------------------
 - Meshlab v0.3
 ------------------------------------------------------------------------------
 
@@ -129,4 +177,5 @@
 ------------------------------------------------------------------------------
 
 * 2005/11/15 First draft
+
 
