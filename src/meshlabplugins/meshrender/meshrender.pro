@@ -16,6 +16,7 @@ unix{
 	QMAKE_CXX	 = g++-3.3
 	QMAKE_LINK	 = gcc-3.3
 	CONFIG		+= warn_off debug_and_release
+	QT		+= xml
 }
 
 contains(TEMPLATE,lib) {
