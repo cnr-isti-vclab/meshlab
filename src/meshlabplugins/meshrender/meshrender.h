@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.8  2005/12/29 13:52:31  mariolatronico
+gl/glew.h -> GL/glew.h
+
 Revision 1.7  2005/12/24 04:18:46  ggangemi
 Added generic .gdp shaders support
 
@@ -56,7 +59,7 @@ Added copyright info
 #include <QMap>
 #include <map>
 
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include "textfile.h"
