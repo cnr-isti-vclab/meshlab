@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.29  2005/12/29 13:50:26  mariolatronico
+changed or in orValue to compile with gcc
+
 Revision 1.28  2005/12/23 10:02:43  giec
 added two filter: Midpoint and  Reoriented
 
@@ -301,9 +304,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 
 	if(filter->text() == ST(FP_REORIENT) ) 
 		{
-			bool or = true;
+			bool orValue = true;
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-			tri::Clean<CMeshO>::IsOrientedMesh(m.cm, or,or);
+			tri::Clean<CMeshO>::IsOrientedMesh(m.cm, orValue, orValue);
 		}
 
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
