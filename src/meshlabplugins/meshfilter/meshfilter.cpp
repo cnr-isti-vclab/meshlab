@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.30  2005/12/30 10:16:14  giec
+Added the Color non manifold filter
+
 Revision 1.29  2005/12/29 13:50:26  mariolatronico
 changed or in orValue to compile with gcc
 
@@ -96,6 +99,7 @@ Added copyright info
 #include "../../meshlab/LogStream.h"
 #include "../../meshlab/glarea.h"
 ////////////
+#include "color_manifold.h"
 using namespace vcg;
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
@@ -110,6 +114,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_LAPLACIAN_SMOOTH), this);
 
 	actionList << new QAction(ST(FP_REORIENT), this);
+	actionList << new QAction(ST(FP_COLOR), this);
 
 	actionList << new QAction(ST(FP_DECIMATOR), this);
 
@@ -142,7 +147,8 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 		return QString("Midpoint Subdivision Surfaces");
 	case FP_REORIENT : 
 		return QString("Re-oriented");	
-
+	case FP_COLOR:
+		return QString("Color non manifold");
 
 	default: assert(0);
   }
@@ -217,6 +223,14 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 			ai.ShortHelp = tr("Re-oriented the face");
 			
  		}
+
+		 	if(action->text() == tr("Color non manifold"))
+ 		{
+			ai.Help = tr("Colors the edge non manifold");
+			ai.ShortHelp = tr("Colors the edge non manifold");
+ 		}
+		
+		
 //	 ai.Help=tr("Generic Help for an action");
    return ai;
  }
@@ -313,6 +327,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		{
 			LaplacianSmooth(m.cm,1);
 		}
+
+	if(filter->text() == ST(FP_COLOR)) 
+		{
+			ColorManifold<CMeshO>(m.cm);
+		}
 	
  	if(filter->text() == ST(FP_DECIMATOR)) 
  		{
@@ -326,7 +345,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			if (glArea) {
 				glArea->log.Log(GLLogStream::Info, "Decimated %d vertices", delvert);
 			}
-
 		}
 	
 	return true;
