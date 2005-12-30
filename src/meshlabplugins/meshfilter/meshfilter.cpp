@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.31  2005/12/30 11:25:09  mariolatronico
+removed glArea dependency ... added log variable to log info
+
 Revision 1.30  2005/12/30 10:16:14  giec
 Added the Color non manifold filter
 
@@ -97,7 +100,7 @@ Added copyright info
 #include "../../test/decimator/decimator.h"
 #include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
-#include "../../meshlab/glarea.h"
+//#include "../../meshlab/glarea.h"
 ////////////
 #include "color_manifold.h"
 using namespace vcg;
@@ -158,6 +161,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 	delete refineDialog;
+	delete decimatorDialog;
 }
 
 QList<QAction *> ExtraMeshFilterPlugin::actions() const {
@@ -296,24 +300,17 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
   if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 		{
 		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-      GLArea *glArea = dynamic_cast<GLArea*>(parent);
-			if (glArea) {
-				glArea->log.Log(GLLogStream::Info, "Removed %d vertices", delvert);
-			}
-			//cb(100,tr("Removed vertices : %1.").arg(delvert).toLocal8Bit());
-			
-			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+			if (log)
+				log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
+		
 		}
 
 	if(filter->text() == ST(FP_REMOVE_NULL_FACES) ) 
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
-      GLArea *glArea = dynamic_cast<GLArea*> (parent);
-			if (glArea) {
-				glArea->log.Log(GLLogStream::Info, "Removed %d null faces", delvert);
-			}
-			//			cb(100,tr("Removed null faces : %1.").arg(delvert).toLocal8Bit());
-			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+			if (log)
+				log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
+		
 		}
 
 	if(filter->text() == ST(FP_REORIENT) ) 
@@ -341,10 +338,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			int step = decimatorDialog->getStep();
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
  			int delvert = Decimator<CMeshO>(m.cm,step);
-      GLArea *glArea = dynamic_cast<GLArea*> ( parent );
-			if (glArea) {
-				glArea->log.Log(GLLogStream::Info, "Decimated %d vertices", delvert);
-			}
+			if (log)
+				log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
+			
 		}
 	
 	return true;
