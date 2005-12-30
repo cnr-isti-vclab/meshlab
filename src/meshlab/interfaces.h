@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.29  2005/12/30 10:51:10  mariolatronico
+- added GLLogStream forward declaration
+- added method setLog to MeshFilterInterface to remove GLArea dependency on meshfilter plugin
+
 Revision 1.28  2005/12/24 04:16:12  ggangemi
 removed "const" from RenderInterface Actions() method
 
@@ -116,7 +120,7 @@ class QAction;
 class MeshModel;
 class RenderMode;
 class GLArea;
-
+class GLLogStream;
 class MeshIOInterface
 {
 public:
@@ -169,7 +173,7 @@ public:
 		virtual QList<QAction *> actions() const = 0;
     virtual const ActionInfo &Info(QAction *)=0;
     virtual const PluginInfo &Info()=0;
-    
+	virtual void setLog(GLLogStream* )=0;
 		virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, QWidget * /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
 };
 /*
