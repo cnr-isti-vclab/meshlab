@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.59  2005/12/30 11:22:08  mariolatronico
+add call to setLog before applyFilter
+
 Revision 1.58  2005/12/24 04:16:12  ggangemi
 few changes in applyColorMode()
 
@@ -504,6 +507,7 @@ void MainWindow::applyFilter()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 	qb->show();
+	iFilter->setLog(&(GLA()->log));
 	iFilter->applyFilter(action,*(GLA()->mm ),GLA(),QCallBack);
 	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());
   qb->hide();
