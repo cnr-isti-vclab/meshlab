@@ -30,7 +30,7 @@
 #include <meshlab/interfaces.h>
 #include "refinedialog.h"
 #include "decimatordialog.h"
-
+#include "../../meshlab/GLLogStream.h"
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
@@ -55,9 +55,9 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	
 	virtual QList<QAction *> actions() const;
 	bool applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;
-	
+	void setLog(GLLogStream *log) { this->log = log ; }
 protected:
-
+	GLLogStream *log;
 	QList <QAction *> actionList;
 	RefineDialog *refineDialog;
 	DecimatorDialog *decimatorDialog;
