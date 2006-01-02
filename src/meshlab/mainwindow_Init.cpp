@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.34  2006/01/02 16:15:16  glvertex
+Added reload action
+
 Revision 1.33  2005/12/23 20:21:16  glvertex
 - Added ColorModes
 - ColorModes consistency between different windows
@@ -324,7 +327,7 @@ MainWindow::MainWindow()
 	updateMenus();
 	addToolBar(mainToolBar);
 	addToolBar(renderToolBar);
-	setWindowTitle(tr("MeshLab v0.4"));
+	setWindowTitle(tr("MeshLab v0.5"));
 	loadPlugins();
 	if(QCoreApplication::instance ()->argc()>1){
 		open(QCoreApplication::instance ()->argv()[1]);
@@ -348,12 +351,18 @@ void MainWindow::createActions()
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
+  reloadAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
+	reloadAct->setShortcutContext(Qt::ApplicationShortcut);
+	reloadAct->setShortcut(Qt::CTRL+Qt::Key_R);
+	connect(reloadAct, SIGNAL(triggered()), this, SLOT(reload()));
+
+
 	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("&Save As..."), this);
 	saveAsAct->setShortcutContext(Qt::ApplicationShortcut);
 	saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-	saveSnapshotAct = new QAction(QIcon(":/images/save.png"),tr("Save snapsho&t"), this);
+	saveSnapshotAct = new QAction(QIcon(":/images/snapshot.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
 
 	for (int i = 0; i < MAXRECENTFILES; ++i) {
@@ -498,6 +507,7 @@ void MainWindow::createToolBars()
 	mainToolBar = addToolBar(tr("Standard"));
 	mainToolBar->setIconSize(QSize(32,32));
 	mainToolBar->addAction(openAct);
+	mainToolBar->addAction(reloadAct);
 	mainToolBar->addAction(saveAsAct);
 	mainToolBar->addAction(saveSnapshotAct);
 
@@ -514,10 +524,14 @@ void MainWindow::createMenus()
 	//////////////////// Menu File ////////////////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(openAct);
+	fileMenu->addAction(reloadAct);
 	fileMenu->addAction(saveAsAct);
-	fileMenu->addAction(saveSnapshotAct);
 
+	
+	fileMenu->addSeparator();
+		fileMenu->addAction(saveSnapshotAct);
 	separatorAct = fileMenu->addSeparator();
+	
 	for (int i = 0; i < MAXRECENTFILES; ++i) fileMenu->addAction(recentFileActs[i]);
 	updateRecentFileActions();
 	fileMenu->addSeparator();
@@ -527,7 +541,7 @@ void MainWindow::createMenus()
 	editMenu = menuBar()->addMenu(tr("&Edit"));
 	
   //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
-	filterMenu = menuBar()->addMenu(tr("F&ilter"));
+	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));

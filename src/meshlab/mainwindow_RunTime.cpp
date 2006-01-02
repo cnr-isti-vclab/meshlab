@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.60  2006/01/02 16:15:16  glvertex
+Added reload action
+
 Revision 1.59  2005/12/30 11:22:08  mariolatronico
 add call to setLog before applyFilter
 
@@ -437,6 +440,7 @@ void MainWindow::setColorMode(QAction *qa)
 void MainWindow::updateMenus()
 {
 	bool active = (bool)workspace->activeWindow();
+	reloadAct->setEnabled(active);
 	saveAsAct->setEnabled(active);
 	saveSnapshotAct->setEnabled(active);
 	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
@@ -695,6 +699,7 @@ void MainWindow::open(QString fileName)
 		GLArea *gla;
 		gla=new GLArea(workspace);
 		gla->mm=mm;
+		gla->setFileName(fileName);
 		gla->setWindowTitle(QFileInfo(fileName).fileName());
 		gla->showInfoArea(true);
 		workspace->addWindow(gla);
@@ -725,6 +730,20 @@ void MainWindow::openRecentFile()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	if (action)	open(action->data().toString());
+}
+
+void MainWindow::reload()
+{
+	// Discards changes and reloads current file
+	
+	// save current file name
+	QString file = GLA()->getFileName();
+	
+	// close current window
+	workspace->closeActiveWindow();
+	
+	// open a new window with old file
+	open(file);
 }
 
 bool MainWindow::saveAs()

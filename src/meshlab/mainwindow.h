@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.53  2006/01/02 16:15:16  glvertex
+Added reload action
+
 Revision 1.52  2005/12/23 20:21:16  glvertex
 - Added ColorModes
 - ColorModes consistency between different windows
@@ -117,6 +120,7 @@ private slots:
 
 	//////////// Slot Menu File //////////////////////
 	void open(QString fileName=QString());
+	void reload();
 	void openRecentFile();							
 	bool saveAs();
 	bool saveSnapshot();
@@ -212,6 +216,7 @@ private:
 
 	//////////// Action Menu File ///////////////////////
 	QAction *openAct;
+	QAction *reloadAct;
 	QAction *saveAsAct;
 	QAction *saveSnapshotAct;
 	QAction *recentFileActs[MAXRECENTFILES];
