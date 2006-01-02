@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.32  2006/01/02 12:39:41  mariolatronico
+used ST function to compare action->text() inside Info function
+
 Revision 1.31  2005/12/30 11:25:09  mariolatronico
 removed glArea dependency ... added log variable to log info
 
@@ -173,71 +176,71 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 {
 	ActionInfo ai; 
   
-	if( action->text() == tr("Loop Subdivision Surface") )
+	if( action->text() == ST(FP_LOOP_SS) )
 		{
 			ai.Help = tr("Apply Loop's Subdivision Surface algorithm, it is an approximate method");
 			ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
 		}
-	if( action->text() == tr("Butterfly Subdivision Surface") )
+	if( action->text() == ST(FP_BUTTERFLY_SS) ) 
 	  {
 			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm, it is an interpolated method");
 			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
 		}
-  if( action->text() == tr("Remove Unreferenced Vertexes"))
+	if( action->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 		{
 			ai.Help = tr("Remove Unreferenced Vertexes");
 			ai.ShortHelp = tr("Remove Unreferenced Vertexes");
 			
 		}
-  if( action->text() == tr("Remove Duplicated Vertexes"))
+  if( action->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 		{
 			ai.Help = tr("Remove Duplicated Vertexes");
 			ai.ShortHelp = tr("Remove Duplicated Vertexes");
 		}
-	if(action->text() == tr("Remove Null Faces"))
+	if(action->text() == ST(FP_REMOVE_NULL_FACES) )
 		{
 			ai.Help = tr("Remove Null Faces");
 			ai.ShortHelp = tr("Remove Null Faces");
 			
 		}
-	if(action->text() == tr("Laplacian Smooth"))
+	if(action->text() == ST(FP_LAPLACIAN_SMOOTH) )
 		{
 			ai.Help = tr("Laplacian Smooth: Smooth the mesh surface");
 			ai.ShortHelp = tr("Smooth the mesh surface");
 	
 		}
 		
- 	if(action->text() == tr("Decimator"))
+ 	if(action->text() == ST(FP_DECIMATOR) )
  		{
 			ai.Help = tr("Decimator tries to elminate triangles by clustering method by Rossignac");
 			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
 			
  		}
-
-		 	if(action->text() == tr("Midpoint Subdivision Surfaces"))
+	
+	if(action->text() == ST(FP_MIDPOINT) )
  		{
 			ai.Help = tr("Apply Midpoint's Subdivision Surface algorithm");
 			ai.ShortHelp = tr("Apply Midpoint's Subdivision Surface algorithm");
 			
  		}
-
-		 	if(action->text() == tr("Re-oriented"))
+	
+	if(action->text() == ST(FP_REORIENT) )
  		{
 			ai.Help = tr("Re-oriented the  adjacencies of the face of the mesh");
 			ai.ShortHelp = tr("Re-oriented the face");
 			
  		}
-
-		 	if(action->text() == tr("Color non manifold"))
+	
+	if(action->text() == ST(FP_COLOR) )
  		{
 			ai.Help = tr("Colors the edge non manifold");
 			ai.ShortHelp = tr("Colors the edge non manifold");
  		}
-		
-		
-//	 ai.Help=tr("Generic Help for an action");
+	
+	
+	//	 ai.Help=tr("Generic Help for an action");
    return ai;
- }
+}
 
  const PluginInfo &ExtraMeshFilterPlugin::Info() 
 {
