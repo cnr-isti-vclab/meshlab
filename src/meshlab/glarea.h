@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.40  2006/01/02 16:14:07  glvertex
+Added setFileName and getFileName methods
+
 Revision 1.39  2005/12/22 20:01:23  glvertex
 - Added support for more than one shader
 - Some methods renamed
@@ -264,6 +267,9 @@ public:
 	int currentHeight;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
+
+	QString getFileName()							{return fileName;}
+	void		setFileName(QString name)	{fileName = name;}
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 	const ColorSetting& getCustomSetting()		const {return cs;}
@@ -330,6 +336,8 @@ private:
 	int lastTime;
 	int currentTime;
 	float fpsVector[10];
+
+	QString fileName;
 	
 	SnapshotSetting ss;
 	QImage snapBuffer;
