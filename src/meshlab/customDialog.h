@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2006/01/02 19:13:57  glvertex
+Multi level logging
+
 Revision 1.5  2006/01/02 17:19:19  glvertex
 Changed include directive to new .ui filenames
 
@@ -55,11 +58,12 @@ Q_OBJECT
 public:
 	CustomDialog(QWidget *parent = 0);
 
-	void loadCurrentSetting(const vcg::Color4b& bkgBottom,const vcg::Color4b& bkgTop,const vcg::Color4b& logArea);
+	void loadCurrentSetting(const vcg::Color4b& bkgBottom,const vcg::Color4b& bkgTop,const vcg::Color4b& logArea,short logLevel);
   
 	vcg::Color4b getBkgBottomColor()	{ return bkgBottomColor;}
 	vcg::Color4b getBkgTopColor()			{ return bkgTopColor;		}
 	vcg::Color4b getLogAreaColor()		{ return logAreaColor;	}
+	short getLogLevel()								{ return ui.comboBoxInfoType->currentIndex()-1;		}
 
 private slots:
 	void setBkgBottomColor();

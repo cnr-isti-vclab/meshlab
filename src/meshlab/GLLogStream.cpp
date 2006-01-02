@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/01/02 19:13:57  glvertex
+Multi level logging
+
 Revision 1.6  2005/12/22 20:05:09  glvertex
 Fixed starting position
 
@@ -90,7 +93,8 @@ void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines)
 
 	for(;li!=S.end();++li)
 	{
-		qgl->renderText(20,StartLine,(*li).second.c_str(),qf);
+		if(Level == -1 || (*li).first == Level)
+			qgl->renderText(20,StartLine,(*li).second.c_str(),qf);
 
 		StartLine+=LineHeight;
 	}
