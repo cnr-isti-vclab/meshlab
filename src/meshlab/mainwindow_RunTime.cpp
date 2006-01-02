@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.61  2006/01/02 17:19:19  glvertex
+Changed include directive to new .ui filenames
+
 Revision 1.60  2006/01/02 16:15:16  glvertex
 Added reload action
 
@@ -381,7 +384,7 @@ First rough version. It simply load a mesh.
 #include "plugindialog.h"
 #include "customDialog.h"		
 #include "saveSnapshotDialog.h"
-#include "ui_aboutForm.h"
+#include "ui_aboutDialog.h"
 
 
 

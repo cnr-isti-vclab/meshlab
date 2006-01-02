@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2006/01/02 17:19:19  glvertex
+Changed include directive to new .ui filenames
+
 Revision 1.4  2005/12/04 16:50:15  glvertex
 Removed [using namespace] directive form .h
 Renaming in QT style
@@ -39,7 +42,7 @@ Added copyright info
 
 ****************************************************************************/
 
-#include "ui_custom.h"
+#include "ui_customDialog.h"
 #include <QColor>
 #include <QDialog>
 #include <QColorDialog>

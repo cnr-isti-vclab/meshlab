@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/01/02 17:19:19  glvertex
+Changed include directive to new .ui filenames
+
 Revision 1.2  2005/12/06 10:42:03  vannini
 Snapshot dialog now works
 
@@ -32,7 +35,7 @@ Added snapshot save dialog (not used yet)
 
 ****************************************************************************/
 
-#include "ui_savesnapshot.h"
+#include "ui_savesnapshotDialog.h"
 #include "glarea.h"
 #include <QDialog>
 #include <QFileDialog>
