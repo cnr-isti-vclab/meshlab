@@ -26,8 +26,8 @@ SOURCES        = main.cpp \
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp
 
-FORMS          = ui/custom.ui\
-ui/savesnapshot.ui\						 ui/aboutForm.ui
+FORMS          = ui/customDialog.ui\
+ui/savesnapshotDialog.ui\						 ui/aboutDialog.ui
 
 
 RESOURCES     = meshlab.qrc

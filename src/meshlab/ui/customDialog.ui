@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>270</width>
-    <height>155</height>
+    <width>327</width>
+    <height>173</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -46,14 +46,50 @@
        <number>6</number>
       </property>
       <item row="1" column="0" >
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="labelLogType" >
+          <property name="text" >
+           <string>Info type</string>
+          </property>
+          <property name="buddy" >
+           <cstring>comboBox</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox" />
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="0" >
        <spacer>
         <property name="orientation" >
          <enum>Qt::Vertical</enum>
         </property>
         <property name="sizeHint" >
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>177</width>
+          <height>41</height>
          </size>
         </property>
        </spacer>
@@ -69,7 +105,7 @@
         <item>
          <widget class="QPushButton" name="pushButtonLogArea" >
           <property name="text" >
-           <string>Log Color</string>
+           <string>Info Area</string>
           </property>
          </widget>
         </item>
@@ -138,7 +174,7 @@
       <property name="spacing" >
        <number>6</number>
       </property>
-      <item row="2" column="0" >
+      <item row="2" column="1" >
        <spacer>
         <property name="orientation" >
          <enum>Qt::Vertical</enum>
@@ -151,7 +187,7 @@
         </property>
        </spacer>
       </item>
-      <item row="0" column="0" >
+      <item row="0" column="1" >
        <layout class="QHBoxLayout" >
         <property name="margin" >
          <number>0</number>
@@ -205,7 +241,7 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0" >
+      <item row="1" column="1" >
        <layout class="QHBoxLayout" >
         <property name="margin" >
          <number>0</number>
@@ -300,42 +336,13 @@
     </layout>
    </item>
   </layout>
-  <widget class="QWidget" name="widget" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget_2" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget_3" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
  </widget>
  <pixmapfunction></pixmapfunction>
  <tabstops>
   <tabstop>pushButtonTopBg</tabstop>
   <tabstop>pushButtonBottomBg</tabstop>
   <tabstop>pushButtonLogArea</tabstop>
+  <tabstop>comboBox</tabstop>
   <tabstop>okButton</tabstop>
   <tabstop>cancelButton</tabstop>
  </tabstops>
