@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2006/01/02 16:44:38  glvertex
+Blending normals
+
 Revision 1.5  2005/12/13 11:02:56  cignoni
 made info structs static
 
@@ -77,7 +80,10 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
     float LineLen = m.cm.bbox.Diag()/20.0;
     CMeshO::VertexIterator vi;
     glDisable(GL_LIGHTING);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
     glBegin(GL_LINES);
+		glColor4f(.4f,.4f,1.f,.3f);
     for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
     {
       glVertex((*vi).P());
