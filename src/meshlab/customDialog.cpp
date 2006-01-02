@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/01/02 17:39:18  glvertex
+Added info types in a combobox
+
 Revision 1.3  2005/12/04 16:50:15  glvertex
 Removed [using namespace] directive form .h
 Renaming in QT style
@@ -61,6 +64,17 @@ void CustomDialog::loadCurrentSetting(const Color4b& bb,const Color4b& bt,const 
 	QPalette pbb(QColor(bb.V(0),bb.V(1),bb.V(2)));
 	QPalette pbt(QColor(bt.V(0),bt.V(1),bt.V(2)));
 	QPalette pl(QColor(l.V(0),l.V(1),l.V(2)));
+
+	//Error=0, Warning=1, Info=2, Debug=3, Direct=4, OnlyFileLog=5, OnlyConsole=6
+	ui.comboBoxInfoType->addItem("Any");
+	ui.comboBoxInfoType->addItem("Errors");
+	ui.comboBoxInfoType->addItem("Warnigs");
+	ui.comboBoxInfoType->addItem("Info");
+	ui.comboBoxInfoType->addItem("Debug");
+	//ui.comboBoxInfoType->addItem("Direct");
+	//ui.comboBoxInfoType->addItem("Only file");
+	//ui.comboBoxInfoType->addItem("Only Console");
+
 	
 	ui.labelBottmBg->setPalette(pbb);
 	ui.labelTopBg->setPalette(pbt);
