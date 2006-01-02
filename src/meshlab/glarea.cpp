@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.60  2006/01/02 18:54:52  glvertex
+added multilevel logging support
+
 Revision 1.59  2005/12/22 20:01:23  glvertex
 - Added support for more than one shader
 - Some methods renamed
@@ -262,6 +265,8 @@ GLArea::GLArea(QWidget *parent)
 	trackBallVisible = true;
 	currentSharder = NULL;
 	time.start();
+
+	currLogLevel = -1;
 }
 
 
@@ -277,14 +282,8 @@ void GLArea::displayModelInfo()
 	renderText(currentWidth-currentWidth*0.15,currentHeight-30,strTriangle);
 }
 
-
-QSize GLArea::minimumSizeHint() const {
-	return QSize(400,300);
-}
-
-QSize GLArea::sizeHint() const {
-	return QSize(400,300);
-}
+QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
+QSize GLArea::sizeHint() const				{return QSize(400,300);}
 
 
 void GLArea::initializeGL()
@@ -509,7 +508,7 @@ void GLArea::paintGL()
 		// Now print out the infos
 		glColor4f(1,1,1,1);
 		if(logVisible)
-			log.glDraw(this,0,3);
+			log.glDraw(this,currLogLevel,3);
 
 		displayModelInfo();
 

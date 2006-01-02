@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.62  2006/01/02 18:54:52  glvertex
+added multilevel logging support
+
 Revision 1.61  2006/01/02 17:19:19  glvertex
 Changed include directive to new .ui filenames
 
@@ -844,14 +847,15 @@ void MainWindow::setCustomize()
 {
 	CustomDialog dialog(this);
 	ColorSetting cs=GLA()->getCustomSetting();
-	dialog.loadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor);
+	dialog.loadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor,GLA()->getLogLevel());
 	if (dialog.exec()==QDialog::Accepted) 
 	{
 		// If press Ok set the selected colors in glArea
 		cs.bColorBottom=dialog.getBkgBottomColor();
 		cs.bColorTop=dialog.getBkgTopColor();
 		cs.lColor=dialog.getLogAreaColor();
-    GLA()->setCustomSetting(cs);	
+    GLA()->setCustomSetting(cs);
+		GLA()->setLogLevel(dialog.getLogLevel());
 	}	
 }
 

@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.41  2006/01/02 18:54:52  glvertex
+added multilevel logging support
+
 Revision 1.40  2006/01/02 16:14:07  glvertex
 Added setFileName and getFileName methods
 
@@ -262,6 +265,7 @@ public:
 	MeshModel *mm;
 	vcg::Trackball trackball;
 	GLLogStream log;
+	short currLogLevel;
 
 	int currentWidth;
 	int currentHeight;
@@ -270,6 +274,9 @@ public:
 
 	QString getFileName()							{return fileName;}
 	void		setFileName(QString name)	{fileName = name;}
+
+	short		getLogLevel()												{return currLogLevel;}
+	void		setLogLevel(short lvl)	{currLogLevel = lvl;}
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 	const ColorSetting& getCustomSetting()		const {return cs;}
