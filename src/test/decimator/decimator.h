@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.10  2006/01/03 23:42:11  cignoni
+changed clean::IsComplexManifold(m) to the new name clean::IsTwoManifoldFace(m) naming
+
 Revision 1.9  2005/12/22 14:17:44  mariolatronico
 Decimator returned the number of eliminated vertices
 
@@ -248,10 +251,7 @@ namespace vcg{
 		tri::Clean<CMeshO>::RemoveZeroAreaFace(m);
 		tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
 		tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-		if (tri::Clean<CMeshO>::IsComplexManifold(m))
-			qDebug("E' 2manifold");
-		else
-			qDebug("NON E' 2manifold");
+		if (tri::Clean<CMeshO>::IsTwoManifoldFace(m))
 		for(int i = 0; i < n; ++i)
 		{
 			for(int j = 0; j < n; ++j)
