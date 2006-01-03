@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.34  2006/01/03 23:41:06  cignoni
+corrected bug in the invocation of clean::IsOrientedMesh with twice the same boolan var
+
 Revision 1.33  2006/01/03 11:15:37  mariolatronico
 ActionInfo ai in Info() must be static because the function return a reference
 
@@ -321,9 +324,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 
 	if(filter->text() == ST(FP_REORIENT) ) 
 		{
-			bool orValue = true;
+			bool oriented;
+      bool orientable;
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-			tri::Clean<CMeshO>::IsOrientedMesh(m.cm, orValue, orValue);
+			tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
 		}
 
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
