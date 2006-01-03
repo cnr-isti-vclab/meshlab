@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.33  2006/01/03 11:15:37  mariolatronico
+ActionInfo ai in Info() must be static because the function return a reference
+
 Revision 1.32  2006/01/02 12:39:41  mariolatronico
 used ST function to compare action->text() inside Info function
 
@@ -174,7 +177,7 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 
 const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action) 
 {
-	ActionInfo ai; 
+	static ActionInfo ai; 
   
 	if( action->text() == ST(FP_LOOP_SS) )
 		{
