@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2006/01/04 15:35:52  alemochi
+Renamed string about general information on plugin
+
 Revision 1.7  2006/01/04 15:27:30  alemochi
 Renamed property of Format struct, and changed plugin dialog
 
@@ -200,21 +203,21 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 		MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
 		if (iDecorate)
 		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author ")+iDecorate->Info().Author+QString(" Date ")+iDecorate->Info().Date+QString(" Version ")+iDecorate->Info().Version);
+			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iDecorate->Info().Author+QString(" Date: ")+iDecorate->Info().Date+QString(" Version: ")+iDecorate->Info().Version);
 			else foreach(QAction *a,iDecorate->actions())
 				if (actionName==a->text()) labelInfo->setText(iDecorate->Info(a).Help);
 		}
 		MeshColorizeInterface *iColorize = qobject_cast<MeshColorizeInterface *>(plugin);
 		if (iColorize)
 		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author ")+iColorize->Info().Author+QString(" Date ")+iColorize->Info().Date+QString(" Version ")+iColorize->Info().Version);
+			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iColorize->Info().Author+QString(" Date: ")+iColorize->Info().Date+QString(" Version: ")+iColorize->Info().Version);
 			else foreach(QAction *a,iColorize->actions())
 				if (actionName==a->text()) labelInfo->setText(iColorize->Info(a).Help);
 		}
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 		if (iFilter)
 		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author ")+iFilter->Info().Author+QString(" Date ")+iFilter->Info().Date+QString(" Version ")+iFilter->Info().Version);
+			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iFilter->Info().Author+QString(" Date: ")+iFilter->Info().Date+QString(" Version: ")+iFilter->Info().Version);
 			else foreach(QAction *a,iFilter->actions())
 							if (actionName==a->text()) labelInfo->setText(iFilter->Info(a).Help);
 		}
@@ -224,7 +227,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 		MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
 		if (iEdit)
 		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author ")+iEdit->Info().Author+QString(" Date ")+iEdit->Info().Date+QString(" Version ")+iEdit->Info().Version);
+			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iEdit->Info().Author+QString(" Date: ")+iEdit->Info().Date+QString(" Version: ")+iEdit->Info().Version);
 			else foreach(QAction *a,iEdit->actions())
 				if (actionName==a->text()) labelInfo->setText(iEdit->Info(a).Help);
 		}
