@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.16  2006/01/04 16:22:20  cignoni
+Made FFAdj optional and added store and restore color functions
+
 Revision 1.15  2005/12/22 21:05:43  cignoni
 Removed Optional Face Normal and added some initalization after opening
 
@@ -89,8 +92,11 @@ class CVertexO;
 
 // Opt stuff
 
-class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Color4b, vert::Normal3f, vert::Qualityf, vert::BitFlags  >{};
-class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,  face::InfoOcf, face::Color4b, face::FFAdj, face::WedgeTexturefOcf, face::VertexRef, face::BitFlags, face::Normal3f, face::Mark > {};
+class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, vert::Coord3f, vert::Color4b, vert::Normal3f, vert::Qualityf, vert::BitFlags  >{ 
+public:
+	Color4b origC;
+};
+class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,  face::InfoOcf, face::Color4b, face::FFAdjOcf, face::WedgeTexturefOcf, face::VertexRef, face::BitFlags, face::Normal3f, face::Mark > {};
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
 
 /*
@@ -106,10 +112,21 @@ public:
 
   CMeshO cm;
   GlTrimesh<CMeshO> glw;
-  MeshModel() {glw.m=&cm; cm.face.EnableWedgeTex();}
+  MeshModel() {glw.m=&cm; cm.face.EnableWedgeTex();cm.face.EnableFFAdjacency();}
   bool Open(const char* filename, CallBackPos *cb=0);
   bool Save(const char* filename, CallBackPos *cb=0);
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
+  inline void storeVertexColor()
+  {
+	CMeshO::VertexIterator vi;
+	for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) (*vi).origC=(*vi).C();
+  }
+  inline void restoreVertexColor()
+  {
+	CMeshO::VertexIterator vi;
+	for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) (*vi).C()=(*vi).origC;
+  }
+
 };
 
 #endif
