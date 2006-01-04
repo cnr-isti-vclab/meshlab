@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.21  2006/01/04 16:51:44  fmazzant
+ changed PM_VERTEXCOORD in PM_WEDGTEXCOORD
+
  Revision 1.20  2005/12/23 10:12:51  fmazzant
  deleted bug to save a face
 
@@ -222,7 +225,7 @@ namespace io {
 				
 			//vertexs normal
 			std::map<Point3f,int> NormalVertex;
-			if(oi.mask & vcg::ply::PLYMask::PM_WEDGNORMAL) 
+			if(oi.mask & vcg::ply::PLYMask::PM_VERTNORMAL) 
 			{
 				int numvert = 0;
 				int value = 1;
