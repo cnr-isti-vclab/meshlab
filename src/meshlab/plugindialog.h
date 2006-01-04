@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/01/04 13:27:52  alemochi
+Added help in plugin dialog
+
 Revision 1.3  2005/12/20 03:33:16  davide_portelli
 Modified PluginDialog.
 
@@ -36,12 +39,16 @@ Added copyright info
 
 #include <QDialog>
 #include <QIcon>
+#include <QTextEdit>
+#include <QSpacerItem>
+
 
 class QLabel;
 class QPushButton;
 class QStringList;
 class QTreeWidget;
 class QTreeWidgetItem;
+class QGroupBox;
 
 class PluginDialog : public QDialog
 {
@@ -56,9 +63,17 @@ private:
 
   QLabel *label;
   QTreeWidget *treeWidget;
-  QPushButton *okButton;
+  QLabel * labelInfo;
+	QPushButton *okButton;
   QIcon interfaceIcon;
-  QIcon featureIcon;
+	QIcon featureIcon;
+	QSpacerItem *spacerItem;
+	QGroupBox *groupBox;
+//	QGroupBox *groupBox;
+	QString pathDirectory;
+public slots:
+	void displayInfo(QTreeWidgetItem* item,int ncolumn);
+
 };
 
 #endif

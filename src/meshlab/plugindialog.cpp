@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2006/01/04 13:27:52  alemochi
+Added help in plugin dialog
+
 Revision 1.5  2005/12/20 03:33:16  davide_portelli
 Modified PluginDialog.
 
@@ -47,7 +50,6 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWi
 {
     label = new QLabel;
     label->setWordWrap(true);
-
     QStringList headerLabels;
     headerLabels << tr("Components");
 
@@ -56,18 +58,35 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWi
     treeWidget->setHeaderLabels(headerLabels);
     treeWidget->header()->hide();
 
+		groupBox=new QGroupBox(tr("Info Plugin"));
+		
     okButton = new QPushButton(tr("OK"));
     okButton->setDefault(true);
+		
+		spacerItem = new QSpacerItem(363, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+		
+		labelInfo=new QLabel(groupBox);
+		labelInfo->setWordWrap(true);
+		//tedit->hide();
 
     connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
+		connect(treeWidget,SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(displayInfo(QTreeWidgetItem*,int)));
 
     QGridLayout *mainLayout = new QGridLayout;
-    mainLayout->setColumnStretch(0, 1);
-    mainLayout->setColumnStretch(2, 1);
-    mainLayout->addWidget(label, 0, 0, 1, 3);
-    mainLayout->addWidget(treeWidget, 1, 0, 1, 3);
-    mainLayout->addWidget(okButton, 2, 1);
-    setLayout(mainLayout);
+		QHBoxLayout *gboxLayout = new QHBoxLayout(groupBox);
+		gboxLayout->addWidget(labelInfo);
+    //mainLayout->setColumnStretch(0, 1);
+    //mainLayout->setColumnStretch(2, 1);
+    mainLayout->addWidget(label, 0, 0, 1, 2);
+    mainLayout->addWidget(treeWidget, 1, 0, 4, 2);
+    mainLayout->addWidget(groupBox,5,0,1,2);
+		mainLayout->addItem(spacerItem, 6, 0, 1, 1);
+		mainLayout->addWidget(okButton,6,1,1,1);
+
+
+		//mainLayout->addWidget(okButton, 3, 1,Qt::AlignHCenter);
+		//mainLayout->addLayout(buttonLayout,3,1);			
+		setLayout(mainLayout);
 
     interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),QIcon::Normal, QIcon::On);
     interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),QIcon::Normal, QIcon::Off);
@@ -75,6 +94,7 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWi
 
     setWindowTitle(tr("Plugin Information"));
     populateTreeWidget(path, fileNames);
+		pathDirectory=path;
 }
 
 void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fileNames)
@@ -110,7 +130,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 									QStringList Templist;
 									foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
 									addItems(pluginItem,Templist);
-								}
+								}								 
 								MeshColorizeInterface *iColorize = qobject_cast<MeshColorizeInterface *>(plugin);
 								if (iColorize){
 									QStringList Templist;
@@ -127,7 +147,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 								if (iRender){
 									QStringList Templist;
 									foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
-									addItems(pluginItem,Templist);
+    									addItems(pluginItem,Templist);
 								}
 								MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
 								if (iEdit){
@@ -136,9 +156,10 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 									addItems(pluginItem,Templist);
 								}
            }
-        }
-    }
+				}
+   	}
 }
+
 
 void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &features){
 
@@ -148,3 +169,51 @@ void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &featu
     featureItem->setIcon(0, featureIcon);
   }
 }
+
+
+void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
+{
+	QString parent;
+	QString actionName;
+	if (item->parent()!=NULL)	{parent=item->parent()->text(0);actionName=item->text(0);}
+	else parent=item->text(0);
+	QString fileName=pathDirectory+"/"+parent;
+	QPluginLoader loader(fileName);
+	QObject *plugin = loader.instance();
+	if (plugin) {
+		MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
+		if (iMeshIO){
+		}
+		MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
+		if (iDecorate)
+		{
+			if (item->parent()==NULL) labelInfo->setText(QString("Author ")+iDecorate->Info().Author+QString(" Date ")+iDecorate->Info().Date+QString(" Version ")+iDecorate->Info().Version);
+			else foreach(QAction *a,iDecorate->actions())
+				if (actionName==a->text()) labelInfo->setText(iDecorate->Info(a).Help);
+		}
+		MeshColorizeInterface *iColorize = qobject_cast<MeshColorizeInterface *>(plugin);
+		if (iColorize)
+		{
+			if (item->parent()==NULL) labelInfo->setText(QString("Author ")+iColorize->Info().Author+QString(" Date ")+iColorize->Info().Date+QString(" Version ")+iColorize->Info().Version);
+			else foreach(QAction *a,iColorize->actions())
+				if (actionName==a->text()) labelInfo->setText(iColorize->Info(a).Help);
+		}
+		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+		if (iFilter)
+		{
+			if (item->parent()==NULL) labelInfo->setText(QString("Author ")+iFilter->Info().Author+QString(" Date ")+iFilter->Info().Date+QString(" Version ")+iFilter->Info().Version);
+			else foreach(QAction *a,iFilter->actions())
+							if (actionName==a->text()) labelInfo->setText(iFilter->Info(a).Help);
+		}
+		MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+		if (iRender){
+		}
+		MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
+		if (iEdit)
+		{
+			if (item->parent()==NULL) labelInfo->setText(QString("Author ")+iEdit->Info().Author+QString(" Date ")+iEdit->Info().Date+QString(" Version ")+iEdit->Info().Version);
+			else foreach(QAction *a,iEdit->actions())
+				if (actionName==a->text()) labelInfo->setText(iEdit->Info(a).Help);
+		}
+	}
+}	

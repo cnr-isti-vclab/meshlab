@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2006/01/04 13:27:53  alemochi
+Added help in plugin dialog
+
 Revision 1.9  2005/12/23 19:34:09  glvertex
 Removed ColorModes (none,pervert,perface)
 
@@ -56,14 +59,14 @@ using namespace vcg;
 
 const ActionInfo &MeshColorCurvaturePlugin::Info(QAction *) 
  {
-   ActionInfo ai; 
+   static ActionInfo ai; 
    ai.Help=tr("Generic Help for an action");
    return ai;
  }
 
  const PluginInfo &MeshColorCurvaturePlugin::Info() 
 {
-   PluginInfo ai; 
+   static PluginInfo ai; 
    ai.Date=tr("__DATE__");
    return ai;
  }
