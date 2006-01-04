@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.30  2006/01/04 15:27:30  alemochi
+Renamed property of Format struct, and changed plugin dialog
+
 Revision 1.29  2005/12/30 10:51:10  mariolatronico
 - added GLLogStream forward declaration
 - added method setLog to MeshFilterInterface to remove GLArea dependency on meshfilter plugin
@@ -126,7 +129,7 @@ class MeshIOInterface
 public:
    struct Format
 		{
-			QString desctiption;
+			QString description;
 			QStringList extensions;
 		};
 

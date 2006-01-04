@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.37  2006/01/04 15:27:30  alemochi
+ Renamed property of Format struct, and changed plugin dialog
+
  Revision 1.36  2005/12/23 00:56:42  buzzelli
  Face normals computed also for STL and OFF files.
  Solved (hopefully) bug with progressbar.
@@ -295,23 +298,23 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::formats() const
 	QList<Format> formatList;
 
 	Format ply;
-	ply.desctiption = "Stanford Polygon File Format";
+	ply.description = "Stanford Polygon File Format";
 	ply.extensions <<  tr("PLY");
 	
 	Format obj;
-	obj.desctiption = "Alias Wavefront Object";
+	obj.description = "Alias Wavefront Object";
 	obj.extensions <<  tr("OBJ");
 	
 	Format off;
-	off.desctiption = "Object File Format";
+	off.description = "Object File Format";
 	off.extensions << tr("OFF");
 
 	Format stl;
-	stl.desctiption = "STL File Format";
+	stl.description = "STL File Format";
 	stl.extensions << tr("STL");
 
 	Format _3ds;
-	_3ds.desctiption = "3D-Studio File Format";
+	_3ds.description = "3D-Studio File Format";
 	_3ds.extensions << tr("3DS");
 
 	formatList << ply;

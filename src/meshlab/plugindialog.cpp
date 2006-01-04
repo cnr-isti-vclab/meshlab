@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/01/04 15:27:30  alemochi
+Renamed property of Format struct, and changed plugin dialog
+
 Revision 1.6  2006/01/04 13:27:52  alemochi
 Added help in plugin dialog
 
@@ -122,7 +125,11 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
                 MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
 								if (iMeshIO){
 									QStringList Templist;
-									foreach(const MeshIOInterface::Format f,iMeshIO->formats()){Templist.push_back(f.desctiption);}
+									foreach(const MeshIOInterface::Format f,iMeshIO->formats()){
+										QString formats;
+										foreach(const QString s,f.extensions) formats+=s+" ";
+										Templist.push_back(formats);
+									}
                   addItems(pluginItem,Templist);
 								}
                 MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
@@ -183,6 +190,12 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 	if (plugin) {
 		MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
 		if (iMeshIO){
+			if (item->parent()!=NULL)
+			foreach(const MeshIOInterface::Format f,iMeshIO->formats()){
+				QString formats;
+				foreach(const QString s,f.extensions) formats+=s+" ";
+				if (actionName==formats) labelInfo->setText(f.description);
+			}
 		}
 		MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
 		if (iDecorate)
