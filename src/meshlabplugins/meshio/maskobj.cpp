@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/01/04 16:48:37  fmazzant
+ changed PM_VERTTEXCOORD in PM_WEDGTEXCOORD
+
  Revision 1.3  2005/12/13 14:02:50  fmazzant
  added the rescue of the materials of the obj
 
@@ -61,7 +64,7 @@ int MaskObj::MaskObjToInt()
 	if(vertexs)	{mask |= vcg::ply::PLYMask::PM_VERTQUALITY;}
 	if(colorV)	{mask |= vcg::ply::PLYMask::PM_VERTCOLOR;}
 	if(colorF)	{mask |= vcg::ply::PLYMask::PM_FACECOLOR;}
-	if(normal)	{mask |= vcg::ply::PLYMask::PM_WEDGNORMAL;}
+	if(normal)	{mask |= vcg::ply::PLYMask::PM_VERTNORMAL;}
 	if(texture)	{mask |= vcg::ply::PLYMask::PM_WEDGTEXCOORD;}
 	return mask;
 }
