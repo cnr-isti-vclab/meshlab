@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.37  2006/01/05 16:08:54  mariolatronico
+correct typo on comments
+
 Revision 1.36  2006/01/05 15:37:56  mariolatronico
 added control for mesh 2-manifold on subdivision algorithms and invert faces
 
@@ -280,7 +283,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	if( filter->text().contains(tr("Subdivision Surface")) ) {
 
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-		// clean need a FaceFace update topology
+		// IsTwoManifoldFace needs a FaceFace update topology
 		if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
 			QMessageBox::warning(parent, // parent
 													 QString("Can't continue"), // caption
@@ -383,7 +386,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		}
 	if (filter->text() == ST(FP_INVERT_FACES) ) {
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-		// clean need a FaceFace update topology
+		// IsTwoManifoldFace needs a FaceFace update topology
 		if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
 			QMessageBox::warning(parent, // parent
 													 QString("Can't continue"), // caption
