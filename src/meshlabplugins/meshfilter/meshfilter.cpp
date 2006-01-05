@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.36  2006/01/05 15:37:56  mariolatronico
+added control for mesh 2-manifold on subdivision algorithms and invert faces
+
 Revision 1.35  2006/01/05 11:06:41  mariolatronico
 Added Invert faces filter
 
@@ -275,6 +278,15 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	bool selected = false;
 
 	if( filter->text().contains(tr("Subdivision Surface")) ) {
+
+		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		// clean need a FaceFace update topology
+		if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+			QMessageBox::warning(parent, // parent
+													 QString("Can't continue"), // caption
+													 QString("Mesh faces not 2 manifold")); // text
+			return false; // can't continue, mesh can't be processed
+		}
 		if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
@@ -313,7 +325,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
   if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 		{
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			
+			if (log)
+				log->Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
+			if (delvert != 0)
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 		}
 
@@ -321,16 +336,18 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		{
 		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 			if (log)
-				log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
-		
+				log->Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+			if (delvert != 0)
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
 
 	if(filter->text() == ST(FP_REMOVE_NULL_FACES) ) 
 		{
-			int delvert=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
+			int nullFaces=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
 			if (log)
-				log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
-		
+				log->Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
+			if (nullFaces != 0)
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
 
 	if(filter->text() == ST(FP_REORIENT) ) 
@@ -344,6 +361,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
 		{
 			LaplacianSmooth(m.cm,1);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
 
 	if(filter->text() == ST(FP_COLOR)) 
@@ -361,10 +379,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
  			int delvert = Decimator<CMeshO>(m.cm,step);
 			if (log)
 				log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
-			
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
 	if (filter->text() == ST(FP_INVERT_FACES) ) {
-			InvertFaces<CMeshO>(m.cm);
+		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		// clean need a FaceFace update topology
+		if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+			QMessageBox::warning(parent, // parent
+													 QString("Can't continue"), // caption
+													 QString("Mesh faces not 2 manifold")); // text
+			return false; // can't continue, mesh can't be processed
+		}
+		
+		InvertFaces<CMeshO>(m.cm);
+		// update normal on InvertFaces function
 	}
 	return true;
 }
