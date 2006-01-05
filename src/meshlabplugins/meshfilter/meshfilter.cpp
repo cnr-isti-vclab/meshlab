@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.38  2006/01/05 16:46:40  mariolatronico
+removed manifold test on invert faces and added update normals on reorient case
+
 Revision 1.37  2006/01/05 16:08:54  mariolatronico
 correct typo on comments
 
@@ -359,6 +362,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
       bool orientable;
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 			tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+
 		}
 
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
@@ -385,14 +390,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		}
 	if (filter->text() == ST(FP_INVERT_FACES) ) {
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-		// IsTwoManifoldFace needs a FaceFace update topology
-		if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
-			QMessageBox::warning(parent, // parent
-													 QString("Can't continue"), // caption
-													 QString("Mesh faces not 2 manifold")); // text
-			return false; // can't continue, mesh can't be processed
-		}
 		
 		InvertFaces<CMeshO>(m.cm);
 		// update normal on InvertFaces function
