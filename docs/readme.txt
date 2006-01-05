@@ -6,7 +6,7 @@
    Visual Computing Lab  http://vcg.isti.cnr.it                    /\/|
    ISTI - Italian National Research Council                           |
                                                                       \
-   MeshLab 0.4 2005/12/24
+   MeshLab
    http://meshlab.sourceforge.net/
    All rights reserved.
 
