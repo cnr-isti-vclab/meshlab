@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.63  2006/01/05 00:21:22  cignoni
+Syntax error, changed desctiption->description
+
 Revision 1.62  2006/01/02 18:54:52  glvertex
 added multilevel logging support
 
@@ -642,7 +645,7 @@ void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &all
 		{
 			MeshIOInterface::Format currentFormat = *itFormat;
 			
-			QString currentFilterEntry = currentFormat.desctiption + " (";
+			QString currentFilterEntry = currentFormat.description + " (";
 			
 			QStringListIterator itExtension(currentFormat.extensions);
 			while (itExtension.hasNext())
