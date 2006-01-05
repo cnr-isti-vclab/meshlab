@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.35  2006/01/05 11:06:41  mariolatronico
+Added Invert faces filter
+
 Revision 1.34  2006/01/03 23:41:06  cignoni
 corrected bug in the invocation of clean::IsOrientedMesh with twice the same boolan var
 
@@ -106,6 +109,7 @@ Added copyright info
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/update/color.h>
 /////////////
+#include "invert_faces.h"
 #include "../../test/decimator/decimator.h"
 #include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
@@ -129,8 +133,9 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_COLOR), this);
 
 	actionList << new QAction(ST(FP_DECIMATOR), this);
-
-
+	
+	actionList << new QAction(ST(FP_INVERT_FACES), this);
+	
 	refineDialog = new RefineDialog();
 	refineDialog->hide();
 	decimatorDialog = new DecimatorDialog();
@@ -161,7 +166,8 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 		return QString("Re-oriented");	
 	case FP_COLOR:
 		return QString("Color non manifold");
-
+	case FP_INVERT_FACES:
+		return QString("Invert Faces");
 	default: assert(0);
   }
   return QString("error!");
@@ -241,6 +247,11 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
  		{
 			ai.Help = tr("Colors the edge non manifold");
 			ai.ShortHelp = tr("Colors the edge non manifold");
+ 		}
+	if(action->text() == ST(FP_INVERT_FACES) )
+ 		{
+			ai.Help = tr("Invert faces orentation");
+			ai.ShortHelp = tr("Invert faces orentation");
  		}
 	
 	
@@ -352,7 +363,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 				log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
 			
 		}
-	
+	if (filter->text() == ST(FP_INVERT_FACES) ) {
+			InvertFaces<CMeshO>(m.cm);
+	}
 	return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)

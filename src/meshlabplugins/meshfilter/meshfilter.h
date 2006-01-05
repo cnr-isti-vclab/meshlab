@@ -44,7 +44,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	*/
 	enum FilterType { FP_LOOP_SS, FP_BUTTERFLY_SS, FP_REMOVE_UNREFERENCED_VERTEX, 
 				 FP_REMOVE_DUPLICATED_VERTEX, FP_REMOVE_NULL_FACES, 
-				 FP_LAPLACIAN_SMOOTH, FP_DECIMATOR, FP_MIDPOINT, FP_REORIENT , FP_COLOR} ;
+				 FP_LAPLACIAN_SMOOTH, FP_DECIMATOR, FP_MIDPOINT, FP_REORIENT , FP_COLOR,FP_INVERT_FACES} ;
 	const QString ST(FilterType filter);
 
 
@@ -58,6 +58,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	void setLog(GLLogStream *log) { this->log = log ; }
 protected:
 	GLLogStream *log;
+	ActionInfo *ai;
 	QList <QAction *> actionList;
 	RefineDialog *refineDialog;
 	DecimatorDialog *decimatorDialog;
