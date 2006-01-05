@@ -32,6 +32,9 @@ ui/savesnapshotDialog.ui\						 ui/aboutDialog.ui
 
 RESOURCES     = meshlab.qrc
 
+# to add windows icon 
+RC_FILE = meshlab.rc
+
 QT           += opengl
 
 # the following line is needed to avoid mismatch between 
