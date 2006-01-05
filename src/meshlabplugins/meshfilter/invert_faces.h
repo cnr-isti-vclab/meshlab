@@ -7,14 +7,15 @@
 
 #include <iostream>
 #include <QtGlobal>
+
+// $Log, invert_faces.h
+
 namespace vcg{
 
 	template<class MESH_TYPE>
 		void InvertFaces(MESH_TYPE &m)
 	{	
 		typename MESH_TYPE::FaceIterator fi;
-		typename MESH_TYPE::VertexType v1,v2;
-		// Test per gli edge manifold
 		
 		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
 		{
