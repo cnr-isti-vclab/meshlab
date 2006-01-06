@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.35  2006/01/06 01:09:55  glvertex
+Application name and version coherency using a member method
+
 Revision 1.34  2006/01/02 16:15:16  glvertex
 Added reload action
 
@@ -327,7 +330,7 @@ MainWindow::MainWindow()
 	updateMenus();
 	addToolBar(mainToolBar);
 	addToolBar(renderToolBar);
-	setWindowTitle(tr("MeshLab v0.5"));
+	setWindowTitle(appName());
 	loadPlugins();
 	if(QCoreApplication::instance ()->argc()>1){
 		open(QCoreApplication::instance ()->argv()[1]);

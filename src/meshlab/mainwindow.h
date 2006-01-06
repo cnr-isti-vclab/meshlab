@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.54  2006/01/06 01:09:55  glvertex
+Application name and version coherency using a member method
+
 Revision 1.53  2006/01/02 16:15:16  glvertex
 Added reload action
 
@@ -113,6 +116,7 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow();
    static bool QCallBack(const int pos, const char * str);
+	 const QString appName() const {return tr("MeshLab v0.5"); }
    MaskObj maskobj;
    
   

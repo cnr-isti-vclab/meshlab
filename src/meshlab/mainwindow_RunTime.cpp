@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.64  2006/01/06 01:09:55  glvertex
+Application name and version coherency using a member method
+
 Revision 1.63  2006/01/05 00:21:22  cignoni
 Syntax error, changed desctiption->description
 
@@ -826,6 +829,7 @@ void MainWindow::about()
 	QDialog *about_dialog = new QDialog();
 	Ui::aboutDialog temp;
 	temp.setupUi(about_dialog);
+	temp.labelMLName->setText(appName());
 	about_dialog->show();
 }
 
