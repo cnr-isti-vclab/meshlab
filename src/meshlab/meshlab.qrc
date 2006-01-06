@@ -14,6 +14,7 @@
         <file>images/wire.png</file>
         <file>images/textures.png</file>
         <file>images/logo.png</file>
+        <file>images/eye_256_splash.png</file>
 	<file>images/snapshot.png</file>
 	<file>images/reload.png</file>
     </qresource>
