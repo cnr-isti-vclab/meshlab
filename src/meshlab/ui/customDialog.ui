@@ -2,8 +2,8 @@
  <author>AleMochi, glVertex</author>
  <comment></comment>
  <exportmacro></exportmacro>
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog" >
+ <class>customDialog</class>
+ <widget class="QDialog" name="customDialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/01/06 00:16:57  glvertex
+Renamed Dialog to customDialog
+
 Revision 1.6  2006/01/02 19:13:57  glvertex
 Multi level logging
 
@@ -71,7 +74,7 @@ private slots:
 	void setLogAreaColor();
 		
 private:
-	Ui::Dialog ui;
+	Ui::customDialog ui;
 
 	vcg::Color4b bkgBottomColor;
 	vcg::Color4b bkgTopColor;
