@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.39  2006/01/06 10:58:22  giec
+Remuved filter "Color non manifold"
+
 Revision 1.38  2006/01/05 16:46:40  mariolatronico
 removed manifold test on invert faces and added update normals on reorient case
 
@@ -124,7 +127,7 @@ Added copyright info
 #include "../../meshlab/LogStream.h"
 //#include "../../meshlab/glarea.h"
 ////////////
-#include "color_manifold.h"
+
 using namespace vcg;
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
@@ -139,7 +142,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_LAPLACIAN_SMOOTH), this);
 
 	actionList << new QAction(ST(FP_REORIENT), this);
-	actionList << new QAction(ST(FP_COLOR), this);
+
 
 	actionList << new QAction(ST(FP_DECIMATOR), this);
 	
@@ -173,8 +176,6 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 		return QString("Midpoint Subdivision Surfaces");
 	case FP_REORIENT : 
 		return QString("Re-oriented");	
-	case FP_COLOR:
-		return QString("Color non manifold");
 	case FP_INVERT_FACES:
 		return QString("Invert Faces");
 	default: assert(0);
@@ -252,11 +253,6 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 			
  		}
 	
-	if(action->text() == ST(FP_COLOR) )
- 		{
-			ai.Help = tr("Colors the edge non manifold");
-			ai.ShortHelp = tr("Colors the edge non manifold");
- 		}
 	if(action->text() == ST(FP_INVERT_FACES) )
  		{
 			ai.Help = tr("Invert faces orentation");
@@ -285,114 +281,110 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 
 	if( filter->text().contains(tr("Subdivision Surface")) ) {
 
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-		// IsTwoManifoldFace needs a FaceFace update topology
-		if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
-			QMessageBox::warning(parent, // parent
-													 QString("Can't continue"), // caption
-													 QString("Mesh faces not 2 manifold")); // text
-			return false; // can't continue, mesh can't be processed
-		}
-		if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
-		int continueValue = refineDialog->exec();
-		if (continueValue == QDialog::Rejected)
-			return false; // don't continue, user pressed Cancel
-		double threshold = refineDialog->getThreshold(); // threshold for refinying
-		bool selected = refineDialog->isSelected(); // refine only selected faces
+	  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+	  // IsTwoManifoldFace needs a FaceFace update topology
+	  if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+	    QMessageBox::warning(parent, // parent
+				 QString("Can't continue"), // caption
+				 QString("Mesh faces not 2 manifold")); // text
+	    return false; // can't continue, mesh can't be processed
+	  }
+	  if(!m.cm.face.IsWedgeTexEnabled()) m.cm.face.EnableWedgeTex();
+	  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+	  vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+	  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+	  int continueValue = refineDialog->exec();
+	  if (continueValue == QDialog::Rejected)
+	    return false; // don't continue, user pressed Cancel
+	  double threshold = refineDialog->getThreshold(); // threshold for refinying
+	  bool selected = refineDialog->isSelected(); // refine only selected faces
 	}
 	
 	if(filter->text() == ST(FP_LOOP_SS) )
-		{
-			vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
-				(m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),threshold, selected, cb);
-			
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
-		}
-
+	  {
+	    vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
+	      (m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),threshold, selected, cb);
+	    
+	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
+	  }
+	
 	if(filter->text() == ST(FP_BUTTERFLY_SS) )
 	  {
-			vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >
-				(m.cm,vcg::MidPointButterfly<CMeshO>(),threshold, selected, cb);
-
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		}
-
-		if(filter->text() == ST(FP_MIDPOINT) )
+	    vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >
+	      (m.cm,vcg::MidPointButterfly<CMeshO>(),threshold, selected, cb);
+	    
+	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	  }
+	
+	if(filter->text() == ST(FP_MIDPOINT) )
 	  {
-			vcg::Refine<CMeshO,MidPoint<CMeshO> >
-				(m.cm,vcg::MidPoint<CMeshO>(),threshold, selected, cb);
-
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		}
-
-  if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
-		{
-			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			if (log)
-				log->Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
-			if (delvert != 0)
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-			//QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
-		}
-
-  if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
-		{
-		  int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-			if (log)
-				log->Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
-			if (delvert != 0)
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		}
-
+	    vcg::Refine<CMeshO,MidPoint<CMeshO> >
+	      (m.cm,vcg::MidPoint<CMeshO>(),threshold, selected, cb);
+	    
+	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	  }
+	
+	if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
+	  {
+	    int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+	    if (log)
+	      log->Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
+	    if (delvert != 0)
+	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	    //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
+	  }
+	
+	if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
+	  {
+	    int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+	    if (log)
+	      log->Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+	    if (delvert != 0)
+	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	  }
+	
 	if(filter->text() == ST(FP_REMOVE_NULL_FACES) ) 
-		{
-			int nullFaces=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
-			if (log)
-				log->Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
-			if (nullFaces != 0)
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		}
-
+	  {
+	    int nullFaces=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
+	    if (log)
+	      log->Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
+	    if (nullFaces != 0)
+	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	  }
+	
 	if(filter->text() == ST(FP_REORIENT) ) 
-		{
-			bool oriented;
-      bool orientable;
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-			tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-
-		}
-
+	  {
+	    bool oriented;
+	    bool orientable;
+	    vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+	    tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
+	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	    
+	  }
+	
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
-		{
-			LaplacianSmooth(m.cm,1);
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		}
-
-	if(filter->text() == ST(FP_COLOR)) 
-		{
-			ColorManifold<CMeshO>(m.cm);
-		}
+	  {
+	    LaplacianSmooth(m.cm,1);
+	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	  }
+	
 	
  	if(filter->text() == ST(FP_DECIMATOR)) 
- 		{
-			int continueValue = decimatorDialog->exec();
-			if (continueValue == QDialog::Rejected)
-				return false; // don't continue, user pressed Cancel
-			int step = decimatorDialog->getStep();
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
- 			int delvert = Decimator<CMeshO>(m.cm,step);
-			if (log)
-				log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		}
+	  {
+	    int continueValue = decimatorDialog->exec();
+	    if (continueValue == QDialog::Rejected)
+	      return false; // don't continue, user pressed Cancel
+	    int step = decimatorDialog->getStep();
+	    vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+	    int delvert = Decimator<CMeshO>(m.cm,step);
+	    if (log)
+	      log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
+	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	  }
 	if (filter->text() == ST(FP_INVERT_FACES) ) {
-		
-		InvertFaces<CMeshO>(m.cm);
-		// update normal on InvertFaces function
+	  
+	  InvertFaces<CMeshO>(m.cm);
+	  // update normal on InvertFaces function
 	}
 	return true;
 }
