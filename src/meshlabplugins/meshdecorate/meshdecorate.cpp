@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/01/07 11:32:05  glvertex
+Disabled textures when drawing corners,axis and normals lines
+Enhanced blending normals
+
 Revision 1.6  2006/01/02 16:44:38  glvertex
 Blending normals
 
@@ -80,8 +84,9 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
     float LineLen = m.cm.bbox.Diag()/20.0;
     CMeshO::VertexIterator vi;
     glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_LINES);
 		glColor4f(.4f,.4f,1.f,.3f);
     for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
@@ -100,6 +105,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
@@ -153,6 +159,7 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m)
 	float hw=m.cm.bbox.Diag()/2.0;
 		glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
