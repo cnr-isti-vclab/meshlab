@@ -22,8 +22,8 @@
 <div id="leftcontent">
 <h1>MeshLab</h1>
 
-<p class="body"> An extendible system for the user assisted processing of
-&nbsp;unstructured meshes. <br>
+<p class="body"> An extendible system for the user
+assisted processing of&nbsp;unstructured meshes. <br>
 
 The system is aimed to help the processing of the typical not-so-small
 unstructured models arising in 3d scanning, providing a set of tools
@@ -39,9 +39,116 @@ course of the <a href="www.di.unipi.it">Computer Science</a>
 department of&nbsp;University of Pisa.<br>
 
 </p>
+
 <h2><a name="Features"></a>Features</h2>
 
+<ul>
+
+  <li>Input/output in many formats (PLY, STL, OFF, OBJ)</li>
+
+  <li>Extendible plugins based architecture, writing new mesh
+processing functions, colorization filters and support for different
+file formats is quite easy.</li>
+
+  <li>Cleaning Filters</li>
+
+  <ul>
+
+    <li>Removal of duplicated, unreferenced vertices, null faces</li>
+
+  </ul>
+
+  <ul>
+
+    <li>Subdivision filters (loop and butterfly)</li>
+
+  </ul>
+
+  <li>Opengl Shader based rendering </li>
+
+  <li>Large snapshot for hi quality printing</li>
+
+  <li>Various Colorization Filters </li>
+
+  <ul>
+
+    <li>Gaussian curvature</li>
+
+  </ul>
+
+  <ul>
+
+    <li>Border edges</li>
+
+    <li>Non two-manifold faces</li>
+
+  </ul>
+
+</ul>
+
 <h2>ScreenShots</h2>
+
+Taken from upcoming v 0.5.
+<table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+
+  <tbody>
+
+    <tr>
+
+      <td style="text-align: center;"><a href="SnapMeshLab.thai.jpg"><img style="border: 0px solid ; width: 200px; height: 233px;" src="SnapMeshLab.thai.small.jpg" alt=""></a></td>
+
+      <td> A 10,000,000 face model successfully
+loaded and ready for inspecting.&nbsp;3D Model of a Thai statue
+courtesy of<a href="http://www.xyzrgb.com/"> XYZ
+RGB inc.</a>
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="text-align: center;"><a href="SnapMeshLab_David.jpg"><img style="border: 0px solid ; width: 206px; height: 233px;" src="SnapMeshLab_David.small.jpg" alt=""></a></td>
+
+      <td>A textured ply model of the well known Michelangelo
+David, original mesh courtesy of <a href="http://www-graphics.stanford.edu/data/3Dscanrep/">Stanford</a>,
+texturing through photo integration by&nbsp; <a href="http://vcg.isti.cnr.it/">Visual
+Computing Lab ISTI - CNR</a></td>
+
+    </tr>
+
+    <tr>
+
+      <td style="text-align: center;"><a href="SnapMeshLab.elephant.jpg"><img style="border: 0px solid ; width: 281px; height: 233px;" src="SnapMeshLab.elephant.small.jpg" alt=""></a></td>
+
+      <td>A model with self intersecting faces detected by
+MeshLab colored in red.</td>
+
+    </tr>
+
+    <tr>
+
+      <td style="text-align: center;"><a href="SnapMeshLab.brain.jpg"><img style="border: 0px solid ; width: 281px; height: 233px;" src="SnapMeshLab.brain.small.jpg" alt=""></a></td>
+
+      <td>A&nbsp;model with border edges&nbsp;colored in
+blue.</td>
+
+    </tr>
+
+    <tr>
+
+      <td><a href="http://sourceforge.net/project/showfiles.php?group_id=149444&amp;package_id=165026&amp;release_id=383433">
+      <img style="border: 0px solid ; width: 113px; height: 233px;" src="SnapshotModel.Thai.small.jpg" alt=""></a><img src="SnapshotModel.Thai.detail.jpg" alt=""></td>
+
+      <td>A high resolution snapshot (4400x9110) of the Thai
+statuette; the snapshot is a 17Mb png, so <a href="http://sourceforge.net/project/showfiles.php?group_id=149444&amp;package_id=165026&amp;release_id=383433">download</a>
+it using the sourceforge file distribution system. On the right you can
+see a very small portion of the orginal sample just to give you an idea
+of the quality of the image. </td>
+
+    </tr>
+
+  </tbody>
+</table>
 
 <h2><a name="Developers"></a>Developers</h2>
 
@@ -54,7 +161,8 @@ Cignoni</a></li>
 
   <ul>
 
-    <li>Latronico [<a href="mailto:latronic@cli.di.unipi.it"><b>latronic</b></a>], Venturi [<a href="mailto:venturia@cli.di.unipi.it"><b>giec</b></a>]</li>
+    <li>Mario Latronico [<a href="mailto:latronic@cli.di.unipi.it"><b>latronic</b></a>],
+Andrea Venturi [<a href="mailto:venturia@cli.di.unipi.it"><b>giec</b></a>]</li>
 
   </ul>
 
@@ -62,7 +170,10 @@ Cignoni</a></li>
 
   <ul>
 
-    <li>Mochi [<a href="mailto:mochi@cli.di.unipi.it"><b>mochi</b></a>]</li>, Vacca [<a href="mailto:dalien_mc@hotmail.com"><b>glVertex</b></a>], Portelli [<a href="mailto:portelli@cli.di.unipi.it"><b>portelli</b></a>]</li>
+    <li>Alessio Mochi [<a href="mailto:mochi@cli.di.unipi.it"><b>mochi</b></a>],
+Daniele Vacca [<a href="mailto:dalien_mc@hotmail.com"><b>glVertex</b></a>],
+Davide Portelli [<a href="mailto:portelli@cli.di.unipi.it"><b>portelli</b></a>]
+    </li>
 
   </ul>
 
@@ -70,7 +181,8 @@ Cignoni</a></li>
 
   <ul>
 
-    <li>Vannini [<a href="mailto:vannini@cli.di.unipi.it"><b>vannini</b></a>], Gangemi [<a href="mailto:g.gangemi@gmail.com"><b>ggangemi</b></a>], Pirro</li>
+    <li>Francesco Vannini [<a href="mailto:vannini@cli.di.unipi.it"><b>vannini</b></a>],
+Giorgio Gangemi [<a href="mailto:g.gangemi@gmail.com"><b>ggangemi</b></a>]</li>
 
   </ul>
 
@@ -78,8 +190,8 @@ Cignoni</a></li>
 
   <ul>
 
-      <li>Andrea Buzzelli [<a href="mailto:buzzelli@cli.di.unipi.it"><b>buzzelli</b></a>], 
-        Federico Mazzanti [<a href="mailto:fmazzant@cli.di.unipi.it"><b>fmazzant</b></a>]</li>
+    <li>Andrea Buzzelli [<a href="mailto:buzzelli@cli.di.unipi.it"><b>buzzelli</b></a>],
+Federico Mazzanti [<a href="mailto:fmazzant@cli.di.unipi.it"><b>fmazzant</b></a>]</li>
 
   </ul>
 
@@ -89,8 +201,38 @@ Cignoni</a></li>
 
 <ul>
 
-  <li><span style="font-style: italic;">17/10/05</span>
-Committed first rough framework. The development begins...</li>
+  <li><span style="font-style: italic;">24/12/2005</span>
+V 0.4 Release&nbsp;</li>
+
+  <ul>
+
+    <li>
+      <pre>Plugin System<br> - Improved PluginSystem<br> - Improved shaders support (based on Typhoon Labs shaders)<br> - Filtering: Customizable filters thru dialogs<br> - Filters:<br> Laplacian smooth<br> MidPoint Subdivision<br> Re-orient<br> Decimator<br> - Editing (No editing tools available)<br> - Colorize:<br> Self intersection<br> Border<br> - Import/Export:<br> obj File Format (Customizable export thru dialog)<br> off File Format<br> stl File Format<br> 3ds File Format<br> - Decoration:<br> Show Axis<br> Show Box Corners<br><br>* User Interface<br> - Bugless progress bar<br> - About Plugin dialog<br> - Logging</pre>
+
+    </li>
+
+  </ul>
+
+  <li><span style="font-style: italic;">07/12/2005</span>
+V 0.3 Release</li>
+
+  <ul>
+
+    <li>
+      <pre>* Plugin System<br> - Complete restyling of plugin architecture<br> - Color: None, Per Vertex, Per Face<br> - Color: Support for shaders (wow!). Provided toon shader sample.<br> - Filtering: Remove Null Faces<br> - Filtering: Butterfly &amp; Loop optimized<br> - Decorize: New plugin class<br> - Import/Export: Obj file format integrated on standard user interface<br><br>* User Interface<br> - Info Panel:<br> Showing some mesh info (numTri&amp;numFaces)<br> Showing fps<br> - Shortcut for some frequently used actions<br> - Trackball hidable<br> - Option dialog:<br> Background colors (Top&amp;Bottom)<br> Log Area color<br> - Progress bar<br> - RenderModes: Textures<br> - Fullscreen<br> - Cycle thru opened windows with Next button<br> - About dialog</pre>
+
+&nbsp;<span style="font-style: italic;"></span></li>
+
+  </ul>
+
+  <li><span style="font-style: italic;">27/11/2005</span>
+V 0.2 Release <span style="font-style: italic;"></span></li>
+
+  <li><span style="font-style: italic;">15/11/2005</span>
+V 0.1 Release <span style="font-style: italic;"></span></li>
+
+  <li><span style="font-style: italic;">17/10/2005</span>
+Committed first rough framework. The development has just begun...</li>
 
 </ul>
 
@@ -103,21 +245,17 @@ Committed first rough framework. The development begins...</li>
 </div>
 
 <div id="rightcontent">
+<img src="../src/meshlab/images/eye_128_splash.png" alt=""><br>
+
 <a href="https://sourceforge.net/projects/meshlab/"><img src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2" alt="SourceForge.net Logo" border="0" height="37" width="125"></a>
-<p class="menu"><a href="#Features">Features</a></p>
+<p class="menu"><a href="devel.html">Developer Page</a></p>
 
-<p class="menu"><a href="#History">History</a></p>
+<p class="menu"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download</a></p>
 
-<p class="menu"><a href="#Developers">Developers</a></p>
+<p class="menu"><a href="stat/index">CVS Statistics</a></p>
 
-<p class="menu"><a href="devel.html">Development</a></p>
-
-<p class="menu"><a href="#Download">Download</a></p>
-
-<p class="menu"><a href="#CVS">CVS</a></p>
-
-<p class="menu"><a href="https://sourceforge.net/projects/meshlab/">SF project
-page</a></p>
+<p class="menu"><a href="http://sourceforge.net/projects/meshlab/">SF project
+page&nbsp;&nbsp; &nbsp;</a></p>
 
 </div>
 
