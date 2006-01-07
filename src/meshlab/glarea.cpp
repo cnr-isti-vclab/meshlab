@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.62  2006/01/07 12:07:16  glvertex
+Set default font
+
 Revision 1.61  2006/01/07 11:04:49  glvertex
 Added Apply Last Filter action
 
@@ -697,9 +700,9 @@ void GLArea::setLightModel()
 
 void GLArea::renderFps()
 {
-	static QFont q("Times",12);
+	//static QFont q("Times",12);
 	QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
-  renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo,q);
+  renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo);
 }
 
 

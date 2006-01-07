@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2006/01/07 12:07:16  glvertex
+Set default font
+
 Revision 1.7  2006/01/02 19:13:57  glvertex
 Multi level logging
 
@@ -78,7 +81,7 @@ void GLLogStream::Save(int Level, const char * filename )
 
 void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines)
 {
-	static QFont qf("Helvetica",8);
+	//static QFont qf("Helvetica",8);
 	const int LineHeight=15;
 
 	list<pair <int,string> > ::iterator li;
@@ -94,7 +97,7 @@ void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines)
 	for(;li!=S.end();++li)
 	{
 		if(Level == -1 || (*li).first == Level)
-			qgl->renderText(20,StartLine,(*li).second.c_str(),qf);
+			qgl->renderText(20,StartLine,(*li).second.c_str());
 
 		StartLine+=LineHeight;
 	}
