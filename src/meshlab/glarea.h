@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.42  2006/01/07 11:04:49  glvertex
+Added Apply Last Filter action
+
 Revision 1.41  2006/01/02 18:54:52  glvertex
 added multilevel logging support
 
@@ -272,6 +275,9 @@ public:
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 
+	QAction *getLastAppliedFilter()							{return lastFilterRef;}
+	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
+
 	QString getFileName()							{return fileName;}
 	void		setFileName(QString name)	{fileName = name;}
 
@@ -331,6 +337,7 @@ private:
 	//shader support
 	MeshRenderInterface *iRenderer;
 	QAction *currentSharder;
+	QAction *lastFilterRef; // reference to last filter applied
 
 	// Editing support
 	MeshEditInterface *iEdit;

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.61  2006/01/07 11:04:49  glvertex
+Added Apply Last Filter action
+
 Revision 1.60  2006/01/02 18:54:52  glvertex
 added multilevel logging support
 
@@ -264,6 +267,7 @@ GLArea::GLArea(QWidget *parent)
 	infoAreaVisible = false;
 	trackBallVisible = true;
 	currentSharder = NULL;
+	lastFilterRef = NULL;
 	time.start();
 
 	currLogLevel = -1;

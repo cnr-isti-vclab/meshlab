@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.65  2006/01/07 11:04:49  glvertex
+Added Apply Last Filter action
+
 Revision 1.64  2006/01/06 01:09:55  glvertex
 Application name and version coherency using a member method
 
@@ -496,6 +499,17 @@ void MainWindow::updateMenus()
 			case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true); break;
 		}
 
+		lastFilterAct->setEnabled(false);
+		if(GLA()->getLastAppliedFilter() != NULL)
+		{
+			lastFilterAct->setText(QString("Apply filter ") + GLA()->getLastAppliedFilter()->text());
+			lastFilterAct->setEnabled(true);
+		}
+		else
+		{
+			lastFilterAct->setText(QString("Apply filter "));
+		}
+
 
 		showLogAct->setChecked(GLA()->isLogVisible());
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
@@ -518,6 +532,11 @@ void MainWindow::updateMenus()
 	}
 }
 
+void MainWindow::applyLastFilter()
+{
+	GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
+}
+
 void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
@@ -526,7 +545,11 @@ void MainWindow::applyFilter()
 	iFilter->setLog(&(GLA()->log));
 	iFilter->applyFilter(action,*(GLA()->mm ),GLA(),QCallBack);
 	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());
-  qb->hide();
+	qb->hide();
+
+	GLA()->setLastAppliedFilter(action);
+	lastFilterAct->setText(QString("Apply filter ") + action->text());
+	lastFilterAct->setEnabled(true);
 }
 
 void MainWindow::applyEditMode()

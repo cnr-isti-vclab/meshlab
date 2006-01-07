@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.55  2006/01/07 11:04:49  glvertex
+Added Apply Last Filter action
+
 Revision 1.54  2006/01/06 01:09:55  glvertex
 Application name and version coherency using a member method
 
@@ -130,6 +133,7 @@ private slots:
 	bool saveSnapshot();
 	///////////Slot Menu Filter ////////////////////////
 	void applyFilter();
+	void applyLastFilter();
 	/////////// Slot Menu Render /////////////////////
 	void renderBbox();
 	void renderPoint();
@@ -223,6 +227,7 @@ private:
 	QAction *reloadAct;
 	QAction *saveAsAct;
 	QAction *saveSnapshotAct;
+	QAction *lastFilterAct;
 	QAction *recentFileActs[MAXRECENTFILES];
 	QAction *separatorAct;										
 	QAction *exitAct;

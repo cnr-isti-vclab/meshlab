@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.36  2006/01/07 11:04:49  glvertex
+Added Apply Last Filter action
+
 Revision 1.35  2006/01/06 01:09:55  glvertex
 Application name and version coherency using a member method
 
@@ -489,6 +492,11 @@ void MainWindow::createActions()
 
 	closeAllAct = new QAction(tr("Close &All"), this);
 	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
+
+	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
+	lastFilterAct = new QAction(tr("Apply filter"),this);
+	lastFilterAct->setEnabled(false);
+	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
 	
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
@@ -540,11 +548,14 @@ void MainWindow::createMenus()
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
 	
-	//////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
+	//////////////////// Menu Edit //////////////////////////////////////////////////////////////////////////
 	editMenu = menuBar()->addMenu(tr("&Edit"));
 	
   //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
+	filterMenu->addAction(lastFilterAct);
+	filterMenu->addSeparator();
+
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
