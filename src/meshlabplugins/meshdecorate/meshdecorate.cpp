@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2006/01/07 11:49:00  glvertex
+Added actions descriptions
+
 Revision 1.7  2006/01/07 11:32:05  glvertex
 Disabled textures when drawing corners,axis and normals lines
 Enhanced blending normals
@@ -50,10 +53,28 @@ cleaned up the identification between by string of decorations
 #include "meshdecorate.h"
 
 using namespace vcg;
-const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *) 
+const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action) 
  {
-   static ActionInfo ai; 
-   ai.Help=tr("Generic Help for an action");
+   static ActionInfo ai;
+
+	 if(action->text() == ST(DP_SHOW_AXIS))
+	 {
+		 ai.Help = tr("Draws XYZ axes in world coordinates");
+		 ai.ShortHelp = tr("Draws XYZ axes in world coordinates");
+	 }
+
+	 if(action->text() == ST(DP_SHOW_BOX_CORNERS))
+	 {
+		 ai.Help = tr("Draws object's bounding box corners");
+		 ai.ShortHelp = tr("Draws object's bounding box corners");
+	 }
+
+	 if(action->text() == ST(DP_SHOW_NORMALS))
+	 {
+		 ai.Help = tr("Draws object vertex normals");
+		 ai.ShortHelp = tr("Draws object vertex normals");
+	 }
+
    return ai;
  }
 
