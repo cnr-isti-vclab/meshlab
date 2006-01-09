@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.6  2006/01/09 15:39:44  mariolatronico
+bugfix : now only old vertices are counted for even pass. Check if the vertices belong to selection and if it is deleted. Commented not working algorithm
+
 Revision 1.5  2005/12/26 16:14:38  mariolatronico
 - added commented code for new even pass of Loop's algorithm
 - added new parameter to RefineOddEvenE to get another callback
@@ -117,6 +120,7 @@ first working version
 #include <iostream>
 #include <math.h>
 #include <QtGlobal>
+#include <vcg/container/simple_temporary_data.h>
 #define PI 3.14159265
 namespace vcg{
 
@@ -197,7 +201,7 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 		typename MESH_TYPE::CoordType *r, *l,  *curr;
 		curr = &he.v->P();
 		
-		if (he.IsBorder()) {
+		if (he.IsBorder()) {//half edge di bordo
 			he.FlipV();
 			r = &he.v->P();
 			he.FlipV();
@@ -213,7 +217,7 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
  			int k = 0; 
 			face::Pos<typename MESH_TYPE::FaceType> heStart = he;
  			std::vector<typename MESH_TYPE::CoordType> otherVertVec; 
-			
+			if(he.v->IsB())return ;
 			do {
 				he.FlipV();
 				otherVertVec.push_back(he.v->P());
@@ -262,8 +266,8 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 
 };
 
-template<class MESH_TYPE> struct EvenParam {
-	typename MESH_TYPE::CoordType sum;
+template<class CoordType> struct EvenParam {
+	CoordType sum;
 	bool border;
 	int k;
 } ;
@@ -277,128 +281,140 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 	
 	// n = numero di vertici iniziali
 	int n = m.vn;
+	// TD = temporary object for EvenParam structure data on vertex 
+	SimpleTempData<MESH_TYPE::VertContainer, 
+								 EvenParam<typename MESH_TYPE::CoordType> > TD(m.vert);
+	
 	// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length, RefineSelected, cbOdd);
-	
+	// momentaneamente le callback sono identiche, almeno cbOdd deve essere passata
 	cbEven = cbOdd;
 
-	//vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-
+	
 	// --------- BEGIN NEW CODE -------------
 
-	//EvenParam<MESH_TYPE> *paramVec = new EvenParam<MESH_TYPE>[m.vn];
+	assert (m.vn != n); // odd aggiunge i vertici
 
-	//// inizializzazione
-	//for (int i = 0 ; i < m.vn; i++) 
-	//{
-
-	//	paramVec[i].sum.Zero();
-	//	paramVec[i].border = false;
-	//	paramVec[i].k = 0;
-
-	//}
-
-	//assert (m.vn != n); // odd aggiunge i vertici
-
+	
 	//vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-	//vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF(m);
-	//vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace (m);
-	//vcg::tri::UpdateColor<MESH_TYPE>::VertexBorderFlag(m);
+	vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF(m);
+	// aggiorno i flag perche' IsB funzioni
+	vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace (m);
+	vcg::tri::UpdateColor<MESH_TYPE>::VertexBorderFlag(m);
+	
+	// marco i vertici even [ i primi n ] come visitati
+	int evenFlag = MESH_TYPE::VertexType::NewBitFlag();
+	for (int i = 0; i < n ; i++ ) {
+		m.vert[i].SetUserBit(evenFlag);
+	}
+	
+	//// inizializza l'oggetto temporaneo
+	//EvenParam<typename MESH_TYPE::CoordType> evenParam;
+	//evenParam.sum = MESH_TYPE::CoordType(0,0,0) ; 
+	//evenParam.k = 0 ;
+	//evenParam.border = false;
 
-	//int oddFlag = MESH_TYPE::VertexType::NewBitFlag();
-	//for (int i = 0; i < n; i++ ) {
-	//	// marco i vertici odd [ i primi n ] come visitati
-	//	m.vert[i].SetUserBit(oddFlag);
-	//}
-
+	//TD.Start(evenParam); 
+	//// calcolo i valori per TD per tutti i vertici vecchi (marcati)
 	//typename MESH_TYPE::FaceIterator fi;
 	//for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
 	//	for (int i = 0; i < 3; i++) { //itero vert
-	//		int index = (*fi).V(i) - &*(m.vert.begin());
-	//		std::cout << "V : " 
-	//			<< ((*fi).V(i)->P())[0] << " " 
-	//			<< ((*fi).V(i)->P())[1] << " " << std::endl;
-
-	//		if ( (*fi).V(i)->IsUserBit(oddFlag) ) { // se e' ODD ...
+	//		if ( (*fi).V(i)->IsUserBit(evenFlag) ) { // se e' even ...
+	//		qDebug("P: %f\t%f\t%f", (*fi).V(i)->P()[0],(*fi).V(i)->P()[1],(*fi).V(i)->P()[2]);
 
 	//			if ((*fi).V(i)->IsB()) { // ... ed e' di bordo
 
 	//				if ( (*fi).V1(i)->IsB() ) // controlla l'altro vertice di bordo
-	//					paramVec[index].sum = (*fi).V1(i)->P() / 8.0;
-	//				else 
-	//					paramVec[index].sum = (*fi).V2(i)->P() / 8.0;
+	//					TD[(*fi).V(i)].sum += (*fi).V1(i)->P() / 8.0;
+	//				if ( (*fi).V2(i)->IsB() )
+	//          TD[(*fi).V(i)].sum += (*fi).V2(i)->P() / 8.0;
 
-	//				paramVec[index].k += 1; // nel bordo non viene usato
-	//				paramVec[index].border = true;
+	//				TD[(*fi).V(i)].border = true;
+	//				// k non viene usato nel caso del bordo
 	//			} else { // non di bordo
-
-	//				paramVec[i].sum += ( (*fi).V1(i)->P() + (*fi).V2(i)->P() ) / 2.0;
-	//				//paramVec[index].sum += (*fi).V1(i)->P();
-	//				paramVec[index].k += 1;
-	//				paramVec[index].border = false;
+	//				
+	//				//TD[(*fi).V(i)].sum += ( (*fi).V1(i)->P() + (*fi).V2(i)->P() ) / 2.0;
+	//				TD[(*fi).V(i)].sum += (*fi).V1(i)->P()/2;
+	//				TD[(*fi).V(i)].sum += (*fi).V2(i)->P()/2;
+	//				Point3f sumTemp = TD[(*fi).V(i)].sum;
+	//				
+	//				TD[(*fi).V(i)].k += 1;
+	//				float kTemp = TD[(*fi).V(i)].k;
+	//				TD[(*fi).V(i)].border = false;
 
 	//			} // bordo / non bordo
-	//		} // e' odd ?
+	//		} // e' even ?
 	//	} // for vert
 	//} // for face
-
-	//for (int i = 0; i < n; i++ ) {
-	//  // stampe di debug
-	//	std::cout << "s[" << i << "] " << paramVec[i].sum[0] << " " 
-	//		<< paramVec[i].sum[1] << " " << paramVec[i].sum[2] 
-	//		<< " k[" << i << "] " << paramVec[i].k 
-	//			<< " b[" << i << "] " << paramVec[i].border << std::endl; 
-	//}
-
+	//	
 	//float beta = 0;
-	//for(int i = 0 ;i < n ; ++i) {
-	//	m.vert[i].C().SetRGB(255,0,0);
-	//	if(!paramVec[i].border)
-	//	{
-	//		if(paramVec[i].k > 3)
-	//			//beta = ((1.0/paramVec[i].k) * (5.0/8.0 - pow((3.0/8.0 + 0.25 * cos(2*PI/paramVec[i].k)),2)));
-	//			beta = 3.0 / (8.0 * paramVec[i].k);
-	//		else
-	//			beta = 3.0f/16.0f;
+	//typename MESH_TYPE::VertexIterator vi;
+	//for (vi = m.vert.begin(); vi != m.vert.end(); ++vi) {
+	//	if ((*vi).IsUserBit(evenFlag)) { // selezionato
+	//		qDebug("P: %f\t%f\t%f", (*vi).P()[0],(*vi).P()[1],(*vi).P()[2]);
+	//		if ( ! TD[*vi].border ) { // non di bordo
 
-	//		m.vert[i].P()= (m.vert[i].P() * (1 - paramVec[i].k * beta)) +(paramVec[i].sum * beta);
-
-	//	}
-	//	else
-	//	{
-	//		m.vert[i].P() = (m.vert[i].P() *(3.0f/4.0f)) + paramVec[i].sum;
+	//			//beta = ((1.0/(float)TD[*vi].k) * (5.0/8.0 - pow((3.0/8.0 + 0.25 * cos(2*PI/(float)TD[*vi].k)),2)));			
+	//			if ( TD[*vi].k > 3 && TD[*vi].k != 6) {
+	//				//beta = ((1.0/(float)TD[*vi].k) * (5.0/8.0 - pow((3.0/8.0 + 0.25 * cos(2*PI/(float)TD[*vi].k)),2)));
+	//				beta = 3.0 / (8.0 * TD[*vi].k);
+	//			}
+	//			if (TD[*vi].k == 6) {
+	//				(*vi).P() = (*vi).P() * 10.0 / 16.0 + TD[*vi].sum * (1.0 / 16.0);
+	//			}	
+	//			if ( TD[*vi].k == 3 ) {
+	//				beta = 3.0f / 16.0f;
+	//				qDebug("b == 3, %f", beta);
+	//			}
+	//			float kTemp = TD[*vi].k;
+	//			Point3f sumTemp = TD[*vi].sum;
+	//			if (TD[*vi].k != 6)
+	//				(*vi).P() = ( (*vi).P() * (1 - TD[*vi].k * beta) ) + (TD[*vi].sum * beta);
+	//			
+	//		}
+	//		else { // bordo 
+	//			assert((*vi).IsB()); // il vertice deve essere di bordo
+	//			(*vi).P() = ( (*vi).P() * (3.0 / 4.0f)) + TD[*vi].sum;
+	//		}
 	//	}
 	//}
 
-		
+	//TD.Stop();	
+
+	
+
 	// --------- END	 NEW CODE -------------
 
 
 	int j = 0;
 	typename MESH_TYPE::FaceType::ColorType color[6];  // per ogni faccia sono al piu' tre i nuovi valori 
-		// di texture per wedge (uno per ogni edge) 
+	// di texture per wedge (uno per ogni edge) 
 
 	typename MESH_TYPE::VertexIterator vi;
 	typename MESH_TYPE::FaceIterator fi;
 	for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
 		for (int i = 0; i < 3; i++) { //itero vert
-			face::Pos<typename MESH_TYPE::FaceType>aux (&(*fi),i);
-			if( MESH_TYPE::HasPerVertexColor() ) {
-				(*fi).V(i)->C().lerp((*fi).V0(i)->C() , (*fi).V1(i)->C(),0.5f);
+			if ( (*fi).V(i)->IsUserBit(evenFlag) && ! (*fi).V(i)->IsD() ) {
+				if (RefineSelected && !(*fi).V(i)->IsS() )
+					break;
+				face::Pos<typename MESH_TYPE::FaceType>aux (&(*fi),i);
+				if( MESH_TYPE::HasPerVertexColor() ) {
+					(*fi).V(i)->C().lerp((*fi).V0(i)->C() , (*fi).V1(i)->C(),0.5f);
+				}
+
+				if (cbEven) {
+					(*cbEven)(100 * (float)j / (float)m.fn,"Refining");
+					j++;
+				}
+				even((*fi).V(i)->P(), aux);
 			}
-			
-			if (cbEven) {
-				(*cbEven)(100 * (float)j / (float)m.fn,"Refining");
-				j++;
-			}
-			even((*fi).V(i)->P(), aux);
 		}
 	}
-	
-	if (cbEven) {
+
+	/*if (cbEven) {
 		(*cbEven)(100, "Updating topology");
 	}
-	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
+	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);*/
 	return true;
 }
 
@@ -410,4 +426,6 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 
 
 #endif
+
+
 
