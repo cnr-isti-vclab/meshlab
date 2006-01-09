@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.64  2006/01/09 18:42:50  alemochi
+Added fov in Info Pane
+
 Revision 1.63  2006/01/09 18:31:18  alemochi
 Fov, work in progress.....
 
@@ -291,6 +294,8 @@ void GLArea::displayModelInfo()
 	//strTriangle.setNum(mm->cm.face.size(),10);
   renderText(currentWidth-currentWidth*0.15,currentHeight-45,strVertex);
 	renderText(currentWidth-currentWidth*0.15,currentHeight-30,strTriangle);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-70,QString("Fov ")+QString::number((int)fov,10));
+
 }
 
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
@@ -744,8 +749,7 @@ void GLArea::renderFps()
 	//static QFont q("Times",12);
 	QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
 	renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-80,QString::number((int)fov,10));
-
+	
 }
 
 
