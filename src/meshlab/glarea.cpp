@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.63  2006/01/09 18:31:18  alemochi
+Fov, work in progress.....
+
 Revision 1.62  2006/01/07 12:07:16  glvertex
 Set default font
 
@@ -263,6 +266,7 @@ GLArea::GLArea(QWidget *parent)
 	lastTime=0;
 	deltaTime=0;
 	cfps=0;
+	fov=60;
 	currentHeight=100;
 	currentWidth=200;
 	logVisible = true;
@@ -428,6 +432,14 @@ void GLArea::paintGL()
 
 	gluLookAt(0,0,3,   0,0,0,   0,1,0);
 
+	if (currentButton & GLArea::KEY_SHIFT)
+	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		gluPerspective(fov,(GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
+		glMatrixMode(GL_MODELVIEW);
+	}
+
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
@@ -440,6 +452,8 @@ void GLArea::paintGL()
 
 	setLightModel();
 
+	
+
 	// Modify frustum... 
 	if (takeSnapTile)
 	{
@@ -447,9 +461,9 @@ void GLArea::paintGL()
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		myGluPerspective(60, (GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
+		myGluPerspective(fov, (GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
 	}
-
+		
 	// Set proper colorMode
 	glDisable(GL_COLOR_MATERIAL);
 	if(rm.colorMode != GLW::CMNone)
@@ -538,7 +552,7 @@ void GLArea::resizeGL(int _width, int _height)
 	currentHeight=_height;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60, float(_width)/float(_height), 0.2, 5);
+	gluPerspective(fov, float(_width)/float(_height), 0.2, 5);
 	glMatrixMode(GL_MODELVIEW);
 	vpWidth=_width;
 	vpHeight=_height;
@@ -556,6 +570,7 @@ void GLArea::saveSnapshot()
 
 Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 {
+
 	int vcgbt=Trackball::BUTTON_NONE;
 	if(qtbt == Qt::LeftButton		) vcgbt |= Trackball::BUTTON_LEFT;
 	if(qtbt == Qt::RightButton		) vcgbt |= Trackball::BUTTON_RIGHT;
@@ -563,15 +578,33 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 	if(modifiers == Qt::ShiftModifier		)	vcgbt |= Trackball::KEY_SHIFT;
 	if(modifiers == Qt::ControlModifier ) vcgbt |= Trackball::KEY_CTRL;
 	if(modifiers == Qt::AltModifier     ) vcgbt |= Trackball::KEY_ALT;
-
 	return Trackball::Button(vcgbt);
 }
 
+
+void GLArea::keyPressEvent ( QKeyEvent * e )  
+{
+	currentButton=GLArea::BUTTON_NONE;
+	if (e->modifiers ()==Qt::ShiftModifier) currentButton|=GLArea::KEY_SHIFT;
+	if (e->modifiers ()==Qt::ControlModifier) currentButton|=GLArea::KEY_CTRL;
+	if (e->modifiers ()==Qt::AltModifier) currentButton|=GLArea::KEY_ALT;
+}
+
+
+void GLArea::keyReleaseEvent ( QKeyEvent * e )
+{
+	if (e->key()==Qt::Key_Shift) currentButton-=GLArea::KEY_SHIFT;
+	if (e->key()==Qt::Key_Control) currentButton-=GLArea::KEY_CTRL;
+	if (e->key()==Qt::Key_Alt) currentButton-=GLArea::KEY_ALT;
+}
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
 	trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	update();
 }
+
+
+
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
@@ -591,7 +624,15 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 void GLArea::wheelEvent(QWheelEvent*e)
 {
 	const int WHEEL_DELTA =120;
-	trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA) );
+	if (currentButton & ButtonPressed::KEY_SHIFT)
+	{
+			fov+= e->delta()/ float(WHEEL_DELTA);
+			updateGL();
+	}
+	else 
+	{
+		trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA) );
+	}
 	update();
 }
 
@@ -702,7 +743,9 @@ void GLArea::renderFps()
 {
 	//static QFont q("Times",12);
 	QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
-  renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-80,QString::number((int)fov,10));
+
 }
 
 

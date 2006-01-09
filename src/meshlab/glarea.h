@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.43  2006/01/09 18:31:18  alemochi
+Fov, work in progress.....
+
 Revision 1.42  2006/01/07 11:04:49  glvertex
 Added Apply Last Filter action
 
@@ -265,6 +268,14 @@ public:
 	GLArea(QWidget *parent = 0);
 	~GLArea(){}
 	
+	enum ButtonPressed { BUTTON_NONE   = 0x0000, 
+		WHEEL         = 0x0008,
+		KEY_SHIFT     = 0x0010, 
+		KEY_SHIFTWHEEL= 0x0018, 
+		KEY_CTRL      = 0x0020, 
+		KEY_ALT       = 0x0040, 
+		};
+
 	MeshModel *mm;
 	vcg::Trackball trackball;
 	GLLogStream log;
@@ -321,6 +332,8 @@ protected:
 	void displayModelInfo();
 	void paintGL();
 	void resizeGL(int width, int height);
+	void keyPressEvent ( QKeyEvent * e );  
+	void keyReleaseEvent ( QKeyEvent * e ); 
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
@@ -344,8 +357,10 @@ private:
 
 	RenderMode rm;
 	ColorSetting cs;
+	int currentButton;
 	float cfps;
-	QTime time;
+	float fov;
+  QTime time;
 	int deltaTime;
 	int lastTime;
 	int currentTime;
@@ -358,6 +373,7 @@ private:
 	QImage tileBuffer;
 	bool takeSnapTile;
 	int vpWidth, vpHeight, tileCol, tileRow, totalCols, totalRows;
+	int vcgFlag;
 };
 
 
