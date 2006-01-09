@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.40  2006/01/09 15:25:58  mariolatronico
+- updated Help and Short help
+- on destructor deleted every action
+
 Revision 1.39  2006/01/06 10:58:22  giec
 Remuved filter "Color non manifold"
 
@@ -187,6 +191,9 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 	delete refineDialog;
 	delete decimatorDialog;
+	for (int i = 0; i < actionList.count() ; i++ ) {
+		delete actionList.at(i);
+	}
 }
 
 QList<QAction *> ExtraMeshFilterPlugin::actions() const {
@@ -200,62 +207,69 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
   
 	if( action->text() == ST(FP_LOOP_SS) )
 		{
-			ai.Help = tr("Apply Loop's Subdivision Surface algorithm, it is an approximate method");
+			ai.Help = tr("Apply Loop's Subdivision Surface algorithm.\
+										It is an approximate method which subdivide each triangle in four \
+										faces. It works for every triangle and has rules for extraordinary vertices");
 			ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
 		}
 	if( action->text() == ST(FP_BUTTERFLY_SS) ) 
 	  {
-			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm, it is an interpolated method");
+			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm.\
+									 It is an interpolated method, defined on arbitrary triangular meshes.\
+									 The scheme is known to be C1 but not C2 on regular meshes");
 			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
 		}
 	if( action->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 		{
-			ai.Help = tr("Remove Unreferenced Vertexes");
+			ai.Help = tr("Check for every vertex on the mesh if it is referenced\
+									 by a face and removes it");
 			ai.ShortHelp = tr("Remove Unreferenced Vertexes");
 			
 		}
   if( action->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 		{
-			ai.Help = tr("Remove Duplicated Vertexes");
+			ai.Help = tr("Check for every vertex on the mesh if there are two vertices\
+									 with same coordinates and removes it");
 			ai.ShortHelp = tr("Remove Duplicated Vertexes");
 		}
 	if(action->text() == ST(FP_REMOVE_NULL_FACES) )
 		{
-			ai.Help = tr("Remove Null Faces");
+			ai.Help = tr("Removes faces with area equal to zero");
 			ai.ShortHelp = tr("Remove Null Faces");
 			
 		}
 	if(action->text() == ST(FP_LAPLACIAN_SMOOTH) )
 		{
-			ai.Help = tr("Laplacian Smooth: Smooth the mesh surface");
+			ai.Help = tr("For each vertex it calculates the average position with nearest vertex");
 			ai.ShortHelp = tr("Smooth the mesh surface");
 	
 		}
 		
  	if(action->text() == ST(FP_DECIMATOR) )
  		{
-			ai.Help = tr("Decimator tries to elminate triangles by clustering method by Rossignac");
+			ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping\
+									 the mesh and discretizes them based on the cells of this grid");
 			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
 			
  		}
 	
 	if(action->text() == ST(FP_MIDPOINT) )
  		{
-			ai.Help = tr("Apply Midpoint's Subdivision Surface algorithm");
+			ai.Help = tr("Splits every edge in two");
 			ai.ShortHelp = tr("Apply Midpoint's Subdivision Surface algorithm");
 			
  		}
 	
 	if(action->text() == ST(FP_REORIENT) )
  		{
-			ai.Help = tr("Re-oriented the  adjacencies of the face of the mesh");
+			ai.Help = tr("Re-oriented the adjacencies of the face of the mesh");
 			ai.ShortHelp = tr("Re-oriented the face");
 			
  		}
 	
 	if(action->text() == ST(FP_INVERT_FACES) )
  		{
-			ai.Help = tr("Invert faces orentation");
+			ai.Help = tr("Invert faces orentation, flip the normal of the mesh");
 			ai.ShortHelp = tr("Invert faces orentation");
  		}
 	
