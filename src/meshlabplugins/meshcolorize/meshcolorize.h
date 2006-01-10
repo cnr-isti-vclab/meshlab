@@ -56,6 +56,7 @@ public:
 
 
 			actionList << new QAction(QString("Gaussian Curvature"),this);
+			actionList << new QAction(QString("Mean Curvature"),this);
 			actionList << new QAction(QString("Self Intersections"),this);
 			actionList << new QAction(QString("Border"),this);
 			actionList << new QAction(QString("Color non Manifold"),this);
