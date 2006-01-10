@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.65  2006/01/10 16:29:29  alemochi
+now background and panel info not move with fov
+
 Revision 1.64  2006/01/09 18:42:50  alemochi
 Added fov in Info Pane
 
@@ -415,49 +418,52 @@ void GLArea::paintGL()
 	GLint old_matrixMode;
 	lastTime=time.elapsed();
 	initTexture();
-  glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
+	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	
-	if (!takeSnapTile)
-	{
-		// == Backround
-		glPushAttrib(GL_ENABLE_BIT);
- 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
-		glBegin(GL_TRIANGLE_STRIP);
-		glColor(cs.bColorTop);  	glVertex3f(-1.f, 1.f,-1.f);
-		glColor(cs.bColorBottom);	glVertex3f(-1.f,-1.f,-1.f);
-		glColor(cs.bColorTop);		glVertex3f( 1.f, 1.f,-1.f);
-		glColor(cs.bColorBottom);	glVertex3f( 1.f,-1.f,-1.f);
-		glEnd();
-		glPopAttrib();
-		// ==
-	}
 
 	gluLookAt(0,0,3,   0,0,0,   0,1,0);
 
-	if (currentButton & GLArea::KEY_SHIFT)
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluPerspective(60,(GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
+	glMatrixMode(GL_MODELVIEW);
+
+	if (!takeSnapTile)
 	{
-		glMatrixMode(GL_PROJECTION);
+		// == Background
+		glPushMatrix();
 		glLoadIdentity();
-		gluPerspective(fov,(GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
-		glMatrixMode(GL_MODELVIEW);
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glBegin(GL_TRIANGLE_STRIP);
+		glColor(cs.bColorTop);  	glVertex3f(-4.f, 4.f,-1.f);
+		glColor(cs.bColorBottom);	glVertex3f(-4.f,-4.f,-1.f);
+		glColor(cs.bColorTop);		glVertex3f( 4.f, 4.f,-1.f);
+		glColor(cs.bColorBottom);	glVertex3f( 4.f,-4.f,-1.f);
+		glEnd();
+		glPopAttrib();
+		glPopMatrix();
+		// ==
 	}
 
+	glColor3f(1.f,1.f,1.f);
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
 	trackball.Apply(trackBallVisible && !takeSnapTile);
-	
-	glColor3f(1.f,1.f,1.f);
+
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
 
 	setLightModel();
 
-	
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
 
 	// Modify frustum... 
 	if (takeSnapTile)
@@ -468,7 +474,7 @@ void GLArea::paintGL()
 		glLoadIdentity();
 		myGluPerspective(fov, (GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
 	}
-		
+
 	// Set proper colorMode
 	glDisable(GL_COLOR_MATERIAL);
 	if(rm.colorMode != GLW::CMNone)
@@ -476,15 +482,27 @@ void GLArea::paintGL()
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
-	
+
 	if(iRenderer && currentSharder) {
 		//iRender->Render(new QAction("Toon Shader", this), *mm, rm, this); 
 		iRenderer->Render(currentSharder, *mm, rm, this); 
 
 	}
-          
-	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-          
+
+	if (!takeSnapTile)
+	{
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluPerspective(fov,(GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
+		mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+		glPopMatrix();
+	}
+	else mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+
+	glMatrixMode(GL_MODELVIEW);
+
+
 	if(iRenderer) {
 		glUseProgramObjectARB(0);
 	}
@@ -497,6 +515,7 @@ void GLArea::paintGL()
 	// ...and take a snapshot
 	if (takeSnapTile)
 	{
+		glPushAttrib(GL_ENABLE_BIT);
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		tileBuffer=grabFrameBuffer(true);
@@ -504,11 +523,11 @@ void GLArea::paintGL()
 		glMatrixMode(old_matrixMode);
 		pasteTile();
 		update();
+		glPopAttrib();
 	}
-	
-// ==============================	
-// Draw the log area background
-// on the bottom of the glArea
+
+	// Draw the log area background
+	// on the bottom of the glArea
 	if(infoAreaVisible)
 	{
 		glPushAttrib(GL_ENABLE_BIT);
@@ -525,10 +544,10 @@ void GLArea::paintGL()
 		glColor(cs.lColor);
 		float h = ((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
 		glBegin(GL_TRIANGLE_STRIP);
-			glVertex3f(-1.f,h,-1.f);
-			glVertex3f(-1.f,-1.f, -1.f);
-			glVertex3f( 1.f,h,-1.f);
-			glVertex3f( 1.f,-1.f, -1.f);
+		glVertex3f(-1.f,h,-1.f);
+		glVertex3f(-1.f,-1.f, -1.f);
+		glVertex3f( 1.f,h,-1.f);
+		glVertex3f( 1.f,-1.f, -1.f);
 		glEnd();
 
 		// Now print out the infos
@@ -547,9 +566,12 @@ void GLArea::paintGL()
 		glPopMatrix();
 
 	}
-// ==============================
-}
 
+	
+	// ==============================	
+
+	// ==============================
+}
 void GLArea::resizeGL(int _width, int _height)
 {
 	//int side = qMin(width, height);
