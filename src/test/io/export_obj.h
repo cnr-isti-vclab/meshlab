@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.22  2006/01/10 16:52:19  fmazzant
+ update ply::PlyMask -> io::Mask
+
  Revision 1.21  2006/01/04 16:51:44  fmazzant
  changed PM_VERTEXCOORD in PM_WEDGTEXCOORD
 
@@ -98,7 +101,7 @@ Added  implementation of OBJ file exporter.
 
 #include <wrap/callback.h>
 #include <vcg/complex/trimesh/allocate.h>
-#include <wrap/ply/io_mask.h>
+#include <wrap/io_trimesh/io_mask.h>
 #include "io_obj.h"
 #include <iostream>
 #include <fstream>
@@ -143,16 +146,15 @@ namespace io {
 			
 			int current = 0;
 			int max = m.vert.size()+ m.face.size();
-			if(oi.mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD){max+=m.face.size();}
-			if(oi.mask & vcg::ply::PLYMask::PM_WEDGNORMAL)	{max+=m.vert.size();}
+			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD){max+=m.face.size();}
+			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)	{max+=m.vert.size();}
 
 			std::vector<Material> materials;//vettore dei materiali.
 
 			std::ofstream stream(filename);
 
 			if (stream.fail())
-				return false; 
-			
+				return false; 		
 
 			stream << "####" << std::endl;
 			stream << "#" << std::endl;
@@ -172,7 +174,7 @@ namespace io {
 			stream << "####" << std::endl << std::endl;
 			
 			//library materials
-			if(oi.mask & ply::PLYMask::PM_FACECOLOR)
+			if(oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 			{
 				QString fileName = QString(filename);
 				QStringList list = fileName.split("/");
@@ -181,7 +183,7 @@ namespace io {
 
 			//vertexs
 			VertexIterator vi;
-			if(oi.mask & vcg::ply::PLYMask::PM_VERTQUALITY)
+			if(oi.mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
 			{
 				int numvert = 0;
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
@@ -200,7 +202,7 @@ namespace io {
 			//texture coords
 			FaceIterator fi;
 			std::map<vcg::TCoord2<float>,int> CoordIndexTexture;
-			if(oi.mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD)
+			if(m.HasPerWedgeTexture() && oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
 			{
 				int numface = 0;
 				int value = 1;
@@ -225,7 +227,7 @@ namespace io {
 				
 			//vertexs normal
 			std::map<Point3f,int> NormalVertex;
-			if(oi.mask & vcg::ply::PLYMask::PM_VERTNORMAL) 
+			if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
 			{
 				int numvert = 0;
 				int value = 1;
@@ -246,13 +248,13 @@ namespace io {
 			}
 			
 			//faces
-			if(oi.mask & vcg::ply::PLYMask::PM_FACEQUALITY)
+			if(oi.mask & vcg::tri::io::Mask::IOM_FACEQUALITY)
 			{
 				unsigned int material_num = 0;
 				int mem_index = 0; //var temporany
 				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 				{
-					if(oi.mask & ply::PLYMask::PM_FACECOLOR)
+					if(oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 					{
 						int index = CreateNewMaterial(m,materials,material_num,fi);
 						
@@ -281,11 +283,11 @@ namespace io {
 						v = GetIndexVertex(m, (*fi).V(k)) + 1;//considera i vertici per faccia
 						
 						int vt = -1;
-						if(oi.mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD)
+						if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
 							vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
 
 						int vn = -1;
-						if(oi.mask & vcg::ply::PLYMask::PM_WEDGNORMAL) 
+						if(oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL) 
 							vn = GetIndexVertexNormal(m, NormalVertex, v);//considera le normali per faccia per ora non va considerato.
 
 						//scrive elementi sul file obj

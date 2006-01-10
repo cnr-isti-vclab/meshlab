@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.5  2006/01/10 16:52:19  fmazzant
+ update ply::PlyMask -> io::Mask
+
  Revision 1.4  2006/01/04 16:48:37  fmazzant
  changed PM_VERTTEXCOORD in PM_WEDGTEXCOORD
 
@@ -41,7 +44,7 @@
 
 
 #include "maskobj.h"
-#include <wrap/ply/io_mask.h>
+#include <wrap/io_trimesh/io_mask.h>
 
 MaskObj::MaskObj()
 {
@@ -60,11 +63,11 @@ MaskObj::MaskObj()
 int MaskObj::MaskObjToInt()
 {
 	int mask=0;
-	if(faces)	{mask |= vcg::ply::PLYMask::PM_FACEQUALITY;}
-	if(vertexs)	{mask |= vcg::ply::PLYMask::PM_VERTQUALITY;}
-	if(colorV)	{mask |= vcg::ply::PLYMask::PM_VERTCOLOR;}
-	if(colorF)	{mask |= vcg::ply::PLYMask::PM_FACECOLOR;}
-	if(normal)	{mask |= vcg::ply::PLYMask::PM_VERTNORMAL;}
-	if(texture)	{mask |= vcg::ply::PLYMask::PM_WEDGTEXCOORD;}
+	if(faces)	{mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
+	if(vertexs)	{mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
+	if(colorV)	{mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
+	if(colorF)	{mask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
+	if(normal)	{mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
+	if(texture)	{mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
 	return mask;
 }

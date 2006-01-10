@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.21  2006/01/10 16:52:16  fmazzant
+update ply::PlyMask -> io::Mask
+
 Revision 1.20  2005/12/22 21:05:43  cignoni
 Removed Optional Face Normal and added some initalization after opening
 
@@ -72,6 +75,7 @@ Added copyright info
 #include <vcg/complex/trimesh/update/bounding.h>
 #include "../test/io/import_obj.h"
 #include "../test/io/export_obj.h"
+#include <wrap/io_trimesh/io_mask.h>
 #include <QString>
 #include <QtGlobal>
 
@@ -82,11 +86,11 @@ bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
 
 	vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename, mask); 
   
-  if(mask&ply::PLYMask::PM_VERTQUALITY) qDebug("Has Vertex Quality\n");
-  if(mask&ply::PLYMask::PM_FACEQUALITY) qDebug("Has Face Quality\n");
-  if(mask&ply::PLYMask::PM_FACECOLOR) qDebug("Has Face Color\n");
-  if(mask&ply::PLYMask::PM_VERTCOLOR) qDebug("Has Vertex Color\n");
-  if(mask&ply::PLYMask::PM_WEDGTEXCOORD) 
+  if(mask&vcg::tri::io::Mask::IOM_VERTQUALITY) qDebug("Has Vertex Quality\n");
+  if(mask&vcg::tri::io::Mask::IOM_FACEQUALITY) qDebug("Has Face Quality\n");
+  if(mask&vcg::tri::io::Mask::IOM_FACECOLOR) qDebug("Has Face Color\n");
+  if(mask&vcg::tri::io::Mask::IOM_VERTCOLOR) qDebug("Has Vertex Color\n");
+  if(mask&vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
   {
     qDebug("Has Wedge Text Coords\n");
     cm.face.EnableWedgeTex();

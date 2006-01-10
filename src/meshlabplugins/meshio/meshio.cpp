@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.39  2006/01/10 16:52:19  fmazzant
+ update ply::PlyMask -> io::Mask
+
  Revision 1.38  2006/01/10 00:36:48  buzzelli
  adding first rough implementation of 3ds file importer
 
@@ -146,6 +149,7 @@
 
 #include<vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
+#include <wrap/io_trimesh/io_mask.h>
 #include <wrap/ply/plylib.h>
 
 #include <QMessageBox>
@@ -181,7 +185,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			oi.cb = cb;
 			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
 
-			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
+			if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
 				m.cm.face.EnableWedgeTex();
@@ -194,18 +198,18 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				return false;
 			}
 
-			if(mask & vcg::ply::PLYMask::PM_WEDGNORMAL)
+			if(mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 				bUpdatedNormals = true;
 		}
 		else if (formatName.toUpper() == tr("PLY"))
 		{
 			vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
 		  
-			if(mask&ply::PLYMask::PM_VERTQUALITY) qDebug("Has Vertex Quality\n");
-			if(mask&ply::PLYMask::PM_FACEQUALITY) qDebug("Has Face Quality\n");
-			if(mask&ply::PLYMask::PM_FACECOLOR)		qDebug("Has Face Color\n");
-			if(mask&ply::PLYMask::PM_VERTCOLOR)		qDebug("Has Vertex Color\n");
-			if(mask&ply::PLYMask::PM_WEDGTEXCOORD) 
+			if(mask&vcg::tri::io::Mask::IOM_VERTQUALITY) qDebug("Has Vertex Quality\n");
+			if(mask&vcg::tri::io::Mask::IOM_FACEQUALITY) qDebug("Has Face Quality\n");
+			if(mask&vcg::tri::io::Mask::IOM_FACECOLOR)		qDebug("Has Face Color\n");
+			if(mask&vcg::tri::io::Mask::IOM_VERTCOLOR)		qDebug("Has Vertex Color\n");
+			if(mask&vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
 				m.cm.face.EnableWedgeTex();
@@ -264,7 +268,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				return false;
 			}
 
-			if(mask & vcg::ply::PLYMask::PM_WEDGNORMAL)
+			if(mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 				bUpdatedNormals = true;
 		}
 

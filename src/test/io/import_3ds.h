@@ -27,7 +27,7 @@
 #include <wrap/callback.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include "io_3ds.h"
-#include <wrap/ply/io_mask.h>
+#include <wrap/io_trimesh/io_mask.h>
 
 // lib3ds headers
 #include <lib3ds/file.h>                        

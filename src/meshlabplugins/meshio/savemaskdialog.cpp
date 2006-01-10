@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.7  2006/01/10 16:52:19  fmazzant
+ update ply::PlyMask -> io::Mask
+
  Revision 1.6  2005/12/13 14:02:50  fmazzant
  added the rescue of the materials of the obj
 
@@ -46,7 +49,7 @@
 *****************************************************************************/
 
 #include "savemaskdialog.h"
-#include <wrap/ply/io_mask.h>
+#include <wrap/io_trimesh/io_mask.h>
 #include <QMessageBox>
 #include <fstream>
 #include <iostream>

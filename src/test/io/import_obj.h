@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.16  2006/01/10 16:52:20  fmazzant
+update ply::PlyMask -> io::Mask
+
 Revision 1.15  2005/12/23 02:31:28  buzzelli
 mask is filled also with infos about used colouring method (per vertex, per face)
 
@@ -83,7 +86,7 @@ First working version (for simplest objects)
 #include <wrap/callback.h>
 #include <vcg/complex/trimesh/allocate.h>
 #include "io_obj.h"
-#include <wrap/ply/io_mask.h>
+#include <wrap/io_trimesh/io_mask.h>
 
 #include <fstream>
 #include <string>
@@ -274,7 +277,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				
 				// assigning vertex color
 				// ----------------------
-				if( oi.mask & ply::PLYMask::PM_VERTCOLOR)
+				if( oi.mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
 				{
 					Material material = materials[currentMaterialIdx];
 					Point3f diffuseColor = material.diffuse;
@@ -319,8 +322,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				int vt1_index, vt2_index, vt3_index;
 				int vn1_index, vn2_index, vn3_index;
 
-				if (( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD ) &&
-						( oi.mask & ply::PLYMask::PM_WEDGNORMAL ) )
+				if (( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD ) &&
+						( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL ) )
 				{
 					std::string vertex;
 					std::string texcoord;
@@ -341,7 +344,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					vt3_index = atoi(texcoord.c_str());	--vt3_index;
 					vn3_index = atoi(normal.c_str());		--vn3_index;
 				}
-				else if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
+				else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 				{
 					std::string vertex;
 					std::string texcoord;
@@ -358,7 +361,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					v3_index = atoi(vertex.c_str());
 					vt3_index = atoi(texcoord.c_str());		--vt3_index;
 				}
-				else if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
+				else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 				{
 					std::string vertex;
 					std::string normal;
@@ -384,7 +387,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			
 				// assigning wedge texture coordinates
 				// -----------------------------------
-				if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
+				if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 				{
 					Material material = materials[currentMaterialIdx];
 					
@@ -425,7 +428,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				
 				// assigning face normal
 				// ---------------------
-				if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
+				if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 				{
 					// face normal is computed as an average of wedge normals
 					Point3f n = (normals[vn1_index] + normals[vn2_index] + normals[vn3_index]);
@@ -444,7 +447,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				// --------------------
 				Color4b faceColor;	// declare it outside code block since other triangles
 														// of this face will share the same color
-				if( oi.mask & ply::PLYMask::PM_FACECOLOR)
+				if( oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 				{
 					Material material = materials[currentMaterialIdx];
 					Point3f diffuseColor = material.diffuse;
@@ -470,8 +473,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					int vt4_index;
 					int vn4_index;
 
-					if (( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD ) &&
-							( oi.mask & ply::PLYMask::PM_WEDGNORMAL ) )
+					if (( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD ) &&
+							( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL ) )
 					{
 						std::string vertex;
 						std::string texcoord;
@@ -482,7 +485,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						vt4_index = atoi(texcoord.c_str()); --vt4_index;
 						vn4_index = atoi(normal.c_str());		--vn4_index;
 					}
-					else if ( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
+					else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 					{
 						std::string vertex;
 						std::string texcoord;
@@ -491,7 +494,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						v4_index	= atoi(vertex.c_str());
 						vt4_index = atoi(texcoord.c_str());	--vt4_index;
 					}
-					else if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
+					else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 					{
 						std::string vertex;
 						std::string normal;
@@ -505,7 +508,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 					// assigning wedge texture coordinates
 					// -----------------------------------
-					if( oi.mask & ply::PLYMask::PM_WEDGTEXCOORD )
+					if( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 					{
 						Material material = materials[currentMaterialIdx];
 						TexCoord t = texCoords[vt1_index];
@@ -538,7 +541,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 					// assigning face normal
 					// ---------------------
-					if ( oi.mask & ply::PLYMask::PM_WEDGNORMAL )
+					if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 					{
 						// face normal is computed as an average of wedge normals
 						Point3f n = (normals[vn1_index] + normals[vn3_index] + normals[vn4_index]);
@@ -557,7 +560,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 					// assigning face color
 					// --------------------
-					if( oi.mask & ply::PLYMask::PM_FACECOLOR)
+					if( oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 					{
 						(*fi).C()[0] = faceColor[0];
 						(*fi).C()[1] = faceColor[1];
@@ -880,13 +883,13 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		mask=0;
 		
 		if (bHasPerWedgeTexCoord)
-			mask |= ply::PLYMask::PM_WEDGTEXCOORD;
+			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 		if (bHasPerWedgeNormal)
-			mask |= ply::PLYMask::PM_WEDGNORMAL;
+			mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
 		if (bHasPerVertexColor)
-			mask |= ply::PLYMask::PM_VERTCOLOR;
+			mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		if (bHasPerFaceColor)
-			mask |= ply::PLYMask::PM_FACECOLOR;
+			mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
 		
 		oi.mask = mask;
 		oi.numVertices	= numVertices;

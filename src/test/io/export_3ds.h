@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.8  2006/01/10 16:52:19  fmazzant
+ update ply::PlyMask -> io::Mask
+
  Revision 1.7  2005/12/23 10:24:37  fmazzant
  added base save 3ds materials
 
@@ -53,7 +56,7 @@
 
 #include <wrap/callback.h>
 #include <vcg/complex/trimesh/allocate.h>
-#include <wrap/ply/io_mask.h>
+#include <wrap/io_trimesh/io_mask.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/io.h>
@@ -129,21 +132,42 @@ namespace io {
 				face.normal[1] = (*fi).N()[1];
 				face.normal[2] = (*fi).N()[2];
 				
-				if(CreateNewMaterial(m, materials, 0, fi) == materials.size())
+				int material_index = 0;
+				if((material_index = CreateNewMaterial(m, materials, 0, fi)) == materials.size())
 				{
 					Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
 					material->name[0] = 'm';
-					material->name[1] = '1';
+					material->name[1] = material_index;
 					
-					//crea il materiale.
-					
+					//ambient
+					material->ambient[0] = materials[materials.size()-1].Ka[0];
+					material->ambient[1] = materials[materials.size()-1].Ka[1];
+					material->ambient[2] = materials[materials.size()-1].Ka[2];
+					material->ambient[3] = materials[materials.size()-1].Tr;
+
+					//diffuse
+					material->diffuse[0] = materials[materials.size()-1].Kd[0];
+					material->diffuse[1] = materials[materials.size()-1].Kd[1];
+					material->diffuse[2] = materials[materials.size()-1].Kd[2];
+					material->diffuse[3] = materials[materials.size()-1].Tr;
+
+					//specular
+					material->specular[0] = materials[materials.size()-1].Ks[0];
+					material->specular[1] = materials[materials.size()-1].Ks[1];
+					material->specular[2] = materials[materials.size()-1].Ks[2];
+					material->specular[3] = materials[materials.size()-1].Tr;
+
+					//shininess
+					material->shininess = materials[materials.size()-1].Ns;
+
 					lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
 					face.material[0] = 'm';//associa alla faccia il materiale.
-					face.material[1] = '1';//l'idice del materiale...
+					face.material[1] = material_index;//l'idice del materiale...
 				}
 				else
 				{
-					//cerca l'indice del materiale e ne prende il nome.
+					face.material[0] = 'm';//associa alla faccia il materiale.
+					face.material[1] = material_index;//l'idice del materiale...
 				}
 
 				mesh->faceL[f_index]=face;
@@ -201,11 +225,8 @@ namespace io {
 			mtl.Ns = ns;
 			mtl.illum = illum;//illumination
 			
-			if(m.textures.size() && (*fi).WT(0).n() >=0 ) {
-				
+			if(m.textures.size() && (*fi).WT(0).n() >=0 ) 		
 				mtl.map_Kd = m.textures[(*fi).WT(0).n()];
-			}
-
 			else
 				mtl.map_Kd = "";
 			

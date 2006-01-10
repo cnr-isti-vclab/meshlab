@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.66  2006/01/10 16:52:16  fmazzant
+update ply::PlyMask -> io::Mask
+
 Revision 1.65  2006/01/07 11:04:49  glvertex
 Added Apply Last Filter action
 
@@ -740,9 +743,9 @@ void MainWindow::open(QString fileName)
 		workspace->addWindow(gla);
 		if(workspace->isVisible()) gla->showMaximized();
 		setCurrentFile(fileName);
-		if( mask & ply::PLYMask::PM_VERTCOLOR)
+		if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
 			gla->setColorMode(GLW::CMPerVert);
-		else if( mask & ply::PLYMask::PM_FACECOLOR)
+		else if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 			gla->setColorMode(GLW::CMPerFace);
 		else
 			gla->setColorMode(GLW::CMNone);
