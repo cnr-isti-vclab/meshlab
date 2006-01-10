@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.38  2006/01/10 00:36:48  buzzelli
+ adding first rough implementation of 3ds file importer
+
  Revision 1.37  2006/01/04 15:27:30  alemochi
  Renamed property of Format struct, and changed plugin dialog
 
@@ -132,6 +135,7 @@
 #include "../../test/io/import_obj.h"
 #include "../../test/io/export_obj.h"
 
+#include "../../test/io/import_3ds.h"
 #include "../../test/io/export_3ds.h"
 
 #include <wrap/io_trimesh/import_ply.h>
@@ -242,8 +246,26 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		}
 		else if (formatName.toUpper() == tr("3DS"))
 		{
-			// TODO: still to be implemented
-			return false;
+			vcg::tri::io::_3dsInfo info;	
+			info.cb = cb;
+			// TODO: decomment this code when implementation of loadmask will be done
+			/*vcg::tri::io::Importer3DS<CMeshO>::LoadMask(filename.c_str(), mask, info);
+
+			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
+			{
+				qDebug("Has Wedge Text Coords\n");
+				m.cm.face.EnableWedgeTex();
+			}*/
+
+			int result = vcg::tri::io::Importer3DS<CMeshO>::Open(m.cm, filename.c_str(), info);
+			if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR)
+			{
+				QMessageBox::warning(parent, tr("3DS Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
+				return false;
+			}
+
+			if(mask & vcg::ply::PLYMask::PM_WEDGNORMAL)
+				bUpdatedNormals = true;
 		}
 
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
