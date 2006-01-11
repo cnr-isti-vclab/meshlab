@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.66  2006/01/11 20:47:51  mariolatronico
+ButtonPressed::KEY_SHIFT -> KEY_SHIFT in wheelEvent()
+
 Revision 1.65  2006/01/10 16:29:29  alemochi
 now background and panel info not move with fov
 
@@ -651,7 +654,7 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 void GLArea::wheelEvent(QWheelEvent*e)
 {
 	const int WHEEL_DELTA =120;
-	if (currentButton & ButtonPressed::KEY_SHIFT)
+	if (currentButton & KEY_SHIFT)
 	{
 			fov+= e->delta()/ float(WHEEL_DELTA);
 			updateGL();
