@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.17  2006/01/11 17:19:03  buzzelli
+code cleaning
+
 Revision 1.16  2006/01/10 16:52:20  fmazzant
 update ply::PlyMask -> io::Mask
 
@@ -890,32 +893,26 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		if (bHasPerFaceColor)
 			mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
+	
+		/*
+		mask |= vcg::tri::io::Mask::IOM_VERTCOORD;
+		mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;
+		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		
+		mask |= vcg::tri::io::Mask::IOM_FACEINDEX;
+		mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;
+
+		mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
+		mask |= vcg::tri::io::Mask::IOM_WEDGTEXMULTI;
+		mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;
+		mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
+		*/
+
 		oi.mask = mask;
 		oi.numVertices	= numVertices;
 		oi.numTriangles = numTriangles;
-
-		/*if( pf.AddToRead(VertDesc(0))!=-1 && 
-				pf.AddToRead(VertDesc(1))!=-1 && 
-				pf.AddToRead(VertDesc(2))!=-1 )   mask |= ply::PLYMask::PM_VERTCOORD;
-
-		if( pf.AddToRead(VertDesc(3))!=-1 )		mask |= ply::PLYMask::PM_VERTFLAGS;
-		if( pf.AddToRead(VertDesc(4))!=-1 )		mask |= ply::PLYMask::PM_VERTQUALITY;
-		if( pf.AddToRead(VertDesc(8))!=-1 )		mask |= ply::PLYMask::PM_VERTQUALITY;
-		if( ( pf.AddToRead(VertDesc(5))!=-1 ) && 
-				( pf.AddToRead(VertDesc(6))!=-1 ) &&
-				( pf.AddToRead(VertDesc(7))!=-1 )  )  mask |= ply::PLYMask::PM_VERTCOLOR;
-		
-		if( pf.AddToRead(FaceDesc(0))!=-1 ) mask |= ply::PLYMask::PM_FACEINDEX;
-		if( pf.AddToRead(FaceDesc(1))!=-1 ) mask |= ply::PLYMask::PM_FACEFLAGS;
-
-		if( pf.AddToRead(FaceDesc(2))!=-1 ) mask |= ply::PLYMask::PM_FACEQUALITY;
-		if( pf.AddToRead(FaceDesc(5))!=-1 ) mask |= ply::PLYMask::PM_WEDGTEXMULTI;
-		if( pf.AddToRead(FaceDesc(4))!=-1 ) mask |= ply::PLYMask::PM_WEDGCOLOR;
-		if( ( pf.AddToRead(FaceDesc(6))!=-1 ) && 
-				( pf.AddToRead(FaceDesc(7))!=-1 ) &&
-				( pf.AddToRead(FaceDesc(8))!=-1 )  )  mask |= ply::PLYMask::PM_FACECOLOR;
-		*/
 
 		return true;
 	}
