@@ -109,6 +109,7 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 
 	CallBackPos *cb = info.cb;
 
+	//LoadMask(filename, info.mask, info);
 	// TODO: call LoadMask
 	// if LoadMask has not been called yet, we call it here
 	/*if (oi.mask == -1)
@@ -290,6 +291,8 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 		bool bHasPerVertexColor		= false;
 		bool bHasPerFaceColor			= false;
 
+		int numVertices, numTriangles;
+
 		// TODO: add code
 
 		mask=0;
@@ -319,9 +322,9 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 		mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
 		*/
 
-		oi.mask = mask;
-		oi.numVertices	= numVertices;
-		oi.numTriangles = numTriangles;
+		info.mask = mask;
+		info.numVertices	= numVertices;
+		info.numTriangles = numTriangles;
 
 		return true;
 	}
