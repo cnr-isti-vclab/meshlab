@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.9  2006/01/11 16:32:43  fmazzant
+ added comment-code for coord text
+
  Revision 1.8  2006/01/10 16:52:19  fmazzant
  update ply::PlyMask -> io::Mask
 
@@ -137,7 +140,7 @@ namespace io {
 				{
 					Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
 					material->name[0] = 'm';
-					material->name[1] = material_index;
+					material->name[1] = 'A' + material_index;
 					
 					//ambient
 					material->ambient[0] = materials[materials.size()-1].Ka[0];
@@ -159,15 +162,22 @@ namespace io {
 
 					//shininess
 					material->shininess = materials[materials.size()-1].Ns;
+					
+					//coordinate di texture
+					//for(int i=0;i<materials[materials.size()-1].map_Kd.size();i++)
+					//	material->texture1_map.name[i] = materials[materials.size()-1].map_Kd[i];
+
+					//material->texture1_map.offset[0] = (*fi).WT(0).u();
+					//material->texture1_map.offset[1] = (*fi).WT(0).v();
 
 					lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
 					face.material[0] = 'm';//associa alla faccia il materiale.
-					face.material[1] = material_index;//l'idice del materiale...
+					face.material[1] = 'A' + material_index;//l'idice del materiale...
 				}
 				else
-				{
+				{	
 					face.material[0] = 'm';//associa alla faccia il materiale.
-					face.material[1] = material_index;//l'idice del materiale...
+					face.material[1] = 'A' + material_index;//l'idice del materiale...
 				}
 
 				mesh->faceL[f_index]=face;
