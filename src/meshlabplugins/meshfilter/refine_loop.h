@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.7  2006/01/11 20:42:59  mariolatronico
+added some include and typename for correct gcc compilation
+
 Revision 1.6  2006/01/09 15:39:44  mariolatronico
 bugfix : now only old vertices are counted for even pass. Check if the vertices belong to selection and if it is deleted. Commented not working algorithm
 
@@ -121,6 +124,10 @@ first working version
 #include <math.h>
 #include <QtGlobal>
 #include <vcg/container/simple_temporary_data.h>
+#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/update/color.h>
+
+
 #define PI 3.14159265
 namespace vcg{
 
@@ -282,8 +289,8 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 	// n = numero di vertici iniziali
 	int n = m.vn;
 	// TD = temporary object for EvenParam structure data on vertex 
-	SimpleTempData<MESH_TYPE::VertContainer, 
-								 EvenParam<typename MESH_TYPE::CoordType> > TD(m.vert);
+	//SimpleTempData<typename MESH_TYPE::VertContainer, 
+	//							 EvenParam<typename MESH_TYPE::CoordType> > TD(m.vert);
 	
 	// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length, RefineSelected, cbOdd);
@@ -297,7 +304,7 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 
 	
 	//vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-	vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF(m);
+		vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF(m);
 	// aggiorno i flag perche' IsB funzioni
 	vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace (m);
 	vcg::tri::UpdateColor<MESH_TYPE>::VertexBorderFlag(m);
