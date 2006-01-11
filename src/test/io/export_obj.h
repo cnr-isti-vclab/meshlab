@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.23  2006/01/11 15:55:14  fmazzant
+ bug-fix in vertex-normal
+
  Revision 1.22  2006/01/10 16:52:19  fmazzant
  update ply::PlyMask -> io::Mask
 
@@ -287,7 +290,7 @@ namespace io {
 							vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
 
 						int vn = -1;
-						if(oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL) 
+						if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
 							vn = GetIndexVertexNormal(m, NormalVertex, v);//considera le normali per faccia per ora non va considerato.
 
 						//scrive elementi sul file obj
