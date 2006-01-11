@@ -295,39 +295,33 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 		mask=0;
 		
 		if (bHasPerWedgeTexCoord)
-			mask |= ply::PLYMask::PM_WEDGTEXCOORD;
+			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 		if (bHasPerWedgeNormal)
-			mask |= ply::PLYMask::PM_WEDGNORMAL;
+			mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
 		if (bHasPerVertexColor)
-			mask |= ply::PLYMask::PM_VERTCOLOR;
+			mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		if (bHasPerFaceColor)
-			mask |= ply::PLYMask::PM_FACECOLOR;
+			mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
 		
+		/*
+		mask |= vcg::tri::io::Mask::IOM_VERTCOORD;
+		mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;
+		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+		
+		mask |= vcg::tri::io::Mask::IOM_FACEINDEX;
+		mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;
+
+		mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
+		mask |= vcg::tri::io::Mask::IOM_WEDGTEXMULTI;
+		mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;
+		mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
+		*/
+
 		oi.mask = mask;
 		oi.numVertices	= numVertices;
 		oi.numTriangles = numTriangles;
-
-		/*if( pf.AddToRead(VertDesc(0))!=-1 && 
-				pf.AddToRead(VertDesc(1))!=-1 && 
-				pf.AddToRead(VertDesc(2))!=-1 )   mask |= ply::PLYMask::PM_VERTCOORD;
-
-		if( pf.AddToRead(VertDesc(3))!=-1 )		mask |= ply::PLYMask::PM_VERTFLAGS;
-		if( pf.AddToRead(VertDesc(4))!=-1 )		mask |= ply::PLYMask::PM_VERTQUALITY;
-		if( pf.AddToRead(VertDesc(8))!=-1 )		mask |= ply::PLYMask::PM_VERTQUALITY;
-		if( ( pf.AddToRead(VertDesc(5))!=-1 ) && 
-				( pf.AddToRead(VertDesc(6))!=-1 ) &&
-				( pf.AddToRead(VertDesc(7))!=-1 )  )  mask |= ply::PLYMask::PM_VERTCOLOR;
-		
-		if( pf.AddToRead(FaceDesc(0))!=-1 ) mask |= ply::PLYMask::PM_FACEINDEX;
-		if( pf.AddToRead(FaceDesc(1))!=-1 ) mask |= ply::PLYMask::PM_FACEFLAGS;
-
-		if( pf.AddToRead(FaceDesc(2))!=-1 ) mask |= ply::PLYMask::PM_FACEQUALITY;
-		if( pf.AddToRead(FaceDesc(5))!=-1 ) mask |= ply::PLYMask::PM_WEDGTEXMULTI;
-		if( pf.AddToRead(FaceDesc(4))!=-1 ) mask |= ply::PLYMask::PM_WEDGCOLOR;
-		if( ( pf.AddToRead(FaceDesc(6))!=-1 ) && 
-				( pf.AddToRead(FaceDesc(7))!=-1 ) &&
-				( pf.AddToRead(FaceDesc(8))!=-1 )  )  mask |= ply::PLYMask::PM_FACECOLOR;
-		*/
 
 		return true;
 	}
