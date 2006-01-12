@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.27  2006/01/12 19:34:43  fmazzant
+ cleaned code
+
  Revision 1.26  2006/01/12 18:43:41  fmazzant
  ostream -> fprintf
 
@@ -160,8 +163,7 @@ namespace io {
 			
 			std::string fn(filename);
 			int i=fn.size()-1;
-			while(fn[i]!='/')
-				i--;
+			while(fn[--i]!='/');
 
 			FILE *fp;
 			fp = fopen(filename,"w");
@@ -172,12 +174,7 @@ namespace io {
 			
 			//library materials
 			if(oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
-			{
-				QString fileName = QString(filename);
-				QStringList list = fileName.split("/");
 				fprintf(fp,"mtllib ./%s.mtl\n\n",fn.substr(i+1).c_str());
-			}
-
 			
 			//vertexs + normal
 			VertexIterator vi;
@@ -188,8 +185,6 @@ namespace io {
 				int value = 1;
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 				{
-					fprintf(fp,"v %f %f %f\n",(*vi).P()[0],(*vi).P()[1],(*vi).P()[2]);
-
 					//salva le normali per vertice
 					if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
 					{
@@ -199,14 +194,16 @@ namespace io {
 							value++;
 						}
 					}
+					
+					//salva il vertice
+					fprintf(fp,"v %f %f %f\n",(*vi).P()[0],(*vi).P()[1],(*vi).P()[2]);
 
 					if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
-					//else
-					//	CancellCallBack(stream);
+					else
+					{ fclose(fp); return false;}
 				}
-				//stream << "# " << m.vert.size() << " vertices" << std::endl;//stampa numero di vertici come commento
-				//stream << std::endl;
+				fprintf(fp,"# %d vertices, %d vertices normals\n\n",m.vert.size(),NormalVertex.size());
 			}
 			
 			//faces + texture coords
@@ -226,14 +223,14 @@ namespace io {
 						if(index == materials.size())//inserted a new element material
 						{
 							material_num++;
-							fprintf(fp,"usemtl material_%d\n",materials[index-1].index);
+							fprintf(fp,"\nusemtl material_%d\n",materials[index-1].index);
 							mem_index = index-1;
 						}
 						else
 						{
 							if(index != mem_index)
 							{
-								fprintf(fp,"usemtl material_%d\n",materials[index].index);
+								fprintf(fp,"\nusemtl material_%d\n",materials[index].index);
 								mem_index=index;
 							}
 						}
@@ -253,7 +250,6 @@ namespace io {
 						}
 					}
 
-					//stream << "f ";
 					fprintf(fp,"f ");
 					for(unsigned int k=0;k<MAX;k++)
 					{
@@ -273,21 +269,19 @@ namespace io {
 						WriteFacesElement(fp,v,vt,vn);
 
 						if(k!=MAX-1)
-							fprintf(fp," ");//	stream << " ";
+							fprintf(fp," ");
 						else
-							fprintf(fp,"\n");//	stream << std::endl;		
+							fprintf(fp,"\n");	
 					}	
 					if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
-					//else
-					//	CancellCallBack(stream);
+					else
+					{ fclose(fp); return false;}
 				}//for
-				//stream << "# " << m.face.size() << " faces" << std::endl;//stampa numero di facce come commento
-				//stream << std::endl;
+				fprintf(fp,"# %d faces, %d coords texture\n\n",m.face.size(),CoordIndexTexture.size());
 			}
 			
-			//stream << "# End of File" << std::endl;
-			//stream.close();
+			fprintf(fp,"# End of File");
 			fclose(fp);
 			WriteMaterials(materials, filename,cb);//scrive il file dei materiali
 			return true;
@@ -311,7 +305,6 @@ namespace io {
 				return SaveASCII(m,filename,oi);
 		}
 
-		
 		/*
 			restituisce l'indice del vertice, aggiunto di una unita'.
 		*/
@@ -339,25 +332,21 @@ namespace io {
 			if(index!=0){return index;}
 			return -1;	
 		}
-
 		
 		/*
 			scrive gli elementi su file.
 		*/
-		inline static void WriteFacesElement(/*std::ofstream &stream*/FILE *fp,int v,int vt, int vn)
+		inline static void WriteFacesElement(FILE *fp,int v,int vt, int vn)
 		{
-			//stream << v;
 			fprintf(fp,"%d",v);
 			if(vt!=-1)
 			{
-				//stream << "/" << vt;
 				fprintf(fp,"/%d",vt);
-				if(vn!=-1) fprintf(fp,"/%d",vn);//stream << "/" << vn;
+				if(vn!=-1) 
+					fprintf(fp,"/%d",vn);
 			}
-			else
-			{
-				if(vn!=-1) fprintf(fp,"//%d",vn);//stream << "//" << vn;
-			}
+			else if(vn!=-1)
+				fprintf(fp,"//%d",vn);
 		}
 		
 		/*
@@ -443,8 +432,8 @@ namespace io {
 				{
 					if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)materials.size(), "saving material file ");
-					//else
-					//	CancellCallBack(stream);
+					else
+					{ fclose(fp); return false;}
 
 					fprintf(fp,"newmtl material_%d\n",materials[i].index);
 					fprintf(fp,"Ka %f %f %f\n",materials[i].Ka[0],materials[i].Ka[1],materials[i].Ka[2]);
@@ -454,20 +443,10 @@ namespace io {
 					fprintf(fp,"illum %d\n",materials[i].illum);
 					fprintf(fp,"Ns %f\n",materials[i].Ns);
 
-					//stream << "newmtl " << "material_" << materials[i].index << std::endl;
-					//stream << "Ka "		<< materials[i].Ka[0] << " " << materials[i].Ka[1] << " " << materials[i].Ka[2] << std::endl;
-					//stream << "Kd "		<< materials[i].Kd[0] << " " << materials[i].Kd[1] << " " << materials[i].Kd[2] << std::endl;
-					//stream << "Ks "		<< materials[i].Ks[0] << " " << materials[i].Ks[1] << " " << materials[i].Ks[2] << std::endl;
-					//stream << "Tr "		<< materials[i].Tr << std::endl;
-					//stream << "illum "	<< materials[i].illum << std::endl;
-					//stream << "Ns "		<< materials[i].Ns << std::endl;
 					if(materials[i].map_Kd.size()>0)
-						fprintf(fp,"map_Kd %s\n",materials[i].map_Kd.c_str());//stream << "map_Kd "	<< materials[i].map_Kd << std::endl;
-					
-					//stream << std::endl;
+						fprintf(fp,"map_Kd %s\n",materials[i].map_Kd.c_str());
 					fprintf(fp,"\n");
 				}
-				//stream.close();
 				fclose(fp);
 			}
 			return true;
@@ -488,17 +467,7 @@ namespace io {
 			}
 			return -1;
 		}
-
-		/*
-			nel caso in cui la callbackpas sia uguale a NULL viene cancellato qualsiasi file generato dall'esecuzione di save.
-		*/
-		inline static void CancellCallBack(std::ofstream &out)
-		{
-			out.close();
-		}
-
 	}; // end class
-
 } // end Namespace tri
 } // end Namespace io
 } // end Namespace vcg
