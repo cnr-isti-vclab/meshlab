@@ -24,8 +24,8 @@
   History
 
 $Log$
-Revision 1.44  2006/01/12 11:00:07  cignoni
-Better Management of deallocation of memory
+Revision 1.45  2006/01/12 22:14:39  alemochi
+added vertigo effect and moveable near clip plane
 
 Revision 1.43  2006/01/09 18:31:18  alemochi
 Fov, work in progress.....
@@ -190,6 +190,13 @@ First rough version. It simply load a mesh.
 #include <QGLWidget>
 #include <QTime>
 #include <QtGui>
+#include <vcg/space/point3.h>
+#include <vcg/space/plane3.h>
+#include <vcg/space/line3.h>
+#include <vcg/math/matrix44.h>
+#include <vcg/math/matrix44.h>
+#include <wrap/gl/math.h>
+//#include <../wrap/gl/math.h>
 
 #include "GLLogStream.h"
 
@@ -269,10 +276,7 @@ class GLArea : public QGLWidget
 
 public:
 	GLArea(QWidget *parent = 0);
-	~GLArea(){
-    qDebug("Destructing glarea");
-    if(mm) delete mm;
-  }
+	~GLArea(){}
 	
 	enum ButtonPressed { BUTTON_NONE   = 0x0000, 
 		WHEEL         = 0x0008,
@@ -324,6 +328,7 @@ public:
 	void setLightMode(bool state,LightingModel lmode);
 	void saveSnapshot();
 	void setLightModel();
+	void setVertigoCamera();
 	void resetTrackBall();
 	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
 
@@ -366,6 +371,9 @@ private:
 	int currentButton;
 	float cfps;
 	float fov;
+	float objDist;
+	float clipRatioFar;
+	float clipRatioNear;
   QTime time;
 	int deltaTime;
 	int lastTime;

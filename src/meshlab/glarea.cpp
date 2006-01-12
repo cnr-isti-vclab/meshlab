@@ -24,11 +24,8 @@
 History
 
 $Log$
-Revision 1.67  2006/01/12 11:00:07  cignoni
-Better Management of deallocation of memory
-
-Revision 1.66  2006/01/11 20:47:51  mariolatronico
-ButtonPressed::KEY_SHIFT -> KEY_SHIFT in wheelEvent()
+Revision 1.68  2006/01/12 22:14:39  alemochi
+added vertigo effect and moveable near clip plane
 
 Revision 1.65  2006/01/10 16:29:29  alemochi
 now background and panel info not move with fov
@@ -272,7 +269,6 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
-  setAttribute(Qt::WA_DeleteOnClose,true); 
 	iRenderer=0; //Shader support
 	iDecoratorsList=0;
 	currentTime=0;
@@ -289,9 +285,11 @@ GLArea::GLArea(QWidget *parent)
 	currentSharder = NULL;
 	lastFilterRef = NULL;
 	time.start();
-  currentButton=0;
+	objDist=3.0;
 	currLogLevel = -1;
-  mm=0;
+	currentButton=GLArea::BUTTON_NONE;
+	clipRatioFar=1;
+	clipRatioNear=1;
 }
 
 
@@ -306,7 +304,8 @@ void GLArea::displayModelInfo()
   renderText(currentWidth-currentWidth*0.15,currentHeight-45,strVertex);
 	renderText(currentWidth-currentWidth*0.15,currentHeight-30,strTriangle);
 	renderText(currentWidth-currentWidth*0.15,currentHeight-70,QString("Fov ")+QString::number((int)fov,10));
-
+	QString strNear=QString("Near: %1").arg(clipRatioNear,7,'f',1);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-80,strNear);
 }
 
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
@@ -418,6 +417,8 @@ void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GL
 	top = fTop - yOff;
 
 	glFrustum(left, right, bottom, top, zNear, zFar);
+	
+
 
 }
 
@@ -428,19 +429,18 @@ void GLArea::paintGL()
 	initTexture();
 	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
-
-	gluLookAt(0,0,3,   0,0,0,   0,1,0);
-
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluPerspective(60,(GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
 	glMatrixMode(GL_MODELVIEW);
-
+	glLoadIdentity();
+	gluLookAt(0,0,3, 0,0,0 ,0,1,0);
+	glPushMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60,(float)vpWidth/vpHeight,0.2,5);
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	
 	if (!takeSnapTile)
 	{
-		// == Background
 		glPushMatrix();
 		glLoadIdentity();
 		glPushAttrib(GL_ENABLE_BIT);
@@ -451,27 +451,38 @@ void GLArea::paintGL()
 		glColor(cs.bColorBottom);	glVertex3f(-4.f,-4.f,-1.f);
 		glColor(cs.bColorTop);		glVertex3f( 4.f, 4.f,-1.f);
 		glColor(cs.bColorBottom);	glVertex3f( 4.f,-4.f,-1.f);
-		glEnd();
+		glEnd();		
 		glPopAttrib();
 		glPopMatrix();
-		// ==
 	}
-
+  double m[16];
+	Matrix44d modelview1;									// Take glLookAt(.....)
+	glGetDoublev(GL_MODELVIEW_MATRIX, m);
+	modelview1.Import(Matrix44d(m));
+	Transpose(modelview1);
 	glColor3f(1.f,1.f,1.f);
+	
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
 	trackball.Apply(trackBallVisible && !takeSnapTile);
-
+	
+	Matrix44d modelview2;									// Take gluLookAt*Apply Matrix
+	glGetDoublev(GL_MODELVIEW_MATRIX, m);
+	modelview2.Import(Matrix44d(m));
+	Transpose(modelview2);
+	Matrix44d modelview1Inv;
+	modelview1Inv.SetIdentity();
+	modelview1Inv=Inverse(modelview1);
+	Matrix44d m_apply=modelview1Inv*modelview2; // Get Apply matrix
+	
+	// Setting camera e projection
+	setVertigoCamera();
+	glMultMatrix(m_apply);
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
-
-	setLightModel();
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
+  setLightModel();
 
 	// Modify frustum... 
 	if (takeSnapTile)
@@ -497,20 +508,8 @@ void GLArea::paintGL()
 
 	}
 
-	if (!takeSnapTile)
-	{
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		gluPerspective(fov,(GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
-		mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-		glPopMatrix();
-	}
-	else mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-
-	glMatrixMode(GL_MODELVIEW);
-
-
+	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+	
 	if(iRenderer) {
 		glUseProgramObjectARB(0);
 	}
@@ -521,6 +520,12 @@ void GLArea::paintGL()
 	}
 
 	// ...and take a snapshot
+	
+	glMatrixMode(GL_PROJECTION); // restore fix projection matrix
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);  // restore fix viewpoint
+	glPopMatrix();
+
 	if (takeSnapTile)
 	{
 		glPushAttrib(GL_ENABLE_BIT);
@@ -620,18 +625,17 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 void GLArea::keyPressEvent ( QKeyEvent * e )  
 {
 	//currentButton=GLArea::BUTTON_NONE;
-  if (e->key ()==Qt::Key_Shift)   { currentButton|=GLArea::KEY_SHIFT; qDebug("Pressed Qt::Key_Shift   %0x",currentButton);}
-  if (e->key ()==Qt::Key_Control) { currentButton|=GLArea::KEY_CTRL; 	qDebug("Pressed Qt::Key_Control %0x",currentButton);}
-  if (e->key ()==Qt::Key_Alt)     { currentButton|=GLArea::KEY_ALT;   qDebug("Pressed Qt::Key_Alt     %0x",currentButton);}
+	if (e->key ()==Qt::Key_Shift) currentButton|=GLArea::KEY_SHIFT;
+	if (e->key ()==Qt::Key_Control) currentButton|=GLArea::KEY_CTRL;
+	if (e->key ()==Qt::Key_Alt) currentButton|=GLArea::KEY_ALT;
 }
 
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
-  if (e->key()==Qt::Key_Shift)  {currentButton &= (~GLArea::KEY_SHIFT); qDebug("Released Qt::Key_Shift   %0x",currentButton);}
-  if (e->key()==Qt::Key_Control){currentButton &= (~GLArea::KEY_CTRL); 	qDebug("Released Qt::Key_Control %0x",currentButton);}
-  if (e->key()==Qt::Key_Alt)    {currentButton &= (~GLArea::KEY_ALT);	  qDebug("Released Qt::Key_Alt     %0x",currentButton);}
-
+	if (e->key()==Qt::Key_Shift) currentButton-=GLArea::KEY_SHIFT;
+	if (e->key()==Qt::Key_Control) currentButton-=GLArea::KEY_CTRL;
+	if (e->key()==Qt::Key_Alt) currentButton-=GLArea::KEY_ALT;
 }
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
@@ -660,18 +664,24 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 void GLArea::wheelEvent(QWheelEvent*e)
 {
 	const int WHEEL_DELTA =120;
-	if (currentButton & KEY_SHIFT)
+	
+	if (currentButton & ButtonPressed::KEY_SHIFT) 
 	{
+		if (currentButton & ButtonPressed::KEY_CTRL)
+		{
+			clipRatioNear-=(e->delta()/ float(WHEEL_DELTA))/10;
+			updateGL();
+		}
+		else 
+		{
 			fov+= e->delta()/ float(WHEEL_DELTA);
 			updateGL();
+		}
 	}
-	else 
-	{
-		trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA) );
-	}
+	else trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA) );
 	update();
-}
-
+	
+}		
 
 void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 {
@@ -793,6 +803,35 @@ void GLArea::setCustomSetting(const ColorSetting & s)
 void GLArea::setSnapshotSetting(const SnapshotSetting & s)
 {
 	ss=s;
+}
+
+void GLArea::setVertigoCamera()
+{
+	GLfloat ClipRatio=1;
+	GLfloat fAspect = (GLfloat)vpWidth/ vpHeight;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	// Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
+	float y=sin(vcg::math::ToRad(fov/2.0));
+	float x=cos(vcg::math::ToRad(fov/2.0));
+	objDist= 1.5*(x*1.0/y);
+	float nearv = objDist - 2.0*clipRatioNear;
+	float farv =  objDist + 2.0*clipRatioFar;
+	if(nearv<=objDist/10.0) nearv=objDist/10.0;
+	if(fov==5)
+	{
+		glOrtho(-1.5*fAspect,1.5*fAspect,-1.5,1.5,- 2.0*clipRatioNear, 2.0*clipRatioFar);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+	}
+	else
+	{
+		
+		gluPerspective(fov, fAspect, nearv, farv);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		gluLookAt(0, 0, objDist,0, 0, 0, 0, 1, 0);
+	}
 }
 
 void GLArea::updateFps()
