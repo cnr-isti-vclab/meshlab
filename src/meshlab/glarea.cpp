@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.69  2006/01/12 22:32:00  alemochi
+remove unnecessary code
+
 Revision 1.68  2006/01/12 22:14:39  alemochi
 added vertigo effect and moveable near clip plane
 
@@ -471,9 +474,7 @@ void GLArea::paintGL()
 	glGetDoublev(GL_MODELVIEW_MATRIX, m);
 	modelview2.Import(Matrix44d(m));
 	Transpose(modelview2);
-	Matrix44d modelview1Inv;
-	modelview1Inv.SetIdentity();
-	modelview1Inv=Inverse(modelview1);
+	Matrix44d modelview1Inv=Inverse(modelview1);
 	Matrix44d m_apply=modelview1Inv*modelview2; // Get Apply matrix
 	
 	// Setting camera e projection
