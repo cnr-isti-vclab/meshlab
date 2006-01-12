@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.67  2006/01/12 11:00:07  cignoni
+Better Management of deallocation of memory
+
 Revision 1.66  2006/01/11 20:47:51  mariolatronico
 ButtonPressed::KEY_SHIFT -> KEY_SHIFT in wheelEvent()
 
@@ -269,6 +272,7 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
+  setAttribute(Qt::WA_DeleteOnClose,true); 
 	iRenderer=0; //Shader support
 	iDecoratorsList=0;
 	currentTime=0;
@@ -285,8 +289,9 @@ GLArea::GLArea(QWidget *parent)
 	currentSharder = NULL;
 	lastFilterRef = NULL;
 	time.start();
-
+  currentButton=0;
 	currLogLevel = -1;
+  mm=0;
 }
 
 
@@ -614,18 +619,19 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 
 void GLArea::keyPressEvent ( QKeyEvent * e )  
 {
-	currentButton=GLArea::BUTTON_NONE;
-	if (e->modifiers ()==Qt::ShiftModifier) currentButton|=GLArea::KEY_SHIFT;
-	if (e->modifiers ()==Qt::ControlModifier) currentButton|=GLArea::KEY_CTRL;
-	if (e->modifiers ()==Qt::AltModifier) currentButton|=GLArea::KEY_ALT;
+	//currentButton=GLArea::BUTTON_NONE;
+  if (e->key ()==Qt::Key_Shift)   { currentButton|=GLArea::KEY_SHIFT; qDebug("Pressed Qt::Key_Shift   %0x",currentButton);}
+  if (e->key ()==Qt::Key_Control) { currentButton|=GLArea::KEY_CTRL; 	qDebug("Pressed Qt::Key_Control %0x",currentButton);}
+  if (e->key ()==Qt::Key_Alt)     { currentButton|=GLArea::KEY_ALT;   qDebug("Pressed Qt::Key_Alt     %0x",currentButton);}
 }
 
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
-	if (e->key()==Qt::Key_Shift) currentButton-=GLArea::KEY_SHIFT;
-	if (e->key()==Qt::Key_Control) currentButton-=GLArea::KEY_CTRL;
-	if (e->key()==Qt::Key_Alt) currentButton-=GLArea::KEY_ALT;
+  if (e->key()==Qt::Key_Shift)  {currentButton &= (~GLArea::KEY_SHIFT); qDebug("Released Qt::Key_Shift   %0x",currentButton);}
+  if (e->key()==Qt::Key_Control){currentButton &= (~GLArea::KEY_CTRL); 	qDebug("Released Qt::Key_Control %0x",currentButton);}
+  if (e->key()==Qt::Key_Alt)    {currentButton &= (~GLArea::KEY_ALT);	  qDebug("Released Qt::Key_Alt     %0x",currentButton);}
+
 }
 void GLArea::mousePressEvent(QMouseEvent*e)
 {

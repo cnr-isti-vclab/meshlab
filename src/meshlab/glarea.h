@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.44  2006/01/12 11:00:07  cignoni
+Better Management of deallocation of memory
+
 Revision 1.43  2006/01/09 18:31:18  alemochi
 Fov, work in progress.....
 
@@ -266,7 +269,10 @@ class GLArea : public QGLWidget
 
 public:
 	GLArea(QWidget *parent = 0);
-	~GLArea(){}
+	~GLArea(){
+    qDebug("Destructing glarea");
+    if(mm) delete mm;
+  }
 	
 	enum ButtonPressed { BUTTON_NONE   = 0x0000, 
 		WHEEL         = 0x0008,
