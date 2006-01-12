@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.24  2006/01/12 16:16:36  fmazzant
+ diminished the time completely of the export_obj
+
  Revision 1.23  2006/01/11 15:55:14  fmazzant
  bug-fix in vertex-normal
 
@@ -149,9 +152,7 @@ namespace io {
 			
 			int current = 0;
 			int max = m.vert.size()+ m.face.size();
-			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD){max+=m.face.size();}
-			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)	{max+=m.vert.size();}
-
+		
 			std::vector<Material> materials;//vettore dei materiali.
 
 			std::ofstream stream(filename);
@@ -184,14 +185,27 @@ namespace io {
 				stream << std::endl << "mtllib ./" << list.at(list.size()-1).toStdString() << ".mtl" << std::endl << std::endl;
 			}
 
-			//vertexs
+			
+			//vertexs + normal
 			VertexIterator vi;
+			std::map<Point3f,int> NormalVertex;
 			if(oi.mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
 			{
 				int numvert = 0;
+				int value = 1;
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 				{
 					stream << "v " << (*vi).P()[0] << " " << (*vi).P()[1] << " " << (*vi).P()[2] << std::endl;
+
+					//salva le normali per vertice
+					if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
+					{
+						if(AddNewNormalVertex(NormalVertex,(*vi).N(),value))
+						{
+							stream << "vn " << (*vi).N()[0] << " " << (*vi).N()[1] << " " << (*vi).N()[2] << std::endl;
+							value++;
+						}
+					}
 
 					if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
@@ -202,59 +216,14 @@ namespace io {
 				stream << std::endl;
 			}
 			
-			//texture coords
+			//faces + texture coords
 			FaceIterator fi;
 			std::map<vcg::TCoord2<float>,int> CoordIndexTexture;
-			if(m.HasPerWedgeTexture() && oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
-			{
-				int numface = 0;
-				int value = 1;
-				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
-				{
-					for(unsigned int k=0;k<3;k++)
-					{
-						if(AddNewTextureCoord(CoordIndexTexture,(*fi).WT(k),value))
-						{
-							stream << "vt " << (*fi).WT(k).u() << " " << (*fi).WT(k).v() << " " /*<< (*fi).WT(k).n() */ << std::endl;
-							value++;//incrementa il numero di valore da associare alle texture
-						}
-					}
-					if (cb !=NULL)
-						(*cb)(100.0 * (float)++current/(float)max, "writing TCoord2");
-					else
-						CancellCallBack(stream);
-				}//for
-				stream << "# " << CoordIndexTexture.size() << " vertices texture" << std::endl;//stampa numero di vert di coord di text
-				stream << std::endl;
-			}
-				
-			//vertexs normal
-			std::map<Point3f,int> NormalVertex;
-			if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
-			{
-				int numvert = 0;
-				int value = 1;
-				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
-				{
-					if(AddNewNormalVertex(NormalVertex,(*vi).N(),value))
-					{
-						stream << "vn " << (*vi).N()[0] << " " << (*vi).N()[1] << " " << (*vi).N()[2] << std::endl;
-						value++;
-					}
-					if (cb !=NULL)
-						(*cb)(100.0 * (float)++current/(float)max, "writing normal");
-					else
-						CancellCallBack(stream);
-				}
-				stream << "# " << NormalVertex.size() << " normals per vertex " << std::endl;//stampa numero di vert di coord di text
-				stream << std::endl;
-			}
-			
-			//faces
 			if(oi.mask & vcg::tri::io::Mask::IOM_FACEQUALITY)
 			{
 				unsigned int material_num = 0;
 				int mem_index = 0; //var temporany
+				int value = 1;//tmp
 				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 				{
 					if(oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
@@ -277,8 +246,21 @@ namespace io {
 						}
 					}
 
-					stream << "f "; 					
+					//salva le coordinate di texture
 					unsigned int MAX = 3;
+					for(unsigned int k=0;k<MAX;k++)
+					{
+						if(m.HasPerWedgeTexture() && oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
+						{
+							if(AddNewTextureCoord(CoordIndexTexture,(*fi).WT(k),value))
+							{
+								stream << "vt " << (*fi).WT(k).u() << " " << (*fi).WT(k).v() << " " << std::endl;
+								value++;//incrementa il numero di valore da associare alle texture
+							}
+						}
+					}
+
+					stream << "f "; 					
 					for(unsigned int k=0;k<MAX;k++)
 					{
 						int v = -1; 
