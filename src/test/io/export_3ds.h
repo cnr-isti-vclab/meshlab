@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.10  2006/01/12 16:38:45  fmazzant
+ update code & clean code
+
  Revision 1.9  2006/01/11 16:32:43  fmazzant
  added comment-code for coord text
 
@@ -164,11 +167,18 @@ namespace io {
 					material->shininess = materials[materials.size()-1].Ns;
 					
 					//coordinate di texture
-					//for(int i=0;i<materials[materials.size()-1].map_Kd.size();i++)
-					//	material->texture1_map.name[i] = materials[materials.size()-1].map_Kd[i];
+					for(int i=0;i<materials[materials.size()-1].map_Kd.size();i++)
+						material->texture1_map.name[i] = materials[materials.size()-1].map_Kd[i];
 
-					//material->texture1_map.offset[0] = (*fi).WT(0).u();
-					//material->texture1_map.offset[1] = (*fi).WT(0).v();
+					unsigned int MAX = 3;
+					for(unsigned int k=0;k<MAX;k++)
+					{
+						if(m.HasPerWedgeTexture() /*&& oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD*/)
+						{
+							//(*fi).WT(k).u();
+							//(*fi).WT(k).v();
+						}
+					}					
 
 					lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
 					face.material[0] = 'm';//associa alla faccia il materiale.

@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.25  2006/01/12 16:38:45  fmazzant
+ update code & clean code
+
  Revision 1.24  2006/01/12 16:16:36  fmazzant
  diminished the time completely of the export_obj
 
@@ -170,10 +173,10 @@ namespace io {
 			stream << "# Object: " <<  list.at(list.size()-1).toStdString() << std::endl;
 			stream << "#" << std::endl;
 			stream << "# Vertices: " << m.vert.size() << std::endl;
-			stream << "# Points: " << 0 <<std::endl;
-			stream << "# Lines: " << 0 <<std::endl;
+			//stream << "# Points: " << 0 <<std::endl;
+			//stream << "# Lines: " << 0 <<std::endl;
 			stream << "# Faces: " << m.face.size() << std::endl;
-			stream << "# Materials: " << 0 <<std::endl;
+			//stream << "# Materials: " << 0 <<std::endl;
 			stream << "#" << std::endl;
 			stream << "####" << std::endl << std::endl;
 			
