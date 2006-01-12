@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.11  2006/01/12 23:53:17  fmazzant
+ deleted part of texture base
+
  Revision 1.10  2006/01/12 16:38:45  fmazzant
  update code & clean code
 
@@ -166,10 +169,6 @@ namespace io {
 					//shininess
 					material->shininess = materials[materials.size()-1].Ns;
 					
-					//coordinate di texture
-					for(int i=0;i<materials[materials.size()-1].map_Kd.size();i++)
-						material->texture1_map.name[i] = materials[materials.size()-1].map_Kd[i];
-
 					unsigned int MAX = 3;
 					for(unsigned int k=0;k<MAX;k++)
 					{
