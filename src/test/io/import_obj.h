@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.18  2006/01/12 23:46:04  buzzelli
+solved a small bug in material loading
+
 Revision 1.17  2006/01/11 17:19:03  buzzelli
 code cleaning
 
@@ -653,7 +656,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		tokens.clear();
 		do
 		{
-			while (line[from]==' ' && from!=length)
+			while ((line[from]==' ' || line[from]=='\t') && from!=length)
 				from++;
       if(from!=length)
       {
