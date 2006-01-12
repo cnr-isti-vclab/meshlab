@@ -32,3 +32,8 @@ TMF repository of the San Diego Supercomputer Center
 http://www.sdsc.edu/tmf/Repository/database.html
 
 22/12/2005  12:12           322,184 conrod.stl
+
+The following model is provided by courtesy of D-Scupltor (http://www.d-vw.com )
+
+10/08/2001  11:24 AM            35,429 radio.3ds
+08/02/2001  11:43 AM           281,715 sub.obj

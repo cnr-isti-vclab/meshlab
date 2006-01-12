@@ -1,0 +1,9 @@
+newmtl Texture
+	Ns 100
+	d 1
+	illum 2
+	Ka .8 .8 .8
+	Kd 0.2 0.2 0.2
+	Ks 0 0 0
+	map_Kd sub_texture.jpg
+	map_Ka sub_texture.jpg
