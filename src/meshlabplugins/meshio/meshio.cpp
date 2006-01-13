@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.41  2006/01/13 15:35:58  fmazzant
+ changed return type of exporter from bool to int
+
  Revision 1.40  2006/01/13 14:18:36  cignoni
  Added initialization of mask to zero
 
@@ -291,30 +294,59 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 
 bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
+	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
 
 	if(formatName.toUpper() == tr("OBJ"))
 	{	
-		bool result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
-		if(!result)
-			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
-		return result;
+		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
+		if(result != vcg::tri::io::ExporterOBJ<CMeshO>::E_NOERROR )
+		{
+			QMessageBox::warning(parent, tr("OBJ Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result)));
+			return false;
+		}
+		return true;
 	}
 
-	if(formatName.toUpper() == tr("PLY")|formatName.toUpper() == tr("OFF")|formatName.toUpper() == tr("STL"))
+	if(formatName.toUpper() == tr("PLY"))
 	{
-		bool result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
-		if(!result)
-			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
-		return result;
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
+		if(result != 0)
+		{
+			//QMessageBox::warning(parent, tr("PLY Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterPLY<CMeshO>::ErrorMsg(result)));
+			return false;
+		}
+		return true;
+	}
+
+	if(formatName.toUpper() == tr("OFF"))
+	{
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
+		if(result != 0)
+		{
+			//QMessageBox::warning(parent, tr("OFF Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOFF<CMeshO>::ErrorMsg(result)));
+			return false;
+		}
+		return true;
+	}
+
+	if(formatName.toUpper() == tr("STL"))
+	{
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
+		if(result != 0)
+		{
+			//QMessageBox::warning(parent, tr("STL Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterSTL<CMeshO>::ErrorMsg(result)));
+			return false;
+		}
+		return true;
 	}
 
 	if(formatName.toUpper() == tr("3DS"))
 	{
-		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,cb);
-		if(!result)
-			QMessageBox::warning(parent, ex.c_str(), "File not saved!");
+		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,mask,cb);//salva esclusivamente in formato binario
+		if(result!=0)
+			QMessageBox::warning(parent, tr("3DS Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
 		return result;
 	}
 

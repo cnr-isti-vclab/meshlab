@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.12  2006/01/13 15:35:58  fmazzant
+ changed return type of exporter from bool to int
+
  Revision 1.11  2006/01/12 23:53:17  fmazzant
  deleted part of texture base
 
@@ -73,6 +76,7 @@
 #include <lib3ds/types.h>
 #include <lib3ds/material.h>
 
+#include <vector>
 #include <iostream>
 #include <fstream>
 
@@ -91,18 +95,48 @@ namespace io {
 		typedef typename SaveMeshType::VertexIterator VertexIterator;
 		typedef typename SaveMeshType::VertexType VertexType;
 	
-		static bool SaveASCII(SaveMeshType &m, const char * filename)	
+		enum SaveError
 		{
-			QMessageBox::warning(new QWidget(),"Warning","Save not implemented!");
-			return false;
+			E_NOERROR,					// 0
+			E_CANTOPENFILE,				// 1
+			E_CANTCLOSEFILE,			// 2
+			E_UNESPECTEDEOF,			// 3
+			E_ABORTED,					// 4
+			E_NOTDEFINITION				// 5
+		};
+
+		/*
+			stampa messaggio di errore dell'export obj
+		*/
+		static const char* ErrorMsg(int error)
+		{
+			static const char* obj_error_msg[] =
+			{
+					"No errors",							// 0
+					"Can't open file",						// 1
+					"can't close file",						// 2
+					"Premature End of file",				// 3
+					"File saving aborted",					// 4
+					"Function not defined"					// 5
+				};
+
+			if(error>4 || error<0) return "Unknown error";
+			else return obj_error_msg[error];
+		};
+
+		static int SaveASCII(SaveMeshType &m, const char * filename)	
+		{
+			return E_NOTDEFINITION;
 		}
 
-		static bool SaveBinary(SaveMeshType &m, const char * filename, CallBackPos *cb=0)
+		static int SaveBinary(SaveMeshType &m, const char * filename, int &mask, CallBackPos *cb=0)
 		{
 			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
 			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//crea una nuova mesh con nome mesh
 
 			std::vector<Material> materials;
+			std::map<vcg::TCoord2<float>,int> CoordTextures;
+			std::vector<vcg::TCoord2<float> > CoordTexturesVector;
 
 			int current = 0;
 			int max = m.vert.size()+m.face.size();
@@ -122,12 +156,13 @@ namespace io {
 				if (cb !=NULL)
 					(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
 				else
-					return false;
+					return E_ABORTED;
 				v_index++;
 			}
 			
 			lib3ds_mesh_new_face_list (mesh, m.face.size());
-			int f_index = 0;
+			int f_index = 0;//indice facce
+			int t_index = 0;//indice texture
 			FaceIterator fi;
 			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 			{
@@ -171,13 +206,9 @@ namespace io {
 					
 					unsigned int MAX = 3;
 					for(unsigned int k=0;k<MAX;k++)
-					{
-						if(m.HasPerWedgeTexture() /*&& oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD*/)
-						{
-							//(*fi).WT(k).u();
-							//(*fi).WT(k).v();
-						}
-					}					
+						if(m.HasPerWedgeTexture())
+							if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),t_index))
+								t_index++;				
 
 					lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
 					face.material[0] = 'm';//associa alla faccia il materiale.
@@ -194,20 +225,33 @@ namespace io {
 				if (cb !=NULL)
 					(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
 				else 
-					return false;
+					return E_ABORTED;
 				f_index++;
 			}
 			
+			//aggiunge le coordinate di texture alla mesh
+			//if(m.HasPerWedgeTexture())
+			//{
+			//	if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
+			//	{
+			//		
+			//	}
+			//	else
+			//		return false;
+			//}
+
 			//salva la mesh in 3ds
 			lib3ds_file_insert_mesh(file, mesh);//inserisce la mesh al file
 			bool result = lib3ds_file_save(file, filename); //salva il file
-			
-			return result;
+			if(result)
+				return E_NOERROR; 
+			else 
+				return E_ABORTED;
 		}
 		
-		static bool Save(SaveMeshType &m, const char * filename, bool binary,CallBackPos *cb=0)
+		static int Save(SaveMeshType &m, const char * filename, bool binary,int &mask, CallBackPos *cb=0)
 		{
-			return SaveBinary(m,filename,cb);	
+			return SaveBinary(m,filename,mask,cb);	
 		}
 
 		/*
@@ -216,6 +260,16 @@ namespace io {
 		inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
 		{
 			return p-&*(m.vert.begin());
+		}
+		
+		/*
+
+		*/
+		inline static bool AddNewTextureCoord(std::map<vcg::TCoord2<float>,int> &m, const vcg::TCoord2<float> &wt,int value)
+		{
+			int index = m[wt];
+			if(index==0){m[wt]=value;return true;}
+			return false;
 		}
 
 		/*
