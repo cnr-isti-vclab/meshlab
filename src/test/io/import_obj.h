@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.19  2006/01/13 00:40:26  buzzelli
+added support for files with negative references to texCoord and vertex normals inside face definition
+
 Revision 1.18  2006/01/12 23:46:04  buzzelli
 solved a small bug in material loading
 
@@ -255,6 +258,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 	int numVertices  = 0;  // stores the number of vertices been read till now
 	int numTriangles = 0;  // stores the number of faces been read till now
+	int numTexCoords = 0;  // stores the number of texture coordinates been read till now
+	int numVNormals	 = 0;  // stores the number of vertex normals been read till now
 
 	int numVerticesPlusFaces = oi.numVertices + oi.numTriangles;
 
@@ -311,6 +316,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				t.v = (ScalarType) atof(tokens[2].c_str());
 				//t.w = (ScalarType) atof(tokens[3].c_str());	
 				texCoords.push_back(t);
+				
+				numTexCoords++;
 			}
 			else if (header.compare("vn")==0)  // vertex normal
 			{
@@ -319,6 +326,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				n[1] = (ScalarType) atof(tokens[2].c_str());
 				n[2] = (ScalarType) atof(tokens[3].c_str());	
 				normals.push_back(n);
+
+				numVNormals++;
 			}
 			else if (header.compare("f")==0)  // face
 			{
@@ -337,18 +346,24 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 					SplitVVTVNToken(tokens[1], vertex, texcoord, normal);
 					v1_index = atoi(vertex.c_str());
-					vt1_index = atoi(texcoord.c_str());	--vt1_index;
-					vn1_index = atoi(normal.c_str());		--vn1_index;
+					vt1_index = atoi(texcoord.c_str());
+					if (vt1_index < 0) vt1_index += numTexCoords; else --vt1_index;
+					vn1_index = atoi(normal.c_str());
+					if (vn1_index < 0) vn1_index += numVNormals;	else --vn1_index;
 
 					SplitVVTVNToken(tokens[2], vertex, texcoord, normal);
 					v2_index = atoi(vertex.c_str());
-					vt2_index = atoi(texcoord.c_str());	--vt2_index;
-					vn2_index = atoi(normal.c_str());		--vn2_index;
+					vt2_index = atoi(texcoord.c_str());
+					if (vt2_index < 0) vt2_index += numTexCoords; else --vt2_index;
+					vn2_index = atoi(normal.c_str());
+					if (vn2_index < 0) vn2_index += numVNormals;	else --vn2_index;
 
 					SplitVVTVNToken(tokens[3], vertex, texcoord, normal);
 					v3_index = atoi(vertex.c_str());
-					vt3_index = atoi(texcoord.c_str());	--vt3_index;
-					vn3_index = atoi(normal.c_str());		--vn3_index;
+					vt3_index = atoi(texcoord.c_str());
+					if (vt3_index < 0) vt3_index += numTexCoords; else --vt3_index;
+					vn3_index = atoi(normal.c_str());
+					if (vn3_index < 0) vn3_index += numVNormals;	else --vn3_index;
 				}
 				else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 				{
@@ -357,15 +372,18 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					
 					SplitVVTToken(tokens[1], vertex, texcoord);
 					v1_index = atoi(vertex.c_str());
-					vt1_index = atoi(texcoord.c_str());		--vt1_index;
+					vt1_index = atoi(texcoord.c_str());
+					if (vt1_index < 0) vt1_index += numTexCoords; else --vt1_index;
 
 					SplitVVTToken(tokens[2], vertex, texcoord);
 					v2_index = atoi(vertex.c_str());
-					vt2_index = atoi(texcoord.c_str());		--vt2_index;
+					vt2_index = atoi(texcoord.c_str());
+					if (vt2_index < 0) vt2_index += numTexCoords; else --vt2_index;
 					
 					SplitVVTToken(tokens[3], vertex, texcoord);
 					v3_index = atoi(vertex.c_str());
-					vt3_index = atoi(texcoord.c_str());		--vt3_index;
+					vt3_index = atoi(texcoord.c_str());
+					if (vt3_index < 0) vt3_index += numTexCoords; else --vt3_index;
 				}
 				else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 				{
@@ -374,15 +392,18 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					
 					SplitVVNToken(tokens[1], vertex, normal);
 					v1_index = atoi(vertex.c_str());
-					vn1_index = atoi(normal.c_str());		--vn1_index;
+					vn1_index = atoi(normal.c_str());
+					if (vn1_index < 0) vn1_index += numVNormals;	else --vn1_index;
 
 					SplitVVNToken(tokens[2], vertex, normal);
 					v2_index = atoi(vertex.c_str());
-					vn2_index = atoi(normal.c_str());		--vn2_index;
+					vn2_index = atoi(normal.c_str());
+					if (vn2_index < 0) vn2_index += numVNormals;	else --vn2_index;
 					
 					SplitVVNToken(tokens[3], vertex, normal);
 					v3_index = atoi(vertex.c_str());
-					vn3_index = atoi(normal.c_str());		--vn3_index;
+					vn3_index = atoi(normal.c_str());
+					if (vn3_index < 0) vn3_index += numVNormals;	else --vn3_index;
 				}
 				else
 				{
@@ -488,8 +509,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 						SplitVVTVNToken(tokens[++iVertex], vertex, texcoord, normal);
 						v4_index	= atoi(vertex.c_str());
-						vt4_index = atoi(texcoord.c_str()); --vt4_index;
-						vn4_index = atoi(normal.c_str());		--vn4_index;
+						vt4_index = atoi(texcoord.c_str());
+						if (vt4_index < 0) vt4_index += numTexCoords; else --vt4_index;
+						vn4_index = atoi(normal.c_str());
+						if (vn4_index < 0) vn4_index += numVNormals;	else --vn4_index;
 					}
 					else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 					{
@@ -498,7 +521,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						
 						SplitVVTToken(tokens[++iVertex], vertex, texcoord);
 						v4_index	= atoi(vertex.c_str());
-						vt4_index = atoi(texcoord.c_str());	--vt4_index;
+						vt4_index = atoi(texcoord.c_str());
+						if (vt4_index < 0) vt4_index += numTexCoords; else --vt4_index;
 					}
 					else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 					{
@@ -507,7 +531,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						
 						SplitVVNToken(tokens[++iVertex], vertex, normal);
 						v4_index = atoi(vertex.c_str());
-						vn4_index = atoi(normal.c_str());		--vn4_index;
+						vn4_index = atoi(normal.c_str());
+						if (vn4_index < 0) vn4_index += numVNormals;	else --vn4_index;
 					}
 					else
 						v4_index	= atoi(tokens[++iVertex].c_str());
