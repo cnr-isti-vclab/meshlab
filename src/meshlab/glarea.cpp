@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.70  2006/01/13 09:28:47  cignoni
+Added scaling of texture images to a power of two
+
 Revision 1.69  2006/01/12 22:32:00  alemochi
 remove unnecessary code
 
@@ -703,9 +706,13 @@ void GLArea::initTexture()
   if(!mm->cm.textures.empty() && mm->glw.TMId.empty()){
 		glEnable(GL_TEXTURE_2D);
 		for(unsigned int i =0; i< mm->cm.textures.size();++i){
-			QImage img, imgGL;
+			QImage img, imgScaled, imgGL;
 			img.load(mm->cm.textures[i].c_str());
-			imgGL=convertToGLFormat(img);
+      // image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
+      int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
+      int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
+      imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+			imgGL=convertToGLFormat(imgScaled);
 			qDebug("loaded texture %s. with id %i w %i  h %i",mm->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
 			mm->glw.TMId.push_back(0);
 
