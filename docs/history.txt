@@ -28,6 +28,54 @@
 ==============================================================================
 
 ------------------------------------------------------------------------------
+- Meshlab v0.5
+------------------------------------------------------------------------------
+
+  ** NEW FEATURES **
+
+* General issues
+  - Corrected Trackball panning
+  - Safer initialization of color data
+  - Better memory management (removed HUGE memory leaks...)
+  - Meshlab icon and logo
+  - About plugin Dialog
+
+* Plugin System
+  - Filters:
+      Invert Faces
+  - Colorize:
+      Logging mesh curvature info
+      Rewritten code to follow coding conventions
+      Mean Curvature
+      Color non Manifold (now sets colorPerVert)
+      Moved mean and gaussian curvature functions into color_curvature.h 
+  - Normals restyled
+  
+* User Interface
+  - Clipping planes now can be moved via CTRL+SHIFT+mouse wheel
+  - Vertigo FOV with CTRL+mouse wheel
+  - Icons restyled (transparent)
+  - Changed snapshot toolbar icon
+  - Reapply last filter command
+  - Reload command
+  - About dialog restyled
+  - CTRL+Tab switch to next opened window
+  - CTRL+F4 close current file
+  - Fonts ok
+
+
+  ** KNOWN BUGS/MISSING FEATURES **
+
+* Plugin System
+  - Import/Export 3DS not working properly
+  - Missing edit commands
+  - Shaders have to be scaled to work well
+
+* User Interface
+  - Font resizing ?
+
+
+------------------------------------------------------------------------------
 - Meshlab v0.4
 ------------------------------------------------------------------------------
 
