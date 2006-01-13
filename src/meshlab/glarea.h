@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.46  2006/01/13 10:12:59  alemochi
+Added control to fov and changed behavior
+
 Revision 1.45  2006/01/12 22:14:39  alemochi
 added vertigo effect and moveable near clip plane
 
@@ -374,6 +377,8 @@ private:
 	float objDist;
 	float clipRatioFar;
 	float clipRatioNear;
+	float nearPlane;
+	float farPlane;
   QTime time;
 	int deltaTime;
 	int lastTime;

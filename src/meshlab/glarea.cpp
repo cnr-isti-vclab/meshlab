@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.71  2006/01/13 10:12:59  alemochi
+Added control to fov and changed behavior
+
 Revision 1.70  2006/01/13 09:28:47  cignoni
 Added scaling of texture images to a power of two
 
@@ -307,11 +310,14 @@ void GLArea::displayModelInfo()
 	QString strTriangle="Faces "+QString("").setNum(mm->cm.face.size(),10);
   //strVertex+=strVertex.setNum(mm->cm.vert.size(),10);
 	//strTriangle.setNum(mm->cm.face.size(),10);
-  renderText(currentWidth-currentWidth*0.15,currentHeight-45,strVertex);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-30,strTriangle);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-70,QString("Fov ")+QString::number((int)fov,10));
-	QString strNear=QString("Near: %1").arg(clipRatioNear,7,'f',1);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-80,strNear);
+  renderText(currentWidth-currentWidth*0.15,currentHeight-35,strVertex);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-20,strTriangle);
+	renderText(currentWidth-currentWidth*0.15,currentHeight-50,QString("Fov ")+QString::number((int)fov,10));
+	QString strNear=QString("  Nplane:%1").arg(nearPlane,2,'f',1);
+	QString strFar=QString("  Fplane:%1").arg(farPlane,2,'f',1);
+	QString strViewer=QString("Viewer:%1").arg(objDist,2,'f',1);
+  renderText(currentWidth-currentWidth*0.15,currentHeight-65,strViewer+strNear+strFar);
+	//renderText(currentWidth-currentWidth*0.15,currentHeight-80,strFar);
 }
 
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
@@ -461,28 +467,29 @@ void GLArea::paintGL()
 		glPopAttrib();
 		glPopMatrix();
 	}
-  double m[16];
+  /*double m[16];
 	Matrix44d modelview1;									// Take glLookAt(.....)
 	glGetDoublev(GL_MODELVIEW_MATRIX, m);
 	modelview1.Import(Matrix44d(m));
 	Transpose(modelview1);
-	glColor3f(1.f,1.f,1.f);
+	glColor3f(1.f,1.f,1.f);*/
 	
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
 	trackball.Apply(trackBallVisible && !takeSnapTile);
 	
-	Matrix44d modelview2;									// Take gluLookAt*Apply Matrix
+	/*Matrix44d modelview2;									// Take gluLookAt*Apply Matrix
 	glGetDoublev(GL_MODELVIEW_MATRIX, m);
 	modelview2.Import(Matrix44d(m));
 	Transpose(modelview2);
 	Matrix44d modelview1Inv=Inverse(modelview1);
-	Matrix44d m_apply=modelview1Inv*modelview2; // Get Apply matrix
+	Matrix44d m_apply=modelview1Inv*modelview2; // Get Apply matrix*/
 	
 	// Setting camera e projection
 	setVertigoCamera();
-	glMultMatrix(m_apply);
+	//glMultMatrix(m_apply);
+	trackball.Apply(false);
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
@@ -668,23 +675,31 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 void GLArea::wheelEvent(QWheelEvent*e)
 {
 	const int WHEEL_DELTA =120;
+	float notch=e->delta()/ float(WHEEL_DELTA);
 	
 	if (currentButton & ButtonPressed::KEY_SHIFT) 
 	{
 		if (currentButton & ButtonPressed::KEY_CTRL)
 		{
-			clipRatioNear-=(e->delta()/ float(WHEEL_DELTA))/10;
-			updateGL();
+			if (notch<0) clipRatioFar*=1.2;
+			else clipRatioFar/=1.2; 
 		}
 		else 
 		{
-			fov+= e->delta()/ float(WHEEL_DELTA);
-			updateGL();
+			if (notch<0) fov/=1.2;
+			else fov*=1.2;
+			if (fov>90) fov=90;
+			if (fov<5)  fov=5;
 		}
+		updateGL();
 	}
-	else trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA) );
-	update();
-	
+	else if (currentButton & ButtonPressed::KEY_CTRL) 
+	{
+		if (notch<0) clipRatioNear*=1.2;
+		else clipRatioNear/=1.2; 
+		updateGL();
+	}
+	else { trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA)); update(); }
 }		
 
 void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
@@ -823,9 +838,9 @@ void GLArea::setVertigoCamera()
 	float y=sin(vcg::math::ToRad(fov/2.0));
 	float x=cos(vcg::math::ToRad(fov/2.0));
 	objDist= 1.5*(x*1.0/y);
-	float nearv = objDist - 2.0*clipRatioNear;
-	float farv =  objDist + 2.0*clipRatioFar;
-	if(nearv<=objDist/10.0) nearv=objDist/10.0;
+	nearPlane = objDist - 2.0*clipRatioNear;
+	farPlane =  objDist + 2.0*clipRatioFar;
+	if(nearPlane<=objDist/10.0) nearPlane=objDist/10.0;
 	if(fov==5)
 	{
 		glOrtho(-1.5*fAspect,1.5*fAspect,-1.5,1.5,- 2.0*clipRatioNear, 2.0*clipRatioFar);
@@ -834,8 +849,7 @@ void GLArea::setVertigoCamera()
 	}
 	else
 	{
-		
-		gluPerspective(fov, fAspect, nearv, farv);
+		gluPerspective(fov, fAspect, nearPlane, farPlane);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		gluLookAt(0, 0, objDist,0, 0, 0, 0, 1, 0);
