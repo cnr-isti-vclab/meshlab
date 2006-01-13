@@ -23,6 +23,12 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2006/01/13 15:22:04  vannini
+colorize:
+ -colorize nonmanifold now sets colorPerVertex mode
+ -code rewritten to follow naming conventions (as in meshfilter)
+ -added help and infos
+
 Revision 1.13  2006/01/13 12:10:31  vannini
 Added logging to mean and gaussian curvautres colorization
 
@@ -58,28 +64,79 @@ Added copyright info
 
 ****************************************************************************/
 #include <QtGui>
-
-#include "meshcolorize.h"
 #include <limits>
 #include <vcg/complex/trimesh/clean.h>
+#include "meshcolorize.h"
 #include "color_manifold.h"
-#include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
 
 using namespace vcg;
 
+ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
+	actionList << new QAction(ST(CP_GAUSSIAN), this);
+  actionList << new QAction(ST(CP_MEAN), this);
+  actionList << new QAction(ST(CP_SELFINTERSECT), this);
+  actionList << new QAction(ST(CP_BORDER), this);
+  actionList << new QAction(ST(CP_COLORNM), this);
+}
+const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
+  switch(c)
+  {
+    case CP_GAUSSIAN: 
+      return QString("Gaussian Curvature");
+    case CP_MEAN: 
+      return QString("Mean Curvature");
+    case CP_SELFINTERSECT: 
+      return QString("Self Intersections");
+    case CP_BORDER: 
+      return QString("Border");
+    case CP_COLORNM: 
+      return QString("Color non Manifold");
+    default: assert(0);
+  }
+  return QString("error!");
+}
+const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action) 
+{
+	static ActionInfo ai; 
+  
+	if( action->text() == ST(CP_GAUSSIAN) )
+  {
+    ai.Help = tr("Colorize vertex and faces depending on gaussian curvature.");
+    ai.ShortHelp = tr("Colorize by gaussian curvature");
+  }
+  if( action->text() == ST(CP_MEAN) )
+  {
+    ai.Help = tr("Colorize vertex and faces depending on mean curvature.");
+    ai.ShortHelp = tr("Colorize by mean curvature");
+  }
 
-const ActionInfo &MeshColorCurvaturePlugin::Info(QAction *) 
- {
-   static ActionInfo ai; 
-   ai.Help=tr("Generic Help for an action");
-   return ai;
- }
+  if( action->text() == ST(CP_SELFINTERSECT) )
+  {
+    ai.Help = tr("Colorize only self intersecting faces.");
+    ai.ShortHelp = tr("Colorize only self intersecting faces");
+  }
 
-const PluginInfo &MeshColorCurvaturePlugin::Info() 
+  if( action->text() == ST(CP_BORDER) )
+  {
+    ai.Help = tr("Colorize only border edges.");
+    ai.ShortHelp = tr("Colorize only border edges");
+  }
+
+  if( action->text() == ST(CP_COLORNM) )
+  {
+    ai.Help = tr("Colorize only non manifold edges.");
+    ai.ShortHelp = tr("Colorize only non manifold edges");
+  }
+
+  return ai;
+}
+const PluginInfo &ExtraMeshColorizePlugin::Info() 
 {
   static PluginInfo ai; 
   ai.Date=tr("__DATE__");
+  ai.Version = tr("0.5");
+  ai.Author = ("Francesco Vannini, Giorgio Gangemi, Andrea Venturi");
   return ai;
 }
 
@@ -299,8 +356,12 @@ static void Mean(CMeshO &m, GLLogStream *log){
   delete[] area;
 }
 
-void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent){
-	if(mode->text() == tr("Gaussian Curvature"))
+
+QList<QAction *> ExtraMeshColorizePlugin::actions() const {
+	return actionList;
+}
+void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent){
+	if(mode->text() == ST(CP_GAUSSIAN))
     {
       Gaussian(m.cm, log);
       vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
@@ -308,7 +369,7 @@ void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode 
       return;
     }
 
-	if(mode->text() == tr("Mean Curvature"))
+	if(mode->text() == ST(CP_MEAN))
     {
       Mean(m.cm, log);
       vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
@@ -316,7 +377,7 @@ void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode 
       return;
     }
 
-  if(mode->text() == tr("Self Intersections"))
+  if(mode->text() == ST(CP_SELFINTERSECT))
     {
       vector<CFaceO *> IntersFace;
       tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
@@ -329,7 +390,7 @@ void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode 
       return;
     }
 
-  if(mode->text() == tr("Border"))
+  if(mode->text() == ST(CP_BORDER))
     {
       vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
       vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
@@ -339,12 +400,12 @@ void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode 
       return;
     }
 
-  if(mode->text() == tr("Color non Manifold"))
+  if(mode->text() == ST(CP_COLORNM))
   {
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
     ColorManifold<CMeshO>(m.cm);
+    rm.colorMode = GLW::CMPerVert;
   }
 }
-
-Q_EXPORT_PLUGIN(MeshColorCurvaturePlugin)
+Q_EXPORT_PLUGIN(ExtraMeshColorizePlugin)
   

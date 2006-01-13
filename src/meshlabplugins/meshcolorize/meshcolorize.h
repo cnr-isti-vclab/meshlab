@@ -19,8 +19,8 @@
 **
 ****************************************************************************/
 
-#ifndef EXTRACURVATUREPLUGIN_H
-#define EXTRACURVATUREPLUGIN_H
+#ifndef EXTRACOLORIZEPLUGIN_H
+#define EXTRACOLORIZEPLUGIN_H
 
 #include <QObject>
 #include <QAction>
@@ -28,7 +28,6 @@
 #include <QList>
 
 #include <math.h>
-//#include <stdlib.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include <meshlab/glarea.h>
@@ -38,40 +37,28 @@
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h>
 
-#include "../../meshlab/GLLogStream.h"
-
-class MeshColorCurvaturePlugin : public QObject, public MeshColorizeInterface
+class ExtraMeshColorizePlugin : public QObject, public MeshColorizeInterface
 {
     Q_OBJECT
     Q_INTERFACES(MeshColorizeInterface)
 
-		QList <QAction *> actionList;
-
 public:
+
+    enum ColorizeType {CP_GAUSSIAN,CP_MEAN,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM};
+    const QString ST(ColorizeType c);
+
+    ExtraMeshColorizePlugin();
+    
     virtual const ActionInfo &Info(QAction *);
     virtual const PluginInfo &Info();
-    void setLog(GLLogStream *log) { this->log = log ; }
-
-		MeshColorCurvaturePlugin()
-		{
-			QAction *qa; 
-			QActionGroup * ag; 
-
-
-			actionList << new QAction(QString("Gaussian Curvature"),this);
-			actionList << new QAction(QString("Mean Curvature"),this);
-			actionList << new QAction(QString("Self Intersections"),this);
-			actionList << new QAction(QString("Border"),this);
-			actionList << new QAction(QString("Color non Manifold"),this);
-      
-		}
-    
+    virtual QList<QAction *> actions() const;
+		
 		void Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent);
-    
-		QList<QAction *> actions() const { return actionList; }
-  
+    void setLog(GLLogStream *log) { this->log = log ; }
+		  
 protected:
 	GLLogStream *log;
+  QList <QAction *> actionList;
 
 };
 
