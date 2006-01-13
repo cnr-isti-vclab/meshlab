@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.40  2006/01/13 14:18:36  cignoni
+ Added initialization of mask to zero
+
  Revision 1.39  2006/01/10 16:52:19  fmazzant
  update ply::PlyMask -> io::Mask
 
@@ -163,6 +166,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
 	
+  mask=0; // just to be sure...
 	
 	if (!fileName.isEmpty())
 	{
