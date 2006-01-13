@@ -50,6 +50,14 @@
       Color non Manifold (now sets colorPerVert)
       Moved mean and gaussian curvature functions into color_curvature.h 
   - Normals restyled
+  - Import/Export:
+      Managing error messages if saving fails
+      .3DS Imporer first rough implementation
+      .3DS Export Standardization, saves vertexes and faces + color per face
+      .3DS Export introduced materials managing
+      .OBJ Import solved some bugs during file import
+      .OBJ Export higly improved speed
+
   
 * User Interface
   - Clipping planes now can be moved via CTRL+SHIFT+mouse wheel
@@ -67,12 +75,13 @@
   ** KNOWN BUGS/MISSING FEATURES **
 
 * Plugin System
-  - Import/Export 3DS not working properly
+  - Import/Export 3DS not working properly (textures not supported yet)
   - Missing edit commands
   - Shaders have to be scaled to work well
 
 * User Interface
   - Font resizing ?
+  - About plugin dialog to be restyled
 
 
 ------------------------------------------------------------------------------
