@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.72  2006/01/13 10:42:44  alemochi
+delete comments in paintGL
+
 Revision 1.71  2006/01/13 10:12:59  alemochi
 Added control to fov and changed behavior
 
@@ -467,28 +470,14 @@ void GLArea::paintGL()
 		glPopAttrib();
 		glPopMatrix();
 	}
-  /*double m[16];
-	Matrix44d modelview1;									// Take glLookAt(.....)
-	glGetDoublev(GL_MODELVIEW_MATRIX, m);
-	modelview1.Import(Matrix44d(m));
-	Transpose(modelview1);
-	glColor3f(1.f,1.f,1.f);*/
-	
+  
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
 	trackball.Apply(trackBallVisible && !takeSnapTile);
 	
-	/*Matrix44d modelview2;									// Take gluLookAt*Apply Matrix
-	glGetDoublev(GL_MODELVIEW_MATRIX, m);
-	modelview2.Import(Matrix44d(m));
-	Transpose(modelview2);
-	Matrix44d modelview1Inv=Inverse(modelview1);
-	Matrix44d m_apply=modelview1Inv*modelview2; // Get Apply matrix*/
-	
 	// Setting camera e projection
 	setVertigoCamera();
-	//glMultMatrix(m_apply);
 	trackball.Apply(false);
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
