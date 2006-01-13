@@ -38,6 +38,8 @@
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h>
 
+#include "../../meshlab/GLLogStream.h"
+
 class MeshColorCurvaturePlugin : public QObject, public MeshColorizeInterface
 {
     Q_OBJECT
@@ -48,7 +50,8 @@ class MeshColorCurvaturePlugin : public QObject, public MeshColorizeInterface
 public:
     virtual const ActionInfo &Info(QAction *);
     virtual const PluginInfo &Info();
-  
+    void setLog(GLLogStream *log) { this->log = log ; }
+
 		MeshColorCurvaturePlugin()
 		{
 			QAction *qa; 
@@ -66,6 +69,9 @@ public:
 		void Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent);
     
 		QList<QAction *> actions() const { return actionList; }
+  
+protected:
+	GLLogStream *log;
 
 };
 

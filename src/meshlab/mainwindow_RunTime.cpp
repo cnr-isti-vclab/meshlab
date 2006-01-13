@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.67  2006/01/13 12:10:30  vannini
+Added logging to mean and gaussian curvautres colorization
+
 Revision 1.66  2006/01/10 16:52:16  fmazzant
 update ply::PlyMask -> io::Mask
 
@@ -595,6 +598,7 @@ void MainWindow::applyColorMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshColorizeInterface *iColorTemp = qobject_cast<MeshColorizeInterface *>(action->parent());
+  iColorTemp->setLog(&(GLA()->log));
   iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
   GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
 }

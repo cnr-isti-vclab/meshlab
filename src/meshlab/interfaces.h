@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.31  2006/01/13 12:10:30  vannini
+Added logging to mean and gaussian curvautres colorization
+
 Revision 1.30  2006/01/04 15:27:30  alemochi
 Renamed property of Format struct, and changed plugin dialog
 
@@ -205,7 +208,7 @@ class MeshColorizeInterface
 public:
     virtual const ActionInfo &Info(QAction *)=0;
     virtual const PluginInfo &Info()=0;
-    
+    virtual void setLog(GLLogStream* )=0;
 		virtual void Compute(QAction * /*mode*/, MeshModel &/*m*/,  RenderMode &/*rm*/, GLArea * /*parent*/){};    
 		virtual void Show(QAction * /*mode*/, bool /*show*/, MeshModel &/*m*/, GLArea * /*parent*/) {};    
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};

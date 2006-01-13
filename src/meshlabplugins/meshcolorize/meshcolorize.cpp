@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2006/01/13 12:10:31  vannini
+Added logging to mean and gaussian curvautres colorization
+
 Revision 1.12  2006/01/10 15:38:53  vannini
 Added mean curvature colorize
 
@@ -60,6 +63,8 @@ Added copyright info
 #include <limits>
 #include <vcg/complex/trimesh/clean.h>
 #include "color_manifold.h"
+#include "../../meshlab/GLLogStream.h"
+#include "../../meshlab/LogStream.h"
 
 using namespace vcg;
 
@@ -78,7 +83,7 @@ const PluginInfo &MeshColorCurvaturePlugin::Info()
   return ai;
 }
 
-static void Gaussian(CMeshO &m){
+static void Gaussian(CMeshO &m, GLLogStream *log){
   
   assert(m.HasPerVertexQuality());
   
@@ -173,12 +178,15 @@ static void Gaussian(CMeshO &m){
     
   for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if(!(*vi).IsD())
     (*vi).Q() = math::Clamp((*vi).Q(), minQ, maxQ);
-    
+
+  if (log)
+    log->Log(GLLogStream::Info, "Mean Curvature: minQ=%f maxQ=%f range=%d", minQ, maxQ, histo_range);
+
   delete[] area;
 
 }
 
-static void Mean(CMeshO &m){
+static void Mean(CMeshO &m, GLLogStream *log){
   
   assert(m.HasPerVertexQuality());
   
@@ -284,13 +292,17 @@ static void Mean(CMeshO &m){
     
   for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if(!(*vi).IsD())
     (*vi).Q() = math::Clamp((*vi).Q(), minQ, maxQ);
-    
+
+  if (log)
+    log->Log(GLLogStream::Info, "Mean Curvature: minQ=%f maxQ=%f range=%d", minQ, maxQ, histo_range);
+
+  delete[] area;
 }
 
 void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent){
 	if(mode->text() == tr("Gaussian Curvature"))
     {
-      Gaussian(m.cm);
+      Gaussian(m.cm, log);
       vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
       rm.colorMode = GLW::CMPerVert;
       return;
@@ -298,7 +310,7 @@ void MeshColorCurvaturePlugin::Compute(QAction * mode, MeshModel &m, RenderMode 
 
 	if(mode->text() == tr("Mean Curvature"))
     {
-      Mean(m.cm);
+      Mean(m.cm, log);
       vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
       rm.colorMode = GLW::CMPerVert;
       return;
