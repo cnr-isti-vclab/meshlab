@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.42  2006/01/13 15:46:20  cignoni
+ added mask to ply saving
+
  Revision 1.41  2006/01/13 15:35:58  fmazzant
  changed return type of exporter from bool to int
 
@@ -311,10 +314,10 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("PLY"))
 	{
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result != 0)
 		{
-			//QMessageBox::warning(parent, tr("PLY Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterPLY<CMeshO>::ErrorMsg(result)));
+			QMessageBox::warning(parent, tr("PLY Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
 		return true;
@@ -333,13 +336,14 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("STL"))
 	{
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result != 0)
 		{
-			//QMessageBox::warning(parent, tr("STL Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterSTL<CMeshO>::ErrorMsg(result)));
+			QMessageBox::warning(parent, tr("Mesh Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
 		return true;
+
 	}
 
 	if(formatName.toUpper() == tr("3DS"))
