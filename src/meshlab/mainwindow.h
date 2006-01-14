@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.56  2006/01/14 00:51:06  davide_portelli
+A little change
+
 Revision 1.55  2006/01/07 11:04:49  glvertex
 Added Apply Last Filter action
 
@@ -119,7 +122,7 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow();
    static bool QCallBack(const int pos, const char * str);
-	 const QString appName() const {return tr("MeshLab v0.5"); }
+	 const QString appName() const {return tr("MeshLab v0.6"); }
    MaskObj maskobj;
    
   

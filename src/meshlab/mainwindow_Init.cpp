@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.37  2006/01/14 00:51:06  davide_portelli
+A little change
+
 Revision 1.36  2006/01/07 11:04:49  glvertex
 Added Apply Last Filter action
 
@@ -482,12 +485,12 @@ void MainWindow::createActions()
 
 	windowsNextAct = new QAction(tr("&Next"), this);
 	windowsNextAct->setShortcutContext(Qt::ApplicationShortcut);
-	windowsNextAct->setShortcut(Qt::Key_Tab);
+	windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_Tab);
 	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
 
 	closeAct = new QAction(tr("Cl&ose"), this);
 	closeAct->setShortcutContext(Qt::ApplicationShortcut);
-	closeAct->setShortcut(Qt::Key_F4);
+	closeAct->setShortcut(Qt::CTRL+Qt::Key_F4);
 	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
 
 	closeAllAct = new QAction(tr("Close &All"), this);
