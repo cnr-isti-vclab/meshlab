@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.73  2006/01/14 10:19:06  mariolatronico
+GLArea::ButtonPressed is not an aggregate type,
+changed ButtonPressed::element to element
+
 Revision 1.72  2006/01/13 10:42:44  alemochi
 delete comments in paintGL
 
@@ -666,9 +670,9 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	const int WHEEL_DELTA =120;
 	float notch=e->delta()/ float(WHEEL_DELTA);
 	
-	if (currentButton & ButtonPressed::KEY_SHIFT) 
+	if (currentButton & KEY_SHIFT) 
 	{
-		if (currentButton & ButtonPressed::KEY_CTRL)
+		if (currentButton & KEY_CTRL)
 		{
 			if (notch<0) clipRatioFar*=1.2;
 			else clipRatioFar/=1.2; 
@@ -682,7 +686,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
 		}
 		updateGL();
 	}
-	else if (currentButton & ButtonPressed::KEY_CTRL) 
+	else if (currentButton & KEY_CTRL) 
 	{
 		if (notch<0) clipRatioNear*=1.2;
 		else clipRatioNear/=1.2; 
