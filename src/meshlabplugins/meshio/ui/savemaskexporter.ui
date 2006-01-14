@@ -9,7 +9,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>229</height>
+    <height>220</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -25,118 +25,13 @@
     </rect>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox_3" >
-   <property name="geometry" >
-    <rect>
-     <x>270</x>
-     <y>10</y>
-     <width>120</width>
-     <height>161</height>
-    </rect>
-   </property>
-   <property name="title" >
-    <string>Wedg</string>
-   </property>
-   <layout class="QVBoxLayout" >
-    <property name="margin" >
-     <number>8</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QCheckBox" name="checkBox" >
-      <property name="text" >
-       <string>Color</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_2" >
-      <property name="text" >
-       <string>TexCoord</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_3" >
-      <property name="text" >
-       <string>TextMulti</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_4" >
-      <property name="text" >
-       <string>Normal</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QGroupBox" name="groupBox_2" >
-   <property name="geometry" >
-    <rect>
-     <x>140</x>
-     <y>10</y>
-     <width>120</width>
-     <height>161</height>
-    </rect>
-   </property>
-   <property name="title" >
-    <string>Face</string>
-   </property>
-   <layout class="QVBoxLayout" >
-    <property name="margin" >
-     <number>8</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QCheckBox" name="checkBox_5" >
-      <property name="text" >
-       <string>Index</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_6" >
-      <property name="text" >
-       <string>Flags</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_7" >
-      <property name="text" >
-       <string>Color</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_8" >
-      <property name="text" >
-       <string>Quality</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_9" >
-      <property name="text" >
-       <string>Normal</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
   <widget class="QGroupBox" name="groupBox" >
    <property name="geometry" >
     <rect>
      <x>10</x>
      <y>10</y>
      <width>120</width>
-     <height>161</height>
+     <height>150</height>
     </rect>
    </property>
    <property name="title" >
@@ -150,42 +45,35 @@
      <number>6</number>
     </property>
     <item>
-     <widget class="QCheckBox" name="checkBox_10" >
-      <property name="text" >
-       <string>Coord</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_11" >
+     <widget class="QCheckBox" name="check_iom_vertflags" >
       <property name="text" >
        <string>Flags</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="checkBox_12" >
+     <widget class="QCheckBox" name="check_iom_vertcolor" >
       <property name="text" >
        <string>Color</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="checkBox_13" >
+     <widget class="QCheckBox" name="check_iom_vertquality" >
       <property name="text" >
        <string>Quality</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="checkBox_14" >
+     <widget class="QCheckBox" name="check_iom_vertnormal" >
       <property name="text" >
        <string>Normal</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="checkBox_15" >
+     <widget class="QCheckBox" name="check_iom_verttexcoord" >
       <property name="text" >
        <string>TextCoord</string>
       </property>
@@ -193,11 +81,102 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="" >
+  <widget class="QGroupBox" name="groupBox_2" >
+   <property name="geometry" >
+    <rect>
+     <x>140</x>
+     <y>10</y>
+     <width>120</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Face</string>
+   </property>
+   <layout class="QVBoxLayout" >
+    <property name="margin" >
+     <number>8</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QCheckBox" name="check_iom_faceflags" >
+      <property name="text" >
+       <string>Flags</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check_iom_facecolor" >
+      <property name="text" >
+       <string>Color</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check_iom_facequality" >
+      <property name="text" >
+       <string>Quality</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check_iom_facenormal" >
+      <property name="text" >
+       <string>Normal</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3" >
+   <property name="geometry" >
+    <rect>
+     <x>270</x>
+     <y>10</y>
+     <width>120</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Wedg</string>
+   </property>
+   <layout class="QVBoxLayout" >
+    <property name="margin" >
+     <number>8</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QCheckBox" name="check_iom_wedgcolor" >
+      <property name="text" >
+       <string>Color</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check_iom_wedgtexcoord" >
+      <property name="text" >
+       <string>TexCoord</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check_iom_wedgnormal" >
+      <property name="text" >
+       <string>Normal</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_2" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>180</y>
+     <y>170</y>
      <width>120</width>
      <height>46</height>
     </rect>
@@ -210,14 +189,14 @@
      <number>6</number>
     </property>
     <item row="1" column="0" >
-     <widget class="QCheckBox" name="checkBox_17" >
+     <widget class="QCheckBox" name="check_iom_all" >
       <property name="text" >
        <string>All</string>
       </property>
      </widget>
     </item>
     <item row="0" column="1" >
-     <widget class="QCheckBox" name="checkBox_18" >
+     <widget class="QCheckBox" name="check_iom_camera" >
       <property name="text" >
        <string>Camera</string>
       </property>
@@ -227,7 +206,7 @@
      </widget>
     </item>
     <item row="0" column="0" >
-     <widget class="QCheckBox" name="checkBox_16" >
+     <widget class="QCheckBox" name="check_iom_none" >
       <property name="text" >
        <string>None</string>
       </property>
@@ -238,8 +217,8 @@
   <widget class="QPushButton" name="okButton" >
    <property name="geometry" >
     <rect>
-     <x>240</x>
-     <y>200</y>
+     <x>230</x>
+     <y>190</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -251,8 +230,8 @@
   <widget class="QPushButton" name="cancelButton" >
    <property name="geometry" >
     <rect>
-     <x>320</x>
-     <y>200</y>
+     <x>310</x>
+     <y>190</y>
      <width>75</width>
      <height>23</height>
     </rect>
