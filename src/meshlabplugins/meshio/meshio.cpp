@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.43  2006/01/14 00:02:52  fmazzant
+ added new include for exporter dialog
+
  Revision 1.42  2006/01/13 15:46:20  cignoni
  added mask to ply saving
 
@@ -142,6 +145,7 @@
 
 #include "meshio.h"
 #include "savemaskdialog.h"
+#include "savemaskexporter.h"
 
 // temporaneamente prendo la versione corrente dalla cartella test
 #include "../../test/io/import_obj.h"
@@ -347,7 +351,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	}
 
 	if(formatName.toUpper() == tr("3DS"))
-	{
+	{	
 		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,mask,cb);//salva esclusivamente in formato binario
 		if(result!=0)
 			QMessageBox::warning(parent, tr("3DS Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
