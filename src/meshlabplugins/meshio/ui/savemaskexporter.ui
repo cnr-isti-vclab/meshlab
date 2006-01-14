@@ -9,7 +9,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>248</height>
+    <height>229</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -25,6 +25,55 @@
     </rect>
    </property>
   </widget>
+  <widget class="QGroupBox" name="groupBox_3" >
+   <property name="geometry" >
+    <rect>
+     <x>270</x>
+     <y>10</y>
+     <width>120</width>
+     <height>161</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Wedg</string>
+   </property>
+   <layout class="QVBoxLayout" >
+    <property name="margin" >
+     <number>8</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QCheckBox" name="checkBox" >
+      <property name="text" >
+       <string>Color</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_2" >
+      <property name="text" >
+       <string>TexCoord</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_3" >
+      <property name="text" >
+       <string>TextMulti</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_4" >
+      <property name="text" >
+       <string>Normal</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QGroupBox" name="groupBox_2" >
    <property name="geometry" >
     <rect>
@@ -37,6 +86,49 @@
    <property name="title" >
     <string>Face</string>
    </property>
+   <layout class="QVBoxLayout" >
+    <property name="margin" >
+     <number>8</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QCheckBox" name="checkBox_5" >
+      <property name="text" >
+       <string>Index</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_6" >
+      <property name="text" >
+       <string>Flags</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_7" >
+      <property name="text" >
+       <string>Color</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_8" >
+      <property name="text" >
+       <string>Quality</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_9" >
+      <property name="text" >
+       <string>Normal</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QGroupBox" name="groupBox" >
    <property name="geometry" >
@@ -50,25 +142,104 @@
    <property name="title" >
     <string>Vert</string>
    </property>
+   <layout class="QVBoxLayout" >
+    <property name="margin" >
+     <number>8</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QCheckBox" name="checkBox_10" >
+      <property name="text" >
+       <string>Coord</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_11" >
+      <property name="text" >
+       <string>Flags</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_12" >
+      <property name="text" >
+       <string>Color</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_13" >
+      <property name="text" >
+       <string>Quality</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_14" >
+      <property name="text" >
+       <string>Normal</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_15" >
+      <property name="text" >
+       <string>TextCoord</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_3" >
+  <widget class="QWidget" name="" >
    <property name="geometry" >
     <rect>
-     <x>270</x>
-     <y>10</y>
+     <x>10</x>
+     <y>180</y>
      <width>120</width>
-     <height>161</height>
+     <height>46</height>
     </rect>
    </property>
-   <property name="title" >
-    <string>Wedg</string>
-   </property>
+   <layout class="QGridLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item row="1" column="0" >
+     <widget class="QCheckBox" name="checkBox_17" >
+      <property name="text" >
+       <string>All</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" >
+     <widget class="QCheckBox" name="checkBox_18" >
+      <property name="text" >
+       <string>Camera</string>
+      </property>
+      <property name="checkable" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" >
+     <widget class="QCheckBox" name="checkBox_16" >
+      <property name="text" >
+       <string>None</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QPushButton" name="okButton" >
    <property name="geometry" >
     <rect>
      <x>240</x>
-     <y>220</y>
+     <y>200</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -81,7 +252,7 @@
    <property name="geometry" >
     <rect>
      <x>320</x>
-     <y>220</y>
+     <y>200</y>
      <width>75</width>
      <height>23</height>
     </rect>

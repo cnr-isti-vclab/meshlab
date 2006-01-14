@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/01/14 11:23:24  fmazzant
+ update savemask exporter with init a mask [base type]
+
  Revision 1.1  2006/01/13 23:59:51  fmazzant
  first commit exporter dialog
 
@@ -34,6 +37,8 @@
 #ifndef __VCGLIB_SAVEMASK_EXPORT
 #define __VCGLIB_SAVEMASK_EXPORT
 
+#include <wrap/io_trimesh/io_mask.h>
+
 #include "ui_savemaskexporter.h"
 
 class SaveMaskExporterDialog : public QDialog
@@ -42,6 +47,10 @@ class SaveMaskExporterDialog : public QDialog
 public:
 	SaveMaskExporterDialog(QWidget *parent);
 	SaveMaskExporterDialog(QWidget *parent,int &mask);
+	SaveMaskExporterDialog(QWidget *parent,int &mask,QString type);
+
+	void Initialize();
+	int GetNewMask();
 
 private slots:
 	void SlotOkButton();
@@ -49,8 +58,33 @@ private slots:
 
 private:
 	Ui::MaskExporterDialog ui;
+	int mask;
+	QString type;
 
 };//end class
 
+
+namespace vcg {
+namespace tri {
+namespace io {
+	
+	class SaveMaskToExporter
+	{
+	public:	
+		inline static int GetMaskToExporter(int &mask,QString type)
+		{
+			SaveMaskExporterDialog dialog(new QWidget(),mask,type);
+			dialog.Initialize();
+			dialog.exec();
+			int newmask = dialog.GetNewMask();
+			dialog.close();
+			return newmask;
+
+		}
+
+	};
+} // end Namespace tri
+} // end Namespace io
+} // end Namespace vcg
 
 #endif

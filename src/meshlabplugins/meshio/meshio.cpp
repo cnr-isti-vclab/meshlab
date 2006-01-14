@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.44  2006/01/14 11:23:24  fmazzant
+ update savemask exporter with init a mask [base type]
+
  Revision 1.43  2006/01/14 00:02:52  fmazzant
  added new include for exporter dialog
 
@@ -352,10 +355,15 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{	
+		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,tr("3DS"));
+		//if( newmask == 0 )return false;
 		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,mask,cb);//salva esclusivamente in formato binario
 		if(result!=0)
+		{
 			QMessageBox::warning(parent, tr("3DS Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
-		return result;
+			return false;
+		}
+		return true;
 	}
 
 	QMessageBox::warning(parent, "Unknow type", "file's extension not supported!!!");
