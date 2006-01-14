@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.29  2006/01/14 00:03:26  fmazzant
+ added more controls
+
  Revision 1.28  2006/01/13 15:35:58  fmazzant
  changed return type of exporter from bool to int
 
@@ -159,7 +162,9 @@ namespace io {
 			E_CANTCLOSEFILE,			// 2
 			E_UNESPECTEDEOF,			// 3
 			E_ABORTED,					// 4
-			E_NOTDEFINITION				// 5
+			E_NOTDEFINITION,			// 5
+			E_NOTVEXTEXVALID,			// 6
+			E_NOTFACESVALID				// 7
 		};
 
 		/*
@@ -174,10 +179,12 @@ namespace io {
 					"can't close file",						// 2
 					"Premature End of file",				// 3
 					"File saving aborted",					// 4
-					"Function not defined"					// 5
+					"Function not defined",					// 5
+					"Vertices not valid",					// 6
+					"Faces not valid"						// 7
 				};
 
-			if(error>4 || error<0) return "Unknown error";
+			if(error>7 || error<0) return "Unknown error";
 			else return obj_error_msg[error];
 		};
 
@@ -188,6 +195,11 @@ namespace io {
 		{
 			CallBackPos *cb = oi.cb;
 			
+			if(m.vert.size() == 0)
+				return E_NOTVEXTEXVALID;
+			if(m.face.size() == 0)
+				return E_NOTFACESVALID;
+
 			int current = 0;
 			int max = m.vert.size()+ m.face.size();
 		
