@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/01/14 14:12:07  fmazzant
+ sample for use save's mask exporter. ony 3ds.
+
  Revision 1.2  2006/01/14 11:23:24  fmazzant
  update savemask exporter with init a mask [base type]
 
@@ -59,22 +62,25 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, QStri
 
 void SaveMaskExporterDialog::Initialize()
 {
-	if( mask & vcg::tri::io::Mask::IOM_VERTFLAGS    ) {}
-	if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR    ) {}
-	if( mask & vcg::tri::io::Mask::IOM_VERTQUALITY  ) {}
-	if( mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD ) {}
-	if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL   ) {}
+	if( mask & vcg::tri::io::Mask::IOM_VERTFLAGS    ) {ui.check_iom_vertflags->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR    ) {ui.check_iom_vertcolor->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_VERTQUALITY  ) {ui.check_iom_vertquality->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD ) {ui.check_iom_verttexcoord->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL   ) {ui.check_iom_vertnormal->setChecked(true);}
 
-	if( mask & vcg::tri::io::Mask::IOM_FACEFLAGS    ) {}
-	if( mask & vcg::tri::io::Mask::IOM_FACECOLOR    ) {}
-	if( mask & vcg::tri::io::Mask::IOM_FACEQUALITY  ) {}
-	if( mask & vcg::tri::io::Mask::IOM_FACENORMAL   ) {}
+	if( mask & vcg::tri::io::Mask::IOM_FACEFLAGS    ) {ui.check_iom_faceflags->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_FACECOLOR    ) {ui.check_iom_facecolor->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_FACEQUALITY  ) {ui.check_iom_facequality->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_FACENORMAL   ) {ui.check_iom_facenormal->setChecked(true);}
 
-	if( mask & vcg::tri::io::Mask::IOM_WEDGCOLOR    ) {}
-	if( mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD ) {}
-	if( mask & vcg::tri::io::Mask::IOM_WEDGNORMAL   ) {}
+	if( mask & vcg::tri::io::Mask::IOM_WEDGCOLOR    ) {ui.check_iom_wedgcolor->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD ) {ui.check_iom_verttexcoord->setChecked(true);}
+	if( mask & vcg::tri::io::Mask::IOM_WEDGNORMAL   ) {ui.check_iom_wedgnormal->setChecked(true);}
 
-	if( mask & vcg::tri::io::Mask::IOM_CAMERA       ) {}
+	if( mask & vcg::tri::io::Mask::IOM_CAMERA       ) {ui.check_iom_camera->setChecked(true);}
+
+	ui.check_iom_vertquality->setDisabled(true);
+	ui.check_iom_facequality->setDisabled(true);
 }
 
 int SaveMaskExporterDialog::GetNewMask()

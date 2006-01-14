@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.45  2006/01/14 14:12:07  fmazzant
+ sample for use save's mask exporter. ony 3ds.
+
  Revision 1.44  2006/01/14 11:23:24  fmazzant
  update savemask exporter with init a mask [base type]
 
@@ -355,8 +358,8 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{	
-		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,tr("3DS"));
-		//if( newmask == 0 )return false;
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,tr("3DS"));
+		if( newmask == 0 )return false;
 		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,mask,cb);//salva esclusivamente in formato binario
 		if(result!=0)
 		{
