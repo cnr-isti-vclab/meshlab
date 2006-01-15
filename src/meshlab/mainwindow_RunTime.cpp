@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.68  2006/01/15 03:54:50  glvertex
+Solved an annoyng old consistency bug between toolbars and toolbar menu's
+
 Revision 1.67  2006/01/13 12:10:30  vannini
 Added logging to mean and gaussian curvautres colorization
 
@@ -471,7 +474,11 @@ void MainWindow::updateMenus()
 	logMenu->setEnabled(active);
   windowsMenu->setEnabled(active);
 	preferencesMenu->setEnabled(active);
+	
 	renderToolBar->setEnabled(active);
+	
+	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
+	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 	if(active){
 		const RenderMode &rm=GLA()->getCurrentRenderMode();
 		switch (rm.drawMode) {

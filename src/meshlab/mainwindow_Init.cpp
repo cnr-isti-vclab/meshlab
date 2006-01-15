@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.38  2006/01/15 03:54:50  glvertex
+Solved an annoyng old consistency bug between toolbars and toolbar menu's
+
 Revision 1.37  2006/01/14 00:51:06  davide_portelli
 A little change
 
@@ -334,8 +337,7 @@ MainWindow::MainWindow()
 	createMenus();
 	createToolBars();
 	updateMenus();
-	addToolBar(mainToolBar);
-	addToolBar(renderToolBar);
+
 	setWindowTitle(appName());
 	loadPlugins();
 	if(QCoreApplication::instance ()->argc()>1){
@@ -615,6 +617,7 @@ void MainWindow::createMenus()
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(showToolbarStandardAct);
 	toolBarMenu->addAction(showToolbarRenderAct);
+	connect(toolBarMenu,SIGNAL(aboutToShow()),this,SLOT(updateMenus()));
 	
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
