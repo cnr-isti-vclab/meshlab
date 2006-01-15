@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2006/01/15 15:27:59  glvertex
+Added few lines to set background even in qt 4.1
+
 Revision 1.5  2006/01/02 18:54:52  glvertex
 added multilevel logging support
 
@@ -56,6 +59,11 @@ CustomDialog::CustomDialog(QWidget * parent)
 	connect(ui.comboBoxInfoType,SIGNAL(editTextChanged()),this,SLOT(setLogLevel()));
 	setFixedSize(260,155);
 
+	// Added for Qt 4.1
+	ui.labelBottmBg->setAutoFillBackground(true);
+	ui.labelTopBg->setAutoFillBackground(true);
+	ui.labelLogArea->setAutoFillBackground(true);
+
 	//Error=0, Warning=1, Info=2, Debug=3, Direct=4, OnlyFileLog=5, OnlyConsole=6
 	ui.comboBoxInfoType->addItem("Any");
 	ui.comboBoxInfoType->addItem("Errors");
@@ -81,6 +89,8 @@ void CustomDialog::loadCurrentSetting(const Color4b& bb,const Color4b& bt,const 
 	QPalette pl(QColor(l.V(0),l.V(1),l.V(2)));
 	
 	ui.comboBoxInfoType->setCurrentIndex(logLevel+1);
+	
+	
 	ui.labelBottmBg->setPalette(pbb);
 	ui.labelTopBg->setPalette(pbt);
 	ui.labelLogArea->setPalette(pl);
