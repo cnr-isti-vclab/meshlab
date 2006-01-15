@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/01/15 00:45:39  fmazzant
+ extend mask exporter for all type file format +
+
  Revision 1.2  2006/01/14 11:23:24  fmazzant
  update savemask exporter with init a mask [base type]
 
@@ -47,9 +50,10 @@ class SaveMaskExporterDialog : public QDialog
 public:
 	SaveMaskExporterDialog(QWidget *parent);
 	SaveMaskExporterDialog(QWidget *parent,int &mask);
-	SaveMaskExporterDialog(QWidget *parent,int &mask,QString type);
+	SaveMaskExporterDialog(QWidget *parent,int &mask,int type);
 
 	void Initialize();
+	void SetDisableChecks(int type);
 	int GetNewMask();
 
 private slots:
@@ -59,7 +63,7 @@ private slots:
 private:
 	Ui::MaskExporterDialog ui;
 	int mask;
-	QString type;
+	int type;
 
 };//end class
 
@@ -71,7 +75,17 @@ namespace io {
 	class SaveMaskToExporter
 	{
 	public:	
-		inline static int GetMaskToExporter(int &mask,QString type)
+
+		enum FileType
+		{
+			_OBJ, //0
+			_PLY, //1
+			_OFF, //2
+			_STL, //3
+			_3DS  //4
+		};
+
+		inline static int GetMaskToExporter(int &mask,int type)
 		{
 			SaveMaskExporterDialog dialog(new QWidget(),mask,type);
 			dialog.Initialize();

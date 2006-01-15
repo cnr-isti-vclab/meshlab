@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.47  2006/01/15 00:45:39  fmazzant
+ extend mask exporter for all type file format +
+
  Revision 1.46  2006/01/14 14:20:32  fmazzant
  bux-fix: mask -> newmask in exporter3ds
 
@@ -316,6 +319,8 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OBJ"))
 	{	
+		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_OBJ);
+		//if( newmask == 0 )return false;
 		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
 		if(result != vcg::tri::io::ExporterOBJ<CMeshO>::E_NOERROR )
 		{
@@ -327,7 +332,10 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("PLY"))
 	{
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_PLY);
+		if( newmask == 0 )return false;
+		
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),newmask,cb);
 		if(result != 0)
 		{
 			QMessageBox::warning(parent, tr("PLY Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
@@ -338,6 +346,9 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OFF"))
 	{
+		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_OFF);
+		//if( newmask == 0 )return false;
+		
 		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
 		if(result != 0)
 		{
@@ -349,7 +360,10 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("STL"))
 	{
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_STL);
+		if( newmask == 0 )return false;
+
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),newmask,cb);
 		if(result != 0)
 		{
 			QMessageBox::warning(parent, tr("Mesh Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
@@ -361,9 +375,10 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{	
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,tr("3DS"));
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_3DS);
 		if( newmask == 0 )return false;
-		bool result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,newmask,cb);//salva esclusivamente in formato binario
+		
+		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,newmask,cb);//salva esclusivamente in formato binario
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("3DS Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));

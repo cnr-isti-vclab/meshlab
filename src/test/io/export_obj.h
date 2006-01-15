@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.30  2006/01/15 00:45:40  fmazzant
+ extend mask exporter for all type file format +
+
  Revision 1.29  2006/01/14 00:03:26  fmazzant
  added more controls
 
@@ -327,7 +330,11 @@ namespace io {
 			
 			fprintf(fp,"# End of File");
 			fclose(fp);
-			int r = WriteMaterials(materials, filename,cb);//scrive il file dei materiali
+
+			int r = 0;
+			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD | oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+				r = WriteMaterials(materials, filename,cb);//scrive il file dei materiali
+			
 			if(r!= E_NOERROR)
 				return r;
 			return E_NOERROR;

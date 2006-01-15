@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/01/15 00:45:39  fmazzant
+ extend mask exporter for all type file format +
+
  Revision 1.3  2006/01/14 14:12:07  fmazzant
  sample for use save's mask exporter. ony 3ds.
 
@@ -53,7 +56,7 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask) : QDi
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 }
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, QString type) : QDialog(parent), mask(mask), type(type)
+SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, int type) : QDialog(parent), mask(mask), type(type)
 {
 	SaveMaskExporterDialog::ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
@@ -79,8 +82,92 @@ void SaveMaskExporterDialog::Initialize()
 
 	if( mask & vcg::tri::io::Mask::IOM_CAMERA       ) {ui.check_iom_camera->setChecked(true);}
 
+	SetDisableChecks(type);
+}
+
+/*
+	Questo metodo serve per specificare le varie personalizzazioni dei vari salvataggi.
+*/
+void SaveMaskExporterDialog::SetDisableChecks(int type)
+{
+	//check globali disabilitati
 	ui.check_iom_vertquality->setDisabled(true);
-	ui.check_iom_facequality->setDisabled(true);
+	ui.check_iom_facequality->setDisabled(true);	
+	
+	//all - none - camera
+	ui.check_iom_all->setDisabled(true);
+	ui.check_iom_none->setDisabled(true);
+	ui.check_iom_camera->setDisabled(true);
+	
+	//vert
+	ui.check_iom_vertflags->setDisabled(true);
+	ui.check_iom_vertcolor->setDisabled(true);
+	ui.check_iom_verttexcoord->setDisabled(true);
+	ui.check_iom_vertnormal->setDisabled(true);
+
+	//face
+	ui.check_iom_facenormal->setDisabled(true);
+	ui.check_iom_facecolor->setDisabled(true);
+	ui.check_iom_faceflags->setDisabled(true);
+
+	//wedg
+	ui.check_iom_wedgcolor->setDisabled(true);
+	ui.check_iom_wedgtexcoord->setDisabled(true);
+	ui.check_iom_wedgnormal->setDisabled(true);
+
+	switch(type)
+	{
+	case vcg::tri::io::SaveMaskToExporter::_OBJ:
+		{
+			this->setWindowTitle("Edit Options OBJ");
+			
+			ui.check_iom_vertnormal->setDisabled(false);
+			ui.check_iom_facecolor->setDisabled(false);
+			ui.check_iom_wedgtexcoord->setDisabled(false);
+			
+			break;
+		}
+	case vcg::tri::io::SaveMaskToExporter::_PLY:
+		{
+			this->setWindowTitle("Edit Options PLY");
+
+			ui.check_iom_wedgtexcoord->setDisabled(false);
+			ui.check_iom_wedgtexcoord->setChecked(true);
+			
+			break;
+		}
+	case vcg::tri::io::SaveMaskToExporter::_OFF:
+		{
+			this->setWindowTitle("Edit Options OFF");
+
+			ui.check_iom_wedgtexcoord->setDisabled(false);
+
+			break;
+		}
+	case vcg::tri::io::SaveMaskToExporter::_STL:
+		{
+			this->setWindowTitle("Edit Options STL");
+
+			ui.check_iom_wedgtexcoord->setDisabled(false);
+
+			break;
+		}
+	case vcg::tri::io::SaveMaskToExporter::_3DS:
+		{
+			this->setWindowTitle("Edit Options 3DS");
+
+			ui.check_iom_facenormal->setDisabled(false);
+			ui.check_iom_facecolor->setDisabled(false);
+			ui.check_iom_wedgtexcoord->setDisabled(false);
+
+			break;
+		}
+	default:
+		{
+			this->mask = 0;
+			break;
+		}
+	}
 }
 
 int SaveMaskExporterDialog::GetNewMask()
@@ -95,6 +182,23 @@ void SaveMaskExporterDialog::SlotOkButton()
 	
 	newmask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 	newmask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
+
+	if( ui.check_iom_vertflags->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
+	if( ui.check_iom_vertcolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
+	if( ui.check_iom_vertquality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
+	if( ui.check_iom_verttexcoord->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
+	if( ui.check_iom_vertnormal->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
+
+	if( ui.check_iom_faceflags->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
+	if( ui.check_iom_facecolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
+	if( ui.check_iom_facequality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
+	if( ui.check_iom_facenormal->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_FACENORMAL;}
+
+	if( ui.check_iom_wedgcolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;}
+	if( ui.check_iom_wedgtexcoord->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
+	if( ui.check_iom_wedgnormal->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;}
+
+	if( ui.check_iom_camera->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_CAMERA;}
 
 	this->mask=newmask;
 }
