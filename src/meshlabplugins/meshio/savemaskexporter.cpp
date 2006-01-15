@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.5  2006/01/15 08:51:29  fmazzant
+ added mask specificy in 3ds code
+
  Revision 1.4  2006/01/15 00:45:39  fmazzant
  extend mask exporter for all type file format +
 
@@ -159,6 +162,7 @@ void SaveMaskExporterDialog::SetDisableChecks(int type)
 			ui.check_iom_facenormal->setDisabled(false);
 			ui.check_iom_facecolor->setDisabled(false);
 			ui.check_iom_wedgtexcoord->setDisabled(false);
+			ui.check_iom_faceflags->setDisabled(false);
 
 			break;
 		}

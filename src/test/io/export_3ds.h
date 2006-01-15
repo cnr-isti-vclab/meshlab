@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.14  2006/01/15 08:51:30  fmazzant
+ added mask specificy in 3ds code
+
  Revision 1.13  2006/01/14 00:03:26  fmazzant
  added more controls
 
@@ -156,91 +159,110 @@ namespace io {
 			lib3ds_mesh_new_point_list(mesh, m.vert.size());//definisce il numero di vertici
 			int v_index = 0;
 			VertexIterator vi;
-			for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
+			if(mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
 			{
-				Lib3dsPoint point;
-				point.pos[0] = (*vi).P()[0];
-				point.pos[1] = (*vi).P()[1];
-				point.pos[2] = (*vi).P()[2];
+				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
+				{
+					Lib3dsPoint point;
+					point.pos[0] = (*vi).P()[0];
+					point.pos[1] = (*vi).P()[1];
+					point.pos[2] = (*vi).P()[2];
 
-				mesh->pointL[v_index] = point;
+					mesh->pointL[v_index] = point;
 
-				if (cb !=NULL)
-					(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
-				else
-					return E_ABORTED;
-				v_index++;
+					if (cb !=NULL)
+						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+					else
+						return E_ABORTED;
+					v_index++;
+				}
 			}
-			
 			lib3ds_mesh_new_face_list (mesh, m.face.size());
 			int f_index = 0;//indice facce
 			int t_index = 0;//indice texture
 			FaceIterator fi;
-			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
+			if(mask & vcg::tri::io::Mask::IOM_FACEQUALITY)
 			{
-				Lib3dsFace face;
-				face.points[0] = GetIndexVertex(m, (*fi).V(0));
-				face.points[1] = GetIndexVertex(m, (*fi).V(1));
-				face.points[2] = GetIndexVertex(m, (*fi).V(2));
-				face.flags = 0;
-				face.smoothing = 10;//da modificare.
-				face.normal[0] = (*fi).N()[0];
-				face.normal[1] = (*fi).N()[1];
-				face.normal[2] = (*fi).N()[2];
-				
-				int material_index = 0;
-				if((material_index = CreateNewMaterial(m, materials, 0, fi)) == materials.size())
+				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 				{
-					Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
-					material->name[0] = 'm';
-					material->name[1] = 'A' + material_index;
+					Lib3dsFace face;
+					face.points[0] = GetIndexVertex(m, (*fi).V(0));
+					face.points[1] = GetIndexVertex(m, (*fi).V(1));
+					face.points[2] = GetIndexVertex(m, (*fi).V(2));
 					
-					//ambient
-					material->ambient[0] = materials[materials.size()-1].Ka[0];
-					material->ambient[1] = materials[materials.size()-1].Ka[1];
-					material->ambient[2] = materials[materials.size()-1].Ka[2];
-					material->ambient[3] = materials[materials.size()-1].Tr;
-
-					//diffuse
-					material->diffuse[0] = materials[materials.size()-1].Kd[0];
-					material->diffuse[1] = materials[materials.size()-1].Kd[1];
-					material->diffuse[2] = materials[materials.size()-1].Kd[2];
-					material->diffuse[3] = materials[materials.size()-1].Tr;
-
-					//specular
-					material->specular[0] = materials[materials.size()-1].Ks[0];
-					material->specular[1] = materials[materials.size()-1].Ks[1];
-					material->specular[2] = materials[materials.size()-1].Ks[2];
-					material->specular[3] = materials[materials.size()-1].Tr;
-
-					//shininess
-					material->shininess = materials[materials.size()-1].Ns;
+					if(mask & vcg::tri::io::Mask::IOM_FACEFLAGS)
+						face.flags = 0;
 					
-					unsigned int MAX = 3;
-					for(unsigned int k=0;k<MAX;k++)
-						if(m.HasPerWedgeTexture())
-							if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),t_index))
-								t_index++;				
+					face.smoothing = 10;//da modificare.
+					if(mask & vcg::tri::io::Mask::IOM_FACENORMAL)
+					{
+						face.normal[0] = (*fi).N()[0];
+						face.normal[1] = (*fi).N()[1];
+						face.normal[2] = (*fi).N()[2];
+					}
 
-					lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
-					face.material[0] = 'm';//associa alla faccia il materiale.
-					face.material[1] = 'A' + material_index;//l'idice del materiale...
+					if(mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+					{
+						int material_index = 0;
+						if((material_index = CreateNewMaterial(m, materials, 0, fi)) == materials.size())
+						{
+							Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
+							material->name[0] = 'm';
+							material->name[1] = 'A' + material_index;
+							
+							//ambient
+							material->ambient[0] = materials[materials.size()-1].Ka[0];
+							material->ambient[1] = materials[materials.size()-1].Ka[1];
+							material->ambient[2] = materials[materials.size()-1].Ka[2];
+							material->ambient[3] = materials[materials.size()-1].Tr;
+
+							//diffuse
+							material->diffuse[0] = materials[materials.size()-1].Kd[0];
+							material->diffuse[1] = materials[materials.size()-1].Kd[1];
+							material->diffuse[2] = materials[materials.size()-1].Kd[2];
+							material->diffuse[3] = materials[materials.size()-1].Tr;
+
+							//specular
+							material->specular[0] = materials[materials.size()-1].Ks[0];
+							material->specular[1] = materials[materials.size()-1].Ks[1];
+							material->specular[2] = materials[materials.size()-1].Ks[2];
+							material->specular[3] = materials[materials.size()-1].Tr;
+
+							//shininess
+							material->shininess = materials[materials.size()-1].Ns;
+							
+							if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
+							{
+								unsigned int MAX = 3;
+								for(unsigned int k=0;k<MAX;k++)
+									if(m.HasPerWedgeTexture())
+										if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),t_index))
+											t_index++;				
+							}
+
+							lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
+							face.material[0] = 'm';//associa alla faccia il materiale.
+							face.material[1] = 'A' + material_index;//l'idice del materiale...
+						}
+						else
+						{	
+							face.material[0] = 'm';//associa alla faccia il materiale.
+							face.material[1] = 'A' + material_index;//l'idice del materiale...
+						}
+					}
+
+					mesh->faceL[f_index]=face;
+
+					if (cb !=NULL)
+						(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
+					else 
+						return E_ABORTED;
+					f_index++;
+					
 				}
-				else
-				{	
-					face.material[0] = 'm';//associa alla faccia il materiale.
-					face.material[1] = 'A' + material_index;//l'idice del materiale...
-				}
-
-				mesh->faceL[f_index]=face;
-
-				if (cb !=NULL)
-					(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
-				else 
-					return E_ABORTED;
-				f_index++;
 			}
-			
+
+
 			//aggiunge le coordinate di texture alla mesh
 			//if(m.HasPerWedgeTexture())
 			//{
