@@ -6,9 +6,7 @@
  * Visual Computing Lab                                            /\/|      *
  * ISTI - Italian National Research Council                           |      *
  *                                                                    \      *
- * All rights reserved.                                                      *
- *                                                                           *
- * This program is free software; you can redistribute it and/or modify      *   
+ * All rights reserved.                  1 * This program is free software; you can redistribute it and/or modify      *   
  * it under the terms of the GNU General Public License as published by      *
  * the Free Software Foundation; either version 2 of the License, or         *
  * (at your option) any later version.                                       *
@@ -23,6 +21,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.41  2006/01/15 13:56:48  mariolatronico
+added Apply Transform progress, but work in progress. Currently it modifies mesh vertices
+
 Revision 1.40  2006/01/09 15:25:58  mariolatronico
 - updated Help and Short help
 - on destructor deleted every action
@@ -124,16 +125,18 @@ Added copyright info
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/update/color.h>
+#include <vcg/complex/trimesh/update/position.h>
+
 /////////////
 #include "invert_faces.h"
 #include "../../test/decimator/decimator.h"
 #include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
+
 //#include "../../meshlab/glarea.h"
 ////////////
 
 using namespace vcg;
-
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_LOOP_SS), this);
 	actionList << new QAction(ST(FP_BUTTERFLY_SS), this);
@@ -151,11 +154,15 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_DECIMATOR), this);
 	
 	actionList << new QAction(ST(FP_INVERT_FACES), this);
+	actionList << new QAction(ST(FP_TRANSFORM), this);
 	
 	refineDialog = new RefineDialog();
 	refineDialog->hide();
 	decimatorDialog = new DecimatorDialog();
 	decimatorDialog->hide();
+	transformDialog = new TransformDialog();
+	transformDialog->hide();
+
 }
 
 const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
@@ -182,6 +189,9 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 		return QString("Re-oriented");	
 	case FP_INVERT_FACES:
 		return QString("Invert Faces");
+	case FP_TRANSFORM:
+		return QString("Apply Transform");
+
 	default: assert(0);
   }
   return QString("error!");
@@ -191,6 +201,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 	delete refineDialog;
 	delete decimatorDialog;
+	delete transformDialog;
 	for (int i = 0; i < actionList.count() ; i++ ) {
 		delete actionList.at(i);
 	}
@@ -207,29 +218,23 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
   
 	if( action->text() == ST(FP_LOOP_SS) )
 		{
-			ai.Help = tr("Apply Loop's Subdivision Surface algorithm.\
-										It is an approximate method which subdivide each triangle in four \
-										faces. It works for every triangle and has rules for extraordinary vertices");
+			ai.Help = tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");
 			ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
 		}
 	if( action->text() == ST(FP_BUTTERFLY_SS) ) 
 	  {
-			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm.\
-									 It is an interpolated method, defined on arbitrary triangular meshes.\
-									 The scheme is known to be C1 but not C2 on regular meshes");
+			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");
 			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
 		}
 	if( action->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 		{
-			ai.Help = tr("Check for every vertex on the mesh if it is referenced\
-									 by a face and removes it");
+			ai.Help = tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
 			ai.ShortHelp = tr("Remove Unreferenced Vertexes");
 			
 		}
   if( action->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 		{
-			ai.Help = tr("Check for every vertex on the mesh if there are two vertices\
-									 with same coordinates and removes it");
+			ai.Help = tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
 			ai.ShortHelp = tr("Remove Duplicated Vertexes");
 		}
 	if(action->text() == ST(FP_REMOVE_NULL_FACES) )
@@ -247,8 +252,7 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 		
  	if(action->text() == ST(FP_DECIMATOR) )
  		{
-			ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping\
-									 the mesh and discretizes them based on the cells of this grid");
+			ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
 			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
 			
  		}
@@ -271,6 +275,11 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
  		{
 			ai.Help = tr("Invert faces orentation, flip the normal of the mesh");
 			ai.ShortHelp = tr("Invert faces orentation");
+ 		}
+	if(action->text() == ST(FP_TRANSFORM) )
+ 		{
+			ai.Help = tr("Apply transformation, you can rotate, translate or scale the mesh");
+			ai.ShortHelp = tr("Apply Transform");
  		}
 	
 	
@@ -395,11 +404,23 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	      log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
+
 	if (filter->text() == ST(FP_INVERT_FACES) ) {
 	  
 	  InvertFaces<CMeshO>(m.cm);
 	  // update normal on InvertFaces function
 	}
+
+	if (filter->text() == ST(FP_TRANSFORM) ) {
+		int continueValue = transformDialog->exec();
+		if (continueValue == QDialog::Rejected)
+			return false;
+		Matrix44f matrix = transformDialog->getTransformation();
+		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
+
+	}
+
+
 	return true;
 }
 Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
