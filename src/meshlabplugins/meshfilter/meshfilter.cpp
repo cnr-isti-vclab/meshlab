@@ -21,6 +21,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.42  2006/01/15 19:23:56  mariolatronico
+added log for Apply Transform
+
 Revision 1.41  2006/01/15 13:56:48  mariolatronico
 added Apply Transform progress, but work in progress. Currently it modifies mesh vertices
 
@@ -412,10 +415,15 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	}
 
 	if (filter->text() == ST(FP_TRANSFORM) ) {
+		//		transformDialog->init();
 		int continueValue = transformDialog->exec();
 		if (continueValue == QDialog::Rejected)
 			return false;
 		Matrix44f matrix = transformDialog->getTransformation();
+		if (log) {
+			log->Log(GLLogStream::Info, 
+							 transformDialog->getLog().toAscii().data());
+		}
 		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
 
 	}

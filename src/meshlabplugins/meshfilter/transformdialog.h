@@ -12,6 +12,9 @@ using vcg::Matrix44f;
 /*
 
 $Log$
+Revision 1.3  2006/01/15 19:23:57  mariolatronico
+added log for Apply Transform
+
 Revision 1.2  2006/01/15 17:15:18  mariolatronico
 separated interface (.h) from implementation for Apply Transform dialog
 
@@ -56,7 +59,8 @@ public:
 	
 	// used to compute transformation on meshfilter.cpp
 	Matrix44f& getTransformation();
-
+ 
+	QString& getLog();
 private: // members
   
   QButtonGroup *whichTransformBG;
@@ -67,6 +71,7 @@ private: // members
   // store the transformation
 	Matrix44f matrix;
 	bool uniformScale; // true if want same scale for X,Y,Z
+	QString log; // used to store string to log
 private: // functions
 
 	// reset initial values for Move, Rotate and Scale

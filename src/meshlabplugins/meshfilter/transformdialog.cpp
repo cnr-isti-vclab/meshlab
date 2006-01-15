@@ -4,6 +4,9 @@
 
 /*
 $Log$
+Revision 1.3  2006/01/15 19:23:57  mariolatronico
+added log for Apply Transform
+
 Revision 1.2  2006/01/15 18:16:54  mariolatronico
 - changed line edit behavior, now values are remembered among Apply Filter invocations
 - added check on line edit values, they must be number
@@ -61,17 +64,22 @@ TransformDialog::~TransformDialog() {
 vcg::Matrix44f& TransformDialog::getTransformation() {
 	return matrix;
 }
+QString& TransformDialog::getLog() {
+	
+	return log;
 
+}
 // select the group box, disable the others
 void TransformDialog::selectTransform(QAbstractButton* button) {
 
-    if (button->text() == QString("Move") ) {
+    if (button->text() == "Move" ) {
 	  
       moveBox->setEnabled(true); 
       rotateBox->setEnabled(false);// resetRotate();
       scaleBox->setEnabled(false); //resetScale();
       whichTransform = TR_MOVE;
-    }
+			log = "Move: ";
+		}
 	
     if (button->text() == QString("Rotate") ) {
 
@@ -79,15 +87,17 @@ void TransformDialog::selectTransform(QAbstractButton* button) {
       rotateBox->setEnabled(true); 
       scaleBox->setEnabled(false); //resetScale();
       whichTransform = TR_ROTATE;
+			log = "Rotate: ";
 
     }
 
-    if (button->text() == QString("Scale") ) {
+    if (button->text() == "Scale" ) {
 
       rotateBox->setEnabled(false); //resetRotate();
 			moveBox->setEnabled(false); //resetMove();
       scaleBox->setEnabled(true); // Scale
       whichTransform = TR_SCALE;
+			log = "Scale: ";
 
     }
 		
@@ -100,6 +110,7 @@ int TransformDialog::exec() {
 	//	resetScale();
 		// default to Move transform
 		isMoveRB->setChecked(true);
+		log = "";
 		selectTransform(isMoveRB);
 		return QDialog::exec();
 }
@@ -116,13 +127,12 @@ void TransformDialog::on_uniformScaleCB_stateChanged(int state) {
 // select the rotation axis
 void TransformDialog::rotateAxisChange(QAbstractButton* axis) {
 
-	if (axis->text() == QString("X") )
+	if (axis->text() == "X" )
 		rotateAxis = AXIS_X;
-	if (axis->text() == QString("Y") )
+	if (axis->text() == "Y" )
 		rotateAxis = AXIS_Y;
-	if (axis->text() == QString("Z") )
+	if (axis->text() == "Z" )
 		rotateAxis = AXIS_Z;
-	
 	
 }
 // used with dial
@@ -138,34 +148,42 @@ void TransformDialog::on_okButton_pressed() {
 	currentMatrix.SetIdentity();
 	float xVal, yVal, zVal;
 	bool okX, okY, okZ; // line edit values can be strings
+	okX = okY = okZ = false;
 	if (whichTransform == TR_MOVE) {
 		xVal = xMoveLE->text().toFloat(&okX);
 		yVal = yMoveLE->text().toFloat(&okY);
 		zVal = zMoveLE->text().toFloat(&okZ);
 
 		if ( ! okX || !okY || !okZ) {
-			qDebug("c'era una stringa");
+			log = "Invalid values entered";
 			reject();
 			return;
 		}
 
 		currentMatrix.SetTranslate(xVal, yVal, zVal);
-		qDebug("xVal %f\t yVal %f\t zVal %f\t", xVal, yVal, zVal); 
+		log += QString("X:   %1    Y:   %2    Z:   %3").arg(xVal).arg(yVal).arg(zVal);
+		//		qDebug("xVal %f\t yVal %f\t zVal %f\t", xVal, yVal, zVal); 
 	}
 	if (whichTransform == TR_ROTATE) {
 		vcg::Point3f axisPoint;
 		if ( rotateAxis == AXIS_X ) {
 			axisPoint[0] = 1.0;	axisPoint[1] = 0.0;	axisPoint[2] = 0.0; 
+			log += "X";
 		}
 		if ( rotateAxis == AXIS_Y ) {
 			axisPoint[0] = 0.0;	axisPoint[1] = 1.0;	axisPoint[2] = 0.0; 
+			log += "Y";
+
 		}
 		if ( rotateAxis == AXIS_Z ) {
 			axisPoint[0] = 0.0;	axisPoint[1] = 0.0;	axisPoint[2] = 1.0; 
+			log += "Z";
+
 		}
 		float rotateVal = rotateLE->text().toFloat();
-		qDebug("Axis : %f\t  %f\t  %f\t", axisPoint[0], axisPoint[1], axisPoint[2]);
-		qDebug("Value: %f", rotateVal * PI / 180.0);
+		log += QString(" %1 degrees").arg(rotateVal);
+		//		qDebug("Axis : %f\t  %f\t  %f\t", axisPoint[0], axisPoint[1], axisPoint[2]);
+		//		qDebug("Value: %f", rotateVal * PI / 180.0);
 		// ANGLE MUST BE IN RADIANS !!!!
 		
 		currentMatrix.SetRotate(rotateVal, axisPoint);
@@ -179,19 +197,25 @@ void TransformDialog::on_okButton_pressed() {
 			yVal = yScaleLE->text().toFloat(&okY);
 			zVal = zScaleLE->text().toFloat(&okZ);
 		}
-		else 
+		else {
 			yVal = zVal = xVal;
+			okY = okZ = okX;
+		}
+
 		if ( ! okX || !okY || !okZ) {
-			qDebug("c'era una stringa");
+			log = "Invalid values entered";
 			reject();
 			return;
 		}
 		currentMatrix.SetScale(xVal, yVal, zVal);
-		qDebug("xVal %f\t yVal %f\t zVal %f\t", xVal, yVal, zVal); 			
+		log += QString("X:   %1    Y:   %2    Z:   %3").arg(xVal).arg(yVal).arg(zVal);
+
 	}
 	
 	//matrix = matrix * currentMatrix;
-	matrix = currentMatrix;
+	// store the current matrix as matrix because we left
+	// the values in the line edit widgets
+	matrix = currentMatrix; 
 	accept();
 	
 }
