@@ -2,7 +2,7 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = meshfilter.h refinedialog.h transformdialog.h decimatordialog.h ../../meshlab/interfaces.h
-SOURCES       = meshfilter.cpp ../../meshlab/GLLogStream.cpp
+SOURCES       = meshfilter.cpp ../../meshlab/GLLogStream.cpp transformdialog.cpp
 TARGET        = meshfilter
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
