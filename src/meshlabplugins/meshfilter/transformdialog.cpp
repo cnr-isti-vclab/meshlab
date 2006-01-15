@@ -1,7 +1,13 @@
 #include "transformdialog.h"
+#include <QRegExp>
+#include <QRegExpValidator>
 
 /*
 $Log$
+Revision 1.2  2006/01/15 18:16:54  mariolatronico
+- changed line edit behavior, now values are remembered among Apply Filter invocations
+- added check on line edit values, they must be number
+
 Revision 1.1  2006/01/15 17:15:17  mariolatronico
 separated interface (.h) from implementation for Apply Transform dialog
 
@@ -23,11 +29,9 @@ TransformDialog::TransformDialog() : QDialog() {
     rotateBG->addButton(yAxisRB);
     rotateBG->addButton(zAxisRB);
 
-    rotateLE->setInputMask("000.000");
-		
-    rotateValidator = new QDoubleValidator(this);
-    rotateValidator->setRange(0.0, 359.999, 3); // from 0 to 359.999 with 3 decimals
-    rotateLE->setValidator(rotateValidator);
+		//    rotateValidator = new QDoubleValidator(this);
+		// rotateValidator->setRange(0.0, 359.999, 3); // from 0 to 359.999 with 3 decimals
+    //rotateLE->setValidator(rotateValidator);
 
 		// when use the dial the line edit needs to change too
 		connect(rotateDial,SIGNAL(valueChanged(int)),
@@ -64,24 +68,24 @@ void TransformDialog::selectTransform(QAbstractButton* button) {
     if (button->text() == QString("Move") ) {
 	  
       moveBox->setEnabled(true); 
-      rotateBox->setEnabled(false); resetRotate();
-      scaleBox->setEnabled(false); resetScale();
+      rotateBox->setEnabled(false);// resetRotate();
+      scaleBox->setEnabled(false); //resetScale();
       whichTransform = TR_MOVE;
     }
 	
     if (button->text() == QString("Rotate") ) {
 
-      moveBox->setEnabled(false); resetMove();
+      moveBox->setEnabled(false); //resetMove();
       rotateBox->setEnabled(true); 
-      scaleBox->setEnabled(false); resetScale();
+      scaleBox->setEnabled(false); //resetScale();
       whichTransform = TR_ROTATE;
 
     }
 
     if (button->text() == QString("Scale") ) {
 
-      rotateBox->setEnabled(false); resetRotate();
-			moveBox->setEnabled(false); resetMove();
+      rotateBox->setEnabled(false); //resetRotate();
+			moveBox->setEnabled(false); //resetMove();
       scaleBox->setEnabled(true); // Scale
       whichTransform = TR_SCALE;
 
@@ -91,9 +95,9 @@ void TransformDialog::selectTransform(QAbstractButton* button) {
 
 // decorate exec from QDialog
 int TransformDialog::exec() {
-		resetMove();
-		resetRotate();
-		resetScale();
+	//		resetMove();
+	//	resetRotate();
+	//	resetScale();
 		// default to Move transform
 		isMoveRB->setChecked(true);
 		selectTransform(isMoveRB);
@@ -133,11 +137,18 @@ void TransformDialog::on_okButton_pressed() {
 	Matrix44f currentMatrix;
 	currentMatrix.SetIdentity();
 	float xVal, yVal, zVal;
-	
+	bool okX, okY, okZ; // line edit values can be strings
 	if (whichTransform == TR_MOVE) {
-		xVal = xMoveLE->text().toFloat();
-		yVal = yMoveLE->text().toFloat();
-		zVal = zMoveLE->text().toFloat();
+		xVal = xMoveLE->text().toFloat(&okX);
+		yVal = yMoveLE->text().toFloat(&okY);
+		zVal = zMoveLE->text().toFloat(&okZ);
+
+		if ( ! okX || !okY || !okZ) {
+			qDebug("c'era una stringa");
+			reject();
+			return;
+		}
+
 		currentMatrix.SetTranslate(xVal, yVal, zVal);
 		qDebug("xVal %f\t yVal %f\t zVal %f\t", xVal, yVal, zVal); 
 	}
@@ -154,7 +165,7 @@ void TransformDialog::on_okButton_pressed() {
 		}
 		float rotateVal = rotateLE->text().toFloat();
 		qDebug("Axis : %f\t  %f\t  %f\t", axisPoint[0], axisPoint[1], axisPoint[2]);
-		qDebug("Value: %f", rotateVal * PI / 360.0);
+		qDebug("Value: %f", rotateVal * PI / 180.0);
 		// ANGLE MUST BE IN RADIANS !!!!
 		
 		currentMatrix.SetRotate(rotateVal, axisPoint);
@@ -162,21 +173,25 @@ void TransformDialog::on_okButton_pressed() {
 	}
 	if (whichTransform == TR_SCALE) {
 		
-		xVal = xScaleLE->text().toFloat();
+		xVal = xScaleLE->text().toFloat(&okX);
 		
 		if ( ! uniformScale) {
-			yVal = yScaleLE->text().toFloat();
-			zVal = zScaleLE->text().toFloat();
+			yVal = yScaleLE->text().toFloat(&okY);
+			zVal = zScaleLE->text().toFloat(&okZ);
 		}
 		else 
 			yVal = zVal = xVal;
-		
+		if ( ! okX || !okY || !okZ) {
+			qDebug("c'era una stringa");
+			reject();
+			return;
+		}
 		currentMatrix.SetScale(xVal, yVal, zVal);
 		qDebug("xVal %f\t yVal %f\t zVal %f\t", xVal, yVal, zVal); 			
 	}
 	
-	matrix = matrix * currentMatrix;
-	
+	//matrix = matrix * currentMatrix;
+	matrix = currentMatrix;
 	accept();
 	
 }
