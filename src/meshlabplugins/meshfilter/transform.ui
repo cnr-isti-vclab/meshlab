@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>549</width>
-    <height>450</height>
+    <width>499</width>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -22,6 +22,74 @@
    <property name="spacing" >
     <number>6</number>
    </property>
+   <item row="2" column="0" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>131</width>
+         <height>31</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okButton" >
+       <property name="text" >
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton" >
+       <property name="text" >
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="0" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QRadioButton" name="isMoveRB" >
+       <property name="text" >
+        <string>Move</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="isRotateRB" >
+       <property name="text" >
+        <string>Rotate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="isScaleRB" >
+       <property name="text" >
+        <string>Scale</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="1" column="0" >
     <layout class="QHBoxLayout" >
      <property name="margin" >
@@ -138,8 +206,14 @@
           <property name="orientation" >
            <enum>Qt::Vertical</enum>
           </property>
+          <property name="invertedAppearance" >
+           <bool>false</bool>
+          </property>
+          <property name="invertedControls" >
+           <bool>false</bool>
+          </property>
           <property name="wrapping" >
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="notchesVisible" >
            <bool>false</bool>
@@ -148,8 +222,11 @@
         </item>
         <item>
          <widget class="QLineEdit" name="rotateLE" >
+          <property name="text" >
+           <string>0.0</string>
+          </property>
           <property name="maxLength" >
-           <number>359</number>
+           <number>10</number>
           </property>
          </widget>
         </item>
@@ -219,81 +296,6 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="0" >
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
-     <item>
-      <widget class="QRadioButton" name="isMoveRB" >
-       <property name="text" >
-        <string>Move</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="isRotateRB" >
-       <property name="text" >
-        <string>Rotate</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="isScaleRB" >
-       <property name="text" >
-        <string>Scale</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="2" column="0" >
-    <widget class="QCheckBox" name="previewCB" >
-     <property name="text" >
-      <string>Preview</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0" >
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" >
-        <size>
-         <width>131</width>
-         <height>31</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="okButton" >
-       <property name="text" >
-        <string>OK</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="cancelButton" >
-       <property name="text" >
-        <string>Cancel</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
   </layout>
  </widget>
  <pixmapfunction></pixmapfunction>
@@ -312,7 +314,6 @@
   <tabstop>xMoveLE</tabstop>
   <tabstop>yMoveLE</tabstop>
   <tabstop>zMoveLE</tabstop>
-  <tabstop>previewCB</tabstop>
   <tabstop>okButton</tabstop>
   <tabstop>cancelButton</tabstop>
  </tabstops>
