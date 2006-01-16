@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/01/16 05:34:16  cignoni
+Added backward qt4.0 compatibility for setAutoFillBackground
+
 Revision 1.6  2006/01/15 15:27:59  glvertex
 Added few lines to set background even in qt 4.1
 
@@ -60,9 +63,11 @@ CustomDialog::CustomDialog(QWidget * parent)
 	setFixedSize(260,155);
 
 	// Added for Qt 4.1
-	ui.labelBottmBg->setAutoFillBackground(true);
+#if (QT_VERSION >= 0x040100)
+  ui.labelBottmBg->setAutoFillBackground(true);
 	ui.labelTopBg->setAutoFillBackground(true);
 	ui.labelLogArea->setAutoFillBackground(true);
+#endif
 
 	//Error=0, Warning=1, Info=2, Debug=3, Direct=4, OnlyFileLog=5, OnlyConsole=6
 	ui.comboBoxInfoType->addItem("Any");
