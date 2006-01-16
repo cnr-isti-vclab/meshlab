@@ -25,85 +25,53 @@
   History
 
  $Log$
- Revision 1.5  2006/01/16 15:30:26  fmazzant
+ Revision 1.1  2006/01/16 15:30:26  fmazzant
  added rename texture dialog for exporter
  removed old maskobj
 
- Revision 1.4  2006/01/16 11:49:48  fmazzant
-  added base texture name option.
-
- Revision 1.3  2006/01/15 00:45:39  fmazzant
- extend mask exporter for all type file format +
-
- Revision 1.2  2006/01/14 11:23:24  fmazzant
- update savemask exporter with init a mask [base type]
-
- Revision 1.1  2006/01/13 23:59:51  fmazzant
- first commit exporter dialog
-
+ 
 
  ****************************************************************************/
 
-#ifndef __VCGLIB_SAVEMASK_EXPORT
-#define __VCGLIB_SAVEMASK_EXPORT
+#ifndef __VCGLIB_TEXTURE_RENAME
+#define __VCGLIB_TEXTURE_RENAME
 
-#include <wrap/io_trimesh/io_mask.h>
+#include "ui_renametexture.h"
 
-#include "../../meshlab/meshmodel.h"
-#include "ui_savemaskexporter.h"
-
-class SaveMaskExporterDialog : public QDialog
+class ChangeTextureNameDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent);
-	SaveMaskExporterDialog(QWidget *parent,int &mask);
-	SaveMaskExporterDialog(QWidget *parent,int &mask,int type);
-	SaveMaskExporterDialog(QWidget *parent,MeshModel &m,int type);
+	ChangeTextureNameDialog(QWidget *parent);
+	ChangeTextureNameDialog(QWidget *parent,std::string oldtexture);
 
-	void Initialize();
-	void SetDisableChecks(int type);
-	void SetTextureName();
-	int GetNewMask();
+
+	std::string GetTextureName(){return texture;}
 
 private slots:
 	void SlotOkButton();
 	void SlotCancelButton();
-	void SlotRenameTexture();
-	void SlotSelectionTextureName();
+	void SlotSearchTextureName();
 
 private:
-	Ui::MaskExporterDialog ui;
-	MeshModel m;
-	int mask;
-	int type;
+	Ui::RenameTextureDialog ui;
+	std::string texture;
 };//end class
 
 namespace vcg {
 namespace tri {
 namespace io {
 	
-	class SaveMaskToExporter
+	class TextureRename
 	{
 	public:	
-
-		enum FileType
+		inline static std::string GetNewTextureName(std::string oldtexturename)
 		{
-			_OBJ, //0
-			_PLY, //1
-			_OFF, //2
-			_STL, //3
-			_3DS  //4
-		};
-
-		inline static int GetMaskToExporter(MeshModel &m,int type)
-		{
-			SaveMaskExporterDialog dialog(new QWidget(),m,type);
-			dialog.Initialize();
+			ChangeTextureNameDialog dialog(new QWidget(),oldtexturename);
 			dialog.exec();
-			int newmask = dialog.GetNewMask();
+			std::string name = dialog.GetTextureName();
 			dialog.close();
-			return newmask;
+			return name;
 		}
 	};
 } // end Namespace tri

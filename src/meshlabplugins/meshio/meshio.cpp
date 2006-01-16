@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.49  2006/01/16 15:30:26  fmazzant
+ added rename texture dialog for exporter
+ removed old maskobj
+
  Revision 1.48  2006/01/16 11:49:48  fmazzant
   added base texture name option.
 
@@ -322,9 +326,9 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OBJ"))
 	{	
-		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(m,vcg::tri::io::SaveMaskToExporter::_OBJ);
-		//if( newmask == 0 )return false;
-		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(m,vcg::tri::io::SaveMaskToExporter::_OBJ);
+		if( newmask == 0 )return false;
+		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,newmask,cb);//salva escusivamente in formato ASCII
 		if(result != vcg::tri::io::ExporterOBJ<CMeshO>::E_NOERROR )
 		{
 			QMessageBox::warning(parent, tr("OBJ Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result)));

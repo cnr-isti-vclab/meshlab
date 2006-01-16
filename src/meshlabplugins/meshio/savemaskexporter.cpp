@@ -25,6 +25,10 @@
   History
 
  $Log$
+ Revision 1.7  2006/01/16 15:30:26  fmazzant
+ added rename texture dialog for exporter
+ removed old maskobj
+
  Revision 1.6  2006/01/16 11:49:48  fmazzant
   added base texture name option.
 
@@ -47,6 +51,7 @@
  ****************************************************************************/
 
 #include "savemaskexporter.h"
+#include "changetexturename.h"
 
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent) : QDialog(parent)
 {
@@ -54,6 +59,8 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent) : QDialog(parent
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
+	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	ui.renametextureButton->setDisabled(true);
 }
 
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask) : QDialog(parent), mask(mask)
@@ -62,6 +69,8 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask) : QDi
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
+	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	ui.renametextureButton->setDisabled(true);
 }
 
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, int type) : QDialog(parent), mask(mask), type(type)
@@ -70,6 +79,8 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, int t
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
+	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	ui.renametextureButton->setDisabled(true);
 }
 
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel &m,int type): QDialog(parent),m(m),type(type)
@@ -84,36 +95,7 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel &m,int 
 
 void SaveMaskExporterDialog::Initialize()
 {
-	mask =0;
-	if( mask & vcg::tri::io::Mask::IOM_VERTFLAGS    ) {ui.check_iom_vertflags->setChecked(true);}
-
-	if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR    ) {ui.check_iom_vertcolor->setChecked(true);}
-	if( mask & vcg::tri::io::Mask::IOM_VERTQUALITY  ) {ui.check_iom_vertquality->setChecked(true);}
-	ui.check_iom_vertquality->setChecked(true);
-	if( mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD ) {ui.check_iom_verttexcoord->setChecked(true);}
-	if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL   ) {ui.check_iom_vertnormal->setChecked(true);}
-
-	if( mask & vcg::tri::io::Mask::IOM_FACEFLAGS    ) {ui.check_iom_faceflags->setChecked(true);}
-	if( mask & vcg::tri::io::Mask::IOM_FACECOLOR    ) {ui.check_iom_facecolor->setChecked(true);}
-	if( mask & vcg::tri::io::Mask::IOM_FACEQUALITY  ) {ui.check_iom_facequality->setChecked(true);}
-	ui.check_iom_facequality->setChecked(true);
-	if( mask & vcg::tri::io::Mask::IOM_FACENORMAL   ) {ui.check_iom_facenormal->setChecked(true);}
-
-	if( mask & vcg::tri::io::Mask::IOM_WEDGCOLOR    ) {ui.check_iom_wedgcolor->setChecked(true);}
-	if( mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD ) {ui.check_iom_verttexcoord->setChecked(true);}
-	if( mask & vcg::tri::io::Mask::IOM_WEDGNORMAL   ) {ui.check_iom_wedgnormal->setChecked(true);}
-
-	if( mask & vcg::tri::io::Mask::IOM_CAMERA       ) {ui.check_iom_camera->setChecked(true);}
-
-	SetDisableChecks(type);
-	SetTextureName();
-}
-
-/*
-	Questo metodo serve per specificare le varie personalizzazioni dei vari salvataggi.
-*/
-void SaveMaskExporterDialog::SetDisableChecks(int type)
-{
+	//disabled
 	//check globali disabilitati
 	ui.check_iom_vertquality->setDisabled(true);
 	ui.check_iom_facequality->setDisabled(true);	
@@ -125,66 +107,80 @@ void SaveMaskExporterDialog::SetDisableChecks(int type)
 	
 	//vert
 	ui.check_iom_vertflags->setDisabled(true);
-	ui.check_iom_vertcolor->setDisabled(true);
-	ui.check_iom_verttexcoord->setDisabled(true);
-	ui.check_iom_vertnormal->setDisabled(true);
+	ui.check_iom_vertcolor->setDisabled(!m.cm.HasPerVertexColor());
+	ui.check_iom_verttexcoord->setDisabled(!m.cm.HasPerVertexTexture());
+	ui.check_iom_vertnormal->setDisabled(!m.cm.HasPerVertexNormal());
 
 	//face
-	ui.check_iom_facenormal->setDisabled(true);
-	ui.check_iom_facecolor->setDisabled(true);
+	ui.check_iom_facenormal->setDisabled(!m.cm.HasPerFaceNormal());
+	ui.check_iom_facecolor->setDisabled(!m.cm.HasPerFaceColor());
 	ui.check_iom_faceflags->setDisabled(true);
 
 	//wedg
-	ui.check_iom_wedgcolor->setDisabled(true);
-	ui.check_iom_wedgtexcoord->setDisabled(true);
-	ui.check_iom_wedgnormal->setDisabled(true);
+	ui.check_iom_wedgcolor->setDisabled(!m.cm.HasPerWedgeColor());
+	ui.check_iom_wedgtexcoord->setDisabled(!m.cm.HasPerWedgeTexture());
+	ui.check_iom_wedgnormal->setDisabled(!m.cm.HasPerWedgeNormal());
 
+	//checked
+	ui.check_iom_vertquality->setChecked(true);
+	ui.check_iom_facequality->setChecked(true);
+	
+	//vert
+	ui.check_iom_vertcolor->setChecked(m.cm.HasPerVertexColor());
+	//ui.check_iom_vertquality->setChecked(m.cm.HasPerVertexQuality());
+	ui.check_iom_verttexcoord->setChecked(m.cm.HasPerVertexTexture());
+	ui.check_iom_vertnormal->setChecked(m.cm.HasPerVertexNormal());
+
+	//face
+	ui.check_iom_facecolor->setChecked(m.cm.HasPerFaceColor());
+	//ui.check_iom_facequality->setChecked(m.cm.HasPerFaceQuality());
+	ui.check_iom_facenormal->setChecked(m.cm.HasPerFaceNormal());
+
+	//wedg
+	ui.check_iom_wedgcolor->setChecked(m.cm.HasPerWedgeColor());
+	ui.check_iom_wedgtexcoord->setChecked(m.cm.HasPerWedgeTexture());
+	ui.check_iom_wedgnormal->setChecked(m.cm.HasPerWedgeNormal());
+
+	//m.cm.HasPerVertexMark();
+	//m.cm.HasPerFaceMark();
+	//m.cm.HasPerWedgeMark();
+	//m.cm.HasPerWedgeQuality();
+	
+	SetDisableChecks(type);
+	SetTextureName();
+}
+
+/*
+	Questo metodo serve per specificare le varie personalizzazioni dei vari salvataggi.
+*/
+void SaveMaskExporterDialog::SetDisableChecks(int type)
+{
 	switch(type)
 	{
 	case vcg::tri::io::SaveMaskToExporter::_OBJ:
 		{
-			this->setWindowTitle("Edit Options OBJ");
-			
-			ui.check_iom_vertnormal->setDisabled(false);
-			ui.check_iom_facecolor->setDisabled(false);
-			ui.check_iom_wedgtexcoord->setDisabled(false);
-			
+			this->setWindowTitle("Edit Options OBJ");		
 			break;
 		}
 	case vcg::tri::io::SaveMaskToExporter::_PLY:
 		{
-			this->setWindowTitle("Edit Options PLY");
-
-			ui.check_iom_wedgtexcoord->setDisabled(false);
-			ui.check_iom_wedgtexcoord->setChecked(true);
-			
+			this->setWindowTitle("Edit Options PLY");			
 			break;
 		}
 	case vcg::tri::io::SaveMaskToExporter::_OFF:
 		{
 			this->setWindowTitle("Edit Options OFF");
-
-			ui.check_iom_wedgtexcoord->setDisabled(false);
-
 			break;
 		}
 	case vcg::tri::io::SaveMaskToExporter::_STL:
 		{
 			this->setWindowTitle("Edit Options STL");
-
-			ui.check_iom_wedgtexcoord->setDisabled(false);
-
 			break;
 		}
 	case vcg::tri::io::SaveMaskToExporter::_3DS:
 		{
 			this->setWindowTitle("Edit Options 3DS");
-
-			ui.check_iom_facenormal->setDisabled(false);
-			ui.check_iom_facecolor->setDisabled(false);
-			ui.check_iom_wedgtexcoord->setDisabled(false);
-			ui.check_iom_faceflags->setDisabled(false);
-
+			ui.check_iom_faceflags->setDisabled(false);			
 			break;
 		}
 	default:
@@ -197,7 +193,7 @@ void SaveMaskExporterDialog::SetDisableChecks(int type)
 
 void SaveMaskExporterDialog::SetTextureName()
 {
-	for(int i=0;i<m.cm.textures.size();i++)
+	for(unsigned int i=0;i<m.cm.textures.size();i++)
 	{
 		QString item(m.cm.textures[i].c_str());
 		ui.listTextureName->addItem(item);
@@ -242,9 +238,13 @@ void SaveMaskExporterDialog::SlotCancelButton()
 	this->mask=0;
 }
 
-void SaveMaskExporterDialog::SlotRenameTexture()//botton
+void SaveMaskExporterDialog::SlotRenameTexture()
 {
-	
+	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName("Prova");
+	if(newtexture.size()>0)
+	{
+		(ui.listTextureName->currentItem())->setText(QString(newtexture.c_str())); 
+	}
 }
 
 void SaveMaskExporterDialog::SlotSelectionTextureName()

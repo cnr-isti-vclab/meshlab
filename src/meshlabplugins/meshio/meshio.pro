@@ -1,9 +1,9 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/lib3ds-1.2.0
-HEADERS       = meshio.h savemaskdialog.h maskobj.h savemaskexporter.h ../../../../sf/wrap/ply/plylib.h
-SOURCES       = meshio.cpp savemaskdialog.cpp maskobj.cpp savemaskexporter.cpp ../../../../sf/wrap/ply/plylib.cpp
-FORMS		  = ui/savemask.ui ui/savemaskexporter.ui
+HEADERS       = meshio.h savemaskdialog.h maskobj.h savemaskexporter.h changetexturename.h ../../../../sf/wrap/ply/plylib.h
+SOURCES       = meshio.cpp savemaskdialog.cpp maskobj.cpp savemaskexporter.cpp changetexturename.cpp ../../../../sf/wrap/ply/plylib.cpp
+FORMS		  = ui/savemask.ui ui/savemaskexporter.ui ui/renametexture.ui
 TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins
 

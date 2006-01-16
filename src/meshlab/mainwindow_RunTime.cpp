@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.69  2006/01/16 15:30:24  fmazzant
+added rename texture dialog for exporter
+removed old maskobj
+
 Revision 1.68  2006/01/15 03:54:50  glvertex
 Solved an annoyng old consistency bug between toolbars and toolbar menu's
 
@@ -825,15 +829,14 @@ bool MainWindow::saveAs()
 	
 		QStringListIterator itFilter(filters);
 		
-		if(extension.toUpper() == tr("OBJ"))
-			if(maskobj.isfirst)
-			{
-				SaveMaskDialog dialog(&maskobj,new QWidget());
-				dialog.ReadMask();
-				dialog.exec();
-			}
-		
-		int mask = maskobj.MaskObjToInt();
+		//if(extension.toUpper() == tr("OBJ"))
+		//	if(maskobj.isfirst)
+		//	{
+		//		SaveMaskDialog dialog(&maskobj,new QWidget());
+		//		dialog.ReadMask();
+		//		dialog.exec();
+		//	}
+		int mask = 0;//maskobj.MaskObjToInt();
 		int idx = allKnownFormats[extension.toLower()];
 		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
 		qb->show();
