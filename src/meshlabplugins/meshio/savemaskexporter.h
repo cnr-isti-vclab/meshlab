@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.6  2006/01/16 23:53:22  fmazzant
+ bux-fix MeshModel &m -> MeshModel *m
+
  Revision 1.5  2006/01/16 15:30:26  fmazzant
  added rename texture dialog for exporter
  removed old maskobj
@@ -59,7 +62,7 @@ public:
 	SaveMaskExporterDialog(QWidget *parent);
 	SaveMaskExporterDialog(QWidget *parent,int &mask);
 	SaveMaskExporterDialog(QWidget *parent,int &mask,int type);
-	SaveMaskExporterDialog(QWidget *parent,MeshModel &m,int type);
+	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type);
 
 	void Initialize();
 	void SetDisableChecks(int type);
@@ -74,7 +77,7 @@ private slots:
 
 private:
 	Ui::MaskExporterDialog ui;
-	MeshModel m;
+	MeshModel *m;
 	int mask;
 	int type;
 };//end class
@@ -96,7 +99,7 @@ namespace io {
 			_3DS  //4
 		};
 
-		inline static int GetMaskToExporter(MeshModel &m,int type)
+		inline static int GetMaskToExporter(MeshModel *m,int type)
 		{
 			SaveMaskExporterDialog dialog(new QWidget(),m,type);
 			dialog.Initialize();

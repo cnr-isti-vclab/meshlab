@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.11  2006/01/16 23:53:22  fmazzant
+ bux-fix MeshModel &m -> MeshModel *m
+
  Revision 1.10  2006/01/16 19:45:40  fmazzant
  deleted small error
 
@@ -94,7 +97,7 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, int t
 	ui.renametextureButton->setDisabled(true);
 }
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel &m,int type): QDialog(parent),m(m),type(type)
+SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type): QDialog(parent),m(m),type(type)
 {
 	SaveMaskExporterDialog::ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
@@ -118,39 +121,39 @@ void SaveMaskExporterDialog::Initialize()
 	
 	//vert
 	ui.check_iom_vertflags->setDisabled(true);
-	ui.check_iom_vertcolor->setDisabled(!m.cm.HasPerVertexColor());
-	ui.check_iom_verttexcoord->setDisabled(!m.cm.HasPerVertexTexture());
-	ui.check_iom_vertnormal->setDisabled(!m.cm.HasPerVertexNormal());
+	ui.check_iom_vertcolor->setDisabled(!m->cm.HasPerVertexColor());
+	ui.check_iom_verttexcoord->setDisabled(!m->cm.HasPerVertexTexture());
+	ui.check_iom_vertnormal->setDisabled(!m->cm.HasPerVertexNormal());
 
 	//face
-	ui.check_iom_facenormal->setDisabled(!m.cm.HasPerFaceNormal());
-	ui.check_iom_facecolor->setDisabled(!m.cm.HasPerFaceColor());
+	ui.check_iom_facenormal->setDisabled(!m->cm.HasPerFaceNormal());
+	ui.check_iom_facecolor->setDisabled(!m->cm.HasPerFaceColor());
 	ui.check_iom_faceflags->setDisabled(true);
 
 	//wedg
-	ui.check_iom_wedgcolor->setDisabled(!m.cm.HasPerWedgeColor());
-	ui.check_iom_wedgtexcoord->setDisabled(!m.cm.HasPerWedgeTexture());
-	ui.check_iom_wedgnormal->setDisabled(!m.cm.HasPerWedgeNormal());
+	ui.check_iom_wedgcolor->setDisabled(!m->cm.HasPerWedgeColor());
+	ui.check_iom_wedgtexcoord->setDisabled(!m->cm.HasPerWedgeTexture());
+	ui.check_iom_wedgnormal->setDisabled(!m->cm.HasPerWedgeNormal());
 
 	//checked
 	ui.check_iom_vertquality->setChecked(true);
 	ui.check_iom_facequality->setChecked(true);
 	
 	//vert
-	ui.check_iom_vertcolor->setChecked(m.cm.HasPerVertexColor());
+	ui.check_iom_vertcolor->setChecked(m->cm.HasPerVertexColor());
 	//ui.check_iom_vertquality->setChecked(m.cm.HasPerVertexQuality());
-	ui.check_iom_verttexcoord->setChecked(m.cm.HasPerVertexTexture());
-	ui.check_iom_vertnormal->setChecked(m.cm.HasPerVertexNormal());
+	ui.check_iom_verttexcoord->setChecked(m->cm.HasPerVertexTexture());
+	ui.check_iom_vertnormal->setChecked(m->cm.HasPerVertexNormal());
 
 	//face
-	ui.check_iom_facecolor->setChecked(m.cm.HasPerFaceColor());
+	ui.check_iom_facecolor->setChecked(m->cm.HasPerFaceColor());
 	//ui.check_iom_facequality->setChecked(m.cm.HasPerFaceQuality());
-	ui.check_iom_facenormal->setChecked(m.cm.HasPerFaceNormal());
+	ui.check_iom_facenormal->setChecked(m->cm.HasPerFaceNormal());
 
 	//wedg
-	ui.check_iom_wedgcolor->setChecked(m.cm.HasPerWedgeColor());
-	ui.check_iom_wedgtexcoord->setChecked(m.cm.HasPerWedgeTexture());
-	ui.check_iom_wedgnormal->setChecked(m.cm.HasPerWedgeNormal());
+	ui.check_iom_wedgcolor->setChecked(m->cm.HasPerWedgeColor());
+	ui.check_iom_wedgtexcoord->setChecked(m->cm.HasPerWedgeTexture());
+	ui.check_iom_wedgnormal->setChecked(m->cm.HasPerWedgeNormal());
 
 	//m.cm.HasPerVertexMark();
 	//m.cm.HasPerFaceMark();
@@ -204,9 +207,9 @@ void SaveMaskExporterDialog::SetDisableChecks(int type)
 
 void SaveMaskExporterDialog::SetTextureName()
 {
-	for(unsigned int i=0;i<m.cm.textures.size();i++)
+	for(unsigned int i=0;i<m->cm.textures.size();i++)
 	{
-		QString item(m.cm.textures[i].c_str());
+		QString item(m->cm.textures[i].c_str());
 		ui.listTextureName->addItem(item);
 	}
 }
@@ -241,9 +244,9 @@ void SaveMaskExporterDialog::SlotOkButton()
 
 	if( ui.check_iom_camera->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_CAMERA;}
 
-	for(unsigned int i=0;i<m.cm.textures.size();i++)
+	for(unsigned int i=0;i<m->cm.textures.size();i++)
 	{
-		m.cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();
+		m->cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();
 	}
 	this->mask=newmask;
 }
@@ -256,7 +259,7 @@ void SaveMaskExporterDialog::SlotCancelButton()
 void SaveMaskExporterDialog::SlotRenameTexture()
 {
 	int row = ui.listTextureName->currentRow();
-	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName(m.cm.textures[row].c_str());
+	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName(m->cm.textures[row].c_str());
 	if(newtexture.size()>0)
 	{
 		QStringList lists = QString(newtexture.c_str()).split('/');
