@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>220</height>
+    <width>551</width>
+    <height>202</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -25,12 +25,77 @@
     </rect>
    </property>
   </widget>
+  <widget class="QPushButton" name="okButton" >
+   <property name="geometry" >
+    <rect>
+     <x>390</x>
+     <y>170</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_2" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>120</width>
+     <height>46</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_3" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>162</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QCheckBox" name="check_iom_all" >
+      <property name="text" >
+       <string>All</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check_iom_none" >
+      <property name="text" >
+       <string>None</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check_iom_camera" >
+      <property name="text" >
+       <string>Camera</string>
+      </property>
+      <property name="checkable" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QGroupBox" name="groupBox" >
    <property name="geometry" >
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>120</width>
+     <width>111</width>
      <height>150</height>
     </rect>
    </property>
@@ -84,9 +149,9 @@
   <widget class="QGroupBox" name="groupBox_2" >
    <property name="geometry" >
     <rect>
-     <x>140</x>
+     <x>130</x>
      <y>10</y>
-     <width>120</width>
+     <width>111</width>
      <height>151</height>
     </rect>
    </property>
@@ -133,9 +198,9 @@
   <widget class="QGroupBox" name="groupBox_3" >
    <property name="geometry" >
     <rect>
-     <x>270</x>
+     <x>250</x>
      <y>10</y>
-     <width>120</width>
+     <width>111</width>
      <height>151</height>
     </rect>
    </property>
@@ -172,66 +237,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="layoutWidget_2" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>170</y>
-     <width>120</width>
-     <height>46</height>
-    </rect>
-   </property>
-   <layout class="QGridLayout" >
-    <property name="margin" >
-     <number>0</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item row="1" column="0" >
-     <widget class="QCheckBox" name="check_iom_all" >
-      <property name="text" >
-       <string>All</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1" >
-     <widget class="QCheckBox" name="check_iom_camera" >
-      <property name="text" >
-       <string>Camera</string>
-      </property>
-      <property name="checkable" >
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" >
-     <widget class="QCheckBox" name="check_iom_none" >
-      <property name="text" >
-       <string>None</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QPushButton" name="okButton" >
-   <property name="geometry" >
-    <rect>
-     <x>230</x>
-     <y>190</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>OK</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="cancelButton" >
    <property name="geometry" >
     <rect>
-     <x>310</x>
-     <y>190</y>
+     <x>470</x>
+     <y>170</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -239,6 +249,37 @@
    <property name="text" >
     <string>Cancel</string>
    </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_4" >
+   <property name="geometry" >
+    <rect>
+     <x>370</x>
+     <y>10</y>
+     <width>171</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Texture Name</string>
+   </property>
+   <layout class="QVBoxLayout" >
+    <property name="margin" >
+     <number>8</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QListWidget" name="listTextureName" />
+    </item>
+    <item>
+     <widget class="QPushButton" name="renametextureButton" >
+      <property name="text" >
+       <string>Rename Texture</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <pixmapfunction></pixmapfunction>

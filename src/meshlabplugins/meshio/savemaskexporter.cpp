@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.6  2006/01/16 11:49:48  fmazzant
+  added base texture name option.
+
  Revision 1.5  2006/01/15 08:51:29  fmazzant
  added mask specificy in 3ds code
 
@@ -50,6 +53,7 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent) : QDialog(parent
 	SaveMaskExporterDialog::ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
+	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
 }
 
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask) : QDialog(parent), mask(mask)
@@ -57,6 +61,7 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask) : QDi
 	SaveMaskExporterDialog::ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
+	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
 }
 
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, int type) : QDialog(parent), mask(mask), type(type)
@@ -64,19 +69,34 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, int t
 	SaveMaskExporterDialog::ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
+	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
+}
+
+SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel &m,int type): QDialog(parent),m(m),type(type)
+{
+	SaveMaskExporterDialog::ui.setupUi(this);
+	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
+	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
+	connect(ui.renametextureButton,SIGNAL(clicked()),this,SLOT(SlotRenameTexture()));
+	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	ui.renametextureButton->setDisabled(true);
 }
 
 void SaveMaskExporterDialog::Initialize()
 {
+	mask =0;
 	if( mask & vcg::tri::io::Mask::IOM_VERTFLAGS    ) {ui.check_iom_vertflags->setChecked(true);}
+
 	if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR    ) {ui.check_iom_vertcolor->setChecked(true);}
 	if( mask & vcg::tri::io::Mask::IOM_VERTQUALITY  ) {ui.check_iom_vertquality->setChecked(true);}
+	ui.check_iom_vertquality->setChecked(true);
 	if( mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD ) {ui.check_iom_verttexcoord->setChecked(true);}
 	if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL   ) {ui.check_iom_vertnormal->setChecked(true);}
 
 	if( mask & vcg::tri::io::Mask::IOM_FACEFLAGS    ) {ui.check_iom_faceflags->setChecked(true);}
 	if( mask & vcg::tri::io::Mask::IOM_FACECOLOR    ) {ui.check_iom_facecolor->setChecked(true);}
 	if( mask & vcg::tri::io::Mask::IOM_FACEQUALITY  ) {ui.check_iom_facequality->setChecked(true);}
+	ui.check_iom_facequality->setChecked(true);
 	if( mask & vcg::tri::io::Mask::IOM_FACENORMAL   ) {ui.check_iom_facenormal->setChecked(true);}
 
 	if( mask & vcg::tri::io::Mask::IOM_WEDGCOLOR    ) {ui.check_iom_wedgcolor->setChecked(true);}
@@ -86,6 +106,7 @@ void SaveMaskExporterDialog::Initialize()
 	if( mask & vcg::tri::io::Mask::IOM_CAMERA       ) {ui.check_iom_camera->setChecked(true);}
 
 	SetDisableChecks(type);
+	SetTextureName();
 }
 
 /*
@@ -174,6 +195,15 @@ void SaveMaskExporterDialog::SetDisableChecks(int type)
 	}
 }
 
+void SaveMaskExporterDialog::SetTextureName()
+{
+	for(int i=0;i<m.cm.textures.size();i++)
+	{
+		QString item(m.cm.textures[i].c_str());
+		ui.listTextureName->addItem(item);
+	}
+}
+
 int SaveMaskExporterDialog::GetNewMask()
 {
 	return this->mask;
@@ -189,13 +219,13 @@ void SaveMaskExporterDialog::SlotOkButton()
 
 	if( ui.check_iom_vertflags->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
 	if( ui.check_iom_vertcolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
-	if( ui.check_iom_vertquality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
+	//if( ui.check_iom_vertquality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
 	if( ui.check_iom_verttexcoord->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
 	if( ui.check_iom_vertnormal->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
 
 	if( ui.check_iom_faceflags->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
 	if( ui.check_iom_facecolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
-	if( ui.check_iom_facequality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
+	//if( ui.check_iom_facequality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
 	if( ui.check_iom_facenormal->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_FACENORMAL;}
 
 	if( ui.check_iom_wedgcolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;}
@@ -210,4 +240,14 @@ void SaveMaskExporterDialog::SlotOkButton()
 void SaveMaskExporterDialog::SlotCancelButton()
 {
 	this->mask=0;
+}
+
+void SaveMaskExporterDialog::SlotRenameTexture()//botton
+{
+	
+}
+
+void SaveMaskExporterDialog::SlotSelectionTextureName()
+{
+	ui.renametextureButton->setDisabled(false);
 }

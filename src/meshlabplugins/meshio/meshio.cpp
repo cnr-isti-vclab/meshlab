@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.48  2006/01/16 11:49:48  fmazzant
+  added base texture name option.
+
  Revision 1.47  2006/01/15 00:45:39  fmazzant
  extend mask exporter for all type file format +
 
@@ -319,7 +322,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OBJ"))
 	{	
-		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_OBJ);
+		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(m,vcg::tri::io::SaveMaskToExporter::_OBJ);
 		//if( newmask == 0 )return false;
 		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva escusivamente in formato ASCII
 		if(result != vcg::tri::io::ExporterOBJ<CMeshO>::E_NOERROR )
@@ -332,7 +335,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("PLY"))
 	{
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_PLY);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(m,vcg::tri::io::SaveMaskToExporter::_PLY);
 		if( newmask == 0 )return false;
 		
 		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),newmask,cb);
@@ -346,7 +349,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OFF"))
 	{
-		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_OFF);
+		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(m,vcg::tri::io::SaveMaskToExporter::_OFF);
 		//if( newmask == 0 )return false;
 		
 		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
@@ -360,7 +363,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("STL"))
 	{
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_STL);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(m,vcg::tri::io::SaveMaskToExporter::_STL);
 		if( newmask == 0 )return false;
 
 		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),newmask,cb);
@@ -375,7 +378,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{	
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(mask,vcg::tri::io::SaveMaskToExporter::_3DS);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(m,vcg::tri::io::SaveMaskToExporter::_3DS);
 		if( newmask == 0 )return false;
 		
 		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,newmask,cb);//salva esclusivamente in formato binario

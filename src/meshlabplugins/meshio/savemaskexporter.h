@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/01/16 11:49:48  fmazzant
+  added base texture name option.
+
  Revision 1.3  2006/01/15 00:45:39  fmazzant
  extend mask exporter for all type file format +
 
@@ -42,6 +45,7 @@
 
 #include <wrap/io_trimesh/io_mask.h>
 
+#include "../../meshlab/meshmodel.h"
 #include "ui_savemaskexporter.h"
 
 class SaveMaskExporterDialog : public QDialog
@@ -51,20 +55,24 @@ public:
 	SaveMaskExporterDialog(QWidget *parent);
 	SaveMaskExporterDialog(QWidget *parent,int &mask);
 	SaveMaskExporterDialog(QWidget *parent,int &mask,int type);
+	SaveMaskExporterDialog(QWidget *parent,MeshModel &m,int type);
 
 	void Initialize();
 	void SetDisableChecks(int type);
+	void SetTextureName();
 	int GetNewMask();
 
 private slots:
 	void SlotOkButton();
 	void SlotCancelButton();
+	void SlotRenameTexture();
+	void SlotSelectionTextureName();
 
 private:
 	Ui::MaskExporterDialog ui;
+	MeshModel m;
 	int mask;
 	int type;
-
 };//end class
 
 
@@ -93,9 +101,17 @@ namespace io {
 			int newmask = dialog.GetNewMask();
 			dialog.close();
 			return newmask;
-
 		}
 
+		inline static int GetMaskToExporter(MeshModel &m,int type)
+		{
+			SaveMaskExporterDialog dialog(new QWidget(),m,type);
+			dialog.Initialize();
+			dialog.exec();
+			int newmask = dialog.GetNewMask();
+			dialog.close();
+			return newmask;
+		}
 	};
 } // end Namespace tri
 } // end Namespace io
