@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/01/16 19:45:40  fmazzant
+ deleted small error
+
  Revision 1.2  2006/01/16 16:19:36  fmazzant
  bug-fix
 
@@ -74,5 +77,8 @@ void ChangeTextureNameDialog::SlotSearchTextureName()
 {
 	this->texture = QFileDialog::getOpenFileName(new QWidget(),tr("Open Image File"),".").toStdString();
 	if(this->texture.size() > 0)
-		ui.newtexturename->setText(QString(texture.c_str()));
+	{
+		QStringList lists = QString(texture.c_str()).split('/');
+		ui.newtexturename->setText(lists[lists.size()-1]);
+	}
 }

@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.10  2006/01/16 19:45:40  fmazzant
+ deleted small error
+
  Revision 1.9  2006/01/16 16:19:36  fmazzant
  bug-fix
 
@@ -55,6 +58,8 @@
 
 
  ****************************************************************************/
+#include <Qt>
+#include <QtGui>
 
 #include "savemaskexporter.h"
 #include "changetexturename.h"
@@ -238,9 +243,8 @@ void SaveMaskExporterDialog::SlotOkButton()
 
 	for(unsigned int i=0;i<m.cm.textures.size();i++)
 	{
-		//m.cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();
+		m.cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();
 	}
-
 	this->mask=newmask;
 }
 
@@ -255,7 +259,8 @@ void SaveMaskExporterDialog::SlotRenameTexture()
 	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName(m.cm.textures[row].c_str());
 	if(newtexture.size()>0)
 	{
-		(ui.listTextureName->currentItem())->setText(QString(newtexture.c_str()));
+		QStringList lists = QString(newtexture.c_str()).split('/');
+		(ui.listTextureName->currentItem())->setText(lists[lists.size()-1]);
 	}
 }
 
