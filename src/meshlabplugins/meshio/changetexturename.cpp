@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/01/16 16:19:36  fmazzant
+ bug-fix
+
  Revision 1.1  2006/01/16 15:30:26  fmazzant
  added rename texture dialog for exporter
  removed old maskobj
@@ -70,5 +73,6 @@ void ChangeTextureNameDialog::SlotCancelButton()
 void ChangeTextureNameDialog::SlotSearchTextureName()
 {
 	this->texture = QFileDialog::getOpenFileName(new QWidget(),tr("Open Image File"),".").toStdString();
-	ui.newtexturename->setText(QString(texture.c_str()));
+	if(this->texture.size() > 0)
+		ui.newtexturename->setText(QString(texture.c_str()));
 }

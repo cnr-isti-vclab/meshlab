@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.9  2006/01/16 16:19:36  fmazzant
+ bug-fix
+
  Revision 1.8  2006/01/16 15:56:00  fmazzant
  bug-fix mask -> newmask
 
@@ -218,13 +221,13 @@ void SaveMaskExporterDialog::SlotOkButton()
 
 	if( ui.check_iom_vertflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
 	if( ui.check_iom_vertcolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
-	//if( ui.check_iom_vertquality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
+	//if( ui.check_iom_vertquality->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
 	if( ui.check_iom_verttexcoord->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
 	if( ui.check_iom_vertnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
 
 	if( ui.check_iom_faceflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
 	if( ui.check_iom_facecolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
-	//if( ui.check_iom_facequality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
+	//if( ui.check_iom_facequality->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
 	if( ui.check_iom_facenormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_FACENORMAL;}
 
 	if( ui.check_iom_wedgcolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;}
@@ -232,6 +235,11 @@ void SaveMaskExporterDialog::SlotOkButton()
 	if( ui.check_iom_wedgnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;}
 
 	if( ui.check_iom_camera->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_CAMERA;}
+
+	for(unsigned int i=0;i<m.cm.textures.size();i++)
+	{
+		//m.cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();
+	}
 
 	this->mask=newmask;
 }
@@ -243,10 +251,11 @@ void SaveMaskExporterDialog::SlotCancelButton()
 
 void SaveMaskExporterDialog::SlotRenameTexture()
 {
-	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName("Prova");
+	int row = ui.listTextureName->currentRow();
+	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName(m.cm.textures[row].c_str());
 	if(newtexture.size()>0)
 	{
-		(ui.listTextureName->currentItem())->setText(QString(newtexture.c_str())); 
+		(ui.listTextureName->currentItem())->setText(QString(newtexture.c_str()));
 	}
 }
 
