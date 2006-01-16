@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.8  2006/01/16 15:56:00  fmazzant
+ bug-fix mask -> newmask
+
  Revision 1.7  2006/01/16 15:30:26  fmazzant
  added rename texture dialog for exporter
  removed old maskobj
@@ -213,22 +216,22 @@ void SaveMaskExporterDialog::SlotOkButton()
 	newmask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 	newmask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
 
-	if( ui.check_iom_vertflags->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
-	if( ui.check_iom_vertcolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
+	if( ui.check_iom_vertflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
+	if( ui.check_iom_vertcolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
 	//if( ui.check_iom_vertquality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
-	if( ui.check_iom_verttexcoord->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
-	if( ui.check_iom_vertnormal->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
+	if( ui.check_iom_verttexcoord->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
+	if( ui.check_iom_vertnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
 
-	if( ui.check_iom_faceflags->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
-	if( ui.check_iom_facecolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
+	if( ui.check_iom_faceflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
+	if( ui.check_iom_facecolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
 	//if( ui.check_iom_facequality->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
-	if( ui.check_iom_facenormal->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_FACENORMAL;}
+	if( ui.check_iom_facenormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_FACENORMAL;}
 
-	if( ui.check_iom_wedgcolor->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;}
-	if( ui.check_iom_wedgtexcoord->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
-	if( ui.check_iom_wedgnormal->isChecked()	) { mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;}
+	if( ui.check_iom_wedgcolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;}
+	if( ui.check_iom_wedgtexcoord->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
+	if( ui.check_iom_wedgnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;}
 
-	if( ui.check_iom_camera->isChecked()		) { mask |= vcg::tri::io::Mask::IOM_CAMERA;}
+	if( ui.check_iom_camera->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_CAMERA;}
 
 	this->mask=newmask;
 }
