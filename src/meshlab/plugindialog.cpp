@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2006/01/17 10:03:29  cignoni
+Removed bug: crash on white space click
+
 Revision 1.8  2006/01/04 15:35:52  alemochi
 Renamed string about general information on plugin
 
@@ -185,6 +188,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 {
 	QString parent;
 	QString actionName;
+  if(item==NULL) return;
 	if (item->parent()!=NULL)	{parent=item->parent()->text(0);actionName=item->text(0);}
 	else parent=item->text(0);
 	QString fileName=pathDirectory+"/"+parent;
