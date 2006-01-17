@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.17  2006/01/17 23:39:52  cignoni
+removed useless includes
+
 Revision 1.16  2006/01/04 16:22:20  cignoni
 Made FFAdj optional and added store and restore color functions
 
@@ -73,15 +76,9 @@ Added copyright info
 #include<vcg/simplex/vertexplus/component_ocf.h>
 #include<vcg/simplex/faceplus/component_ocf.h>
 #include<vcg/complex/trimesh/base.h>
-#include<vcg/complex/trimesh/create/platonic.h>
-#include<vcg/complex/trimesh/update/topology.h>
-#include<vcg/complex/trimesh/update/flag.h>
-#include<vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/refine.h>
 
-#include <wrap/io_trimesh/import_ply.h>
-#include <wrap/io_trimesh/export_ply.h>
 #include <wrap/gl/trimesh.h>
+#include <wrap/callback.h>
 
 using namespace vcg;
 using namespace std;
