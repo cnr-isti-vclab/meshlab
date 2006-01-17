@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.2  2006/01/17 13:46:35  mariolatronico
+spell check threshold, added typename for proper gcc compiling
+
 Revision 1.1  2006/01/17 00:53:49  giec
 Detacher function
 
@@ -37,7 +40,7 @@ Detacher function
 #include <vcg/complex/trimesh/clean.h>
 #include<vcg/space/point3.h>
 #include<vcg/complex/trimesh/update/topology.h>
-
+#include<vcg/simplex/face/topology.h>
 #include <iostream>
 #include <QtGlobal>
 
@@ -54,7 +57,7 @@ float Distanza(Point3f p1, Point3f p2)
 
 
 	template<class MESH_TYPE>
-		void Detacher(MESH_TYPE &m, float trashold)
+		void Detacher(MESH_TYPE &m, float threshold)
 	{	
 		//assert(m.HasFFTopology());
 
@@ -70,17 +73,17 @@ float Distanza(Point3f p1, Point3f p2)
 					d2 = Distanza((*fi).V(1)->P(),(*fi).V(2)->P());
 					d3 = Distanza((*fi).V(2)->P(),(*fi).V(0)->P());
 					if(
-						( d1 >= trashold )
-						||( d2 >= trashold )
-						||( d3 >= trashold )	)
+						( d1 >= threshold )
+						||( d2 >= threshold )
+						||( d3 >= threshold )	)
 					{
 
-						if(!face::IsBorder<MESH_TYPE::FaceType>((*fi),0 ) )
-							face::FFDetach<MESH_TYPE::FaceType>((*fi),0);
-						if(!face::IsBorder<MESH_TYPE::FaceType>((*fi),1 ) )
-							face::FFDetach<MESH_TYPE::FaceType>((*fi),1);
-						if(!face::IsBorder<MESH_TYPE::FaceType>((*fi),2 ) )
-							face::FFDetach<MESH_TYPE::FaceType>((*fi),2);
+						if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),0 ) )
+							face::FFDetach<typename MESH_TYPE::FaceType>((*fi),0);
+						if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),1 ) )
+							face::FFDetach<typename MESH_TYPE::FaceType>((*fi),1);
+						if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),2 ) )
+							face::FFDetach<typename MESH_TYPE::FaceType>((*fi),2);
 						(*fi).SetD();
 
 					}
