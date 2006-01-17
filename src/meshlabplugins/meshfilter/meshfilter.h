@@ -31,6 +31,7 @@
 #include "refinedialog.h"
 #include "decimatordialog.h"
 #include "transformdialog.h"
+#include "detacherdialog.h"
 
 #include "../../meshlab/GLLogStream.h"
 
@@ -47,7 +48,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	enum FilterType { FP_LOOP_SS, FP_BUTTERFLY_SS, FP_REMOVE_UNREFERENCED_VERTEX, 
 										FP_REMOVE_DUPLICATED_VERTEX, FP_REMOVE_NULL_FACES, 
 										FP_LAPLACIAN_SMOOTH, FP_DECIMATOR, FP_MIDPOINT, FP_REORIENT ,FP_INVERT_FACES,
-										FP_TRANSFORM	} ;
+										FP_TRANSFORM, FP_DETACHER	} ;
 	const QString ST(FilterType filter);
 
 
@@ -66,6 +67,7 @@ protected:
 	RefineDialog *refineDialog;
 	DecimatorDialog *decimatorDialog;
 	TransformDialog *transformDialog;
+	DetacherDialog *detacherDialog;
 };
 
 #endif

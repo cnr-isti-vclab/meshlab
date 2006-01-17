@@ -21,6 +21,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.43  2006/01/17 00:55:01  giec
+Added detacher filter with it's dialog
+
 Revision 1.42  2006/01/15 19:23:56  mariolatronico
 added log for Apply Transform
 
@@ -125,6 +128,7 @@ Added copyright info
 #include <stdlib.h>
 #include "refine_loop.h"
 #include "meshfilter.h"
+#include "detacher.h"
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/update/color.h>
@@ -135,6 +139,7 @@ Added copyright info
 #include "../../test/decimator/decimator.h"
 #include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
+
 
 //#include "../../meshlab/glarea.h"
 ////////////
@@ -153,7 +158,9 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 
 	actionList << new QAction(ST(FP_REORIENT), this);
 
-
+////
+	actionList << new QAction(ST(FP_DETACHER), this);
+////
 	actionList << new QAction(ST(FP_DECIMATOR), this);
 	
 	actionList << new QAction(ST(FP_INVERT_FACES), this);
@@ -165,6 +172,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	decimatorDialog->hide();
 	transformDialog = new TransformDialog();
 	transformDialog->hide();
+	detacherDialog = new DetacherDialog();
+	detacherDialog->hide();
 
 }
 
@@ -194,6 +203,8 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 		return QString("Invert Faces");
 	case FP_TRANSFORM:
 		return QString("Apply Transform");
+	case FP_DETACHER:
+		return QString("Remuve triangle above trashold");
 
 	default: assert(0);
   }
@@ -284,7 +295,11 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 			ai.Help = tr("Apply transformation, you can rotate, translate or scale the mesh");
 			ai.ShortHelp = tr("Apply Transform");
  		}
-	
+		if(action->text() == ST(FP_DETACHER) )
+ 		{
+			ai.Help = tr("remove from the mesh all triangles whose have an edge with lenght greater or equal than a trashold");
+			ai.ShortHelp = tr("Remove triangle with edge greater than a trashold");
+ 		}
 	
 	//	 ai.Help=tr("Generic Help for an action");
    return ai;
@@ -428,6 +443,17 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 
 	}
 
+	if (filter->text() == ST(FP_DETACHER) ) {
+		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+
+		int continueValue = detacherDialog->exec();
+		if (continueValue == QDialog::Rejected)
+			return false; // don't continue, user pressed Cancel
+		double threshold = detacherDialog->getThreshold(); // threshold for refinying
+
+
+		Detacher<CMeshO>(m.cm, threshold);
+	}
 
 	return true;
 }
