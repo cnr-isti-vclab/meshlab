@@ -4,6 +4,10 @@
 
 /*
 $Log$
+Revision 1.4  2006/01/17 14:18:03  mariolatronico
+- added connection between rotate Line edit and dial
+- bugfix, angle were passed in degrees, must be in radians
+
 Revision 1.3  2006/01/15 19:23:57  mariolatronico
 added log for Apply Transform
 
@@ -142,6 +146,15 @@ void TransformDialog::updateRotateLE(int value) {
 	rotateLE->setText(strValue);
 }	
 
+void TransformDialog::on_rotateLE_textChanged(const QString &text) {
+	// type coercion
+	bool isNumber = false;
+	int value = text.toFloat(&isNumber);
+	if (isNumber) 
+		rotateDial->setValue(value);
+
+}
+
 void TransformDialog::on_okButton_pressed() {
 	
 	Matrix44f currentMatrix;
@@ -180,13 +193,16 @@ void TransformDialog::on_okButton_pressed() {
 			log += "Z";
 
 		}
-		float rotateVal = rotateLE->text().toFloat();
+		bool isNumber = false;
+		float rotateVal = rotateLE->text().toFloat(&isNumber);
+		if ( ! isNumber ) {
+			log += "Invalid values entered";
+			reject();
+			return;
+		}
 		log += QString(" %1 degrees").arg(rotateVal);
-		//		qDebug("Axis : %f\t  %f\t  %f\t", axisPoint[0], axisPoint[1], axisPoint[2]);
-		//		qDebug("Value: %f", rotateVal * PI / 180.0);
 		// ANGLE MUST BE IN RADIANS !!!!
-		
-		currentMatrix.SetRotate(rotateVal, axisPoint);
+		currentMatrix.SetRotate(rotateVal * PI / 180.0, axisPoint);
 		
 	}
 	if (whichTransform == TR_SCALE) {

@@ -12,6 +12,10 @@ using vcg::Matrix44f;
 /*
 
 $Log$
+Revision 1.4  2006/01/17 14:18:03  mariolatronico
+- added connection between rotate Line edit and dial
+- bugfix, angle were passed in degrees, must be in radians
+
 Revision 1.3  2006/01/15 19:23:57  mariolatronico
 added log for Apply Transform
 
@@ -46,8 +50,8 @@ public slots:
 	// this is a slot to update the rotation LineEdit 
 	// from the dial
 	void updateRotateLE(int value);
-	
-
+	// ... and viceversa
+	void on_rotateLE_textChanged(const QString &text);
 	// do the real count when ok button is pressed
   void on_okButton_pressed();
 	
