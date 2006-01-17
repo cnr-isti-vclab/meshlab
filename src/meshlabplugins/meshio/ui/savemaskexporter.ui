@@ -9,7 +9,7 @@
     <x>0</x>
     <y>0</y>
     <width>551</width>
-    <height>202</height>
+    <height>203</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -37,58 +37,6 @@
    <property name="text" >
     <string>OK</string>
    </property>
-  </widget>
-  <widget class="QWidget" name="layoutWidget_2" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>170</y>
-     <width>120</width>
-     <height>46</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="layoutWidget_3" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>170</y>
-     <width>162</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" >
-    <property name="margin" >
-     <number>0</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QCheckBox" name="check_iom_all" >
-      <property name="text" >
-       <string>All</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="check_iom_none" >
-      <property name="text" >
-       <string>None</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="check_iom_camera" >
-      <property name="text" >
-       <string>Camera</string>
-      </property>
-      <property name="checkable" >
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
   </widget>
   <widget class="QGroupBox" name="groupBox" >
    <property name="geometry" >
@@ -280,6 +228,68 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_3" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>162</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QSplitter" name="splitter" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>158</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="orientation" >
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <layout class="QHBoxLayout" >
+    <property name="margin" >
+     <number>8</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+   </layout>
+   <widget class="QSplitter" name="splitter_2" >
+    <property name="orientation" >
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>8</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+    </layout>
+    <widget class="QRadioButton" name="AllButton" >
+     <property name="text" >
+      <string>All</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="NoneButton" >
+     <property name="text" >
+      <string>None</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QCheckBox" name="check_iom_camera" >
+    <property name="text" >
+     <string>Camera</string>
+    </property>
+    <property name="checkable" >
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
  </widget>
  <pixmapfunction></pixmapfunction>

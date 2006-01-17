@@ -25,6 +25,10 @@
   History
 
  $Log$
+ Revision 1.12  2006/01/17 09:08:36  fmazzant
+ update Check Button -> Radio Button and
+ connect slot for AllButton and NoneButton
+
  Revision 1.11  2006/01/16 23:53:22  fmazzant
  bux-fix MeshModel &m -> MeshModel *m
 
@@ -74,6 +78,8 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent) : QDialog(parent
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
 	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
+	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
 }
 
@@ -84,6 +90,8 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask) : QDi
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
 	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
+	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
 }
 
@@ -94,6 +102,8 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, int t
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
 	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
+	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
 }
 
@@ -104,6 +114,8 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int 
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 	connect(ui.renametextureButton,SIGNAL(clicked()),this,SLOT(SlotRenameTexture()));
 	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
+	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
+	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
 }
 
@@ -115,8 +127,8 @@ void SaveMaskExporterDialog::Initialize()
 	ui.check_iom_facequality->setDisabled(true);	
 	
 	//all - none - camera
-	ui.check_iom_all->setDisabled(true);
-	ui.check_iom_none->setDisabled(true);
+	ui.AllButton->setChecked(true);
+	ui.NoneButton->setChecked(false);
 	ui.check_iom_camera->setDisabled(true);
 	
 	//vert
@@ -126,9 +138,10 @@ void SaveMaskExporterDialog::Initialize()
 	ui.check_iom_vertnormal->setDisabled(!m->cm.HasPerVertexNormal());
 
 	//face
+	ui.check_iom_faceflags->setDisabled(true);
 	ui.check_iom_facenormal->setDisabled(!m->cm.HasPerFaceNormal());
 	ui.check_iom_facecolor->setDisabled(!m->cm.HasPerFaceColor());
-	ui.check_iom_faceflags->setDisabled(true);
+	
 
 	//wedg
 	ui.check_iom_wedgcolor->setDisabled(!m->cm.HasPerWedgeColor());
@@ -270,4 +283,42 @@ void SaveMaskExporterDialog::SlotRenameTexture()
 void SaveMaskExporterDialog::SlotSelectionTextureName()
 {
 	ui.renametextureButton->setDisabled(false);
+}
+
+void SaveMaskExporterDialog::SlotSelectionAllButton()
+{
+	//vert
+	ui.check_iom_vertflags->setChecked(ui.check_iom_vertflags->isEnabled());
+	ui.check_iom_vertcolor->setChecked(ui.check_iom_vertcolor->isEnabled());
+	ui.check_iom_verttexcoord->setChecked(ui.check_iom_verttexcoord->isEnabled());
+	ui.check_iom_vertnormal->setChecked(ui.check_iom_vertnormal->isEnabled());
+
+	//face
+	ui.check_iom_faceflags->setChecked(ui.check_iom_faceflags->isEnabled());
+	ui.check_iom_facenormal->setChecked(ui.check_iom_facenormal->isEnabled());
+	ui.check_iom_facecolor->setChecked(ui.check_iom_facecolor->isEnabled());
+	
+	//wedg
+	ui.check_iom_wedgcolor->setChecked(ui.check_iom_wedgcolor->isEnabled());
+	ui.check_iom_wedgtexcoord->setChecked(ui.check_iom_wedgtexcoord->isEnabled());
+	ui.check_iom_wedgnormal->setChecked(ui.check_iom_wedgnormal->isEnabled());
+}
+
+void SaveMaskExporterDialog::SlotSelectionNoneButton()
+{
+	//vert
+	ui.check_iom_vertflags->setChecked(ui.check_iom_vertflags->isEnabled() && !ui.check_iom_vertflags->isChecked());
+	ui.check_iom_vertcolor->setChecked(ui.check_iom_vertcolor->isEnabled() && !ui.check_iom_vertcolor->isChecked());
+	ui.check_iom_verttexcoord->setChecked(ui.check_iom_verttexcoord->isEnabled() && !ui.check_iom_verttexcoord->isChecked());
+	ui.check_iom_vertnormal->setChecked(ui.check_iom_vertnormal->isEnabled() && !ui.check_iom_vertnormal->isChecked());
+
+	//face
+	ui.check_iom_faceflags->setChecked(ui.check_iom_faceflags->isEnabled() && !ui.check_iom_faceflags->isChecked());
+	ui.check_iom_facenormal->setChecked(ui.check_iom_facenormal->isEnabled()&& !ui.check_iom_facenormal->isChecked());
+	ui.check_iom_facecolor->setChecked(ui.check_iom_facecolor->isEnabled()&& !ui.check_iom_facecolor->isChecked());
+	
+	//wedg
+	ui.check_iom_wedgcolor->setChecked(ui.check_iom_wedgcolor->isEnabled() && !ui.check_iom_wedgcolor->isChecked());
+	ui.check_iom_wedgtexcoord->setChecked(ui.check_iom_wedgtexcoord->isEnabled() && !ui.check_iom_wedgtexcoord->isChecked());
+	ui.check_iom_wedgnormal->setChecked(ui.check_iom_wedgnormal->isEnabled() && !ui.check_iom_wedgnormal->isChecked());
 }

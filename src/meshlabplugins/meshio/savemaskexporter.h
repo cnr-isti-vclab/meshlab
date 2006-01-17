@@ -25,6 +25,10 @@
   History
 
  $Log$
+ Revision 1.7  2006/01/17 09:08:36  fmazzant
+ update Check Button -> Radio Button and
+ connect slot for AllButton and NoneButton
+
  Revision 1.6  2006/01/16 23:53:22  fmazzant
  bux-fix MeshModel &m -> MeshModel *m
 
@@ -74,6 +78,8 @@ private slots:
 	void SlotCancelButton();
 	void SlotRenameTexture();
 	void SlotSelectionTextureName();
+	void SlotSelectionAllButton();
+	void SlotSelectionNoneButton();
 
 private:
 	Ui::MaskExporterDialog ui;
