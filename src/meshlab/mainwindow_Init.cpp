@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.39  2006/01/17 09:20:02  fmazzant
+deleted Ob&j saving options... menu
+
 Revision 1.38  2006/01/15 03:54:50  glvertex
 Solved an annoyng old consistency bug between toolbars and toolbar menu's
 
@@ -627,7 +630,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
 	preferencesMenu->addAction(setCustomizeAct);
-	preferencesMenu->addAction(setSaveMaskObjAct);
+	//preferencesMenu->addAction(setSaveMaskObjAct);
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
