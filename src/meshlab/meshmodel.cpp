@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.22  2006/01/17 23:45:12  cignoni
+Removed useless open function
+
 Revision 1.21  2006/01/10 16:52:16  fmazzant
 update ply::PlyMask -> io::Mask
 
@@ -71,53 +74,8 @@ Added copyright info
 ****************************************************************************/
 
 #include "meshmodel.h"
-
-#include <vcg/complex/trimesh/update/bounding.h>
-#include "../test/io/import_obj.h"
-#include "../test/io/export_obj.h"
-#include <wrap/io_trimesh/io_mask.h>
 #include <QString>
 #include <QtGlobal>
-
-bool MeshModel::Open(const char *filename, vcg::CallBackPos *cb)
-{
-  int mask;
-  QString f = QString(filename);
-
-	vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename, mask); 
-  
-  if(mask&vcg::tri::io::Mask::IOM_VERTQUALITY) qDebug("Has Vertex Quality\n");
-  if(mask&vcg::tri::io::Mask::IOM_FACEQUALITY) qDebug("Has Face Quality\n");
-  if(mask&vcg::tri::io::Mask::IOM_FACECOLOR) qDebug("Has Face Color\n");
-  if(mask&vcg::tri::io::Mask::IOM_VERTCOLOR) qDebug("Has Vertex Color\n");
-  if(mask&vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
-  {
-    qDebug("Has Wedge Text Coords\n");
-    cm.face.EnableWedgeTex();
-  }
-
-	int ret;
-	ret = vcg::tri::io::ImporterPLY<CMeshO>::Open(cm,filename,cb);
-	
-	//qDebug("Face 0 %f %f \n",cm.face[0].WT(0).u(),cm.face[0].WT(0).v());
-	
-	vcg::tri::UpdateBounding<CMeshO>::Box(cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(cm);
-	
-  return ret==::vcg::ply::E_NOERROR;
-}
-
-bool MeshModel::Save(const char *filename,CallBackPos *cb)
-{
-	int mask;
-	QString fileName(filename);
-	
-	
-	bool ret;
-	ret = vcg::tri::io::ExporterPLY<CMeshO>::Save(this->cm,filename,cb);
-
-	return ret;
-}
 
 bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm)
 {
