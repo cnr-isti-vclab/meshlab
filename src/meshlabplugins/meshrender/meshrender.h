@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.9  2006/01/17 11:04:14  cignoni
+Removed bug due to multiple creation of list of action
+
 Revision 1.8  2005/12/29 13:52:31  mariolatronico
 gl/glew.h -> GL/glew.h
 
@@ -106,10 +109,14 @@ public:
 
 	MeshShaderRenderPlugin()
 	{
+    initActionList();
 		supported = false;
 	}
 
-	QList<QAction *> MeshShaderRenderPlugin::actions () {
+	QList<QAction *> MeshShaderRenderPlugin::actions () const {
+    return actionList;
+  }
+  void MeshShaderRenderPlugin::initActionList() {
 
 	
 		QDir shadersDir = QDir(qApp->applicationDirPath());
@@ -236,7 +243,7 @@ public:
 			}
 		}
 
-		return actionList;
+//		return actionList;
 	}
 
 
