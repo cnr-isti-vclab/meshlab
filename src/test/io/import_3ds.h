@@ -21,6 +21,11 @@
 *                                                                           *
 ****************************************************************************/
 
+/****************************************************************************
+  History
+
+*****************************************************************************/
+
 #ifndef __VCGLIB_IMPORT_3DS
 #define __VCGLIB_IMPORT_3DS
 
@@ -135,24 +140,31 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 
 	
 	Lib3dsNode *p;
+	
+	//Lib3dsMatrix matrix;
+	//lib3ds_matrix_identity(matrix);
+
+	int numVertices = 0;
+	p=file->nodes;
   for (p=file->nodes; p!=0; p=p->next) {
-      ReadNode(m, file, p, vi, fi);
+      ReadNode(m, file, p, vi, fi/*, &matrix*/, numVertices);
   }
 	
   return E_NOERROR;
 } // end of Open
 
 
-	static bool ReadNode(OpenMeshType &m, Lib3dsFile* file, Lib3dsNode *node, VertexIterator &vi, FaceIterator &fi)
+	static bool ReadNode(OpenMeshType &m, Lib3dsFile* file, Lib3dsNode *node, VertexIterator &vi, FaceIterator &fi, int &numVertices)
 	{
 		ASSERT(file);
+
 
 		{
 			Lib3dsNode *p;
 			for (p=node->childs; p!=0; p=p->next)
-				ReadNode(m, file, p, vi, fi);
+				ReadNode(m, file, p, vi, fi, numVertices);
 		}
-	  
+
 		if (node->type==LIB3DS_OBJECT_NODE)
 		{
 			if (strcmp(node->name,"$$$DUMMY") == 0)
@@ -169,16 +181,22 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 				
 				Lib3dsVector *normalL= (Lib3dsVector*) malloc(3*sizeof(Lib3dsVector)*mesh->faces);
 
-				{
-					Lib3dsMatrix M;
-					lib3ds_matrix_copy(M, mesh->matrix);
-					lib3ds_matrix_inv(M);
+					Lib3dsMatrix matrix;
+					Lib3dsMatrix translatedMatrix;
+					Lib3dsMatrix inverseMatrix;
+					//lib3ds_matrix_identity(matrix);
+				
+					Lib3dsObjectData *d;
+					d=&node->data.object;
 
-					// TODO: fare qualcosa con la matrice
-					// forse bisogna moltiplicarla alle coordinate
-					// dei punti e alle normali
-					//glMultMatrixf(&M[0][0]);
-				}
+					lib3ds_matrix_copy(translatedMatrix, mesh->matrix);
+					lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
+					lib3ds_matrix_inv(inverseMatrix);
+					lib3ds_matrix_translate_xyz(translatedMatrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
+					lib3ds_matrix_mul(matrix, translatedMatrix, inverseMatrix);
+					
+					// TODO: moltiplicare la matrice anche alle normali!
+					
 				lib3ds_mesh_calculate_normals(mesh, normalL);
 
 
@@ -188,14 +206,21 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 
 				
 				for (unsigned v=0; v<mesh->points; ++v) {
-					Lib3dsPoint			*p		= &mesh->pointL[v];
+					Lib3dsVector	*p		= &mesh->pointL[v].pos;
 					
-					(*vi).P()[0] = p->pos[0];
-					(*vi).P()[1] = p->pos[1];
-					(*vi).P()[2] = p->pos[2];
+					Lib3dsVector	transformedP;
+					lib3ds_vector_transform( transformedP, matrix, *p);
+					
+					(*vi).P()[0] = transformedP[0];
+					(*vi).P()[1] = transformedP[1];
+					(*vi).P()[2] = transformedP[2];
 
 					++vi;
 				}
+
+				// TODO: get texture coords
+				
+				
 
 				for (unsigned p=0; p<mesh->faces; ++p) {
 					Lib3dsFace			*f		= &mesh->faceL[p];
@@ -230,7 +255,7 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 
 					// assigning face normal
 					// ---------------------
-					(*fi).N() = f->normal;
+					(*fi).N() = f->normal; // moltiplicare per la matrice
 					
 					for (int i=0; i<3; ++i)
 					{
@@ -239,26 +264,29 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 								
 						// assigning face vertices
 						// -----------------------
-						(*fi).V(i) = &(m.vert[ f->points[i] ]);
+						(*fi).V(i) = &(m.vert[ (numVertices + f->points[i]) ]); // TODO: l'errore e' qui!
 					}
 
 					++fi;
 				}
 
         free(normalL);
+
+				numVertices += mesh->points;
       }
-    }
 
-    /*if (node->user.d) {
-      Lib3dsObjectData *d;
+		
+			/*if (node->user.d) {
+				Lib3dsObjectData *d;
 
-      glPushMatrix();
-      d=&node->data.object;
-      glMultMatrixf(&node->matrix[0][0]);
-      glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
-      glCallList(node->user.d);
-      glPopMatrix();
-    }*/
+				glPushMatrix();
+				d=&node->data.object;
+				glMultMatrixf(&node->matrix[0][0]);
+				glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
+				glCallList(node->user.d);
+				glPopMatrix();
+			}*/
+		}
 	}
 
 	/*!
@@ -279,7 +307,7 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 	*	\param mask	A mask which will be filled according to type of data found in the object
 	* \param oi A structure which will be filled with infos about the object to be opened
 	*/
-	static bool LoadMask(const char * filename, int &mask, _3dsInfo &info)
+	static bool LoadMask(const char * filename, int &mask, _3dsInfo &info, Lib3dsFile *file)
 	{
 		std::ifstream stream(filename);
 		if (stream.fail())
