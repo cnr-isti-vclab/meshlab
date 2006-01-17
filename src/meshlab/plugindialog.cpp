@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2006/01/17 13:47:45  fmazzant
+update interface meshio : formats -> importFormats() & exportFormts
+
 Revision 1.9  2006/01/17 10:03:29  cignoni
 Removed bug: crash on white space click
 
@@ -131,9 +134,14 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
                 MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
 								if (iMeshIO){
 									QStringList Templist;
-									foreach(const MeshIOInterface::Format f,iMeshIO->formats()){
+									foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
 										QString formats;
-										foreach(const QString s,f.extensions) formats+=s+" ";
+										foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
+										Templist.push_back(formats);
+									}
+									foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+										QString formats;
+										foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
 										Templist.push_back(formats);
 									}
                   addItems(pluginItem,Templist);
@@ -198,9 +206,14 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 		MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
 		if (iMeshIO){
 			if (item->parent()!=NULL)
-			foreach(const MeshIOInterface::Format f,iMeshIO->formats()){
+			foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
 				QString formats;
-				foreach(const QString s,f.extensions) formats+=s+" ";
+				foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
+				if (actionName==formats) labelInfo->setText(f.description);
+			}
+			foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+				QString formats;
+				foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
 				if (actionName==formats) labelInfo->setText(f.description);
 			}
 		}

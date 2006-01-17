@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.33  2006/01/17 13:47:45  fmazzant
+update interface meshio : formats -> importFormats() & exportFormts
+
 Revision 1.32  2006/01/17 10:04:20  cignoni
 Slightly change MeshEditInterface
 
@@ -140,7 +143,8 @@ public:
 		};
 
     virtual ~MeshIOInterface() {}
-    virtual QList<Format> formats() const = 0;
+	virtual QList<Format> importFormats() const = 0;
+	virtual QList<Format> exportFormats() const = 0;
     
  virtual bool open(
       const QString &format, // "OBJ"

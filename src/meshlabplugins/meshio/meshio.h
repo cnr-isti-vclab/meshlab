@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.16  2006/01/17 13:47:45  fmazzant
+ update interface meshio : formats -> importFormats() & exportFormts
+
  Revision 1.15  2005/12/15 01:20:28  buzzelli
  formats method adapted in order to fit with recent changes in MeshIOInterface
 
@@ -76,7 +79,8 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
 
   
 public:
-	QList<Format> formats() const;
+	QList<Format> importFormats() const;
+	QList<Format> exportFormats() const;
 
 	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.70  2006/01/17 13:47:45  fmazzant
+update interface meshio : formats -> importFormats() & exportFormts
+
 Revision 1.69  2006/01/16 15:30:24  fmazzant
 added rename texture dialog for exporter
 removed old maskobj
@@ -675,7 +678,8 @@ void MainWindow::toggleBackFaceCulling()
 }
 
 
-void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats)
+enum TypeIO{IMPORT,EXPORT};
+void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats,int type)
 {
 	QString allKnownFormatsFilter = tr("All known formats ("); 
 	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
@@ -683,7 +687,16 @@ void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &all
 	{
 		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
 
-		QList<MeshIOInterface::Format> currentFormats = pMeshIOPlugin->formats();
+		QList<MeshIOInterface::Format> currentFormats;// = pMeshIOPlugin->formats();
+
+		/* new */
+		if(type == IMPORT)
+			currentFormats = pMeshIOPlugin->importFormats();
+
+		if(type == EXPORT)
+			currentFormats = pMeshIOPlugin->exportFormats();
+		/* end new part */
+
 		QList<MeshIOInterface::Format>::iterator itFormat = currentFormats.begin();
 		while(itFormat != currentFormats.end())
 		{
@@ -723,7 +736,7 @@ void MainWindow::open(QString fileName)
 	// the index of first plugin which is able to open it
 	QHash<QString, int> allKnownFormats;
 	
-	LoadKnownFilters(filters, allKnownFormats);
+	LoadKnownFilters(filters, allKnownFormats,IMPORT);
 
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".", filters.join("\n"));
@@ -805,7 +818,7 @@ bool MainWindow::saveAs()
 	
 	QHash<QString, int> allKnownFormats;
 	
-	LoadKnownFilters(filters, allKnownFormats);
+	LoadKnownFilters(filters, allKnownFormats,EXPORT);
 
 	QString fileName;
 

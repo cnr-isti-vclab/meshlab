@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.57  2006/01/17 13:47:45  fmazzant
+update interface meshio : formats -> importFormats() & exportFormts
+
 Revision 1.56  2006/01/14 00:51:06  davide_portelli
 A little change
 
@@ -185,7 +188,7 @@ private:
 	void updateRecentFileActions();				
 	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
-	void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats);
+	void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type);
 
 
 	

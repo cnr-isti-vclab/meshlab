@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.51  2006/01/17 13:47:45  fmazzant
+ update interface meshio : formats -> importFormats() & exportFormts
+
  Revision 1.50  2006/01/16 23:53:22  fmazzant
  bux-fix MeshModel &m -> MeshModel *m
 
@@ -329,9 +332,10 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OBJ"))
 	{	
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_OBJ);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_OBJ,vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability());
 		if( newmask == 0 )return false;
-		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,newmask,cb);//salva escusivamente in formato ASCII
+
+		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,newmask,cb);//salva esclusivamente in formato ASCII
 		if(result != vcg::tri::io::ExporterOBJ<CMeshO>::E_NOERROR )
 		{
 			QMessageBox::warning(parent, tr("OBJ Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result)));
@@ -342,7 +346,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("PLY"))
 	{
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_PLY);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_PLY,0);//aggiungere la capability
 		if( newmask == 0 )return false;
 		
 		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),newmask,cb);
@@ -356,7 +360,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OFF"))
 	{
-		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_OFF);
+		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_OFF,0);//aggiungere la capability
 		//if( newmask == 0 )return false;
 		
 		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
@@ -370,7 +374,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("STL"))
 	{
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_STL);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_STL,0);//aggiungere la capability
 		if( newmask == 0 )return false;
 
 		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),newmask,cb);
@@ -385,7 +389,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{	
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_3DS);
+		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_3DS,vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability());
 		if( newmask == 0 )return false;
 		
 		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,newmask,cb);//salva esclusivamente in formato binario
@@ -402,7 +406,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	return false;
 }
 
-QList<MeshIOInterface::Format> ExtraMeshIOPlugin::formats() const
+QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
 
@@ -432,8 +436,41 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::formats() const
 	formatList << stl;
 	formatList << _3ds;
 	
-	return formatList;
-};
 
+	return formatList;
+}
+
+QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
+{
+	QList<Format> formatList;
+
+	Format ply;
+	ply.description = "Stanford Polygon File Format";
+	ply.extensions <<  tr("PLY");
+	
+	Format obj;
+	obj.description = "Alias Wavefront Object";
+	obj.extensions <<  tr("OBJ");
+	
+	Format off;
+	off.description = "Object File Format";
+	off.extensions << tr("OFF");
+
+	Format stl;
+	stl.description = "STL File Format";
+	stl.extensions << tr("STL");
+
+	Format _3ds;
+	_3ds.description = "3D-Studio File Format";
+	_3ds.extensions << tr("3DS");
+
+	formatList << ply;
+	formatList << obj;
+	formatList << off;
+	formatList << stl;
+	formatList << _3ds;
+
+	return formatList;
+}
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)
