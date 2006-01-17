@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.32  2006/01/17 10:04:20  cignoni
+Slightly change MeshEditInterface
+
 Revision 1.31  2006/01/13 12:10:30  vannini
 Added logging to mean and gaussian curvautres colorization
 
@@ -200,7 +203,7 @@ public:
 		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual bool isSupported() = 0;
-		virtual QList<QAction *> actions() = 0;
+		virtual QList<QAction *> actions() const = 0;
 };
 
 class MeshColorizeInterface
@@ -244,9 +247,9 @@ public:
 		virtual void Edit(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
 		virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
     virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
-    virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	  virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	  virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+    virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
+	  virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
+	  virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 //	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
 		virtual QList<QAction *> actions() const = 0;
 };
