@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.71  2006/01/17 23:46:36  cignoni
+Moved some include from meshmodel.h to here
+
 Revision 1.70  2006/01/17 13:47:45  fmazzant
 update interface meshio : formats -> importFormats() & exportFormts
 
@@ -414,6 +417,8 @@ First rough version. It simply load a mesh.
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 
+#include <wrap/io_trimesh/io_mask.h>
+#include <vcg/complex/trimesh/update/normal.h>
 
 
 void MainWindow::updateRecentFileActions()

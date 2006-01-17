@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.16  2006/01/17 23:46:36  cignoni
+Moved some include from meshmodel.h to here
+
 Revision 1.15  2006/01/13 16:24:16  vannini
 Moved gaussian and mean curvature functions into color_curvature.h
 
@@ -69,6 +72,7 @@ Added copyright info
 #include <QtGui>
 #include <limits>
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/update/flag.h>
 #include "meshcolorize.h"
 #include "color_manifold.h"
 #include "color_curvature.h"

@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.52  2006/01/17 23:46:36  cignoni
+ Moved some include from meshmodel.h to here
+
  Revision 1.51  2006/01/17 13:47:45  fmazzant
  update interface meshio : formats -> importFormats() & exportFormts
 
@@ -189,6 +192,7 @@
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/ply/plylib.h>
+#include <vcg/complex/trimesh/update/normal.h>
 
 #include <QMessageBox>
 #include <QFileDialog>
