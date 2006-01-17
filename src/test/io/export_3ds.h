@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.15  2006/01/17 13:48:54  fmazzant
+ added capability mask on export file format
+
  Revision 1.14  2006/01/15 08:51:30  fmazzant
  added mask specificy in 3ds code
 
@@ -133,6 +136,28 @@ namespace io {
 			if(error>7 || error<0) return "Unknown error";
 			else return obj_error_msg[error];
 		};
+
+		/*
+			restituisce quali informazioni sono possibili salvare in base alla maschera
+		*/
+		static int GetExportMaskCapability()
+		{
+			int capability = 0;
+
+			//vert
+			capability |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+
+			//face
+			capability |= vcg::tri::io::Mask::IOM_FACEFLAGS;
+			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
+			capability |= vcg::tri::io::Mask::IOM_FACEQUALITY;
+			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
+
+			//wedg
+			capability |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+
+			return capability;
+		}
 
 		static int SaveASCII(SaveMeshType &m, const char * filename)	
 		{

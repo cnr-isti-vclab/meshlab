@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.8  2006/01/17 13:48:54  fmazzant
+ added capability mask on export file format
+
  Revision 1.7  2006/01/17 09:08:36  fmazzant
  update Check Button -> Radio Button and
  connect slot for AllButton and NoneButton
@@ -67,11 +70,13 @@ public:
 	SaveMaskExporterDialog(QWidget *parent,int &mask);
 	SaveMaskExporterDialog(QWidget *parent,int &mask,int type);
 	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type);
+	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type,int capability);
 
 	void Initialize();
-	void SetDisableChecks(int type);
+	void SetWindowTitle();
 	void SetTextureName();
 	int GetNewMask();
+	void SetMaskCapability();
 
 private slots:
 	void SlotOkButton();
@@ -86,6 +91,7 @@ private:
 	MeshModel *m;
 	int mask;
 	int type;
+	int capability;
 };//end class
 
 namespace vcg {
@@ -105,9 +111,9 @@ namespace io {
 			_3DS  //4
 		};
 
-		inline static int GetMaskToExporter(MeshModel *m,int type)
+		inline static int GetMaskToExporter(MeshModel *m,int type,int capability)
 		{
-			SaveMaskExporterDialog dialog(new QWidget(),m,type);
+			SaveMaskExporterDialog dialog(new QWidget(),m,type,capability);
 			dialog.Initialize();
 			dialog.exec();
 			int newmask = dialog.GetNewMask();

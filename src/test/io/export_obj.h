@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.31  2006/01/17 13:48:54  fmazzant
+ added capability mask on export file format
+
  Revision 1.30  2006/01/15 00:45:40  fmazzant
  extend mask exporter for all type file format +
 
@@ -190,6 +193,28 @@ namespace io {
 			if(error>7 || error<0) return "Unknown error";
 			else return obj_error_msg[error];
 		};
+
+		/*
+			restituisce quali informazioni sono possibili salvare in base alla maschera
+		*/
+		static int GetExportMaskCapability()
+		{
+			int capability = 0;
+			
+			//vert
+			capability |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+			capability |= vcg::tri::io::Mask::IOM_VERTNORMAL;
+
+			//face
+			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
+			capability |= vcg::tri::io::Mask::IOM_FACEQUALITY;
+			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
+
+			//wedg
+			capability |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+
+			return capability;
+		}
 
 		/*
 			salva la Mesh in formato Obj File.
