@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.47  2006/01/17 16:35:27  glvertex
+Added Scalable fonts
+
 Revision 1.46  2006/01/13 10:12:59  alemochi
 Added control to fov and changed behavior
 
@@ -365,6 +368,8 @@ private:
 	MeshRenderInterface *iRenderer;
 	QAction *currentSharder;
 	QAction *lastFilterRef; // reference to last filter applied
+	QFont	qFont;			//font settings
+
 
 	// Editing support
 	MeshEditInterface *iEdit;

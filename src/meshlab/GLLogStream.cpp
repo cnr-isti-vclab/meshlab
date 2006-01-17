@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2006/01/17 16:35:27  glvertex
+Added Scalable fonts
+
 Revision 1.8  2006/01/07 12:07:16  glvertex
 Set default font
 
@@ -79,10 +82,9 @@ void GLLogStream::Save(int Level, const char * filename )
 }
 
 
-void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines)
+void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,QFont font)
 {
-	//static QFont qf("Helvetica",8);
-	const int LineHeight=15;
+	const int LineHeight=font.pointSize()+4;
 
 	list<pair <int,string> > ::iterator li;
 	li=S.end();
@@ -97,7 +99,7 @@ void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines)
 	for(;li!=S.end();++li)
 	{
 		if(Level == -1 || (*li).first == Level)
-			qgl->renderText(20,StartLine,(*li).second.c_str());
+			qgl->renderText(20,StartLine,(*li).second.c_str(),font);
 
 		StartLine+=LineHeight;
 	}

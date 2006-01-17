@@ -24,6 +24,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/01/17 16:35:27  glvertex
+Added Scalable fonts
+
 Revision 1.2  2005/11/26 18:24:00  glvertex
 Added method [print] that writes the log entries ina QStringList
 
@@ -56,11 +59,13 @@ Initial Commit
 #include <utility>
 #include "LogStream.h"
 
+class GLArea;
+
 class GLLogStream : public LogStream
 {
 public:
 	void print(QStringList &list);		// Fills a QStringList with the log entries 
-  void glDraw(QGLWidget *qgl, int Level, int nlines);
+  void glDraw(QGLWidget *qgl, int Level, int nlines,QFont font);
   void Save(int Level, const char *filename);
   void Clear() {S.clear();}
 	void Log(int Level, const char * f, ... );

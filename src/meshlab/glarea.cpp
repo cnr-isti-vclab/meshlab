@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.74  2006/01/17 16:35:27  glvertex
+Added Scalable fonts
+
 Revision 1.73  2006/01/14 10:19:06  mariolatronico
 GLArea::ButtonPressed is not an aggregate type,
 changed ButtonPressed::element to element
@@ -311,21 +314,31 @@ GLArea::GLArea(QWidget *parent)
 
 
 void GLArea::displayModelInfo()
-{
+{	
+	float fontSpacingV = (currentHeight*.01f)+3;
+	float startPos= currentHeight-(fontSpacingV/3);
+
 	QString strMessage;
 	QString strVertex="Vertices   "+QString("").setNum(mm->cm.vert.size(),10);
 	QString strTriangle="Faces "+QString("").setNum(mm->cm.face.size(),10);
   //strVertex+=strVertex.setNum(mm->cm.vert.size(),10);
 	//strTriangle.setNum(mm->cm.face.size(),10);
-  renderText(currentWidth-currentWidth*0.15,currentHeight-35,strVertex);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-20,strTriangle);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-50,QString("Fov ")+QString::number((int)fov,10));
 	QString strNear=QString("  Nplane:%1").arg(nearPlane,2,'f',1);
 	QString strFar=QString("  Fplane:%1").arg(farPlane,2,'f',1);
 	QString strViewer=QString("Viewer:%1").arg(objDist,2,'f',1);
-  renderText(currentWidth-currentWidth*0.15,currentHeight-65,strViewer+strNear+strFar);
+  renderText(currentWidth-currentWidth*.15f,startPos-4*fontSpacingV,strViewer+strNear+strFar,qFont);
+	renderText(currentWidth-currentWidth*.15f,startPos-3*fontSpacingV,QString("Fov ")+QString::number((int)fov,10),qFont);
+	renderText(currentWidth-currentWidth*.15f,startPos-2*fontSpacingV,strVertex,qFont);
+	renderText(currentWidth-currentWidth*.15f,startPos-fontSpacingV,strTriangle,qFont);
 	//renderText(currentWidth-currentWidth*0.15,currentHeight-80,strFar);
 }
+
+void GLArea::renderFps()
+{	
+	QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
+	renderText(currentWidth-currentWidth*.15f,currentHeight-2,strInfo,qFont);	
+}
+
 
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
 QSize GLArea::sizeHint() const				{return QSize(400,300);}
@@ -570,7 +583,7 @@ void GLArea::paintGL()
 		// Now print out the infos
 		glColor4f(1,1,1,1);
 		if(logVisible)
-			log.glDraw(this,currLogLevel,3);
+			log.glDraw(this,currLogLevel,3,qFont);
 
 		displayModelInfo();
 
@@ -601,6 +614,9 @@ void GLArea::resizeGL(int _width, int _height)
 	vpWidth=_width;
 	vpHeight=_height;
 	glViewport(0,0, _width, _height);
+
+		// Set font size depending on window size (min = 1, max = 9)
+	qFont.setPointSizeF(vcg::math::Clamp<float>(-3 + sqrtf(currentWidth*currentWidth + currentHeight*currentHeight) * .01f,1,9));
 }
 
 void GLArea::saveSnapshot()
@@ -674,13 +690,13 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	{
 		if (currentButton & KEY_CTRL)
 		{
-			if (notch<0) clipRatioFar*=1.2;
-			else clipRatioFar/=1.2; 
+			if (notch<0) clipRatioFar*=1.2f;
+			else clipRatioFar/=1.2f; 
 		}
 		else 
 		{
-			if (notch<0) fov/=1.2;
-			else fov*=1.2;
+			if (notch<0) fov/=1.2f;
+			else fov*=1.2f;
 			if (fov>90) fov=90;
 			if (fov<5)  fov=5;
 		}
@@ -688,8 +704,8 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	}
 	else if (currentButton & KEY_CTRL) 
 	{
-		if (notch<0) clipRatioNear*=1.2;
-		else clipRatioNear/=1.2; 
+		if (notch<0) clipRatioNear*=1.2f;
+		else clipRatioNear/=1.2f; 
 		updateGL();
 	}
 	else { trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA)); update(); }
@@ -800,16 +816,6 @@ void GLArea::setLightModel()
 }
 
 
-
-void GLArea::renderFps()
-{
-	//static QFont q("Times",12);
-	QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
-	renderText(currentWidth-currentWidth*0.15,currentHeight-5,strInfo);
-	
-}
-
-
 void GLArea::setCustomSetting(const ColorSetting & s)
 {
 	cs.bColorBottom=s.bColorBottom;
@@ -823,7 +829,7 @@ void GLArea::setSnapshotSetting(const SnapshotSetting & s)
 
 void GLArea::setVertigoCamera()
 {
-	GLfloat ClipRatio=1;
+//	GLfloat ClipRatio=1;
 	GLfloat fAspect = (GLfloat)vpWidth/ vpHeight;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
