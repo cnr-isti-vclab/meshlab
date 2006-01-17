@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2006/01/17 10:43:48  cignoni
+removed '' from DATE macro
+
 Revision 1.8  2006/01/07 11:49:00  glvertex
 Added actions descriptions
 
@@ -81,7 +84,7 @@ const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
  const PluginInfo &ExtraMeshDecoratePlugin::Info() 
 {
    static PluginInfo ai; 
-   ai.Date=tr("__DATE__");
+   ai.Date=tr(__DATE__);
    return ai;
  }
  
