@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.16  2006/01/17 18:13:06  fmazzant
+ changed vertflags in vertnormal [bug]
+
  Revision 1.15  2006/01/17 13:48:54  fmazzant
  added capability mask on export file format
 
@@ -151,7 +154,7 @@ namespace io {
 			capability |= vcg::tri::io::Mask::IOM_FACEFLAGS;
 			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
 			capability |= vcg::tri::io::Mask::IOM_FACEQUALITY;
-			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
+			capability |= vcg::tri::io::Mask::IOM_FACENORMAL;
 
 			//wedg
 			capability |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
@@ -173,7 +176,7 @@ namespace io {
 
 			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
 			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//crea una nuova mesh con nome mesh
-
+									
 			std::vector<Material> materials;
 			std::map<vcg::TCoord2<float>,int> CoordTextures;
 			std::vector<vcg::TCoord2<float> > CoordTexturesVector;
