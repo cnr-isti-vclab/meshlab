@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.15  2006/01/18 14:57:25  fmazzant
+ added Lib3dsNode in export_3ds
+
  Revision 1.14  2006/01/18 00:44:27  fmazzant
  added control for unchecked wedgytexcood when textures is empty
 
@@ -146,7 +149,6 @@ void SaveMaskExporterDialog::Initialize()
 	//all - none - camera
 	ui.AllButton->setChecked(true);
 	ui.NoneButton->setChecked(false);
-	ui.check_iom_camera->setDisabled(true);
 	
 	//vert
 	//ui.check_iom_vertflags->setDisabled(true);

@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.18  2006/01/18 14:57:26  fmazzant
+ added Lib3dsNode in export_3ds
+
  Revision 1.17  2006/01/18 12:27:49  fmazzant
  added control on diffuse component
 
@@ -181,8 +184,8 @@ namespace io {
 				return E_NOTFACESVALID;
 
 			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
-			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//crea una nuova mesh con nome mesh
-									
+			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//crea una nuova mesh con nome mesh		
+
 			std::vector<Material> materials;
 			std::map<vcg::TCoord2<float>,int> CoordTextures;
 
@@ -264,16 +267,7 @@ namespace io {
 							//shininess
 							material->shininess = materials[materials.size()-1].Ns;
 							
-							if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
-							{
-								unsigned int MAX = 3;
-								for(unsigned int k=0;k<MAX;k++)
-									if(m.HasPerWedgeTexture())
-										if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),t_index))
-											t_index++;				
-							}
-
-							lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
+							//lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
 							face.material[0] = 'm';//associa alla faccia il materiale.
 							face.material[1] = 'A' + material_index;//l'idice del materiale...
 						}
@@ -282,6 +276,15 @@ namespace io {
 							face.material[0] = 'm';//associa alla faccia il materiale.
 							face.material[1] = 'A' + material_index;//l'idice del materiale...
 						}
+					}
+
+					if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
+					{
+						unsigned int MAX = 3;
+						for(unsigned int k=0;k<MAX;k++)
+							if(m.HasPerWedgeTexture())
+								if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),t_index))
+									t_index++;				
 					}
 
 					mesh->faceL[f_index]=face;
@@ -297,7 +300,7 @@ namespace io {
 
 
 			//aggiunge le coordinate di texture alla mesh
-			//if(m.HasPerWedgeTexture())
+			//if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 			//{
 			//	if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
 			//	{
@@ -307,8 +310,14 @@ namespace io {
 			//		return false;
 			//}
 
-			//salva la mesh in 3ds
+
 			lib3ds_file_insert_mesh(file, mesh);//inserisce la mesh al file
+			
+			Lib3dsNode *node = lib3ds_node_new_object();//crea un nuovo nodo
+			strcpy(node->name,mesh->name);
+			node->parent_id = LIB3DS_NO_PARENT;	
+			lib3ds_file_insert_node(file,node);
+
 			bool result = lib3ds_file_save(file, filename); //salva il file
 			if(result)
 				return E_NOERROR; 
