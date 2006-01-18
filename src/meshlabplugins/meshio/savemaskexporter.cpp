@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.14  2006/01/18 00:44:27  fmazzant
+ added control for unchecked wedgytexcood when textures is empty
+
  Revision 1.13  2006/01/17 13:48:54  fmazzant
  added capability mask on export file format
 
@@ -233,6 +236,12 @@ void SaveMaskExporterDialog::SetWindowTitle()
 
 void SaveMaskExporterDialog::SetTextureName()
 {
+	if( m->cm.textures.size() == 0 )
+	{
+		ui.check_iom_wedgtexcoord->setDisabled(true);
+		ui.check_iom_wedgtexcoord->setChecked(false);
+	}
+
 	for(unsigned int i=0;i<m->cm.textures.size();i++)
 	{
 		QString item(m->cm.textures[i].c_str());
