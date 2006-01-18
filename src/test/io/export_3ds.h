@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.20  2006/01/18 16:12:58  fmazzant
+ updated material
+
  Revision 1.19  2006/01/18 15:09:45  fmazzant
  added texture base
 
@@ -244,12 +247,12 @@ namespace io {
 
 					if(mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 					{
-						int material_index = 0;
-						if((material_index = CreateNewMaterial(m, materials, 0, fi)) == materials.size())
+						int material_index = CreateNewMaterial(m, materials, 0, fi);
+						if(material_index == materials.size())
 						{
 							Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
 							material->name[0] = 'm';
-							material->name[1] = 'A' + material_index;
+							material->name[1] = 'A' + material_index - 1;
 							
 							//ambient
 							material->ambient[0] = materials[materials.size()-1].Ka[0];
@@ -274,7 +277,7 @@ namespace io {
 							
 							//lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
 							face.material[0] = 'm';//associa alla faccia il materiale.
-							face.material[1] = 'A' + material_index;//l'idice del materiale...
+							face.material[1] = 'A' + material_index - 1;//l'idice del materiale...
 						}
 						else
 						{	
@@ -289,7 +292,7 @@ namespace io {
 						for(unsigned int k=0;k<MAX;k++)
 							if(m.HasPerWedgeTexture())
 								if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),t_index))
-									t_index++;				
+									t_index++;
 					}
 
 					mesh->faceL[f_index]=face;
