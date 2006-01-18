@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.21  2006/01/18 16:14:52  fmazzant
+ update small error
+
  Revision 1.20  2006/01/18 16:12:58  fmazzant
  updated material
 
@@ -150,7 +153,7 @@ namespace io {
 					"Texture Coord not valid"				// 8
 				};
 
-			if(error>7 || error<0) return "Unknown error";
+			if(error>8 || error<0) return "Unknown error";
 			else return obj_error_msg[error];
 		};
 
