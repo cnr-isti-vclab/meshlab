@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.32  2006/01/18 00:45:56  fmazzant
+ added control on face's diffuse
+
  Revision 1.31  2006/01/17 13:48:54  fmazzant
  added capability mask on export file format
 
@@ -456,8 +459,19 @@ namespace io {
 			unsigned char b = (*fi).C()[2];
 			unsigned char alpha = (*fi).C()[3];
 			
-			Point3f diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);
-			float Tr = (float)alpha/255.0;
+			Point3f diffuse;
+			if(r > 1 || g > 1 || b > 1)
+				diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);
+			else if (r != 0 || g != 0 || b != 0)
+				diffuse = Point3f((float)r,(float)g,(float)b);
+			else
+				diffuse = Point3f(1.0,1.0,1.0);
+
+			float Tr;
+			if(alpha > 1)
+				Tr = (float)alpha/255.0;
+			else
+				Tr = (float)alpha;
 			
 			int illum = 2; //default not use Ks!
 			float ns = 0.0; //default
