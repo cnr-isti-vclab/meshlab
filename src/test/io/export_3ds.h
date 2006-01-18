@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.17  2006/01/18 12:27:49  fmazzant
+ added control on diffuse component
+
  Revision 1.16  2006/01/17 18:13:06  fmazzant
  changed vertflags in vertnormal [bug]
 
@@ -147,6 +150,9 @@ namespace io {
 		{
 			int capability = 0;
 
+			//camera
+			//capability |= vcg::tri::io::Mask::IOM_CAMERA;
+
 			//vert
 			capability |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 
@@ -179,7 +185,6 @@ namespace io {
 									
 			std::vector<Material> materials;
 			std::map<vcg::TCoord2<float>,int> CoordTextures;
-			std::vector<vcg::TCoord2<float> > CoordTexturesVector;
 
 			int current = 0;
 			int max = m.vert.size()+m.face.size();
@@ -344,8 +349,19 @@ namespace io {
 			unsigned char b = (*fi).C()[2];
 			unsigned char alpha = (*fi).C()[3];
 			
-			Point3f diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);
-			float Tr = (float)alpha/255.0;
+			Point3f diffuse;
+			if(r > 1 || g > 1 || b > 1)
+				diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);
+			else if (r != 0 || g != 0 || b != 0)
+				diffuse = Point3f((float)r,(float)g,(float)b);
+			else
+				diffuse = Point3f(1.0,1.0,1.0);
+
+			float Tr;
+			if(alpha > 1)
+				Tr = (float)alpha/255.0;
+			else
+				Tr = (float)alpha;
 			
 			int illum = 2; //default not use Ks!
 			float ns = 0.0; //default
