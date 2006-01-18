@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.19  2006/01/18 15:09:45  fmazzant
+ added texture base
+
  Revision 1.18  2006/01/18 14:57:26  fmazzant
  added Lib3dsNode in export_3ds
 
@@ -122,7 +125,8 @@ namespace io {
 			E_ABORTED,					// 4
 			E_NOTDEFINITION,			// 5
 			E_NOTVEXTEXVALID,			// 6
-			E_NOTFACESVALID				// 7
+			E_NOTFACESVALID,			// 7
+			E_NOTEXCOORDVALID			// 8
 		};
 
 		/*
@@ -140,6 +144,7 @@ namespace io {
 					"Function not defined",					// 5
 					"Vertices not valid",					// 6
 					"Faces not valid"						// 7
+					"Texture Coord not valid"				// 8
 				};
 
 			if(error>7 || error<0) return "Unknown error";
@@ -298,18 +303,16 @@ namespace io {
 				}
 			}
 
-
 			//aggiunge le coordinate di texture alla mesh
-			//if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
-			//{
-			//	if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
-			//	{
-			//		
-			//	}
-			//	else
-			//		return false;
-			//}
-
+			if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
+			{
+				if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
+				{
+					
+				}
+				else
+					return E_NOTEXCOORDVALID;
+			}
 
 			lib3ds_file_insert_mesh(file, mesh);//inserisce la mesh al file
 			
