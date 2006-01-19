@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.59  2006/01/19 11:54:15  fmazzant
+cleaned up code & cleaned up history log
+
 Revision 1.58  2006/01/19 11:21:12  fmazzant
 deleted old savemaskobj & old MaskObj
 
@@ -35,70 +38,6 @@ A little change
 Revision 1.55  2006/01/07 11:04:49  glvertex
 Added Apply Last Filter action
 
-Revision 1.54  2006/01/06 01:09:55  glvertex
-Application name and version coherency using a member method
-
-Revision 1.53  2006/01/02 16:15:16  glvertex
-Added reload action
-
-Revision 1.52  2005/12/23 20:21:16  glvertex
-- Added ColorModes
-- ColorModes consistency between different windows
-
-Revision 1.51  2005/12/22 20:01:23  glvertex
-- Added support for more than one shader
-- Some methods renamed
-- Adjusted some accelerators keys
-- Fixed up minor visual issues
-
-Revision 1.50  2005/12/19 19:03:06  davide_portelli
-Now decorations in render menu are consistent when we have tiled windows.
-
-Revision 1.49  2005/12/15 01:13:02  buzzelli
-common code of open and save methods factorized into LoadKnownFilters method
-
-Revision 1.48  2005/12/14 22:24:14  cignoni
-Added preliminary supprot for editing/selection plugins.
-
-Revision 1.47  2005/12/13 00:31:23  davide_portelli
-Cleaned commented code, and dummy code.
-
-Revision 1.46  2005/12/10 06:09:56  davide_portelli
-A little change
-
-Revision 1.45  2005/12/09 16:43:51  fmazzant
-added tools -> save mask obj file II
-
-Revision 1.44  2005/12/09 10:43:04  fmazzant
-added tools -> set mask obj file
-
-Revision 1.43  2005/12/09 00:26:25  buzzelli
-io importing mechanism adapted in order to be fully transparent towards the user
-
-Revision 1.42  2005/12/05 12:17:45  ggangemi
-Added void applyDecorateMode();
-
-Revision 1.41  2005/12/04 17:47:18  davide_portelli
-Added menu windows->Next and Shortcut "CTRL+PageDown"
-Added reset trackbal Shortcut "CTRL+H"
-Optimize fullscreen
-
-Revision 1.40  2005/12/04 14:45:30  glvertex
-gla now is a local variable used only if needed
-texture button now works properly
-
-Revision 1.39  2005/12/04 02:44:39  davide_portelli
-Added texture icon in toolbar
-
-Revision 1.38  2005/12/04 00:22:46  cignoni
-Switched from progresBar widget to progressbar dialog
-
-Revision 1.37  2005/12/03 23:40:31  davide_portelli
-Added FullScreen menu and TrackBall->Reset trackBall
-
-Revision 1.36  2005/12/03 22:49:46  cignoni
-Added copyright info
-
 ****************************************************************************/
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
@@ -110,7 +49,6 @@ Added copyright info
 #include <QColorDialog>
 #include "meshmodel.h"
 #include "glarea.h"
-//#include "../meshlabplugins/meshio/savemaskdialog.h"
 
 #define MAXRECENTFILES 4
 
@@ -174,7 +112,6 @@ private slots:
 	void updateMenus();
 	///////////Slot Menu Preferences /////////////////
 	void setCustomize();
-	void setSaveMaskObj();
 	///////////Slot Menu Help ////////////////////////
 	void about();
 	void aboutPlugins();	
@@ -275,7 +212,6 @@ private:
 	QAction *closeAllAct;
 	///////////Action Menu Preferences /////////////////
 	QAction *setCustomizeAct;
-	QAction *setSaveMaskObjAct;
 	///////////Action Menu Help ////////////////////////
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;
