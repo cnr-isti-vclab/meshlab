@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.40  2006/01/19 11:21:12  fmazzant
+deleted old savemaskobj & old MaskObj
+
 Revision 1.39  2006/01/17 09:20:02  fmazzant
 deleted Ob&j saving options... menu
 
@@ -325,7 +328,7 @@ QProgressDialog *MainWindow::qb;
 
 MainWindow::MainWindow()
 {
-	maskobj = MaskObj();
+	//maskobj = MaskObj();
 
 	workspace = new QWorkspace(this);
 	setCentralWidget(workspace);

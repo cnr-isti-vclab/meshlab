@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/01/19 11:21:14  fmazzant
+ deleted old savemaskobj & old MaskObj
+
  Revision 1.2  2005/12/13 14:02:50  fmazzant
  added the rescue of the materials of the obj
 
@@ -33,19 +36,19 @@
  
 *****************************************************************************/
 
-class MaskObj
-{
-public:
-	MaskObj();
-	
-	int MaskObjToInt();
-
-	bool isfirst;
-	bool vertexs;
-	bool faces;
-	bool texture;
-	bool normal;
-	bool binary;
-	bool colorV;
-	bool colorF;
-};
+//class MaskObj
+//{
+//public:
+//	MaskObj();
+//	
+//	int MaskObjToInt();
+//
+//	bool isfirst;
+//	bool vertexs;
+//	bool faces;
+//	bool texture;
+//	bool normal;
+//	bool binary;
+//	bool colorV;
+//	bool colorF;
+//};

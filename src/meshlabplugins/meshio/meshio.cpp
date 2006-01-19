@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.54  2006/01/19 11:21:14  fmazzant
+ deleted old savemaskobj & old MaskObj
+
  Revision 1.53  2006/01/19 09:36:28  fmazzant
  cleaned up history log
 
@@ -45,7 +48,7 @@
 #include <QtGui>
 
 #include "meshio.h"
-#include "savemaskdialog.h"
+//#include "savemaskdialog.h"
 #include "savemaskexporter.h"
 
 // temporaneamente prendo la versione corrente dalla cartella test

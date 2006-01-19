@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.6  2006/01/19 11:21:14  fmazzant
+ deleted old savemaskobj & old MaskObj
+
  Revision 1.5  2006/01/10 16:52:19  fmazzant
  update ply::PlyMask -> io::Mask
 
@@ -43,31 +46,31 @@
 *****************************************************************************/
 
 
-#include "maskobj.h"
-#include <wrap/io_trimesh/io_mask.h>
-
-MaskObj::MaskObj()
-{
-	this->isfirst=true;
-
-	this->faces = true;
-	this->vertexs = true;
-
-	this->binary = false;
-	this->colorV = false;
-	this->colorF = false;
-	this->normal = false;
-	this->texture = false;
-}
-
-int MaskObj::MaskObjToInt()
-{
-	int mask=0;
-	if(faces)	{mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
-	if(vertexs)	{mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
-	if(colorV)	{mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
-	if(colorF)	{mask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
-	if(normal)	{mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
-	if(texture)	{mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
-	return mask;
-}
+//#include "maskobj.h"
+//#include <wrap/io_trimesh/io_mask.h>
+//
+//MaskObj::MaskObj()
+//{
+//	this->isfirst=true;
+//
+//	this->faces = true;
+//	this->vertexs = true;
+//
+//	this->binary = false;
+//	this->colorV = false;
+//	this->colorF = false;
+//	this->normal = false;
+//	this->texture = false;
+//}
+//
+//int MaskObj::MaskObjToInt()
+//{
+//	int mask=0;
+//	if(faces)	{mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
+//	if(vertexs)	{mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
+//	if(colorV)	{mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
+//	if(colorF)	{mask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
+//	if(normal)	{mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
+//	if(texture)	{mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
+//	return mask;
+//}

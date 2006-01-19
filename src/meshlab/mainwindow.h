@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.58  2006/01/19 11:21:12  fmazzant
+deleted old savemaskobj & old MaskObj
+
 Revision 1.57  2006/01/17 13:47:45  fmazzant
 update interface meshio : formats -> importFormats() & exportFormts
 
@@ -107,7 +110,7 @@ Added copyright info
 #include <QColorDialog>
 #include "meshmodel.h"
 #include "glarea.h"
-#include "../meshlabplugins/meshio/savemaskdialog.h"
+//#include "../meshlabplugins/meshio/savemaskdialog.h"
 
 #define MAXRECENTFILES 4
 
@@ -126,7 +129,7 @@ public:
 	MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v0.6"); }
-   MaskObj maskobj;
+  // MaskObj maskobj;
    
   
 private slots:

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.72  2006/01/19 11:21:12  fmazzant
+deleted old savemaskobj & old MaskObj
+
 Revision 1.71  2006/01/17 23:46:36  cignoni
 Moved some include from meshmodel.h to here
 
@@ -926,9 +929,9 @@ void MainWindow::setCustomize()
 
 void MainWindow::setSaveMaskObj()
 {
-	SaveMaskDialog objdialog(&maskobj,new QWidget());
+	/*SaveMaskDialog objdialog(&maskobj,new QWidget());
 	objdialog.ReadMask();
-	objdialog.exec();
+	objdialog.exec();*/
 }
 
 void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
