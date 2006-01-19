@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.57  2006/01/19 17:07:51  fmazzant
+ changed struct Format to class Format(QString, QString).
+ updated importFormats() and exportFormats() to the new class.
+
  Revision 1.56  2006/01/19 16:23:21  fmazzant
  changed return 0 in return MeshModel::IOM_ALL on GetExportMaskCapability(...)
 
@@ -276,67 +280,22 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
-
-	Format ply;
-	ply.description = "Stanford Polygon File Format";
-	ply.extensions <<  tr("PLY");
-	
-	Format obj;
-	obj.description = "Alias Wavefront Object";
-	obj.extensions <<  tr("OBJ");
-	
-	Format off;
-	off.description = "Object File Format";
-	off.extensions << tr("OFF");
-
-	Format stl;
-	stl.description = "STL File Format";
-	stl.extensions << tr("STL");
-
-	Format _3ds;
-	_3ds.description = "3D-Studio File Format";
-	_3ds.extensions << tr("3DS");
-
-	formatList << ply;
-	formatList << obj;
-	formatList << off;
-	formatList << stl;
-	formatList << _3ds;
-	
-
+	formatList << Format("Stanford Polygon File Format"	,tr("PLY"));
+	formatList << Format("Alias Wavefront Object"		,tr("OBJ"));
+	formatList << Format("Object File Format"			,tr("OFF"));
+	formatList << Format("STL File Format"				,tr("STL"));
+	formatList << Format("3D-Studio File Format"		,tr("3DS"));
 	return formatList;
 }
 
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
-
-	Format ply;
-	ply.description = "Stanford Polygon File Format";
-	ply.extensions <<  tr("PLY");
-	
-	Format obj;
-	obj.description = "Alias Wavefront Object";
-	obj.extensions <<  tr("OBJ");
-	
-	Format off;
-	off.description = "Object File Format";
-	off.extensions << tr("OFF");
-
-	Format stl;
-	stl.description = "STL File Format";
-	stl.extensions << tr("STL");
-
-	Format _3ds;
-	_3ds.description = "3D-Studio File Format";
-	_3ds.extensions << tr("3DS");
-
-	formatList << ply;
-	formatList << obj;
-	formatList << off;
-	formatList << stl;
-	formatList << _3ds;
-
+	formatList << Format("Stanford Polygon File Format"	,tr("PLY"));
+	formatList << Format("Alias Wavefront Object"		,tr("OBJ"));
+	formatList << Format("Object File Format"			,tr("OFF"));
+	formatList << Format("STL File Format"				,tr("STL"));
+	formatList << Format("3D-Studio File Format"		,tr("3DS"));
 	return formatList;
 }
 

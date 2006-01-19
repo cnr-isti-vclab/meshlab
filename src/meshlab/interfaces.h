@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.35  2006/01/19 17:07:51  fmazzant
+changed struct Format to class Format(QString, QString).
+updated importFormats() and exportFormats() to the new class.
+
 Revision 1.34  2006/01/19 15:58:59  fmazzant
 moved savemaskexporter to mainwindows
 
@@ -139,11 +143,14 @@ class GLLogStream;
 class MeshIOInterface
 {
 public:
-   struct Format
-		{
-			QString description;
-			QStringList extensions;
-		};
+	class Format
+	{
+	public:
+		Format(QString description,QString ex): description(description){extensions << ex;}
+		QString description;
+		QStringList extensions;
+	};
+
 
     virtual ~MeshIOInterface() {}
 	virtual QList<Format> importFormats() const = 0;
