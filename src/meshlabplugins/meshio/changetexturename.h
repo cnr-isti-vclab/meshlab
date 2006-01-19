@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/01/19 09:51:04  fmazzant
+ cleaned code
+
  Revision 1.1  2006/01/16 15:30:26  fmazzant
  added rename texture dialog for exporter
  removed old maskobj
@@ -45,7 +48,7 @@ public:
 	ChangeTextureNameDialog(QWidget *parent);
 	ChangeTextureNameDialog(QWidget *parent,std::string oldtexture);
 
-
+	void InitDialog();
 	std::string GetTextureName(){return texture;}
 
 private slots:

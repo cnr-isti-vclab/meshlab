@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/01/19 09:51:04  fmazzant
+ cleaned code
+
  Revision 1.3  2006/01/16 19:45:40  fmazzant
  deleted small error
 
@@ -44,23 +47,23 @@
 
 ChangeTextureNameDialog::ChangeTextureNameDialog(QWidget *parent) : QDialog(parent)
 {
-	ChangeTextureNameDialog::ui.setupUi(this);
-	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
-	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
-	connect(ui.searchButton,SIGNAL(clicked()),this,SLOT(SlotSearchTextureName()));
-	ui.newtexturename->setWindowTitle("Rename Texture");
+	InitDialog();
 }
 
 ChangeTextureNameDialog::ChangeTextureNameDialog(QWidget *parent,std::string oldtexture) : QDialog(parent), texture(oldtexture)
+{
+	InitDialog();
+	ui.newtexturename->setText(QString(texture.c_str()));
+}
+
+void ChangeTextureNameDialog::InitDialog()
 {
 	ChangeTextureNameDialog::ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
 	connect(ui.searchButton,SIGNAL(clicked()),this,SLOT(SlotSearchTextureName()));
 	ui.newtexturename->setWindowTitle("Rename Texture");
-	ui.newtexturename->setText(QString(texture.c_str()));
 }
-
 
 void ChangeTextureNameDialog::SlotOkButton()
 {
