@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.10  2006/01/19 12:45:00  fmazzant
+ deleted SaveMaskExporterDialog::Initialize()
+
  Revision 1.9  2006/01/19 09:25:28  fmazzant
  cleaned code & deleted history log
 
@@ -37,10 +40,6 @@
 
  Revision 1.6  2006/01/16 23:53:22  fmazzant
  bux-fix MeshModel &m -> MeshModel *m
-
- Revision 1.5  2006/01/16 15:30:26  fmazzant
- added rename texture dialog for exporter
- removed old maskobj
 
  ****************************************************************************/
 
@@ -58,7 +57,6 @@ class SaveMaskExporterDialog : public QDialog
 public:
 	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type,int capability);
 
-	void Initialize();
 	void InitDialog();
 	void SetWindowTitle();
 	void SetTextureName();
@@ -101,7 +99,6 @@ namespace io {
 		inline static int GetMaskToExporter(MeshModel *m,int type,int capability)
 		{
 			SaveMaskExporterDialog dialog(new QWidget(),m,type,capability);
-			dialog.Initialize();
 			dialog.exec();
 			int newmask = dialog.GetNewMask();
 			dialog.close();

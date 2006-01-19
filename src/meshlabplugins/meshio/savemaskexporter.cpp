@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.17  2006/01/19 12:45:00  fmazzant
+ deleted SaveMaskExporterDialog::Initialize()
+
  Revision 1.16  2006/01/19 09:25:28  fmazzant
  cleaned code & deleted history log
 
@@ -36,10 +39,6 @@
 
  Revision 1.13  2006/01/17 13:48:54  fmazzant
  added capability mask on export file format
-
- Revision 1.12  2006/01/17 09:08:36  fmazzant
- update Check Button -> Radio Button and
- connect slot for AllButton and NoneButton
 
  ****************************************************************************/
 #include <Qt>
@@ -63,60 +62,21 @@ void SaveMaskExporterDialog::InitDialog()
 	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
 	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
-}
-
-void SaveMaskExporterDialog::Initialize()
-{
+	
 	//disabled
 	//check globali disabilitati
 	ui.check_iom_vertquality->setDisabled(true);
-	ui.check_iom_facequality->setDisabled(true);	
-	
-	//all - none - camera
-	ui.AllButton->setChecked(true);
-	ui.NoneButton->setChecked(false);
-	
-	//vert
-	//ui.check_iom_vertflags->setDisabled(true);
-	ui.check_iom_vertcolor->setDisabled(!m->cm.HasPerVertexColor());
-	ui.check_iom_verttexcoord->setDisabled(!m->cm.HasPerVertexTexture());
-	ui.check_iom_vertnormal->setDisabled(!m->cm.HasPerVertexNormal());
+	ui.check_iom_facequality->setDisabled(true);
 
-	//face
-	//ui.check_iom_faceflags->setDisabled(true);
-	ui.check_iom_facenormal->setDisabled(!m->cm.HasPerFaceNormal());
-	ui.check_iom_facecolor->setDisabled(!m->cm.HasPerFaceColor());
-	
-	//wedg
-	ui.check_iom_wedgcolor->setDisabled(!m->cm.HasPerWedgeColor());
-	ui.check_iom_wedgtexcoord->setDisabled(!m->cm.HasPerWedgeTexture());
-	ui.check_iom_wedgnormal->setDisabled(!m->cm.HasPerWedgeNormal());
+	//all - none
+	ui.AllButton->setChecked(false);
+	ui.NoneButton->setChecked(true);
 
 	//checked
 	ui.check_iom_vertquality->setChecked(true);
 	ui.check_iom_facequality->setChecked(true);
-	
-	//vert
-	ui.check_iom_vertcolor->setChecked(m->cm.HasPerVertexColor());
-	//ui.check_iom_vertquality->setChecked(m.cm.HasPerVertexQuality());
-	ui.check_iom_verttexcoord->setChecked(m->cm.HasPerVertexTexture());
-	ui.check_iom_vertnormal->setChecked(m->cm.HasPerVertexNormal());
 
-	//face
-	ui.check_iom_facecolor->setChecked(m->cm.HasPerFaceColor());
-	//ui.check_iom_facequality->setChecked(m.cm.HasPerFaceQuality());
-	ui.check_iom_facenormal->setChecked(m->cm.HasPerFaceNormal());
-
-	//wedg
-	ui.check_iom_wedgcolor->setChecked(m->cm.HasPerWedgeColor());
-	ui.check_iom_wedgtexcoord->setChecked(m->cm.HasPerWedgeTexture());
-	ui.check_iom_wedgnormal->setChecked(m->cm.HasPerWedgeNormal());
-
-	//m.cm.HasPerVertexMark();
-	//m.cm.HasPerFaceMark();
-	//m.cm.HasPerWedgeMark();
-	//m.cm.HasPerWedgeQuality();
-	
+	//Initialize();
 	SetWindowTitle();
 	SetTextureName();
 	SetMaskCapability();
@@ -317,7 +277,7 @@ void SaveMaskExporterDialog::SlotRenameTexture()
 
 void SaveMaskExporterDialog::SlotSelectionTextureName()
 {
-	ui.renametextureButton->setDisabled(false);
+	
 }
 
 void SaveMaskExporterDialog::SlotSelectionAllButton()
