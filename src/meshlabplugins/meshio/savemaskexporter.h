@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.9  2006/01/19 09:25:28  fmazzant
+ cleaned code & deleted history log
+
  Revision 1.8  2006/01/17 13:48:54  fmazzant
  added capability mask on export file format
 
@@ -38,19 +41,6 @@
  Revision 1.5  2006/01/16 15:30:26  fmazzant
  added rename texture dialog for exporter
  removed old maskobj
-
- Revision 1.4  2006/01/16 11:49:48  fmazzant
-  added base texture name option.
-
- Revision 1.3  2006/01/15 00:45:39  fmazzant
- extend mask exporter for all type file format +
-
- Revision 1.2  2006/01/14 11:23:24  fmazzant
- update savemask exporter with init a mask [base type]
-
- Revision 1.1  2006/01/13 23:59:51  fmazzant
- first commit exporter dialog
-
 
  ****************************************************************************/
 
@@ -66,13 +56,10 @@ class SaveMaskExporterDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent);
-	SaveMaskExporterDialog(QWidget *parent,int &mask);
-	SaveMaskExporterDialog(QWidget *parent,int &mask,int type);
-	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type);
 	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type,int capability);
 
 	void Initialize();
+	void InitDialog();
 	void SetWindowTitle();
 	void SetTextureName();
 	int GetNewMask();

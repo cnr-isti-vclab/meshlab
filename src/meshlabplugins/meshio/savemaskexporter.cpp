@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.16  2006/01/19 09:25:28  fmazzant
+ cleaned code & deleted history log
+
  Revision 1.15  2006/01/18 14:57:25  fmazzant
  added Lib3dsNode in export_3ds
 
@@ -38,41 +41,6 @@
  update Check Button -> Radio Button and
  connect slot for AllButton and NoneButton
 
- Revision 1.11  2006/01/16 23:53:22  fmazzant
- bux-fix MeshModel &m -> MeshModel *m
-
- Revision 1.10  2006/01/16 19:45:40  fmazzant
- deleted small error
-
- Revision 1.9  2006/01/16 16:19:36  fmazzant
- bug-fix
-
- Revision 1.8  2006/01/16 15:56:00  fmazzant
- bug-fix mask -> newmask
-
- Revision 1.7  2006/01/16 15:30:26  fmazzant
- added rename texture dialog for exporter
- removed old maskobj
-
- Revision 1.6  2006/01/16 11:49:48  fmazzant
-  added base texture name option.
-
- Revision 1.5  2006/01/15 08:51:29  fmazzant
- added mask specificy in 3ds code
-
- Revision 1.4  2006/01/15 00:45:39  fmazzant
- extend mask exporter for all type file format +
-
- Revision 1.3  2006/01/14 14:12:07  fmazzant
- sample for use save's mask exporter. ony 3ds.
-
- Revision 1.2  2006/01/14 11:23:24  fmazzant
- update savemask exporter with init a mask [base type]
-
- Revision 1.1  2006/01/13 23:59:51  fmazzant
- first commit exporter dialog
-
-
  ****************************************************************************/
 #include <Qt>
 #include <QtGui>
@@ -80,56 +48,13 @@
 #include "savemaskexporter.h"
 #include "changetexturename.h"
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent) : QDialog(parent)
-{
-	SaveMaskExporterDialog::ui.setupUi(this);
-	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
-	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
-	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
-	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
-	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
-	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
-	ui.renametextureButton->setDisabled(true);
-}
-
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask) : QDialog(parent), mask(mask)
-{
-	SaveMaskExporterDialog::ui.setupUi(this);
-	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
-	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
-	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
-	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
-	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
-	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
-	ui.renametextureButton->setDisabled(true);
-}
-
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent, int &mask, int type) : QDialog(parent), mask(mask), type(type)
-{
-	SaveMaskExporterDialog::ui.setupUi(this);
-	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
-	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
-	connect(ui.renametextureButton,SIGNAL(clicked),this,SLOT(SlotRenameTexture()));
-	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
-	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
-	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
-	ui.renametextureButton->setDisabled(true);
-}
-
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type): QDialog(parent),m(m),type(type)
-{
-	SaveMaskExporterDialog::ui.setupUi(this);
-	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
-	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
-	connect(ui.renametextureButton,SIGNAL(clicked()),this,SLOT(SlotRenameTexture()));
-	connect(ui.listTextureName,SIGNAL(itemSelectionChanged()),this,SLOT(SlotSelectionTextureName()));
-	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
-	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
-	ui.renametextureButton->setDisabled(true);
-}
-
 SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type,int capability): QDialog(parent),m(m),type(type),capability(capability)
 {
+	InitDialog();
+}
+
+void SaveMaskExporterDialog::InitDialog()
+{
 	SaveMaskExporterDialog::ui.setupUi(this);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));
@@ -139,6 +64,7 @@ SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int 
 	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
 }
+
 void SaveMaskExporterDialog::Initialize()
 {
 	//disabled
