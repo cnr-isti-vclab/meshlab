@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.53  2006/01/19 09:36:28  fmazzant
+ cleaned up history log
+
  Revision 1.52  2006/01/17 23:46:36  cignoni
  Moved some include from meshmodel.h to here
 
@@ -36,136 +39,6 @@
  Revision 1.49  2006/01/16 15:30:26  fmazzant
  added rename texture dialog for exporter
  removed old maskobj
-
- Revision 1.48  2006/01/16 11:49:48  fmazzant
-  added base texture name option.
-
- Revision 1.47  2006/01/15 00:45:39  fmazzant
- extend mask exporter for all type file format +
-
- Revision 1.46  2006/01/14 14:20:32  fmazzant
- bux-fix: mask -> newmask in exporter3ds
-
- Revision 1.45  2006/01/14 14:12:07  fmazzant
- sample for use save's mask exporter. ony 3ds.
-
- Revision 1.44  2006/01/14 11:23:24  fmazzant
- update savemask exporter with init a mask [base type]
-
- Revision 1.43  2006/01/14 00:02:52  fmazzant
- added new include for exporter dialog
-
- Revision 1.42  2006/01/13 15:46:20  cignoni
- added mask to ply saving
-
- Revision 1.41  2006/01/13 15:35:58  fmazzant
- changed return type of exporter from bool to int
-
- Revision 1.40  2006/01/13 14:18:36  cignoni
- Added initialization of mask to zero
-
- Revision 1.39  2006/01/10 16:52:19  fmazzant
- update ply::PlyMask -> io::Mask
-
- Revision 1.38  2006/01/10 00:36:48  buzzelli
- adding first rough implementation of 3ds file importer
-
- Revision 1.37  2006/01/04 15:27:30  alemochi
- Renamed property of Format struct, and changed plugin dialog
-
- Revision 1.36  2005/12/23 00:56:42  buzzelli
- Face normals computed also for STL and OFF files.
- Solved (hopefully) bug with progressbar.
-
- Revision 1.35  2005/12/22 23:39:21  buzzelli
- UpdateNormals is now called only when needed
-
- Revision 1.34  2005/12/22 21:05:43  cignoni
- Removed Optional Face Normal and added some initalization after opening
-
- Revision 1.33  2005/12/21 23:28:56  buzzelli
- code cleaning
-
- Revision 1.32  2005/12/21 14:22:58  buzzelli
- First steps in STL and OFF files importing
-
- Revision 1.31  2005/12/21 01:17:05  buzzelli
- Better handling of errors residing inside opened file
-
- Revision 1.30  2005/12/16 17:14:42  fmazzant
- added control file's extension
-
- Revision 1.29  2005/12/16 00:37:30  fmazzant
- update base export_3ds.h + callback
-
- Revision 1.28  2005/12/15 12:27:57  fmazzant
- first commit 3ds
-
- Revision 1.27  2005/12/15 09:50:53  fmazzant
- 3ds
-
- Revision 1.26  2005/12/15 09:24:23  fmazzant
- added base support (very base) 3ds & cleaned code
-
- Revision 1.25  2005/12/15 08:10:51  fmazzant
- added OFF & STL in formats(...)
-
- Revision 1.24  2005/12/15 01:20:28  buzzelli
- formats method adapted in order to fit with recent changes in MeshIOInterface
-
- Revision 1.23  2005/12/14 18:08:24  fmazzant
- added generic save of all type define obj, ply, off, stl
-
- Revision 1.22  2005/12/14 00:11:33  fmazzant
- update method SaveAs  for a using generic (not still optimized)
-
- Revision 1.21  2005/12/13 14:02:50  fmazzant
- added the rescue of the materials of the obj
-
- Revision 1.20  2005/12/09 18:16:14  fmazzant
- added generic obj save with plugin arch.
-
- Revision 1.19  2005/12/09 16:37:20  fmazzant
- maskobj for select element to save
-
- Revision 1.18  2005/12/09 00:34:31  buzzelli
- io importing mechanism adapted in order to be fully transparent towards the user
-
- Revision 1.17  2005/12/07 07:52:25  fmazzant
- export obj generic(base)
-
- Revision 1.16  2005/12/07 00:56:40  fmazzant
- added support for exporter generic obj file (level base)
-
- Revision 1.15  2005/12/06 05:16:54  buzzelli
- added code to grant that material files will be searched into the right directory
-
- Revision 1.14  2005/12/03 23:46:56  cignoni
- Adapted to the new plugin interface in a more standard way
-
- Revision 1.13  2005/12/03 09:45:42  fmazzant
- adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
-
- Revision 1.12  2005/12/02 23:36:52  fmazzant
- update to the new interface of MeshIOInterface
-
- Revision 1.11  2005/12/02 17:41:33  fmazzant
- added support obj dialog exporter
-
- Revision 1.10  2005/11/30 16:26:56  cignoni
- All the modification, restructuring seen during the 30/12 lesson...
-
- Revision 1.9  2005/11/30 08:58:57  mariolatronico
- temporary remove of ExportOBJ (in save)
-
- Revision 1.8  2005/11/30 08:34:33  cignoni
- Removed spurious 'i' before the comment header.
- Corrected small error in save.
-
- Revision 1.7  2005/11/30 01:06:59  fmazzant
- added support Export OBJ(base)
- added comment line history
- deleted bug-fix in meshio.pro in unix{ ... }
 
 *****************************************************************************/
 #include <Qt>

@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.22  2006/01/19 09:36:29  fmazzant
+ cleaned up history log
+
  Revision 1.21  2006/01/18 16:14:52  fmazzant
  update small error
 
@@ -36,57 +39,6 @@
 
  Revision 1.18  2006/01/18 14:57:26  fmazzant
  added Lib3dsNode in export_3ds
-
- Revision 1.17  2006/01/18 12:27:49  fmazzant
- added control on diffuse component
-
- Revision 1.16  2006/01/17 18:13:06  fmazzant
- changed vertflags in vertnormal [bug]
-
- Revision 1.15  2006/01/17 13:48:54  fmazzant
- added capability mask on export file format
-
- Revision 1.14  2006/01/15 08:51:30  fmazzant
- added mask specificy in 3ds code
-
- Revision 1.13  2006/01/14 00:03:26  fmazzant
- added more controls
-
- Revision 1.12  2006/01/13 15:35:58  fmazzant
- changed return type of exporter from bool to int
-
- Revision 1.11  2006/01/12 23:53:17  fmazzant
- deleted part of texture base
-
- Revision 1.10  2006/01/12 16:38:45  fmazzant
- update code & clean code
-
- Revision 1.9  2006/01/11 16:32:43  fmazzant
- added comment-code for coord text
-
- Revision 1.8  2006/01/10 16:52:19  fmazzant
- update ply::PlyMask -> io::Mask
-
- Revision 1.7  2005/12/23 10:24:37  fmazzant
- added base save 3ds materials
-
- Revision 1.6  2005/12/16 17:26:05  fmazzant
- cleaned up code
-
- Revision 1.5  2005/12/16 15:30:17  fmazzant
- added in Save 3ds vertexs & faces
-
- Revision 1.4  2005/12/16 13:04:04  fmazzant
- update method SaveBinary. generete empty file 3ds.
-
- Revision 1.3  2005/12/16 00:37:31  fmazzant
- update base export_3ds.h + callback
-
- Revision 1.2  2005/12/15 15:26:33  fmazzant
- update lib3ds
-
- Revision 1.1  2005/12/15 12:27:58  fmazzant
- first commit 3ds
 
 ****************************************************************************/
 

@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.8  2006/01/19 09:36:28  fmazzant
+ cleaned up history log
+
  Revision 1.7  2006/01/10 16:52:19  fmazzant
  update ply::PlyMask -> io::Mask
 
@@ -35,16 +38,6 @@
 
  Revision 1.4  2005/12/07 07:52:25  fmazzant
  export obj generic(base)
-
- Revision 1.3  2005/12/06 15:54:59  fmazzant
- update dialog export obj
-
- Revision 1.2  2005/12/03 09:45:42  fmazzant
- adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
-
- Revision 1.1  2005/12/02 17:40:26  fmazzant
- added dialog obj exporter.
-
 
 *****************************************************************************/
 

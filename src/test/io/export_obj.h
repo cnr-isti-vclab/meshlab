@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.33  2006/01/19 09:36:29  fmazzant
+ cleaned up history log
+
  Revision 1.32  2006/01/18 00:45:56  fmazzant
  added control on face's diffuse
 
@@ -36,90 +39,6 @@
 
  Revision 1.29  2006/01/14 00:03:26  fmazzant
  added more controls
-
- Revision 1.28  2006/01/13 15:35:58  fmazzant
- changed return type of exporter from bool to int
-
- Revision 1.27  2006/01/12 19:34:43  fmazzant
- cleaned code
-
- Revision 1.26  2006/01/12 18:43:41  fmazzant
- ostream -> fprintf
-
- Revision 1.24  2006/01/12 16:16:36  fmazzant
- diminished the time completely of the export_obj
-
- Revision 1.23  2006/01/11 15:55:14  fmazzant
- bug-fix in vertex-normal
-
- Revision 1.22  2006/01/10 16:52:19  fmazzant
- update ply::PlyMask -> io::Mask
-
- Revision 1.21  2006/01/04 16:51:44  fmazzant
- changed PM_VERTEXCOORD in PM_WEDGTEXCOORD
-
- Revision 1.20  2005/12/23 10:12:51  fmazzant
- deleted bug to save a face
-
- Revision 1.19  2005/12/16 14:58:28  fmazzant
- deleted old code
-
- Revision 1.18  2005/12/15 01:00:51  fmazzant
- added the +1 to the value of return from function GetIndexVertex(m, (*fi).V(k))
-
- Revision 1.17  2005/12/14 22:21:49  cignoni
- Changed GetIndexVertex from O(n) to O(1)
-
- Revision 1.16  2005/12/14 18:08:24  fmazzant
- added generic save of all type define obj, ply, off, stl
-
- Revision 1.15  2005/12/14 10:49:00  mariolatronico
- check on textures size [ with Federico Mazzanti supervision ]
-
- Revision 1.14  2005/12/14 08:38:55  fmazzant
- bugfix
-
- Revision 1.13  2005/12/14 01:21:15  fmazzant
- bug-fix
-
- Revision 1.12  2005/12/14 00:06:19  fmazzant
- deleted bug meterial index usemtl.
-
- Revision 1.11  2005/12/13 14:02:51  fmazzant
- added the rescue of the materials of the obj
-
- Revision 1.10  2005/12/11 08:33:57  fmazzant
- deleted method.
-
- Revision 1.9  2005/12/09 18:16:14  fmazzant
- added generic obj save with plugin arch.
-
- Revision 1.8  2005/12/07 08:01:09  fmazzant
- exporter obj temporany
-
- Revision 1.7  2005/12/03 09:45:43  fmazzant
- adding to mask how much we save a obj file format. the mask taken from the dialogue window SaveMaskDialog.
-
- Revision 1.6  2005/12/02 17:49:27  fmazzant
- added support for the rescue of the normal per vertex
-
- Revision 1.5  2005/11/30 00:44:07  fmazzant
- added:
- 1. save TCoord2 with struct map
- 2. callback
- 3. define static member to the access class Exporter
-
- Revision 1.4  2005/11/10 00:06:43  fmazzant
- Added comment code
-
- Revision 1.3  2005/11/10 00:01:50  fmazzant
- Added comment revision
-
-Revision 1.2  2005/11/09 23:36:10  fmazzant
-Up to date method Save
-
-Revision 1.1  2005/11/08 17:45:26  fmazzant
-Added  implementation of OBJ file exporter.
 
 ****************************************************************************/
 

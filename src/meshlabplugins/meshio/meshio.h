@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.17  2006/01/19 09:36:28  fmazzant
+ cleaned up history log
+
  Revision 1.16  2006/01/17 13:47:45  fmazzant
  update interface meshio : formats -> importFormats() & exportFormts
 
@@ -35,31 +38,6 @@
 
  Revision 1.13  2005/12/07 07:52:25  fmazzant
  export obj generic(base)
-
- Revision 1.12  2005/12/07 01:11:18  fmazzant
- bug-fix(sorry)
-
- Revision 1.11  2005/12/03 23:46:56  cignoni
- Adapted to the new plugin interface in a more standard way
-
- Revision 1.10  2005/12/03 22:50:06  cignoni
- Added copyright info
-
- Revision 1.9  2005/12/02 23:36:52  fmazzant
- update to the new interface of MeshIOInterface
-
- Revision 1.8  2005/12/02 17:41:33  fmazzant
- added support obj dialog exporter
-
- Revision 1.7  2005/11/30 16:26:56  cignoni
- All the modification, restructuring seen during the 30/12 lesson...
-
- Revision 1.6  2005/11/30 01:06:59  fmazzant
- added support Export OBJ(base)
- added comment line history
- deleted bug-fix in meshio.pro in unix{ ... }
-
-   
 
  *****************************************************************************/
 #ifndef EXTRAIOPLUGIN_H
