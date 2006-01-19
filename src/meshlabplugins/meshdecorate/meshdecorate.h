@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2006/01/19 23:56:44  glvertex
+Starting quoted box (simply draws xyz axes)
+
 Revision 1.5  2005/12/12 22:47:35  cignoni
 Added plugin info methods
 
@@ -53,6 +56,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_NORMALS = 1,
     DP_SHOW_BOX_CORNERS = 2,
     DP_SHOW_AXIS = 3,
+		DP_SHOW_QUOTED_BOX = 4,
   };
 
   const QString ST(int id) const;
@@ -71,12 +75,16 @@ public:
 		qa= new QAction(ST(DP_SHOW_AXIS),this);
 		qa->setCheckable(true);
 		actionList << qa;
+		qa= new QAction(ST(DP_SHOW_QUOTED_BOX),this);
+		qa->setCheckable(true);
+		actionList << qa;
 	}
 
 	QList<QAction *> actions () const {return actionList;}
 
   void DrawBBoxCorner(MeshModel &m);
   void DrawAxis(MeshModel &m);
+	void DrawQuotedBox(MeshModel &m);
 
   virtual void Decorate(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
 

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2006/01/19 23:56:44  glvertex
+Starting quoted box (simply draws xyz axes)
+
 Revision 1.9  2006/01/17 10:43:48  cignoni
 removed '' from DATE macro
 
@@ -78,13 +81,19 @@ const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
 		 ai.ShortHelp = tr("Draws object vertex normals");
 	 }
 
+	 if(action->text() == ST(DP_SHOW_QUOTED_BOX))
+	 {
+		 ai.Help = tr("Draws quoted box");
+		 ai.ShortHelp = tr("Draws quoted box");
+	 }
+
    return ai;
  }
 
  const PluginInfo &ExtraMeshDecoratePlugin::Info() 
 {
    static PluginInfo ai; 
-   ai.Date=tr(__DATE__);
+   ai.Date=tr("January 2006");
    return ai;
  }
  
@@ -95,6 +104,7 @@ const QString ExtraMeshDecoratePlugin::ST(int id) const
     case DP_SHOW_NORMALS      : return QString("Show Normals");
     case DP_SHOW_BOX_CORNERS  : return QString("Show Box Corners");
     case DP_SHOW_AXIS         : return QString("Show Axis");
+		case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
     default: assert(0);
   }
   return QString("error!");
@@ -121,8 +131,39 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
     glEnd();
    glPopAttrib();
   }
-  if(a->text() == ST(DP_SHOW_BOX_CORNERS)) DrawBBoxCorner(m);
-  if(a->text() == ST(DP_SHOW_AXIS)) DrawAxis(m);
+  if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
+  if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m);
+	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m);
+}
+
+void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
+{
+	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_LINE_SMOOTH);
+	glLineWidth(1.0);
+
+	// Mesh boundingBox
+	Box3f b=m.cm.bbox;
+	float spanX = b.DimX()*.5f;
+	float spanY = b.DimY()*.5f;
+	float spanZ = b.DimZ()*.5f;
+
+	// bbox center
+	Point3f c = b.Center();
+
+	glColor4f(.5f,1.f,.5f,.8f);
+	glBegin(GL_LINES);
+		glVertex3f(c[0]-spanX,c[1],c[2]);	glVertex3f(c[0]+spanX,c[1],c[2]);
+		glVertex3f(c[0],c[1]-spanY,c[2]);	glVertex3f(c[0],c[1]+spanY,c[2]);
+		glVertex3f(c[0],c[1],c[2]-spanZ);	glVertex3f(c[0],c[1],c[2]+spanZ);
+	glEnd();
+
+	glPopAttrib();
+
 }
  
 void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
