@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.10  2006/01/19 11:41:42  ggangemi
+Reduced memory occupation of "UniformVariable" struct
+
 Revision 1.9  2006/01/17 11:04:14  cignoni
 Removed bug due to multiple creation of list of action
 
@@ -69,12 +72,14 @@ Added copyright info
 
 
 struct UniformVariable {
-	int type;
+	short type;
 	float val;
 	GLint location;
-	vcg::Point2f val2;
-	vcg::Point3f val3;
-	vcg::Point4f val4;
+	union {
+		float val2[2];
+		float val3[3];
+		float val4[4];
+	};
 };
 
 struct ShaderInfo {
