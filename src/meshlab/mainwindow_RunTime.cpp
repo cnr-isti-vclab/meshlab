@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.75  2006/01/19 23:11:39  glvertex
+No significant changes
+
 Revision 1.74  2006/01/19 15:58:59  fmazzant
 moved savemaskexporter to mainwindows
 
@@ -594,7 +597,9 @@ void MainWindow::fullScreen(){
 	}
 }
 void MainWindow::keyPressEvent(QKeyEvent *e){
-	if(e->key()==Qt::Key_Escape && isFullScreen()){
+	if(e->key()==Qt::Key_Escape && isFullScreen())
+	{
+		e->accept();
 		menuBar()->show();
 		restoreState(toolbarState);
 		setWindowState(windowState()^ Qt::WindowFullScreen);
@@ -606,4 +611,6 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 		}
 		fullScreenAct->setChecked(false);
 	}
+	else
+		e->ignore();
 }

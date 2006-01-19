@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.43  2006/01/19 23:11:39  glvertex
+No significant changes
+
 Revision 1.42  2006/01/19 15:58:59  fmazzant
 moved savemaskexporter to mainwindows
 
@@ -224,14 +227,14 @@ void MainWindow::createActions()
 	connect(windowsCascadeAct, SIGNAL(triggered()), workspace, SLOT(cascade()));
 
 	windowsNextAct = new QAction(tr("&Next"), this);
-	windowsNextAct->setShortcutContext(Qt::ApplicationShortcut);
+	//windowsNextAct->setShortcutContext(Qt::ApplicationShortcut);
 	windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_Tab);
-	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
+	//connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
 
 	closeAct = new QAction(tr("Cl&ose"), this);
-	closeAct->setShortcutContext(Qt::ApplicationShortcut);
+	//closeAct->setShortcutContext(Qt::ApplicationShortcut);
 	closeAct->setShortcut(Qt::CTRL+Qt::Key_F4);
-	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
+	//connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
 
 	closeAllAct = new QAction(tr("Close &All"), this);
 	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.75  2006/01/19 23:11:39  glvertex
+No significant changes
+
 Revision 1.74  2006/01/17 16:35:27  glvertex
 Added Scalable fonts
 
@@ -487,7 +490,7 @@ void GLArea::paintGL()
 		glPopAttrib();
 		glPopMatrix();
 	}
-  
+
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 	trackball.GetView();
@@ -644,21 +647,24 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 
 void GLArea::keyPressEvent ( QKeyEvent * e )  
 {
+	e->ignore();
 	//currentButton=GLArea::BUTTON_NONE;
-	if (e->key ()==Qt::Key_Shift) currentButton|=GLArea::KEY_SHIFT;
-	if (e->key ()==Qt::Key_Control) currentButton|=GLArea::KEY_CTRL;
-	if (e->key ()==Qt::Key_Alt) currentButton|=GLArea::KEY_ALT;
+	if (e->key ()==Qt::Key_Shift)		{currentButton|=GLArea::KEY_SHIFT;e->accept();}
+	if (e->key ()==Qt::Key_Control) {currentButton|=GLArea::KEY_CTRL; e->accept();}
+	if (e->key ()==Qt::Key_Alt)			{currentButton|=GLArea::KEY_ALT; e->accept();}
 }
 
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
-	if (e->key()==Qt::Key_Shift) currentButton-=GLArea::KEY_SHIFT;
-	if (e->key()==Qt::Key_Control) currentButton-=GLArea::KEY_CTRL;
-	if (e->key()==Qt::Key_Alt) currentButton-=GLArea::KEY_ALT;
+	e->ignore();
+	if (e->key()==Qt::Key_Shift)		{currentButton-=GLArea::KEY_SHIFT;e->accept();}
+	if (e->key()==Qt::Key_Control)	{currentButton-=GLArea::KEY_CTRL;e->accept();}
+	if (e->key()==Qt::Key_Alt)			{currentButton-=GLArea::KEY_ALT;e->accept();}
 }
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
+	e->accept();
 	trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	update();
 }
