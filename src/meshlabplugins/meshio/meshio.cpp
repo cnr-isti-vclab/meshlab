@@ -24,8 +24,8 @@
   History
 
  $Log$
- Revision 1.54  2006/01/19 11:21:14  fmazzant
- deleted old savemaskobj & old MaskObj
+ Revision 1.55  2006/01/19 15:59:00  fmazzant
+ moved savemaskexporter to mainwindows
 
  Revision 1.53  2006/01/19 09:36:28  fmazzant
  cleaned up history log
@@ -48,7 +48,6 @@
 #include <QtGui>
 
 #include "meshio.h"
-//#include "savemaskdialog.h"
 #include "savemaskexporter.h"
 
 // temporaneamente prendo la versione corrente dalla cartella test
@@ -212,10 +211,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OBJ"))
 	{	
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_OBJ,vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability());
-		if( newmask == 0 )return false;
-
-		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,newmask,cb);//salva esclusivamente in formato ASCII
+		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva esclusivamente in formato ASCII
 		if(result != vcg::tri::io::ExporterOBJ<CMeshO>::E_NOERROR )
 		{
 			QMessageBox::warning(parent, tr("OBJ Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result)));
@@ -225,11 +221,8 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	}
 
 	if(formatName.toUpper() == tr("PLY"))
-	{
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_PLY,0);//aggiungere la capability
-		if( newmask == 0 )return false;
-		
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),newmask,cb);
+	{		
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result != 0)
 		{
 			QMessageBox::warning(parent, tr("PLY Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
@@ -240,9 +233,6 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OFF"))
 	{
-		//int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_OFF,0);//aggiungere la capability
-		//if( newmask == 0 )return false;
-		
 		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
 		if(result != 0)
 		{
@@ -254,10 +244,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("STL"))
 	{
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_STL,0);//aggiungere la capability
-		if( newmask == 0 )return false;
-
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),newmask,cb);
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result != 0)
 		{
 			QMessageBox::warning(parent, tr("Mesh Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
@@ -269,10 +256,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{	
-		int newmask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(&m,vcg::tri::io::SaveMaskToExporter::_3DS,vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability());
-		if( newmask == 0 )return false;
-		
-		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,newmask,cb);//salva esclusivamente in formato binario
+		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,mask,cb);//salva esclusivamente in formato binario
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("3DS Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
@@ -351,6 +335,15 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 	formatList << _3ds;
 
 	return formatList;
+}
+
+int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
+{
+	if(format.toUpper() == tr("OBJ")){return vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("PLY")){return 0;}
+	if(format.toUpper() == tr("OFF")){return 0;}
+	if(format.toUpper() == tr("STL")){return 0;}
+	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)

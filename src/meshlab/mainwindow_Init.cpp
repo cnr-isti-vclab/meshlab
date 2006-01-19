@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.42  2006/01/19 15:58:59  fmazzant
+moved savemaskexporter to mainwindows
+
 Revision 1.41  2006/01/19 11:54:15  fmazzant
 cleaned up code & cleaned up history log
 
@@ -38,7 +41,6 @@ Solved an annoyng old consistency bug between toolbars and toolbar menu's
 
 Revision 1.37  2006/01/14 00:51:06  davide_portelli
 A little change
-
 
 ****************************************************************************/
 

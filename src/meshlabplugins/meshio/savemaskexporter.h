@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.11  2006/01/19 15:59:00  fmazzant
+ moved savemaskexporter to mainwindows
+
  Revision 1.10  2006/01/19 12:45:00  fmazzant
  deleted SaveMaskExporterDialog::Initialize()
 
@@ -55,10 +58,9 @@ class SaveMaskExporterDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int type,int capability);
-
+	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability);
+	
 	void InitDialog();
-	void SetWindowTitle();
 	void SetTextureName();
 	int GetNewMask();
 	void SetMaskCapability();
@@ -87,18 +89,9 @@ namespace io {
 	{
 	public:	
 
-		enum FileType
+		inline static int GetMaskToExporter(MeshModel *m,int capability)
 		{
-			_OBJ, //0
-			_PLY, //1
-			_OFF, //2
-			_STL, //3
-			_3DS  //4
-		};
-
-		inline static int GetMaskToExporter(MeshModel *m,int type,int capability)
-		{
-			SaveMaskExporterDialog dialog(new QWidget(),m,type,capability);
+			SaveMaskExporterDialog dialog(new QWidget(),m,capability);
 			dialog.exec();
 			int newmask = dialog.GetNewMask();
 			dialog.close();

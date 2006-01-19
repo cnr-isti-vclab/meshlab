@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.18  2006/01/19 15:59:00  fmazzant
+ moved savemaskexporter to mainwindows
+
  Revision 1.17  2006/01/19 09:36:28  fmazzant
  cleaned up history log
 
@@ -59,6 +62,7 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
 public:
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
+	int GetExportMaskCapability(QString &format) const;
 
 	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);

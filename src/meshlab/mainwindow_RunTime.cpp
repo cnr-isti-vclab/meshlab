@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.74  2006/01/19 15:58:59  fmazzant
+moved savemaskexporter to mainwindows
+
 Revision 1.73  2006/01/19 11:54:15  fmazzant
 cleaned up code & cleaned up history log
 
@@ -56,6 +59,7 @@ removed old maskobj
 #include "customDialog.h"		
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
+#include "../meshlabplugins/meshio/savemaskexporter.h"
 
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
@@ -486,10 +490,15 @@ bool MainWindow::saveAs()
 		extension.remove(0, fileName.lastIndexOf('.')+1);
 	
 		QStringListIterator itFilter(filters);
-		
-		int mask = 0;//maskobj.MaskObjToInt();
+
 		int idx = allKnownFormats[extension.toLower()];
 		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
+		
+		int capability = pCurrentIOPlugin->GetExportMaskCapability(extension);
+		
+		int mask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(this->GLA()->mm, capability);
+		if(mask == 0)return false;
+
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
 		qb->hide();
