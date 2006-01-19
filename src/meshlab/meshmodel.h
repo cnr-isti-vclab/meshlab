@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.18  2006/01/19 11:58:28  cignoni
+Added mask field
+
 Revision 1.17  2006/01/17 23:39:52  cignoni
 removed useless includes
 
@@ -79,6 +82,7 @@ Added copyright info
 
 #include <wrap/gl/trimesh.h>
 #include <wrap/callback.h>
+#include <wrap/io_trimesh/io_mask.h>
 
 using namespace vcg;
 using namespace std;
@@ -103,26 +107,32 @@ contiene i dati relativi ad un singolo oggetto.
 Ogni oggetto si sa caricare e contiene una mesh
 */
 
-class MeshModel
+class MeshModel : public tri::io::Mask
 {
 public:
 
   CMeshO cm;
   GlTrimesh<CMeshO> glw;
-  MeshModel() {glw.m=&cm; cm.face.EnableWedgeTex();cm.face.EnableFFAdjacency();}
-  bool Open(const char* filename, CallBackPos *cb=0);
-  bool Save(const char* filename, CallBackPos *cb=0);
+  MeshModel() {
+    glw.m=&cm; 
+    cm.face.EnableWedgeTex();
+    cm.face.EnableFFAdjacency();
+    mask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
+  }
+  //bool Open(const char* filename, CallBackPos *cb=0);
+  //bool Save(const char* filename, CallBackPos *cb=0);
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
   inline void storeVertexColor()
   {
-	CMeshO::VertexIterator vi;
-	for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) (*vi).origC=(*vi).C();
+	  CMeshO::VertexIterator vi;
+	  for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) (*vi).origC=(*vi).C();
   }
   inline void restoreVertexColor()
   {
-	CMeshO::VertexIterator vi;
-	for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) (*vi).C()=(*vi).origC;
+	  CMeshO::VertexIterator vi;
+	  for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) (*vi).C()=(*vi).origC;
   }
+  int mask;
 
 };
 
