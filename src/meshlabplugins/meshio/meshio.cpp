@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.56  2006/01/19 16:23:21  fmazzant
+ changed return 0 in return MeshModel::IOM_ALL on GetExportMaskCapability(...)
+
  Revision 1.55  2006/01/19 15:59:00  fmazzant
  moved savemaskexporter to mainwindows
 
@@ -340,9 +343,9 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 {
 	if(format.toUpper() == tr("OBJ")){return vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("PLY")){return 0;}
-	if(format.toUpper() == tr("OFF")){return 0;}
-	if(format.toUpper() == tr("STL")){return 0;}
+	if(format.toUpper() == tr("PLY")){return MeshModel::IOM_ALL;}
+	if(format.toUpper() == tr("OFF")){return MeshModel::IOM_ALL;}
+	if(format.toUpper() == tr("STL")){return MeshModel::IOM_ALL;}
 	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
 }
 
