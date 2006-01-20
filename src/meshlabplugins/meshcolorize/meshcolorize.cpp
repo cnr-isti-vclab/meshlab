@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.18  2006/01/20 16:25:39  vannini
+Added Absolute Curvature colorize
+
 Revision 1.17  2006/01/20 14:46:44  vannini
 Code refactoring
 Added RMS Curvature colorize
@@ -87,6 +90,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 	actionList << new QAction(ST(CP_GAUSSIAN), this);
   actionList << new QAction(ST(CP_MEAN), this);
   actionList << new QAction(ST(CP_RMS), this);
+  actionList << new QAction(ST(CP_ABSOLUTE), this);
   actionList << new QAction(ST(CP_SELFINTERSECT), this);
   actionList << new QAction(ST(CP_BORDER), this);
   actionList << new QAction(ST(CP_COLORNM), this);
@@ -100,6 +104,8 @@ const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
       return QString("Mean Curvature");
     case CP_RMS: 
       return QString("Root mean square Curvature");
+    case CP_ABSOLUTE: 
+      return QString("Absolute Curvature");
     case CP_SELFINTERSECT: 
       return QString("Self Intersections");
     case CP_BORDER: 
@@ -127,7 +133,12 @@ const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action)
   if( action->text() == ST(CP_RMS) )
   {
     ai.Help = tr("Colorize vertex and faces depending on root mean square curvature.");
-    ai.ShortHelp = tr("Colorize by mean curvature");
+    ai.ShortHelp = tr("Colorize by root mean square curvature");
+  }
+  if( action->text() == ST(CP_ABSOLUTE) )
+  {
+    ai.Help = tr("Colorize vertex and faces depending on absolute curvature.");
+    ai.ShortHelp = tr("Colorize by absolute curvature");
   }
   if( action->text() == ST(CP_SELFINTERSECT) )
   {
@@ -181,6 +192,14 @@ void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &
   if(mode->text() == ST(CP_RMS))
     {
       ColorRMS<CMeshO>(m.cm, log);
+      vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
+      rm.colorMode = GLW::CMPerVert;
+      return;
+    }
+
+  if(mode->text() == ST(CP_ABSOLUTE))
+    {
+      ColorAbsolute<CMeshO>(m.cm, log);
       vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
       rm.colorMode = GLW::CMPerVert;
       return;

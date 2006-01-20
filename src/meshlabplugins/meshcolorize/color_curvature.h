@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/01/20 16:25:39  vannini
+Added Absolute Curvature colorize
+
 Revision 1.2  2006/01/20 14:46:44  vannini
 Code refactoring
 Added RMS Curvature colorize
@@ -45,6 +48,9 @@ Moved gaussian and mean curvature functions into color_curvature.h
 #include <vcg/math/histogram.h>
 
 #include "../../meshlab/LogStream.h"
+
+#define DEFAULT_HISTO_FRAC 0.1f
+#define DEFAULT_HISTO_RANGE 10000
 
 class histoMinMaxQ
 {
@@ -98,7 +104,7 @@ namespace vcg
     }
   }
 
-  template<class MESH_TYPE> histoMinMaxQ HK(MESH_TYPE &m, bool computeH, bool useHisto, float histo_frac=0.1f, int histo_range=10000) 
+  template<class MESH_TYPE> histoMinMaxQ HK(MESH_TYPE &m, bool computeH, bool useHisto, float histo_frac=DEFAULT_HISTO_FRAC, int histo_range=DEFAULT_HISTO_RANGE) 
   {
     // Calcola la curvatura gaussiana (K) oppure la media (H) in base a computeH
     // e salva il risultato in Q
@@ -135,7 +141,6 @@ namespace vcg
     {
       for(fi=m.face.begin();fi!=m.face.end();++fi) if(!(*fi).IsD())
       {    
-    	  
         angle0 = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
         angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
         angle2 = M_PI-(angle0+angle1);
@@ -235,8 +240,8 @@ namespace vcg
     typename MESH_TYPE::VertexIterator vi;
     
     vcg::Histogram<float> histo;
-    float histo_frac=0.1f;
-    int histo_range=10000;
+    float histo_frac=DEFAULT_HISTO_FRAC;
+    int histo_range=DEFAULT_HISTO_RANGE;
     float minQ = std::numeric_limits<float>::max();
     float maxQ = -std::numeric_limits<float>::max();
 
@@ -278,6 +283,55 @@ namespace vcg
 
   }
 
+  template<class MESH_TYPE> void ColorAbsolute(MESH_TYPE &m, GLLogStream *log)
+  {
+    float *H = new float[m.vn];
+    int i;
+    typename MESH_TYPE::VertexIterator vi;
+    
+    vcg::Histogram<float> histo;
+    float histo_frac=DEFAULT_HISTO_FRAC;
+    int histo_range=DEFAULT_HISTO_RANGE;
+    float minQ = std::numeric_limits<float>::max();
+    float maxQ = -std::numeric_limits<float>::max();
+
+    //Compute H
+	  HK(m,true,false);
+    
+    i=0;
+    for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi,++i) if(!(*vi).IsD())
+      H[i] = (*vi).Q();
+
+    //Compute K
+	  HK(m,false,false);
+
+    //Compute abs(H+sqrt(H*H-K)) + abs(H-sqrt(H*H-K))
+    i=0;
+    for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi,++i) if(!(*vi).IsD())
+    {
+      (*vi).Q() = math::Abs(H[i] + math::Sqrt(powf(H[i], 2.0f) - (*vi).Q())) + math::Abs(H[i] - math::Sqrt(powf(H[i], 2.0f) - (*vi).Q()));
+      
+      if ((*vi).Q() < minQ) minQ = (*vi).Q();
+      if ((*vi).Q() > maxQ) maxQ = (*vi).Q();   
+    }
+
+    histo.SetRange(minQ, maxQ, histo_range);
+    
+    for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if(!(*vi).IsD())
+      histo.Add((*vi).Q());
+    
+    minQ = histo.Percentile(histo_frac);
+    maxQ = histo.Percentile(1.0f - histo_frac);
+      
+    for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if(!(*vi).IsD())
+      (*vi).Q() = math::Clamp((*vi).Q(), minQ, maxQ);
+
+    if (log)
+      log->Log(GLLogStream::Info, "Absolute Curvature: minQ=%f maxQ=%f", minQ, maxQ);
+    
+    delete[] H;
+
+  }
 }
 
 #endif
