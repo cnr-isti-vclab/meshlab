@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.20  2006/01/20 11:38:35  buzzelli
+code cleaning + more validation controls
+
 Revision 1.19  2006/01/13 00:40:26  buzzelli
 added support for files with negative references to texCoord and vertex normals inside face definition
 
@@ -69,22 +72,6 @@ Progress bar counter unified for both vertices and faces
 
 Revision 1.5  2005/12/06 05:07:39  buzzelli
 Object file importer now performs also materials and texture names loading
-
-Revision 1.4  2005/11/27 16:46:13  buzzelli
-Added test of callback with null
-
-Revision 1.3  2005/11/24 01:43:25  cignoni
-Ho committato la versione come si era sistemata a lezione.
-Se non va bene sovrascrivetela pure...
-
-Revision 1.2  2005/11/09 11:01:10  buzzelli
-OBJ file importing mechanism extended for faces with more than four vertices.
-
-Revision 1.1  2005/11/08 17:45:26  buzzelli
-Added first working implementation of OBJ file importer.
-
-Revision 1.1  2005/11/07 11:00:00  buzzelli
-First working version (for simplest objects)
 
 ****************************************************************************/
 
@@ -182,7 +169,8 @@ enum OBJError {
 	E_NO_FACE,								// 5
 	E_LESS_THAN_3VERTINFACE,	// 6
 	E_BAD_VERT_INDEX,					// 7
-	E_BAD_TEX_VERT_INDEX 			// 8
+	E_BAD_VERT_TEX_INDEX, 		// 8
+	E_BAD_VERT_NORMAL_INDEX 	// 9
 };
 
 static const char* ErrorMsg(int error)
@@ -197,35 +185,22 @@ static const char* ErrorMsg(int error)
 		"No face field found",							// 5
 		"Face with less than 3 vertices",		// 6
 		"Bad vertex index in face",					// 7
-		"Bad texture index in face"					// 8
+		"Bad texture coords index in face",	// 8
+		"Bad vertex normal index in face"		// 9
 	};
 
-  if(error>8 || error<0) return "Unknown error";
+  if(error>9 || error<0) return "Unknown error";
   else return obj_error_msg[error];
 };
-
-static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
-{
-	return OpenAscii(m, filename, oi);
-}
-
-static int Open( OpenMeshType &m, const char * filename, int &mask, CallBackPos *cb=0)
-{
-	ObjInfo oi;
-  oi.cb=cb; 
-	int result = OpenAscii(m, filename, oi);
-	mask = oi.mask;
-	return result;
-}
 
 /*!
 * Opens an object file (in ascii format) and populates the mesh passed as first
 * accordingly to read data
 * \param m The mesh model to be populated with data stored into the file
-* \param filename The name of the file to open
+* \param filename The name of the file to be opened
 * \param oi A structure containing infos about the object to be opened
 */
-static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
+static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 {
 	m.Clear();
 	
@@ -292,10 +267,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				{
 					Material material = materials[currentMaterialIdx];
 					Point3f diffuseColor = material.diffuse;
-					unsigned char r = (unsigned char) (diffuseColor[0] * 255.0);
-					unsigned char g = (unsigned char) (diffuseColor[1] * 255.0);
-					unsigned char b = (unsigned char) (diffuseColor[2] * 255.0);
-					unsigned char alpha = (unsigned char) (material.alpha * 255.0);
+					unsigned char r			= (unsigned char) (diffuseColor[0] * 255.0);
+					unsigned char g			= (unsigned char) (diffuseColor[1] * 255.0);
+					unsigned char b			= (unsigned char) (diffuseColor[2] * 255.0);
+					unsigned char alpha = (unsigned char) (material.alpha  * 255.0);
 					Color4b vertexColor = Color4b(r, g, b, alpha);
 					(*vi).C()[0] = vertexColor[0];
 					(*vi).C()[1] = vertexColor[1];
@@ -345,25 +320,19 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					std::string normal;
 
 					SplitVVTVNToken(tokens[1], vertex, texcoord, normal);
-					v1_index = atoi(vertex.c_str());
+					v1_index	= atoi(vertex.c_str());
 					vt1_index = atoi(texcoord.c_str());
-					if (vt1_index < 0) vt1_index += numTexCoords; else --vt1_index;
 					vn1_index = atoi(normal.c_str());
-					if (vn1_index < 0) vn1_index += numVNormals;	else --vn1_index;
 
 					SplitVVTVNToken(tokens[2], vertex, texcoord, normal);
-					v2_index = atoi(vertex.c_str());
+					v2_index	= atoi(vertex.c_str());
 					vt2_index = atoi(texcoord.c_str());
-					if (vt2_index < 0) vt2_index += numTexCoords; else --vt2_index;
 					vn2_index = atoi(normal.c_str());
-					if (vn2_index < 0) vn2_index += numVNormals;	else --vn2_index;
 
 					SplitVVTVNToken(tokens[3], vertex, texcoord, normal);
-					v3_index = atoi(vertex.c_str());
+					v3_index	= atoi(vertex.c_str());
 					vt3_index = atoi(texcoord.c_str());
-					if (vt3_index < 0) vt3_index += numTexCoords; else --vt3_index;
 					vn3_index = atoi(normal.c_str());
-					if (vn3_index < 0) vn3_index += numVNormals;	else --vn3_index;
 				}
 				else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 				{
@@ -371,19 +340,16 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					std::string texcoord;
 					
 					SplitVVTToken(tokens[1], vertex, texcoord);
-					v1_index = atoi(vertex.c_str());
+					v1_index	= atoi(vertex.c_str());
 					vt1_index = atoi(texcoord.c_str());
-					if (vt1_index < 0) vt1_index += numTexCoords; else --vt1_index;
-
+					
 					SplitVVTToken(tokens[2], vertex, texcoord);
-					v2_index = atoi(vertex.c_str());
+					v2_index	= atoi(vertex.c_str());
 					vt2_index = atoi(texcoord.c_str());
-					if (vt2_index < 0) vt2_index += numTexCoords; else --vt2_index;
 					
 					SplitVVTToken(tokens[3], vertex, texcoord);
-					v3_index = atoi(vertex.c_str());
+					v3_index	= atoi(vertex.c_str());
 					vt3_index = atoi(texcoord.c_str());
-					if (vt3_index < 0) vt3_index += numTexCoords; else --vt3_index;
 				}
 				else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 				{
@@ -391,19 +357,16 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					std::string normal;
 					
 					SplitVVNToken(tokens[1], vertex, normal);
-					v1_index = atoi(vertex.c_str());
+					v1_index	= atoi(vertex.c_str());
 					vn1_index = atoi(normal.c_str());
-					if (vn1_index < 0) vn1_index += numVNormals;	else --vn1_index;
 
 					SplitVVNToken(tokens[2], vertex, normal);
-					v2_index = atoi(vertex.c_str());
+					v2_index	= atoi(vertex.c_str());
 					vn2_index = atoi(normal.c_str());
-					if (vn2_index < 0) vn2_index += numVNormals;	else --vn2_index;
 					
 					SplitVVNToken(tokens[3], vertex, normal);
-					v3_index = atoi(vertex.c_str());
+					v3_index	= atoi(vertex.c_str());
 					vn3_index = atoi(normal.c_str());
-					if (vn3_index < 0) vn3_index += numVNormals;	else --vn3_index;
 				}
 				else
 				{
@@ -412,10 +375,37 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					v3_index = atoi(tokens[3].c_str());
 				}
 			
-				// assigning wedge texture coordinates
-				// -----------------------------------
 				if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 				{
+					// verifying validity of texture coords indices
+					// --------------------------------------------
+					if (vt1_index < 0)
+					{
+						vt1_index += numTexCoords;
+						if (vt1_index < 0)	return E_BAD_VERT_TEX_INDEX;
+					}
+					else if (vt1_index > numTexCoords)	return E_BAD_VERT_TEX_INDEX;
+					else --vt1_index;
+
+					if (vt2_index < 0)
+					{
+						vt2_index += numTexCoords;
+						if (vt2_index < 0)	return E_BAD_VERT_TEX_INDEX;
+					}
+					else if (vt2_index > numTexCoords)	return E_BAD_VERT_TEX_INDEX;
+					else --vt2_index;
+
+					if (vt3_index < 0)
+					{
+						vt3_index += numTexCoords;
+						if (vt3_index < 0)	return E_BAD_VERT_TEX_INDEX;
+					}
+					else if (vt3_index > numTexCoords)	return E_BAD_VERT_TEX_INDEX;
+					else --vt3_index;
+
+
+					// assigning wedge texture coordinates
+					// -----------------------------------
 					Material material = materials[currentMaterialIdx];
 					
 					TexCoord t = texCoords[vt1_index];
@@ -434,16 +424,29 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					/*if(multit) */(*fi).WT(2).n() = material.textureIdx;
 				}
 				
-
-				if (v1_index < 0) v1_index += numVertices;
+				// verifying validity of vertex indices
+				// ------------------------------------
+				if (v1_index < 0)
+				{
+					v1_index += numVertices;
+					if (v1_index < 0)	return E_BAD_VERT_INDEX;
+				}
 				else if (v1_index > numVertices)	return E_BAD_VERT_INDEX;
 				else v1_index--;  // since index starts from 1 instead of 0
 
-				if (v2_index < 0) v2_index += numVertices;
+				if (v2_index < 0)
+				{
+					v2_index += numVertices;
+					if (v2_index < 0)	return E_BAD_VERT_INDEX;
+				}
 				else if (v2_index > numVertices)	return E_BAD_VERT_INDEX;
 				else v2_index--;  // since index starts from 1 instead of 0
 
-				if (v3_index < 0) v3_index += numVertices;
+				if (v3_index < 0)
+				{
+					v3_index += numVertices;
+					if (v3_index < 0)	return E_BAD_VERT_INDEX;
+				}
 				else if (v3_index > numVertices)	return E_BAD_VERT_INDEX;
 				else v3_index--;	// since index starts from 1 instead of 0
 			
@@ -457,6 +460,33 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				// ---------------------
 				if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 				{
+					// verifying validity of vertex normal indices
+					// -------------------------------------------
+					if (vn1_index < 0)
+					{
+						vn1_index += numVNormals;
+						if (vn1_index < 0)	return E_BAD_VERT_NORMAL_INDEX;
+					}
+					else if (vn1_index > numVNormals)	return E_BAD_VERT_NORMAL_INDEX;
+					else vn1_index--;
+
+					if (vn2_index < 0)
+					{
+						vn2_index += numVNormals;
+						if (vn2_index < 0)	return E_BAD_VERT_NORMAL_INDEX;
+					}
+					else if (vn2_index > numVNormals)	return E_BAD_VERT_NORMAL_INDEX;
+					else vn2_index--;
+
+					if (vn3_index < 0)
+					{
+						vn3_index += numVNormals;
+						if (vn3_index < 0)	return E_BAD_VERT_NORMAL_INDEX;
+					}
+					else if (vn3_index > numVNormals)	return E_BAD_VERT_NORMAL_INDEX;
+					else vn3_index--;
+
+
 					// face normal is computed as an average of wedge normals
 					Point3f n = (normals[vn1_index] + normals[vn2_index] + normals[vn3_index]);
 					n.Normalize();
@@ -472,16 +502,16 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 				// assigning face color
 				// --------------------
-				Color4b faceColor;	// declare it outside code block since other triangles
-														// of this face will share the same color
+				Color4b faceColor;	// we declare this outside code block since other 
+														// triangles of this face will share the same color
 				if( oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 				{
 					Material material = materials[currentMaterialIdx];
 					Point3f diffuseColor = material.diffuse;
-					unsigned char r = (unsigned char) (diffuseColor[0] * 255.0);
-					unsigned char g = (unsigned char) (diffuseColor[1] * 255.0);
-					unsigned char b = (unsigned char) (diffuseColor[2] * 255.0);
-					unsigned char alpha = (unsigned char) (material.alpha * 255.0);
+					unsigned char r			= (unsigned char) (diffuseColor[0] * 255.0);
+					unsigned char g			= (unsigned char) (diffuseColor[1] * 255.0);
+					unsigned char b			= (unsigned char) (diffuseColor[2] * 255.0);
+					unsigned char alpha = (unsigned char) (material.alpha  * 255.0);
 					faceColor = Color4b(r, g, b, alpha);
 					(*fi).C()[0] = faceColor[0];
 					(*fi).C()[1] = faceColor[1];
@@ -510,9 +540,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						SplitVVTVNToken(tokens[++iVertex], vertex, texcoord, normal);
 						v4_index	= atoi(vertex.c_str());
 						vt4_index = atoi(texcoord.c_str());
-						if (vt4_index < 0) vt4_index += numTexCoords; else --vt4_index;
 						vn4_index = atoi(normal.c_str());
-						if (vn4_index < 0) vn4_index += numVNormals;	else --vn4_index;
 					}
 					else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 					{
@@ -522,7 +550,6 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						SplitVVTToken(tokens[++iVertex], vertex, texcoord);
 						v4_index	= atoi(vertex.c_str());
 						vt4_index = atoi(texcoord.c_str());
-						if (vt4_index < 0) vt4_index += numTexCoords; else --vt4_index;
 					}
 					else if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 					{
@@ -530,9 +557,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						std::string normal;
 						
 						SplitVVNToken(tokens[++iVertex], vertex, normal);
-						v4_index = atoi(vertex.c_str());
+						v4_index  = atoi(vertex.c_str());
 						vn4_index = atoi(normal.c_str());
-						if (vn4_index < 0) vn4_index += numVNormals;	else --vn4_index;
 					}
 					else
 						v4_index	= atoi(tokens[++iVertex].c_str());
@@ -541,6 +567,17 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					// -----------------------------------
 					if( oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 					{
+						// verifying validity of texture coords index
+						// ------------------------------------------
+						if (vt4_index < 0)
+						{
+							vt4_index += numTexCoords;
+							if (vt4_index < 0)	return E_BAD_VERT_TEX_INDEX;
+						}
+						else if (vt4_index > numTexCoords)	return E_BAD_VERT_TEX_INDEX;
+						else --vt4_index;
+
+
 						Material material = materials[currentMaterialIdx];
 						TexCoord t = texCoords[vt1_index];
 						(*fi).WT(0).u() = t.u;
@@ -559,8 +596,14 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 						vt3_index = vt4_index;
 					}
-						
-					if (v4_index < 0) v4_index += numVertices;
+					
+					// verifying validity of vertex index
+					// ----------------------------------
+					if (v4_index < 0)
+					{
+						v4_index += numVertices;
+						if (v4_index < 0)	return E_BAD_VERT_INDEX;
+					}
 					else if (v4_index > numVertices)	return E_BAD_VERT_INDEX;
 					else v4_index--;	// since index starts from 1 instead of 0
 
@@ -574,6 +617,17 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					// ---------------------
 					if ( oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
 					{
+						// verifying validity of vertex normal index
+						// -----------------------------------------
+						if (vn4_index < 0)
+						{
+							vn4_index += numVNormals;
+							if (vn4_index < 0)	return E_BAD_VERT_NORMAL_INDEX;
+						}
+						else if (vn4_index > numVNormals)	return E_BAD_VERT_NORMAL_INDEX;
+						else vn4_index--;
+
+
 						// face normal is computed as an average of wedge normals
 						Point3f n = (normals[vn1_index] + normals[vn3_index] + normals[vn4_index]);
 						n.Normalize();
@@ -599,8 +653,8 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						(*fi).C()[3] = faceColor[3];
 					}
 
-					// La faccia composta da piu' di tre vertici viene suddivisa in triangoli
-					// secondo lo schema seguente:
+					// A face polygon composed of more than three vertices is tringulated
+					// according to the following schema:
 					//                     v5
 					//                    /  \
 					//                   /    \
@@ -611,13 +665,10 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					//                 |  \  /
 					//                v2---v3
 					//
-					// Nell'esempio in figura, il poligono di 5 vertici (v1,v2,v3,v4,v5)
-					// viene suddiviso nei triangoli (v1,v2,v3), (v1,v3,v4) e (v1,v4,v5).
-					// In questo modo il vertice v1 diventa il vertice comune di tutti i
-					// triangoli in cui il poligono originale viene suddiviso, e questo
-					// puo' portare alla generazione di triangoli molto 'sottili' (tuttavia
-					// con questo metodo si ha la garanzia che tutti i triangoli generati
-					// conservino la stessa orientazione).
+					// As shown above, the 5 vertices polygon (v1,v2,v3,v4,v5)
+					// has been split into the triangles (v1,v2,v3), (v1,v3,v4) e (v1,v4,v5).
+					// This way vertex v1 becomes the common vertex of all newly generated
+					// triangles, and this may lead to the creation of very thin triangles.
 
 					++fi;
 					++numTriangles;
@@ -792,19 +843,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 
 	/*!
-	* Retrieves kind of data stored into the file and fills a mask appropriately
-	* \param filename The name of the file to open
-	*	\param mask	A mask which will be filled according to type of data found in the object
-	*/
-	static bool LoadMask(const char * filename, int &mask)
-	{
-		ObjInfo oi;
-		return LoadMask(filename, mask,oi);
-	}
-
-	
-	/*!
-	* Retrieves kind of data stored into the file and fills a mask appropriately
+	* Retrieves infos about kind of data stored into the file and fills a mask appropriately
 	* \param filename The name of the file to open
 	*	\param mask	A mask which will be filled according to type of data found in the object
 	* \param oi A structure which will be filled with infos about the object to be opened
@@ -948,7 +987,7 @@ static int OpenAscii( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 	static bool LoadMaterials(const char * filename, std::vector<Material> &materials, std::vector<std::string> &textures)
 	{
-		// nel chiamante garantire che ci si trovi nella directory giusta 
+		// assumes we are in the right directory
 
 		std::ifstream stream(filename);
 		if (stream.fail())
