@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.23  2006/01/20 14:15:52  fmazzant
+ added texture filename on material 3ds and coordtexture on face
+
  Revision 1.22  2006/01/19 09:36:29  fmazzant
  cleaned up history log
 
@@ -230,7 +233,14 @@ namespace io {
 							//shininess
 							material->shininess = materials[materials.size()-1].Ns;
 							
-							//lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
+							//texture
+							if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
+							{
+								strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
+							}
+
+							lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
+							
 							face.material[0] = 'm';//associa alla faccia il materiale.
 							face.material[1] = 'A' + material_index - 1;//l'idice del materiale...
 						}
@@ -247,7 +257,9 @@ namespace io {
 						for(unsigned int k=0;k<MAX;k++)
 							if(m.HasPerWedgeTexture())
 								if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),t_index))
+								{
 									t_index++;
+								}
 					}
 
 					mesh->faceL[f_index]=face;
@@ -266,7 +278,14 @@ namespace io {
 			{
 				if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
 				{
-					
+					typedef std::map<vcg::TCoord2<float>,int>::iterator MI;
+					int i =0;
+					for(MI coord = CoordTextures.begin();coord!=CoordTextures.end();++coord)
+					{
+						mesh->texelL[i][0] = (*coord).first.u();
+						mesh->texelL[i][1] = (*coord).first.v();
+						i++;
+					}
 				}
 				else
 					return E_NOTEXCOORDVALID;
