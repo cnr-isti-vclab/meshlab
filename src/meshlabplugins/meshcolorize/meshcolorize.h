@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2006/01/20 18:17:07  vannini
+added Restore Color
+
 Revision 1.14  2006/01/20 16:25:39  vannini
 Added Absolute Curvature colorize
 
@@ -60,7 +63,7 @@ class ExtraMeshColorizePlugin : public QObject, public MeshColorizeInterface
 
 public:
 
-    enum ColorizeType {CP_GAUSSIAN,CP_MEAN,CP_RMS,CP_ABSOLUTE,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM};
+    enum ColorizeType {CP_GAUSSIAN,CP_MEAN,CP_RMS,CP_ABSOLUTE,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM,CP_RESTORE_ORIGINAL};
     const QString ST(ColorizeType c);
 
     ExtraMeshColorizePlugin();

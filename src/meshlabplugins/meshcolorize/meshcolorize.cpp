@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.19  2006/01/20 18:17:07  vannini
+added Restore Color
+
 Revision 1.18  2006/01/20 16:25:39  vannini
 Added Absolute Curvature colorize
 
@@ -94,6 +97,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
   actionList << new QAction(ST(CP_SELFINTERSECT), this);
   actionList << new QAction(ST(CP_BORDER), this);
   actionList << new QAction(ST(CP_COLORNM), this);
+  actionList << new QAction(ST(CP_RESTORE_ORIGINAL), this);
 }
 const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
   switch(c)
@@ -112,6 +116,8 @@ const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
       return QString("Border");
     case CP_COLORNM: 
       return QString("Color non Manifold");
+    case CP_RESTORE_ORIGINAL: 
+      return QString("Restore Color");
     default: assert(0);
   }
   return QString("error!");
@@ -157,7 +163,12 @@ const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action)
     ai.Help = tr("Colorize only non manifold edges.");
     ai.ShortHelp = tr("Colorize only non manifold edges");
   }
-
+  
+  if( action->text() == ST(CP_RESTORE_ORIGINAL) )
+  {
+    ai.Help = tr("Restore original per vertex color.");
+    ai.ShortHelp = tr("Restore original per vertex color");
+  }
   return ai;
 }
 const PluginInfo &ExtraMeshColorizePlugin::Info() 
@@ -233,6 +244,12 @@ void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &
     vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
     ColorManifold<CMeshO>(m.cm);
     rm.colorMode = GLW::CMPerVert;
+  }
+
+  if(mode->text() == ST(CP_RESTORE_ORIGINAL))
+  {
+     m.restoreVertexColor();
+     rm.colorMode = GLW::CMPerVert;
   }
 }
 Q_EXPORT_PLUGIN(ExtraMeshColorizePlugin)

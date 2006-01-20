@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.58  2006/01/20 18:17:10  vannini
+ added Restore Color
+
  Revision 1.57  2006/01/19 17:07:51  fmazzant
  changed struct Format to class Format(QString, QString).
  updated importFormats() and exportFormats() to the new class.
@@ -203,6 +206,8 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 
 		if (cb != NULL)
 			(*cb)(100, "Done");
+
+    m.storeVertexColor();
 
 		return true;
 	}
