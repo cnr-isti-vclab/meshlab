@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2006/01/20 14:46:44  vannini
+Code refactoring
+Added RMS Curvature colorize
+
 Revision 1.12  2006/01/13 16:24:16  vannini
 Moved gaussian and mean curvature functions into color_curvature.h
 
@@ -53,7 +57,7 @@ class ExtraMeshColorizePlugin : public QObject, public MeshColorizeInterface
 
 public:
 
-    enum ColorizeType {CP_GAUSSIAN,CP_MEAN,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM};
+    enum ColorizeType {CP_GAUSSIAN,CP_MEAN,CP_RMS,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM};
     const QString ST(ColorizeType c);
 
     ExtraMeshColorizePlugin();
