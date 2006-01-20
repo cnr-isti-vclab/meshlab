@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.76  2006/01/20 11:14:27  glvertex
+Applyfilter now sets the <modified> flag when the filter is applied succesfully
+
 Revision 1.75  2006/01/19 23:11:39  glvertex
 No significant changes
 
@@ -215,13 +218,17 @@ void MainWindow::applyFilter()
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 	qb->show();
 	iFilter->setLog(&(GLA()->log));
-	iFilter->applyFilter(action,*(GLA()->mm ),GLA(),QCallBack);
-	GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());
+	
+	// Log if filter applied succesfully
+	if(iFilter->applyFilter(action,*(GLA()->mm ),GLA(),QCallBack))
+	{
+		GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());
+		GLA()->setWindowModified(true);
+		GLA()->setLastAppliedFilter(action);
+		lastFilterAct->setText(QString("Apply filter ") + action->text());
+		lastFilterAct->setEnabled(true);
+	}
 	qb->hide();
-
-	GLA()->setLastAppliedFilter(action);
-	lastFilterAct->setText(QString("Apply filter ") + action->text());
-	lastFilterAct->setEnabled(true);
 }
 
 void MainWindow::applyEditMode()
@@ -418,7 +425,7 @@ void MainWindow::open(QString fileName)
 		gla=new GLArea(workspace);
 		gla->mm=mm;
 		gla->setFileName(fileName);
-		gla->setWindowTitle(QFileInfo(fileName).fileName());
+		gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
 		gla->showInfoArea(true);
 		workspace->addWindow(gla);
 		if(workspace->isVisible()) gla->showMaximized();
