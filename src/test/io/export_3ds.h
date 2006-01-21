@@ -25,6 +25,11 @@
   History
 
  $Log$
+ Revision 1.24  2006/01/21 15:19:51  fmazzant
+ changed:
+ inserting coord texture in to map from key = index, value=coord
+ to key=coord, value=index_of_vertix.
+
  Revision 1.23  2006/01/20 14:15:52  fmazzant
  added texture filename on material 3ds and coordtexture on face
 
@@ -153,12 +158,14 @@ namespace io {
 			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//crea una nuova mesh con nome mesh		
 
 			std::vector<Material> materials;
-			std::map<vcg::TCoord2<float>,int> CoordTextures;
-
+			//std::map<vcg::TCoord2<float>,int> CoordTextures;
+			std::map<int,vcg::TCoord2<float> > CoordTextures;
+			
 			int current = 0;
 			int max = m.vert.size()+m.face.size();
 			
 			lib3ds_mesh_new_point_list(mesh, m.vert.size());//definisce il numero di vertici
+	
 			int v_index = 0;
 			VertexIterator vi;
 			if(mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
@@ -170,7 +177,7 @@ namespace io {
 					point.pos[1] = (*vi).P()[1];
 					point.pos[2] = (*vi).P()[2];
 
-					mesh->pointL[v_index] = point;
+					mesh->pointL[v_index] = point;		
 
 					if (cb !=NULL)
 						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
@@ -256,10 +263,8 @@ namespace io {
 						unsigned int MAX = 3;
 						for(unsigned int k=0;k<MAX;k++)
 							if(m.HasPerWedgeTexture())
-								if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),t_index))
-								{
+								if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),GetIndexVertex(m, (*fi).V(k))))
 									t_index++;
-								}
 					}
 
 					mesh->faceL[f_index]=face;
@@ -278,15 +283,15 @@ namespace io {
 			{
 				if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
 				{
-					typedef std::map<vcg::TCoord2<float>,int>::iterator MI;
+					typedef std::map<int, vcg::TCoord2<float> >::iterator MI;
 					int i =0;
 					for(MI coord = CoordTextures.begin();coord!=CoordTextures.end();++coord)
 					{
-						mesh->texelL[i][0] = (*coord).first.u();
-						mesh->texelL[i][1] = (*coord).first.v();
+						mesh->texelL[i][0] = (*coord).second.u();
+						mesh->texelL[i][1] = (*coord).second.v();
 						i++;
 					}
-				}
+				}	
 				else
 					return E_NOTEXCOORDVALID;
 			}
@@ -319,13 +324,17 @@ namespace io {
 		}
 		
 		/*
-
+			aggiunge o sovrascrive il valore della coordinata di texture per vertice
+			TODO:migliorare...possibilità di eliminare anche la funzione.
 		*/
-		inline static bool AddNewTextureCoord(std::map<vcg::TCoord2<float>,int> &m, const vcg::TCoord2<float> &wt,int value)
+		inline static bool AddNewTextureCoord(std::map<int, vcg::TCoord2<float> > &m, const vcg::TCoord2<float> &wt,int index_vertex)
 		{
-			int index = m[wt];
-			if(index==0){m[wt]=value;return true;}
-			return false;
+			//vcg::TCoord2<float> wtp = m[value];
+			//if(wtp!=0){
+			m[index_vertex]=wt;
+			return true;
+			//}
+			//return false;
 		}
 
 		/*
