@@ -6,12 +6,16 @@
 #include <QDoubleValidator>
 #include "ui_transform.h"
 #include <vcg/math/matrix44.h>
+#include <meshlab/meshmodel.h> // for CMeshO
 
 using vcg::Matrix44f;
 #define PI 3.14159265
 /*
 
 $Log$
+Revision 1.5  2006/01/21 14:20:38  mariolatronico
+interface work in progress on new features , need implementation
+
 Revision 1.4  2006/01/17 14:18:03  mariolatronico
 - added connection between rotate Line edit and dial
 - bugfix, angle were passed in degrees, must be in radians
@@ -27,7 +31,6 @@ file for Apply Transform dialog (implementation and user interface)
 
 
 */
-
 class TransformDialog : public QDialog, Ui::TransformDialog {
 	
   Q_OBJECT
@@ -39,7 +42,7 @@ public slots:
 
 	// overloaded exec() function, sets some initial values
 	// on start
-	int exec(); 
+	int exec(CMeshO *mesh); 
 	// disable buttons when uniformScale check box is
 	// selected
 	void on_uniformScaleCB_stateChanged(int state);
@@ -55,6 +58,13 @@ public slots:
 	// do the real count when ok button is pressed
   void on_okButton_pressed();
 	
+	// move mesh center to origin
+	// simply updates the move line edit
+	void on_mvCenterOriginPB_clicked();
+
+	// scale to unit box
+	void on_scaleUnitPB_clicked();
+	
 	
 public:
 
@@ -66,7 +76,8 @@ public:
  
 	QString& getLog();
 private: // members
-  
+  CMeshO *mesh;
+	Point3f minBbox, maxBbox; // min and max of bounding box
   QButtonGroup *whichTransformBG;
   QButtonGroup *rotateBG;
   QDoubleValidator *rotateValidator;

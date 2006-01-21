@@ -8,295 +8,450 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>499</width>
-    <height>297</height>
+    <width>567</width>
+    <height>487</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Dialog</string>
   </property>
-  <layout class="QGridLayout" >
-   <property name="margin" >
-    <number>9</number>
+  <widget class="QWidget" name="layoutWidget_3" >
+   <property name="geometry" >
+    <rect>
+     <x>30</x>
+     <y>410</y>
+     <width>191</width>
+     <height>21</height>
+    </rect>
    </property>
-   <property name="spacing" >
-    <number>6</number>
+   <layout class="QHBoxLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="bboxMaxLBL" >
+      <property name="text" >
+       <string>BBox max</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="bboxValueMaxLBL" >
+      <property name="text" >
+       <string>bboxValueMaxLBL</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>30</x>
+     <y>440</y>
+     <width>481</width>
+     <height>33</height>
+    </rect>
    </property>
-   <item row="2" column="0" >
-    <layout class="QHBoxLayout" >
+   <layout class="QHBoxLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>131</width>
+        <height>31</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="okButton" >
+      <property name="text" >
+       <string>OK</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="cancelButton" >
+      <property name="text" >
+       <string>Cancel</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>9</x>
+     <y>9</y>
+     <width>541</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QRadioButton" name="isMoveRB" >
+      <property name="text" >
+       <string>Move</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QRadioButton" name="isRotateRB" >
+      <property name="text" >
+       <string>Rotate</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QRadioButton" name="isScaleRB" >
+      <property name="text" >
+       <string>Scale</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="rotateBox" >
+   <property name="geometry" >
+    <rect>
+     <x>194</x>
+     <y>41</y>
+     <width>175</width>
+     <height>329</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Rotate</string>
+   </property>
+   <layout class="QGridLayout" >
+    <property name="margin" >
+     <number>9</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item row="3" column="0" >
+     <widget class="QGroupBox" name="centerRotateBox" >
+      <property name="title" >
+       <string>Center</string>
+      </property>
+      <layout class="QGridLayout" >
+       <property name="margin" >
+        <number>9</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item row="0" column="0" >
+        <widget class="QRadioButton" name="centerRotateRB" >
+         <property name="text" >
+          <string>Mesh Center</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <widget class="QRadioButton" name="originRotateRB" >
+         <property name="text" >
+          <string>Origin</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="2" column="0" >
+     <widget class="QLineEdit" name="rotateLE" >
+      <property name="text" >
+       <string>0.0</string>
+      </property>
+      <property name="maxLength" >
+       <number>10</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" >
+     <widget class="QDial" name="rotateDial" >
+      <property name="maximum" >
+       <number>359</number>
+      </property>
+      <property name="sliderPosition" >
+       <number>0</number>
+      </property>
+      <property name="orientation" >
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="invertedAppearance" >
+       <bool>false</bool>
+      </property>
+      <property name="invertedControls" >
+       <bool>false</bool>
+      </property>
+      <property name="wrapping" >
+       <bool>false</bool>
+      </property>
+      <property name="notchesVisible" >
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" >
+     <layout class="QHBoxLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QRadioButton" name="xAxisRB" >
+        <property name="text" >
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="yAxisRB" >
+        <property name="text" >
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="zAxisRB" >
+        <property name="text" >
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_2" >
+   <property name="geometry" >
+    <rect>
+     <x>30</x>
+     <y>380</y>
+     <width>191</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="bboxMinLBL" >
+      <property name="text" >
+       <string>BBox min</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="bboxValueMinLBL" >
+      <property name="text" >
+       <string>bboxValueMinLBL</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="moveBox" >
+   <property name="geometry" >
+    <rect>
+     <x>11</x>
+     <y>41</y>
+     <width>177</width>
+     <height>329</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Move</string>
+   </property>
+   <widget class="QWidget" name="layoutWidget" >
+    <property name="geometry" >
+     <rect>
+      <x>11</x>
+      <y>84</y>
+      <width>155</width>
+      <height>89</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" >
      <property name="margin" >
       <number>0</number>
      </property>
      <property name="spacing" >
       <number>6</number>
      </property>
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" >
-        <size>
-         <width>131</width>
-         <height>31</height>
-        </size>
-       </property>
-      </spacer>
+     <item row="2" column="1" >
+      <widget class="QLineEdit" name="zMoveLE" />
      </item>
-     <item>
-      <widget class="QPushButton" name="okButton" >
+     <item row="0" column="1" >
+      <widget class="QLineEdit" name="xMoveLE" />
+     </item>
+     <item row="2" column="0" >
+      <widget class="QLabel" name="zMoveLBL" >
        <property name="text" >
-        <string>OK</string>
+        <string>Z</string>
+       </property>
+       <property name="buddy" >
+        <cstring>zMoveLE</cstring>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="cancelButton" >
+     <item row="1" column="1" >
+      <widget class="QLineEdit" name="yMoveLE" />
+     </item>
+     <item row="1" column="0" >
+      <widget class="QLabel" name="yMoveLBL" >
        <property name="text" >
-        <string>Cancel</string>
+        <string>Y</string>
+       </property>
+       <property name="buddy" >
+        <cstring>yMoveLE</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" >
+      <widget class="QLabel" name="xMoveLBL" >
+       <property name="text" >
+        <string>X</string>
+       </property>
+       <property name="buddy" >
+        <cstring>xMoveLE</cstring>
        </property>
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="0" column="0" >
-    <layout class="QHBoxLayout" >
+   </widget>
+   <widget class="QPushButton" name="mvCenterOriginPB" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>190</y>
+      <width>155</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Move center to origin</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="scaleBox" >
+   <property name="geometry" >
+    <rect>
+     <x>370</x>
+     <y>40</y>
+     <width>175</width>
+     <height>329</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Scale</string>
+   </property>
+   <widget class="QWidget" name="layoutWidget" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>64</y>
+      <width>161</width>
+      <height>119</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" >
      <property name="margin" >
       <number>0</number>
      </property>
      <property name="spacing" >
       <number>6</number>
      </property>
-     <item>
-      <widget class="QRadioButton" name="isMoveRB" >
+     <item row="2" column="0" >
+      <widget class="QLabel" name="zScaleLBL" >
        <property name="text" >
-        <string>Move</string>
+        <string>Z</string>
+       </property>
+       <property name="buddy" >
+        <cstring>zScaleLE</cstring>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QRadioButton" name="isRotateRB" >
+     <item row="1" column="1" >
+      <widget class="QLineEdit" name="yScaleLE" />
+     </item>
+     <item row="0" column="1" >
+      <widget class="QLineEdit" name="xScaleLE" />
+     </item>
+     <item row="1" column="0" >
+      <widget class="QLabel" name="yScaleLBL" >
        <property name="text" >
-        <string>Rotate</string>
+        <string>Y</string>
+       </property>
+       <property name="buddy" >
+        <cstring>yScaleLE</cstring>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QRadioButton" name="isScaleRB" >
+     <item row="0" column="0" >
+      <widget class="QLabel" name="xScaleLBL" >
        <property name="text" >
-        <string>Scale</string>
+        <string>X</string>
+       </property>
+       <property name="buddy" >
+        <cstring>xScaleLE</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" >
+      <widget class="QLineEdit" name="zScaleLE" />
+     </item>
+     <item row="3" column="0" colspan="2" >
+      <widget class="QCheckBox" name="uniformScaleCB" >
+       <property name="text" >
+        <string>Uniform</string>
        </property>
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="1" column="0" >
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
-     <item>
-      <widget class="QGroupBox" name="moveBox" >
-       <property name="title" >
-        <string>Move</string>
-       </property>
-       <layout class="QGridLayout" >
-        <property name="margin" >
-         <number>9</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
-        <item row="1" column="0" >
-         <widget class="QLabel" name="yMoveLBL" >
-          <property name="text" >
-           <string>Y</string>
-          </property>
-          <property name="buddy" >
-           <cstring>yMoveLE</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0" >
-         <widget class="QLabel" name="xMoveLBL" >
-          <property name="text" >
-           <string>X</string>
-          </property>
-          <property name="buddy" >
-           <cstring>xMoveLE</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" >
-         <widget class="QLabel" name="zMoveLBL" >
-          <property name="text" >
-           <string>Z</string>
-          </property>
-          <property name="buddy" >
-           <cstring>zMoveLE</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1" >
-         <widget class="QLineEdit" name="zMoveLE" />
-        </item>
-        <item row="1" column="1" >
-         <widget class="QLineEdit" name="yMoveLE" />
-        </item>
-        <item row="0" column="1" >
-         <widget class="QLineEdit" name="xMoveLE" />
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="rotateBox" >
-       <property name="title" >
-        <string>Rotate</string>
-       </property>
-       <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>9</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" >
-          <property name="margin" >
-           <number>0</number>
-          </property>
-          <property name="spacing" >
-           <number>6</number>
-          </property>
-          <item>
-           <widget class="QRadioButton" name="xAxisRB" >
-            <property name="text" >
-             <string>X</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="yAxisRB" >
-            <property name="text" >
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="zAxisRB" >
-            <property name="text" >
-             <string>Z</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QDial" name="rotateDial" >
-          <property name="maximum" >
-           <number>359</number>
-          </property>
-          <property name="sliderPosition" >
-           <number>0</number>
-          </property>
-          <property name="orientation" >
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="invertedAppearance" >
-           <bool>false</bool>
-          </property>
-          <property name="invertedControls" >
-           <bool>false</bool>
-          </property>
-          <property name="wrapping" >
-           <bool>false</bool>
-          </property>
-          <property name="notchesVisible" >
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="rotateLE" >
-          <property name="text" >
-           <string>0.0</string>
-          </property>
-          <property name="maxLength" >
-           <number>10</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="scaleBox" >
-       <property name="title" >
-        <string>Scale</string>
-       </property>
-       <layout class="QGridLayout" >
-        <property name="margin" >
-         <number>9</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
-        <item row="1" column="1" >
-         <widget class="QLineEdit" name="yScaleLE" />
-        </item>
-        <item row="2" column="1" >
-         <widget class="QLineEdit" name="zScaleLE" />
-        </item>
-        <item row="0" column="0" >
-         <widget class="QLabel" name="xScaleLBL" >
-          <property name="text" >
-           <string>X</string>
-          </property>
-          <property name="buddy" >
-           <cstring>xScaleLE</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" >
-         <widget class="QLabel" name="zScaleLBL" >
-          <property name="text" >
-           <string>Z</string>
-          </property>
-          <property name="buddy" >
-           <cstring>zScaleLE</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1" >
-         <widget class="QLineEdit" name="xScaleLE" />
-        </item>
-        <item row="1" column="0" >
-         <widget class="QLabel" name="yScaleLBL" >
-          <property name="text" >
-           <string>Y</string>
-          </property>
-          <property name="buddy" >
-           <cstring>yScaleLE</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="2" >
-         <widget class="QCheckBox" name="uniformScaleCB" >
-          <property name="text" >
-           <string>Uniform</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
-   </item>
-  </layout>
+   </widget>
+   <widget class="QPushButton" name="scaleUnitPB" >
+    <property name="geometry" >
+     <rect>
+      <x>11</x>
+      <y>191</y>
+      <width>153</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Scale to unit box</string>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <pixmapfunction></pixmapfunction>
  <tabstops>
@@ -308,32 +463,10 @@
   <tabstop>zAxisRB</tabstop>
   <tabstop>rotateDial</tabstop>
   <tabstop>rotateLE</tabstop>
-  <tabstop>xScaleLE</tabstop>
-  <tabstop>yScaleLE</tabstop>
-  <tabstop>zScaleLE</tabstop>
   <tabstop>xMoveLE</tabstop>
   <tabstop>yMoveLE</tabstop>
   <tabstop>zMoveLE</tabstop>
-  <tabstop>okButton</tabstop>
-  <tabstop>cancelButton</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>cancelButton</sender>
-   <signal>clicked()</signal>
-   <receiver>TransformDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>472</x>
-     <y>415</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>269</x>
-     <y>404</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

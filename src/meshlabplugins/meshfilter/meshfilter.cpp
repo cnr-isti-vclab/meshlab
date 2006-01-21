@@ -21,6 +21,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.44  2006/01/21 14:20:38  mariolatronico
+interface work in progress on new features , need implementation
+
 Revision 1.43  2006/01/17 00:55:01  giec
 Added detacher filter with it's dialog
 
@@ -106,21 +109,6 @@ Added the call to cluster algorithm
 Revision 1.16  2005/12/09 18:28:34  mariolatronico
 added commented code for Decimator
 
-Revision 1.15  2005/12/08 22:46:44  cignoni
-Added Laplacian Smooth
-
-Revision 1.14  2005/12/08 13:52:01  mariolatronico
-added preliminary version of callback. Now it counts only even point on RefineOddEven
-
-Revision 1.13  2005/12/05 14:51:03  mariolatronico
-second action from "Loop" to "Butterfly"
-
-Revision 1.12  2005/12/03 23:46:11  cignoni
-Cleaned up a little and added a remove null faces filter
-
-Revision 1.11  2005/12/03 22:50:06  cignoni
-Added copyright info
-
 ****************************************************************************/
 #include <QtGui>
 
@@ -170,8 +158,6 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	refineDialog->hide();
 	decimatorDialog = new DecimatorDialog();
 	decimatorDialog->hide();
-	transformDialog = new TransformDialog();
-	transformDialog->hide();
 	detacherDialog = new DetacherDialog();
 	detacherDialog->hide();
 
@@ -215,7 +201,8 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 	delete refineDialog;
 	delete decimatorDialog;
-	delete transformDialog;
+	if (transformDialog)
+		delete transformDialog;
 	for (int i = 0; i < actionList.count() ; i++ ) {
 		delete actionList.at(i);
 	}
@@ -430,17 +417,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	}
 
 	if (filter->text() == ST(FP_TRANSFORM) ) {
-		//		transformDialog->init();
-		int continueValue = transformDialog->exec();
-		if (continueValue == QDialog::Rejected)
-			return false;
-		Matrix44f matrix = transformDialog->getTransformation();
-		if (log) {
-			log->Log(GLLogStream::Info, 
-							 transformDialog->getLog().toAscii().data());
-		}
-		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
+	
+		// if (!transformDialog)
+// 			transformDialog = new TransformDialog(/*&m.cm*/);
 
+// 		int continueValue = transformDialog->exec(&m.cm);
+// 		if (continueValue == QDialog::Rejected)
+// 			return false;
+// 		Matrix44f matrix = transformDialog->getTransformation();
+// 		if (log) {
+// 			log->Log(GLLogStream::Info, 
+// 							 transformDialog->getLog().toAscii().data());
+// 		}
+// 		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
+		// TODO : need update normal
 	}
 
 	if (filter->text() == ST(FP_DETACHER) ) {
