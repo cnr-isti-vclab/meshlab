@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.34  2006/01/22 23:59:01  fmazzant
+ changed default value of diffuse. 1.0 -> 0.8
+
  Revision 1.33  2006/01/19 09:36:29  fmazzant
  cleaned up history log
 
@@ -384,7 +387,7 @@ namespace io {
 			else if (r != 0 || g != 0 || b != 0)
 				diffuse = Point3f((float)r,(float)g,(float)b);
 			else
-				diffuse = Point3f(1.0,1.0,1.0);
+				diffuse = Point3f(0.8,0.8,0.8);
 
 			float Tr;
 			if(alpha > 1)
