@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.26  2006/01/22 10:42:18  fmazzant
+ cleaned code & optimized code of material's name 3ds
+
  Revision 1.25  2006/01/22 01:26:52  fmazzant
  deleted bug on saving name material 3ds
 
@@ -70,6 +73,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <QString>
 #include <QMessageBox>
 
 namespace vcg {
@@ -128,19 +132,20 @@ namespace io {
 			int capability = 0;
 
 			//camera
-			//capability |= vcg::tri::io::Mask::IOM_CAMERA;
+			//capability |= MeshModel::IOM_CAMERA;
 
 			//vert
-			capability |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+			capability |= MeshModel::IOM_VERTQUALITY;
+			//capability |= MeshModel::IOM_VERTTEXCOORD;
 
 			//face
-			capability |= vcg::tri::io::Mask::IOM_FACEFLAGS;
-			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
-			capability |= vcg::tri::io::Mask::IOM_FACEQUALITY;
-			capability |= vcg::tri::io::Mask::IOM_FACENORMAL;
+			capability |= MeshModel::IOM_FACEFLAGS;
+			capability |= MeshModel::IOM_FACECOLOR;
+			capability |= MeshModel::IOM_FACEQUALITY;
+			capability |= MeshModel::IOM_FACENORMAL;
 
 			//wedg
-			capability |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+			capability |= MeshModel::IOM_WEDGTEXCOORD;
 
 			return capability;
 		}
@@ -160,9 +165,8 @@ namespace io {
 			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
 			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//crea una nuova mesh con nome mesh		
 
+			QString qnamematerial = "Material - %1";
 			std::vector<Material> materials;
-			//std::map<vcg::TCoord2<float>,int> CoordTextures;
-			std::map<int,vcg::TCoord2<float> > CoordTextures;
 			
 			int current = 0;
 			int max = m.vert.size()+m.face.size();
@@ -174,7 +178,7 @@ namespace io {
 
 			int v_index = 0;
 			VertexIterator vi;
-			if(mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
+			if(mask & MeshModel::IOM_VERTQUALITY)
 			{
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 				{
@@ -196,7 +200,7 @@ namespace io {
 			int f_index = 0;//indice facce
 			int t_index = 0;//indice texture
 			FaceIterator fi;
-			if(mask & vcg::tri::io::Mask::IOM_FACEQUALITY)
+			if(mask & MeshModel::IOM_FACEQUALITY)
 			{
 				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 				{
@@ -205,7 +209,7 @@ namespace io {
 					face.points[1] = GetIndexVertex(m, (*fi).V(1));
 					face.points[2] = GetIndexVertex(m, (*fi).V(2));
 					
-					if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
+					if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
 					{
 						unsigned int MAX = 3;
 						for(unsigned int k=0;k<MAX;k++)
@@ -215,26 +219,25 @@ namespace io {
 						}
 					}
 
-					if(mask & vcg::tri::io::Mask::IOM_FACEFLAGS)
+					if(mask & MeshModel::IOM_FACEFLAGS)
 						face.flags = 0;
 					
 					face.smoothing = 10;//da modificare.
-					if(mask & vcg::tri::io::Mask::IOM_FACENORMAL)
+					if(mask & MeshModel::IOM_FACENORMAL)
 					{
 						face.normal[0] = (*fi).N()[0];
 						face.normal[1] = (*fi).N()[1];
 						face.normal[2] = (*fi).N()[2];
 					}
 
-					if(mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+					if(mask & MeshModel::IOM_FACECOLOR)
 					{
 						int material_index = CreateNewMaterial(m, materials, 0, fi);
 						if(material_index == materials.size())
 						{
 							Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
-							//material->name[0] = 'm';
-							//material->name[1] = (char) (96 + material_index - 1);
-							std::string name = "material" + (material_index-1);
+							
+							std::string name = qnamematerial.arg(material_index-1).toStdString();
 							strcpy(material->name,name.c_str());
 
 							//ambient
@@ -259,34 +262,18 @@ namespace io {
 							material->shininess = materials[materials.size()-1].Ns;
 							
 							//texture
-							if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
-							{
+							if(mask & MeshModel::IOM_WEDGTEXCOORD)
 								strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
-							}
 
 							lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
-							
-							//face.material[0] = 'm';//associa alla faccia il materiale.
-							//face.material[1] = (char) (96 + material_index - 1);//l'idice del materiale...
 							strcpy(face.material,name.c_str());
 						}
 						else
 						{	
-							//face.material[0] = 'm';//associa alla faccia il materiale.
-							//face.material[1] = (char) (96 + material_index);//l'idice del materiale...
-							std::string name = "material"+(material_index);
+							std::string name = qnamematerial.arg(material_index).toStdString();
 							strcpy(face.material,name.c_str());
 						}
 					}
-
-					/*if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
-					{
-						unsigned int MAX = 3;
-						for(unsigned int k=0;k<MAX;k++)
-							if(m.HasPerWedgeTexture())
-								if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),GetIndexVertex(m, (*fi).V(k))))
-									t_index++;
-					}*/
 
 					mesh->faceL[f_index]=face;
 
@@ -298,24 +285,6 @@ namespace io {
 					
 				}
 			}
-
-			//aggiunge le coordinate di texture alla mesh
-			//if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
-			//{
-			//	if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
-			//	{
-			//		typedef std::map<int, vcg::TCoord2<float> >::iterator MI;
-			//		int i =0;
-			//		for(MI coord = CoordTextures.begin();coord!=CoordTextures.end();++coord)
-			//		{
-			//			mesh->texelL[i][0] = (*coord).second.u();
-			//			mesh->texelL[i][1] = (*coord).second.v();
-			//			i++;
-			//		}
-			//	}	
-			//	else
-			//		return E_NOTEXCOORDVALID;
-			//}
 
 			lib3ds_file_insert_mesh(file, mesh);//inserisce la mesh al file
 			
@@ -343,21 +312,7 @@ namespace io {
 		{
 			return p-&*(m.vert.begin());
 		}
-		
-		/*
-			aggiunge o sovrascrive il valore della coordinata di texture per vertice
-			TODO:migliorare...possibilità di eliminare anche la funzione.
-		*/
-		inline static bool AddNewTextureCoord(std::map<int, vcg::TCoord2<float> > &m, const vcg::TCoord2<float> &wt,int index_vertex)
-		{
-			//vcg::TCoord2<float> wtp = m[value];
-			//if(wtp!=0){
-			m[index_vertex]=wt;
-			return true;
-			//}
-			//return false;
-		}
-
+	
 		/*
 			crea un nuovo materiale
 		*/
