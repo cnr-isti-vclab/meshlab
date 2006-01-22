@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.25  2006/01/22 01:26:52  fmazzant
+ deleted bug on saving name material 3ds
+
  Revision 1.24  2006/01/21 15:19:51  fmazzant
  changed:
  inserting coord texture in to map from key = index, value=coord
@@ -166,6 +169,9 @@ namespace io {
 			
 			lib3ds_mesh_new_point_list(mesh, m.vert.size());//definisce il numero di vertici
 	
+			if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
+				lib3ds_mesh_new_texel_list(mesh,m.vert.size());
+
 			int v_index = 0;
 			VertexIterator vi;
 			if(mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
@@ -199,6 +205,16 @@ namespace io {
 					face.points[1] = GetIndexVertex(m, (*fi).V(1));
 					face.points[2] = GetIndexVertex(m, (*fi).V(2));
 					
+					if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
+					{
+						unsigned int MAX = 3;
+						for(unsigned int k=0;k<MAX;k++)
+						{
+							mesh->texelL[face.points[k]][0] = (*fi).WT(k).u();
+							mesh->texelL[face.points[k]][1] = (*fi).WT(k).v();
+						}
+					}
+
 					if(mask & vcg::tri::io::Mask::IOM_FACEFLAGS)
 						face.flags = 0;
 					
@@ -216,9 +232,11 @@ namespace io {
 						if(material_index == materials.size())
 						{
 							Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
-							material->name[0] = 'm';
-							material->name[1] = 'A' + material_index - 1;
-							
+							//material->name[0] = 'm';
+							//material->name[1] = (char) (96 + material_index - 1);
+							std::string name = "material" + (material_index-1);
+							strcpy(material->name,name.c_str());
+
 							//ambient
 							material->ambient[0] = materials[materials.size()-1].Ka[0];
 							material->ambient[1] = materials[materials.size()-1].Ka[1];
@@ -248,24 +266,27 @@ namespace io {
 
 							lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
 							
-							face.material[0] = 'm';//associa alla faccia il materiale.
-							face.material[1] = 'A' + material_index - 1;//l'idice del materiale...
+							//face.material[0] = 'm';//associa alla faccia il materiale.
+							//face.material[1] = (char) (96 + material_index - 1);//l'idice del materiale...
+							strcpy(face.material,name.c_str());
 						}
 						else
 						{	
-							face.material[0] = 'm';//associa alla faccia il materiale.
-							face.material[1] = 'A' + material_index;//l'idice del materiale...
+							//face.material[0] = 'm';//associa alla faccia il materiale.
+							//face.material[1] = (char) (96 + material_index);//l'idice del materiale...
+							std::string name = "material"+(material_index);
+							strcpy(face.material,name.c_str());
 						}
 					}
 
-					if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
+					/*if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
 					{
 						unsigned int MAX = 3;
 						for(unsigned int k=0;k<MAX;k++)
 							if(m.HasPerWedgeTexture())
 								if(AddNewTextureCoord(CoordTextures, (*fi).WT(k),GetIndexVertex(m, (*fi).V(k))))
 									t_index++;
-					}
+					}*/
 
 					mesh->faceL[f_index]=face;
 
@@ -279,22 +300,22 @@ namespace io {
 			}
 
 			//aggiunge le coordinate di texture alla mesh
-			if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
-			{
-				if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
-				{
-					typedef std::map<int, vcg::TCoord2<float> >::iterator MI;
-					int i =0;
-					for(MI coord = CoordTextures.begin();coord!=CoordTextures.end();++coord)
-					{
-						mesh->texelL[i][0] = (*coord).second.u();
-						mesh->texelL[i][1] = (*coord).second.v();
-						i++;
-					}
-				}	
-				else
-					return E_NOTEXCOORDVALID;
-			}
+			//if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
+			//{
+			//	if(lib3ds_mesh_new_texel_list(mesh,CoordTextures.size()))//alloca spazio per le coordinate di texture
+			//	{
+			//		typedef std::map<int, vcg::TCoord2<float> >::iterator MI;
+			//		int i =0;
+			//		for(MI coord = CoordTextures.begin();coord!=CoordTextures.end();++coord)
+			//		{
+			//			mesh->texelL[i][0] = (*coord).second.u();
+			//			mesh->texelL[i][1] = (*coord).second.v();
+			//			i++;
+			//		}
+			//	}	
+			//	else
+			//		return E_NOTEXCOORDVALID;
+			//}
 
 			lib3ds_file_insert_mesh(file, mesh);//inserisce la mesh al file
 			
