@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/01/22 14:47:16  glvertex
+Puts ticks on X axis... Still working on...
+
 Revision 1.6  2006/01/19 23:56:44  glvertex
 Starting quoted box (simply draws xyz axes)
 
@@ -60,6 +63,8 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   };
 
   const QString ST(int id) const;
+
+	float niceRound(float value);
 
 public:
      

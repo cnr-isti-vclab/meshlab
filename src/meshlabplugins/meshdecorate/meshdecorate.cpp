@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2006/01/22 14:47:16  glvertex
+Puts ticks on X axis... Still working on...
+
 Revision 1.10  2006/01/19 23:56:44  glvertex
 Starting quoted box (simply draws xyz axes)
 
@@ -144,27 +147,65 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
-	glLineWidth(1.0);
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_POINT_DISTANCE_ATTENUATION);
+	glLineWidth(2.0);
+
+	// Get gl state values
+	double mm[16],mp[16];
+	int vp[4];
+	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
+	glGetDoublev(GL_PROJECTION_MATRIX,mp);
+	glGetIntegerv(GL_VIEWPORT,vp);
+
 
 	// Mesh boundingBox
 	Box3f b=m.cm.bbox;
-	float spanX = b.DimX()*.5f;
-	float spanY = b.DimY()*.5f;
-	float spanZ = b.DimZ()*.5f;
 
-	// bbox center
 	Point3f c = b.Center();
 
 	glColor4f(.5f,1.f,.5f,.8f);
-	glBegin(GL_LINES);
-		glVertex3f(c[0]-spanX,c[1],c[2]);	glVertex3f(c[0]+spanX,c[1],c[2]);
-		glVertex3f(c[0],c[1]-spanY,c[2]);	glVertex3f(c[0],c[1]+spanY,c[2]);
-		glVertex3f(c[0],c[1],c[2]-spanZ);	glVertex3f(c[0],c[1],c[2]+spanZ);
+	glBoxWire(b);
+	
+	Point3d p1,p2;
+	gluProject(b.min[0],b.min[1],b.min[2],mm,mp,vp,&p1[0],&p1[1],&p1[2]);
+	gluProject(b.max[0],b.max[1],b.max[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
+
+	assert(p2[0]!=p1[0]);
+
+	float spanX	 = (b.DimX()*.5f);
+	float slopeX = niceRound((float) 500.f/abs(p2[0]-p1[0]));	// 8 pxl spacing
+
+	//gluUnProject(slopeX,slopeX,slopeX,mm,mp,vp,&p1[0],&p1[1],&p1[2]);
+
+	
+	//glColor4f(.8f,1.f,.8f,.8f);
+	glColor4f(1.f,.5f,.5f,.8f);
+	glPointSize(4.f);
+	glBegin(GL_POINTS);
+		//glVertex(p1);
+		//glVertex(p2);
+		glVertex(c);	// drwas the center first
+		// skip the center and draws points on positive & negative axis
+		for(float i=slopeX;i<spanX;i+=slopeX)
+		{
+			glVertex3f(c[0] + i,c[1],c[2]);
+			glVertex3f(c[0] - i,c[1],c[2]);
+		}
+		
+		// draws ending points
+		glColor4f(1.f,1.f,1.f,.8f);
+		glVertex3f(c[0]-spanX,c[1],c[2]);
+		glVertex3f(c[0]+spanX,c[1],c[2]);
 	glEnd();
+	glPointSize(1.f);
 
 	glPopAttrib();
 
 }
+
+float ExtraMeshDecoratePlugin::niceRound(float Val)	{return powf(10,ceil(log10(Val)));}
+
  
 void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 {
