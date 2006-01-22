@@ -5,6 +5,10 @@
 
 /*
 $Log$
+Revision 1.7  2006/01/22 16:40:38  mariolatronico
+- restored correct layout in .ui
+- added rotate around origini / object center
+
 Revision 1.6  2006/01/22 14:11:04  mariolatronico
 added scale to unit box, move obj center. Rotate around object and origin are not working actually.
 
@@ -132,12 +136,12 @@ int TransformDialog::exec() {
 	
  	isMoveRB->setChecked(true);
 //	 set the min and max Label
- 	QString bboxString = QString("X:%1    Y:%2    Z:%3")
+ 	QString bboxString = QString("X: %1     Y: %2     Z: %3")
  		.arg(minBbox[0])
  		.arg(minBbox[1])
  		.arg(minBbox[2]);
  	bboxValueMinLBL->setText(bboxString);
- 	bboxString = QString("X:%1     Y:%2     Z:%3")
+ 	bboxString = QString("X: %1     Y: %2     Z: %3")
  		.arg(maxBbox[0])
  		.arg(maxBbox[1])
  		.arg(maxBbox[2]);
@@ -246,19 +250,19 @@ void TransformDialog::on_okButton_pressed() {
 			return;
 		}
 		log += QString(" %1 degrees").arg(rotateVal);
-		// SetTranslate, SetScale and SetRotate set initalially the identity
+		// SetTranslate, SetScale and SetRotate set initially the identity
 		if (centerRotateRB->isChecked()) // rotate around obj center
 		{
-			Matrix44f transMat = currentMatrix.SetTranslate( - bbox.Center() );
+			Matrix44f transMat = currentMatrix.SetTranslate(  bbox.Center() );
 			// ANGLE MUST BE IN RADIANS !!!!
 			Matrix44f rotMat = currentMatrix.SetRotate(rotateVal * PI / 180.0, axisPoint);
-			Matrix44f trans2Mat = currentMatrix.SetTranslate(  bbox.Center() );
+			Matrix44f trans2Mat = currentMatrix.SetTranslate( -  bbox.Center() );
 			currentMatrix = transMat * rotMat * trans2Mat;	
-		}
+		} else {
 			
-		// ANGLE MUST BE IN RADIANS !!!!
-		currentMatrix.SetRotate(rotateVal * PI / 180.0, axisPoint);
-		
+			// ANGLE MUST BE IN RADIANS !!!!
+			currentMatrix.SetRotate(rotateVal * PI / 180.0, axisPoint);
+		}
 	}
 	if (whichTransform == TR_SCALE) {
 		
@@ -323,7 +327,7 @@ void TransformDialog::on_rotateXUpPB_clicked()
 	xAxisRB->setChecked(true);
 }
 
-void TransformDialog::on_rotateYUpPB_clicked()
+void TransformDialog::on_rotateZUpPB_clicked()
 {
 	rotateDial->setValue(90);
 	zAxisRB->setChecked(true);

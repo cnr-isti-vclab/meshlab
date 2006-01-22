@@ -13,6 +13,10 @@ using vcg::Matrix44f;
 /*
 
 $Log$
+Revision 1.7  2006/01/22 16:40:38  mariolatronico
+- restored correct layout in .ui
+- added rotate around origini / object center
+
 Revision 1.6  2006/01/22 14:11:04  mariolatronico
 added scale to unit box, move obj center. Rotate around object and origin are not working actually.
 
@@ -37,15 +41,16 @@ file for Apply Transform dialog (implementation and user interface)
 class TransformDialog : public QDialog, Ui::TransformDialog {
 	
   Q_OBJECT
-
 public slots:
+	// overloaded exec() function, sets some initial values
+	// on start
+	int exec(); 
+	
+private slots:
 	// disable transformations group box differnt from the one
 	// selected by top check box
   void selectTransform(QAbstractButton* button);
 
-	// overloaded exec() function, sets some initial values
-	// on start
-	int exec(); 
 	// disable buttons when uniformScale check box is
 	// selected
 	void on_uniformScaleCB_stateChanged(int state);
@@ -68,6 +73,9 @@ public slots:
 	// scale to unit box
 	void on_scaleUnitPB_clicked();
 	
+	// Rotate X / Z Up push buttons: simply fill Rotate fields
+	void on_rotateZUpPB_clicked();
+	void on_rotateXUpPB_clicked();
 	
 public:
 
@@ -99,13 +107,7 @@ private: // functions
 	void setRotate(int value = 0);
   void setScale(QString x = "1.0", QString y = "1.0", QString z = "1.0"); 
 
-	
 
-
-
-private slots:
-	void on_rotateYUpPB_clicked();
-	void on_rotateXUpPB_clicked();
 };
 
 #endif // TRANSFORM_DIALOG_H
