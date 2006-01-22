@@ -21,6 +21,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.46  2006/01/22 16:43:32  mariolatronico
+added update bbox and normal after transform dialog
+
 Revision 1.45  2006/01/22 14:11:04  mariolatronico
 added scale to unit box, move obj center. Rotate around object and origin are not working actually.
 
@@ -109,6 +112,7 @@ added refine dialog (preliminary code). Actually parameters are not used
 #include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/position.h>
+#include <vcg/complex/trimesh/update/bounding.h>
 
 /////////////
 #include "invert_faces.h"
@@ -406,8 +410,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	}
 
 	if (filter->text() == ST(FP_TRANSFORM) ) {
-		if (transformDialog)
-			transformDialog->setMesh(&m.cm);
+		transformDialog->setMesh(&m.cm);
 		int continueValue = transformDialog->exec();
  		if (continueValue == QDialog::Rejected)
  			return false;
@@ -417,7 +420,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
  							 transformDialog->getLog().toAscii().data());
  		}
  		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
-		//// TODO : need update normal
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
 
 	if (filter->text() == ST(FP_DETACHER) ) {
