@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2006/01/22 23:37:59  glvertex
+Choosing axes candidates
+
 Revision 1.11  2006/01/22 14:47:16  glvertex
 Puts ticks on X axis... Still working on...
 
@@ -57,6 +60,7 @@ cleaned up the identification between by string of decorations
 #include <QtGui>
 
 #include <math.h>
+#include <limits>
 #include <stdlib.h>
 
 #include "meshdecorate.h"
@@ -158,55 +162,79 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 	glGetDoublev(GL_PROJECTION_MATRIX,mp);
 	glGetIntegerv(GL_VIEWPORT,vp);
 
-
 	// Mesh boundingBox
-	Box3f b=m.cm.bbox;
+	Box3f b(m.cm.bbox);
 
-	Point3f c = b.Center();
-
-	glColor4f(.5f,1.f,.5f,.8f);
-	glBoxWire(b);
-	
 	Point3d p1,p2;
-	gluProject(b.min[0],b.min[1],b.min[2],mm,mp,vp,&p1[0],&p1[1],&p1[2]);
-	gluProject(b.max[0],b.max[1],b.max[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
 
-	assert(p2[0]!=p1[0]);
-
-	float spanX	 = (b.DimX()*.5f);
-	float slopeX = niceRound((float) 500.f/abs(p2[0]-p1[0]));	// 8 pxl spacing
-
-	//gluUnProject(slopeX,slopeX,slopeX,mm,mp,vp,&p1[0],&p1[1],&p1[2]);
-
-	
-	//glColor4f(.8f,1.f,.8f,.8f);
-	glColor4f(1.f,.5f,.5f,.8f);
-	glPointSize(4.f);
-	glBegin(GL_POINTS);
-		//glVertex(p1);
-		//glVertex(p2);
-		glVertex(c);	// drwas the center first
-		// skip the center and draws points on positive & negative axis
-		for(float i=slopeX;i<spanX;i+=slopeX)
-		{
-			glVertex3f(c[0] + i,c[1],c[2]);
-			glVertex3f(c[0] - i,c[1],c[2]);
-		}
-		
-		// draws ending points
-		glColor4f(1.f,1.f,1.f,.8f);
-		glVertex3f(c[0]-spanX,c[1],c[2]);
-		glVertex3f(c[0]+spanX,c[1],c[2]);
-	glEnd();
-	glPointSize(1.f);
+	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
+	drawAxis(p1,p2,b.DimX(),mm,mp,vp);	// Draws x axis
 
 	glPopAttrib();
 
 }
 
-float ExtraMeshDecoratePlugin::niceRound(float Val)	{return powf(10,ceil(log10(Val)));}
+void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,int *vp,Point3d &x1,Point3d &x2)
+{
+	float d = -std::numeric_limits<float>::max();
+	Point3d c;
+	// Project the bbox center
+	gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
+	c[2] = 0;
 
- 
+	Point3d out1,out2;
+	Point3f in1,in2;
+
+	for (int i=0;i<8;i+=2)
+	{
+		in1 = box.P(i);
+		in2 = box.P(i+1);
+
+		gluProject((double)in1[0],(double)in1[1],(double)in2[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+		gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
+		out1[2] = out2[2] = 0;
+
+		float currDist = Distance(c,(out1+out2)*.5f);
+
+		if(currDist > d)
+		{
+			d = currDist;
+			x1.Import(in1);
+			x2.Import(in2);
+		}
+	}
+}
+
+void ExtraMeshDecoratePlugin::drawAxis(Point3d &a,Point3d &b,float dim,double *mm,double *mp,int *vp)
+{
+	Point3d p1,p2;
+
+	gluProject(a[0],a[1],a[2],mm,mp,vp,&p1[0],&p1[1],&p1[2]);
+	gluProject(b[0],b[1],b[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
+  p1[2]=p2[2]=0;
+
+	// ORIGINAL
+	//float tickNum = Distance(p2,p1)/5.0;// 5 pxl spacing
+	//float slope = dim/tickNum;
+
+	// OPTIMIZED (MISS A QUOTIENT)
+	float tickNum = 5.f/Distance(p2,p1);// 5 pxl spacing
+	float slope = dim*tickNum;
+	slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
+
+	glColor4f(1.f,1.f,1.f,.8f);
+	glPointSize(2.f);
+	glBegin(GL_POINTS);
+		for(float i=slope;i<dim;i+=slope)
+			glVertex3f(a[0] + i,a[1],a[2]);
+	glEnd();
+	
+	glPointSize(1.f);
+}
+
+float ExtraMeshDecoratePlugin::niceRound2(float Val,float base)	{return powf(base,ceil(log10(Val)/log10(base)));}
+float ExtraMeshDecoratePlugin::niceRound(float val)	{return powf(10.f,ceil(log10(val)));}
+
 void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2006/01/22 23:37:59  glvertex
+Choosing axes candidates
+
 Revision 1.7  2006/01/22 14:47:16  glvertex
 Puts ticks on X axis... Still working on...
 
@@ -64,7 +67,13 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 
   const QString ST(int id) const;
 
+	float niceRound2(float value,float base);
 	float niceRound(float value);
+	void	drawAxis(Point3d &p1,Point3d &p2,float dim,double *modelview,double *projection,int *viewport);
+	
+	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
+	void	chooseY(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &y1,Point3d &y2);
+	void	chooseZ(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &z1,Point3d &z2);
 
 public:
      
