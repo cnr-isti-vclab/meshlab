@@ -13,6 +13,9 @@ using vcg::Matrix44f;
 /*
 
 $Log$
+Revision 1.6  2006/01/22 14:11:04  mariolatronico
+added scale to unit box, move obj center. Rotate around object and origin are not working actually.
+
 Revision 1.5  2006/01/21 14:20:38  mariolatronico
 interface work in progress on new features , need implementation
 
@@ -42,7 +45,7 @@ public slots:
 
 	// overloaded exec() function, sets some initial values
 	// on start
-	int exec(CMeshO *mesh); 
+	int exec(); 
 	// disable buttons when uniformScale check box is
 	// selected
 	void on_uniformScaleCB_stateChanged(int state);
@@ -73,11 +76,12 @@ public:
 	
 	// used to compute transformation on meshfilter.cpp
 	Matrix44f& getTransformation();
- 
+	void setMesh(CMeshO *mesh);
 	QString& getLog();
 private: // members
   CMeshO *mesh;
 	Point3f minBbox, maxBbox; // min and max of bounding box
+	Box3f bbox; // the mesh bounding box
   QButtonGroup *whichTransformBG;
   QButtonGroup *rotateBG;
   QDoubleValidator *rotateValidator;
@@ -90,14 +94,18 @@ private: // members
 private: // functions
 
 	// reset initial values for Move, Rotate and Scale
-
-  void resetMove();
-	void resetRotate();
-  void resetScale(); 
+	// without parameters are RESET functions
+  void setMove(QString x = "0.0", QString y = "0.0", QString z = "0.0");
+	void setRotate(int value = 0);
+  void setScale(QString x = "1.0", QString y = "1.0", QString z = "1.0"); 
 
 	
 
 
+
+private slots:
+	void on_rotateYUpPB_clicked();
+	void on_rotateXUpPB_clicked();
 };
 
 #endif // TRANSFORM_DIALOG_H

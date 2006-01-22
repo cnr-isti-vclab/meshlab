@@ -21,6 +21,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.45  2006/01/22 14:11:04  mariolatronico
+added scale to unit box, move obj center. Rotate around object and origin are not working actually.
+
 Revision 1.44  2006/01/21 14:20:38  mariolatronico
 interface work in progress on new features , need implementation
 
@@ -94,21 +97,6 @@ Revision 1.22  2005/12/18 15:01:05  mariolatronico
 Revision 1.21  2005/12/17 13:33:19  mariolatronico
 added refine dialog (preliminary code). Actually parameters are not used
 
-Revision 1.20  2005/12/13 11:01:57  cignoni
-Added callback management in standard refine
-
-Revision 1.19  2005/12/13 09:23:39  mariolatronico
-added Information on plugins
-
-Revision 1.18  2005/12/12 22:48:42  cignoni
-Added plugin info methods
-
-Revision 1.17  2005/12/09 20:56:16  giec
-Added the call to cluster algorithm
-
-Revision 1.16  2005/12/09 18:28:34  mariolatronico
-added commented code for Decimator
-
 ****************************************************************************/
 #include <QtGui>
 
@@ -160,7 +148,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	decimatorDialog->hide();
 	detacherDialog = new DetacherDialog();
 	detacherDialog->hide();
-
+	transformDialog = new TransformDialog();
+	transformDialog->hide();
 }
 
 const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
@@ -417,20 +406,18 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	}
 
 	if (filter->text() == ST(FP_TRANSFORM) ) {
-	
-		// if (!transformDialog)
-// 			transformDialog = new TransformDialog(/*&m.cm*/);
-
-// 		int continueValue = transformDialog->exec(&m.cm);
-// 		if (continueValue == QDialog::Rejected)
-// 			return false;
-// 		Matrix44f matrix = transformDialog->getTransformation();
-// 		if (log) {
-// 			log->Log(GLLogStream::Info, 
-// 							 transformDialog->getLog().toAscii().data());
-// 		}
-// 		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
-		// TODO : need update normal
+		if (transformDialog)
+			transformDialog->setMesh(&m.cm);
+		int continueValue = transformDialog->exec();
+ 		if (continueValue == QDialog::Rejected)
+ 			return false;
+ 		Matrix44f matrix = transformDialog->getTransformation();
+ 		if (log) {
+ 			log->Log(GLLogStream::Info, 
+ 							 transformDialog->getLog().toAscii().data());
+ 		}
+ 		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
+		//// TODO : need update normal
 	}
 
 	if (filter->text() == ST(FP_DETACHER) ) {

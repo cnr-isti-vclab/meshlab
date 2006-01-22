@@ -5,6 +5,9 @@
 
 /*
 $Log$
+Revision 1.6  2006/01/22 14:11:04  mariolatronico
+added scale to unit box, move obj center. Rotate around object and origin are not working actually.
+
 Revision 1.5  2006/01/21 14:20:38  mariolatronico
 interface work in progress on new features , need implementation
 
@@ -23,15 +26,14 @@ Revision 1.1  2006/01/15 17:15:17  mariolatronico
 separated interface (.h) from implementation for Apply Transform dialog
 
 */
-TransformDialog::TransformDialog(/*CMeshO *mesh*/) : QDialog() {
+TransformDialog::TransformDialog() : QDialog() {
 	
 	setupUi(this);
 	
-	//	this->mesh = mesh;
-
+	
 	whichTransformBG = new QButtonGroup(this);
 	rotateBG = new QButtonGroup(this);
-	
+	log = QString(" ");
 	// top checkBox button group
 	whichTransformBG->addButton(isMoveRB);
 	whichTransformBG->addButton(isRotateRB);
@@ -59,9 +61,10 @@ TransformDialog::TransformDialog(/*CMeshO *mesh*/) : QDialog() {
 	rotateAxis = AXIS_X;
 	matrix.SetIdentity();
 	uniformScale = false; // default to non uniform scale
-	resetMove();
-	resetScale();
-	resetRotate();
+	setMove();
+	setScale();
+	setRotate();
+	
 	
 }
 TransformDialog::~TransformDialog() {
@@ -73,6 +76,17 @@ TransformDialog::~TransformDialog() {
 vcg::Matrix44f& TransformDialog::getTransformation() {
 	return matrix;
 }
+
+void TransformDialog::setMesh(CMeshO *mesh) {
+	
+	this->mesh = mesh;
+	this->bbox = mesh->bbox;
+	vcg::tri::UpdateBounding<CMeshO>::Box(*mesh);
+
+ 	minBbox = mesh->bbox.min;
+ 	maxBbox = mesh->bbox.max;
+}
+
 QString& TransformDialog::getLog() {
 	
 	return log;
@@ -114,28 +128,20 @@ void TransformDialog::selectTransform(QAbstractButton* button) {
 }
 
 // decorate exec from QDialog
-int TransformDialog::exec(CMeshO *mesh) {
-	//		resetMove();
-	//	resetRotate();
-	//	resetScale();
-		// default to Move transform
-	// get the bounding box
-// 	vcg::tri::UpdateBounding<CMeshO>::Box(*mesh);
-// 	minBbox = mesh->bbox.min;
-// 	maxBbox = mesh->bbox.max;
-// 	isMoveRB->setChecked(true);
-	// set the min and max Label
-// 	QString bboxString = QString("X:%1 Y:%2 Y:%3")
-// 		.arg(minBbox[0])
-// 		.arg(minBbox[1])
-// 		.arg(minBbox[2]);
-// 	bboxValueMinLBL->setText(bboxString);
-// 	bboxString = QString("X:%1 Y:%2 Y:%3")
-// 		.arg(minBbox[0])
-// 		.arg(minBbox[1])
-// 		.arg(minBbox[2]);
-// 	bboxValueMaxLBL->setText(bboxString);
-
+int TransformDialog::exec() {
+	
+ 	isMoveRB->setChecked(true);
+//	 set the min and max Label
+ 	QString bboxString = QString("X:%1    Y:%2    Z:%3")
+ 		.arg(minBbox[0])
+ 		.arg(minBbox[1])
+ 		.arg(minBbox[2]);
+ 	bboxValueMinLBL->setText(bboxString);
+ 	bboxString = QString("X:%1     Y:%2     Z:%3")
+ 		.arg(maxBbox[0])
+ 		.arg(maxBbox[1])
+ 		.arg(maxBbox[2]);
+ 	bboxValueMaxLBL->setText(bboxString);
 
 	log = "";
 	selectTransform(isMoveRB);
@@ -181,11 +187,18 @@ void TransformDialog::on_rotateLE_textChanged(const QString &text) {
 // simply updates the move line edit
 void TransformDialog::on_mvCenterOriginPB_clicked() {
 	
+	Box3f bbox = mesh->bbox;
+	Point3f center = bbox.Center();
+	setMove(QString().setNum(-center[0]), QString().setNum(-center[1]), QString().setNum(-center[2]));
+	
 }
 
-	// scale to unit box
+// scale to unit box
 void TransformDialog::on_scaleUnitPB_clicked() {
-
+	// get the bounding box longest edge
+	float scale =1.0 / (float)( max(abs(maxBbox[0] - minBbox[0]),
+											max(abs(maxBbox[1] - minBbox[1]), abs(maxBbox[2] - minBbox[2]))));
+	setScale(QString().setNum(scale), QString().setNum(scale), QString().setNum(scale));
 }
 void TransformDialog::on_okButton_pressed() {
 	
@@ -233,6 +246,16 @@ void TransformDialog::on_okButton_pressed() {
 			return;
 		}
 		log += QString(" %1 degrees").arg(rotateVal);
+		// SetTranslate, SetScale and SetRotate set initalially the identity
+		if (centerRotateRB->isChecked()) // rotate around obj center
+		{
+			Matrix44f transMat = currentMatrix.SetTranslate( - bbox.Center() );
+			// ANGLE MUST BE IN RADIANS !!!!
+			Matrix44f rotMat = currentMatrix.SetRotate(rotateVal * PI / 180.0, axisPoint);
+			Matrix44f trans2Mat = currentMatrix.SetTranslate(  bbox.Center() );
+			currentMatrix = transMat * rotMat * trans2Mat;	
+		}
+			
 		// ANGLE MUST BE IN RADIANS !!!!
 		currentMatrix.SetRotate(rotateVal * PI / 180.0, axisPoint);
 		
@@ -270,23 +293,38 @@ void TransformDialog::on_okButton_pressed() {
 
 // ------- Private Functions --------
 
-void TransformDialog::resetMove() {
 
-	xMoveLE->setText("0.0");
-	yMoveLE->setText("0.0");
-	zMoveLE->setText("0.0");
+void TransformDialog::setMove(QString x , QString y , QString z) {
+
+	xMoveLE->setText(x);
+	yMoveLE->setText(y);
+	zMoveLE->setText(z);
 	
 }
 
-void TransformDialog::resetRotate() {
-	rotateDial->setValue(0);
+void TransformDialog::setRotate(int value) {
+	rotateDial->setValue(value);
+	xAxisRB->setChecked(true);
+	centerRotateRB->setChecked(true);
+}
+	
+void TransformDialog::setScale(QString x , QString y , QString z ) {
+	
+	xScaleLE->setText(x);
+	yScaleLE->setText(y);
+	zScaleLE->setText(z);
+	
+}
+
+// rotate 90 degrees in z axis
+void TransformDialog::on_rotateXUpPB_clicked()
+{
+	rotateDial->setValue(90);
 	xAxisRB->setChecked(true);
 }
-	
-void TransformDialog::resetScale() {
-	
-	xScaleLE->setText("1.0");
-	yScaleLE->setText("1.0");
-	zScaleLE->setText("1.0");
-	
+
+void TransformDialog::on_rotateYUpPB_clicked()
+{
+	rotateDial->setValue(90);
+	zAxisRB->setChecked(true);
 }
