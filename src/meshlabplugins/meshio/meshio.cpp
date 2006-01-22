@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.59  2006/01/22 00:31:14  buzzelli
+ adding first rough texture loading support into 3ds file importing
+
  Revision 1.58  2006/01/20 18:17:10  vannini
  added Restore Color
 
@@ -39,19 +42,6 @@
 
  Revision 1.53  2006/01/19 09:36:28  fmazzant
  cleaned up history log
-
- Revision 1.52  2006/01/17 23:46:36  cignoni
- Moved some include from meshmodel.h to here
-
- Revision 1.51  2006/01/17 13:47:45  fmazzant
- update interface meshio : formats -> importFormats() & exportFormts
-
- Revision 1.50  2006/01/16 23:53:22  fmazzant
- bux-fix MeshModel &m -> MeshModel *m
-
- Revision 1.49  2006/01/16 15:30:26  fmazzant
- added rename texture dialog for exporter
- removed old maskobj
 
 *****************************************************************************/
 #include <Qt>
@@ -186,7 +176,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
-				m.cm.face.EnableWedgeTex();
+				*//*TODO: abilitare solo quando necessario*/m.cm.face.EnableWedgeTex();/*
 			}*/
 
 			int result = vcg::tri::io::Importer3DS<CMeshO>::Open(m.cm, filename.c_str(), info);

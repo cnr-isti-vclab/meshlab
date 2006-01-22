@@ -181,22 +181,25 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 				
 				Lib3dsVector *normalL= (Lib3dsVector*) malloc(3*sizeof(Lib3dsVector)*mesh->faces);
 
-					Lib3dsMatrix matrix;
-					Lib3dsMatrix translatedMatrix;
-					Lib3dsMatrix inverseMatrix;
-					//lib3ds_matrix_identity(matrix);
+				// Obtain current transformation matrix
+				// ------------------------------------
+				Lib3dsMatrix matrix;
+				Lib3dsMatrix translatedMatrix;
+				Lib3dsMatrix inverseMatrix;
+				//lib3ds_matrix_identity(matrix);
 				
-					Lib3dsObjectData *d;
-					d=&node->data.object;
+				Lib3dsObjectData *d;
+				d=&node->data.object;
 
-					lib3ds_matrix_copy(translatedMatrix, mesh->matrix);
-					lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
-					lib3ds_matrix_inv(inverseMatrix);
-					lib3ds_matrix_translate_xyz(translatedMatrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
-					lib3ds_matrix_mul(matrix, translatedMatrix, inverseMatrix);
+				lib3ds_matrix_copy(translatedMatrix, mesh->matrix);
+				lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
+				lib3ds_matrix_inv(inverseMatrix);
+				lib3ds_matrix_translate_xyz(translatedMatrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
+				lib3ds_matrix_mul(matrix, translatedMatrix, inverseMatrix);
 					
 					// TODO: moltiplicare la matrice anche alle normali!
 					
+				
 				lib3ds_mesh_calculate_normals(mesh, normalL);
 
 
@@ -237,6 +240,44 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 						//mat->specular;
 						//float s = pow(2, 10.0*mat->shininess);
 						//if (s>128.0)	s=128.0;
+
+						if (mat->texture1_map.name[0])
+						{
+							std::string textureName = mat->texture1_map.name;
+							int textureIdx = 0;
+							
+							// adding texture name into textures vector (if not already present)
+							// avoid adding the same name twice
+							bool found = false;
+							unsigned size = m.textures.size();
+							unsigned j = 0;
+							while (!found && (j < size))
+							{
+								if (textureName.compare(m.textures[j])==0)
+								{
+									textureIdx = (int)j;
+									found = true;
+								}
+								++j;
+							}
+							if (!found)
+							{
+								m.textures.push_back(textureName);
+								textureIdx = (int)size;
+							}
+
+							// TODO: questo nel caso di wedge texture coords, controllare
+							// se possono esserci altri casi
+							// TODO: probabilmente non va' qui dato che forse le coordinate di texture
+							// sono per vertice e non per wedge
+							for (int i=0; i<3; ++i)
+							{
+								(*fi).WT(i).u() = mesh->texelL[f->points[i]][0];
+								(*fi).WT(i).v() = mesh->texelL[f->points[i]][1];
+
+								(*fi).WT(i).n() = textureIdx;
+							}
+						}
 					}
 					else {
 						//Lib3dsRgba a={0.2, 0.2, 0.2, 1.0};
@@ -275,17 +316,6 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 				numVertices += mesh->points;
       }
 
-		
-			/*if (node->user.d) {
-				Lib3dsObjectData *d;
-
-				glPushMatrix();
-				d=&node->data.object;
-				glMultMatrixf(&node->matrix[0][0]);
-				glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
-				glCallList(node->user.d);
-				glPopMatrix();
-			}*/
 		}
 	}
 
