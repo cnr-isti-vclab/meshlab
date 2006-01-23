@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.60  2006/01/23 01:26:30  buzzelli
+ added handling of non critical errors which may occurr during obj file importing
+
  Revision 1.59  2006/01/22 00:31:14  buzzelli
  adding first rough texture loading support into 3ds file importing
 
@@ -92,7 +95,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
 		QDir::setCurrent(FileNameDir);
 
-		QString errorMsgFormat = "Error encountered while loading file %1:\n%2";
+		QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 		string filename = fileName.toUtf8().data();
 
 		bool bUpdatedNormals = false;
@@ -112,22 +115,27 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
 			if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 			{
-				QMessageBox::warning(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
-				return false;
+				if (result & vcg::tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
+					QMessageBox::warning(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+				else
+				{
+					QMessageBox::critical(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+					return false;
+				}
 			}
 
-			if(mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
+			if(mask & MeshModel::IOM_WEDGNORMAL)
 				bUpdatedNormals = true;
 		}
 		else if (formatName.toUpper() == tr("PLY"))
 		{
 			vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
 		  
-			if(mask&vcg::tri::io::Mask::IOM_VERTQUALITY) qDebug("Has Vertex Quality\n");
-			if(mask&vcg::tri::io::Mask::IOM_FACEQUALITY) qDebug("Has Face Quality\n");
-			if(mask&vcg::tri::io::Mask::IOM_FACECOLOR)		qDebug("Has Face Color\n");
-			if(mask&vcg::tri::io::Mask::IOM_VERTCOLOR)		qDebug("Has Vertex Color\n");
-			if(mask&vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
+			if(mask&MeshModel::IOM_VERTQUALITY) qDebug("Has Vertex Quality\n");
+			if(mask&MeshModel::IOM_FACEQUALITY) qDebug("Has Face Quality\n");
+			if(mask&MeshModel::IOM_FACECOLOR)		qDebug("Has Face Color\n");
+			if(mask&MeshModel::IOM_VERTCOLOR)		qDebug("Has Vertex Color\n");
+			if(mask&MeshModel::IOM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
 				m.cm.face.EnableWedgeTex();
@@ -173,10 +181,10 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			// TODO: decomment this code when implementation of loadmask will be done
 			/*vcg::tri::io::Importer3DS<CMeshO>::LoadMask(filename.c_str(), mask, info);
 
-			if(mask & vcg::ply::PLYMask::PM_WEDGTEXCOORD) 
+			if(mask & MeshModel::IOM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
-				*//*TODO: abilitare solo quando necessario*/m.cm.face.EnableWedgeTex();/*
+				*//*TODO: abilitare solo quando necessario*//*m.cm.face.EnableWedgeTex();*//*
 			}*/
 
 			int result = vcg::tri::io::Importer3DS<CMeshO>::Open(m.cm, filename.c_str(), info);
@@ -186,7 +194,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				return false;
 			}
 
-			if(mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
+			if(mask & MeshModel::IOM_WEDGNORMAL)
 				bUpdatedNormals = true;
 		}
 
