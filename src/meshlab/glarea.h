@@ -24,6 +24,12 @@
   History
 
 $Log$
+Revision 1.48  2006/01/23 08:56:49  fmazzant
+added GetMeshInfoString(mask meshmodel).
+This member shows the information of the Mesh in terms of VC,VQ,FC,FQ,WT
+where:
+VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
+
 Revision 1.47  2006/01/17 16:35:27  glvertex
 Added Scalable fonts
 
@@ -347,6 +353,7 @@ protected:
 	void initializeGL();
 	void initTexture();
 	void displayModelInfo();
+	QString GetMeshInfoString(int mask);
 	void paintGL();
 	void resizeGL(int width, int height);
 	void keyPressEvent ( QKeyEvent * e );  

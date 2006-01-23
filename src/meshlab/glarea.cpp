@@ -24,6 +24,12 @@
 History
 
 $Log$
+Revision 1.76  2006/01/23 08:56:49  fmazzant
+added GetMeshInfoString(mask meshmodel).
+This member shows the information of the Mesh in terms of VC,VQ,FC,FQ,WT
+where:
+VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
+
 Revision 1.75  2006/01/19 23:11:39  glvertex
 No significant changes
 
@@ -314,7 +320,16 @@ GLArea::GLArea(QWidget *parent)
 	clipRatioNear=1;
 }
 
-
+QString GLArea::GetMeshInfoString(int mask)
+{
+	QString info;
+	if( mask & MeshModel::IOM_VERTCOLOR){info.append("VC ");}
+	if( mask & MeshModel::IOM_VERTQUALITY){info.append("VQ ");}
+	if( mask & MeshModel::IOM_FACECOLOR){info.append("FC ");}
+	if( mask & MeshModel::IOM_FACEQUALITY){info.append("FQ ");}
+	if( mask & MeshModel::IOM_WEDGTEXCOORD){info.append("WT ");}
+	return info;
+}
 
 void GLArea::displayModelInfo()
 {	
@@ -322,18 +337,25 @@ void GLArea::displayModelInfo()
 	float startPos= currentHeight-(fontSpacingV/3);
 
 	QString strMessage;
-	QString strVertex="Vertices   "+QString("").setNum(mm->cm.vert.size(),10);
-	QString strTriangle="Faces "+QString("").setNum(mm->cm.face.size(),10);
-  //strVertex+=strVertex.setNum(mm->cm.vert.size(),10);
+	//QString strVertex="Vertices   "+QString("").setNum(mm->cm.vert.size(),10);
+	//QString strTriangle="Faces "+QString("").setNum(mm->cm.face.size(),10);
+	//strVertex+=strVertex.setNum(mm->cm.vert.size(),10);
 	//strTriangle.setNum(mm->cm.face.size(),10);
 	QString strNear=QString("  Nplane:%1").arg(nearPlane,2,'f',1);
 	QString strFar=QString("  Fplane:%1").arg(farPlane,2,'f',1);
 	QString strViewer=QString("Viewer:%1").arg(objDist,2,'f',1);
-  renderText(currentWidth-currentWidth*.15f,startPos-4*fontSpacingV,strViewer+strNear+strFar,qFont);
+	
+	//old version
+	/*renderText(currentWidth-currentWidth*.15f,startPos-4*fontSpacingV,strViewer+strNear+strFar,qFont);
 	renderText(currentWidth-currentWidth*.15f,startPos-3*fontSpacingV,QString("Fov ")+QString::number((int)fov,10),qFont);
 	renderText(currentWidth-currentWidth*.15f,startPos-2*fontSpacingV,strVertex,qFont);
-	renderText(currentWidth-currentWidth*.15f,startPos-fontSpacingV,strTriangle,qFont);
+	renderText(currentWidth-currentWidth*.15f,startPos-fontSpacingV,strTriangle,qFont);*/
 	//renderText(currentWidth-currentWidth*0.15,currentHeight-80,strFar);
+
+	//new version
+	renderText(currentWidth-currentWidth*.15f,startPos-4.5*fontSpacingV,strViewer+strNear+strFar,qFont);
+	renderText(currentWidth-currentWidth*.15f,startPos-3*fontSpacingV,QString("Fov ")+QString::number((int)fov,10),qFont);
+	renderText(currentWidth-currentWidth*.15f,startPos-1.5*fontSpacingV,GetMeshInfoString(mm->mask),qFont);
 }
 
 void GLArea::renderFps()
