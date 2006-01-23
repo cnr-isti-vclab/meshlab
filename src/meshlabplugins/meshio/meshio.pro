@@ -3,6 +3,7 @@ CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/lib3ds-1.2.0
 HEADERS       = meshio.h  ../../../../sf/wrap/ply/plylib.h
 SOURCES       = meshio.cpp  ../../../../sf/wrap/ply/plylib.cpp
+FORMS         =	ui/renametexture.ui ui/savemaskexporter.ui
 TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins
 
