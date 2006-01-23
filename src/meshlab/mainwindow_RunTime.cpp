@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.77  2006/01/23 10:23:07  vannini
+added updateMenus() in applyColorMode()
+
 Revision 1.76  2006/01/20 11:14:27  glvertex
 Applyfilter now sets the <modified> flag when the filter is applied succesfully
 
@@ -274,6 +277,7 @@ void MainWindow::applyColorMode()
   iColorTemp->setLog(&(GLA()->log));
   iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
   GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
+  updateMenus();
 }
 
 void MainWindow::applyDecorateMode()
