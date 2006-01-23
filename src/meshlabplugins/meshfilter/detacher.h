@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2006/01/23 21:47:58  giec
+Update detucherdialog with the diagonal percentage spinbox.
+
 Revision 1.2  2006/01/17 13:46:35  mariolatronico
 spell check threshold, added typename for proper gcc compiling
 
@@ -46,21 +49,9 @@ Detacher function
 
 namespace vcg{
 
-float Distanza(Point3f p1, Point3f p2)
-{
-	float distanza;
-	Point3f aux;
-	aux = p1 - p2;
-	distanza=(float)sqrt((aux[0]*aux[0])+(aux[1]*aux[1])+(aux[2]*aux[2]));
-	return distanza;
-}
-
-
 	template<class MESH_TYPE>
 		void Detacher(MESH_TYPE &m, float threshold)
 	{	
-		//assert(m.HasFFTopology());
-
 		typename MESH_TYPE::FaceIterator fi;
 
 		for(fi = m.face.begin(); fi != m.face.end(); ++fi)
@@ -69,21 +60,21 @@ float Distanza(Point3f p1, Point3f p2)
 			{
 			
 					float d1,d2,d3;
-					d1 = Distanza((*fi).V(0)->P(),(*fi).V(1)->P());
-					d2 = Distanza((*fi).V(1)->P(),(*fi).V(2)->P());
-					d3 = Distanza((*fi).V(2)->P(),(*fi).V(0)->P());
+					d1 = Distance<float>((*fi).V(0)->P(),(*fi).V(1)->P());
+					d2 = Distance<float>((*fi).V(1)->P(),(*fi).V(2)->P());
+					d3 = Distance<float>((*fi).V(2)->P(),(*fi).V(0)->P());
 					if(
 						( d1 >= threshold )
 						||( d2 >= threshold )
 						||( d3 >= threshold )	)
 					{
 
-						if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),0 ) )
-							face::FFDetach<typename MESH_TYPE::FaceType>((*fi),0);
-						if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),1 ) )
-							face::FFDetach<typename MESH_TYPE::FaceType>((*fi),1);
-						if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),2 ) )
-							face::FFDetach<typename MESH_TYPE::FaceType>((*fi),2);
+						//if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),0 ) )
+						//	face::FFDetach<typename MESH_TYPE::FaceType>((*fi),0);
+						//if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),1 ) )
+						//	face::FFDetach<typename MESH_TYPE::FaceType>((*fi),1);
+						//if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),2 ) )
+						//	face::FFDetach<typename MESH_TYPE::FaceType>((*fi),2);
 						(*fi).SetD();
 
 					}

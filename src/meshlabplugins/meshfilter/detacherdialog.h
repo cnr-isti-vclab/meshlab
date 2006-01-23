@@ -14,20 +14,60 @@ public:
   {
    setupUi( this );
 		threshold = 0.00;
+		diagonal_percentual = 0.00;
+		diagonale= 0.00;
 	}
-public slots:
-	void on_thresholdSB_valueChanged(double threshold) {
-		this->threshold = threshold;
-	}
+
 public:
 
-	inline double getThreshold() {
+	inline float getThreshold() 
+	{
 		return threshold;
 	}
 	
+	void setDiagonale(float diag)
+	{
+		diagonale = diag;
+		thresholdSB->setMaximum(diag);
+	}
+
+	void aggiornaPercentualeDiagonale()
+	{
+		diagonal_percentual = (threshold / diagonale) * 100;
+		percdiag->setValue(diagonal_percentual);
+	}
+
+	void aggiornaTrashold()
+	{
+		threshold = (diagonal_percentual * diagonale) /100;
+		thresholdSB->setValue(threshold);
+	}
+
+
+public slots:
+
+	void on_thresholdSB_valueChanged(double threshold) 
+	{
+		if(threshold <= this->diagonale)
+		{
+			this->threshold = threshold;
+			aggiornaPercentualeDiagonale();
+		}
+	}
+
+	void on_percdiag_valueChanged(double pd)
+	{
+		diagonal_percentual = pd;
+		aggiornaTrashold();
+	}
+
+
+
 private:
   // threshold value for refine
 	double threshold;
+	double diagonal_percentual;
+	double diagonale;
 };
 
 #endif 

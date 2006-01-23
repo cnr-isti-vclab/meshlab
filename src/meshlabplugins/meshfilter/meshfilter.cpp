@@ -21,6 +21,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.47  2006/01/23 21:47:58  giec
+Update detucherdialog with the diagonal percentage spinbox.
+
 Revision 1.46  2006/01/22 16:43:32  mariolatronico
 added update bbox and normal after transform dialog
 
@@ -113,6 +116,7 @@ added refine dialog (preliminary code). Actually parameters are not used
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/math/histogram.h>
 
 /////////////
 #include "invert_faces.h"
@@ -425,15 +429,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	}
 
 	if (filter->text() == ST(FP_DETACHER) ) {
+	
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 
+		float diagonale = m.cm.bbox.Diag();
+
+		detacherDialog->setDiagonale(diagonale);
 		int continueValue = detacherDialog->exec();
+		
 		if (continueValue == QDialog::Rejected)
 			return false; // don't continue, user pressed Cancel
 		double threshold = detacherDialog->getThreshold(); // threshold for refinying
 
-
 		Detacher<CMeshO>(m.cm, threshold);
+		
 	}
 
 	return true;
