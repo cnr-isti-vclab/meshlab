@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.78  2006/01/23 15:25:43  fmazzant
+No significant changes
+
 Revision 1.77  2006/01/23 09:09:30  fmazzant
 commented code
 
@@ -331,10 +334,10 @@ GLArea::GLArea(QWidget *parent)
 QString GLArea::GetMeshInfoString(int mask)
 {
 	QString info;
-	if( mask & MeshModel::IOM_VERTCOLOR){info.append("VC ");}
 	if( mask & MeshModel::IOM_VERTQUALITY){info.append("VQ ");}
-	if( mask & MeshModel::IOM_FACECOLOR){info.append("FC ");}
+	if( mask & MeshModel::IOM_VERTCOLOR){info.append("VC ");}
 	if( mask & MeshModel::IOM_FACEQUALITY){info.append("FQ ");}
+	if( mask & MeshModel::IOM_FACECOLOR){info.append("FC ");}
 	if( mask & MeshModel::IOM_WEDGTEXCOORD){info.append("WT ");}
 	return info;
 }
