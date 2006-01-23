@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/01/23 11:48:48  vannini
+bugfix in AreaMix() (voronoi area)
+
 Revision 1.3  2006/01/20 16:25:39  vannini
 Added Absolute Curvature colorize
 
@@ -84,12 +87,9 @@ namespace vcg
 	      float e12 = SquaredDistance( (*fi).V(2)->P() , (*fi).V(1)->P() );
 	      float e20 = SquaredDistance( (*fi).V(0)->P() , (*fi).V(2)->P() );
   	  
-	      // voronoi area v[0]
-	      area0 = ( e01*(1.0/tan(angle2)) + e20*(1.0/tan(angle1)) ) /8;
-	      // voronoi area v[1]
-	      area1 = ( e01*(1.0/tan(angle2)) + e12*(1.0/tan(angle0)) ) /8;
-	      // voronoi area v[2]
-	      area2 = ( e20*(1.0/tan(angle1)) + e20*(1.0/tan(angle0)) ) /8;
+        area0 = ( e20*(1.0/tan(angle1)) + e01*(1.0/tan(angle2)) ) / 8.0;
+	      area1 = ( e01*(1.0/tan(angle2)) + e12*(1.0/tan(angle0)) ) / 8.0;
+	      area2 = ( e12*(1.0/tan(angle0)) + e20*(1.0/tan(angle1)) ) / 8.0;
   	  
 	      (*fi).V(0)->Q()  += area0;
 	      (*fi).V(1)->Q()  += area1;
@@ -97,9 +97,9 @@ namespace vcg
 	    }
       else // triangolo ottuso
 	    { 
-	      (*fi).V(0)->Q() += vcg::Area<CFaceO>((*fi)) / 3.0;
-	      (*fi).V(1)->Q() += vcg::Area<CFaceO>((*fi)) / 3.0;
-	      (*fi).V(2)->Q() += vcg::Area<CFaceO>((*fi)) / 3.0;      
+	      (*fi).V(0)->Q() += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
+	      (*fi).V(1)->Q() += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
+	      (*fi).V(2)->Q() += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;      
 	    }
     }
   }
@@ -109,8 +109,6 @@ namespace vcg
     // Calcola la curvatura gaussiana (K) oppure la media (H) in base a computeH
     // e salva il risultato in Q
     // Se useHisto è true approssima il risultato usando l'istogramma
-		
-    assert(m.HasFFTopology());
 
     float *area;
     int i;
