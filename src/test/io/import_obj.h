@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.21  2006/01/23 01:37:51  buzzelli
+added handling of some of the non critical errors which may occurr during obj file importing
+
 Revision 1.20  2006/01/20 11:38:35  buzzelli
 code cleaning + more validation controls
 
@@ -57,21 +60,6 @@ code cleaning
 
 Revision 1.10  2005/12/21 00:42:32  buzzelli
 Better handling of errors inside opened file
-
-Revision 1.9  2005/12/12 17:10:13  buzzelli
-face loading process speeded up
-
-Revision 1.8  2005/12/08 15:48:51  buzzelli
-Added correct calculation of texture indexes
-
-Revision 1.7  2005/12/08 02:28:36  buzzelli
-solved a bug into LoadMask function, since now texture loading begins to work properly
-
-Revision 1.6  2005/12/07 17:42:38  buzzelli
-Progress bar counter unified for both vertices and faces
-
-Revision 1.5  2005/12/06 05:07:39  buzzelli
-Object file importer now performs also materials and texture names loading
 
 ****************************************************************************/
 
@@ -159,37 +147,58 @@ struct Material
 
 enum OBJError {
 		// Successfull opening
-	E_NOERROR,								// 0
-		// Opening Errors
-	E_CANTOPEN,								// 1
-	E_UNESPECTEDEOF,					// 2
-	E_ABORTED,								// 3
+	E_NOERROR											= 0x000,	//	0  (position of correspondig string in the array)
+	
+	// Non Critical Errors (only odd numbers)
+	E_NON_CRITICAL_ERROR					= 0x001,
+	E_MATERIAL_FILE_NOT_FOUND			= 0x003,	//  1
+	E_MATERIAL_NOT_FOUND					= 0x005,	//  2
+	E_TEXTURE_NOT_FOUND						= 0x007,	//  3
 
-	E_NO_VERTEX,							// 4
-	E_NO_FACE,								// 5
-	E_LESS_THAN_3VERTINFACE,	// 6
-	E_BAD_VERT_INDEX,					// 7
-	E_BAD_VERT_TEX_INDEX, 		// 8
-	E_BAD_VERT_NORMAL_INDEX 	// 9
+	// Critical Opening Errors (only even numbers)
+	E_CANTOPEN										=	0x008,	//  4
+	E_UNESPECTEDEOF								= 0x00A,	//  5
+	E_ABORTED											= 0x00C,	//  6
+	E_NO_VERTEX										= 0x00E,	//  7
+	E_NO_FACE											= 0x010,	//  8
+	E_BAD_VERTEX_STATEMENT				= 0x012,	//  9
+	E_BAD_VERT_TEX_STATEMENT			= 0x014,	// 10
+	E_BAD_VERT_NORMAL_STATEMENT	  = 0x016,	// 11
+	E_LESS_THAN_3VERTINFACE				= 0x018,	// 12
+	E_BAD_VERT_INDEX							= 0x01A,	// 13
+	E_BAD_VERT_TEX_INDEX 					= 0x01C,	// 14
+	E_BAD_VERT_NORMAL_INDEX 			= 0x01E		// 15
 };
 
 static const char* ErrorMsg(int error)
 {
   static const char* obj_error_msg[] =
   {
-		"No errors",												// 0
-		"Can't open file",									// 1
-		"Premature End of file",						// 2
-		"File opening aborted",							// 3
-		"No vertex field found",						// 4
-		"No face field found",							// 5
-		"Face with less than 3 vertices",		// 6
-		"Bad vertex index in face",					// 7
-		"Bad texture coords index in face",	// 8
-		"Bad vertex normal index in face"		// 9
+		"No errors",																					//  0
+
+		"Material library file not found, a default white material is used",						//  1
+		"Some materials definitions were not found, a default white material is used where no material was available",  // 2
+		"Texture file not found",															//  3
+
+		"Can't open file",																		//  4
+		"Premature End of file",															//  5
+		"File opening aborted",																//  6
+		"No vertex field found",															//  7
+		"No face field found",																//  8
+		"Vertex statement with less than 3 coords",						//  9
+		"Texture coords statement with less than 2 coords",		// 10
+		"Vertex normal statement with less than 3 coords",		// 11  
+		"Face with less than 3 vertices",											// 12
+		"Bad vertex index in face",														// 13
+		"Bad texture coords index in face",										// 14
+		"Bad vertex normal index in face"											// 15
 	};
 
-  if(error>9 || error<0) return "Unknown error";
+	// due to approximation, following line works well for either even (critical err codes)
+	// or odd (non critical ones) numbers
+	error = (int) error/2;
+
+  if(error>15 || error<0) return "Unknown error";
   else return obj_error_msg[error];
 };
 
@@ -202,9 +211,10 @@ static const char* ErrorMsg(int error)
 */
 static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 {
+	int result = E_NOERROR;
+
 	m.Clear();
-	
-	CallBackPos *cb = oi.cb;
+		CallBackPos *cb = oi.cb;
 
 	// if LoadMask has not been called yet, we call it here
 	if (oi.mask == -1)
@@ -256,6 +266,8 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 			if (header.compare("v")==0)	// vertex
 			{
+				if (numTokens < 4) return E_BAD_VERTEX_STATEMENT;
+
 				(*vi).P()[0] = (ScalarType) atof(tokens[1].c_str());
 				(*vi).P()[1] = (ScalarType) atof(tokens[2].c_str());
 				(*vi).P()[2] = (ScalarType) atof(tokens[3].c_str());
@@ -286,6 +298,8 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			}
 			else if (header.compare("vt")==0)	// vertex texture coords
 			{
+				if (numTokens < 3) return E_BAD_VERT_TEX_STATEMENT;
+
 				TexCoord t;
 				t.u = (ScalarType) atof(tokens[1].c_str());
 				t.v = (ScalarType) atof(tokens[2].c_str());
@@ -296,6 +310,8 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			}
 			else if (header.compare("vn")==0)  // vertex normal
 			{
+				if (numTokens != 4) return E_BAD_VERT_NORMAL_STATEMENT;
+
 				Point3f n;
 				n[0] = (ScalarType) atof(tokens[1].c_str());
 				n[1] = (ScalarType) atof(tokens[2].c_str());
@@ -701,12 +717,18 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					}
 					++i;
 				}
+
+				if (!found)
+				{
+					// TODO: currentMaterial = ...;
+					result = E_MATERIAL_NOT_FOUND;
+				}
 			}
 			// we simply ignore other situations
 		}
 	}
 	
-  return E_NOERROR;
+  return result;
 } // end of Open
 
 
