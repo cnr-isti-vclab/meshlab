@@ -24,8 +24,11 @@
 History
 
 $Log$
+Revision 1.77  2006/01/23 09:09:30  fmazzant
+commented code
+
 Revision 1.76  2006/01/23 08:56:49  fmazzant
-added GetMeshInfoString(mask meshmodel).
+added GetMeshInfoString(int mask_meshmodel).
 This member shows the information of the Mesh in terms of VC,VQ,FC,FQ,WT
 where:
 VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
@@ -320,6 +323,11 @@ GLArea::GLArea(QWidget *parent)
 	clipRatioNear=1;
 }
 
+/*
+	This member returns the information of the Mesh in terms of VC,VQ,FC,FQ,WT
+	where:
+	VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
+*/
 QString GLArea::GetMeshInfoString(int mask)
 {
 	QString info;
