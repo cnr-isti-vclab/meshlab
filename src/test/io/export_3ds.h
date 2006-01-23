@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.28  2006/01/23 14:07:39  fmazzant
+ deleted bug when saving a face color.
+
  Revision 1.27  2006/01/22 23:59:01  fmazzant
  changed default value of diffuse. 1.0 -> 0.8
 
@@ -233,16 +236,16 @@ namespace io {
 						face.normal[2] = (*fi).N()[2];
 					}
 
-					if(mask & MeshModel::IOM_FACECOLOR)
+					int material_index = CreateNewMaterial(m, materials, 0, fi);
+					if(material_index == materials.size())
 					{
-						int material_index = CreateNewMaterial(m, materials, 0, fi);
-						if(material_index == materials.size())
-						{
-							Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
-							
-							std::string name = qnamematerial.arg(material_index-1).toStdString();
-							strcpy(material->name,name.c_str());
+						Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
+						
+						std::string name = qnamematerial.arg(material_index-1).toStdString();
+						strcpy(material->name,name.c_str());
 
+						if(mask & MeshModel::IOM_FACECOLOR)
+						{
 							//ambient
 							material->ambient[0] = materials[materials.size()-1].Ka[0];
 							material->ambient[1] = materials[materials.size()-1].Ka[1];
@@ -263,20 +266,21 @@ namespace io {
 
 							//shininess
 							material->shininess = materials[materials.size()-1].Ns;
-							
-							//texture
-							if(mask & MeshModel::IOM_WEDGTEXCOORD)
-								strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
+						}
+											
+						//texture
+						if(mask & MeshModel::IOM_WEDGTEXCOORD)
+							strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
 
-							lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
-							strcpy(face.material,name.c_str());
-						}
-						else
-						{	
-							std::string name = qnamematerial.arg(material_index).toStdString();
-							strcpy(face.material,name.c_str());
-						}
+						lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
+						strcpy(face.material,name.c_str());
 					}
+					else
+					{	
+						std::string name = qnamematerial.arg(material_index).toStdString();
+						strcpy(face.material,name.c_str());
+					}
+
 
 					mesh->faceL[f_index]=face;
 
