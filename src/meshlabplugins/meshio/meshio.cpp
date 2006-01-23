@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.61  2006/01/23 15:54:04  fmazzant
+ added m.mask = mask to show Mesh information
+
  Revision 1.60  2006/01/23 01:26:30  buzzelli
  added handling of non critical errors which may occurr during obj file importing
 
@@ -205,7 +208,9 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		if (cb != NULL)
 			(*cb)(100, "Done");
 
-    m.storeVertexColor();
+		m.storeVertexColor();
+		
+		m.mask = mask;
 
 		return true;
 	}
