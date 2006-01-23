@@ -5,6 +5,10 @@
 
 /*
 $Log$
+Revision 1.8  2006/01/23 14:03:19  mariolatronico
+Rotate X/Z axis had wrong axes, now rotate around x has z axis
+and viceversa
+
 Revision 1.7  2006/01/22 16:40:38  mariolatronico
 - restored correct layout in .ui
 - added rotate around origini / object center
@@ -324,11 +328,11 @@ void TransformDialog::setScale(QString x , QString y , QString z ) {
 void TransformDialog::on_rotateXUpPB_clicked()
 {
 	rotateDial->setValue(90);
-	xAxisRB->setChecked(true);
+	zAxisRB->setChecked(true);
 }
 
 void TransformDialog::on_rotateZUpPB_clicked()
 {
 	rotateDial->setValue(90);
-	zAxisRB->setChecked(true);
+	xAxisRB->setChecked(true);
 }
