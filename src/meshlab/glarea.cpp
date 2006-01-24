@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.80  2006/01/24 17:29:04  alemochi
+spaces removed
+
 Revision 1.79  2006/01/24 17:19:36  alemochi
 Added help on screen (key F1)
 
@@ -689,16 +692,12 @@ void GLArea::renderHelpOnScreen()
 	renderText(100,4.5*fontSpacingV,QString("Pan"));
 	renderText(2,6*fontSpacingV,QString("Wheel: "));
 	renderText(100,6*fontSpacingV,QString("Zoom"));
-	
 	renderText(2,7.5*fontSpacingV,QString("Shift-Drag: "));
   renderText(100,7.5*fontSpacingV,QString("Zoom"));
-	
 	renderText(2,9*fontSpacingV,QString("Shift-Wheel: "));
 	renderText(100,9*fontSpacingV,QString("Vertigo Effect"));
-	
 	renderText(2,10.5*fontSpacingV,QString("Ctrl-Shift-Wheel: "));
 	renderText(100,10.5*fontSpacingV,QString("Far"));
-	
 	renderText(2,12*fontSpacingV,QString("Ctrl-Wheel: "));
 	renderText(100,12*fontSpacingV,QString("Near"));
 	glDisable(GL_BLEND);
