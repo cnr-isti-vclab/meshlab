@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.79  2006/01/24 17:19:36  alemochi
+Added help on screen (key F1)
+
 Revision 1.78  2006/01/23 15:25:43  fmazzant
 No significant changes
 
@@ -324,6 +327,7 @@ GLArea::GLArea(QWidget *parent)
 	currentButton=GLArea::BUTTON_NONE;
 	clipRatioFar=1;
 	clipRatioNear=1;
+	helpVisible=false;
 }
 
 /*
@@ -605,7 +609,6 @@ void GLArea::paintGL()
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE,GL_SRC_ALPHA);
-
 		cs.lColor.V(3) = 128;	// set half alpha value
 		glColor(cs.lColor);
 		float h = ((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
@@ -615,14 +618,13 @@ void GLArea::paintGL()
 		glVertex3f( 1.f,h,-1.f);
 		glVertex3f( 1.f,-1.f, -1.f);
 		glEnd();
-
+		
 		// Now print out the infos
 		glColor4f(1,1,1,1);
 		if(logVisible)
 			log.glDraw(this,currLogLevel,3,qFont);
 
 		displayModelInfo();
-
 		currentTime=time.elapsed();
 		deltaTime=currentTime-lastTime;
 		updateFps();
@@ -632,6 +634,7 @@ void GLArea::paintGL()
 		glPopMatrix();
 
 	}
+	if (isHelpVisible()) renderHelpOnScreen();
 
 	
 	// ==============================	
@@ -653,6 +656,53 @@ void GLArea::resizeGL(int _width, int _height)
 
 		// Set font size depending on window size (min = 1, max = 9)
 	qFont.setPointSizeF(vcg::math::Clamp<float>(-3 + sqrtf(currentWidth*currentWidth + currentHeight*currentHeight) * .01f,1,9));
+}
+
+
+void GLArea::renderHelpOnScreen()
+{
+	glPushAttrib(GL_ENABLE_BIT);
+	float maxh=-0.1154;	 // 0.1154=height/2
+	float minh=0.1154;
+	float minw=-0.1154*currentWidth/currentHeight; // -width/2
+	float maxw=minw+abs(minw)*2*170/currentWidth;
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE_MINUS_DST_COLOR,GL_ZERO); // Invert color background
+	Color4b hColor(100,100,0,128);
+	glColor(hColor);
+	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
+	glBegin(GL_TRIANGLE_STRIP);
+		glVertex3f(minw ,maxh, 2.8);
+		glVertex3f(minw, minh, 2.8);
+		glVertex3f(maxw, maxh, 2.8);
+		glVertex3f(maxw, minh, 2.8);
+	glEnd();
+	glColor(Color4b(255,255,255,255));
+	glDisable(GL_DEPTH_TEST);
+  float fontSpacingV = (currentHeight*.01f)+3;
+	renderText(15,1.5*fontSpacingV,QString("   HELP ON SCREEN"));
+  renderText(2,3*fontSpacingV,QString("Drag: "));
+	renderText(100,3*fontSpacingV,QString("Rotate"));
+	renderText(2,4.5*fontSpacingV,QString("Ctrl-Drag: "));
+	renderText(100,4.5*fontSpacingV,QString("Pan"));
+	renderText(2,6*fontSpacingV,QString("Wheel: "));
+	renderText(100,6*fontSpacingV,QString("Zoom"));
+	
+	renderText(2,7.5*fontSpacingV,QString("Shift-Drag: "));
+  renderText(100,7.5*fontSpacingV,QString("Zoom"));
+	
+	renderText(2,9*fontSpacingV,QString("Shift-Wheel: "));
+	renderText(100,9*fontSpacingV,QString("Vertigo Effect"));
+	
+	renderText(2,10.5*fontSpacingV,QString("Ctrl-Shift-Wheel: "));
+	renderText(100,10.5*fontSpacingV,QString("Far"));
+	
+	renderText(2,12*fontSpacingV,QString("Ctrl-Wheel: "));
+	renderText(100,12*fontSpacingV,QString("Near"));
+	glDisable(GL_BLEND);
+	glPopAttrib();
 }
 
 void GLArea::saveSnapshot()
@@ -682,6 +732,7 @@ void GLArea::keyPressEvent ( QKeyEvent * e )
 {
 	e->ignore();
 	//currentButton=GLArea::BUTTON_NONE;
+	if (e->key ()==Qt::Key_F1)      {helpVisible=!helpVisible;e->accept();updateGL();}
 	if (e->key ()==Qt::Key_Shift)		{currentButton|=GLArea::KEY_SHIFT;e->accept();}
 	if (e->key ()==Qt::Key_Control) {currentButton|=GLArea::KEY_CTRL; e->accept();}
 	if (e->key ()==Qt::Key_Alt)			{currentButton|=GLArea::KEY_ALT; e->accept();}

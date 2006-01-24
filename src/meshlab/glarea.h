@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.49  2006/01/24 17:19:36  alemochi
+Added help on screen (key F1)
+
 Revision 1.48  2006/01/23 08:56:49  fmazzant
 added GetMeshInfoString(mask meshmodel).
 This member shows the information of the Mesh in terms of VC,VQ,FC,FQ,WT
@@ -322,11 +325,12 @@ public:
 	const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
 	void updateFps();
 	void renderFps();
-	
+	void renderHelpOnScreen();
 	void showLog(bool b)			{logVisible = b; updateGL();}
 	void showInfoArea(bool b)		{infoAreaVisible = b; updateGL();}
 	void showTrackBall(bool b)		{trackBallVisible = b; updateGL();}
 	bool isLogVisible()				{return logVisible;}
+	bool isHelpVisible()      {return helpVisible;}  
 	bool isInfoAreaVisible()		{return infoAreaVisible;}
 	bool isTrackBallVisible()		{return trackBallVisible;}
 
@@ -368,6 +372,7 @@ private:
 	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
     
 	bool	logVisible;				// Prints out log infos ?
+	bool  helpVisible;				// Help on screen	
 	bool	infoAreaVisible;		// Draws the lower info area ?
 	bool	trackBallVisible;		// Draws the trackball ?
 	
