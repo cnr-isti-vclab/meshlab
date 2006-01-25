@@ -13,6 +13,9 @@ using vcg::Matrix44f;
 /*
 
 $Log$
+Revision 1.8  2006/01/25 19:53:58  mariolatronico
+dial start from 0 at north , 90 east and so on
+
 Revision 1.7  2006/01/22 16:40:38  mariolatronico
 - restored correct layout in .ui
 - added rotate around origini / object center
@@ -104,7 +107,7 @@ private: // functions
 	// reset initial values for Move, Rotate and Scale
 	// without parameters are RESET functions
   void setMove(QString x = "0.0", QString y = "0.0", QString z = "0.0");
-	void setRotate(int value = 0);
+	void setRotate(int value = 180); // 
   void setScale(QString x = "1.0", QString y = "1.0", QString z = "1.0"); 
 
 

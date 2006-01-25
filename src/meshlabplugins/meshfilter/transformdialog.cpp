@@ -5,6 +5,9 @@
 
 /*
 $Log$
+Revision 1.9  2006/01/25 19:53:58  mariolatronico
+dial start from 0 at north , 90 east and so on
+
 Revision 1.8  2006/01/23 14:03:19  mariolatronico
 Rotate X/Z axis had wrong axes, now rotate around x has z axis
 and viceversa
@@ -179,16 +182,17 @@ void TransformDialog::rotateAxisChange(QAbstractButton* axis) {
 // used with dial
 void TransformDialog::updateRotateLE(int value) {
 	QString strValue;
-	strValue.setNum(value);
+	strValue.setNum((value + 180)%360);
 	rotateLE->setText(strValue);
 }	
 
 void TransformDialog::on_rotateLE_textChanged(const QString &text) {
-	// type coercion
+
 	bool isNumber = false;
+	// type coercion
 	int value = text.toFloat(&isNumber);
 	if (isNumber) 
-		rotateDial->setValue(value);
+		rotateDial->setValue((value + 180)%360);
 
 }
 // move mesh center to origin
