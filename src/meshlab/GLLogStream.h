@@ -24,6 +24,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/01/25 15:37:15  glvertex
+Added variable vertical spacing
+
 Revision 1.3  2006/01/17 16:35:27  glvertex
 Added Scalable fonts
 
@@ -65,7 +68,7 @@ class GLLogStream : public LogStream
 {
 public:
 	void print(QStringList &list);		// Fills a QStringList with the log entries 
-  void glDraw(QGLWidget *qgl, int Level, int nlines,QFont font);
+  void glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font);
   void Save(int Level, const char *filename);
   void Clear() {S.clear();}
 	void Log(int Level, const char * f, ... );

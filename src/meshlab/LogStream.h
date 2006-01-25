@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/01/25 15:37:15  glvertex
+Added variable vertical spacing
+
 Revision 1.3  2006/01/17 16:35:27  glvertex
 Added Scalable fonts
 
@@ -79,7 +82,7 @@ public:
 	virtual void Log(int Level, const char * f, ... ) = 0;
 
 
-	virtual void glDraw(QGLWidget *qgl, int Level, int nlines,QFont font) = 0;
+	virtual void glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font) = 0;
 
 };
 

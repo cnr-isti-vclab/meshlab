@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2006/01/25 15:37:15  glvertex
+Added variable vertical spacing
+
 Revision 1.9  2006/01/17 16:35:27  glvertex
 Added Scalable fonts
 
@@ -82,10 +85,8 @@ void GLLogStream::Save(int Level, const char * filename )
 }
 
 
-void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,QFont font)
+void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font)
 {
-	const int LineHeight=font.pointSize()+4;
-
 	list<pair <int,string> > ::iterator li;
 	li=S.end();
 
@@ -94,13 +95,13 @@ void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,QFont font)
 	if(li==S.end())
 		li=S.begin();
 
-	int StartLine = qgl->height() - nlines * LineHeight;
+	int StartLine = qgl->height() - nlines * vSpacing;
 
 	for(;li!=S.end();++li)
 	{
 		if(Level == -1 || (*li).first == Level)
 			qgl->renderText(20,StartLine,(*li).second.c_str(),font);
 
-		StartLine+=LineHeight;
+		StartLine+=vSpacing;
 	}
 }
