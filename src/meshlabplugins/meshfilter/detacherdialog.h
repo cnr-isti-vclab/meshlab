@@ -4,6 +4,7 @@
 // for options on decimator
 #include <QDialog>
 #include "ui_detacher.h"
+#include <vcg/math/histogram.h>
 
 class DetacherDialog : public QDialog, Ui::DetacherDialog {
 
@@ -16,6 +17,7 @@ public:
 		threshold = 0.00;
 		diagonal_percentual = 0.00;
 		diagonale= 0.00;
+		perc = 0.0f;
 	}
 
 public:
@@ -31,6 +33,11 @@ public:
 		thresholdSB->setMaximum(diag);
 	}
 
+	void setHistogram(vcg::Histogram<float> *hi)
+	{
+		histo = hi;
+	}
+
 	void aggiornaPercentualeDiagonale()
 	{
 		diagonal_percentual = (threshold / diagonale) * 100;
@@ -43,6 +50,13 @@ public:
 		thresholdSB->setValue(threshold);
 	}
 
+	void aggiornaPercentile()
+	{
+		threshold = histo->Percentile(perc);
+		thresholdSB->setValue(threshold);
+		diagonal_percentual = (threshold / diagonale) * 100;
+		percdiag->setValue(diagonal_percentual);
+	}
 
 public slots:
 
@@ -62,12 +76,18 @@ public slots:
 	}
 
 
+void on_percentileSB_valueChanged(int pd)
+{
+		perc = 1.0f - (pd * 0.01);
+		aggiornaPercentile();
+}
 
 private:
-  // threshold value for refine
 	double threshold;
 	double diagonal_percentual;
 	double diagonale;
+	vcg::Histogram<float> *histo;
+	float perc;
 };
 
 #endif 

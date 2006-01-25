@@ -6,7 +6,8 @@
  * Visual Computing Lab                                            /\/|      *
  * ISTI - Italian National Research Council                           |      *
  *                                                                    \      *
- * All rights reserved.                  1 * This program is free software; you can redistribute it and/or modify      *   
+ * All rights reserved.																											 *
+ * This program is free software; you can redistribute it and/or modify      *
  * it under the terms of the GNU General Public License as published by      *
  * the Free Software Foundation; either version 2 of the License, or         *
  * (at your option) any later version.                                       *
@@ -21,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.48  2006/01/25 21:06:24  giec
+Implemented percentile for detucher's dialog
+
 Revision 1.47  2006/01/23 21:47:58  giec
 Update detucherdialog with the diagonal percentage spinbox.
 
@@ -429,11 +433,45 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	}
 
 	if (filter->text() == ST(FP_DETACHER) ) {
-	
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-
 		float diagonale = m.cm.bbox.Diag();
+		
+		Histogram<float> *histo= new Histogram<float>();
 
+		histo->SetRange( 0, diagonale, 10000);
+
+
+		CMeshO::FaceIterator fi;
+		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+		{
+			if(!(*fi).IsD())
+			{
+				if( !(*fi).V(0)->IsS() && !(*fi).V(1)->IsS()  )
+				{
+					histo->Add(Distance<float>((*fi).V(0)->P(),(*fi).V(1)->P()));
+					(*fi).V(0)->SetS();
+					(*fi).V(1)->SetS();
+				}
+				if( !(*fi).V(1)->IsS() && !(*fi).V(2)->IsS())
+				{
+					histo->Add(Distance<float>((*fi).V(1)->P(),(*fi).V(2)->P()));
+					(*fi).V(2)->SetS();
+					(*fi).V(1)->SetS();
+				}
+				if( !(*fi).V(2)->IsS() && !(*fi).V(0)->IsS())
+				{
+					histo->Add(Distance<float>((*fi).V(2)->P(),(*fi).V(0)->P()));
+					(*fi).V(0)->SetS();
+					(*fi).V(2)->SetS();
+				}
+			}
+		}
+
+		CMeshO::VertexIterator vi;
+		for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+			(*vi).ClearS();
+
+
+		detacherDialog->setHistogram(histo);
 		detacherDialog->setDiagonale(diagonale);
 		int continueValue = detacherDialog->exec();
 		
@@ -442,7 +480,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		double threshold = detacherDialog->getThreshold(); // threshold for refinying
 
 		Detacher<CMeshO>(m.cm, threshold);
-		
+		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	}
 
 	return true;

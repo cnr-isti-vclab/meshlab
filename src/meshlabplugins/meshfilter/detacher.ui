@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>100</height>
+    <width>205</width>
+    <height>160</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -22,8 +22,8 @@
   </property>
   <property name="minimumSize" >
    <size>
-    <width>200</width>
-    <height>100</height>
+    <width>16</width>
+    <height>16</height>
    </size>
   </property>
   <property name="windowTitle" >
@@ -39,6 +39,83 @@
    <property name="spacing" >
     <number>6</number>
    </property>
+   <item row="2" column="0" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_2" >
+       <property name="text" >
+        <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;pre style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;span style=&quot; font-family:Courier New,courier;&quot;>Percentile&lt;/span>&lt;/pre>&lt;/body>&lt;/html></string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>21</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="percentileSB" >
+       <property name="maximum" >
+        <number>100</number>
+       </property>
+       <property name="minimum" >
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;span style=&quot; color:#000000;&quot;>Diagonal percentage&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>31</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="percdiag" >
+       <property name="maximum" >
+        <double>100</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="0" column="0" >
     <layout class="QHBoxLayout" >
      <property name="margin" >
@@ -72,31 +149,7 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0" >
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="label" >
-       <property name="text" >
-        <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;span style=&quot; color:#000000;&quot;>Diagonal percentage&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="percdiag" >
-       <property name="maximum" >
-        <double>100</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="2" column="0" >
+   <item row="3" column="0" >
     <layout class="QHBoxLayout" >
      <property name="margin" >
       <number>0</number>
@@ -121,32 +174,32 @@
     </layout>
    </item>
   </layout>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="widget" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>10</y>
+     <y>50</y>
+     <width>182</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QWidget" name="widget_2" >
+   <property name="geometry" >
+    <rect>
+     <x>11</x>
+     <y>51</y>
      <width>181</width>
      <height>20</height>
     </rect>
    </property>
   </widget>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="widget_3" >
    <property name="geometry" >
     <rect>
-     <x>10</x>
-     <y>60</y>
-     <width>171</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="" >
-   <property name="geometry" >
-    <rect>
-     <x>20</x>
-     <y>40</y>
-     <width>151</width>
+     <x>12</x>
+     <y>50</y>
+     <width>181</width>
      <height>20</height>
     </rect>
    </property>
