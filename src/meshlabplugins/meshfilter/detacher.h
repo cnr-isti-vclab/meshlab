@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.4  2006/01/25 21:09:02  giec
+Bugfix
+
 Revision 1.3  2006/01/23 21:47:58  giec
 Update detucherdialog with the diagonal percentage spinbox.
 
@@ -68,15 +71,8 @@ namespace vcg{
 						||( d2 >= threshold )
 						||( d3 >= threshold )	)
 					{
-
-						//if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),0 ) )
-						//	face::FFDetach<typename MESH_TYPE::FaceType>((*fi),0);
-						//if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),1 ) )
-						//	face::FFDetach<typename MESH_TYPE::FaceType>((*fi),1);
-						//if(!face::IsBorder<typename MESH_TYPE::FaceType>((*fi),2 ) )
-						//	face::FFDetach<typename MESH_TYPE::FaceType>((*fi),2);
+						m.fn--;
 						(*fi).SetD();
-
 					}
 				
 			}
