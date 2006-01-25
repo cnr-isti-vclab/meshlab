@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.82  2006/01/25 01:06:51  alemochi
+irrelevant change
+
 Revision 1.81  2006/01/25 00:56:51  alemochi
 Added trackball to change directional lighting
 
@@ -538,7 +541,7 @@ void GLArea::paintGL()
 	float lightPos[]={0.0,0.0,1.0,0.0};
   glPushMatrix();
 	glPushAttrib(GL_ENABLE_BIT);
-	glColor3f(0,1,1);
+	glColor3f(1,1,0);
 	glDisable(GL_LIGHTING);
 	trackball_light.center=Point3f(0, 0, 0);
 	trackball_light.radius= 1;
@@ -548,7 +551,7 @@ void GLArea::paintGL()
 	{
 		glBegin(GL_LINES);
 			glVertex3f(0,0,0);
-			glVertex3f(0,0,100);
+			glVertex3f(0,0,200);
 		glEnd();
 	}
 	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
