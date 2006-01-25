@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.84  2006/01/25 11:33:34  alemochi
+Added "move light" to help on screen
+
 Revision 1.83  2006/01/25 03:57:15  glvertex
 - Code cleaning and restyling
 - Some bugs removed on resizing
@@ -313,13 +316,12 @@ void GLArea::paintGL()
 	glMatrixMode(GL_MODELVIEW);
 
 	glPushMatrix();
-
 	// Apply trackball for the light
 	glColor3f(1,1,0);
-	glDisable(GL_LIGHTING);
+  glDisable(GL_LIGHTING);
 	trackball_light.GetView();
 	trackball_light.Apply(!(isDefaultTrackBall()));
-	if (!(isDefaultTrackBall()))
+  if (!(isDefaultTrackBall()))
 	{
 		glBegin(GL_LINES);
 			glVertex3f(0,0,0);
@@ -475,7 +477,6 @@ void GLArea::renderHelpOnScreen()
 	//glColor(hColor);
 	glColor4f(.3f,.7f,.8f,.5f);
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
-	//glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 
 	//glBegin(GL_TRIANGLE_STRIP);
 	//	glVertex3f(minw ,maxh, -1.f);
@@ -485,7 +486,6 @@ void GLArea::renderHelpOnScreen()
 	//glEnd();
 	//glColor(Color4b(255,255,255,255));
 	//glColor4f(.0f,.0f,.0f,1.f);
-	//glDisable(GL_DEPTH_TEST);
   float fontSpacingV = (currentHeight*.01f)+3;
 	renderText(15,1.5*fontSpacingV,QString("HELP ON SCREEN"),qFont);
   renderText(2,3*fontSpacingV,QString("Drag: "),qFont);
@@ -502,6 +502,8 @@ void GLArea::renderHelpOnScreen()
 	renderText(100,10.5*fontSpacingV,QString("Far"),qFont);
 	renderText(2,12*fontSpacingV,QString("Ctrl-Wheel: "),qFont);
 	renderText(100,12*fontSpacingV,QString("Near"),qFont);
+	renderText(2,13.5*fontSpacingV,QString("Ctrl-Shift-Click: "),qFont);
+	renderText(100,13.5*fontSpacingV,QString("Move light"),qFont);
 
 	glPopMatrix();
 	glPopAttrib();
