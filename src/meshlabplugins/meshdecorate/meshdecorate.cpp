@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2006/01/25 11:02:23  glvertex
+No relevant changes
+
 Revision 1.12  2006/01/22 23:37:59  glvertex
 Choosing axes candidates
 
@@ -187,6 +190,7 @@ void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,int *vp,P
 
 	for (int i=0;i<8;i+=2)
 	{
+		// find the furthest axis
 		in1 = box.P(i);
 		in2 = box.P(i+1);
 
