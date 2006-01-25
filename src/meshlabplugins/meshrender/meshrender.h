@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.11  2006/01/25 02:59:38  ggangemi
+added shadersDialog initial support
+
 Revision 1.10  2006/01/19 11:41:42  ggangemi
 Reduced memory occupation of "UniformVariable" struct
 
@@ -69,33 +72,9 @@ Added copyright info
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include "textfile.h"
+#include "shaderStructs.h"
+#include "shadersDialog.h"
 
-
-struct UniformVariable {
-	short type;
-	float val;
-	GLint location;
-	union {
-		float val2[2];
-		float val3[3];
-		float val4[4];
-	};
-};
-
-struct ShaderInfo {
-	QString vpFile;
-	QString fpFile;
-	map<QString, UniformVariable> uniformVars;
-	GLhandleARB shaderProg;
-};
-
-enum {
-	SINGLE_INT = 0,
-	SINGLE_FLOAT = 5,
-	ARRAY_2_FLOAT = 6,
-	ARRAY_3_FLOAT = 7,
-	ARRAY_4_FLOAT = 8
-};
 
 class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 {
@@ -109,6 +88,7 @@ class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 
 	bool supported;
 	QList <QAction *> actionList;
+	
 
 public:
 
@@ -121,138 +101,8 @@ public:
 	QList<QAction *> MeshShaderRenderPlugin::actions () const {
     return actionList;
   }
-  void MeshShaderRenderPlugin::initActionList() {
 
-	
-		QDir shadersDir = QDir(qApp->applicationDirPath());
-	#if defined(Q_OS_WIN)
-		if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release")
-			shadersDir.cdUp();
-	#elif defined(Q_OS_MAC)
-		if (shadersDir.dirName() == "MacOS") {
-			shadersDir.cdUp();
-			shadersDir.cdUp();
-			shadersDir.cdUp();
-		}
-	#endif
-		shadersDir.cd("shaders");
-
-	
-		QDomDocument doc;
-		foreach (QString fileName, shadersDir.entryList(QDir::Files)) {
-			if (fileName.endsWith(".gdp")) {
-				QFile file(shadersDir.absoluteFilePath(fileName));
-				if (file.open(QIODevice::ReadOnly)) {
-					if (doc.setContent(&file)) {
-						file.close();
-
-						QDomElement root = doc.documentElement();
-						if (root.nodeName() == tr("GLSLang")) {
-
-							ShaderInfo si;
-
-							QDomElement elem;
-
-							//Vertex program filename
-							elem = root.firstChildElement("VPCount");
-							if (!elem.isNull()) {
-								//first child of VPCount is "Filenames"
-								QDomNode child = elem.firstChild();
-								if (!child.isNull()) {
-									//first child of "Filenames" is "Filename0"
-									child = child.firstChild();
-									si.vpFile =	(child.toElement()).attribute("VertexProgram", "");
-								}
-							}
-
-							//Fragment program filename
-							elem = root.firstChildElement("FPCount");
-							if (!elem.isNull()) {
-								//first child of FPCount is "Filenames"
-								QDomNode child = elem.firstChild();
-								if (!child.isNull()) {
-									//first child of "Filenames" is "Filename0"
-									child = child.firstChild();
-									si.fpFile =	(child.toElement()).attribute("FragmentProgram", "");
-								}
-							}	
-
-							//Uniform Variables
-							elem = root.firstChildElement("UniformVariables");
-							if (!elem.isNull()) {
-
-								QDomNode unif = elem.firstChild();
-								while( !unif.isNull() ) {
-									
-									UniformVariable uv;
-
-									QDomElement unifElem = unif.toElement();
-									QString unifVarName = unifElem.attribute("Name", "");
-
-									uv.type = (unifElem.attribute("Type", "")).toInt();
-									QDomNode unifElemValue = unifElem.firstChild();
-								
-									if (!unifElemValue.isNull()) {
-
-										switch (uv.type) 
-										{
-										case SINGLE_INT: 
-											{
-												uv.val = unifElemValue.toElement().attribute("Value0", 0).toFloat();
-											} break;
-										case SINGLE_FLOAT: 
-											{ 
-												uv.val = unifElemValue.toElement().attribute("Value0", 0).toFloat();
-											} break; 
-										case ARRAY_2_FLOAT: 
-											{ 
-												uv.val2[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.val2[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();	
-											} break; 
-										case ARRAY_3_FLOAT: 
-											{ 
-												uv.val3[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.val3[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
-												uv.val3[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();		
-											} break; 
-										case ARRAY_4_FLOAT: 
-											{ 
-												uv.val4[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.val4[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
-												uv.val4[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
-												uv.val4[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();		
-											} break; 
-										default: 
-											{ 
-												
-											} break; 
-										}
-										
-										si.uniformVars[unifVarName] = uv;
-									}
-								
-									unif = unif.nextSibling();
-								}
-							}					
-							
-							shaders[fileName] = si;
-
-							QAction * qa = new QAction(fileName, this); 
-							qa->setCheckable(false);
-							actionList << qa;
-						}
-					} else {
-						file.close();
-					}
-				}
-			}
-		}
-
-//		return actionList;
-	}
-
-
-
+  void MeshShaderRenderPlugin::initActionList();
 	virtual bool isSupported() {return supported;}
 	virtual void Init(QAction *a, MeshModel &m, GLArea *gla);
 	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
