@@ -24,6 +24,11 @@
   History
 
 $Log$
+Revision 1.52  2006/01/25 15:38:10  glvertex
+- Restyling part II
+- Font resizing works better
+- Some renaming
+
 Revision 1.51  2006/01/25 03:57:15  glvertex
 - Code cleaning and restyling
 - Some bugs removed on resizing
@@ -181,8 +186,7 @@ public:
 	const ColorSetting& getCustomSetting()		const {return cs;}
 	const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
 	void updateFps();
-	void renderFps();
-	void renderHelpOnScreen();
+	
 	void showLog(bool b)			{logVisible = b; updateGL();}
 	void showInfoArea(bool b)		{infoAreaVisible = b; updateGL();}
 	void showTrackBall(bool b)		{trackBallVisible = b; updateGL();}
@@ -214,7 +218,10 @@ public:
 protected:
 	void initializeGL();
 	void initTexture();
-	void displayModelInfo();
+	void displayMeshInfo();
+	void displayEnvInfo();
+	void displayHelp();
+
 	QString GetMeshInfoString(int mask);
 	void paintGL();
 	void resizeGL(int width, int height);

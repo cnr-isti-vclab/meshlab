@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.85  2006/01/25 15:38:10  glvertex
+- Restyling part II
+- Font resizing works better
+- Some renaming
+
 Revision 1.84  2006/01/25 11:33:34  alemochi
 Added "move light" to help on screen
 
@@ -117,40 +122,6 @@ QString GLArea::GetMeshInfoString(int mask)
 	if( mask & MeshModel::IOM_WEDGTEXCOORD){info.append("WT ");}
 	return info;
 }
-
-void GLArea::displayModelInfo()
-{	
-	float fontSpacingV = (currentHeight*.01f)+3;
-	float startPos= currentHeight-(fontSpacingV/3);
-
-	QString strMessage;
-	//QString strVertex="Vertices   "+QString("").setNum(mm->cm.vert.size(),10);
-	//QString strTriangle="Faces "+QString("").setNum(mm->cm.face.size(),10);
-	//strVertex+=strVertex.setNum(mm->cm.vert.size(),10);
-	//strTriangle.setNum(mm->cm.face.size(),10);
-	QString strNear=QString("  Nplane:%1").arg(nearPlane,2,'f',1);
-	QString strFar=QString("  Fplane:%1").arg(farPlane,2,'f',1);
-	QString strViewer=QString("Viewer:%1").arg(objDist,2,'f',1);
-	
-	//old version
-	/*renderText(currentWidth-currentWidth*.15f,startPos-4*fontSpacingV,strViewer+strNear+strFar,qFont);
-	renderText(currentWidth-currentWidth*.15f,startPos-3*fontSpacingV,QString("Fov ")+QString::number((int)fov,10),qFont);
-	renderText(currentWidth-currentWidth*.15f,startPos-2*fontSpacingV,strVertex,qFont);
-	renderText(currentWidth-currentWidth*.15f,startPos-fontSpacingV,strTriangle,qFont);*/
-	//renderText(currentWidth-currentWidth*0.15,currentHeight-80,strFar);
-
-	//new version
-	renderText(currentWidth-currentWidth*.15f,startPos-4.5*fontSpacingV,strViewer+strNear+strFar,qFont);
-	renderText(currentWidth-currentWidth*.15f,startPos-3*fontSpacingV,QString("Fov ")+QString::number((int)fov,10),qFont);
-	renderText(currentWidth-currentWidth*.15f,startPos-1.5*fontSpacingV,GetMeshInfoString(mm->mask),qFont);
-}
-
-void GLArea::renderFps()
-{	
-	QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
-	renderText(currentWidth-currentWidth*.15f,currentHeight-2,strInfo,qFont);	
-}
-
 
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
 QSize GLArea::sizeHint() const				{return QSize(400,300);}
@@ -276,11 +247,14 @@ void GLArea::paintGL()
 	initTexture();
 	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
 
+	// Set Modelview and Projection matrix
+	setView();
+
+	// Enter in 2D screen Mode and
+	// draws the background
 	if(!takeSnapTile)
 	{
-		// Enter in 2D screen Mode and draws the background
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
@@ -307,20 +281,30 @@ void GLArea::paintGL()
 		glMatrixMode(GL_MODELVIEW);
 	}
 
+	// glVertex: commented out
 	// First draw the trackball from a fixed point of view
-	glLoadIdentity();
-	gluLookAt(0,0,3, 0,0,0 ,0,1,0);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60.f,(float)currentWidth/currentHeight,.1f,5.f);
-	glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
+	//gluLookAt(0,0,3, 0,0,0 ,0,1,0);
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	//gluPerspective(60.f,(float)currentWidth/currentHeight,.1f,5.f);
+	//glMatrixMode(GL_MODELVIEW);
 
+	// Apply trackball for the model
+	//trackball.GetView();
+	//trackball.Apply(trackBallVisible && !takeSnapTile);
+
+	// ============== LIGHT TRACKBALL ==============
+	// Apply the trackball for the light direction
 	glPushMatrix();
-	// Apply trackball for the light
 	glColor3f(1,1,0);
   glDisable(GL_LIGHTING);
 	trackball_light.GetView();
 	trackball_light.Apply(!(isDefaultTrackBall()));
+
+	static float lightPos[]={0.0,0.0,1.0,0.0};
+	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
+
   if (!(isDefaultTrackBall()))
 	{
 		glBegin(GL_LINES);
@@ -328,23 +312,18 @@ void GLArea::paintGL()
 			glVertex3f(0,0,200);
 		glEnd();
 	}
-
-	// USE ANOTHER Trackball FOR LIGHT
-	static float lightPos[]={0.0,0.0,1.0,0.0};
-	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
 	glPopMatrix();
+	// =============================================
+	
 
-
-	// Apply trackball for the model
+	// Finally apply the Trackball for the model
+	// (get messy when in orthoMode)
 	trackball.GetView();
 	trackball.Apply(trackBallVisible && !takeSnapTile);
 
-	// Now can set the camera properly
-	setView();
-	trackball.Apply(false);
-	
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
+	
 	glTranslate(-mm->cm.bbox.Center());
   setLightModel();
 
@@ -414,7 +393,7 @@ void GLArea::paintGL()
 		glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 		cs.lColor.V(3) = 128;	// set half alpha value
 		glColor(cs.lColor);
-		float h = -0.75f;//((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
+		float h = -0.80f;//vcg::math::Min(-0.8f,-.08f*qFont.pointSize());//((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
 		glBegin(GL_TRIANGLE_STRIP);
 			glVertex2f(-1.f,h);
 			glVertex2f(-1.f,-1.f);
@@ -423,19 +402,29 @@ void GLArea::paintGL()
 		glEnd();
 		
 		// Now print out the infos
+		//========================
+
+		// First the LOG
 		glColor4f(1,1,1,1);
 		if(logVisible)
-			log.glDraw(this,currLogLevel,3,qFont);
+		{
+			renderText(20,currentHeight - 5 * (qFont.pointSizeF()+(currentHeight/225.f)),tr("LOG MESSAGES"),qFont);
+			log.glDraw(this,currLogLevel,3,qFont.pointSizeF()+(currentHeight/225.f),qFont);
+		}
 
-//		glColor4f(0,0,0,1);
-		displayModelInfo();
+		// Second the MESH INFO (numVert,NumFaces,....)
+		displayMeshInfo();
+		
+		// Third the ENV INFO (Fps,ClippingPlanes,....)
 		currentTime=time.elapsed();
 		deltaTime=currentTime-lastTime;
 		updateFps();
-		if ((cfps>0) && (cfps<200)) renderFps();
 
+		displayEnvInfo();
 	}
-	if (isHelpVisible()) renderHelpOnScreen();
+	
+	// Finally display HELP if requested
+	if (isHelpVisible()) displayHelp();
 
 	// Closing 2D
 	glPopAttrib();
@@ -445,12 +434,48 @@ void GLArea::paintGL()
 	glMatrixMode(GL_MODELVIEW);
 }
 
+void GLArea::displayMeshInfo()
+{	
+	float fontSpacingV = qFont.pointSizeF()+(currentHeight/225.f);
+	float startPos= currentHeight-(fontSpacingV/3);
+	
+	renderText(currentWidth*.5f,startPos-5*fontSpacingV,tr("MESH INFO"),qFont);
+
+	renderText(currentWidth*.5f,startPos-3*fontSpacingV,tr("Vertices: %1").arg(mm->cm.vert.size()),qFont);
+	renderText(currentWidth*.5f,startPos-2*fontSpacingV,tr("Faces: %1").arg(mm->cm.face.size()),qFont);
+	renderText(currentWidth*.5f,startPos-  fontSpacingV,GetMeshInfoString(mm->mask),qFont);
+}
+
+void GLArea::displayEnvInfo()
+{	
+	float fontSpacingV = qFont.pointSizeF()+(currentHeight/225.f);
+	float startPos = currentHeight-(fontSpacingV/3);
+
+	QString strNear=QString("Nplane: %1  ").arg(nearPlane,2,'f',1);
+	QString strFar=QString("Fplane: %1").arg(farPlane,2,'f',1);
+	QString strViewer=QString("Viewer: %1  ").arg(objDist,2,'f',1);
+
+	renderText(currentWidth-currentWidth*.25f,startPos-5*fontSpacingV,tr("ENV INFO"),qFont);
+	
+	renderText(currentWidth-currentWidth*.25f,startPos-3*fontSpacingV,strViewer+strNear+strFar,qFont);
+	renderText(currentWidth-currentWidth*.25f,startPos-2*fontSpacingV,QString("FOV: ")+QString::number((int)fov,10),qFont);
+
+
+	if ((cfps>0) && (cfps<200)) 
+	{
+		QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
+		renderText(currentWidth-currentWidth*.25f,startPos-fontSpacingV,strInfo,qFont);	
+	}
+}
+
+
 void GLArea::resizeGL(int _width, int _height)
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(fov, float(_width)/float(_height), nearPlane, farPlane);
-	glMatrixMode(GL_MODELVIEW);
+	// glVertex: No longer needed. Every frame we set a new projection matrix
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	//gluPerspective(fov, float(_width)/float(_height), nearPlane, farPlane);
+	//glMatrixMode(GL_MODELVIEW);
 	glViewport(0,0, _width, _height);
 	currentWidth=_width;
 	currentHeight=_height;
@@ -460,7 +485,7 @@ void GLArea::resizeGL(int _width, int _height)
 }
 
 
-void GLArea::renderHelpOnScreen()
+void GLArea::displayHelp()
 {
 	glPushAttrib(GL_ENABLE_BIT);
 	glPushMatrix();
@@ -502,7 +527,7 @@ void GLArea::renderHelpOnScreen()
 	renderText(100,10.5*fontSpacingV,QString("Far"),qFont);
 	renderText(2,12*fontSpacingV,QString("Ctrl-Wheel: "),qFont);
 	renderText(100,12*fontSpacingV,QString("Near"),qFont);
-	renderText(2,13.5*fontSpacingV,QString("Ctrl-Shift-Click: "),qFont);
+	renderText(2,13.5*fontSpacingV,QString("Ctrl-Shift-Drag: "),qFont);
 	renderText(100,13.5*fontSpacingV,QString("Move light"),qFont);
 
 	glPopMatrix();
@@ -550,8 +575,9 @@ void GLArea::keyReleaseEvent ( QKeyEvent * e )
 	if (e->key()==Qt::Key_Control)	{currentButton-=GLArea::KEY_CTRL;e->accept();}
 	if (e->key()==Qt::Key_Alt)			{currentButton-=GLArea::KEY_ALT;e->accept();}
 	if (!isDefaultTrackBall())
-		if (!((currentButton & KEY_SHIFT) && (currentButton & KEY_CTRL))) activeDefaultTrackball=true;
+	if (!((currentButton & KEY_SHIFT) && (currentButton & KEY_CTRL))) activeDefaultTrackball=true;
 }
+
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
   e->accept();
@@ -563,9 +589,6 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 	else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	update();
 }
-
-
-
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
@@ -738,15 +761,22 @@ void GLArea::setView()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	// Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
-	float y=sin(vcg::math::ToRad(fov/2.0));
-	float x=cos(vcg::math::ToRad(fov/2.0));
-	objDist= 1.5*(x/y);//(x*1.0/y);
+	
+	// glVertex: old code
+	//float y=sin(vcg::math::ToRad(fov/2.0));
+	//float x=cos(vcg::math::ToRad(fov/2.0));
+	//objDist= 1.5*(x*1.0/y);
+
+	// glVertex: new code (should be faster?)
+	float ratio = 1.75f;
+	objDist = ratio / tanf(vcg::math::ToRad(fov*.5f));
+
 	nearPlane = objDist - 2.f*clipRatioNear;
 	farPlane =  objDist + 2.f*clipRatioFar;
 	if(nearPlane<=objDist*.1f) nearPlane=objDist*.1f;
 	if(fov==5)
 	{
-		glOrtho(-1.5*fAspect,1.5*fAspect,-1.5,1.5,- 2.f*clipRatioNear, 2.f*clipRatioFar);
+		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,- 2.f*clipRatioNear, 2.f*clipRatioFar);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 	}
