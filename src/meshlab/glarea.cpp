@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.81  2006/01/25 00:56:51  alemochi
+Added trackball to change directional lighting
+
 Revision 1.80  2006/01/24 17:29:04  alemochi
 spaces removed
 
@@ -331,6 +334,7 @@ GLArea::GLArea(QWidget *parent)
 	clipRatioFar=1;
 	clipRatioNear=1;
 	helpVisible=false;
+	activeDefaultTrackball=true;
 }
 
 /*
@@ -530,6 +534,27 @@ void GLArea::paintGL()
 		glPopAttrib();
 		glPopMatrix();
 	}
+
+	float lightPos[]={0.0,0.0,1.0,0.0};
+  glPushMatrix();
+	glPushAttrib(GL_ENABLE_BIT);
+	glColor3f(0,1,1);
+	glDisable(GL_LIGHTING);
+	trackball_light.center=Point3f(0, 0, 0);
+	trackball_light.radius= 1;
+	trackball_light.GetView();
+	trackball_light.Apply(!(isDefaultTrackBall()));
+	if (!(isDefaultTrackBall()))
+	{
+		glBegin(GL_LINES);
+			glVertex3f(0,0,0);
+			glVertex3f(0,0,100);
+		glEnd();
+	}
+	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
+	glPopAttrib();
+	glPopMatrix();
+
 
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
@@ -744,11 +769,18 @@ void GLArea::keyReleaseEvent ( QKeyEvent * e )
 	if (e->key()==Qt::Key_Shift)		{currentButton-=GLArea::KEY_SHIFT;e->accept();}
 	if (e->key()==Qt::Key_Control)	{currentButton-=GLArea::KEY_CTRL;e->accept();}
 	if (e->key()==Qt::Key_Alt)			{currentButton-=GLArea::KEY_ALT;e->accept();}
+	if (!isDefaultTrackBall())
+		if (!((currentButton & KEY_SHIFT) && (currentButton & KEY_CTRL))) activeDefaultTrackball=true;
 }
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
-	e->accept();
-	trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+  e->accept();
+	if ((currentButton & KEY_SHIFT) && (currentButton & KEY_CTRL))
+    if (e->button()==Qt::LeftButton) activeDefaultTrackball=false;
+		else activeDefaultTrackball=true;
+
+	if (isDefaultTrackBall())	trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	update();
 }
 
@@ -759,14 +791,17 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
 	if(e->buttons() | Qt::LeftButton) 
 	{
-		trackball.MouseMove(e->x(),height()-e->y());
+		if (isDefaultTrackBall()) trackball.MouseMove(e->x(),height()-e->y());
+		else trackball_light.MouseMove(e->x(),height()-e->y());
 		update();
 	}
 }
 
 void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
-	trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	activeDefaultTrackball=true;
+	if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	update();
 }
 

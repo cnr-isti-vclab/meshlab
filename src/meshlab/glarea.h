@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.50  2006/01/25 00:56:51  alemochi
+Added trackball to change directional lighting
+
 Revision 1.49  2006/01/24 17:19:36  alemochi
 Added help on screen (key F1)
 
@@ -303,6 +306,7 @@ public:
 
 	MeshModel *mm;
 	vcg::Trackball trackball;
+	vcg::Trackball trackball_light;
 	GLLogStream log;
 	short currLogLevel;
 
@@ -333,6 +337,7 @@ public:
 	bool isHelpVisible()      {return helpVisible;}  
 	bool isInfoAreaVisible()		{return infoAreaVisible;}
 	bool isTrackBallVisible()		{return trackBallVisible;}
+	bool isDefaultTrackBall()   {return activeDefaultTrackball;}
 
 	void setBackFaceCulling(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
@@ -371,10 +376,11 @@ private:
 	void pasteTile();
 	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
     
-	bool	logVisible;				// Prints out log infos ?
+	bool	logVisible;				  // Prints out log infos ?
 	bool  helpVisible;				// Help on screen	
 	bool	infoAreaVisible;		// Draws the lower info area ?
 	bool	trackBallVisible;		// Draws the trackball ?
+	bool  activeDefaultTrackball; // keep track on active trackball
 	
 	//shader support
 	MeshRenderInterface *iRenderer;
