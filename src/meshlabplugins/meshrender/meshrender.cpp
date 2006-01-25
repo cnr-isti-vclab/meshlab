@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.8  2006/01/25 16:58:05  ggangemi
+shaderdialog closed every time the user changes the current shader
+
 Revision 1.7  2006/01/25 02:59:38  ggangemi
 added shadersDialog initial support
 
@@ -185,7 +188,7 @@ void MeshShaderRenderPlugin::initActionList() {
 
 void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla) 
 {
-	
+	if (sDialog) sDialog->close();
 
 	GLenum err = glewInit();
 	if (GLEW_OK == err) {
@@ -254,7 +257,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla)
 						"or the shader's code\n\n");
 				}
 
-				ShadersDialog *sDialog = new ShadersDialog(&shaders[a->text()]);
+				sDialog = new ShadersDialog(&shaders[a->text()]);
 
 				/*int okPressed = */sDialog->show();
 				//if (okPressed != QDialog::Rejected) return;

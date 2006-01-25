@@ -26,6 +26,8 @@ private:
 		ShaderInfo* shaderInfo;
 		QSignalMapper *signalMapper;
 		std::map<QString, QLabel*> labels;
+		
+
 		void setSimpleValue(QString varName);
 		void setColorValue(QString varName);
 		void setSliderValue(QString varName);

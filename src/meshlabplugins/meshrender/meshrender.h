@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.12  2006/01/25 16:58:05  ggangemi
+shaderdialog closed every time the user changes the current shader
+
 Revision 1.11  2006/01/25 02:59:38  ggangemi
 added shadersDialog initial support
 
@@ -89,6 +92,7 @@ class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 	bool supported;
 	QList <QAction *> actionList;
 	
+	ShadersDialog *sDialog;
 
 public:
 
@@ -96,6 +100,7 @@ public:
 	{
     initActionList();
 		supported = false;
+		sDialog = 0;
 	}
 
 	QList<QAction *> MeshShaderRenderPlugin::actions () const {
