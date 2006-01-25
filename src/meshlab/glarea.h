@@ -24,6 +24,11 @@
   History
 
 $Log$
+Revision 1.51  2006/01/25 03:57:15  glvertex
+- Code cleaning and restyling
+- Some bugs removed on resizing
+- A lot of changes in paintGL
+
 Revision 1.50  2006/01/25 00:56:51  alemochi
 Added trackball to change directional lighting
 
@@ -45,158 +50,6 @@ Added control to fov and changed behavior
 Revision 1.45  2006/01/12 22:14:39  alemochi
 added vertigo effect and moveable near clip plane
 
-Revision 1.43  2006/01/09 18:31:18  alemochi
-Fov, work in progress.....
-
-Revision 1.42  2006/01/07 11:04:49  glvertex
-Added Apply Last Filter action
-
-Revision 1.41  2006/01/02 18:54:52  glvertex
-added multilevel logging support
-
-Revision 1.40  2006/01/02 16:14:07  glvertex
-Added setFileName and getFileName methods
-
-Revision 1.39  2005/12/22 20:01:23  glvertex
-- Added support for more than one shader
-- Some methods renamed
-- Adjusted some accelerators keys
-- Fixed up minor visual issues
-
-Revision 1.38  2005/12/14 22:25:26  cignoni
-Added preliminary supprot for editing/selection plugins.
-
-Revision 1.37  2005/12/13 14:31:51  alemochi
-Changed names of member functions.
-
-Revision 1.36  2005/12/08 18:21:56  vannini
-Rewritten tiled rendering functions. Now we use grabFrameBuffer() instead of glReadPixels.
-
-Known bug:
-when in wireframe mode, there is a 1 pixel space between tiles on the final image...
-
-Revision 1.35  2005/12/06 10:42:03  vannini
-Snapshot dialog now works
-
-Revision 1.34  2005/12/05 18:15:27  vannini
-Added snapshot save dialog (not used yet)
-
-Revision 1.33  2005/12/05 18:09:08  ggangemi
-added:
-MeshRenderInterface *iRender;
-void setRender(MeshRenderInterface *);
-MeshRenderInterface * getRender();
-
-Revision 1.32  2005/12/05 12:16:46  ggangemi
-iRendersList -> iDecoratorsList
-
-Revision 1.31  2005/12/05 10:27:39  vannini
-Snapshot in png format instead of ppm
-
-Revision 1.30  2005/12/04 22:19:48  alemochi
-Added in Info Pane number of triangles and vertices
-
-Revision 1.29  2005/12/04 17:47:18  davide_portelli
-Added menu windows->Next and Shortcut "CTRL+PageDown"
-Added reset trackbal Shortcut "CTRL+H"
-Optimize fullscreen
-
-Revision 1.28  2005/12/04 10:43:45  glvertex
-Some cleanup and renaming
-
-Revision 1.27  2005/12/03 17:04:34  glvertex
-Added backface culling action and slots
-Added shortcuts for fancy and double lighting
-
-Revision 1.26  2005/12/03 16:26:45  vannini
-New code for snapshot and tiled rendering (disabled by default because not fully functional)
-
-Revision 1.25  2005/12/03 16:05:18  glvertex
-solved some compatilbility issues
-
-Revision 1.24  2005/12/02 15:30:36  alemochi
-Changed fps, added a control
-
-Revision 1.23  2005/12/02 13:51:43  alemochi
-Changed fps (problem with initialization fps)
-
-Revision 1.22  2005/12/02 11:57:59  glvertex
-- show log
-- show info area
-- show trackball
-- some renaming
-
-Revision 1.21  2005/12/02 00:52:10  cignoni
-Added support for textures
-
-Revision 1.20  2005/12/01 17:20:48  vannini
-Added basic tiled rendering functions
-saveSnapshot saves a 4x resolution snapshot
-
-Revision 1.19  2005/12/01 03:27:33  glvertex
-- Cleaned lighting code
-- Minimum size now is (400,300)
-- Added rendering log area on the bottom of the screen
-- Solved zBuff conflicts during rendering texts
-
-Revision 1.18  2005/11/30 16:26:56  cignoni
-All the modification, restructuring seen during the 30/12 lesson...
-
-Revision 1.17  2005/11/30 00:43:19  alemochi
-FPS modified (not work correctly)
-
-Revision 1.16  2005/11/30 00:21:07  alemochi
-Added function to display fps
-
-Revision 1.15  2005/11/29 18:32:56  alemochi
-Added customize menu to change colors of environment
-
-Revision 1.14  2005/11/29 11:22:23  vannini
-Added experimental snapshot saving function
-
-Revision 1.13  2005/11/28 21:05:37  alemochi
-Added menu preferences and configurable background
-
-Revision 1.12  2005/11/28 01:06:04  davide_portelli
-Now GLA contains a list of RenderMode, instead of a single RenderMode.
-Thus it is possible to have more active RenderMode (MeshRenderInterface)
-at the same time, and when there are many opened windows, the menù of rendering
-is consisting.
-
-Revision 1.11  2005/11/27 03:50:58  glvertex
-- Added method setColorMode
-- Now getCurrentRenderMode is inline method
-
-Revision 1.10  2005/11/26 16:53:54  glvertex
-getRenderState --> getCurrentRenderMode
-
-Revision 1.9  2005/11/26 14:09:15  alemochi
-Added double side lighting and fancy lighting (working only double side+fancy)
-
-Revision 1.8  2005/11/25 11:55:59  alemochi
-Added function to Enable/Disable lighting (work in progress)
-
-Revision 1.7  2005/11/24 01:38:36  cignoni
-Added new plugins intefaces, tested with shownormal render mode
-
-Revision 1.6  2005/11/20 19:30:50  glvertex
-- Added lighting parameters (still working on...)
-- Added logging events
-
-Revision 1.5  2005/11/19 12:14:20  glvertex
-Some cleanup and renaming
-
-Revision 1.4  2005/11/18 18:25:35  alemochi
-Rename function in glArea.h
-
-Revision 1.3  2005/11/18 18:10:28  alemochi
-Aggiunto slot cambiare la modalita' di rendering
-
-Revision 1.2  2005/11/17 14:54:27  glvertex
-Some little changes to allow differents rendering modes (not working yet)
-
-Revision 1.1  2005/10/18 10:38:02  cignoni
-First rough version. It simply load a mesh.
 
 ****************************************************************************/
 #ifndef GLAREA_H
@@ -349,7 +202,7 @@ public:
 	void setLightMode(bool state,LightingModel lmode);
 	void saveSnapshot();
 	void setLightModel();
-	void setVertigoCamera();
+	void setView();
 	void resetTrackBall();
 	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
 
@@ -414,7 +267,7 @@ private:
 	QImage snapBuffer;
 	QImage tileBuffer;
 	bool takeSnapTile;
-	int vpWidth, vpHeight, tileCol, tileRow, totalCols, totalRows;
+	int tileCol, tileRow, totalCols, totalRows;
 	int vcgFlag;
 };
 

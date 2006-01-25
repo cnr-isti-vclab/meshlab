@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.83  2006/01/25 03:57:15  glvertex
+- Code cleaning and restyling
+- Some bugs removed on resizing
+- A lot of changes in paintGL
+
 Revision 1.82  2006/01/25 01:06:51  alemochi
 irrelevant change
 
@@ -48,254 +53,6 @@ This member shows the information of the Mesh in terms of VC,VQ,FC,FQ,WT
 where:
 VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
 
-Revision 1.75  2006/01/19 23:11:39  glvertex
-No significant changes
-
-Revision 1.74  2006/01/17 16:35:27  glvertex
-Added Scalable fonts
-
-Revision 1.73  2006/01/14 10:19:06  mariolatronico
-GLArea::ButtonPressed is not an aggregate type,
-changed ButtonPressed::element to element
-
-Revision 1.72  2006/01/13 10:42:44  alemochi
-delete comments in paintGL
-
-Revision 1.71  2006/01/13 10:12:59  alemochi
-Added control to fov and changed behavior
-
-Revision 1.70  2006/01/13 09:28:47  cignoni
-Added scaling of texture images to a power of two
-
-Revision 1.69  2006/01/12 22:32:00  alemochi
-remove unnecessary code
-
-Revision 1.68  2006/01/12 22:14:39  alemochi
-added vertigo effect and moveable near clip plane
-
-Revision 1.65  2006/01/10 16:29:29  alemochi
-now background and panel info not move with fov
-
-Revision 1.64  2006/01/09 18:42:50  alemochi
-Added fov in Info Pane
-
-Revision 1.63  2006/01/09 18:31:18  alemochi
-Fov, work in progress.....
-
-Revision 1.62  2006/01/07 12:07:16  glvertex
-Set default font
-
-Revision 1.61  2006/01/07 11:04:49  glvertex
-Added Apply Last Filter action
-
-Revision 1.60  2006/01/02 18:54:52  glvertex
-added multilevel logging support
-
-Revision 1.59  2005/12/22 20:01:23  glvertex
-- Added support for more than one shader
-- Some methods renamed
-- Adjusted some accelerators keys
-- Fixed up minor visual issues
-
-Revision 1.58  2005/12/22 10:33:37  vannini
-Removed old code
-On SaveSnapshotDialog, "Save" button is default
-
-Revision 1.57  2005/12/14 22:25:57  cignoni
-minor formatting changes
-
-Revision 1.56  2005/12/14 00:25:50  cignoni
-completed multiple texture support
-
-Revision 1.55  2005/12/13 14:31:51  alemochi
-Changed names of member functions.
-
-Revision 1.54  2005/12/08 22:53:11  cignoni
-added missing glclearcolor
-
-Revision 1.53  2005/12/08 18:21:56  vannini
-Rewritten tiled rendering functions. Now we use grabFrameBuffer() instead of glReadPixels.
-
-Known bug:
-when in wireframe mode, there is a 1 pixel space between tiles on the final image...
-
-Revision 1.52  2005/12/06 20:54:53  alemochi
-Added more space between property displayed
-
-Revision 1.51  2005/12/06 15:13:23  glvertex
-Disabled textures during print info
-
-Revision 1.50  2005/12/06 10:42:03  vannini
-Snapshot dialog now works
-
-Revision 1.49  2005/12/05 18:15:27  vannini
-Added snapshot save dialog (not used yet)
-
-Revision 1.48  2005/12/05 18:09:08  ggangemi
-added:
-MeshRenderInterface *iRender;
-void setRender(MeshRenderInterface *);
-MeshRenderInterface * getRender();
-
-Revision 1.47  2005/12/05 12:16:46  ggangemi
-iRendersList -> iDecoratorsList
-
-Revision 1.46  2005/12/05 10:27:38  vannini
-Snapshot in png format instead of ppm
-
-Revision 1.45  2005/12/04 22:19:47  alemochi
-Added in Info Pane number of triangles and vertices
-
-Revision 1.44  2005/12/04 17:47:18  davide_portelli
-Added menu windows->Next and Shortcut "CTRL+PageDown"
-Added reset trackbal Shortcut "CTRL+H"
-Optimize fullscreen
-
-Revision 1.43  2005/12/04 17:00:56  vannini
-Code optimization
-
-Revision 1.42  2005/12/04 11:59:48  vannini
-Tiled rendering now works.
-By default "save snapshot" saves a (X*Y)*2 pixels PPM (4 tiles) where X is the glarea width and Y the glarea height
-
-Revision 1.41  2005/12/04 11:49:39  glvertex
-solved some little bugs
-now texture button works (not always correct: TO FIX)
-
-Revision 1.40  2005/12/04 10:43:45  glvertex
-Some cleanup and renaming
-
-Revision 1.39  2005/12/03 17:04:34  glvertex
-Added backface culling action and slots
-Added shortcuts for fancy and double lighting
-
-Revision 1.38  2005/12/03 16:26:45  vannini
-New code for snapshot and tiled rendering (disabled by default because not fully functional)
-
-Revision 1.37  2005/12/03 15:41:21  glvertex
-showLog initial value set to true
-
-Revision 1.36  2005/12/02 17:51:17  glvertex
-removed some old plugin code to testing new interfaces
-
-Revision 1.35  2005/12/02 15:40:18  alemochi
-removed unused variable
-
-Revision 1.34  2005/12/02 15:30:36  alemochi
-Changed fps, added a control
-
-Revision 1.33  2005/12/02 13:51:43  alemochi
-Changed fps (problem with initialization fps)
-
-Revision 1.32  2005/12/02 11:57:59  glvertex
-- show log
-- show info area
-- show trackball
-- some renaming
-
-Revision 1.31  2005/12/02 00:52:10  cignoni
-Added support for textures
-
-Revision 1.30  2005/12/01 17:20:48  vannini
-Added basic tiled rendering functions
-saveSnapshot saves a 4x resolution snapshot
-
-Revision 1.29  2005/12/01 04:06:13  glvertex
-Now the log area is a percentage of the window height
-
-Revision 1.28  2005/12/01 03:27:33  glvertex
-- Cleaned lighting code
-- Minimum size now is (400,300)
-- Added rendering log area on the bottom of the screen
-- Solved zBuff conflicts during rendering texts
-
-Revision 1.27  2005/11/30 16:26:56  cignoni
-All the modification, restructuring seen during the 30/12 lesson...
-
-Revision 1.26  2005/11/30 00:43:19  alemochi
-FPS modified (not work correctly)
-
-Revision 1.25  2005/11/30 00:21:07  alemochi
-Added function to display fps
-
-Revision 1.24  2005/11/29 18:32:55  alemochi
-Added customize menu to change colors of environment
-
-Revision 1.23  2005/11/29 11:22:23  vannini
-Added experimental snapshot saving function
-
-Revision 1.22  2005/11/28 21:05:37  alemochi
-Added menu preferences and configurable background
-
-Revision 1.21  2005/11/28 01:06:04  davide_portelli
-Now GLA contains a list of RenderMode, instead of a single RenderMode.
-Thus it is possible to have more active RenderMode (MeshRenderInterface)
-at the same time, and when there are many opened windows, the menù of rendering
-is consisting.
-
-Revision 1.20  2005/11/27 12:18:58  alemochi
-deleted unused variables
-
-Revision 1.19  2005/11/27 04:04:38  glvertex
-Changed literal double values to literal float to avoid conversion warnings
-
-Revision 1.18  2005/11/27 03:50:58  glvertex
-- Added method setColorMode
-- Now getCurrentRenderMode is inline method
-
-Revision 1.17  2005/11/26 21:47:37  alemochi
-Solved problems about fancy lighting and double side lighting
-
-Revision 1.16  2005/11/26 16:53:54  glvertex
-getRenderState --> getCurrentRenderMode
-
-Revision 1.15  2005/11/26 14:09:15  alemochi
-Added double side lighting and fancy lighting (working only double side+fancy)
-
-Revision 1.14  2005/11/25 11:55:59  alemochi
-Added function to Enable/Disable lighting (work in progress)
-
-Revision 1.13  2005/11/24 01:38:36  cignoni
-Added new plugins intefaces, tested with shownormal render mode
-
-Revision 1.12  2005/11/22 21:51:53  alemochi
-Changed frustum values.
-
-Revision 1.11  2005/11/20 23:48:01  alemochi
-*** empty log message ***
-
-Revision 1.10  2005/11/20 23:40:23  alemochi
-Added updating normalperface
-
-Revision 1.9  2005/11/20 19:30:50  glvertex
-- Added lighting parameters (still working on...)
-- Added logging events
-
-Revision 1.8  2005/11/20 14:28:26  glvertex
-GLW::DrawMode::DMxxx -> GLW::DMxxx in order to compile under gcc 3.3
-
-Revision 1.7  2005/11/20 04:34:34  davide_portelli
-Adding in the file menù, the list of the last open file (Recent File).
-
-Revision 1.6  2005/11/19 18:15:20  glvertex
-- Some bug removed.
-- Interface more friendly.
-- Background.
-
-Revision 1.5  2005/11/19 12:14:20  glvertex
-Some cleanup and renaming
-
-Revision 1.4  2005/11/18 18:25:35  alemochi
-Rename function in glArea.h
-
-Revision 1.3  2005/11/18 18:10:28  alemochi
-Aggiunto slot cambiare la modalita' di rendering
-
-Revision 1.2  2005/11/17 14:54:27  glvertex
-Some little changes to allow differents rendering modes (not working yet)
-
-Revision 1.1  2005/10/18 10:38:02  cignoni
-First rough version. It simply load a mesh.
 
 ****************************************************************************/
 
@@ -321,23 +78,25 @@ GLArea::GLArea(QWidget *parent)
 	lastTime=0;
 	deltaTime=0;
 	cfps=0;
-	fov=60;
-	currentHeight=100;
-	currentWidth=200;
 	logVisible = true;
+	helpVisible=false;
 	takeSnapTile=false;
+	activeDefaultTrackball=true;
 	infoAreaVisible = false;
 	trackBallVisible = true;
 	currentSharder = NULL;
 	lastFilterRef = NULL;
 	time.start();
-	objDist=3.0;
 	currLogLevel = -1;
 	currentButton=GLArea::BUTTON_NONE;
-	clipRatioFar=1;
-	clipRatioNear=1;
-	helpVisible=false;
-	activeDefaultTrackball=true;
+	
+	// Projection Matrix starting settings
+	objDist = 3.f;
+	fov = 60;
+	clipRatioFar = 1;
+	clipRatioNear = 1;
+	nearPlane = .2f;
+	farPlane = 5.f;
 }
 
 /*
@@ -405,6 +164,12 @@ void GLArea::initializeGL()
 	glLightfv(GL_LIGHT0,GL_POSITION,pfront);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
+
+	trackball.center=Point3f(0, 0, 0);
+	trackball.radius= 1;
+
+	trackball_light.center=Point3f(0, 0, 0);
+	trackball_light.radius= 1;
 }
 
 
@@ -499,9 +264,6 @@ void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GL
 	top = fTop - yOff;
 
 	glFrustum(left, right, bottom, top, zNear, zFar);
-	
-
-
 }
 
 void GLArea::paintGL()
@@ -511,40 +273,50 @@ void GLArea::paintGL()
 	initTexture();
 	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0,0,3, 0,0,0 ,0,1,0);
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60,(float)vpWidth/vpHeight,0.2,5);
-	glPushMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	
-	if (!takeSnapTile)
+
+	if(!takeSnapTile)
 	{
+		// Enter in 2D screen Mode and draws the background
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(-1,1,-1,1,-1,1);
+		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+
 		glBegin(GL_TRIANGLE_STRIP);
-		glColor(cs.bColorTop);  	glVertex3f(-4.f, 4.f,-1.f);
-		glColor(cs.bColorBottom);	glVertex3f(-4.f,-4.f,-1.f);
-		glColor(cs.bColorTop);		glVertex3f( 4.f, 4.f,-1.f);
-		glColor(cs.bColorBottom);	glVertex3f( 4.f,-4.f,-1.f);
-		glEnd();		
+			glColor(cs.bColorTop);  	glVertex2f(-1, 1);
+			glColor(cs.bColorBottom);	glVertex2f(-1,-1);
+			glColor(cs.bColorTop);		glVertex2f( 1, 1);
+			glColor(cs.bColorBottom);	glVertex2f( 1,-1);
+		glEnd();
+
 		glPopAttrib();
+		glPopMatrix(); // restore modelview
+		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
 	}
 
-	float lightPos[]={0.0,0.0,1.0,0.0};
-  glPushMatrix();
-	glPushAttrib(GL_ENABLE_BIT);
+	// First draw the trackball from a fixed point of view
+	glLoadIdentity();
+	gluLookAt(0,0,3, 0,0,0 ,0,1,0);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60.f,(float)currentWidth/currentHeight,.1f,5.f);
+	glMatrixMode(GL_MODELVIEW);
+
+	glPushMatrix();
+
+	// Apply trackball for the light
 	glColor3f(1,1,0);
 	glDisable(GL_LIGHTING);
-	trackball_light.center=Point3f(0, 0, 0);
-	trackball_light.radius= 1;
 	trackball_light.GetView();
 	trackball_light.Apply(!(isDefaultTrackBall()));
 	if (!(isDefaultTrackBall()))
@@ -554,19 +326,21 @@ void GLArea::paintGL()
 			glVertex3f(0,0,200);
 		glEnd();
 	}
+
+	// USE ANOTHER Trackball FOR LIGHT
+	static float lightPos[]={0.0,0.0,1.0,0.0};
 	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
-	glPopAttrib();
 	glPopMatrix();
 
 
-	trackball.center=Point3f(0, 0, 0);
-	trackball.radius= 1;
+	// Apply trackball for the model
 	trackball.GetView();
 	trackball.Apply(trackBallVisible && !takeSnapTile);
-	
-	// Setting camera e projection
-	setVertigoCamera();
+
+	// Now can set the camera properly
+	setView();
 	trackball.Apply(false);
+	
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
 	glTranslate(-mm->cm.bbox.Center());
@@ -579,7 +353,7 @@ void GLArea::paintGL()
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		myGluPerspective(fov, (GLdouble) vpWidth / (GLdouble) vpHeight, 0.2, 5);
+		myGluPerspective(fov, (GLdouble) currentWidth / (GLdouble) currentHeight, nearPlane, farPlane);
 	}
 
 	// Set proper colorMode
@@ -590,11 +364,7 @@ void GLArea::paintGL()
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
 
-	if(iRenderer && currentSharder) {
-		//iRender->Render(new QAction("Toon Shader", this), *mm, rm, this); 
-		iRenderer->Render(currentSharder, *mm, rm, this); 
-
-	}
+	if(iRenderer && currentSharder) iRenderer->Render(currentSharder, *mm, rm, this); 
 
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 	
@@ -608,12 +378,6 @@ void GLArea::paintGL()
 	}
 
 	// ...and take a snapshot
-	
-	glMatrixMode(GL_PROJECTION); // restore fix projection matrix
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);  // restore fix viewpoint
-	glPopMatrix();
-
 	if (takeSnapTile)
 	{
 		glPushAttrib(GL_ENABLE_BIT);
@@ -627,27 +391,33 @@ void GLArea::paintGL()
 		glPopAttrib();
 	}
 
+	// Enter in 2D screen Mode again
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(-1,1,-1,1,-1,1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+
 	// Draw the log area background
 	// on the bottom of the glArea
 	if(infoAreaVisible)
 	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glPushMatrix();
-		glLoadIdentity();
-
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 		cs.lColor.V(3) = 128;	// set half alpha value
 		glColor(cs.lColor);
-		float h = ((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
+		float h = -0.75f;//((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
 		glBegin(GL_TRIANGLE_STRIP);
-		glVertex3f(-1.f,h,-1.f);
-		glVertex3f(-1.f,-1.f, -1.f);
-		glVertex3f( 1.f,h,-1.f);
-		glVertex3f( 1.f,-1.f, -1.f);
+			glVertex2f(-1.f,h);
+			glVertex2f(-1.f,-1.f);
+			glVertex2f( 1.f,h);
+			glVertex2f( 1.f,-1.f);
 		glEnd();
 		
 		// Now print out the infos
@@ -655,80 +425,85 @@ void GLArea::paintGL()
 		if(logVisible)
 			log.glDraw(this,currLogLevel,3,qFont);
 
+//		glColor4f(0,0,0,1);
 		displayModelInfo();
 		currentTime=time.elapsed();
 		deltaTime=currentTime-lastTime;
 		updateFps();
 		if ((cfps>0) && (cfps<200)) renderFps();
 
-		glPopAttrib();
-		glPopMatrix();
-
 	}
 	if (isHelpVisible()) renderHelpOnScreen();
 
-	
-	// ==============================	
-
-	// ==============================
+	// Closing 2D
+	glPopAttrib();
+	glPopMatrix(); // restore modelview
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
 }
+
 void GLArea::resizeGL(int _width, int _height)
 {
-	//int side = qMin(width, height);
-	currentWidth=_width;
-	currentHeight=_height;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(fov, float(_width)/float(_height), 0.2, 5);
+	gluPerspective(fov, float(_width)/float(_height), nearPlane, farPlane);
 	glMatrixMode(GL_MODELVIEW);
-	vpWidth=_width;
-	vpHeight=_height;
 	glViewport(0,0, _width, _height);
+	currentWidth=_width;
+	currentHeight=_height;
 
 		// Set font size depending on window size (min = 1, max = 9)
-	qFont.setPointSizeF(vcg::math::Clamp<float>(-3 + sqrtf(currentWidth*currentWidth + currentHeight*currentHeight) * .01f,1,9));
+	qFont.setPointSizeF(vcg::math::Clamp<float>(-3 + sqrtf(_width*_width + _height*_height) * .01f,1,9));
 }
 
 
 void GLArea::renderHelpOnScreen()
 {
 	glPushAttrib(GL_ENABLE_BIT);
-	float maxh=-0.1154;	 // 0.1154=height/2
-	float minh=0.1154;
-	float minw=-0.1154*currentWidth/currentHeight; // -width/2
+	glPushMatrix();
+	glLoadIdentity();
+	float maxh=-0.1154f;	 // 0.1154=height/2
+	float minh=0.1154f;
+	float minw=-0.1154f*currentWidth/currentHeight; // -width/2
 	float maxw=minw+abs(minw)*2*170/currentWidth;
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_BLEND);
 	//glBlendFunc(GL_ONE_MINUS_DST_COLOR,GL_ZERO); // Invert color background
-	Color4b hColor(100,100,0,128);
-	glColor(hColor);
+	//Color4b hColor(100,100,0,128);
+	//glColor(hColor);
+	glColor4f(.3f,.7f,.8f,.5f);
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
-	glBegin(GL_TRIANGLE_STRIP);
-		glVertex3f(minw ,maxh, 2.8);
-		glVertex3f(minw, minh, 2.8);
-		glVertex3f(maxw, maxh, 2.8);
-		glVertex3f(maxw, minh, 2.8);
-	glEnd();
-	glColor(Color4b(255,255,255,255));
-	glDisable(GL_DEPTH_TEST);
+	//glBlendFunc(GL_ONE,GL_SRC_ALPHA);
+
+	//glBegin(GL_TRIANGLE_STRIP);
+	//	glVertex3f(minw ,maxh, -1.f);
+	//	glVertex3f(minw, minh, -1.f);
+	//	glVertex3f(maxw, maxh, -1.f);
+	//	glVertex3f(maxw, minh, -1.f);
+	//glEnd();
+	//glColor(Color4b(255,255,255,255));
+	//glColor4f(.0f,.0f,.0f,1.f);
+	//glDisable(GL_DEPTH_TEST);
   float fontSpacingV = (currentHeight*.01f)+3;
-	renderText(15,1.5*fontSpacingV,QString("   HELP ON SCREEN"));
-  renderText(2,3*fontSpacingV,QString("Drag: "));
-	renderText(100,3*fontSpacingV,QString("Rotate"));
-	renderText(2,4.5*fontSpacingV,QString("Ctrl-Drag: "));
-	renderText(100,4.5*fontSpacingV,QString("Pan"));
-	renderText(2,6*fontSpacingV,QString("Wheel: "));
-	renderText(100,6*fontSpacingV,QString("Zoom"));
-	renderText(2,7.5*fontSpacingV,QString("Shift-Drag: "));
-  renderText(100,7.5*fontSpacingV,QString("Zoom"));
-	renderText(2,9*fontSpacingV,QString("Shift-Wheel: "));
-	renderText(100,9*fontSpacingV,QString("Vertigo Effect"));
-	renderText(2,10.5*fontSpacingV,QString("Ctrl-Shift-Wheel: "));
-	renderText(100,10.5*fontSpacingV,QString("Far"));
-	renderText(2,12*fontSpacingV,QString("Ctrl-Wheel: "));
-	renderText(100,12*fontSpacingV,QString("Near"));
-	glDisable(GL_BLEND);
+	renderText(15,1.5*fontSpacingV,QString("HELP ON SCREEN"),qFont);
+  renderText(2,3*fontSpacingV,QString("Drag: "),qFont);
+	renderText(100,3*fontSpacingV,QString("Rotate"),qFont);
+	renderText(2,4.5*fontSpacingV,QString("Ctrl-Drag: "),qFont);
+	renderText(100,4.5*fontSpacingV,QString("Pan"),qFont);
+	renderText(2,6*fontSpacingV,QString("Wheel: "),qFont);
+	renderText(100,6*fontSpacingV,QString("Zoom"),qFont);
+	renderText(2,7.5*fontSpacingV,QString("Shift-Drag: "),qFont);
+  renderText(100,7.5*fontSpacingV,QString("Zoom"),qFont);
+	renderText(2,9*fontSpacingV,QString("Shift-Wheel: "),qFont);
+	renderText(100,9*fontSpacingV,QString("Vertigo Effect"),qFont);
+	renderText(2,10.5*fontSpacingV,QString("Ctrl-Shift-Wheel: "),qFont);
+	renderText(100,10.5*fontSpacingV,QString("Far"),qFont);
+	renderText(2,12*fontSpacingV,QString("Ctrl-Wheel: "),qFont);
+	renderText(100,12*fontSpacingV,QString("Near"),qFont);
+
+	glPopMatrix();
 	glPopAttrib();
 }
 
@@ -827,15 +602,15 @@ void GLArea::wheelEvent(QWheelEvent*e)
 			if (fov>90) fov=90;
 			if (fov<5)  fov=5;
 		}
-		updateGL();
 	}
 	else if (currentButton & KEY_CTRL) 
 	{
 		if (notch<0) clipRatioNear*=1.2f;
 		else clipRatioNear/=1.2f; 
-		updateGL();
 	}
-	else { trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA)); update(); }
+	else {trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA)); update(); }
+	
+	updateGL();
 }		
 
 void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
@@ -903,7 +678,6 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 									break;
 	}
 	updateGL();
-
 }
 
 void GLArea::setBackFaceCulling(bool enabled)
@@ -949,27 +723,28 @@ void GLArea::setCustomSetting(const ColorSetting & s)
 	cs.bColorTop=s.bColorTop;
 	cs.lColor=s.lColor;
 }
+
 void GLArea::setSnapshotSetting(const SnapshotSetting & s)
 {
 	ss=s;
 }
 
-void GLArea::setVertigoCamera()
+void GLArea::setView()
 {
 //	GLfloat ClipRatio=1;
-	GLfloat fAspect = (GLfloat)vpWidth/ vpHeight;
+	GLfloat fAspect = (GLfloat)currentWidth/ currentHeight;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	// Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
 	float y=sin(vcg::math::ToRad(fov/2.0));
 	float x=cos(vcg::math::ToRad(fov/2.0));
-	objDist= 1.5*(x*1.0/y);
-	nearPlane = objDist - 2.0*clipRatioNear;
-	farPlane =  objDist + 2.0*clipRatioFar;
-	if(nearPlane<=objDist/10.0) nearPlane=objDist/10.0;
+	objDist= 1.5*(x/y);//(x*1.0/y);
+	nearPlane = objDist - 2.f*clipRatioNear;
+	farPlane =  objDist + 2.f*clipRatioFar;
+	if(nearPlane<=objDist*.1f) nearPlane=objDist*.1f;
 	if(fov==5)
 	{
-		glOrtho(-1.5*fAspect,1.5*fAspect,-1.5,1.5,- 2.0*clipRatioNear, 2.0*clipRatioFar);
+		glOrtho(-1.5*fAspect,1.5*fAspect,-1.5,1.5,- 2.f*clipRatioNear, 2.f*clipRatioFar);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 	}
