@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2006/01/26 00:38:59  glvertex
+Quoted box: draws xyz axes candidates
+
 Revision 1.8  2006/01/22 23:37:59  glvertex
 Choosing axes candidates
 
@@ -69,7 +72,8 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 
 	float niceRound2(float value,float base);
 	float niceRound(float value);
-	void	drawAxis(Point3d &p1,Point3d &p2,float dim,double *modelview,double *projection,int *viewport);
+	
+	template<bool x,bool y,bool z > void	drawAxis(Point3d &p1,Point3d &p2,float dim,double *modelview,double *projection,int *viewport);
 	
 	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
 	void	chooseY(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &y1,Point3d &y2);

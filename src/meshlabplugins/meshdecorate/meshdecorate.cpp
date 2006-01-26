@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2006/01/26 00:38:59  glvertex
+Quoted box: draws xyz axes candidates
+
 Revision 1.13  2006/01/25 11:02:23  glvertex
 No relevant changes
 
@@ -104,6 +107,8 @@ const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
 {
    static PluginInfo ai; 
    ai.Date=tr("January 2006");
+	 ai.Author=tr("Paolo Cignoni, Daniele Vacca");
+	 ai.Version=tr("1.0");
    return ai;
  }
  
@@ -156,7 +161,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_POINT_DISTANCE_ATTENUATION);
-	glLineWidth(2.0);
+	glLineWidth(1.0);
 
 	// Get gl state values
 	double mm[16],mp[16];
@@ -167,11 +172,20 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 
 	// Mesh boundingBox
 	Box3f b(m.cm.bbox);
+	
+	glColor4f(.2f,.9f,.7f,1.f);
+	//glBoxWire(b);
 
 	Point3d p1,p2;
 
 	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
-	drawAxis(p1,p2,b.DimX(),mm,mp,vp);	// Draws x axis
+	drawAxis<true,false,false>(p1,p2,b.DimX(),mm,mp,vp);	// Draws x axis
+
+	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
+	drawAxis<false,true,false>(p1,p2,b.DimY(),mm,mp,vp);	// Draws y axis
+
+	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate
+	drawAxis<false,false,true>(p1,p2,b.DimZ(),mm,mp,vp);	// Draws z axis
 
 	glPopAttrib();
 
@@ -209,6 +223,73 @@ void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,int *vp,P
 	}
 }
 
+
+void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,int *vp,Point3d &y1,Point3d &y2)
+{
+	float d = -std::numeric_limits<float>::max();
+	Point3d c;
+	// Project the bbox center
+	gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
+	c[2] = 0;
+
+	Point3d out1,out2;
+	Point3f in1,in2;
+
+	for (int i=0;i<6;++i)
+	{
+		if(i==2) i = 4;	// skip
+		// find the furthest axis
+		in1 = box.P(i);
+		in2 = box.P(i+2);
+
+		gluProject((double)in1[0],(double)in1[1],(double)in2[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+		gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
+		out1[2] = out2[2] = 0;
+
+		float currDist = Distance(c,(out1+out2)*.5f);
+
+		if(currDist > d)
+		{
+			d = currDist;
+			y1.Import(in1);
+			y2.Import(in2);
+		}
+	}
+}
+
+void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,Point3d &x1,Point3d &x2)
+{
+	float d = -std::numeric_limits<float>::max();
+	Point3d c;
+	// Project the bbox center
+	gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
+	c[2] = 0;
+
+	Point3d out1,out2;
+	Point3f in1,in2;
+
+	for (int i=0;i<5;++i)
+	{
+		// find the furthest axis
+		in1 = box.P(i);
+		in2 = box.P(i+4);
+
+		gluProject((double)in1[0],(double)in1[1],(double)in2[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+		gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
+		out1[2] = out2[2] = 0;
+
+		float currDist = Distance(c,(out1+out2)*.5f);
+
+		if(currDist > d)
+		{
+			d = currDist;
+			x1.Import(in1);
+			x2.Import(in2);
+		}
+	}
+}
+
+template<bool x,bool y,bool z>
 void ExtraMeshDecoratePlugin::drawAxis(Point3d &a,Point3d &b,float dim,double *mm,double *mp,int *vp)
 {
 	Point3d p1,p2;
@@ -226,11 +307,27 @@ void ExtraMeshDecoratePlugin::drawAxis(Point3d &a,Point3d &b,float dim,double *m
 	float slope = dim*tickNum;
 	slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
 
-	glColor4f(1.f,1.f,1.f,.8f);
-	glPointSize(2.f);
+	//glColor4f(1.f,1.f,1.f,.8f);
+	glPointSize(3.f);
 	glBegin(GL_POINTS);
-		for(float i=slope;i<dim;i+=slope)
-			glVertex3f(a[0] + i,a[1],a[2]);
+		if(x)
+		{
+			for(float i=slope;i<dim;i+=slope)
+				glVertex3f(a[0]+i,a[1],a[2]);
+		}
+	
+		if(y)
+		{
+			for(float i=slope;i<dim;i+=slope)
+				glVertex3f(a[0],a[1]+i,a[2]);
+		}
+
+		if(z)
+		{
+			for(float i=slope;i<dim;i+=slope)
+				glVertex3f(a[0],a[1],a[2]+i);
+		}
+
 	glEnd();
 	
 	glPointSize(1.f);
