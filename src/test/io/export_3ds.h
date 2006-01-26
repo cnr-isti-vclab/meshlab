@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.30  2006/01/26 15:57:20  fmazzant
+ deleted a small bug
+
  Revision 1.29  2006/01/26 15:48:49  fmazzant
  added control on the maximum number of vertices allowed by the 3DS file format
 
@@ -121,16 +124,16 @@ namespace io {
 		{
 			static const char* obj_error_msg[] =
 			{
-					"No errors",								// 0
-					"Can't open file",							// 1
-					"can't close file",							// 2
-					"Premature End of file",					// 3
-					"File saving aborted",						// 4
-					"Function not defined",						// 5
-					"Vertices not valid",						// 6
-					"Faces not valid"							// 7
-					"Texture Coord not valid",					// 8
-					"You cannot save more than 65535 vertices"	// 9
+					"No errors",													// 0
+					"Can't open file",												// 1
+					"can't close file",												// 2
+					"Premature End of file",										// 3
+					"File saving aborted",											// 4
+					"Function not defined",											// 5
+					"Vertices not valid",											// 6
+					"Faces not valid",												// 7
+					"Texture Coord not valid",										// 8
+					"You cannot save more than 65535 vertices for the 3DS format"	// 9
 				};
 
 			if(error>9 || error<0) return "Unknown error";
