@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.49  2006/01/26 16:49:50  giec
+Bugfix the new signature for decimator function call
+
 Revision 1.48  2006/01/25 21:06:24  giec
 Implemented percentile for detucher's dialog
 
@@ -400,12 +403,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	
  	if(filter->text() == ST(FP_DECIMATOR)) 
 	  {
-	    int continueValue = decimatorDialog->exec();
-	    if (continueValue == QDialog::Rejected)
+			float diagonale = m.cm.bbox.Diag();
+			
+			decimatorDialog->setBboxEdge(m.cm.bbox.min,m.cm.bbox.max);
+			//decimatorDialog->setDiagonale(diagonale);
+	    
+			int continueValue = decimatorDialog->exec();
+	    
+			if (continueValue == QDialog::Rejected)
 	      return false; // don't continue, user pressed Cancel
-	    int step = decimatorDialog->getStep();
-	    vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-	    int delvert = Decimator<CMeshO>(m.cm,step);
+	    int Xstep = decimatorDialog->getXStep();
+			int Ystep = decimatorDialog->getYStep();
+			int Zstep = decimatorDialog->getZStep();
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+	    int delvert = Decimator<CMeshO>(m.cm,Xstep,Ystep,Zstep);
 	    if (log)
 	      log->Log(GLLogStream::Info, "Removed %d vertices", delvert);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
@@ -469,7 +480,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		CMeshO::VertexIterator vi;
 		for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 			(*vi).ClearS();
-
 
 		detacherDialog->setHistogram(histo);
 		detacherDialog->setDiagonale(diagonale);
