@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.62  2006/01/26 18:39:20  fmazzant
+ moved mask dialog exporter from mashio to meshlab
+
  Revision 1.61  2006/01/23 15:54:04  fmazzant
  added m.mask = mask to show Mesh information
 
@@ -54,7 +57,7 @@
 #include <QtGui>
 
 #include "meshio.h"
-#include "savemaskexporter.h"
+#include "../../meshlab/savemaskexporter.h"
 
 // temporaneamente prendo la versione corrente dalla cartella test
 #include "../../test/io/import_obj.h"

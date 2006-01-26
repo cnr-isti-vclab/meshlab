@@ -6,8 +6,8 @@ HEADERS        = interfaces.h \
                  plugindialog.h \
                  customDialog.h \
                  saveSnapshotDialog.h \
-                 ../meshlabplugins/meshio/savemaskexporter.h \
-                 ../meshlabplugins/meshio/changetexturename.h \
+                 savemaskexporter.h \
+                 changetexturename.h \
                  ../../../sf/wrap/gui/trackball.h\
                  ../../../sf/wrap/gui/trackmode.h\
                  ../../../sf/wrap/gl/trimesh.h
@@ -20,15 +20,17 @@ SOURCES        = main.cpp \
                  plugindialog.cpp \
                  customDialog.cpp \
                  saveSnapshotDialog.cpp \
-                 ../meshlabplugins/meshio/savemaskexporter.cpp \
-                 ../meshlabplugins/meshio/changetexturename.cpp \
+                 savemaskexporter.cpp \
+                 changetexturename.cpp \
                  ../../../sf/wrap/ply/plylib.cpp\
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp
 
 FORMS          =	ui/customDialog.ui\
 					ui/savesnapshotDialog.ui\						 
-					ui/aboutDialog.ui 				
+					ui/aboutDialog.ui \
+					ui/renametexture.ui \
+					ui/savemaskexporter.ui			
 
 
 RESOURCES     = meshlab.qrc

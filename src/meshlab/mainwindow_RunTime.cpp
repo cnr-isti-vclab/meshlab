@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.78  2006/01/26 18:39:19  fmazzant
+moved mask dialog exporter from mashio to meshlab
+
 Revision 1.77  2006/01/23 10:23:07  vannini
 added updateMenus() in applyColorMode()
 
@@ -68,7 +71,7 @@ removed old maskobj
 #include "customDialog.h"		
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
-#include "../meshlabplugins/meshio/savemaskexporter.h"
+#include "savemaskexporter.h"
 
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
