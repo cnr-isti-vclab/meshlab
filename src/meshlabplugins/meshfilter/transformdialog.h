@@ -1,18 +1,34 @@
-#ifndef TRANSFORM_DIALOG_H
-#define TRANSFORM_DIALOG_H
+/****************************************************************************
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005, 2006                                          \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
 
-#include <QDialog>
-#include <QButtonGroup>
-#include <QDoubleValidator>
-#include "ui_transform.h"
-#include <vcg/math/matrix44.h>
-#include <meshlab/meshmodel.h> // for CMeshO
+// History
 
-using vcg::Matrix44f;
-#define PI 3.14159265
 /*
 
 $Log$
+Revision 1.9  2006/01/26 18:08:28  mariolatronico
+Code cleanup, added widget naming convention and GPL license header
+
 Revision 1.8  2006/01/25 19:53:58  mariolatronico
 dial start from 0 at north , 90 east and so on
 
@@ -30,17 +46,31 @@ Revision 1.4  2006/01/17 14:18:03  mariolatronico
 - added connection between rotate Line edit and dial
 - bugfix, angle were passed in degrees, must be in radians
 
-Revision 1.3  2006/01/15 19:23:57  mariolatronico
-added log for Apply Transform
-
-Revision 1.2  2006/01/15 17:15:18  mariolatronico
-separated interface (.h) from implementation for Apply Transform dialog
-
-Revision 1.1  2006/01/15 13:55:11  mariolatronico
-file for Apply Transform dialog (implementation and user interface)
-
 
 */
+
+
+#ifndef TRANSFORM_DIALOG_H
+#define TRANSFORM_DIALOG_H
+
+#include <QDialog>
+#include <QButtonGroup>
+#include <QDoubleValidator>
+#include "ui_transform.h"
+#include <vcg/math/matrix44.h>
+#include <meshlab/meshmodel.h> // for CMeshO
+
+using vcg::Matrix44f;
+#define PI 3.14159265
+
+/*
+ *	Naming conventions for widgets:
+ *	LineEdit -> ends with LE (eg rotateLE )
+ *	Label -> ends with LBL (eg rotateLBL )
+ *	PushButton -> ends with PB (eg mvCenterOriginPB )
+ *	CheckBox -> ends with CB (eg uniformScaleCB )
+*/
+
 class TransformDialog : public QDialog, Ui::TransformDialog {
 	
   Q_OBJECT
@@ -89,13 +119,13 @@ public:
 	Matrix44f& getTransformation();
 	void setMesh(CMeshO *mesh);
 	QString& getLog();
+
 private: // members
   CMeshO *mesh;
 	Point3f minBbox, maxBbox; // min and max of bounding box
 	Box3f bbox; // the mesh bounding box
   QButtonGroup *whichTransformBG;
   QButtonGroup *rotateBG;
-  QDoubleValidator *rotateValidator;
 	enum AxisType {AXIS_X,AXIS_Y,AXIS_Z}  rotateAxis;
   enum TransformType { TR_MOVE, TR_ROTATE, TR_SCALE } whichTransform; 
   // store the transformation

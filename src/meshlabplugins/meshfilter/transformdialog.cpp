@@ -1,10 +1,34 @@
-#include "transformdialog.h"
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <QRegExp>
-#include <QRegExpValidator>
+
+/****************************************************************************
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005, 2006                                          \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
+//History
 
 /*
 $Log$
+Revision 1.10  2006/01/26 18:08:28  mariolatronico
+Code cleanup, added widget naming convention and GPL license header
+
 Revision 1.9  2006/01/25 19:53:58  mariolatronico
 dial start from 0 at north , 90 east and so on
 
@@ -26,17 +50,13 @@ Revision 1.4  2006/01/17 14:18:03  mariolatronico
 - added connection between rotate Line edit and dial
 - bugfix, angle were passed in degrees, must be in radians
 
-Revision 1.3  2006/01/15 19:23:57  mariolatronico
-added log for Apply Transform
-
-Revision 1.2  2006/01/15 18:16:54  mariolatronico
-- changed line edit behavior, now values are remembered among Apply Filter invocations
-- added check on line edit values, they must be number
-
-Revision 1.1  2006/01/15 17:15:17  mariolatronico
-separated interface (.h) from implementation for Apply Transform dialog
-
 */
+
+#include "transformdialog.h"
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <QRegExp>
+#include <QRegExpValidator>
+
 TransformDialog::TransformDialog() : QDialog() {
 	
 	setupUi(this);
@@ -54,10 +74,6 @@ TransformDialog::TransformDialog() : QDialog() {
 	rotateBG->addButton(xAxisRB);
 	rotateBG->addButton(yAxisRB);
 	rotateBG->addButton(zAxisRB);
-	
-	//    rotateValidator = new QDoubleValidator(this);
-	// rotateValidator->setRange(0.0, 359.999, 3); // from 0 to 359.999 with 3 decimals
-	//rotateLE->setValidator(rotateValidator);
 	
 	// when use the dial the line edit needs to change too
 	connect(rotateDial,SIGNAL(valueChanged(int)),
@@ -81,7 +97,6 @@ TransformDialog::TransformDialog() : QDialog() {
 TransformDialog::~TransformDialog() {
   delete whichTransformBG;
 	delete rotateBG;
-	delete rotateValidator;
 }
 
 vcg::Matrix44f& TransformDialog::getTransformation() {
@@ -111,30 +126,30 @@ void TransformDialog::selectTransform(QAbstractButton* button) {
 	  
 		moveBox->setEnabled(true); 
 		rotateBox->setEnabled(false);// resetRotate();
-      scaleBox->setEnabled(false); //resetScale();
-      whichTransform = TR_MOVE;
-			log = "Move: ";
-		}
+		scaleBox->setEnabled(false); //resetScale();
+		whichTransform = TR_MOVE;
+		log = "Move: ";
+	}
 	
-    if (button->text() == QString("Rotate") ) {
-
-      moveBox->setEnabled(false); //resetMove();
-      rotateBox->setEnabled(true); 
-      scaleBox->setEnabled(false); //resetScale();
-      whichTransform = TR_ROTATE;
-			log = "Rotate: ";
-
-    }
-
-    if (button->text() == QString("Scale") ) {
-
-      rotateBox->setEnabled(false); //resetRotate();
-			moveBox->setEnabled(false); //resetMove();
-      scaleBox->setEnabled(true); // Scale
-      whichTransform = TR_SCALE;
-			log = "Scale: ";
-
-    }
+	if (button->text() == QString("Rotate") ) {
+		
+		moveBox->setEnabled(false); //resetMove();
+		rotateBox->setEnabled(true); 
+		scaleBox->setEnabled(false); //resetScale();
+		whichTransform = TR_ROTATE;
+		log = "Rotate: ";
+		
+	}
+	
+	if (button->text() == QString("Scale") ) {
+		
+		rotateBox->setEnabled(false); //resetRotate();
+		moveBox->setEnabled(false); //resetMove();
+		scaleBox->setEnabled(true); // Scale
+		whichTransform = TR_SCALE;
+		log = "Scale: ";
+		
+	}
 		
 }
 
@@ -142,7 +157,7 @@ void TransformDialog::selectTransform(QAbstractButton* button) {
 int TransformDialog::exec() {
 	
  	isMoveRB->setChecked(true);
-//	 set the min and max Label
+	//	 set the min and max Label
  	QString bboxString = QString("X: %1     Y: %2     Z: %3")
  		.arg(minBbox[0])
  		.arg(minBbox[1])
@@ -164,7 +179,7 @@ void TransformDialog::on_uniformScaleCB_stateChanged(int state) {
 		uniformScale = true;
 	else // don't care tristate
 			uniformScale = false;
-	// in uniformScale is false we must enable Y and Z LineEdit
+	// if uniformScale is false enable Y and Z LineEdit
 	yScaleLE->setEnabled( ! uniformScale );
 	zScaleLE->setEnabled( ! uniformScale );
 }
@@ -212,6 +227,7 @@ void TransformDialog::on_scaleUnitPB_clicked() {
 											max(abs(maxBbox[1] - minBbox[1]), abs(maxBbox[2] - minBbox[2]))));
 	setScale(QString().setNum(scale), QString().setNum(scale), QString().setNum(scale));
 }
+// do the real calculations
 void TransformDialog::on_okButton_pressed() {
 	
 	Matrix44f currentMatrix;
