@@ -4,7 +4,6 @@ INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../
 HEADERS       = meshio.h  ../../../../sf/wrap/ply/plylib.h
 SOURCES       = meshio.cpp  ../../../../sf/wrap/ply/plylib.cpp
 TARGET        = meshio
-FORMS		  = ../../meshlab/ui/savemaskexporter.ui ../../meshlab/ui/renametexture.ui
 DESTDIR       = ../../meshlab/plugins
 
 win32:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds-120s.lib
