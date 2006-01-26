@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.29  2006/01/26 15:48:49  fmazzant
+ added control on the maximum number of vertices allowed by the 3DS file format
+
  Revision 1.28  2006/01/23 14:07:39  fmazzant
  deleted bug when saving a face color.
 
@@ -82,6 +85,8 @@
 #include <QString>
 #include <QMessageBox>
 
+#define MAX_POLYGONS 65535
+
 namespace vcg {
 namespace tri {
 namespace io {
@@ -105,7 +110,8 @@ namespace io {
 			E_NOTDEFINITION,			// 5
 			E_NOTVEXTEXVALID,			// 6
 			E_NOTFACESVALID,			// 7
-			E_NOTEXCOORDVALID			// 8
+			E_NOTEXCOORDVALID,			// 8
+			E_NOTNUMBERVERTVALID		// 9
 		};
 
 		/*
@@ -115,18 +121,19 @@ namespace io {
 		{
 			static const char* obj_error_msg[] =
 			{
-					"No errors",							// 0
-					"Can't open file",						// 1
-					"can't close file",						// 2
-					"Premature End of file",				// 3
-					"File saving aborted",					// 4
-					"Function not defined",					// 5
-					"Vertices not valid",					// 6
-					"Faces not valid"						// 7
-					"Texture Coord not valid"				// 8
+					"No errors",								// 0
+					"Can't open file",							// 1
+					"can't close file",							// 2
+					"Premature End of file",					// 3
+					"File saving aborted",						// 4
+					"Function not defined",						// 5
+					"Vertices not valid",						// 6
+					"Faces not valid"							// 7
+					"Texture Coord not valid",					// 8
+					"You cannot save more than 65535 vertices"	// 9
 				};
 
-			if(error>8 || error<0) return "Unknown error";
+			if(error>9 || error<0) return "Unknown error";
 			else return obj_error_msg[error];
 		};
 
@@ -163,6 +170,9 @@ namespace io {
 
 		static int SaveBinary(SaveMeshType &m, const char * filename, int &mask, CallBackPos *cb=0)
 		{
+			if(m.vert.size() > MAX_POLYGONS)
+				return E_NOTNUMBERVERTVALID;
+
 			if(m.vert.size() == 0)
 				return E_NOTVEXTEXVALID;
 			if(m.face.size() == 0)
