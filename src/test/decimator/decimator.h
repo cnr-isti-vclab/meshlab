@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.11  2006/01/26 16:41:06  giec
+Changed the sgnatureof decimatorfunction, added 3 parameter to perform three different subdivision on the three axises.
+
 Revision 1.10  2006/01/03 23:42:11  cignoni
 changed clean::IsComplexManifold(m) to the new name clean::IsTwoManifoldFace(m) naming
 
@@ -87,7 +90,7 @@ namespace vcg{
     Metodo di clustering
   */
   template<class MESH_TYPE>
-  int Decimator(MESH_TYPE &m, int n)
+  int Decimator(MESH_TYPE &m, int Xn, int Yn, int Zn)
   {	 
 		typedef struct media_struct
 		{
@@ -98,14 +101,15 @@ namespace vcg{
 		}structMedia;
     
 		structMedia ***Vett;
-		Vett = new structMedia **[n];
-		for(int i = 0; i < n; ++i)
+		Vett = new structMedia **[Xn];
+		
+		for(int i = 0; i < Xn; ++i)
 		{
-			Vett[i] = new structMedia *[n];
-				for(int j = 0; j < n; ++j)
+			Vett[i] = new structMedia *[Yn];
+				for(int j = 0; j < Yn; ++j)
 			{
-				Vett[i][j] = new structMedia[n];
-				for(int z = 0 ; z < n ; ++z)
+				Vett[i][j] = new structMedia[Zn];
+				for(int z = 0 ; z < Zn ; ++z)
 				{
 					Vett[i][j][z].accum.Zero();
 					Vett[i][j][z].num = 0;
@@ -116,37 +120,41 @@ namespace vcg{
 			}
 		}
 
-	  typename MESH_TYPE::CoordType Cmin,Cmax;
-		Cmin.Zero(); Cmax.Zero();
-		for (int i = 0; i < 3; i++) {
-			//			Cmin[i] = numeric_limits< float >::max();
-			//Cmax[i] = -numeric_limits< float >::max();
-			Cmin[i] = 10000.0f;
-			Cmax[i] = -10000.0f;
-		}
+	 typename MESH_TYPE::CoordType Cmin,Cmax;
+		//Cmin.Zero(); Cmax.Zero();
+		//for (int i = 0; i < 3; i++) {
+		//	//			Cmin[i] = numeric_limits< float >::max();
+		//	//Cmax[i] = -numeric_limits< float >::max();
+		//	Cmin[i] = 10000.0f;
+		//	Cmax[i] = -10000.0f;
+		//}
 
 
-		
-		typename MESH_TYPE::VertexIterator vi;
-    for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-      {
-				Cmin.X() = min(Cmin.X(), (*vi).P().X());
-				Cmin.Y() = min(Cmin.Y(), (*vi).P().Y());
-				Cmin.Z() = min(Cmin.Z(), (*vi).P().Z());
-				Cmax.X() = max(Cmax.X(), (*vi).P().X());
-				Cmax.Y() = max(Cmax.Y(), (*vi).P().Y());
-				Cmax.Z() = max(Cmax.Z(), (*vi).P().Z());
+		//
+		//
+  //  for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+  //    {
+		//		Cmin.X() = min(Cmin.X(), (*vi).P().X());
+		//		Cmin.Y() = min(Cmin.Y(), (*vi).P().Y());
+		//		Cmin.Z() = min(Cmin.Z(), (*vi).P().Z());
+		//		Cmax.X() = max(Cmax.X(), (*vi).P().X());
+		//		Cmax.Y() = max(Cmax.Y(), (*vi).P().Y());
+		//		Cmax.Z() = max(Cmax.Z(), (*vi).P().Z());
 
-			}		
-		
+		//	}		
+		//
 
-    if(Cmin > Cmax)
-      {
-				typename MESH_TYPE::CoordType t = Cmax;
-				Cmax=Cmin;
-				Cmin = t;
-      }
-		Point3f tras;
+    //if(Cmin > Cmax)
+    //  {
+				//typename MESH_TYPE::CoordType t = Cmax;
+				//Cmax=Cmin;
+				//Cmin = t;
+    //  }
+
+		Cmax = m.bbox.max;
+		Cmin = m.bbox.min;
+
+		Point3f tras = Cmin;
 		tras.Zero();
 		if ( Cmin.X() < 0.00000001 ) {
 			tras.X() =abs( Cmin.X());
@@ -159,14 +167,15 @@ namespace vcg{
 		}
 
     //Passo di divisione per ogni asse della bounding box
-    float Px = (Cmax[0] + tras[0])/n;
-    float Py = (Cmax[1] + tras[1])/n;
-    float Pz = (Cmax[2] + tras[2])/n;
+    float Px = (Cmax[0] + tras[0])/Xn;
+    float Py = (Cmax[1] + tras[1])/Yn;
+    float Pz = (Cmax[2] + tras[2])/Zn;
 
   	
     int idx,idy,idz;
 		float x=0.0f,y=0.0f,z=0.0f;
 		int referredBit = MESH_TYPE::VertexType::NewBitFlag();
+		typename MESH_TYPE::VertexIterator vi;
     //calcolo i nuovi vertici dalla media di quelli di ogni cella
     for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
       {
@@ -182,9 +191,9 @@ namespace vcg{
 				idy = (floor(y / Py));
 				idz = (floor(z / Pz));
 				
-				if(idx > n-1)idx=n-1;
-				if(idy > n-1)idy=n-1;
-				if(idz > n-1)idz=n-1;
+				if(idx > Xn-1)idx = Xn-1;
+				if(idy > Yn-1)idy = Yn-1;
+				if(idz > Zn-1)idz = Zn-1;
 
 				//Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (app - tras))/2;
 				Vett[idx][idy][idz].accum += (app - tras);
@@ -216,9 +225,9 @@ namespace vcg{
 										idy = (floor(y / Py));
 										idz = (floor(z / Pz));
 										//
-										if(idx > (n - 1)) idx = n - 1;
-										if(idy > (n - 1)) idy = n - 1;
-										if(idz > (n - 1)) idz = n - 1;
+										if(idx > (Xn - 1)) idx = Xn - 1;
+										if(idy > (Yn - 1)) idy = Yn - 1;
+										if(idz > (Zn - 1)) idz = Zn - 1;
 																
 
 										if(Vett[idx][idy][idz].init)
@@ -252,9 +261,9 @@ namespace vcg{
 		tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
 		tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 		if (tri::Clean<CMeshO>::IsTwoManifoldFace(m))
-		for(int i = 0; i < n; ++i)
+		for(int i = 0; i < Xn; ++i)
 		{
-			for(int j = 0; j < n; ++j)
+			for(int j = 0; j < Yn; ++j)
 			{
 				delete[] Vett[i][j];
 			}
