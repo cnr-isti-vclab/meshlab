@@ -110,6 +110,8 @@ static const char* ErrorMsg(int error)
 */
 static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 {
+	int result = E_NOERROR;
+
 	m.Clear();
 
 	CallBackPos *cb = info.cb;
@@ -141,16 +143,13 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 	
 	Lib3dsNode *p;
 	
-	//Lib3dsMatrix matrix;
-	//lib3ds_matrix_identity(matrix);
-
 	int numVertices = 0;
 	p=file->nodes;
   for (p=file->nodes; p!=0; p=p->next) {
-      ReadNode(m, file, p, vi, fi/*, &matrix*/, numVertices);
+      ReadNode(m, file, p, vi, fi, numVertices);
   }
 	
-  return E_NOERROR;
+  return result;
 } // end of Open
 
 
@@ -186,7 +185,6 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 				Lib3dsMatrix matrix;
 				Lib3dsMatrix translatedMatrix;
 				Lib3dsMatrix inverseMatrix;
-				//lib3ds_matrix_identity(matrix);
 				
 				Lib3dsObjectData *d;
 				d=&node->data.object;
@@ -196,10 +194,8 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 				lib3ds_matrix_inv(inverseMatrix);
 				lib3ds_matrix_translate_xyz(translatedMatrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
 				lib3ds_matrix_mul(matrix, translatedMatrix, inverseMatrix);
-					
-					// TODO: moltiplicare la matrice anche alle normali!
-					
 				
+
 				lib3ds_mesh_calculate_normals(mesh, normalL);
 
 
@@ -219,11 +215,7 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 					(*vi).P()[2] = transformedP[2];
 
 					++vi;
-				}
-
-				// TODO: get texture coords
-				
-				
+				}				
 
 				for (unsigned p=0; p<mesh->faces; ++p) {
 					Lib3dsFace			*f		= &mesh->faceL[p];
@@ -235,12 +227,10 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 
 					if (mat)
 					{
-						//static GLfloat a[4]={0,0,0,1};
+						// considering only diffuse color component
 						faceColor = Point4f(mat->diffuse);
-						//mat->specular;
-						//float s = pow(2, 10.0*mat->shininess);
-						//if (s>128.0)	s=128.0;
 
+						// albedo
 						if (mat->texture1_map.name[0])
 						{
 							std::string textureName = mat->texture1_map.name;
@@ -266,10 +256,8 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 								textureIdx = (int)size;
 							}
 
-							// TODO: questo nel caso di wedge texture coords, controllare
-							// se possono esserci altri casi
-							// TODO: probabilmente non va' qui dato che forse le coordinate di texture
-							// sono per vertice e non per wedge
+							// TODO: questo nel caso di wedge texture coords, tuttavia le ccordinate
+							// di texture sembrano essere per vertice e non per wedge nei 3ds, sistemare
 							for (int i=0; i<3; ++i)
 							{
 								(*fi).WT(i).u() = mesh->texelL[f->points[i]][0];
@@ -280,9 +268,8 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 						}
 					}
 					else {
-						//Lib3dsRgba a={0.2, 0.2, 0.2, 1.0};
+						// we consider only diffuse color component, using default value
 						faceColor = Point4f(0.8, 0.8, 0.8, 1.0);
-						//Lib3dsRgba s={0.0, 0.0, 0.0, 1.0};
 					}
 						
 
@@ -296,11 +283,13 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 
 					// assigning face normal
 					// ---------------------
-					(*fi).N() = f->normal; // moltiplicare per la matrice
+					// we do not have to multiply normal for current matrix (as we did for vertices)
+					// since translation operations do not affect normals
+					(*fi).N() = f->normal;
 					
 					for (int i=0; i<3; ++i)
 					{
-						// TODO: normale per wedge
+						// per wedge normal
 						(*fi).WN(i) = normalL[3*p+i];
 								
 						// assigning face vertices
