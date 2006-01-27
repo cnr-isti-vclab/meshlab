@@ -28,10 +28,10 @@
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include "refinedialog.h"
-#include "decimatordialog.h"
-#include "transformdialog.h"
-#include "detacherdialog.h"
+#include <meshlab/refineDialog.h>
+#include <meshlab/decimatorDialog.h>
+#include <meshlab/transformDialog.h>
+#include <meshlab/detacherDialog.h>
 
 #include "../../meshlab/GLLogStream.h"
 
