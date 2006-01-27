@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.53  2006/01/27 12:41:21  glvertex
+Removed HUGE memory leaks. The model is now deallocated when the window is colsed.
+
 Revision 1.52  2006/01/25 15:38:10  glvertex
 - Restyling part II
 - Font resizing works better
@@ -45,16 +48,6 @@ added GetMeshInfoString(mask meshmodel).
 This member shows the information of the Mesh in terms of VC,VQ,FC,FQ,WT
 where:
 VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
-
-Revision 1.47  2006/01/17 16:35:27  glvertex
-Added Scalable fonts
-
-Revision 1.46  2006/01/13 10:12:59  alemochi
-Added control to fov and changed behavior
-
-Revision 1.45  2006/01/12 22:14:39  alemochi
-added vertigo effect and moveable near clip plane
-
 
 ****************************************************************************/
 #ifndef GLAREA_H
@@ -214,6 +207,8 @@ public:
 	MeshRenderInterface * getRenderer() { return iRenderer; }
 
 	void setEdit(MeshEditInterface *edit){	iEdit = edit; }
+
+	void closeEvent(QCloseEvent *event);
 
 protected:
 	void initializeGL();

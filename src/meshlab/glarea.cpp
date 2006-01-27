@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.86  2006/01/27 12:41:21  glvertex
+Removed HUGE memory leaks. The model is now deallocated when the window is colsed.
+
 Revision 1.85  2006/01/25 15:38:10  glvertex
 - Restyling part II
 - Font resizing works better
@@ -42,25 +45,6 @@ irrelevant change
 
 Revision 1.81  2006/01/25 00:56:51  alemochi
 Added trackball to change directional lighting
-
-Revision 1.80  2006/01/24 17:29:04  alemochi
-spaces removed
-
-Revision 1.79  2006/01/24 17:19:36  alemochi
-Added help on screen (key F1)
-
-Revision 1.78  2006/01/23 15:25:43  fmazzant
-No significant changes
-
-Revision 1.77  2006/01/23 09:09:30  fmazzant
-commented code
-
-Revision 1.76  2006/01/23 08:56:49  fmazzant
-added GetMeshInfoString(int mask_meshmodel).
-This member shows the information of the Mesh in terms of VC,VQ,FC,FQ,WT
-where:
-VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
-
 
 ****************************************************************************/
 
@@ -94,6 +78,7 @@ GLArea::GLArea(QWidget *parent)
 	trackBallVisible = true;
 	currentSharder = NULL;
 	lastFilterRef = NULL;
+	mm = NULL;
 	time.start();
 	currLogLevel = -1;
 	currentButton=GLArea::BUTTON_NONE;
@@ -555,6 +540,19 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 	if(modifiers == Qt::AltModifier     ) vcgbt |= Trackball::KEY_ALT;
 	return Trackball::Button(vcgbt);
 }
+
+
+void GLArea::closeEvent(QCloseEvent *event)
+{
+	// TODO: if modified ask if want to save
+	if(mm)
+	{
+		delete mm;
+		mm = NULL;
+	}
+	event->accept();
+}
+
 
 
 void GLArea::keyPressEvent ( QKeyEvent * e )  
