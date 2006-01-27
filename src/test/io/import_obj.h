@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.24  2006/01/27 01:07:40  buzzelli
+Added a better distinction beetween critical and non critical error messages
+
 Revision 1.23  2006/01/27 00:53:07  buzzelli
 added control for faces with identical vertex indices
 
@@ -39,18 +42,6 @@ code cleaning + more validation controls
 
 Revision 1.19  2006/01/13 00:40:26  buzzelli
 added support for files with negative references to texCoord and vertex normals inside face definition
-
-Revision 1.18  2006/01/12 23:46:04  buzzelli
-solved a small bug in material loading
-
-Revision 1.17  2006/01/11 17:19:03  buzzelli
-code cleaning
-
-Revision 1.16  2006/01/10 16:52:20  fmazzant
-update ply::PlyMask -> io::Mask
-
-Revision 1.15  2005/12/23 02:31:28  buzzelli
-mask is filled also with infos about used colouring method (per vertex, per face)
 
 ****************************************************************************/
 
@@ -171,7 +162,7 @@ static const char* ErrorMsg(int error)
 		"Material library file not found, a default white material is used",						//  1
 		"Some materials definitions were not found, a default white material is used where no material was available",  // 2
 		"Texture file not found",																			//  3
-		"Some faces have vertices with identical index ", //	4
+		"Identical index vertices found in the same face",						//	4
 
 		"Can't open file",																						//  5
 		"Premature End of file",																			//  6
