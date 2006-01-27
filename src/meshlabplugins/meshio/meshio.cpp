@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.65  2006/01/27 17:02:51  buzzelli
+ solved a small bug with progress bar
+
  Revision 1.64  2006/01/27 01:13:27  buzzelli
  Added a better distinction beetween critical and non critical error messages
 
@@ -41,22 +44,6 @@
 
  Revision 1.59  2006/01/22 00:31:14  buzzelli
  adding first rough texture loading support into 3ds file importing
-
- Revision 1.58  2006/01/20 18:17:10  vannini
- added Restore Color
-
- Revision 1.57  2006/01/19 17:07:51  fmazzant
- changed struct Format to class Format(QString, QString).
- updated importFormats() and exportFormats() to the new class.
-
- Revision 1.56  2006/01/19 16:23:21  fmazzant
- changed return 0 in return MeshModel::IOM_ALL on GetExportMaskCapability(...)
-
- Revision 1.55  2006/01/19 15:59:00  fmazzant
- moved savemaskexporter to mainwindows
-
- Revision 1.53  2006/01/19 09:36:28  fmazzant
- cleaned up history log
 
 *****************************************************************************/
 #include <Qt>
@@ -214,7 +201,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
 		if (cb != NULL)
-			(*cb)(100, "Done");
+			(*cb)(99, "Done");
 
 		m.storeVertexColor();
 		
