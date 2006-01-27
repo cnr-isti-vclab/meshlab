@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.23  2006/01/27 00:53:07  buzzelli
+added control for faces with identical vertex indices
+
 Revision 1.22  2006/01/26 16:56:00  buzzelli
 vertex and face quality flags added to mask
 
@@ -48,21 +51,6 @@ update ply::PlyMask -> io::Mask
 
 Revision 1.15  2005/12/23 02:31:28  buzzelli
 mask is filled also with infos about used colouring method (per vertex, per face)
-
-Revision 1.14  2005/12/22 23:37:26  buzzelli
-storing per wedge normals into model when opened file provides them
-
-Revision 1.13  2005/12/22 22:10:18  buzzelli
-using face::ComputeNormalizedNormal to compute face normal when no per wedge normal is provided
-
-Revision 1.12  2005/12/22 02:23:11  buzzelli
-added face normals computation
-
-Revision 1.11  2005/12/21 23:23:33  buzzelli
-code cleaning
-
-Revision 1.10  2005/12/21 00:42:32  buzzelli
-Better handling of errors inside opened file
 
 ****************************************************************************/
 
@@ -150,51 +138,53 @@ struct Material
 
 enum OBJError {
 		// Successfull opening
-	E_NOERROR											= 0x000,	//	0  (position of correspondig string in the array)
+	E_NOERROR													= 0x000,	//	0  (position of correspondig string in the array)
 	
 	// Non Critical Errors (only odd numbers)
-	E_NON_CRITICAL_ERROR					= 0x001,
-	E_MATERIAL_FILE_NOT_FOUND			= 0x003,	//  1
-	E_MATERIAL_NOT_FOUND					= 0x005,	//  2
-	E_TEXTURE_NOT_FOUND						= 0x007,	//  3
+	E_NON_CRITICAL_ERROR							= 0x001,
+	E_MATERIAL_FILE_NOT_FOUND					= 0x003,	//  1
+	E_MATERIAL_NOT_FOUND							= 0x005,	//  2
+	E_TEXTURE_NOT_FOUND								= 0x007,	//  3
+	E_VERTICES_WITH_SAME_IDX_IN_FACE	= 0x009,  //	4
 
 	// Critical Opening Errors (only even numbers)
-	E_CANTOPEN										=	0x008,	//  4
-	E_UNESPECTEDEOF								= 0x00A,	//  5
-	E_ABORTED											= 0x00C,	//  6
-	E_NO_VERTEX										= 0x00E,	//  7
-	E_NO_FACE											= 0x010,	//  8
-	E_BAD_VERTEX_STATEMENT				= 0x012,	//  9
-	E_BAD_VERT_TEX_STATEMENT			= 0x014,	// 10
-	E_BAD_VERT_NORMAL_STATEMENT	  = 0x016,	// 11
-	E_LESS_THAN_3VERTINFACE				= 0x018,	// 12
-	E_BAD_VERT_INDEX							= 0x01A,	// 13
-	E_BAD_VERT_TEX_INDEX 					= 0x01C,	// 14
-	E_BAD_VERT_NORMAL_INDEX 			= 0x01E		// 15
+	E_CANTOPEN										=	0x00A,	//  5
+	E_UNESPECTEDEOF								= 0x00C,	//  6
+	E_ABORTED											= 0x00E,	//  7
+	E_NO_VERTEX										= 0x010,	//  8
+	E_NO_FACE											= 0x012,	//  9
+	E_BAD_VERTEX_STATEMENT				= 0x014,	// 10
+	E_BAD_VERT_TEX_STATEMENT			= 0x016,	// 11
+	E_BAD_VERT_NORMAL_STATEMENT	  = 0x018,	// 12
+	E_LESS_THAN_3VERTINFACE				= 0x01A,	// 13
+	E_BAD_VERT_INDEX							= 0x01C,	// 14
+	E_BAD_VERT_TEX_INDEX 					= 0x01E,	// 15
+	E_BAD_VERT_NORMAL_INDEX 			= 0x020		// 16
 };
 
 static const char* ErrorMsg(int error)
 {
   static const char* obj_error_msg[] =
   {
-		"No errors",																					//  0
+		"No errors",																									//  0
 
 		"Material library file not found, a default white material is used",						//  1
 		"Some materials definitions were not found, a default white material is used where no material was available",  // 2
-		"Texture file not found",															//  3
+		"Texture file not found",																			//  3
+		"Some faces have vertices with identical index ", //	4
 
-		"Can't open file",																		//  4
-		"Premature End of file",															//  5
-		"File opening aborted",																//  6
-		"No vertex field found",															//  7
-		"No face field found",																//  8
-		"Vertex statement with less than 3 coords",						//  9
-		"Texture coords statement with less than 2 coords",		// 10
-		"Vertex normal statement with less than 3 coords",		// 11  
-		"Face with less than 3 vertices",											// 12
-		"Bad vertex index in face",														// 13
-		"Bad texture coords index in face",										// 14
-		"Bad vertex normal index in face"											// 15
+		"Can't open file",																						//  5
+		"Premature End of file",																			//  6
+		"File opening aborted",																				//  7
+		"No vertex field found",																			//  8
+		"No face field found",																				//  9
+		"Vertex statement with less than 3 coords",										// 10
+		"Texture coords statement with less than 2 coords",						// 11
+		"Vertex normal statement with less than 3 coords",						// 12  
+		"Face with less than 3 vertices",															// 13
+		"Bad vertex index in face",																		// 14
+		"Bad texture coords index in face",														// 15
+		"Bad vertex normal index in face"															// 16
 	};
 
 	// due to approximation, following line works well for either even (critical err codes)
@@ -469,6 +459,14 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				else if (v3_index > numVertices)	return E_BAD_VERT_INDEX;
 				else v3_index--;	// since index starts from 1 instead of 0
 			
+				// TODO: resolve the following
+				// problem, if more non critical errors of different types happen
+				// only the last one is reported
+				if ((v1_index == v2_index) ||
+						(v1_index == v3_index) || 
+						(v2_index == v3_index))
+					result = E_VERTICES_WITH_SAME_IDX_IN_FACE;
+
 				// assigning face vertices
 				// -----------------------
 				(*fi).V(0) = &(m.vert[ v1_index ]);
@@ -625,6 +623,13 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					}
 					else if (v4_index > numVertices)	return E_BAD_VERT_INDEX;
 					else v4_index--;	// since index starts from 1 instead of 0
+
+					// TODO: resolve the following
+					// problem, if more non critical errors of different types happen
+					// only the last one is reported
+					if ((v1_index == v4_index) ||
+							(v3_index == v4_index))
+						result = E_VERTICES_WITH_SAME_IDX_IN_FACE;
 
 					// assigning face vertices
 					// -----------------------
