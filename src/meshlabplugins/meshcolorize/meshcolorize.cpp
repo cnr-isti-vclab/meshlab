@@ -23,6 +23,13 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.20  2006/01/27 18:27:53  vannini
+code refactoring for curvature colorize
+added colorize equalizer dialog and
+"Colorize by Quality" filter
+some small bugfixes
+removed color_curvature.h in favour of curvature.h
+
 Revision 1.19  2006/01/20 18:17:07  vannini
 added Restore Color
 
@@ -85,12 +92,13 @@ Added copyright info
 #include <vcg/complex/trimesh/update/flag.h>
 #include "meshcolorize.h"
 #include "color_manifold.h"
-#include "color_curvature.h"
+#include "curvature.h"
 
 using namespace vcg;
 
 ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
-	actionList << new QAction(ST(CP_GAUSSIAN), this);
+	actionList << new QAction(ST(CP_EQUALIZE), this);
+  actionList << new QAction(ST(CP_GAUSSIAN), this);
   actionList << new QAction(ST(CP_MEAN), this);
   actionList << new QAction(ST(CP_RMS), this);
   actionList << new QAction(ST(CP_ABSOLUTE), this);
@@ -102,14 +110,16 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
   switch(c)
   {
+    case CP_EQUALIZE: 
+      return QString("Colorize by Quality");
     case CP_GAUSSIAN: 
-      return QString("Gaussian Curvature");
+      return QString("Gaussian Curvature (equalized)");
     case CP_MEAN: 
-      return QString("Mean Curvature");
+      return QString("Mean Curvature (equalized)");
     case CP_RMS: 
-      return QString("Root mean square Curvature");
+      return QString("Root mean square Curvature (equalized)");
     case CP_ABSOLUTE: 
-      return QString("Absolute Curvature");
+      return QString("Absolute Curvature (equalized)");
     case CP_SELFINTERSECT: 
       return QString("Self Intersections");
     case CP_BORDER: 
@@ -126,24 +136,29 @@ const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action)
 {
 	static ActionInfo ai; 
   
-	if( action->text() == ST(CP_GAUSSIAN) )
+	if( action->text() == ST(CP_EQUALIZE) )
   {
-    ai.Help = tr("Colorize vertex and faces depending on gaussian curvature.");
+    ai.Help = tr("Colorize vertex and faces depending on quality field (manually equalized).");
+    ai.ShortHelp = tr("Colorize by quality");
+  }
+  if( action->text() == ST(CP_GAUSSIAN) )
+  {
+    ai.Help = tr("Colorize vertex and faces depending on equalized gaussian curvature.");
     ai.ShortHelp = tr("Colorize by gaussian curvature");
   }
   if( action->text() == ST(CP_MEAN) )
   {
-    ai.Help = tr("Colorize vertex and faces depending on mean curvature.");
+    ai.Help = tr("Colorize vertex and faces depending on equalized mean curvature.");
     ai.ShortHelp = tr("Colorize by mean curvature");
   }
   if( action->text() == ST(CP_RMS) )
   {
-    ai.Help = tr("Colorize vertex and faces depending on root mean square curvature.");
+    ai.Help = tr("Colorize vertex and faces depending on equalized root mean square curvature.");
     ai.ShortHelp = tr("Colorize by root mean square curvature");
   }
   if( action->text() == ST(CP_ABSOLUTE) )
   {
-    ai.Help = tr("Colorize vertex and faces depending on absolute curvature.");
+    ai.Help = tr("Colorize vertex and faces depending on equalize absolute curvature.");
     ai.ShortHelp = tr("Colorize by absolute curvature");
   }
   if( action->text() == ST(CP_SELFINTERSECT) )
@@ -163,7 +178,6 @@ const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action)
     ai.Help = tr("Colorize only non manifold edges.");
     ai.ShortHelp = tr("Colorize only non manifold edges");
   }
-  
   if( action->text() == ST(CP_RESTORE_ORIGINAL) )
   {
     ai.Help = tr("Restore original per vertex color.");
@@ -184,34 +198,62 @@ QList<QAction *> ExtraMeshColorizePlugin::actions() const {
 	return actionList;
 }
 void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent){
-	if(mode->text() == ST(CP_GAUSSIAN))
+	if(mode->text() == ST(CP_EQUALIZE))
     {
-      ColorGaussian<CMeshO>(m.cm, log);
-      vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
-      rm.colorMode = GLW::CMPerVert;
+      Curvature<CMeshO> c(m.cm);
+            
+      Frange mmmq = c.minMaxQ();
+      eqSettings.meshMinQ = mmmq.min;
+      eqSettings.meshMaxQ = mmmq.max;
+
+      Frange hmmq=c.histoPercentile(mmmq, 1.0f / (float) eqSettings.percentile, eqSettings.range);
+      eqSettings.histoMinQ = hmmq.min;
+      eqSettings.histoMaxQ = hmmq.max;      
+            
+      EqualizerDialog eqdialog(parent);
+      eqdialog.setValues(eqSettings);
+      if (eqdialog.exec()!=QDialog::Accepted) 
+        return;
+
+      eqSettings=eqdialog.getValues();
+      c.ColorizeByEqualizedQuality(c.histoPercentile(mmmq, 1.0f / (float) eqSettings.percentile, eqSettings.range));
+      rm.colorMode = GLW::CMPerVert;   
+
+      return;
+    }
+
+  if(mode->text() == ST(CP_GAUSSIAN))
+    {
+      Curvature<CMeshO> c(m.cm);
+      c.MapGaussianCurvatureIntoQuality();
+      c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));
+      rm.colorMode = GLW::CMPerVert;         
       return;
     }
 
 	if(mode->text() == ST(CP_MEAN))
     {
-      ColorMean<CMeshO>(m.cm, log);
-      vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
+      Curvature<CMeshO> c(m.cm);
+      c.MapMeanCurvatureIntoQuality();
+      c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));
       rm.colorMode = GLW::CMPerVert;
       return;
     }
 
   if(mode->text() == ST(CP_RMS))
     {
-      ColorRMS<CMeshO>(m.cm, log);
-      vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
+      Curvature<CMeshO> c(m.cm);
+      c.MapRMSCurvatureIntoQuality();
+      c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));
       rm.colorMode = GLW::CMPerVert;
       return;
     }
 
   if(mode->text() == ST(CP_ABSOLUTE))
     {
-      ColorAbsolute<CMeshO>(m.cm, log);
-      vcg::tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
+      Curvature<CMeshO> c(m.cm);
+      c.MapAbsoluteCurvatureIntoQuality();
+      c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));
       rm.colorMode = GLW::CMPerVert;
       return;
     }

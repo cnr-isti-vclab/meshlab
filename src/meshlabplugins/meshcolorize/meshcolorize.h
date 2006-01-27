@@ -23,6 +23,13 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.16  2006/01/27 18:27:53  vannini
+code refactoring for curvature colorize
+added colorize equalizer dialog and
+"Colorize by Quality" filter
+some small bugfixes
+removed color_curvature.h in favour of curvature.h
+
 Revision 1.15  2006/01/20 18:17:07  vannini
 added Restore Color
 
@@ -55,6 +62,7 @@ Moved gaussian and mean curvature functions into color_curvature.h
 #include <vcg/math/histogram.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h>
+#include "equalizerdialog.h"
 
 class ExtraMeshColorizePlugin : public QObject, public MeshColorizeInterface
 {
@@ -63,7 +71,7 @@ class ExtraMeshColorizePlugin : public QObject, public MeshColorizeInterface
 
 public:
 
-    enum ColorizeType {CP_GAUSSIAN,CP_MEAN,CP_RMS,CP_ABSOLUTE,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM,CP_RESTORE_ORIGINAL};
+    enum ColorizeType {CP_EQUALIZE,CP_GAUSSIAN,CP_MEAN,CP_RMS,CP_ABSOLUTE,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM,CP_RESTORE_ORIGINAL};
     const QString ST(ColorizeType c);
 
     ExtraMeshColorizePlugin();
@@ -78,6 +86,7 @@ public:
 protected:
 	GLLogStream *log;
   QList <QAction *> actionList;
+  EqualizerSettings eqSettings;
 
 };
 

@@ -2,13 +2,14 @@ TEMPLATE      = lib
 CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = meshcolorize.h
-SOURCES       = meshcolorize.cpp
+HEADERS       = meshcolorize.h curvature.h equalizerDialog.h
+SOURCES       = meshcolorize.cpp equalizerDialog.cpp
 TARGET        = meshcolorize
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
+FORMS		  = equalizerDialog.ui
 
 unix{
 	QMAKE_CC	 = gcc-3.3
