@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.64  2006/01/27 01:13:27  buzzelli
+ Added a better distinction beetween critical and non critical error messages
+
  Revision 1.63  2006/01/26 22:51:57  fmazzant
  removed last links to the Exporter mask
 
@@ -124,7 +127,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 			{
 				if (result & vcg::tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
-					QMessageBox::warning(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
+					QMessageBox::warning(parent, tr("OBJ Opening Warning"), vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result));
 				else
 				{
 					QMessageBox::critical(parent, tr("OBJ Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOBJ<CMeshO>::ErrorMsg(result)));
