@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.66  2006/01/28 20:43:38  buzzelli
+ minor changes in Import3ds LoadMask
+
  Revision 1.65  2006/01/27 17:02:51  buzzelli
  solved a small bug with progress bar
 
@@ -42,9 +45,6 @@
  Revision 1.60  2006/01/23 01:26:30  buzzelli
  added handling of non critical errors which may occurr during obj file importing
 
- Revision 1.59  2006/01/22 00:31:14  buzzelli
- adding first rough texture loading support into 3ds file importing
-
 *****************************************************************************/
 #include <Qt>
 #include <QtGui>
@@ -55,6 +55,7 @@
 #include "../../test/io/import_obj.h"
 #include "../../test/io/export_obj.h"
 
+#include <lib3ds/file.h>
 #include "../../test/io/import_3ds.h"
 #include "../../test/io/export_3ds.h"
 
@@ -96,7 +97,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 		string filename = fileName.toUtf8().data();
 
-		bool bUpdatedNormals = false;
+		bool normalsUpdated = false;
 
 		if(formatName.toUpper() == tr("OBJ"))
 		{
@@ -123,7 +124,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			}
 
 			if(mask & MeshModel::IOM_WEDGNORMAL)
-				bUpdatedNormals = true;
+				normalsUpdated = true;
 		}
 		else if (formatName.toUpper() == tr("PLY"))
 		{
@@ -176,16 +177,17 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		{
 			vcg::tri::io::_3dsInfo info;	
 			info.cb = cb;
-			// TODO: decomment this code when implementation of loadmask will be done
-			/*vcg::tri::io::Importer3DS<CMeshO>::LoadMask(filename.c_str(), mask, info);
+			Lib3dsFile *file = NULL;
+
+			vcg::tri::io::Importer3DS<CMeshO>::LoadMask(filename.c_str(), file, info);
 
 			if(mask & MeshModel::IOM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
-				*//*TODO: abilitare solo quando necessario*//*m.cm.face.EnableWedgeTex();*//*
-			}*/
-
-			int result = vcg::tri::io::Importer3DS<CMeshO>::Open(m.cm, filename.c_str(), info);
+				m.cm.face.EnableWedgeTex();
+			}
+			
+			int result = vcg::tri::io::Importer3DS<CMeshO>::Open(m.cm, filename.c_str(), file, info);
 			if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR)
 			{
 				QMessageBox::warning(parent, tr("3DS Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
@@ -193,11 +195,11 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			}
 
 			if(mask & MeshModel::IOM_WEDGNORMAL)
-				bUpdatedNormals = true;
+				normalsUpdated = true;
 		}
 
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
-		if (!bUpdatedNormals) 
+		if (!normalsUpdated) 
 			vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
 		if (cb != NULL)

@@ -54,6 +54,9 @@ public:
  
 	/// number of triangles
 	int numTriangles;
+	
+	/// number of submeshes
+	int numMeshes;
 
 }; // end class
 } // end namespace tri

@@ -20,12 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-
-/****************************************************************************
-  History
-
-*****************************************************************************/
-
 #ifndef __VCGLIB_IMPORT_3DS
 #define __VCGLIB_IMPORT_3DS
 
@@ -66,7 +60,6 @@ typedef typename OpenMeshType::FaceType FaceType;
 typedef typename OpenMeshType::VertexIterator VertexIterator;
 typedef typename OpenMeshType::FaceIterator FaceIterator;
 
-
 enum _3DSError {
 		// Successfull opening
 	E_NOERROR,								// 0
@@ -101,6 +94,7 @@ static const char* ErrorMsg(int error)
   else return _3ds_error_msg[error];
 };
 
+
 /*!
 * Opens a 3ds file and populates the mesh passed as first parameter
 * accordingly to read data
@@ -108,7 +102,7 @@ static const char* ErrorMsg(int error)
 * \param filename The name of the file to open
 * \param oi A structure containing infos about the object to be opened
 */
-static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
+static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsInfo &info)
 {
 	int result = E_NOERROR;
 
@@ -116,25 +110,23 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 
 	CallBackPos *cb = info.cb;
 
-	//LoadMask(filename, info.mask, info);
-	// TODO: call LoadMask
-	// if LoadMask has not been called yet, we call it here
-	/*if (oi.mask == -1)
-		LoadMask(filename, oi.mask, oi);
-	
+	if (file == 0)
+	{
+		file = lib3ds_file_load(filename);
+		if (!file)
+			return E_CANTOPEN;
+		lib3ds_file_eval(file,0);
+	}
+
+	if (info.mask == 0)
+		LoadMask(filename, file, info);
+
 	if (info.numVertices == 0)
 		return E_NO_VERTEX;
 
 	if (info.numTriangles == 0)
 		return E_NO_FACE;
-	*/
-
-	static Lib3dsFile *file=0;
-	file = lib3ds_file_load(filename);
-  if (!file)
-   return E_CANTOPEN;
-	lib3ds_file_eval(file,0);
-
+	
 	
 	// vertices and faces allocatetion
 	VertexIterator vi;// = Allocator<OpenMeshType>::AddVertices(m,oi.numVertices);
@@ -144,39 +136,45 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 	Lib3dsNode *p;
 	
 	int numVertices = 0;
+	int numFaces		= 0;
+
 	p=file->nodes;
-  for (p=file->nodes; p!=0; p=p->next) {
-      ReadNode(m, file, p, vi, fi, numVertices);
-  }
+  for (p=file->nodes; p!=0; p=p->next)
+      if (ReadNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
+				return E_ABORTED;
 	
-  return result;
+	// freeing memory
+	lib3ds_file_free(file);
+
+	return result;
 } // end of Open
 
 
-	static bool ReadNode(OpenMeshType &m, Lib3dsFile* file, Lib3dsNode *node, VertexIterator &vi, FaceIterator &fi, int &numVertices)
+	static int ReadNode(OpenMeshType &m, Lib3dsFile* file, Lib3dsNode *node, VertexIterator &vi, FaceIterator &fi, _3dsInfo &info, int &numVertices, int &numFaces)
 	{
+		int result = E_NOERROR;
 		ASSERT(file);
-
 
 		{
 			Lib3dsNode *p;
 			for (p=node->childs; p!=0; p=p->next)
-				ReadNode(m, file, p, vi, fi, numVertices);
+				if (ReadNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
+					return E_ABORTED;
 		}
 
 		if (node->type==LIB3DS_OBJECT_NODE)
 		{
 			if (strcmp(node->name,"$$$DUMMY") == 0)
-				return false;
+				return E_NOERROR;  // TODO: vedere cosa ritornare, magari non e' un errore grave
 		
 			if (!node->user.d)
 			{
 				Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->name);
 				ASSERT(mesh);
 				if (!mesh)
-				  return false;
+				  return E_NOERROR;  // TODO: vedere cosa ritornare, magari non e' un errore grave
       
-				
+				int numVerticesPlusFaces = info.numVertices + info.numTriangles;				
 				
 				Lib3dsVector *normalL= (Lib3dsVector*) malloc(3*sizeof(Lib3dsVector)*mesh->faces);
 
@@ -202,7 +200,6 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 				// allocazione spazio per i vertici e le facce della mesh corrente
 				vi = Allocator<OpenMeshType>::AddVertices(m ,mesh->points);
 				fi = Allocator<OpenMeshType>::AddFaces(m ,mesh->faces);
-
 				
 				for (unsigned v=0; v<mesh->points; ++v) {
 					Lib3dsVector	*p		= &mesh->pointL[v].pos;
@@ -215,6 +212,12 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 					(*vi).P()[2] = transformedP[2];
 
 					++vi;
+
+					// callback invocation, abort loading process if the call returns false
+					if (	(info.cb !=NULL) && 
+								(((numFaces + numVertices + v)%100)==0) && 
+								!(*info.cb)(100.0f * (float)(numFaces + numVertices + v)/(float)numVerticesPlusFaces, "Vertex Loading")	)
+						return E_ABORTED;
 				}				
 
 				for (unsigned p=0; p<mesh->faces; ++p) {
@@ -294,10 +297,16 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 								
 						// assigning face vertices
 						// -----------------------
-						(*fi).V(i) = &(m.vert[ (numVertices + f->points[i]) ]); // TODO: l'errore e' qui!
+						(*fi).V(i) = &(m.vert[ (numVertices + f->points[i]) ]);
 					}
 
 					++fi;
+					++numFaces;
+					// callback invocation, abort loading process if the call returns false
+					if (	(info.cb !=NULL) && 
+								(((numFaces + numVertices + mesh->points)%100)==0) && 
+								!(*info.cb)(100.0f * (float)(numFaces + numVertices + mesh->points)/(float)numVerticesPlusFaces, "Face Loading")	)
+						return E_ABORTED;
 				}
 
         free(normalL);
@@ -306,19 +315,9 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
       }
 
 		}
-	}
 
-	/*!
-	* Retrieves kind of data stored into the file and fills a mask appropriately
-	* \param filename The name of the file to open
-	*	\param mask	A mask which will be filled according to type of data found in the object
-	*/
-	static bool LoadMask(const char * filename, int &mask)
-	{
-		_3dsInfo info;
-		return LoadMask(filename, mask, info);
+		return result;
 	}
-
 	
 	/*!
 	* Retrieves kind of data stored into the file and fills a mask appropriately
@@ -326,12 +325,16 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 	*	\param mask	A mask which will be filled according to type of data found in the object
 	* \param oi A structure which will be filled with infos about the object to be opened
 	*/
-	static bool LoadMask(const char * filename, int &mask, _3dsInfo &info, Lib3dsFile *file)
+	static bool LoadMask(const char * filename, Lib3dsFile *file, _3dsInfo &info)
 	{
-		std::ifstream stream(filename);
-		if (stream.fail())
-			return false;
-
+		if (file == 0)
+		{
+			file = lib3ds_file_load(filename);
+			if (!file)
+				return false;
+			lib3ds_file_eval(file,0);
+		}
+		
 		bool bHasPerWedgeTexCoord = false;
 		bool bHasPerWedgeNormal		= false;
 		bool bUsingMaterial				= false;
@@ -340,18 +343,23 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 
 		int numVertices, numTriangles;
 
-		// TODO: add code
+		
+		info.mask = 0;
 
-		mask=0;
+		Lib3dsNode *p;
+		p=file->nodes;
+		for (p=file->nodes; p!=0; p=p->next) {
+			LoadNodeMask(file, p, info);
+		}
 		
 		if (bHasPerWedgeTexCoord)
-			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+			info.mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 		if (bHasPerWedgeNormal)
-			mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
+			info.mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
 		if (bHasPerVertexColor)
-			mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+			info.mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		if (bHasPerFaceColor)
-			mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
+			info.mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
 		
 		/*
 		mask |= vcg::tri::io::Mask::IOM_VERTCOORD;
@@ -369,11 +377,34 @@ static int Open( OpenMeshType &m, const char * filename, _3dsInfo &info)
 		mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
 		*/
 
-		info.mask = mask;
-		info.numVertices	= numVertices;
-		info.numTriangles = numTriangles;
-
 		return true;
+	}
+
+	static bool LoadNodeMask(Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &info)
+	{
+		{
+			Lib3dsNode *p;
+			for (p=node->childs; p!=0; p=p->next)
+				LoadNodeMask(file, p, info);
+		}
+
+		if (node->type==LIB3DS_OBJECT_NODE)
+		{
+			if (strcmp(node->name,"$$$DUMMY") == 0)
+				return false;
+		
+			if (!node->user.d)
+			{
+				Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->name);
+				ASSERT(mesh);
+				if (!mesh)
+				  return false;
+				
+				info.numVertices	+= mesh->points;
+				info.numTriangles	+= mesh->faces;
+				++info.numMeshes;
+      }
+		}
 	}
 
 }; // end class
