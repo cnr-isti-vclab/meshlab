@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/01/29 23:52:43  fmazzant
+ correct a small bug
+
  Revision 1.2  2006/01/29 18:33:42  fmazzant
  added some comment to the code
 
@@ -138,12 +141,9 @@ namespace io {
 			int capability = 0;
 			
 			//vert
-			capability |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 			capability |= vcg::tri::io::Mask::IOM_VERTNORMAL;
 
 			//face
-			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
-			capability |= vcg::tri::io::Mask::IOM_FACEQUALITY;
 			capability |= vcg::tri::io::Mask::IOM_FACECOLOR;
 
 			//wedg
@@ -187,107 +187,101 @@ namespace io {
 			//vertexs + normal
 			VertexIterator vi;
 			std::map<Point3f,int> NormalVertex;
-			if(oi.mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
+			int numvert = 0;
+			int value = 1;
+			for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 			{
-				int numvert = 0;
-				int value = 1;
-				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
+				//saves normal per vertex
+				if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
 				{
-					//saves normal per vertex
-					if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
+					if(AddNewNormalVertex(NormalVertex,(*vi).N(),value))
 					{
-						if(AddNewNormalVertex(NormalVertex,(*vi).N(),value))
-						{
-							fprintf(fp,"vn %f %f %f\n",(*vi).N()[0],(*vi).N()[1],(*vi).N()[2]);
-							value++;
-						}
+						fprintf(fp,"vn %f %f %f\n",(*vi).N()[0],(*vi).N()[1],(*vi).N()[2]);
+						value++;
 					}
-					
-					//saves vertex
-					fprintf(fp,"v %f %f %f\n",(*vi).P()[0],(*vi).P()[1],(*vi).P()[2]);
-
-					if (cb !=NULL)
-						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
-					else
-					{ fclose(fp); return E_ABORTED;}
 				}
-				fprintf(fp,"# %d vertices, %d vertices normals\n\n",m.vert.size(),NormalVertex.size());
+				
+				//saves vertex
+				fprintf(fp,"v %f %f %f\n",(*vi).P()[0],(*vi).P()[1],(*vi).P()[2]);
+
+				if (cb !=NULL)
+					(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+				else
+				{ fclose(fp); return E_ABORTED;}
 			}
+			fprintf(fp,"# %d vertices, %d vertices normals\n\n",m.vert.size(),NormalVertex.size());
 			
 			//faces + texture coords
 			FaceIterator fi;
 			std::map<vcg::TCoord2<float>,int> CoordIndexTexture;
-			if(oi.mask & vcg::tri::io::Mask::IOM_FACEQUALITY)
+			unsigned int material_num = 0;
+			int mem_index = 0; //var temporany
+			/*int*/ value = 1;//tmp
+			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 			{
-				unsigned int material_num = 0;
-				int mem_index = 0; //var temporany
-				int value = 1;//tmp
-				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
+				if(oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 				{
-					if(oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+					int index = CreateNewMaterial(m,materials,material_num,fi);
+					
+					if(index == materials.size())//inserts a new element material
 					{
-						int index = CreateNewMaterial(m,materials,material_num,fi);
-						
-						if(index == materials.size())//inserts a new element material
-						{
-							material_num++;
-							fprintf(fp,"\nusemtl material_%d\n",materials[index-1].index);
-							mem_index = index-1;
-						}
-						else
-						{
-							if(index != mem_index)//inserts old name elemente material
-							{
-								fprintf(fp,"\nusemtl material_%d\n",materials[index].index);
-								mem_index=index;
-							}
-						}
+						material_num++;
+						fprintf(fp,"\nusemtl material_%d\n",materials[index-1].index);
+						mem_index = index-1;
 					}
-
-					//saves texture coord
-					unsigned int MAX = 3;
-					for(unsigned int k=0;k<MAX;k++)
-					{
-						if(m.HasPerWedgeTexture() && oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
-						{
-							if(AddNewTextureCoord(CoordIndexTexture,(*fi).WT(k),value))
-							{
-								fprintf(fp,"vt %f %f\n",(*fi).WT(k).u(),(*fi).WT(k).v());
-								value++;//ncreases the value number to be associated to the Texture
-							}
-						}
-					}
-
-					fprintf(fp,"f ");
-					for(unsigned int k=0;k<MAX;k++)
-					{
-						int v = -1; 
-						// +1 because Obj file format begins from index = 1 but not from index = 0.
-						v = GetIndexVertex(m, (*fi).V(k)) + 1;//index of vertex per face
-						
-						int vt = -1;
-						if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
-							vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//index of vertex texture per face
-
-						int vn = -1;
-						if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
-							vn = GetIndexVertexNormal(m, NormalVertex, v);//index of vertex normal per face.
-
-						//writes elements on file obj
-						WriteFacesElement(fp,v,vt,vn);
-
-						if(k!=MAX-1)
-							fprintf(fp," ");
-						else
-							fprintf(fp,"\n");	
-					}	
-					if (cb !=NULL)
-						(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
 					else
-					{ fclose(fp); return E_ABORTED;}
-				}//for
-				fprintf(fp,"# %d faces, %d coords texture\n\n",m.face.size(),CoordIndexTexture.size());
-			}
+					{
+						if(index != mem_index)//inserts old name elemente material
+						{
+							fprintf(fp,"\nusemtl material_%d\n",materials[index].index);
+							mem_index=index;
+						}
+					}
+				}
+
+				//saves texture coord
+				unsigned int MAX = 3;
+				for(unsigned int k=0;k<MAX;k++)
+				{
+					if(m.HasPerWedgeTexture() && oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
+					{
+						if(AddNewTextureCoord(CoordIndexTexture,(*fi).WT(k),value))
+						{
+							fprintf(fp,"vt %f %f\n",(*fi).WT(k).u(),(*fi).WT(k).v());
+							value++;//ncreases the value number to be associated to the Texture
+						}
+					}
+				}
+
+				fprintf(fp,"f ");
+				for(unsigned int k=0;k<MAX;k++)
+				{
+					int v = -1; 
+					// +1 because Obj file format begins from index = 1 but not from index = 0.
+					v = GetIndexVertex(m, (*fi).V(k)) + 1;//index of vertex per face
+					
+					int vt = -1;
+					if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
+						vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//index of vertex texture per face
+
+					int vn = -1;
+					if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
+						vn = GetIndexVertexNormal(m, NormalVertex, v);//index of vertex normal per face.
+
+					//writes elements on file obj
+					WriteFacesElement(fp,v,vt,vn);
+
+					if(k!=MAX-1)
+						fprintf(fp," ");
+					else
+						fprintf(fp,"\n");	
+				}	
+				if (cb !=NULL)
+					(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
+				else
+				{ fclose(fp); return E_ABORTED;}
+			}//for
+			fprintf(fp,"# %d faces, %d coords texture\n\n",m.face.size(),CoordIndexTexture.size());
 			
 			fprintf(fp,"# End of File");
 			fclose(fp);

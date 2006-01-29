@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/01/29 23:52:43  fmazzant
+ correct a small bug
+
  Revision 1.1  2006/01/26 18:39:19  fmazzant
  moved mask dialog exporter from mashio to meshlab
 
@@ -69,18 +72,9 @@ void SaveMaskExporterDialog::InitDialog()
 	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
 	
-	//disabled
-	//check globali disabilitati
-	ui.check_iom_vertquality->setDisabled(true);
-	ui.check_iom_facequality->setDisabled(true);
-
 	//all - none
 	ui.AllButton->setChecked(true);
 	//ui.NoneButton->setChecked(true);
-
-	//checked
-	ui.check_iom_vertquality->setChecked(true);
-	ui.check_iom_facequality->setChecked(true);
 
 	SetTextureName();
 	SetMaskCapability();
@@ -124,6 +118,9 @@ int SaveMaskExporterDialog::GetNewMask()
 void SaveMaskExporterDialog::SetMaskCapability()
 {
 	//vert
+	ui.check_iom_vertquality->setDisabled( ((capability & MeshModel::IOM_VERTQUALITY)==0) /*| ((m->mask & MeshModel::IOM_VERTQUALITY)==0)*/ );
+	ui.check_iom_vertquality->setChecked( ((capability & MeshModel::IOM_VERTQUALITY)!=0) /*& ((m->mask & MeshModel::IOM_VERTQUALITY)!=0)*/);
+	
 	ui.check_iom_vertflags->setDisabled( ((capability & MeshModel::IOM_VERTFLAGS)==0) /*| ((m->mask & MeshModel::IOM_VERTFLAGS)==0)*/ );
 	ui.check_iom_vertflags->setChecked ( ((capability & MeshModel::IOM_VERTFLAGS)!=0) /*& ((m->mask & MeshModel::IOM_VERTFLAGS)!=0)*/ );
 
@@ -137,6 +134,9 @@ void SaveMaskExporterDialog::SetMaskCapability()
 	ui.check_iom_vertnormal->setChecked ( ((capability & MeshModel::IOM_VERTNORMAL)!=0) /*& ((m->mask & MeshModel::IOM_VERTNORMAL)!=0)*/ );
 
 	//face
+	ui.check_iom_facequality->setDisabled( ((capability & MeshModel::IOM_FACEQUALITY)==0) /*| ((m->mask & MeshModel::IOM_FACEQUALITY)==0)*/);
+	ui.check_iom_facequality->setChecked( ((capability & MeshModel::IOM_FACEQUALITY)!=0) /*& ((m->mask & MeshModel::IOM_FACEQUALITY)!=0)*/);
+
 	ui.check_iom_faceflags->setDisabled( ((capability & MeshModel::IOM_FACEFLAGS)==0) /*| ((m->mask & MeshModel::IOM_FACEFLAGS)==0) */);
 	ui.check_iom_faceflags->setChecked ( ((capability & MeshModel::IOM_FACEFLAGS)!=0) /*& ((m->mask & MeshModel::IOM_FACEFLAGS)!=0) */);
 
@@ -169,19 +169,16 @@ void SaveMaskExporterDialog::SetMaskCapability()
 void SaveMaskExporterDialog::SlotOkButton()
 {
 	int newmask = 0;
-	
-	newmask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-	newmask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
 
 	if( ui.check_iom_vertflags->isChecked()		) { newmask |= MeshModel::IOM_VERTFLAGS;}
 	if( ui.check_iom_vertcolor->isChecked()		) { newmask |= MeshModel::IOM_VERTCOLOR;}
-	//if( ui.check_iom_vertquality->isChecked()	) { newmask |= MeshModel::IOM_VERTQUALITY;}
+	if( ui.check_iom_vertquality->isChecked()	) { newmask |= MeshModel::IOM_VERTQUALITY;}
 	if( ui.check_iom_verttexcoord->isChecked()	) { newmask |= MeshModel::IOM_VERTTEXCOORD;}
 	if( ui.check_iom_vertnormal->isChecked()	) { newmask |= MeshModel::IOM_VERTNORMAL;}
 
 	if( ui.check_iom_faceflags->isChecked()		) { newmask |= MeshModel::IOM_FACEFLAGS;}
 	if( ui.check_iom_facecolor->isChecked()		) { newmask |= MeshModel::IOM_FACECOLOR;}
-	//if( ui.check_iom_facequality->isChecked()	) { newmask |= MeshModel::IOM_FACEQUALITY;}
+	if( ui.check_iom_facequality->isChecked()	) { newmask |= MeshModel::IOM_FACEQUALITY;}
 	if( ui.check_iom_facenormal->isChecked()	) { newmask |= MeshModel::IOM_FACENORMAL;}
 
 	if( ui.check_iom_wedgcolor->isChecked()		) { newmask |= MeshModel::IOM_WEDGCOLOR;}
@@ -219,12 +216,14 @@ void SaveMaskExporterDialog::SlotSelectionTextureName()
 void SaveMaskExporterDialog::SlotSelectionAllButton()
 {
 	//vert
+	ui.check_iom_vertquality->setChecked(ui.check_iom_vertquality->isEnabled());
 	ui.check_iom_vertflags->setChecked(ui.check_iom_vertflags->isEnabled());
 	ui.check_iom_vertcolor->setChecked(ui.check_iom_vertcolor->isEnabled());
 	ui.check_iom_verttexcoord->setChecked(ui.check_iom_verttexcoord->isEnabled());
 	ui.check_iom_vertnormal->setChecked(ui.check_iom_vertnormal->isEnabled());
 
 	//face
+	ui.check_iom_facequality->setChecked(ui.check_iom_facequality->isEnabled());
 	ui.check_iom_faceflags->setChecked(ui.check_iom_faceflags->isEnabled());
 	ui.check_iom_facenormal->setChecked(ui.check_iom_facenormal->isEnabled());
 	ui.check_iom_facecolor->setChecked(ui.check_iom_facecolor->isEnabled());
@@ -238,18 +237,20 @@ void SaveMaskExporterDialog::SlotSelectionAllButton()
 void SaveMaskExporterDialog::SlotSelectionNoneButton()
 {
 	//vert
-	ui.check_iom_vertflags->setChecked((ui.check_iom_vertflags->isEnabled()& ui.check_iom_vertflags->isChecked()) && !ui.check_iom_vertflags->isChecked());
-	ui.check_iom_vertcolor->setChecked((ui.check_iom_vertcolor->isEnabled() & ui.check_iom_vertcolor->isChecked())&& !ui.check_iom_vertcolor->isChecked());
-	ui.check_iom_verttexcoord->setChecked((ui.check_iom_verttexcoord->isEnabled() & ui.check_iom_verttexcoord->isChecked())&& !ui.check_iom_verttexcoord->isChecked());
-	ui.check_iom_vertnormal->setChecked((ui.check_iom_vertnormal->isEnabled() & ui.check_iom_vertnormal->isChecked())&& !ui.check_iom_vertnormal->isChecked());
+	ui.check_iom_vertquality->setChecked(ui.check_iom_vertquality->isEnabled() & ui.check_iom_vertquality->isChecked());
+	ui.check_iom_vertflags->setChecked(ui.check_iom_vertflags->isEnabled()& ui.check_iom_vertflags->isChecked());
+	ui.check_iom_vertcolor->setChecked(ui.check_iom_vertcolor->isEnabled() & ui.check_iom_vertcolor->isChecked());
+	ui.check_iom_verttexcoord->setChecked(ui.check_iom_verttexcoord->isEnabled() & ui.check_iom_verttexcoord->isChecked());
+	ui.check_iom_vertnormal->setChecked(ui.check_iom_vertnormal->isEnabled() & ui.check_iom_vertnormal->isChecked());
 
 	//face
-	ui.check_iom_faceflags->setChecked((ui.check_iom_faceflags->isEnabled() & ui.check_iom_faceflags->isChecked())&& !ui.check_iom_faceflags->isChecked());
-	ui.check_iom_facenormal->setChecked((ui.check_iom_facenormal->isEnabled()& ui.check_iom_facenormal->isChecked())&& !ui.check_iom_facenormal->isChecked());
-	ui.check_iom_facecolor->setChecked((ui.check_iom_facecolor->isEnabled()& ui.check_iom_facecolor->isChecked())&& !ui.check_iom_facecolor->isChecked());
+	ui.check_iom_facequality->setChecked(ui.check_iom_facequality->isEnabled() & ui.check_iom_facequality->isChecked());
+	ui.check_iom_faceflags->setChecked(ui.check_iom_faceflags->isEnabled() & ui.check_iom_faceflags->isChecked());
+	ui.check_iom_facenormal->setChecked(ui.check_iom_facenormal->isEnabled()& ui.check_iom_facenormal->isChecked());
+	ui.check_iom_facecolor->setChecked(ui.check_iom_facecolor->isEnabled()& ui.check_iom_facecolor->isChecked());
 	
 	//wedg
-	ui.check_iom_wedgcolor->setChecked((ui.check_iom_wedgcolor->isEnabled() & ui.check_iom_wedgcolor->isChecked())&& !ui.check_iom_wedgcolor->isChecked());
-	ui.check_iom_wedgtexcoord->setChecked((ui.check_iom_wedgtexcoord->isEnabled() & ui.check_iom_wedgtexcoord->isChecked())&& !ui.check_iom_wedgtexcoord->isChecked());
-	ui.check_iom_wedgnormal->setChecked((ui.check_iom_wedgnormal->isEnabled() & ui.check_iom_wedgnormal->isChecked())&& !ui.check_iom_wedgnormal->isChecked());
+	ui.check_iom_wedgcolor->setChecked(ui.check_iom_wedgcolor->isEnabled() & ui.check_iom_wedgcolor->isChecked());
+	ui.check_iom_wedgtexcoord->setChecked(ui.check_iom_wedgtexcoord->isEnabled() & ui.check_iom_wedgtexcoord->isChecked());
+	ui.check_iom_wedgnormal->setChecked(ui.check_iom_wedgnormal->isEnabled() & ui.check_iom_wedgnormal->isChecked());
 }

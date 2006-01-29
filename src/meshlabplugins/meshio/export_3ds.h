@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/01/29 23:52:43  fmazzant
+ correct a small bug
+
  Revision 1.2  2006/01/29 18:33:42  fmazzant
  added some comment to the code
 
@@ -159,13 +162,11 @@ namespace io {
 			//capability |= MeshModel::IOM_CAMERA;
 
 			//vert
-			capability |= MeshModel::IOM_VERTQUALITY;
 			//capability |= MeshModel::IOM_VERTTEXCOORD;
 
 			//face
 			capability |= MeshModel::IOM_FACEFLAGS;
 			capability |= MeshModel::IOM_FACECOLOR;
-			capability |= MeshModel::IOM_FACEQUALITY;
 			capability |= MeshModel::IOM_FACENORMAL;
 
 			//wedg
@@ -211,116 +212,111 @@ namespace io {
 
 			int v_index = 0;
 			VertexIterator vi;
-			if(mask & MeshModel::IOM_VERTQUALITY)
+			//saves vert
+			for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 			{
-				//saves vert
-				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
-				{
-					Lib3dsPoint point;
-					point.pos[0] = (*vi).P()[0];
-					point.pos[1] = (*vi).P()[1];
-					point.pos[2] = (*vi).P()[2];
+				Lib3dsPoint point;
+				point.pos[0] = (*vi).P()[0];
+				point.pos[1] = (*vi).P()[1];
+				point.pos[2] = (*vi).P()[2];
 
-					mesh->pointL[v_index] = point;		
+				mesh->pointL[v_index] = point;		
 
-					if (cb !=NULL)
-						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
-					else
-						return E_ABORTED;
-					v_index++;
-				}
+				if (cb !=NULL)
+					(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+				else
+					return E_ABORTED;
+				v_index++;
 			}
+
 			lib3ds_mesh_new_face_list (mesh, m.face.size());//set number of faces
 			int f_index = 0;//face index
 			int t_index = 0;//texture index
 			FaceIterator fi;
-			if(mask & MeshModel::IOM_FACEQUALITY)
+			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 			{
-				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
+				Lib3dsFace face;
+				face.points[0] = GetIndexVertex(m, (*fi).V(0));
+				face.points[1] = GetIndexVertex(m, (*fi).V(1));
+				face.points[2] = GetIndexVertex(m, (*fi).V(2));
+				
+				//saves coord textures
+				if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
 				{
-					Lib3dsFace face;
-					face.points[0] = GetIndexVertex(m, (*fi).V(0));
-					face.points[1] = GetIndexVertex(m, (*fi).V(1));
-					face.points[2] = GetIndexVertex(m, (*fi).V(2));
-					
-					//saves coord textures
-					if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
+					unsigned int MAX = 3;
+					for(unsigned int k=0;k<MAX;k++)
 					{
-						unsigned int MAX = 3;
-						for(unsigned int k=0;k<MAX;k++)
-						{
-							mesh->texelL[face.points[k]][0] = (*fi).WT(k).u();
-							mesh->texelL[face.points[k]][1] = (*fi).WT(k).v();
-						}
+						mesh->texelL[face.points[k]][0] = (*fi).WT(k).u();
+						mesh->texelL[face.points[k]][1] = (*fi).WT(k).v();
 					}
-
-					if(mask & MeshModel::IOM_FACEFLAGS)
-						face.flags = 0;
-					
-					face.smoothing = 10;
-
-					if(mask & MeshModel::IOM_FACENORMAL)
-					{
-						face.normal[0] = (*fi).N()[0];
-						face.normal[1] = (*fi).N()[1];
-						face.normal[2] = (*fi).N()[2];
-					}
-
-					int material_index = CreateNewMaterial(m, materials, 0, fi);
-					if(material_index == materials.size())
-					{
-						Lib3dsMaterial *material = lib3ds_material_new();//creates a new material
-						
-						std::string name = qnamematerial.arg(material_index-1).toStdString();
-						strcpy(material->name,name.c_str());//copy new name of material
-
-						if(mask & MeshModel::IOM_FACECOLOR)
-						{
-							//ambient
-							material->ambient[0] = materials[materials.size()-1].Ka[0];
-							material->ambient[1] = materials[materials.size()-1].Ka[1];
-							material->ambient[2] = materials[materials.size()-1].Ka[2];
-							material->ambient[3] = materials[materials.size()-1].Tr;
-
-							//diffuse
-							material->diffuse[0] = materials[materials.size()-1].Kd[0];
-							material->diffuse[1] = materials[materials.size()-1].Kd[1];
-							material->diffuse[2] = materials[materials.size()-1].Kd[2];
-							material->diffuse[3] = materials[materials.size()-1].Tr;
-
-							//specular
-							material->specular[0] = materials[materials.size()-1].Ks[0];
-							material->specular[1] = materials[materials.size()-1].Ks[1];
-							material->specular[2] = materials[materials.size()-1].Ks[2];
-							material->specular[3] = materials[materials.size()-1].Tr;
-
-							//shininess
-							material->shininess = materials[materials.size()-1].Ns;
-						}
-											
-						//texture
-						if(mask & MeshModel::IOM_WEDGTEXCOORD)
-							strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
-
-						lib3ds_file_insert_material(file,material);//inserts the material inside the file
-						strcpy(face.material,name.c_str());
-					}
-					else
-					{	
-						std::string name = qnamematerial.arg(material_index).toStdString();
-						strcpy(face.material,name.c_str());//set name of material
-					}
-
-
-					mesh->faceL[f_index]=face;
-
-					if (cb !=NULL)
-						(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
-					else 
-						return E_ABORTED;
-					f_index++;
-					
 				}
+
+				if(mask & MeshModel::IOM_FACEFLAGS)
+					face.flags = 0;
+				
+				face.smoothing = 10;
+
+				if(mask & MeshModel::IOM_FACENORMAL)
+				{
+					face.normal[0] = (*fi).N()[0];
+					face.normal[1] = (*fi).N()[1];
+					face.normal[2] = (*fi).N()[2];
+				}
+
+				int material_index = CreateNewMaterial(m, materials, 0, fi);
+				if(material_index == materials.size())
+				{
+					Lib3dsMaterial *material = lib3ds_material_new();//creates a new material
+					
+					std::string name = qnamematerial.arg(material_index-1).toStdString();
+					strcpy(material->name,name.c_str());//copy new name of material
+
+					if(mask & MeshModel::IOM_FACECOLOR)
+					{
+						//ambient
+						material->ambient[0] = materials[materials.size()-1].Ka[0];
+						material->ambient[1] = materials[materials.size()-1].Ka[1];
+						material->ambient[2] = materials[materials.size()-1].Ka[2];
+						material->ambient[3] = materials[materials.size()-1].Tr;
+
+						//diffuse
+						material->diffuse[0] = materials[materials.size()-1].Kd[0];
+						material->diffuse[1] = materials[materials.size()-1].Kd[1];
+						material->diffuse[2] = materials[materials.size()-1].Kd[2];
+						material->diffuse[3] = materials[materials.size()-1].Tr;
+
+						//specular
+						material->specular[0] = materials[materials.size()-1].Ks[0];
+						material->specular[1] = materials[materials.size()-1].Ks[1];
+						material->specular[2] = materials[materials.size()-1].Ks[2];
+						material->specular[3] = materials[materials.size()-1].Tr;
+
+						//shininess
+						material->shininess = materials[materials.size()-1].Ns;
+					}
+										
+					//texture
+					if(mask & MeshModel::IOM_WEDGTEXCOORD)
+						strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
+
+					lib3ds_file_insert_material(file,material);//inserts the material inside the file
+					strcpy(face.material,name.c_str());
+				}
+				else
+				{	
+					std::string name = qnamematerial.arg(material_index).toStdString();
+					strcpy(face.material,name.c_str());//set name of material
+				}
+
+
+				mesh->faceL[f_index]=face;
+
+				if (cb !=NULL)
+					(*cb)(100.0 * (float)++current/(float)max, "writing faces ");
+				else 
+					return E_ABORTED;
+				f_index++;
+				
 			}
 
 			lib3ds_file_insert_mesh(file, mesh);//inserts the Mesh into file
