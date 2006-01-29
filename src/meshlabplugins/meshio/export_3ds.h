@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/01/29 18:33:42  fmazzant
+ added some comment to the code
+
  Revision 1.1  2006/01/29 16:33:03  fmazzant
  moved export_obj and export_3ds from test/io into meshio/
 
@@ -97,7 +100,6 @@ namespace vcg {
 namespace tri {
 namespace io {
 
-
 	template <class SaveMeshType>
 	class Exporter3DS
 	{
@@ -106,6 +108,9 @@ namespace io {
 		typedef typename SaveMeshType::VertexIterator VertexIterator;
 		typedef typename SaveMeshType::VertexType VertexType;
 	
+		/*
+			enum of all the types of error
+		*/
 		enum SaveError
 		{
 			E_NOERROR,					// 0
@@ -121,7 +126,7 @@ namespace io {
 		};
 
 		/*
-			stampa messaggio di errore dell'export obj
+			this function takes an index and the relative error message gets back
 		*/
 		static const char* ErrorMsg(int error)
 		{
@@ -144,7 +149,7 @@ namespace io {
 		};
 
 		/*
-			restituisce quali informazioni sono possibili salvare in base alla maschera
+			returns mask of capability one define with what are the saveable information of the format.
 		*/
 		static int GetExportMaskCapability()
 		{
@@ -169,14 +174,20 @@ namespace io {
 			return capability;
 		}
 
+		/*
+			function which saves in 3DS file format
+		*/
 		static int SaveASCII(SaveMeshType &m, const char * filename)	
 		{
 			return E_NOTDEFINITION;
 		}
 
+		/*
+			function which saves in 3DS file format
+		*/
 		static int SaveBinary(SaveMeshType &m, const char * filename, int &mask, CallBackPos *cb=0)
 		{
-			if(m.vert.size() > MAX_POLYGONS)
+			if(m.vert.size() > MAX_POLYGONS)//check max polygons
 				return E_NOTNUMBERVERTVALID;
 
 			if(m.vert.size() == 0)
@@ -185,7 +196,7 @@ namespace io {
 				return E_NOTFACESVALID;
 
 			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
-			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//crea una nuova mesh con nome mesh		
+			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//creates a new mesh with mesh's name "mesh"		
 
 			QString qnamematerial = "Material - %1";
 			std::vector<Material> materials;
@@ -193,15 +204,16 @@ namespace io {
 			int current = 0;
 			int max = m.vert.size()+m.face.size();
 			
-			lib3ds_mesh_new_point_list(mesh, m.vert.size());//definisce il numero di vertici
+			lib3ds_mesh_new_point_list(mesh, m.vert.size());// set number of vertexs
 	
 			if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
-				lib3ds_mesh_new_texel_list(mesh,m.vert.size());
+				lib3ds_mesh_new_texel_list(mesh,m.vert.size()); //set number of textures
 
 			int v_index = 0;
 			VertexIterator vi;
 			if(mask & MeshModel::IOM_VERTQUALITY)
 			{
+				//saves vert
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 				{
 					Lib3dsPoint point;
@@ -218,9 +230,9 @@ namespace io {
 					v_index++;
 				}
 			}
-			lib3ds_mesh_new_face_list (mesh, m.face.size());
-			int f_index = 0;//indice facce
-			int t_index = 0;//indice texture
+			lib3ds_mesh_new_face_list (mesh, m.face.size());//set number of faces
+			int f_index = 0;//face index
+			int t_index = 0;//texture index
 			FaceIterator fi;
 			if(mask & MeshModel::IOM_FACEQUALITY)
 			{
@@ -231,6 +243,7 @@ namespace io {
 					face.points[1] = GetIndexVertex(m, (*fi).V(1));
 					face.points[2] = GetIndexVertex(m, (*fi).V(2));
 					
+					//saves coord textures
 					if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
 					{
 						unsigned int MAX = 3;
@@ -244,7 +257,8 @@ namespace io {
 					if(mask & MeshModel::IOM_FACEFLAGS)
 						face.flags = 0;
 					
-					face.smoothing = 10;//da modificare.
+					face.smoothing = 10;
+
 					if(mask & MeshModel::IOM_FACENORMAL)
 					{
 						face.normal[0] = (*fi).N()[0];
@@ -255,10 +269,10 @@ namespace io {
 					int material_index = CreateNewMaterial(m, materials, 0, fi);
 					if(material_index == materials.size())
 					{
-						Lib3dsMaterial *material = lib3ds_material_new();//cre un nuovo materiale
+						Lib3dsMaterial *material = lib3ds_material_new();//creates a new material
 						
 						std::string name = qnamematerial.arg(material_index-1).toStdString();
-						strcpy(material->name,name.c_str());
+						strcpy(material->name,name.c_str());//copy new name of material
 
 						if(mask & MeshModel::IOM_FACECOLOR)
 						{
@@ -288,13 +302,13 @@ namespace io {
 						if(mask & MeshModel::IOM_WEDGTEXCOORD)
 							strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
 
-						lib3ds_file_insert_material(file,material);//inserisce il materiale nella mesh
+						lib3ds_file_insert_material(file,material);//inserts the material inside the file
 						strcpy(face.material,name.c_str());
 					}
 					else
 					{	
 						std::string name = qnamematerial.arg(material_index).toStdString();
-						strcpy(face.material,name.c_str());
+						strcpy(face.material,name.c_str());//set name of material
 					}
 
 
@@ -309,27 +323,30 @@ namespace io {
 				}
 			}
 
-			lib3ds_file_insert_mesh(file, mesh);//inserisce la mesh al file
+			lib3ds_file_insert_mesh(file, mesh);//inserts the Mesh into file
 			
-			Lib3dsNode *node = lib3ds_node_new_object();//crea un nuovo nodo
+			Lib3dsNode *node = lib3ds_node_new_object();//creates a new node
 			strcpy(node->name,mesh->name);
 			node->parent_id = LIB3DS_NO_PARENT;	
-			lib3ds_file_insert_node(file,node);
+			lib3ds_file_insert_node(file,node);//inserts the node into file
 
-			bool result = lib3ds_file_save(file, filename); //salva il file
+			bool result = lib3ds_file_save(file, filename); //saves the file
 			if(result)
 				return E_NOERROR; 
 			else 
 				return E_ABORTED;
 		}
 		
+		/*
+			function which saves in 3DS format
+		*/
 		static int Save(SaveMeshType &m, const char * filename, bool binary,int &mask, CallBackPos *cb=0)
 		{
 			return SaveBinary(m,filename,mask,cb);	
 		}
 
 		/*
-			restituisce l'indice del vertice.
+			returns index of the vertex
 		*/
 		inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
 		{
@@ -337,7 +354,7 @@ namespace io {
 		}
 	
 		/*
-			crea un nuovo materiale
+			create a new material
 		*/
 		inline static int CreateNewMaterial(SaveMeshType &m, std::vector<Material> &materials, unsigned int index, FaceIterator &fi)
 		{			
@@ -387,8 +404,10 @@ namespace io {
 			}
 			return i;
 		}
+
 		/*
-			compara il materiale.
+			returns the index of the material if it exists inside the list of the materials, 
+			otherwise it returns -1.
 		*/
 		inline static int MaterialsCompare(std::vector<Material> &materials, Material mtl)
 		{

@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.70  2006/01/29 18:33:42  fmazzant
+ added some comment to the code
+
  Revision 1.69  2006/01/29 17:14:20  buzzelli
  files import_obj.h, import_3ds.h, io_3ds.h and io_obj.h have been moved from test/io to meshio
 
@@ -241,7 +244,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OBJ"))
 	{	
-		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//salva esclusivamente in formato ASCII
+		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//only ASCII format
 		if(result != vcg::tri::io::ExporterOBJ<CMeshO>::E_NOERROR )
 		{
 			QMessageBox::warning(parent, tr("OBJ Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result)));
@@ -286,7 +289,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("3DS"))
 	{	
-		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,mask,cb);//salva esclusivamente in formato binario
+		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,mask,cb);//only binary format
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("3DS Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
@@ -300,6 +303,9 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	return false;
 }
 
+/*
+	returns the list of the file's type which can be importered
+*/
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
@@ -311,6 +317,9 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 	return formatList;
 }
 
+/*
+	returns the list of the file's type which can be exported
+*/
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
@@ -322,6 +331,10 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 	return formatList;
 }
 
+/*
+	returns the mask on the basis of the file's type. 
+	otherwise it returns 0 if the file format is unknown
+*/
 int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 {
 	if(format.toUpper() == tr("OBJ")){return vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
@@ -329,6 +342,7 @@ int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 	if(format.toUpper() == tr("OFF")){return MeshModel::IOM_ALL;}
 	if(format.toUpper() == tr("STL")){return MeshModel::IOM_ALL;}
 	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
+	return 0;
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)

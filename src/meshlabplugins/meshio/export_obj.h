@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/01/29 18:33:42  fmazzant
+ added some comment to the code
+
  Revision 1.1  2006/01/29 16:33:03  fmazzant
  moved export_obj and export_3ds from test/io into meshio/
 
@@ -63,9 +66,12 @@ namespace vcg {
 namespace tri {
 namespace io {
 
+	/*
+		structures material
+	*/
 	struct Material
 	{
-		unsigned int index;
+		unsigned int index;//index of material
 
 		Point3f Ka;//ambient
 		Point3f Kd;//diffuse
@@ -88,6 +94,9 @@ namespace io {
 		typedef typename SaveMeshType::VertexIterator VertexIterator;
 		typedef typename SaveMeshType::VertexType VertexType;
 	
+		/*
+			enum of all the types of error
+		*/
 		enum SaveError
 		{
 			E_NOERROR,					// 0
@@ -101,7 +110,7 @@ namespace io {
 		};
 
 		/*
-			stampa messaggio di errore dell'export obj
+			this function takes an index and the relative error message gets back
 		*/
 		static const char* ErrorMsg(int error)
 		{
@@ -122,7 +131,7 @@ namespace io {
 		};
 
 		/*
-			restituisce quali informazioni sono possibili salvare in base alla maschera
+			returns mask of capability one define with what are the saveable information of the format.
 		*/
 		static int GetExportMaskCapability()
 		{
@@ -144,7 +153,7 @@ namespace io {
 		}
 
 		/*
-			salva la Mesh in formato Obj File.
+			function which saves in OBJ file format
 		*/
 		static int SaveASCII(SaveMeshType &m, const char * filename, ObjInfo &oi)	
 		{
@@ -158,7 +167,7 @@ namespace io {
 			int current = 0;
 			int max = m.vert.size()+ m.face.size();
 		
-			std::vector<Material> materials;//vettore dei materiali.
+			std::vector<Material> materials;
 			
 			std::string fn(filename);
 			int i=fn.size()-1;
@@ -184,7 +193,7 @@ namespace io {
 				int value = 1;
 				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 				{
-					//salva le normali per vertice
+					//saves normal per vertex
 					if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
 					{
 						if(AddNewNormalVertex(NormalVertex,(*vi).N(),value))
@@ -194,7 +203,7 @@ namespace io {
 						}
 					}
 					
-					//salva il vertice
+					//saves vertex
 					fprintf(fp,"v %f %f %f\n",(*vi).P()[0],(*vi).P()[1],(*vi).P()[2]);
 
 					if (cb !=NULL)
@@ -219,7 +228,7 @@ namespace io {
 					{
 						int index = CreateNewMaterial(m,materials,material_num,fi);
 						
-						if(index == materials.size())//inserted a new element material
+						if(index == materials.size())//inserts a new element material
 						{
 							material_num++;
 							fprintf(fp,"\nusemtl material_%d\n",materials[index-1].index);
@@ -227,7 +236,7 @@ namespace io {
 						}
 						else
 						{
-							if(index != mem_index)
+							if(index != mem_index)//inserts old name elemente material
 							{
 								fprintf(fp,"\nusemtl material_%d\n",materials[index].index);
 								mem_index=index;
@@ -235,7 +244,7 @@ namespace io {
 						}
 					}
 
-					//salva le coordinate di texture
+					//saves texture coord
 					unsigned int MAX = 3;
 					for(unsigned int k=0;k<MAX;k++)
 					{
@@ -244,7 +253,7 @@ namespace io {
 							if(AddNewTextureCoord(CoordIndexTexture,(*fi).WT(k),value))
 							{
 								fprintf(fp,"vt %f %f\n",(*fi).WT(k).u(),(*fi).WT(k).v());
-								value++;//incrementa il numero di valore da associare alle texture
+								value++;//ncreases the value number to be associated to the Texture
 							}
 						}
 					}
@@ -253,18 +262,18 @@ namespace io {
 					for(unsigned int k=0;k<MAX;k++)
 					{
 						int v = -1; 
-						//il +1 perche' gli obj considerano i vertici a partire da 1 e non da 0.
-						v = GetIndexVertex(m, (*fi).V(k)) + 1;//considera i vertici per faccia
+						// +1 because Obj file format begins from index = 1 but not from index = 0.
+						v = GetIndexVertex(m, (*fi).V(k)) + 1;//index of vertex per face
 						
 						int vt = -1;
 						if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD)
-							vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//considera le texture per faccia
+							vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//index of vertex texture per face
 
 						int vn = -1;
 						if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
-							vn = GetIndexVertexNormal(m, NormalVertex, v);//considera le normali per faccia per ora non va considerato.
+							vn = GetIndexVertexNormal(m, NormalVertex, v);//index of vertex normal per face.
 
-						//scrive elementi sul file obj
+						//writes elements on file obj
 						WriteFacesElement(fp,v,vt,vn);
 
 						if(k!=MAX-1)
@@ -285,18 +294,24 @@ namespace io {
 
 			int r = 0;
 			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD | oi.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
-				r = WriteMaterials(materials, filename,cb);//scrive il file dei materiali
+				r = WriteMaterials(materials, filename,cb);//write material 
 			
 			if(r!= E_NOERROR)
 				return r;
 			return E_NOERROR;
 		}
 
+		/*
+			function which saves in OBJ file format
+		*/
 		static int SaveBinary(SaveMeshType &m, const char * filename, ObjInfo &oi)
 		{
 			return E_NOTDEFINITION;
 		}
 
+		/*
+			function which saves in OBJ file format
+		*/
 		static int Save(SaveMeshType &m, const char * filename, bool binary, int &mask, CallBackPos *cb=0)
 		{
 			ObjInfo oi;
@@ -309,7 +324,7 @@ namespace io {
 		}
 
 		/*
-			restituisce l'indice del vertice, aggiunto di una unita'.
+			returns index of the vertex
 		*/
 		inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
 		{
@@ -317,7 +332,7 @@ namespace io {
 		}
 		
 		/*
-			restituisce l'indice della coordinata di texture.
+			returns index of the texture coord
 		*/
 		inline static int GetIndexVertexTexture(std::map<vcg::TCoord2<float>,int> &m, const vcg::TCoord2<float> &wt)
 		{
@@ -327,7 +342,7 @@ namespace io {
 		}
 
 		/*
-			restituisce l'indice della normale.
+			returns index of the vertex normal
 		*/
 		inline static int GetIndexVertexNormal(SaveMeshType &m, std::map<Point3f,int> &ma, unsigned int iv )
 		{
@@ -337,7 +352,7 @@ namespace io {
 		}
 		
 		/*
-			scrive gli elementi su file.
+			write elements on file
 		*/
 		inline static void WriteFacesElement(FILE *fp,int v,int vt, int vn)
 		{
@@ -353,8 +368,8 @@ namespace io {
 		}
 		
 		/*
-			aggiunge un nuovo indice alla coordinata di texture se essa e' la prima
-			volta che viene incontrata altrimenti non esegue niente.
+			adds a new index to the coordinate of Texture if it is the first time 
+			which is otherwise met not execute anything
 		*/
 		inline static bool AddNewTextureCoord(std::map<vcg::TCoord2<float>,int> &m, const vcg::TCoord2<float> &wt,int value)
 		{
@@ -364,7 +379,8 @@ namespace io {
 		}
 
 		/*
-			aggiunge una normal restituendo true nel caso dell'insirimento e false in caso contrario
+			adds a new index to the normal per vertex if it is the first time 
+			which is otherwise met does not execute anything
 		*/
 		inline static bool AddNewNormalVertex(std::map<Point3f,int> &m, Point3f &n ,int value)
 		{
@@ -374,7 +390,7 @@ namespace io {
 		}
 		
 		/*
-			gestione del file material.
+			creates a new meterial
 		*/
 		inline static int CreateNewMaterial(SaveMeshType &m, std::vector<Material> &materials, unsigned int index, FaceIterator &fi)
 		{			
@@ -410,11 +426,8 @@ namespace io {
 			mtl.Ns = ns;
 			mtl.illum = illum;//illumination
 			
-			if(m.textures.size() && (*fi).WT(0).n() >=0 ) {
-				
+			if(m.textures.size() && (*fi).WT(0).n() >=0 ) 
 				mtl.map_Kd = m.textures[(*fi).WT(0).n()];
-			}
-
 			else
 				mtl.map_Kd = "";
 			
@@ -427,6 +440,9 @@ namespace io {
 			return i;
 		}
 
+		/*
+			writes material into file
+		*/
 		inline static int WriteMaterials(std::vector<Material> &materials, const char * filename, CallBackPos *cb=0)
 		{			
 			std::string fileName = std::string(filename);
@@ -466,6 +482,10 @@ namespace io {
 			return E_NOERROR;
 		}
 
+		/*
+			returns the index of the material if it exists inside the list of the materials, 
+			otherwise it returns -1.
+		*/
 		inline static int MaterialsCompare(std::vector<Material> &materials, Material mtl)
 		{
 			for(int i=0;i<materials.size();i++)
