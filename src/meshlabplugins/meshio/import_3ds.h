@@ -259,14 +259,17 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 								textureIdx = (int)size;
 							}
 
-							// TODO: questo nel caso di wedge texture coords, tuttavia le ccordinate
-							// di texture sembrano essere per vertice e non per wedge nei 3ds, sistemare
-							for (int i=0; i<3; ++i)
+							if ( info.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 							{
-								(*fi).WT(i).u() = mesh->texelL[f->points[i]][0];
-								(*fi).WT(i).v() = mesh->texelL[f->points[i]][1];
+								// TODO: questo nel caso di wedge texture coords, tuttavia le coordinate
+								// di texture sembrano essere per vertice e non per wedge nei 3ds, sistemare
+								for (int i=0; i<3; ++i)
+								{
+									(*fi).WT(i).u() = mesh->texelL[f->points[i]][0];
+									(*fi).WT(i).v() = mesh->texelL[f->points[i]][1];
 
-								(*fi).WT(i).n() = textureIdx;
+									(*fi).WT(i).n() = textureIdx;
+								}
 							}
 						}
 					}
@@ -275,26 +278,34 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 						faceColor = Point4f(0.8, 0.8, 0.8, 1.0);
 					}
 						
+					if( info.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+					{
+						// assigning face color
+						// --------------------
+						(*fi).C()[0] = faceColor[0];
+						(*fi).C()[1] = faceColor[1];
+						(*fi).C()[2] = faceColor[2];
+						(*fi).C()[3] = faceColor[3];
+					}
 
-					// assigning face color
-					// --------------------
-					(*fi).C()[0] = faceColor[0];
-					(*fi).C()[1] = faceColor[1];
-					(*fi).C()[2] = faceColor[2];
-					(*fi).C()[3] = faceColor[3];
-				
-
-					// assigning face normal
-					// ---------------------
-					// we do not have to multiply normal for current matrix (as we did for vertices)
-					// since translation operations do not affect normals
-					(*fi).N() = f->normal;
+					if ( info.mask & vcg::tri::io::Mask::IOM_FACENORMAL )
+					{
+						// assigning face normal
+						// ---------------------
+						// we do not have to multiply normal for current matrix (as we did for vertices)
+						// since translation operations do not affect normals
+						(*fi).N() = f->normal;
+					}
 					
 					for (int i=0; i<3; ++i)
 					{
-						// per wedge normal
-						(*fi).WN(i) = normalL[3*p+i];
-								
+						if ( info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
+						{
+							// assigning per wedge normal
+							// --------------------------
+							(*fi).WN(i) = normalL[3*p+i];
+						}
+
 						// assigning face vertices
 						// -----------------------
 						(*fi).V(i) = &(m.vert[ (numVertices + f->points[i]) ]);
@@ -335,11 +346,11 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 			lib3ds_file_eval(file,0);
 		}
 		
-		bool bHasPerWedgeTexCoord = false;
-		bool bHasPerWedgeNormal		= false;
-		bool bUsingMaterial				= false;
+		bool bHasPerWedgeTexCoord = true;
+		bool bHasPerFacenormal		= true;
+		bool bHasPerWedgeNormal		= true;
 		bool bHasPerVertexColor		= false;
-		bool bHasPerFaceColor			= false;
+		bool bHasPerFaceColor			= true;
 
 		int numVertices, numTriangles;
 
@@ -354,6 +365,8 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		
 		if (bHasPerWedgeTexCoord)
 			info.mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		if (bHasPerFacenormal)
+			info.mask |= vcg::tri::io::Mask::IOM_FACENORMAL;
 		if (bHasPerWedgeNormal)
 			info.mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
 		if (bHasPerVertexColor)

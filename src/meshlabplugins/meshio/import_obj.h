@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.1  2006/01/29 17:14:20  buzzelli
+files import_obj.h, import_3ds.h, io_3ds.h and io_obj.h have been moved from test/io to meshio
+
 Revision 1.24  2006/01/27 01:07:40  buzzelli
 Added a better distinction beetween critical and non critical error messages
 

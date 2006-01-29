@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.69  2006/01/29 17:14:20  buzzelli
+ files import_obj.h, import_3ds.h, io_3ds.h and io_obj.h have been moved from test/io to meshio
+
  Revision 1.68  2006/01/29 17:07:16  buzzelli
  missing texture files warning has been added
 
@@ -42,15 +45,6 @@
  Revision 1.63  2006/01/26 22:51:57  fmazzant
  removed last links to the Exporter mask
 
- Revision 1.62  2006/01/26 18:39:20  fmazzant
- moved mask dialog exporter from mashio to meshlab
-
- Revision 1.61  2006/01/23 15:54:04  fmazzant
- added m.mask = mask to show Mesh information
-
- Revision 1.60  2006/01/23 01:26:30  buzzelli
- added handling of non critical errors which may occurr during obj file importing
-
 *****************************************************************************/
 #include <Qt>
 #include <QtGui>
@@ -58,11 +52,11 @@
 #include "meshio.h"
 
 // temporaneamente prendo la versione corrente dalla cartella test
-#include "../../test/io/import_obj.h"
+#include "import_obj.h"
 #include "export_obj.h"
 
 #include <lib3ds/file.h>
-#include "../../test/io/import_3ds.h"
+#include "import_3ds.h"
 #include "export_3ds.h"
 
 #include <wrap/io_trimesh/import_ply.h>
