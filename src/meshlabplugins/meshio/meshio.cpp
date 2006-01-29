@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.67  2006/01/29 16:33:03  fmazzant
+ moved export_obj and export_3ds from test/io into meshio/
+
  Revision 1.66  2006/01/28 20:43:38  buzzelli
  minor changes in Import3ds LoadMask
 
@@ -53,11 +56,11 @@
 
 // temporaneamente prendo la versione corrente dalla cartella test
 #include "../../test/io/import_obj.h"
-#include "../../test/io/export_obj.h"
+#include "export_obj.h"
 
 #include <lib3ds/file.h>
 #include "../../test/io/import_3ds.h"
-#include "../../test/io/export_3ds.h"
+#include "export_3ds.h"
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/export_ply.h>
