@@ -1,7 +1,14 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/lib3ds-1.2.0
-HEADERS       = meshio.h  ../../../../sf/wrap/ply/plylib.h export_obj.h export_3ds.h
+HEADERS       = meshio.h \
+				../../../../sf/wrap/ply/plylib.h \
+				export_obj.h \
+				export_3ds.h \
+				import_obj.h \
+				import_3ds.h \
+				io_obj.h \
+				io_3ds.h
 SOURCES       = meshio.cpp  ../../../../sf/wrap/ply/plylib.cpp 
 TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins
