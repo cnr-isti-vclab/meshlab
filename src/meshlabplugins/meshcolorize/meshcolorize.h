@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.17  2006/01/29 18:59:12  mariolatronico
+changed #include "equalizerdialog.h" -> equalizerDialog.h
+
 Revision 1.16  2006/01/27 18:27:53  vannini
 code refactoring for curvature colorize
 added colorize equalizer dialog and
@@ -62,7 +65,7 @@ Moved gaussian and mean curvature functions into color_curvature.h
 #include <vcg/math/histogram.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h>
-#include "equalizerdialog.h"
+#include "equalizerDialog.h"
 
 class ExtraMeshColorizePlugin : public QObject, public MeshColorizeInterface
 {
