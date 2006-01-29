@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.71  2006/01/29 23:17:27  fmazzant
+ correct small error
+
  Revision 1.70  2006/01/29 18:33:42  fmazzant
  added some comment to the code
 
@@ -304,7 +307,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 }
 
 /*
-	returns the list of the file's type which can be importered
+	returns the list of the file's type which can be imported
 */
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 {
