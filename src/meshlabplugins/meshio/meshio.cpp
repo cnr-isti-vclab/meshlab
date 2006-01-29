@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.68  2006/01/29 17:07:16  buzzelli
+ missing texture files warning has been added
+
  Revision 1.67  2006/01/29 16:33:03  fmazzant
  moved export_obj and export_3ds from test/io into meshio/
 
@@ -200,6 +203,24 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			if(mask & MeshModel::IOM_WEDGNORMAL)
 				normalsUpdated = true;
 		}
+
+		// verify if texture files apre present
+		QString missingTextureFilesMsg = "The following texture files were not found:\n";
+		bool someTextureNotFound = false;
+		for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
+		{
+			FILE* pFile = fopen (m.cm.textures[textureIdx].c_str(), "r");
+			if (pFile == NULL)
+			{
+				missingTextureFilesMsg.append("\n");
+				missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
+				someTextureNotFound = true;
+			}
+			else
+				fclose (pFile);
+		}
+		if (someTextureNotFound)
+			QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
 
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 		if (!normalsUpdated) 
