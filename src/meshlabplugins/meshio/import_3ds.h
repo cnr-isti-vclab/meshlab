@@ -108,8 +108,6 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 
 	m.Clear();
 
-	CallBackPos *cb = info.cb;
-
 	if (file == 0)
 	{
 		file = lib3ds_file_load(filename);
@@ -275,7 +273,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 					}
 					else {
 						// we consider only diffuse color component, using default value
-						faceColor = Point4f(0.8, 0.8, 0.8, 1.0);
+						faceColor = Point4f(.8f, .8f, .8f, 1.0f);
 					}
 						
 					if( info.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
@@ -351,11 +349,10 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		bool bHasPerWedgeNormal		= true;
 		bool bHasPerVertexColor		= false;
 		bool bHasPerFaceColor			= true;
-
-		int numVertices, numTriangles;
-
 		
 		info.mask = 0;
+		info.numVertices	= 0;
+		info.numTriangles	= 0;
 
 		Lib3dsNode *p;
 		p=file->nodes;
@@ -393,7 +390,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		return true;
 	}
 
-	static bool LoadNodeMask(Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &info)
+	static void LoadNodeMask(Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &info)
 	{
 		{
 			Lib3dsNode *p;
@@ -404,14 +401,14 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		if (node->type==LIB3DS_OBJECT_NODE)
 		{
 			if (strcmp(node->name,"$$$DUMMY") == 0)
-				return false;
+				return;
 		
 			if (!node->user.d)
 			{
 				Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->name);
 				ASSERT(mesh);
 				if (!mesh)
-				  return false;
+				  return;
 				
 				info.numVertices	+= mesh->points;
 				info.numTriangles	+= mesh->faces;
