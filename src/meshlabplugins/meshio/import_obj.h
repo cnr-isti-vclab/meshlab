@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.2  2006/01/29 23:40:54  buzzelli
+small bugs solved
+
 Revision 1.1  2006/01/29 17:14:20  buzzelli
 files import_obj.h, import_3ds.h, io_3ds.h and io_obj.h have been moved from test/io to meshio
 
@@ -39,12 +42,6 @@ vertex and face quality flags added to mask
 
 Revision 1.21  2006/01/23 01:37:51  buzzelli
 added handling of some of the non critical errors which may occurr during obj file importing
-
-Revision 1.20  2006/01/20 11:38:35  buzzelli
-code cleaning + more validation controls
-
-Revision 1.19  2006/01/13 00:40:26  buzzelli
-added support for files with negative references to texCoord and vertex normals inside face definition
 
 ****************************************************************************/
 
@@ -976,10 +973,6 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 		mask=0;
 		
-		if (numVertices > 0)
-			mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-		if (numTriangles > 0)
-			mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
 		if (bHasPerWedgeTexCoord)
 			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 		if (bHasPerWedgeNormal)
@@ -990,13 +983,8 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
 	
 		/*
-		mask |= vcg::tri::io::Mask::IOM_VERTCOORD;
 		mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;
-		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
-		
-		mask |= vcg::tri::io::Mask::IOM_FACEINDEX;
 		mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;
-
 		mask |= vcg::tri::io::Mask::IOM_WEDGTEXMULTI;
 		mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;
 		*/

@@ -375,7 +375,6 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		mask |= vcg::tri::io::Mask::IOM_VERTCOORD;
 		mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;
 		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
-		mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		
 		mask |= vcg::tri::io::Mask::IOM_FACEINDEX;
