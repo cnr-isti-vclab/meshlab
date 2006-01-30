@@ -20,6 +20,15 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+/****************************************************************************
+  History
+
+ $Log$
+ Revision 1.4  2006/01/30 23:10:36  buzzelli
+ solved a bug regarding face color loading
+
+
+*****************************************************************************/
 #ifndef __VCGLIB_IMPORT_3DS
 #define __VCGLIB_IMPORT_3DS
 
@@ -139,7 +148,10 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 	p=file->nodes;
   for (p=file->nodes; p!=0; p=p->next)
       if (ReadNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
+			{
+				lib3ds_file_free(file);
 				return E_ABORTED;
+			}
 	
 	// freeing memory
 	lib3ds_file_free(file);
@@ -224,12 +236,18 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 					if (f->material[0])
 						mat = lib3ds_file_material_by_name(file, f->material);
 						
-					Point4f faceColor;
-
 					if (mat)
 					{
 						// considering only diffuse color component
-						faceColor = Point4f(mat->diffuse);
+						if( info.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+						{
+							// assigning face color
+							// --------------------
+							(*fi).C()[0] = (unsigned char) (mat->diffuse[0] * 255.0f);
+							(*fi).C()[1] = (unsigned char) (mat->diffuse[1] * 255.0f);
+							(*fi).C()[2] = (unsigned char) (mat->diffuse[2] * 255.0f);
+							(*fi).C()[3] = (unsigned char) (mat->diffuse[3] * 255.0f);
+						}
 
 						// albedo
 						if (mat->texture1_map.name[0])
@@ -259,6 +277,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 
 							if ( info.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 							{
+								// vedere il ply
 								// TODO: questo nel caso di wedge texture coords, tuttavia le coordinate
 								// di texture sembrano essere per vertice e non per wedge nei 3ds, sistemare
 								for (int i=0; i<3; ++i)
@@ -273,17 +292,15 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 					}
 					else {
 						// we consider only diffuse color component, using default value
-						faceColor = Point4f(.8f, .8f, .8f, 1.0f);
-					}
-						
-					if( info.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
-					{
-						// assigning face color
-						// --------------------
-						(*fi).C()[0] = faceColor[0];
-						(*fi).C()[1] = faceColor[1];
-						(*fi).C()[2] = faceColor[2];
-						(*fi).C()[3] = faceColor[3];
+						if( info.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+						{
+							// assigning default face color
+							// ----------------------------
+							(*fi).C()[0] = 204;
+							(*fi).C()[1] = 204;
+							(*fi).C()[2] = 204;
+							(*fi).C()[3] = 255;
+						}
 					}
 
 					if ( info.mask & vcg::tri::io::Mask::IOM_FACENORMAL )
@@ -345,7 +362,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		}
 		
 		bool bHasPerWedgeTexCoord = true;
-		bool bHasPerFacenormal		= true;
+		bool bHasPerFaceNormal		= true;
 		bool bHasPerWedgeNormal		= true;
 		bool bHasPerVertexColor		= false;
 		bool bHasPerFaceColor			= true;
@@ -362,7 +379,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		
 		if (bHasPerWedgeTexCoord)
 			info.mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
-		if (bHasPerFacenormal)
+		if (bHasPerFaceNormal)
 			info.mask |= vcg::tri::io::Mask::IOM_FACENORMAL;
 		if (bHasPerWedgeNormal)
 			info.mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
