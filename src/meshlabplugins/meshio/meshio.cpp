@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.75  2006/01/30 22:18:09  buzzelli
+ removing unnecessary change mask dialog at import tyme
+
  Revision 1.74  2006/01/30 22:09:13  buzzelli
  code cleaning
 
@@ -38,9 +41,6 @@
 
  Revision 1.70  2006/01/29 18:33:42  fmazzant
  added some comment to the code
-
- Revision 1.69  2006/01/29 17:14:20  buzzelli
- files import_obj.h, import_3ds.h, io_3ds.h and io_obj.h have been moved from test/io to meshio
 
 *****************************************************************************/
 #include <Qt>
@@ -66,8 +66,6 @@
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/ply/plylib.h>
 #include <vcg/complex/trimesh/update/normal.h>
-
-#include "../../meshlab/changemaskDialog.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -102,12 +100,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 			oi.cb = cb;
 			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
 
-			ChangeMaskDialog dialog(oi.mask, parent);
-			if (dialog.exec() != QDialog::Accepted)
-				return false;
-			oi.mask = dialog.getNewMask();
-			dialog.close();
-			
 			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
@@ -182,15 +174,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 			info.cb = cb;
 			Lib3dsFile *file = NULL;
 			vcg::tri::io::Importer3DS<CMeshO>::LoadMask(filename.c_str(), file, info);
-
-			ChangeMaskDialog dialog(info.mask, parent);
-			if (dialog.exec() != QDialog::Accepted)
-			{	
-				lib3ds_file_free(file);
-				return false;
-			}
-			info.mask = dialog.getNewMask();
-			dialog.close();
 
 			if(info.mask & MeshModel::IOM_WEDGTEXCOORD) 
 			{

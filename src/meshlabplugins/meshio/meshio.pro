@@ -1,7 +1,6 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/lib3ds-1.2.0
-FORMS		  = ../../meshlab/ui/changemaskDialog.ui
 HEADERS       = meshio.h \
 				../../../../sf/wrap/ply/plylib.h \
 				export_obj.h \
@@ -9,11 +8,9 @@ HEADERS       = meshio.h \
 				import_obj.h \
 				import_3ds.h \
 				io_obj.h \
-				io_3ds.h \
-				../../meshlab/changemaskDialog.h
+				io_3ds.h
 SOURCES       = meshio.cpp \
-				../../../../sf/wrap/ply/plylib.cpp \
-				../../meshlab/changemaskDialog.cpp
+				../../../../sf/wrap/ply/plylib.cpp
 TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins
 
