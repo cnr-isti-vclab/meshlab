@@ -1,0 +1,434 @@
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>TransformDialog</class>
+ <widget class="QDialog" name="TransformDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>598</width>
+    <height>526</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Apply Transform</string>
+  </property>
+  <layout class="QGridLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item row="1" column="2" >
+    <widget class="QGroupBox" name="scaleBox" >
+     <property name="title" >
+      <string>Scale</string>
+     </property>
+     <layout class="QGridLayout" >
+      <property name="margin" >
+       <number>9</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item row="1" column="0" >
+       <widget class="QPushButton" name="scaleUnitPB" >
+        <property name="text" >
+         <string>Scale to unit box</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" >
+       <layout class="QGridLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item row="2" column="0" >
+         <widget class="QLabel" name="zScaleLBL" >
+          <property name="text" >
+           <string>Z</string>
+          </property>
+          <property name="buddy" >
+           <cstring>zScaleLE</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QLineEdit" name="yScaleLE" />
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="xScaleLE" />
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="yScaleLBL" >
+          <property name="text" >
+           <string>Y</string>
+          </property>
+          <property name="buddy" >
+           <cstring>yScaleLE</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" >
+         <widget class="QLabel" name="xScaleLBL" >
+          <property name="text" >
+           <string>X</string>
+          </property>
+          <property name="buddy" >
+           <cstring>xScaleLE</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" >
+         <widget class="QLineEdit" name="zScaleLE" />
+        </item>
+        <item row="3" column="0" colspan="2" >
+         <widget class="QCheckBox" name="uniformScaleCB" >
+          <property name="text" >
+           <string>Uniform</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="1" >
+    <widget class="QGroupBox" name="rotateBox" >
+     <property name="title" >
+      <string>Rotate</string>
+     </property>
+     <layout class="QGridLayout" >
+      <property name="margin" >
+       <number>9</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item row="1" column="0" >
+       <widget class="QDial" name="rotateDial" >
+        <property name="maximum" >
+         <number>359</number>
+        </property>
+        <property name="sliderPosition" >
+         <number>180</number>
+        </property>
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="invertedAppearance" >
+         <bool>true</bool>
+        </property>
+        <property name="invertedControls" >
+         <bool>true</bool>
+        </property>
+        <property name="wrapping" >
+         <bool>true</bool>
+        </property>
+        <property name="notchesVisible" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" >
+       <widget class="QPushButton" name="rotateZUpPB" >
+        <property name="text" >
+         <string>Rotate Z Up</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" >
+       <widget class="QPushButton" name="rotateXUpPB" >
+        <property name="text" >
+         <string>Rotate X Up</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" >
+       <widget class="QGroupBox" name="centerRotateBox" >
+        <property name="title" >
+         <string>Center</string>
+        </property>
+        <layout class="QGridLayout" >
+         <property name="margin" >
+          <number>9</number>
+         </property>
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QRadioButton" name="centerRotateRB" >
+           <property name="text" >
+            <string>Mesh Center</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" >
+          <widget class="QRadioButton" name="originRotateRB" >
+           <property name="text" >
+            <string>Origin</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QLineEdit" name="rotateLE" >
+        <property name="text" >
+         <string>0.0</string>
+        </property>
+        <property name="maxLength" >
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" >
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QRadioButton" name="xAxisRB" >
+          <property name="text" >
+           <string>X</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="yAxisRB" >
+          <property name="text" >
+           <string>Y</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="zAxisRB" >
+          <property name="text" >
+           <string>Z</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" >
+    <widget class="QGroupBox" name="moveBox" >
+     <property name="title" >
+      <string>Move</string>
+     </property>
+     <layout class="QGridLayout" >
+      <property name="margin" >
+       <number>9</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item row="1" column="0" >
+       <widget class="QPushButton" name="mvCenterOriginPB" >
+        <property name="text" >
+         <string>Move center to origin</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" >
+       <layout class="QGridLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item row="2" column="1" >
+         <widget class="QLineEdit" name="zMoveLE" />
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="xMoveLE" />
+        </item>
+        <item row="2" column="0" >
+         <widget class="QLabel" name="zMoveLBL" >
+          <property name="text" >
+           <string>Z</string>
+          </property>
+          <property name="buddy" >
+           <cstring>zMoveLE</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QLineEdit" name="yMoveLE" />
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="yMoveLBL" >
+          <property name="text" >
+           <string>Y</string>
+          </property>
+          <property name="buddy" >
+           <cstring>yMoveLE</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" >
+         <widget class="QLabel" name="xMoveLBL" >
+          <property name="text" >
+           <string>X</string>
+          </property>
+          <property name="buddy" >
+           <cstring>xMoveLE</cstring>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>131</width>
+         <height>31</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okButton" >
+       <property name="text" >
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton" >
+       <property name="text" >
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" colspan="3" >
+    <layout class="QGridLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item row="1" column="0" >
+      <widget class="QLabel" name="bboxMaxLBL" >
+       <property name="text" >
+        <string>Bounding Box Max</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" >
+      <widget class="QLabel" name="bboxMinLBL" >
+       <property name="text" >
+        <string>Bounding Box Min</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" >
+      <widget class="QLabel" name="bboxValueMaxLBL" >
+       <property name="text" >
+        <string>bboxValueMaxLBL</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" >
+      <widget class="QLabel" name="bboxValueMinLBL" >
+       <property name="text" >
+        <string>bboxValueMinLBL</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="0" colspan="3" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QRadioButton" name="isMoveRB" >
+       <property name="text" >
+        <string>Move</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="isRotateRB" >
+       <property name="text" >
+        <string>Rotate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="isScaleRB" >
+       <property name="text" >
+        <string>Scale</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <tabstops>
+  <tabstop>isMoveRB</tabstop>
+  <tabstop>isRotateRB</tabstop>
+  <tabstop>isScaleRB</tabstop>
+  <tabstop>xMoveLE</tabstop>
+  <tabstop>yMoveLE</tabstop>
+  <tabstop>zMoveLE</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>cancelButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TransformDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>487</x>
+     <y>498</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>526</x>
+     <y>471</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
