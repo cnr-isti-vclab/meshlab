@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/01/30 14:02:05  fmazzant
+ bug-fix
+
  Revision 1.3  2006/01/29 23:52:43  fmazzant
  correct a small bug
 
@@ -148,6 +151,7 @@ namespace io {
 
 			//wedg
 			capability |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+			capability |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
 
 			return capability;
 		}
@@ -192,7 +196,7 @@ namespace io {
 			for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
 			{
 				//saves normal per vertex
-				if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
+				if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL | oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL) 
 				{
 					if(AddNewNormalVertex(NormalVertex,(*vi).N(),value))
 					{
@@ -265,7 +269,7 @@ namespace io {
 						vt = GetIndexVertexTexture(CoordIndexTexture,(*fi).WT(k));//index of vertex texture per face
 
 					int vn = -1;
-					if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL) 
+					if(oi.mask & vcg::tri::io::Mask::IOM_VERTNORMAL | oi.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL) 
 						vn = GetIndexVertexNormal(m, NormalVertex, v);//index of vertex normal per face.
 
 					//writes elements on file obj

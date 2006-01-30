@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.5  2006/01/30 14:02:04  fmazzant
+ bug-fix
+
  Revision 1.4  2006/01/30 10:02:57  fmazzant
  update none selection
 
@@ -107,17 +110,17 @@ int SaveMaskExporterDialog::GetNewMask()
 }
 
 /*
-	setDisabled(true): non si puo' checkare
-	setDisabled(false) : si puo' checkare
+	setDisabled(true): uncheckable
+	setDisabled(false) : checkable
 	
-	true  : quando l'informazione non e' presente o nella capability oppure nella mask di MeshModel
-	false : quando l'informazione e' presente sia nella capability e sia nella mask di MeshModel
+	true  : when the information is not present or in the Capability or in the MeshModel Mask
+	false : when the information is present in the Capability and in the Mask MeshModel
 
-	setChecked(true) : checkato
-	setChecked(false): non checkato
+	setChecked(true) : checked
+	setChecked(false): unchecked
 	
-	true  : dato quando l'informazione e' presente sia nella capability sia nella mask di MeshModel
-	false : altrimenti.
+	true  : the information is present both in the Capability and the MeshModel Mask
+	false : otherwise.
 
 */
 
@@ -238,25 +241,31 @@ void SaveMaskExporterDialog::SlotSelectionAllButton()
 	ui.check_iom_wedgcolor->setChecked(ui.check_iom_wedgcolor->isEnabled());
 	ui.check_iom_wedgtexcoord->setChecked(ui.check_iom_wedgtexcoord->isEnabled());
 	ui.check_iom_wedgnormal->setChecked(ui.check_iom_wedgnormal->isEnabled());
+
+	//camera
+	ui.check_iom_camera->setChecked(ui.check_iom_camera->isEnabled());
 }
 
 void SaveMaskExporterDialog::SlotSelectionNoneButton()
 {
 	//vert
-	ui.check_iom_vertquality->setChecked(false);//(ui.check_iom_vertquality->isEnabled() & ui.check_iom_vertquality->isChecked()) && !ui.check_iom_vertquality->isChecked());
-	ui.check_iom_vertflags->setChecked(false);//(ui.check_iom_vertflags->isEnabled()& ui.check_iom_vertflags->isChecked())&& !ui.check_iom_vertflags->isChecked() );
-	ui.check_iom_vertcolor->setChecked(false);//(ui.check_iom_vertcolor->isEnabled() & ui.check_iom_vertcolor->isChecked()) && !ui.check_iom_vertcolor->isChecked());
-	ui.check_iom_verttexcoord->setChecked(false);//(ui.check_iom_verttexcoord->isEnabled() & ui.check_iom_verttexcoord->isChecked())&& !ui.check_iom_verttexcoord->isChecked());
-	ui.check_iom_vertnormal->setChecked(false);//(ui.check_iom_vertnormal->isEnabled() & ui.check_iom_vertnormal->isChecked())&& !ui.check_iom_vertnormal->isChecked());
+	ui.check_iom_vertquality->setChecked(false);
+	ui.check_iom_vertflags->setChecked(false);
+	ui.check_iom_vertcolor->setChecked(false);
+	ui.check_iom_verttexcoord->setChecked(false);
+	ui.check_iom_vertnormal->setChecked(false);
 
 	//face
-	ui.check_iom_facequality->setChecked(false);//(ui.check_iom_facequality->isEnabled() & ui.check_iom_facequality->isChecked()) && !ui.check_iom_facequality->isChecked());
-	ui.check_iom_faceflags->setChecked(false);//(ui.check_iom_faceflags->isEnabled() & ui.check_iom_faceflags->isChecked()) && !ui.check_iom_faceflags->isChecked());
-	ui.check_iom_facenormal->setChecked(false);//(ui.check_iom_facenormal->isEnabled()& ui.check_iom_facenormal->isChecked()) && !ui.check_iom_facenormal->isChecked());
-	ui.check_iom_facecolor->setChecked(false);//(ui.check_iom_facecolor->isEnabled()& ui.check_iom_facecolor->isChecked()) && !ui.check_iom_facecolor->isChecked());
+	ui.check_iom_facequality->setChecked(false);
+	ui.check_iom_faceflags->setChecked(false);
+	ui.check_iom_facenormal->setChecked(false);
+	ui.check_iom_facecolor->setChecked(false);
 	
 	//wedg
-	ui.check_iom_wedgcolor->setChecked(false);//(ui.check_iom_wedgcolor->isEnabled() & ui.check_iom_wedgcolor->isChecked()) && !ui.check_iom_wedgcolor->isChecked());
-	ui.check_iom_wedgtexcoord->setChecked(false);//(ui.check_iom_wedgtexcoord->isEnabled() & ui.check_iom_wedgtexcoord->isChecked()) && !ui.check_iom_wedgtexcoord->isChecked());
-	ui.check_iom_wedgnormal->setChecked(false);//(ui.check_iom_wedgnormal->isEnabled() & ui.check_iom_wedgnormal->isChecked()) && !ui.check_iom_wedgtexcoord->isChecked());
+	ui.check_iom_wedgcolor->setChecked(false);
+	ui.check_iom_wedgtexcoord->setChecked(false);
+	ui.check_iom_wedgnormal->setChecked(false);
+	
+	//camera
+	ui.check_iom_camera->setChecked(false);
 }
