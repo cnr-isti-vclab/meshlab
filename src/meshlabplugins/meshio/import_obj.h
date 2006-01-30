@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.3  2006/01/30 00:59:29  buzzelli
+showing loadmask progress status
+
 Revision 1.2  2006/01/29 23:40:54  buzzelli
 small bugs solved
 
@@ -875,6 +878,13 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		if (stream.fail())
 			return false;
 
+		 // obtain length of file:
+		stream.seekg (0, ios::end);
+		int length = stream.tellg();
+		if (length == 0) return false;
+		stream.seekg (0, ios::beg);
+
+
 		bool bHasPerWedgeTexCoord = false;
 		bool bHasPerWedgeNormal		= false;
 		bool bUsingMaterial				= false;
@@ -886,6 +896,10 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 		
 		int numVertices		= 0;  // stores the number of vertexes been read till now
 		int numTriangles	= 0;	// stores the number of triangular faces been read till now
+		
+		const int deltaPos	= 100;
+		int currPos					= 0;
+		int lastPos					= currPos; 
 
 		// cycle till we encounter first face
 		while (!stream.eof())
@@ -943,6 +957,18 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				else if (header.compare("usemtl")==0)
 					bUsingMaterial = true;
 			}
+
+			// callback invocation, abort loading process if the call returns false
+			if (oi.cb !=NULL)
+			{
+				currPos = stream.tellg();
+				if ((currPos - lastPos) > deltaPos)
+				{
+					if (!(*oi.cb)(100.0 * (float)currPos/(float)length, "Loading mask..."))
+						return E_ABORTED;
+					lastPos = currPos;
+				}
+			}
 		}
 
 		// after the encounter of first face we avoid to do additional tests
@@ -968,6 +994,18 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				}
 				else if (header.compare("usemtl")==0)
 					bUsingMaterial = true;
+			}
+
+			// callback invocation, abort loading process if the call returns false
+			if (oi.cb !=NULL)
+			{
+				currPos = stream.tellg();
+				if ((currPos - lastPos) > deltaPos)
+				{
+					if (!(*oi.cb)(100.0 * (float)currPos/(float)length, "Loading mask..."))
+						return E_ABORTED;
+					lastPos = currPos;
+				}
 			}
 		}
 
