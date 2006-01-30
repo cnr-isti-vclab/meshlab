@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.19  2006/01/30 05:27:25  cignoni
+Switched the order of component ocf and trimesh_base includes
+
 Revision 1.18  2006/01/19 11:58:28  cignoni
 Added mask field
 
@@ -35,35 +38,6 @@ Made FFAdj optional and added store and restore color functions
 Revision 1.15  2005/12/22 21:05:43  cignoni
 Removed Optional Face Normal and added some initalization after opening
 
-Revision 1.14  2005/12/19 16:50:30  cignoni
-Added Mark component (needed for self-intersection)
-
-Revision 1.13  2005/12/07 00:56:40  fmazzant
-added support for exporter generic obj file (level base)
-
-Revision 1.12  2005/12/04 00:22:46  cignoni
-Switched from progresBar widget to progressbar dialog
-
-Revision 1.11  2005/12/02 00:54:13  cignoni
-Added TextureMode in render
-
-Revision 1.10  2005/11/30 16:26:56  cignoni
-All the modification, restructuring seen during the 30/12 lesson...
-
-Revision 1.9  2005/11/26 00:14:17  cignoni
-Cleaned up mesh types
-
-Revision 1.8  2005/11/25 16:25:35  ggangemi
-Added vert::Color4b, vert::Qualityf components to CVertexO: required by MeshColorizeInterface plugins
-
-Revision 1.7  2005/11/22 16:16:35  glvertex
-Added preprocessor intructions to prevent multiple inclusion
-
-Revision 1.6  2005/11/21 22:06:47  cignoni
-Reinserted optional normals (now working)
-
-Revision 1.5  2005/11/21 12:09:33  cignoni
-Added copyright info
 ****************************************************************************/
 
 #ifndef MESHMODEL_H
@@ -76,9 +50,9 @@ Added copyright info
 #include<vcg/simplex/faceplus/base.h>
 #include<vcg/simplex/face/topology.h>
 
+#include<vcg/complex/trimesh/base.h>
 #include<vcg/simplex/vertexplus/component_ocf.h>
 #include<vcg/simplex/faceplus/component_ocf.h>
-#include<vcg/complex/trimesh/base.h>
 
 #include <wrap/gl/trimesh.h>
 #include <wrap/callback.h>
