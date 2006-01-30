@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.73  2006/01/30 14:27:30  fmazzant
+ update GetMaskCapability of PLY,OFF and STL.
+
  Revision 1.72  2006/01/30 06:36:21  buzzelli
  added a dialog used to select type of data being imported
 
@@ -367,9 +370,9 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 {
 	if(format.toUpper() == tr("OBJ")){return vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("PLY")){return MeshModel::IOM_ALL;}
-	if(format.toUpper() == tr("OFF")){return MeshModel::IOM_ALL;}
-	if(format.toUpper() == tr("STL")){return MeshModel::IOM_ALL;}
+	if(format.toUpper() == tr("PLY")){return vcg::tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("OFF")){return vcg::tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("STL")){return vcg::tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();}
 	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
 	return 0;
 }
