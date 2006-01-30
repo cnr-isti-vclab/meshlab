@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.4  2006/01/30 18:45:17  buzzelli
+code cleaning
+
 Revision 1.3  2006/01/30 00:59:29  buzzelli
 showing loadmask progress status
 
@@ -39,12 +42,6 @@ Added a better distinction beetween critical and non critical error messages
 
 Revision 1.23  2006/01/27 00:53:07  buzzelli
 added control for faces with identical vertex indices
-
-Revision 1.22  2006/01/26 16:56:00  buzzelli
-vertex and face quality flags added to mask
-
-Revision 1.21  2006/01/23 01:37:51  buzzelli
-added handling of some of the non critical errors which may occurr during obj file importing
 
 ****************************************************************************/
 
@@ -96,7 +93,6 @@ struct TexCoord
 {
 	float u;
 	float v;
-	// float w; // not used
 };
 
 struct Material
@@ -290,7 +286,6 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				TexCoord t;
 				t.u = (ScalarType) atof(tokens[1].c_str());
 				t.v = (ScalarType) atof(tokens[2].c_str());
-				//t.w = (ScalarType) atof(tokens[3].c_str());	
 				texCoords.push_back(t);
 				
 				numTexCoords++;
@@ -414,17 +409,17 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					TexCoord t = texCoords[vt1_index];
 					(*fi).WT(0).u() = t.u;
 					(*fi).WT(0).v() = t.v;
-					/*if(multit) */(*fi).WT(0).n() = material.textureIdx;
+					(*fi).WT(0).n() = material.textureIdx;
 
 					t = texCoords[vt2_index];
 					(*fi).WT(1).u() = t.u;
 					(*fi).WT(1).v() = t.v;
-					/*if(multit) */(*fi).WT(1).n() = material.textureIdx;
+					(*fi).WT(1).n() = material.textureIdx;
 
 					t = texCoords[vt3_index];
 					(*fi).WT(2).u() = t.u;
 					(*fi).WT(2).v() = t.v;
-					/*if(multit) */(*fi).WT(2).n() = material.textureIdx;
+					(*fi).WT(2).n() = material.textureIdx;
 				}
 				
 				// verifying validity of vertex indices
@@ -453,9 +448,6 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				else if (v3_index > numVertices)	return E_BAD_VERT_INDEX;
 				else v3_index--;	// since index starts from 1 instead of 0
 			
-				// TODO: resolve the following
-				// problem, if more non critical errors of different types happen
-				// only the last one is reported
 				if ((v1_index == v2_index) ||
 						(v1_index == v3_index) || 
 						(v2_index == v3_index))
@@ -593,17 +585,17 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 						TexCoord t = texCoords[vt1_index];
 						(*fi).WT(0).u() = t.u;
 						(*fi).WT(0).v() = t.v;
-						/*if(multit) */(*fi).WT(0).n() = material.textureIdx;
+						(*fi).WT(0).n() = material.textureIdx;
 
 						t = texCoords[vt3_index];
 						(*fi).WT(1).u() = t.u;
 						(*fi).WT(1).v() = t.v;
-						/*if(multit) */(*fi).WT(1).n() = material.textureIdx;
+						(*fi).WT(1).n() = material.textureIdx;
 
 						t = texCoords[vt4_index];
 						(*fi).WT(2).u() = t.u;
 						(*fi).WT(2).v() = t.v;
-						/*if(multit) */(*fi).WT(2).n() = material.textureIdx;
+						(*fi).WT(2).n() = material.textureIdx;
 
 						vt3_index = vt4_index;
 					}
@@ -618,9 +610,6 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 					else if (v4_index > numVertices)	return E_BAD_VERT_INDEX;
 					else v4_index--;	// since index starts from 1 instead of 0
 
-					// TODO: resolve the following
-					// problem, if more non critical errors of different types happen
-					// only the last one is reported
 					if ((v1_index == v4_index) ||
 							(v3_index == v4_index))
 						result = E_VERTICES_WITH_SAME_IDX_IN_FACE;
@@ -702,7 +691,8 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			{
 				// obtain the name of the file containing materials library
 				std::string materialFileName = tokens[1];
-				LoadMaterials( materialFileName.c_str(), materials, m.textures);
+				if (!LoadMaterials( materialFileName.c_str(), materials, m.textures))
+					result = E_MATERIAL_FILE_NOT_FOUND;
 			}
 			else if (header.compare("usemtl")==0)	// material usage
 			{
@@ -722,7 +712,7 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 				if (!found)
 				{
-					// TODO: currentMaterial = ...;
+					currentMaterialIdx = 0;
 					result = E_MATERIAL_NOT_FOUND;
 				}
 			}
