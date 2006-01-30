@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.50  2006/01/30 21:26:53  giec
+-changed the voice of the menu from Decimator in Cluster decimator
+
 Revision 1.49  2006/01/26 16:49:50  giec
 Bugfix the new signature for decimator function call
 
@@ -104,12 +107,6 @@ refactored subdivision surfaces code
 Revision 1.23  2005/12/19 15:11:49  mariolatronico
 added decimator dialog
 
-Revision 1.22  2005/12/18 15:01:05  mariolatronico
-- added slot for threshold refine and "refine only selected vertices"
-
-Revision 1.21  2005/12/17 13:33:19  mariolatronico
-added refine dialog (preliminary code). Actually parameters are not used
-
 ****************************************************************************/
 #include <QtGui>
 
@@ -124,36 +121,23 @@ added refine dialog (preliminary code). Actually parameters are not used
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/math/histogram.h>
-
-/////////////
 #include "invert_faces.h"
-#include "../../test/decimator/decimator.h"
+#include "decimator.h"
 #include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
-
-
-//#include "../../meshlab/glarea.h"
-////////////
 
 using namespace vcg;
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_LOOP_SS), this);
 	actionList << new QAction(ST(FP_BUTTERFLY_SS), this);
-
 	actionList << new QAction(ST(FP_MIDPOINT), this);
-
 	actionList << new QAction(ST(FP_REMOVE_UNREFERENCED_VERTEX), this);
 	actionList << new QAction(ST(FP_REMOVE_DUPLICATED_VERTEX), this);
 	actionList << new QAction(ST(FP_REMOVE_NULL_FACES), this);
 	actionList << new QAction(ST(FP_LAPLACIAN_SMOOTH), this);
-
 	actionList << new QAction(ST(FP_REORIENT), this);
-
-////
 	actionList << new QAction(ST(FP_DETACHER), this);
-////
 	actionList << new QAction(ST(FP_DECIMATOR), this);
-	
 	actionList << new QAction(ST(FP_INVERT_FACES), this);
 	actionList << new QAction(ST(FP_TRANSFORM), this);
 	
@@ -184,7 +168,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 	case FP_LAPLACIAN_SMOOTH : 
 		return QString("Laplacian Smooth");
 	case FP_DECIMATOR : 
-		return QString("Decimator");
+		return QString("Clustering decimation");
 	case FP_MIDPOINT : 
 		return QString("Midpoint Subdivision Surfaces");
 	case FP_REORIENT : 
@@ -292,7 +276,6 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 			ai.ShortHelp = tr("Remove triangle with edge greater than a trashold");
  		}
 	
-	//	 ai.Help=tr("Generic Help for an action");
    return ai;
 }
 
@@ -314,7 +297,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	if( filter->text().contains(tr("Subdivision Surface")) ) {
 
 	  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-	  // IsTwoManifoldFace needs a FaceFace update topology
+	 
 	  if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
 	    QMessageBox::warning(parent, // parent
 				 QString("Can't continue"), // caption
@@ -363,7 +346,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	      log->Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
 	    if (delvert != 0)
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	    //QMessageBox::information(parent, tr("Filter Plugins"), tr("Removed vertices : %1.").arg(delvert));
 	  }
 	
 	if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
@@ -425,7 +407,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	if (filter->text() == ST(FP_INVERT_FACES) ) {
 	  
 	  InvertFaces<CMeshO>(m.cm);
-	  // update normal on InvertFaces function
 	}
 
 	if (filter->text() == ST(FP_TRANSFORM) ) {
