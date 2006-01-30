@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.5  2006/01/30 23:02:11  buzzelli
+removed redundant argument in ImporterObj::LoadMask
+
 Revision 1.4  2006/01/30 18:45:17  buzzelli
 code cleaning
 
@@ -201,7 +204,7 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 
 	// if LoadMask has not been called yet, we call it here
 	if (oi.mask == -1)
-		LoadMask(filename, oi.mask, oi);
+		LoadMask(filename, oi);
 
 	if (oi.numVertices == 0)
 		return E_NO_VERTEX;
@@ -862,7 +865,7 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 	*	\param mask	A mask which will be filled according to type of data found in the object
 	* \param oi A structure which will be filled with infos about the object to be opened
 	*/
-	static bool LoadMask(const char * filename, int &mask, ObjInfo &oi)
+	static bool LoadMask(const char * filename, ObjInfo &oi)
 	{
 		std::ifstream stream(filename);
 		if (stream.fail())
@@ -999,7 +1002,7 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			}
 		}
 
-		mask=0;
+		int mask = 0;
 		
 		if (bHasPerWedgeTexCoord)
 			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;

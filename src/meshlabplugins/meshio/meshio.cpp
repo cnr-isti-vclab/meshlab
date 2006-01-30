@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.76  2006/01/30 23:02:11  buzzelli
+ removed redundant argument in ImporterObj::LoadMask
+
  Revision 1.75  2006/01/30 22:18:09  buzzelli
  removing unnecessary change mask dialog at import tyme
 
@@ -98,7 +101,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 		{
 			vcg::tri::io::ObjInfo oi;	
 			oi.cb = cb;
-			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
+			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi);
 
 			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
 			{
@@ -120,6 +123,8 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 
 			if(oi.mask & MeshModel::IOM_WEDGNORMAL)
 				normalsUpdated = true;
+
+			mask = oi.mask;
 		}
 		else if (formatName.toUpper() == tr("PLY"))
 		{
@@ -190,6 +195,8 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 
 			if(info.mask & MeshModel::IOM_WEDGNORMAL)
 				normalsUpdated = true;
+
+			mask = info.mask;
 		}
 
 		// verify if texture files are present
@@ -217,7 +224,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 		if (cb != NULL)	(*cb)(99, "Done");
 
 		m.storeVertexColor();
-		m.mask = mask;
+		m.mask = mask;				// store mask into model structure
 
 		return true;
 	}
