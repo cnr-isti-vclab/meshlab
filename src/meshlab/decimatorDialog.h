@@ -3,7 +3,7 @@
 
 // for options on decimator
 #include <QDialog>
-#include "ui_decimator.h"
+#include "ui_decimatorDialog.h"
 #include <math.h>
 #include <vcg/space/point3.h>
 
@@ -74,6 +74,13 @@ public:
 		XL = max[0] - min[0]; XedgeLength->setMaximum(XL);
 		YL = max[1] - min[1]; YedgeLength->setMaximum(YL);
 		ZL = max[2] - min[2]; ZedgeLength->setMaximum(ZL);
+		float app;
+		if(XL>YL)app= XL; else app=YL;
+		if(app<ZL)app=ZL;
+		XedgeLength->setValue(app/10);
+		YedgeLength->setValue(app/10);
+		ZedgeLength->setValue(app/10);
+				
 		aggiornaLatoX();
 		aggiornaLatoY();
 		aggiornaLatoZ();
@@ -83,38 +90,85 @@ public:
 public slots:
 	void on_stepXSB_valueChanged(double val) 
 	{
-		Xstep = floor(val);
-		aggiornaLatoX();
+		if(stepXSB->hasFocus())
+		{
+			Xstep = floor(val);
+			if(Uniform->checkState () ==  2)
+			{
+				stepYSB->setValue(Xstep);
+				stepZSB->setValue(Xstep);
+			}
+			aggiornaLatoX();
+		}
 	}
 
 	void on_stepYSB_valueChanged(double val) 
 	{
-		Ystep = floor(val);
-		aggiornaLatoY();
+		if(stepYSB->hasFocus())
+		{
+			Ystep = floor(val);
+			if(Uniform->checkState () ==  2)
+			{
+				stepXSB->setValue(Ystep);
+				stepZSB->setValue(Ystep);
+			}
+			aggiornaLatoY();
+		}
 	}
 
 	void on_stepZSB_valueChanged(double val) 
 	{
-		Zstep = floor(val);
-		aggiornaLatoZ();
+		if(stepZSB->hasFocus())
+		{
+			Zstep = floor(val);
+			if(Uniform->checkState () ==  2)
+			{
+				stepYSB->setValue(Zstep);
+				stepXSB->setValue(Zstep);
+			}
+			aggiornaLatoZ();
+		}
 	}
 
 	void on_XedgeLength_valueChanged(double pd)
 	{
-		TXL = pd;
-		aggiornaXStep();
+		if(XedgeLength->hasFocus())
+		{
+			TXL = pd;
+			if(Uniform->checkState () ==  2)
+			{
+				YedgeLength->setValue(TXL);
+				ZedgeLength->setValue(TXL);
+			}
+			aggiornaXStep();
+		}
 	}
 
 	void on_YedgeLength_valueChanged(double pd)
 	{
-		TYL = pd;
-		aggiornaYStep();
+		if(YedgeLength->hasFocus()){
+			TYL = pd;
+			if(Uniform->checkState () ==  2)
+			{
+				XedgeLength->setValue(TYL);
+				ZedgeLength->setValue(TYL);
+			}
+			aggiornaYStep();
+		}
 	}
 
 	void on_ZedgeLength_valueChanged(double pd)
 	{
-		TZL = pd;
-		aggiornaZStep();
+		if(ZedgeLength->hasFocus())
+		{
+			TZL = pd;
+			if(Uniform->checkState () ==  2)
+			{
+				YedgeLength->setValue(TZL);
+				XedgeLength->setValue(TZL);
+			}
+			aggiornaZStep();
+		}
 	}
 
 
