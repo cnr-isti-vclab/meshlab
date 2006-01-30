@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/01/30 10:02:57  fmazzant
+ update none selection
+
  Revision 1.3  2006/01/30 00:26:40  fmazzant
  deleted small bug
 
@@ -122,7 +125,7 @@ void SaveMaskExporterDialog::SetMaskCapability()
 {
 	//vert
 	ui.check_iom_vertquality->setDisabled( ((capability & MeshModel::IOM_VERTQUALITY)==0) /*| ((m->mask & MeshModel::IOM_VERTQUALITY)==0)*/ );
-	ui.check_iom_vertquality->setChecked( ((capability & MeshModel::IOM_VERTQUALITY)!=0) /*& ((m->mask & MeshModel::IOM_VERTQUALITY)!=0)*/);
+	ui.check_iom_vertquality->setChecked ( ((capability & MeshModel::IOM_VERTQUALITY)!=0) /*& ((m->mask & MeshModel::IOM_VERTQUALITY)!=0)*/);
 	
 	ui.check_iom_vertflags->setDisabled( ((capability & MeshModel::IOM_VERTFLAGS)==0) /*| ((m->mask & MeshModel::IOM_VERTFLAGS)==0)*/ );
 	ui.check_iom_vertflags->setChecked ( ((capability & MeshModel::IOM_VERTFLAGS)!=0) /*& ((m->mask & MeshModel::IOM_VERTFLAGS)!=0)*/ );
@@ -138,7 +141,7 @@ void SaveMaskExporterDialog::SetMaskCapability()
 
 	//face
 	ui.check_iom_facequality->setDisabled( ((capability & MeshModel::IOM_FACEQUALITY)==0) /*| ((m->mask & MeshModel::IOM_FACEQUALITY)==0)*/);
-	ui.check_iom_facequality->setChecked( ((capability & MeshModel::IOM_FACEQUALITY)!=0) /*& ((m->mask & MeshModel::IOM_FACEQUALITY)!=0)*/);
+	ui.check_iom_facequality->setChecked ( ((capability & MeshModel::IOM_FACEQUALITY)!=0) /*& ((m->mask & MeshModel::IOM_FACEQUALITY)!=0)*/);
 
 	ui.check_iom_faceflags->setDisabled( ((capability & MeshModel::IOM_FACEFLAGS)==0) /*| ((m->mask & MeshModel::IOM_FACEFLAGS)==0) */);
 	ui.check_iom_faceflags->setChecked ( ((capability & MeshModel::IOM_FACEFLAGS)!=0) /*& ((m->mask & MeshModel::IOM_FACEFLAGS)!=0) */);
@@ -240,20 +243,20 @@ void SaveMaskExporterDialog::SlotSelectionAllButton()
 void SaveMaskExporterDialog::SlotSelectionNoneButton()
 {
 	//vert
-	ui.check_iom_vertquality->setChecked((ui.check_iom_vertquality->isEnabled() & ui.check_iom_vertquality->isChecked()) && !ui.check_iom_vertquality->isChecked());
-	ui.check_iom_vertflags->setChecked((ui.check_iom_vertflags->isEnabled()& ui.check_iom_vertflags->isChecked())&& !ui.check_iom_vertflags->isChecked() );
-	ui.check_iom_vertcolor->setChecked((ui.check_iom_vertcolor->isEnabled() & ui.check_iom_vertcolor->isChecked()) && !ui.check_iom_vertcolor->isChecked());
-	ui.check_iom_verttexcoord->setChecked((ui.check_iom_verttexcoord->isEnabled() & ui.check_iom_verttexcoord->isChecked())&& !ui.check_iom_verttexcoord->isChecked());
-	ui.check_iom_vertnormal->setChecked((ui.check_iom_vertnormal->isEnabled() & ui.check_iom_vertnormal->isChecked())&& !ui.check_iom_vertnormal->isChecked());
+	ui.check_iom_vertquality->setChecked(false);//(ui.check_iom_vertquality->isEnabled() & ui.check_iom_vertquality->isChecked()) && !ui.check_iom_vertquality->isChecked());
+	ui.check_iom_vertflags->setChecked(false);//(ui.check_iom_vertflags->isEnabled()& ui.check_iom_vertflags->isChecked())&& !ui.check_iom_vertflags->isChecked() );
+	ui.check_iom_vertcolor->setChecked(false);//(ui.check_iom_vertcolor->isEnabled() & ui.check_iom_vertcolor->isChecked()) && !ui.check_iom_vertcolor->isChecked());
+	ui.check_iom_verttexcoord->setChecked(false);//(ui.check_iom_verttexcoord->isEnabled() & ui.check_iom_verttexcoord->isChecked())&& !ui.check_iom_verttexcoord->isChecked());
+	ui.check_iom_vertnormal->setChecked(false);//(ui.check_iom_vertnormal->isEnabled() & ui.check_iom_vertnormal->isChecked())&& !ui.check_iom_vertnormal->isChecked());
 
 	//face
-	ui.check_iom_facequality->setChecked((ui.check_iom_facequality->isEnabled() & ui.check_iom_facequality->isChecked()) && !ui.check_iom_facequality->isChecked());
-	ui.check_iom_faceflags->setChecked((ui.check_iom_faceflags->isEnabled() & ui.check_iom_faceflags->isChecked()) && !ui.check_iom_faceflags->isChecked());
-	ui.check_iom_facenormal->setChecked((ui.check_iom_facenormal->isEnabled()& ui.check_iom_facenormal->isChecked()) && !ui.check_iom_facenormal->isChecked());
-	ui.check_iom_facecolor->setChecked((ui.check_iom_facecolor->isEnabled()& ui.check_iom_facecolor->isChecked()) && !ui.check_iom_facecolor->isChecked());
+	ui.check_iom_facequality->setChecked(false);//(ui.check_iom_facequality->isEnabled() & ui.check_iom_facequality->isChecked()) && !ui.check_iom_facequality->isChecked());
+	ui.check_iom_faceflags->setChecked(false);//(ui.check_iom_faceflags->isEnabled() & ui.check_iom_faceflags->isChecked()) && !ui.check_iom_faceflags->isChecked());
+	ui.check_iom_facenormal->setChecked(false);//(ui.check_iom_facenormal->isEnabled()& ui.check_iom_facenormal->isChecked()) && !ui.check_iom_facenormal->isChecked());
+	ui.check_iom_facecolor->setChecked(false);//(ui.check_iom_facecolor->isEnabled()& ui.check_iom_facecolor->isChecked()) && !ui.check_iom_facecolor->isChecked());
 	
 	//wedg
-	ui.check_iom_wedgcolor->setChecked((ui.check_iom_wedgcolor->isEnabled() & ui.check_iom_wedgcolor->isChecked()) && !ui.check_iom_wedgcolor->isChecked());
-	ui.check_iom_wedgtexcoord->setChecked((ui.check_iom_wedgtexcoord->isEnabled() & ui.check_iom_wedgtexcoord->isChecked()) && !ui.check_iom_wedgtexcoord->isChecked());
-	ui.check_iom_wedgnormal->setChecked((ui.check_iom_wedgnormal->isEnabled() & ui.check_iom_wedgnormal->isChecked()) && !ui.check_iom_wedgtexcoord->isChecked());
+	ui.check_iom_wedgcolor->setChecked(false);//(ui.check_iom_wedgcolor->isEnabled() & ui.check_iom_wedgcolor->isChecked()) && !ui.check_iom_wedgcolor->isChecked());
+	ui.check_iom_wedgtexcoord->setChecked(false);//(ui.check_iom_wedgtexcoord->isEnabled() & ui.check_iom_wedgtexcoord->isChecked()) && !ui.check_iom_wedgtexcoord->isChecked());
+	ui.check_iom_wedgnormal->setChecked(false);//(ui.check_iom_wedgnormal->isEnabled() & ui.check_iom_wedgnormal->isChecked()) && !ui.check_iom_wedgtexcoord->isChecked());
 }
