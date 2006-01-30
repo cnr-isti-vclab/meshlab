@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.74  2006/01/30 22:09:13  buzzelli
+ code cleaning
+
  Revision 1.73  2006/01/30 14:27:30  fmazzant
  update GetMaskCapability of PLY,OFF and STL.
 
@@ -39,31 +42,12 @@
  Revision 1.69  2006/01/29 17:14:20  buzzelli
  files import_obj.h, import_3ds.h, io_3ds.h and io_obj.h have been moved from test/io to meshio
 
- Revision 1.68  2006/01/29 17:07:16  buzzelli
- missing texture files warning has been added
-
- Revision 1.67  2006/01/29 16:33:03  fmazzant
- moved export_obj and export_3ds from test/io into meshio/
-
- Revision 1.66  2006/01/28 20:43:38  buzzelli
- minor changes in Import3ds LoadMask
-
- Revision 1.65  2006/01/27 17:02:51  buzzelli
- solved a small bug with progress bar
-
- Revision 1.64  2006/01/27 01:13:27  buzzelli
- Added a better distinction beetween critical and non critical error messages
-
- Revision 1.63  2006/01/26 22:51:57  fmazzant
- removed last links to the Exporter mask
-
 *****************************************************************************/
 #include <Qt>
 #include <QtGui>
 
 #include "meshio.h"
 
-// temporaneamente prendo la versione corrente dalla cartella test
 #include "import_obj.h"
 #include "export_obj.h"
 
@@ -90,19 +74,18 @@
 
 using namespace vcg;
 
-
-bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshModel &m, int& mask,CallBackPos *cb,QWidget *parent)
+bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
 	
-  mask=0; // just to be sure...
+	// initializing mask
+  mask = 0;
 	
 	if (!fileName.isEmpty())
 	{
 		// initializing progress bar status
-		if (cb != NULL)
-			(*cb)(0, "Loading...");
+		if (cb != NULL)		(*cb)(0, "Loading...");
 
 		// this change of dir is needed for subsequent texture/material loading
 		QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
@@ -149,13 +132,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		else if (formatName.toUpper() == tr("PLY"))
 		{
 			vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
-
-			//ChangeMaskDialog dialog(mask, parent);
-			//if (dialog.exec() != QDialog::Accepted)
-			//	return false;
-			//mask = dialog.getNewMask();
-			//dialog.close();
-
 
 			if(mask&MeshModel::IOM_VERTQUALITY) qDebug("Has Vertex Quality\n");
 			if(mask&MeshModel::IOM_FACEQUALITY) qDebug("Has Face Quality\n");
@@ -255,11 +231,9 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 		if (!normalsUpdated) 
 			vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
-		if (cb != NULL)
-			(*cb)(99, "Done");
+		if (cb != NULL)	(*cb)(99, "Done");
 
 		m.storeVertexColor();
-		
 		m.mask = mask;
 
 		return true;
