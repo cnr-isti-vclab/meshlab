@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/01/30 00:26:40  fmazzant
+ deleted small bug
+
  Revision 1.2  2006/01/29 23:52:43  fmazzant
  correct a small bug
 
@@ -237,20 +240,20 @@ void SaveMaskExporterDialog::SlotSelectionAllButton()
 void SaveMaskExporterDialog::SlotSelectionNoneButton()
 {
 	//vert
-	ui.check_iom_vertquality->setChecked(ui.check_iom_vertquality->isEnabled() & ui.check_iom_vertquality->isChecked());
-	ui.check_iom_vertflags->setChecked(ui.check_iom_vertflags->isEnabled()& ui.check_iom_vertflags->isChecked());
-	ui.check_iom_vertcolor->setChecked(ui.check_iom_vertcolor->isEnabled() & ui.check_iom_vertcolor->isChecked());
-	ui.check_iom_verttexcoord->setChecked(ui.check_iom_verttexcoord->isEnabled() & ui.check_iom_verttexcoord->isChecked());
-	ui.check_iom_vertnormal->setChecked(ui.check_iom_vertnormal->isEnabled() & ui.check_iom_vertnormal->isChecked());
+	ui.check_iom_vertquality->setChecked((ui.check_iom_vertquality->isEnabled() & ui.check_iom_vertquality->isChecked()) && !ui.check_iom_vertquality->isChecked());
+	ui.check_iom_vertflags->setChecked((ui.check_iom_vertflags->isEnabled()& ui.check_iom_vertflags->isChecked())&& !ui.check_iom_vertflags->isChecked() );
+	ui.check_iom_vertcolor->setChecked((ui.check_iom_vertcolor->isEnabled() & ui.check_iom_vertcolor->isChecked()) && !ui.check_iom_vertcolor->isChecked());
+	ui.check_iom_verttexcoord->setChecked((ui.check_iom_verttexcoord->isEnabled() & ui.check_iom_verttexcoord->isChecked())&& !ui.check_iom_verttexcoord->isChecked());
+	ui.check_iom_vertnormal->setChecked((ui.check_iom_vertnormal->isEnabled() & ui.check_iom_vertnormal->isChecked())&& !ui.check_iom_vertnormal->isChecked());
 
 	//face
-	ui.check_iom_facequality->setChecked(ui.check_iom_facequality->isEnabled() & ui.check_iom_facequality->isChecked());
-	ui.check_iom_faceflags->setChecked(ui.check_iom_faceflags->isEnabled() & ui.check_iom_faceflags->isChecked());
-	ui.check_iom_facenormal->setChecked(ui.check_iom_facenormal->isEnabled()& ui.check_iom_facenormal->isChecked());
-	ui.check_iom_facecolor->setChecked(ui.check_iom_facecolor->isEnabled()& ui.check_iom_facecolor->isChecked());
+	ui.check_iom_facequality->setChecked((ui.check_iom_facequality->isEnabled() & ui.check_iom_facequality->isChecked()) && !ui.check_iom_facequality->isChecked());
+	ui.check_iom_faceflags->setChecked((ui.check_iom_faceflags->isEnabled() & ui.check_iom_faceflags->isChecked()) && !ui.check_iom_faceflags->isChecked());
+	ui.check_iom_facenormal->setChecked((ui.check_iom_facenormal->isEnabled()& ui.check_iom_facenormal->isChecked()) && !ui.check_iom_facenormal->isChecked());
+	ui.check_iom_facecolor->setChecked((ui.check_iom_facecolor->isEnabled()& ui.check_iom_facecolor->isChecked()) && !ui.check_iom_facecolor->isChecked());
 	
 	//wedg
-	ui.check_iom_wedgcolor->setChecked(ui.check_iom_wedgcolor->isEnabled() & ui.check_iom_wedgcolor->isChecked());
-	ui.check_iom_wedgtexcoord->setChecked(ui.check_iom_wedgtexcoord->isEnabled() & ui.check_iom_wedgtexcoord->isChecked());
-	ui.check_iom_wedgnormal->setChecked(ui.check_iom_wedgnormal->isEnabled() & ui.check_iom_wedgnormal->isChecked());
+	ui.check_iom_wedgcolor->setChecked((ui.check_iom_wedgcolor->isEnabled() & ui.check_iom_wedgcolor->isChecked()) && !ui.check_iom_wedgcolor->isChecked());
+	ui.check_iom_wedgtexcoord->setChecked((ui.check_iom_wedgtexcoord->isEnabled() & ui.check_iom_wedgtexcoord->isChecked()) && !ui.check_iom_wedgtexcoord->isChecked());
+	ui.check_iom_wedgnormal->setChecked((ui.check_iom_wedgnormal->isEnabled() & ui.check_iom_wedgnormal->isChecked()) && !ui.check_iom_wedgtexcoord->isChecked());
 }
