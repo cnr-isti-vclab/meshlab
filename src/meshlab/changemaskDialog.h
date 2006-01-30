@@ -1,14 +1,14 @@
 /****************************************************************************
-* VCGLib                                                            o o     *
-* Visual and Computer Graphics Library                            o     o   *
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004                                                \/)\/    *
+* Copyright(C) 2005, 2006                                          \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -21,42 +21,38 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef __VCGLIB_IOTRIMESH_IO_OBJ
-#define __VCGLIB_IOTRIMESH_IO_OBJ
+/****************************************************************************
+  History
+
+ $Log$
+ Revision 1.1  2006/01/30 06:32:33  buzzelli
+ added a dialog used to select type of data being imported
 
 
-#include<wrap/callback.h>
+ ****************************************************************************/
+#ifndef __CHANGEMASK_DIALOG_H
+#define __CHANGEMASK_DIALOG_H
 
-namespace vcg {
-namespace tri {
-namespace io {
+#include "ui_changeMaskDialog.h"
 
-  
-class ObjInfo
+class ChangeMaskDialog : public QDialog, Ui::ChangeMaskDialog
 {
+	Q_OBJECT
+
 public:
+	ChangeMaskDialog(int capability = 0, QWidget *parent = 0);
+	
+	void	setMaskCapability();
+	int		getNewMask();
 
-  ObjInfo()
-  {
-    mask	= 0;
-    cb		= 0;
-  }
+private slots:
+	void	slotOkButtonPressed();
+	void	slotSelectionAllButtonPressed();
+	void slotSelectionNoneButtonPressed();
 
-	/// It returns a bit mask describing the field preesnt in the ply file
-  int mask;  
+private:
+	int		capability;
+	int		mask;
+};
 
-  /// a Simple callback that can be used for long obj parsing. 
-  // it returns the current position, and formats a string with a description of what th efunction is doing (loading vertexes, faces...)
-  CallBackPos *cb;
-
-  /// number of vertices
-  int numVertices;
- 
-	/// number of triangles
-	int numTriangles;
-
-}; // end class
-} // end namespace tri
-} // end namespace io
-} // end namespace vcg
-#endif
+#endif // __CHANGEMASK_DIALOG_H

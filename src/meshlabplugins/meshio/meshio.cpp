@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.72  2006/01/30 06:36:21  buzzelli
+ added a dialog used to select type of data being imported
+
  Revision 1.71  2006/01/29 23:17:27  fmazzant
  correct small error
 
@@ -77,6 +80,8 @@
 #include <wrap/ply/plylib.h>
 #include <vcg/complex/trimesh/update/normal.h>
 
+#include "../../meshlab/changemaskDialog.h"
+
 #include <QMessageBox>
 #include <QFileDialog>
 
@@ -111,7 +116,13 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			oi.cb = cb;
 			vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), mask, oi);
 
-			if(mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
+			ChangeMaskDialog dialog(oi.mask, parent);
+			if (dialog.exec() != QDialog::Accepted)
+				return false;
+			oi.mask = dialog.getNewMask();
+			dialog.close();
+			
+			if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
 				m.cm.face.EnableWedgeTex();
@@ -129,13 +140,20 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				}
 			}
 
-			if(mask & MeshModel::IOM_WEDGNORMAL)
+			if(oi.mask & MeshModel::IOM_WEDGNORMAL)
 				normalsUpdated = true;
 		}
 		else if (formatName.toUpper() == tr("PLY"))
 		{
 			vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
-		  
+
+			//ChangeMaskDialog dialog(mask, parent);
+			//if (dialog.exec() != QDialog::Accepted)
+			//	return false;
+			//mask = dialog.getNewMask();
+			//dialog.close();
+
+
 			if(mask&MeshModel::IOM_VERTQUALITY) qDebug("Has Vertex Quality\n");
 			if(mask&MeshModel::IOM_FACEQUALITY) qDebug("Has Face Quality\n");
 			if(mask&MeshModel::IOM_FACECOLOR)		qDebug("Has Face Color\n");
@@ -146,7 +164,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				m.cm.face.EnableWedgeTex();
 			}
 			
-			int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), cb);
+			int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 			if (result != ::vcg::ply::E_NOERROR)
 			{
 				QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
@@ -184,10 +202,18 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 			vcg::tri::io::_3dsInfo info;	
 			info.cb = cb;
 			Lib3dsFile *file = NULL;
-
 			vcg::tri::io::Importer3DS<CMeshO>::LoadMask(filename.c_str(), file, info);
 
-			if(mask & MeshModel::IOM_WEDGTEXCOORD) 
+			ChangeMaskDialog dialog(info.mask, parent);
+			if (dialog.exec() != QDialog::Accepted)
+			{	
+				lib3ds_file_free(file);
+				return false;
+			}
+			info.mask = dialog.getNewMask();
+			dialog.close();
+
+			if(info.mask & MeshModel::IOM_WEDGTEXCOORD) 
 			{
 				qDebug("Has Wedge Text Coords\n");
 				m.cm.face.EnableWedgeTex();
@@ -200,11 +226,11 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName,MeshMo
 				return false;
 			}
 
-			if(mask & MeshModel::IOM_WEDGNORMAL)
+			if(info.mask & MeshModel::IOM_WEDGNORMAL)
 				normalsUpdated = true;
 		}
 
-		// verify if texture files apre present
+		// verify if texture files are present
 		QString missingTextureFilesMsg = "The following texture files were not found:\n";
 		bool someTextureNotFound = false;
 		for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
