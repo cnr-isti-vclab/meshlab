@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.21  2006/01/30 17:19:22  vannini
+Added manual values to control min and max Q (mapping curvature to color)
+
 Revision 1.20  2006/01/27 18:27:53  vannini
 code refactoring for curvature colorize
 added colorize equalizer dialog and
@@ -216,7 +219,16 @@ void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &
         return;
 
       eqSettings=eqdialog.getValues();
-      c.ColorizeByEqualizedQuality(c.histoPercentile(mmmq, 1.0f / (float) eqSettings.percentile, eqSettings.range));
+      if (eqSettings.useManual)
+      {
+        Frange manual;
+        manual.min=eqSettings.manualMinQ;
+        manual.max=eqSettings.manualMaxQ;
+        c.ColorizeByEqualizedQuality(manual);
+      }else{
+        c.ColorizeByEqualizedQuality(c.histoPercentile(mmmq, 1.0f / (float) eqSettings.percentile, eqSettings.range));
+      }
+      
       rm.colorMode = GLW::CMPerVert;   
 
       return;

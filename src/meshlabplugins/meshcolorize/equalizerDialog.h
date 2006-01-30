@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/01/30 17:19:22  vannini
+Added manual values to control min and max Q (mapping curvature to color)
+
 Revision 1.1  2006/01/27 18:27:53  vannini
 code refactoring for curvature colorize
 added colorize equalizer dialog and
@@ -49,12 +52,16 @@ public:
   float meshMinQ;
   float histoMaxQ;
   float histoMinQ;
+  float manualMaxQ;
+  float manualMinQ;
+  bool useManual;
   		
 	EqualizerSettings()
 	{
     percentile=20;
     range=10000;
-    meshMaxQ=meshMinQ=histoMaxQ=histoMinQ=0.0f;
+    meshMaxQ=meshMinQ=histoMaxQ=histoMinQ=manualMaxQ=manualMinQ=0.0f;
+    useManual=false;
 	};
 };
 

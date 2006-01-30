@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/01/30 17:19:22  vannini
+Added manual values to control min and max Q (mapping curvature to color)
+
 Revision 1.1  2006/01/27 18:27:53  vannini
 code refactoring for curvature colorize
 added colorize equalizer dialog and
@@ -39,7 +42,7 @@ EqualizerDialog::EqualizerDialog(QWidget *parent): QDialog(parent)
 	ui.setupUi(this);
   connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
   connect(ui.applyButton, SIGNAL(clicked()), this, SLOT(accept()));
-  setFixedSize(338,232);
+  setFixedSize(338,235);
 }
 
 EqualizerDialog::~EqualizerDialog()
@@ -58,12 +61,17 @@ void EqualizerDialog::setValues(const EqualizerSettings& es)
   ui.meshMaxQlineEdit->setText(qnum.arg(settings.meshMaxQ));
   ui.histoMinQlineEdit->setText(qnum.arg(settings.histoMinQ));
   ui.histoMaxQlineEdit->setText(qnum.arg(settings.histoMaxQ));
-
+  ui.manualMinQlineEdit->setText(qnum.arg(settings.manualMinQ));
+  ui.manualMaxQlineEdit->setText(qnum.arg(settings.manualMaxQ));
+  ui.manualCheckBox->setChecked(settings.useManual);  
 }
 
 EqualizerSettings EqualizerDialog::getValues()
 {
   settings.percentile = ui.percentileSpinbox->value();
-  settings.range=ui.rangeSpinbox->value();
+  settings.range = ui.rangeSpinbox->value();
+  settings.useManual=ui.manualCheckBox->isChecked();
+  settings.manualMinQ=ui.manualMinQlineEdit->text().toFloat();
+  settings.manualMaxQ=ui.manualMaxQlineEdit->text().toFloat();
 	return settings;
 }
