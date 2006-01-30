@@ -9,11 +9,14 @@
     <x>0</x>
     <y>0</y>
     <width>275</width>
-    <height>170</height>
+    <height>147</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Dialog</string>
+   <string>Refine</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset>..\..\..\meshlab\images\eye128.png</iconset>
   </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >

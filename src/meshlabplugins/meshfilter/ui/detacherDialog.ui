@@ -27,10 +27,10 @@
    </size>
   </property>
   <property name="windowTitle" >
-   <string>Dialog</string>
+   <string>Detacher</string>
   </property>
   <property name="windowIcon" >
-   <iconset>..\..\meshlab\images\eye16.png</iconset>
+   <iconset>..\..\..\meshlab\images\eye128.png</iconset>
   </property>
   <layout class="QGridLayout" >
    <property name="margin" >

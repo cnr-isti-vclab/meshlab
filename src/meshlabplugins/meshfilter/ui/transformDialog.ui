@@ -15,6 +15,9 @@
   <property name="windowTitle" >
    <string>Apply Transform</string>
   </property>
+  <property name="windowIcon" >
+   <iconset>..\..\..\meshlab\images\eye128.png</iconset>
+  </property>
   <layout class="QGridLayout" >
    <property name="margin" >
     <number>9</number>
