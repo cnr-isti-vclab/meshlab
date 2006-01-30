@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.79  2006/01/30 23:47:25  buzzelli
+minor changes into open method
+
 Revision 1.78  2006/01/26 18:39:19  fmazzant
 moved mask dialog exporter from mashio to meshlab
 
@@ -443,7 +446,7 @@ void MainWindow::open(QString fileName)
 			gla->setColorMode(GLW::CMPerFace);
 		else
 			gla->setColorMode(GLW::CMNone);
-		//updateMenus();
+		updateMenus();
 		renderModeTextureAct->setChecked(false);
 		renderModeTextureAct->setEnabled(false);
 		if(!GLA()->mm->cm.textures.empty())
