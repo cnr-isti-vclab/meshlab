@@ -18,6 +18,13 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+/* History
+$Log$
+Revision 1.22  2006/01/31 14:40:40  mariolatronico
+removed unused variable ActionInfo *ai, added Log history
+
+*/
+
 
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
@@ -62,7 +69,6 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	void setLog(GLLogStream *log) { this->log = log ; }
 protected:
 	GLLogStream *log;
-	ActionInfo *ai;
 	QList <QAction *> actionList;
 	RefineDialog *refineDialog;
 	DecimatorDialog *decimatorDialog;
