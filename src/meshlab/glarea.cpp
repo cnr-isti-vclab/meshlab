@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.88  2006/01/31 17:04:44  alemochi
+Changed fancy lighting (use two lights instead of double lighting)
+
 Revision 1.87  2006/01/31 11:09:07  alemochi
 remove unnecessary comments
 
@@ -120,13 +123,10 @@ void GLArea::initializeGL()
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
-
-	GLfloat pfront[] = {0,0,1,0};
-	
-	glLightfv(GL_LIGHT0,GL_POSITION,pfront);
+	static float diffuseColor[]={1.0,1.0,1.0,1.0};
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
-
+	glDisable(GL_LIGHT1);
+	glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuseColor);
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 
@@ -290,8 +290,10 @@ void GLArea::paintGL()
 	trackball_light.GetView();
 	trackball_light.Apply(!(isDefaultTrackBall()));
 
-	static float lightPos[]={0.0,0.0,1.0,0.0};
-	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
+	static float lightPosF[]={0.0,0.0,1.0,0.0};
+	glLightfv(GL_LIGHT0,GL_POSITION,lightPosF);
+	static float lightPosB[]={0.0,0.0,-1.0,0.0};
+	glLightfv(GL_LIGHT1,GL_POSITION,lightPosB);
 
   if (!(isDefaultTrackBall()))
 	{
@@ -702,25 +704,25 @@ void GLArea::setBackFaceCulling(bool enabled)
 
 void GLArea::setLightModel()
 {
-  static GLfloat standard_front[]={1.f,1.f,1.f,1.f};
-  static GLfloat standard_back[]={1.f,1.f,1.f,1.f};
-  static GLfloat m_diffuseFancyBack[]={.81f,.61f,.61f,1.f};
-  static GLfloat m_diffuseFancyFront[]={.71f,.71f,.95f,1.f};
+  static GLfloat standard_light[]={1.f,1.f,1.f,1.f};
+  static GLfloat l_diffuseFancyBack[]={.81f,.61f,.61f,1.f};
+  static GLfloat l_diffuseFancyFront[]={.71f,.71f,.95f,1.f};
 	
 	glDisable(GL_LIGHTING);
 	if (rm.lighting) 
 	{
 		glEnable(GL_LIGHTING);
-		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, rm.doubleSideLighting);
+		if (rm.doubleSideLighting) glEnable(GL_LIGHT1);
+		else glDisable(GL_LIGHT1);
 		if(rm.fancyLighting)
 		{
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFancyFront);
-			glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseFancyBack);
+			glLightfv(GL_LIGHT0,GL_DIFFUSE,l_diffuseFancyFront);
+			glLightfv(GL_LIGHT1,GL_DIFFUSE,l_diffuseFancyBack);
 		}
 		else
 		{
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, standard_front);
-			glMaterialfv(GL_BACK, GL_DIFFUSE, standard_back);
+			glLightfv(GL_LIGHT0,GL_DIFFUSE,standard_light);
+			glLightfv(GL_LIGHT1,GL_DIFFUSE,standard_light);
 		}
 	}
 }
