@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2006/01/31 16:36:13  vannini
+Removed two arrays of floats in favour of one SimpleTempData for temporary area values
+
 Revision 1.4  2006/01/31 16:22:10  vannini
 Small bugfix
 
@@ -63,6 +66,12 @@ namespace vcg
     float K;
   };
 
+  class AreaData
+  {
+  public:
+    float A;
+  };
+
   class Frange
   {
   public:
@@ -79,23 +88,21 @@ namespace vcg
 
   private:
     MESH_TYPE *ms;
-    SimpleTempData<VertContainer, CurvData> *TDPtr;
+    SimpleTempData<VertContainer, CurvData> *TDCurvPtr;
+    SimpleTempData<VertContainer, AreaData> *TDAreaPtr;
 
     void ComputeHK() 
     {
-      float *areaH,*areaK;
-      int i;
       float area0, area1, area2, angle0, angle1, angle2, e01, e12, e20, t;
       FaceIterator fi;
       VertexIterator vi;
 	
       //Calcola AreaMix in H (vale anche per K)
       for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
-        (*TDPtr)[*vi].H=0;
+        (*TDCurvPtr)[*vi].H=0;
 
       for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if( !(*fi).IsD())
       {
-
         // angles
         angle0 = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
         angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
@@ -111,27 +118,23 @@ namespace vcg
 	        area1 = ( e01*(1.0/tan(angle2)) + e12*(1.0/tan(angle0)) ) / 8.0;
 	        area2 = ( e12*(1.0/tan(angle0)) + e20*(1.0/tan(angle1)) ) / 8.0;
       	
-	        (*TDPtr)[(*fi).V(0)].H  += area0;
-	        (*TDPtr)[(*fi).V(1)].H  += area1;
-	        (*TDPtr)[(*fi).V(2)].H  += area2;
+	        (*TDCurvPtr)[(*fi).V(0)].H  += area0;
+	        (*TDCurvPtr)[(*fi).V(1)].H  += area1;
+	        (*TDCurvPtr)[(*fi).V(2)].H  += area2;
 	      }
         else // triangolo ottuso
 	      { 
-	        (*TDPtr)[(*fi).V(0)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
-	        (*TDPtr)[(*fi).V(1)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
-	        (*TDPtr)[(*fi).V(2)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;      
+	        (*TDCurvPtr)[(*fi).V(0)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
+	        (*TDCurvPtr)[(*fi).V(1)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
+	        (*TDCurvPtr)[(*fi).V(2)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;      
 	      }
       }   
 
-      i = 0;
-      areaH = new float[(*ms).vn];
-      areaK = new float[(*ms).vn];
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi,++i) if(!(*vi).IsD())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
       {
-        areaH[i] = areaK[i] = (*TDPtr)[*vi].H;    //Areamix è comune a H e a K
-        (*TDPtr)[*vi].H = 0;
-        (*TDPtr)[*vi].K = (float)(2.0 * M_PI);
-
+        (*TDAreaPtr)[*vi].A = (*TDCurvPtr)[*vi].H;      //Areamix è comune a H e a K
+        (*TDCurvPtr)[*vi].H = 0;
+        (*TDCurvPtr)[*vi].K = (float)(2.0 * M_PI);
       }
       
       for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if( !(*fi).IsD() )
@@ -148,44 +151,45 @@ namespace vcg
 	      area1 = ( e01 * (1.0/tan(angle2)) + e12 * (1.0/tan(angle0)) ) / 4.0;
 	      area2 = ( e12 * (1.0/tan(angle0)) + e20 * (1.0/tan(angle1)) ) / 4.0;
           
-        (*TDPtr)[(*fi).V(0)].H  += area0;
-	      (*TDPtr)[(*fi).V(1)].H  += area1;
-	      (*TDPtr)[(*fi).V(2)].H  += area2;
+        (*TDCurvPtr)[(*fi).V(0)].H  += area0;
+	      (*TDCurvPtr)[(*fi).V(1)].H  += area1;
+	      (*TDCurvPtr)[(*fi).V(2)].H  += area2;
 
-        (*TDPtr)[(*fi).V(0)].K -= angle0;
-        (*TDPtr)[(*fi).V(1)].K -= angle1;
-        (*TDPtr)[(*fi).V(2)].K -= angle2;
+        (*TDCurvPtr)[(*fi).V(0)].K -= angle0;
+        (*TDCurvPtr)[(*fi).V(1)].K -= angle1;
+        (*TDCurvPtr)[(*fi).V(2)].K -= angle2;
       }
       
-      i=0;
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi,++i) if(!(*vi).IsD() && !(*vi).IsB())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
       {
-        if(areaH[i]<=std::numeric_limits<float>::epsilon())
-          (*TDPtr)[*vi].H = 0;
+        if((*TDAreaPtr)[*vi].A<=std::numeric_limits<float>::epsilon())
+        {
+          (*TDCurvPtr)[*vi].H = 0;
+          (*TDCurvPtr)[*vi].K = 0;
+        }
         else
-          (*TDPtr)[*vi].H /= areaH[i];
-
-        if(areaK[i]<=std::numeric_limits<float>::epsilon())
-          (*TDPtr)[*vi].K = 0;
-        else
-          (*TDPtr)[*vi].K /= areaK[i];
+        {
+          (*TDCurvPtr)[*vi].H /= (*TDAreaPtr)[*vi].A;
+          (*TDCurvPtr)[*vi].K /= (*TDAreaPtr)[*vi].A;
+        }
       }
-
-      delete[] areaH;
-      delete[] areaK;
     }
 
   public:
     Curvature(MESH_TYPE &mt):ms(&mt)
     {
-      TDPtr = new SimpleTempData<VertContainer, CurvData>((*ms).vert);
-      (*TDPtr).Start(CurvData());
+      TDCurvPtr = new SimpleTempData<VertContainer, CurvData>((*ms).vert);
+      (*TDCurvPtr).Start(CurvData());
+      TDAreaPtr = new SimpleTempData<VertContainer, AreaData>((*ms).vert);
+      (*TDAreaPtr).Start(AreaData());
+
       ComputeHK();
     }
 
     ~Curvature()
     {
-      (*TDPtr).Stop();
+      (*TDCurvPtr).Stop();
+      (*TDAreaPtr).Stop();
     }
 
 
@@ -194,7 +198,7 @@ namespace vcg
       VertexIterator vi;
 
       for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
-        (*vi).Q() = (*TDPtr)[*vi].K;
+        (*vi).Q() = (*TDCurvPtr)[*vi].K;
     }
 
 
@@ -202,7 +206,7 @@ namespace vcg
     {
       VertexIterator vi;
       for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
-        (*vi).Q() = (*TDPtr)[*vi].H;
+        (*vi).Q() = (*TDCurvPtr)[*vi].H;
     }
 
 
@@ -212,7 +216,7 @@ namespace vcg
 
       //Compute sqrt(4*H^2-2K)
 	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
-        (*vi).Q()=math::Sqrt((4.0f * powf((*TDPtr)[*vi].H, 2.0f)) - ((*TDPtr)[*vi].K * 2.0f));
+        (*vi).Q()=math::Sqrt((4.0f * powf((*TDCurvPtr)[*vi].H, 2.0f)) - ((*TDCurvPtr)[*vi].K * 2.0f));
     }
 
     void MapAbsoluteCurvatureIntoQuality()
@@ -223,8 +227,8 @@ namespace vcg
       //Compute abs(H+sqrt(H*H-K)) + abs(H-sqrt(H*H-K))
 	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
       {
-        t=math::Sqrt(powf((*TDPtr)[*vi].H, 2.0f) - (*TDPtr)[*vi].K);
-        (*vi).Q()= math::Abs((*TDPtr)[*vi].H + t) + math::Abs((*TDPtr)[*vi].H - t);
+        t=math::Sqrt(powf((*TDCurvPtr)[*vi].H, 2.0f) - (*TDCurvPtr)[*vi].K);
+        (*vi).Q()= math::Abs((*TDCurvPtr)[*vi].H + t) + math::Abs((*TDCurvPtr)[*vi].H - t);
       }
     }
 
