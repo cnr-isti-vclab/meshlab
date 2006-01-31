@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.77  2006/01/31 01:14:11  fmazzant
+ standardized call to the export_off function.
+
  Revision 1.76  2006/01/30 23:02:11  buzzelli
  removed redundant argument in ImporterObj::LoadMask
 
@@ -262,10 +265,10 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 
 	if(formatName.toUpper() == tr("OFF"))
 	{
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),cb);
+		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result != 0)
 		{
-			//QMessageBox::warning(parent, tr("OFF Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOFF<CMeshO>::ErrorMsg(result)));
+			QMessageBox::warning(parent, tr("OFF Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOFF<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
 		return true;
