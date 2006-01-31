@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.87  2006/01/31 11:09:07  alemochi
+remove unnecessary comments
+
 Revision 1.86  2006/01/27 12:41:21  glvertex
 Removed HUGE memory leaks. The model is now deallocated when the window is colsed.
 
@@ -475,27 +478,11 @@ void GLArea::displayHelp()
 	glPushAttrib(GL_ENABLE_BIT);
 	glPushMatrix();
 	glLoadIdentity();
-	float maxh=-0.1154f;	 // 0.1154=height/2
-	float minh=0.1154f;
-	float minw=-0.1154f*currentWidth/currentHeight; // -width/2
-	float maxw=minw+abs(minw)*2*170/currentWidth;
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE_MINUS_DST_COLOR,GL_ZERO); // Invert color background
-	//Color4b hColor(100,100,0,128);
-	//glColor(hColor);
 	glColor4f(.3f,.7f,.8f,.5f);
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
-
-	//glBegin(GL_TRIANGLE_STRIP);
-	//	glVertex3f(minw ,maxh, -1.f);
-	//	glVertex3f(minw, minh, -1.f);
-	//	glVertex3f(maxw, maxh, -1.f);
-	//	glVertex3f(maxw, minh, -1.f);
-	//glEnd();
-	//glColor(Color4b(255,255,255,255));
-	//glColor4f(.0f,.0f,.0f,1.f);
   float fontSpacingV = (currentHeight*.01f)+3;
 	renderText(15,1.5*fontSpacingV,QString("HELP ON SCREEN"),qFont);
   renderText(2,3*fontSpacingV,QString("Drag: "),qFont);
@@ -514,7 +501,6 @@ void GLArea::displayHelp()
 	renderText(100,12*fontSpacingV,QString("Near"),qFont);
 	renderText(2,13.5*fontSpacingV,QString("Ctrl-Shift-Drag: "),qFont);
 	renderText(100,13.5*fontSpacingV,QString("Move light"),qFont);
-
 	glPopMatrix();
 	glPopAttrib();
 }
