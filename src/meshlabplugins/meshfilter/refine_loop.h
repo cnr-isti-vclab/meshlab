@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.8  2006/01/31 14:48:27  mariolatronico
+removed commented code
+
 Revision 1.7  2006/01/11 20:42:59  mariolatronico
 added some include and typename for correct gcc compilation
 
@@ -96,22 +99,6 @@ Creata la sottocartella test/loop con dentro un progetto da cui iniziare per imp
 
 Revision 1.6  2005/07/11 13:13:33  cignoni
 small gcc-related compiling issues (typenames,ending cr, initialization order)
-
-Revision 1.5  2005/06/29 15:25:41  callieri
-deleted a wrong declaration "typename typename"
-
-Revision 1.4  2005/06/17 00:48:27  cignoni
-Corrected the type name of wedge tex coords WedgeInterp in RefineE
-
-Revision 1.3  2005/02/25 10:28:04  pietroni
-added #include<vcg/complex/trimesh/update/topology.h> use of update topology in refineE
-
-Revision 1.2  2005/02/02 16:01:13  pietroni
-1 warning corrected
-
-Revision 1.1  2004/10/12 15:42:29  ganovelli
-first working version
-
 
 ****************************************************************************/
 
@@ -190,7 +177,6 @@ struct OddPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::F
 	TCoord2<FL_TYPE,1> WedgeInterp(TCoord2<FL_TYPE,1> &t0, TCoord2<FL_TYPE,1> &t1)
 	{
 		TCoord2<FL_TYPE,1> tmp;
-		//	 	assert(t0.n()== t1.n());
 		tmp.n()=t0.n(); 
 		tmp.t()=(t0.t()+t1.t())/2.0;
 		return tmp;
@@ -288,22 +274,15 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 	
 	// n = numero di vertici iniziali
 	int n = m.vn;
-	// TD = temporary object for EvenParam structure data on vertex 
-	//SimpleTempData<typename MESH_TYPE::VertContainer, 
-	//							 EvenParam<typename MESH_TYPE::CoordType> > TD(m.vert);
 	
 	// refine dei vertici odd, crea dei nuovi vertici in coda
 	Refine< MESH_TYPE,OddPointLoop<MESH_TYPE> > (m, odd, length, RefineSelected, cbOdd);
 	// momentaneamente le callback sono identiche, almeno cbOdd deve essere passata
 	cbEven = cbOdd;
 
-	
-	// --------- BEGIN NEW CODE -------------
-
 	assert (m.vn != n); // odd aggiunge i vertici
 
 	
-	//vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
 		vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF(m);
 	// aggiorno i flag perche' IsB funzioni
 	vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace (m);
@@ -315,83 +294,6 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 		m.vert[i].SetUserBit(evenFlag);
 	}
 	
-	//// inizializza l'oggetto temporaneo
-	//EvenParam<typename MESH_TYPE::CoordType> evenParam;
-	//evenParam.sum = MESH_TYPE::CoordType(0,0,0) ; 
-	//evenParam.k = 0 ;
-	//evenParam.border = false;
-
-	//TD.Start(evenParam); 
-	//// calcolo i valori per TD per tutti i vertici vecchi (marcati)
-	//typename MESH_TYPE::FaceIterator fi;
-	//for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
-	//	for (int i = 0; i < 3; i++) { //itero vert
-	//		if ( (*fi).V(i)->IsUserBit(evenFlag) ) { // se e' even ...
-	//		qDebug("P: %f\t%f\t%f", (*fi).V(i)->P()[0],(*fi).V(i)->P()[1],(*fi).V(i)->P()[2]);
-
-	//			if ((*fi).V(i)->IsB()) { // ... ed e' di bordo
-
-	//				if ( (*fi).V1(i)->IsB() ) // controlla l'altro vertice di bordo
-	//					TD[(*fi).V(i)].sum += (*fi).V1(i)->P() / 8.0;
-	//				if ( (*fi).V2(i)->IsB() )
-	//          TD[(*fi).V(i)].sum += (*fi).V2(i)->P() / 8.0;
-
-	//				TD[(*fi).V(i)].border = true;
-	//				// k non viene usato nel caso del bordo
-	//			} else { // non di bordo
-	//				
-	//				//TD[(*fi).V(i)].sum += ( (*fi).V1(i)->P() + (*fi).V2(i)->P() ) / 2.0;
-	//				TD[(*fi).V(i)].sum += (*fi).V1(i)->P()/2;
-	//				TD[(*fi).V(i)].sum += (*fi).V2(i)->P()/2;
-	//				Point3f sumTemp = TD[(*fi).V(i)].sum;
-	//				
-	//				TD[(*fi).V(i)].k += 1;
-	//				float kTemp = TD[(*fi).V(i)].k;
-	//				TD[(*fi).V(i)].border = false;
-
-	//			} // bordo / non bordo
-	//		} // e' even ?
-	//	} // for vert
-	//} // for face
-	//	
-	//float beta = 0;
-	//typename MESH_TYPE::VertexIterator vi;
-	//for (vi = m.vert.begin(); vi != m.vert.end(); ++vi) {
-	//	if ((*vi).IsUserBit(evenFlag)) { // selezionato
-	//		qDebug("P: %f\t%f\t%f", (*vi).P()[0],(*vi).P()[1],(*vi).P()[2]);
-	//		if ( ! TD[*vi].border ) { // non di bordo
-
-	//			//beta = ((1.0/(float)TD[*vi].k) * (5.0/8.0 - pow((3.0/8.0 + 0.25 * cos(2*PI/(float)TD[*vi].k)),2)));			
-	//			if ( TD[*vi].k > 3 && TD[*vi].k != 6) {
-	//				//beta = ((1.0/(float)TD[*vi].k) * (5.0/8.0 - pow((3.0/8.0 + 0.25 * cos(2*PI/(float)TD[*vi].k)),2)));
-	//				beta = 3.0 / (8.0 * TD[*vi].k);
-	//			}
-	//			if (TD[*vi].k == 6) {
-	//				(*vi).P() = (*vi).P() * 10.0 / 16.0 + TD[*vi].sum * (1.0 / 16.0);
-	//			}	
-	//			if ( TD[*vi].k == 3 ) {
-	//				beta = 3.0f / 16.0f;
-	//				qDebug("b == 3, %f", beta);
-	//			}
-	//			float kTemp = TD[*vi].k;
-	//			Point3f sumTemp = TD[*vi].sum;
-	//			if (TD[*vi].k != 6)
-	//				(*vi).P() = ( (*vi).P() * (1 - TD[*vi].k * beta) ) + (TD[*vi].sum * beta);
-	//			
-	//		}
-	//		else { // bordo 
-	//			assert((*vi).IsB()); // il vertice deve essere di bordo
-	//			(*vi).P() = ( (*vi).P() * (3.0 / 4.0f)) + TD[*vi].sum;
-	//		}
-	//	}
-	//}
-
-	//TD.Stop();	
-
-	
-
-	// --------- END	 NEW CODE -------------
-
 
 	int j = 0;
 	typename MESH_TYPE::FaceType::ColorType color[6];  // per ogni faccia sono al piu' tre i nuovi valori 
@@ -418,10 +320,6 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 		}
 	}
 
-	/*if (cbEven) {
-		(*cbEven)(100, "Updating topology");
-	}
-	vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);*/
 	return true;
 }
 
