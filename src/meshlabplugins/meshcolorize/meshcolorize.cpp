@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.22  2006/01/31 10:54:28  vannini
+curvature<>color mapping now ignores border vertex
+
 Revision 1.21  2006/01/30 17:19:22  vannini
 Added manual values to control min and max Q (mapping curvature to color)
 
@@ -236,6 +239,9 @@ void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &
 
   if(mode->text() == ST(CP_GAUSSIAN))
     {
+      vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+      vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+      vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace (m.cm);
       Curvature<CMeshO> c(m.cm);
       c.MapGaussianCurvatureIntoQuality();
       c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));

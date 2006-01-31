@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/01/31 10:54:28  vannini
+curvature<>color mapping now ignores border vertex
+
 Revision 1.1  2006/01/27 18:27:53  vannini
 code refactoring for curvature colorize
 added colorize equalizer dialog and
@@ -79,13 +82,14 @@ namespace vcg
       float area0, area1, area2, angle0, angle1, angle2, e01, e12, e20, t;
       FaceIterator fi;
       VertexIterator vi;
-
+	
       //Calcola AreaMix in H (vale anche per K)
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
         (*TDPtr)[*vi].H=0;
 
-      for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if(!(*fi).IsD())
+      for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if( !(*fi).IsD())
       {
+
         // angles
         angle0 = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
         angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
@@ -116,7 +120,7 @@ namespace vcg
       i = 0;
       areaH = new float[(*ms).vn];
       areaK = new float[(*ms).vn];
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi,++i) if(!(*vi).IsD())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi,++i) if(!(*vi).IsD() && !(*vi).IsB())
       {
         areaH[i] = areaK[i] = (*TDPtr)[*vi].H;    //Areamix è comune a H e a K
         (*TDPtr)[*vi].H = 0;
@@ -124,7 +128,7 @@ namespace vcg
 
       }
       
-      for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if(!(*fi).IsD())
+      for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if( !(*fi).IsD() )
       {    
         angle0 = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
         angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
@@ -148,7 +152,7 @@ namespace vcg
       }
       
       i=0;
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi,++i) if(!(*vi).IsD())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi,++i) if(!(*vi).IsD() && !(*vi).IsB())
       {
         if(areaH[i]<=std::numeric_limits<float>::epsilon())
           (*TDPtr)[*vi].H = 0;
@@ -181,9 +185,9 @@ namespace vcg
 
     void MapGaussianCurvatureIntoQuality()
     { 
-          
       VertexIterator vi;
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD()) 
+
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
         (*vi).Q() = (*TDPtr)[*vi].K;
     }
 
@@ -191,7 +195,7 @@ namespace vcg
     void MapMeanCurvatureIntoQuality()
     {
       VertexIterator vi;
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD()) 
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
         (*vi).Q() = (*TDPtr)[*vi].H;
     }
 
@@ -201,7 +205,7 @@ namespace vcg
       VertexIterator vi;
 
       //Compute sqrt(4*H^2-2K)
-	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
+	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
         (*vi).Q()=math::Sqrt((4.0f * powf((*TDPtr)[*vi].H, 2.0f)) - ((*TDPtr)[*vi].K * 2.0f));
     }
 
@@ -211,7 +215,7 @@ namespace vcg
       float t;
 
       //Compute abs(H+sqrt(H*H-K)) + abs(H-sqrt(H*H-K))
-	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
+	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
       {
         t=math::Sqrt(powf((*TDPtr)[*vi].H, 2.0f) - (*TDPtr)[*vi].K);
         (*vi).Q()= math::Abs((*TDPtr)[*vi].H + t) + math::Abs((*TDPtr)[*vi].H - t);
@@ -225,7 +229,7 @@ namespace vcg
       r.min=std::numeric_limits<float>::max();
       r.max=-std::numeric_limits<float>::max();
 
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
       {
         if ((*vi).Q() < r.min) r.min = (*vi).Q();
         if ((*vi).Q() > r.max) r.max = (*vi).Q();   
@@ -242,7 +246,7 @@ namespace vcg
       
       histo.SetRange(Q.min, Q.max, histo_range);
       
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD()) 
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
         histo.Add((*vi).Q());
         
       Q.min = histo.Percentile(histo_frac);
@@ -256,7 +260,7 @@ namespace vcg
     {
       VertexIterator vi;
               
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD()) 
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
         (*vi).C().ColorRamp(P.min, P.max, (*vi).Q());
       
     }
