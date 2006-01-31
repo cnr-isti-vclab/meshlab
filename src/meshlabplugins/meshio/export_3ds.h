@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/01/31 09:34:30  fmazzant
+ bug-fix on savemaskexporter, when press cancel returns -1.
+
  Revision 1.3  2006/01/29 23:52:43  fmazzant
  correct a small bug
 
@@ -263,51 +266,53 @@ namespace io {
 					face.normal[2] = (*fi).N()[2];
 				}
 
-				int material_index = CreateNewMaterial(m, materials, 0, fi);
-				if(material_index == materials.size())
+				if(mask & MeshModel::IOM_FACECOLOR | mask & MeshModel::IOM_WEDGTEXCOORD)
 				{
-					Lib3dsMaterial *material = lib3ds_material_new();//creates a new material
-					
-					std::string name = qnamematerial.arg(material_index-1).toStdString();
-					strcpy(material->name,name.c_str());//copy new name of material
-
-					if(mask & MeshModel::IOM_FACECOLOR)
+					int material_index = CreateNewMaterial(m, materials, 0, fi);
+					if(material_index == materials.size())
 					{
-						//ambient
-						material->ambient[0] = materials[materials.size()-1].Ka[0];
-						material->ambient[1] = materials[materials.size()-1].Ka[1];
-						material->ambient[2] = materials[materials.size()-1].Ka[2];
-						material->ambient[3] = materials[materials.size()-1].Tr;
+						Lib3dsMaterial *material = lib3ds_material_new();//creates a new material
+						
+						std::string name = qnamematerial.arg(material_index-1).toStdString();
+						strcpy(material->name,name.c_str());//copy new name of material
 
-						//diffuse
-						material->diffuse[0] = materials[materials.size()-1].Kd[0];
-						material->diffuse[1] = materials[materials.size()-1].Kd[1];
-						material->diffuse[2] = materials[materials.size()-1].Kd[2];
-						material->diffuse[3] = materials[materials.size()-1].Tr;
+						if(mask & MeshModel::IOM_FACECOLOR)
+						{
+							//ambient
+							material->ambient[0] = materials[materials.size()-1].Ka[0];
+							material->ambient[1] = materials[materials.size()-1].Ka[1];
+							material->ambient[2] = materials[materials.size()-1].Ka[2];
+							material->ambient[3] = materials[materials.size()-1].Tr;
 
-						//specular
-						material->specular[0] = materials[materials.size()-1].Ks[0];
-						material->specular[1] = materials[materials.size()-1].Ks[1];
-						material->specular[2] = materials[materials.size()-1].Ks[2];
-						material->specular[3] = materials[materials.size()-1].Tr;
+							//diffuse
+							material->diffuse[0] = materials[materials.size()-1].Kd[0];
+							material->diffuse[1] = materials[materials.size()-1].Kd[1];
+							material->diffuse[2] = materials[materials.size()-1].Kd[2];
+							material->diffuse[3] = materials[materials.size()-1].Tr;
 
-						//shininess
-						material->shininess = materials[materials.size()-1].Ns;
+							//specular
+							material->specular[0] = materials[materials.size()-1].Ks[0];
+							material->specular[1] = materials[materials.size()-1].Ks[1];
+							material->specular[2] = materials[materials.size()-1].Ks[2];
+							material->specular[3] = materials[materials.size()-1].Tr;
+
+							//shininess
+							material->shininess = materials[materials.size()-1].Ns;
+						}
+											
+						//texture
+						if(mask & MeshModel::IOM_WEDGTEXCOORD)
+							strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
+
+						lib3ds_file_insert_material(file,material);//inserts the material inside the file
+						strcpy(face.material,name.c_str());
 					}
-										
-					//texture
-					if(mask & MeshModel::IOM_WEDGTEXCOORD)
-						strcpy(material->texture1_map.name,materials[materials.size()-1].map_Kd.c_str());
-
-					lib3ds_file_insert_material(file,material);//inserts the material inside the file
-					strcpy(face.material,name.c_str());
+					else
+					{	
+						std::string name = qnamematerial.arg(material_index).toStdString();
+						strcpy(face.material,name.c_str());//set name of material
+					}
 				}
-				else
-				{	
-					std::string name = qnamematerial.arg(material_index).toStdString();
-					strcpy(face.material,name.c_str());//set name of material
-				}
-
 
 				mesh->faceL[f_index]=face;
 

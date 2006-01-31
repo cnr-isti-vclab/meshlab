@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.7  2006/01/31 09:34:29  fmazzant
+ bug-fix on savemaskexporter, when press cancel returns -1.
+
  Revision 1.6  2006/01/30 14:27:29  fmazzant
  update GetMaskCapability of PLY,OFF and STL.
 
@@ -206,7 +209,7 @@ void SaveMaskExporterDialog::SlotOkButton()
 
 void SaveMaskExporterDialog::SlotCancelButton()
 {
-	this->mask=0;
+	this->mask=-1;
 }
 
 void SaveMaskExporterDialog::SlotRenameTexture()

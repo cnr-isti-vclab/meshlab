@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.80  2006/01/31 09:34:29  fmazzant
+bug-fix on savemaskexporter, when press cancel returns -1.
+
 Revision 1.79  2006/01/30 23:47:25  buzzelli
 minor changes into open method
 
@@ -517,8 +520,8 @@ bool MainWindow::saveAs()
 		int capability = pCurrentIOPlugin->GetExportMaskCapability(extension);
 		
 		int mask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(this->GLA()->mm, capability);
-		if(mask == 0)return false;
-
+		if(mask == -1) 
+			return false;
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
 		qb->hide();
