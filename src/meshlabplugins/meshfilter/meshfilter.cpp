@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.52  2006/01/31 14:42:27  mariolatronico
+fake commit, removed only some history logs
+
 Revision 1.51  2006/01/31 14:37:40  mariolatronico
 trashold -> threshold
 
@@ -58,57 +61,6 @@ added Apply Transform progress, but work in progress. Currently it modifies mesh
 Revision 1.40  2006/01/09 15:25:58  mariolatronico
 - updated Help and Short help
 - on destructor deleted every action
-
-Revision 1.39  2006/01/06 10:58:22  giec
-Remuved filter "Color non manifold"
-
-Revision 1.38  2006/01/05 16:46:40  mariolatronico
-removed manifold test on invert faces and added update normals on reorient case
-
-Revision 1.37  2006/01/05 16:08:54  mariolatronico
-correct typo on comments
-
-Revision 1.36  2006/01/05 15:37:56  mariolatronico
-added control for mesh 2-manifold on subdivision algorithms and invert faces
-
-Revision 1.35  2006/01/05 11:06:41  mariolatronico
-Added Invert faces filter
-
-Revision 1.34  2006/01/03 23:41:06  cignoni
-corrected bug in the invocation of clean::IsOrientedMesh with twice the same boolan var
-
-Revision 1.33  2006/01/03 11:15:37  mariolatronico
-ActionInfo ai in Info() must be static because the function return a reference
-
-Revision 1.32  2006/01/02 12:39:41  mariolatronico
-used ST function to compare action->text() inside Info function
-
-Revision 1.31  2005/12/30 11:25:09  mariolatronico
-removed glArea dependency ... added log variable to log info
-
-Revision 1.30  2005/12/30 10:16:14  giec
-Added the Color non manifold filter
-
-Revision 1.29  2005/12/29 13:50:26  mariolatronico
-changed or in orValue to compile with gcc
-
-Revision 1.28  2005/12/23 10:02:43  giec
-added two filter: Midpoint and  Reoriented
-
-Revision 1.27  2005/12/22 15:19:22  mariolatronico
-changed normal cast to dynamic_cast for GLArea
-
-Revision 1.26  2005/12/22 14:16:00  mariolatronico
-added log information through glArea->log object
-
-Revision 1.25  2005/12/22 13:32:20  mariolatronico
-changed name conventions of plugin, now use ST and enum FilterType
-
-Revision 1.24  2005/12/21 11:02:14  mariolatronico
-refactored subdivision surfaces code
-
-Revision 1.23  2005/12/19 15:11:49  mariolatronico
-added decimator dialog
 
 ****************************************************************************/
 #include <QtGui>
