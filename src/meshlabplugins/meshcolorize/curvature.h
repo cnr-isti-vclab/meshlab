@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/01/31 15:59:00  vannini
+Severe bugfix in mean curvature computation
+
 Revision 1.2  2006/01/31 10:54:28  vannini
 curvature<>color mapping now ignores border vertex
 
@@ -95,7 +98,7 @@ namespace vcg
         angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
         angle2 = M_PI-(angle0+angle1);
         
-        if((angle0 < M_PI/2) || (angle1 < M_PI/2) || (angle2 < M_PI/2))  // triangolo non ottuso
+        if((angle0 > M_PI/2) || (angle1 > M_PI/2) || (angle2 > M_PI/2))  // triangolo non ottuso
         { 
 	        float e01 = SquaredDistance( (*fi).V(1)->P() , (*fi).V(0)->P() );
 	        float e12 = SquaredDistance( (*fi).V(2)->P() , (*fi).V(1)->P() );
@@ -133,12 +136,12 @@ namespace vcg
         angle0 = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
         angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
         angle2 = M_PI-(angle0+angle1);
-
-        e01 = Distance( (*fi).V(1)->P() , (*fi).V(0)->P() );
-        e12 = Distance( (*fi).V(2)->P() , (*fi).V(1)->P() );
-        e20 = Distance( (*fi).V(0)->P() , (*fi).V(2)->P() );
         
-        area0 = ( e20*(1.0/tan(angle1)) + e01*(1.0/tan(angle2)) ) / 2.0;
+        e01 = ( (*fi).V(1)->P() - (*fi).V(0)->P() ) * (*fi).V(0)->N();
+        e12 = ( (*fi).V(2)->P() - (*fi).V(1)->P() ) * (*fi).V(1)->N();
+        e20 = ( (*fi).V(0)->P() - (*fi).V(2)->P() ) * (*fi).V(2)->N();
+        
+        area0 = ( e20 * (1.0/tan(angle1)) + e01 * (1.0/tan(angle2)) ) / 2.0;
 	      area1 = ( e01*(1.0/tan(angle2)) + e12*(1.0/tan(angle0)) ) / 2.0;
 	      area2 = ( e12*(1.0/tan(angle0)) + e20*(1.0/tan(angle1)) ) / 2.0;
           
