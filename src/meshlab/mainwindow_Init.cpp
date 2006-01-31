@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.44  2006/01/31 15:25:13  davide_portelli
+Added short key lastFilter
+
 Revision 1.43  2006/01/19 23:11:39  glvertex
 No significant changes
 
@@ -241,6 +244,8 @@ void MainWindow::createActions()
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
 	lastFilterAct = new QAction(tr("Apply filter"),this);
+	lastFilterAct->setShortcutContext(Qt::ApplicationShortcut);
+	lastFilterAct->setShortcut(Qt::CTRL+Qt::Key_L);
 	lastFilterAct->setEnabled(false);
 	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
 	
