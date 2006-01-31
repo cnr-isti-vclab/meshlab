@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.2  2006/01/31 14:44:41  mariolatronico
+removed unused and commented old code
+
 Revision 1.1  2006/01/30 20:43:57  giec
 Added filter dialog files
 
@@ -47,25 +50,6 @@ new version with real average point
 Revision 1.6  2005/12/09 20:53:49  giec
 Change vetor<vetor<vetor<Point3f>>> to Point3f***.
 Semplify the mesh but with a litter error.
-
-Revision 1.5  2005/12/09 18:26:13  mariolatronico
-code cleaning and added floor() to calculate indexes (idx, idy, idz)
-
-Revision 1.4  2005/12/08 14:53:36  mariolatronico
-changed implementation of Vett type (from array [] [] [] to 3 std::vector nested)
-
-Revision 1.3  2005/12/05 18:47:08  mariolatronico
-first try with correct Set and User bit
-
-Revision 1.2  2005/12/02 21:34:21  mariolatronico
-correct bounding box coordinate and indexes (idx, idy and idz).
-Doesn't work yet, work in progress. Need to check UpdateBoundingBox
-and correct set of flags (SetS and IsS)
-
-Revision 1.1  2005/12/01 20:46:43  giec
-Test program for clustering decimator.
-
-
 
 ****************************************************************************/
 
@@ -124,85 +108,54 @@ namespace vcg{
 		}
 
 	 typename MESH_TYPE::CoordType Cmin,Cmax;
-		//Cmin.Zero(); Cmax.Zero();
-		//for (int i = 0; i < 3; i++) {
-		//	//			Cmin[i] = numeric_limits< float >::max();
-		//	//Cmax[i] = -numeric_limits< float >::max();
-		//	Cmin[i] = 10000.0f;
-		//	Cmax[i] = -10000.0f;
-		//}
-
-
-		//
-		//
-  //  for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-  //    {
-		//		Cmin.X() = min(Cmin.X(), (*vi).P().X());
-		//		Cmin.Y() = min(Cmin.Y(), (*vi).P().Y());
-		//		Cmin.Z() = min(Cmin.Z(), (*vi).P().Z());
-		//		Cmax.X() = max(Cmax.X(), (*vi).P().X());
-		//		Cmax.Y() = max(Cmax.Y(), (*vi).P().Y());
-		//		Cmax.Z() = max(Cmax.Z(), (*vi).P().Z());
-
-		//	}		
-		//
-
-    //if(Cmin > Cmax)
-    //  {
-				//typename MESH_TYPE::CoordType t = Cmax;
-				//Cmax=Cmin;
-				//Cmin = t;
-    //  }
-
-		Cmax = m.bbox.max;
-		Cmin = m.bbox.min;
-
-		Point3f tras = Cmin;
-		tras.Zero();
-		if ( Cmin.X() < 0.00000001 ) {
-			tras.X() =abs( Cmin.X());
-		}
-		if ( Cmin.Y() < 0.00000001 ) {
-			tras.Y() = abs(Cmin.Y());
-		}
-		if ( Cmin.Z() < 0.00000001 ) {
-			tras.Z() = abs(Cmin.Z());
-		}
-
-    //Passo di divisione per ogni asse della bounding box
-    float Px = (Cmax[0] + tras[0])/Xn;
-    float Py = (Cmax[1] + tras[1])/Yn;
-    float Pz = (Cmax[2] + tras[2])/Zn;
-
-  	
-    int idx,idy,idz;
-		float x=0.0f,y=0.0f,z=0.0f;
-		int referredBit = MESH_TYPE::VertexType::NewBitFlag();
-		typename MESH_TYPE::VertexIterator vi;
-    //calcolo i nuovi vertici dalla media di quelli di ogni cella
-    for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-      {
-				
-				//calcolo l'indice della cella in cui cade il vertice
-				Point3f app = (*vi).P();
-				app = (app + tras);
-				x=app[0];
-				y=app[1];
-				z=app[2];
-				
-				idx = (floor(x / Px));
-				idy = (floor(y / Py));
-				idz = (floor(z / Pz));
-				
-				if(idx > Xn-1)idx = Xn-1;
-				if(idy > Yn-1)idy = Yn-1;
-				if(idz > Zn-1)idz = Zn-1;
-
-				//Vett[idx][idy][idz] = (Vett[idx][idy][idz] + (app - tras))/2;
-				Vett[idx][idy][idz].accum += (app - tras);
-				Vett[idx][idy][idz].num++;
-				
-				(*vi).ClearUserBit(referredBit);
+	 Cmax = m.bbox.max;
+	 Cmin = m.bbox.min;
+	 
+	 Point3f tras = Cmin;
+	 tras.Zero();
+	 if ( Cmin.X() < 0.00000001 ) {
+		 tras.X() =abs( Cmin.X());
+	 }
+	 if ( Cmin.Y() < 0.00000001 ) {
+		 tras.Y() = abs(Cmin.Y());
+	 }
+	 if ( Cmin.Z() < 0.00000001 ) {
+		 tras.Z() = abs(Cmin.Z());
+	 }
+	 
+	 //Passo di divisione per ogni asse della bounding box
+	 float Px = (Cmax[0] + tras[0])/Xn;
+	 float Py = (Cmax[1] + tras[1])/Yn;
+	 float Pz = (Cmax[2] + tras[2])/Zn;
+	 
+	 
+	 int idx,idy,idz;
+	 float x=0.0f,y=0.0f,z=0.0f;
+	 int referredBit = MESH_TYPE::VertexType::NewBitFlag();
+	 typename MESH_TYPE::VertexIterator vi;
+	 //calcolo i nuovi vertici dalla media di quelli di ogni cella
+	 for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+		 {
+			 
+			 //calcolo l'indice della cella in cui cade il vertice
+			 Point3f app = (*vi).P();
+			 app = (app + tras);
+			 x=app[0];
+			 y=app[1];
+			 z=app[2];
+			 
+			 idx = (floor(x / Px));
+			 idy = (floor(y / Py));
+			 idz = (floor(z / Pz));
+			 
+			 if(idx > Xn-1)idx = Xn-1;
+			 if(idy > Yn-1)idy = Yn-1;
+			 if(idz > Zn-1)idz = Zn-1;
+			 
+			 Vett[idx][idy][idz].accum += (app - tras);
+			 Vett[idx][idy][idz].num++;
+			 
+			 (*vi).ClearUserBit(referredBit);
 
 			}
 
@@ -247,10 +200,6 @@ namespace vcg{
 
 									}
 							}
-						//area = Area(*fi);
-						//if( area  <  0.0000000001f ) {// numeric_limits<float>::epsilon() ){
-						//	(*fi).SetD();
-						//	}
 						for(int idf =0 ;idf <3;++idf)
 						{
 							if(((*fi).V(idf) == (*fi).V1(idf)) || ((*fi).V(idf) == (*fi).V2(idf)))
@@ -258,7 +207,6 @@ namespace vcg{
 						}
 					}
 			}
-		//		qDebug("eliminate %d vertici",tri::Clean<CMeshO>::RemoveUnreferencedVertex(m));
 		int vertexDeleted = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m);
 		tri::Clean<CMeshO>::RemoveZeroAreaFace(m);
 		tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
