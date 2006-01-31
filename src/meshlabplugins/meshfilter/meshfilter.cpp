@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.51  2006/01/31 14:37:40  mariolatronico
+trashold -> threshold
+
 Revision 1.50  2006/01/30 21:26:53  giec
 -changed the voice of the menu from Decimator in Cluster decimator
 
@@ -178,7 +181,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 	case FP_TRANSFORM:
 		return QString("Apply Transform");
 	case FP_DETACHER:
-		return QString("Remuve triangle above trashold");
+		return QString("Remuve triangle above threshold");
 
 	default: assert(0);
   }
@@ -272,8 +275,8 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
  		}
 		if(action->text() == ST(FP_DETACHER) )
  		{
-			ai.Help = tr("remove from the mesh all triangles whose have an edge with lenght greater or equal than a trashold");
-			ai.ShortHelp = tr("Remove triangle with edge greater than a trashold");
+			ai.Help = tr("remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");
+			ai.ShortHelp = tr("Remove triangle with edge greater than a threshold");
  		}
 	
    return ai;
