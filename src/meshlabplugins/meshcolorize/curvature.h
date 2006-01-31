@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/01/31 16:22:10  vannini
+Small bugfix
+
 Revision 1.3  2006/01/31 15:59:00  vannini
 Severe bugfix in mean curvature computation
 
@@ -87,7 +90,7 @@ namespace vcg
       VertexIterator vi;
 	
       //Calcola AreaMix in H (vale anche per K)
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
         (*TDPtr)[*vi].H=0;
 
       for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if( !(*fi).IsD())
@@ -123,7 +126,7 @@ namespace vcg
       i = 0;
       areaH = new float[(*ms).vn];
       areaK = new float[(*ms).vn];
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi,++i) if(!(*vi).IsD() && !(*vi).IsB())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi,++i) if(!(*vi).IsD())
       {
         areaH[i] = areaK[i] = (*TDPtr)[*vi].H;    //Areamix è comune a H e a K
         (*TDPtr)[*vi].H = 0;
@@ -141,9 +144,9 @@ namespace vcg
         e12 = ( (*fi).V(2)->P() - (*fi).V(1)->P() ) * (*fi).V(1)->N();
         e20 = ( (*fi).V(0)->P() - (*fi).V(2)->P() ) * (*fi).V(2)->N();
         
-        area0 = ( e20 * (1.0/tan(angle1)) + e01 * (1.0/tan(angle2)) ) / 2.0;
-	      area1 = ( e01*(1.0/tan(angle2)) + e12*(1.0/tan(angle0)) ) / 2.0;
-	      area2 = ( e12*(1.0/tan(angle0)) + e20*(1.0/tan(angle1)) ) / 2.0;
+        area0 = ( e20 * (1.0/tan(angle1)) + e01 * (1.0/tan(angle2)) ) / 4.0;
+	      area1 = ( e01 * (1.0/tan(angle2)) + e12 * (1.0/tan(angle0)) ) / 4.0;
+	      area2 = ( e12 * (1.0/tan(angle0)) + e20 * (1.0/tan(angle1)) ) / 4.0;
           
         (*TDPtr)[(*fi).V(0)].H  += area0;
 	      (*TDPtr)[(*fi).V(1)].H  += area1;
