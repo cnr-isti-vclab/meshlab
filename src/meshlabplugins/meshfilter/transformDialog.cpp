@@ -26,6 +26,12 @@
 
 /*
 $Log$
+Revision 1.2  2006/01/31 18:24:44  mariolatronico
+- dial updated only if rotate line edit has non negative numbers.
+  This allows negative numbers on rotate line edit
+- connections between line edits and on_okButton_pressed() to allow
+  rapid edit and return actions
+
 Revision 1.1  2006/01/30 20:43:57  giec
 Added filter dialog files
 
@@ -45,16 +51,6 @@ and viceversa
 Revision 1.7  2006/01/22 16:40:38  mariolatronico
 - restored correct layout in .ui
 - added rotate around origini / object center
-
-Revision 1.6  2006/01/22 14:11:04  mariolatronico
-added scale to unit box, move obj center. Rotate around object and origin are not working actually.
-
-Revision 1.5  2006/01/21 14:20:38  mariolatronico
-interface work in progress on new features , need implementation
-
-Revision 1.4  2006/01/17 14:18:03  mariolatronico
-- added connection between rotate Line edit and dial
-- bugfix, angle were passed in degrees, must be in radians
 
 */
 
@@ -89,7 +85,16 @@ TransformDialog::TransformDialog() : QDialog() {
 					this, SLOT(selectTransform(QAbstractButton* )));
 	connect(rotateBG, SIGNAL(buttonClicked(QAbstractButton* )),
 					this, SLOT(rotateAxisChange(QAbstractButton* )));
-	
+
+	connect(xMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	connect(yMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	connect(zMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	connect(xScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	connect(yScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	connect(zScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	connect(rotateLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+
+
 	// default to AXIS_X for rotation and Move transformation
 	rotateAxis = AXIS_X;
 	matrix.SetIdentity();
@@ -212,8 +217,9 @@ void TransformDialog::on_rotateLE_textChanged(const QString &text) {
 	bool isNumber = false;
 	// type coercion
 	int value = text.toFloat(&isNumber);
-	if (isNumber) 
+	if ( isNumber && value > 0 ) {
 		rotateDial->setValue((value + 180)%360);
+	}
 
 }
 // move mesh center to origin
