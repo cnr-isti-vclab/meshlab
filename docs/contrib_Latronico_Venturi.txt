@@ -1,3 +1,11 @@
+Prima di andare a fare la vera e propria chiamata del filtro,
+viene fatto un controllo sul tipo di filtro selezionato, se questo fa 
+parte della famiglia dei filtri che suddividono le facce, viene controllata
+la mesh per essere sicuri che sia 2-manifold, se passa il test vengono 
+aggiornate le topologie della mesh, specificatamente quella delle facce,
+delle facce di bordo e normali.
+
+
 [Loop Subdivision Surfaces]
 
 Per l'algoritmo di Loop abbiamo preso come riferimento le "Course Notes"
@@ -20,7 +28,16 @@ Come Butterfly richiama il metodo RefineE con la funzione di suddivisione
 che implementa il metodo midpoint
 
 [Remove Unreferenced Vertex]
+
+Questo filtro richiama la funzione della libreria VCG che controlla la topologia
+della mesh e rimuove i vertici non riferiti da nessuna faccia.
+
 [Remove Duplicated Vertex]
+
+Questo filtro richiama la funzione della libreria VCG che controlla la topologia
+della mesh e rimuove i vertici duplicati.
+
+
 [Remove Null Faces]
 
 Anche in questo caso e' un'interfaccia verso i metodi della libreria VCG
@@ -29,7 +46,13 @@ i vertici duplicati e le facce nulle
 
 [Laplacian Smooth]
 
+La chiamata di questo filtro determina l'invocazioe di un solo ciclo dell'algoritmo
+di smoothing implementato nella libreria VCG.
+
 [Reorient Faces]
+
+Invoca la chiamata di libreria che riorienta le facce della mesh, questa chiamata viene 
+fatta dopo aver aggiornato la topologia faccia-faccia e prima di ritornare aggiorna le normali.
 
 [Remove triangle above threshold]
 
@@ -41,6 +64,10 @@ Rimuove i triangoli che soddisfano alcune condizioni di soglia, specificata come
 [Decimator]
 
 Applica l'algoritmo di decimazione, basato sul lavoro di Rossignac.
+Tramite il dialog, a cui viene passata la diagonale della bounding box, si puo' 
+specificare la lunghezza dei lati dei cubi o in quanti cubi deve essere divisa la 
+bounding box, tramite un check box inoltre e' possibile decidere se le misure dei 
+tre assi devono essere uniformate.
 
 [Invert Faces]
 
@@ -53,6 +80,12 @@ Applica le trasformazioni SRT (Scale, Rotate, Transform). Ci sono degli
 shortcut in modo da posizionare il centro dell'oggetto nell'origine del mondo,
 oppure di scalare l'oggetto in modo da racchiuderlo in un cubo unitario.
 La rotazione puo' essere fatta attorno all'origine o al centro dell'oggetto.
+La trasformazione viene attuata tramite una matrice di trasformazione, di 
+tipo Matrix44f dalla libreria VCG che ha i metodi SetTranslate, SetRotate, SetScale.
 
+[Color non manifold]
 
+Questa funzione cicla su tutte le facce della mesh passatagli e colora le facce
+che non sono manifold, ovvero controlla il numero di facce che incidono su uno 
+stesso edge, se questo numero e' maggiore di due la mesh non e' manifold.
 
