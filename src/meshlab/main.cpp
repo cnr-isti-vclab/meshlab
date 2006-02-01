@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/02/01 12:45:29  glvertex
+- Solved openig bug when running by command line
+
 Revision 1.3  2005/12/01 02:24:50  davide_portelli
 Mainwindow Splitted----->[ mainwindow_Init.cpp ]&&[ mainwindow_RunTime.cpp ]
 
@@ -36,8 +39,13 @@ Added copyright info
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
-    MainWindow window;
-    window.showMaximized();
-    return app.exec();
+	QApplication app(argc, argv);
+	MainWindow window;
+	window.showMaximized();
+
+	if(argc>1)	window.open(argv[1]);
+	else		window.open();
+
+
+	return app.exec();
 }
