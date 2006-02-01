@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.82  2006/02/01 15:49:46  buzzelli
+solved a bug which appeared when a not supported file was loaded via command line option
+
 Revision 1.81  2006/02/01 12:44:42  glvertex
 - Disabled EDIT menu when no editing tools loaded
 - Solved openig bug when running by command line
@@ -334,7 +337,7 @@ void MainWindow::toggleBackFaceCulling()
 
 
 enum TypeIO{IMPORT,EXPORT};
-void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats,int type)
+void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type)
 {
 	QString allKnownFormatsFilter = tr("All known formats ("); 
 	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
@@ -365,7 +368,7 @@ void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &all
 				QString currentExtension = itExtension.next().toLower();
 				if (!allKnownFormats.contains(currentExtension))
 				{
-					allKnownFormats.insert(currentExtension, i);
+					allKnownFormats.insert(currentExtension, i+1);
 					allKnownFormatsFilter.append(tr(" *."));
 					allKnownFormatsFilter.append(currentExtension);
 				}
@@ -388,7 +391,7 @@ void MainWindow::open(QString fileName)
 	QStringList filters;
 	
 	// HashTable storing all supported formats togheter with
-	// the index of first plugin which is able to open it
+	// the (1-based) index  of first plugin which is able to open it
 	QHash<QString, int> allKnownFormats;
 	
 	LoadKnownFilters(filters, allKnownFormats,IMPORT);
@@ -403,17 +406,22 @@ void MainWindow::open(QString fileName)
 	QDir::setCurrent(fileNameDir);
 
 	
-	MeshModel *mm= new MeshModel();	
-	qb->show();
-
 	QString extension = fileName;
 	extension.remove(0, fileName.lastIndexOf('.')+1);
 	
 	// retrieving corresponding IO plugin
 	int idx = allKnownFormats[extension.toLower()];
-	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
+	if (idx == 0)
+	{	
+		QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
+		QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
+		return;
+	}
+	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 	
-	int mask = -1;
+	qb->show();
+	int mask = 0;
+	MeshModel *mm= new MeshModel();	
 	if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla*/))
 		delete mm;
 	else{
@@ -497,7 +505,12 @@ bool MainWindow::saveAs()
 		QStringListIterator itFilter(filters);
 
 		int idx = allKnownFormats[extension.toLower()];
-		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx];
+		if (idx == 0)
+		{
+			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
+			return false;
+		}
+		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 		
 		int capability = pCurrentIOPlugin->GetExportMaskCapability(extension);
 		
