@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.18  2006/02/01 16:23:09  vannini
+Added "smooth color" filter
+
 Revision 1.17  2006/01/29 18:59:12  mariolatronico
 changed #include "equalizerdialog.h" -> equalizerDialog.h
 
@@ -74,7 +77,7 @@ class ExtraMeshColorizePlugin : public QObject, public MeshColorizeInterface
 
 public:
 
-    enum ColorizeType {CP_EQUALIZE,CP_GAUSSIAN,CP_MEAN,CP_RMS,CP_ABSOLUTE,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM,CP_RESTORE_ORIGINAL};
+    enum ColorizeType {CP_EQUALIZE,CP_GAUSSIAN,CP_MEAN,CP_RMS,CP_ABSOLUTE,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM,CP_SMOOTH,CP_RESTORE_ORIGINAL};
     const QString ST(ColorizeType c);
 
     ExtraMeshColorizePlugin();

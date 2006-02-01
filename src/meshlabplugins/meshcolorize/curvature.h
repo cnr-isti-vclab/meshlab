@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2006/02/01 16:23:09  vannini
+Added "smooth color" filter
+
 Revision 1.5  2006/01/31 16:36:13  vannini
 Removed two arrays of floats in favour of one SimpleTempData for temporary area values
 
@@ -93,7 +96,7 @@ namespace vcg
 
     void ComputeHK() 
     {
-      float area0, area1, area2, angle0, angle1, angle2, e01, e12, e20, t;
+      float area0, area1, area2, angle0, angle1, angle2, e01, e12, e20;
       FaceIterator fi;
       VertexIterator vi;
 	

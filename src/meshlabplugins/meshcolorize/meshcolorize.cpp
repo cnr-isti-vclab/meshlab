@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.23  2006/02/01 16:23:09  vannini
+Added "smooth color" filter
+
 Revision 1.22  2006/01/31 10:54:28  vannini
 curvature<>color mapping now ignores border vertex
 
@@ -99,6 +102,7 @@ Added copyright info
 #include "meshcolorize.h"
 #include "color_manifold.h"
 #include "curvature.h"
+#include "smoothcolor.h"
 
 using namespace vcg;
 
@@ -111,6 +115,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
   actionList << new QAction(ST(CP_SELFINTERSECT), this);
   actionList << new QAction(ST(CP_BORDER), this);
   actionList << new QAction(ST(CP_COLORNM), this);
+  actionList << new QAction(ST(CP_SMOOTH), this);
   actionList << new QAction(ST(CP_RESTORE_ORIGINAL), this);
 }
 const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
@@ -132,6 +137,8 @@ const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
       return QString("Border");
     case CP_COLORNM: 
       return QString("Color non Manifold");
+    case CP_SMOOTH: 
+      return QString("Smooth Color");
     case CP_RESTORE_ORIGINAL: 
       return QString("Restore Color");
     default: assert(0);
@@ -183,6 +190,11 @@ const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action)
   {
     ai.Help = tr("Colorize only non manifold edges.");
     ai.ShortHelp = tr("Colorize only non manifold edges");
+  }
+  if( action->text() == ST(CP_SMOOTH) )
+  {
+    ai.Help = tr("Apply laplacian smooth for colors.");
+    ai.ShortHelp = tr("Laplacian smooth for colors");
   }
   if( action->text() == ST(CP_RESTORE_ORIGINAL) )
   {
@@ -309,6 +321,12 @@ void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &
   if(mode->text() == ST(CP_RESTORE_ORIGINAL))
   {
      m.restoreVertexColor();
+     rm.colorMode = GLW::CMPerVert;
+  }
+
+  if(mode->text() == ST(CP_SMOOTH))
+  {
+     LaplacianSmoothColor(m.cm,1);
      rm.colorMode = GLW::CMPerVert;
   }
 }
