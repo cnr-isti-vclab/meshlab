@@ -8,5 +8,5 @@ DEPENDPATH += .
 INCLUDEPATH += .
 
 # Input
-HEADERS += QEdgeLength.h ui_edgeLengthDialog.h
+HEADERS += QEdgeLength.h 
 SOURCES += main.cpp QEdgeLength.cpp
