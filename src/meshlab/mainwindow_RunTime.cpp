@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.83  2006/02/01 17:48:12  buzzelli
+resolved a platform dependent issue about material and texture files locations
+
 Revision 1.82  2006/02/01 15:49:46  buzzelli
 solved a bug which appeared when a not supported file was loaded via command line option
 
@@ -39,12 +42,6 @@ minor changes into open method
 
 Revision 1.78  2006/01/26 18:39:19  fmazzant
 moved mask dialog exporter from mashio to meshlab
-
-Revision 1.77  2006/01/23 10:23:07  vannini
-added updateMenus() in applyColorMode()
-
-Revision 1.76  2006/01/20 11:14:27  glvertex
-Applyfilter now sets the <modified> flag when the filter is applied succesfully
 
 ****************************************************************************/
 
@@ -401,13 +398,11 @@ void MainWindow::open(QString fileName)
 	
 	if (fileName.isEmpty())	return;
 
-	// this change of dir is needed for subsequent texture loading
-	QString fileNameDir = fileName.left(fileName.lastIndexOf("/")); 
-	QDir::setCurrent(fileNameDir);
-
+	QFileInfo fi(fileName);
+	// this change of dir is needed for subsequent textures/materials loading
+	QDir::setCurrent(fi.absoluteDir().absolutePath());
 	
-	QString extension = fileName;
-	extension.remove(0, fileName.lastIndexOf('.')+1);
+	QString extension = fi.suffix();
 	
 	// retrieving corresponding IO plugin
 	int idx = allKnownFormats[extension.toLower()];
