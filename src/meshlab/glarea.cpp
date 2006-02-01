@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.89  2006/02/01 11:49:12  glvertex
+Closing confirmation for modified files
+
 Revision 1.88  2006/01/31 17:04:44  alemochi
 Changed fancy lighting (use two lights instead of double lighting)
 
@@ -532,12 +535,28 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 
 void GLArea::closeEvent(QCloseEvent *event)
 {
-	// TODO: if modified ask if want to save
-	if(mm)
+	if(isWindowModified())
 	{
-		delete mm;
-		mm = NULL;
+		if(QMessageBox::question(
+                this,
+                tr("Exiting..."),
+                tr("File %1 modified.\n\n"
+                   "Are you sure you want to close it without saving?")
+                .arg(fileName),
+								QMessageBox::Yes|QMessageBox::Default,
+								QMessageBox::No|QMessageBox::Escape,
+								QMessageBox::NoButton) == QMessageBox::Yes)
+		{
+			if(mm){	delete mm;mm = NULL;}	// quit without saving
+			event->accept();
+		}
+		else
+			event->ignore();	// don't quit please!
+
+		return;
 	}
+
+	if(mm){	delete mm;mm = NULL;}	// delete mesh anyway
 	event->accept();
 }
 
