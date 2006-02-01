@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.90  2006/02/01 12:43:20  glvertex
+Optimized onClose code
+
 Revision 1.89  2006/02/01 11:49:12  glvertex
 Closing confirmation for modified files
 
@@ -535,29 +538,29 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 
 void GLArea::closeEvent(QCloseEvent *event)
 {
+	bool close = true;
 	if(isWindowModified())
 	{
 		if(QMessageBox::question(
                 this,
-                tr("Exiting..."),
+                tr("MeshLab"),
                 tr("File %1 modified.\n\n"
-                   "Are you sure you want to close it without saving?")
+                   "Continue without saving?")
                 .arg(fileName),
 								QMessageBox::Yes|QMessageBox::Default,
 								QMessageBox::No|QMessageBox::Escape,
-								QMessageBox::NoButton) == QMessageBox::Yes)
+								QMessageBox::NoButton) == QMessageBox::No)
 		{
-			if(mm){	delete mm;mm = NULL;}	// quit without saving
-			event->accept();
+			close = false;	// don't close please!
 		}
-		else
-			event->ignore();	// don't quit please!
-
-		return;
 	}
 
-	if(mm){	delete mm;mm = NULL;}	// delete mesh anyway
-	event->accept();
+	event->ignore();
+	if(close)
+	{
+		if(mm){	delete mm;mm = NULL;}	// quit without saving
+		event->accept();
+	}
 }
 
 
