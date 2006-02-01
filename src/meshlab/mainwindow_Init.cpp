@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.45  2006/02/01 12:44:42  glvertex
+- Disabled EDIT menu when no editing tools loaded
+- Solved openig bug when running by command line
+
 Revision 1.44  2006/01/31 15:25:13  davide_portelli
 Added short key lastFilter
 
@@ -84,12 +88,6 @@ MainWindow::MainWindow()
 
 	setWindowTitle(appName());
 	loadPlugins();
-	if(QCoreApplication::instance ()->argc()>1){
-		open(QCoreApplication::instance ()->argv()[1]);
-	}
-	else{ 
-		QTimer::singleShot(500, this, SLOT(open()));
-	}
   qb=new QProgressDialog(this);
   qb->setMaximum(100);
   qb->setMinimum(0);

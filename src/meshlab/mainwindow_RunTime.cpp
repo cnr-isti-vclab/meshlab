@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.81  2006/02/01 12:44:42  glvertex
+- Disabled EDIT menu when no editing tools loaded
+- Solved openig bug when running by command line
+
 Revision 1.80  2006/01/31 09:34:29  fmazzant
 bug-fix on savemaskexporter, when press cancel returns -1.
 
@@ -38,28 +42,6 @@ added updateMenus() in applyColorMode()
 
 Revision 1.76  2006/01/20 11:14:27  glvertex
 Applyfilter now sets the <modified> flag when the filter is applied succesfully
-
-Revision 1.75  2006/01/19 23:11:39  glvertex
-No significant changes
-
-Revision 1.74  2006/01/19 15:58:59  fmazzant
-moved savemaskexporter to mainwindows
-
-Revision 1.73  2006/01/19 11:54:15  fmazzant
-cleaned up code & cleaned up history log
-
-Revision 1.72  2006/01/19 11:21:12  fmazzant
-deleted old savemaskobj & old MaskObj
-
-Revision 1.71  2006/01/17 23:46:36  cignoni
-Moved some include from meshmodel.h to here
-
-Revision 1.70  2006/01/17 13:47:45  fmazzant
-update interface meshio : formats -> importFormats() & exportFormts
-
-Revision 1.69  2006/01/16 15:30:24  fmazzant
-added rename texture dialog for exporter
-removed old maskobj
 
 ****************************************************************************/
 
@@ -142,6 +124,7 @@ void MainWindow::updateMenus()
 	saveAsAct->setEnabled(active);
 	saveSnapshotAct->setEnabled(active);
 	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
+	editMenu->setEnabled(active && !editMenu->actions().isEmpty());
 	renderMenu->setEnabled(active);
 	fullScreenAct->setEnabled(active);
 	trackBallMenu->setEnabled(active);
@@ -472,14 +455,13 @@ void MainWindow::openRecentFile()
 
 void MainWindow::reload()
 {
-	// Discards changes and reloads current file
-	
+	// Discards changes and reloads current file 
 	// save current file name
 	QString file = GLA()->getFileName();
-	
+
 	// close current window
 	workspace->closeActiveWindow();
-	
+
 	// open a new window with old file
 	open(file);
 }

@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.60  2006/02/01 12:44:42  glvertex
+- Disabled EDIT menu when no editing tools loaded
+- Solved openig bug when running by command line
+
 Revision 1.59  2006/01/19 11:54:15  fmazzant
 cleaned up code & cleaned up history log
 
@@ -68,12 +72,14 @@ public:
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v0.6"); }
   // MaskObj maskobj;
+
+public slots:
+ void open(QString fileName=QString());
    
   
 private slots:
 
 	//////////// Slot Menu File //////////////////////
-	void open(QString fileName=QString());
 	void reload();
 	void openRecentFile();							
 	bool saveAs();
