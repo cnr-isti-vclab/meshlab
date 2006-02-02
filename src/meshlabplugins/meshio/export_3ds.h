@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.8  2006/02/02 16:05:18  fmazzant
+ deleted bug when saving mesh without textures.
+
  Revision 1.7  2006/02/02 15:35:15  fmazzant
  updated comment code
 
@@ -260,15 +263,21 @@ namespace io {
 
 				alla fine vengono duplicati solamente quei vertici che hanno più coordinate di texture.
 
+				c'e' da tenere presente che il codice appena descritto viene eseguito SOLAMENTE se la mesh contiene texture e
+				se dalla maschera viene spuntato il salvataggio delle texture. in caso contrario non esegue niente e tratta
+				solamente i vertici che sono presenti nella mesh senza crearne duplicati. senza le texture le informazioni 
+				presenti sono piu' che sufficienti.
 			*/			
 			std::map<Key,int> ListOfDuplexVert;
 			std::vector<VertexType> VectorOfVertexType;
 			
 			int count = 1;
+			int nface = 0;
 			if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 			{
 				FaceIterator fi;
 				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
+				{
 					for(unsigned int k=0;k<3;k++)
 					{
 						int i = GetIndexVertex(m, (*fi).V(k));
@@ -283,9 +292,18 @@ namespace io {
 							}
 						}
 					}
+
+					if (cb !=NULL)
+						(*cb)(100.0 * (float)++nface/(float)m.face.size(), "calulating dubliction vertex ...");
+					else
+						return E_ABORTED;
+				}
 			}
 
-			int number_vertex_to_duplicate = (count-1) - m.vert.size();
+			int number_vertex_to_duplicate = 0;
+			
+			if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
+				number_vertex_to_duplicate = (count-1) - m.vert.size();
 
 			Lib3dsFile *file = lib3ds_file_new();//creates new file
 			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//creates a new mesh with mesh's name "mesh"		
@@ -304,19 +322,40 @@ namespace io {
 			int v_index = 0;
 			VertexIterator vi;
 			//saves vert
-			for(unsigned int i=0; i< VectorOfVertexType.size();i++)
+			if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
 			{
-				Lib3dsPoint point;
-				point.pos[0] = VectorOfVertexType[i].P()[0];
-				point.pos[1] = VectorOfVertexType[i].P()[1];
-				point.pos[2] = VectorOfVertexType[i].P()[2];
+				for(unsigned int i=0; i< VectorOfVertexType.size();i++)
+				{
+					Lib3dsPoint point;
+					point.pos[0] = VectorOfVertexType[i].P()[0];
+					point.pos[1] = VectorOfVertexType[i].P()[1];
+					point.pos[2] = VectorOfVertexType[i].P()[2];
+		
+					mesh->pointL[i] = point;		
 
-				mesh->pointL[i] = point;		
+					if (cb !=NULL)
+						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+					else
+						return E_ABORTED;
+				}
+			}
+			else
+			{
+				for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
+				{
+					Lib3dsPoint point;
+					point.pos[0] = (*vi).P()[0];
+					point.pos[1] = (*vi).P()[1];
+					point.pos[2] = (*vi).P()[2];
 
-				if (cb !=NULL)
-					(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
-				else
-					return E_ABORTED;
+					mesh->pointL[v_index] = point;		
+
+					if (cb !=NULL)
+						(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+					else
+						return E_ABORTED;
+					v_index++;
+				}
 			}
 
 			lib3ds_mesh_new_face_list (mesh, m.face.size());//set number of faces
@@ -326,16 +365,31 @@ namespace io {
 			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 			{
 				int i0 = GetIndexVertex(m, (*fi).V(0));
-				vcg::TCoord2<float> t0 = (*fi).WT(0);
+				vcg::TCoord2<float> t0;
 				int i1 = GetIndexVertex(m, (*fi).V(1));
-				vcg::TCoord2<float> t1 = (*fi).WT(1);
+				vcg::TCoord2<float> t1;
 				int i2 = GetIndexVertex(m, (*fi).V(2));
-				vcg::TCoord2<float> t2 = (*fi).WT(2);
+				vcg::TCoord2<float> t2;
+				if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
+				{
+					t0 = (*fi).WT(0);
+					t1 = (*fi).WT(1);
+					t2 = (*fi).WT(2);
+				}
 
 				Lib3dsFace face;
-				face.points[0] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i0,t0));
-				face.points[1] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i1,t1));
-				face.points[2] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i2,t2));
+				if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
+				{
+					face.points[0] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i0,t0));
+					face.points[1] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i1,t1));
+					face.points[2] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i2,t2));
+				}
+				else
+				{
+					face.points[0] = i0;
+					face.points[1] = i1;
+					face.points[2] = i2;
+				}
 				
 				//saves coord textures
 				if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
