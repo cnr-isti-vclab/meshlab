@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.7  2006/02/02 15:35:15  fmazzant
+ updated comment code
+
  Revision 1.6  2006/02/02 13:08:10  fmazzant
  cleaned & commented[italian] code
 
@@ -210,37 +213,52 @@ namespace io {
 				return E_NOTFACESVALID;
 
 			/*
-				si tiene in considerazione una mappa ListOfDuplexVert, alla quale gli viene associato il seguente significato:
-					Key:è una coppia formata da int che rappresenta l'indice del vettore nella mesh e una coordinata di texture.
-						tale coppia rappresenta una chiave, essendo univoca in tutta la mesh. non è possibile che si incontrino due
-						vertici che hanno solite coordinate e solite coordinate di texture, se un vertice di questo tipo esistesse allora
-						uno dei due è di troppo perchè rappresentano il solito vertice.
-					int:è l'indice del vertice inserito all'interno del vettore VectorOfVertexType, all'interno del quale vengono inseriti
-						tutti i vertici appartenendi alla mesh.
+				<<concetto:>>
+				si tiene in considerazione una mappa ListOfDuplexVert<Key,int>, alla quale gli viene associato il seguente significato:
+					Key:è una coppia (int,TexCoord) formata da un int che rappresenta l'indice del vettore nella mesh originale e la sua 
+						coordinata di texture. tale coppia rappresenta una chiave, essendo univoca in tutta la mesh. non è possibile che 
+						si incontrino due vertici che hanno solite coordinate di vertice e solite coordinate di texture, se un vertice di 
+						questo tipo esistesse allora i due vertici rappresenterebbero lo stesso vertice.
+					int:è l'indice del vertice inserito all'interno del vettore VectorOfVertexType<VertexType>
+					
+					Nel vertice VectorOfVertexType vengono inseriti tutti i vertici appartenendi alla mesh + i k vertici dublicati. la scelta 
+					di tali vertici va in base alla seguente regola:
+						se un vertice con indice x(originale) ha più di una coordinata di texture allora tale vertice viene duplicato e 
+						inserito in ListOfDuplexVert e in VectorOfVertexType(in VectorOfVertexType, l'inserimento del doppio vertice non 
+						sarebbe necessario, però viene fatto per comodità, in caso contrario dovremmo cercare il vertice dentro il vettore).
+
+					rappresentazione grafica:
 
 					ListOfDuplexVert						VectorOfVertexType
-						-----									---------
-						|key| -> value1 ------                  |vertix1|
-						-----				 |		            ---------
-						|key| -> value2	-	 -----------------> |vertex2|
-						-----			|						---------
-						|	|			|						|vertex2|
-						-----			|						---------
-						|	|			|						|vertex2|
-						-----			|						---------
-						|	|			----------------------> |vertex2|
-						-----									---------
+						------									---------
+						|key1| -> index1 ---------              |vertex1|
+						------				 	 |	            ---------
+						|key2| -> index2 ----	 -------------> |vertex2|
+						------				|					---------
+						|key3|				|					|vertex3|
+						------				|					---------
+						|key4|				------------------>	|vertex4|
+						------									---------
+						|key5|			        --------------> |vertex5|
+						------					|				---------
+						  .						|					.
+						  .						|					.
+						  .						|					.
+						------					|				---------
+						|keyn| -> indexn -------				|vertexn|
+						------									---------
 
-				e così via......per tutti gli altri.
 
+				questo tipo di struttura permette di selezionare l'indice del vertice in VectorOfVertexType con costo O(1).
 
+				<<code:>>
 				questo pezzo di codice itera su tutte le facce della mesh per riempire la mappa e il vettore.
 				per ogni faccia e per ogni vertice di faccia costruisce la coppia (indice,texture), controlla se
-				all'interno di ListOfDuplexVert esiste già in tal caso non fa niente, in caso contrario aggiunte 
-				coppia in ListOfDuplexVert e l'oggetto VertexType in VectorOfVertexType associando alla chiave il 
-				valore dell'indice del vettore preso in considerazione.
+				all'interno di ListOfDuplexVert esiste già in tal caso non fa niente, in caso contrario aggiunte la
+				coppia in ListOfDuplexVert e l'oggetto VertexType in VectorOfVertexType associando al valore della
+				chiave (indice,texture) l'indice del vertice a cui punta.
 
-				alla fine sappiamo quanti sono i vertici che dobbiamo duplicare.
+				alla fine vengono duplicati solamente quei vertici che hanno più coordinate di texture.
 
 			*/			
 			std::map<Key,int> ListOfDuplexVert;
