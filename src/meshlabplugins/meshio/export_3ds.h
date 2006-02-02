@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.5  2006/02/02 10:50:46  fmazzant
+ deleted a big bug of exporter 3ds
+
  Revision 1.4  2006/01/31 09:34:30  fmazzant
  bug-fix on savemaskexporter, when press cancel returns -1.
 
@@ -113,6 +116,10 @@ namespace io {
 		typedef typename SaveMeshType::FaceIterator FaceIterator;
 		typedef typename SaveMeshType::VertexIterator VertexIterator;
 		typedef typename SaveMeshType::VertexType VertexType;
+
+		//int:rappresenta indice vertice vecchio
+		//TCoord2: la cordinata di texture del vertice con indice  i
+		typedef std::pair<int,vcg::TCoord2<float> > Key;
 	
 		/*
 			enum of all the types of error
@@ -199,38 +206,80 @@ namespace io {
 			if(m.face.size() == 0)
 				return E_NOTFACESVALID;
 
-			Lib3dsFile *file = lib3ds_file_new();//crea un nuovo file
+			/*
+				commentare bene ....
+			*/			
+			std::map<Key,int> ListOfDuplexVert;
+			std::vector<VertexType> v;
+			
+			int count = 1;
+			if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
+			{
+				FaceIterator fi;
+				for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
+					for(unsigned int k=0;k<3;k++)
+					{
+						int i = GetIndexVertex(m, (*fi).V(k));
+						vcg::TCoord2<float> t = (*fi).WT(k);
+						if(AddDublexVertexCoord(ListOfDuplexVert,Key(i,t), count))
+						{
+							v.push_back((*(*fi).V(k)));
+							ListOfDuplexVert[Key(i,t)] = v.size()-1;
+							count++;
+						}
+					}
+			}
+
+			int number_vertex_to_duplicate = (count-1) - m.vert.size();
+
+
+			Lib3dsFile *file = lib3ds_file_new();//creates new file
 			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//creates a new mesh with mesh's name "mesh"		
 
 			QString qnamematerial = "Material - %1";
 			std::vector<Material> materials;
 			
 			int current = 0;
-			int max = m.vert.size()+m.face.size();
+			int max = m.vert.size()+m.face.size()+ number_vertex_to_duplicate;
 			
-			lib3ds_mesh_new_point_list(mesh, m.vert.size());// set number of vertexs
+			lib3ds_mesh_new_point_list(mesh, m.vert.size() + number_vertex_to_duplicate);// set number of vertexs
 	
 			if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
-				lib3ds_mesh_new_texel_list(mesh,m.vert.size()); //set number of textures
+				lib3ds_mesh_new_texel_list(mesh,m.vert.size() + number_vertex_to_duplicate); //set number of textures
 
 			int v_index = 0;
 			VertexIterator vi;
-			//saves vert
-			for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
+			////saves vert
+			//for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
+			//{
+			//	Lib3dsPoint point;
+			//	point.pos[0] = (*vi).P()[0];
+			//	point.pos[1] = (*vi).P()[1];
+			//	point.pos[2] = (*vi).P()[2];
+
+			//	mesh->pointL[v_index] = point;		
+
+			//	if (cb !=NULL)
+			//		(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
+			//	else
+			//		return E_ABORTED;
+			//	v_index++;
+			//}
+			for(unsigned int i=0; i< v.size();i++)
 			{
 				Lib3dsPoint point;
-				point.pos[0] = (*vi).P()[0];
-				point.pos[1] = (*vi).P()[1];
-				point.pos[2] = (*vi).P()[2];
+				point.pos[0] = v[i].P()[0];
+				point.pos[1] = v[i].P()[1];
+				point.pos[2] = v[i].P()[2];
 
-				mesh->pointL[v_index] = point;		
+				mesh->pointL[i] = point;		
 
 				if (cb !=NULL)
 					(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
 				else
 					return E_ABORTED;
-				v_index++;
 			}
+
 
 			lib3ds_mesh_new_face_list (mesh, m.face.size());//set number of faces
 			int f_index = 0;//face index
@@ -238,20 +287,27 @@ namespace io {
 			FaceIterator fi;
 			for(fi=m.face.begin(); fi!=m.face.end(); ++fi) if( !(*fi).IsD() )
 			{
+				int i0 = GetIndexVertex(m, (*fi).V(0));
+				vcg::TCoord2<float> t0 = (*fi).WT(0);
+				int i1 = GetIndexVertex(m, (*fi).V(1));
+				vcg::TCoord2<float> t1 = (*fi).WT(1);
+				int i2 = GetIndexVertex(m, (*fi).V(2));
+				vcg::TCoord2<float> t2 = (*fi).WT(2);
+
 				Lib3dsFace face;
-				face.points[0] = GetIndexVertex(m, (*fi).V(0));
-				face.points[1] = GetIndexVertex(m, (*fi).V(1));
-				face.points[2] = GetIndexVertex(m, (*fi).V(2));
+				face.points[0] = GetIndexDublexVertex(ListOfDuplexVert,Key(i0,t0));//GetIndexVertex(m, (*fi).V(0));
+				face.points[1] = GetIndexDublexVertex(ListOfDuplexVert,Key(i1,t1));//GetIndexVertex(m, (*fi).V(1));
+				face.points[2] = GetIndexDublexVertex(ListOfDuplexVert,Key(i2,t2));//GetIndexVertex(m, (*fi).V(2));
 				
 				//saves coord textures
 				if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
 				{
-					unsigned int MAX = 3;
-					for(unsigned int k=0;k<MAX;k++)
-					{
-						mesh->texelL[face.points[k]][0] = (*fi).WT(k).u();
-						mesh->texelL[face.points[k]][1] = (*fi).WT(k).v();
-					}
+					mesh->texelL[face.points[0]][0] = t0.u();//(*fi).WT(0).u();
+					mesh->texelL[face.points[0]][1] = t0.v();//(*fi).WT(0).v();
+					mesh->texelL[face.points[1]][0] = t1.u();//(*fi).WT(1).u();
+					mesh->texelL[face.points[1]][1] = t1.v();//(*fi).WT(1).v();
+					mesh->texelL[face.points[2]][0] = t2.u();//(*fi).WT(2).u();
+					mesh->texelL[face.points[2]][1] = t2.v();//(*fi).WT(2).v();
 				}
 
 				if(mask & MeshModel::IOM_FACEFLAGS)
@@ -352,6 +408,21 @@ namespace io {
 		inline static int GetIndexVertex(SaveMeshType &m, VertexType *p)
 		{
 			return p-&*(m.vert.begin());
+		}
+
+		/*
+
+		*/
+		inline static bool AddDublexVertexCoord(std::map<Key,int> &m,Key key, int value)
+		{
+			int index = m[key];
+			if(index==0){m[key]=value;return true;}
+			return false;
+		}
+
+		inline static int GetIndexDublexVertex(std::map<Key,int> &m,Key key)
+		{
+			return m[key];
 		}
 	
 		/*
