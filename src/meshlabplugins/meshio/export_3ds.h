@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.9  2006/02/02 16:08:27  fmazzant
+  updated comment code
+
  Revision 1.8  2006/02/02 16:05:18  fmazzant
  deleted bug when saving mesh without textures.
 
@@ -248,7 +251,7 @@ namespace io {
 						  .						|					.
 						  .						|					.
 						------					|				---------
-						|keyn| -> indexn -------				|vertexn|
+						|keyn| -> indexn --------				|vertexn|
 						------									---------
 
 
@@ -265,8 +268,8 @@ namespace io {
 
 				c'e' da tenere presente che il codice appena descritto viene eseguito SOLAMENTE se la mesh contiene texture e
 				se dalla maschera viene spuntato il salvataggio delle texture. in caso contrario non esegue niente e tratta
-				solamente i vertici che sono presenti nella mesh senza crearne duplicati. senza le texture le informazioni 
-				presenti sono piu' che sufficienti.
+				solamente i vertici che sono presenti nella mesh senza creare duplicati. le informazioni presenti in assenza di
+				texture sono piu' che sufficienti.
 			*/			
 			std::map<Key,int> ListOfDuplexVert;
 			std::vector<VertexType> VectorOfVertexType;
