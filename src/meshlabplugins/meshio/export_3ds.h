@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.6  2006/02/02 13:08:10  fmazzant
+ cleaned & commented[italian] code
+
  Revision 1.5  2006/02/02 10:50:46  fmazzant
  deleted a big bug of exporter 3ds
 
@@ -207,10 +210,41 @@ namespace io {
 				return E_NOTFACESVALID;
 
 			/*
-				commentare bene ....
+				si tiene in considerazione una mappa ListOfDuplexVert, alla quale gli viene associato il seguente significato:
+					Key:è una coppia formata da int che rappresenta l'indice del vettore nella mesh e una coordinata di texture.
+						tale coppia rappresenta una chiave, essendo univoca in tutta la mesh. non è possibile che si incontrino due
+						vertici che hanno solite coordinate e solite coordinate di texture, se un vertice di questo tipo esistesse allora
+						uno dei due è di troppo perchè rappresentano il solito vertice.
+					int:è l'indice del vertice inserito all'interno del vettore VectorOfVertexType, all'interno del quale vengono inseriti
+						tutti i vertici appartenendi alla mesh.
+
+					ListOfDuplexVert						VectorOfVertexType
+						-----									---------
+						|key| -> value1 ------                  |vertix1|
+						-----				 |		            ---------
+						|key| -> value2	-	 -----------------> |vertex2|
+						-----			|						---------
+						|	|			|						|vertex2|
+						-----			|						---------
+						|	|			|						|vertex2|
+						-----			|						---------
+						|	|			----------------------> |vertex2|
+						-----									---------
+
+				e così via......per tutti gli altri.
+
+
+				questo pezzo di codice itera su tutte le facce della mesh per riempire la mappa e il vettore.
+				per ogni faccia e per ogni vertice di faccia costruisce la coppia (indice,texture), controlla se
+				all'interno di ListOfDuplexVert esiste già in tal caso non fa niente, in caso contrario aggiunte 
+				coppia in ListOfDuplexVert e l'oggetto VertexType in VectorOfVertexType associando alla chiave il 
+				valore dell'indice del vettore preso in considerazione.
+
+				alla fine sappiamo quanti sono i vertici che dobbiamo duplicare.
+
 			*/			
 			std::map<Key,int> ListOfDuplexVert;
-			std::vector<VertexType> v;
+			std::vector<VertexType> VectorOfVertexType;
 			
 			int count = 1;
 			if(m.HasPerWedgeTexture() && mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
@@ -221,17 +255,19 @@ namespace io {
 					{
 						int i = GetIndexVertex(m, (*fi).V(k));
 						vcg::TCoord2<float> t = (*fi).WT(k);
-						if(AddDublexVertexCoord(ListOfDuplexVert,Key(i,t), count))
+						if(!m.vert[i].IsD())
 						{
-							v.push_back((*(*fi).V(k)));
-							ListOfDuplexVert[Key(i,t)] = v.size()-1;
-							count++;
+							if(AddDuplexVertexCoord(ListOfDuplexVert,Key(i,t)))
+							{
+								VectorOfVertexType.push_back((*(*fi).V(k)));
+								ListOfDuplexVert[Key(i,t)] = VectorOfVertexType.size()-1;
+								count++;
+							}
 						}
 					}
 			}
 
 			int number_vertex_to_duplicate = (count-1) - m.vert.size();
-
 
 			Lib3dsFile *file = lib3ds_file_new();//creates new file
 			Lib3dsMesh *mesh = lib3ds_mesh_new("mesh");//creates a new mesh with mesh's name "mesh"		
@@ -249,28 +285,13 @@ namespace io {
 
 			int v_index = 0;
 			VertexIterator vi;
-			////saves vert
-			//for(vi=m.vert.begin(); vi!=m.vert.end(); ++vi) if( !(*vi).IsD() )
-			//{
-			//	Lib3dsPoint point;
-			//	point.pos[0] = (*vi).P()[0];
-			//	point.pos[1] = (*vi).P()[1];
-			//	point.pos[2] = (*vi).P()[2];
-
-			//	mesh->pointL[v_index] = point;		
-
-			//	if (cb !=NULL)
-			//		(*cb)(100.0 * (float)++current/(float)max, "writing vertices ");
-			//	else
-			//		return E_ABORTED;
-			//	v_index++;
-			//}
-			for(unsigned int i=0; i< v.size();i++)
+			//saves vert
+			for(unsigned int i=0; i< VectorOfVertexType.size();i++)
 			{
 				Lib3dsPoint point;
-				point.pos[0] = v[i].P()[0];
-				point.pos[1] = v[i].P()[1];
-				point.pos[2] = v[i].P()[2];
+				point.pos[0] = VectorOfVertexType[i].P()[0];
+				point.pos[1] = VectorOfVertexType[i].P()[1];
+				point.pos[2] = VectorOfVertexType[i].P()[2];
 
 				mesh->pointL[i] = point;		
 
@@ -279,7 +300,6 @@ namespace io {
 				else
 					return E_ABORTED;
 			}
-
 
 			lib3ds_mesh_new_face_list (mesh, m.face.size());//set number of faces
 			int f_index = 0;//face index
@@ -295,19 +315,19 @@ namespace io {
 				vcg::TCoord2<float> t2 = (*fi).WT(2);
 
 				Lib3dsFace face;
-				face.points[0] = GetIndexDublexVertex(ListOfDuplexVert,Key(i0,t0));//GetIndexVertex(m, (*fi).V(0));
-				face.points[1] = GetIndexDublexVertex(ListOfDuplexVert,Key(i1,t1));//GetIndexVertex(m, (*fi).V(1));
-				face.points[2] = GetIndexDublexVertex(ListOfDuplexVert,Key(i2,t2));//GetIndexVertex(m, (*fi).V(2));
+				face.points[0] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i0,t0));
+				face.points[1] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i1,t1));
+				face.points[2] = GetIndexDuplexVertex(ListOfDuplexVert,Key(i2,t2));
 				
 				//saves coord textures
 				if(m.HasPerWedgeTexture() && mask & MeshModel::IOM_WEDGTEXCOORD )
 				{
-					mesh->texelL[face.points[0]][0] = t0.u();//(*fi).WT(0).u();
-					mesh->texelL[face.points[0]][1] = t0.v();//(*fi).WT(0).v();
-					mesh->texelL[face.points[1]][0] = t1.u();//(*fi).WT(1).u();
-					mesh->texelL[face.points[1]][1] = t1.v();//(*fi).WT(1).v();
-					mesh->texelL[face.points[2]][0] = t2.u();//(*fi).WT(2).u();
-					mesh->texelL[face.points[2]][1] = t2.v();//(*fi).WT(2).v();
+					mesh->texelL[face.points[0]][0] = t0.u();
+					mesh->texelL[face.points[0]][1] = t0.v();
+					mesh->texelL[face.points[1]][0] = t1.u();
+					mesh->texelL[face.points[1]][1] = t1.v();
+					mesh->texelL[face.points[2]][0] = t2.u();
+					mesh->texelL[face.points[2]][1] = t2.v();
 				}
 
 				if(mask & MeshModel::IOM_FACEFLAGS)
@@ -411,16 +431,20 @@ namespace io {
 		}
 
 		/*
-
+			added pair Key,int into map
 		*/
-		inline static bool AddDublexVertexCoord(std::map<Key,int> &m,Key key, int value)
+		inline static bool AddDuplexVertexCoord(std::map<Key,int> &m,Key key)
 		{
 			int index = m[key];
-			if(index==0){m[key]=value;return true;}
+			if(index==0)
+				return true;
 			return false;
 		}
 
-		inline static int GetIndexDublexVertex(std::map<Key,int> &m,Key key)
+		/*
+			returns value of key key into map. this value is vertex's index into list all duplicate vertex
+		*/
+		inline static int GetIndexDuplexVertex(std::map<Key,int> &m,Key key)
 		{
 			return m[key];
 		}
