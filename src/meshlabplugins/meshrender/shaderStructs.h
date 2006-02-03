@@ -13,11 +13,15 @@ struct UniformVariable {
 	int location;
 	union {
 		int ival;
+		float fval[4];
+	};
+	/*union {
+		int ival;
 		float fval;
 		float val2[2];
 		float val3[3];
 		float val4[4];
-	};
+	};*/
 };
 
 struct ShaderInfo {
