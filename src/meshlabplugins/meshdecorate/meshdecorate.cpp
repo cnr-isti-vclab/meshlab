@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.19  2006/02/03 18:12:37  davide_portelli
+Added arrows in the axis
+
 Revision 1.18  2006/02/03 16:36:24  glvertex
 - Some renaming
 - Quoted axis now also draw lines
@@ -392,7 +395,6 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
-//	glEnable(GL_POINT_DISTANCE_ATTENUATION);
 	glEnable(GL_POINT_SMOOTH);
 	glLineWidth(2.0);
 	glPointSize(3.f);
@@ -416,21 +418,26 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 	drawQuotedLine<false,true,false>(Point3d(0,-hw,0),Point3d(0,hw,0),2*hw,mm,mp,vp);	// Draws y axis
 	drawQuotedLine<false,false,true>(Point3d(0,0,-hw),Point3d(0,0,hw),2*hw,mm,mp,vp);	// Draws z axis
 
-	//glColor(Color4b::White);
-	//glMatrixMode(GL_MODELVIEW);
-	//glEnable(GL_LIGHTING);
+	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-		glTranslate(Point3d(hw,0,0));
-		
-		Add_Ons::Cone(16,.9f,.3f,true);
+		glTranslate(Point3d(hw,0,0));	glScalef(0.05,0.05,0.05);	Add_Ons::Cone(10,3,1,true);
+	glPopMatrix();
+	
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+		glTranslate(Point3d(0,hw,0));	glRotated(90,0,0,1); glScalef(0.05,0.05,0.05); Add_Ons::Cone(10,3,1,true);
+	glPopMatrix();
+	
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+		glTranslate(Point3d(0,0,hw));	glRotated(-90,0,1,0);	glScalef(0.05,0.05,0.05);	Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 
-	glColor(Color4b::White);
 	QFont f(gla->getFont());
 	f.setBold(true);
-	gla->renderText(hw+0.02,0,0,QString("X"),f);
-	gla->renderText(0,-hw-0.01,0,QString("Y"),f);
-	gla->renderText(0,0,hw,QString("Z"),f);
+	glColor(Color4b::Red);	 gla->renderText(hw+0.25,0,0,QString("X"),f);
+	glColor(Color4b::Green); gla->renderText(0,hw+0.25,0,QString("Y"),f);
+	glColor(Color4b::Blue);  gla->renderText(0,0,hw+0.25,QString("Z"),f);
 
 	glPopAttrib();
 }
