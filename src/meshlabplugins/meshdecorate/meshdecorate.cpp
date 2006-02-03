@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.17  2006/02/03 14:58:36  alemochi
+Changed axis and added tick
+
 Revision 1.16  2006/02/03 13:42:27  mariolatronico
 removed enum Name to template parameter, since it doesn't define a scope
 
@@ -400,39 +403,42 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 {
 	float hw=m.cm.bbox.Diag()/2.0;
-		glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
-		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(2.0);
-	/*glBegin(GL_LINES);
-		glColor(Color4b::Red);
-		glVertex3f(-hw,0,0);
-		glVertex3f(+hw,0,0);
-		glColor(Color4b::Green);
-		glVertex3f(0,-hw,0);
-		glVertex3f(0,+hw,0);
-		glColor(Color4b::Blue);
-		glVertex3f(0,0,-hw);
-		glVertex3f(0,0,+hw);
-	glEnd();*/
 
-	gla->renderText(hw,0,0,QString("X"),QFont());
+	// Get gl state values
+	double mm[16],mp[16];
+	int vp[4];
+
+	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
+	glGetDoublev(GL_PROJECTION_MATRIX,mp);
+	glGetIntegerv(GL_VIEWPORT,vp);
+
+	glColor(Color4b::White);
+	gla->renderText(hw+0.02,0,0,QString("X"),QFont());
 	gla->renderText(0,-hw-0.01,0,QString("Y"),QFont());
 	gla->renderText(0,0,hw,QString("Z"),QFont());
 
 	glColor(Color4b::Red);
-	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(hw,0,0),0.001,0.01,0.002,10,10,true);
-	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(-hw,0,0),0.001,0.01,0.002,10,10,true);
+	drawAxis<true,false,false>(Point3d(-hw,0,0),Point3d(hw,0,0),2*hw,mm,mp,vp);	// Draws x axis
 	glColor(Color4b::Green);
-	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(0,hw,0),0.001,0.01,0.002,10,10,true);
-	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(0,-hw,0),0.001,0.01,0.002,10,10,true);
+	drawAxis<false,true,false>(Point3d(0,-hw,0),Point3d(0,hw,0),2*hw,mm,mp,vp);	// Draws y axis
 	glColor(Color4b::Blue);
-	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(0,0,hw),0.001,0.01,0.002,10,10,true);
-	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(0,0,-hw),0.001,0.01,0.002,10,10,true);
-	glDepthRange(0.0f,1.0f);
+	drawAxis<false,false,true>(Point3d(0,0,-hw),Point3d(0,0,hw),2*hw,mm,mp,vp);	// Draws z axis
+
+	glColor(Color4b::White);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+		glTranslate(Point3d(hw,0,0));
+		glScalef(0.005,0.005,0.005);
+		Add_Ons::Cone(10,3,1,true);
+	glPopMatrix();
+	
 	glPopAttrib();
 
 }
