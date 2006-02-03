@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.10  2006/02/03 10:04:41  fmazzant
+ no significant updated
+
  Revision 1.9  2006/02/02 16:08:27  fmazzant
   updated comment code
 
@@ -537,10 +540,8 @@ namespace io {
 			Point3f diffuse;
 			if(r > 1 || g > 1 || b > 1)
 				diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);
-			else if (r != 0 || g != 0 || b != 0)
+			else 
 				diffuse = Point3f((float)r,(float)g,(float)b);
-			else
-				diffuse = Point3f(0.8,0.8,0.80);
 
 			float Tr;
 			if(alpha > 1)
