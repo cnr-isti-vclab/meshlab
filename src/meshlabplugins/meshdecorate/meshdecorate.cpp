@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.16  2006/02/03 13:42:27  mariolatronico
+removed enum Name to template parameter, since it doesn't define a scope
+
 Revision 1.15  2006/02/03 11:05:12  alemochi
 Modified axis and added arrows.
 
@@ -77,7 +80,7 @@ cleaned up the identification between by string of decorations
 #include <wrap/gl/addons.h>
 
 using namespace vcg;
-const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action) 
+const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
  {
    static ActionInfo ai;
 
@@ -108,15 +111,15 @@ const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
    return ai;
  }
 
- const PluginInfo &ExtraMeshDecoratePlugin::Info() 
+ const PluginInfo &ExtraMeshDecoratePlugin::Info()
 {
-   static PluginInfo ai; 
+   static PluginInfo ai;
    ai.Date=tr("January 2006");
 	 ai.Author=tr("Paolo Cignoni, Daniele Vacca");
 	 ai.Version=tr("1.0");
    return ai;
  }
- 
+
 const QString ExtraMeshDecoratePlugin::ST(int id) const
 {
   switch(id)
@@ -130,7 +133,7 @@ const QString ExtraMeshDecoratePlugin::ST(int id) const
   return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, GLArea *gla) 
+void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, GLArea *gla)
 {
 	if(a->text() == ST(DP_SHOW_NORMALS))
 	{
@@ -177,7 +180,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 
 	// Mesh boundingBox
 	Box3f b(m.cm.bbox);
-	
+
 	glColor4f(.2f,.9f,.7f,1.f);
 	//glBoxWire(b);
 
@@ -320,7 +323,7 @@ void ExtraMeshDecoratePlugin::drawAxis(Point3d &a,Point3d &b,float dim,double *m
 			for(float i=slope;i<dim;i+=slope)
 				glVertex3f(a[0]+i,a[1],a[2]);
 		}
-	
+
 		if(y)
 		{
 			for(float i=slope;i<dim;i+=slope)
@@ -334,7 +337,7 @@ void ExtraMeshDecoratePlugin::drawAxis(Point3d &a,Point3d &b,float dim,double *m
 		}
 
 	glEnd();
-	
+
 	glPointSize(1.f);
 }
 
@@ -357,38 +360,38 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 	Point3f d3=(b.max-b.min)/4.0;
 	Point3f zz(0,0,0);
 	glBegin(GL_LINES);
-	glVertex3f(mi[0],mi[1],mi[2]); glVertex3f(mi[0]+d3[0],mi[1]+zz[1],mi[2]+zz[2]); 
+	glVertex3f(mi[0],mi[1],mi[2]); glVertex3f(mi[0]+d3[0],mi[1]+zz[1],mi[2]+zz[2]);
 	glVertex3f(mi[0],mi[1],mi[2]); glVertex3f(mi[0]+zz[0],mi[1]+d3[1],mi[2]+zz[2]);
 	glVertex3f(mi[0],mi[1],mi[2]); glVertex3f(mi[0]+zz[0],mi[1]+zz[1],mi[2]+d3[2]);
-																																		
+
 	glVertex3f(ma[0],mi[1],mi[2]); glVertex3f(ma[0]-d3[0],mi[1]+zz[1],mi[2]+zz[2]);
 	glVertex3f(ma[0],mi[1],mi[2]); glVertex3f(ma[0]+zz[0],mi[1]+d3[1],mi[2]+zz[2]);
 	glVertex3f(ma[0],mi[1],mi[2]); glVertex3f(ma[0]+zz[0],mi[1]+zz[1],mi[2]+d3[2]);
-																																		
+
   glVertex3f(mi[0],ma[1],mi[2]); glVertex3f(mi[0]+d3[0],ma[1]+zz[1],mi[2]+zz[2]);
 	glVertex3f(mi[0],ma[1],mi[2]); glVertex3f(mi[0]+zz[0],ma[1]-d3[1],mi[2]+zz[2]);
 	glVertex3f(mi[0],ma[1],mi[2]); glVertex3f(mi[0]+zz[0],ma[1]+zz[1],mi[2]+d3[2]);
-																																		
+
 	glVertex3f(ma[0],ma[1],mi[2]); glVertex3f(ma[0]-d3[0],ma[1]+zz[1],mi[2]+zz[2]);
 	glVertex3f(ma[0],ma[1],mi[2]); glVertex3f(ma[0]+zz[0],ma[1]-d3[1],mi[2]+zz[2]);
 	glVertex3f(ma[0],ma[1],mi[2]); glVertex3f(ma[0]+zz[0],ma[1]+zz[1],mi[2]+d3[2]);
-																																		
+
 	glVertex3f(mi[0],mi[1],ma[2]); glVertex3f(mi[0]+d3[0],mi[1]+zz[1],ma[2]+zz[2]);
 	glVertex3f(mi[0],mi[1],ma[2]); glVertex3f(mi[0]+zz[0],mi[1]+d3[1],ma[2]+zz[2]);
 	glVertex3f(mi[0],mi[1],ma[2]); glVertex3f(mi[0]+zz[0],mi[1]+zz[1],ma[2]-d3[2]);
-																																		
+
 	glVertex3f(ma[0],mi[1],ma[2]); glVertex3f(ma[0]-d3[0],mi[1]+zz[1],ma[2]+zz[2]);
 	glVertex3f(ma[0],mi[1],ma[2]); glVertex3f(ma[0]+zz[0],mi[1]+d3[1],ma[2]+zz[2]);
 	glVertex3f(ma[0],mi[1],ma[2]); glVertex3f(ma[0]+zz[0],mi[1]+zz[1],ma[2]-d3[2]);
-																																		
+
 	glVertex3f(mi[0],ma[1],ma[2]); glVertex3f(mi[0]+d3[0],ma[1]+zz[1],ma[2]+zz[2]);
 	glVertex3f(mi[0],ma[1],ma[2]); glVertex3f(mi[0]+zz[0],ma[1]-d3[1],ma[2]+zz[2]);
 	glVertex3f(mi[0],ma[1],ma[2]); glVertex3f(mi[0]+zz[0],ma[1]+zz[1],ma[2]-d3[2]);
-																																		
+
 	glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]-d3[0],ma[1]+zz[1],ma[2]+zz[2]);
 	glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]+zz[0],ma[1]-d3[1],ma[2]+zz[2]);
 	glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]+zz[0],ma[1]+zz[1],ma[2]-d3[2]);
-	
+
 	glEnd();
 	glPopAttrib();
 }
@@ -419,16 +422,16 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 	gla->renderText(hw,0,0,QString("X"),QFont());
 	gla->renderText(0,-hw-0.01,0,QString("Y"),QFont());
 	gla->renderText(0,0,hw,QString("Z"),QFont());
-	
+
 	glColor(Color4b::Red);
-	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(hw,0,0),0.001,0.01,0.002,10,10,true);
-	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(-hw,0,0),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(hw,0,0),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(-hw,0,0),0.001,0.01,0.002,10,10,true);
 	glColor(Color4b::Green);
-	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(0,hw,0),0.001,0.01,0.002,10,10,true);
-	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(0,-hw,0),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(0,hw,0),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(0,-hw,0),0.001,0.01,0.002,10,10,true);
 	glColor(Color4b::Blue);
-	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(0,0,hw),0.001,0.01,0.002,10,10,true);
-	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(0,0,-hw),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(0,0,hw),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DMSolid>(Point3f(0,0,0),Point3f(0,0,-hw),0.001,0.01,0.002,10,10,true);
 	glDepthRange(0.0f,1.0f);
 	glPopAttrib();
 
