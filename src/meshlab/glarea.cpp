@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.91  2006/02/03 11:45:42  cignoni
+Corrected bug for ortho trackball
+
 Revision 1.90  2006/02/01 12:43:20  glvertex
 Optimized onClose code
 
@@ -35,28 +38,6 @@ Changed fancy lighting (use two lights instead of double lighting)
 
 Revision 1.87  2006/01/31 11:09:07  alemochi
 remove unnecessary comments
-
-Revision 1.86  2006/01/27 12:41:21  glvertex
-Removed HUGE memory leaks. The model is now deallocated when the window is colsed.
-
-Revision 1.85  2006/01/25 15:38:10  glvertex
-- Restyling part II
-- Font resizing works better
-- Some renaming
-
-Revision 1.84  2006/01/25 11:33:34  alemochi
-Added "move light" to help on screen
-
-Revision 1.83  2006/01/25 03:57:15  glvertex
-- Code cleaning and restyling
-- Some bugs removed on resizing
-- A lot of changes in paintGL
-
-Revision 1.82  2006/01/25 01:06:51  alemochi
-irrelevant change
-
-Revision 1.81  2006/01/25 00:56:51  alemochi
-Added trackball to change directional lighting
 
 ****************************************************************************/
 
@@ -764,37 +745,23 @@ void GLArea::setSnapshotSetting(const SnapshotSetting & s)
 
 void GLArea::setView()
 {
-//	GLfloat ClipRatio=1;
 	GLfloat fAspect = (GLfloat)currentWidth/ currentHeight;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	// Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
 	
-	// glVertex: old code
-	//float y=sin(vcg::math::ToRad(fov/2.0));
-	//float x=cos(vcg::math::ToRad(fov/2.0));
-	//objDist= 1.5*(x*1.0/y);
-
-	// glVertex: new code (should be faster?)
 	float ratio = 1.75f;
 	objDist = ratio / tanf(vcg::math::ToRad(fov*.5f));
 
 	nearPlane = objDist - 2.f*clipRatioNear;
 	farPlane =  objDist + 2.f*clipRatioFar;
 	if(nearPlane<=objDist*.1f) nearPlane=objDist*.1f;
-	if(fov==5)
-	{
-		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,- 2.f*clipRatioNear, 2.f*clipRatioFar);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-	}
-	else
-	{
-		gluPerspective(fov, fAspect, nearPlane, farPlane);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		gluLookAt(0, 0, objDist,0, 0, 0, 0, 1, 0);
-	}
+
+	if(fov==5)		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,objDist - 2.f*clipRatioNear, objDist+2.f*clipRatioFar);
+	   else    		gluPerspective(fov, fAspect, nearPlane, farPlane);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(0, 0, objDist,0, 0, 0, 0, 1, 0);
 }
 
 void GLArea::updateFps()
