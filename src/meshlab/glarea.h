@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.54  2006/02/03 15:58:21  glvertex
+Added getFont() inline method
+
 Revision 1.53  2006/01/27 12:41:21  glvertex
 Removed HUGE memory leaks. The model is now deallocated when the window is colsed.
 
@@ -165,6 +168,7 @@ public:
 	int currentHeight;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
+	QFont getFont() {return qFont;}
 
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
