@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2006/02/03 11:05:12  alemochi
+Modified axis and added arrows.
+
 Revision 1.14  2006/01/26 00:38:59  glvertex
 Quoted box: draws xyz axes candidates
 
@@ -70,6 +73,8 @@ cleaned up the identification between by string of decorations
 #include <stdlib.h>
 
 #include "meshdecorate.h"
+#include<vcg/complex/trimesh/base.h>
+#include <wrap/gl/addons.h>
 
 using namespace vcg;
 const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action) 
@@ -125,7 +130,7 @@ const QString ExtraMeshDecoratePlugin::ST(int id) const
   return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, GLArea * /*gla*/) 
+void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, GLArea *gla) 
 {
 	if(a->text() == ST(DP_SHOW_NORMALS))
 	{
@@ -147,7 +152,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
    glPopAttrib();
   }
   if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
-  if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m);
+  if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m,gla);
 	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m);
 }
 
@@ -389,7 +394,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 }
 
 
-void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m)
+void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 {
 	float hw=m.cm.bbox.Diag()/2.0;
 		glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
@@ -399,7 +404,7 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(2.0);
-	glBegin(GL_LINES);
+	/*glBegin(GL_LINES);
 		glColor(Color4b::Red);
 		glVertex3f(-hw,0,0);
 		glVertex3f(+hw,0,0);
@@ -409,7 +414,21 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m)
 		glColor(Color4b::Blue);
 		glVertex3f(0,0,-hw);
 		glVertex3f(0,0,+hw);
-	glEnd();
+	glEnd();*/
+
+	gla->renderText(hw,0,0,QString("X"),QFont());
+	gla->renderText(0,-hw-0.01,0,QString("Y"),QFont());
+	gla->renderText(0,0,hw,QString("Z"),QFont());
+	
+	glColor(Color4b::Red);
+	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(hw,0,0),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(-hw,0,0),0.001,0.01,0.002,10,10,true);
+	glColor(Color4b::Green);
+	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(0,hw,0),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(0,-hw,0),0.001,0.01,0.002,10,10,true);
+	glColor(Color4b::Blue);
+	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(0,0,hw),0.001,0.01,0.002,10,10,true);
+	Add_Ons::glArrow<Add_Ons::DrawMode::DMSolid>(Point3f(0,0,0),Point3f(0,0,-hw),0.001,0.01,0.002,10,10,true);
 	glDepthRange(0.0f,1.0f);
 	glPopAttrib();
 

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2006/02/03 11:05:14  alemochi
+Modified axis and added arrows.
+
 Revision 1.9  2006/01/26 00:38:59  glvertex
 Quoted box: draws xyz axes candidates
 
@@ -52,6 +55,7 @@ cleaned up the identification between by string of decorations
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include "../../meshlab/mainwindow.h"
 
 class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
@@ -101,7 +105,7 @@ public:
 	QList<QAction *> actions () const {return actionList;}
 
   void DrawBBoxCorner(MeshModel &m);
-  void DrawAxis(MeshModel &m);
+  void DrawAxis(MeshModel &m,GLArea* gla);
 	void DrawQuotedBox(MeshModel &m);
 
   virtual void Decorate(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
