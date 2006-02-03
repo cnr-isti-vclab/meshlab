@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.11  2006/02/03 12:36:53  fmazzant
+ not significant updating
+
  Revision 1.10  2006/02/03 10:04:41  fmazzant
  no significant updated
 
@@ -196,6 +199,7 @@ namespace io {
 
 			//wedg
 			capability |= MeshModel::IOM_WEDGTEXCOORD;
+			capability |= MeshModel::IOM_WEDGNORMAL;
 
 			return capability;
 		}
@@ -413,7 +417,7 @@ namespace io {
 				
 				face.smoothing = 10;
 
-				if(mask & MeshModel::IOM_FACENORMAL)
+				if(mask & MeshModel::IOM_FACENORMAL | mask & MeshModel::IOM_WEDGNORMAL)
 				{
 					face.normal[0] = (*fi).N()[0];
 					face.normal[1] = (*fi).N()[1];
