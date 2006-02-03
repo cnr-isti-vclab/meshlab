@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.53  2006/02/03 13:46:47  mariolatronico
+spell check, remuve -> remove
+
 Revision 1.52  2006/01/31 14:42:27  mariolatronico
 fake commit, removed only some history logs
 
@@ -45,22 +48,6 @@ added update bbox and normal after transform dialog
 
 Revision 1.45  2006/01/22 14:11:04  mariolatronico
 added scale to unit box, move obj center. Rotate around object and origin are not working actually.
-
-Revision 1.44  2006/01/21 14:20:38  mariolatronico
-interface work in progress on new features , need implementation
-
-Revision 1.43  2006/01/17 00:55:01  giec
-Added detacher filter with it's dialog
-
-Revision 1.42  2006/01/15 19:23:56  mariolatronico
-added log for Apply Transform
-
-Revision 1.41  2006/01/15 13:56:48  mariolatronico
-added Apply Transform progress, but work in progress. Currently it modifies mesh vertices
-
-Revision 1.40  2006/01/09 15:25:58  mariolatronico
-- updated Help and Short help
-- on destructor deleted every action
 
 ****************************************************************************/
 #include <QtGui>
@@ -95,7 +82,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_DECIMATOR), this);
 	actionList << new QAction(ST(FP_INVERT_FACES), this);
 	actionList << new QAction(ST(FP_TRANSFORM), this);
-	
+
 	refineDialog = new RefineDialog();
 	refineDialog->hide();
 	decimatorDialog = new DecimatorDialog();
@@ -110,30 +97,30 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 
  switch(filter)
   {
-	case FP_LOOP_SS : 
+	case FP_LOOP_SS :
 		return QString("Loop Subdivision Surfaces");
-	case FP_BUTTERFLY_SS : 
+	case FP_BUTTERFLY_SS :
 		return QString("Butterfly Subdivision Surfaces");
-	case FP_REMOVE_UNREFERENCED_VERTEX : 
+	case FP_REMOVE_UNREFERENCED_VERTEX :
 		return QString("Remove Unreferenced Vertex");
-	case FP_REMOVE_DUPLICATED_VERTEX : 
+	case FP_REMOVE_DUPLICATED_VERTEX :
 		return QString("Remove Duplicated Vertex");
-	case FP_REMOVE_NULL_FACES : 
+	case FP_REMOVE_NULL_FACES :
 		return QString("Remove Null Faces");
-	case FP_LAPLACIAN_SMOOTH : 
+	case FP_LAPLACIAN_SMOOTH :
 		return QString("Laplacian Smooth");
-	case FP_DECIMATOR : 
+	case FP_DECIMATOR :
 		return QString("Clustering decimation");
-	case FP_MIDPOINT : 
+	case FP_MIDPOINT :
 		return QString("Midpoint Subdivision Surfaces");
-	case FP_REORIENT : 
-		return QString("Re-oriented");	
+	case FP_REORIENT :
+		return QString("Re-oriented");
 	case FP_INVERT_FACES:
 		return QString("Invert Faces");
 	case FP_TRANSFORM:
 		return QString("Apply Transform");
 	case FP_DETACHER:
-		return QString("Remuve triangle above threshold");
+		return QString("Remove triangle above threshold");
 
 	default: assert(0);
   }
@@ -156,16 +143,16 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 }
 
 
-const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action) 
+const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 {
-	static ActionInfo ai; 
-  
+	static ActionInfo ai;
+
 	if( action->text() == ST(FP_LOOP_SS) )
 		{
 			ai.Help = tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");
 			ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
 		}
-	if( action->text() == ST(FP_BUTTERFLY_SS) ) 
+	if( action->text() == ST(FP_BUTTERFLY_SS) )
 	  {
 			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");
 			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
@@ -174,7 +161,7 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 		{
 			ai.Help = tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
 			ai.ShortHelp = tr("Remove Unreferenced Vertexes");
-			
+
 		}
   if( action->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 		{
@@ -185,36 +172,36 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 		{
 			ai.Help = tr("Removes faces with area equal to zero");
 			ai.ShortHelp = tr("Remove Null Faces");
-			
+
 		}
 	if(action->text() == ST(FP_LAPLACIAN_SMOOTH) )
 		{
 			ai.Help = tr("For each vertex it calculates the average position with nearest vertex");
 			ai.ShortHelp = tr("Smooth the mesh surface");
-	
+
 		}
-		
+
  	if(action->text() == ST(FP_DECIMATOR) )
  		{
 			ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
 			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
-			
+
  		}
-	
+
 	if(action->text() == ST(FP_MIDPOINT) )
  		{
 			ai.Help = tr("Splits every edge in two");
 			ai.ShortHelp = tr("Apply Midpoint's Subdivision Surface algorithm");
-			
+
  		}
-	
+
 	if(action->text() == ST(FP_REORIENT) )
  		{
 			ai.Help = tr("Re-oriented the adjacencies of the face of the mesh");
 			ai.ShortHelp = tr("Re-oriented the face");
-			
+
  		}
-	
+
 	if(action->text() == ST(FP_INVERT_FACES) )
  		{
 			ai.Help = tr("Invert faces orentation, flip the normal of the mesh");
@@ -227,24 +214,24 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
  		}
 		if(action->text() == ST(FP_DETACHER) )
  		{
-			ai.Help = tr("remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");
+			ai.Help = tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");
 			ai.ShortHelp = tr("Remove triangle with edge greater than a threshold");
  		}
-	
+
    return ai;
 }
 
- const PluginInfo &ExtraMeshFilterPlugin::Info() 
+ const PluginInfo &ExtraMeshFilterPlugin::Info()
 {
-   static PluginInfo ai; 
+   static PluginInfo ai;
    ai.Date=tr("__DATE__");
 	 ai.Version = tr("0.5");
 	 ai.Author = ("Paolo Cignoni, Mario Latronico, Andrea Venturi");
    return ai;
  }
- 
 
-bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb) 
+
+bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos *cb)
 {
 	double threshold = 0.0;
 	bool selected = false;
@@ -252,7 +239,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	if( filter->text().contains(tr("Subdivision Surface")) ) {
 
 	  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-	 
+
 	  if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
 	    QMessageBox::warning(parent, // parent
 				 QString("Can't continue"), // caption
@@ -269,31 +256,31 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	  double threshold = refineDialog->getThreshold(); // threshold for refinying
 	  bool selected = refineDialog->isSelected(); // refine only selected faces
 	}
-	
+
 	if(filter->text() == ST(FP_LOOP_SS) )
 	  {
 	    vcg::RefineOddEvenE<CMeshO, vcg::OddPointLoop<CMeshO>, vcg::EvenPointLoop<CMeshO> >
 	      (m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(),threshold, selected, cb);
-	    
-	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
+
+	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
-	
+
 	if(filter->text() == ST(FP_BUTTERFLY_SS) )
 	  {
 	    vcg::Refine<CMeshO,MidPointButterfly<CMeshO> >
 	      (m.cm,vcg::MidPointButterfly<CMeshO>(),threshold, selected, cb);
-	    
+
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
-	
+
 	if(filter->text() == ST(FP_MIDPOINT) )
 	  {
 	    vcg::Refine<CMeshO,MidPoint<CMeshO> >
 	      (m.cm,vcg::MidPoint<CMeshO>(),threshold, selected, cb);
-	    
+
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
-	
+
 	if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 	  {
 	    int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
@@ -302,7 +289,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	    if (delvert != 0)
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
-	
+
 	if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 	  {
 	    int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
@@ -311,8 +298,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	    if (delvert != 0)
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
-	
-	if(filter->text() == ST(FP_REMOVE_NULL_FACES) ) 
+
+	if(filter->text() == ST(FP_REMOVE_NULL_FACES) )
 	  {
 	    int nullFaces=tri::Clean<CMeshO>::RemoveZeroAreaFace(m.cm);
 	    if (log)
@@ -320,33 +307,33 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	    if (nullFaces != 0)
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
-	
-	if(filter->text() == ST(FP_REORIENT) ) 
+
+	if(filter->text() == ST(FP_REORIENT) )
 	  {
 	    bool oriented;
 	    bool orientable;
 	    vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	    tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	    
+
 	  }
-	
-	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH)) 
+
+	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH))
 	  {
 	    LaplacianSmooth(m.cm,1);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
-	
-	
- 	if(filter->text() == ST(FP_DECIMATOR)) 
+
+
+ 	if(filter->text() == ST(FP_DECIMATOR))
 	  {
 			float diagonale = m.cm.bbox.Diag();
-			
+
 			decimatorDialog->setBboxEdge(m.cm.bbox.min,m.cm.bbox.max);
 			//decimatorDialog->setDiagonale(diagonale);
-	    
+
 			int continueValue = decimatorDialog->exec();
-	    
+
 			if (continueValue == QDialog::Rejected)
 	      return false; // don't continue, user pressed Cancel
 	    int Xstep = decimatorDialog->getXStep();
@@ -360,7 +347,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	  }
 
 	if (filter->text() == ST(FP_INVERT_FACES) ) {
-	  
+
 	  InvertFaces<CMeshO>(m.cm);
 	}
 
@@ -371,7 +358,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
  			return false;
  		Matrix44f matrix = transformDialog->getTransformation();
  		if (log) {
- 			log->Log(GLLogStream::Info, 
+ 			log->Log(GLLogStream::Info,
  							 transformDialog->getLog().toAscii().data());
  		}
  		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
@@ -381,7 +368,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 
 	if (filter->text() == ST(FP_DETACHER) ) {
 		float diagonale = m.cm.bbox.Diag();
-		
+
 		Histogram<float> *histo= new Histogram<float>();
 
 		histo->SetRange( 0, diagonale, 10000);
@@ -420,7 +407,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		detacherDialog->setHistogram(histo);
 		detacherDialog->setDiagonale(diagonale);
 		int continueValue = detacherDialog->exec();
-		
+
 		if (continueValue == QDialog::Rejected)
 			return false; // don't continue, user pressed Cancel
 		double threshold = detacherDialog->getThreshold(); // threshold for refinying
