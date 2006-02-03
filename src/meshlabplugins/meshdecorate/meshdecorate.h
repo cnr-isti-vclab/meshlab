@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2006/02/03 16:36:24  glvertex
+- Some renaming
+- Quoted axis now also draw lines
+
 Revision 1.10  2006/02/03 11:05:14  alemochi
 Modified axis and added arrows.
 
@@ -37,13 +41,6 @@ Puts ticks on X axis... Still working on...
 
 Revision 1.6  2006/01/19 23:56:44  glvertex
 Starting quoted box (simply draws xyz axes)
-
-Revision 1.5  2005/12/12 22:47:35  cignoni
-Added plugin info methods
-
-Revision 1.4  2005/12/12 11:19:41  cignoni
-Added bbox corners and axis,
-cleaned up the identification between by string of decorations
 
 ****************************************************************************/
 #ifndef EXTRADECORATEPLUGIN_H
@@ -76,8 +73,10 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 
 	float niceRound2(float value,float base);
 	float niceRound(float value);
-	
-	template<bool x,bool y,bool z > void	drawAxis(Point3d &p1,Point3d &p2,float dim,double *modelview,double *projection,int *viewport);
+
+
+private:
+	template<bool x,bool y,bool z> void	drawQuotedLine(Point3d &p1,Point3d &p2,float dim,double *modelview,double *projection,int *viewport);
 	
 	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
 	void	chooseY(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &y1,Point3d &y2);

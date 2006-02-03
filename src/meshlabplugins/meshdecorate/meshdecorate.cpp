@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.18  2006/02/03 16:36:24  glvertex
+- Some renaming
+- Quoted axis now also draw lines
+
 Revision 1.17  2006/02/03 14:58:36  alemochi
 Changed axis and added tick
 
@@ -164,7 +168,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
 
 void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 {
-	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
+	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -172,7 +176,6 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_POINT_DISTANCE_ATTENUATION);
-	glLineWidth(1.0);
 
 	// Get gl state values
 	double mm[16],mp[16];
@@ -185,18 +188,19 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 	Box3f b(m.cm.bbox);
 
 	glColor4f(.2f,.9f,.7f,1.f);
-	//glBoxWire(b);
+	glLineWidth(2.f);
+	glPointSize(3.f);
 
 	Point3d p1,p2;
 
 	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
-	drawAxis<true,false,false>(p1,p2,b.DimX(),mm,mp,vp);	// Draws x axis
+	drawQuotedLine<true,false,false>(p1,p2,b.DimX(),mm,mp,vp);	// Draws x axis
 
 	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
-	drawAxis<false,true,false>(p1,p2,b.DimY(),mm,mp,vp);	// Draws y axis
+	drawQuotedLine<false,true,false>(p1,p2,b.DimY(),mm,mp,vp);	// Draws y axis
 
 	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate
-	drawAxis<false,false,true>(p1,p2,b.DimZ(),mm,mp,vp);	// Draws z axis
+	drawQuotedLine<false,false,true>(p1,p2,b.DimZ(),mm,mp,vp);	// Draws z axis
 
 	glPopAttrib();
 
@@ -300,48 +304,27 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,P
 	}
 }
 
+
 template<bool x,bool y,bool z>
-void ExtraMeshDecoratePlugin::drawAxis(Point3d &a,Point3d &b,float dim,double *mm,double *mp,int *vp)
+void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,double *mm,double *mp,int *vp)
 {
 	Point3d p1,p2;
 
 	gluProject(a[0],a[1],a[2],mm,mp,vp,&p1[0],&p1[1],&p1[2]);
 	gluProject(b[0],b[1],b[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
-  p1[2]=p2[2]=0;
+	p1[2]=p2[2]=0;
 
-	// ORIGINAL
-	//float tickNum = Distance(p2,p1)/5.0;// 5 pxl spacing
-	//float slope = dim/tickNum;
-
-	// OPTIMIZED (MISS A QUOTIENT)
 	float tickNum = 5.f/Distance(p2,p1);// 5 pxl spacing
 	float slope = dim*tickNum;
 	slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
 
-	//glColor4f(1.f,1.f,1.f,.8f);
-	glPointSize(3.f);
+
 	glBegin(GL_POINTS);
-		if(x)
-		{
-			for(float i=slope;i<dim;i+=slope)
-				glVertex3f(a[0]+i,a[1],a[2]);
-		}
-
-		if(y)
-		{
-			for(float i=slope;i<dim;i+=slope)
-				glVertex3f(a[0],a[1]+i,a[2]);
-		}
-
-		if(z)
-		{
-			for(float i=slope;i<dim;i+=slope)
-				glVertex3f(a[0],a[1],a[2]+i);
-		}
-
+	for(float i=slope;i<dim;i+=slope)
+		glVertex3f( x ? a[0]+i: a[0],
+		y ? a[1]+i: a[1],
+		z ? a[2]+i: a[2]);
 	glEnd();
-
-	glPointSize(1.f);
 }
 
 float ExtraMeshDecoratePlugin::niceRound2(float Val,float base)	{return powf(base,ceil(log10(Val)/log10(base)));}
@@ -349,7 +332,7 @@ float ExtraMeshDecoratePlugin::niceRound(float val)	{return powf(10.f,ceil(log10
 
 void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 {
-	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
+	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -403,13 +386,16 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 {
 	float hw=m.cm.bbox.Diag()/2.0;
-	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
+	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
+//	glEnable(GL_POINT_DISTANCE_ATTENUATION);
+	glEnable(GL_POINT_SMOOTH);
 	glLineWidth(2.0);
+	glPointSize(3.f);
 
 	// Get gl state values
 	double mm[16],mp[16];
@@ -419,28 +405,34 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 	glGetDoublev(GL_PROJECTION_MATRIX,mp);
 	glGetIntegerv(GL_VIEWPORT,vp);
 
-	glColor(Color4b::White);
-	gla->renderText(hw+0.02,0,0,QString("X"),QFont());
-	gla->renderText(0,-hw-0.01,0,QString("Y"),QFont());
-	gla->renderText(0,0,hw,QString("Z"),QFont());
-
-	glColor(Color4b::Red);
-	drawAxis<true,false,false>(Point3d(-hw,0,0),Point3d(hw,0,0),2*hw,mm,mp,vp);	// Draws x axis
-	glColor(Color4b::Green);
-	drawAxis<false,true,false>(Point3d(0,-hw,0),Point3d(0,hw,0),2*hw,mm,mp,vp);	// Draws y axis
-	glColor(Color4b::Blue);
-	drawAxis<false,false,true>(Point3d(0,0,-hw),Point3d(0,0,hw),2*hw,mm,mp,vp);	// Draws z axis
+	glBegin(GL_LINES);
+		glColor(Color4b::Red); 		glVertex(Point3d(-hw,0,0));glVertex(Point3d(hw,0,0));
+		glColor(Color4b::Green);	glVertex(Point3d(0,-hw,0));glVertex(Point3d(0,hw,0));
+		glColor(Color4b::Blue);		glVertex(Point3d(0,0,-hw));glVertex(Point3d(0,0,hw));
+	glEnd();
 
 	glColor(Color4b::White);
-	glMatrixMode(GL_MODELVIEW);
+	drawQuotedLine<true,false,false>(Point3d(-hw,0,0),Point3d(hw,0,0),2*hw,mm,mp,vp);	// Draws x axis
+	drawQuotedLine<false,true,false>(Point3d(0,-hw,0),Point3d(0,hw,0),2*hw,mm,mp,vp);	// Draws y axis
+	drawQuotedLine<false,false,true>(Point3d(0,0,-hw),Point3d(0,0,hw),2*hw,mm,mp,vp);	// Draws z axis
+
+	//glColor(Color4b::White);
+	//glMatrixMode(GL_MODELVIEW);
+	//glEnable(GL_LIGHTING);
 	glPushMatrix();
 		glTranslate(Point3d(hw,0,0));
-		glScalef(0.005,0.005,0.005);
-		Add_Ons::Cone(10,3,1,true);
+		
+		Add_Ons::Cone(16,.9f,.3f,true);
 	glPopMatrix();
-	
-	glPopAttrib();
 
+	glColor(Color4b::White);
+	QFont f(gla->getFont());
+	f.setBold(true);
+	gla->renderText(hw+0.02,0,0,QString("X"),f);
+	gla->renderText(0,-hw-0.01,0,QString("Y"),f);
+	gla->renderText(0,0,hw,QString("Z"),f);
+
+	glPopAttrib();
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)
