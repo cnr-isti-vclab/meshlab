@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.9  2006/02/03 12:27:08  ggangemi
+improved shaderDialog support
+
 Revision 1.8  2006/01/25 16:58:05  ggangemi
 shaderdialog closed every time the user changes the current shader
 
@@ -137,25 +140,25 @@ void MeshShaderRenderPlugin::initActionList() {
 											} break;
 										case SINGLE_FLOAT: 
 											{ 
-												uv.fval = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+												uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
 											} break; 
 										case ARRAY_2_FLOAT: 
 											{ 
-												uv.val2[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.val2[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();	
+												uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
+												uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();	
 											} break; 
 										case ARRAY_3_FLOAT: 
 											{ 
-												uv.val3[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.val3[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
-												uv.val3[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();		
+												uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
+												uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
+												uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();		
 											} break; 
 										case ARRAY_4_FLOAT: 
 											{ 
-												uv.val4[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.val4[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
-												uv.val4[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
-												uv.val4[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();		
+												uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
+												uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
+												uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
+												uv.fval[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();		
 											} break; 
 										default: 
 											{ 
@@ -257,7 +260,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla)
 						"or the shader's code\n\n");
 				}
 
-				sDialog = new ShadersDialog(&shaders[a->text()]);
+				sDialog = new ShaderDialog(&shaders[a->text()]);
 
 				/*int okPressed = */sDialog->show();
 				//if (okPressed != QDialog::Rejected) return;
@@ -287,16 +290,16 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GL
 					glUniform1fARB(i->second.location, i->second.ival);
 												 } break;
 				case SINGLE_FLOAT: {
-					glUniform1fARB(i->second.location, i->second.fval);
+					glUniform1fARB(i->second.location, i->second.fval[0]);
 													 } break;
 				case ARRAY_2_FLOAT: {
-					glUniform2fARB(i->second.location, i->second.val2[0], i->second.val2[1]);
+					glUniform2fARB(i->second.location, i->second.fval[0], i->second.fval[1]);
 														} break;
 				case ARRAY_3_FLOAT: {
-					glUniform3fARB(i->second.location, i->second.val3[0], i->second.val3[1], i->second.val3[2]);
+					glUniform3fARB(i->second.location, i->second.fval[0], i->second.fval[1], i->second.fval[2]);
 														} break;
 				case ARRAY_4_FLOAT: {
-					glUniform4fARB(i->second.location, i->second.val4[0], i->second.val4[1], i->second.val4[2], i->second.val4[3]);
+					glUniform4fARB(i->second.location, i->second.fval[0], i->second.fval[1], i->second.fval[2], i->second.fval[3]);
 														} break;
 				default: {} break;
 			}

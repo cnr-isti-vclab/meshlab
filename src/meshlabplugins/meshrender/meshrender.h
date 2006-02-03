@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.13  2006/02/03 12:27:08  ggangemi
+improved shaderDialog support
+
 Revision 1.12  2006/01/25 16:58:05  ggangemi
 shaderdialog closed every time the user changes the current shader
 
@@ -76,7 +79,7 @@ Added copyright info
 #include <meshlab/interfaces.h>
 #include "textfile.h"
 #include "shaderStructs.h"
-#include "shadersDialog.h"
+#include "shaderDialog.h"
 
 
 class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
@@ -92,7 +95,7 @@ class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 	bool supported;
 	QList <QAction *> actionList;
 	
-	ShadersDialog *sDialog;
+	ShaderDialog *sDialog;
 
 public:
 
