@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/02/03 17:42:48  vannini
+bugfix & code indentation
+
 Revision 1.1  2006/02/01 16:23:09  vannini
 Added "smooth color" filter
 
@@ -68,60 +71,60 @@ namespace vcg{
 			  if(!(*fi).IsD()) 
 				  for(int j=0;j<3;++j)
 					  if(!(*fi).IsB(j)) 
-						  {
-							  TD[(*fi).V(j)].r+=(*fi).V1(j)->C()[0];
-                TD[(*fi).V(j)].g+=(*fi).V1(j)->C()[1];
-                TD[(*fi).V(j)].b+=(*fi).V1(j)->C()[2];
-                TD[(*fi).V(j)].a+=(*fi).V1(j)->C()[3];
+						{
+							TD[(*fi).V(j)].r+=(*fi).V1(j)->C()[0];
+              TD[(*fi).V(j)].g+=(*fi).V1(j)->C()[1];
+              TD[(*fi).V(j)].b+=(*fi).V1(j)->C()[2];
+              TD[(*fi).V(j)].a+=(*fi).V1(j)->C()[3];
 
-                TD[(*fi).V1(j)].r+=(*fi).V(j)->C()[0];
-                TD[(*fi).V1(j)].g+=(*fi).V(j)->C()[1];
-                TD[(*fi).V1(j)].b+=(*fi).V(j)->C()[2];		  
-                TD[(*fi).V1(j)].a+=(*fi).V(j)->C()[3];		  
+              TD[(*fi).V1(j)].r+=(*fi).V(j)->C()[0];
+              TD[(*fi).V1(j)].g+=(*fi).V(j)->C()[1];
+              TD[(*fi).V1(j)].b+=(*fi).V(j)->C()[2];		  
+              TD[(*fi).V1(j)].a+=(*fi).V(j)->C()[3];		  
 
-							  ++TD[(*fi).V(j)].cnt;
-							  ++TD[(*fi).V1(j)].cnt;
+							++TD[(*fi).V(j)].cnt;
+							++TD[(*fi).V1(j)].cnt;
 					  }
 
-			  // si azzaera i dati per i vertici di bordo
-			  for(fi=m.face.begin();fi!=m.face.end();++fi)
-				  if(!(*fi).IsD()) 
-					  for(int j=0;j<3;++j)
-						  if((*fi).IsB(j))
-							  {
-								  TD[(*fi).V(j)]=csi;
-								  TD[(*fi).V1(j)]=csi;
-							  }
+			// si azzaera i dati per i vertici di bordo
+			for(fi=m.face.begin();fi!=m.face.end();++fi)
+				if(!(*fi).IsD()) 
+					for(int j=0;j<3;++j)
+						if((*fi).IsB(j))
+						{
+						  TD[(*fi).V(j)]=csi;
+							TD[(*fi).V1(j)]=csi;
+						}
 
-			  // se l'edge j e' di bordo si deve mediare solo con gli adiacenti
-			  for(fi=m.face.begin();fi!=m.face.end();++fi)
-				  if(!(*fi).IsD()) 
-					  for(int j=0;j<3;++j)
-						  if((*fi).IsB(j)) 
-							  {
-								  TD[(*fi).V(j)].r+=(*fi).V1(j)->C()[0];
-                  TD[(*fi).V(j)].g+=(*fi).V1(j)->C()[1];
-                  TD[(*fi).V(j)].b+=(*fi).V1(j)->C()[2];
-                  TD[(*fi).V(j)].a+=(*fi).V1(j)->C()[3];
+			// se l'edge j e' di bordo si deve mediare solo con gli adiacenti
+			for(fi=m.face.begin();fi!=m.face.end();++fi)
+				if(!(*fi).IsD()) 
+					for(int j=0;j<3;++j)
+						if((*fi).IsB(j)) 
+						{
+						  TD[(*fi).V(j)].r+=(*fi).V1(j)->C()[0];
+              TD[(*fi).V(j)].g+=(*fi).V1(j)->C()[1];
+              TD[(*fi).V(j)].b+=(*fi).V1(j)->C()[2];
+              TD[(*fi).V(j)].a+=(*fi).V1(j)->C()[3];
 
-                  TD[(*fi).V1(j)].r+=(*fi).V(j)->C()[0];
-                  TD[(*fi).V1(j)].g+=(*fi).V(j)->C()[1];
-                  TD[(*fi).V1(j)].b+=(*fi).V(j)->C()[2];		  
-                  TD[(*fi).V1(j)].a+=(*fi).V(j)->C()[3];
+              TD[(*fi).V1(j)].r+=(*fi).V(j)->C()[0];
+              TD[(*fi).V1(j)].g+=(*fi).V(j)->C()[1];
+              TD[(*fi).V1(j)].b+=(*fi).V(j)->C()[2];		  
+              TD[(*fi).V1(j)].a+=(*fi).V(j)->C()[3];
 
-							    ++TD[(*fi).V(j)].cnt;
-							    ++TD[(*fi).V1(j)].cnt;
-						  }
+						  ++TD[(*fi).V(j)].cnt;
+						  ++TD[(*fi).V1(j)].cnt;
+					  }
 
-	  for(vi=m.vert.begin();vi!=m.vert.end();++vi)
-		  if(!(*vi).IsD() && TD[*vi].cnt>0 )
-			  if(!SmoothSelected || (*vi).IsS())
-        {
-          (*vi).C()[0] = (unsigned int) ceil((double) (TD[*vi].r / TD[*vi].cnt));
-          (*vi).C()[1] = (unsigned int) ceil((double) (TD[*vi].g / TD[*vi].cnt));
-          (*vi).C()[2] = (unsigned int) ceil((double) (TD[*vi].b / TD[*vi].cnt));
-          (*vi).C()[3] = (unsigned int) ceil((double) (TD[*vi].a / TD[*vi].cnt));
-        }
+	    for(vi=m.vert.begin();vi!=m.vert.end();++vi)
+		    if(!(*vi).IsD() && TD[*vi].cnt>0 )
+			    if(!SmoothSelected || (*vi).IsS())
+          {
+            (*vi).C()[0] = (unsigned int) ceil((double) (TD[*vi].r / TD[*vi].cnt));
+            (*vi).C()[1] = (unsigned int) ceil((double) (TD[*vi].g / TD[*vi].cnt));
+            (*vi).C()[2] = (unsigned int) ceil((double) (TD[*vi].b / TD[*vi].cnt));
+            (*vi).C()[3] = (unsigned int) ceil((double) (TD[*vi].a / TD[*vi].cnt));
+          }
 	  }
   		 	
 	  TD.Stop();

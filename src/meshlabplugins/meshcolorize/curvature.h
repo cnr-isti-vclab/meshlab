@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/02/03 17:42:48  vannini
+bugfix & code indentation
+
 Revision 1.6  2006/02/01 16:23:09  vannini
 Added "smooth color" filter
 
@@ -111,7 +114,7 @@ namespace vcg
         angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
         angle2 = M_PI-(angle0+angle1);
         
-        if((angle0 > M_PI/2) || (angle1 > M_PI/2) || (angle2 > M_PI/2))  // triangolo non ottuso
+        if((angle0 < M_PI/2) && (angle1 < M_PI/2) && (angle2 < M_PI/2))  // triangolo non ottuso
         { 
 	        float e01 = SquaredDistance( (*fi).V(1)->P() , (*fi).V(0)->P() );
 	        float e12 = SquaredDistance( (*fi).V(2)->P() , (*fi).V(1)->P() );
