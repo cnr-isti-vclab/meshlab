@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.24  2006/02/04 09:41:44  vannini
+Better handling of curvature computation for border vertex
+Plugin info updated
+
 Revision 1.23  2006/02/01 16:23:09  vannini
 Added "smooth color" filter
 
@@ -206,8 +210,8 @@ const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action)
 const PluginInfo &ExtraMeshColorizePlugin::Info() 
 {
   static PluginInfo ai; 
-  ai.Date=tr("__DATE__");
-  ai.Version = tr("0.5");
+  ai.Date=tr("January 2006");
+  ai.Version = tr("1.0");
   ai.Author = ("Francesco Vannini, Giorgio Gangemi, Andrea Venturi");
   return ai;
 }
@@ -251,9 +255,6 @@ void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &
 
   if(mode->text() == ST(CP_GAUSSIAN))
     {
-      vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-      vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-      vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace (m.cm);
       Curvature<CMeshO> c(m.cm);
       c.MapGaussianCurvatureIntoQuality();
       c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));

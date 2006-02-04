@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2006/02/04 09:41:44  vannini
+Better handling of curvature computation for border vertex
+Plugin info updated
+
 Revision 1.7  2006/02/03 17:42:48  vannini
 bugfix & code indentation
 
@@ -59,6 +63,10 @@ removed color_curvature.h in favour of curvature.h
 #include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/math/histogram.h>
+#include <vcg/simplex/face/topology.h>
+#include <vcg/simplex/face/pos.h>
+
+#include <stdio.h>
 
 #define DEFAULT_HISTO_FRAC 0.05f
 #define DEFAULT_HISTO_RANGE 10000
@@ -91,6 +99,8 @@ namespace vcg
     typedef typename MESH_TYPE::FaceIterator FaceIterator;
     typedef typename MESH_TYPE::VertexIterator VertexIterator;
     typedef typename MESH_TYPE::VertContainer VertContainer;
+    typedef typename MESH_TYPE::FaceType FaceType;
+    typedef typename MESH_TYPE::CoordType CoordType;
 
   private:
     MESH_TYPE *ms;
@@ -101,11 +111,15 @@ namespace vcg
     {
       float area0, area1, area2, angle0, angle1, angle2, e01, e12, e20;
       FaceIterator fi;
-      VertexIterator vi;
-	
+      VertexIterator vi;   
+
       //Calcola AreaMix in H (vale anche per K)
       for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
-        (*TDCurvPtr)[*vi].H=0;
+      {
+        (*TDAreaPtr)[*vi].A = 0;
+        (*TDCurvPtr)[*vi].H = 0;
+        (*TDCurvPtr)[*vi].K = (float)(2.0 * M_PI);
+      }
 
       for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if( !(*fi).IsD())
       {
@@ -124,25 +138,19 @@ namespace vcg
 	        area1 = ( e01*(1.0/tan(angle2)) + e12*(1.0/tan(angle0)) ) / 8.0;
 	        area2 = ( e12*(1.0/tan(angle0)) + e20*(1.0/tan(angle1)) ) / 8.0;
       	
-	        (*TDCurvPtr)[(*fi).V(0)].H  += area0;
-	        (*TDCurvPtr)[(*fi).V(1)].H  += area1;
-	        (*TDCurvPtr)[(*fi).V(2)].H  += area2;
+	        (*TDAreaPtr)[(*fi).V(0)].A  += area0;
+	        (*TDAreaPtr)[(*fi).V(1)].A  += area1;
+	        (*TDAreaPtr)[(*fi).V(2)].A  += area2;
+
 	      }
         else // triangolo ottuso
 	      { 
-	        (*TDCurvPtr)[(*fi).V(0)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
-	        (*TDCurvPtr)[(*fi).V(1)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
-	        (*TDCurvPtr)[(*fi).V(2)].H += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;      
+	        (*TDAreaPtr)[(*fi).V(0)].A += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
+	        (*TDAreaPtr)[(*fi).V(1)].A += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;
+	        (*TDAreaPtr)[(*fi).V(2)].A += vcg::DoubleArea<CFaceO>((*fi)) / 6.0;      
 	      }
       }   
-
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD())
-      {
-        (*TDAreaPtr)[*vi].A = (*TDCurvPtr)[*vi].H;      //Areamix è comune a H e a K
-        (*TDCurvPtr)[*vi].H = 0;
-        (*TDCurvPtr)[*vi].K = (float)(2.0 * M_PI);
-      }
-      
+     
       for(fi=(*ms).face.begin();fi!=(*ms).face.end();++fi) if( !(*fi).IsD() )
       {    
         angle0 = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
@@ -164,9 +172,27 @@ namespace vcg
         (*TDCurvPtr)[(*fi).V(0)].K -= angle0;
         (*TDCurvPtr)[(*fi).V(1)].K -= angle1;
         (*TDCurvPtr)[(*fi).V(2)].K -= angle2;
+
+        
+        for(int i=0;i<3;i++)
+		    {
+			    if(vcg::face::IsBorder((*fi), i))
+			    {
+				    CoordType e1,e2;
+				    vcg::face::Pos<FaceType> hp(&*fi, i, (*fi).V(i));
+				    vcg::face::Pos<FaceType> hp1=hp;
+				    
+            hp1.FlipV();
+    	      e1=hp1.v->P() - hp.v->P();
+				    hp1.FlipV();
+				    hp1.NextB();
+				    e2=hp1.v->P() - hp.v->P();
+            (*TDCurvPtr)[(*fi).V(i)].K -= math::Abs(Angle(e1,e2));
+			    }
+	      }
       }
-      
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
+         
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/)
       {
         if((*TDAreaPtr)[*vi].A<=std::numeric_limits<float>::epsilon())
         {
@@ -180,7 +206,7 @@ namespace vcg
         }
       }
     }
-
+    
   public:
     Curvature(MESH_TYPE &mt):ms(&mt)
     {
@@ -188,6 +214,11 @@ namespace vcg
       (*TDCurvPtr).Start(CurvData());
       TDAreaPtr = new SimpleTempData<VertContainer, AreaData>((*ms).vert);
       (*TDAreaPtr).Start(AreaData());
+
+      vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace((*ms));
+      vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF((*ms));
+      vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace((*ms));
+      //vcg::tri::UpdateColor<MESH_TYPE>::VertexBorderFlag((*ms));
 
       ComputeHK();
     }
@@ -198,12 +229,11 @@ namespace vcg
       (*TDAreaPtr).Stop();
     }
 
-
     void MapGaussianCurvatureIntoQuality()
     { 
       VertexIterator vi;
 
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/) 
         (*vi).Q() = (*TDCurvPtr)[*vi].K;
     }
 
@@ -211,7 +241,7 @@ namespace vcg
     void MapMeanCurvatureIntoQuality()
     {
       VertexIterator vi;
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/) 
         (*vi).Q() = (*TDCurvPtr)[*vi].H;
     }
 
@@ -221,7 +251,7 @@ namespace vcg
       VertexIterator vi;
 
       //Compute sqrt(4*H^2-2K)
-	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
+	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/)
         (*vi).Q()=math::Sqrt((4.0f * powf((*TDCurvPtr)[*vi].H, 2.0f)) - ((*TDCurvPtr)[*vi].K * 2.0f));
     }
 
@@ -231,7 +261,7 @@ namespace vcg
       float t;
 
       //Compute abs(H+sqrt(H*H-K)) + abs(H-sqrt(H*H-K))
-	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
+	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/)
       {
         t=math::Sqrt(powf((*TDCurvPtr)[*vi].H, 2.0f) - (*TDCurvPtr)[*vi].K);
         (*vi).Q()= math::Abs((*TDCurvPtr)[*vi].H + t) + math::Abs((*TDCurvPtr)[*vi].H - t);
@@ -245,7 +275,7 @@ namespace vcg
       r.min=std::numeric_limits<float>::max();
       r.max=-std::numeric_limits<float>::max();
 
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB())
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/)
       {
         if ((*vi).Q() < r.min) r.min = (*vi).Q();
         if ((*vi).Q() > r.max) r.max = (*vi).Q();   
@@ -262,7 +292,7 @@ namespace vcg
       
       histo.SetRange(Q.min, Q.max, histo_range);
       
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/) 
         histo.Add((*vi).Q());
         
       Q.min = histo.Percentile(histo_frac);
@@ -276,7 +306,7 @@ namespace vcg
     {
       VertexIterator vi;
               
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() && !(*vi).IsB()) 
+      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/) 
         (*vi).C().ColorRamp(P.min, P.max, (*vi).Q());
       
     }
