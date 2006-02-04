@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.12  2006/02/04 10:18:46  fmazzant
+ clean code
+
  Revision 1.11  2006/02/03 12:36:53  fmazzant
  not significant updating
 
@@ -230,7 +233,7 @@ namespace io {
 				si tiene in considerazione una mappa ListOfDuplexVert<Key,int>, alla quale gli viene associato il seguente significato:
 					Key:è una coppia (int,TexCoord) formata da un int che rappresenta l'indice del vettore nella mesh originale e la sua 
 						coordinata di texture. tale coppia rappresenta una chiave, essendo univoca in tutta la mesh. non è possibile che 
-						si incontrino due vertici che hanno solite coordinate di vertice e solite coordinate di texture, se un vertice di 
+						si incontrino due vertici che hanno solita coordinata di vertice e solite coordinate di texture, se un vertice di 
 						questo tipo esistesse allora i due vertici rappresenterebbero lo stesso vertice.
 					int:è l'indice del vertice inserito all'interno del vettore VectorOfVertexType<VertexType>
 					
@@ -274,7 +277,7 @@ namespace io {
 				alla fine vengono duplicati solamente quei vertici che hanno più coordinate di texture.
 
 				c'e' da tenere presente che il codice appena descritto viene eseguito SOLAMENTE se la mesh contiene texture e
-				se dalla maschera viene spuntato il salvataggio delle texture. in caso contrario non esegue niente e tratta
+				se dalla dialog di exporter viene spuntato il salvataggio delle texture. in caso contrario non esegue niente e tratta
 				solamente i vertici che sono presenti nella mesh senza creare duplicati. le informazioni presenti in assenza di
 				texture sono piu' che sufficienti.
 			*/			
@@ -541,17 +544,8 @@ namespace io {
 			unsigned char b = (*fi).C()[2];
 			unsigned char alpha = (*fi).C()[3];
 			
-			Point3f diffuse;
-			if(r > 1 || g > 1 || b > 1)
-				diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);
-			else 
-				diffuse = Point3f((float)r,(float)g,(float)b);
-
-			float Tr;
-			if(alpha > 1)
-				Tr = (float)alpha/255.0;
-			else
-				Tr = (float)alpha;
+			Point3f diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);//diffuse
+			float Tr = (float)alpha/255.0;//alpha
 			
 			int illum = 2; //default not use Ks!
 			float ns = 0.0; //default

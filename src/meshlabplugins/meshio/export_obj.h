@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.6  2006/02/04 10:18:46  fmazzant
+ clean code
+
  Revision 1.5  2006/02/03 10:04:41  fmazzant
  no significant updated
 
@@ -400,17 +403,8 @@ namespace io {
 			unsigned char b = (*fi).C()[2];
 			unsigned char alpha = (*fi).C()[3];
 			
-			Point3f diffuse;
-			if(r > 1 || g > 1 || b > 1)
-				diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);
-			else 
-				diffuse = Point3f((float)r,(float)g,(float)b);
-			
-			float Tr;
-			if(alpha > 1)
-				Tr = (float)alpha/255.0;
-			else
-				Tr = (float)alpha;
+			Point3f diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);//diffuse
+			float Tr = (float)alpha/255.0;//alpha
 			
 			int illum = 2; //default not use Ks!
 			float ns = 0.0; //default
