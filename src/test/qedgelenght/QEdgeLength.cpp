@@ -1,6 +1,9 @@
 /* History
 
 $Log$
+Revision 1.2  2006/02/05 11:16:58  mariolatronico
+some changes to adapt the widget for Designer integration
+
 Revision 1.1  2006/02/01 14:28:24  mariolatronico
 first try for a QEdgeLength widget
 
@@ -9,10 +12,11 @@ first try for a QEdgeLength widget
 
 #include "QEdgeLength.h"
 
-QEdgeLength::QEdgeLength(float diagValue, QWidget *parent) : QWidget(parent)
+
+QEdgeLength::QEdgeLength(QWidget *parent) : QWidget(parent)
  {
 
-	this->diagValue = diagValue;
+	diagValue = 1;
 	percValue = 100.0f;
 	absValue = 0.0f;
 	// Widget and layout creation
@@ -82,13 +86,27 @@ void QEdgeLength::setPercentValue(const QString & absString) {
 }
 
 QEdgeLength::~QEdgeLength() {
-	// It's layout responsability to delete their own widgets
+
+    // It's layout responsability to delete their own widgets
 	// added with addWidget
-	delete layout;
-	delete layoutAbs;
-	delete layoutDiag; delete layoutPerc;
+//     if ( layout )
+//         delete layout;
+// 	if ( layoutAbs )
+//       delete layoutAbs;
+// 	if ( layoutDiag )
+//       delete layoutDiag;
+//   if ( layoutPerc )
+//       delete layoutPerc;
 
 }
+
+void QEdgeLength::setDiagonal( float diagValue )
+{
+    this->diagValue = diagValue;
+    diagValueLBL->setText( QString::number((double)diagValue));
+
+}
+
 
 
 
