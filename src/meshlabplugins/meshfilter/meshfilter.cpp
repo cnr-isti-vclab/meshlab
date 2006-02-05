@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.54  2006/02/05 11:22:40  mariolatronico
+changed spinbox to QEdgeLength widget
+
 Revision 1.53  2006/02/03 13:46:47  mariolatronico
 spell check, remuve -> remove
 
@@ -250,11 +253,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	  vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	  vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 	  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+    vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+    refineDialog->setDiagonal( m.cm.bbox.Diag() );
 	  int continueValue = refineDialog->exec();
 	  if (continueValue == QDialog::Rejected)
 	    return false; // don't continue, user pressed Cancel
 	  double threshold = refineDialog->getThreshold(); // threshold for refinying
-	  bool selected = refineDialog->isSelected(); // refine only selected faces
+    qDebug( "%f", threshold );
+    bool selected = refineDialog->isSelected(); // refine only selected faces
 	}
 
 	if(filter->text() == ST(FP_LOOP_SS) )

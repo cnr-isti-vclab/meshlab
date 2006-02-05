@@ -20,6 +20,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.23  2006/02/05 11:22:40  mariolatronico
+changed spinbox to QEdgeLength widget
+
 Revision 1.22  2006/01/31 14:40:40  mariolatronico
 removed unused variable ActionInfo *ai, added Log history
 
@@ -35,7 +38,7 @@ removed unused variable ActionInfo *ai, added Log history
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include "refineDialog.h"
+#include "refineDialog2.h"
 #include "decimatorDialog.h"
 #include "transformDialog.h"
 #include "detacherDialog.h"
@@ -46,14 +49,14 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
-		
+
 		public:
-	/* naming convention : 
+	/* naming convention :
 		 - FP -> Filter Plugin
 		 - name of the plugin separated by _
 	*/
-	enum FilterType { FP_LOOP_SS, FP_BUTTERFLY_SS, FP_REMOVE_UNREFERENCED_VERTEX, 
-										FP_REMOVE_DUPLICATED_VERTEX, FP_REMOVE_NULL_FACES, 
+	enum FilterType { FP_LOOP_SS, FP_BUTTERFLY_SS, FP_REMOVE_UNREFERENCED_VERTEX,
+										FP_REMOVE_DUPLICATED_VERTEX, FP_REMOVE_NULL_FACES,
 										FP_LAPLACIAN_SMOOTH, FP_DECIMATOR, FP_MIDPOINT, FP_REORIENT ,FP_INVERT_FACES,
 										FP_TRANSFORM, FP_DETACHER	} ;
 	const QString ST(FilterType filter);
@@ -63,7 +66,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	~ExtraMeshFilterPlugin();
 	virtual const ActionInfo &Info(QAction *);
 	virtual const PluginInfo &Info();
-	
+
 	virtual QList<QAction *> actions() const;
 	bool applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;
 	void setLog(GLLogStream *log) { this->log = log ; }

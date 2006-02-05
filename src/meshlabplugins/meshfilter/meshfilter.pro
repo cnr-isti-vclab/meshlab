@@ -1,16 +1,19 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = refineDialog.h \
+INCLUDEPATH  += ../../test/qedgelenght ../.. ../../../../sf ../../../../code/lib/glew/include
+HEADERS       = refineDialog2.h \
 				transformDialog.h \
 				decimatorDialog.h \
 				detacher.h \
 				detacherDialog.h \
 				../../meshlab/interfaces.h \
-				meshfilter.h 
+				meshfilter.h \
+        ../../test/qedgelenght/QEdgeLength.h
+
 SOURCES       = transformDialog.cpp \
 				meshfilter.cpp \ 
-				../../meshlab/GLLogStream.cpp 
+				../../meshlab/GLLogStream.cpp \
+        ../../test/qedgelenght/QEdgeLength.cpp
 
 TARGET        = meshfilter
 DESTDIR       = ../../meshlab/plugins
@@ -18,10 +21,11 @@ DESTDIR       = ../../meshlab/plugins
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 # all dialog are stored in meshlab/ui directory
-FORMS         = ui/refineDialog.ui \
-				ui/decimatorDialog.ui \
-				ui/transformDialog.ui \
-				ui/detacherDialog.ui
+FORMS         = ui/refineDialog2.ui \
+ui/decimatorDialog.ui \
+ui/transformDialog.ui \
+ui/detacherDialog.ui
+
 QT += opengl
 unix{
 	QMAKE_CC	 = gcc-3.3
