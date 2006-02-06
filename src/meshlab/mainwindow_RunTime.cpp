@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.84  2006/02/06 23:37:30  glvertex
+Showing about dialog with fixed size
+
 Revision 1.83  2006/02/01 17:48:12  buzzelli
 resolved a platform dependent issue about material and texture files locations
 
@@ -543,6 +546,7 @@ void MainWindow::about()
 	Ui::aboutDialog temp;
 	temp.setupUi(about_dialog);
 	temp.labelMLName->setText(appName());
+	about_dialog->setFixedSize(566,580);
 	about_dialog->show();
 }
 
