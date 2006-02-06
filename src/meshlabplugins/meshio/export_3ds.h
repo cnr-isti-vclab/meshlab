@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.14  2006/02/06 11:26:26  fmazzant
+ bug-fix comment
+
  Revision 1.13  2006/02/06 11:04:39  fmazzant
  added file material.h. it include struct Material, CreateNewMaterial(...) and MaterialsCompare(...)
 
@@ -242,7 +245,7 @@ namespace io {
 						questo tipo esistesse allora i due vertici rappresenterebbero lo stesso vertice.
 					int:è l'indice del vertice inserito all'interno del vettore VectorOfVertexType<VertexType>
 					
-					Nel vertice VectorOfVertexType vengono inseriti tutti i vertici appartenendi alla mesh + i k vertici dublicati. la scelta 
+					Nel vertice VectorOfVertexType vengono inseriti tutti i vertici appartenenti alla mesh + i k vertici dublicati. la scelta 
 					di tali vertici va in base alla seguente regola:
 						se un vertice con indice x(originale) ha più di una coordinata di texture allora tale vertice viene duplicato e 
 						inserito in ListOfDuplexVert e in VectorOfVertexType(in VectorOfVertexType, l'inserimento del doppio vertice non 
