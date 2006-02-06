@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.20  2006/02/06 15:17:04  davide_portelli
+Correct a little bug
+
 Revision 1.19  2006/02/03 18:12:37  davide_portelli
 Added arrows in the axis
 
@@ -420,24 +423,24 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-		glTranslate(Point3d(hw,0,0));	glScalef(0.05,0.05,0.05);	Add_Ons::Cone(10,3,1,true);
+		glTranslate(Point3d(hw,0,0));	glScalef(hw/50,hw/50,hw/50);	Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 	
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-		glTranslate(Point3d(0,hw,0));	glRotated(90,0,0,1); glScalef(0.05,0.05,0.05); Add_Ons::Cone(10,3,1,true);
+		glTranslate(Point3d(0,hw,0));	glRotated(90,0,0,1); glScalef(hw/50,hw/50,hw/50); Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 	
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-		glTranslate(Point3d(0,0,hw));	glRotated(-90,0,1,0);	glScalef(0.05,0.05,0.05);	Add_Ons::Cone(10,3,1,true);
+		glTranslate(Point3d(0,0,hw));	glRotated(-90,0,1,0);	glScalef(hw/50,hw/50,hw/50);	Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 
 	QFont f(gla->getFont());
 	f.setBold(true);
-	glColor(Color4b::Red);	 gla->renderText(hw+0.25,0,0,QString("X"),f);
-	glColor(Color4b::Green); gla->renderText(0,hw+0.25,0,QString("Y"),f);
-	glColor(Color4b::Blue);  gla->renderText(0,0,hw+0.25,QString("Z"),f);
+	glColor(Color4b::Red);	 gla->renderText(hw+(hw/16),0,0,QString("X"),f);
+	glColor(Color4b::Green); gla->renderText(0,hw+(hw/16),0,QString("Y"),f);
+	glColor(Color4b::Blue);  gla->renderText(0,0,hw+(hw/16),QString("Z"),f);
 
 	glPopAttrib();
 }
