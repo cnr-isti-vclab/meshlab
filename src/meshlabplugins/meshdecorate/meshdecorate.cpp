@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.21  2006/02/06 22:44:02  davide_portelli
+Some changes in DrawAxis in order to compile under gcc
+
 Revision 1.20  2006/02/06 15:17:04  davide_portelli
 Correct a little bug
 
@@ -417,21 +420,19 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 	glEnd();
 
 	glColor(Color4b::White);
-	drawQuotedLine<true,false,false>(Point3d(-hw,0,0),Point3d(hw,0,0),2*hw,mm,mp,vp);	// Draws x axis
-	drawQuotedLine<false,true,false>(Point3d(0,-hw,0),Point3d(0,hw,0),2*hw,mm,mp,vp);	// Draws y axis
-	drawQuotedLine<false,false,true>(Point3d(0,0,-hw),Point3d(0,0,hw),2*hw,mm,mp,vp);	// Draws z axis
+	Point3d a(hw,0,0);Point3d b(0,hw,0);Point3d c(0,0,hw);
+	drawQuotedLine<true,false,false>(-a,a,2*hw,mm,mp,vp);	// Draws x axis
+	drawQuotedLine<false,true,false>(-b,b,2*hw,mm,mp,vp);	// Draws y axis
+	drawQuotedLine<false,false,true>(-c,c,2*hw,mm,mp,vp);	// Draws z axis
 
-	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 		glTranslate(Point3d(hw,0,0));	glScalef(hw/50,hw/50,hw/50);	Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 	
-	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 		glTranslate(Point3d(0,hw,0));	glRotated(90,0,0,1); glScalef(hw/50,hw/50,hw/50); Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 	
-	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 		glTranslate(Point3d(0,0,hw));	glRotated(-90,0,1,0);	glScalef(hw/50,hw/50,hw/50);	Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
