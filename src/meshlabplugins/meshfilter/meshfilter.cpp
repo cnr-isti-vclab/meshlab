@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.55  2006/02/06 10:18:27  mariolatronico
+reverted to old behaviour, removed QEdgeLength
+
 Revision 1.54  2006/02/05 11:22:40  mariolatronico
 changed spinbox to QEdgeLength widget
 
@@ -254,12 +257,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	  vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 	  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
     vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-    refineDialog->setDiagonal( m.cm.bbox.Diag() );
+//    refineDialog->setDiagonal( m.cm.bbox.Diag() );
 	  int continueValue = refineDialog->exec();
 	  if (continueValue == QDialog::Rejected)
 	    return false; // don't continue, user pressed Cancel
 	  double threshold = refineDialog->getThreshold(); // threshold for refinying
-    qDebug( "%f", threshold );
+//    qDebug( "%f", threshold );
     bool selected = refineDialog->isSelected(); // refine only selected faces
 	}
 

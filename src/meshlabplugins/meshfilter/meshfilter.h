@@ -20,6 +20,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.24  2006/02/06 10:18:27  mariolatronico
+reverted to old behaviour, removed QEdgeLength
+
 Revision 1.23  2006/02/05 11:22:40  mariolatronico
 changed spinbox to QEdgeLength widget
 
@@ -38,7 +41,7 @@ removed unused variable ActionInfo *ai, added Log history
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include "refineDialog2.h"
+#include "refineDialog.h"
 #include "decimatorDialog.h"
 #include "transformDialog.h"
 #include "detacherDialog.h"
