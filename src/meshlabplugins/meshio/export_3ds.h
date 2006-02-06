@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.13  2006/02/06 11:04:39  fmazzant
+ added file material.h. it include struct Material, CreateNewMaterial(...) and MaterialsCompare(...)
+
  Revision 1.12  2006/02/04 10:18:46  fmazzant
  clean code
 
@@ -111,6 +114,8 @@
 #include <vcg/complex/trimesh/allocate.h>
 #include <wrap/io_trimesh/io_mask.h>
 
+#include "material.h"
+
 #include <lib3ds/file.h>
 #include <lib3ds/io.h>
 #include <lib3ds/mesh.h>
@@ -138,8 +143,8 @@ namespace io {
 		typedef typename SaveMeshType::VertexIterator VertexIterator;
 		typedef typename SaveMeshType::VertexType VertexType;
 
-		//int:rappresenta indice vertice vecchio
-		//TCoord2: la cordinata di texture del vertice con indice  i
+		//int: old index vertex
+		//TCoord2: textcoord with vertex's index i
 		typedef std::pair<int,vcg::TCoord2<float> > Key;
 	
 		/*
@@ -307,7 +312,7 @@ namespace io {
 					}
 
 					if (cb !=NULL)
-						(*cb)(100.0 * (float)++nface/(float)m.face.size(), "calulating dubliction vertex ...");
+						(*cb)(100.0 * (float)++nface/(float)m.face.size(), "calc duplex vertex ...");
 					else
 						return E_ABORTED;
 				}
@@ -429,7 +434,7 @@ namespace io {
 
 				if(mask & MeshModel::IOM_FACECOLOR | mask & MeshModel::IOM_WEDGTEXCOORD)
 				{
-					int material_index = CreateNewMaterial(m, materials, 0, fi);
+					int material_index = vcg::tri::io::Materials<SaveMeshType>::CreateNewMaterial(m, materials, 0, fi);
 					if(material_index == materials.size())
 					{
 						Lib3dsMaterial *material = lib3ds_material_new();//creates a new material
@@ -533,67 +538,7 @@ namespace io {
 		{
 			return m[key];
 		}
-	
-		/*
-			create a new material
-		*/
-		inline static int CreateNewMaterial(SaveMeshType &m, std::vector<Material> &materials, unsigned int index, FaceIterator &fi)
-		{			
-			unsigned char r = (*fi).C()[0];
-			unsigned char g = (*fi).C()[1];
-			unsigned char b = (*fi).C()[2];
-			unsigned char alpha = (*fi).C()[3];
-			
-			Point3f diffuse = Point3f((float)r/255.0,(float)g/255.0,(float)b/255.0);//diffuse
-			float Tr = (float)alpha/255.0;//alpha
-			
-			int illum = 2; //default not use Ks!
-			float ns = 0.0; //default
 
-			Material mtl;
-
-			mtl.index = index;//index of materials
-			mtl.Ka = Point3f(0.2,0.2,0.2);//ambient
-			mtl.Kd = diffuse;//diffuse
-			mtl.Ks = Point3f(1.0,1.0,1.0);//specular
-			mtl.Tr = Tr;//alpha
-			mtl.Ns = ns;
-			mtl.illum = illum;//illumination
-			
-			if(m.textures.size() && (*fi).WT(0).n() >=0 ) 		
-				mtl.map_Kd = m.textures[(*fi).WT(0).n()];
-			else
-				mtl.map_Kd = "";
-			
-			int i = -1;
-			if((i = MaterialsCompare(materials,mtl)) == -1)
-			{
-				materials.push_back(mtl);
-				index++;
-				return materials.size();
-			}
-			return i;
-		}
-
-		/*
-			returns the index of the material if it exists inside the list of the materials, 
-			otherwise it returns -1.
-		*/
-		inline static int MaterialsCompare(std::vector<Material> &materials, Material mtl)
-		{
-			for(int i=0;i<materials.size();i++)
-			{
-				bool ka = materials[i].Ka == mtl.Ka;
-				bool kd = materials[i].Kd == mtl.Kd;
-				bool ks = materials[i].Ks == mtl.Ks;
-				bool tr = materials[i].Tr == mtl.Tr;
-				bool illum = materials[i].illum == mtl.illum;
-				bool ns = materials[i].Ns == mtl.Ns;
-				bool map = materials[i].map_Kd == mtl.map_Kd;
-				if(ka & kd & ks & tr & illum & ns & map){return i;}
-			}
-			return -1;
-		}
 	}; // end class
 
 } // end Namespace tri

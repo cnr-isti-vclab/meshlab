@@ -8,7 +8,8 @@ HEADERS       = meshio.h \
 				import_obj.h \
 				import_3ds.h \
 				io_obj.h \
-				io_3ds.h
+				io_3ds.h \
+				material.h
 SOURCES       = meshio.cpp \
 				../../../../sf/wrap/ply/plylib.cpp
 TARGET        = meshio
