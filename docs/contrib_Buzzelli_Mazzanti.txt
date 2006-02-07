@@ -1,1 +1,123 @@
-Mettete qui l'elenco di quel che avete fatto...
+[export_obj.h]
+All’interno di questo file viene definita la funzione per il salvataggio della mesh in formato obj. 
+Tale funzione ha più firme, ma di seguito viene descritta solamente quella principale. L’algoritmo 
+è diviso in quattro fasi: 
+
+1.	Inizializzazione variabili + controlli
+2.	Salvataggio vertici + normali per vertice
+3.	Salvataggio facce + coordinate texture
+4.	Salvataggio materiali
+
+1.	controllo dell’esistenza vertici e facce.
+
+2.	Vengono salvate su file le coordinate del vertice nel seguente forma: v x,y,z. Per quanto riguarda 
+	le   normali viene prima controllato se esse sono state selezionate dalla dialog utilizzata per decidere 
+	quali  informazioni salvare della mesh,  in tal caso la normale viene passata alla funzione AddNewNormalVertex() 
+	come parametro la quale restituisce false se la normale è già presente nella map o true se essa è una 
+	nuova normale e in tal caso viene salvata nella seguente forma: vn x,y,z.
+
+3.	Questa fase può essere divisa in tre sottofasi: selezione o creazione del materiale della faccia; 
+	salvataggio delle coordinate di texture e come ultima fase viene assemblato il tutto per salvare tutte 
+	le facce, dove ognuna delle quali è composta da: l’indice del vertice(parte da 1 non da 0), l’indice 
+	di coordinata di texture, l’indice della normale. Il salvataggio delle coordinate di texture avviene 
+	analogamente come nel punto 2 per le normali.
+
+4.	Viene richiamata la funzione WriteMaterials la quale salva tutti i materiali presenti nel vector Materials.
+
+
+[export_3ds.h]
+C’è da precisare che il salvataggio dei file 3ds è stato implementato utilizzando la libreria lib3ds.
+Questa funzione è divisibile in cinque fasi distinte:
+
+1.	controlli correttezza mesh
+2.	generazione vertici duplicati, se necessario
+3.	salvataggio dei vertici
+4.	salvataggio facce, texture e materiali.
+5.	salvataggio del file 3ds mediante la chiamata della funzione della libreria lib3ds
+
+1.	nella prima fase viene controllato oltre all’esistenza di vertici,facce e se il numero di vertici 
+	presenti nella mesh non sia superiore a 65535, numero massimo consentito dal formato 3DS.
+
+2.	questa fase viene eseguita solamente quando viene deciso di salvare le coordinate di texture della mesh, 
+	sempre che essa le abbia. Il concetto che sta alla base è il seguente: si tiene in considerazione una mappa 
+	ListOfDuplexVert<Key,int>, alla quale gli viene associato il seguente significato: Key:è una coppia (int,TexCoord) 
+	formata da un int che rappresenta l'indice del vettore nella mesh originale e la sua coordinata di texture. tale 
+	coppia rappresenta una chiave, essendo univoca in tutta la mesh. non è possibile che si incontrino due vertici che 
+	hanno solita coordinata di vertice e solite coordinate di texture, se un vertice di questo tipo esistesse allora i 
+	due vertici rappresenterebbero lo stesso vertice. int:è l'indice del vertice inserito all'interno del vettore 
+	VectorOfVertexType<VertexType>. Nel vertice VectorOfVertexType vengono inseriti tutti i vertici appartenenti alla 
+	mesh + i k vertici dublicati. la scelta di tali vertici va in base alla seguente regola:
+    se un vertice con indice i(originale) ha più di una coordinata di texture allora tale vertice viene duplicato e 
+    inserito in ListOfDuplexVert e in VectorOfVertexType(in VectorOfVertexType, l'inserimento del doppio vertice non 
+    sarebbe necessario, però viene fatto per comodità, in caso contrario dovremmo cercare il vertice dentro il vettore).
+
+3.	Il salvataggio dei vertici può esser fatto in due modi distinti: il primo nel caso in cui si trattano le coordinate 
+	di texture, il secondo in cui la mesh non ha texture o l’utente decide di non salvarle. Nel primo caso i vertici da 
+	salvare sono quelli presenti nel vettore VectorOfVertexType e quindi comprendenti anche i vertici duplicati, nel secondo 
+	caso i vertici sono quelli della mesh e quindi non abbiamo bisogno dei vertici duplicati. I vertici da salvare vengono 
+	inseriti all’interno la struttura dati presente in lib3ds.
+
+4.	Per il salvataggio delle facce viene fatto un ciclo for su tutte le facce, per ogni faccia vengono presi gli indici dei 
+	vertici che la compongono. L’assegnamento dei vertici alla faccia viene fatto in due modi: il primo considerando le 
+	coordinate di texture, quindi l’indice da assegnare è l’indice del vertici all’interno dei vertici duplicati, nel secondo 
+	modo, senza texture, vengono considerati gli indici dei vertici appartenenti alla mesh. Successivamente vengono salvate, 
+	cioè inserire all’interno della mesh della lib3ds, le informazioni che l’utente ha selezionato, in ordine : texture, 
+	normali e materiali.
+
+5.	Appena finito la creazione della mesh della libreria lib3ds, viene aggiunto il nodo rappresentante tale mesh, dopodichè 
+	viene chiamata la funzione della libreria lib3ds per salvare la mesh su file. Il risultato ti tale operazione viene 
+	restituito al chiamante.
+
+
+[material.h]
+Il questo file viene definita la struttura dati del materiale. La funzione CreateNewMaterial()  crea un nuovo materiale 
+aggiungendolo al vector passato come argomento, sotto condizione che esso sia effettivamente un nuova materiale. Nel caso 
+in cui il materiale sia nuovo viene restituito un intero rappresentante la dimensione del valore del vector, altrimenti 
+viene restituito l’indice del materiale all’interno del vettore. 
+
+[savemaskexporter.h/cpp/ui]
+È la dialog mediante la quale l’utente può selezionare cosa salvare di una mesh. Le informazioni selezionabili sono quelle 
+presenti all’interno dell’enumerazione nel file sf\wrap\io_trimesh\io_mask.h appartenente alla libreria vcg. La dialog ha 
+il seguente funzionamento: a priori sappiamo quale informazioni, sotto forma di maschera, sono presenti nella mesh caricata. 
+Ogni tipo di exporter ha una funzione, GetExportMaskCapability, la quale restituisce una capability(maschera) contenente le 
+informazioni che il formato può salvare. A questo punto viene fatto il merge delle due maschere, così facendo le informazioni 
+che possono essere selezionate sono quelle che sono presenti sia nella mesh che nella capability.
+È possibile dalla dialog appena descritta selezionare, se presenti, i nomi dei file delle texture e modificarne il valore. La 
+modifica non fa nessun controllo ne che il file esista ne che le coordinate di texture siano consone a quel tipo di file.
+
+[changetexturename.h/cpp/ui]
+È la dialog con quale l’utente seleziona/modifica il nome del nuovo file della texture. Tale interfaccia grafica viene 
+richiamata da savemaskexporter.
+
+[meshio.h/cpp]
+Raggruppa tutti i salvataggi dei vari formati. All’interno vi è un membro save(…) il quale permette di salvare la mesh in tutti 
+i formati disponibili. Per ogni formato viene eseguita la seguente procedura: viene richiamata la funzione Save(…) dell’exporter 
+la quale restituisce un interno >= 0 rappresentante il codice di errore. 0 rappresenta NOERROR. Se il salvataggio restituisce un 
+errore viene visualizzata un dialog contenente la stringa di errore associata all’intero. Vi sono altre tre funzioni presenti in 
+questo codice: importFormats(…) che restituisce la lista delle estensioni dei file supportati per importazione; exportFormats(…) 
+restituisce la lista delle estensioni dei file supportati per l’esportazione; GetExportMaskCapabilty(…)restituisce la capability 
+relativa all’estensione passata come argomento.
+
+[glarea.h/cpp]
+definita un funzione che restituisce una stringa del tipo VC, FC,WT…. contenente le informazioni caricate da file della mesh. Le 
+informazioni prese in considerazione sono quelle all’interno di MeshModel.
+
+[mainwindow.h/cpp]
+Implementata la funzione Saveas(…) il cui funzionamento è il seguente:
+1.	vengono caricati i filtri, ovvero i vari formati supportati 
+2.	viene aperta la dialog con la quale è possibile selezionare/digitare il nome e il formato con cui salvare la mesh
+3.	viene ricavato il pluing in base all’estensione del file
+4.	viene prelevata la capability del formato 
+5.	viene prelevata la maschera che l’utente ha scelto di salvare
+6.	viene eseguita la funzione Save relativa al plugin passangohli l’estensione del file e la maschera presa al punto 5.
+
+
+
+
+[interface.h]
+modificata l'interfaccia MeshIOInterfaces.
+
+
+[vecchia dialog obj export]
+creata una dialog personalizzata per esportazione del formato obj, devenuta in un secondo momento obsoleta e quindi eliminata 
+dal progetto!
