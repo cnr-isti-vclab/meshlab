@@ -1,1 +1,19 @@
-Mettete qui l'elenco di quel che avete fatto...
+[Snapshot]
+Il tiled rendering è stato implementato direttamente all'interno della paintGL. In pratica viene settata una variabile booleana a true quando l'utente richiede uno snapshot mediante il dialog e il comportamento di paintGL cambia di conseguenza; in particolare viene alterato il frustum per inquadrare solo la porzione della scena che corrisponde al tile corrente mediante la funzione myGluPerspective. Viene quindi salvato il framebuffer corrente che mediante la funzione pasteTile viene copiato nel buffer dello snapshot (si tiene traccia delle coordinate per righe e per colonne mediante variabili private di glArea); il buffer è un oggetto QImage allocato la prima volta che pasteTile viene invocata dopo la richiesta di uno snapshot; la quantità di memoria allocata per il buffer è quella occupata dall'immagine finale; ciò è necessario in quanto la funzione di QT che salva il .png richiede (naturalmente) che l'intera immagine sia in memoria (si era pensato di fare tutto dal disco ma alla fine l'immagine deve comunque essere caricata per intero per poter essere compressa a meno di non reimplementare il salvataggio dei png); la paintGL richiama se stessa quando viene richiesto uno snapshot finchè non sono stati renderizzati tutti i tiles. Alla fine viene salvato il .png mediante le api di Qt. C'è un problema conosciuto che pensiamo dipenda da QT/driver scheda video; su alcune macchine (soprattutto con schede ati) nello snapshot finale si notano righe orizontali e talvolta interi pezzi di immagine di tiles precedenti; ciò accade sia utilizzando per la cattura del framebuffer le api di QT che usando chiamate openGL. 
+
+[Curvature]
+In curvature.h sono definite le funzioni che effettuano il calcolo delle curvature (salvando il risultato nella qualità) e le funzioni di mappatura qualità->colore. Le formule utilizzate sono state ricavate dal paper "Discrete Differential-Geometry Operators for Triangulated 2-Manifolds" di Mark Meyer, Mathieu Desbrun, Peter Schroder, e Alan H. Barr. In meshcolorize.cpp si crea un oggetto Curvature passando al costruttore la mesh; vengono calcolate immediatamente le curvature media e gaussiana mediante la funzione privata ComputeHK che opera nel seguente modo:
+
+1) per ogni vertice di ogni faccia viene calcolata l'areamix (area di voronoi) che è comune ad entrambe le curvature e viene salvata in un SimpleTempData costruito con un oggetto di tipo AreaData
+2) per ogni vertice di ogni faccia si calcolano (parzialmente) le curvature media e gaussiana che vengono salvate in un oggetto di tipo CurvData; se il vertice è di bordo si calcola l'angolo tra i due vertici adiacenti (si ricava il vertice adiacente al corrente e si calcola l'edge che li attraversa, si ricava il vertice adiacente al nuovo vertice e si cerca il suo prossimo vertice di bordo quindi si calcola l'edge che attraversa il vertice corrente e il nuovo vertice di bordo trovato e infine si calcola l'angolo tra i due edges)
+3) per ogni vertice si dividono le curvature parziali per l'areamix associata al vertice ottenendo le curvature finali
+
+Mediante le chiamate Map{Gaussian,Mean,RMS,Absolute}CurvatureIntoQuality si copiano i valori calcolati in precedenza nel campo qualità associato ad ogni vertice. In particolare, le ultime due curvature sono ricavate a partire dalle prime due, mediante ulteriori calcoli.
+
+La funzione ColorizeByEqualizedQuality prende come parametro un oggetto di tipo Frange che viene prodotto dalla funzione histoPercentile che calcola il minimo e il massimo valore di curvatura ricorrendo all'istogramma della libreria vcg (controllabile mediante il dialog). ColorizeByEqualizedQuality colora ogni vertice utilizzando la funzione ColorRamp della VCG passandogli i valori min e max ricavati dall'istogramma e il valore di qualità.
+
+[Smooth color]
+Si tratta semplicemente dell'algoritmo di smoothing presente in VCG applicato però al colore per vertice che viene mediato con quello dei vertici adiacenti.
+
+
+
