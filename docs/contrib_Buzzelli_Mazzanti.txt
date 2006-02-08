@@ -111,12 +111,8 @@ Implementata la funzione Saveas(…) il cui funzionamento è il seguente:
 5.	viene prelevata la maschera che l’utente ha scelto di salvare
 6.	viene eseguita la funzione Save relativa al plugin passangohli l’estensione del file e la maschera presa al punto 5.
 
-
-
-
 [interface.h]
 modificata l'interfaccia MeshIOInterfaces.
-
 
 [vecchia dialog obj export]
 creata una dialog personalizzata per esportazione del formato obj, devenuta in un secondo momento obsoleta e quindi eliminata 
