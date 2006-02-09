@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.85  2006/02/09 21:39:56  buzzelli
+making ProgressDialog interruptable
+
 Revision 1.84  2006/02/06 23:37:30  glvertex
 Showing about dialog with fixed size
 
@@ -40,11 +43,6 @@ Revision 1.81  2006/02/01 12:44:42  glvertex
 Revision 1.80  2006/01/31 09:34:29  fmazzant
 bug-fix on savemaskexporter, when press cancel returns -1.
 
-Revision 1.79  2006/01/30 23:47:25  buzzelli
-minor changes into open method
-
-Revision 1.78  2006/01/26 18:39:19  fmazzant
-moved mask dialog exporter from mashio to meshlab
 
 ****************************************************************************/
 
@@ -306,6 +304,12 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	if(qb==0) return true;
 	qb->setWindowTitle (str);
 	qb->setValue(pos);
+	qApp->processEvents();
+	if (qb->wasCanceled())
+	{
+		qb->reset();
+		return false;
+	}
 	return true;
 }
 
