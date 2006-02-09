@@ -25,6 +25,9 @@
   History
 
 $Log$
+Revision 1.6  2006/02/09 21:25:35  buzzelli
+making obj loadmask interruptable
+
 Revision 1.5  2006/01/30 23:02:11  buzzelli
 removed redundant argument in ImporterObj::LoadMask
 
@@ -39,12 +42,6 @@ small bugs solved
 
 Revision 1.1  2006/01/29 17:14:20  buzzelli
 files import_obj.h, import_3ds.h, io_3ds.h and io_obj.h have been moved from test/io to meshio
-
-Revision 1.24  2006/01/27 01:07:40  buzzelli
-Added a better distinction beetween critical and non critical error messages
-
-Revision 1.23  2006/01/27 00:53:07  buzzelli
-added control for faces with identical vertex indices
 
 ****************************************************************************/
 
@@ -958,7 +955,7 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				if ((currPos - lastPos) > deltaPos)
 				{
 					if (!(*oi.cb)(100.0 * (float)currPos/(float)length, "Loading mask..."))
-						return E_ABORTED;
+						return false;
 					lastPos = currPos;
 				}
 			}
@@ -996,7 +993,7 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 				if ((currPos - lastPos) > deltaPos)
 				{
 					if (!(*oi.cb)(100.0 * (float)currPos/(float)length, "Loading mask..."))
-						return E_ABORTED;
+						return false;
 					lastPos = currPos;
 				}
 			}
@@ -1012,13 +1009,6 @@ static int Open( OpenMeshType &m, const char * filename, ObjInfo &oi)
 			mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		if (bHasPerFaceColor)
 			mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
-	
-		/*
-		mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;
-		mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;
-		mask |= vcg::tri::io::Mask::IOM_WEDGTEXMULTI;
-		mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;
-		*/
 
 		oi.mask = mask;
 		oi.numVertices	= numVertices;

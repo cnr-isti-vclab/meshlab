@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.79  2006/02/09 21:25:38  buzzelli
+ making obj loadmask interruptable
+
  Revision 1.78  2006/02/01 17:47:21  buzzelli
  resolved a platform dependent issue about material and texture files locations
 
@@ -38,9 +41,6 @@
 
  Revision 1.74  2006/01/30 22:09:13  buzzelli
  code cleaning
-
- Revision 1.73  2006/01/30 14:27:30  fmazzant
- update GetMaskCapability of PLY,OFF and STL.
 
 *****************************************************************************/
 #include <Qt>
@@ -100,7 +100,8 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	{
 		vcg::tri::io::ObjInfo oi;	
 		oi.cb = cb;
-		vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi);
+		if (!vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
+			return false;
 
 		if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
 		{
