@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.10  2006/02/09 00:42:40  ggangemi
+now GLArea is passed to the shaderDialog
+
 Revision 1.9  2006/02/03 12:27:08  ggangemi
 improved shaderDialog support
 
@@ -136,7 +139,7 @@ void MeshShaderRenderPlugin::initActionList() {
 										{
 										case SINGLE_INT: 
 											{
-												uv.ival = unifElemValue.toElement().attribute("Value0", 0).toInt();
+												uv.ival[0] = unifElemValue.toElement().attribute("Value0", 0).toInt();
 											} break;
 										case SINGLE_FLOAT: 
 											{ 
@@ -260,7 +263,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla)
 						"or the shader's code\n\n");
 				}
 
-				sDialog = new ShaderDialog(&shaders[a->text()]);
+				sDialog = new ShaderDialog(&shaders[a->text()], gla);
 
 				/*int okPressed = */sDialog->show();
 				//if (okPressed != QDialog::Rejected) return;
@@ -287,7 +290,7 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GL
 		while (i != si.uniformVars.end()) {
 			switch(i->second.type) {
 				case SINGLE_INT: {
-					glUniform1fARB(i->second.location, i->second.ival);
+					glUniform1fARB(i->second.location, i->second.ival[0]);
 												 } break;
 				case SINGLE_FLOAT: {
 					glUniform1fARB(i->second.location, i->second.fval[0]);
