@@ -25,13 +25,13 @@
     <Uniform0 Type="7" Name="LightPosition" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
       <Values Value0="0" Value1="0" Value2="5" />
     </Uniform0>
-    <Uniform1 Type="8" Name="GlassColor" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+    <Uniform1 Type="8" Name="GlassColor" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
       <Values Value0="0.5" Value1="0.5" Value2="0.6" Value3="0.15" />
     </Uniform1>
-    <Uniform2 Type="8" Name="SpecularColor1" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+    <Uniform2 Type="8" Name="SpecularColor1" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
       <Values Value0="0.1" Value1="0.08" Value2="0.05" Value3="1" />
     </Uniform2>
-    <Uniform3 Type="8" Name="SpecularColor2" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+    <Uniform3 Type="8" Name="SpecularColor2" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
       <Values Value0="0.1" Value1="0.1" Value2="0.05" Value3="1" />
     </Uniform3>
     <Uniform4 Type="5" Name="SpecularFactor1" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
