@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.5  2006/02/09 17:20:38  buzzelli
+ cleaning some comments
+
  Revision 1.4  2006/01/30 23:10:36  buzzelli
  solved a bug regarding face color loading
 
@@ -135,9 +138,9 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		return E_NO_FACE;
 	
 	
-	// vertices and faces allocatetion
-	VertexIterator vi;// = Allocator<OpenMeshType>::AddVertices(m,oi.numVertices);
-	FaceIterator   fi;// = Allocator<OpenMeshType>::AddFaces(m,oi.numTriangles);
+	// vertices and faces iterators
+	VertexIterator vi;
+	FaceIterator   fi;
 
 	
 	Lib3dsNode *p;
@@ -175,14 +178,14 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		if (node->type==LIB3DS_OBJECT_NODE)
 		{
 			if (strcmp(node->name,"$$$DUMMY") == 0)
-				return E_NOERROR;  // TODO: vedere cosa ritornare, magari non e' un errore grave
+				return E_NOERROR;
 		
 			if (!node->user.d)
 			{
 				Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->name);
 				ASSERT(mesh);
 				if (!mesh)
-				  return E_NOERROR;  // TODO: vedere cosa ritornare, magari non e' un errore grave
+				  return E_NOERROR;
       
 				int numVerticesPlusFaces = info.numVertices + info.numTriangles;				
 				
@@ -249,7 +252,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 							(*fi).C()[3] = (unsigned char) (mat->diffuse[3] * 255.0f);
 						}
 
-						// albedo
+						// texture map 1
 						if (mat->texture1_map.name[0])
 						{
 							std::string textureName = mat->texture1_map.name;
@@ -277,9 +280,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 
 							if ( info.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
 							{
-								// vedere il ply
-								// TODO: questo nel caso di wedge texture coords, tuttavia le coordinate
-								// di texture sembrano essere per vertice e non per wedge nei 3ds, sistemare
+								// texture coordinates
 								for (int i=0; i<3; ++i)
 								{
 									(*fi).WT(i).u() = mesh->texelL[f->points[i]][0];
