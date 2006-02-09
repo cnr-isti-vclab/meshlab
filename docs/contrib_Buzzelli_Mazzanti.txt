@@ -117,3 +117,41 @@ modificata l'interfaccia MeshIOInterfaces.
 [vecchia dialog obj export]
 creata una dialog personalizzata per esportazione del formato obj, devenuta in un secondo momento obsoleta e quindi eliminata 
 dal progetto!
+
+
+[Trasparenza intermediazione plugin IO]
+Adattamento della mainWindow di meshLab in modo da supportare in maniera del tutto trasparente all'utente il meccanismo di import/export realizzato tramite l'intermediazioni di plugin.
+A tale proposito e' stata modificata la modalita' di caricamento dei plugin di IO, che ora provvede a conservare i puntatori ai plugin di io all'interno di un vettore presente in mainWindow; e sono stati adattati i metodi open e saveAs di mainwindow in modo da rendere accessibili, nelle usuali finestre di open e save, tutti i formati resi disponibili dai plugin.
+Entrambe le funzioni invocano un apposito metodo che si occupa di popolare una map che conserva l'associazione
+<estensione format, indice plugin corrispondente>. In questo modo data l'estensione del file e' possibile delegare al plugin corrispondente il compito di importare/esportare il file specificato.
+
+[import]
+
+- import STL e OFF
+vengono semplicemente invocati i metodi open delle rispettive classi ImportSTL e ImportOFF e in caso di errore viene mostrato il messaggio di errore corrispondente. Se invce tutto va' a buon fine vengono calcolate le normali per faccia.
+
+- import ply
+ci si limita ad invocare la loadmask, abilitare le coordinate di texture per wedge se presetni e viene invocato il metodo open. Opportuni messaggi in caso di errore.
+
+- import obj
+Per quanto riguarda l'importazione dei file di tipo obj, il compito e' eseguito principalmente dalla classe ImportOBJ, che fornisce i metodi Open e LoadMask.
+Entrambe le funzioni prevedono come parametro in ingresso una struttura di tipo ObjInfo, che contiene le seguenti informazioni:
+- numero di vertici
+- numero di facce
+- maschera di bit relativa alle informazioni presenti nel file
+- puntatore alla callback utilizzata per informare l'esterno riguardo lo stato di avanzamento del processo, e per rendere il processo interrompibile.
+Lo stesso oggetto viene dapprima passato alla loadMask che provvede a riempirne i campi significativi e in seguito e' passato alla stessa procedura open.
+La loadmask, a seconda di quanto trovato nel file, andra' a settare i bit relativi a normali per wedge, coordinate di texture per wedge, colore per faccia, colore per vertice.
+La open si occupa di riempire i campi della struttura dati del modello in base alle informazioni esistenti nel file: coordinate dei vertici, coordinate di texture per vertice, normali per vertice, facce, colore.
+In particolare, per quanto riguarda le normali per faccia si distinguono due casi:
+- se e' presente la normale per wedge si ottiene la normale per faccia facendo la media delle normali per wedge
+- altrimenti si calcola la normale per faccia con il prodotto vettore (si invoca la face::ComputeNormalizedNormal).
+Inoltre riguardo alle facce, se queste corrispondono a poligoni con piu' di tre vertici, nell'importer si provvede a suddividerle in triangoli ottenuti considerando il primo vertice come vertice comune a tutte le facce generate, mentre gli altri due vertici corrispondono agli ultimi due vertici incontrati tra quelli enumerati all'interno della faccia. I questo modo si ottiene una "triangolrizzazione" a ventaglio.
+Nel caso in cui nel file siano presenti degli errori, a seconda della gravita' degli stessi ci si comporta in due diverse modalita'.
+Nel caso in cui l'errore sia di una certa criticita', e quindi tale da non permettere il caricamento corretto delle caratteristiche geometriche del modello, il processo di lettura viene interrotto e viene restituito il corrispondente codice di errore, in base al quale verra poi mostrato l'oportuno messaggio.
+Nel caso in cui l'errore riscontrato non sia di una eccessiva gravita', e comunque tale da non pregiudicare il caricamento della strutura geometrica del modello (es: definizione di materiale mancante, texture non trovata), il processo di caricamento non viene interrotto. ma ci si limita a fornire un opportuno messaggio di errore. Lo stesso avviene anche quando nella definizione di un modello vi sono triangoli in cui vi e' piu' di un vertice con lo stesso indice.
+
+- import 3ds
+Anche per quanto riguarda l'importazione dei file di tipo 3ds, il processo prevede l'invocazione dei due metodi LoadMask ed open. Anche in questo caso i due metodi condivinono come parametro in ingresso una struttura chiamata 3dsInfo, che in sostanza contiene gli stessi membri visti nella struttura corrispondente per i file obj.
+Oltre a questa struttura, nel caso dei file 3ds, dato che il caricamento di questo tipo di file e' quasi totalmente delegato alla libreria Lib3ds, i due metodi condividono anche un ulteriore parametro, ossia un puntatore ad una struttura di tipo Lib3dsFile, in modo da caricare questa struttura una sola volta e condividerla tra i due metodi.
+La lettura dei file 3ds avviene in maniera ricorsiva sui nodi (chunk) del file 3ds, l'importer si occupa della lettura di coordinate dei vertici, facce, colore per faccia, normale per faccia e normale per wedge, coordinate di texture. L'importer legge correttamente anche files contenenti piu' meshes in nodi diversi, in tal caso vengono effettuate delle opportune operazioni matriciali affinche tutte le mesh compaiano nella loro corretta posizione le une rispetto alle altre. Dato che le operazioni sopra elencate consistono a meno di semplificazioni in una semplice traslazione, l'applicazione di tali operazioni viene effettuata solo nei confronti delle coordinate dei vertici e non delle normali.
