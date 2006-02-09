@@ -7,6 +7,8 @@
 
 
 
+
+  
   
   
   
@@ -18,9 +20,12 @@
 
 
 
+
   
 
 
+  
+  
   
   
   
@@ -38,6 +43,8 @@
 
 
 
+
+  
   
   
   
@@ -50,6 +57,8 @@
 
 
 
+
+  
   
   
   
@@ -62,6 +71,8 @@
 
 
 
+
+  
   
   
   
@@ -74,6 +85,8 @@
 
 
 
+
+  
   
   
   
@@ -90,9 +103,11 @@
 
 
 
+
 <div id="leftcontent">
 <h1>MeshLab:
 Development page</h1>
+
 
 
 
@@ -110,8 +125,10 @@ italian. Sorry.
 
 
 
+
 <h2>CVS&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 &nbsp;</h2>
+
 
 
 
@@ -126,6 +143,7 @@ le solite pratiche del bravo programmatore: <br>
 
 
 
+
 </p>
 
 
@@ -133,7 +151,9 @@ le solite pratiche del bravo programmatore: <br>
 
 
 
+
 <ul>
+
 
 
 
@@ -148,7 +168,9 @@ del repository di MeshLab, ma anche di quello di VCG</li>
 
 
 
+
   <li>Fate edit delle cose che iniziate a cambiare,</li>
+
 
 
 
@@ -163,7 +185,9 @@ qualcun altro,</li>
 
 
 
+
   <li>Non lasciate in edit le cose per troppo tempo,</li>
+
 
 
 
@@ -178,7 +202,9 @@ funzionare le cose degli altri,</li>
 
 
 
+
   <li>Committate spesso (compatibilmente con quanto di cui sopra).</li>
+
 
 
 
@@ -193,6 +219,7 @@ vostro commit (in inglese please) </li>
 
 
 
+
 </ul>
 
 
@@ -200,7 +227,9 @@ vostro commit (in inglese please) </li>
 
 
 
+
 <h2>Web</h2>
+
 
 
 
@@ -215,8 +244,10 @@ tenute anche loro in cvs. <br>
 
 
 
+
 Quindi se fate modifiche fatele sul vostro file system, committatele e
 poi a mano fate update tramite ftp.<br>
+
 
 
 
@@ -233,8 +264,10 @@ volta dentro la dir meshlab/htdocs e'</p>
 
 
 
+
 <p style="font-family: monospace;" class="body"> cvs -d
 :pserver:anonymous@cvs1:/cvsroot/meshlab update</p>
+
 
 
 
@@ -246,13 +279,16 @@ volta dentro la dir meshlab/htdocs e'</p>
 
 
 
+
 <p>C'e' una mailing list su sourceforge cui siete pregati di iscrivervi tutti:
 </p>
 
 
 
 
+
 <p><a class="moz-txt-link-freetext" href="http://lists.sourceforge.net/lists/listinfo/meshlab-devel">http://lists.sourceforge.net/lists/listinfo/meshlab-devel</a></p>
+
 
 
 
@@ -269,7 +305,9 @@ interfacce comuni...
 
 
 
+
 <h3>Note di Compilazione</h3>
+
 
 
 
@@ -283,6 +321,7 @@ interfacce comuni...
 
 
 
+
 <ol>
 
 
@@ -290,7 +329,9 @@ interfacce comuni...
 
 
 
+
   <li>QT 4.0 sia installato</li>
+
 
 
 
@@ -309,7 +350,9 @@ es. dovreste avere qualcosa tipo \doc\sf\vcg\space\point3.h e
 
 
 
+
 </ol>
+
 
 
 
@@ -327,7 +370,9 @@ anonimo
 
 
 
+
 <div style="text-align: center;">&nbsp;:ext:anonymous@cvs.sourceforge.net:/cvsroot/vcg<br>
+
 
 
 
@@ -341,9 +386,11 @@ anonimo
 
 
 
+
 <p class="body"> Gli esempi di base della libreria li
 trovate sotto sf/apps/sample.
 Lasciate perdere la roba sotto test.</p>
+
 <p class="body"><a href="style.html">Guida di stile</a>.
 </p>
 
@@ -352,7 +399,9 @@ Lasciate perdere la roba sotto test.</p>
 
 
 
+
 <h2>Task</h2>
+
 
 
 
@@ -368,8 +417,10 @@ che fanno parte di MeshLab&nbsp; </p>
 
 
 
+
 <h3><a href="./filter.html">Gruppo
 Filtering</a></h3>
+
 
 
 
@@ -384,14 +435,20 @@ Filtering</a></h3>
 
 
 
-  <li><a href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120436&amp;group_id=149444&amp;group_project_id=44906">LOOP</a>
+
+  <li><a style="font-weight: bold;" href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120436&amp;group_id=149444&amp;group_project_id=44906">LOOP</a>
 Implementare la tecnica di subdivision surface di Loop.</li>
 
 
-  <li><span style="color: rgb(204, 0, 0); font-weight: bold;">DECIMATOR </span><span style="color: rgb(0, 0, 0);">Implementare con algoritmo di cluster.</span><br style="color: rgb(0, 0, 0);">
+
+  <li><span style="color: rgb(204, 0, 0); font-weight: bold;"><span style="text-decoration: underline;">DECIMATOR</span> </span><span style="color: rgb(0, 0, 0);">Implementare con algoritmo di cluster.</span></li>
+  <li><span style="color: rgb(0, 0, 0);"></span><span style="font-weight: bold; text-decoration: underline; color: rgb(204, 0, 0);">REMOVER</span> Implementare la rimozione i triangoli che hanno almeno un lato piu' lungo di una soglia</li>
+  <li><span style="font-weight: bold; text-decoration: underline; color: rgb(204, 0, 0);">APLLAY TRASFORM</span> Applicare le trasformazioni S.R.T.&nbsp;<br style="color: rgb(0, 0, 0);">
+
 
 
     <br style="color: rgb(0, 0, 0);">
+
 
 
 
@@ -405,7 +462,9 @@ Implementare la tecnica di subdivision surface di Loop.</li>
 
 
 
+
 </ol>
+
 
 
 
@@ -420,7 +479,9 @@ Interface Framework</a></h3>
 
 
 
+
 <span style="font-style: italic;">Mochi, Vacca, Portelli<br>
+
 
 
 
@@ -429,6 +490,7 @@ Interface Framework</a></h3>
 
 </span>
 <ol>
+
 
 
 
@@ -448,6 +510,7 @@ linux e src).</li>
 
 
 
+
   <li><span style="font-weight: bold;">Logging e toolbar</span>,
 Adattate la classe LogStream.h alle nostre necessita', inizialmente
 fate solo che mostra il dump delle varie scritte (ad es. usate la
@@ -464,7 +527,9 @@ voglia)&nbsp;</li>
 
 
 
+
 </ol>
+
 
 
 
@@ -479,7 +544,9 @@ Rendering</a>&nbsp;</h3>
 
 
 
+
 <span style="font-style: italic;">Vannini, Gangemi, Pirro<br>
+
 
 
 
@@ -488,6 +555,7 @@ Rendering</a>&nbsp;</h3>
 
 </span>
 <ol>
+
 
 
 
@@ -507,7 +575,9 @@ serve. Poi se tutto funge come si deve lo si aggiunge come componente.</li>
 
 
 
+
 </ol>
+
 
 
 
@@ -521,8 +591,10 @@ serve. Poi se tutto funge come si deve lo si aggiunge come componente.</li>
 
 
 
+
 <span style="font-style: italic;">Buzzelli, Mazzanti</span>
 <ol>
+
 
 
 
@@ -533,12 +605,15 @@ serve. Poi se tutto funge come si deve lo si aggiunge come componente.</li>
 
 
 
+
     <a href="http://www.csit.fsu.edu/%7Eburkardt/data/obj/obj.html">http://www.csit.fsu.edu/~burkardt/data/obj/obj.html</a><br>
 
 
 
 
+
     <a href="http://www.dcs.ed.ac.uk/home/mxr/gfx/3d/OBJ.spec">http://www.dcs.ed.ac.uk/home/mxr/gfx/3d/OBJ.spec</a><br>
+
 
 
 
@@ -549,7 +624,9 @@ vari tipi di attributi che possono comparire nei modelli. </li>
 
 
 
+
 </ol>
+
 
 
 
@@ -560,8 +637,10 @@ vari tipi di attributi che possono comparire nei modelli. </li>
 
 
 
+
 &nbsp;&nbsp;&nbsp; </span>
 <dl>
+
 
 
 
@@ -575,7 +654,9 @@ vari tipi di attributi che possono comparire nei modelli. </li>
 
 
 
+
 </div>
+
 
 
 
@@ -592,7 +673,9 @@ Page&nbsp;</a></p>
 
 
 
+
 <p class="menu"><a href="https://sourceforge.net/project/showfiles.php?group_id=149444">Download</a></p>
+
 
 
 
@@ -606,7 +689,9 @@ Page&nbsp;</a></p>
 
 
 
+
 <p class="menu"><a href="https://sourceforge.net/pm/?group_id=149444">TASK</a></p>
+
 
 
 
@@ -621,7 +706,9 @@ page</a></p>
 
 
 
+
 </div>
+
 
 
 
