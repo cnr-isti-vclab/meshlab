@@ -26,22 +26,22 @@
     <Uniform0 Type="7" Name="LightPosition" ArraySize="1">
       <Values Value0="4" Value1="4" Value2="4" />
     </Uniform0>
-    <Uniform1 Type="7" Name="LightColor" ArraySize="1">
+    <Uniform1 Type="7" Name="LightColor" ArraySize="1" Widget="1">
       <Values Value0="0.9" Value1="0.8" Value2="0.7" />
     </Uniform1>
     <Uniform2 Type="7" Name="EyePosition" ArraySize="1">
       <Values Value0="0" Value1="0" Value2="4" />
     </Uniform2>
-    <Uniform3 Type="7" Name="Specular" ArraySize="1">
+    <Uniform3 Type="7" Name="Specular" ArraySize="1" Widget="1">
       <Values Value0="0.2" Value1="0.2" Value2="0.2" />
     </Uniform3>
-    <Uniform4 Type="7" Name="Ambient" ArraySize="1">
+    <Uniform4 Type="7" Name="Ambient" ArraySize="1" Widget="1">
       <Values Value0="0.2" Value1="0.2" Value2="0.2" />
     </Uniform4>
     <Uniform5 Type="5" Name="Kd" ArraySize="1">
       <Values Value0="0.8" />
     </Uniform5>
-    <Uniform6 Type="7" Name="SurfaceColor" ArraySize="1">
+    <Uniform6 Type="7" Name="SurfaceColor" ArraySize="1" Widget="1">
       <Values Value0="0.9" Value1="0.7" Value2="0.25" />
     </Uniform6>
     <Uniform7 Type="6" Name="Scale" ArraySize="1">

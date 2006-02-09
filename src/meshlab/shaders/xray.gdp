@@ -22,7 +22,7 @@
   <TexturesPlugins NumberOfPlugins="0" />
   <TexturedUsed NumberUsedTU="0" />
   <UniformVariables NumberOfVariables="1">
-    <Uniform0 Type="5" Name="edgefalloff" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+    <Uniform0 Type="5" Name="edgefalloff" ArraySize="1" Widget="2" Min="0" Max="2" Step="0.005">
       <Values Value0="1" />
     </Uniform0>
   </UniformVariables>

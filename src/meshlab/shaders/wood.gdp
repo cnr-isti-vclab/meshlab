@@ -28,10 +28,10 @@
     <Uniform1 Type="5" Name="GrainSizeRecip" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
       <Values Value0="1" />
     </Uniform1>
-    <Uniform2 Type="5" Name="Scale" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+    <Uniform2 Type="5" Name="Scale" ArraySize="1" Widget="2" Min="0" Max="1" Step="0.005">
       <Values Value0="1" />
     </Uniform2>
-    <Uniform3 Type="7" Name="DarkColor" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
+    <Uniform3 Type="7" Name="DarkColor" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
       <Values Value0="0.6" Value1="0.3" Value2="0.1" />
     </Uniform3>
     <Uniform4 Type="7" Name="spread" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">

@@ -23,13 +23,13 @@
   <TexturesPlugins NumberOfPlugins="0" />
   <TexturedUsed NumberUsedTU="0" />
   <UniformVariables NumberOfVariables="6">
-    <Uniform0 Type="7" Name="SurfaceColor" ArraySize="1">
+    <Uniform0 Type="7" Name="SurfaceColor" ArraySize="1" Widget="1">
       <Values Value0="0.75" Value1="0.75" Value2="0.75" />
     </Uniform0>
     <Uniform1 Type="7" Name="LightPosition" ArraySize="1">
       <Values Value0="0" Value1="0" Value2="4" />
     </Uniform1>
-    <Uniform2 Type="7" Name="WarmColor" ArraySize="1">
+    <Uniform2 Type="7" Name="WarmColor" ArraySize="1" Widget="1">
       <Values Value0="0.6" Value1="0.6" Value2="0" />
     </Uniform2>
     <Uniform3 Type="5" Name="DiffuseWarm" ArraySize="1">
@@ -38,7 +38,7 @@
     <Uniform4 Type="5" Name="DiffuseCool" ArraySize="1">
       <Values Value0="0.45" />
     </Uniform4>
-    <Uniform5 Type="7" Name="CoolColor" ArraySize="1">
+    <Uniform5 Type="7" Name="CoolColor" ArraySize="1" Widget="1">
       <Values Value0="0" Value1="0" Value2="1" />
     </Uniform5>
   </UniformVariables>
