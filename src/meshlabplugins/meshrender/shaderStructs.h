@@ -12,15 +12,15 @@ struct UniformVariable {
 	float step;
 	int location;
 	union {
-		int ival;
+		int ival[4];
 		float fval[4];
 	};
 	/*union {
-		int ival;
-		float fval;
-		float val2[2];
-		float val3[3];
-		float val4[4];
+	int ival;
+	float fval;
+	float val2[2];
+	float val3[3];
+	float val4[4];
 	};*/
 };
 
@@ -38,6 +38,18 @@ enum {
 	ARRAY_3_FLOAT = 7,
 	ARRAY_4_FLOAT = 8
 };
+
+static int getVarsNumber(int i) {
+	switch (i) {
+		case SINGLE_INT: return 1; break; 
+		case SINGLE_FLOAT: return 1; break;
+		case ARRAY_2_FLOAT: return 2; break;
+		case ARRAY_3_FLOAT: return 3; break;
+		case ARRAY_4_FLOAT: return 4; break;
+		default: return 0; break;
+	}
+}
+
 
 enum {
 	WIDGET_NONE = 0,
