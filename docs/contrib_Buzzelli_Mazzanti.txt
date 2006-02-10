@@ -1,3 +1,7 @@
+[export ply|off|stl]
+Per quanto riguarda il salvataggio per questi tre formati viene richiamata la funzione exporter appartenente
+alla libreria vcg, che provvede a sua volta ad invocare la funzione corretta per il salvataggio del formato.
+
 [export_obj.h]
 All’interno di questo file viene definita la funzione per il salvataggio della mesh in formato obj. 
 Tale funzione ha più firme, ma di seguito viene descritta solamente quella principale. L’algoritmo 
