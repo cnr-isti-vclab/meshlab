@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.46  2006/02/13 16:18:04  cignoni
+Minor edits.
+
 Revision 1.45  2006/02/01 12:44:42  glvertex
 - Disabled EDIT menu when no editing tools loaded
 - Solved openig bug when running by command line
@@ -36,22 +39,6 @@ No significant changes
 
 Revision 1.42  2006/01/19 15:58:59  fmazzant
 moved savemaskexporter to mainwindows
-
-Revision 1.41  2006/01/19 11:54:15  fmazzant
-cleaned up code & cleaned up history log
-
-Revision 1.40  2006/01/19 11:21:12  fmazzant
-deleted old savemaskobj & old MaskObj
-
-Revision 1.39  2006/01/17 09:20:02  fmazzant
-deleted Ob&j saving options... menu
-
-Revision 1.38  2006/01/15 03:54:50  glvertex
-Solved an annoyng old consistency bug between toolbars and toolbar menu's
-
-Revision 1.37  2006/01/14 00:51:06  davide_portelli
-A little change
-
 ****************************************************************************/
 
 
@@ -227,15 +214,11 @@ void MainWindow::createActions()
 	windowsCascadeAct = new QAction(tr("&Cascade"), this);
 	connect(windowsCascadeAct, SIGNAL(triggered()), workspace, SLOT(cascade()));
 
-	windowsNextAct = new QAction(tr("&Next"), this);
-	//windowsNextAct->setShortcutContext(Qt::ApplicationShortcut);
-	windowsNextAct->setShortcut(Qt::CTRL+Qt::Key_Tab);
-	//connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
+  windowsNextAct = new QAction(tr("&Next"), this);
+	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
 
 	closeAct = new QAction(tr("Cl&ose"), this);
-	//closeAct->setShortcutContext(Qt::ApplicationShortcut);
-	closeAct->setShortcut(Qt::CTRL+Qt::Key_F4);
-	//connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
+	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
 
 	closeAllAct = new QAction(tr("Close &All"), this);
 	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.86  2006/02/13 16:18:04  cignoni
+Minor edits.
+
 Revision 1.85  2006/02/09 21:39:56  buzzelli
 making ProgressDialog interruptable
 
@@ -323,7 +326,7 @@ void MainWindow::setLight()
 void MainWindow::setDoubleLighting()
 {
 	const RenderMode &rm=GLA()->getCurrentRenderMode();
-	GLA()->setLightMode(!rm.doubleSideLighting,LDOUBLE);
+	GLA()->setLightMode(  !rm.doubleSideLighting,LDOUBLE);
 }
 
 void MainWindow::setFancyLighting()
@@ -432,7 +435,7 @@ void MainWindow::open(QString fileName)
 		gla->mm=mm;
 		gla->setFileName(fileName);
 		gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
-		gla->showInfoArea(true);
+    gla->showInfoArea(true);
 		workspace->addWindow(gla);
 		if(workspace->isVisible()) gla->showMaximized();
 		setCurrentFile(fileName);
@@ -550,7 +553,7 @@ void MainWindow::about()
 	Ui::aboutDialog temp;
 	temp.setupUi(about_dialog);
 	temp.labelMLName->setText(appName());
-	about_dialog->setFixedSize(566,580);
+	//about_dialog->setFixedSize(566,580);
 	about_dialog->show();
 }
 
