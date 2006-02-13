@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.92  2006/02/13 15:37:18  cignoni
+Restructured some functions (pasteTile, wheelevent,lightmode)
+Added DoubleClick for zoom and center. Restructured all the keyboard modifier (removed currentButton)
+Removed various gl state leaking
+
 Revision 1.91  2006/02/03 11:45:42  cignoni
 Corrected bug for ortho trackball
 
@@ -41,28 +46,30 @@ remove unnecessary comments
 
 ****************************************************************************/
 
+#include <GL/glew.h>
 #include <QtGui>
 
 // widget capace di fare rendering di un Modello
-
 #include <vcg/space/box3.h>
-#include <GL/glew.h>
 #include <wrap/gl/space.h>
 #include "meshmodel.h"
 #include "interfaces.h"
 #include "glarea.h"
+#include <wrap/gl/picking.h>
 
 using namespace vcg; 
 
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
+  animMode=AnimNone;
 	iRenderer=0; //Shader support
 	iDecoratorsList=0;
 	currentTime=0;
 	lastTime=0;
 	deltaTime=0;
 	cfps=0;
+  hasToPick=false;
 	logVisible = true;
 	helpVisible=false;
 	takeSnapTile=false;
@@ -74,7 +81,6 @@ GLArea::GLArea(QWidget *parent)
 	mm = NULL;
 	time.start();
 	currLogLevel = -1;
-	currentButton=GLArea::BUTTON_NONE;
 	
 	// Projection Matrix starting settings
 	objDist = 3.f;
@@ -149,23 +155,11 @@ void GLArea::pasteTile()
 
 		if (tileRow >= totalRows)
 		{				
-			QString outfile=ss.outdir;
-			outfile.append("/");
-			outfile.append(ss.basename);
-			
-			QString cnt;
-			cnt.setNum(ss.counter);
-
-			if (ss.counter<10)
-				cnt.prepend("0");
-			if (ss.counter<100)
-				cnt.prepend("0");
-
-			outfile.append(cnt);
-			outfile.append(".png");			
-				
+			QString outfile=QString("%1/%2%3.png")
+        .arg(ss.outdir)
+        .arg(ss.basename)
+        .arg(ss.counter,2,10,QChar('0'));
 			bool ret = snapBuffer.save(outfile,"PNG");		
-
 			if (ret)
 			{
 				ss.counter++;
@@ -256,24 +250,10 @@ void GLArea::paintGL()
 		glMatrixMode(GL_MODELVIEW);
 	}
 
-	// glVertex: commented out
-	// First draw the trackball from a fixed point of view
-	//glLoadIdentity();
-	//gluLookAt(0,0,3, 0,0,0 ,0,1,0);
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-	//gluPerspective(60.f,(float)currentWidth/currentHeight,.1f,5.f);
-	//glMatrixMode(GL_MODELVIEW);
-
-	// Apply trackball for the model
-	//trackball.GetView();
-	//trackball.Apply(trackBallVisible && !takeSnapTile);
 
 	// ============== LIGHT TRACKBALL ==============
 	// Apply the trackball for the light direction
 	glPushMatrix();
-	glColor3f(1,1,0);
-  glDisable(GL_LIGHTING);
 	trackball_light.GetView();
 	trackball_light.Apply(!(isDefaultTrackBall()));
 
@@ -284,10 +264,19 @@ void GLArea::paintGL()
 
   if (!(isDefaultTrackBall()))
 	{
+    glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
+		glColor3f(1,1,0);
+    glDisable(GL_LIGHTING);
+	  const int lineNum=3;
 		glBegin(GL_LINES);
-			glVertex3f(0,0,0);
-			glVertex3f(0,0,200);
+    for(unsigned int i=0;i<=lineNum;++i)
+      for(unsigned int j=0;j<=lineNum;++j) {
+        glVertex3f(-1.0f+i*2.0/lineNum,-1.0f+j*2.0/lineNum,-2);
+        glVertex3f(-1.0f+i*2.0/lineNum,-1.0f+j*2.0/lineNum, 2);
+      }
+      glEnd();
 		glEnd();
+    glPopAttrib();
 	}
 	glPopMatrix();
 	// =============================================
@@ -296,8 +285,8 @@ void GLArea::paintGL()
 	// Finally apply the Trackball for the model
 	// (get messy when in orthoMode)
 	trackball.GetView();
+  glPushMatrix(); 
 	trackball.Apply(trackBallVisible && !takeSnapTile);
-
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
 	
@@ -325,7 +314,7 @@ void GLArea::paintGL()
 	if(iRenderer && currentSharder) iRenderer->Render(currentSharder, *mm, rm, this); 
 
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-	
+
 	if(iRenderer) {
 		glUseProgramObjectARB(0);
 	}
@@ -348,6 +337,17 @@ void GLArea::paintGL()
 		update();
 		glPopAttrib();
 	}
+  glPopMatrix(); // now we are back in pre-trackball space
+  if(hasToPick)
+  {
+    Point3f pp;
+    hasToPick=false;
+    if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp)) {
+          trackball.Translate(-pp);
+          trackball.Scale(1.2f);
+        }  
+  }
+
 
 	// Enter in 2D screen Mode again
 	glMatrixMode(GL_PROJECTION);
@@ -507,12 +507,12 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 {
 
 	int vcgbt=Trackball::BUTTON_NONE;
-	if(qtbt == Qt::LeftButton		) vcgbt |= Trackball::BUTTON_LEFT;
-	if(qtbt == Qt::RightButton		) vcgbt |= Trackball::BUTTON_RIGHT;
-	if(qtbt == Qt::MidButton			) vcgbt |= Trackball::BUTTON_MIDDLE;
-	if(modifiers == Qt::ShiftModifier		)	vcgbt |= Trackball::KEY_SHIFT;
-	if(modifiers == Qt::ControlModifier ) vcgbt |= Trackball::KEY_CTRL;
-	if(modifiers == Qt::AltModifier     ) vcgbt |= Trackball::KEY_ALT;
+	if(qtbt & Qt::LeftButton		) vcgbt |= Trackball::BUTTON_LEFT;
+	if(qtbt & Qt::RightButton		) vcgbt |= Trackball::BUTTON_RIGHT;
+	if(qtbt & Qt::MidButton			) vcgbt |= Trackball::BUTTON_MIDDLE;
+	if(modifiers & Qt::ShiftModifier		)	vcgbt |= Trackball::KEY_SHIFT;
+	if(modifiers & Qt::ControlModifier ) vcgbt |= Trackball::KEY_CTRL;
+	if(modifiers & Qt::AltModifier     ) vcgbt |= Trackball::KEY_ALT;
 	return Trackball::Button(vcgbt);
 }
 
@@ -549,33 +549,27 @@ void GLArea::closeEvent(QCloseEvent *event)
 void GLArea::keyPressEvent ( QKeyEvent * e )  
 {
 	e->ignore();
-	//currentButton=GLArea::BUTTON_NONE;
 	if (e->key ()==Qt::Key_F1)      {helpVisible=!helpVisible;e->accept();updateGL();}
-	if (e->key ()==Qt::Key_Shift)		{currentButton|=GLArea::KEY_SHIFT;e->accept();}
-	if (e->key ()==Qt::Key_Control) {currentButton|=GLArea::KEY_CTRL; e->accept();}
-	if (e->key ()==Qt::Key_Alt)			{currentButton|=GLArea::KEY_ALT; e->accept();}
 }
 
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
 	e->ignore();
-	if (e->key()==Qt::Key_Shift)		{currentButton-=GLArea::KEY_SHIFT;e->accept();}
-	if (e->key()==Qt::Key_Control)	{currentButton-=GLArea::KEY_CTRL;e->accept();}
-	if (e->key()==Qt::Key_Alt)			{currentButton-=GLArea::KEY_ALT;e->accept();}
-	if (!isDefaultTrackBall())
-	if (!((currentButton & KEY_SHIFT) && (currentButton & KEY_CTRL))) activeDefaultTrackball=true;
+	if (isDefaultTrackBall()) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, e->modifiers() ) );
 }
 
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
   e->accept();
-	if ((currentButton & KEY_SHIFT) && (currentButton & KEY_CTRL))
-    if (e->button()==Qt::LeftButton) activeDefaultTrackball=false;
-		else activeDefaultTrackball=true;
-
-	if (isDefaultTrackBall())	trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
-	else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
+      (e->button()==Qt::LeftButton) )
+         activeDefaultTrackball=false;
+	  else activeDefaultTrackball=true;
+  
+	if (isDefaultTrackBall())
+       trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
 	update();
 }
 
@@ -593,7 +587,7 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
 	activeDefaultTrackball=true;
 	if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
-	else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
 	update();
 }
 
@@ -601,31 +595,26 @@ void GLArea::wheelEvent(QWheelEvent*e)
 {
 	const int WHEEL_DELTA =120;
 	float notch=e->delta()/ float(WHEEL_DELTA);
-	
-	if (currentButton & KEY_SHIFT) 
-	{
-		if (currentButton & KEY_CTRL)
-		{
-			if (notch<0) clipRatioFar*=1.2f;
-			else clipRatioFar/=1.2f; 
-		}
-		else 
-		{
-			if (notch<0) fov/=1.2f;
-			else fov*=1.2f;
-			if (fov>90) fov=90;
-			if (fov<5)  fov=5;
-		}
+  switch(e->modifiers())
+  {
+    case Qt::ControlModifier                     : clipRatioFar  *= powf(1.2f, notch); break;
+    case Qt::ShiftModifier + Qt::ControlModifier : clipRatioNear *= powf(1.2f, notch); break;
+    case Qt::ShiftModifier                       : fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
+    default:
+      trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA)); 
+      break;
 	}
-	else if (currentButton & KEY_CTRL) 
-	{
-		if (notch<0) clipRatioNear*=1.2f;
-		else clipRatioNear/=1.2f; 
-	}
-	else {trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA)); update(); }
-	
 	updateGL();
 }		
+
+
+void GLArea::mouseDoubleClickEvent ( QMouseEvent * e ) 
+{
+  hasToPick=true;
+  pointToPick=Point2i(e->x(),height()-e->y());
+	updateGL();
+}
+
 
 void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 {
@@ -685,23 +674,17 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 {
 	switch(lmode)
 	{
-	case LDOUBLE:		rm.doubleSideLighting = state;
-									break;
-	
-	case LFANCY:		rm.fancyLighting = state;
-									break;
+	  case LDOUBLE:		rm.doubleSideLighting = state;	break;
+	  case LFANCY:		rm.fancyLighting = state;				break;
 	}
 	updateGL();
 }
 
 void GLArea::setBackFaceCulling(bool enabled)
 {
-	glDisable(GL_CULL_FACE);
-	if(enabled)
-		glEnable(GL_CULL_FACE);
-
+	if(enabled)	glEnable(GL_CULL_FACE);
+	       else glDisable(GL_CULL_FACE);
 	rm.backFaceCull = enabled;
-
 	updateGL();
 }
 
@@ -775,5 +758,6 @@ void GLArea::updateFps()
 	for (int i=0;i<10;i++) averageFps+=fpsVector[i];
 	cfps=1000.0f/(averageFps/10);
 }
+
 void GLArea::resetTrackBall(){trackball.Reset();updateGL();}
 

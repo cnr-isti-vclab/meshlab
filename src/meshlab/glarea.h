@@ -24,6 +24,11 @@
   History
 
 $Log$
+Revision 1.55  2006/02/13 15:37:18  cignoni
+Restructured some functions (pasteTile, wheelevent,lightmode)
+Added DoubleClick for zoom and center. Restructured all the keyboard modifier (removed currentButton)
+Removed various gl state leaking
+
 Revision 1.54  2006/02/03 15:58:21  glvertex
 Added getFont() inline method
 
@@ -39,36 +44,20 @@ Revision 1.51  2006/01/25 03:57:15  glvertex
 - Code cleaning and restyling
 - Some bugs removed on resizing
 - A lot of changes in paintGL
-
-Revision 1.50  2006/01/25 00:56:51  alemochi
-Added trackball to change directional lighting
-
-Revision 1.49  2006/01/24 17:19:36  alemochi
-Added help on screen (key F1)
-
-Revision 1.48  2006/01/23 08:56:49  fmazzant
-added GetMeshInfoString(mask meshmodel).
-This member shows the information of the Mesh in terms of VC,VQ,FC,FQ,WT
-where:
-VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
-
 ****************************************************************************/
 #ifndef GLAREA_H
 #define GLAREA_H
-#include <wrap/gl/trimesh.h>
-#include <wrap/gui/trackball.h>
+#include <GL/glew.h>
 #include <QTimer>
-#include <QWidget>
 #include <QGLWidget>
 #include <QTime>
 #include <QtGui>
-#include <vcg/space/point3.h>
 #include <vcg/space/plane3.h>
 #include <vcg/space/line3.h>
 #include <vcg/math/matrix44.h>
-#include <vcg/math/matrix44.h>
 #include <wrap/gl/math.h>
-//#include <../wrap/gl/math.h>
+#include <wrap/gl/trimesh.h>
+#include <wrap/gui/trackball.h>
 
 #include "GLLogStream.h"
 
@@ -174,7 +163,11 @@ public:
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
 	QString getFileName()							{return fileName;}
-	void		setFileName(QString name)	{fileName = name;}
+	void		setFileName(QString name)	
+  {
+    fileName = name; 
+    ss.basename=QFileInfo(fileName).baseName().append("Snap");
+	}
 
 	short		getLogLevel()												{return currLogLevel;}
 	void		setLogLevel(short lvl)	{currLogLevel = lvl;}
@@ -229,6 +222,7 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
+  void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
 	
 private:
@@ -240,7 +234,8 @@ private:
 	bool	infoAreaVisible;		// Draws the lower info area ?
 	bool	trackBallVisible;		// Draws the trackball ?
 	bool  activeDefaultTrackball; // keep track on active trackball
-	
+	bool  hasToPick;         // has to pick during the next redraw.
+  Point2i pointToPick;
 	//shader support
 	MeshRenderInterface *iRenderer;
 	QAction *currentSharder;
@@ -253,7 +248,6 @@ private:
 
 	RenderMode rm;
 	ColorSetting cs;
-	int currentButton;
 	float cfps;
 	float fov;
 	float objDist;
@@ -273,6 +267,9 @@ private:
 	QImage snapBuffer;
 	QImage tileBuffer;
 	bool takeSnapTile;
+  
+  enum AnimMode { AnimNone, AnimSpin, AnimInterp};
+  AnimMode animMode; 
 	int tileCol, tileRow, totalCols, totalRows;
 	int vcgFlag;
 };
