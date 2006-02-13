@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.20  2006/02/13 14:20:13  cignoni
+Removed glew.h
+
 Revision 1.19  2006/01/30 05:27:25  cignoni
 Switched the order of component ocf and trimesh_base includes
 
@@ -34,14 +37,11 @@ removed useless includes
 
 Revision 1.16  2006/01/04 16:22:20  cignoni
 Made FFAdj optional and added store and restore color functions
-
-Revision 1.15  2005/12/22 21:05:43  cignoni
-Removed Optional Face Normal and added some initalization after opening
-
 ****************************************************************************/
 
 #ifndef MESHMODEL_H
 #define MESHMODEL_H
+#include <GL/glew.h>
 
 #include <stdio.h>
 #include <time.h>
@@ -93,8 +93,6 @@ public:
     cm.face.EnableFFAdjacency();
     mask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
   }
-  //bool Open(const char* filename, CallBackPos *cb=0);
-  //bool Save(const char* filename, CallBackPos *cb=0);
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
   inline void storeVertexColor()
   {
