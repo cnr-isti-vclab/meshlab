@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.56  2006/02/13 16:18:51  cignoni
+Used the treshold param...
+
 Revision 1.55  2006/02/06 10:18:27  mariolatronico
 reverted to old behaviour, removed QEdgeLength
 
@@ -261,8 +264,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	  int continueValue = refineDialog->exec();
 	  if (continueValue == QDialog::Rejected)
 	    return false; // don't continue, user pressed Cancel
-	  double threshold = refineDialog->getThreshold(); // threshold for refinying
-//    qDebug( "%f", threshold );
+	  threshold = refineDialog->getThreshold(); // threshold for refinying
+    qDebug( "%f", threshold );
     bool selected = refineDialog->isSelected(); // refine only selected faces
 	}
 
