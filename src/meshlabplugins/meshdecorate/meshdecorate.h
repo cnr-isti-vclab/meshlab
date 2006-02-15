@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2006/02/15 16:27:33  glvertex
+- Added labels to the quoted box
+- Credits
+
 Revision 1.11  2006/02/03 16:36:24  glvertex
 - Some renaming
 - Quoted axis now also draw lines
@@ -76,7 +80,8 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 
 
 private:
-	template<bool x,bool y,bool z> void	drawQuotedLine(Point3d &p1,Point3d &p2,float dim,double *modelview,double *projection,int *viewport);
+	template<bool x,bool y,bool z>
+	void	drawQuotedLine(Point3d &p1,Point3d &p2,float dim,double *modelview,double *projection,int *viewport,GLArea *gla=NULL);
 	
 	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
 	void	chooseY(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &y1,Point3d &y2);
@@ -105,7 +110,7 @@ public:
 
   void DrawBBoxCorner(MeshModel &m);
   void DrawAxis(MeshModel &m,GLArea* gla);
-	void DrawQuotedBox(MeshModel &m);
+	void DrawQuotedBox(MeshModel &m,GLArea *gla);
 
   virtual void Decorate(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
 

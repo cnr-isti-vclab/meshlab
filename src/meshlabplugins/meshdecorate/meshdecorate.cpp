@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.22  2006/02/15 16:27:33  glvertex
+- Added labels to the quoted box
+- Credits
+
 Revision 1.21  2006/02/06 22:44:02  davide_portelli
 Some changes in DrawAxis in order to compile under gcc
 
@@ -41,47 +45,6 @@ Changed axis and added tick
 
 Revision 1.16  2006/02/03 13:42:27  mariolatronico
 removed enum Name to template parameter, since it doesn't define a scope
-
-Revision 1.15  2006/02/03 11:05:12  alemochi
-Modified axis and added arrows.
-
-Revision 1.14  2006/01/26 00:38:59  glvertex
-Quoted box: draws xyz axes candidates
-
-Revision 1.13  2006/01/25 11:02:23  glvertex
-No relevant changes
-
-Revision 1.12  2006/01/22 23:37:59  glvertex
-Choosing axes candidates
-
-Revision 1.11  2006/01/22 14:47:16  glvertex
-Puts ticks on X axis... Still working on...
-
-Revision 1.10  2006/01/19 23:56:44  glvertex
-Starting quoted box (simply draws xyz axes)
-
-Revision 1.9  2006/01/17 10:43:48  cignoni
-removed '' from DATE macro
-
-Revision 1.8  2006/01/07 11:49:00  glvertex
-Added actions descriptions
-
-Revision 1.7  2006/01/07 11:32:05  glvertex
-Disabled textures when drawing corners,axis and normals lines
-Enhanced blending normals
-
-Revision 1.6  2006/01/02 16:44:38  glvertex
-Blending normals
-
-Revision 1.5  2005/12/13 11:02:56  cignoni
-made info structs static
-
-Revision 1.4  2005/12/12 22:48:42  cignoni
-Added plugin info methods
-
-Revision 1.3  2005/12/12 11:19:41  cignoni
-Added bbox corners and axis,
-cleaned up the identification between by string of decorations
 
 ****************************************************************************/
 
@@ -131,7 +94,7 @@ const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
 {
    static PluginInfo ai;
    ai.Date=tr("January 2006");
-	 ai.Author=tr("Paolo Cignoni, Daniele Vacca");
+	 ai.Author=tr("Paolo Cignoni &  Alessio Mochi, Davide Portelli, Daniele Vacca ");
 	 ai.Version=tr("1.0");
    return ai;
  }
@@ -172,10 +135,10 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
   }
   if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
   if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m,gla);
-	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m);
+	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m,gla);
 }
 
-void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
+void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
@@ -184,7 +147,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_POINT_DISTANCE_ATTENUATION);
+	//glEnable(GL_POINT_DISTANCE_ATTENUATION);
 
 	// Get gl state values
 	double mm[16],mp[16];
@@ -196,20 +159,25 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m)
 	// Mesh boundingBox
 	Box3f b(m.cm.bbox);
 
+	glBoxWire(b);
+
 	glColor4f(.2f,.9f,.7f,1.f);
-	glLineWidth(2.f);
+	glLineWidth(1.f);
 	glPointSize(3.f);
 
 	Point3d p1,p2;
 
+	glColor(Color4b::LightRed);
 	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
-	drawQuotedLine<true,false,false>(p1,p2,b.DimX(),mm,mp,vp);	// Draws x axis
+	drawQuotedLine<true,false,false>(p1,p2,b.DimX(),mm,mp,vp,gla);	// Draws x axis
 
+	glColor(Color4b::LightGreen);
 	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
-	drawQuotedLine<false,true,false>(p1,p2,b.DimY(),mm,mp,vp);	// Draws y axis
+	drawQuotedLine<false,true,false>(p1,p2,b.DimY(),mm,mp,vp,gla);	// Draws y axis
 
+	glColor(Color4b::LightBlue);
 	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate
-	drawQuotedLine<false,false,true>(p1,p2,b.DimZ(),mm,mp,vp);	// Draws z axis
+	drawQuotedLine<false,false,true>(p1,p2,b.DimZ(),mm,mp,vp,gla);	// Draws z axis
 
 	glPopAttrib();
 
@@ -281,7 +249,7 @@ void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,int *vp,P
 	}
 }
 
-void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,Point3d &x1,Point3d &x2)
+void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,Point3d &z1,Point3d &z2)
 {
 	float d = -std::numeric_limits<float>::max();
 	Point3d c;
@@ -307,15 +275,15 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,P
 		if(currDist > d)
 		{
 			d = currDist;
-			x1.Import(in1);
-			x2.Import(in2);
+			z1.Import(in1);
+			z2.Import(in2);
 		}
 	}
 }
 
 
 template<bool x,bool y,bool z>
-void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,double *mm,double *mp,int *vp)
+void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,double *mm,double *mp,int *vp,GLArea *gla)
 {
 	Point3d p1,p2;
 
@@ -323,17 +291,30 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 	gluProject(b[0],b[1],b[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
 	p1[2]=p2[2]=0;
 
-	float tickNum = 5.f/Distance(p2,p1);// 5 pxl spacing
+	float tickNum = 10.f/Distance(p2,p1);// 5 pxl spacing
 	float slope = dim*tickNum;
 	slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
 
 
 	glBegin(GL_POINTS);
 	for(float i=slope;i<dim;i+=slope)
+	{
 		glVertex3f( x ? a[0]+i: a[0],
 		y ? a[1]+i: a[1],
 		z ? a[2]+i: a[2]);
+	}
 	glEnd();
+	
+	int c=0;
+	for(float i=slope;i<dim;i+=slope)
+	{
+		if(!(c%2))
+				gla->renderText(x ? a[0]+i: a[0],
+										y ? a[1]+i: a[1],
+										z ? a[2]+i: a[2],tr("%1").arg(i),gla->getFont());
+		++c;
+	}
+
 }
 
 float ExtraMeshDecoratePlugin::niceRound2(float Val,float base)	{return powf(base,ceil(log10(Val)/log10(base)));}
