@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.80  2006/02/15 23:09:06  fmazzant
+ added the part of MeshIO credits
+
  Revision 1.79  2006/02/09 21:25:38  buzzelli
  making obj loadmask interruptable
 
@@ -337,5 +340,20 @@ int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
 	return 0;
 }
+
+const ActionInfo &ExtraMeshIOPlugin::Info(QAction *action)
+{
+	static ActionInfo ai;
+	return ai;
+}
+
+const PluginInfo &ExtraMeshIOPlugin::Info()
+{
+	static PluginInfo ai;
+	ai.Date=tr("January 2006");
+	ai.Version = tr("0.6");
+	ai.Author = ("Paolo Cignoni, Andrea Buzzelli, Federico Mazzanti");
+	return ai;
+ }
 
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.36  2006/02/15 23:09:06  fmazzant
+added the part of MeshIO credits
+
 Revision 1.35  2006/01/19 17:07:51  fmazzant
 changed struct Format to class Format(QString, QString).
 updated importFormats() and exportFormats() to the new class.
@@ -140,6 +143,22 @@ class MeshModel;
 class RenderMode;
 class GLArea;
 class GLLogStream;
+
+class ActionInfo
+{
+public:
+  QString Help;
+  QString ShortHelp;
+};
+
+class PluginInfo
+{
+public:
+  QString Date;
+  QString Version;
+  QString Author;
+};
+
 class MeshIOInterface
 {
 public:
@@ -151,8 +170,10 @@ public:
 		QStringList extensions;
 	};
 
-
     virtual ~MeshIOInterface() {}
+	virtual const ActionInfo &Info(QAction *)=0;
+    virtual const PluginInfo &Info()=0;
+	
 	virtual QList<Format> importFormats() const = 0;
 	virtual QList<Format> exportFormats() const = 0;
 	virtual int GetExportMaskCapability(QString &format) const = 0;
@@ -173,22 +194,6 @@ public:
       vcg::CallBackPos *cb=0,
       QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
 };
-
-class ActionInfo
-{
-public:
-  QString Help;
-  QString ShortHelp;
-};
-
-class PluginInfo
-{
-public:
-  QString Date;
-  QString Version;
-  QString Author;
-};
-
 
 class MeshFilterInterface
 {

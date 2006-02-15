@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2006/02/15 23:09:06  fmazzant
+added the part of MeshIO credits
+
 Revision 1.10  2006/01/17 13:47:45  fmazzant
 update interface meshio : formats -> importFormats() & exportFormts
 
@@ -205,16 +208,22 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 	if (plugin) {
 		MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
 		if (iMeshIO){
-			if (item->parent()!=NULL)
-			foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
-				QString formats;
-				foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
-				if (actionName==formats) labelInfo->setText(f.description);
+			if (item->parent()==NULL)
+			{
+				labelInfo->setText(QString("Author: ")+iMeshIO->Info().Author+QString(" Date: ")+iMeshIO->Info().Date+QString(" Version: ")+iMeshIO->Info().Version);
 			}
-			foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
-				QString formats;
-				foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
-				if (actionName==formats) labelInfo->setText(f.description);
+			else
+			{
+				foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
+					QString formats;
+					foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
+					if (actionName==formats) labelInfo->setText(f.description);
+				}
+				foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+					QString formats;
+					foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
+					if (actionName==formats) labelInfo->setText(f.description);
+				}
 			}
 		}
 		MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);

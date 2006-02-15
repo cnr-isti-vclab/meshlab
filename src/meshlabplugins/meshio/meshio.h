@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.19  2006/02/15 23:09:06  fmazzant
+ added the part of MeshIO credits
+
  Revision 1.18  2006/01/19 15:59:00  fmazzant
  moved savemaskexporter to mainwindows
 
@@ -62,6 +65,8 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
 public:
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
+	const ActionInfo &Info(QAction *);
+    const PluginInfo &Info();
 	int GetExportMaskCapability(QString &format) const;
 
 	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
