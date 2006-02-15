@@ -18,6 +18,7 @@ public:
 		diagonal_percentual = 0.00;
 		diagonale= 0.00;
 		perc = 0.0f;
+		selected=false;
 	}
 
 public:
@@ -27,6 +28,11 @@ public:
 		return threshold;
 	}
 	
+	inline bool getSelected() 
+	{
+		return selected;
+	}
+
 	void setDiagonale(float diag)
 	{
 		diagonale = diag;
@@ -82,12 +88,21 @@ void on_percentileSB_valueChanged(int pd)
 		aggiornaPercentile();
 }
 
+	void on_selctedCB_stateChanged(int pd) {
+	
+	if (pd == Qt::Checked)
+		selected= true;
+	else
+		selected = false;
+	}
+
 private:
 	double threshold;
 	double diagonal_percentual;
 	double diagonale;
 	vcg::Histogram<float> *histo;
 	float perc;
+		bool selected;
 };
 
 #endif 
