@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.5  2006/02/15 22:05:13  giec
+Added boolean 'selected' for affect only selected faces
+
 Revision 1.4  2006/01/25 21:09:02  giec
 Bugfix
 
@@ -53,28 +56,30 @@ Detacher function
 namespace vcg{
 
 	template<class MESH_TYPE>
-		void Detacher(MESH_TYPE &m, float threshold)
+		void Detacher(MESH_TYPE &m, float threshold, bool selected = false)
 	{	
 		typename MESH_TYPE::FaceIterator fi;
 
 		for(fi = m.face.begin(); fi != m.face.end(); ++fi)
 		{
+			if( (!(*fi).IsS()) && (selected))
+				continue;
 			if(!(*fi).IsD())
 			{
-			
-					float d1,d2,d3;
-					d1 = Distance<float>((*fi).V(0)->P(),(*fi).V(1)->P());
-					d2 = Distance<float>((*fi).V(1)->P(),(*fi).V(2)->P());
-					d3 = Distance<float>((*fi).V(2)->P(),(*fi).V(0)->P());
-					if(
-						( d1 >= threshold )
-						||( d2 >= threshold )
-						||( d3 >= threshold )	)
-					{
-						m.fn--;
-						(*fi).SetD();
-					}
-				
+
+				float d1,d2,d3;
+				d1 = Distance<float>((*fi).V(0)->P(),(*fi).V(1)->P());
+				d2 = Distance<float>((*fi).V(1)->P(),(*fi).V(2)->P());
+				d3 = Distance<float>((*fi).V(2)->P(),(*fi).V(0)->P());
+				if(
+					( d1 >= threshold )
+					||( d2 >= threshold )
+					||( d3 >= threshold )	)
+				{
+					m.fn--;
+					(*fi).SetD();
+				}
+
 			}
 		}
 	}
