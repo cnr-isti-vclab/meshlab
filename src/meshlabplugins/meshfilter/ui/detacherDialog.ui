@@ -9,7 +9,7 @@
     <x>0</x>
     <y>0</y>
     <width>205</width>
-    <height>160</height>
+    <height>178</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -39,6 +39,13 @@
    <property name="spacing" >
     <number>6</number>
    </property>
+   <item row="3" column="0" >
+    <widget class="QCheckBox" name="selctedCB" >
+     <property name="text" >
+      <string>affect only selected faces</string>
+     </property>
+    </widget>
+   </item>
    <item row="2" column="0" >
     <layout class="QHBoxLayout" >
      <property name="margin" >
@@ -149,7 +156,7 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="0" >
+   <item row="4" column="0" >
     <layout class="QHBoxLayout" >
      <property name="margin" >
       <number>0</number>
@@ -174,36 +181,6 @@
     </layout>
    </item>
   </layout>
-  <widget class="QWidget" name="widget" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>50</y>
-     <width>182</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget_2" >
-   <property name="geometry" >
-    <rect>
-     <x>11</x>
-     <y>51</y>
-     <width>181</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget_3" >
-   <property name="geometry" >
-    <rect>
-     <x>12</x>
-     <y>50</y>
-     <width>181</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
  </widget>
  <pixmapfunction></pixmapfunction>
  <tabstops>
