@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.57  2006/02/15 22:13:01  giec
+Modify the Detucher function call
+
 Revision 1.56  2006/02/13 16:18:51  cignoni
 Used the treshold param...
 
@@ -423,8 +426,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		if (continueValue == QDialog::Rejected)
 			return false; // don't continue, user pressed Cancel
 		double threshold = detacherDialog->getThreshold(); // threshold for refinying
-
-		Detacher<CMeshO>(m.cm, threshold);
+		selected = detacherDialog->getSelected();
+		Detacher<CMeshO>(m.cm, threshold,selected);
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	}
 
