@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2006/02/15 01:53:24  glvertex
+Debugged drawing method
+
 Revision 1.10  2006/01/25 15:37:15  glvertex
 Added variable vertical spacing
 
@@ -37,15 +40,6 @@ Multi level logging
 
 Revision 1.6  2005/12/22 20:05:09  glvertex
 Fixed starting position
-
-Revision 1.5  2005/11/26 18:50:56  alemochi
-correct syntax error
-
-Revision 1.4  2005/11/26 18:24:00  glvertex
-Added method [print] that writes the log entries ina QStringList
-
-Revision 1.3  2005/11/21 12:12:54  cignoni
-Added copyright info
 
 ****************************************************************************/
 
@@ -100,8 +94,6 @@ void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,Q
 	for(;li!=S.end();++li)
 	{
 		if(Level == -1 || (*li).first == Level)
-			qgl->renderText(20,StartLine,(*li).second.c_str(),font);
-
-		StartLine+=vSpacing;
+			qgl->renderText(20,StartLine+=vSpacing,(*li).second.c_str(),font);
 	}
 }
