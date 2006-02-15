@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.2  2006/02/15 05:32:34  cignoni
+Now it colors also non manifold faces
+
 Revision 1.1  2006/01/06 11:14:44  giec
 Change location meshfilter to meshcolorize.
 ----------------------------------------------------------------------
@@ -42,6 +45,7 @@ Filter that it colors the edge non manifold
 #include <vcg/complex/trimesh/clean.h>
 #include<vcg/space/triangle3.h>
 #include<vcg/complex/trimesh/update/topology.h>
+#include<vcg/complex/trimesh/update/color.h>
 
 #include <iostream>
 #include <QtGlobal>
@@ -58,26 +62,18 @@ namespace vcg{
 
 		typename MESH_TYPE::VertexIterator vi;
 		typename MESH_TYPE::FaceIterator fi;
+   
+    tri::UpdateColor<MESH_TYPE>::VertexConstant(m, Color4b::White);
 
 		// Test per gli edge manifold
-		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
-		{
-			if (!fi->IsD())
+		for (fi = m.face.begin(); fi != m.face.end(); ++fi)	if (!fi->IsD())
 			{
-				if(!IsManifold(*fi,0)){
-					(*fi).V(0)->C().SetRGB(255,0,0);
-					(*fi).V(1)->C().SetRGB(255,0,0);
-				}
-				if(!IsManifold(*fi,1)){
-					(*fi).V(1)->C().SetRGB(255,0,0);
-					(*fi).V(2)->C().SetRGB(255,0,0);
-				}
-				if(!IsManifold(*fi,2)){
-					(*fi).V(2)->C().SetRGB(255,0,0);
-					(*fi).V(0)->C().SetRGB(255,0,0);
-				}
-			}
-		}
+        for(int i=0;i<3;++i)
+        if(!IsManifold(*fi,i)){
+					(*fi).V0(i)->C().SetRGB(255,0,0);
+					(*fi).V1(i)->C().SetRGB(255,0,0);
+          }
+		  }
 	}
 }
 #endif
