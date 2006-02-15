@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.93  2006/02/15 01:37:55  glvertex
+Restyled help
+
 Revision 1.92  2006/02/13 15:37:18  cignoni
 Restructured some functions (pasteTile, wheelevent,lightmode)
 Added DoubleClick for zoom and center. Restructured all the keyboard modifier (removed currentButton)
@@ -40,9 +43,6 @@ Closing confirmation for modified files
 
 Revision 1.88  2006/01/31 17:04:44  alemochi
 Changed fancy lighting (use two lights instead of double lighting)
-
-Revision 1.87  2006/01/31 11:09:07  alemochi
-remove unnecessary comments
 
 ****************************************************************************/
 
@@ -464,33 +464,33 @@ void GLArea::resizeGL(int _width, int _height)
 
 void GLArea::displayHelp()
 {
-	glPushAttrib(GL_ENABLE_BIT);
-	glPushMatrix();
-	glLoadIdentity();
+	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_BLEND);
-	glColor4f(.3f,.7f,.8f,.5f);
-	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	glBegin(GL_TRIANGLE_STRIP);
+		glColor4f(.5f,.8f,1.f,.6f); glVertex2f(-1, 1);
+		glColor4f(.0f,.0f,.0f,.0f); glVertex2f(-1,-1);
+		glColor4f(.5f,.8f,1.f,.6f); glVertex2f(-.5f,1);
+		glColor4f(.0f,.0f,.0f,.0f); glVertex2f(-.5f,-1);
+	glEnd();
+
+
   float fontSpacingV = (currentHeight*.01f)+3;
-	renderText(15,1.5*fontSpacingV,QString("HELP ON SCREEN"),qFont);
-  renderText(2,3*fontSpacingV,QString("Drag: "),qFont);
-	renderText(100,3*fontSpacingV,QString("Rotate"),qFont);
-	renderText(2,4.5*fontSpacingV,QString("Ctrl-Drag: "),qFont);
-	renderText(100,4.5*fontSpacingV,QString("Pan"),qFont);
-	renderText(2,6*fontSpacingV,QString("Wheel: "),qFont);
-	renderText(100,6*fontSpacingV,QString("Zoom"),qFont);
-	renderText(2,7.5*fontSpacingV,QString("Shift-Drag: "),qFont);
-  renderText(100,7.5*fontSpacingV,QString("Zoom"),qFont);
-	renderText(2,9*fontSpacingV,QString("Shift-Wheel: "),qFont);
-	renderText(100,9*fontSpacingV,QString("Vertigo Effect"),qFont);
-	renderText(2,10.5*fontSpacingV,QString("Ctrl-Shift-Wheel: "),qFont);
-	renderText(100,10.5*fontSpacingV,QString("Far"),qFont);
-	renderText(2,12*fontSpacingV,QString("Ctrl-Wheel: "),qFont);
-	renderText(100,12*fontSpacingV,QString("Near"),qFont);
-	renderText(2,13.5*fontSpacingV,QString("Ctrl-Shift-Drag: "),qFont);
-	renderText(100,13.5*fontSpacingV,QString("Move light"),qFont);
-	glPopMatrix();
+	float hPosition = currentWidth*.1f;
+	glColor(Color4b::White);
+	qFont.setBold(true);renderText(2+hPosition-(qFont.pointSize()*9),1.5*fontSpacingV,QString("MeshLab Quick Help"),qFont);qFont.setBold(false);
+  renderText(2,3*fontSpacingV,QString("Drag: "),qFont);									renderText(hPosition,3*fontSpacingV,QString("Rotate"),qFont);
+	renderText(2,4.5*fontSpacingV,QString("Ctrl-Drag: "),qFont);					renderText(hPosition,4.5*fontSpacingV,QString("Pan"),qFont);
+	renderText(2,6*fontSpacingV,QString("Wheel: "),qFont);								renderText(hPosition,6*fontSpacingV,QString("Zoom"),qFont);
+	renderText(2,7.5*fontSpacingV,QString("Shift-Drag: "),qFont);					renderText(hPosition,7.5*fontSpacingV,QString("Zoom"),qFont);
+	renderText(2,9*fontSpacingV,QString("Double Click: "),qFont);					renderText(hPosition,9*fontSpacingV,QString("Center on mouse"),qFont);
+	renderText(2,10.5*fontSpacingV,QString("Shift-Wheel: "),qFont);				renderText(hPosition,10.5*fontSpacingV,QString("Vertigo Effect"),qFont);
+	renderText(2,12*fontSpacingV,QString("Ctrl-Shift-Wheel: "),qFont);		renderText(hPosition,12*fontSpacingV,QString("Move far clipping plane"),qFont);
+	renderText(2,13.5*fontSpacingV,QString("Ctrl-Wheel: "),qFont);				renderText(hPosition,13.5*fontSpacingV,QString("Move near clipping plane"),qFont);
+	renderText(2,15*fontSpacingV,QString("Ctrl-Shift-Drag: "),qFont);			renderText(hPosition,15*fontSpacingV,QString("Rotate light"),qFont);
 	glPopAttrib();
 }
 
