@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.24  2006/02/16 12:34:35  glvertex
+Fixed quoted box
+Some optimizations
+
 Revision 1.23  2006/02/16 12:01:51  alemochi
 correct bug
 
@@ -294,10 +298,23 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 	gluProject(b[0],b[1],b[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
 	p1[2]=p2[2]=0;
 
-	float tickNum = 10.f/Distance(p2,p1);// 5 pxl spacing
+	float tickNum = 10.f/Distance(p2,p1);// 10 pxl spacing
 	float slope = dim*tickNum;
 	slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
+	slope = vcg::math::Max<float>(niceRound(dim*.001f),slope);
 
+	// Draws bigger ticks at 0 and at max size
+	glPushAttrib(GL_POINT_BIT);
+	glPointSize(6);
+	
+	glBegin(GL_POINTS);
+			glVertex(a);		// Zero
+			glVertex3f( x ? a[0]+dim: a[0],
+		y ? a[1]+dim: a[1],
+		z ? a[2]+dim: a[2]);
+	glEnd();
+
+	glPopAttrib();
 
 	glBegin(GL_POINTS);
 	for(float i=slope;i<dim;i+=slope)
@@ -308,18 +325,27 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 	}
 	glEnd();
 	
-	int c=0;
-	if (gla)
+	if(gla)
 	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_DEPTH_TEST);
+		int c=1;
+		QFont qf = gla->getFont();
+		qf.setBold(true);
+
 		for(float i=slope;i<dim;i+=slope)
 		{
-		
 			if(!(c%2))
-				gla->renderText(x ? a[0]+i: a[0],
-										y ? a[1]+i: a[1],
-										z ? a[2]+i: a[2],tr("%1").arg(i),gla->getFont());
+					gla->renderText(x ? a[0]+i: a[0],
+											y ? a[1]+i: a[1],
+											z ? a[2]+i: a[2],tr("%1").arg(i),gla->getFont());
 			++c;
 		}
+
+		gla->renderText(x ? a[0]+dim: a[0],
+										y ? a[1]+dim: a[1],
+										z ? a[2]+dim: a[2],tr("%1").arg(dim),qf);
+		glPopAttrib();
 	}
 }
 
@@ -400,35 +426,37 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 	glGetDoublev(GL_PROJECTION_MATRIX,mp);
 	glGetIntegerv(GL_VIEWPORT,vp);
 
+	Point3d a(hw,0,0);Point3d b(0,hw,0);Point3d c(0,0,hw);
+
 	glBegin(GL_LINES);
-		glColor(Color4b::Red); 		glVertex(Point3d(-hw,0,0));glVertex(Point3d(hw,0,0));
-		glColor(Color4b::Green);	glVertex(Point3d(0,-hw,0));glVertex(Point3d(0,hw,0));
-		glColor(Color4b::Blue);		glVertex(Point3d(0,0,-hw));glVertex(Point3d(0,0,hw));
+		glColor(Color4b::Red); 		glVertex(-a);glVertex(a);
+		glColor(Color4b::Green);	glVertex(-b);glVertex(b);
+		glColor(Color4b::Blue);		glVertex(-c);glVertex(c);
 	glEnd();
 
 	glColor(Color4b::White);
-	Point3d a(hw,0,0);Point3d b(0,hw,0);Point3d c(0,0,hw);
 	drawQuotedLine<true,false,false>(-a,a,2*hw,mm,mp,vp);	// Draws x axis
 	drawQuotedLine<false,true,false>(-b,b,2*hw,mm,mp,vp);	// Draws y axis
 	drawQuotedLine<false,false,true>(-c,c,2*hw,mm,mp,vp);	// Draws z axis
 
+	float sf = hw*0.02f; // scale factor hw / 50
 	glPushMatrix();
-		glTranslate(Point3d(hw,0,0));	glScalef(hw/50,hw/50,hw/50);	Add_Ons::Cone(10,3,1,true);
+		glTranslate(a);  glScalef(sf,sf,sf);	Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 	
 	glPushMatrix();
-		glTranslate(Point3d(0,hw,0));	glRotated(90,0,0,1); glScalef(hw/50,hw/50,hw/50); Add_Ons::Cone(10,3,1,true);
+		glTranslate(b);	glRotatef(90,0,0,1); glScalef(sf,sf,sf); Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 	
 	glPushMatrix();
-		glTranslate(Point3d(0,0,hw));	glRotated(-90,0,1,0);	glScalef(hw/50,hw/50,hw/50);	Add_Ons::Cone(10,3,1,true);
+		glTranslate(c);	glRotatef(-90,0,1,0);	glScalef(sf,sf,sf);	Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 
 	QFont f(gla->getFont());
 	f.setBold(true);
-	glColor(Color4b::Red);	 gla->renderText(hw+(hw/16),0,0,QString("X"),f);
-	glColor(Color4b::Green); gla->renderText(0,hw+(hw/16),0,QString("Y"),f);
-	glColor(Color4b::Blue);  gla->renderText(0,0,hw+(hw/16),QString("Z"),f);
+	glColor(Color4b::Red);	 gla->renderText(hw+(sf*3),0,0,QString("X"),f);
+	glColor(Color4b::Green); gla->renderText(0,hw+(sf*3),0,QString("Y"),f);
+	glColor(Color4b::Blue);  gla->renderText(0,0,hw+(sf*3),QString("Z"),f);
 
 	glPopAttrib();
 }
