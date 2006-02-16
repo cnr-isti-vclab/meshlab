@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.25  2006/02/16 17:06:54  glvertex
+Solved nasty bug on choosing axis candidate
+
 Revision 1.24  2006/02/16 12:34:35  glvertex
 Fixed quoted box
 Some optimizations
@@ -36,22 +39,6 @@ Revision 1.22  2006/02/15 16:27:33  glvertex
 
 Revision 1.21  2006/02/06 22:44:02  davide_portelli
 Some changes in DrawAxis in order to compile under gcc
-
-Revision 1.20  2006/02/06 15:17:04  davide_portelli
-Correct a little bug
-
-Revision 1.19  2006/02/03 18:12:37  davide_portelli
-Added arrows in the axis
-
-Revision 1.18  2006/02/03 16:36:24  glvertex
-- Some renaming
-- Quoted axis now also draw lines
-
-Revision 1.17  2006/02/03 14:58:36  alemochi
-Changed axis and added tick
-
-Revision 1.16  2006/02/03 13:42:27  mariolatronico
-removed enum Name to template parameter, since it doesn't define a scope
 
 ****************************************************************************/
 
@@ -154,7 +141,6 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POINT_SMOOTH);
-	//glEnable(GL_POINT_DISTANCE_ATTENUATION);
 
 	// Get gl state values
 	double mm[16],mp[16];
@@ -207,7 +193,7 @@ void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,int *vp,P
 		in1 = box.P(i);
 		in2 = box.P(i+1);
 
-		gluProject((double)in1[0],(double)in1[1],(double)in2[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+		gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
 		gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
 		out1[2] = out2[2] = 0;
 
@@ -241,7 +227,7 @@ void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,int *vp,P
 		in1 = box.P(i);
 		in2 = box.P(i+2);
 
-		gluProject((double)in1[0],(double)in1[1],(double)in2[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+		gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
 		gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
 		out1[2] = out2[2] = 0;
 
@@ -267,13 +253,16 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,P
 	Point3d out1,out2;
 	Point3f in1,in2;
 
-	for (int i=0;i<5;++i)
+	Point3d m;
+
+	for (int i=0;i<4;++i)
 	{
 		// find the furthest axis
 		in1 = box.P(i);
 		in2 = box.P(i+4);
 
-		gluProject((double)in1[0],(double)in1[1],(double)in2[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+
+		gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
 		gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
 		out1[2] = out2[2] = 0;
 
@@ -301,7 +290,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 	float tickNum = 10.f/Distance(p2,p1);// 10 pxl spacing
 	float slope = dim*tickNum;
 	slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
-	slope = vcg::math::Max<float>(niceRound(dim*.001f),slope);
+	//slope = vcg::math::Max<float>(niceRound(dim*.001f),slope);
 
 	// Draws bigger ticks at 0 and at max size
 	glPushAttrib(GL_POINT_BIT);
@@ -327,8 +316,6 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 	
 	if(gla)
 	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_DEPTH_TEST);
 		int c=1;
 		QFont qf = gla->getFont();
 		qf.setBold(true);
@@ -345,7 +332,6 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 		gla->renderText(x ? a[0]+dim: a[0],
 										y ? a[1]+dim: a[1],
 										z ? a[2]+dim: a[2],tr("%1").arg(dim),qf);
-		glPopAttrib();
 	}
 }
 
