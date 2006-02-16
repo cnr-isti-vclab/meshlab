@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.81  2006/02/16 19:29:20  fmazzant
+ transfer of Export_3ds.h, Export_obj.h, Io_3ds_obj_material.h from Meshlab to vcg
+
  Revision 1.80  2006/02/15 23:09:06  fmazzant
  added the part of MeshIO credits
 
@@ -52,19 +55,16 @@
 #include "meshio.h"
 
 #include "import_obj.h"
-#include "export_obj.h"
 
 #include <lib3ds/file.h>
 #include "import_3ds.h"
-#include "export_3ds.h"
+#include <wrap/io_trimesh/export_3ds.h>
 
 #include <wrap/io_trimesh/import_ply.h>
-#include <wrap/io_trimesh/export_ply.h>
-
 #include <wrap/io_trimesh/import_stl.h>
 #include <wrap/io_trimesh/import_off.h>
 
-#include<vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/ply/plylib.h>
@@ -232,71 +232,32 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	return true;
 }
 
-bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, int &mask, vcg::CallBackPos *cb, QWidget *parent)
+bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
-
-	if(formatName.toUpper() == tr("OBJ"))
-	{	
-		int result = vcg::tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),false,mask,cb);//only ASCII format
-		if(result != vcg::tri::io::ExporterOBJ<CMeshO>::E_NOERROR )
-		{
-			QMessageBox::warning(parent, tr("OBJ Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-		return true;
-	}
-
-	if(formatName.toUpper() == tr("PLY"))
-	{		
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-		if(result != 0)
-		{
-			QMessageBox::warning(parent, tr("PLY Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-		return true;
-	}
-
-	if(formatName.toUpper() == tr("OFF"))
-	{
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-		if(result != 0)
-		{
-			QMessageBox::warning(parent, tr("OFF Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterOFF<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-		return true;
-	}
-
-	if(formatName.toUpper() == tr("STL"))
-	{
-		int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-		if(result != 0)
-		{
-			QMessageBox::warning(parent, tr("Mesh Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-		return true;
-
-	}
-
+	
+	//START TMP
 	if(formatName.toUpper() == tr("3DS"))
-	{	
-		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),true,mask,cb);//only binary format
+	{
+		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result!=0)
 		{
-			QMessageBox::warning(parent, tr("3DS Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
+			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
 		return true;
 	}
+	//END TMP
 
-	QMessageBox::warning(parent, "Unknow type", "file's extension not supported!!!");
-
-	return false;
+	int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+	if(result!=0)
+	{
+		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+		return false;
+	}
+	return true;
 }
 
 /*

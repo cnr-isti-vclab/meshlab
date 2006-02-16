@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.20  2006/02/16 19:29:20  fmazzant
+ transfer of Export_3ds.h, Export_obj.h, Io_3ds_obj_material.h from Meshlab to vcg
+
  Revision 1.19  2006/02/15 23:09:06  fmazzant
  added the part of MeshIO credits
 
@@ -70,7 +73,7 @@ public:
 	int GetExportMaskCapability(QString &format) const;
 
 	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	bool save(const QString &formatName, QString &fileName, MeshModel &m, const int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 };
 
 #endif

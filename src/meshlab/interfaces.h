@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.37  2006/02/16 19:29:14  fmazzant
+transfer of Export_3ds.h, Export_obj.h, Io_3ds_obj_material.h from Meshlab to vcg
+
 Revision 1.36  2006/02/15 23:09:06  fmazzant
 added the part of MeshIO credits
 
@@ -190,7 +193,7 @@ public:
       const QString &format, // "OBJ"
 			QString &fileName,
       MeshModel &m, 
-      int &mask,
+      const int &mask,
       vcg::CallBackPos *cb=0,
       QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
 };
