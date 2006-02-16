@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.23  2006/02/16 12:01:51  alemochi
+correct bug
+
 Revision 1.22  2006/02/15 16:27:33  glvertex
 - Added labels to the quoted box
 - Credits
@@ -306,15 +309,18 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 	glEnd();
 	
 	int c=0;
-	for(float i=slope;i<dim;i+=slope)
+	if (gla)
 	{
-		if(!(c%2))
+		for(float i=slope;i<dim;i+=slope)
+		{
+		
+			if(!(c%2))
 				gla->renderText(x ? a[0]+i: a[0],
 										y ? a[1]+i: a[1],
 										z ? a[2]+i: a[2],tr("%1").arg(i),gla->getFont());
-		++c;
+			++c;
+		}
 	}
-
 }
 
 float ExtraMeshDecoratePlugin::niceRound2(float Val,float base)	{return powf(base,ceil(log10(Val)/log10(base)));}
