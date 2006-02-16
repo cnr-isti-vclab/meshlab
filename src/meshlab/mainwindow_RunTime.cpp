@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.87  2006/02/16 15:26:58  glvertex
+Solved some minimizing/restore bugs
+
 Revision 1.86  2006/02/13 16:18:04  cignoni
 Minor edits.
 
@@ -123,7 +126,7 @@ void MainWindow::setColorMode(QAction *qa)
 
 void MainWindow::updateMenus()
 {
-	bool active = (bool)workspace->activeWindow();
+	bool active = (bool) !workspace->windowList().empty() && workspace->activeWindow();
 	reloadAct->setEnabled(active);
 	saveAsAct->setEnabled(active);
 	saveSnapshotAct->setEnabled(active);
@@ -189,7 +192,7 @@ void MainWindow::updateMenus()
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
-		renderModeTextureAct->setEnabled(!GLA()->mm->cm.textures.empty());
+		renderModeTextureAct->setEnabled(GLA()->mm && !GLA()->mm->cm.textures.empty());
 		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
 		
 		setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
