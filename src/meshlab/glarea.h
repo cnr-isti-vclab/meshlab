@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.56  2006/02/16 10:09:34  cignoni
+Removed unnecessary stuff (modifiers)
+
 Revision 1.55  2006/02/13 15:37:18  cignoni
 Restructured some functions (pasteTile, wheelevent,lightmode)
 Added DoubleClick for zoom and center. Restructured all the keyboard modifier (removed currentButton)
@@ -139,14 +142,6 @@ public:
 	GLArea(QWidget *parent = 0);
 	~GLArea(){}
 	
-	enum ButtonPressed { BUTTON_NONE   = 0x0000, 
-		WHEEL         = 0x0008,
-		KEY_SHIFT     = 0x0010, 
-		KEY_SHIFTWHEEL= 0x0018, 
-		KEY_CTRL      = 0x0020, 
-		KEY_ALT       = 0x0040, 
-		};
-
 	MeshModel *mm;
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
@@ -271,7 +266,6 @@ private:
   enum AnimMode { AnimNone, AnimSpin, AnimInterp};
   AnimMode animMode; 
 	int tileCol, tileRow, totalCols, totalRows;
-	int vcgFlag;
 };
 
 
