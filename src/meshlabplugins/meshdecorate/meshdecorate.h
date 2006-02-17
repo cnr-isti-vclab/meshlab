@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2006/02/17 16:09:31  glvertex
+Partial restyle in drawAxis and drawQuotedBox
+A lot of optimizations
+
 Revision 1.12  2006/02/15 16:27:33  glvertex
 - Added labels to the quoted box
 - Credits
@@ -75,14 +79,16 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 
   const QString ST(int id) const;
 
+private:
 	float niceRound2(float value,float base);
 	float niceRound(float value);
 
+	float calcSlope(Point3d &a,Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp);
 
-private:
-	template<bool x,bool y,bool z>
-	void	drawQuotedLine(Point3d &p1,Point3d &p2,float dim,double *modelview,double *projection,int *viewport,GLArea *gla=NULL);
-	
+	void	drawTickedLine(Point3d &p1,Point3d &p2,float dim,float tickDist);
+	void	drawQuotedLine(Point3d &p1,Point3d &p2,float dim,float tickDist,GLArea *gla);
+
+
 	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
 	void	chooseY(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &y1,Point3d &y2);
 	void	chooseZ(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &z1,Point3d &z2);

@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.26  2006/02/17 16:09:31  glvertex
+Partial restyle in drawAxis and drawQuotedBox
+A lot of optimizations
+
 Revision 1.25  2006/02/16 17:06:54  glvertex
 Solved nasty bug on choosing axis candidate
 
@@ -151,10 +155,10 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
 
 	// Mesh boundingBox
 	Box3f b(m.cm.bbox);
-
+	
+	glColor(Color4b::LightGray);
 	glBoxWire(b);
 
-	glColor4f(.2f,.9f,.7f,1.f);
 	glLineWidth(1.f);
 	glPointSize(3.f);
 
@@ -162,15 +166,28 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
 
 	glColor(Color4b::LightRed);
 	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
-	drawQuotedLine<true,false,false>(p1,p2,b.DimX(),mm,mp,vp,gla);	// Draws x axis
+	glPushMatrix();
+	glTranslate(b.Center());
+	glScalef(1,1.1f,1.1f);
+	drawQuotedLine(p1,p2,b.DimX(),calcSlope(p1,p2,b.DimX(),10,mm,mp,vp),gla);	// Draws x axis
+	glPopMatrix();
 
 	glColor(Color4b::LightGreen);
 	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
-	drawQuotedLine<false,true,false>(p1,p2,b.DimY(),mm,mp,vp,gla);	// Draws y axis
+	glPushMatrix();
+	glTranslate(b.Center());
+	glScalef(1.1f,1,1.1f);
+	drawQuotedLine(p1,p2,b.DimY(),calcSlope(p1,p2,b.DimY(),10,mm,mp,vp),gla);	// Draws y axis
+	glPopMatrix();
+
 
 	glColor(Color4b::LightBlue);
 	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate
-	drawQuotedLine<false,false,true>(p1,p2,b.DimZ(),mm,mp,vp,gla);	// Draws z axis
+	glPushMatrix();
+	glTranslate(b.Center());
+	glScalef(1.1,1.1f,1);
+	drawQuotedLine(p1,p2,b.DimZ(),calcSlope(p1,p2,b.DimZ(),10,mm,mp,vp),gla);	// Draws z axis
+	glPopMatrix();
 
 	glPopAttrib();
 
@@ -277,9 +294,7 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,P
 	}
 }
 
-
-template<bool x,bool y,bool z>
-void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,double *mm,double *mp,int *vp,GLArea *gla)
+float ExtraMeshDecoratePlugin::calcSlope(Point3d &a,Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp)
 {
 	Point3d p1,p2;
 
@@ -287,10 +302,24 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 	gluProject(b[0],b[1],b[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
 	p1[2]=p2[2]=0;
 
-	float tickNum = 10.f/Distance(p2,p1);// 10 pxl spacing
+	float tickNum = spacing/Distance(p2,p1);// pxl spacing
 	float slope = dim*tickNum;
 	slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
-	//slope = vcg::math::Max<float>(niceRound(dim*.001f),slope);
+	slope = vcg::math::Max<float>(niceRound(dim*.001f),slope); // prevent too small slope
+
+	return slope;
+}
+
+
+void ExtraMeshDecoratePlugin::drawTickedLine(Point3d &a,Point3d &b,float dim,float tickDist)
+{
+	Point3d v(b-a);
+	v = v /dim; // normalize without computing square roots and powers
+	glBegin(GL_POINTS);
+	float i;
+	for(i=tickDist;i<dim;i+=tickDist)
+		glVertex3f(a[0] + i*v[0],a[1] + i*v[1],a[2] + i*v[2]);
+	glEnd();
 
 	// Draws bigger ticks at 0 and at max size
 	glPushAttrib(GL_POINT_BIT);
@@ -298,42 +327,57 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,dou
 	
 	glBegin(GL_POINTS);
 			glVertex(a);		// Zero
-			glVertex3f( x ? a[0]+dim: a[0],
-		y ? a[1]+dim: a[1],
-		z ? a[2]+dim: a[2]);
+			glVertex3f(a[0] + i*v[0],a[1] + i*v[1],a[2] + i*v[2]);
+	glEnd();
+
+	glPopAttrib();
+}
+
+
+void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,float tickDist,GLArea *gla)
+{
+	glPushAttrib(GL_COLOR_BUFFER_BIT);
+	glColor(Color4b::LightGray);
+		glBegin(GL_LINES);
+			glVertex(a); glVertex(b);
+		glEnd();
+	glPopAttrib();
+
+
+	Point3d v(b-a);
+	v = v /dim; // normalize without computing square roots and powers
+	glBegin(GL_POINTS);
+	float i;
+	for(i=tickDist;i<dim;i+=tickDist)
+		glVertex3f(a[0] + i*v[0],a[1] + i*v[1],a[2] + i*v[2]);
+	glEnd();
+
+
+	// Draws bigger ticks at 0 and at max size
+	glPushAttrib(GL_POINT_BIT);
+	glPointSize(6);
+	
+	glBegin(GL_POINTS);
+			glVertex(a);		// Zero
+			glVertex3f(a[0] + dim*v[0],a[1] + dim*v[1],a[2] + dim*v[2]);
 	glEnd();
 
 	glPopAttrib();
 
-	glBegin(GL_POINTS);
-	for(float i=slope;i<dim;i+=slope)
+	int c=1;
+	for(i=tickDist;i<dim;i+=tickDist)
 	{
-		glVertex3f( x ? a[0]+i: a[0],
-		y ? a[1]+i: a[1],
-		z ? a[2]+i: a[2]);
+		if(!(c%2))
+				gla->renderText(a[0]+i*v[0],a[1]+i*v[1],a[2]+i*v[2],tr("%1").arg(i),gla->getFont());
+		++c;
 	}
-	glEnd();
-	
-	if(gla)
-	{
-		int c=1;
-		QFont qf = gla->getFont();
-		qf.setBold(true);
 
-		for(float i=slope;i<dim;i+=slope)
-		{
-			if(!(c%2))
-					gla->renderText(x ? a[0]+i: a[0],
-											y ? a[1]+i: a[1],
-											z ? a[2]+i: a[2],tr("%1").arg(i),gla->getFont());
-			++c;
-		}
-
-		gla->renderText(x ? a[0]+dim: a[0],
-										y ? a[1]+dim: a[1],
-										z ? a[2]+dim: a[2],tr("%1").arg(dim),qf);
-	}
+	// bold font at the end
+	QFont qf = gla->getFont();
+	qf.setBold(true);
+	gla->renderText(a[0]+dim*v[0],a[1]+dim*v[1],a[2]+dim*v[2],tr("%1").arg(dim),qf);
 }
+
 
 float ExtraMeshDecoratePlugin::niceRound2(float Val,float base)	{return powf(base,ceil(log10(Val)/log10(base)));}
 float ExtraMeshDecoratePlugin::niceRound(float val)	{return powf(10.f,ceil(log10(val)));}
@@ -421,9 +465,9 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 	glEnd();
 
 	glColor(Color4b::White);
-	drawQuotedLine<true,false,false>(-a,a,2*hw,mm,mp,vp);	// Draws x axis
-	drawQuotedLine<false,true,false>(-b,b,2*hw,mm,mp,vp);	// Draws y axis
-	drawQuotedLine<false,false,true>(-c,c,2*hw,mm,mp,vp);	// Draws z axis
+	drawTickedLine(-a,a,2*hw,calcSlope(-a,a,2*hw,10,mm,mp,vp));	// Draws x axis
+	drawTickedLine(-b,b,2*hw,calcSlope(-b,b,2*hw,10,mm,mp,vp));	// Draws y axis
+	drawTickedLine(-c,c,2*hw,calcSlope(-c,c,2*hw,10,mm,mp,vp));	// Draws z axis
 
 	float sf = hw*0.02f; // scale factor hw / 50
 	glPushMatrix();
