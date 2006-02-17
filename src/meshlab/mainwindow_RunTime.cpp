@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.88  2006/02/17 11:17:23  glvertex
+- Moved closeAction in FileMenu
+- Minor changes
+
 Revision 1.87  2006/02/16 15:26:58  glvertex
 Solved some minimizing/restore bugs
 
@@ -90,7 +94,6 @@ void MainWindow::updateRecentFileActions()
 void MainWindow::updateWindowMenu()
 {
 	windowsMenu->clear();
-	windowsMenu->addAction(closeAct);
 	windowsMenu->addAction(closeAllAct);
 	windowsMenu->addSeparator();
 	windowsMenu->addAction(windowsTileAct);
@@ -127,6 +130,7 @@ void MainWindow::setColorMode(QAction *qa)
 void MainWindow::updateMenus()
 {
 	bool active = (bool) !workspace->windowList().empty() && workspace->activeWindow();
+	closeAct->setEnabled(active);
 	reloadAct->setEnabled(active);
 	saveAsAct->setEnabled(active);
 	saveSnapshotAct->setEnabled(active);
@@ -482,6 +486,7 @@ void MainWindow::reload()
 	open(file);
 }
 
+
 bool MainWindow::saveAs()
 {	
 	QStringList filters;
@@ -501,7 +506,7 @@ bool MainWindow::saveAs()
 	
 	if(!fileName.isEmpty() && fs.size() < 2)
 	{
-		QMessageBox::warning(new QWidget(),"Save Error","you must specify the file's extension!!");
+		QMessageBox::warning(new QWidget(),"Save Error","You must specify file extension!!");
 		return ret;
 	}
 

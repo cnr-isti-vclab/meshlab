@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.47  2006/02/17 11:17:23  glvertex
+- Moved closeAction in FileMenu
+- Minor changes
+
 Revision 1.46  2006/02/13 16:18:04  cignoni
 Minor edits.
 
@@ -90,6 +94,12 @@ void MainWindow::createActions()
 	openAct->setShortcutContext(Qt::ApplicationShortcut);
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+	closeAct = new QAction(tr("&Close"), this);
+	closeAct->setShortcutContext(Qt::ApplicationShortcut);
+	closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
+	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
+
 
   reloadAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
 	reloadAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -217,10 +227,7 @@ void MainWindow::createActions()
   windowsNextAct = new QAction(tr("&Next"), this);
 	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
 
-	closeAct = new QAction(tr("Cl&ose"), this);
-	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
-
-	closeAllAct = new QAction(tr("Close &All"), this);
+	closeAllAct = new QAction(tr("Close &All Windows"), this);
 	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
@@ -264,6 +271,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu File ////////////////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(openAct);
+	fileMenu->addAction(closeAct);
 	fileMenu->addAction(reloadAct);
 	fileMenu->addAction(saveAsAct);
 

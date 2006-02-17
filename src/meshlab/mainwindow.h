@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.61  2006/02/17 11:17:23  glvertex
+- Moved closeAction in FileMenu
+- Minor changes
+
 Revision 1.60  2006/02/01 12:44:42  glvertex
 - Disabled EDIT menu when no editing tools loaded
 - Solved openig bug when running by command line
@@ -75,7 +79,7 @@ public:
 
 public slots:
  void open(QString fileName=QString());
-   
+
   
 private slots:
 
@@ -147,13 +151,11 @@ private:
 	std::vector<MeshIOInterface*> meshIOPlugins;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 	
-	
-	////////ToolBar///////////////
+	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;
 
-
-	///////// Menu ///////////////
+	///////// Menus ///////////////
 	QMenu *fileMenu;
 	QMenu *filterMenu;
 	QMenu *editMenu;
@@ -174,8 +176,9 @@ private:
 	QMenu *helpMenu;
 
 
-	//////////// Action Menu File ///////////////////////
+	//////////// Actions Menu File ///////////////////////
 	QAction *openAct;
+	QAction *closeAct;
 	QAction *reloadAct;
 	QAction *saveAsAct;
 	QAction *saveSnapshotAct;
@@ -183,7 +186,7 @@ private:
 	QAction *recentFileActs[MAXRECENTFILES];
 	QAction *separatorAct;										
 	QAction *exitAct;
-	/////////// Action Menu Render /////////////////////
+	/////////// Actions Menu Render /////////////////////
 	QActionGroup *renderModeGroupAct;
 	QAction *renderBboxAct;
 	QAction *renderModePointsAct;
@@ -202,7 +205,7 @@ private:
 	QAction *colorModeNoneAct;
 	QAction *colorModePerVertexAct;
 	QAction *colorModePerFaceAct;
-	///////////Action Menu View ////////////////////////
+	///////////Actions Menu View ////////////////////////
 	QAction *fullScreenAct;
 	QAction *showToolbarStandardAct;
 	QAction *showToolbarRenderAct;
@@ -210,15 +213,14 @@ private:
 	QAction *showInfoPaneAct;
 	QAction *showTrackBallAct;
 	QAction *resetTrackBallAct;
-	///////////Action Menu Windows /////////////////////
+	///////////Actions Menu Windows /////////////////////
 	QAction *windowsTileAct;
 	QAction *windowsCascadeAct;
 	QAction *windowsNextAct;
-	QAction *closeAct;
 	QAction *closeAllAct;
-	///////////Action Menu Preferences /////////////////
+	///////////Actions Menu Preferences /////////////////
 	QAction *setCustomizeAct;
-	///////////Action Menu Help ////////////////////////
+	///////////Actions Menu Help ////////////////////////
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;
 	////////////////////////////////////////////////////
