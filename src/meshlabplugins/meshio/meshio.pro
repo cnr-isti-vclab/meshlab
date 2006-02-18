@@ -9,7 +9,7 @@ HEADERS       = meshio.h \
 				import_3ds.h \
 				io_obj.h \
 				io_3ds.h \
-				../../../../sf/wrap/io_trimesh/material.h
+				../../../../sf/wrap/io_trimesh/io_3ds_obj_material.h
 SOURCES       = meshio.cpp \
 				../../../../sf/wrap/ply/plylib.cpp
 TARGET        = meshio
