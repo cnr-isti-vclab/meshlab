@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.27  2006/02/18 18:07:20  glvertex
+Quoted box now has extern quoted lines
+
 Revision 1.26  2006/02/17 16:09:31  glvertex
 Partial restyle in drawAxis and drawQuotedBox
 A lot of optimizations
@@ -93,7 +96,7 @@ const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
    static PluginInfo ai;
    ai.Date=tr("January 2006");
 	 ai.Author=tr("Paolo Cignoni &  Alessio Mochi, Davide Portelli, Daniele Vacca ");
-	 ai.Version=tr("1.0");
+	 ai.Version=tr("0.6");
    return ai;
  }
 
@@ -122,7 +125,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_LINES);
-		glColor4f(.4f,.4f,1.f,.3f);
+		glColor4f(.4f,.4f,1.f,.6f);
     for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
     {
       glVertex((*vi).P());
@@ -149,13 +152,12 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
 	// Get gl state values
 	double mm[16],mp[16];
 	int vp[4];
-	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
 	glGetDoublev(GL_PROJECTION_MATRIX,mp);
+	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
 	glGetIntegerv(GL_VIEWPORT,vp);
 
 	// Mesh boundingBox
 	Box3f b(m.cm.bbox);
-	
 	glColor(Color4b::LightGray);
 	glBoxWire(b);
 
@@ -164,29 +166,29 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
 
 	Point3d p1,p2;
 
-	glColor(Color4b::LightRed);
+	Point3f c = b.Center();
+		
+	float s = 1.15f;
+
 	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
 	glPushMatrix();
-	glTranslate(b.Center());
-	glScalef(1,1.1f,1.1f);
+	glScalef(1,s,s);
+	glTranslatef(0,c[1]/s-c[1],c[2]/s-c[2]);
 	drawQuotedLine(p1,p2,b.DimX(),calcSlope(p1,p2,b.DimX(),10,mm,mp,vp),gla);	// Draws x axis
 	glPopMatrix();
 
-	glColor(Color4b::LightGreen);
 	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
 	glPushMatrix();
-	glTranslate(b.Center());
-	glScalef(1.1f,1,1.1f);
+	glScalef(s,1,s);
+	glTranslatef(c[0]/s-c[0],0,c[2]/s-c[2]);
 	drawQuotedLine(p1,p2,b.DimY(),calcSlope(p1,p2,b.DimY(),10,mm,mp,vp),gla);	// Draws y axis
 	glPopMatrix();
 
-
-	glColor(Color4b::LightBlue);
-	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate
+	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate	
 	glPushMatrix();
-	glTranslate(b.Center());
-	glScalef(1.1,1.1f,1);
-	drawQuotedLine(p1,p2,b.DimZ(),calcSlope(p1,p2,b.DimZ(),10,mm,mp,vp),gla);	// Draws z axis
+	glScalef(s,s,1);
+	glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
+	drawQuotedLine(p2,p1,b.DimZ(),calcSlope(p1,p2,b.DimZ(),10,mm,mp,vp),gla);	// Draws z axis
 	glPopMatrix();
 
 	glPopAttrib();
@@ -327,7 +329,7 @@ void ExtraMeshDecoratePlugin::drawTickedLine(Point3d &a,Point3d &b,float dim,flo
 	
 	glBegin(GL_POINTS);
 			glVertex(a);		// Zero
-			glVertex3f(a[0] + i*v[0],a[1] + i*v[1],a[2] + i*v[2]);
+			glVertex3f(a[0] + dim*v[0],a[1] + dim*v[1],a[2] + dim*v[2]);
 	glEnd();
 
 	glPopAttrib();
@@ -336,12 +338,9 @@ void ExtraMeshDecoratePlugin::drawTickedLine(Point3d &a,Point3d &b,float dim,flo
 
 void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,float tickDist,GLArea *gla)
 {
-	glPushAttrib(GL_COLOR_BUFFER_BIT);
-	glColor(Color4b::LightGray);
-		glBegin(GL_LINES);
-			glVertex(a); glVertex(b);
-		glEnd();
-	glPopAttrib();
+	glBegin(GL_LINES);
+		glVertex(a); glVertex(b);
+	glEnd();
 
 
 	Point3d v(b-a);
@@ -372,9 +371,10 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,flo
 		++c;
 	}
 
-	// bold font at the end
+	// bold font at beginning and at the end
 	QFont qf = gla->getFont();
 	qf.setBold(true);
+	gla->renderText(a[0],a[1],a[2],tr("0"),qf);
 	gla->renderText(a[0]+dim*v[0],a[1]+dim*v[1],a[2]+dim*v[2],tr("%1").arg(dim),qf);
 }
 
