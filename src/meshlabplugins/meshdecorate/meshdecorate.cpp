@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.28  2006/02/19 22:17:17  glvertex
+Applied gcc patch
+
 Revision 1.27  2006/02/18 18:07:20  glvertex
 Quoted box now has extern quoted lines
 
@@ -296,9 +299,9 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,P
 	}
 }
 
-float ExtraMeshDecoratePlugin::calcSlope(Point3d &a,Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp)
+float ExtraMeshDecoratePlugin::calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp)
 {
-	Point3d p1,p2;
+ 	Point3d p1,p2;
 
 	gluProject(a[0],a[1],a[2],mm,mp,vp,&p1[0],&p1[1],&p1[2]);
 	gluProject(b[0],b[1],b[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
@@ -313,7 +316,7 @@ float ExtraMeshDecoratePlugin::calcSlope(Point3d &a,Point3d &b,float dim,int spa
 }
 
 
-void ExtraMeshDecoratePlugin::drawTickedLine(Point3d &a,Point3d &b,float dim,float tickDist)
+void ExtraMeshDecoratePlugin::drawTickedLine(const Point3d &a,const Point3d &b, float dim,float tickDist)
 {
 	Point3d v(b-a);
 	v = v /dim; // normalize without computing square roots and powers
@@ -336,7 +339,7 @@ void ExtraMeshDecoratePlugin::drawTickedLine(Point3d &a,Point3d &b,float dim,flo
 }
 
 
-void ExtraMeshDecoratePlugin::drawQuotedLine(Point3d &a,Point3d &b,float dim,float tickDist,GLArea *gla)
+void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b,float dim,float tickDist,GLArea *gla)
 {
 	glBegin(GL_LINES);
 		glVertex(a); glVertex(b);

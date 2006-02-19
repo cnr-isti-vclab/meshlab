@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2006/02/19 22:17:17  glvertex
+Applied gcc patch
+
 Revision 1.13  2006/02/17 16:09:31  glvertex
 Partial restyle in drawAxis and drawQuotedBox
 A lot of optimizations
@@ -83,10 +86,10 @@ private:
 	float niceRound2(float value,float base);
 	float niceRound(float value);
 
-	float calcSlope(Point3d &a,Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp);
+	float calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp);
 
-	void	drawTickedLine(Point3d &p1,Point3d &p2,float dim,float tickDist);
-	void	drawQuotedLine(Point3d &p1,Point3d &p2,float dim,float tickDist,GLArea *gla);
+	void	drawTickedLine(const Point3d &p1,const Point3d &p2,float dim,float tickDist);
+	void	drawQuotedLine(const Point3d &p1,const Point3d &p2,float dim,float tickDist,GLArea *gla);
 
 
 	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
