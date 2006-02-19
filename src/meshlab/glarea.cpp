@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.95  2006/02/19 02:54:27  ggangemi
+Added glPushAttrib() and glPopAttrib for shader support
+
 Revision 1.94  2006/02/16 15:05:30  glvertex
 Added some entries in quickhelp
 
@@ -314,11 +317,15 @@ void GLArea::paintGL()
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
 
-	if(iRenderer && currentSharder) iRenderer->Render(currentSharder, *mm, rm, this); 
+	if(iRenderer && currentSharder) {
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		iRenderer->Render(currentSharder, *mm, rm, this); 
+	}
 
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
 	if(iRenderer) {
+		glPopAttrib();
 		glUseProgramObjectARB(0);
 	}
 
