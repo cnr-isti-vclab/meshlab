@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.14  2006/02/19 02:57:49  ggangemi
+Now each shader can change the opengl status
+
 Revision 1.13  2006/02/03 12:27:08  ggangemi
 improved shaderDialog support
 
@@ -68,6 +71,7 @@ Added copyright info
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
+#include <QtXml/QDomNamedNodeMap>
 #include <QFile>
 #include <QString>
 #include <QApplication>

@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.11  2006/02/19 02:57:49  ggangemi
+Now each shader can change the opengl status
+
 Revision 1.10  2006/02/09 00:42:40  ggangemi
 now GLArea is passed to the shaderDialog
 
@@ -176,6 +179,29 @@ void MeshShaderRenderPlugin::initActionList() {
 								}
 							}					
 							
+
+							//OpenGL Status
+							elem = root.firstChildElement("FragmentProcessor");
+							if (!elem.isNull()) {
+								if (elem.hasAttribute("Shade"))					si.glStatus[SHADE] = elem.attribute("Shade", "0");
+								if (elem.hasAttribute("AlphaTest"))			si.glStatus[ALPHA_TEST] = elem.attribute("AlphaTest", "False");
+								if (elem.hasAttribute("AlphaFunc"))			si.glStatus[ALPHA_FUNC] = elem.attribute("AlphaFunc", "0");
+								if (elem.hasAttribute("AlphaClamp"))		si.glStatus[ALPHA_CLAMP] = elem.attribute("AlphaClamp", "0");
+								if (elem.hasAttribute("Blending"))			si.glStatus[BLENDING] = elem.attribute("Blending", "False");
+								if (elem.hasAttribute("BlendFuncSRC"))	si.glStatus[BLEND_FUNC_SRC] = elem.attribute("BlendFuncSRC", "0");
+								if (elem.hasAttribute("BlendFuncDST"))	si.glStatus[BLEND_FUNC_DST] = elem.attribute("BlendFuncDST", "0");
+								if (elem.hasAttribute("BlendEquation")) si.glStatus[BLEND_EQUATION] = elem.attribute("BlendEquation", "0");
+								if (elem.hasAttribute("DepthTest"))			si.glStatus[DEPTH_TEST] = elem.attribute("DepthTest", "False");
+								if (elem.hasAttribute("DepthFunc"))			si.glStatus[DEPTH_FUNC] = elem.attribute("DepthFunc", "0");
+								if (elem.hasAttribute("ClampNear"))			si.glStatus[CLAMP_NEAR] = elem.attribute("ClampNear", "0");
+								if (elem.hasAttribute("ClampFar"))			si.glStatus[CLAMP_FAR] = elem.attribute("ClampFar", "0");
+								if (elem.hasAttribute("ClearColorR"))		si.glStatus[CLEAR_COLOR_R] = elem.attribute("ClearColorR", "0");
+								if (elem.hasAttribute("ClearColorG"))		si.glStatus[CLEAR_COLOR_G] = elem.attribute("ClearColorG", "0");
+								if (elem.hasAttribute("ClearColorB"))		si.glStatus[CLEAR_COLOR_B] = elem.attribute("ClearColorB", "0");
+								if (elem.hasAttribute("ClearColorA"))		si.glStatus[CLEAR_COLOR_A] = elem.attribute("ClearColorA", "0");
+							}
+
+
 							shaders[fileName] = si;
 
 							QAction * qa = new QAction(fileName, this); 
@@ -188,8 +214,6 @@ void MeshShaderRenderPlugin::initActionList() {
 				}
 			}
 		}
-
-//		return actionList;
 	}
 
 void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla) 
@@ -264,10 +288,8 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla)
 				}
 
 				sDialog = new ShaderDialog(&shaders[a->text()], gla);
-
-				/*int okPressed = */sDialog->show();
-				//if (okPressed != QDialog::Rejected) return;
-
+				sDialog->show();
+				
 			} else {
 				QMessageBox::critical(0, "Meshlab",
 					QString("An error occurred during shader's compiling.\n") +
@@ -307,6 +329,32 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GL
 				default: {} break;
 			}
 			++i;
+		}
+
+		std::map<int, QString>::iterator j = si.glStatus.begin();
+		while (j != si.glStatus.end()) {
+			switch (j->first) {
+				case SHADE: glShadeModel(j->second.toInt()); break;
+				case ALPHA_TEST: if (j->second == "True") glEnable(GL_ALPHA_TEST); else glDisable(GL_ALPHA_TEST); break;
+				case ALPHA_FUNC: glAlphaFunc(j->second.toInt(), (si.glStatus[ALPHA_CLAMP]).toFloat()); break;
+				//case ALPHA_CLAMP: used in ALPHA_FUNC
+				case BLENDING: if (j->second == "True") glEnable(GL_BLEND); else glDisable(GL_BLEND); break;
+				case BLEND_FUNC_SRC: glBlendFunc(j->second.toInt(), (si.glStatus[BLEND_FUNC_DST]).toInt()); break;
+				//case BLEND_FUNC_DST: used in BLEND_FUNC_SRC
+				case BLEND_EQUATION: glBlendEquation(j->second.toInt()); break;
+				case DEPTH_TEST: if (j->second == "True") glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST); break;
+				case DEPTH_FUNC: glDepthFunc(j->second.toInt()); break;
+				//case CLAMP_NEAR:
+				//case CLAMP_FAR:
+				case CLEAR_COLOR_R: glClearColor(j->second.toFloat(), 
+															(si.glStatus[CLEAR_COLOR_G]).toFloat(),
+															(si.glStatus[CLEAR_COLOR_B]).toFloat(),
+															(si.glStatus[CLEAR_COLOR_A]).toFloat()); break;
+				//case CLEAR_COLOR_G: used in CLEAR_COLOR_R
+				//case CLEAR_COLOR_B: used in CLEAR_COLOR_R
+				//case CLEAR_COLOR_A: used in CLEAR_COLOR_R
+			}
+			++j;
 		}
 	}
 }
