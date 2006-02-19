@@ -28,6 +28,7 @@ struct ShaderInfo {
 	QString vpFile;
 	QString fpFile;
 	std::map<QString, UniformVariable> uniformVars;
+	std::map<int, QString> glStatus;
 	int shaderProg;
 };
 
@@ -55,6 +56,25 @@ enum {
 	WIDGET_NONE = 0,
 	WIDGET_COLOR = 1,
 	WIDGET_SLIDER = 2
+};
+
+enum {
+	SHADE = 0,
+	ALPHA_TEST,
+	ALPHA_FUNC,
+	ALPHA_CLAMP,
+	BLENDING,
+	BLEND_FUNC_SRC,
+	BLEND_FUNC_DST,
+	BLEND_EQUATION,
+	DEPTH_TEST,
+	DEPTH_FUNC,
+	CLAMP_NEAR,
+	CLAMP_FAR,
+	CLEAR_COLOR_R,
+	CLEAR_COLOR_G,
+	CLEAR_COLOR_B,
+	CLEAR_COLOR_A
 };
 
 #endif
