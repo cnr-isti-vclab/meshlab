@@ -43,7 +43,7 @@
   </UniformVariables>
   <FogParameters FogColorR="0" FogColorG="0" FogColorB="0" FogColorA="1" Density="1" Start="0" End="1" />
   <VertexProcessor CullFace="True" PolygonMode="DummieField" PolygonModeBack="6914" PolygonModeFront="6914" LocalValue="1" TwoSidedValue="0" ColorControlValue="33273" />
-  <FragmentProcessor Shade="7425" AlphaTest="False" AlphaFunc="516" AlphaClamp="0.5" Blending="True" BlendFuncSRC="770" BlendFuncDST="771" BlendEquation="32774" DepthTest="False" DepthFunc="515" ClampNear="0" ClampFar="1" ClearColorR="0" ClearColorG="0" ClearColorB="0" ClearColorA="1" />
+  <FragmentProcessor Shade="7425" AlphaTest="False" AlphaFunc="516" AlphaClamp="0.5" Blending="True" BlendFuncSRC="770" BlendFuncDST="1" BlendEquation="32774" DepthTest="False" DepthFunc="515" ClampNear="0" ClampFar="1" ClearColorR="0" ClearColorG="0" ClearColorB="0" ClearColorA="1" />
   <MotionData Speed="0.05" Distance="4" Rotation="False" />
   <BuiltInStates>
     <ModelAmbient AmbientR="4.730091E-11" AmbientG="4.730091E-11" AmbientB="4.730091E-11" AmbientA="2.365045E-10" />

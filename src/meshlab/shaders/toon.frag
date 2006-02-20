@@ -13,15 +13,23 @@ uniform vec3 PhongColor;
 uniform float Edge;
 uniform float Phong;
 varying vec3 Normal;
+varying vec3 LightDir;
+uniform float Fuzz=.1;
 
 void main (void)
 {
 	vec3 color = DiffuseColor;
-	float f = dot(vec3(0,0,1),Normal);
-	if (abs(f) < Edge)
-		color = vec3(0);
-	if (f > Phong)
-		color = PhongColor;
-
+	float f = dot(LightDir,Normal);
+	
+	if (f < Edge+Fuzz)
+	{
+		float frac=clamp((f-Edge)/Fuzz,0,1);
+		color=mix(vec3(0),DiffuseColor,frac);
+	}
+	else 
+	{ 
+		float frac=clamp((f-Phong)/Fuzz,0,1);
+		color=mix(DiffuseColor,PhongColor,frac);
+	}
 	gl_FragColor = vec4(color, 1);
 }

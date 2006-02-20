@@ -26,7 +26,7 @@
       <Values Value0="0.64" />
     </Uniform0>
     <Uniform1 Type="5" Name="Phong" ArraySize="1" Widget="2" Min="0" Max="1" Step="0.001">
-      <Values Value0="0.9540001" />
+      <Values Value0="0.9" />
     </Uniform1>
     <Uniform2 Type="7" Name="DiffuseColor" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
       <Values Value0="0" Value1="0.25" Value2="1" />
@@ -34,6 +34,9 @@
     <Uniform3 Type="7" Name="PhongColor" ArraySize="1" Widget="1" Min="0" Max="1" Step="0.005">
       <Values Value0="0.75" Value1="0.75" Value2="1" />
     </Uniform3>
+    <Uniform4 Type="5" Name="Fuzz" ArraySize="1" Widget="2" Min="0" Max="1" Step="0.001">
+      <Values Value0="0.02" />
+    </Uniform4>
   </UniformVariables>
   <FogParameters FogColorR="0" FogColorG="0" FogColorB="0" FogColorA="1" Density="1" Start="0" End="1" />
   <VertexProcessor CullFace="True" PolygonMode="DummieField" PolygonModeBack="6914" PolygonModeFront="6914" LocalValue="1" TwoSidedValue="0" ColorControlValue="33273" />
