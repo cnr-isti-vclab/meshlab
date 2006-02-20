@@ -20,6 +20,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.26  2006/02/20 21:11:36  giec
+bugfix
+
 Revision 1.25  2006/02/20 20:52:37  giec
 replace refine and detacher dialog whit GnericELDialog
 
@@ -44,10 +47,8 @@ removed unused variable ActionInfo *ai, added Log history
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include "refineDialog.h"
 #include "decimatorDialog.h"
 #include "transformDialog.h"
-//#include "GenericELDialog.h"
 #include "../../meshlab/genericELDialog.h"
 #include "../../meshlab/GLLogStream.h"
 
