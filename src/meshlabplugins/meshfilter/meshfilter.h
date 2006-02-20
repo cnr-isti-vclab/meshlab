@@ -20,6 +20,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.25  2006/02/20 20:52:37  giec
+replace refine and detacher dialog whit GnericELDialog
+
 Revision 1.24  2006/02/06 10:18:27  mariolatronico
 reverted to old behaviour, removed QEdgeLength
 
@@ -44,8 +47,8 @@ removed unused variable ActionInfo *ai, added Log history
 #include "refineDialog.h"
 #include "decimatorDialog.h"
 #include "transformDialog.h"
-#include "detacherDialog.h"
-
+//#include "GenericELDialog.h"
+#include "../../meshlab/genericELDialog.h"
 #include "../../meshlab/GLLogStream.h"
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
@@ -76,10 +79,10 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 protected:
 	GLLogStream *log;
 	QList <QAction *> actionList;
-	RefineDialog *refineDialog;
+//	RefineDialog *refineDialog;
 	DecimatorDialog *decimatorDialog;
 	TransformDialog *transformDialog;
-	DetacherDialog *detacherDialog;
+	GenericELDialog *genericELD;
 };
 
 #endif

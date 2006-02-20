@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.58  2006/02/20 20:52:36  giec
+replace refine and detacher dialog whit GnericELDialog
+
 Revision 1.57  2006/02/15 22:13:01  giec
 Modify the Detucher function call
 
@@ -95,12 +98,14 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	actionList << new QAction(ST(FP_INVERT_FACES), this);
 	actionList << new QAction(ST(FP_TRANSFORM), this);
 
-	refineDialog = new RefineDialog();
-	refineDialog->hide();
+	//refineDialog = new RefineDialog();
+	//refineDialog->hide();
 	decimatorDialog = new DecimatorDialog();
 	decimatorDialog->hide();
-	detacherDialog = new DetacherDialog();
-	detacherDialog->hide();
+	
+	genericELD = new GenericELDialog();
+	genericELD->hide();
+	
 	transformDialog = new TransformDialog();
 	transformDialog->hide();
 }
@@ -141,7 +146,8 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
 }
 
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
-	delete refineDialog;
+//	delete refineDialog;
+	delete genericELD;
 	delete decimatorDialog;
 	if (transformDialog)
 		delete transformDialog;
@@ -263,13 +269,47 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 	  vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 	  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
     vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-//    refineDialog->setDiagonal( m.cm.bbox.Diag() );
-	  int continueValue = refineDialog->exec();
+
+				float diagonale = m.cm.bbox.Diag();
+		Histogram<float> *histo= new Histogram<float>();
+		histo->SetRange( 0, diagonale, 10000);
+		CMeshO::FaceIterator fi;
+		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+		{
+			if(!(*fi).IsD())
+			{
+				if( !(*fi).V(0)->IsS() && !(*fi).V(1)->IsS()  )
+				{
+					histo->Add(Distance<float>((*fi).V(0)->P(),(*fi).V(1)->P()));
+					(*fi).V(0)->SetS();
+					(*fi).V(1)->SetS();
+				}
+				if( !(*fi).V(1)->IsS() && !(*fi).V(2)->IsS())
+				{
+					histo->Add(Distance<float>((*fi).V(1)->P(),(*fi).V(2)->P()));
+					(*fi).V(2)->SetS();
+					(*fi).V(1)->SetS();
+				}
+				if( !(*fi).V(2)->IsS() && !(*fi).V(0)->IsS())
+				{
+					histo->Add(Distance<float>((*fi).V(2)->P(),(*fi).V(0)->P()));
+					(*fi).V(0)->SetS();
+					(*fi).V(2)->SetS();
+				}
+			}
+		}
+		CMeshO::VertexIterator vi;
+		for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+			(*vi).ClearS();
+		genericELD->setHistogram(histo);
+		genericELD->setDiagonale(diagonale);
+		int continueValue = genericELD->exec();
+		//int continueValue = refineDialog->exec();
 	  if (continueValue == QDialog::Rejected)
 	    return false; // don't continue, user pressed Cancel
-	  threshold = refineDialog->getThreshold(); // threshold for refinying
-    qDebug( "%f", threshold );
-    bool selected = refineDialog->isSelected(); // refine only selected faces
+	  threshold = genericELD->getThreshold(); // threshold for refinying
+   // qDebug( "%f", threshold );
+    bool selected = genericELD->getSelected(); // refine only selected faces
 	}
 
 	if(filter->text() == ST(FP_LOOP_SS) )
@@ -383,12 +423,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 
 	if (filter->text() == ST(FP_DETACHER) ) {
 		float diagonale = m.cm.bbox.Diag();
-
 		Histogram<float> *histo= new Histogram<float>();
-
 		histo->SetRange( 0, diagonale, 10000);
-
-
 		CMeshO::FaceIterator fi;
 		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 		{
@@ -414,19 +450,17 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 				}
 			}
 		}
-
 		CMeshO::VertexIterator vi;
 		for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 			(*vi).ClearS();
-
-		detacherDialog->setHistogram(histo);
-		detacherDialog->setDiagonale(diagonale);
-		int continueValue = detacherDialog->exec();
+		genericELD->setHistogram(histo);
+		genericELD->setDiagonale(diagonale);
+		int continueValue = genericELD->exec();
 
 		if (continueValue == QDialog::Rejected)
 			return false; // don't continue, user pressed Cancel
-		double threshold = detacherDialog->getThreshold(); // threshold for refinying
-		selected = detacherDialog->getSelected();
+		double threshold = genericELD->getThreshold(); // threshold for refinying
+		selected = genericELD->getSelected();
 		Detacher<CMeshO>(m.cm, threshold,selected);
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	}

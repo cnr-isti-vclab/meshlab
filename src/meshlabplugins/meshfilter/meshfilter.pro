@@ -1,11 +1,10 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  +=  ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = refineDialog.h \
-transformDialog.h \
+HEADERS       = transformDialog.h \
 decimatorDialog.h \
 detacher.h \
-detacherDialog.h \
+../../meshlab/genericELDialog.h \
 ../../meshlab/interfaces.h \
 meshfilter.h 
 
@@ -19,10 +18,7 @@ DESTDIR       = ../../meshlab/plugins
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 # all dialog are stored in meshlab/ui directory
-FORMS         = ui/refineDialog.ui \
-ui/decimatorDialog.ui \
-ui/transformDialog.ui \
-ui/detacherDialog.ui
+FORMS         = ui/decimatorDialog.ui ui/transformDialog.ui ../../meshlab/ui/genericELDialog.ui
 
 QT += opengl
 unix{
