@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.89  2006/02/21 17:25:57  ggangemi
+RenderMode is now passed to MeshRenderInterface::Init()
+
 Revision 1.88  2006/02/17 11:17:23  glvertex
 - Moved closeAction in FileMenu
 - Minor changes
@@ -258,7 +261,7 @@ void MainWindow::applyRenderMode()
 	
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	iRenderTemp->Init(action,*(GLA()->mm),GLA());
+	iRenderTemp->Init(action,*(GLA()->mm),GLA()->getCurrentRenderMode(),GLA());
 
 	if(iRenderTemp->isSupported())
 	{

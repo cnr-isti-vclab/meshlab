@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.39  2006/02/21 17:25:57  ggangemi
+RenderMode is now passed to MeshRenderInterface::Init()
+
 Revision 1.38  2006/02/21 15:59:06  ggangemi
 added info() method in meshrender plugin
 
@@ -225,7 +228,7 @@ class MeshRenderInterface
 public:
     virtual ~MeshRenderInterface() {}
 		
-    virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/){};
 		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual bool isSupported() = 0;
