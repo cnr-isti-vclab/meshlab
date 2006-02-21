@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.12  2006/02/21 16:10:02  ggangemi
+added info() method
+
 Revision 1.11  2006/02/19 02:57:49  ggangemi
 Now each shader can change the opengl status
 
@@ -357,6 +360,16 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GL
 			++j;
 		}
 	}
+}
+
+
+const PluginInfo &MeshShaderRenderPlugin::Info() 
+{
+  static PluginInfo ai; 
+  ai.Date=tr("February 2006");
+  ai.Version = tr("1.0");
+  ai.Author = ("Giorgio Gangemi");
+  return ai;
 }
 
 Q_EXPORT_PLUGIN(MeshShaderRenderPlugin)
