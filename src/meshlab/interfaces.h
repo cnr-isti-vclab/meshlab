@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.38  2006/02/21 15:59:06  ggangemi
+added info() method in meshrender plugin
+
 Revision 1.37  2006/02/16 19:29:14  fmazzant
 transfer of Export_3ds.h, Export_obj.h, Io_3ds_obj_material.h from Meshlab to vcg
 
@@ -221,11 +224,12 @@ class MeshRenderInterface
 {
 public:
     virtual ~MeshRenderInterface() {}
-
+		
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual bool isSupported() = 0;
+		virtual const PluginInfo &Info()=0;
 		virtual QList<QAction *> actions() const = 0;
 };
 
