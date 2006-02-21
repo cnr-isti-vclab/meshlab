@@ -20,6 +20,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.27  2006/02/21 15:24:47  mariolatronico
+case typo on #include
+
 Revision 1.26  2006/02/20 21:11:36  giec
 bugfix
 
@@ -49,7 +52,7 @@ removed unused variable ActionInfo *ai, added Log history
 #include <meshlab/interfaces.h>
 #include "decimatorDialog.h"
 #include "transformDialog.h"
-#include "../../meshlab/genericELDialog.h"
+#include "../../meshlab/GenericELDialog.h"
 #include "../../meshlab/GLLogStream.h"
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
