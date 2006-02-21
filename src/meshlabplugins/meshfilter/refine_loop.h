@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.9  2006/02/21 15:30:47  mariolatronico
+removed assert (gave an assertion when no faces was added)
+
 Revision 1.8  2006/01/31 14:48:27  mariolatronico
 removed commented code
 
@@ -280,10 +283,7 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 	// momentaneamente le callback sono identiche, almeno cbOdd deve essere passata
 	cbEven = cbOdd;
 
-	assert (m.vn != n); // odd aggiunge i vertici
-
-	
-		vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF(m);
+	vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF(m);
 	// aggiorno i flag perche' IsB funzioni
 	vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace (m);
 	vcg::tri::UpdateColor<MESH_TYPE>::VertexBorderFlag(m);
