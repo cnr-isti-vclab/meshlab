@@ -8,7 +8,7 @@
 #include <QSignalMapper>
 #include <QLineEdit>
 #include <QSlider>
-#include <QPalette>
+#include <QGridLayout>
 #include <map>
 #include "shaderStructs.h"
 #include "ui_shaderDialog.h"
