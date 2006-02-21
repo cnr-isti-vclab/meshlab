@@ -36,6 +36,7 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, QWidget *parent)
 			case WIDGET_NONE: {
 				for (int j=0;j<varNum;++j) {
 					QLineEdit *qline = new QLineEdit(this);
+					qline->setAlignment(Qt::AlignRight);
 					qline->setObjectName(tr("%1%2").arg(i->first).arg(j));
 					if (i->second.type == SINGLE_INT) {
 						qline->setText(tr("%1").arg(i->second.ival[j]));
@@ -95,8 +96,46 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, QWidget *parent)
 	connect(colorSignalMapper, SIGNAL(mapped(const QString &)), this, SLOT(setColorValue(const QString &)));
 	connect(valueSignalMapper, SIGNAL(mapped(const QString &)), this, SLOT(valuesChanged(const QString &)));
 
+	//OpenGL Status Tab Section
+	
+	QGridLayout * qgridGlStatus = new QGridLayout(ui.glTab);
+	qgridGlStatus->setColumnMinimumWidth(0, 45);
+	qgridGlStatus->setColumnMinimumWidth(1, 40);
 
+	row = 0;
+	std::map<int, QString>::iterator glIterator;
+	for (glIterator = shaderInfo->glStatus.begin(); glIterator != shaderInfo->glStatus.end(); ++glIterator) {
+		QLabel *glVarLabel = new QLabel(this);
+		QLabel *glValueLabel = new QLabel(this);
+	
+	
+		switch (glIterator->first) {
+			case SHADE:  glVarLabel->setText("glShadeModel"); glValueLabel->setText(glIterator->second); ++row; break;
+			case ALPHA_TEST:  glVarLabel->setText("GL_ALPHA_TEST"); glValueLabel->setText(glIterator->second); ++row; break;
+			case ALPHA_FUNC:  glVarLabel->setText("glAlphaFunc"); glValueLabel->setText(glIterator->second + ", " + shaderInfo->glStatus[ALPHA_CLAMP]); ++row; break;
+			//case ALPHA_CLAMP: used in ALPHA_FUNC
+			case BLENDING:  glVarLabel->setText("GL_BLEND"); glValueLabel->setText(glIterator->second); ++row; break;
+			case BLEND_FUNC_SRC:  glVarLabel->setText("glBlendFunc"); glValueLabel->setText(glIterator->second + ", " + shaderInfo->glStatus[BLEND_FUNC_SRC]); ++row; break;
+			//case BLEND_FUNC_DST: used in BLEND_FUNC_SRC
+			case BLEND_EQUATION: glVarLabel->setText("glBlendEquation"); glValueLabel->setText(glIterator->second); ++row; break;
+			case DEPTH_TEST: glVarLabel->setText("GL_DEPTH_TEST"); glValueLabel->setText(glIterator->second); ++row; break;
+			case DEPTH_FUNC: glVarLabel->setText("glDepthFunc"); glValueLabel->setText(glIterator->second); ++row; break;
+			//case CLAMP_NEAR:
+			//case CLAMP_FAR:
+			case CLEAR_COLOR_R: glVarLabel->setText("glClearColor"); glValueLabel->setText(glIterator->second + ", " +
+																																										 shaderInfo->glStatus[CLEAR_COLOR_G] + ", " +
+																																										 shaderInfo->glStatus[CLEAR_COLOR_B] + ", " +
+																																										 shaderInfo->glStatus[CLEAR_COLOR_A]); ++row; break;
+			//case CLEAR_COLOR_G: used in CLEAR_COLOR_R
+			//case CLEAR_COLOR_B: used in CLEAR_COLOR_R
+			//case CLEAR_COLOR_A: used in CLEAR_COLOR_R
+		}
 
+		qgridGlStatus->addWidget(glVarLabel, row, 0);
+		qgridGlStatus->addWidget(glValueLabel, row, 1);
+		
+	}
+    
 	//Vertex and Fragment Program Tabs Section
 	QDir shadersDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
@@ -148,8 +187,6 @@ void ShaderDialog::setColorValue(const QString &varName)
 
 	QColor newColor = QColorDialog::getColor(old, this);
 	if (newColor.isValid()) {
-
-		QLabel *label = labels[varName];
 
 		shaderInfo->uniformVars[varName].fval[0] = newColor.redF(); 
 		shaderInfo->uniformVars[varName].fval[1] = newColor.greenF();
