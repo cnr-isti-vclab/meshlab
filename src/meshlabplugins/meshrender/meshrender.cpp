@@ -23,8 +23,8 @@
 /****************************************************************************
 History
 $Log$
-Revision 1.12  2006/02/21 16:10:02  ggangemi
-added info() method
+Revision 1.13  2006/02/21 17:26:38  ggangemi
+RenderMode is now passed to MeshRender::Init()
 
 Revision 1.11  2006/02/19 02:57:49  ggangemi
 Now each shader can change the opengl status
@@ -219,7 +219,7 @@ void MeshShaderRenderPlugin::initActionList() {
 		}
 	}
 
-void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla) 
+void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla) 
 {
 	if (sDialog) sDialog->close();
 
@@ -290,7 +290,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, GLArea *gla)
 						"or the shader's code\n\n");
 				}
 
-				sDialog = new ShaderDialog(&shaders[a->text()], gla);
+				sDialog = new ShaderDialog(&shaders[a->text()], gla, rm);
 				sDialog->show();
 				
 			} else {

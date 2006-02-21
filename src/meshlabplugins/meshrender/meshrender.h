@@ -23,8 +23,8 @@
 /****************************************************************************
 History
 $Log$
-Revision 1.15  2006/02/21 16:10:02  ggangemi
-added info() method
+Revision 1.16  2006/02/21 17:26:38  ggangemi
+RenderMode is now passed to MeshRender::Init()
 
 Revision 1.14  2006/02/19 02:57:49  ggangemi
 Now each shader can change the opengl status
@@ -121,7 +121,7 @@ public:
 
 	virtual const PluginInfo &Info();
 	virtual bool isSupported() {return supported;}
-	virtual void Init(QAction *a, MeshModel &m, GLArea *gla);
+	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
 	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
 
 };
