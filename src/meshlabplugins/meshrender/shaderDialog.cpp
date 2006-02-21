@@ -4,12 +4,14 @@
 
 
 
-ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, QWidget *parent)
+ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, RenderMode &rm, QWidget *parent)
 : QDialog(parent)
 {
 	ui.setupUi(this);
 	shaderInfo = sInfo;
 	glarea = gla;
+	rendMode = &rm;
+
 	colorSignalMapper = new QSignalMapper(this);
 	valueSignalMapper = new QSignalMapper(this);
 
@@ -19,7 +21,16 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, QWidget *parent)
 	qgrid->setColumnMinimumWidth(2, 40);
 	qgrid->setColumnMinimumWidth(3, 40);
 
-	int row=0;
+	QLabel *perVertexColorLabel = new QLabel(this);
+	perVertexColorLabel->setText("Use PerVertex Color");
+	QCheckBox *perVertexColorCBox = new QCheckBox(this);
+	rendMode->colorMode =  GLW::CMNone;
+	connect(perVertexColorCBox, SIGNAL(stateChanged(int)), this, SLOT(setColorMode(int)));
+
+	qgrid->addWidget(perVertexColorLabel, 0, 0);
+	qgrid->addWidget(perVertexColorCBox, 0, 1);
+
+	int row=1;
 	std::map<QString, UniformVariable>::iterator i;
 	for (i = shaderInfo->uniformVars.begin(); i != shaderInfo->uniformVars.end(); ++i) {
 
@@ -233,3 +244,12 @@ void ShaderDialog::valuesChanged(const QString &varNameAndIndex) {
 
 }
 
+
+void ShaderDialog::setColorMode(int state) {
+	if (state == Qt::Checked) {
+		rendMode->colorMode = GLW::CMPerVert;
+	} else {
+		rendMode->colorMode = GLW::CMNone;
+	}
+	glarea->updateGL();
+}
