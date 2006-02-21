@@ -4,7 +4,7 @@ INCLUDEPATH  +=  ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = transformDialog.h \
 decimatorDialog.h \
 detacher.h \
-../../meshlab/genericELDialog.h \
+../../meshlab/GenericELDialog.h \
 ../../meshlab/interfaces.h \
 meshfilter.h 
 
