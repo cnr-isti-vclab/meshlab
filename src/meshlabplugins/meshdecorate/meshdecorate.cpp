@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.29  2006/02/22 12:24:41  cignoni
+Restructured Quoted Box.
+
 Revision 1.28  2006/02/19 22:17:17  glvertex
 Applied gcc patch
 
@@ -172,26 +175,26 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
 	Point3f c = b.Center();
 		
 	float s = 1.15f;
-
+  const float LabelSpacing = 20;
 	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
 	glPushMatrix();
 	glScalef(1,s,s);
 	glTranslatef(0,c[1]/s-c[1],c[2]/s-c[2]);
-	drawQuotedLine(p1,p2,b.DimX(),calcSlope(p1,p2,b.DimX(),10,mm,mp,vp),gla);	// Draws x axis
+	drawQuotedLine(p1,p2,b.min[0],b.max[0],calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla);	// Draws x axis
 	glPopMatrix();
 
 	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
 	glPushMatrix();
 	glScalef(s,1,s);
 	glTranslatef(c[0]/s-c[0],0,c[2]/s-c[2]);
-	drawQuotedLine(p1,p2,b.DimY(),calcSlope(p1,p2,b.DimY(),10,mm,mp,vp),gla);	// Draws y axis
+	drawQuotedLine(p1,p2,b.min[1],b.max[1],calcSlope(p1,p2,b.DimY(),LabelSpacing,mm,mp,vp),gla);	// Draws y axis
 	glPopMatrix();
 
 	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate	
 	glPushMatrix();
 	glScalef(s,s,1);
 	glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
-	drawQuotedLine(p2,p1,b.DimZ(),calcSlope(p1,p2,b.DimZ(),10,mm,mp,vp),gla);	// Draws z axis
+	drawQuotedLine(p2,p1,b.min[2],b.max[2],calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla);	// Draws z axis
 	glPopMatrix();
 
 	glPopAttrib();
@@ -309,10 +312,14 @@ float ExtraMeshDecoratePlugin::calcSlope(const Point3d &a,const Point3d &b,float
 
 	float tickNum = spacing/Distance(p2,p1);// pxl spacing
 	float slope = dim*tickNum;
-	slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
-	slope = vcg::math::Max<float>(niceRound(dim*.001f),slope); // prevent too small slope
-
-	return slope;
+	//slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
+  qDebug("slope %f nice %f 0.5f*nice(2*slope) %f 0.2f*nice(5*slope)%f",slope,niceRound(slope), 0.5f*niceRound(2.0f*slope),0.2f*niceRound(5.0f*slope));
+	float nslope = min(
+          min(niceRound(slope), 0.5f*niceRound(2.0f*slope)), 
+                                0.2f*niceRound(5.0f*slope));
+	nslope = vcg::math::Max<float>(niceRound(dim*.001f),nslope); // prevent too small slope
+  qDebug("choosen %f ",nslope);
+	return nslope;
 }
 
 
@@ -322,6 +329,7 @@ void ExtraMeshDecoratePlugin::drawTickedLine(const Point3d &a,const Point3d &b, 
 	v = v /dim; // normalize without computing square roots and powers
 	glBegin(GL_POINTS);
 	float i;
+  qDebug("drawTickedLine %f",tickDist);
 	for(i=tickDist;i<dim;i+=tickDist)
 		glVertex3f(a[0] + i*v[0],a[1] + i*v[1],a[2] + i*v[2]);
 	glEnd();
@@ -339,20 +347,39 @@ void ExtraMeshDecoratePlugin::drawTickedLine(const Point3d &a,const Point3d &b, 
 }
 
 
-void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b,float dim,float tickDist,GLArea *gla)
-{
-	glBegin(GL_LINES);
-		glVertex(a); glVertex(b);
-	glEnd();
+void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickDist,GLArea *gla)
+{  
+  qDebug("drawQuotedLine %f",tickDist);
 
+  float firstTick;
+  if(aVal > 0) firstTick = aVal - fmod(aVal,tickDist) + tickDist;
+          else firstTick = aVal - fmod(aVal,tickDist);
 
+  float firstTickTen,tickDistTen;
+  tickDistTen=tickDist /10.0f;
+  if(aVal > 0) firstTickTen = aVal - fmod(aVal,tickDistTen) + tickDistTen;
+          else firstTickTen = aVal - fmod(aVal,tickDistTen);          
+  
+  Point3d Zero = a-((b-a)/(bVal-aVal))*aVal; 
 	Point3d v(b-a);
-	v = v /dim; // normalize without computing square roots and powers
-	glBegin(GL_POINTS);
+  v.Normalize();
+
+  glPointSize(3);
 	float i;
-	for(i=tickDist;i<dim;i+=tickDist)
-		glVertex3f(a[0] + i*v[0],a[1] + i*v[1],a[2] + i*v[2]);
+	glBegin(GL_POINTS);
+	for(i=firstTick;i<bVal;i+=tickDist)
+		glVertex(Zero+v*i);
 	glEnd();
+
+ 	int neededZeros=ceil(max(0.0f,-log10(tickDist)));
+	for(i=firstTick;i<bVal;i+=tickDist)
+    gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),gla->getFont());		
+
+ glPointSize(1);
+ glBegin(GL_POINTS);
+    for(i=firstTickTen;i<=bVal;i+=tickDistTen)
+  		glVertex(Zero+v*i);
+ glEnd();
 
 
 	// Draws bigger ticks at 0 and at max size
@@ -360,25 +387,18 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b,f
 	glPointSize(6);
 	
 	glBegin(GL_POINTS);
-			glVertex(a);		// Zero
-			glVertex3f(a[0] + dim*v[0],a[1] + dim*v[1],a[2] + dim*v[2]);
+			glVertex(a);	
+			glVertex(b);
+      if(bVal*aVal<0) glVertex(Zero);
 	glEnd();
 
 	glPopAttrib();
 
-	int c=1;
-	for(i=tickDist;i<dim;i+=tickDist)
-	{
-		if(!(c%2))
-				gla->renderText(a[0]+i*v[0],a[1]+i*v[1],a[2]+i*v[2],tr("%1").arg(i),gla->getFont());
-		++c;
-	}
-
 	// bold font at beginning and at the end
 	QFont qf = gla->getFont();
 	qf.setBold(true);
-	gla->renderText(a[0],a[1],a[2],tr("0"),qf);
-	gla->renderText(a[0]+dim*v[0],a[1]+dim*v[1],a[2]+dim*v[2],tr("%1").arg(dim),qf);
+	gla->renderText(a[0],a[1],a[2],tr("%1").arg(aVal,3+neededZeros,'f',neededZeros+2 ),qf);
+	gla->renderText(b[0],b[1],b[2],tr("%1").arg(bVal,3+neededZeros,'f',neededZeros+2 ),qf);
 }
 
 

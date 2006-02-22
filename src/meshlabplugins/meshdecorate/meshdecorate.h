@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2006/02/22 12:24:41  cignoni
+Restructured Quoted Box.
+
 Revision 1.14  2006/02/19 22:17:17  glvertex
 Applied gcc patch
 
@@ -89,7 +92,7 @@ private:
 	float calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp);
 
 	void	drawTickedLine(const Point3d &p1,const Point3d &p2,float dim,float tickDist);
-	void	drawQuotedLine(const Point3d &p1,const Point3d &p2,float dim,float tickDist,GLArea *gla);
+	void	drawQuotedLine(const Point3d &a,const Point3d &b,float aVal, float bVal,float tickDist,GLArea *gla);
 
 
 	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
