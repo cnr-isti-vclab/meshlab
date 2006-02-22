@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.48  2006/02/22 10:20:09  cignoni
+Changed progressbar->hide  into close to avoid 100% cpu use.
+
 Revision 1.47  2006/02/17 11:17:23  glvertex
 - Moved closeAction in FileMenu
 - Minor changes
@@ -37,12 +40,6 @@ Revision 1.45  2006/02/01 12:44:42  glvertex
 
 Revision 1.44  2006/01/31 15:25:13  davide_portelli
 Added short key lastFilter
-
-Revision 1.43  2006/01/19 23:11:39  glvertex
-No significant changes
-
-Revision 1.42  2006/01/19 15:58:59  fmazzant
-moved savemaskexporter to mainwindows
 ****************************************************************************/
 
 
@@ -84,7 +81,7 @@ MainWindow::MainWindow()
   qb->setMinimum(0);
   qb->setAutoClose(false);
   qb->setMinimumDuration(0);
-  qb->hide();
+  qb->close();
 }
 
 void MainWindow::createActions()

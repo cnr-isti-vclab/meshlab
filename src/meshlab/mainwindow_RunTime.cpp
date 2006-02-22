@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.90  2006/02/22 10:20:09  cignoni
+Changed progressbar->hide  into close to avoid 100% cpu use.
+
 Revision 1.89  2006/02/21 17:25:57  ggangemi
 RenderMode is now passed to MeshRenderInterface::Init()
 
@@ -36,27 +39,6 @@ Solved some minimizing/restore bugs
 
 Revision 1.86  2006/02/13 16:18:04  cignoni
 Minor edits.
-
-Revision 1.85  2006/02/09 21:39:56  buzzelli
-making ProgressDialog interruptable
-
-Revision 1.84  2006/02/06 23:37:30  glvertex
-Showing about dialog with fixed size
-
-Revision 1.83  2006/02/01 17:48:12  buzzelli
-resolved a platform dependent issue about material and texture files locations
-
-Revision 1.82  2006/02/01 15:49:46  buzzelli
-solved a bug which appeared when a not supported file was loaded via command line option
-
-Revision 1.81  2006/02/01 12:44:42  glvertex
-- Disabled EDIT menu when no editing tools loaded
-- Solved openig bug when running by command line
-
-Revision 1.80  2006/01/31 09:34:29  fmazzant
-bug-fix on savemaskexporter, when press cancel returns -1.
-
-
 ****************************************************************************/
 
 
@@ -237,7 +219,7 @@ void MainWindow::applyFilter()
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
 		lastFilterAct->setEnabled(true);
 	}
-	qb->hide();
+	qb->close();
 }
 
 void MainWindow::applyEditMode()
@@ -467,7 +449,8 @@ void MainWindow::open(QString fileName)
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
 	}
 
-	qb->hide();
+	//qb->hide();
+  qb->close();
 }
 
 void MainWindow::openRecentFile()
@@ -535,7 +518,7 @@ bool MainWindow::saveAs()
 			return false;
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
-		qb->hide();
+		qb->close();
 	}	
 	return ret;
 }
