@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.97  2006/02/22 23:45:28  glvertex
+Bug solved in myGluPerspective. Now QuotedBox works propely.
+
 Revision 1.96  2006/02/19 22:19:00  glvertex
 Some help entries corrected
 
@@ -40,18 +43,6 @@ Revision 1.92  2006/02/13 15:37:18  cignoni
 Restructured some functions (pasteTile, wheelevent,lightmode)
 Added DoubleClick for zoom and center. Restructured all the keyboard modifier (removed currentButton)
 Removed various gl state leaking
-
-Revision 1.91  2006/02/03 11:45:42  cignoni
-Corrected bug for ortho trackball
-
-Revision 1.90  2006/02/01 12:43:20  glvertex
-Optimized onClose code
-
-Revision 1.89  2006/02/01 11:49:12  glvertex
-Closing confirmation for modified files
-
-Revision 1.88  2006/01/31 17:04:44  alemochi
-Changed fancy lighting (use two lights instead of double lighting)
 
 ****************************************************************************/
 
@@ -220,7 +211,6 @@ void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GL
 
 void GLArea::paintGL()
 {
-	GLint old_matrixMode;
 	lastTime=time.elapsed();
 	initTexture();
 	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
@@ -292,7 +282,6 @@ void GLArea::paintGL()
 	
 
 	// Finally apply the Trackball for the model
-	// (get messy when in orthoMode)
 	trackball.GetView();
   glPushMatrix(); 
 	trackball.Apply(trackBallVisible && !takeSnapTile);
@@ -305,11 +294,11 @@ void GLArea::paintGL()
 	// Modify frustum... 
 	if (takeSnapTile)
 	{
-		glGetIntegerv(GL_MATRIX_MODE, &old_matrixMode);
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
 		myGluPerspective(fov, (GLdouble) currentWidth / (GLdouble) currentHeight, nearPlane, farPlane);
+		glMatrixMode(GL_MODELVIEW);
 	}
 
 	// Set proper colorMode
@@ -345,7 +334,6 @@ void GLArea::paintGL()
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		tileBuffer=grabFrameBuffer(true);
 		glPopMatrix();
-		glMatrixMode(old_matrixMode);
 		pasteTile();
 		update();
 		glPopAttrib();
