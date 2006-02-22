@@ -1,4 +1,5 @@
 #include "shaderDialog.h"
+#include <QTextStream>
 
 #define DECFACTOR 100000.0f
 
@@ -160,18 +161,22 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, RenderMode &rm, QWidg
 	}
 #endif
 	shadersDir.cd("shaders");
+  QFile qf;
+  QTextStream ts(&qf);
+  
+  qf.setFileName(shadersDir.path()+QString("/")+shaderInfo->vpFile);
+  if (!qf.open(QIODevice::ReadOnly | QIODevice::Text) )
+      QMessageBox::critical(this,"Opengl Shader" ,"unable to open file");
+  ui.vpTextBrowser->insertPlainText(ts.readAll());
+  qf.close();
+  
+  qf.setFileName(shadersDir.path()+QString("/")+shaderInfo->fpFile);
+  if (!qf.open(QIODevice::ReadOnly | QIODevice::Text) )
+      QMessageBox::critical(this,"Opengl Shader" ,"unable to open file");
+  ui.fpTextBrowser->insertPlainText(ts.readAll());
+  qf.close();
 
-	ui.fpTextBrowser->setSearchPaths(QStringList(shadersDir.absolutePath()));
-	ui.fpTextBrowser->setSource(QUrl(shaderInfo->fpFile));
-	ui.fpTextBrowser->setAutoFormatting(QTextBrowser::AutoNone);
-	ui.fpTextBrowser->setLineWrapMode(QTextBrowser::WidgetWidth);
-
-
-
-	ui.vpTextBrowser->setSearchPaths(QStringList(shadersDir.absolutePath()));
-	ui.vpTextBrowser->setSource(QUrl(shaderInfo->vpFile));
-	ui.vpTextBrowser->setAutoFormatting(QTextBrowser::AutoNone);
-	//End of Vertex and Fragment Program Tabs Section
+  //End of Vertex and Fragment Program Tabs Section
 
 
 	this->setWindowFlags(Qt::WindowStaysOnTopHint);
