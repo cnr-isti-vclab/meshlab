@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.49  2006/02/24 08:21:00  cignoni
+yet another attempt to solve the QProgressDialog issue. Now trying with qt->reset.
+
 Revision 1.48  2006/02/22 10:20:09  cignoni
 Changed progressbar->hide  into close to avoid 100% cpu use.
 
@@ -79,9 +82,9 @@ MainWindow::MainWindow()
   qb=new QProgressDialog(this);
   qb->setMaximum(100);
   qb->setMinimum(0);
-  qb->setAutoClose(false);
+  qb->setAutoClose(true);
   qb->setMinimumDuration(0);
-  qb->close();
+  qb->reset();
 }
 
 void MainWindow::createActions()

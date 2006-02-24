@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.91  2006/02/24 08:21:00  cignoni
+yet another attempt to solve the QProgressDialog issue. Now trying with qt->reset.
+
 Revision 1.90  2006/02/22 10:20:09  cignoni
 Changed progressbar->hide  into close to avoid 100% cpu use.
 
@@ -219,7 +222,7 @@ void MainWindow::applyFilter()
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
 		lastFilterAct->setEnabled(true);
 	}
-	qb->close();
+	qb->reset();
 }
 
 void MainWindow::applyEditMode()
@@ -450,7 +453,7 @@ void MainWindow::open(QString fileName)
 	}
 
 	//qb->hide();
-  qb->close();
+  qb->reset();
 }
 
 void MainWindow::openRecentFile()
@@ -518,7 +521,7 @@ bool MainWindow::saveAs()
 			return false;
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
-		qb->close();
+		qb->reset();
 	}	
 	return ret;
 }
