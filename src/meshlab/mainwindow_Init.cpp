@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.50  2006/02/25 13:43:39  ggangemi
+Action "None" is now exported from MeshRenderPlugin
+
 Revision 1.49  2006/02/24 08:21:00  cignoni
 yet another attempt to solve the QProgressDialog issue. Now trying with qt->reset.
 
@@ -332,7 +335,7 @@ void MainWindow::createMenus()
 
 	// Shaders SUBmenu
 	shadersMenu = renderMenu->addMenu(tr("&Shaders"));
-	shadersMenu->addAction("None",this,SLOT(applyRenderMode()));
+	//shadersMenu->addAction("None",this,SLOT(applyRenderMode()));
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));

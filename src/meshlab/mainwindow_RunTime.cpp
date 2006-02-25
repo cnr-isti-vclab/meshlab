@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.92  2006/02/25 13:43:39  ggangemi
+Action "None" is now exported from MeshRenderPlugin
+
 Revision 1.91  2006/02/24 08:21:00  cignoni
 yet another attempt to solve the QProgressDialog issue. Now trying with qt->reset.
 
@@ -237,26 +240,25 @@ void MainWindow::applyRenderMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal 
 	
-	if(action->text() == tr("None"))
-	{
-		GLA()->log.Log(GLLogStream::Info,"No Shader");
-		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
-		return;
-	}
-	
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
 	iRenderTemp->Init(action,*(GLA()->mm),GLA()->getCurrentRenderMode(),GLA());
 
-	if(iRenderTemp->isSupported())
+	if(action->text() == tr("None"))
 	{
-		GLA()->setRenderer(iRenderTemp,action);
-		GLA()->log.Log(GLLogStream::Info,"%s",action->text().toLocal8Bit().constData());	// Prints out action name
-	}
-	else
-	{
+		GLA()->log.Log(GLLogStream::Info,"No Shader");
 		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
-		GLA()->log.Log(GLLogStream::Warning,"Shader not supported!");
+	} else {
+		if(iRenderTemp->isSupported())
+		{
+			GLA()->setRenderer(iRenderTemp,action);
+			GLA()->log.Log(GLLogStream::Info,"%s",action->text().toLocal8Bit().constData());	// Prints out action name
+		}
+		else
+		{
+			GLA()->setRenderer(0,0); //vertex and fragment programs not supported
+			GLA()->log.Log(GLLogStream::Warning,"Shader not supported!");
+		}
 	}
 }
 

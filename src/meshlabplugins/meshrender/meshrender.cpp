@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.14  2006/02/25 13:44:45  ggangemi
+Action "None" is now exported from MeshRenderPlugin
+
 Revision 1.13  2006/02/21 17:26:38  ggangemi
 RenderMode is now passed to MeshRender::Init()
 
@@ -65,159 +68,162 @@ using namespace vcg;
 
 void MeshShaderRenderPlugin::initActionList() {
 
-	
-		QDir shadersDir = QDir(qApp->applicationDirPath());
-	#if defined(Q_OS_WIN)
-		if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release")
-			shadersDir.cdUp();
-	#elif defined(Q_OS_MAC)
-		if (shadersDir.dirName() == "MacOS") {
-			shadersDir.cdUp();
-			shadersDir.cdUp();
-			shadersDir.cdUp();
-		}
-	#endif
-		shadersDir.cd("shaders");
+	QAction * qaNone = new QAction("None", this); 
+	qaNone->setCheckable(false);
+	actionList << qaNone;
 
-	
-		QDomDocument doc;
-		foreach (QString fileName, shadersDir.entryList(QDir::Files)) {
-			if (fileName.endsWith(".gdp")) {
-				QFile file(shadersDir.absoluteFilePath(fileName));
-				if (file.open(QIODevice::ReadOnly)) {
-					if (doc.setContent(&file)) {
-						file.close();
+	QDir shadersDir = QDir(qApp->applicationDirPath());
+#if defined(Q_OS_WIN)
+	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release")
+		shadersDir.cdUp();
+#elif defined(Q_OS_MAC)
+	if (shadersDir.dirName() == "MacOS") {
+		shadersDir.cdUp();
+		shadersDir.cdUp();
+		shadersDir.cdUp();
+	}
+#endif
+	shadersDir.cd("shaders");
 
-						QDomElement root = doc.documentElement();
-						if (root.nodeName() == tr("GLSLang")) {
 
-							ShaderInfo si;
+	QDomDocument doc;
+	foreach (QString fileName, shadersDir.entryList(QDir::Files)) {
+		if (fileName.endsWith(".gdp")) {
+			QFile file(shadersDir.absoluteFilePath(fileName));
+			if (file.open(QIODevice::ReadOnly)) {
+				if (doc.setContent(&file)) {
+					file.close();
 
-							QDomElement elem;
+					QDomElement root = doc.documentElement();
+					if (root.nodeName() == tr("GLSLang")) {
 
-							//Vertex program filename
-							elem = root.firstChildElement("VPCount");
-							if (!elem.isNull()) {
-								//first child of VPCount is "Filenames"
-								QDomNode child = elem.firstChild();
-								if (!child.isNull()) {
-									//first child of "Filenames" is "Filename0"
-									child = child.firstChild();
-									si.vpFile =	(child.toElement()).attribute("VertexProgram", "");
-								}
+						ShaderInfo si;
+
+						QDomElement elem;
+
+						//Vertex program filename
+						elem = root.firstChildElement("VPCount");
+						if (!elem.isNull()) {
+							//first child of VPCount is "Filenames"
+							QDomNode child = elem.firstChild();
+							if (!child.isNull()) {
+								//first child of "Filenames" is "Filename0"
+								child = child.firstChild();
+								si.vpFile =	(child.toElement()).attribute("VertexProgram", "");
 							}
-
-							//Fragment program filename
-							elem = root.firstChildElement("FPCount");
-							if (!elem.isNull()) {
-								//first child of FPCount is "Filenames"
-								QDomNode child = elem.firstChild();
-								if (!child.isNull()) {
-									//first child of "Filenames" is "Filename0"
-									child = child.firstChild();
-									si.fpFile =	(child.toElement()).attribute("FragmentProgram", "");
-								}
-							}	
-
-							//Uniform Variables
-							elem = root.firstChildElement("UniformVariables");
-							if (!elem.isNull()) {
-
-								QDomNode unif = elem.firstChild();
-								while( !unif.isNull() ) {
-									
-									UniformVariable uv;
-
-									QDomElement unifElem = unif.toElement();
-									QString unifVarName = unifElem.attribute("Name", "");
-									
-									uv.type = (unifElem.attribute("Type", "")).toInt();
-									uv.widget = (unifElem.attribute("Widget", "")).toInt();
-									uv.min = (unifElem.attribute("Min", "")).toFloat();
-									uv.max = (unifElem.attribute("Max", "")).toFloat();
-									uv.step = (unifElem.attribute("Step", "")).toFloat();
-
-									QDomNode unifElemValue = unifElem.firstChild();
-								
-									if (!unifElemValue.isNull()) {
-
-										switch (uv.type) 
-										{
-										case SINGLE_INT: 
-											{
-												uv.ival[0] = unifElemValue.toElement().attribute("Value0", 0).toInt();
-											} break;
-										case SINGLE_FLOAT: 
-											{ 
-												uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
-											} break; 
-										case ARRAY_2_FLOAT: 
-											{ 
-												uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();	
-											} break; 
-										case ARRAY_3_FLOAT: 
-											{ 
-												uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
-												uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();		
-											} break; 
-										case ARRAY_4_FLOAT: 
-											{ 
-												uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-												uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
-												uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
-												uv.fval[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();		
-											} break; 
-										default: 
-											{ 
-												
-											} break; 
-										}
-										
-										si.uniformVars[unifVarName] = uv;
-									}
-								
-									unif = unif.nextSibling();
-								}
-							}					
-							
-
-							//OpenGL Status
-							elem = root.firstChildElement("FragmentProcessor");
-							if (!elem.isNull()) {
-								if (elem.hasAttribute("Shade"))					si.glStatus[SHADE] = elem.attribute("Shade", "0");
-								if (elem.hasAttribute("AlphaTest"))			si.glStatus[ALPHA_TEST] = elem.attribute("AlphaTest", "False");
-								if (elem.hasAttribute("AlphaFunc"))			si.glStatus[ALPHA_FUNC] = elem.attribute("AlphaFunc", "0");
-								if (elem.hasAttribute("AlphaClamp"))		si.glStatus[ALPHA_CLAMP] = elem.attribute("AlphaClamp", "0");
-								if (elem.hasAttribute("Blending"))			si.glStatus[BLENDING] = elem.attribute("Blending", "False");
-								if (elem.hasAttribute("BlendFuncSRC"))	si.glStatus[BLEND_FUNC_SRC] = elem.attribute("BlendFuncSRC", "0");
-								if (elem.hasAttribute("BlendFuncDST"))	si.glStatus[BLEND_FUNC_DST] = elem.attribute("BlendFuncDST", "0");
-								if (elem.hasAttribute("BlendEquation")) si.glStatus[BLEND_EQUATION] = elem.attribute("BlendEquation", "0");
-								if (elem.hasAttribute("DepthTest"))			si.glStatus[DEPTH_TEST] = elem.attribute("DepthTest", "False");
-								if (elem.hasAttribute("DepthFunc"))			si.glStatus[DEPTH_FUNC] = elem.attribute("DepthFunc", "0");
-								if (elem.hasAttribute("ClampNear"))			si.glStatus[CLAMP_NEAR] = elem.attribute("ClampNear", "0");
-								if (elem.hasAttribute("ClampFar"))			si.glStatus[CLAMP_FAR] = elem.attribute("ClampFar", "0");
-								if (elem.hasAttribute("ClearColorR"))		si.glStatus[CLEAR_COLOR_R] = elem.attribute("ClearColorR", "0");
-								if (elem.hasAttribute("ClearColorG"))		si.glStatus[CLEAR_COLOR_G] = elem.attribute("ClearColorG", "0");
-								if (elem.hasAttribute("ClearColorB"))		si.glStatus[CLEAR_COLOR_B] = elem.attribute("ClearColorB", "0");
-								if (elem.hasAttribute("ClearColorA"))		si.glStatus[CLEAR_COLOR_A] = elem.attribute("ClearColorA", "0");
-							}
-
-
-							shaders[fileName] = si;
-
-							QAction * qa = new QAction(fileName, this); 
-							qa->setCheckable(false);
-							actionList << qa;
 						}
-					} else {
-						file.close();
+
+						//Fragment program filename
+						elem = root.firstChildElement("FPCount");
+						if (!elem.isNull()) {
+							//first child of FPCount is "Filenames"
+							QDomNode child = elem.firstChild();
+							if (!child.isNull()) {
+								//first child of "Filenames" is "Filename0"
+								child = child.firstChild();
+								si.fpFile =	(child.toElement()).attribute("FragmentProgram", "");
+							}
+						}	
+
+						//Uniform Variables
+						elem = root.firstChildElement("UniformVariables");
+						if (!elem.isNull()) {
+
+							QDomNode unif = elem.firstChild();
+							while( !unif.isNull() ) {
+
+								UniformVariable uv;
+
+								QDomElement unifElem = unif.toElement();
+								QString unifVarName = unifElem.attribute("Name", "");
+
+								uv.type = (unifElem.attribute("Type", "")).toInt();
+								uv.widget = (unifElem.attribute("Widget", "")).toInt();
+								uv.min = (unifElem.attribute("Min", "")).toFloat();
+								uv.max = (unifElem.attribute("Max", "")).toFloat();
+								uv.step = (unifElem.attribute("Step", "")).toFloat();
+
+								QDomNode unifElemValue = unifElem.firstChild();
+
+								if (!unifElemValue.isNull()) {
+
+									switch (uv.type) 
+									{
+									case SINGLE_INT: 
+										{
+											uv.ival[0] = unifElemValue.toElement().attribute("Value0", 0).toInt();
+										} break;
+									case SINGLE_FLOAT: 
+										{ 
+											uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+										} break; 
+									case ARRAY_2_FLOAT: 
+										{ 
+											uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
+											uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();	
+										} break; 
+									case ARRAY_3_FLOAT: 
+										{ 
+											uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
+											uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
+											uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();		
+										} break; 
+									case ARRAY_4_FLOAT: 
+										{ 
+											uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
+											uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
+											uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
+											uv.fval[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();		
+										} break; 
+									default: 
+										{ 
+
+										} break; 
+									}
+
+									si.uniformVars[unifVarName] = uv;
+								}
+
+								unif = unif.nextSibling();
+							}
+						}					
+
+
+						//OpenGL Status
+						elem = root.firstChildElement("FragmentProcessor");
+						if (!elem.isNull()) {
+							if (elem.hasAttribute("Shade"))					si.glStatus[SHADE] = elem.attribute("Shade", "0");
+							if (elem.hasAttribute("AlphaTest"))			si.glStatus[ALPHA_TEST] = elem.attribute("AlphaTest", "False");
+							if (elem.hasAttribute("AlphaFunc"))			si.glStatus[ALPHA_FUNC] = elem.attribute("AlphaFunc", "0");
+							if (elem.hasAttribute("AlphaClamp"))		si.glStatus[ALPHA_CLAMP] = elem.attribute("AlphaClamp", "0");
+							if (elem.hasAttribute("Blending"))			si.glStatus[BLENDING] = elem.attribute("Blending", "False");
+							if (elem.hasAttribute("BlendFuncSRC"))	si.glStatus[BLEND_FUNC_SRC] = elem.attribute("BlendFuncSRC", "0");
+							if (elem.hasAttribute("BlendFuncDST"))	si.glStatus[BLEND_FUNC_DST] = elem.attribute("BlendFuncDST", "0");
+							if (elem.hasAttribute("BlendEquation")) si.glStatus[BLEND_EQUATION] = elem.attribute("BlendEquation", "0");
+							if (elem.hasAttribute("DepthTest"))			si.glStatus[DEPTH_TEST] = elem.attribute("DepthTest", "False");
+							if (elem.hasAttribute("DepthFunc"))			si.glStatus[DEPTH_FUNC] = elem.attribute("DepthFunc", "0");
+							if (elem.hasAttribute("ClampNear"))			si.glStatus[CLAMP_NEAR] = elem.attribute("ClampNear", "0");
+							if (elem.hasAttribute("ClampFar"))			si.glStatus[CLAMP_FAR] = elem.attribute("ClampFar", "0");
+							if (elem.hasAttribute("ClearColorR"))		si.glStatus[CLEAR_COLOR_R] = elem.attribute("ClearColorR", "0");
+							if (elem.hasAttribute("ClearColorG"))		si.glStatus[CLEAR_COLOR_G] = elem.attribute("ClearColorG", "0");
+							if (elem.hasAttribute("ClearColorB"))		si.glStatus[CLEAR_COLOR_B] = elem.attribute("ClearColorB", "0");
+							if (elem.hasAttribute("ClearColorA"))		si.glStatus[CLEAR_COLOR_A] = elem.attribute("ClearColorA", "0");
+						}
+
+
+						shaders[fileName] = si;
+
+						QAction * qa = new QAction(fileName, this); 
+						qa->setCheckable(false);
+						actionList << qa;
 					}
+				} else {
+					file.close();
 				}
 			}
 		}
 	}
+}
 
 void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla) 
 {
@@ -226,7 +232,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLAr
 	GLenum err = glewInit();
 	if (GLEW_OK == err) {
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
-			supported = true;
+			supported = true;			
 			if (shaders.find(a->text()) != shaders.end()) {
 
 				v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
@@ -281,23 +287,24 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLAr
 							(shaders[a->text()].uniformVars[i->first]).location = glGetUniformLocationARB(shaders[a->text()].shaderProg, (i->first).toLocal8Bit().data());
 							++i;
 						}
-						
+
+					} else {
+						QMessageBox::critical(0, "Meshlab",
+							QString("An error occurred during shader's linking.\n") +
+							"Please check your graphic card's extensions \n"+
+							"or the shader's code\n\n");
 					}
+
+					sDialog = new ShaderDialog(&shaders[a->text()], gla, rm);
+					sDialog->move(10,100);
+					sDialog->show();
+
 				} else {
 					QMessageBox::critical(0, "Meshlab",
-						QString("An error occurred during shader's linking.\n") +
+						QString("An error occurred during shader's compiling.\n") +
 						"Please check your graphic card's extensions \n"+
 						"or the shader's code\n\n");
 				}
-
-				sDialog = new ShaderDialog(&shaders[a->text()], gla, rm);
-				sDialog->show();
-				
-			} else {
-				QMessageBox::critical(0, "Meshlab",
-					QString("An error occurred during shader's compiling.\n") +
-					"Please check your graphic card's extensions \n"+
-					"or the shader's code\n\n");
 			}
 		}
 	}
@@ -340,22 +347,22 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GL
 				case SHADE: glShadeModel(j->second.toInt()); break;
 				case ALPHA_TEST: if (j->second == "True") glEnable(GL_ALPHA_TEST); else glDisable(GL_ALPHA_TEST); break;
 				case ALPHA_FUNC: glAlphaFunc(j->second.toInt(), (si.glStatus[ALPHA_CLAMP]).toFloat()); break;
-				//case ALPHA_CLAMP: used in ALPHA_FUNC
+					//case ALPHA_CLAMP: used in ALPHA_FUNC
 				case BLENDING: if (j->second == "True") glEnable(GL_BLEND); else glDisable(GL_BLEND); break;
 				case BLEND_FUNC_SRC: glBlendFunc(j->second.toInt(), (si.glStatus[BLEND_FUNC_DST]).toInt()); break;
-				//case BLEND_FUNC_DST: used in BLEND_FUNC_SRC
+					//case BLEND_FUNC_DST: used in BLEND_FUNC_SRC
 				case BLEND_EQUATION: glBlendEquation(j->second.toInt()); break;
 				case DEPTH_TEST: if (j->second == "True") glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST); break;
 				case DEPTH_FUNC: glDepthFunc(j->second.toInt()); break;
-				//case CLAMP_NEAR:
-				//case CLAMP_FAR:
+					//case CLAMP_NEAR:
+					//case CLAMP_FAR:
 				case CLEAR_COLOR_R: glClearColor(j->second.toFloat(), 
 															(si.glStatus[CLEAR_COLOR_G]).toFloat(),
 															(si.glStatus[CLEAR_COLOR_B]).toFloat(),
 															(si.glStatus[CLEAR_COLOR_A]).toFloat()); break;
-				//case CLEAR_COLOR_G: used in CLEAR_COLOR_R
-				//case CLEAR_COLOR_B: used in CLEAR_COLOR_R
-				//case CLEAR_COLOR_A: used in CLEAR_COLOR_R
+					//case CLEAR_COLOR_G: used in CLEAR_COLOR_R
+					//case CLEAR_COLOR_B: used in CLEAR_COLOR_R
+					//case CLEAR_COLOR_A: used in CLEAR_COLOR_R
 			}
 			++j;
 		}
@@ -365,11 +372,11 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GL
 
 const PluginInfo &MeshShaderRenderPlugin::Info() 
 {
-  static PluginInfo ai; 
-  ai.Date=tr("February 2006");
-  ai.Version = tr("1.0");
-  ai.Author = ("Giorgio Gangemi");
-  return ai;
+	static PluginInfo ai; 
+	ai.Date=tr("February 2006");
+	ai.Version = tr("1.0");
+	ai.Author = ("Giorgio Gangemi");
+	return ai;
 }
 
 Q_EXPORT_PLUGIN(MeshShaderRenderPlugin)
