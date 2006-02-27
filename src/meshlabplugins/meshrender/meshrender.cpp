@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.15  2006/02/27 05:02:01  ggangemi
+Added texture support
+
 Revision 1.14  2006/02/25 13:44:45  ggangemi
 Action "None" is now exported from MeshRenderPlugin
 
@@ -210,6 +213,27 @@ void MeshShaderRenderPlugin::initActionList() {
 							if (elem.hasAttribute("ClearColorA"))		si.glStatus[CLEAR_COLOR_A] = elem.attribute("ClearColorA", "0");
 						}
 
+						
+						//Textures
+						elem = root.firstChildElement("TexturedUsed");
+						if (!elem.isNull()) {
+							QDomNode unif = elem.firstChild();
+							while( !unif.isNull() ) {
+								QDomElement unifElem = unif.toElement();
+								TextureInfo tInfo;
+
+								tInfo.path = (unifElem.attribute("Filename", ""));								
+								tInfo.MinFilter = (unifElem.attribute("MinFilter", 0)).toInt();
+								tInfo.MagFilter = (unifElem.attribute("MagFilter", 0)).toInt();
+								tInfo.Target = (unifElem.attribute("Target", 0)).toInt();
+								tInfo.WrapS = (unifElem.attribute("WrapS", 0)).toInt();
+								tInfo.WrapT = (unifElem.attribute("WrapT", 0)).toInt();
+								tInfo.WrapR = (unifElem.attribute("WrapR", 0)).toInt();
+							
+								si.textureInfo.push_back(tInfo);
+								unif = unif.nextSibling();
+							}
+						}
 
 						shaders[fileName] = si;
 
@@ -295,6 +319,35 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLAr
 							"or the shader's code\n\n");
 					}
 
+					//Textures
+					shadersDir.cdUp();
+					shadersDir.cd("textures");
+
+					std::vector<TextureInfo>::iterator tIter = shaders[a->text()].textureInfo.begin();
+					while (tIter != shaders[a->text()].textureInfo.end()) {
+						glEnable(tIter->Target);
+						QImage img, imgScaled, imgGL;
+						img.load(shadersDir.absoluteFilePath(tIter->path));
+						// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
+						int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
+						int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
+						imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+						imgGL=QGLWidget::convertToGLFormat(imgScaled);
+
+						glGenTextures( 1, &(tIter->tId) );
+						glBindTexture( tIter->Target, tIter->tId );
+						glTexImage2D( tIter->Target, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
+						glTexParameteri( tIter->Target, GL_TEXTURE_MIN_FILTER, tIter->MinFilter );
+						glTexParameteri( tIter->Target, GL_TEXTURE_MAG_FILTER, tIter->MagFilter ); 
+						glTexParameteri( tIter->Target, GL_TEXTURE_WRAP_S, tIter->WrapS ); 
+						glTexParameteri( tIter->Target, GL_TEXTURE_WRAP_T, tIter->WrapT ); 
+						glTexParameteri( tIter->Target, GL_TEXTURE_WRAP_R, tIter->WrapR ); 
+
+
+						++tIter;
+					}
+
+
 					sDialog = new ShaderDialog(&shaders[a->text()], gla, rm);
 					sDialog->move(10,100);
 					sDialog->show();
@@ -366,6 +419,21 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GL
 			}
 			++j;
 		}
+	
+		int n = GL_TEXTURE0_ARB;
+		std::vector<TextureInfo>::iterator tIter = shaders[a->text()].textureInfo.begin();
+		while (tIter != shaders[a->text()].textureInfo.end()) {
+			glActiveTexture(n);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);	
+
+			glBindTexture( tIter->Target, tIter->tId );
+			rm.textureMode = GLW::TMPerVert;
+			glEnable(tIter->Target);
+			++tIter;
+			++n;
+		}
+
+		
 	}
 }
 

@@ -17,11 +17,24 @@ struct UniformVariable {
 	};
 };
 
+struct TextureInfo {
+	QString path;
+	unsigned int tId;
+	short MinFilter;
+	short	MagFilter;
+	short	Target;
+	short	WrapS;  
+	short	WrapT;
+	short	WrapR;
+};
+
+
 struct ShaderInfo {
 	QString vpFile;
 	QString fpFile;
 	std::map<QString, UniformVariable> uniformVars;
 	std::map<int, QString> glStatus;
+	std::vector<TextureInfo> textureInfo;
 	int shaderProg;
 };
 

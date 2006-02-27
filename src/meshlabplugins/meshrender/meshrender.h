@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.17  2006/02/27 05:02:01  ggangemi
+Added texture support
+
 Revision 1.16  2006/02/21 17:26:38  ggangemi
 RenderMode is now passed to MeshRender::Init()
 
@@ -80,6 +83,8 @@ Added copyright info
 #include <QApplication>
 #include <QMap>
 #include <map>
+#include <vector>
+#include <QImage>
 
 #include <GL/glew.h>
 #include <meshlab/meshmodel.h>
