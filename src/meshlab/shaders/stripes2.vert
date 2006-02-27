@@ -47,8 +47,10 @@ varying vec3 pos;
        directionalLight(0, normal);
 
         color = gl_FrontLightModelProduct.sceneColor +
-                    Ambient  * gl_FrontMaterial.ambient +
-                    Diffuse  * gl_FrontMaterial.diffuse;
+       //             Ambient  * gl_FrontMaterial.ambient +
+       //             Diffuse  * gl_FrontMaterial.diffuse;
+                    Ambient  * gl_Color +
+                    Diffuse  * gl_Color;
         color += Specular * gl_FrontMaterial.specular;
         color = clamp( color, 0.0, 1.0 );
         gl_FrontColor = color;

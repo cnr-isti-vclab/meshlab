@@ -21,19 +21,16 @@
   </FPCount>
   <TexturesPlugins NumberOfPlugins="0" />
   <TexturedUsed NumberUsedTU="0" />
-  <UniformVariables NumberOfVariables="4">
-    <Uniform0 Type="5" Name="Scale" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.001">
-      <Values Value0="10" />
+  <UniformVariables NumberOfVariables="3">
+    <Uniform0 Type="5" Name="Scale" ArraySize="1" Widget="0" Min="0" Max="100" Step="0.1">
+      <Values Value0="1" />
     </Uniform0>
-    <Uniform1 Type="7" Name="Ambient" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.001">
-      <Values Value0="0.2" Value1="0.2" Value2="0.2" />
+    <Uniform1 Type="5" Name="Width" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.01">
+      <Values Value0="0.5" Value1="0.5" Value2="0.5" />
     </Uniform1>
-    <Uniform2 Type="5" Name="Kd" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.001">
-      <Values Value0="0.8" />
-    </Uniform2>
-    <Uniform3 Type="7" Name="StripeDir" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.001">
+    <Uniform2 Type="7" Name="StripeDir" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.001">
       <Values Value0="0" Value1="1" Value2="0" />
-    </Uniform3>
+    </Uniform2>
   </UniformVariables>
   <FogParameters FogColorR="0" FogColorG="0" FogColorB="0" FogColorA="1" Density="1" Start="0" End="1" />
   <VertexProcessor CullFace="False" PolygonMode="DummieField" PolygonModeBack="6914" PolygonModeFront="6914" LocalValue="1" TwoSidedValue="1" ColorControlValue="33273" />
