@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.98  2006/02/28 13:29:36  ponchio
+abs -> fabs
+
 Revision 1.97  2006/02/22 23:45:28  glvertex
 Bug solved in myGluPerspective. Now QuotedBox works propely.
 
@@ -189,8 +192,8 @@ void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GL
 	fRight = -fLeft;
 	
 	// Dimensione totale
-	xDim = abs(fLeft * 2);
-	yDim = abs(fTop * 2);
+	xDim = fabs(fLeft * 2);
+	yDim = fabs(fTop * 2);
 	
 	// Dimensione di un tile
 	tDimX = xDim / totalCols;
