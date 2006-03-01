@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.99  2006/03/01 10:08:01  ponchio
+WHEEL_DELTA -> WHEEL_STEP
+as WHEEL_DELTA is already defined somewhere.
+
 Revision 1.98  2006/02/28 13:29:36  ponchio
 abs -> fabs
 
@@ -600,15 +604,15 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 
 void GLArea::wheelEvent(QWheelEvent*e)
 {
-	const int WHEEL_DELTA =120;
-	float notch=e->delta()/ float(WHEEL_DELTA);
+	const int WHEEL_STEP = 120;
+	float notch = e->delta()/ float(WHEEL_STEP);
   switch(e->modifiers())
   {
     case Qt::ControlModifier                     : clipRatioFar  *= powf(1.2f, notch); break;
     case Qt::ShiftModifier + Qt::ControlModifier : clipRatioNear *= powf(1.2f, notch); break;
     case Qt::ShiftModifier                       : fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
     default:
-      trackball.MouseWheel( e->delta()/ float(WHEEL_DELTA)); 
+      trackball.MouseWheel( e->delta()/ float(WHEEL_STEP)); 
       break;
 	}
 	updateGL();
