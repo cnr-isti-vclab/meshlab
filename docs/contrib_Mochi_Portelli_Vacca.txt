@@ -1,1 +1,69 @@
-Mettete qui l'elenco di quel che avete fatto...
+[RenderMode]
+La mesh e' renderizzata secondo una delle seguenti modalita' <Point,Wireframe,Hidden Line,Flat Line, Flat, Smooth>.
+
+[Lighting]
+L'illuminazione puo' essere single side (realizzata con singola luce bianca) o double side lighting 
+(realizzata con due luci bianche poste una davanti all'oggetto e una dietro)
+L'illuminazione fancy lighting (realizzata con una luce viola in fronte e una luce rosa in back) 
+permette di distinguere i poligoni in fronte all'osservatore da quelli dietro.
+
+[Color]
+Cambia la modalita' di rendering del colore (per esempio per faccia, per vertice ......)
+
+[Show Axis]
+Mostra l'asse di riferimento del sistema di coordinate (x,y,z).
+
+[Show Quoted Box]
+Mostra il bounding box dell'oggetto quotato in x,y,z.
+
+[FullScreen]
+La finestra puo' essere visualizzata in modalita' fullscreen.
+
+[TrackBall]
+L'utente puo' scegliere se visualizzare la trackball o meno.E' possibile ripristinare la posizione iniziale
+della trackball.
+
+[Show Info Pane]
+Pannello visualizzabile nella parte inferiore della finestra.
+Da informazioni sui parametri della mesh (numero vertici,numero facce), sulla velocita' di rendering (fps)
+e sui parametri della camera (fov,near plane,far plane).
+Il pannello e' composto anche da un log che tiene traccia degli ultimi filtri applicati.
+
+[Tile/Cascade]
+Possibilita' di mettere in tile o in cascade le finestre aperte.
+
+[About]
+Informazioni generali sul programma.
+
+[About Plugin]
+Vengono mostrati i plugin attualmente caricati e una breve descrizione sul loro utilizzo.
+
+[ToolBar]
+
+[Change perspective]
+L'effetto e' stato ottenuto facendo contemporaneamente uno zoom in avanti e una carrellata indietro e viceversa.
+
+[MeshLab Quick Help]
+Menu trasparente renderizzato su schermo che mostra tutte le combinazioni dei tasti di meshlab con rispettiva descrizione.
+
+[Options]
+Possibilita' di personalizzare i colori del background (colori interpolati tra color top e color bottom) e del pannello di informazioni.
+
+- Meccanismo che tiene traccia della storia (gli utimi 4 files aperti).
+
+- Meccanismo che tiene traccia della consistenza tra i menu e la toolbar e tra le singole finestre aperte.
+
+- Font ridimensionabili
+
+- Quoted box: la scala della quotatura e' piu' fine quando si fa lo zoom avanti e viceversa 
+
+- Possibilita' di modificare near plane, far plane, fov. 
+
+- Short key
+
+- File di stile, history, readme.
+
+- Compilazione del progetto su qt4.1 GPL e procedura di release su sourceforge.
+
+
+
