@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.93  2006/03/07 10:47:50  cignoni
+Better mask management during io
+
 Revision 1.92  2006/02/25 13:43:39  ggangemi
 Action "None" is now exported from MeshRenderPlugin
 
@@ -430,6 +433,8 @@ void MainWindow::open(QString fileName)
 		GLArea *gla;
 		gla=new GLArea(workspace);
 		gla->mm=mm;
+    gla->mm->mask = mask;				// store mask into model structure
+
 		gla->setFileName(fileName);
 		gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
     gla->showInfoArea(true);
@@ -437,7 +442,10 @@ void MainWindow::open(QString fileName)
 		if(workspace->isVisible()) gla->showMaximized();
 		setCurrentFile(fileName);
 		if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
+    {
+      gla->mm->storeVertexColor();
 			gla->setColorMode(GLW::CMPerVert);
+    }
 		else if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 			gla->setColorMode(GLW::CMPerFace);
 		else

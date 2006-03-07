@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.82  2006/03/07 10:47:55  cignoni
+ Better mask management during io
+
  Revision 1.81  2006/02/16 19:29:20  fmazzant
  transfer of Export_3ds.h, Export_obj.h, Io_3ds_obj_material.h from Meshlab to vcg
 
@@ -152,7 +155,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	}
 	else if (formatName.toUpper() == tr("OFF"))
 	{
-		int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str());
+		int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)  // OFFCodes enum is protected
 		{
 			QMessageBox::warning(parent, tr("OFF Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
@@ -225,9 +228,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
 	if (cb != NULL)	(*cb)(99, "Done");
-
-	m.storeVertexColor();
-	m.mask = mask;				// store mask into model structure
 
 	return true;
 }
