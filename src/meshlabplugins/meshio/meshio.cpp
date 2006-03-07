@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.83  2006/03/07 13:24:52  cignoni
+ moved import_obj to vcg library
+
  Revision 1.82  2006/03/07 10:47:55  cignoni
  Better mask management during io
 
@@ -57,14 +60,13 @@
 
 #include "meshio.h"
 
-#include "import_obj.h"
-
 #include <lib3ds/file.h>
 #include "import_3ds.h"
 #include <wrap/io_trimesh/export_3ds.h>
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/import_stl.h>
+#include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/import_off.h>
 
 #include <vcg/complex/trimesh/update/bounding.h>
@@ -104,7 +106,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 
 	if(formatName.toUpper() == tr("OBJ"))
 	{
-		vcg::tri::io::ObjInfo oi;	
+    vcg::tri::io::ImporterOBJ<CMeshO>::Info oi;	
 		oi.cb = cb;
 		if (!vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
 			return false;
