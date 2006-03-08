@@ -15,5 +15,21 @@ La funzione ColorizeByEqualizedQuality prende come parametro un oggetto di tipo 
 [Smooth color]
 Si tratta semplicemente dell'algoritmo di smoothing presente in VCG applicato però al colore per vertice che viene mediato con quello dei vertici adiacenti.
 
+[Shaders]
+All'avvio dell'applicazione vengono analizzati i file .gdp (il formato xml di ShaderDesigner) che rappresentano le informazioni relative agli shader.
+Per ogni shader vengono salvati in una struttura dati i seguenti elementi:
+- path Vertex e Fragment Program
+- path delle eventuali texture utilizzate e relative variabili 
+- valori dello stato OpenGL che lo shader richiede per il rendering
+- nomi e parametri delle uniform variables 
 
+Al momento della chiamata di uno shader vengono compilati i Vertex e Fragment Program. In seguito si procede al caricamento da file delle texture con i relativi parametri.
+Per ogni fase di rendering dell'applicazione si procede all'attivazione delle texture precedentemente utilizzate e si impostano tutte le variabili di stato OpenGL e tutte le uniform variables con i valori attuali.
 
+Viene inoltre creato dinamicamente un dialogo che contiene cinque distinte tab:
+1) nella prima vengono aggiunti, per ogni uniform variable, i widget ad essa relativi in modo da consentirne la modifica come specificato all'interno del file .gdp (modifica diretta via campo di testo, con slider o da dialogo di selezione del colore).
+2) nella seconda tab vengono elencate le eventuali texture utilizzate e caricate dallo shader con i relativi path.
+Qui è possibile cambiarle sia impostando direttamente il percorso nella casella di testo, sia utilizzando il tasto Browse per selezionare il file relativo alla nuova texture.
+3) nella terza tab vengono elencate tutte le variabili di stato OpenGL con i valori che lo shader ha dichiarato all'interno del file gdp
+4) In questa tab viene mostrato il codice relativo al Vertex Program
+5) In questa tab viene mostrato il codice relativo al Fragment Program
