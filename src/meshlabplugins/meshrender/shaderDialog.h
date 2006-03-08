@@ -29,8 +29,11 @@ private:
 		ShaderInfo * shaderInfo;
 		QSignalMapper *colorSignalMapper;
 		QSignalMapper *valueSignalMapper;
-		std::map<QString, QLabel*> labels;
+		QSignalMapper *textLineSignalMapper;
+		QSignalMapper *textButtonSignalMapper;
+    std::map<QString, QLabel*> labels;
 		std::map<QString, QSlider*> sliders;
+		std::vector<QLineEdit*> textLineEdits;
 		std::map<QString, QLineEdit*> lineEdits;
     Ui::ShaderDialogClass ui;
 
@@ -38,6 +41,9 @@ private slots:
 	void valuesChanged(const QString &);
 	void setColorValue(const QString &);
 	void setColorMode(int);
+	void changeTexturePath(int);
+	void browseTexturePath(int);
+	void reloadTexture(int i);
 		
 };
 

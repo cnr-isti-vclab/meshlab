@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.16  2006/03/08 17:26:13  ggangemi
+added texture tab
+
 Revision 1.15  2006/02/27 05:02:01  ggangemi
 Added texture support
 
@@ -112,7 +115,7 @@ void MeshShaderRenderPlugin::initActionList() {
 							if (!child.isNull()) {
 								//first child of "Filenames" is "Filename0"
 								child = child.firstChild();
-								si.vpFile =	(child.toElement()).attribute("VertexProgram", "");
+								si.vpFile =	shadersDir.absoluteFilePath((child.toElement()).attribute("VertexProgram", ""));
 							}
 						}
 
@@ -124,7 +127,7 @@ void MeshShaderRenderPlugin::initActionList() {
 							if (!child.isNull()) {
 								//first child of "Filenames" is "Filename0"
 								child = child.firstChild();
-								si.fpFile =	(child.toElement()).attribute("FragmentProgram", "");
+								si.fpFile =	shadersDir.absoluteFilePath((child.toElement()).attribute("FragmentProgram", ""));
 							}
 						}	
 
@@ -215,6 +218,9 @@ void MeshShaderRenderPlugin::initActionList() {
 
 						
 						//Textures
+						
+						shadersDir.cdUp();
+						shadersDir.cd("textures");
 						elem = root.firstChildElement("TexturedUsed");
 						if (!elem.isNull()) {
 							QDomNode unif = elem.firstChild();
@@ -222,7 +228,7 @@ void MeshShaderRenderPlugin::initActionList() {
 								QDomElement unifElem = unif.toElement();
 								TextureInfo tInfo;
 
-								tInfo.path = (unifElem.attribute("Filename", ""));								
+								tInfo.path = shadersDir.absoluteFilePath((unifElem.attribute("Filename", "")));								
 								tInfo.MinFilter = (unifElem.attribute("MinFilter", 0)).toInt();
 								tInfo.MagFilter = (unifElem.attribute("MagFilter", 0)).toInt();
 								tInfo.Target = (unifElem.attribute("Target", 0)).toInt();
@@ -234,6 +240,10 @@ void MeshShaderRenderPlugin::initActionList() {
 								unif = unif.nextSibling();
 							}
 						}
+						shadersDir.cdUp();
+						shadersDir.cd("shaders");
+
+						//End Textures
 
 						shaders[fileName] = si;
 
@@ -262,22 +272,8 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLAr
 				v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
 				f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 
-
-				QDir shadersDir = QDir(qApp->applicationDirPath());
-#if defined(Q_OS_WIN)
-				if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release")
-					shadersDir.cdUp();
-#elif defined(Q_OS_MAC)
-				if (shadersDir.dirName() == "MacOS") {
-					shadersDir.cdUp();
-					shadersDir.cdUp();
-					shadersDir.cdUp();
-				}
-#endif
-				shadersDir.cd("shaders");
-
-				char *fs = textFileRead(shadersDir.absoluteFilePath(shaders[a->text()].fpFile).toLocal8Bit().data());
-				char *vs = textFileRead(shadersDir.absoluteFilePath(shaders[a->text()].vpFile).toLocal8Bit().data());
+				char *fs = textFileRead((shaders[a->text()].fpFile).toLocal8Bit().data());
+				char *vs = textFileRead((shaders[a->text()].vpFile).toLocal8Bit().data());
 
 				const char * vv = vs;
 				const char * ff = fs;
@@ -320,14 +316,13 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLAr
 					}
 
 					//Textures
-					shadersDir.cdUp();
-					shadersDir.cd("textures");
+				
 
 					std::vector<TextureInfo>::iterator tIter = shaders[a->text()].textureInfo.begin();
 					while (tIter != shaders[a->text()].textureInfo.end()) {
 						glEnable(tIter->Target);
 						QImage img, imgScaled, imgGL;
-						img.load(shadersDir.absoluteFilePath(tIter->path));
+						img.load(tIter->path);
 						// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
 						int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
 						int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
@@ -424,11 +419,12 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GL
 		std::vector<TextureInfo>::iterator tIter = shaders[a->text()].textureInfo.begin();
 		while (tIter != shaders[a->text()].textureInfo.end()) {
 			glActiveTexture(n);
+			glEnable(tIter->Target);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);	
 
 			glBindTexture( tIter->Target, tIter->tId );
 			rm.textureMode = GLW::TMPerVert;
-			glEnable(tIter->Target);
+			
 			++tIter;
 			++n;
 		}

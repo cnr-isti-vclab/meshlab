@@ -108,8 +108,47 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, RenderMode &rm, QWidg
 	connect(colorSignalMapper, SIGNAL(mapped(const QString &)), this, SLOT(setColorValue(const QString &)));
 	connect(valueSignalMapper, SIGNAL(mapped(const QString &)), this, SLOT(valuesChanged(const QString &)));
 
+	//Texture Tab Section
+
+	if (shaderInfo->textureInfo.size() > 0) {
+		textLineSignalMapper = new QSignalMapper(this);
+		textButtonSignalMapper = new QSignalMapper(this);
+
+
+		QGridLayout * qgridTexTab = new QGridLayout(ui.textureTab);
+		qgridTexTab->setColumnMinimumWidth(0, 45);
+		qgridTexTab->setColumnMinimumWidth(1, 40);
+
+		row = 0;
+		std::vector<TextureInfo>::iterator textIter;
+		for (textIter = shaderInfo->textureInfo.begin(); textIter != shaderInfo->textureInfo.end(); ++textIter) {
+			QLabel *textNameLabel = new QLabel(this);
+			QLineEdit *textValueEdit = new QLineEdit(this);
+			QPushButton * textButton = new QPushButton(this);
+			textButton->setText("Browse");
+			textNameLabel->setText(tr("Texture Unit %1:").arg(row));
+			textValueEdit->setText(textIter->path);
+			qgridTexTab->addWidget(textNameLabel, row, 0);
+			qgridTexTab->addWidget(textValueEdit, row, 1);
+			qgridTexTab->addWidget(textButton, row, 2);
+
+
+			connect(textValueEdit, SIGNAL(editingFinished()), textLineSignalMapper, SLOT(map()));
+			textLineSignalMapper->setMapping(textValueEdit,row);
+
+			connect(textButton, SIGNAL(clicked()), textButtonSignalMapper, SLOT(map()));
+			textButtonSignalMapper->setMapping(textButton,row);
+
+			textLineEdits.push_back(textValueEdit);
+			++row;
+		}
+
+		connect(textLineSignalMapper, SIGNAL(mapped(int)), this, SLOT(changeTexturePath(int)));
+		connect(textButtonSignalMapper, SIGNAL(mapped(int)), this, SLOT(browseTexturePath(int)));
+	}
+
 	//OpenGL Status Tab Section
-	
+
 	QGridLayout * qgridGlStatus = new QGridLayout(ui.glTab);
 	qgridGlStatus->setColumnMinimumWidth(0, 45);
 	qgridGlStatus->setColumnMinimumWidth(1, 40);
@@ -119,64 +158,53 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, RenderMode &rm, QWidg
 	for (glIterator = shaderInfo->glStatus.begin(); glIterator != shaderInfo->glStatus.end(); ++glIterator) {
 		QLabel *glVarLabel = new QLabel(this);
 		QLabel *glValueLabel = new QLabel(this);
-	
-	
+
+
 		switch (glIterator->first) {
 			case SHADE:  glVarLabel->setText("glShadeModel"); glValueLabel->setText(glIterator->second); ++row; break;
 			case ALPHA_TEST:  glVarLabel->setText("GL_ALPHA_TEST"); glValueLabel->setText(glIterator->second); ++row; break;
 			case ALPHA_FUNC:  glVarLabel->setText("glAlphaFunc"); glValueLabel->setText(glIterator->second + ", " + shaderInfo->glStatus[ALPHA_CLAMP]); ++row; break;
-			//case ALPHA_CLAMP: used in ALPHA_FUNC
+				//case ALPHA_CLAMP: used in ALPHA_FUNC
 			case BLENDING:  glVarLabel->setText("GL_BLEND"); glValueLabel->setText(glIterator->second); ++row; break;
 			case BLEND_FUNC_SRC:  glVarLabel->setText("glBlendFunc"); glValueLabel->setText(glIterator->second + ", " + shaderInfo->glStatus[BLEND_FUNC_SRC]); ++row; break;
-			//case BLEND_FUNC_DST: used in BLEND_FUNC_SRC
+				//case BLEND_FUNC_DST: used in BLEND_FUNC_SRC
 			case BLEND_EQUATION: glVarLabel->setText("glBlendEquation"); glValueLabel->setText(glIterator->second); ++row; break;
 			case DEPTH_TEST: glVarLabel->setText("GL_DEPTH_TEST"); glValueLabel->setText(glIterator->second); ++row; break;
 			case DEPTH_FUNC: glVarLabel->setText("glDepthFunc"); glValueLabel->setText(glIterator->second); ++row; break;
-			//case CLAMP_NEAR:
-			//case CLAMP_FAR:
+				//case CLAMP_NEAR:
+				//case CLAMP_FAR:
 			case CLEAR_COLOR_R: glVarLabel->setText("glClearColor"); glValueLabel->setText(glIterator->second + ", " +
-																																										 shaderInfo->glStatus[CLEAR_COLOR_G] + ", " +
-																																										 shaderInfo->glStatus[CLEAR_COLOR_B] + ", " +
-																																										 shaderInfo->glStatus[CLEAR_COLOR_A]); ++row; break;
-			//case CLEAR_COLOR_G: used in CLEAR_COLOR_R
-			//case CLEAR_COLOR_B: used in CLEAR_COLOR_R
-			//case CLEAR_COLOR_A: used in CLEAR_COLOR_R
+														shaderInfo->glStatus[CLEAR_COLOR_G] + ", " +
+														shaderInfo->glStatus[CLEAR_COLOR_B] + ", " +
+														shaderInfo->glStatus[CLEAR_COLOR_A]); ++row; break;
+				//case CLEAR_COLOR_G: used in CLEAR_COLOR_R
+				//case CLEAR_COLOR_B: used in CLEAR_COLOR_R
+				//case CLEAR_COLOR_A: used in CLEAR_COLOR_R
 		}
 
 		qgridGlStatus->addWidget(glVarLabel, row, 0);
 		qgridGlStatus->addWidget(glValueLabel, row, 1);
-		
-	}
-    
-	//Vertex and Fragment Program Tabs Section
-	QDir shadersDir = QDir(qApp->applicationDirPath());
-#if defined(Q_OS_WIN)
-	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release")
-		shadersDir.cdUp();
-#elif defined(Q_OS_MAC)
-	if (shadersDir.dirName() == "MacOS") {
-		shadersDir.cdUp();
-		shadersDir.cdUp();
-		shadersDir.cdUp();
-	}
-#endif
-	shadersDir.cd("shaders");
-  QFile qf;
-  QTextStream ts(&qf);
-  
-  qf.setFileName(shadersDir.path()+QString("/")+shaderInfo->vpFile);
-  if (!qf.open(QIODevice::ReadOnly | QIODevice::Text) )
-      QMessageBox::critical(this,"Opengl Shader" ,"unable to open file");
-  ui.vpTextBrowser->insertPlainText(ts.readAll());
-  qf.close();
-  
-  qf.setFileName(shadersDir.path()+QString("/")+shaderInfo->fpFile);
-  if (!qf.open(QIODevice::ReadOnly | QIODevice::Text) )
-      QMessageBox::critical(this,"Opengl Shader" ,"unable to open file");
-  ui.fpTextBrowser->insertPlainText(ts.readAll());
-  qf.close();
 
-  //End of Vertex and Fragment Program Tabs Section
+	}
+
+	//Vertex and Fragment Program Tabs Section
+	
+	QFile qf;
+	QTextStream ts(&qf);
+
+	qf.setFileName(shaderInfo->vpFile);
+	if (!qf.open(QIODevice::ReadOnly | QIODevice::Text) )
+		QMessageBox::critical(this,"Opengl Shader" ,"unable to open file");
+	ui.vpTextBrowser->insertPlainText(ts.readAll());
+	qf.close();
+
+	qf.setFileName(shaderInfo->fpFile);
+	if (!qf.open(QIODevice::ReadOnly | QIODevice::Text) )
+		QMessageBox::critical(this,"Opengl Shader" ,"unable to open file");
+	ui.fpTextBrowser->insertPlainText(ts.readAll());
+	qf.close();
+
+	//End of Vertex and Fragment Program Tabs Section
 
 
 	this->setWindowFlags(Qt::WindowStaysOnTopHint);
@@ -256,5 +284,64 @@ void ShaderDialog::setColorMode(int state) {
 	} else {
 		rendMode->colorMode = GLW::CMNone;
 	}
+	glarea->updateGL();
+}
+
+void ShaderDialog::changeTexturePath(int i) {
+	shaderInfo->textureInfo[i].path = textLineEdits[i]->text();
+	reloadTexture(i);
+}
+
+void ShaderDialog::browseTexturePath(int i) {
+	QFileDialog fd(0,"Choose new texture");
+
+	QDir shadersDir = QDir(qApp->applicationDirPath());
+#if defined(Q_OS_WIN)
+	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release")
+		shadersDir.cdUp();
+#elif defined(Q_OS_MAC)
+	if (shadersDir.dirName() == "MacOS") {
+		shadersDir.cdUp();
+		shadersDir.cdUp();
+		shadersDir.cdUp();
+	}
+#endif
+	shadersDir.cd("textures");
+	
+	fd.setDirectory(shadersDir);
+	fd.move(500, 100);
+
+	QStringList newPath;
+	if (fd.exec())
+	{
+		newPath = fd.selectedFiles();
+		textLineEdits[i]->setText(newPath.at(0));
+		shaderInfo->textureInfo[i].path = newPath.at(0);
+		reloadTexture(i);
+	} 
+	
+}
+
+void ShaderDialog::reloadTexture(int i) {
+	glDeleteTextures( 1, &shaderInfo->textureInfo[i].tId);
+
+	glEnable(shaderInfo->textureInfo[i].Target);
+	QImage img, imgScaled, imgGL;
+	img.load(shaderInfo->textureInfo[i].path);
+	// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
+	int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
+	int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
+	imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+	imgGL=QGLWidget::convertToGLFormat(imgScaled);
+
+	glGenTextures( 1, &(shaderInfo->textureInfo[i].tId) );
+	glBindTexture( shaderInfo->textureInfo[i].Target, shaderInfo->textureInfo[i].tId );
+	glTexImage2D( shaderInfo->textureInfo[i].Target, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
+	glTexParameteri( shaderInfo->textureInfo[i].Target, GL_TEXTURE_MIN_FILTER, shaderInfo->textureInfo[i].MinFilter );
+	glTexParameteri( shaderInfo->textureInfo[i].Target, GL_TEXTURE_MAG_FILTER, shaderInfo->textureInfo[i].MagFilter ); 
+	glTexParameteri( shaderInfo->textureInfo[i].Target, GL_TEXTURE_WRAP_S, shaderInfo->textureInfo[i].WrapS ); 
+	glTexParameteri( shaderInfo->textureInfo[i].Target, GL_TEXTURE_WRAP_T, shaderInfo->textureInfo[i].WrapT ); 
+	glTexParameteri( shaderInfo->textureInfo[i].Target, GL_TEXTURE_WRAP_R, shaderInfo->textureInfo[i].WrapR ); 
+
 	glarea->updateGL();
 }

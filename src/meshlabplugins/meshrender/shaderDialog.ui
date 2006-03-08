@@ -41,77 +41,6 @@
   <property name="windowIcon" >
    <iconset>..\..\..\..\..\meshlab\src\meshlab\images\eye16.png</iconset>
   </property>
-  <widget class="QTabWidget" name="tabWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>421</width>
-     <height>301</height>
-    </rect>
-   </property>
-   <property name="currentIndex" >
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="uvTab" >
-    <attribute name="title" >
-     <string>Uniform Variables</string>
-    </attribute>
-    <widget class="QWidget" name="varListLayer" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>171</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" >
-      <property name="margin" >
-       <number>0</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="glTab" >
-    <attribute name="title" >
-     <string>OpenGL Status</string>
-    </attribute>
-   </widget>
-   <widget class="QWidget" name="vpTab" >
-    <attribute name="title" >
-     <string>Vertex Program</string>
-    </attribute>
-    <widget class="QTextBrowser" name="vpTextBrowser" >
-     <property name="geometry" >
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>421</width>
-       <height>281</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="fpTab" >
-    <attribute name="title" >
-     <string>Fragment Program</string>
-    </attribute>
-    <widget class="QTextBrowser" name="fpTextBrowser" >
-     <property name="geometry" >
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>421</width>
-       <height>281</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-  </widget>
   <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
@@ -149,6 +78,82 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QTabWidget" name="tabWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>421</width>
+     <height>301</height>
+    </rect>
+   </property>
+   <property name="currentIndex" >
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="uvTab" >
+    <attribute name="title" >
+     <string>Uniform Variables</string>
+    </attribute>
+    <widget class="QWidget" name="varListLayer" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>171</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="textureTab" >
+    <attribute name="title" >
+     <string>Textures</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="glTab" >
+    <attribute name="title" >
+     <string>OpenGL Status</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="vpTab" >
+    <attribute name="title" >
+     <string>Vertex Program</string>
+    </attribute>
+    <widget class="QTextBrowser" name="vpTextBrowser" >
+     <property name="geometry" >
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>421</width>
+       <height>281</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="fpTab" >
+    <attribute name="title" >
+     <string>Fragment Program</string>
+    </attribute>
+    <widget class="QTextBrowser" name="fpTextBrowser" >
+     <property name="geometry" >
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>421</width>
+       <height>281</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11" />
