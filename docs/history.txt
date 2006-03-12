@@ -28,6 +28,62 @@
 ==============================================================================
 
 ------------------------------------------------------------------------------
+- Meshlab v0.6
+------------------------------------------------------------------------------
+
+  ** NEW FEATURES/PATCHES **
+
+* General issues
+  - Slight code restyling in order to reduce the lines of code
+  - Command line execution now works correctly
+  - Better managing of optional mesh datas
+  - Better color initialization
+  
+* Plugin System
+  - Decoration:
+      Thicked axes with arrows and axes names
+      Quoted Box
+      Normals restyled
+  - Filters:
+      Sub-division surface
+      Remove triangles above threshold
+      Apply Transformation
+      Color non-manifold
+  - Colorize:
+      Curvature code restyled
+      RMS curvature
+      Absolute curvature
+      By Quality
+      Added restore color function
+  - Shaders:
+      Import code restyled and optimized
+      Runtime dynamic dialog created to change shader properties
+  - Import/Export:
+      .3DS Import/Export full supported (via lib3ds)
+
+* User Interface
+  - Reimplemented double-sided lighting
+  - Added some new shortcuts
+  - Optimizations in ChangeFOV (Vertigo)
+  - Solved OpenGL bugs on FLAT_LINES
+  - Solved bug in trackball visualization
+  - Light direction can be rotated
+  - Better scalable fonts
+  - Quick help on screen (Press F1)
+  - About plugin restyled
+  
+
+  ** KNOWN BUGS **
+
+* User Interface
+  None reported
+
+* Plugin System
+  None reported
+  
+
+
+------------------------------------------------------------------------------
 - Meshlab v0.5
 ------------------------------------------------------------------------------
 
