@@ -49,8 +49,8 @@ CONFIG += stl
 win32:LIBS	+= ../../../code/lib/glew/lib/glew32.lib 
 unix{
 	LIBS		+= -lGLEW
-	QMAKE_CC	 = gcc-3.3
-	QMAKE_CXX	 = g++-3.3
-	QMAKE_LINK	 = gcc-3.3
+	QMAKE_CC	 = gcc
+	QMAKE_CXX	 = g++
+	QMAKE_LINK	 = gcc
 	CONFIG		+= warn_off debug_and_release
 }

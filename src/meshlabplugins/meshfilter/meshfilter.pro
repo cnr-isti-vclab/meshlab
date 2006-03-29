@@ -22,9 +22,9 @@ FORMS         = ui/decimatorDialog.ui ui/transformDialog.ui ../../meshlab/ui/gen
 
 QT += opengl
 unix{
-	QMAKE_CC	 = gcc-3.3
-	QMAKE_CXX	 = g++-3.3
-	QMAKE_LINK	 = gcc-3.3
+	QMAKE_CC	 = gcc
+	QMAKE_CXX	 = g++
+	QMAKE_LINK	 = gcc
 	CONFIG		+= warn_off debug_and_release
 }
 
