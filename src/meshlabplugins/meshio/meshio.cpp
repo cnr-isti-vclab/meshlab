@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.84  2006/03/29 10:05:33  cignoni
+ Added missing include export.obj
+
  Revision 1.83  2006/03/07 13:24:52  cignoni
  moved import_obj to vcg library
 
@@ -63,6 +66,7 @@
 #include <lib3ds/file.h>
 #include "import_3ds.h"
 #include <wrap/io_trimesh/export_3ds.h>
+#include <wrap/io_trimesh/export_obj.h>
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/import_stl.h>
