@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.10  2006/03/29 07:29:50  zifnab1974
+extra typename needed for compilation with gcc 3.4.5
+
 Revision 1.9  2006/02/21 15:30:47  mariolatronico
 removed assert (gave an assertion when no faces was added)
 
@@ -228,7 +231,7 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 				beta = (1.0/(float)k) * (5.0/8.0 - pow((3.0/8.0 + 0.25 * cos(2*PI/k)),2));
 
 			*curr = *curr * (1 - k * beta) ;
-			std::vector<typename MESH_TYPE::CoordType>::iterator iter;
+			typename std::vector<typename MESH_TYPE::CoordType>::iterator iter;
 			for (iter = otherVertVec.begin();
 					 iter != otherVertVec.end();
 					 ++iter) {
