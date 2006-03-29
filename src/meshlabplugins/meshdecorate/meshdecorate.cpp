@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.30  2006/03/29 07:30:21  zifnab1974
+max of float and double is not possible, remove f for gcc 3.4.5
+
 Revision 1.29  2006/02/22 12:24:41  cignoni
 Restructured Quoted Box.
 
@@ -371,7 +374,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 		glVertex(Zero+v*i);
 	glEnd();
 
- 	int neededZeros=ceil(max(0.0f,-log10(tickDist)));
+ 	int neededZeros=ceil(max(0.0,-log10(tickDist)));
 	for(i=firstTick;i<bVal;i+=tickDist)
     gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),gla->getFont());		
 
