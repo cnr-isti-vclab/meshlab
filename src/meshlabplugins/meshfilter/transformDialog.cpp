@@ -26,6 +26,9 @@
 
 /*
 $Log$
+Revision 1.3  2006/03/29 07:30:54  zifnab1974
+use fabs instead of abs for floats, needed for gcc 3.4.5
+
 Revision 1.2  2006/01/31 18:24:44  mariolatronico
 - dial updated only if rotate line edit has non negative numbers.
   This allows negative numbers on rotate line edit
@@ -235,8 +238,8 @@ void TransformDialog::on_mvCenterOriginPB_clicked() {
 // scale to unit box
 void TransformDialog::on_scaleUnitPB_clicked() {
 	// get the bounding box longest edge
-	float scale =1.0 / (float)( max(abs(maxBbox[0] - minBbox[0]),
-											max(abs(maxBbox[1] - minBbox[1]), abs(maxBbox[2] - minBbox[2]))));
+	float scale =1.0 / (float)( max(fabs(maxBbox[0] - minBbox[0]),
+											max(fabs(maxBbox[1] - minBbox[1]), fabs(maxBbox[2] - minBbox[2]))));
 	setScale(QString().setNum(scale), QString().setNum(scale), QString().setNum(scale));
 }
 // do the real calculations

@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2006/03/29 07:30:54  zifnab1974
+use fabs instead of abs for floats, needed for gcc 3.4.5
+
 Revision 1.2  2006/01/31 14:44:41  mariolatronico
 removed unused and commented old code
 
@@ -114,13 +117,13 @@ namespace vcg{
 	 Point3f tras = Cmin;
 	 tras.Zero();
 	 if ( Cmin.X() < 0.00000001 ) {
-		 tras.X() =abs( Cmin.X());
+		 tras.X() = fabs( Cmin.X());
 	 }
 	 if ( Cmin.Y() < 0.00000001 ) {
-		 tras.Y() = abs(Cmin.Y());
+		 tras.Y() = fabs(Cmin.Y());
 	 }
 	 if ( Cmin.Z() < 0.00000001 ) {
-		 tras.Z() = abs(Cmin.Z());
+		 tras.Z() = fabs(Cmin.Z());
 	 }
 	 
 	 //Passo di divisione per ogni asse della bounding box
