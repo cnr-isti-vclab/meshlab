@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <GLSLang>
   <Metadata>
     <Author Author="" />
@@ -11,12 +11,12 @@
   </Metadata>
   <VPCount numero="1">
     <Filenames>
-      <Filename0 VertexProgram=".\Hatch.vert" />
+      <Filename0 VertexProgram="Hatch.vert" />
     </Filenames>
   </VPCount>
   <FPCount numero="1">
     <Filenames>
-      <Filename0 FragmentProgram=".\Hatch.frag" />
+      <Filename0 FragmentProgram="Hatch.frag" />
     </Filenames>
   </FPCount>
   <TexturesPlugins NumberOfPlugins="0" />

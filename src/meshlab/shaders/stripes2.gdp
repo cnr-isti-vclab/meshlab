@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <GLSLang>
   <Metadata>
     <Author Author="" />
@@ -11,12 +11,12 @@
   </Metadata>
   <VPCount numero="1">
     <Filenames>
-      <Filename0 VertexProgram=".\stripes2.vert" />
+      <Filename0 VertexProgram="stripes2.vert" />
     </Filenames>
   </VPCount>
   <FPCount numero="1">
     <Filenames>
-      <Filename0 FragmentProgram=".\stripes2.frag" />
+      <Filename0 FragmentProgram="stripes2.frag" />
     </Filenames>
   </FPCount>
   <TexturesPlugins NumberOfPlugins="0" />
