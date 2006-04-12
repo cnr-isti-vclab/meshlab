@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.59  2006/04/12 15:12:18  cignoni
+Added Filter classes (cleaning, meshing etc)
+
 Revision 1.58  2006/02/20 20:52:36  giec
 replace refine and detacher dialog whit GnericELDialog
 
@@ -84,19 +87,26 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 #include "../../meshlab/LogStream.h"
 
 using namespace vcg;
-ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
-	actionList << new QAction(ST(FP_LOOP_SS), this);
-	actionList << new QAction(ST(FP_BUTTERFLY_SS), this);
-	actionList << new QAction(ST(FP_MIDPOINT), this);
-	actionList << new QAction(ST(FP_REMOVE_UNREFERENCED_VERTEX), this);
-	actionList << new QAction(ST(FP_REMOVE_DUPLICATED_VERTEX), this);
-	actionList << new QAction(ST(FP_REMOVE_NULL_FACES), this);
-	actionList << new QAction(ST(FP_LAPLACIAN_SMOOTH), this);
-	actionList << new QAction(ST(FP_REORIENT), this);
-	actionList << new QAction(ST(FP_DETACHER), this);
-	actionList << new QAction(ST(FP_DECIMATOR), this);
-	actionList << new QAction(ST(FP_INVERT_FACES), this);
-	actionList << new QAction(ST(FP_TRANSFORM), this);
+
+ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
+{
+  typeList << FP_LOOP_SS<< 
+    FP_BUTTERFLY_SS<< 
+    FP_REMOVE_UNREFERENCED_VERTEX<<
+    FP_REMOVE_DUPLICATED_VERTEX<< 
+    FP_REMOVE_NULL_FACES<<
+    FP_LAPLACIAN_SMOOTH<< 
+    FP_DECIMATOR<< 
+    FP_MIDPOINT<< 
+    FP_REORIENT <<
+    FP_INVERT_FACES<<
+    FP_TRANSFORM<< 
+    FP_REMOVE_SMALL_FACES	;
+  
+  FilterType tt;
+  
+  foreach(tt , types())
+	    actionList << new QAction(ST(tt), this);
 
 	//refineDialog = new RefineDialog();
 	//refineDialog->hide();
@@ -110,35 +120,47 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() {
 	transformDialog->hide();
 }
 
-const QString ExtraMeshFilterPlugin::ST(FilterType filter) {
+const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction *a)
+{
+  switch(ID(a))
+  {
+    case FP_REMOVE_UNREFERENCED_VERTEX :
+    case FP_REMOVE_DUPLICATED_VERTEX :
+    case FP_REMOVE_NULL_FACES :
+    case FP_REMOVE_SMALL_FACES :
+         return FilterClass::Cleaning; 
 
+    default : return FilterClass::Generic;
+  }
+}
+
+
+const ExtraMeshFilterPlugin::FilterType ExtraMeshFilterPlugin::ID(QAction *a)
+{
+ foreach( FilterType tt, types())
+     if( a->text() == ST(tt) ) return tt;
+ assert(0);
+ return FP_LOOP_SS;
+}
+
+
+const QString ExtraMeshFilterPlugin::ST(FilterType filter) 
+{
  switch(filter)
   {
-	case FP_LOOP_SS :
-		return QString("Loop Subdivision Surfaces");
-	case FP_BUTTERFLY_SS :
-		return QString("Butterfly Subdivision Surfaces");
-	case FP_REMOVE_UNREFERENCED_VERTEX :
-		return QString("Remove Unreferenced Vertex");
-	case FP_REMOVE_DUPLICATED_VERTEX :
-		return QString("Remove Duplicated Vertex");
-	case FP_REMOVE_NULL_FACES :
-		return QString("Remove Null Faces");
-	case FP_LAPLACIAN_SMOOTH :
-		return QString("Laplacian Smooth");
-	case FP_DECIMATOR :
-		return QString("Clustering decimation");
-	case FP_MIDPOINT :
-		return QString("Midpoint Subdivision Surfaces");
-	case FP_REORIENT :
-		return QString("Re-oriented");
-	case FP_INVERT_FACES:
-		return QString("Invert Faces");
-	case FP_TRANSFORM:
-		return QString("Apply Transform");
-	case FP_DETACHER:
-		return QString("Remove triangle above threshold");
-
+	case FP_LOOP_SS :		                  return QString("Loop Subdivision Surfaces");
+	case FP_BUTTERFLY_SS :								return QString("Butterfly Subdivision Surfaces");
+	case FP_REMOVE_UNREFERENCED_VERTEX :	return QString("Remove Unreferenced Vertex");
+	case FP_REMOVE_DUPLICATED_VERTEX :		return QString("Remove Duplicated Vertex");
+	case FP_REMOVE_NULL_FACES :        		return QString("Remove Null Faces");
+	case FP_REMOVE_SMALL_FACES:						return QString("Remove faces wrt size");
+  case FP_LAPLACIAN_SMOOTH :						return QString("Laplacian Smooth");
+	case FP_DECIMATOR :	                	return QString("Clustering decimation");
+	case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
+	case FP_REORIENT :	                  return QString("Re-oriented");
+	case FP_INVERT_FACES:									return QString("Invert Faces");
+	case FP_TRANSFORM:	                	return QString("Apply Transform");
+	
 	default: assert(0);
   }
   return QString("error!");
@@ -160,82 +182,60 @@ QList<QAction *> ExtraMeshFilterPlugin::actions() const {
 	return actionList;
 }
 
-
 const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 {
 	static ActionInfo ai;
-
-	if( action->text() == ST(FP_LOOP_SS) )
-		{
-			ai.Help = tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");
-			ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
-		}
-	if( action->text() == ST(FP_BUTTERFLY_SS) )
-	  {
-			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");
+  switch(ID(action))
+  {
+  case FP_LOOP_SS :
+      ai.Help      = tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");
+      ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
+		     break;
+  case FP_BUTTERFLY_SS : 
+ 			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");
 			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
-		}
-	if( action->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
-		{
+		     break;
+  case FP_REMOVE_UNREFERENCED_VERTEX : 
 			ai.Help = tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
 			ai.ShortHelp = tr("Remove Unreferenced Vertexes");
-
-		}
-  if( action->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
-		{
+		     break;
+  case FP_REMOVE_DUPLICATED_VERTEX : 
 			ai.Help = tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
 			ai.ShortHelp = tr("Remove Duplicated Vertexes");
-		}
-	if(action->text() == ST(FP_REMOVE_NULL_FACES) )
-		{
+		     break;
+  case FP_REMOVE_NULL_FACES : 
 			ai.Help = tr("Removes faces with area equal to zero");
 			ai.ShortHelp = tr("Remove Null Faces");
-
-		}
-	if(action->text() == ST(FP_LAPLACIAN_SMOOTH) )
-		{
+		     break;
+  case FP_LAPLACIAN_SMOOTH : 
 			ai.Help = tr("For each vertex it calculates the average position with nearest vertex");
 			ai.ShortHelp = tr("Smooth the mesh surface");
-
-		}
-
- 	if(action->text() == ST(FP_DECIMATOR) )
- 		{
+		     break;
+  case FP_DECIMATOR : 
 			ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
 			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
-
- 		}
-
-	if(action->text() == ST(FP_MIDPOINT) )
- 		{
+		     break;
+  case FP_MIDPOINT : 
 			ai.Help = tr("Splits every edge in two");
 			ai.ShortHelp = tr("Apply Midpoint's Subdivision Surface algorithm");
-
- 		}
-
-	if(action->text() == ST(FP_REORIENT) )
- 		{
+		     break;
+  case FP_REORIENT : 
 			ai.Help = tr("Re-oriented the adjacencies of the face of the mesh");
 			ai.ShortHelp = tr("Re-oriented the face");
-
- 		}
-
-	if(action->text() == ST(FP_INVERT_FACES) )
- 		{
+		     break;
+  case FP_INVERT_FACES : 
 			ai.Help = tr("Invert faces orentation, flip the normal of the mesh");
 			ai.ShortHelp = tr("Invert faces orentation");
- 		}
-	if(action->text() == ST(FP_TRANSFORM) )
- 		{
+		     break;
+  case FP_TRANSFORM : 
 			ai.Help = tr("Apply transformation, you can rotate, translate or scale the mesh");
 			ai.ShortHelp = tr("Apply Transform");
- 		}
-		if(action->text() == ST(FP_DETACHER) )
- 		{
+		     break;
+  case FP_REMOVE_SMALL_FACES : 
 			ai.Help = tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");
 			ai.ShortHelp = tr("Remove triangle with edge greater than a threshold");
- 		}
-
+		     break;
+  }
    return ai;
 }
 
@@ -421,7 +421,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, QWidget *
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
 
-	if (filter->text() == ST(FP_DETACHER) ) {
+	if (filter->text() == ST(FP_REMOVE_SMALL_FACES) ) {
 		float diagonale = m.cm.bbox.Diag();
 		Histogram<float> *histo= new Histogram<float>();
 		histo->SetRange( 0, diagonale, 10000);

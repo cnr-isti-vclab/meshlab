@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.51  2006/04/12 15:12:18  cignoni
+Added Filter classes (cleaning, meshing etc)
+
 Revision 1.50  2006/02/25 13:43:39  ggangemi
 Action "None" is now exported from MeshRenderPlugin
 
@@ -295,6 +298,8 @@ void MainWindow::createMenus()
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addSeparator();
+	filterMenuSelect = filterMenu->addMenu(tr("Select"));
+	filterMenuClean = filterMenu->addMenu(tr("Clean"));
 
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
@@ -395,8 +400,23 @@ void MainWindow::loadPlugins()
 			
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
-				addToMenu(iFilter->actions(), filterMenu, SLOT(applyFilter()));
-
+      { 
+        QAction *filterAction;
+        foreach(filterAction, iFilter->actions())
+        {
+          connect(filterAction,SIGNAL(triggered()),this,SLOT(applyFilter()));
+		      switch(iFilter->getClass(filterAction))
+          {
+            case MeshFilterInterface::FilterClass::Selection : 
+              		filterMenuSelect->addAction(filterAction); break;
+            case MeshFilterInterface::FilterClass::Cleaning : 
+              		filterMenuClean->addAction(filterAction); break;
+            case MeshFilterInterface::FilterClass::Generic : 
+            default:
+              		filterMenu->addAction(filterAction); break;
+          }  
+        }
+       }
 		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
 			if (iIO)
 				meshIOPlugins.push_back(iIO);
@@ -413,7 +433,7 @@ void MainWindow::loadPlugins()
 
 			MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
 			if (iEdit)
-			  addToMenu(iEdit->actions(), renderMenu, SLOT(applyEditMode()));
+			  addToMenu(iEdit->actions(), editMenu, SLOT(applyEditMode()));
 
       pluginFileNames += fileName;
 		}

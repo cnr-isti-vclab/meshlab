@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.40  2006/04/12 15:12:18  cignoni
+Added Filter classes (cleaning, meshing etc)
+
 Revision 1.39  2006/02/21 17:25:57  ggangemi
 RenderMode is now passed to MeshRenderInterface::Init()
 
@@ -207,9 +210,12 @@ public:
 class MeshFilterInterface
 {
 public:
+  	enum FilterClass { Generic, Selection, Cleaning, Subdivision} ;
+
     virtual ~MeshFilterInterface() {}
 		virtual QList<QAction *> actions() const = 0;
     virtual const ActionInfo &Info(QAction *)=0;
+    virtual const FilterClass getClass(QAction *) {return FilterClass::Generic;};
     virtual const PluginInfo &Info()=0;
 	virtual void setLog(GLLogStream* )=0;
 		virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, QWidget * /*parent*/, vcg::CallBackPos * /*cb*/) = 0;

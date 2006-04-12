@@ -20,6 +20,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.28  2006/04/12 15:12:18  cignoni
+Added Filter classes (cleaning, meshing etc)
+
 Revision 1.27  2006/02/21 15:24:47  mariolatronico
 case typo on #include
 
@@ -65,17 +68,29 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 		 - FP -> Filter Plugin
 		 - name of the plugin separated by _
 	*/
-	enum FilterType { FP_LOOP_SS, FP_BUTTERFLY_SS, FP_REMOVE_UNREFERENCED_VERTEX,
-										FP_REMOVE_DUPLICATED_VERTEX, FP_REMOVE_NULL_FACES,
-										FP_LAPLACIAN_SMOOTH, FP_DECIMATOR, FP_MIDPOINT, FP_REORIENT ,FP_INVERT_FACES,
-										FP_TRANSFORM, FP_DETACHER	} ;
-	const QString ST(FilterType filter);
+	enum FilterType { FP_LOOP_SS, 
+                    FP_BUTTERFLY_SS, 
+                    FP_REMOVE_UNREFERENCED_VERTEX,
+										FP_REMOVE_DUPLICATED_VERTEX, 
+                    FP_REMOVE_NULL_FACES,
+										FP_LAPLACIAN_SMOOTH, 
+                    FP_DECIMATOR, 
+                    FP_MIDPOINT, 
+                    FP_REORIENT ,
+                    FP_INVERT_FACES,
+										FP_TRANSFORM, 
+                    FP_REMOVE_SMALL_FACES	} ;
 
+	const QString ST(FilterType filter);
+  const FilterType ID(QAction *a);
+
+  virtual QList<FilterType> &types() { return typeList;}
 
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin();
 	virtual const ActionInfo &Info(QAction *);
 	virtual const PluginInfo &Info();
+  virtual const FilterClass getClass(QAction *);
 
 	virtual QList<QAction *> actions() const;
 	bool applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;
@@ -83,6 +98,8 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 protected:
 	GLLogStream *log;
 	QList <QAction *> actionList;
+	QList <FilterType> typeList;
+
 //	RefineDialog *refineDialog;
 	DecimatorDialog *decimatorDialog;
 	TransformDialog *transformDialog;

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.62  2006/04/12 15:12:18  cignoni
+Added Filter classes (cleaning, meshing etc)
+
 Revision 1.61  2006/02/17 11:17:23  glvertex
 - Moved closeAction in FileMenu
 - Minor changes
@@ -158,8 +161,10 @@ private:
 	///////// Menus ///////////////
 	QMenu *fileMenu;
 	QMenu *filterMenu;
+	QMenu *filterMenuSelect;
+  QMenu *filterMenuClean;
 	QMenu *editMenu;
-	//Render Menu and SubMenu ////
+  //Render Menu and SubMenu ////
 	QMenu *shadersMenu;
 	QMenu *renderMenu;
 	QMenu *renderModeMenu;
