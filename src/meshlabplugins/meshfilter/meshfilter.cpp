@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.60  2006/04/18 06:57:35  zifnab1974
+syntax errors for gcc 3.4.5 resolved
+
 Revision 1.59  2006/04/12 15:12:18  cignoni
 Added Filter classes (cleaning, meshing etc)
 
@@ -128,9 +131,9 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_REMOVE_DUPLICATED_VERTEX :
     case FP_REMOVE_NULL_FACES :
     case FP_REMOVE_SMALL_FACES :
-         return FilterClass::Cleaning; 
+         return MeshFilterInterface::Cleaning; 
 
-    default : return FilterClass::Generic;
+    default : return MeshFilterInterface::Generic;
   }
 }
 

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.34  2006/04/18 06:57:35  zifnab1974
+syntax errors for gcc 3.4.5 resolved
+
 Revision 1.33  2006/04/12 15:12:18  cignoni
 Added Filter classes (cleaning, meshing etc)
 
@@ -383,7 +386,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 		glVertex(Zero+v*i);
 	glEnd();
 
- 	int neededZeros=ceil(max(0.0f,-log10(tickDist)));
+ 	int neededZeros=ceil(max(0.0,-log10(tickDist)));
 	for(i=firstTick;i<bVal;i+=tickDist)
     gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),gla->getFont());		
 

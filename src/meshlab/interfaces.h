@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.41  2006/04/18 06:57:34  zifnab1974
+syntax errors for gcc 3.4.5 resolved
+
 Revision 1.40  2006/04/12 15:12:18  cignoni
 Added Filter classes (cleaning, meshing etc)
 
@@ -215,7 +218,7 @@ public:
     virtual ~MeshFilterInterface() {}
 		virtual QList<QAction *> actions() const = 0;
     virtual const ActionInfo &Info(QAction *)=0;
-    virtual const FilterClass getClass(QAction *) {return FilterClass::Generic;};
+    virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Generic;};
     virtual const PluginInfo &Info()=0;
 	virtual void setLog(GLLogStream* )=0;
 		virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, QWidget * /*parent*/, vcg::CallBackPos * /*cb*/) = 0;

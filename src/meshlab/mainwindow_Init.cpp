@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.52  2006/04/18 06:57:34  zifnab1974
+syntax errors for gcc 3.4.5 resolved
+
 Revision 1.51  2006/04/12 15:12:18  cignoni
 Added Filter classes (cleaning, meshing etc)
 
@@ -407,11 +410,11 @@ void MainWindow::loadPlugins()
           connect(filterAction,SIGNAL(triggered()),this,SLOT(applyFilter()));
 		      switch(iFilter->getClass(filterAction))
           {
-            case MeshFilterInterface::FilterClass::Selection : 
+            case MeshFilterInterface::Selection : 
               		filterMenuSelect->addAction(filterAction); break;
-            case MeshFilterInterface::FilterClass::Cleaning : 
+            case MeshFilterInterface::Cleaning : 
               		filterMenuClean->addAction(filterAction); break;
-            case MeshFilterInterface::FilterClass::Generic : 
+            case MeshFilterInterface::Generic : 
             default:
               		filterMenu->addAction(filterAction); break;
           }  
