@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.35  2006/04/20 16:58:51  cignoni
+Disambiguated (hopefully for the last time) max(float/double) issue.
+
 Revision 1.34  2006/04/18 06:57:35  zifnab1974
 syntax errors for gcc 3.4.5 resolved
 
@@ -386,7 +389,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 		glVertex(Zero+v*i);
 	glEnd();
 
- 	int neededZeros=ceil(max(0.0,-log10(tickDist)));
+ 	int neededZeros=ceil(max(0.0,-log10(double(tickDist))));
 	for(i=firstTick;i<bVal;i+=tickDist)
     gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),gla->getFont());		
 
