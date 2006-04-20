@@ -24,7 +24,8 @@ SOURCES        = main.cpp \
                  changetexturename.cpp \
                  ../../../sf/wrap/ply/plylib.cpp\
                  ../../../sf/wrap/gui/trackball.cpp\
-                 ../../../sf/wrap/gui/trackmode.cpp
+                 ../../../sf/wrap/gui/trackmode.cpp \
+                 ../../../code/lib/glew/src/glew.c
 
 FORMS          =	ui/customDialog.ui\
 					ui/savesnapshotDialog.ui\						 
@@ -44,9 +45,16 @@ QT           += opengl
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 
+DEFINES += GLEW_STATIC
+
 INCLUDEPATH += . ../../../sf ../../../code/lib/glew/include
 CONFIG += stl
-win32:LIBS	+= ../../../code/lib/glew/lib/glew32.lib 
+#win32:LIBS	+= ../../../code/lib/glew/lib/glew32.lib 
+win32-g++{
+#LIBS	+= glew32
+#LIBPATH += ../../../code/lib/glew/lib/
+}
+
 unix{
 	LIBS		+= -lGLEW
 	QMAKE_CC	 = gcc
