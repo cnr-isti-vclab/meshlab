@@ -20,9 +20,11 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
 /* History
 $Log$
+Revision 1.31  2006/05/25 09:46:38  cignoni
+missing std and and all the other gcc detected syntax errors
+
 Revision 1.30  2006/05/25 06:24:14  cignoni
 Decimator dialog no more necessary
 

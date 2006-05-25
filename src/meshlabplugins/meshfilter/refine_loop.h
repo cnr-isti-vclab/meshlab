@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.11  2006/05/25 09:46:38  cignoni
+missing std and and all the other gcc detected syntax errors
+
 Revision 1.10  2006/03/29 07:29:50  zifnab1974
 extra typename needed for compilation with gcc 3.4.5
 
@@ -111,6 +114,7 @@ small gcc-related compiling issues (typenames,ending cr, initialization order)
 #ifndef __VCGLIB_REFINE_LOOP
 #define __VCGLIB_REFINE_LOOP
 
+#include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/refine.h>
 #include <vcg/space/color4.h>
 #include <iostream>
@@ -251,6 +255,7 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 	{
 		Color4b cc;
 		cc.lerp(c0,c1,0.5f);
+		return cc;
 	}
 
 	template<class FL_TYPE>
@@ -315,7 +320,7 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 				}
 
 				if (cbEven) {
-					(*cbEven)(100 * (float)j / (float)m.fn,"Refining");
+					(*cbEven)(int(100.0f * (float)j / (float)m.fn),"Refining");
 					j++;
 				}
 				even((*fi).V(i)->P(), aux);

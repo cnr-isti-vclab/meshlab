@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.43  2006/05/25 09:46:37  cignoni
+missing std and and all the other gcc detected syntax errors
+
 Revision 1.42  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -237,7 +240,7 @@ public:
     QMap<QString,QVariant>::iterator ii=paramMap.find(name);
     if(ii==paramMap.end()) assert(0);
     assert(ii.value().type()==QVariant::Int);
-    return float(ii.value().toInt());
+    return ii.value().toInt();
   }
 
   inline float getFloat(QString name) { 

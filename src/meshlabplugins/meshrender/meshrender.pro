@@ -10,7 +10,7 @@ DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
-win32:LIBS += QtXml4.lib
+//win32:LIBS += QtXml4.lib
 FORMS		  = shaderDialog.ui
 DEFINES += GLEW_STATIC
 
@@ -28,4 +28,4 @@ contains(TEMPLATE,lib) {
       else:TARGET = $$member(TARGET, 0)d
    }
 }
-QT           += opengl
+QT           += opengl xml

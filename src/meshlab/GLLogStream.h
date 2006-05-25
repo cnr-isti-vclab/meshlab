@@ -24,6 +24,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2006/05/25 09:46:37  cignoni
+missing std and and all the other gcc detected syntax errors
+
 Revision 1.4  2006/01/25 15:37:15  glvertex
 Added variable vertical spacing
 
@@ -67,7 +70,8 @@ class GLArea;
 class GLLogStream : public LogStream
 {
 public:
-	void print(QStringList &list);		// Fills a QStringList with the log entries 
+	virtual ~GLLogStream () {}
+  void print(QStringList &list);		// Fills a QStringList with the log entries 
   void glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font);
   void Save(int Level, const char *filename);
   void Clear() {S.clear();}

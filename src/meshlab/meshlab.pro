@@ -8,6 +8,7 @@ HEADERS        = interfaces.h \
                  saveSnapshotDialog.h \
                  savemaskexporter.h \
                  changetexturename.h \
+                 GenericELDialog.h \
                  ../../../sf/wrap/gui/trackball.h\
                  ../../../sf/wrap/gui/trackmode.h\
                  ../../../sf/wrap/gl/trimesh.h
@@ -30,7 +31,8 @@ FORMS          =	ui/customDialog.ui\
 					ui/savesnapshotDialog.ui\						 
 					ui/aboutDialog.ui \
 					ui/renametexture.ui \
-					ui/savemaskexporter.ui			
+					ui/savemaskexporter.ui \
+					ui/GenericELDialog.ui
 
 
 RESOURCES     = meshlab.qrc

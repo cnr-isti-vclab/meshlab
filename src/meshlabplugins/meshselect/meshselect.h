@@ -48,7 +48,7 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 	virtual const PluginInfo &Info();
   
   virtual const QString ST(FilterType filter);
-  virtual const FilterClass getClass(QAction *) {return FilterClass::Selection;};
+  virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
   virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par){return true;};
   virtual const int getRequirements(QAction *){return 0;};
   virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;

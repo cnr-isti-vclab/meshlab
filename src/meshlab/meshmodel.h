@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.22  2006/05/25 09:46:37  cignoni
+missing std and and all the other gcc detected syntax errors
+
 Revision 1.21  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
