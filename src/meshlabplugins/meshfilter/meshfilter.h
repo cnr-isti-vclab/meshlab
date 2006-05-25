@@ -23,6 +23,9 @@
 /****************************************************************************
 /* History
 $Log$
+Revision 1.30  2006/05/25 06:24:14  cignoni
+Decimator dialog no more necessary
+
 Revision 1.29  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -59,7 +62,7 @@ removed unused variable ActionInfo *ai, added Log history
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include "decimatorDialog.h"
+//#include "decimatorDialog.h"
 #include "transformDialog.h"
 #include "../../meshlab/GenericELDialog.h"
 #include "../../meshlab/GLLogStream.h"
@@ -105,7 +108,7 @@ protected:
 
 
 //	RefineDialog *refineDialog;
-	DecimatorDialog *decimatorDialog;
+//	DecimatorDialog *decimatorDialog;
 	TransformDialog *transformDialog;
 	GenericELDialog *genericELD;
 };

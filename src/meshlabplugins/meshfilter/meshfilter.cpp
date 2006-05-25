@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.62  2006/05/25 06:24:14  cignoni
+Decimator dialog no more necessary
+
 Revision 1.61  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -118,8 +121,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 
 	//refineDialog = new RefineDialog();
 	//refineDialog->hide();
-	decimatorDialog = new DecimatorDialog();
-	decimatorDialog->hide();
+//	decimatorDialog = new DecimatorDialog();
+//	decimatorDialog->hide();
 	
 	genericELD = new GenericELDialog();
 	genericELD->hide();
@@ -173,7 +176,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 //	delete refineDialog;
 	delete genericELD;
-	delete decimatorDialog;
+//	delete decimatorDialog;
 	if (transformDialog)
 		delete transformDialog;
 	for (int i = 0; i < actionList.count() ; i++ ) {
