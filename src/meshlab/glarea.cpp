@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.100  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.99  2006/03/01 10:08:01  ponchio
 WHEEL_DELTA -> WHEEL_STEP
 as WHEEL_DELTA is already defined somewhere.
@@ -72,8 +76,10 @@ GLArea::GLArea(QWidget *parent)
   animMode=AnimNone;
 	iRenderer=0; //Shader support
 	iDecoratorsList=0;
-	currentTime=0;
-	lastTime=0;
+	iEdit=0;
+	currentEditor=0;
+	//currentTime=0;
+	//lastTime=0;
 	deltaTime=0;
 	cfps=0;
   hasToPick=false;
@@ -86,11 +92,10 @@ GLArea::GLArea(QWidget *parent)
 	currentSharder = NULL;
 	lastFilterRef = NULL;
 	mm = NULL;
-	time.start();
 	currLogLevel = -1;
 	
 	// Projection Matrix starting settings
-	objDist = 3.f;
+	//objDist = 3.f;
 	fov = 60;
 	clipRatioFar = 1;
 	clipRatioNear = 1;
@@ -132,6 +137,10 @@ void GLArea::initializeGL()
 
 	trackball_light.center=Point3f(0, 0, 0);
 	trackball_light.radius= 1;
+  GLenum err = glewInit();
+	if (err != GLEW_OK ) {
+    assert(0);
+  }
 }
 
 
@@ -218,7 +227,10 @@ void GLArea::myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GL
 
 void GLArea::paintGL()
 {
-	lastTime=time.elapsed();
+  QTime time;
+  time.start();
+	
+	//int lastTime=time.elapsed();
 	initTexture();
 	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -304,7 +316,7 @@ void GLArea::paintGL()
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		myGluPerspective(fov, (GLdouble) currentWidth / (GLdouble) currentHeight, nearPlane, farPlane);
+		myGluPerspective(fov, (GLdouble) curSiz.width() / (GLdouble) curSiz.height(), nearPlane, farPlane);
 		glMatrixMode(GL_MODELVIEW);
 	}
 
@@ -316,21 +328,32 @@ void GLArea::paintGL()
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
 
-	if(iRenderer && currentSharder) {
+	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
+	              else glDisable(GL_CULL_FACE);
+
+  if(iRenderer && currentSharder) {
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		iRenderer->Render(currentSharder, *mm, rm, this); 
 	}
 
 	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
+	if(iEdit){
+    iEdit->Decorate(currentEditor,*mm,this);
+  }
+
 	if(iRenderer) {
 		glPopAttrib();
 		glUseProgramObjectARB(0);
 	}
 
+  // Draw the selection
+  if(rm.selectedFaces)
+    mm->RenderSelectedFaces();
+
 	if(iDecoratorsList){
 		pair<QAction *,MeshDecorateInterface *> p;
-		foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm,rm,this);}
+		foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm,rm,this,qFont);}
 	}
 
 	// ...and take a snapshot
@@ -378,7 +401,7 @@ void GLArea::paintGL()
 		glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 		cs.lColor.V(3) = 128;	// set half alpha value
 		glColor(cs.lColor);
-		float h = -0.80f;//vcg::math::Min(-0.8f,-.08f*qFont.pointSize());//((.03f * currentHeight) - (currentHeight>>1)) / (float)currentHeight;
+		float h = -0.80f;//vcg::math::Min(-0.8f,-.08f*qFont.pointSize());//((.03f * curSiz.height()) - (curSiz.height()>>1)) / (float)curSiz.height();
 		glBegin(GL_TRIANGLE_STRIP);
 			glVertex2f(-1.f,h);
 			glVertex2f(-1.f,-1.f);
@@ -393,16 +416,17 @@ void GLArea::paintGL()
 		glColor4f(1,1,1,1);
 		if(logVisible)
 		{
-			renderText(20,currentHeight - 5 * (qFont.pointSizeF()+(currentHeight/225.f)),tr("LOG MESSAGES"),qFont);
-			log.glDraw(this,currLogLevel,3,qFont.pointSizeF()+(currentHeight/225.f),qFont);
+			renderText(20,curSiz.height() - 5 * (qFont.pointSizeF()+(curSiz.height()/225.f)),tr("LOG MESSAGES"),qFont);
+			log.glDraw(this,currLogLevel,3,qFont.pointSizeF()+(curSiz.height()/225.f),qFont);
 		}
 
 		// Second the MESH INFO (numVert,NumFaces,....)
 		displayMeshInfo();
 		
 		// Third the ENV INFO (Fps,ClippingPlanes,....)
-		currentTime=time.elapsed();
-		deltaTime=currentTime-lastTime;
+		//int currentTime=time.elapsed();
+		//deltaTime=currentTime-lastTime;
+		deltaTime=time.elapsed();
 		updateFps();
 
 		displayEnvInfo();
@@ -421,35 +445,35 @@ void GLArea::paintGL()
 
 void GLArea::displayMeshInfo()
 {	
-	float fontSpacingV = qFont.pointSizeF()+(currentHeight/225.f);
-	float startPos= currentHeight-(fontSpacingV/3);
+	float fontSpacingV = qFont.pointSizeF()+(curSiz.height()/225.f);
+	float startPos= curSiz.height()-(fontSpacingV/3);
 	
-	renderText(currentWidth*.5f,startPos-5*fontSpacingV,tr("MESH INFO"),qFont);
+	renderText(curSiz.width()*.5f,startPos-5*fontSpacingV,tr("MESH INFO"),qFont);
 
-	renderText(currentWidth*.5f,startPos-3*fontSpacingV,tr("Vertices: %1").arg(mm->cm.vert.size()),qFont);
-	renderText(currentWidth*.5f,startPos-2*fontSpacingV,tr("Faces: %1").arg(mm->cm.face.size()),qFont);
-	renderText(currentWidth*.5f,startPos-  fontSpacingV,GetMeshInfoString(mm->mask),qFont);
+	renderText(curSiz.width()*.5f,startPos-3*fontSpacingV,tr("Vertices: %1").arg(mm->cm.vert.size()),qFont);
+	renderText(curSiz.width()*.5f,startPos-2*fontSpacingV,tr("Faces: %1").arg(mm->cm.face.size()),qFont);
+	renderText(curSiz.width()*.5f,startPos-  fontSpacingV,GetMeshInfoString(mm->mask),qFont);
 }
 
 void GLArea::displayEnvInfo()
 {	
-	float fontSpacingV = qFont.pointSizeF()+(currentHeight/225.f);
-	float startPos = currentHeight-(fontSpacingV/3);
+	float fontSpacingV = qFont.pointSizeF()+(curSiz.height()/225.f);
+	float startPos = curSiz.height()-(fontSpacingV/3);
 
 	QString strNear=QString("Nplane: %1  ").arg(nearPlane,2,'f',1);
 	QString strFar=QString("Fplane: %1").arg(farPlane,2,'f',1);
-	QString strViewer=QString("Viewer: %1  ").arg(objDist,2,'f',1);
+	//QString strViewer=QString("Viewer: %1  ").arg(objDist,2,'f',1);
 
-	renderText(currentWidth-currentWidth*.25f,startPos-5*fontSpacingV,tr("ENV INFO"),qFont);
+	renderText(curSiz.width()-curSiz.width()*.25f,startPos-5*fontSpacingV,tr("ENV INFO"),qFont);
 	
-	renderText(currentWidth-currentWidth*.25f,startPos-3*fontSpacingV,strViewer+strNear+strFar,qFont);
-	renderText(currentWidth-currentWidth*.25f,startPos-2*fontSpacingV,QString("FOV: ")+QString::number((int)fov,10),qFont);
+	//renderText(curSiz.width()-curSiz.width()*.25f,startPos-3*fontSpacingV,strViewer+strNear+strFar,qFont);
+	renderText(curSiz.width()-curSiz.width()*.25f,startPos-2*fontSpacingV,QString("FOV: ")+QString::number((int)fov,10),qFont);
 
 
 	if ((cfps>0) && (cfps<200)) 
 	{
 		QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
-		renderText(currentWidth-currentWidth*.25f,startPos-fontSpacingV,strInfo,qFont);	
+		renderText(curSiz.width()-curSiz.width()*.25f,startPos-fontSpacingV,strInfo,qFont);	
 	}
 }
 
@@ -462,8 +486,8 @@ void GLArea::resizeGL(int _width, int _height)
 	//gluPerspective(fov, float(_width)/float(_height), nearPlane, farPlane);
 	//glMatrixMode(GL_MODELVIEW);
 	glViewport(0,0, _width, _height);
-	currentWidth=_width;
-	currentHeight=_height;
+	curSiz.setWidth(_width);
+	curSiz.setHeight(_height);
 
 		// Set font size depending on window size (min = 1, max = 9)
 	qFont.setPointSizeF(vcg::math::Clamp<float>(-3 + sqrtf(_width*_width + _height*_height) * .01f,1,9));
@@ -486,8 +510,8 @@ void GLArea::displayHelp()
 	glEnd();
 
 
-  float fontSpacingV = (currentHeight*.01f)+3;
-	float hPosition = currentWidth*.1f;
+  float fontSpacingV = (curSiz.height()*.01f)+3;
+	float hPosition = curSiz.width()*.1f;
 	glColor(Color4b::White);
 	qFont.setBold(true);renderText(2+hPosition-(qFont.pointSize()*9),1.5*fontSpacingV,QString("MeshLab Quick Help"),qFont);qFont.setBold(false);
   renderText(2,3*fontSpacingV,QString("Drag:"),qFont);								renderText(hPosition,3*fontSpacingV,QString("Rotate"),qFont);
@@ -573,14 +597,17 @@ void GLArea::keyReleaseEvent ( QKeyEvent * e )
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
   e->accept();
-	if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
-      (e->button()==Qt::LeftButton) )
-         activeDefaultTrackball=false;
-	  else activeDefaultTrackball=true;
-  
-	if (isDefaultTrackBall())
-       trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
-	else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
+  if(iEdit)  iEdit->mousePressEvent(currentEditor,e,*mm,this);
+  else {          
+	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
+          (e->button()==Qt::LeftButton) )
+            activeDefaultTrackball=false;
+	      else activeDefaultTrackball=true;
+      
+	    if (isDefaultTrackBall())
+          trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	    else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
+  }
 	update();
 }
 
@@ -588,17 +615,23 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
 	if(e->buttons() | Qt::LeftButton) 
 	{
-		if (isDefaultTrackBall()) trackball.MouseMove(e->x(),height()-e->y());
-		else trackball_light.MouseMove(e->x(),height()-e->y());
-		update();
+      if(iEdit) iEdit->mouseMoveEvent(currentEditor,e,*mm,this);
+      else {
+		    if (isDefaultTrackBall()) trackball.MouseMove(e->x(),height()-e->y());
+		    else trackball_light.MouseMove(e->x(),height()-e->y());
+        update();
+      }
 	}
 }
 
 void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
 	activeDefaultTrackball=true;
-	if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
-	else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
+	if(iEdit) iEdit->mouseReleaseEvent(currentEditor,e,*mm,this);
+  else {
+        if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	    else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
+        }
 	update();
 }
 
@@ -693,9 +726,13 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 
 void GLArea::setBackFaceCulling(bool enabled)
 {
-	if(enabled)	glEnable(GL_CULL_FACE);
-	       else glDisable(GL_CULL_FACE);
 	rm.backFaceCull = enabled;
+	updateGL();
+}
+
+void GLArea::setSelectionRendering(bool enabled)
+{
+	rm.selectedFaces = enabled;
 	updateGL();
 }
 
@@ -739,13 +776,13 @@ void GLArea::setSnapshotSetting(const SnapshotSetting & s)
 
 void GLArea::setView()
 {
-	GLfloat fAspect = (GLfloat)currentWidth/ currentHeight;
+	GLfloat fAspect = (GLfloat)curSiz.width()/ curSiz.height();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	// Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
 	
 	float ratio = 1.75f;
-	objDist = ratio / tanf(vcg::math::ToRad(fov*.5f));
+	float objDist = ratio / tanf(vcg::math::ToRad(fov*.5f));
 
 	nearPlane = objDist - 2.f*clipRatioNear;
 	farPlane =  objDist + 2.f*clipRatioFar;

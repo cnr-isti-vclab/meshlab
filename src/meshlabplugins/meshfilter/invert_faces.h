@@ -24,6 +24,10 @@
 
 /*
  * $Log$
+ * Revision 1.4  2006/05/25 04:57:45  cignoni
+ * Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+ * Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+ *
  * Revision 1.3  2006/05/06 17:05:18  mariolatronico
  * - Added license and history
  * - On invert face also swap the texture coordinates if the
@@ -51,21 +55,15 @@ namespace vcg{
 		typename MESH_TYPE::FaceIterator fi;
 		
 		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
-		{
-				
+		{				
 				swap((*fi).V1(0), (*fi).V2(0));
 				// swap also texture coordinates
-				if (MESH_TYPE::HasPerWedgeTexture()) {
+				if (HasPerWedgeTexture(m)) {
 					swap((*fi).WT(0),(*fi).WT(1));
-					swap((*fi).WT(1),(*fi).WT(2));
-					swap((*fi).WT(2),(*fi).WT(0));
-
+				//	swap((*fi).WT(1),(*fi).WT(2));
+				//	swap((*fi).WT(2),(*fi).WT(0));
 				}
 		}
-		vcg::tri::UpdateNormals<MESH_TYPE>::PerVertexNormalizedPerFace(m);
-		vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace(m);
-		vcg::tri::UpdateTopology<MESH_TYPE>::VertexFace(m);
-
 	}	
 
 } // end of namespace

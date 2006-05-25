@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.11  2006/02/15 23:09:06  fmazzant
 added the part of MeshIO credits
 
@@ -155,12 +159,6 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 									foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
 									addItems(pluginItem,Templist);
 								}								 
-								MeshColorizeInterface *iColorize = qobject_cast<MeshColorizeInterface *>(plugin);
-								if (iColorize){
-									QStringList Templist;
-									foreach(QAction *a,iColorize->actions()){Templist.push_back(a->text());}
-									addItems(pluginItem,Templist);
-								}
 								MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 								if (iFilter){
 									QStringList Templist;
@@ -232,13 +230,6 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iDecorate->Info().Author+QString(" Date: ")+iDecorate->Info().Date+QString(" Version: ")+iDecorate->Info().Version);
 			else foreach(QAction *a,iDecorate->actions())
 				if (actionName==a->text()) labelInfo->setText(iDecorate->Info(a).Help);
-		}
-		MeshColorizeInterface *iColorize = qobject_cast<MeshColorizeInterface *>(plugin);
-		if (iColorize)
-		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iColorize->Info().Author+QString(" Date: ")+iColorize->Info().Date+QString(" Version: ")+iColorize->Info().Version);
-			else foreach(QAction *a,iColorize->actions())
-				if (actionName==a->text()) labelInfo->setText(iColorize->Info(a).Help);
 		}
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 		if (iFilter)

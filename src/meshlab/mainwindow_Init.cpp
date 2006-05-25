@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.53  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.52  2006/04/18 06:57:34  zifnab1974
 syntax errors for gcc 3.4.5 resolved
 
@@ -104,7 +108,17 @@ void MainWindow::createActions()
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
-	closeAct = new QAction(tr("&Close"), this);
+  openFilterScriptAct = new QAction(QIcon(":/images/open.png"),tr("&Open Filter Script..."), this);
+	openFilterScriptAct->setShortcutContext(Qt::ApplicationShortcut);
+	openFilterScriptAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_O);
+	connect(openFilterScriptAct, SIGNAL(triggered()), this, SLOT(openFilterScript()));
+
+  saveFilterScriptAct = new QAction(QIcon(":/images/save.png"),tr("&Save Filter Script..."), this);
+	saveFilterScriptAct->setShortcutContext(Qt::ApplicationShortcut);
+	saveFilterScriptAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_S);
+	connect(saveFilterScriptAct, SIGNAL(triggered()), this, SLOT(saveFilterScript()));
+
+  closeAct = new QAction(tr("&Close"), this);
 	closeAct->setShortcutContext(Qt::ApplicationShortcut);
 	closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
 	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
@@ -191,7 +205,13 @@ void MainWindow::createActions()
 	backFaceCullAct->setShortcutContext(Qt::ApplicationShortcut);
 	backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
-	
+
+  setSelectionRenderingAct 	  = new QAction(QIcon(":/images/selected.png"),tr("Selected Face Rendering"),this);
+	setSelectionRenderingAct->setCheckable(true);
+	setSelectionRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
+	setSelectionRenderingAct->setShortcut(Qt::CTRL+Qt::Key_S);
+	connect(setSelectionRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectionRendering()));
+
 	//////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
 	fullScreenAct->setCheckable(true);
@@ -226,6 +246,12 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
+  endEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
+	endEditModeAct->setShortcut(Qt::Key_Escape);
+	endEditModeAct->setCheckable(true);
+	endEditModeAct->setChecked(true);
+	connect(endEditModeAct, SIGNAL(triggered()), this, SLOT(endEditMode()));
+
 	//////////////Action Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
 	connect(windowsTileAct, SIGNAL(triggered()), workspace, SLOT(tile()));
@@ -245,6 +271,10 @@ void MainWindow::createActions()
 	lastFilterAct->setShortcut(Qt::CTRL+Qt::Key_L);
 	lastFilterAct->setEnabled(false);
 	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
+	
+  runFilterScriptAct = new QAction(tr("Run current filter script"),this);
+	runFilterScriptAct->setEnabled(false);
+	connect(runFilterScriptAct, SIGNAL(triggered()), this, SLOT(runFilterScript()));
 	
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
@@ -268,10 +298,15 @@ void MainWindow::createToolBars()
 	mainToolBar->addAction(saveSnapshotAct);
 
 	renderToolBar = addToolBar(tr("Render"));
-	renderToolBar->setIconSize(QSize(32,32));
+	//renderToolBar->setIconSize(QSize(32,32));
 	renderToolBar->addActions(renderModeGroupAct->actions());
 	renderToolBar->addAction(renderModeTextureAct);
 	renderToolBar->addAction(setLightAct);
+	renderToolBar->addAction(setSelectionRenderingAct);
+
+  editToolBar = addToolBar(tr("Edit"));
+	editToolBar->addAction(endEditModeAct);
+
 }
 
 
@@ -283,6 +318,8 @@ void MainWindow::createMenus()
 	fileMenu->addAction(closeAct);
 	fileMenu->addAction(reloadAct);
 	fileMenu->addAction(saveAsAct);
+	fileMenu->addAction(openFilterScriptAct);
+	fileMenu->addAction(saveFilterScriptAct);
 
 	
 	fileMenu->addSeparator();
@@ -296,13 +333,16 @@ void MainWindow::createMenus()
 	
 	//////////////////// Menu Edit //////////////////////////////////////////////////////////////////////////
 	editMenu = menuBar()->addMenu(tr("&Edit"));
+	editMenu->addAction(endEditModeAct);
 	
   //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addSeparator();
 	filterMenuSelect = filterMenu->addMenu(tr("Select"));
-	filterMenuClean = filterMenu->addMenu(tr("Clean"));
+	filterMenuClean  = filterMenu->addMenu(tr("Clean"));
+	filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing"));
+
 
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
@@ -312,6 +352,7 @@ void MainWindow::createMenus()
 	renderModeMenu->addAction(backFaceCullAct);
 	renderModeMenu->addActions(renderModeGroupAct->actions());
 	renderModeMenu->addAction(renderModeTextureAct);
+	renderModeMenu->addAction(setSelectionRenderingAct);
 
 	lightingModeMenu=renderMenu->addMenu(tr("&Lighting"));
 	lightingModeMenu->addAction(setLightAct);
@@ -397,23 +438,27 @@ void MainWindow::loadPlugins()
 		QObject *plugin = loader.instance();
 		
 		if (plugin) {		
-			MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
-			if (iColor)
-			  addToMenu(iColor->actions(), colorModeMenu, SLOT(applyColorMode()));
-			
+			//MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
+						
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
       { 
         QAction *filterAction;
         foreach(filterAction, iFilter->actions())
         {
+          filterMap[filterAction->text()]=filterAction;
           connect(filterAction,SIGNAL(triggered()),this,SLOT(applyFilter()));
-		      switch(iFilter->getClass(filterAction))
+          switch(iFilter->getClass(filterAction))
           {
+            case MeshFilterInterface::FaceColoring : 
+            case MeshFilterInterface::VertexColoring : 
+              		colorModeMenu->addAction(filterAction); break;
             case MeshFilterInterface::Selection : 
               		filterMenuSelect->addAction(filterAction); break;
             case MeshFilterInterface::Cleaning : 
               		filterMenuClean->addAction(filterAction); break;
+            case MeshFilterInterface::Remeshing : 
+              		filterMenuRemeshing->addAction(filterAction); break;
             case MeshFilterInterface::Generic : 
             default:
               		filterMenu->addAction(filterAction); break;
@@ -435,9 +480,15 @@ void MainWindow::loadPlugins()
 			  addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 
 			MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
+      QAction *editAction;
 			if (iEdit)
-			  addToMenu(iEdit->actions(), editMenu, SLOT(applyEditMode()));
-
+        foreach(editAction, iEdit->actions())
+        {
+			    editMenu->addAction(editAction);
+          if(!editAction->icon().isNull())
+          editToolBar->addAction(editAction);
+          connect(editAction,SIGNAL(triggered()),this,SLOT(applyEditMode()));
+        }
       pluginFileNames += fileName;
 		}
 	}

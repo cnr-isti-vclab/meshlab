@@ -11,20 +11,23 @@
 #include <QGridLayout>
 #include <QCheckBox>
 #include <map>
+#include <GL/glew.h>
+#include <meshlab/meshmodel.h>
+
 #include "shaderStructs.h"
 #include "ui_shaderDialog.h"
-#include <meshlab/glarea.h>
+//#include <meshlab/glarea.h>
 
 class ShaderDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    ShaderDialog(ShaderInfo *sInfo, GLArea* gla, RenderMode &rm, QWidget *parent = 0);
+    ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QWidget *parent = 0);
     ~ShaderDialog();
 
 private:
-		GLArea* glarea;
+		QGLWidget* glarea;
 		RenderMode * rendMode;
 		ShaderInfo * shaderInfo;
 		QSignalMapper *colorSignalMapper;

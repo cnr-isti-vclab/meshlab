@@ -23,6 +23,10 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.18  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.17  2006/02/27 05:02:01  ggangemi
 Added texture support
 
@@ -126,8 +130,8 @@ public:
 
 	virtual const PluginInfo &Info();
 	virtual bool isSupported() {return supported;}
-	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
-	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla);
+	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
+	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
 
 };
 

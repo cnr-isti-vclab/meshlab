@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.42  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.41  2006/04/18 06:57:34  zifnab1974
 syntax errors for gcc 3.4.5 resolved
 
@@ -147,13 +151,17 @@ Added copyright info
 
 #ifndef MESHLAB_INTERFACES_H
 #define MESHLAB_INTERFACES_H
+#include <QTCore>
+#include <QMap>
+#include <QPair>
+#include <QAction>
 
 class QWidget;
+class QGLWidget;
 class QIcon;
 class QString;
+class QVariant;
 class QMouseEvent;
-//class QList;
-class QAction;
 class MeshModel;
 class RenderMode;
 class GLArea;
@@ -210,19 +218,106 @@ public:
       QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
 };
 
+
+
+class FilterParameter
+{
+public:
+
+  FilterParameter(){}
+
+  inline bool getBool(QString name) { 
+    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
+    assert(ii!=paramMap.end());
+    assert(ii.value().type()==QVariant::Bool);
+    return ii.value().toBool();
+  }
+  
+  inline int getInt(QString name) { 
+    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
+    if(ii==paramMap.end()) assert(0);
+    assert(ii.value().type()==QVariant::Int);
+    return float(ii.value().toInt());
+  }
+
+  inline float getFloat(QString name) { 
+    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
+    if(ii==paramMap.end()) assert(0);
+    assert(ii.value().type()==QVariant::Double);
+    return float(ii.value().toDouble());
+  }
+  
+  inline Matrix44f getMatrix44(QString name) { 
+    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
+    if(ii==paramMap.end()) assert(0);
+    assert(ii.value().type()==QVariant::List);
+    Matrix44f matrix;
+    QList<QVariant> matrixVals = ii.value().toList();
+    assert(matrixVals.size()==16);
+    for(int i=0;i<16;++i)
+      matrix.V()[i]=matrixVals[i].toDouble();
+    
+    return matrix;
+  }
+
+  inline void addFloat(QString name,float val){ paramMap.insert(name, QVariant( double(val)) ); }
+  inline void addInt  (QString name,float val){ paramMap.insert(name, QVariant(    int(val)) ); }
+  inline void addBool (QString name,bool val) { paramMap.insert(name, QVariant(        val )  );  }
+  
+  inline void addMatrix44(QString name,Matrix44f val) { 
+    QList<QVariant> matrixVals;
+    for(int i=0;i<16;++i)
+        matrixVals.append(val.V()[i]);
+    paramMap.insert(name, QVariant(matrixVals)  );  
+  }
+
+  inline void clear() { paramMap.clear(); }
+private:
+  // The data is just a list of Parameters
+  QMap<QString,QVariant> paramMap;  
+};
+
 class MeshFilterInterface
 {
 public:
-  	enum FilterClass { Generic, Selection, Cleaning, Subdivision} ;
-
+  typedef int FilterType;
+  	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring} ;
     virtual ~MeshFilterInterface() {}
-		virtual QList<QAction *> actions() const = 0;
-    virtual const ActionInfo &Info(QAction *)=0;
+		virtual const ActionInfo &Info(QAction *)=0;
+
+    // The filterclass describe in which submenu each filter should be placed 
     virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Generic;};
+    
+    // This function invokes a dialog and get back the parameters
+    virtual bool getParameters(QAction *, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameter & /*par*/) {return true;};
+    
+    // The filters can require some additional
+    virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}
+
+    // The main function that apply the selected filter 
+    virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameter & /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
+
     virtual const PluginInfo &Info()=0;
-	virtual void setLog(GLLogStream* )=0;
-		virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, QWidget * /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
+	  void setLog(GLLogStream *log) { this->log = log ; }
+
+    virtual const QString ST(FilterType filter)=0;
+
+    virtual const FilterType ID(QAction *a)
+  	{
+      foreach( FilterType tt, types())
+        if( a->text() == this->ST(tt) ) return tt;
+          assert(0);
+      return 0;
+    }
+    virtual QList<QAction *> actions() const { return actionList;}
+	  virtual QList<FilterType> &types() { return typeList;}
+
+protected:
+    QList <QAction *> actionList;
+    QList <FilterType> typeList;
+    GLLogStream *log;	
 };
+
 /*
 Serve per customizzare totalmente il processo di rendering
 Viene invocata al posto del rendering standard della mesh.
@@ -237,26 +332,13 @@ class MeshRenderInterface
 public:
     virtual ~MeshRenderInterface() {}
 		
-    virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/){};
-		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
+    virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){};
+		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual bool isSupported() = 0;
 		virtual const PluginInfo &Info()=0;
 		virtual QList<QAction *> actions() const = 0;
 };
-
-class MeshColorizeInterface
-{
-public:
-    virtual const ActionInfo &Info(QAction *)=0;
-    virtual const PluginInfo &Info()=0;
-    virtual void setLog(GLLogStream* )=0;
-		virtual void Compute(QAction * /*mode*/, MeshModel &/*m*/,  RenderMode &/*rm*/, GLArea * /*parent*/){};    
-		virtual void Show(QAction * /*mode*/, bool /*show*/, MeshModel &/*m*/, GLArea * /*parent*/) {};    
-		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-		virtual QList<QAction *> actions() const = 0;
-};
-
 
 
 class MeshDecorateInterface
@@ -268,7 +350,7 @@ public:
     virtual const PluginInfo &Info()=0;
 
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
+		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/,QFont qf) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual QList<QAction *> actions() const = 0;
 };
@@ -283,9 +365,9 @@ public:
     virtual const PluginInfo &Info()=0;
 
     virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-		virtual void Edit(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
+		//virtual void Edit(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
 		virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
+    virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) = 0;
     virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	  virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	  virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
@@ -296,7 +378,6 @@ public:
 Q_DECLARE_INTERFACE(MeshIOInterface,       "vcg.meshlab.MeshIOInterface/1.0")
 Q_DECLARE_INTERFACE(MeshFilterInterface,   "vcg.meshlab.MeshFilterInterface/1.0")
 Q_DECLARE_INTERFACE(MeshRenderInterface,   "vcg.meshlab.MeshRenderInterface/1.0")
-Q_DECLARE_INTERFACE(MeshColorizeInterface, "vcg.meshlab.MeshColorizeInterface/1.0")
 Q_DECLARE_INTERFACE(MeshDecorateInterface, "vcg.meshlab.MeshDecorateInterface/1.0")
 Q_DECLARE_INTERFACE(MeshEditInterface,     "vcg.meshlab.MeshEditInterface/1.0")
 

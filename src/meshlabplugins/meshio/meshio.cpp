@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.85  2006/05/25 04:57:45  cignoni
+ Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+ Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
  Revision 1.84  2006/03/29 10:05:33  cignoni
  Added missing include export.obj
 
@@ -114,13 +118,8 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 		oi.cb = cb;
 		if (!vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
 			return false;
-
-		if(oi.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) 
-		{
-			qDebug("Has Wedge Text Coords\n");
-			m.cm.face.EnableWedgeTex();
-		}
-
+    m.Enable(oi.mask);
+		
 		int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
 		if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 		{
@@ -141,16 +140,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	else if (formatName.toUpper() == tr("PLY"))
 	{
 		vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
-
-		if(mask&MeshModel::IOM_VERTQUALITY) qDebug("Has Vertex Quality\n");
-		if(mask&MeshModel::IOM_FACEQUALITY) qDebug("Has Face Quality\n");
-		if(mask&MeshModel::IOM_FACECOLOR)		qDebug("Has Face Color\n");
-		if(mask&MeshModel::IOM_VERTCOLOR)		qDebug("Has Vertex Color\n");
-		if(mask&MeshModel::IOM_WEDGTEXCOORD) 
-		{
-			qDebug("Has Wedge Text Coords\n");
-			m.cm.face.EnableWedgeTex();
-		}
+    m.Enable(mask);
 		
 		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != ::vcg::ply::E_NOERROR)
@@ -191,12 +181,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 		info.cb = cb;
 		Lib3dsFile *file = NULL;
 		vcg::tri::io::Importer3DS<CMeshO>::LoadMask(filename.c_str(), file, info);
-
-		if(info.mask & MeshModel::IOM_WEDGTEXCOORD) 
-		{
-			qDebug("Has Wedge Text Coords\n");
-			m.cm.face.EnableWedgeTex();
-		}
+    m.Enable(info.mask);
 		
 		int result = vcg::tri::io::Importer3DS<CMeshO>::Open(m.cm, filename.c_str(), file, info);
 		if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR)

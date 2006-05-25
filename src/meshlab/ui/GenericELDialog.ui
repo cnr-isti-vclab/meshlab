@@ -57,7 +57,7 @@
      <item>
       <widget class="QLabel" name="label_2" >
        <property name="text" >
-        <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;pre style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;span style=&quot; font-family:Courier New,courier;&quot;>Percentile&lt;/span>&lt;/pre>&lt;/body>&lt;/html></string>
+        <string>Percentile</string>
        </property>
       </widget>
      </item>
@@ -97,7 +97,7 @@
      <item>
       <widget class="QLabel" name="label" >
        <property name="text" >
-        <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>&lt;span style=&quot; color:#000000;&quot;>Diagonal percentage&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+        <string>Diagonal Percentage</string>
        </property>
       </widget>
      </item>
@@ -118,6 +118,9 @@
       <widget class="QDoubleSpinBox" name="percdiag" >
        <property name="maximum" >
         <double>100</double>
+       </property>
+       <property name="singleStep" >
+        <double>0.2</double>
        </property>
       </widget>
      </item>

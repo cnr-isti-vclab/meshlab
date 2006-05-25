@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.63  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.62  2006/04/12 15:12:18  cignoni
 Added Filter classes (cleaning, meshing etc)
 
@@ -77,7 +81,7 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow();
    static bool QCallBack(const int pos, const char * str);
-	 const QString appName() const {return tr("MeshLab v0.6"); }
+	 const QString appName() const {return tr("MeshLab v0.7"); }
   // MaskObj maskobj;
 
 public slots:
@@ -87,13 +91,19 @@ public slots:
 private slots:
 
 	//////////// Slot Menu File //////////////////////
+  void openFilterScript(QString fileName=QString());
+  void saveFilterScript(QString fileName=QString());
 	void reload();
 	void openRecentFile();							
 	bool saveAs();
-	bool saveSnapshot();
+	bool saveSnapshot(); 
+	///////////Slot Menu Edit ////////////////////////
+  void applyEditMode();
+	void endEditMode();
 	///////////Slot Menu Filter ////////////////////////
 	void applyFilter();
 	void applyLastFilter();
+	void runFilterScript();
 	/////////// Slot Menu Render /////////////////////
 	void renderBbox();
 	void renderPoint();
@@ -109,8 +119,8 @@ private slots:
 	void setColorMode(QAction *qa);
 	void applyRenderMode();
 	void applyColorMode();
-  void applyEditMode();
 	void toggleBackFaceCulling();
+  void toggleSelectionRendering();
 	void applyDecorateMode();
 	///////////Slot Menu View ////////////////////////
 	void fullScreen();
@@ -153,16 +163,19 @@ private:
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
+  QMap<QString,QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
 	
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;
+	QToolBar *editToolBar;
 
 	///////// Menus ///////////////
 	QMenu *fileMenu;
 	QMenu *filterMenu;
 	QMenu *filterMenuSelect;
   QMenu *filterMenuClean;
+  QMenu *filterMenuRemeshing;
 	QMenu *editMenu;
   //Render Menu and SubMenu ////
 	QMenu *shadersMenu;
@@ -183,14 +196,19 @@ private:
 
 	//////////// Actions Menu File ///////////////////////
 	QAction *openAct;
+	QAction *openFilterScriptAct;
+	QAction *saveFilterScriptAct;
 	QAction *closeAct;
 	QAction *reloadAct;
 	QAction *saveAsAct;
 	QAction *saveSnapshotAct;
 	QAction *lastFilterAct;
+	QAction *runFilterScriptAct;
 	QAction *recentFileActs[MAXRECENTFILES];
 	QAction *separatorAct;										
 	QAction *exitAct;
+	/////////// Actions Menu Edit  /////////////////////
+  QAction *endEditModeAct;
 	/////////// Actions Menu Render /////////////////////
 	QActionGroup *renderModeGroupAct;
 	QAction *renderBboxAct;
@@ -205,6 +223,7 @@ private:
 	QAction *setFancyLightingAct;
 	QAction *setLightAct;
 	QAction *backFaceCullAct;
+  QAction *setSelectionRenderingAct;
 
 	QActionGroup *colorModeGroupAct;
 	QAction *colorModeNoneAct;

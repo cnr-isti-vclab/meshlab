@@ -23,6 +23,10 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.17  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.16  2006/03/08 17:26:13  ggangemi
 added texture tab
 
@@ -69,6 +73,7 @@ Added copyright info
 #include <stdlib.h>
 
 #include "meshrender.h"
+#include <QGLWidget>
 
 using namespace vcg;
 
@@ -259,10 +264,10 @@ void MeshShaderRenderPlugin::initActionList() {
 	}
 }
 
-void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla) 
+void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla) 
 {
 	if (sDialog) sDialog->close();
-
+  gla->makeCurrent();
 	GLenum err = glewInit();
 	if (GLEW_OK == err) {
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
@@ -359,7 +364,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, GLAr
 }
 
 
-void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, GLArea *gla) 
+void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget * /* gla */) 
 {
 	if (shaders.find(a->text()) != shaders.end()) {
 		ShaderInfo si = shaders[a->text()];

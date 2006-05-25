@@ -2,11 +2,11 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  +=  ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = transformDialog.h \
-decimatorDialog.h \
-detacher.h \
-../../meshlab/GenericELDialog.h \
-../../meshlab/interfaces.h \
-meshfilter.h 
+                decimatorDialog.h \
+                clean.h \
+                ../../meshlab/GenericELDialog.h \
+                ../../meshlab/interfaces.h \
+                meshfilter.h 
 
 SOURCES       = transformDialog.cpp \
 				meshfilter.cpp \ 

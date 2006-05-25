@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.94  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.93  2006/03/07 10:47:50  cignoni
 Better mask management during io
 
@@ -144,34 +148,20 @@ void MainWindow::updateMenus()
 	if(active){
 		const RenderMode &rm=GLA()->getCurrentRenderMode();
 		switch (rm.drawMode) {
-			case GLW::DMBox:
-				renderBboxAct->setChecked(true);
-				break;
-			case GLW::DMPoints:
-				renderModePointsAct->setChecked(true);
-				break;
-			case GLW::DMWire:
-				renderModeWireAct->setChecked(true);
-				break;
-			case GLW::DMFlat:
-				renderModeFlatAct->setChecked(true);
-				break;
-			case GLW::DMSmooth:
-				renderModeSmoothAct->setChecked(true);
-				break;
-			case GLW::DMFlatWire:
-				renderModeFlatLinesAct->setChecked(true);
-				break;
-			case GLW::DMHidden:
-				renderModeHiddenLinesAct->setChecked(true);
-				break;
+			case GLW::DMBox:				renderBboxAct->setChecked(true);                break;
+			case GLW::DMPoints:			renderModePointsAct->setChecked(true);      		break;
+			case GLW::DMWire: 			renderModeWireAct->setChecked(true);      			break;
+			case GLW::DMFlat:				renderModeFlatAct->setChecked(true);    				break;
+			case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
+			case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
+			case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
 		}
 
 		switch (rm.colorMode)
 		{
-			case GLW::CMNone:			colorModeNoneAct->setChecked(true);	break;
-			case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true); break;
-			case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true); break;
+			case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
+			case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
+			case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
 		}
 
 		lastFilterAct->setEnabled(false);
@@ -186,6 +176,13 @@ void MainWindow::updateMenus()
 		}
 
 
+    if(GLA()->getEditAction()) 
+    {
+      endEditModeAct->setChecked(false);
+      GLA()->getEditAction()->setChecked(true);
+    }
+    else  endEditModeAct->setChecked(true);
+
 		showLogAct->setChecked(GLA()->isLogVisible());
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
@@ -198,6 +195,7 @@ void MainWindow::updateMenus()
 
 		setFancyLightingAct->setChecked(rm.fancyLighting);
 		setDoubleLightingAct->setChecked(rm.doubleSideLighting);
+		setSelectionRenderingAct->setChecked(rm.selectedFaces);
 
 		foreach (QAction *a,TotalDecoratorsList){a->setChecked(false);}
 		if(GLA()->iDecoratorsList){
@@ -209,34 +207,86 @@ void MainWindow::updateMenus()
 
 void MainWindow::applyLastFilter()
 {
-	GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
+  GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
 }
+
+void MainWindow::runFilterScript()
+{
+  FilterScript::iterator ii;
+  for(ii= GLA()->filterHistory.actionList.begin();ii!= GLA()->filterHistory.actionList.end();++ii)
+  {
+	  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>( (*ii).first->parent());
+    iFilter->applyFilter( (*ii).first, *(GLA()->mm), (*ii).second, QCallBack );
+    GLA()->log.Log(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first->text()));
+	}
+}
+// /////////////////////////////////////////////////
+// The Very Important Procedure of applying a filter
+// /////////////////////////////////////////////////
 
 void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-	qb->show();
-	iFilter->setLog(&(GLA()->log));
+  
+  // (1) Ask for filter requirements (eg a filter can need topology, border flags etc)
+  //    and statisfy them
+  int req=iFilter->getRequirements(action);
+  GLA()->mm->updateDataMask(req);
+
+  
+  // (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
+  FilterParameter par;
+  iFilter->getParameters(action, GLA(),*(GLA()->mm), par);
+
 	
-	// Log if filter applied succesfully
-	if(iFilter->applyFilter(action,*(GLA()->mm ),GLA(),QCallBack))
+  // (3) save the current filter and its parameters in the history
+  GLA()->filterHistory.actionList.append(qMakePair(action,par));
+
+  qDebug("Filter History size %i",GLA()->filterHistory.actionList.size());
+  qDebug("Filter History Last entry %s",qPrintable (GLA()->filterHistory.actionList.front().first->text()));
+
+  qb->show();
+  iFilter->setLog(&(GLA()->log));
+  // (4) Apply the Filter 
+  bool ret=iFilter->applyFilter(action, *(GLA()->mm), par, QCallBack);
+
+  // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
+
+	if(ret)
 	{
-		GLA()->log.Log(GLLogStream::Info,"Applied filter %s",action->text().toLocal8Bit().constData());
+		GLA()->log.Log(GLLogStream::Info,"Applied filter %s",qPrintable(action->text()));
 		GLA()->setWindowModified(true);
 		GLA()->setLastAppliedFilter(action);
 		lastFilterAct->setText(QString("Apply filter ") + action->text());
 		lastFilterAct->setEnabled(true);
 	}
-	qb->reset();
-}
 
+  // at the end for filters that change the color set the appropriate color mode
+  if(iFilter->getClass(action)==MeshFilterInterface::FaceColoring ) 
+    GLA()->setColorMode(vcg::GLW::CMPerFace);
+  if(iFilter->getClass(action)==MeshFilterInterface::VertexColoring )
+    GLA()->setColorMode(vcg::GLW::CMPerVert);
+  if(iFilter->getClass(action)==MeshFilterInterface::Selection )
+    GLA()->setSelectionRendering(true);
+
+	qb->reset();
+  updateMenus();
+}
+void MainWindow::endEditMode()
+{
+	GLA()->getEditAction()->setChecked(false);
+  GLA()->endEdit();
+}
 void MainWindow::applyEditMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
-  GLA()->setEdit(iEdit);
-	GLA()->log.Log(GLLogStream::Info,"Started Mode %s",action->text().toLocal8Bit().constData());
+  GLA()->setEdit(iEdit,action);
+  iEdit->StartEdit(action,*(GLA()->mm),GLA());
+	GLA()->log.Log(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
+  GLA()->setSelectionRendering(true);
+  updateMenus();
 }
 
 void MainWindow::applyRenderMode()
@@ -255,7 +305,7 @@ void MainWindow::applyRenderMode()
 		if(iRenderTemp->isSupported())
 		{
 			GLA()->setRenderer(iRenderTemp,action);
-			GLA()->log.Log(GLLogStream::Info,"%s",action->text().toLocal8Bit().constData());	// Prints out action name
+			GLA()->log.Log(GLLogStream::Info,"%s",qPrintable(action->text()));	// Prints out action name
 		}
 		else
 		{
@@ -269,9 +319,9 @@ void MainWindow::applyRenderMode()
 void MainWindow::applyColorMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
-	MeshColorizeInterface *iColorTemp = qobject_cast<MeshColorizeInterface *>(action->parent());
+	MeshFilterInterface *iColorTemp = qobject_cast<MeshFilterInterface *>(action->parent());
   iColorTemp->setLog(&(GLA()->log));
-  iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
+  //iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
   GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
   updateMenus();
 }
@@ -338,8 +388,13 @@ void MainWindow::setFancyLighting()
 void MainWindow::toggleBackFaceCulling()
 {
 	RenderMode &rm = GLA()->getCurrentRenderMode();
-
 	GLA()->setBackFaceCulling(!rm.backFaceCull);
+}
+
+void MainWindow::toggleSelectionRendering()
+{
+	RenderMode &rm = GLA()->getCurrentRenderMode();
+	GLA()->setSelectionRendering(!rm.selectedFaces);
 }
 
 
@@ -392,6 +447,26 @@ void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &all
 	filters.push_front(allKnownFormatsFilter);
 }
 
+void MainWindow::openFilterScript(QString fileName)
+{
+	if (fileName.isEmpty())
+		fileName = QFileDialog::getOpenFileName(this,tr("Open Filter Script File"),".", "*.mls");
+	
+	if (fileName.isEmpty())	return;
+
+
+}
+
+void MainWindow::saveFilterScript(QString fileName)
+{
+	if (fileName.isEmpty())
+		fileName = QFileDialog::getOpenFileName(this,tr("Open Filter Script File"),".", "*.mls");
+	
+	if (fileName.isEmpty())	return;
+}
+
+
+
 void MainWindow::open(QString fileName)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
@@ -434,24 +509,22 @@ void MainWindow::open(QString fileName)
 		gla=new GLArea(workspace);
 		gla->mm=mm;
     gla->mm->mask = mask;				// store mask into model structure
-
+    
 		gla->setFileName(fileName);
 		gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
     gla->showInfoArea(true);
 		workspace->addWindow(gla);
 		if(workspace->isVisible()) gla->showMaximized();
 		setCurrentFile(fileName);
+		
+    if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+			gla->setColorMode(GLW::CMPerFace);
 		if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
     {
       gla->mm->storeVertexColor();
 			gla->setColorMode(GLW::CMPerVert);
     }
-		else if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
-			gla->setColorMode(GLW::CMPerFace);
-		else
-			gla->setColorMode(GLW::CMNone);
-		updateMenus();
-		renderModeTextureAct->setChecked(false);
+    renderModeTextureAct->setChecked(false);
 		renderModeTextureAct->setEnabled(false);
 		if(!GLA()->mm->cm.textures.empty())
 		{
@@ -460,10 +533,10 @@ void MainWindow::open(QString fileName)
 			GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 		}
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
+    updateMenus();
 	}
 
-	//qb->hide();
-  qb->reset();
+	qb->reset();
 }
 
 void MainWindow::openRecentFile()

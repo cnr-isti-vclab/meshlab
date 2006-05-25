@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.25  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.24  2006/02/04 09:41:44  vannini
 Better handling of curvature computation for border vertex
 Plugin info updated
@@ -102,6 +106,7 @@ Added copyright info
 #include <QtGui>
 #include <limits>
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/stat.h>
 #include <vcg/complex/trimesh/update/flag.h>
 #include "meshcolorize.h"
 #include "color_manifold.h"
@@ -111,40 +116,36 @@ Added copyright info
 using namespace vcg;
 
 ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
-	actionList << new QAction(ST(CP_EQUALIZE), this);
-  actionList << new QAction(ST(CP_GAUSSIAN), this);
-  actionList << new QAction(ST(CP_MEAN), this);
-  actionList << new QAction(ST(CP_RMS), this);
-  actionList << new QAction(ST(CP_ABSOLUTE), this);
-  actionList << new QAction(ST(CP_SELFINTERSECT), this);
-  actionList << new QAction(ST(CP_BORDER), this);
-  actionList << new QAction(ST(CP_COLORNM), this);
-  actionList << new QAction(ST(CP_SMOOTH), this);
-  actionList << new QAction(ST(CP_RESTORE_ORIGINAL), this);
+    typeList << 
+    CP_MAP_QUALITY_INTO_COLOR <<
+    CP_GAUSSIAN <<
+    CP_MEAN <<
+    CP_RMS <<
+    CP_ABSOLUTE <<
+    CP_SELFINTERSECT <<
+    CP_BORDER <<
+    CP_COLOR_NON_MANIFOLD <<
+    CP_SMOOTH <<
+    CP_RESTORE_ORIGINAL;
+    
+  FilterType tt;
+  foreach(tt , types())
+	    actionList << new QAction(ST(tt), this);
 }
-const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
+
+const QString ExtraMeshColorizePlugin::ST(FilterType c) {
   switch(c)
   {
-    case CP_EQUALIZE: 
-      return QString("Colorize by Quality");
-    case CP_GAUSSIAN: 
-      return QString("Gaussian Curvature (equalized)");
-    case CP_MEAN: 
-      return QString("Mean Curvature (equalized)");
-    case CP_RMS: 
-      return QString("Root mean square Curvature (equalized)");
-    case CP_ABSOLUTE: 
-      return QString("Absolute Curvature (equalized)");
-    case CP_SELFINTERSECT: 
-      return QString("Self Intersections");
-    case CP_BORDER: 
-      return QString("Border");
-    case CP_COLORNM: 
-      return QString("Color non Manifold");
-    case CP_SMOOTH: 
-      return QString("Smooth Color");
-    case CP_RESTORE_ORIGINAL: 
-      return QString("Restore Color");
+    case CP_MAP_QUALITY_INTO_COLOR:   return QString("Colorize by Quality");
+    case CP_GAUSSIAN:                 return QString("Gaussian Curvature (equalized)");
+    case CP_MEAN:                     return QString("Mean Curvature (equalized)");
+    case CP_RMS:                      return QString("Root mean square Curvature (equalized)");
+    case CP_ABSOLUTE:                 return QString("Absolute Curvature (equalized)");
+    case CP_SELFINTERSECT:            return QString("Self Intersections");
+    case CP_BORDER:                   return QString("Border");
+    case CP_COLOR_NON_MANIFOLD:       return QString("Color non Manifold");
+    case CP_SMOOTH:                   return QString("Smooth Color");
+    case CP_RESTORE_ORIGINAL:         return QString("Restore Color");
     default: assert(0);
   }
   return QString("error!");
@@ -152,58 +153,28 @@ const QString ExtraMeshColorizePlugin::ST(ColorizeType c) {
 const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action) 
 {
 	static ActionInfo ai; 
-  
-	if( action->text() == ST(CP_EQUALIZE) )
+  switch(ID(action))
   {
-    ai.Help = tr("Colorize vertex and faces depending on quality field (manually equalized).");
-    ai.ShortHelp = tr("Colorize by quality");
-  }
-  if( action->text() == ST(CP_GAUSSIAN) )
-  {
-    ai.Help = tr("Colorize vertex and faces depending on equalized gaussian curvature.");
-    ai.ShortHelp = tr("Colorize by gaussian curvature");
-  }
-  if( action->text() == ST(CP_MEAN) )
-  {
-    ai.Help = tr("Colorize vertex and faces depending on equalized mean curvature.");
-    ai.ShortHelp = tr("Colorize by mean curvature");
-  }
-  if( action->text() == ST(CP_RMS) )
-  {
-    ai.Help = tr("Colorize vertex and faces depending on equalized root mean square curvature.");
-    ai.ShortHelp = tr("Colorize by root mean square curvature");
-  }
-  if( action->text() == ST(CP_ABSOLUTE) )
-  {
-    ai.Help = tr("Colorize vertex and faces depending on equalize absolute curvature.");
-    ai.ShortHelp = tr("Colorize by absolute curvature");
-  }
-  if( action->text() == ST(CP_SELFINTERSECT) )
-  {
-    ai.Help = tr("Colorize only self intersecting faces.");
-    ai.ShortHelp = tr("Colorize only self intersecting faces");
-  }
-
-  if( action->text() == ST(CP_BORDER) )
-  {
-    ai.Help = tr("Colorize only border edges.");
-    ai.ShortHelp = tr("Colorize only border edges");
-  }
-
-  if( action->text() == ST(CP_COLORNM) )
-  {
-    ai.Help = tr("Colorize only non manifold edges.");
-    ai.ShortHelp = tr("Colorize only non manifold edges");
-  }
-  if( action->text() == ST(CP_SMOOTH) )
-  {
-    ai.Help = tr("Apply laplacian smooth for colors.");
-    ai.ShortHelp = tr("Laplacian smooth for colors");
-  }
-  if( action->text() == ST(CP_RESTORE_ORIGINAL) )
-  {
-    ai.Help = tr("Restore original per vertex color.");
-    ai.ShortHelp = tr("Restore original per vertex color");
+    case CP_MAP_QUALITY_INTO_COLOR :  ai.Help = tr("Colorize vertex and faces depending on quality field (manually equalized).");
+                                 ai.ShortHelp = tr("Colorize by quality");break;
+    case CP_GAUSSIAN :                ai.Help = tr("Colorize vertex and faces depending on equalized gaussian curvature.");
+                                 ai.ShortHelp = tr("Colorize by gaussian curvature");break;
+    case CP_MEAN :                    ai.Help = tr("Colorize vertex and faces depending on equalized mean curvature.");
+                                 ai.ShortHelp = tr("Colorize by mean curvature");break;
+    case CP_RMS :                     ai.Help = tr("Colorize vertex and faces depending on equalized root mean square curvature.");
+                                 ai.ShortHelp = tr("Colorize by root mean square curvature");break;
+    case CP_ABSOLUTE :                ai.Help = tr("Colorize vertex and faces depending on equalize absolute curvature.");
+                                 ai.ShortHelp = tr("Colorize by absolute curvature");break;
+    case CP_SELFINTERSECT:            ai.Help = tr("Colorize only self intersecting faces.");
+                                 ai.ShortHelp = tr("Colorize only self intersecting faces");break;
+    case CP_BORDER :                  ai.Help = tr("Colorize only border edges.");
+                                 ai.ShortHelp = tr("Colorize only border edges");break;
+    case CP_COLOR_NON_MANIFOLD:       ai.Help = tr("Colorize only non manifold edges.");
+                                 ai.ShortHelp = tr("Colorize only non manifold edges");break;
+    case CP_SMOOTH :                  ai.Help = tr("Apply laplacian smooth for colors.");
+                                 ai.ShortHelp = tr("Laplacian smooth for colors");break;
+    case CP_RESTORE_ORIGINAL :        ai.Help = tr("Restore original per vertex color.");
+                                 ai.ShortHelp = tr("Restore original per vertex color");  break;
   }
   return ai;
 }
@@ -216,80 +187,88 @@ const PluginInfo &ExtraMeshColorizePlugin::Info()
   return ai;
 }
 
-QList<QAction *> ExtraMeshColorizePlugin::actions() const {
-	return actionList;
-}
-void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent){
-	if(mode->text() == ST(CP_EQUALIZE))
-    {
-      Curvature<CMeshO> c(m.cm);
-            
-      Frange mmmq = c.minMaxQ();
-      eqSettings.meshMinQ = mmmq.min;
-      eqSettings.meshMaxQ = mmmq.max;
 
-      Frange hmmq=c.histoPercentile(mmmq, 1.0f / (float) eqSettings.percentile, eqSettings.range);
-      eqSettings.histoMinQ = hmmq.min;
-      eqSettings.histoMaxQ = hmmq.max;      
+const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
+{
+  switch(ID(action))
+  {
+    case CP_GAUSSIAN:                 
+    case CP_MEAN:                     
+    case CP_RMS:                      
+    case CP_ABSOLUTE:                 return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
+    case CP_SELFINTERSECT:            return MeshModel::MM_FACEMARK | MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
+    case CP_BORDER:                   return MeshModel::MM_BORDERFLAG;
+    case CP_COLOR_NON_MANIFOLD:       return MeshModel::MM_FACETOPO;
+    case CP_SMOOTH:                   
+    case CP_RESTORE_ORIGINAL:         
+    case CP_MAP_QUALITY_INTO_COLOR:   return 0;
+    default: assert(0);
+  }
+  return 0;
+}
+
+
+bool ExtraMeshColorizePlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
+{
+ par.clear();
+ switch(ID(action))
+  {
+    case CP_MAP_QUALITY_INTO_COLOR :
+      Histogramf H;
+      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+            
+      Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
+      eqSettings.meshMinQ = mmmq.minV;
+      eqSettings.meshMaxQ = mmmq.maxV;
+
+      eqSettings.histoMinQ = H.Percentile(eqSettings.percentile/100);
+      eqSettings.histoMaxQ = H.Percentile(1.0f-eqSettings.percentile/100);
             
       EqualizerDialog eqdialog(parent);
       eqdialog.setValues(eqSettings);
+
       if (eqdialog.exec()!=QDialog::Accepted) 
-        return;
+        return false;
 
+      Frange FinalRange;
       eqSettings=eqdialog.getValues();
-      if (eqSettings.useManual)
-      {
-        Frange manual;
-        manual.min=eqSettings.manualMinQ;
-        manual.max=eqSettings.manualMaxQ;
-        c.ColorizeByEqualizedQuality(manual);
-      }else{
-        c.ColorizeByEqualizedQuality(c.histoPercentile(mmmq, 1.0f / (float) eqSettings.percentile, eqSettings.range));
-      }
+      if (eqSettings.useManual) 
+        FinalRange = Frange(eqSettings.manualMinQ,eqSettings.manualMaxQ);
+       else
+       {
+        FinalRange.minV=H.Percentile(eqSettings.percentile);
+        FinalRange.maxV=H.Percentile(1.0f-eqSettings.percentile);
+       }
+
+      par.addFloat("RangeMin",FinalRange.minV);
+      par.addFloat("RangeMax",FinalRange.maxV);      
+  }
+}
+bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameter & par, vcg::CallBackPos *cb)
+{
+ switch(ID(filter)) {
+  case CP_MAP_QUALITY_INTO_COLOR :
+    {
+//      Curvature<CMeshO> c(m.cm);
+        break;
+    }
+  case CP_GAUSSIAN:
+  case CP_MEAN:
+  case CP_RMS:
+  case CP_ABSOLUTE:
+    {
+      Curvature<CMeshO> c(m.cm);
+      switch (ID(filter)){
+          case CP_GAUSSIAN: c.MapGaussianCurvatureIntoQuality();    break;
+          case CP_MEAN:     c.MapMeanCurvatureIntoQuality();        break;
+          case CP_RMS:      c.MapRMSCurvatureIntoQuality();         break;
+          case CP_ABSOLUTE: c.MapAbsoluteCurvatureIntoQuality();    break;
+      }      
       
-      rm.colorMode = GLW::CMPerVert;   
-
-      return;
+      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,-.1,.1);
+    break;
     }
-
-  if(mode->text() == ST(CP_GAUSSIAN))
-    {
-      Curvature<CMeshO> c(m.cm);
-      c.MapGaussianCurvatureIntoQuality();
-      c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));
-      rm.colorMode = GLW::CMPerVert;         
-      return;
-    }
-
-	if(mode->text() == ST(CP_MEAN))
-    {
-      Curvature<CMeshO> c(m.cm);
-      c.MapMeanCurvatureIntoQuality();
-      c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));
-      rm.colorMode = GLW::CMPerVert;
-      return;
-    }
-
-  if(mode->text() == ST(CP_RMS))
-    {
-      Curvature<CMeshO> c(m.cm);
-      c.MapRMSCurvatureIntoQuality();
-      c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));
-      rm.colorMode = GLW::CMPerVert;
-      return;
-    }
-
-  if(mode->text() == ST(CP_ABSOLUTE))
-    {
-      Curvature<CMeshO> c(m.cm);
-      c.MapAbsoluteCurvatureIntoQuality();
-      c.ColorizeByEqualizedQuality(c.histoPercentile(c.minMaxQ(), 1.0f / (float) eqSettings.percentile, eqSettings.range));
-      rm.colorMode = GLW::CMPerVert;
-      return;
-    }
-
-  if(mode->text() == ST(CP_SELFINTERSECT))
+  case CP_SELFINTERSECT:
     {
       vector<CFaceO *> IntersFace;
       tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
@@ -298,38 +277,45 @@ void ExtraMeshColorizePlugin::Compute(QAction * mode, MeshModel &m, RenderMode &
       for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
         (*fpi)->C()=Color4b::Red;
       
-      rm.colorMode = GLW::CMPerFace;
-      return;
+    break;
     }
 
-  if(mode->text() == ST(CP_BORDER))
-    {
-      vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-      vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-      vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace (m.cm);
-      vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
-      rm.colorMode = GLW::CMPerVert;
-      return;
-    }
-
-  if(mode->text() == ST(CP_COLORNM))
-  {
-    vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+  case CP_BORDER:
+    vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
+    break;
+  case CP_COLOR_NON_MANIFOLD:
     ColorManifold<CMeshO>(m.cm);
-    rm.colorMode = GLW::CMPerVert;
-  }
-
-  if(mode->text() == ST(CP_RESTORE_ORIGINAL))
-  {
+    break;
+  case CP_RESTORE_ORIGINAL:
      m.restoreVertexColor();
-     rm.colorMode = GLW::CMPerVert;
-  }
-
-  if(mode->text() == ST(CP_SMOOTH))
-  {
+     break;
+  case CP_SMOOTH:
      LaplacianSmoothColor(m.cm,1);
-     rm.colorMode = GLW::CMPerVert;
+     break;
+ }
+	return true;
+}
+
+const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a)
+{
+  switch(ID(a))
+  {
+    case   CP_BORDER:
+    case   CP_COLOR_NON_MANIFOLD:
+    case   CP_SMOOTH:
+    case   CP_RESTORE_ORIGINAL:
+    case   CP_MAP_QUALITY_INTO_COLOR:
+    case   CP_GAUSSIAN:
+    case   CP_MEAN:
+    case   CP_RMS:
+    case   CP_ABSOLUTE:
+               return MeshFilterInterface::VertexColoring; 
+    case   CP_SELFINTERSECT:
+               return MeshFilterInterface::FaceColoring; 
+    default: assert(0);
+              return MeshFilterInterface::Generic;
   }
 }
+
 Q_EXPORT_PLUGIN(ExtraMeshColorizePlugin)
   

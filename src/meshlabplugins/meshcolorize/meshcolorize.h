@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.19  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.18  2006/02/01 16:23:09  vannini
 Added "smooth color" filter
 
@@ -35,21 +39,6 @@ added colorize equalizer dialog and
 "Colorize by Quality" filter
 some small bugfixes
 removed color_curvature.h in favour of curvature.h
-
-Revision 1.15  2006/01/20 18:17:07  vannini
-added Restore Color
-
-Revision 1.14  2006/01/20 16:25:39  vannini
-Added Absolute Curvature colorize
-
-Revision 1.13  2006/01/20 14:46:44  vannini
-Code refactoring
-Added RMS Curvature colorize
-
-Revision 1.12  2006/01/13 16:24:16  vannini
-Moved gaussian and mean curvature functions into color_curvature.h
-
-
 ****************************************************************************/
 
 #ifndef EXTRACOLORIZEPLUGIN_H
@@ -70,30 +59,41 @@ Moved gaussian and mean curvature functions into color_curvature.h
 #include <vcg/complex/trimesh/update/color.h>
 #include "equalizerDialog.h"
 
-class ExtraMeshColorizePlugin : public QObject, public MeshColorizeInterface
+class ExtraMeshColorizePlugin : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
-    Q_INTERFACES(MeshColorizeInterface)
+    Q_INTERFACES(MeshFilterInterface)
 
 public:
 
-    enum ColorizeType {CP_EQUALIZE,CP_GAUSSIAN,CP_MEAN,CP_RMS,CP_ABSOLUTE,CP_SELFINTERSECT,CP_BORDER,CP_COLORNM,CP_SMOOTH,CP_RESTORE_ORIGINAL};
-    const QString ST(ColorizeType c);
+    enum  {
+      CP_MAP_QUALITY_INTO_COLOR,
+      CP_GAUSSIAN,
+      CP_MEAN,
+      CP_RMS,
+      CP_ABSOLUTE,
+      CP_SELFINTERSECT,
+      CP_BORDER,
+      CP_COLOR_NON_MANIFOLD,
+      CP_SMOOTH,
+      CP_RESTORE_ORIGINAL
+    };
+
+    
 
     ExtraMeshColorizePlugin();
-    
-    virtual const ActionInfo &Info(QAction *);
-    virtual const PluginInfo &Info();
-    virtual QList<QAction *> actions() const;
-		
-		void Compute(QAction * mode, MeshModel &m, RenderMode &rm, GLArea *parent);
-    void setLog(GLLogStream *log) { this->log = log ; }
-		  
-protected:
-	GLLogStream *log;
-  QList <QAction *> actionList;
-  EqualizerSettings eqSettings;
+    ~ExtraMeshColorizePlugin(){};
+  
+  virtual const QString ST(FilterType filter);
+  virtual const ActionInfo &Info(QAction *);
+	virtual const PluginInfo &Info();
+  virtual const FilterClass getClass(QAction *);
+  virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);
+  virtual const int getRequirements(QAction *);
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 
+protected:
+  EqualizerSettings eqSettings;
 };
 
 #endif

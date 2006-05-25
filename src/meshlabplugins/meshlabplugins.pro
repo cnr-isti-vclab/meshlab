@@ -3,4 +3,6 @@ SUBDIRS       = meshfilter \
 		meshrender \
 		meshio \
 		meshcolorize \
-		meshdecorate
+		meshdecorate \ 
+		meshedit \ 
+		meshselect

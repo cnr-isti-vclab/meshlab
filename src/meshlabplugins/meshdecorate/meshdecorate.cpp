@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.36  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.35  2006/04/20 16:58:51  cignoni
 Disambiguated (hopefully for the last time) max(float/double) issue.
 
@@ -78,9 +82,8 @@ Some changes in DrawAxis in order to compile under gcc
 #include <math.h>
 #include <limits>
 #include <stdlib.h>
-
 #include "meshdecorate.h"
-#include<vcg/complex/trimesh/base.h>
+#include <QGLWidget>
 #include <wrap/gl/addons.h>
 
 using namespace vcg;
@@ -137,7 +140,7 @@ const QString ExtraMeshDecoratePlugin::ST(int id) const
   return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, GLArea *gla)
+void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, QGLWidget *gla, QFont qf)
 {
 	if(a->text() == ST(DP_SHOW_NORMALS))
 	{
@@ -150,20 +153,21 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_LINES);
 		glColor4f(.4f,.4f,1.f,.6f);
-    for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-    {
-      glVertex((*vi).P());
-      glVertex((*vi).P()+(*vi).N()*LineLen);
-    }
+    for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) 
+      if(!(*vi).IsD())
+        {
+          glVertex((*vi).P());
+          glVertex((*vi).P()+(*vi).N()*LineLen);
+        }
     glEnd();
    glPopAttrib();
   }
   if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
-  if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m,gla);
-	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m,gla);
+  if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m,gla,qf);
+	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m,gla,qf);
 }
 
-void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
+void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QGLWidget *gla,QFont qf)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
@@ -198,21 +202,21 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla)
 	glPushMatrix();
 	glScalef(1,s,s);
 	glTranslatef(0,c[1]/s-c[1],c[2]/s-c[2]);
-	drawQuotedLine(p1,p2,b.min[0],b.max[0],calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla);	// Draws x axis
+	drawQuotedLine(p1,p2,b.min[0],b.max[0],calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws x axis
 	glPopMatrix();
 
 	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
 	glPushMatrix();
 	glScalef(s,1,s);
 	glTranslatef(c[0]/s-c[0],0,c[2]/s-c[2]);
-	drawQuotedLine(p1,p2,b.min[1],b.max[1],calcSlope(p1,p2,b.DimY(),LabelSpacing,mm,mp,vp),gla);	// Draws y axis
+	drawQuotedLine(p1,p2,b.min[1],b.max[1],calcSlope(p1,p2,b.DimY(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws y axis
 	glPopMatrix();
 
 	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate	
 	glPushMatrix();
 	glScalef(s,s,1);
 	glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
-	drawQuotedLine(p2,p1,b.min[2],b.max[2],calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla);	// Draws z axis
+	drawQuotedLine(p2,p1,b.min[2],b.max[2],calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws z axis
 	glPopMatrix();
 
 	glPopAttrib();
@@ -365,7 +369,7 @@ void ExtraMeshDecoratePlugin::drawTickedLine(const Point3d &a,const Point3d &b, 
 }
 
 
-void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickDist,GLArea *gla)
+void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickDist,QGLWidget *gla, QFont qf)
 {  
   qDebug("drawQuotedLine %f",tickDist);
 
@@ -391,7 +395,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 
  	int neededZeros=ceil(max(0.0,-log10(double(tickDist))));
 	for(i=firstTick;i<bVal;i+=tickDist)
-    gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),gla->getFont());		
+    gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),qf);		
 
  glPointSize(1);
  glBegin(GL_POINTS);
@@ -413,7 +417,6 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 	glPopAttrib();
 
 	// bold font at beginning and at the end
-	QFont qf = gla->getFont();
 	qf.setBold(true);
 	gla->renderText(a[0],a[1],a[2],tr("%1").arg(aVal,3+neededZeros,'f',neededZeros+2 ),qf);
 	gla->renderText(b[0],b[1],b[2],tr("%1").arg(bVal,3+neededZeros,'f',neededZeros+2 ),qf);
@@ -475,8 +478,8 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 	glPopAttrib();
 }
 
-
-void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
+ 
+void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,QGLWidget* gla,QFont qf)
 {
 	float hw=m.cm.bbox.Diag()/2.0;
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
@@ -523,11 +526,11 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla)
 		glTranslate(c);	glRotatef(-90,0,1,0);	glScalef(sf,sf,sf);	Add_Ons::Cone(10,3,1,true);
 	glPopMatrix();
 
-	QFont f(gla->getFont());
-	f.setBold(true);
-	glColor(Color4b::Red);	 gla->renderText(hw+(sf*3),0,0,QString("X"),f);
-	glColor(Color4b::Green); gla->renderText(0,hw+(sf*3),0,QString("Y"),f);
-	glColor(Color4b::Blue);  gla->renderText(0,0,hw+(sf*3),QString("Z"),f);
+	//QFont f(gla->getFont());
+	qf.setBold(true);
+	glColor(Color4b::Red);	 gla->renderText(hw+(sf*3),0,0,QString("X"),qf);
+	glColor(Color4b::Green); gla->renderText(0,hw+(sf*3),0,QString("Y"),qf);
+	glColor(Color4b::Blue);  gla->renderText(0,0,hw+(sf*3),QString("Z"),qf);
 
 	glPopAttrib();
 }

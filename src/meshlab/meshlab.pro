@@ -15,14 +15,13 @@ SOURCES        = main.cpp \
                  mainwindow_Init.cpp \
                  mainwindow_RunTime.cpp\
                  meshmodel.cpp \
-		 GLLogStream.cpp \
+		         GLLogStream.cpp \
                  glarea.cpp \
                  plugindialog.cpp \
                  customDialog.cpp \
                  saveSnapshotDialog.cpp \
                  savemaskexporter.cpp \
                  changetexturename.cpp \
-                 ../../../sf/wrap/ply/plylib.cpp\
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp \
                  ../../../code/lib/glew/src/glew.c

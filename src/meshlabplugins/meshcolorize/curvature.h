@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.8  2006/02/04 09:41:44  vannini
 Better handling of curvature computation for border vertex
 Plugin info updated
@@ -89,8 +93,12 @@ namespace vcg
   class Frange
   {
   public:
-    float min;
-    float max;
+    Frange(){}
+    Frange(pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
+    Frange(float _min,float _max):minV(_min),maxV(_max){}
+
+    float minV;
+    float maxV;
   };
 
   template <class MESH_TYPE> class Curvature
@@ -208,18 +216,21 @@ namespace vcg
     }
     
   public:
+    // REQUIREMENTS: 
+    // FF Topology
+    // Face Border flags
+    // Vertex Border flags
+    // in case of doubts before calling it:
+    // vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace((*ms));
+    // vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF((*ms));
+    // vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace((*ms));
+
     Curvature(MESH_TYPE &mt):ms(&mt)
     {
       TDCurvPtr = new SimpleTempData<VertContainer, CurvData>((*ms).vert);
       (*TDCurvPtr).Start(CurvData());
       TDAreaPtr = new SimpleTempData<VertContainer, AreaData>((*ms).vert);
       (*TDAreaPtr).Start(AreaData());
-
-      vcg::tri::UpdateTopology<MESH_TYPE>::FaceFace((*ms));
-      vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF((*ms));
-      vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace((*ms));
-      //vcg::tri::UpdateColor<MESH_TYPE>::VertexBorderFlag((*ms));
-
       ComputeHK();
     }
 
@@ -266,49 +277,6 @@ namespace vcg
         t=math::Sqrt(powf((*TDCurvPtr)[*vi].H, 2.0f) - (*TDCurvPtr)[*vi].K);
         (*vi).Q()= math::Abs((*TDCurvPtr)[*vi].H + t) + math::Abs((*TDCurvPtr)[*vi].H - t);
       }
-    }
-
-    Frange minMaxQ()
-    {
-      VertexIterator vi;
-      Frange r;
-      r.min=std::numeric_limits<float>::max();
-      r.max=-std::numeric_limits<float>::max();
-
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/)
-      {
-        if ((*vi).Q() < r.min) r.min = (*vi).Q();
-        if ((*vi).Q() > r.max) r.max = (*vi).Q();   
-      }
-    
-      return r;
-
-    }
-
-    Frange histoPercentile(Frange Q, float histo_frac=DEFAULT_HISTO_FRAC, int histo_range=DEFAULT_HISTO_RANGE)
-    {
-      VertexIterator vi;
-      vcg::Histogram<float> histo;
-      
-      histo.SetRange(Q.min, Q.max, histo_range);
-      
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/) 
-        histo.Add((*vi).Q());
-        
-      Q.min = histo.Percentile(histo_frac);
-      Q.max = histo.Percentile(1.0f - histo_frac);
-
-      return Q;
-    }
-
-
-    void ColorizeByEqualizedQuality(Frange P)
-    {
-      VertexIterator vi;
-              
-      for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/) 
-        (*vi).C().ColorRamp(P.min, P.max, (*vi).Q());
-      
     }
 
   };

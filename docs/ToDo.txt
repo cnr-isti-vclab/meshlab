@@ -1,0 +1,45 @@
+25/5/06
+o clustering nel filtro in input epoch.
+o install doc e attempt.
+
+24/5/06
+
+o Uniformare i nomi degli slot nel main window
+o Measuring Tool
+o risistemare Recent file stuff...(bug in apertura cambio dir?)
+o snapshot con fbo invece che con il rendering nel backbuffer.
+o Ambient Occlusion
+o Clustering dialog diag percentage <1 non va
+o esc che ritorna all'ultimo modo di selezione.
+x selection ico che stanno accese // DONE 24/5
+x selection drawing abilitato subito // DONE 24/5
+o filtro geodesic quality
+
+23/5/06
+
+o scrivere doc di sample di fiultri 
+x aggiornare i filtri epoch // DONE 25/5
+o aggiungere un filtro in ingresso per aln
+
+22/5/06 
+
+o Mapping Colore Qualita Implementare e Debuggare
+o Default colore e curvatura
+o Colore nel clustering
+x Face Selection Tool // DONE 24/5
+ - Feature  // DONE 24/5
+ - Icon  // DONE 24/5
+x Face Selection Drawing // DONE 24/5
+ - Func  // DONE 23/5
+ - Ico e slot // DONE 24/5
+o Global Options, for each plugins
+o Animation Spinning e interopolation
+o Ripulire glarea 
+ - Snapshot
+ - FPS
+ - Log
+ - Paint
+o ScriptDialog
+o Generic dialog option
+o Clustering con bound e selezione.
+o Dialogo shaders che galleggia un po' troppo

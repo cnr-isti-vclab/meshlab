@@ -1,11 +1,13 @@
 #include "shaderDialog.h"
 #include <QTextStream>
-
+#include <QGLWidget>
+#include <QFileDialog>
+#include <QMessageBox>
 #define DECFACTOR 100000.0f
 
 
 
-ShaderDialog::ShaderDialog(ShaderInfo *sInfo, GLArea* gla, RenderMode &rm, QWidget *parent)
+ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QWidget *parent)
 : QDialog(parent)
 {
 	ui.setupUi(this);

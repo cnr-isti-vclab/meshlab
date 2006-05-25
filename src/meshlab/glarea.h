@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.57  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.56  2006/02/16 10:09:34  cignoni
 Removed unnecessary stuff (modifiers)
 
@@ -63,42 +67,13 @@ Revision 1.51  2006/01/25 03:57:15  glvertex
 #include <wrap/gui/trackball.h>
 
 #include "GLLogStream.h"
-
 #include "meshmodel.h"
 #include "interfaces.h"
+#include "filterscript.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
-
-class RenderMode
-{
-public:
-  	vcg::GLW::DrawMode	drawMode;
-  	vcg::GLW::ColorMode	colorMode;
-  	vcg::GLW::TextureMode	textureMode;
-
-    bool lighting;
-    bool backFaceCull;
-    bool doubleSideLighting;  
-    bool fancyLighting;
-    bool castShadow;
-    vcg::Point3f lightDir;
-		
-		
-		RenderMode()
-		{
-      drawMode	= GLW::DMSmooth;
-			colorMode = GLW::CMNone;
-			textureMode = GLW::TMNone;
-
-			lighting = true;
-			backFaceCull = false;
-			doubleSideLighting = false;
-			fancyLighting = false;
-			castShadow = false;
-    }
-};
 
 
 class ColorSetting
@@ -147,9 +122,9 @@ public:
 	vcg::Trackball trackball_light;
 	GLLogStream log;
 	short currLogLevel;
+  FilterScript filterHistory;
 
-	int currentWidth;
-	int currentHeight;
+	QSize curSiz;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 	QFont getFont() {return qFont;}
@@ -182,6 +157,7 @@ public:
 	bool isDefaultTrackBall()   {return activeDefaultTrackball;}
 
 	void setBackFaceCulling(bool enabled);
+	void setSelectionRendering(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
 	void setSnapshotSetting(const SnapshotSetting & s);
 	void setDrawMode(vcg::GLW::DrawMode mode);
@@ -198,7 +174,9 @@ public:
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentSharder = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
 
-	void setEdit(MeshEditInterface *edit){	iEdit = edit; }
+	void setEdit(MeshEditInterface *edit, QAction *editor){	iEdit = edit; currentEditor=editor;}
+	QAction * getEditAction() { return currentEditor; }
+	void endEdit(){	iEdit = 0; currentEditor=0;}///
 
 	void closeEvent(QCloseEvent *event);
 
@@ -220,6 +198,7 @@ protected:
   void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
 	
+  bool drawSelection;
 private:
 	void pasteTile();
 	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
@@ -240,21 +219,21 @@ private:
 
 	// Editing support
 	MeshEditInterface *iEdit;
+	QAction *currentEditor;
 
 	RenderMode rm;
 	ColorSetting cs;
-	float cfps;
 	float fov;
-	float objDist;
+	//float objDist;
 	float clipRatioFar;
 	float clipRatioNear;
 	float nearPlane;
 	float farPlane;
-  QTime time;
-	int deltaTime;
-	int lastTime;
-	int currentTime;
+public:  
+  int deltaTime;
+private:
 	float fpsVector[10];
+	float cfps;
 
 	QString fileName;
 	

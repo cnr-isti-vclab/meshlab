@@ -1,25 +1,32 @@
 /****************************************************************************
-**
-** Copyright (C) 2005-2005 Trolltech AS. All rights reserved.
-**
-** This file is part of the example classes of the Qt Toolkit.
-**
-** Licensees holding valid Qt Commercial licenses may use this file in
-** accordance with the Qt Commercial License Agreement provided with the
-** Software.
-**
-** See http://www.trolltech.com/pricing.html or email sales@trolltech.com for
-** information about Qt Commercial License Agreements.
-**
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
 ****************************************************************************/
+/****************************************************************************
 /* History
 $Log$
+Revision 1.29  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.28  2006/04/12 15:12:18  cignoni
 Added Filter classes (cleaning, meshing etc)
 
@@ -41,8 +48,7 @@ changed spinbox to QEdgeLength widget
 Revision 1.22  2006/01/31 14:40:40  mariolatronico
 removed unused variable ActionInfo *ai, added Log history
 
-*/
-
+****************************************************************************/
 
 #ifndef EXTRAFILTERSPLUGIN_H
 #define EXTRAFILTERSPLUGIN_H
@@ -68,37 +74,35 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 		 - FP -> Filter Plugin
 		 - name of the plugin separated by _
 	*/
-	enum FilterType { FP_LOOP_SS, 
-                    FP_BUTTERFLY_SS, 
-                    FP_REMOVE_UNREFERENCED_VERTEX,
-										FP_REMOVE_DUPLICATED_VERTEX, 
-                    FP_REMOVE_NULL_FACES,
-										FP_LAPLACIAN_SMOOTH, 
-                    FP_DECIMATOR, 
-                    FP_MIDPOINT, 
-                    FP_REORIENT ,
-                    FP_INVERT_FACES,
-										FP_TRANSFORM, 
-                    FP_REMOVE_SMALL_FACES	} ;
+	enum {  FP_LOOP_SS, 
+          FP_BUTTERFLY_SS, 
+          FP_REMOVE_UNREFERENCED_VERTEX,
+				  FP_REMOVE_DUPLICATED_VERTEX, 
+          FP_REMOVE_FACES_BY_AREA,
+				  FP_REMOVE_FACES_BY_EDGE,
+          FP_LAPLACIAN_SMOOTH, 
+          FP_DECIMATOR, 
+          FP_MIDPOINT, 
+          FP_REORIENT ,
+          FP_INVERT_FACES,
+				  FP_TRANSFORM
+          } ;
 
-	const QString ST(FilterType filter);
-  const FilterType ID(QAction *a);
-
-  virtual QList<FilterType> &types() { return typeList;}
-
+	 
+  
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin();
-	virtual const ActionInfo &Info(QAction *);
+	virtual const QString ST(FilterType filter);
+  virtual const ActionInfo &Info(QAction *);
 	virtual const PluginInfo &Info();
   virtual const FilterClass getClass(QAction *);
+  virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);
+  virtual const int getRequirements(QAction *);
 
-	virtual QList<QAction *> actions() const;
-	bool applyFilter(QAction *filter, MeshModel &m, QWidget *parent, vcg::CallBackPos * cb) ;
-	void setLog(GLLogStream *log) { this->log = log ; }
+
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 protected:
-	GLLogStream *log;
-	QList <QAction *> actionList;
-	QList <FilterType> typeList;
+
 
 //	RefineDialog *refineDialog;
 	DecimatorDialog *decimatorDialog;

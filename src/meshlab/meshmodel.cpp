@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.23  2006/05/25 04:57:45  cignoni
+Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
+Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
+
 Revision 1.22  2006/01/17 23:45:12  cignoni
 Removed useless open function
 
@@ -32,45 +36,6 @@ update ply::PlyMask -> io::Mask
 Revision 1.20  2005/12/22 21:05:43  cignoni
 Removed Optional Face Normal and added some initalization after opening
 
-Revision 1.19  2005/12/09 18:16:12  fmazzant
-added generic obj save with plugin arch.
-
-Revision 1.18  2005/12/09 00:26:25  buzzelli
-io importing mechanism adapted in order to be fully transparent towards the user
-
-Revision 1.17  2005/12/07 00:56:40  fmazzant
-added support for exporter generic obj file (level base)
-
-Revision 1.16  2005/12/06 16:27:43  fmazzant
-added obj file in generic open dialog
-
-Revision 1.15  2005/12/04 00:22:46  cignoni
-Switched from progresBar widget to progressbar dialog
-
-Revision 1.14  2005/12/02 00:54:13  cignoni
-Added TextureMode in render
-
-Revision 1.13  2005/11/25 11:55:59  alemochi
-Added function to Enable/Disable lighting (work in progress)
-
-Revision 1.12  2005/11/24 01:45:28  cignoni
-commented line 62. dangerous unuseful debug line.
-
-Revision 1.11  2005/11/24 01:38:36  cignoni
-Added new plugins intefaces, tested with shownormal render mode
-
-Revision 1.10  2005/11/23 00:04:03  cignoni
-added hint for better hiddenline
-
-Revision 1.9  2005/11/22 11:40:14  glvertex
-Now using a single method to compute normals (PerVertePerFace instead PerVertex then PerFace)
-
-Revision 1.8  2005/11/21 22:09:35  cignoni
-added missing enablenormal
-
-Revision 1.7  2005/11/21 12:12:54  cignoni
-Added copyright info
-
 ****************************************************************************/
 
 #include "meshmodel.h"
@@ -79,8 +44,32 @@ Added copyright info
 
 bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm)
 {
-  glw.SetHintParamf(GLW::HNPZTwist,0.0005f); //
   glColor3f(.8f,.8f,.8f);
   glw.Draw(dm,cm,tm);
+  return true;
+}
+
+bool MeshModel::RenderSelectedFaces()
+{
+  glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT );
+  glEnable(GL_POLYGON_OFFSET_FILL);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_BLEND);
+  glDepthMask(GL_FALSE);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
+  glColor4f(1.0f,0.0,0.0,.3f);
+  glPolygonOffset(-1.0, -1);
+  CMeshO::FaceIterator fi;
+  glBegin(GL_TRIANGLES);
+	for(fi=cm.face.begin();fi!=cm.face.end();++fi)
+    if(!(*fi).IsD() && (*fi).IsS())
+    {
+  		glVertex((*fi).cP(0));
+  		glVertex((*fi).cP(1));
+  		glVertex((*fi).cP(2));
+    }
+  glEnd();
+	glPopAttrib();
   return true;
 }

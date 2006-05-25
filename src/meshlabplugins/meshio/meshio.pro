@@ -15,7 +15,7 @@ SOURCES       = meshio.cpp \
 TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins
 
-#win32:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds-120s.lib
+win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds-120s.lib
 
 win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds/lib3ds.a
 
