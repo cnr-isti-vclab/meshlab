@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.54  2006/05/26 04:09:52  cignoni
+Still debugging 0.7
+
 Revision 1.53  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -246,6 +249,7 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
+  //////////////Action Menu Windows /////////////////////////////////////////////////////////////////////////
   endEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
 	endEditModeAct->setShortcut(Qt::Key_Escape);
 	endEditModeAct->setCheckable(true);

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.95  2006/05/26 04:09:52  cignoni
+Still debugging 0.7
+
 Revision 1.94  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -275,8 +278,12 @@ void MainWindow::applyFilter()
 }
 void MainWindow::endEditMode()
 {
-	GLA()->getEditAction()->setChecked(false);
-  GLA()->endEdit();
+  if(GLA()->getEditAction())
+  {
+	  GLA()->getEditAction()->setChecked(false);
+    GLA()->endEdit();
+  }
+  updateMenus();
 }
 void MainWindow::applyEditMode()
 {

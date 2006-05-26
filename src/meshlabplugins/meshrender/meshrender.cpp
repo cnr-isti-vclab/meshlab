@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.18  2006/05/26 04:09:52  cignoni
+Still debugging 0.7
+
 Revision 1.17  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -85,7 +88,7 @@ void MeshShaderRenderPlugin::initActionList() {
 
 	QDir shadersDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
-	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release")
+	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins"  )
 		shadersDir.cdUp();
 #elif defined(Q_OS_MAC)
 	if (shadersDir.dirName() == "MacOS") {
@@ -94,7 +97,11 @@ void MeshShaderRenderPlugin::initActionList() {
 		shadersDir.cdUp();
 	}
 #endif
-	shadersDir.cd("shaders");
+	bool ret=shadersDir.cd("shaders");
+  if(!ret) 
+    QMessageBox::information(0, "MeshLAb",
+      "Unable to find the shaders directory.\n"
+        "No shaders will be loaded.");
 
 
 	QDomDocument doc;
