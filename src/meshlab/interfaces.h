@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.44  2006/06/06 14:32:38  zifnab1974
+Linux filenames are case-sensitive
+
 Revision 1.43  2006/05/25 09:46:37  cignoni
 missing std and and all the other gcc detected syntax errors
 
@@ -154,7 +157,7 @@ Added copyright info
 
 #ifndef MESHLAB_INTERFACES_H
 #define MESHLAB_INTERFACES_H
-#include <QTCore>
+#include <QtCore>
 #include <QMap>
 #include <QPair>
 #include <QAction>
