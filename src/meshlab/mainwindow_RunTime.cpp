@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.96  2006/06/07 08:49:25  cignoni
+Disable rendering during processing and loading
+
 Revision 1.95  2006/05/26 04:09:52  cignoni
 Still debugging 0.7
 
@@ -231,7 +234,7 @@ void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-  
+  GLA()->mm->busy=true;
   // (1) Ask for filter requirements (eg a filter can need topology, border flags etc)
   //    and statisfy them
   int req=iFilter->getRequirements(action);
@@ -240,8 +243,9 @@ void MainWindow::applyFilter()
   
   // (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
   FilterParameter par;
-  iFilter->getParameters(action, GLA(),*(GLA()->mm), par);
+  bool ret=iFilter->getParameters(action, GLA(),*(GLA()->mm), par);
 
+  if(!ret) return;
 	
   // (3) save the current filter and its parameters in the history
   GLA()->filterHistory.actionList.append(qMakePair(action,par));
@@ -252,7 +256,7 @@ void MainWindow::applyFilter()
   qb->show();
   iFilter->setLog(&(GLA()->log));
   // (4) Apply the Filter 
-  bool ret=iFilter->applyFilter(action, *(GLA()->mm), par, QCallBack);
+  ret=iFilter->applyFilter(action, *(GLA()->mm), par, QCallBack);
 
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
@@ -261,7 +265,7 @@ void MainWindow::applyFilter()
 		GLA()->log.Log(GLLogStream::Info,"Applied filter %s",qPrintable(action->text()));
 		GLA()->setWindowModified(true);
 		GLA()->setLastAppliedFilter(action);
-		lastFilterAct->setText(QString("Apply filter ") + action->text());
+		lastFilterAct->setText(QString("Apply filter ") + action->text());  
 		lastFilterAct->setEnabled(true);
 	}
 
@@ -275,6 +279,7 @@ void MainWindow::applyFilter()
 
 	qb->reset();
   updateMenus();
+  GLA()->mm->busy=false;
 }
 void MainWindow::endEditMode()
 {
@@ -542,6 +547,8 @@ void MainWindow::open(QString fileName)
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
     updateMenus();
 	}
+
+  GLA()->mm->busy=false;
 
 	qb->reset();
 }

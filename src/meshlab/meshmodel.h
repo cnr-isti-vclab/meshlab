@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.23  2006/06/07 08:49:25  cignoni
+Disable rendering during processing and loading
+
 Revision 1.22  2006/05/25 09:46:37  cignoni
 missing std and and all the other gcc detected syntax errors
 
@@ -127,6 +130,7 @@ public:
   int currentDataMask;
   // Bitmask denoting what fields are loaded/saved
   int mask;
+  bool busy;
 
   MeshModel() {
 //    size_t faceSize=sizeof(CFaceO);
@@ -135,6 +139,7 @@ public:
     glw.m=&cm; 
     currentDataMask=MM_NONE;
     mask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
+    busy=true;
   }
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
   bool RenderSelectedFaces();

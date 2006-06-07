@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.101  2006/06/07 08:49:25  cignoni
+Disable rendering during processing and loading
+
 Revision 1.100  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -330,32 +333,33 @@ void GLArea::paintGL()
 
 	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
 	              else glDisable(GL_CULL_FACE);
+  if(!mm->busy)
+  {
+    if(iRenderer && currentSharder) {
+		  glPushAttrib(GL_ALL_ATTRIB_BITS);
+		  iRenderer->Render(currentSharder, *mm, rm, this); 
+	  }
 
-  if(iRenderer && currentSharder) {
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		iRenderer->Render(currentSharder, *mm, rm, this); 
-	}
+	  mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
-	mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+	  if(iEdit){
+      iEdit->Decorate(currentEditor,*mm,this);
+    }
 
-	if(iEdit){
-    iEdit->Decorate(currentEditor,*mm,this);
-  }
+	  if(iRenderer) {
+		  glPopAttrib();
+		  glUseProgramObjectARB(0);
+	  }
 
-	if(iRenderer) {
-		glPopAttrib();
-		glUseProgramObjectARB(0);
-	}
+    // Draw the selection
+    if(rm.selectedFaces)
+      mm->RenderSelectedFaces();
 
-  // Draw the selection
-  if(rm.selectedFaces)
-    mm->RenderSelectedFaces();
-
-	if(iDecoratorsList){
-		pair<QAction *,MeshDecorateInterface *> p;
-		foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm,rm,this,qFont);}
-	}
-
+	  if(iDecoratorsList){
+		  pair<QAction *,MeshDecorateInterface *> p;
+		  foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm,rm,this,qFont);}
+	  }
+  } ///end if busy 
 	// ...and take a snapshot
 	if (takeSnapTile)
 	{
@@ -375,7 +379,8 @@ void GLArea::paintGL()
     hasToPick=false;
     if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp)) {
           trackball.Translate(-pp);
-          trackball.Scale(1.2f);
+          trackball.Scale(1.25f);
+          QCursor::setPos(mapToGlobal(QPoint(width()/2+2,height()/2+2)));
         }  
   }
 
