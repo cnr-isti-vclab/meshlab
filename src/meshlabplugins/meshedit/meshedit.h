@@ -59,6 +59,8 @@ public:
     vector<CMeshO::FacePointer> LastSel;
 
 private:
+  typedef enum {SMAdd, SMClear,SMSub} SelMode;
+  SelMode selMode;
   void DrawXORRect(GLArea * gla, bool doubleDraw);
 };
 

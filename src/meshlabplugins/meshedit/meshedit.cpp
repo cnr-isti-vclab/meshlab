@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/06/07 08:48:11  cignoni
+Added selection modes: clean/Add (ctrl) / Sub (shift)
+
 Revision 1.1  2006/05/25 04:57:46  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -73,8 +76,23 @@ QList<QAction *> ExtraMeshEditPlugin::actions() const {
 	 ai.Author = ("Paolo Cignoni");
    return ai;
  } 
-  void ExtraMeshEditPlugin::mousePressEvent    (QAction *, QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+  void ExtraMeshEditPlugin::mousePressEvent    (QAction *, QMouseEvent * event, MeshModel &m, GLArea * gla)
   {
+    LastSel.clear();
+
+    if(event->modifiers() == Qt::ControlModifier || 
+       event->modifiers() == Qt::ShiftModifier )
+      {
+        CMeshO::FaceIterator fi;
+        for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
+            if(!(*fi).IsD() && (*fi).IsS()) 
+                    LastSel.push_back(&*fi);        
+      }  
+      
+    selMode=SMClear;
+    if(event->modifiers()==Qt::ControlModifier) selMode=SMAdd;
+    if(event->modifiers()==Qt::ShiftModifier) selMode=SMSub;
+
     start=event->pos();
     cur=start;
     return;
@@ -153,33 +171,53 @@ QList<QAction *> ExtraMeshEditPlugin::actions() const {
     {
     DrawXORRect(gla,false);
     vector<CMeshO::FacePointer>::iterator fpi;
-    vector<CMeshO::FacePointer> NewSel;
+    // Starting Sel 
+    vector<CMeshO::FacePointer> NewSel;  
     QPoint mid=(start+cur)/2;
     mid.setY(gla->curSiz.height()-  mid.y());
     QPoint wid=(start-cur);
     if(wid.x()<0)  wid.setX(-wid.x());
     if(wid.y()<0)  wid.setY(-wid.y());
 
-    CMeshO::FaceIterator fi;
+ /*   CMeshO::FaceIterator fi;
     for(fi=m.cm.face.begin(),fpi=NewSel.begin();fpi!=NewSel.end();++fi) 
       if(!(*fi).IsD()) {
-        if(&(*fi)!=*fpi) (*fpi)->ClearS();
+          if(&(*fi)!=*fpi) (*fpi)->ClearS();
         else {
           (*fpi)->SetS();
           ++fpi;
         }
       }
+
     for(;fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD()) (*fi).ClearS();
 
+*/
+   
+   CMeshO::FaceIterator fi;
+    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+      if(!(*fi).IsD()) (*fi).ClearS();
 
     GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, NewSel, wid.x(), wid.y());
     qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
     qDebug("Pickface: Got  %i on %i",NewSel.size(),m.cm.face.size());
    
-    for(fpi=NewSel.begin();fpi!=NewSel.end();++fpi)
-      (*fpi)->SetS();
-
+    switch(selMode)
+    { 
+      case SMSub :
+      for(fpi=LastSel.begin();fpi!=LastSel.end();++fpi)
+          (*fpi)->SetS();
+      for(fpi=NewSel.begin();fpi!=NewSel.end();++fpi)
+          (*fpi)->ClearS();
+      break;
+      case SMAdd :
+        for(fpi=LastSel.begin();fpi!=LastSel.end();++fpi)
+          (*fpi)->SetS(); 
+      case SMClear :
+        for(fpi=NewSel.begin();fpi!=NewSel.end();++fpi)
+          (*fpi)->SetS();
+        break;
+    }
      isDragging=false;
     }   
 
