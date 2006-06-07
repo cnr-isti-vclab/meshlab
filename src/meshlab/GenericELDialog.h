@@ -14,8 +14,8 @@ public:
   GenericELDialog() : QDialog()
   {
    setupUi( this );
-		threshold = 0.00;
-		diagonal_percentual = 0.00;
+//		threshold = 0.00;
+	//	diagonal_percentual = 0.00;
 		diagonale= 0.00;
 		perc = 0.0f;
 		selected=false;
@@ -30,7 +30,7 @@ public:
 
 	inline float getThreshold() 
 	{
-		return threshold;
+		return thresholdSB->value();
 	}
 	
 	inline bool getSelected() 
@@ -44,53 +44,53 @@ public:
 		thresholdSB->setMaximum(diag);
 	}
 
+  void setStartingPerc(float perc)
+	{
+    percdiag->setValue(perc);
+    updateAbsoluteThr();
+	}
+
 	void setHistogram(vcg::Histogram<float> *hi)
 	{
 		histo = hi;
 	}
 
-	void aggiornaPercentualeDiagonale()
+	void updatePercDiagThr()
 	{
-		diagonal_percentual = (threshold / diagonale) * 100;
-		percdiag->setValue(diagonal_percentual);
+		percdiag->setValue((thresholdSB->value()/ diagonale) * 100);
 	}
 
-	void aggiornaTrashold()
+	void updateAbsoluteThr()
 	{
-		threshold = (diagonal_percentual * diagonale) /100;
-		thresholdSB->setValue(threshold);
+		thresholdSB->setValue((percdiag->value() * diagonale) /100);
 	}
 
-	void aggiornaPercentile()
+	void updatePercentile()
 	{
-		threshold = histo->Percentile(perc);
+		/*threshold = histo->Percentile(perc);
 		thresholdSB->setValue(threshold);
 		diagonal_percentual = (threshold / diagonale) * 100;
-		percdiag->setValue(diagonal_percentual);
+		percdiag->setValue(diagonal_percentual);*/
 	}
 
 public slots:
 
 	void on_thresholdSB_valueChanged(double threshold) 
 	{
-		if(threshold <= this->diagonale)
-		{
-			this->threshold = threshold;
-			aggiornaPercentualeDiagonale();
-		}
+		updatePercDiagThr();
 	}
 
 	void on_percdiag_valueChanged(double pd)
 	{
-		diagonal_percentual = pd;
-		aggiornaTrashold();
+		//diagonal_percentual = pd;
+		updateAbsoluteThr();
 	}
 
 
 void on_percentileSB_valueChanged(int pd)
 {
 		perc = 1.0f - (pd * 0.01);
-		aggiornaPercentile();
+		updatePercentile();
 }
 
 	void on_selctedCB_stateChanged(int pd) {
@@ -102,12 +102,12 @@ void on_percentileSB_valueChanged(int pd)
 	}
 
 private:
-	double threshold;
-	double diagonal_percentual;
+	//double threshold;
+	//double diagonal_percentual;
 	double diagonale;
 	vcg::Histogram<float> *histo;
 	float perc;
-		bool selected;
+	bool selected;
 };
 
 #endif 

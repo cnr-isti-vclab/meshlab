@@ -76,6 +76,9 @@
      </item>
      <item>
       <widget class="QSpinBox" name="percentileSB" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
        <property name="maximum" >
         <number>100</number>
        </property>
