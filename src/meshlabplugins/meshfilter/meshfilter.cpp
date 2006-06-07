@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.63  2006/06/07 10:25:28  cignoni
+init of bbox diag for generic lenght dialog
+
 Revision 1.62  2006/05/25 06:24:14  cignoni
 Decimator dialog no more necessary
 
@@ -286,6 +289,7 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *, MeshModel 
         Histogram<float> histo;
         genericELD->setHistogram(&histo);
         genericELD->setDiagonale(m.cm.bbox.Diag());
+        genericELD->setStartingPerc(1.0);
         int continueValue = genericELD->exec();
 
         //int continueValue = refineDialog->exec();
