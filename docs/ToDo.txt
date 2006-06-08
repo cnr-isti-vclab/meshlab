@@ -1,8 +1,20 @@
+
+6/6/06
+x move cursor after dblclick // DONE 6/6 
+
+26/5/06
+o install cleaning.
+ - no file after uninstall
+ x licenza  // Added GPL Done 6/6
+
 25/5/06
 o clustering nel filtro in input epoch.
-o install doc e attempt.
+o install doc e attempt. // DONE 26/5
 o Last Dir
-o selections plus/minus
+x selections plus/minus
+x Esc Pianta  // DONE 26/5
+o save 3ds pianta
+
 24/5/06
 
 o Uniformare i nomi degli slot nel main window
@@ -10,7 +22,7 @@ o Measuring Tool
 o risistemare Recent file stuff...(bug in apertura cambio dir?)
 o snapshot con fbo invece che con il rendering nel backbuffer.
 o Ambient Occlusion
-o Clustering dialog diag percentage <1 non va
+x Clustering dialog diag percentage <1 non va // DONE 7/6
 o esc che ritorna all'ultimo modo di selezione.
 x selection ico che stanno accese // DONE 24/5
 x selection drawing abilitato subito // DONE 24/5
@@ -26,13 +38,13 @@ o aggiungere un filtro in ingresso per aln
 
 o Mapping Colore Qualita Implementare e Debuggare
 o Default colore e curvatura
-o Colore nel clustering
+x Colore nel clustering // DONE 7/6
 x Face Selection Tool // DONE 24/5
- - Feature  // DONE 24/5
- - Icon  // DONE 24/5
+x - Feature  // DONE 24/5
+x - Icon  // DONE 24/5
 x Face Selection Drawing // DONE 24/5
- - Func  // DONE 23/5
- - Ico e slot // DONE 24/5
+x - Func  // DONE 23/5
+x - Ico e slot // DONE 24/5
 o Global Options, for each plugins
 o Animation Spinning e interopolation
 o Ripulire glarea 
