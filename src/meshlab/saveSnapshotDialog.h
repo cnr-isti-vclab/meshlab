@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/06/08 11:55:07  zifnab1974
+Do not use classname in class definition
+
 Revision 1.3  2006/01/02 17:19:19  glvertex
 Changed include directive to new .ui filenames
 
@@ -46,8 +49,8 @@ Q_OBJECT
 
 public:
 	SaveSnapshotDialog(QWidget *parent = 0);
-	void SaveSnapshotDialog::setValues(const SnapshotSetting &ss);
-	SnapshotSetting SaveSnapshotDialog::getValues();
+	void setValues(const SnapshotSetting &ss);
+	SnapshotSetting getValues();
 	
 private slots:
 	void browseDir();
