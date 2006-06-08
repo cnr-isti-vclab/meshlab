@@ -12,6 +12,7 @@
 #include <QCheckBox>
 #include <map>
 #include <GL/glew.h>
+#include <QGLWidget>
 #include <meshlab/meshmodel.h>
 
 #include "shaderStructs.h"

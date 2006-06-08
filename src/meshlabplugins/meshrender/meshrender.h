@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.19  2006/06/08 08:54:43  zifnab1974
+Do not use classname in class definition
+
 Revision 1.18  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -122,11 +125,11 @@ public:
 		sDialog = 0;
 	}
 
-	QList<QAction *> MeshShaderRenderPlugin::actions () const {
+	QList<QAction *> actions () const {
     return actionList;
   }
 
-  void MeshShaderRenderPlugin::initActionList();
+  void initActionList();
 
 	virtual const PluginInfo &Info();
 	virtual bool isSupported() {return supported;}

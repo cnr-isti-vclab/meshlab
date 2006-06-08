@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/06/08 08:54:43  zifnab1974
+Do not use classname in class definition
+
 Revision 1.2  2006/01/30 17:19:22  vannini
 Added manual values to control min and max Q (mapping curvature to color)
 
@@ -76,8 +79,8 @@ private:
 public:
   EqualizerDialog(QWidget *parent = 0);
   ~EqualizerDialog();
-  void EqualizerDialog::setValues(const EqualizerSettings& es);
-  EqualizerSettings EqualizerDialog::getValues();
+  void setValues(const EqualizerSettings& es);
+  EqualizerSettings getValues();
 
 };
 
