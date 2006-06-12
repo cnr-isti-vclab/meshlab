@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.58  2006/06/12 15:18:36  cignoni
+toggle between last editing mode
+
 Revision 1.57  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -130,7 +133,9 @@ public:
 	QFont getFont() {return qFont;}
 
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
+	QAction *getLastAppliedEdit()							{return lastEditRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
+	void		setLastAppliedEdit(QAction *qa)		  {lastEditRef = qa;}
 
 	QString getFileName()							{return fileName;}
 	void		setFileName(QString name)	
@@ -214,6 +219,7 @@ private:
 	MeshRenderInterface *iRenderer;
 	QAction *currentSharder;
 	QAction *lastFilterRef; // reference to last filter applied
+	QAction *lastEditRef; // reference to last Editing Mode Used 
 	QFont	qFont;			//font settings
 
 

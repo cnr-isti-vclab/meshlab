@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.97  2006/06/12 15:21:03  cignoni
+toggle between last editing mode
+
 Revision 1.96  2006/06/07 08:49:25  cignoni
 Disable rendering during processing and loading
 
@@ -211,6 +214,16 @@ void MainWindow::updateMenus()
 	}
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+  qDebug("dragEnterEvent: %s",event->format());
+  QDrag *drag=new QDrag(this);
+
+}
+void MainWindow::dropEvent ( QDropEvent * event )  
+{
+  qDebug("dropEvent: %s",event->format());
+}
 void MainWindow::applyLastFilter()
 {
   GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
@@ -288,6 +301,16 @@ void MainWindow::endEditMode()
 	  GLA()->getEditAction()->setChecked(false);
     GLA()->endEdit();
   }
+  else
+    if(GLA()->getLastAppliedEdit())
+    {	
+      QAction *action = qobject_cast<QAction *>(GLA()->getLastAppliedEdit());
+	    MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
+      GLA()->setEdit(iEdit,action);
+      iEdit->StartEdit(action,*(GLA()->mm),GLA());
+	    GLA()->log.Log(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
+      GLA()->setSelectionRendering(true);
+    }
   updateMenus();
 }
 void MainWindow::applyEditMode()
@@ -295,6 +318,8 @@ void MainWindow::applyEditMode()
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
   GLA()->setEdit(iEdit,action);
+  GLA()->setLastAppliedEdit(action);
+
   iEdit->StartEdit(action,*(GLA()->mm),GLA());
 	GLA()->log.Log(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
   GLA()->setSelectionRendering(true);

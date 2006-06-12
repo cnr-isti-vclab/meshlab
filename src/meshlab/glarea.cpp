@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.102  2006/06/12 15:18:36  cignoni
+toggle between last editing mode
+
 Revision 1.101  2006/06/07 08:49:25  cignoni
 Disable rendering during processing and loading
 
@@ -94,9 +97,10 @@ GLArea::GLArea(QWidget *parent)
 	trackBallVisible = true;
 	currentSharder = NULL;
 	lastFilterRef = NULL;
+	lastEditRef = NULL;
 	mm = NULL;
 	currLogLevel = -1;
-	
+	setAttribute(Qt::WA_DeleteOnClose,true);
 	// Projection Matrix starting settings
 	//objDist = 3.f;
 	fov = 60;
