@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/06/12 15:18:56  cignoni
+Shortcut to delete selected face
+
 Revision 1.1  2006/05/25 04:57:46  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -60,7 +63,11 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   FilterType tt;
   
   foreach(tt , types())
-	    actionList << new QAction(ST(tt), this);
+    {
+      actionList << new QAction(ST(tt), this);
+      if(tt==FP_SELECT_DELETE)
+            actionList.last()->setShortcut(QKeySequence (Qt::Key_Delete));
+    }	  
 }
 SelectionFilterPlugin::~SelectionFilterPlugin() 
 {
