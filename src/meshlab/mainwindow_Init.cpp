@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.55  2006/06/12 15:20:44  cignoni
+Initial Dragdrop support (still not working,,,)
+
 Revision 1.54  2006/05/26 04:09:52  cignoni
 Still debugging 0.7
 
@@ -92,7 +95,8 @@ MainWindow::MainWindow()
 	createMenus();
 	createToolBars();
 	updateMenus();
-
+  setAcceptDrops(true);
+  workspace->setAcceptDrops(true);
 	setWindowTitle(appName());
 	loadPlugins();
   qb=new QProgressDialog(this);
