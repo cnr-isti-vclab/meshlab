@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/06/12 15:19:51  cignoni
+Correct bug in the update of the selection during dragging
+
 Revision 1.2  2006/06/07 08:48:11  cignoni
 Added selection modes: clean/Add (ctrl) / Sub (shift)
 
@@ -39,6 +42,7 @@ Optional data really working. Clustering decimation totally rewrote. History sta
 #include <meshlab/glarea.h>
 #include "meshedit.h"
 #include <wrap/gl/pick.h>
+#include<limits>
 using namespace vcg;
 
 ExtraMeshEditPlugin::ExtraMeshEditPlugin() {
@@ -105,12 +109,18 @@ QList<QAction *> ExtraMeshEditPlugin::actions() const {
     isDragging = true;
     
     // now the management of the update 
-    static int lastMouse=0;
-    static int lastRendering=0;
+    //static int lastMouse=0;
+    static int lastRendering=clock();
     int curT = clock();
-    if(gla->deltaTime < 50 )     gla->update();
+    qDebug("mouseMoveEvent: curt %i last %i",curT,lastRendering);
+    if(gla->deltaTime < 50 || (curT - lastRendering) > 1000 )
+    {
+      lastRendering=curT;
+      gla->update();
+      qDebug("mouseMoveEvent: ----");
+    }
     else{
-      gla->makeCurrent ();
+      gla->makeCurrent();
       glDrawBuffer(GL_FRONT);
       DrawXORRect(gla,true);
       glDrawBuffer(GL_BACK);
