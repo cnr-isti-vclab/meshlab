@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.98  2006/06/13 13:50:01  cignoni
+Cleaned FPS management
+
 Revision 1.97  2006/06/12 15:21:03  cignoni
 toggle between last editing mode
 
@@ -497,9 +500,10 @@ void MainWindow::openFilterScript(QString fileName)
 void MainWindow::saveFilterScript(QString fileName)
 {
 	if (fileName.isEmpty())
-		fileName = QFileDialog::getOpenFileName(this,tr("Open Filter Script File"),".", "*.mls");
+		fileName = QFileDialog::getSaveFileName(this,tr("Save Filter Script File"),".", "*.mls");
 	
 	if (fileName.isEmpty())	return;
+
 }
 
 

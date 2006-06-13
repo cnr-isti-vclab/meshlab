@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/06/13 13:50:01  cignoni
+Cleaned FPS management
+
 Revision 1.3  2006/06/12 15:19:51  cignoni
 Correct bug in the update of the selection during dragging
 
@@ -113,7 +116,7 @@ QList<QAction *> ExtraMeshEditPlugin::actions() const {
     static int lastRendering=clock();
     int curT = clock();
     qDebug("mouseMoveEvent: curt %i last %i",curT,lastRendering);
-    if(gla->deltaTime < 50 || (curT - lastRendering) > 1000 )
+    if(gla->lastRenderingTime() < 50 || (curT - lastRendering) > 1000 )
     {
       lastRendering=curT;
       gla->update();

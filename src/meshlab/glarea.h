@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.59  2006/06/13 13:50:01  cignoni
+Cleaned FPS management
+
 Revision 1.58  2006/06/12 15:18:36  cignoni
 toggle between last editing mode
 
@@ -150,7 +153,7 @@ public:
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 	const ColorSetting& getCustomSetting()		const {return cs;}
 	const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
-	void updateFps();
+	void updateFps(float deltaTime);
 	
 	void showLog(bool b)			{logVisible = b; updateGL();}
 	void showInfoArea(bool b)		{infoAreaVisible = b; updateGL();}
@@ -184,6 +187,7 @@ public:
 	void endEdit(){	iEdit = 0; currentEditor=0;}///
 
 	void closeEvent(QCloseEvent *event);
+  float lastRenderingTime() { return lastTime;}
 
 protected:
 	void initializeGL();
@@ -202,7 +206,6 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *event);
   void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
-	
   bool drawSelection;
 private:
 	void pasteTile();
@@ -235,11 +238,9 @@ private:
 	float clipRatioNear;
 	float nearPlane;
 	float farPlane;
-public:  
-  int deltaTime;
 private:
-	float fpsVector[10];
 	float cfps;
+  float lastTime;
 
 	QString fileName;
 	

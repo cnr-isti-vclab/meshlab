@@ -1,3 +1,7 @@
+12/6/06
+o selection che genera parametri
+o progress bar integrata nella glarea.
+x shortcut delete selected faces
 
 6/6/06
 x move cursor after dblclick // DONE 6/6 
@@ -8,7 +12,7 @@ o install cleaning.
  x licenza  // Added GPL Done 6/6
 
 25/5/06
-o clustering nel filtro in input epoch.
+x clustering nel filtro in input epoch // DONE 6/6 
 o install doc e attempt. // DONE 26/5
 o Last Dir
 x selections plus/minus
@@ -23,14 +27,14 @@ o risistemare Recent file stuff...(bug in apertura cambio dir?)
 o snapshot con fbo invece che con il rendering nel backbuffer.
 o Ambient Occlusion
 x Clustering dialog diag percentage <1 non va // DONE 7/6
-o esc che ritorna all'ultimo modo di selezione.
+x esc che ritorna all'ultimo modo di selezione. // DONE 12/6 
 x selection ico che stanno accese // DONE 24/5
 x selection drawing abilitato subito // DONE 24/5
 o filtro geodesic quality
 
 23/5/06
 
-o scrivere doc di sample di fiultri 
+o scrivere doc di sample di filtri 
 x aggiornare i filtri epoch // DONE 25/5
 o aggiungere un filtro in ingresso per aln
 

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.103  2006/06/13 13:50:01  cignoni
+Cleaned FPS management
+
 Revision 1.102  2006/06/12 15:18:36  cignoni
 toggle between last editing mode
 
@@ -84,10 +87,8 @@ GLArea::GLArea(QWidget *parent)
 	iDecoratorsList=0;
 	iEdit=0;
 	currentEditor=0;
-	//currentTime=0;
-	//lastTime=0;
-	deltaTime=0;
 	cfps=0;
+  lastTime=0;
   hasToPick=false;
 	logVisible = true;
 	helpVisible=false;
@@ -435,8 +436,8 @@ void GLArea::paintGL()
 		// Third the ENV INFO (Fps,ClippingPlanes,....)
 		//int currentTime=time.elapsed();
 		//deltaTime=currentTime-lastTime;
-		deltaTime=time.elapsed();
-		updateFps();
+		//deltaTime=time.elapsed();
+		updateFps(time.elapsed());
 
 		displayEnvInfo();
 	}
@@ -459,8 +460,8 @@ void GLArea::displayMeshInfo()
 	
 	renderText(curSiz.width()*.5f,startPos-5*fontSpacingV,tr("MESH INFO"),qFont);
 
-	renderText(curSiz.width()*.5f,startPos-3*fontSpacingV,tr("Vertices: %1").arg(mm->cm.vert.size()),qFont);
-	renderText(curSiz.width()*.5f,startPos-2*fontSpacingV,tr("Faces: %1").arg(mm->cm.face.size()),qFont);
+	renderText(curSiz.width()*.5f,startPos-3*fontSpacingV,tr("Vertices: %1").arg(mm->cm.vn),qFont);
+	renderText(curSiz.width()*.5f,startPos-2*fontSpacingV,tr("Faces: %1").arg(mm->cm.fn),qFont);
 	renderText(curSiz.width()*.5f,startPos-  fontSpacingV,GetMeshInfoString(mm->mask),qFont);
 }
 
@@ -804,8 +805,9 @@ void GLArea::setView()
 	gluLookAt(0, 0, objDist,0, 0, 0, 0, 1, 0);
 }
 
-void GLArea::updateFps()
+void GLArea::updateFps(float deltaTime)
 {
+ 	static float fpsVector[10];
 	static int j=0;
 	float averageFps=0;
   if (deltaTime>0) {
@@ -814,6 +816,7 @@ void GLArea::updateFps()
   }
 	for (int i=0;i<10;i++) averageFps+=fpsVector[i];
 	cfps=1000.0f/(averageFps/10);
+  lastTime=deltaTime;
 }
 
 void GLArea::resetTrackBall(){trackball.Reset();updateGL();}
