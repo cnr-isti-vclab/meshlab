@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.104  2006/06/14 04:18:59  cignoni
+removed no per vertex color bug
+
 Revision 1.103  2006/06/13 13:50:01  cignoni
 Cleaned FPS management
 
@@ -329,13 +332,14 @@ void GLArea::paintGL()
 	}
 
 	// Set proper colorMode
-	glDisable(GL_COLOR_MATERIAL);
+	//glDisable(GL_COLOR_MATERIAL);
 	if(rm.colorMode != GLW::CMNone)
 	{
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
-
+	else glColor(Color4b::LightGray);
+	
 	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
 	              else glDisable(GL_CULL_FACE);
   if(!mm->busy)
