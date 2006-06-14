@@ -33,9 +33,13 @@
 
 
   ** NEW FEATURES/PATCHES **
+Editing and Selection is IN!
+
 Bug in shaders
 Filter classes (now filters are assigned to different submenus)
 Intial mode faceted
+Real Installer for windows
+
 
 ------------------------------------------------------------------------------
 - Meshlab v0.6

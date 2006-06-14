@@ -20,7 +20,7 @@
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 ; License page
-!insertmacro MUI_PAGE_LICENSE "..\..\docs\license.txt"
+!insertmacro MUI_PAGE_LICENSE "..\..\docs\gpl.txt"
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
@@ -110,13 +110,14 @@ Section "MainSection" SEC01
   File "..\sample\TextureDouble_A.png"
   File "..\sample\Laurana50k.ply"
   SetOutPath "$INSTDIR\plugins\imageformats"
-  File "C:\Qt\4.1.0\plugins\imageformats\qjpeg1.dll"
+  File "C:\Qt\4.1.2\plugins\imageformats\qjpeg1.dll"
   SetOutPath "$INSTDIR"
-  File "C:\Qt\4.1.0\bin\QtCore4.dll"
-  File "C:\Qt\4.1.0\bin\QtGui4.dll"
-  File "C:\Qt\4.1.0\bin\QtOpenGL4.dll"
-  File "C:\Qt\4.1.0\bin\QtXml4.dll"
-  File "C:\Qt\4.1.0\bin\QtNetwork4.dll"
+  File "C:\Qt\4.1.2\bin\QtCore4.dll"
+  File "C:\Qt\4.1.2\bin\QtGui4.dll"
+  File "C:\Qt\4.1.2\bin\QtOpenGL4.dll"
+  File "C:\Qt\4.1.2\bin\QtXml4.dll"
+  File "C:\Qt\4.1.2\bin\QtNetwork4.dll"
+  File "C:\MinGW\bin\mingwm10.dll"
 SectionEnd
 
 Section -AdditionalIcons
