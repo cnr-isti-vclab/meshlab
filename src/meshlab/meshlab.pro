@@ -3,8 +3,10 @@ HEADERS        = interfaces.h \
                  mainwindow.h \
                  meshmodel.h \
                  glarea.h \
+                 filterscript.h \
                  plugindialog.h \
                  customDialog.h \
+                 filterScriptDialog.h \
                  saveSnapshotDialog.h \
                  savemaskexporter.h \
                  changetexturename.h \
@@ -19,7 +21,9 @@ SOURCES        = main.cpp \
 		         GLLogStream.cpp \
                  glarea.cpp \
                  plugindialog.cpp \
+                 filterscript.cpp \
                  customDialog.cpp \
+                 filterScriptDialog.cpp \
                  saveSnapshotDialog.cpp \
                  savemaskexporter.cpp \
                  changetexturename.cpp \
@@ -27,7 +31,8 @@ SOURCES        = main.cpp \
                  ../../../sf/wrap/gui/trackmode.cpp \
                  ../../../code/lib/glew/src/glew.c
 
-FORMS          =	ui/customDialog.ui\
+FORMS          =	ui/filterScriptDialog.ui \
+                    ui/customDialog.ui\
 					ui/savesnapshotDialog.ui\						 
 					ui/aboutDialog.ui \
 					ui/renametexture.ui \

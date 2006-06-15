@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.56  2006/06/15 13:05:57  cignoni
+added Filter History Dialogs
+
 Revision 1.55  2006/06/12 15:20:44  cignoni
 Initial Dragdrop support (still not working,,,)
 
@@ -253,14 +256,14 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 
-  //////////////Action Menu Windows /////////////////////////////////////////////////////////////////////////
+  //////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
   endEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
 	endEditModeAct->setShortcut(Qt::Key_Escape);
 	endEditModeAct->setCheckable(true);
 	endEditModeAct->setChecked(true);
 	connect(endEditModeAct, SIGNAL(triggered()), this, SLOT(endEditMode()));
 
-	//////////////Action Menu Windows /////////////////////////////////////////////////////////////////////////
+	//////////////Action Menu WINDOWS /////////////////////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
 	connect(windowsTileAct, SIGNAL(triggered()), workspace, SLOT(tile()));
 
@@ -280,9 +283,9 @@ void MainWindow::createActions()
 	lastFilterAct->setEnabled(false);
 	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
 	
-  runFilterScriptAct = new QAction(tr("Run current filter script"),this);
-	runFilterScriptAct->setEnabled(false);
-	connect(runFilterScriptAct, SIGNAL(triggered()), this, SLOT(runFilterScript()));
+  showFilterScriptAct = new QAction(tr("Show current filter script"),this);
+	showFilterScriptAct->setEnabled(true);
+	connect(showFilterScriptAct, SIGNAL(triggered()), this, SLOT(showFilterScript()));
 	
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
@@ -346,6 +349,7 @@ void MainWindow::createMenus()
   //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	filterMenu->addAction(lastFilterAct);
+  filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addSeparator();
 	filterMenuSelect = filterMenu->addMenu(tr("Select"));
 	filterMenuClean  = filterMenu->addMenu(tr("Clean"));

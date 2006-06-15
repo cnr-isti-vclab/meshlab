@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.65  2006/06/15 13:05:57  cignoni
+added Filter History Dialogs
+
 Revision 1.64  2006/06/12 15:20:44  cignoni
 Initial Dragdrop support (still not working,,,)
 
@@ -107,6 +110,7 @@ private slots:
 	void applyFilter();
 	void applyLastFilter();
 	void runFilterScript();
+	void showFilterScript();
 	/////////// Slot Menu Render /////////////////////
 	void renderBbox();
 	void renderPoint();
@@ -166,7 +170,7 @@ private:
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
-  QMap<QString,QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
+  QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
 	
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
@@ -207,6 +211,7 @@ private:
 	QAction *saveSnapshotAct;
 	QAction *lastFilterAct;
 	QAction *runFilterScriptAct;
+	QAction *showFilterScriptAct;
 	QAction *recentFileActs[MAXRECENTFILES];
 	QAction *separatorAct;										
 	QAction *exitAct;

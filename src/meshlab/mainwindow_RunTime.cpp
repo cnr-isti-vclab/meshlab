@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.99  2006/06/15 13:05:57  cignoni
+added Filter History Dialogs
+
 Revision 1.98  2006/06/13 13:50:01  cignoni
 Cleaned FPS management
 
@@ -77,6 +80,7 @@ Minor edits.
 #include "mainwindow.h"
 #include "glarea.h"
 #include "plugindialog.h"
+#include "filterScriptDialog.h"
 #include "customDialog.h"		
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
@@ -231,15 +235,30 @@ void MainWindow::applyLastFilter()
 {
   GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
 }
+void MainWindow::showFilterScript()
+{
+  FilterScriptDialog dialog(this);
+	dialog.setScript(&(GLA()->filterHistory));
+	if (dialog.exec()==QDialog::Accepted) 
+	{
+			runFilterScript();
+      return ;
+	}
+
+}
 
 void MainWindow::runFilterScript()
 {
   FilterScript::iterator ii;
   for(ii= GLA()->filterHistory.actionList.begin();ii!= GLA()->filterHistory.actionList.end();++ii)
   {
-	  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>( (*ii).first->parent());
-    iFilter->applyFilter( (*ii).first, *(GLA()->mm), (*ii).second, QCallBack );
-    GLA()->log.Log(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first->text()));
+    QAction *action = filterMap[ (*ii).first];
+	  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+
+    int req=iFilter->getRequirements(action);
+    GLA()->mm->updateDataMask(req);
+    iFilter->applyFilter( action, *(GLA()->mm), (*ii).second, QCallBack );
+    GLA()->log.Log(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
 }
 // /////////////////////////////////////////////////
@@ -264,10 +283,10 @@ void MainWindow::applyFilter()
   if(!ret) return;
 	
   // (3) save the current filter and its parameters in the history
-  GLA()->filterHistory.actionList.append(qMakePair(action,par));
+  GLA()->filterHistory.actionList.append(qMakePair(action->text(),par));
 
   qDebug("Filter History size %i",GLA()->filterHistory.actionList.size());
-  qDebug("Filter History Last entry %s",qPrintable (GLA()->filterHistory.actionList.front().first->text()));
+  qDebug("Filter History Last entry %s",qPrintable (GLA()->filterHistory.actionList.front().first));
 
   qb->show();
   iFilter->setLog(&(GLA()->log));

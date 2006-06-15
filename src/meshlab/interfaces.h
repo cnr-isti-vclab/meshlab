@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.45  2006/06/15 13:05:57  cignoni
+added Filter History Dialogs
+
 Revision 1.44  2006/06/06 14:32:38  zifnab1974
 Linux filenames are case-sensitive
 
@@ -161,6 +164,7 @@ Added copyright info
 #include <QMap>
 #include <QPair>
 #include <QAction>
+#include "filterparameter.h"
 
 class QWidget;
 class QGLWidget;
@@ -224,64 +228,6 @@ public:
       QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
 };
 
-
-
-class FilterParameter
-{
-public:
-
-  FilterParameter(){}
-
-  inline bool getBool(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    assert(ii!=paramMap.end());
-    assert(ii.value().type()==QVariant::Bool);
-    return ii.value().toBool();
-  }
-  
-  inline int getInt(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    if(ii==paramMap.end()) assert(0);
-    assert(ii.value().type()==QVariant::Int);
-    return ii.value().toInt();
-  }
-
-  inline float getFloat(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    if(ii==paramMap.end()) assert(0);
-    assert(ii.value().type()==QVariant::Double);
-    return float(ii.value().toDouble());
-  }
-  
-  inline Matrix44f getMatrix44(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    if(ii==paramMap.end()) assert(0);
-    assert(ii.value().type()==QVariant::List);
-    Matrix44f matrix;
-    QList<QVariant> matrixVals = ii.value().toList();
-    assert(matrixVals.size()==16);
-    for(int i=0;i<16;++i)
-      matrix.V()[i]=matrixVals[i].toDouble();
-    
-    return matrix;
-  }
-
-  inline void addFloat(QString name,float val){ paramMap.insert(name, QVariant( double(val)) ); }
-  inline void addInt  (QString name,float val){ paramMap.insert(name, QVariant(    int(val)) ); }
-  inline void addBool (QString name,bool val) { paramMap.insert(name, QVariant(        val )  );  }
-  
-  inline void addMatrix44(QString name,Matrix44f val) { 
-    QList<QVariant> matrixVals;
-    for(int i=0;i<16;++i)
-        matrixVals.append(val.V()[i]);
-    paramMap.insert(name, QVariant(matrixVals)  );  
-  }
-
-  inline void clear() { paramMap.clear(); }
-private:
-  // The data is just a list of Parameters
-  QMap<QString,QVariant> paramMap;  
-};
 
 class MeshFilterInterface
 {
