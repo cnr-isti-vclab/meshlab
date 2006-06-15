@@ -5,11 +5,11 @@ HEADERS       = meshio.h \
 				../../../../sf/wrap/ply/plylib.h \
 				../../../../sf/wrap/io_trimesh/export_obj.h \
 				../../../../sf/wrap/io_trimesh/export_3ds.h \
-				import_obj.h \
+				../../../../sf/wrap/io_trimesh/import_obj.h \
+				../../../../sf/wrap/io_trimesh/io_material.h \
 				import_3ds.h \
-				io_obj.h \
-				io_3ds.h \
-				../../../../sf/wrap/io_trimesh/io_material.h
+				io_3ds.h 
+				
 SOURCES       = meshio.cpp \
 				../../../../sf/wrap/ply/plylib.cpp
 TARGET        = meshio
