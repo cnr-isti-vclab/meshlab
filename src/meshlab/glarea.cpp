@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.105  2006/06/16 01:27:33  cignoni
+Comment
+
 Revision 1.104  2006/06/14 04:18:59  cignoni
 removed no per vertex color bug
 
@@ -382,8 +385,8 @@ void GLArea::paintGL()
 		glPopAttrib();
 	}
   glPopMatrix(); // now we are back in pre-trackball space
-  if(hasToPick)
-  {
+  if(hasToPick) 
+  { // Double click move picked point to center
     Point3f pp;
     hasToPick=false;
     if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp)) {
