@@ -69,4 +69,5 @@ unix{
 	QMAKE_CXX	 = g++
 	QMAKE_LINK	 = gcc
 	CONFIG		+= warn_off debug_and_release
+        LIBS            += -L../../../code/lib/glew/lib -lGLEW
 }

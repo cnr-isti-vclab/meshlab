@@ -27,7 +27,7 @@ unix{
 	QMAKE_CXX	 = g++
 	QMAKE_LINK	 = gcc
 	CONFIG		+= warn_off debug_and_release
-	LIBS		+= -l3ds
+	LIBS		+= -L../../../../code/lib/lib3ds-1.2.0/lib3ds/ -l3ds
 }
 
 
