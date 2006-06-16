@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/06/16 07:27:20  zifnab1974
+don't use class name in member definition. GCC 4.1 complains
+
 Revision 1.2  2006/06/16 01:26:07  cignoni
 Added Initial Filter Script Dialog
 
@@ -40,7 +43,7 @@ class FilterScriptDialog : public QDialog
 Q_OBJECT
 public:
 	FilterScriptDialog(QWidget *parent = 0);
-  void FilterScriptDialog::setScript(FilterScript *scr);
+  void setScript(FilterScript *scr);
 
 private slots:
 	void clearScript();	
