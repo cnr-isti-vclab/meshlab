@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.26  2006/06/16 01:26:42  cignoni
+Debugged Color by quality and default Curvature
+
 Revision 1.25  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -236,8 +239,8 @@ bool ExtraMeshColorizePlugin::getParameters(QAction *action, QWidget *parent, Me
         FinalRange = Frange(eqSettings.manualMinQ,eqSettings.manualMaxQ);
        else
        {
-        FinalRange.minV=H.Percentile(eqSettings.percentile);
-        FinalRange.maxV=H.Percentile(1.0f-eqSettings.percentile);
+        FinalRange.minV=H.Percentile(eqSettings.percentile/100.0);
+        FinalRange.maxV=H.Percentile(1.0f-(eqSettings.percentile/100.0));
        }
 
       par.addFloat("RangeMin",FinalRange.minV);
@@ -249,7 +252,12 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
  switch(ID(filter)) {
   case CP_MAP_QUALITY_INTO_COLOR :
     {
-//      Curvature<CMeshO> c(m.cm);
+      float RangeMin=par.getFloat("RangeMin");	
+      float RangeMax = par.getFloat("RangeMax");		
+
+     
+  tri::UpdateColor<CMeshO>::VertexQuality(m.cm,RangeMin,RangeMax);
+     
         break;
     }
   case CP_GAUSSIAN:
@@ -265,7 +273,10 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
           case CP_ABSOLUTE: c.MapAbsoluteCurvatureIntoQuality();    break;
       }      
       
-      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,-.1,.1);
+      Histogramf H;
+      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,H.Percentile(0.1),H.Percentile(0.9));
+      
     break;
     }
   case CP_SELFINTERSECT:
