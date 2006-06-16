@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.100  2006/06/16 01:26:07  cignoni
+Added Initial Filter Script Dialog
+
 Revision 1.99  2006/06/15 13:05:57  cignoni
 added Filter History Dialogs
 
@@ -594,9 +597,10 @@ void MainWindow::open(QString fileName)
 		}
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
     updateMenus();
+    GLA()->mm->busy=false;
 	}
 
-  GLA()->mm->busy=false;
+ 
 
 	qb->reset();
 }

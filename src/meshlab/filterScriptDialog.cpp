@@ -23,28 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/06/16 01:26:07  cignoni
+Added Initial Filter Script Dialog
+
 Revision 1.1  2006/06/15 13:05:57  cignoni
 added Filter History Dialogs
-
-Revision 1.7  2006/01/16 05:34:16  cignoni
-Added backward qt4.0 compatibility for setAutoFillBackground
-
-Revision 1.6  2006/01/15 15:27:59  glvertex
-Added few lines to set background even in qt 4.1
-
-Revision 1.5  2006/01/02 18:54:52  glvertex
-added multilevel logging support
-
-Revision 1.4  2006/01/02 17:39:18  glvertex
-Added info types in a combobox
-
-Revision 1.3  2005/12/04 16:50:15  glvertex
-Removed [using namespace] directive form .h
-Renaming in QT style
-Adapted method behavior to the new ui interface
-
-Revision 1.2  2005/12/03 22:49:46  cignoni
-Added copyright info
 
 ****************************************************************************/
 
@@ -58,6 +41,9 @@ FilterScriptDialog::FilterScriptDialog(QWidget * parent)
 {
   FilterScriptDialog::ui.setupUi(this);
   scriptPtr=0;
+  connect(ui.clearScriptButton,SIGNAL(clicked()), this, SLOT(clearScript()));
+  connect(ui.saveScriptButton, SIGNAL(clicked()), this, SLOT(saveScript()));
+  connect(ui.openScriptButton, SIGNAL(clicked()), this, SLOT(openScript()));
 }
 
 void FilterScriptDialog::setScript(FilterScript *scr)
@@ -74,4 +60,17 @@ void FilterScriptDialog::clearScript()
 {
   assert(scriptPtr);
   scriptPtr->actionList.clear();
+  ui.scriptListWidget->clear();
+ 
+}
+
+
+void FilterScriptDialog::saveScript()
+{
+  scriptPtr->save("Prova.xml");
+}
+
+void FilterScriptDialog::openScript()
+{
+  scriptPtr->open("Prova.xml");
 }

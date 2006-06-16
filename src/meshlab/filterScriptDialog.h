@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/06/16 01:26:07  cignoni
+Added Initial Filter Script Dialog
+
 Revision 1.1  2006/06/15 13:05:57  cignoni
 added Filter History Dialogs
 
@@ -41,6 +44,8 @@ public:
 
 private slots:
 	void clearScript();	
+	void saveScript();	
+	void openScript();	
 private:
 	Ui::scriptDialog ui;
   FilterScript *scriptPtr;

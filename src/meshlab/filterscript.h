@@ -11,8 +11,8 @@
 class FilterScript 
 {
 public:
-  bool Open(QString filename);
-  bool Save(QString filename);
+  bool open(QString filename);
+  bool save(QString filename);
   
   QList< QPair< QString , FilterParameter> > actionList;
   typedef QList< QPair<QString, FilterParameter> >::iterator iterator;

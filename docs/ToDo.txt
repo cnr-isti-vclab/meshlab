@@ -1,3 +1,13 @@
+
+15/6/06
+o continua a chiedere di salvare anche dopo aver salvato
+o crash on open obj se compilato con mingw
+o crash su topologia facce degeneri
+x restore color crash
+o icona delete
+x crash on cancel in opening // DONE 15/6 
+o progress bar occupa tempo macchina
+
 12/6/06
 o selection che genera parametri
 o progress bar integrata nella glarea.

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.24  2006/06/16 01:26:07  cignoni
+Added Initial Filter Script Dialog
+
 Revision 1.23  2006/06/07 08:49:25  cignoni
 Disable rendering during processing and loading
 
@@ -154,6 +157,7 @@ public:
   }
   inline void restoreVertexColor()
   {
+    if(originalVertexColor.empty()) return;
     vector<Color4b>::iterator ci;
 	  CMeshO::VertexIterator vi;
 	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 

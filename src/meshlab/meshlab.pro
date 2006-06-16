@@ -1,9 +1,10 @@
 HEADERS        = interfaces.h \
-		 GLLogStream.h \
+		         GLLogStream.h \
                  mainwindow.h \
                  meshmodel.h \
                  glarea.h \
                  filterscript.h \
+                 filterparameter.h \
                  plugindialog.h \
                  customDialog.h \
                  filterScriptDialog.h \
@@ -45,7 +46,8 @@ RESOURCES     = meshlab.qrc
 # to add windows icon 
 RC_FILE = meshlab.rc
 
-QT           += opengl
+QT           += opengl 
+QT           += xml
 
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max

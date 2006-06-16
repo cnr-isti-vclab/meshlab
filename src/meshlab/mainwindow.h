@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.66  2006/06/16 01:26:07  cignoni
+Added Initial Filter Script Dialog
+
 Revision 1.65  2006/06/15 13:05:57  cignoni
 added Filter History Dialogs
 
@@ -170,8 +173,9 @@ private:
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
+public:
   QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
-	
+private:	
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;

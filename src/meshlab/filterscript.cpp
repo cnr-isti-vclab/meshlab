@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.2  2006/06/16 01:26:07  cignoni
+Added Initial Filter Script Dialog
+
 Revision 1.1  2006/06/15 13:05:57  cignoni
 added Filter History Dialogs
 
@@ -39,8 +42,94 @@ added Filter History Dialogs
 #include "meshmodel.h"
 #include "interfaces.h"
 #include "glarea.h"
+#include <QtXml/QDomDocument>
+#include <QtXml/QDomElement>
+#include <QtXml/QDomNode>
 
 using namespace vcg; 
 
+bool FilterScript::save(QString filename)
+{
 
+  QDomDocument doc("FilterScript");
+  QDomElement root = doc.createElement("FilterScript");
+  doc.appendChild(root);
 
+  FilterScript::iterator ii;
+  for(ii=actionList.begin();ii!= actionList.end();++ii)
+  {
+    QDomElement tag = doc.createElement("filter");
+    tag.setAttribute(QString("name"),(*ii).first);
+    FilterParameter &par=(*ii).second;
+    QMap<QString,QVariant>::iterator jj;
+    for(jj=par.paramMap.begin();jj!=par.paramMap.end();++jj)
+    {
+      QDomElement parElem = doc.createElement("Param");
+      parElem.setAttribute("name",jj.key());
+      if(jj.value().type()==QVariant::Bool) { 
+        parElem.setAttribute("type","Bool");
+        if(jj.value().toBool())parElem.setAttribute("value","true");
+                          else parElem.setAttribute("value","true");
+      }
+
+      if(jj.value().type()==QVariant::Int) {
+        parElem.setAttribute("type","Int");
+        parElem.setAttribute("value",jj.value().toInt());
+      }
+      if(jj.value().type()==QVariant::Double) {
+        parElem.setAttribute("type","Float");
+        parElem.setAttribute("value",jj.value().toString());
+      }
+
+      if(jj.value().type()==QVariant::List) {
+        parElem.setAttribute("type","Matrix44");
+        QList<QVariant> matrixVals = jj.value().toList();
+        for(int i=0;i<16;++i)
+          parElem.setAttribute(QString("val")+QString::number(i),matrixVals[i].toString());
+      }
+      tag.appendChild(parElem);
+    }
+    root.appendChild(tag);
+  }
+  QFile file("Prova.xml");
+  file.open(QIODevice::WriteOnly);
+  doc.save(QTextStream(&file),1);
+  file.close();
+  return true;
+}
+
+bool FilterScript::open(QString filename)
+{
+	QDomDocument doc;
+	actionList.clear();
+	//if(filename.endsWith(".mlx"))
+	{
+  		QFile file(filename);
+			if (file.open(QIODevice::ReadOnly) && doc.setContent(&file)) 
+        {
+					file.close();
+					QDomElement root = doc.documentElement();
+					if (root.nodeName() == "FilterScript") 
+          {
+             qDebug("FilterScript");
+              for(QDomElement n = root.firstChildElement("filter"); !n.isNull(); n = n.nextSiblingElement("filter"))
+              {
+                  QString name=n.attribute("name");
+                  qDebug("Reading filter with name %s",qPrintable(name));
+ //               actionList.append(qMakePair(filterName(n),filterPar(n)));
+             }
+
+          }
+        }
+    }
+  return true;
+}
+//
+//QString FilterScript::FilterName(QDomNode &n)
+//{
+//
+//}
+//FilterParameter FilterScript::FilterPar(QDomNode &n)
+//{
+//
+//}
