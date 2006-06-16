@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.3  2006/06/16 07:28:21  zifnab1974
+changed call to dom.save because gcc didn't like a reference to a variable created inside the function call
+
 Revision 1.2  2006/06/16 01:26:07  cignoni
 Added Initial Filter Script Dialog
 
@@ -93,7 +96,8 @@ bool FilterScript::save(QString filename)
   }
   QFile file("Prova.xml");
   file.open(QIODevice::WriteOnly);
-  doc.save(QTextStream(&file),1);
+	QTextStream qstream(&file);
+  doc.save(qstream,1);
   file.close();
   return true;
 }
