@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.101  2006/06/18 21:27:49  cignoni
+Progress bar redesigned, now integrated in the workspace window
+
 Revision 1.100  2006/06/16 01:26:07  cignoni
 Added Initial Filter Script Dialog
 
@@ -416,15 +419,17 @@ void MainWindow::applyDecorateMode()
 
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
-	if(qb==0) return true;
-	qb->setWindowTitle (str);
+  MainWindow::globalStatusBar()->showMessage(str,1000);
 	qb->setValue(pos);
-	qApp->processEvents();
-	if (qb->wasCanceled())
-	{
-		qb->reset();
-		return false;
-	}
+	
+  //if(qb==0) return true;
+	//qb->setWindowTitle (str);
+	//qApp->processEvents();
+	//if (qb->wasCanceled())
+	//{
+	//	qb->reset();
+	//	return false;
+	//}
 	return true;
 }
 
@@ -508,26 +513,6 @@ void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &all
 	allKnownFormatsFilter.append(')');
 	filters.push_front(allKnownFormatsFilter);
 }
-
-void MainWindow::openFilterScript(QString fileName)
-{
-	if (fileName.isEmpty())
-		fileName = QFileDialog::getOpenFileName(this,tr("Open Filter Script File"),".", "*.mls");
-	
-	if (fileName.isEmpty())	return;
-
-
-}
-
-void MainWindow::saveFilterScript(QString fileName)
-{
-	if (fileName.isEmpty())
-		fileName = QFileDialog::getSaveFileName(this,tr("Save Filter Script File"),".", "*.mls");
-	
-	if (fileName.isEmpty())	return;
-
-}
-
 
 
 void MainWindow::open(QString fileName)

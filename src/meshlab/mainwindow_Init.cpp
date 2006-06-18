@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.57  2006/06/18 21:27:49  cignoni
+Progress bar redesigned, now integrated in the workspace window
+
 Revision 1.56  2006/06/15 13:05:57  cignoni
 added Filter History Dialogs
 
@@ -81,7 +84,7 @@ Added short key lastFilter
 #include "customDialog.h"	
 #include "saveSnapshotDialog.h"	
 
-QProgressDialog *MainWindow::qb;
+QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
 {
@@ -102,12 +105,15 @@ MainWindow::MainWindow()
   workspace->setAcceptDrops(true);
 	setWindowTitle(appName());
 	loadPlugins();
-  qb=new QProgressDialog(this);
+  setStatusBar(new QStatusBar());
+  globalStatusBar()=statusBar();
+  qb=new QProgressBar(this);
   qb->setMaximum(100);
   qb->setMinimum(0);
-  qb->setAutoClose(true);
-  qb->setMinimumDuration(0);
-  qb->reset();
+  statusBar()->addPermanentWidget(qb,0);
+  //qb->setAutoClose(true);
+  //qb->setMinimumDuration(0);
+  //qb->reset();
 }
 
 void MainWindow::createActions()
@@ -117,16 +123,6 @@ void MainWindow::createActions()
 	openAct->setShortcutContext(Qt::ApplicationShortcut);
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-
-  openFilterScriptAct = new QAction(QIcon(":/images/open.png"),tr("&Open Filter Script..."), this);
-	openFilterScriptAct->setShortcutContext(Qt::ApplicationShortcut);
-	openFilterScriptAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_O);
-	connect(openFilterScriptAct, SIGNAL(triggered()), this, SLOT(openFilterScript()));
-
-  saveFilterScriptAct = new QAction(QIcon(":/images/save.png"),tr("&Save Filter Script..."), this);
-	saveFilterScriptAct->setShortcutContext(Qt::ApplicationShortcut);
-	saveFilterScriptAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_S);
-	connect(saveFilterScriptAct, SIGNAL(triggered()), this, SLOT(saveFilterScript()));
 
   closeAct = new QAction(tr("&Close"), this);
 	closeAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -329,8 +325,6 @@ void MainWindow::createMenus()
 	fileMenu->addAction(closeAct);
 	fileMenu->addAction(reloadAct);
 	fileMenu->addAction(saveAsAct);
-	fileMenu->addAction(openFilterScriptAct);
-	fileMenu->addAction(saveFilterScriptAct);
 
 	
 	fileMenu->addSeparator();
@@ -466,7 +460,10 @@ void MainWindow::loadPlugins()
             case MeshFilterInterface::VertexColoring : 
               		colorModeMenu->addAction(filterAction); break;
             case MeshFilterInterface::Selection : 
-              		filterMenuSelect->addAction(filterAction); break;
+              		filterMenuSelect->addAction(filterAction); 
+                  if(!filterAction->icon().isNull())
+                      editToolBar->addAction(filterAction);
+            break;
             case MeshFilterInterface::Cleaning : 
               		filterMenuClean->addAction(filterAction); break;
             case MeshFilterInterface::Remeshing : 
@@ -498,7 +495,7 @@ void MainWindow::loadPlugins()
         {
 			    editMenu->addAction(editAction);
           if(!editAction->icon().isNull())
-          editToolBar->addAction(editAction);
+              editToolBar->addAction(editAction);
           connect(editAction,SIGNAL(triggered()),this,SLOT(applyEditMode()));
         }
       pluginFileNames += fileName;

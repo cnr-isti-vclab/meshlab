@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.67  2006/06/18 21:27:49  cignoni
+Progress bar redesigned, now integrated in the workspace window
+
 Revision 1.66  2006/06/16 01:26:07  cignoni
 Added Initial Filter Script Dialog
 
@@ -100,9 +103,7 @@ public slots:
 private slots:
 
 	//////////// Slot Menu File //////////////////////
-  void openFilterScript(QString fileName=QString());
-  void saveFilterScript(QString fileName=QString());
-	void reload();
+  void reload();
 	void openRecentFile();							
 	bool saveAs();
 	bool saveSnapshot(); 
@@ -165,16 +166,21 @@ private:
 
 
 	
-	static QProgressDialog *qb;
+	static QProgressBar *qb;
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
-  GLArea *GLA(){return qobject_cast<GLArea *>(workspace->activeWindow()); }
-	QDir pluginsDir;
+ QDir pluginsDir;
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 public:
+  GLArea *GLA() const {return qobject_cast<GLArea *>(workspace->activeWindow()); }
   QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
+  static QStatusBar *&globalStatusBar()
+  {
+    static QStatusBar *_qsb=0;
+    return _qsb;
+  }
 private:	
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
@@ -207,8 +213,6 @@ private:
 
 	//////////// Actions Menu File ///////////////////////
 	QAction *openAct;
-	QAction *openFilterScriptAct;
-	QAction *saveFilterScriptAct;
 	QAction *closeAct;
 	QAction *reloadAct;
 	QAction *saveAsAct;
