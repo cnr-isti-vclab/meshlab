@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/06/18 21:26:30  cignoni
+delete selected face icon
+
 Revision 1.2  2006/06/12 15:18:56  cignoni
 Shortcut to delete selected face
 
@@ -65,8 +68,10 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   foreach(tt , types())
     {
       actionList << new QAction(ST(tt), this);
-      if(tt==FP_SELECT_DELETE)
+      if(tt==FP_SELECT_DELETE){
             actionList.last()->setShortcut(QKeySequence (Qt::Key_Delete));
+            actionList.last()->setIcon(QIcon(":/images/delete_face.png"));
+      }
     }	  
 }
 SelectionFilterPlugin::~SelectionFilterPlugin() 
