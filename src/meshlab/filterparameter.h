@@ -23,137 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/06/18 20:40:06  cignoni
+Completed Open/Save of scripts
+
 Revision 1.1  2006/06/15 21:24:35  cignoni
 First ver
-
-Revision 1.44  2006/06/06 14:32:38  zifnab1974
-Linux filenames are case-sensitive
-
-Revision 1.43  2006/05/25 09:46:37  cignoni
-missing std and and all the other gcc detected syntax errors
-
-Revision 1.42  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.41  2006/04/18 06:57:34  zifnab1974
-syntax errors for gcc 3.4.5 resolved
-
-Revision 1.40  2006/04/12 15:12:18  cignoni
-Added Filter classes (cleaning, meshing etc)
-
-Revision 1.39  2006/02/21 17:25:57  ggangemi
-RenderMode is now passed to MeshRenderInterface::Init()
-
-Revision 1.38  2006/02/21 15:59:06  ggangemi
-added info() method in meshrender plugin
-
-Revision 1.37  2006/02/16 19:29:14  fmazzant
-transfer of Export_3ds.h, Export_obj.h, Io_3ds_obj_material.h from Meshlab to vcg
-
-Revision 1.36  2006/02/15 23:09:06  fmazzant
-added the part of MeshIO credits
-
-Revision 1.35  2006/01/19 17:07:51  fmazzant
-changed struct Format to class Format(QString, QString).
-updated importFormats() and exportFormats() to the new class.
-
-Revision 1.34  2006/01/19 15:58:59  fmazzant
-moved savemaskexporter to mainwindows
-
-Revision 1.33  2006/01/17 13:47:45  fmazzant
-update interface meshio : formats -> importFormats() & exportFormts
-
-Revision 1.32  2006/01/17 10:04:20  cignoni
-Slightly change MeshEditInterface
-
-Revision 1.31  2006/01/13 12:10:30  vannini
-Added logging to mean and gaussian curvautres colorization
-
-Revision 1.30  2006/01/04 15:27:30  alemochi
-Renamed property of Format struct, and changed plugin dialog
-
-Revision 1.29  2005/12/30 10:51:10  mariolatronico
-- added GLLogStream forward declaration
-- added method setLog to MeshFilterInterface to remove GLArea dependency on meshfilter plugin
-
-Revision 1.28  2005/12/24 04:16:12  ggangemi
-removed "const" from RenderInterface Actions() method
-
-Revision 1.27  2005/12/15 01:15:07  buzzelli
-minor changes into MeshIOInterface
-
-Revision 1.26  2005/12/14 22:24:14  cignoni
-Added preliminary supprot for editing/selection plugins.
-
-Revision 1.25  2005/12/12 22:46:05  cignoni
-Cleaned up and added info functions
-
-Revision 1.24  2005/12/09 00:26:25  buzzelli
-io importing mechanism adapted in order to be fully transparent towards the user
-
-Revision 1.23  2005/12/07 08:01:09  fmazzant
-exporter obj temporany
-
-Revision 1.22  2005/12/05 18:08:21  ggangemi
-added MeshRenderInterface::isSupported() method
-
-Revision 1.21  2005/12/05 12:17:09  ggangemi
-Added MeshDecorateInterface
-
-Revision 1.20  2005/12/05 11:38:52  ggangemi
-workaround: added RenderMode parameter to MeshColorizePlugin::compute
-
-Revision 1.19  2005/12/03 23:50:15  cignoni
-changed io interface to return a list instead of a vector
-
-Revision 1.18  2005/12/03 16:05:18  glvertex
-solved some compatilbility issues
-
-Revision 1.17  2005/12/02 17:39:07  glvertex
-modified plugin import code. old plugins have been disabled cause of new interface.
-
-Revision 1.16  2005/11/30 16:26:56  cignoni
-All the modification, restructuring seen during the 30/12 lesson...
-
-Revision 1.15  2005/11/28 15:36:41  mariolatronico
-changed again interface on MeshIO (filename not const on save / open)
-
-Revision 1.14  2005/11/28 15:21:07  mariolatronico
-added const on various methods to comply C++ standard on reference variable
-
-Revision 1.13  2005/11/27 18:36:58  buzzelli
-changed applyImportExport method in order to handle correctly the case of no opened subwindows
-
-Revision 1.12  2005/11/26 23:57:04  cignoni
-made io filters to appear into file menu.
-
-Revision 1.11  2005/11/26 23:29:08  cignoni
-Commented out names of unused parameters to remove boring warnings
-
-Revision 1.10  2005/11/25 21:57:51  mariolatronico
-changed signature of MeshColorizeInterface::Compute to allow gcc compilation
-
-Revision 1.9  2005/11/25 19:29:01  buzzelli
-small changes to signature of MeshIOInterface methods
-
-Revision 1.8  2005/11/25 00:10:08  glvertex
-added Q_DECLARE_INTERFACE for MeshColorizeInterface
-
-Revision 1.7  2005/11/24 10:54:37  cignoni
-Yet another test to compile under linux: added a const before QString in applyfilter...
-
-Revision 1.6  2005/11/24 01:38:36  cignoni
-Added new plugins intefaces, tested with shownormal render mode
-
-Revision 1.5  2005/11/23 00:25:06  glvertex
-Reverted plugin interface to prev version
-
-Revision 1.4  2005/11/22 17:10:53  glvertex
-MeshFilter Plugin STRONGLY reviewed and changed
-
-Revision 1.3  2005/11/21 12:07:56  cignoni
-Added copyright info
 
 
 ****************************************************************************/
@@ -165,11 +39,23 @@ Added copyright info
 #include <QPair>
 #include <QAction>
 
+/*
+The FilterParameter class abstracts the whole set of parameters that are necessary to a given filter
+It is a map from string (the name of the parameter) to QVariant (their values)
+*/
+
 class FilterParameter
 {
 public:
 
   FilterParameter(){}
+
+  inline QString getString(QString name) { 
+    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
+    assert(ii!=paramMap.end());
+    assert(ii.value().type()==QVariant::String);
+    return ii.value().toString();
+  }
 
   inline bool getBool(QString name) { 
     QMap<QString,QVariant>::iterator ii=paramMap.find(name);
@@ -205,9 +91,10 @@ public:
     return matrix;
   }
 
-  inline void addFloat(QString name,float val){ paramMap.insert(name, QVariant( double(val)) ); }
-  inline void addInt  (QString name,float val){ paramMap.insert(name, QVariant(    int(val)) ); }
-  inline void addBool (QString name,bool val) { paramMap.insert(name, QVariant(        val )  );  }
+  inline void addFloat(QString name,float val)  { paramMap.insert(name, QVariant( double(val)) ); }
+  inline void addInt  (QString name,float val)  { paramMap.insert(name, QVariant(    int(val)) ); }
+  inline void addBool (QString name,bool val)   { paramMap.insert(name, QVariant(        val )  );  }
+  inline void addString(QString name,QString val){ paramMap.insert(name,QVariant(        val )  );  }
   
   inline void addMatrix44(QString name,Matrix44f val) { 
     QList<QVariant> matrixVals;
@@ -217,9 +104,11 @@ public:
   }
 
   inline void clear() { paramMap.clear(); }
-//private:
+
+
   // The data is just a list of Parameters
   QMap<QString,QVariant> paramMap;  
+
 };
 
 #endif

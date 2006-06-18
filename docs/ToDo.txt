@@ -1,16 +1,24 @@
+18/6/06
+
+16/6/06
+o bug normali subdiv. non vengono ricalcolate
+o bug border. non viene MAI ricalcolato
+x open/save recorded nella history // DONE 18/6 
+o cursor icon selection 
 
 15/6/06
+o merge to a single surface
 o continua a chiedere di salvare anche dopo aver salvato
-o crash on open obj se compilato con mingw
+x crash on open obj se compilato con mingw
 o crash su topologia facce degeneri
 x restore color crash
-o icona delete
+x icona delete // DONE 16/6 
 x crash on cancel in opening // DONE 15/6 
 o progress bar occupa tempo macchina
 
 12/6/06
 o selection che genera parametri
-o progress bar integrata nella glarea.
+x progress bar integrata nel workspace// DONE 18/6 
 x shortcut delete selected faces
 
 6/6/06
@@ -50,8 +58,8 @@ o aggiungere un filtro in ingresso per aln
 
 22/5/06 
 
-o Mapping Colore Qualita Implementare e Debuggare
-o Default colore e curvatura
+X Mapping Colore Qualita Implementare e Debuggare // DONE 15/6 
+X Default colore e curvatura // DONE 15/6 
 x Colore nel clustering // DONE 7/6
 x Face Selection Tool // DONE 24/5
 x - Feature  // DONE 24/5
@@ -66,7 +74,7 @@ o Ripulire glarea
  - FPS
  - Log
  - Paint
-o ScriptDialog
+X ScriptDialog // DONE 15/6 
 o Generic dialog option
 o Clustering con bound e selezione.
 o Dialogo shaders che galleggia un po' troppo

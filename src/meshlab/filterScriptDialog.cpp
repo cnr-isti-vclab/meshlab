@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/06/18 20:40:06  cignoni
+Completed Open/Save of scripts
+
 Revision 1.2  2006/06/16 01:26:07  cignoni
 Added Initial Filter Script Dialog
 
@@ -30,6 +33,7 @@ Revision 1.1  2006/06/15 13:05:57  cignoni
 added Filter History Dialogs
 
 ****************************************************************************/
+#include <QFileDialog>
 
 #include "filterScriptDialog.h"
 
@@ -61,16 +65,22 @@ void FilterScriptDialog::clearScript()
   assert(scriptPtr);
   scriptPtr->actionList.clear();
   ui.scriptListWidget->clear();
- 
 }
-
 
 void FilterScriptDialog::saveScript()
 {
-  scriptPtr->save("Prova.xml");
+  QString fileName = QFileDialog::getSaveFileName(this,tr("Save Filter Script File"),".", "*.mlx");
+	if (fileName.isEmpty())	return;
+  QFileInfo fi(fileName);
+  if(fi.suffix().toLower()!="mlx")
+    fileName.append(".mlx");
+  scriptPtr->save(fileName);
 }
 
 void FilterScriptDialog::openScript()
 {
-  scriptPtr->open("Prova.xml");
+	QString fileName = QFileDialog::getOpenFileName(this,tr("Open Filter Script File"),".", "*.mlx");
+	if (fileName.isEmpty())	return;
+  scriptPtr->open(fileName);
+  setScript(scriptPtr);
 }

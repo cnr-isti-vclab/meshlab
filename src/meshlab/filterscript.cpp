@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.4  2006/06/18 20:40:06  cignoni
+Completed Open/Save of scripts
+
 Revision 1.3  2006/06/16 07:28:21  zifnab1974
 changed call to dom.save because gcc didn't like a reference to a variable created inside the function call
 
@@ -69,12 +72,15 @@ bool FilterScript::save(QString filename)
     {
       QDomElement parElem = doc.createElement("Param");
       parElem.setAttribute("name",jj.key());
+
       if(jj.value().type()==QVariant::Bool) { 
         parElem.setAttribute("type","Bool");
-        if(jj.value().toBool())parElem.setAttribute("value","true");
-                          else parElem.setAttribute("value","true");
+        parElem.setAttribute("value",jj.value().toString());
       }
-
+      if(jj.value().type()==QVariant::String) {
+        parElem.setAttribute("type","String");
+        parElem.setAttribute("value",jj.value().toString());
+      }
       if(jj.value().type()==QVariant::Int) {
         parElem.setAttribute("type","Int");
         parElem.setAttribute("value",jj.value().toInt());
@@ -94,7 +100,7 @@ bool FilterScript::save(QString filename)
     }
     root.appendChild(tag);
   }
-  QFile file("Prova.xml");
+  QFile file(filename);
   file.open(QIODevice::WriteOnly);
 	QTextStream qstream(&file);
   doc.save(qstream,1);
@@ -116,24 +122,35 @@ bool FilterScript::open(QString filename)
 					if (root.nodeName() == "FilterScript") 
           {
              qDebug("FilterScript");
-              for(QDomElement n = root.firstChildElement("filter"); !n.isNull(); n = n.nextSiblingElement("filter"))
+              for(QDomElement nf = root.firstChildElement("filter"); !nf.isNull(); nf = nf.nextSiblingElement("filter"))
               {
-                  QString name=n.attribute("name");
+                  FilterParameter par;
+                  QString name=nf.attribute("name");
                   qDebug("Reading filter with name %s",qPrintable(name));
- //               actionList.append(qMakePair(filterName(n),filterPar(n)));
-             }
+                      for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
+                      {
+                        QString name=np.attribute("name");
+                        QString type=np.attribute("type");
 
+                        qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
+                        if(type=="Bool")    par.addBool(name,np.attribute("value")!=QString("false"));
+                        if(type=="Int")     par.addInt(name,np.attribute("value").toInt());
+                        if(type=="Float")   par.addFloat(name,np.attribute("value").toDouble());
+                        if(type=="String")  par.addString(name,np.attribute("value"));
+                        if(type=="Matrix44")par.addMatrix44(name,getMatrix(&np));                        
+                      }
+                   actionList.append(qMakePair(name,par));
+             }
           }
         }
     }
   return true;
 }
-//
-//QString FilterScript::FilterName(QDomNode &n)
-//{
-//
-//}
-//FilterParameter FilterScript::FilterPar(QDomNode &n)
-//{
-//
-//}
+
+Matrix44f FilterScript::getMatrix(QDomElement *n)
+{
+  Matrix44f mm;
+  for(int i=0;i<16;++i)
+    mm.V()[i]=n->attribute(QString("val")+QString::number(i)).toDouble();
+  return mm;
+}
