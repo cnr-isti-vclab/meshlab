@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.27  2006/06/18 21:26:56  cignoni
+range color bug for quality/curvature
+
 Revision 1.26  2006/06/16 01:26:42  cignoni
 Debugged Color by quality and default Curvature
 
@@ -252,13 +255,10 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
  switch(ID(filter)) {
   case CP_MAP_QUALITY_INTO_COLOR :
     {
-      float RangeMin=par.getFloat("RangeMin");	
+      float RangeMin = par.getFloat("RangeMin");	
       float RangeMax = par.getFloat("RangeMax");		
-
-     
-  tri::UpdateColor<CMeshO>::VertexQuality(m.cm,RangeMin,RangeMax);
-     
-        break;
+      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,RangeMin,RangeMax);
+      break;
     }
   case CP_GAUSSIAN:
   case CP_MEAN:
