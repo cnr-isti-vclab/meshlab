@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.12  2006/06/18 20:40:55  cignoni
+Added some missing IsD tests
+
 Revision 1.11  2006/05/25 09:46:38  cignoni
 missing std and and all the other gcc detected syntax errors
 
@@ -294,7 +297,7 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 	vcg::tri::UpdateFlags<MESH_TYPE>::FaceBorderFromFF(m);
 	// aggiorno i flag perche' IsB funzioni
 	vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace (m);
-	vcg::tri::UpdateColor<MESH_TYPE>::VertexBorderFlag(m);
+	//vcg::tri::UpdateColor<MESH_TYPE>::VertexBorderFlag(m);
 	
 	// marco i vertici even [ i primi n ] come visitati
 	int evenFlag = MESH_TYPE::VertexType::NewBitFlag();
@@ -309,7 +312,7 @@ bool RefineOddEvenE(MESH_TYPE &m, ODD_VERT odd, EVEN_VERT even,float length,
 
 	typename MESH_TYPE::VertexIterator vi;
 	typename MESH_TYPE::FaceIterator fi;
-	for (fi = m.face.begin(); fi != m.face.end(); fi++) { //itero facce
+	for (fi = m.face.begin(); fi != m.face.end(); fi++) if(!(*fi).IsD()){ //itero facce
 		for (int i = 0; i < 3; i++) { //itero vert
 			if ( (*fi).V(i)->IsUserBit(evenFlag) && ! (*fi).V(i)->IsD() ) {
 				if (RefineSelected && !(*fi).V(i)->IsS() )
