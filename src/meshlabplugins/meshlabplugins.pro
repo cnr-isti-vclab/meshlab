@@ -5,4 +5,5 @@ SUBDIRS       = meshfilter \
 		meshcolorize \
 		meshdecorate \ 
 		meshedit \ 
-		meshselect
+		meshselect\
+		colladaio
