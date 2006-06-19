@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.65  2006/06/19 15:16:01  cignoni
+Update of normals after refinement
+
 Revision 1.64  2006/06/19 05:29:12  cignoni
 changed include order for disambiguating gcc specialization template rule
 
@@ -351,6 +354,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
         Refine<CMeshO,MidPoint<CMeshO> >
           (m.cm, MidPoint<CMeshO>(), threshold, selected, cb);
     }
+	 vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
   }
 	if (ID(filter) == FP_REMOVE_FACES_BY_EDGE ) {
     bool selected  = par.getBool("Selected");	
