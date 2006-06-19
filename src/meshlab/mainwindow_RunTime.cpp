@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.102  2006/06/19 15:17:19  cignoni
+Dirty flag bug, Busy Bug, Cleaning of degenerate faces on loading.
+
 Revision 1.101  2006/06/18 21:27:49  cignoni
 Progress bar redesigned, now integrated in the workspace window
 
@@ -94,6 +97,7 @@ Minor edits.
 
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/clean.h>
 
 
 void MainWindow::updateRecentFileActions()
@@ -275,7 +279,6 @@ void MainWindow::applyFilter()
 {
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-  GLA()->mm->busy=true;
   // (1) Ask for filter requirements (eg a filter can need topology, border flags etc)
   //    and statisfy them
   int req=iFilter->getRequirements(action);
@@ -297,8 +300,10 @@ void MainWindow::applyFilter()
   qb->show();
   iFilter->setLog(&(GLA()->log));
   // (4) Apply the Filter 
+  GLA()->mm->busy=true;
   ret=iFilter->applyFilter(action, *(GLA()->mm), par, QCallBack);
-
+  GLA()->mm->busy=false;
+	
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
 	if(ret)
@@ -318,9 +323,9 @@ void MainWindow::applyFilter()
   if(iFilter->getClass(action)==MeshFilterInterface::Selection )
     GLA()->setSelectionRendering(true);
 
-	qb->reset();
+  qb->reset();
   updateMenus();
-  GLA()->mm->busy=false;
+  
 }
 void MainWindow::endEditMode()
 {
@@ -582,6 +587,7 @@ void MainWindow::open(QString fileName)
 		}
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
     updateMenus();
+    vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
     GLA()->mm->busy=false;
 	}
 
@@ -657,6 +663,7 @@ bool MainWindow::saveAs()
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
 		qb->reset();
 	}	
+  GLA()->setWindowModified(false);
 	return ret;
 }
 
