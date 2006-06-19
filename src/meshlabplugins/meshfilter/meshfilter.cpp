@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.64  2006/06/19 05:29:12  cignoni
+changed include order for disambiguating gcc specialization template rule
+
 Revision 1.63  2006/06/07 10:25:28  cignoni
 init of bbox diag for generic lenght dialog
 
@@ -85,7 +88,6 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 
 #include <math.h>
 #include <stdlib.h>
-#include "refine_loop.h"
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
@@ -95,6 +97,7 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include "invert_faces.h"
+#include "refine_loop.h"
 //#include "decimator.h"
 
 #include "../../meshlab/GLLogStream.h"
