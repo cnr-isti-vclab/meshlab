@@ -23,28 +23,28 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 
 --- General Info ---
 
-MeshLab is an extendible mesh processing system, aimed to the user
-assisted cleaning, filtering, editing and rendering of unstructured 3D
-triangular meshes.
-The tool found its natural use for the processiing of the meshes that usually 
-arise in 3d scanning. The system is heavily based on
-the VCG library (vcg.sf.net). The current version of Meshlab was developed during 
-the FGT (Foundation of Three-dimensional Graphics) course of the Computer Science 
-department ofUniversity of Pisa. 
+MeshLab is an open source portable and extendible system for the processing and editing of unstructured 3D triangular meshes.
+The system is aimed to help the processing of the typical not-so-small unstructured models arising in 3D scanning, providing a set of tools for editing, cleaning, healing, inspecting, rendering and converting this kind of meshes.
+
+The project is supported by the European Networks of Excellence Epoch 
+
+The system is heavily based on the VCG library developed at the Visual Computing Lab of ISTI - CNR, for all the core mesh processing tasks. The MeshLab system started as a part of the FGT course of the Computer Science department of University of Pisa and most of the code (~15k lines) of the first versions was written by a handful of students.  
 
 --- Main Features ---
-
-Input/output in many formats (PLY, STL, OFF, OBJ)
-Extendible plugins based architecture, writing new mesh 
-processing functions, filters and format support is quite easy.
-Cleaning Filters
-	Removal of duplicated, unreferenced vertices, null faces
-	Subdivision filters
-Opengl Shader based rendering 
-Large snapshot for hi quality printing
-Various Colorization Filters 
-	Gaussian Curvature
-	Border edges
+# Interactive selection and deletion of portion of the mesh. Even for large models.
+# Input/output in many formats (PLY, STL, OFF, OBJ, 3DS)
+# Extendible plugins based architecture, writing new mesh processing functions, colorization filters and support for different file formats is quite easy (look at this code sample)
+# Cleaning Filters:
+    * removal of duplicated, unreferenced vertices, null faces 
+    * subdivision filters (midpoint, loop and butterfly)
+    * coherent normal unification and flipping 
+# OpenGL Shader based rendering (write your own shader!) compatible with Shader Designer
+# Large rendering (up to 16k x 16k) for high quality printing
+# Various Colorization/inspecting Filters
+    * Gaussian and mean curvature
+    * Border edges
+    * Non two-manifold faces 
+# The history of the all performed cleaning/editing actions can be re-played on different meshes or saved and for archival purposes. 
 
 --- References ----
 
@@ -74,8 +74,3 @@ P. Cignoni and
 A. Buzzelli, L. Colombini, G. Gangemi, M. Latronico, F. Mazzanti,
 A. Mochi, D. Portelli, D. Vacca, F. Vannini, A. Venturi
 
---- Extra Credits ---
-
-Thanks goes to
-Christopher January, Dave Brondsema, Christian Ehrlicher, Ralf Habacker
-for their unofficial patch for Qt4 ( http://sourceforge.net/projects/qtwin ).

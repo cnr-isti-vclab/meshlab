@@ -19,7 +19,7 @@
         <file>images/textures.png</file>
         <file>images/wire.png</file>
         <file>images/no_edit.png</file>
-    <file>images/logo_epoch.png</file>
-    
-</qresource>
+        <file>images/logo_epoch.png</file>    
+        <file>images/logo_epoch_2.png</file>    
+	</qresource>
 </RCC>

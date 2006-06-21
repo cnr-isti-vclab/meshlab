@@ -110,14 +110,15 @@ Section "MainSection" SEC01
   File "..\sample\TextureDouble_A.png"
   File "..\sample\Laurana50k.ply"
   SetOutPath "$INSTDIR\plugins\imageformats"
-  File "C:\Qt\4.1.2\plugins\imageformats\qjpeg1.dll"
+  File "C:\Qt\4.1.3\plugins\imageformats\qjpeg1.dll"
   SetOutPath "$INSTDIR"
-  File "C:\Qt\4.1.2\bin\QtCore4.dll"
-  File "C:\Qt\4.1.2\bin\QtGui4.dll"
-  File "C:\Qt\4.1.2\bin\QtOpenGL4.dll"
-  File "C:\Qt\4.1.2\bin\QtXml4.dll"
-  File "C:\Qt\4.1.2\bin\QtNetwork4.dll"
+  File "C:\Qt\4.1.3\bin\QtCore4.dll"
+  File "C:\Qt\4.1.3\bin\QtGui4.dll"
+  File "C:\Qt\4.1.3\bin\QtOpenGL4.dll"
+  File "C:\Qt\4.1.3\bin\QtXml4.dll"
+  File "C:\Qt\4.1.3\bin\QtNetwork4.dll"
   File "C:\MinGW\bin\mingwm10.dll"
+  File "..\docs\readme.txt"
 SectionEnd
 
 Section -AdditionalIcons
