@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.86  2006/06/21 04:25:27  cignoni
+ Removed progress bar callback because caused assert under gcc debugged QT libs (to be investigated)
+
  Revision 1.85  2006/05/25 04:57:45  cignoni
  Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
  Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -115,7 +118,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	if(formatName.toUpper() == tr("OBJ"))
 	{
     vcg::tri::io::ImporterOBJ<CMeshO>::Info oi;	
-		oi.cb = cb;
+		oi.cb = 0;
 		if (!vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
 			return false;
     m.Enable(oi.mask);
