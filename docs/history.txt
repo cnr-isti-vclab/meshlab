@@ -33,12 +33,16 @@
 
 
   ** NEW FEATURES/PATCHES **
-Editing and Selection is IN!
 
-Bug in shaders
-Filter classes (now filters are assigned to different submenus)
-Intial mode faceted
-Real Installer for windows
+Selection and Editing of large meshes is now possible!
+Recording and replaying of history of filters 
+Filter classes restructured (now filters are assigned to different submenus)
+Rewrote of  Clustering simplification algorithms
+Shaders debugged
+Better choice of initial modes
+Automatic Installer for windows
+No more intrusive progress bars
+
 
 
 ------------------------------------------------------------------------------

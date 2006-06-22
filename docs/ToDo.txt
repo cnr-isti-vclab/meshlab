@@ -1,20 +1,20 @@
 18/6/06
 
 16/6/06
-o bug normali subdiv. non vengono ricalcolate
+o bug normali subdiv. non vengono ricalcolate // DONE 18/6 
 o bug border. non viene MAI ricalcolato
 x open/save recorded nella history // DONE 18/6 
 o cursor icon selection 
 
 15/6/06
 o merge to a single surface
-o continua a chiedere di salvare anche dopo aver salvato
-x crash on open obj se compilato con mingw
+x continua a chiedere di salvare anche dopo aver salvato // DONE 18/6 
+x crash on open obj se compilato con mingw // DONE 18/6 
 o crash su topologia facce degeneri
 x restore color crash
 x icona delete // DONE 16/6 
 x crash on cancel in opening // DONE 15/6 
-o progress bar occupa tempo macchina
+x progress bar occupa tempo macchina // DONE 15/6 
 
 12/6/06
 o selection che genera parametri
@@ -35,7 +35,7 @@ o install doc e attempt. // DONE 26/5
 o Last Dir
 x selections plus/minus
 x Esc Pianta  // DONE 26/5
-o save 3ds pianta
+x save 3ds pianta // DONE 18/6 
 
 24/5/06
 
