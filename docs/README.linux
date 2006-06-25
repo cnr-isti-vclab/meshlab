@@ -12,11 +12,11 @@ apt-get install libglew-dev libqt4-dev lib3ds-dev
 
 VCG library (from vcg.sf.net) instead is distributed only in source form . In order to download this library you can follow SourceForge CVS instructions. For example :
 
-mario@ath64:~/src$  cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/vcg login
-Logging in to :pserver:anonymous@cvs.sourceforge.net:2401/cvsroot/vcg
+mario@ath64:~/src$  cvs -d:pserver:anonymous@vcg.cvs.sourceforge.net:/cvsroot/vcg login
+Logging in to :pserver:anonymous@vcg.cvs.sourceforge.net:2401/cvsroot/vcg
 CVS password: [empty password]
 
-mario@ath64:~/src$  cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/vcg co -P vcg
+mario@ath64:~/src$  cvs -z3 -d:pserver:anonymous@vcg.cvs.sourceforge.net:/cvsroot/vcg co -P vcg
 cvs checkout: Updating vcg
 cvs checkout: Updating vcg/apps
 cvs checkout: Updating vcg/apps/borland
