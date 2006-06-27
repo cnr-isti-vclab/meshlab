@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/06/27 08:08:12  cignoni
+First working version. now it loads all the needed plugins and a mesh!
+
 Revision 1.1  2006/06/19 15:11:50  cignoni
 Initial Rel
 
@@ -38,21 +41,125 @@ Added copyright info
 ****************************************************************************/
 
 #include <QApplication>
-#include "../meshlab/mainwindow.h"
+#include "../meshlab/meshmodel.h"
+#include "../meshlab/interfaces.h"
+#include "../meshlab/plugin_support.h"
+
+QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
+std::vector<MeshIOInterface*> meshIOPlugins;
+ 
+
+void loadPlugins()
+{
+	QDir pluginsDir = QDir(qApp->applicationDirPath());
+#if defined(Q_OS_WIN)
+	if (pluginsDir.dirName() == "debug" || pluginsDir.dirName() == "release")
+		pluginsDir.cdUp();
+#elif defined(Q_OS_MAC)
+	if (pluginsDir.dirName() == "MacOS") {
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+		pluginsDir.cdUp();
+	}
+#endif
+	pluginsDir.cd("../meshlab/plugins");
+
+	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
+		QObject *plugin = loader.instance();
+		
+		if (plugin) {		
+			//MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
+						
+		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+			if (iFilter)
+      { 
+        QAction *filterAction;
+        foreach(filterAction, iFilter->actions())
+        {
+          filterMap[filterAction->text()]=filterAction;
+          //connect(filterAction,SIGNAL(triggered()),this,SLOT(applyFilter()));
+          switch(iFilter->getClass(filterAction))
+          {
+            //case MeshFilterInterface::FaceColoring : 
+            //case MeshFilterInterface::VertexColoring : 
+            //  		colorModeMenu->addAction(filterAction); break;
+            //case MeshFilterInterface::Selection : 
+            //  		filterMenuSelect->addAction(filterAction); 
+            //      if(!filterAction->icon().isNull())
+            //          editToolBar->addAction(filterAction);
+            //break;
+            //case MeshFilterInterface::Cleaning : 
+            //  		filterMenuClean->addAction(filterAction); break;
+            //case MeshFilterInterface::Remeshing : 
+            //  		filterMenuRemeshing->addAction(filterAction); break;
+            //case MeshFilterInterface::Generic : 
+            //default:
+            //  		filterMenu->addAction(filterAction); break;
+          }  
+        }
+         printf("Loaded %i filtering actions form %s\n",filterMap.size(),qPrintable(fileName));
+       }
+		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+			if (iIO)	meshIOPlugins.push_back(iIO);
+      
+
+//	    pluginfileNames += fileName;
+		}
+	}
+   printf("Total %i filtering actions\n",filterMap.size());
+   printf("Total %i io plugins\n",meshIOPlugins.size());
+}
+
+bool Open(MeshModel &mm, QString fileName)
+{
+	// Opening files in a transparent form (IO plugins contribution is hidden to user)
+	QStringList filters;
+	
+	// HashTable storing all supported formats togheter with
+	// the (1-based) index  of first plugin which is able to open it
+	QHash<QString, int> allKnownFormats;
+	
+	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
+
+	QFileInfo fi(fileName);
+	// this change of dir is needed for subsequent textures/materials loading
+	QDir::setCurrent(fi.absoluteDir().absolutePath());
+	
+	QString extension = fi.suffix();
+	
+	// retrieving corresponding IO plugin
+	int idx = allKnownFormats[extension.toLower()];
+	if (idx == 0)
+	{	
+    printf("Error encountered while opening file: ");
+		//QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
+		//QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
+		return false;
+	}
+	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
+	
+	int mask = 0;
+	if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,0,0/*gla*/))
+  {
+    printf("Failed loading\n");
+  }
+
+}
 
 int main(int argc, char *argv[])
 {
-	QApplication app(argc, argv);
-	MainWindow window;
-  //window.loadPlugins();
-	//window.showMaximized();
-  
+	QApplication app(argc, argv);  
+  loadPlugins();
+  MeshModel mm;
 	if(argc>1)	
   {
-    window.open(argv[1]);
-    printf("Mesh loaded is %i vn %i fn\n",window.GLA()->mm->cm.vn,window.GLA()->mm->cm.vn);
+    Open(mm,argv[1]);
+    printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
   }
   else exit(-1);
 
 	//return app.exec();
 }
+
+
