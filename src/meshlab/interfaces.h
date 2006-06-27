@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.46  2006/06/27 08:07:42  cignoni
+Restructured plugins interface for simplifying the server
+
 Revision 1.45  2006/06/15 13:05:57  cignoni
 added Filter History Dialogs
 
@@ -289,7 +292,7 @@ public:
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual bool isSupported() = 0;
 		virtual const PluginInfo &Info()=0;
-		virtual QList<QAction *> actions() const = 0;
+		virtual QList<QAction *> actions() = 0;
 };
 
 

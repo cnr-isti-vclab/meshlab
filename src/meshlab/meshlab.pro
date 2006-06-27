@@ -8,6 +8,7 @@ HEADERS        = interfaces.h \
                  plugindialog.h \
                  customDialog.h \
                  filterScriptDialog.h \
+                 plugin_support.h \
                  saveSnapshotDialog.h \
                  savemaskexporter.h \
                  changetexturename.h \
@@ -21,6 +22,7 @@ SOURCES        = main.cpp \
                  meshmodel.cpp \
 		         GLLogStream.cpp \
                  glarea.cpp \
+                 plugin_support.cpp \
                  plugindialog.cpp \
                  filterscript.cpp \
                  customDialog.cpp \

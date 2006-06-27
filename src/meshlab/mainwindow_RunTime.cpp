@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.103  2006/06/27 08:07:42  cignoni
+Restructured plugins interface for simplifying the server
+
 Revision 1.102  2006/06/19 15:17:19  cignoni
 Dirty flag bug, Busy Bug, Cleaning of degenerate faces on loading.
 
@@ -94,6 +97,7 @@ Minor edits.
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
+#include "plugin_support.h"
 
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
@@ -470,54 +474,6 @@ void MainWindow::toggleSelectionRendering()
 }
 
 
-enum TypeIO{IMPORT,EXPORT};
-void MainWindow::LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type)
-{
-	QString allKnownFormatsFilter = tr("All known formats ("); 
-	std::vector<MeshIOInterface*>::iterator itIOPlugin = meshIOPlugins.begin();
-	for (int i = 0; itIOPlugin != meshIOPlugins.end(); ++itIOPlugin, ++i)  // cycle among loaded IO plugins
-	{
-		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
-
-		QList<MeshIOInterface::Format> currentFormats;// = pMeshIOPlugin->formats();
-
-		/* new */
-		if(type == IMPORT)
-			currentFormats = pMeshIOPlugin->importFormats();
-
-		if(type == EXPORT)
-			currentFormats = pMeshIOPlugin->exportFormats();
-		/* end new part */
-
-		QList<MeshIOInterface::Format>::iterator itFormat = currentFormats.begin();
-		while(itFormat != currentFormats.end())
-		{
-			MeshIOInterface::Format currentFormat = *itFormat;
-			
-			QString currentFilterEntry = currentFormat.description + " (";
-			
-			QStringListIterator itExtension(currentFormat.extensions);
-			while (itExtension.hasNext())
-			{
-				QString currentExtension = itExtension.next().toLower();
-				if (!allKnownFormats.contains(currentExtension))
-				{
-					allKnownFormats.insert(currentExtension, i+1);
-					allKnownFormatsFilter.append(tr(" *."));
-					allKnownFormatsFilter.append(currentExtension);
-				}
-				currentFilterEntry.append(tr(" *."));
-				currentFilterEntry.append(currentExtension);
-			}
-			currentFilterEntry.append(')');
-			filters.append(currentFilterEntry);
-
-			++itFormat;
-		}
-	}
-	allKnownFormatsFilter.append(')');
-	filters.push_front(allKnownFormatsFilter);
-}
 
 
 void MainWindow::open(QString fileName)
@@ -529,7 +485,7 @@ void MainWindow::open(QString fileName)
 	// the (1-based) index  of first plugin which is able to open it
 	QHash<QString, int> allKnownFormats;
 	
-	LoadKnownFilters(filters, allKnownFormats,IMPORT);
+	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
 
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getOpenFileName(this,tr("Open File"),".", filters.join("\n"));
@@ -622,7 +578,7 @@ bool MainWindow::saveAs()
 	
 	QHash<QString, int> allKnownFormats;
 	
-	LoadKnownFilters(filters, allKnownFormats,EXPORT);
+	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,EXPORT);
 
 	QString fileName;
 

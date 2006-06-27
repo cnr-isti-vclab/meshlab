@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.68  2006/06/27 08:07:42  cignoni
+Restructured plugins interface for simplifying the server
+
 Revision 1.67  2006/06/18 21:27:49  cignoni
 Progress bar redesigned, now integrated in the workspace window
 
@@ -162,7 +165,7 @@ private:
 	void updateRecentFileActions();				
 	void setCurrentFile(const QString &fileName);			
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
-	void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type);
+	//void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type);
 
 
 	

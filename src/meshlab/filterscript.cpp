@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.5  2006/06/27 08:07:42  cignoni
+Restructured plugins interface for simplifying the server
+
 Revision 1.4  2006/06/18 20:40:06  cignoni
 Completed Open/Save of scripts
 
@@ -41,16 +44,19 @@ added Filter History Dialogs
 
 #include <GL/glew.h>
 #include <QtGui>
+#include <algorithm>
 
 // widget capace di fare rendering di un Modello
 #include <vcg/space/box3.h>
 #include <wrap/gl/space.h>
 #include "meshmodel.h"
 #include "interfaces.h"
-#include "glarea.h"
+#include "filterscript.h"
+//#include "glarea.h"
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
+#include <QPair>
 
 using namespace vcg; 
 
