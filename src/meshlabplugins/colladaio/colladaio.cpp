@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/07/07 06:57:04  granzuglia
+ added the save function
+
  Revision 1.1  2006/06/19 13:42:53  granzuglia
  collada importer
 
@@ -32,6 +35,7 @@
 #include <QtGui>
 
 #include <wrap/io_trimesh/import_dae.h>
+#include <wrap/io_trimesh/export_dae.h>
 #include "colladaio.h"
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
@@ -124,16 +128,16 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 
 bool ColladaIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	//QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-	//string filename = fileName.toUtf8().data();
-	//string ex = formatName.toUtf8().data();
-	//
-	//int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-	//if(result!=0)
-	//{
-	//	QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
-	//	return false;
-	//}
+	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+	std::string filename = fileName.toUtf8().data();
+	std::string ex = formatName.toUtf8().data();
+	
+	int result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str()/*,mask,cb*/);
+	if(result!=0)
+	{
+		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+		return false;
+	}
 	return true;
 }
 
@@ -163,7 +167,7 @@ QList<MeshIOInterface::Format> ColladaIOPlugin::exportFormats() const
 */
 int ColladaIOPlugin::GetExportMaskCapability(QString &format) const
 {
-	//if(format.toUpper() == tr("DAE")){return vcg::tri::io::ExporterDAE<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("DAE")){return vcg::tri::io::ExporterDAE<CMeshO>::GetExportMaskCapability();}
 	return 0;
 }
 
