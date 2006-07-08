@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.104  2006/07/08 06:37:47  cignoni
+Many small bugs correction (esc crash, info in about, obj loading progress,fullscreen es)
+
 Revision 1.103  2006/06/27 08:07:42  cignoni
 Restructured plugins interface for simplifying the server
 
@@ -333,6 +336,7 @@ void MainWindow::applyFilter()
 }
 void MainWindow::endEditMode()
 {
+  if(!GLA()) return;
   if(GLA()->getEditAction())
   {
 	  GLA()->getEditAction()->setChecked(false);
@@ -646,7 +650,7 @@ void MainWindow::about()
 	QDialog *about_dialog = new QDialog();
 	Ui::aboutDialog temp;
 	temp.setupUi(about_dialog);
-	temp.labelMLName->setText(appName());
+	temp.labelMLName->setText(appName()+"   ("+__DATE__+")");
 	//about_dialog->setFixedSize(566,580);
 	about_dialog->show();
 }
@@ -699,24 +703,27 @@ void MainWindow::renderTexture()
 
 
 void MainWindow::fullScreen(){
-	toolbarState = saveState();
-	menuBar()->hide();
-	mainToolBar->hide();
-	renderToolBar->hide();
-	setWindowState(windowState()^Qt::WindowFullScreen);
-	bool found=true;
-	//Caso di piu' finestre aperte in tile:
-	if((workspace->windowList()).size()>1){
-		foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
-		if (found)workspace->tile();
-	}
-}
-void MainWindow::keyPressEvent(QKeyEvent *e){
-	if(e->key()==Qt::Key_Escape && isFullScreen())
-	{
-		e->accept();
-		menuBar()->show();
+  if(!isFullScreen())
+  {
+	  toolbarState = saveState();
+	  menuBar()->hide();
+	  mainToolBar->hide();
+	  renderToolBar->hide();
+    globalStatusBar()->hide();
+	  setWindowState(windowState()^Qt::WindowFullScreen);
+	  bool found=true;
+	  //Caso di piu' finestre aperte in tile:
+	  if((workspace->windowList()).size()>1){
+		  foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
+		  if (found)workspace->tile();
+	  }
+  }
+  else
+  {
+    menuBar()->show();
 		restoreState(toolbarState);
+    globalStatusBar()->show();
+
 		setWindowState(windowState()^ Qt::WindowFullScreen);
 		bool found=true;
 		//Caso di piu' finestre aperte in tile:
@@ -725,7 +732,15 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 			if (found){workspace->tile();}
 		}
 		fullScreenAct->setChecked(false);
-	}
-	else
-		e->ignore();
+  }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *e)
+{
+  if(e->key()==Qt::Key_Return && e->modifiers()==Qt::AltModifier)
+  {
+    fullScreen();
+    e->accept();
+  }
+  else e->ignore();
 }

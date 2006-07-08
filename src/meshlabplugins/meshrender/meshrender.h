@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.20  2006/07/08 06:37:48  cignoni
+Many small bugs correction (esc crash, info in about, obj loading progress,fullscreen es)
+
 Revision 1.19  2006/06/08 08:54:43  zifnab1974
 Do not use classname in class definition
 
@@ -120,12 +123,13 @@ public:
 
 	MeshShaderRenderPlugin()
 	{
-    initActionList();
+    
 		supported = false;
 		sDialog = 0;
 	}
 
-	QList<QAction *> actions () const {
+	QList<QAction *> actions () {
+    if(actionList.isEmpty()) initActionList();
     return actionList;
   }
 

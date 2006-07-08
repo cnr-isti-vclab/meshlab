@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.58  2006/07/08 06:37:47  cignoni
+Many small bugs correction (esc crash, info in about, obj loading progress,fullscreen es)
+
 Revision 1.57  2006/06/18 21:27:49  cignoni
 Progress bar redesigned, now integrated in the workspace window
 
@@ -221,6 +224,7 @@ void MainWindow::createActions()
 	//////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
 	fullScreenAct->setCheckable(true);
+	fullScreenAct->setShortcutContext(Qt::ApplicationShortcut);
 	fullScreenAct->setShortcut(Qt::ALT+Qt::Key_Return);
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(fullScreen()));
 
