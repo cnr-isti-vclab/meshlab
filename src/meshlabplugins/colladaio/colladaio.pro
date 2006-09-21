@@ -1,13 +1,13 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut/include ../../../../code/lib/FCollada/ ../../../../code/lib/FCollada/LibXML/include
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut/include ../../../../code/lib/FCollada-1.13/ ../../../../code/lib/FCollada-1.13/LibXML/include
 HEADERS       = colladaio.h \
 		    io_dae.h
 SOURCES       = colladaio.cpp
 TARGET        = colladaio
 DESTDIR       = ../../meshlab/plugins
 
-win32-msvc.net:LIBS	+= ../../../../code/lib/FCollada/FColladaSU_MTD.lib
+win32-msvc.net:LIBS	+= ../../../../code/lib/FCollada-1.13/Output/FColladaSU_MTD.lib
 win32-msvc.net:LIBS     -= LIBCMTD.lib
 
 # the following line is needed to avoid mismatch between 
