@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.25  2006/09/22 06:28:02  granzuglia
+abstract pointer to fileformat's dependent additional info added
+
 Revision 1.24  2006/06/16 01:26:07  cignoni
 Added Initial Filter Script Dialog
 
@@ -72,6 +75,7 @@ Made FFAdj optional and added store and restore color functions
 #include <wrap/gl/trimesh.h>
 #include <wrap/callback.h>
 #include <wrap/io_trimesh/io_mask.h>
+#include <wrap/io_trimesh/additionalinfo.h>
 
 using namespace vcg;
 using namespace std;
@@ -134,6 +138,9 @@ public:
   // Bitmask denoting what fields are loaded/saved
   int mask;
   bool busy;
+
+  //abstract pointer to fileformat's dependent additional info
+  AdditionalInfo* addinfo;
 
   MeshModel() {
 //    size_t faceSize=sizeof(CFaceO);
