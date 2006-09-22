@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/09/22 06:08:17  granzuglia
+ colladaio.pro updated with support for FCollada 1.13
+
  Revision 1.1  2006/06/19 13:42:53  granzuglia
  collada importer
 
@@ -42,9 +45,11 @@ class ColladaIOPlugin : public QObject, public MeshIOInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshIOInterface)
-
   
-public:
+ public:
+	 //std::map<MeshModel*,typename vcg::tri::io::InfoDAE*> _mp;
+	 std::vector<MeshModel*> _mp;
+
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
 	const ActionInfo &Info(QAction *);

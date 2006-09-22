@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/09/22 06:08:17  granzuglia
+ colladaio.pro updated with support for FCollada 1.13
+
  Revision 1.2  2006/07/07 06:57:04  granzuglia
  added the save function
 
@@ -31,12 +34,17 @@
  collada importer
 
 *****************************************************************************/
-#include <Qt>
-#include <QtGui>
+
+#include <algorithm>
 
 #include <wrap/io_trimesh/import_dae.h>
 #include <wrap/io_trimesh/export_dae.h>
+
+#include <Qt>
+#include <QtGui>
+
 #include "colladaio.h"
+
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
@@ -60,7 +68,7 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 		// this change of dir is needed for subsequent textures/materials loading
 		QDir::setCurrent(fi.absoluteDir().absolutePath());
 	}
-	
+
 	// initializing mask
   mask = 0;
 	
@@ -79,8 +87,10 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 		//if (!vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
 		//	return false;
 		//	m.Enable(oi.mask);
+		//std::pair<MeshModel*,vcg::tri::io::InfoDAE*> pr(&m,NULL);
+
+		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),m.addinfo);
 		
-		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str());
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
 		{
 			/*if (result & vcg::tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
@@ -91,7 +101,9 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 				return false;
 			}*/
 			QMessageBox::critical(parent, tr("DAE Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result)));
+			return false;
 		}
+		else _mp.push_back(&m);
 
 		/*if(oi.mask & MeshModel::IOM_WEDGNORMAL)
 			normalsUpdated = true;
@@ -99,6 +111,7 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 		mask = oi.mask;*/
 	}
 
+	
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;
@@ -131,8 +144,12 @@ bool ColladaIOPlugin::save(const QString &formatName,QString &fileName, MeshMode
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	std::string filename = fileName.toUtf8().data();
 	std::string ex = formatName.toUtf8().data();
+	int result;
 	
-	int result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str()/*,mask,cb*/);
+	if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end()) 
+		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str());
+	else 
+		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo);
 	if(result!=0)
 	{
 		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
@@ -185,5 +202,6 @@ const PluginInfo &ColladaIOPlugin::Info()
 	ai.Author = ("Guido Ranzuglia");
 	return ai;
  }
+
 
 Q_EXPORT_PLUGIN(ColladaIOPlugin)

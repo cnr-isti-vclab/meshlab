@@ -7,7 +7,8 @@ SOURCES       = colladaio.cpp
 TARGET        = colladaio
 DESTDIR       = ../../meshlab/plugins
 
-win32-msvc.net:LIBS	+= ../../../../code/lib/FCollada-1.13/Output/FColladaSU_MTD.lib
+win32-msvc.net:LIBS	+= ../../../../code/lib/FCollada-1.13/Output/FColladaSUD_MTD.lib
+
 win32-msvc.net:LIBS     -= LIBCMTD.lib
 
 # the following line is needed to avoid mismatch between 
