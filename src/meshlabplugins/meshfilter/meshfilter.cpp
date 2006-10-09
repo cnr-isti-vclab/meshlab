@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.66  2006/10/09 13:53:36  corsini
+fix face inversion
+
 Revision 1.65  2006/06/19 15:16:01  cignoni
 Update of normals after refinement
 
@@ -409,8 +412,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
-	if (filter->text() == ST(FP_INVERT_FACES) ) {
+	if (filter->text() == ST(FP_INVERT_FACES) ) 
+	{
 	  InvertFaces<CMeshO>(m.cm);
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	}
 
 	if (filter->text() == ST(FP_TRANSFORM) ) {
