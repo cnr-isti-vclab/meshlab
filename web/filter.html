@@ -19,8 +19,10 @@
 				implement the "MeshFilterInterface", you can find it in<span style="FONT-STYLE: italic"> "meshlab/interfaces.h".</span></p>
 			<p><span style="FONT-STYLE: italic"></span>Then you create a new class filter which 
 				must inherit from the interface and from QObject. This involves you specifying 
-				the two keywords "<span style="FONT-WEIGHT: bold; FONT-STYLE: italic">Q_OBJECT</span>" 
-				and "<span style="FONT-WEIGHT: bold; FONT-STYLE: italic">Q_INTERFACES(MeshFilterInterface)</span>" 
+				the two keywords
+				<br>
+				<span style="FONT-WEIGHT: bold; FONT-STYLE: italic">Q_OBJECT</span><br>
+				<span style="FONT-WEIGHT: bold; FONT-STYLE: italic">Q_INTERFACES(MeshFilterInterface)</span><br>
 				before the method declaration to permit the moc'ing phases.</p>
 			<p>It is essential to import of the mesh definition found in "meshlab/meshmodel.h".<br>
 				<br>
@@ -43,7 +45,11 @@
 				Before performing a filter function call it is good practice to check that the 
 				characteristics of the mesh (topology, normal, texture and so on) are up to 
 				date, otherwise you should call the specific method.</p>
-			<h2><span style="FONT-STYLE: italic"></span>Example</h2>
+			<br>
+			<p><span style="FONT-WEIGHT: bold">Download:</span><br>
+				You can download here a sample code <a href="http://meshlab.sourceforge.net/samplePlugins.zip">
+					FilterPlugins.zip</a></p>
+			<h2><span style="FONT-STYLE: italic"></span>Example of filter plug-in</h2>
 			<p><span style="FONT-STYLE: italic"></span><span style="FONT-WEIGHT: bold; TEXT-DECORATION: underline"> Example.h</span></p>
 			<p><span style="FONT-STYLE: italic">#ifndef EXAMPLEPLUGIN_H</span><br style="FONT-STYLE: italic">
 				<span style="FONT-STYLE: italic">#define EXAMPLEPLUGIN_H</span><br style="FONT-STYLE: italic">
