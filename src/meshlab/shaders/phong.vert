@@ -8,7 +8,9 @@
 void main()
 {	
 	vec3 n, lightDir, rVector;
-	vec4 ambient, diffuse, specular;
+	vec4 ambient = {0.0};
+	vec4 diffuse = {0.0};
+	vec4 specular = {0.0};
 
 	// vertex normal
 	n = normalize(gl_NormalMatrix * gl_Normal);
@@ -20,13 +22,21 @@ void main()
 	vec3 vpos = vec3(gl_ModelViewMatrix * gl_Vertex);
 	lightDir = normalize(gl_LightSource[0].position.xyz - vpos);
 	vec4 kd = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
-	diffuse = max(dot(lightDir, n), 0.0) * kd;
+	float NdotL = dot(n, lightDir);
+	
+	if (NdotL > 0.0)
+		diffuse = kd * NdotL;
 	
 	// specular term
-	vec3 viewVector = -vpos;
-	rVector = reflect(lightDir, n);
-	specular = gl_FrontMaterial.specular * max(pow(dot(rVector, viewVector), gl_FrontMaterial.shininess), 0.0); 
+	rVector = normalize(2.0 * n * dot(n, lightDir) - lightDir);
+	vec4 ks = gl_FrontMaterial.specular * gl_LightSource[0].specular;
+	vec3 viewVector = normalize(-vpos);
+	float RdotV = dot(rVector, viewVector);
 	
+	if (RdotV > 0.0)
+		specular = ks * pow(RdotV, gl_FrontMaterial.shininess);
+	
+	// final color
 	gl_FrontColor = ambient + diffuse + specular;
 	
 	// vertex position
