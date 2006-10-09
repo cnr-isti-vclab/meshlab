@@ -24,6 +24,9 @@
 
 /*
  * $Log$
+ * Revision 1.5  2006/10/09 13:53:20  corsini
+ * cleaning
+ *
  * Revision 1.4  2006/05/25 04:57:45  cignoni
  * Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
  * Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -38,8 +41,8 @@
 #ifndef __VCGLIB_INVERT_FACES
 #define __VCGLIB_INVERT_FACES
 
-#include<vcg/complex/trimesh/base.h>
-#include<vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/trimesh/update/normal.h>
 #include <algorithm>
 
 #include <iostream>
@@ -47,22 +50,20 @@
 
 // $Log, invert_faces.h
 
-namespace vcg{
-
+namespace vcg
+{
 	template<class MESH_TYPE>
-		void InvertFaces(MESH_TYPE &m)
+	void InvertFaces(MESH_TYPE &m)
 	{	
 		typename MESH_TYPE::FaceIterator fi;
 		
 		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
 		{				
 				swap((*fi).V1(0), (*fi).V2(0));
+
 				// swap also texture coordinates
-				if (HasPerWedgeTexture(m)) {
+				if (HasPerWedgeTexture(m))
 					swap((*fi).WT(0),(*fi).WT(1));
-				//	swap((*fi).WT(1),(*fi).WT(2));
-				//	swap((*fi).WT(2),(*fi).WT(0));
-				}
 		}
 	}	
 
