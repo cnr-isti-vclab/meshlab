@@ -1,20 +1,34 @@
+// Bui Tuong Phong shading model (per-vertex) 
+// 
+// by 
+// Massimiliano Corsini
+// Visual Computing Lab (2006)
+// 
+
 void main()
 {	
+	vec3 n, lightDir, rVector;
+	vec4 ambient, diffuse, specular;
 
-	vec3 normal, lightDir, viewVector, rVector;
-	vec4 diffuse, ambient, globalAmbient, specular = vec4(0.0);
+	// vertex normal
+	n = normalize(gl_NormalMatrix * gl_Normal);
 	
-	normal = normalize(gl_NormalMatrix * gl_Normal);
-	lightDir = normalize(vec3(gl_LightSource[0].position));
-	viewVector =  normalize(vec3(2.0 * gl_LightSource[0].halfVector - gl_LightSource[0].position));
-	diffuse = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
-	ambient = gl_FrontMaterial.ambient * gl_LightSource[0].ambient;
-	globalAmbient = gl_LightModel.ambient * gl_FrontMaterial.ambient;
-	
-	rVector = normalize(2.0 * normal * dot(normal, lightDir) - lightDir);
-	specular = gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(dot(rVector, viewVector), gl_FrontMaterial.shininess);
+	// ambient term
+	ambient = gl_LightModel.ambient * gl_FrontMaterial.ambient;
 
-	gl_FrontColor = globalAmbient + dot(normal, lightDir) * diffuse + ambient + specular;
+	// diffuse term
+	vec3 vpos = vec3(gl_ModelViewMatrix * gl_Vertex);
+	lightDir = normalize(gl_LightSource[0].position.xyz - vpos);
+	vec4 kd = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
+	diffuse = max(dot(lightDir, n), 0.0) * kd;
 	
-	gl_Position = ftransform();
+	// specular term
+	vec3 viewVector = -vpos;
+	rVector = reflect(lightDir, n);
+	specular = gl_FrontMaterial.specular * max(pow(dot(rVector, viewVector), gl_FrontMaterial.shininess), 0.0); 
+	
+	gl_FrontColor = ambient + diffuse + specular;
+	
+	// vertex position
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 }
