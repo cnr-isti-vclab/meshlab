@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.87  2006/10/10 21:10:33  cignoni
+ progress bar bug
+
  Revision 1.86  2006/06/21 04:25:27  cignoni
  Removed progress bar callback because caused assert under gcc debugged QT libs (to be investigated)
 
@@ -118,7 +121,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	if(formatName.toUpper() == tr("OBJ"))
 	{
     vcg::tri::io::ImporterOBJ<CMeshO>::Info oi;	
-		oi.cb = 0;
+		oi.cb = cb;
 		if (!vcg::tri::io::ImporterOBJ<CMeshO>::LoadMask(filename.c_str(), oi))
 			return false;
     m.Enable(oi.mask);
