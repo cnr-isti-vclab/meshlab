@@ -6,9 +6,10 @@
 // Visual Computing Lab (2006)
 //
 
-
 varying vec3 normal;
 varying vec3 vpos;
+
+uniform float shininess;
 
 void main()
 {
@@ -38,7 +39,7 @@ void main()
 	float RdotV = dot(rVector, viewVector);
 	
 	if (RdotV > 0.0)
-		specular = ks * pow(RdotV, gl_FrontMaterial.shininess);
+		specular = ks * pow(RdotV, shininess);
 
 	gl_FragColor = ambient + diffuse + specular;
 } 

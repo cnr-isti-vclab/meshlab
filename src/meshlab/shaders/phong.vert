@@ -11,10 +11,6 @@ varying vec3 vpos;
 
 void main()
 {	
-	vec3 n, lightDir, rVector;
-	vec4 diffuse = {0.0};
-	vec4 specular = {0.0};
-
 	// vertex normal
 	normal = normalize(gl_NormalMatrix * gl_Normal);
 	
