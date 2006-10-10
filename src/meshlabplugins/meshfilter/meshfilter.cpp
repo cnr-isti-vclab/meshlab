@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.67  2006/10/10 21:13:08  cignoni
+Added remove non manifold and quadric simplification filter.
+
 Revision 1.66  2006/10/09 13:53:36  corsini
 fix face inversion
 
@@ -111,6 +114,8 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 
 using namespace vcg;
 
+void QuadricSimplification(CMeshO &cm,float threshold);
+
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
 {
   typeList << FP_LOOP_SS<< 
@@ -120,10 +125,12 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_REMOVE_FACES_BY_AREA<<
     FP_REMOVE_FACES_BY_EDGE<<
     FP_LAPLACIAN_SMOOTH<< 
-    FP_DECIMATOR<< 
+    FP_CLUSTERING<< 
+    FP_QUADRIC_SIMPLIFICATION<<
     FP_MIDPOINT<< 
     FP_REORIENT <<
     FP_INVERT_FACES<<
+    FP_REMOVE_NON_MANIFOLD<<
     FP_TRANSFORM;
   
   FilterType tt;
@@ -173,11 +180,13 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 	case FP_REMOVE_FACES_BY_AREA :     		return QString("Remove Zero Area Faces");
 	case FP_REMOVE_FACES_BY_EDGE :				return QString("Remove Faces with edges longer than...");
   case FP_LAPLACIAN_SMOOTH :						return QString("Laplacian Smooth");
-	case FP_DECIMATOR :	                	return QString("Clustering decimation");
+	case FP_QUADRIC_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation");
+	case FP_CLUSTERING :	                return QString("Clustering decimation");
 	case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
 	case FP_REORIENT :	                  return QString("Re-orient");
 	case FP_INVERT_FACES:									return QString("Invert Faces");
 	case FP_TRANSFORM:	                	return QString("Apply Transform");
+	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
 	
 	default: assert(0);
   }
@@ -233,10 +242,14 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 			ai.Help = tr("For each vertex it calculates the average position with nearest vertex");
 			ai.ShortHelp = tr("Smooth the mesh surface");
 		     break;
-  case FP_DECIMATOR : 
+  case FP_CLUSTERING : 
 			ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
 			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
 		     break;
+  case FP_QUADRIC_SIMPLIFICATION: 
+			ai.Help = tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
+			ai.ShortHelp = tr("Quadric Based Edge Collapse Simplification");
+		     break;        
   case FP_REORIENT : 
 			ai.Help = tr("Re-oriented the adjacencies of the face of the mesh");
 			ai.ShortHelp = tr("Re-oriented the face");
@@ -267,6 +280,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
+    case FP_REMOVE_NON_MANIFOLD:
     case FP_LOOP_SS :
     case FP_BUTTERFLY_SS : 
     case FP_MIDPOINT :            return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
@@ -276,9 +290,10 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_REMOVE_DUPLICATED_VERTEX:
     case FP_REMOVE_FACES_BY_AREA:
     case FP_REMOVE_FACES_BY_EDGE:
-    case FP_DECIMATOR:
+    case FP_CLUSTERING:
     case FP_TRANSFORM:
     case FP_INVERT_FACES:         return 0;
+    case FP_QUADRIC_SIMPLIFICATION: return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
     default: assert(0); 
   }
   return 0;
@@ -293,7 +308,8 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *, MeshModel 
     case FP_BUTTERFLY_SS : 
     case FP_MIDPOINT : 
     case FP_REMOVE_FACES_BY_EDGE:
-    case FP_DECIMATOR:
+    case FP_QUADRIC_SIMPLIFICATION:
+    case FP_CLUSTERING:
       {
         Histogram<float> histo;
         genericELD->setHistogram(&histo);
@@ -326,6 +342,7 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *, MeshModel 
     case FP_REORIENT:
     case FP_INVERT_FACES:
     case FP_LAPLACIAN_SMOOTH:
+    case FP_REMOVE_NON_MANIFOLD:
        return true; // no parameters
    default :assert(0);
   }
@@ -387,6 +404,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
+	if(filter->text() == ST(FP_REMOVE_NON_MANIFOLD) )
+	  {
+	    int delvert=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
+	    if (log)
+	      log->Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+	  }
+
 	if(filter->text() == ST(FP_REORIENT) )
 	  {
 	    bool oriented;
@@ -401,7 +425,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
- 	if(filter->text() == ST(FP_DECIMATOR))
+ 	if(filter->text() == ST(FP_CLUSTERING))
 	  {
       bool selected  = par.getBool("Selected");	
       float threshold = par.getFloat("Threshold");		
@@ -429,6 +453,16 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
+
+
+	if (filter->text() == ST(FP_QUADRIC_SIMPLIFICATION) ) {
+  float threshold = par.getFloat("Threshold");		
+  
+   QuadricSimplification(m.cm,threshold);
+   vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	 vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+	}
+
 
 
 	return true;

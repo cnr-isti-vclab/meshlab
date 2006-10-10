@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.32  2006/10/10 21:13:08  cignoni
+Added remove non manifold and quadric simplification filter.
+
 Revision 1.31  2006/05/25 09:46:38  cignoni
 missing std and and all the other gcc detected syntax errors
 
@@ -85,8 +88,10 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 				  FP_REMOVE_DUPLICATED_VERTEX, 
           FP_REMOVE_FACES_BY_AREA,
 				  FP_REMOVE_FACES_BY_EDGE,
+          FP_REMOVE_NON_MANIFOLD,
           FP_LAPLACIAN_SMOOTH, 
-          FP_DECIMATOR, 
+          FP_CLUSTERING, 
+          FP_QUADRIC_SIMPLIFICATION, 
           FP_MIDPOINT, 
           FP_REORIENT ,
           FP_INVERT_FACES,
