@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.8  2006/10/10 21:14:34  cignoni
+ changed the name of the mask member
+
  Revision 1.7  2006/01/31 09:34:29  fmazzant
  bug-fix on savemaskexporter, when press cancel returns -1.
 
@@ -133,47 +136,47 @@ int SaveMaskExporterDialog::GetNewMask()
 void SaveMaskExporterDialog::SetMaskCapability()
 {
 	//vert
-	ui.check_iom_vertquality->setDisabled( ((capability & MeshModel::IOM_VERTQUALITY)==0) | ((m->mask & MeshModel::IOM_VERTQUALITY)==0) );
-	ui.check_iom_vertquality->setChecked ( ((capability & MeshModel::IOM_VERTQUALITY)!=0) & ((m->mask & MeshModel::IOM_VERTQUALITY)!=0));
+	ui.check_iom_vertquality->setDisabled( ((capability & MeshModel::IOM_VERTQUALITY)==0) | ((m->ioMask & MeshModel::IOM_VERTQUALITY)==0) );
+	ui.check_iom_vertquality->setChecked ( ((capability & MeshModel::IOM_VERTQUALITY)!=0) & ((m->ioMask & MeshModel::IOM_VERTQUALITY)!=0));
 	
-	ui.check_iom_vertflags->setDisabled( ((capability & MeshModel::IOM_VERTFLAGS)==0) | ((m->mask & MeshModel::IOM_VERTFLAGS)==0));
-	ui.check_iom_vertflags->setChecked ( ((capability & MeshModel::IOM_VERTFLAGS)!=0) & ((m->mask & MeshModel::IOM_VERTFLAGS)!=0) );
+	ui.check_iom_vertflags->setDisabled( ((capability & MeshModel::IOM_VERTFLAGS)==0) | ((m->ioMask & MeshModel::IOM_VERTFLAGS)==0));
+	ui.check_iom_vertflags->setChecked ( ((capability & MeshModel::IOM_VERTFLAGS)!=0) & ((m->ioMask & MeshModel::IOM_VERTFLAGS)!=0) );
 
-	ui.check_iom_vertcolor->setDisabled( ((capability & MeshModel::IOM_VERTCOLOR)==0) | ((m->mask & MeshModel::IOM_VERTCOLOR)==0) );
-	ui.check_iom_vertcolor->setChecked ( ((capability & MeshModel::IOM_VERTCOLOR)!=0) & ((m->mask & MeshModel::IOM_VERTCOLOR)!=0) );
+	ui.check_iom_vertcolor->setDisabled( ((capability & MeshModel::IOM_VERTCOLOR)==0) | ((m->ioMask & MeshModel::IOM_VERTCOLOR)==0) );
+	ui.check_iom_vertcolor->setChecked ( ((capability & MeshModel::IOM_VERTCOLOR)!=0) & ((m->ioMask & MeshModel::IOM_VERTCOLOR)!=0) );
 	
-	ui.check_iom_verttexcoord->setDisabled( ((capability & MeshModel::IOM_VERTTEXCOORD)==0) | ((m->mask & MeshModel::IOM_VERTTEXCOORD)==0) );
-	ui.check_iom_verttexcoord->setChecked ( ((capability & MeshModel::IOM_VERTTEXCOORD)!=0) & ((m->mask & MeshModel::IOM_VERTTEXCOORD)!=0) );
+	ui.check_iom_verttexcoord->setDisabled( ((capability & MeshModel::IOM_VERTTEXCOORD)==0) | ((m->ioMask & MeshModel::IOM_VERTTEXCOORD)==0) );
+	ui.check_iom_verttexcoord->setChecked ( ((capability & MeshModel::IOM_VERTTEXCOORD)!=0) & ((m->ioMask & MeshModel::IOM_VERTTEXCOORD)!=0) );
 
-	ui.check_iom_vertnormal->setDisabled( ((capability & MeshModel::IOM_VERTNORMAL)==0) | ((m->mask & MeshModel::IOM_VERTNORMAL)==0) );
-	ui.check_iom_vertnormal->setChecked ( ((capability & MeshModel::IOM_VERTNORMAL)!=0) & ((m->mask & MeshModel::IOM_VERTNORMAL)!=0) );
+	ui.check_iom_vertnormal->setDisabled( ((capability & MeshModel::IOM_VERTNORMAL)==0) | ((m->ioMask & MeshModel::IOM_VERTNORMAL)==0) );
+	ui.check_iom_vertnormal->setChecked ( ((capability & MeshModel::IOM_VERTNORMAL)!=0) & ((m->ioMask & MeshModel::IOM_VERTNORMAL)!=0) );
 
 	//face
-	ui.check_iom_facequality->setDisabled( ((capability & MeshModel::IOM_FACEQUALITY)==0) | ((m->mask & MeshModel::IOM_FACEQUALITY)==0));
-	ui.check_iom_facequality->setChecked ( ((capability & MeshModel::IOM_FACEQUALITY)!=0) & ((m->mask & MeshModel::IOM_FACEQUALITY)!=0));
+	ui.check_iom_facequality->setDisabled( ((capability & MeshModel::IOM_FACEQUALITY)==0) | ((m->ioMask & MeshModel::IOM_FACEQUALITY)==0));
+	ui.check_iom_facequality->setChecked ( ((capability & MeshModel::IOM_FACEQUALITY)!=0) & ((m->ioMask & MeshModel::IOM_FACEQUALITY)!=0));
 
-	ui.check_iom_faceflags->setDisabled( ((capability & MeshModel::IOM_FACEFLAGS)==0) | ((m->mask & MeshModel::IOM_FACEFLAGS)==0) );
-	ui.check_iom_faceflags->setChecked ( ((capability & MeshModel::IOM_FACEFLAGS)!=0) & ((m->mask & MeshModel::IOM_FACEFLAGS)!=0) );
+	ui.check_iom_faceflags->setDisabled( ((capability & MeshModel::IOM_FACEFLAGS)==0) | ((m->ioMask & MeshModel::IOM_FACEFLAGS)==0) );
+	ui.check_iom_faceflags->setChecked ( ((capability & MeshModel::IOM_FACEFLAGS)!=0) & ((m->ioMask & MeshModel::IOM_FACEFLAGS)!=0) );
 
-	ui.check_iom_facecolor->setDisabled( ((capability & MeshModel::IOM_FACECOLOR)==0) | ((m->mask & MeshModel::IOM_FACECOLOR)==0) );
-	ui.check_iom_facecolor->setChecked ( ((capability & MeshModel::IOM_FACECOLOR)!=0) & ((m->mask & MeshModel::IOM_FACECOLOR)!=0) );
+	ui.check_iom_facecolor->setDisabled( ((capability & MeshModel::IOM_FACECOLOR)==0) | ((m->ioMask & MeshModel::IOM_FACECOLOR)==0) );
+	ui.check_iom_facecolor->setChecked ( ((capability & MeshModel::IOM_FACECOLOR)!=0) & ((m->ioMask & MeshModel::IOM_FACECOLOR)!=0) );
 	
-	ui.check_iom_facenormal->setDisabled( ((capability & MeshModel::IOM_FACENORMAL)==0) | ((m->mask & MeshModel::IOM_FACENORMAL)==0) );
-	ui.check_iom_facenormal->setChecked ( ((capability & MeshModel::IOM_FACENORMAL)!=0) & ((m->mask & MeshModel::IOM_FACENORMAL)!=0) );
+	ui.check_iom_facenormal->setDisabled( ((capability & MeshModel::IOM_FACENORMAL)==0) | ((m->ioMask & MeshModel::IOM_FACENORMAL)==0) );
+	ui.check_iom_facenormal->setChecked ( ((capability & MeshModel::IOM_FACENORMAL)!=0) & ((m->ioMask & MeshModel::IOM_FACENORMAL)!=0) );
 
 	//wedg
-	ui.check_iom_wedgcolor->setDisabled( ((capability & MeshModel::IOM_WEDGCOLOR)==0) | ((m->mask & MeshModel::IOM_WEDGCOLOR)==0) );
-	ui.check_iom_wedgcolor->setChecked ( ((capability & MeshModel::IOM_WEDGCOLOR)!=0) & ((m->mask & MeshModel::IOM_WEDGCOLOR)!=0) );
+	ui.check_iom_wedgcolor->setDisabled( ((capability & MeshModel::IOM_WEDGCOLOR)==0) | ((m->ioMask & MeshModel::IOM_WEDGCOLOR)==0) );
+	ui.check_iom_wedgcolor->setChecked ( ((capability & MeshModel::IOM_WEDGCOLOR)!=0) & ((m->ioMask & MeshModel::IOM_WEDGCOLOR)!=0) );
 
-	ui.check_iom_wedgtexcoord->setDisabled( ((capability & MeshModel::IOM_WEDGTEXCOORD)==0) | ((m->mask & MeshModel::IOM_WEDGTEXCOORD)==0) );
-	ui.check_iom_wedgtexcoord->setChecked ( ((capability & MeshModel::IOM_WEDGTEXCOORD)!=0) & ((m->mask & MeshModel::IOM_WEDGTEXCOORD)!=0) );
+	ui.check_iom_wedgtexcoord->setDisabled( ((capability & MeshModel::IOM_WEDGTEXCOORD)==0) | ((m->ioMask & MeshModel::IOM_WEDGTEXCOORD)==0) );
+	ui.check_iom_wedgtexcoord->setChecked ( ((capability & MeshModel::IOM_WEDGTEXCOORD)!=0) & ((m->ioMask & MeshModel::IOM_WEDGTEXCOORD)!=0) );
 
-	ui.check_iom_wedgnormal->setDisabled( ((capability & MeshModel::IOM_WEDGNORMAL)==0) | ((m->mask & MeshModel::IOM_WEDGNORMAL)==0) );
-	ui.check_iom_wedgnormal->setChecked ( ((capability & MeshModel::IOM_WEDGNORMAL)!=0) & ((m->mask & MeshModel::IOM_WEDGNORMAL)!=0) );
+	ui.check_iom_wedgnormal->setDisabled( ((capability & MeshModel::IOM_WEDGNORMAL)==0) | ((m->ioMask & MeshModel::IOM_WEDGNORMAL)==0) );
+	ui.check_iom_wedgnormal->setChecked ( ((capability & MeshModel::IOM_WEDGNORMAL)!=0) & ((m->ioMask & MeshModel::IOM_WEDGNORMAL)!=0) );
 
 	//camera
-	ui.check_iom_camera->setDisabled( ((capability & MeshModel::IOM_CAMERA)==0) | ((m->mask & MeshModel::IOM_CAMERA)==0) );
-	ui.check_iom_camera->setChecked ( ((capability & MeshModel::IOM_CAMERA)!=0) & ((m->mask & MeshModel::IOM_CAMERA)!=0) );
+	ui.check_iom_camera->setDisabled( ((capability & MeshModel::IOM_CAMERA)==0) | ((m->ioMask & MeshModel::IOM_CAMERA)==0) );
+	ui.check_iom_camera->setChecked ( ((capability & MeshModel::IOM_CAMERA)!=0) & ((m->ioMask & MeshModel::IOM_CAMERA)!=0) );
 
 
 	if(capability == 0)
