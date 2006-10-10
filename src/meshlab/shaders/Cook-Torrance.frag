@@ -10,10 +10,10 @@ varying vec3 normal;
 varying vec3 vpos;
 
 // gaussian coefficient
-uniform float C = 0.8;
+uniform float C;
 
 // index of refraction
-uniform float ni = 5.0;
+uniform float ni;
 
 void main()
 {
