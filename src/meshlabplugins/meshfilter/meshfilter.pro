@@ -9,6 +9,7 @@ HEADERS       = transformDialog.h \
 
 SOURCES       = transformDialog.cpp \
 				meshfilter.cpp \ 
+				quadricsimp.cpp \ 
 				../../meshlab/GLLogStream.cpp 
 
 TARGET        = meshfilter
