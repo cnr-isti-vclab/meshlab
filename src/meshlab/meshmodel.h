@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.26  2006/10/10 21:16:13  cignoni
+Added VF optional component
+
 Revision 1.25  2006/09/22 06:28:02  granzuglia
 abstract pointer to fileformat's dependent additional info added
 
@@ -63,6 +66,7 @@ Made FFAdj optional and added store and restore color functions
 #include <time.h>
 
 #include<vcg/simplex/vertexplus/base.h>
+#include <vcg/simplex/edge/edge.h>
 #include<vcg/simplex/faceplus/base.h>
 #include<vcg/simplex/face/topology.h>
 
@@ -80,7 +84,7 @@ Made FFAdj optional and added store and restore color functions
 using namespace vcg;
 using namespace std;
 
-class CEdge;    // dummy prototype never used
+class CEdge;   
 class CFaceO;
 class CVertexO;
 
@@ -91,11 +95,23 @@ class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO,
   vert::BitFlags,    /*  4b */
   vert::Normal3f,    /* 12b */
   vert::Qualityf,    /*  4b */
+  vert::VFAdj,       /*  4b */
+  vert::Mark,        /* 0b */
   vert::Color4b      /*  4b */
   >{ 
 };
 
 //Face Mem Occupancy  --- 32 ---
+
+
+  
+class CEdge : public Edge<CEdge,CVertexO> {
+public:
+  inline CEdge() {};
+  inline CEdge( CVertexO * v0, CVertexO * v1):Edge<CEdge,CVertexO>(v0,v1){};
+  inline CEdge( Edge<CEdge,CVertexO> &e):Edge<CEdge,CVertexO>(e){};
+};
+
 
 class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,  
       face::InfoOcf,              /* 4b */
@@ -105,6 +121,7 @@ class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,
       face::MarkOcf,              /* 0b */
       face::Color4bOcf,           /* 0b */
       face::FFAdjOcf,             /* 0b */
+      face::VFAdjOcf,             /* 0b */
       face::WedgeTexturefOcf      /* 0b */
     > {};
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
@@ -126,6 +143,7 @@ public:
                     MM_WEDGTEXCOORD  = 0x0004,
                     MM_FACECOLOR     = 0x0008,
                     MM_FACEMARK      = 0x0010,
+                    MM_VERTFACETOPO  = 0x0020,
                     MM_ALL           = 0xffff} ;
 
 
@@ -134,9 +152,12 @@ public:
   vector<Color4b> originalVertexColor;
 
   // Bitmask denoting what fields are currently kept updated in mesh
+  // it is composed by OR-ing MM_XXXX enums (defined in the above FilterReq)
   int currentDataMask;
+
   // Bitmask denoting what fields are loaded/saved
-  int mask;
+  // it is composed by OR-ing IOM_XXXX enums (defined in tri::io::Mask)
+  int ioMask;
   bool busy;
 
   //abstract pointer to fileformat's dependent additional info
@@ -148,7 +169,7 @@ public:
     
     glw.m=&cm; 
     currentDataMask=MM_NONE;
-    mask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
+    ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
     busy=true;
   }
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
@@ -195,6 +216,12 @@ public:
     cm.face.EnableFFAdjacency();
     currentDataMask |= MM_FACETOPO;
 	  tri::UpdateTopology<CMeshO>::FaceFace(cm);
+   }
+   if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && (currentDataMask& MM_VERTFACETOPO)==0)			
+   {
+    cm.face.EnableVFAdjacency();
+    currentDataMask |= MM_VERTFACETOPO;
+	  tri::UpdateTopology<CMeshO>::VertexFace(cm);
    }
    if( ( (neededDataMask & MM_BORDERFLAG)!=0) && (currentDataMask& MM_BORDERFLAG)==0)			
    {
