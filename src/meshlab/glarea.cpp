@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.106  2006/10/10 19:55:02  cignoni
+Corrected trackball bug, changed default background color.
+
 Revision 1.105  2006/06/16 01:27:33  cignoni
 Comment
 
@@ -469,7 +472,7 @@ void GLArea::displayMeshInfo()
 
 	renderText(curSiz.width()*.5f,startPos-3*fontSpacingV,tr("Vertices: %1").arg(mm->cm.vn),qFont);
 	renderText(curSiz.width()*.5f,startPos-2*fontSpacingV,tr("Faces: %1").arg(mm->cm.fn),qFont);
-	renderText(curSiz.width()*.5f,startPos-  fontSpacingV,GetMeshInfoString(mm->mask),qFont);
+	renderText(curSiz.width()*.5f,startPos-  fontSpacingV,GetMeshInfoString(mm->ioMask),qFont);
 }
 
 void GLArea::displayEnvInfo()
@@ -608,7 +611,9 @@ void GLArea::keyPressEvent ( QKeyEvent * e )
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
 	e->ignore();
-	if (isDefaultTrackBall()) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, e->modifiers() ) );
+      if(e->key()==Qt::Key_Control) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+      if(e->key()==Qt::Key_Shift) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+      if(e->key()==Qt::Key_Alt) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, Qt::AltModifier ) );
 }
 
 void GLArea::mousePressEvent(QMouseEvent*e)

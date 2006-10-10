@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.60  2006/10/10 19:55:02  cignoni
+Corrected trackball bug, changed default background color.
+
 Revision 1.59  2006/06/13 13:50:01  cignoni
 Cleaned FPS management
 
@@ -90,8 +93,12 @@ public:
 	Color4b lColor;
 	ColorSetting()
 	{
-		bColorBottom=Color4b(64,64,128,1);	
-		bColorTop=Color4b(0,0,0,1);
+		//bColorBottom=Color4b(64,64,128,1);	
+		//bColorTop=Color4b(0,0,0,1);
+		//lColor=Color4b(128,16,16,1);
+
+    bColorBottom=Color4b(192,192,192,1);	
+		bColorTop=Color4b(255,255,255,1);
 		lColor=Color4b(128,16,16,1);
 	};
 };
