@@ -9,6 +9,8 @@
 varying vec3 normal;
 varying vec3 vpos;
 
+uniform float m;
+
 void main (void)
 {
 	vec3 N = normalize(normal);
@@ -22,5 +24,5 @@ void main (void)
 	float NdotV = dot(N,V);
 	float NdotL = dot(N,L);
 
-	gl_FragColor = max(0.0, NdotV * NdotL) * kd;
+	gl_FragColor = pow(NdotV * NdotL, m) * kd;
 }
