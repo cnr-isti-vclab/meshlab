@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.105  2006/10/12 06:45:48  cignoni
+Updated access to mm mask and the choice of the color mode according to the filter class
+
 Revision 1.104  2006/07/08 06:37:47  cignoni
 Many small bugs correction (esc crash, info in about, obj loading progress,fullscreen es)
 
@@ -323,11 +326,16 @@ void MainWindow::applyFilter()
 	}
 
   // at the end for filters that change the color set the appropriate color mode
-  if(iFilter->getClass(action)==MeshFilterInterface::FaceColoring ) 
+  if(iFilter->getClass(action)==MeshFilterInterface::FaceColoring ) {
     GLA()->setColorMode(vcg::GLW::CMPerFace);
-  if(iFilter->getClass(action)==MeshFilterInterface::VertexColoring )
+    GLA()->mm->ioMask|=MeshModel::IOM_FACECOLOR;
+  }
+  if(iFilter->getClass(action)==MeshFilterInterface::VertexColoring ){
     GLA()->setColorMode(vcg::GLW::CMPerVert);
-  if(iFilter->getClass(action)==MeshFilterInterface::Selection )
+    GLA()->mm->ioMask|=MeshModel::IOM_VERTCOLOR;
+    GLA()->mm->ioMask|=MeshModel::IOM_VERTQUALITY;
+  }
+if(iFilter->getClass(action)==MeshFilterInterface::Selection )
     GLA()->setSelectionRendering(true);
 
   qb->reset();
@@ -521,7 +529,7 @@ void MainWindow::open(QString fileName)
 		GLArea *gla;
 		gla=new GLArea(workspace);
 		gla->mm=mm;
-    gla->mm->mask = mask;				// store mask into model structure
+    gla->mm->ioMask = mask;				// store mask into model structure
     
 		gla->setFileName(fileName);
 		gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
