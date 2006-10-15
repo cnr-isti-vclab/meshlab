@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/10/15 17:08:52  cignoni
+typenames and qualifiers for gcc compliance
+
 Revision 1.1  2006/10/10 21:13:08  cignoni
 Added remove non manifold and quadric simplification filter.
 
@@ -43,7 +46,7 @@ using namespace vcg;
 using namespace std;
 
 
-typedef	SimpleTempData<typename CMeshO::VertContainer, math::Quadric<double> > QuadricTemp;
+typedef	SimpleTempData<CMeshO::VertContainer, math::Quadric<double> > QuadricTemp;
 
 
 class QHelper
