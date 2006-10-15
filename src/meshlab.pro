@@ -1,3 +1,4 @@
 TEMPLATE      = subdirs
 SUBDIRS       = meshlab \
-                meshlabplugins
+                meshlabplugins \
+                meshlabserver
