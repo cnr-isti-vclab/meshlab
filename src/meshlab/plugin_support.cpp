@@ -22,15 +22,12 @@ void LoadKnownFilters(std::vector<MeshIOInterface*> meshIOPlugins, QStringList &
 		MeshIOInterface* pMeshIOPlugin = *itIOPlugin;
 
 		QList<MeshIOInterface::Format> currentFormats;// = pMeshIOPlugin->formats();
-
-		/* new */
-		if(type == IMPORT)
-			currentFormats = pMeshIOPlugin->importFormats();
-
-		if(type == EXPORT)
-			currentFormats = pMeshIOPlugin->exportFormats();
-		/* end new part */
-
+    switch(type){ 
+      case IMPORT :	currentFormats = pMeshIOPlugin->importFormats(); break;
+      case EXPORT : currentFormats = pMeshIOPlugin->exportFormats(); break;
+      default :assert(0); // unknown filter type
+    }
+		
 		QList<MeshIOInterface::Format>::iterator itFormat = currentFormats.begin();
 		while(itFormat != currentFormats.end())
 		{
