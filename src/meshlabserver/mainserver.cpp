@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/10/15 20:31:38  cignoni
+Added saving of the mesh
+
 Revision 1.2  2006/06/27 08:08:12  cignoni
 First working version. now it loads all the needed plugins and a mesh!
 
@@ -76,29 +79,8 @@ void loadPlugins()
       { 
         QAction *filterAction;
         foreach(filterAction, iFilter->actions())
-        {
           filterMap[filterAction->text()]=filterAction;
-          //connect(filterAction,SIGNAL(triggered()),this,SLOT(applyFilter()));
-          switch(iFilter->getClass(filterAction))
-          {
-            //case MeshFilterInterface::FaceColoring : 
-            //case MeshFilterInterface::VertexColoring : 
-            //  		colorModeMenu->addAction(filterAction); break;
-            //case MeshFilterInterface::Selection : 
-            //  		filterMenuSelect->addAction(filterAction); 
-            //      if(!filterAction->icon().isNull())
-            //          editToolBar->addAction(filterAction);
-            //break;
-            //case MeshFilterInterface::Cleaning : 
-            //  		filterMenuClean->addAction(filterAction); break;
-            //case MeshFilterInterface::Remeshing : 
-            //  		filterMenuRemeshing->addAction(filterAction); break;
-            //case MeshFilterInterface::Generic : 
-            //default:
-            //  		filterMenu->addAction(filterAction); break;
-          }  
-        }
-         printf("Loaded %i filtering actions form %s\n",filterMap.size(),qPrintable(fileName));
+        printf("Loaded %i filtering actions form %s\n",filterMap.size(),qPrintable(fileName));
        }
 		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
 			if (iIO)	meshIOPlugins.push_back(iIO);
@@ -143,9 +125,52 @@ bool Open(MeshModel &mm, QString fileName)
 	if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,0,0/*gla*/))
   {
     printf("Failed loading\n");
+    return false;
   }
-
+  return true;
 }
+/*
+ sintassi 
+ meshlab -i mesh -o mesh -f filtro
+
+
+*/
+
+bool Save(MeshModel &mm, QString fileName)
+{
+	// Opening files in a transparent form (IO plugins contribution is hidden to user)
+	QStringList filters;
+	
+	// HashTable storing all supported formats togheter with
+	// the (1-based) index  of first plugin which is able to open it
+	QHash<QString, int> allKnownFormats;
+	
+	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
+
+	QFileInfo fi(fileName);
+	// this change of dir is needed for subsequent textures/materials loading
+	QDir::setCurrent(fi.absoluteDir().absolutePath());
+	
+	QString extension = fi.suffix();
+	
+	// retrieving corresponding IO plugin
+	int idx = allKnownFormats[extension.toLower()];
+	if (idx == 0)
+	{	
+    printf("Error encountered while opening file: ");
+		//QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
+		//QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
+		return false;
+	}
+	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
+	
+	int mask = 0;
+	if (!pCurrentIOPlugin->save(extension, fileName, mm ,mask,0,0/*gla*/))
+  {
+    printf("Failed saving\n");
+  }
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -156,10 +181,10 @@ int main(int argc, char *argv[])
   {
     Open(mm,argv[1]);
     printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
+    Save(mm,argv[2]);    
   }
   else exit(-1);
 
 	//return app.exec();
 }
-
 

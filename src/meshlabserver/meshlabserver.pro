@@ -4,7 +4,7 @@ HEADERS        = ../meshlab/interfaces.h \
                  ../meshlab/filterparameter.h 
 
 SOURCES        = mainserver.cpp \
-                 ../meshlab/filterscript.cpp 
+                 ../meshlab/filterscript.cpp \
                  ../meshlab/plugin_support.cpp 
 
 
