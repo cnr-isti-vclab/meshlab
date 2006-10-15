@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.27  2006/10/15 23:45:51  cignoni
+Added orderedEdge constructor for gcc compiling of quadric simplifciation stuff
+
 Revision 1.26  2006/10/10 21:16:13  cignoni
 Added VF optional component
 
@@ -109,7 +112,12 @@ class CEdge : public Edge<CEdge,CVertexO> {
 public:
   inline CEdge() {};
   inline CEdge( CVertexO * v0, CVertexO * v1):Edge<CEdge,CVertexO>(v0,v1){};
-  inline CEdge( Edge<CEdge,CVertexO> &e):Edge<CEdge,CVertexO>(e){};
+  static inline CEdge OrderedEdge(VertexType* v0,VertexType* v1){
+   if(v0<v1) return CEdge(v0,v1);
+   else return CEdge(v1,v0);
+  }
+
+  //inline CEdge( Edge<CEdge,CVertexO> &e):Edge<CEdge,CVertexO>(e){};
 };
 
 
