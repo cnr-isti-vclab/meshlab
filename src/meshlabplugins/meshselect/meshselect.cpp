@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/10/16 08:57:16  cignoni
+Rewrote for using the new update/selection helper class. Added Selection dilate and erode
+
 Revision 1.3  2006/06/18 21:26:30  cignoni
 delete selected face icon
 
@@ -40,6 +43,7 @@ Optional data really working. Clustering decimation totally rewrote. History sta
 #include <math.h>
 #include <stdlib.h>
 #include "meshselect.h"
+#include <vcg/complex/trimesh/update/selection.h>
 
 using namespace vcg;
 
@@ -51,6 +55,8 @@ const QString SelectionFilterPlugin::ST(FilterType filter)
 	  case FP_SELECT_NONE :		             return QString("Select None");
 	  case FP_SELECT_INVERT :		           return QString("Invert Selection");
 	  case FP_SELECT_DELETE :		           return QString("Delete Selected Faces");
+	  case FP_SELECT_ERODE :		           return QString("Erode Selection");
+	  case FP_SELECT_DILATE :		           return QString("Dilate Selection");
   }
   return QString("Unknown filter");
 }
@@ -61,6 +67,8 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     FP_SELECT_ALL <<
     FP_SELECT_NONE <<
     FP_SELECT_DELETE <<
+    FP_SELECT_ERODE <<
+    FP_SELECT_DILATE <<
     FP_SELECT_INVERT;
   
   FilterType tt;
@@ -96,22 +104,17 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
         --m.cm.fn;
       }
     break;
-  case FP_SELECT_ALL : 
-    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-      if(!(*fi).IsD()) (*fi).SetS();
+  case FP_SELECT_ALL    : tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
+  case FP_SELECT_NONE   : tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   break;
+  case FP_SELECT_INVERT : tri::UpdateSelection<CMeshO>::InvertFace(m.cm);  break;
+  case FP_SELECT_ERODE  : tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
+                          tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm); 
     break;
-  case FP_SELECT_NONE : 
-    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-      if(!(*fi).IsD()) (*fi).ClearS();
-    break;
-  case FP_SELECT_INVERT : 
-    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-      if(!(*fi).IsD()) 
-      {
-        if((*fi).IsS()) (*fi).ClearS(); 
-        else (*fi).SetS();
-      }
-    break;
+  case FP_SELECT_DILATE  : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);  
+                          tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
+  break;
+  
+
   default:  assert(0);
   }
   return true;

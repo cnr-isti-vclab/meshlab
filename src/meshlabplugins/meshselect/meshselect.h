@@ -40,7 +40,7 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 		 - FP -> Filter Plugin
 		 - name of the plugin separated by _
 	*/
-	enum { FP_SELECT_ALL, FP_SELECT_NONE, FP_SELECT_INVERT, FP_SELECT_DELETE} ;
+	enum { FP_SELECT_ALL, FP_SELECT_NONE, FP_SELECT_INVERT, FP_SELECT_DELETE, FP_SELECT_ERODE, FP_SELECT_DILATE} ;
 
 	SelectionFilterPlugin();
 	~SelectionFilterPlugin();
