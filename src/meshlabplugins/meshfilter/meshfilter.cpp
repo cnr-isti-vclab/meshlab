@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.68  2006/10/16 08:57:29  cignoni
+Added management of selection in laplacian filter
+
 Revision 1.67  2006/10/10 21:13:08  cignoni
 Added remove non manifold and quadric simplification filter.
 
@@ -105,6 +108,7 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/selection.h>
 #include "invert_faces.h"
 #include "refine_loop.h"
 //#include "decimator.h"
@@ -421,8 +425,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH))
 	  {
-	    LaplacianSmooth(m.cm,1);
-	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+      size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      if(cnt>0) LaplacianSmooth(m.cm,1,true);
+      else LaplacianSmooth(m.cm,1,false);
+	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	    
 	  }
 
  	if(filter->text() == ST(FP_CLUSTERING))
