@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/10/19 07:34:24  cignoni
+added callback
+
 Revision 1.2  2006/10/15 17:08:52  cignoni
 typenames and qualifiers for gcc compliance
 
@@ -56,8 +59,8 @@ class QHelper
       static void Init(){};
       static math::Quadric<double> &Qd(CVertexO &v) {return TD()[v];}
       static math::Quadric<double> &Qd(CVertexO *v) {return TD()[*v];}
-      static CVertexO::ScalarType W(CVertexO *v) {return 1.0;};
-      static CVertexO::ScalarType W(CVertexO &v) {return 1.0;};
+      static CVertexO::ScalarType W(CVertexO * /*v*/) {return 1.0;};
+      static CVertexO::ScalarType W(CVertexO & /*v*/) {return 1.0;};
       static void Merge(CVertexO & /*v_dest*/, CVertexO const & /*v_del*/){};
       static QuadricTemp* &TDp() {static QuadricTemp *td; return td;}
       static QuadricTemp &TD() {return *TDp();}
@@ -72,7 +75,7 @@ class MyTriEdgeCollapse: public vcg::tri::TriEdgeCollapseQuadric< CMeshO, MyTriE
 };
 
 
-void QuadricSimplification(CMeshO &cm,float threshold)
+void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, CallBackPos *cb)
 {
   math::Quadric<double> QZero;
   QZero.Zero();
@@ -83,19 +86,19 @@ void QuadricSimplification(CMeshO &cm,float threshold)
   tri::TriEdgeCollapseQuadricParameter qparams;
   MyTriEdgeCollapse::SetDefaultParams();
   qparams.QualityThr  =.3;
-  int FinalSize=cm.fn/2;
   vcg::LocalOptimization<CMeshO> DeciSession(cm);
-	
-	int t1=clock();		
+	cb(1,"Initializing simplification");
 	DeciSession.Init<MyTriEdgeCollapse >();
-  int t2=clock();	
-  printf("Initial Heap Size %i\n",DeciSession.h.size());
 
-	DeciSession.SetTargetSimplices(FinalSize);
-	DeciSession.SetTimeBudget(0.5f);
+	DeciSession.SetTargetSimplices(TargetFaceNum);
+	DeciSession.SetTimeBudget(0.1f); // this allow to update the progress bar 10 time for sec...
 //  if(TargetError< numeric_limits<double>::max() ) DeciSession.SetTargetMetric(TargetError);
-
- while( DeciSession.DoOptimization() && cm.fn>FinalSize );
+  int startFn=cm.fn;
+  int faceToDel=cm.fn-TargetFaceNum;
+ while( DeciSession.DoOptimization() && cm.fn>TargetFaceNum )
+ {
+   cb(100-100*(cm.fn-TargetFaceNum)/(faceToDel), "Simplifing");
+ };
 
  
 }
