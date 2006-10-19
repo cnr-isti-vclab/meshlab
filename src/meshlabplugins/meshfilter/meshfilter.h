@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.33  2006/10/19 08:57:45  cignoni
+Added working ball pivoting and normal creation
+
 Revision 1.32  2006/10/10 21:13:08  cignoni
 Added remove non manifold and quadric simplification filter.
 
@@ -90,8 +93,11 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 				  FP_REMOVE_FACES_BY_EDGE,
           FP_REMOVE_NON_MANIFOLD,
           FP_LAPLACIAN_SMOOTH, 
+          FP_HC_LAPLACIAN_SMOOTH, 
+          FP_TWO_STEP_SMOOTH, 
           FP_CLUSTERING, 
           FP_QUADRIC_SIMPLIFICATION, 
+          FP_NORMAL_EXTRAPOLATION,
           FP_MIDPOINT, 
           FP_REORIENT ,
           FP_INVERT_FACES,

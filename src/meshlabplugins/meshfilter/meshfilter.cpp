@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.69  2006/10/19 08:57:44  cignoni
+Added working ball pivoting and normal creation
+
 Revision 1.68  2006/10/16 08:57:29  cignoni
 Added management of selection in laplacian filter
 
@@ -109,6 +112,8 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/space/normal_extrapolation.h>
+
 #include "invert_faces.h"
 #include "refine_loop.h"
 //#include "decimator.h"
@@ -118,7 +123,42 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 
 using namespace vcg;
 
-void QuadricSimplification(CMeshO &cm,float threshold);
+void QuadricSimplification(CMeshO &cm,int  TargetFaceNum,CallBackPos *cb);
+
+bool askInt(int &val, QString Title, QString Label, QWidget *parent)
+{
+  QDialog *dialog=new QDialog(parent);
+  dialog->setModal(true);
+  dialog->setWindowTitle(Title);
+
+  QPushButton *okButton = new QPushButton("OK", dialog);
+  QPushButton *cancButton = new QPushButton("cancel", dialog);
+  QGridLayout *gridLayout  = new QGridLayout(dialog);
+  dialog->setLayout(gridLayout);
+
+  gridLayout->addWidget(okButton,1,1);
+  gridLayout->addWidget(cancButton,1,0);
+
+  QLineEdit *floatEdit = new QLineEdit(dialog);
+  floatEdit->setText(QString::number(val));
+  QLabel *label = new QLabel(Label,dialog);
+  gridLayout->addWidget(label,0,0 );
+  gridLayout->addWidget(floatEdit,0,1);
+  
+  QObject::connect(floatEdit, SIGNAL(returnPressed ()),  dialog, SLOT(accept()));  
+  QObject::connect(okButton, SIGNAL(clicked()),  dialog, SLOT(accept()));  
+  QObject::connect(cancButton, SIGNAL(clicked()), dialog, SLOT(reject()));  
+ 
+  dialog->exec();
+  if(dialog->result()== QDialog::Accepted )
+  {
+    val=floatEdit->text().toInt();
+    return true;
+  }
+  if(dialog->result()== QDialog::Rejected ) return false;
+  assert(0); 
+  return true;
+}
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
 {
@@ -129,12 +169,15 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_REMOVE_FACES_BY_AREA<<
     FP_REMOVE_FACES_BY_EDGE<<
     FP_LAPLACIAN_SMOOTH<< 
+    FP_HC_LAPLACIAN_SMOOTH<< 
+    FP_TWO_STEP_SMOOTH<< 
     FP_CLUSTERING<< 
     FP_QUADRIC_SIMPLIFICATION<<
     FP_MIDPOINT<< 
     FP_REORIENT <<
     FP_INVERT_FACES<<
     FP_REMOVE_NON_MANIFOLD<<
+    FP_NORMAL_EXTRAPOLATION<<
     FP_TRANSFORM;
   
   FilterType tt;
@@ -184,6 +227,8 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 	case FP_REMOVE_FACES_BY_AREA :     		return QString("Remove Zero Area Faces");
 	case FP_REMOVE_FACES_BY_EDGE :				return QString("Remove Faces with edges longer than...");
   case FP_LAPLACIAN_SMOOTH :						return QString("Laplacian Smooth");
+  case FP_HC_LAPLACIAN_SMOOTH :					return QString("HC Laplacian Smooth");
+  case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
 	case FP_QUADRIC_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation");
 	case FP_CLUSTERING :	                return QString("Clustering decimation");
 	case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
@@ -191,7 +236,8 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 	case FP_INVERT_FACES:									return QString("Invert Faces");
 	case FP_TRANSFORM:	                	return QString("Apply Transform");
 	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
-	
+	case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
+    
 	default: assert(0);
   }
   return QString("error!");
@@ -243,8 +289,16 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 			ai.ShortHelp = tr("Remove triangle with edge greater than a threshold");
 		     break;
   case FP_LAPLACIAN_SMOOTH : 
-			ai.Help = tr("For each vertex it calculates the average position with nearest vertex");
+    ai.Help = tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");
 			ai.ShortHelp = tr("Smooth the mesh surface");
+		     break;
+  case FP_HC_LAPLACIAN_SMOOTH : 
+			ai.Help = tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller");
+			ai.ShortHelp = tr("Improved surface Smoothing");
+		     break;
+  case FP_TWO_STEP_SMOOTH : 
+			ai.Help = tr("Two Step Smoothing, Normal Smoothing and vertex fitting smoothing, based on the paper of ...");
+			ai.ShortHelp = tr("Two Step Smoothing");
 		     break;
   case FP_CLUSTERING : 
 			ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
@@ -265,6 +319,10 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
   case FP_TRANSFORM : 
 			ai.Help = tr("Apply transformation, you can rotate, translate or scale the mesh");
 			ai.ShortHelp = tr("Apply Transform");
+		     break;
+  case FP_NORMAL_EXTRAPOLATION : 
+			ai.Help = tr("Compute the normals of a mesh without exploiting the triangle connectivity");
+			ai.ShortHelp = tr("Compute the normals for a point set");
 		     break;
   }
    return ai;
@@ -288,7 +346,9 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_LOOP_SS :
     case FP_BUTTERFLY_SS : 
     case FP_MIDPOINT :            return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
+    case FP_HC_LAPLACIAN_SMOOTH:  
     case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_BORDERFLAG;
+    case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
     case FP_REORIENT:             return MeshModel::MM_FACETOPO;
     case FP_REMOVE_UNREFERENCED_VERTEX:
     case FP_REMOVE_DUPLICATED_VERTEX:
@@ -296,6 +356,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_REMOVE_FACES_BY_EDGE:
     case FP_CLUSTERING:
     case FP_TRANSFORM:
+    case FP_NORMAL_EXTRAPOLATION:
     case FP_INVERT_FACES:         return 0;
     case FP_QUADRIC_SIMPLIFICATION: return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
     default: assert(0); 
@@ -303,7 +364,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
   return 0;
 }
 
-bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *, MeshModel &m,FilterParameter &par)
+bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
 {
  par.clear();
  switch(ID(action))
@@ -312,7 +373,6 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *, MeshModel 
     case FP_BUTTERFLY_SS : 
     case FP_MIDPOINT : 
     case FP_REMOVE_FACES_BY_EDGE:
-    case FP_QUADRIC_SIMPLIFICATION:
     case FP_CLUSTERING:
       {
         Histogram<float> histo;
@@ -345,9 +405,22 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *, MeshModel 
     case FP_REMOVE_DUPLICATED_VERTEX:
     case FP_REORIENT:
     case FP_INVERT_FACES:
+    case FP_HC_LAPLACIAN_SMOOTH:
     case FP_LAPLACIAN_SMOOTH:
+    case FP_TWO_STEP_SMOOTH:
     case FP_REMOVE_NON_MANIFOLD:
+    case FP_NORMAL_EXTRAPOLATION:
        return true; // no parameters
+    case FP_QUADRIC_SIMPLIFICATION:
+      {
+        int NewFaceNum=m.cm.fn/2;
+        if(askInt(NewFaceNum,"Quadric Edge Collapse Simplification","Target number of faces",parent))
+        {
+          par.addInt("TargetFaceNum",NewFaceNum);
+          return true;
+        }
+        else return false;
+      }
    default :assert(0);
   }
   return true;
@@ -428,8 +501,23 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       if(cnt>0) LaplacianSmooth(m.cm,1,true);
       else LaplacianSmooth(m.cm,1,false);
-	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	    
+	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+	  }
+
+	if(filter->text() == ST(FP_HC_LAPLACIAN_SMOOTH))
+	  {
+      size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      if(cnt>0) HCSmooth(m.cm,1,true);
+      else HCSmooth(m.cm,1,false);
+	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+	  }
+
+  if(filter->text() == ST(FP_TWO_STEP_SMOOTH))
+	  {
+      //size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
+      PasoDobleSmoothFast(m.cm, 2, .1, 5);
+      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 
  	if(filter->text() == ST(FP_CLUSTERING))
@@ -463,11 +551,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 
 	if (filter->text() == ST(FP_QUADRIC_SIMPLIFICATION) ) {
-  float threshold = par.getFloat("Threshold");		
-  
-   QuadricSimplification(m.cm,threshold);
+   int TargetFaceNum = par.getInt("TargetFaceNum");		
+   QuadricSimplification(m.cm,TargetFaceNum,cb);
    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	 vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+	}
+	if (filter->text() == ST(FP_NORMAL_EXTRAPOLATION) ) {
+    NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::NormalOrientation::IsCorrect,  cb);
 	}
 
 
