@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.34  2006/10/22 21:09:35  cignoni
+Added Close Hole
+
 Revision 1.33  2006/10/19 08:57:45  cignoni
 Added working ball pivoting and normal creation
 
@@ -101,7 +104,9 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
           FP_MIDPOINT, 
           FP_REORIENT ,
           FP_INVERT_FACES,
-				  FP_TRANSFORM
+				  FP_TRANSFORM,
+          FP_CLOSE_HOLES_TRIVIAL,
+          FP_CLOSE_HOLES_LIEPA
           } ;
 
 	 

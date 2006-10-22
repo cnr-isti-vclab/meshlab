@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.70  2006/10/22 21:09:35  cignoni
+Added Close Hole
+
 Revision 1.69  2006/10/19 08:57:44  cignoni
 Added working ball pivoting and normal creation
 
@@ -107,6 +110,7 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/complex/trimesh/smooth.h>
+#include <vcg/complex/trimesh/hole.h>
 #include <vcg/complex/trimesh/clustering.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/position.h>
@@ -178,6 +182,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_INVERT_FACES<<
     FP_REMOVE_NON_MANIFOLD<<
     FP_NORMAL_EXTRAPOLATION<<
+    FP_CLOSE_HOLES_LIEPA<<
     FP_TRANSFORM;
   
   FilterType tt;
@@ -237,6 +242,8 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 	case FP_TRANSFORM:	                	return QString("Apply Transform");
 	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
 	case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
+	case FP_CLOSE_HOLES_LIEPA:	          return QString("Close Small Holes");
+          
     
 	default: assert(0);
   }
@@ -324,6 +331,11 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 			ai.Help = tr("Compute the normals of a mesh without exploiting the triangle connectivity");
 			ai.ShortHelp = tr("Compute the normals for a point set");
 		     break;
+  case FP_CLOSE_HOLES_LIEPA : 
+			ai.Help = tr("Close holes smaller than a given threshold");
+			ai.ShortHelp = tr("Close holes smaller than a given threshold");
+		     break;
+         
   }
    return ai;
 }
@@ -345,7 +357,9 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_REMOVE_NON_MANIFOLD:
     case FP_LOOP_SS :
     case FP_BUTTERFLY_SS : 
-    case FP_MIDPOINT :            return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
+    case FP_MIDPOINT :      
+    case FP_CLOSE_HOLES_LIEPA :
+           return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
     case FP_HC_LAPLACIAN_SMOOTH:  
     case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_BORDERFLAG;
     case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
@@ -421,6 +435,17 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
         }
         else return false;
       }
+    case FP_CLOSE_HOLES_LIEPA:
+      {
+        int maxHoleSize=10;
+        if(askInt(maxHoleSize,"Close hole","Max size to be closed ",parent))
+        {
+          par.addInt("MaxHoleSize",maxHoleSize);
+          return true;
+        }
+        else return false;
+      }
+      
    default :assert(0);
   }
   return true;
@@ -556,11 +581,19 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	 vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
-	if (filter->text() == ST(FP_NORMAL_EXTRAPOLATION) ) {
+
+  if (filter->text() == ST(FP_NORMAL_EXTRAPOLATION) ) {
     NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::NormalOrientation::IsCorrect,  cb);
 	}
 
-
+	if(filter->text() == ST(FP_CLOSE_HOLES_LIEPA))
+	  {
+      int MaxHoleSize = par.getInt("MaxHoleSize");		
+      size_t cnt=tri::UpdateSelection<CMeshO>::CountFace(m.cm);
+      tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
+      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+      tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
+	  }
 
 	return true;
 }
