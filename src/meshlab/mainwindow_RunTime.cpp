@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.106  2006/10/22 21:36:14  cignoni
+Corrected bug per face color (now the entr y is enabled only if the mesh has the perface color)
+
 Revision 1.105  2006/10/12 06:45:48  cignoni
 Updated access to mm mask and the choice of the color mode according to the filter class
 
@@ -192,7 +195,7 @@ void MainWindow::updateMenus()
 			case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
 			case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
 		}
-
+    colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm->cm));
 		switch (rm.colorMode)
 		{
 			case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
