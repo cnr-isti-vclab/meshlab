@@ -17,6 +17,11 @@ uniform float ni;
 
 void main()
 {
+	// the material propertise are embedded in the shader (for now)
+	vec4 mat_ambient = {1.0, 1.0, 1.0, 1.0};
+	vec4 mat_diffuse = {1.0, 1.0, 1.0, 1.0};
+	vec4 mat_specular = {1.0, 1.0, 1.0, 1.0};
+
 	// normalize interpolated normal
 	vec3 N = normalize(normal);
 
@@ -48,8 +53,11 @@ void main()
 	float k = pow(1.0 - NdotV, 5.0);
 	float F = 1.0 - k + ni * k;
 	
+	// ambient
+	vec4 ambient = mat_ambient * gl_LightSource[0].ambient;
+	
 	// diffuse color
-	vec4 kd  = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
+	vec4 kd  = mat_diffuse * gl_LightSource[0].diffuse;
 
-    gl_FragColor  = kd * (F * D * G) / NdotV;
+    gl_FragColor  = ambient + kd * (F * D * G) / NdotV;
 }
