@@ -17,14 +17,19 @@ void main()
 	vec4 diffuse = {0.0};
 	vec4 specular = {0.0};
 	
+	// the material properties are embedded in the shader (for now)
+	vec4 mat_ambient = {1.0, 1.0, 1.0, 1.0};
+	vec4 mat_diffuse = {1.0, 1.0, 1.0, 1.0};
+	vec4 mat_specular = {1.0, 1.0, 1.0, 1.0};
+	
 	// ambient term
-	vec4 ambient = gl_LightModel.ambient * gl_FrontMaterial.ambient;
+	vec4 ambient = mat_ambient * gl_LightSource[0].ambient;
 	
 	// diffuse color
-	vec4 kd = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
+	vec4 kd = mat_diffuse * gl_LightSource[0].diffuse;
 	
 	// specular color
-	vec4 ks = gl_FrontMaterial.specular * gl_LightSource[0].specular;
+	vec4 ks = mat_specular * gl_LightSource[0].specular;
 	
 	// diffuse term
 	vec3 lightDir = normalize(gl_LightSource[0].position.xyz - vpos);
