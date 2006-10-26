@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.69  2006/10/26 12:07:12  corsini
+add lighting properties option
+
 Revision 1.68  2006/06/27 08:07:42  cignoni
 Restructured plugins interface for simplifying the server
 
@@ -130,6 +133,7 @@ private slots:
 	void setLight();
 	void setDoubleLighting();
 	void setFancyLighting();
+	void setLightingProperties();
 	void setColorMode(QAction *qa);
 	void applyRenderMode();
 	void applyColorMode();
@@ -240,6 +244,7 @@ private:
 	QAction *renderModeTextureAct;
 	QAction *setDoubleLightingAct;
 	QAction *setFancyLightingAct;
+	QAction *setLightingPropertiesAct;
 	QAction *setLightAct;
 	QAction *backFaceCullAct;
   QAction *setSelectionRenderingAct;

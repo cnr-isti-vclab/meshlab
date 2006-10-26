@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.59  2006/10/26 12:07:30  corsini
+add lighting properties option
+
 Revision 1.58  2006/07/08 06:37:47  cignoni
 Many small bugs correction (esc crash, info in about, obj loading progress,fullscreen es)
 
@@ -203,11 +206,16 @@ void MainWindow::createActions()
 	setDoubleLightingAct->setShortcut(Qt::CTRL+Qt::Key_D);
 	connect(setDoubleLightingAct, SIGNAL(triggered()), this, SLOT(setDoubleLighting()));
 
-	setFancyLightingAct	  = new QAction(tr("&Fancy Lighting"),this);
+	setFancyLightingAct   = new QAction(tr("&Fancy Lighting"),this);
 	setFancyLightingAct->setCheckable(true);
 	setFancyLightingAct->setShortcutContext(Qt::ApplicationShortcut);
 	setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_F);
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(setFancyLighting()));
+
+	setLightingPropertiesAct  = new QAction(tr("Lighting &Properties"), this);
+	setLightingPropertiesAct->setShortcutContext(Qt::ApplicationShortcut);
+	setLightingPropertiesAct->setShortcut(Qt::CTRL+Qt::Key_P);
+	connect(setLightingPropertiesAct, SIGNAL(triggered()), this, SLOT(setLightingProperties()));
 
 	backFaceCullAct 	  = new QAction(tr("BackFace &Culling"),this);
 	backFaceCullAct->setCheckable(true);
@@ -368,6 +376,7 @@ void MainWindow::createMenus()
 	lightingModeMenu->addAction(setLightAct);
 	lightingModeMenu->addAction(setDoubleLightingAct);
 	lightingModeMenu->addAction(setFancyLightingAct);
+	lightingModeMenu->addAction(setLightingPropertiesAct);
 
 	// Color SUBmenu
 	colorModeMenu = renderMenu->addMenu(tr("&Color"));
@@ -391,10 +400,10 @@ void MainWindow::createMenus()
 
 	connect(colorModeGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(setColorMode(QAction *)));
 
-
 	// Shaders SUBmenu
 	shadersMenu = renderMenu->addMenu(tr("&Shaders"));
-	//shadersMenu->addAction("None",this,SLOT(applyRenderMode()));
+
+	renderMenu->addSeparator();
 
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
