@@ -14,6 +14,10 @@ uniform float roughnessSquared;
 
 void main()
 {
+	// material properties are embedded in the shader (for now)
+	vec4 mat_ambient = {1.0, 1.0, 1.0, 1.0};
+	vec4 mat_diffuse = {1.0, 1.0, 1.0, 1.0};
+
 	// normalize interpolated normal
 	vec3 N = normalize(normal);
 
@@ -24,10 +28,10 @@ void main()
 	vec3 V = normalize(-vpos);
 	
 	// ambient term
-	vec4 ambient = gl_FrontMaterial.ambient * gl_LightModel.ambient;
+	vec4 ambient = mat_ambient * gl_LightModel.ambient;
 	
 	// diffuse color
-	vec4 kd = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;	
+	vec4 kd = mat_diffuse * gl_LightSource[0].diffuse;	
 	
 	// Oren-Nayar model
 	float A = 1.0 - (0.5 * roughnessSquared) / (roughnessSquared + 0.33);
@@ -48,6 +52,6 @@ void main()
 	float beta  = min(angleViewNormal, angleLightNormal);
 				
 	// final color
-	gl_FragColor  = kd * irradiance * 
+	gl_FragColor  = ambient + kd * irradiance * 
 		(A + B * angleDiff * sin(alpha) * tan(beta));
 }
