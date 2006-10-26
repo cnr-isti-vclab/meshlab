@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.61  2006/10/26 12:06:16  corsini
+add GLlightSettings structure
+
 Revision 1.60  2006/10/10 19:55:02  cignoni
 Corrected trackball bug, changed default background color.
 
@@ -84,13 +87,69 @@ Revision 1.51  2006/01/25 03:57:15  glvertex
 
 enum LightingModel{LDOUBLE,LFANCY};
 
+class GLLightSetting
+{
+public:
+
+	GLfloat ambient[4];
+	GLfloat diffuse[4];
+	GLfloat specular[4];
+
+	GLfloat ambientFancyBack[4];
+	GLfloat diffuseFancyBack[4];
+	GLfloat specularFancyBack[4];
+
+	GLfloat ambientFancyFront[4];
+	GLfloat diffuseFancyFront[4];
+	GLfloat specularFancyFront[4];
+
+	GLLightSetting()
+	{
+		// defaults
+		ambient[0] = 0.2f; ambient[1] = 0.2f; ambient[2] = 0.2f; ambient[3] = 1.0f;
+		diffuse[0] = 0.8f; diffuse[1] = 0.8f; diffuse[2] = 0.8f; diffuse[3] = 1.0f;
+		specular[0] = 1.0f; specular[1] = 1.0f; specular[2] = 1.0f; specular[3] = 1.0f;
+
+		ambientFancyBack[0] = 0.0f;
+		ambientFancyBack[1] = 0.0f;
+		ambientFancyBack[2] = 0.0f;
+		ambientFancyBack[3] = 1.0f;
+
+		diffuseFancyBack[0] = 0.0f;
+		diffuseFancyBack[1] = 1.0f;
+		diffuseFancyBack[2] = 0.0f;
+		diffuseFancyBack[3] = 1.0f;
+
+		specularFancyBack[0] = 1.0f;
+		specularFancyBack[1] = 1.0f;
+		specularFancyBack[2] = 1.0f;
+		specularFancyBack[3] = 1.0f;
+
+		ambientFancyFront[0] = 0.0f;
+		ambientFancyFront[1] = 0.0f;
+		ambientFancyFront[2] = 0.0f;
+		ambientFancyFront[3] = 1.0f;
+
+		diffuseFancyFront[0] = 1.0f;
+		diffuseFancyFront[1] = 0.0f;
+		diffuseFancyFront[2] = 0.0f;
+		diffuseFancyFront[3] = 1.0f;
+
+		specularFancyFront[0] = 1.0f;
+		specularFancyFront[1] = 1.0f;
+		specularFancyFront[2] = 1.0f;
+		specularFancyFront[3] = 1.0f;
+	}
+};
 
 class ColorSetting
 {
 public:
+	
 	Color4b bColorBottom;
 	Color4b bColorTop;
 	Color4b lColor;
+
 	ColorSetting()
 	{
 		//bColorBottom=Color4b(64,64,128,1);	
@@ -159,6 +218,8 @@ public:
 	
 	RenderMode &  getCurrentRenderMode()		{return rm;}
 	const ColorSetting& getCustomSetting()		const {return cs;}
+	GLLightSetting getLightSettings(){return ls;}
+	void setLightSettings(GLLightSetting glls){ls = glls;}
 	const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
 	void updateFps(float deltaTime);
 	
@@ -197,6 +258,7 @@ public:
   float lastRenderingTime() { return lastTime;}
 
 protected:
+
 	void initializeGL();
 	void initTexture();
 	void displayMeshInfo();
@@ -214,7 +276,9 @@ protected:
   void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
   bool drawSelection;
+
 private:
+
 	void pasteTile();
 	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
     
@@ -225,6 +289,7 @@ private:
 	bool  activeDefaultTrackball; // keep track on active trackball
 	bool  hasToPick;         // has to pick during the next redraw.
   Point2i pointToPick;
+
 	//shader support
 	MeshRenderInterface *iRenderer;
 	QAction *currentSharder;
@@ -232,19 +297,20 @@ private:
 	QAction *lastEditRef; // reference to last Editing Mode Used 
 	QFont	qFont;			//font settings
 
-
 	// Editing support
 	MeshEditInterface *iEdit;
 	QAction *currentEditor;
 
 	RenderMode rm;
 	ColorSetting cs;
+	GLLightSetting ls;
 	float fov;
 	//float objDist;
 	float clipRatioFar;
 	float clipRatioNear;
 	float nearPlane;
 	float farPlane;
+
 private:
 	float cfps;
   float lastTime;

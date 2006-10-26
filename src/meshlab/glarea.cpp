@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.107  2006/10/26 12:06:02  corsini
+add GLlightSettings structure
+
 Revision 1.106  2006/10/10 19:55:02  cignoni
 Corrected trackball bug, changed default background color.
 
@@ -741,7 +744,7 @@ void GLArea::setLightMode(bool state,LightingModel lmode)
 	switch(lmode)
 	{
 	  case LDOUBLE:		rm.doubleSideLighting = state;	break;
-	  case LFANCY:		rm.fancyLighting = state;				break;
+	  case LFANCY:		rm.fancyLighting = state; break;
 	}
 	updateGL();
 }
@@ -759,26 +762,36 @@ void GLArea::setSelectionRendering(bool enabled)
 }
 
 void GLArea::setLightModel()
-{
-  static GLfloat standard_light[]={1.f,1.f,1.f,1.f};
-  static GLfloat l_diffuseFancyBack[]={.81f,.61f,.61f,1.f};
-  static GLfloat l_diffuseFancyFront[]={.71f,.71f,.95f,1.f};
-	
+{	
 	glDisable(GL_LIGHTING);
 	if (rm.lighting) 
 	{
 		glEnable(GL_LIGHTING);
-		if (rm.doubleSideLighting) glEnable(GL_LIGHT1);
-		else glDisable(GL_LIGHT1);
+
+		if (rm.doubleSideLighting) 
+			glEnable(GL_LIGHT1);
+		else 
+			glDisable(GL_LIGHT1);
+
 		if(rm.fancyLighting)
 		{
-			glLightfv(GL_LIGHT0,GL_DIFFUSE,l_diffuseFancyFront);
-			glLightfv(GL_LIGHT1,GL_DIFFUSE,l_diffuseFancyBack);
+			glLightfv(GL_LIGHT0, GL_AMBIENT, ls.ambientFancyFront);
+			glLightfv(GL_LIGHT0, GL_DIFFUSE, ls.diffuseFancyFront);
+			glLightfv(GL_LIGHT0, GL_SPECULAR, ls.specularFancyFront);
+
+			glLightfv(GL_LIGHT1, GL_AMBIENT, ls.ambientFancyBack);
+			glLightfv(GL_LIGHT1, GL_DIFFUSE, ls.diffuseFancyBack);
+			glLightfv(GL_LIGHT1, GL_SPECULAR, ls.specularFancyBack);
 		}
 		else
 		{
-			glLightfv(GL_LIGHT0,GL_DIFFUSE,standard_light);
-			glLightfv(GL_LIGHT1,GL_DIFFUSE,standard_light);
+			glLightfv(GL_LIGHT0, GL_AMBIENT, ls.ambient);
+			glLightfv(GL_LIGHT0, GL_DIFFUSE, ls.diffuse);
+			glLightfv(GL_LIGHT0, GL_SPECULAR, ls.specular);
+
+			glLightfv(GL_LIGHT1, GL_AMBIENT, ls.ambient);
+			glLightfv(GL_LIGHT1, GL_DIFFUSE, ls.diffuse);
+			glLightfv(GL_LIGHT1, GL_SPECULAR, ls.specular);
 		}
 	}
 }
@@ -786,9 +799,9 @@ void GLArea::setLightModel()
 
 void GLArea::setCustomSetting(const ColorSetting & s)
 {
-	cs.bColorBottom=s.bColorBottom;
-	cs.bColorTop=s.bColorTop;
-	cs.lColor=s.lColor;
+	cs.bColorBottom = s.bColorBottom;
+	cs.bColorTop = s.bColorTop;
+	cs.lColor = s.lColor;
 }
 
 void GLArea::setSnapshotSetting(const SnapshotSetting & s)
