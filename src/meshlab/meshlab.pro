@@ -7,6 +7,7 @@ HEADERS        = interfaces.h \
                  filterparameter.h \
                  plugindialog.h \
                  customDialog.h \
+                 lightingDialog.h \
                  filterScriptDialog.h \
                  plugin_support.h \
                  saveSnapshotDialog.h \
@@ -20,12 +21,13 @@ SOURCES        = main.cpp \
                  mainwindow_Init.cpp \
                  mainwindow_RunTime.cpp\
                  meshmodel.cpp \
-		         GLLogStream.cpp \
+		 GLLogStream.cpp \
                  glarea.cpp \
                  plugin_support.cpp \
                  plugindialog.cpp \
                  filterscript.cpp \
                  customDialog.cpp \
+                 lightingDialog.cpp \
                  filterScriptDialog.cpp \
                  saveSnapshotDialog.cpp \
                  savemaskexporter.cpp \
@@ -36,6 +38,7 @@ SOURCES        = main.cpp \
 
 FORMS          =	ui/filterScriptDialog.ui \
                     ui/customDialog.ui\
+                    ui/lightingProperties.ui \
 					ui/savesnapshotDialog.ui\						 
 					ui/aboutDialog.ui \
 					ui/renametexture.ui \
