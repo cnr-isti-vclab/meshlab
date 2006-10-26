@@ -60,10 +60,3 @@ int textFileWrite(char *fn, char *s) {
 	}
 	return(status);
 }
-
-
-
-
-
-
-
