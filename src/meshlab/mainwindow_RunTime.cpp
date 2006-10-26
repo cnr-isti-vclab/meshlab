@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.107  2006/10/26 12:07:51  corsini
+add lighting properties customization
+
 Revision 1.106  2006/10/22 21:36:14  cignoni
 Corrected bug per face color (now the entr y is enabled only if the mesh has the perface color)
 
@@ -102,7 +105,8 @@ Minor edits.
 #include "glarea.h"
 #include "plugindialog.h"
 #include "filterScriptDialog.h"
-#include "customDialog.h"		
+#include "customDialog.h"
+#include "lightingDialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
@@ -463,17 +467,34 @@ void MainWindow::setLight()
 	updateMenus();
 };
 
-
 void MainWindow::setDoubleLighting()
 {
-	const RenderMode &rm=GLA()->getCurrentRenderMode();
-	GLA()->setLightMode(  !rm.doubleSideLighting,LDOUBLE);
+	const RenderMode &rm = GLA()->getCurrentRenderMode();
+	GLA()->setLightMode(!rm.doubleSideLighting,LDOUBLE);
 }
 
 void MainWindow::setFancyLighting()
 {
-	const RenderMode &rm=GLA()->getCurrentRenderMode();
+	const RenderMode &rm = GLA()->getCurrentRenderMode();
 	GLA()->setLightMode(!rm.fancyLighting,LFANCY);
+}
+
+void MainWindow::setLightingProperties()
+{
+	// retrieve current lighting settings
+	GLLightSetting GLlightsetting = GLA()->getLightSettings();
+	
+	// customize them
+	LightingDialog dlg(GLlightsetting, this);
+	if (dlg.exec() == QDialog::Accepted)
+	{
+		// update light settings
+		dlg.lightSettingsToGL(GLlightsetting);
+		GLA()->setLightSettings(GLlightsetting);
+
+		// update lighting model
+		GLA()->setLightModel();
+	}
 }
 
 void MainWindow::toggleBackFaceCulling()
