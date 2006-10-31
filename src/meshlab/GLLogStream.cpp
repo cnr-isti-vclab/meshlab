@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2006/10/31 12:22:39  ganovelli
+corrected bug arised with 2005 compiler (decrementation of end() of empty vector)
+
 Revision 1.11  2006/02/15 01:53:24  glvertex
 Debugged drawing method
 
@@ -81,10 +84,11 @@ void GLLogStream::Save(int Level, const char * filename )
 
 void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font)
 {
+	if(  nlines>S.size()) nlines = S.size();
 	list<pair <int,string> > ::iterator li;
-	li=S.end();
+	li=S.begin();
 
-	advance(li,-nlines); 
+	advance(li,S.size()-nlines); 
 
 	if(li==S.end())
 		li=S.begin();
