@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/11/05 19:21:09  granzuglia
+ colladaio updated
+
  Revision 1.3  2006/09/22 06:08:17  granzuglia
  colladaio.pro updated with support for FCollada 1.13
 
@@ -89,6 +92,8 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 		//	m.Enable(oi.mask);
 		//std::pair<MeshModel*,vcg::tri::io::InfoDAE*> pr(&m,NULL);
 
+		m.cm.face.EnableColor();
+		m.cm.face.EnableWedgeTex();
 		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),m.addinfo);
 		
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
@@ -150,6 +155,7 @@ bool ColladaIOPlugin::save(const QString &formatName,QString &fileName, MeshMode
 		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str());
 	else 
 		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo);
+
 	if(result!=0)
 	{
 		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
@@ -184,7 +190,7 @@ QList<MeshIOInterface::Format> ColladaIOPlugin::exportFormats() const
 */
 int ColladaIOPlugin::GetExportMaskCapability(QString &format) const
 {
-	if(format.toUpper() == tr("DAE")){return vcg::tri::io::ExporterDAE<CMeshO>::GetExportMaskCapability();}
+	/*if(format.toUpper() == tr("DAE")){return vcg::tri::io::ExporterDAE<CMeshO>::GetExportMaskCapability();}*/
 	return 0;
 }
 
