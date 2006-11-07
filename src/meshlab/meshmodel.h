@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.28  2006/11/07 09:03:40  cignoni
+Added clearDataMask
+
 Revision 1.27  2006/10/15 23:45:51  cignoni
 Added orderedEdge constructor for gcc compiling of quadric simplifciation stuff
 
@@ -253,6 +256,11 @@ public:
     currentDataMask |= MM_FACEMARK;
    }
   }
+
+   void clearDataMask(int neededDataMask)
+   {
+     currentDataMask = currentDataMask & (!neededDataMask);
+   }
 };
 
 class RenderMode
