@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2006/11/07 09:22:32  cignoni
+Wrote correct Help strings, and added required cleardatamask
+
 Revision 1.4  2006/10/16 08:57:16  cignoni
 Rewrote for using the new update/selection helper class. Added Selection dilate and erode
 
@@ -103,6 +106,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
         (*fi).SetD(); 
         --m.cm.fn;
       }
+      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
     break;
   case FP_SELECT_ALL    : tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
   case FP_SELECT_NONE   : tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   break;
@@ -110,7 +114,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   case FP_SELECT_ERODE  : tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
                           tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm); 
     break;
-  case FP_SELECT_DILATE  : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);  
+  case FP_SELECT_DILATE : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);  
                           tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
   break;
   
@@ -122,14 +126,16 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
 
  const ActionInfo &SelectionFilterPlugin::Info(QAction *action) 
  {
-   static ActionInfo ai; 
-  
-	if( action->text() == tr("Loop Subdivision Surface") )
-		{
-			ai.Help = tr("Apply Loop's Subdivision Surface algorithm, it is an approximate method");
-			ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
-		}
-   return ai;
+  static ActionInfo ai; 
+  switch(ID(action))
+  {
+  case FP_SELECT_DILATE : ai.Help = tr("Dilate (expand) the current set of selected faces"); break;
+  case FP_SELECT_ERODE  : ai.Help = tr("Erode (reduce) the current set of selected faces"); break;
+  case FP_SELECT_INVERT : ai.Help = tr("Invert the current set of selected faces"); break;
+  case FP_SELECT_NONE   : ai.Help = tr("Clear the current set of selected faces"); break;
+  case FP_SELECT_ALL    : ai.Help = tr("Select all the faces of the current mesh"); break;
+  }  
+  return ai;
  }
 
  const PluginInfo &SelectionFilterPlugin::Info() 

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2006/11/07 09:22:31  cignoni
+Wrote correct Help strings, and added required cleardatamask
+
 Revision 1.4  2006/06/13 13:50:01  cignoni
 Cleaned FPS management
 
@@ -66,12 +69,8 @@ QList<QAction *> ExtraMeshEditPlugin::actions() const {
  const ActionInfo &ExtraMeshEditPlugin::Info(QAction *action) 
  {
    static ActionInfo ai; 
-  
-	if( action->text() == tr("Invert Selection") )
-		{
-			ai.Help = tr("Apply Loop's Subdivision Surface algorithm, it is an approximate method");
-			ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
-		}
+	 if( action->text() == tr("Select Faces in a region") )
+			ai.Help = tr("Interactive selection of faces inside a dragged rectangle in screen space");
    return ai;
  }
 

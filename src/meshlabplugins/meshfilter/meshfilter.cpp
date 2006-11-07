@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.71  2006/11/07 09:22:31  cignoni
+Wrote correct Help strings, and added required cleardatamask
+
 Revision 1.70  2006/10/22 21:09:35  cignoni
 Added Close Hole
 
@@ -267,75 +270,23 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 	static ActionInfo ai;
   switch(ID(action))
   {
-  case FP_LOOP_SS :
-      ai.Help      = tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");
-      ai.ShortHelp = tr("Apply Loop's Subdivision Surface algorithm");
-		     break;
-  case FP_BUTTERFLY_SS : 
- 			ai.Help = tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");
-			ai.ShortHelp = tr("Apply Butterfly Subdivision Surface algorithm");
-		     break;
-  case FP_MIDPOINT : 
-			ai.Help = tr("Splits every edge in two");
-			ai.ShortHelp = tr("Apply Midpoint's Subdivision Surface algorithm");
-		     break;
-  case FP_REMOVE_UNREFERENCED_VERTEX : 
-			ai.Help = tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
-			ai.ShortHelp = tr("Remove Unreferenced Vertexes");
-		     break;
-  case FP_REMOVE_DUPLICATED_VERTEX : 
-			ai.Help = tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
-			ai.ShortHelp = tr("Remove Duplicated Vertexes");
-		     break;
-  case FP_REMOVE_FACES_BY_AREA : 
-			ai.Help = tr("Removes faces with area equal to zero");
-			ai.ShortHelp = tr("Remove Null Faces");
-		     break;
-  case FP_REMOVE_FACES_BY_EDGE : 
-			ai.Help = tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");
-			ai.ShortHelp = tr("Remove triangle with edge greater than a threshold");
-		     break;
-  case FP_LAPLACIAN_SMOOTH : 
-    ai.Help = tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");
-			ai.ShortHelp = tr("Smooth the mesh surface");
-		     break;
-  case FP_HC_LAPLACIAN_SMOOTH : 
-			ai.Help = tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller");
-			ai.ShortHelp = tr("Improved surface Smoothing");
-		     break;
-  case FP_TWO_STEP_SMOOTH : 
-			ai.Help = tr("Two Step Smoothing, Normal Smoothing and vertex fitting smoothing, based on the paper of ...");
-			ai.ShortHelp = tr("Two Step Smoothing");
-		     break;
-  case FP_CLUSTERING : 
-			ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
-			ai.ShortHelp = tr("Simplify the surface eliminating triangle");
-		     break;
-  case FP_QUADRIC_SIMPLIFICATION: 
-			ai.Help = tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
-			ai.ShortHelp = tr("Quadric Based Edge Collapse Simplification");
-		     break;        
-  case FP_REORIENT : 
-			ai.Help = tr("Re-oriented the adjacencies of the face of the mesh");
-			ai.ShortHelp = tr("Re-oriented the face");
-		     break;
-  case FP_INVERT_FACES : 
-			ai.Help = tr("Invert faces orentation, flip the normal of the mesh");
-			ai.ShortHelp = tr("Invert faces orentation");
-		     break;
-  case FP_TRANSFORM : 
-			ai.Help = tr("Apply transformation, you can rotate, translate or scale the mesh");
-			ai.ShortHelp = tr("Apply Transform");
-		     break;
-  case FP_NORMAL_EXTRAPOLATION : 
-			ai.Help = tr("Compute the normals of a mesh without exploiting the triangle connectivity");
-			ai.ShortHelp = tr("Compute the normals for a point set");
-		     break;
-  case FP_CLOSE_HOLES_LIEPA : 
-			ai.Help = tr("Close holes smaller than a given threshold");
-			ai.ShortHelp = tr("Close holes smaller than a given threshold");
-		     break;
-         
+  case FP_LOOP_SS :                   ai.Help = tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices"); break;
+  case FP_BUTTERFLY_SS :  			      ai.Help = tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes"); break;
+  case FP_MIDPOINT : 			            ai.Help = tr("Splits every edge in two"); break;
+  case FP_REMOVE_UNREFERENCED_VERTEX: ai.Help = tr("Check for every vertex on the mesh if it is referenced by a face and removes it"); break;
+  case FP_REMOVE_DUPLICATED_VERTEX : 	ai.Help = tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it"); break;
+  case FP_REMOVE_FACES_BY_AREA : 			ai.Help = tr("Removes null faces (the one with area equal to zero)"); break;
+  case FP_REMOVE_FACES_BY_EDGE : 			ai.Help = tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold"); break;
+  case FP_LAPLACIAN_SMOOTH :          ai.Help = tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex"); break;
+  case FP_HC_LAPLACIAN_SMOOTH : 			ai.Help = tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller"); break;
+  case FP_TWO_STEP_SMOOTH : 			    ai.Help = tr("Two Step Smoothing, Normal Smoothing and vertex fitting smoothing, based on the paper of ..."); break;
+  case FP_CLUSTERING : 			          ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid"); break;
+  case FP_QUADRIC_SIMPLIFICATION: 		ai.Help = tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower"); break;        
+  case FP_REORIENT : 			            ai.Help = tr("Re-oriented the adjacencies of the face of the mesh"); break;
+  case FP_INVERT_FACES : 			        ai.Help = tr("Invert faces orentation, flip the normal of the mesh"); break;
+  case FP_TRANSFORM : 	              ai.Help = tr("Apply transformation, you can rotate, translate or scale the mesh"); break;
+  case FP_NORMAL_EXTRAPOLATION :      ai.Help = tr("Compute the normals of a mesh without exploiting the triangle connectivity");break;
+  case FP_CLOSE_HOLES_LIEPA :         ai.Help = tr("Close holes smaller than a given threshold");break;
   }
    return ai;
 }
@@ -483,12 +434,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
     float threshold = par.getFloat("Threshold");		
 	  if(selected) tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<true>(m.cm,0,threshold );
          else    tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<false>(m.cm,0,threshold );
+    m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	}
 
   if(filter->text() == ST(FP_REMOVE_FACES_BY_AREA) )
 	  {
 	    int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
 	    if (log) log->Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
+      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
 
   if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
@@ -554,6 +507,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       Grid.Add(m.cm);
       Grid.Extract(m.cm);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
 
 	if (filter->text() == ST(FP_INVERT_FACES) ) 
