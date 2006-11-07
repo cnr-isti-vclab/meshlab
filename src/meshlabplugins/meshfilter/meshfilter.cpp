@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.72  2006/11/07 11:47:23  cignoni
+gcc compiling issues
+
 Revision 1.71  2006/11/07 09:22:31  cignoni
 Wrote correct Help strings, and added required cleardatamask
 
@@ -537,7 +540,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	}
 
   if (filter->text() == ST(FP_NORMAL_EXTRAPOLATION) ) {
-    NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::NormalOrientation::IsCorrect,  cb);
+    NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
 	}
 
 	if(filter->text() == ST(FP_CLOSE_HOLES_LIEPA))
