@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.7  2006/11/07 17:26:01  cignoni
+ small gcc compiling issues
+
  Revision 1.6  2006/11/07 09:26:10  granzuglia
  fixed bug: added mask parameter
 
@@ -46,9 +49,6 @@
 
 #include <algorithm>
 
-#include <wrap/io_trimesh/import_dae.h>
-#include <wrap/io_trimesh/export_dae.h>
-
 #include <Qt>
 #include <QtGui>
 
@@ -59,6 +59,11 @@
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/ply/plylib.h>
 #include <vcg/complex/trimesh/update/normal.h>
+
+#include <wrap/io_trimesh/import_dae.h>
+#include <wrap/io_trimesh/export_dae.h>
+
+
 
 #include <QMessageBox>
 #include <QFileDialog>

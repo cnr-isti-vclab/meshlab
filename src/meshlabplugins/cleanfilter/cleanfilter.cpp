@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/11/07 17:26:01  cignoni
+ small gcc compiling issues
+
  Revision 1.2  2006/11/07 14:56:23  zifnab1974
  Changes for compilation with gcc 3.4.6 on linux AMD64
 
@@ -271,7 +274,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
       float crease=0;
       m.cm.fn=0;
       m.cm.face.resize(0);
-      NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >/*::NormalOrientation*/::IsCorrect,  cb);
+      NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
       tri::Pivot<CMeshO> pivot(m.cm, radius, clustering, crease); 
       // the main processing
       pivot.buildMesh(cb);
