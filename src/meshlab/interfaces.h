@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.48  2006/11/07 14:56:23  zifnab1974
+Changes for compilation with gcc 3.4.6 on linux AMD64
+
 Revision 1.47  2006/11/07 09:03:17  cignoni
 Removed short help
 Slightly changed the Decorate interface
@@ -188,6 +191,7 @@ class ActionInfo
 {
 public:
   QString Help;
+  QString ShortHelp;
 };
 
 class PluginInfo

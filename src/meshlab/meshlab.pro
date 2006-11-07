@@ -69,7 +69,7 @@ win32-g++{
 }
 
 unix{
-	LIBS		+= -lGLEW
+	LIBS		+= -L../../../code/lib/glew/lib -lGLEW
 	QMAKE_CC	 = gcc
 	QMAKE_CXX	 = g++
 	QMAKE_LINK	 = gcc
