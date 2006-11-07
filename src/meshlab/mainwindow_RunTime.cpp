@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.108  2006/11/07 09:15:27  cignoni
+Added Drag n drog opening of files (thanks to Valentino Fiorin)
+
 Revision 1.107  2006/10/26 12:07:51  corsini
 add lighting properties customization
 
@@ -250,13 +253,24 @@ void MainWindow::updateMenus()
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-  qDebug("dragEnterEvent: %s",event->format());
-  QDrag *drag=new QDrag(this);
-
+	//qDebug("dragEnterEvent: %s",event->format());
+	//QDrag *drag=new QDrag(this);
+	event->accept();
 }
+
 void MainWindow::dropEvent ( QDropEvent * event )  
 {
-  qDebug("dropEvent: %s",event->format());
+  //qDebug("dropEvent: %s",event->format());
+	const QMimeData * data = event->mimeData();
+	if (data->hasUrls())
+	{
+		QList< QUrl > url_list = data->urls();
+		for (int i=0, size=url_list.size(); i<size; i++)
+		{
+			QString path = url_list.at(i).toLocalFile();
+			open(path);
+		}
+	}
 }
 void MainWindow::applyLastFilter()
 {
