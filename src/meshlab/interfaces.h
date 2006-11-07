@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.47  2006/11/07 09:03:17  cignoni
+Removed short help
+Slightly changed the Decorate interface
+
 Revision 1.46  2006/06/27 08:07:42  cignoni
 Restructured plugins interface for simplifying the server
 
@@ -184,7 +188,6 @@ class ActionInfo
 {
 public:
   QString Help;
-  QString ShortHelp;
 };
 
 class PluginInfo
@@ -299,6 +302,8 @@ public:
 class MeshDecorateInterface
 {
 public:
+  typedef int FilterType;
+
     virtual ~MeshDecorateInterface() {}
 
     virtual const ActionInfo &Info(QAction *)=0;
@@ -307,7 +312,23 @@ public:
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/,QFont qf) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-		virtual QList<QAction *> actions() const = 0;
+//		virtual QList<QAction *> actions() const = 0;
+        
+    virtual const QString ST(FilterType filter) const=0;
+    virtual const FilterType ID(QAction *a)
+  	{
+      foreach( FilterType tt, types())
+        if( a->text() == this->ST(tt) ) return tt;
+          assert(0);
+      return 0;
+    }
+
+    virtual QList<QAction *> actions() const { return actionList;}
+    virtual QList<FilterType> &types() { return typeList;}
+protected:
+    QList <QAction *> actionList;
+    QList <FilterType> typeList;
+    GLLogStream *log;	
 };
 
 
