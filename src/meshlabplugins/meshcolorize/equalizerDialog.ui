@@ -58,7 +58,7 @@
         </size>
        </property>
        <property name="text" >
-        <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Percentile&lt;/p>&lt;/body>&lt;/html></string>
+        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Percentile&lt;/p>&lt;/body>&lt;/html></string>
        </property>
       </widget>
      </item>
@@ -118,7 +118,7 @@
         </size>
        </property>
        <property name="text" >
-        <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Range&lt;/p>&lt;/body>&lt;/html></string>
+        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Range&lt;/p>&lt;/body>&lt;/html></string>
        </property>
       </widget>
      </item>
@@ -273,7 +273,7 @@
       <x>10</x>
       <y>20</y>
       <width>301</width>
-      <height>78</height>
+      <height>84</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" >
@@ -314,7 +314,7 @@
           </size>
          </property>
          <property name="text" >
-          <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Min Q:&lt;/p>&lt;/body>&lt;/html></string>
+          <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Min Q:&lt;/p>&lt;/body>&lt;/html></string>
          </property>
         </widget>
        </item>
@@ -384,7 +384,7 @@
           </size>
          </property>
          <property name="text" >
-          <string>&lt;html>&lt;head>&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; />&lt;/head>&lt;body style=&quot; white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;&quot;>&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;>Max Q:&lt;/p>&lt;/body>&lt;/html></string>
+          <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Max Q:&lt;/p>&lt;/body>&lt;/html></string>
          </property>
         </widget>
        </item>
@@ -446,6 +446,19 @@
  </widget>
  <layoutdefault spacing="6" margin="11" />
  <pixmapfunction></pixmapfunction>
+ <tabstops>
+  <tabstop>applyButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>meshMinQlineEdit</tabstop>
+  <tabstop>meshMaxQlineEdit</tabstop>
+  <tabstop>histoMinQlineEdit</tabstop>
+  <tabstop>histoMaxQlineEdit</tabstop>
+  <tabstop>percentileSpinbox</tabstop>
+  <tabstop>manualMinQlineEdit</tabstop>
+  <tabstop>manualMaxQlineEdit</tabstop>
+  <tabstop>manualCheckBox</tabstop>
+  <tabstop>rangeSpinbox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
