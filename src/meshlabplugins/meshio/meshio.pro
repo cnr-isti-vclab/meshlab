@@ -1,6 +1,6 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/lib3ds-1.2.0
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/lib3ds-1.3.0
 HEADERS       = meshio.h \
 				../../../../sf/wrap/ply/plylib.h \
 				../../../../sf/wrap/io_trimesh/export_obj.h \
@@ -15,7 +15,8 @@ SOURCES       = meshio.cpp \
 TARGET        = meshio
 DESTDIR       = ../../meshlab/plugins
 
-win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds-120s.lib
+win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
+win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
 
 win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds/lib3ds.a
 
