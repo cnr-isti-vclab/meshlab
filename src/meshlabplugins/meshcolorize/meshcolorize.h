@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.20  2006/11/07 09:10:32  cignoni
+Removed shorthHelp and added topo_non_coherent (draft)
+
 Revision 1.19  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -76,6 +79,7 @@ public:
       CP_BORDER,
       CP_COLOR_NON_MANIFOLD,
       CP_SMOOTH,
+      CP_COLOR_NON_TOPO_COHERENT,
       CP_RESTORE_ORIGINAL
     };
 

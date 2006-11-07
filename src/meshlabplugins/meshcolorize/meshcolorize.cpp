@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.28  2006/11/07 09:10:32  cignoni
+Removed shorthHelp and added topo_non_coherent (draft)
+
 Revision 1.27  2006/06/18 21:26:56  cignoni
 range color bug for quality/curvature
 
@@ -132,6 +135,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     CP_BORDER <<
     CP_COLOR_NON_MANIFOLD <<
     CP_SMOOTH <<
+    CP_COLOR_NON_TOPO_COHERENT <<
     CP_RESTORE_ORIGINAL;
     
   FilterType tt;
@@ -150,6 +154,7 @@ const QString ExtraMeshColorizePlugin::ST(FilterType c) {
     case CP_SELFINTERSECT:            return QString("Self Intersections");
     case CP_BORDER:                   return QString("Border");
     case CP_COLOR_NON_MANIFOLD:       return QString("Color non Manifold");
+    case CP_COLOR_NON_TOPO_COHERENT:  return QString("Color edges topologically non coherent");
     case CP_SMOOTH:                   return QString("Smooth Color");
     case CP_RESTORE_ORIGINAL:         return QString("Restore Color");
     default: assert(0);
@@ -161,35 +166,28 @@ const ActionInfo &ExtraMeshColorizePlugin::Info(QAction *action)
 	static ActionInfo ai; 
   switch(ID(action))
   {
-    case CP_MAP_QUALITY_INTO_COLOR :  ai.Help = tr("Colorize vertex and faces depending on quality field (manually equalized).");
-                                 ai.ShortHelp = tr("Colorize by quality");break;
-    case CP_GAUSSIAN :                ai.Help = tr("Colorize vertex and faces depending on equalized gaussian curvature.");
-                                 ai.ShortHelp = tr("Colorize by gaussian curvature");break;
-    case CP_MEAN :                    ai.Help = tr("Colorize vertex and faces depending on equalized mean curvature.");
-                                 ai.ShortHelp = tr("Colorize by mean curvature");break;
-    case CP_RMS :                     ai.Help = tr("Colorize vertex and faces depending on equalized root mean square curvature.");
-                                 ai.ShortHelp = tr("Colorize by root mean square curvature");break;
-    case CP_ABSOLUTE :                ai.Help = tr("Colorize vertex and faces depending on equalize absolute curvature.");
-                                 ai.ShortHelp = tr("Colorize by absolute curvature");break;
-    case CP_SELFINTERSECT:            ai.Help = tr("Colorize only self intersecting faces.");
-                                 ai.ShortHelp = tr("Colorize only self intersecting faces");break;
-    case CP_BORDER :                  ai.Help = tr("Colorize only border edges.");
-                                 ai.ShortHelp = tr("Colorize only border edges");break;
-    case CP_COLOR_NON_MANIFOLD:       ai.Help = tr("Colorize only non manifold edges.");
-                                 ai.ShortHelp = tr("Colorize only non manifold edges");break;
-    case CP_SMOOTH :                  ai.Help = tr("Apply laplacian smooth for colors.");
-                                 ai.ShortHelp = tr("Laplacian smooth for colors");break;
-    case CP_RESTORE_ORIGINAL :        ai.Help = tr("Restore original per vertex color.");
-                                 ai.ShortHelp = tr("Restore original per vertex color");  break;
+    case CP_MAP_QUALITY_INTO_COLOR :  ai.Help = tr("Colorize vertex and faces depending on quality field (manually equalized).");break;
+    case CP_GAUSSIAN :                ai.Help = tr("Colorize vertex and faces depending on equalized gaussian curvature.");break;
+    case CP_MEAN :                    ai.Help = tr("Colorize vertex and faces depending on equalized mean curvature.");break;
+    case CP_RMS :                     ai.Help = tr("Colorize vertex and faces depending on equalized root mean square curvature.");break;
+    case CP_ABSOLUTE :                ai.Help = tr("Colorize vertex and faces depending on equalize absolute curvature.");break;
+    case CP_SELFINTERSECT:            ai.Help = tr("Colorize only self intersecting faces.");break;
+    case CP_BORDER :                  ai.Help = tr("Colorize only border edges.");break;
+    case CP_COLOR_NON_MANIFOLD:       ai.Help = tr("Colorize only non manifold edges.");break;
+    case CP_SMOOTH :                  ai.Help = tr("Apply laplacian smooth for colors.");break;
+    case CP_RESTORE_ORIGINAL :        ai.Help = tr("Restore original per vertex color.");break;
+    case CP_COLOR_NON_TOPO_COHERENT : ai.Help = tr("Color edges topologically non coherent.");break;
+
+    default: assert(0);
   }
   return ai;
 }
 const PluginInfo &ExtraMeshColorizePlugin::Info() 
 {
   static PluginInfo ai; 
-  ai.Date=tr("January 2006");
-  ai.Version = tr("1.0");
-  ai.Author = ("Francesco Vannini, Giorgio Gangemi, Andrea Venturi");
+  ai.Date=tr("Oct 2006");
+  ai.Version = tr("1.1");
+  ai.Author = ("Paolo Cignoni, Francesco Vannini, Giorgio Gangemi, Andrea Venturi");
   return ai;
 }
 
@@ -283,12 +281,12 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
     {
       vector<CFaceO *> IntersFace;
       tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
-      
+      tri::UpdateColor<CMeshO>::FaceConstant(m.cm,Color4b::White);
       vector<CFaceO *>::iterator fpi;
       for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
         (*fpi)->C()=Color4b::Red;
       
-    break;
+    break;  
     }
 
   case CP_BORDER:
@@ -320,7 +318,8 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
     case   CP_MEAN:
     case   CP_RMS:
     case   CP_ABSOLUTE:
-               return MeshFilterInterface::VertexColoring; 
+    case   CP_COLOR_NON_TOPO_COHERENT:
+        return MeshFilterInterface::VertexColoring; 
     case   CP_SELFINTERSECT:
                return MeshFilterInterface::FaceColoring; 
     default: assert(0);
