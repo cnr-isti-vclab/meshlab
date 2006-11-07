@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.6  2006/11/07 09:26:10  granzuglia
+ fixed bug: added mask parameter
+
  Revision 1.5  2006/11/06 05:30:32  granzuglia
  great changes
 
@@ -143,7 +146,7 @@ bool ColladaIOPlugin::save(const QString &formatName,QString &fileName, MeshMode
 	int result;
 	
 	if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end()) 
-		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str());
+		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
 	else 
 		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
 
