@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.37  2006/11/07 09:24:10  cignoni
+Removed shorthHelp and reformatted the code
+
 Revision 1.36  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -87,34 +90,17 @@ Some changes in DrawAxis in order to compile under gcc
 #include <wrap/gl/addons.h>
 
 using namespace vcg;
+
 const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
  {
-   static ActionInfo ai;
-
-	 if(action->text() == ST(DP_SHOW_AXIS))
-	 {
-		 ai.Help = tr("Draws XYZ axes in world coordinates");
-		 ai.ShortHelp = tr("Draws XYZ axes in world coordinates");
+  static ActionInfo ai;
+  switch(ID(action))
+  {
+    case DP_SHOW_AXIS :       ai.Help = tr("Draws XYZ axes in world coordinates");break;
+    case DP_SHOW_BOX_CORNERS: ai.Help = tr("Draws object's bounding box corners");break;
+    case DP_SHOW_NORMALS:     ai.Help = tr("Draws object vertex normals");break;
+    case DP_SHOW_QUOTED_BOX:  ai.Help = tr("Draws quoted box");break;
 	 }
-
-	 if(action->text() == ST(DP_SHOW_BOX_CORNERS))
-	 {
-		 ai.Help = tr("Draws object's bounding box corners");
-		 ai.ShortHelp = tr("Draws object's bounding box corners");
-	 }
-
-	 if(action->text() == ST(DP_SHOW_NORMALS))
-	 {
-		 ai.Help = tr("Draws object vertex normals");
-		 ai.ShortHelp = tr("Draws object vertex normals");
-	 }
-
-	 if(action->text() == ST(DP_SHOW_QUOTED_BOX))
-	 {
-		 ai.Help = tr("Draws quoted box");
-		 ai.ShortHelp = tr("Draws quoted box");
-	 }
-
    return ai;
  }
 
@@ -127,9 +113,9 @@ const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
    return ai;
  }
 
-const QString ExtraMeshDecoratePlugin::ST(int id) const
+const QString ExtraMeshDecoratePlugin::ST(FilterType filter) const
 {
-  switch(id)
+  switch(filter)
   {
     case DP_SHOW_NORMALS      : return QString("Show Normals");
     case DP_SHOW_BOX_CORNERS  : return QString("Show Box Corners");

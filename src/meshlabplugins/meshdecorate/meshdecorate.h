@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.17  2006/11/07 09:24:10  cignoni
+Removed shorthHelp and reformatted the code
+
 Revision 1.16  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -79,15 +82,14 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   virtual const ActionInfo &Info(QAction *);
   virtual const PluginInfo &Info();
   
-	QList <QAction *> actionList;
   enum {
-    DP_SHOW_NORMALS = 1,
-    DP_SHOW_BOX_CORNERS = 2,
-    DP_SHOW_AXIS = 3,
-		DP_SHOW_QUOTED_BOX = 4,
+    DP_SHOW_NORMALS,
+    DP_SHOW_BOX_CORNERS,
+    DP_SHOW_AXIS,
+		DP_SHOW_QUOTED_BOX,
   };
 
-  const QString ST(int id) const;
+  virtual const QString ST(FilterType filter) const;
 
 private:
 	float niceRound2(float value,float base);
@@ -98,7 +100,6 @@ private:
 	void	drawTickedLine(const Point3d &p1,const Point3d &p2,float dim,float tickDist);
 	void	drawQuotedLine(const Point3d &a,const Point3d &b,float aVal, float bVal,float tickDist,QGLWidget *gla, QFont qf);
 
-
 	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
 	void	chooseY(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &y1,Point3d &y2);
 	void	chooseZ(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &z1,Point3d &z2);
@@ -107,20 +108,21 @@ public:
      
 	ExtraMeshDecoratePlugin()
 	{
-		QAction * qa;
-    qa= new QAction(ST(DP_SHOW_NORMALS),this);
-		qa->setCheckable(true);
-		actionList << qa;
-    qa= new QAction(ST(DP_SHOW_BOX_CORNERS),this);
-    qa->setCheckable(true);
-		actionList << qa;
-		qa= new QAction(ST(DP_SHOW_AXIS),this);
-		qa->setCheckable(true);
-		actionList << qa;
-		qa= new QAction(ST(DP_SHOW_QUOTED_BOX),this);
-		qa->setCheckable(true);
-		actionList << qa;
-	}
+    typeList << 
+    DP_SHOW_NORMALS <<
+    DP_SHOW_BOX_CORNERS <<
+    DP_SHOW_AXIS <<
+    DP_SHOW_QUOTED_BOX;
+
+    FilterType tt;
+    foreach(tt , types()){
+	      actionList << new QAction(ST(tt), this);
+    }
+    QAction *ap;
+    foreach(ap,actionList){
+        ap->setCheckable(true);
+    }
+  }
 
 	QList<QAction *> actions () const {return actionList;}
 
@@ -129,7 +131,6 @@ public:
 	void DrawQuotedBox(MeshModel &m,QGLWidget *gla, QFont qf);
 
   virtual void Decorate(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla,QFont qf);
-
 };
 
 #endif
