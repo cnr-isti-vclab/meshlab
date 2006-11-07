@@ -75,12 +75,12 @@ public:
 
 public slots:
 
-	void on_thresholdSB_valueChanged(double threshold) 
+	void on_thresholdSB_valueChanged(double /* threshold */) 
 	{
 		updatePercDiagThr();
 	}
 
-	void on_percdiag_valueChanged(double pd)
+	void on_percdiag_valueChanged(double /* pd */)
 	{
 		//diagonal_percentual = pd;
 		updateAbsoluteThr();
