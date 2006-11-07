@@ -7,4 +7,5 @@ SUBDIRS       = meshfilter \
 		meshedit \ 
 		meshselect \
 		cleanfilter \
-		colladaio 
+		colladaio \
+		epoch_io
