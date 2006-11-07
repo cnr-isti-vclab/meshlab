@@ -1,15 +1,17 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut/include ../../../../code/lib/FCollada-1.13/ ../../../../code/lib/FCollada-1.13/LibXML/include
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut/include 
 HEADERS       = colladaio.h \
 		    io_dae.h
 SOURCES       = colladaio.cpp
 TARGET        = colladaio
 DESTDIR       = ../../meshlab/plugins
 
-win32-msvc.net:LIBS	+= ../../../../code/lib/FCollada-1.13/Output/FColladaSUD_MTD.lib
 
 win32-msvc.net:LIBS     -= LIBCMTD.lib
+
+QT           += opengl 
+QT           += xml
 
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
