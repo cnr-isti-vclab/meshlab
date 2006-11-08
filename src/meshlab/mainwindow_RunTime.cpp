@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.110  2006/11/08 15:51:00  cignoni
+Corrected bug apply last filter on empty workspace
+
 Revision 1.109  2006/11/08 01:04:48  cignoni
 First version with http communications
 
@@ -257,7 +260,6 @@ void MainWindow::updateMenus()
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
 	//qDebug("dragEnterEvent: %s",event->format());
-	//QDrag *drag=new QDrag(this);
 	event->accept();
 }
 
@@ -277,6 +279,7 @@ void MainWindow::dropEvent ( QDropEvent * event )
 }
 void MainWindow::applyLastFilter()
 {
+  if(GLA()==0) return;
   GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
 }
 void MainWindow::showFilterScript()
