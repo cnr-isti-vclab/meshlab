@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.62  2006/11/08 15:40:10  cignoni
+Restored original checca colors
+
 Revision 1.61  2006/10/26 12:06:16  corsini
 add GLlightSettings structure
 
@@ -115,9 +118,9 @@ public:
 		ambientFancyBack[2] = 0.0f;
 		ambientFancyBack[3] = 1.0f;
 
-		diffuseFancyBack[0] = 0.0f;
-		diffuseFancyBack[1] = 1.0f;
-		diffuseFancyBack[2] = 0.0f;
+		diffuseFancyBack[0] = 1.0f;
+		diffuseFancyBack[1] = 0.7f;
+		diffuseFancyBack[2] = 0.7f;
 		diffuseFancyBack[3] = 1.0f;
 
 		specularFancyBack[0] = 1.0f;
@@ -130,9 +133,9 @@ public:
 		ambientFancyFront[2] = 0.0f;
 		ambientFancyFront[3] = 1.0f;
 
-		diffuseFancyFront[0] = 1.0f;
-		diffuseFancyFront[1] = 0.0f;
-		diffuseFancyFront[2] = 0.0f;
+		diffuseFancyFront[0] = 0.7f;
+		diffuseFancyFront[1] = 0.7f;
+		diffuseFancyFront[2] = 1.0f;
 		diffuseFancyFront[3] = 1.0f;
 
 		specularFancyFront[0] = 1.0f;
