@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.61  2006/11/08 01:35:59  cignoni
+still on the web logging
+
 Revision 1.60  2006/11/08 01:04:48  cignoni
 First version with http communications
 
@@ -550,6 +553,8 @@ void MainWindow::setCurrentFile(const QString &fileName)
 		if (mainWin) mainWin->updateRecentFileActions();
 	}
 
+  int connectionInterval=settings.value("connectionInterval",20).toInt();
+  settings.setValue("connectionInterval",connectionInterval);
   int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
   settings.setValue("loadedMeshCounter",loadedMeshCounter+1);
   int lastComunicatedValue=settings.value("lastComunicatedValue",0).toInt();
@@ -559,7 +564,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
     UID=QUuid::createUuid ().toString();
     settings.setValue("UID",UID);
   }
-  if(loadedMeshCounter-lastComunicatedValue>20)
+  if(loadedMeshCounter-lastComunicatedValue>connectionInterval)
   {
     QString message=  QString("/~cignoni/meshlab.php?code=%1&count=%2").arg(UID).arg(loadedMeshCounter);
     idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
@@ -578,7 +583,7 @@ void MainWindow::connectionFinished(int id, bool status)
      if(myLocalBuf->isOpen()) 
       {
         myLocalBuf->close();
-        QMessageBox::information(this,"Remote Counter",QString("Updated!"));
+        //QMessageBox::information(this,"Remote Counter",QString("Updated!"));
         QSettings settings;
         int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
         settings.setValue("lastComunicatedValue",loadedMeshCounter);
