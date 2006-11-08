@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.8  2006/11/08 17:57:20  granzuglia
+ texture loading
+
  Revision 1.7  2006/11/07 17:26:01  cignoni
  small gcc compiling issues
 
@@ -100,7 +103,8 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 		if (!vcg::tri::io::ImporterDAE<CMeshO>::LoadMask(filename.c_str(), info))
 			return false;
 		m.Enable(info->dae->mask);
-
+		for(unsigned int tx = 0; tx < info->dae->texturefile.size();++tx)
+			m.cm.textures.push_back(info->dae->texturefile[tx].toStdString());
 		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),m.addinfo);
 		
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
