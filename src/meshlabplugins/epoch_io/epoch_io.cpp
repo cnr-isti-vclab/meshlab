@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/11/08 15:49:42  cignoni
+ Added quality to the loaded masks
+
  Revision 1.1  2006/11/07 18:14:21  cignoni
  Moved from the epoch svn repository
 
@@ -356,7 +359,7 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
 {
   EpochReconstruction er;
 	
-  mask = MeshModel::IOM_VERTCOLOR; 
+  mask = MeshModel::IOM_VERTCOLOR | MeshModel::IOM_VERTQUALITY; 
 // just to be sure...
 	
 	if (fileName.isEmpty()) return false;
