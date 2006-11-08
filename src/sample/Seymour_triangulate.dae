@@ -1297,7 +1297,7 @@ dereferenceXRefs=0;cameraXFov=0;cameraYFov=1</comments>
     </library_lights>
     <library_images>
         <image id="file5" name="file5">
-            <init_from>images/boy_10.tga</init_from>
+            <init_from>images/boy_10.jpg</init_from>
         </image>
     </library_images>
     <library_materials>

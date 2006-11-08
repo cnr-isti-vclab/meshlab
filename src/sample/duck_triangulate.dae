@@ -40,7 +40,7 @@ dereferenceXRefs=0;cameraXFov=0;cameraYFov=1</comments>
     </library_physics_scenes>
     <library_images>
         <image id="file2" name="file2">
-            <init_from>images/duckCM.tga</init_from>
+            <init_from>images/duckCM.jpg</init_from>
         </image>
     </library_images>
     <library_materials>

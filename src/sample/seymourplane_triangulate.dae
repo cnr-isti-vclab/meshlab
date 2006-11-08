@@ -118,7 +118,7 @@ dereferenceXRefs=0;cameraXFov=0;cameraYFov=1</comments>
     </library_lights>
     <library_images>
         <image id="file2" name="file2">
-            <init_from>images/planeDiffuse.tga</init_from>
+            <init_from>images/planeDiffuse.jpg</init_from>
         </image>
     </library_images>
     <library_materials>
