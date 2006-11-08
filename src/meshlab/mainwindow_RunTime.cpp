@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.109  2006/11/08 01:04:48  cignoni
+First version with http communications
+
 Revision 1.108  2006/11/07 09:15:27  cignoni
 Added Drag n drog opening of files (thanks to Valentino Fiorin)
 
@@ -100,7 +103,7 @@ Minor edits.
 #include <QtGui>
 #include <QToolBar>
 #include <QProgressBar>
-
+#include <QHttp>
 
 #include "meshmodel.h"
 #include "interfaces.h"
@@ -122,7 +125,7 @@ Minor edits.
 
 void MainWindow::updateRecentFileActions()
 {
-	QSettings settings("Recent Files");
+	QSettings settings;
 	QStringList files = settings.value("recentFileList").toStringList();
 	int numRecentFiles = qMin(files.size(), (int)MAXRECENTFILES);
 	for (int i = 0; i < numRecentFiles; ++i) {

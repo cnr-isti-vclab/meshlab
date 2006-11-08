@@ -53,6 +53,7 @@ RC_FILE = meshlab.rc
 
 QT           += opengl 
 QT           += xml
+QT           += network
 
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max

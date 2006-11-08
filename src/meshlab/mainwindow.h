@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.70  2006/11/08 01:04:48  cignoni
+First version with http communications
+
 Revision 1.69  2006/10/26 12:07:12  corsini
 add lighting properties option
 
@@ -91,6 +94,7 @@ class QMenu;
 class QScrollArea;
 class QSignalMapper;
 class QProgressDialog;
+class QHttp;
 
 class MainWindow : public QMainWindow
 {
@@ -99,7 +103,7 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow();
    static bool QCallBack(const int pos, const char * str);
-	 const QString appName() const {return tr("MeshLab v0.7"); }
+	 const QString appName() const {return tr("MeshLab v0.8"); }
   // MaskObj maskobj;
 
 public slots:
@@ -157,8 +161,11 @@ private slots:
 	void about();
 	void aboutPlugins();	
 
+	///////////Slot General Purpose ////////////////////////
+
   void dropEvent ( QDropEvent * event );
   void dragEnterEvent(QDragEnterEvent *);
+  void connectionFinished(int id, bool status);
 
 private:
 	void createActions();
@@ -172,11 +179,15 @@ private:
 	//void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type);
 
 
-	
+	QHttp *httpReq;
+  QBuffer *myLocalBuf;
+  int idHost;
+  int idGet;
+
 	static QProgressBar *qb;
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
- QDir pluginsDir;
+  QDir pluginsDir;
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.60  2006/11/08 01:04:48  cignoni
+First version with http communications
+
 Revision 1.59  2006/10/26 12:07:30  corsini
 add lighting properties option
 
@@ -80,7 +83,7 @@ Added short key lastFilter
 #include <QtGui>
 #include <QToolBar>
 #include <QProgressBar>
-
+#include <QHttp>
 
 #include "meshmodel.h"
 #include "interfaces.h"
@@ -102,6 +105,9 @@ MainWindow::MainWindow()
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateMenus()));
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateWindowMenu()));
+
+  httpReq=new QHttp(this);
+  connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
 
 	createActions();
 	createMenus();
@@ -526,9 +532,11 @@ void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char 
 	}
 }
 
+// this function update the app settings with the current recent file list
+// and update the loaded mesh counter
 void MainWindow::setCurrentFile(const QString &fileName)
 {
-	QSettings settings("Recent Files");
+	QSettings settings;
 	QStringList files = settings.value("recentFileList").toStringList();
 	files.removeAll(fileName);
 	files.prepend(fileName);
@@ -541,5 +549,39 @@ void MainWindow::setCurrentFile(const QString &fileName)
 		MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
 		if (mainWin) mainWin->updateRecentFileActions();
 	}
+
+  int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
+  settings.setValue("loadedMeshCounter",loadedMeshCounter+1);
+  int lastComunicatedValue=settings.value("lastComunicatedValue",0).toInt();
+  QString UID=settings.value("UID",QString("")).toString();
+  if(UID.isEmpty())
+  {
+    UID=QUuid::createUuid ().toString();
+    settings.setValue("UID",UID);
+  }
+  if(loadedMeshCounter-lastComunicatedValue>20)
+  {
+    QString message=  QString("/~cignoni/meshlab.php?code=%1&count=%2").arg(UID).arg(loadedMeshCounter);
+    idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
+    myLocalBuf = new QBuffer();
+    bool ret=myLocalBuf->open(QBuffer::WriteOnly);
+    if(!ret) QMessageBox::information(this,"Meshlab",QString("Failed opening of internal buffer"));
+    idGet=httpReq->get(message,myLocalBuf);     // id == 2  
+  }
 }
 
+void MainWindow::connectionFinished(int id, bool status)
+{
+  if(id==idGet && status == false)
+  {
+    httpReq->close();
+     if(myLocalBuf->isOpen()) 
+      {
+        myLocalBuf->close();
+        QMessageBox::information(this,"Remote Counter",QString("Updated!"));
+        QSettings settings;
+        int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
+        settings.setValue("lastComunicatedValue",loadedMeshCounter);
+      }
+  }
+}

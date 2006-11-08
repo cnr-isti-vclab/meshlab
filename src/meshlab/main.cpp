@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2006/11/08 01:04:48  cignoni
+First version with http communications
+
 Revision 1.4  2006/02/01 12:45:29  glvertex
 - Solved openig bug when running by command line
 
@@ -40,8 +43,10 @@ Added copyright info
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
-	MainWindow window;
-	window.showMaximized();
+	QCoreApplication::setOrganizationName("VCG");
+  QCoreApplication::setApplicationName("MeshLab");
+  MainWindow window;
+  window.showMaximized();
 
 	if(argc>1)	window.open(argv[1]);
 	else		window.open();
