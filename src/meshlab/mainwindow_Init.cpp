@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.62  2006/11/08 15:51:56  cignoni
+Added kvert to the saved vars
+
 Revision 1.61  2006/11/08 01:35:59  cignoni
 still on the web logging
 
@@ -553,6 +556,8 @@ void MainWindow::setCurrentFile(const QString &fileName)
 		if (mainWin) mainWin->updateRecentFileActions();
 	}
 
+  int totalKV=settings.value("totalKV",0).toInt();
+  settings.setValue("totalKV",totalKV+(GLA()->mm->cm.vn)/1000);
   int connectionInterval=settings.value("connectionInterval",20).toInt();
   settings.setValue("connectionInterval",connectionInterval);
   int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
@@ -566,7 +571,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
   }
   if(loadedMeshCounter-lastComunicatedValue>connectionInterval)
   {
-    QString message=  QString("/~cignoni/meshlab.php?code=%1&count=%2").arg(UID).arg(loadedMeshCounter);
+    QString message=  QString("/~cignoni/meshlab.php?code=%1&count=%2&totkv=%2").arg(UID).arg(loadedMeshCounter).arg(totalKV);
     idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
     myLocalBuf = new QBuffer();
     bool ret=myLocalBuf->open(QBuffer::WriteOnly);
