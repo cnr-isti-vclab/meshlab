@@ -1,7 +1,7 @@
 #ifndef VCG_SCALARIMAGE_H
 #define VCG_SCALARIMAGE_H
 #include <assert.h>
-
+#include <vcg/space/color4.h>
 /*
 Very simple class to store a bitmap of floating point values.
 */
@@ -40,8 +40,8 @@ public:
             for(int sj=0;sj<factor;++sj)
                 sum+=  fli.Val(j*factor+sj,i*factor+si);
           sum/=factor*factor;
-          sum=min(sum,colormax);
-          Color4b avgcolor; avgcolor.ColorRamp(0,colormax,sum);
+					sum=std::min(sum,colormax);
+					vcg::Color4b avgcolor; avgcolor.ColorRamp(0,colormax,sum);
           newImage.setPixel(j,i,qRgb(avgcolor.V(0),avgcolor.V(1),avgcolor.V(2)));
         }
         return QPixmap::fromImage(newImage);
