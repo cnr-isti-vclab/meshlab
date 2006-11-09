@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.73  2006/11/09 17:25:51  cignoni
+Cleaned RemoveNonManifold
+
 Revision 1.72  2006/11/07 11:47:23  cignoni
 gcc compiling issues
 
@@ -216,7 +219,8 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_REMOVE_DUPLICATED_VERTEX :
     case FP_REMOVE_FACES_BY_AREA:
     case FP_REMOVE_FACES_BY_EDGE :
-         return MeshFilterInterface::Cleaning; 
+    case FP_REMOVE_NON_MANIFOLD;
+      return MeshFilterInterface::Cleaning; 
     case FP_BUTTERFLY_SS :
     case FP_LOOP_SS :
     case FP_MIDPOINT :
@@ -464,9 +468,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if(filter->text() == ST(FP_REMOVE_NON_MANIFOLD) )
 	  {
-	    int delvert=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
+	    int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
 	    if (log)
-	      log->Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+	      if(nonManif) log->Log(GLLogStream::Info, "Removed %d Non Manifold Faces", nonManif);
+                else log->Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
 	  }
 
 	if(filter->text() == ST(FP_REORIENT) )
