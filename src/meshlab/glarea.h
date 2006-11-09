@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.63  2006/11/09 08:15:59  cignoni
+Restored classical dark background
+
 Revision 1.62  2006/11/08 15:40:10  cignoni
 Restored original checca colors
 
@@ -155,13 +158,13 @@ public:
 
 	ColorSetting()
 	{
-		//bColorBottom=Color4b(64,64,128,1);	
-		//bColorTop=Color4b(0,0,0,1);
-		//lColor=Color4b(128,16,16,1);
-
-    bColorBottom=Color4b(192,192,192,1);	
-		bColorTop=Color4b(255,255,255,1);
+		bColorBottom=Color4b(64,64,128,1);	
+		bColorTop=Color4b(0,0,0,1);
 		lColor=Color4b(128,16,16,1);
+
+    //bColorBottom=Color4b(192,192,192,1);	
+		//bColorTop=Color4b(255,255,255,1);
+		//lColor=Color4b(128,16,16,1);
 	};
 };
 
