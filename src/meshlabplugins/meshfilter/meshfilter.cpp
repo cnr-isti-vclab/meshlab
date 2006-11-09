@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.74  2006/11/09 17:41:25  cignoni
+mismatch : with ;
+
 Revision 1.73  2006/11/09 17:25:51  cignoni
 Cleaned RemoveNonManifold
 
@@ -219,7 +222,7 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_REMOVE_DUPLICATED_VERTEX :
     case FP_REMOVE_FACES_BY_AREA:
     case FP_REMOVE_FACES_BY_EDGE :
-    case FP_REMOVE_NON_MANIFOLD;
+    case FP_REMOVE_NON_MANIFOLD:
       return MeshFilterInterface::Cleaning; 
     case FP_BUTTERFLY_SS :
     case FP_LOOP_SS :
