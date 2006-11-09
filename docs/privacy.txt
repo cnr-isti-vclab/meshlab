@@ -11,7 +11,11 @@ published or made available for general access without an explicit consensus.
 If you prefer that MeshLab does not send back any kind of information simply
 use a plain firewall to prevent MeshLab access to the network.
 
-We should like to remark that the kind of information collected by MeshLab
+We would like to remark that the kind of information collected by MeshLab
 is probably less than the information that is silently collected by most
-web sites when you surf them, ip address, visited pages, frequency of
-return...
+web sites when you surf them: ip address, visited pages, frequency of
+return, and that we really need this information in order to assess 
+how diffusely MeshLab is used.
+
+Thanks for your patience
+The Developers.
