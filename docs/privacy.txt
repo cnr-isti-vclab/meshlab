@@ -1,0 +1,17 @@
+
+Privacy Disclaimer
+Please read it carefully.
+
+When using the MeshLab system certain information about its use, such as
+IP addresses and some statistical data, are
+collected. This information will not specifically identify users and the
+information will be used internally for statistical analysis only and will not be
+published or made available for general access without an explicit consensus.
+
+If you prefer that MeshLab does not send back any kind of information simply
+use a plain firewall to prevent MeshLab access to the network.
+
+We should like to remark that the kind of information collected by MeshLab
+is probably less than the information that is silently collected by most
+web sites when you surf them, ip address, visited pages, frequency of
+return...

@@ -41,7 +41,7 @@ first versions was written by a handful of students.
 --- Main Features ---
 # Interactive selection and deletion of portion of the mesh. Even for
   large models.
-# Input/output in many formats (PLY, STL, OFF, OBJ, 3DS)
+# Input/output in many formats (PLY, STL, OFF, OBJ, 3DS, COLLADA)
 # Extendible plugins based architecture, writing new mesh processing
   functions, colorization filters and support for different file formats is
   quite easy (look at this code sample)
@@ -49,6 +49,9 @@ first versions was written by a handful of students.
     * removal of duplicated, unreferenced vertices, null faces
     * subdivision filters (midpoint, loop and butterfly)
     * coherent normal unification and flipping
+    * Small isolate pieces removal
+    * Automatic Quadric based High quality simplification
+    * Smoothing and Fairing filters
 # OpenGL Shader based rendering (write your own shader!) compatible with
   Typhoon Labs Shader Designer
 # Large rendering (up to 16k x 16k) for high quality printing
@@ -73,8 +76,11 @@ http://meshlab.sourceforge.net/
     note = {http://meshlab.sourceforge.net/}
 }
 
-For any general question about the use of this software please contact:
-Paolo Cignoni ( p.cignoni@isti.cnr.it )
+For any general question about the use of this software use the sourceforge public forums 
+http://sourceforge.net/forum/forum.php?forum_id=499532
+
+or contact:
+Paolo Cignoni ( p.cignoni (at) isti.cnr.it )
 
 For bugs, feature requests and such, please use the sourceforge service
 http://sourceforge.net/tracker/?group_id=149444
@@ -84,5 +90,5 @@ http://sourceforge.net/tracker/?group_id=149444
 
 P. Cignoni and
 (in strict alphabetic order)
-A. Buzzelli, L. Colombini, G. Gangemi, M. Latronico, F. Mazzanti,
-A. Mochi, D. Portelli, D. Vacca, F. Vannini, A. Venturi
+A. Buzzelli, L. Colombini, G. Gangemi, M. Latronico, F. Mazzanti, A. Mochi, 
+D. Portelli, G. Ranzuglia, D. Vacca, F. Vannini, A. Venturi, M. Vergauwen

@@ -28,7 +28,34 @@
 ==============================================================================
 
 ------------------------------------------------------------------------------
-- Meshlab v0.7
+- Meshlab v0.8
+------------------------------------------------------------------------------
+** New features **
+First command line version
+Filter history recording
+New Smoothing filters
+- HC smoothing and two step normal fitting
+New High Quality Quadric Based Simplification filter
+Support of Collada file format (read and write)
+Support for 3d models reconstructed by the Epoch 3d Web Service
+Support for point based models
+- Computation of implicit surface normals
+- Surface reconstruction (a ball pivoting variant)
+
+** Corrected Bugs **
+No more sticky trackball
+Better Obj and off loading
+Better control of lighting in Shaders and debugged most of them.
+
+** Known Bugs **
+- Collada support for non triangulated meshes
+- Surface reconstruction from points lack of robustness... 
+- Quadric simplification does not optimize texture coords during simplification
+- Filter recording and re-playing still buggy.
+
+
+------------------------------------------------------------------------------
+- Meshlab v0.7 22/06/06
 ------------------------------------------------------------------------------
 
 
@@ -43,10 +70,8 @@ Better choice of initial modes
 Automatic Installer for windows
 No more intrusive progress bars
 
-
-
 ------------------------------------------------------------------------------
-- Meshlab v0.6
+- Meshlab v0.6 12/3/06
 ------------------------------------------------------------------------------
 
   ** NEW FEATURES/PATCHES **
@@ -102,7 +127,7 @@ No more intrusive progress bars
 
 
 ------------------------------------------------------------------------------
-- Meshlab v0.5
+- Meshlab v0.5 13/1/06
 ------------------------------------------------------------------------------
 
   ** NEW FEATURES **

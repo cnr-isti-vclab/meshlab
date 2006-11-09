@@ -1,7 +1,85 @@
-18/6/06
+
+8/11/06
+o Mismatch iomask (dati caricati da file) e currentDataMask (dati correntemente abilitati) 
+o Remove duplicate faces
+o Global check of logging printing (many filters hasn't any)
+o date dei plugins da cvs?
+o nomi degli autori da risorsa
+
+30/10/06
+o filter script loading hangs!!! 
+
+22/10/06
+o da finire topologically coherent colorize
+
+20/10/06
+x filter smoothnes aware.
+o bug patchato laplacian con qualita' da sistemare
+o dialogo disegno deve mantenere i settaggi
+x BUG ctrl+L senza nulla di aperto pianta // DONE 6/11
+
+19/10/06
+x BUG perface color a volte pianta // DONE 22/10
+
+17/10/06
+x Info dim img e dim resampled nel dialogo // DONE 17/10
+o tasto destro menu contestuale render ?
+o export diretto di mappe da dentro il plugin epoch
+
+16/10/06
+o visible face selection
+x erode/dilate selection // DONE 16/10
+o New di primitive. 
+x progress in quadric simplification // DONE 16/10
+o bug shaders su pc scop
+
+15/10/06
+X histogram con in count color nel loading dialog // DONE 15/10
+o erode/dilate nel maskediting
+x filtro pivot // DONE 17/10
+x filtro hole  // DONE 20/10
+o setting scala/up nel dialogo epoch
+x laplaciano su selection // DONE 16/10
+x new pasodoble // DONE 17/10
+x filtro reconstruction // DONE 15/10
+
+5/10/06
+x invert faces non setta le normali Done
+
+6/7/06
+o Colore nel clustering
+x Semplificazione quadric based 
+o selezione + efficiente per mesh grosse
+
+5/7/06
+x if color have been added it is not possible to save it (from the forums) // DONE 10/7
+x epoch hints // DONE 6/7
+x epoch Averaging/median filtering // DONE 4/7
+o Architettura a Comandi. 
+  i filtri alla fine restituiscono una lista di comandi.
+x correct default button in quality colorization // DONE 4/7
+
+4/7/06
+x Trackball Bug drag// DONE 13/7
+x Drag with middlemouse button // DONE 13/7
+x compiled date in about // DONE 6/7
+x epoch masks // DONE 6/7
+x esc non toglie piu' dal fullscreen mode // DONE 4/7
+o 99 Percentile box.
+x esc crash su glarea closed // DONE 4/7
+x arrow movement in the epoch pluging do not upadate the preview // DONE 4/7
+
+2/7/06
+x Crash su uscita qualche volta (se partito in dir sbagliata?) // DONE 5/7/06 
+x bug epoch directory open masks // DONE 5/7/06
+x bug dialog import epoch mantiene troppe cose 
+  tra un open e il successivo. // Done 5/7/06
+o delete wrt quality default sbagliati.
+o bug bounding box update.
+x progress bar load obj do not work // DONE 6/7
 
 16/6/06
-o bug normali subdiv. non vengono ricalcolate // DONE 18/6 
+x bug normali subdiv. non vengono ricalcolate // DONE 18/6 
 o bug border. non viene MAI ricalcolato
 x open/save recorded nella history // DONE 18/6 
 o cursor icon selection 
