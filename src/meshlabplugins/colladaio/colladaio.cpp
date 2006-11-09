@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.9  2006/11/09 02:20:36  granzuglia
+ cleaner version
+
  Revision 1.8  2006/11/08 17:57:20  granzuglia
  texture loading
 
@@ -63,6 +66,7 @@
 #include <wrap/ply/plylib.h>
 #include <vcg/complex/trimesh/update/normal.h>
 
+
 #include <wrap/io_trimesh/import_dae.h>
 #include <wrap/io_trimesh/export_dae.h>
 
@@ -99,14 +103,19 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 
 	if(formatName.toUpper() == tr("DAE"))
 	{
+		m.addinfo = NULL;
 		vcg::tri::io::AdditionalInfoDAE* info = NULL;
 		if (!vcg::tri::io::ImporterDAE<CMeshO>::LoadMask(filename.c_str(), info))
 			return false;
-		m.Enable(info->dae->mask);
-		for(unsigned int tx = 0; tx < info->dae->texturefile.size();++tx)
-			m.cm.textures.push_back(info->dae->texturefile[tx].toStdString());
+
+		m.Enable(info->mask);
+		for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
+			m.cm.textures.push_back(info->texturefile[tx].toStdString());
+		
 		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),m.addinfo);
 		
+		
+
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
 		{
 			QMessageBox::critical(parent, tr("DAE Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result)));
@@ -114,9 +123,9 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 		}
 		else _mp.push_back(&m);
 
-		if(info->dae->mask & MeshModel::IOM_WEDGNORMAL)
+		if(info->mask & MeshModel::IOM_WEDGNORMAL)
 			normalsUpdated = true;
-		mask = info->dae->mask;
+		mask = info->mask;
 	}
 
 	
