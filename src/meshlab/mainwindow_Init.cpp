@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.63  2006/11/09 08:16:23  cignoni
+Bug in the http communication
+
 Revision 1.62  2006/11/08 15:51:56  cignoni
 Added kvert to the saved vars
 
@@ -571,7 +574,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
   }
   if(loadedMeshCounter-lastComunicatedValue>connectionInterval)
   {
-    QString message=  QString("/~cignoni/meshlab.php?code=%1&count=%2&totkv=%2").arg(UID).arg(loadedMeshCounter).arg(totalKV);
+    QString message=  QString("/~cignoni/meshlab.php?code=%1&count=%2&totkv=%3").arg(UID).arg(loadedMeshCounter).arg(totalKV);
     idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
     myLocalBuf = new QBuffer();
     bool ret=myLocalBuf->open(QBuffer::WriteOnly);
