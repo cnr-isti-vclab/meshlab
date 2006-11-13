@@ -1,21 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-	<head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head>
 		<title>MeshLab</title>
-		<meta content="Paolo Cignoni" name="author">
-		<meta content="mesh 3d processing meshlab scanning" name="keywords">
-		<meta content="Course Web page" name="description">
-		<meta content="all" name="robots">
-		<LINK media="all" href="style.css" type="text/css" rel="stylesheet">
-			<LINK href="favicon.ico" type="image/x-icon" rel="shortcut icon">
-				<style>A { COLOR: #0000bb; TEXT-DECORATION: none }
+<meta content="Paolo Cignoni" name=author>
+<meta content="mesh 3d processing meshlab scanning" name=keywords>
+<meta content="Course Web page" name=description>
+<meta content=all name=robots><LINK media=all href="style.css" type=text/css rel=stylesheet ><LINK href="favicon.ico" type=image/x-icon rel="shortcut icon" >
+<style>A { COLOR: #0000bb; TEXT-DECORATION: none }
 	</style>
-				<style>A:hover { COLOR: #9999ff; TEXT-DECORATION: none }
+
+<style>A:hover { COLOR: #9999ff; TEXT-DECORATION: none }
 	</style>
-				<style> .hidden { DISPLAY: none }
+
+<style> .hidden { DISPLAY: none }
 	.shown { DISPLAY: inline }
 	</style>
-				<script type="text/Javascript">
+
+<script type=text/Javascript>
 function toggle (postid) {
    whichpost = document.getElementById(postid);
    if (whichpost.className=="shown") {
@@ -32,288 +31,235 @@ function hideNow (postid) {
    document.getElementById(postid).className="hidden";
 }
 				</script>
-	</head>
-	<body>
-		<div id="leftcontent">
-			<h1><IMG style="WIDTH: 400px; HEIGHT: 65px" alt="MeshLab" src="meshlab.png"></h1>
-			<p class="body">MeshLab is an open source portable and extendible system for the 
-				processing and editing of unstructured 3D triangular meshes.	<br>
-				
-				The system is aimed to help the processing of the typical not-so-small 
-				unstructured models arising in 3D scanning, providing a set of tools for 
-				editing, cleaning, healing, inspecting, rendering and converting this kind of 
-				meshes.<br>
-				<br>
-				The project is supported by the European Network of Excellence <a href="http://www.epoch-net.org/">
-					Epoch</a>
-				<br>
-				<br>
-				The system is heavily based on the <a href="http://vcg.sourceforge.net">VCG library</a>
-				developed at the <a href="http://vcg.isti.cnr.it">Visual Computing Lab</a> of <A href="www.isti.cnr.it">
-					ISTI - CNR</A>, for all the core mesh processing tasks. The MeshLab system 
-				started as a part of the <a href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0506/index.html">
-					FGT</a> course of the <A href="www.di.unipi.it">Computer Science</A> department 
-				of University of Pisa and most of the code (~15k lines) of the first versions 
-				was written by a handful of <A href="#Developers">students</A>. &nbsp;</p>
-			<p class="body"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444"></a></p>
-			<p class="body"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download
-				</a><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">
-					Latest Version (9 November 2006)&nbsp;<b><i> V0.8 </i></b></a></p>
-			<br>
-			<p class="body">Remember that, whenever you use MeshLab in a official/commercial 
-				project, you should : </p>
-				
-			<ul>
-				<li>
-					Explicitly cite in your work that you have used MeshLab a tool developed with 
-					the support of the <a href="http://www.epoch-net.org/">Epoch</a> NOE,
-				<li>
-					Post a couple of lines in the <a href="http://sourceforge.net/forum/forum.php?forum_id=499532">
-					users' forum</a> describing the project where MeshLab was used.
-				</li>
-			</ul>
-			<h2><a name="Features"></a>Features</h2>
-			<ul>
-				<li>
-				Interactive selection and deletion of portion of the mesh. Even for large 
-				models.
-				<LI>
-				<b>Input/output</b> in many formats: <b>PLY, STL, OFF, OBJ, 3DS and COLLADA</b>
-				<li> 
-				Mesh <b>Cleaning</b> Filters:
-					<ul>
-						<li> removal of duplicated, unreferenced vertices, null faces
-						<li> removal of small isolated components
-						<li> coherent normal unification and flipping
-						<li> erasing of non manifold faces
-						<li> automatic filling of small holes 
-						</li>
-					</ul>
-				<li> 
-					<b>Remeshing</b> filters:
-					<ul>
-						<li> High quality edge collapse simplfication
-						<li> Surface from points (a ball pivoting variant)
-						<li> Subdivision surfaces (loop and butterfly)
-						<li> Smoothing and fairing filters
-						</li>
-					</ul>
-				<li>
-					Various <b>Colorization/inspection</b> filters
-					<ul>
-						<li> Gaussian and mean curvature
-						<li> Border edges
-						<li> Non two-manifold edges
-						<li> Self intersecting faces 
-						</li>
-					</ul>
-				</li>	
-				<li>
-					OpenGL Shader based rendering (write your own shader!) compatible with Typhoon Lab's Shader 
-				Designer
-				</li>
-				<li>
-				Large rendering (up to 16k x 16k) for high quality printing
-				<LI>
-					The history of the all performed cleaning/editing actions can be re-played on 
-					different meshes or saved and for archival purposes.
-				</LI>
-				<LI>
-					Extendible plugins based architecture, writing new mesh processing functions, 
-					colorization filters and support for different file formats is quite easy! Look 
-					at <a href="http://meshlab.sourceforge.net/filter.html"> Filter-PlugIn Sample</a>
-					or <a href="http://meshlab.sourceforge.net/meshio.html"> MeshIO-PlugIn Sample</a>
+</HEAD>
+<body>
+<div id=leftcontent>
+<h1><IMG style="WIDTH: 400px; HEIGHT: 65px" alt=MeshLab src="meshlab.png" ></H1>
+<p class=body>MeshLab is an open source portable and 
+extendible system for the processing and editing of unstructured 3D triangular 
+meshes. <br>The system is aimed to help the processing of 
+the typical not-so-small unstructured models arising in 3D scanning, providing a 
+set of tools for editing, cleaning, healing, inspecting, rendering and 
+converting this kind of meshes.<br><br>The project is supported by the European Network of 
+Excellence <a href="http://www.epoch-net.org/">Epoch</A> 
+<br><br>The system is heavily based on 
+the <a href="http://vcg.sourceforge.net">VCG library</A> 
+developed at the <a href="http://vcg.isti.cnr.it">Visual 
+Computing Lab</A> of <A href="www.isti.cnr.it" >ISTI - CNR</A>, for all the core mesh processing 
+tasks. The MeshLab system started as a part of the <a 
+href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0506/index.html">FGT</A> course of the <A href="www.di.unipi.it" >Computer Science</A> 
+department of University of Pisa and most of the code (~15k lines) of the first 
+versions was written by a handful of <A href="#Developers" >students</A>. &nbsp;</P>
+<p class=body><a 
+href="http://sourceforge.net/project/showfiles.php?group_id=149444"></A></P>
+<p class=body><a 
+href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download </A><a 
+href="http://sourceforge.net/project/showfiles.php?group_id=149444">Latest Version (9 November 2006)&nbsp;<b><i> V0.8 </I></B></A></P><br>
+<p class=body>Remember that, whenever you use MeshLab in a 
+official/commercial project, you should : </P>
+<ul>
+  <li>Explicitly cite in your work that you have used 
+  MeshLab a tool developed with the support of the <a 
+  href="http://www.epoch-net.org/">Epoch</A> NOE, 
+  <li>Post a couple of lines in the <a 
+  href="http://sourceforge.net/forum/forum.php?forum_id=499532" 
+  >users' forum</A> describing the project where MeshLab was 
+  used. </LI></UL>
+<h2><a name=Features></A>Features</H2>
+<ul>
+  <li>Interactive selection and deletion of portion of the 
+  mesh. Even for large models. 
+  <LI><b>Input/output</B> in many 
+  formats: <b>PLY, STL, OFF, OBJ, 3DS and COLLADA</B> 
+  <li>Mesh <b>Cleaning</B> Filters: 
+  <ul>
+    <li>removal of duplicated, unreferenced vertices, null 
+    faces 
+    <li>removal of small isolated components 
+    <li>coherent normal unification and flipping 
+    <li>erasing of non manifold faces 
+    <li>automatic filling of small holes </LI></UL>
+  <li><b>Remeshing</B> filters: 
+  <ul>
+    <li>High quality edge collapse simplfication 
+    <li>Surface from points (a ball pivoting variant) 
+    <li>Subdivision surfaces (loop and butterfly) 
+    <li>Smoothing and fairing filters </LI></UL>
+  <li>Various <b 
+  >Colorization/inspection</B> filters 
+  <ul>
+    <li>Gaussian and mean curvature 
+    <li>Border edges 
+    <li>Non two-manifold edges 
+    <li>Self intersecting faces </LI></UL>
+  <li>OpenGL Shader based rendering (write your own 
+  shader!) compatible with Typhoon Lab's Shader Designer 
+  <li>Large rendering (up to 16k x 16k) for high quality 
+  printing 
+  <LI>The history of the all performed cleaning/editing 
+  actions can be re-played on different meshes or saved and for archival 
+  purposes. 
+  <LI>Extendible plugins based architecture, writing new 
+  mesh processing functions, colorization filters and support for different file 
+  formats is quite easy! Look at <a 
+  href="http://meshlab.sourceforge.net/filter.html" 
+  >Filter-PlugIn Sample</A> or <a 
+  href="http://meshlab.sourceforge.net/meshio.html" 
+  >MeshIO-PlugIn Sample</A> </LI></UL>Bug reports and feature 
+requests should be filed using the sourceforge <a 
+href="http://sourceforge.net/tracker/?group_id=149444">service -&gt;</A><br>General questions 
+can be posted on the <a 
+href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums</A><A href="../../../Documents%20and%20Settings/Paolo%20Cignoni/Epoch_3D_WebService_Setup_1.2.5.exe" ></A> 
 
-			</ul>
-			Bug reports and feature requests should be filed using the sourceforge <a href="http://sourceforge.net/tracker/?group_id=149444">
-				service -&gt;</a><br>
-			General questions can be posted on the <a href="http://sourceforge.net/forum/forum.php?forum_id=499533">
-				help public forums</a><A href="../../../Documents%20and%20Settings/Paolo%20Cignoni/Epoch_3D_WebService_Setup_1.2.5.exe"></A>
-			<h2>ScreenShots</h2>
-			<table style="WIDTH: 100%; TEXT-ALIGN: left" cellSpacing="2" cellPadding="2" border="1">
-				<tbody>
-					<tr>
-						<td colSpan="2">Snapshots taken from MeshLab v <b>0.8</b>	</td>
-					</tr>
-					<tr>
-						<td>
-						<A href="SnapMeshLab.SmoothTS1.png"><IMG alt="" src="SnapMeshLab.SmoothTS1.small.jpg"></A> 
-						<A href="SnapMeshLab.SmoothTS2.png"><IMG alt="" src="SnapMeshLab.SmoothTS2.small.jpg"></A> 
-						<A href="SnapMeshLab.SmoothTS3.png"><IMG alt="" src="SnapMeshLab.SmoothTS3.small.jpg"></A> 
-						</td>
-						<td>
-						An example of automatic noise removal. A mesh with some random noise (left) is smoothed twice (center and right) using a feature preserving two-step smoothing algorithm.
-						</td>
-					</tr>
-					<tr>
-						<td>
-						<A href="SnapMeshLab.HoleFill1.png"><IMG alt="" src="SnapMeshLab.HoleFill1.small.jpg"></A> 
-						<A href="SnapMeshLab.HoleFill2.png"><IMG alt="" src="SnapMeshLab.HoleFill2.small.jpg"></A> 
-						</td>
-						<td>
-						An example of automatic hole filling. All the holes with a boundary smaller than 
-						a given threshold (30 edges in this case) are autmatically filled.
-						</td>
-					</tr>
-					<tr>
-						<td>
-						<A href="SnapMeshLab.Quadric1.png"><IMG alt="" src="SnapMeshLab.Quadric1.small.jpg"></A> 
-						<A href="SnapMeshLab.Quadric2.png"><IMG alt="" src="SnapMeshLab.Quadric2.small.jpg"></A> 
-						<A href="SnapMeshLab.Quadric3.png"><IMG alt="" src="SnapMeshLab.Quadric3.small.jpg"></A>
-						</td>
-						<td>An example of the high quality edgecollapse simplification algorithm based on quadric error metrics. A ~1.000.000 triangle mesh (left) is simplified to 100.000 (center) and then up to 10.000 triangles, while maintaining most of its geometric features.
-						</td>
-					</tr>
-					<tr>
-						<td colSpan="2">Snapshots taken from MeshLab v <b>0.7</b>	</td>
-					</tr>
-					<tr>
-						<td><A href="Edzna_edit_0.png"><IMG alt="" src="Edzna_edit_0.small.png"></A> <A href="Edzna_edit_1.png">
-								<IMG alt="" src="Edzna_edit_1.small.png"></A> <A href="Edzna_edit_2.png"><IMG alt="" src="Edzna_edit_2.small.png"></A>
-						</td>
-						<td>An interactive editing session over the a mesh built a using 
-							geometry-from-photo-sequence reconstruction tool developed withing the EPOCH 
-							framework. An unwanted part of the mesh is selected and deleted. Original mesh 
-							courtesy of the Epoch network.
-						</td>
-					</tr>
-					<tr>
-						<td><A href="david_edit1.png"><IMG alt="" src="david_edit1.small.png"></A> <A href="david_edit2.png">
-								<IMG alt="" src="david_edit2.small.png"></A> <A href="david_edit3.png"><IMG alt="" src="david_edit3.small.png"></A></td>
-						<td>An interactive editing session over the 8M tri David model. The bottom part of 
-							the mesh is selected and deleted. Original mesh courtesy of <a href="http://www-graphics.stanford.edu/data/dmich-public/">
-								Stanford Digital Michelangelo Project</a>.
-						</td>
-					</tr>
-					<tr>
-						<td><A href="Laurana50k_hatch.jpg"><IMG alt="" src="Laurana50k_hatch.small.png"></A></td>
-						<td>One example of real time NPR rendering using a hatching style implemented 
-							through a OpenGL shader. The shader was used to create the high res snapshot 
-							(2282x2942).
-						</td>
-					</tr>
-					<tr>
-						<td colSpan="2">Snapshots taken from MeshLab v 0.6
-						</td>
-					</tr>
-					<tr>
-						<td><A href="Meshlab_XRay.png"><IMG alt="" src="Meshlab_XRay.small.png"></A> <A href="Meshlab_NPR.png">
-								<IMG alt="" src="Meshlab_NPR.small.png"></A></td>
-						<td>A couple of examples of a OpenGL shaders applied over a 3.7 Mtri model 
-							(courtesy of <A href="http://www.aimatshape.net">Aim@Shape</A> Shape 
-							repository)..
-						</td>
-					</tr>
-					<tr>
-						<td colSpan="2">Snapshots taken from MeshLab v 0.5
-						</td>
-					</tr>
-					<tr>
-						<td><A href="SnapMeshLab.thai.jpg"><IMG alt="" src="SnapMeshLab.thai.small.jpg"></A></td>
-						<td>A 10,000,000 face model successfully loaded and ready for inspecting.&nbsp;3D 
-							Model of a Thai statue courtesy&nbsp;of<a href="http://www.xyzrgb.com/"> XYZ RGB 
-								inc.</a> provided by the <a href="http://www-graphics.stanford.edu/data/3Dscanrep/">
-								Stanford 3D Scanning Repository</a>.<a href="http://www.xyzrgb.com/"></a>
-						</td>
-					</tr>
-					<tr>
-						<td><A href="SnapMeshLab_David.jpg"><IMG style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 206px; BORDER-BOTTOM: 0px solid; HEIGHT: 233px"
-									alt="" src="SnapMeshLab_David.small.jpg"></A></td>
-						<td>A textured ply model of the well known Michelangelo David, original mesh 
-							courtesy of <a href="http://www-graphics.stanford.edu/data/dmich-public/">Stanford 
-								Digital Michelangelo Project</a>, texturing done by&nbsp; <a href="http://vcg.isti.cnr.it/">
-								Visual Computing Lab ISTI - CNR </a>&nbsp;through integration of photos 
-							taken during the <a href="http://vcg.isti.cnr.it/projects/davidrestoration/restaurodavid.htm">
-								Restoration of the David.</a></td>
-					</tr>
-					<tr>
-						<td><A href="SnapMeshLab.elephant.jpg"><IMG style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 281px; BORDER-BOTTOM: 0px solid; HEIGHT: 233px"
-									alt="" src="SnapMeshLab.elephant.small.jpg"></A></td>
-						<td>A model with self intersecting faces detected by MeshLab colored in red. Mesh 
-							courtesy of the Aim@Shape &nbsp;<a href="http://shapes.aim-at-shape.net/index.php">Shape 
-								Repository.</a></td>
-					</tr>
-					<tr>
-						<td><A href="SnapMeshLab.brain.jpg"><IMG style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 281px; BORDER-BOTTOM: 0px solid; HEIGHT: 233px"
-									alt="" src="SnapMeshLab.brain.small.jpg"></A></td>
-						<td>A&nbsp;model with border edges&nbsp;colored in blue.&nbsp;Mesh courtesy of the 
-							&nbsp;<a href="http://shapes.aim-at-shape.net/index.php">Shape Repository </a>of 
-							Aim@Shape.</td>
-					</tr>
-					<tr>
-						<td><a href="http://sourceforge.net/project/showfiles.php?group_id=149444&amp;package_id=165026&amp;release_id=383433"><IMG style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 113px; BORDER-BOTTOM: 0px solid; HEIGHT: 233px"
-									alt="" src="SnapshotModel.Thai.small.jpg"></a><IMG alt="" src="SnapshotModel.Thai.detail.jpg"></td>
-						<td>A high resolution snapshot (4400x9110) taken with MeshLab of the 10 Mtri 3D 
-							model of the above cited Thai statuette.&nbsp;The snapshot is a 17Mb png, so 
-							you can <a href="http://sourceforge.net/project/showfiles.php?group_id=149444&amp;package_id=165026&amp;release_id=383433">
-								download</a> it using the sourceforge file distribution system. On the 
-							right you can see a very small portion of the orginal sample just to give you 
-							an idea of the quality of a 40 Mpix&nbsp;image.
-						</td>
-					</tr>
-					<tr>
-						<td><IMG alt="" src="David8M.small.jpg"><IMG alt="" src="David8M.detail.jpg"></td>
-						<td>An high resolution rendering (3200x6424) taken with MeshLab of the 8 Mtri model 
-							of the Michelangelo David. Original mesh courtesy of <a href="http://www-graphics.stanford.edu/data/dmich-public/">
-								Stanford Digital Michelangelo Project</a>. The model is interactively 
-							rendered using a pre-computed ambient occlusion term computed with the open 
-							source <a href="http://vcg.sourceforge.net/tiki-index.php?page=ShadeVis">ShadeVis</a>
-							tool. On the right you can see a very small portion of the original rendering 
-							just to give you an idea of the quality of the original 20 Mpix&nbsp;image.</td>
-					</tr>
-				</tbody></table>
-			<h2><a name="Developers"></a>Developers</h2>
-			<ul>
-				<li>
-					Designer: <a href="http://vcg.isti.cnr.it/%7Ecignoni">Paolo Cignoni</a>
-				<li>
-					Filtering Plugins:
-					<ul>
-						<li>
-							Mario Latronico [<b>latronic</b>], Andrea Venturi [<b>giec</b>], Elisa Cerisoli 
-							[<b>e_cerisoli</b>]
-						</li>
-					</ul>
-				<li>
-					Interface Framework
-					<ul>
-						<li>
-							Alessio Mochi [<b>mochi</b>], Daniele Vacca [<b>glVertex</b>], Davide Portelli 
-							[<b>portelli</b>]
-						</li>
-					</ul>
-				<li>
-					Rendering Modes
-					<ul>
-						<li>
-							Francesco Vannini [<b>vannini</b>], Giorgio Gangemi [<b>ggangemi</b>]
-						</li>
-					</ul>
-				<li>
-					IO filters:
-					<ul>
-						<li>
-							Andrea Buzzelli [<b>buzzelli</b>], Guido Ranzuglia [<b>granzuglia</b>], 
-							Federico Mazzanti [<b>fmazzant</b>]
-						</li>
-					</ul>
-				<li>
-					Linux Porting and Epoch integration:
-					<ul>
-						<li>
-							Maarten Vergauwen [<b>zifnab1974</b>]
-						</li>
-					</ul>
-				</li>
-			</ul>
-			<h2><a name="History"></a>History</h2>
-			<UL>
-				<LI>
-					<i>09/11/2006</i> V 0.8 Release
-					<span class="shown" id="_no_V08">
-						<font size="-1"><A href="javascript:showNow('_V08');hideNow('_no_V08');"><b>[details]</b></A></font>
-					</span><span class="hidden" id="_V08"><A href="javascript:showNow('_no_V08');hideNow('_V08');"><b>[hide]</b></A></FONT> <font color="#777777" size="-1">
-<pre>	
+<h2>ScreenShots</H2>
+<table style="WIDTH: 100%; TEXT-ALIGN: left" cellSpacing=2 cellPadding=2 
+border=1>
+  <tbody>
+  <tr>
+    <td colSpan=2>Snapshots taken from MeshLab v <b 
+      >0.8</B> </TD></TR>
+  <tr>
+    <td><A href="SnapMeshLab.SmoothTS1.png" ><IMG alt="" src="SnapMeshLab.SmoothTS1.small.jpg" ></A> <A href="SnapMeshLab.SmoothTS2.png" ><IMG alt="" src="SnapMeshLab.SmoothTS2.small.jpg" ></A> <A href="SnapMeshLab.SmoothTS3.png" ><IMG alt="" src="SnapMeshLab.SmoothTS3.small.jpg" ></A> </TD>
+    <td>An example of automatic noise removal. A mesh 
+      with some random noise (left) is smoothed twice (center and right) using a 
+      feature preserving two-step smoothing algorithm. </TD></TR>
+  <tr>
+    <td><A href="SnapMeshLab.HoleFill1.png" ><IMG alt="" src="SnapMeshLab.HoleFill1.small.jpg" ></A> <A href="SnapMeshLab.HoleFill2.png" ><IMG alt="" src="SnapMeshLab.HoleFill2.small.jpg" ></A> </TD>
+    <td>An example of automatic hole filling. All the 
+      holes with a boundary smaller than a given threshold (30 edges in this 
+      case) are autmatically filled. </TD></TR>
+  <tr>
+    <td><A href="SnapMeshLab.Quadric1.png" ><IMG alt="" src="SnapMeshLab.Quadric1.small.jpg" ></A> <A href="SnapMeshLab.Quadric2.png" ><IMG alt="" src="SnapMeshLab.Quadric2.small.jpg" ></A> <A href="SnapMeshLab.Quadric3.png" ><IMG alt="" src="SnapMeshLab.Quadric3.small.jpg" ></A> </TD>
+    <td>An example of the high quality edgecollapse 
+      simplification algorithm based on quadric error metrics. A ~1.000.000 
+      triangle mesh (left) is simplified to 100.000 (center) and then up to 
+      10.000 triangles, while maintaining most of its geometric features. </TD></TR>
+  <tr>
+    <td colSpan=2>Snapshots taken from MeshLab v <b 
+      >0.7</B> </TD></TR>
+  <tr>
+    <td><A href="Edzna_edit_0.png" ><IMG alt="" src="Edzna_edit_0.small.png" ></A> <A href="Edzna_edit_1.png" ><IMG alt="" src="Edzna_edit_1.small.png" ></A> <A href="Edzna_edit_2.png" ><IMG alt="" src="Edzna_edit_2.small.png" ></A> </TD>
+    <td>An interactive editing session over the a mesh 
+      built a using geometry-from-photo-sequence reconstruction tool developed 
+      withing the EPOCH framework. An unwanted part of the mesh is selected and 
+      deleted. Original mesh courtesy of the Epoch network. </TD></TR>
+  <tr>
+    <td><A href="david_edit1.png" ><IMG alt="" src="david_edit1.small.png" ></A> <A href="david_edit2.png" ><IMG alt="" src="david_edit2.small.png" ></A> <A href="david_edit3.png" ><IMG alt="" src="david_edit3.small.png" ></A></TD>
+    <td>An interactive editing session over the 8M tri 
+      David model. The bottom part of the mesh is selected and deleted. Original 
+      mesh courtesy of <a 
+      href="http://www-graphics.stanford.edu/data/dmich-public/" 
+      >Stanford Digital Michelangelo Project</A>. </TD></TR>
+  <tr>
+    <td><A href="Laurana50k_hatch.jpg" ><IMG alt="" src="Laurana50k_hatch.small.png" ></A></TD>
+    <td>One example of real time NPR rendering using a 
+      hatching style implemented through a OpenGL shader. The shader was used to 
+      create the high res snapshot (2282x2942). </TD></TR>
+  <tr>
+    <td colSpan=2>Snapshots taken from MeshLab v 0.6 
+  </TD></TR>
+  <tr>
+    <td><A href="Meshlab_XRay.png" ><IMG alt="" src="Meshlab_XRay.small.png" ></A> <A href="Meshlab_NPR.png" ><IMG alt="" src="Meshlab_NPR.small.png" ></A></TD>
+    <td>A couple of examples of a OpenGL shaders applied 
+      over a 3.7 Mtri model (courtesy of <A href="http://www.aimatshape.net" 
+      >Aim@Shape</A> Shape repository).. </TD></TR>
+  <tr>
+    <td colSpan=2>Snapshots taken from MeshLab v 0.5 
+  </TD></TR>
+  <tr>
+    <td><A href="SnapMeshLab.thai.jpg" ><IMG alt="" src="SnapMeshLab.thai.small.jpg" ></A></TD>
+    <td>A 10,000,000 face model successfully loaded and 
+      ready for inspecting.&nbsp;3D Model of a Thai statue courtesy&nbsp;of<a 
+      href="http://www.xyzrgb.com/"> XYZ RGB inc.</A> 
+      provided by the <a href="http://www-graphics.stanford.edu/data/3Dscanrep/" 
+      >Stanford 3D Scanning Repository</A>.<a 
+      href="http://www.xyzrgb.com/"></A> </TD></TR>
+  <tr>
+    <td><A href="SnapMeshLab_David.jpg" ><IMG style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 206px; BORDER-BOTTOM: 0px solid; HEIGHT: 233px" alt="" src="SnapMeshLab_David.small.jpg" ></A></TD>
+    <td>A textured ply model of the well known 
+      Michelangelo David, original mesh courtesy of <a 
+      href="http://www-graphics.stanford.edu/data/dmich-public/" 
+      >Stanford Digital Michelangelo Project</A>, texturing 
+      done by&nbsp; <a href="http://vcg.isti.cnr.it/" 
+      >Visual Computing Lab ISTI - CNR </A>&nbsp;through 
+      integration of photos taken during the <a 
+      href="http://vcg.isti.cnr.it/projects/davidrestoration/restaurodavid.htm" 
+      >Restoration of the David.</A></TD></TR>
+  <tr>
+    <td><A href="SnapMeshLab.elephant.jpg" ><IMG style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 281px; BORDER-BOTTOM: 0px solid; HEIGHT: 233px" alt="" src="SnapMeshLab.elephant.small.jpg" ></A></TD>
+    <td>A model with self intersecting faces detected by 
+      MeshLab colored in red. Mesh courtesy of the Aim@Shape &nbsp;<a 
+      href="http://shapes.aim-at-shape.net/index.php">Shape 
+      Repository.</A></TD></TR>
+  <tr>
+    <td><A href="SnapMeshLab.brain.jpg" ><IMG style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 281px; BORDER-BOTTOM: 0px solid; HEIGHT: 233px" alt="" src="SnapMeshLab.brain.small.jpg" ></A></TD>
+    <td>A&nbsp;model with border edges&nbsp;colored in 
+      blue.&nbsp;Mesh courtesy of the &nbsp;<a 
+      href="http://shapes.aim-at-shape.net/index.php">Shape 
+      Repository </A>of Aim@Shape.</TD></TR>
+  <tr>
+    <td><a 
+      href="http://sourceforge.net/project/showfiles.php?group_id=149444&amp;package_id=165026&amp;release_id=383433" 
+      ><IMG style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 113px; BORDER-BOTTOM: 0px solid; HEIGHT: 233px" alt="" src="SnapshotModel.Thai.small.jpg" ></A><IMG alt="" src="SnapshotModel.Thai.detail.jpg" ></TD>
+    <td>A high resolution snapshot (4400x9110) taken with 
+      MeshLab of the 10 Mtri 3D model of the above cited Thai 
+      statuette.&nbsp;The snapshot is a 17Mb png, so you can <a 
+      href="http://sourceforge.net/project/showfiles.php?group_id=149444&amp;package_id=165026&amp;release_id=383433" 
+      >download</A> it using the sourceforge file 
+      distribution system. On the right you can see a very small portion of the 
+      orginal sample just to give you an idea of the quality of a 40 
+      Mpix&nbsp;image. </TD></TR>
+  <tr>
+    <td><IMG alt="" src="David8M.small.jpg" ><IMG alt="" src="David8M.detail.jpg" ></TD>
+    <td>An high resolution rendering (3200x6424) taken 
+      with MeshLab of the 8 Mtri model of the Michelangelo David. Original mesh 
+      courtesy of <a href="http://www-graphics.stanford.edu/data/dmich-public/" 
+      >Stanford Digital Michelangelo Project</A>. The model 
+      is interactively rendered using a pre-computed ambient occlusion term 
+      computed with the open source <a 
+      href="http://vcg.sourceforge.net/tiki-index.php?page=ShadeVis" 
+      >ShadeVis</A> tool. On the right you can see a very 
+      small portion of the original rendering just to give you an idea of the 
+      quality of the original 20 Mpix&nbsp;image.</TD></TR></TBODY></TABLE>
+<h2><a name=Developers></A>Developers</H2>
+<ul>
+  <li>Designer: <a href="http://vcg.isti.cnr.it/%7Ecignoni" 
+  >Paolo Cignoni</A> 
+  <li>Filtering Plugins: 
+  <ul>
+    <li>Mario Latronico [<b 
+    >latronic</B>], Andrea Venturi [<b 
+    >giec</B>], Elisa Cerisoli [<b 
+    >e_cerisoli</B>] </LI></UL>
+  <li>Interface Framework 
+  <ul>
+    <li>Alessio Mochi [<b>mochi</B>], 
+    Daniele Vacca [<b>glVertex</B>], Davide Portelli [<b 
+    >portelli</B>] </LI></UL>
+  <li>Rendering Modes 
+  <ul>
+    <li>Massimiliano Corsini, Francesco Vannini [<b 
+    >vannini</B>], Giorgio Gangemi [<b 
+    >ggangemi</B>] </LI></UL>
+  <li>IO filters: 
+  <ul>
+    <li>Andrea Buzzelli [<b 
+    >buzzelli</B>], Guido Ranzuglia [<b 
+    >granzuglia</B>], Federico Mazzanti [<b 
+    >fmazzant</B>] </LI></UL>
+  <li>Linux Porting and Epoch integration: 
+  <ul>
+    <li>Maarten Vergauwen [<b 
+    >zifnab1974</B>] </LI></UL></LI></UL>
+<h2><a name=History></A>History</H2>
+<UL>
+  <LI><i>09/11/2006</I> V 0.8 Release 
+  <span class=shown id=_no_V08><font size=-1 
+  ><A href="javascript:showNow('_V08');hideNow('_no_V08');" ><b 
+  >[details]</B></A></FONT> </SPAN><span class=hidden 
+  id=_V08><A href="javascript:showNow('_no_V08');hideNow('_V08');" ><b 
+  >[hide]</B></A></FONT> <font color=#777777 size=-1 
+  ><pre>	
 	** New features **
 	New High Quality Quadric Based Simplification filter
 	Support of Collada file format (read and write)
@@ -334,15 +280,14 @@ function hideNow (postid) {
 	- Surface reconstruction from points lacks of robustness... 
 	- Quadric simplification does not optimize texture coords during simplification
 	- Filter recording and re-playing still buggy.
-</pre>
-						</font></span>
-				<LI>				
-					<i>22/06/2006</i> V 0.7 Release
-					<span class="shown" id="_no_V07">
-						<font size="-1"><A href="javascript:showNow('_V07');hideNow('_no_V07');"><b>[details]</b></A></font>
-					</span><span class="hidden" id="_V07"><A href="javascript:showNow('_no_V07');hideNow('_V07');"><b>[hide]</b></A></FONT> <font color="#777777" size="-1">
-<pre>
-	Selection and Editing of large meshes is now possible!
+</PRE></FONT></SPAN>
+  <LI><i>22/06/2006</I> V 0.7 Release 
+  <span class=shown id=_no_V07><font size=-1 
+  ><A href="javascript:showNow('_V07');hideNow('_no_V07');" ><b 
+  >[details]</B></A></FONT> </SPAN><span class=hidden 
+  id=_V07><A href="javascript:showNow('_no_V07');hideNow('_V07');" ><b 
+  >[hide]</B></A></FONT> <font color=#777777 size=-1 
+  ><pre>	Selection and Editing of large meshes is now possible!
 	Recording and replaying of history of filters 
 	Filter classes restructured (now filters are assigned to different submenus)
 	Rewrote of  Clustering simplification algorithms
@@ -350,13 +295,14 @@ function hideNow (postid) {
 	Better choice of initial modes
 	Automatic Installer for windows
 	No more intrusive progress bars
-</pre>
-						</font></span>
-				<LI>
-					<i>12/03/2006</i> V 0.6 Release
-					<span class="shown" id="_no_V06">
-						<font size="-1"><A href="javascript:showNow('_V06');hideNow('_no_V06');"><b>[details]</b></A></font>
-					</span><span class="hidden" id="_V06"><A href="javascript:showNow('_no_V06');hideNow('_V06');"><b>[hide]</b></A></FONT> <font color="#777777" size="-1"><pre>    General issues
+</PRE></FONT></SPAN>
+  <LI><i>12/03/2006</I> V 0.6 Release 
+  <span class=shown id=_no_V06><font size=-1 
+  ><A href="javascript:showNow('_V06');hideNow('_no_V06');" ><b 
+  >[details]</B></A></FONT> </SPAN><span class=hidden 
+  id=_V06><A href="javascript:showNow('_no_V06');hideNow('_V06');" ><b 
+  >[hide]</B></A></FONT> <font color=#777777 size=-1 
+  ><pre>    General issues
       - Slight code restyling in order to reduce the lines of code
       - Command line execution now works correctly
       - Better managing of optional mesh datas
@@ -392,45 +338,41 @@ function hideNow (postid) {
        - Better scalable fonts
        - Quick help on screen (Press F1)
        - About plugin restyled
-       </pre>
-						</font></span>
-				<li>
-					<i>13/01/2006</i> V 0.5 Release
-					<span class="shown" id="_no_V05">
-						<font size="-1"><A href="javascript:showNow('_V05');hideNow('_no_V05');"><b>[details]</b></A></font>
-					</span><span class="hidden" id="_V05"><A href="javascript:showNow('_no_V05');hideNow('_V05');"><b>[hide]</b></A></FONT> <font color="#777777" size="-1"><pre> 
+       </PRE></FONT></SPAN>
+  <li><i>13/01/2006</I> V 0.5 Release 
+  <span class=shown id=_no_V05><font size=-1 
+  ><A href="javascript:showNow('_V05');hideNow('_no_V05');" ><b 
+  >[details]</B></A></FONT> </SPAN><span class=hidden 
+  id=_V05><A href="javascript:showNow('_no_V05');hideNow('_V05');" ><b 
+  >[hide]</B></A></FONT> <font color=#777777 size=-1 
+  ><pre> 
 * General issues<br>  - Switched to qt4.1<br>  - Corrected Trackball panning<br>  - Safer initialization of color data<br>  - Better memory management (removed HUGE memory leaks...)<br>  - Meshlab icon and logo<br>  - About plugin Dialog<br><br>* Plugin System<br>  - Filters:<br>      Invert Faces<br>  - Colorize:<br>      Logging mesh curvature info<br>      Rewritten code to follow coding conventions<br>      Mean Curvature<br>      Color non Manifold (now sets colorPerVert)<br>      Moved mean and gaussian curvature functions into color_curvature.h <br>  - Normals restyled<br>  - Import/Export:<br>      Managing error messages if saving fails<br>      .3DS Imporer first rough implementation<br>      .3DS Export Standardization, saves vertexes and faces + color per face<br>      .3DS Export introduced materials managing<br>      .OBJ Import solved some bugs during file import<br>      .OBJ Export higly improved speed<br><br>  <br>* User Interface<br>  - Clipping planes now can be moved via CTRL+SHIFT+mouse wheel<br>  - Vertigo FOV with CTRL+mouse wheel<br>  - Icons restyled (transparent)<br>  - Changed snapshot toolbar icon<br>  - Reapply last filter command<br>  - Reload command<br>  - About dialog restyled<br>  - CTRL+Tab switch to next opened window<br>  - CTRL+F4 close current file<br>  - Fonts ok
-		</pre>
-						</font></span>
-				<li>
-					<i>24/12/2005</i> V 0.4 Release
-					<span class="shown" id="_no_V04">
-						<font size="-1"><A href="javascript:showNow('_V04');hideNow('_no_V04');"><b>[details]</b></A></font>
-					</span><span class="hidden" id="_V04"><A href="javascript:showNow('_no_V04');hideNow('_V04');"><b>[hide]</b></A></FONT> <font color="#777777" size="-1"><pre>* Plugin System<br> - Improved PluginSystem<br> - Improved shaders support (based on Typhoon Labs shaders)<br> - Filtering: Customizable filters thru dialogs<br> - Filters:<br> Laplacian smooth<br> MidPoint Subdivision<br> Re-orient<br> Decimator<br> - Editing (No editing tools available)<br> - Colorize:<br> Self intersection<br> Border<br> - Import/Export:<br> obj File Format (Customizable export thru dialog)<br> off File Format<br> stl File Format<br> 3ds File Format<br> - Decoration:<br> Show Axis<br> Show Box Corners<br><br>* User Interface<br> - Bugless progress bar<br> - About Plugin dialog<br> - Logging
-		</pre>
-						</font></span>
-				<li>
-					<i>07/12/2005</i> V 0.3 Release
-					<span class="shown" id="_no_V03">
-						<font size="-1"><A href="javascript:showNow('_V03');hideNow('_no_V03');"><b>[details]</b></A></font>
-					</span><span class="hidden" id="_V03"><A href="javascript:showNow('_no_V03');hideNow('_V03');"><b>[hide]</b></A></FONT> <font color="#777777" size="-1"><pre>* Plugin System<br> - Complete restyling of plugin architecture<br> - Color: None, Per Vertex, Per Face<br> - Color: Support for shaders (wow!). Provided toon shader sample.<br> - Filtering: Remove Null Faces<br> - Filtering: Butterfly &amp; Loop optimized<br> - Decorize: New plugin class<br> - Import/Export: Obj file format integrated on standard user interface<br><br>* User Interface<br> - Info Panel:<br> Showing some mesh info (numTri&amp;numFaces)<br> Showing fps<br> - Shortcut for some frequently used actions<br> - Trackball hidable<br> - Option dialog:<br> Background colors (Top&amp;Bottom)<br> Log Area color<br> - Progress bar<br> - RenderModes: Textures<br> - Fullscreen<br> - Cycle thru opened windows with Next button<br> - About dialog
-		</pre>
-						</font></span>
-				<li>
-					<i>27/11/2005</i>
-				V 0.2 Release
-				<li>
-					<i>15/11/2005</i>
-				V 0.1 Release
-				<li>
-					<i>17/10/2005</i> Committed first rough framework. The development has just 
-					begun...
-				</li>
-			</UL>
-			<P><br>
-			</P>
-			<!-- phpmyvisites --><a title="phpMyVisites" onclick="window.open(this.href);return(false);" href="http://www.phpmyvisites.net/">
-				<script type="text/javascript">
+		</PRE></FONT></SPAN>
+  <li><i>24/12/2005</I> V 0.4 Release 
+  <span class=shown id=_no_V04><font size=-1 
+  ><A href="javascript:showNow('_V04');hideNow('_no_V04');" ><b 
+  >[details]</B></A></FONT> </SPAN><span class=hidden 
+  id=_V04><A href="javascript:showNow('_no_V04');hideNow('_V04');" ><b 
+  >[hide]</B></A></FONT> <font color=#777777 size=-1 
+  ><pre>* Plugin System<br> - Improved PluginSystem<br> - Improved shaders support (based on Typhoon Labs shaders)<br> - Filtering: Customizable filters thru dialogs<br> - Filters:<br> Laplacian smooth<br> MidPoint Subdivision<br> Re-orient<br> Decimator<br> - Editing (No editing tools available)<br> - Colorize:<br> Self intersection<br> Border<br> - Import/Export:<br> obj File Format (Customizable export thru dialog)<br> off File Format<br> stl File Format<br> 3ds File Format<br> - Decoration:<br> Show Axis<br> Show Box Corners<br><br>* User Interface<br> - Bugless progress bar<br> - About Plugin dialog<br> - Logging
+		</PRE></FONT></SPAN>
+  <li><i>07/12/2005</I> V 0.3 Release 
+  <span class=shown id=_no_V03><font size=-1 
+  ><A href="javascript:showNow('_V03');hideNow('_no_V03');" ><b 
+  >[details]</B></A></FONT> </SPAN><span class=hidden 
+  id=_V03><A href="javascript:showNow('_no_V03');hideNow('_V03');" ><b 
+  >[hide]</B></A></FONT> <font color=#777777 size=-1 
+  ><pre>* Plugin System<br> - Complete restyling of plugin architecture<br> - Color: None, Per Vertex, Per Face<br> - Color: Support for shaders (wow!). Provided toon shader sample.<br> - Filtering: Remove Null Faces<br> - Filtering: Butterfly &amp; Loop optimized<br> - Decorize: New plugin class<br> - Import/Export: Obj file format integrated on standard user interface<br><br>* User Interface<br> - Info Panel:<br> Showing some mesh info (numTri&amp;numFaces)<br> Showing fps<br> - Shortcut for some frequently used actions<br> - Trackball hidable<br> - Option dialog:<br> Background colors (Top&amp;Bottom)<br> Log Area color<br> - Progress bar<br> - RenderModes: Textures<br> - Fullscreen<br> - Cycle thru opened windows with Next button<br> - About dialog
+		</PRE></FONT></SPAN>
+  <li><i>27/11/2005</I> V 0.2 Release 
+  <li><i>15/11/2005</I> V 0.1 Release 
+  <li><i>17/10/2005</I> Committed 
+  first rough framework. The development has just begun... </LI></UL>
+<P><br></P>
+			<!-- phpmyvisites --><a 
+title=phpMyVisites onclick=window.open(this.href);return(false); 
+href="http://www.phpmyvisites.net/">
+<script type=text/javascript>
 <!--
 var a_vars = Array();
 var pagename='';
@@ -439,31 +381,31 @@ var phpmyvisitesSite = 1;
 var phpmyvisitesURL = "http://meshlab.sourceforge.net/phpmv2/phpmyvisites.php";
 //-->
 				</script>
-				<script language="javascript" src="http://meshlab.sourceforge.net/phpmv2/phpmyvisites.js"
-					type="text/javascript"></script>
-				<noscript>
-					<p>phpMyVisites: sistema opensource di statistiche per web in PHP/MySQL, basato su 
-						licenza GPL. <img style="BORDER-RIGHT: 0px; BORDER-TOP: 0px; BORDER-LEFT: 0px; BORDER-BOTTOM: 0px"
-							alt="phpMyVisites" src="http://meshlab.sourceforge.net/phpmv2/phpmyvisites.php">
-					</p>
-				</noscript></a> 
-			<!-- /phpmyvisites --></div>
+
+<script language=javascript 
+src="http://meshlab.sourceforge.net/phpmv2/phpmyvisites.js" type=text/javascript></script>
+<noscript>
+<p>phpMyVisites: sistema opensource di statistiche per web 
+in PHP/MySQL, basato su licenza GPL. <img 
+style="BORDER-RIGHT: 0px; BORDER-TOP: 0px; BORDER-LEFT: 0px; BORDER-BOTTOM: 0px" 
+alt=phpMyVisites src="http://meshlab.sourceforge.net/phpmv2/phpmyvisites.php"> </P></NOSCRIPT></A> 
+			<!-- /phpmyvisites --></DIV>
 		<!-- DIV -->
-		<div id="rightcontent"><IMG title="MeshLab Logo" style="WIDTH: 128px; HEIGHT: 128px" alt="MeshLab Logo" src="eye_128_splash.png"><br>
-			<br>
-			<A href="https://sourceforge.net/projects/meshlab/"><img style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 38px"
-					alt="SourceForge.net Logo" src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2"></A><br>
-			<br>
-			<a href="http://vcg.isti.cnr.it"><IMG title="Visual Computing Lab" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 103px"
-					alt="Visual Computing Lab logo" src="vcl.png"></a>
-			<p class="menu"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444"><IMG title="http://epoch-net.org/" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 100px; BORDER-BOTTOM: 0px solid; HEIGHT: 100px"
-						alt="" src="logo_epoch.png"></a></p>
-			<p class="menu"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download 
-					V0.8</a></p>
-			<p class="menu"><A href="stat">CVS Statistics</A></p>
-			<p class="menu"><a href="http://sourceforge.net/projects/meshlab/">Sourceforge page</a></p>
-			<p class="menu"><a href="http://freshmeat.net/projects/meshlab/">FreshMeat page</a></p>
-			<p class="menu"><A href="devel.html">Developer's Corner</A></p>
-		</div>
-	</body>
-</html>
+<div id=rightcontent><IMG title="MeshLab Logo" style="WIDTH: 128px; HEIGHT: 128px" alt="MeshLab Logo" src="eye_128_splash.png" ><br><br><A href="https://sourceforge.net/projects/meshlab/" ><img 
+style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 38px" 
+alt="SourceForge.net Logo" 
+src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2"></A><br><br><a 
+href="http://vcg.isti.cnr.it"><IMG title="Visual Computing Lab" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 103px" alt="Visual Computing Lab logo" src="vcl.png" ></A> 
+<p class=menu><a 
+href="http://sourceforge.net/project/showfiles.php?group_id=149444"><IMG title=http://epoch-net.org/ style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 100px; BORDER-BOTTOM: 0px solid; HEIGHT: 100px" alt="" src="logo_epoch.png" ></A></P>
+<p class=menu><a 
+href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download V0.8</A></P>
+<p class=menu><A href="stat" >CVS Statistics</A></P>
+<p class=menu><a 
+href="http://sourceforge.net/projects/meshlab/">Sourceforge 
+page</A></P>
+<p class=menu><a 
+href="http://freshmeat.net/projects/meshlab/">FreshMeat 
+page</A></P>
+			<p class="menu"><A href="devel.html">Developer's Corner</A></p></DIV>
+	</body></HTML>
