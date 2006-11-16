@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.88  2006/11/16 11:25:32  e_cerisoli
+ Update meshio.cpp: new file I/O
+
  Revision 1.87  2006/10/10 21:10:33  cignoni
  progress bar bug
 
@@ -77,11 +80,14 @@
 #include "import_3ds.h"
 #include <wrap/io_trimesh/export_3ds.h>
 #include <wrap/io_trimesh/export_obj.h>
+#include <wrap/io_trimesh/export_vrml.h>
+#include <wrap/io_trimesh/export_dxf.h>
 
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/import_stl.h>
 #include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/import_off.h>
+#include <wrap/io_trimesh/import_ptx.h>
 
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
@@ -114,6 +120,8 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	if (cb != NULL)		(*cb)(0, "Loading...");
 
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+	QString error_2MsgFormat = "Error encountered while loading file:\n\"%1\"\n\n File with more than a mesh.\n Load only the first!";
+
 	string filename = fileName.toUtf8().data();
 
 	bool normalsUpdated = false;
@@ -143,10 +151,23 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 
 		mask = oi.mask;
 	}
+	else if (formatName.toUpper() == tr("PTX"))
+	{
+		int result = vcg::tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+		if (result == 1)
+		{
+			QMessageBox::warning(parent, tr("PTX Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
+			return false;
+		}
+		if (result == 2)
+		{
+			QMessageBox::warning(parent, tr("PTX Opening Error"), error_2MsgFormat.arg(fileName, vcg::tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
+		}
+	}
 	else if (formatName.toUpper() == tr("PLY"))
 	{
 		vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
-    m.Enable(mask);
+		m.Enable(mask);
 		
 		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != ::vcg::ply::E_NOERROR)
@@ -247,7 +268,16 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 		return true;
 	}
 	//END TMP
-
+	if(formatName.toUpper() == tr("WRL"))
+	{
+		int result = vcg::tri::io::ExporterWRL<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+		if(result!=0)
+		{
+			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterWRL<CMeshO>::ErrorMsg(result)));
+			return false;
+		}
+		return true;
+	}
 	int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 	if(result!=0)
 	{
@@ -268,6 +298,7 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 	formatList << Format("Object File Format"			,tr("OFF"));
 	formatList << Format("STL File Format"				,tr("STL"));
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));
+	formatList << Format("PTX File Format"      		,tr("PTX"));
 	return formatList;
 }
 
@@ -282,6 +313,8 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 	formatList << Format("Object File Format"			,tr("OFF"));
 	formatList << Format("STL File Format"				,tr("STL"));
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));
+	formatList << Format("VRML File Format"             ,tr("WRL"));
+	formatList << Format("DXF File Format"              ,tr("DXF"));
 	return formatList;
 }
 
@@ -296,6 +329,7 @@ int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 	if(format.toUpper() == tr("OFF")){return vcg::tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
 	if(format.toUpper() == tr("STL")){return vcg::tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();}
 	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("WRL")){return vcg::tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
 	return 0;
 }
 
