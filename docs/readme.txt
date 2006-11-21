@@ -90,5 +90,5 @@ http://sourceforge.net/tracker/?group_id=149444
 
 P. Cignoni and
 (in strict alphabetic order)
-A. Buzzelli, L. Colombini, G. Gangemi, M. Latronico, F. Mazzanti, A. Mochi, 
+A. Buzzelli, L. Colombini, M. Corsini, G. Gangemi, M. Latronico, F. Mazzanti, A. Mochi, 
 D. Portelli, G. Ranzuglia, D. Vacca, F. Vannini, A. Venturi, M. Vergauwen
