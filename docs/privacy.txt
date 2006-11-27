@@ -2,20 +2,26 @@
 Privacy Disclaimer
 Please read it carefully.
 
-When using the MeshLab system certain information about its use, such as
-IP addresses and some statistical data, are
-collected. This information will not specifically identify users and the
-information will be used internally for statistical analysis only and will not be
-published or made available for general access without an explicit consensus.
+MeshLab will automatically check for the availability of updated versions
+and will notify the need of upgrading the software to the users. For this
+reason, from time to time, MeshLab will issue a http network connection.
 
-If you prefer that MeshLab does not send back any kind of information simply
-use a plain firewall to prevent MeshLab access to the network.
+If you prefer that MeshLab does not communicate in any way with its
+developers, simply use a plain firewall to prevent any MeshLab access to
+the network.
+
+When using the MeshLab system some aggregated statistical data about the
+specific usage of MeshLab itself, is collected and periodically this
+information is sent back to the developers. This information will not
+specifically identify users and the information will be used internally
+for statistical analysis only and will not be published or made available
+for general access without an explicit consensus.
 
 We would like to remark that the kind of information collected by MeshLab
-is probably less than the information that is silently collected by most
-web sites when you surf them: ip address, visited pages, frequency of
-return, and that we really need this information in order to assess 
-how diffusely MeshLab is used.
+is probably by far less sensitive than the information that is silently
+collected by most web sites when you surf them: ip address, visited pages,
+frequency of return. We would also like to stress that we really need this
+information in order to assess how diffusely MeshLab is used.
 
 Thanks for your patience
 The Developers.
