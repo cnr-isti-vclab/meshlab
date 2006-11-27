@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
   <title>Meshlab Development</title>
+  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
   <meta name="author" content="Paolo Cignoni">
   <meta name="keywords" content="mesh 3d processing meshlab scanning">
   <meta name="description" content="Course Web page">
@@ -23,20 +23,25 @@ italian. Sorry.
 <p class="body"> Al solito mi raccomando di seguire tutte
 le solite pratiche del bravo programmatore: <br>
 </p>
-<ul>
-  <li>Fate update ogni volta che vi mettete a lavorare, non solo
-del repository di MeshLab, ma anche di quello di VCG</li>
-  <li>Fate edit delle cose che iniziate a cambiare,</li>
-  <li>Prima di fare edit controllate che non l'abbia in edit
-qualcun altro,</li>
-  <li>Non lasciate in edit le cose per troppo tempo,</li>
-  <li>Non committate mai cose che non compilano o che non fanno
-funzionare le cose degli altri,</li>
-  <li>Committate spesso (compatibilmente con quanto di cui sopra).</li>
-  <li>Commentate <span style="font-weight: bold; font-style: italic;">SEMPRE
+<UL>
+  <li>Fate update ogni volta che vi mettete a lavorare, non 
+  solo del repository di MeshLab, ma anche di quello di VCG 
+  <li>Fate edit delle cose che iniziate a cambiare, 
+  <li>Prima di fare edit controllate che non l'abbia in 
+  edit qualcun altro, 
+  <li>Non lasciate in edit le cose per troppo tempo, 
+  <li>Non committate mai cose che non compilano o che non 
+  fanno funzionare le cose degli altri, 
+  <li>Committate spesso (compatibilmente con quanto di cui 
+  sopra). 
+  <li>Commentate <span style="FONT-WEIGHT: bold; FONT-STYLE: italic">SEMPRE
     </span>ogni
-vostro commit (in inglese please) </li>
-</ul>
+vostro commit (in inglese please) </li></UL>
+<P>Per una intro generale a cvs e a come accedere ai servizi cvs di sourceforge 
+leggetevi la lunga introduzione a cvs su:</P>
+<P><A 
+href="http://sourceforge.net/cvs/?group_id=149444">http://sourceforge.net/cvs/?group_id=149444</A></P>
+<P>&nbsp;</P>
 <h2>Web</h2>
 <p class="body"> Le paginette web di sourceforge sono
 tenute anche loro in cvs. <br>
@@ -46,7 +51,7 @@ poi a mano fate update tramite ftp.<br>
 sulla shell di sf che aggiorni la copia in public_html direttamente via
 cvs update una volta al giorno). Il comando da dare su shell.sf.net una
 volta dentro la dir meshlab/htdocs e'</p>
-<p style="font-family: monospace;" class="body"> cvs -d
+<p style="FONT-FAMILY: monospace" class="body"> cvs -d
 :pserver:anonymous@cvs1:/cvsroot/meshlab update</p>
 <h2>Mailing List</h2>
 <p>C'e' una mailing list su sourceforge cui siete pregati di iscrivervi
@@ -62,122 +67,57 @@ di interfacce comuni...
 </p>
 <h3>Note di Compilazione</h3>
 <p class="body">Si assume che&nbsp;</p>
-<ol>
-  <li>QT 4.0 sia installato</li>
-  <li>il modulo cvs meshlab e quello di vcg siano allo stesso
-livello e
-che il modulo che contiene la <i>vcg lib</i> sia in una
-dir chiamata sf. (ad
-es. dovreste avere qualcosa tipo \doc\sf\vcg\space\point3.h e
-\doc\meshlab\src\meshlab\meshlab.pro )</li>
-</ol>
+<OL>
+  <li>QT 4.1 sia installato 
+  <li>il modulo cvs meshlab e quello di vcg siano allo 
+  stesso livello e che il modulo che contiene la <EM>vcg lib (</EM>modulo cvs 
+  che si chiama <EM>vcg)</EM>&nbsp;sia in una dir chiamata non vcg ma 
+  <STRONG>sf</STRONG>. (ad es. dovreste avere qualcosa tipo 
+  \doc\sf\vcg\space\point3.h e \doc\meshlab\src\meshlab\meshlab.pro )
+  <LI>allo stesso livello di&nbsp;sf e meshlab ci sia una 
+  dir code con dentro una sotto dir lib con dentro i contenuti 
+  delle&nbsp;seguenti librerie open source: 
+  <ol>
+    <LI> OpenGL, ovviamente da qualche parte nei path standard del 
+    vostro compilatore dovreste avere include e lib per OpenGL. Di solito 
+    non dovreste far nulla e trovare tutto quel che riguarda opengl 
+    (e.g. "&lt gl/gl.h&gt" e "&lt gl/glu.h&gt") al suo posto.
+    <li> GLUT <b>NON</b> dovrebbe servire. Se vi serve per qualche motivo fatemelo sapere...
+    <LI>glew. Dentro ci scompattate il contenuto dei 
+    sorgenti dell'ultima distribuzione di glew (ci deve essere glew.c tra i 
+    file, meshlab per evitare orridi problemi di unicode/debug/dll si ricompila direttamente glew invece di linkarsi la 
+    lib)
+    <LI>lib3ds-1.2.0 il contenuto dell'ultima distribuzione ufficiale (a seconda 
+    dell'ambiente di sviluppo dovete anche ricompilarvela)
+    <LI>lib3ds-1.3.0 una copia del cvs di lib3ds acceduto in&nbsp;cvs anonimous 
+    da sourceforge.</LI></OL></LI></OL>
 <p class="body">
 La libreria VCG, pagina ufficiale <a href="http://vcg.sourceforge.net">vcg.sf.net</a>,&nbsp;e'
 scaricabile in cvs
 anonimo
 </p>
-<div style="text-align: center;">&nbsp;:ext:anonymous@vcg.cvs.sourceforge.net:/cvsroot/vcg<br>
+<div style="TEXT-ALIGN: center">&nbsp;:pserver:anonymous@vcg.cvs.sourceforge.net:/cvsroot/vcg<br>
 </div>
 <p class="body"> Gli esempi di base della libreria li
 trovate sotto sf/apps/sample.
-Lasciate perdere la roba sotto test.</p>
+Lasciate perdere la roba sotto test.&nbsp;</p>
 <p class="body"><a href="style.html">Guida di stile</a>.
 </p>
 <h2>Task</h2>
-<p class="body"> I vari task che vi sono assegnati sono registrati come
-task dei
-rispettivi <a href="https://sourceforge.net/pm/?group_id=149444">sottoprogetti</a>
-che fanno parte di MeshLab&nbsp; </p>
-<h3><a href="./filter.html">Gruppo
-Filtering</a></h3>
-<span style="font-style: italic;">Latronico, Venturi </span>
-<ol>
-  <li><a style="font-weight: bold;"
- href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120436&amp;group_id=149444&amp;group_project_id=44906">LOOP</a>
-Implementare la tecnica di subdivision surface di Loop.</li>
-  <li><span style="color: rgb(204, 0, 0); font-weight: bold;">DECIMATOR
-    </span><span style="color: rgb(0, 0, 0);">Implementare con
-algoritmo di cluster.</span></li>
-  <li><span style="color: rgb(0, 0, 0);"></span><span
- style="font-weight: bold; color: rgb(204, 0, 0);">REMOVER</span>
-Implementare la rimozione i triangoli che hanno almeno un lato piu'
-lungo di una soglia</li>
-  <li><span style="font-weight: bold; color: rgb(204, 0, 0);">APPLY
-TRASFORM</span> Applicare le trasformazioni
-Scala,&nbsp;Rotazione,&nbsp;Traslazione&nbsp;</li>
-  <li><span style="font-weight: bold; color: rgb(204, 0, 0);">COLOR NON
-MANIFOLD</span> Colorare i vertici che non sono 2-manifold<br
- style="color: rgb(0, 0, 0);">
-    <br style="color: rgb(0, 0, 0);">
-  </li>
-</ol>
-<h3><a
- href="https://sourceforge.net/pm/task.php?group_project_id=44908&amp;group_id=149444&amp;func=browse">Gruppo
-Interface Framework</a></h3>
-<span style="font-style: italic;">Mochi, Vacca, Portelli<br>
-</span>
-<ol>
-  <li><a
- href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120441&amp;group_id=149444&amp;group_project_id=44908">Release</a>:
-Iniziate a prendere confidenza con il meccanismo di release di SF e
-fate la prima rel dei binari e dei src di MeshLab. Aggiungete una dir
-"docs" dove mettete i readme che accompagnano la release. Suggerisco di
-scegliere subito un naming preciso per le release (e per i file che
-compongono la release) copiate da altri progetti (ad es <span
- style="font-style: italic;">metro</span> di vcg) e
-scrivete le vostre scelte da qualche parte. Procuratevi anche un
-ambiente linux e compilate anche anche per qualche distrib. Fate un
-solo package (chiamato MeshLab) e tre file al suo interno (binari win
-linux e src).</li>
-  <li><span style="font-weight: bold;">Logging e toolbar</span>,
-Adattate la classe LogStream.h alle nostre necessita', inizialmente
-fate solo che mostra il dump delle varie scritte (ad es. usate la
-classe callback nella lettura ply) e modificate la classe di
-interfaccia dei filtri in modo da fornire un modo per fare output.
-Aggiungete anche una toolbar di rendering option stile quella di
-Easy3dView (per ottenere i vari modi basta cambiare i&nbsp; parametri
-della chiamata alla glw.draw() nella Render) ritagliate pure le icone
-da meshlab/images/easyIcons.png (o fatene di migliori se ne avete
-voglia)&nbsp;</li>
-</ol>
-<h3><a
- href="https://sourceforge.net/pm/task.php?group_project_id=44907&amp;group_id=149444&amp;func=browse">Gruppo
-Rendering</a>&nbsp;</h3>
-<span style="font-style: italic;">Vannini, Gangemi, Pirro<br>
-</span>
-<ol>
-  <li><a
- href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120438&amp;group_id=149444&amp;group_project_id=44907">CURVATURE</a>
-Implementare il calcolo delle curvature principali gaussiane e media
-per una mesh. Inizialmente fate una dir <span
- style="font-style: italic;">meshlab/src/test/curvature</span> e fate
-esperimenti li' dentro prendendo spunto come stile dagli esempi che
-trovate sotto sf/apps/sample. Inizialmente partite aggiungendo ad un
-vostro tipo vertice un membro di tipo curvature con tutto quello che vi
-serve. Poi se tutto funge come si deve lo si aggiunge come componente.</li>
-</ol>
-<h3><a
- href="https://sourceforge.net/pm/task.php?group_project_id=44909&amp;group_id=149444&amp;func=browse">Gruppo
-Selection and IO</a></h3>
-<span style="font-style: italic;">Buzzelli, Mazzanti</span>
-<ol>
-  <li><a
- href="https://sourceforge.net/pm/task.php?func=detailtask&amp;project_task_id=120762&amp;group_id=149444&amp;group_project_id=44909">Obj
-file format</a> input Aggiungere il supporto del formato obj, come
-documentazione del formato 3d partite da:<br>
-    <a href="http://www.csit.fsu.edu/%7Eburkardt/data/obj/obj.html">http://www.csit.fsu.edu/~burkardt/data/obj/obj.html</a><br>
-    <a href="http://www.dcs.ed.ac.uk/home/mxr/gfx/3d/OBJ.spec">http://www.dcs.ed.ac.uk/home/mxr/gfx/3d/OBJ.spec</a><br>
-Raccogliete anche un po di modelli 3d obj liberi che esemplifichino i
-vari tipi di attributi che possono comparire nei modelli. </li>
-</ol>
-<span style="font-style: italic;"><br>
-&nbsp;&nbsp;&nbsp; </span>
-<dl>
-</dl>
+lista incompleta e inaffidabile di possibili sottotask che mi vengono in mente tanto per fissare le idee e fare qualche esempio...
+<OL>
+<li> Unit testing
+<li> Meccanismo parametri plugins configurabile.
+<li> Editing stile painting (brush painting sulla mesh)
+<li> Filtri input per altri formati
+<li> Shader OpenGL multi passata in un formato piu' diffuso (RenderMonkey?)
+<li> Selezioni stile bacchetta magica
+
+
 </div>
 <div id="rightcontent">
 <a href="https://sourceforge.net/projects/meshlab/"><img
- style="border: 0px solid ; width: 125px; height: 37px;"
+ style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 125px; BORDER-BOTTOM: 0px solid; HEIGHT: 37px"
  src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2"
  alt="SourceForge.net Logo"></a>
 <p class="menu"><a href="http://meshlab.sourceforge.net">Main
