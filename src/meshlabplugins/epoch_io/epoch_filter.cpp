@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/11/27 06:57:19  cignoni
+ Wrong way of using the __DATE__ preprocessor symbol
+
  Revision 1.1  2006/11/07 18:14:21  cignoni
  Moved from the epoch svn repository
 
@@ -101,7 +104,7 @@ const ActionInfo &EpochFilter::Info(QAction *action)
 const PluginInfo &EpochFilter::Info()
 {
    static PluginInfo ai;
-   ai.Date=tr("__DATE__");
+   ai.Date=tr(__DATE__);
 	 ai.Version = tr("0.1");
 	 ai.Author = ("Paolo Cignoni");
    return ai;

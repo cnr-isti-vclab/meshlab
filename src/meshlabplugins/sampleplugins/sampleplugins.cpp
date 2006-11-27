@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/11/27 06:57:21  cignoni
+Wrong way of using the __DATE__ preprocessor symbol
+
 Revision 1.1  2006/09/25 09:24:39  e_cerisoli
 add sampleplugins
 
@@ -74,7 +77,7 @@ const ActionInfo &ExtraSamplePlugin::Info(QAction *action)
 const PluginInfo &ExtraSamplePlugin::Info()
 {
    static PluginInfo ai;
-   ai.Date=tr("__DATE__");
+   ai.Date=tr(__DATE__);
 	 ai.Version = tr("0.5");
 	 ai.Author = ("Elisa Cerisoli");
    return ai;

@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.75  2006/11/27 06:57:20  cignoni
+Wrong way of using the __DATE__ preprocessor symbol
+
 Revision 1.74  2006/11/09 17:41:25  cignoni
 mismatch : with ;
 
@@ -305,7 +308,7 @@ const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
 const PluginInfo &ExtraMeshFilterPlugin::Info()
 {
    static PluginInfo ai;
-   ai.Date=tr("__DATE__");
+   ai.Date=tr(__DATE__);
 	 ai.Version = tr("0.5");
 	 ai.Author = ("Paolo Cignoni, Mario Latronico, Andrea Venturi");
    return ai;

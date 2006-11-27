@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/11/27 06:57:19  cignoni
+ Wrong way of using the __DATE__ preprocessor symbol
+
  Revision 1.3  2006/11/07 17:26:01  cignoni
  small gcc compiling issues
 
@@ -194,7 +197,7 @@ const ActionInfo &CleanFilter::Info(QAction *action)
 const PluginInfo &CleanFilter::Info()
 {
    static PluginInfo ai;
-   ai.Date=tr("__DATE__");
+   ai.Date=tr( __DATE__ );
 	 ai.Version = tr("0.1");
 	 ai.Author = ("Paolo Cignoni");
    return ai;

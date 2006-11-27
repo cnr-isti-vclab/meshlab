@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2006/11/27 06:57:21  cignoni
+Wrong way of using the __DATE__ preprocessor symbol
+
 Revision 1.5  2006/11/07 09:22:32  cignoni
 Wrote correct Help strings, and added required cleardatamask
 
@@ -141,7 +144,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
  const PluginInfo &SelectionFilterPlugin::Info() 
 {
    static PluginInfo ai; 
-   ai.Date=tr("__DATE__");
+   ai.Date=tr(__DATE__);
 	 ai.Version = tr("0.5");
 	 ai.Author = ("Paolo Cignoni");
    return ai;

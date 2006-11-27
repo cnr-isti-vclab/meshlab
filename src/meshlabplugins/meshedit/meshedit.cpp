@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2006/11/27 06:57:20  cignoni
+Wrong way of using the __DATE__ preprocessor symbol
+
 Revision 1.5  2006/11/07 09:22:31  cignoni
 Wrote correct Help strings, and added required cleardatamask
 
@@ -77,7 +80,7 @@ QList<QAction *> ExtraMeshEditPlugin::actions() const {
  const PluginInfo &ExtraMeshEditPlugin::Info() 
 {
    static PluginInfo ai; 
-   ai.Date=tr("__DATE__");
+   ai.Date=tr(__DATE__);
 	 ai.Version = tr("0.5");
 	 ai.Author = ("Paolo Cignoni");
    return ai;

@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.10  2006/11/27 06:57:19  cignoni
+ Wrong way of using the __DATE__ preprocessor symbol
+
  Revision 1.9  2006/11/09 02:20:36  granzuglia
  cleaner version
 
@@ -60,11 +63,10 @@
 
 #include "colladaio.h"
 
-#include <vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
-#include <wrap/ply/plylib.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
 
 
 #include <wrap/io_trimesh/import_dae.h>
