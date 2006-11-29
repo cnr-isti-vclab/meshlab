@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.71  2006/11/29 00:53:43  cignoni
+Improved logging and added web based version checking
+
 Revision 1.70  2006/11/08 01:04:48  cignoni
 First version with http communications
 
@@ -103,7 +106,9 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow();
    static bool QCallBack(const int pos, const char * str);
-	 const QString appName() const {return tr("MeshLab v0.8"); }
+	 const QString appName() const {return tr("MeshLab v")+appVer(); }
+   const QString appVer() const {return tr("0.9"); }
+
   // MaskObj maskobj;
 
 public slots:
@@ -165,7 +170,7 @@ private slots:
 
   void dropEvent ( QDropEvent * event );
   void dragEnterEvent(QDragEnterEvent *);
-  void connectionFinished(int id, bool status);
+  void connectionDone(bool status);
 
 private:
 	void createActions();
@@ -180,7 +185,7 @@ private:
 
 
 	QHttp *httpReq;
-  QBuffer *myLocalBuf;
+  QBuffer myLocalBuf;
   int idHost;
   int idGet;
 

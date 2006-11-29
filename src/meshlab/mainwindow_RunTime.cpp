@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.111  2006/11/29 00:53:43  cignoni
+Improved logging and added web based version checking
+
 Revision 1.110  2006/11/08 15:51:00  cignoni
 Corrected bug apply last filter on empty workspace
 
@@ -674,6 +677,10 @@ bool MainWindow::saveAs()
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
 		qb->reset();
+
+    QSettings settings;
+    int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
+    settings.setValue("savedMeshCounter",savedMeshCounter+1);
 	}	
   GLA()->setWindowModified(false);
 	return ret;

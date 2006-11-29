@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.64  2006/11/29 00:53:43  cignoni
+Improved logging and added web based version checking
+
 Revision 1.63  2006/11/09 08:16:23  cignoni
 Bug in the http communication
 
@@ -116,7 +119,8 @@ MainWindow::MainWindow()
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateWindowMenu()));
 
   httpReq=new QHttp(this);
-  connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
+  //connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
+  connect(httpReq, SIGNAL(done(bool)), this, SLOT(connectionDone(bool)));
 
 	createActions();
 	createMenus();
@@ -565,6 +569,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
   settings.setValue("connectionInterval",connectionInterval);
   int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
   settings.setValue("loadedMeshCounter",loadedMeshCounter+1);
+  int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
   int lastComunicatedValue=settings.value("lastComunicatedValue",0).toInt();
   QString UID=settings.value("UID",QString("")).toString();
   if(UID.isEmpty())
@@ -572,29 +577,35 @@ void MainWindow::setCurrentFile(const QString &fileName)
     UID=QUuid::createUuid ().toString();
     settings.setValue("UID",UID);
   }
-  if(loadedMeshCounter-lastComunicatedValue>connectionInterval)
+  if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
   {
-    QString message=  QString("/~cignoni/meshlab.php?code=%1&count=%2&totkv=%3").arg(UID).arg(loadedMeshCounter).arg(totalKV);
+#ifdef _DEBUG_PHP
+    QString BaseCommand("/~cignoni/meshlab_d.php");
+#else 
+    QString BaseCommand("/~cignoni/meshlab.php");
+#endif
+#ifdef Q_WS_WIN    
+    QString OS="Win";
+#elif Q_WS_MAC
+    QString OS="Mac";
+#else
+    QString OS="Lin";
+#endif
+    QString message=BaseCommand+QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(appVer()).arg(OS);
     idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
-    myLocalBuf = new QBuffer();
-    bool ret=myLocalBuf->open(QBuffer::WriteOnly);
+    bool ret=myLocalBuf.open(QBuffer::WriteOnly);
     if(!ret) QMessageBox::information(this,"Meshlab",QString("Failed opening of internal buffer"));
-    idGet=httpReq->get(message,myLocalBuf);     // id == 2  
+    idGet=httpReq->get(message,&myLocalBuf);     // id == 2  
   }
 }
-
-void MainWindow::connectionFinished(int id, bool status)
+void MainWindow::connectionDone(bool status)
 {
-  if(id==idGet && status == false)
-  {
-    httpReq->close();
-     if(myLocalBuf->isOpen()) 
-      {
-        myLocalBuf->close();
+        QString answer=myLocalBuf.data();
+        if(answer!=QString("ok"))
+          QMessageBox::information(this,"MeshLab Version Checking",myLocalBuf.data());
+        myLocalBuf.close();
         //QMessageBox::information(this,"Remote Counter",QString("Updated!"));
         QSettings settings;
         int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
         settings.setValue("lastComunicatedValue",loadedMeshCounter);
-      }
-  }
 }
