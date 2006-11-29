@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2006/11/29 00:59:21  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.1  2006/09/25 09:24:39  e_cerisoli
 add sampleplugins
 
@@ -53,7 +56,7 @@ public:
 	
 	bool init_randnumber; 
 	virtual const QString ST(FilterType filter);
-	virtual const ActionInfo &Info(QAction *);
+	virtual const QString &Info(QAction *);
 	virtual const PluginInfo &Info();
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 

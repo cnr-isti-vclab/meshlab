@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.23  2006/11/29 00:59:19  cignoni
+ Cleaned plugins interface; changed useless help class into a plain string
+
  Revision 1.22  2006/03/07 13:30:24  cignoni
  undoed wrong removal...
 
@@ -71,8 +74,7 @@ class ExtraMeshIOPlugin : public QObject, public MeshIOInterface
 public:
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
-	const ActionInfo &Info(QAction *);
-    const PluginInfo &Info();
+	const PluginInfo &Info();
 	int GetExportMaskCapability(QString &format) const;
 
 	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);

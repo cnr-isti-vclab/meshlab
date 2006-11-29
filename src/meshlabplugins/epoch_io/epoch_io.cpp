@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/11/29 00:59:16  cignoni
+ Cleaned plugins interface; changed useless help class into a plain string
+
  Revision 1.2  2006/11/08 15:49:42  cignoni
  Added quality to the loaded masks
 
@@ -509,12 +512,6 @@ QList<MeshIOInterface::Format> EpochIO::importFormats() const
   formatList << Format("Epoch Reconstructed mesh","V3D");
 	return formatList;
 };
-
-const ActionInfo &EpochIO::Info(QAction *action)
-{
-	static ActionInfo ai;
-	return ai;
-}
 
 const PluginInfo &EpochIO::Info()
 {

@@ -41,7 +41,7 @@ public:
 
     virtual ~ExtraMeshEditPlugin() {}
 
-    virtual const ActionInfo &Info(QAction *);
+    virtual const QString Info(QAction *);
     virtual const PluginInfo &Info();
 
     virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);

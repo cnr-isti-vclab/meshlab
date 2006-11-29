@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.35  2006/11/29 00:59:18  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.34  2006/10/22 21:09:35  cignoni
 Added Close Hole
 
@@ -33,34 +36,6 @@ Added remove non manifold and quadric simplification filter.
 
 Revision 1.31  2006/05/25 09:46:38  cignoni
 missing std and and all the other gcc detected syntax errors
-
-Revision 1.30  2006/05/25 06:24:14  cignoni
-Decimator dialog no more necessary
-
-Revision 1.29  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.28  2006/04/12 15:12:18  cignoni
-Added Filter classes (cleaning, meshing etc)
-
-Revision 1.27  2006/02/21 15:24:47  mariolatronico
-case typo on #include
-
-Revision 1.26  2006/02/20 21:11:36  giec
-bugfix
-
-Revision 1.25  2006/02/20 20:52:37  giec
-replace refine and detacher dialog whit GnericELDialog
-
-Revision 1.24  2006/02/06 10:18:27  mariolatronico
-reverted to old behaviour, removed QEdgeLength
-
-Revision 1.23  2006/02/05 11:22:40  mariolatronico
-changed spinbox to QEdgeLength widget
-
-Revision 1.22  2006/01/31 14:40:40  mariolatronico
-removed unused variable ActionInfo *ai, added Log history
 
 ****************************************************************************/
 
@@ -114,7 +89,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin();
 	virtual const QString ST(FilterType filter);
-  virtual const ActionInfo &Info(QAction *);
+  virtual const QString Info(QAction *);
 	virtual const PluginInfo &Info();
   virtual const FilterClass getClass(QAction *);
   virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);

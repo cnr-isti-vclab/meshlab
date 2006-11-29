@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.11  2006/11/29 00:59:16  cignoni
+ Cleaned plugins interface; changed useless help class into a plain string
+
  Revision 1.10  2006/11/27 06:57:19  cignoni
  Wrong way of using the __DATE__ preprocessor symbol
 
@@ -206,12 +209,6 @@ int ColladaIOPlugin::GetExportMaskCapability(QString &format) const
 {
 	if(format.toUpper() == tr("DAE")){return vcg::tri::io::ExporterDAE<CMeshO>::GetExportMaskCapability();}
 	return 0;
-}
-
-const ActionInfo &ColladaIOPlugin::Info(QAction *action)
-{
-	static ActionInfo ai;
-	return ai;
 }
 
 const PluginInfo &ColladaIOPlugin::Info()

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/11/29 00:59:20  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.2  2006/11/27 06:57:21  cignoni
 Wrong way of using the __DATE__ preprocessor symbol
 
@@ -66,11 +69,9 @@ const QString ExtraSamplePlugin::ST(FilterType filter)
 ExtraSamplePlugin::~ExtraSamplePlugin()
 {}
 
-const ActionInfo &ExtraSamplePlugin::Info(QAction *action)
+const QString &ExtraSamplePlugin::Info(QAction *action)
 {
-   static ActionInfo ai;
-   ai.Help = tr("Apply Filter Move Vertex");
-   return ai;
+   return tr("Apply Filter Move Vertex");
 }
 
 

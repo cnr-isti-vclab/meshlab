@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/11/29 00:59:15  cignoni
+ Cleaned plugins interface; changed useless help class into a plain string
+
  Revision 1.1  2006/11/07 09:09:27  cignoni
  First Working release, moved in from epoch svn
 
@@ -63,7 +66,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
 	CleanFilter();
 	~CleanFilter();
 	virtual const QString ST(FilterType filter);
-  virtual const ActionInfo &Info(QAction *);
+  virtual const QString Info(QAction *);
 	virtual const PluginInfo &Info();
 
   virtual const FilterClass getClass(QAction *);

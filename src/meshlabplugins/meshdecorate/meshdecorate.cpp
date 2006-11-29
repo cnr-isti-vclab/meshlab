@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.38  2006/11/29 00:59:17  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.37  2006/11/07 09:24:10  cignoni
 Removed shorthHelp and reformatted the code
 
@@ -91,17 +94,17 @@ Some changes in DrawAxis in order to compile under gcc
 
 using namespace vcg;
 
-const ActionInfo &ExtraMeshDecoratePlugin::Info(QAction *action)
+const QString ExtraMeshDecoratePlugin::Info(QAction *action)
  {
-  static ActionInfo ai;
   switch(ID(action))
   {
-    case DP_SHOW_AXIS :       ai.Help = tr("Draws XYZ axes in world coordinates");break;
-    case DP_SHOW_BOX_CORNERS: ai.Help = tr("Draws object's bounding box corners");break;
-    case DP_SHOW_NORMALS:     ai.Help = tr("Draws object vertex normals");break;
-    case DP_SHOW_QUOTED_BOX:  ai.Help = tr("Draws quoted box");break;
+    case DP_SHOW_AXIS :      return tr("Draws XYZ axes in world coordinates");
+    case DP_SHOW_BOX_CORNERS:return tr("Draws object's bounding box corners");
+    case DP_SHOW_NORMALS:    return tr("Draws object vertex normals");
+    case DP_SHOW_QUOTED_BOX: return tr("Draws quoted box");
 	 }
-   return ai;
+  assert(0);
+  return QString();
  }
 
  const PluginInfo &ExtraMeshDecoratePlugin::Info()

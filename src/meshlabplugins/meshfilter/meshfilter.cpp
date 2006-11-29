@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.76  2006/11/29 00:59:18  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.75  2006/11/27 06:57:20  cignoni
 Wrong way of using the __DATE__ preprocessor symbol
 
@@ -278,30 +281,30 @@ ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
 	}
 }
 
-const ActionInfo &ExtraMeshFilterPlugin::Info(QAction *action)
+const QString ExtraMeshFilterPlugin::Info(QAction *action)
 {
-	static ActionInfo ai;
   switch(ID(action))
   {
-  case FP_LOOP_SS :                   ai.Help = tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices"); break;
-  case FP_BUTTERFLY_SS :  			      ai.Help = tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes"); break;
-  case FP_MIDPOINT : 			            ai.Help = tr("Splits every edge in two"); break;
-  case FP_REMOVE_UNREFERENCED_VERTEX: ai.Help = tr("Check for every vertex on the mesh if it is referenced by a face and removes it"); break;
-  case FP_REMOVE_DUPLICATED_VERTEX : 	ai.Help = tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it"); break;
-  case FP_REMOVE_FACES_BY_AREA : 			ai.Help = tr("Removes null faces (the one with area equal to zero)"); break;
-  case FP_REMOVE_FACES_BY_EDGE : 			ai.Help = tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold"); break;
-  case FP_LAPLACIAN_SMOOTH :          ai.Help = tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex"); break;
-  case FP_HC_LAPLACIAN_SMOOTH : 			ai.Help = tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller"); break;
-  case FP_TWO_STEP_SMOOTH : 			    ai.Help = tr("Two Step Smoothing, Normal Smoothing and vertex fitting smoothing, based on the paper of ..."); break;
-  case FP_CLUSTERING : 			          ai.Help = tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid"); break;
-  case FP_QUADRIC_SIMPLIFICATION: 		ai.Help = tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower"); break;        
-  case FP_REORIENT : 			            ai.Help = tr("Re-oriented the adjacencies of the face of the mesh"); break;
-  case FP_INVERT_FACES : 			        ai.Help = tr("Invert faces orentation, flip the normal of the mesh"); break;
-  case FP_TRANSFORM : 	              ai.Help = tr("Apply transformation, you can rotate, translate or scale the mesh"); break;
-  case FP_NORMAL_EXTRAPOLATION :      ai.Help = tr("Compute the normals of a mesh without exploiting the triangle connectivity");break;
-  case FP_CLOSE_HOLES_LIEPA :         ai.Help = tr("Close holes smaller than a given threshold");break;
+    case FP_LOOP_SS :                   return tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");  
+    case FP_BUTTERFLY_SS :  			      return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");  
+    case FP_MIDPOINT : 			            return tr("Splits every edge in two");  
+    case FP_REMOVE_UNREFERENCED_VERTEX: return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");  
+    case FP_REMOVE_DUPLICATED_VERTEX : 	return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");  
+    case FP_REMOVE_FACES_BY_AREA : 			return tr("Removes null faces (the one with area equal to zero)");  
+    case FP_REMOVE_FACES_BY_EDGE : 			return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");  
+    case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");  
+    case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller");  
+    case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, Normal Smoothing and vertex fitting smoothing, based on the paper of ...");  
+    case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");  
+    case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
+    case FP_REORIENT : 			            return tr("Re-oriented the adjacencies of the face of the mesh");  
+    case FP_INVERT_FACES : 			        return tr("Invert faces orentation, flip the normal of the mesh");  
+    case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");  
+    case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of a mesh without exploiting the triangle connectivity"); 
+    case FP_CLOSE_HOLES_LIEPA :         return tr("Close holes smaller than a given threshold"); 
   }
-   return ai;
+  assert(0);
+  return QString();
 }
 
 

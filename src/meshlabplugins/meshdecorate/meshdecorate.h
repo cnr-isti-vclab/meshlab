@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.18  2006/11/29 00:59:18  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.17  2006/11/07 09:24:10  cignoni
 Removed shorthHelp and reformatted the code
 
@@ -79,7 +82,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
-  virtual const ActionInfo &Info(QAction *);
+  virtual const QString Info(QAction *);
   virtual const PluginInfo &Info();
   
   enum {

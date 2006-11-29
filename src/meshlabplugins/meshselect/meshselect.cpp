@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/11/29 00:59:20  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.6  2006/11/27 06:57:21  cignoni
 Wrong way of using the __DATE__ preprocessor symbol
 
@@ -127,18 +130,18 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   return true;
 }
 
- const ActionInfo &SelectionFilterPlugin::Info(QAction *action) 
+ const QString SelectionFilterPlugin::Info(QAction *action) 
  {
-  static ActionInfo ai; 
   switch(ID(action))
   {
-  case FP_SELECT_DILATE : ai.Help = tr("Dilate (expand) the current set of selected faces"); break;
-  case FP_SELECT_ERODE  : ai.Help = tr("Erode (reduce) the current set of selected faces"); break;
-  case FP_SELECT_INVERT : ai.Help = tr("Invert the current set of selected faces"); break;
-  case FP_SELECT_NONE   : ai.Help = tr("Clear the current set of selected faces"); break;
-  case FP_SELECT_ALL    : ai.Help = tr("Select all the faces of the current mesh"); break;
+    case FP_SELECT_DILATE : return tr("Dilate (expand) the current set of selected faces");  
+    case FP_SELECT_ERODE  : return tr("Erode (reduce) the current set of selected faces");  
+    case FP_SELECT_INVERT : return tr("Invert the current set of selected faces");  
+    case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");  
+    case FP_SELECT_ALL    : return tr("Select all the faces of the current mesh");  
   }  
-  return ai;
+  assert(0);
+  return QString();
  }
 
  const PluginInfo &SelectionFilterPlugin::Info() 

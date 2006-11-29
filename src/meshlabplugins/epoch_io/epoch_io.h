@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2006/11/29 00:59:16  cignoni
+ Cleaned plugins interface; changed useless help class into a plain string
+
  Revision 1.1  2006/11/07 18:14:21  cignoni
  Moved from the epoch svn repository
 
@@ -55,7 +58,6 @@ public:
   ~EpochIO();
   v3dImportDialog *epochDialog;
   QString lastFileName;
-  const ActionInfo &Info(QAction *);
   const PluginInfo &Info();
   int GetExportMaskCapability(QString &) const {return 0;} 
 

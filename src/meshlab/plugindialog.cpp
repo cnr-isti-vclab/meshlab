@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2006/11/29 00:55:36  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.12  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -229,14 +232,14 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 		{
 			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iDecorate->Info().Author+QString(" Date: ")+iDecorate->Info().Date+QString(" Version: ")+iDecorate->Info().Version);
 			else foreach(QAction *a,iDecorate->actions())
-				if (actionName==a->text()) labelInfo->setText(iDecorate->Info(a).Help);
+				if (actionName==a->text()) labelInfo->setText(iDecorate->Info(a));
 		}
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 		if (iFilter)
 		{
 			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iFilter->Info().Author+QString(" Date: ")+iFilter->Info().Date+QString(" Version: ")+iFilter->Info().Version);
 			else foreach(QAction *a,iFilter->actions())
-							if (actionName==a->text()) labelInfo->setText(iFilter->Info(a).Help);
+							if (actionName==a->text()) labelInfo->setText(iFilter->Info(a));
 		}
 		MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 		if (iRender){
@@ -246,7 +249,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 		{
 			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iEdit->Info().Author+QString(" Date: ")+iEdit->Info().Date+QString(" Version: ")+iEdit->Info().Version);
 			else foreach(QAction *a,iEdit->actions())
-				if (actionName==a->text()) labelInfo->setText(iEdit->Info(a).Help);
+				if (actionName==a->text()) labelInfo->setText(iEdit->Info(a));
 		}
 	}
 }	

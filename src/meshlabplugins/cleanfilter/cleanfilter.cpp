@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.5  2006/11/29 00:59:15  cignoni
+ Cleaned plugins interface; changed useless help class into a plain string
+
  Revision 1.4  2006/11/27 06:57:19  cignoni
  Wrong way of using the __DATE__ preprocessor symbol
 
@@ -181,17 +184,15 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
   }
 }
 
-const ActionInfo &CleanFilter::Info(QAction *action)
+const QString CleanFilter::Info(QAction *action)
 {
-	static ActionInfo ai;
   switch(ID(action))
   {
-  case FP_REBUILD_SURFACE :	 ai.Help = tr("Merge"); break;
-	case FP_REMOVE_ISOLATED_COMPLEXITY:	 ai.Help = tr("Remove Isolated"); break;
-	case FP_REMOVE_ISOLATED_DIAMETER:	 ai.Help = tr("Remove Isolated"); break;
-	case FP_REMOVE_WRT_Q:	     ai.Help = tr("Remove all the faces with quality lower than..."); break;
+  case FP_REBUILD_SURFACE :	return QString("Merge"); 
+	case FP_REMOVE_ISOLATED_COMPLEXITY:	 return tr("Remove Isolated"); 
+	case FP_REMOVE_ISOLATED_DIAMETER:	 return tr("Remove Isolated"); 
+	case FP_REMOVE_WRT_Q:	     return tr("Remove all the faces with quality lower than..."); 
   }
-  return ai;
 }
 
 const PluginInfo &CleanFilter::Info()

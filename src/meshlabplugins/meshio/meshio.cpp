@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.89  2006/11/29 00:59:19  cignoni
+ Cleaned plugins interface; changed useless help class into a plain string
+
  Revision 1.88  2006/11/16 11:25:32  e_cerisoli
  Update meshio.cpp: new file I/O
 
@@ -331,12 +334,6 @@ int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
 	if(format.toUpper() == tr("WRL")){return vcg::tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
 	return 0;
-}
-
-const ActionInfo &ExtraMeshIOPlugin::Info(QAction *action)
-{
-	static ActionInfo ai;
-	return ai;
 }
 
 const PluginInfo &ExtraMeshIOPlugin::Info()

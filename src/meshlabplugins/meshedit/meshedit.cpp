@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2006/11/29 00:59:18  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.6  2006/11/27 06:57:20  cignoni
 Wrong way of using the __DATE__ preprocessor symbol
 
@@ -69,15 +72,14 @@ QList<QAction *> ExtraMeshEditPlugin::actions() const {
 }
 
 
- const ActionInfo &ExtraMeshEditPlugin::Info(QAction *action) 
- {
-   static ActionInfo ai; 
-	 if( action->text() == tr("Select Faces in a region") )
-			ai.Help = tr("Interactive selection of faces inside a dragged rectangle in screen space");
-   return ai;
- }
+const QString ExtraMeshEditPlugin::Info(QAction *action) 
+{
+  if( action->text() != tr("Select Faces in a region") ) assert (0);
 
- const PluginInfo &ExtraMeshEditPlugin::Info() 
+	return tr("Interactive selection of faces inside a dragged rectangle in screen space");
+}
+
+const PluginInfo &ExtraMeshEditPlugin::Info() 
 {
    static PluginInfo ai; 
    ai.Date=tr(__DATE__);

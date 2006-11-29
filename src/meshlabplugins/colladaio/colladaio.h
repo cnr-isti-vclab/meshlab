@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2006/11/29 00:59:16  cignoni
+ Cleaned plugins interface; changed useless help class into a plain string
+
  Revision 1.2  2006/09/22 06:08:17  granzuglia
  colladaio.pro updated with support for FCollada 1.13
 
@@ -51,9 +54,9 @@ class ColladaIOPlugin : public QObject, public MeshIOInterface
 	 std::vector<MeshModel*> _mp;
 
 	QList<Format> importFormats() const;
-	QList<Format> exportFormats() const;
-	const ActionInfo &Info(QAction *);
-    const PluginInfo &Info();
+  QList<Format> exportFormats() const;
+
+	const PluginInfo &Info();
 	int GetExportMaskCapability(QString &format) const;
 
 	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);

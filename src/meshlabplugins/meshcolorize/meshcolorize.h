@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.21  2006/11/29 00:59:17  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
+
 Revision 1.20  2006/11/07 09:10:32  cignoni
 Removed shorthHelp and added topo_non_coherent (draft)
 
@@ -89,7 +92,7 @@ public:
     ~ExtraMeshColorizePlugin(){};
   
   virtual const QString ST(FilterType filter);
-  virtual const ActionInfo &Info(QAction *);
+  virtual const QString Info(QAction *);
 	virtual const PluginInfo &Info();
   virtual const FilterClass getClass(QAction *);
   virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);
