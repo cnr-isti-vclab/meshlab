@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.29  2006/11/29 01:03:38  cignoni
+Edited some comments
+
 Revision 1.28  2006/11/07 09:03:40  cignoni
 Added clearDataMask
 
@@ -35,33 +38,6 @@ Added VF optional component
 Revision 1.25  2006/09/22 06:28:02  granzuglia
 abstract pointer to fileformat's dependent additional info added
 
-Revision 1.24  2006/06/16 01:26:07  cignoni
-Added Initial Filter Script Dialog
-
-Revision 1.23  2006/06/07 08:49:25  cignoni
-Disable rendering during processing and loading
-
-Revision 1.22  2006/05/25 09:46:37  cignoni
-missing std and and all the other gcc detected syntax errors
-
-Revision 1.21  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.20  2006/02/13 14:20:13  cignoni
-Removed glew.h
-
-Revision 1.19  2006/01/30 05:27:25  cignoni
-Switched the order of component ocf and trimesh_base includes
-
-Revision 1.18  2006/01/19 11:58:28  cignoni
-Added mask field
-
-Revision 1.17  2006/01/17 23:39:52  cignoni
-removed useless includes
-
-Revision 1.16  2006/01/04 16:22:20  cignoni
-Made FFAdj optional and added store and restore color functions
 ****************************************************************************/
 
 #ifndef MESHMODEL_H
@@ -94,7 +70,7 @@ class CEdge;
 class CFaceO;
 class CVertexO;
 
-//Vert Mem Occupancy  --- 36 ---
+//Vert Mem Occupancy  --- 44b ---
 
 class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, 
   vert::Coord3f,     /* 12b */ 
@@ -102,13 +78,10 @@ class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO,
   vert::Normal3f,    /* 12b */
   vert::Qualityf,    /*  4b */
   vert::VFAdj,       /*  4b */
-  vert::Mark,        /* 0b */
+  vert::Mark,        /*  4b */
   vert::Color4b      /*  4b */
   >{ 
 };
-
-//Face Mem Occupancy  --- 32 ---
-
 
   
 class CEdge : public Edge<CEdge,CVertexO> {
@@ -123,6 +96,7 @@ public:
   //inline CEdge( Edge<CEdge,CVertexO> &e):Edge<CEdge,CVertexO>(e){};
 };
 
+//Face Mem Occupancy  --- 32b ---
 
 class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,  
       face::InfoOcf,              /* 4b */
@@ -135,6 +109,7 @@ class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,
       face::VFAdjOcf,             /* 0b */
       face::WedgeTexturefOcf      /* 0b */
     > {};
+
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
 
 /*
