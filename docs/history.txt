@@ -26,6 +26,16 @@
   All rights reserved.                                                    
    
 ==============================================================================
+------------------------------------------------------------------------------
+- Meshlab v0.9
+------------------------------------------------------------------------------
+** New features **
+Support of WRL and SMF file format (write only)
+Support of PTX file format (read only)
+Automatic checking of new version
+
+** Corrected Bugs **
+nasty bug in OBJ loading.
 
 ------------------------------------------------------------------------------
 - Meshlab v0.8
