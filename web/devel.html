@@ -71,18 +71,19 @@ di interfacce comuni...
   <li>QT 4.1 sia installato 
   <li>il modulo cvs meshlab e quello di vcg siano allo 
   stesso livello e che il modulo che contiene la <EM>vcg lib (</EM>modulo cvs 
-  che si chiama <EM>vcg)</EM>&nbsp;sia in una dir chiamata non vcg ma 
+  che si chiama <EM>vcg)</EM> sia in una dir chiamata non vcg ma 
   <STRONG>sf</STRONG>. (ad es. dovreste avere qualcosa tipo 
   \doc\sf\vcg\space\point3.h e \doc\meshlab\src\meshlab\meshlab.pro )
-  <LI>allo stesso livello di&nbsp;sf e meshlab ci sia una 
-  dir code con dentro una sotto dir lib con dentro i contenuti 
-  delle&nbsp;seguenti librerie open source: 
-  <ol>
-    <LI> OpenGL, ovviamente da qualche parte nei path standard del 
+  <LI> ci sia OpenGL, ovviamente da qualche parte nei path standard del 
     vostro compilatore dovreste avere include e lib per OpenGL. Di solito 
-    non dovreste far nulla e trovare tutto quel che riguarda opengl 
-    (e.g. "&lt gl/gl.h&gt" e "&lt gl/glu.h&gt") al suo posto.
-    <li> GLUT <b>NON</b> dovrebbe servire. Se vi serve per qualche motivo fatemelo sapere...
+    non dovreste far nulla e il compilatore dovrebbe trovare tutto quel che riguarda opengl 
+    (e.g. "&lt gl/gl.h&gt" e "&lt gl/glu.h&gt") senza chiedere nulla.
+  <li> GLUT <b>NON</b> serve per meshlab, ma puo' servire per compilare 
+  gli esempi di lib3ds (che in effetti non servono)   
+  <LI> allo stesso livello di <b>sf</b> e <b>meshlab</b> ci sia una 
+  dir <b>code</b> con dentro una sotto dir lib con dentro i contenuti 
+  delle seguenti librerie open source: 
+  <ol>
     <LI>glew. Dentro ci scompattate il contenuto dei 
     sorgenti dell'ultima distribuzione di glew (ci deve essere glew.c tra i 
     file, meshlab per evitare orridi problemi di unicode/debug/dll si ricompila direttamente glew invece di linkarsi la 
@@ -91,6 +92,7 @@ di interfacce comuni...
     dell'ambiente di sviluppo dovete anche ricompilarvela)
     <LI>lib3ds-1.3.0 una copia del cvs di lib3ds acceduto in&nbsp;cvs anonimous 
     da sourceforge.</LI></OL></LI></OL>
+  
 <p class="body">
 La libreria VCG, pagina ufficiale <a href="http://vcg.sourceforge.net">vcg.sf.net</a>,&nbsp;e'
 scaricabile in cvs
@@ -112,6 +114,8 @@ lista incompleta e inaffidabile di possibili sottotask che mi vengono in mente t
 <li> Filtri input per altri formati
 <li> Shader OpenGL multi passata in un formato piu' diffuso (RenderMonkey?)
 <li> Selezioni stile bacchetta magica
+<li> Rendering usando punti automatico durante interazione quando framerate basso
+<li> Selection per vertex/face,componenti?
 
 
 </div>
