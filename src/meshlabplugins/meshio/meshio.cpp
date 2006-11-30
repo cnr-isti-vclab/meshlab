@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.90  2006/11/30 22:55:05  cignoni
+ Separated very basic io filters to the more advanced one into two different plugins baseio and meshio
+
  Revision 1.89  2006/11/29 00:59:19  cignoni
  Cleaned plugins interface; changed useless help class into a plain string
 
@@ -32,46 +35,6 @@
 
  Revision 1.87  2006/10/10 21:10:33  cignoni
  progress bar bug
-
- Revision 1.86  2006/06/21 04:25:27  cignoni
- Removed progress bar callback because caused assert under gcc debugged QT libs (to be investigated)
-
- Revision 1.85  2006/05/25 04:57:45  cignoni
- Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
- Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
- Revision 1.84  2006/03/29 10:05:33  cignoni
- Added missing include export.obj
-
- Revision 1.83  2006/03/07 13:24:52  cignoni
- moved import_obj to vcg library
-
- Revision 1.82  2006/03/07 10:47:55  cignoni
- Better mask management during io
-
- Revision 1.81  2006/02/16 19:29:20  fmazzant
- transfer of Export_3ds.h, Export_obj.h, Io_3ds_obj_material.h from Meshlab to vcg
-
- Revision 1.80  2006/02/15 23:09:06  fmazzant
- added the part of MeshIO credits
-
- Revision 1.79  2006/02/09 21:25:38  buzzelli
- making obj loadmask interruptable
-
- Revision 1.78  2006/02/01 17:47:21  buzzelli
- resolved a platform dependent issue about material and texture files locations
-
- Revision 1.77  2006/01/31 01:14:11  fmazzant
- standardized call to the export_off function.
-
- Revision 1.76  2006/01/30 23:02:11  buzzelli
- removed redundant argument in ImporterObj::LoadMask
-
- Revision 1.75  2006/01/30 22:18:09  buzzelli
- removing unnecessary change mask dialog at import tyme
-
- Revision 1.74  2006/01/30 22:09:13  buzzelli
- code cleaning
 
 *****************************************************************************/
 #include <Qt>
@@ -86,8 +49,6 @@
 #include <wrap/io_trimesh/export_vrml.h>
 #include <wrap/io_trimesh/export_dxf.h>
 
-#include <wrap/io_trimesh/import_ply.h>
-#include <wrap/io_trimesh/import_stl.h>
 #include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/import_off.h>
 #include <wrap/io_trimesh/import_ptx.h>
@@ -95,7 +56,6 @@
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
-#include <wrap/ply/plylib.h>
 #include <vcg/complex/trimesh/update/normal.h>
 
 #include <QMessageBox>
@@ -167,37 +127,12 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 			QMessageBox::warning(parent, tr("PTX Opening Error"), error_2MsgFormat.arg(fileName, vcg::tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
 		}
 	}
-	else if (formatName.toUpper() == tr("PLY"))
-	{
-		vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
-		m.Enable(mask);
-		
-		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
-		if (result != ::vcg::ply::E_NOERROR)
-		{
-			QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-	}
 	else if (formatName.toUpper() == tr("OFF"))
 	{
 		int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)  // OFFCodes enum is protected
 		{
 			QMessageBox::warning(parent, tr("OFF Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-
-		CMeshO::FaceIterator fi = m.cm.face.begin();
-		for (; fi != m.cm.face.end(); ++fi)
-			face::ComputeNormalizedNormal(*fi);
-	}
-	else if (formatName.toUpper() == tr("STL"))
-	{
-		int result = vcg::tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), cb);
-		if (result != vcg::tri::io::ImporterSTL<CMeshO>::E_NOERROR)
-		{
-			QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
 
@@ -259,7 +194,6 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
 	
-	//START TMP
 	if(formatName.toUpper() == tr("3DS"))
 	{
 		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
@@ -270,8 +204,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 		}
 		return true;
 	}
-	//END TMP
-	if(formatName.toUpper() == tr("WRL"))
+	else if(formatName.toUpper() == tr("WRL"))
 	{
 		int result = vcg::tri::io::ExporterWRL<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result!=0)
@@ -281,13 +214,17 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 		}
 		return true;
 	}
-	int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-	if(result!=0)
-	{
-		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
-		return false;
-	}
-	return true;
+	else if( formatName.toUpper() == tr("OFF") || formatName.toUpper() == tr("DXF") || formatName.toUpper() == tr("OBJ") )
+  {
+    int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+  	if(result!=0)
+	  {
+		  QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+		  return false;
+	  }
+  }
+  assert(0); // unknown format
+  return false;
 }
 
 /*
@@ -296,10 +233,8 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
-	formatList << Format("Stanford Polygon File Format"	,tr("PLY"));
 	formatList << Format("Alias Wavefront Object"		,tr("OBJ"));
-	formatList << Format("Object File Format"			,tr("OFF"));
-	formatList << Format("STL File Format"				,tr("STL"));
+	formatList << Format("Object File Format"			  ,tr("OFF"));
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));
 	formatList << Format("PTX File Format"      		,tr("PTX"));
 	return formatList;
@@ -311,13 +246,11 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::importFormats() const
 QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
-	formatList << Format("Stanford Polygon File Format"	,tr("PLY"));
 	formatList << Format("Alias Wavefront Object"		,tr("OBJ"));
-	formatList << Format("Object File Format"			,tr("OFF"));
-	formatList << Format("STL File Format"				,tr("STL"));
+	formatList << Format("Object File Format"			  ,tr("OFF"));
 	formatList << Format("3D-Studio File Format"		,tr("3DS"));
-	formatList << Format("VRML File Format"             ,tr("WRL"));
-	formatList << Format("DXF File Format"              ,tr("DXF"));
+	formatList << Format("VRML File Format"         ,tr("WRL"));
+	formatList << Format("DXF File Format"          ,tr("DXF"));
 	return formatList;
 }
 
@@ -328,9 +261,7 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 {
 	if(format.toUpper() == tr("OBJ")){return vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("PLY")){return vcg::tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();}
 	if(format.toUpper() == tr("OFF")){return vcg::tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("STL")){return vcg::tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();}
 	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
 	if(format.toUpper() == tr("WRL")){return vcg::tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
 	return 0;
@@ -341,7 +272,7 @@ const PluginInfo &ExtraMeshIOPlugin::Info()
 	static PluginInfo ai;
 	ai.Date=tr("January 2006");
 	ai.Version = tr("0.6");
-	ai.Author = ("Paolo Cignoni, Andrea Buzzelli, Federico Mazzanti");
+	ai.Author = ("Paolo Cignoni, Andrea Buzzelli, Elisa Cerisoli, Federico Mazzanti");
 	return ai;
  }
 

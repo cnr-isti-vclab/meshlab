@@ -1,11 +1,15 @@
 TEMPLATE      = subdirs
 SUBDIRS       = meshfilter \
-		meshrender \
-		meshio \
-		meshcolorize \
-		meshdecorate \ 
-		meshedit \ 
-		meshselect \
-		cleanfilter \
-		colladaio \
-		epoch_io
+				cleanfilter \
+				baseio\
+				meshio \
+				colladaio \
+				epoch_io \
+				meshrender \
+				meshcolorize \
+				meshdecorate \ 
+				meshedit \ 
+				meshselect 
+		
+		
+		
