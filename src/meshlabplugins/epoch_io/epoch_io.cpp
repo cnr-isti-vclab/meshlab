@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2006/11/30 11:40:33  cignoni
+ Updated the calls to the hole filling functions to the new interface
+
  Revision 1.3  2006/11/29 00:59:16  cignoni
  Cleaned plugins interface; changed useless help class into a plain string
 
@@ -489,7 +492,7 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
   {
     tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
     tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
-    tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,maxHoleSize,false); 
+    vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,maxHoleSize,false);
     tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
     tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
   }

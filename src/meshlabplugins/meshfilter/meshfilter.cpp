@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.77  2006/11/30 11:40:34  cignoni
+Updated the calls to the hole filling functions to the new interface
+
 Revision 1.76  2006/11/29 00:59:18  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -561,7 +564,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  {
       int MaxHoleSize = par.getInt("MaxHoleSize");		
       size_t cnt=tri::UpdateSelection<CMeshO>::CountFace(m.cm);
-      tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
+		  
+      vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,500,false);
+
+      //tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
       tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
 	  }
