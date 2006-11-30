@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.112  2006/11/30 23:23:13  cignoni
+Open take care also of updating the bbox
+
 Revision 1.111  2006/11/29 00:53:43  cignoni
 Improved logging and added web based version checking
 
@@ -36,73 +39,6 @@ First version with http communications
 Revision 1.108  2006/11/07 09:15:27  cignoni
 Added Drag n drog opening of files (thanks to Valentino Fiorin)
 
-Revision 1.107  2006/10/26 12:07:51  corsini
-add lighting properties customization
-
-Revision 1.106  2006/10/22 21:36:14  cignoni
-Corrected bug per face color (now the entr y is enabled only if the mesh has the perface color)
-
-Revision 1.105  2006/10/12 06:45:48  cignoni
-Updated access to mm mask and the choice of the color mode according to the filter class
-
-Revision 1.104  2006/07/08 06:37:47  cignoni
-Many small bugs correction (esc crash, info in about, obj loading progress,fullscreen es)
-
-Revision 1.103  2006/06/27 08:07:42  cignoni
-Restructured plugins interface for simplifying the server
-
-Revision 1.102  2006/06/19 15:17:19  cignoni
-Dirty flag bug, Busy Bug, Cleaning of degenerate faces on loading.
-
-Revision 1.101  2006/06/18 21:27:49  cignoni
-Progress bar redesigned, now integrated in the workspace window
-
-Revision 1.100  2006/06/16 01:26:07  cignoni
-Added Initial Filter Script Dialog
-
-Revision 1.99  2006/06/15 13:05:57  cignoni
-added Filter History Dialogs
-
-Revision 1.98  2006/06/13 13:50:01  cignoni
-Cleaned FPS management
-
-Revision 1.97  2006/06/12 15:21:03  cignoni
-toggle between last editing mode
-
-Revision 1.96  2006/06/07 08:49:25  cignoni
-Disable rendering during processing and loading
-
-Revision 1.95  2006/05/26 04:09:52  cignoni
-Still debugging 0.7
-
-Revision 1.94  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.93  2006/03/07 10:47:50  cignoni
-Better mask management during io
-
-Revision 1.92  2006/02/25 13:43:39  ggangemi
-Action "None" is now exported from MeshRenderPlugin
-
-Revision 1.91  2006/02/24 08:21:00  cignoni
-yet another attempt to solve the QProgressDialog issue. Now trying with qt->reset.
-
-Revision 1.90  2006/02/22 10:20:09  cignoni
-Changed progressbar->hide  into close to avoid 100% cpu use.
-
-Revision 1.89  2006/02/21 17:25:57  ggangemi
-RenderMode is now passed to MeshRenderInterface::Init()
-
-Revision 1.88  2006/02/17 11:17:23  glvertex
-- Moved closeAction in FileMenu
-- Minor changes
-
-Revision 1.87  2006/02/16 15:26:58  glvertex
-Solved some minimizing/restore bugs
-
-Revision 1.86  2006/02/13 16:18:04  cignoni
-Minor edits.
 ****************************************************************************/
 
 
@@ -126,6 +62,7 @@ Minor edits.
 
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/clean.h>
 
 
@@ -601,12 +538,11 @@ void MainWindow::open(QString fileName)
 			GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 		}
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
+    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
     updateMenus();
     vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
     GLA()->mm->busy=false;
 	}
-
- 
 
 	qb->reset();
 }
