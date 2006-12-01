@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.79  2006/12/01 08:52:24  cignoni
+Better text in the help, and corrected bug  the hole size parameter
+
 Revision 1.78  2006/12/01 00:02:52  cignoni
 Removed use of the local invertfaces function and used the function in clean.h
 added progress to holefilling
@@ -302,10 +305,10 @@ const QString ExtraMeshFilterPlugin::Info(QAction *action)
     case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, Normal Smoothing and vertex fitting smoothing, based on the paper of ...");  
     case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");  
     case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
-    case FP_REORIENT : 			            return tr("Re-oriented the adjacencies of the face of the mesh");  
-    case FP_INVERT_FACES : 			        return tr("Invert faces orentation, flip the normal of the mesh");  
+    case FP_REORIENT : 			            return tr("Re-orient in a consistent way all the faces of the mesh");  
+    case FP_INVERT_FACES : 			        return tr("Invert faces orientation, flip the normal of the mesh");  
     case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");  
-    case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of a mesh without exploiting the triangle connectivity"); 
+    case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces"); 
     case FP_CLOSE_HOLES_LIEPA :         return tr("Close holes smaller than a given threshold"); 
   }
   assert(0);
@@ -555,8 +558,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	if (filter->text() == ST(FP_QUADRIC_SIMPLIFICATION) ) {
    int TargetFaceNum = par.getInt("TargetFaceNum");		
    QuadricSimplification(m.cm,TargetFaceNum,cb);
-   vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	 vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+   tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	 tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
 
   if (filter->text() == ST(FP_NORMAL_EXTRAPOLATION) ) {
@@ -568,8 +571,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       int MaxHoleSize = par.getInt("MaxHoleSize");		
       size_t cnt=tri::UpdateSelection<CMeshO>::CountFace(m.cm);
 		  
-      vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,10,false,cb);
-
+      vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,false,cb);
+      assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
       //tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
       //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
