@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.91  2006/12/01 10:41:11  granzuglia
+ fixed a little bug: added return true in the off-file
+
  Revision 1.90  2006/11/30 22:55:05  cignoni
  Separated very basic io filters to the more advanced one into two different plugins baseio and meshio
 
@@ -222,6 +225,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 		  QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
 		  return false;
 	  }
+	return true;
   }
   assert(0); // unknown format
   return false;
