@@ -22,6 +22,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.78  2006/12/01 00:02:52  cignoni
+Removed use of the local invertfaces function and used the function in clean.h
+added progress to holefilling
+
 Revision 1.77  2006/11/30 11:40:34  cignoni
 Updated the calls to the hole filling functions to the new interface
 
@@ -139,9 +143,7 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/space/normal_extrapolation.h>
 
-#include "invert_faces.h"
 #include "refine_loop.h"
-//#include "decimator.h"
 
 #include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
@@ -532,8 +534,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if (filter->text() == ST(FP_INVERT_FACES) ) 
 	{
-	  InvertFaces<CMeshO>(m.cm);
+	  tri::Clean<CMeshO>::FlipMesh(m.cm);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+    m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	}
 
 	if (filter->text() == ST(FP_TRANSFORM) ) {
@@ -565,11 +568,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       int MaxHoleSize = par.getInt("MaxHoleSize");		
       size_t cnt=tri::UpdateSelection<CMeshO>::CountFace(m.cm);
 		  
-      vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,500,false);
+      vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,10,false,cb);
 
       //tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
-      tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
+      //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
 	  }
 
 	return true;
