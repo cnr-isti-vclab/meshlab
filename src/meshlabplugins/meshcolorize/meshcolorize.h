@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.22  2006/12/05 15:37:27  cignoni
+Added rough version of non manifold vertex coloring
+
 Revision 1.21  2006/11/29 00:59:17  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -80,7 +83,8 @@ public:
       CP_ABSOLUTE,
       CP_SELFINTERSECT,
       CP_BORDER,
-      CP_COLOR_NON_MANIFOLD,
+      CP_COLOR_NON_MANIFOLD_FACE,
+      CP_COLOR_NON_MANIFOLD_VERTEX,
       CP_SMOOTH,
       CP_COLOR_NON_TOPO_COHERENT,
       CP_RESTORE_ORIGINAL

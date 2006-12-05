@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.3  2006/12/05 15:37:27  cignoni
+Added rough version of non manifold vertex coloring
+
 Revision 1.2  2006/02/15 05:32:34  cignoni
 Now it colors also non manifold faces
 
@@ -56,7 +59,7 @@ Filter that it colors the edge non manifold
 namespace vcg{
 
 	template<class MESH_TYPE>
-		void ColorManifold(MESH_TYPE &m)
+		void ColorManifoldFace(MESH_TYPE &m)
 	{	
 		assert(m.HasFFTopology());
 
@@ -75,5 +78,52 @@ namespace vcg{
           }
 		  }
 	}
-}
+
+  template<class MESH_TYPE>
+		void ColorManifoldVertex(MESH_TYPE &m)
+	{	
+		assert(m.HasFFTopology());
+
+		typename MESH_TYPE::VertexIterator vi;
+		typename MESH_TYPE::FaceIterator fi;
+   
+    tri::UpdateColor<MESH_TYPE>::VertexConstant(m, Color4b::White);
+
+    SimpleTempData<typename MESH_TYPE::VertContainer, int > TD(m.vert);
+
+  	// primo loop, si conta quanti facce incidono su ogni vertice...
+
+    TD.Start(0);
+    for (fi = m.face.begin(); fi != m.face.end(); ++fi)	if (!fi->IsD())
+    {
+      TD[(*fi).V(0)]++;
+      TD[(*fi).V(1)]++;
+      TD[(*fi).V(2)]++;
+    }
+
+    
+    int ub[3];
+    ub[0] = MESH_TYPE::FaceType::NewBitFlag();
+    ub[1] = MESH_TYPE::FaceType::NewBitFlag();
+    ub[2] = MESH_TYPE::FaceType::NewBitFlag();
+    
+    for (fi = m.face.begin(); fi != m.face.end(); ++fi)	if (!fi->IsD())
+    {
+    
+    // Qui ci va la visita fatta sfruttando la adiacenza ff
+
+    // per settare un bit:
+    // pos.f->SetUserBit(ub[pos.z]);
+
+    }
+
+    MESH_TYPE::FaceType::DeleteBitFlag(ub[2]);
+    MESH_TYPE::FaceType::DeleteBitFlag(ub[1]);
+    MESH_TYPE::FaceType::DeleteBitFlag(ub[0]);
+    
+    TD.Stop();
+	}
+
+
+} // end namespace
 #endif

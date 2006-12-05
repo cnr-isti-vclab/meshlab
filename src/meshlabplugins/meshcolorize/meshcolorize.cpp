@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.30  2006/12/05 15:37:27  cignoni
+Added rough version of non manifold vertex coloring
+
 Revision 1.29  2006/11/29 00:59:17  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -136,7 +139,8 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     CP_ABSOLUTE <<
     CP_SELFINTERSECT <<
     CP_BORDER <<
-    CP_COLOR_NON_MANIFOLD <<
+    CP_COLOR_NON_MANIFOLD_FACE <<
+    CP_COLOR_NON_MANIFOLD_VERTEX <<
     CP_SMOOTH <<
     CP_COLOR_NON_TOPO_COHERENT <<
     CP_RESTORE_ORIGINAL;
@@ -156,7 +160,8 @@ const QString ExtraMeshColorizePlugin::ST(FilterType c) {
     case CP_ABSOLUTE:                 return QString("Absolute Curvature (equalized)");
     case CP_SELFINTERSECT:            return QString("Self Intersections");
     case CP_BORDER:                   return QString("Border");
-    case CP_COLOR_NON_MANIFOLD:       return QString("Color non Manifold");
+    case CP_COLOR_NON_MANIFOLD_FACE:  return QString("Color non Manifold Faces");
+    case CP_COLOR_NON_MANIFOLD_VERTEX:return QString("Color non Manifold Vertices");
     case CP_COLOR_NON_TOPO_COHERENT:  return QString("Color edges topologically non coherent");
     case CP_SMOOTH:                   return QString("Smooth Color");
     case CP_RESTORE_ORIGINAL:         return QString("Restore Color");
@@ -175,7 +180,8 @@ const QString ExtraMeshColorizePlugin::Info(QAction *action)
     case CP_ABSOLUTE :               return tr("Colorize vertex and faces depending on equalize absolute curvature.");
     case CP_SELFINTERSECT:           return tr("Colorize only self intersecting faces.");
     case CP_BORDER :                 return tr("Colorize only border edges.");
-    case CP_COLOR_NON_MANIFOLD:      return tr("Colorize only non manifold edges.");
+    case CP_COLOR_NON_MANIFOLD_FACE: return tr("Colorize the non manifold edges, eg the edges where there are more than two incident faces");
+    case CP_COLOR_NON_MANIFOLD_VERTEX:return tr("Colorize only non manifold edges eg. ");
     case CP_SMOOTH :                 return tr("Apply laplacian smooth for colors.");
     case CP_RESTORE_ORIGINAL :       return tr("Restore original per vertex color.");
     case CP_COLOR_NON_TOPO_COHERENT :return tr("Color edges topologically non coherent.");
@@ -203,7 +209,8 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_ABSOLUTE:                 return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
     case CP_SELFINTERSECT:            return MeshModel::MM_FACEMARK | MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
     case CP_BORDER:                   return MeshModel::MM_BORDERFLAG;
-    case CP_COLOR_NON_MANIFOLD:       return MeshModel::MM_FACETOPO;
+    case CP_COLOR_NON_MANIFOLD_FACE:       
+    case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACETOPO;
     case CP_SMOOTH:                   
     case CP_RESTORE_ORIGINAL:         
     case CP_MAP_QUALITY_INTO_COLOR:   return 0;
@@ -293,8 +300,11 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
   case CP_BORDER:
     vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
     break;
-  case CP_COLOR_NON_MANIFOLD:
-    ColorManifold<CMeshO>(m.cm);
+  case CP_COLOR_NON_MANIFOLD_FACE:
+    ColorManifoldFace<CMeshO>(m.cm);
+    break;
+  case CP_COLOR_NON_MANIFOLD_VERTEX:
+    ColorManifoldVertex<CMeshO>(m.cm);
     break;
   case CP_RESTORE_ORIGINAL:
      m.restoreVertexColor();
@@ -311,7 +321,8 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
   switch(ID(a))
   {
     case   CP_BORDER:
-    case   CP_COLOR_NON_MANIFOLD:
+    case   CP_COLOR_NON_MANIFOLD_VERTEX:
+    case   CP_COLOR_NON_MANIFOLD_FACE:
     case   CP_SMOOTH:
     case   CP_RESTORE_ORIGINAL:
     case   CP_MAP_QUALITY_INTO_COLOR:
