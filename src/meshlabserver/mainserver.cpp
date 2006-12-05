@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/12/05 15:19:18  cignoni
+added a missing return
+
 Revision 1.3  2006/10/15 20:31:38  cignoni
 Added saving of the mesh
 
@@ -168,7 +171,9 @@ bool Save(MeshModel &mm, QString fileName)
 	if (!pCurrentIOPlugin->save(extension, fileName, mm ,mask,0,0/*gla*/))
   {
     printf("Failed saving\n");
+    return false;
   }
+  return true;
 }
 
 
