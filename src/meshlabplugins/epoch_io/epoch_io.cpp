@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.5  2006/12/06 21:25:00  cignoni
+ small optimization and logging for profiling
+
  Revision 1.4  2006/11/30 11:40:33  cignoni
  Updated the calls to the hole filling functions to the new interface
 
@@ -65,6 +68,7 @@
 #include "epoch_reconstruction.h"
 #include "../cleanfilter/remove_small_cc.h"
 
+FILE *logFP=0; 
 using namespace vcg;
 
 bool EpochModel::CombineMaskAndQuality(CharImage &qualityImg, QString maskName )
@@ -149,8 +153,8 @@ void EpochModel::Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, Char
   int w=depth.w,h=depth.h;
   Sum.resize(w,h);
   
+ for(int y=1;y<h-1;++y)
   for(int x=1;x<w-1;++x)
-    for(int y=1;y<h-1;++y)
     {
       int cnt=0;
       for(int j=-1;j<=1;++j)
@@ -168,8 +172,8 @@ void EpochModel::Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, Char
       else Sum.Val(x,y)=depth.Val(x,y);
     }
 
+ for(int y=1;y<h-1;++y)
   for(int x=1;x<w-1;++x)
-    for(int y=1;y<h-1;++y)
     {
       float q=(mask.Val(x,y)/255.0);
       depth.Val(x,y) =  depth.Val(x,y)*q + Sum.Val(x,y)*(1-q);
@@ -190,7 +194,7 @@ void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, CharImage &m
       int dy=abs(int(gray.Val(x,y))-int(gray.Val(x,y-1))) + abs(int(gray.Val(x,y))-int(gray.Val(x,y+1)));
       grad.Val(x,y)=min(255,16*dx+dy);
     }      
-  grad.convertToQImage().save("test.jpg","jpg");
+  //grad.convertToQImage().save("test.jpg","jpg");
 
   //CharImage mask;
   int ws=gray.w/subsampleFactor, hs=gray.h/subsampleFactor;
@@ -207,8 +211,8 @@ void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, CharImage &m
           mask.Val(x,y)=min((unsigned char)255,sum);
     }
   
-  grad.convertToQImage().save("test.jpg","jpg");
-  mask.convertToQImage().save("testmask.jpg","jpg");
+  //grad.convertToQImage().save("test.jpg","jpg");
+  //mask.convertToQImage().save("testmask.jpg","jpg");
 }
 
 /*
@@ -225,27 +229,38 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsample, int minCount, float minAngl
 {
   FloatImage fli;
   CharImage chi;
-  
+  int ttt0=clock();
   fli.Open(depthName.toAscii());
   chi.Open(countName.toAscii());
   
-  CombineMaskAndQuality(chi,maskName);
+  QImage tx;
+  tx.load(textureName);
+  int ttt1=clock();
+  if(logFP) fprintf(logFP,"**** Buildmesh: Opening files %i\n",ttt1-ttt0);
 
+  CombineMaskAndQuality(chi,maskName);
+  
   FloatImage flisub;  // the subsampled depth image 
   FloatImage flisubQ; // the subsampled quality image (quality == count)
   CharImage QualityMask; // the subsampled image with (quality == features)
 
   SmartSubSample(subsample,fli,chi,flisub,flisubQ,minCount);
   GenerateGradientSmoothingMask(subsample,QualityMask);
-  
+
+  int ttt2=clock();
+  if(logFP) fprintf(logFP,"**** Buildmesh: SubSample and Gradient %i\n",ttt2-ttt1);
+
   for(int ii=0;ii<smoothSteps;++ii) 
     // Laplacian(flisub,QualityMask);
     Laplacian2(flisub,flisubQ,minCount,QualityMask);
 
-  QImage tx;
-  tx.load(textureName);
-  
+  int ttt3=clock();
+  if(logFP) fprintf(logFP,"**** Buildmesh: Smoothing %i\n",ttt3-ttt2);
+
   vcg::tri::Grid<CMeshO>(m,flisub.w,flisub.h,fli.w,fli.h,&*flisub.v.begin());
+
+  int ttt4=clock();
+  if(logFP) fprintf(logFP,"**** Buildmesh: trimesh building %i\n",ttt4-ttt3);
 
   for(int i=0;i<m.vn;++i)
     if(flisubQ.v[i]<minCount) 
@@ -274,8 +289,11 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsample, int minCount, float minAngl
     (*vi).Q()=float(QualityMask.Val(in[0]/subsample, in[1]/subsample))/255.0;
   }
     
-  
+  int ttt5=clock();
+  if(logFP) fprintf(logFP,"**** Buildmesh: Projecting and Coloring %i\n",ttt5-ttt4);
+
   CMeshO::FaceIterator fi;
+  Point3f CameraPos=Point3f::Construct(cam.t);
    for(fi=m.face.begin();fi!=m.face.end();++fi)
    {
 
@@ -288,7 +306,7 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsample, int minCount, float minAngl
      {
        Point3f n=vcg::Normal(*fi);
        n.Normalize();
-       Point3f dir=Point3f::Construct(cam.t)-vcg::Barycenter(*fi);
+       Point3f dir=CameraPos-vcg::Barycenter(*fi);
        dir.Normalize();
        if(dir*n < minAngleCos)
                 {
@@ -297,6 +315,9 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsample, int minCount, float minAngl
                 }
      }
    }
+
+  int ttt6=clock();
+  if(logFP) fprintf(logFP,"**** Buildmesh: Deleting skewed %i\n",ttt6-ttt5);
 
 //  Matrix44d Rot;
 //  Rot.SetRotate(M_PI,Point3d(1,0,0));
@@ -413,7 +434,10 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
   
   //Here we invoke the modal dialog and wait for its termination
   int continueValue = epochDialog->exec();
-  
+
+  // 
+  int t0=clock();
+  logFP=fopen("epoch.log","w");
 
   int subSampleVal = epochDialog->subsampleSpinBox->value();
   int minCountVal= epochDialog->minCountSpinBox->value();
@@ -452,7 +476,11 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
       {
         ++selectedCount;
         mm.Clear();
+        int tt0=clock();
         (*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps);
+        int tt1=clock();
+        if(logFP) fprintf(logFP,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
+
         if(clustering)
         {
           if (firstTime) 
@@ -466,6 +494,10 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
           Grid.Add(mm);
         }
         else  tri::Append<CMeshO,CMeshO>::Mesh(m.cm,mm); // append mesh mr to ml
+
+        int tt2=clock();
+        if(logFP) fprintf(logFP,"** Mesh %i : Append in %i\n",selectedCount,tt2-tt1);
+
       }
       if (cb)(*cb)(selectedCount*90/selectedNum, "Building meshes");
   }
@@ -476,7 +508,9 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
     Grid.Extract(m.cm);
   }
  
-  
+  int t1=clock();
+  if(logFP) fprintf(logFP,"Extracted %i meshes in %i\n",selectedCount,t1-t0);
+
   if (cb != NULL) (*cb)(95, "Final Processing: Removing Small Connected Components");
   if(removeSmallCC)
   {
@@ -485,20 +519,28 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
     RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,m.cm.bbox.Diag()*maxCCDiagVal/100.0);
   }
 
+  int t2=clock();
+  if(logFP) fprintf(logFP,"Topology and removed CC in %i\n",t2-t1);
+
   vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	
   if (cb != NULL) (*cb)(97, "Final Processing: Closing Holes");
   if(closeHole)
   {
-    tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
+	  m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
     tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
     vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,maxHoleSize,false);
-    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
-    tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
   }
 
 	if (cb != NULL) (*cb)(100, "Done");
-  vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
+//  vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
+
+
+  int t3=clock();
+  if(logFP) fprintf(logFP,"---------- Total Processing Time%i\n\n\n",t3-t0);
+  if(logFP) fclose(logFP);
+  logFP=0;
+
 	return true;
 }
 
