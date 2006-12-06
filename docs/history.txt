@@ -33,9 +33,11 @@
 Support of WRL and SMF file format (write only)
 Support of PTX file format (read only)
 Automatic checking of new version
+Non manifold vertex coloring
+Improved quality and robustness of Hole Filling filter
 
 ** Corrected Bugs **
-nasty bug in OBJ loading.
+nasty bug that affected the saving and loading various 3d format (3ds, obj and off)
 
 ------------------------------------------------------------------------------
 - Meshlab v0.8

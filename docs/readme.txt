@@ -44,7 +44,7 @@ first versions was written by a handful of students.
 # Input/output in many formats (PLY, STL, OFF, OBJ, 3DS, COLLADA)
 # Extendible plugins based architecture, writing new mesh processing
   functions, colorization filters and support for different file formats is
-  quite easy (look at this code sample)
+  quite easy (look at the provided code samples)
 # Cleaning Filters:
     * removal of duplicated, unreferenced vertices, null faces
     * subdivision filters (midpoint, loop and butterfly)
