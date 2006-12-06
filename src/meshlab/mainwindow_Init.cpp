@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.65  2006/12/06 00:48:17  cignoni
+Improved managment of http answer
+
 Revision 1.64  2006/11/29 00:53:43  cignoni
 Improved logging and added web based version checking
 
@@ -598,11 +601,13 @@ void MainWindow::setCurrentFile(const QString &fileName)
     idGet=httpReq->get(message,&myLocalBuf);     // id == 2  
   }
 }
+
+
 void MainWindow::connectionDone(bool status)
 {
         QString answer=myLocalBuf.data();
-        if(answer!=QString("ok"))
-          QMessageBox::information(this,"MeshLab Version Checking",myLocalBuf.data());
+        if(answer.left(3)==QString("NEW"))
+          QMessageBox::information(this,"MeshLab Version Checking",answer.remove(0,3));
         myLocalBuf.close();
         //QMessageBox::information(this,"Remote Counter",QString("Updated!"));
         QSettings settings;
