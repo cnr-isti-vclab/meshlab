@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.4  2006/12/06 21:24:00  cignoni
+Completed NonManifoldVertex
+
 Revision 1.3  2006/12/05 15:37:27  cignoni
 Added rough version of non manifold vertex coloring
 
@@ -101,25 +104,40 @@ namespace vcg{
       TD[(*fi).V(2)]++;
     }
 
-    
-    int ub[3];
-    ub[0] = MESH_TYPE::FaceType::NewBitFlag();
-    ub[1] = MESH_TYPE::FaceType::NewBitFlag();
-    ub[2] = MESH_TYPE::FaceType::NewBitFlag();
+    for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)	if (!vi->IsD())
+      (*vi).ClearV();
     
     for (fi = m.face.begin(); fi != m.face.end(); ++fi)	if (!fi->IsD())
     {
-    
-    // Qui ci va la visita fatta sfruttando la adiacenza ff
-
-    // per settare un bit:
-    // pos.f->SetUserBit(ub[pos.z]);
-
+      
+      for(int i=0;i<3;i++) if(!(*fi).V(i)->IsV()){
+        (*fi).V(i)->SetV();
+        face::Pos<typename MESH_TYPE::FaceType> sp(&(*fi),i);
+        face::Pos<typename MESH_TYPE::FaceType> ip=sp;
+        bool borderfound = false;
+        int facenumber = 0;
+        do 
+        {
+          if(!ip.IsManifold()) break;
+          if(ip.IsBorder())
+            borderfound = true;
+          ip.FlipF();
+          ip.FlipE();
+          facenumber++;
+        } while(ip!=sp);
+        
+        if(borderfound && ip.IsManifold()){
+          assert((facenumber%2)==0);
+          facenumber=facenumber/2;
+        }
+        if(TD[(*fi).V(i)]!=facenumber || !(ip.IsManifold())){
+          (*fi).V(i)->C()=Color4b::Red;
+        
+        }
+      
+      }
     }
 
-    MESH_TYPE::FaceType::DeleteBitFlag(ub[2]);
-    MESH_TYPE::FaceType::DeleteBitFlag(ub[1]);
-    MESH_TYPE::FaceType::DeleteBitFlag(ub[0]);
     
     TD.Stop();
 	}
