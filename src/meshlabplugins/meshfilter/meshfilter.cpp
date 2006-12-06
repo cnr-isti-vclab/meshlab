@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.80  2006/12/06 21:39:57  cignoni
+Hole filling no intersection
+
 Revision 1.79  2006/12/01 08:52:24  cignoni
 Better text in the help, and corrected bug  the hole size parameter
 
@@ -571,10 +574,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       int MaxHoleSize = par.getInt("MaxHoleSize");		
       size_t cnt=tri::UpdateSelection<CMeshO>::CountFace(m.cm);
 		  
-      vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,false,cb);
+      //vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,false,cb);
+      vcg::tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,false);		
+
       assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
       //tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
-      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+      tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);	    
       //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
 	  }
 
