@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.72  2006/12/06 21:38:56  cignoni
+0.9RC
+
 Revision 1.71  2006/11/29 00:53:43  cignoni
 Improved logging and added web based version checking
 
@@ -107,7 +110,7 @@ public:
 	MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("0.9"); }
+   const QString appVer() const {return tr("0.9RC"); }
 
   // MaskObj maskobj;
 
