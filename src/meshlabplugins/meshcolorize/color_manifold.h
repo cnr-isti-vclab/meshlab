@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.5  2006/12/08 21:27:55  cignoni
+Added missing include temporary data
+
 Revision 1.4  2006/12/06 21:24:00  cignoni
 Completed NonManifoldVertex
 
@@ -52,6 +55,7 @@ Filter that it colors the edge non manifold
 #include<vcg/space/triangle3.h>
 #include<vcg/complex/trimesh/update/topology.h>
 #include<vcg/complex/trimesh/update/color.h>
+#include <vcg/container/simple_temporary_data.h>
 
 #include <iostream>
 #include <QtGlobal>
