@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.81  2006/12/11 23:50:07  cignoni
+corrected border management after holefilling filter
+
 Revision 1.80  2006/12/06 21:39:57  cignoni
 Hole filling no intersection
 
@@ -580,6 +583,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
       //tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
       tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);	    
+
+      // hole filling does not update well the border flags (but the topology is still ok!) 
+      m.clearDataMask(MeshModel::MM_BORDERFLAG);
       //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
 	  }
 
