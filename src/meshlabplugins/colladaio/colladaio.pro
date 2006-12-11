@@ -1,8 +1,7 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut/include 
-HEADERS       = colladaio.h \
-		    io_dae.h
+HEADERS       = colladaio.h 
 SOURCES       = colladaio.cpp
 TARGET        = colladaio
 DESTDIR       = ../../meshlab/plugins
