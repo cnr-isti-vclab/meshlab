@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.108  2006/12/11 23:53:19  cignoni
+Corrected gl error (a glEnd in excess) and corrected help entries
+
 Revision 1.107  2006/10/26 12:06:02  corsini
 add GLlightSettings structure
 
@@ -312,12 +315,12 @@ void GLArea::paintGL()
         glVertex3f(-1.0f+i*2.0/lineNum,-1.0f+j*2.0/lineNum,-2);
         glVertex3f(-1.0f+i*2.0/lineNum,-1.0f+j*2.0/lineNum, 2);
       }
-      glEnd();
 		glEnd();
     glPopAttrib();
 	}
 	glPopMatrix();
-	// =============================================
+  assert(!glGetError());
+  // =============================================
 	
 
 	// Finally apply the Trackball for the model
@@ -378,6 +381,9 @@ void GLArea::paintGL()
 		  foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm,rm,this,qFont);}
 	  }
   } ///end if busy 
+	
+  assert(!glGetError());
+
 	// ...and take a snapshot
 	if (takeSnapTile)
 	{
@@ -548,7 +554,7 @@ void GLArea::displayHelp()
 	renderText(2,15*fontSpacingV,QString("Ctrl-Shift-Wheel:"),qFont);		renderText(hPosition,15*fontSpacingV,QString("Move near clipping plane"),qFont);
 	renderText(2,16.5*fontSpacingV,QString("Double Click:"),qFont);			renderText(hPosition,16.5*fontSpacingV,QString("Center on mouse"),qFont);
 	renderText(2,18*fontSpacingV,QString("F1:"),qFont);									renderText(hPosition,18*fontSpacingV,QString("Toggle this help"),qFont);
-	renderText(2,19.5*fontSpacingV,QString("Escape:"),qFont);						renderText(hPosition,19.5*fontSpacingV,QString("Exit fullscreen mode"),qFont);
+	renderText(2,19.5*fontSpacingV,QString(Alt+enter:"),qFont);						renderText(hPosition,19.5*fontSpacingV,QString("Enter/Exit fullscreen mode"),qFont);
 	glPopAttrib();
 }
 
