@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.31  2006/12/11 23:49:32  cignoni
+removed unimplemented filter non topo coherent
+
 Revision 1.30  2006/12/05 15:37:27  cignoni
 Added rough version of non manifold vertex coloring
 
@@ -142,7 +145,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     CP_COLOR_NON_MANIFOLD_FACE <<
     CP_COLOR_NON_MANIFOLD_VERTEX <<
     CP_SMOOTH <<
-    CP_COLOR_NON_TOPO_COHERENT <<
+    //CP_COLOR_NON_TOPO_COHERENT <<
     CP_RESTORE_ORIGINAL;
     
   FilterType tt;
