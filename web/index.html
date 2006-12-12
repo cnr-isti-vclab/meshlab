@@ -52,9 +52,8 @@ department of University of Pisa and most of the code (~15k lines) of the first
 versions was written by a handful of <A href="#Developers" >students</A>. &nbsp;</P>
 <p class=body><a 
 href="http://sourceforge.net/project/showfiles.php?group_id=149444"></A></P>
-<p class=body><a 
-href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download </A><a 
-href="http://sourceforge.net/project/showfiles.php?group_id=149444">Latest Version (9 November 2006)&nbsp;<b><i> V0.8 </I></B></A></P><br>
+<p class=body><big><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download Latest Version (12 December 2006)<b><i> V0.9 </I></B></A></big>
+<a href="#History">(changes)</a></P><br>
 <p class=body>Remember that, whenever you use MeshLab in a 
 official/commercial project, you should : </P>
 <ul>
@@ -70,7 +69,9 @@ official/commercial project, you should : </P>
   <li>Interactive selection and deletion of portion of the 
   mesh. Even for large models. 
   <LI><b>Input/output</B> in many 
-  formats: <b>PLY, STL, OFF, OBJ, 3DS and COLLADA</B> 
+  formats:<br> 
+  import:<b>PLY, STL, OFF, OBJ, 3DS, COLLADA, PTX</B> <br>
+  export:<b>PLY, STL, OFF, OBJ, 3DS, COLLADA, VRML, DXF</B>
   <li>Mesh <b>Cleaning</B> Filters: 
   <ul>
     <li>removal of duplicated, unreferenced vertices, null 
@@ -82,7 +83,7 @@ official/commercial project, you should : </P>
   <li><b>Remeshing</B> filters: 
   <ul>
     <li>High quality edge collapse simplfication 
-    <li>Surface from points (a ball pivoting variant) 
+    <li>Surface reconstruction from points (a ball pivoting variant) 
     <li>Subdivision surfaces (loop and butterfly) 
     <li>Smoothing and fairing filters </LI></UL>
   <li>Various <b 
@@ -115,9 +116,16 @@ href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums
 <table style="WIDTH: 100%; TEXT-ALIGN: left" cellSpacing=2 cellPadding=2 
 border=1>
   <tbody>
+    <tr>
+    <td colSpan=2>Snapshots taken from MeshLab v <b>0.9</B> </TD></TR>
   <tr>
-    <td colSpan=2>Snapshots taken from MeshLab v <b 
-      >0.8</B> </TD></TR>
+    <td><A href="SnapMeshLab.HoleFillNew1.png" ><IMG alt="" src="SnapMeshLab.HoleFillNew1.small.jpg" ></A> 
+        <A href="SnapMeshLab.HoleFillNew2.png" ><IMG alt="" src="SnapMeshLab.HoleFillNew2.small.jpg" ></A> 
+        </TD>
+    <td>An example of the improved hole filling algorithm. Holes with irregularly shaped borders can be successfully closed with (possibly) non self-intersecting patches.</TD></TR>
+
+  <tr>
+    <td colSpan=2>Snapshots taken from MeshLab v <b>0.8</B> </TD></TR>
   <tr>
     <td><A href="SnapMeshLab.SmoothTS1.png" ><IMG alt="" src="SnapMeshLab.SmoothTS1.small.jpg" ></A> <A href="SnapMeshLab.SmoothTS2.png" ><IMG alt="" src="SnapMeshLab.SmoothTS2.small.jpg" ></A> <A href="SnapMeshLab.SmoothTS3.png" ><IMG alt="" src="SnapMeshLab.SmoothTS3.small.jpg" ></A> </TD>
     <td>An example of automatic noise removal. A mesh 
@@ -135,8 +143,7 @@ border=1>
       triangle mesh (left) is simplified to 100.000 (center) and then up to 
       10.000 triangles, while maintaining most of its geometric features. </TD></TR>
   <tr>
-    <td colSpan=2>Snapshots taken from MeshLab v <b 
-      >0.7</B> </TD></TR>
+    <td colSpan=2>Snapshots taken from MeshLab v <b>0.7</B> </TD></TR>
   <tr>
     <td><A href="Edzna_edit_0.png" ><IMG alt="" src="Edzna_edit_0.small.png" ></A> <A href="Edzna_edit_1.png" ><IMG alt="" src="Edzna_edit_1.small.png" ></A> <A href="Edzna_edit_2.png" ><IMG alt="" src="Edzna_edit_2.small.png" ></A> </TD>
     <td>An interactive editing session over the a mesh 
@@ -253,13 +260,27 @@ border=1>
     >zifnab1974</B>] </LI></UL></LI></UL>
 <h2><a name=History></A>History</H2>
 <UL>
-  <LI><i>09/11/2006</I> V 0.8 Release 
-  <span class=shown id=_no_V08><font size=-1 
-  ><A href="javascript:showNow('_V08');hideNow('_no_V08');" ><b 
-  >[details]</B></A></FONT> </SPAN><span class=hidden 
-  id=_V08><A href="javascript:showNow('_no_V08');hideNow('_V08');" ><b 
-  >[hide]</B></A></FONT> <font color=#777777 size=-1 
-  ><pre>	
+  <LI><i>12/12/2006</I> V 0.9 Release 
+  <span class=shown id=_no_V09><font size=-1><A href="javascript:showNow('_V09');hideNow('_no_V09');" >
+  <b>[details]</B></A></FONT> </SPAN><span class=hidden id=_V09>
+  <A href="javascript:showNow('_no_V09');hideNow('_V09');" >
+  <b>[hide]</B></A></FONT> <font color=#777777 size=-1><pre>	
+	** New features **
+	Support of WRL and SMF file format (write only)
+	Support of PTX file format (read only)
+	Automatic checking of new version
+	Non manifold vertex coloring
+	Improved quality and robustness of Hole Filling filter 
+	(now large and non manifold holes can be handled)
+
+	** Corrected Bugs **
+	nasty bug that affected the saving and loading various 3d format (3ds, obj and off)
+</PRE></FONT></SPAN>
+  <LI><i>10/11/2006</I> V 0.8 Release 
+  <span class=shown id=_no_V08><font size=-1><A href="javascript:showNow('_V08');hideNow('_no_V08');" >
+  <b>[details]</B></A></FONT> </SPAN><span class=hidden id=_V08>
+  <A href="javascript:showNow('_no_V08');hideNow('_V08');" >
+  <b>[hide]</B></A></FONT> <font color=#777777 size=-1><pre>	
 	** New features **
 	New High Quality Quadric Based Simplification filter
 	Support of Collada file format (read and write)
