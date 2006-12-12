@@ -27,20 +27,21 @@
    
 ==============================================================================
 ------------------------------------------------------------------------------
-- Meshlab v0.9
+- Meshlab v0.9 12/12/2006
 ------------------------------------------------------------------------------
 ** New features **
 Support of WRL and SMF file format (write only)
 Support of PTX file format (read only)
 Automatic checking of new version
 Non manifold vertex coloring
-Improved quality and robustness of Hole Filling filter
+Improved quality and robustness of Hole Filling filter 
+  (now large and non manifold holes can be handled)
 
 ** Corrected Bugs **
 nasty bug that affected the saving and loading various 3d format (3ds, obj and off)
 
 ------------------------------------------------------------------------------
-- Meshlab v0.8
+- Meshlab v0.8 10/11/2006
 ------------------------------------------------------------------------------
 ** New features **
 New High Quality Quadric Based Simplification filter
