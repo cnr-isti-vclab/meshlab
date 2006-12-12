@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.73  2006/12/12 11:16:08  cignoni
+changed version string 0.9RC -> 0.9
+
 Revision 1.72  2006/12/06 21:38:56  cignoni
 0.9RC
 
@@ -110,7 +113,7 @@ public:
 	MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("0.9RC"); }
+   const QString appVer() const {return tr("0.9"); }
 
   // MaskObj maskobj;
 
