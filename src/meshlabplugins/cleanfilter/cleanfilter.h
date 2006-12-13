@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.3  2006/12/13 17:37:27  pirosu
+ Added standard plugin window support
+
+
  Revision 1.2  2006/11/29 00:59:15  cignoni
  Cleaned plugins interface; changed useless help class into a plain string
 
@@ -62,6 +66,12 @@ class CleanFilter : public QObject, public MeshFilterInterface
     FP_REMOVE_WRT_Q
   } ;
 	
+	/* default values for standard parameters' values of the plugin actions */
+    float maxDiag1;
+    float maxDiag2;
+    int minCC;
+    float val1;
+
 
 	CleanFilter();
 	~CleanFilter();
@@ -70,9 +80,13 @@ class CleanFilter : public QObject, public MeshFilterInterface
 	virtual const PluginInfo &Info();
 
   virtual const FilterClass getClass(QAction *);
-  virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
+
+	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst,char **filterdesc,QWidget **extraw);
+	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar);
+
+
 	protected:
 	
 };

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.50  2006/12/13 17:37:02  pirosu
+Added standard plugin window support
+
 Revision 1.49  2006/11/29 00:55:36  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -46,6 +49,8 @@ added Filter History Dialogs
 #include <QtCore>
 #include <QAction>
 #include "filterparameter.h"
+
+
 
 class QWidget;
 class QGLWidget;
@@ -100,6 +105,16 @@ public:
       QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
 };
 
+/* this is used to callback the executeFilter() function
+	when the apply button of the standard plugin window
+	is clicked
+*/
+class MainWindowInterface
+{
+public:
+	virtual void executeFilter(QAction *action,FilterParameter *stdpar){};
+};
+
 
 class MeshFilterInterface
 {
@@ -135,6 +150,13 @@ public:
     }
     virtual QList<QAction *> actions() const { return actionList;}
 	  virtual QList<FilterType> &types() { return typeList;}
+
+	  /* Returns an array of standard parameters descriptors for the standard plugin window .NULL is returned by default if the plugin doesn't implement this */
+	virtual bool getStdFields(QAction *, MeshModel &, StdParList &,char **,QWidget ** /* optional custom widget which is added after standard fields in the standard plugin window */){return false;}
+    
+	/* Overloading of the function getParameters that supports the standard plugin window. If the plugin doesn't implement this, the classic function is called */
+	virtual bool getParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/,FilterParameter * /* parameters obtained by the standard parameters' plugin window*/) {return getParameters(qa,qw,mm,fp);};
+
 
 protected:
     QList <QAction *> actionList;

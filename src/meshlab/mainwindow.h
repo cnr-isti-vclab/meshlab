@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.74  2006/12/13 17:37:02  pirosu
+Added standard plugin window support
+
 Revision 1.73  2006/12/12 11:16:08  cignoni
 changed version string 0.9RC -> 0.9
 
@@ -94,6 +97,7 @@ Added Apply Last Filter action
 #include <QColorDialog>
 #include "meshmodel.h"
 #include "glarea.h"
+#include "stdpardialog.h"
 
 #define MAXRECENTFILES 4
 
@@ -104,13 +108,20 @@ class QScrollArea;
 class QSignalMapper;
 class QProgressDialog;
 class QHttp;
+class MeshlabStdDialog;
+class MeshlabStdDialogFrame;
 
-class MainWindow : public QMainWindow
+
+
+class MainWindow : public QMainWindow,MainWindowInterface
 {
 	Q_OBJECT
 
 public:
-	MainWindow();
+	// callback function to execute a filter
+  void executeFilter(QAction *action,FilterParameter *srcpar);
+
+  MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
    const QString appVer() const {return tr("0.9"); }
@@ -179,6 +190,7 @@ private slots:
   void connectionDone(bool status);
 
 private:
+	void createStdPluginWnd();
 	void createActions();
 	void createMenus();
 	void createToolBars();
@@ -202,6 +214,8 @@ private:
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
+	MeshlabStdDialog *stddialog;
+
 public:
   GLArea *GLA() const {return qobject_cast<GLArea *>(workspace->activeWindow()); }
   QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
@@ -297,5 +311,4 @@ private:
 	QList<QAction *> TotalDecoratorsList;
 	////////////////////////////////////////////////////
 };
-
 #endif

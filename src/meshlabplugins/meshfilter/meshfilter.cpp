@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.82  2006/12/13 17:37:27  pirosu
+Added standard plugin window support
+
 Revision 1.81  2006/12/11 23:50:07  cignoni
 corrected border management after holefilling filter
 
@@ -160,41 +163,6 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 using namespace vcg;
 
 void QuadricSimplification(CMeshO &cm,int  TargetFaceNum,CallBackPos *cb);
-
-bool askInt(int &val, QString Title, QString Label, QWidget *parent)
-{
-  QDialog *dialog=new QDialog(parent);
-  dialog->setModal(true);
-  dialog->setWindowTitle(Title);
-
-  QPushButton *okButton = new QPushButton("OK", dialog);
-  QPushButton *cancButton = new QPushButton("cancel", dialog);
-  QGridLayout *gridLayout  = new QGridLayout(dialog);
-  dialog->setLayout(gridLayout);
-
-  gridLayout->addWidget(okButton,1,1);
-  gridLayout->addWidget(cancButton,1,0);
-
-  QLineEdit *floatEdit = new QLineEdit(dialog);
-  floatEdit->setText(QString::number(val));
-  QLabel *label = new QLabel(Label,dialog);
-  gridLayout->addWidget(label,0,0 );
-  gridLayout->addWidget(floatEdit,0,1);
-  
-  QObject::connect(floatEdit, SIGNAL(returnPressed ()),  dialog, SLOT(accept()));  
-  QObject::connect(okButton, SIGNAL(clicked()),  dialog, SLOT(accept()));  
-  QObject::connect(cancButton, SIGNAL(clicked()), dialog, SLOT(reject()));  
- 
-  dialog->exec();
-  if(dialog->result()== QDialog::Accepted )
-  {
-    val=floatEdit->text().toInt();
-    return true;
-  }
-  if(dialog->result()== QDialog::Rejected ) return false;
-  assert(0); 
-  return true;
-}
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
 {
@@ -359,6 +327,52 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
   return 0;
 }
 
+
+
+bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst,char **filterdesc,QWidget **extraw)
+{
+	*extraw = NULL;
+
+	 switch(ID(action))
+	 {
+	  case FP_QUADRIC_SIMPLIFICATION:
+		  (*filterdesc) = "Quadric Edge Collapse Simplification";
+		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
+		  break;
+	  case FP_CLOSE_HOLES_LIEPA:
+		  (*filterdesc) = "Close hole";
+		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)10);
+		  break;
+	  default:
+		  (*filterdesc) = NULL; 
+		  return false;
+	 }
+
+	 return true;
+}
+bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar)
+{
+	 par.clear();
+	 int val;
+
+	 switch(ID(action))
+	 {
+	    case FP_QUADRIC_SIMPLIFICATION:
+		  val = srcpar->getInt("TargetFaceNum");
+          par.addInt("TargetFaceNum",val);
+		  return true;
+	    case FP_CLOSE_HOLES_LIEPA:
+		  val = srcpar->getInt("MaxHoleSize");
+          par.addInt("MaxHoleSize",val);
+		  return true;
+  	 }
+
+	 return getParameters(action,parent,m,par);
+}
+
+
+
+
 bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
 {
  par.clear();
@@ -406,27 +420,6 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
     case FP_REMOVE_NON_MANIFOLD:
     case FP_NORMAL_EXTRAPOLATION:
        return true; // no parameters
-    case FP_QUADRIC_SIMPLIFICATION:
-      {
-        int NewFaceNum=m.cm.fn/2;
-        if(askInt(NewFaceNum,"Quadric Edge Collapse Simplification","Target number of faces",parent))
-        {
-          par.addInt("TargetFaceNum",NewFaceNum);
-          return true;
-        }
-        else return false;
-      }
-    case FP_CLOSE_HOLES_LIEPA:
-      {
-        int maxHoleSize=10;
-        if(askInt(maxHoleSize,"Close hole","Max size to be closed ",parent))
-        {
-          par.addInt("MaxHoleSize",maxHoleSize);
-          return true;
-        }
-        else return false;
-      }
-      
    default :assert(0);
   }
   return true;

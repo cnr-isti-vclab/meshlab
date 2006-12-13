@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.66  2006/12/13 17:37:02  pirosu
+Added standard plugin window support
+
 Revision 1.65  2006/12/06 00:48:17  cignoni
 Improved managment of http answer
 
@@ -128,6 +131,7 @@ MainWindow::MainWindow()
 	createActions();
 	createMenus();
 	createToolBars();
+  createStdPluginWnd();
 	updateMenus();
   setAcceptDrops(true);
   workspace->setAcceptDrops(true);
@@ -143,6 +147,17 @@ MainWindow::MainWindow()
   //qb->setMinimumDuration(0);
   //qb->reset();
 }
+
+
+// creates the standard plugin window
+void MainWindow::createStdPluginWnd()
+{
+	stddialog = new MeshlabStdDialog(this);
+	addDockWidget(Qt::RightDockWidgetArea,stddialog);
+	stddialog->setFloating(true);
+	stddialog->move(0,120);
+}
+
 
 void MainWindow::createActions()
 {

@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.36  2006/12/13 17:37:27  pirosu
+Added standard plugin window support
+
 Revision 1.35  2006/11/29 00:59:18  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -97,6 +100,9 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 
 
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
+	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst,char **filterdesc,QWidget **extraw);
+	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar);
+
 protected:
 
 

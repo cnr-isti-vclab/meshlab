@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.113  2006/12/13 17:37:02  pirosu
+Added standard plugin window support
+
+
 Revision 1.112  2006/11/30 23:23:13  cignoni
 Open take care also of updating the bbox
 
@@ -59,6 +63,7 @@ Added Drag n drog opening of files (thanks to Valentino Fiorin)
 #include "ui_aboutDialog.h"
 #include "savemaskexporter.h"
 #include "plugin_support.h"
+#include "stdpardialog.h"
 
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
@@ -248,13 +253,37 @@ void MainWindow::runFilterScript()
     GLA()->log.Log(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
 }
+
 // /////////////////////////////////////////////////
 // The Very Important Procedure of applying a filter
 // /////////////////////////////////////////////////
 
 void MainWindow::applyFilter()
 {
+	QWidget *extraw = NULL;
+
 	QAction *action = qobject_cast<QAction *>(sender());
+	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+  // Ask for filter requirements (eg a filter can need topology, border flags etc)
+  //    and statisfy them
+  int req=iFilter->getRequirements(action);
+  GLA()->mm->updateDataMask(req);
+
+	/*
+		loads the plugin action in the standard plugin window.
+		If the plugin action doesn't support the use of the standard
+		plugin window, the function executeFilter() is immediately called
+	*/
+	stddialog->loadPluginAction(iFilter,GLA()->mm,action,this);
+}
+
+/* callback function that applies the filter action */
+void MainWindow::executeFilter(QAction *action,FilterParameter *srcpar)
+{
+
+	if(GLA()==NULL)
+		return;
+
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
   // (1) Ask for filter requirements (eg a filter can need topology, border flags etc)
   //    and statisfy them
@@ -264,7 +293,7 @@ void MainWindow::applyFilter()
   
   // (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
   FilterParameter par;
-  bool ret=iFilter->getParameters(action, GLA(),*(GLA()->mm), par);
+  bool ret=iFilter->getParameters(action, GLA(),*(GLA()->mm), par,srcpar);
 
   if(!ret) return;
 	
@@ -307,8 +336,12 @@ if(iFilter->getClass(action)==MeshFilterInterface::Selection )
 
   qb->reset();
   updateMenus();
+  GLA()->update();
   
+
 }
+
+	
 void MainWindow::endEditMode()
 {
   if(!GLA()) return;

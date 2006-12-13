@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.6  2006/12/13 17:37:27  pirosu
+ Added standard plugin window support
+
+ 
  Revision 1.5  2006/11/29 00:59:15  cignoni
  Cleaned plugins interface; changed useless help class into a plain string
 
@@ -67,82 +71,6 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/space/normal_extrapolation.h>
 
-/////////////////////// Accessory functions
-
-bool askFloat(float &val, QString Title, QString Label, QWidget *parent)
-{
-  QDialog *dialog=new QDialog(parent);
-  dialog->setModal(true);
-  dialog->setWindowTitle(Title);
-
-  QPushButton *okButton = new QPushButton("OK", dialog);
-  QPushButton *cancButton = new QPushButton("cancel", dialog);
-  QGridLayout *gridLayout  = new QGridLayout(dialog);
-  dialog->setLayout(gridLayout);
-
-  gridLayout->addWidget(okButton,1,1);
-  gridLayout->addWidget(cancButton,1,0);
-
-  QLineEdit *floatEdit = new QLineEdit(dialog);
-  floatEdit->setText(QString::number(val));
-  QLabel *label = new QLabel(Label,dialog);
-  gridLayout->addWidget(label,0,0 );
-  gridLayout->addWidget(floatEdit,0,1);
-  
-  QObject::connect(floatEdit, SIGNAL(returnPressed ()),  dialog, SLOT(accept()));  
-  QObject::connect(okButton, SIGNAL(clicked()),  dialog, SLOT(accept()));  
-  QObject::connect(cancButton, SIGNAL(clicked()), dialog, SLOT(reject()));  
- 
-  dialog->exec();
-  if(dialog->result()== QDialog::Accepted )
-  {
-    val=floatEdit->text().toFloat();
-    return true;
-  }
-  if(dialog->result()== QDialog::Rejected ) return false;
-  assert(0); 
-  return true;
-}
-
-
-bool askInt(int &val, QString Title, QString Label, QWidget *parent)
-{
-  QDialog *dialog=new QDialog(parent);
-  dialog->setModal(true);
-  dialog->setWindowTitle(Title);
-
-  QPushButton *okButton = new QPushButton("OK", dialog);
-  QPushButton *cancButton = new QPushButton("cancel", dialog);
-  QGridLayout *gridLayout  = new QGridLayout(dialog);
-  dialog->setLayout(gridLayout);
-
-  gridLayout->addWidget(okButton,1,1);
-  gridLayout->addWidget(cancButton,1,0);
-
-  QLineEdit *floatEdit = new QLineEdit(dialog);
-  floatEdit->setText(QString::number(val));
-  QLabel *label = new QLabel(Label,dialog);
-  gridLayout->addWidget(label,0,0 );
-  gridLayout->addWidget(floatEdit,0,1);
-  
-  QObject::connect(floatEdit, SIGNAL(returnPressed ()),  dialog, SLOT(accept()));  
-  QObject::connect(okButton, SIGNAL(clicked()),  dialog, SLOT(accept()));  
-  QObject::connect(cancButton, SIGNAL(clicked()), dialog, SLOT(reject()));  
- 
-  dialog->exec();
-  if(dialog->result()== QDialog::Accepted )
-  {
-    val=floatEdit->text().toInt();
-    return true;
-  }
-  if(dialog->result()== QDialog::Rejected ) return false;
-  assert(0); 
-  return true;
-}
-
-/////////////////////////////////////////////////////////////////////
-
-
 using namespace vcg;
 
 CleanFilter::CleanFilter() 
@@ -152,6 +80,12 @@ CleanFilter::CleanFilter()
   FilterType tt;
   foreach(tt , types())
 	    actionList << new QAction(ST(tt), this);
+
+    maxDiag1=0;
+	maxDiag2=10;
+	minCC=25;
+	val1=1.0;
+
 }
 
 CleanFilter::~CleanFilter() {
@@ -218,55 +152,63 @@ const int CleanFilter::getRequirements(QAction *action)
   return 0;
 }
 
-bool CleanFilter::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
+bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst,char **filterdesc,QWidget **extraw)
+{
+
+	*extraw = NULL;
+ 
+  switch(ID(action))
+  {
+    case FP_REBUILD_SURFACE :
+		  (*filterdesc) = "Ballpivoting Surface reconstruction";
+		  parlst.addField("BallRadius","Enter ball size as a diag perc. (0 autoguess))",(float)maxDiag1);
+		  break;
+    case FP_REMOVE_ISOLATED_DIAMETER:	 
+		  (*filterdesc) = "Remove Small Connected Components under a given size"; 
+		  parlst.addField("MinComponentDiag","Enter size (as a diag perc 0..100)",(float)maxDiag2);
+		  break;
+    case FP_REMOVE_ISOLATED_COMPLEXITY:	 
+		  (*filterdesc) = "Remove Small Connected Components"; 
+		  parlst.addField("MinComponentSize","Enter minimum conn. comp size:",(int)minCC);
+		  break;
+    case FP_REMOVE_WRT_Q:
+		  (*filterdesc) = "Quality Filter"; 
+		  parlst.addField("MaxQualityThr","Delete all Vertices with quality under:",(float)val1);
+		  break;
+	default:
+	  (*filterdesc) = NULL; 
+		return false;
+  }
+
+  return true;
+}
+
+bool CleanFilter::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar)
 {
  par.clear();
  switch(ID(action))
   {
-    case FP_REBUILD_SURFACE :	
-      {
-        static float maxDiag=0;
-        if(askFloat(maxDiag, "Ballpivoting Surface reconstruction",
-          "Enter ball size as a diag perc. (0 autoguess))",parent))
-        {
-          par.addFloat("BallRadius",m.cm.bbox.Diag()*maxDiag/100.0);
+	 case FP_REBUILD_SURFACE :
+		 maxDiag1 = srcpar->getFloat("BallRadius");
+    	par.addFloat("BallRadius",m.cm.bbox.Diag()*maxDiag1/100.0);
+		 return true;
+	 case FP_REMOVE_ISOLATED_DIAMETER:	 
+		 maxDiag2 = srcpar->getFloat("MinComponentDiag");
+          par.addFloat("MinComponentDiag",m.cm.bbox.Diag()*maxDiag2/100.0);
           return true;
-        } 
-        else return false;
-      }
-      return true;
-	  case FP_REMOVE_ISOLATED_DIAMETER:	 
-      {
-        static float maxDiag=10;
-        if(askFloat(maxDiag, "Remove Small Connected Components under a given size","Enter size (as a diag perc 0..100)",parent))
-        {
-          par.addFloat("MinComponentDiag",m.cm.bbox.Diag()*maxDiag/100.0);
-          return true;
-        } 
-        else return false;
-      }
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-      {
-        static int minCC=25;
-        if(askInt(minCC, "Remove Small Connected Components","Enter minimum conn. comp size:",parent))
-        {
-          par.addInt("MinComponentSize",minCC);
-          return true;
-        } 
-        else return false;
-      }
+        minCC = srcpar->getInt("MinComponentSize");
+        par.addInt("MinComponentSize",minCC);
+         return true;
     case FP_REMOVE_WRT_Q:
-      {
-        static float val=1.0;
-        if(askFloat(val, "Quality Filter","Delete all Vertices with quality under:",parent))
-        {
-          par.addFloat("MaxQualityThr",val);
+          val1 = srcpar->getFloat("MaxQualityThr");
+          par.addFloat("MaxQualityThr",val1);
           return true;
-        } 
-        else return false; 
-      }
   }
+
+ return false;
 }
+
 
 
 bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & par, vcg::CallBackPos * cb) 

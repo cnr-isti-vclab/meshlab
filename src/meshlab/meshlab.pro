@@ -14,6 +14,7 @@ HEADERS        = interfaces.h \
                  savemaskexporter.h \
                  changetexturename.h \
                  GenericELDialog.h \
+                 stdpardialog.h \
                  ../../../sf/wrap/gui/trackball.h\
                  ../../../sf/wrap/gui/trackmode.h\
                  ../../../sf/wrap/gl/trimesh.h
@@ -32,6 +33,7 @@ SOURCES        = main.cpp \
                  saveSnapshotDialog.cpp \
                  savemaskexporter.cpp \
                  changetexturename.cpp \
+                 stdpardialog.cpp \
                  ../../../sf/wrap/gui/trackball.cpp\
                  ../../../sf/wrap/gui/trackmode.cpp \
                  ../../../code/lib/glew/src/glew.c

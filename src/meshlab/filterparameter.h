@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2006/12/13 17:37:02  pirosu
+Added standard plugin window support
+
 Revision 1.2  2006/06/18 20:40:06  cignoni
 Completed Open/Save of scripts
 
@@ -110,5 +113,153 @@ public:
   QMap<QString,QVariant> paramMap;  
 
 };
+
+
+
+
+// standard filter parameter types
+enum
+{
+   MESHLAB_STDPAR_PARBOOL = 1,
+   MESHLAB_STDPAR_PARINT = 2,
+   MESHLAB_STDPAR_PARFLOAT = 3,
+   MESHLAB_STDPAR_PARSTRING = 4    
+};
+
+// standard filter parameter descriptor
+typedef struct MESHLAB_STDFIELD
+{
+  QString *fieldname;
+  QString *fielddesc;
+  QVariant *fieldval;
+  int fieldtype;
+}MESHLAB_STDFIELD;
+
+class StdParList
+{
+public:
+
+	StdParList()
+	{
+	}
+
+	~StdParList()
+	{
+		this->clear();
+	}
+
+	void addField(char *name, char* desc, bool val)
+	{
+		MESHLAB_STDFIELD std;
+
+		std.fieldname = new QString(name);
+		std.fielddesc = new QString(desc);
+		std.fieldval = new QVariant(val);
+		std.fieldtype = MESHLAB_STDPAR_PARBOOL;
+
+		v.push_back(std);
+	}
+	void addField(char *name, char* desc, float val)
+	{
+		MESHLAB_STDFIELD std;
+
+		std.fieldname = new QString(name);
+		std.fielddesc = new QString(desc);
+		std.fieldval = new QVariant(val);
+		std.fieldtype = MESHLAB_STDPAR_PARFLOAT;
+
+		v.push_back(std);
+	}
+	void addField(char *name, char* desc, int val)
+	{
+		MESHLAB_STDFIELD std;
+
+		std.fieldname = new QString(name);
+		std.fielddesc = new QString(desc);
+		std.fieldval = new QVariant(val);
+		std.fieldtype = MESHLAB_STDPAR_PARINT;
+
+		v.push_back(std);
+	}
+	void addField(char *name, char* desc, char *val)
+	{
+		MESHLAB_STDFIELD std;
+
+		std.fieldname = new QString(name);
+		std.fielddesc = new QString(desc);
+		std.fieldval = new QVariant(val);
+		std.fieldtype = MESHLAB_STDPAR_PARSTRING;
+
+		v.push_back(std);
+	}
+
+	int count()
+	{
+		return v.size();
+	}
+
+	void clear()
+	{
+		for(int i = 0; i < v.size(); i++)
+		{
+			delete v[i].fieldname;
+			delete v[i].fielddesc;
+			delete v[i].fieldval;
+		}
+
+		v.clear();
+	}
+
+	void getPars(FilterParameter &srcpars)
+	{
+		srcpars.clear();
+
+		for(int i = 0; i < v.size(); i++)
+		{
+			switch(v[i].fieldtype)
+			{
+	      	  case MESHLAB_STDPAR_PARBOOL:
+		    	srcpars.addBool(*v[i].fieldname,v[i].fieldval->toBool());
+				break;
+	      	  case MESHLAB_STDPAR_PARFLOAT:
+		    	srcpars.addFloat(*v[i].fieldname,float(v[i].fieldval->toDouble()));
+				break;
+	      	  case MESHLAB_STDPAR_PARINT:
+		    	srcpars.addInt(*v[i].fieldname,v[i].fieldval->toInt());
+				break;
+	      	  case MESHLAB_STDPAR_PARSTRING:
+		    	srcpars.addString(*v[i].fieldname,v[i].fieldval->toString());
+				break;
+			}
+
+		}
+
+	}
+
+	QString &getFieldName(int i)
+	{
+		return *v[i].fieldname;
+	}
+
+	QString &getFieldDesc(int i)
+	{
+		return *v[i].fielddesc;
+	}
+
+	QVariant &getFieldVal(int i)
+	{
+		return *v[i].fieldval;
+	}
+
+	int &getFieldType(int i)
+	{
+		return v[i].fieldtype;
+	}
+
+	protected:
+		QVector<MESHLAB_STDFIELD> v;
+
+};
+
 
 #endif
