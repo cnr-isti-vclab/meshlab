@@ -35,6 +35,7 @@ unix{
 	QMAKE_CXX	 = g++
 	QMAKE_LINK	 = gcc
 	CONFIG		+= warn_off debug_and_release
+        LIBS            += -lbz2
 #	LIBS		+= -l3ds
 }
 

@@ -24,6 +24,8 @@
 #include <vector>
 #include "scalar_image.h"
 
+#include <bzlib.h>
+
 using namespace std;
 /*
 
@@ -33,7 +35,7 @@ with images of different bit-depths in the range of 1 to 31 bits per pixel.
 
 The file consists of a one line text header followed by the (raw) data.
 
-Header: "PG"+ ws +<endianess>+ ws +[sign]+ws + <bit-depth>+" "+<width>+" "+<height>+'\n'
+Header: "PG"+ ws +<endianess>+ ws +[sign]+ws + <bit-depth>+" "+<width>+" "+<height>+[compressed_size]'\n'
 
 where:
 
@@ -56,19 +58,63 @@ bool ScalarImage<float>::Open(const char *filename)
   qDebug("Header of %s is '%s'",filename,buf);
   float ll,lh;
   int depth;
-  sscanf(buf,"PG LM %i %i %i l %f %f",&depth,&w,&h,&ll,&lh);
-  qDebug("image should be of %i x %i %i depth and with range in %f -- %f ",w,h,depth,ll,lh);
+	char mode;
+	int compressed_size=0;
+  sscanf(buf,"PG LM %i %i %i %c %f %f %i",&depth,&w,&h,&mode,&ll,&lh,&compressed_size);
+  qDebug("image should be of %i x %i %i depth and with range in %f -- %f in mode %c",w,h,depth,ll,lh,mode);
   if(depth!=16) 
   {
     qDebug("Wrong depth of image 16 bit expected");
     return false;
   }
-  vector<unsigned short> bb(w*h);
-  fread(&*bb.begin(),w*h,sizeof(short),fp);
-  v.resize(w*h);
-  for(int i =0; i<w*h;++i)
-    v[i]=ll+(lh-ll)*(float(bb[i])/65536.0f);
+	if (mode != 'l' && mode != 'L')
+	{
+		qDebug("Wrong mode, expected l or L");
+		return false;
+	}
 
+	if (mode == 'l')
+	{
+		vector<unsigned short> bb(w*h);
+		fread(&*bb.begin(),w*h,sizeof(short),fp);
+		v.resize(w*h);
+		for(int i =0; i<w*h;++i)
+			v[i]=ll+(lh-ll)*(float(bb[i])/65536.0f);
+	}
+	else
+	{
+		char* compressed_buffer = new char[compressed_size];
+		fread(compressed_buffer,compressed_size,1,fp);
+		// decompress!
+		size_t size = w*h*sizeof(short);
+		unsigned char * uncompressed_buffer = new unsigned char[size];
+		unsigned int mysize = size;
+		BZ2_bzBuffToBuffDecompress((char*)uncompressed_buffer, &mysize, compressed_buffer, compressed_size, 0, 0);
+		if (mysize != size)
+		{
+			qDebug("This is very wrong. The uncompressed size is not the expected size");
+			return false;
+		}
+		int imagesize = w*h;
+		unsigned char *correct_buffer = new unsigned char[size];
+		for (size_t i=0; i<imagesize; ++i)
+		{
+			for (size_t j=0; j<sizeof(short); ++j)
+			{
+				correct_buffer[sizeof(short)*i +j] = uncompressed_buffer[imagesize*j + i];
+			}
+		}
+		v.resize(w*h);
+		for (size_t i=0; i<imagesize; ++i)
+		{
+			double a = *((short*)&correct_buffer[i*sizeof(short)]);
+			v[i] = ll+(lh-ll)*(a/65536.0f);
+		}
+
+		delete [] uncompressed_buffer;
+		delete [] compressed_buffer;
+		delete [] correct_buffer;
+	}
   fclose(fp);
   return true;
 }
@@ -83,16 +129,38 @@ bool ScalarImage<unsigned char>::Open(const char *filename)
   fgets(buf,255,fp);
   qDebug("Header of %s is '%s'",filename,buf);
   int depth;
-  sscanf(buf,"PG LM %i %i %i",&depth,&w,&h);
-  qDebug("image should be of %i x %i %i depth ",w,h,depth);
+	char mode = ' ';
+	int compressed_size=0;
+  int nrscan = sscanf(buf,"PG LM %i %i %i %c %i",&depth,&w,&h,&mode,&compressed_size);
+	if (nrscan == 3)
+		qDebug("image should be of %i x %i %i depth ",w,h,depth);
+	else
+		qDebug("compressed image of %i x %i %i depth ",w,h,depth);
   if(depth!=8) 
   {
     qDebug("Wrong depth of image: 8 bit expected");
     return false;
   }
   
-  v.resize(w*h);
-  fread(&*v.begin(),w*h,sizeof(unsigned char),fp);
+	if (mode != 'C')
+	{
+		v.resize(w*h);
+		fread(&*v.begin(),w*h,sizeof(unsigned char),fp);
+	}
+	else
+	{
+		char* compressed_buffer = new char[compressed_size];
+		fread(compressed_buffer,compressed_size,1,fp);
+		// decompress!
+		unsigned int mysize = w*h;
+		v.resize(w*h);
+		BZ2_bzBuffToBuffDecompress((char*)&*v.begin(), &mysize, compressed_buffer, compressed_size, 0, 0);
+		if (mysize != w*h)
+		{
+			qDebug("This is very wrong. The uncompressed size is not the expected size");
+			return false;
+		}
+	}
   
   fclose(fp);
   return true;
