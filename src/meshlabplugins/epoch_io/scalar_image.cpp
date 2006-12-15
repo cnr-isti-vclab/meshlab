@@ -107,7 +107,7 @@ bool ScalarImage<float>::Open(const char *filename)
 		v.resize(w*h);
 		for (size_t i=0; i<imagesize; ++i)
 		{
-			double a = *((short*)&correct_buffer[i*sizeof(short)]);
+			float a = *((unsigned short*)&correct_buffer[i*sizeof(short)]);
 			v[i] = ll+(lh-ll)*(a/65536.0f);
 		}
 
