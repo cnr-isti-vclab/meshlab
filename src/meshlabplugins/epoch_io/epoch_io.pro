@@ -1,6 +1,6 @@
 TEMPLATE      = lib
 CONFIG       += plugin 
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/bzip2-1.0.3
 
 FORMS         = ui/v3dImportDialog.ui
 HEADERS       = epoch_io.h \
@@ -26,6 +26,8 @@ TARGET        = epoch_io
 DESTDIR       = ../../meshlab/plugins
 QT           += xml
 
+win32-msvc.net:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
+win32-msvc2005:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
 
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
