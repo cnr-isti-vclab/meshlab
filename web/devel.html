@@ -77,7 +77,7 @@ di interfacce comuni...
   <LI> ci sia OpenGL, ovviamente da qualche parte nei path standard del 
     vostro compilatore dovreste avere include e lib per OpenGL. Di solito 
     non dovreste far nulla e il compilatore dovrebbe trovare tutto quel che riguarda opengl 
-    (e.g. "&lt gl/gl.h&gt" e "&lt gl/glu.h&gt") senza chiedere nulla.
+    (e.g. "&lt; gl/gl.h&gt;" e "&lt; gl/glu.h&gt;") senza chiedere nulla.
   <li> GLUT <b>NON</b> serve per meshlab, ma puo' servire per compilare 
   gli esempi di lib3ds (che in effetti non servono)   
   <LI> allo stesso livello di <b>sf</b> e <b>meshlab</b> ci sia una 
@@ -90,8 +90,11 @@ di interfacce comuni...
     lib)
     <LI>lib3ds-1.2.0 il contenuto dell'ultima distribuzione ufficiale (a seconda 
     dell'ambiente di sviluppo dovete anche ricompilarvela)
-    <LI>lib3ds-1.3.0 una copia del cvs di lib3ds acceduto in&nbsp;cvs anonimous 
-    da sourceforge.</LI></OL></LI></OL>
+    <LI>lib3ds-1.3.0 una copia del cvs di lib3ds acceduto 
+    in cvs anonimous da sourceforge.
+    <LI>bzip2-1.0.3 il contenuto della distribuzione ufficiale di bzip2. 
+    Sotto win la lib deve essere compilate staticamente, altrimenti vi dovete copiare la dll assieme all'eseguibile del meshlab.
+    </LI></ol></LI></OL>
   
 <p class="body">
 La libreria VCG, pagina ufficiale <a href="http://vcg.sourceforge.net">vcg.sf.net</a>,&nbsp;e'
@@ -111,8 +114,8 @@ lista incompleta e inaffidabile di possibili sottotask che mi vengono in mente t
 <OL>
 <li> Filtri input per altri formati (wrl)
 <li> parametrizzazione automatica
-<li> Unit testing 
-</ol>
+<li> Unit testing</li> 
+</OL>
 <b>Allocated tasks</b>
 <OL>
 <li> Meccanismo creazione automatica del dialogo richiesta di parametri di un filtro,
@@ -126,7 +129,7 @@ lista incompleta e inaffidabile di possibili sottotask che mi vengono in mente t
 <ol> 
     <li> zoom interpolato della camera su doppio click 
     <li> copy and paste delle trackball/viste
-    <li> spinning della trackball
+    <li> spinning della trackball</li>
 </ol>
 <li> Rendering usando punti automatico durante interazione quando framerate basso (colombini / integrated)
 <li> Selezioni stile bacchetta magica, o selezione solo delle facce visibili (cerisoli)
@@ -139,8 +142,9 @@ lista incompleta e inaffidabile di possibili sottotask che mi vengono in mente t
 <li> Shader OpenGL multi passata in un formato piu' diffuso (RenderMonkey?) (giardina, fusco, galilei / rendershader)
 <li> save snapshot come gif animata (leone)
 <LI> multi texture switchable (leone / rendertexture )
-<LI> Texture Viewer Dialog (con possibilita' di vedere come la mesh si stende sulla texture e zoom e pan) (leone/decorshowtexture)
-</ol>
+<LI> Texture Viewer Dialog (con possibilita' di vedere come 
+  la mesh si stende sulla texture e zoom e pan) (leone/decorshowtexture)</LI>
+</OL>
 
 </div>
 <div id="rightcontent">
