@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.110  2006/12/21 00:37:27  cignoni
+Correctly balanced a pushmatrix/popmatrix in the snapshot case
+
 Revision 1.109  2006/12/12 00:03:19  cignoni
 Accidentally deleted a quotation mark just before the commit...
 
@@ -152,6 +155,8 @@ QSize GLArea::sizeHint() const				{return QSize(400,300);}
 void GLArea::initializeGL()
 {
 	glShadeModel(GL_SMOOTH);
+  glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
 	static float diffuseColor[]={1.0,1.0,1.0,1.0};
@@ -322,7 +327,6 @@ void GLArea::paintGL()
     glPopAttrib();
 	}
 	glPopMatrix();
-  assert(!glGetError());
   // =============================================
 	
 
@@ -347,7 +351,6 @@ void GLArea::paintGL()
 	}
 
 	// Set proper colorMode
-	//glDisable(GL_COLOR_MATERIAL);
 	if(rm.colorMode != GLW::CMNone)
 	{
 		glEnable(GL_COLOR_MATERIAL);
@@ -366,9 +369,8 @@ void GLArea::paintGL()
 
 	  mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
-	  if(iEdit){
-      iEdit->Decorate(currentEditor,*mm,this);
-    }
+	  if(iEdit)  iEdit->Decorate(currentEditor,*mm,this);
+    
 
 	  if(iRenderer) {
 		  glPopAttrib();
@@ -376,8 +378,7 @@ void GLArea::paintGL()
 	  }
 
     // Draw the selection
-    if(rm.selectedFaces)
-      mm->RenderSelectedFaces();
+    if(rm.selectedFaces)  mm->RenderSelectedFaces();
 
 	  if(iDecoratorsList){
 		  pair<QAction *,MeshDecorateInterface *> p;
@@ -385,21 +386,19 @@ void GLArea::paintGL()
 	  }
   } ///end if busy 
 	
-  assert(!glGetError());
-
 	// ...and take a snapshot
 	if (takeSnapTile)
 	{
 		glPushAttrib(GL_ENABLE_BIT);
-		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		tileBuffer=grabFrameBuffer(true);
+		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
 		pasteTile();
 		update();
 		glPopAttrib();
 	}
-  glPopMatrix(); // now we are back in pre-trackball space
+ glPopMatrix(); // now we are back in pre-trackball space
   if(hasToPick) 
   { // Double click move picked point to center
     Point3f pp;
@@ -452,15 +451,9 @@ void GLArea::paintGL()
 			log.glDraw(this,currLogLevel,3,qFont.pointSizeF()+(curSiz.height()/225.f),qFont);
 		}
 
-		// Second the MESH INFO (numVert,NumFaces,....)
-		displayMeshInfo();
 		
-		// Third the ENV INFO (Fps,ClippingPlanes,....)
-		//int currentTime=time.elapsed();
-		//deltaTime=currentTime-lastTime;
-		//deltaTime=time.elapsed();
-		updateFps(time.elapsed());
-
+		displayMeshInfo();     // Second the MESH INFO (numVert,NumFaces,....)				
+		updateFps(time.elapsed()); // Third the ENV INFO (Fps,ClippingPlanes,....)
 		displayEnvInfo();
 	}
 	
@@ -473,6 +466,7 @@ void GLArea::paintGL()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+  assert(!glGetError());
 }
 
 void GLArea::displayMeshInfo()

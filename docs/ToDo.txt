@@ -1,6 +1,34 @@
+20/12/06
+tolto bug snapshot 
+tolto bug obj su facce quadrate
+
+16/12/06
+aggiunta prima ver dialoghi istantanei.
+
+11/12/06
+x tolto colorize topologically coherent
+x corrected onscreen help
+
+6/12/06
+x Hole Closing non si pianta + 
+x Non manifold vertex coloring.
+
+30/11/06
+x bug saving 3ds
+x split meshio baseio
+x bug reorient
+
+24/11/06
+x stat con savedNum e version checking 
+
+22/11/06
+x Patched date dei plugins con al data corrente di compilazione
+o Nomi dei file relativi ai dialog
+o Rendering dello schermo durante il processing...
+o textured/env  background
 
 8/11/06
-o Mismatch iomask (dati caricati da file) e currentDataMask (dati correntemente abilitati) 
+o Mismatch iomask (dati caricati da file) e currentDataMask (dati correntemente abilitati) ??
 o Remove duplicate faces
 o Global check of logging printing (many filters hasn't any)
 o date dei plugins da cvs?
