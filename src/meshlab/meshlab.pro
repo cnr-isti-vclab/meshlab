@@ -71,11 +71,18 @@ win32-g++{
 #LIBPATH += ../../../code/lib/glew/lib/
 }
 
+# The following define is needed in gcc to remove the asserts
+win32-g++:DEFINES += NDEBUG
+CONFIG(debug, debug|release) {
+	win32-g++:release:DEFINES -= NDEBUG
+}
+
+
+
 unix{
-	LIBS		+= -L../../../code/lib/glew/lib -lGLEW
+    LIBS	    += -L../../../code/lib/glew/lib -lGLEW
 	QMAKE_CC	 = gcc
 	QMAKE_CXX	 = g++
 	QMAKE_LINK	 = gcc
 	CONFIG		+= warn_off debug_and_release
-        LIBS            += -L../../../code/lib/glew/lib -lGLEW
 }

@@ -29,6 +29,20 @@ QT           += xml
 win32-msvc.net:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
 win32-msvc2005:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
 
+win32-g++:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.a
+
+# The following define is needed in gcc to remove the asserts
+win32-g++:DEFINES += NDEBUG
+CONFIG(debug, debug|release) {
+	win32-g++:release:DEFINES -= NDEBUG
+}
+
+CONFIG(release, debug|release) {
+	win32-g++:release:QMAKE_CXXFLAGS -= -O2
+	win32-g++:release:QMAKE_CFLAGS -= -O2
+	win32-g++:release:QMAKE_CXXFLAGS += -O3 -mtune=pentium3 -ffast-math
+}	
+
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
