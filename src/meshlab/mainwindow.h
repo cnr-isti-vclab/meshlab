@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.75  2006/12/21 21:24:54  cignoni
+version 0.9.1
+
 Revision 1.74  2006/12/13 17:37:02  pirosu
 Added standard plugin window support
 
@@ -124,7 +127,7 @@ public:
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("0.9"); }
+   const QString appVer() const {return tr("0.9.1"); }
 
   // MaskObj maskobj;
 
