@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.19  2006/12/24 22:46:34  cignoni
+Corrected bug about a wrong glUniform1fARB  (thanks Clement Menier!)
+
 Revision 1.18  2006/05/26 04:09:52  cignoni
 Still debugging 0.7
 
@@ -382,7 +385,7 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QG
 		while (i != si.uniformVars.end()) {
 			switch(i->second.type) {
 				case SINGLE_INT: {
-					glUniform1fARB(i->second.location, i->second.ival[0]);
+					glUniform1iARB(i->second.location, i->second.ival[0]);
 												 } break;
 				case SINGLE_FLOAT: {
 					glUniform1fARB(i->second.location, i->second.fval[0]);
