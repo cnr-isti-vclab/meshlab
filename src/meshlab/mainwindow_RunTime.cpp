@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.114  2006/12/27 21:41:41  pirosu
+Added improvements for the standard plugin window:
+split of the apply button in two buttons:ok and apply
+added support for parameters with absolute and percentage values
+
 Revision 1.113  2006/12/13 17:37:02  pirosu
 Added standard plugin window support
 
@@ -260,8 +265,6 @@ void MainWindow::runFilterScript()
 
 void MainWindow::applyFilter()
 {
-	QWidget *extraw = NULL;
-
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
   // Ask for filter requirements (eg a filter can need topology, border flags etc)

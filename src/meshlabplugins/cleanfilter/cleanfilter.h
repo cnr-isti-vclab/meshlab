@@ -24,6 +24,11 @@
   History
 
  $Log$
+ Revision 1.4  2006/12/27 21:41:58  pirosu
+ Added improvements for the standard plugin window:
+ split of the apply button in two buttons:ok and apply
+ added support for parameters with absolute and percentage values
+
  Revision 1.3  2006/12/13 17:37:27  pirosu
  Added standard plugin window support
 
@@ -83,7 +88,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 
-	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst,char **filterdesc,QWidget **extraw);
+	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst,char **filterdesc);
 	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar);
 
 

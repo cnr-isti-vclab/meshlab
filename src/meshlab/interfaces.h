@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.51  2006/12/27 21:41:41  pirosu
+Added improvements for the standard plugin window:
+split of the apply button in two buttons:ok and apply
+added support for parameters with absolute and percentage values
+
 Revision 1.50  2006/12/13 17:37:02  pirosu
 Added standard plugin window support
 
@@ -112,7 +117,7 @@ public:
 class MainWindowInterface
 {
 public:
-	virtual void executeFilter(QAction *action,FilterParameter *stdpar){};
+	virtual void executeFilter(QAction *,FilterParameter *){};
 };
 
 
@@ -152,7 +157,7 @@ public:
 	  virtual QList<FilterType> &types() { return typeList;}
 
 	  /* Returns an array of standard parameters descriptors for the standard plugin window .NULL is returned by default if the plugin doesn't implement this */
-	virtual bool getStdFields(QAction *, MeshModel &, StdParList &,char **,QWidget ** /* optional custom widget which is added after standard fields in the standard plugin window */){return false;}
+	virtual bool getStdFields(QAction *, MeshModel &, StdParList &,char **){return false;}
     
 	/* Overloading of the function getParameters that supports the standard plugin window. If the plugin doesn't implement this, the classic function is called */
 	virtual bool getParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/,FilterParameter * /* parameters obtained by the standard parameters' plugin window*/) {return getParameters(qa,qw,mm,fp);};

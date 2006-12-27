@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.3  2006/12/27 21:41:41  pirosu
+Added improvements for the standard plugin window:
+split of the apply button in two buttons:ok and apply
+added support for parameters with absolute and percentage values
+
 Revision 1.2  2006/12/13 21:54:35  pirosu
 2 updates for the standard plugin window: 1) it recovers its last size when it is undocked and 2) it closes itself when a filter is applied (only if it is floating)
 
@@ -39,6 +44,7 @@ Added standard plugin window support
 #include <QtCore>
 #include <QAction>
 #include <QtGui>
+#include <QDoubleSpinBox>
 
 #include "meshmodel.h"
 #include "filterparameter.h"
@@ -55,6 +61,60 @@ public:
 
 };
 
+class AbsPercWidget : public QGridLayout
+{
+	  Q_OBJECT
+
+public:
+  AbsPercWidget(QWidget *p, double defaultv, double min, double max):QGridLayout(p)
+  {
+	  m_min = min;
+	  m_max = max;
+	  absSB = new QDoubleSpinBox(p);
+	  percSB = new QDoubleSpinBox(p);
+
+	  absSB->setMinimum(min);
+	  absSB->setMaximum(max);
+	  absSB->setDecimals(3);
+	  absSB->setSingleStep(0.001);
+	  absSB->setValue(defaultv);
+
+	  percSB->setMinimum(0);
+	  percSB->setMaximum(100);
+      percSB->setSingleStep(0.2);
+	  percSB->setValue((100*(defaultv - min))/(max - min));
+
+	  this->addWidget(absSB,0,0,Qt::AlignTop);
+	  this->addWidget(percSB,0,1,Qt::AlignTop);
+
+
+  	  connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+  	  connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
+
+
+  }
+
+  ~AbsPercWidget()
+  {
+	  delete absSB;
+	  delete percSB;
+  }
+
+  float getValue();
+
+public slots:
+
+	void on_absSB_valueChanged(double newv); 
+	void on_percSB_valueChanged(double newv);
+
+protected:
+  QDoubleSpinBox *absSB;
+  QDoubleSpinBox *percSB;
+  float m_min;
+  float m_max;
+
+};
+
 
 // standard plugin window
 class MeshlabStdDialog : public QDockWidget
@@ -65,6 +125,7 @@ public:
   MeshlabStdDialog(QWidget *p):QDockWidget(QString("Plugin"),p)
   {
 	qf = NULL;
+	parlist = new StdParList();
 	initValues();
 	QSize siz = this->size();
 	lastsize.setWidth(siz.width());
@@ -84,18 +145,24 @@ public:
 
   private slots:
 	 void applyClick();
+	 void okClick();
 	 void topLevelChanged(bool);
  
 protected:
 	QFrame *qf;
 	QAction *curaction;
+	MeshModel *curmodel;
+	MeshFilterInterface *curmfi;
 	MainWindowInterface *curmwi;
-	QVector<QWidget *> stdfieldwidgets;
-	QWidget *curextra;
-	StdParList parlist;
+	QVector<void *> stdfieldwidgets;
+	StdParList *parlist;
 
 	bool restorelastsize;
 	QSize lastsize;
+
+	void loadFrameContent(char *actiondesc);
+	void stdClick();
+
 };
 
 

@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2006/12/27 21:41:41  pirosu
+Added improvements for the standard plugin window:
+split of the apply button in two buttons:ok and apply
+added support for parameters with absolute and percentage values
+
 Revision 1.3  2006/12/13 17:37:02  pirosu
 Added standard plugin window support
 
@@ -123,7 +128,8 @@ enum
    MESHLAB_STDPAR_PARBOOL = 1,
    MESHLAB_STDPAR_PARINT = 2,
    MESHLAB_STDPAR_PARFLOAT = 3,
-   MESHLAB_STDPAR_PARSTRING = 4    
+   MESHLAB_STDPAR_PARSTRING = 4,
+   MESHLAB_STDPAR_PARABSPERC = 5
 };
 
 // standard filter parameter descriptor
@@ -133,6 +139,8 @@ typedef struct MESHLAB_STDFIELD
   QString *fielddesc;
   QVariant *fieldval;
   int fieldtype;
+  float min;
+  float max;
 }MESHLAB_STDFIELD;
 
 class StdParList
@@ -167,6 +175,19 @@ public:
 		std.fielddesc = new QString(desc);
 		std.fieldval = new QVariant(val);
 		std.fieldtype = MESHLAB_STDPAR_PARFLOAT;
+
+		v.push_back(std);
+	}
+	void addField(char *name, char* desc, float val, float minv, float maxv)
+	{
+		MESHLAB_STDFIELD std;
+
+		std.fieldname = new QString(name);
+		std.fielddesc = new QString(desc);
+		std.fieldval = new QVariant(val);
+		std.fieldtype = MESHLAB_STDPAR_PARABSPERC;
+		std.min = minv;
+		std.max = maxv;
 
 		v.push_back(std);
 	}
@@ -222,6 +243,7 @@ public:
 		    	srcpars.addBool(*v[i].fieldname,v[i].fieldval->toBool());
 				break;
 	      	  case MESHLAB_STDPAR_PARFLOAT:
+	      	  case MESHLAB_STDPAR_PARABSPERC:
 		    	srcpars.addFloat(*v[i].fieldname,float(v[i].fieldval->toDouble()));
 				break;
 	      	  case MESHLAB_STDPAR_PARINT:
@@ -236,25 +258,12 @@ public:
 
 	}
 
-	QString &getFieldName(int i)
-	{
-		return *v[i].fieldname;
-	}
-
-	QString &getFieldDesc(int i)
-	{
-		return *v[i].fielddesc;
-	}
-
-	QVariant &getFieldVal(int i)
-	{
-		return *v[i].fieldval;
-	}
-
-	int &getFieldType(int i)
-	{
-		return v[i].fieldtype;
-	}
+	QString &getFieldName(int i){return *v[i].fieldname;}
+	QString &getFieldDesc(int i){return *v[i].fielddesc;}
+	QVariant &getFieldVal(int i){return *v[i].fieldval;}
+	float getMin(int i){return v[i].min;}
+	float getMax(int i){return v[i].max;}
+	int getFieldType(int i){return v[i].fieldtype;}
 
 	protected:
 		QVector<MESHLAB_STDFIELD> v;

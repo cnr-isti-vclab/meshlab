@@ -22,6 +22,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.83  2006/12/27 21:41:58  pirosu
+Added improvements for the standard plugin window:
+split of the apply button in two buttons:ok and apply
+added support for parameters with absolute and percentage values
+
 Revision 1.82  2006/12/13 17:37:27  pirosu
 Added standard plugin window support
 
@@ -329,19 +334,29 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 
 
 
-bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst,char **filterdesc,QWidget **extraw)
+bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst,char **filterdesc)
 {
-	*extraw = NULL;
+	float max;
 
 	 switch(ID(action))
 	 {
-	  case FP_QUADRIC_SIMPLIFICATION:
+		case FP_QUADRIC_SIMPLIFICATION:
 		  (*filterdesc) = "Quadric Edge Collapse Simplification";
 		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
 		  break;
-	  case FP_CLOSE_HOLES_LIEPA:
+		case FP_CLOSE_HOLES_LIEPA:
 		  (*filterdesc) = "Close hole";
 		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)10);
+		  break;
+		case FP_LOOP_SS:
+		case FP_BUTTERFLY_SS: 
+		case FP_MIDPOINT: 
+		case FP_REMOVE_FACES_BY_EDGE:
+		case FP_CLUSTERING:
+		  (*filterdesc) = "Edge Length Dialog";
+		  max = m.cm.bbox.Diag();
+		  parlst.addField("Threshold","Threshold",max*0.01,0,max);
+		  parlst.addField("Selected","Affect only selected faces",false);
 		  break;
 	  default:
 		  (*filterdesc) = NULL; 
@@ -365,41 +380,25 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
 		  val = srcpar->getInt("MaxHoleSize");
           par.addInt("MaxHoleSize",val);
 		  return true;
+		case FP_LOOP_SS :
+		case FP_BUTTERFLY_SS : 
+		case FP_MIDPOINT : 
+		case FP_REMOVE_FACES_BY_EDGE:
+		case FP_CLUSTERING:
+	        par.addBool("Selected",srcpar->getBool("Selected"));
+		    par.addFloat("Threshold",srcpar->getFloat("Threshold"));
+			break;
   	 }
 
 	 return getParameters(action,parent,m,par);
 }
-
-
-
 
 bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
 {
  par.clear();
  switch(ID(action))
   {
-    case FP_LOOP_SS :
-    case FP_BUTTERFLY_SS : 
-    case FP_MIDPOINT : 
-    case FP_REMOVE_FACES_BY_EDGE:
-    case FP_CLUSTERING:
-      {
-        Histogram<float> histo;
-        genericELD->setHistogram(&histo);
-        genericELD->setDiagonale(m.cm.bbox.Diag());
-        genericELD->setStartingPerc(1.0);
-        int continueValue = genericELD->exec();
-
-        //int continueValue = refineDialog->exec();
-        if (continueValue == QDialog::Rejected)    return false; // don't continue, user pressed Cancel
-        float threshold = genericELD->getThreshold(); // threshold for refinying
-        // qDebug( "%f", threshold );
-        bool selected = genericELD->getSelected(); // refine only selected faces
-        par.addBool("Selected",selected);
-        par.addFloat("Threshold",threshold);
-        break;
-      }
-    case FP_TRANSFORM:
+	case FP_TRANSFORM:
       {
         transformDialog->setMesh(&m.cm);
 		    int continueValue = transformDialog->exec();
