@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.4  2007/01/11 10:40:09  cignoni
+Renamed ambiguous min/max vars
+
 Revision 1.3  2006/12/27 21:41:41  pirosu
 Added improvements for the standard plugin window:
 split of the apply button in two buttons:ok and apply
@@ -66,15 +69,15 @@ class AbsPercWidget : public QGridLayout
 	  Q_OBJECT
 
 public:
-  AbsPercWidget(QWidget *p, double defaultv, double min, double max):QGridLayout(p)
+  AbsPercWidget(QWidget *p, double defaultv, double minVal, double maxVal):QGridLayout(p)
   {
-	  m_min = min;
-	  m_max = max;
+	  m_min = minVal;
+	  m_max = maxVal;
 	  absSB = new QDoubleSpinBox(p);
 	  percSB = new QDoubleSpinBox(p);
 
-	  absSB->setMinimum(min);
-	  absSB->setMaximum(max);
+	  absSB->setMinimum(m_min);
+	  absSB->setMaximum(m_max);
 	  absSB->setDecimals(3);
 	  absSB->setSingleStep(0.001);
 	  absSB->setValue(defaultv);
@@ -82,7 +85,7 @@ public:
 	  percSB->setMinimum(0);
 	  percSB->setMaximum(100);
       percSB->setSingleStep(0.2);
-	  percSB->setValue((100*(defaultv - min))/(max - min));
+	  percSB->setValue((100*(defaultv - m_min))/(m_max - m_min));
 
 	  this->addWidget(absSB,0,0,Qt::AlignTop);
 	  this->addWidget(percSB,0,1,Qt::AlignTop);
