@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.30  2007/01/11 10:40:48  cignoni
+added a safety test in restorecolor
+
 Revision 1.29  2006/11/29 01:03:38  cignoni
 Edited some comments
 
@@ -172,6 +175,7 @@ public:
   inline void restoreVertexColor()
   {
     if(originalVertexColor.empty()) return;
+    if(originalVertexColor.size() != cm.vert.size()) return;
     vector<Color4b>::iterator ci;
 	  CMeshO::VertexIterator vi;
 	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
