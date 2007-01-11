@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.8  2007/01/11 19:52:25  pirosu
+ fixed bug for QT 4.1.0/dotnet2003
+ removed the request of the window title to the plugin. The action description is used instead.
+
  Revision 1.7  2006/12/27 21:41:58  pirosu
  Added improvements for the standard plugin window:
  split of the apply button in two buttons:ok and apply
@@ -157,7 +161,7 @@ const int CleanFilter::getRequirements(QAction *action)
   return 0;
 }
 
-bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst,char **filterdesc)
+bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst)
 {
 
 
@@ -165,23 +169,18 @@ bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst
   switch(ID(action))
   {
     case FP_REBUILD_SURFACE :
-		  (*filterdesc) = "Ballpivoting Surface reconstruction";
 		  parlst.addField("BallRadius","Enter ball size as a diag perc. (0 autoguess))",(float)maxDiag1);
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
-		  (*filterdesc) = "Remove Small Connected Components under a given size"; 
 		  parlst.addField("MinComponentDiag","Enter size (as a diag perc 0..100)",(float)maxDiag2);
 		  break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-		  (*filterdesc) = "Remove Small Connected Components"; 
 		  parlst.addField("MinComponentSize","Enter minimum conn. comp size:",(int)minCC);
 		  break;
     case FP_REMOVE_WRT_Q:
-		  (*filterdesc) = "Quality Filter"; 
 		  parlst.addField("MaxQualityThr","Delete all Vertices with quality under:",(float)val1);
 		  break;
 	default:
-	  (*filterdesc) = NULL; 
 		return false;
   }
 

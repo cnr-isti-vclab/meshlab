@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.4  2007/01/11 19:51:46  pirosu
+fixed bug for QT 4.1.0/dotnet2003
+removed the request of the window title to the plugin. The action description is used instead.
+
 Revision 1.3  2006/12/27 21:41:41  pirosu
 Added improvements for the standard plugin window:
 split of the apply button in two buttons:ok and apply
@@ -47,14 +51,13 @@ Added standard plugin window support
 /* manages the setup of the standard plugin window, when the execution of a plugin filter is requested */
 void MeshlabStdDialog::loadPluginAction(MeshFilterInterface *mfi,MeshModel *mm,QAction *q,MainWindowInterface *mwi)
   {
-		char *actiondesc = NULL;
 		StdParList *newparlist = new StdParList();
 
 	  if(mm == NULL)
 		  return;
 
 	  /* checks wether the plugin action wants to handle parameters input by the standard plugin window or by itself */
-	  if(!mfi->getStdFields(q,*mm,*newparlist,&actiondesc))
+	  if(!mfi->getStdFields(q,*mm,*newparlist))
 	  {
 		  /* the plugin action wants to handle parameters input by itself: the executeFilter() function is directly called */
 		  mwi->executeFilter(q,NULL);
@@ -70,7 +73,7 @@ void MeshlabStdDialog::loadPluginAction(MeshFilterInterface *mfi,MeshModel *mm,Q
 			curmodel = mm;
 			curmfi = mfi;
 			curmwi = mwi;
-			loadFrameContent(actiondesc);
+			loadFrameContent(q->text());
 	  }
 
 
@@ -103,12 +106,12 @@ void MeshlabStdDialog::resetMe()
   initValues();
 }
 
-void MeshlabStdDialog::loadFrameContent(char *actiondesc)
+void MeshlabStdDialog::loadFrameContent(QString &actiondesc)
 {
 
 
 	qf->hide();	
-	setWindowTitle(QString(actiondesc));
+	setWindowTitle(actiondesc);
 
 	QGridLayout *gridLayout = new QGridLayout(qf);
     qf->setLayout(gridLayout);
@@ -220,7 +223,6 @@ void MeshlabStdDialog::stdClick()
 
 void MeshlabStdDialog::applyClick()
 {
-	char *actiondesc = NULL;
 
 	stdClick();
 
@@ -235,8 +237,8 @@ void MeshlabStdDialog::applyClick()
 	curmwi = curmwis;
 
 
-	curmfi->getStdFields(curaction,*curmodel,*parlist,&actiondesc);
-    loadFrameContent(actiondesc);
+	curmfi->getStdFields(curaction,*curmodel,*parlist);
+    loadFrameContent(curaction->text());
 }
 
 /* click event for the ok button of the standard plugin window */

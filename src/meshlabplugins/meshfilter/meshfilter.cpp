@@ -22,6 +22,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.85  2007/01/11 19:52:26  pirosu
+fixed bug for QT 4.1.0/dotnet2003
+removed the request of the window title to the plugin. The action description is used instead.
+
 Revision 1.84  2007/01/11 10:38:58  cignoni
 Renamed ambiguous min/max vars e added a missing return in the getParameters
 
@@ -337,18 +341,16 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 
 
 
-bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst,char **filterdesc)
+bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst)
 {
 	float maxVal;
 
 	 switch(ID(action))
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
-		  (*filterdesc) = "Quadric Edge Collapse Simplification";
 		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
 		  break;
 		case FP_CLOSE_HOLES_LIEPA:
-		  (*filterdesc) = "Close hole";
 		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)10);
 		  break;
 		case FP_LOOP_SS:
@@ -356,13 +358,11 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 		case FP_MIDPOINT: 
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
-		  (*filterdesc) = "Edge Length Dialog";
 		  maxVal = m.cm.bbox.Diag();
 		  parlst.addField("Threshold","Threshold",maxVal*0.01,0,maxVal);
 		  parlst.addField("Selected","Affect only selected faces",false);
 		  break;
 	  default:
-		  (*filterdesc) = NULL; 
 		  return false;
 	 }
 

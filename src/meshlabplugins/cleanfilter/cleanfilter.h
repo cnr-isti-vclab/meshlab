@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.5  2007/01/11 19:52:25  pirosu
+ fixed bug for QT 4.1.0/dotnet2003
+ removed the request of the window title to the plugin. The action description is used instead.
+
  Revision 1.4  2006/12/27 21:41:58  pirosu
  Added improvements for the standard plugin window:
  split of the apply button in two buttons:ok and apply
@@ -88,7 +92,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 
-	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst,char **filterdesc);
+	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst);
 	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar);
 
 

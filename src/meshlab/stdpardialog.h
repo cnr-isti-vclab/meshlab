@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.5  2007/01/11 19:51:46  pirosu
+fixed bug for QT 4.1.0/dotnet2003
+removed the request of the window title to the plugin. The action description is used instead.
+
 Revision 1.4  2007/01/11 10:40:09  cignoni
 Renamed ambiguous min/max vars
 
@@ -69,7 +73,7 @@ class AbsPercWidget : public QGridLayout
 	  Q_OBJECT
 
 public:
-  AbsPercWidget(QWidget *p, double defaultv, double minVal, double maxVal):QGridLayout(p)
+  AbsPercWidget(QWidget *p, double defaultv, double minVal, double maxVal):QGridLayout(NULL)
   {
 	  m_min = minVal;
 	  m_max = maxVal;
@@ -163,7 +167,7 @@ protected:
 	bool restorelastsize;
 	QSize lastsize;
 
-	void loadFrameContent(char *actiondesc);
+	void loadFrameContent(QString &actiondesc);
 	void stdClick();
 
 };

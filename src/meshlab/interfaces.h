@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.52  2007/01/11 19:51:46  pirosu
+fixed bug for QT 4.1.0/dotnet2003
+removed the request of the window title to the plugin. The action description is used instead.
+
 Revision 1.51  2006/12/27 21:41:41  pirosu
 Added improvements for the standard plugin window:
 split of the apply button in two buttons:ok and apply
@@ -157,7 +161,7 @@ public:
 	  virtual QList<FilterType> &types() { return typeList;}
 
 	  /* Returns an array of standard parameters descriptors for the standard plugin window .NULL is returned by default if the plugin doesn't implement this */
-	virtual bool getStdFields(QAction *, MeshModel &, StdParList &,char **){return false;}
+	virtual bool getStdFields(QAction *, MeshModel &, StdParList &){return false;}
     
 	/* Overloading of the function getParameters that supports the standard plugin window. If the plugin doesn't implement this, the classic function is called */
 	virtual bool getParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/,FilterParameter * /* parameters obtained by the standard parameters' plugin window*/) {return getParameters(qa,qw,mm,fp);};
