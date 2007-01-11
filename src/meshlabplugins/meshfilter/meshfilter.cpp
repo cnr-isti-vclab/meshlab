@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.84  2007/01/11 10:38:58  cignoni
+Renamed ambiguous min/max vars e added a missing return in the getParameters
+
 Revision 1.83  2006/12/27 21:41:58  pirosu
 Added improvements for the standard plugin window:
 split of the apply button in two buttons:ok and apply
@@ -336,7 +339,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 
 bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst,char **filterdesc)
 {
-	float max;
+	float maxVal;
 
 	 switch(ID(action))
 	 {
@@ -354,8 +357,8 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
 		  (*filterdesc) = "Edge Length Dialog";
-		  max = m.cm.bbox.Diag();
-		  parlst.addField("Threshold","Threshold",max*0.01,0,max);
+		  maxVal = m.cm.bbox.Diag();
+		  parlst.addField("Threshold","Threshold",maxVal*0.01,0,maxVal);
 		  parlst.addField("Selected","Affect only selected faces",false);
 		  break;
 	  default:
@@ -387,6 +390,7 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
 		case FP_CLUSTERING:
 	        par.addBool("Selected",srcpar->getBool("Selected"));
 		    par.addFloat("Threshold",srcpar->getFloat("Threshold"));
+		  return true;
 			break;
   	 }
 
@@ -576,7 +580,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       //tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
       tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);	    
 
-      // hole filling does not update well the border flags (but the topology is still ok!) 
+      // hole filling filter does not correctly update the border flags (but the topology is still ok!) 
       m.clearDataMask(MeshModel::MM_BORDERFLAG);
       //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
 	  }
