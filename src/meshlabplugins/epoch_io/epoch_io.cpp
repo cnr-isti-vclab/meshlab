@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.6  2007/01/11 11:48:04  cignoni
+ Reordered include
+
  Revision 1.5  2006/12/06 21:25:00  cignoni
  small optimization and logging for profiling
 
@@ -50,7 +53,12 @@
 #include <QtXml/QDomNode>
 
 
-// temporaneamente prendo la versione corrente dalla cartella test
+
+#include <QMessageBox>
+#include <QFileDialog>
+
+#include "epoch_io.h"
+#include "epoch_reconstruction.h"
 #include <vcg/math/matrix33.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/create/platonic.h>
@@ -60,12 +68,6 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/hole.h>
 #include <wrap/io_trimesh/io_mask.h>
-
-#include <QMessageBox>
-#include <QFileDialog>
-
-#include "epoch_io.h"
-#include "epoch_reconstruction.h"
 #include "../cleanfilter/remove_small_cc.h"
 
 FILE *logFP=0; 
@@ -280,11 +282,11 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsample, int minCount, float minAngl
     cam.DepthTo3DPoint(in[0], in[1], in[2], out);
     
     (*vi).P().Import(out);
-    QRgb c = tx.pixel(in[0], in[1]);
+    QRgb c = tx.pixel(int(in[0]), int(in[1]));
     (*vi).C().SetRGB(qRed(c),qGreen(c),qBlue(c));
     //(*vi).Q()=chi.Val(in[0], in[1]);
     //(*vi).Q()=flisubQ.Val(in[0]/subsample, in[1]/subsample);
-    if(QualityMask.Val(in[0]/subsample, in[1]/subsample)<200) (*vi).Q()=0; 
+    if(QualityMask.Val(int(in[0]/subsample), int(in[1]/subsample))<200) (*vi).Q()=0; 
     else (*vi).Q()=1; 
     (*vi).Q()=float(QualityMask.Val(in[0]/subsample, in[1]/subsample))/255.0;
   }
