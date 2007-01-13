@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.6  2007/01/13 02:02:28  cignoni
+Changed loadFrameContent to pass the QString not as a reference (to avoid a temp var referencing)
+
 Revision 1.5  2007/01/11 19:51:46  pirosu
 fixed bug for QT 4.1.0/dotnet2003
 removed the request of the window title to the plugin. The action description is used instead.
@@ -167,7 +170,7 @@ protected:
 	bool restorelastsize;
 	QSize lastsize;
 
-	void loadFrameContent(QString &actiondesc);
+	void loadFrameContent(QString actiondesc);
 	void stdClick();
 
 };
