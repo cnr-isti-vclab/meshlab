@@ -1,0 +1,38 @@
+# Diese Datei wurde mit dem qmake-Manager von KDevelop erstellt. 
+# ------------------------------------------- 
+# Unterordner relativ zum Projektordner: .
+# Das Target ist eine Anwendung:  
+
+TEMPLATE = lib
+CONFIG += plugin
+INCLUDEPATH += ../.. ../../../../sf ../../../../code/lib/glew/include
+HEADERS = editpaint.h \
+	colorwid.h \
+	ui_painttoolbox.h
+SOURCES = editpaint.cpp ../../../../code/lib/glew/src/glew.c \
+	paintbox.cpp
+TARGET = editpaint
+DESTDIR = ../../meshlab/plugins
+DEFINES += GLEW_STATIC
+QT += opengl
+RESOURCES = meshlab.qrc
+unix{
+  QMAKE_CC = gcc
+  QMAKE_CXX = g++
+  QMAKE_LINK = gcc
+  CONFIG += warn_off debug_and_release
+}
+contains(TEMPLATE,lib){
+  CONFIG(debug, debug|release){
+    unix{
+      TARGET = $$member(TARGET, 0)_debug
+    }
+    else{
+      TARGET = $$member(TARGET, 0)d
+    }
+  }
+}
+win32{
+  SOURCES += paintbox.cpp 
+  DEFINES += NOMINMAX
+}
