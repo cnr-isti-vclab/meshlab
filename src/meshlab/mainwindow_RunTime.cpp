@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.115  2007/01/18 13:35:02  gfrei
+Resolved crash when a edit-plugin is selected without a mesh.
+Resolves multiple-pushed edit-buttons problem.
+
 Revision 1.114  2006/12/27 21:41:41  pirosu
 Added improvements for the standard plugin window:
 split of the apply button in two buttons:ok and apply
@@ -367,6 +371,14 @@ void MainWindow::endEditMode()
 }
 void MainWindow::applyEditMode()
 {
+	if(!GLA()) { //prevents crash without mesh
+		QAction *action = qobject_cast<QAction *>(sender()); 
+		action->setChecked(false);
+		return;
+	}
+	if(GLA()->getEditAction()) { //prevents multiple buttons pushed
+		GLA()->getEditAction()->setChecked(false);
+	}
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
   GLA()->setEdit(iEdit,action);
