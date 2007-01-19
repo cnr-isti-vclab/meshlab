@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2007/01/19 00:51:59  cignoni
+ Now meshlab ask for automatic cleaning of stl files
+
  Revision 1.1  2006/11/30 22:55:06  cignoni
  Separated very basic io filters to the more advanced one into two different plugins baseio and meshio
 
@@ -39,7 +42,8 @@
 #include <wrap/io_trimesh/export_stl.h>
 
 #include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/clean.h>
 
 using namespace vcg;
 
@@ -85,6 +89,9 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
 			QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
+    int retVal=QMessageBox::question ( parent, tr("STL File Importing"),tr("Do you want to unify duplicated vertices?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No );
+    if(retVal==QMessageBox::Yes )
+      tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 	}
   else
   {
