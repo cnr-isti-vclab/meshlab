@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2007/01/19 09:12:39  cignoni
+Added parameters for quality,selection and boundary preservation
+
 Revision 1.3  2006/10/19 07:34:24  cignoni
 added callback
 
@@ -42,6 +45,7 @@ Added remove non manifold and quadric simplification filter.
 #include "meshfilter.h"
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/local_optimization.h>
 #include <vcg/complex/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/container/simple_temporary_data.h>
@@ -75,7 +79,7 @@ class MyTriEdgeCollapse: public vcg::tri::TriEdgeCollapseQuadric< CMeshO, MyTriE
 };
 
 
-void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, CallBackPos *cb)
+void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool Selected, CallBackPos *cb)
 {
   math::Quadric<double> QZero;
   QZero.Zero();
@@ -83,9 +87,31 @@ void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, CallBackPos *cb)
   QHelper::TDp()=&TD;
 
   TD.Start(QZero);
-  tri::TriEdgeCollapseQuadricParameter qparams;
   MyTriEdgeCollapse::SetDefaultParams();
-  qparams.QualityThr  =.3;
+  MyTriEdgeCollapse::SetHint(MyTriEdgeCollapse::HNHasVFTopology);
+  MyTriEdgeCollapse::SetHint(MyTriEdgeCollapse::HNHasBorderFlag);
+
+  MyTriEdgeCollapse::Params().QualityThr=QualityThr;
+  
+  
+  if(Selected) // simplify only inside selected faces
+  {
+    // select only the vertices having ALL incident faces selected
+    tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(cm);
+
+    // Mark not writable un-selected vertices
+    CMeshO::VertexIterator  vi;
+    for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) if(!(*vi).IsD())
+          if(!(*vi).IsS()) (*vi).ClearW();
+                      else (*vi).SetW();
+  }
+
+  if(PreserveBoundary && Selected) 
+    MyTriEdgeCollapse::Params().PreserveBoundary=true;
+  if(PreserveBoundary && !Selected) 
+    MyTriEdgeCollapse::Params().FastPreserveBoundary=true;
+
+
   vcg::LocalOptimization<CMeshO> DeciSession(cm);
 	cb(1,"Initializing simplification");
 	DeciSession.Init<MyTriEdgeCollapse >();
@@ -97,8 +123,15 @@ void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, CallBackPos *cb)
   int faceToDel=cm.fn-TargetFaceNum;
  while( DeciSession.DoOptimization() && cm.fn>TargetFaceNum )
  {
-   cb(100-100*(cm.fn-TargetFaceNum)/(faceToDel), "Simplifing");
+   cb(100-100*(cm.fn-TargetFaceNum)/(faceToDel), "Simplifying...");
  };
 
- 
+	DeciSession.Finalize<MyTriEdgeCollapse >();
+  
+  if(Selected) // Clear Writable flags 
+  {
+    CMeshO::VertexIterator  vi;
+    for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) 
+      if(!(*vi).IsD()) (*vi).SetW();
+  }
 }

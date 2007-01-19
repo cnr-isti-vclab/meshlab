@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.86  2007/01/19 09:12:37  cignoni
+Added parameters for quality,selection and boundary preservation
+
 Revision 1.85  2007/01/11 19:52:26  pirosu
 fixed bug for QT 4.1.0/dotnet2003
 removed the request of the window title to the plugin. The action description is used instead.
@@ -174,7 +177,7 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 
 using namespace vcg;
 
-void QuadricSimplification(CMeshO &cm,int  TargetFaceNum,CallBackPos *cb);
+void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool Selected, CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
 {
@@ -349,6 +352,9 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
 		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
+		  parlst.addField("QualityThr","Quality treshold for penalizing bad shaped faces.",float(0.3f));
+		  parlst.addField("PreserveBoundary","Preserve Boundary of the mesh",false);
+		  parlst.addField("Selected","Simplify only selected faces",false);
 		  break;
 		case FP_CLOSE_HOLES_LIEPA:
 		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)10);
@@ -376,8 +382,10 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
 	 switch(ID(action))
 	 {
 	    case FP_QUADRIC_SIMPLIFICATION:
-		  val = srcpar->getInt("TargetFaceNum");
-          par.addInt("TargetFaceNum",val);
+		  par.addInt("TargetFaceNum",srcpar->getInt("TargetFaceNum"));
+      par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
+      par.addBool("PreserveBoundary",srcpar->getBool("PreserveBoundary"));
+	    par.addBool("Selected",srcpar->getBool("Selected"));
 		  return true;
 	    case FP_CLOSE_HOLES_LIEPA:
 		  val = srcpar->getInt("MaxHoleSize");
@@ -559,7 +567,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if (filter->text() == ST(FP_QUADRIC_SIMPLIFICATION) ) {
    int TargetFaceNum = par.getInt("TargetFaceNum");		
-   QuadricSimplification(m.cm,TargetFaceNum,cb);
+   float QualityThr = par.getFloat("QualityThr");		
+
+   QuadricSimplification(m.cm,TargetFaceNum,QualityThr, par.getBool("PreserveBoundary"),par.getBool("Selected"),  cb);
    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	 tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
