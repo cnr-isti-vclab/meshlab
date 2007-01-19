@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.6  2007/01/19 09:12:59  cignoni
+Better formatting of floating points numbers in the dialog
+
 Revision 1.5  2007/01/13 02:02:28  cignoni
 Changed loadFrameContent to pass the QString not as a reference (to avoid a temp var referencing)
 
@@ -142,8 +145,15 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 		  stdfieldwidgets.push_back(qcb);
 
 		  break;
-	  case MESHLAB_STDPAR_PARINT:
 	  case MESHLAB_STDPAR_PARFLOAT:
+      ql = new QLabel(parlist->getFieldDesc(i),qf);
+		  qle = new QLineEdit(QString::number(parlist->getFieldVal(i).toDouble(),'g',3),qf); // better formatting of floating point numbers		  
+		  gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+		  gridLayout->addWidget(qle,i,1,Qt::AlignTop);
+		  stdfieldwidgets.push_back(qle);
+
+		  break;
+	  case MESHLAB_STDPAR_PARINT:
 	  case MESHLAB_STDPAR_PARSTRING:
 		  ql = new QLabel(parlist->getFieldDesc(i),qf);
 		  qle = new QLineEdit(parlist->getFieldVal(i).toString(),qf);
