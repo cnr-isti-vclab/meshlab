@@ -1,24 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2005-2005 Trolltech AS. All rights reserved.
-**
-** This file is part of the example classes of the Qt Toolkit.
-**
-** Licensees holding valid Qt Commercial licenses may use this file in
-** accordance with the Qt Commercial License Agreement provided with the
-** Software.
-**
-** See http://www.trolltech.com/pricing.html or email sales@trolltech.com for
-** information about Qt Commercial License Agreements.
-**
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
-****************************************************************************/
-
 #ifndef EDITPAINT_H
 #define EDITPAINT_H
 
@@ -27,6 +6,7 @@
 #include <QList>
 #include <QDockWidget>
 #include <QHash>
+#include <QDialog>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -38,7 +18,7 @@ class EditPaintPlugin;
 class PaintToolbox;
 class Penn;
 
-typedef enum {Pen, Fill, Pick} PaintThing;
+typedef enum {PEN, FILL, PICK} PaintThing;
 
 class Penn {
 public:
@@ -76,10 +56,18 @@ public:
 	vector<CMeshO::FacePointer> LastSel;
 
 private:
+
+	bool pressed; // to check in decorate if it is the first call after a mouse click
 	typedef enum {SMAdd, SMClear,SMSub} SelMode;
 	SelMode selMode;
 
-	vector<CMeshO::FacePointer> curSel;
+
+	double mvmatrix[16];
+	double projmatrix[16];
+	int viewport[4];
+
+	vector<CMeshO::FacePointer> tempSel; //to use when needed
+	vector<CMeshO::FacePointer> curSel; //the faces i am painting on
 	QHash<CVertexO *,Color4b> temporaneo;
 	Penn pen;
 	//QHash <long,face::Color4bOcf> dipendendo;
@@ -88,10 +76,51 @@ private:
 	PaintToolbox* paintbox;
 	Qt::MouseButton curr_mouse;
 
+	GLfloat *pixels;
+	bool first;
+	QPoint old_size;
+
+	int inverse_y; // gla->curSiz.height()
 	int paintType();
 	void DrawXORRect(GLArea * gla, bool doubleDraw);
 	void getInternFaces(vector<CMeshO::FacePointer> *actual,vector<CMeshO::VertexPointer> * risult, GLArea * gla);
 	int isIn(QPointF p0,QPointF p1,float dx,float dy,float raduis);
+	bool getFaceAtMouse(MeshModel &,CMeshO::FacePointer &);
+	bool getFacesAtMouse(MeshModel &,vector<CMeshO::FacePointer> &);
+	bool getVertexAtMouse(MeshModel &,CMeshO::VertexPointer &);
+	bool getVertexesAtMouse();
+
+	void fillFrom(MeshModel &,CFaceO *);
+
+	inline void updateMatrixes() {		
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix);
+		glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
+	}
+
+	inline int getNearest(QPointF center, QPointF punti[],int num) {
+		int near=0;
+		float dist=fabsf(center.x()-punti[0].x())*fabsf(center.x()-punti[0].x())+fabsf(center.y()-punti[0].y())*fabsf(center.y()-punti[0].y());
+		for (int lauf=1; lauf<num; lauf++) {
+			float temp=fabsf(center.x()-punti[lauf].x())*fabsf(center.x()-punti[lauf].x())+
+				fabsf(center.y()-punti[lauf].y())*fabsf(center.y()-punti[lauf].y());
+			if (temp<dist) {
+				near=lauf;
+				dist=temp;
+			}
+		}
+		return near;
+	}
+	
+	inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
+		Color4b orig=vertice->C();
+		orig[0]=min(255,(newcol[0]*opac+orig[0]*(100-opac))/100);
+		orig[1]=min(255,(newcol[1]*opac+orig[1]*(100-opac))/100);
+		orig[2]=min(255,(newcol[2]*opac+orig[2]*(100-opac))/100);
+		orig[3]=min(255,(newcol[3]*opac+orig[3]*(100-opac))/100);
+		vertice->C()=orig;
+	}
+
 };
 
 class PaintToolbox : public QWidget {
@@ -100,10 +129,15 @@ public:
 	float diag;
 	PaintToolbox ( /*const QString & title,*/ QWidget * parent = 0, Qt::WindowFlags flags = 0 );
 	Color4b getColor(Qt::MouseButton);
-	double getRadius() { return ui.pen_radius->value(); }
-	int paintType() { if (ui.pen_type->currentText()=="pixel") return 1; return 2; }
-	int getOpacity() { return ui.deck_slider->value(); }
+	void setColor(Color4b,Qt::MouseButton);
+	inline double getRadius() { return ui.pen_radius->value(); }
+	inline int paintType() { if (ui.pen_type->currentText()=="pixel") return 1; return 2; }
+	inline int getOpacity() { return ui.deck_slider->value(); }
+	inline int paintUtensil() { return paint_utensil; }
+	inline bool getPaintBackface() { return ui.backface_culling->checkState()!=Qt::Unchecked; }
+	inline bool getPaintInvisible() { return ui.invisible_painting->checkState()!=Qt::Unchecked; }
 private:
+	int paint_utensil;
 	Ui::PaintToolbox ui;
 private slots:
 	void on_pen_type_currentIndexChanged(QString value);
@@ -112,6 +146,11 @@ private slots:
 	void on_set_bw_clicked();
 	void on_deck_slider_valueChanged(int value);
 	void on_deck_box_valueChanged(int value);
+	void on_pen_button_clicked();
+	void on_fill_button_clicked();
+	void on_pick_button_clicked();
+	void on_backface_culling_stateChanged(int value);
+	void on_invisible_painting_stateChanged(int value);
 };
 
 #endif

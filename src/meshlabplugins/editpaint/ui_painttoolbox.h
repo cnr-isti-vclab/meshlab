@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'PaintToolbox.ui'
 **
-** Created: Wed Jan 17 18:05:13 2007
+** Created: Sat Jan 20 14:32:05 2007
 **      by: Qt User Interface Compiler version 4.2.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -14,13 +14,13 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QCheckBox>
 #include <QtGui/QComboBox>
 #include <QtGui/QDoubleSpinBox>
 #include <QtGui/QFrame>
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QSlider>
-#include <QtGui/QSpacerItem>
 #include <QtGui/QSpinBox>
 #include <QtGui/QToolButton>
 #include <QtGui/QWidget>
@@ -33,30 +33,35 @@ public:
     QFrame *top_frame;
     QToolButton *pen_button;
     QToolButton *fill_button;
+    QToolButton *pick_button;
     QFrame *frame_3;
     QFrame *color_frame;
     ColorWid *back;
     ColorWid *front;
     QToolButton *set_bw;
     QToolButton *switch_me;
-    QFrame *bottom_frame;
+    QFrame *pen_frame;
     QGridLayout *gridLayout1;
+    QSpinBox *deck_box;
+    QLabel *label_deck;
+    QLabel *label_penmodus;
+    QComboBox *pen_modus;
+    QSlider *deck_slider;
+    QFrame *pen_extra_frame;
+    QGridLayout *gridLayout2;
+    QCheckBox *backface_culling;
     QLabel *label_pen;
+    QLabel *label;
     QComboBox *pen_type;
     QDoubleSpinBox *pen_radius;
-    QSpacerItem *spacerItem;
-    QSlider *deck_slider;
-    QComboBox *pen_modus;
-    QLabel *label_penmodus;
-    QLabel *label_deck;
-    QSpinBox *deck_box;
+    QCheckBox *invisible_painting;
 
     void setupUi(QWidget *PaintToolbox)
     {
     PaintToolbox->setObjectName(QString::fromUtf8("PaintToolbox"));
     gridLayout = new QGridLayout(PaintToolbox);
-    gridLayout->setSpacing(6);
-    gridLayout->setMargin(9);
+    gridLayout->setSpacing(2);
+    gridLayout->setMargin(2);
     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
     top_frame = new QFrame(PaintToolbox);
     top_frame->setObjectName(QString::fromUtf8("top_frame"));
@@ -71,7 +76,7 @@ public:
     pen_button = new QToolButton(top_frame);
     pen_button->setObjectName(QString::fromUtf8("pen_button"));
     pen_button->setGeometry(QRect(10, 10, 48, 48));
-    pen_button->setIcon(QIcon(QString::fromUtf8(":/images/pinsel.png")));
+    pen_button->setIcon(QIcon(QString::fromUtf8(":/images/pinsel2.png")));
     pen_button->setIconSize(QSize(48, 48));
     pen_button->setCheckable(true);
     pen_button->setAutoExclusive(true);
@@ -84,6 +89,14 @@ public:
     fill_button->setCheckable(true);
     fill_button->setAutoExclusive(true);
     fill_button->setAutoRaise(false);
+    pick_button = new QToolButton(top_frame);
+    pick_button->setObjectName(QString::fromUtf8("pick_button"));
+    pick_button->setGeometry(QRect(130, 10, 48, 48));
+    pick_button->setIcon(QIcon(QString::fromUtf8(":/images/pick.png")));
+    pick_button->setIconSize(QSize(48, 48));
+    pick_button->setCheckable(true);
+    pick_button->setAutoExclusive(true);
+    pick_button->setAutoRaise(false);
 
     gridLayout->addWidget(top_frame, 0, 0, 1, 2);
 
@@ -128,25 +141,76 @@ public:
 
     gridLayout->addWidget(color_frame, 1, 0, 1, 1);
 
-    bottom_frame = new QFrame(PaintToolbox);
-    bottom_frame->setObjectName(QString::fromUtf8("bottom_frame"));
-    bottom_frame->setFrameShape(QFrame::StyledPanel);
-    bottom_frame->setFrameShadow(QFrame::Raised);
-    gridLayout1 = new QGridLayout(bottom_frame);
+    pen_frame = new QFrame(PaintToolbox);
+    pen_frame->setObjectName(QString::fromUtf8("pen_frame"));
+    pen_frame->setFrameShape(QFrame::StyledPanel);
+    pen_frame->setFrameShadow(QFrame::Raised);
+    gridLayout1 = new QGridLayout(pen_frame);
     gridLayout1->setSpacing(6);
     gridLayout1->setMargin(9);
     gridLayout1->setObjectName(QString::fromUtf8("gridLayout1"));
-    label_pen = new QLabel(bottom_frame);
+    deck_box = new QSpinBox(pen_frame);
+    deck_box->setObjectName(QString::fromUtf8("deck_box"));
+    deck_box->setMaximum(100);
+    deck_box->setValue(100);
+
+    gridLayout1->addWidget(deck_box, 0, 2, 1, 1);
+
+    label_deck = new QLabel(pen_frame);
+    label_deck->setObjectName(QString::fromUtf8("label_deck"));
+
+    gridLayout1->addWidget(label_deck, 0, 0, 1, 1);
+
+    label_penmodus = new QLabel(pen_frame);
+    label_penmodus->setObjectName(QString::fromUtf8("label_penmodus"));
+
+    gridLayout1->addWidget(label_penmodus, 1, 0, 1, 1);
+
+    pen_modus = new QComboBox(pen_frame);
+    pen_modus->setObjectName(QString::fromUtf8("pen_modus"));
+
+    gridLayout1->addWidget(pen_modus, 1, 1, 1, 2);
+
+    deck_slider = new QSlider(pen_frame);
+    deck_slider->setObjectName(QString::fromUtf8("deck_slider"));
+    deck_slider->setMaximum(100);
+    deck_slider->setValue(100);
+    deck_slider->setOrientation(Qt::Horizontal);
+
+    gridLayout1->addWidget(deck_slider, 0, 1, 1, 1);
+
+
+    gridLayout->addWidget(pen_frame, 2, 0, 1, 2);
+
+    pen_extra_frame = new QFrame(PaintToolbox);
+    pen_extra_frame->setObjectName(QString::fromUtf8("pen_extra_frame"));
+    pen_extra_frame->setFrameShape(QFrame::StyledPanel);
+    pen_extra_frame->setFrameShadow(QFrame::Raised);
+    gridLayout2 = new QGridLayout(pen_extra_frame);
+    gridLayout2->setSpacing(6);
+    gridLayout2->setMargin(9);
+    gridLayout2->setObjectName(QString::fromUtf8("gridLayout2"));
+    backface_culling = new QCheckBox(pen_extra_frame);
+    backface_culling->setObjectName(QString::fromUtf8("backface_culling"));
+
+    gridLayout2->addWidget(backface_culling, 1, 1, 1, 2);
+
+    label_pen = new QLabel(pen_extra_frame);
     label_pen->setObjectName(QString::fromUtf8("label_pen"));
 
-    gridLayout1->addWidget(label_pen, 2, 0, 1, 1);
+    gridLayout2->addWidget(label_pen, 0, 0, 1, 1);
 
-    pen_type = new QComboBox(bottom_frame);
+    label = new QLabel(pen_extra_frame);
+    label->setObjectName(QString::fromUtf8("label"));
+
+    gridLayout2->addWidget(label, 1, 0, 1, 1);
+
+    pen_type = new QComboBox(pen_extra_frame);
     pen_type->setObjectName(QString::fromUtf8("pen_type"));
 
-    gridLayout1->addWidget(pen_type, 2, 2, 1, 2);
+    gridLayout2->addWidget(pen_type, 0, 2, 1, 2);
 
-    pen_radius = new QDoubleSpinBox(bottom_frame);
+    pen_radius = new QDoubleSpinBox(pen_extra_frame);
     pen_radius->setObjectName(QString::fromUtf8("pen_radius"));
     pen_radius->setDecimals(1);
     pen_radius->setMaximum(70);
@@ -154,49 +218,20 @@ public:
     pen_radius->setSingleStep(0.1);
     pen_radius->setValue(25);
 
-    gridLayout1->addWidget(pen_radius, 2, 1, 1, 1);
+    gridLayout2->addWidget(pen_radius, 0, 1, 1, 1);
 
-    spacerItem = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+    invisible_painting = new QCheckBox(pen_extra_frame);
+    invisible_painting->setObjectName(QString::fromUtf8("invisible_painting"));
 
-    gridLayout1->addItem(spacerItem, 3, 2, 1, 1);
-
-    deck_slider = new QSlider(bottom_frame);
-    deck_slider->setObjectName(QString::fromUtf8("deck_slider"));
-    deck_slider->setMaximum(100);
-    deck_slider->setValue(100);
-    deck_slider->setOrientation(Qt::Horizontal);
-
-    gridLayout1->addWidget(deck_slider, 0, 1, 1, 2);
-
-    pen_modus = new QComboBox(bottom_frame);
-    pen_modus->setObjectName(QString::fromUtf8("pen_modus"));
-
-    gridLayout1->addWidget(pen_modus, 1, 1, 1, 3);
-
-    label_penmodus = new QLabel(bottom_frame);
-    label_penmodus->setObjectName(QString::fromUtf8("label_penmodus"));
-
-    gridLayout1->addWidget(label_penmodus, 1, 0, 1, 1);
-
-    label_deck = new QLabel(bottom_frame);
-    label_deck->setObjectName(QString::fromUtf8("label_deck"));
-
-    gridLayout1->addWidget(label_deck, 0, 0, 1, 1);
-
-    deck_box = new QSpinBox(bottom_frame);
-    deck_box->setObjectName(QString::fromUtf8("deck_box"));
-    deck_box->setMaximum(100);
-    deck_box->setValue(100);
-
-    gridLayout1->addWidget(deck_box, 0, 3, 1, 1);
+    gridLayout2->addWidget(invisible_painting, 1, 3, 1, 1);
 
 
-    gridLayout->addWidget(bottom_frame, 2, 0, 1, 2);
+    gridLayout->addWidget(pen_extra_frame, 3, 0, 1, 2);
 
 
     retranslateUi(PaintToolbox);
 
-    QSize size(307, 414);
+    QSize size(318, 344);
     size = size.expandedTo(PaintToolbox->minimumSizeHint());
     PaintToolbox->resize(size);
 
@@ -206,17 +241,28 @@ public:
 
     void retranslateUi(QWidget *PaintToolbox)
     {
-    PaintToolbox->setWindowTitle(QApplication::translate("PaintToolbox", "Vector Painting", 0, QApplication::UnicodeUTF8));
+    PaintToolbox->setWindowTitle(QApplication::translate("PaintToolbox", "Vertex Painting", 0, QApplication::UnicodeUTF8));
+    pen_button->setToolTip(QApplication::translate("PaintToolbox", "Paint with the pen", 0, QApplication::UnicodeUTF8));
     pen_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    fill_button->setToolTip(QApplication::translate("PaintToolbox", "Fill an area", 0, QApplication::UnicodeUTF8));
     fill_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    pick_button->setToolTip(QApplication::translate("PaintToolbox", "Pick a color", 0, QApplication::UnicodeUTF8));
+    pick_button->setText(QString());
     set_bw->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
     switch_me->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    deck_box->setToolTip(QApplication::translate("PaintToolbox", "Change the opacity of the color (this is not the opengl alpha value)", 0, QApplication::UnicodeUTF8));
+    label_deck->setText(QApplication::translate("PaintToolbox", "Opacity", 0, QApplication::UnicodeUTF8));
+    label_penmodus->setText(QApplication::translate("PaintToolbox", "Modus", 0, QApplication::UnicodeUTF8));
+    pen_modus->clear();
+    pen_modus->addItem(QApplication::translate("PaintToolbox", "Normal", 0, QApplication::UnicodeUTF8));
+    deck_slider->setToolTip(QApplication::translate("PaintToolbox", "Change the opacity of the color (this is not the opengl alpha value)", 0, QApplication::UnicodeUTF8));
+    backface_culling->setText(QApplication::translate("PaintToolbox", "backfaces", 0, QApplication::UnicodeUTF8));
     label_pen->setText(QApplication::translate("PaintToolbox", "Pen", 0, QApplication::UnicodeUTF8));
+    label->setText(QApplication::translate("PaintToolbox", "Paint on:", 0, QApplication::UnicodeUTF8));
     pen_type->clear();
     pen_type->addItem(QApplication::translate("PaintToolbox", "pixel", 0, QApplication::UnicodeUTF8));
     pen_type->addItem(QApplication::translate("PaintToolbox", "percentuale", 0, QApplication::UnicodeUTF8));
-    label_penmodus->setText(QApplication::translate("PaintToolbox", "Modus", 0, QApplication::UnicodeUTF8));
-    label_deck->setText(QApplication::translate("PaintToolbox", "Opacity", 0, QApplication::UnicodeUTF8));
+    invisible_painting->setText(QApplication::translate("PaintToolbox", "hidden polygons", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(PaintToolbox);
     } // retranslateUi
 

@@ -7,8 +7,14 @@ Color4b to4b(QColor c) {
 	return Color4b(c.red(),c.green(),c.blue(),100);
 }
 
+QColor toQcolor(Color4b c) {
+	return QColor(c[0],c[1],c[2]);
+}
+
 void ColorWid::setColor(QColor co) {
 	bg=co;
+	//repaint();
+	update();
 }
 
 void ColorWid::paintEvent(QPaintEvent * event ) {
@@ -26,7 +32,7 @@ void ColorWid::mousePressEvent ( QMouseEvent * event ) {
 	update();
 }
 
-PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::WindowFlags flags) : QWidget(parent,flags | Qt::WindowStaysOnTopHint) {
+PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::WindowFlags flags) : QWidget(/*parent*/0,flags | Qt::WindowStaysOnTopHint | Qt::Window) {
 	ui.setupUi(this);
 	ui.front->setColor(Qt::black);
 	ui.back->setColor(Qt::white);
@@ -34,7 +40,9 @@ PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::Wind
 	ui.back->setGeometry(30,25,40,35);
 	ui.switch_me->setGeometry(55,10,15,15);
 	ui.set_bw->setGeometry(10,45,15,15);
-	ui.fill_button->setEnabled(false);
+	QPoint p=parent->mapToGlobal(QPoint(0,0));
+	setGeometry(p.x()+parent->width()-/*width()*/60,p.y(),/*width()*/100,height());
+	//ui.fill_button->setEnabled(false);
 	
 }
 
@@ -66,14 +74,14 @@ void PaintToolbox::on_switch_me_clicked() {
 	QColor temp=ui.front->getColor();
 	ui.front->setColor(ui.back->getColor());
 	ui.back->setColor(temp);
-	ui.front->update();
-	ui.back->update();
+	//ui.front->update();
+	//ui.back->update();
 }
 void PaintToolbox::on_set_bw_clicked() {
 	ui.front->setColor(Qt::black);
 	ui.back->setColor(Qt::white);
-	ui.front->update();
-	ui.back->update();
+	//ui.front->update();
+	//ui.back->update();
 }
 
 void PaintToolbox::on_deck_slider_valueChanged(int value) {
@@ -83,3 +91,36 @@ void PaintToolbox::on_deck_slider_valueChanged(int value) {
 void PaintToolbox::on_deck_box_valueChanged(int value) {
 	if (value!=ui.deck_slider->value()) ui.deck_box->setValue((int)value);
 }
+
+void PaintToolbox::on_pen_button_clicked() {
+	paint_utensil=PEN;
+	ui.pen_frame->setVisible(true);
+	ui.pen_extra_frame->setVisible(true);
+}
+void PaintToolbox::on_fill_button_clicked() {
+	paint_utensil=FILL;
+	ui.pen_frame->setVisible(true);
+	ui.pen_extra_frame->setVisible(false);
+}
+void PaintToolbox::on_pick_button_clicked() {
+	paint_utensil=PICK;
+	ui.pen_frame->setVisible(false);
+	ui.pen_extra_frame->setVisible(false);
+}
+
+void PaintToolbox::setColor(Color4b newcol,Qt::MouseButton mouse) {
+	switch (mouse) {
+		case Qt::LeftButton: {ui.front->setColor(toQcolor(newcol)); return; }
+		case Qt::RightButton: {ui.back->setColor(toQcolor(newcol)); return;}
+		default: {ui.front->setColor(toQcolor(newcol)); return;}
+	}
+}
+
+void PaintToolbox::on_backface_culling_stateChanged(int value) {
+	//if (value==Qt::Unchecked) {}
+	//else
+}
+void PaintToolbox::on_invisible_painting_stateChanged(int value) {
+
+}
+
