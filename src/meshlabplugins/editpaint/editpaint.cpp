@@ -22,12 +22,12 @@
  ****************************************************************************/
 /****************************************************************************
 
-//TODO first paint hang problem
+//TODO better to vertex painting switch
 //TODO bits instead of hashtables
 //TODO trackball zbuffer problem
 //TODO PaintToolbox does not close
 //TODO lines problem with percentual painting
-
+//TODO first paint hang problem -- PROBALLY SOLVED, not shure
 version 0.1 gfrei
 
 ****************************************************************************/
@@ -72,13 +72,13 @@ QList<QAction *> EditPaintPlugin::actions() const {
 
 const QString EditPaintPlugin::Info(QAction *action) {
 	if( action->text() != tr("Vertex painting") ) assert (0);
-	return tr("Testo da inserire ............");
+	return tr("Colorize the polygons of your mesh");
 }
 
 const PluginInfo &EditPaintPlugin::Info() {
 	static PluginInfo ai; 
 	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.00001");
+	ai.Version = tr("0.001");
 	ai.Author = ("Andreas Gfrei");
 	return ai;
 } 
@@ -129,7 +129,7 @@ void EditPaintPlugin::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &/
 	isDragging = true;
 	// now the management of the update 
 	//static int lastMouse=0;
-	static int lastRendering=clock();
+	static int lastRendering=0;//clock();
 	int curT = clock();
 	//qDebug("mouseMoveEvent: curt %i last %i",curT,lastRendering);
 	if(gla->lastRenderingTime() < 50 || (curT - lastRendering) > 1000 )
@@ -138,7 +138,7 @@ void EditPaintPlugin::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &/
 		gla->update();
 	//qDebug("mouseMoveEvent: ----");
 	}
-	else{
+	else {
 		gla->makeCurrent();
 		glDrawBuffer(GL_FRONT);
 		DrawXORRect(gla,true);
@@ -711,8 +711,10 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	//m.Enable(MeshModel::MM_FACECOLOR);
 	
 	//parent->setColorMode(vcg::GLW::CMPerVert);
-	//parent->mm->ioMask|=MeshModel::IOM_VERTCOLOR;
-	//parent->mm->ioMask|=MeshModel::IOM_VERTQUALITY;
+	
+	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
+	parent->mm->ioMask|=MeshModel::IOM_VERTCOLOR;
+	parent->mm->ioMask|=MeshModel::IOM_VERTQUALITY;
 	
 	LastSel.clear();
 	curSel.clear();

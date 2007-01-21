@@ -4,7 +4,7 @@
 
 
 Color4b to4b(QColor c) {
-	return Color4b(c.red(),c.green(),c.blue(),100);
+	return Color4b(c.red(),c.green(),c.blue(),255);
 }
 
 QColor toQcolor(Color4b c) {
