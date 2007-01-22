@@ -178,18 +178,6 @@ ScalarImage<unsigned char>::ScalarImage(QImage img)
 
 }
 
-template <>
-QImage ScalarImage<unsigned char>::convertToQImage()
-{
-  QImage img(w,h,QImage::Format_RGB32);
-  for(int x=0;x<w;++x)
-    for(int y=0;y<h;++y){
-     unsigned char g=Val(x,y);
-     img.setPixel(x,y,qRgb(g,g,g));
-    }
-   return img;
-}
-
 template <class ScalarType>
 bool ScalarImage<ScalarType>::Subsample(const int factor, ScalarImage<ScalarType> &fli)
 {

@@ -19,7 +19,33 @@ public:
     return v[y*w+x];
   };
 
-  QImage convertToQImage();
+	inline QImage convertToQImage()
+	{
+		QImage img(w,h,QImage::Format_RGB32);
+
+		float max = 0.0f;
+		float min = Val(0,0);
+		for (int y = 0; y < h; y++)
+			for (int x = 0; x < w; x++)
+			{
+				if (Val(x, y) < min)
+					min = Val(x, y);
+				if (Val(x, y) > max)
+					max = Val(x, y);
+			}
+
+		float scale = 1.0f / max;
+		for (int y = 0; y < h; y++)
+			for (int x = 0; x < w; x++)
+			{
+				float value = (Val(x, y) - min) * scale;
+				value *= 255.0f;
+				img.setPixel(x,y,qRgb(value,value,value));
+			}
+
+		return img;
+	}
+
   ScalarImage(QImage img);
   ScalarImage(){};
   bool Subsample(const int factor, ScalarImage<ScalarType> &fli);
