@@ -98,18 +98,18 @@ private:
 		glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
 	}
 
-	inline int getNearest(QPointF center, QPointF punti[],int num) {
-		int near=0;
+	inline int getNearest(QPointF center, QPointF *punti,int num) {
+		int nearestInd=0;
 		float dist=fabsf(center.x()-punti[0].x())*fabsf(center.x()-punti[0].x())+fabsf(center.y()-punti[0].y())*fabsf(center.y()-punti[0].y());
 		for (int lauf=1; lauf<num; lauf++) {
 			float temp=fabsf(center.x()-punti[lauf].x())*fabsf(center.x()-punti[lauf].x())+
 				fabsf(center.y()-punti[lauf].y())*fabsf(center.y()-punti[lauf].y());
 			if (temp<dist) {
-				near=lauf;
+				nearestInd=lauf;
 				dist=temp;
 			}
 		}
-		return near;
+		return nearestInd;
 	}
 	
 	inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
