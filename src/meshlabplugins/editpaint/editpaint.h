@@ -17,13 +17,39 @@
 class EditPaintPlugin;
 class PaintToolbox;
 class Penn;
+class PaintWorker;
+struct PaintData;
+
+int isIn(QPointF p0,QPointF p1,float dx,float dy,float raduis);
+
+inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
+	Color4b orig=vertice->C();
+	orig[0]=min(255,(newcol[0]*opac+orig[0]*(100-opac))/100);
+	orig[1]=min(255,(newcol[1]*opac+orig[1]*(100-opac))/100);
+	orig[2]=min(255,(newcol[2]*opac+orig[2]*(100-opac))/100);
+	orig[3]=min(255,(newcol[3]*opac+orig[3]*(100-opac))/100);
+	vertice->C()=orig;
+}
 
 typedef enum {PEN, FILL, PICK} PaintThing;
 
 class Penn {
 public:
-	QPoint width;
-	QPoint pos;
+	float radius;
+	//QPoint pos;
+	int painttype;
+	bool backface;
+	bool invisible;
+};
+
+struct PaintData{
+	int special;
+	QPoint start;
+	QPoint end;
+	int opac;
+	Color4b color;
+	//double radius;
+	Penn pen;
 };
 
 class EditPaintPlugin : public QObject, public MeshEditInterface
@@ -56,7 +82,7 @@ public:
 	vector<CMeshO::FacePointer> LastSel;
 
 private:
-
+	bool has_track; // to restore the trackball settings
 	bool pressed; // to check in decorate if it is the first call after a mouse click
 	typedef enum {SMAdd, SMClear,SMSub} SelMode;
 	SelMode selMode;
@@ -66,11 +92,12 @@ private:
 	double projmatrix[16];
 	int viewport[4];
 
+	PaintWorker * worker;
+
 	vector<CMeshO::FacePointer> tempSel; //to use when needed
 	vector<CMeshO::FacePointer> curSel; //the faces i am painting on
 	QHash<CVertexO *,Color4b> temporaneo;
 	Penn pen;
-	//QHash <long,face::Color4bOcf> dipendendo;
 	QHash <long,CFaceO *> painting_at;
 	
 	PaintToolbox* paintbox;
@@ -83,8 +110,8 @@ private:
 	int inverse_y; // gla->curSiz.height()
 	int paintType();
 	void DrawXORRect(GLArea * gla, bool doubleDraw);
-	void getInternFaces(vector<CMeshO::FacePointer> *actual,vector<CMeshO::VertexPointer> * risult, GLArea * gla);
-	int isIn(QPointF p0,QPointF p1,float dx,float dy,float raduis);
+	//void getInternFaces(vector<CMeshO::FacePointer> *actual,vector<CMeshO::VertexPointer> * risult, GLArea * gla);
+	
 	bool getFaceAtMouse(MeshModel &,CMeshO::FacePointer &);
 	bool getFacesAtMouse(MeshModel &,vector<CMeshO::FacePointer> &);
 	bool getVertexAtMouse(MeshModel &,CMeshO::VertexPointer &);
@@ -96,6 +123,11 @@ private:
 		glGetIntegerv(GL_VIEWPORT, viewport);
 		glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix);
 		glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
+		/*for (int lauf=0; lauf<4; lauf++) {
+			qDebug() <<projmatrix[lauf*4]<<" "<<projmatrix[lauf*4+1]<<" "<<projmatrix[lauf*4+2]<<" "<<projmatrix[lauf*4+3]<<" ";
+			//if (lauf%4==0) qDebug() << endl;
+		}
+		qDebug() << "---------"<<endl;*/
 	}
 
 	inline int getNearest(QPointF center, QPointF *punti,int num) {
@@ -112,30 +144,61 @@ private:
 		return nearestInd;
 	}
 	
-	inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
-		Color4b orig=vertice->C();
-		orig[0]=min(255,(newcol[0]*opac+orig[0]*(100-opac))/100);
-		orig[1]=min(255,(newcol[1]*opac+orig[1]*(100-opac))/100);
-		orig[2]=min(255,(newcol[2]*opac+orig[2]*(100-opac))/100);
-		orig[3]=min(255,(newcol[3]*opac+orig[3]*(100-opac))/100);
-		vertice->C()=orig;
-	}
 
+
+	public slots:
+		void updateMe();
+};
+
+class PaintWorker : public QThread{
+Q_OBJECT
+private:
+	MeshModel* mesh;
+	GLArea *gla;
+	QVector <PaintData> dati;
+	QMutex mutex;
+	QWaitCondition condition;
+	bool nothingTodo;
+
+	double mvmatrix[16];
+	double projmatrix[16];
+	int viewport[4];
+
+	vector<CMeshO::FacePointer> curSel;
+	QHash<CVertexO *,Color4b> temporaneo;
+	GLfloat *pixels;
+
+	void run();
+public:
+	PaintWorker();
+	//inline bool waitsForData() { return nothingTodo; }
+	inline void waitTillPause() { mutex.lock(); if (nothingTodo) {mutex.unlock(); return;} condition.wait(&mutex); mutex.unlock(); return; }
+	inline void setModelArea(MeshModel * mo, GLArea * a) {  mesh=mo; gla=a; }
+	inline void clear(GLfloat * pi) { 
+		curSel.clear(); temporaneo.clear(); pixels=pi; 
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix);
+		glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
+	}
+//public slots:
+	void addData(PaintData data) { mutex.lock(); dati.push_back(data); condition.wakeAll(); mutex.unlock(); }
 };
 
 class PaintToolbox : public QWidget {
 Q_OBJECT
 public:
-	float diag;
+	//float diag;
 	PaintToolbox ( /*const QString & title,*/ QWidget * parent = 0, Qt::WindowFlags flags = 0 );
 	Color4b getColor(Qt::MouseButton);
 	void setColor(Color4b,Qt::MouseButton);
+	void setColor(int,int,int,Qt::MouseButton mouse);
 	inline double getRadius() { return ui.pen_radius->value(); }
 	inline int paintType() { if (ui.pen_type->currentText()=="pixel") return 1; return 2; }
 	inline int getOpacity() { return ui.deck_slider->value(); }
 	inline int paintUtensil() { return paint_utensil; }
 	inline bool getPaintBackface() { return ui.backface_culling->checkState()!=Qt::Unchecked; }
 	inline bool getPaintInvisible() { return ui.invisible_painting->checkState()!=Qt::Unchecked; }
+	inline int getPickMode() { return ui.pick_mode->currentIndex(); }
 private:
 	int paint_utensil;
 	Ui::PaintToolbox ui;

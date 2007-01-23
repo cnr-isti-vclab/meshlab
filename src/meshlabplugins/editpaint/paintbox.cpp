@@ -43,6 +43,7 @@ PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::Wind
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
 	setGeometry(p.x()+parent->width()-/*width()*/60,p.y(),/*width()*/100,height());
 	//ui.fill_button->setEnabled(false);
+	ui.pick_frame->setVisible(false);
 	
 }
 
@@ -55,7 +56,6 @@ Color4b PaintToolbox::getColor(Qt::MouseButton mouse) {
 }
 
 void PaintToolbox::on_pen_type_currentIndexChanged(QString value) {
-	qDebug() << "textchange" << endl;
 	on_pen_radius_valueChanged( ui.pen_radius->value());
 }
 void PaintToolbox::on_pen_radius_valueChanged(double value) {
@@ -96,16 +96,19 @@ void PaintToolbox::on_pen_button_clicked() {
 	paint_utensil=PEN;
 	ui.pen_frame->setVisible(true);
 	ui.pen_extra_frame->setVisible(true);
+	ui.pick_frame->setVisible(false);
 }
 void PaintToolbox::on_fill_button_clicked() {
 	paint_utensil=FILL;
 	ui.pen_frame->setVisible(true);
 	ui.pen_extra_frame->setVisible(false);
+	ui.pick_frame->setVisible(false);
 }
 void PaintToolbox::on_pick_button_clicked() {
 	paint_utensil=PICK;
 	ui.pen_frame->setVisible(false);
 	ui.pen_extra_frame->setVisible(false);
+	ui.pick_frame->setVisible(true);
 }
 
 void PaintToolbox::setColor(Color4b newcol,Qt::MouseButton mouse) {
@@ -113,6 +116,14 @@ void PaintToolbox::setColor(Color4b newcol,Qt::MouseButton mouse) {
 		case Qt::LeftButton: {ui.front->setColor(toQcolor(newcol)); return; }
 		case Qt::RightButton: {ui.back->setColor(toQcolor(newcol)); return;}
 		default: {ui.front->setColor(toQcolor(newcol)); return;}
+	}
+}
+
+void PaintToolbox::setColor(int r,int g,int b,Qt::MouseButton mouse) {
+	switch (mouse) {
+		case Qt::LeftButton: {ui.front->setColor(QColor(r,g,b)); return; }
+		case Qt::RightButton: {ui.back->setColor(QColor(r,g,b)); return;}
+		default: {ui.front->setColor(QColor(r,g,b)); return;}
 	}
 }
 
