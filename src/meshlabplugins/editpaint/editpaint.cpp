@@ -26,7 +26,7 @@
 //TODO better to vertex painting switch
 //TODO bits instead of hashtables
 //TODO PaintToolbox does not close
-//TODO lines problem with percentual painting SOLVED BUT BLAH
+//TODO lines problem with percentual painting
 ----------- SOLVED: ------------
 //TODO first paint hang problem -- PROBALLY SOLVED, not shure
 //TODO trackball zbuffer problem OK
@@ -148,11 +148,11 @@ void EditPaintPlugin::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &/
 	//qDebug("mouseMoveEvent: ----");
 	}
 	else {
-		gla->makeCurrent();
+		/*gla->makeCurrent();
 		glDrawBuffer(GL_FRONT);
 		DrawXORRect(gla,true);
 		glDrawBuffer(GL_BACK);
-		glFlush();
+		glFlush();*/
 	}
 	//qDebug() << "moveEnd" << endl;
 }
@@ -172,10 +172,6 @@ void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshMod
 }
 
 void calcCoord(float x,float y,float z,double matrix[],double *xr,double *yr,double *zr) {
-	//Dreif num;
-	//float x=orig.x;
-	//float y=orig.y;
-	//float z=orig.z;
 	*xr=x*matrix[0]+y*matrix[4]+z*matrix[8]+matrix[12];
 	*yr=x*matrix[1]+y*matrix[5]+z*matrix[9]+matrix[13];	
 	*zr=x*matrix[2]+y*matrix[6]+z*matrix[10]+matrix[14];
@@ -194,7 +190,7 @@ void getInv(double orig[],double inv[]) {
 }
 
 
-void EditPaintPlugin::DrawXORRect(GLArea * gla, bool doubleDraw) {
+void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 	int PEZ=18;
 	if (paintType()==1) {
 		glMatrixMode(GL_PROJECTION);
@@ -255,31 +251,10 @@ void EditPaintPlugin::DrawXORRect(GLArea * gla, bool doubleDraw) {
 		updateMatrixes();
 		
 		QPoint mid= QPoint(cur.x(),gla->curSiz.height()-cur.y());
-	
 		gluUnProject ((double) mid.x(), mid.y(), 0.0, mvmatrix, projmatrix, viewport, &dX, &dY, &dZ);
-		//pos_maus = Dreif ( (float) dX, (float) dY, (float) dZ );
-		
 		gluUnProject ((double) mid.x(), mid.y(), 1.0, mvmatrix, projmatrix, viewport, &dX2, &dY2, &dZ2);
-		//pos_maus2 = Dreif ( (float) dX, (float) dY, (float) dZ );
-	
 
 
-
-		glPushAttrib(GL_ENABLE_BIT);
-	//	glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_COLOR_LOGIC_OP);
-		glLogicOp(GL_XOR);
-		glColor3f(1,1,1);
-	
-		/*for (int lauf=0; lauf<PEZ; lauf++) {
-			glBegin(GL_LINES);
-				glVertex3f(dX+sin(M_PI*(float)lauf/9.0)*pen.width.x()*0.01,dY+cos(M_PI*(float)lauf/9.0)*pen.width.x()*0.01,dZ);
-				glVertex3f(dX2+sin(M_PI*(float)lauf/9.0)*pen.width.x()*0.01,dY2+cos(M_PI*(float)lauf/9.0)*pen.width.x()*0.01,dZ2);
-			glEnd();
-		}*/
-	
 		glPushMatrix();
 		glLoadIdentity();
 		gluLookAt(dX,dY,dZ,dX2,dY2,dZ2,1,0,0);
@@ -288,86 +263,120 @@ void EditPaintPlugin::DrawXORRect(GLArea * gla, bool doubleDraw) {
 		glPopMatrix();
 	
 		double tx,ty,tz;
-	
-		glPushMatrix();
-		//mvmatrix[12]=mvmatrix[13]=mvmatrix[14]=0;
-		//mvmatrix[0]=mvmatrix[5]=mvmatrix[10]=1;
+		double tx2,ty2,tz2;
 	
 		double inv_mvmatrix[16];
-		//getInv(mvmatrix2,inv_mvmatrix);
 	
 		Matrix44d temp(mvmatrix2);
 		Invert(temp);
 		for (int lauf=0; lauf<16; lauf++) inv_mvmatrix[lauf]=temp[lauf/4][lauf%4];
 		
 		float radius=pen.radius;
-	
-		glBegin(GL_LINES);
-		for (int lauf=0; lauf<PEZ; lauf++) {
-			calcCoord(sin(M_PI*(double)lauf/9.0)*radius,
-					cos(M_PI*(double)lauf/9.0)*radius,
-				-1000,inv_mvmatrix,&tx,&ty,&tz);
-	
-			glVertex3f(tx,ty,tz);
-	
-			calcCoord(sin(M_PI*(double)lauf/9.0)*radius,
-					cos(M_PI*(double)lauf/9.0)*radius,
-				1000,inv_mvmatrix,&tx,&ty,&tz);
-			glVertex3f(tx,ty,tz);
+		double a,b,c;
+		double a2,b2,c2;
 
-			//tx/=inv_mvmatrix[10];
-			//ty/=inv_mvmatrix[10];
-			//tz/=inv_mvmatrix[10];
-			//gluProject(sin(M_PI*(float)lauf/9.0)*10,cos(M_PI*(float)lauf/9.0)*10,0,mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
-			//glVertex3f(dX,dY,dZ);
-			//glVertex3f(dX2+tx,dY2+ty,dZ2+tz);
-		}
-		glEnd();
+		PEZ=56;
+		int STEPS=60;
+		float diag=m.cm.bbox.Diag()*(-7);
+		QPoint circle_points[PEZ];
 
-	
-		glPopMatrix();
-	
-		glPopAttrib();
-
-		//TTTTTTTTTTTTEREEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSTTTTTTTTTTTTTT
-/*
 		glPushAttrib(GL_ENABLE_BIT);
 		//glDisable(GL_DEPTH_TEST);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
-		//glDisable(GL_DEPTH_TEST);
 		glEnable(GL_COLOR_LOGIC_OP);
 		glLogicOp(GL_XOR);
 		glColor3f(1,1,1);
 
-		double tempx,tempy,tempz;
-		calcCoord(dX,dY,dZ,mvmatrix,&tempx,&tempy,&tempz);
-		qDebug()<< "ber1: "<<tempx<<" "<<tempy<<" "<<tempz<<endl;
-		calcCoord(dX2,dY2,dZ2,mvmatrix,&tempx,&tempy,&tempz);
-		qDebug()<< "ber2: "<<tempx<<" "<<tempy<<" "<<tempz<<endl;
-
-		Matrix44d temp2(mvmatrix);
-		Invert(temp2);
-		for (int lauf=0; lauf<16; lauf++) inv_mvmatrix[lauf]=temp2[lauf/4][lauf%4];
 		glBegin(GL_LINES);
 		for (int lauf=0; lauf<PEZ; lauf++) {
-			double ta,tb,tc;
-			calcCoord(//sin(M_PI*(float)lauf/9.0)*radius*0.01
-					-2+lauf*0.1,0,
-					//cos(M_PI*(float)lauf/9.0)*radius*0.01,
-				-5,inv_mvmatrix,&tx,&ty,&tz);
-			glVertex3f(tx,ty,tz);
-			gluProject(tx,ty,tz,mvmatrix,projmatrix,viewport,&ta,&tb,&tc);
-			qDebug() <<"screen: "<< ta << " "<<  tb << " "<< tc << endl;
-			calcCoord(//sin(M_PI*(float)lauf/9.0)*radius*0.01
-					-2+lauf*0.1,
-					0,//cos(M_PI*(float)lauf/9.0)*radius*0.01
-				5,inv_mvmatrix,&tx,&ty,&tz);
-			glVertex3f(tx,ty,tz);
+			calcCoord(sin(M_PI*(double)lauf/(PEZ/2))*radius,cos(M_PI*(double)lauf/(PEZ/2))*radius,diag,inv_mvmatrix,&tx,&ty,&tz);
+			//glVertex3f(tx,ty,tz);
+			gluProject(tx,ty,tz,mvmatrix,projmatrix,viewport,&a,&b,&c);
+
+			calcCoord(sin(M_PI*(double)lauf/(PEZ/2))*radius,cos(M_PI*(double)lauf/(PEZ/2))*radius,0,inv_mvmatrix,&tx2,&ty2,&tz2);
+			//glVertex3f(tx2,ty2,tz2);
+			gluProject(tx2,ty2,tz2,mvmatrix,projmatrix,viewport,&a2,&b2,&c2);
+
+			double da=(a-a2)/(double)STEPS;
+			double db=(b-b2)/(double)STEPS;
+			double dc=(c-c2)/(double)STEPS;
+			double pix_x=a2;
+			double pix_y=b2;
+			double pix_z=c2;
+			//circle_points[lauf]=QPoint(a2,old_size.y()-b2);
+			//qDebug() <<"dabc: "<< da << " "<< db << " "<<dc << " abc: "<<a<<" "<<b<<" "<<c<< " a2b2c2: "<<a2<<" "<<b2<<" "<<c2<<endl;
+			for (int lauf2=0; lauf2<STEPS; lauf2++) {
+				pix_x+=da;
+				pix_y+=db;
+				pix_z+=dc;
+				double inv_yy=old_size.y()-pix_y;
+				//circle_points[lauf]=QPoint(pix_x,inv_yy);
+				//qDebug() << pix_x << " "<<pix_y << endl;
+				//if (pix_z<=0 || pix_z>=1)qDebug() <<"OK: "<< pix_x << " "<<pix_y <<" pix_z: "<< pix_z<<" zz: "<<endl;
+					
+				if ((int)pix_x>=0 && (int)pix_x<old_size.x() && (int)pix_y>=0 && (int)pix_y<old_size.y()) {
+					double zz=(GLfloat)pixels[(int)(((int)pix_y)*old_size.x()+(int)pix_x)];
+					if (zz<0.99999 && zz<pix_z /*&& pix_z<1*/ && pix_z>0) {
+						circle_points[lauf]=QPoint(pix_x,inv_yy);
+						//lauf2=1000;
+						break;
+					}
+				}
+				if (lauf2==STEPS-1 /*|| pix_z>=1*/) { circle_points[lauf]=QPoint(pix_x,inv_yy); break; }
+			}
+
 		}
+
 		glEnd();
-		glPopAttrib();*/
-		//TTTTTTEEEEEEEEESSSSSSSSSSSTTTTTTTTTTTTTT EEEEEEEENNNNNNNDDDDDDDDDEEEEEEEEE
+		glDisable(GL_COLOR_LOGIC_OP);
+		glPopAttrib();
+	
+
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0,gla->curSiz.width(),gla->curSiz.height(),0,-1,1);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+		//Color4b co=paintbox->getColor(curr_mouse);
+		//qDebug() << co[0] << " " << co[1] << " " << co[2] << endl;
+		glBegin(GL_TRIANGLES);
+		glColor4d(1,1,1,0.1);
+		for (int lauf=0; lauf<PEZ; lauf++) {
+			glVertex2f(mid.x(),gla->curSiz.height()-mid.y());
+			glVertex2f(circle_points[lauf].x(),circle_points[lauf].y());
+			glVertex2f(circle_points[(lauf+1)%PEZ].x(),circle_points[(lauf+1)%PEZ].y());
+		} 
+		glEnd();
+		glDisable(GL_BLEND);
+		glEnable(GL_COLOR_LOGIC_OP);
+		glLogicOp(GL_XOR);
+		glColor3f(1,1,1);
+		glBegin(GL_LINE_STRIP);
+		for (int lauf=0; lauf<PEZ; lauf++) {
+			glVertex2f(circle_points[lauf].x(),circle_points[lauf].y());
+		} glVertex2f(circle_points[0].x(),circle_points[0].y());
+		/*if(doubleDraw) {
+			for (int lauf=0; lauf<PEZ; lauf++) {
+				glVertex2f(circle_points[lauf].x(),circle_points[lauf].y());
+			} glVertex2f(circle_points[0].x(),circle_points[0].y());
+		}*/
+		glEnd();
+		glDisable(GL_COLOR_LOGIC_OP);
+		glPopAttrib();
+		glPopMatrix(); // restore modelview
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
 	}
 
 }
@@ -431,7 +440,6 @@ bool pointInTriangle(QPointF p,QPointF a, QPointF b,QPointF c) {
 }
 
 bool isFront(QPointF a, QPointF b, QPointF c) {
-	//return (a.x()*b.x()+a.y()*b.y())>0;
 	return (b.x()-a.x())*(c.y()-a.y())-(b.y()-a.y())*(c.x()-a.x())>0;
 }
 
@@ -483,7 +491,7 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<CMe
 				gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
 				p[lauf]=QPointF(tx,ty);
 				//qDebug() << "zzz: "<<(int)(((int)ty)*old_size.x()+(int)tx)<<" t: "<<tx<<" "<<ty<<" "<<tz<<endl;
-				if (tx>=0 && tx<old_size.x() && ty>=0 && ty<=old_size.y())
+				if (tx>=0 && tx<old_size.x() && ty>=0 && ty<old_size.y())
 					z[lauf]=QPointF(tz,(GLfloat)pixels[(int)(((int)ty)*old_size.x()+(int)tx)]);
 				else z[lauf]=QPoint(1,0);
 				//qDebug() << "zzz_ende"<<endl;
@@ -528,7 +536,7 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<CMe
 	} else { // PERCENTUAL
 		double dX, dY, dZ;
 		double dX2, dY2, dZ2;
-		/*gluUnProject ((double) mid.x(), mid.y(), 0.0, mvmatrix, projmatrix, viewport, &dX, &dY, &dZ);
+		gluUnProject ((double) mid.x(), mid.y(), 0.0, mvmatrix, projmatrix, viewport, &dX, &dY, &dZ);
 		gluUnProject ((double) mid.x(), mid.y(), 1.0, mvmatrix, projmatrix, viewport, &dX2, &dY2, &dZ2);
 		glPushMatrix();
 		glLoadIdentity();
@@ -539,7 +547,7 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<CMe
 		double inv_mvmatrix[16];
 		Matrix44d temp(mvmatrix2);
 		Invert(temp);
-		for (int lauf=0; lauf<16; lauf++) inv_mvmatrix[lauf]=temp[lauf/4][lauf%4];*/
+		for (int lauf=0; lauf<16; lauf++) inv_mvmatrix[lauf]=temp[lauf/4][lauf%4];
 
 		double ttx,tty,ttz;
 		calcCoord(dX,dY,0,mvmatrix,&ttx,&tty,&ttz);
@@ -562,6 +570,7 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<CMe
 		double scale_fac=sqrt((ty-dY)*(ty-dY)+(tx-dX)*(tx-dX)+(tz-dZ)*(tz-dZ));
 		//qDebug() <<"scale_fac: "<< scale_fac << " radius: "<<radius<<endl;
 		//for(fpi=temp.begin();fpi!=temp.end();++fpi) {
+		//qDebug() << pen.radius << "  "<<scale_fac<<"  "<<old_size<<" diag: "<<m.cm.bbox.Diag()<<endl;
 		for (int lauf2=0; lauf2<temp_po.size(); lauf2++) {
 			CFaceO * fac=temp_po.at(lauf2);
 			bool intern=false;
@@ -575,7 +584,7 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<CMe
 				gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
 				//p[lauf]=QPointF(dx,dy);
 				p[lauf]=QPointF(tx,ty);
-				if (tx>=0 && tx<old_size.x() && ty>=0 && ty<=old_size.y())
+				if (tx>=0 && tx<old_size.x() && ty>=0 && ty<old_size.y())
 					z[lauf]=QPointF(tz,(GLfloat)pixels[(int)(((int)ty)*old_size.x()+(int)tx)]);
 				else z[lauf]=QPoint(1,0);
 				distance[lauf]=dz;
@@ -583,7 +592,9 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<CMe
 				/*double a,b,c;
 				calcCoord((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix2,&a,&b,&c);
 				gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
-				z[lauf]=QPointF(tz,(GLfloat)pixels[(int)(((int)ty)*old_size.x()+(int)tx)]);
+				if (tx>=0 && tx<old_size.x() && ty>=0 && ty<old_size.y())
+					z[lauf]=QPointF(tz,(GLfloat)pixels[(int)(((int)ty)*old_size.x()+(int)tx)]);
+				else z[lauf]=QPoint(1,0);
 				p[lauf]=QPointF(a,b);*/
 				//gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
 				//p[lauf]=QPointF(tx,ty);
@@ -596,8 +607,8 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<CMe
 					//QPointF poo(mid.x()*(distance[lauf])*-1.0,mid.y()*(distance[lauf])*-1.0);
 					//if (isIn(poo,poo,tx,ty,/*0.08*gla->trackball.track.sca*/radius)==1) {
 					//THE 2*190 should not be a constant !!!
-					if (isIn(mid,mid_prev,tx,ty,pen.radius*1.0*scale_fac*190.0*4.0*1.0/distance[lauf])==1) {
-					//if (isIn(QPoint(0,0),QPoint(0,0),tx,ty,radius)==1) {  
+					if (isIn(mid,mid_prev,tx,ty,pen.radius*scale_fac*viewport[3]*0.88/distance[lauf])==1) {
+					//if (isIn(QPoint(0,0),QPoint(0,0),tx,ty,pen.radius)==1) {  
 						intern=true;
 						if (!sel_vert.contains(fac->V(lauf))) {
 							risult->push_back(fac->V(lauf));
@@ -743,7 +754,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 		case PEN: {}
 	}
 
-	DrawXORRect(gla,false);
+	DrawXORRect(m,gla,false);
 
 	pen.painttype=paintType();
 	pen.backface=paintbox->getPaintBackface();

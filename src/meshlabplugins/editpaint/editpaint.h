@@ -107,9 +107,9 @@ private:
 	bool first;
 	QPoint old_size;
 
-	int inverse_y; // gla->curSiz.height()
+	int inverse_y; // gla->curSiz.height()-cur.y()
 	int paintType();
-	void DrawXORRect(GLArea * gla, bool doubleDraw);
+	void DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw);
 	//void getInternFaces(vector<CMeshO::FacePointer> *actual,vector<CMeshO::VertexPointer> * risult, GLArea * gla);
 	
 	bool getFaceAtMouse(MeshModel &,CMeshO::FacePointer &);
@@ -125,9 +125,8 @@ private:
 		glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
 		/*for (int lauf=0; lauf<4; lauf++) {
 			qDebug() <<projmatrix[lauf*4]<<" "<<projmatrix[lauf*4+1]<<" "<<projmatrix[lauf*4+2]<<" "<<projmatrix[lauf*4+3]<<" ";
-			//if (lauf%4==0) qDebug() << endl;
 		}
-		qDebug() << "---------"<<endl;*/
+		qDebug() <<"---- viewport: "<<viewport[0]<<" "<<viewport[1]<<" "<<viewport[2]<<" "<<viewport[3]<< "---------"<<endl;*/
 	}
 
 	inline int getNearest(QPointF center, QPointF *punti,int num) {
@@ -143,8 +142,6 @@ private:
 		}
 		return nearestInd;
 	}
-	
-
 
 	public slots:
 		void updateMe();
