@@ -28,10 +28,9 @@ public:
   bool BuildMesh(CMeshO &m, int subsample, int count, float minQuality,int smoothSteps);
   void SmartSubSample(int subsampleFactor, FloatImage &fli, CharImage &chi, FloatImage &subD,FloatImage &subQ, int minCount);
   void AddCameraIcon(CMeshO &m);
-  bool CombineMaskAndQuality(CharImage &qualityImg, QString maskName );
+  bool CombineHandMadeMaskAndCount(CharImage &qualityImg, QString maskName );
   void GenerateCountImage();
-  void GenerateGradientSmoothingMask(int subsampleFactor, CharImage &mask);
-  void Laplacian(FloatImage &depth, CharImage &mask);
+  void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
   void Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, CharImage &mask);
 
   QIcon *getIcon();

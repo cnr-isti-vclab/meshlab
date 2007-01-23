@@ -172,8 +172,8 @@ ScalarImage<unsigned char>::ScalarImage(QImage img)
 {
   resize(img.width(),img.height());
 
-  for(int x=0;x<w;++x)
-    for(int y=0;y<h;++y)
+   for(int y=0;y<h;++y)
+      for(int x=0;x<w;++x)
         Val(x,y)=qGray(img.pixel(x,y));
 
 }

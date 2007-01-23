@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.8  2007/01/23 10:50:44  cignoni
+ Better comments and variable names
+
  Revision 1.7  2007/01/23 09:21:28  corsini
  add mean+erosion filter
 
@@ -76,23 +79,24 @@
 FILE *logFP=0; 
 using namespace vcg;
 
-bool EpochModel::CombineMaskAndQuality(CharImage &qualityImg, QString maskName )
+/// Apply the hand drawn mask image 
+bool EpochModel::CombineHandMadeMaskAndCount(CharImage &CountImg, QString maskName )
 {
 	QImage maskImg(maskName);
 
 	if(maskImg.isNull()) 
 		return false;
 
-	if(maskImg.width()!= qualityImg.w) 
+	if(maskImg.width()!= CountImg.w) 
 		return false;
 
-	if(maskImg.height()!= qualityImg.h) 
+	if(maskImg.height()!= CountImg.h) 
 		return false;
 
 	for(int j=0;j<maskImg.height();++j)
 		for(int i=0;i<maskImg.width();++i)
 			if(qRed(maskImg.pixel(i,j))>128)
-				qualityImg.Val(i,j)=0;
+				CountImg.Val(i,j)=0;
 
 	return true;
 }
@@ -136,33 +140,15 @@ void EpochModel::SmartSubSample(int factor, FloatImage &fli, CharImage &chi, Flo
     }
 }
 
-void EpochModel::Laplacian(FloatImage &depth, CharImage &mask)
-{
-  FloatImage Sum;
-  int w=depth.w,h=depth.h;
-  Sum.resize(w,h);
-  for(int x=1;x<w-1;++x)
-    for(int y=1;y<h-1;++y)
-      Sum.Val(x,y)=(depth.Val(x-1,y-1)+depth.Val(x  ,y-1)+depth.Val(x+1,y-1)+
-                    depth.Val(x-1,y  )+depth.Val(x  ,y  )+depth.Val(x+1,y  )+
-                    depth.Val(x-1,y+1)+depth.Val(x  ,y+1)+depth.Val(x+1,y+1))/9.0;
-
-  for(int x=1;x<w-1;++x)
-    for(int y=1;y<h-1;++y)
-    {
-      float q=(mask.Val(x,y)/255.0);
-      depth.Val(x,y) =  depth.Val(x,y)*q + Sum.Val(x,y)*(1-q);
-    }
-}
 /* 
 This filter average apply a laplacian smoothing over a depth map averaging the samples with a weighting scheme that follows the Counting masks.
 The result  of the laplacian is applied only on sample with low quality.
 */
 
-void EpochModel::Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, CharImage &mask)
+void EpochModel::Laplacian2(FloatImage &depthImg, FloatImage &countImg, int minCount, CharImage &featureMask)
 {
   FloatImage Sum;
-  int w=depth.w,h=depth.h;
+  int w=depthImg.w,h=depthImg.h;
   Sum.resize(w,h);
   
  for(int y=1;y<h-1;++y)
@@ -172,30 +158,32 @@ void EpochModel::Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, Char
       for(int j=-1;j<=1;++j)
         for(int i=-1;i<=1;++i)
          {
-           int q=Q.Val(x+i,y+j)-minCount+1;
+           int q=countImg.Val(x+i,y+j)-minCount+1;
            if(q>0) {
-             Sum.Val(x,y)+=q*depth.Val(x+i,y+j);
+             Sum.Val(x,y)+=q*depthImg.Val(x+i,y+j);
              cnt+=q;
            }
          }
          if(cnt>0) {
            Sum.Val(x,y)/=cnt;
          }
-      else Sum.Val(x,y)=depth.Val(x,y);
+         else Sum.Val(x,y)=depthImg.Val(x,y);
     }
 
  for(int y=1;y<h-1;++y)
   for(int x=1;x<w-1;++x)
     {
-      float q=(mask.Val(x,y)/255.0);
-      depth.Val(x,y) = depth.Val(x,y)*q + Sum.Val(x,y)*(1-q);
+      float q=(featureMask.Val(x,y)/255.0);
+      depthImg.Val(x,y) = depthImg.Val(x,y)*q + Sum.Val(x,y)*(1-q);
     }
 }
 
-void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, CharImage &mask)
+// It generate a feature mask that mark the featureless area of the original photo. 
+// Featureless areas are usually affected by noise and have to be smoothed more
+
+void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask)
 {
-	QImage base(textureName); 
-	CharImage gray(base);
+	CharImage gray(OriginalTexture);
 	CharImage grad;
 	grad.resize(gray.w,gray.h);
 	int w=gray.w,h=gray.h;
@@ -214,12 +202,12 @@ void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, CharImage &m
 	for(int x=0;x<ws;++x)
 		for(int y=0;y<hs;++y)
 		{
-			unsigned char sum=0;
+			unsigned char maxGrad=0;
 			for(int si=0;si<subsampleFactor;++si)
 				for(int sj=0;sj<subsampleFactor;++sj)
-					sum = max(sum, grad.Val(x*subsampleFactor+sj,y*subsampleFactor+si));
+					maxGrad = max(maxGrad, grad.Val(x*subsampleFactor+sj,y*subsampleFactor+si));
 
-			mask.Val(x,y) = min((unsigned char)255, sum);
+			mask.Val(x,y) = maxGrad;
 		}
 
 	CharImage mask2;
@@ -238,6 +226,9 @@ void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, CharImage &m
 
 			mask2.Val(x, y) = min(255, avg / ((2 * wsize + 1)* (2 * wsize +1)));
 		}
+  
+  mask.convertToQImage().save("C:/temp/testmask.jpg","jpg");
+  mask2.convertToQImage().save("C:/temp/testmaskSmooth.jpg","jpg");
 
 	// erosion filter (7 x 7)
 	int minimum;
@@ -255,7 +246,7 @@ void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, CharImage &m
 		}
   
 	grad.convertToQImage().save("C:/temp/test.jpg","jpg");
-	mask.convertToQImage().save("C:/temp/testmask.jpg","jpg");
+	mask.convertToQImage().save("C:/temp/testmaskeroded.jpg","jpg");
 }
 
 /*
@@ -268,47 +259,48 @@ it takes a depth map, a count map,
 - and smooth them with a count/quality aware laplacian filter
 */ 
 
-bool EpochModel::BuildMesh(CMeshO &m, int subsample, int minCount, float minAngleCos, int smoothSteps)
+bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps)
 {
-  FloatImage fli;
-  CharImage chi;
+  FloatImage depthImgf;
+  CharImage countImgc;
   int ttt0=clock();
-  fli.Open(depthName.toAscii());
-  chi.Open(countName.toAscii());
+  depthImgf.Open(depthName.toAscii());
+  countImgc.Open(countName.toAscii());
   
-  QImage tx;
-  tx.load(textureName);
+  QImage TextureImg;
+  TextureImg.load(textureName);
   int ttt1=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: Opening files %i\n",ttt1-ttt0);
 
-  CombineMaskAndQuality(chi,maskName);
+  CombineHandMadeMaskAndCount(countImgc,maskName);  // set count to zero for all masked points
   
-  FloatImage flisub;  // the subsampled depth image 
-  FloatImage flisubQ; // the subsampled quality image (quality == count)
-  CharImage QualityMask; // the subsampled image with (quality == features)
+  FloatImage depthSubf;  // the subsampled depth image 
+  FloatImage countSubf;  // the subsampled quality image (quality == count)
+  
+  SmartSubSample(subsampleFactor,depthImgf,countImgc,depthSubf,countSubf,minCount);
+  
+  CharImage FeatureMask; // the subsampled image with (quality == features)
+  GenerateGradientSmoothingMask(subsampleFactor, TextureImg, FeatureMask);
 
-  SmartSubSample(subsample,fli,chi,flisub,flisubQ,minCount);
-  GenerateGradientSmoothingMask(subsample,QualityMask);
-
-  flisub.convertToQImage().save("C:/temp/depth.jpg", "jpg");
+  depthSubf.convertToQImage().save("C:/temp/depth.jpg", "jpg");
 
   int ttt2=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: SubSample and Gradient %i\n",ttt2-ttt1);
 
   for(int ii=0;ii<smoothSteps;++ii) 
     // Laplacian(flisub,QualityMask);
-    Laplacian2(flisub,flisubQ,minCount,QualityMask);
+    Laplacian2(depthSubf,countSubf,minCount,FeatureMask);
 
   int ttt3=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: Smoothing %i\n",ttt3-ttt2);
 
-  vcg::tri::Grid<CMeshO>(m,flisub.w,flisub.h,fli.w,fli.h,&*flisub.v.begin());
+  vcg::tri::Grid<CMeshO>(m,depthSubf.w,depthSubf.h,depthImgf.w,depthImgf.h,&*depthSubf.v.begin());
 
   int ttt4=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: trimesh building %i\n",ttt4-ttt3);
 
   for(int i=0;i<m.vn;++i)
-    if(flisubQ.v[i]<minCount) 
+    if(countSubf.v[i]<minCount) 
     {
       m.vert[i].SetD();
       m.vn--;
@@ -325,13 +317,13 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsample, int minCount, float minAngl
     cam.DepthTo3DPoint(in[0], in[1], in[2], out);
     
     (*vi).P().Import(out);
-    QRgb c = tx.pixel(int(in[0]), int(in[1]));
+    QRgb c = TextureImg.pixel(int(in[0]), int(in[1]));
     (*vi).C().SetRGB(qRed(c),qGreen(c),qBlue(c));
     //(*vi).Q()=chi.Val(in[0], in[1]);
     //(*vi).Q()=flisubQ.Val(in[0]/subsample, in[1]/subsample);
-    if(QualityMask.Val(int(in[0]/subsample), int(in[1]/subsample))<200) (*vi).Q()=0; 
+    if(FeatureMask.Val(int(in[0]/subsampleFactor), int(in[1]/subsampleFactor))<200) (*vi).Q()=0; 
     else (*vi).Q()=1; 
-    (*vi).Q()=float(QualityMask.Val(in[0]/subsample, in[1]/subsample))/255.0;
+    (*vi).Q()=float(FeatureMask.Val(in[0]/subsampleFactor, in[1]/subsampleFactor))/255.0;
   }
     
   int ttt5=clock();
