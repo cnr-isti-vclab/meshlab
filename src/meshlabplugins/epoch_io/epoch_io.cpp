@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.9  2007/01/23 11:38:55  cignoni
+ Added depth jump control in laplacian smoothing of featureless areas of depthmap
+
  Revision 1.8  2007/01/23 10:50:44  cignoni
  Better comments and variable names
 
@@ -66,6 +69,7 @@
 #include "epoch_io.h"
 #include "epoch_reconstruction.h"
 #include <vcg/math/matrix33.h>
+#include <vcg/math/histogram.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/create/platonic.h>
 #include <vcg/complex/trimesh/update/bounding.h>
@@ -78,6 +82,23 @@
 
 FILE *logFP=0; 
 using namespace vcg;
+
+
+float EpochModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
+{
+  Histogramf HH;
+  HH.Clear();
+  HH.SetRange(depthImgf.MinVal(),depthImgf.MaxVal(),1000);
+  for(int i=1;i<depthImgf.v.size();++i)
+    HH.Add(fabs(depthImgf.v[i]-depthImgf.v[i-1]));
+
+  if(logFP) fprintf(logFP,"**** Depth histogram Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.minv,HH.maxv,HH.Avg(),
+        HH.Percentile(.1),HH.Percentile(.25),HH.Percentile(.5),HH.Percentile(.75),HH.Percentile(.9));
+  
+  return HH.Percentile(percentile);
+}
+
+
 
 /// Apply the hand drawn mask image 
 bool EpochModel::CombineHandMadeMaskAndCount(CharImage &CountImg, QString maskName )
@@ -145,7 +166,7 @@ This filter average apply a laplacian smoothing over a depth map averaging the s
 The result  of the laplacian is applied only on sample with low quality.
 */
 
-void EpochModel::Laplacian2(FloatImage &depthImg, FloatImage &countImg, int minCount, CharImage &featureMask)
+void EpochModel::Laplacian2(FloatImage &depthImg, FloatImage &countImg, int minCount, CharImage &featureMask, float depthThr)
 {
   FloatImage Sum;
   int w=depthImg.w,h=depthImg.h;
@@ -154,12 +175,13 @@ void EpochModel::Laplacian2(FloatImage &depthImg, FloatImage &countImg, int minC
  for(int y=1;y<h-1;++y)
   for(int x=1;x<w-1;++x)
     {
+      float curDepth=depthImg.Val(x,y);
       int cnt=0;
       for(int j=-1;j<=1;++j)
         for(int i=-1;i<=1;++i)
          {
            int q=countImg.Val(x+i,y+j)-minCount+1;
-           if(q>0) {
+           if(q>0 && fabs(depthImg.Val(x+i,y+j)-curDepth) < depthThr) {
              Sum.Val(x,y)+=q*depthImg.Val(x+i,y+j);
              cnt+=q;
            }
@@ -287,9 +309,10 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
   int ttt2=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: SubSample and Gradient %i\n",ttt2-ttt1);
 
+  float depthThr = ComputeDepthJumpThr(depthSubf,0.8f);
   for(int ii=0;ii<smoothSteps;++ii) 
     // Laplacian(flisub,QualityMask);
-    Laplacian2(depthSubf,countSubf,minCount,FeatureMask);
+    Laplacian2(depthSubf,countSubf,minCount,FeatureMask,depthThr);
 
   int ttt3=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: Smoothing %i\n",ttt3-ttt2);

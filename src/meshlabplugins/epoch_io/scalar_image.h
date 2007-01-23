@@ -19,6 +19,9 @@ public:
     return v[y*w+x];
   };
 
+  ScalarType MinVal()  {   return *std::min_element(v.begin(),v.end());  }
+  ScalarType MaxVal()  {   return *std::max_element(v.begin(),v.end());  }
+
 	inline QImage convertToQImage()
 	{
 		QImage img(w,h,QImage::Format_RGB32);

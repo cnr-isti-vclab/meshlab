@@ -31,7 +31,8 @@ public:
   bool CombineHandMadeMaskAndCount(CharImage &qualityImg, QString maskName );
   void GenerateCountImage();
   void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
-  void Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, CharImage &mask);
+  void Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, CharImage &mask, float depthThr);
+  float EpochModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile);
 
   QIcon *getIcon();
 };
