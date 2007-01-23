@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.10  2007/01/23 14:31:16  corsini
+ add improved depth filtering to remove artifacts
+
  Revision 1.9  2007/01/23 11:38:55  cignoni
  Added depth jump control in laplacian smoothing of featureless areas of depthmap
 
@@ -83,6 +86,54 @@
 FILE *logFP=0; 
 using namespace vcg;
 
+void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf)
+{
+	int numpass = 5;
+
+	FloatImage depth;
+	int w = depthImgf.w;
+	int h = depthImgf.h;
+	depth.resize(w, h);
+
+	FloatImage depth2;
+	depth2.resize(w, h);
+
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			depth.Val(x, y) = depthImgf.Val(x, y);
+
+	for (int k = 0; k < numpass; k++)
+	{
+		// erosion filter (3 x 3)
+		int minimum;
+		int wsize = 1;
+		for (int y = wsize; y < h-wsize; y++)
+			for (int x = wsize; x < w-wsize; x++)
+			{
+				minimum = depth.Val(x, y);
+				for (int yy = y - wsize; yy <= y + wsize; yy++)
+					for (int xx = x - wsize; xx <= x + wsize; xx++)
+						if (depth.Val(xx, yy) < minimum)
+							minimum = depth.Val(xx, yy);
+
+				depth2.Val(x, y) = minimum;
+			}
+
+		// copy depth2 in depth
+		for (int y = 0; y < h; y++)
+			for (int x = 0; x < w; x++)
+				depth.Val(x, y) = depth2.Val(x, y);
+	}
+
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+		{
+				if ((depthImgf.Val(x, y) - depth.Val(x, y)) / depthImgf.Val(x, y) > 0.6)
+					countImgf.Val(x, y) = 0.0f;
+		}
+
+	countImgf.convertToQImage().save("C:/temp/filteredcount.jpg","jpg");
+}
 
 float EpochModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
 {
@@ -311,7 +362,6 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 
   float depthThr = ComputeDepthJumpThr(depthSubf,0.8f);
   for(int ii=0;ii<smoothSteps;++ii) 
-    // Laplacian(flisub,QualityMask);
     Laplacian2(depthSubf,countSubf,minCount,FeatureMask,depthThr);
 
   int ttt3=clock();
@@ -322,7 +372,14 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
   int ttt4=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: trimesh building %i\n",ttt4-ttt3);
 
-  for(int i=0;i<m.vn;++i)
+
+	// The depth is filtered and the minimum count mask is update accordingly.
+	// To be more specific the border of the depth map are identified by erosion
+	// and the relative vertex removed (by setting mincount equal to 0).
+	depthFilter(depthSubf, countSubf);
+
+	int vn = m.vn;
+  for(int i=0;i<vn;++i)
     if(countSubf.v[i]<minCount) 
     {
       m.vert[i].SetD();
