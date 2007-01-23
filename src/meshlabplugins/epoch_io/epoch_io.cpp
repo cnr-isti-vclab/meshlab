@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.7  2007/01/23 09:21:28  corsini
+ add mean+erosion filter
+
  Revision 1.6  2007/01/11 11:48:04  cignoni
  Reordered include
 
@@ -75,16 +78,23 @@ using namespace vcg;
 
 bool EpochModel::CombineMaskAndQuality(CharImage &qualityImg, QString maskName )
 {
-  QImage maskImg(maskName);
+	QImage maskImg(maskName);
 
-  if(maskImg.isNull()) return false;
-  if(maskImg.width()!= qualityImg.w) return false;
-  if(maskImg.height()!= qualityImg.h) return false;
-  for(int j=0;j<maskImg.height();++j)
-    for(int i=0;i<maskImg.width();++i)
-      if(qRed(maskImg.pixel(i,j))>128)
-          qualityImg.Val(i,j)=0;
-        
+	if(maskImg.isNull()) 
+		return false;
+
+	if(maskImg.width()!= qualityImg.w) 
+		return false;
+
+	if(maskImg.height()!= qualityImg.h) 
+		return false;
+
+	for(int j=0;j<maskImg.height();++j)
+		for(int i=0;i<maskImg.width();++i)
+			if(qRed(maskImg.pixel(i,j))>128)
+				qualityImg.Val(i,j)=0;
+
+	return true;
 }
 
 
@@ -178,43 +188,74 @@ void EpochModel::Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, Char
   for(int x=1;x<w-1;++x)
     {
       float q=(mask.Val(x,y)/255.0);
-      depth.Val(x,y) =  depth.Val(x,y)*q + Sum.Val(x,y)*(1-q);
+      depth.Val(x,y) = depth.Val(x,y)*q + Sum.Val(x,y)*(1-q);
     }
 }
 
 void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, CharImage &mask)
 {
-  QImage base(textureName); 
-  CharImage gray(base);
-  CharImage grad;
-  grad.resize(gray.w,gray.h);
-  int w=gray.w,h=gray.h;
-  for(int x=1;x<w-1;++x)
-    for(int y=1;y<h-1;++y)
-    {
-      int dx=abs(int(gray.Val(x,y))-int(gray.Val(x-1,y))) + abs(int(gray.Val(x,y))-int(gray.Val(x+1,y)));
-      int dy=abs(int(gray.Val(x,y))-int(gray.Val(x,y-1))) + abs(int(gray.Val(x,y))-int(gray.Val(x,y+1)));
-      grad.Val(x,y)=min(255,16*dx+dy);
-    }      
-  //grad.convertToQImage().save("test.jpg","jpg");
+	QImage base(textureName); 
+	CharImage gray(base);
+	CharImage grad;
+	grad.resize(gray.w,gray.h);
+	int w=gray.w,h=gray.h;
+	for(int x=1;x<w-1;++x)
+		for(int y=1;y<h-1;++y)
+		{
+			int dx=abs(int(gray.Val(x,y))-int(gray.Val(x-1,y))) + abs(int(gray.Val(x,y))-int(gray.Val(x+1,y)));
+			int dy=abs(int(gray.Val(x,y))-int(gray.Val(x,y-1))) + abs(int(gray.Val(x,y))-int(gray.Val(x,y+1)));
+			grad.Val(x,y)=min(255,16*dx+dy);
+		}
 
-  //CharImage mask;
-  int ws=gray.w/subsampleFactor, hs=gray.h/subsampleFactor;
-  mask.resize(ws,hs);
+	// create subsampled mask
+	int ws=gray.w/subsampleFactor, hs=gray.h/subsampleFactor;
+	mask.resize(ws,hs);
 
-  for(int x=0;x<ws;++x)
-    for(int y=0;y<hs;++y)
-    {
-          unsigned char sum=0;
-          for(int si=0;si<subsampleFactor;++si)
-            for(int sj=0;sj<subsampleFactor;++sj)
-                sum = max(sum,  grad.Val(x*subsampleFactor+sj,y*subsampleFactor+si));
-       
-          mask.Val(x,y)=min((unsigned char)255,sum);
-    }
+	for(int x=0;x<ws;++x)
+		for(int y=0;y<hs;++y)
+		{
+			unsigned char sum=0;
+			for(int si=0;si<subsampleFactor;++si)
+				for(int sj=0;sj<subsampleFactor;++sj)
+					sum = max(sum, grad.Val(x*subsampleFactor+sj,y*subsampleFactor+si));
+
+			mask.Val(x,y) = min((unsigned char)255, sum);
+		}
+
+	CharImage mask2;
+	mask2.resize(ws, hs);
+
+	// average filter (11 x 11)
+	int avg;
+	int wsize = 5;
+	for (int y = wsize; y < hs-wsize; y++)
+		for (int x = wsize; x < ws-wsize; x++)
+		{
+			avg = 0;
+			for (int yy = y - wsize; yy <= y + wsize; yy++)
+				for (int xx = x - wsize; xx <= x + wsize; xx++)
+					avg += mask.Val(xx, yy);
+
+			mask2.Val(x, y) = min(255, avg / ((2 * wsize + 1)* (2 * wsize +1)));
+		}
+
+	// erosion filter (7 x 7)
+	int minimum;
+	wsize = 3;
+	for (int y = wsize; y < hs-wsize; y++)
+		for (int x = wsize; x < ws-wsize; x++)
+		{
+			minimum = mask2.Val(x, y);
+			for (int yy = y - wsize; yy <= y + wsize; yy++)
+				for (int xx = x - wsize; xx <= x + wsize; xx++)
+					if (mask2.Val(xx, yy) < minimum)
+						minimum = mask2.Val(xx, yy);
+
+			mask.Val(x, y) = minimum;
+		}
   
-  //grad.convertToQImage().save("test.jpg","jpg");
-  //mask.convertToQImage().save("testmask.jpg","jpg");
+	grad.convertToQImage().save("C:/temp/test.jpg","jpg");
+	mask.convertToQImage().save("C:/temp/testmask.jpg","jpg");
 }
 
 /*
@@ -248,6 +289,8 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsample, int minCount, float minAngl
 
   SmartSubSample(subsample,fli,chi,flisub,flisubQ,minCount);
   GenerateGradientSmoothingMask(subsample,QualityMask);
+
+  flisub.convertToQImage().save("C:/temp/depth.jpg", "jpg");
 
   int ttt2=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: SubSample and Gradient %i\n",ttt2-ttt1);
