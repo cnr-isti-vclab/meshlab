@@ -17,8 +17,10 @@
 class EditPaintPlugin;
 class PaintToolbox;
 class Penn;
+class ColorUndo;
 class PaintWorker;
 struct PaintData;
+struct UndoItem;
 
 int isIn(QPointF p0,QPointF p1,float dx,float dy,float raduis);
 
@@ -99,6 +101,10 @@ private:
 
 	PaintWorker * worker;
 
+	GLArea* current_gla;
+
+	QHash <GLArea *,ColorUndo *> color_undo;
+
 	int paintType();
 	void DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw);
 	bool getFaceAtMouse(MeshModel &,CMeshO::FacePointer &);
@@ -131,8 +137,43 @@ private:
 		return nearestInd;
 	}
 
-//public slots:
-//	void updateMe();
+public slots:
+	void undo(int value);
+	//void redo();
+};
+
+struct UndoItem {
+	CVertexO * vertex;
+	Color4b original;
+	//Color4b new_color;
+};
+
+class ColorUndo {
+private:
+	vector<vector<UndoItem> *> undos;
+	vector<vector<UndoItem> *> redos;
+	vector<UndoItem> * temp_vector; 
+public:
+	void pushUndo() { 
+		if (undos.size()==10) removeUndo();
+		if (temp_vector->size()==0) return;
+		for (int lauf=0; lauf<redos.size(); lauf++) { redos[lauf]->clear(); delete redos[lauf];}
+		redos.clear();
+		undos.push_back(temp_vector);
+		temp_vector=new vector<UndoItem>();
+	}
+	void undo();
+	void redo();
+	void removeUndo() { 
+		if (undos.size()==0) return; 
+		undos[0]->clear();
+		delete undos[0];
+		undos.erase(undos.begin());
+	}
+	bool hasUndo() { return undos.size()!=0; }
+	bool hasRedo() { return redos.size()!=0; }
+	inline void addItem(UndoItem u) { temp_vector->push_back(u); }
+	ColorUndo() { temp_vector=new vector<UndoItem>();}
 };
 
 class PaintWorker : public QThread{
@@ -184,6 +225,8 @@ public:
 	inline bool getPaintBackface() { return ui.backface_culling->checkState()!=Qt::Unchecked; }
 	inline bool getPaintInvisible() { return ui.invisible_painting->checkState()!=Qt::Unchecked; }
 	inline int getPickMode() { return ui.pick_mode->currentIndex(); }
+	void setUndo(bool value) { ui.undo_button->setEnabled(value); }
+	void setRedo(bool value) { ui.redo_button->setEnabled(value); }
 private:
 	int paint_utensil;
 	Ui::PaintToolbox ui;
@@ -200,6 +243,11 @@ private slots:
 	void on_advanced_button_clicked();
 	void on_backface_culling_stateChanged(int value);
 	void on_invisible_painting_stateChanged(int value);
+	void on_undo_button_clicked();
+	void on_redo_button_clicked();
+signals:
+	void undo_redo(int value);
+	//void redo();
 };
 
 #endif

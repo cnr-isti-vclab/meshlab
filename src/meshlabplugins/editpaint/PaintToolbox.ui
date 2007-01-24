@@ -340,6 +340,50 @@ p, li { white-space: pre-wrap; }
      <property name="frameShadow" >
       <enum>QFrame::Raised</enum>
      </property>
+     <widget class="QToolButton" name="undo_button" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>48</width>
+        <height>48</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="icon" >
+       <iconset resource="meshlab.qrc" >:/images/undo.png</iconset>
+      </property>
+      <property name="iconSize" >
+       <size>
+        <width>48</width>
+        <height>48</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="redo_button" >
+      <property name="geometry" >
+       <rect>
+        <x>60</x>
+        <y>10</y>
+        <width>48</width>
+        <height>48</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="icon" >
+       <iconset resource="meshlab.qrc" >:/images/redo.png</iconset>
+      </property>
+      <property name="iconSize" >
+       <size>
+        <width>48</width>
+        <height>48</height>
+       </size>
+      </property>
+     </widget>
     </widget>
    </item>
    <item row="0" column="0" colspan="2" >
@@ -364,23 +408,23 @@ p, li { white-space: pre-wrap; }
      <property name="frameShadow" >
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QToolButton" name="fill_button" >
+     <widget class="QToolButton" name="advanced_button" >
       <property name="geometry" >
        <rect>
-        <x>60</x>
-        <y>10</y>
+        <x>10</x>
+        <y>60</y>
         <width>48</width>
         <height>48</height>
        </rect>
       </property>
       <property name="toolTip" >
-       <string>Fill an area</string>
+       <string>Change advanced settings</string>
       </property>
       <property name="text" >
-       <string>...</string>
+       <string/>
       </property>
       <property name="icon" >
-       <iconset resource="meshlab.qrc" >:/images/fill.png</iconset>
+       <iconset resource="meshlab.qrc" >:/images/kcontrol.png</iconset>
       </property>
       <property name="iconSize" >
        <size>
@@ -466,23 +510,23 @@ p, li { white-space: pre-wrap; }
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QToolButton" name="advanced_button" >
+     <widget class="QToolButton" name="fill_button" >
       <property name="geometry" >
        <rect>
-        <x>10</x>
-        <y>60</y>
+        <x>60</x>
+        <y>10</y>
         <width>48</width>
         <height>48</height>
        </rect>
       </property>
       <property name="toolTip" >
-       <string>Change advanced settings</string>
+       <string>Fill an area</string>
       </property>
       <property name="text" >
-       <string/>
+       <string>...</string>
       </property>
       <property name="icon" >
-       <iconset resource="meshlab.qrc" >:/images/kcontrol.png</iconset>
+       <iconset resource="meshlab.qrc" >:/images/fill.png</iconset>
       </property>
       <property name="iconSize" >
        <size>

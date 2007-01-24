@@ -7,5 +7,7 @@
 	<file>images/switch.png</file>
 	<file>images/pick.png</file>
 	<file>images/kcontrol.png</file>
+	<file>images/undo.png</file>
+	<file>images/redo.png</file>
     </qresource>
 </RCC>

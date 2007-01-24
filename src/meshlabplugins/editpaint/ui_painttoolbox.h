@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'PaintToolbox.ui'
 **
-** Created: Wed Jan 24 14:41:01 2007
+** Created: Wed Jan 24 19:15:38 2007
 **      by: Qt User Interface Compiler version 4.2.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -55,11 +55,13 @@ public:
     QComboBox *pen_modus;
     QSlider *deck_slider;
     QFrame *frame_3;
+    QToolButton *undo_button;
+    QToolButton *redo_button;
     QFrame *top_frame;
-    QToolButton *fill_button;
+    QToolButton *advanced_button;
     QToolButton *pen_button;
     QToolButton *pick_button;
-    QToolButton *advanced_button;
+    QToolButton *fill_button;
     QFrame *pick_frame;
     QGridLayout *gridLayout4;
     QComboBox *pick_mode;
@@ -223,6 +225,16 @@ public:
     frame_3->setObjectName(QString::fromUtf8("frame_3"));
     frame_3->setFrameShape(QFrame::StyledPanel);
     frame_3->setFrameShadow(QFrame::Raised);
+    undo_button = new QToolButton(frame_3);
+    undo_button->setObjectName(QString::fromUtf8("undo_button"));
+    undo_button->setGeometry(QRect(10, 10, 48, 48));
+    undo_button->setIcon(QIcon(QString::fromUtf8(":/images/undo.png")));
+    undo_button->setIconSize(QSize(48, 48));
+    redo_button = new QToolButton(frame_3);
+    redo_button->setObjectName(QString::fromUtf8("redo_button"));
+    redo_button->setGeometry(QRect(60, 10, 48, 48));
+    redo_button->setIcon(QIcon(QString::fromUtf8(":/images/redo.png")));
+    redo_button->setIconSize(QSize(48, 48));
 
     gridLayout->addWidget(frame_3, 1, 1, 1, 1);
 
@@ -236,14 +248,14 @@ public:
     top_frame->setMinimumSize(QSize(16, 120));
     top_frame->setFrameShape(QFrame::StyledPanel);
     top_frame->setFrameShadow(QFrame::Raised);
-    fill_button = new QToolButton(top_frame);
-    fill_button->setObjectName(QString::fromUtf8("fill_button"));
-    fill_button->setGeometry(QRect(60, 10, 48, 48));
-    fill_button->setIcon(QIcon(QString::fromUtf8(":/images/fill.png")));
-    fill_button->setIconSize(QSize(48, 48));
-    fill_button->setCheckable(true);
-    fill_button->setAutoExclusive(true);
-    fill_button->setAutoRaise(false);
+    advanced_button = new QToolButton(top_frame);
+    advanced_button->setObjectName(QString::fromUtf8("advanced_button"));
+    advanced_button->setGeometry(QRect(10, 60, 48, 48));
+    advanced_button->setIcon(QIcon(QString::fromUtf8(":/images/kcontrol.png")));
+    advanced_button->setIconSize(QSize(48, 48));
+    advanced_button->setCheckable(true);
+    advanced_button->setAutoExclusive(true);
+    advanced_button->setAutoRaise(false);
     pen_button = new QToolButton(top_frame);
     pen_button->setObjectName(QString::fromUtf8("pen_button"));
     pen_button->setGeometry(QRect(10, 10, 48, 48));
@@ -260,14 +272,14 @@ public:
     pick_button->setCheckable(true);
     pick_button->setAutoExclusive(true);
     pick_button->setAutoRaise(false);
-    advanced_button = new QToolButton(top_frame);
-    advanced_button->setObjectName(QString::fromUtf8("advanced_button"));
-    advanced_button->setGeometry(QRect(10, 60, 48, 48));
-    advanced_button->setIcon(QIcon(QString::fromUtf8(":/images/kcontrol.png")));
-    advanced_button->setIconSize(QSize(48, 48));
-    advanced_button->setCheckable(true);
-    advanced_button->setAutoExclusive(true);
-    advanced_button->setAutoRaise(false);
+    fill_button = new QToolButton(top_frame);
+    fill_button->setObjectName(QString::fromUtf8("fill_button"));
+    fill_button->setGeometry(QRect(60, 10, 48, 48));
+    fill_button->setIcon(QIcon(QString::fromUtf8(":/images/fill.png")));
+    fill_button->setIconSize(QSize(48, 48));
+    fill_button->setCheckable(true);
+    fill_button->setAutoExclusive(true);
+    fill_button->setAutoRaise(false);
 
     gridLayout->addWidget(top_frame, 0, 0, 1, 2);
 
@@ -330,14 +342,16 @@ public:
     pen_modus->clear();
     pen_modus->addItem(QApplication::translate("PaintToolbox", "Normal", 0, QApplication::UnicodeUTF8));
     deck_slider->setToolTip(QApplication::translate("PaintToolbox", "Change the opacity of the color (this is not the opengl alpha value)", 0, QApplication::UnicodeUTF8));
-    fill_button->setToolTip(QApplication::translate("PaintToolbox", "Fill an area", 0, QApplication::UnicodeUTF8));
-    fill_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    undo_button->setText(QString());
+    redo_button->setText(QString());
+    advanced_button->setToolTip(QApplication::translate("PaintToolbox", "Change advanced settings", 0, QApplication::UnicodeUTF8));
+    advanced_button->setText(QString());
     pen_button->setToolTip(QApplication::translate("PaintToolbox", "Paint with the pen", 0, QApplication::UnicodeUTF8));
     pen_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
     pick_button->setToolTip(QApplication::translate("PaintToolbox", "Pick a color", 0, QApplication::UnicodeUTF8));
     pick_button->setText(QString());
-    advanced_button->setToolTip(QApplication::translate("PaintToolbox", "Change advanced settings", 0, QApplication::UnicodeUTF8));
-    advanced_button->setText(QString());
+    fill_button->setToolTip(QApplication::translate("PaintToolbox", "Fill an area", 0, QApplication::UnicodeUTF8));
+    fill_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
     pick_mode->clear();
     pick_mode->addItem(QApplication::translate("PaintToolbox", "Nearest vertex color", 0, QApplication::UnicodeUTF8));
     pick_mode->addItem(QApplication::translate("PaintToolbox", "Pixel color", 0, QApplication::UnicodeUTF8));

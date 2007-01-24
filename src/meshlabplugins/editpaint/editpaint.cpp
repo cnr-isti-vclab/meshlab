@@ -53,8 +53,10 @@ EditPaintPlugin::EditPaintPlugin() {
 	pixels=0;
 	first=true;
 	pressed=false;
+	//color_undo= new ColorUndo();
 	actionList << new QAction(QIcon(":/images/pinsel.png"),"Vertex painting", this);
 	QAction *editAction;
+	//QObject::connect(editAction, SIGNAL(redo()),this, SLOT(redo()));
 	foreach(editAction, actionList)
 	editAction->setCheckable(true);
 	//qDebug("CONSTRUCTOR");
@@ -87,12 +89,26 @@ const PluginInfo &EditPaintPlugin::Info() {
 	return ai;
 } 
 
+void EditPaintPlugin::undo(int value) {
+	if (!color_undo.contains(current_gla)) {
+		color_undo.insert(current_gla,new ColorUndo());
+	}
+	if (value==1) color_undo[current_gla]->undo();
+	else color_undo[current_gla]->redo();
+	current_gla->update();
+	paintbox->setUndo(color_undo[current_gla]->hasUndo());
+	paintbox->setRedo(color_undo[current_gla]->hasRedo());
+}
+
 void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent) {
 	first=true;
 	pressed=false;
 	//qDebug() <<"startedit"<<  endl;
 	tri::UpdateBounding<CMeshO>::Box(m.cm);
-	if (paintbox==0) paintbox=new PaintToolbox(parent);
+	if (paintbox==0) { 
+		paintbox=new PaintToolbox(parent);
+		QObject::connect(paintbox, SIGNAL(undo_redo(int)),this, SLOT(undo(int)));
+	}
 	//paintbox->setGeometry();
 	paintbox->setVisible(true);
 	//paintbox->diag=m.cm.bbox.Diag();
@@ -107,6 +123,16 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	LastSel.clear();
 	curSel.clear();
 	parent->update();
+
+	current_gla=parent;
+	if (!color_undo.contains(parent)) {
+		color_undo.insert(parent,new ColorUndo());
+		paintbox->setUndo(false);
+		paintbox->setRedo(false);
+	} else {
+		paintbox->setUndo(color_undo[parent]->hasUndo());
+		paintbox->setRedo(color_undo[parent]->hasRedo());
+	}
 }
 
 void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) {
@@ -129,6 +155,8 @@ void EditPaintPlugin::mousePressEvent(QAction * ac, QMouseEvent * event, MeshMod
 	inverse_y=gla->curSiz.height()-cur.y();
 	curr_mouse=event->button();
 	
+	current_gla=gla;
+
 	pen.painttype=paintType();
 	pen.backface=paintbox->getPaintBackface();
 	pen.invisible=paintbox->getPaintInvisible();
@@ -183,6 +211,12 @@ void EditPaintPlugin::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &/
   
 void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla) {
 	gla->showTrackBall(has_track);
+	if (!color_undo.contains(current_gla)) {
+		color_undo.insert(current_gla,new ColorUndo());
+	} else {}
+	color_undo[gla]->pushUndo();
+	paintbox->setUndo(color_undo[current_gla]->hasUndo());
+	paintbox->setRedo(color_undo[current_gla]->hasRedo());
 	temporaneo.clear();
 	gla->update();
 	prev=cur;
@@ -644,13 +678,17 @@ void EditPaintPlugin::fillFrom(MeshModel & m,CFaceO * face) {
 	visited.insert(face,face);
 	int opac=paintbox->getOpacity();
 	Color4b newcol=paintbox->getColor(curr_mouse);
+	UndoItem u;
 	for (int lauf2=0; lauf2<temp_po.size(); lauf2++) {
 		CFaceO * fac=temp_po.at(lauf2);
 		if (who==fac->IsS()) {
 			for (int lauf=0; lauf<3; lauf++) {
 				if (!temporaneo.contains(fac->V(lauf))) {
 					temporaneo.insert(fac->V(lauf),fac->V(lauf));
+					u.vertex=fac->V(lauf);
+					u.original=fac->V(lauf)->C();
 					colorize(fac->V(lauf),newcol,opac);
+					color_undo[current_gla]->addItem(u);
 				}
 			}
 			for (int lauf=0; lauf<3; lauf++) { 
@@ -715,6 +753,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 	}
 	if(isDragging)
 	{
+	isDragging=false;
 	//qDebug() << "decorate" << endl;
 	switch (paintbox->paintUtensil()) {
 		case FILL: { 
@@ -747,7 +786,6 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 	}
 
 	DrawXORRect(m,gla,false);
-
 	/*PaintData pa;pa.start=cur;pa.end=prev;pa.pen=pen;
 	pa.color=paintbox->getColor(curr_mouse);
 	pa.opac=paintbox->getOpacity();
@@ -765,19 +803,61 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 
 	int opac=paintbox->getOpacity();
 	Color4b newcol=paintbox->getColor(curr_mouse);
+	UndoItem u;
 	for(vpo=newSel.begin();vpo!=newSel.end();++vpo) {
 		if (!temporaneo.contains(*vpo)) {
+			u.vertex=*vpo;
+			u.original=(*vpo)->C();
+			color_undo[current_gla]->addItem(u);
 			temporaneo.insert(*vpo,(*vpo)->C());
 			colorize(*vpo,newcol,opac);
 		}
 	}
-	isDragging=false;
 	pressed=false;
 	}
 	//qDebug()<<"enddecor"<<endl;
 }
 
 //void EditPaintPlugin::updateMe() {}
+
+
+void ColorUndo::undo() {
+	if (undos.size()==0) return;
+	vector<UndoItem> * temp=undos[undos.size()-1];
+	vector<UndoItem> * temp_redo=new vector<UndoItem>();
+	UndoItem u;
+	Color4b oldcol;
+	for (int lauf=0; lauf<temp->size(); lauf++) {
+		u=(*temp)[lauf];
+		oldcol=u.vertex->C();
+		u.vertex->C()=u.original;
+		u.original=oldcol;
+		temp_redo->push_back(u);
+	}
+	undos.pop_back();
+	temp->clear();
+	delete temp;
+	redos.push_back(temp_redo);
+}
+
+void ColorUndo::redo() {
+	if (redos.size()==0) return;
+	vector<UndoItem> * temp=redos[redos.size()-1];
+	vector<UndoItem> * temp_undo=new vector<UndoItem>();
+	UndoItem u;
+	Color4b oldcol;
+	for (int lauf=0; lauf<temp->size(); lauf++) {
+		u=(*temp)[lauf];
+		oldcol=u.vertex->C();
+		u.vertex->C()=u.original;
+		u.original=oldcol;
+		temp_undo->push_back(u);
+	}
+	redos.pop_back();
+	temp->clear();
+	delete temp;
+	undos.push_back(temp_undo);
+}
 
 PaintWorker::PaintWorker() {
 	nothingTodo=true;

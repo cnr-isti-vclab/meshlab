@@ -46,6 +46,8 @@ PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::Wind
 	ui.pick_frame->setVisible(false);
 	ui.advanced_frame->setVisible(false);
 	ui.pen_button->setChecked(true);
+	ui.undo_button->setEnabled(false);
+	ui.redo_button->setEnabled(false);
 }
 
 Color4b PaintToolbox::getColor(Qt::MouseButton mouse) {
@@ -149,3 +151,9 @@ void PaintToolbox::on_invisible_painting_stateChanged(int value) {
 
 }
 
+void PaintToolbox::on_undo_button_clicked() {
+	emit undo_redo(1);
+}
+void PaintToolbox::on_redo_button_clicked() {
+	emit undo_redo(2);
+}
