@@ -6,5 +6,6 @@
 	<file>images/bw.png</file>
 	<file>images/switch.png</file>
 	<file>images/pick.png</file>
+	<file>images/kcontrol.png</file>
     </qresource>
 </RCC>

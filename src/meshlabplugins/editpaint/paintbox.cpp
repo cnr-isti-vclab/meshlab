@@ -41,10 +41,11 @@ PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::Wind
 	ui.switch_me->setGeometry(55,10,15,15);
 	ui.set_bw->setGeometry(10,45,15,15);
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
-	setGeometry(p.x()+parent->width()-/*width()*/60,p.y(),/*width()*/100,height());
+	setGeometry(p.x()+parent->width()-/*width()*/60,p.y(),/*width()*/100,/*height()*/100);
 	//ui.fill_button->setEnabled(false);
 	ui.pick_frame->setVisible(false);
-	
+	ui.advanced_frame->setVisible(false);
+	ui.pen_button->setChecked(true);
 }
 
 Color4b PaintToolbox::getColor(Qt::MouseButton mouse) {
@@ -97,18 +98,31 @@ void PaintToolbox::on_pen_button_clicked() {
 	ui.pen_frame->setVisible(true);
 	ui.pen_extra_frame->setVisible(true);
 	ui.pick_frame->setVisible(false);
+	ui.advanced_frame->setVisible(false);
 }
+
 void PaintToolbox::on_fill_button_clicked() {
 	paint_utensil=FILL;
 	ui.pen_frame->setVisible(true);
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(false);
+	ui.advanced_frame->setVisible(false);
 }
+
 void PaintToolbox::on_pick_button_clicked() {
 	paint_utensil=PICK;
 	ui.pen_frame->setVisible(false);
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(true);
+	ui.advanced_frame->setVisible(false);
+}
+
+void PaintToolbox::on_advanced_button_clicked() {
+	paint_utensil=NONE;
+	ui.pen_frame->setVisible(false);
+	ui.pen_extra_frame->setVisible(false);
+	ui.pick_frame->setVisible(false);
+	ui.advanced_frame->setVisible(true);
 }
 
 void PaintToolbox::setColor(Color4b newcol,Qt::MouseButton mouse) {
