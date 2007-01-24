@@ -19,6 +19,19 @@ public:
     return v[y*w+x];
   };
 
+  ScalarType Val(int x,int y) const {
+    assert(x>=0 && x<w);
+    assert(y>=0 && y<h);
+    return v[y*w+x];
+  };
+
+  void operator = ( const ScalarImage & img )			
+	{
+    w=img.w;
+    h=img.h;
+    v=img.v;
+  } 
+
   ScalarType MinVal()  {   return *std::min_element(v.begin(),v.end());  }
   ScalarType MaxVal()  {   return *std::max_element(v.begin(),v.end());  }
 
@@ -26,28 +39,56 @@ public:
 	{
 		QImage img(w,h,QImage::Format_RGB32);
 
-		float max = 0.0f;
-		float min = Val(0,0);
-		for (int y = 0; y < h; y++)
-			for (int x = 0; x < w; x++)
-			{
-				if (Val(x, y) < min)
-					min = Val(x, y);
-				if (Val(x, y) > max)
-					max = Val(x, y);
-			}
+		float maxV = MaxVal();
+		float minV = MinVal();
 
-		float scale = 1.0f / max;
+    float scale = 1.0f / (maxV-minV);
 		for (int y = 0; y < h; y++)
 			for (int x = 0; x < w; x++)
 			{
-				float value = (Val(x, y) - min) * scale;
+				float value = (Val(x, y) - minV) * scale;
 				value *= 255.0f;
 				img.setPixel(x,y,qRgb(value,value,value));
 			}
 
 		return img;
 	}
+
+  void Erode(ScalarImage &Eroded, const int wsize=1) const
+  {
+    Eroded.resize(w,h);
+    // erosion filter (3 x 3)
+		  int minimum;
+		  for (int y = wsize; y < h-wsize; y++)
+			  for (int x = wsize; x < w-wsize; x++)
+			  {
+				  minimum = Val(x, y);
+				  for (int yy = y - wsize; yy <= y + wsize; yy++)
+					  for (int xx = x - wsize; xx <= x + wsize; xx++)
+						  if (Val(xx, yy) < minimum)
+							  minimum = Val(xx, yy);
+
+				  Eroded.Val(x, y) = minimum;
+			  }
+  }
+
+  void Dilate(ScalarImage &Dilated,int wsize=1)
+  {
+    Dilated.resize(w,h);
+    // dilation filter (3 x 3)
+		  int maximum;
+		  for (int y = wsize; y < h-wsize; y++)
+			  for (int x = wsize; x < w-wsize; x++)
+			  {
+				  maximum = Val(x, y);
+				  for (int yy = y - wsize; yy <= y + wsize; yy++)
+					  for (int xx = x - wsize; xx <= x + wsize; xx++)
+						  if (Val(xx, yy) > maximum)
+							  maximum = Val(xx, yy);
+
+				  Dilated.Val(x, y) = maximum;
+			  }
+  }
 
   ScalarImage(QImage img);
   ScalarImage(){};

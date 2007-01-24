@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.11  2007/01/24 08:33:15  cignoni
+ Still experiments in filtering depth jumps
+
  Revision 1.10  2007/01/23 14:31:16  corsini
  add improved depth filtering to remove artifacts
 
@@ -86,60 +89,60 @@
 FILE *logFP=0; 
 using namespace vcg;
 
-void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf)
+void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr)
 {
-	int numpass = 5;
+	int numpass = 3;
 
 	FloatImage depth;
+	FloatImage depth2;
 	int w = depthImgf.w;
 	int h = depthImgf.h;
-	depth.resize(w, h);
-
-	FloatImage depth2;
-	depth2.resize(w, h);
-
-	for (int y = 0; y < h; y++)
-		for (int x = 0; x < w; x++)
-			depth.Val(x, y) = depthImgf.Val(x, y);
+	
+	depth=depthImgf;
+  
+  depth.Dilate(depth2);
+  depth=depth2;
 
 	for (int k = 0; k < numpass; k++)
 	{
-		// erosion filter (3 x 3)
-		int minimum;
-		int wsize = 1;
-		for (int y = wsize; y < h-wsize; y++)
-			for (int x = wsize; x < w-wsize; x++)
-			{
-				minimum = depth.Val(x, y);
-				for (int yy = y - wsize; yy <= y + wsize; yy++)
-					for (int xx = x - wsize; xx <= x + wsize; xx++)
-						if (depth.Val(xx, yy) < minimum)
-							minimum = depth.Val(xx, yy);
-
-				depth2.Val(x, y) = minimum;
-			}
-
-		// copy depth2 in depth
-		for (int y = 0; y < h; y++)
-			for (int x = 0; x < w; x++)
-				depth.Val(x, y) = depth2.Val(x, y);
+    depth.Erode(depth2);
+    depth=depth2;
 	}
 
+  Histogramf HH;
+  HH.Clear();
+  HH.SetRange(0,depthImgf.MaxVal()-depthImgf.MinVal(),10000);
+  for(int i=1;i<depthImgf.v.size();++i)
+    HH.Add(fabs(depthImgf.v[i]-depth.v[i-1]));
+
+  if(logFP) fprintf(logFP,"**** Depth histogram 2 Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.minv,HH.maxv,HH.Avg(),
+        HH.Percentile(.1),HH.Percentile(.25),HH.Percentile(.5),HH.Percentile(.75),HH.Percentile(.9));
+
+  int deletedCnt=0;
+  
+  depthJumpThr=HH.Percentile(.8);
 	for (int y = 0; y < h; y++)
 		for (int x = 0; x < w; x++)
 		{
 				if ((depthImgf.Val(x, y) - depth.Val(x, y)) / depthImgf.Val(x, y) > 0.6)
+				//if (fabs(depthImgf.Val(x, y) - depth.Val(x, y)) > depthJumpThr)
+        {
 					countImgf.Val(x, y) = 0.0f;
+          ++deletedCnt;
+        }
 		}
 
 	countImgf.convertToQImage().save("C:/temp/filteredcount.jpg","jpg");
+  
+  if(logFP) fprintf(logFP,"**** depthFilter: deleted %i on %i\n",deletedCnt,w*h);
+
 }
 
 float EpochModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
 {
   Histogramf HH;
   HH.Clear();
-  HH.SetRange(depthImgf.MinVal(),depthImgf.MaxVal(),1000);
+  HH.SetRange(0,depthImgf.MaxVal()-depthImgf.MinVal(),10000);
   for(int i=1;i<depthImgf.v.size();++i)
     HH.Add(fabs(depthImgf.v[i]-depthImgf.v[i-1]));
 
@@ -376,7 +379,8 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 	// The depth is filtered and the minimum count mask is update accordingly.
 	// To be more specific the border of the depth map are identified by erosion
 	// and the relative vertex removed (by setting mincount equal to 0).
-	depthFilter(depthSubf, countSubf);
+  float depthThr2 = ComputeDepthJumpThr(depthSubf,0.95f);
+	depthFilter(depthSubf, countSubf, depthThr2);
 
 	int vn = m.vn;
   for(int i=0;i<vn;++i)

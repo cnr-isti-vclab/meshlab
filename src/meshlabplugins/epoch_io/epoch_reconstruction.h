@@ -33,7 +33,7 @@ public:
   void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
   void Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, CharImage &mask, float depthThr);
   float ComputeDepthJumpThr(FloatImage &depthImgf, float percentile);
-	void depthFilter(FloatImage &depthImgf, FloatImage &countImgf);
+	void depthFilter(FloatImage &depthImgf, FloatImage &countImgf,float depthThr);
 
   QIcon *getIcon();
 };
