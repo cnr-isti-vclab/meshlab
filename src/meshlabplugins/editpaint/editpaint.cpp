@@ -27,6 +27,7 @@
 //TODO bits instead of hashtables
 //TODO PaintToolbox does not close
 //TODO lines problem with percentual painting
+//TODO optimize undo to not include when new and old colors are the same
 ----------- SOLVED: ------------
 //TODO first paint hang problem -- PROBALLY SOLVED, not shure
 //TODO trackball zbuffer problem OK
@@ -52,7 +53,7 @@ EditPaintPlugin::EditPaintPlugin() {
 	paintbox=0;
 	pixels=0;
 	first=true;
-	pressed=false;
+	pressed=0;
 	//color_undo= new ColorUndo();
 	actionList << new QAction(QIcon(":/images/pinsel.png"),"Vertex painting", this);
 	QAction *editAction;
@@ -102,7 +103,7 @@ void EditPaintPlugin::undo(int value) {
 
 void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent) {
 	first=true;
-	pressed=false;
+	pressed=0;
 	//qDebug() <<"startedit"<<  endl;
 	tri::UpdateBounding<CMeshO>::Box(m.cm);
 	if (paintbox==0) { 
@@ -114,6 +115,7 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	//paintbox->diag=m.cm.bbox.Diag();
 	//m.updateDataMask(MeshModel::MM_FACECOLOR);
 	m.updateDataMask(MeshModel::MM_FACETOPO);
+	//m.cm.InitVertexIMark();
 	//m.Enable(MeshModel::MM_FACECOLOR);
 	//parent->setColorMode(vcg::GLW::CMPerVert);
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
@@ -146,7 +148,7 @@ void EditPaintPlugin::mousePressEvent(QAction * ac, QMouseEvent * event, MeshMod
 	gla->showTrackBall(false);
 	LastSel.clear();
 	first=true;
-	pressed=true;
+	pressed=1;
 	isDragging = true;
 	temporaneo.clear();
 	start=event->pos();
@@ -208,25 +210,34 @@ void EditPaintPlugin::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &/
 	}
 	//qDebug() << "moveEnd" << endl;
 }
+
+void EditPaintPlugin::pushUndo(GLArea * gla) {
+	if (!color_undo.contains(gla)) {
+		color_undo.insert(gla,new ColorUndo());
+	} else {}
+	color_undo[gla]->pushUndo();
+	paintbox->setUndo(color_undo[gla]->hasUndo());
+	paintbox->setRedo(color_undo[gla]->hasRedo());
+}
   
 void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla) {
 	gla->showTrackBall(has_track);
-	if (!color_undo.contains(current_gla)) {
-		color_undo.insert(current_gla,new ColorUndo());
-	} else {}
-	color_undo[gla]->pushUndo();
-	paintbox->setUndo(color_undo[current_gla]->hasUndo());
-	paintbox->setRedo(color_undo[current_gla]->hasRedo());
+
+	pushUndo(gla);
+
 	temporaneo.clear();
 	gla->update();
 	prev=cur;
 	cur=event->pos();
-	switch (paintbox->paintUtensil()) {
-		case FILL: { return; }
-		case PICK: { return; }
-		case PEN: {}
-	}
+	pressed=2;
 	isDragging=false;
+	switch (paintbox->paintUtensil()) {
+		case FILL: { } break;
+		case PICK: { } break;
+		case PEN: { } break;
+		case GRADIENT: { isDragging=true; gla->update(); } break;
+	}
+
 }
 
 inline void calcCoord(float x,float y,float z,double matrix[],double *xr,double *yr,double *zr) {
@@ -278,6 +289,35 @@ inline bool pointInTriangle(QPointF p,QPointF a, QPointF b,QPointF c) {
 
 inline bool isFront(QPointF a, QPointF b, QPointF c) {
 	return (b.x()-a.x())*(c.y()-a.y())-(b.y()-a.y())*(c.x()-a.x())>0;
+}
+
+
+void EditPaintPlugin::drawLine(GLArea * gla) {
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0,gla->curSiz.width(),gla->curSiz.height(),0,-1,1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_COLOR_LOGIC_OP);
+	//glEnable(GL_LINE_SMOOTH);
+	glLineWidth(4);
+	glLogicOp(GL_XOR);
+	glColor3f(1,1,1);
+	glBegin(GL_LINES);
+	glVertex2f(start.x(),start.y());
+	glVertex2f(cur.x(),cur.y());
+	glEnd();
+	glPopAttrib();
+	glPopMatrix(); // restore modelview
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
 }
 
 void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
@@ -736,7 +776,125 @@ bool EditPaintPlugin::getVertexesAtMouse() {
 	return false;
 }
 
-/** only in decorare it is possible to obtain the correct zbuffer values and other opengl stuff */
+GLfloat getWinkel(GLfloat px,GLfloat pz) {
+	GLfloat wink;
+	if ((px)!=0) {
+		wink=-atan((pz)/(px))*180.0/M_PI;
+		if ((px)<0) {wink=180.0+wink;}
+	}else {
+		if ((pz)>0) wink=-90.0;
+		else wink=90.0;
+	}
+	return wink;
+}
+
+
+
+inline void mergeColor(double percent,const Color4b& c1,const Color4b& c2,Color4b* dest) {
+	(*dest)[0]=min(255.0,(c1[0]*percent+c2[0]*(1.0-percent)));
+	(*dest)[1]=min(255.0,(c1[1]*percent+c2[1]*(1.0-percent)));
+	(*dest)[2]=min(255.0,(c1[2]*percent+c2[2]*(1.0-percent)));
+	(*dest)[3]=min(255.0,(c1[3]*percent+c2[3]*(1.0-percent)));
+	//qDebug() << (*dest)[0] << " "<< (*dest)[1] << " "<< (*dest)[2]<< "percent: "<<percent<<endl;
+}
+
+bool EditPaintPlugin::hasSelected(MeshModel &m) {
+	CMeshO::FaceIterator fi;
+	for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) {
+		if (!(*fi).IsD() && (*fi).IsS()) return true;
+	}
+	return false;
+}
+
+void EditPaintPlugin::fillGradient(MeshModel & m,GLArea * gla) {
+	QPoint p=start-cur;
+	QHash <CFaceO *,CFaceO *> selezionati;
+	QHash <CVertexO *,CVertexO *> temporaneo;
+	//vector<CMeshO::FacePointer>::iterator fpi;
+	//vector<CMeshO::FacePointer> temp_po;
+
+	int opac=paintbox->getOpacity();
+	Color4b c1=paintbox->getColor(Qt::LeftButton);
+	Color4b c2=paintbox->getColor(Qt::RightButton);
+
+	QPointF p1(start.x(),gla->curSiz.height()-start.y());
+	QPointF p0(cur.x(),gla->curSiz.height()-cur.y());
+	float x2=(p1.x()-p0.x());
+	float y2=(p1.y()-p0.y());
+	//double l=sqrt(x2*x2+y2*y2);
+	float l_square=x2*x2+y2*y2;
+
+	CVertexO * vertex;
+	CMeshO::FaceIterator fi;
+	double dx,dy,dz;
+	Color4b merger;
+	bool tutti=!hasSelected(m);
+	float radius=sqrt(p.x()*p.x()+p.y()*p.y());
+	UndoItem u;
+	int gradient_type=paintbox->getGradientType();
+	int gradient_form=paintbox->getGradientForm();
+	for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
+		if (!(*fi).IsD() && (tutti || (*fi).IsS()))
+		for (int lauf=0; lauf<3; lauf++) {
+			if (!temporaneo.contains((*fi).V(lauf))) {
+				vertex=(*fi).V(lauf);
+				temporaneo.insert(vertex,vertex);
+				gluProject(vertex->P()[0],vertex->P()[1],vertex->P()[2],mvmatrix,projmatrix,viewport,&dx,&dy,&dz);
+				//qDebug () << yt <<""<< ye << endl;
+				u.vertex=vertex;
+				u.original=vertex->C();
+				if (gradient_form==0) {
+					double r=(dx-p0.x())*(p1.x()-p0.x())+(dy-p0.y())*(p1.y()-p0.y());
+					//r=r/(l*l);
+					r=r/l_square;
+					
+					float px=p0.x()+r*(p1.x()-p0.x());
+					float py=p0.y()+r*(p1.y()-p0.y());
+				
+					px=px-dx;
+					py=py-dy;
+	
+					if (gradient_type==0) {
+						if (r>=0 && r<=1 /*&& (px*px+py*py<radius*radius)*/) { 
+							mergeColor(r,c1,c2,&merger);
+							colorize(vertex,merger,opac);
+						} else if (r>1) {
+							colorize(vertex,c1,opac);
+						} else if (r<0) {
+							colorize(vertex,c2,opac);
+						}
+					} else {
+						if (r>=0 && r<=1 /*&& (px*px+py*py<radius*radius)*/) { 
+							//mergeColor(r,c1,c2,&merger);
+							colorize(vertex,c1,((double)opac*0.01)*r*100.0);
+						} else if (r>1) {
+							colorize(vertex,c1,opac);
+						} else if (r<0) {
+							//colorize((*fi).V(lauf),c2,opac);
+						}
+					}
+				} else {
+					float x0=(dx-p1.x());
+					float y0=(dy-p1.y());
+					float bla0=x0*x0+y0*y0;
+					if (bla0<radius*radius && radius>0) {
+						float r=1.0-bla0/(radius*radius);
+						if (gradient_type==0) {
+							mergeColor(r,c1,c2,&merger);
+							colorize(vertex,merger,opac);
+						} else {
+							colorize(vertex,c1,((double)opac*0.01)*r*100.0);
+						}
+					}
+				}
+				color_undo[current_gla]->addItem(u);
+			}
+		}
+	pushUndo(gla);
+	gla->update();
+}
+
+/** only in decorare it is possible to obtain the correct zbuffer values and the other opengl stuff */
 void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 	//qDebug()<<"startdecor"<<endl;
 	//if (cur.x()==0 && cur.y()==0) return;
@@ -762,7 +920,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 			if(getFaceAtMouse(m,temp_face)) {
 				fillFrom(m,temp_face);
 			}
-			pressed=false;
+			pressed=0;
 			return; 
 		}
 		case PICK: { 
@@ -779,7 +937,12 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 				glReadPixels( mid.x(),mid.y(), 1, 1,GL_RGB,GL_UNSIGNED_BYTE,(void *)pixel);
 				paintbox->setColor(pixel[0],pixel[1],pixel[2],curr_mouse);
 			}
-			pressed=false;
+			pressed=0;
+			return; 
+		}
+		case GRADIENT: {
+			if (pressed==1) drawLine(gla);
+			else if (pressed==2) { fillGradient(m,gla); pressed=0; }
 			return; 
 		}
 		case PEN: {}
@@ -813,8 +976,8 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 			colorize(*vpo,newcol,opac);
 		}
 	}
-	pressed=false;
-	}
+	pressed=0;
+	} 
 	//qDebug()<<"enddecor"<<endl;
 }
 

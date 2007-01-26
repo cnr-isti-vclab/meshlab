@@ -48,6 +48,7 @@ PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::Wind
 	ui.pen_button->setChecked(true);
 	ui.undo_button->setEnabled(false);
 	ui.redo_button->setEnabled(false);
+	ui.gradient_frame->setVisible(false);
 }
 
 Color4b PaintToolbox::getColor(Qt::MouseButton mouse) {
@@ -101,6 +102,7 @@ void PaintToolbox::on_pen_button_clicked() {
 	ui.pen_extra_frame->setVisible(true);
 	ui.pick_frame->setVisible(false);
 	ui.advanced_frame->setVisible(false);
+	ui.gradient_frame->setVisible(false);
 }
 
 void PaintToolbox::on_fill_button_clicked() {
@@ -109,6 +111,7 @@ void PaintToolbox::on_fill_button_clicked() {
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(false);
 	ui.advanced_frame->setVisible(false);
+	ui.gradient_frame->setVisible(false);
 }
 
 void PaintToolbox::on_pick_button_clicked() {
@@ -117,6 +120,7 @@ void PaintToolbox::on_pick_button_clicked() {
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(true);
 	ui.advanced_frame->setVisible(false);
+	ui.gradient_frame->setVisible(false);
 }
 
 void PaintToolbox::on_advanced_button_clicked() {
@@ -125,6 +129,16 @@ void PaintToolbox::on_advanced_button_clicked() {
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(false);
 	ui.advanced_frame->setVisible(true);
+	ui.gradient_frame->setVisible(false);
+}
+
+void PaintToolbox::on_gradient_button_clicked() {
+	paint_utensil=GRADIENT;
+	ui.pen_frame->setVisible(true);
+	ui.pen_extra_frame->setVisible(false);
+	ui.pick_frame->setVisible(false);
+	ui.advanced_frame->setVisible(false);
+	ui.gradient_frame->setVisible(true);
 }
 
 void PaintToolbox::setColor(Color4b newcol,Qt::MouseButton mouse) {

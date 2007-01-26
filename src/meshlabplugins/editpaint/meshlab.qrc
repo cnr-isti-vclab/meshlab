@@ -9,5 +9,6 @@
 	<file>images/kcontrol.png</file>
 	<file>images/undo.png</file>
 	<file>images/redo.png</file>
+	<file>images/gradient.png</file>
     </qresource>
 </RCC>

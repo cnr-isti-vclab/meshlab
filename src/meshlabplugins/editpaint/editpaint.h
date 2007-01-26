@@ -33,7 +33,9 @@ inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
 	vertice->C()=orig;
 }
 
-typedef enum {PEN, FILL, PICK, NONE} PaintThing;
+
+
+typedef enum {PEN, FILL, PICK, NONE, GRADIENT} PaintThing;
 
 class Penn {
 public:
@@ -85,7 +87,7 @@ private:
 	//typedef enum {SMAdd, SMClear,SMSub} SelMode;
 	//SelMode selMode;
 	bool has_track; // to restore the trackball settings
-	bool pressed; // to check in decorate if it is the first call after a mouse click
+	int pressed; // to check in decorate if it is the first call after a mouse click
 	bool first; // same as pressed, TODO probably removable
 	double mvmatrix[16]; //modelview
 	double projmatrix[16]; //projection
@@ -107,11 +109,16 @@ private:
 
 	int paintType();
 	void DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw);
+	void drawLine(GLArea * gla);
+	void fillGradient(MeshModel &,GLArea * gla);
 	bool getFaceAtMouse(MeshModel &,CMeshO::FacePointer &);
 	bool getFacesAtMouse(MeshModel &,vector<CMeshO::FacePointer> &);
 	bool getVertexAtMouse(MeshModel &,CMeshO::VertexPointer &);
 	bool getVertexesAtMouse();
 	void fillFrom(MeshModel &,CFaceO *);
+	bool hasSelected(MeshModel &);
+
+	void pushUndo(GLArea * gla);
 
 	inline void updateMatrixes() {		
 		glGetIntegerv(GL_VIEWPORT, viewport);
@@ -224,6 +231,10 @@ public:
 	inline int paintUtensil() { return paint_utensil; }
 	inline bool getPaintBackface() { return ui.backface_culling->checkState()!=Qt::Unchecked; }
 	inline bool getPaintInvisible() { return ui.invisible_painting->checkState()!=Qt::Unchecked; }
+
+	inline int getGradientType() { return ui.gradient_type->currentIndex(); }
+	inline int getGradientForm() { return ui.gradient_form->currentIndex(); }
+
 	inline int getPickMode() { return ui.pick_mode->currentIndex(); }
 	void setUndo(bool value) { ui.undo_button->setEnabled(value); }
 	void setRedo(bool value) { ui.redo_button->setEnabled(value); }
@@ -245,6 +256,7 @@ private slots:
 	void on_invisible_painting_stateChanged(int value);
 	void on_undo_button_clicked();
 	void on_redo_button_clicked();
+	void on_gradient_button_clicked();
 signals:
 	void undo_redo(int value);
 	//void redo();
