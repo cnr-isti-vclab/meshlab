@@ -408,7 +408,7 @@ void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 		PEZ=56;
 		int STEPS=60;
 		float diag=m.cm.bbox.Diag()*(-7);
-		QPoint circle_points[PEZ];
+		QPoint circle_points[56]; //because of the .NET 2003 problem
 
 		glPushAttrib(GL_ENABLE_BIT);
 		//glDisable(GL_DEPTH_TEST);
@@ -829,7 +829,7 @@ void EditPaintPlugin::fillGradient(MeshModel & m,GLArea * gla) {
 	double dx,dy,dz;
 	Color4b merger;
 	bool tutti=!hasSelected(m);
-	float radius=sqrt(p.x()*p.x()+p.y()*p.y());
+	float radius=sqrt((float)(p.x()*p.x()+p.y()*p.y()));
 	UndoItem u;
 	int gradient_type=paintbox->getGradientType();
 	int gradient_form=paintbox->getGradientForm();
@@ -878,7 +878,7 @@ void EditPaintPlugin::fillGradient(MeshModel & m,GLArea * gla) {
 					float y0=(dy-p1.y());
 					float bla0=x0*x0+y0*y0;
 					if (bla0<radius*radius && radius>0) {
-						float r=1.0-bla0/(radius*radius);
+						float r=1.0-sqrt(bla0)/sqrt(radius*radius);
 						if (gradient_type==0) {
 							mergeColor(r,c1,c2,&merger);
 							colorize(vertex,merger,opac);
