@@ -115,6 +115,7 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	//paintbox->diag=m.cm.bbox.Diag();
 	//m.updateDataMask(MeshModel::MM_FACECOLOR);
 	m.updateDataMask(MeshModel::MM_FACETOPO);
+	m.updateDataMask(MeshModel::MM_VERTFACETOPO); //TODO !!!!
 	//m.cm.InitVertexIMark();
 	//m.Enable(MeshModel::MM_FACECOLOR);
 	//parent->setColorMode(vcg::GLW::CMPerVert);
@@ -964,16 +965,70 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 
 	getInternFaces(m,&curSel,&newSel,gla,pen,cur,prev,pixels,mvmatrix,projmatrix,viewport);
 
-	int opac=paintbox->getOpacity();
-	Color4b newcol=paintbox->getColor(curr_mouse);
 	UndoItem u;
-	for(vpo=newSel.begin();vpo!=newSel.end();++vpo) {
-		if (!temporaneo.contains(*vpo)) {
-			u.vertex=*vpo;
-			u.original=(*vpo)->C();
-			color_undo[current_gla]->addItem(u);
-			temporaneo.insert(*vpo,(*vpo)->C());
-			colorize(*vpo,newcol,opac);
+	QHash <CVertexO *,Color4b> originals;
+	if (paintbox->paintUtensil()==SMOOTH) {
+		temporaneo.clear();
+		Color4b newcol,destCol;
+		int opac=paintbox->getSmoothPercentual();
+		int c_r,c_g,c_b;
+		for(vpo=newSel.begin();vpo!=newSel.end();++vpo) {
+			if (!temporaneo.contains(*vpo)) {
+				CVertexO * vert=*vpo;
+				u.vertex=*vpo;
+				u.original=(*vpo)->C();
+				originals.insert(*vpo,(*vpo)->C());
+				color_undo[current_gla]->addItem(u);
+				temporaneo.insert(*vpo,(*vpo)->C());
+				//qDebug() << "a" << endl;
+				CFaceO * f= vert->VFp();
+				CFaceO * one_face=f;
+				int pos=vert->VFi();
+				c_r=c_g=c_b=0;
+				int count_me=0;
+				//qDebug() << "b: " <<pos<< " "<<(int)one_face<<endl;
+				do {
+					CFaceO * temp=one_face->VFp(pos);
+					//qDebug() << "c:" <<(int)one_face <<endl;
+					if (one_face!=0) {
+						for (int lauf=0; lauf<3; lauf++) {
+							if (pos!=lauf) { 
+								Color4b tco=one_face->V(lauf)->C();
+								if (originals.contains(one_face->V(lauf))) tco=originals[one_face->V(lauf)];
+								c_r+=tco[0]; c_g+=tco[1]; c_b+=tco[2]; 
+							}
+						}
+						pos=one_face->VFi(pos);
+						count_me+=2;
+					//qDebug() << "d" << endl;
+					}
+					one_face=temp;
+				} while (one_face!=f && one_face!=0);
+				if (count_me>0) {
+					//qDebug() << "coloro" <<endl;
+					newcol[0]=c_r/count_me;
+					newcol[1]=c_g/count_me;
+					newcol[2]=c_b/count_me;
+					//qDebug() << "opac"<< (float)opac/100.0<< endl;
+					mergeColor((float)opac/100.0,newcol,vert->C(),&destCol);
+					vert->C()[0]=destCol[0];
+					vert->C()[1]=destCol[1];
+					vert->C()[2]=destCol[2];
+				}
+				//colorize(*vpo,newcol,opac);
+			}
+		}
+	} else {
+		int opac=paintbox->getOpacity();
+		Color4b newcol=paintbox->getColor(curr_mouse);
+		for(vpo=newSel.begin();vpo!=newSel.end();++vpo) {
+			if (!temporaneo.contains(*vpo)) {
+				u.vertex=*vpo;
+				u.original=(*vpo)->C();
+				color_undo[current_gla]->addItem(u);
+				temporaneo.insert(*vpo,(*vpo)->C());
+				colorize(*vpo,newcol,opac);
+			}
 		}
 	}
 	pressed=0;

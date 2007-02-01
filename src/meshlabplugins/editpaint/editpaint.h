@@ -35,7 +35,7 @@ inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
 
 
 
-typedef enum {PEN, FILL, PICK, NONE, GRADIENT} PaintThing;
+typedef enum {PEN, FILL, PICK, NONE, GRADIENT, SMOOTH} PaintThing;
 
 class Penn {
 public:
@@ -87,8 +87,8 @@ private:
 	//typedef enum {SMAdd, SMClear,SMSub} SelMode;
 	//SelMode selMode;
 	bool has_track; // to restore the trackball settings
-	int pressed; // to check in decorate if it is the first call after a mouse click
-	bool first; // same as pressed, TODO probably removable
+	int pressed; // to check in decorate if it is the first call after a mouse down or mouse up
+	bool first; // to check in decorate if it is the first call after a mouse down
 	double mvmatrix[16]; //modelview
 	double projmatrix[16]; //projection
 	int viewport[4]; //viewport
@@ -162,7 +162,7 @@ private:
 	vector<UndoItem> * temp_vector; 
 public:
 	void pushUndo() { 
-		if (undos.size()==10) removeUndo();
+		if (undos.size()==15) removeUndo();
 		if (temp_vector->size()==0) return;
 		for (int lauf=0; lauf<redos.size(); lauf++) { redos[lauf]->clear(); delete redos[lauf];}
 		redos.clear();
@@ -228,6 +228,7 @@ public:
 	inline int paintType() { /*if (ui.pen_type->currentText()=="pixel") return 1; return 2;*/ return ui.pen_type->currentIndex()+1; }
 	inline int searchMode() { return ui.search_mode->currentIndex()+1; }
 	inline int getOpacity() { return ui.deck_slider->value(); }
+	inline int getSmoothPercentual() { return ui.percentual_slider->value(); }
 	inline int paintUtensil() { return paint_utensil; }
 	inline bool getPaintBackface() { return ui.backface_culling->checkState()!=Qt::Unchecked; }
 	inline bool getPaintInvisible() { return ui.invisible_painting->checkState()!=Qt::Unchecked; }
@@ -257,6 +258,9 @@ private slots:
 	void on_undo_button_clicked();
 	void on_redo_button_clicked();
 	void on_gradient_button_clicked();
+	void on_smooth_button_clicked();
+	void on_percentual_slider_valueChanged(int value);
+	void on_percentual_box_valueChanged(int value);
 signals:
 	void undo_redo(int value);
 	//void redo();

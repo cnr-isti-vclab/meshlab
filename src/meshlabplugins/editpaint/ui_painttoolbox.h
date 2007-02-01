@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'PaintToolbox.ui'
 **
-** Created: Fri Jan 26 21:08:32 2007
+** Created: Thu Feb 1 16:57:04 2007
 **      by: Qt User Interface Compiler version 4.2.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -30,25 +30,19 @@ class Ui_PaintToolbox
 {
 public:
     QGridLayout *gridLayout;
-    QFrame *gradient_frame;
+    QFrame *smooth_frame;
     QGridLayout *gridLayout1;
-    QLabel *label_4;
-    QComboBox *gradient_type;
-    QLabel *label_3;
-    QComboBox *gradient_form;
-    QFrame *pick_frame;
+    QSlider *percentual_slider;
+    QLabel *label_percentual;
+    QSpinBox *percentual_box;
+    QFrame *pen_extra_frame;
     QGridLayout *gridLayout2;
-    QComboBox *pick_mode;
-    QLabel *label_pick;
-    QFrame *top_frame;
-    QToolButton *pick_button;
-    QToolButton *gradient_button;
-    QToolButton *fill_button;
-    QToolButton *pen_button;
-    QToolButton *advanced_button;
-    QFrame *frame_3;
-    QToolButton *redo_button;
-    QToolButton *undo_button;
+    QCheckBox *backface_culling;
+    QLabel *label_pen;
+    QLabel *label;
+    QComboBox *pen_type;
+    QDoubleSpinBox *pen_radius;
+    QCheckBox *invisible_painting;
     QFrame *pen_frame;
     QGridLayout *gridLayout3;
     QSpinBox *deck_box;
@@ -56,23 +50,35 @@ public:
     QLabel *label_penmodus;
     QComboBox *pen_modus;
     QSlider *deck_slider;
-    QFrame *pen_extra_frame;
+    QFrame *advanced_frame;
     QGridLayout *gridLayout4;
-    QCheckBox *backface_culling;
-    QLabel *label_pen;
-    QLabel *label;
-    QComboBox *pen_type;
-    QDoubleSpinBox *pen_radius;
-    QCheckBox *invisible_painting;
+    QComboBox *search_mode;
+    QLabel *label_2;
     QFrame *color_frame;
     QToolButton *set_bw;
     QToolButton *switch_me;
     ColorWid *front;
     ColorWid *back;
-    QFrame *advanced_frame;
+    QFrame *frame_3;
+    QToolButton *redo_button;
+    QToolButton *undo_button;
+    QFrame *top_frame;
+    QToolButton *gradient_button;
+    QToolButton *fill_button;
+    QToolButton *pen_button;
+    QToolButton *advanced_button;
+    QToolButton *smooth_button;
+    QToolButton *pick_button;
+    QFrame *pick_frame;
     QGridLayout *gridLayout5;
-    QComboBox *search_mode;
-    QLabel *label_2;
+    QComboBox *pick_mode;
+    QLabel *label_pick;
+    QFrame *gradient_frame;
+    QGridLayout *gridLayout6;
+    QLabel *label_4;
+    QComboBox *gradient_type;
+    QLabel *label_3;
+    QComboBox *gradient_form;
 
     void setupUi(QWidget *PaintToolbox)
     {
@@ -81,127 +87,88 @@ public:
     gridLayout->setSpacing(2);
     gridLayout->setMargin(2);
     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-    gradient_frame = new QFrame(PaintToolbox);
-    gradient_frame->setObjectName(QString::fromUtf8("gradient_frame"));
-    gradient_frame->setFrameShape(QFrame::StyledPanel);
-    gradient_frame->setFrameShadow(QFrame::Raised);
-    gridLayout1 = new QGridLayout(gradient_frame);
+    smooth_frame = new QFrame(PaintToolbox);
+    smooth_frame->setObjectName(QString::fromUtf8("smooth_frame"));
+    smooth_frame->setFrameShape(QFrame::StyledPanel);
+    smooth_frame->setFrameShadow(QFrame::Raised);
+    gridLayout1 = new QGridLayout(smooth_frame);
     gridLayout1->setSpacing(6);
     gridLayout1->setMargin(9);
     gridLayout1->setObjectName(QString::fromUtf8("gridLayout1"));
-    label_4 = new QLabel(gradient_frame);
-    label_4->setObjectName(QString::fromUtf8("label_4"));
+    percentual_slider = new QSlider(smooth_frame);
+    percentual_slider->setObjectName(QString::fromUtf8("percentual_slider"));
+    percentual_slider->setMaximum(100);
+    percentual_slider->setValue(25);
+    percentual_slider->setSliderPosition(25);
+    percentual_slider->setOrientation(Qt::Horizontal);
 
-    gridLayout1->addWidget(label_4, 0, 0, 1, 1);
+    gridLayout1->addWidget(percentual_slider, 0, 1, 1, 1);
 
-    gradient_type = new QComboBox(gradient_frame);
-    gradient_type->setObjectName(QString::fromUtf8("gradient_type"));
+    label_percentual = new QLabel(smooth_frame);
+    label_percentual->setObjectName(QString::fromUtf8("label_percentual"));
 
-    gridLayout1->addWidget(gradient_type, 0, 1, 1, 2);
+    gridLayout1->addWidget(label_percentual, 0, 0, 1, 1);
 
-    label_3 = new QLabel(gradient_frame);
-    label_3->setObjectName(QString::fromUtf8("label_3"));
+    percentual_box = new QSpinBox(smooth_frame);
+    percentual_box->setObjectName(QString::fromUtf8("percentual_box"));
+    percentual_box->setMaximum(100);
+    percentual_box->setValue(25);
 
-    gridLayout1->addWidget(label_3, 1, 0, 1, 2);
-
-    gradient_form = new QComboBox(gradient_frame);
-    gradient_form->setObjectName(QString::fromUtf8("gradient_form"));
-
-    gridLayout1->addWidget(gradient_form, 1, 2, 1, 1);
+    gridLayout1->addWidget(percentual_box, 0, 2, 1, 1);
 
 
-    gridLayout->addWidget(gradient_frame, 6, 0, 1, 2);
+    gridLayout->addWidget(smooth_frame, 3, 0, 1, 2);
 
-    pick_frame = new QFrame(PaintToolbox);
-    pick_frame->setObjectName(QString::fromUtf8("pick_frame"));
-    pick_frame->setFrameShape(QFrame::StyledPanel);
-    pick_frame->setFrameShadow(QFrame::Raised);
-    gridLayout2 = new QGridLayout(pick_frame);
+    pen_extra_frame = new QFrame(PaintToolbox);
+    pen_extra_frame->setObjectName(QString::fromUtf8("pen_extra_frame"));
+    pen_extra_frame->setFrameShape(QFrame::StyledPanel);
+    pen_extra_frame->setFrameShadow(QFrame::Raised);
+    gridLayout2 = new QGridLayout(pen_extra_frame);
     gridLayout2->setSpacing(6);
     gridLayout2->setMargin(9);
     gridLayout2->setObjectName(QString::fromUtf8("gridLayout2"));
-    pick_mode = new QComboBox(pick_frame);
-    pick_mode->setObjectName(QString::fromUtf8("pick_mode"));
+    backface_culling = new QCheckBox(pen_extra_frame);
+    backface_culling->setObjectName(QString::fromUtf8("backface_culling"));
 
-    gridLayout2->addWidget(pick_mode, 0, 1, 1, 1);
+    gridLayout2->addWidget(backface_culling, 1, 1, 1, 2);
 
-    label_pick = new QLabel(pick_frame);
-    label_pick->setObjectName(QString::fromUtf8("label_pick"));
+    label_pen = new QLabel(pen_extra_frame);
+    label_pen->setObjectName(QString::fromUtf8("label_pen"));
 
-    gridLayout2->addWidget(label_pick, 0, 0, 1, 1);
+    gridLayout2->addWidget(label_pen, 0, 0, 1, 1);
 
+    label = new QLabel(pen_extra_frame);
+    label->setObjectName(QString::fromUtf8("label"));
 
-    gridLayout->addWidget(pick_frame, 4, 0, 1, 2);
+    gridLayout2->addWidget(label, 1, 0, 1, 1);
 
-    top_frame = new QFrame(PaintToolbox);
-    top_frame->setObjectName(QString::fromUtf8("top_frame"));
-    QSizePolicy sizePolicy(static_cast<QSizePolicy::Policy>(5), static_cast<QSizePolicy::Policy>(7));
+    pen_type = new QComboBox(pen_extra_frame);
+    pen_type->setObjectName(QString::fromUtf8("pen_type"));
+    QSizePolicy sizePolicy(static_cast<QSizePolicy::Policy>(5), static_cast<QSizePolicy::Policy>(0));
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(top_frame->sizePolicy().hasHeightForWidth());
-    top_frame->setSizePolicy(sizePolicy);
-    top_frame->setMinimumSize(QSize(16, 120));
-    top_frame->setFrameShape(QFrame::StyledPanel);
-    top_frame->setFrameShadow(QFrame::Raised);
-    pick_button = new QToolButton(top_frame);
-    pick_button->setObjectName(QString::fromUtf8("pick_button"));
-    pick_button->setGeometry(QRect(160, 10, 48, 48));
-    pick_button->setIcon(QIcon(QString::fromUtf8(":/images/pick.png")));
-    pick_button->setIconSize(QSize(48, 48));
-    pick_button->setCheckable(true);
-    pick_button->setAutoExclusive(true);
-    pick_button->setAutoRaise(false);
-    gradient_button = new QToolButton(top_frame);
-    gradient_button->setObjectName(QString::fromUtf8("gradient_button"));
-    gradient_button->setGeometry(QRect(110, 10, 48, 48));
-    gradient_button->setIcon(QIcon(QString::fromUtf8(":/images/gradient.png")));
-    gradient_button->setIconSize(QSize(48, 48));
-    gradient_button->setCheckable(true);
-    gradient_button->setAutoExclusive(true);
-    gradient_button->setAutoRaise(false);
-    fill_button = new QToolButton(top_frame);
-    fill_button->setObjectName(QString::fromUtf8("fill_button"));
-    fill_button->setGeometry(QRect(60, 10, 48, 48));
-    fill_button->setIcon(QIcon(QString::fromUtf8(":/images/fill.png")));
-    fill_button->setIconSize(QSize(48, 48));
-    fill_button->setCheckable(true);
-    fill_button->setAutoExclusive(true);
-    fill_button->setAutoRaise(false);
-    pen_button = new QToolButton(top_frame);
-    pen_button->setObjectName(QString::fromUtf8("pen_button"));
-    pen_button->setGeometry(QRect(10, 10, 48, 48));
-    pen_button->setIcon(QIcon(QString::fromUtf8(":/images/pinsel2.png")));
-    pen_button->setIconSize(QSize(48, 48));
-    pen_button->setCheckable(true);
-    pen_button->setAutoExclusive(true);
-    pen_button->setAutoRaise(false);
-    advanced_button = new QToolButton(top_frame);
-    advanced_button->setObjectName(QString::fromUtf8("advanced_button"));
-    advanced_button->setGeometry(QRect(10, 60, 48, 48));
-    advanced_button->setIcon(QIcon(QString::fromUtf8(":/images/kcontrol.png")));
-    advanced_button->setIconSize(QSize(48, 48));
-    advanced_button->setCheckable(true);
-    advanced_button->setAutoExclusive(true);
-    advanced_button->setAutoRaise(false);
+    sizePolicy.setHeightForWidth(pen_type->sizePolicy().hasHeightForWidth());
+    pen_type->setSizePolicy(sizePolicy);
 
-    gridLayout->addWidget(top_frame, 0, 0, 1, 2);
+    gridLayout2->addWidget(pen_type, 0, 2, 1, 2);
 
-    frame_3 = new QFrame(PaintToolbox);
-    frame_3->setObjectName(QString::fromUtf8("frame_3"));
-    frame_3->setFrameShape(QFrame::StyledPanel);
-    frame_3->setFrameShadow(QFrame::Raised);
-    redo_button = new QToolButton(frame_3);
-    redo_button->setObjectName(QString::fromUtf8("redo_button"));
-    redo_button->setGeometry(QRect(60, 10, 48, 48));
-    redo_button->setIcon(QIcon(QString::fromUtf8(":/images/redo.png")));
-    redo_button->setIconSize(QSize(48, 48));
-    undo_button = new QToolButton(frame_3);
-    undo_button->setObjectName(QString::fromUtf8("undo_button"));
-    undo_button->setGeometry(QRect(10, 10, 48, 48));
-    undo_button->setIcon(QIcon(QString::fromUtf8(":/images/undo.png")));
-    undo_button->setIconSize(QSize(48, 48));
+    pen_radius = new QDoubleSpinBox(pen_extra_frame);
+    pen_radius->setObjectName(QString::fromUtf8("pen_radius"));
+    pen_radius->setDecimals(1);
+    pen_radius->setMaximum(70);
+    pen_radius->setMinimum(0.1);
+    pen_radius->setSingleStep(0.1);
+    pen_radius->setValue(25);
 
-    gridLayout->addWidget(frame_3, 1, 1, 1, 1);
+    gridLayout2->addWidget(pen_radius, 0, 1, 1, 1);
+
+    invisible_painting = new QCheckBox(pen_extra_frame);
+    invisible_painting->setObjectName(QString::fromUtf8("invisible_painting"));
+
+    gridLayout2->addWidget(invisible_painting, 1, 3, 1, 1);
+
+
+    gridLayout->addWidget(pen_extra_frame, 4, 0, 1, 2);
 
     pen_frame = new QFrame(PaintToolbox);
     pen_frame->setObjectName(QString::fromUtf8("pen_frame"));
@@ -244,64 +211,34 @@ public:
 
     gridLayout->addWidget(pen_frame, 2, 0, 1, 2);
 
-    pen_extra_frame = new QFrame(PaintToolbox);
-    pen_extra_frame->setObjectName(QString::fromUtf8("pen_extra_frame"));
-    pen_extra_frame->setFrameShape(QFrame::StyledPanel);
-    pen_extra_frame->setFrameShadow(QFrame::Raised);
-    gridLayout4 = new QGridLayout(pen_extra_frame);
+    advanced_frame = new QFrame(PaintToolbox);
+    advanced_frame->setObjectName(QString::fromUtf8("advanced_frame"));
+    advanced_frame->setFrameShape(QFrame::StyledPanel);
+    advanced_frame->setFrameShadow(QFrame::Raised);
+    gridLayout4 = new QGridLayout(advanced_frame);
     gridLayout4->setSpacing(6);
     gridLayout4->setMargin(9);
     gridLayout4->setObjectName(QString::fromUtf8("gridLayout4"));
-    backface_culling = new QCheckBox(pen_extra_frame);
-    backface_culling->setObjectName(QString::fromUtf8("backface_culling"));
+    search_mode = new QComboBox(advanced_frame);
+    search_mode->setObjectName(QString::fromUtf8("search_mode"));
 
-    gridLayout4->addWidget(backface_culling, 1, 1, 1, 2);
+    gridLayout4->addWidget(search_mode, 0, 1, 1, 1);
 
-    label_pen = new QLabel(pen_extra_frame);
-    label_pen->setObjectName(QString::fromUtf8("label_pen"));
+    label_2 = new QLabel(advanced_frame);
+    label_2->setObjectName(QString::fromUtf8("label_2"));
 
-    gridLayout4->addWidget(label_pen, 0, 0, 1, 1);
-
-    label = new QLabel(pen_extra_frame);
-    label->setObjectName(QString::fromUtf8("label"));
-
-    gridLayout4->addWidget(label, 1, 0, 1, 1);
-
-    pen_type = new QComboBox(pen_extra_frame);
-    pen_type->setObjectName(QString::fromUtf8("pen_type"));
-    QSizePolicy sizePolicy1(static_cast<QSizePolicy::Policy>(5), static_cast<QSizePolicy::Policy>(0));
-    sizePolicy1.setHorizontalStretch(0);
-    sizePolicy1.setVerticalStretch(0);
-    sizePolicy1.setHeightForWidth(pen_type->sizePolicy().hasHeightForWidth());
-    pen_type->setSizePolicy(sizePolicy1);
-
-    gridLayout4->addWidget(pen_type, 0, 2, 1, 2);
-
-    pen_radius = new QDoubleSpinBox(pen_extra_frame);
-    pen_radius->setObjectName(QString::fromUtf8("pen_radius"));
-    pen_radius->setDecimals(1);
-    pen_radius->setMaximum(70);
-    pen_radius->setMinimum(0.1);
-    pen_radius->setSingleStep(0.1);
-    pen_radius->setValue(25);
-
-    gridLayout4->addWidget(pen_radius, 0, 1, 1, 1);
-
-    invisible_painting = new QCheckBox(pen_extra_frame);
-    invisible_painting->setObjectName(QString::fromUtf8("invisible_painting"));
-
-    gridLayout4->addWidget(invisible_painting, 1, 3, 1, 1);
+    gridLayout4->addWidget(label_2, 0, 0, 1, 1);
 
 
-    gridLayout->addWidget(pen_extra_frame, 3, 0, 1, 2);
+    gridLayout->addWidget(advanced_frame, 6, 0, 1, 2);
 
     color_frame = new QFrame(PaintToolbox);
     color_frame->setObjectName(QString::fromUtf8("color_frame"));
-    QSizePolicy sizePolicy2(static_cast<QSizePolicy::Policy>(5), static_cast<QSizePolicy::Policy>(0));
-    sizePolicy2.setHorizontalStretch(0);
-    sizePolicy2.setVerticalStretch(0);
-    sizePolicy2.setHeightForWidth(color_frame->sizePolicy().hasHeightForWidth());
-    color_frame->setSizePolicy(sizePolicy2);
+    QSizePolicy sizePolicy1(static_cast<QSizePolicy::Policy>(5), static_cast<QSizePolicy::Policy>(0));
+    sizePolicy1.setHorizontalStretch(0);
+    sizePolicy1.setVerticalStretch(0);
+    sizePolicy1.setHeightForWidth(color_frame->sizePolicy().hasHeightForWidth());
+    color_frame->setSizePolicy(sizePolicy1);
     color_frame->setMinimumSize(QSize(70, 70));
     color_frame->setMaximumSize(QSize(16777215, 70));
     color_frame->setFrameShape(QFrame::StyledPanel);
@@ -329,31 +266,140 @@ public:
 
     gridLayout->addWidget(color_frame, 1, 0, 1, 1);
 
-    advanced_frame = new QFrame(PaintToolbox);
-    advanced_frame->setObjectName(QString::fromUtf8("advanced_frame"));
-    advanced_frame->setFrameShape(QFrame::StyledPanel);
-    advanced_frame->setFrameShadow(QFrame::Raised);
-    gridLayout5 = new QGridLayout(advanced_frame);
+    frame_3 = new QFrame(PaintToolbox);
+    frame_3->setObjectName(QString::fromUtf8("frame_3"));
+    frame_3->setFrameShape(QFrame::StyledPanel);
+    frame_3->setFrameShadow(QFrame::Raised);
+    redo_button = new QToolButton(frame_3);
+    redo_button->setObjectName(QString::fromUtf8("redo_button"));
+    redo_button->setGeometry(QRect(60, 10, 48, 48));
+    redo_button->setIcon(QIcon(QString::fromUtf8(":/images/redo.png")));
+    redo_button->setIconSize(QSize(48, 48));
+    undo_button = new QToolButton(frame_3);
+    undo_button->setObjectName(QString::fromUtf8("undo_button"));
+    undo_button->setGeometry(QRect(10, 10, 48, 48));
+    undo_button->setIcon(QIcon(QString::fromUtf8(":/images/undo.png")));
+    undo_button->setIconSize(QSize(48, 48));
+
+    gridLayout->addWidget(frame_3, 1, 1, 1, 1);
+
+    top_frame = new QFrame(PaintToolbox);
+    top_frame->setObjectName(QString::fromUtf8("top_frame"));
+    QSizePolicy sizePolicy2(static_cast<QSizePolicy::Policy>(5), static_cast<QSizePolicy::Policy>(7));
+    sizePolicy2.setHorizontalStretch(0);
+    sizePolicy2.setVerticalStretch(0);
+    sizePolicy2.setHeightForWidth(top_frame->sizePolicy().hasHeightForWidth());
+    top_frame->setSizePolicy(sizePolicy2);
+    top_frame->setMinimumSize(QSize(16, 120));
+    top_frame->setFrameShape(QFrame::StyledPanel);
+    top_frame->setFrameShadow(QFrame::Raised);
+    gradient_button = new QToolButton(top_frame);
+    gradient_button->setObjectName(QString::fromUtf8("gradient_button"));
+    gradient_button->setGeometry(QRect(110, 10, 48, 48));
+    gradient_button->setIcon(QIcon(QString::fromUtf8(":/images/gradient.png")));
+    gradient_button->setIconSize(QSize(48, 48));
+    gradient_button->setCheckable(true);
+    gradient_button->setAutoExclusive(true);
+    gradient_button->setAutoRaise(false);
+    fill_button = new QToolButton(top_frame);
+    fill_button->setObjectName(QString::fromUtf8("fill_button"));
+    fill_button->setGeometry(QRect(60, 10, 48, 48));
+    fill_button->setIcon(QIcon(QString::fromUtf8(":/images/fill.png")));
+    fill_button->setIconSize(QSize(48, 48));
+    fill_button->setCheckable(true);
+    fill_button->setAutoExclusive(true);
+    fill_button->setAutoRaise(false);
+    pen_button = new QToolButton(top_frame);
+    pen_button->setObjectName(QString::fromUtf8("pen_button"));
+    pen_button->setGeometry(QRect(10, 10, 48, 48));
+    pen_button->setIcon(QIcon(QString::fromUtf8(":/images/pinsel2.png")));
+    pen_button->setIconSize(QSize(48, 48));
+    pen_button->setCheckable(true);
+    pen_button->setAutoExclusive(true);
+    pen_button->setAutoRaise(false);
+    advanced_button = new QToolButton(top_frame);
+    advanced_button->setObjectName(QString::fromUtf8("advanced_button"));
+    advanced_button->setGeometry(QRect(10, 60, 48, 48));
+    advanced_button->setIcon(QIcon(QString::fromUtf8(":/images/kcontrol.png")));
+    advanced_button->setIconSize(QSize(48, 48));
+    advanced_button->setCheckable(true);
+    advanced_button->setAutoExclusive(true);
+    advanced_button->setAutoRaise(false);
+    smooth_button = new QToolButton(top_frame);
+    smooth_button->setObjectName(QString::fromUtf8("smooth_button"));
+    smooth_button->setGeometry(QRect(160, 10, 48, 48));
+    smooth_button->setIcon(QIcon(QString::fromUtf8(":/images/smooth_me.png")));
+    smooth_button->setIconSize(QSize(48, 48));
+    smooth_button->setCheckable(true);
+    smooth_button->setAutoExclusive(true);
+    smooth_button->setAutoRaise(false);
+    pick_button = new QToolButton(top_frame);
+    pick_button->setObjectName(QString::fromUtf8("pick_button"));
+    pick_button->setGeometry(QRect(210, 10, 48, 48));
+    pick_button->setIcon(QIcon(QString::fromUtf8(":/images/pick.png")));
+    pick_button->setIconSize(QSize(48, 48));
+    pick_button->setCheckable(true);
+    pick_button->setAutoExclusive(true);
+    pick_button->setAutoRaise(false);
+
+    gridLayout->addWidget(top_frame, 0, 0, 1, 2);
+
+    pick_frame = new QFrame(PaintToolbox);
+    pick_frame->setObjectName(QString::fromUtf8("pick_frame"));
+    pick_frame->setFrameShape(QFrame::StyledPanel);
+    pick_frame->setFrameShadow(QFrame::Raised);
+    gridLayout5 = new QGridLayout(pick_frame);
     gridLayout5->setSpacing(6);
     gridLayout5->setMargin(9);
     gridLayout5->setObjectName(QString::fromUtf8("gridLayout5"));
-    search_mode = new QComboBox(advanced_frame);
-    search_mode->setObjectName(QString::fromUtf8("search_mode"));
+    pick_mode = new QComboBox(pick_frame);
+    pick_mode->setObjectName(QString::fromUtf8("pick_mode"));
 
-    gridLayout5->addWidget(search_mode, 0, 1, 1, 1);
+    gridLayout5->addWidget(pick_mode, 0, 1, 1, 1);
 
-    label_2 = new QLabel(advanced_frame);
-    label_2->setObjectName(QString::fromUtf8("label_2"));
+    label_pick = new QLabel(pick_frame);
+    label_pick->setObjectName(QString::fromUtf8("label_pick"));
 
-    gridLayout5->addWidget(label_2, 0, 0, 1, 1);
+    gridLayout5->addWidget(label_pick, 0, 0, 1, 1);
 
 
-    gridLayout->addWidget(advanced_frame, 5, 0, 1, 2);
+    gridLayout->addWidget(pick_frame, 5, 0, 1, 2);
+
+    gradient_frame = new QFrame(PaintToolbox);
+    gradient_frame->setObjectName(QString::fromUtf8("gradient_frame"));
+    gradient_frame->setFrameShape(QFrame::StyledPanel);
+    gradient_frame->setFrameShadow(QFrame::Raised);
+    gridLayout6 = new QGridLayout(gradient_frame);
+    gridLayout6->setSpacing(6);
+    gridLayout6->setMargin(9);
+    gridLayout6->setObjectName(QString::fromUtf8("gridLayout6"));
+    label_4 = new QLabel(gradient_frame);
+    label_4->setObjectName(QString::fromUtf8("label_4"));
+
+    gridLayout6->addWidget(label_4, 0, 0, 1, 1);
+
+    gradient_type = new QComboBox(gradient_frame);
+    gradient_type->setObjectName(QString::fromUtf8("gradient_type"));
+
+    gridLayout6->addWidget(gradient_type, 0, 1, 1, 2);
+
+    label_3 = new QLabel(gradient_frame);
+    label_3->setObjectName(QString::fromUtf8("label_3"));
+
+    gridLayout6->addWidget(label_3, 1, 0, 1, 2);
+
+    gradient_form = new QComboBox(gradient_frame);
+    gradient_form->setObjectName(QString::fromUtf8("gradient_form"));
+
+    gridLayout6->addWidget(gradient_form, 1, 2, 1, 1);
+
+
+    gridLayout->addWidget(gradient_frame, 7, 0, 1, 2);
 
 
     retranslateUi(PaintToolbox);
 
-    QSize size(321, 484);
+    QSize size(332, 558);
     size = size.expandedTo(PaintToolbox->minimumSizeHint());
     PaintToolbox->resize(size);
 
@@ -364,36 +410,15 @@ public:
     void retranslateUi(QWidget *PaintToolbox)
     {
     PaintToolbox->setWindowTitle(QApplication::translate("PaintToolbox", "Vertex Painting", 0, QApplication::UnicodeUTF8));
-    label_4->setText(QApplication::translate("PaintToolbox", "Type", 0, QApplication::UnicodeUTF8));
-    gradient_type->clear();
-    gradient_type->addItem(QApplication::translate("PaintToolbox", "Foreground to background (RGB)", 0, QApplication::UnicodeUTF8));
-    gradient_type->addItem(QApplication::translate("PaintToolbox", "Foreground to transparency", 0, QApplication::UnicodeUTF8));
-    label_3->setText(QApplication::translate("PaintToolbox", "Form", 0, QApplication::UnicodeUTF8));
-    gradient_form->clear();
-    gradient_form->addItem(QApplication::translate("PaintToolbox", "Linear", 0, QApplication::UnicodeUTF8));
-    gradient_form->addItem(QApplication::translate("PaintToolbox", "Circular", 0, QApplication::UnicodeUTF8));
-    pick_mode->clear();
-    pick_mode->addItem(QApplication::translate("PaintToolbox", "Nearest vertex color", 0, QApplication::UnicodeUTF8));
-    pick_mode->addItem(QApplication::translate("PaintToolbox", "Pixel color", 0, QApplication::UnicodeUTF8));
-    label_pick->setText(QApplication::translate("PaintToolbox", "Picking mode", 0, QApplication::UnicodeUTF8));
-    pick_button->setToolTip(QApplication::translate("PaintToolbox", "Pick a color", 0, QApplication::UnicodeUTF8));
-    pick_button->setText(QString());
-    gradient_button->setToolTip(QApplication::translate("PaintToolbox", "Fill with gradients", 0, QApplication::UnicodeUTF8));
-    gradient_button->setText(QString());
-    fill_button->setToolTip(QApplication::translate("PaintToolbox", "Fill an area", 0, QApplication::UnicodeUTF8));
-    fill_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
-    pen_button->setToolTip(QApplication::translate("PaintToolbox", "Paint with the pen", 0, QApplication::UnicodeUTF8));
-    pen_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
-    advanced_button->setToolTip(QApplication::translate("PaintToolbox", "Change advanced settings", 0, QApplication::UnicodeUTF8));
-    advanced_button->setText(QString());
-    redo_button->setText(QString());
-    undo_button->setText(QString());
-    deck_box->setToolTip(QApplication::translate("PaintToolbox", "Change the opacity of the color (this is not the opengl alpha value)", 0, QApplication::UnicodeUTF8));
-    label_deck->setText(QApplication::translate("PaintToolbox", "Opacity", 0, QApplication::UnicodeUTF8));
-    label_penmodus->setText(QApplication::translate("PaintToolbox", "Modus", 0, QApplication::UnicodeUTF8));
-    pen_modus->clear();
-    pen_modus->addItem(QApplication::translate("PaintToolbox", "Normal", 0, QApplication::UnicodeUTF8));
-    deck_slider->setToolTip(QApplication::translate("PaintToolbox", "Change the opacity of the color (this is not the opengl alpha value)", 0, QApplication::UnicodeUTF8));
+    percentual_slider->setToolTip(QApplication::translate("PaintToolbox", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>", 0, QApplication::UnicodeUTF8));
+    label_percentual->setText(QApplication::translate("PaintToolbox", "Percentual", 0, QApplication::UnicodeUTF8));
+    percentual_box->setToolTip(QApplication::translate("PaintToolbox", "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>", 0, QApplication::UnicodeUTF8));
     backface_culling->setText(QApplication::translate("PaintToolbox", "backfaces", 0, QApplication::UnicodeUTF8));
     label_pen->setText(QApplication::translate("PaintToolbox", "Pen", 0, QApplication::UnicodeUTF8));
     label->setText(QApplication::translate("PaintToolbox", "Paint on:", 0, QApplication::UnicodeUTF8));
@@ -402,8 +427,12 @@ public:
     pen_type->addItem(QApplication::translate("PaintToolbox", "percentual of bbox diagonal", 0, QApplication::UnicodeUTF8));
     pen_type->addItem(QApplication::translate("PaintToolbox", "percentual of bbox height", 0, QApplication::UnicodeUTF8));
     invisible_painting->setText(QApplication::translate("PaintToolbox", "hidden polygons", 0, QApplication::UnicodeUTF8));
-    set_bw->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
-    switch_me->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    deck_box->setToolTip(QApplication::translate("PaintToolbox", "Change the opacity of the color (this is not the opengl alpha value)", 0, QApplication::UnicodeUTF8));
+    label_deck->setText(QApplication::translate("PaintToolbox", "Opacity", 0, QApplication::UnicodeUTF8));
+    label_penmodus->setText(QApplication::translate("PaintToolbox", "Modus", 0, QApplication::UnicodeUTF8));
+    pen_modus->clear();
+    pen_modus->addItem(QApplication::translate("PaintToolbox", "Normal", 0, QApplication::UnicodeUTF8));
+    deck_slider->setToolTip(QApplication::translate("PaintToolbox", "Change the opacity of the color (this is not the opengl alpha value)", 0, QApplication::UnicodeUTF8));
     search_mode->clear();
     search_mode->addItem(QApplication::translate("PaintToolbox", "fast", 0, QApplication::UnicodeUTF8));
     search_mode->addItem(QApplication::translate("PaintToolbox", "slow but accurate", 0, QApplication::UnicodeUTF8));
@@ -412,6 +441,34 @@ public:
 "</style></head><body style=\" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">fast:</span> works better with big meshes, but can loose some vertexes when faces are not direct connected<br /><span style=\" font-weight:600;\">slow but accurate: </span>sholud be used with small meshes, because it finds every vertex during painting</p></body></html>", 0, QApplication::UnicodeUTF8));
     label_2->setText(QApplication::translate("PaintToolbox", "Vertex search:", 0, QApplication::UnicodeUTF8));
+    set_bw->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    switch_me->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    redo_button->setText(QString());
+    undo_button->setText(QString());
+    gradient_button->setToolTip(QApplication::translate("PaintToolbox", "Fill with gradients", 0, QApplication::UnicodeUTF8));
+    gradient_button->setText(QString());
+    fill_button->setToolTip(QApplication::translate("PaintToolbox", "Fill an area", 0, QApplication::UnicodeUTF8));
+    fill_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    pen_button->setToolTip(QApplication::translate("PaintToolbox", "Paint with the pen", 0, QApplication::UnicodeUTF8));
+    pen_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
+    advanced_button->setToolTip(QApplication::translate("PaintToolbox", "Change advanced settings", 0, QApplication::UnicodeUTF8));
+    advanced_button->setText(QString());
+    smooth_button->setToolTip(QApplication::translate("PaintToolbox", "Smooth", 0, QApplication::UnicodeUTF8));
+    smooth_button->setText(QString());
+    pick_button->setToolTip(QApplication::translate("PaintToolbox", "Pick a color", 0, QApplication::UnicodeUTF8));
+    pick_button->setText(QString());
+    pick_mode->clear();
+    pick_mode->addItem(QApplication::translate("PaintToolbox", "Nearest vertex color", 0, QApplication::UnicodeUTF8));
+    pick_mode->addItem(QApplication::translate("PaintToolbox", "Pixel color", 0, QApplication::UnicodeUTF8));
+    label_pick->setText(QApplication::translate("PaintToolbox", "Picking mode", 0, QApplication::UnicodeUTF8));
+    label_4->setText(QApplication::translate("PaintToolbox", "Type", 0, QApplication::UnicodeUTF8));
+    gradient_type->clear();
+    gradient_type->addItem(QApplication::translate("PaintToolbox", "Foreground to background (RGB)", 0, QApplication::UnicodeUTF8));
+    gradient_type->addItem(QApplication::translate("PaintToolbox", "Foreground to transparency", 0, QApplication::UnicodeUTF8));
+    label_3->setText(QApplication::translate("PaintToolbox", "Form", 0, QApplication::UnicodeUTF8));
+    gradient_form->clear();
+    gradient_form->addItem(QApplication::translate("PaintToolbox", "Linear", 0, QApplication::UnicodeUTF8));
+    gradient_form->addItem(QApplication::translate("PaintToolbox", "Circular", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(PaintToolbox);
     } // retranslateUi
 

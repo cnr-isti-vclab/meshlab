@@ -49,6 +49,7 @@ PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::Wind
 	ui.undo_button->setEnabled(false);
 	ui.redo_button->setEnabled(false);
 	ui.gradient_frame->setVisible(false);
+	ui.smooth_frame->setVisible(false);
 }
 
 Color4b PaintToolbox::getColor(Qt::MouseButton mouse) {
@@ -96,6 +97,14 @@ void PaintToolbox::on_deck_box_valueChanged(int value) {
 	if (value!=ui.deck_slider->value()) ui.deck_box->setValue((int)value);
 }
 
+void PaintToolbox::on_percentual_slider_valueChanged(int value) {
+	if (value!=ui.percentual_box->value()) ui.percentual_box->setValue(value);
+}
+
+void PaintToolbox::on_percentual_box_valueChanged(int value) {
+	if (value!=ui.percentual_slider->value()) ui.percentual_box->setValue((int)value);
+}
+
 void PaintToolbox::on_pen_button_clicked() {
 	paint_utensil=PEN;
 	ui.pen_frame->setVisible(true);
@@ -103,6 +112,7 @@ void PaintToolbox::on_pen_button_clicked() {
 	ui.pick_frame->setVisible(false);
 	ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(false);
+	ui.smooth_frame->setVisible(false);
 }
 
 void PaintToolbox::on_fill_button_clicked() {
@@ -112,6 +122,7 @@ void PaintToolbox::on_fill_button_clicked() {
 	ui.pick_frame->setVisible(false);
 	ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(false);
+	ui.smooth_frame->setVisible(false);
 }
 
 void PaintToolbox::on_pick_button_clicked() {
@@ -121,6 +132,7 @@ void PaintToolbox::on_pick_button_clicked() {
 	ui.pick_frame->setVisible(true);
 	ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(false);
+	ui.smooth_frame->setVisible(false);
 }
 
 void PaintToolbox::on_advanced_button_clicked() {
@@ -130,6 +142,7 @@ void PaintToolbox::on_advanced_button_clicked() {
 	ui.pick_frame->setVisible(false);
 	ui.advanced_frame->setVisible(true);
 	ui.gradient_frame->setVisible(false);
+	ui.smooth_frame->setVisible(false);
 }
 
 void PaintToolbox::on_gradient_button_clicked() {
@@ -139,6 +152,17 @@ void PaintToolbox::on_gradient_button_clicked() {
 	ui.pick_frame->setVisible(false);
 	ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(true);
+	ui.smooth_frame->setVisible(false);
+}
+
+void PaintToolbox::on_smooth_button_clicked() {
+	paint_utensil=SMOOTH;
+	ui.pen_frame->setVisible(false);
+	ui.pen_extra_frame->setVisible(true);
+	ui.pick_frame->setVisible(false);
+	ui.advanced_frame->setVisible(false);
+	ui.gradient_frame->setVisible(false);
+	ui.smooth_frame->setVisible(true);
 }
 
 void PaintToolbox::setColor(Color4b newcol,Qt::MouseButton mouse) {
