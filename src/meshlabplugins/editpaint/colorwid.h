@@ -1,3 +1,10 @@
+/***************************************************************************
+first version: 0.1 
+autor: Gfrei Andreas 
+date:  07/02/2007 
+email: gfrei.andreas@gmx.net
+****************************************************************************/
+
 #ifndef COLORWID_H
 #define COLORWID_H
 

@@ -1,3 +1,10 @@
+/***************************************************************************
+first version: 0.1 
+autor: Gfrei Andreas 
+date:  07/02/2007 
+email: gfrei.andreas@gmx.net
+****************************************************************************/
+
 #include "editpaint.h"
 #include <QPainter>
 #include <QColorDialog>
@@ -32,7 +39,7 @@ void ColorWid::mousePressEvent ( QMouseEvent * event ) {
 	update();
 }
 
-PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::WindowFlags flags) : QWidget(/*parent*/0,flags | Qt::WindowStaysOnTopHint | Qt::Window) {
+PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::WindowFlags flags) : QWidget(/*parent*/0,flags/* | Qt::WindowStaysOnTopHint*/) {
 	ui.setupUi(this);
 	ui.front->setColor(Qt::black);
 	ui.back->setColor(Qt::white);
@@ -41,15 +48,28 @@ PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::Wind
 	ui.switch_me->setGeometry(55,10,15,15);
 	ui.set_bw->setGeometry(10,45,15,15);
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
-	setGeometry(p.x()+parent->width()-/*width()*/60,p.y(),/*width()*/100,/*height()*/100);
+	//QDesktopWidget::screenGeometry();
 	//ui.fill_button->setEnabled(false);
 	ui.pick_frame->setVisible(false);
-	ui.advanced_frame->setVisible(false);
+	//ui.advanced_frame->setVisible(false);
 	ui.pen_button->setChecked(true);
 	ui.undo_button->setEnabled(false);
 	ui.redo_button->setEnabled(false);
 	ui.gradient_frame->setVisible(false);
 	ui.smooth_frame->setVisible(false);
+	//ui.select_widget->setVisible(false);
+	ui.tabWidget->widget(0)->layout()->setMargin(2);
+	ui.tabWidget->widget(0)->layout()->setSpacing(2);
+	ui.tabWidget->widget(1)->layout()->setMargin(2);
+	ui.tabWidget->widget(1)->layout()->setSpacing(2);
+	//####################
+	setGeometry(p.x()+parent->width()-width(),p.y(),/*width()*/width(),/*height()*/400);
+	ui.select_button->setChecked(true);
+	//ui.pen_select_frame->setEnabled(true);
+	ui.poly_smooth_frame->setVisible(false);
+	paint_utensil[0]=PEN;
+	paint_utensil[1]=SELECT;
+	//this->setWidget(wi);
 }
 
 Color4b PaintToolbox::getColor(Qt::MouseButton mouse) {
@@ -75,6 +95,7 @@ void PaintToolbox::on_pen_radius_valueChanged(double value) {
 	}
 	oldval=ui.pen_radius->value();
 }
+
 void PaintToolbox::on_switch_me_clicked() {
 	QColor temp=ui.front->getColor();
 	ui.front->setColor(ui.back->getColor());
@@ -88,6 +109,7 @@ void PaintToolbox::on_set_bw_clicked() {
 	//ui.front->update();
 	//ui.back->update();
 }
+
 
 void PaintToolbox::on_deck_slider_valueChanged(int value) {
 	if (value!=ui.deck_box->value()) ui.deck_box->setValue(value);
@@ -105,65 +127,128 @@ void PaintToolbox::on_percentual_box_valueChanged(int value) {
 	if (value!=ui.percentual_slider->value()) ui.percentual_box->setValue((int)value);
 }
 
+void PaintToolbox::on_decrease_slider_valueChanged(int value) {
+	if (value!=ui.decrease_box->value()) ui.decrease_box->setValue(value);
+}
+
+void PaintToolbox::on_decrease_box_valueChanged(int value) {
+	if (value!=ui.decrease_slider->value()) ui.decrease_box->setValue((int)value);
+}
+
+
 void PaintToolbox::on_pen_button_clicked() {
-	paint_utensil=PEN;
+	paint_utensil[0]=PEN;
 	ui.pen_frame->setVisible(true);
 	ui.pen_extra_frame->setVisible(true);
 	ui.pick_frame->setVisible(false);
-	ui.advanced_frame->setVisible(false);
+	//ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(false);
 	ui.smooth_frame->setVisible(false);
 }
 
 void PaintToolbox::on_fill_button_clicked() {
-	paint_utensil=FILL;
+	paint_utensil[0]=FILL;
 	ui.pen_frame->setVisible(true);
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(false);
-	ui.advanced_frame->setVisible(false);
+	//ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(false);
 	ui.smooth_frame->setVisible(false);
 }
 
 void PaintToolbox::on_pick_button_clicked() {
-	paint_utensil=PICK;
+	paint_utensil[0]=PICK;
 	ui.pen_frame->setVisible(false);
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(true);
-	ui.advanced_frame->setVisible(false);
+	//ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(false);
 	ui.smooth_frame->setVisible(false);
 }
 
-void PaintToolbox::on_advanced_button_clicked() {
+/*void PaintToolbox::on_advanced_button_clicked() {
 	paint_utensil=NONE;
 	ui.pen_frame->setVisible(false);
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(false);
-	ui.advanced_frame->setVisible(true);
+	//ui.advanced_frame->setVisible(true);
 	ui.gradient_frame->setVisible(false);
 	ui.smooth_frame->setVisible(false);
-}
+}*/
 
 void PaintToolbox::on_gradient_button_clicked() {
-	paint_utensil=GRADIENT;
+	paint_utensil[0]=GRADIENT;
 	ui.pen_frame->setVisible(true);
 	ui.pen_extra_frame->setVisible(false);
 	ui.pick_frame->setVisible(false);
-	ui.advanced_frame->setVisible(false);
+	//ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(true);
 	ui.smooth_frame->setVisible(false);
 }
 
 void PaintToolbox::on_smooth_button_clicked() {
-	paint_utensil=SMOOTH;
+	paint_utensil[0]=SMOOTH;
 	ui.pen_frame->setVisible(false);
 	ui.pen_extra_frame->setVisible(true);
 	ui.pick_frame->setVisible(false);
-	ui.advanced_frame->setVisible(false);
+	//ui.advanced_frame->setVisible(false);
 	ui.gradient_frame->setVisible(false);
 	ui.smooth_frame->setVisible(true);
 }
+
+void PaintToolbox::on_tabWidget_currentChanged ( int index ) {
+	switch (index) {
+		/*case 0: { ui.select_widget->setVisible(false); ui.paint_widget->setVisible(true); } break;
+		case 1: { ui.select_widget->setVisible(true); ui.paint_widget->setVisible(false); } break;
+		case 2: { ui.select_widget->setVisible(false); ui.paint_widget->setVisible(false); } break;*/
+	}
+	//resize(10,10);
+}
+
+void PaintToolbox::on_select_button_clicked() {
+	paint_utensil[1]=SELECT;
+	ui.pen_select_frame->setVisible(true);
+	ui.poly_smooth_frame->setVisible(false);
+}
+void PaintToolbox::on_poly_smooth_button_clicked() {
+	paint_utensil[1]=POLY_SMOOTH;
+	ui.pen_select_frame->setVisible(true);
+	ui.poly_smooth_frame->setVisible(true);
+}
+
+void PaintToolbox::on_percentual_slider_2_valueChanged(int value) {
+	if (value!=ui.percentual_box_2->value()) ui.percentual_box_2->setValue(value);
+}
+
+void PaintToolbox::on_percentual_box_2_valueChanged(int value) {
+	if (value!=ui.percentual_slider_2->value()) ui.percentual_box_2->setValue((int)value);
+}
+
+void PaintToolbox::on_decrease_slider_2_valueChanged(int value) {
+	if (value!=ui.decrease_box_2->value()) ui.decrease_box_2->setValue(value);
+}
+
+void PaintToolbox::on_decrease_box_2_valueChanged(int value) {
+	if (value!=ui.decrease_slider_2->value()) ui.decrease_box_2->setValue((int)value);
+}
+
+void PaintToolbox::on_pen_type_2_currentIndexChanged(QString value) {
+	on_pen_radius_2_valueChanged( ui.pen_radius_2->value());
+}
+
+void PaintToolbox::on_pen_radius_2_valueChanged(double value) {
+	static double oldval=-1;
+	if (ui.pen_type_2->currentText()=="pixel") {
+		if ((double)((int)value)!=value) {
+			if (oldval<value)
+			ui.pen_radius_2->setValue((double)((int)value)+1);
+			else ui.pen_radius_2->setValue((double)((int)value));
+		}
+	} else {
+	}
+	oldval=ui.pen_radius_2->value();
+}
+
 
 void PaintToolbox::setColor(Color4b newcol,Qt::MouseButton mouse) {
 	switch (mouse) {

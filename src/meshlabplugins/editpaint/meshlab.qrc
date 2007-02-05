@@ -2,6 +2,7 @@
     <qresource prefix="/" >
 	<file>images/smooth_me.png</file>
         <file>images/pinsel.png</file>
+        <file>images/pinsel_select.png</file>
 	<file>images/pinsel2.png</file>
 	<file>images/fill.png</file>
 	<file>images/bw.png</file>

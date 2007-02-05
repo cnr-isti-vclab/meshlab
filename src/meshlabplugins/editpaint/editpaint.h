@@ -1,3 +1,10 @@
+/***************************************************************************
+first version: 0.1 
+autor: Gfrei Andreas 
+date:  07/02/2007 
+email: gfrei.andreas@gmx.net
+****************************************************************************/
+
 #ifndef EDITPAINT_H
 #define EDITPAINT_H
 
@@ -24,18 +31,8 @@ struct UndoItem;
 
 int isIn(QPointF p0,QPointF p1,float dx,float dy,float raduis);
 
-inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
-	Color4b orig=vertice->C();
-	orig[0]=min(255,(newcol[0]*opac+orig[0]*(100-opac))/100);
-	orig[1]=min(255,(newcol[1]*opac+orig[1]*(100-opac))/100);
-	orig[2]=min(255,(newcol[2]*opac+orig[2]*(100-opac))/100);
-	orig[3]=min(255,(newcol[3]*opac+orig[3]*(100-opac))/100);
-	vertice->C()=orig;
-}
 
-
-
-typedef enum {PEN, FILL, PICK, NONE, GRADIENT, SMOOTH} PaintThing;
+typedef enum {PEN, FILL, PICK, NONE, GRADIENT, SMOOTH, SELECT, POLY_SMOOTH} PaintThing;
 
 class Penn {
 public:
@@ -54,6 +51,24 @@ struct PaintData{
 	Color4b color;
 	//double radius;
 	Penn pen;
+};
+
+struct Vert_Data {
+	CVertexO * v;
+	float distance;
+};
+
+struct Vert_Data_2 {
+	//CVertexO * v;
+	float distance;
+	Color4b color;
+};
+
+struct Vert_Data_3{
+	//CVertexO * v;
+	float distance;
+	float pos[3];
+	Color4b color;
 };
 
 class EditPaintPlugin : public QObject, public MeshEditInterface {
@@ -96,15 +111,14 @@ private:
 	int inverse_y; // gla->curSiz.height()-cur.y() TODO probably removable
 	vector<CMeshO::FacePointer> tempSel; //to use when needed
 	vector<CMeshO::FacePointer> curSel; //the faces i am painting on
-	QHash<CVertexO *,Color4b> temporaneo; //the vertexes i am painting on
+	QHash<CVertexO *,Vert_Data_2> temporaneo; //the vertexes i am painting on
 	Penn pen; //contains informations about the painting mode, color, type ...
-	PaintToolbox* paintbox; //the widget with the painting stuff
+	PaintToolbox *paintbox; //the widget with the painting stuff
+	QDockWidget *paint_dock;
 	Qt::MouseButton curr_mouse; // which mouse button is selected
 
-	PaintWorker * worker;
-
+	//PaintWorker * worker;
 	GLArea* current_gla;
-
 	QHash <GLArea *,ColorUndo *> color_undo;
 
 	int paintType();
@@ -224,14 +238,17 @@ public:
 	Color4b getColor(Qt::MouseButton);
 	void setColor(Color4b,Qt::MouseButton);
 	void setColor(int,int,int,Qt::MouseButton mouse);
-	inline double getRadius() { return ui.pen_radius->value(); }
-	inline int paintType() { /*if (ui.pen_type->currentText()=="pixel") return 1; return 2;*/ return ui.pen_type->currentIndex()+1; }
-	inline int searchMode() { return ui.search_mode->currentIndex()+1; }
-	inline int getOpacity() { return ui.deck_slider->value(); }
-	inline int getSmoothPercentual() { return ui.percentual_slider->value(); }
-	inline int paintUtensil() { return paint_utensil; }
-	inline bool getPaintBackface() { return ui.backface_culling->checkState()!=Qt::Unchecked; }
-	inline bool getPaintInvisible() { return ui.invisible_painting->checkState()!=Qt::Unchecked; }
+	double getRadius() { if (ui.tabWidget->currentIndex()==1) return ui.pen_radius_2->value(); return ui.pen_radius->value(); }
+	int paintType() { if (ui.tabWidget->currentIndex()==1) return ui.pen_type_2->currentIndex()+1; return ui.pen_type->currentIndex()+1; }
+	int searchMode() { return ui.search_mode->currentIndex()+1; }
+	int getOpacity() { return ui.deck_slider->value(); }
+	int getSmoothPercentual() { if (ui.tabWidget->currentIndex()==1) return ui.percentual_slider_2->value(); return ui.percentual_slider->value(); }
+	int getDecreasePercentual() { if (ui.tabWidget->currentIndex()==1) return ui.decrease_slider_2->value(); return ui.decrease_slider->value(); }
+	int paintUtensil() { if (ui.tabWidget->currentIndex()<2) return paint_utensil[ui.tabWidget->currentIndex()]; else return NONE; }
+	bool getPaintBackface() { if (ui.tabWidget->currentIndex()==1) return ui.backface_culling_2->checkState()!=Qt::Unchecked; 
+					return ui.backface_culling->checkState()!=Qt::Unchecked; }
+	bool getPaintInvisible() { if (ui.tabWidget->currentIndex()==1) return ui.invisible_painting_2->checkState()!=Qt::Unchecked; 
+					return ui.invisible_painting->checkState()!=Qt::Unchecked; }
 
 	inline int getGradientType() { return ui.gradient_type->currentIndex(); }
 	inline int getGradientForm() { return ui.gradient_form->currentIndex(); }
@@ -240,7 +257,7 @@ public:
 	void setUndo(bool value) { ui.undo_button->setEnabled(value); }
 	void setRedo(bool value) { ui.redo_button->setEnabled(value); }
 private:
-	int paint_utensil;
+	int paint_utensil[2];
 	Ui::PaintToolbox ui;
 private slots:
 	void on_pen_type_currentIndexChanged(QString value);
@@ -252,7 +269,7 @@ private slots:
 	void on_pen_button_clicked();
 	void on_fill_button_clicked();
 	void on_pick_button_clicked();
-	void on_advanced_button_clicked();
+	//void on_advanced_button_clicked();
 	void on_backface_culling_stateChanged(int value);
 	void on_invisible_painting_stateChanged(int value);
 	void on_undo_button_clicked();
@@ -261,6 +278,19 @@ private slots:
 	void on_smooth_button_clicked();
 	void on_percentual_slider_valueChanged(int value);
 	void on_percentual_box_valueChanged(int value);
+	void on_tabWidget_currentChanged ( int index );
+	void on_select_button_clicked();
+	void on_poly_smooth_button_clicked();
+
+	void on_decrease_slider_valueChanged(int value);
+	void on_decrease_box_valueChanged(int value);
+
+	void on_percentual_slider_2_valueChanged(int value);
+	void on_percentual_box_2_valueChanged(int value);
+	void on_decrease_slider_2_valueChanged(int value);
+	void on_decrease_box_2_valueChanged(int value);
+	void on_pen_type_2_currentIndexChanged(QString value);
+	void on_pen_radius_2_valueChanged(double value);
 signals:
 	void undo_redo(int value);
 	//void redo();
