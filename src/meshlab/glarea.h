@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.64  2007/02/05 19:25:05  gfrei
+added float getFov()
+
 Revision 1.63  2006/11/09 08:15:59  cignoni
 Restored classical dark background
 
@@ -262,6 +265,8 @@ public:
 
 	void closeEvent(QCloseEvent *event);
   float lastRenderingTime() { return lastTime;}
+
+	float getFov() { return fov; }
 
 protected:
 
