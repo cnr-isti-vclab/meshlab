@@ -66,7 +66,7 @@ struct Vert_Data_2 {
 
 struct Vert_Data_3{
 	//CVertexO * v;
-	float distance;
+	//float distance;
 	float pos[3];
 	Color4b color;
 };
@@ -111,7 +111,7 @@ private:
 	int inverse_y; // gla->curSiz.height()-cur.y() TODO probably removable
 	vector<CMeshO::FacePointer> tempSel; //to use when needed
 	vector<CMeshO::FacePointer> curSel; //the faces i am painting on
-	QHash<CVertexO *,Vert_Data_2> temporaneo; //the vertexes i am painting on
+	QHash<CVertexO *,Vert_Data_2> visited_vertexes; //the vertexes i am painting on
 	Penn pen; //contains informations about the painting mode, color, type ...
 	PaintToolbox *paintbox; //the widget with the painting stuff
 	QDockWidget *paint_dock;
