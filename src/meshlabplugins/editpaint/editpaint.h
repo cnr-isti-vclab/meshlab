@@ -26,31 +26,23 @@ class PaintToolbox;
 class Penn;
 class ColorUndo;
 class PaintWorker;
-struct PaintData;
 struct UndoItem;
 
-int isIn(QPointF p0,QPointF p1,float dx,float dy,float raduis);
-
-
+/** the different painting types */
 typedef enum {PEN, FILL, PICK, NONE, GRADIENT, SMOOTH, SELECT, POLY_SMOOTH} PaintThing;
 
-class Penn {
-public:
+/** contains some info about the current paint util */
+struct Penn {
 	float radius;
-	//QPoint pos;
+	int paintutensil;
 	int painttype;
 	bool backface;
 	bool invisible;
 };
 
-struct PaintData{
-	int special;
-	QPoint start;
-	QPoint end;
-	int opac;
-	Color4b color;
-	//double radius;
-	Penn pen;
+struct UndoItem {
+	CVertexO * vertex;
+	Color4b original;
 };
 
 struct Vert_Data {
@@ -59,18 +51,16 @@ struct Vert_Data {
 };
 
 struct Vert_Data_2 {
-	//CVertexO * v;
 	float distance;
 	Color4b color;
 };
 
 struct Vert_Data_3{
-	//CVertexO * v;
-	//float distance;
 	float pos[3];
 	Color4b color;
 };
 
+/** the main class of the plugin */
 class EditPaintPlugin : public QObject, public MeshEditInterface {
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
@@ -78,7 +68,6 @@ class EditPaintPlugin : public QObject, public MeshEditInterface {
 
 public:
 	EditPaintPlugin();
-	
 	virtual ~EditPaintPlugin();
 	
 	virtual const QString Info(QAction *);
@@ -92,13 +81,12 @@ public:
 	virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	//	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
 	virtual QList<QAction *> actions() const ;
-	QPoint start;
-	QPoint cur;
-	QPoint prev;
-	bool isDragging;
-	vector<CMeshO::FacePointer> LastSel;
 
 private:
+	QPoint start; // mousepos at press
+	QPoint cur; // current mousepos
+	QPoint prev; // previous mouse pos
+	bool isDragging; // to check in decorate if it is called 1 time after a mouse move ...
 	//typedef enum {SMAdd, SMClear,SMSub} SelMode;
 	//SelMode selMode;
 	bool has_track; // to restore the trackball settings
@@ -116,14 +104,11 @@ private:
 	PaintToolbox *paintbox; //the widget with the painting stuff
 	QDockWidget *paint_dock;
 	Qt::MouseButton curr_mouse; // which mouse button is selected
-
-	//PaintWorker * worker;
-	GLArea* current_gla;
-	QHash <GLArea *,ColorUndo *> color_undo;
-
-	int paintType();
-	void DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw);
-	void drawLine(GLArea * gla);
+	GLArea* current_gla; // the glarea
+	/** 1 ColorUdo for every glarea !!! could lead to errors when an area is closed and another gets the same pointer */
+	QHash <GLArea *,ColorUndo *> color_undo; 
+	void DrawXORCircle(MeshModel &m,GLArea * gla, bool doubleDraw); // draws the circle which represents the pen
+	void drawLine(GLArea * gla); // to draw a xor-line from start to cur, used for gradient
 	void fillGradient(MeshModel &,GLArea * gla);
 	bool getFaceAtMouse(MeshModel &,CMeshO::FacePointer &);
 	bool getFacesAtMouse(MeshModel &,vector<CMeshO::FacePointer> &);
@@ -131,7 +116,6 @@ private:
 	bool getVertexesAtMouse();
 	void fillFrom(MeshModel &,CFaceO *);
 	bool hasSelected(MeshModel &);
-
 	void pushUndo(GLArea * gla);
 
 	inline void updateMatrixes() {		
@@ -144,12 +128,13 @@ private:
 		qDebug() <<"---- viewport: "<<viewport[0]<<" "<<viewport[1]<<" "<<viewport[2]<<" "<<viewport[3]<< "---------"<<endl;*/
 	}
 
-	inline int getNearest(QPointF center, QPointF *punti,int num) {
+	/** searchs the nearest point to center in the array points and returns the pos*/
+	inline int getNearest(QPointF center, QPointF *points,int num) {
 		int nearestInd=0;
-		float dist=fabsf(center.x()-punti[0].x())*fabsf(center.x()-punti[0].x())+fabsf(center.y()-punti[0].y())*fabsf(center.y()-punti[0].y());
+		float dist=fabsf(center.x()-points[0].x())*fabsf(center.x()-points[0].x())+fabsf(center.y()-points[0].y())*fabsf(center.y()-points[0].y());
 		for (int lauf=1; lauf<num; lauf++) {
-			float temp=fabsf(center.x()-punti[lauf].x())*fabsf(center.x()-punti[lauf].x())+
-				fabsf(center.y()-punti[lauf].y())*fabsf(center.y()-punti[lauf].y());
+			float temp=fabsf(center.x()-points[lauf].x())*fabsf(center.x()-points[lauf].x())+
+				fabsf(center.y()-points[lauf].y())*fabsf(center.y()-points[lauf].y());
 			if (temp<dist) {
 				nearestInd=lauf;
 				dist=temp;
@@ -160,21 +145,18 @@ private:
 
 public slots:
 	void undo(int value);
-	//void redo();
 };
 
-struct UndoItem {
-	CVertexO * vertex;
-	Color4b original;
-	//Color4b new_color;
-};
-
+/** the class manages the undos.
+there is still some error, and at the moment it manages only color undo, but not vertex-pos undo */
 class ColorUndo {
 private:
-	vector<vector<UndoItem> *> undos;
-	vector<vector<UndoItem> *> redos;
-	vector<UndoItem> * temp_vector; 
+	vector<vector<UndoItem> *> undos; // the vector of the undo's
+	vector<vector<UndoItem> *> redos; // the vector of the redo's
+	vector<UndoItem> * temp_vector;   // the vector of the not yet added single undos
 public:
+	/** adds the single undos as unified undo and checks if there are more then 15 undos, 
+		in that case it removes the first undo */
 	void pushUndo() { 
 		if (undos.size()==15) removeUndo();
 		if (temp_vector->size()==0) return;
@@ -185,6 +167,7 @@ public:
 	}
 	void undo();
 	void redo();
+	/** removes the first undo */
 	void removeUndo() { 
 		if (undos.size()==0) return; 
 		undos[0]->clear();
@@ -193,44 +176,12 @@ public:
 	}
 	bool hasUndo() { return undos.size()!=0; }
 	bool hasRedo() { return redos.size()!=0; }
-	inline void addItem(UndoItem u) { temp_vector->push_back(u); }
+	/** adds a single item */
+	inline void addItem(UndoItem u) { temp_vector->push_back(u); } 
 	ColorUndo() { temp_vector=new vector<UndoItem>();}
 };
 
-class PaintWorker : public QThread{
-Q_OBJECT
-private:
-	MeshModel* mesh;
-	GLArea *gla;
-	QVector <PaintData> dati;
-	QMutex mutex;
-	QWaitCondition condition;
-	bool nothingTodo;
-
-	double mvmatrix[16];
-	double projmatrix[16];
-	int viewport[4];
-
-	vector<CMeshO::FacePointer> curSel;
-	QHash<CVertexO *,Color4b> temporaneo;
-	GLfloat *pixels;
-
-	void run();
-public:
-	PaintWorker();
-	//inline bool waitsForData() { return nothingTodo; }
-	inline void waitTillPause() { mutex.lock(); if (nothingTodo) {mutex.unlock(); return;} condition.wait(&mutex); mutex.unlock(); return; }
-	inline void setModelArea(MeshModel * mo, GLArea * a) {  mesh=mo; gla=a; }
-	inline void clear(GLfloat * pi) { 
-		curSel.clear(); temporaneo.clear(); pixels=pi; 
-		glGetIntegerv(GL_VIEWPORT, viewport);
-		glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix);
-		glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
-	}
-//public slots:
-	void addData(PaintData data) { mutex.lock(); dati.push_back(data); condition.wakeAll(); mutex.unlock(); }
-};
-
+/** manages the paint window */
 class PaintToolbox : public QWidget {
 Q_OBJECT
 public:
@@ -269,7 +220,6 @@ private slots:
 	void on_pen_button_clicked();
 	void on_fill_button_clicked();
 	void on_pick_button_clicked();
-	//void on_advanced_button_clicked();
 	void on_backface_culling_stateChanged(int value);
 	void on_invisible_painting_stateChanged(int value);
 	void on_undo_button_clicked();
@@ -293,7 +243,6 @@ private slots:
 	void on_pen_radius_2_valueChanged(double value);
 signals:
 	void undo_redo(int value);
-	//void redo();
 };
 
 #endif

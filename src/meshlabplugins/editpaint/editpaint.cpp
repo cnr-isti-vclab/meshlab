@@ -22,19 +22,18 @@
  ****************************************************************************/
 /****************************************************************************
 
-//TODO CLEAN ME
-//TODO bright colors problem
-//TODO add IsD() check
-//TODO bits instead of hashtables
+//TODO bug when pen smaller than polys and fast mouse movement
+//TODO there could be some IsD() missing
+//TODO in some cases bits instead of hashtables would be better
 //TODO optimize undo to not include when new and old colors are the same
-//TODO bug when pen smaller than polys
-//TODO error with undo
-//TODO color smooth has some problem
+//TODO color smooth has some problems
+//TODO bright colors problem
 ################################
 //TODO paint selection selects some wrong piece: SOLVED
 //TODO opengl line width after gradient: SOLVED
 //TODO PaintToolbox does not close: SOLVED
 //TODO remove FF or VF: SOLVED removed FF
+//TODO error with undo and color smooth: SOLVED
 */
 
 /*****************************************************************************
@@ -73,23 +72,17 @@ using namespace vcg;
 
 EditPaintPlugin::EditPaintPlugin() {
 	isDragging=false;
+	first=true;
 	paintbox=0;
 	pixels=0;
-	first=true;
 	pressed=0;
-	//color_undo= new ColorUndo();
 	actionList << new QAction(QIcon(":/images/pinsel.png"),"Vertex painting, Face selection and smoothing", this);
 	QAction *editAction;
-	//QObject::connect(editAction, SIGNAL(redo()),this, SLOT(redo()));
 	foreach(editAction, actionList)
 	editAction->setCheckable(true);
-	//qDebug("CONSTRUCTOR");
-	//paintbox=new PaintToolbox("Vertex painting");
-	//paintbox->setVisible(false);
-	//worker= new PaintWorker();
-	//worker->start(QThread::HighestPriority);
 }
 
+/** the destructor is never called */
 EditPaintPlugin::~EditPaintPlugin() {
 	if (paintbox!=0) { delete paintbox; paintbox=0; }
 	qDebug() << "~EditPaint" << endl;
@@ -113,6 +106,7 @@ const PluginInfo &EditPaintPlugin::Info() {
 	return ai;
 } 
 
+/** an undo==1 or a redo was called */
 void EditPaintPlugin::undo(int value) {
 	if (!color_undo.contains(current_gla)) {
 		color_undo.insert(current_gla,new ColorUndo());
@@ -148,7 +142,6 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	parent->mm->ioMask|=MeshModel::IOM_VERTCOLOR;
 	parent->mm->ioMask|=MeshModel::IOM_VERTQUALITY;
 	
-	LastSel.clear();
 	curSel.clear();
 	parent->update();
 
@@ -163,16 +156,16 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	}
 }
 
+/** is never called  */
 void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) {
 	qDebug() <<"ENDEDIT"<<endl;
-	if (paintbox!=0) { paintbox->setVisible(false); delete paintbox; paintbox=0; }
+	if (paintbox!=0) { paintbox->setVisible(false); /*delete paintbox; paintbox=0;*/ }
 }
 
 void EditPaintPlugin::mousePressEvent(QAction * ac, QMouseEvent * event, MeshModel &m, GLArea * gla) {
 	//qDebug() << "pressStart" << endl;
 	has_track=gla->isTrackBallVisible();
 	gla->showTrackBall(false);
-	LastSel.clear();
 	first=true;
 	pressed=1;
 	isDragging = true;
@@ -182,41 +175,25 @@ void EditPaintPlugin::mousePressEvent(QAction * ac, QMouseEvent * event, MeshMod
 	prev=start;
 	inverse_y=gla->curSiz.height()-cur.y();
 	curr_mouse=event->button();
-	
 	current_gla=gla;
 
-	pen.painttype=paintType();
+	pen.painttype=paintbox->paintType();
+	pen.paintutensil=paintbox->paintUtensil();
 	pen.backface=paintbox->getPaintBackface();
 	pen.invisible=paintbox->getPaintInvisible();
-	switch (paintType()) {
+	switch (paintbox->paintType()) {
 		case 1: { pen.radius=paintbox->getRadius()*0.5; } break;
 		case 2: { pen.radius=paintbox->getRadius()*m.cm.bbox.Diag()*0.01*0.5; } break;
 		case 3: { pen.radius=paintbox->getRadius()*m.cm.bbox.DimY()*0.01*0.5; } break;
 		case 4: { pen.radius=paintbox->getRadius()*0.5; } break;
 	}
 	curSel.clear();
-
-	switch (paintbox->paintUtensil()) {
-		case FILL: {} break;
-		case PICK: {} break;
-		case PEN: {} break;
-	}
-	//qDebug() << "pressEnd" << endl;
 }
-  
+
 void EditPaintPlugin::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla) {
-	//qDebug() << "moveStart" << endl;
-	switch (paintbox->paintUtensil()) {
-		case FILL: { return; }
-		case PICK: { return; }
-		case PEN: {}
-	}
-	
 	if (!isDragging) prev=cur; /** to prevent losses when two mouseEvents occur befor one decorate */
 	cur=event->pos();
-
 	isDragging = true;
-
 	gla->update();
 }
 
@@ -231,9 +208,7 @@ void EditPaintPlugin::pushUndo(GLArea * gla) {
   
 void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla) {
 	gla->showTrackBall(has_track);
-
 	pushUndo(gla);
-
 	visited_vertexes.clear();
 	gla->update();
 	prev=cur;
@@ -249,6 +224,8 @@ void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshMod
 
 }
 
+/** colorizes a vertex with the new color.
+  i'm not shure if the function is correct */
 inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
 	Color4b orig=vertice->C();
 	orig[0]=min(255,((newcol[0]-orig[0])*opac+orig[0]*(100))/100);
@@ -258,19 +235,33 @@ inline void colorize(CVertexO * vertice,const Color4b& newcol,int opac) {
 	vertice->C()=orig;
 }
 
+/** same doubt as above */
+inline void mergeColor(double percent,const Color4b& c1,const Color4b& c2,Color4b* dest) {
+	(*dest)[0]=min(255.0,((c1[0]-c2[0])*percent+c2[0]));//(*dest)[0]=min(255.0,(c1[0]*percent+c2[0]*(1.0-percent)));
+	(*dest)[1]=min(255.0,((c1[1]-c2[1])*percent+c2[1]));//(*dest)[1]=min(255.0,(c1[1]*percent+c2[1]*(1.0-percent)));
+	(*dest)[2]=min(255.0,((c1[2]-c2[2])*percent+c2[2]));//(*dest)[2]=min(255.0,(c1[2]*percent+c2[2]*(1.0-percent)));
+	(*dest)[3]=min(255.0,((c1[3]-c2[3])*percent+c2[3]));//(*dest)[3]=min(255.0,(c1[3]*percent+c2[3]*(1.0-percent)));
+}
+
+/** same doubt as above */
+inline void mergePos(double percent,const float c1[3],const float c2[3], float dest[3]) {
+	dest[0]=c1[0]*percent+c2[0]*(1.0-percent);
+	dest[1]=c1[1]*percent+c2[1]*(1.0-percent);
+	dest[2]=c1[2]*percent+c2[2]*(1.0-percent);
+}
+
+/** transforms a point with a matrix */
 inline void calcCoord(float x,float y,float z,double matrix[],double *xr,double *yr,double *zr) {
 	*xr=x*matrix[0]+y*matrix[4]+z*matrix[8]+matrix[12];
 	*yr=x*matrix[1]+y*matrix[5]+z*matrix[9]+matrix[13];	
 	*zr=x*matrix[2]+y*matrix[6]+z*matrix[10]+matrix[14];
 }
 
-void getTranspose(double orig[],double inv[]) {
-	inv[0]=orig[0]; inv[1]=orig[4]; inv[2]=orig[8];  inv[3]=orig[12];
-	inv[4]=orig[1]; inv[5]=orig[5]; inv[6]=orig[9];  inv[7]=orig[13];
-	inv[8]=orig[2]; inv[9]=orig[6]; inv[10]=orig[10];inv[11]=orig[14];
-	inv[12]=orig[3];inv[13]=orig[7];inv[14]=orig[11]; inv[15]=orig[15];
-}
-
+/** checks if a point (2d) is in a rect between p0 and p1 and diameter 2*radius 
+    or in the circle (p0,radius) or in the circle (p1.radius) */
+//    (Cx-Ax)(Bx-Ax) + (Cy-Ay)(By-Ay)
+//r = ------------------------------
+//                  L²
 inline int isIn(QPointF p0,QPointF p1,float dx,float dy,float radius,float *dist) {
 	if (p0!=p1) { /** this must be checked first, because of the color decrease tool */
 		float x2=(p1.x()-p0.x());
@@ -287,24 +278,28 @@ inline int isIn(QPointF p0,QPointF p1,float dx,float dy,float radius,float *dist
 		px=px-dx;
 		py=py-dy;
 	
-		if (r>0 && r<1 && (px*px+py*py<radius*radius)) { *dist=sqrt(px*px+py*py)/sqrt(radius*radius); return 1; }
+		if (r>=0 && r<=1 && (px*px+py*py<radius*radius)) { *dist=sqrt(px*px+py*py)/radius; return 1; }
 	}
 
-	float x0=(dx-p0.x());
-	float y0=(dy-p0.y());
-	float bla0=x0*x0+y0*y0;
-	if (bla0<radius*radius) { *dist=sqrt(bla0)/sqrt(radius*radius); return 1;}
-	if (p0==p1) return 0;
+	//TODO: there could be some problem when point is nearer p0 or p1 and viceversa
 
 	float x1=(dx-p1.x());
 	float y1=(dy-p1.y());
 	float bla1=x1*x1+y1*y1;
-	if (bla1<radius*radius) { *dist=sqrt(bla1)/sqrt(radius*radius); return 1;}
+	if (bla1<radius*radius) { *dist=sqrt(bla1)/radius; return 1;}
+
+	if (p0==p1) return 0;
+
+	float x0=(dx-p0.x());
+	float y0=(dy-p0.y());
+	float bla0=x0*x0+y0*y0;
+	if (bla0<radius*radius) { *dist=sqrt(bla0)/radius; return 1;}
 
 	return 0;
 }
 
-inline bool pointInTriangle(QPointF p,QPointF a, QPointF b,QPointF c) {
+/** checks if a point is in a triangle (2D) */
+inline bool pointInTriangle(QPointF p,QPointF a,QPointF b,QPointF c) {
 	float fab=(p.y()-a.y())*(b.x()-a.x()) - (p.x()-a.x())*(b.y()-a.y());
 	float fbc=(p.y()-c.y())*(a.x()-c.x()) - (p.x()-c.x())*(a.y()-c.y());
 	float fca=(p.y()-b.y())*(c.x()-b.x()) - (p.x()-b.x())*(c.y()-b.y());
@@ -312,11 +307,12 @@ inline bool pointInTriangle(QPointF p,QPointF a, QPointF b,QPointF c) {
 	return false;
 }
 
+/** checks if a triangle is front or backfaced */
 inline bool isFront(QPointF a, QPointF b, QPointF c) {
 	return (b.x()-a.x())*(c.y()-a.y())-(b.y()-a.y())*(c.x()-a.x())>0;
 }
 
-
+/** draws the xor-line */
 void EditPaintPlugin::drawLine(GLArea * gla) {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -348,9 +344,10 @@ void EditPaintPlugin::drawLine(GLArea * gla) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
+void EditPaintPlugin::DrawXORCircle(MeshModel &m,GLArea * gla, bool doubleDraw) {
 	int PEZ=18;
-	if (paintType()==1) {
+	/** paint the normal circle in pixel-mode */
+	if (paintbox->paintType()==1) { 
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
@@ -369,40 +366,24 @@ void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 		QPoint mid= QPoint(cur.x(),/*gla->curSiz.height()-*/cur.y());
 		if(doubleDraw) {
 			glBegin(GL_LINE_LOOP);
-			for (int lauf=0; lauf<PEZ; lauf++) {
+			for (int lauf=0; lauf<PEZ; lauf++) 
 				glVertex2f(mid.x()+sin(M_PI*(float)lauf/9.0)*pen.radius,mid.y()+cos(M_PI*(float)lauf/9.0)*pen.radius);
-				//qDebug() << (mid.x()+sin(M_PI*(lauf/9.0)*10.0)) << " " << mid.y()+cos(M_PI*(lauf/9.0)*10.0) << endl;
-			}
 			glEnd();
 		}
 	
 		glBegin(GL_LINE_LOOP);
-		for (int lauf=0; lauf<PEZ; lauf++) {
+		for (int lauf=0; lauf<PEZ; lauf++) 
 			glVertex2f(mid.x()+sin(M_PI*(float)lauf/9.0)*pen.radius,mid.y()+cos(M_PI*(float)lauf/9.0)*pen.radius);
-			//qDebug() << (mid.x()+sin(M_PI*(lauf/9.0)*10.0)) << " " << mid.y()+cos(M_PI*(lauf/9.0)*10.0) << endl;
-		}
 		glEnd();
-	
-		glDisable(GL_LOGIC_OP);
 
-		/*glDisable(GL_DEPTH_TEST);
-		glBegin(GL_TRIANGLES);
-		Color4b co=paintbox->getColor(curr_mouse);
-		glColor3f(co[0],co[1],co[2]);
-		for (int lauf=0; lauf<PEZ; lauf++) {
-			glVertex2f(mid.x(),mid.y());
-			glVertex2f(mid.x()+sin(M_PI*(float)lauf/9.0)*pen.width.x()/2.0,mid.y()+cos(M_PI*(float)lauf/9.0)*pen.width.y()/2.0);
-			glVertex2f(mid.x()+sin(M_PI*(float)(lauf+1)/9.0)*pen.width.x()/2.0,mid.y()+cos(M_PI*(float)(lauf+1)/9.0)*pen.width.y()/2.0);
-		}
-		glEnd();*/
-	
-	// Closing 2D
+		glDisable(GL_LOGIC_OP);
+		// Closing 2D
 		glPopAttrib();
 		glPopMatrix(); // restore modelview
 		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
-	} else {
+	} else { /** paint the complicated circle in percentual-mode */
 		double dX, dY, dZ;
 		double dX2, dY2, dZ2;
 		
@@ -411,7 +392,6 @@ void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 		QPoint mid= QPoint(cur.x(),gla->curSiz.height()-cur.y());
 		gluUnProject ((double) mid.x(), mid.y(), 0.0, mvmatrix, projmatrix, viewport, &dX, &dY, &dZ);
 		gluUnProject ((double) mid.x(), mid.y(), 1.0, mvmatrix, projmatrix, viewport, &dX2, &dY2, &dZ2);
-
 
 		glPushMatrix();
 		glLoadIdentity();
@@ -448,10 +428,11 @@ void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 
 		glBegin(GL_LINES);
 		for (int lauf=0; lauf<PEZ; lauf++) {
+			/** calcs the far point of the line */
 			calcCoord(sin(M_PI*(double)lauf/(double)(PEZ/2))*radius,cos(M_PI*(double)lauf/(double)(PEZ/2))*radius,diag,inv_mvmatrix,&tx,&ty,&tz);
 			//glVertex3f(tx,ty,tz);
 			gluProject(tx,ty,tz,mvmatrix,projmatrix,viewport,&a,&b,&c);
-
+			/** calcs the near point of the line */
 			calcCoord(sin(M_PI*(double)lauf/(double)(PEZ/2))*radius,cos(M_PI*(double)lauf/(double)(PEZ/2))*radius,0,inv_mvmatrix,&tx2,&ty2,&tz2);
 			//glVertex3f(tx2,ty2,tz2);
 			gluProject(tx2,ty2,tz2,mvmatrix,projmatrix,viewport,&a2,&b2,&c2);
@@ -462,11 +443,9 @@ void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 			double pix_x=a2;
 			double pix_y=b2;
 			double pix_z=c2;
+			/** to search with quicksearch the nearset zbuffer value in the line */
 			for (int lauf2=0; lauf2<STEPS; lauf2++) {
 				double inv_yy=gla->curSiz.height()-pix_y;
-				//circle_points[lauf]=QPoint(pix_x,inv_yy);
-				//qDebug() << pix_x << " "<<pix_y << endl;
-				//if (pix_z<=0 || pix_z>=1)qDebug() <<"OK: "<< pix_x << " "<<pix_y <<" pix_z: "<< pix_z<<" zz: "<<endl;
 				double zz=999;
 				if ((int)pix_x>=0 && (int)pix_x<gla->curSiz.width() && (int)pix_y>=0 && (int)pix_y<gla->curSiz.height()) 
 					zz=(GLfloat)pixels[(int)(((int)pix_y)*gla->curSiz.width()+(int)pix_x)];
@@ -485,22 +464,14 @@ void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 						pix_y-=db;
 						pix_z-=dc;
 					}
-					/*if (zz<0.99999 && zz<pix_z && pix_z>0 ) {
-						circle_points[lauf]=QPoint(pix_x,inv_yy);
-						//lauf2=1000;
-						break;
-					}*/
-				
 				if (lauf2==STEPS-1) { circle_points[lauf]=QPoint(pix_x,inv_yy); break; }
 			}
-
 		}
 
 		glEnd();
 		glDisable(GL_COLOR_LOGIC_OP);
 		glPopAttrib();
 	
-
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
@@ -512,32 +483,16 @@ void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
-		
-		/*glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-		//Color4b co=paintbox->getColor(curr_mouse);
-		//qDebug() << co[0] << " " << co[1] << " " << co[2] << endl;
-		glBegin(GL_TRIANGLES);
-		glColor4d(1,1,1,0.0);
-		for (int lauf=0; lauf<PEZ; lauf++) {
-			glVertex2f(mid.x(),gla->curSiz.height()-mid.y());
-			glVertex2f(circle_points[lauf].x(),circle_points[lauf].y());
-			glVertex2f(circle_points[(lauf+1)%PEZ].x(),circle_points[(lauf+1)%PEZ].y());
-		} 
-		glEnd();
-		glDisable(GL_BLEND);*/
+
 		glEnable(GL_COLOR_LOGIC_OP);
 		glLogicOp(GL_XOR);
 		glColor3f(1,1,1);
+		/** draws the circle */
 		glBegin(GL_LINE_STRIP);
 		for (int lauf=0; lauf<PEZ; lauf++) {
 			glVertex2f(circle_points[lauf].x(),circle_points[lauf].y());
 		} glVertex2f(circle_points[0].x(),circle_points[0].y());
-		/*if(doubleDraw) {
-			for (int lauf=0; lauf<PEZ; lauf++) {
-				glVertex2f(circle_points[lauf].x(),circle_points[lauf].y());
-			} glVertex2f(circle_points[0].x(),circle_points[0].y());
-		}*/
+
 		glEnd();
 		glDisable(GL_COLOR_LOGIC_OP);
 		glPopAttrib();
@@ -549,23 +504,7 @@ void EditPaintPlugin::DrawXORRect(MeshModel &m,GLArea * gla, bool doubleDraw) {
 
 }
 
-//    (Cx-Ax)(Bx-Ax) + (Cy-Ay)(By-Ay)
-//r = ------------------------------
-//                  L²
-
-
-inline void getSurroundingFacesFF(CFaceO * fac,int vert_pos,vector<CFaceO *> *surround) {
-	CVertexO * vert=fac->V(vert_pos);
-	CFaceO * curr_f;
-	face::Pos<CFaceO> ip(fac,vert_pos);
-	do {
-		curr_f=ip.f;
-		ip.FlipE();
-		ip.FlipF();
-		if (curr_f!=ip.f) surround->push_back(ip.f);
-	} while(curr_f!=fac);
-}
-
+/** calcs the surrounding faces of a vertex with VF topology */
 inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos,vector<CFaceO *> *surround) {
 	CVertexO * vert=fac->V(vert_pos);
 	int pos=vert->VFi();
@@ -576,20 +515,17 @@ inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos,vector<CFaceO *> *su
 		if (curr_f!=0 && !curr_f->IsD()) {
 			surround->push_back(curr_f);
 			pos=curr_f->VFi(pos);
-		//qDebug() << "d" << endl;
 		}
 		curr_f=temp;
 	} while (curr_f!=first_fac && curr_f!=0);
 }
 
-int EditPaintPlugin::paintType() { return paintbox->paintType(); }
-
+/** finds the faces or vertexes in the circle */
 void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Vert_Data> * risult, vector<CMeshO::FacePointer> * face_risult,
 	GLArea * gla,Penn &pen,QPoint &cur, QPoint &prev, GLfloat * pixels,
-	double mvmatrix[16],double projmatrix[16],int viewport[4], int what) {
+	double mvmatrix[16],double projmatrix[16],int viewport[4]) {
 
-
-	QHash <CFaceO *,CFaceO *> selezionati;
+	QHash <CFaceO *,CFaceO *> selected;
 	QHash <CVertexO *,CVertexO *> sel_vert;
 	vector<CMeshO::FacePointer>::iterator fpi;
 	vector<CMeshO::FacePointer> temp_po;
@@ -616,8 +552,6 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 	bool backface=pen.backface;
 	bool invisible=pen.invisible;
 
-	//qDebug() << "bf: "<<backface << " inv: "<<invisible << endl;
-
 	if (pen.painttype==1) { /// PIXEL 
 		for (int lauf2=0; lauf2<temp_po.size(); lauf2++) {
 			CFaceO * fac=temp_po.at(lauf2);
@@ -630,22 +564,17 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 				if (tx>=0 && tx<viewport[2] && ty>=0 && ty<viewport[3])
 					z[lauf]=QPointF(tz,(GLfloat)pixels[(int)(((int)ty)*viewport[2]+(int)tx)]);
 				else z[lauf]=QPoint(1,0);
-				//qDebug() << "zzz_ende"<<endl;
-				//float zz;
-   				//glReadPixels( (int)tx, /*viewport[3]-*/(int)ty, 1, 1,GL_DEPTH_COMPONENT, GL_FLOAT, &zz );
-				//qDebug () << "?? "<< /*viewport[3]-*/(int)ty<<"  "<<old_size.y()-(int)ty<< endl;
-				//qDebug() << tx <<" "<<ty<<" z:"<<(float)tz<<" buf:"<<(GLfloat)pixels[(int)((/*old_size.y()-*/(int)ty)*old_size.x()+(int)tx)]
-				//	<<" buf2: "<<zz<<endl;
 			}
 	
 			if (backface || isFront(p[0],p[1],p[2])) {
-				for (int lauf=0; lauf<3; lauf++) if (invisible || (z[lauf].x()<=z[lauf].y()+0.003)){
+				/// colud be useful to calc the medium of z in the matrix
+				for (int lauf=0; lauf<3; lauf++) if (invisible || (z[lauf].x()<=z[lauf].y()+0.004)){
 					tx=p[lauf].x();
 					ty=p[lauf].y();
 					float dist;
 					if (isIn(mid,mid_prev,tx,ty,pen.radius,&dist)==1) {
 						intern=1;
-						if (what!=SELECT && !sel_vert.contains(fac->V(lauf))) {
+						if (pen.paintutensil!=SELECT && !sel_vert.contains(fac->V(lauf))) {
 							Vert_Data d;
 							d.v=fac->V(lauf);
 							d.distance=dist;
@@ -659,21 +588,21 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 					intern=-1;
 				}
 			}
-			if (intern!=0 && !selezionati.contains(fac)) {
-				selezionati.insert((fac),(fac));
+			if (intern!=0 && !selected.contains(fac)) {
+				selected.insert((fac),(fac));
 				actual->push_back(fac);
 
 				vector <CFaceO *> surround;
 				for (int lauf=0; lauf<3; lauf++) getSurroundingFacesVF(fac,lauf,&surround);
 
 				for (int lauf3=0; lauf3<surround.size(); lauf3++) {
-					if (!selezionati.contains(surround[lauf3])) {
+					if (!selected.contains(surround[lauf3])) {
 						//actual->push_back(surround[lauf3]);
 						temp_po.push_back(surround[lauf3]);
 					} 
 				}
 
-				if (what==SELECT && intern>0) face_risult->push_back(fac);
+				if (pen.paintutensil==SELECT && intern>0) face_risult->push_back(fac);
 			}
 		}
 
@@ -695,37 +624,20 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 
 		double ttx,tty,ttz;
 		calcCoord(dX,dY,0,mvmatrix,&ttx,&tty,&ttz);
-		//mid=QPointF((double)mid.x()/(double)gla->curSiz.width()*2.0-1.0,(double)mid.y()/(double)gla->curSiz.height()*2.0-1.0);
-		//mid=QPointF(mid.x()*2,mid.y()*2);
-		//mid=QPointF(ttx,tty);
-		//qDebug() <<mid<<" scale: "<<gla->trackball.track.sca<<"  "<<endl;
-		/*double inv2_mvmatrix[16];
-		Matrix44d temp2(projmatrix);
-		Invert(temp2);
-		for (int lauf=0; lauf<16; lauf++) inv2_mvmatrix[lauf]=temp2[lauf/4][lauf%4];
-		calcCoord(mid.x(), mid.y(),0,inv2_mvmatrix,&ttx,&tty,&ttz);
-		qDebug() << mid_temp << " "<< ttx<<" "<< tty << endl; */
-	
-		//calcCoord(0,pen.width.x()*paintbox->diag*0.01*0.5,0,mvmatrix,&tx,&ty,&tz);
+
 		calcCoord(0,0,0,mvmatrix,&dX,&dY,&dZ);
-		//radius=pen.width.x()*m.cm.bbox.Diag()*0.01*0.5;
-		//radius=sqrt((ty-dY)*(ty-dY)+(tx-dX)*(tx-dX)+(tz-dZ)*(tz-dZ));
 		calcCoord(0,1,0,mvmatrix,&tx,&ty,&tz);
 		double scale_fac=sqrt((ty-dY)*(ty-dY)+(tx-dX)*(tx-dX)+(tz-dZ)*(tz-dZ));
-		//qDebug() <<"scale_fac: "<< scale_fac << " radius: "<<radius<<endl;
-		//for(fpi=temp.begin();fpi!=temp.end();++fpi) {
-		//qDebug() << pen.radius << "  "<<scale_fac<<"  "<<old_size<<" diag: "<<m.cm.bbox.Diag()<<endl;
+
+		/** to get the correct radius depending on distance but on fov too */
 		float fo=gla->getFov()*0.5;
 		float fov = 1.0/tan(fo*M_PI/180.0)*0.5;
-		//qDebug() << fo << " " << fov << endl;
+
 		for (int lauf2=0; lauf2<temp_po.size(); lauf2++) {
 			CFaceO * fac=temp_po.at(lauf2);
 			int intern=0;
-
 			double distance[3];
-			//Debug() << fov << endl;
 			for (int lauf=0; lauf<3; lauf++) { 
-				//TODO problema: se la proiezione cambia c'e' un errore => melgio ricalcolare mid e mid_prev con mvmatrix ???
 				double dx,dy,dz; // distance
 				calcCoord((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,&dx,&dy,&dz);
 				gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
@@ -735,16 +647,6 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 					z[lauf]=QPointF(tz,(GLfloat)pixels[(int)(((int)ty)*viewport[2]+(int)tx)]);
 				else z[lauf]=QPoint(1,0);
 				distance[lauf]=dz;
-				//qDebug() << dx << " " << dy << " " << dz<<" "<<mid<<endl;
-				/*double a,b,c;
-				calcCoord((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix2,&a,&b,&c);
-				gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
-				if (tx>=0 && tx<old_size.x() && ty>=0 && ty<old_size.y())
-					z[lauf]=QPointF(tz,(GLfloat)pixels[(int)(((int)ty)*old_size.x()+(int)tx)]);
-				else z[lauf]=QPoint(1,0);
-				p[lauf]=QPointF(a,b);*/
-				//gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
-				//p[lauf]=QPointF(tx,ty);
 			}
 	
 			if (backface || isFront(p[0],p[1],p[2])) {
@@ -753,18 +655,16 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 					ty=p[lauf].y();
 					//QPointF poo(mid.x()*(distance[lauf])*-1.0,mid.y()*(distance[lauf])*-1.0);
 					//if (isIn(poo,poo,tx,ty,/*0.08*gla->trackball.track.sca*/radius)==1) {
-					/** i have NO idea why it works with viewport[3]*0.88 */
 					float dist;
 					if (isIn(mid,mid_prev,tx,ty,pen.radius*scale_fac *viewport[3]*fov/distance[lauf],&dist)==1) {
 					//if (isIn(QPoint(0,0),QPoint(0,0),tx,ty,pen.radius)==1) {  
 						intern=1;
-						if (what!=SELECT && !sel_vert.contains(fac->V(lauf))) {
+						if (pen.paintutensil!=SELECT && !sel_vert.contains(fac->V(lauf))) {
 							Vert_Data d;
 							d.v=fac->V(lauf);
 							d.distance=dist;
-							risult->push_back(/*fac->V(lauf)*/d);
+							risult->push_back(d);
 							sel_vert.insert(fac->V(lauf),fac->V(lauf));
-							//qDebug() << tx << " " << ty << " " << tz <<"   "<< mid<<endl;
 						}
 					}
 				}
@@ -772,36 +672,28 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 					intern=-1;
 				}
 			}
-			if (intern!=0 && ! selezionati.contains(fac)) {
-				selezionati.insert((fac),(fac));
+			if (intern!=0 && ! selected.contains(fac)) {
+				selected.insert((fac),(fac));
 				actual->push_back(fac);
-				/*for (int lauf=0; lauf<3; lauf++) {
-					//face::Pos<CFaceO> ip(fac,lauf);
-					//ip.FlipF();
-					CFaceO * nf=fac->FFp(lauf);//ip.f;
-					if (!selezionati.contains(nf) && !nf->IsD()) {
-						//actual->push_back(nf);
-						temp_po.push_back(nf);
-					}
-				}*/
+				/// WOULD BE FASTER WITH FF TOPOLOGY
 				vector <CFaceO *> surround;
 				for (int lauf=0; lauf<3; lauf++) getSurroundingFacesVF(fac,lauf,&surround);
 
 				for (int lauf3=0; lauf3<surround.size(); lauf3++) {
-					if (!selezionati.contains(surround[lauf3])) {
+					if (!selected.contains(surround[lauf3])) {
 						//actual->push_back(surround[lauf3]);
 						temp_po.push_back(surround[lauf3]);
 					} 
 				}
-				if (what==SELECT && intern>0) face_risult->push_back(fac);
+				if (pen.paintutensil==SELECT && intern>0) face_risult->push_back(fac);
 			}
 		}
 	}
-	//qDebug() << "----------"<< endl;
 }
 
+/** fills the mesh starting from face.
+If face is selected, it will fill only the selected area, otherwise only the non selected area */
 void EditPaintPlugin::fillFrom(MeshModel & m,CFaceO * face) {
-	//qDebug() << "fillFrom" << endl;
 	QHash <CFaceO *,CFaceO *> visited;
 	QHash <CVertexO *,CVertexO *> temporaneo;
 	vector <CFaceO *>temp_po;
@@ -842,6 +734,7 @@ bool EditPaintPlugin::getFaceAtMouse(MeshModel &m,CMeshO::FacePointer& val) {
 	QPoint mid=QPoint(cur.x(),inverse_y);
 	return (GLPickTri<CMeshO>::PickNearestFace(mid.x(), mid.y(), m.cm, val,2,2));
 }
+
 bool EditPaintPlugin::getFacesAtMouse(MeshModel &m,vector<CMeshO::FacePointer> & val) {
 	val.clear();
 	QPoint mid=QPoint(cur.x(),inverse_y);
@@ -852,18 +745,14 @@ bool EditPaintPlugin::getFacesAtMouse(MeshModel &m,vector<CMeshO::FacePointer> &
 bool EditPaintPlugin::getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value) {
 	CFaceO * temp=0;
 	QPoint mid=QPoint(cur.x(),inverse_y);
-	//qDebug() << "getVert" << mid << endl;
-	//if (getFacesAtMouse(m,tempSel)) {
 	double tx,ty,tz;
 	if (getFaceAtMouse(m,temp)) {
-		
 		QPointF point[3];
 		for (int lauf=0; lauf<3; lauf++) {
 			gluProject(temp->V(lauf)->P()[0],temp->V(lauf)->P()[1],temp->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
 			point[lauf]=QPointF(tx,ty);
 		}
 		value=temp->V(getNearest(mid,point,3));
-	//qDebug() << "getVert2 " <<(int)value <<  endl;
 		return true;
 	}
 	return false;
@@ -873,34 +762,7 @@ bool EditPaintPlugin::getVertexesAtMouse() {
 	return false;
 }
 
-GLfloat getWinkel(GLfloat px,GLfloat pz) {
-	GLfloat wink;
-	if ((px)!=0) {
-		wink=-atan((pz)/(px))*180.0/M_PI;
-		if ((px)<0) {wink=180.0+wink;}
-	}else {
-		if ((pz)>0) wink=-90.0;
-		else wink=90.0;
-	}
-	return wink;
-}
 
-
-
-inline void mergeColor(double percent,const Color4b& c1,const Color4b& c2,Color4b* dest) {
-	(*dest)[0]=min(255.0,(c1[0]*percent+c2[0]*(1.0-percent)));
-	(*dest)[1]=min(255.0,(c1[1]*percent+c2[1]*(1.0-percent)));
-	(*dest)[2]=min(255.0,(c1[2]*percent+c2[2]*(1.0-percent)));
-	(*dest)[3]=min(255.0,(c1[3]*percent+c2[3]*(1.0-percent)));
-	//qDebug() << (*dest)[0] << " "<< (*dest)[1] << " "<< (*dest)[2]<< "percent: "<<percent<<endl;
-}
-
-inline void mergePos(double percent,const float c1[3],const float c2[3], float dest[3]) {
-	dest[0]=c1[0]*percent+c2[0]*(1.0-percent);
-	dest[1]=c1[1]*percent+c2[1]*(1.0-percent);
-	dest[2]=c1[2]*percent+c2[2]*(1.0-percent);
-	//qDebug() << (*dest)[0] << " "<< (*dest)[1] << " "<< (*dest)[2]<< "percent: "<<percent<<endl;
-}
 
 bool EditPaintPlugin::hasSelected(MeshModel &m) {
 	CMeshO::FaceIterator fi;
@@ -914,8 +776,6 @@ void EditPaintPlugin::fillGradient(MeshModel & m,GLArea * gla) {
 	QPoint p=start-cur;
 	QHash <CFaceO *,CFaceO *> selezionati;
 	QHash <CVertexO *,CVertexO *> temporaneo;
-	//vector<CMeshO::FacePointer>::iterator fpi;
-	//vector<CMeshO::FacePointer> temp_po;
 
 	int opac=paintbox->getOpacity();
 	Color4b c1=paintbox->getColor(Qt::LeftButton);
@@ -1000,19 +860,14 @@ void EditPaintPlugin::fillGradient(MeshModel & m,GLArea * gla) {
 
 /** only in decorare it is possible to obtain the correct zbuffer values and the other opengl stuff */
 void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
-	//qDebug()<<"startdecor"<<endl;
-	//if (cur.x()==0 && cur.y()==0) return;
 	updateMatrixes();
 	QPoint mid=QPoint(cur.x(),gla->curSiz.height()-  cur.y());
 	int utensil=paintbox->paintUtensil();
 	if (first) {
-		//worker->waitTillPause();
 		first=false;
 		if (pixels!=0) { free(pixels); }
 		pixels=(GLfloat *)malloc(sizeof(GLfloat)*gla->curSiz.width()*gla->curSiz.height());
 		glReadPixels(0,0,gla->curSiz.width(),gla->curSiz.height(),GL_DEPTH_COMPONENT,GL_FLOAT,pixels);
-		//worker->clear(pixels);
-		//worker->setModelArea(&m,gla);
 	}
 	if(isDragging)
 	{
@@ -1052,29 +907,21 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 		case PEN: {}
 	}
 
-	DrawXORRect(m,gla,false);
-	/*PaintData pa;pa.start=cur;pa.end=prev;pa.pen=pen;
-	pa.color=paintbox->getColor(curr_mouse);
-	pa.opac=paintbox->getOpacity();
-	worker->addData(pa);*/
+	DrawXORCircle(m,gla,false);
 
 	vector<Vert_Data>::iterator vpo;
-	//vector<CMeshO::VertexPointer> newSel;
 	vector<Vert_Data> newSel;
 	
 	vector<CMeshO::FacePointer> faceSel;
 	
 	if (paintbox->searchMode()==2) curSel.clear();
-	//GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, curSel, pen.width.x(), pen.width.y());
-	//CFaceO * tmp=0;
 	//if (GLPickTri<CMeshO>::PickNearestFace(mid.x(), mid.y(), m.cm, tmp, pen.width.x(), pen.width.y()))
+	getInternFaces(m,&curSel,&newSel,&faceSel,gla,pen,cur,prev,pixels,mvmatrix,projmatrix,viewport);
 
-	getInternFaces(m,&curSel,&newSel,&faceSel,gla,pen,cur,prev,pixels,mvmatrix,projmatrix,viewport,utensil);
-
-	UndoItem u;
+	//UndoItem u;
 	QHash <CVertexO *,Vert_Data_3> originals;
-	if (utensil==SMOOTH || utensil==POLY_SMOOTH) {
-		visited_vertexes.clear();
+	if (utensil==SMOOTH || utensil==POLY_SMOOTH) { /// color smooth and geometry smooth with the pen
+		//visited_vertexes.clear();
 		Color4b newcol,destCol;
 		int opac=paintbox->getSmoothPercentual();
 		int c_r,c_g,c_b;
@@ -1084,16 +931,24 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 		for(vpo=newSel.begin();vpo!=newSel.end();++vpo) {
 			CVertexO * v=vpo->v;
 			//float distence=vpo->distance;
-			if (!visited_vertexes.contains(v)) {
+			//if (!visited_vertexes.contains(v)) {
 				Vert_Data_2 ved; ved.distance=0;
 				//CVertexO * vert=v;
-				u.vertex=v;
-				u.original=v->C();
+
 				Vert_Data_3 d; d.color=Color4b(v->C()[0],v->C()[1],v->C()[2],v->C()[3]); //d.distance=vpo->distance;
 				for (int lauf=0; lauf<3; lauf++) d.pos[lauf]=v->P()[lauf];
-				originals.insert(v,d);
-				color_undo[current_gla]->addItem(u);
-				visited_vertexes.insert(v,/*v->C()*/ved);
+
+				if (!visited_vertexes.contains(v)) {
+					if (utensil==SMOOTH) {
+						UndoItem u;
+						u.vertex=v;
+						u.original=Color4b(v->C()[0],v->C()[1],v->C()[2],v->C()[3]);
+						color_undo[current_gla]->addItem(u);
+					}
+					visited_vertexes.insert(v,/*v->C()*/ved);
+				}
+				if (!originals.contains(v)) originals.insert(v,d);
+				
 				//qDebug() << "a" << endl;
 				CFaceO * f= v->VFp();
 				CFaceO * one_face=f;
@@ -1101,10 +956,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 				c_r=c_g=c_b=0;
 				p_x=p_y=p_z=0;
 				int count_me=0;
-				//qDebug() << "b: " <<pos<< " "<<(int)one_face<<endl;
-				//vector <CFaceO *> surround;
-				//getSurroundingFaces();
-				do {
+				do { /// calc the sum of the surrounding vertexes pos or and vertexes color
 					CFaceO * temp=one_face->VFp(pos);
 					//qDebug() << "c:" <<(int)one_face <<endl;
 					if (one_face!=0 && !one_face->IsD()) {
@@ -1131,7 +983,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 					}
 					one_face=temp;
 				} while (one_face!=f && one_face!=0);
-				if (count_me>0) {
+				if (count_me>0) { /// calc the new color or pos
 					float op=0.0;
 					//qDebug() << vpo->distance << endl;
 					if (vpo->distance*100.0>(float)decrease_pos) {
@@ -1139,7 +991,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 						//op=op*op;
 					}
 					//qDebug() << "coloro" <<endl;
-					if (utensil==SMOOTH) {
+					if (utensil==SMOOTH) { ///
 						newcol[0]=c_r/count_me;
 						newcol[1]=c_g/count_me;
 						newcol[2]=c_b/count_me;
@@ -1158,31 +1010,30 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 						for (int lauf=0; lauf<3; lauf++) v->P()[lauf]=newpos[lauf];
 					}
 				}
-				one_face=f;
-				pos=v->VFi();
-				v->N()[0]=0;v->N()[1]=0;v->N()[2]=0;
-				do {
-					CFaceO * temp=one_face->VFp(pos);
-					//qDebug() << "c:" <<(int)one_face <<endl;
-					if (one_face!=0 && !one_face->IsD()) {
-						for (int lauf=0; lauf<3; lauf++) 
-							if (pos!=lauf) { 
-								v->N()+=one_face->V(lauf)->cN();
-							}
-						face::ComputeNormalizedNormal(*one_face);
-						pos=one_face->VFi(pos);
-					//qDebug() << "d" << endl;
-					}
-					one_face=temp;
-				} while (one_face!=f && one_face!=0);
-				v->N().Normalize();
+				if (utensil==POLY_SMOOTH) { /// recalc face and vertex normale
+					one_face=f;
+					pos=v->VFi();
+					v->N()[0]=0;v->N()[1]=0;v->N()[2]=0;
+					do {
+						CFaceO * temp=one_face->VFp(pos);
+						//qDebug() << "c:" <<(int)one_face <<endl;
+						if (one_face!=0 && !one_face->IsD()) {
+							for (int lauf=0; lauf<3; lauf++) 
+								if (pos!=lauf) { 
+									v->N()+=one_face->V(lauf)->cN();
+								}
+							face::ComputeNormalizedNormal(*one_face);
+							pos=one_face->VFi(pos);
+						//qDebug() << "d" << endl;
+						}
+						one_face=temp;
+					} while (one_face!=f && one_face!=0);
+					v->N().Normalize();
+				}
 				//colorize(*vpo,newcol,opac);
-			}
+			//}
 		}
-		/*for(vpo=newSel.begin();vpo!=newSel.end();++vpo) {
-			CVertexO * v=vpo->v;
-		}*/
-	} else {
+	} else { /// painting or selecting with the pen
 		if (utensil==SELECT) {
 			vector<CMeshO::FacePointer>::iterator fpo;
 			bool sel_or_not=(curr_mouse==Qt::LeftButton);
@@ -1190,35 +1041,35 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 				if (sel_or_not) (*fpo)->SetS();
 				else (*fpo)->ClearS();
 			}
-		} else {
+		} else { /// painting
 			int opac=paintbox->getOpacity();
 			int decrease_pos=100-paintbox->getDecreasePercentual(); // 100 .. all opac ; 0 .. nothing opac
 			Color4b newcol=paintbox->getColor(curr_mouse);
 			for(vpo=newSel.begin();vpo!=newSel.end();++vpo) {
 				CVertexO * v=vpo->v;
 				float op=0.0;
-				//qDebug() << vpo->distance << endl;
 				if (vpo->distance*100.0>(float)decrease_pos) {
 					op=(vpo->distance*100.0-(float)decrease_pos)/(float)(100-decrease_pos);
 					//op=op*op;
 				}
 				if (!visited_vertexes.contains(v)) {
-					//qDebug() << "new" << endl;
 					Vert_Data_2 ved; 
 					ved.distance=opac-op*opac;
 					ved.color=Color4b(v->C()[0],v->C()[1],v->C()[2],v->C()[3]);
 					visited_vertexes.insert(v,/*v->C()*/ved);
+					UndoItem u;
 					u.vertex=v;
 					u.original=v->C();
 					color_undo[current_gla]->addItem(u);
 					colorize(v,newcol,opac-op*opac);
-				} else {
+				} else { 
+					/** if there has already been a painting on this vertex i have to check if 
+					the new opacity is greater and eventually repaint */
 					if (visited_vertexes[v].distance<opac-op*opac) {
-					visited_vertexes[v].distance=opac-op*opac;
-					Color4b temp=visited_vertexes[v].color;
-					v->C()[0]=temp[0];v->C()[1]=temp[1];v->C()[2]=temp[2];
-					//qDebug() <<temporaneo.size() << temporaneo[v].distance << "  " << opac-op*opac << " "<<temp[0] <<endl;
-					colorize(v,newcol,opac-op*opac);//TODO ERROR BECAUSE NEW COLOR
+						visited_vertexes[v].distance=opac-op*opac;
+						Color4b temp=visited_vertexes[v].color;
+						v->C()[0]=temp[0];v->C()[1]=temp[1];v->C()[2]=temp[2];
+						colorize(v,newcol,opac-op*opac);
 					}
 				}
 			}
@@ -1227,11 +1078,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 	}
 	pressed=0;
 	} 
-	//qDebug()<<"enddecor"<<endl;
 }
-
-//void EditPaintPlugin::updateMe() {}
-
 
 void ColorUndo::undo() {
 	if (undos.size()==0) return;
@@ -1270,61 +1117,5 @@ void ColorUndo::redo() {
 	delete temp;
 	undos.push_back(temp_undo);
 }
-
-PaintWorker::PaintWorker() {
-	nothingTodo=true;
-	gla=0;
-	mesh=0;
-}
-
-void PaintWorker::run() {
-	int lauf=0;
-	//exec();
-	while(true) {
-		PaintData data;
-		mutex.lock();//------------------
-		if (dati.size()==0) {
-			nothingTodo=true;
-			if (gla!=0) gla->update();
-			//qDebug() << "worker-wait"<<endl;
-			condition.wait(&mutex);
-			//qDebug() << "worker-wait-end"<<endl;
-			nothingTodo=false;
-		} 
-		data=dati[0];
-		dati.pop_front();
-		//qDebug() << "worker-wait-end2"<<endl;
-		mutex.unlock();//-----------------
-		//qDebug() << data.start<< " "<<data.end <<lauf << endl;
-
-		vector<CMeshO::VertexPointer>::iterator vpo;
-		vector<CMeshO::VertexPointer> newSel;
-		//qDebug() << "worker-wait-end3"<<endl;
-		//if (curSel.size()==0) {
-			//getFacesAtMouse(m,curSel);
-			//GLPickTri<CMeshO>::PickFace(data.start.x(),gla->curSiz.height()-  data.start.y(), mesh->cm, curSel, data.pen.radius, data.pen.radius);
-			//CFaceO * tmp=0;
-			/*CMeshO::FaceIterator fi;
-        		for(fi=mesh->cm.face.begin();fi!=mesh->cm.face.end();++fi) 
-            		if(!(*fi).IsD()) {
-				curSel.push_back((&*fi));
-			}*/
-			curSel.clear();
-			
-		//}
-		//qDebug() << "worker-wait-end4"<<endl;
-		/*QPoint old_size=QPoint(gla->curSiz.width(),gla->curSiz.height());
-		getInternFaces(*mesh,&curSel,&newSel,gla,data.pen,data.start,data.end,pixels,mvmatrix,projmatrix,viewport);
-	
-		for(vpo=newSel.begin();vpo!=newSel.end();++vpo) {
-			if (!temporaneo.contains(*vpo)) {
-				temporaneo.insert(*vpo,(*vpo)->C());
-				colorize(*vpo,data.color,data.opac);
-			}
-		}
-		if (gla!=0) gla->update();*/
-	}
-}
-
 
 Q_EXPORT_PLUGIN(EditPaintPlugin)

@@ -166,16 +166,6 @@ void PaintToolbox::on_pick_button_clicked() {
 	ui.smooth_frame->setVisible(false);
 }
 
-/*void PaintToolbox::on_advanced_button_clicked() {
-	paint_utensil=NONE;
-	ui.pen_frame->setVisible(false);
-	ui.pen_extra_frame->setVisible(false);
-	ui.pick_frame->setVisible(false);
-	//ui.advanced_frame->setVisible(true);
-	ui.gradient_frame->setVisible(false);
-	ui.smooth_frame->setVisible(false);
-}*/
-
 void PaintToolbox::on_gradient_button_clicked() {
 	paint_utensil[0]=GRADIENT;
 	ui.pen_frame->setVisible(true);
@@ -196,14 +186,7 @@ void PaintToolbox::on_smooth_button_clicked() {
 	ui.smooth_frame->setVisible(true);
 }
 
-void PaintToolbox::on_tabWidget_currentChanged ( int index ) {
-	switch (index) {
-		/*case 0: { ui.select_widget->setVisible(false); ui.paint_widget->setVisible(true); } break;
-		case 1: { ui.select_widget->setVisible(true); ui.paint_widget->setVisible(false); } break;
-		case 2: { ui.select_widget->setVisible(false); ui.paint_widget->setVisible(false); } break;*/
-	}
-	//resize(10,10);
-}
+void PaintToolbox::on_tabWidget_currentChanged ( int index ) {}
 
 void PaintToolbox::on_select_button_clicked() {
 	paint_utensil[1]=SELECT;
@@ -266,13 +249,9 @@ void PaintToolbox::setColor(int r,int g,int b,Qt::MouseButton mouse) {
 	}
 }
 
-void PaintToolbox::on_backface_culling_stateChanged(int value) {
-	//if (value==Qt::Unchecked) {}
-	//else
-}
-void PaintToolbox::on_invisible_painting_stateChanged(int value) {
+void PaintToolbox::on_backface_culling_stateChanged(int value) {}
 
-}
+void PaintToolbox::on_invisible_painting_stateChanged(int value) {}
 
 void PaintToolbox::on_undo_button_clicked() {
 	emit undo_redo(1);
