@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.88  2007/02/08 16:10:15  cignoni
+Added more parameters to holefilling and quadric simplification
+
 Revision 1.87  2007/02/08 13:39:58  pirosu
 Added Quadric Simplification(with textures) Filter
 
@@ -202,7 +205,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_INVERT_FACES<<
     FP_REMOVE_NON_MANIFOLD<<
     FP_NORMAL_EXTRAPOLATION<<
-    FP_CLOSE_HOLES_LIEPA<<
+    FP_CLOSE_HOLES<<
     FP_TRANSFORM;
   
   FilterType tt;
@@ -271,7 +274,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 	case FP_TRANSFORM:	                	return QString("Apply Transform");
 	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
 	case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
-	case FP_CLOSE_HOLES_LIEPA:	          return QString("Close Small Holes");
+	case FP_CLOSE_HOLES:	          return QString("Close Small Holes");
           
     
 	default: assert(0);
@@ -312,7 +315,7 @@ const QString ExtraMeshFilterPlugin::Info(QAction *action)
     case FP_INVERT_FACES : 			        return tr("Invert faces orientation, flip the normal of the mesh");  
     case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");  
     case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces"); 
-    case FP_CLOSE_HOLES_LIEPA :         return tr("Close holes smaller than a given threshold"); 
+    case FP_CLOSE_HOLES :         return tr("Close holes smaller than a given threshold"); 
   }
   assert(0);
   return QString();
@@ -336,7 +339,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_LOOP_SS :
     case FP_BUTTERFLY_SS : 
     case FP_MIDPOINT :      
-    case FP_CLOSE_HOLES_LIEPA :
+    case FP_CLOSE_HOLES :
            return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
     case FP_HC_LAPLACIAN_SMOOTH:  
     case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_BORDERFLAG;
@@ -377,8 +380,11 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 		  parlst.addField("QualityThr","Quality treshold for penalizing bad shaped faces.",lastqtex_QualityThr);
 		  parlst.addField("Extratcoordw","Additional weight for each extra TexCoord",lastqtex_extratw);
 		  break;
-		case FP_CLOSE_HOLES_LIEPA:
+		case FP_CLOSE_HOLES:
 		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)10);
+		  parlst.addField("Selected","Close holes with selected faces",false);
+		  parlst.addField("NewFaceSelected","Select the newly created faces",true);
+		  parlst.addField("SelfIntersection","Prevent creation of selfIntersecting faces",true);
 		  break;
 		case FP_LOOP_SS:
 		case FP_BUTTERFLY_SS: 
@@ -404,7 +410,7 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
 	 {
 	    case FP_QUADRIC_SIMPLIFICATION:
 		  par.addInt("TargetFaceNum",srcpar->getInt("TargetFaceNum"));
-	      par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
+	    par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
 		  par.addBool("PreserveBoundary",srcpar->getBool("PreserveBoundary"));
 		  par.addBool("Selected",srcpar->getBool("Selected"));
 		  return true;
@@ -413,9 +419,12 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
 		  par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
 		  par.addFloat("Extratcoordw",srcpar->getFloat("Extratcoordw"));
 		  return true;
-	    case FP_CLOSE_HOLES_LIEPA:
-		  val = srcpar->getInt("MaxHoleSize");
-          par.addInt("MaxHoleSize",val);
+	    case FP_CLOSE_HOLES:
+          par.addInt("MaxHoleSize",srcpar->getInt("MaxHoleSize"));
+	        par.addBool("Selected",srcpar->getBool("Selected"));
+	        par.addBool("SelfIntersection",srcpar->getBool("SelfIntersection"));
+          par.addBool("NewFaceSelected",srcpar->getBool("NewFaceSelected"));
+
 		  return true;
 		case FP_LOOP_SS :
 		case FP_BUTTERFLY_SS : 
@@ -619,20 +628,30 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
     NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
 	}
 
-	if(filter->text() == ST(FP_CLOSE_HOLES_LIEPA))
+	if(filter->text() == ST(FP_CLOSE_HOLES))
 	  {
+      size_t OriginalSize= m.cm.face.size();
       int MaxHoleSize = par.getInt("MaxHoleSize");		
-      size_t cnt=tri::UpdateSelection<CMeshO>::CountFace(m.cm);
+	    bool SelectedFlag = par.getBool("Selected");
+      bool SelfIntersectionFlag = par.getBool("SelfIntersection");
+      bool NewFaceSelectedFlag = par.getBool("NewFaceSelected");
 		  
-      //vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,false,cb);
-      vcg::tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,false);		
+      if( SelfIntersectionFlag ) 
+          tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag);		
+      else 
+          tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
 
       assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
-      //tri::holeFillingEar<CMeshO, tri::TrivialEar<CMeshO> > (m.cm,MaxHoleSize,(cnt>0)); 
       tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);	    
 
       // hole filling filter does not correctly update the border flags (but the topology is still ok!) 
       m.clearDataMask(MeshModel::MM_BORDERFLAG);
+      if(NewFaceSelectedFlag)
+      {
+        tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   
+        for(int i=OriginalSize;i<m.cm.face.size();++i)
+          if(!m.cm.face[i].IsD()) m.cm.face[i].SetS();
+      }
       //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
 	  }
 

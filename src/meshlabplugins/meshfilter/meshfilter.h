@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.40  2007/02/08 16:10:15  cignoni
+Added more parameters to holefilling and quadric simplification
+
 Revision 1.39  2007/02/08 13:39:58  pirosu
 Added Quadric Simplification(with textures) Filter
 
@@ -97,7 +100,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
           FP_INVERT_FACES,
 				  FP_TRANSFORM,
           FP_CLOSE_HOLES_TRIVIAL,
-          FP_CLOSE_HOLES_LIEPA
+          FP_CLOSE_HOLES
           } ;
 
 	 
