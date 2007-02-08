@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2007/02/08 15:59:46  cignoni
+Added Border selection filters
+
 Revision 1.7  2006/11/29 00:59:20  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -66,6 +69,7 @@ const QString SelectionFilterPlugin::ST(FilterType filter)
 	  case FP_SELECT_DELETE :		           return QString("Delete Selected Faces");
 	  case FP_SELECT_ERODE :		           return QString("Erode Selection");
 	  case FP_SELECT_DILATE :		           return QString("Dilate Selection");
+	  case FP_SELECT_BORDER_FACES:		     return QString("Select Border Faces");
   }
   return QString("Unknown filter");
 }
@@ -78,6 +82,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     FP_SELECT_DELETE <<
     FP_SELECT_ERODE <<
     FP_SELECT_DILATE <<
+    FP_SELECT_BORDER_FACES <<
     FP_SELECT_INVERT;
   
   FilterType tt;
@@ -119,9 +124,11 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   case FP_SELECT_INVERT : tri::UpdateSelection<CMeshO>::InvertFace(m.cm);  break;
   case FP_SELECT_ERODE  : tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
                           tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm); 
-    break;
+  break;
   case FP_SELECT_DILATE : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);  
                           tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
+  break;
+  case FP_SELECT_BORDER_FACES: tri::UpdateSelection<CMeshO>::FaceFromBorder(m.cm);  
   break;
   
 
@@ -139,6 +146,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
     case FP_SELECT_INVERT : return tr("Invert the current set of selected faces");  
     case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");  
     case FP_SELECT_ALL    : return tr("Select all the faces of the current mesh");  
+    case FP_SELECT_BORDER_FACES    : return tr("Select all the faces on the boundary");  
   }  
   assert(0);
   return QString();
@@ -152,5 +160,12 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
 	 ai.Author = ("Paolo Cignoni");
    return ai;
  } 
- 
+
+const int SelectionFilterPlugin::getRequirements(QAction *action)
+{
+ switch(ID(action))
+  {
+   case FP_SELECT_BORDER_FACES:   return  MeshModel::MM_BORDERFLAG;
+  }
+}
 Q_EXPORT_PLUGIN(SelectionFilterPlugin)

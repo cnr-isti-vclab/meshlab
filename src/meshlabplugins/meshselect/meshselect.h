@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.5  2007/02/08 15:59:46  cignoni
+Added Border selection filters
+
 Revision 1.4  2006/11/29 00:59:20  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -48,7 +51,7 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 		 - FP -> Filter Plugin
 		 - name of the plugin separated by _
 	*/
-	enum { FP_SELECT_ALL, FP_SELECT_NONE, FP_SELECT_INVERT, FP_SELECT_DELETE, FP_SELECT_ERODE, FP_SELECT_DILATE} ;
+	enum { FP_SELECT_ALL, FP_SELECT_NONE, FP_SELECT_INVERT, FP_SELECT_DELETE, FP_SELECT_ERODE, FP_SELECT_DILATE, FP_SELECT_BORDER_FACES} ;
 
 	SelectionFilterPlugin();
 	~SelectionFilterPlugin();
@@ -58,7 +61,7 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
   virtual const QString ST(FilterType filter);
   virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
   virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par){return true;};
-  virtual const int getRequirements(QAction *){return 0;};
+  virtual const int getRequirements(QAction *);
   virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 
 protected:
