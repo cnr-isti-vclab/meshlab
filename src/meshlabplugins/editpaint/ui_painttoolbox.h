@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'PaintToolbox.ui'
 **
-** Created: Mon Feb 5 18:13:56 2007
+** Created: Thu Feb 8 12:24:24 2007
 **      by: Qt User Interface Compiler version 4.2.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -626,7 +626,6 @@ public:
     void retranslateUi(QWidget *PaintToolbox)
     {
     PaintToolbox->setWindowTitle(QApplication::translate("PaintToolbox", "Vertex Painting", 0, QApplication::UnicodeUTF8));
-    tabWidget->setStyleSheet(QString());
     fill_button->setToolTip(QApplication::translate("PaintToolbox", "Fill an area", 0, QApplication::UnicodeUTF8));
     fill_button->setText(QApplication::translate("PaintToolbox", "...", 0, QApplication::UnicodeUTF8));
     gradient_button->setToolTip(QApplication::translate("PaintToolbox", "Fill with gradients", 0, QApplication::UnicodeUTF8));

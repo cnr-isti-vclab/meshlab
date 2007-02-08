@@ -43,9 +43,6 @@
        <height>320</height>
       </size>
      </property>
-     <property name="styleSheet" >
-      <string/>
-     </property>
      <property name="currentIndex" >
       <number>0</number>
      </property>
