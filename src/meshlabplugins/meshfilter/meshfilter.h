@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.39  2007/02/08 13:39:58  pirosu
+Added Quadric Simplification(with textures) Filter
+
 Revision 1.38  2007/01/11 19:52:26  pirosu
 fixed bug for QT 4.1.0/dotnet2003
 removed the request of the window title to the plugin. The action description is used instead.
@@ -86,7 +89,8 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
           FP_HC_LAPLACIAN_SMOOTH, 
           FP_TWO_STEP_SMOOTH, 
           FP_CLUSTERING, 
-          FP_QUADRIC_SIMPLIFICATION, 
+          FP_QUADRIC_SIMPLIFICATION,
+          FP_QUADRIC_TEXCOORD_SIMPLIFICATION,
           FP_NORMAL_EXTRAPOLATION,
           FP_MIDPOINT, 
           FP_REORIENT ,
@@ -119,6 +123,14 @@ protected:
 //	DecimatorDialog *decimatorDialog;
 	TransformDialog *transformDialog;
 	GenericELDialog *genericELD;
+	
+
+	float lastq_QualityThr;
+	bool lastq_PreserveBoundary;
+	bool lastq_Selected;
+
+	float lastqtex_QualityThr;
+	float lastqtex_extratw;
 };
 
 #endif

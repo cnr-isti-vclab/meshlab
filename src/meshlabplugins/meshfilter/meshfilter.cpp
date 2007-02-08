@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.87  2007/02/08 13:39:58  pirosu
+Added Quadric Simplification(with textures) Filter
+
 Revision 1.86  2007/01/19 09:12:37  cignoni
 Added parameters for quality,selection and boundary preservation
 
@@ -178,6 +181,7 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 using namespace vcg;
 
 void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool Selected, CallBackPos *cb);
+void QuadricTexSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr,float c, CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
 {
@@ -192,6 +196,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_TWO_STEP_SMOOTH<< 
     FP_CLUSTERING<< 
     FP_QUADRIC_SIMPLIFICATION<<
+	FP_QUADRIC_TEXCOORD_SIMPLIFICATION<<
     FP_MIDPOINT<< 
     FP_REORIENT <<
     FP_INVERT_FACES<<
@@ -215,6 +220,13 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 	
 	transformDialog = new TransformDialog();
 	transformDialog->hide();
+
+	lastq_QualityThr = 0.3f;
+	lastq_PreserveBoundary = false;
+	lastq_Selected = false;
+
+	lastqtex_QualityThr = 0.3f;
+	lastqtex_extratw = 0.0;
 }
 
 const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction *a)
@@ -251,6 +263,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
   case FP_HC_LAPLACIAN_SMOOTH :					return QString("HC Laplacian Smooth");
   case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
 	case FP_QUADRIC_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation");
+	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation (with texture)");
 	case FP_CLUSTERING :	                return QString("Clustering decimation");
 	case FP_MIDPOINT :										return QString("Midpoint Subdivision Surfaces");
 	case FP_REORIENT :	                  return QString("Re-orient");
@@ -294,6 +307,7 @@ const QString ExtraMeshFilterPlugin::Info(QAction *action)
     case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, Normal Smoothing and vertex fitting smoothing, based on the paper of ...");  
     case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");  
     case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
+    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
     case FP_REORIENT : 			            return tr("Re-orient in a consistent way all the faces of the mesh");  
     case FP_INVERT_FACES : 			        return tr("Invert faces orientation, flip the normal of the mesh");  
     case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");  
@@ -310,7 +324,7 @@ const PluginInfo &ExtraMeshFilterPlugin::Info()
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
 	 ai.Version = tr("0.5");
-	 ai.Author = ("Paolo Cignoni, Mario Latronico, Andrea Venturi");
+	 ai.Author = ("Paolo Cignoni, Mario Latronico, Andrea Venturi, Marco Pirosu");
    return ai;
  }
 
@@ -336,7 +350,9 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_TRANSFORM:
     case FP_NORMAL_EXTRAPOLATION:
     case FP_INVERT_FACES:         return 0;
-    case FP_QUADRIC_SIMPLIFICATION: return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
+    case FP_QUADRIC_SIMPLIFICATION:
+	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
+		return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
     default: assert(0); 
   }
   return 0;
@@ -352,9 +368,14 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
 		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
-		  parlst.addField("QualityThr","Quality treshold for penalizing bad shaped faces.",float(0.3f));
-		  parlst.addField("PreserveBoundary","Preserve Boundary of the mesh",false);
-		  parlst.addField("Selected","Simplify only selected faces",false);
+		  parlst.addField("QualityThr","Quality treshold for penalizing bad shaped faces.",lastq_QualityThr);
+		  parlst.addField("PreserveBoundary","Preserve Boundary of the mesh",lastq_PreserveBoundary);
+		  parlst.addField("Selected","Simplify only selected faces",lastq_Selected);
+		  break;
+		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
+		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
+		  parlst.addField("QualityThr","Quality treshold for penalizing bad shaped faces.",lastqtex_QualityThr);
+		  parlst.addField("Extratcoordw","Additional weight for each extra TexCoord",lastqtex_extratw);
 		  break;
 		case FP_CLOSE_HOLES_LIEPA:
 		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)10);
@@ -383,9 +404,14 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
 	 {
 	    case FP_QUADRIC_SIMPLIFICATION:
 		  par.addInt("TargetFaceNum",srcpar->getInt("TargetFaceNum"));
-      par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
-      par.addBool("PreserveBoundary",srcpar->getBool("PreserveBoundary"));
-	    par.addBool("Selected",srcpar->getBool("Selected"));
+	      par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
+		  par.addBool("PreserveBoundary",srcpar->getBool("PreserveBoundary"));
+		  par.addBool("Selected",srcpar->getBool("Selected"));
+		  return true;
+		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
+		  par.addInt("TargetFaceNum",srcpar->getInt("TargetFaceNum"));
+		  par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
+		  par.addFloat("Extratcoordw",srcpar->getFloat("Extratcoordw"));
 		  return true;
 	    case FP_CLOSE_HOLES_LIEPA:
 		  val = srcpar->getInt("MaxHoleSize");
@@ -566,12 +592,27 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 
 	if (filter->text() == ST(FP_QUADRIC_SIMPLIFICATION) ) {
-   int TargetFaceNum = par.getInt("TargetFaceNum");		
-   float QualityThr = par.getFloat("QualityThr");		
+  
+		int TargetFaceNum = par.getInt("TargetFaceNum");		
+		lastq_QualityThr = par.getFloat("QualityThr");
+		lastq_PreserveBoundary = par.getBool("PreserveBoundary");
+		lastq_Selected = par.getBool("Selected");
 
-   QuadricSimplification(m.cm,TargetFaceNum,QualityThr, par.getBool("PreserveBoundary"),par.getBool("Selected"),  cb);
-   tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	 tri::UpdateBounding<CMeshO>::Box(m.cm);
+	   QuadricSimplification(m.cm,TargetFaceNum,lastq_QualityThr, lastq_PreserveBoundary,lastq_Selected,  cb);
+		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		 tri::UpdateBounding<CMeshO>::Box(m.cm);
+	}
+
+
+	if (filter->text() == ST(FP_QUADRIC_TEXCOORD_SIMPLIFICATION) ) {
+  
+		int TargetFaceNum = par.getInt("TargetFaceNum");		
+		lastqtex_QualityThr = par.getFloat("QualityThr");
+		lastqtex_extratw = par.getFloat("Extratcoordw");
+
+	   QuadricTexSimplification(m.cm,TargetFaceNum,lastqtex_QualityThr,lastqtex_extratw,  cb);
+		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		 tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
 
   if (filter->text() == ST(FP_NORMAL_EXTRAPOLATION) ) {
