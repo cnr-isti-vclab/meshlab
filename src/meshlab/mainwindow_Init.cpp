@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.67  2007/02/08 16:04:18  cignoni
+Corrected behaviour of edit actions
+
 Revision 1.66  2006/12/13 17:37:02  pirosu
 Added standard plugin window support
 
@@ -547,6 +550,7 @@ void MainWindow::loadPlugins()
           if(!editAction->icon().isNull())
               editToolBar->addAction(editAction);
           connect(editAction,SIGNAL(triggered()),this,SLOT(applyEditMode()));
+          editActionList.push_back(editAction);
         }
       pluginFileNames += fileName;
 		}

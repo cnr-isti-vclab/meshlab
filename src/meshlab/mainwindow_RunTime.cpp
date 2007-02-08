@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.116  2007/02/08 16:04:18  cignoni
+Corrected behaviour of edit actions
+
 Revision 1.115  2007/01/18 13:35:02  gfrei
 Resolved crash when a edit-plugin is selected without a mesh.
 Resolves multiple-pushed edit-buttons problem.
@@ -181,15 +184,14 @@ void MainWindow::updateMenus()
 			lastFilterAct->setText(QString("Apply filter "));
 		}
 
+    foreach (QAction *a,editActionList)
+         {a->setChecked(false);}
+    endEditModeAct->setChecked(false);
 
-    if(GLA()->getEditAction()) 
-    {
-      endEditModeAct->setChecked(false);
-      GLA()->getEditAction()->setChecked(true);
-    }
-    else  endEditModeAct->setChecked(true);
+    if(GLA()->getEditAction())   GLA()->getEditAction()->setChecked(true);
+                              else       endEditModeAct->setChecked(true);
 
-		showLogAct->setChecked(GLA()->isLogVisible());
+   	showLogAct->setChecked(GLA()->isLogVisible());
 		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);

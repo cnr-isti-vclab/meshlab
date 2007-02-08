@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.77  2007/02/08 16:04:18  cignoni
+Corrected behaviour of edit actions
+
 Revision 1.76  2007/01/13 02:00:51  cignoni
 Ver 0.9.1b
 
@@ -219,6 +222,7 @@ private:
   QDir pluginsDir;
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
+  QList<QAction *> editActionList;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 	MeshlabStdDialog *stddialog;
 
