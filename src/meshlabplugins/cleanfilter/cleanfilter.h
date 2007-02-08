@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.6  2007/02/08 23:46:16  pirosu
+ merged srcpar and par in the GetStdParameters() function
+
  Revision 1.5  2007/01/11 19:52:25  pirosu
  fixed bug for QT 4.1.0/dotnet2003
  removed the request of the window title to the plugin. The action description is used instead.
@@ -93,7 +96,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 
 	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst);
-	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar);
+	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par);
 
 
 	protected:

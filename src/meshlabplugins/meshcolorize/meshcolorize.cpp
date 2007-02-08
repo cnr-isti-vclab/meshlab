@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.32  2007/02/08 23:46:17  pirosu
+merged srcpar and par in the GetStdParameters() function
+
 Revision 1.31  2006/12/11 23:49:32  cignoni
 removed unimplemented filter non topo coherent
 
@@ -225,7 +228,6 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
 
 bool ExtraMeshColorizePlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
 {
- par.clear();
  switch(ID(action))
   {
     case CP_MAP_QUALITY_INTO_COLOR :

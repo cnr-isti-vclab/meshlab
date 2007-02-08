@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2007/02/08 23:46:18  pirosu
+merged srcpar and par in the GetStdParameters() function
+
 Revision 1.8  2007/02/08 15:59:46  cignoni
 Added Border selection filters
 
@@ -106,7 +109,6 @@ SelectionFilterPlugin::~SelectionFilterPlugin()
 
 bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterParameter & par, vcg::CallBackPos * cb) 
 {
- par.clear();
  CMeshO::FaceIterator fi;
  switch(ID(action))
   {

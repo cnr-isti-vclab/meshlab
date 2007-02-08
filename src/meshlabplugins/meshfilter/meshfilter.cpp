@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.89  2007/02/08 23:46:17  pirosu
+merged srcpar and par in the GetStdParameters() function
+
 Revision 1.88  2007/02/08 16:10:15  cignoni
 Added more parameters to holefilling and quadric simplification
 
@@ -401,40 +404,19 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 
 	 return true;
 }
-bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar)
+bool ExtraMeshFilterPlugin::getStdParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
 {
-	 par.clear();
-	 int val;
-
 	 switch(ID(action))
 	 {
 	    case FP_QUADRIC_SIMPLIFICATION:
-		  par.addInt("TargetFaceNum",srcpar->getInt("TargetFaceNum"));
-	    par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
-		  par.addBool("PreserveBoundary",srcpar->getBool("PreserveBoundary"));
-		  par.addBool("Selected",srcpar->getBool("Selected"));
-		  return true;
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
-		  par.addInt("TargetFaceNum",srcpar->getInt("TargetFaceNum"));
-		  par.addFloat("QualityThr",srcpar->getFloat("QualityThr"));
-		  par.addFloat("Extratcoordw",srcpar->getFloat("Extratcoordw"));
-		  return true;
 	    case FP_CLOSE_HOLES:
-          par.addInt("MaxHoleSize",srcpar->getInt("MaxHoleSize"));
-	        par.addBool("Selected",srcpar->getBool("Selected"));
-	        par.addBool("SelfIntersection",srcpar->getBool("SelfIntersection"));
-          par.addBool("NewFaceSelected",srcpar->getBool("NewFaceSelected"));
-
-		  return true;
 		case FP_LOOP_SS :
 		case FP_BUTTERFLY_SS : 
 		case FP_MIDPOINT : 
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
-	        par.addBool("Selected",srcpar->getBool("Selected"));
-		    par.addFloat("Threshold",srcpar->getFloat("Threshold"));
 		  return true;
-			break;
   	 }
 
 	 return getParameters(action,parent,m,par);
@@ -442,7 +424,7 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
 
 bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
 {
- par.clear();
+
  switch(ID(action))
   {
 	case FP_TRANSFORM:

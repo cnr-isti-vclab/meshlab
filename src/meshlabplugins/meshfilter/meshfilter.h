@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.41  2007/02/08 23:46:17  pirosu
+merged srcpar and par in the GetStdParameters() function
+
 Revision 1.40  2007/02/08 16:10:15  cignoni
 Added more parameters to holefilling and quadric simplification
 
@@ -117,7 +120,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst);
-	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar);
+	bool getStdParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par);
 
 protected:
 

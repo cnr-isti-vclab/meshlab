@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.117  2007/02/08 23:45:27  pirosu
+merged srcpar and par in the GetStdParameters() function
+
 Revision 1.116  2007/02/08 16:04:18  cignoni
 Corrected behaviour of edit actions
 
@@ -287,7 +290,7 @@ void MainWindow::applyFilter()
 }
 
 /* callback function that applies the filter action */
-void MainWindow::executeFilter(QAction *action,FilterParameter *srcpar)
+void MainWindow::executeFilter(QAction *action,FilterParameter *par)
 {
 
 	if(GLA()==NULL)
@@ -301,13 +304,12 @@ void MainWindow::executeFilter(QAction *action,FilterParameter *srcpar)
 
   
   // (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
-  FilterParameter par;
-  bool ret=iFilter->getParameters(action, GLA(),*(GLA()->mm), par,srcpar);
+  bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm), *par);
 
   if(!ret) return;
 	
   // (3) save the current filter and its parameters in the history
-  GLA()->filterHistory.actionList.append(qMakePair(action->text(),par));
+  GLA()->filterHistory.actionList.append(qMakePair(action->text(),*par));
 
   qDebug("Filter History size %i",GLA()->filterHistory.actionList.size());
   qDebug("Filter History Last entry %s",qPrintable (GLA()->filterHistory.actionList.front().first));
@@ -316,7 +318,7 @@ void MainWindow::executeFilter(QAction *action,FilterParameter *srcpar)
   iFilter->setLog(&(GLA()->log));
   // (4) Apply the Filter 
   GLA()->mm->busy=true;
-  ret=iFilter->applyFilter(action, *(GLA()->mm), par, QCallBack);
+  ret=iFilter->applyFilter(action, *(GLA()->mm), *par, QCallBack);
   GLA()->mm->busy=false;
 	
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)

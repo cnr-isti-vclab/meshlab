@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2007/02/08 23:45:26  pirosu
+merged srcpar and par in the GetStdParameters() function
+
 Revision 1.4  2006/12/27 21:41:41  pirosu
 Added improvements for the standard plugin window:
 split of the apply button in two buttons:ok and apply
@@ -103,6 +106,7 @@ public:
   inline void addInt  (QString name,float val)  { paramMap.insert(name, QVariant(    int(val)) ); }
   inline void addBool (QString name,bool val)   { paramMap.insert(name, QVariant(        val )  );  }
   inline void addString(QString name,QString val){ paramMap.insert(name,QVariant(        val )  );  }
+  inline QVariant update(QString name,QVariant val){paramMap[name] = val; return val;}
   
   inline void addMatrix44(QString name,Matrix44f val) { 
     QList<QVariant> matrixVals;

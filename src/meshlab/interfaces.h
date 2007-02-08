@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.53  2007/02/08 23:45:26  pirosu
+merged srcpar and par in the GetStdParameters() function
+
 Revision 1.52  2007/01/11 19:51:46  pirosu
 fixed bug for QT 4.1.0/dotnet2003
 removed the request of the window title to the plugin. The action description is used instead.
@@ -164,7 +167,7 @@ public:
 	virtual bool getStdFields(QAction *, MeshModel &, StdParList &){return false;}
     
 	/* Overloading of the function getParameters that supports the standard plugin window. If the plugin doesn't implement this, the classic function is called */
-	virtual bool getParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/,FilterParameter * /* parameters obtained by the standard parameters' plugin window*/) {return getParameters(qa,qw,mm,fp);};
+	virtual bool getStdParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/) {return getParameters(qa,qw,mm,fp);};
 
 
 protected:

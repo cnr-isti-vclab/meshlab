@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.9  2007/02/08 23:46:15  pirosu
+ merged srcpar and par in the GetStdParameters() function
+
  Revision 1.8  2007/01/11 19:52:25  pirosu
  fixed bug for QT 4.1.0/dotnet2003
  removed the request of the window title to the plugin. The action description is used instead.
@@ -187,31 +190,28 @@ bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst
   return true;
 }
 
-bool CleanFilter::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par,FilterParameter *srcpar)
+bool CleanFilter::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
 {
- par.clear();
  switch(ID(action))
   {
 	 case FP_REBUILD_SURFACE :
-		 maxDiag1 = srcpar->getFloat("BallRadius");
-    	par.addFloat("BallRadius",m.cm.bbox.Diag()*maxDiag1/100.0);
+		 maxDiag1 = par.getFloat("BallRadius");
+    	par.update("BallRadius",float(m.cm.bbox.Diag()*maxDiag1/100.0));
 		 return true;
 	 case FP_REMOVE_ISOLATED_DIAMETER:	 
-		 maxDiag2 = srcpar->getFloat("MinComponentDiag");
-          par.addFloat("MinComponentDiag",m.cm.bbox.Diag()*maxDiag2/100.0);
+		 maxDiag2 = par.getFloat("MinComponentDiag");
+          par.update("MinComponentDiag",float(m.cm.bbox.Diag()*maxDiag2/100.0));
           return true;
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-        minCC = srcpar->getInt("MinComponentSize");
-        par.addInt("MinComponentSize",minCC);
+        minCC = par.getInt("MinComponentSize");
          return true;
     case FP_REMOVE_WRT_Q:
-          val1 = srcpar->getFloat("MaxQualityThr");
-          par.addFloat("MaxQualityThr",val1);
+          val1 = par.getFloat("MaxQualityThr");
           return true;
+	}
+ return false;
   }
 
- return false;
-}
 
 
 
