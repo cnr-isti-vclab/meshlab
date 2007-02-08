@@ -281,21 +281,26 @@ inline int isIn(QPointF p0,QPointF p1,float dx,float dy,float radius,float *dist
 		if (r>=0 && r<=1 && (px*px+py*py<radius*radius)) { *dist=sqrt(px*px+py*py)/radius; return 1; }
 	}
 
-	//TODO: there could be some problem when point is nearer p0 or p1 and viceversa
-
+	// there could be some problem when point is nearer p0 or p1 and viceversa
+	// so i have to check both. is only needed with smooth_borders
+	bool found=0;
 	float x1=(dx-p1.x());
 	float y1=(dy-p1.y());
 	float bla1=x1*x1+y1*y1;
-	if (bla1<radius*radius) { *dist=sqrt(bla1)/radius; return 1;}
+	if (bla1<radius*radius) { *dist=sqrt(bla1)/radius; found=1;/*return 1;*/}
 
-	if (p0==p1) return 0;
+	if (p0==p1) return found;
 
 	float x0=(dx-p0.x());
 	float y0=(dy-p0.y());
 	float bla0=x0*x0+y0*y0;
-	if (bla0<radius*radius) { *dist=sqrt(bla0)/radius; return 1;}
+	if (bla0<radius*radius) { 
+		if (found==1) *dist=min((*dist),(float)sqrt(bla0)/radius);
+		else *dist=sqrt(bla0)/radius;
+		return 1;
+	}
 
-	return 0;
+	return found;
 }
 
 /** checks if a point is in a triangle (2D) */
