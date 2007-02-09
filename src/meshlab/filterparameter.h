@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2007/02/09 09:09:39  pirosu
+Added ToolTip support for standard parameters
+
 Revision 1.5  2007/02/08 23:45:26  pirosu
 merged srcpar and par in the GetStdParameters() function
 
@@ -141,6 +144,7 @@ typedef struct MESHLAB_STDFIELD
 {
   QString *fieldname;
   QString *fielddesc;
+  QString *fieldttip;
   QVariant *fieldval;
   int fieldtype;
   float min;
@@ -162,57 +166,83 @@ public:
 
 	void addField(char *name, char* desc, bool val)
 	{
+		addField(name,desc,val,(char *)NULL);
+	}
+	void addField(char *name, char* desc, float val)
+	{
+		addField(name,desc,val,(char *)NULL);
+	}
+	void addField(char *name, char* desc, float val, float minv, float maxv)
+	{
+		addField(name,desc,val,minv,maxv,(char *)NULL);
+	}
+	void addField(char *name, char* desc, int val)
+	{
+		addField(name,desc,val,(char *)NULL);
+	}
+	void addField(char *name, char* desc, char *val)
+	{
+		addField(name,desc,val,(char *)NULL);
+	}
+
+	void addField(char *name, char* desc, bool val,char *ttex)
+	{
 		MESHLAB_STDFIELD std;
 
 		std.fieldname = new QString(name);
 		std.fielddesc = new QString(desc);
 		std.fieldval = new QVariant(val);
+		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
 		std.fieldtype = MESHLAB_STDPAR_PARBOOL;
 
 		v.push_back(std);
 	}
-	void addField(char *name, char* desc, float val)
+	void addField(char *name, char* desc, float val,char *ttex)
 	{
 		MESHLAB_STDFIELD std;
 
 		std.fieldname = new QString(name);
 		std.fielddesc = new QString(desc);
 		std.fieldval = new QVariant(val);
+		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
 		std.fieldtype = MESHLAB_STDPAR_PARFLOAT;
 
 		v.push_back(std);
 	}
-	void addField(char *name, char* desc, float val, float minv, float maxv)
+	void addField(char *name, char* desc, float val, float minv, float maxv,char *ttex)
 	{
 		MESHLAB_STDFIELD std;
 
 		std.fieldname = new QString(name);
 		std.fielddesc = new QString(desc);
 		std.fieldval = new QVariant(val);
+		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
 		std.fieldtype = MESHLAB_STDPAR_PARABSPERC;
 		std.min = minv;
 		std.max = maxv;
 
 		v.push_back(std);
 	}
-	void addField(char *name, char* desc, int val)
+	void addField(char *name, char* desc, int val,char *ttex)
 	{
 		MESHLAB_STDFIELD std;
 
 		std.fieldname = new QString(name);
 		std.fielddesc = new QString(desc);
 		std.fieldval = new QVariant(val);
+		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
 		std.fieldtype = MESHLAB_STDPAR_PARINT;
 
 		v.push_back(std);
 	}
-	void addField(char *name, char* desc, char *val)
+	void addField(char *name, char* desc, char *val,char *ttex)
 	{
 		MESHLAB_STDFIELD std;
 
 		std.fieldname = new QString(name);
 		std.fielddesc = new QString(desc);
 		std.fieldval = new QVariant(val);
+		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
 		std.fieldtype = MESHLAB_STDPAR_PARSTRING;
 
 		v.push_back(std);
@@ -230,6 +260,7 @@ public:
 			delete v[i].fieldname;
 			delete v[i].fielddesc;
 			delete v[i].fieldval;
+			delete v[i].fieldttip;
 		}
 
 		v.clear();
@@ -265,6 +296,7 @@ public:
 	QString &getFieldName(int i){return *v[i].fieldname;}
 	QString &getFieldDesc(int i){return *v[i].fielddesc;}
 	QVariant &getFieldVal(int i){return *v[i].fieldval;}
+	QString *getFieldToolTip(int i){return v[i].fieldttip;}
 	float getMin(int i){return v[i].min;}
 	float getMax(int i){return v[i].max;}
 	int getFieldType(int i){return v[i].fieldtype;}

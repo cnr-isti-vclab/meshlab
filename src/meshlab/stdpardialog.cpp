@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.7  2007/02/09 09:09:40  pirosu
+Added ToolTip support for standard parameters
+
 Revision 1.6  2007/01/19 09:12:59  cignoni
 Better formatting of floating points numbers in the dialog
 
@@ -132,10 +135,14 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 
 	for(int i = 0; i < parlist->count(); i++)
 	{
+		QString *ttip = parlist->getFieldToolTip(i);
 	  switch(parlist->getFieldType(i))
 	  {
 	  case MESHLAB_STDPAR_PARBOOL:
 		  qcb = new QCheckBox(parlist->getFieldDesc(i),qf);
+		  
+		  if(ttip != NULL)
+			qcb->setToolTip(*ttip);
 		  
 		  if(parlist->getFieldVal(i).toBool())
 			  qcb->setCheckState(Qt::Checked);
@@ -146,7 +153,11 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 
 		  break;
 	  case MESHLAB_STDPAR_PARFLOAT:
-      ql = new QLabel(parlist->getFieldDesc(i),qf);
+		 ql = new QLabel(parlist->getFieldDesc(i),qf);
+		  
+		  if(ttip != NULL)
+			ql->setToolTip(*ttip);
+		  
 		  qle = new QLineEdit(QString::number(parlist->getFieldVal(i).toDouble(),'g',3),qf); // better formatting of floating point numbers		  
 		  gridLayout->addWidget(ql,i,0,Qt::AlignTop);
 		  gridLayout->addWidget(qle,i,1,Qt::AlignTop);
@@ -156,6 +167,10 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 	  case MESHLAB_STDPAR_PARINT:
 	  case MESHLAB_STDPAR_PARSTRING:
 		  ql = new QLabel(parlist->getFieldDesc(i),qf);
+		  
+		  if(ttip != NULL)
+			ql->setToolTip(*ttip);
+		  
 		  qle = new QLineEdit(parlist->getFieldVal(i).toString(),qf);
 		  
 		  gridLayout->addWidget(ql,i,0,Qt::AlignTop);
@@ -167,6 +182,10 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 	  case MESHLAB_STDPAR_PARABSPERC:
 		  QString desc = parlist->getFieldDesc(i) + " (abs and %)";
 		  ql = new QLabel(desc ,qf);
+		  
+		  if(ttip != NULL)
+			ql->setToolTip(*ttip);
+		  
 		  apw = new AbsPercWidget(qf,float(parlist->getFieldVal(i).toDouble()),parlist->getMin(i),parlist->getMax(i));
 		  gridLayout->addWidget(ql,i,0,Qt::AlignTop);
 		  gridLayout->addLayout(apw,i,1,Qt::AlignTop);

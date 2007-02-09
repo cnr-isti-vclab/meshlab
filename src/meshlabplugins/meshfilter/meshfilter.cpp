@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.90  2007/02/09 09:10:06  pirosu
+Added ToolTip support for standard parameters
+
 Revision 1.89  2007/02/08 23:46:17  pirosu
 merged srcpar and par in the GetStdParameters() function
 
@@ -374,14 +377,14 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
 		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
-		  parlst.addField("QualityThr","Quality treshold for penalizing bad shaped faces.",lastq_QualityThr);
-		  parlst.addField("PreserveBoundary","Preserve Boundary of the mesh",lastq_PreserveBoundary);
+		  parlst.addField("QualityThr","Quality threshold",lastq_QualityThr,"Quality threshold for penalizing bad shaped faces");
+		  parlst.addField("PreserveBoundary","Preserve Boundary of the mesh",lastq_PreserveBoundary,"The simplification process tries not to destroy mesh boundaries");
 		  parlst.addField("Selected","Simplify only selected faces",lastq_Selected);
 		  break;
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
-		  parlst.addField("QualityThr","Quality treshold for penalizing bad shaped faces.",lastqtex_QualityThr);
-		  parlst.addField("Extratcoordw","Additional weight for each extra TexCoord",lastqtex_extratw);
+		  parlst.addField("QualityThr","Quality threshold",lastqtex_QualityThr,"Quality threshold for penalizing bad shaped faces");
+		  parlst.addField("Extratcoordw","Texture discontinuity extra weight",lastqtex_extratw,"Additional weight for each extra Texture Coordinates for every (selected) vertex");
 		  break;
 		case FP_CLOSE_HOLES:
 		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)10);
