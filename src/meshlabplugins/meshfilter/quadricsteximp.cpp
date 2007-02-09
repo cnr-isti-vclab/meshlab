@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2007/02/09 16:07:35  pirosu
+Removed debug code
+
 Revision 1.2  2007/02/08 15:54:33  cignoni
 Corrected ">>" into "> >" in double templates
 
@@ -522,23 +525,6 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 							  }
 
 						}
-
-		typename TriMeshType::VertexIterator pv;
-		for(pv=m.vert.begin();pv!=m.vert.end();++pv)
-		{
-			if(QH::Vd(&*pv).size() > 1)
-			{
-				
-				for(int i = 0; i < QH::Vd(&*pv).size(); i++)
-				{
-					Quadric5<double> &q =  QH::Vd(&*pv)[i].second;
-					math::Quadric<double> &q3 =  QH::Qd3(*pv);
-					j = 1;
-
-				}
-			}
-
-		} 
 
 	}
 
