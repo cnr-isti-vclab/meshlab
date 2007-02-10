@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.8  2007/02/10 16:41:18  pirosu
+replaced NULL with empty FilterParameter for filters that don't use the standard plugin window
+
 Revision 1.7  2007/02/09 09:09:40  pirosu
 Added ToolTip support for standard parameters
 
@@ -69,7 +72,9 @@ void MeshlabStdDialog::loadPluginAction(MeshFilterInterface *mfi,MeshModel *mm,Q
 	  if(!mfi->getStdFields(q,*mm,*newparlist))
 	  {
 		  /* the plugin action wants to handle parameters input by itself: the executeFilter() function is directly called */
-		  mwi->executeFilter(q,NULL);
+		  FilterParameter fp;
+		  fp.clear();
+		  mwi->executeFilter(q,&fp);
 	  }
 	  else
 	  {
