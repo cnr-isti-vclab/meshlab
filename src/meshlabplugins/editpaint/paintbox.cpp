@@ -48,6 +48,9 @@ PaintToolbox::PaintToolbox(/*const QString & title,*/ QWidget * parent, Qt::Wind
 	ui.switch_me->setGeometry(55,10,15,15);
 	ui.set_bw->setGeometry(10,45,15,15);
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
+
+	ui.label_penmodus->setVisible(false); // since at the moment there is only one modus it is useless
+	ui.pen_modus->setVisible(false); // same as above
 	//QDesktopWidget::screenGeometry();
 	//ui.fill_button->setEnabled(false);
 	ui.pick_frame->setVisible(false);

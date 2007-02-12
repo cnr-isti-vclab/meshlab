@@ -22,12 +22,12 @@
  ****************************************************************************/
 /****************************************************************************
 
-//TODO bug when pen smaller than polys and fast mouse movement
 //TODO there could be some IsD() missing
 //TODO in some cases bits instead of hashtables would be better
 //TODO optimize undo to not include when new and old colors are the same
 //TODO color smooth has some problems
 //TODO bright colors problem
+//TODO bug when pen smaller than polys and fast mouse movement .... WORKS BETTER BUT NOT SOLVED
 ################################
 //TODO paint selection selects some wrong piece: SOLVED
 //TODO opengl line width after gradient: SOLVED
@@ -262,7 +262,7 @@ inline void calcCoord(float x,float y,float z,double matrix[],double *xr,double 
 //    (Cx-Ax)(Bx-Ax) + (Cy-Ay)(By-Ay)
 //r = ------------------------------
 //                  L²
-inline int isIn(QPointF p0,QPointF p1,float dx,float dy,float radius,float *dist) {
+inline int isIn(const QPointF &p0,const QPointF &p1,float dx,float dy,float radius,float *dist) {
 	if (p0!=p1) { /** this must be checked first, because of the color decrease tool */
 		float x2=(p1.x()-p0.x());
 		float y2=(p1.y()-p0.y());
@@ -304,7 +304,7 @@ inline int isIn(QPointF p0,QPointF p1,float dx,float dy,float radius,float *dist
 }
 
 /** checks if a point is in a triangle (2D) */
-inline bool pointInTriangle(QPointF p,QPointF a,QPointF b,QPointF c) {
+inline bool pointInTriangle(const QPointF &p,const QPointF &a,const QPointF &b,const QPointF &c) {
 	float fab=(p.y()-a.y())*(b.x()-a.x()) - (p.x()-a.x())*(b.y()-a.y());
 	float fbc=(p.y()-c.y())*(a.x()-c.x()) - (p.x()-c.x())*(a.y()-c.y());
 	float fca=(p.y()-b.y())*(c.x()-b.x()) - (p.x()-b.x())*(c.y()-b.y());
@@ -313,8 +313,46 @@ inline bool pointInTriangle(QPointF p,QPointF a,QPointF b,QPointF c) {
 }
 
 /** checks if a triangle is front or backfaced */
-inline bool isFront(QPointF a, QPointF b, QPointF c) {
+inline bool isFront(const QPointF &a,const QPointF &b,const QPointF &c) {
 	return (b.x()-a.x())*(c.y()-a.y())-(b.y()-a.y())*(c.x()-a.x())>0;
+}
+
+
+inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCenter, float Radius, QPointF* const pOut = 0) {
+	const float RadiusSq = Radius * Radius;
+	QPointF PMinusM =LineStart - CircleCenter;
+	
+	float pm_squ=PMinusM.x()*PMinusM.x()+PMinusM.y()*PMinusM.y();
+	if(pm_squ <= RadiusSq) { /// startpoint in circle
+		if(pOut) *pOut = LineStart;
+		return true;
+	}
+	QPointF LineDir=LineEnd - LineStart; /// line direction
+	// u * (p - m) 
+	const float UDotPMinusM = LineDir.x()*PMinusM.x()+LineDir.y()*PMinusM.y();//Vector2D_Dot(LineDir, PMinusM);
+	// u*u
+	const float LineDirSq = LineDir.x()*LineDir.x()+LineDir.y()*LineDir.y();
+	//   (u * (p - m))^2
+	// - (u*u * ((p - m)^2 - r^2)) 
+	const float d =   UDotPMinusM * UDotPMinusM - LineDirSq * (pm_squ - RadiusSq);
+	
+	if(d < 0.0f) return false;
+	else if(d < 0.0001f) {
+	const float s = -UDotPMinusM / LineDirSq;
+	if(s < 0.0f || s > 1.0f) return false;
+		else {
+			if(pOut) *pOut = LineStart + s * LineDir;
+			return true;
+		}
+	}
+	else {
+		const float s = (-UDotPMinusM - sqrtf(d)) / LineDirSq;
+		if(s < 0.0f || s > 1.0f) return false;
+		else {
+			if(pOut) *pOut = LineStart + s * LineDir;
+			return true;
+		}
+	}
 }
 
 /** draws the xor-line */
@@ -525,6 +563,7 @@ inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos,vector<CFaceO *> *su
 	} while (curr_f!=first_fac && curr_f!=0);
 }
 
+//getInternFaces(m,&curSel,&newSel,&faceSel,gla,pen,cur,prev,pixels,mvmatrix,projmatrix,viewport);
 /** finds the faces or vertexes in the circle */
 void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Vert_Data> * risult, vector<CMeshO::FacePointer> * face_risult,
 	GLArea * gla,Penn &pen,QPoint &cur, QPoint &prev, GLfloat * pixels,
@@ -561,25 +600,26 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 		for (int lauf2=0; lauf2<temp_po.size(); lauf2++) {
 			CFaceO * fac=temp_po.at(lauf2);
 			int intern=0;
-	
+			bool checkable=0; /// to avoid problems when the pen is smaller then the polys
 			for (int lauf=0; lauf<3; lauf++) {
-				gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
+				if (gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],
+						mvmatrix,projmatrix,viewport,&tx,&ty,&tz)==GL_TRUE) checkable++;
 				p[lauf]=QPointF(tx,ty);
 				//qDebug() << "zzz: "<<(int)(((int)ty)*old_size.x()+(int)tx)<<" t: "<<tx<<" "<<ty<<" "<<tz<<endl;
 				if (tx>=0 && tx<viewport[2] && ty>=0 && ty<viewport[3])
 					z[lauf]=QPointF(tz,(GLfloat)pixels[(int)(((int)ty)*viewport[2]+(int)tx)]);
 				else z[lauf]=QPoint(1,0);
 			}
-	
+
 			if (backface || isFront(p[0],p[1],p[2])) {
+				//checkable++;
 				/// colud be useful to calc the medium of z in the matrix
 				for (int lauf=0; lauf<3; lauf++) if (invisible || (z[lauf].x()<=z[lauf].y()+0.004)){
-					tx=p[lauf].x();
-					ty=p[lauf].y();
 					float dist;
-					if (isIn(mid,mid_prev,tx,ty,pen.radius,&dist)==1) {
+					if (isIn(mid,mid_prev,p[lauf].x(),p[lauf].y(),pen.radius,&dist)==1) {
 						intern=1;
-						if (pen.paintutensil!=SELECT && !sel_vert.contains(fac->V(lauf))) {
+						if (pen.paintutensil==SELECT) continue;
+						else if (!sel_vert.contains(fac->V(lauf))) {
 							Vert_Data d;
 							d.v=fac->V(lauf);
 							d.distance=dist;
@@ -587,22 +627,24 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 							sel_vert.insert(fac->V(lauf),fac->V(lauf));
 							//qDebug() << tx << " " << ty << " " << tz <<"   "<< mid<<endl;
 						}
+					} 
+					QPointF pos_res;
+					if (pen.paintutensil==SELECT && intern==0 && lineHitsCircle(p[lauf],p[(lauf+1)%3],mid,pen.radius,&pos_res)) {
+						intern=1; continue;
 					}
 				}
-				if (!intern && (pointInTriangle(mid,p[0],p[1],p[2]) || pointInTriangle(mid_prev,p[0],p[1],p[2]))) {
+				if (checkable==3 && !intern && (pointInTriangle(mid,p[0],p[1],p[2]) || pointInTriangle(mid_prev,p[0],p[1],p[2]))) {
 					intern=-1;
 				}
 			}
 			if (intern!=0 && !selected.contains(fac)) {
 				selected.insert((fac),(fac));
 				actual->push_back(fac);
-
 				vector <CFaceO *> surround;
 				for (int lauf=0; lauf<3; lauf++) getSurroundingFacesVF(fac,lauf,&surround);
 
 				for (int lauf3=0; lauf3<surround.size(); lauf3++) {
 					if (!selected.contains(surround[lauf3])) {
-						//actual->push_back(surround[lauf3]);
 						temp_po.push_back(surround[lauf3]);
 					} 
 				}
@@ -641,11 +683,13 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 		for (int lauf2=0; lauf2<temp_po.size(); lauf2++) {
 			CFaceO * fac=temp_po.at(lauf2);
 			int intern=0;
+			int checkable=0;
 			double distance[3];
 			for (int lauf=0; lauf<3; lauf++) { 
 				double dx,dy,dz; // distance
 				calcCoord((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,&dx,&dy,&dz);
-				gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
+				if (gluProject((fac)->V(lauf)->P()[0],(fac)->V(lauf)->P()[1],(fac)->V(lauf)->P()[2],
+					mvmatrix,projmatrix,viewport,&tx,&ty,&tz)==GL_TRUE) checkable++;
 				//p[lauf]=QPointF(dx,dy);
 				p[lauf]=QPointF(tx,ty);
 				if (tx>=0 && tx<viewport[2] && ty>=0 && ty<viewport[3])
@@ -664,7 +708,8 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 					if (isIn(mid,mid_prev,tx,ty,pen.radius*scale_fac *viewport[3]*fov/distance[lauf],&dist)==1) {
 					//if (isIn(QPoint(0,0),QPoint(0,0),tx,ty,pen.radius)==1) {  
 						intern=1;
-						if (pen.paintutensil!=SELECT && !sel_vert.contains(fac->V(lauf))) {
+						if (pen.paintutensil==SELECT) continue;
+						else if(!sel_vert.contains(fac->V(lauf))) {
 							Vert_Data d;
 							d.v=fac->V(lauf);
 							d.distance=dist;
@@ -672,8 +717,13 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 							sel_vert.insert(fac->V(lauf),fac->V(lauf));
 						}
 					}
+					QPointF pos_res;
+					if (pen.paintutensil==SELECT && intern==0 && lineHitsCircle(p[lauf],p[(lauf+1)%3],mid,
+						pen.radius*scale_fac *viewport[3]*fov/distance[lauf],&pos_res)) {
+						intern=1; continue;
+					}
 				}
-				if ((pointInTriangle(mid,p[0],p[1],p[2]) || pointInTriangle(mid_prev,p[0],p[1],p[2]))) {
+				if (checkable==3 && !intern && (pointInTriangle(mid,p[0],p[1],p[2]) || pointInTriangle(mid_prev,p[0],p[1],p[2]))) {
 					intern=-1;
 				}
 			}
@@ -1082,7 +1132,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 		}
 	}
 	pressed=0;
-	} 
+	}
 }
 
 void ColorUndo::undo() {
