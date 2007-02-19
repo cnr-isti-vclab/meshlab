@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.111  2007/02/19 06:00:26  cignoni
+Added cast for mac compiling
+
 Revision 1.110  2006/12/21 00:37:27  cignoni
 Correctly balanced a pushmatrix/popmatrix in the snapshot case
 
@@ -717,7 +720,7 @@ void GLArea::initTexture()
 			qDebug("loaded texture %s. with id %i w %i  h %i",mm->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
 			mm->glw.TMId.push_back(0);
 
-			glGenTextures( 1, &(mm->glw.TMId.back()) );
+			glGenTextures( 1, (GLuint*)&(mm->glw.TMId.back()) );
 			glBindTexture( GL_TEXTURE_2D, mm->glw.TMId.back() );
 			glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
