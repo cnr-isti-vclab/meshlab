@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2007/02/19 06:02:13  cignoni
+Added casts and typedefs for gcc
+
 Revision 1.3  2007/02/09 16:07:35  pirosu
 Removed debug code
 
@@ -172,8 +175,11 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	typedef typename tri::TriEdgeCollapse<TriMeshType, MYTYPE>::HeapType HeapType;
 	typedef typename tri::TriEdgeCollapse<TriMeshType, MYTYPE>::HeapElem HeapElem;
 	typedef typename TriMeshType::FaceType FaceType;
+	typedef typename TriMeshType::FaceType::EdgeType EdgeType;
 	typedef typename TriMeshType::VertexType VertexType;
-
+	typedef typename TriMeshType::CoordType CoordType;
+	typedef typename TriMeshType::CoordType::ScalarType ScalarType;
+  
 
 	public:
 
@@ -295,7 +301,7 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 
 			ncoords = GetTexCoords(tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2);
 
-			return ComputeMinimalsAndPriority(min1,min2,qsum1,qsum2,tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2,ncoords);			
+			return (ScalarType)ComputeMinimalsAndPriority(min1,min2,qsum1,qsum2,tcoord0_1,tcoord1_1,tcoord0_2,tcoord1_2,ncoords);			
 		}
 
 		ScalarType ComputePriority(double vv[5],Quadric5<double> &qsum)
