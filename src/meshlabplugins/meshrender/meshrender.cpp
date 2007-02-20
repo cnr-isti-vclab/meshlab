@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.20  2007/02/20 13:05:23  corsini
+add log file for shader compilation and linking error
+
 Revision 1.19  2006/12/24 22:46:34  cignoni
 Corrected bug about a wrong glUniform1fARB  (thanks Clement Menier!)
 
@@ -80,6 +83,7 @@ Added copyright info
 
 #include "meshrender.h"
 #include <QGLWidget>
+#include <QTextStream>
 
 using namespace vcg;
 
@@ -323,11 +327,32 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 							++i;
 						}
 
-					} else {
+					}
+					else 
+					{
+						QFile file("shaders.log");
+						if (file.open(QFile::Append))
+						{
+							static char proglog[2048];
+							int length;
+							QTextStream out(&file);
+
+							glGetProgramiv(v, GL_LINK_STATUS, &statusV);
+							glGetProgramInfoLog(v, 2048, &length, proglog);
+							out << "VERTEX SHADER LINK INFO:" << endl;
+							out << proglog << endl << endl;
+
+							glGetProgramiv(f, GL_LINK_STATUS, &statusF);
+							glGetProgramInfoLog(f, 2048, &length, proglog);
+							out << "FRAGMENT SHADER LINK INFO:" << endl << endl;
+							out << proglog << endl << endl;
+
+							file.close();
+						}
+
 						QMessageBox::critical(0, "Meshlab",
 							QString("An error occurred during shader's linking.\n") +
-							"Please check your graphic card's extensions \n"+
-							"or the shader's code\n\n");
+							"See shaders.log for further details about this error.\n");
 					}
 
 					//Textures
@@ -362,11 +387,32 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 					sDialog->move(10,100);
 					sDialog->show();
 
-				} else {
+				} 
+				else 
+				{	
+					QFile file("shaders.log");
+					if (file.open(QFile::WriteOnly))
+					{
+						static char shlog[2048];
+						int length;
+						QTextStream out(&file);
+
+						glGetShaderiv(v, GL_COMPILE_STATUS, &statusV);
+						glGetShaderInfoLog(v, 2048, &length, shlog);
+						out << "VERTEX SHADER COMPILE INFO:" << endl << endl;
+						out << shlog << endl << endl;
+
+						glGetShaderiv(f, GL_COMPILE_STATUS, &statusF);
+						glGetShaderInfoLog(f, 2048, &length, shlog);
+						out << "FRAGMENT SHADER COMPILE INFO:" << endl << endl;
+						out << shlog << endl << endl;
+
+						file.close();
+					}
+
 					QMessageBox::critical(0, "Meshlab",
-						QString("An error occurred during shader's compiling.\n") +
-						"Please check your graphic card's extensions \n"+
-						"or the shader's code\n\n");
+						QString("An error occurred during shader's compiling.\n"
+						"See shaders.log for further details about this error."));
 				}
 			}
 		}
