@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.21  2007/02/20 13:05:50  corsini
+*** empty log message ***
+
 Revision 1.20  2007/02/20 13:05:23  corsini
 add log file for shader compilation and linking error
 
@@ -333,7 +336,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 						QFile file("shaders.log");
 						if (file.open(QFile::Append))
 						{
-							static char proglog[2048];
+							char proglog[2048];
 							int length;
 							QTextStream out(&file);
 
@@ -393,7 +396,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 					QFile file("shaders.log");
 					if (file.open(QFile::WriteOnly))
 					{
-						static char shlog[2048];
+						char shlog[2048];
 						int length;
 						QTextStream out(&file);
 
