@@ -24,5 +24,5 @@ void main (void)
 	float NdotV = dot(N,V);
 	float NdotL = dot(N,L);
 
-	gl_FragColor = pow(NdotV * NdotL, m) * kd;
+	gl_FragColor = pow(max(NdotV * NdotL, 0.0), m) * kd;
 }
