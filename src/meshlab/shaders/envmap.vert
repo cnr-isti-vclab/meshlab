@@ -66,7 +66,7 @@ vec4 Specular;
        //             Diffuse  * gl_FrontMaterial.diffuse;
                     Ambient  * gl_Color +
                     Diffuse  * gl_Color;
-        color += Specular * vec4(SpecularVal,SpecularVal,SpecularVal,1);
+        color += Specular * vec4(SpecularVal,SpecularVal,SpecularVal,1.0);
         color = clamp( color, 0.0, 1.0 );
         gl_FrontColor = color;
         gl_FrontColor.a *= alphaFade;

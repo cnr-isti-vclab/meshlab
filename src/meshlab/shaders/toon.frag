@@ -14,7 +14,7 @@ uniform float Edge;
 uniform float Phong;
 varying vec3 Normal;
 varying vec3 LightDir;
-uniform float Fuzz=.1;
+float Fuzz=0.1f;
 
 void main (void)
 {
