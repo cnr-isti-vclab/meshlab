@@ -23,12 +23,12 @@ void main (void)
 	
 	if (f < Edge+Fuzz)
 	{
-		float frac=clamp((f-Edge)/Fuzz, 0.0f, 1.0f);
+		float frac=clamp((f-Edge)/Fuzz, 0.0, 1.0);
 		color = mix(vec3(0.0f), DiffuseColor, frac);
 	}
 	else 
 	{ 
-		float frac=clamp((f-Phong)/Fuzz, 0.0f, 1.0f);
+		float frac=clamp((f-Phong)/Fuzz, 0.0, 1.0);
 		color=mix(DiffuseColor, PhongColor, frac);
 	}
 	gl_FragColor = vec4(color, 1.0);
