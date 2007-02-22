@@ -25,6 +25,7 @@ SOURCES       = epoch_io.cpp \
 TARGET        = epoch_io
 DESTDIR       = ../../meshlab/plugins
 QT           += xml
+CONFIG		+= debug_and_release
 
 win32-msvc.net:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
 win32-msvc2005:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
@@ -46,14 +47,7 @@ CONFIG(release, debug|release) {
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
-unix{
-	QMAKE_CC	 = gcc
-	QMAKE_CXX	 = g++
-	QMAKE_LINK	 = gcc
-	CONFIG		+= warn_off debug_and_release
-        LIBS            += -lbz2
-#	LIBS		+= -l3ds
-}
+mac:LIBS   += -lbz2
 
 
 contains(TEMPLATE,lib) {

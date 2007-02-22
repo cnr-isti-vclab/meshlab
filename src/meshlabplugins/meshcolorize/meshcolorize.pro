@@ -10,6 +10,7 @@ DESTDIR       = ../../meshlab/plugins
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 FORMS		  = equalizerDialog.ui
+CONFIG		+= debug_and_release
 
 
 contains(TEMPLATE,lib) {

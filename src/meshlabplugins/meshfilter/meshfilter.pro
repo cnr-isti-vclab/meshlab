@@ -20,6 +20,7 @@ DESTDIR       = ../../meshlab/plugins
 win32:DEFINES += NOMINMAX
 # all dialog are stored in meshlab/ui directory
 FORMS         = ui/transformDialog.ui ../../meshlab/ui/genericELDialog.ui
+CONFIG		+= debug_and_release
 
 QT += opengl
 

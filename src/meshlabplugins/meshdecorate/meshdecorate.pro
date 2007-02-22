@@ -8,7 +8,7 @@ DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
-# win32:LIBS	+= ../../../../code/lib/glut/lib/glut32.lib
+CONFIG		+= debug_and_release
 
 
 contains(TEMPLATE,lib) {

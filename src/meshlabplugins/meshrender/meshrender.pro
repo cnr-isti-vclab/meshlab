@@ -13,6 +13,7 @@ win32:DEFINES += NOMINMAX
 //win32:LIBS += QtXml4.lib
 FORMS		  = shaderDialog.ui
 DEFINES += GLEW_STATIC
+CONFIG		+= debug_and_release
 
 
 contains(TEMPLATE,lib) {

@@ -12,6 +12,7 @@ DESTDIR = ../../meshlab/plugins
 DEFINES += GLEW_STATIC
 QT += opengl
 RESOURCES = meshlab.qrc
+CONFIG		+= debug_and_release
 
 contains(TEMPLATE,lib){
   CONFIG(debug, debug|release){

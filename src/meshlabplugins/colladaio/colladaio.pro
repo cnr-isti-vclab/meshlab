@@ -5,6 +5,7 @@ HEADERS       = colladaio.h
 SOURCES       = colladaio.cpp
 TARGET        = colladaio
 DESTDIR       = ../../meshlab/plugins
+CONFIG		+= debug_and_release
 
 
 win32-msvc.net:LIBS     -= LIBCMTD.lib

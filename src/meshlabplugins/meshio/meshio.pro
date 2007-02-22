@@ -1,6 +1,6 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/lib3ds-1.3.0
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include 
 HEADERS       = meshio.h \
 				../../../../sf/wrap/ply/plylib.h \
 				../../../../sf/wrap/io_trimesh/export_obj.h \
@@ -13,25 +13,22 @@ HEADERS       = meshio.h \
 SOURCES       = meshio.cpp \
 				../../../../sf/wrap/ply/plylib.cpp
 TARGET        = meshio
-DESTDIR       = ../../meshlab/plugins
+DESTDIR       = ../../meshlab/plugins	
 
 win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
 win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
-
+win32-msvc2005:INCLUDEPATH += ../../../../code/lib/lib3ds-1.3.0
 win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds/lib3ds.a
-win32-g++:INCLUDEPATH  -= ../../../../code/lib/lib3ds-1.3.0
+mac:INCLUDEPATH  += ../../../../code/lib/lib3ds-1.2.0
 win32-g++:INCLUDEPATH  += ../../../../code/lib/lib3ds-1.2.0
 
-# the following line is needed to avoid mismatch between 
-# the awful min/max macros of windows and the limits max
-win32:DEFINES += NOMINMAX
+CONFIG		+= debug_and_release
+
 unix{
-	QMAKE_CC	 = gcc
-	QMAKE_CXX	 = g++
-	QMAKE_LINK	 = gcc
 	CONFIG		+= warn_off debug_and_release
-	LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
+#	LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
 }
+mac:LIBS +=  ../../../../code/lib/lib3ds-1.2.0/macos/lib3ds.a
 
 
 contains(TEMPLATE,lib) {
@@ -40,3 +37,7 @@ contains(TEMPLATE,lib) {
       else:TARGET = $$member(TARGET, 0)d
    }
 }
+
+# the following line is needed to avoid mismatch between 
+# the awful min/max macros of windows and the limits max
+win32:DEFINES += NOMINMAX

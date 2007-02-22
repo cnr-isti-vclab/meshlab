@@ -9,6 +9,7 @@ SOURCES       = baseio.cpp \
 				../../../../sf/wrap/ply/plylib.cpp
 TARGET        = baseio
 DESTDIR       = ../../meshlab/plugins
+CONFIG		+= debug_and_release
 
 
 # the following line is needed to avoid mismatch between 
