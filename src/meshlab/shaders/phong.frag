@@ -14,13 +14,13 @@ uniform float shininess;
 void main()
 {
 	vec3 n = normalize(normal);
-	vec4 diffuse = {0.0};
-	vec4 specular = {0.0};
+	vec4 diffuse = vec4(0.0);
+	vec4 specular = vec4(0.0);
 	
 	// the material properties are embedded in the shader (for now)
-	vec4 mat_ambient = {1.0, 1.0, 1.0, 1.0};
-	vec4 mat_diffuse = {1.0, 1.0, 1.0, 1.0};
-	vec4 mat_specular = {1.0, 1.0, 1.0, 1.0};
+	vec4 mat_ambient = vec4(1.0, 1.0, 1.0, 1.0);
+	vec4 mat_diffuse = vec4(1.0, 1.0, 1.0, 1.0);
+	vec4 mat_specular = vec4(1.0, 1.0, 1.0, 1.0);
 	
 	// ambient term
 	vec4 ambient = mat_ambient * gl_LightSource[0].ambient;

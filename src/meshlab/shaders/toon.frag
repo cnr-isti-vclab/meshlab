@@ -14,17 +14,17 @@ uniform float Edge;
 uniform float Phong;
 varying vec3 Normal;
 varying vec3 LightDir;
-float Fuzz=0.1f;
+uniform float Fuzz;
 
 void main (void)
 {
-	vec3 color = DiffuseColor;
+        vec3 color = DiffuseColor;
 	float f = dot(LightDir,Normal);
 	
 	if (f < Edge+Fuzz)
 	{
 		float frac=clamp((f-Edge)/Fuzz, 0.0, 1.0);
-		color = mix(vec3(0.0f), DiffuseColor, frac);
+		color = mix(vec3(0.0), DiffuseColor, frac);
 	}
 	else 
 	{ 

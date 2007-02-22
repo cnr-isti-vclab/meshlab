@@ -18,9 +18,9 @@ uniform float ni;
 void main()
 {
 	// the material propertise are embedded in the shader (for now)
-	vec4 mat_ambient = {1.0, 1.0, 1.0, 1.0};
-	vec4 mat_diffuse = {1.0, 1.0, 1.0, 1.0};
-	vec4 mat_specular = {1.0, 1.0, 1.0, 1.0};
+	vec4 mat_ambient = vec4(1.0, 1.0, 1.0, 1.0);
+	vec4 mat_diffuse = vec4(1.0, 1.0, 1.0, 1.0);
+	vec4 mat_specular= vec4(1.0, 1.0, 1.0, 1.0);
 
 	// normalize interpolated normal
 	vec3 N = normalize(normal);

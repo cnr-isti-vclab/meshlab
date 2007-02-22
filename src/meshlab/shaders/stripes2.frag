@@ -1,8 +1,8 @@
 varying vec3 pos;
 uniform vec3 StripeDir;
-uniform float Fuzz=.1;
-float Width=0.5f;
-float Scale=1.0f;
+uniform float Fuzz;
+uniform float Width;//=0.5;
+uniform float Scale;//=1.0;
 void main (void) 
 {
         vec4 color;
@@ -16,6 +16,6 @@ void main (void)
 	  frac1 = frac1 * (1.0 - frac2);
     	  frac1 = frac1 * frac1 * (3.0 - (2.0 * frac1));
            
-        color.a=mix(0,1,frac1);
+        color.a=mix(0.0,1.0,frac1);
         gl_FragColor = color;
 }
