@@ -1,7 +1,3 @@
-# Diese Datei wurde mit dem qmake-Manager von KDevelop erstellt. 
-# ------------------------------------------- 
-# Unterordner relativ zum Projektordner: .
-# Das Target ist eine Anwendung:  
 
 TEMPLATE = lib
 CONFIG += plugin
@@ -16,12 +12,7 @@ DESTDIR = ../../meshlab/plugins
 DEFINES += GLEW_STATIC
 QT += opengl
 RESOURCES = meshlab.qrc
-unix{
-  QMAKE_CC = gcc
-  QMAKE_CXX = g++
-  QMAKE_LINK = gcc
-  CONFIG += warn_off debug_and_release
-}
+
 contains(TEMPLATE,lib){
   CONFIG(debug, debug|release){
     unix{

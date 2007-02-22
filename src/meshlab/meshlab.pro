@@ -53,6 +53,9 @@ RESOURCES     = meshlab.qrc
 # to add windows icon 
 RC_FILE = meshlab.rc
 
+# to add MacOS icon 
+ICON = images/meshlab.icns
+
 QT           += opengl 
 QT           += xml
 QT           += network
@@ -78,11 +81,3 @@ CONFIG(debug, debug|release) {
 }
 
 
-
-unix{
-    LIBS	    += -L../../../code/lib/glew/lib -lGLEW
-	QMAKE_CC	 = gcc
-	QMAKE_CXX	 = g++
-	QMAKE_LINK	 = gcc
-	CONFIG		+= warn_off debug_and_release
-}
