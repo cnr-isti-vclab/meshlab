@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.39  2007/02/25 21:23:05  cignoni
+Added casts for mac compiling
+
 Revision 1.38  2006/11/29 00:59:17  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -168,7 +171,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QGLWidget *gla,QFont qf
 
 	// Get gl state values
 	double mm[16],mp[16];
-	int vp[4];
+	GLint vp[4];
 	glGetDoublev(GL_PROJECTION_MATRIX,mp);
 	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
 	glGetIntegerv(GL_VIEWPORT,vp);
@@ -212,7 +215,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QGLWidget *gla,QFont qf
 
 }
 
-void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,int *vp,Point3d &x1,Point3d &x2)
+void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,GLint *vp,Point3d &x1,Point3d &x2)
 {
 	float d = -std::numeric_limits<float>::max();
 	Point3d c;
@@ -245,7 +248,7 @@ void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,int *vp,P
 }
 
 
-void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,int *vp,Point3d &y1,Point3d &y2)
+void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,GLint *vp,Point3d &y1,Point3d &y2)
 {
 	float d = -std::numeric_limits<float>::max();
 	Point3d c;
@@ -278,7 +281,7 @@ void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,int *vp,P
 	}
 }
 
-void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,Point3d &z1,Point3d &z2)
+void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,GLint *vp,Point3d &z1,Point3d &z2)
 {
 	float d = -std::numeric_limits<float>::max();
 	Point3d c;
@@ -313,7 +316,7 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,int *vp,P
 	}
 }
 
-float ExtraMeshDecoratePlugin::calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp)
+float ExtraMeshDecoratePlugin::calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,GLint *vp)
 {
  	Point3d p1,p2;
 
@@ -483,7 +486,7 @@ void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,QGLWidget* gla,QFont qf)
 
 	// Get gl state values
 	double mm[16],mp[16];
-	int vp[4];
+	GLint vp[4];
 
 	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
 	glGetDoublev(GL_PROJECTION_MATRIX,mp);

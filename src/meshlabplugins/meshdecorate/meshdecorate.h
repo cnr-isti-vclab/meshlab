@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.19  2007/02/25 21:23:05  cignoni
+Added casts for mac compiling
+
 Revision 1.18  2006/11/29 00:59:18  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -98,14 +101,14 @@ private:
 	float niceRound2(float value,float base);
 	float niceRound(float value);
 
-	float calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,int *vp);
+	float calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,GLint *vp);
 
 	void	drawTickedLine(const Point3d &p1,const Point3d &p2,float dim,float tickDist);
 	void	drawQuotedLine(const Point3d &a,const Point3d &b,float aVal, float bVal,float tickDist,QGLWidget *gla, QFont qf);
 
-	void	chooseX(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &x1,Point3d &x2);
-	void	chooseY(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &y1,Point3d &y2);
-	void	chooseZ(Box3f &box,double *modelview,double *projection,int *viewport,Point3d &z1,Point3d &z2);
+	void	chooseX(Box3f &box,double *modelview,double *projection,GLint *viewport,Point3d &x1,Point3d &x2);
+	void	chooseY(Box3f &box,double *modelview,double *projection,GLint *viewport,Point3d &y1,Point3d &y2);
+	void	chooseZ(Box3f &box,double *modelview,double *projection,GLint *viewport,Point3d &z1,Point3d &z2);
 
 public:
      
