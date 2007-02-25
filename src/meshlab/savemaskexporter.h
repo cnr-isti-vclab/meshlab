@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2007/02/25 21:26:22  cignoni
+ corrected include path
+
  Revision 1.1  2006/01/26 18:39:19  fmazzant
  moved mask dialog exporter from mashio to meshlab
 
@@ -54,7 +57,7 @@
 
 #include <wrap/io_trimesh/io_mask.h>
 
-#include "../../meshlab/meshmodel.h"
+#include "meshmodel.h"
 #include "ui_savemaskexporter.h"
 
 class SaveMaskExporterDialog : public QDialog
