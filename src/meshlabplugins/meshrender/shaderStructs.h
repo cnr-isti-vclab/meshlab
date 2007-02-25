@@ -20,7 +20,7 @@ struct UniformVariable {
 
 struct TextureInfo {
 	QString path;
-	unsigned int tId;
+	GLuint tId;
 	short MinFilter;
 	short	MagFilter;
 	short	Target;
