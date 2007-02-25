@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2007/02/25 21:31:49  cignoni
+new parameters for quadric simplification
+
 Revision 1.4  2007/01/19 09:12:39  cignoni
 Added parameters for quality,selection and boundary preservation
 
@@ -79,7 +82,11 @@ class MyTriEdgeCollapse: public vcg::tri::TriEdgeCollapseQuadric< CMeshO, MyTriE
 };
 
 
-void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool Selected, CallBackPos *cb)
+void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, 
+		bool PreserveBoundary, 
+		bool PreserveNormal,
+		bool OptimalPlacement,
+		bool Selected, CallBackPos *cb)
 {
   math::Quadric<double> QZero;
   QZero.Zero();
@@ -111,7 +118,15 @@ void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, bool
   if(PreserveBoundary && !Selected) 
     MyTriEdgeCollapse::Params().FastPreserveBoundary=true;
 
-
+  MyTriEdgeCollapse::Params().OptimalPlacement=OptimalPlacement;
+		
+  if(PreserveNormal) {
+	MyTriEdgeCollapse::Params().NormalCheck= true;
+	MyTriEdgeCollapse::Params().NormalThrRad = M_PI/4.0;
+	}
+	else
+	MyTriEdgeCollapse::Params().NormalCheck= false;
+	
   vcg::LocalOptimization<CMeshO> DeciSession(cm);
 	cb(1,"Initializing simplification");
 	DeciSession.Init<MyTriEdgeCollapse >();

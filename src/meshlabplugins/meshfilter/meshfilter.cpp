@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.91  2007/02/25 21:31:49  cignoni
+new parameters for quadric simplification
+
 Revision 1.90  2007/02/09 09:10:06  pirosu
 Added ToolTip support for standard parameters
 
@@ -189,7 +192,7 @@ added scale to unit box, move obj center. Rotate around object and origin are no
 
 using namespace vcg;
 
-void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool Selected, CallBackPos *cb);
+void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool PreserveNormal, bool OptimalPlacement, bool Selected, CallBackPos *cb);
 void QuadricTexSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr,float c, CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
@@ -232,6 +235,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 
 	lastq_QualityThr = 0.3f;
 	lastq_PreserveBoundary = false;
+	lastq_PreserveNormal = false;
+	lastq_OptimalPlacement = true;
 	lastq_Selected = false;
 
 	lastqtex_QualityThr = 0.3f;
@@ -280,7 +285,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 	case FP_TRANSFORM:	                	return QString("Apply Transform");
 	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
 	case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
-	case FP_CLOSE_HOLES:	          return QString("Close Small Holes");
+	case FP_CLOSE_HOLES:	          return QString("Close Holes");
           
     
 	default: assert(0);
@@ -377,9 +382,11 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
 		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
-		  parlst.addField("QualityThr","Quality threshold",lastq_QualityThr,"Quality threshold for penalizing bad shaped faces");
+		  parlst.addField("QualityThr","Quality threshold",lastq_QualityThr,"Quality threshold for penalizing bad shaped faces.\nThe value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
 		  parlst.addField("PreserveBoundary","Preserve Boundary of the mesh",lastq_PreserveBoundary,"The simplification process tries not to destroy mesh boundaries");
-		  parlst.addField("Selected","Simplify only selected faces",lastq_Selected);
+		  parlst.addField("PreserveNormal","Preserve Normal",lastq_PreserveNormal,"Try to avoid face flipping effects and try to preserve the original orientation of the surface");
+		  parlst.addField("OptimalPlacement","Optimal position of simplified vertices",lastq_OptimalPlacement,"Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices. ");
+		  parlst.addField("Selected","Simplify only selected faces",lastq_Selected,"The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
 		  break;
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
@@ -387,7 +394,7 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 		  parlst.addField("Extratcoordw","Texture discontinuity extra weight",lastqtex_extratw,"Additional weight for each extra Texture Coordinates for every (selected) vertex");
 		  break;
 		case FP_CLOSE_HOLES:
-		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)10);
+		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)30,"The size is expressed as number of edges composing the hole boundary");
 		  parlst.addField("Selected","Close holes with selected faces",false);
 		  parlst.addField("NewFaceSelected","Select the newly created faces",true);
 		  parlst.addField("SelfIntersection","Prevent creation of selfIntersecting faces",true);
@@ -590,9 +597,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		int TargetFaceNum = par.getInt("TargetFaceNum");		
 		lastq_QualityThr = par.getFloat("QualityThr");
 		lastq_PreserveBoundary = par.getBool("PreserveBoundary");
+		lastq_PreserveNormal = par.getBool("PreserveNormal");
+		lastq_OptimalPlacement = par.getBool("OptimalPlacement");
 		lastq_Selected = par.getBool("Selected");
 
-	   QuadricSimplification(m.cm,TargetFaceNum,lastq_QualityThr, lastq_PreserveBoundary,lastq_Selected,  cb);
+	   QuadricSimplification(m.cm,TargetFaceNum,lastq_QualityThr, lastq_PreserveBoundary,lastq_PreserveNormal, lastq_OptimalPlacement,lastq_Selected,  cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		 tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}

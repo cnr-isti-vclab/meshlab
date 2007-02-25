@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.42  2007/02/25 21:31:49  cignoni
+new parameters for quadric simplification
+
 Revision 1.41  2007/02/08 23:46:17  pirosu
 merged srcpar and par in the GetStdParameters() function
 
@@ -134,7 +137,9 @@ protected:
 	float lastq_QualityThr;
 	bool lastq_PreserveBoundary;
 	bool lastq_Selected;
-
+    bool lastq_PreserveNormal;
+    bool lastq_OptimalPlacement;
+	
 	float lastqtex_QualityThr;
 	float lastqtex_extratw;
 };
