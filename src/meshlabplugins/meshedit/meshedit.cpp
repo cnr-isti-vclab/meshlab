@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2007/02/26 01:05:11  cignoni
+cursor added
+
 Revision 1.7  2006/11/29 00:59:18  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -240,13 +243,15 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
 
   }
 
-void ExtraMeshEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * /*parent*/)
+void ExtraMeshEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
 {
  LastSel.clear();
  CMeshO::FaceIterator fi;
  for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
  if(!(*fi).IsD() && (*fi).IsS() )
       LastSel.push_back(&*fi);
+	  
+ gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));	
 
 }
 

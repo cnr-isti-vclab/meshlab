@@ -21,5 +21,9 @@
         <file>images/no_edit.png</file>
         <file>images/logo_epoch.png</file>    
         <file>images/logo_epoch_2.png</file>    
+	<file>images/cursors/plain.png</file>    
+	<file>images/cursors/plain_trackball.png</file>    
+	<file>images/cursors/plain_pan.png</file>    
+	<file>images/cursors/plain_zoom.png</file>    
 	</qresource>
 </RCC>
