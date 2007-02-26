@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.113  2007/02/26 11:57:19  cignoni
+Re enabled on screen help, moved back far plane
+
 Revision 1.112  2007/02/26 01:20:59  cignoni
 cursor added
 
@@ -123,7 +126,7 @@ GLArea::GLArea(QWidget *parent)
 	activeDefaultTrackball=true;
 	infoAreaVisible = false;
 	trackBallVisible = true;
-	currentSharder = NULL;
+	currentShader = NULL;
 	lastFilterRef = NULL;
 	lastEditRef = NULL;
 	mm = NULL;
@@ -368,9 +371,9 @@ void GLArea::paintGL()
 	              else glDisable(GL_CULL_FACE);
   if(!mm->busy)
   {
-    if(iRenderer && currentSharder) {
+    if(iRenderer && currentShader) {
 		  glPushAttrib(GL_ALL_ATTRIB_BITS);
-		  iRenderer->Render(currentSharder, *mm, rm, this); 
+		  iRenderer->Render(currentShader, *mm, rm, this); 
 	  }
 
 	  mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
@@ -611,15 +614,6 @@ void GLArea::closeEvent(QCloseEvent *event)
 	}
 }
 
-
-
-void GLArea::keyPressEvent ( QKeyEvent * e )  
-{
-	e->ignore();
-	if (e->key ()==Qt::Key_F1)      {helpVisible=!helpVisible;e->accept();updateGL();}
-}
-
-
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
 	e->ignore();
@@ -851,7 +845,7 @@ void GLArea::setView()
 	float objDist = ratio / tanf(vcg::math::ToRad(fov*.5f));
 
 	nearPlane = objDist - 2.f*clipRatioNear;
-	farPlane =  objDist + 2.f*clipRatioFar;
+	farPlane =  objDist + 10.f*clipRatioFar;
 	if(nearPlane<=objDist*.1f) nearPlane=objDist*.1f;
 
 	if(fov==5)		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,objDist - 2.f*clipRatioNear, objDist+2.f*clipRatioFar);

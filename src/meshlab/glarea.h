@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.66  2007/02/26 11:57:19  cignoni
+Re enabled on screen help, moved back far plane
+
 Revision 1.65  2007/02/26 01:20:59  cignoni
 cursor added
 
@@ -244,6 +247,7 @@ public:
 	bool isTrackBallVisible()		{return trackBallVisible;}
 	bool isDefaultTrackBall()   {return activeDefaultTrackball;}
 
+	bool toggleHelpVisible()      {helpVisible = !helpVisible; update();}  
 	void setBackFaceCulling(bool enabled);
 	void setSelectionRendering(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
@@ -259,7 +263,7 @@ public:
 	void resetTrackBall();
 	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
 
-	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentSharder = shader;}
+	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
 
 	void setEdit(MeshEditInterface *edit, QAction *editor){	iEdit = edit; currentEditor=editor;}
@@ -282,14 +286,13 @@ protected:
 	QString GetMeshInfoString(int mask);
 	void paintGL();
 	void resizeGL(int width, int height);
-	void keyPressEvent ( QKeyEvent * e );  
 	void keyReleaseEvent ( QKeyEvent * e ); 
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
-    void mouseDoubleClickEvent ( QMouseEvent * event ) ;
+  void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
-    bool drawSelection;
+	bool drawSelection;
 
 private:
 
@@ -306,7 +309,7 @@ private:
 
 	//shader support
 	MeshRenderInterface *iRenderer;
-	QAction *currentSharder;
+	QAction *currentShader;
 	QAction *lastFilterRef; // reference to last filter applied
 	QAction *lastEditRef; // reference to last Editing Mode Used 
 	QFont	qFont;			//font settings
