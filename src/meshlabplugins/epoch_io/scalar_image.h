@@ -72,7 +72,7 @@ public:
 			  }
   }
 
-  void Dilate(ScalarImage &Dilated,int wsize=1)
+  void Dilate(ScalarImage &Dilated, int wsize=1)
   {
     Dilated.resize(w,h);
     // dilation filter (3 x 3)

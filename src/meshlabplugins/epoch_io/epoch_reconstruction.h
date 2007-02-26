@@ -25,7 +25,8 @@ public:
   bool Init(QDomNode &node);
   static QString ThumbName(QString &imageName);
 
-  bool BuildMesh(CMeshO &m, int subsample, int count, float minQuality,int smoothSteps);
+	bool BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps,
+		bool dilation, int dilationPasses, int dilationSize, bool erosion, int erosionPasses, int erosionSize);
   void SmartSubSample(int subsampleFactor, FloatImage &fli, CharImage &chi, FloatImage &subD,FloatImage &subQ, int minCount);
   void AddCameraIcon(CMeshO &m);
   bool CombineHandMadeMaskAndCount(CharImage &qualityImg, QString maskName );
@@ -33,7 +34,8 @@ public:
   void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
   void Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, CharImage &mask, float depthThr);
   float ComputeDepthJumpThr(FloatImage &depthImgf, float percentile);
-	void depthFilter(FloatImage &depthImgf, FloatImage &countImgf,float depthThr);
+	void depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 
+		bool dilation, int dilationNumPasses, int dilationWinsize, bool erosion, int erosionNumPasses, int erosionWinsize);
 
   QIcon *getIcon();
 };
