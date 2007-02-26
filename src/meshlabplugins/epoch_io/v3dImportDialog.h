@@ -16,6 +16,11 @@ public:
     setupUi( this );
     subsampleSpinBox->setValue(2);
     minCountSpinBox->setValue(3);
+
+		// connections
+		connect(dilationSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(dilationSizeChanged(int)));
+		connect(erosionSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(erosionSizeChanged(int)));
+
     er=0;
 	}
 
@@ -37,6 +42,8 @@ private slots:
   void on_subsampleSpinBox_valueChanged(int);
   void on_minCountSlider_valueChanged(int);
   void on_minCountSpinBox_valueChanged(int);
+	void dilationSizeChanged(int);
+	void erosionSizeChanged(int);
 };
 
 #endif 

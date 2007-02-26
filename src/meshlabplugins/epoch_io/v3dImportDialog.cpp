@@ -216,5 +216,19 @@ void v3dImportDialog::on_subsampleSpinBox_valueChanged(int)
 
 void v3dImportDialog::on_mergeResolutionSpinBox_valueChanged(int)
 {
-fastMergeCheckBox->setChecked(true); // if someone touch the slider check the fast merging box
+	fastMergeCheckBox->setChecked(true); // if someone touch the slider check the fast merging box
+}
+
+void v3dImportDialog::dilationSizeChanged(int size)
+{
+	int winsize = size * 2 + 1;
+	QString str = QString("%1 x %2").arg(winsize).arg(winsize);
+	lblDilationSizeValue->setText(str);
+}
+
+void v3dImportDialog::erosionSizeChanged(int size)
+{
+	int winsize = size * 2 + 1;
+	QString str = QString("%1 x %2").arg(winsize).arg(winsize);
+	lblErosionSizeValue->setText(str);
 }
