@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.118  2007/02/26 12:03:44  cignoni
+Added Help online and check for updates
+
 Revision 1.117  2007/02/08 23:45:27  pirosu
 merged srcpar and par in the GetStdParameters() function
 
@@ -65,6 +68,7 @@ Added Drag n drog opening of files (thanks to Valentino Fiorin)
 #include <QToolBar>
 #include <QProgressBar>
 #include <QHttp>
+#include <QDesktopServices>
 
 #include "meshmodel.h"
 #include "interfaces.h"
@@ -459,9 +463,16 @@ void MainWindow::applyDecorateMode()
 
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
-  MainWindow::globalStatusBar()->showMessage(str,1000);
+  MainWindow::globalStatusBar()->showMessage(str,5000);
+
+	qb->show();
+	qb->setEnabled(true);
+  qb->setRange(0,100);
+	qb->setValue(50);
 	qb->setValue(pos);
-	
+	qb->update();
+	MainWindow::globalStatusBar()->update();
+//qb->repaint();
   //if(qb==0) return true;
 	//qb->setWindowTitle (str);
 	//qApp->processEvents();
@@ -707,6 +718,19 @@ void MainWindow::aboutPlugins()
 	PluginDialog dialog(pluginsDir.path(), pluginFileNames, this);
 	dialog.exec();
 }
+
+void MainWindow::helpOnscreen()
+{
+if(GLA()) GLA()->toggleHelpVisible();
+}
+
+void MainWindow::helpOnline()
+{
+  checkForUpdates();
+	QDesktopServices::openUrl(QUrl("http://meshlab.sourceforge.net/wiki"));
+}
+
+
 void MainWindow::showToolbarFile(){
 		mainToolBar->setVisible(!mainToolBar->isVisible());
 }

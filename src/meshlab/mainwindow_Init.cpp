@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.69  2007/02/26 12:03:43  cignoni
+Added Help online and check for updates
+
 Revision 1.68  2007/02/26 01:21:46  cignoni
 no more snapping dialog, better search for plugins
 
@@ -143,12 +146,13 @@ MainWindow::MainWindow()
   workspace->setAcceptDrops(true);
 	setWindowTitle(appName());
 	loadPlugins();
-  setStatusBar(new QStatusBar());
+  setStatusBar(new QStatusBar(this));
   globalStatusBar()=statusBar();
   qb=new QProgressBar(this);
   qb->setMaximum(100);
   qb->setMinimum(0);
-  statusBar()->addPermanentWidget(qb,0);
+	//qb->reset();
+	statusBar()->addPermanentWidget(qb,0);
   //qb->setAutoClose(true);
   //qb->setMinimumDuration(0);
   //qb->reset();
@@ -349,6 +353,15 @@ void MainWindow::createActions()
 
 	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
 	connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
+
+	onlineHelpAct = new QAction(tr("Online &Documentation"), this);
+	connect(onlineHelpAct, SIGNAL(triggered()), this, SLOT(helpOnline()));
+
+	onscreenHelpAct = new QAction(tr("On screen quick help"), this);
+	connect(onscreenHelpAct, SIGNAL(triggered()), this, SLOT(helpOnscreen()));
+
+	checkUpdatesAct = new QAction(tr("Check for updates"), this);
+	connect(checkUpdatesAct, SIGNAL(triggered()), this, SLOT(checkForUpdates()));
 }
 
 void MainWindow::createToolBars()
@@ -479,6 +492,9 @@ void MainWindow::createMenus()
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAct);
 	helpMenu->addAction(aboutPluginsAct);
+	helpMenu->addAction(onlineHelpAct);
+	helpMenu->addAction(onscreenHelpAct);
+	helpMenu->addAction(checkUpdatesAct);
 }
 
 void MainWindow::loadPlugins()
@@ -591,12 +607,26 @@ void MainWindow::setCurrentFile(const QString &fileName)
 		if (mainWin) mainWin->updateRecentFileActions();
 	}
 
+  settings.setValue("totalKV",          settings.value("totalKV",0).toInt()           + (GLA()->mm->cm.vn)/1000);
+  settings.setValue("loadedMeshCounter",settings.value("loadedMeshCounter",0).toInt() + 1);
+  
+	int loadedMeshCounter    = settings.value("loadedMeshCounter",20).toInt(); 
+	int connectionInterval   = settings.value("connectionInterval",20).toInt();
+	int lastComunicatedValue = settings.value("lastComunicatedValue",0).toInt();
+  
+	if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
+  {
+		checkForUpdates();
+	}
+}
+
+void MainWindow::checkForUpdates()
+{
+	QSettings settings;
   int totalKV=settings.value("totalKV",0).toInt();
-  settings.setValue("totalKV",totalKV+(GLA()->mm->cm.vn)/1000);
   int connectionInterval=settings.value("connectionInterval",20).toInt();
   settings.setValue("connectionInterval",connectionInterval);
   int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
-  settings.setValue("loadedMeshCounter",loadedMeshCounter+1);
   int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
   int lastComunicatedValue=settings.value("lastComunicatedValue",0).toInt();
   QString UID=settings.value("UID",QString("")).toString();
@@ -605,13 +635,13 @@ void MainWindow::setCurrentFile(const QString &fileName)
     UID=QUuid::createUuid ().toString();
     settings.setValue("UID",UID);
   }
-  if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
-  {
+
 #ifdef _DEBUG_PHP
     QString BaseCommand("/~cignoni/meshlab_d.php");
 #else 
     QString BaseCommand("/~cignoni/meshlab.php");
 #endif
+
 #ifdef Q_WS_WIN    
     QString OS="Win";
 #elif defined( Q_WS_MAC)
@@ -624,9 +654,8 @@ void MainWindow::setCurrentFile(const QString &fileName)
     bool ret=myLocalBuf.open(QBuffer::WriteOnly);
     if(!ret) QMessageBox::information(this,"Meshlab",QString("Failed opening of internal buffer"));
     idGet=httpReq->get(message,&myLocalBuf);     // id == 2  
-  }
-}
 
+}
 
 void MainWindow::connectionDone(bool status)
 {
@@ -638,4 +667,4 @@ void MainWindow::connectionDone(bool status)
         QSettings settings;
         int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
         settings.setValue("lastComunicatedValue",loadedMeshCounter);
-}
+}	

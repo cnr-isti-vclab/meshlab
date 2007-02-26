@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.78  2007/02/26 12:03:44  cignoni
+Added Help online and check for updates
+
 Revision 1.77  2007/02/08 16:04:18  cignoni
 Corrected behaviour of edit actions
 
@@ -133,7 +136,7 @@ public:
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("0.9.1b"); }
+   const QString appVer() const {return tr("1.0.0RC"); }
 
   // MaskObj maskobj;
 
@@ -191,7 +194,10 @@ private slots:
 	///////////Slot Menu Help ////////////////////////
 	void about();
 	void aboutPlugins();	
-
+  void helpOnline();
+	void helpOnscreen();
+	void checkForUpdates();
+	 
 	///////////Slot General Purpose ////////////////////////
 
   void dropEvent ( QDropEvent * event );
@@ -317,6 +323,9 @@ private:
 	///////////Actions Menu Help ////////////////////////
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;
+	QAction *onlineHelpAct;
+	QAction *onscreenHelpAct;
+	QAction *checkUpdatesAct;
 	////////////////////////////////////////////////////
 	QList<QAction *> TotalDecoratorsList;
 	////////////////////////////////////////////////////
