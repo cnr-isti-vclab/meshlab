@@ -94,7 +94,7 @@ private:
 	bool first; // to check in decorate if it is the first call after a mouse down
 	double mvmatrix[16]; //modelview
 	double projmatrix[16]; //projection
-	int viewport[4]; //viewport
+	GLint viewport[4]; //viewport
 	GLfloat *pixels; // the z-buffer
 	int inverse_y; // gla->curSiz.height()-cur.y() TODO probably removable
 	vector<CMeshO::FacePointer> tempSel; //to use when needed

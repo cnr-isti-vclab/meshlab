@@ -119,7 +119,8 @@ void EditPaintPlugin::undo(int value) {
 }
 
 void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent) {
-	first=true;
+	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
+    first=true;
 	pressed=0;
 	tri::UpdateBounding<CMeshO>::Box(m.cm);
 	if (paintbox==0) { 
@@ -579,7 +580,7 @@ inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos,vector<CFaceO *> *su
 /** finds the faces or vertexes in the circle */
 void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Vert_Data> * risult, vector<CMeshO::FacePointer> * face_risult,
 	GLArea * gla,Penn &pen,QPoint &cur, QPoint &prev, GLfloat * pixels,
-	double mvmatrix[16],double projmatrix[16],int viewport[4]) {
+	double mvmatrix[16],double projmatrix[16],GLint viewport[4]) {
 
 	QHash <CFaceO *,CFaceO *> selected;
 	QHash <CVertexO *,CVertexO *> sel_vert;
