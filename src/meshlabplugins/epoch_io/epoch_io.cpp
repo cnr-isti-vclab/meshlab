@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.12  2007/02/26 11:41:07  corsini
+ add more control to depth filter through interface paramters
+
  Revision 1.11  2007/01/24 08:33:15  cignoni
  Still experiments in filtering depth jumps
 
@@ -89,30 +92,39 @@
 FILE *logFP=0; 
 using namespace vcg;
 
-void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr)
+void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 
+														 bool dilation, int dilationNumPasses, int dilationWinsize,
+														 bool erosion, int erosionNumPasses, int erosionWinsize)
 {
-	int numpass = 3;
-
 	FloatImage depth;
 	FloatImage depth2;
 	int w = depthImgf.w;
 	int h = depthImgf.h;
 	
 	depth=depthImgf;
-  
-  depth.Dilate(depth2);
-  depth=depth2;
 
-	for (int k = 0; k < numpass; k++)
+	if (dilation)
 	{
-    depth.Erode(depth2);
-    depth=depth2;
+		for (int k = 0; k < dilationNumPasses; k++)
+		{
+			depth.Dilate(depth2, dilationWinsize / 2);
+			depth=depth2;
+		}
+	}
+
+	if (erosion)
+	{
+		for (int k = 0; k < erosionNumPasses; k++)
+		{
+			depth.Erode(depth2, erosionWinsize / 2);
+			depth=depth2;
+		}
 	}
 
   Histogramf HH;
   HH.Clear();
   HH.SetRange(0,depthImgf.MaxVal()-depthImgf.MinVal(),10000);
-  for(int i=1;i<depthImgf.v.size();++i)
+  for(int i=1; i < static_cast<int>(depthImgf.v.size()); ++i)
     HH.Add(fabs(depthImgf.v[i]-depth.v[i-1]));
 
   if(logFP) fprintf(logFP,"**** Depth histogram 2 Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.minv,HH.maxv,HH.Avg(),
@@ -120,12 +132,11 @@ void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float
 
   int deletedCnt=0;
   
-  depthJumpThr=HH.Percentile(.8);
+  depthJumpThr = static_cast<float>(HH.Percentile(0.8));
 	for (int y = 0; y < h; y++)
 		for (int x = 0; x < w; x++)
 		{
 				if ((depthImgf.Val(x, y) - depth.Val(x, y)) / depthImgf.Val(x, y) > 0.6)
-				//if (fabs(depthImgf.Val(x, y) - depth.Val(x, y)) > depthJumpThr)
         {
 					countImgf.Val(x, y) = 0.0f;
           ++deletedCnt;
@@ -335,7 +346,9 @@ it takes a depth map, a count map,
 - and smooth them with a count/quality aware laplacian filter
 */ 
 
-bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps)
+bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps,
+													 bool dilation, int dilationPasses, int dilationSize, 
+													 bool erosion, int erosionPasses, int erosionSize)
 {
   FloatImage depthImgf;
   CharImage countImgc;
@@ -380,7 +393,9 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 	// To be more specific the border of the depth map are identified by erosion
 	// and the relative vertex removed (by setting mincount equal to 0).
   float depthThr2 = ComputeDepthJumpThr(depthSubf,0.95f);
-	depthFilter(depthSubf, countSubf, depthThr2);
+	depthFilter(depthSubf, countSubf, depthThr2, 
+		dilation, dilationPasses, dilationSize, 
+		erosion, erosionPasses, erosionSize);
 
 	int vn = m.vn;
   for(int i=0;i<vn;++i)
@@ -588,6 +603,12 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
       return false;
   }
 
+	bool dilationFlag = epochDialog->dilationCheckBox->isChecked();
+	int dilationN = epochDialog->dilationNumPassSpinBox->value();
+	int dilationSz = epochDialog->dilationSizeSlider->value() * 2 + 1;
+	bool erosionFlag = epochDialog->erosionCheckBox->isChecked();
+	int erosionN = epochDialog->erosionNumPassSpinBox->value();
+	int erosionSz = epochDialog->erosionSizeSlider->value() * 2 + 1;
 
   bool firstTime=true;
   QList<EpochModel>::iterator li;
@@ -598,7 +619,8 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
         ++selectedCount;
         mm.Clear();
         int tt0=clock();
-        (*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps);
+        (*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps, 
+					dilationFlag, dilationN, dilationSz, erosionFlag, erosionN, erosionSz);
         int tt1=clock();
         if(logFP) fprintf(logFP,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
 
