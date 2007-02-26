@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.67  2007/02/26 15:05:49  cignoni
+syntax error
+
 Revision 1.66  2007/02/26 11:57:19  cignoni
 Re enabled on screen help, moved back far plane
 
@@ -247,7 +250,7 @@ public:
 	bool isTrackBallVisible()		{return trackBallVisible;}
 	bool isDefaultTrackBall()   {return activeDefaultTrackball;}
 
-	bool toggleHelpVisible()      {helpVisible = !helpVisible; update();}  
+	void toggleHelpVisible()      {helpVisible = !helpVisible; update();}  
 	void setBackFaceCulling(bool enabled);
 	void setSelectionRendering(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
