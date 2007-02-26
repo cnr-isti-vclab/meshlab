@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.68  2007/02/26 01:21:46  cignoni
+no more snapping dialog, better search for plugins
+
 Revision 1.67  2007/02/08 16:04:18  cignoni
 Corrected behaviour of edit actions
 
@@ -156,7 +159,8 @@ MainWindow::MainWindow()
 void MainWindow::createStdPluginWnd()
 {
 	stddialog = new MeshlabStdDialog(this);
-	addDockWidget(Qt::RightDockWidgetArea,stddialog);
+	stddialog->setAllowedAreas (    Qt::NoDockWidgetArea );
+	//addDockWidget(Qt::RightDockWidgetArea,stddialog);
 	stddialog->setFloating(true);
 	stddialog->move(0,120);
 }
@@ -479,19 +483,21 @@ void MainWindow::createMenus()
 
 void MainWindow::loadPlugins()
 {
-	pluginsDir = QDir(qApp->applicationDirPath());
+   	pluginsDir = QDir(qApp->applicationDirPath());
+//qDebug("plugins dir %s", qPrintable(pluginsDir.dirName()));
 #if defined(Q_OS_WIN)
 	if (pluginsDir.dirName() == "debug" || pluginsDir.dirName() == "release")
 		pluginsDir.cdUp();
 #elif defined(Q_OS_MAC)
 	if (pluginsDir.dirName() == "MacOS") {
-		pluginsDir.cdUp();
-		pluginsDir.cdUp();
-		pluginsDir.cdUp();
+		for(int i=0;i<6;++i){
+			//qDebug("plugins dir %s", qPrintable(pluginsDir.dirName()));
+			pluginsDir.cdUp();
+			if(pluginsDir.exists("plugins")) break;
+		}
 	}
 #endif
 	pluginsDir.cd("plugins");
-
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
@@ -608,7 +614,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
 #endif
 #ifdef Q_WS_WIN    
     QString OS="Win";
-#elif Q_WS_MAC
+#elif defined( Q_WS_MAC)
     QString OS="Mac";
 #else
     QString OS="Lin";
