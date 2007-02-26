@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.65  2007/02/26 01:20:59  cignoni
+cursor added
+
 Revision 1.64  2007/02/05 19:25:05  gfrei
 added float getFov()
 
@@ -203,7 +206,7 @@ public:
 	vcg::Trackball trackball_light;
 	GLLogStream log;
 	short currLogLevel;
-  FilterScript filterHistory;
+    FilterScript filterHistory;
 
 	QSize curSiz;
 	QSize minimumSizeHint() const;
@@ -217,7 +220,7 @@ public:
 
 	QString getFileName()							{return fileName;}
 	void		setFileName(QString name)	
-  {
+    {
     fileName = name; 
     ss.basename=QFileInfo(fileName).baseName().append("Snap");
 	}
@@ -261,10 +264,10 @@ public:
 
 	void setEdit(MeshEditInterface *edit, QAction *editor){	iEdit = edit; currentEditor=editor;}
 	QAction * getEditAction() { return currentEditor; }
-	void endEdit(){	iEdit = 0; currentEditor=0;}///
+	void endEdit(){	iEdit = 0; currentEditor=0; setCursorTrack(0);update();}///
 
 	void closeEvent(QCloseEvent *event);
-  float lastRenderingTime() { return lastTime;}
+    float lastRenderingTime() { return lastTime;}
 
 	float getFov() { return fov; }
 
@@ -284,9 +287,9 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
-  void mouseDoubleClickEvent ( QMouseEvent * event ) ;
+    void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
-  bool drawSelection;
+    bool drawSelection;
 
 private:
 
@@ -299,7 +302,7 @@ private:
 	bool	trackBallVisible;		// Draws the trackball ?
 	bool  activeDefaultTrackball; // keep track on active trackball
 	bool  hasToPick;         // has to pick during the next redraw.
-  Point2i pointToPick;
+	Point2i pointToPick;
 
 	//shader support
 	MeshRenderInterface *iRenderer;
@@ -324,7 +327,7 @@ private:
 
 private:
 	float cfps;
-  float lastTime;
+    float lastTime;
 
 	QString fileName;
 	
@@ -336,6 +339,9 @@ private:
   enum AnimMode { AnimNone, AnimSpin, AnimInterp};
   AnimMode animMode; 
 	int tileCol, tileRow, totalCols, totalRows;
+	void GLArea::setCursorTrack(vcg::TrackMode *tm);
+
+	
 };
 
 

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.112  2007/02/26 01:20:59  cignoni
+cursor added
+
 Revision 1.111  2007/02/19 06:00:26  cignoni
 Added cast for mac compiling
 
@@ -133,7 +136,7 @@ GLArea::GLArea(QWidget *parent)
 	clipRatioNear = 1;
 	nearPlane = .2f;
 	farPlane = 5.f;
-}
+	}
 
 /*
 	This member returns the information of the Mesh in terms of VC,VQ,FC,FQ,WT
@@ -336,7 +339,7 @@ void GLArea::paintGL()
 	// Finally apply the Trackball for the model
 	trackball.GetView();
   glPushMatrix(); 
-	trackball.Apply(trackBallVisible && !takeSnapTile);
+	trackball.Apply(trackBallVisible && !takeSnapTile && iEdit==0);
 	float d=2.0f/mm->cm.bbox.Diag();
 	glScale(d);
 	
@@ -372,7 +375,7 @@ void GLArea::paintGL()
 
 	  mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
-	  if(iEdit)  iEdit->Decorate(currentEditor,*mm,this);
+	  if(iEdit) iEdit->Decorate(currentEditor,*mm,this);
     
 
 	  if(iRenderer) {
@@ -574,7 +577,7 @@ Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 	if(qtbt & Qt::LeftButton		) vcgbt |= Trackball::BUTTON_LEFT;
 	if(qtbt & Qt::RightButton		) vcgbt |= Trackball::BUTTON_RIGHT;
 	if(qtbt & Qt::MidButton			) vcgbt |= Trackball::BUTTON_MIDDLE;
-	if(modifiers & Qt::ShiftModifier		)	vcgbt |= Trackball::KEY_SHIFT;
+	if(modifiers & Qt::ShiftModifier   ) vcgbt |= Trackball::KEY_SHIFT;
 	if(modifiers & Qt::ControlModifier ) vcgbt |= Trackball::KEY_CTRL;
 	if(modifiers & Qt::AltModifier     ) vcgbt |= Trackball::KEY_ALT;
 	return Trackball::Button(vcgbt);
@@ -648,21 +651,29 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 	{
       if(iEdit) iEdit->mouseMoveEvent(currentEditor,e,*mm,this);
       else {
-		    if (isDefaultTrackBall()) trackball.MouseMove(e->x(),height()-e->y());
+		    if (isDefaultTrackBall()) 
+			{
+			  trackball.MouseMove(e->x(),height()-e->y());
+			  setCursorTrack(trackball.current_mode);
+			}
 		    else trackball_light.MouseMove(e->x(),height()-e->y());
         update();
       }
 	}
 }
-
+// When mouse is released we set the correct mouse curson
 void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
 	activeDefaultTrackball=true;
 	if(iEdit) iEdit->mouseReleaseEvent(currentEditor,e,*mm,this);
-  else {
-        if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
-	    else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
+    else {
+          if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+	        else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
+		      setCursorTrack(trackball.current_mode);
         }
+	
+	
+	
 	update();
 }
 
@@ -690,6 +701,20 @@ void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
 	updateGL();
 }
 
+void GLArea::setCursorTrack(vcg::TrackMode *tm)
+{
+ static QMap<QString,QCursor> curMap;
+ if(curMap.isEmpty())
+ {
+  curMap[QString("")]=QCursor(Qt::ArrowCursor);	
+  curMap["SphereMode"]=QCursor(QPixmap(":/images/cursors/plain_trackball.png"),1,1);	
+  curMap["PlaneMode"]=QCursor(QPixmap(":/images/cursors/plain_pan.png"),1,1);	
+  curMap["ScaleMode"]=QCursor(QPixmap(":/images/cursors/plain_zoom.png"),1,1);	
+ }
+ if(tm) setCursor(curMap[tm->Name()]);
+ else setCursor(curMap[""]);
+
+}
 
 void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
 {
