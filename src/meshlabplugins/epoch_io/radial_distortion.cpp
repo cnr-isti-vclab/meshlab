@@ -34,7 +34,7 @@ void RadialDistortion::ComputeNewXY(double xo, double yo, double& xn, double& yn
 {
    double r = (xo*xo) + (yo*yo);  // r is r squared
    double f = 1.0;
-   for (int i = 0; i < k_.size(); i++) f += (k_[i] * pow(r, i+1));
+   for (int i = 0; i < static_cast<int>(k_.size()); i++) f += (k_[i] * pow(r, i+1));
    xn = f*xo;
    yn = f*yo;
 }
@@ -68,7 +68,7 @@ void RadialDistortion::SetupLookupTable(double max, int resolution)
    while (value < max)
    {
       double f = 1.0;
-      for (int i = 0; i < k_.size(); i++) 
+      for (int i = 0; i < static_cast<int>(k_.size()); i++) 
          f += (k_[i] * pow(value*value, i+1));
       if ((f*value)>old) 
       {
