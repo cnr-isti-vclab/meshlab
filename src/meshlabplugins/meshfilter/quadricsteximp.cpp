@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2007/02/26 08:20:30  zifnab1974
+Removed the .h extension for Qt4 includes
+
 Revision 1.4  2007/02/19 06:02:13  cignoni
 Added casts and typedefs for gcc
 
@@ -39,8 +42,8 @@ Added Quadric Simplification(with textures) Filter
 ****************************************************************************/
 
 #include "meshfilter.h"   
-#include <QVector.h>
-#include <QPair.h>
+#include <QVector>
+#include <QPair>
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/selection.h>
