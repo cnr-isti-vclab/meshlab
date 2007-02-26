@@ -491,7 +491,7 @@
         <number>5</number>
        </property>
        <property name="value" >
-        <number>5</number>
+        <number>2</number>
        </property>
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
@@ -557,7 +557,7 @@
         <number>5</number>
        </property>
        <property name="value" >
-        <number>5</number>
+        <number>2</number>
        </property>
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
