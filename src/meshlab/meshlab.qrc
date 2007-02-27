@@ -2,6 +2,10 @@
     <qresource prefix="/" >
         <file>images/backlines.png</file>
         <file>images/bbox.png</file>
+        <file>images/cursors/plain.png</file>
+        <file>images/cursors/plain_pan.png</file>
+        <file>images/cursors/plain_trackball.png</file>
+        <file>images/cursors/plain_zoom.png</file>
         <file>images/eye_256_splash.png</file>
         <file>images/flat.png</file>
         <file>images/flatlines.png</file>
@@ -9,6 +13,10 @@
         <file>images/lightoff.png</file>
         <file>images/lighton.png</file>
         <file>images/logo.png</file>
+        <file>images/logo_aimatshape.png</file>
+        <file>images/logo_epoch.png</file>
+        <file>images/logo_epoch_2.png</file>
+        <file>images/no_edit.png</file>
         <file>images/open.png</file>
         <file>images/points.png</file>
         <file>images/reload.png</file>
@@ -18,12 +26,5 @@
         <file>images/snapshot.png</file>
         <file>images/textures.png</file>
         <file>images/wire.png</file>
-        <file>images/no_edit.png</file>
-        <file>images/logo_epoch.png</file>    
-        <file>images/logo_epoch_2.png</file>    
-	<file>images/cursors/plain.png</file>    
-	<file>images/cursors/plain_trackball.png</file>    
-	<file>images/cursors/plain_pan.png</file>    
-	<file>images/cursors/plain_zoom.png</file>    
-	</qresource>
+    </qresource>
 </RCC>
