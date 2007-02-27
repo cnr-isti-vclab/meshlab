@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.9  2007/02/27 23:58:36  cignoni
+Changed apply/ok into apply/close
+
 Revision 1.8  2007/02/10 16:41:18  pirosu
 replaced NULL with empty FilterParameter for filters that don't use the standard plugin window
 
@@ -204,14 +207,14 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 
 	int nbut = parlist->count();
 
-	QPushButton *okButton = new QPushButton("Ok", qf);
+	QPushButton *closeButton = new QPushButton("Close", qf);
 	QPushButton *applyButton = new QPushButton("Apply", qf);
 
-	gridLayout->addWidget(okButton,nbut,0,Qt::AlignBottom);
+	gridLayout->addWidget(closeButton,nbut,0,Qt::AlignBottom);
 	gridLayout->addWidget(applyButton,nbut,1,Qt::AlignBottom);
 
 	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
-	connect(okButton,SIGNAL(clicked()),this,SLOT(okClick()));
+	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
 
 	qf->showNormal();	
 
@@ -278,12 +281,12 @@ void MeshlabStdDialog::applyClick()
     loadFrameContent(curaction->text());
 }
 
-/* click event for the ok button of the standard plugin window */
+/* click event for the close button of the standard plugin window */
 
-void MeshlabStdDialog::okClick()
+void MeshlabStdDialog::closeClick()
 {
 	this->hide();
-	stdClick();
+	// stdClick(); commented out when switched from ok to close
 }
 
 void MeshlabStdDialog::topLevelChanged (bool topLevel)

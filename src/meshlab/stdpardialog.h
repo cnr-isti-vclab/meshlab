@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.7  2007/02/27 23:58:36  cignoni
+Changed apply/ok into apply/close
+
 Revision 1.6  2007/01/13 02:02:28  cignoni
 Changed loadFrameContent to pass the QString not as a reference (to avoid a temp var referencing)
 
@@ -155,7 +158,7 @@ public:
 
   private slots:
 	 void applyClick();
-	 void okClick();
+	 void closeClick();
 	 void topLevelChanged(bool);
  
 protected:
