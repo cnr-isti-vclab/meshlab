@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.54  2007/02/28 00:02:12  cignoni
+Added missing virtual destructors
+
 Revision 1.53  2007/02/08 23:45:26  pirosu
 merged srcpar and par in the GetStdParameters() function
 
@@ -125,6 +128,7 @@ class MainWindowInterface
 {
 public:
 	virtual void executeFilter(QAction *,FilterParameter *){};
+	virtual ~MainWindowInterface(){};
 };
 
 

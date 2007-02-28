@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2007/02/28 00:02:11  cignoni
+Added missing virtual destructors
+
 Revision 1.5  2006/02/13 14:18:16  cignoni
 cleaned up
 
@@ -52,7 +55,7 @@ public:
   typedef enum {Error=0, Warning=1, Info=2, Debug=3, Direct=4, OnlyFileLog=5, OnlyConsole=6} Level ;
 	virtual void Log(int Level, const char * f, ... ) = 0;
 	virtual void glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font) = 0;
-
+  virtual ~LogStream(){}
 };
 
 #endif
