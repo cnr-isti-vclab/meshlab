@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.70  2007/02/28 00:05:12  cignoni
+Added Bug submitting menu
+
 Revision 1.69  2007/02/26 12:03:43  cignoni
 Added Help online and check for updates
 
@@ -356,6 +359,9 @@ void MainWindow::createActions()
 
 	onlineHelpAct = new QAction(tr("Online &Documentation"), this);
 	connect(onlineHelpAct, SIGNAL(triggered()), this, SLOT(helpOnline()));
+	
+	submitBugAct = new QAction(tr("Submit Bug"), this);
+	connect(submitBugAct, SIGNAL(triggered()), this, SLOT(submitBug()));
 
 	onscreenHelpAct = new QAction(tr("On screen quick help"), this);
 	connect(onscreenHelpAct, SIGNAL(triggered()), this, SLOT(helpOnscreen()));
@@ -494,6 +500,7 @@ void MainWindow::createMenus()
 	helpMenu->addAction(aboutPluginsAct);
 	helpMenu->addAction(onlineHelpAct);
 	helpMenu->addAction(onscreenHelpAct);
+	helpMenu->addAction(submitBugAct);
 	helpMenu->addAction(checkUpdatesAct);
 }
 
@@ -616,19 +623,19 @@ void MainWindow::setCurrentFile(const QString &fileName)
   
 	if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
   {
-		checkForUpdates();
+		checkForUpdates(false);
 	}
 }
 
-void MainWindow::checkForUpdates()
+void MainWindow::checkForUpdates(bool verboseFlag)
 {
+  VerboseCheckingFlag=verboseFlag;
 	QSettings settings;
   int totalKV=settings.value("totalKV",0).toInt();
   int connectionInterval=settings.value("connectionInterval",20).toInt();
   settings.setValue("connectionInterval",connectionInterval);
   int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
   int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
-  int lastComunicatedValue=settings.value("lastComunicatedValue",0).toInt();
   QString UID=settings.value("UID",QString("")).toString();
   if(UID.isEmpty())
   {
@@ -661,10 +668,37 @@ void MainWindow::connectionDone(bool status)
 {
         QString answer=myLocalBuf.data();
         if(answer.left(3)==QString("NEW"))
-          QMessageBox::information(this,"MeshLab Version Checking",answer.remove(0,3));
+						QMessageBox::information(this,"MeshLab Version Checking",answer.remove(0,3));
+						else if (VerboseCheckingFlag) QMessageBox::information(this,"MeshLab Version Checking","Your MeshLab version is the most recent one.");
+						
         myLocalBuf.close();
-        //QMessageBox::information(this,"Remote Counter",QString("Updated!"));
         QSettings settings;
         int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
         settings.setValue("lastComunicatedValue",loadedMeshCounter);
 }	
+
+
+void MainWindow::submitBug()
+{
+	QMessageBox mb(QMessageBox::NoIcon,tr("MeshLab"),tr("MeshLab"),QMessageBox::NoButton, this);
+	//mb.setWindowTitle(tr("MeshLab"));
+	QPushButton *submitBug = mb.addButton("Submit Bug",QMessageBox::AcceptRole);
+	QPushButton *abortButton = mb.addButton(QMessageBox::Cancel);
+	mb.setText(tr("If Meshlab closed in unexpected way (e.g. it crashed badly) and"
+						 "if you are able to repeat the bug, please consider to submit a report using the SourceForge tracking system.\n"
+						  ) );
+		mb.setInformativeText(	tr(
+		         "Hints for a good, useful bug report:\n"
+						 "- Be verbose and descriptive\n"
+						 "- Report meshlab version and OS\n"
+						 "- Describe the sequence of actions that bring you to the crash.\n"
+						 "- Consider submitting the mesh file causing a particular crash.\n"
+						 ) );
+
+	mb.exec();
+
+ if (mb.clickedButton() == submitBug) 
+	QDesktopServices::openUrl(QUrl("http://sourceforge.net/tracker/?func=add&group_id=149444&atid=774731"));
+					 
+}
+

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.79  2007/02/28 00:05:13  cignoni
+Added Bug submitting menu
+
 Revision 1.78  2007/02/26 12:03:44  cignoni
 Added Help online and check for updates
 
@@ -196,7 +199,8 @@ private slots:
 	void aboutPlugins();	
   void helpOnline();
 	void helpOnscreen();
-	void checkForUpdates();
+	void submitBug();
+	void checkForUpdates(bool verboseFlag=true);
 	 
 	///////////Slot General Purpose ////////////////////////
 
@@ -221,7 +225,8 @@ private:
   QBuffer myLocalBuf;
   int idHost;
   int idGet;
-
+  bool VerboseCheckingFlag;
+	  
 	static QProgressBar *qb;
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
@@ -323,6 +328,7 @@ private:
 	///////////Actions Menu Help ////////////////////////
 	QAction *aboutAct;
 	QAction *aboutPluginsAct;
+	QAction *submitBugAct;
 	QAction *onlineHelpAct;
 	QAction *onscreenHelpAct;
 	QAction *checkUpdatesAct;
