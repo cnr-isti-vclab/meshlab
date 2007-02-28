@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.22  2007/02/28 00:02:57  cignoni
+Added casts for mac compiling
+
 Revision 1.21  2007/02/20 13:05:50  corsini
 *** empty log message ***
 
@@ -337,7 +340,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 						if (file.open(QFile::Append))
 						{
 							char proglog[2048];
-							int length;
+							GLsizei length;
 							QTextStream out(&file);
 
 							glGetProgramiv(v, GL_LINK_STATUS, &statusV);
@@ -397,7 +400,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 					if (file.open(QFile::WriteOnly))
 					{
 						char shlog[2048];
-						int length;
+						GLsizei length;
 						QTextStream out(&file);
 
 						glGetShaderiv(v, GL_COMPILE_STATUS, &statusV);
