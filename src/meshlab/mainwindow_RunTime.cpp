@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.119  2007/03/01 04:56:28  cignoni
+Added checks on the existence and readability of input files
+
 Revision 1.118  2007/02/26 12:03:44  cignoni
 Added Help online and check for updates
 
@@ -552,6 +555,19 @@ void MainWindow::open(QString fileName)
 	if (fileName.isEmpty())	return;
 
 	QFileInfo fi(fileName);
+	if(!fi.exists()) 
+	{	
+		QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
+		QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+		return;
+	}
+	if(!fi.isReadable()) 
+	{	
+		QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+		QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+		return;
+	}
+
 	// this change of dir is needed for subsequent textures/materials loading
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
 	
