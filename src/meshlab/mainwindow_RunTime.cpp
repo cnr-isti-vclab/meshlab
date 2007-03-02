@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.120  2007/03/02 15:58:32  cignoni
+Progress bar bug removed
+
 Revision 1.119  2007/03/01 04:56:28  cignoni
 Added checks on the existence and readability of input files
 
@@ -470,10 +473,8 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 
 	qb->show();
 	qb->setEnabled(true);
-  qb->setRange(0,100);
-	qb->setValue(50);
 	qb->setValue(pos);
-	qb->update();
+//	qb->update();
 	MainWindow::globalStatusBar()->update();
 //qb->repaint();
   //if(qb==0) return true;
