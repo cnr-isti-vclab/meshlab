@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.114  2007/03/03 00:13:48  cignoni
+quick patch of font size
+
 Revision 1.113  2007/02/26 11:57:19  cignoni
 Re enabled on screen help, moved back far plane
 
@@ -480,6 +483,7 @@ void GLArea::paintGL()
 
 void GLArea::displayMeshInfo()
 {	
+//	float fontSpacingV = qFont.pointSizeF()+(curSiz.height()/225.f);
 	float fontSpacingV = qFont.pointSizeF()+(curSiz.height()/225.f);
 	float startPos= curSiz.height()-(fontSpacingV/3);
 	
@@ -525,7 +529,7 @@ void GLArea::resizeGL(int _width, int _height)
 	curSiz.setHeight(_height);
 
 		// Set font size depending on window size (min = 1, max = 9)
-	qFont.setPointSizeF(vcg::math::Clamp<float>(-3 + sqrtf(_width*_width + _height*_height) * .01f,1,9));
+	//qFont.setPointSizeF(vcg::math::Clamp<float>(-3 + sqrtf(_width*_width + _height*_height) * .01f,1,9));
 }
 
 

@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.68  2007/03/03 00:13:48  cignoni
+quick patch of font size
+
 Revision 1.67  2007/02/26 15:05:49  cignoni
 syntax error
 
@@ -217,7 +220,7 @@ public:
 	QSize curSiz;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
-	QFont getFont() {return qFont;}
+	//QFont getFont() {return qFont;}
 
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	QAction *getLastAppliedEdit()							{return lastEditRef;}
