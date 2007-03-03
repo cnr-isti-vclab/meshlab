@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2007/03/03 02:03:51  cignoni
+Removed bug on simplification of selected faces
+
 Revision 1.5  2007/02/25 21:31:49  cignoni
 new parameters for quadric simplification
 
@@ -131,6 +134,8 @@ void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr,
 	cb(1,"Initializing simplification");
 	DeciSession.Init<MyTriEdgeCollapse >();
 
+	if(Selected)
+		TargetFaceNum= cm.fn - (cm.sfn-TargetFaceNum);
 	DeciSession.SetTargetSimplices(TargetFaceNum);
 	DeciSession.SetTimeBudget(0.1f); // this allow to update the progress bar 10 time for sec...
 //  if(TargetError< numeric_limits<double>::max() ) DeciSession.SetTargetMetric(TargetError);
