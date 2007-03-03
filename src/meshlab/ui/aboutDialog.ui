@@ -153,10 +153,10 @@ p, li { white-space: pre-wrap; }
           <property name="text" >
            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg';">&lt;span style=" font-weight:600;">General Info&lt;/span>&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-weight:600;">&lt;span style=" font-weight:400;">MeshLab is an extendible mesh processing system, aimed to the user assisted cleaning, filtering, editing and rendering of unstructured 3D triangular meshes. &lt;/span>&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg';">The tool found its natural use for the processiing of the meshes that usually arise in 3D scanning. The system is heavily based on the VCG library (vcg.sf.net). The current version of Meshlab was developed during the FGT (Foundation of Three-dimensional Graphics) course of the Computer Science department of the University of Pisa.&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:13pt;">&lt;span style=" font-size:11pt; font-weight:600;">General Info&lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt; font-weight:600;">&lt;span style=" font-weight:400;">MeshLab is an extendible mesh processing system, aimed to the user assisted cleaning, filtering, editing and rendering of unstructured 3D triangular meshes. &lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;">The tool found its natural use for the processiing of the meshes that usually arise in 3D scanning. The system is heavily based on the VCG library (vcg.sf.net). The current version of Meshlab was developed during the FGT (Foundation of Three-dimensional Graphics) course of the Computer Science department of the University of Pisa.&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="wordWrap" >
            <bool>true</bool>
@@ -181,11 +181,11 @@ p, li { white-space: pre-wrap; }
           <property name="text" >
            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal; text-decoration:none;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:8pt;">&lt;span style=" font-size:10pt; font-weight:600;">Authors&lt;/span>&lt;/p>
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt; font-weight:600;">&lt;span style=" font-weight:400;">P. Cignoni and&lt;/span>&lt;/p>
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">(in strict alphabetic order)&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">E. Cerisoli, M. Corsini, G. Gangemi, V. Fiorin, M. Latronico, F. Mazzanti, A. Mochi, F. Ponchio, D. Portelli, G. Ranzuglia, D. Vacca, F. Vannini, A. Venturi, M. Vergauwen&lt;/p>&lt;/body>&lt;/html></string>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">E. Cerisoli, M. Corsini, V. Fiorin, A. Gfrei, G. Gangemi, M. Latronico, F. Mazzanti, A. Mochi, F. Pirosu, F. Ponchio, D. Portelli, G. Ranzuglia, D. Vacca, F. Vannini, A. Venturi, M. Vergauwen&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="wordWrap" >
            <bool>true</bool>
@@ -266,10 +266,10 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox" >
        <layout class="QVBoxLayout" >
         <property name="margin" >
-         <number>0</number>
+         <number>9</number>
         </property>
         <property name="spacing" >
-         <number>0</number>
+         <number>6</number>
         </property>
         <item>
          <layout class="QHBoxLayout" >
@@ -288,93 +288,18 @@ p, li { white-space: pre-wrap; }
              <number>6</number>
             </property>
             <item>
-             <layout class="QHBoxLayout" >
-              <property name="margin" >
-               <number>0</number>
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Vertical</enum>
               </property>
-              <property name="spacing" >
-               <number>6</number>
+              <property name="sizeHint" >
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
               </property>
-              <item>
-               <spacer>
-                <property name="orientation" >
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" >
-                 <size>
-                  <width>31</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QLabel" name="labelVCGLogo_3" >
-                <property name="minimumSize" >
-                 <size>
-                  <width>121</width>
-                  <height>125</height>
-                 </size>
-                </property>
-                <property name="maximumSize" >
-                 <size>
-                  <width>121</width>
-                  <height>125</height>
-                 </size>
-                </property>
-                <property name="text" >
-                 <string/>
-                </property>
-                <property name="pixmap" >
-                 <pixmap resource="../meshlab.qrc" >:/images/logo_aimatshape.png</pixmap>
-                </property>
-                <property name="scaledContents" >
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer>
-                <property name="orientation" >
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" >
-                 <size>
-                  <width>31</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
+             </spacer>
             </item>
-            <item>
-             <widget class="QLabel" name="label_2" >
-              <property name="font" >
-               <font>
-                <pointsize>11</pointsize>
-               </font>
-              </property>
-              <property name="text" >
-               <string>partially supported
-by the Aim @ Shape 
-network of excellence</string>
-              </property>
-              <property name="alignment" >
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" >
-            <property name="margin" >
-             <number>0</number>
-            </property>
-            <property name="spacing" >
-             <number>6</number>
-            </property>
             <item>
              <layout class="QHBoxLayout" >
               <property name="margin" >
@@ -446,6 +371,107 @@ network of excellence</string>
               <property name="text" >
                <string>partially supported
 by the Epoch 
+network of excellence</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" >
+            <property name="margin" >
+             <number>0</number>
+            </property>
+            <property name="spacing" >
+             <number>6</number>
+            </property>
+            <item>
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" >
+              <property name="margin" >
+               <number>0</number>
+              </property>
+              <property name="spacing" >
+               <number>6</number>
+              </property>
+              <item>
+               <spacer>
+                <property name="orientation" >
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" >
+                 <size>
+                  <width>31</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="labelVCGLogo_3" >
+                <property name="minimumSize" >
+                 <size>
+                  <width>121</width>
+                  <height>125</height>
+                 </size>
+                </property>
+                <property name="maximumSize" >
+                 <size>
+                  <width>121</width>
+                  <height>125</height>
+                 </size>
+                </property>
+                <property name="text" >
+                 <string/>
+                </property>
+                <property name="pixmap" >
+                 <pixmap resource="../meshlab.qrc" >:/images/logo_aimatshape.png</pixmap>
+                </property>
+                <property name="scaledContents" >
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer>
+                <property name="orientation" >
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" >
+                 <size>
+                  <width>31</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_2" >
+              <property name="font" >
+               <font>
+                <pointsize>11</pointsize>
+               </font>
+              </property>
+              <property name="text" >
+               <string>partially supported
+by the Aim @ Shape 
 network of excellence</string>
               </property>
               <property name="alignment" >

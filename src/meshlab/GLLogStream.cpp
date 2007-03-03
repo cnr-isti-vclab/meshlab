@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2007/03/03 02:03:25  cignoni
+Reformatted lower bar, added number of selected faces. Updated about dialog
+
 Revision 1.12  2006/10/31 12:22:39  ganovelli
 corrected bug arised with 2005 compiler (decrementation of end() of empty vector)
 
@@ -93,7 +96,7 @@ void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,Q
 	if(li==S.end())
 		li=S.begin();
 
-	int StartLine = qgl->height() - nlines * vSpacing;
+	int StartLine =  qgl->height() - (nlines * vSpacing+5);
 
 	for(;li!=S.end();++li)
 	{

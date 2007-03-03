@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.115  2007/03/03 02:03:25  cignoni
+Reformatted lower bar, added number of selected faces. Updated about dialog
+
 Revision 1.114  2007/03/03 00:13:48  cignoni
 quick patch of font size
 
@@ -123,7 +126,6 @@ GLArea::GLArea(QWidget *parent)
 	cfps=0;
   lastTime=0;
   hasToPick=false;
-	logVisible = true;
 	helpVisible=false;
 	takeSnapTile=false;
 	activeDefaultTrackball=true;
@@ -441,32 +443,8 @@ void GLArea::paintGL()
 	// on the bottom of the glArea
 	if(infoAreaVisible)
 	{
-		glBlendFunc(GL_ONE,GL_SRC_ALPHA);
-		cs.lColor.V(3) = 128;	// set half alpha value
-		glColor(cs.lColor);
-		float h = -0.80f;//vcg::math::Min(-0.8f,-.08f*qFont.pointSize());//((.03f * curSiz.height()) - (curSiz.height()>>1)) / (float)curSiz.height();
-		glBegin(GL_TRIANGLE_STRIP);
-			glVertex2f(-1.f,h);
-			glVertex2f(-1.f,-1.f);
-			glVertex2f( 1.f,h);
-			glVertex2f( 1.f,-1.f);
-		glEnd();
-		
-		// Now print out the infos
-		//========================
-
-		// First the LOG
-		glColor4f(1,1,1,1);
-		if(logVisible)
-		{
-			renderText(20,curSiz.height() - 5 * (qFont.pointSizeF()+(curSiz.height()/225.f)),tr("LOG MESSAGES"),qFont);
-			log.glDraw(this,currLogLevel,3,qFont.pointSizeF()+(curSiz.height()/225.f),qFont);
-		}
-
-		
-		displayMeshInfo();     // Second the MESH INFO (numVert,NumFaces,....)				
-		updateFps(time.elapsed()); // Third the ENV INFO (Fps,ClippingPlanes,....)
-		displayEnvInfo();
+		displayInfo();    
+		updateFps(time.elapsed());
 	}
 	
 	// Finally display HELP if requested
@@ -481,55 +459,50 @@ void GLArea::paintGL()
   assert(!glGetError());
 }
 
-void GLArea::displayMeshInfo()
+void GLArea::displayInfo()
 {	
-//	float fontSpacingV = qFont.pointSizeF()+(curSiz.height()/225.f);
-	float fontSpacingV = qFont.pointSizeF()+(curSiz.height()/225.f);
-	float startPos= curSiz.height()-(fontSpacingV/3);
-	
-	renderText(curSiz.width()*.5f,startPos-5*fontSpacingV,tr("MESH INFO"),qFont);
+	qFont.setFamily("Helvetica");
+	qFont.setPixelSize(12);
 
-	renderText(curSiz.width()*.5f,startPos-3*fontSpacingV,tr("Vertices: %1").arg(mm->cm.vn),qFont);
-	renderText(curSiz.width()*.5f,startPos-2*fontSpacingV,tr("Faces: %1").arg(mm->cm.fn),qFont);
-	renderText(curSiz.width()*.5f,startPos-  fontSpacingV,GetMeshInfoString(mm->ioMask),qFont);
-}
+	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
+	cs.lColor.V(3) = 128;	// set half alpha value
+	glColor(cs.lColor);
+	int lineNum =4;
+	float lineSpacing = qFont.pixelSize()*1.5f;
+	float barHeight = -1 + 2.0*(lineSpacing*(lineNum+.25))/float(curSiz.height());
 
-void GLArea::displayEnvInfo()
-{	
-	float fontSpacingV = qFont.pointSizeF()+(curSiz.height()/225.f);
-	float startPos = curSiz.height()-(fontSpacingV/3);
+	glBegin(GL_QUADS);
+		glVertex2f(-1.f,barHeight); glVertex2f( 1.f,barHeight);
+		glVertex2f( 1.f,-1.f);      glVertex2f(-1.f,-1.f);
+	glEnd();
+		
+	// First the LOG
+	glColor4f(1,1,1,1);
 
-	QString strNear=QString("Nplane: %1  ").arg(nearPlane,2,'f',1);
-	QString strFar=QString("Fplane: %1").arg(farPlane,2,'f',1);
-	//QString strViewer=QString("Viewer: %1  ").arg(objDist,2,'f',1);
+  float middleCol=curSiz.width()*0.40;
+  float rightCol=curSiz.width()*0.85;
+ 	float startPos = curSiz.height()-(5+lineSpacing*(lineNum));
 
-	renderText(curSiz.width()-curSiz.width()*.25f,startPos-5*fontSpacingV,tr("ENV INFO"),qFont);
-	
-	//renderText(curSiz.width()-curSiz.width()*.25f,startPos-3*fontSpacingV,strViewer+strNear+strFar,qFont);
-	renderText(curSiz.width()-curSiz.width()*.25f,startPos-2*fontSpacingV,QString("FOV: ")+QString::number((int)fov,10),qFont);
+	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
+	log.glDraw(this,currLogLevel,3,lineSpacing,qFont);
 
+	renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm->cm.vn),qFont);
+	renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm->cm.fn),qFont);
+	if(rm.selectedFaces)  
+		 renderText(middleCol,startPos+ 3*lineSpacing,tr("Selected: %1").arg(mm->cm.sfn),qFont);
+	renderText(middleCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm->ioMask),qFont);
 
-	if ((cfps>0) && (cfps<200)) 
-	{
-		QString strInfo=QString("FPS: %1").arg(cfps,7,'f',1);
-		renderText(curSiz.width()-curSiz.width()*.25f,startPos-fontSpacingV,strInfo,qFont);	
-	}
+  renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
+	if ((cfps>0) && (cfps<500)) 
+			renderText(rightCol,startPos+2*lineSpacing,QString("FPS: %1").arg(cfps,7,'f',1),qFont);
 }
 
 
 void GLArea::resizeGL(int _width, int _height)
 {
-	// glVertex: No longer needed. Every frame we set a new projection matrix
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-	//gluPerspective(fov, float(_width)/float(_height), nearPlane, farPlane);
-	//glMatrixMode(GL_MODELVIEW);
 	glViewport(0,0, _width, _height);
 	curSiz.setWidth(_width);
 	curSiz.setHeight(_height);
-
-		// Set font size depending on window size (min = 1, max = 9)
-	//qFont.setPointSizeF(vcg::math::Clamp<float>(-3 + sqrtf(_width*_width + _height*_height) * .01f,1,9));
 }
 
 

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.24  2007/03/03 02:03:25  cignoni
+Reformatted lower bar, added number of selected faces. Updated about dialog
+
 Revision 1.23  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -62,12 +65,14 @@ bool MeshModel::RenderSelectedFaces()
   glPolygonOffset(-1.0, -1);
   CMeshO::FaceIterator fi;
   glBegin(GL_TRIANGLES);
+	cm.sfn=0;
 	for(fi=cm.face.begin();fi!=cm.face.end();++fi)
     if(!(*fi).IsD() && (*fi).IsS())
     {
   		glVertex((*fi).cP(0));
   		glVertex((*fi).cP(1));
   		glVertex((*fi).cP(2));
+			++cm.sfn;
     }
   glEnd();
 	glPopAttrib();

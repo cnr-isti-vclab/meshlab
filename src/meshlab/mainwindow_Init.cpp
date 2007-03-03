@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.71  2007/03/03 02:03:25  cignoni
+Reformatted lower bar, added number of selected faces. Updated about dialog
+
 Revision 1.70  2007/02/28 00:05:12  cignoni
 Added Bug submitting menu
 
@@ -297,10 +300,6 @@ void MainWindow::createActions()
 	showToolbarRenderAct->setChecked(true);
 	connect(showToolbarRenderAct, SIGNAL(triggered()), this, SLOT(showToolbarRender()));
 
-	showLogAct= new QAction (tr("Show &Infos"), this);
-	showLogAct->setCheckable(true);
-	connect(showLogAct, SIGNAL(triggered()), this, SLOT(showLog()));
-
 	showInfoPaneAct= new QAction (tr("Show Info &Pane"), this);
 	showInfoPaneAct->setCheckable(true);
 	connect(showInfoPaneAct, SIGNAL(triggered()), this, SLOT(showInfoPane()));
@@ -478,7 +477,6 @@ void MainWindow::createMenus()
 	
 	logMenu = viewMenu->addMenu(tr("&Info"));
 	logMenu->addAction(showInfoPaneAct);
-	logMenu->addAction(showLogAct);
 
 	toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(showToolbarStandardAct);

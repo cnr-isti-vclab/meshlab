@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.80  2007/03/03 02:03:25  cignoni
+Reformatted lower bar, added number of selected faces. Updated about dialog
+
 Revision 1.79  2007/02/28 00:05:13  cignoni
 Added Bug submitting menu
 
@@ -185,7 +188,6 @@ private slots:
 	void fullScreen();
 	void showToolbarFile();
 	void showToolbarRender();
-	void showLog();
 	void showInfoPane();
 	void showTrackBall();
 	void resetTrackBall();
@@ -314,7 +316,6 @@ private:
 	QAction *fullScreenAct;
 	QAction *showToolbarStandardAct;
 	QAction *showToolbarRenderAct;
-	QAction *showLogAct;
 	QAction *showInfoPaneAct;
 	QAction *showTrackBallAct;
 	QAction *resetTrackBallAct;

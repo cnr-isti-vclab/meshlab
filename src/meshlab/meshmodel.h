@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.31  2007/03/03 02:03:26  cignoni
+Reformatted lower bar, added number of selected faces. Updated about dialog
+
 Revision 1.30  2007/01/11 10:40:48  cignoni
 added a safety test in restorecolor
 
@@ -113,7 +116,10 @@ class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,
       face::WedgeTexturefOcf      /* 0b */
     > {};
 
-class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {};
+class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {
+public :
+	int sfn; //The number of selected faces.
+};
 
 /*
   MeshModel Class

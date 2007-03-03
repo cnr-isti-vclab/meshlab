@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.69  2007/03/03 02:03:25  cignoni
+Reformatted lower bar, added number of selected faces. Updated about dialog
+
 Revision 1.68  2007/03/03 00:13:48  cignoni
 quick patch of font size
 
@@ -244,12 +247,8 @@ public:
 	const SnapshotSetting& getSnapshotSetting()	{/*ss.dx=vpWidth; ss.dy=vpHeight;*/ return ss;}
 	void updateFps(float deltaTime);
 	
-	void showLog(bool b)			{logVisible = b; updateGL();}
-	void showInfoArea(bool b)		{infoAreaVisible = b; updateGL();}
 	void showTrackBall(bool b)		{trackBallVisible = b; updateGL();}
-	bool isLogVisible()				{return logVisible;}
 	bool isHelpVisible()      {return helpVisible;}  
-	bool isInfoAreaVisible()		{return infoAreaVisible;}
 	bool isTrackBallVisible()		{return trackBallVisible;}
 	bool isDefaultTrackBall()   {return activeDefaultTrackball;}
 
@@ -277,16 +276,17 @@ public:
 	void endEdit(){	iEdit = 0; currentEditor=0; setCursorTrack(0);update();}///
 
 	void closeEvent(QCloseEvent *event);
-    float lastRenderingTime() { return lastTime;}
+  float lastRenderingTime() { return lastTime;}
 
 	float getFov() { return fov; }
+
+	bool	infoAreaVisible;		// Draws the lower info area ?
 
 protected:
 
 	void initializeGL();
 	void initTexture();
-	void displayMeshInfo();
-	void displayEnvInfo();
+	void displayInfo();
 	void displayHelp();
 
 	QString GetMeshInfoString(int mask);
@@ -305,9 +305,7 @@ private:
 	void pasteTile();
 	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
     
-	bool	logVisible;				  // Prints out log infos ?
 	bool  helpVisible;				// Help on screen	
-	bool	infoAreaVisible;		// Draws the lower info area ?
 	bool	trackBallVisible;		// Draws the trackball ?
 	bool  activeDefaultTrackball; // keep track on active trackball
 	bool  hasToPick;         // has to pick during the next redraw.

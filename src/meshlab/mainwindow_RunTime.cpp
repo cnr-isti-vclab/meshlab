@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.121  2007/03/03 02:03:25  cignoni
+Reformatted lower bar, added number of selected faces. Updated about dialog
+
 Revision 1.120  2007/03/02 15:58:32  cignoni
 Progress bar bug removed
 
@@ -204,8 +207,7 @@ void MainWindow::updateMenus()
     if(GLA()->getEditAction())   GLA()->getEditAction()->setChecked(true);
                               else       endEditModeAct->setChecked(true);
 
-   	showLogAct->setChecked(GLA()->isLogVisible());
-		showInfoPaneAct->setChecked(GLA()->isInfoAreaVisible());
+		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
 		renderModeTextureAct->setEnabled(GLA()->mm && !GLA()->mm->cm.textures.empty());
@@ -597,7 +599,7 @@ void MainWindow::open(QString fileName)
     
 		gla->setFileName(fileName);
 		gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
-    gla->showInfoArea(true);
+    gla->infoAreaVisible=true;
 		workspace->addWindow(gla);
 		if(workspace->isVisible()) gla->showMaximized();
 		setCurrentFile(fileName);
@@ -756,8 +758,7 @@ void MainWindow::showToolbarRender(){
 	renderToolBar->setVisible(!renderToolBar->isVisible());
 }
 
-void MainWindow::showLog()			 {if(GLA() != 0)	GLA()->showLog(!GLA()->isLogVisible());}
-void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->showInfoArea(!GLA()->isInfoAreaVisible());}
+void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
 void MainWindow::setCustomize()
