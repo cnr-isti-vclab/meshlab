@@ -30,7 +30,7 @@ function showNow (postid) {
 function hideNow (postid) {
    document.getElementById(postid).className="hidden";
 }
-				</script>
+	</script>
 </head>
 <body>
 <div id=leftcontent>
@@ -48,7 +48,7 @@ the <a href="http://vcg.sourceforge.net">VCG library</a>
 developed at the <a href="http://vcg.isti.cnr.it">Visual 
 Computing Lab</a> of <A href="www.isti.cnr.it" >ISTI - CNR</A>, for all the core mesh processing 
 tasks. The MeshLab system started in late 2005 as a part of the <a 
-href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0506/index.html">FGT</a> course of the <A href="www.di.unipi.it" >Computer Science</A> 
+href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0506/index.html">FGT</a> course of the <A href="http://www.di.unipi.it" >Computer Science</A> 
 department of University of Pisa and most of the code (~15k lines) of the first 
 versions was written by a handful of students. Also this year <a 
 href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0607/index.html">FGT</a> students has continued to work to this project implementing new features. 
@@ -61,7 +61,7 @@ href="http://sourceforge.net/project/showfiles.php?group_id=149444"></a></p>
 official/commercial project, you should : </p>
 <ul>
   <li>Explicitly cite in your work that you have used 
-  MeshLab a tool developed with the support of the <a 
+  MeshLab, a tool developed with the support of the <a 
   href="http://www.epoch-net.org/">Epoch</a> NOE, 
   <li>Post a couple of lines in the <a 
   href="http://sourceforge.net/forum/forum.php?forum_id=499532" 
@@ -71,6 +71,7 @@ official/commercial project, you should : </p>
 <ul>
   <li>Interactive selection and deletion of portion of the 
   mesh. Even for large models. 
+  <li> Painting interface for selecting, smoothing and coloring meshes.</li>
   <LI><b>Input/output</b> in many 
   formats:<br> 
   import:<b>PLY, STL, OFF, OBJ, 3DS, COLLADA, PTX</b> <br>
@@ -85,7 +86,7 @@ official/commercial project, you should : </p>
     <li>automatic filling of small holes </li></ul>
   <li><b>Remeshing</b> filters: 
   <ul>
-    <li>High quality edge collapse simplfication 
+    <li>High quality edge collapse simplfication (even meshes with texture coords preservation)
     <li>Surface reconstruction from points (a ball pivoting variant) 
     <li>Subdivision surfaces (loop and butterfly) 
     <li>Smoothing and fairing filters </li></ul>
