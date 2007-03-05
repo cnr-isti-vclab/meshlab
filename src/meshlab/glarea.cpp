@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.116  2007/03/05 11:12:56  cignoni
+correct management of release of keyboard modifiers
+
 Revision 1.115  2007/03/03 02:03:25  cignoni
 Reformatted lower bar, added number of selected faces. Updated about dialog
 
@@ -594,14 +597,23 @@ void GLArea::closeEvent(QCloseEvent *event)
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
 	e->ignore();
-      if(e->key()==Qt::Key_Control) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-      if(e->key()==Qt::Key_Shift) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-      if(e->key()==Qt::Key_Alt) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+      if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+      if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+      if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+}	
+
+void GLArea::keyPressEvent ( QKeyEvent * e )
+{
+	e->ignore();
+      if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+      if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+      if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
 }
 
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
   e->accept();
+	setFocus();
   if(iEdit)  iEdit->mousePressEvent(currentEditor,e,*mm,this);
   else {          
 	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
@@ -635,6 +647,7 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 // When mouse is released we set the correct mouse curson
 void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
+  clearFocus();
 	activeDefaultTrackball=true;
 	if(iEdit) iEdit->mouseReleaseEvent(currentEditor,e,*mm,this);
     else {

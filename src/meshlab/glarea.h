@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.70  2007/03/05 11:12:55  cignoni
+correct management of release of keyboard modifiers
+
 Revision 1.69  2007/03/03 02:03:25  cignoni
 Reformatted lower bar, added number of selected faces. Updated about dialog
 
@@ -293,6 +296,7 @@ protected:
 	void paintGL();
 	void resizeGL(int width, int height);
 	void keyReleaseEvent ( QKeyEvent * e ); 
+	void keyPressEvent ( QKeyEvent * e ); 
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
