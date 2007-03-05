@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.81  2007/03/05 12:23:01  cignoni
+v.1.0.0 string
+
 Revision 1.80  2007/03/03 02:03:25  cignoni
 Reformatted lower bar, added number of selected faces. Updated about dialog
 
@@ -142,7 +145,7 @@ public:
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("1.0.0RC"); }
+   const QString appVer() const {return tr("1.0.0"); }
 
   // MaskObj maskobj;
 
