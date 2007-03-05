@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.117  2007/03/05 13:09:21  cignoni
+Removed useless clearFocus
+
 Revision 1.116  2007/03/05 11:12:56  cignoni
 correct management of release of keyboard modifiers
 
@@ -647,7 +650,7 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 // When mouse is released we set the correct mouse curson
 void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
-  clearFocus();
+  //clearFocus();
 	activeDefaultTrackball=true;
 	if(iEdit) iEdit->mouseReleaseEvent(currentEditor,e,*mm,this);
     else {
@@ -655,8 +658,6 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 	        else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
 		      setCursorTrack(trackball.current_mode);
         }
-	
-	
 	
 	update();
 }
