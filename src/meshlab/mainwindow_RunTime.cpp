@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.122  2007/03/05 22:31:33  cignoni
+V100 Final patch of version checking
+
 Revision 1.121  2007/03/03 02:03:25  cignoni
 Reformatted lower bar, added number of selected faces. Updated about dialog
 
@@ -745,7 +748,7 @@ if(GLA()) GLA()->toggleHelpVisible();
 
 void MainWindow::helpOnline()
 {
-  checkForUpdates();
+  checkForUpdates(false);
 	QDesktopServices::openUrl(QUrl("http://meshlab.sourceforge.net/wiki"));
 }
 
