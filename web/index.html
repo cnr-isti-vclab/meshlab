@@ -52,13 +52,16 @@ href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0506/index.html">FGT</a> course of th
 department of University of Pisa and most of the code (~15k lines) of the first 
 versions was written by a handful of students. Also this year <a 
 href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0607/index.html">FGT</a> students has continued to work to this project implementing new features. 
-The proud MeshLab <a href="#Developers" >developers</a> are listed below. &nbsp;</p>
+The proud MeshLab <a href="#Developers" >developers</a> are listed below.</p>
 <p class="body"><a 
 href="http://sourceforge.net/project/showfiles.php?group_id=149444"></a></p>
-<p class="body"><big><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download Latest Version (12 December 2006)<b><i> V0.9 </i></b></a></big>
+<p class="body">
+	<big><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">
+		Download Latest Version (4 March 2007)<b><i> V1.0.0 </i></b></a>
+	</big>
 <a href="#History">(changes)</a></p><br/>
 <p class="body">Remember that, whenever you use MeshLab in a 
-official/commercial project, you should : </p>
+official/commercial project or in any kind of research, you should: </p>
 <ul>
   <li>Explicitly cite in your work that you have used 
   MeshLab, a tool developed with the support of the <a 
@@ -85,35 +88,38 @@ official/commercial project, you should : </p>
     <li>removal of small isolated components </li>
     <li>coherent normal unification and flipping </li>
     <li>erasing of non manifold faces </li>
-    <li>automatic filling of small holes </li>
+    <li>automatic filling of holes </li>
   </ul></li>
   <li><b>Remeshing</b> filters: 
   <ul>
     <li>High quality edge collapse simplfication (even meshes with texture coords preservation)</li>
     <li>Surface reconstruction from points (a ball pivoting variant) </li>
     <li>Subdivision surfaces (loop and butterfly) </li>
-    <li>Smoothing and fairing filters </li>
+    <li>Feature preserving smoothing and fairing filters </li>
   </ul></li>
-  <li>Various <b> Colorization/inspection</b> filters 
+  <li>Various <b> Colorization/Inspection</b> filters 
   <ul>
     <li>Gaussian and mean curvature </li>
     <li>Border edges </li>
     <li>Non two-manifold edges </li>
     <li>Self intersecting faces </li>
   </ul></li>
+  <li>Interactive Mesh <b>Painting</b>
+  <ul>
+    <li>Color Painting </li>
+    <li>Selection paint</li>
+    <li>Smoothing</li>
+  </ul></li>
   <li>OpenGL Shader based rendering (write your own 
   shader!) compatible with Typhoon Lab's Shader Designer </li>
-  <li>Large rendering (up to 16k x 16k) for high quality 
-  printing </li>
+  <li>Large rendering (up to 16k x 16k) for high quality printing </li>
   <li>The history of the all performed cleaning/editing 
   actions can be re-played on different meshes or saved and for archival 
   purposes. </li>
   <li>Extendible plugins based architecture, writing new 
   mesh processing functions, colorization filters and support for different file 
-  formats is quite easy! Look at <a 
-  href="http://meshlab.sourceforge.net/filter.html" 
-  >Filter-PlugIn Sample</a> or <a 
-  href="http://meshlab.sourceforge.net/meshio.html" 
+  formats is quite easy! Look at <a href="http://meshlab.sourceforge.net/filter.html" 
+  >Filter-PlugIn Sample</a> or <a  href="http://meshlab.sourceforge.net/meshio.html" 
   >MeshIO-PlugIn Sample</a> </li></ul>
   
 Bug reports and feature 
@@ -132,8 +138,17 @@ href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums
         <a href="SnapMeshLab.QuadricTexture2.png" ><img alt="" src="SnapMeshLab.QuadricTexture2.small.jpg" /></a> 
         </td>
     <td>An example of the new quadric based simplification algorithm that is now able to correctly manage texture coordinateds. 
-    New texture coords are computed for the vertexes resulting from the edge collpases and 
-    even texture seams are correctly simplified. 
+    New texture coordinates are computed for the vertexes resulting from the edge collpases and 
+    texture seams are correctly simplified. Thanks to Marco Pirosu for the development of this plugin.
+    </td>
+  </tr>
+  <tr>
+    <td><a href="SnapMeshLab.EditPaint1.png" ><img alt="" src="SnapMeshLab.EditPaint1.small.jpg" /></a> 
+        <a href="SnapMeshLab.EditPaint2.png" ><img alt="" src="SnapMeshLab.EditPaint2.small.jpg" /></a> 
+        <a href="SnapMeshLab.EditPaint3.png" ><img alt="" src="SnapMeshLab.EditPaint3.small.jpg" /></a> 
+        </td>
+    <td> An example of the new interactive editing features. You can directly paint, with customizable brushed over the mesh color (left), selection (center) and even smooth (right). 
+	Thanks to Andreas Gfrei for the development of this plugin.
     </td>
   </tr>
   
@@ -256,7 +271,7 @@ href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums
   <li>Designer: <a href="http://vcg.isti.cnr.it/%7Ecignoni">Paolo Cignoni</a> </li>
   <li>Filtering Plugins: 
   <ul>
-    <li>Mario Latronico [<b>latronic</b>], Andrea Venturi [<b>giec</b>], Elisa Cerisoli [<b>e_cerisoli</b>], Francesco Pirosu [<b>pirosu</b>]</li>
+    <li>Mario Latronico [<b>latronic</b>], Andrea Venturi [<b>giec</b>], Elisa Cerisoli [<b>e_cerisoli</b>], Marco Pirosu [<b>pirosu</b>]</li>
    </ul></li>
   <li>Interface Framework 
   <ul>
@@ -472,18 +487,19 @@ alt="phpMyVisites" src="http://meshlab.sourceforge.net/phpmv2/phpmyvisites.php" 
 <div id="rightcontent"><img title="MeshLab Logo" style="WIDTH: 128px; HEIGHT: 128px" alt="MeshLab Logo" src="eye_128_splash.png" /><br/><br/><a href="http://sourceforge.net/projects/meshlab/" ><img 
 style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 38px" 
 alt="SourceForge.net Logo" 
-src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2" /></a><br/><br/><a 
-href="http://vcg.isti.cnr.it"><img title="Visual Computing Lab" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 103px" alt="Visual Computing Lab logo" src="vcl.png" /></a> 
-<p class="menu"><a 
-href="http://sourceforge.net/project/showfiles.php?group_id=149444"><img title="http://epoch-net.org/" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 100px; BORDER-BOTTOM: 0px solid; HEIGHT: 100px" alt="" src="logo_epoch.png" /></a></p>
-<p class="menu"><a 
-href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download V0.8</a></p>
+src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2" /></a><br/>
+<p class="menu"><a href="http://meshlab.sourceforge.net/wiki">Documentation</a></p>
+<p class="menu"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download V1.0.0</a></p>
 <p class="menu"><a href="stat" >CVS Statistics</a></p>
-<p class="menu"><a 
-href="http://sourceforge.net/projects/meshlab/">Sourceforge 
-page</a></p>
-<p class="menu"><a 
-href="http://freshmeat.net/projects/meshlab/">FreshMeat 
-page</a></p>
-			<p class="menu"><a href="devel.html">Developer's Corner</a></p></div>
-	</body></html>
+<p class="menu"><a href="http://sourceforge.net/projects/meshlab/">Sourceforge page</a></p>
+<p class="menu"><a href="http://freshmeat.net/projects/meshlab/">FreshMeat page</a></p>
+<p class="menu"><a href="devel.html">Developer's Corner</a></p>
+<p class="menu"><a href="http://sourceforge.net/tracker/?group_id=149444">Bug Reporting</a></p>	
+
+<br/><a 
+href="http://vcg.isti.cnr.it"><img title="Visual Computing Lab" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 103px" alt="Visual Computing Lab logo" src="vcl.png" /></a> 
+<p class="menu"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444"><img title="http://epoch-net.org/" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 100px; BORDER-BOTTOM: 0px solid; HEIGHT: 100px" alt="" src="logo_epoch.png" /></a></p>
+
+</div>
+	
+</body></html>

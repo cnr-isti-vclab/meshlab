@@ -6,7 +6,7 @@
   MeshLab   http://meshlab.sourceforge.net/                         o o
   An extendible mesh processor                                    o     o   
                                                                  _   O  _   
-  Copyright(C) 2005, 2006                                          \/)\/    
+  Copyright(C) 2005, 2007                                          \/)\/    
   Visual Computing Lab                                            /\/|      
   ISTI - Italian National Research Council                           |      
                                                                      \      
@@ -26,6 +26,29 @@
   All rights reserved.                                                    
    
 ==============================================================================
+------------------------------------------------------------------------------
+- Meshlab v1.0.0 04/03/2007
+------------------------------------------------------------------------------
+= New features =
+* Painting plugin:  color, selection and smoothing directly interactively onto the mesh (thanks to gfrei)
+* Simplification of textured Mesh with preservation of texture coords (thanks to pirosu)
+* Automatic vertex unification when loading stl files
+* More user-definable parameters in quadric simplification and in hole filling
+* Improved filtering and support for compressed depthimage in the Epoch import tool
+* New generic dialog mechanism, easier for developer add/change/document filter parameters
+* Selection handling improved in many filters
+* Added wiki based online help
+* Restored on screen help
+* Added online bug submission using Sourceforge tracking system
+* Reformatted info bar (Added number of selected faces and fixed size fonts)
+
+= Corrected Bugs = 
+* Snapshots do not crash MeshLab any more.
+* Improved OpenGL shader compatibilities.
+* Corrected bug in quadrics simplification about target number of selected faces
+* Corrected bug of wrong loading ply with per face color (was save a 3ds and reload as a ply)
+* Corrected bug on trackball hanging (if you released a modifier before mouse)
+
 ------------------------------------------------------------------------------
 - Meshlab v0.9 12/12/2006
 ------------------------------------------------------------------------------

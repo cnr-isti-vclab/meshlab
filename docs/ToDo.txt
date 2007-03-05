@@ -1,9 +1,40 @@
+1/2/2007
+o bounding box non viene aggiornato dopo varie operazioni..
+x Added Select border face
+x added more parameters to hole filling dialog
+
+19/01/2007
+o Numero vertici facce selezionate deve essere mostrato
+o refine distrugge la selezione
+o refine e colore dda controllare.
+o mesh senza facce pianta??
+o unify vertex deve smarcare i border e obbligarli a rifare??
+
+18/01/2007
+x Doppia init topologia vertice faccia nella semplificazione
+x aggiunta parametri semplificazione (selected, boundary, quality)
+x Auto cleaning dopo apertura stl
+
+13/01/2007
+o bug boolean flag su selezione che non rimane settato
+o bug su apply/ok nei dialoghi
+
+09/01/2007
+o ristrutturare directory sampleplugins e nuovi plugins
+
+08/01/2007
+o Bug epoch full resolution merge si vedono le superfici doppie
+o bug epoch fill hole
+x bug stl ascii da forum // Done
+o crash "remove face longer than" e "remeshing"
+o portare dentro il plugin di elisa
+
 20/12/06
-tolto bug snapshot 
-tolto bug obj su facce quadrate
+x tolto bug snapshot 
+x tolto bug obj su facce quadrate
 
 16/12/06
-aggiunta prima ver dialoghi istantanei.
+x aggiunta prima ver dialoghi istantanei.
 
 11/12/06
 x tolto colorize topologically coherent
