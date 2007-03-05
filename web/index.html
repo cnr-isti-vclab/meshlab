@@ -57,7 +57,7 @@ The proud MeshLab <a href="#Developers" >developers</a> are listed below.</p>
 href="http://sourceforge.net/project/showfiles.php?group_id=149444"></a></p>
 <p class="body">
 	<big><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">
-		Download Latest Version (4 March 2007)<b><i> V1.0.0 </i></b></a>
+		Download Latest Version (5 March 2007)<b><i> V1.0.0 </i></b></a>
 	</big>
 <a href="#History">(changes)</a></p><br/>
 <p class="body">Remember that, whenever you use MeshLab in a 
@@ -147,7 +147,7 @@ href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums
         <a href="SnapMeshLab.EditPaint2.png" ><img alt="" src="SnapMeshLab.EditPaint2.small.jpg" /></a> 
         <a href="SnapMeshLab.EditPaint3.png" ><img alt="" src="SnapMeshLab.EditPaint3.small.jpg" /></a> 
         </td>
-    <td> An example of the new interactive editing features. You can directly paint, with customizable brushed over the mesh color (left), selection (center) and even smooth (right). 
+    <td> An example of the new interactive editing features. You can directly paint, with customizable brushes, over the mesh. You can interactively change color (left), define selection (center) and even smooth out noise and small features (right). 
 	Thanks to Andreas Gfrei for the development of this plugin.
     </td>
   </tr>
@@ -301,15 +301,27 @@ href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums
   <b>[details]</b></a></font> </span><span class="hidden" id="_V10">
   <a href="javascript:showNow('_no_V10');hideNow('_V10');" >
   <b>[hide]</b></a> <font color="#777777" size="-1">	
-<pre>	** New features **
-	Support of WRL and SMF file format (write only)
-	Support of PTX file format (read only)
-	Automatic checking of new version
-	Non manifold vertex coloring
-	Improved quality and robustness of Hole Filling filter 
-	(now large and non manifold holes can be handled)
-	** Corrected Bugs **
-	nasty bug that affected the saving and loading various 3d format (3ds, obj and off)
+<pre>= New features =
+* Painting plugin:  color, selection and smoothing directly interactively onto the mesh (thanks to gfrei)
+* Simplification of textured Mesh with preservation of texture coords (thanks to pirosu)
+* Automatic vertex unification when loading stl files
+* More user-definable parameters in quadric simplification and in hole filling
+* Improved filtering and support for compressed depthimage in the Epoch import tool
+* New generic dialog mechanism, easier for developer add/change/document filter parameters
+* Selection handling improved in many filters
+* Added wiki based online help
+* Restored on screen help
+* Added online bug submission using Sourceforge tracking system
+* Reformatted info bar (Added number of selected faces and fixed size fonts)
+
+= Corrected Bugs = 
+* Snapshots do not crash MeshLab any more.
+* Improved OpenGL shader compatibilities.
+* Corrected bug in quadrics simplification about target number of selected faces
+* Corrected bug of wrong loading ply with per face color (was save a 3ds and reload as a ply)
+* Corrected bug on trackball hanging (if you released a modifier before mouse)
+
+
 </pre></font></span></li>
 <li><i>12/12/2006</i> V 0.9 Release 
   <span class="shown" id="_no_V09"><font size="-1"><a href="javascript:showNow('_V09');hideNow('_no_V09');" >
