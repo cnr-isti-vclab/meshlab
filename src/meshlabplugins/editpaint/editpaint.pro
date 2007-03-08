@@ -25,6 +25,5 @@ contains(TEMPLATE,lib){
   }
 }
 win32{
-  SOURCES += paintbox.cpp 
   DEFINES += NOMINMAX
 }
