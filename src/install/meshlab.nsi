@@ -2,13 +2,13 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "0.9"
+!define PRODUCT_VERSION "1.0.0"
 !define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\4.1.3"
+!define QT_BASE "C:\Qt\4.2.2"
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -28,6 +28,8 @@
 !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
+
+
 ; Finish page
 !define MUI_FINISHPAGE_RUN "$INSTDIR\meshlab.exe"
 !insertmacro MUI_PAGE_FINISH
@@ -61,6 +63,7 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\baseio.dll"
   File "..\meshlab\plugins\cleanfilter.dll"
   File "..\meshlab\plugins\colladaio.dll"
+  File "..\meshlab\plugins\editpaint.dll"
   File "..\meshlab\plugins\epoch_io.dll"
   File "..\meshlab\plugins\meshcolorize.dll"
   File "..\meshlab\plugins\meshdecorate.dll"
@@ -156,3 +159,78 @@ Section Uninstall
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   SetAutoClose true
 SectionEnd
+
+  ;******************** PARTE SPERIMENTALE SULLE ASSOCIAZIONI FILE ****************
+;Things that need to be extracted on startup (keep these lines before any File command!)
+;Only useful for BZIP2 compression
+;Use ReserveFile for your own InstallOptions INI files too!
+
+!define TEMP1 $R0 ;Temp variable
+
+ReserveFile "${NSISDIR}\Plugins\InstallOptions.dll"
+ReserveFile "fileassociation_nsis.ini"
+
+;Order of pages
+; la prox linea se scommnentata serve ad abilitare il loading di una pagine aggiuntiva
+; in cui si settano le associazioni file extensions-registro per il meshlab.
+; Page custom SetCustom ValidateCustom ": Testing InstallOptions" ;Custom page. InstallOptions gets called in SetCustom.
+;Page instfiles
+
+Section "Components"
+
+  ;Get Install Options dialog user input
+
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 2" "State"
+  DetailPrint "Install X=${TEMP1}"
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 3" "State"
+  DetailPrint "Install Y=${TEMP1}"
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 4" "State"
+  DetailPrint "Install Z=${TEMP1}"
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 5" "State"
+  DetailPrint "File=${TEMP1}"
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 6" "State"
+  DetailPrint "Dir=${TEMP1}"
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 8" "State"
+  DetailPrint "Info=${TEMP1}"
+
+SectionEnd
+
+Function .onInit
+
+  ;Extract InstallOptions files
+  ;$PLUGINSDIR will automatically be removed when the installer closes
+
+  InitPluginsDir
+  File /oname=$PLUGINSDIR\fileassociation_nsis.ini "fileassociation_nsis.ini"
+
+FunctionEnd
+
+Function SetCustom
+
+  ;Display the InstallOptions dialog
+
+  Push ${TEMP1}
+
+    InstallOptions::dialog "$PLUGINSDIR\fileassociation_nsis.ini"
+    Pop ${TEMP1}
+
+  Pop ${TEMP1}
+
+FunctionEnd
+
+Function ValidateCustom
+
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 2" "State"
+  StrCmp ${TEMP1} 1 done
+
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 3" "State"
+  StrCmp ${TEMP1} 1 done
+
+  ReadINIStr ${TEMP1} "$PLUGINSDIR\fileassociation_nsis.ini" "Field 4" "State"
+  StrCmp ${TEMP1} 1 done
+    MessageBox MB_ICONEXCLAMATION|MB_OK "You must select at least one install option!"
+    Abort
+
+  done:
+
+FunctionEnd
