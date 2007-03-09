@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.71  2007/03/09 11:08:09  mariolatronico
+Removed unnecessary modifier
+
 Revision 1.70  2007/03/05 11:12:55  cignoni
 correct management of release of keyboard modifiers
 
@@ -350,7 +353,7 @@ private:
   enum AnimMode { AnimNone, AnimSpin, AnimInterp};
   AnimMode animMode; 
 	int tileCol, tileRow, totalCols, totalRows;
-	void GLArea::setCursorTrack(vcg::TrackMode *tm);
+	void setCursorTrack(vcg::TrackMode *tm);
 
 	
 };
