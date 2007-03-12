@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.72  2007/03/12 15:23:59  cignoni
+Safer dir search for plugins for mac
+
 Revision 1.71  2007/03/03 02:03:25  cignoni
 Reformatted lower bar, added number of selected faces. Updated about dialog
 
@@ -504,7 +507,17 @@ void MainWindow::createMenus()
 
 void MainWindow::loadPlugins()
 {
-   	pluginsDir = QDir(qApp->applicationDirPath());
+#if defined(Q_OS_MAC)
+QDir qtPluginsDir(qApp->applicationDirPath());
+qtPluginsDir.cdUp();
+qApp->addLibraryPath(qtPluginsDir.absolutePath () );
+qDebug("qtplugins dir %s", qPrintable(qtPluginsDir.absolutePath ()));
+qDebug("qtplugins dir %s", qPrintable(qtPluginsDir.dirName ()));
+
+qtPluginsDir.cd("plugins");
+qApp->addLibraryPath(qtPluginsDir.absolutePath () );
+#endif
+pluginsDir = QDir(qApp->applicationDirPath());
 //qDebug("plugins dir %s", qPrintable(pluginsDir.dirName()));
 #if defined(Q_OS_WIN)
 	if (pluginsDir.dirName() == "debug" || pluginsDir.dirName() == "release")

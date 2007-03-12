@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.23  2007/03/12 15:24:00  cignoni
+Safer dir search for plugins for mac
+
 Revision 1.22  2007/02/28 00:02:57  cignoni
 Added casts for mac compiling
 
@@ -105,9 +108,10 @@ void MeshShaderRenderPlugin::initActionList() {
 		shadersDir.cdUp();
 #elif defined(Q_OS_MAC)
 	if (shadersDir.dirName() == "MacOS") {
-		shadersDir.cdUp();
-		shadersDir.cdUp();
-		shadersDir.cdUp();
+		for(int i=0;i<4;++i){
+			shadersDir.cdUp();
+			if(shadersDir.exists("shaders")) break;
+		}
 	}
 #endif
 	bool ret=shadersDir.cd("shaders");
