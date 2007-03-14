@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.32  2007/03/14 22:59:34  cignoni
+Texture -> TexCoord name change
+
 Revision 1.31  2007/03/03 02:03:26  cignoni
 Reformatted lower bar, added number of selected faces. Updated about dialog
 
@@ -113,7 +116,7 @@ class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,
       face::Color4bOcf,           /* 0b */
       face::FFAdjOcf,             /* 0b */
       face::VFAdjOcf,             /* 0b */
-      face::WedgeTexturefOcf      /* 0b */
+      face::WedgeTexCoordfOcf      /* 0b */
     > {};
 
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {
