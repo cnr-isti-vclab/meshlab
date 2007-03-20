@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2007/03/20 15:52:45  cignoni
+ Patched issue related to path with non ascii chars
+
  Revision 1.3  2007/03/20 10:51:26  cignoni
  attempting to solve unicode bug in filenames
 
@@ -52,16 +55,6 @@ using namespace vcg;
 
 bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
-	if (fileName.isEmpty())
-	{
-		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
-		if (fileName.isEmpty())		return false;
-
-		QFileInfo fi(fileName);
-		// this change of dir is needed for subsequent textures/materials loading
-		QDir::setCurrent(fi.absoluteDir().absolutePath());
-	}
-	
 	// initializing mask
   mask = 0;
 	
@@ -126,7 +119,8 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
 bool BaseMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-	string filename = fileName.toUtf8().data();
+  string filename = QFile::encodeName(fileName).constData ();
+  //string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
 	
 	if(formatName.toUpper() == tr("PLY"))

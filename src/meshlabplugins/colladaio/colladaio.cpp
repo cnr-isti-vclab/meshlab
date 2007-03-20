@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.12  2007/03/20 15:52:46  cignoni
+ Patched issue related to path with non ascii chars
+
  Revision 1.11  2006/11/29 00:59:16  cignoni
  Cleaned plugins interface; changed useless help class into a plain string
 
@@ -78,23 +81,10 @@
 
 
 #include <QMessageBox>
-#include <QFileDialog>
-
 using namespace vcg;
 
 bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
-	if (fileName.isEmpty())
-	{
-		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Collada files (*.dae)");
-		if (fileName.isEmpty())
-			return false;
-
-		QFileInfo fi(fileName);
-		// this change of dir is needed for subsequent textures/materials loading
-		QDir::setCurrent(fi.absoluteDir().absolutePath());
-	}
-
 	// initializing mask
   mask = 0;
 	
@@ -102,7 +92,8 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 	if (cb != NULL)		(*cb)(0, "Loading...");
 
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-	std::string filename = fileName.toUtf8().data();
+	string filename = QFile::encodeName(fileName).constData ();
+  //std::string filename = fileName.toUtf8().data();
 
 	bool normalsUpdated = false;
 
@@ -164,7 +155,8 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 bool ColladaIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-	std::string filename = fileName.toUtf8().data();
+	string filename = QFile::encodeName(fileName).constData ();
+  //std::string filename = fileName.toUtf8().data();
 	std::string ex = formatName.toUtf8().data();
 	int result;
 	

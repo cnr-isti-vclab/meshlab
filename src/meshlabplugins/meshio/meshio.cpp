@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.92  2007/03/20 15:52:47  cignoni
+ Patched issue related to path with non ascii chars
+
  Revision 1.91  2006/12/01 10:41:11  granzuglia
  fixed a little bug: added return true in the off-file
 
@@ -62,23 +65,11 @@
 #include <vcg/complex/trimesh/update/normal.h>
 
 #include <QMessageBox>
-#include <QFileDialog>
 
 using namespace vcg;
 
 bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
-	if (fileName.isEmpty())
-	{
-		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.obj)");
-		if (fileName.isEmpty())
-			return false;
-
-		QFileInfo fi(fileName);
-		// this change of dir is needed for subsequent textures/materials loading
-		QDir::setCurrent(fi.absoluteDir().absolutePath());
-	}
-	
 	// initializing mask
   mask = 0;
 	
@@ -88,7 +79,8 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 	QString error_2MsgFormat = "Error encountered while loading file:\n\"%1\"\n\n File with more than a mesh.\n Load only the first!";
 
-	string filename = fileName.toUtf8().data();
+	string filename = QFile::encodeName(fileName).constData ();
+  //string filename = fileName.toUtf8().data();
 
 	bool normalsUpdated = false;
 
@@ -194,7 +186,8 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-	string filename = fileName.toUtf8().data();
+	string filename = QFile::encodeName(fileName).constData ();
+  //string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
 	
 	if(formatName.toUpper() == tr("3DS"))

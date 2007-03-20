@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.13  2007/03/20 15:52:46  cignoni
+ Patched issue related to path with non ascii chars
+
  Revision 1.12  2007/02/26 11:41:07  corsini
  add more control to depth filter through interface paramters
 
@@ -534,7 +537,8 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
 	QDir::setCurrent(FileNameDir);
 
 	QString errorMsgFormat = "Error encountered while loading file %1:\n%2";
-	string filename = fileName.toUtf8().data();
+	string filename = QFile::encodeName(fileName).constData ();
+  //string filename = fileName.toUtf8().data();
 
 	QDomDocument doc;
 	
