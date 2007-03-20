@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2007/03/20 10:51:26  cignoni
+ attempting to solve unicode bug in filenames
+
  Revision 1.2  2007/01/19 00:51:59  cignoni
  Now meshlab ask for automatic cleaning of stl files
 
@@ -67,8 +70,9 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
 
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
-	string filename = fileName.toUtf8().data();
-
+	//string filename = fileName.toUtf8().data();
+	string filename = QFile::encodeName(fileName).constData ();
+  
   if (formatName.toUpper() == tr("PLY"))
 	{
 		vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
