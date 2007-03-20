@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2007/03/20 15:51:15  cignoni
+Update to the new texture syntax
+
 Revision 1.1  2007/02/08 13:39:59  pirosu
 Added Quadric Simplification(with textures) Filter
 
@@ -166,7 +169,7 @@ public:
 
 		if(!onlygeo)
 		{
-			vcg::TCoord2<float>& t = fi.WT(0);
+			vcg::TexCoord2<float>& t = fi.WT(0);
 			p[3] = t.u();
 			p[4] = t.v();
 		}
@@ -183,7 +186,7 @@ public:
 
 		if(!onlygeo)
 		{
-			vcg::TCoord2<float>& t = fi.WT(1);
+			vcg::TexCoord2<float>& t = fi.WT(1);
 			q[3] = t.u();
 			q[4] = t.v();
 		}
@@ -200,7 +203,7 @@ public:
 		r[2] = v3.P().Z();
 		if(!onlygeo)
 		{
-			vcg::TCoord2<float>& t = fi.WT(2);
+			vcg::TexCoord2<float>& t = fi.WT(2);
 			r[3] = t.u();
 			r[4] = t.v();
 		}

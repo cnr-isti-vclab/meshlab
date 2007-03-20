@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.13  2007/03/20 15:51:16  cignoni
+Update to the new texture syntax
+
 Revision 1.12  2006/06/18 20:40:55  cignoni
 Added some missing IsD tests
 
@@ -187,9 +190,9 @@ struct OddPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::F
 	}
 	
 	template<class FL_TYPE>
-	TCoord2<FL_TYPE,1> WedgeInterp(TCoord2<FL_TYPE,1> &t0, TCoord2<FL_TYPE,1> &t1)
+	TexCoord2<FL_TYPE,1> WedgeInterp(TexCoord2<FL_TYPE,1> &t0, TexCoord2<FL_TYPE,1> &t1)
 	{
-		TCoord2<FL_TYPE,1> tmp;
+		TexCoord2<FL_TYPE,1> tmp;
 		tmp.n()=t0.n(); 
 		tmp.t()=(t0.t()+t1.t())/2.0;
 		return tmp;
@@ -262,9 +265,9 @@ struct EvenPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::
 	}
 
 	template<class FL_TYPE>
-	TCoord2<FL_TYPE,1> WedgeInterp(TCoord2<FL_TYPE,1> &t0, TCoord2<FL_TYPE,1> &t1)
+	TexCoord2<FL_TYPE,1> WedgeInterp(TexCoord2<FL_TYPE,1> &t0, TexCoord2<FL_TYPE,1> &t1)
 	{
-		TCoord2<FL_TYPE,1> tmp;
+		TexCoord2<FL_TYPE,1> tmp;
 		// assert(t0.n()== t1.n());
 		tmp.n()=t0.n(); 
 		tmp.t()=(t0.t()+t1.t())/2.0;
