@@ -122,7 +122,7 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
     first=true;
 	pressed=0;
-	tri::UpdateBounding<CMeshO>::Box(m.cm);
+	tri::UpdateBounding<CMeshO>::Box(m.cm());
 	if (paintbox==0) { 
 		paintbox=new PaintToolbox(parent->window());
 		paint_dock=new QDockWidget(parent->window());
@@ -184,8 +184,8 @@ void EditPaintPlugin::mousePressEvent(QAction * ac, QMouseEvent * event, MeshMod
 	pen.invisible=paintbox->getPaintInvisible();
 	switch (paintbox->paintType()) {
 		case 1: { pen.radius=paintbox->getRadius()*0.5; } break;
-		case 2: { pen.radius=paintbox->getRadius()*m.cm.bbox.Diag()*0.01*0.5; } break;
-		case 3: { pen.radius=paintbox->getRadius()*m.cm.bbox.DimY()*0.01*0.5; } break;
+		case 2: { pen.radius=paintbox->getRadius()*m.cm().bbox.Diag()*0.01*0.5; } break;
+		case 3: { pen.radius=paintbox->getRadius()*m.cm().bbox.DimY()*0.01*0.5; } break;
 		case 4: { pen.radius=paintbox->getRadius()*0.5; } break;
 	}
 	curSel.clear();
@@ -471,7 +471,7 @@ void EditPaintPlugin::DrawXORCircle(MeshModel &m,GLArea * gla, bool doubleDraw) 
 
 		PEZ=64;
 		int STEPS=30;
-		float diag=m.cm.bbox.Diag()*(-7);
+		float diag=m.cm().bbox.Diag()*(-7);
 		QPoint circle_points[64]; //because of the .NET 2003 problem
 
 		glPushAttrib(GL_ENABLE_BIT);
@@ -589,7 +589,7 @@ void getInternFaces(MeshModel & m,vector<CMeshO::FacePointer> *actual,vector<Ver
 
 	if (actual->size()==0) {
 		CMeshO::FaceIterator fi;
-        	for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
+        	for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi) 
             	if(!(*fi).IsD()) {
 			temp_po.push_back((&*fi));
 		}
@@ -794,13 +794,13 @@ void EditPaintPlugin::fillFrom(MeshModel & m,CFaceO * face) {
 
 bool EditPaintPlugin::getFaceAtMouse(MeshModel &m,CMeshO::FacePointer& val) {
 	QPoint mid=QPoint(cur.x(),inverse_y);
-	return (GLPickTri<CMeshO>::PickNearestFace(mid.x(), mid.y(), m.cm, val,2,2));
+	return (GLPickTri<CMeshO>::PickNearestFace(mid.x(), mid.y(), m.cm(), val,2,2));
 }
 
 bool EditPaintPlugin::getFacesAtMouse(MeshModel &m,vector<CMeshO::FacePointer> & val) {
 	val.clear();
 	QPoint mid=QPoint(cur.x(),inverse_y);
-	GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, val,2,2);
+	GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm(), val,2,2);
 	return (val.size()>0);
 }
 
@@ -828,7 +828,7 @@ bool EditPaintPlugin::getVertexesAtMouse() {
 
 bool EditPaintPlugin::hasSelected(MeshModel &m) {
 	CMeshO::FaceIterator fi;
-	for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) {
+	for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi) {
 		if (!(*fi).IsD() && (*fi).IsS()) return true;
 	}
 	return false;
@@ -859,7 +859,7 @@ void EditPaintPlugin::fillGradient(MeshModel & m,GLArea * gla) {
 	UndoItem u;
 	int gradient_type=paintbox->getGradientType();
 	int gradient_form=paintbox->getGradientForm();
-	for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
+	for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi) 
 		if (!(*fi).IsD() && (tutti || (*fi).IsS()))
 		for (int lauf=0; lauf<3; lauf++) {
 			if (!temporaneo.contains((*fi).V(lauf))) {
@@ -977,7 +977,7 @@ void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
 	vector<CMeshO::FacePointer> faceSel;
 	
 	if (paintbox->searchMode()==2) curSel.clear();
-	//if (GLPickTri<CMeshO>::PickNearestFace(mid.x(), mid.y(), m.cm, tmp, pen.width.x(), pen.width.y()))
+	//if (GLPickTri<CMeshO>::PickNearestFace(mid.x(), mid.y(), m.cm(), tmp, pen.width.x(), pen.width.y()))
 	getInternFaces(m,&curSel,&newSel,&faceSel,gla,pen,cur,prev,pixels,mvmatrix,projmatrix,viewport);
 
 	//UndoItem u;

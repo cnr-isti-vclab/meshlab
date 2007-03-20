@@ -23,7 +23,7 @@ email: gfrei.andreas@gmx.net
 
 class EditPaintPlugin;
 class PaintToolbox;
-class Penn;
+struct Penn;
 class ColorUndo;
 class PaintWorker;
 struct UndoItem;

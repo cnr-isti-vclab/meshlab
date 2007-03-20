@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.93  2007/03/20 16:23:10  cignoni
+ Big small change in accessing mesh interface. First step toward layers
+
  Revision 1.92  2007/03/20 15:52:47  cignoni
  Patched issue related to path with non ascii chars
 
@@ -92,7 +95,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 			return false;
     m.Enable(oi.mask);
 		
-		int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm, filename.c_str(), oi);
+		int result = vcg::tri::io::ImporterOBJ<CMeshO>::Open(m.cm(), filename.c_str(), oi);
 		if (result != vcg::tri::io::ImporterOBJ<CMeshO>::E_NOERROR)
 		{
 			if (result & vcg::tri::io::ImporterOBJ<CMeshO>::E_NON_CRITICAL_ERROR)
@@ -111,7 +114,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	}
 	else if (formatName.toUpper() == tr("PTX"))
 	{
-		int result = vcg::tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+		int result = vcg::tri::io::ImporterPTX<CMeshO>::Open(m.cm(), filename.c_str(), mask, cb);
 		if (result == 1)
 		{
 			QMessageBox::warning(parent, tr("PTX Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
@@ -124,15 +127,15 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	}
 	else if (formatName.toUpper() == tr("OFF"))
 	{
-		int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+		int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm(), filename.c_str(), mask, cb);
 		if (result != 0)  // OFFCodes enum is protected
 		{
 			QMessageBox::warning(parent, tr("OFF Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
 
-		CMeshO::FaceIterator fi = m.cm.face.begin();
-		for (; fi != m.cm.face.end(); ++fi)
+		CMeshO::FaceIterator fi = m.cm().face.begin();
+		for (; fi != m.cm().face.end(); ++fi)
 			face::ComputeNormalizedNormal(*fi);
 	}
 	else if (formatName.toUpper() == tr("3DS"))
@@ -143,7 +146,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 		vcg::tri::io::Importer3DS<CMeshO>::LoadMask(filename.c_str(), file, info);
     m.Enable(info.mask);
 		
-		int result = vcg::tri::io::Importer3DS<CMeshO>::Open(m.cm, filename.c_str(), file, info);
+		int result = vcg::tri::io::Importer3DS<CMeshO>::Open(m.cm(), filename.c_str(), file, info);
 		if (result != vcg::tri::io::Importer3DS<CMeshO>::E_NOERROR)
 		{
 			QMessageBox::warning(parent, tr("3DS Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Importer3DS<CMeshO>::ErrorMsg(result)));
@@ -159,13 +162,13 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;
-	for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
+	for ( unsigned textureIdx = 0; textureIdx < m.cm().textures.size(); ++textureIdx)
 	{
-		FILE* pFile = fopen (m.cm.textures[textureIdx].c_str(), "r");
+		FILE* pFile = fopen (m.cm().textures[textureIdx].c_str(), "r");
 		if (pFile == NULL)
 		{
 			missingTextureFilesMsg.append("\n");
-			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
+			missingTextureFilesMsg.append(m.cm().textures[textureIdx].c_str());
 			someTextureNotFound = true;
 		}
 		else
@@ -174,9 +177,9 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 	if (someTextureNotFound)
 		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
 
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm());					// updates bounding box
 	if (!normalsUpdated) 
-		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
+		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm());		// updates normals
 
 	if (cb != NULL)	(*cb)(99, "Done");
 
@@ -192,7 +195,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	
 	if(formatName.toUpper() == tr("3DS"))
 	{
-		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+		int result = vcg::tri::io::Exporter3DS<CMeshO>::Save(m.cm(),filename.c_str(),mask,cb);
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter3DS<CMeshO>::ErrorMsg(result)));
@@ -202,7 +205,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	}
 	else if(formatName.toUpper() == tr("WRL"))
 	{
-		int result = vcg::tri::io::ExporterWRL<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+		int result = vcg::tri::io::ExporterWRL<CMeshO>::Save(m.cm(),filename.c_str(),mask,cb);
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterWRL<CMeshO>::ErrorMsg(result)));
@@ -212,7 +215,7 @@ bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMo
 	}
 	else if( formatName.toUpper() == tr("OFF") || formatName.toUpper() == tr("DXF") || formatName.toUpper() == tr("OBJ") )
   {
-    int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+    int result = vcg::tri::io::Exporter<CMeshO>::Save(m.cm(),filename.c_str(),mask,cb);
   	if(result!=0)
 	  {
 		  QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));

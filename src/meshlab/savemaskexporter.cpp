@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.9  2007/03/20 16:22:34  cignoni
+ Big small change in accessing mesh interface. First step toward layers
+
  Revision 1.8  2006/10/10 21:14:34  cignoni
  changed the name of the mask member
 
@@ -100,15 +103,15 @@ void SaveMaskExporterDialog::InitDialog()
 
 void SaveMaskExporterDialog::SetTextureName()
 {
-	if( m->cm.textures.size() == 0 )
+	if( m->cm().textures.size() == 0 )
 	{
 		ui.check_iom_wedgtexcoord->setDisabled(true);
 		ui.check_iom_wedgtexcoord->setChecked(false);
 	}
 
-	for(unsigned int i=0;i<m->cm.textures.size();i++)
+	for(unsigned int i=0;i<m->cm().textures.size();i++)
 	{
-		QString item(m->cm.textures[i].c_str());
+		QString item(m->cm().textures[i].c_str());
 		ui.listTextureName->addItem(item);
 	}
 }
@@ -205,8 +208,8 @@ void SaveMaskExporterDialog::SlotOkButton()
 
 	if( ui.check_iom_camera->isChecked()		) { newmask |= MeshModel::IOM_CAMERA;}
 
-	for(unsigned int i=0;i<m->cm.textures.size();i++)
-		m->cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();
+	for(unsigned int i=0;i<m->cm().textures.size();i++)
+		m->cm().textures[i] = ui.listTextureName->item(i)->text().toStdString();
 	this->mask=newmask;
 }
 
@@ -218,7 +221,7 @@ void SaveMaskExporterDialog::SlotCancelButton()
 void SaveMaskExporterDialog::SlotRenameTexture()
 {
 	int row = ui.listTextureName->currentRow();
-	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName(m->cm.textures[row].c_str());
+	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName(m->cm().textures[row].c_str());
 	if(newtexture.size()>0)
 	{
 		QStringList lists = QString(newtexture.c_str()).split('/');

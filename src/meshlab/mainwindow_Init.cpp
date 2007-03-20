@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.73  2007/03/20 16:22:34  cignoni
+Big small change in accessing mesh interface. First step toward layers
+
 Revision 1.72  2007/03/12 15:23:59  cignoni
 Safer dir search for plugins for mac
 
@@ -625,7 +628,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
 		if (mainWin) mainWin->updateRecentFileActions();
 	}
 
-  settings.setValue("totalKV",          settings.value("totalKV",0).toInt()           + (GLA()->mm->cm.vn)/1000);
+  settings.setValue("totalKV",          settings.value("totalKV",0).toInt()           + (GLA()->mm->cm().vn)/1000);
   settings.setValue("loadedMeshCounter",settings.value("loadedMeshCounter",0).toInt() + 1);
   
 	int loadedMeshCounter    = settings.value("loadedMeshCounter",20).toInt(); 

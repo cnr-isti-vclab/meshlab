@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.10  2007/03/20 16:23:07  cignoni
+ Big small change in accessing mesh interface. First step toward layers
+
  Revision 1.9  2007/02/08 23:46:15  pirosu
  merged srcpar and par in the GetStdParameters() function
 
@@ -196,11 +199,11 @@ bool CleanFilter::getParameters(QAction *action, QWidget *parent, MeshModel &m,F
   {
 	 case FP_REBUILD_SURFACE :
 		 maxDiag1 = par.getFloat("BallRadius");
-    	par.update("BallRadius",float(m.cm.bbox.Diag()*maxDiag1/100.0));
+    	par.update("BallRadius",float(m.cm().bbox.Diag()*maxDiag1/100.0));
 		 return true;
 	 case FP_REMOVE_ISOLATED_DIAMETER:	 
 		 maxDiag2 = par.getFloat("MinComponentDiag");
-          par.update("MinComponentDiag",float(m.cm.bbox.Diag()*maxDiag2/100.0));
+          par.update("MinComponentDiag",float(m.cm().bbox.Diag()*maxDiag2/100.0));
           return true;
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:	 
         minCC = par.getInt("MinComponentSize");
@@ -222,40 +225,40 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
       float radius = par.getFloat("BallRadius");		
       float clustering = 0.1;
       float crease=0;
-      m.cm.fn=0;
-      m.cm.face.resize(0);
-      NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
-      tri::Pivot<CMeshO> pivot(m.cm, radius, clustering, crease); 
+      m.cm().fn=0;
+      m.cm().face.resize(0);
+      NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm().vert.begin(), m.cm().vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
+      tri::Pivot<CMeshO> pivot(m.cm(), radius, clustering, crease); 
       // the main processing
       pivot.buildMesh(cb);
 	  }
     if(filter->text() == ST(FP_REMOVE_ISOLATED_DIAMETER) )
 	  {
       float minCC= par.getFloat("MinComponentDiag");		
-      RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,minCC);
+      RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm(),minCC);
     }  	
 
     if(filter->text() == ST(FP_REMOVE_ISOLATED_COMPLEXITY) )
 	  {
       float minCC= par.getInt("MinComponentSize");		
-      RemoveSmallConnectedComponentsSize<CMeshO>(m.cm,minCC);
+      RemoveSmallConnectedComponentsSize<CMeshO>(m.cm(),minCC);
 	  }
 	if(filter->text() == ST(FP_REMOVE_WRT_Q) )
 	  {
       float val=par.getFloat("MaxQualityThr");		
       CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+      for(vi=m.cm().vert.begin();vi!=m.cm().vert.end();++vi)
         if(!(*vi).IsD() && (*vi).Q()<val)
         {
           (*vi).SetD();
-          m.cm.vn--;
+          m.cm().vn--;
         } 
       CMeshO::FaceIterator fi;
-      for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+      for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi) if(!(*fi).IsD())
                if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() ) 
        {
         (*fi).SetD();
-        --m.cm.fn;
+        --m.cm().fn;
        }
 
 	  }

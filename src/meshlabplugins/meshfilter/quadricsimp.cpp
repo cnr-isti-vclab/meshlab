@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2007/03/20 16:23:10  cignoni
+Big small change in accessing mesh interface. First step toward layers
+
 Revision 1.6  2007/03/03 02:03:51  cignoni
 Removed bug on simplification of selected faces
 
@@ -85,7 +88,7 @@ class MyTriEdgeCollapse: public vcg::tri::TriEdgeCollapseQuadric< CMeshO, MyTriE
 };
 
 
-void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, 
+void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, 
 		bool PreserveBoundary, 
 		bool PreserveNormal,
 		bool OptimalPlacement,
@@ -93,7 +96,7 @@ void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr,
 {
   math::Quadric<double> QZero;
   QZero.Zero();
-  QuadricTemp TD(cm.vert);
+  QuadricTemp TD(m.vert);
   QHelper::TDp()=&TD;
 
   TD.Start(QZero);
@@ -107,11 +110,11 @@ void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr,
   if(Selected) // simplify only inside selected faces
   {
     // select only the vertices having ALL incident faces selected
-    tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(cm);
+    tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m);
 
     // Mark not writable un-selected vertices
     CMeshO::VertexIterator  vi;
-    for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) if(!(*vi).IsD())
+    for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
           if(!(*vi).IsS()) (*vi).ClearW();
                       else (*vi).SetW();
   }
@@ -130,20 +133,20 @@ void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr,
 	else
 	MyTriEdgeCollapse::Params().NormalCheck= false;
 	
-  vcg::LocalOptimization<CMeshO> DeciSession(cm);
+  vcg::LocalOptimization<CMeshO> DeciSession(m);
 	cb(1,"Initializing simplification");
 	DeciSession.Init<MyTriEdgeCollapse >();
 
 	if(Selected)
-		TargetFaceNum= cm.fn - (cm.sfn-TargetFaceNum);
+		TargetFaceNum= m.fn - (m.sfn-TargetFaceNum);
 	DeciSession.SetTargetSimplices(TargetFaceNum);
 	DeciSession.SetTimeBudget(0.1f); // this allow to update the progress bar 10 time for sec...
 //  if(TargetError< numeric_limits<double>::max() ) DeciSession.SetTargetMetric(TargetError);
-  int startFn=cm.fn;
-  int faceToDel=cm.fn-TargetFaceNum;
- while( DeciSession.DoOptimization() && cm.fn>TargetFaceNum )
+  int startFn=m.fn;
+  int faceToDel=m.fn-TargetFaceNum;
+ while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
  {
-   cb(100-100*(cm.fn-TargetFaceNum)/(faceToDel), "Simplifying...");
+   cb(100-100*(m.fn-TargetFaceNum)/(faceToDel), "Simplifying...");
  };
 
 	DeciSession.Finalize<MyTriEdgeCollapse >();
@@ -151,7 +154,7 @@ void QuadricSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr,
   if(Selected) // Clear Writable flags 
   {
     CMeshO::VertexIterator  vi;
-    for(vi=cm.vert.begin();vi!=cm.vert.end();++vi) 
+    for(vi=m.vert.begin();vi!=m.vert.end();++vi) 
       if(!(*vi).IsD()) (*vi).SetW();
   }
 }

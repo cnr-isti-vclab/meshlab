@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.13  2007/03/20 16:23:08  cignoni
+ Big small change in accessing mesh interface. First step toward layers
+
  Revision 1.12  2007/03/20 15:52:46  cignoni
  Patched issue related to path with non ascii chars
 
@@ -106,9 +109,9 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 
 		m.Enable(info->mask);
 		for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
-			m.cm.textures.push_back(info->texturefile[tx].toStdString());
+			m.cm().textures.push_back(info->texturefile[tx].toStdString());
 		
-		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),m.addinfo);
+		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm(), filename.c_str(),m.addinfo);
 		
 		
 
@@ -128,13 +131,13 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;
-	for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
+	for ( unsigned textureIdx = 0; textureIdx < m.cm().textures.size(); ++textureIdx)
 	{
-		FILE* pFile = fopen (m.cm.textures[textureIdx].c_str(), "r");
+		FILE* pFile = fopen (m.cm().textures[textureIdx].c_str(), "r");
 		if (pFile == NULL)
 		{
 			missingTextureFilesMsg.append("\n");
-			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
+			missingTextureFilesMsg.append(m.cm().textures[textureIdx].c_str());
 			someTextureNotFound = true;
 		}
 		else
@@ -143,9 +146,9 @@ bool ColladaIOPlugin::open(const QString &formatName, QString &fileName, MeshMod
 	if (someTextureNotFound)
 		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
 
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm());					// updates bounding box
 	if (!normalsUpdated) 
-		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
+		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm());		// updates normals
 
 	if (cb != NULL)	(*cb)(99, "Done");
 
@@ -161,9 +164,9 @@ bool ColladaIOPlugin::save(const QString &formatName,QString &fileName, MeshMode
 	int result;
 	
 	if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end()) 
-		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
+		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm(),filename.c_str(),mask);
 	else 
-		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
+		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm(),filename.c_str(),m.addinfo,mask);
 
 	if(result!=0)
 	{

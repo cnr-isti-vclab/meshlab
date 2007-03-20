@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2007/03/20 16:23:10  cignoni
+Big small change in accessing mesh interface. First step toward layers
+
 Revision 1.6  2007/03/20 15:51:16  cignoni
 Update to the new texture syntax
 
@@ -749,11 +752,11 @@ class MyTriEdgeCollapseQTex: public TriEdgeCollapseQuadricTex< CMeshO, MyTriEdge
             inline MyTriEdgeCollapseQTex(  const EdgeType &p, int i) :TECQ(p,i){}
 };
 
-void QuadricTexSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, float extratexw, CallBackPos *cb)
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, float extratexw, CallBackPos *cb)
 {
 	math::Quadric<double> QZero;
 	QZero.Zero();
-	QuadricTemp TD3(cm.vert);
+	QuadricTemp TD3(m.vert);
 	QuadricTexHelper::TDp3()=&TD3;
 
 	TD3.Start(QZero);
@@ -761,7 +764,7 @@ void QuadricTexSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, f
 	
 	QVector <QPair<vcg::TexCoord2<float>,Quadric5<double> > > qv;
 
-     Quadric5Temp TD(cm.vert);
+     Quadric5Temp TD(m.vert);
     QuadricTexHelper::TDp()=&TD;
     TD.Start(qv);
 
@@ -778,21 +781,21 @@ void QuadricTexSimplification(CMeshO &cm,int  TargetFaceNum, float QualityThr, f
 
 
 
-  vcg::LocalOptimization<CMeshO> DeciSession(cm);
+  vcg::LocalOptimization<CMeshO> DeciSession(m);
 	cb(1,"Initializing simplification");
 	DeciSession.Init<MyTriEdgeCollapseQTex>();
 
 	DeciSession.SetTargetSimplices(TargetFaceNum);
 	DeciSession.SetTimeBudget(0.1f);
-	int startFn=cm.fn;
+	int startFn=m.fn;
   
-	int faceToDel=cm.fn-TargetFaceNum;
+	int faceToDel=m.fn-TargetFaceNum;
 	
-	while( DeciSession.DoOptimization() && cm.fn>TargetFaceNum )
+	while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
 	{
     char buf[256];
     sprintf(buf,"Simplifing heap size %i ops %i\n",DeciSession.h.size(),DeciSession.nPerfmormedOps);
-	   cb(100-100*(cm.fn-TargetFaceNum)/(faceToDel), buf);
+	   cb(100-100*(m.fn-TargetFaceNum)/(faceToDel), buf);
 	};
 
 	DeciSession.Finalize<MyTriEdgeCollapseQTex>();

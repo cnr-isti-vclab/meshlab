@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.118  2007/03/20 16:22:34  cignoni
+Big small change in accessing mesh interface. First step toward layers
+
 Revision 1.117  2007/03/05 13:09:21  cignoni
 Removed useless clearFocus
 
@@ -354,10 +357,10 @@ void GLArea::paintGL()
 	trackball.GetView();
   glPushMatrix(); 
 	trackball.Apply(trackBallVisible && !takeSnapTile && iEdit==0);
-	float d=2.0f/mm->cm.bbox.Diag();
+	float d=2.0f/mm->cm().bbox.Diag();
 	glScale(d);
 	
-	glTranslate(-mm->cm.bbox.Center());
+	glTranslate(-mm->cm().bbox.Center());
   setLightModel();
 
 	// Modify frustum... 
@@ -492,10 +495,10 @@ void GLArea::displayInfo()
 	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
 	log.glDraw(this,currLogLevel,3,lineSpacing,qFont);
 
-	renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm->cm.vn),qFont);
-	renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm->cm.fn),qFont);
+	renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm->cm().vn),qFont);
+	renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm->cm().fn),qFont);
 	if(rm.selectedFaces)  
-		 renderText(middleCol,startPos+ 3*lineSpacing,tr("Selected: %1").arg(mm->cm.sfn),qFont);
+		 renderText(middleCol,startPos+ 3*lineSpacing,tr("Selected: %1").arg(mm->cm().sfn),qFont);
 	renderText(middleCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm->ioMask),qFont);
 
   renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
@@ -717,17 +720,17 @@ void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 // Texture loading done during the first paint.
 void GLArea::initTexture()
 {
-  if(!mm->cm.textures.empty() && mm->glw.TMId.empty()){
+  if(!mm->cm().textures.empty() && mm->glw.TMId.empty()){
 		glEnable(GL_TEXTURE_2D);
-		for(unsigned int i =0; i< mm->cm.textures.size();++i){
+		for(unsigned int i =0; i< mm->cm().textures.size();++i){
 			QImage img, imgScaled, imgGL;
-			img.load(mm->cm.textures[i].c_str());
+			img.load(mm->cm().textures[i].c_str());
       // image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
       int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
       int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
       imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 			imgGL=convertToGLFormat(imgScaled);
-			qDebug("loaded texture %s. with id %i w %i  h %i",mm->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
+			qDebug("loaded texture %s. with id %i w %i  h %i",mm->cm().textures[i].c_str(),i, imgGL.width(), imgGL.height());
 			mm->glw.TMId.push_back(0);
 
 			glGenTextures( 1, (GLuint*)&(mm->glw.TMId.back()) );
@@ -737,7 +740,7 @@ void GLArea::initTexture()
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-			qDebug("loaded texture  %s. in %i",mm->cm.textures[i].c_str(),mm->glw.TMId[i]);
+			qDebug("loaded texture  %s. in %i",mm->cm().textures[i].c_str(),mm->glw.TMId[i]);
 		}
 	}
 	glDisable(GL_TEXTURE_2D);

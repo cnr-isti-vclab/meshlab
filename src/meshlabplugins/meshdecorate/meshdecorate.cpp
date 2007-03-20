@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.40  2007/03/20 16:23:09  cignoni
+Big small change in accessing mesh interface. First step toward layers
+
 Revision 1.39  2007/02/25 21:23:05  cignoni
 Added casts for mac compiling
 
@@ -137,7 +140,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
 	if(a->text() == ST(DP_SHOW_NORMALS))
 	{
     glPushAttrib(GL_ENABLE_BIT );
-    float LineLen = m.cm.bbox.Diag()/20.0;
+    float LineLen = m.cm().bbox.Diag()/20.0;
     CMeshO::VertexIterator vi;
     glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
@@ -145,7 +148,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_LINES);
 		glColor4f(.4f,.4f,1.f,.6f);
-    for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) 
+    for(vi=m.cm().vert.begin();vi!=m.cm().vert.end();++vi) 
       if(!(*vi).IsD())
         {
           glVertex((*vi).P());
@@ -177,7 +180,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QGLWidget *gla,QFont qf
 	glGetIntegerv(GL_VIEWPORT,vp);
 
 	// Mesh boundingBox
-	Box3f b(m.cm.bbox);
+	Box3f b(m.cm().bbox);
 	glColor(Color4b::LightGray);
 	glBoxWire(b);
 
@@ -428,7 +431,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(1.0);
 	glColor(Color4b::Cyan);
-	Box3f b=m.cm.bbox;
+	Box3f b=m.cm().bbox;
 	Point3f mi=b.min;
 	Point3f ma=b.max;
 	Point3f d3=(b.max-b.min)/4.0;
@@ -473,7 +476,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
  
 void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,QGLWidget* gla,QFont qf)
 {
-	float hw=m.cm.bbox.Diag()/2.0;
+	float hw=m.cm().bbox.Diag()/2.0;
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);

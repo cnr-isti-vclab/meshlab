@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.123  2007/03/20 16:22:34  cignoni
+Big small change in accessing mesh interface. First step toward layers
+
 Revision 1.122  2007/03/05 22:31:33  cignoni
 V100 Final patch of version checking
 
@@ -184,7 +187,7 @@ void MainWindow::updateMenus()
 			case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
 			case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
 		}
-    colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm->cm));
+    colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm->cm()));
 		switch (rm.colorMode)
 		{
 			case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
@@ -213,7 +216,7 @@ void MainWindow::updateMenus()
 		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
-		renderModeTextureAct->setEnabled(GLA()->mm && !GLA()->mm->cm.textures.empty());
+		renderModeTextureAct->setEnabled(GLA()->mm && !GLA()->mm->cm().textures.empty());
 		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
 		
 		setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
@@ -616,16 +619,16 @@ void MainWindow::open(QString fileName)
     }
     renderModeTextureAct->setChecked(false);
 		renderModeTextureAct->setEnabled(false);
-		if(!GLA()->mm->cm.textures.empty())
+		if(!GLA()->mm->cm().textures.empty())
 		{
 			renderModeTextureAct->setChecked(true);
 			renderModeTextureAct->setEnabled(true);
 			GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 		}
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm());																																			 
+    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm());					// updates bounding box
     updateMenus();
-    vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+    vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm());
     GLA()->mm->busy=false;
 	}
 

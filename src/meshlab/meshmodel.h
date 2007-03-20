@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.33  2007/03/20 16:22:34  cignoni
+Big small change in accessing mesh interface. First step toward layers
+
 Revision 1.32  2007/03/14 22:59:34  cignoni
 Texture -> TexCoord name change
 
@@ -145,7 +148,11 @@ public:
                     MM_ALL           = 0xffff} ;
 
 
-  CMeshO cm;
+	CMeshO &cm(){return _cm;}
+private:
+  CMeshO _cm;
+
+public:
   GlTrimesh<CMeshO> glw;
   vector<Color4b> originalVertexColor;
 
@@ -165,7 +172,7 @@ public:
 //    size_t faceSize=sizeof(CFaceO);
 //    size_t vertSize=sizeof(CVertexO);
     
-    glw.m=&cm; 
+    glw.m=&cm(); 
     currentDataMask=MM_NONE;
     ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
     busy=true;
@@ -175,19 +182,19 @@ public:
 
   inline void storeVertexColor()
   {
-    originalVertexColor.resize(cm.vert.size());
+    originalVertexColor.resize(cm().vert.size());
     vector<Color4b>::iterator ci;
 	  CMeshO::VertexIterator vi;
-	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
+	  for(vi=cm().vert.begin(),ci=originalVertexColor.begin();vi!=cm().vert.end();++vi,++ci) 
       (*ci)=(*vi).C();
   }
   inline void restoreVertexColor()
   {
     if(originalVertexColor.empty()) return;
-    if(originalVertexColor.size() != cm.vert.size()) return;
+    if(originalVertexColor.size() != cm().vert.size()) return;
     vector<Color4b>::iterator ci;
 	  CMeshO::VertexIterator vi;
-	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
+	  for(vi=cm().vert.begin(),ci=originalVertexColor.begin();vi!=cm().vert.end();++vi,++ci) 
       (*vi).C()=(*ci);
   }
 
@@ -212,35 +219,35 @@ public:
   {
    if( ( (neededDataMask & MM_FACETOPO)!=0) && (currentDataMask& MM_FACETOPO)==0)			
    {
-    cm.face.EnableFFAdjacency();
+    cm().face.EnableFFAdjacency();
     currentDataMask |= MM_FACETOPO;
-	  tri::UpdateTopology<CMeshO>::FaceFace(cm);
+	  tri::UpdateTopology<CMeshO>::FaceFace(cm());
    }
    if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && (currentDataMask& MM_VERTFACETOPO)==0)			
    {
-    cm.face.EnableVFAdjacency();
+    cm().face.EnableVFAdjacency();
     currentDataMask |= MM_VERTFACETOPO;
-	  tri::UpdateTopology<CMeshO>::VertexFace(cm);
+	  tri::UpdateTopology<CMeshO>::VertexFace(cm());
    }
    if( ( (neededDataMask & MM_BORDERFLAG)!=0) && (currentDataMask& MM_BORDERFLAG)==0)			
    {
-     if(currentDataMask& MM_FACETOPO) tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
-     else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
+     if(currentDataMask& MM_FACETOPO) tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm());
+     else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm());
      currentDataMask |= MM_BORDERFLAG;
    }
    if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0) && (currentDataMask& MM_WEDGTEXCOORD)==0)			
    {
-    cm.face.EnableWedgeTex();
+    cm().face.EnableWedgeTex();
     currentDataMask |= MM_WEDGTEXCOORD;
    }
    if( ( (neededDataMask & MM_FACECOLOR)!=0) && (currentDataMask& MM_FACECOLOR)==0)			
    {
-    cm.face.EnableColor();
+    cm().face.EnableColor();
     currentDataMask |= MM_FACECOLOR;
    } 
    if( ( (neededDataMask & MM_FACEMARK)!=0) && (currentDataMask& MM_FACEMARK)==0)			
    {
-    cm.face.EnableMark();
+    cm().face.EnableMark();
     currentDataMask |= MM_FACEMARK;
    }
   }
