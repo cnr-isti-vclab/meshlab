@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.8  2007/03/26 08:25:10  zifnab1974
+added eol at the end of the files
+
 Revision 1.7  2007/02/27 23:58:36  cignoni
 Changed apply/ok into apply/close
 
@@ -182,3 +185,4 @@ protected:
 
 
 #endif
+

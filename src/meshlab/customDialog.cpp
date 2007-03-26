@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2007/03/26 08:25:09  zifnab1974
+added eol at the end of the files
+
 Revision 1.7  2006/01/16 05:34:16  cignoni
 Added backward qt4.0 compatibility for setAutoFillBackground
 

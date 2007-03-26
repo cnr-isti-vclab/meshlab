@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.2  2007/03/26 08:25:09  zifnab1974
+ added eol at the end of the files
+
  Revision 1.1  2006/01/26 18:39:19  fmazzant
  moved mask dialog exporter from mashio to meshlab
 

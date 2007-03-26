@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.124  2007/03/26 08:25:09  zifnab1974
+added eol at the end of the files
+
 Revision 1.123  2007/03/20 16:22:34  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -186,13 +189,15 @@ void MainWindow::updateMenus()
 			case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
 			case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
 			case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
+		default: break;
 		}
     colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm->cm()));
 		switch (rm.colorMode)
 		{
 			case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
 			case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
-			case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
+  		case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
+  		default: break;
 		}
 
 		lastFilterAct->setEnabled(false);
