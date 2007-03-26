@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.119  2007/03/26 08:24:10  zifnab1974
+When a user minimizes the window using a shortcut that uses modifiers (alt, ctrl, shift), the state of the button remained "pressed" after the window was reraised. Added a hideevent which resets the button state.
+
 Revision 1.118  2007/03/20 16:22:34  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -864,4 +867,9 @@ void GLArea::updateFps(float deltaTime)
 }
 
 void GLArea::resetTrackBall(){trackball.Reset();updateGL();}
+
+void GLArea::hideEvent(QHideEvent * /*event*/)
+{
+	trackball.current_button=0;
+}
 

@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.72  2007/03/26 08:24:10  zifnab1974
+When a user minimizes the window using a shortcut that uses modifiers (alt, ctrl, shift), the state of the button remained "pressed" after the window was reraised. Added a hideevent which resets the button state.
+
 Revision 1.71  2007/03/09 11:08:09  mariolatronico
 Removed unnecessary modifier
 
@@ -306,6 +309,8 @@ protected:
   void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
 	bool drawSelection;
+
+	void hideEvent(QHideEvent * event);
 
 private:
 
