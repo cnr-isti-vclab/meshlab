@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.55  2007/03/27 12:20:16  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.54  2007/02/28 00:02:12  cignoni
 Added missing virtual destructors
 
@@ -64,6 +67,7 @@ added Filter History Dialogs
 #include <QtCore>
 #include <QAction>
 #include "filterparameter.h"
+#include "GLLogStream.h"
 
 
 
@@ -75,7 +79,6 @@ class QMouseEvent;
 class MeshModel;
 class RenderMode;
 class GLArea;
-class GLLogStream;
 
 class PluginInfo
 {
@@ -177,6 +180,20 @@ public:
 protected:
     QList <QAction *> actionList;
     QList <FilterType> typeList;
+    void Log(int Level, const char * f, ... ) 
+		{
+		if(log)
+			{	
+				char buf[4096];
+				va_list marker;
+				va_start( marker, f );     
+				vsprintf(buf,f,marker);
+				va_end( marker );              
+				log->Log(Level,buf);
+			}
+		}
+
+private:
     GLLogStream *log;	
 };
 

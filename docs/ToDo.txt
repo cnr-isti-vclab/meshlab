@@ -1,11 +1,30 @@
+25/3/2007
+x check selezione automatico, init numero selected in quadric.
+
+
+23/3/2007
+o bug dialogo troppo piccolo per quando ci sono troppi parametri
+o meccanismo piu' furbo per memorizzare i param da una volta alla successiva
+x meno polimofrismo nelle fun di passaggio di parametri
+x icona processing
+x bug open su command line su mac. FATTO
+o merge gllogstream e logstream
+
+15/3/2007
+x corrected bug simplification mac
+x More parameter in pasodoble
+x Added first step for layer management
+x Changed log stream
+
+
 1/2/2007
 o bounding box non viene aggiornato dopo varie operazioni..
 x Added Select border face
 x added more parameters to hole filling dialog
 
 19/01/2007
-o Numero vertici facce selezionate deve essere mostrato
-o refine distrugge la selezione
+x Numero vertici facce selezionate deve essere mostrato
+x refine se distrugge la selezione
 o refine e colore dda controllare.
 o mesh senza facce pianta??
 o unify vertex deve smarcare i border e obbligarli a rifare??
@@ -141,7 +160,7 @@ x progress bar load obj do not work // DONE 6/7
 x bug normali subdiv. non vengono ricalcolate // DONE 18/6 
 o bug border. non viene MAI ricalcolato
 x open/save recorded nella history // DONE 18/6 
-o cursor icon selection 
+x cursor icon selection Done v100
 
 15/6/06
 o merge to a single surface
@@ -168,7 +187,7 @@ o install cleaning.
 
 25/5/06
 x clustering nel filtro in input epoch // DONE 6/6 
-o install doc e attempt. // DONE 26/5
+x install doc e attempt. // DONE 26/5
 o Last Dir
 x selections plus/minus
 x Esc Pianta  // DONE 26/5
@@ -178,7 +197,7 @@ x save 3ds pianta // DONE 18/6
 
 o Uniformare i nomi degli slot nel main window
 o Measuring Tool
-o risistemare Recent file stuff...(bug in apertura cambio dir?)
+x risistemare Recent file stuff...(bug in apertura cambio dir?)
 o snapshot con fbo invece che con il rendering nel backbuffer.
 o Ambient Occlusion
 x Clustering dialog diag percentage <1 non va // DONE 7/6
@@ -212,6 +231,6 @@ o Ripulire glarea
  - Log
  - Paint
 X ScriptDialog // DONE 15/6 
-o Generic dialog option
+x Generic dialog option DONE 1.000
 o Clustering con bound e selezione.
-o Dialogo shaders che galleggia un po' troppo
+x Dialogo shaders che galleggia un po' troppo

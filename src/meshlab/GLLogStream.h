@@ -24,6 +24,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2007/03/27 12:20:09  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.5  2006/05/25 09:46:37  cignoni
 missing std and and all the other gcc detected syntax errors
 
@@ -75,8 +78,12 @@ public:
   void glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font);
   void Save(int Level, const char *filename);
   void Clear() {S.clear();}
-	void Log(int Level, const char * f, ... );
- 
+	void Logf(int Level, const char * f, ... );
+  void Log(int Level, const char * buf )
+	{
+		S.push_back(std::make_pair<int,std::string>(Level,buf));
+	}
+
 private:
   std::list<std::pair<int,std::string> > S;
 };

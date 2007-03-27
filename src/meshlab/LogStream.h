@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2007/03/27 12:20:14  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.6  2007/02/28 00:02:11  cignoni
 Added missing virtual destructors
 
@@ -45,15 +48,14 @@ Initial Draft release; still to be adapted to our needs.
 #ifndef LOGSTREAM_H
 #define LOGSTREAM_H
 
-#include <QGLWidget> 
 #include <QFont>
-
+class QGLWidget;
 
 class LogStream 
 {
 public:
   typedef enum {Error=0, Warning=1, Info=2, Debug=3, Direct=4, OnlyFileLog=5, OnlyConsole=6} Level ;
-	virtual void Log(int Level, const char * f, ... ) = 0;
+	virtual void Logf(int Level, const char * f, ... ) = 0;
 	virtual void glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font) = 0;
   virtual ~LogStream(){}
 };

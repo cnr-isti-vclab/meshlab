@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2007/03/27 12:20:15  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.13  2007/03/03 02:03:25  cignoni
 Reformatted lower bar, added number of selected faces. Updated about dialog
 
@@ -49,7 +52,9 @@ Fixed starting position
 
 ****************************************************************************/
 
-#include <qfont.h>
+#include <QFont>
+#include <QGLWidget>
+
 #include <stdio.h>
 
 #include "GLLogStream.h"
@@ -64,7 +69,8 @@ void GLLogStream::print(QStringList &l)
 		l << (*li).second.c_str();
 }
 
-void GLLogStream::Log(int Level, const char * f, ... )
+
+void GLLogStream::Logf(int Level, const char * f, ... )
 {
 	char buf[4096];
 	va_list marker;
@@ -72,8 +78,7 @@ void GLLogStream::Log(int Level, const char * f, ... )
 
 	vsprintf(buf,f,marker);
 	va_end( marker );              
-
-	S.push_back(make_pair<int,string>(Level,buf));
+	Log(Level,buf);
 }
 
 void GLLogStream::Save(int Level, const char * filename )

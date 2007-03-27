@@ -68,7 +68,6 @@ DEFINES += GLEW_STATIC
 
 INCLUDEPATH += . ../../../sf ../../../code/lib/glew/include
 CONFIG += stl
-#win32:LIBS	+= ../../../code/lib/glew/lib/glew32.lib 
 win32-g++{
 #LIBS	+= glew32
 #LIBPATH += ../../../code/lib/glew/lib/
@@ -80,4 +79,8 @@ CONFIG(debug, debug|release) {
 	win32-g++:release:DEFINES -= NDEBUG
 }
 
+macx{
+message( "We are on a mac: build universal binaries" )
+#CONFIG += ppc
+}
 

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.120  2007/03/27 12:20:17  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.119  2007/03/26 08:24:10  zifnab1974
 When a user minimizes the window using a shortcut that uses modifiers (alt, ctrl, shift), the state of the button remained "pressed" after the window was reraised. Added a hideevent which resets the button state.
 
@@ -238,11 +241,11 @@ void GLArea::pasteTile()
 				ss.counter++;
 				if (ss.counter>999)
 					ss.counter=0;
-                log.Log(GLLogStream::Info,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
+                log.Logf(GLLogStream::Info,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
 			}
 			else
 			{
-			    log.Log(GLLogStream::Error,"Error saving %s",outfile.toLocal8Bit().constData());
+			    log.Logf(GLLogStream::Error,"Error saving %s",outfile.toLocal8Bit().constData());
 			}
 
 			takeSnapTile=false;

@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.93  2007/03/27 12:20:18  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.92  2007/03/20 16:23:10  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -321,7 +324,7 @@ const QString ExtraMeshFilterPlugin::Info(QAction *action)
     case FP_REMOVE_FACES_BY_EDGE : 			return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");  
     case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");  
     case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller");  
-    case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, Normal Smoothing and vertex fitting smoothing, based on the paper of ...");  
+    case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing and vertex fitting smoothing, based on the paper of ...");  
     case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");  
     case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
@@ -384,23 +387,23 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 	 switch(ID(action))
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
-		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm().fn/2));
-		  parlst.addField("QualityThr","Quality threshold",lastq_QualityThr,"Quality threshold for penalizing bad shaped faces.\nThe value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
-		  parlst.addField("PreserveBoundary","Preserve Boundary of the mesh",lastq_PreserveBoundary,"The simplification process tries not to destroy mesh boundaries");
-		  parlst.addField("PreserveNormal","Preserve Normal",lastq_PreserveNormal,"Try to avoid face flipping effects and try to preserve the original orientation of the surface");
-		  parlst.addField("OptimalPlacement","Optimal position of simplified vertices",lastq_OptimalPlacement,"Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices. ");
-		  parlst.addField("Selected","Simplify only selected faces",lastq_Selected,"The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
+		  parlst.addFieldInt  ("TargetFaceNum","Target number of faces", (m.cm().sfn>0) ? m.cm().sfn/2 : m.cm().fn/2);
+		  parlst.addFieldFloat("QualityThr","Quality threshold",lastq_QualityThr,"Quality threshold for penalizing bad shaped faces.\nThe value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
+		  parlst.addFieldBool ("PreserveBoundary","Preserve Boundary of the mesh",lastq_PreserveBoundary,"The simplification process tries not to destroy mesh boundaries");
+		  parlst.addFieldBool ("PreserveNormal","Preserve Normal",lastq_PreserveNormal,"Try to avoid face flipping effects and try to preserve the original orientation of the surface");
+		  parlst.addFieldBool ("OptimalPlacement","Optimal position of simplified vertices",lastq_OptimalPlacement,"Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices. ");
+		  parlst.addFieldBool ("Selected","Simplify only selected faces",m.cm().sfn>0,"The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
 		  break;
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
-		  parlst.addField("TargetFaceNum","Target number of faces",(int)(m.cm().fn/2));
-		  parlst.addField("QualityThr","Quality threshold",lastqtex_QualityThr,"Quality threshold for penalizing bad shaped faces");
-		  parlst.addField("Extratcoordw","Texture discontinuity extra weight",lastqtex_extratw,"Additional weight for each extra Texture Coordinates for every (selected) vertex");
+		  parlst.addFieldInt  ("TargetFaceNum","Target number of faces",(int)(m.cm().fn/2));
+		  parlst.addFieldFloat("QualityThr","Quality threshold",lastqtex_QualityThr,"Quality threshold for penalizing bad shaped faces");
+		  parlst.addFieldFloat("Extratcoordw","Texture discontinuity extra weight",lastqtex_extratw,"Additional weight for each extra Texture Coordinates for every (selected) vertex");
 		  break;
 		case FP_CLOSE_HOLES:
-		  parlst.addField("MaxHoleSize","Max size to be closed ",(int)30,"The size is expressed as number of edges composing the hole boundary");
-		  parlst.addField("Selected","Close holes with selected faces",false);
-		  parlst.addField("NewFaceSelected","Select the newly created faces",true);
-		  parlst.addField("SelfIntersection","Prevent creation of selfIntersecting faces",true);
+		  parlst.addFieldInt ("MaxHoleSize","Max size to be closed ",(int)30,"The size is expressed as number of edges composing the hole boundary");
+		  parlst.addFieldBool("Selected","Close holes with selected faces",m.cm().sfn>0);
+		  parlst.addFieldBool("NewFaceSelected","Select the newly created faces",true);
+		  parlst.addFieldBool("SelfIntersection","Prevent creation of selfIntersecting faces",true);
 		  break;
 		case FP_LOOP_SS:
 		case FP_BUTTERFLY_SS: 
@@ -408,9 +411,16 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
 		  maxVal = m.cm().bbox.Diag();
-		  parlst.addField("Threshold","Threshold",maxVal*0.01,0,maxVal);
-		  parlst.addField("Selected","Affect only selected faces",false);
+		  parlst.addFieldAbsPerc("Threshold","Threshold",maxVal*0.01,0,maxVal);
+		  parlst.addFieldBool ("Selected","Affect only selected faces",m.cm().sfn>0);
 		  break;
+		case FP_TWO_STEP_SMOOTH:
+			parlst.addFieldInt  ("stepSmoothNum","Smoothing steps", (int) 3, "");
+			parlst.addFieldFloat("normalThr","Feature Angle Threshold (deg)", (float) 60, "Specify a threshold angle for features that you want to be preserved.\nFeatures forming angles LARGER than the specified threshold will be preserved.");
+			parlst.addFieldInt  ("stepNormalNum","Normal Smoothing steps", (int) 20, "");
+      parlst.addFieldBool ("Selected","Affect only selected faces",m.cm().sfn>0);
+		break;
+		
 	  default:
 		  return false;
 	 }
@@ -429,6 +439,7 @@ bool ExtraMeshFilterPlugin::getStdParameters(QAction *action, QWidget *parent, M
 		case FP_MIDPOINT : 
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
+		case FP_TWO_STEP_SMOOTH:
 		  return true;
   	 }
 
@@ -457,7 +468,6 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
     case FP_INVERT_FACES:
     case FP_HC_LAPLACIAN_SMOOTH:
     case FP_LAPLACIAN_SMOOTH:
-    case FP_TWO_STEP_SMOOTH:
     case FP_REMOVE_NON_MANIFOLD:
     case FP_NORMAL_EXTRAPOLATION:
        return true; // no parameters
@@ -504,21 +514,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
   if(filter->text() == ST(FP_REMOVE_FACES_BY_AREA) )
 	  {
 	    int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm(),0);
-	    if (log) log->Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
+	    Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
 
   if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
 	  {
 	    int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm());
-	    if (log) log->Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
+	    Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
 	  }
 
 	if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
 	  {
 	    int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm());
-	    if (log)
-	      log->Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+	    Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
 	    if (delvert != 0)
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm());
 	  }
@@ -526,9 +535,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	if(filter->text() == ST(FP_REMOVE_NON_MANIFOLD) )
 	  {
 	    int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm());
-	    if (log)
-	      if(nonManif) log->Log(GLLogStream::Info, "Removed %d Non Manifold Faces", nonManif);
-                else log->Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
+	    
+			if(nonManif) Log(GLLogStream::Info, "Removed %d Non Manifold Faces", nonManif);
+							else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
 	  }
 
 	if(filter->text() == ST(FP_REORIENT) )
@@ -541,9 +550,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH))
 	  {
+		  tri::UpdateSelection<CMeshO>::ClearVertex(m.cm());
       size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm());
       if(cnt>0) LaplacianSmooth(m.cm(),1,true);
       else LaplacianSmooth(m.cm(),1,false);
+			 Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm().vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm());	    
 	  }
 
@@ -557,9 +568,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
   if(filter->text() == ST(FP_TWO_STEP_SMOOTH))
 	  {
+      //size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+			int stepSmoothNum = par.getInt("stepSmoothNum");
+			float normalThr   = cos(math::ToRad(par.getFloat("normalThr")));
+      int stepNormalNum = par.getInt("stepNormalNum");
+
       //size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm());
       tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm());
-      PasoDobleSmoothFast(m.cm(), 2, .1, 5);
+      PasoDobleSmoothFast(m.cm(), stepSmoothNum, normalThr, stepNormalNum);
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm());	    
 	  }
 
@@ -585,10 +601,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	if (filter->text() == ST(FP_TRANSFORM) ) {
     Matrix44f matrix= par.getMatrix44("Transform");		
 
-		if (log) {
- 			log->Log(GLLogStream::Info,
+		Log(GLLogStream::Info,
  							 transformDialog->getLog().toAscii().data());
- 		}
+ 		
  		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm(), matrix);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm());
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm());
@@ -604,9 +619,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		lastq_OptimalPlacement = par.getBool("OptimalPlacement");
 		lastq_Selected = par.getBool("Selected");
 
-	   QuadricSimplification(m.cm(),TargetFaceNum,lastq_QualityThr, lastq_PreserveBoundary,lastq_PreserveNormal, lastq_OptimalPlacement,lastq_Selected,  cb);
+		QuadricSimplification(m.cm(),TargetFaceNum,lastq_QualityThr, lastq_PreserveBoundary,lastq_PreserveNormal, lastq_OptimalPlacement,lastq_Selected,  cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm());
-		 tri::UpdateBounding<CMeshO>::Box(m.cm());
+		tri::UpdateBounding<CMeshO>::Box(m.cm());
 	}
 
 

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2007/03/27 12:20:09  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.5  2006/11/08 01:04:48  cignoni
 First version with http communications
 
@@ -38,6 +41,7 @@ Added copyright info
 ****************************************************************************/
 
 #include <QApplication>
+#include <QMessageBox>
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
@@ -48,9 +52,13 @@ int main(int argc, char *argv[])
   MainWindow window;
   window.showMaximized();
 
+  // This filter is installed to intercept the open events sent directly by the Operative System. 
+	FileOpenEater *filterObj=new FileOpenEater();
+  filterObj->mainWindow=&window;
+	app.installEventFilter(filterObj);
+	app.processEvents();
 	if(argc>1)	window.open(argv[1]);
-	else		window.open();
-
-
+	else 	if(filterObj->noEvent) window.open();
+ 
 	return app.exec();
 }

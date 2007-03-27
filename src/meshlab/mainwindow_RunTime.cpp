@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.125  2007/03/27 12:20:17  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.124  2007/03/26 08:25:09  zifnab1974
 added eol at the end of the files
 
@@ -287,7 +290,7 @@ void MainWindow::runFilterScript()
     int req=iFilter->getRequirements(action);
     GLA()->mm->updateDataMask(req);
     iFilter->applyFilter( action, *(GLA()->mm), (*ii).second, QCallBack );
-    GLA()->log.Log(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
+    GLA()->log.Logf(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
 }
 
@@ -323,7 +326,9 @@ void MainWindow::executeFilter(QAction *action,FilterParameter *par)
   // (1) Ask for filter requirements (eg a filter can need topology, border flags etc)
   //    and statisfy them
   int req=iFilter->getRequirements(action);
-  GLA()->mm->updateDataMask(req);
+	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
+	GLA()->mm->updateDataMask(req);
+  qApp->restoreOverrideCursor();	
 
   
   // (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
@@ -340,15 +345,18 @@ void MainWindow::executeFilter(QAction *action,FilterParameter *par)
   qb->show();
   iFilter->setLog(&(GLA()->log));
   // (4) Apply the Filter 
-  GLA()->mm->busy=true;
+
+  qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
+	GLA()->mm->busy=true;
   ret=iFilter->applyFilter(action, *(GLA()->mm), *par, QCallBack);
   GLA()->mm->busy=false;
-	
+  qApp->restoreOverrideCursor();	
+
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
 	if(ret)
 	{
-		GLA()->log.Log(GLLogStream::Info,"Applied filter %s",qPrintable(action->text()));
+		GLA()->log.Logf(GLLogStream::Info,"Applied filter %s",qPrintable(action->text()));
 		GLA()->setWindowModified(true);
 		GLA()->setLastAppliedFilter(action);
 		lastFilterAct->setText(QString("Apply filter ") + action->text());  
@@ -391,7 +399,7 @@ void MainWindow::endEditMode()
 	    MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
       GLA()->setEdit(iEdit,action);
       iEdit->StartEdit(action,*(GLA()->mm),GLA());
-	    GLA()->log.Log(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
+	    GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
       GLA()->setSelectionRendering(true);
     }
   updateMenus();
@@ -412,7 +420,7 @@ void MainWindow::applyEditMode()
   GLA()->setLastAppliedEdit(action);
 
   iEdit->StartEdit(action,*(GLA()->mm),GLA());
-	GLA()->log.Log(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
+	GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
   GLA()->setSelectionRendering(true);
   updateMenus();
 }
@@ -427,18 +435,18 @@ void MainWindow::applyRenderMode()
 
 	if(action->text() == tr("None"))
 	{
-		GLA()->log.Log(GLLogStream::Info,"No Shader");
+		GLA()->log.Logf(GLLogStream::Info,"No Shader");
 		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
 	} else {
 		if(iRenderTemp->isSupported())
 		{
 			GLA()->setRenderer(iRenderTemp,action);
-			GLA()->log.Log(GLLogStream::Info,"%s",qPrintable(action->text()));	// Prints out action name
+			GLA()->log.Logf(GLLogStream::Info,"%s",qPrintable(action->text()));	// Prints out action name
 		}
 		else
 		{
 			GLA()->setRenderer(0,0); //vertex and fragment programs not supported
-			GLA()->log.Log(GLLogStream::Warning,"Shader not supported!");
+			GLA()->log.Logf(GLLogStream::Warning,"Shader not supported!");
 		}
 	}
 }
@@ -450,7 +458,7 @@ void MainWindow::applyColorMode()
 	MeshFilterInterface *iColorTemp = qobject_cast<MeshFilterInterface *>(action->parent());
   iColorTemp->setLog(&(GLA()->log));
   //iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
-  GLA()->log.Log(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
+  GLA()->log.Logf(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
   updateMenus();
 }
 
@@ -462,20 +470,20 @@ void MainWindow::applyDecorateMode()
 	if(GLA()->iDecoratorsList==0){
 		GLA()->iDecoratorsList= new list<pair<QAction *,MeshDecorateInterface *> >;
 		GLA()->iDecoratorsList->push_back(make_pair(action,iDecorateTemp));
-		GLA()->log.Log(GLLogStream::Info,"Enable Decorate mode %s",action->text().toLocal8Bit().constData());
+		GLA()->log.Logf(GLLogStream::Info,"Enable Decorate mode %s",action->text().toLocal8Bit().constData());
 	}else{
 		bool found=false;
 		pair<QAction *,MeshDecorateInterface *> p;
 		foreach(p,*GLA()->iDecoratorsList){
 			if(iDecorateTemp==p.second && p.first->text()==action->text()){
 				GLA()->iDecoratorsList->remove(p);
-				GLA()->log.Log(0,"Disabled Decorate mode %s",action->text().toLocal8Bit().constData());
+				GLA()->log.Logf(0,"Disabled Decorate mode %s",action->text().toLocal8Bit().constData());
 				found=true;
 			} 
 		}
 		if(!found){
 			GLA()->iDecoratorsList->push_back(make_pair(action,iDecorateTemp));
-			GLA()->log.Log(GLLogStream::Info,"Enable Decorate mode %s",action->text().toLocal8Bit().constData());
+			GLA()->log.Logf(GLLogStream::Info,"Enable Decorate mode %s",action->text().toLocal8Bit().constData());
 		}
 	}
 }
@@ -489,6 +497,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	qb->setValue(pos);
 //	qb->update();
 	MainWindow::globalStatusBar()->update();
+ qApp->processEvents();
 //qb->repaint();
   //if(qb==0) return true;
 	//qb->setWindowTitle (str);

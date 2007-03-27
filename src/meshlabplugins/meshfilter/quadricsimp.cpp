@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2007/03/27 12:20:18  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.7  2007/03/20 16:23:10  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -101,8 +104,8 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,
 
   TD.Start(QZero);
   MyTriEdgeCollapse::SetDefaultParams();
-  MyTriEdgeCollapse::SetHint(MyTriEdgeCollapse::HNHasVFTopology);
-  MyTriEdgeCollapse::SetHint(MyTriEdgeCollapse::HNHasBorderFlag);
+  //MyTriEdgeCollapse::SetHint(MyTriEdgeCollapse::HNHasVFTopology);
+  //MyTriEdgeCollapse::SetHint(MyTriEdgeCollapse::HNHasBorderFlag);
 
   MyTriEdgeCollapse::Params().QualityThr=QualityThr;
   
@@ -124,7 +127,8 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,
   if(PreserveBoundary && !Selected) 
     MyTriEdgeCollapse::Params().FastPreserveBoundary=true;
 
-  MyTriEdgeCollapse::Params().OptimalPlacement=OptimalPlacement;
+ // MyTriEdgeCollapse::Params().OptimalPlacement=OptimalPlacement;
+		MyTriEdgeCollapse::Params().OptimalPlacement=true;
 		
   if(PreserveNormal) {
 	MyTriEdgeCollapse::Params().NormalCheck= true;

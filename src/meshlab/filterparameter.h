@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2007/03/27 12:20:13  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.6  2007/02/09 09:09:39  pirosu
 Added ToolTip support for standard parameters
 
@@ -164,28 +167,7 @@ public:
 		this->clear();
 	}
 
-	void addField(char *name, char* desc, bool val)
-	{
-		addField(name,desc,val,(char *)NULL);
-	}
-	void addField(char *name, char* desc, float val)
-	{
-		addField(name,desc,val,(char *)NULL);
-	}
-	void addField(char *name, char* desc, float val, float minv, float maxv)
-	{
-		addField(name,desc,val,minv,maxv,(char *)NULL);
-	}
-	void addField(char *name, char* desc, int val)
-	{
-		addField(name,desc,val,(char *)NULL);
-	}
-	void addField(char *name, char* desc, char *val)
-	{
-		addField(name,desc,val,(char *)NULL);
-	}
-
-	void addField(char *name, char* desc, bool val,char *ttex)
+	void addFieldBool(char *name, char* desc, bool val,char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
@@ -197,7 +179,8 @@ public:
 
 		v.push_back(std);
 	}
-	void addField(char *name, char* desc, float val,char *ttex)
+
+	void addFieldFloat(char *name, char* desc, float val,char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
@@ -209,7 +192,8 @@ public:
 
 		v.push_back(std);
 	}
-	void addField(char *name, char* desc, float val, float minv, float maxv,char *ttex)
+	
+	void addFieldAbsPerc(char *name, char* desc, float val, float minv, float maxv,char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
@@ -223,7 +207,8 @@ public:
 
 		v.push_back(std);
 	}
-	void addField(char *name, char* desc, int val,char *ttex)
+  
+	void addFieldInt(char *name, char* desc, int val,char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
@@ -235,7 +220,8 @@ public:
 
 		v.push_back(std);
 	}
-	void addField(char *name, char* desc, char *val,char *ttex)
+	
+	void addFieldString(char *name, char* desc, char *val,char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 

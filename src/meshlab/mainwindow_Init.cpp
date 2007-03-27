@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.74  2007/03/27 12:20:16  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.73  2007/03/20 16:22:34  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -123,6 +126,8 @@ Added short key lastFilter
 #include <QToolBar>
 #include <QProgressBar>
 #include <QHttp>
+#include <QFileOpenEvent>
+
 
 #include "meshmodel.h"
 #include "interfaces.h"
@@ -170,7 +175,6 @@ MainWindow::MainWindow()
   //qb->reset();
 }
 
-
 // creates the standard plugin window
 void MainWindow::createStdPluginWnd()
 {
@@ -178,7 +182,7 @@ void MainWindow::createStdPluginWnd()
 	stddialog->setAllowedAreas (    Qt::NoDockWidgetArea );
 	//addDockWidget(Qt::RightDockWidgetArea,stddialog);
 	stddialog->setFloating(true);
-	stddialog->move(0,120);
+	//stddialog->move(0,120);
 }
 
 

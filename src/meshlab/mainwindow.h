@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.82  2007/03/27 12:20:16  cignoni
+Revamped logging iterface, changed function names in automatic parameters, better selection handling
+
 Revision 1.81  2007/03/05 12:23:01  cignoni
 v.1.0.0 string
 
@@ -132,8 +135,6 @@ class QHttp;
 class MeshlabStdDialog;
 class MeshlabStdDialogFrame;
 
-
-
 class MainWindow : public QMainWindow,MainWindowInterface
 {
 	Q_OBJECT
@@ -151,7 +152,6 @@ public:
 
 public slots:
  void open(QString fileName=QString());
-
   
 private slots:
 
@@ -340,4 +340,31 @@ private:
 	QList<QAction *> TotalDecoratorsList;
 	////////////////////////////////////////////////////
 };
+
+class FileOpenEater : public QObject
+{
+Q_OBJECT
+
+public:
+FileOpenEater() {noEvent=true;}
+MainWindow *mainWindow;
+bool noEvent;
+
+protected:
+
+bool eventFilter(QObject *obj, QEvent *event)
+ {
+	 if (event->type() == QEvent::FileOpen) {
+						noEvent=false;
+						QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
+						mainWindow->open(fileEvent->file());
+						// QMessageBox::information(0,"Meshlab",fileEvent->file());
+						return true;
+        } else {
+             // standard event processing
+             return QObject::eventFilter(obj, event);
+         }
+     }
+ };
+
 #endif
