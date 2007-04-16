@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2007/04/16 10:02:15  cignoni
+Again on the cm() ->cm issue
+
 Revision 1.5  2007/03/20 16:22:35  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -188,7 +191,7 @@ int main(int argc, char *argv[])
 	if(argc>1)	
   {
     Open(mm,argv[1]);
-    printf("Mesh loaded is %i vn %i fn\n",mm.cm().vn,mm.cm().fn);
+    printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
     Save(mm,argv[2]);    
   }
   else exit(-1);
