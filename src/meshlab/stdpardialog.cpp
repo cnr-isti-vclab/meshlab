@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.10  2007/04/16 09:22:43  cignoni
+corrected resizing bug in the dialog
+
 Revision 1.9  2007/02/27 23:58:36  cignoni
 Changed apply/ok into apply/close
 
@@ -51,19 +54,15 @@ added support for parameters with absolute and percentage values
 Revision 1.2  2006/12/13 21:54:35  pirosu
 2 updates for the standard plugin window: 1) it recovers its last size when it is undocked and 2) it closes itself when a filter is applied (only if it is floating)
 
-
 Revision 1.0  2006/12/13 17:37:02  pirosu
 Added standard plugin window support
 
 ****************************************************************************/
 
-
 #include "stdpardialog.h"
 
 
-
-
-/* manages the setup of the standard plugin window, when the execution of a plugin filter is requested */
+/* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
 void MeshlabStdDialog::loadPluginAction(MeshFilterInterface *mfi,MeshModel *mm,QAction *q,MainWindowInterface *mwi)
   {
 		StdParList *newparlist = new StdParList();
@@ -71,7 +70,7 @@ void MeshlabStdDialog::loadPluginAction(MeshFilterInterface *mfi,MeshModel *mm,Q
 	  if(mm == NULL)
 		  return;
 
-	  /* checks wether the plugin action wants to handle parameters input by the standard plugin window or by itself */
+	  /* checks wether the plugin action wants to handle parameters input by the standard parameter window or by itself */
 	  if(!mfi->getStdFields(q,*mm,*newparlist))
 	  {
 		  /* the plugin action wants to handle parameters input by itself: the executeFilter() function is directly called */
@@ -82,7 +81,7 @@ void MeshlabStdDialog::loadPluginAction(MeshFilterInterface *mfi,MeshModel *mm,Q
 	  else
 	  {
 		  /* the plugin action wants to handle parameters input by the standard plugin window */
-		  	resetMe();
+			resetMe();
 			delete parlist;
 			parlist = newparlist;
 
@@ -125,8 +124,6 @@ void MeshlabStdDialog::resetMe()
 
 void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 {
-
-
 	qf->hide();	
 	setWindowTitle(actiondesc);
 
@@ -139,7 +136,6 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 	AbsPercWidget *apw;
 
 	/* creates widgets for the standard parameters */
-
 
 	for(int i = 0; i < parlist->count(); i++)
 	{
@@ -217,12 +213,13 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
 
 	qf->showNormal();	
+	qf->adjustSize();
 
-	if(this->isHidden())
-	{
+	//if(this->isHidden())
+	//{
 		this->showNormal();
 		this->adjustSize();
-	}
+	//}
 	
 }
 
