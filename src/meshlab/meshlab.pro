@@ -1,5 +1,5 @@
 HEADERS        = interfaces.h \
-		         GLLogStream.h \
+		 GLLogStream.h \
                  mainwindow.h \
                  meshmodel.h \
                  glarea.h \
@@ -14,6 +14,7 @@ HEADERS        = interfaces.h \
                  savemaskexporter.h \
                  changetexturename.h \
                  GenericELDialog.h \
+                 layerDialog.h \
                  stdpardialog.h \
                  ../../../sf/wrap/gui/trackball.h\
                  ../../../sf/wrap/gui/trackmode.h\
@@ -31,6 +32,7 @@ SOURCES        = main.cpp \
                  lightingDialog.cpp \
                  filterScriptDialog.cpp \
                  saveSnapshotDialog.cpp \
+                 layerDialog.cpp \
                  savemaskexporter.cpp \
                  changetexturename.cpp \
                  stdpardialog.cpp \
@@ -38,7 +40,8 @@ SOURCES        = main.cpp \
                  ../../../sf/wrap/gui/trackmode.cpp \
                  ../../../code/lib/glew/src/glew.c
 
-FORMS          =	ui/filterScriptDialog.ui \
+FORMS          =    ui/layerDialog.ui \
+                    ui/filterScriptDialog.ui \
                     ui/customDialog.ui\
                     ui/lightingProperties.ui \
 					ui/savesnapshotDialog.ui\						 
