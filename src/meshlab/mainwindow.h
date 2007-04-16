@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.84  2007/04/16 10:19:18  cignoni
+v.1.1.0b string
+
 Revision 1.83  2007/04/16 09:24:37  cignoni
 ** big change **
 Added Layers managemnt.
@@ -151,7 +154,7 @@ public:
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("1.0.0"); }
+   const QString appVer() const {return tr("1.1.0b"); }
 
   // MaskObj maskobj;
 
