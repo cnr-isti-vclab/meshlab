@@ -26,5 +26,9 @@
         <file>images/snapshot.png</file>
         <file>images/textures.png</file>
         <file>images/wire.png</file>
+        <file>images/layer_eye_open.png</file>
+        <file>images/layer_eye_close.png</file>
+        <file>images/layer_edit_locked.png</file>
+        <file>images/layer_edit_unlocked.png</file>
     </qresource>
 </RCC>
