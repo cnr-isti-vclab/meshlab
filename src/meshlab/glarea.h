@@ -24,6 +24,11 @@
   History
 
 $Log$
+Revision 1.73  2007/04/16 09:24:37  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing...
+
 Revision 1.72  2007/03/26 08:24:10  zifnab1974
 When a user minimizes the window using a shortcut that uses modifiers (alt, ctrl, shift), the state of the button remained "pressed" after the window was reraised. Added a hideevent which resets the button state.
 
@@ -119,6 +124,8 @@ Revision 1.51  2006/01/25 03:57:15  glvertex
 #define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
+
+class LayerDialog;
 
 class GLLightSetting
 {
@@ -217,12 +224,18 @@ class GLArea : public QGLWidget
 {
 	Q_OBJECT
 
-
+private:
+  MeshModel *currentMesh;	
+public:
+  LayerDialog *layerDialog;
+  // Layer Management stuff. 
+  QList<MeshModel *> meshList;
 public:
 	GLArea(QWidget *parent = 0);
 	~GLArea(){}
 	
-	MeshModel *mm;
+	MeshModel *mm(){return currentMesh;}
+	void addMesh(MeshModel *mm);
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
 	GLLogStream log;
@@ -239,11 +252,11 @@ public:
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 	void		setLastAppliedEdit(QAction *qa)		  {lastEditRef = qa;}
 
-	QString getFileName()							{return fileName;}
+	QString getFileName()							{return QString(currentMesh->fileName.c_str());}
 	void		setFileName(QString name)	
     {
-    fileName = name; 
-    ss.basename=QFileInfo(fileName).baseName().append("Snap");
+    currentMesh->fileName = qPrintable(name); 
+    ss.basename=QFileInfo(getFileName()).baseName().append("Snap");
 	}
 
 	short		getLogLevel()												{return currLogLevel;}
@@ -346,9 +359,7 @@ private:
 
 private:
 	float cfps;
-    float lastTime;
-
-	QString fileName;
+	float lastTime;
 	
 	SnapshotSetting ss;
 	QImage snapBuffer;

@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.75  2007/04/16 09:24:37  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing...
+
 Revision 1.74  2007/03/27 12:20:16  cignoni
 Revamped logging iterface, changed function names in automatic parameters, better selection handling
 
@@ -182,7 +187,7 @@ void MainWindow::createStdPluginWnd()
 	stddialog->setAllowedAreas (    Qt::NoDockWidgetArea );
 	//addDockWidget(Qt::RightDockWidgetArea,stddialog);
 	stddialog->setFloating(true);
-	//stddialog->move(0,120);
+	stddialog->move(50,100);
 }
 
 
@@ -193,6 +198,11 @@ void MainWindow::createActions()
 	openAct->setShortcutContext(Qt::ApplicationShortcut);
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+	
+  openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open inside..."), this);
+	openInAct->setShortcutContext(Qt::ApplicationShortcut);
+	openInAct->setShortcut(Qt::CTRL+Qt::Key_O);
+	connect(openInAct, SIGNAL(triggered()), this, SLOT(openIn()));
 
   closeAct = new QAction(tr("&Close"), this);
 	closeAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -323,6 +333,12 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcutContext(Qt::ApplicationShortcut);
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
+	
+	showLayerDlgAct =  new QAction (tr("Show Layer Dialog"), this);
+	showLayerDlgAct->setCheckable(true);
+	showLayerDlgAct->setChecked(true);
+	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));
+
 
   //////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
   endEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
@@ -406,6 +422,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu File ////////////////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(openAct);
+	fileMenu->addAction(openInAct);
 	fileMenu->addAction(closeAct);
 	fileMenu->addAction(reloadAct);
 	fileMenu->addAction(saveAsAct);
@@ -480,6 +497,7 @@ void MainWindow::createMenus()
 	//////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(fullScreenAct);
+	viewMenu->addAction(showLayerDlgAct);
 
 	trackBallMenu = viewMenu->addMenu(tr("&Trackball"));
 	trackBallMenu->addAction(showTrackBallAct);
@@ -553,6 +571,7 @@ pluginsDir = QDir(qApp->applicationDirPath());
         foreach(filterAction, iFilter->actions())
         {
           filterMap[filterAction->text()]=filterAction;
+					filterAction->setToolTip(iFilter->Info(filterAction));
           connect(filterAction,SIGNAL(triggered()),this,SLOT(applyFilter()));
           switch(iFilter->getClass(filterAction))
           {
@@ -632,7 +651,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
 		if (mainWin) mainWin->updateRecentFileActions();
 	}
 
-  settings.setValue("totalKV",          settings.value("totalKV",0).toInt()           + (GLA()->mm->cm().vn)/1000);
+  settings.setValue("totalKV",          settings.value("totalKV",0).toInt()           + (GLA()->mm()->cm.vn)/1000);
   settings.setValue("loadedMeshCounter",settings.value("loadedMeshCounter",0).toInt() + 1);
   
 	int loadedMeshCounter    = settings.value("loadedMeshCounter",20).toInt(); 

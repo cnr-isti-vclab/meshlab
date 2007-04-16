@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.56  2007/04/16 09:24:37  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing...
+
 Revision 1.55  2007/03/27 12:20:16  cignoni
 Revamped logging iterface, changed function names in automatic parameters, better selection handling
 
@@ -139,26 +144,48 @@ class MeshFilterInterface
 {
 public:
   typedef int FilterType;
-  	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring} ;
-    virtual ~MeshFilterInterface() {}
-		virtual const QString Info(QAction *)=0;
+	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring} ;
+	virtual ~MeshFilterInterface() {}
 
-    // The filterclass describe in which submenu each filter should be placed 
-    virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Generic;};
+	// The longer string describing each filtering action 
+	// (this string is used in the About plugin dialog)
+	virtual const QString Info(FilterType filter)=0;
+	
+	// The very short string describing each filtering action 
+	// (this string is used also to define the menu entry)
+	virtual const QString ST(FilterType filter)=0;
+
+	// Generic Info about the plugin version and author.
+	virtual const PluginInfo &Info()=0;
+
+	// The filterclass describe in which generic class of filters it fits. 
+	// This choice affect the submenu in which each filter will be placed 
+	// For example filters that perform action only on the selection will be placed in the Ê
+	virtual const FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
+	
+	// This function invokes a dialog and get back the parameters
+	virtual bool getParameters(QAction *, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameter & /*par*/) {return true;}
+	
+	// The filters can have some additional requirements on the mesh capabiliteis. 
+	// For example if a filters requires Face-Face Adjacency you shoud re-implement 
+	// this function making it returns MeshModel::MM_FACETOPO. 
+	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
+	virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}
+
+	// The main function that applies the selected filter.
+	// This function is called by the frameworl 
+	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameter & /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
+	
+	// Returns an array of standard parameters descriptors for the standard plugin window. 
+	// FALSE is returned by default if the plugin doesn't implement this 
+	virtual bool getStdFields(QAction *, MeshModel &, StdParList &){return false;}
     
-    // This function invokes a dialog and get back the parameters
-    virtual bool getParameters(QAction *, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameter & /*par*/) {return true;};
-    
-    // The filters can require some additional
-    virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}
+	/* Overloading of the function getParameters that supports the standard plugin window. If the plugin doesn't implement this, the classic function is called */
+	virtual bool getStdParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/) {return getParameters(qa,qw,mm,fp);};
 
-    // The main function that applies the selected filter 
-    virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameter & /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
 
-    virtual const PluginInfo &Info()=0;
+  /// Standard stuff that usually should not be redefined. 
 	  void setLog(GLLogStream *log) { this->log = log ; }
-
-    virtual const QString ST(FilterType filter)=0;
 
     virtual const FilterType ID(QAction *a)
   	{
@@ -167,20 +194,22 @@ public:
           assert(0);
       return 0;
     }
+		virtual const QString Info(QAction *a){return Info(ID(a));};
+	 
     virtual QList<QAction *> actions() const { return actionList;}
 	  virtual QList<FilterType> &types() { return typeList;}
 
-	  /* Returns an array of standard parameters descriptors for the standard plugin window .NULL is returned by default if the plugin doesn't implement this */
-	virtual bool getStdFields(QAction *, MeshModel &, StdParList &){return false;}
-    
-	/* Overloading of the function getParameters that supports the standard plugin window. If the plugin doesn't implement this, the classic function is called */
-	virtual bool getStdParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/) {return getParameters(qa,qw,mm,fp);};
-
-
 protected:
-    QList <QAction *> actionList;
-    QList <FilterType> typeList;
-    void Log(int Level, const char * f, ... ) 
+    // Each plugins exposes a set of filtering possibilities. 
+		// Each filtering procedure corresponds to a single QAction with a corresponding FilterType id. 
+		// 
+		
+    // The list of actions exported by the plugin. Each actions strictly corresponds to 
+		QList <QAction *> actionList;
+    
+		QList <FilterType> typeList;
+    
+		void Log(int Level, const char * f, ... ) 
 		{
 		if(log)
 			{	

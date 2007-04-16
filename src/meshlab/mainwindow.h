@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.83  2007/04/16 09:24:37  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing...
+
 Revision 1.82  2007/03/27 12:20:16  cignoni
 Revamped logging iterface, changed function names in automatic parameters, better selection handling
 
@@ -151,11 +156,12 @@ public:
   // MaskObj maskobj;
 
 public slots:
- void open(QString fileName=QString());
+ void open(QString fileName=QString(), GLArea *gla=0);
   
 private slots:
 
 	//////////// Slot Menu File //////////////////////
+	void openIn(QString fileName=QString());
   void reload();
 	void openRecentFile();							
 	bool saveAs();
@@ -194,6 +200,7 @@ private slots:
 	void showInfoPane();
 	void showTrackBall();
 	void resetTrackBall();
+	void showLayerDlg();
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
 	void updateMenus();
@@ -282,6 +289,7 @@ private:
 
 	//////////// Actions Menu File ///////////////////////
 	QAction *openAct;
+	QAction *openInAct;
 	QAction *closeAct;
 	QAction *reloadAct;
 	QAction *saveAsAct;
@@ -322,6 +330,7 @@ private:
 	QAction *showInfoPaneAct;
 	QAction *showTrackBallAct;
 	QAction *resetTrackBallAct;
+	QAction *showLayerDlgAct;
 	///////////Actions Menu Windows /////////////////////
 	QAction *windowsTileAct;
 	QAction *windowsCascadeAct;

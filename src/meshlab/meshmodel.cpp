@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.26  2007/04/16 09:24:37  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing...
+
 Revision 1.25  2007/03/20 16:22:34  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -68,14 +73,14 @@ bool MeshModel::RenderSelectedFaces()
   glPolygonOffset(-1.0, -1);
   CMeshO::FaceIterator fi;
   glBegin(GL_TRIANGLES);
-	cm().sfn=0;
-	for(fi=cm().face.begin();fi!=cm().face.end();++fi)
+	cm.sfn=0;
+	for(fi=cm.face.begin();fi!=cm.face.end();++fi)
     if(!(*fi).IsD() && (*fi).IsS())
     {
   		glVertex((*fi).cP(0));
   		glVertex((*fi).cP(1));
   		glVertex((*fi).cP(2));
-			++cm().sfn;
+			++cm.sfn;
     }
   glEnd();
 	glPopAttrib();

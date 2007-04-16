@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.34  2007/04/16 09:24:37  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing...
+
 Revision 1.33  2007/03/20 16:22:34  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -59,14 +64,14 @@ abstract pointer to fileformat's dependent additional info added
 #include <stdio.h>
 #include <time.h>
 
-#include<vcg/simplex/vertexplus/base.h>
+#include <vcg/simplex/vertexplus/base.h>
 #include <vcg/simplex/edge/edge.h>
-#include<vcg/simplex/faceplus/base.h>
-#include<vcg/simplex/face/topology.h>
+#include <vcg/simplex/faceplus/base.h>
+#include <vcg/simplex/face/topology.h>
 
-#include<vcg/complex/trimesh/base.h>
-#include<vcg/simplex/vertexplus/component_ocf.h>
-#include<vcg/simplex/faceplus/component_ocf.h>
+#include <vcg/complex/trimesh/base.h>
+#include <vcg/simplex/vertexplus/component_ocf.h>
+#include <vcg/simplex/faceplus/component_ocf.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/flag.h>
 
@@ -128,10 +133,9 @@ public :
 };
 
 /*
-  MeshModel Class
-
-contiene i dati relativi ad un singolo oggetto.
-Ogni oggetto si sa caricare e contiene una mesh
+MeshModel Class
+The base class for representing a single mesh.
+It contains a single vcg mesh object with some additional information for keeping track of its origin and of what info it has. 
 */
 
 class MeshModel : public tri::io::Mask
@@ -148,13 +152,12 @@ public:
                     MM_ALL           = 0xffff} ;
 
 
-	CMeshO &cm(){return _cm;}
-private:
-  CMeshO _cm;
+  CMeshO cm;
 
 public:
   GlTrimesh<CMeshO> glw;
   vector<Color4b> originalVertexColor;
+	std::string fileName;
 
   // Bitmask denoting what fields are currently kept updated in mesh
   // it is composed by OR-ing MM_XXXX enums (defined in the above FilterReq)
@@ -163,42 +166,43 @@ public:
   // Bitmask denoting what fields are loaded/saved
   // it is composed by OR-ing IOM_XXXX enums (defined in tri::io::Mask)
   int ioMask;
+	
   bool busy;
+	bool visible;
 
   //abstract pointer to fileformat's dependent additional info
   AdditionalInfo* addinfo;
 
-  MeshModel() {
-//    size_t faceSize=sizeof(CFaceO);
-//    size_t vertSize=sizeof(CVertexO);
-    
-    glw.m=&cm(); 
+  MeshModel() {    
+    glw.m=&cm; 
     currentDataMask=MM_NONE;
     ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
     busy=true;
+		visible=true;
   }
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
   bool RenderSelectedFaces();
 
   inline void storeVertexColor()
   {
-    originalVertexColor.resize(cm().vert.size());
+    originalVertexColor.resize(cm.vert.size());
     vector<Color4b>::iterator ci;
 	  CMeshO::VertexIterator vi;
-	  for(vi=cm().vert.begin(),ci=originalVertexColor.begin();vi!=cm().vert.end();++vi,++ci) 
+	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
       (*ci)=(*vi).C();
   }
   inline void restoreVertexColor()
   {
     if(originalVertexColor.empty()) return;
-    if(originalVertexColor.size() != cm().vert.size()) return;
+    if(originalVertexColor.size() != cm.vert.size()) return;
     vector<Color4b>::iterator ci;
 	  CMeshO::VertexIterator vi;
-	  for(vi=cm().vert.begin(),ci=originalVertexColor.begin();vi!=cm().vert.end();++vi,++ci) 
+	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
       (*vi).C()=(*ci);
   }
-
-// FUNZIONE equivalente alla updatedatamask ma solo che prende in ingresso mask da filetype.
+	
+// This function is roughly equivalent to the updateDataMask,
+// but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
   void Enable(int openingFileMask)
   {
    if( openingFileMask & IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
@@ -219,35 +223,35 @@ public:
   {
    if( ( (neededDataMask & MM_FACETOPO)!=0) && (currentDataMask& MM_FACETOPO)==0)			
    {
-    cm().face.EnableFFAdjacency();
+    cm.face.EnableFFAdjacency();
     currentDataMask |= MM_FACETOPO;
-	  tri::UpdateTopology<CMeshO>::FaceFace(cm());
+	  tri::UpdateTopology<CMeshO>::FaceFace(cm);
    }
    if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && (currentDataMask& MM_VERTFACETOPO)==0)			
    {
-    cm().face.EnableVFAdjacency();
+    cm.face.EnableVFAdjacency();
     currentDataMask |= MM_VERTFACETOPO;
-	  tri::UpdateTopology<CMeshO>::VertexFace(cm());
+	  tri::UpdateTopology<CMeshO>::VertexFace(cm);
    }
    if( ( (neededDataMask & MM_BORDERFLAG)!=0) && (currentDataMask& MM_BORDERFLAG)==0)			
    {
-     if(currentDataMask& MM_FACETOPO) tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm());
-     else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm());
+     if(currentDataMask& MM_FACETOPO) tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
+     else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
      currentDataMask |= MM_BORDERFLAG;
    }
    if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0) && (currentDataMask& MM_WEDGTEXCOORD)==0)			
    {
-    cm().face.EnableWedgeTex();
+    cm.face.EnableWedgeTex();
     currentDataMask |= MM_WEDGTEXCOORD;
    }
    if( ( (neededDataMask & MM_FACECOLOR)!=0) && (currentDataMask& MM_FACECOLOR)==0)			
    {
-    cm().face.EnableColor();
+    cm.face.EnableColor();
     currentDataMask |= MM_FACECOLOR;
    } 
    if( ( (neededDataMask & MM_FACEMARK)!=0) && (currentDataMask& MM_FACEMARK)==0)			
    {
-    cm().face.EnableMark();
+    cm.face.EnableMark();
     currentDataMask |= MM_FACEMARK;
    }
   }

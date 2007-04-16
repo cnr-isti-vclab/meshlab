@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.121  2007/04/16 09:24:37  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing...
+
 Revision 1.120  2007/03/27 12:20:17  cignoni
 Revamped logging iterface, changed function names in automatic parameters, better selection handling
 
@@ -126,6 +131,8 @@ Removed various gl state leaking
 #include "meshmodel.h"
 #include "interfaces.h"
 #include "glarea.h"
+#include "layerDialog.h"
+
 #include <wrap/gl/picking.h>
 
 using namespace vcg; 
@@ -149,7 +156,7 @@ GLArea::GLArea(QWidget *parent)
 	currentShader = NULL;
 	lastFilterRef = NULL;
 	lastEditRef = NULL;
-	mm = NULL;
+	currentMesh = NULL;
 	currLogLevel = -1;
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	// Projection Matrix starting settings
@@ -159,7 +166,17 @@ GLArea::GLArea(QWidget *parent)
 	clipRatioNear = 1;
 	nearPlane = .2f;
 	farPlane = 5.f;
+	layerDialog = new LayerDialog(this);
 	}
+	
+void GLArea::addMesh(MeshModel *mm)
+{
+ meshList.push_back(mm);
+ currentMesh=meshList.back();
+ //layerDialog->
+
+}
+	
 
 /*
 	This member returns the information of the Mesh in terms of VC,VQ,FC,FQ,WT
@@ -357,16 +374,19 @@ void GLArea::paintGL()
 	}
 	glPopMatrix();
   // =============================================
-	
-
+	/// Compute BBox 
+	Box3f FullBBox;
+	foreach(MeshModel * mp, meshList) 
+	 FullBBox.Add(mp->cm.bbox);
+		
 	// Finally apply the Trackball for the model
 	trackball.GetView();
   glPushMatrix(); 
 	trackball.Apply(trackBallVisible && !takeSnapTile && iEdit==0);
-	float d=2.0f/mm->cm().bbox.Diag();
+	float d=2.0f/FullBBox.Diag();
 	glScale(d);
 	
-	glTranslate(-mm->cm().bbox.Center());
+	glTranslate(-FullBBox.Center());
   setLightModel();
 
 	// Modify frustum... 
@@ -389,16 +409,18 @@ void GLArea::paintGL()
 	
 	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
 	              else glDisable(GL_CULL_FACE);
-  if(!mm->busy)
+  if(!mm()->busy)
   {
     if(iRenderer && currentShader) {
 		  glPushAttrib(GL_ALL_ATTRIB_BITS);
-		  iRenderer->Render(currentShader, *mm, rm, this); 
+		  iRenderer->Render(currentShader, *mm(), rm, this); 
 	  }
 
-	  mm->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+	  foreach(MeshModel * mp, meshList) 
+			if(mp->visible)
+				mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
-	  if(iEdit) iEdit->Decorate(currentEditor,*mm,this);
+	  if(iEdit) iEdit->Decorate(currentEditor,*mm(),this);
     
 
 	  if(iRenderer) {
@@ -407,11 +429,11 @@ void GLArea::paintGL()
 	  }
 
     // Draw the selection
-    if(rm.selectedFaces)  mm->RenderSelectedFaces();
+    if(rm.selectedFaces)  mm()->RenderSelectedFaces();
 
 	  if(iDecoratorsList){
 		  pair<QAction *,MeshDecorateInterface *> p;
-		  foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm,rm,this,qFont);}
+		  foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm(),rm,this,qFont);}
 	  }
   } ///end if busy 
 	
@@ -501,11 +523,11 @@ void GLArea::displayInfo()
 	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
 	log.glDraw(this,currLogLevel,3,lineSpacing,qFont);
 
-	renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm->cm().vn),qFont);
-	renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm->cm().fn),qFont);
+	renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm()->cm.vn),qFont);
+	renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm()->cm.fn),qFont);
 	if(rm.selectedFaces)  
-		 renderText(middleCol,startPos+ 3*lineSpacing,tr("Selected: %1").arg(mm->cm().sfn),qFont);
-	renderText(middleCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm->ioMask),qFont);
+		 renderText(middleCol,startPos+ 3*lineSpacing,tr("Selected: %1").arg(mm()->cm.sfn),qFont);
+	renderText(middleCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm()->ioMask),qFont);
 
   renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
 	if ((cfps>0) && (cfps<500)) 
@@ -589,7 +611,7 @@ void GLArea::closeEvent(QCloseEvent *event)
                 tr("MeshLab"),
                 tr("File %1 modified.\n\n"
                    "Continue without saving?")
-                .arg(fileName),
+                .arg(getFileName()),
 								QMessageBox::Yes|QMessageBox::Default,
 								QMessageBox::No|QMessageBox::Escape,
 								QMessageBox::NoButton) == QMessageBox::No)
@@ -601,7 +623,10 @@ void GLArea::closeEvent(QCloseEvent *event)
 	event->ignore();
 	if(close)
 	{
-		if(mm){	delete mm;mm = NULL;}	// quit without saving
+		if(mm()){
+			foreach(MeshModel *mmp, meshList)
+					delete mmp;
+			}	// quit without saving
 		event->accept();
 	}
 }
@@ -626,7 +651,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 {
   e->accept();
 	setFocus();
-  if(iEdit)  iEdit->mousePressEvent(currentEditor,e,*mm,this);
+  if(iEdit)  iEdit->mousePressEvent(currentEditor,e,*mm(),this);
   else {          
 	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
           (e->button()==Qt::LeftButton) )
@@ -644,7 +669,7 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
 	if(e->buttons() | Qt::LeftButton) 
 	{
-      if(iEdit) iEdit->mouseMoveEvent(currentEditor,e,*mm,this);
+      if(iEdit) iEdit->mouseMoveEvent(currentEditor,e,*mm(),this);
       else {
 		    if (isDefaultTrackBall()) 
 			{
@@ -661,7 +686,7 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
   //clearFocus();
 	activeDefaultTrackball=true;
-	if(iEdit) iEdit->mouseReleaseEvent(currentEditor,e,*mm,this);
+	if(iEdit) iEdit->mouseReleaseEvent(currentEditor,e,*mm(),this);
     else {
           if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	        else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
@@ -726,27 +751,27 @@ void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 // Texture loading done during the first paint.
 void GLArea::initTexture()
 {
-  if(!mm->cm().textures.empty() && mm->glw.TMId.empty()){
+  if(!mm()->cm.textures.empty() && mm()->glw.TMId.empty()){
 		glEnable(GL_TEXTURE_2D);
-		for(unsigned int i =0; i< mm->cm().textures.size();++i){
+		for(unsigned int i =0; i< mm()->cm.textures.size();++i){
 			QImage img, imgScaled, imgGL;
-			img.load(mm->cm().textures[i].c_str());
+			img.load(mm()->cm.textures[i].c_str());
       // image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
       int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
       int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
       imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 			imgGL=convertToGLFormat(imgScaled);
-			qDebug("loaded texture %s. with id %i w %i  h %i",mm->cm().textures[i].c_str(),i, imgGL.width(), imgGL.height());
-			mm->glw.TMId.push_back(0);
+			qDebug("loaded texture %s. with id %i w %i  h %i",mm()->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
+			mm()->glw.TMId.push_back(0);
 
-			glGenTextures( 1, (GLuint*)&(mm->glw.TMId.back()) );
-			glBindTexture( GL_TEXTURE_2D, mm->glw.TMId.back() );
+			glGenTextures( 1, (GLuint*)&(mm()->glw.TMId.back()) );
+			glBindTexture( GL_TEXTURE_2D, mm()->glw.TMId.back() );
 			glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-			qDebug("loaded texture  %s. in %i",mm->cm().textures[i].c_str(),mm->glw.TMId[i]);
+			qDebug("loaded texture  %s. in %i",mm()->cm.textures[i].c_str(),mm()->glw.TMId[i]);
 		}
 	}
 	glDisable(GL_TEXTURE_2D);

@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.126  2007/04/16 09:24:37  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing...
+
 Revision 1.125  2007/03/27 12:20:17  cignoni
 Revamped logging iterface, changed function names in automatic parameters, better selection handling
 
@@ -104,6 +109,7 @@ Added Drag n drog opening of files (thanks to Valentino Fiorin)
 #include "savemaskexporter.h"
 #include "plugin_support.h"
 #include "stdpardialog.h"
+#include "layerDialog.h"
 
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
@@ -194,7 +200,7 @@ void MainWindow::updateMenus()
 			case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
 		default: break;
 		}
-    colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm->cm()));
+    colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm()->cm)); 
 		switch (rm.colorMode)
 		{
 			case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
@@ -224,7 +230,7 @@ void MainWindow::updateMenus()
 		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
-		renderModeTextureAct->setEnabled(GLA()->mm && !GLA()->mm->cm().textures.empty());
+		renderModeTextureAct->setEnabled(GLA()->mm() && !GLA()->mm()->cm.textures.empty());
 		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
 		
 		setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
@@ -239,6 +245,14 @@ void MainWindow::updateMenus()
 			pair<QAction *,MeshDecorateInterface *> p;
 			foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
 		}
+	}
+	
+	
+	if(GLA()) 
+	{
+		showLayerDlgAct->setChecked(GLA()->layerDialog->isVisible());
+		//if(GLA()->layerDialog->isVisible())
+					GLA()->layerDialog->updateTable();
 	}
 }
 
@@ -288,8 +302,8 @@ void MainWindow::runFilterScript()
 	  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 
     int req=iFilter->getRequirements(action);
-    GLA()->mm->updateDataMask(req);
-    iFilter->applyFilter( action, *(GLA()->mm), (*ii).second, QCallBack );
+    GLA()->mm()->updateDataMask(req);
+    iFilter->applyFilter( action, *(GLA()->mm()), (*ii).second, QCallBack );
     GLA()->log.Logf(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
 }
@@ -305,14 +319,14 @@ void MainWindow::applyFilter()
   // Ask for filter requirements (eg a filter can need topology, border flags etc)
   //    and statisfy them
   int req=iFilter->getRequirements(action);
-  GLA()->mm->updateDataMask(req);
+  GLA()->mm()->updateDataMask(req);
 
 	/*
 		loads the plugin action in the standard plugin window.
 		If the plugin action doesn't support the use of the standard
 		plugin window, the function executeFilter() is immediately called
 	*/
-	stddialog->loadPluginAction(iFilter,GLA()->mm,action,this);
+	stddialog->loadPluginAction(iFilter,GLA()->mm(),action,this);
 }
 
 /* callback function that applies the filter action */
@@ -327,12 +341,12 @@ void MainWindow::executeFilter(QAction *action,FilterParameter *par)
   //    and statisfy them
   int req=iFilter->getRequirements(action);
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
-	GLA()->mm->updateDataMask(req);
+	GLA()->mm()->updateDataMask(req);
   qApp->restoreOverrideCursor();	
 
   
   // (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
-  bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm), *par);
+  bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
 
   if(!ret) return;
 	
@@ -347,9 +361,9 @@ void MainWindow::executeFilter(QAction *action,FilterParameter *par)
   // (4) Apply the Filter 
 
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
-	GLA()->mm->busy=true;
-  ret=iFilter->applyFilter(action, *(GLA()->mm), *par, QCallBack);
-  GLA()->mm->busy=false;
+	GLA()->mm()->busy=true;
+  ret=iFilter->applyFilter(action, *(GLA()->mm()), *par, QCallBack);
+  GLA()->mm()->busy=false;
   qApp->restoreOverrideCursor();	
 
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
@@ -366,12 +380,12 @@ void MainWindow::executeFilter(QAction *action,FilterParameter *par)
   // at the end for filters that change the color set the appropriate color mode
   if(iFilter->getClass(action)==MeshFilterInterface::FaceColoring ) {
     GLA()->setColorMode(vcg::GLW::CMPerFace);
-    GLA()->mm->ioMask|=MeshModel::IOM_FACECOLOR;
+    GLA()->mm()->ioMask|=MeshModel::IOM_FACECOLOR;
   }
   if(iFilter->getClass(action)==MeshFilterInterface::VertexColoring ){
     GLA()->setColorMode(vcg::GLW::CMPerVert);
-    GLA()->mm->ioMask|=MeshModel::IOM_VERTCOLOR;
-    GLA()->mm->ioMask|=MeshModel::IOM_VERTQUALITY;
+    GLA()->mm()->ioMask|=MeshModel::IOM_VERTCOLOR;
+    GLA()->mm()->ioMask|=MeshModel::IOM_VERTQUALITY;
   }
 if(iFilter->getClass(action)==MeshFilterInterface::Selection )
     GLA()->setSelectionRendering(true);
@@ -398,7 +412,7 @@ void MainWindow::endEditMode()
       QAction *action = qobject_cast<QAction *>(GLA()->getLastAppliedEdit());
 	    MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
       GLA()->setEdit(iEdit,action);
-      iEdit->StartEdit(action,*(GLA()->mm),GLA());
+      iEdit->StartEdit(action,*(GLA()->mm()),GLA());
 	    GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
       GLA()->setSelectionRendering(true);
     }
@@ -419,7 +433,7 @@ void MainWindow::applyEditMode()
   GLA()->setEdit(iEdit,action);
   GLA()->setLastAppliedEdit(action);
 
-  iEdit->StartEdit(action,*(GLA()->mm),GLA());
+  iEdit->StartEdit(action,*(GLA()->mm()),GLA());
 	GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
   GLA()->setSelectionRendering(true);
   updateMenus();
@@ -431,7 +445,7 @@ void MainWindow::applyRenderMode()
 	
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-	iRenderTemp->Init(action,*(GLA()->mm),GLA()->getCurrentRenderMode(),GLA());
+	iRenderTemp->Init(action,*(GLA()->mm()),GLA()->getCurrentRenderMode(),GLA());
 
 	if(action->text() == tr("None"))
 	{
@@ -491,22 +505,11 @@ void MainWindow::applyDecorateMode()
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
   MainWindow::globalStatusBar()->showMessage(str,5000);
-
 	qb->show();
 	qb->setEnabled(true);
 	qb->setValue(pos);
-//	qb->update();
 	MainWindow::globalStatusBar()->update();
- qApp->processEvents();
-//qb->repaint();
-  //if(qb==0) return true;
-	//qb->setWindowTitle (str);
-	//qApp->processEvents();
-	//if (qb->wasCanceled())
-	//{
-	//	qb->reset();
-	//	return false;
-	//}
+  qApp->processEvents();
 	return true;
 }
 
@@ -558,10 +561,13 @@ void MainWindow::toggleSelectionRendering()
 	GLA()->setSelectionRendering(!rm.selectedFaces);
 }
 
+void MainWindow::openIn(QString fileName)
+{
+	open(QString(),GLA());
+}
 
 
-
-void MainWindow::open(QString fileName)
+void MainWindow::open(QString fileName, GLArea *gla)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
@@ -608,14 +614,13 @@ void MainWindow::open(QString fileName)
 	
 	qb->show();
 	int mask = 0;
-	MeshModel *mm= new MeshModel();	
+  MeshModel *mm= new MeshModel();	
 	if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla*/))
 		delete mm;
 	else{
-		GLArea *gla;
-		gla=new GLArea(workspace);
-		gla->mm=mm;
-    gla->mm->ioMask = mask;				// store mask into model structure
+		if(gla==0) gla=new GLArea(workspace);
+		gla->addMesh(mm);
+    gla->mm()->ioMask = mask;				// store mask into model structure
     
 		gla->setFileName(fileName);
 		gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
@@ -628,22 +633,22 @@ void MainWindow::open(QString fileName)
 			gla->setColorMode(GLW::CMPerFace);
 		if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
     {
-      gla->mm->storeVertexColor();
+      gla->mm()->storeVertexColor();
 			gla->setColorMode(GLW::CMPerVert);
     }
     renderModeTextureAct->setChecked(false);
 		renderModeTextureAct->setEnabled(false);
-		if(!GLA()->mm->cm().textures.empty())
+		if(!GLA()->mm()->cm.textures.empty())
 		{
 			renderModeTextureAct->setChecked(true);
 			renderModeTextureAct->setEnabled(true);
 			GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 		}
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm());																																			 
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm());					// updates bounding box
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
+    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
     updateMenus();
-    vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm());
-    GLA()->mm->busy=false;
+    vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+    GLA()->mm()->busy=false;
 	}
 
 	qb->reset();
@@ -709,11 +714,11 @@ bool MainWindow::saveAs()
 		
 		int capability = pCurrentIOPlugin->GetExportMaskCapability(extension);
 		
-		int mask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(this->GLA()->mm, capability);
+		int mask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(this->GLA()->mm(), capability);
 		if(mask == -1) 
 			return false;
 		qb->show();
-		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm ,mask,QCallBack,this);
+		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,QCallBack,this);
 		qb->reset();
 
     QSettings settings;
@@ -781,6 +786,8 @@ void MainWindow::showToolbarRender(){
 void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
+void MainWindow::showLayerDlg() {if(GLA() != 0) 	GLA()->layerDialog->setVisible( !GLA()->layerDialog->isVisible() );}
+
 void MainWindow::setCustomize()
 {
 	CustomDialog dialog(this);
