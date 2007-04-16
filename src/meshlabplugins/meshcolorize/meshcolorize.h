@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.23  2007/04/16 09:25:29  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing again...
+
 Revision 1.22  2006/12/05 15:37:27  cignoni
 Added rough version of non manifold vertex coloring
 
@@ -96,7 +101,7 @@ public:
     ~ExtraMeshColorizePlugin(){};
   
   virtual const QString ST(FilterType filter);
-  virtual const QString Info(QAction *);
+  virtual const QString Info(FilterType filterId);
 	virtual const PluginInfo &Info();
   virtual const FilterClass getClass(QAction *);
   virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);

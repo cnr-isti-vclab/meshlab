@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.34  2007/04/16 09:25:29  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing again...
+
 Revision 1.33  2007/03/20 16:23:09  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -178,9 +183,9 @@ const QString ExtraMeshColorizePlugin::ST(FilterType c) {
   }
   return QString("error!");
 }
-const QString ExtraMeshColorizePlugin::Info(QAction *action) 
+const QString ExtraMeshColorizePlugin::Info(FilterType filterId) 
 {
-  switch(ID(action))
+  switch(filterId)
   {
     case CP_MAP_QUALITY_INTO_COLOR : return tr("Colorize vertex and faces depending on quality field (manually equalized).");
     case CP_GAUSSIAN :               return tr("Colorize vertex and faces depending on equalized gaussian curvature.");
@@ -235,9 +240,9 @@ bool ExtraMeshColorizePlugin::getParameters(QAction *action, QWidget *parent, Me
   {
     case CP_MAP_QUALITY_INTO_COLOR :
       Histogramf H;
-      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm(),H);
+      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
             
-      Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm()));
+      Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
       eqSettings.meshMinQ = mmmq.minV;
       eqSettings.meshMaxQ = mmmq.maxV;
 
@@ -271,7 +276,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
     {
       float RangeMin = par.getFloat("RangeMin");	
       float RangeMax = par.getFloat("RangeMax");		
-      tri::UpdateColor<CMeshO>::VertexQuality(m.cm(),RangeMin,RangeMax);
+      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,RangeMin,RangeMax);
       break;
     }
   case CP_GAUSSIAN:
@@ -279,7 +284,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
   case CP_RMS:
   case CP_ABSOLUTE:
     {
-      Curvature<CMeshO> c(m.cm());
+      Curvature<CMeshO> c(m.cm);
       switch (ID(filter)){
           case CP_GAUSSIAN: c.MapGaussianCurvatureIntoQuality();    break;
           case CP_MEAN:     c.MapMeanCurvatureIntoQuality();        break;
@@ -288,16 +293,16 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
       }      
       
       Histogramf H;
-      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm(),H);
-      tri::UpdateColor<CMeshO>::VertexQuality(m.cm(),H.Percentile(0.1),H.Percentile(0.9));
+      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,H.Percentile(0.1),H.Percentile(0.9));
       
     break;
     }
   case CP_SELFINTERSECT:
     {
       vector<CFaceO *> IntersFace;
-      tri::Clean<CMeshO>::SelfIntersections(m.cm(),IntersFace);
-      tri::UpdateColor<CMeshO>::FaceConstant(m.cm(),Color4b::White);
+      tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
+      tri::UpdateColor<CMeshO>::FaceConstant(m.cm,Color4b::White);
       vector<CFaceO *>::iterator fpi;
       for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
         (*fpi)->C()=Color4b::Red;
@@ -306,19 +311,19 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
     }
 
   case CP_BORDER:
-    vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm());
+    vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
     break;
   case CP_COLOR_NON_MANIFOLD_FACE:
-    ColorManifoldFace<CMeshO>(m.cm());
+    ColorManifoldFace<CMeshO>(m.cm);
     break;
   case CP_COLOR_NON_MANIFOLD_VERTEX:
-    ColorManifoldVertex<CMeshO>(m.cm());
+    ColorManifoldVertex<CMeshO>(m.cm);
     break;
   case CP_RESTORE_ORIGINAL:
      m.restoreVertexColor();
      break;
   case CP_SMOOTH:
-     LaplacianSmoothColor(m.cm(),1);
+     LaplacianSmoothColor(m.cm,1);
      break;
  }
 	return true;

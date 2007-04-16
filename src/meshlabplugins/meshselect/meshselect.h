@@ -22,6 +22,11 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.6  2007/04/16 09:25:30  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing again...
+
 Revision 1.5  2007/02/08 15:59:46  cignoni
 Added Border selection filters
 
@@ -55,7 +60,7 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 
 	SelectionFilterPlugin();
 	~SelectionFilterPlugin();
-	virtual const QString Info(QAction *);
+	virtual const QString Info(FilterType filter);
 	virtual const PluginInfo &Info();
   
   virtual const QString ST(FilterType filter);

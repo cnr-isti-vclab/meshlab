@@ -24,6 +24,11 @@
   History
 
  $Log$
+ Revision 1.11  2007/04/16 09:25:28  cignoni
+ ** big change **
+ Added Layers managemnt.
+ Interfaces are changing again...
+
  Revision 1.10  2007/03/20 16:23:07  cignoni
  Big small change in accessing mesh interface. First step toward layers
 
@@ -133,9 +138,9 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
   }
 }
 
-const QString CleanFilter::Info(QAction *action)
+const QString CleanFilter::Info(FilterType filterId)
 {
-  switch(ID(action))
+  switch(filterId)
   {
   case FP_REBUILD_SURFACE :	return QString("Merge"); 
 	case FP_REMOVE_ISOLATED_COMPLEXITY:	 return tr("Remove Isolated"); 
@@ -168,23 +173,21 @@ const int CleanFilter::getRequirements(QAction *action)
 }
 
 bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst)
-{
-
-
- 
+{ 
   switch(ID(action))
   {
     case FP_REBUILD_SURFACE :
-		  parlst.addField("BallRadius","Enter ball size as a diag perc. (0 autoguess))",(float)maxDiag1);
+		  parlst.addFieldFloat("BallRadius","Enter ball size as a diag perc. (0 autoguess))",(float)maxDiag1);
+		  parlst.addFieldBool("ComputeNormal","Compute the per vertex normals using only the point set ",false);
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
-		  parlst.addField("MinComponentDiag","Enter size (as a diag perc 0..100)",(float)maxDiag2);
+		  parlst.addFieldFloat("MinComponentDiag","Enter size (as a diag perc 0..100)",(float)maxDiag2);
 		  break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-		  parlst.addField("MinComponentSize","Enter minimum conn. comp size:",(int)minCC);
+		  parlst.addFieldInt("MinComponentSize","Enter minimum conn. comp size:",(int)minCC);
 		  break;
     case FP_REMOVE_WRT_Q:
-		  parlst.addField("MaxQualityThr","Delete all Vertices with quality under:",(float)val1);
+		  parlst.addFieldFloat("MaxQualityThr","Delete all Vertices with quality under:",(float)val1);
 		  break;
 	default:
 		return false;
@@ -193,25 +196,32 @@ bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst
   return true;
 }
 
+bool CleanFilter::getStdParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
+{
+ return true;
+}
 bool CleanFilter::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
 {
- switch(ID(action))
+ /*	 switch(ID(action))
   {
-	 case FP_REBUILD_SURFACE :
+ case FP_REBUILD_SURFACE :
 		 maxDiag1 = par.getFloat("BallRadius");
-    	par.update("BallRadius",float(m.cm().bbox.Diag()*maxDiag1/100.0));
+     ComputeNormalFlag=
+			par.update("BallRadius",float(m.cm.bbox.Diag()*maxDiag1/100.0));
 		 return true;
 	 case FP_REMOVE_ISOLATED_DIAMETER:	 
 		 maxDiag2 = par.getFloat("MinComponentDiag");
-          par.update("MinComponentDiag",float(m.cm().bbox.Diag()*maxDiag2/100.0));
-          return true;
+				  par.update("MinComponentDiag",float(m.cm.bbox.Diag()*maxDiag2/100.0));
+				  return true;
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-        minCC = par.getInt("MinComponentSize");
-         return true;
-    case FP_REMOVE_WRT_Q:
-          val1 = par.getFloat("MaxQualityThr");
-          return true;
-	}
+			  minCC = par.getInt("MinComponentSize");
+				 return true;
+	  case FP_REMOVE_WRT_Q:
+				  val1 = par.getFloat("MaxQualityThr");
+				  return true;
+	
+			}  
+ return false;*/
  return false;
   }
 
@@ -225,40 +235,40 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
       float radius = par.getFloat("BallRadius");		
       float clustering = 0.1;
       float crease=0;
-      m.cm().fn=0;
-      m.cm().face.resize(0);
-      NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm().vert.begin(), m.cm().vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
-      tri::Pivot<CMeshO> pivot(m.cm(), radius, clustering, crease); 
+      m.cm.fn=0;
+      m.cm.face.resize(0);
+      NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
+      tri::Pivot<CMeshO> pivot(m.cm, radius, clustering, crease); 
       // the main processing
       pivot.buildMesh(cb);
 	  }
     if(filter->text() == ST(FP_REMOVE_ISOLATED_DIAMETER) )
 	  {
       float minCC= par.getFloat("MinComponentDiag");		
-      RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm(),minCC);
+      RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,minCC);
     }  	
 
     if(filter->text() == ST(FP_REMOVE_ISOLATED_COMPLEXITY) )
 	  {
       float minCC= par.getInt("MinComponentSize");		
-      RemoveSmallConnectedComponentsSize<CMeshO>(m.cm(),minCC);
+      RemoveSmallConnectedComponentsSize<CMeshO>(m.cm,minCC);
 	  }
 	if(filter->text() == ST(FP_REMOVE_WRT_Q) )
 	  {
       float val=par.getFloat("MaxQualityThr");		
       CMeshO::VertexIterator vi;
-      for(vi=m.cm().vert.begin();vi!=m.cm().vert.end();++vi)
+      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
         if(!(*vi).IsD() && (*vi).Q()<val)
         {
           (*vi).SetD();
-          m.cm().vn--;
+          m.cm.vn--;
         } 
       CMeshO::FaceIterator fi;
-      for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi) if(!(*fi).IsD())
+      for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
                if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() ) 
        {
         (*fi).SetD();
-        --m.cm().fn;
+        --m.cm.fn;
        }
 
 	  }

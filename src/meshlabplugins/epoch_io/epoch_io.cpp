@@ -24,6 +24,11 @@
   History
 
  $Log$
+ Revision 1.15  2007/04/16 09:25:29  cignoni
+ ** big change **
+ Added Layers managemnt.
+ Interfaces are changing again...
+
  Revision 1.14  2007/03/20 16:23:08  cignoni
  Big small change in accessing mesh interface. First step toward layers
 
@@ -643,7 +648,7 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
             }
           Grid.Add(mm);
         }
-        else  tri::Append<CMeshO,CMeshO>::Mesh(m.cm(),mm); // append mesh mr to ml
+        else  tri::Append<CMeshO,CMeshO>::Mesh(m.cm,mm); // append mesh mr to ml
 
         int tt2=clock();
         if(logFP) fprintf(logFP,"** Mesh %i : Append in %i\n",selectedCount,tt2-tt1);
@@ -655,7 +660,7 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
   if (cb != NULL) (*cb)(90, "Final Processing: clustering");
   if(clustering)  
   {
-    Grid.Extract(m.cm());
+    Grid.Extract(m.cm);
   }
  
   int t1=clock();
@@ -664,26 +669,26 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
   if (cb != NULL) (*cb)(95, "Final Processing: Removing Small Connected Components");
   if(removeSmallCC)
   {
-    vcg::tri::UpdateBounding<CMeshO>::Box(m.cm());					// updates bounding box
+    vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	  m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
-    RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm(),m.cm().bbox.Diag()*maxCCDiagVal/100.0);
+    RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,m.cm.bbox.Diag()*maxCCDiagVal/100.0);
   }
 
   int t2=clock();
   if(logFP) fprintf(logFP,"Topology and removed CC in %i\n",t2-t1);
 
-  vcg::tri::UpdateBounding<CMeshO>::Box(m.cm());					// updates bounding box
+  vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	
   if (cb != NULL) (*cb)(97, "Final Processing: Closing Holes");
   if(closeHole)
   {
 	  m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
-    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm());	    
-    vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm(),maxHoleSize,false);
+    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+    vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,maxHoleSize,false);
   }
 
 	if (cb != NULL) (*cb)(100, "Done");
-//  vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm());		// updates normals
+//  vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
 
   int t3=clock();

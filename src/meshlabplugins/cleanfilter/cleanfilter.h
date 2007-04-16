@@ -24,6 +24,11 @@
   History
 
  $Log$
+ Revision 1.7  2007/04/16 09:25:28  cignoni
+ ** big change **
+ Added Layers managemnt.
+ Interfaces are changing again...
+
  Revision 1.6  2007/02/08 23:46:16  pirosu
  merged srcpar and par in the GetStdParameters() function
 
@@ -88,7 +93,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
 	CleanFilter();
 	~CleanFilter();
 	virtual const QString ST(FilterType filter);
-  virtual const QString Info(QAction *);
+  virtual const QString Info(FilterType filter);
 	virtual const PluginInfo &Info();
 
   virtual const FilterClass getClass(QAction *);
@@ -97,6 +102,7 @@ class CleanFilter : public QObject, public MeshFilterInterface
 
 	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst);
 	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par);
+  bool getStdParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par);
 
 
 	protected:

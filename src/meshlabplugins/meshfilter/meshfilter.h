@@ -22,6 +22,11 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.43  2007/04/16 09:25:29  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing again...
+
 Revision 1.42  2007/02/25 21:31:49  cignoni
 new parameters for quadric simplification
 
@@ -114,7 +119,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin();
 	virtual const QString ST(FilterType filter);
-  virtual const QString Info(QAction *);
+  virtual const QString Info(FilterType filter);
 	virtual const PluginInfo &Info();
   virtual const FilterClass getClass(QAction *);
   virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);

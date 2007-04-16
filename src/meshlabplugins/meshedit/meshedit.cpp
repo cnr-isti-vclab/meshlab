@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2007/04/16 09:25:29  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing again...
+
 Revision 1.9  2007/03/20 16:23:09  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -101,7 +106,7 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
        event->modifiers() == Qt::ShiftModifier )
       {
         CMeshO::FaceIterator fi;
-        for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi) 
+        for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
             if(!(*fi).IsD() && (*fi).IsS()) 
                     LastSel.push_back(&*fi);        
       }  
@@ -203,7 +208,7 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
     if(wid.y()<0)  wid.setY(-wid.y());
 
  /*   CMeshO::FaceIterator fi;
-    for(fi=m.cm().face.begin(),fpi=NewSel.begin();fpi!=NewSel.end();++fi) 
+    for(fi=m.cm.face.begin(),fpi=NewSel.begin();fpi!=NewSel.end();++fi) 
       if(!(*fi).IsD()) {
           if(&(*fi)!=*fpi) (*fpi)->ClearS();
         else {
@@ -212,18 +217,18 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
         }
       }
 
-    for(;fi!=m.cm().face.end();++fi)
+    for(;fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD()) (*fi).ClearS();
 
 */
    
    CMeshO::FaceIterator fi;
-    for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi)
+    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD()) (*fi).ClearS();
 
-    GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm(), NewSel, wid.x(), wid.y());
+    GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, NewSel, wid.x(), wid.y());
     qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
-    qDebug("Pickface: Got  %i on %i",NewSel.size(),m.cm().face.size());
+    qDebug("Pickface: Got  %i on %i",NewSel.size(),m.cm.face.size());
    
     switch(selMode)
     { 
@@ -250,7 +255,7 @@ void ExtraMeshEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gl
 {
  LastSel.clear();
  CMeshO::FaceIterator fi;
- for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi)
+ for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
  if(!(*fi).IsD() && (*fi).IsS() )
       LastSel.push_back(&*fi);
 	  

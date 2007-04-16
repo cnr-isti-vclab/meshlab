@@ -24,6 +24,11 @@
   History
 
  $Log$
+ Revision 1.6  2007/04/16 09:25:28  cignoni
+ ** big change **
+ Added Layers managemnt.
+ Interfaces are changing again...
+
  Revision 1.5  2007/03/20 16:23:07  cignoni
  Big small change in accessing mesh interface. First step toward layers
 
@@ -74,7 +79,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
 		vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
 		m.Enable(mask);
 		
-		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm(), filename.c_str(), mask, cb);
+		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0) // all the importers return 0 on success
 		{
 			QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
@@ -83,7 +88,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
 	}
 	else if (formatName.toUpper() == tr("STL"))
 	{
-		int result = vcg::tri::io::ImporterSTL<CMeshO>::Open(m.cm(), filename.c_str(), cb);
+		int result = vcg::tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), cb);
 		if (result != 0) // all the importers return 0 on success
 		{
 			QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
@@ -91,7 +96,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
 		}
     int retVal=QMessageBox::question ( parent, tr("STL File Importing"),tr("Do you want to unify duplicated vertices?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No );
     if(retVal==QMessageBox::Yes )
-      tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm());
+      tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 	}
   else
   {
@@ -102,12 +107,12 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;
-	for ( unsigned textureIdx = 0; textureIdx < m.cm().textures.size(); ++textureIdx)
+	for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
 	{
-    if (!QFile::exists(m.cm().textures[textureIdx].c_str()))
+    if (!QFile::exists(m.cm.textures[textureIdx].c_str()))
 		{
 			missingTextureFilesMsg.append("\n");
-			missingTextureFilesMsg.append(m.cm().textures[textureIdx].c_str());
+			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
 			someTextureNotFound = true;
 		}
 	}
@@ -128,7 +133,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMod
 	
 	if(formatName.toUpper() == tr("PLY"))
 	{
-		int result = vcg::tri::io::ExporterPLY<CMeshO>::Save(m.cm(),filename.c_str(),mask,cb);
+		int result = vcg::tri::io::ExporterPLY<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterPLY<CMeshO>::ErrorMsg(result)));
@@ -138,7 +143,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshMod
 	}
 	if(formatName.toUpper() == tr("STL"))
 	{
-		int result = vcg::tri::io::ExporterSTL<CMeshO>::Save(m.cm(),filename.c_str(),mask,cb);
+		int result = vcg::tri::io::ExporterSTL<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterSTL<CMeshO>::ErrorMsg(result)));

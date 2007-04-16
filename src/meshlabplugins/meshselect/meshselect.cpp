@@ -23,6 +23,11 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2007/04/16 09:25:30  cignoni
+** big change **
+Added Layers managemnt.
+Interfaces are changing again...
+
 Revision 1.10  2007/03/20 16:23:10  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -116,24 +121,24 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
  switch(ID(action))
   {
   case FP_SELECT_DELETE : 
-    for(fi=m.cm().face.begin();fi!=m.cm().face.end();++fi)
+    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD() && (*fi).IsS() )
       {
         (*fi).SetD(); 
-        --m.cm().fn;
+        --m.cm.fn;
       }
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
     break;
-  case FP_SELECT_ALL    : tri::UpdateSelection<CMeshO>::AllFace(m.cm());     break;
-  case FP_SELECT_NONE   : tri::UpdateSelection<CMeshO>::ClearFace(m.cm());   break;
-  case FP_SELECT_INVERT : tri::UpdateSelection<CMeshO>::InvertFace(m.cm());  break;
-  case FP_SELECT_ERODE  : tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm());  
-                          tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm()); 
+  case FP_SELECT_ALL    : tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
+  case FP_SELECT_NONE   : tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   break;
+  case FP_SELECT_INVERT : tri::UpdateSelection<CMeshO>::InvertFace(m.cm);  break;
+  case FP_SELECT_ERODE  : tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
+                          tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm); 
   break;
-  case FP_SELECT_DILATE : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm());  
-                          tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm()); 
+  case FP_SELECT_DILATE : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);  
+                          tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
   break;
-  case FP_SELECT_BORDER_FACES: tri::UpdateSelection<CMeshO>::FaceFromBorder(m.cm());  
+  case FP_SELECT_BORDER_FACES: tri::UpdateSelection<CMeshO>::FaceFromBorder(m.cm);  
   break;
   
 
@@ -142,9 +147,9 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   return true;
 }
 
- const QString SelectionFilterPlugin::Info(QAction *action) 
+ const QString SelectionFilterPlugin::Info(FilterType filterId) 
  {
-  switch(ID(action))
+  switch(filterId)
   {
     case FP_SELECT_DILATE : return tr("Dilate (expand) the current set of selected faces");  
     case FP_SELECT_ERODE  : return tr("Erode (reduce) the current set of selected faces");  
