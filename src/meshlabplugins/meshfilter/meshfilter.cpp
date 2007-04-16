@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.95  2007/04/16 10:16:25  cignoni
+Added missing info on filtering actions
+
 Revision 1.94  2007/04/16 09:25:29  cignoni
 ** big change **
 Added Layers managemnt.
@@ -322,6 +325,7 @@ const QString ExtraMeshFilterPlugin::Info(FilterType filterID)
     case FP_REMOVE_DUPLICATED_VERTEX : 	return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");  
     case FP_REMOVE_FACES_BY_AREA : 			return tr("Removes null faces (the one with area equal to zero)");  
     case FP_REMOVE_FACES_BY_EDGE : 			return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");  
+    case FP_REMOVE_NON_MANIFOLD : 			return tr("Remove non manifold edges by removing some of the faces incident on non manifold edges");  
     case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");  
     case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller");  
     case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing and vertex fitting smoothing, based on the paper of ...");  
@@ -333,8 +337,8 @@ const QString ExtraMeshFilterPlugin::Info(FilterType filterID)
     case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");  
     case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces"); 
     case FP_CLOSE_HOLES :         return tr("Close holes smaller than a given threshold"); 
-  }
-  assert(0);
+		default : assert(0);
+	}
   return QString();
 }
 

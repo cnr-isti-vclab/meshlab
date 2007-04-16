@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2007/04/16 10:16:25  cignoni
+Added missing info on filtering actions
+
 Revision 1.11  2007/04/16 09:25:30  cignoni
 ** big change **
 Added Layers managemnt.
@@ -152,6 +155,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   switch(filterId)
   {
     case FP_SELECT_DILATE : return tr("Dilate (expand) the current set of selected faces");  
+    case FP_SELECT_DELETE : return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");  
     case FP_SELECT_ERODE  : return tr("Erode (reduce) the current set of selected faces");  
     case FP_SELECT_INVERT : return tr("Invert the current set of selected faces");  
     case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");  
