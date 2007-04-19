@@ -41,7 +41,7 @@ class LayerDialog : public QDialog
 
  public:
      LayerDialog(QWidget *parent = 0);
-void LayerDialog::updateTable();
+     void updateTable();
 
 public slots:
 void toggleStatus(int row, int column);
