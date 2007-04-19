@@ -28,8 +28,8 @@ unix{
 	CONFIG		+= warn_off debug_and_release
 #	LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
 }
-mac:LIBS +=  ../../../../code/lib/lib3ds-1.2.0/macos/lib3ds.a
 
+mac:LIBS +=  -L../../../../code/lib/lib3ds-1.2.0/macos/ -l3ds 
 
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {
