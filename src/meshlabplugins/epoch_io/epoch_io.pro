@@ -48,6 +48,7 @@ CONFIG(release, debug|release) {
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 mac:LIBS   += -lbz2
+unix:LIBS += -lbz2
 
 
 contains(TEMPLATE,lib) {
