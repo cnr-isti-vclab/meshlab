@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.96  2007/04/20 10:09:56  cignoni
+issue on vertex selection from face selection
+
 Revision 1.95  2007/04/16 10:16:25  cignoni
 Added missing info on filtering actions
 
@@ -554,7 +557,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH))
 	  {
-		  tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
       size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       if(cnt>0) LaplacianSmooth(m.cm,1,true);
       else LaplacianSmooth(m.cm,1,false);
@@ -564,7 +566,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if(filter->text() == ST(FP_HC_LAPLACIAN_SMOOTH))
 	  {
-      size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       if(cnt>0) HCSmooth(m.cm,1,true);
       else HCSmooth(m.cm,1,false);
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
