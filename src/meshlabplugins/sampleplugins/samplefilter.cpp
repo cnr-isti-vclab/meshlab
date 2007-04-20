@@ -47,7 +47,6 @@ add samplefilter
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
-
 #include "samplefilter.h"
 
 // Constructor usually performs only two simple tasks of filling the two lists 
@@ -62,42 +61,78 @@ ExtraSamplePlugin::ExtraSamplePlugin()
 	  actionList << new QAction(ST(tt), this);
 }
 
-// The very short string describing each filtering action (this string is used also to define the menu entry)
-const QString ExtraSamplePlugin::ST(FilterType filter) 
+// ST() must return the very short string describing each filtering action 
+// (this string is used also to define the menu entry)
+const QString ExtraSamplePlugin::ST(FilterType filterId) 
 {
-  return QString("Random Vertex Displacement");
+  switch(filterId) {
+		case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement"); 
+		default : assert(0); 
+	}
 }
 
-// The longer string describing each filtering action 
+// Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString ExtraSamplePlugin::Info(FilterType filter)
+const QString ExtraSamplePlugin::Info(FilterType filterId)
 {
-   return tr("Apply Filter Move Vertex");
+  switch(filterId) {
+		case FP_MOVE_VERTEX :  return QString("Randomly move each vertex of the mesh of a small amount"); 
+		default : assert(0); 
+	}
 }
 
 const PluginInfo &ExtraSamplePlugin::Info()
 {
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.8");
+	 ai.Version = tr("0.9");
 	 ai.Author = ("Elisa Cerisoli, Paolo Cignoni");
    return ai;
  }
 
-//Move Vertex of random quantity
+// This function define the needed parameters for each filter. Return true if the filter has some parameters
+// it is called every time, so you can set the default value of parameters according to the mesh
+// For each parmeter you need to define, 
+// - the name of the parameter, 
+// - the string shown in the dialog 
+// - the default value
+// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
+bool ExtraSamplePlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst)
+{
+	 switch(ID(action))	 {
+		case FP_MOVE_VERTEX :  
+ 		  parlst.addFieldBool ("UpdateNormals","Recompute normals",true,"Toggle the recomputation of the normals after the random displacement.\n\n If disabled the face normals will remains unchanged resulting in a visually pleasant effect.");
+		  return true;
+		default : assert(0); 
+	}
+	return false;
+}
+
+// The Real Core Function doing the actual mesh processing.
+// Move Vertex of a random quantity
 bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameter & par, vcg::CallBackPos *cb)
 {
 	srand(time(NULL)); 
 	const float max_displacement = m.cm.bbox.Diag()/100;
- 	for(int i = 0; i< m.cm.vert.size(); i++){
-				
+
+ 	for(unsigned int i = 0; i< m.cm.vert.size(); i++){
+		 // Typical usage of the callback for showing a nice progress bar in the bottom. 
+		 // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
+		  cb(100*i/m.cm.vert.size(), "Randomly Displacing...");
+
 		float rndax = (float(rand())/RAND_MAX)*max_displacement;
 		float rnday = (float(rand())/RAND_MAX)*max_displacement;
 		float rndaz = (float(rand())/RAND_MAX)*max_displacement;
 		m.cm.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);		
 	}
 	
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	// Log function dump textual info in the lower part of the MeshLab screen. 
+	Log(0,"Successfully displaced %i vertices",m.cm.vn);
+	
+	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
+	if(par.getBool("UpdateNormals"))	
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
   
 	return true;

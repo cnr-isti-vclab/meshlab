@@ -52,6 +52,7 @@ public:
 	virtual const QString ST(FilterType filter);
 	virtual const QString Info(FilterType filter);
 	virtual const PluginInfo &Info();
+	bool ExtraSamplePlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 };
 
