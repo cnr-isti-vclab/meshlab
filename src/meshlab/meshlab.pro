@@ -82,8 +82,9 @@ CONFIG(debug, debug|release) {
 	win32-g++:release:DEFINES -= NDEBUG
 }
 
-macx{
+mac{
 message( "We are on a mac: build universal binaries" )
-#CONFIG += ppc
+CONFIG += x86 ppc
 }
+
 

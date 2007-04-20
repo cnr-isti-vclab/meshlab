@@ -11,6 +11,7 @@ RESOURCES     = meshlab.qrc
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 CONFIG		+= debug_and_release
+mac:CONFIG += x86 ppc
 
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {

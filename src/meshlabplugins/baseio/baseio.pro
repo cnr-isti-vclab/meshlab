@@ -23,3 +23,5 @@ contains(TEMPLATE,lib) {
       else:TARGET = $$member(TARGET, 0)d
    }
 }
+
+mac:CONFIG += x86 ppc

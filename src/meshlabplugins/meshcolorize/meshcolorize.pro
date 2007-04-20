@@ -11,6 +11,7 @@ DESTDIR       = ../../meshlab/plugins
 win32:DEFINES += NOMINMAX
 FORMS		  = equalizerDialog.ui
 CONFIG		+= debug_and_release
+mac:CONFIG += x86 ppc
 
 
 contains(TEMPLATE,lib) {

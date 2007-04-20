@@ -26,6 +26,7 @@ TARGET        = epoch_io
 DESTDIR       = ../../meshlab/plugins
 QT           += xml
 CONFIG		+= debug_and_release
+mac:CONFIG += x86 ppc
 
 win32-msvc.net:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
 win32-msvc2005:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
