@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.127  2007/04/20 09:57:00  cignoni
+Smarter Callback that does not slow down the system when called too frequently
+
 Revision 1.126  2007/04/16 09:24:37  cignoni
 ** big change **
 Added Layers managemnt.
@@ -504,6 +507,13 @@ void MainWindow::applyDecorateMode()
 
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
+  int static lastPos=-1;
+	if(pos==lastPos) return true;
+	lastPos=pos;
+	
+  static QTime currTime;
+	if(currTime.elapsed()< 100) return true;
+	currTime.start();
   MainWindow::globalStatusBar()->showMessage(str,5000);
 	qb->show();
 	qb->setEnabled(true);
