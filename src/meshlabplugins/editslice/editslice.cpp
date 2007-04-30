@@ -13,7 +13,7 @@ using namespace vcg;
 
 ExtraMeshSlidePlugin::ExtraMeshSlidePlugin() {
  first=false;
- actionList << new QAction(QIcon(":/images/iconaslice.png"),"Slice mesh geometry", this);
+ actionList << new QAction(QIcon(":/images/iconslice.png"),"Slice mesh geometry", this);
   QAction *editAction;
   trackball_slice.center=Point3f(0, 0, 0);
   trackball_slice.radius= 50;
