@@ -10,6 +10,7 @@ SUBDIRS       = meshfilter \
 				meshdecorate \ 
 				meshedit \ 
 				meshselect \
+				editslice \
 				editpaint
 		
 		
