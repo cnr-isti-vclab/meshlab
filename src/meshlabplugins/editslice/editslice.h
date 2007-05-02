@@ -21,7 +21,7 @@ class ExtraMeshSlidePlugin : public QObject, public MeshEditInterface
 public:
 	ExtraMeshSlidePlugin();
     vcg::Trackball trackball_slice;
-	virtual ~ExtraMeshSlidePlugin() {}
+	virtual ~ExtraMeshSlidePlugin();
 	virtual const QString Info(QAction *);
     virtual const PluginInfo &Info();
 	virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
@@ -32,11 +32,18 @@ public:
     virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual QList<QAction *> actions() const ;
 	void restoreDefault();
+	
 private:
+	 bool isDragging;
+	GLArea * gla;
+	MeshModel m;
     bool first;
 	Slicedialog *slicedialog;
     void DrawPlane(GLArea * gla,MeshModel &m);
 	bool  activeDefaultTrackball;
     bool disableTransision;
+public Q_SLOTS:
+	void SlotExportButton();
+	void upGlA();
 };
 #endif

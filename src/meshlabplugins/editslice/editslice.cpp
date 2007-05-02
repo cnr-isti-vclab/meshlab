@@ -4,21 +4,31 @@
 #include <meshlab/glarea.h>
 #include "editslice.h"
 #include <wrap/gl/pick.h>
-#include <vcg/space/box3.h>
+#include <vcg/complex/trimesh/create/platonic.h>
 #include <vcg/space/point3.h>
+#include <vcg/space/box3.h>
+#include <vcg/space/index/grid_closest.h>
+#include <vcg/complex/intersection.h>
 #include <wrap/gl/space.h>
 #include <wrap/gui/trackball.h>
+#include <qfiledialog.h>
 #include<limits>
 using namespace vcg;
 
 ExtraMeshSlidePlugin::ExtraMeshSlidePlugin() {
  first=false;
+ isDragging=false;
  actionList << new QAction(QIcon(":/images/iconslice.png"),"Slice mesh geometry", this);
   QAction *editAction;
   trackball_slice.center=Point3f(0, 0, 0);
   trackball_slice.radius= 50;
   foreach(editAction, actionList)
     editAction->setCheckable(true);
+ 
+}
+ExtraMeshSlidePlugin::~ExtraMeshSlidePlugin() {
+
+	delete slicedialog;
 }
 QList<QAction *> ExtraMeshSlidePlugin::actions() const {
 	return actionList;
@@ -51,12 +61,12 @@ const PluginInfo &ExtraMeshSlidePlugin::Info()
    return ai;
  } 
 
-	
+
 void ExtraMeshSlidePlugin::restoreDefault(){
   trackball_slice.Reset();
 }
  void ExtraMeshSlidePlugin::mousePressEvent    (QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
- {
+ {   isDragging = true;
      disableTransision=true; //diable transition for main trackball
 	 //e->accept();
 
@@ -92,7 +102,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
  }
  void ExtraMeshSlidePlugin::mouseMoveEvent     (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
  {
-	
+	isDragging = true;
 	if(e->buttons()| Qt::LeftButton) 
 	{
 		if(slicedialog->getDefaultTrackball())
@@ -102,24 +112,39 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		    else
 				trackball_slice.MouseMove(e->x(),gla->height()-e->y());
 	}
-	
+	gla->update();
  }
- 
+ void ExtraMeshSlidePlugin::SlotExportButton(){
+	 QString fileName = QFileDialog::getSaveFileName(gla->window(), tr("Save polyline File"),"/",tr("Mesh (*.obj)"));
+	 vcg::Plane3f* pl= new vcg::Plane3f();
+	 pl->SetDirection(vcg::Point3f(1,0,0));	 
+	 pl->SetOffset(100);
+	 //vcg::tri::Grid* gr=new vcg::tri::Grid();
+	 
+	 
+	 
+
+ }
+
  void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
  {
-	 
+	  isDragging = true;
 	  if(slicedialog->getDefaultTrackball())
 		 gla->trackball.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
 	     
 			
 	 else trackball_slice.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
 	
-	//gla->update();
+	
   
  }
  void ExtraMeshSlidePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
  {
- DrawPlane(gla,m);
+	 this->gla=gla;
+	 this->m=m;
+	 
+		 DrawPlane(this->gla,this->m);
+   
  }
  void ExtraMeshSlidePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
    slicedialog->close();
@@ -127,27 +152,36 @@ void ExtraMeshSlidePlugin::restoreDefault(){
  void ExtraMeshSlidePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla ){
 	 if(!first){
 	 slicedialog=new Slicedialog(gla->window());
+	 
 	 first=true;}
 	 
 	 slicedialog->show();
+	 
+	 QObject::connect(slicedialog, SIGNAL(exportMesh()), this,SLOT(SlotExportButton()));
+     QObject::connect(slicedialog, SIGNAL(Update_glArea()), this, SLOT(upGlA()));
+ }
+ void ExtraMeshSlidePlugin::upGlA(){
+ 
+	 gla->update();
  }
  void ExtraMeshSlidePlugin::DrawPlane(GLArea * gla, MeshModel &m){
 	 
     
-	
+	 
     Box3f b=m.cm.bbox;
+	
 	Point3f mi=b.min;
 	Point3f ma=b.max;
 	Point3f centre=b.Center();
-    int LX= ma[0]-mi[0];
-	int LY= ma[1]-mi[1];
-	int LZ= ma[2]-mi[2];
-	int Delta= max(LX, LY);
+    float LX= ma[0]-mi[0];
+	float LY= ma[1]-mi[1];
+	float LZ= ma[2]-mi[2];
+	float Delta= max(LX, LY);
 	Delta=max(Delta, LZ);
-
+    
  
 	glPushMatrix();
-	glPushAttrib(GL_COLOR_BUFFER_BIT);
+	glPushAttrib(GL_COLOR_BUFFER_BIT|GL_LIGHTING_BIT);
     
 
 	
@@ -183,10 +217,10 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		glColor4f(1,0,0,0.5);
 		glBegin(GL_QUADS);
         glNormal3f(-1,0,0);
-        glVertex3f(mi[0]+(layer*i)-0.01, centre[1]-Delta, centre[2]-Delta);
-        glVertex3f(mi[0]+(layer*i)-0.01, centre[1]+Delta, centre[2]-Delta);
-		glVertex3f(mi[0]+(layer*i)-0.01, centre[1]+Delta, centre[2]+Delta);
-		glVertex3f(mi[0]+(layer*i)-0.01, centre[1]-Delta, centre[2]+Delta);
+        glVertex3f(mi[0]+(layer*i)-0.001, centre[1]-Delta, centre[2]-Delta);
+        glVertex3f(mi[0]+(layer*i)-0.001, centre[1]+Delta, centre[2]-Delta);
+		glVertex3f(mi[0]+(layer*i)-0.001, centre[1]+Delta, centre[2]+Delta);
+		glVertex3f(mi[0]+(layer*i)-0.001, centre[1]-Delta, centre[2]+Delta);
 		glEnd();
 	  }
 	  else{
@@ -213,7 +247,9 @@ void ExtraMeshSlidePlugin::restoreDefault(){
   
       glPopAttrib();
       glPopMatrix();
- gla->update();
+ if(isDragging){
+		 isDragging=false;
+		 gla->update();}
  }
 
 

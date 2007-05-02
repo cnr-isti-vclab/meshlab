@@ -15,45 +15,12 @@
     <height>300</height>
    </size>
   </property>
+  <property name="contextMenuPolicy" >
+   <enum>Qt::CustomContextMenu</enum>
+  </property>
   <property name="windowTitle" >
    <string>Slide preference</string>
   </property>
-  <widget class="QGroupBox" name="groupBox" >
-   <property name="geometry" >
-    <rect>
-     <x>210</x>
-     <y>210</y>
-     <width>181</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <widget class="QToolButton" name="ExportButton" >
-    <property name="geometry" >
-     <rect>
-      <x>90</x>
-      <y>10</y>
-      <width>80</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Export Slice...</string>
-    </property>
-   </widget>
-   <widget class="QToolButton" name="DefultButton" >
-    <property name="geometry" >
-     <rect>
-      <x>0</x>
-      <y>10</y>
-      <width>80</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Default</string>
-    </property>
-   </widget>
-  </widget>
   <widget class="QWidget" name="verticalLayout_2" >
    <property name="geometry" >
     <rect>
@@ -136,6 +103,9 @@
         </property>
         <property name="maximum" >
          <number>500</number>
+        </property>
+        <property name="minimum" >
+         <number>1</number>
         </property>
        </widget>
       </item>
@@ -353,6 +323,42 @@
     </property>
     <property name="checked" >
      <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox" >
+   <property name="geometry" >
+    <rect>
+     <x>200</x>
+     <y>210</y>
+     <width>191</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <widget class="QToolButton" name="DefultButton" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>10</y>
+      <width>80</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Default</string>
+    </property>
+   </widget>
+   <widget class="QToolButton" name="ExportButton" >
+    <property name="geometry" >
+     <rect>
+      <x>90</x>
+      <y>10</y>
+      <width>96</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Export Polyline...</string>
     </property>
    </widget>
   </widget>
