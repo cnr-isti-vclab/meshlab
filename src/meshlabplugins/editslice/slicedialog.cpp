@@ -9,6 +9,7 @@ Slicedialog::Slicedialog(QWidget *parent)
 	ui.setupUi(this);
 	numPlane=1;
 	distance=1;
+	muldistance=1;//order of
 	defaultTrackball=false;
 	restoreDefalut=false;
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
@@ -95,3 +96,29 @@ emit exportMesh();
 }
 
 
+
+
+void Slicedialog::on_decdec_clicked()
+{
+muldistance=0.01f;
+emit Update_glArea();
+}
+
+void Slicedialog::on_dec_clicked()
+{
+muldistance=0.1f;
+emit Update_glArea();
+}
+
+void Slicedialog::on_unit_clicked()
+{
+muldistance=1;
+emit Update_glArea();
+}
+
+
+void Slicedialog::on_tenmulti_clicked()
+{
+muldistance=10;
+emit Update_glArea();
+}

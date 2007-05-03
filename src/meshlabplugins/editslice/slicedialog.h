@@ -12,7 +12,7 @@ public:
 	Slicedialog(QWidget *parent = 0);
 	~Slicedialog();
 	inline int getPlaneNumber() {return numPlane;}
-	inline int getDistance() {return distance;}
+	inline float getDistance() {return (distance*muldistance);}
 	inline bool getDefaultTrackball(){return defaultTrackball;}
 	inline bool getdistanceDefault(){return distanceDefault;}
 	inline bool getRestoreDefalut(){return restoreDefalut;}
@@ -25,13 +25,18 @@ private:
 	
 	Ui::SlicedialogClass ui;
 	int numPlane; //numeber of plane
-	int distance; //distance of plane
+	float distance; //distance of plane
+	float muldistance;
 
 	bool distanceDefault; // enable/disable distance 
 	bool  defaultTrackball;
 	bool restoreDefalut;
 
 private slots:
+	void on_tenmulti_clicked();
+	void on_unit_clicked();
+	void on_dec_clicked();
+	void on_decdec_clicked();
 	
 	
 	void on_ExportButton_clicked();

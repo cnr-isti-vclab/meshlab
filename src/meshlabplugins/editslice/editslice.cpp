@@ -191,7 +191,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		trackball_slice.radius=Delta;
 
 
-    glColor4f(1.0,0,0,0.8);
+    glColor4f(1.0,0.0,0.0,0.8);
 	if(slicedialog->getRestoreDefalut()){
 		trackball_slice.Reset();
 		gla->trackball.Reset();
@@ -200,12 +200,14 @@ void ExtraMeshSlidePlugin::restoreDefault(){
    
   
    int plane=1;
+
  if(slicedialog!=0) plane=slicedialog->getPlaneNumber();
-  
+  glEnable(GL_BLEND); 
+  glEnable(GL_COLOR_MATERIAL);
   float layer=(float)LX /(float)(plane+1);
   for(int i=1; i<=(plane); i++){
 	  if(slicedialog->getdistanceDefault()){
-		glEnable(GL_BLEND); 
+		
 		glColor4f(0,1,0,0.5);
 		glBegin(GL_QUADS);
 	    glNormal3f(1,0,0);
@@ -237,10 +239,10 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		glColor4f(1,0,0,0.5);
 		glBegin(GL_QUADS);
         glNormal3f(-1,0,0);
-        glVertex3f(centre[0]-((slicedialog->getDistance()*(plane+1))/2)+(slicedialog->getDistance()*i)-0.01, centre[1]-Delta, centre[2]-Delta);
-        glVertex3f(centre[0]-((slicedialog->getDistance()*(plane+1))/2)+(slicedialog->getDistance()*i)-0.01, centre[1]+Delta, centre[2]-Delta);
-		glVertex3f(centre[0]-((slicedialog->getDistance()*(plane+1))/2)+(slicedialog->getDistance()*i)-0.01, centre[1]+Delta, centre[2]+Delta);
-		glVertex3f(centre[0]-((slicedialog->getDistance()*(plane+1))/2)+(slicedialog->getDistance()*i)-0.01, centre[1]-Delta, centre[2]+Delta);
+        glVertex3f(centre[0]-((slicedialog->getDistance()*(plane+1))/2)+(slicedialog->getDistance()*i)-0.001, centre[1]-Delta, centre[2]-Delta);
+        glVertex3f(centre[0]-((slicedialog->getDistance()*(plane+1))/2)+(slicedialog->getDistance()*i)-0.001, centre[1]+Delta, centre[2]-Delta);
+		glVertex3f(centre[0]-((slicedialog->getDistance()*(plane+1))/2)+(slicedialog->getDistance()*i)-0.001, centre[1]+Delta, centre[2]+Delta);
+		glVertex3f(centre[0]-((slicedialog->getDistance()*(plane+1))/2)+(slicedialog->getDistance()*i)-0.001, centre[1]-Delta, centre[2]+Delta);
 		glEnd();
 	  }
   }
