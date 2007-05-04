@@ -122,3 +122,4 @@ void Slicedialog::on_tenmulti_clicked()
 muldistance=10;
 emit Update_glArea();
 }
+
