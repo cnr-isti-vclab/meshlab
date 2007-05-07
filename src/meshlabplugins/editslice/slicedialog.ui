@@ -1,51 +1,158 @@
 <ui version="4.0" >
- <class>SlicedialogClass</class>
- <widget class="QDialog" name="SlicedialogClass" >
+ <class>dialogsliceClass</class>
+ <widget class="QWidget" name="dialogsliceClass" >
+  <property name="windowModality" >
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>403</width>
-    <height>300</height>
+    <width>370</width>
+    <height>380</height>
    </rect>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>370</width>
+    <height>380</height>
+   </size>
   </property>
   <property name="maximumSize" >
    <size>
-    <width>500</width>
-    <height>300</height>
+    <width>370</width>
+    <height>380</height>
    </size>
   </property>
-  <property name="contextMenuPolicy" >
-   <enum>Qt::CustomContextMenu</enum>
+  <property name="sizeIncrement" >
+   <size>
+    <width>5</width>
+    <height>2</height>
+   </size>
   </property>
-  <property name="windowTitle" >
-   <string>Slide preference</string>
+  <property name="mouseTracking" >
+   <bool>false</bool>
   </property>
-  <widget class="QWidget" name="verticalLayout" >
+  <property name="focusPolicy" >
+   <enum>Qt::NoFocus</enum>
+  </property>
+  <property name="layoutDirection" >
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <widget class="QDockWidget" name="dockWidget" >
    <property name="geometry" >
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>391</width>
-     <height>101</height>
+     <x>20</x>
+     <y>30</y>
+     <width>331</width>
+     <height>341</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" >
-    <property name="margin" >
-     <number>0</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QLabel" name="label" >
-      <property name="text" >
-       <string>Number of plane</string>
+   <property name="minimumSize" >
+    <size>
+     <width>330</width>
+     <height>330</height>
+    </size>
+   </property>
+   <property name="maximumSize" >
+    <size>
+     <width>350</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="sizeIncrement" >
+    <size>
+     <width>1</width>
+     <height>1</height>
+    </size>
+   </property>
+   <property name="windowIcon" >
+    <iconset>images/iconslice.png</iconset>
+   </property>
+   <property name="autoFillBackground" >
+    <bool>true</bool>
+   </property>
+   <property name="features" >
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas" >
+    <set>Qt::NoDockWidgetArea</set>
+   </property>
+   <property name="windowTitle" >
+    <string>Slice dialog...</string>
+   </property>
+   <widget class="QWidget" name="dockWidgetContents" >
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="geometry" >
+      <rect>
+       <x>9</x>
+       <y>9</y>
+       <width>321</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Number of plains</string>
+     </property>
+     <widget class="QSpinBox" name="spinBoxPlane" >
+      <property name="geometry" >
+       <rect>
+        <x>11</x>
+        <y>61</y>
+        <width>50</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="sizePolicy" >
+       <sizepolicy>
+        <hsizetype>5</hsizetype>
+        <vsizetype>0</vsizetype>
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize" >
+       <size>
+        <width>0</width>
+        <height>15</height>
+       </size>
+      </property>
+      <property name="maximumSize" >
+       <size>
+        <width>50</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="buttonSymbols" >
+       <enum>QAbstractSpinBox::PlusMinus</enum>
+      </property>
+      <property name="minimum" >
+       <number>1</number>
       </property>
      </widget>
-    </item>
-    <item>
      <widget class="QSlider" name="SliderPlane" >
+      <property name="geometry" >
+       <rect>
+        <x>11</x>
+        <y>29</y>
+        <width>300</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="sizePolicy" >
+       <sizepolicy>
+        <hsizetype>7</hsizetype>
+        <vsizetype>0</vsizetype>
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize" >
+       <size>
+        <width>300</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="cursor" >
        <cursor>6</cursor>
       </property>
@@ -53,7 +160,7 @@
        <number>1</number>
       </property>
       <property name="maximum" >
-       <number>50</number>
+       <number>100</number>
       </property>
       <property name="value" >
        <number>1</number>
@@ -71,164 +178,67 @@
        <number>1</number>
       </property>
      </widget>
-    </item>
-    <item>
-     <widget class="Line" name="line" >
-      <property name="orientation" >
-       <enum>Qt::Horizontal</enum>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_2" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>321</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Distance between plains</string>
+     </property>
+     <widget class="QSpinBox" name="spinBoxDistance" >
+      <property name="enabled" >
+       <bool>false</bool>
       </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" >
-      <property name="margin" >
-       <number>0</number>
+      <property name="geometry" >
+       <rect>
+        <x>11</x>
+        <y>104</y>
+        <width>40</width>
+        <height>18</height>
+       </rect>
       </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QSpinBox" name="spinBoxPlane" >
-        <property name="minimum" >
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <spacer>
-      <property name="orientation" >
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" >
+      <property name="minimumSize" >
        <size>
-        <width>20</width>
-        <height>40</height>
+        <width>0</width>
+        <height>15</height>
        </size>
       </property>
-     </spacer>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QGroupBox" name="groupBox" >
-   <property name="geometry" >
-    <rect>
-     <x>210</x>
-     <y>250</y>
-     <width>191</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <widget class="QToolButton" name="DefultButton" >
-    <property name="geometry" >
-     <rect>
-      <x>0</x>
-      <y>10</y>
-      <width>80</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Default</string>
-    </property>
-   </widget>
-   <widget class="QToolButton" name="ExportButton" >
-    <property name="geometry" >
-     <rect>
-      <x>90</x>
-      <y>10</y>
-      <width>96</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Export Polyline...</string>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QGroupBox" name="groupBox_2" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>230</y>
-     <width>91</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="title" >
-    <string>Trackball mode</string>
-   </property>
-   <widget class="QRadioButton" name="on_slideTrackBall" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>83</width>
-      <height>18</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>only Plane</string>
-    </property>
-    <property name="checked" >
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="DefaultTrackball" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>40</y>
-      <width>83</width>
-      <height>18</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Default</string>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QWidget" name="verticalLayout_2" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>110</y>
-     <width>391</width>
-     <height>121</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" >
-    <property name="margin" >
-     <number>0</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QLabel" name="label_2" >
-      <property name="text" >
-       <string>Distance between  plane</string>
+      <property name="maximumSize" >
+       <size>
+        <width>40</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="maximum" >
+       <number>500</number>
+      </property>
+      <property name="minimum" >
+       <number>1</number>
       </property>
      </widget>
-    </item>
-    <item>
      <widget class="QSlider" name="SliderPlaneDistance" >
       <property name="enabled" >
        <bool>false</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>11</x>
+        <y>71</y>
+        <width>300</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="minimumSize" >
+       <size>
+        <width>300</width>
+        <height>0</height>
+       </size>
       </property>
       <property name="cursor" >
        <cursor>6</cursor>
@@ -237,7 +247,7 @@
        <number>1</number>
       </property>
       <property name="maximum" >
-       <number>500</number>
+       <number>100</number>
       </property>
       <property name="value" >
        <number>1</number>
@@ -249,201 +259,264 @@
        <bool>true</bool>
       </property>
       <property name="tickPosition" >
-       <enum>QSlider::NoTicks</enum>
+       <enum>QSlider::TicksBelow</enum>
       </property>
       <property name="tickInterval" >
        <number>1</number>
       </property>
      </widget>
-    </item>
-    <item>
-     <widget class="Line" name="line_2" >
-      <property name="orientation" >
-       <enum>Qt::Horizontal</enum>
+     <widget class="QGroupBox" name="radioButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>101</width>
+        <height>40</height>
+       </rect>
       </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" >
-      <property name="margin" >
-       <number>0</number>
+      <property name="layoutDirection" >
+       <enum>Qt::LeftToRight</enum>
       </property>
-      <property name="spacing" >
-       <number>6</number>
+      <property name="alignment" >
+       <set>Qt::AlignRight</set>
       </property>
-      <item>
-       <widget class="QSpinBox" name="spinBoxDistance" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="maximumSize" >
-         <size>
-          <width>40</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="maximum" >
-         <number>500</number>
-        </property>
-        <property name="minimum" >
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="enable/disable_distance" >
-        <property name="minimumSize" >
-         <size>
-          <width>250</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="alignment" >
-         <set>Qt::AlignRight</set>
-        </property>
-        <widget class="QRadioButton" name="radioButton" >
-         <property name="geometry" >
-          <rect>
-           <x>10</x>
-           <y>0</y>
-           <width>111</width>
-           <height>18</height>
-          </rect>
-         </property>
-         <property name="text" >
-          <string>Enable distance</string>
-         </property>
-        </widget>
-        <widget class="QRadioButton" name="radioButton_2" >
-         <property name="geometry" >
-          <rect>
-           <x>130</x>
-           <y>0</y>
-           <width>121</width>
-           <height>18</height>
-          </rect>
-         </property>
-         <property name="text" >
-          <string>Disable distance</string>
-         </property>
-         <property name="checked" >
-          <bool>true</bool>
-         </property>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="distanceOrder" >
-      <widget class="QRadioButton" name="dec" >
+      <widget class="QRadioButton" name="diasbledistance" >
        <property name="geometry" >
         <rect>
-         <x>100</x>
-         <y>0</y>
-         <width>83</width>
+         <x>0</x>
+         <y>20</y>
+         <width>121</width>
          <height>18</height>
         </rect>
        </property>
        <property name="text" >
-        <string>0.1</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="unit" >
-       <property name="geometry" >
-        <rect>
-         <x>200</x>
-         <y>0</y>
-         <width>83</width>
-         <height>18</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>1</string>
+        <string>Default distance</string>
        </property>
        <property name="checked" >
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QRadioButton" name="tenmulti" >
+      <widget class="QRadioButton" name="radioButton_6" >
        <property name="geometry" >
         <rect>
-         <x>300</x>
+         <x>0</x>
          <y>0</y>
-         <width>83</width>
+         <width>111</width>
          <height>18</height>
         </rect>
        </property>
        <property name="text" >
-        <string>10</string>
+        <string>Edit distance...</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="distanceOrder" >
+      <property name="enabled" >
+       <bool>false</bool>
+      </property>
+      <property name="geometry" >
+       <rect>
+        <x>120</x>
+        <y>20</y>
+        <width>200</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <property name="minimumSize" >
+       <size>
+        <width>200</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="maximumSize" >
+       <size>
+        <width>40</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="title" >
+       <string>Distance order</string>
+      </property>
+      <widget class="QRadioButton" name="tenmulti" >
+       <property name="geometry" >
+        <rect>
+         <x>150</x>
+         <y>20</y>
+         <width>41</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>X10</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="unit" >
+       <property name="geometry" >
+        <rect>
+         <x>110</x>
+         <y>20</y>
+         <width>41</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>X1</string>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="dec" >
+       <property name="geometry" >
+        <rect>
+         <x>60</x>
+         <y>20</y>
+         <width>51</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>X0.1</string>
        </property>
       </widget>
       <widget class="QRadioButton" name="decdec" >
        <property name="geometry" >
         <rect>
-         <x>10</x>
-         <y>0</y>
-         <width>83</width>
+         <x>0</x>
+         <y>20</y>
+         <width>51</width>
          <height>18</height>
         </rect>
        </property>
        <property name="text" >
-        <string>00.1</string>
+        <string>X00.1</string>
        </property>
       </widget>
      </widget>
-    </item>
-   </layout>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_3" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>240</y>
+       <width>100</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="minimumSize" >
+      <size>
+       <width>0</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="maximumSize" >
+      <size>
+       <width>100</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="title" >
+      <string>Trackball mode</string>
+     </property>
+     <widget class="QRadioButton" name="DefaultTrackball" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>83</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Default</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="on_slideTrackBall" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>151</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>only Plane</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_4" >
+     <property name="geometry" >
+      <rect>
+       <x>130</x>
+       <y>250</y>
+       <width>201</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="minimumSize" >
+      <size>
+       <width>200</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize" >
+      <size>
+       <width>300</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <widget class="QToolButton" name="ExportButton_2" >
+      <property name="geometry" >
+       <rect>
+        <x>100</x>
+        <y>10</y>
+        <width>96</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Export Polyline...</string>
+      </property>
+      <property name="popupMode" >
+       <enum>QToolButton::InstantPopup</enum>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="DefultButton" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>80</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Default</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11" />
+ <tabstops>
+  <tabstop>SliderPlane</tabstop>
+  <tabstop>spinBoxPlane</tabstop>
+  <tabstop>radioButton_6</tabstop>
+  <tabstop>diasbledistance</tabstop>
+  <tabstop>SliderPlaneDistance</tabstop>
+  <tabstop>spinBoxDistance</tabstop>
+  <tabstop>on_slideTrackBall</tabstop>
+  <tabstop>DefaultTrackball</tabstop>
+  <tabstop>DefultButton</tabstop>
+  <tabstop>ExportButton_2</tabstop>
+ </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>SliderPlane</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>spinBoxPlane</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>444</x>
-     <y>130</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>550</x>
-     <y>195</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>spinBoxPlane</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>SliderPlane</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>550</x>
-     <y>195</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>444</x>
-     <y>130</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>SliderPlaneDistance</sender>
    <signal>valueChanged(int)</signal>
@@ -451,12 +524,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>512</x>
-     <y>258</y>
+     <x>50</x>
+     <y>186</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>345</x>
-     <y>297</y>
+     <x>59</x>
+     <y>230</y>
     </hint>
    </hints>
   </connection>
@@ -467,12 +540,44 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>345</x>
-     <y>297</y>
+     <x>59</x>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>512</x>
-     <y>258</y>
+     <x>91</x>
+     <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBoxPlane</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SliderPlane</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>69</x>
+     <y>87</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>116</x>
+     <y>63</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SliderPlane</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>spinBoxPlane</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>63</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>61</x>
+     <y>87</y>
     </hint>
    </hints>
   </connection>

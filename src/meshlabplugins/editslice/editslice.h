@@ -7,6 +7,7 @@
 #include <QList>
 
 #include "slicedialog.h"
+
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include <wrap/gui/trackball.h>
@@ -34,11 +35,12 @@ public:
 	void restoreDefault();
 	
 private:
-	 bool isDragging;
+	bool isDragging;
 	GLArea * gla;
 	MeshModel m;
     bool first;
-	Slicedialog *slicedialog;
+	
+	dialogslice *dialogsliceobj;
     void DrawPlane(GLArea * gla,MeshModel &m);
 	bool  activeDefaultTrackball;
     bool disableTransision;

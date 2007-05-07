@@ -1,38 +1,44 @@
-#ifndef SLICEDIALOG_H
-#define SLICEDIALOG_H
+#ifndef DIALOGSLICE_H
+#define DIALOGSLICE_H
 
-#include <QDialog>
+#include <QWidget>
+#include <QtGui/QDockWidget>
 #include "ui_slicedialog.h"
 
-class Slicedialog : public QDialog
+class dialogslice : public QDockWidget
 {
 	Q_OBJECT
 
 public:
-	Slicedialog(QWidget *parent = 0);
-	~Slicedialog();
+	dialogslice(QWidget *parent = 0);
+	~dialogslice();
 	inline int getPlaneNumber() {return numPlane;}
 	inline float getDistance() {return (distance*muldistance);}
 	inline bool getDefaultTrackball(){return defaultTrackball;}
 	inline bool getdistanceDefault(){return distanceDefault;}
 	inline bool getRestoreDefalut(){return restoreDefalut;}
-	inline void setRestoreDefalut(bool in){ restoreDefalut=in;}
+	inline void setRestoreDefalut(bool in){ 
+		restoreDefalut=in; 
+		
+	
+	}
 Q_SIGNALS:
 	void exportMesh(); 
 	void Update_glArea();
 
 private:
-	
-	Ui::SlicedialogClass ui;
+	Ui::dialogsliceClass ui;
 	int numPlane; //numeber of plane
 	float distance; //distance of plane
 	float muldistance;
-
+    QWidget* parent;
 	bool distanceDefault; // enable/disable distance 
 	bool  defaultTrackball;
 	bool restoreDefalut;
 
 private slots:
+	
+	void on_diasbledistance_toggled(bool);
 	void on_tenmulti_clicked();
 	void on_unit_clicked();
 	void on_dec_clicked();
@@ -40,7 +46,7 @@ private slots:
 	
 	
 	void on_ExportButton_clicked();
-	void on_radioButton_toggled(bool);
+	//void on_radioButton_toggled(bool);
 	void on_DefultButton_clicked();
 	
 	
@@ -58,4 +64,5 @@ private slots:
 	
 };
 
-#endif // Slicedialog_H
+#endif
+
