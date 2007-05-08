@@ -19,14 +19,19 @@ using namespace vcg;
 ExtraMeshSlidePlugin::ExtraMeshSlidePlugin() {
  first=false;
  isDragging=false;
- actionList << new QAction(QIcon(":/images/iconslice.png"),"Slice mesh geometry", this);
+ QAction* editslice = new QAction(QIcon(":/images/iconslice.png"),"Slice mesh geometry", this);
+ editslice->setShortcut(Qt::Key_Escape);
+ actionList << editslice;
+ 
   QAction *editAction;
   trackball_slice.center=Point3f(0, 0, 0);
   trackball_slice.radius= 50;
+  
   foreach(editAction, actionList)
     editAction->setCheckable(true);
  
 }
+
 ExtraMeshSlidePlugin::~ExtraMeshSlidePlugin() {
 
 	//delete dialogsliceobj;
@@ -44,6 +49,7 @@ QList<QAction *> ExtraMeshSlidePlugin::actions() const {
 	if(modifiers & Qt::ShiftModifier   ) vcgbt |= Trackball::KEY_SHIFT;
 	if(modifiers & Qt::ControlModifier ) vcgbt |= Trackball::KEY_CTRL;
 	if(modifiers & Qt::AltModifier     ) vcgbt |= Trackball::KEY_ALT;
+	
 	return Trackball::Button(vcgbt);
 }
 
@@ -71,7 +77,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
      disableTransision=true; //diable transition for main trackball
 	 e->accept();
 
-      trackball_slice.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+	 trackball_slice.ButtonUp(QT2VCG(Qt::NoButton,  Qt::ControlModifier ) );
       trackball_slice.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
 	  trackball_slice.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
 	  if (((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
@@ -122,6 +128,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	 pl->SetOffset(100);
 	 //vcg::tri::Grid* gr=new vcg::tri::Grid();
 	 
+	
 	 
 	 
 
@@ -140,7 +147,8 @@ void ExtraMeshSlidePlugin::restoreDefault(){
   
  }
  void ExtraMeshSlidePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
- {      
+ {   
+	 
 	 this->gla=gla;
 	 this->m=m;
 	 if(!gla->isEnabled()){
@@ -178,12 +186,13 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	Point3f mi=b.min;
 	Point3f ma=b.max;
 	Point3f centre=b.Center();
+	float Delta=0;
     float LX= ma[0]-mi[0];
 	float LY= ma[1]-mi[1];
 	float LZ= ma[2]-mi[2];
-	float Delta= max(LX, LY);
+	Delta= max(LX, LY);
 	Delta=max(Delta, LZ);
-    
+	dialogsliceobj->setDistanceRange(Delta);
  
 	glPushMatrix();
 	glPushAttrib(GL_COLOR_BUFFER_BIT|GL_LIGHTING_BIT);
@@ -213,7 +222,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
   float layer=(float)LX /(float)(plane+1);
   for(int i=1; i<=(plane); i++){
 	  if(dialogsliceobj->getdistanceDefault()){
-		
+		glEnable(GL_CULL_FACE);
 		glColor4f(0,1,0,0.5);
 		glBegin(GL_QUADS);
 	    glNormal3f(1,0,0);
@@ -225,14 +234,14 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		glColor4f(1,0,0,0.5);
 		glBegin(GL_QUADS);
         glNormal3f(-1,0,0);
-        glVertex3f(mi[0]+(layer*i)-0.001, centre[1]-Delta, centre[2]-Delta);
-        glVertex3f(mi[0]+(layer*i)-0.001, centre[1]+Delta, centre[2]-Delta);
-		glVertex3f(mi[0]+(layer*i)-0.001, centre[1]+Delta, centre[2]+Delta);
-		glVertex3f(mi[0]+(layer*i)-0.001, centre[1]-Delta, centre[2]+Delta);
+        glVertex3f(mi[0]+(layer*i), centre[1]-Delta, centre[2]-Delta);
+        glVertex3f(mi[0]+(layer*i), centre[1]-Delta, centre[2]+Delta);
+		glVertex3f(mi[0]+(layer*i), centre[1]+Delta, centre[2]+Delta);
+		glVertex3f(mi[0]+(layer*i), centre[1]+Delta, centre[2]-Delta);
 		glEnd();
 	  }
 	  else{
-	    
+	    glEnable(GL_CULL_FACE);
 	    glEnable(GL_BLEND); 
 		glColor4f(0,1,0,0.5);
 		glBegin(GL_QUADS);
@@ -245,10 +254,10 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		glColor4f(1,0,0,0.5);
 		glBegin(GL_QUADS);
         glNormal3f(-1,0,0);
-        glVertex3f(centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i)-0.001, centre[1]-Delta, centre[2]-Delta);
-        glVertex3f(centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i)-0.001, centre[1]+Delta, centre[2]-Delta);
-		glVertex3f(centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i)-0.001, centre[1]+Delta, centre[2]+Delta);
-		glVertex3f(centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i)-0.001, centre[1]-Delta, centre[2]+Delta);
+        glVertex3f(centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i), centre[1]-Delta, centre[2]-Delta);
+        glVertex3f(centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i), centre[1]-Delta, centre[2]+Delta);
+		glVertex3f(centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i), centre[1]+Delta, centre[2]+Delta);
+		glVertex3f(centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i), centre[1]+Delta, centre[2]-Delta);
 		glEnd();
 	  }
   }

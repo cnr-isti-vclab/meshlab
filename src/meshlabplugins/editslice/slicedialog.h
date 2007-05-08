@@ -13,14 +13,18 @@ public:
 	dialogslice(QWidget *parent = 0);
 	~dialogslice();
 	inline int getPlaneNumber() {return numPlane;}
-	inline float getDistance() {return (distance*muldistance);}
+	inline float getDistance() {return (distance*distanceRange);}
 	inline bool getDefaultTrackball(){return defaultTrackball;}
 	inline bool getdistanceDefault(){return distanceDefault;}
 	inline bool getRestoreDefalut(){return restoreDefalut;}
 	inline void setRestoreDefalut(bool in){ 
-		restoreDefalut=in; 
+		restoreDefalut=in;}
+	inline void setDistanceRange(float dRange){
+		this->distanceRange=dRange/100;
 		
-	
+		
+		ui.labelDistanceRange->setText(QString("Distance range from 0 to "+ QString::number(distanceRange)));
+		
 	}
 Q_SIGNALS:
 	void exportMesh(); 
@@ -30,7 +34,7 @@ private:
 	Ui::dialogsliceClass ui;
 	int numPlane; //numeber of plane
 	float distance; //distance of plane
-	float muldistance;
+	float distanceRange;
     QWidget* parent;
 	bool distanceDefault; // enable/disable distance 
 	bool  defaultTrackball;
@@ -39,10 +43,7 @@ private:
 private slots:
 	
 	void on_diasbledistance_toggled(bool);
-	void on_tenmulti_clicked();
-	void on_unit_clicked();
-	void on_dec_clicked();
-	void on_decdec_clicked();
+	
 	
 	
 	void on_ExportButton_clicked();
@@ -53,7 +54,7 @@ private slots:
 	void on_SliderPlaneDistance_valueChanged(int);
 	void on_spinBoxDistance_valueChanged(int);
 	void on_spinBoxPlane_valueChanged(int);
-	void on_SliderPlane_valueChanged(int);
+	
 	void on_on_slideTrackBall_clicked(bool);
 	void on_DefaultTrackball_clicked(bool);
 
