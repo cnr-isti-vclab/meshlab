@@ -30,5 +30,6 @@
         <file>images/layer_eye_close.png</file>
         <file>images/layer_edit_locked.png</file>
         <file>images/layer_edit_unlocked.png</file>
+        <file>images/100mesh.html</file>
     </qresource>
 </RCC>

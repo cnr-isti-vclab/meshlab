@@ -48,7 +48,8 @@ FORMS          =    ui/layerDialog.ui \
 					ui/aboutDialog.ui \
 					ui/renametexture.ui \
 					ui/savemaskexporter.ui \
-					ui/GenericELDialog.ui
+					ui/GenericELDialog.ui  \
+					ui/congratsDialog.ui
 
 
 RESOURCES     = meshlab.qrc

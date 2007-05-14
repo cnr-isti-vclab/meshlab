@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.76  2007/05/14 10:46:04  cignoni
+Added cngrt dialog
+
 Revision 1.75  2007/04/16 09:24:37  cignoni
 ** big change **
 Added Layers managemnt.
@@ -141,6 +144,7 @@ Added short key lastFilter
 #include "plugindialog.h"
 #include "customDialog.h"	
 #include "saveSnapshotDialog.h"	
+#include "ui_congratsDialog.h"
 
 QProgressBar *MainWindow::qb;
 
@@ -661,6 +665,26 @@ void MainWindow::setCurrentFile(const QString &fileName)
 	if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
   {
 		checkForUpdates(false);
+		
+		int congratsMeshCounter = settings.value("congratsMeshCounter",0).toInt(); 
+		if(loadedMeshCounter > congratsMeshCounter + 100 ) 
+			{
+				QFile txtFile(":/images/100mesh.html");
+				txtFile.open(QIODevice::ReadOnly | QIODevice::Text);
+				QString tttt=txtFile.readAll();
+				// This preference values store when you did the last request for a mail
+				settings.setValue("congratsMeshCounter",loadedMeshCounter);
+
+				QDialog *congratsDialog = new QDialog();
+				Ui::CongratsDialog temp;
+				temp.setupUi(congratsDialog);
+				
+				temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
+				temp.congratsTextEdit->setHtml(tttt);
+				congratsDialog->exec();
+				if(congratsDialog->result()==QDialog::Accepted)
+					QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
+			}	
 	}
 }
 
