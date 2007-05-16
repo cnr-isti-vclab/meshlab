@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.122  2007/05/16 15:02:05  cignoni
+Better management of toggling between edit actions and camera movement
+
 Revision 1.121  2007/04/16 09:24:37  cignoni
 ** big change **
 Added Layers managemnt.
@@ -145,6 +148,7 @@ GLArea::GLArea(QWidget *parent)
 	iDecoratorsList=0;
 	iEdit=0;
 	currentEditor=0;
+	suspendedEditor=false;
 	cfps=0;
   lastTime=0;
   hasToPick=false;
@@ -155,7 +159,7 @@ GLArea::GLArea(QWidget *parent)
 	trackBallVisible = true;
 	currentShader = NULL;
 	lastFilterRef = NULL;
-	lastEditRef = NULL;
+	//lastEditRef = NULL;
 	currentMesh = NULL;
 	currLogLevel = -1;
 	setAttribute(Qt::WA_DeleteOnClose,true);
@@ -382,7 +386,7 @@ void GLArea::paintGL()
 	// Finally apply the Trackball for the model
 	trackball.GetView();
   glPushMatrix(); 
-	trackball.Apply(trackBallVisible && !takeSnapTile && iEdit==0);
+	trackball.Apply(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor));
 	float d=2.0f/FullBBox.Diag();
 	glScale(d);
 	
@@ -651,7 +655,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 {
   e->accept();
 	setFocus();
-  if(iEdit)  iEdit->mousePressEvent(currentEditor,e,*mm(),this);
+  if(iEdit && !suspendedEditor)  iEdit->mousePressEvent(currentEditor,e,*mm(),this);
   else {          
 	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
           (e->button()==Qt::LeftButton) )
@@ -669,7 +673,7 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
 	if(e->buttons() | Qt::LeftButton) 
 	{
-      if(iEdit) iEdit->mouseMoveEvent(currentEditor,e,*mm(),this);
+      if(iEdit && !suspendedEditor) iEdit->mouseMoveEvent(currentEditor,e,*mm(),this);
       else {
 		    if (isDefaultTrackBall()) 
 			{
@@ -686,7 +690,7 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
   //clearFocus();
 	activeDefaultTrackball=true;
-	if(iEdit) iEdit->mouseReleaseEvent(currentEditor,e,*mm(),this);
+	if(iEdit && !suspendedEditor) iEdit->mouseReleaseEvent(currentEditor,e,*mm(),this);
     else {
           if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	        else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
@@ -702,8 +706,8 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	float notch = e->delta()/ float(WHEEL_STEP);
   switch(e->modifiers())
   {
-    case Qt::ControlModifier                     : clipRatioFar  *= powf(1.2f, notch); break;
-    case Qt::ShiftModifier + Qt::ControlModifier : clipRatioNear *= powf(1.2f, notch); break;
+    case Qt::ShiftModifier + Qt::ControlModifier : clipRatioFar  *= powf(1.2f, notch); break;
+    case Qt::ControlModifier                     : clipRatioNear *= powf(1.2f, notch); break;
     case Qt::ShiftModifier                       : fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
     default:
       trackball.MouseWheel( e->delta()/ float(WHEEL_STEP)); 

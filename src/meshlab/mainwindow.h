@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.85  2007/05/16 15:02:05  cignoni
+Better management of toggling between edit actions and camera movement
+
 Revision 1.84  2007/04/16 10:19:18  cignoni
 v.1.1.0b string
 
@@ -171,7 +174,7 @@ private slots:
 	bool saveSnapshot(); 
 	///////////Slot Menu Edit ////////////////////////
   void applyEditMode();
-	void endEditMode();
+	void suspendEditMode();
 	///////////Slot Menu Filter ////////////////////////
 	void applyFilter();
 	void applyLastFilter();
@@ -304,7 +307,7 @@ private:
 	QAction *separatorAct;										
 	QAction *exitAct;
 	/////////// Actions Menu Edit  /////////////////////
-  QAction *endEditModeAct;
+  QAction *suspendEditModeAct;
 	/////////// Actions Menu Render /////////////////////
 	QActionGroup *renderModeGroupAct;
 	QAction *renderBboxAct;

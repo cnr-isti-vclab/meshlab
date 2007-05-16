@@ -157,10 +157,15 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	}
 }
 
-/** is never called  */
+// this is called only when we change editor or we want to close it.
 void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) {
-	qDebug() <<"ENDEDIT"<<endl;
-	if (paintbox!=0) { paintbox->setVisible(false); /*delete paintbox; paintbox=0;*/ }
+	qDebug() <<"EditPaintPlugin::ENDEDIT"<<endl;
+	if (paintbox!=0) { 
+			delete paintbox; 
+			delete paint_dock; 
+			paintbox=0;
+			paint_dock=0;
+	 }
 }
 
 void EditPaintPlugin::mousePressEvent(QAction * ac, QMouseEvent * event, MeshModel &m, GLArea * gla) {

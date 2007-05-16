@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.77  2007/05/16 15:02:05  cignoni
+Better management of toggling between edit actions and camera movement
+
 Revision 1.76  2007/05/14 10:46:04  cignoni
 Added cngrt dialog
 
@@ -345,11 +348,11 @@ void MainWindow::createActions()
 
 
   //////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
-  endEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
-	endEditModeAct->setShortcut(Qt::Key_Escape);
-	endEditModeAct->setCheckable(true);
-	endEditModeAct->setChecked(true);
-	connect(endEditModeAct, SIGNAL(triggered()), this, SLOT(endEditMode()));
+  suspendEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
+	suspendEditModeAct->setShortcut(Qt::Key_Escape);
+	suspendEditModeAct->setCheckable(true);
+	suspendEditModeAct->setChecked(true);
+	connect(suspendEditModeAct, SIGNAL(triggered()), this, SLOT(suspendEditMode()));
 
 	//////////////Action Menu WINDOWS /////////////////////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
@@ -416,7 +419,7 @@ void MainWindow::createToolBars()
 	renderToolBar->addAction(setSelectionRenderingAct);
 
   editToolBar = addToolBar(tr("Edit"));
-	editToolBar->addAction(endEditModeAct);
+	editToolBar->addAction(suspendEditModeAct);
 
 }
 
@@ -443,7 +446,7 @@ void MainWindow::createMenus()
 	
 	//////////////////// Menu Edit //////////////////////////////////////////////////////////////////////////
 	editMenu = menuBar()->addMenu(tr("&Edit"));
-	editMenu->addAction(endEditModeAct);
+	editMenu->addAction(suspendEditModeAct);
 	
   //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));

@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.74  2007/05/16 15:02:04  cignoni
+Better management of toggling between edit actions and camera movement
+
 Revision 1.73  2007/04/16 09:24:37  cignoni
 ** big change **
 Added Layers managemnt.
@@ -248,9 +251,7 @@ public:
 	//QFont getFont() {return qFont;}
 
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
-	QAction *getLastAppliedEdit()							{return lastEditRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
-	void		setLastAppliedEdit(QAction *qa)		  {lastEditRef = qa;}
 
 	QString getFileName()							{return QString(currentMesh->fileName.c_str());}
 	void		setFileName(QString name)	
@@ -293,17 +294,48 @@ public:
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
 
-	void setEdit(MeshEditInterface *edit, QAction *editor){	iEdit = edit; currentEditor=editor;}
+  // Edit Mode management
+	// In the glArea we can have a active Editor that can toggled into a ''suspendeed'' state 
+	// in which the mouse event are redirected back to the GLArea to drive the camera trackball
+	// The decorate function of the current active editor is still called.
+  // EndEdit is called only when you press again the same button or when you change editor.
+	  
+	void endEdit(){	
+		if(iEdit && currentEditor) 
+				{
+						if(suspendedEditor) suspendEditToggle();
+						iEdit->EndEdit(currentEditor,*mm(),this);
+						currentEditor->setChecked(false);
+				}
+		iEdit= 0; 
+		currentEditor=0; 
+		setCursorTrack(0); 
+		update(); 
+	} 
+  void suspendEditToggle()
+		{	
+			if(currentEditor==0) return;
+			static QCursor qc;
+			if(suspendedEditor) {
+							suspendedEditor=false; 
+							setCursor(qc); 
+			}	else {
+							suspendedEditor=true;
+							qc=cursor(); 
+							setCursorTrack(0); 						
+			}
+		}
+		
+	void      setEdit(MeshEditInterface *edit, QAction *editor){	iEdit = edit; currentEditor=editor;}
 	QAction * getEditAction() { return currentEditor; }
-	void endEdit(){	iEdit = 0; currentEditor=0; setCursorTrack(0);update();}///
-
+	
 	void closeEvent(QCloseEvent *event);
   float lastRenderingTime() { return lastTime;}
 
 	float getFov() { return fov; }
 
 	bool	infoAreaVisible;		// Draws the lower info area ?
-
+  bool  suspendedEditor;
 protected:
 
 	void initializeGL();
@@ -340,18 +372,18 @@ private:
 	MeshRenderInterface *iRenderer;
 	QAction *currentShader;
 	QAction *lastFilterRef; // reference to last filter applied
-	QAction *lastEditRef; // reference to last Editing Mode Used 
 	QFont	qFont;			//font settings
 
 	// Editing support
 	MeshEditInterface *iEdit;
 	QAction *currentEditor;
+	QAction *suspendedEditRef; // reference to last Editing Mode Used 
 
 	RenderMode rm;
 	ColorSetting cs;
 	GLLightSetting ls;
 	float fov;
-	//float objDist;
+	//float objDist; 
 	float clipRatioFar;
 	float clipRatioNear;
 	float nearPlane;

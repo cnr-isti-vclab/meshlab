@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.128  2007/05/16 15:02:06  cignoni
+Better management of toggling between edit actions and camera movement
+
 Revision 1.127  2007/04/20 09:57:00  cignoni
 Smarter Callback that does not slow down the system when called too frequently
 
@@ -225,10 +228,10 @@ void MainWindow::updateMenus()
 
     foreach (QAction *a,editActionList)
          {a->setChecked(false);}
-    endEditModeAct->setChecked(false);
+    suspendEditModeAct->setChecked(false);
 
     if(GLA()->getEditAction())   GLA()->getEditAction()->setChecked(true);
-                              else       endEditModeAct->setChecked(true);
+                              else   suspendEditModeAct->setChecked(true);
 
 		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
@@ -401,25 +404,25 @@ if(iFilter->getClass(action)==MeshFilterInterface::Selection )
 }
 
 	
-void MainWindow::endEditMode()
+void MainWindow::suspendEditMode()
 {
   if(!GLA()) return;
   if(GLA()->getEditAction())
   {
-	  GLA()->getEditAction()->setChecked(false);
-    GLA()->endEdit();
+//	  GLA()->getEditAction()->setChecked(false);
+    GLA()->suspendEditToggle();
   }
-  else
-    if(GLA()->getLastAppliedEdit())
-    {	
-      QAction *action = qobject_cast<QAction *>(GLA()->getLastAppliedEdit());
-	    MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
-      GLA()->setEdit(iEdit,action);
-      iEdit->StartEdit(action,*(GLA()->mm()),GLA());
-	    GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
-      GLA()->setSelectionRendering(true);
-    }
-  updateMenus();
+  /* else
+		 if(GLA()->getLastAppliedEdit())
+		 {	
+			 QAction *action = qobject_cast<QAction *>(GLA()->getLastAppliedEdit());
+			 MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
+			 GLA()->setEdit(iEdit,action);
+			 iEdit->StartEdit(action,*(GLA()->mm()),GLA());
+			 GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
+			 GLA()->setSelectionRendering(true);
+		 }
+	 */ updateMenus();
 }
 void MainWindow::applyEditMode()
 {
@@ -428,13 +431,21 @@ void MainWindow::applyEditMode()
 		action->setChecked(false);
 		return;
 	}
-	if(GLA()->getEditAction()) { //prevents multiple buttons pushed
-		GLA()->getEditAction()->setChecked(false);
-	}
+
 	QAction *action = qobject_cast<QAction *>(sender());
+
+	if(GLA()->getEditAction()) { //prevents multiple buttons pushed
+		  if(action==GLA()->getEditAction()) // We have double pressed the same action and that means disable that actioon
+			{
+				GLA()->endEdit();
+				return;
+			}
+			GLA()->endEdit();
+		}
+		
 	MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
   GLA()->setEdit(iEdit,action);
-  GLA()->setLastAppliedEdit(action);
+//  GLA()->setLastAppliedEdit(action);
 
   iEdit->StartEdit(action,*(GLA()->mm()),GLA());
 	GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
