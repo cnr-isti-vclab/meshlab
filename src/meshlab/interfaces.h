@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.57  2007/05/16 15:03:21  cignoni
+better comments
+
 Revision 1.56  2007/04/16 09:24:37  cignoni
 ** big change **
 Added Layers managemnt.
@@ -140,6 +143,8 @@ public:
 };
 
 
+
+
 class MeshFilterInterface
 {
 public:
@@ -158,9 +163,9 @@ public:
 	// Generic Info about the plugin version and author.
 	virtual const PluginInfo &Info()=0;
 
-	// The filterclass describe in which generic class of filters it fits. 
+	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
-	// For example filters that perform action only on the selection will be placed in the Ê
+	// For example filters that perform an action only on the selection will be placed in the Selection Class Ê
 	virtual const FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
 	
 	// This function invokes a dialog and get back the parameters
@@ -180,7 +185,8 @@ public:
 	// FALSE is returned by default if the plugin doesn't implement this 
 	virtual bool getStdFields(QAction *, MeshModel &, StdParList &){return false;}
     
-	/* Overloading of the function getParameters that supports the standard plugin window. If the plugin doesn't implement this, the classic function is called */
+	/* Overloading of the function getParameters that supports the standard plugin window. 
+	If the plugin doesn't implement this, the classic function is called */
 	virtual bool getStdParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/) {return getParameters(qa,qw,mm,fp);};
 
 
@@ -262,7 +268,6 @@ public:
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/,QFont qf) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-//		virtual QList<QAction *> actions() const = 0;
         
     virtual const QString ST(FilterType filter) const=0;
     virtual const FilterType ID(QAction *a)
@@ -286,19 +291,22 @@ class MeshEditInterface
 {
 public:
     virtual ~MeshEditInterface() {}
-
+		virtual QList<QAction *> actions() const = 0;
     virtual const QString Info(QAction *)=0;
     virtual const PluginInfo &Info()=0;
 
-    virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-		//virtual void Edit(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, GLArea * /*parent*/) = 0;
+    // Called when the user press the first time the button 
+		virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+		
+		// Called when the user press the second time the button 
 		virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) = 0;
+    
+		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) = 0;
     virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	  virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	  virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 //	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
-		virtual QList<QAction *> actions() const = 0;
+
 };
 
 Q_DECLARE_INTERFACE(MeshIOInterface,       "vcg.meshlab.MeshIOInterface/1.0")
