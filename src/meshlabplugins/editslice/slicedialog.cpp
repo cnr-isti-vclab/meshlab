@@ -58,10 +58,12 @@ ui.lcdPlaneDistance->display(distance*distanceRange);
 void dialogslice::on_DefultButton_clicked()
 {
  emit Update_glArea();
- restoreDefalut=true;
+ emit  RestoreDefault();
+ 
  numPlane=1;
  distance=1;
  this->ui.SliderPlaneDistance->setValue(1);
+ this->ui.spinBoxPlane->setValue(1);
  
 
 }
@@ -77,6 +79,7 @@ if (f){
 	
 	}
 	else {this->ui.SliderPlaneDistance->setEnabled(true);
+	this->ui.SliderPlaneDistance->setValue(defaultdistance/distanceRange);
 	
 
 	
