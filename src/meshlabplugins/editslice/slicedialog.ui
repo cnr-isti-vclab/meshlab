@@ -182,6 +182,60 @@
       </property>
      </widget>
     </widget>
+    <widget class="QGroupBox" name="groupBox_3" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>200</y>
+       <width>100</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="minimumSize" >
+      <size>
+       <width>0</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="maximumSize" >
+      <size>
+       <width>100</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="title" >
+      <string>Trackball mode</string>
+     </property>
+     <widget class="QRadioButton" name="DefaultTrackball" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>83</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Default</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="on_slideTrackBall" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>151</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>only Plane</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
     <widget class="QGroupBox" name="groupBox_2" >
      <property name="geometry" >
       <rect>
@@ -249,6 +303,16 @@
        </rect>
       </property>
      </widget>
+     <widget class="QLabel" name="labelDistanceRange" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>291</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
      <widget class="QSlider" name="SliderPlaneDistance" >
       <property name="enabled" >
        <bool>false</bool>
@@ -290,70 +354,6 @@
       </property>
       <property name="tickInterval" >
        <number>1</number>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labelDistanceRange" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>70</y>
-        <width>291</width>
-        <height>21</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_3" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>200</y>
-       <width>100</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="minimumSize" >
-      <size>
-       <width>0</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="maximumSize" >
-      <size>
-       <width>100</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="title" >
-      <string>Trackball mode</string>
-     </property>
-     <widget class="QRadioButton" name="DefaultTrackball" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>83</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>Default</string>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="on_slideTrackBall" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>151</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>only Plane</string>
-      </property>
-      <property name="checked" >
-       <bool>true</bool>
       </property>
      </widget>
     </widget>

@@ -12,6 +12,7 @@ class dialogslice : public QDockWidget
 public:
 	dialogslice(QWidget *parent = 0);
 	~dialogslice();
+	
 	inline int getPlaneNumber() {return numPlane;}
 	inline float getDistance() {return (distance*distanceRange);}
 	inline bool getDefaultTrackball(){return defaultTrackball;}
@@ -19,6 +20,10 @@ public:
 	inline bool getRestoreDefalut(){return restoreDefalut;}
 	inline void setRestoreDefalut(bool in){ 
 		restoreDefalut=in;}
+	inline void setDefaultDistance(float f){
+	defaultdistance=f;
+	}
+		
 	inline void setDistanceRange(float dRange){
 		this->distanceRange=dRange/100;
 		
@@ -26,15 +31,17 @@ public:
 		ui.labelDistanceRange->setText(QString("Distance range from 0 to "+ QString::number(distanceRange)));
 		
 	}
+	
 Q_SIGNALS:
 	void exportMesh(); 
 	void Update_glArea();
-
+     void RestoreDefault();
 private:
 	Ui::dialogsliceClass ui;
 	int numPlane; //numeber of plane
 	float distance; //distance of plane
 	float distanceRange;
+	float defaultdistance;
     QWidget* parent;
 	bool distanceDefault; // enable/disable distance 
 	bool  defaultTrackball;
