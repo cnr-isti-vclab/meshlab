@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.12  2007/05/22 15:16:43  cignoni
+ Improved params of ball pivoting
+
  Revision 1.11  2007/04/16 09:25:28  cignoni
  ** big change **
  Added Layers managemnt.
@@ -72,23 +75,20 @@
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
-
-
-// temporaneamente prendo la versione corrente dalla cartella test
-#include<vcg/complex/trimesh/update/bounding.h>
-#include <wrap/io_trimesh/io_mask.h>
-#include <vcg/complex/trimesh/create/platonic.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/clean.h>
 #include <vcg/math/matrix33.h>
-#include <vcg/complex/trimesh/create/ball_pivoting.h>
-
-#include <QMessageBox>
-#include <QFileDialog>
 
 #include "cleanfilter.h"
 #include "remove_small_cc.h"
+
+
+//#include <wrap/io_trimesh/io_mask.h>
+#include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/create/ball_pivoting.h>
+
 #include <vcg/space/normal_extrapolation.h>
 
 using namespace vcg;
@@ -178,7 +178,9 @@ bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst
   {
     case FP_REBUILD_SURFACE :
 		  parlst.addFieldFloat("BallRadius","Enter ball size as a diag perc. (0 autoguess))",(float)maxDiag1);
+		  parlst.addFieldFloat("CreaseThr","Angle Threshold",(float)maxDiag1);
 		  parlst.addFieldBool("ComputeNormal","Compute the per vertex normals using only the point set ",false);
+		  parlst.addFieldBool("DeleteFaces","Delete intial set of faces",false);
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
 		  parlst.addFieldFloat("MinComponentDiag","Enter size (as a diag perc 0..100)",(float)maxDiag2);
@@ -233,12 +235,23 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
 	if(filter->text() == ST(FP_REBUILD_SURFACE) )
 	  {
       float radius = par.getFloat("BallRadius");		
+			bool ComputeNormal = par.getBool("ComputeNormal");
+			float CreaseThr = par.getFloat("CreaseThr");
+			bool DeleteFaces = par.getBool("DeleteFaces");
       float clustering = 0.1;
       float crease=0;
-      m.cm.fn=0;
-      m.cm.face.resize(0);
-      NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
-      tri::Pivot<CMeshO> pivot(m.cm, radius, clustering, crease); 
+      if(DeleteFaces) {
+				m.cm.fn=0;
+				m.cm.face.resize(0);
+      }
+			
+			if(ComputeNormal)
+				NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
+      
+			tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
+			tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+			
+			tri::Pivot<CMeshO> pivot(m.cm, radius, clustering, crease); 
       // the main processing
       pivot.buildMesh(cb);
 	  }
