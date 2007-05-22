@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.13  2007/05/22 15:26:02  cignoni
+ Improved params of ball pivoting (again)
+
  Revision 1.12  2007/05/22 15:16:43  cignoni
  Improved params of ball pivoting
 
@@ -239,7 +242,6 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
 			float CreaseThr = par.getFloat("CreaseThr");
 			bool DeleteFaces = par.getBool("DeleteFaces");
       float clustering = 0.1;
-      float crease=0;
       if(DeleteFaces) {
 				m.cm.fn=0;
 				m.cm.face.resize(0);
@@ -251,7 +253,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
 			tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 			tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
 			
-			tri::Pivot<CMeshO> pivot(m.cm, radius, clustering, crease); 
+			tri::Pivot<CMeshO> pivot(m.cm, radius, clustering, CreaseThr); 
       // the main processing
       pivot.buildMesh(cb);
 	  }
