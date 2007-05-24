@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <meshlab/glarea.h>
 #include "editslice.h"
-
+#include <qstring.h>
 #include <wrap/gl/pick.h>
 #include <vcg/complex/trimesh/create/platonic.h>
 #include <vcg/simplex/vertexplus/base.h>
@@ -140,6 +140,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
  void ExtraMeshSlidePlugin::SlotExportButton(){
 	 
 	 fileName = QFileDialog::getSaveFileName(gla->window(), tr("Save polyline File"),"/",tr("Mesh (*.svg)"));
+	 
 	 Matrix44f mat_trac_rotation ; 
 	 trackball_slice.track.rot.ToMatrix( mat_trac_rotation ); //Matrice di rotazione della trackball dei piani
 	 
@@ -147,45 +148,37 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	 (*dir)= mat_trac_rotation * (*dir); // moltiplico la matrice di rotazione per la normale del piano
 	
      Point3f translation_plains=trackball_slice.track.tra;  //vettore di translazione dei piani
-	 
-	 /*float alpha;
-     Point3f axis;
-	 trackball_slice.track.rot.ToAxis(alpha, axis);
-	 alpha=math::ToDeg(alpha);	 
-	 float rot_x=axis[0]*alpha;
-	 float rot_y=axis[1]*alpha;
-	 float rot_z=axis[2]*alpha;*/
-     
-	 Point3f po=point_Vector[0];
-	 Plane3f p;
-	
-	
-	
-	 p.SetDirection(*dir);
+	 for(int i=0; i<point_Vector.size(); i++){	
+		Point3f po=point_Vector[i];
+	    Plane3f p;
+	    p.SetDirection(*dir);
 /* Equazione del piano ax+by+cz=distance
    dir->X=x
    dir->Y=y
    dir->Z=z
    a,b,c coordinata centro di rotazione del piano
 */   
-	 Point3f off= mat_trac_rotation * translation_plains;
-
-	 p.SetOffset( (po.X()*dir->X() )+ (po.Y()*dir->Y()) +(po.Z()*dir->Z())+ (off*(*dir)) );
-	
-     
-	 double avg_length;  //lunghezza media edge
-	 mesh_grid.Set(m.cm.face.begin() ,m.cm.face.end());
-	 std::vector<TriMeshGrid::Cell *> intersected_cells;
-	 n_EdgeMesh edge_mesh;
-     n_Mesh trimesh;
-	 vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(p , edge_mesh, avg_length, &mesh_grid, intersected_cells);
-     vcg::edge::UpdateBounding<n_EdgeMesh>::Box(edge_mesh);
+	    Point3f off= mat_trac_rotation * translation_plains;
+		p.SetOffset( (po.X()*dir->X() )+ (po.Y()*dir->Y()) +(po.Z()*dir->Z())+ (off*(*dir)) );
+		double avg_length;  //lunghezza media edge
+		mesh_grid.Set(m.cm.face.begin() ,m.cm.face.end());
+		std::vector<TriMeshGrid::Cell *> intersected_cells;
+		n_EdgeMesh edge_mesh;
+		n_Mesh trimesh;
+		vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(p , edge_mesh, avg_length, &mesh_grid, intersected_cells);
+		vcg::edge::UpdateBounding<n_EdgeMesh>::Box(edge_mesh);
 
 	 //Export in svg
-	 vcg::edge::io::SVGProperties pr;
-	 pr.setPlane(0,Point3d((*dir).X(),(*dir).Y(), (*dir).Z() )); 
-	 QByteArray fn = fileName.toLatin1();
-	 vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fn.data(), pr  );
+		vcg::edge::io::SVGProperties pr;
+		pr.setPlane(0,Point3d((*dir).X(),(*dir).Y(), (*dir).Z() )); 
+		
+		//fileName.insert(fileName.find( QRegExp(".svg"), 0 ),"_01");
+		QString index;
+		index.setNum(i);
+        QString fn=fileName;
+        fn.insert(fileName.length()-4, index);
+		vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fn.toLatin1().data(), pr  );
+	 }
 	
  }
 
@@ -258,6 +251,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
   glEnable(GL_COLOR_MATERIAL);
   float layer=(float)LX /(float)(plane+1);
   dialogsliceobj->setDefaultDistance(layer);
+  point_Vector.clear();
   for(int i=1; i<=(plane); i++){
 	  int in_ass;
 	  if(dialogsliceobj->getdistanceDefault())in_ass=0;
