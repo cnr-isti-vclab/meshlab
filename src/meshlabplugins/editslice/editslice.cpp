@@ -6,7 +6,8 @@
 
 #include <wrap/gl/pick.h>
 #include <vcg/complex/trimesh/create/platonic.h>
-
+#include <vcg/simplex/vertexplus/base.h>
+#include <vcg/simplex/vertexplus/component_ocf.h>
 #include <vcg/space/point3.h>
 #include <vcg/space/box3.h>
 #include <vcg/space/index/grid_closest.h>
@@ -141,35 +142,50 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	 fileName = QFileDialog::getSaveFileName(gla->window(), tr("Save polyline File"),"/",tr("Mesh (*.svg)"));
 	 Matrix44f mat_trac_rotation ; 
 	 trackball_slice.track.rot.ToMatrix( mat_trac_rotation ); //Matrice di rotazione della trackball dei piani
-	
 	 
-	 Point3f* dir=new Point3f(0,1,0);  
-	 (*dir)= mat_trac_rotation * (*dir);
+	 Point3f* dir=new Point3f(1,0,0);   //inizializzo la normale del piano a 1, 0, 0
+	 (*dir)= mat_trac_rotation * (*dir); // moltiplico la matrice di rotazione per la normale del piano
+	
      Point3f translation_plains=trackball_slice.track.tra;  //vettore di translazione dei piani
 	 
+	 /*float alpha;
+     Point3f axis;
+	 trackball_slice.track.rot.ToAxis(alpha, axis);
+	 alpha=math::ToDeg(alpha);	 
+	 float rot_x=axis[0]*alpha;
+	 float rot_y=axis[1]*alpha;
+	 float rot_z=axis[2]*alpha;*/
+     
+	 Point3f po=point_Vector[0];
+	 Plane3f p;
+	
+	
+	
+	 p.SetDirection(*dir);
+/* Equazione del piano ax+by+cz=distance
+   dir->X=x
+   dir->Y=y
+   dir->Z=z
+   a,b,c coordinata centro di rotazione del piano
+*/   
+	 Point3f off= mat_trac_rotation * translation_plains;
+
+	 p.SetOffset( (po.X()*dir->X() )+ (po.Y()*dir->Y()) +(po.Z()*dir->Z())+ (off*(*dir)) );
+	
+     
 	 double avg_length;  //lunghezza media edge
-	 TriMeshGrid mesh_grid;
-	 
-	 /* Tentativo di rotazione della mesh
-	 CMeshO* mes= new CMeshO(m.cm);
-     *mes=m.cm;
-	  vcg::tri::UpdatePosition<CMeshO>::Matrix(*mes,mat_trac_rotation );
-	 vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(*mes);
-	 mesh_grid.Set(mes->face.begin(), mes->face.end());
-	 */
 	 mesh_grid.Set(m.cm.face.begin() ,m.cm.face.end());
 	 std::vector<TriMeshGrid::Cell *> intersected_cells;
 	 n_EdgeMesh edge_mesh;
      n_Mesh trimesh;
-	 Plane3f p=*plains.begin();
-	 p.SetDirection(*dir);
-	 p.Normalize();
-	 p.SetOffset(p.Offset()+ translation_plains[0]);
 	 vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(p , edge_mesh, avg_length, &mesh_grid, intersected_cells);
      vcg::edge::UpdateBounding<n_EdgeMesh>::Box(edge_mesh);
-	 
+
+	 //Export in svg
+	 vcg::edge::io::SVGProperties pr;
+	 pr.setPlane(0,Point3d((*dir).X(),(*dir).Y(), (*dir).Z() )); 
 	 QByteArray fn = fileName.toLatin1();
-	 vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fn.data() );
+	 vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fn.data(), pr  );
 	
  }
 
@@ -207,6 +223,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	 
 	 QObject::connect(dialogsliceobj, SIGNAL(exportMesh()), this,SLOT(SlotExportButton()));
      QObject::connect(dialogsliceobj, SIGNAL(Update_glArea()), this, SLOT(upGlA()));
+	  QObject::connect(dialogsliceobj, SIGNAL(RestoreDefault()), this, SLOT(RestoreDefault()));
  }
  void ExtraMeshSlidePlugin::upGlA(){
  
@@ -219,7 +236,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	b=m.cm.bbox; //Boundig Box
 	Point3f mi=b.min;
 	Point3f ma=b.max;
-	Point3f centre=b.Center();
+	Point3f centre=b.Center() ;
 	float edgeMax=0;
     float LX= ma[0]-mi[0];
 	float LY= ma[1]-mi[1];
@@ -250,22 +267,21 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		glColor4f(0,1,0,0.5);
 		glBegin(GL_QUADS);
 			glNormal3f(1,0,0);
-			Plane3f* p=new Plane3f();
+			
 			float assi_x[4];
 			assi_x[0]=mi[0]+(layer*i);
 			assi_x[1]=mi[0]+(layer*((plane+1)-i));
 			assi_x[2]=centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*i);
 			assi_x[3]=centre[0]-((dialogsliceobj->getDistance()*(plane+1))/2)+(dialogsliceobj->getDistance()*((plane+1)-i));	
-			p->Init( Point3f (assi_x[0], centre[1]-edgeMax, centre[2]-edgeMax),
-                Point3f( assi_x[0], centre[1]+edgeMax, centre[2]-edgeMax),
-                Point3f( assi_x[0], centre[1]+edgeMax, centre[2]+edgeMax));
-
+			
+			this->point_Vector.push_back(Point3f(assi_x[in_ass], centre[1], centre[2]));
+			
 			glVertex3f(assi_x[in_ass], centre[1]-edgeMax, centre[2]-edgeMax);
 			glVertex3f(assi_x[in_ass], centre[1]+edgeMax, centre[2]-edgeMax);
 			glVertex3f(assi_x[in_ass], centre[1]+edgeMax, centre[2]+edgeMax);
 			glVertex3f(assi_x[in_ass], centre[1]-edgeMax, centre[2]+edgeMax);
 		glEnd();
-		this->plains.insert(plains.begin()+(i-1) , *p);
+		
 		glColor4f(1,0,0,0.5);
 		glBegin(GL_QUADS);
         glNormal3f(-1,0,0);

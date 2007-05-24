@@ -60,8 +60,10 @@ public:
 	void restoreDefault();
 	
 private:
+	TriMeshGrid mesh_grid;
 	
-	std::vector<Plane3f> plains;
+	
+	vector<Point3f> point_Vector;
 	QString fileName;
 	bool isDragging;
 	GLArea * gla;
