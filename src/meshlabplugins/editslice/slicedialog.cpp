@@ -32,29 +32,10 @@ defaultTrackball=!f;
 }
 
 
-
-
-
-
 void dialogslice::on_spinBoxPlane_valueChanged(int x)
 {emit Update_glArea();
   numPlane=x;
 }
-
-void dialogslice::on_spinBoxDistance_valueChanged(int x)
-{emit Update_glArea();
- distance=x;
-}
-
-void dialogslice::on_SliderPlaneDistance_valueChanged(int x)
-{emit Update_glArea();
-distance=x;
-ui.lcdPlaneDistance->display(distance*distanceRange);
-}
-
-
-
-
 void dialogslice::on_DefultButton_clicked()
 {
  emit Update_glArea();
@@ -69,7 +50,7 @@ void dialogslice::on_DefultButton_clicked()
 }
 
 void dialogslice::on_diasbledistance_toggled(bool f)
-{emit Update_glArea();
+{
 
 if (f){
 		this->ui.SliderPlaneDistance->setEnabled(false);
@@ -78,14 +59,13 @@ if (f){
 		distanceDefault=true;
 	
 	}
-	else {this->ui.SliderPlaneDistance->setEnabled(true);
+else {
+	this->ui.SliderPlaneDistance->setEnabled(true);
 	this->ui.SliderPlaneDistance->setValue(defaultdistance/distanceRange);
-	
-
-	
+	this->distance=defaultdistance/distanceRange;
 	distanceDefault=false;
 	}
-
+emit Update_glArea();
 }
 
 void dialogslice::on_ExportButton_clicked()
@@ -95,12 +75,27 @@ emit exportMesh();
 
 
 
+void dialogslice::on_Update_Val_clicked()
+{
+bool ok;
+float val=this->ui.DistanceEdit->text().toFloat(&ok);
+ if (ok)
+ {
+	 this->ui.SliderPlaneDistance->setValue(val/distanceRange); 
+	 distance=val/distanceRange;
+	 QString c;
+	
+ }
+ else
+ this->ui.SliderPlaneDistance->setValue(1); 
+ emit Update_glArea();
+}
 
+void dialogslice::on_SliderPlaneDistance_sliderMoved(int x)
+{
 
-
-
-
-
-
-
-
+distance=x;
+QString c;
+ui.DistanceEdit->setText(c.setNum(distance*distanceRange));
+emit Update_glArea();
+}

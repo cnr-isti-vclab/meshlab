@@ -26,9 +26,7 @@ public:
 		
 	inline void setDistanceRange(float dRange){
 		this->distanceRange=dRange/100;
-		
-		
-		ui.labelDistanceRange->setText(QString("Distance range from 0 to "+ QString::number(distanceRange)));
+		ui.labelDistanceRange->setText(QString("Distance range from 0 to "+ QString::number(dRange)));
 		
 	}
 	
@@ -48,18 +46,15 @@ private:
 	bool restoreDefalut;
 
 private slots:
-	
+	void on_SliderPlaneDistance_sliderMoved(int);
+	void on_Update_Val_clicked();
 	void on_diasbledistance_toggled(bool);
-	
-	
-	
 	void on_ExportButton_clicked();
-	//void on_radioButton_toggled(bool);
 	void on_DefultButton_clicked();
 	
 	
-	void on_SliderPlaneDistance_valueChanged(int);
-	void on_spinBoxDistance_valueChanged(int);
+	//void on_SliderPlaneDistance_valueChanged(int);
+	//void on_spinBoxDistance_valueChanged(int);
 	void on_spinBoxPlane_valueChanged(int);
 	
 	void on_on_slideTrackBall_clicked(bool);

@@ -178,6 +178,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		//fileName.insert(fileName.find( QRegExp(".svg"), 0 ),"_01");
 		QString index;
 		index.setNum(i);
+		index="_"+index;
         QString fn=fileName;
         fn.insert(fileName.length()-4, index);
 		vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fn.toLatin1().data(), pr  );

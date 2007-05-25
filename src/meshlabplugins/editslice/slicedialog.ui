@@ -293,16 +293,6 @@
        </property>
       </widget>
      </widget>
-     <widget class="QLCDNumber" name="lcdPlaneDistance" >
-      <property name="geometry" >
-       <rect>
-        <x>190</x>
-        <y>20</y>
-        <width>111</width>
-        <height>31</height>
-       </rect>
-      </property>
-     </widget>
      <widget class="QLabel" name="labelDistanceRange" >
       <property name="geometry" >
        <rect>
@@ -355,6 +345,51 @@
       <property name="tickInterval" >
        <number>1</number>
       </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_5" >
+      <property name="geometry" >
+       <rect>
+        <x>179</x>
+        <y>20</y>
+        <width>121</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <widget class="QLineEdit" name="DistanceEdit" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>1</string>
+       </property>
+       <property name="echoMode" >
+        <enum>QLineEdit::Normal</enum>
+       </property>
+       <property name="cursorPosition" >
+        <number>1</number>
+       </property>
+       <property name="alignment" >
+        <set>Qt::AlignHCenter</set>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="Update_Val" >
+       <property name="geometry" >
+        <rect>
+         <x>60</x>
+         <y>40</y>
+         <width>51</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Updade</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>
