@@ -147,8 +147,10 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	 Point3f* dir=new Point3f(1,0,0);   //inizializzo la normale del piano a 1, 0, 0
 	 (*dir)= mat_trac_rotation * (*dir); // moltiplico la matrice di rotazione per la normale del piano
 	
-     Point3f translation_plains=trackball_slice.track.tra;  //vettore di translazione dei piani
+     Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
 	 for(int i=0; i<point_Vector.size(); i++){	
+		
+		Point3f rotationCenter=m.cm.bbox.Center(); 
 		Point3f po=point_Vector[i];
 	    Plane3f p;
 	    p.SetDirection(*dir);
@@ -158,8 +160,9 @@ void ExtraMeshSlidePlugin::restoreDefault(){
    dir->Z=z
    a,b,c coordinata centro di rotazione del piano
 */   
-	    Point3f off= mat_trac_rotation * translation_plains;
-		p.SetOffset( (po.X()*dir->X() )+ (po.Y()*dir->Y()) +(po.Z()*dir->Z())+ (off*(*dir)) );
+	    Point3f off= mat_trac_rotation * (translation_plans+po); //definisco il vettore di translazione
+		
+		p.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) );
 		double avg_length;  //lunghezza media edge
 		mesh_grid.Set(m.cm.face.begin() ,m.cm.face.end());
 		std::vector<TriMeshGrid::Cell *> intersected_cells;
