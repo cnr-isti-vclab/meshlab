@@ -43,7 +43,11 @@ ExtraMeshSlidePlugin::ExtraMeshSlidePlugin() {
 }
 
 ExtraMeshSlidePlugin::~ExtraMeshSlidePlugin() {
-
+if ( dialogsliceobj!=0) { 
+			delete  dialogsliceobj; 
+			
+			 dialogsliceobj=0;
+			 }
 	
 }
 QList<QAction *> ExtraMeshSlidePlugin::actions() const {
@@ -91,10 +95,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
       trackball_slice.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
 	  trackball_slice.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
 	 
-	  /*if (((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
-		  (e->button()==Qt::LeftButton))){
-	  
-	  }*/
+
 
 	  if (((e->modifiers() & Qt::ControlModifier) &&
 		    (e->button()==Qt::LeftButton)&&
@@ -138,53 +139,70 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		   gla->update();
  }
  void ExtraMeshSlidePlugin::SlotExportButton(){
-	 
-	 fileName = QFileDialog::getSaveFileName(gla->window(), tr("Save polyline File"),"/",tr("Mesh (*.svg)"));
-	 
-	 Matrix44f mat_trac_rotation ; 
-	 trackball_slice.track.rot.ToMatrix( mat_trac_rotation ); //Matrice di rotazione della trackball dei piani
-	 
-	 Point3f* dir=new Point3f(1,0,0);   //inizializzo la normale del piano a 1, 0, 0
-	 (*dir)= mat_trac_rotation * (*dir); // moltiplico la matrice di rotazione per la normale del piano
-	
-     Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
-	 for(int i=0; i<point_Vector.size(); i++){	
-		
-		Point3f rotationCenter=m.cm.bbox.Center(); 
+	  
+    if (!dialogsliceobj->getExportOption()){
+			   QFileDialog saveF;
+			   dirName=saveF.getExistingDirectory(gla->window(),tr("Save polyline in one or more file, one each pane"), "Choose a directory",QFileDialog::Option::ShowDirsOnly );
+	}
+	else
+	{
+		QFileDialog saveF;
+		fileName = saveF.getSaveFileName(gla->window(), tr("Save polyline in sigle File"),"/",tr("Mesh (*.svg)"));
+	}
+
+	Matrix44f mat_trac_rotation ; 
+	trackball_slice.track.rot.ToMatrix( mat_trac_rotation ); //rotation Matrix of the plans' trackball 
+	Point3f* dir=new Point3f(1,0,0);   //the plans' normal vector init 
+	(*dir)= mat_trac_rotation * (*dir); //rotation of the directions vector 
+	Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
+	for(int i=0; i<point_Vector.size(); i++){	
+		Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
 		Point3f po=point_Vector[i];
 	    Plane3f p;
 	    p.SetDirection(*dir);
-/* Equazione del piano ax+by+cz=distance
-   dir->X=x
-   dir->Y=y
-   dir->Z=z
-   a,b,c coordinata centro di rotazione del piano
-*/   
-	    Point3f off= mat_trac_rotation * (translation_plans+po); //definisco il vettore di translazione
-		
+				/* Equazione del piano ax+by+cz=distance
+				   dir->X=x
+                   dir->Y=y
+                   dir->Z=z
+                   a,b,c coordinata centro di rotazione del piano
+                */   
+	    Point3f off= mat_trac_rotation * (translation_plans+po); //translation vector
 		p.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) );
-		double avg_length;  //lunghezza media edge
+		double avg_length;  
 		mesh_grid.Set(m.cm.face.begin() ,m.cm.face.end());
 		std::vector<TriMeshGrid::Cell *> intersected_cells;
 		n_EdgeMesh edge_mesh;
 		n_Mesh trimesh;
 		vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(p , edge_mesh, avg_length, &mesh_grid, intersected_cells);
 		vcg::edge::UpdateBounding<n_EdgeMesh>::Box(edge_mesh);
+        
+	    
+	    
+		if (!dialogsliceobj->getExportOption()){
+			   QString index;
+			   index.setNum(i);
+			   fileN=dirName+"slice_"+index+".svg";
+			   vcg::edge::io::SVGProperties pr;
+			   pr.setPlane(0,Point3d((*dir).X(),(*dir).Y(), (*dir).Z() )); 
+			   vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fileN.toLatin1().data(), pr  );
+		}
+		else{
+		     vcg::edge::io::SVGProperties pr;
+		     pr.setPlane(0,Point3d((*dir).X(),(*dir).Y(), (*dir).Z() )); 
 
-	 //Export in svg
-		vcg::edge::io::SVGProperties pr;
-		pr.setPlane(0,Point3d((*dir).X(),(*dir).Y(), (*dir).Z() )); 
-		
-		//fileName.insert(fileName.find( QRegExp(".svg"), 0 ),"_01");
-		QString index;
-		index.setNum(i);
-		index="_"+index;
-        QString fn=fileName;
-        fn.insert(fileName.length()-4, index);
-		vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fn.toLatin1().data(), pr  );
-	 }
-	
+		}
+	}
  }
+	
+	
+		
+		
+	
+		
+		
+	 
+	
+ 
 
  void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
  {
@@ -205,23 +223,25 @@ void ExtraMeshSlidePlugin::restoreDefault(){
    
  }
  void ExtraMeshSlidePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
-   dialogsliceobj->close();
+   //if ( dialogsliceobj!=0) { 
+	//		delete  dialogsliceobj; 
+			
+	//		 dialogsliceobj=0;
+	//		
+	// }
  }
  void ExtraMeshSlidePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla ){
 	 
 	 if(!first){
 		 dialogsliceobj=new dialogslice(gla->window());
-		 
-		
-	 first=true;}
-	 dialogsliceobj->show();
-	 this->m=m;
-	
-	 
-	 QObject::connect(dialogsliceobj, SIGNAL(exportMesh()), this,SLOT(SlotExportButton()));
-     QObject::connect(dialogsliceobj, SIGNAL(Update_glArea()), this, SLOT(upGlA()));
-	  QObject::connect(dialogsliceobj, SIGNAL(RestoreDefault()), this, SLOT(RestoreDefault()));
- }
+		 dialogsliceobj->show();
+		 first=true;
+		 this->m=m;
+		 QObject::connect(dialogsliceobj, SIGNAL(exportMesh()), this,SLOT(SlotExportButton()));
+         QObject::connect(dialogsliceobj, SIGNAL(Update_glArea()), this, SLOT(upGlA()));
+	    QObject::connect(dialogsliceobj, SIGNAL(RestoreDefault()), this, SLOT(RestoreDefault()));
+	 }
+	 }
  void ExtraMeshSlidePlugin::upGlA(){
  
 	 gla->update();

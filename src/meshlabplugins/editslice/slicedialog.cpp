@@ -11,8 +11,8 @@ dialogslice::dialogslice(QWidget *parent)
 	restoreDefalut=false;
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
 	this->setGeometry(p.x()+parent->width()-width(),p.y()+30,width(),height() );
-	
 	this->setFloating(true);
+	multi_sigleExportFile=false;
     
 }
 
@@ -54,13 +54,14 @@ void dialogslice::on_diasbledistance_toggled(bool f)
 
 if (f){
 		this->ui.SliderPlaneDistance->setEnabled(false);
-		
+		ui.Distnace_edit_group->setEnabled(false);
 		
 		distanceDefault=true;
 	
 	}
 else {
 	this->ui.SliderPlaneDistance->setEnabled(true);
+	ui.Distnace_edit_group->setEnabled(true);
 	this->ui.SliderPlaneDistance->setValue(defaultdistance/distanceRange);
 	this->distance=defaultdistance/distanceRange;
 	distanceDefault=false;
@@ -98,4 +99,19 @@ distance=x;
 QString c;
 ui.DistanceEdit->setText(c.setNum(distance*distanceRange));
 emit Update_glArea();
+}
+
+
+
+
+
+
+void dialogslice::on_Exporter_singleFile_clicked()
+{//not implemented yet
+//this->multi_sigleExportFile=true;
+}
+
+void dialogslice::on_Exporter_MultiFile_clicked()
+{
+this->multi_sigleExportFile=false;
 }

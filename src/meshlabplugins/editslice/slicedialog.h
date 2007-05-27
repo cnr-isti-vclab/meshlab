@@ -20,6 +20,9 @@ public:
 	inline bool getRestoreDefalut(){return restoreDefalut;}
 	inline void setRestoreDefalut(bool in){ 
 		restoreDefalut=in;}
+	inline bool getExportOption(){
+	    return multi_sigleExportFile;
+	}
 	inline void setDefaultDistance(float f){
 	defaultdistance=f;
 	}
@@ -37,15 +40,20 @@ Q_SIGNALS:
 private:
 	Ui::dialogsliceClass ui;
 	int numPlane; //numeber of plane
-	float distance; //distance of plane
+	float distance; 
 	float distanceRange;
 	float defaultdistance;
     QWidget* parent;
 	bool distanceDefault; // enable/disable distance 
+	bool multi_sigleExportFile; 
 	bool  defaultTrackball;
 	bool restoreDefalut;
 
 private slots:
+	void on_Exporter_MultiFile_clicked();
+	void on_Exporter_singleFile_clicked();
+
+	
 	void on_SliderPlaneDistance_sliderMoved(int);
 	void on_Update_Val_clicked();
 	void on_diasbledistance_toggled(bool);
@@ -53,8 +61,6 @@ private slots:
 	void on_DefultButton_clicked();
 	
 	
-	//void on_SliderPlaneDistance_valueChanged(int);
-	//void on_spinBoxDistance_valueChanged(int);
 	void on_spinBoxPlane_valueChanged(int);
 	
 	void on_on_slideTrackBall_clicked(bool);
