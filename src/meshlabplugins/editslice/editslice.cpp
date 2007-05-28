@@ -183,12 +183,14 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 			   index.setNum(i);
 			   fileN=dirName+"slice_"+index+".svg";
 			   vcg::edge::io::SVGProperties pr;
-			   pr.setPlane(0,Point3d((*dir).X(),(*dir).Y(), (*dir).Z() )); 
+			   Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
+			   pr.setPlane(0, d); 
 			   vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fileN.toLatin1().data(), pr  );
 		}
 		else{
 		     vcg::edge::io::SVGProperties pr;
-		     pr.setPlane(0,Point3d((*dir).X(),(*dir).Y(), (*dir).Z() )); 
+		     Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
+		     pr.setPlane(0, d);
 
 		}
 	}
