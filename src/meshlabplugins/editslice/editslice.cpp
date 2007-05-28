@@ -142,7 +142,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	  
     if (!dialogsliceobj->getExportOption()){
 			   QFileDialog saveF;
-			   dirName=saveF.getExistingDirectory(gla->window(),tr("Save polyline in one or more file, one each pane"), "Choose a directory",QFileDialog::Option::ShowDirsOnly );
+			   dirName=saveF.getExistingDirectory(gla->window(),tr("Save polyline in one or more file, one each pane"), "Choose a directory",QFileDialog::ShowDirsOnly );
 	}
 	else
 	{
