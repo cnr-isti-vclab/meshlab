@@ -86,51 +86,38 @@ const PluginInfo &ExtraMeshSlidePlugin::Info()
 void ExtraMeshSlidePlugin::restoreDefault(){
   trackball_slice.Reset();
 }
+void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+ {
+  if(dialogsliceobj->getDefaultTrackball())
+		 gla->trackball.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
+	  else trackball_slice.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
+
+}
  void ExtraMeshSlidePlugin::mousePressEvent    (QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
- {   isDragging = true;
-     disableTransision=true; //diable transition for main trackball
-	 e->accept();
-
-	  trackball_slice.ButtonUp(QT2VCG(Qt::NoButton,  Qt::ControlModifier ) ); 
-      trackball_slice.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-	  trackball_slice.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-	 
-
-
-	  if (((e->modifiers() & Qt::ControlModifier) &&
-		    (e->button()==Qt::LeftButton)&&
-			dialogsliceobj->getDefaultTrackball()
-			)){ 
-	    disableTransision=false;
-		
-	  }
-
-	  if (((e->modifiers() & Qt::ShiftModifier) &&
-		    (e->button()==Qt::LeftButton)&&
-			dialogsliceobj->getDefaultTrackball()
-			)){ 
-          
-	      disableTransision=false;
-	  }
-     if(dialogsliceobj->getDefaultTrackball()&&disableTransision)
-          gla->trackball.MouseDown(e->x(),(gla->height()-e->y()),QT2VCG(e->button(), e->modifiers()) );
-	  else if(!dialogsliceobj->getDefaultTrackball())
-		  trackball_slice.MouseDown(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()) );
-  
+ {  
+	 if ( (dialogsliceobj->getDefaultTrackball()) &&
+		   !(e->modifiers() & Qt::ShiftModifier)  &&
+		   (e->button()==Qt::LeftButton)          &&
+           !(e->modifiers() & Qt::ControlModifier))
+           gla->trackball.MouseDown(e->x(),(gla->height()-e->y()),QT2VCG(e->button(), e->modifiers()) );
+     if ( (!dialogsliceobj->getDefaultTrackball())&&
+		    (e->button()==Qt::LeftButton)         &&
+		   !(e->modifiers() & Qt::ShiftModifier) )
+		   trackball_slice.MouseDown(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()) );
 	 gla->update();
  }
  void ExtraMeshSlidePlugin::mouseMoveEvent     (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
  {
-	isDragging = true;
-	if(e->buttons()| Qt::LeftButton) 
-	{
-		if(dialogsliceobj->getDefaultTrackball())
-			{
-			  gla->trackball.MouseMove(e->x(),gla->height()-e->y());
-			}
-		    else
-				trackball_slice.MouseMove(e->x(),gla->height()-e->y());
-	}
+
+     if( (e->buttons()| Qt::LeftButton) &&
+       (dialogsliceobj->getDefaultTrackball()) &&
+	   !(e->modifiers() & Qt::ShiftModifier)  &&
+       !(e->modifiers() & Qt::ControlModifier))
+			gla->trackball.MouseMove(e->x(),gla->height()-e->y());
+	 if( (e->buttons()| Qt::LeftButton) &&
+		  !(dialogsliceobj->getDefaultTrackball()) &&
+		   !(e->modifiers() & Qt::ShiftModifier))
+           trackball_slice.MouseMove(e->x(),gla->height()-e->y());
 	gla->update();
  }
  void ExtraMeshSlidePlugin::RestoreDefault(){
@@ -139,7 +126,7 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 		   gla->update();
  }
  void ExtraMeshSlidePlugin::SlotExportButton(){
-	  
+	
     if (!dialogsliceobj->getExportOption()){
 			   QFileDialog saveF;
 			   dirName=saveF.getExistingDirectory(gla->window(),tr("Save polyline in one or more file, one each pane"), "Choose a directory",QFileDialog::ShowDirsOnly );
@@ -161,24 +148,19 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 	    Plane3f p;
 	    p.SetDirection(*dir);
 				/* Equazione del piano ax+by+cz=distance
-				   dir->X=x
-                   dir->Y=y
-                   dir->Z=z
-                   a,b,c coordinata centro di rotazione del piano
+				   a,b,c coordinata centro di rotazione del piano
+				   x,y,z vettore di rotazione del pinao
+				   
                 */   
 	    Point3f off= mat_trac_rotation * (translation_plans+po); //translation vector
 		p.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) );
 		double avg_length;  
 		mesh_grid.Set(m.cm.face.begin() ,m.cm.face.end());
-		std::vector<TriMeshGrid::Cell *> intersected_cells;
-		n_EdgeMesh edge_mesh;
-		n_Mesh trimesh;
+		edge_mesh.Clear();
 		vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(p , edge_mesh, avg_length, &mesh_grid, intersected_cells);
 		vcg::edge::UpdateBounding<n_EdgeMesh>::Box(edge_mesh);
-        
-	    
-	    
-		if (!dialogsliceobj->getExportOption()){
+		Box3f b= edge_mesh.bbox; 
+        if (!dialogsliceobj->getExportOption()){
 			   QString index;
 			   index.setNum(i);
 			   fileN=dirName+"slice_"+index+".svg";
@@ -186,33 +168,17 @@ void ExtraMeshSlidePlugin::restoreDefault(){
 			   Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
 			   pr.setPlane(0, d); 
 			   vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&edge_mesh, fileN.toLatin1().data(), pr  );
+		
 		}
 		else{
 		     vcg::edge::io::SVGProperties pr;
 		     Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
 		     pr.setPlane(0, d);
 
+             
 		}
 	}
  }
-	
-	
-		
-		
-	
-		
-		
-	 
-	
- 
-
- void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
- {
-	  isDragging = true;
-	  if(dialogsliceobj->getDefaultTrackball())
-		 gla->trackball.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
-	  else trackball_slice.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
-}
  void ExtraMeshSlidePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
  {   
 	 

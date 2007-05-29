@@ -48,15 +48,13 @@ private:
 	bool multi_sigleExportFile; 
 	bool  defaultTrackball;
 	bool restoreDefalut;
-
 private slots:
+	void on_EditDistanceCheck_stateChanged(int);
 	void on_Exporter_MultiFile_clicked();
 	void on_Exporter_singleFile_clicked();
-
-	
-	void on_SliderPlaneDistance_sliderMoved(int);
+    void on_SliderPlaneDistance_sliderMoved(int);
 	void on_Update_Val_clicked();
-	void on_diasbledistance_toggled(bool);
+	
 	void on_ExportButton_clicked();
 	void on_DefultButton_clicked();
 	

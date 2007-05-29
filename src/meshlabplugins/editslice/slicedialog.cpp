@@ -49,25 +49,7 @@ void dialogslice::on_DefultButton_clicked()
 
 }
 
-void dialogslice::on_diasbledistance_toggled(bool f)
-{
 
-if (f){
-		this->ui.SliderPlaneDistance->setEnabled(false);
-		ui.Distnace_edit_group->setEnabled(false);
-		
-		distanceDefault=true;
-	
-	}
-else {
-	this->ui.SliderPlaneDistance->setEnabled(true);
-	ui.Distnace_edit_group->setEnabled(true);
-	this->ui.SliderPlaneDistance->setValue(defaultdistance/distanceRange);
-	this->distance=defaultdistance/distanceRange;
-	distanceDefault=false;
-	}
-emit Update_glArea();
-}
 
 void dialogslice::on_ExportButton_clicked()
 {
@@ -114,4 +96,24 @@ void dialogslice::on_Exporter_singleFile_clicked()
 void dialogslice::on_Exporter_MultiFile_clicked()
 {
 this->multi_sigleExportFile=false;
+}
+
+void dialogslice::on_EditDistanceCheck_stateChanged(int i)
+{
+	if (i==0){
+		this->ui.SliderPlaneDistance->setEnabled(false);
+		ui.Distnace_edit_group->setEnabled(false);
+		
+		distanceDefault=true;
+	
+	}
+else {
+	this->ui.SliderPlaneDistance->setEnabled(true);
+	ui.Distnace_edit_group->setEnabled(true);
+	this->ui.SliderPlaneDistance->setValue(defaultdistance/distanceRange);
+	this->distance=defaultdistance/distanceRange;
+	distanceDefault=false;
+	}
+emit Update_glArea();
+
 }
