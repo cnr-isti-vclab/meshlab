@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.14  2007/05/30 15:10:54  ponchio
+ *** empty log message ***
+
  Revision 1.13  2007/05/22 15:26:02  cignoni
  Improved params of ball pivoting (again)
 
@@ -241,21 +244,21 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
 			bool ComputeNormal = par.getBool("ComputeNormal");
 			float CreaseThr = par.getFloat("CreaseThr");
 			bool DeleteFaces = par.getBool("DeleteFaces");
-      float clustering = 0.1;
+      float clustering = 0.3;
       if(DeleteFaces) {
 				m.cm.fn=0;
 				m.cm.face.resize(0);
       }
 			
-			if(ComputeNormal)
+/*			if(ComputeNormal)
 				NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
       
 			tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
-			tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
-			
-			tri::Pivot<CMeshO> pivot(m.cm, radius, clustering, CreaseThr); 
+			tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);*/
+			if(CreaseThr == 0) CreaseThr = M_PI/2;
+			tri::BallPivoting<CMeshO> pivot(m.cm, radius, clustering, CreaseThr); 
       // the main processing
-      pivot.buildMesh(cb);
+      pivot.BuildMesh(cb);
 	  }
     if(filter->text() == ST(FP_REMOVE_ISOLATED_DIAMETER) )
 	  {
