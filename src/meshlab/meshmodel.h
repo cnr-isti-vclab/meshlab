@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.36  2007/06/01 10:04:21  ponchio
+!   !=  ~
+
 Revision 1.35  2007/06/01 09:19:24  cignoni
 Added MeshDocument and computation of VertexBorderFlags when asking border flags
 
@@ -263,7 +266,7 @@ public:
 
    void clearDataMask(int neededDataMask)
    {
-     currentDataMask = currentDataMask & (!neededDataMask);
+     currentDataMask = currentDataMask & (~neededDataMask);
    }
 };
 
