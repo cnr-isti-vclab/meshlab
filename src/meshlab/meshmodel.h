@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.35  2007/06/01 09:19:24  cignoni
+Added MeshDocument and computation of VertexBorderFlags when asking border flags
+
 Revision 1.34  2007/04/16 09:24:37  cignoni
 ** big change **
 Added Layers managemnt.
@@ -79,7 +82,7 @@ abstract pointer to fileformat's dependent additional info added
 #include <wrap/callback.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/additionalinfo.h>
-
+#include <QList>
 using namespace vcg;
 using namespace std;
 
@@ -237,6 +240,8 @@ public:
    {
      if(currentDataMask& MM_FACETOPO) tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
      else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
+		 tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
+
      currentDataMask |= MM_BORDERFLAG;
    }
    if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0) && (currentDataMask& MM_WEDGTEXCOORD)==0)			
@@ -261,6 +266,7 @@ public:
      currentDataMask = currentDataMask & (!neededDataMask);
    }
 };
+
 
 class RenderMode
 {
@@ -291,6 +297,40 @@ public:
 			castShadow = false;
       selectedFaces=false;
     }
+};
+
+class MeshDocument
+{
+public :
+MeshDocument()
+		{currentMesh = NULL;
+	}
+ ~MeshDocument()
+		{
+			foreach(MeshModel *mmp, meshList)
+					delete mmp;
+   }
+	 
+	void setCurrentMesh(unsigned int i)
+	{
+	  assert(i>=0 && i < meshList.size());
+		currentMesh=meshList.at(i);
+	}
+	
+	MeshModel *mm() {
+	return currentMesh;
+	}
+	
+  QList<MeshModel *> meshList;	
+
+void addMesh(MeshModel *mm)
+{
+ meshList.push_back(mm);
+ currentMesh=meshList.back();
+}
+
+private:
+  MeshModel *currentMesh;	
 };
 
 #endif
