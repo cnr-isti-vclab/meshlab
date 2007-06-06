@@ -11,7 +11,8 @@ SUBDIRS       = meshfilter \
 				meshedit \ 
 				meshselect \
 				editslice \
-				editpaint
+				editpaint \
+				editsegment
 		
 		
 		
