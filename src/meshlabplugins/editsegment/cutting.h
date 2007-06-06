@@ -158,10 +158,13 @@ namespace vcg {
 		void MeshCut() {
 
 			VertexIterator vi;
+			int counter = 0;
 			
 			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
-				if ( !vi->IsD() && (*TDMarkPtr)[*vi].Mark != iF && (*TDMarkPtr)[*vi].Mark != iB) 
+				if ( !vi->IsD() && (*TDMarkPtr)[*vi].Mark != iF && (*TDMarkPtr)[*vi].Mark != iB) {
 					(*TDMarkPtr)[*vi].Mark = U;
+					++counter;
+				}
 			}
 
 			//Computing principal curvatures and directions for all vertices
@@ -169,19 +172,25 @@ namespace vcg {
 			ct.ComputeCurvatureTensor();
 			//now each vertex has principals curvatures and directions in its temp data
 
-			//second iteration on the marked vertex
-			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
-				if ( !vi->IsD() && ((*TDMarkPtr)[*vi].Mark == iF || (*TDMarkPtr)[*vi].Mark == iB) ) 
-					AddNearestToQ(&(*vi));	
-			}
 
-			//algorithm main loop
-			CuttingTriplet<VertexType> tempTriplet;
-			while(!Q.empty()) {
-				tempTriplet = Q.top();
-				Q.pop();
-				(*TDMarkPtr)[tempTriplet.v].Mark = tempTriplet.m;
-				AddNearestToQ(tempTriplet.v);	
+			while (counter != 0) {
+				//second iteration on the marked vertex
+				for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
+					if ( !vi->IsD() && ((*TDMarkPtr)[*vi].Mark != U))
+						AddNearestToQ(&(*vi));	
+				}
+
+				//algorithm main loop
+				CuttingTriplet<VertexType> tempTriplet;
+				while(!Q.empty()) {
+					tempTriplet = Q.top();
+					Q.pop();
+					if ( (*TDMarkPtr)[tempTriplet.v].Mark == U) {
+						(*TDMarkPtr)[tempTriplet.v].Mark = tempTriplet.m;
+						AddNearestToQ(tempTriplet.v);	
+						--counter;
+					}				
+				}
 			}
 			
 			//checks if all vertices are marked
