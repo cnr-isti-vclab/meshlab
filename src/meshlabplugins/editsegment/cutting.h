@@ -75,7 +75,7 @@ namespace vcg {
 			Matrix33<double> n_nMatrix;
 			Point3<double> ViVj;
 			Point3<double> Tij;
-			Point3<CoordType::ScalarType> tempViVj = p->P() - q->P();
+			Point3<typename CoordType::ScalarType> tempViVj = p->P() - q->P();
 			Point3<double> n = Point3<double>((double)p->N()[0], (double)p->N()[1], (double)p->N()[2]); 
 			n = n.Normalize();
 			n_nMatrix.ExternalProduct(n, n);

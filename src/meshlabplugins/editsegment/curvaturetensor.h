@@ -40,7 +40,7 @@ namespace vcg {
 				*s = 0;
 			}
 			else {
-				if (abs(b)>abs(a)) {
+				if (fabs(b)>fabs(a)) {
 					tao =  -a/b;
 					*s = 1.0/sqrt(1.0+tao*tao);
 					*c = *s * tao;
@@ -152,17 +152,17 @@ namespace vcg {
 
 					//Mvi matrix ready for the vertex vi
 					//calculate principal directions and curvature
-					Point3<double> Wvi;
-					Matrix33<double> Qvi;
-					Matrix33<double> QviT;
-					Matrix33<double> tempMatrix;
+					Point3d Wvi;
+					Matrix33d Qvi;
+					Matrix33d QviT;
+					Matrix33d tempMatrix;
 
-					Matrix33<double> A;
-					Point3<double> E1 = Point3<double>(1,0,0);
-					Point3<double> Nvi = Point3<double>( (double)(*vi).N()[0], (double)(*vi).N()[1], (double)(*vi).N()[2]);
+					Matrix33d A;
+					Point3d E1(1.0,0.0,0.0);
+					Point3d Nvi = Point3d::Construct((*vi).N());
 					Nvi.Normalize();
-					Point3<double> E1nNvi = E1 - Nvi;
-					Point3<double> E1pNvi = E1 + Nvi;
+					Point3d E1nNvi = E1 - Nvi;
+					Point3d E1pNvi = E1 + Nvi;
 
 					if (E1nNvi.Norm() > E1pNvi.Norm() ) Wvi = E1nNvi / E1nNvi.Norm();
 					else Wvi = E1pNvi / E1pNvi.Norm();
