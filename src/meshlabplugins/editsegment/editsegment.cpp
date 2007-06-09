@@ -226,7 +226,7 @@ void getInternFaces(	MeshModel & m,
 Color4b toVcgColor(QColor c) {
 	return Color4b(c.red(),c.green(),c.blue(),255);
 }
-										EditSegment::EditSegment() {
+EditSegment::EditSegment() {
 	actionList << new QAction(QIcon(":/images/editsegment.png"),"Mesh Segmentation", this);
 	pixels = 0;
 	pen.radius = 5;
@@ -270,14 +270,14 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 		meshcut_dock->setWidget(meshCutDialog);
 		QPoint pos = parent->window()->mapToGlobal(QPoint(0,0));
 		meshcut_dock->setGeometry(-5+pos.x()+parent->window()->width()-meshCutDialog->width(),
-																pos.y(),meshCutDialog->width(),meshCutDialog->height());
+			pos.y(),meshCutDialog->width(),meshCutDialog->height());
 		meshcut_dock->setFloating(true);
 		QObject::connect(meshCutDialog, SIGNAL(meshCutSignal()),this, SLOT(MeshCutSlot()));
 		QObject::connect(meshCutDialog, SIGNAL(selectForegroundSignal(bool)),this, SLOT(SelectForegroundSlot(bool)));
 	}
 	meshcut_dock->setVisible(true);
 	meshcut_dock->layout()->update();
-	
+
 	m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 	m.updateDataMask(MeshModel::MM_FACETOPO);
 
@@ -331,19 +331,17 @@ void EditSegment::Decorate (QAction * ac, MeshModel & m, GLArea * gla) {
 }
 
 void EditSegment::mousePressEvent    (QAction *, QMouseEvent *event, MeshModel & m, GLArea * gla){
-	if (mouse_button_pressed == Qt::RightButton && event->modifiers() == Qt::CTRL) {
-		meshCut->MeshCut();
-	} else {
-		show_trackball = gla->isTrackBallVisible();
-		gla->showTrackBall(false);
-		first = true;
-		dragging = true;
-		mouse_button_pressed = event->button();
-		pressed = true;
 
-		current_point = event->pos();
-		previous_point = current_point;
-	}
+	show_trackball = gla->isTrackBallVisible();
+	gla->showTrackBall(false);
+	first = true;
+	dragging = true;
+	mouse_button_pressed = event->button();
+	pressed = true;
+
+	current_point = event->pos();
+	previous_point = current_point;
+
 	currentSelection.clear();
 }
 void EditSegment::mouseMoveEvent     (QAction *, QMouseEvent *event, MeshModel & m, GLArea * gla){
