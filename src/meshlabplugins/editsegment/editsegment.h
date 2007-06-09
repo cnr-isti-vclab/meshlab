@@ -35,6 +35,7 @@ private:
 	bool show_trackball;
 	bool first;
 	bool dragging;
+	bool selectForeground;
 	QPoint starting_point;
 	QPoint current_point;
 	QPoint previous_point;
@@ -43,6 +44,7 @@ private:
 	Penn pen;
 	QDockWidget *meshcut_dock;
 	MeshCutDialog * meshCutDialog;
+	GLArea * glarea;
 
 	vector<CMeshO::FacePointer> currentSelection;
 	GLfloat *pixels;
@@ -77,7 +79,8 @@ public:
 	QList<QAction *> actions() const ;
 
 public slots:
-	void MeshCut();
+	void MeshCutSlot();
+	void SelectForegroundSlot(bool);
 
 };
 

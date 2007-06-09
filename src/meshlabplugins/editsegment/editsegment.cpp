@@ -221,8 +221,13 @@ void getInternFaces(	MeshModel & m,
 
 }
 
-EditSegment::EditSegment() {
-	actionList << new QAction("Mesh Segmentation", this);
+
+
+Color4b toVcgColor(QColor c) {
+	return Color4b(c.red(),c.green(),c.blue(),255);
+}
+										EditSegment::EditSegment() {
+	actionList << new QAction(QIcon(":/images/editsegment.png"),"Mesh Segmentation", this);
 	pixels = 0;
 	pen.radius = 5;
 	pen.backface = false;
@@ -230,7 +235,8 @@ EditSegment::EditSegment() {
 	pressed = false;
 	meshCut = 0;
 	meshCutDialog = 0;
-
+	glarea = 0;
+	selectForeground = true;
 }
 EditSegment::~EditSegment(){
 	delete meshCut;
@@ -253,27 +259,32 @@ const PluginInfo &EditSegment::Info() {
 } 
 
 void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
+	parent->setCursor(QCursor(QPixmap(":/images/editsegment_cursor.png","PNG"),1,1));
+
 	if (!meshCut) meshCut = new MeshCutting<CMeshO>(&m.cm);
 
-	/*if (!meshCutDialog) {
+	if (!meshCutDialog) {
 		meshCutDialog = new MeshCutDialog(parent->window());
 		meshcut_dock = new QDockWidget(parent->window());
 		meshcut_dock->setAllowedAreas(Qt::NoDockWidgetArea);
 		meshcut_dock->setWidget(meshCutDialog);
 		QPoint pos = parent->window()->mapToGlobal(QPoint(0,0));
-		meshcut_dock->setGeometry(-5+pos.x()+parent->window()->width()-meshcut_dock->width(),
-																pos.y(),meshcut_dock->width(),meshcut_dock->height());
+		meshcut_dock->setGeometry(-5+pos.x()+parent->window()->width()-meshCutDialog->width(),
+																pos.y(),meshCutDialog->width(),meshCutDialog->height());
 		meshcut_dock->setFloating(true);
-		QObject::connect(meshCutDialog, SIGNAL(mesh_cut()),this, SLOT(MeshCut()));
+		QObject::connect(meshCutDialog, SIGNAL(meshCutSignal()),this, SLOT(MeshCutSlot()));
+		QObject::connect(meshCutDialog, SIGNAL(selectForegroundSignal(bool)),this, SLOT(SelectForegroundSlot(bool)));
 	}
 	meshcut_dock->setVisible(true);
-	meshcut_dock->layout()->update();*/
+	meshcut_dock->layout()->update();
 	
 	m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 	m.updateDataMask(MeshModel::MM_FACETOPO);
 
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	parent->mm()->ioMask|=MeshModel::IOM_VERTCOLOR;
+
+	glarea = parent;
 
 	parent->update();
 }
@@ -307,12 +318,12 @@ void EditSegment::Decorate (QAction * ac, MeshModel & m, GLArea * gla) {
 			for (int i=0; i<3; ++i) {
 				if (sel_or_not) {
 					meshCut->Mark((*fpo)->V(i), iF);
-					(*fpo)->V(i)->C() = vcg::Color4b::Red;
+					(*fpo)->V(i)->C() = toVcgColor(meshCutDialog->getForegroundColor());
 					//(*fpo)->SetS();
 				}	else {
 					//(*fpo)->ClearS();
 					meshCut->Mark((*fpo)->V(i), iB);
-					(*fpo)->V(i)->C() = vcg::Color4b::Blue;
+					(*fpo)->V(i)->C() = toVcgColor(meshCutDialog->getBackgroundColor());
 				}
 			}
 		}
@@ -390,8 +401,16 @@ void EditSegment::DrawXORCircle(MeshModel &m,GLArea * gla, bool doubleDraw) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void EditSegment::MeshCut() {
-	if (meshCut) meshCut->MeshCut();
+void EditSegment::MeshCutSlot() {
+	if (meshCut) {
+		meshCut->MeshCut();
+		meshCut->Colorize(selectForeground);
+	}
+	glarea->update();
+}
+
+void EditSegment::SelectForegroundSlot(bool value) {
+	selectForeground = value;
 }
 
 Q_EXPORT_PLUGIN(EditSegment)

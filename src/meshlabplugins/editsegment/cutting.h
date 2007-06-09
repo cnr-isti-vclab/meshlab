@@ -20,10 +20,10 @@
 namespace vcg {
 
 	enum MarkType {U, //unmarked
-									F, //foreground
-									B, //background
-									iF, //inputForeground
-									iB //inputBackground
+		F, //foreground
+		B, //background
+		iF, //inputForeground
+		iB //inputBackground
 	}; 
 
 	class MarkData {
@@ -67,11 +67,11 @@ namespace vcg {
 			float dist;
 			double kpq = 0.0;
 			const double e = 2.71828182845904523536;
-			
+
 			const float W1 = 0.4f;
 			const float W2 = 0.6f;
-		
-			
+
+
 			Matrix33<double> n_nMatrix;
 			Point3<double> ViVj;
 			Point3<double> Tij;
@@ -81,13 +81,13 @@ namespace vcg {
 			n_nMatrix.ExternalProduct(n, n);
 			ViVj = Point3<double>((double)tempViVj[0], (double)tempViVj[1], (double)tempViVj[2]);
 			Tij = (n_nMatrix * ViVj) / Norm(n_nMatrix * ViVj);
-			
+
 			double cos = (Tij * (*TDCurvPtr)[*p].T1) / (Tij.Norm() * ((*TDCurvPtr)[*p].T1).Norm());
 			cos *= cos;
-			
+
 			//k = k1 * cos^2(@) + k2 * sin^2(@); @ = angle between T1 and direction P->Q projected onto the plane N
 			kpq = ((*TDCurvPtr)[*p].k1 * cos) + ((*TDCurvPtr)[*p].k2 * (1 - cos));
-			
+
 			if (kpq < 0) {
 				kpq = pow(e,fabs(kpq)) - 1; //if kpq < 0 -> kpq = (e^|kpq|) - 1
 			}
@@ -98,7 +98,7 @@ namespace vcg {
 		}
 
 		void AddNearestToQ(VertexType * v) {
-			
+
 			float dist = 0.0f;
 			float min_dist = std::numeric_limits<float>::max();
 			VertexType* nearestV=0;
@@ -135,9 +135,9 @@ namespace vcg {
 			}
 		}
 
-	
+
 	public:
-		
+
 		MeshCutting(MESH_TYPE * ms) {
 			mesh = ms;
 			TDMarkPtr = new SimpleTempData<VertContainer, MarkData>((*mesh).vert);
@@ -159,13 +159,19 @@ namespace vcg {
 
 			VertexIterator vi;
 			int counter = 0;
-			
+			int inputCounter = 0;
+
 			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
 				if ( !vi->IsD() && (*TDMarkPtr)[*vi].Mark != iF && (*TDMarkPtr)[*vi].Mark != iB) {
 					(*TDMarkPtr)[*vi].Mark = U;
 					++counter;
+				} else {
+					++inputCounter;
 				}
 			}
+
+			//check if no input is given to prevent infinite loop.
+			if (!inputCounter) return;
 
 			//Computing principal curvatures and directions for all vertices
 			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
@@ -192,21 +198,49 @@ namespace vcg {
 					}				
 				}
 			}
-			
+
 			//checks if all vertices are marked
-			int count = 0;
+			/*int count = 0;
 			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
-				if (!vi->IsD()) {
-					switch((*TDMarkPtr)[*vi].Mark) {
-						case iF: vi->C() = vcg::Color4b::Red; break;
-						case F: vi->C() = vcg::Color4b::Yellow; break;
-						case iB: vi->C() = vcg::Color4b::Blue; break;
-						case B: vi->C() = vcg::Color4b::Green; break;
-						case U: vi->C() = vcg::Color4b::White; ++count; break;
+			if (!vi->IsD()) {
+			switch((*TDMarkPtr)[*vi].Mark) {
+			case iF: vi->C() = vcg::Color4b::Red; break;
+			case F: vi->C() = vcg::Color4b::Yellow; break;
+			case iB: vi->C() = vcg::Color4b::Blue; break;
+			case B: vi->C() = vcg::Color4b::Green; break;
+			case U: vi->C() = vcg::Color4b::White; ++count; break;
+			}
+			}
+			}
+			count = count;*/
+
+		}
+		void Colorize(bool selectForeground) {
+			FaceIterator fi;
+			int count;
+			if (selectForeground) {
+				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
+					count = 0;
+					for (int i = 0; i<3; ++i) {
+						if ( (*TDMarkPtr)[(*fi).V(i)].Mark == F || (*TDMarkPtr)[(*fi).V(i)].Mark == iF	) ++count;
 					}
+					if (count == 3) 
+						(*fi).SetS();
+					else 
+						(*fi).ClearS();
+				}
+			} else {
+				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
+					count = 0;
+					for (int i = 0; i<3; ++i) {
+						if ( (*TDMarkPtr)[(*fi).V(i)].Mark == B || (*TDMarkPtr)[(*fi).V(i)].Mark == iB	) ++count;
+					}
+					if (count == 3) 
+						(*fi).SetS();
+					else 
+						(*fi).ClearS();
 				}
 			}
-			count = count;
 
 		}
 	};
