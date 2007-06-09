@@ -5,28 +5,151 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>210</width>
-    <height>102</height>
+    <width>140</width>
+    <height>201</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>MeshCutDialog</string>
+   <string>Mesh Segmentation</string>
   </property>
-  <widget class="QPushButton" name="pushButton" >
+  <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
-     <x>70</x>
-     <y>30</y>
-     <width>75</width>
-     <height>23</height>
+     <x>10</x>
+     <y>10</y>
+     <width>116</width>
+     <height>149</height>
     </rect>
    </property>
-   <property name="text" >
-    <string>PushButton</string>
-   </property>
+   <layout class="QVBoxLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QRadioButton" name="foreRadioButton" >
+        <property name="text" >
+         <string>Select Foreground</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="backRadioButton" >
+        <property name="text" >
+         <string>Select Background</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="foregroundLabel" >
+          <property name="text" >
+           <string>Foreground Color
+</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ColorPicker" native="1" name="foreColorPicker" >
+          <property name="minimumSize" >
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize" >
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="backgroundLabel" >
+          <property name="text" >
+           <string>Background Color
+</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ColorPicker" native="1" name="backColorPicker" >
+          <property name="minimumSize" >
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize" >
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QPushButton" name="meshSegmentButton" >
+      <property name="text" >
+       <string>Start Segmentation</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11" />
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>ColorPicker</class>
+   <extends>QWidget</extends>
+   <header>colorpicker.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="meshlab.qrc" />
+ </resources>
  <connections/>
 </ui>

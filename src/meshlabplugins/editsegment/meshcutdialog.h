@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "ui_meshcutdialog.h"
+#include <colorpicker.h>
 
 class MeshCutDialog : public QWidget
 {
@@ -12,13 +13,21 @@ public:
 	MeshCutDialog(QWidget *parent = 0);
 	~MeshCutDialog();
 
+	inline bool SelectForeground() {return ui.foreRadioButton->isChecked();}
+	inline QColor getForegroundColor() {return ui.foreColorPicker->getColor();}
+	inline QColor getBackgroundColor() {return ui.backColorPicker->getColor();}
+
 private:
 	Ui::MeshCutDialogClass ui;
 
 	public slots:
-		void on_meshcutButton_clicked();
+		void on_meshSegmentButton_clicked();
+		void on_foreRadioButton_clicked();
+		void on_backRadioButton_clicked();
+		
 	signals:
-	void mesh_cut();
+		void meshCutSignal();
+		void selectForegroundSignal(bool);
 };
 
 #endif // MESHCUTDIALOG_H
