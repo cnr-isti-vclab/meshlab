@@ -1,13 +1,13 @@
 TEMPLATE = lib
 CONFIG += plugin
 INCLUDEPATH += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS = editsegment.h cutting.h curvaturetensor.h meshcutdialog.h 
-SOURCES = editsegment.cpp ../../../../code/lib/glew/src/glew.c meshcutdialog.cpp
+HEADERS = editsegment.h cutting.h curvaturetensor.h meshcutdialog.h colorpicker.h
+SOURCES = editsegment.cpp ../../../../code/lib/glew/src/glew.c meshcutdialog.cpp colorpiker.cpp
 TARGET = editsegment
 DESTDIR = ../../meshlab/plugins
 DEFINES += GLEW_STATIC
 QT += opengl
-#RESOURCES = meshlab.qrc
+RESOURCES = meshlab.qrc
 FORMS+=meshcutdialog.ui
 contains(TEMPLATE,lib){
   CONFIG(debug, debug|release){
@@ -20,6 +20,5 @@ contains(TEMPLATE,lib){
   }
 }
 #win32{
-#  SOURCES += paintbox.cpp 
 #  DEFINES += NOMINMAX
 #}
