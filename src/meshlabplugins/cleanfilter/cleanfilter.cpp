@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.15  2007/06/11 15:26:43  ponchio
+ *** empty log message ***
+
  Revision 1.14  2007/05/30 15:10:54  ponchio
  *** empty log message ***
 
@@ -169,7 +172,7 @@ const int CleanFilter::getRequirements(QAction *action)
   switch(ID(action))
   {
     case FP_REMOVE_WRT_Q:
-    case FP_REBUILD_SURFACE :	return 0;
+    case FP_REBUILD_SURFACE :	return MeshModel::MM_BORDERFLAG;
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
         return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK;
@@ -184,8 +187,9 @@ bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst
   {
     case FP_REBUILD_SURFACE :
 		  parlst.addFieldFloat("BallRadius","Enter ball size as a diag perc. (0 autoguess))",(float)maxDiag1);
-		  parlst.addFieldFloat("CreaseThr","Angle Threshold",(float)maxDiag1);
-		  parlst.addFieldBool("ComputeNormal","Compute the per vertex normals using only the point set ",false);
+		  parlst.addFieldFloat("Clustering","Enter clustering radius (as ball size percent)",30.0f);		  
+		  parlst.addFieldFloat("CreaseThr","Angle Threshold (degrees)", 90.0f);
+//		  parlst.addFieldBool("ComputeNormal","Compute the per vertex normals using only the point set ",false);
 		  parlst.addFieldBool("DeleteFaces","Delete intial set of faces",false);
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
@@ -240,11 +244,12 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
 {
 	if(filter->text() == ST(FP_REBUILD_SURFACE) )
 	  {
-      float radius = par.getFloat("BallRadius");		
-			bool ComputeNormal = par.getBool("ComputeNormal");
+      float Radius = par.getFloat("BallRadius");		
+      float Clustering = par.getFloat("Clustering");		      
+//			bool ComputeNormal = par.getBool("ComputeNormal");
 			float CreaseThr = par.getFloat("CreaseThr");
 			bool DeleteFaces = par.getBool("DeleteFaces");
-      float clustering = 0.3;
+
       if(DeleteFaces) {
 				m.cm.fn=0;
 				m.cm.face.resize(0);
@@ -253,12 +258,13 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
 /*			if(ComputeNormal)
 				NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
       
-			tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
-			tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);*/
-			if(CreaseThr == 0) CreaseThr = M_PI/2;
-			tri::BallPivoting<CMeshO> pivot(m.cm, radius, clustering, CreaseThr); 
+		*/
+		  CreaseThr *= M_PI/180;
+		  Clustering /= 100;
+			tri::BallPivoting<CMeshO> pivot(m.cm, Radius, Clustering, CreaseThr); 
       // the main processing
       pivot.BuildMesh(cb);
+      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
     if(filter->text() == ST(FP_REMOVE_ISOLATED_DIAMETER) )
 	  {
