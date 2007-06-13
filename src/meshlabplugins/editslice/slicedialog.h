@@ -28,7 +28,7 @@ public:
 	}
 		
 	inline void setDistanceRange(float dRange){
-		this->distanceRange=dRange/100;
+		this->distanceRange=dRange/100;  // Scale of values in slider rappresent the value in px of any tick 
 		ui.labelDistanceRange->setText(QString("Distance range from 0 to "+ QString::number(dRange)));
 		
 	}
@@ -49,24 +49,15 @@ private:
 	bool  defaultTrackball;
 	bool restoreDefalut;
 private slots:
-	void on_EditDistanceCheck_stateChanged(int);
+	
+	void on_spinBox_valueChanged(int);
+	void on_DistanceEdit_returnPressed();
 	void on_Exporter_MultiFile_clicked();
 	void on_Exporter_singleFile_clicked();
     void on_SliderPlaneDistance_sliderMoved(int);
-	void on_Update_Val_clicked();
-	
+
 	void on_ExportButton_clicked();
 	void on_DefultButton_clicked();
-	
-	
-	void on_spinBoxPlane_valueChanged(int);
-	
-	void on_on_slideTrackBall_clicked(bool);
-	void on_DefaultTrackball_clicked(bool);
-
-
-	
-
 	
 	
 };

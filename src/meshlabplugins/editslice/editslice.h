@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QList>
-
+#include "svgpro.h"
 #include "slicedialog.h"
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -19,6 +19,8 @@
 
 #include <vcg/simplex/edge/edge.h>
 
+#include <wrap/io_edgemesh/export_svg.h>
+
 typedef CMeshO n_Mesh;
 
 class n_Face;
@@ -31,7 +33,7 @@ class n_EdgeMesh: public vcg::edge::EdgeMesh< vector<n_Vertex>, vector<n_Edge> >
 
 typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
 typedef vcg::edge::EdgeMesh<vector<n_Vertex>,vector<n_Edge> > Edge_Mesh;
-
+typedef vcg::edge::io::SVGProperties SVGProperties;
 
 
 
@@ -55,11 +57,11 @@ public:
     virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
     virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual QList<QAction *> actions() const ;
-	void restoreDefault();
+	
 	
 private:
-	TriMeshGrid mesh_grid;
-	n_EdgeMesh edge_mesh;
+	TriMeshGrid* mesh_grid;
+	n_EdgeMesh* edge_mesh;
 	n_Mesh trimesh;
 	std::vector<typename TriMeshGrid::Cell *> intersected_cells;
 	vector<Point3f> point_Vector;
@@ -69,10 +71,15 @@ private:
 	MeshModel m;
     bool first;
 	Box3f b;
+	SVGPro *svgpro;
+	float edgeMax;
+SVGProperties pr;
 	dialogslice *dialogsliceobj;
     void DrawPlane(GLArea * gla,MeshModel &m);
+	void UpdateVal(SVGPro * sv, SVGProperties * pr);
 	bool  activeDefaultTrackball;
     bool disableTransision;
+
 public Q_SLOTS:
 	void RestoreDefault();
 	void SlotExportButton();

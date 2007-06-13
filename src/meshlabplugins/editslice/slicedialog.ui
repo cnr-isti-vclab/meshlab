@@ -45,7 +45,7 @@
      <x>20</x>
      <y>30</y>
      <width>331</width>
-     <height>341</height>
+     <height>330</height>
     </rect>
    </property>
    <property name="minimumSize" >
@@ -94,75 +94,36 @@
      <property name="title" >
       <string>Distance between plans</string>
      </property>
+     <widget class="QLineEdit" name="DistanceEdit" >
+      <property name="geometry" >
+       <rect>
+        <x>190</x>
+        <y>30</y>
+        <width>101</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>1</string>
+      </property>
+      <property name="echoMode" >
+       <enum>QLineEdit::Normal</enum>
+      </property>
+      <property name="cursorPosition" >
+       <number>1</number>
+      </property>
+      <property name="alignment" >
+       <set>Qt::AlignHCenter</set>
+      </property>
+     </widget>
      <widget class="QLabel" name="labelDistanceRange" >
       <property name="geometry" >
        <rect>
         <x>10</x>
         <y>70</y>
-        <width>291</width>
+        <width>241</width>
         <height>21</height>
        </rect>
-      </property>
-     </widget>
-     <widget class="QGroupBox" name="Distnace_edit_group" >
-      <property name="enabled" >
-       <bool>false</bool>
-      </property>
-      <property name="geometry" >
-       <rect>
-        <x>180</x>
-        <y>20</y>
-        <width>121</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <widget class="QPushButton" name="Update_Val" >
-       <property name="geometry" >
-        <rect>
-         <x>60</x>
-         <y>40</y>
-         <width>51</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Updade</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="DistanceEdit" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>101</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>1</string>
-       </property>
-       <property name="echoMode" >
-        <enum>QLineEdit::Normal</enum>
-       </property>
-       <property name="cursorPosition" >
-        <number>1</number>
-       </property>
-       <property name="alignment" >
-        <set>Qt::AlignHCenter</set>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QCheckBox" name="EditDistanceCheck" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>141</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>Manualy edit distance</string>
       </property>
      </widget>
      <widget class="QSlider" name="SliderPlaneDistance" >
@@ -208,36 +169,103 @@
        <number>1</number>
       </property>
      </widget>
+     <widget class="QToolButton" name="DefultButton" >
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>91</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Restore Default</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QToolButton" name="DefultButton" >
+    <widget class="QGroupBox" name="groupBox_4" >
      <property name="geometry" >
       <rect>
-       <x>10</x>
-       <y>280</y>
-       <width>91</width>
-       <height>30</height>
+       <x>120</x>
+       <y>200</y>
+       <width>211</width>
+       <height>51</height>
       </rect>
      </property>
-     <property name="text" >
-      <string>Restore Default</string>
+     <property name="minimumSize" >
+      <size>
+       <width>200</width>
+       <height>30</height>
+      </size>
      </property>
+     <property name="maximumSize" >
+      <size>
+       <width>300</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <widget class="QRadioButton" name="Exporter_MultiFile" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>83</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Multi file</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="ExportButton" >
+      <property name="geometry" >
+       <rect>
+        <x>110</x>
+        <y>10</y>
+        <width>96</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Export Polyline...</string>
+      </property>
+      <property name="popupMode" >
+       <enum>QToolButton::InstantPopup</enum>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="Exporter_singleFile" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>83</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Single file</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="groupBox" >
      <property name="geometry" >
       <rect>
        <x>10</x>
        <y>0</y>
-       <width>99</width>
+       <width>321</width>
        <height>51</height>
       </rect>
      </property>
      <property name="title" >
       <string>Number of plans</string>
      </property>
-     <widget class="QSpinBox" name="spinBoxPlane" >
+     <widget class="QSpinBox" name="spinBox" >
       <property name="geometry" >
        <rect>
-        <x>10</x>
+        <x>30</x>
         <y>20</y>
         <width>50</width>
         <height>18</height>
@@ -271,139 +299,12 @@
       </property>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox_3" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>200</y>
-       <width>100</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="minimumSize" >
-      <size>
-       <width>0</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="maximumSize" >
-      <size>
-       <width>100</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="title" >
-      <string>Trackball mode</string>
-     </property>
-     <widget class="QRadioButton" name="on_slideTrackBall" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>151</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>only Plane</string>
-      </property>
-      <property name="checked" >
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="DefaultTrackball" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>83</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>Default</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_4" >
-     <property name="geometry" >
-      <rect>
-       <x>120</x>
-       <y>250</y>
-       <width>211</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="minimumSize" >
-      <size>
-       <width>200</width>
-       <height>30</height>
-      </size>
-     </property>
-     <property name="maximumSize" >
-      <size>
-       <width>300</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <widget class="QToolButton" name="ExportButton" >
-      <property name="geometry" >
-       <rect>
-        <x>110</x>
-        <y>20</y>
-        <width>96</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>Export Polyline...</string>
-      </property>
-      <property name="popupMode" >
-       <enum>QToolButton::InstantPopup</enum>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="Exporter_MultiFile" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>30</y>
-        <width>83</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>Multi file</string>
-      </property>
-      <property name="checked" >
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="Exporter_singleFile" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>83</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>Single file</string>
-      </property>
-      <property name="checkable" >
-       <bool>false</bool>
-      </property>
-     </widget>
-    </widget>
    </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11" />
  <tabstops>
-  <tabstop>spinBoxPlane</tabstop>
   <tabstop>SliderPlaneDistance</tabstop>
-  <tabstop>on_slideTrackBall</tabstop>
-  <tabstop>DefaultTrackball</tabstop>
   <tabstop>DefultButton</tabstop>
   <tabstop>ExportButton</tabstop>
  </tabstops>
