@@ -1,15 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <GLSLang>
-  <Metadata>
-    <Author Author="" />
-    <Email Email="" />
-    <Company Company="" />
-    <Shader Shader="" />
-    <ShaderDescription ShaderDescription="" />
-    <License License="" />
-    <Version Version="" />
-  </Metadata>
-  <VPCount numero="1">
+   <VPCount numero="1">
     <Filenames>
       <Filename0 VertexProgram="xray.vert" />
     </Filenames>
@@ -44,7 +35,4 @@
     <Light6 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
     <Light7 Enabled="False" PosX="0" PosY="0" PosZ="1" PosW="0" AmbR="0" AmbG="0" AmbB="0" AmbA="1" DifR="0" DifG="0" DifB="0" DifA="1" SpecR="0" SpecG="0" SpecB="0" SpecA="1" SpotDirX="0" SpotDirY="0" SpotDirZ="-1" SpotExp="0" SpotCutoff="180" SpotConstant="1" SpotLinear="0" SpotQuadratic="0" />
   </BuiltInStates>
-  <BackGround>
-    <BackGroundMode Mode="1" BackGround=".\Art\saruman.jpg" />
-  </BackGround>
 </GLSLang>

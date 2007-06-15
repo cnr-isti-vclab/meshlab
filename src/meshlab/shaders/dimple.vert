@@ -1,10 +1,6 @@
-
 //
 // dimple.vert: Vertex shader for bump mapping dimples (bumps)
-//
-// author: John Kessenich
-//
-// Copyright (c) 2002: 3Dlabs, Inc.
+// based on the code of John Kessenich
 //
 
 varying vec3 LightDir;

@@ -1,13 +1,3 @@
-//
-// Vertex shader for cartoon-style shading
-//
-// Author: Philip Rideout
-//
-// Copyright (c) 2004 3Dlabs Inc. Ltd.
-//
-// See 3Dlabs-License.txt for license information
-//
-
 varying vec3 Normal;
 varying vec3 LightDir;
 

@@ -1,14 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <GLSLang>
-  <Metadata>
-    <Author Author="yooyo" />
-    <Email Email="yooyo@sbb.co.yu" />
-    <Company Company="Centroid/RTTV" />
-    <Shader Shader="Parallax + Specular" />
-    <ShaderDescription ShaderDescription="Yet another parallax and specular hl shader..." />
-    <License License="Free" />
-    <Version Version="1.1" />
-  </Metadata>
   <VPCount numero="1">
     <Filenames>
       <Filename0 VertexProgram="dimple.vert" />
