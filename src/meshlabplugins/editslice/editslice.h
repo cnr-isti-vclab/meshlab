@@ -63,7 +63,7 @@ private:
 	TriMeshGrid* mesh_grid;
 	n_EdgeMesh* edge_mesh;
 	n_Mesh trimesh;
-	std::vector<typename TriMeshGrid::Cell *> intersected_cells;
+	std::vector< TriMeshGrid::Cell *> intersected_cells;
 	vector<Point3f> point_Vector;
 	QString fileName, dirName, fileN;
 	bool isDragging;
