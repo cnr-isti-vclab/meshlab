@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.35  2007/06/19 00:30:53  cignoni
+getParameter should return false only in case of aborting a dialog...
+
 Revision 1.34  2007/04/16 09:25:29  cignoni
 ** big change **
 Added Layers managemnt.
@@ -239,6 +242,7 @@ bool ExtraMeshColorizePlugin::getParameters(QAction *action, QWidget *parent, Me
  switch(ID(action))
   {
     case CP_MAP_QUALITY_INTO_COLOR :
+		{
       Histogramf H;
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
             
@@ -267,7 +271,10 @@ bool ExtraMeshColorizePlugin::getParameters(QAction *action, QWidget *parent, Me
 
       par.addFloat("RangeMin",FinalRange.minV);
       par.addFloat("RangeMax",FinalRange.maxV);      
+			return true;
+		}
   }
+	return true;
 }
 bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameter & par, vcg::CallBackPos *cb)
 {
