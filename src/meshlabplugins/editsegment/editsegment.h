@@ -13,7 +13,7 @@
 #include <vcg/math/matrix44.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include <meshCutDialog.h>
+#include <meshcutdialog.h>
 
 #include <cutting.h>
 
