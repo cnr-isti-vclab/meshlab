@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2007/06/25 13:31:55  zifnab1974
+passing char* instead of const char* is about to be deprecated in gcc
+
 Revision 1.7  2007/03/27 12:20:13  cignoni
 Revamped logging iterface, changed function names in automatic parameters, better selection handling
 
@@ -167,7 +170,7 @@ public:
 		this->clear();
 	}
 
-	void addFieldBool(char *name, char* desc, bool val,char *ttex=0)
+	void addFieldBool(const char *name, const char* desc, bool val, const char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
@@ -180,7 +183,7 @@ public:
 		v.push_back(std);
 	}
 
-	void addFieldFloat(char *name, char* desc, float val,char *ttex=0)
+	void addFieldFloat(const char *name, const char* desc, float val, const char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
@@ -193,7 +196,7 @@ public:
 		v.push_back(std);
 	}
 	
-	void addFieldAbsPerc(char *name, char* desc, float val, float minv, float maxv,char *ttex=0)
+	void addFieldAbsPerc(const char *name, const char* desc, float val, float minv, float maxv, const char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
@@ -208,7 +211,7 @@ public:
 		v.push_back(std);
 	}
   
-	void addFieldInt(char *name, char* desc, int val,char *ttex=0)
+	void addFieldInt(const char *name, const char* desc, int val, const char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
@@ -221,7 +224,7 @@ public:
 		v.push_back(std);
 	}
 	
-	void addFieldString(char *name, char* desc, char *val,char *ttex=0)
+	void addFieldString(const char *name, const char* desc, char *val, const char *ttex=0)
 	{
 		MESHLAB_STDFIELD std;
 
