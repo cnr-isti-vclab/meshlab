@@ -114,7 +114,7 @@ void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshMo
  }
  void ExtraMeshSlidePlugin::SlotExportButton()
  {
-	
+	 
 	QFileDialog saveF;
 	fileName = saveF.getSaveFileName(gla->window(), tr("Saving..."),"/",tr("Mesh (*.svg)"));
 	if (fileName==0) return;
@@ -145,15 +145,15 @@ void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshMo
 		else
 			pr.numCol=point_Vector.size();
 		pr.numRow=1;
+		
 		mesh_grid = new TriMeshGrid();
 		mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
-		float scale =  (pr.getViewBox().V(0)/pr.numCol) /edgeMax ;
-		
+		float scale =  (pr.getViewBox().V(0)/pr.numCol) /(edgeMax*(1.4142)) ;
 		pr.setScale(scale);
 		pr.setTextDetails( svgpro->showText );
 		for(int i=0; i<point_Vector.size(); i++){	
 			Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
-			Point3f po=point_Vector[i];
+			Point3f po=point_Vector[i]-m.cm.bbox.Center();
 			Plane3f p;
 			p.SetDirection(*dir);
 				/*
@@ -163,7 +163,8 @@ void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshMo
 			   */   
 			
 			Point3f off= mat_trac_rotation * (translation_plans+po); //translation vector
-			p.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) );
+			p.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)));
+			
 			double avg_length;  
 			edge_mesh = new n_EdgeMesh();
 			vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(p , *edge_mesh, avg_length, mesh_grid, intersected_cells);
@@ -177,7 +178,8 @@ void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshMo
 			   pr.setPosition(Point2d(0,0));
 			   pr.numCol=1;
 			   pr.numRow=1;
-			   vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr  );
+			   
+			   vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr);
 		
 			}
 			else{
