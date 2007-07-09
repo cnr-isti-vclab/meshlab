@@ -118,7 +118,8 @@ void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshMo
 	QFileDialog saveF;
 	fileName = saveF.getSaveFileName(gla->window(), tr("Saving..."),"/",tr("Mesh (*.svg)"));
 	if (fileName==0) return;
-
+    if (!(fileName.endsWith("svg")))
+		fileName= fileName+".svg";
 	
 	dialogsliceobj->hide();
 
