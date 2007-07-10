@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.58  2007/07/10 06:46:26  cignoni
+better comments
+
 Revision 1.57  2007/05/16 15:03:21  cignoni
 better comments
 
@@ -168,9 +171,6 @@ public:
 	// For example filters that perform an action only on the selection will be placed in the Selection Class Ê
 	virtual const FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
 	
-	// This function invokes a dialog and get back the parameters
-	virtual bool getParameters(QAction *, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameter & /*par*/) {return true;}
-	
 	// The filters can have some additional requirements on the mesh capabiliteis. 
 	// For example if a filters requires Face-Face Adjacency you shoud re-implement 
 	// this function making it returns MeshModel::MM_FACETOPO. 
@@ -181,14 +181,17 @@ public:
 	// This function is called by the frameworl 
 	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameter & /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
 	
+	// This function invokes a dialog and get back the parameters
+	virtual bool getParameters(QAction *, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameter & /*par*/) {return true;}	
+
 	// Returns an array of standard parameters descriptors for the standard plugin window. 
-	// FALSE is returned by default if the plugin doesn't implement this 
+	// FALSE is returned by default if the plugin doesn't implement this (e.g. the filter does not require a automatic parameter dialog)	
+	// TRUE means that for the given filter it requires an automatic parameter dialog.
 	virtual bool getStdFields(QAction *, MeshModel &, StdParList &){return false;}
     
 	/* Overloading of the function getParameters that supports the standard plugin window. 
 	If the plugin doesn't implement this, the classic function is called */
 	virtual bool getStdParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/) {return getParameters(qa,qw,mm,fp);};
-
 
   /// Standard stuff that usually should not be redefined. 
 	  void setLog(GLLogStream *log) { this->log = log ; }
