@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2007/07/10 06:49:19  cignoni
+correct resizing behaviour
+
 Revision 1.2  2005/12/06 10:42:03  vannini
 Snapshot dialog now works
 
@@ -41,7 +44,7 @@ SaveSnapshotDialog::SaveSnapshotDialog(QWidget * parent):QDialog(parent)
 	connect(ui.cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 	connect(ui.browseDir, SIGNAL(clicked()),this, SLOT(browseDir()));
 	ui.outDirLineEdit->setReadOnly(true);
-	setFixedSize(250,130);
+//	setFixedSize(250,130);
 }
 
 void SaveSnapshotDialog::setValues(const SnapshotSetting& ss)
