@@ -72,6 +72,9 @@ void v3dImportDialog::setEpochReconstruction(EpochReconstruction *_er,CallBackPo
   
   rangeLabel->setPixmap(generateColorRamp());
   rangeLabel->setMaximumHeight(10);
+	rangeLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	rangeLabel->setScaledContents(true);
+	
   minCountSlider->setMaximumHeight(12);
     
   int i;
