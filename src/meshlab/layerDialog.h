@@ -30,6 +30,7 @@ $Log: stdpardialog.cpp,v $
 #include <QtGui>
 
 class GLArea;
+class MainWindow;
 class QTableWidget;
 
 #include "ui_layerDialog.h"
@@ -37,19 +38,18 @@ class QTableWidget;
 
 class LayerDialog : public QDialog
 {
-     Q_OBJECT
-
- public:
+	Q_OBJECT
+	public:
      LayerDialog(QWidget *parent = 0);
      void updateTable();
 
-public slots:
-void toggleStatus(int row, int column);
- private:
-	Ui::layerDialog ui;
+	public slots:
+		void toggleStatus(int row, int column);
 
-		QTableWidget *layerTable;
+	private:
+		Ui::layerDialog ui;
 		GLArea *gla; 
+		MainWindow *mw; 
 };
 
 

@@ -24,6 +24,10 @@
   History
 
 $Log$
+Revision 1.75  2007/07/10 07:19:12  cignoni
+** Serious Changes **
+again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
+
 Revision 1.74  2007/05/16 15:02:04  cignoni
 Better management of toggling between edit actions and camera movement
 
@@ -227,18 +231,18 @@ class GLArea : public QGLWidget
 {
 	Q_OBJECT
 
-private:
-  MeshModel *currentMesh;	
-public:
-  LayerDialog *layerDialog;
-  // Layer Management stuff. 
-  QList<MeshModel *> meshList;
 public:
 	GLArea(QWidget *parent = 0);
 	~GLArea(){}
-	
-	MeshModel *mm(){return currentMesh;}
-	void addMesh(MeshModel *mm);
+
+private:
+public:
+  LayerDialog *layerDialog;
+  // Layer Management stuff. 
+	MeshDocument meshDoc;
+	MeshModel *mm(){return meshDoc.mm();}
+ 
+	//void addMesh(MeshModel *mm);
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
 	GLLogStream log;
@@ -253,10 +257,10 @@ public:
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-	QString getFileName()							{return QString(currentMesh->fileName.c_str());}
+	QString getFileName()							{return QString(mm()->fileName.c_str());}
 	void		setFileName(QString name)	
     {
-    currentMesh->fileName = qPrintable(name); 
+    mm()->fileName = qPrintable(name); 
     ss.basename=QFileInfo(getFileName()).baseName().append("Snap");
 	}
 
@@ -379,7 +383,9 @@ private:
 	QAction *currentEditor;
 	QAction *suspendedEditRef; // reference to last Editing Mode Used 
 
+public:
 	RenderMode rm;
+private:
 	ColorSetting cs;
 	GLLightSetting ls;
 	float fov;

@@ -32,38 +32,41 @@ $Log: stdpardialog.cpp,v $
 
 #include "layerDialog.h"
 #include "glarea.h"
+#include "mainwindow.h"
 
 LayerDialog::LayerDialog(QWidget *parent )    : QDialog(parent)    
 { 
   setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
 	setVisible(false);
 	LayerDialog::ui.setupUi(this);
-	gla=static_cast<GLArea *>(parent);
+	gla=qobject_cast<GLArea *>(parent);
+	mw=qobject_cast<MainWindow *>(gla->parentWidget()->parentWidget());
+	
 	connect(	ui.layerTableWidget, SIGNAL(cellClicked(int, int)) , this,  SLOT(toggleStatus(int,int)) );
+	connect(	ui.addButton, SIGNAL(clicked()) , mw,  SLOT(openIn()) );
+	//connect(	ui.deleteButton, SIGNAL(cellClicked(int, int)) , this,  SLOT(openIn(int,int)) );
 }
-
 void LayerDialog::toggleStatus(int row, int col)
 {
-	if(col==1) 
-	{
-	  QList<MeshModel *> &meshList=gla->meshList;
-		if(meshList.at(row)->visible)
+  switch(col)
+	{ 
+		case 0 :
+				gla->meshDoc.setCurrentMesh(row);
+				updateTable();
+				break;
+		case 1 : 
 		{
-			ui.layerTableWidget->item(row,col)->setIcon(QIcon(":/images/layer_eye_close.png"));
-			meshList.at(row)->visible=false;
+			QList<MeshModel *> &meshList=gla->meshDoc.meshList;
+			meshList.at(row)->visible = ! meshList.at(row)->visible ;
+			updateTable();	
 		}
-		else
-		{
-			ui.layerTableWidget->item(row,col)->setIcon(QIcon(":/images/layer_eye_open.png"));
-			meshList.at(row)->visible=true;
-		}		
-		gla->update();
 	}
+	gla->update();
 }
 
 void LayerDialog::updateTable()
 {
-	QList<MeshModel *> &meshList=gla->meshList;
+	QList<MeshModel *> &meshList=gla->meshDoc.meshList;
 	qDebug("Items in list: %d", meshList.size());
 	ui.layerTableWidget->setColumnCount(3);
 	ui.layerTableWidget->setRowCount(meshList.size());
@@ -77,17 +80,32 @@ void LayerDialog::updateTable()
 		qDebug("Filename %s", meshList.at(i)->fileName.c_str());
 		
 		item = new QTableWidgetItem(QFileInfo(meshList.at(i)->fileName.c_str()).fileName());
+		if(meshList.at(i)==gla->mm()) {
+//						item->setSelected(true);
+						item->setBackground(QBrush(Qt::yellow));
+						item->setForeground(QBrush(Qt::blue));	
+						}						
+	
+//					else item->setSelected(false);
   	ui.layerTableWidget->setItem(i,0,item );
-		item = new QTableWidgetItem(QIcon(":/images/layer_eye_open.png"),"");
+		
+		if(meshList.at(i)->visible){
+				item = new QTableWidgetItem(QIcon(":/images/layer_eye_open.png"),"");
+			}		else		{
+				item = new QTableWidgetItem(QIcon(":/images/layer_eye_close.png"),"");
+			}		
 		item->setFlags(Qt::ItemIsEnabled);
   	ui.layerTableWidget->setItem(i,1,item ); 
+
 		item = new QTableWidgetItem(QIcon(":/images/layer_edit_unlocked.png"),QString());
 		item->setFlags(Qt::ItemIsEnabled);
   	ui.layerTableWidget->setItem(i,2,item );
+		
 	}
-	ui.layerTableWidget->adjustSize();
+	ui.layerTableWidget->resizeColumnsToContents();
+	//ui.layerTableWidget->adjustSize();
 
-	this->adjustSize();
+	//this->adjustSize();
 
 }
 

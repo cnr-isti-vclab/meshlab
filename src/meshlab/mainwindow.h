@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.86  2007/07/10 07:19:21  cignoni
+** Serious Changes **
+again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
+
 Revision 1.85  2007/05/16 15:02:05  cignoni
 Better management of toggling between edit actions and camera movement
 
@@ -162,12 +166,15 @@ public:
   // MaskObj maskobj;
 
 public slots:
- void open(QString fileName=QString(), GLArea *gla=0);
-  
+		 
+	void open(QString fileName=QString(), GLArea *gla=0);
+	void openIn(QString fileName=QString());
+  void openProject(QString fileName=QString(), GLArea *gla=0);
+  void saveProject();
+	
 private slots:
 
 	//////////// Slot Menu File //////////////////////
-	void openIn(QString fileName=QString());
   void reload();
 	void openRecentFile();							
 	bool saveAs();
@@ -256,7 +263,15 @@ private:
 	MeshlabStdDialog *stddialog;
 
 public:
-  GLArea *GLA() const {return qobject_cast<GLArea *>(workspace->activeWindow()); }
+  GLArea *GLA() const {
+   	  if(workspace->activeWindow()==0) return 0;
+			GLArea *glw = qobject_cast<GLArea *>(workspace->activeWindow()); 
+			if(glw) return glw;
+			glw = qobject_cast<GLArea *>(workspace->activeWindow()->parentWidget());
+			assert(glw);
+			return glw;
+			
+			}
   QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
   static QStatusBar *&globalStatusBar()
   {
@@ -295,10 +310,10 @@ private:
 
 	//////////// Actions Menu File ///////////////////////
 	QAction *openAct;
-	QAction *openInAct;
+	QAction *openInAct,*openProjectAct;
 	QAction *closeAct;
 	QAction *reloadAct;
-	QAction *saveAsAct;
+	QAction *saveAsAct,*saveProjectAct;
 	QAction *saveSnapshotAct;
 	QAction *lastFilterAct;
 	QAction *runFilterScriptAct;

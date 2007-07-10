@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.78  2007/07/10 07:19:22  cignoni
+** Serious Changes **
+again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
+
 Revision 1.77  2007/05/16 15:02:05  cignoni
 Better management of toggling between edit actions and camera movement
 
@@ -207,9 +211,10 @@ void MainWindow::createActions()
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 	
   openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open inside..."), this);
-	openInAct->setShortcutContext(Qt::ApplicationShortcut);
-	openInAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openInAct, SIGNAL(triggered()), this, SLOT(openIn()));
+	
+	openProjectAct = new QAction(QIcon(":/images/openPrj.png"),tr("&Open project..."), this);
+	connect(openProjectAct, SIGNAL(triggered()), this, SLOT(openProject()));
 
   closeAct = new QAction(tr("&Close"), this);
 	closeAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -227,7 +232,10 @@ void MainWindow::createActions()
 	saveAsAct->setShortcutContext(Qt::ApplicationShortcut);
 	saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-
+	
+	saveProjectAct = new QAction(QIcon(":/images/savePrj.png"),tr("&Save Project..."), this);
+	connect(saveProjectAct, SIGNAL(triggered()), this, SLOT(saveProject()));
+	
 	saveSnapshotAct = new QAction(QIcon(":/images/snapshot.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
 
@@ -430,9 +438,11 @@ void MainWindow::createMenus()
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(openAct);
 	fileMenu->addAction(openInAct);
+	fileMenu->addAction(openProjectAct);
 	fileMenu->addAction(closeAct);
 	fileMenu->addAction(reloadAct);
 	fileMenu->addAction(saveAsAct);
+  fileMenu->addAction(saveProjectAct);
 
 	
 	fileMenu->addSeparator();

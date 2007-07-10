@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.27  2007/07/10 07:19:29  cignoni
+** Serious Changes **
+again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
+
 Revision 1.26  2007/04/16 09:24:37  cignoni
 ** big change **
 Added Layers managemnt.
@@ -52,11 +56,15 @@ Removed Optional Face Normal and added some initalization after opening
 #include "meshmodel.h"
 #include <QString>
 #include <QtGlobal>
+#include <wrap/gl/math.h>
 
 bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm)
 {
+  glPushMatrix();
   glColor3f(.8f,.8f,.8f);
+	glMultMatrix(Tr);
   glw.Draw(dm,cm,tm);
+	glPopMatrix();
   return true;
 }
 

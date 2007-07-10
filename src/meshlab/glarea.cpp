@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.123  2007/07/10 07:19:11  cignoni
+** Serious Changes **
+again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
+
 Revision 1.122  2007/05/16 15:02:05  cignoni
 Better management of toggling between edit actions and camera movement
 
@@ -160,7 +164,6 @@ GLArea::GLArea(QWidget *parent)
 	currentShader = NULL;
 	lastFilterRef = NULL;
 	//lastEditRef = NULL;
-	currentMesh = NULL;
 	currLogLevel = -1;
 	setAttribute(Qt::WA_DeleteOnClose,true);
 	// Projection Matrix starting settings
@@ -172,15 +175,7 @@ GLArea::GLArea(QWidget *parent)
 	farPlane = 5.f;
 	layerDialog = new LayerDialog(this);
 	}
-	
-void GLArea::addMesh(MeshModel *mm)
-{
- meshList.push_back(mm);
- currentMesh=meshList.back();
- //layerDialog->
-
-}
-	
+		
 
 /*
 	This member returns the information of the Mesh in terms of VC,VQ,FC,FQ,WT
@@ -380,7 +375,7 @@ void GLArea::paintGL()
   // =============================================
 	/// Compute BBox 
 	Box3f FullBBox;
-	foreach(MeshModel * mp, meshList) 
+	foreach(MeshModel * mp, meshDoc.meshList) 
 	 FullBBox.Add(mp->cm.bbox);
 		
 	// Finally apply the Trackball for the model
@@ -420,7 +415,7 @@ void GLArea::paintGL()
 		  iRenderer->Render(currentShader, *mm(), rm, this); 
 	  }
 
-	  foreach(MeshModel * mp, meshList) 
+	  foreach(MeshModel * mp, meshDoc.meshList) 
 			if(mp->visible)
 				mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 
@@ -527,8 +522,17 @@ void GLArea::displayInfo()
 	renderText(20,startPos+ 1*lineSpacing,tr("LOG MESSAGES"),qFont);
 	log.glDraw(this,currLogLevel,3,lineSpacing,qFont);
 
-	renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm()->cm.vn),qFont);
-	renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm()->cm.fn),qFont);
+	if(meshDoc.size()==1) 
+	{ 
+		renderText(middleCol,startPos+ 1*lineSpacing,tr("Vertices: %1").arg(mm()->cm.vn),qFont);
+		renderText(middleCol,startPos+ 2*lineSpacing,tr("Faces: %1").arg(mm()->cm.fn),qFont);
+	}
+	else
+	{
+		renderText(middleCol,startPos+ 1*lineSpacing,tr("<%1>").arg(QFileInfo(mm()->fileName.c_str()).fileName()),qFont);
+		renderText(middleCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc.vn()),qFont);
+		renderText(middleCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc.fn()),qFont);
+	}
 	if(rm.selectedFaces)  
 		 renderText(middleCol,startPos+ 3*lineSpacing,tr("Selected: %1").arg(mm()->cm.sfn),qFont);
 	renderText(middleCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm()->ioMask),qFont);
@@ -627,10 +631,6 @@ void GLArea::closeEvent(QCloseEvent *event)
 	event->ignore();
 	if(close)
 	{
-		if(mm()){
-			foreach(MeshModel *mmp, meshList)
-					delete mmp;
-			}	// quit without saving
 		event->accept();
 	}
 }
@@ -771,11 +771,13 @@ void GLArea::initTexture()
 			glGenTextures( 1, (GLuint*)&(mm()->glw.TMId.back()) );
 			glBindTexture( GL_TEXTURE_2D, mm()->glw.TMId.back() );
 			glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imgGL.width(), imgGL.height(), GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
+			
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-			qDebug("loaded texture  %s. in %i",mm()->cm.textures[i].c_str(),mm()->glw.TMId[i]);
+			qDebug("loaded texture %s. in %i",mm()->cm.textures[i].c_str(),mm()->glw.TMId[i]);
 		}
 	}
 	glDisable(GL_TEXTURE_2D);

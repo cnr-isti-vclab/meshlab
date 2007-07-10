@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.37  2007/07/10 07:19:29  cignoni
+** Serious Changes **
+again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
+
 Revision 1.36  2007/06/01 10:04:21  ponchio
 !   !=  ~
 
@@ -173,9 +177,11 @@ public:
   // it is composed by OR-ing IOM_XXXX enums (defined in tri::io::Mask)
   int ioMask;
 	
-  bool busy;
-	bool visible;
-
+  bool busy;    // used in processing. To disable access to the mesh by the rendering thread
+	bool visible; // used in rendering; Needed for toggling on and off the meshes
+	
+  Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
+	
   //abstract pointer to fileformat's dependent additional info
   AdditionalInfo* addinfo;
 
@@ -185,6 +191,7 @@ public:
     ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
     busy=true;
 		visible=true;
+		Tr.SetIdentity();
   }
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
   bool RenderSelectedFaces();
@@ -213,6 +220,7 @@ public:
   {
    if( openingFileMask & IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
    if( openingFileMask & IOM_FACECOLOR    ) updateDataMask(MM_FACECOLOR);
+	 
   }
 
   // Ogni filtro dichiara
@@ -306,8 +314,10 @@ class MeshDocument
 {
 public :
 MeshDocument()
-		{currentMesh = NULL;
+	{
+		currentMesh = NULL;
 	}
+ 
  ~MeshDocument()
 		{
 			foreach(MeshModel *mmp, meshList)
@@ -316,24 +326,41 @@ MeshDocument()
 	 
 	void setCurrentMesh(unsigned int i)
 	{
-	  assert(i>=0 && i < meshList.size());
+	  assert(i < meshList.size());
 		currentMesh=meshList.at(i);
 	}
 	
 	MeshModel *mm() {
-	return currentMesh;
+		return currentMesh;
 	}
+/// The very important member:
+/// The list of MeshModels. 
 	
   QList<MeshModel *> meshList;	
+	
+	int size() const {return meshList.size();}
 
-void addMesh(MeshModel *mm)
-{
- meshList.push_back(mm);
- currentMesh=meshList.back();
-}
+	void addMesh(MeshModel *mm)
+	{
+	 meshList.push_back(mm);
+	 currentMesh=meshList.back();
+	}
 
-private:
-  MeshModel *currentMesh;	
+  int vn() { 
+			int tot=0;
+			foreach(MeshModel *mmp, meshList)
+					tot+= mmp->cm.vn;
+			return tot;
+	}
+	int fn() { 
+			int tot=0;
+			foreach(MeshModel *mmp, meshList)
+					tot+= mmp->cm.fn;
+			return tot;
+	}		
+	
+	private:
+		MeshModel *currentMesh;	
 };
 
 #endif
