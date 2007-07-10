@@ -31,7 +31,6 @@ $Log: meshedit.cpp,v $
 #include <meshlab/glarea.h>
 #include "sampleedit.h"
 #include <wrap/gl/pick.h>
-#include<limits>
 using namespace vcg;
 
 SampleEditPlugin::SampleEditPlugin() {
@@ -63,52 +62,44 @@ const PluginInfo &SampleEditPlugin::Info()
 	 ai.Version = tr("1.0");
 	 ai.Author = ("Paolo Cignoni");
    return ai;
- } 
+} 
  
-  void SampleEditPlugin::mousePressEvent    (QAction *, QMouseEvent * event, MeshModel &m, GLArea * gla)
-  {  }
+void SampleEditPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+{
+	gla->update();
+	cur=event->pos();
+	haveToPick=true;
+}
   
-  void SampleEditPlugin::mouseMoveEvent     (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
-  {  }
-  
-  void SampleEditPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
-  {
-    gla->update();
-    cur=event->pos();
-		haveToPick=true;
-  }
-  
-	void SampleEditPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
-  {
-    if(haveToPick)
-    {
-			vector<CMeshO::FacePointer> NewSel;  
-			GLPickTri<CMeshO>::PickFace(cur.x(), gla->height() - cur.y(), m.cm, NewSel);
-			qDebug("Pickface: Mousepos %i %i",cur.x(),cur.y());
-			qDebug("Pickface: Got  %i on %i",NewSel.size(),m.cm.face.size());
-      if(NewSel.size()>0)
-					curFacePtr=NewSel.front();
-			haveToPick=false;
-    }   
-	 if(curFacePtr)
-	 {
-	  glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
-		glDisable(GL_DEPTH_TEST); 
-		glDisable(GL_LIGHTING);
-		glColor(Color4b::Red);
-	  glBegin(GL_LINE_LOOP);
-			glVertex(curFacePtr->P(0));
-			glVertex(curFacePtr->P(1));
-			glVertex(curFacePtr->P(2));
-		glEnd();
-		for(int i=0;i<3;++i)
-			gla->renderText(curFacePtr->P(i)[0],curFacePtr->P(i)[1],curFacePtr->P(i)[2],
-											QString("v%1:%2").arg(i).arg(curFacePtr->V(i) - &m.cm.vert[0]), qFont);
-		glPopAttrib();
-	 }
-  }
+void SampleEditPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
+{
+	if(haveToPick)
+	{
+		vector<CMeshO::FacePointer> NewSel;  
+		GLPickTri<CMeshO>::PickFace(cur.x(), gla->height() - cur.y(), m.cm, NewSel);
+		if(NewSel.size()>0)
+				curFacePtr=NewSel.front();
+		haveToPick=false;
+	}   
+ if(curFacePtr)
+ {
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
+	glDisable(GL_DEPTH_TEST); 
+	glDisable(GL_LIGHTING);
+	glColor(Color4b::Red);
+	glBegin(GL_LINE_LOOP);
+		glVertex(curFacePtr->P(0));
+		glVertex(curFacePtr->P(1));
+		glVertex(curFacePtr->P(2));
+	glEnd();
+	for(int i=0;i<3;++i)
+		gla->renderText(curFacePtr->P(i)[0],curFacePtr->P(i)[1],curFacePtr->P(i)[2],
+										QString("v%1:%2").arg(i).arg(curFacePtr->V(i) - &m.cm.vert[0]), qFont);
+	glPopAttrib();
+ }
+}
 
-void SampleEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
+void SampleEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla )
 {
 	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 }

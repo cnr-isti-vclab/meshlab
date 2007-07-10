@@ -38,7 +38,6 @@ class SampleEditPlugin : public QObject, public MeshEditInterface
 		
 public:
     SampleEditPlugin();
-
     virtual ~SampleEditPlugin() {}
 
     virtual const QString Info(QAction *);
@@ -47,10 +46,9 @@ public:
     virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
     virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
     virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-//	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
+    virtual void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
+    virtual void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
+    virtual void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
 		virtual QList<QAction *> actions() const ;
 
@@ -58,7 +56,6 @@ public:
 		QFont qFont;
     bool haveToPick;
 		CMeshO::FacePointer curFacePtr;
-		
 
 };
 
