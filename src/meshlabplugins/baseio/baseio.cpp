@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.7  2007/07/10 06:52:47  cignoni
+ small patch to allow the loading of per wedge color into faces.
+
  Revision 1.6  2007/04/16 09:25:28  cignoni
  ** big change **
  Added Layers managemnt.
@@ -77,8 +80,11 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
   if (formatName.toUpper() == tr("PLY"))
 	{
 		vcg::tri::io::ImporterPLY<CMeshO>::LoadMask(filename.c_str(), mask); 
+		// small patch to allow the loading of per wedge color into faces.  
+		if(mask & tri::io::Mask::IOM_WEDGCOLOR) mask |= tri::io::Mask::Mask::IOM_FACECOLOR;
 		m.Enable(mask);
-		
+
+		 
 		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0) // all the importers return 0 on success
 		{
