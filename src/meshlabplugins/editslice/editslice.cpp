@@ -122,8 +122,6 @@ void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshMo
 		fileName= fileName+".svg";
 	
 	dialogsliceobj->hide();
-
-
 	Matrix44f mat_trac_rotation ; 
 	trackball_slice.track.rot.ToMatrix( mat_trac_rotation ); //rotation Matrix of the plans' trackball 
 	Point3f* dir=new Point3f(1,0,0);   //the plans' normal vector init 
