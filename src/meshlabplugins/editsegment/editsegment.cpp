@@ -274,6 +274,10 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 		meshcut_dock->setFloating(true);
 		QObject::connect(meshCutDialog, SIGNAL(meshCutSignal()),this, SLOT(MeshCutSlot()));
 		QObject::connect(meshCutDialog, SIGNAL(selectForegroundSignal(bool)),this, SLOT(SelectForegroundSlot(bool)));
+
+		QObject::connect(meshCutDialog, SIGNAL(colorizeGaussianSignal()),this, SLOT(ColorizeGaussianSlot()));
+		QObject::connect(meshCutDialog, SIGNAL(colorizeMeanSignal()),this, SLOT(ColorizeMeanSlot()));
+
 	}
 	meshcut_dock->setVisible(true);
 	meshcut_dock->layout()->update();
@@ -409,6 +413,20 @@ void EditSegment::MeshCutSlot() {
 
 void EditSegment::SelectForegroundSlot(bool value) {
 	selectForeground = value;
+}
+
+void EditSegment::ColorizeGaussianSlot() {
+	if (meshCut) {
+		meshCut->ColorizeCurvature(true);
+		glarea->update();
+	}
+}
+
+void EditSegment::ColorizeMeanSlot() {
+	if (meshCut) {
+		meshCut->ColorizeCurvature(false);
+		glarea->update();
+	}
 }
 
 Q_EXPORT_PLUGIN(EditSegment)

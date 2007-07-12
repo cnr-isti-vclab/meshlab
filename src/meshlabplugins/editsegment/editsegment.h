@@ -82,6 +82,9 @@ public slots:
 	void MeshCutSlot();
 	void SelectForegroundSlot(bool);
 
+	void ColorizeGaussianSlot();
+	void ColorizeMeanSlot();
+
 };
 
 #endif

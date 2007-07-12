@@ -17,6 +17,13 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <curvaturetensor.h>
 
+#include <vcg/complex/trimesh/update/color.h>
+#include <vcg/math/histogram.h>
+#include <vcg/complex/trimesh/stat.h>
+
+
+
+
 namespace vcg {
 
 	enum MarkType {U, //unmarked
@@ -66,30 +73,31 @@ namespace vcg {
 		float ImprovedIsophoticDist(VertexType * p, VertexType * q) {
 			float dist;
 			double kpq = 0.0;
-			const double e = 2.71828182845904523536;
+			const float e = 2.71828182845904523536;
 
-			const float W1 = 0.4f;
-			const float W2 = 0.6f;
+			const float W1 = 0.1f;
+			const float W2 = 0.9f;
 
 
-			Matrix33<double> n_nMatrix;
-			Point3<double> ViVj;
-			Point3<double> Tij;
-			Point3<typename CoordType::ScalarType> tempViVj = p->P() - q->P();
-			Point3<double> n = Point3<double>((double)p->N()[0], (double)p->N()[1], (double)p->N()[2]); 
+			Matrix33<float> n_nMatrix;
+			Point3<float> ViVj = p->P() - q->P();
+			Point3<float> Tij;
+			
+			Point3<float> n = p->N();
 			n = n.Normalize();
 			n_nMatrix.ExternalProduct(n, n);
-			ViVj = Point3<double>((double)tempViVj[0], (double)tempViVj[1], (double)tempViVj[2]);
+			
 			Tij = (n_nMatrix * ViVj) / Norm(n_nMatrix * ViVj);
 
-			double cos = (Tij * (*TDCurvPtr)[*p].T1) / (Tij.Norm() * ((*TDCurvPtr)[*p].T1).Norm());
+			float cos = (Tij * (*TDCurvPtr)[*p].T1) / (Tij.Norm() * ((*TDCurvPtr)[*p].T1).Norm());
 			cos *= cos;
 
 			//k = k1 * cos^2(@) + k2 * sin^2(@); @ = angle between T1 and direction P->Q projected onto the plane N
 			kpq = ((*TDCurvPtr)[*p].k1 * cos) + ((*TDCurvPtr)[*p].k2 * (1 - cos));
 
 			if (kpq < 0) {
-				kpq = pow(e,fabs(kpq)) - 1; //if kpq < 0 -> kpq = (e^|kpq|) - 1
+				//kpq = pow(e,fabs(kpq)) - 1; //if kpq < 0 -> kpq = (e^|kpq|) - 1
+				kpq = powf(e,fabs(kpq)) -1;
 			}
 
 			dist = (p->P() - q->P()).Norm() + W1 * (p->N() - q->N()).Norm() + W2 * kpq;
@@ -175,6 +183,8 @@ namespace vcg {
 
 			//Computing principal curvatures and directions for all vertices
 			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
+			//ct.ComputeCurvatureTensor();
+
 			ct.ComputeCurvatureTensor();
 			//now each vertex has principals curvatures and directions in its temp data
 
@@ -242,6 +252,30 @@ namespace vcg {
 				}
 			}
 
+		}
+
+		//debugging function
+		void ColorizeCurvature(bool gaussian) {
+			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
+			ct.ComputeCurvatureTensor();
+			
+			VertexIterator vi;
+
+			if (gaussian) { //gaussian
+				for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
+					float gauss = (*TDCurvPtr)[*vi].k1 * (*TDCurvPtr)[*vi].k2; 
+					vi->Q() = gauss;
+				}
+			} else { //mean
+				for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
+					float mean = ((*TDCurvPtr)[*vi].k1 + (*TDCurvPtr)[*vi].k2) * 0.5f;
+					vi->Q() = mean;
+				}
+			}
+
+			Histogramf H;
+			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(*mesh,H);
+			tri::UpdateColor<CMeshO>::VertexQuality(*mesh,H.Percentile(0.1),H.Percentile(0.9));
 		}
 	};
 
