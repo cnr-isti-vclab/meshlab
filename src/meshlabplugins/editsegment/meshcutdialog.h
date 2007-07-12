@@ -24,10 +24,16 @@ private:
 		void on_meshSegmentButton_clicked();
 		void on_foreRadioButton_clicked();
 		void on_backRadioButton_clicked();
+
+		void on_gaussianButton_clicked();
+		void on_meanButton_clicked();
 		
 	signals:
 		void meshCutSignal();
 		void selectForegroundSignal(bool);
+
+		void colorizeGaussianSignal();
+		void colorizeMeanSignal();
 };
 
 #endif // MESHCUTDIALOG_H

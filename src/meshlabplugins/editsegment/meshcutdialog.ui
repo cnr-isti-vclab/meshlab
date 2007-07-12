@@ -6,19 +6,19 @@
     <x>0</x>
     <y>0</y>
     <width>140</width>
-    <height>201</height>
+    <height>256</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Mesh Segmentation</string>
   </property>
-  <widget class="QWidget" name="layoutWidget" >
+  <widget class="QWidget" name="" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>10</y>
+     <y>11</y>
      <width>116</width>
-     <height>149</height>
+     <height>207</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" >
@@ -134,6 +134,20 @@
      <widget class="QPushButton" name="meshSegmentButton" >
       <property name="text" >
        <string>Start Segmentation</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="gaussianButton" >
+      <property name="text" >
+       <string>Colorize Gaussian</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="meanButton" >
+      <property name="text" >
+       <string>Colorize Mean</string>
       </property>
      </widget>
     </item>

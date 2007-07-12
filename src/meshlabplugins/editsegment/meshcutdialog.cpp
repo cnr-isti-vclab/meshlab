@@ -28,3 +28,11 @@ void MeshCutDialog::on_backRadioButton_clicked() {
 }
 
 
+//debug function
+void MeshCutDialog::on_gaussianButton_clicked() {
+	emit colorizeGaussianSignal();
+}
+
+void MeshCutDialog::on_meanButton_clicked() {
+	emit colorizeMeanSignal();
+}
