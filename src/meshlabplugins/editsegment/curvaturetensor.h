@@ -1,5 +1,7 @@
 #include <vcg/container/simple_temporary_data.h>
 #include <vcg/simplex/face/pos.h>
+#include <vcg/simplex/face/jumping_pos.h>
+
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/simplex/vertexplus/base.h>
 #include <vcg/simplex/faceplus/base.h>
@@ -12,10 +14,10 @@ namespace vcg {
 
 	class CurvData {
 	public:
-		Point3<double> T1;
-		Point3<double> T2;
-		double k1;
-		double k2;
+		Point3<float> T1;
+		Point3<float> T2;
+		float k1;
+		float k2;
 	};
 
 	template <class MESH_TYPE> class CurvatureTensor {
@@ -32,9 +34,9 @@ namespace vcg {
 		MESH_TYPE * mesh;
 		SimpleTempData<VertContainer, CurvData> *TDCurvPtr;
 
-		void givens(double a, double b, double *c, double *s)
+		void givens(float a, float b, float *c, float *s)
 		{
-			double tao;
+			float tao;
 			if (b == 0) {
 				*c = 1;
 				*s = 0;
@@ -53,16 +55,16 @@ namespace vcg {
 			}
 		}
 
-		void ComputePerVertexMatrix(VertexType & i, VertexType & j, Matrix33<double>& Mvi, Matrix33<double> & n_nMatrix, double wij) {
-			Point3<double> ViVj;
-			Point3<double> Tij;
-			double kij = 0.0f;
-			Matrix33<double> tempMatrix;
+		void ComputePerVertexMatrix(VertexType & i, VertexType & j, Matrix33<float>& Mvi, Matrix33<float> & n_nMatrix, float wij) {
+			Point3<float> ViVj;
+			Point3<float> Tij;
+			float kij = 0.0f;
+			Matrix33<float> tempMatrix;
 
-			Point3<ScalarType> tempViVj = i.P() - j.P();
-			Point3<double> n = Point3<double>((double)i.N()[0], (double)i.N()[1], (double)i.N()[2]); 
+
+			Point3<float> n = i.N();
 			n = n.Normalize();
-			ViVj = Point3<double>((double)tempViVj[0], (double)tempViVj[1], (double)tempViVj[2]);
+			ViVj = i.P() - j.P();
 			Tij = (n_nMatrix * ViVj) / Norm(n_nMatrix * ViVj);
 			kij = (2 * (n * ViVj)) / Norm(ViVj);
 
@@ -88,25 +90,26 @@ namespace vcg {
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
 				if (!vi->IsD() ) {
 
-					Matrix33<double> Mvi;
+					Matrix33<float> Mvi;
 					Mvi.SetZero();
-					Matrix33<double> I;
+					Matrix33<float> I;
 					I.SetIdentity();
 
-					Matrix33<double> n_nM;
-					Point3<double> normal_d = Point3<double>((double)vi->N()[0], (double)vi->N()[1],(double)vi->N()[2]);
-					normal_d = normal_d.Normalize();
-					n_nM.ExternalProduct(normal_d, normal_d);
+					Matrix33<float> n_nM;
+					//Point3<float> normal_d = Point3<double>((double)vi->N()[0], (double)vi->N()[1],(double)vi->N()[2]);
+					Point3<float> normal = vi->N();
+					normal = normal.Normalize();
+					n_nM.ExternalProduct(normal, normal);
 					n_nM = I - n_nM;				
 
 					//Inizio Calcolo dei wij per tutti i vertici adiacenti
 					FaceType* first_face = vi->VFp();
 					vcg::face::Pos<FaceType> pos2(first_face, vi->VFi(), &(*vi));
-					vector<double> wij_container;
-					double totalDoubleAreaSize = 0;
+					vector<float> wij_container;
+					float totalDoubleAreaSize = 0;
 					do {
 
-						double doubleArea = vcg::DoubleArea<FaceType>(*pos2.F());
+						float doubleArea = vcg::DoubleArea<FaceType>(*pos2.F());
 						totalDoubleAreaSize += doubleArea;
 						wij_container.push_back(doubleArea);
 
@@ -152,17 +155,17 @@ namespace vcg {
 
 					//Mvi matrix ready for the vertex vi
 					//calculate principal directions and curvature
-					Point3d Wvi;
-					Matrix33d Qvi;
-					Matrix33d QviT;
-					Matrix33d tempMatrix;
+					Point3f Wvi;
+					Matrix33f Qvi;
+					Matrix33f QviT;
+					Matrix33f tempMatrix;
 
-					Matrix33d A;
-					Point3d E1(1.0,0.0,0.0);
-					Point3d Nvi = Point3d::Construct((*vi).N());
+					Matrix33f A;
+					Point3f E1(1.0,0.0,0.0);
+					Point3f Nvi = (*vi).N();
 					Nvi.Normalize();
-					Point3d E1nNvi = E1 - Nvi;
-					Point3d E1pNvi = E1 + Nvi;
+					Point3f E1nNvi = E1 - Nvi;
+					Point3f E1pNvi = E1 + Nvi;
 
 					if (E1nNvi.Norm() > E1pNvi.Norm() ) Wvi = E1nNvi / E1nNvi.Norm();
 					else Wvi = E1pNvi / E1pNvi.Norm();
@@ -176,25 +179,16 @@ namespace vcg {
 
 					A = QviT * Mvi * Qvi;
 
-					//loop to set at 0 extremely small values
-					/*for (int i = 0; i<3; ++i) {
-						for (int j = 0; j<3; ++j) {
-							if (abs(A[i][j]) < 0.000001) { 
-								A[i][j] = 0.0; 
-							}
-						}
-					}	*/
-
-					double c;
-					double s;
+					float c;
+					float s;
 
 					givens(A[1][1], A[2][1], &c, &s);
 
-					Point3<double> T1 = (A.GetColumn(1) * c) - (A.GetColumn(2) * s);
-					Point3<double> T2 = (A.GetColumn(1) * s) + (A.GetColumn(2) * c);
+					Point3<float> T1 = (A.GetColumn(1) * c) - (A.GetColumn(2) * s);
+					Point3<float> T2 = (A.GetColumn(1) * s) + (A.GetColumn(2) * c);
 
-					double k1 = 3*T1[1] - T2[2];
-					double k2 = 3*T2[2] - T1[1];
+					float k1 = 3*T1[1] - T2[2];
+					float k2 = 3*T2[2] - T1[1];
 
 					(*TDCurvPtr)[*vi].T1 = T1;
 					(*TDCurvPtr)[*vi].T2 = T2;
@@ -203,7 +197,56 @@ namespace vcg {
 				}
 			}
 		}
+/* 
+		//re-write, to be continued
+		void newComputeCurvatureTensor() {
+			vcg::tri::UpdateNormals<MESH_TYPE>::PerVertex(*mesh);
 
+			VertexIterator vi;
 
+			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
+				
+				if ( ! (*vi).IsD()) {
+					std::vector<FaceType*> faces;
+					std::vector<VertexType*> vertices;
+					std::vector<float> weights;
+					std::vector<AdjVertex> vertices;
+
+					vcg::face::JumpingPos<FaceType> pos((*vi).VFp(), (*vi));
+				
+					VertexType* firstV = pos.VFlip();
+					VertexType* tempV;
+					float totalDoubleAreaSize = 0.0f;
+					do 
+					{
+						pos.NextE();
+						tempV = pos.VFlip();
+
+						AdjVertex v;
+						
+						v.isBorder = pos.IsBorder()
+						v.vertex = tempV;			
+						v.doubleArea = pos.f->DoubleArea();
+						totalDoubleAreaSize += v.doubleArea;
+
+						vertices.push_back(v);						
+					} 
+					while(tempV != firstV);	
+					
+					std::vector<float> Weights;
+
+					for (int i = 0; i<vertices.size(); ++i) {
+						if (vertices[i].isBorder) {
+							Weights.push_back(vertices[i].doubleArea /= totalDoubleAreaSize);
+						} else {
+							Weights.push_back((vertices[i].doubleArea + vertices[(i-1)%vertices.size()].doubleArea) / totalDoubleAreaSize);
+						}
+					}
+
+				}
+			}
+		}
+
+		*/
 	};
 }
