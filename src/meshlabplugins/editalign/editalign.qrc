@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/" >
+	<file>images/icon_align.png</file>
+        <file>images/cur_align.png</file>
+    </qresource>
+</RCC>
