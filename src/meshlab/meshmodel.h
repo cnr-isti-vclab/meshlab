@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.38  2007/07/13 15:16:48  cignoni
+Corrected bug on bbox of multiple meshes
+
 Revision 1.37  2007/07/10 07:19:29  cignoni
 ** Serious Changes **
 again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
@@ -358,7 +361,14 @@ MeshDocument()
 					tot+= mmp->cm.fn;
 			return tot;
 	}		
-	
+
+ Box3f bbox()
+ {
+		Box3f FullBBox;
+		foreach(MeshModel * mp, meshList) 
+			FullBBox.Add(mp->Tr,mp->cm.bbox);
+		return FullBBox;
+ }
 	private:
 		MeshModel *currentMesh;	
 };

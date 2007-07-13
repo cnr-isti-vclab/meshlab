@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.124  2007/07/13 15:15:52  cignoni
+Corrected bug on bbox of multiple meshes
+
 Revision 1.123  2007/07/10 07:19:11  cignoni
 ** Serious Changes **
 again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
@@ -374,9 +377,9 @@ void GLArea::paintGL()
 	glPopMatrix();
   // =============================================
 	/// Compute BBox 
-	Box3f FullBBox;
+	Box3f FullBBox=meshDoc.bbox();
 	foreach(MeshModel * mp, meshDoc.meshList) 
-	 FullBBox.Add(mp->cm.bbox);
+	 FullBBox.Add(mp->Tr,mp->cm.bbox);
 		
 	// Finally apply the Trackball for the model
 	trackball.GetView();
@@ -534,8 +537,8 @@ void GLArea::displayInfo()
 		renderText(middleCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc.fn()),qFont);
 	}
 	if(rm.selectedFaces)  
-		 renderText(middleCol,startPos+ 3*lineSpacing,tr("Selected: %1").arg(mm()->cm.sfn),qFont);
-	renderText(middleCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm()->ioMask),qFont);
+		 renderText(middleCol,startPos+ 4*lineSpacing,tr("Selected: %1").arg(mm()->cm.sfn),qFont);
+	renderText(rightCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm()->ioMask),qFont);
 
   renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
 	if ((cfps>0) && (cfps<500)) 
