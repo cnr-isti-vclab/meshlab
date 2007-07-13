@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.130  2007/07/13 15:18:22  cignoni
+Save and load of beloved aln files
+
 Revision 1.129  2007/07/10 07:19:27  cignoni
 ** Serious Changes **
 again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
@@ -598,37 +601,42 @@ void MainWindow::openIn(QString /* fileName */)
 
 void MainWindow::saveProject()
 {
-	/* printf("Saving aln file %s\n",alnfile);
-	FILE *fp=fopen(alnfile,"w");
+
+	QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),"untitled.aln", tr("*.aln"));
+	qDebug("Saving aln file %s\n",qPrintable(fileName));
+	if (fileName.isEmpty()) return;
+	
+	FILE *fp=fopen(qPrintable(fileName),"w");
 	if(!fp)
 	{
-	 printf("unable to open file %s\n",alnfile);
-	 return false;
+	 qDebug("unable to open file %s\n",qPrintable(fileName));
+	 return;
 	}
 
-	fprintf(fp,"%i\n",names.size());
-	for(int i=0;i<names.size();++i)
+	MeshDocument &meshDoc=GLA()->meshDoc;
+	
+	fprintf(fp,"%i\n",meshDoc.meshList.size());
+
+  foreach(MeshModel * mp, meshDoc.meshList) 
 	{
-		fprintf(fp,"%s\n",names[i].c_str());
+		fprintf(fp,"%s\n",mp->fileName.c_str());
 
 		fprintf(fp,"#\n");
-		fprintf(fp,"%lf %lf %lf %lf \n",(Tr[i][0][0]),(Tr[i][0][1]),(Tr[i][0][2]),(Tr[i][0][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(Tr[i][1][0]),(Tr[i][1][1]),(Tr[i][1][2]),(Tr[i][1][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(Tr[i][2][0]),(Tr[i][2][1]),(Tr[i][2][2]),(Tr[i][2][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(Tr[i][3][0]),(Tr[i][3][1]),(Tr[i][3][2]),(Tr[i][3][3]));
+		fprintf(fp,"%lf %lf %lf %lf \n",(mp->Tr[0][0]),(mp->Tr[0][1]),(mp->Tr[0][2]),(mp->Tr[0][3]));
+		fprintf(fp,"%lf %lf %lf %lf \n",(mp->Tr[1][0]),(mp->Tr[1][1]),(mp->Tr[1][2]),(mp->Tr[1][3]));
+		fprintf(fp,"%lf %lf %lf %lf \n",(mp->Tr[2][0]),(mp->Tr[2][1]),(mp->Tr[2][2]),(mp->Tr[2][3]));
+		fprintf(fp,"%lf %lf %lf %lf \n",(mp->Tr[3][0]),(mp->Tr[3][1]),(mp->Tr[3][2]),(mp->Tr[3][3]));
 	}
 	fprintf(fp,"0\n");
 
 	fclose(fp);
-	return true;
-	 */
 }
 
 void MainWindow::openProject(QString fileName, GLArea *gla)
 {
-		if (fileName.isEmpty())
+	if (fileName.isEmpty())
 	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"),".", "*.aln");
-
+	if (fileName.isEmpty()) return;
 	vector<RangeMap> rmv;
 	
 	ALNParser::ParseALN(rmv,qPrintable(fileName));
@@ -642,6 +650,7 @@ void MainWindow::openProject(QString fileName, GLArea *gla)
 		}
 		else
 			open((*ir).filename.c_str(),GLA());
+			GLA()->mm()->Tr=(*ir).trasformation;
 	}
 }
 
@@ -655,79 +664,87 @@ void MainWindow::open(QString fileName, GLArea *gla)
 	QHash<QString, int> allKnownFormats;
 	
 	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
-  QStringList fileNameList;
+	filters.push_back("ALN project ( *.aln)");
+	filters.front().chop(1);
+	filters.front().append(" *.aln)");
+	QStringList fileNameList;
 	if (fileName.isEmpty())
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"),".", filters.join("\n"));
 	else fileNameList.push_back(fileName);
 	if (fileNameList.isEmpty())	return;
+	
   foreach(fileName,fileNameList)
 	{
 			QFileInfo fi(fileName);
-			if(!fi.exists()) 	{	
-				QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-				return;
-			}
-			if(!fi.isReadable()) 	{	
-				QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
-				QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-				return;
-			}
+			if(fi.suffix().toLower()=="aln") openProject(fileName, NULL);
+			else
+			{					
+				if(!fi.exists()) 	{	
+					QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
+					QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+					return;
+				}
+				if(!fi.isReadable()) 	{	
+					QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
+					QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
+					return;
+				}
 
-			// this change of dir is needed for subsequent textures/materials loading
-			QDir::setCurrent(fi.absoluteDir().absolutePath());
-			
-			QString extension = fi.suffix();
-			
-			// retrieving corresponding IO plugin
-			int idx = allKnownFormats[extension.toLower()];
-			if (idx == 0)
-			{	
-				QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
-				QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
-				return;
-			}
-			MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-			
-			qb->show();
-			int mask = 0;
-			MeshModel *mm= new MeshModel();	
-			if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla*/))
-				delete mm;
-			else{
-				if(gla==0) gla=new GLArea(workspace);
-				gla->meshDoc.addMesh(mm);
-				gla->mm()->ioMask = mask;				// store mask into model structure
+				// this change of dir is needed for subsequent textures/materials loading
+				QDir::setCurrent(fi.absoluteDir().absolutePath());
 				
-				gla->setFileName(fileName);
-				gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
-				gla->infoAreaVisible=true;
-				workspace->addWindow(gla);
-				if(workspace->isVisible()) gla->showMaximized();
-				setCurrentFile(fileName);
+				QString extension = fi.suffix();
 				
-				if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
-					gla->setColorMode(GLW::CMPerFace);
-				if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
-				{
-					gla->mm()->storeVertexColor();
-					gla->setColorMode(GLW::CMPerVert);
+				// retrieving corresponding IO plugin
+				int idx = allKnownFormats[extension.toLower()];
+				if (idx == 0)
+				{	
+					QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
+					QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
+					return;
 				}
-				renderModeTextureAct->setChecked(false);
-				renderModeTextureAct->setEnabled(false);
-				if(!GLA()->mm()->cm.textures.empty())
-				{
-					renderModeTextureAct->setChecked(true);
-					renderModeTextureAct->setEnabled(true);
-					GLA()->setTextureMode(GLW::TMPerWedgeMulti);
+				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
+				
+				qb->show();
+				int mask = 0;
+				MeshModel *mm= new MeshModel();	
+				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla*/))
+					delete mm;
+				else{
+					if(gla==0) gla=new GLArea(workspace);
+					gla->meshDoc.addMesh(mm);
+					gla->mm()->ioMask = mask;				// store mask into model structure
+					
+					gla->setFileName(fileName);
+					gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
+					gla->infoAreaVisible=true;
+					workspace->addWindow(gla);
+					if(workspace->isVisible()) gla->showMaximized();
+					setCurrentFile(fileName);
+					
+					if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+						gla->setColorMode(GLW::CMPerFace);
+					if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
+					{
+						gla->mm()->storeVertexColor();
+						gla->setColorMode(GLW::CMPerVert);
+					}
+					renderModeTextureAct->setChecked(false);
+					renderModeTextureAct->setEnabled(false);
+					if(!GLA()->mm()->cm.textures.empty())
+					{
+						renderModeTextureAct->setChecked(true);
+						renderModeTextureAct->setEnabled(true);
+						GLA()->setTextureMode(GLW::TMPerWedgeMulti);
+					}
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
+					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
+					updateMenus();
+					vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+					GLA()->mm()->busy=false;
 				}
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
-				vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
-				updateMenus();
-				vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-				GLA()->mm()->busy=false;
 			}
-}
+	}// end foreach file of the input list
 	qb->reset();
 }
 
