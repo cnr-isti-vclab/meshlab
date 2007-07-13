@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.28  2007/07/13 15:17:16  cignoni
+Corrected per mesh color management (needed by align)
+
 Revision 1.27  2007/07/10 07:19:29  cignoni
 ** Serious Changes **
 again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
@@ -58,12 +61,11 @@ Removed Optional Face Normal and added some initalization after opening
 #include <QtGlobal>
 #include <wrap/gl/math.h>
 
-bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm)
+bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode _cm, GLW::TextureMode tm)
 {
   glPushMatrix();
-  glColor3f(.8f,.8f,.8f);
 	glMultMatrix(Tr);
-  glw.Draw(dm,cm,tm);
+  glw.Draw(dm,_cm,tm);
 	glPopMatrix();
   return true;
 }
