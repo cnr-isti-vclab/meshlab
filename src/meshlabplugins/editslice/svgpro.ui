@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>363</width>
-    <height>380</height>
+    <width>364</width>
+    <height>397</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -15,8 +15,8 @@
   <widget class="QSplitter" name="splitter_4" >
    <property name="geometry" >
     <rect>
-     <x>110</x>
-     <y>330</y>
+     <x>120</x>
+     <y>360</y>
      <width>241</width>
      <height>25</height>
     </rect>
@@ -33,11 +33,11 @@
     </property>
    </widget>
   </widget>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>300</y>
+     <y>320</y>
      <width>341</width>
      <height>22</height>
     </rect>
@@ -61,27 +61,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QCheckBox" name="view_text" >
-   <property name="geometry" >
-    <rect>
-     <x>230</x>
-     <y>120</y>
-     <width>71</width>
-     <height>18</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>view text</string>
-   </property>
-   <property name="checked" >
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>260</y>
+     <y>290</y>
      <width>341</width>
      <height>22</height>
     </rect>
@@ -105,161 +89,12 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>60</y>
-     <width>331</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" >
-    <property name="margin" >
-     <number>0</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <layout class="QVBoxLayout" >
-      <property name="margin" >
-       <number>0</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="label_2" >
-        <property name="text" >
-         <string>Width</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="ImageWidth" />
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" >
-      <property name="margin" >
-       <number>0</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="label_3" >
-        <property name="text" >
-         <string>Height</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="ImageHeight" />
-      </item>
-     </layout>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QLabel" name="TitleLabel" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>20</y>
-     <width>351</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="font" >
-    <font>
-     <family>MS Shell Dlg 2</family>
-     <pointsize>13</pointsize>
-     <weight>50</weight>
-     <italic>false</italic>
-     <bold>false</bold>
-     <underline>false</underline>
-     <strikeout>false</strikeout>
-    </font>
-   </property>
-  </widget>
-  <widget class="QWidget" name="" >
-   <property name="geometry" >
-    <rect>
-     <x>180</x>
-     <y>140</y>
-     <width>162</width>
-     <height>58</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" >
-    <property name="margin" >
-     <number>0</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QGroupBox" name="groupBox_3" >
-      <property name="minimumSize" >
-       <size>
-        <width>100</width>
-        <height>0</height>
-       </size>
-      </property>
-      <widget class="QRadioButton" name="cm_choose" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>41</width>
-         <height>18</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Cm</string>
-       </property>
-       <property name="checked" >
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="pixel_choose" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>51</width>
-         <height>18</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Pixel</string>
-       </property>
-      </widget>
-     </widget>
-    </item>
-    <item>
-     <spacer>
-      <property name="orientation" >
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" >
-       <size>
-        <width>54</width>
-        <height>56</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
      <x>12</x>
      <y>140</y>
-     <width>137</width>
+     <width>161</width>
      <height>56</height>
     </rect>
    </property>
@@ -309,58 +144,260 @@
     </item>
    </layout>
   </widget>
-  <widget class="QSplitter" name="splitter" >
+  <widget class="QGroupBox" name="groupBox" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>341</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Image Size</string>
+   </property>
+   <widget class="QWidget" name="" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>321</width>
+      <height>60</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_2" >
+         <property name="text" >
+          <string>Width</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="ImageWidth" />
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_3" >
+         <property name="text" >
+          <string>Height</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="ImageHeight" />
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3" >
+         <property name="minimumSize" >
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <widget class="QWidget" name="" >
+          <property name="geometry" >
+           <rect>
+            <x>10</x>
+            <y>0</y>
+            <width>71</width>
+            <height>61</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" >
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <property name="spacing" >
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QRadioButton" name="cm_choose" >
+             <property name="text" >
+              <string>Cm</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="pixel_choose" >
+             <property name="text" >
+              <string>Pixel</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer>
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>54</width>
+           <height>56</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="TitleLabel" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>351</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <property name="font" >
+    <font>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>13</pointsize>
+     <weight>50</weight>
+     <italic>false</italic>
+     <bold>false</bold>
+     <underline>false</underline>
+     <strikeout>false</strikeout>
+    </font>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2" >
    <property name="geometry" >
     <rect>
      <x>10</x>
      <y>210</y>
-     <width>331</width>
-     <height>42</height>
+     <width>341</width>
+     <height>71</height>
     </rect>
    </property>
-   <property name="orientation" >
-    <enum>Qt::Horizontal</enum>
+   <property name="title" >
+    <string>View Box Resolution</string>
    </property>
-   <widget class="QWidget" name="" >
-    <layout class="QVBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="label_5" >
-       <property name="text" >
-        <string>Width</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="viewBox_Width" />
-     </item>
-    </layout>
+   <widget class="QSplitter" name="splitter" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>321</width>
+      <height>42</height>
+     </rect>
+    </property>
+    <property name="orientation" >
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <widget class="QWidget" name="layoutWidget" >
+     <layout class="QVBoxLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_5" >
+        <property name="text" >
+         <string>Width</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="viewBox_Width" />
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget" >
+     <layout class="QVBoxLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_6" >
+        <property name="text" >
+         <string>Height</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="viewBox_Height" />
+      </item>
+     </layout>
+    </widget>
    </widget>
-   <widget class="QWidget" name="" >
-    <layout class="QVBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="label_6" >
-       <property name="text" >
-        <string>Height</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="viewBox_Height" />
-     </item>
-    </layout>
-   </widget>
+  </widget>
+  <widget class="QCheckBox" name="view_text" >
+   <property name="geometry" >
+    <rect>
+     <x>230</x>
+     <y>160</y>
+     <width>71</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>view text</string>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11" />

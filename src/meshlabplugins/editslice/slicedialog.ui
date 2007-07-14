@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>329</width>
-    <height>366</height>
+    <width>330</width>
+    <height>339</height>
    </rect>
   </property>
   <property name="sizeIncrement" >
@@ -27,83 +27,13 @@
   <property name="layoutDirection" >
    <enum>Qt::LeftToRight</enum>
   </property>
-  <widget class="QWidget" name="" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>290</y>
-     <width>311</width>
-     <height>64</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" >
-    <property name="margin" >
-     <number>0</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QGroupBox" name="groupBox_4" >
-      <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>9</number>
-       </property>
-       <property name="spacing" >
-        <number>6</number>
-       </property>
-       <item>
-        <widget class="QRadioButton" name="Exporter_singleFile" >
-         <property name="text" >
-          <string>Single file</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="Exporter_MultiFile" >
-         <property name="text" >
-          <string>Multi file</string>
-         </property>
-         <property name="checked" >
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QToolButton" name="ExportButton" >
-      <property name="text" >
-       <string>Export Polyline...</string>
-      </property>
-      <property name="popupMode" >
-       <enum>QToolButton::InstantPopup</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <spacer>
-      <property name="orientation" >
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" >
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-   </layout>
-  </widget>
   <widget class="QGroupBox" name="groupBox" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>60</y>
+     <y>50</y>
      <width>311</width>
-     <height>81</height>
+     <height>61</height>
     </rect>
    </property>
    <property name="title" >
@@ -113,7 +43,7 @@
     <property name="geometry" >
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>20</y>
       <width>291</width>
       <height>31</height>
      </rect>
@@ -174,9 +104,9 @@
   <widget class="QGroupBox" name="groupBox_2" >
    <property name="geometry" >
     <rect>
-     <x>0</x>
-     <y>140</y>
-     <width>321</width>
+     <x>10</x>
+     <y>110</y>
+     <width>311</width>
      <height>141</height>
     </rect>
    </property>
@@ -298,6 +228,76 @@
        </spacer>
       </item>
      </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>260</y>
+     <width>311</width>
+     <height>64</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" >
+    <property name="margin" >
+     <number>0</number>
+    </property>
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QGroupBox" name="groupBox_4" >
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>9</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QRadioButton" name="Exporter_singleFile" >
+         <property name="text" >
+          <string>Single file</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="Exporter_MultiFile" >
+         <property name="text" >
+          <string>Multi file</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QToolButton" name="ExportButton" >
+      <property name="text" >
+       <string>Export Polyline...</string>
+      </property>
+      <property name="popupMode" >
+       <enum>QToolButton::InstantPopup</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>

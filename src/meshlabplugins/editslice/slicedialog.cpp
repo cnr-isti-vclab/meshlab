@@ -26,8 +26,8 @@ void dialogslice::on_DefultButton_clicked()
  
  numPlane=1;
  distance=1;
- this->ui.SliderPlaneDistance->setValue(1);
-
+ ui.SliderPlaneDistance->setValue(1);
+ ui.spinBox->setValue(1);
  
 
 }
@@ -48,6 +48,7 @@ distanceDefault=false;
 distance=x;  
 QString c;
 ui.DistanceEdit->setText(c.setNum(distance*distanceRange));
+
 emit Update_glArea();
 }
 void dialogslice::on_Exporter_singleFile_clicked()
