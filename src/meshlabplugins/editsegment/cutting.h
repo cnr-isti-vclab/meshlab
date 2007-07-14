@@ -183,8 +183,6 @@ namespace vcg {
 
 			//Computing principal curvatures and directions for all vertices
 			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
-			//ct.ComputeCurvatureTensor();
-
 			ct.ComputeCurvatureTensor();
 			//now each vertex has principals curvatures and directions in its temp data
 
@@ -208,23 +206,8 @@ namespace vcg {
 					}				
 				}
 			}
-
-			//checks if all vertices are marked
-			/*int count = 0;
-			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
-			if (!vi->IsD()) {
-			switch((*TDMarkPtr)[*vi].Mark) {
-			case iF: vi->C() = vcg::Color4b::Red; break;
-			case F: vi->C() = vcg::Color4b::Yellow; break;
-			case iB: vi->C() = vcg::Color4b::Blue; break;
-			case B: vi->C() = vcg::Color4b::Green; break;
-			case U: vi->C() = vcg::Color4b::White; ++count; break;
-			}
-			}
-			}
-			count = count;*/
-
 		}
+
 		void Colorize(bool selectForeground) {
 			FaceIterator fi;
 			int count;
