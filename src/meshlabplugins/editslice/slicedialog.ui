@@ -27,80 +27,6 @@
   <property name="layoutDirection" >
    <enum>Qt::LeftToRight</enum>
   </property>
-  <widget class="QGroupBox" name="groupBox" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>50</y>
-     <width>311</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="title" >
-    <string>Number of planes</string>
-   </property>
-   <widget class="QWidget" name="horizontalLayout_3" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>291</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
-     <item>
-      <widget class="QSpinBox" name="spinBox" >
-       <property name="sizePolicy" >
-        <sizepolicy>
-         <hsizetype>5</hsizetype>
-         <vsizetype>0</vsizetype>
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize" >
-        <size>
-         <width>0</width>
-         <height>15</height>
-        </size>
-       </property>
-       <property name="maximumSize" >
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="buttonSymbols" >
-        <enum>QAbstractSpinBox::PlusMinus</enum>
-       </property>
-       <property name="minimum" >
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" >
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </widget>
-  </widget>
   <widget class="QGroupBox" name="groupBox_2" >
    <property name="geometry" >
     <rect>
@@ -130,6 +56,14 @@
       </property>
       <item>
        <widget class="QToolButton" name="DefultButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>5</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text" >
          <string>Restore Default</string>
         </property>
@@ -137,6 +71,14 @@
       </item>
       <item>
        <widget class="QLineEdit" name="DistanceEdit" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>5</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text" >
          <string>1</string>
         </property>
@@ -150,6 +92,19 @@
          <set>Qt::AlignHCenter</set>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
        <spacer>
@@ -181,6 +136,14 @@
        <widget class="QSlider" name="SliderPlaneDistance" >
         <property name="enabled" >
          <bool>false</bool>
+        </property>
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
         <property name="minimumSize" >
          <size>
@@ -235,9 +198,9 @@
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>260</y>
+     <y>280</y>
      <width>311</width>
-     <height>64</height>
+     <height>41</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" >
@@ -251,13 +214,21 @@
      <widget class="QGroupBox" name="groupBox_4" >
       <layout class="QVBoxLayout" >
        <property name="margin" >
-        <number>9</number>
+        <number>0</number>
        </property>
        <property name="spacing" >
-        <number>6</number>
+        <number>0</number>
        </property>
        <item>
         <widget class="QRadioButton" name="Exporter_singleFile" >
+         <property name="sizePolicy" >
+          <sizepolicy>
+           <hsizetype>5</hsizetype>
+           <vsizetype>5</vsizetype>
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text" >
           <string>Single file</string>
          </property>
@@ -265,6 +236,14 @@
        </item>
        <item>
         <widget class="QRadioButton" name="Exporter_MultiFile" >
+         <property name="sizePolicy" >
+          <sizepolicy>
+           <hsizetype>5</hsizetype>
+           <vsizetype>5</vsizetype>
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text" >
           <string>Multi file</string>
          </property>
@@ -278,6 +257,14 @@
     </item>
     <item>
      <widget class="QToolButton" name="ExportButton" >
+      <property name="sizePolicy" >
+       <sizepolicy>
+        <hsizetype>5</hsizetype>
+        <vsizetype>1</vsizetype>
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="text" >
        <string>Export Polyline...</string>
       </property>
@@ -300,6 +287,80 @@
      </spacer>
     </item>
    </layout>
+  </widget>
+  <widget class="QGroupBox" name="groupBox" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>50</y>
+     <width>311</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Number of planes</string>
+   </property>
+   <widget class="QWidget" name="horizontalLayout_3" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>291</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QSpinBox" name="spinBox" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>5</hsizetype>
+         <vsizetype>5</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>0</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="buttonSymbols" >
+        <enum>QAbstractSpinBox::PlusMinus</enum>
+       </property>
+       <property name="minimum" >
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11" />
