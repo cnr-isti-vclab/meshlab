@@ -235,7 +235,7 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr){
 		 dialogsliceobj=new dialogslice(gla->window());
 		 dialogsliceobj->show();
 		 first=true;
-		
+		 dialogsliceobj->setAllowedAreas(Qt::NoDockWidgetArea);
 		 this->m=m;
 		 QObject::connect(dialogsliceobj, SIGNAL(exportMesh()), this,SLOT(SlotExportButton()));
          QObject::connect(dialogsliceobj, SIGNAL(Update_glArea()), this, SLOT(upGlA()));

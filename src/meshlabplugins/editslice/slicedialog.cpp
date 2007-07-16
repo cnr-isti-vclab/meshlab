@@ -3,7 +3,9 @@
 dialogslice::dialogslice(QWidget *parent)
 	: QDockWidget(parent)
 {
+	
 	ui.setupUi(this);
+	this->setWidget(ui.frame);
 	numPlane=1;  //number of plans
 	distance=1;  
 	
