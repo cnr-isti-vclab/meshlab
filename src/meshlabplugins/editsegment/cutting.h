@@ -4,6 +4,9 @@
 #ifdef max
 #undef max
 #endif
+#ifdef minor
+#undef minor
+#endif
 
 #include <queue>
 #include <math.h>

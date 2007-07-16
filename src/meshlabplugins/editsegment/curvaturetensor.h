@@ -9,7 +9,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/math/matrix.h>
 #include <vcg/math/matrix33.h>
-
+#include <values.h>
 namespace vcg {
 
 	class CurvData {
