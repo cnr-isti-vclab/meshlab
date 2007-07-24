@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.29  2007/07/24 07:17:27  cignoni
+moved matrix inside mesh class
+
 Revision 1.28  2007/07/13 15:17:16  cignoni
 Corrected per mesh color management (needed by align)
 
@@ -64,7 +67,7 @@ Removed Optional Face Normal and added some initalization after opening
 bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode _cm, GLW::TextureMode tm)
 {
   glPushMatrix();
-	glMultMatrix(Tr);
+	glMultMatrix(cm.Tr);
   glw.Draw(dm,_cm,tm);
 	glPopMatrix();
   return true;
