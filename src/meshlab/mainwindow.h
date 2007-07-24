@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.87  2007/07/24 07:19:04  cignoni
+managed failure in loading of project. Added safe cleaning of meshes with nan coords
+
 Revision 1.86  2007/07/10 07:19:21  cignoni
 ** Serious Changes **
 again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
@@ -167,9 +170,9 @@ public:
 
 public slots:
 		 
-	void open(QString fileName=QString(), GLArea *gla=0);
-	void openIn(QString fileName=QString());
-  void openProject(QString fileName=QString(), GLArea *gla=0);
+	bool open(QString fileName=QString(), GLArea *gla=0);
+	bool openIn(QString fileName=QString());
+  bool openProject(QString fileName=QString(), GLArea *gla=0);
   void saveProject();
 	
 private slots:

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.131  2007/07/24 07:19:01  cignoni
+managed failure in loading of project. Added safe cleaning of meshes with nan coords
+
 Revision 1.130  2007/07/13 15:18:22  cignoni
 Save and load of beloved aln files
 
@@ -594,9 +597,9 @@ void MainWindow::toggleSelectionRendering()
 	GLA()->setSelectionRendering(!rm.selectedFaces);
 }
 
-void MainWindow::openIn(QString /* fileName */)
+bool MainWindow::openIn(QString /* fileName */)
 {
-	open(QString(),GLA());
+	return open(QString(),GLA());
 }
 
 void MainWindow::saveProject()
@@ -622,39 +625,41 @@ void MainWindow::saveProject()
 		fprintf(fp,"%s\n",mp->fileName.c_str());
 
 		fprintf(fp,"#\n");
-		fprintf(fp,"%lf %lf %lf %lf \n",(mp->Tr[0][0]),(mp->Tr[0][1]),(mp->Tr[0][2]),(mp->Tr[0][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(mp->Tr[1][0]),(mp->Tr[1][1]),(mp->Tr[1][2]),(mp->Tr[1][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(mp->Tr[2][0]),(mp->Tr[2][1]),(mp->Tr[2][2]),(mp->Tr[2][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(mp->Tr[3][0]),(mp->Tr[3][1]),(mp->Tr[3][2]),(mp->Tr[3][3]));
+		fprintf(fp,"%lf %lf %lf %lf \n",(mp->cm.Tr[0][0]),(mp->cm.Tr[0][1]),(mp->cm.Tr[0][2]),(mp->cm.Tr[0][3]));
+		fprintf(fp,"%lf %lf %lf %lf \n",(mp->cm.Tr[1][0]),(mp->cm.Tr[1][1]),(mp->cm.Tr[1][2]),(mp->cm.Tr[1][3]));
+		fprintf(fp,"%lf %lf %lf %lf \n",(mp->cm.Tr[2][0]),(mp->cm.Tr[2][1]),(mp->cm.Tr[2][2]),(mp->cm.Tr[2][3]));
+		fprintf(fp,"%lf %lf %lf %lf \n",(mp->cm.Tr[3][0]),(mp->cm.Tr[3][1]),(mp->cm.Tr[3][2]),(mp->cm.Tr[3][3]));
 	}
 	fprintf(fp,"0\n");
 
 	fclose(fp);
 }
 
-void MainWindow::openProject(QString fileName, GLArea *gla)
+bool MainWindow::openProject(QString fileName, GLArea *gla)
 {
+	bool openRes=true;
 	if (fileName.isEmpty())
 	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"),".", "*.aln");
-	if (fileName.isEmpty()) return;
+	if (fileName.isEmpty()) return false;
 	vector<RangeMap> rmv;
 	
 	ALNParser::ParseALN(rmv,qPrintable(fileName));
-	
+	// this change of dir is needed for subsequent textures/materials loading
+	QFileInfo fi(fileName);
+	QDir::setCurrent(fi.absoluteDir().absolutePath());
+
 	vector<RangeMap>::iterator ir;
-	for(ir=rmv.begin();ir!=rmv.end();++ir)
+	for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
 	{
-		if(ir==rmv.begin())
-		{
-			open((*ir).filename.c_str());
-		}
-		else
-			open((*ir).filename.c_str(),GLA());
-			GLA()->mm()->Tr=(*ir).trasformation;
+		if(ir==rmv.begin()) openRes = open((*ir).filename.c_str());
+		else								openRes = open((*ir).filename.c_str(),GLA());
+		
+		GLA()->mm()->cm.Tr=(*ir).trasformation;
 	}
+	return true;
 }
 
-void MainWindow::open(QString fileName, GLArea *gla)
+bool MainWindow::open(QString fileName, GLArea *gla)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
@@ -671,7 +676,7 @@ void MainWindow::open(QString fileName, GLArea *gla)
 	if (fileName.isEmpty())
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"),".", filters.join("\n"));
 	else fileNameList.push_back(fileName);
-	if (fileNameList.isEmpty())	return;
+	if (fileNameList.isEmpty())	return false;
 	
   foreach(fileName,fileNameList)
 	{
@@ -682,12 +687,12 @@ void MainWindow::open(QString fileName, GLArea *gla)
 				if(!fi.exists()) 	{	
 					QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
 					QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-					return;
+					return false;
 				}
 				if(!fi.isReadable()) 	{	
 					QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
 					QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
-					return;
+					return false;
 				}
 
 				// this change of dir is needed for subsequent textures/materials loading
@@ -701,7 +706,7 @@ void MainWindow::open(QString fileName, GLArea *gla)
 				{	
 					QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
 					QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
-					return;
+					return false;
 				}
 				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 				
@@ -740,7 +745,11 @@ void MainWindow::open(QString fileName, GLArea *gla)
 					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 					updateMenus();
-					vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+					int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
+					int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
+					
+					if(delVertNum>0 || delFaceNum>0 ) 
+						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
 					GLA()->mm()->busy=false;
 				}
 			}
