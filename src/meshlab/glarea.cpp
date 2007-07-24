@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.125  2007/07/24 07:18:05  cignoni
+moved matrix Tr inside mesh class
+
 Revision 1.124  2007/07/13 15:15:52  cignoni
 Corrected bug on bbox of multiple meshes
 
@@ -379,7 +382,7 @@ void GLArea::paintGL()
 	/// Compute BBox 
 	Box3f FullBBox=meshDoc.bbox();
 	foreach(MeshModel * mp, meshDoc.meshList) 
-	 FullBBox.Add(mp->Tr,mp->cm.bbox);
+	 FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
 		
 	// Finally apply the Trackball for the model
 	trackball.GetView();
