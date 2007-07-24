@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.39  2007/07/24 07:16:51  cignoni
+moved matrix inside mesh class and added safe init at construction time
+
 Revision 1.38  2007/07/13 15:16:48  cignoni
 Corrected bug on bbox of multiple meshes
 
@@ -143,6 +146,7 @@ class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,
 class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {
 public :
 	int sfn; //The number of selected faces.
+  Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
 };
 
 /*
@@ -183,7 +187,6 @@ public:
   bool busy;    // used in processing. To disable access to the mesh by the rendering thread
 	bool visible; // used in rendering; Needed for toggling on and off the meshes
 	
-  Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
 	
   //abstract pointer to fileformat's dependent additional info
   AdditionalInfo* addinfo;
@@ -194,7 +197,8 @@ public:
     ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
     busy=true;
 		visible=true;
-		Tr.SetIdentity();
+		cm.Tr.SetIdentity();
+		cm.sfn=0;
   }
   bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
   bool RenderSelectedFaces();
@@ -366,7 +370,7 @@ MeshDocument()
  {
 		Box3f FullBBox;
 		foreach(MeshModel * mp, meshList) 
-			FullBBox.Add(mp->Tr,mp->cm.bbox);
+			FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
 		return FullBBox;
  }
 	private:
