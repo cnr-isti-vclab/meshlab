@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.97  2007/07/24 07:20:20  cignoni
+Added Freeze transform and improved transformation dialog
+
 Revision 1.96  2007/04/20 10:09:56  cignoni
 issue on vertex selection from face selection
 
@@ -232,7 +235,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_REMOVE_NON_MANIFOLD<<
     FP_NORMAL_EXTRAPOLATION<<
     FP_CLOSE_HOLES<<
-    FP_TRANSFORM;
+		FP_FREEZE_TRANSFORM<<
+		FP_TRANSFORM;
   
   FilterType tt;
   
@@ -295,6 +299,7 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 	case FP_REORIENT :	                  return QString("Re-orient");
 	case FP_INVERT_FACES:									return QString("Invert Faces");
 	case FP_TRANSFORM:	                	return QString("Apply Transform");
+	case FP_FREEZE_TRANSFORM:	            return QString("Freeze Current Matrix");
 	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
 	case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
 	case FP_CLOSE_HOLES:	          return QString("Close Holes");
@@ -338,6 +343,7 @@ const QString ExtraMeshFilterPlugin::Info(FilterType filterID)
     case FP_REORIENT : 			            return tr("Re-orient in a consistent way all the faces of the mesh");  
     case FP_INVERT_FACES : 			        return tr("Invert faces orientation, flip the normal of the mesh");  
     case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");  
+    case FP_FREEZE_TRANSFORM : 	        return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh");  
     case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces"); 
     case FP_CLOSE_HOLES :         return tr("Close holes smaller than a given threshold"); 
 		default : assert(0);
@@ -375,6 +381,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_REMOVE_FACES_BY_EDGE:
     case FP_CLUSTERING:
     case FP_TRANSFORM:
+    case FP_FREEZE_TRANSFORM:
     case FP_NORMAL_EXTRAPOLATION:
     case FP_INVERT_FACES:         return 0;
     case FP_QUADRIC_SIMPLIFICATION:
@@ -460,7 +467,10 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
   {
 	case FP_TRANSFORM:
       {
-        transformDialog->setMesh(&m.cm);
+        transformDialog->setMesh(m);
+				transformDialog->show();
+				transformDialog->resize(transformDialog->size());
+				
 		    int continueValue = transformDialog->exec();
  		    if (continueValue == QDialog::Rejected)
  			    return false;
@@ -477,6 +487,7 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
     case FP_LAPLACIAN_SMOOTH:
     case FP_REMOVE_NON_MANIFOLD:
     case FP_NORMAL_EXTRAPOLATION:
+		case FP_FREEZE_TRANSFORM:
        return true; // no parameters
    default :assert(0);
   }
@@ -604,15 +615,16 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
     m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	}
 
-	if (filter->text() == ST(FP_TRANSFORM) ) {
-    Matrix44f matrix= par.getMatrix44("Transform");		
-
-		Log(GLLogStream::Info,
- 							 transformDialog->getLog().toAscii().data());
- 		
- 		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, matrix);
+	if (filter->text() == ST(FP_FREEZE_TRANSFORM) ) {
+		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+		m.cm.Tr.SetIdentity();
+	}
+	if (filter->text() == ST(FP_TRANSFORM) ) {
+			Matrix44f matrix= par.getMatrix44("Transform");		
+			Log(GLLogStream::Info, qPrintable(transformDialog->getLog()) ); 		
+			m.cm.Tr=matrix;
 	}
 
 

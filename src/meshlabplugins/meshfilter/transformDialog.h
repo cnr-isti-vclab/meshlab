@@ -26,6 +26,9 @@
 /*
 
 $Log$
+Revision 1.2  2007/07/24 07:20:24  cignoni
+Added Freeze transform and improved transformation dialog
+
 Revision 1.1  2006/01/30 20:43:57  giec
 Added filter dialog files
 
@@ -115,6 +118,7 @@ private slots:
 	// Rotate X / Z Up push buttons: simply fill Rotate fields
 	void on_rotateZUpPB_clicked();
 	void on_rotateXUpPB_clicked();
+	void freeze();
 	
 public:
 
@@ -123,9 +127,8 @@ public:
 	
 	// used to compute transformation on meshfilter.cpp
 	Matrix44f& getTransformation();
-	void setMesh(CMeshO *mesh);
+	void setMesh(MeshModel &m);
 	QString& getLog();
-
 private: // members
   CMeshO *mesh;
 	Point3f minBbox, maxBbox; // min and max of bounding box
@@ -146,6 +149,9 @@ private: // functions
 	void setRotate(int value = 180); // 
   void setScale(QString x = "1.0", QString y = "1.0", QString z = "1.0"); 
 
+	void resizeEvent ( QResizeEvent * event );
+	void showEvent ( QShowEvent * event );
+	
 
 };
 

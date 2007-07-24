@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.44  2007/07/24 07:20:18  cignoni
+Added Freeze transform and improved transformation dialog
+
 Revision 1.43  2007/04/16 09:25:29  cignoni
 ** big change **
 Added Layers managemnt.
@@ -110,6 +113,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
           FP_REORIENT ,
           FP_INVERT_FACES,
 				  FP_TRANSFORM,
+				  FP_FREEZE_TRANSFORM,
           FP_CLOSE_HOLES_TRIVIAL,
           FP_CLOSE_HOLES
           } ;
@@ -133,8 +137,6 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 protected:
 
 
-//	RefineDialog *refineDialog;
-//	DecimatorDialog *decimatorDialog;
 	TransformDialog *transformDialog;
 	GenericELDialog *genericELD;
 	

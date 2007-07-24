@@ -26,6 +26,9 @@
 
 /*
 $Log$
+Revision 1.4  2007/07/24 07:20:20  cignoni
+Added Freeze transform and improved transformation dialog
+
 Revision 1.3  2006/03/29 07:30:54  zifnab1974
 use fabs instead of abs for floats, needed for gcc 3.4.5
 
@@ -61,7 +64,7 @@ Revision 1.7  2006/01/22 16:40:38  mariolatronico
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <QRegExp>
 #include <QRegExpValidator>
-
+#include <QtGui>
 TransformDialog::TransformDialog() : QDialog() {
 	
 	setupUi(this);
@@ -97,6 +100,7 @@ TransformDialog::TransformDialog() : QDialog() {
 	connect(zScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
 	connect(rotateLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
 
+//	connect(freezeButton, SIGNAL(buttonClicked()), this, SLOT(freeze()) );
 
 	// default to AXIS_X for rotation and Move transformation
 	rotateAxis = AXIS_X;
@@ -106,8 +110,34 @@ TransformDialog::TransformDialog() : QDialog() {
 	setScale();
 	setRotate();
 	
+	tableWidget->setColumnCount(4);
+	tableWidget->setRowCount(4);
+	tableWidget->horizontalHeader()->hide();
+	tableWidget->verticalHeader()->hide();
+	for(int i=0;i<4;i++)
+		{
+		tableWidget->setColumnWidth(i,40);
+		tableWidget->setRowHeight(i,18);
+		}
+}
+void TransformDialog::showEvent ( QShowEvent * event )
+{
+	for(int i=0;i<4;i++)
+		{
+		tableWidget->setColumnWidth(i,tableWidget->width()/4 - 2);
+		tableWidget->setRowHeight(i,tableWidget->height()/4 - 2);
+		}
 	
 }
+void TransformDialog::resizeEvent ( QResizeEvent * event )
+{
+		for(int i=0;i<4;i++)
+		{
+			tableWidget->setColumnWidth(i,tableWidget->width()/4 - 2);
+			tableWidget->setRowHeight(i,tableWidget->height()/4 - 2);
+		}
+}
+
 TransformDialog::~TransformDialog() {
   delete whichTransformBG;
 	delete rotateBG;
@@ -117,14 +147,21 @@ vcg::Matrix44f& TransformDialog::getTransformation() {
 	return matrix;
 }
 
-void TransformDialog::setMesh(CMeshO *mesh) {
-	
+void TransformDialog::setMesh(MeshModel &m) {
+	matrix=m.cm.Tr;
+	CMeshO *mesh=&m.cm;
 	this->mesh = mesh;
 	this->bbox = mesh->bbox;
 	vcg::tri::UpdateBounding<CMeshO>::Box(*mesh);
 
  	minBbox = mesh->bbox.min;
  	maxBbox = mesh->bbox.max;
+	
+		for(int ii=0;ii<4;++ii)
+			for(int jj=0;jj<4;++jj)
+				tableWidget->setItem(ii,jj,new QTableWidgetItem(QString::number(m.cm.Tr[ii][jj])) );
+
+														 
 }
 
 QString& TransformDialog::getLog() {
@@ -329,7 +366,8 @@ void TransformDialog::on_okButton_pressed() {
 	//matrix = matrix * currentMatrix;
 	// store the current matrix as matrix because we left
 	// the values in the line edit widgets
-	matrix = currentMatrix; 
+	if(absoluteRB->isChecked()) matrix = currentMatrix; 
+	else matrix=matrix*currentMatrix;
 	accept();
 	
 }
@@ -370,4 +408,9 @@ void TransformDialog::on_rotateZUpPB_clicked()
 {
 	rotateDial->setValue(90);
 	xAxisRB->setChecked(true);
+}
+
+// Freezing means that 
+void TransformDialog::freeze (  )
+{
 }
