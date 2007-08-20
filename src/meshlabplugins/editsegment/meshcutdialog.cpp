@@ -36,3 +36,7 @@ void MeshCutDialog::on_gaussianButton_clicked() {
 void MeshCutDialog::on_meanButton_clicked() {
 	emit colorizeMeanSignal();
 }
+
+void MeshCutDialog::on_resetButton_clicked() {
+	emit resetSignal();
+}

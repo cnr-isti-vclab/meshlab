@@ -27,6 +27,7 @@ private:
 
 		void on_gaussianButton_clicked();
 		void on_meanButton_clicked();
+		void on_resetButton_clicked();
 		
 	signals:
 		void meshCutSignal();
@@ -34,6 +35,7 @@ private:
 
 		void colorizeGaussianSignal();
 		void colorizeMeanSignal();
+		void resetSignal();
 };
 
 #endif // MESHCUTDIALOG_H

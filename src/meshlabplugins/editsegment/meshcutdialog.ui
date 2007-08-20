@@ -6,19 +6,19 @@
     <x>0</x>
     <y>0</y>
     <width>140</width>
-    <height>256</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Mesh Segmentation</string>
   </property>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>11</y>
-     <width>116</width>
-     <height>207</height>
+     <y>12</y>
+     <width>114</width>
+     <height>242</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" >
@@ -148,6 +148,13 @@
      <widget class="QPushButton" name="meanButton" >
       <property name="text" >
        <string>Colorize Mean</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="resetButton" >
+      <property name="text" >
+       <string>Reset Selection</string>
       </property>
      </widget>
     </item>
