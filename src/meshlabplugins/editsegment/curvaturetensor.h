@@ -1,3 +1,6 @@
+#ifndef MESHCUTCURVATURE_H
+#define MESHCUTCURVATURE_H
+
 #include <vcg/container/simple_temporary_data.h>
 #include <vcg/simplex/face/pos.h>
 #include <vcg/simplex/face/jumping_pos.h>
@@ -9,7 +12,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/math/matrix.h>
 #include <vcg/math/matrix33.h>
-#include <values.h>
+
 namespace vcg {
 
 	class CurvData {
@@ -57,7 +60,7 @@ namespace vcg {
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
 
-				if ( ! (*vi).IsD()) {
+				if ( ! (*vi).IsD() && (*vi).VFp() != NULL) {
 
 					VertexType * central_vertex = &(*vi);
 
@@ -71,13 +74,13 @@ namespace vcg {
 					VertexType* tempV;
 					float totalDoubleAreaSize = 0.0f;
 
-				/*	if (((firstV->P()-central_vertex->P())^(pos.VFlip()->P()-central_vertex->P()))*central_vertex->N()<=0.0f)
+					if (((firstV->P()-central_vertex->P())^(pos.VFlip()->P()-central_vertex->P()))*central_vertex->N()<=0.0f)
 					{
 						pos.Set(central_vertex->VFp(), central_vertex);
 						pos.FlipE();
 						firstV = pos.VFlip();
 					}	
-					else pos.Set(central_vertex->VFp(), central_vertex);*/
+					else pos.Set(central_vertex->VFp(), central_vertex);
 
 					do 
 					{
@@ -95,7 +98,7 @@ namespace vcg {
 					} 
 					while(tempV != firstV);	
 
-					for (int i = 0; i<vertices.size(); ++i) {
+					for (int i = 0; i < vertices.size(); ++i) {
 						if (vertices[i].isBorder) {
 							weights.push_back(vertices[i].doubleArea / totalDoubleAreaSize);
 						} else {
@@ -186,14 +189,14 @@ namespace vcg {
 					c = best_c;
 					s = best_s;
 
-					vcg::ndim::MatrixMNf minor (2,2);
+					vcg::ndim::MatrixMNf minor2x2 (2,2);
 					vcg::ndim::MatrixMNf S (2,2);
 
 
-					minor[0][0] = QtMQ[1][1];
-					minor[0][1] = QtMQ[1][2];
-					minor[0][0] = QtMQ[2][1];
-					minor[1][1] = QtMQ[2][2];
+					minor2x2[0][0] = QtMQ[1][1];
+					minor2x2[0][1] = QtMQ[1][2];
+					minor2x2[1][0] = QtMQ[2][1];
+					minor2x2[1][1] = QtMQ[2][2];
 
 					S[0][0] = S[1][1] = c;
 					S[0][1] = s;
@@ -202,132 +205,28 @@ namespace vcg {
 					vcg::ndim::MatrixMNf St (S);
 					St.Transpose();					
 
-					vcg::ndim::MatrixMNf StMS(St * minor * S);
+					vcg::ndim::MatrixMNf StMS(St * minor2x2 * S);
 
-					float Principal_Curvature1 = 3.0f * StMS[0][0] - StMS[1][1];
-					float Principal_Curvature2 = 3.0f * StMS[1][1] - StMS[0][0];
+					float stms00 = StMS[0][0];
+					float stms01 = StMS[0][1];
+					float stms10 = StMS[1][0];
+					float stms11 = StMS[1][1];
+
+					float Principal_Curvature1 = (3.0f * StMS[0][0]) - StMS[1][1];
+					float Principal_Curvature2 = (3.0f * StMS[1][1]) - StMS[0][0];
 
 					Point3f Principal_Direction1 = T1 * c - T2 * s;
 					Point3f Principal_Direction2 = T1 * s + T2 * c; 
+
 
 					(*TDCurvPtr)[*vi].T1 = Principal_Direction1;
 					(*TDCurvPtr)[*vi].T2 = Principal_Direction2;
 					(*TDCurvPtr)[*vi].k1 = Principal_Curvature1;
 					(*TDCurvPtr)[*vi].k2 = Principal_Curvature2;
+
 				}
 			}
 		}
-
-		/* OLD VERSION
-		void oldComputeCurvatureTensor () {
-		//updating per-vertex normals
-		vcg::tri::UpdateNormals<MESH_TYPE>::PerVertex(*mesh);
-
-		VertexIterator vi;
-		for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
-		if (!vi->IsD() ) {
-
-		Matrix33<float> Mvi;
-		Mvi.SetZero();
-		Matrix33<float> I;
-		I.SetIdentity();
-
-		Matrix33<float> n_nM;
-		//Point3<float> normal_d = Point3<double>((double)vi->N()[0], (double)vi->N()[1],(double)vi->N()[2]);
-		Point3<float> normal = vi->N();
-		normal = normal.Normalize();
-		n_nM.ExternalProduct(normal, normal);
-		n_nM = I - n_nM;				
-
-		//Inizio Calcolo dei wij per tutti i vertici adiacenti
-		FaceType* first_face = vi->VFp();
-		vcg::face::Pos<FaceType> pos2(first_face, vi->VFi(), &(*vi));
-		vector<float> wij_container;
-		float totalDoubleAreaSize = 0;
-		do {
-
-		float doubleArea = vcg::DoubleArea<FaceType>(*pos2.F());
-		totalDoubleAreaSize += doubleArea;
-		wij_container.push_back(doubleArea);
-
-		pos2.NextE();
-		}  while (first_face != pos2.F());
-
-		totalDoubleAreaSize *= 2;
-
-		int last_wij = wij_container[wij_container.size()-1];
-		for (int i = (wij_container.size()-1); i > 0; --i) {
-		wij_container[i] += wij_container[i-1];
-		wij_container[i] /= totalDoubleAreaSize;
-		}
-		wij_container[0] += last_wij;
-		wij_container[0] /= totalDoubleAreaSize;
-
-		//calcola la matrice Mvi per ogni vertice 
-		vcg::face::Pos<FaceType> pos(first_face, vi->VFi(), &(*vi));
-		pos.FlipV();
-		pos.FlipE();
-		int i = 0;
-		ComputePerVertexMatrix(*vi, *(pos.V()), Mvi, n_nM, wij_container[i]);
-		pos.FlipV();
-		pos.FlipE();
-		pos.FlipF();
-		pos.FlipE();
-		while (first_face != pos.F()) {
-		++i;
-		ComputePerVertexMatrix(*vi, *(pos.V()), Mvi, n_nM, wij_container[i]);
-		pos.FlipV();
-		pos.FlipE();
-		pos.FlipF();
-		pos.FlipE();					
-		}
-
-
-		//Mvi matrix ready for the vertex vi
-		//calculate principal directions and curvature
-		Point3f Wvi;
-		Matrix33f Qvi;
-		Matrix33f QviT;
-		Matrix33f tempMatrix;
-
-		Matrix33f A;
-		Point3f E1(1.0,0.0,0.0);
-		Point3f Nvi = (*vi).N();
-		Nvi.Normalize();
-		Point3f E1nNvi = E1 - Nvi;
-		Point3f E1pNvi = E1 + Nvi;
-
-		if (E1nNvi.Norm() > E1pNvi.Norm() ) Wvi = E1nNvi / E1nNvi.Norm();
-		else Wvi = E1pNvi / E1pNvi.Norm();
-
-		tempMatrix.ExternalProduct(Wvi, Wvi);
-
-		Qvi.SetIdentity();
-		Qvi -= tempMatrix * 2;
-		QviT = Qvi;
-		QviT.Transpose();
-
-		A = QviT * Mvi * Qvi;
-
-		float c;
-		float s;
-
-		givens(A[1][1], A[2][1], &c, &s);
-
-		Point3<float> T1 = (A.GetColumn(1) * c) - (A.GetColumn(2) * s);
-		Point3<float> T2 = (A.GetColumn(1) * s) + (A.GetColumn(2) * c);
-
-		float k1 = 3*T1[1] - T2[2];
-		float k2 = 3*T2[2] - T1[1];
-
-		(*TDCurvPtr)[*vi].T1 = T1;
-		(*TDCurvPtr)[*vi].T2 = T2;
-		(*TDCurvPtr)[*vi].k1 = k1;
-		(*TDCurvPtr)[*vi].k2 = k2;
-		}
-		}
-		}
-		*/
-
 	};
 }
+#endif

@@ -229,7 +229,7 @@ Color4b toVcgColor(QColor c) {
 EditSegment::EditSegment() {
 	actionList << new QAction(QIcon(":/images/editsegment.png"),"Mesh Segmentation", this);
 	pixels = 0;
-	pen.radius = 5;
+	pen.radius = 3;
 	pen.backface = false;
 	pen.invisible = false;
 	pressed = false;
@@ -247,7 +247,7 @@ QList<QAction * > EditSegment::actions() const {
 
 const QString EditSegment::Info(QAction *action) {
 	if( action->text() != tr("Mesh Segmentation") ) assert (0);
-	return tr("blablabla");
+	return tr("Segment the mesh by selecting the foreground and background");
 }
 
 const PluginInfo &EditSegment::Info() {
@@ -261,7 +261,8 @@ const PluginInfo &EditSegment::Info() {
 void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 	parent->setCursor(QCursor(QPixmap(":/images/editsegment_cursor.png","PNG"),1,1));
 
-	if (!meshCut) meshCut = new MeshCutting<CMeshO>(&m.cm);
+	if (!meshCut) 
+		meshCut = new MeshCutting<CMeshO>(&m.cm);
 
 	if (!meshCutDialog) {
 		meshCutDialog = new MeshCutDialog(parent->window());
@@ -275,6 +276,7 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 		QObject::connect(meshCutDialog, SIGNAL(meshCutSignal()),this, SLOT(MeshCutSlot()));
 		QObject::connect(meshCutDialog, SIGNAL(selectForegroundSignal(bool)),this, SLOT(SelectForegroundSlot(bool)));
 
+		QObject::connect(meshCutDialog, SIGNAL(resetSignal()),this,SLOT(ResetSlot()));
 		QObject::connect(meshCutDialog, SIGNAL(colorizeGaussianSignal()),this, SLOT(ColorizeGaussianSlot()));
 		QObject::connect(meshCutDialog, SIGNAL(colorizeMeanSignal()),this, SLOT(ColorizeMeanSlot()));
 
@@ -317,15 +319,13 @@ void EditSegment::Decorate (QAction * ac, MeshModel & m, GLArea * gla) {
 
 		getInternFaces(m,&currentSelection,&newSel,&faceSel,gla,pen,current_point,previous_point,pixels,mvmatrix,projmatrix,viewport);
 		vector<CMeshO::FacePointer>::iterator fpo;
-		bool sel_or_not=(mouse_button_pressed==Qt::LeftButton);
+		
 		for(fpo=faceSel.begin();fpo!=faceSel.end();++fpo) {
 			for (int i=0; i<3; ++i) {
-				if (sel_or_not) {
+				if (mouse_button_pressed==Qt::LeftButton) {
 					meshCut->Mark((*fpo)->V(i), iF);
 					(*fpo)->V(i)->C() = toVcgColor(meshCutDialog->getForegroundColor());
-					//(*fpo)->SetS();
 				}	else {
-					//(*fpo)->ClearS();
 					meshCut->Mark((*fpo)->V(i), iB);
 					(*fpo)->V(i)->C() = toVcgColor(meshCutDialog->getBackgroundColor());
 				}
@@ -425,6 +425,13 @@ void EditSegment::ColorizeGaussianSlot() {
 void EditSegment::ColorizeMeanSlot() {
 	if (meshCut) {
 		meshCut->ColorizeCurvature(false);
+		glarea->update();
+	}
+}
+
+void EditSegment::ResetSlot() {
+	if (meshCut) {
+		meshCut->Reset();
 		glarea->update();
 	}
 }

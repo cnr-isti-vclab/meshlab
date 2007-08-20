@@ -84,6 +84,7 @@ public slots:
 
 	void ColorizeGaussianSlot();
 	void ColorizeMeanSlot();
+	void ResetSlot();
 
 };
 
