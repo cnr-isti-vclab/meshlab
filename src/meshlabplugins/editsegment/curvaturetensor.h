@@ -13,6 +13,8 @@
 #include <vcg/math/matrix.h>
 #include <vcg/math/matrix33.h>
 
+#include <float.h>
+
 namespace vcg {
 
 	class CurvData {
@@ -207,17 +209,11 @@ namespace vcg {
 
 					vcg::ndim::MatrixMNf StMS(St * minor2x2 * S);
 
-					float stms00 = StMS[0][0];
-					float stms01 = StMS[0][1];
-					float stms10 = StMS[1][0];
-					float stms11 = StMS[1][1];
-
 					float Principal_Curvature1 = (3.0f * StMS[0][0]) - StMS[1][1];
 					float Principal_Curvature2 = (3.0f * StMS[1][1]) - StMS[0][0];
 
 					Point3f Principal_Direction1 = T1 * c - T2 * s;
 					Point3f Principal_Direction2 = T1 * s + T2 * c; 
-
 
 					(*TDCurvPtr)[*vi].T1 = Principal_Direction1;
 					(*TDCurvPtr)[*vi].T2 = Principal_Direction2;
