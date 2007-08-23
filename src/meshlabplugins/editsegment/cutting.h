@@ -231,10 +231,10 @@ namespace vcg {
 
 					if (file) file << "Estratta tripletta con distanza: " << tempTriplet.d << std::endl;
 
-					//prendo tutti i vertici che avevano inserito il vertice estratto
+					//prendo tutti i vertici che avevano inserito il vertice appena estratto
 					vector<VertexType*> tempVertex;
 
-					typedef multimap<VertexType*,VertexType*>::iterator MMI;
+					typedef typename multimap<VertexType*,VertexType*>::const_iterator MMI;
 					pair<MMI,MMI> mm_range = VertToV.equal_range(tempTriplet.v);
 					for (MMI mm_iter = mm_range.first; mm_iter != mm_range.second; ++mm_iter) {
 						tempVertex.push_back(mm_iter->second);
@@ -243,7 +243,7 @@ namespace vcg {
 					VertToV.erase(tempTriplet.v);
 
 					//rimuovo dalla coda tutte le triplette che sono state inserite dai vertici presi prima
-					vector<VertexType*>::iterator tempV_iter;
+					typename vector<VertexType*>::iterator tempV_iter;
 					for (tempV_iter = tempVertex.begin(); tempV_iter != tempVertex.end(); tempV_iter++) {
 						if (setQ.find(VToTriplet[*tempV_iter]) != setQ.end())
 							setQ.erase(setQ.find(VToTriplet[*tempV_iter]));
