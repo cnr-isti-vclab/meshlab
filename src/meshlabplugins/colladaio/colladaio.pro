@@ -1,6 +1,6 @@
 TEMPLATE      = lib
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut/include 
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = colladaio.h 
 SOURCES       = colladaio.cpp
 TARGET        = colladaio
