@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.15  2007/08/25 08:42:45  cignoni
+ cleaned include files
+
  Revision 1.14  2007/04/16 09:25:28  cignoni
  ** big change **
  Added Layers managemnt.
@@ -77,14 +80,16 @@
 
 #include "colladaio.h"
 
-#include <wrap/io_trimesh/export.h>
-#include <wrap/io_trimesh/io_mask.h>
-#include <vcg/complex/trimesh/update/normal.h>
+//#include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
-
+#include <wrap/io_trimesh/export.h>
+#include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/import_dae.h>
 #include <wrap/io_trimesh/export_dae.h>
+
+
+
 
 
 
