@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.40  2007/09/07 12:01:10  ldpmatic
+Avoiding gcc's warning
+
 Revision 1.39  2007/07/24 07:16:51  cignoni
 moved matrix inside mesh class and added safe init at construction time
 
@@ -333,7 +336,7 @@ MeshDocument()
 	 
 	void setCurrentMesh(unsigned int i)
 	{
-	  assert(i < meshList.size());
+	  assert(i < (unsigned int)meshList.size());
 		currentMesh=meshList.at(i);
 	}
 	
