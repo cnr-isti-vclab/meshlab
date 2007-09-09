@@ -23,6 +23,10 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.24  2007/09/09 17:56:13  ldpmatic
+Minor changes to avoid memory leak.
+Added two glGetError() to avoid MeshLab to crash when the plugin encounters some error on its way
+
 Revision 1.23  2007/03/12 15:24:00  cignoni
 Safer dir search for plugins for mac
 
@@ -290,7 +294,11 @@ void MeshShaderRenderPlugin::initActionList() {
 
 void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla) 
 {
-	if (sDialog) sDialog->close();
+	if (sDialog) {
+		sDialog->close();
+		delete sDialog;
+	}
+
   gla->makeCurrent();
 	GLenum err = glewInit();
 	if (GLEW_OK == err) {
@@ -427,6 +435,9 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 			}
 		}
 	}
+
+	// * clear the errors, if any
+	glGetError();
 }
 
 
@@ -502,6 +513,8 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QG
 
 		
 	}
+	// * clear the errors, if any
+	glGetError();
 }
 
 
