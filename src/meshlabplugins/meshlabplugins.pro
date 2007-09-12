@@ -6,6 +6,7 @@ SUBDIRS       = meshfilter \
 				colladaio \
 				epoch_io \
 				meshrender \
+				render_rm \
 				meshcolorize \
 				meshdecorate \ 
 				meshedit \ 
