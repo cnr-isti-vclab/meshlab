@@ -1,0 +1,249 @@
+<ui version="4.0" >
+ <class>RmShaderDialogClass</class>
+ <widget class="QDialog" name="RmShaderDialogClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>499</width>
+    <height>381</height>
+   </rect>
+  </property>
+  <property name="focusPolicy" >
+   <enum>Qt::StrongFocus</enum>
+  </property>
+  <property name="windowTitle" >
+   <string>RmShaderDialog</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset>../../../../../meshlab/src/meshlab/images/eye16.png</iconset>
+  </property>
+  <property name="sizeGripEnabled" >
+   <bool>true</bool>
+  </property>
+  <widget class="QGroupBox" name="groupBox" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>481</width>
+     <height>331</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Passes</string>
+   </property>
+   <widget class="QComboBox" name="cmbPassSelection" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>461</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>461</width>
+      <height>271</height>
+     </rect>
+    </property>
+    <property name="currentIndex" >
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab1_Uniform" >
+     <attribute name="title" >
+      <string>Uniform</string>
+     </attribute>
+     <widget class="QFrame" name="frame1" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>441</width>
+        <height>231</height>
+       </rect>
+      </property>
+      <property name="frameShape" >
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="frameShadow" >
+       <enum>QFrame::Raised</enum>
+      </property>
+      <property name="lineWidth" >
+       <number>1</number>
+      </property>
+      <property name="midLineWidth" >
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="gridLayout" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>421</width>
+         <height>211</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" />
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab2_Texture" >
+     <attribute name="title" >
+      <string>Textures</string>
+     </attribute>
+     <widget class="QFrame" name="frame" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>441</width>
+        <height>231</height>
+       </rect>
+      </property>
+      <property name="frameShape" >
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="frameShadow" >
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QWidget" name="gridLayout_2" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>421</width>
+         <height>211</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" />
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab3_OpenGl" >
+     <attribute name="title" >
+      <string>OpenGL</string>
+     </attribute>
+     <widget class="QFrame" name="frame_2" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>441</width>
+        <height>231</height>
+       </rect>
+      </property>
+      <property name="frameShape" >
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="frameShadow" >
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QWidget" name="gridLayout_3" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>421</width>
+         <height>211</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" />
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab4_Vertex" >
+     <attribute name="title" >
+      <string>Vertex</string>
+     </attribute>
+     <widget class="QTextEdit" name="textVertex" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>451</width>
+        <height>241</height>
+       </rect>
+      </property>
+      <property name="lineWrapMode" >
+       <enum>QTextEdit::NoWrap</enum>
+      </property>
+      <property name="readOnly" >
+       <bool>true</bool>
+      </property>
+      <property name="acceptRichText" >
+       <bool>false</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab5_Fragment" >
+     <attribute name="title" >
+      <string>Fragment</string>
+     </attribute>
+     <widget class="QTextEdit" name="textFragment" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>451</width>
+        <height>241</height>
+       </rect>
+      </property>
+      <property name="lineWrapMode" >
+       <enum>QTextEdit::NoWrap</enum>
+      </property>
+      <property name="readOnly" >
+       <bool>true</bool>
+      </property>
+      <property name="acceptRichText" >
+       <bool>false</bool>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="lblEffectSelection" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>81</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Effect Selection</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="cmbEffectSelection" >
+   <property name="geometry" >
+    <rect>
+     <x>90</x>
+     <y>10</y>
+     <width>181</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnOk" >
+   <property name="geometry" >
+    <rect>
+     <x>280</x>
+     <y>10</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Ok</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
