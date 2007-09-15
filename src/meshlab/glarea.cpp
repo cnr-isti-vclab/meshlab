@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.126  2007/09/15 09:06:20  cignoni
+Added notification of ortho projection
+
 Revision 1.125  2007/07/24 07:18:05  cignoni
 moved matrix Tr inside mesh class
 
@@ -543,7 +546,8 @@ void GLArea::displayInfo()
 		 renderText(middleCol,startPos+ 4*lineSpacing,tr("Selected: %1").arg(mm()->cm.sfn),qFont);
 	renderText(rightCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm()->ioMask),qFont);
 
-  renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
+  if(fov>5) renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
+			 else renderText(rightCol,startPos+1*lineSpacing,QString("FOV: Ortho"),qFont);
 	if ((cfps>0) && (cfps<500)) 
 			renderText(rightCol,startPos+2*lineSpacing,QString("FPS: %1").arg(cfps,7,'f',1),qFont);
 }
