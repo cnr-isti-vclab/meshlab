@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.132  2007/09/15 09:07:33  cignoni
+Added missing return
+
 Revision 1.131  2007/07/24 07:19:01  cignoni
 managed failure in loading of project. Added safe cleaning of meshes with nan coords
 
@@ -755,6 +758,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 			}
 	}// end foreach file of the input list
 	qb->reset();
+	return true;
 }
 
 void MainWindow::openRecentFile()
