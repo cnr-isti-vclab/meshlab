@@ -269,17 +269,83 @@ namespace vcg {
 
 		void Colorize(bool selectForeground) {
 			FaceIterator fi;
+			VertexIterator vi;
+
+			queue<FaceType*> edgeFaceQueue;
+
+			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
+				if ( (*TDMarkPtr)[(*vi)].Mark == F ) vi->C() = Color4b::Magenta;
+				if ( (*TDMarkPtr)[(*vi)].Mark == B ) vi->C() = Color4b::White;
+				if ( (*TDMarkPtr)[(*vi)].Mark == U ) vi->C() = Color4b::Yellow;
+			}
+
+			int bitflag = FaceType::NewBitFlag();
+
 			int count;
 			if (selectForeground) {
+
 				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
+					(*fi).ClearUserBit(bitflag);
 					count = 0;
 					for (int i = 0; i<3; ++i) {
 						if ( (*TDMarkPtr)[(*fi).V(i)].Mark == F || (*TDMarkPtr)[(*fi).V(i)].Mark == iF	) ++count;
 					}
-					if (count == 3) 
+					if (count == 3) {
 						(*fi).SetS();
-					else 
+					}
+					else if (count > 0) {
+						edgeFaceQueue.push(&(*fi));
+						(*fi).SetUserBit(bitflag);
+					}	else 
 						(*fi).ClearS();
+				}
+
+				while(!edgeFaceQueue.empty()) {
+					FaceType * tmp_face = edgeFaceQueue.front();
+					edgeFaceQueue.pop();
+					float prod[3];
+					float max_prod = 0.0f;
+					int max_faceid = -1;
+					for (int i=0; i<3; ++i) {
+						prod[i] = (tmp_face->N().Normalize()) * (tmp_face->FFp(i)->N().Normalize());
+						if (prod[i] > max_prod) {
+							max_prod = prod[i];
+							max_faceid = i;
+						}  
+					}
+
+
+					if (!tmp_face->FFp(max_faceid)->IsUserBit(bitflag)) {
+						//faccia certa
+						if (tmp_face->FFp(max_faceid)->IsS()) {
+							tmp_face->SetS();
+						} else {
+							tmp_face->ClearS();
+						}
+						tmp_face->ClearUserBit(bitflag);
+					} else {
+						//max faccia incerta
+						//prendo la seconda
+						float sec_prod = 0.0f;
+						int sec_faceid = -1;
+						for (int i = 0; i<3; ++i) {
+							if (i != max_faceid && prod[i] > sec_prod && prod[i] > (max_prod - 0.001f) && !tmp_face->FFp(i)->IsUserBit(bitflag)) {
+								sec_prod = prod[i];
+								sec_faceid = i;
+							}  
+						}
+						if (sec_prod != 0.0f) {
+							if (tmp_face->FFp(sec_faceid)->IsS()) {
+								tmp_face->SetS();
+							} else {
+								tmp_face->ClearS();
+							}
+							tmp_face->ClearUserBit(bitflag);
+						} else {
+							edgeFaceQueue.push(tmp_face);
+							tmp_face->SetUserBit(bitflag);
+						}
+					}
 				}
 			} else {
 				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
@@ -293,7 +359,6 @@ namespace vcg {
 						(*fi).ClearS();
 				}
 			}
-
 		}
 
 		//debugging function
