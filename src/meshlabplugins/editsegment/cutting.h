@@ -274,18 +274,21 @@ namespace vcg {
 			queue<FaceType*> edgeFaceQueue;
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
-				if ( (*TDMarkPtr)[(*vi)].Mark == F ) vi->C() = Color4b::Magenta;
+				if ( (*TDMarkPtr)[(*vi)].Mark == F ) vi->C() = Color4b::Yellow;
 				if ( (*TDMarkPtr)[(*vi)].Mark == B ) vi->C() = Color4b::White;
-				if ( (*TDMarkPtr)[(*vi)].Mark == U ) vi->C() = Color4b::Yellow;
+				if ( (*TDMarkPtr)[(*vi)].Mark == U ) vi->C() = Color4b::Green;
 			}
 
 			int bitflag = FaceType::NewBitFlag();
+			int bitflag_2 = FaceType::NewBitFlag();
 
 			int count;
 			if (selectForeground) {
 
 				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
 					(*fi).ClearUserBit(bitflag);
+					(*fi).ClearUserBit(bitflag_2);
+
 					count = 0;
 					for (int i = 0; i<3; ++i) {
 						if ( (*TDMarkPtr)[(*fi).V(i)].Mark == F || (*TDMarkPtr)[(*fi).V(i)].Mark == iF	) ++count;
@@ -342,8 +345,11 @@ namespace vcg {
 							}
 							tmp_face->ClearUserBit(bitflag);
 						} else {
-							edgeFaceQueue.push(tmp_face);
-							tmp_face->SetUserBit(bitflag);
+							if (!tmp_face->IsUserBit(bitflag_2)) {
+								edgeFaceQueue.push(tmp_face);
+								tmp_face->SetUserBit(bitflag);
+								tmp_face->SetUserBit(bitflag_2);
+							}
 						}
 					}
 				}
@@ -359,6 +365,9 @@ namespace vcg {
 						(*fi).ClearS();
 				}
 			}
+			
+			FaceType::DeleteBitFlag(bitflag_2);
+			FaceType::DeleteBitFlag(bitflag);
 		}
 
 		//debugging function
