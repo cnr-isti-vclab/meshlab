@@ -181,16 +181,19 @@ GLStatePassHolder::GLStatePassHolder( RmPass & pass )
 
 	passName = pass.getName();
 
-	QString & vprog = pass.getVertex();
-	QString & fprog = pass.getFragment();
-
+	QString &vprog = pass.getVertex();
+	QString &fprog = pass.getFragment();
+	
+	GLenum err = glewInit();
 	if( vprog.isNull() ) {
 		setVertexProgram = false;
 	} else {
 		setVertexProgram = true;
 		vhandler = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-		const char * vvv = vprog.toLocal8Bit().data();
-		glShaderSourceARB(vhandler, 1, ((const char **)&vvv), NULL);
+		QByteArray * c = new QByteArray(vprog.toLocal8Bit());
+		const char * vvv = c->data();
+		glShaderSourceARB(vhandler, 1, &vvv, NULL);
+		delete c;
 	}
 
 	if( fprog.isNull() ) {
@@ -198,8 +201,10 @@ GLStatePassHolder::GLStatePassHolder( RmPass & pass )
 	} else {
 		setFragmentProgram = true;
 		fhandler = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-		const char * fff = fprog.toLocal8Bit().data();
-		glShaderSourceARB(fhandler, 1, ((const char **)&fff), NULL);
+		QByteArray* c = new QByteArray(fprog.toLocal8Bit());
+		const char * fff = c->data();
+		glShaderSourceARB(fhandler, 1, &fff, NULL);
+		delete c;
 	}
 
 	for( int i = 0; i < 2; i++ ) 

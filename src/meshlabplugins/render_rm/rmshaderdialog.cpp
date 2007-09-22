@@ -172,7 +172,7 @@ void RmShaderDialog::fillTabsWithPass( int index ) {
 						input -> setDecimals(4);
 						if( v.minSet ) input -> setMinimum( v.fmin ); else input -> setMinimum( -1000 );
 						if( v.maxSet ) input -> setMaximum( v.fmax ); else input -> setMaximum( 1000 );
-						input -> setSingleStep( (v.minSet && v.maxSet ) ? fmax(( v.fmax - v.fmin )/10., 0.0001) : 0.0001 );
+						input -> setSingleStep( (v.minSet && v.maxSet ) ? max(( v.fmax - v.fmin )/10., 0.0001) : 0.0001 );
 						input -> setValue( v.vec4[i] );
 						ui.gridLayout1 -> addWidget( input, row, 1+i, 1, ((i+1)==n ? 5-n : 1) );
 						shown.append(input);
@@ -196,7 +196,7 @@ void RmShaderDialog::fillTabsWithPass( int index ) {
 							input -> setDecimals(4);
 							if( v.minSet ) input -> setMinimum( v.fmin ); else input -> setMinimum( -1000 );
 							if( v.maxSet ) input -> setMaximum( v.fmax ); else input -> setMaximum( 1000 );
-							input -> setSingleStep( (v.minSet && v.maxSet ) ? fmax(( v.fmax - v.fmin )/10., 0.0001) : 0.0001 );
+							input -> setSingleStep( (v.minSet && v.maxSet ) ? max(( v.fmax - v.fmin )/10., 0.0001) : 0.0001 );
 							input -> setValue( v.vec4[(i*n)+j] );
 							ui.gridLayout1 -> addWidget( input, row, 1+j, 1, ((j+1)==n ? 5-n : 1) );
 							shown.append(input);
