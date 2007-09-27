@@ -125,6 +125,7 @@ class GLStateHolder : public QObject
 		void VarDump();
 
 		int passNumber() { return passes.size(); }
+    inline void reset(){ needUpdateInGLMemory = true; };
 		void usePassProgram( int i ) { passes[i] -> useProgram(); }
 };
 

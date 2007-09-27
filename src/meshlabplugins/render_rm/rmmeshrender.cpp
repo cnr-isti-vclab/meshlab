@@ -73,6 +73,7 @@ void RmMeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QG
 	if (GLEW_OK == err) {
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
 
+      holder.reset();
 			dialog = new RmShaderDialog(&holder, parser, gla, rm);
 			dialog->move(10,100);
 			dialog->show();
@@ -90,7 +91,7 @@ void RmMeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, 
 
 	if( holder.isSupported() ) {
 		qDebug() << "Render: " << a;
-		//holder.usePassProgram(0);
+		holder.usePassProgram(0);
 	}
 		
 
