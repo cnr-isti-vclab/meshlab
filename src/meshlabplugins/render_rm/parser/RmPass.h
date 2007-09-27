@@ -4,7 +4,7 @@
 #include <QList>
 #include <QString>
 #include <QStringList>
-#include <qDebug>
+#include <QDebug>
 
 
 #include "GlState.h"

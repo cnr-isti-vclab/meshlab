@@ -4,7 +4,7 @@
 #include <QString>
 #include <QFile>
 #include <QDomDocument>
-#include <qDebug>
+#include <QDebug>
 #include <QList>
 
 #include "RmEffect.h"
