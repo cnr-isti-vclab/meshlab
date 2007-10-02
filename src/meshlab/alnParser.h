@@ -53,7 +53,7 @@ public:
 	{
 		rangemaps.clear();
 
-		FILE *stream=fopen(ALNname, "r");
+		FILE *stream=fopen(ALNname, "rt");
 		if(stream==NULL)
 			return CantOpen; 
 
@@ -67,10 +67,13 @@ public:
 
 			fgets(buffer, 1024, stream);
 			*strchr(buffer, '\n')=0;
+			if(strchr(buffer,'\r')) 	*strchr(buffer,'\r')=0;
 			rm.filename = buffer;
 
 			fgets(buffer, 1024, stream);
 			*strchr(buffer,'\n')=0;
+			if(strchr(buffer,'\r')) 	*strchr(buffer,'\r')=0;
+
 			if(buffer[0]!='#') 
 				return ExpectingComment;
 

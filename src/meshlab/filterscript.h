@@ -20,8 +20,8 @@ public:
   bool save(QString filename);
   Matrix44f getMatrix(QDomElement *n);
   
-  QList< QPair< QString , FilterParameter> > actionList;
-  typedef QList< QPair<QString, FilterParameter> >::iterator iterator;
+  QList< QPair< QString , FilterParameterSet> > actionList;
+  typedef QList< QPair<QString, FilterParameterSet> >::iterator iterator;
 };
 
 #endif

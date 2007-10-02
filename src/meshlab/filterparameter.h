@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2007/10/02 07:59:34  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.8  2007/06/25 13:31:55  zifnab1974
 passing char* instead of const char* is about to be deprecated in gcc
 
@@ -60,239 +63,90 @@ First ver
 #include <QAction>
 
 /*
-The FilterParameter class abstracts the whole set of parameters that are necessary to a given filter
-It is a map from string (the name of the parameter) to QVariant (their values)
+The Filter Parameter class 
+The plugin for each filter exposes a set of typed parameters.
+The invocation of a filter requires that these parameters have the specified values.
+The Specification of the parameters can be done in two ways, either by an automatic dialog constructed by the MeshLab framework or by a user built dialog.
+
 */
 
 class FilterParameter
 {
-public:
-
-  FilterParameter(){}
-
-  inline QString getString(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    assert(ii!=paramMap.end());
-    assert(ii.value().type()==QVariant::String);
-    return ii.value().toString();
-  }
-
-  inline bool getBool(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    assert(ii!=paramMap.end());
-    assert(ii.value().type()==QVariant::Bool);
-    return ii.value().toBool();
-  }
+ public:
+ FilterParameter()
+	{
+		fieldType=-1;
+	}
+	
+	FilterParameter(QString name, QString desc, QString tooltip)
+	{
+		fieldType=-1;
+		fieldName=name;
+		fieldDesc=desc;
+		fieldToolTip=tooltip;
+	}
+	
+	enum ParType
+	{
+		PARBOOL    = 1,
+		PARINT     = 2,
+		PARFLOAT   = 3,
+		PARSTRING  = 4,
+		PARABSPERC = 5,
+		PARMATRIX  = 6
+	};
+	
+	QString  fieldName;
+  QString  fieldDesc;
+  QString  fieldToolTip;
+  QVariant fieldVal;
+	
+	// The type of the parameter
+  int fieldType;  
   
-  inline int getInt(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    if(ii==paramMap.end()) assert(0);
-    assert(ii.value().type()==QVariant::Int);
-    return ii.value().toInt();
-  }
-
-  inline float getFloat(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    if(ii==paramMap.end()) assert(0);
-    assert(ii.value().type()==QVariant::Double);
-    return float(ii.value().toDouble());
-  }
-  
-  inline Matrix44f getMatrix44(QString name) { 
-    QMap<QString,QVariant>::iterator ii=paramMap.find(name);
-    if(ii==paramMap.end()) assert(0);
-    assert(ii.value().type()==QVariant::List);
-    Matrix44f matrix;
-    QList<QVariant> matrixVals = ii.value().toList();
-    assert(matrixVals.size()==16);
-    for(int i=0;i<16;++i)
-      matrix.V()[i]=matrixVals[i].toDouble();
-    
-    return matrix;
-  }
-
-  inline void addFloat(QString name,float val)  { paramMap.insert(name, QVariant( double(val)) ); }
-  inline void addInt  (QString name,float val)  { paramMap.insert(name, QVariant(    int(val)) ); }
-  inline void addBool (QString name,bool val)   { paramMap.insert(name, QVariant(        val )  );  }
-  inline void addString(QString name,QString val){ paramMap.insert(name,QVariant(        val )  );  }
-  inline QVariant update(QString name,QVariant val){paramMap[name] = val; return val;}
-  
-  inline void addMatrix44(QString name,Matrix44f val) { 
-    QList<QVariant> matrixVals;
-    for(int i=0;i<16;++i)
-        matrixVals.append(val.V()[i]);
-    paramMap.insert(name, QVariant(matrixVals)  );  
-  }
-
-  inline void clear() { paramMap.clear(); }
-
-
-  // The data is just a list of Parameters
-  QMap<QString,QVariant> paramMap;  
-
-};
-
-
-
-
-// standard filter parameter types
-enum
-{
-   MESHLAB_STDPAR_PARBOOL = 1,
-   MESHLAB_STDPAR_PARINT = 2,
-   MESHLAB_STDPAR_PARFLOAT = 3,
-   MESHLAB_STDPAR_PARSTRING = 4,
-   MESHLAB_STDPAR_PARABSPERC = 5
-};
-
-// standard filter parameter descriptor
-typedef struct MESHLAB_STDFIELD
-{
-  QString *fieldname;
-  QString *fielddesc;
-  QString *fieldttip;
-  QVariant *fieldval;
-  int fieldtype;
-  float min;
+	float min;
   float max;
-}MESHLAB_STDFIELD;
+};
 
-class StdParList
+/*
+ The Filter Parameter class 
+ */
+
+class FilterParameterSet
 {
 public:
 
-	StdParList()
-	{
-	}
-
-	~StdParList()
-	{
-		this->clear();
-	}
-
-	void addFieldBool(const char *name, const char* desc, bool val, const char *ttex=0)
-	{
-		MESHLAB_STDFIELD std;
-
-		std.fieldname = new QString(name);
-		std.fielddesc = new QString(desc);
-		std.fieldval = new QVariant(val);
-		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
-		std.fieldtype = MESHLAB_STDPAR_PARBOOL;
-
-		v.push_back(std);
-	}
-
-	void addFieldFloat(const char *name, const char* desc, float val, const char *ttex=0)
-	{
-		MESHLAB_STDFIELD std;
-
-		std.fieldname = new QString(name);
-		std.fielddesc = new QString(desc);
-		std.fieldval = new QVariant(val);
-		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
-		std.fieldtype = MESHLAB_STDPAR_PARFLOAT;
-
-		v.push_back(std);
-	}
+  FilterParameterSet(){}	
+	// The data is just a list of Parameters
+  //QMap<QString, FilterParameter *> paramMap;  
+	QList<FilterParameter> paramList;  
 	
-	void addFieldAbsPerc(const char *name, const char* desc, float val, float minv, float maxv, const char *ttex=0)
-	{
-		MESHLAB_STDFIELD std;
+	// Members 
 
-		std.fieldname = new QString(name);
-		std.fielddesc = new QString(desc);
-		std.fieldval = new QVariant(val);
-		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
-		std.fieldtype = MESHLAB_STDPAR_PARABSPERC;
-		std.min = minv;
-		std.max = maxv;
-
-		v.push_back(std);
-	}
-  
-	void addFieldInt(const char *name, const char* desc, int val, const char *ttex=0)
-	{
-		MESHLAB_STDFIELD std;
-
-		std.fieldname = new QString(name);
-		std.fielddesc = new QString(desc);
-		std.fieldval = new QVariant(val);
-		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
-		std.fieldtype = MESHLAB_STDPAR_PARINT;
-
-		v.push_back(std);
-	}
+	void addBool     (QString name, bool      defaultVal, QString desc=QString(), QString tooltip=QString());
+	void addInt      (QString name, int       defaultVal, QString desc=QString(), QString tooltip=QString());
+	void addFloat    (QString name, float     defaultVal, QString desc=QString(), QString tooltip=QString());
+	void addString   (QString name, QString   defaultVal, QString desc=QString(), QString tooltip=QString());
+	void addMatrix44 (QString name, vcg::Matrix44f defaultVal, QString desc=QString(), QString tooltip=QString());
+  void addAbsPerc  (QString name, float     defaultVal, float minVal, float maxVal,  QString desc=QString(), QString tooltip=QString());
+		
+	bool				getBool(QString name);
+	int					getInt(QString name);
+	float				getFloat(QString name);
+	QString			getString(QString name);
+	vcg::Matrix44f		getMatrix44(QString name);
+	float		    getAbsPerc(QString name);
 	
-	void addFieldString(const char *name, const char* desc, char *val, const char *ttex=0)
-	{
-		MESHLAB_STDFIELD std;
+	void setBool(QString name, bool newVal) ;
+	void setInt(QString name, int newVal) ;
+	void setFloat(QString name, float newVal);
+	void setString(QString name, QString newVal);
+	void setMatrix44(QString name, vcg::Matrix44f newVal);
+	void setAbsPerc(QString name, float newVal);
 
-		std.fieldname = new QString(name);
-		std.fielddesc = new QString(desc);
-		std.fieldval = new QVariant(val);
-		std.fieldttip = (ttex == NULL) ? NULL : (new QString(ttex));
-		std.fieldtype = MESHLAB_STDPAR_PARSTRING;
+	FilterParameter &FilterParameterSet::findParameter(QString name);
 
-		v.push_back(std);
-	}
-
-	int count()
-	{
-		return v.size();
-	}
-
-	void clear()
-	{
-		for(int i = 0; i < v.size(); i++)
-		{
-			delete v[i].fieldname;
-			delete v[i].fielddesc;
-			delete v[i].fieldval;
-			delete v[i].fieldttip;
-		}
-
-		v.clear();
-	}
-
-	void getPars(FilterParameter &srcpars)
-	{
-		srcpars.clear();
-
-		for(int i = 0; i < v.size(); i++)
-		{
-			switch(v[i].fieldtype)
-			{
-	      	  case MESHLAB_STDPAR_PARBOOL:
-		    	srcpars.addBool(*v[i].fieldname,v[i].fieldval->toBool());
-				break;
-	      	  case MESHLAB_STDPAR_PARFLOAT:
-	      	  case MESHLAB_STDPAR_PARABSPERC:
-		    	srcpars.addFloat(*v[i].fieldname,float(v[i].fieldval->toDouble()));
-				break;
-	      	  case MESHLAB_STDPAR_PARINT:
-		    	srcpars.addInt(*v[i].fieldname,v[i].fieldval->toInt());
-				break;
-	      	  case MESHLAB_STDPAR_PARSTRING:
-		    	srcpars.addString(*v[i].fieldname,v[i].fieldval->toString());
-				break;
-			}
-
-		}
-
-	}
-
-	QString &getFieldName(int i){return *v[i].fieldname;}
-	QString &getFieldDesc(int i){return *v[i].fielddesc;}
-	QVariant &getFieldVal(int i){return *v[i].fieldval;}
-	QString *getFieldToolTip(int i){return v[i].fieldttip;}
-	float getMin(int i){return v[i].min;}
-	float getMax(int i){return v[i].max;}
-	int getFieldType(int i){return v[i].fieldtype;}
-
-	protected:
-		QVector<MESHLAB_STDFIELD> v;
-
+	void clear() { paramList.clear(); }
 };
 
 

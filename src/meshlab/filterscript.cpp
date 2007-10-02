@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.6  2007/10/02 07:59:42  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.5  2006/06/27 08:07:42  cignoni
 Restructured plugins interface for simplifying the server
 
@@ -72,33 +75,33 @@ bool FilterScript::save(QString filename)
   {
     QDomElement tag = doc.createElement("filter");
     tag.setAttribute(QString("name"),(*ii).first);
-    FilterParameter &par=(*ii).second;
-    QMap<QString,QVariant>::iterator jj;
-    for(jj=par.paramMap.begin();jj!=par.paramMap.end();++jj)
+    FilterParameterSet &par=(*ii).second;
+    QList<FilterParameter>::iterator jj;
+    for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
     {
       QDomElement parElem = doc.createElement("Param");
-      parElem.setAttribute("name",jj.key());
+      parElem.setAttribute("name",(*jj).fieldName);
 
-      if(jj.value().type()==QVariant::Bool) { 
+      if((*jj).fieldVal.type()==QVariant::Bool) { 
         parElem.setAttribute("type","Bool");
-        parElem.setAttribute("value",jj.value().toString());
+        parElem.setAttribute("value",(*jj).fieldVal.toString());
       }
-      if(jj.value().type()==QVariant::String) {
+      if((*jj).fieldVal.type()==QVariant::String) {
         parElem.setAttribute("type","String");
-        parElem.setAttribute("value",jj.value().toString());
+        parElem.setAttribute("value",(*jj).fieldVal.toString());
       }
-      if(jj.value().type()==QVariant::Int) {
+      if((*jj).fieldVal.type()==QVariant::Int) {
         parElem.setAttribute("type","Int");
-        parElem.setAttribute("value",jj.value().toInt());
+        parElem.setAttribute("value",(*jj).fieldVal.toInt());
       }
-      if(jj.value().type()==QVariant::Double) {
+      if((*jj).fieldVal.type()==QVariant::Double) {
         parElem.setAttribute("type","Float");
-        parElem.setAttribute("value",jj.value().toString());
+        parElem.setAttribute("value",(*jj).fieldVal.toString());
       }
 
-      if(jj.value().type()==QVariant::List) {
+      if((*jj).fieldVal.type()==QVariant::List) {
         parElem.setAttribute("type","Matrix44");
-        QList<QVariant> matrixVals = jj.value().toList();
+        QList<QVariant> matrixVals = (*jj).fieldVal.toList();
         for(int i=0;i<16;++i)
           parElem.setAttribute(QString("val")+QString::number(i),matrixVals[i].toString());
       }
@@ -130,7 +133,7 @@ bool FilterScript::open(QString filename)
              qDebug("FilterScript");
               for(QDomElement nf = root.firstChildElement("filter"); !nf.isNull(); nf = nf.nextSiblingElement("filter"))
               {
-                  FilterParameter par;
+                  FilterParameterSet par;
                   QString name=nf.attribute("name");
                   qDebug("Reading filter with name %s",qPrintable(name));
                       for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))

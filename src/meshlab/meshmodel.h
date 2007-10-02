@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.41  2007/10/02 07:59:32  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.40  2007/09/07 12:01:10  ldpmatic
 Avoiding gcc's warning
 
@@ -356,7 +359,8 @@ MeshDocument()
 	 currentMesh=meshList.back();
 	}
 
-  int vn() { 
+  int vn() /// Sum of all the vertices of all the meshes
+	{ 
 			int tot=0;
 			foreach(MeshModel *mmp, meshList)
 					tot+= mmp->cm.vn;

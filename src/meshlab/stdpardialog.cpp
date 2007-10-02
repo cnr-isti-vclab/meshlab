@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.11  2007/10/02 07:59:35  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.10  2007/04/16 09:22:43  cignoni
 corrected resizing bug in the dialog
 
@@ -61,138 +64,141 @@ Added standard plugin window support
 
 #include "stdpardialog.h"
 
+MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
+	:QDockWidget(QString("Plugin"),p)
+  {
+		qf = NULL;
+		clearValues();
+}
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-void MeshlabStdDialog::loadPluginAction(MeshFilterInterface *mfi,MeshModel *mm,QAction *q,MainWindowInterface *mwi)
+void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, QAction *action, MainWindowInterface *mwi)
   {
-		StdParList *newparlist = new StdParList();
-
-	  if(mm == NULL)
-		  return;
-
-	  /* checks wether the plugin action wants to handle parameters input by the standard parameter window or by itself */
-	  if(!mfi->getStdFields(q,*mm,*newparlist))
-	  {
-		  /* the plugin action wants to handle parameters input by itself: the executeFilter() function is directly called */
-		  FilterParameter fp;
-		  fp.clear();
-		  mwi->executeFilter(q,&fp);
-	  }
-	  else
-	  {
-		  /* the plugin action wants to handle parameters input by the standard plugin window */
-			resetMe();
-			delete parlist;
-			parlist = newparlist;
-
-			curaction = q;
-			curmodel = mm;
-			curmfi = mfi;
-			curmwi = mwi;
-			loadFrameContent(q->text());
-	  }
-
-
+		curAction=action;
+		curmfi=mfi;
+		curmwi=mwi;
+		curParSet.clear();
+		curModel = mm;
+		mfi->initParameterSet(action, *mm, curParSet);	
+		createFrame();
+		loadFrameContent();
   }
-	void MeshlabStdDialog::initValues()
+
+
+	void MeshlabStdDialog::clearValues()
 	{
-		curaction = NULL;
+		curAction = NULL;
 		stdfieldwidgets.clear();
-		curmodel = NULL;
+		curModel = NULL;
 		curmfi = NULL;
 		curmwi = NULL;
 	}
 
-void MeshlabStdDialog::resetMe()
+void MeshlabStdDialog::createFrame()
 {
-  stdfieldwidgets.clear();
-
-  parlist->clear();
-
+	if(qf)   delete qf;
   QFrame *newqf = new MeshlabStdDialogFrame(this);
-
   newqf->setFrameStyle(QFrame::Box | QFrame::Sunken);
 	newqf->setMinimumSize(75, 75);
 	setWidget(newqf);
-
-  delete qf;
   qf = newqf;
-
-
-  initValues();
 }
 
-void MeshlabStdDialog::loadFrameContent(QString actiondesc)
+// update the values of the widgets with the values in the paramlist;
+void MeshlabStdDialog::resetValues()
 {
+	curParSet.clear();
+	curmfi->initParameterSet(curAction, *curModel, curParSet);	
+		
+	assert(qf);
+	assert(qf->isVisible());
+  assert(curParSet.paramList.count() == stdfieldwidgets.count());
+	QList<FilterParameter> &parList =curParSet.paramList;
+	for(int i = 0; i < parList.count(); i++)
+		{
+			const FilterParameter &fpi=parList.at(i);
+			switch(fpi.fieldType)
+			{ 
+				case FilterParameter::PARBOOL:
+					if(fpi.fieldVal.toBool()) ((QCheckBox *)stdfieldwidgets.at(i))->setCheckState(Qt::Checked);
+					break;
+				case FilterParameter::PARFLOAT:
+					((QLineEdit *)stdfieldwidgets.at(i))->setText(QString::number(fpi.fieldVal.toDouble(),'g',3));
+					break;
+				case FilterParameter::PARINT:
+				case FilterParameter::PARSTRING:
+					((QLineEdit *)stdfieldwidgets.at(i))->setText(fpi.fieldVal.toString());
+					break;
+				case FilterParameter::PARABSPERC:
+					((AbsPercWidget *)stdfieldwidgets.at(i))->setValue(fpi.fieldVal.toDouble(),fpi.min,fpi.max);
+					break;
+			}
+	}
+			
+}
+
+void MeshlabStdDialog::loadFrameContent()
+{
+	assert(qf);
 	qf->hide();	
-	setWindowTitle(actiondesc);
+	setWindowTitle(curmfi->filterName(curAction));
 
 	QGridLayout *gridLayout = new QGridLayout(qf);
-    qf->setLayout(gridLayout);
+	qf->setLayout(gridLayout);
 
 	QCheckBox *qcb;
 	QLineEdit *qle;
 	QLabel *ql;
 	AbsPercWidget *apw;
-
+	QList<FilterParameter> &parList =curParSet.paramList;
 	/* creates widgets for the standard parameters */
-
-	for(int i = 0; i < parlist->count(); i++)
+	
+	ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
+	ql->setTextFormat(Qt::RichText);
+	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop);
+	
+	for(int i = 0; i < parList.count(); i++)
 	{
-		QString *ttip = parlist->getFieldToolTip(i);
-	  switch(parlist->getFieldType(i))
-	  {
-	  case MESHLAB_STDPAR_PARBOOL:
-		  qcb = new QCheckBox(parlist->getFieldDesc(i),qf);
-		  
-		  if(ttip != NULL)
-			qcb->setToolTip(*ttip);
-		  
-		  if(parlist->getFieldVal(i).toBool())
-			  qcb->setCheckState(Qt::Checked);
-
-		  gridLayout->addWidget(qcb,i,0,1,2,Qt::AlignTop);
-
+		const FilterParameter &fpi=parList.at(i);
+		switch(parList.at(i).fieldType)
+	  { 
+	  case FilterParameter::PARBOOL:
+		  qcb = new QCheckBox(fpi.fieldDesc,qf);
+		  qcb->setToolTip(fpi.fieldToolTip);		  
+		  if(fpi.fieldVal.toBool()) qcb->setCheckState(Qt::Checked);
+		  gridLayout->addWidget(qcb,i+1,0,1,2,Qt::AlignTop);
 		  stdfieldwidgets.push_back(qcb);
-
 		  break;
-	  case MESHLAB_STDPAR_PARFLOAT:
-		 ql = new QLabel(parlist->getFieldDesc(i),qf);
-		  
-		  if(ttip != NULL)
-			ql->setToolTip(*ttip);
-		  
-		  qle = new QLineEdit(QString::number(parlist->getFieldVal(i).toDouble(),'g',3),qf); // better formatting of floating point numbers		  
-		  gridLayout->addWidget(ql,i,0,Qt::AlignTop);
-		  gridLayout->addWidget(qle,i,1,Qt::AlignTop);
+			
+	  case FilterParameter::PARFLOAT:
+		  ql = new QLabel(fpi.fieldDesc,qf);
+		  ql->setToolTip(fpi.fieldToolTip);			  
+		  qle = new QLineEdit(QString::number(fpi.fieldVal.toDouble(),'g',3),qf); // better formatting of floating point numbers		  
+		  gridLayout->addWidget(ql,i+1,0,Qt::AlignTop);
+		  gridLayout->addWidget(qle,i+1,1,Qt::AlignTop);
 		  stdfieldwidgets.push_back(qle);
-
 		  break;
-	  case MESHLAB_STDPAR_PARINT:
-	  case MESHLAB_STDPAR_PARSTRING:
-		  ql = new QLabel(parlist->getFieldDesc(i),qf);
+	  case FilterParameter::PARINT:
+	  case FilterParameter::PARSTRING:
+		  ql = new QLabel(parList.at(i).fieldDesc,qf);
+			ql->setToolTip(fpi.fieldToolTip);		
+				  
+		  qle = new QLineEdit(fpi.fieldVal.toString(),qf);
 		  
-		  if(ttip != NULL)
-			ql->setToolTip(*ttip);
-		  
-		  qle = new QLineEdit(parlist->getFieldVal(i).toString(),qf);
-		  
-		  gridLayout->addWidget(ql,i,0,Qt::AlignTop);
-		  gridLayout->addWidget(qle,i,1,Qt::AlignTop);
+		  gridLayout->addWidget(ql,i+1,0,Qt::AlignTop);
+		  gridLayout->addWidget(qle,i+1,1,Qt::AlignTop);
 
 		  stdfieldwidgets.push_back(qle);
 
 		  break;
-	  case MESHLAB_STDPAR_PARABSPERC:
-		  QString desc = parlist->getFieldDesc(i) + " (abs and %)";
+	  case FilterParameter::PARABSPERC:
+		  QString desc = parList.at(i).fieldDesc + " (abs and %)";
 		  ql = new QLabel(desc ,qf);
+		  ql->setToolTip(fpi.fieldToolTip);	
 		  
-		  if(ttip != NULL)
-			ql->setToolTip(*ttip);
-		  
-		  apw = new AbsPercWidget(qf,float(parlist->getFieldVal(i).toDouble()),parlist->getMin(i),parlist->getMax(i));
-		  gridLayout->addWidget(ql,i,0,Qt::AlignTop);
-		  gridLayout->addLayout(apw,i,1,Qt::AlignTop);
+		  apw = new AbsPercWidget(qf,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max);
+		  gridLayout->addWidget(ql,i+1,0,Qt::AlignTop);
+		  gridLayout->addLayout(apw,i+1,1,Qt::AlignTop);
 	  		
 		  stdfieldwidgets.push_back(apw);
 
@@ -201,17 +207,20 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 
 	}
 
-	int nbut = parlist->count();
+	int nbut = parList.count()+1;
 
 	QPushButton *closeButton = new QPushButton("Close", qf);
 	QPushButton *applyButton = new QPushButton("Apply", qf);
+	QPushButton *defaultButton = new QPushButton("Default", qf);
 
-	gridLayout->addWidget(closeButton,nbut,0,Qt::AlignBottom);
-	gridLayout->addWidget(applyButton,nbut,1,Qt::AlignBottom);
+	gridLayout->addWidget(defaultButton,nbut,0,Qt::AlignBottom);
+	gridLayout->addWidget(closeButton,nbut+1,0,Qt::AlignBottom);
+	gridLayout->addWidget(applyButton,nbut+1,1,Qt::AlignBottom);
 
 	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
 	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
-
+	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetValues()));
+ 
 	qf->showNormal();	
 	qf->adjustSize();
 
@@ -223,59 +232,39 @@ void MeshlabStdDialog::loadFrameContent(QString actiondesc)
 	
 }
 
-void MeshlabStdDialog::stdClick()
-{
-	  FilterParameter par;
-	  QAction *q = curaction;
 
-	  par.clear();
-	  for(int i = 0; i < parlist->count(); i++)
+/* click event for the apply button of the standard plugin window */
+void MeshlabStdDialog::applyClick()
+{
+	  QAction *q = curAction;
+		QList<FilterParameter> &parList =curParSet.paramList;
+		
+	  for(int i = 0; i < parList.count(); i++)
 	  {
-		  QString &sname = parlist->getFieldName(i);
-		  switch(parlist->getFieldType(i))
+		  QString sname = parList.at(i).fieldName;
+		  switch(parList.at(i).fieldType)
 		  {
-		  case MESHLAB_STDPAR_PARBOOL:
-			  par.addBool(sname,((QCheckBox *)stdfieldwidgets[i])->checkState() == Qt::Checked);
+				case FilterParameter::PARBOOL:
+				QCheckBox * tt=(QCheckBox *)stdfieldwidgets[i];
+			  curParSet.setBool(sname,((QCheckBox *)stdfieldwidgets[i])->checkState() == Qt::Checked);
 			  break;
-		  case MESHLAB_STDPAR_PARINT:
-			  par.addInt(sname,((QLineEdit *)stdfieldwidgets[i])->text().toInt());
+		  case FilterParameter::PARINT:
+			  curParSet.setInt(sname,((QLineEdit *)stdfieldwidgets[i])->text().toInt());
 			  break;
-		  case MESHLAB_STDPAR_PARFLOAT:
-			  par.addFloat(sname,((QLineEdit *)stdfieldwidgets[i])->text().toFloat());
+		  case FilterParameter::PARFLOAT:
+			  curParSet.setFloat(sname,((QLineEdit *)stdfieldwidgets[i])->text().toFloat());
 			  break;
-		  case MESHLAB_STDPAR_PARABSPERC:
-			  par.addFloat(sname,((AbsPercWidget *)stdfieldwidgets[i])->getValue());
+		  case FilterParameter::PARABSPERC:
+			  curParSet.setAbsPerc(sname,((AbsPercWidget *)stdfieldwidgets[i])->getValue());
 			  break;
-		  case MESHLAB_STDPAR_PARSTRING:
-			  par.addString(sname,((QLineEdit *)stdfieldwidgets[i])->text());
+		  case FilterParameter::PARSTRING:
+			  curParSet.setString(sname,((QLineEdit *)stdfieldwidgets[i])->text());
 			  break;
 		  }
 	  }
 
-	  curmwi->executeFilter(q,&par);
-
-}
-
-/* click event for the apply button of the standard plugin window */
-
-void MeshlabStdDialog::applyClick()
-{
-
-	stdClick();
-
-	QAction *curactions = curaction;
-	MeshModel *curmodels = curmodel;
-	MeshFilterInterface *curmfis = curmfi;
-	MainWindowInterface *curmwis = curmwi;
-	resetMe();
-	curaction = curactions;
-	curmodel = curmodels;
-	curmfi = curmfis;
-	curmwi = curmwis;
-
-
-	curmfi->getStdFields(curaction,*curmodel,*parlist);
-    loadFrameContent(curaction->text());
+	  curmwi->executeFilter(q,curParSet);
+		
 }
 
 /* click event for the close button of the standard plugin window */
@@ -283,16 +272,6 @@ void MeshlabStdDialog::applyClick()
 void MeshlabStdDialog::closeClick()
 {
 	this->hide();
-	// stdClick(); commented out when switched from ok to close
-}
-
-void MeshlabStdDialog::topLevelChanged (bool topLevel)
-{
-	if(topLevel)
-		restorelastsize = true; /* i want to restore the old size but i can't do it here
-								   because, after the topLevelChanged event, QT wants to
-								   resize the window, so i must postpone the resize in order
-								   to prevent being overridden by the QT resize */
 }
 
 void MeshlabStdDialog::resizeEvent ( QResizeEvent *  )
@@ -330,4 +309,12 @@ void AbsPercWidget::on_percSB_valueChanged(double newv)
 float AbsPercWidget::getValue()
 {
 	return float(absSB->value());
+}
+
+void AbsPercWidget::setValue(float val, float minV, float maxV)
+{
+	assert(absSB);
+	absSB->setValue (val);
+	m_min=minV;
+	m_max=maxV;
 }

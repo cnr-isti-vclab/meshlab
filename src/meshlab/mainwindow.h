@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.88  2007/10/02 07:59:42  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.87  2007/07/24 07:19:04  cignoni
 managed failure in loading of project. Added safe cleaning of meshes with nan coords
 
@@ -159,7 +162,7 @@ class MainWindow : public QMainWindow,MainWindowInterface
 
 public:
 	// callback function to execute a filter
-  void executeFilter(QAction *action,FilterParameter *srcpar);
+  void executeFilter(QAction *action,FilterParameterSet &srcpar);
 
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
@@ -186,7 +189,7 @@ private slots:
   void applyEditMode();
 	void suspendEditMode();
 	///////////Slot Menu Filter ////////////////////////
-	void applyFilter();
+	void startFilter();
 	void applyLastFilter();
 	void runFilterScript();
 	void showFilterScript();
@@ -205,7 +208,7 @@ private slots:
 	void setLightingProperties();
 	void setColorMode(QAction *qa);
 	void applyRenderMode();
-	void applyColorMode();
+	//void applyColorMode();
 	void toggleBackFaceCulling();
   void toggleSelectionRendering();
 	void applyDecorateMode();

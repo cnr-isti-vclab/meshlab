@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.79  2007/10/02 07:59:33  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.78  2007/07/10 07:19:22  cignoni
 ** Serious Changes **
 again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
@@ -588,8 +591,8 @@ pluginsDir = QDir(qApp->applicationDirPath());
         foreach(filterAction, iFilter->actions())
         {
           filterMap[filterAction->text()]=filterAction;
-					filterAction->setToolTip(iFilter->Info(filterAction));
-          connect(filterAction,SIGNAL(triggered()),this,SLOT(applyFilter()));
+					filterAction->setToolTip(iFilter->filterInfo(filterAction));
+          connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
           switch(iFilter->getClass(filterAction))
           {
             case MeshFilterInterface::FaceColoring : 

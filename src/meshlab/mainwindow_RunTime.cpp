@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.133  2007/10/02 07:59:40  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.132  2007/09/15 09:07:33  cignoni
 Added missing return
 
@@ -333,52 +336,57 @@ void MainWindow::runFilterScript()
 // /////////////////////////////////////////////////
 // The Very Important Procedure of applying a filter
 // /////////////////////////////////////////////////
+// It is splitted in two part
+// - startFilter that setup the dialogs and asks for parameters
+// - executeFilter callback invoked when the params have been set up.
 
-void MainWindow::applyFilter()
+
+void MainWindow::startFilter()
 {
+	if(GLA()==NULL) return;
+
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-  // Ask for filter requirements (eg a filter can need topology, border flags etc)
-  //    and statisfy them
+ 
+	// Ask for filter requirements (eg a filter can need topology, border flags etc)
+  // and statisfy them
+	
+	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
   int req=iFilter->getRequirements(action);
   GLA()->mm()->updateDataMask(req);
+  qApp->restoreOverrideCursor();	
+	
+	// (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
+  // bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
+	FilterParameterSet parList;
 
-	/*
-		loads the plugin action in the standard plugin window.
-		If the plugin action doesn't support the use of the standard
-		plugin window, the function executeFilter() is immediately called
-	*/
-	stddialog->loadPluginAction(iFilter,GLA()->mm(),action,this);
+  if(iFilter->autoDialog(action))
+	{
+		/// Start the automatic dialog with the collected parameters
+		stddialog->showAutoDialog(iFilter, GLA()->mm(), action, this);
+  }
+	else if(iFilter->customDialog(action))
+	{
+		/// Start the custom dialog with the collected parameters
+		iFilter->getParameters(action, GLA(),*(GLA()->mm()), parList, this);
+  }	
+	else executeFilter(action,parList);
 }
 
-/* callback function that applies the filter action;
-This function is called back from the StdDialog even in the case the filter has not parameters
+/* 
+	callback function that actually start the chosen filter. 
+  it is called once the parameters have been filled. 
+	It can be called 
+	from the automatic dialog 
+	from the user defined dialog 
 */
-void MainWindow::executeFilter(QAction *action, FilterParameter *par)
+void MainWindow::executeFilter(QAction *action, FilterParameterSet &params)
 {
 
-	if(GLA()==NULL)
-		return;
-
-	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-  // (1) Ask for filter requirements (eg a filter can need topology, border flags etc)
-  //    and statisfy them
-  int req=iFilter->getRequirements(action);
-	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
-	GLA()->mm()->updateDataMask(req);
-  qApp->restoreOverrideCursor();	
-
-  
-  // (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
-  bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
-
-  if(!ret) return;
+	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());  
 	
   // (3) save the current filter and its parameters in the history
-  GLA()->filterHistory.actionList.append(qMakePair(action->text(),*par));
-
-  qDebug("Filter History size %i",GLA()->filterHistory.actionList.size());
-  qDebug("Filter History Last entry %s",qPrintable (GLA()->filterHistory.actionList.front().first));
+  GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
 
   qb->show();
   iFilter->setLog(&(GLA()->log));
@@ -386,7 +394,7 @@ void MainWindow::executeFilter(QAction *action, FilterParameter *par)
 
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
 	GLA()->mm()->busy=true;
-  ret=iFilter->applyFilter(action, *(GLA()->mm()), *par, QCallBack);
+  bool ret=iFilter->applyFilter(action, *(GLA()->mm()), params, QCallBack);
   GLA()->mm()->busy=false;
   qApp->restoreOverrideCursor();	
 
@@ -417,8 +425,6 @@ if(iFilter->getClass(action)==MeshFilterInterface::Selection )
   qb->reset();
   updateMenus();
   GLA()->update();
-  
-
 }
 
 	
@@ -497,16 +503,6 @@ void MainWindow::applyRenderMode()
 	}
 }
 
-
-void MainWindow::applyColorMode()
-{
-	QAction *action = qobject_cast<QAction *>(sender());
-	MeshFilterInterface *iColorTemp = qobject_cast<MeshFilterInterface *>(action->parent());
-  iColorTemp->setLog(&(GLA()->log));
-  //iColorTemp->Compute(action,*(GLA()->mm ),GLA()->getCurrentRenderMode(), GLA());
-  GLA()->log.Logf(GLLogStream::Info,"Applied colorize %s",action->text().toLocal8Bit().constData());
-  updateMenus();
-}
 
 void MainWindow::applyDecorateMode()
 {

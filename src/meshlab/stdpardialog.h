@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.9  2007/10/02 07:59:44  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.8  2007/03/26 08:25:10  zifnab1974
 added eol at the end of the files
 
@@ -77,6 +80,11 @@ public:
 
 };
 
+
+/// Widget to enter a value as a percentage or as an absolute value. 
+/// You have to specify the default value and the range of the possible values.
+/// The default value is expressed in ABSolute units (e.g. it should be in the min..max range.
+
 class AbsPercWidget : public QGridLayout
 {
 	  Q_OBJECT
@@ -89,25 +97,28 @@ public:
 	  absSB = new QDoubleSpinBox(p);
 	  percSB = new QDoubleSpinBox(p);
 
-	  absSB->setMinimum(m_min);
-	  absSB->setMaximum(m_max);
+	  //absSB->setMinimum(m_min);
+	  absSB->setMaximum(m_max*2);
 	  absSB->setDecimals(3);
-	  absSB->setSingleStep(0.001);
+	  absSB->setSingleStep((m_max-m_min)/20.0);
 	  absSB->setValue(defaultv);
 
 	  percSB->setMinimum(0);
-	  percSB->setMaximum(100);
-      percSB->setSingleStep(0.2);
+	  percSB->setMaximum(200);
+		percSB->setSingleStep(0.5);
 	  percSB->setValue((100*(defaultv - m_min))/(m_max - m_min));
+		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
+		QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
+		
+		this->addWidget(absLab,0,0,Qt::AlignHCenter);
+		this->addWidget(percLab,0,1,Qt::AlignHCenter);
+		
+	  this->addWidget(absSB,1,0);
+	  this->addWidget(percSB,1,1,Qt::AlignTop);
 
-	  this->addWidget(absSB,0,0,Qt::AlignTop);
-	  this->addWidget(percSB,0,1,Qt::AlignTop);
 
-
-  	  connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
-  	  connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-
-
+		connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+		connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
   }
 
   ~AbsPercWidget()
@@ -117,6 +128,7 @@ public:
   }
 
   float getValue();
+	void  setValue(float val, float minV, float maxV);
 
 public slots:
 
@@ -128,7 +140,6 @@ protected:
   QDoubleSpinBox *percSB;
   float m_min;
   float m_max;
-
 };
 
 
@@ -138,47 +149,33 @@ class MeshlabStdDialog : public QDockWidget
 	  Q_OBJECT
 
 public:
-  MeshlabStdDialog(QWidget *p):QDockWidget(QString("Plugin"),p)
-  {
-	qf = NULL;
-	parlist = new StdParList();
-	initValues();
-	QSize siz = this->size();
-	lastsize.setWidth(siz.width());
-	lastsize.setHeight(siz.height());
-	restorelastsize = false;
-	connect(this,SIGNAL(topLevelChanged(bool)),this,SLOT(topLevelChanged(bool)));
+  MeshlabStdDialog(QWidget *p);
 
-  }
+	void clearValues();
+	void createFrame();
+	void loadFrameContent();
 
-	void initValues();
-	void resetMe();
-    void resizeEvent(QResizeEvent *e);
-	void loadPluginAction(MeshFilterInterface *mfi,MeshModel *mm,QAction *q,MainWindowInterface *mwi);
-
-
-
+	void resizeEvent(QResizeEvent *e);
+	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, QAction *q, MainWindowInterface *mwi);
 
   private slots:
-	 void applyClick();
-	 void closeClick();
-	 void topLevelChanged(bool);
- 
+	void applyClick();
+	void closeClick();
+  void resetValues();
+
 protected:
 	QFrame *qf;
-	QAction *curaction;
-	MeshModel *curmodel;
+	QAction *curAction;
+	MeshModel *curModel;
 	MeshFilterInterface *curmfi;
 	MainWindowInterface *curmwi;
+	FilterParameterSet curParSet;
+	
 	QVector<void *> stdfieldwidgets;
-	StdParList *parlist;
-
+	
 	bool restorelastsize;
 	QSize lastsize;
-
-	void loadFrameContent(QString actiondesc);
-	void stdClick();
-
+	
 };
 
 

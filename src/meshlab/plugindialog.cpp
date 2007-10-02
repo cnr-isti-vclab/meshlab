@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2007/10/02 07:59:44  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.13  2006/11/29 00:55:36  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -237,9 +240,9 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 		if (iFilter)
 		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iFilter->Info().Author+QString(" Date: ")+iFilter->Info().Date+QString(" Version: ")+iFilter->Info().Version);
+			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iFilter->pluginInfo().Author+QString(" Date: ")+iFilter->pluginInfo().Date+QString(" Version: ")+iFilter->pluginInfo().Version);
 			else foreach(QAction *a,iFilter->actions())
-							if (actionName==a->text()) labelInfo->setText(iFilter->Info(a));
+							if (actionName==a->text()) labelInfo->setText(iFilter->filterName(a));
 		}
 		MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 		if (iRender){

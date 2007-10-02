@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.59  2007/10/02 07:59:37  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.58  2007/07/10 06:46:26  cignoni
 better comments
 
@@ -141,30 +144,29 @@ public:
 class MainWindowInterface
 {
 public:
-	virtual void executeFilter(QAction *,FilterParameter *){};
+	virtual void executeFilter(QAction *, FilterParameterSet &){};
 	virtual ~MainWindowInterface(){};
 };
-
 
 
 
 class MeshFilterInterface
 {
 public:
-  typedef int FilterType;
+  typedef int FilterIDType;
 	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring} ;
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action 
 	// (this string is used in the About plugin dialog)
-	virtual const QString Info(FilterType filter)=0;
+	virtual const QString filterInfo(FilterIDType filter)=0;
 	
 	// The very short string describing each filtering action 
 	// (this string is used also to define the menu entry)
-	virtual const QString ST(FilterType filter)=0;
+	virtual const QString filterName(FilterIDType filter)=0;
 
 	// Generic Info about the plugin version and author.
-	virtual const PluginInfo &Info()=0;
+	virtual const PluginInfo &pluginInfo()=0;
 
 	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
@@ -177,46 +179,55 @@ public:
 	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
 	virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}
 
-	// The main function that applies the selected filter.
-	// This function is called by the frameworl 
-	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameter & /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
+	// The main function that applies the selected filter with the already stabilished parameters
+	// This function is called by the framework after getting the user params 
+	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameterSet & /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
 	
-	// This function invokes a dialog and get back the parameters
-	virtual bool getParameters(QAction *, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameter & /*par*/) {return true;}	
+  
+	//  this function returns true if the filter has parameters that must be filled with an automatically build dialog.
+	virtual bool autoDialog(QAction *) {return false;}
+	
+	// This function is called to initialized the list of parameters. 
+	// it is called by the auto dialog framework to know the list of parameters.
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/) {}
 
-	// Returns an array of standard parameters descriptors for the standard plugin window. 
-	// FALSE is returned by default if the plugin doesn't implement this (e.g. the filter does not require a automatic parameter dialog)	
-	// TRUE means that for the given filter it requires an automatic parameter dialog.
-	virtual bool getStdFields(QAction *, MeshModel &, StdParList &){return false;}
-    
-	/* Overloading of the function getParameters that supports the standard plugin window. 
-	If the plugin doesn't implement this, the classic function is called */
-	virtual bool getStdParameters(QAction *qa, QWidget *qw /*parent*/, MeshModel &mm/*m*/, FilterParameter &fp /*par*/) {return getParameters(qa,qw,mm,fp);};
+	//  this function returns true if the filter has a personally customized dialog..
+	virtual bool customDialog(QAction *) {return false;}
+	
+	// This function is invokes the custom dialog of a filter and when has the params 
+	// it notify it to the mainwindow with the collected parameters
+	virtual bool getParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw) 
+	{
+		assert(mw);
+		mw->executeFilter(action,params);
+	}	
 
   /// Standard stuff that usually should not be redefined. 
 	  void setLog(GLLogStream *log) { this->log = log ; }
 
-    virtual const FilterType ID(QAction *a)
+    virtual const FilterIDType ID(QAction *a)
   	{
-      foreach( FilterType tt, types())
-        if( a->text() == this->ST(tt) ) return tt;
+      foreach( FilterIDType tt, types())
+        if( a->text() == this->filterName(tt) ) return tt;
           assert(0);
       return 0;
     }
-		virtual const QString Info(QAction *a){return Info(ID(a));};
+	 
+	 virtual const QString filterInfo(QAction *a){return filterInfo(ID(a));};
+	 virtual const QString filterName(QAction *a){return filterName(ID(a));};
 	 
     virtual QList<QAction *> actions() const { return actionList;}
-	  virtual QList<FilterType> &types() { return typeList;}
+	  virtual QList<FilterIDType> &types() { return typeList;}
 
 protected:
     // Each plugins exposes a set of filtering possibilities. 
-		// Each filtering procedure corresponds to a single QAction with a corresponding FilterType id. 
+		// Each filtering procedure corresponds to a single QAction with a corresponding FilterIDType id. 
 		// 
 		
     // The list of actions exported by the plugin. Each actions strictly corresponds to 
 		QList <QAction *> actionList;
     
-		QList <FilterType> typeList;
+		QList <FilterIDType> typeList;
     
 		void Log(int Level, const char * f, ... ) 
 		{
@@ -261,7 +272,7 @@ public:
 class MeshDecorateInterface
 {
 public:
-  typedef int FilterType;
+  typedef int FilterIDType;
 
     virtual ~MeshDecorateInterface() {}
 
@@ -272,20 +283,20 @@ public:
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/,QFont qf) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
         
-    virtual const QString ST(FilterType filter) const=0;
-    virtual const FilterType ID(QAction *a)
+    virtual const QString ST(FilterIDType filter) const=0;
+    virtual const FilterIDType ID(QAction *a)
   	{
-      foreach( FilterType tt, types())
+      foreach( FilterIDType tt, types())
         if( a->text() == this->ST(tt) ) return tt;
           assert(0);
       return 0;
     }
 
     virtual QList<QAction *> actions() const { return actionList;}
-    virtual QList<FilterType> &types() { return typeList;}
+    virtual QList<FilterIDType> &types() { return typeList;}
 protected:
     QList <QAction *> actionList;
-    QList <FilterType> typeList;
+    QList <FilterIDType> typeList;
     GLLogStream *log;	
 };
 
