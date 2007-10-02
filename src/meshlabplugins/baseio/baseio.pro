@@ -24,4 +24,4 @@ contains(TEMPLATE,lib) {
    }
 }
 
-mac:CONFIG += x86 ppc
+# mac:CONFIG += x86 ppc

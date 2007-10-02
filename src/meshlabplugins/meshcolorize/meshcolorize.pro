@@ -3,7 +3,9 @@ CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = meshcolorize.h curvature.h equalizerDialog.h smoothcolor.h
-SOURCES       = meshcolorize.cpp equalizerDialog.cpp
+SOURCES       = meshcolorize.cpp \
+		equalizerDialog.cpp\ 
+		../../meshlab/filterparameter.cpp
 TARGET        = meshcolorize
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
@@ -11,7 +13,7 @@ DESTDIR       = ../../meshlab/plugins
 win32:DEFINES += NOMINMAX
 FORMS		  = equalizerDialog.ui
 CONFIG		+= debug_and_release
-mac:CONFIG += x86 ppc
+# mac:CONFIG += x86 ppc
 
 
 contains(TEMPLATE,lib) {

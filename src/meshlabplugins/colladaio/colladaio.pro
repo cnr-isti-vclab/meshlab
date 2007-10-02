@@ -6,7 +6,7 @@ SOURCES       = colladaio.cpp
 TARGET        = colladaio
 DESTDIR       = ../../meshlab/plugins
 CONFIG		+= debug_and_release
-mac:CONFIG += x86 ppc
+# mac:CONFIG += x86 ppc
 
 
 win32-msvc.net:LIBS     -= LIBCMTD.lib

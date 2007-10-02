@@ -28,6 +28,7 @@ SOURCES        = main.cpp \
                  plugin_support.cpp \
                  plugindialog.cpp \
                  filterscript.cpp \
+                 filterparameter.cpp \
                  customDialog.cpp \
                  lightingDialog.cpp \
                  filterScriptDialog.cpp \
@@ -84,8 +85,8 @@ CONFIG(debug, debug|release) {
 }
 
 mac{
-message( "We are on a mac: build universal binaries" )
-CONFIG += x86 ppc
+# message( "We are on a mac: build universal binaries" )
+# CONFIG += x86 ppc
 }
 
 

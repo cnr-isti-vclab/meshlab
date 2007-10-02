@@ -2,7 +2,9 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = meshselect.h 
-SOURCES       = meshselect.cpp
+SOURCES       = meshselect.cpp\ 
+		../../meshlab/filterparameter.cpp
+
 TARGET        = meshselect
 DESTDIR       = ../../meshlab/plugins
 RESOURCES     = meshlab.qrc
@@ -11,7 +13,7 @@ RESOURCES     = meshlab.qrc
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 CONFIG		+= debug_and_release
-mac:CONFIG += x86 ppc
+# mac:CONFIG += x86 ppc
 
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {

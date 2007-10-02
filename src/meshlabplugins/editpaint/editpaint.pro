@@ -13,7 +13,7 @@ DEFINES += GLEW_STATIC
 QT += opengl
 RESOURCES = meshlab.qrc
 CONFIG		+= debug_and_release
-mac:CONFIG += x86 ppc
+# mac:CONFIG += x86 ppc
 
 contains(TEMPLATE,lib){
   CONFIG(debug, debug|release){

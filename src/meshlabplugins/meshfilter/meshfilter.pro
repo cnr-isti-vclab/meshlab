@@ -8,20 +8,24 @@ HEADERS       = transformDialog.h \
                 meshfilter.h 
 
 SOURCES       = transformDialog.cpp \
-				meshfilter.cpp \ 
-				quadricsimp.cpp \ 
-				quadricsteximp.cpp \ 
-				../../meshlab/GLLogStream.cpp 
+		meshfilter.cpp \ 
+		quadricsimp.cpp \ 
+		quadricsteximp.cpp \ 
+		../../meshlab/GLLogStream.cpp\ 
+		../../meshlab/filterparameter.cpp 
 
 TARGET        = meshfilter
 DESTDIR       = ../../meshlab/plugins
+
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
+
 # all dialog are stored in meshlab/ui directory
-FORMS         = ui/transformDialog.ui ../../meshlab/ui/genericELDialog.ui
+FORMS         = ui/transformDialog.ui 
+	       # ../../meshlab/ui/genericELDialog.ui
 CONFIG		+= debug_and_release
-mac:CONFIG += x86 ppc
+# mac:CONFIG += x86 ppc
 
 QT += opengl
 

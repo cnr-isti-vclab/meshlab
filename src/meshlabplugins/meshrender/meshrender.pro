@@ -14,7 +14,7 @@ win32:DEFINES += NOMINMAX
 FORMS		  = shaderDialog.ui
 DEFINES += GLEW_STATIC
 CONFIG		+= debug_and_release
-mac:CONFIG += x86 ppc
+# mac:CONFIG += x86 ppc
 
 
 contains(TEMPLATE,lib) {
