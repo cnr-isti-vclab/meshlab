@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.24  2007/10/02 08:13:53  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.23  2007/04/16 09:25:29  cignoni
 ** big change **
 Added Layers managemnt.
@@ -100,13 +103,19 @@ public:
     ExtraMeshColorizePlugin();
     ~ExtraMeshColorizePlugin(){};
   
-  virtual const QString ST(FilterType filter);
-  virtual const QString Info(FilterType filterId);
-	virtual const PluginInfo &Info();
+  virtual const QString filterName(FilterIDType filter);
+  virtual const QString filterInfo(FilterIDType filterId);
+	virtual const PluginInfo &pluginInfo();
   virtual const FilterClass getClass(QAction *);
-  virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);
+	virtual bool autoDialog(QAction *) {return false;}
+	virtual bool customDialog(QAction *filter) { 
+		if(ID(filter) == CP_MAP_QUALITY_INTO_COLOR ) return true;  
+			return false;
+	}
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/){}
+	virtual bool getParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 protected:
   EqualizerSettings eqSettings;

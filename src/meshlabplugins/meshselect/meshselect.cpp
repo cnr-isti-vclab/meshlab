@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2007/10/02 08:13:48  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.12  2007/04/16 10:16:25  cignoni
 Added missing info on filtering actions
 
@@ -73,7 +76,7 @@ Optional data really working. Clustering decimation totally rewrote. History sta
 
 using namespace vcg;
 
-const QString SelectionFilterPlugin::ST(FilterType filter) 
+const QString SelectionFilterPlugin::filterName(FilterIDType filter) 
 {
  switch(filter)
   {
@@ -99,11 +102,11 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     FP_SELECT_BORDER_FACES <<
     FP_SELECT_INVERT;
   
-  FilterType tt;
+  FilterIDType tt;
   
   foreach(tt , types())
     {
-      actionList << new QAction(ST(tt), this);
+      actionList << new QAction(filterName(tt), this);
       if(tt==FP_SELECT_DELETE){
             actionList.last()->setShortcut(QKeySequence (Qt::Key_Delete));
             actionList.last()->setIcon(QIcon(":/images/delete_face.png"));
@@ -118,7 +121,7 @@ SelectionFilterPlugin::~SelectionFilterPlugin()
 }
 
 
-bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterParameter & par, vcg::CallBackPos * cb) 
+bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
 {
  CMeshO::FaceIterator fi;
  switch(ID(action))
@@ -150,7 +153,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   return true;
 }
 
- const QString SelectionFilterPlugin::Info(FilterType filterId) 
+ const QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) 
  {
   switch(filterId)
   {
@@ -166,7 +169,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   return QString();
  }
 
- const PluginInfo &SelectionFilterPlugin::Info() 
+ const PluginInfo &SelectionFilterPlugin::pluginInfo() 
 {
    static PluginInfo ai; 
    ai.Date=tr(__DATE__);
@@ -182,4 +185,5 @@ const int SelectionFilterPlugin::getRequirements(QAction *action)
    case FP_SELECT_BORDER_FACES:   return  MeshModel::MM_BORDERFLAG;
   }
 }
+
 Q_EXPORT_PLUGIN(SelectionFilterPlugin)

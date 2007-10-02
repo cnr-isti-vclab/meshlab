@@ -57,13 +57,13 @@ ExtraSamplePlugin::ExtraSamplePlugin()
 { 
 	typeList << FP_MOVE_VERTEX;
   
-  foreach(FilterType tt , types())
-	  actionList << new QAction(ST(tt), this);
+  foreach(FilterIDType tt , types())
+	  actionList << new QAction(filterName(tt), this);
 }
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-const QString ExtraSamplePlugin::ST(FilterType filterId) 
+const QString ExtraSamplePlugin::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
 		case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement"); 
@@ -73,7 +73,7 @@ const QString ExtraSamplePlugin::ST(FilterType filterId)
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
-const QString ExtraSamplePlugin::Info(FilterType filterId)
+const QString ExtraSamplePlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
 		case FP_MOVE_VERTEX :  return QString("Randomly move each vertex of the mesh of a small amount"); 
@@ -81,12 +81,12 @@ const QString ExtraSamplePlugin::Info(FilterType filterId)
 	}
 }
 
-const PluginInfo &ExtraSamplePlugin::Info()
+const PluginInfo &ExtraSamplePlugin::pluginInfo()
 {
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.9");
-	 ai.Author = ("Elisa Cerisoli, Paolo Cignoni");
+	 ai.Version = tr("1.0");
+	 ai.Author = ("Paolo Cignoni");
    return ai;
  }
 
@@ -97,21 +97,27 @@ const PluginInfo &ExtraSamplePlugin::Info()
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-bool ExtraSamplePlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst)
+void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
+//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	 switch(ID(action))	 {
 		case FP_MOVE_VERTEX :  
- 		  parlst.addFieldBool ("UpdateNormals","Recompute normals",true,"Toggle the recomputation of the normals after the random displacement.\n\n If disabled the face normals will remains unchanged resulting in a visually pleasant effect.");
-		  return true;
+ 		  parlst.addBool ("UpdateNormals",
+											true,
+											"Recompute normals",
+											"Toggle the recomputation of the normals after the random displacement.\n\n"
+											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect.");
+											break;
+											
 		default : assert(0); 
 	}
-	return false;
 }
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameter & par, vcg::CallBackPos *cb)
+bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
+	//MeshModel &m=*md->mm();
 	srand(time(NULL)); 
 	const float max_displacement = m.cm.bbox.Diag()/100;
 

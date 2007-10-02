@@ -49,11 +49,12 @@ public:
 
 	ExtraSamplePlugin();
 	
-	virtual const QString ST(FilterType filter);
-	virtual const QString Info(FilterType filter);
-	virtual const PluginInfo &Info();
-	bool ExtraSamplePlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst);
-	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual const QString filterName(FilterIDType filter);
+	virtual const QString filterInfo(FilterIDType filter);
+	virtual const PluginInfo &pluginInfo();
+	virtual bool autoDialog(QAction *) {return true;}
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 };
 
 #endif

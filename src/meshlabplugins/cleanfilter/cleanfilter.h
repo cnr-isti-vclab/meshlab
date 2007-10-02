@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.8  2007/10/02 08:13:39  cignoni
+ New filter interface. Hopefully more clean and easy to use.
+
  Revision 1.7  2007/04/16 09:25:28  cignoni
  ** big change **
  Added Layers managemnt.
@@ -92,17 +95,17 @@ class CleanFilter : public QObject, public MeshFilterInterface
 
 	CleanFilter();
 	~CleanFilter();
-	virtual const QString ST(FilterType filter);
-  virtual const QString Info(FilterType filter);
-	virtual const PluginInfo &Info();
+
+	virtual const QString filterName(FilterIDType filter);
+	virtual const QString filterInfo(FilterIDType filter);
+	virtual const PluginInfo &pluginInfo();
 
   virtual const FilterClass getClass(QAction *);
   virtual const int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
 
-	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst);
-	bool getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par);
-  bool getStdParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par);
+	virtual bool autoDialog(QAction *) {return true;}
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 
 	protected:

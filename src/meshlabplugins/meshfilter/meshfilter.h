@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.45  2007/10/02 08:13:45  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.44  2007/07/24 07:20:18  cignoni
 Added Freeze transform and improved transformation dialog
 
@@ -122,30 +125,30 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
   
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin();
-	virtual const QString ST(FilterType filter);
-  virtual const QString Info(FilterType filter);
-	virtual const PluginInfo &Info();
+	virtual const QString filterName(FilterIDType filter);
+  virtual const QString filterInfo(FilterIDType filter);
+	virtual const PluginInfo &pluginInfo();
   virtual const FilterClass getClass(QAction *);
-  virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par);
+	virtual bool autoDialog(QAction *) ;
+	virtual bool customDialog(QAction *filter);
+	
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
+	virtual bool getParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
-
-
-	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
-	bool getStdFields(QAction *, MeshModel &m, StdParList &parlst);
-	bool getStdParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par);
-
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	
 protected:
 
 
 	TransformDialog *transformDialog;
-	GenericELDialog *genericELD;
+//	GenericELDialog *genericELD;
 	
 
 	float lastq_QualityThr;
 	bool lastq_PreserveBoundary;
 	bool lastq_Selected;
-    bool lastq_PreserveNormal;
-    bool lastq_OptimalPlacement;
+	bool lastq_PreserveNormal;
+	bool lastq_OptimalPlacement;
 	
 	float lastqtex_QualityThr;
 	float lastqtex_extratw;

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.42  2007/10/02 08:13:50  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.41  2007/04/16 09:25:29  cignoni
 ** big change **
 Added Layers managemnt.
@@ -127,7 +130,7 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
    return ai;
  }
 
-const QString ExtraMeshDecoratePlugin::ST(FilterType filter) const
+const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
 {
   switch(filter)
   {

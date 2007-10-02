@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.98  2007/10/02 08:13:44  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.97  2007/07/24 07:20:20  cignoni
 Added Freeze transform and improved transformation dialog
 
@@ -36,157 +39,6 @@ Revision 1.94  2007/04/16 09:25:29  cignoni
 Added Layers managemnt.
 Interfaces are changing again...
 
-Revision 1.93  2007/03/27 12:20:18  cignoni
-Revamped logging iterface, changed function names in automatic parameters, better selection handling
-
-Revision 1.92  2007/03/20 16:23:10  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.91  2007/02/25 21:31:49  cignoni
-new parameters for quadric simplification
-
-Revision 1.90  2007/02/09 09:10:06  pirosu
-Added ToolTip support for standard parameters
-
-Revision 1.89  2007/02/08 23:46:17  pirosu
-merged srcpar and par in the GetStdParameters() function
-
-Revision 1.88  2007/02/08 16:10:15  cignoni
-Added more parameters to holefilling and quadric simplification
-
-Revision 1.87  2007/02/08 13:39:58  pirosu
-Added Quadric Simplification(with textures) Filter
-
-Revision 1.86  2007/01/19 09:12:37  cignoni
-Added parameters for quality,selection and boundary preservation
-
-Revision 1.85  2007/01/11 19:52:26  pirosu
-fixed bug for QT 4.1.0/dotnet2003
-removed the request of the window title to the plugin. The action description is used instead.
-
-Revision 1.84  2007/01/11 10:38:58  cignoni
-Renamed ambiguous min/max vars e added a missing return in the getParameters
-
-Revision 1.83  2006/12/27 21:41:58  pirosu
-Added improvements for the standard plugin window:
-split of the apply button in two buttons:ok and apply
-added support for parameters with absolute and percentage values
-
-Revision 1.82  2006/12/13 17:37:27  pirosu
-Added standard plugin window support
-
-Revision 1.81  2006/12/11 23:50:07  cignoni
-corrected border management after holefilling filter
-
-Revision 1.80  2006/12/06 21:39:57  cignoni
-Hole filling no intersection
-
-Revision 1.79  2006/12/01 08:52:24  cignoni
-Better text in the help, and corrected bug  the hole size parameter
-
-Revision 1.78  2006/12/01 00:02:52  cignoni
-Removed use of the local invertfaces function and used the function in clean.h
-added progress to holefilling
-
-Revision 1.77  2006/11/30 11:40:34  cignoni
-Updated the calls to the hole filling functions to the new interface
-
-Revision 1.76  2006/11/29 00:59:18  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.75  2006/11/27 06:57:20  cignoni
-Wrong way of using the __DATE__ preprocessor symbol
-
-Revision 1.74  2006/11/09 17:41:25  cignoni
-mismatch : with ;
-
-Revision 1.73  2006/11/09 17:25:51  cignoni
-Cleaned RemoveNonManifold
-
-Revision 1.72  2006/11/07 11:47:23  cignoni
-gcc compiling issues
-
-Revision 1.71  2006/11/07 09:22:31  cignoni
-Wrote correct Help strings, and added required cleardatamask
-
-Revision 1.70  2006/10/22 21:09:35  cignoni
-Added Close Hole
-
-Revision 1.69  2006/10/19 08:57:44  cignoni
-Added working ball pivoting and normal creation
-
-Revision 1.68  2006/10/16 08:57:29  cignoni
-Added management of selection in laplacian filter
-
-Revision 1.67  2006/10/10 21:13:08  cignoni
-Added remove non manifold and quadric simplification filter.
-
-Revision 1.66  2006/10/09 13:53:36  corsini
-fix face inversion
-
-Revision 1.65  2006/06/19 15:16:01  cignoni
-Update of normals after refinement
-
-Revision 1.64  2006/06/19 05:29:12  cignoni
-changed include order for disambiguating gcc specialization template rule
-
-Revision 1.63  2006/06/07 10:25:28  cignoni
-init of bbox diag for generic lenght dialog
-
-Revision 1.62  2006/05/25 06:24:14  cignoni
-Decimator dialog no more necessary
-
-Revision 1.61  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.60  2006/04/18 06:57:35  zifnab1974
-syntax errors for gcc 3.4.5 resolved
-
-Revision 1.59  2006/04/12 15:12:18  cignoni
-Added Filter classes (cleaning, meshing etc)
-
-Revision 1.58  2006/02/20 20:52:36  giec
-replace refine and detacher dialog whit GnericELDialog
-
-Revision 1.57  2006/02/15 22:13:01  giec
-Modify the Detucher function call
-
-Revision 1.56  2006/02/13 16:18:51  cignoni
-Used the treshold param...
-
-Revision 1.55  2006/02/06 10:18:27  mariolatronico
-reverted to old behaviour, removed QEdgeLength
-
-Revision 1.54  2006/02/05 11:22:40  mariolatronico
-changed spinbox to QEdgeLength widget
-
-Revision 1.53  2006/02/03 13:46:47  mariolatronico
-spell check, remuve -> remove
-
-Revision 1.52  2006/01/31 14:42:27  mariolatronico
-fake commit, removed only some history logs
-
-Revision 1.51  2006/01/31 14:37:40  mariolatronico
-trashold -> threshold
-
-Revision 1.50  2006/01/30 21:26:53  giec
--changed the voice of the menu from Decimator in Cluster decimator
-
-Revision 1.49  2006/01/26 16:49:50  giec
-Bugfix the new signature for decimator function call
-
-Revision 1.48  2006/01/25 21:06:24  giec
-Implemented percentile for detucher's dialog
-
-Revision 1.47  2006/01/23 21:47:58  giec
-Update detucherdialog with the diagonal percentage spinbox.
-
-Revision 1.46  2006/01/22 16:43:32  mariolatronico
-added update bbox and normal after transform dialog
-
-Revision 1.45  2006/01/22 14:11:04  mariolatronico
-added scale to unit box, move obj center. Rotate around object and origin are not working actually.
 
 ****************************************************************************/
 #include <QtGui>
@@ -238,13 +90,13 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 		FP_FREEZE_TRANSFORM<<
 		FP_TRANSFORM;
   
-  FilterType tt;
+  FilterIDType tt;
   
   foreach(tt , types())
-	    actionList << new QAction(ST(tt), this);
+	    actionList << new QAction(filterName(tt), this);
 	
-	genericELD = new GenericELDialog();
-	genericELD->hide();
+	//genericELD = new GenericELDialog();
+	//genericELD->hide();
 	
 	transformDialog = new TransformDialog();
 	transformDialog->hide();
@@ -279,7 +131,7 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
 }
 
 
-const QString ExtraMeshFilterPlugin::ST(FilterType filter) 
+const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) 
 {
  switch(filter)
   {
@@ -312,17 +164,14 @@ const QString ExtraMeshFilterPlugin::ST(FilterType filter)
 }
 
 ExtraMeshFilterPlugin::~ExtraMeshFilterPlugin() {
-//	delete refineDialog;
-	delete genericELD;
-//	delete decimatorDialog;
-	if (transformDialog)
-		delete transformDialog;
-	for (int i = 0; i < actionList.count() ; i++ ) {
-		delete actionList.at(i);
-	}
+//	if(genericELD) delete genericELD;
+//	if(transformDialog)		delete transformDialog;
+//	for (int i = 0; i < actionList.count() ; i++ ) {
+//		delete actionList.at(i);
+//	}
 }
 
-const QString ExtraMeshFilterPlugin::Info(FilterType filterID)
+const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
 {
   switch(filterID)
   {
@@ -352,7 +201,7 @@ const QString ExtraMeshFilterPlugin::Info(FilterType filterID)
 }
 
 
-const PluginInfo &ExtraMeshFilterPlugin::Info()
+const PluginInfo &ExtraMeshFilterPlugin::pluginInfo()
 {
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
@@ -393,31 +242,35 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 }
 
 
-
-bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParList &parlst)
+// this function builds and intializes with the default values (that can depend on the current mesh or selection) 
+// the list of parameters that a filter requires. 
+// return 
+//		true if has some parameters 
+//		false is has no params
+void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	float maxVal;
-
-	 switch(ID(action))
+	
+	switch(ID(action))
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
-		  parlst.addFieldInt  ("TargetFaceNum","Target number of faces", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2);
-		  parlst.addFieldFloat("QualityThr","Quality threshold",lastq_QualityThr,"Quality threshold for penalizing bad shaped faces.\nThe value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
-		  parlst.addFieldBool ("PreserveBoundary","Preserve Boundary of the mesh",lastq_PreserveBoundary,"The simplification process tries not to destroy mesh boundaries");
-		  parlst.addFieldBool ("PreserveNormal","Preserve Normal",lastq_PreserveNormal,"Try to avoid face flipping effects and try to preserve the original orientation of the surface");
-		  parlst.addFieldBool ("OptimalPlacement","Optimal position of simplified vertices",lastq_OptimalPlacement,"Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices. ");
-		  parlst.addFieldBool ("Selected","Simplify only selected faces",m.cm.sfn>0,"The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
+		  parlst.addInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces");
+		  parlst.addFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.\nThe value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
+		  parlst.addBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries");
+		  parlst.addBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface");
+		  parlst.addBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices. ");
+		  parlst.addBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
 		  break;
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
-		  parlst.addFieldInt  ("TargetFaceNum","Target number of faces",(int)(m.cm.fn/2));
-		  parlst.addFieldFloat("QualityThr","Quality threshold",lastqtex_QualityThr,"Quality threshold for penalizing bad shaped faces");
-		  parlst.addFieldFloat("Extratcoordw","Texture discontinuity extra weight",lastqtex_extratw,"Additional weight for each extra Texture Coordinates for every (selected) vertex");
+		  parlst.addInt  ("TargetFaceNum",(int)(m.cm.fn/2),"Target number of faces");
+		  parlst.addFloat("QualityThr",lastqtex_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces");
+		  parlst.addFloat("Extratcoordw",lastqtex_extratw,"Additional weight for each extra Texture Coordinates for every (selected) vertex");
 		  break;
 		case FP_CLOSE_HOLES:
-		  parlst.addFieldInt ("MaxHoleSize","Max size to be closed ",(int)30,"The size is expressed as number of edges composing the hole boundary");
-		  parlst.addFieldBool("Selected","Close holes with selected faces",m.cm.sfn>0);
-		  parlst.addFieldBool("NewFaceSelected","Select the newly created faces",true);
-		  parlst.addFieldBool("SelfIntersection","Prevent creation of selfIntersecting faces",true);
+		  parlst.addInt ("MaxHoleSize",(int)30,"Max size to be closed ","The size is expressed as number of edges composing the hole boundary");
+		  parlst.addBool("Selected",m.cm.sfn>0,"Close holes with selected faces");
+		  parlst.addBool("NewFaceSelected",true,"Select the newly created faces");
+		  parlst.addBool("SelfIntersection",true,"Prevent creation of selfIntersecting faces");
 		  break;
 		case FP_LOOP_SS:
 		case FP_BUTTERFLY_SS: 
@@ -425,29 +278,27 @@ bool ExtraMeshFilterPlugin::getStdFields(QAction *action, MeshModel &m, StdParLi
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
 		  maxVal = m.cm.bbox.Diag();
-		  parlst.addFieldAbsPerc("Threshold","Threshold",maxVal*0.01,0,maxVal);
-		  parlst.addFieldBool ("Selected","Affect only selected faces",m.cm.sfn>0);
+		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Threshold");
+		  parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		  break;
 		case FP_TWO_STEP_SMOOTH:
-			parlst.addFieldInt  ("stepSmoothNum","Smoothing steps", (int) 3, "");
-			parlst.addFieldFloat("normalThr","Feature Angle Threshold (deg)", (float) 60, "Specify a threshold angle for features that you want to be preserved.\nFeatures forming angles LARGER than the specified threshold will be preserved.");
-			parlst.addFieldInt  ("stepNormalNum","Normal Smoothing steps", (int) 20, "");
-      parlst.addFieldBool ("Selected","Affect only selected faces",m.cm.sfn>0);
+			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "");
+			parlst.addFloat("normalThr", (float) 60,"Feature Angle Threshold (deg)", "Specify a threshold angle for features that you want to be preserved.\nFeatures forming angles LARGER than the specified threshold will be preserved.");
+			parlst.addInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "");
+      parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		break;
-		
-	  default:
-		  return false;
-	 }
-
-	 return true;
+			 }
 }
-bool ExtraMeshFilterPlugin::getStdParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
+
+// Return true if the specified action has an automatic dialog.
+// return false if the action has no parameters or has an self generated dialog.
+bool ExtraMeshFilterPlugin::autoDialog(QAction *action)
 {
 	 switch(ID(action))
 	 {
-	    case FP_QUADRIC_SIMPLIFICATION:
+		case FP_QUADRIC_SIMPLIFICATION:
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
-	    case FP_CLOSE_HOLES:
+		case FP_CLOSE_HOLES:
 		case FP_LOOP_SS :
 		case FP_BUTTERFLY_SS : 
 		case FP_MIDPOINT : 
@@ -456,13 +307,24 @@ bool ExtraMeshFilterPlugin::getStdParameters(QAction *action, QWidget *parent, M
 		case FP_TWO_STEP_SMOOTH:
 		  return true;
   	 }
-
-	 return getParameters(action,parent,m,par);
+  return false;
+}
+bool ExtraMeshFilterPlugin::customDialog(QAction *action)
+{
+	 switch(ID(action))
+	 {
+		 case FP_TRANSFORM:
+			 return true;
+	 }
+  return false;
 }
 
-bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
-{
+// this function is called to fill the parameter list 
+// It is called only for filters that have a not empty list of parameters and 
+// that do not use the autogenerated dialog, but want a personalized dialog.
 
+bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget * /*parent*/, MeshModel &m, FilterParameterSet & params, MainWindowInterface *mw)
+{
  switch(ID(action))
   {
 	case FP_TRANSFORM:
@@ -474,36 +336,29 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget *parent, Mesh
 		    int continueValue = transformDialog->exec();
  		    if (continueValue == QDialog::Rejected)
  			    return false;
+					
       	Matrix44f matrix = transformDialog->getTransformation();
-        par.addMatrix44("Transform",matrix);
+        params.addMatrix44("Transform",matrix);
+				mw->executeFilter(action,params);
         break;
       } 		
-    case FP_REMOVE_FACES_BY_AREA:
-    case FP_REMOVE_UNREFERENCED_VERTEX:
-    case FP_REMOVE_DUPLICATED_VERTEX:
-    case FP_REORIENT:
-    case FP_INVERT_FACES:
-    case FP_HC_LAPLACIAN_SMOOTH:
-    case FP_LAPLACIAN_SMOOTH:
-    case FP_REMOVE_NON_MANIFOLD:
-    case FP_NORMAL_EXTRAPOLATION:
-		case FP_FREEZE_TRANSFORM:
-       return true; // no parameters
    default :assert(0);
   }
   return true;
 }
-	
-bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameter & par, vcg::CallBackPos *cb)
+
+bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
+	//MeshModel &m=*md->mm();
+
 	if( getClass(filter)==Remeshing)
   {
     if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
       QMessageBox::warning(0, QString("Can't continue"), QString("Mesh faces not 2 manifold")); // text
       return false; // can't continue, mesh can't be processed
     }
-
-    bool selected=par.getBool("Selected");	
+ 
+    bool  selected  = par.getBool("Selected");	
     float threshold = par.getFloat("Threshold");		
 
     switch(ID(filter)) {
@@ -529,20 +384,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
     m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	}
 
-  if(filter->text() == ST(FP_REMOVE_FACES_BY_AREA) )
+  if(ID(filter) == (FP_REMOVE_FACES_BY_AREA) )
 	  {
 	    int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
 	    Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
 
-  if(filter->text() == ST(FP_REMOVE_UNREFERENCED_VERTEX) )
+  if(ID(filter) == (FP_REMOVE_UNREFERENCED_VERTEX) )
 	  {
 	    int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 	    Log(GLLogStream::Info, "Removed %d unreferenced vertices",delvert);
 	  }
 
-	if(filter->text() == ST(FP_REMOVE_DUPLICATED_VERTEX) )
+	if(ID(filter) == (FP_REMOVE_DUPLICATED_VERTEX) )
 	  {
 	    int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 	    Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
@@ -550,7 +405,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
-	if(filter->text() == ST(FP_REMOVE_NON_MANIFOLD) )
+	if(ID(filter) == (FP_REMOVE_NON_MANIFOLD) )
 	  {
 	    int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
 	    
@@ -558,7 +413,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 							else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
 	  }
 
-	if(filter->text() == ST(FP_REORIENT) )
+	if(ID(filter) == (FP_REORIENT) )
 	  {
 	    bool oriented;
 	    bool orientable;
@@ -566,7 +421,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
-	if(filter->text() == ST(FP_LAPLACIAN_SMOOTH))
+	if(ID(filter) == (FP_LAPLACIAN_SMOOTH))
 	  {
       size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       if(cnt>0) LaplacianSmooth(m.cm,1,true);
@@ -575,7 +430,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 
-	if(filter->text() == ST(FP_HC_LAPLACIAN_SMOOTH))
+	if(ID(filter) == (FP_HC_LAPLACIAN_SMOOTH))
 	  {
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       if(cnt>0) HCSmooth(m.cm,1,true);
@@ -583,7 +438,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 
-  if(filter->text() == ST(FP_TWO_STEP_SMOOTH))
+  if(ID(filter) == (FP_TWO_STEP_SMOOTH))
 	  {
       //size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			int stepSmoothNum = par.getInt("stepSmoothNum");
@@ -596,7 +451,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 
- 	if(filter->text() == ST(FP_CLUSTERING))
+ 	if(ID(filter) == (FP_CLUSTERING))
 	  {
       bool selected  = par.getBool("Selected");	
       float threshold = par.getFloat("Threshold");		
@@ -608,27 +463,27 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
 
-	if (filter->text() == ST(FP_INVERT_FACES) ) 
+	if (ID(filter) == (FP_INVERT_FACES) ) 
 	{
 	  tri::Clean<CMeshO>::FlipMesh(m.cm);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
     m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	}
 
-	if (filter->text() == ST(FP_FREEZE_TRANSFORM) ) {
+	if (ID(filter) == (FP_FREEZE_TRANSFORM) ) {
 		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 		m.cm.Tr.SetIdentity();
 	}
-	if (filter->text() == ST(FP_TRANSFORM) ) {
+	if (ID(filter) == (FP_TRANSFORM) ) {
 			Matrix44f matrix= par.getMatrix44("Transform");		
 			Log(GLLogStream::Info, qPrintable(transformDialog->getLog()) ); 		
 			m.cm.Tr=matrix;
 	}
 
 
-	if (filter->text() == ST(FP_QUADRIC_SIMPLIFICATION) ) {
+	if (ID(filter) == (FP_QUADRIC_SIMPLIFICATION) ) {
   
 		int TargetFaceNum = par.getInt("TargetFaceNum");		
 		lastq_QualityThr = par.getFloat("QualityThr");
@@ -643,7 +498,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	}
 
 
-	if (filter->text() == ST(FP_QUADRIC_TEXCOORD_SIMPLIFICATION) ) {
+	if (ID(filter) == (FP_QUADRIC_TEXCOORD_SIMPLIFICATION) ) {
   
 		int TargetFaceNum = par.getInt("TargetFaceNum");		
 		lastqtex_QualityThr = par.getFloat("QualityThr");
@@ -654,11 +509,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		 tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
 
-  if (filter->text() == ST(FP_NORMAL_EXTRAPOLATION) ) {
+  if (ID(filter) == (FP_NORMAL_EXTRAPOLATION) ) {
     NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
 	}
 
-	if(filter->text() == ST(FP_CLOSE_HOLES))
+	if(ID(filter) == (FP_CLOSE_HOLES))
 	  {
       size_t OriginalSize= m.cm.face.size();
       int MaxHoleSize = par.getInt("MaxHoleSize");		

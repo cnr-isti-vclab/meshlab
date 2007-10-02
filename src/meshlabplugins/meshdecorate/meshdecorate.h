@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.20  2007/10/02 08:13:50  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.19  2007/02/25 21:23:05  cignoni
 Added casts for mac compiling
 
@@ -95,7 +98,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 		DP_SHOW_QUOTED_BOX,
   };
 
-  virtual const QString ST(FilterType filter) const;
+  virtual const QString ST(FilterIDType filter) const;
 
 private:
 	float niceRound2(float value,float base);
@@ -120,7 +123,7 @@ public:
     DP_SHOW_AXIS <<
     DP_SHOW_QUOTED_BOX;
 
-    FilterType tt;
+    FilterIDType tt;
     foreach(tt , types()){
 	      actionList << new QAction(ST(tt), this);
     }

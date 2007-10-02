@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.7  2007/10/02 08:13:46  cignoni
+New filter interface. Hopefully more clean and easy to use.
+
 Revision 1.6  2007/04/16 09:25:30  cignoni
 ** big change **
 Added Layers managemnt.
@@ -56,19 +59,28 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 		 - FP -> Filter Plugin
 		 - name of the plugin separated by _
 	*/
-	enum { FP_SELECT_ALL, FP_SELECT_NONE, FP_SELECT_INVERT, FP_SELECT_DELETE, FP_SELECT_ERODE, FP_SELECT_DILATE, FP_SELECT_BORDER_FACES} ;
+	enum { 
+		FP_SELECT_ALL, 
+		FP_SELECT_NONE, 
+		FP_SELECT_INVERT, 
+		FP_SELECT_DELETE, 
+		FP_SELECT_ERODE, 
+		FP_SELECT_DILATE, 
+		FP_SELECT_BORDER_FACES
+	} ;
 
 	SelectionFilterPlugin();
 	~SelectionFilterPlugin();
-	virtual const QString Info(FilterType filter);
-	virtual const PluginInfo &Info();
+	virtual const QString filterInfo(FilterIDType filter);
+  virtual const QString filterName(FilterIDType filter);
+	virtual const PluginInfo &pluginInfo();
   
-  virtual const QString ST(FilterType filter);
   virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
-  virtual bool getParameters(QAction *, QWidget *, MeshModel &m, FilterParameter &par){return true;};
-  virtual const int getRequirements(QAction *);
-  virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameter & /*parent*/, vcg::CallBackPos * cb) ;
-
+  
+	virtual const int getRequirements(QAction *);
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+		
+	
 protected:
 
 //	ActionInfo *ai;

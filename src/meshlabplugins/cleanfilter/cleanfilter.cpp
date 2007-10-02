@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.16  2007/10/02 08:13:38  cignoni
+ New filter interface. Hopefully more clean and easy to use.
+
  Revision 1.15  2007/06/11 15:26:43  ponchio
  *** empty log message ***
 
@@ -96,6 +99,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/stat.h>
 #include <vcg/complex/trimesh/create/ball_pivoting.h>
 
 #include <vcg/space/normal_extrapolation.h>
@@ -106,12 +110,12 @@ CleanFilter::CleanFilter()
 {
   typeList << FP_REBUILD_SURFACE << FP_REMOVE_WRT_Q << FP_REMOVE_ISOLATED_COMPLEXITY << FP_REMOVE_ISOLATED_DIAMETER;
  
-  FilterType tt;
+  FilterIDType tt;
   foreach(tt , types())
-	    actionList << new QAction(ST(tt), this);
+	    actionList << new QAction(filterName(tt), this);
 
-    maxDiag1=0;
-	maxDiag2=10;
+	maxDiag1=0;
+	maxDiag2=-1;
 	minCC=25;
 	val1=1.0;
 
@@ -122,14 +126,27 @@ CleanFilter::~CleanFilter() {
 		delete actionList.at(i);
 }
 
-const QString CleanFilter::ST(FilterType filter) 
+const QString CleanFilter::filterName(FilterIDType filter) 
 {
  switch(filter)
   {
-	  case FP_REBUILD_SURFACE :		return QString("Build surface from points");
-	  case FP_REMOVE_WRT_Q :		return QString("Remove Faces wrt quality");
+	  case FP_REBUILD_SURFACE :								return QString("Build surface from points");
+	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
+  	default: assert(0);
+  }
+  return QString("error!");
+}
+
+const QString CleanFilter::filterInfo(FilterIDType filterId)
+{
+  switch(filterId)
+  {
+		case FP_REBUILD_SURFACE :	return QString("Merge"); 
+		case FP_REMOVE_ISOLATED_COMPLEXITY:	 return tr("Remove isolated connected components composed by a limited number of triangles"); 
+		case FP_REMOVE_ISOLATED_DIAMETER:	 return tr("Remove isolated connected components whose diameter is smaller than the specified constant"); 
+		case FP_REMOVE_WRT_Q:	     return tr("Remove all the vertices with a quality lower smaller than the specified constant"); 
   	default: assert(0);
   }
   return QString("error!");
@@ -147,18 +164,8 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
   }
 }
 
-const QString CleanFilter::Info(FilterType filterId)
-{
-  switch(filterId)
-  {
-  case FP_REBUILD_SURFACE :	return QString("Merge"); 
-	case FP_REMOVE_ISOLATED_COMPLEXITY:	 return tr("Remove Isolated"); 
-	case FP_REMOVE_ISOLATED_DIAMETER:	 return tr("Remove Isolated"); 
-	case FP_REMOVE_WRT_Q:	     return tr("Remove all the faces with quality lower than..."); 
-  }
-}
 
-const PluginInfo &CleanFilter::Info()
+const PluginInfo &CleanFilter::pluginInfo()
 {
    static PluginInfo ai;
    ai.Date=tr( __DATE__ );
@@ -181,68 +188,37 @@ const int CleanFilter::getRequirements(QAction *action)
   return 0;
 }
 
-bool CleanFilter::getStdFields(QAction *action, MeshModel &m, StdParList &parlst)
+void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
 { 
+	pair<float,float> qualityRange;
   switch(ID(action))
   {
     case FP_REBUILD_SURFACE :
-		  parlst.addFieldFloat("BallRadius","Enter ball size as a diag perc. (0 autoguess))",(float)maxDiag1);
-		  parlst.addFieldFloat("Clustering","Enter clustering radius (as ball size percent)",30.0f);		  
-		  parlst.addFieldFloat("CreaseThr","Angle Threshold (degrees)", 90.0f);
-//		  parlst.addFieldBool("ComputeNormal","Compute the per vertex normals using only the point set ",false);
-		  parlst.addFieldBool("DeleteFaces","Delete intial set of faces",false);
+		  parlst.addFloat("BallRadius",(float)maxDiag1,"Enter ball size as a diag perc. (0 autoguess))");
+		  parlst.addFloat("Clustering",30.0f,"Enter clustering radius (as ball size percent)");		  
+		  parlst.addFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)");
+//		  parlst.addBool("ComputeNormal","Compute the per vertex normals using only the point set ",false);
+		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces");
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
-		  parlst.addFieldFloat("MinComponentDiag","Enter size (as a diag perc 0..100)",(float)maxDiag2);
+		  parlst.addAbsPerc("MinComponentDiag",m.cm.bbox.Diag()/10.0,0,m.cm.bbox.Diag(),"Enter max diameter of isolated pieces","All the connected components with a smaller diameter will be deleted");
 		  break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-		  parlst.addFieldInt("MinComponentSize","Enter minimum conn. comp size:",(int)minCC);
+		  parlst.addInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:");
 		  break;
     case FP_REMOVE_WRT_Q:
-		  parlst.addFieldFloat("MaxQualityThr","Delete all Vertices with quality under:",(float)val1);
+			 qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+		  parlst.addAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:");
 		  break;
-	default:
-		return false;
+	default: assert(0);
   }
-
-  return true;
 }
 
-bool CleanFilter::getStdParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
+
+
+bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
 {
- return true;
-}
-bool CleanFilter::getParameters(QAction *action, QWidget *parent, MeshModel &m,FilterParameter &par)
-{
- /*	 switch(ID(action))
-  {
- case FP_REBUILD_SURFACE :
-		 maxDiag1 = par.getFloat("BallRadius");
-     ComputeNormalFlag=
-			par.update("BallRadius",float(m.cm.bbox.Diag()*maxDiag1/100.0));
-		 return true;
-	 case FP_REMOVE_ISOLATED_DIAMETER:	 
-		 maxDiag2 = par.getFloat("MinComponentDiag");
-				  par.update("MinComponentDiag",float(m.cm.bbox.Diag()*maxDiag2/100.0));
-				  return true;
-	  case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-			  minCC = par.getInt("MinComponentSize");
-				 return true;
-	  case FP_REMOVE_WRT_Q:
-				  val1 = par.getFloat("MaxQualityThr");
-				  return true;
-	
-			}  
- return false;*/
- return false;
-  }
-
-
-
-
-bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & par, vcg::CallBackPos * cb) 
-{
-	if(filter->text() == ST(FP_REBUILD_SURFACE) )
+	if(filter->text() == filterName(FP_REBUILD_SURFACE) )
 	  {
       float Radius = par.getFloat("BallRadius");		
       float Clustering = par.getFloat("Clustering");		      
@@ -266,20 +242,20 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameter & p
       pivot.BuildMesh(cb);
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
-    if(filter->text() == ST(FP_REMOVE_ISOLATED_DIAMETER) )
+    if(filter->text() == filterName(FP_REMOVE_ISOLATED_DIAMETER) )
 	  {
-      float minCC= par.getFloat("MinComponentDiag");		
+      float minCC= par.getAbsPerc("MinComponentDiag");		
       RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,minCC);
     }  	
 
-    if(filter->text() == ST(FP_REMOVE_ISOLATED_COMPLEXITY) )
+    if(filter->text() == filterName(FP_REMOVE_ISOLATED_COMPLEXITY) )
 	  {
       float minCC= par.getInt("MinComponentSize");		
       RemoveSmallConnectedComponentsSize<CMeshO>(m.cm,minCC);
 	  }
-	if(filter->text() == ST(FP_REMOVE_WRT_Q) )
+	if(filter->text() == filterName(FP_REMOVE_WRT_Q) )
 	  {
-      float val=par.getFloat("MaxQualityThr");		
+      float val=par.getAbsPerc("MaxQualityThr");		
       CMeshO::VertexIterator vi;
       for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
         if(!(*vi).IsD() && (*vi).Q()<val)
