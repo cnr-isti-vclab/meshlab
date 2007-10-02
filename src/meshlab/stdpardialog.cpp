@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.12  2007/10/02 10:03:03  cignoni
+wrong init in a case statement
+
 Revision 1.11  2007/10/02 07:59:35  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -245,8 +248,7 @@ void MeshlabStdDialog::applyClick()
 		  switch(parList.at(i).fieldType)
 		  {
 				case FilterParameter::PARBOOL:
-				QCheckBox * tt=(QCheckBox *)stdfieldwidgets[i];
-			  curParSet.setBool(sname,((QCheckBox *)stdfieldwidgets[i])->checkState() == Qt::Checked);
+				curParSet.setBool(sname,((QCheckBox *)stdfieldwidgets[i])->checkState() == Qt::Checked);
 			  break;
 		  case FilterParameter::PARINT:
 			  curParSet.setInt(sname,((QLineEdit *)stdfieldwidgets[i])->text().toInt());
