@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.99  2007/10/06 23:39:01  cignoni
+Updated used defined dialog to the new filter interface.
+
 Revision 1.98  2007/10/02 08:13:44  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -337,8 +340,8 @@ bool ExtraMeshFilterPlugin::getParameters(QAction *action, QWidget * /*parent*/,
  		    if (continueValue == QDialog::Rejected)
  			    return false;
 					
-      	Matrix44f matrix = transformDialog->getTransformation();
-        params.addMatrix44("Transform",matrix);
+      	Matrix44f matrixDlg = transformDialog->getTransformation();
+        params.addMatrix44("Transform",matrixDlg);
 				mw->executeFilter(action,params);
         break;
       } 		
@@ -477,9 +480,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		m.cm.Tr.SetIdentity();
 	}
 	if (ID(filter) == (FP_TRANSFORM) ) {
-			Matrix44f matrix= par.getMatrix44("Transform");		
+			Matrix44f matrixPar= par.getMatrix44("Transform");		
 			Log(GLLogStream::Info, qPrintable(transformDialog->getLog()) ); 		
-			m.cm.Tr=matrix;
+			m.cm.Tr=matrixPar;
 	}
 
 

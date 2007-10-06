@@ -26,6 +26,9 @@
 /*
 
 $Log$
+Revision 1.3  2007/10/06 23:39:01  cignoni
+Updated used defined dialog to the new filter interface.
+
 Revision 1.2  2007/07/24 07:20:24  cignoni
 Added Freeze transform and improved transformation dialog
 
@@ -106,7 +109,7 @@ private slots:
 	// ... and viceversa
 	void on_rotateLE_textChanged(const QString &text);
 	// do the real count when ok button is pressed
-  void on_okButton_pressed();
+  void on_applyButton_clicked();
 	
 	// move mesh center to origin
 	// simply updates the move line edit

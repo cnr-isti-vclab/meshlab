@@ -26,6 +26,9 @@
 
 /*
 $Log$
+Revision 1.5  2007/10/06 23:39:01  cignoni
+Updated used defined dialog to the new filter interface.
+
 Revision 1.4  2007/07/24 07:20:20  cignoni
 Added Freeze transform and improved transformation dialog
 
@@ -92,13 +95,13 @@ TransformDialog::TransformDialog() : QDialog() {
 	connect(rotateBG, SIGNAL(buttonClicked(QAbstractButton* )),
 					this, SLOT(rotateAxisChange(QAbstractButton* )));
 
-	connect(xMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
-	connect(yMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
-	connect(zMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
-	connect(xScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
-	connect(yScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
-	connect(zScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
-	connect(rotateLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	//connect(xMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	//connect(yMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	//connect(zMoveLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	//connect(xScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	//connect(yScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	//connect(zScaleLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
+	//connect(rotateLE, SIGNAL(returnPressed()), this, SLOT(on_okButton_pressed()) );
 
 //	connect(freezeButton, SIGNAL(buttonClicked()), this, SLOT(freeze()) );
 
@@ -280,7 +283,7 @@ void TransformDialog::on_scaleUnitPB_clicked() {
 	setScale(QString().setNum(scale), QString().setNum(scale), QString().setNum(scale));
 }
 // do the real calculations
-void TransformDialog::on_okButton_pressed() {
+void TransformDialog::on_applyButton_clicked() {
 	
 	Matrix44f currentMatrix;
 	currentMatrix.SetIdentity();
