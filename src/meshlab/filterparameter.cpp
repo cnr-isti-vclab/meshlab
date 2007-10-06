@@ -123,7 +123,6 @@ void FilterParameterSet::addString   (QString name, QString   defaultVal, QStrin
 QString			FilterParameterSet::getString(QString name)
 {
 	assert(0);
-
 }
 void FilterParameterSet::setString(QString name, QString newVal)
 {
@@ -135,13 +134,37 @@ void FilterParameterSet::setString(QString name, QString newVal)
 
 Matrix44f		FilterParameterSet::getMatrix44(QString name)
 {
+    FilterParameter &p=findParameter(name);
+
+    assert(p.fieldType==FilterParameter::PARMATRIX);
+		assert(p.fieldVal.type()==QVariant::List);
+   
+    Matrix44f matrix;
+    QList<QVariant> matrixVals = p.fieldVal.toList();
+    assert(matrixVals.size()==16);
+    for(int i=0;i<16;++i)
+      matrix.V()[i]=matrixVals[i].toDouble();
+        return matrix;
+
 }
 void FilterParameterSet::addMatrix44 (QString name, Matrix44f defaultVal, QString desc, QString tooltip)
 {
+	FilterParameter p(name,desc,tooltip);
+ 
+	QList<QVariant> matrixVals;
+    for(int i=0;i<16;++i)
+        matrixVals.append(defaultVal.V()[i]);
+	p.fieldVal=matrixVals;
+	p.fieldType=FilterParameter::PARMATRIX;
+	paramList.push_back(p);		
 }
+
+
 void FilterParameterSet::setMatrix44(QString name, Matrix44f newVal)
 {
+	assert(0);
 }
+
 
 //--------------------------------------
 
