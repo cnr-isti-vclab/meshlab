@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.134  2007/10/06 23:29:51  cignoni
+corrected management of suspeneded editing actions. Added filter toolbar
+
 Revision 1.133  2007/10/02 07:59:40  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -243,13 +246,28 @@ void MainWindow::updateMenus()
 			lastFilterAct->setText(QString("Apply filter "));
 		}
 
+
+    // Management of the editing toolbar
+		// when you enter in a editing mode you can toggle between editing 
+		// and camera moving by esc;
+		// you exit from editing mode by pressing again the editing button
+		// When you are in a editing mode all the other editing are disabled.
+		
     foreach (QAction *a,editActionList)
-         {a->setChecked(false);}
-    suspendEditModeAct->setChecked(false);
+         {
+						a->setChecked(false); 
+						a->setEnabled( GLA()->getEditAction() == NULL ); 
+				 }
 
-    if(GLA()->getEditAction())   GLA()->getEditAction()->setChecked(true);
-                              else   suspendEditModeAct->setChecked(true);
+    suspendEditModeAct->setChecked(GLA()->suspendedEditor);
+		suspendEditModeAct->setDisabled(GLA()->getEditAction() == NULL);
 
+    if(GLA()->getEditAction())   
+				{
+						GLA()->getEditAction()->setChecked(! GLA()->suspendedEditor);
+						GLA()->getEditAction()->setEnabled(true);
+				}
+		
 		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
@@ -427,26 +445,24 @@ if(iFilter->getClass(action)==MeshFilterInterface::Selection )
   GLA()->update();
 }
 
+// Edit Mode Managment
+// At any point there can be a single editing plugin active. 
+// When a plugin is active it intercept the mouse actions. 
+// Each active editing tools 
+//
+//
+
 	
 void MainWindow::suspendEditMode()
 {
-  if(!GLA()) return;
-  if(GLA()->getEditAction())
-  {
-//	  GLA()->getEditAction()->setChecked(false);
-    GLA()->suspendEditToggle();
-  }
-  /* else
-		 if(GLA()->getLastAppliedEdit())
-		 {	
-			 QAction *action = qobject_cast<QAction *>(GLA()->getLastAppliedEdit());
-			 MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
-			 GLA()->setEdit(iEdit,action);
-			 iEdit->StartEdit(action,*(GLA()->mm()),GLA());
-			 GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
-			 GLA()->setSelectionRendering(true);
-		 }
-	 */ updateMenus();
+   // return if no window is open
+  if(!GLA()) return;  
+	
+	// return if no editing action is currently ongoing
+  if(!GLA()->getEditAction()) return;
+
+	GLA()->suspendEditToggle();
+	updateMenus();
 }
 void MainWindow::applyEditMode()
 {
@@ -458,13 +474,21 @@ void MainWindow::applyEditMode()
 
 	QAction *action = qobject_cast<QAction *>(sender());
 
-	if(GLA()->getEditAction()) { //prevents multiple buttons pushed
+	if(GLA()->getEditAction()) //prevents multiple buttons pushed
+		{
 		  if(action==GLA()->getEditAction()) // We have double pressed the same action and that means disable that actioon
 			{
+				if(GLA()->suspendedEditor) 
+				{
+					suspendEditMode();
+					return;
+				}
 				GLA()->endEdit();
+				updateMenus();
 				return;
 			}
-			GLA()->endEdit();
+			assert(0); // it should be impossible to start an action without having ended the previous one.
+			return;
 		}
 		
 	MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());

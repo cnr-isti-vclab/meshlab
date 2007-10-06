@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.89  2007/10/06 23:29:51  cignoni
+corrected management of suspeneded editing actions. Added filter toolbar
+
 Revision 1.88  2007/10/02 07:59:42  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -289,6 +292,7 @@ private:
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;
 	QToolBar *editToolBar;
+	QToolBar *filterToolBar;
 
 	///////// Menus ///////////////
 	QMenu *fileMenu;
@@ -297,12 +301,14 @@ private:
   QMenu *filterMenuClean;
   QMenu *filterMenuRemeshing;
 	QMenu *editMenu;
+
   //Render Menu and SubMenu ////
 	QMenu *shadersMenu;
 	QMenu *renderMenu;
 	QMenu *renderModeMenu;
 	QMenu *lightingModeMenu;
 	QMenu *colorModeMenu;
+	
 	//View Menu and SubMenu //////
 	QMenu *viewMenu;
 	QMenu *trackBallMenu;

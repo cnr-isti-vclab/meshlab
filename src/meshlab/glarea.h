@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.76  2007/10/06 23:29:51  cignoni
+corrected management of suspeneded editing actions. Added filter toolbar
+
 Revision 1.75  2007/07/10 07:19:12  cignoni
 ** Serious Changes **
 again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
@@ -306,16 +309,15 @@ public:
 	  
 	void endEdit(){	
 		if(iEdit && currentEditor) 
-				{
-						if(suspendedEditor) suspendEditToggle();
-						iEdit->EndEdit(currentEditor,*mm(),this);
-						currentEditor->setChecked(false);
-				}
+		{
+			iEdit->EndEdit(currentEditor,*mm(),this);
+		}
 		iEdit= 0; 
 		currentEditor=0; 
 		setCursorTrack(0); 
 		update(); 
 	} 
+	
   void suspendEditToggle()
 		{	
 			if(currentEditor==0) return;

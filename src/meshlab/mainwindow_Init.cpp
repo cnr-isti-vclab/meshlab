@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.80  2007/10/06 23:29:51  cignoni
+corrected management of suspeneded editing actions. Added filter toolbar
+
 Revision 1.79  2007/10/02 07:59:33  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -431,7 +434,9 @@ void MainWindow::createToolBars()
 
   editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
+	editToolBar->addSeparator();
 
+  filterToolBar = addToolBar(tr("Action"));
 }
 
 
@@ -601,7 +606,7 @@ pluginsDir = QDir(qApp->applicationDirPath());
             case MeshFilterInterface::Selection : 
               		filterMenuSelect->addAction(filterAction); 
                   if(!filterAction->icon().isNull())
-                      editToolBar->addAction(filterAction);
+                      filterToolBar->addAction(filterAction);
             break;
             case MeshFilterInterface::Cleaning : 
               		filterMenuClean->addAction(filterAction); break;
