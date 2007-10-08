@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.135  2007/10/08 08:55:09  cignoni
+moved out code for saving of aln
+
 Revision 1.134  2007/10/06 23:29:51  cignoni
 corrected management of suspeneded editing actions. Added filter toolbar
 
@@ -632,30 +635,20 @@ void MainWindow::saveProject()
 	qDebug("Saving aln file %s\n",qPrintable(fileName));
 	if (fileName.isEmpty()) return;
 	
-	FILE *fp=fopen(qPrintable(fileName),"w");
-	if(!fp)
-	{
-	 qDebug("unable to open file %s\n",qPrintable(fileName));
-	 return;
-	}
-
 	MeshDocument &meshDoc=GLA()->meshDoc;
-	
-	fprintf(fp,"%i\n",meshDoc.meshList.size());
+	vector<string> meshNameVector;
+	vector<Matrix44f> transfVector;
 
   foreach(MeshModel * mp, meshDoc.meshList) 
 	{
-		fprintf(fp,"%s\n",mp->fileName.c_str());
-
-		fprintf(fp,"#\n");
-		fprintf(fp,"%lf %lf %lf %lf \n",(mp->cm.Tr[0][0]),(mp->cm.Tr[0][1]),(mp->cm.Tr[0][2]),(mp->cm.Tr[0][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(mp->cm.Tr[1][0]),(mp->cm.Tr[1][1]),(mp->cm.Tr[1][2]),(mp->cm.Tr[1][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(mp->cm.Tr[2][0]),(mp->cm.Tr[2][1]),(mp->cm.Tr[2][2]),(mp->cm.Tr[2][3]));
-		fprintf(fp,"%lf %lf %lf %lf \n",(mp->cm.Tr[3][0]),(mp->cm.Tr[3][1]),(mp->cm.Tr[3][2]),(mp->cm.Tr[3][3]));
+		meshNameVector.push_back(mp->fileName.c_str());
+		transfVector.push_back(mp->cm.Tr);
 	}
-	fprintf(fp,"0\n");
+	bool ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
+	
+	if(!ret)
+	 QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
 
-	fclose(fp);
 }
 
 bool MainWindow::openProject(QString fileName, GLArea *gla)
