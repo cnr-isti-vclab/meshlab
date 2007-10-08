@@ -92,6 +92,41 @@ public:
 
 		return NoError;
 	} // end of ParseALN
+
+static bool SaveALN(const char *alnfile, vector<string> &names)
+{
+	vector<Matrix44f> Tr(names.size());
+	for(int i=0;i<Tr.size();++i) Tr[i].SetIdentity();
+	return SaveALN(alnfile,names, Tr);
+}
+template <class matrixfloat>
+static bool SaveALN(const char *alnfile, vector<string> &names, vector<Matrix44 <matrixfloat> > &Tr)
+{
+ // printf("Saving aln file %s\n",alnfile);
+  FILE *fp=fopen(alnfile,"w");
+  if(!fp)
+  {
+    printf("unable to open file %s\n",alnfile);
+    return false;
+  }
+
+  fprintf(fp,"%i\n",names.size());
+  for(int i=0;i<names.size();++i)
+  {
+    fprintf(fp,"%s\n",names[i].c_str());
+
+    fprintf(fp,"#\n");
+    fprintf(fp,"%lf %lf %lf %lf \n",(Tr[i][0][0]),(Tr[i][0][1]),(Tr[i][0][2]),(Tr[i][0][3]));
+    fprintf(fp,"%lf %lf %lf %lf \n",(Tr[i][1][0]),(Tr[i][1][1]),(Tr[i][1][2]),(Tr[i][1][3]));
+    fprintf(fp,"%lf %lf %lf %lf \n",(Tr[i][2][0]),(Tr[i][2][1]),(Tr[i][2][2]),(Tr[i][2][3]));
+    fprintf(fp,"%lf %lf %lf %lf \n",(Tr[i][3][0]),(Tr[i][3][1]),(Tr[i][3][2]),(Tr[i][3][3]));
+  }
+  fprintf(fp,"0\n");
+
+  fclose(fp);
+  return true;
+}
+
 };
 
 #endif //__OM_ALNPARSER_
