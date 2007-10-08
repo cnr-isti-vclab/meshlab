@@ -32,7 +32,6 @@ ExtraMeshSlidePlugin::ExtraMeshSlidePlugin() {
  first=false;
  isDragging=false;
  QAction* editslice = new QAction(QIcon(":/images/iconslice.png"),"Slice mesh geometry", this);
- editslice->setShortcut(Qt::Key_Escape);
  actionList << editslice;
  QAction *editAction;
  trackball_slice.center=Point3f(0, 0, 0);
@@ -84,15 +83,12 @@ const PluginInfo &ExtraMeshSlidePlugin::Info()
  } 
 
 
-
 void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
-
 	 trackball_slice.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
-
-
 }
- void ExtraMeshSlidePlugin::mousePressEvent    (QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
+
+void ExtraMeshSlidePlugin::mousePressEvent    (QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
  {  
 
 	  if (  (e->button()==Qt::LeftButton)         &&
@@ -100,17 +96,19 @@ void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshMo
 		  trackball_slice.MouseDown(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()) );
 	 gla->update();
  }
- void ExtraMeshSlidePlugin::mouseMoveEvent     (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+
+void ExtraMeshSlidePlugin::mouseMoveEvent     (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
  {
   if( (e->buttons()| Qt::LeftButton) &&
 	  !(e->modifiers() & Qt::ShiftModifier))
-	  trackball_slice.MouseMove(e->x(),gla->height()-e->y());
+				trackball_slice.MouseMove(e->x(),gla->height()-e->y());
 	gla->update();
  }
- void ExtraMeshSlidePlugin::RestoreDefault(){
-           trackball_slice.Reset();
-		   gla->trackball.Reset();
-		   gla->update();
+
+void ExtraMeshSlidePlugin::RestoreDefault(){
+			trackball_slice.Reset();
+			gla->trackball.Reset();
+			gla->update();
  }
  void ExtraMeshSlidePlugin::SlotExportButton()
  {
@@ -222,12 +220,12 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr){
    
  }
  void ExtraMeshSlidePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
-   //if ( dialogsliceobj!=0) { 
-	//		delete  dialogsliceobj; 
+	if ( dialogsliceobj!=0) { 
+			delete  dialogsliceobj; 
 			
-	//		 dialogsliceobj=0;
-	//		
-	// }
+			 dialogsliceobj=0;
+			
+	 }
  }
  void ExtraMeshSlidePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla ){
 	 gla->update();

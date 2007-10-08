@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.127  2007/10/08 19:48:45  cignoni
+corrected behavior for endedit
+
 Revision 1.126  2007/09/15 09:06:20  cignoni
 Added notification of ortho projection
 
@@ -637,7 +640,7 @@ void GLArea::closeEvent(QCloseEvent *event)
 			close = false;	// don't close please!
 		}
 	}
-
+  if(getEditAction()) endEdit();
 	event->ignore();
 	if(close)
 	{
