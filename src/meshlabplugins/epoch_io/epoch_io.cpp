@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.16  2007/10/08 08:55:44  cignoni
+ Added automatic exporting of ply and aln from the dialog
+
  Revision 1.15  2007/04/16 09:25:29  cignoni
  ** big change **
  Added Layers managemnt.
@@ -98,7 +101,9 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/hole.h>
 #include <wrap/io_trimesh/io_mask.h>
+#include <wrap/io_trimesh/export_ply.h>
 #include "../cleanfilter/remove_small_cc.h"
+#include <meshlab/alnParser.h>
 
 FILE *logFP=0; 
 using namespace vcg;
@@ -512,9 +517,9 @@ bool EpochModel::Init(QDomNode &node)
   return true;
 }
 
-QString EpochModel::ThumbName(QString &imageName)
+QString EpochModel::ThumbName(QString &_imageName)
 {
-  QString tmpName=imageName.left(imageName.length()-4);
+  QString tmpName=_imageName.left(_imageName.length()-4);
   return tmpName.append(".thumb.jpg");
 }
 
@@ -545,7 +550,7 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
 	QDir::setCurrent(FileNameDir);
 
 	QString errorMsgFormat = "Error encountered while loading file %1:\n%2";
-	string filename = QFile::encodeName(fileName).constData ();
+	string stdfilename = QFile::encodeName(fileName).constData ();
   //string filename = fileName.toUtf8().data();
 
 	QDomDocument doc;
@@ -579,123 +584,147 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
     }
 
 	epochDialog->setEpochReconstruction( &er, cb);
-  
-  //Here we invoke the modal dialog and wait for its termination
-  int continueValue = epochDialog->exec();
+  do
+	{
+			epochDialog->exportToPLY=false;
+			
+			//Here we invoke the modal dialog and wait for its termination
+			int continueValue = epochDialog->exec();
 
-  // 
-  int t0=clock();
-  logFP=fopen("epoch.log","w");
+			// The user has pressed the ok button: now start the real processing:
+			
+			if(epochDialog->exportToPLY == true) qDebug("Starting the ply exporting process");
+			
+			int t0=clock();
+			logFP=fopen("epoch.log","w");
 
-  int subSampleVal = epochDialog->subsampleSpinBox->value();
-  int minCountVal= epochDialog->minCountSpinBox->value();
-  float maxCCDiagVal= epochDialog->maxCCDiagSpinBox->value();
-  int mergeResolution=epochDialog->mergeResolutionSpinBox->value();
-  int smoothSteps=epochDialog->smoothSpinBox->value();
-  bool closeHole = epochDialog->holeCheckBox->isChecked();
-  int maxHoleSize = epochDialog->holeSpinBox->value();
-	if (continueValue == QDialog::Rejected)
-  {
-	    QMessageBox::warning(parent, "Open V3d format","Aborted");    
-      return false;
-  }
-  CMeshO mm;
-  QTableWidget *qtw=epochDialog->imageTableWidget;
-  float MinAngleCos=cos(vcg::math::ToRad(epochDialog->qualitySpinBox->value()));
-  bool clustering=epochDialog->fastMergeCheckBox->isChecked();
-  bool removeSmallCC=epochDialog->removeSmallCCCheckBox->isChecked();
-  vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > Grid;
+			int subSampleVal = epochDialog->subsampleSpinBox->value();
+			int minCountVal= epochDialog->minCountSpinBox->value();
+			float maxCCDiagVal= epochDialog->maxCCDiagSpinBox->value();
+			int mergeResolution=epochDialog->mergeResolutionSpinBox->value();
+			int smoothSteps=epochDialog->smoothSpinBox->value();
+			bool closeHole = epochDialog->holeCheckBox->isChecked();
+			int maxHoleSize = epochDialog->holeSpinBox->value();
+			if (continueValue == QDialog::Rejected)
+			{
+					QMessageBox::warning(parent, "Open V3d format","Aborted");    
+					return false;
+			}
+			CMeshO mm;
+			QTableWidget *qtw=epochDialog->imageTableWidget;
+			float MinAngleCos=cos(vcg::math::ToRad(epochDialog->qualitySpinBox->value()));
+			bool clustering=epochDialog->fastMergeCheckBox->isChecked();
+			bool removeSmallCC=epochDialog->removeSmallCCCheckBox->isChecked();
+			vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > Grid;
 
-  int selectedNum=0,selectedCount=0;
- 	int i;
-   for(i=0;i<qtw->rowCount();++i) if(qtw->isItemSelected(qtw->item(i,0))) ++selectedNum;
-  if(selectedNum==0)
-    {
-	    QMessageBox::warning(parent, "Open V3d format","No range map selected. Nothing loaded");    
-      return false;
-  }
+			int selectedNum=0,selectedCount=0;
+			int i;
+			 for(i=0;i<qtw->rowCount();++i) if(qtw->isItemSelected(qtw->item(i,0))) ++selectedNum;
+			if(selectedNum==0)
+				{
+					QMessageBox::warning(parent, "Open V3d format","No range map selected. Nothing loaded");    
+					return false;
+			}
 
-	bool dilationFlag = epochDialog->dilationCheckBox->isChecked();
-	int dilationN = epochDialog->dilationNumPassSpinBox->value();
-	int dilationSz = epochDialog->dilationSizeSlider->value() * 2 + 1;
-	bool erosionFlag = epochDialog->erosionCheckBox->isChecked();
-	int erosionN = epochDialog->erosionNumPassSpinBox->value();
-	int erosionSz = epochDialog->erosionSizeSlider->value() * 2 + 1;
+			bool dilationFlag = epochDialog->dilationCheckBox->isChecked();
+			int dilationN = epochDialog->dilationNumPassSpinBox->value();
+			int dilationSz = epochDialog->dilationSizeSlider->value() * 2 + 1;
+			bool erosionFlag = epochDialog->erosionCheckBox->isChecked();
+			int erosionN = epochDialog->erosionNumPassSpinBox->value();
+			int erosionSz = epochDialog->erosionSizeSlider->value() * 2 + 1;
+			std:vector<string> savedMeshVector;
 
-  bool firstTime=true;
-  QList<EpochModel>::iterator li;
-  for(li=er.modelList.begin(), i=0;li!=er.modelList.end();++li,++i)
-  {
-      if(qtw->isItemSelected(qtw->item(i,0)))
-      {
-        ++selectedCount;
-        mm.Clear();
-        int tt0=clock();
-        (*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps, 
-					dilationFlag, dilationN, dilationSz, erosionFlag, erosionN, erosionSz);
-        int tt1=clock();
-        if(logFP) fprintf(logFP,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
+			bool firstTime=true;
+			QList<EpochModel>::iterator li;
+			for(li=er.modelList.begin(), i=0;li!=er.modelList.end();++li,++i)
+			{
+					if(qtw->isItemSelected(qtw->item(i,0)))
+					{
+						++selectedCount;
+						mm.Clear();
+						int tt0=clock();
+						(*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps, 
+							dilationFlag, dilationN, dilationSz, erosionFlag, erosionN, erosionSz);
+						int tt1=clock();
+						if(logFP) fprintf(logFP,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
 
-        if(clustering)
-        {
-          if (firstTime) 
-            {
-              //Grid.Init(mm.bbox,100000);
-              vcg::tri::UpdateBounding<CMeshO>::Box(mm);	
-              //Grid.Init(mm.bbox,1000.0*pow(10.0,mergeResolution),mm.bbox.Diag()/1000.0f);
-              Grid.Init(mm.bbox,100000.0*pow(10.0,mergeResolution));
-              firstTime=false;
-            }
-          Grid.Add(mm);
-        }
-        else  tri::Append<CMeshO,CMeshO>::Mesh(m.cm,mm); // append mesh mr to ml
+						if(epochDialog->exportToPLY) 
+								{
+									QString plyFilename =(*li).textureName.left((*li).textureName.length()-4);
+									plyFilename.append(".x.ply");	
+									savedMeshVector.push_back(qPrintable(plyFilename));
+									int mask= tri::io::Mask::IOM_VERTCOORD + tri::io::Mask::IOM_VERTCOLOR + tri::io::Mask::IOM_VERTQUALITY;
+									int result = tri::io::ExporterPLY<CMeshO>::Save(mm,qPrintable(plyFilename),mask);
+								}
+						else 
+								{
+								if(clustering)
+									{
+										if (firstTime) 
+											{
+												//Grid.Init(mm.bbox,100000);
+												vcg::tri::UpdateBounding<CMeshO>::Box(mm);	
+												//Grid.Init(mm.bbox,1000.0*pow(10.0,mergeResolution),mm.bbox.Diag()/1000.0f);
+												Grid.Init(mm.bbox,100000.0*pow(10.0,mergeResolution));
+												firstTime=false;
+											}
+										Grid.Add(mm);
+									}
+								else  
+									tri::Append<CMeshO,CMeshO>::Mesh(m.cm,mm); // append mesh mr to ml
+							}
+							int tt2=clock();
+							if(logFP) fprintf(logFP,"** Mesh %i : Append in %i\n",selectedCount,tt2-tt1);
 
-        int tt2=clock();
-        if(logFP) fprintf(logFP,"** Mesh %i : Append in %i\n",selectedCount,tt2-tt1);
+					}
+					if (cb)(*cb)(selectedCount*90/selectedNum, "Building meshes");
+			}
+			 
+			if (cb != NULL) (*cb)(90, "Final Processing: clustering");
+			if(clustering)  
+			{
+				Grid.Extract(m.cm);
+			}
+			
+			if(epochDialog->exportToPLY) 
+			{
+				QString ALNfilename = fileName.left(fileName.length()-4).append(".aln");
+				ALNParser::SaveALN(qPrintable(ALNfilename), savedMeshVector);
+			}
+			int t1=clock();
+			if(logFP) fprintf(logFP,"Extracted %i meshes in %i\n",selectedCount,t1-t0);
 
-      }
-      if (cb)(*cb)(selectedCount*90/selectedNum, "Building meshes");
-  }
-   
-  if (cb != NULL) (*cb)(90, "Final Processing: clustering");
-  if(clustering)  
-  {
-    Grid.Extract(m.cm);
-  }
- 
-  int t1=clock();
-  if(logFP) fprintf(logFP,"Extracted %i meshes in %i\n",selectedCount,t1-t0);
+			if (cb != NULL) (*cb)(95, "Final Processing: Removing Small Connected Components");
+			if(removeSmallCC)
+			{
+				vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+				m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
+				RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,m.cm.bbox.Diag()*maxCCDiagVal/100.0);
+			}
 
-  if (cb != NULL) (*cb)(95, "Final Processing: Removing Small Connected Components");
-  if(removeSmallCC)
-  {
-    vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
-	  m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
-    RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,m.cm.bbox.Diag()*maxCCDiagVal/100.0);
-  }
+			int t2=clock();
+			if(logFP) fprintf(logFP,"Topology and removed CC in %i\n",t2-t1);
 
-  int t2=clock();
-  if(logFP) fprintf(logFP,"Topology and removed CC in %i\n",t2-t1);
+			vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+			
+			if (cb != NULL) (*cb)(97, "Final Processing: Closing Holes");
+			if(closeHole)
+			{
+				m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
+				tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+				vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,maxHoleSize,false);
+			}
 
-  vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+			if (cb != NULL) (*cb)(100, "Done");
+		//  vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
+			 
+
+			int t3=clock();
+			if(logFP) fprintf(logFP,"---------- Total Processing Time%i\n\n\n",t3-t0);
+			if(logFP) fclose(logFP);
+			logFP=0;
+	} while(epochDialog->exportToPLY);
 	
-  if (cb != NULL) (*cb)(97, "Final Processing: Closing Holes");
-  if(closeHole)
-  {
-	  m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK);
-    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
-    vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,maxHoleSize,false);
-  }
-
-	if (cb != NULL) (*cb)(100, "Done");
-//  vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
-
-
-  int t3=clock();
-  if(logFP) fprintf(logFP,"---------- Total Processing Time%i\n\n\n",t3-t0);
-  if(logFP) fclose(logFP);
-  logFP=0;
-
 	return true;
 }
 

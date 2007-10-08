@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>661</width>
-    <height>551</height>
+    <width>778</width>
+    <height>555</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -65,7 +65,7 @@
      <item>
       <widget class="QSpinBox" name="subsampleSpinBox" >
        <property name="toolTip" >
-        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-size:8.25pt; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Set the subsample factor:&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  1 the image is not resized&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  2 image is halved &lt;span style=" font-style:italic;">(one point every 4)&lt;/span>&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  3 image is reduced to one third &lt;span style=" font-style:italic;">(one point every 9)&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Set the subsample factor:&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  1 the image is not resized&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  2 image is halved &lt;span style=" font-style:italic;">(one point every 4)&lt;/span>&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">  3 image is reduced to one third &lt;span style=" font-style:italic;">(one point every 9)&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
        </property>
       </widget>
      </item>
@@ -138,7 +138,7 @@
      <item>
       <widget class="QCheckBox" name="fastMergeCheckBox" >
        <property name="toolTip" >
-        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-size:8.25pt; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Perform a fast, fixed resolution merging of all the range maps. If unchecked all the rangemaps are simply put in the same space without merging them.&lt;/p>&lt;/body>&lt;/html></string>
+        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Perform a fast, fixed resolution merging of all the range maps. If unchecked all the rangemaps are simply put in the same space without merging them.&lt;/p>&lt;/body>&lt;/html></string>
        </property>
        <property name="layoutDirection" >
         <enum>Qt::RightToLeft</enum>
@@ -341,7 +341,7 @@
      <item>
       <widget class="QSpinBox" name="minCountSpinBox" >
        <property name="toolTip" >
-        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-size:8.25pt; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Set the minimum number of match for a sample to be accepted&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">3 means that only samples that had been found a correspondence with other 2 images or more are considered&lt;/p>&lt;/body>&lt;/html></string>
+        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Set the minimum number of match for a sample to be accepted&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">3 means that only samples that had been found a correspondence with other 2 images or more are considered&lt;/p>&lt;/body>&lt;/html></string>
        </property>
       </widget>
      </item>
@@ -414,7 +414,7 @@
         </sizepolicy>
        </property>
        <property name="toolTip" >
-        <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-size:8.25pt; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">When enabled, all the floating pieces smaller than the indicated percentage are deleted. Unit is the diagonal of the bounding box of the object&lt;/p>&lt;/body>&lt;/html></string>
+        <string>When enabled, all the floating pieces smaller than the indicated percentage are deleted. Unit is the diagonal of the bounding box of the object</string>
        </property>
        <property name="decimals" >
         <number>0</number>
@@ -639,6 +639,16 @@
       <widget class="QPushButton" name="okButton" >
        <property name="text" >
         <string>OK</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="plyButton" >
+       <property name="toolTip" >
+        <string>Process all selected range maps and save them as separated ply</string>
+       </property>
+       <property name="text" >
+        <string>Export as PLY</string>
        </property>
       </widget>
      </item>

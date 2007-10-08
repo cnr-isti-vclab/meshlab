@@ -20,7 +20,9 @@ SOURCES       = epoch_io.cpp \
                 v3dImportDialog.cpp \ 
                 maskRenderWidget.cpp \
                 maskImageWidget.cpp \
-                fillImage.cpp
+                fillImage.cpp \
+		../../../../sf/wrap/ply/plylib.cpp
+
                 
 TARGET        = epoch_io
 DESTDIR       = ../../meshlab/plugins

@@ -22,20 +22,24 @@ public:
 		connect(erosionSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(erosionSizeChanged(int)));
 
     er=0;
+		exportToPLY=false;
 	}
 
 public:
   void setEpochReconstruction(EpochReconstruction *_er,CallBackPos *cb);
+	bool exportToPLY;  /// when true all the selected range maps are exported as separated ply
 
 public slots:
 void on_selectButton_clicked();
 void on_imageTableWidget_itemClicked(QTableWidgetItem * item );
 void on_imageTableWidget_itemSelectionChanged();
 void on_imageTableWidget_itemDoubleClicked(QTableWidgetItem * item );
+void on_plyButton_clicked();
 private:
 EpochReconstruction *er;
 QString erCreated;
 QSize imgSize;
+
 
 private slots:
   void on_mergeResolutionSpinBox_valueChanged(int);

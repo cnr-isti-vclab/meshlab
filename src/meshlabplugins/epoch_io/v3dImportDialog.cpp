@@ -154,6 +154,11 @@ void v3dImportDialog::on_imageTableWidget_itemSelectionChanged()
     on_subsampleSpinBox_valueChanged(subsampleSpinBox->value());
   }
 }
+void v3dImportDialog::on_plyButton_clicked()
+{
+	exportToPLY = true;
+	accept();
+}
 void v3dImportDialog::on_selectButton_clicked()
 {
   int itemNum=imageTableWidget->rowCount();
