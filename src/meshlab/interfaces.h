@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.60  2007/10/09 12:07:39  corsini
+fix missing return value
+
 Revision 1.59  2007/10/02 07:59:37  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -200,6 +203,7 @@ public:
 	{
 		assert(mw);
 		mw->executeFilter(action,params);
+		return true;
 	}	
 
   /// Standard stuff that usually should not be redefined. 
