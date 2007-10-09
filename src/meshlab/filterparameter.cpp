@@ -120,9 +120,10 @@ void FilterParameterSet::addString   (QString name, QString   defaultVal, QStrin
 {
 	assert(0);
 }
-QString			FilterParameterSet::getString(QString name)
+QString FilterParameterSet::getString(QString name)
 {
 	assert(0);
+	return QString("");
 }
 void FilterParameterSet::setString(QString name, QString newVal)
 {
