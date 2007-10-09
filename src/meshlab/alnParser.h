@@ -96,7 +96,7 @@ public:
 static bool SaveALN(const char *alnfile, vector<string> &names)
 {
 	vector<Matrix44f> Tr(names.size());
-	for(int i=0;i<Tr.size();++i) Tr[i].SetIdentity();
+	for(int i=0; i < static_cast<int>(Tr.size()); ++i) Tr[i].SetIdentity();
 	return SaveALN(alnfile,names, Tr);
 }
 template <class matrixfloat>
@@ -111,7 +111,7 @@ static bool SaveALN(const char *alnfile, vector<string> &names, vector<Matrix44 
   }
 
   fprintf(fp,"%i\n",names.size());
-  for(int i=0;i<names.size();++i)
+  for(int i=0;i < static_cast<int>(names.size());++i)
   {
     fprintf(fp,"%s\n",names[i].c_str());
 
