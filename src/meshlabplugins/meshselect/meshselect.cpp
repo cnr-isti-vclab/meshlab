@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2007/10/09 11:54:07  cignoni
+added delete face and vert
+
 Revision 1.13  2007/10/02 08:13:48  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -83,7 +86,8 @@ const QString SelectionFilterPlugin::filterName(FilterIDType filter)
 	  case FP_SELECT_ALL :		             return QString("Select All");
 	  case FP_SELECT_NONE :		             return QString("Select None");
 	  case FP_SELECT_INVERT :		           return QString("Invert Selection");
-	  case FP_SELECT_DELETE :		           return QString("Delete Selected Faces");
+	  case FP_SELECT_DELETE_FACE :		     return QString("Delete Selected Faces");
+	  case FP_SELECT_DELETE_FACEVERT :		 return QString("Delete Selected Faces and Vertices");
 	  case FP_SELECT_ERODE :		           return QString("Erode Selection");
 	  case FP_SELECT_DILATE :		           return QString("Dilate Selection");
 	  case FP_SELECT_BORDER_FACES:		     return QString("Select Border Faces");
@@ -96,7 +100,8 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   typeList << 
     FP_SELECT_ALL <<
     FP_SELECT_NONE <<
-    FP_SELECT_DELETE <<
+    FP_SELECT_DELETE_FACE <<
+    FP_SELECT_DELETE_FACEVERT <<
     FP_SELECT_ERODE <<
     FP_SELECT_DILATE <<
     FP_SELECT_BORDER_FACES <<
@@ -107,9 +112,13 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   foreach(tt , types())
     {
       actionList << new QAction(filterName(tt), this);
-      if(tt==FP_SELECT_DELETE){
+      if(tt==FP_SELECT_DELETE_FACE){
             actionList.last()->setShortcut(QKeySequence (Qt::Key_Delete));
             actionList.last()->setIcon(QIcon(":/images/delete_face.png"));
+      }
+      if(tt==FP_SELECT_DELETE_FACEVERT){
+            actionList.last()->setShortcut(QKeySequence ("Shift+Del"));
+            actionList.last()->setIcon(QIcon(":/images/delete_facevert.png"));
       }
     }	  
 }
@@ -123,17 +132,35 @@ SelectionFilterPlugin::~SelectionFilterPlugin()
 
 bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
 {
- CMeshO::FaceIterator fi;
- switch(ID(action))
+	CMeshO::FaceIterator fi;
+	CMeshO::VertexIterator vi;
+	switch(ID(action))
   {
-  case FP_SELECT_DELETE : 
-    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+  case FP_SELECT_DELETE_FACE : 
+		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD() && (*fi).IsS() )
       {
         (*fi).SetD(); 
         --m.cm.fn;
       }
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+    break;
+  case FP_SELECT_DELETE_FACEVERT : 
+		tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
+    for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+      if(!(*fi).IsD() && (*fi).IsS() )
+      {
+        (*fi).SetD(); 
+        --m.cm.fn;
+      }
+		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+			if(!(*vi).IsD() && (*vi).IsS() )
+			{
+				(*vi).SetD(); 
+				--m.cm.vn;
+			}
+			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
     break;
   case FP_SELECT_ALL    : tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
   case FP_SELECT_NONE   : tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   break;
@@ -158,7 +185,8 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   switch(filterId)
   {
     case FP_SELECT_DILATE : return tr("Dilate (expand) the current set of selected faces");  
-    case FP_SELECT_DELETE : return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");  
+    case FP_SELECT_DELETE_FACE : return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");  
+    case FP_SELECT_DELETE_FACEVERT : return tr("Delete the current set of selected faces and all the vertices surrounded by that faces.");  
     case FP_SELECT_ERODE  : return tr("Erode (reduce) the current set of selected faces");  
     case FP_SELECT_INVERT : return tr("Invert the current set of selected faces");  
     case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");  

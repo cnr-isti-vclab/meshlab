@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.8  2007/10/09 11:54:06  cignoni
+added delete face and vert
+
 Revision 1.7  2007/10/02 08:13:46  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -63,7 +66,8 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 		FP_SELECT_ALL, 
 		FP_SELECT_NONE, 
 		FP_SELECT_INVERT, 
-		FP_SELECT_DELETE, 
+		FP_SELECT_DELETE_FACE, 
+		FP_SELECT_DELETE_FACEVERT, 
 		FP_SELECT_ERODE, 
 		FP_SELECT_DILATE, 
 		FP_SELECT_BORDER_FACES
