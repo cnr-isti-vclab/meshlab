@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.61  2007/10/09 13:02:08  fuscof
+Initial implementation of multipass rendering.
+Please note that MeshRenderInterface has been modified to get the number of rendering passes.
+
 Revision 1.60  2007/10/09 12:07:39  corsini
 fix missing return value
 
@@ -270,6 +274,7 @@ public:
 		virtual bool isSupported() = 0;
 		virtual const PluginInfo &Info()=0;
 		virtual QList<QAction *> actions() = 0;
+    virtual int passNum() = 0;
 };
 
 

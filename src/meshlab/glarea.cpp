@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.128  2007/10/09 13:02:09  fuscof
+Initial implementation of multipass rendering.
+Please note that MeshRenderInterface has been modified to get the number of rendering passes.
+
 Revision 1.127  2007/10/08 19:48:45  cignoni
 corrected behavior for endedit
 
@@ -317,7 +321,6 @@ void GLArea::paintGL()
 {
   QTime time;
   time.start();
-	
 	//int lastTime=time.elapsed();
 	initTexture();
 	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
@@ -422,14 +425,20 @@ void GLArea::paintGL()
 	              else glDisable(GL_CULL_FACE);
   if(!mm()->busy)
   {
-    if(iRenderer && currentShader) {
-		  glPushAttrib(GL_ALL_ATTRIB_BITS);
-		  iRenderer->Render(currentShader, *mm(), rm, this); 
-	  }
+    int numPass = 1;
+    if (iRenderer && currentShader){ 
+      numPass = iRenderer->passNum();
+      glPushAttrib(GL_ALL_ATTRIB_BITS);
+    }
 
-	  foreach(MeshModel * mp, meshDoc.meshList) 
-			if(mp->visible)
-				mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+    for (int i = 0; i < numPass; i++){
+      if(iRenderer && currentShader) {
+        iRenderer->Render(currentShader, *mm(), rm, this); 
+      }
+      foreach(MeshModel * mp, meshDoc.meshList) 
+        if(mp->visible)
+          mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+    }
 
 	  if(iEdit) iEdit->Decorate(currentEditor,*mm(),this);
     
@@ -446,6 +455,8 @@ void GLArea::paintGL()
 		  pair<QAction *,MeshDecorateInterface *> p;
 		  foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm(),rm,this,qFont);}
 	  }
+
+    
   } ///end if busy 
 	
 	// ...and take a snapshot

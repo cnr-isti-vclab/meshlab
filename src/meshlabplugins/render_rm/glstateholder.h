@@ -16,6 +16,7 @@
 
 #include <GL/glew.h>
 #include <QGLWidget>
+#include <QGLFramebufferObject>
 #include <meshlab/meshmodel.h>
 
 
@@ -64,10 +65,11 @@ class GLStatePassHolder : public QObject
 
 	bool setVertexProgram;
 	bool setFragmentProgram;
-
+  bool fbo_released;
 	QString lastError;
 
 	GLhandleARB program;
+  QGLFramebufferObject* fbo; /* output buffer */
 
 	QMap<QString, UniformValue*> uniformValues;
 
@@ -88,7 +90,12 @@ class GLStatePassHolder : public QObject
 
 		void VarDump();
 
-		void useProgram() { glUseProgramObjectARB( program ); }
+		inline void useProgram() { glUseProgramObjectARB( program ); }
+    inline void bind() { fbo->bind(); fbo_released = false;}
+    void bindTexture();
+    void release();
+    inline bool released() { return fbo_released; }
+
 };
 
 // * This class hold the state of the rmshader render:
@@ -106,8 +113,9 @@ class GLStateHolder : public QObject
 	public:
 
 		bool needUpdateInGLMemory;
+    int currentPass;
 
-		GLStateHolder( ) {needUpdateInGLMemory = true; supported = false;}
+		GLStateHolder( ) {needUpdateInGLMemory = true; supported = false; currentPass = -1;}
 		GLStateHolder( QList<RmPass> & passes ) { setPasses(passes); needUpdateInGLMemory = true; supported = false; }
 		~GLStateHolder( );
 
@@ -122,11 +130,16 @@ class GLStateHolder : public QObject
 		bool isSupported() { return supported; }
 	
 		bool updateUniformVariableValuesInGLMemory();
+    bool updateUniformVariableValuesInGLMemory(int pass_idx);
 		void VarDump();
 
 		int passNumber() { return passes.size(); }
     inline void reset(){ needUpdateInGLMemory = true; };
 		void usePassProgram( int i ) { passes[i] -> useProgram(); }
+    void bind( int i ) { passes[i] -> bind(); }
+    void bindTexture(int i) { passes[i] ->bindTexture();}
+    void release(int i) { passes[i] -> release(); }
+    bool released(int i) { return passes[i]->released();}
 };
 
 

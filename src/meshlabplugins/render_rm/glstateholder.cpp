@@ -1,4 +1,5 @@
 #include "glstateholder.h"
+/* #define DEBUG_MPASS */
 
 int UniformValue::textureUnit = 0;
 
@@ -141,7 +142,7 @@ bool UniformValue::updateValueInGLMemory()
 				QMessageBox::critical(0, "Meshlab", "Number of active texture is greater than max number supported (which is" + QString().setNum(GL_MAX_TEXTURE_UNITS) + ")" );
 				return false;
 			}
-			glActiveTexture( GL_TEXTURE0 + UniformValue::textureUnit );
+			glActiveTexture(GL_TEXTURE0);// + UniformValue::textureUnit );
 			glBindTexture( GL_TEXTURE_2D, textureId );
 			glUniform1iARB( location, UniformValue::textureUnit++ );
 			break;
@@ -180,6 +181,8 @@ GLStatePassHolder::GLStatePassHolder( RmPass & pass )
 {
 
 	passName = pass.getName();
+  fbo = new QGLFramebufferObject(512,512);
+  fbo_released = true;
 
 	QString &vprog = pass.getVertex();
 	QString &fprog = pass.getFragment();
@@ -228,6 +231,7 @@ GLStatePassHolder::~GLStatePassHolder()
 		it.next();
 		delete it.value();
 	}
+  delete fbo;
 }
 
 bool GLStatePassHolder::compile() 
@@ -325,6 +329,34 @@ void GLStatePassHolder::VarDump()
 	}
 }
 
+void GLStatePassHolder::bindTexture()
+{
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, fbo->texture());
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void GLStatePassHolder::release()
+{
+  fbo->release(); 
+  fbo_released = true;
+#ifdef DEBUG_MPASS
+  QImage img(fbo->toImage());
+  QString img_name("render");
+  img_name.append(passName);
+  img_name.append(".png");
+  if (!img.save(img_name,"PNG"))
+    qDebug() << "           error while saving" << img_name;
+  else
+    qDebug() << "           Image " << img_name << " saved";
+
+#endif     
+
+}
+
 
 // ***************** GL STATE HOLDER ****************** //
 
@@ -389,6 +421,16 @@ bool GLStateHolder::updateUniformVariableValuesInGLMemory()
 	glUseProgramObjectARB(0);
 	return ret;
 }
+
+bool GLStateHolder::updateUniformVariableValuesInGLMemory(int pass_idx)
+{
+  bool ret = true;
+  if (pass_idx >= passes.size()) return false;
+  if(!passes[pass_idx] -> updateUniformVariableValuesInGLMemory() )
+    ret = false;
+  return ret;
+}
+
 
 void GLStateHolder::VarDump()
 {

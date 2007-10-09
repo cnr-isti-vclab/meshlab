@@ -23,6 +23,10 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.21  2007/10/09 13:02:08  fuscof
+Initial implementation of multipass rendering.
+Please note that MeshRenderInterface has been modified to get the number of rendering passes.
+
 Revision 1.20  2006/07/08 06:37:48  cignoni
 Many small bugs correction (esc crash, info in about, obj loading progress,fullscreen es)
 
@@ -139,6 +143,7 @@ public:
 	virtual bool isSupported() {return supported;}
 	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
 	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
+  virtual int passNum() { return 1; } /* single pass rendering */
 
 };
 

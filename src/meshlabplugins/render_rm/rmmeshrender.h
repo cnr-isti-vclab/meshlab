@@ -36,9 +36,10 @@ class RmMeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 	private:
 
 		void initActionList();
+    void myWindowRendering1(int pass);
 
 	public:
-		RmMeshShaderRenderPlugin() { dialog = NULL; }
+		RmMeshShaderRenderPlugin() { dialog = NULL;}
 		~RmMeshShaderRenderPlugin() { QMapIterator<QString, RmXmlParser*> i(rmsources); while( i.hasNext() ) { i.next(); delete i.value();} }
 
 		QList<QAction *> actions () { if(actionList.isEmpty()) initActionList(); return actionList; }
@@ -47,6 +48,7 @@ class RmMeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 		virtual bool isSupported() {return holder.isSupported();}
 		virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
 		virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
+    virtual int passNum() { return holder.passNumber();}
 };
 
 #endif

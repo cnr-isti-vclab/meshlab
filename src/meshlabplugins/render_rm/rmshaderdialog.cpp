@@ -210,7 +210,12 @@ void RmShaderDialog::fillTabsWithPass( int index ) {
 					if( v.maxSet ) { varname += " max: " + QString().setNum(v.fmax); }
 					break;
 				}
-				case UniformVar::SAMPLER1D: case UniformVar::SAMPLER2D: case UniformVar::SAMPLER3D:	case UniformVar::SAMPLERCUBE: case UniformVar::SAMPLER1DSHADOW: case UniformVar::SAMPLER2DSHADOW:
+				case UniformVar::SAMPLER1D: 
+        case UniformVar::SAMPLER2D: 
+        case UniformVar::SAMPLER3D:	
+        case UniformVar::SAMPLERCUBE: 
+        case UniformVar::SAMPLER1DSHADOW: 
+        case UniformVar::SAMPLER2DSHADOW:
 				{
 					QLabel * link = new QLabel( "<font color=\"blue\">See texture tab</font>" );
 					ui.gridLayout1 -> addWidget( link, row, 1, 1, 4 );
