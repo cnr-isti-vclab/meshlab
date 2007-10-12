@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/" >
+	<file>images/icon_measure.png</file>
+        <file>images/cur_measure.png</file>
+    </qresource>
+</RCC>

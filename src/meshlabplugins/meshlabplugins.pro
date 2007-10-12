@@ -13,6 +13,8 @@ SUBDIRS       = meshfilter \
 				meshselect \
 				editslice \
 				editpaint \
+				editalign\
+				editmeasure\
 				editsegment
 		
 		
