@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.18  2007/10/12 10:09:29  corsini
+ signed/unsigned warning removed
+
  Revision 1.17  2007/10/12 10:06:58  corsini
  fix some warnings
 
@@ -173,7 +176,7 @@ float EpochModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
   Histogramf HH;
   HH.Clear();
   HH.SetRange(0,depthImgf.MaxVal()-depthImgf.MinVal(),10000);
-  for(int i=1; i<depthImgf.v.size(); ++i)
+  for(unsigned int i=1; i < static_cast<unsigned int>(depthImgf.v.size()); ++i)
     HH.Add(fabs(depthImgf.v[i]-depthImgf.v[i-1]));
 
   if(logFP) fprintf(logFP,"**** Depth histogram Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.minv,HH.maxv,HH.Avg(),
