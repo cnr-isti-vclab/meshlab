@@ -30,8 +30,10 @@ QT           += xml
 CONFIG		+= debug_and_release
 # mac:CONFIG += x86 ppc
 
-win32-msvc.net:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
-win32-msvc2005:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.lib
+win32-msvc.net:LIBS 	   += ../../../../code/lib/bzip2-1.0.3/libbz2.lib
+win32-msvc2005:LIBS	   += ../../../../code/lib/bzip2-1.0.4/win32/lib/bzip2.lib
+win32-msvc2005:INCLUDEPATH -= ../../../../code/lib/bzip2-1.0.3
+win32-msvc2005:INCLUDEPATH += ../../../../code/lib/bzip2-1.0.4/win32/include
 
 win32-g++:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.a
 
