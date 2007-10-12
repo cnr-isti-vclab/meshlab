@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.17  2007/10/12 10:06:58  corsini
+ fix some warnings
+
  Revision 1.16  2007/10/08 08:55:44  cignoni
  Added automatic exporting of ply and aln from the dialog
 
@@ -170,7 +173,7 @@ float EpochModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
   Histogramf HH;
   HH.Clear();
   HH.SetRange(0,depthImgf.MaxVal()-depthImgf.MinVal(),10000);
-  for(int i=1;i<depthImgf.v.size();++i)
+  for(int i=1; i<depthImgf.v.size(); ++i)
     HH.Add(fabs(depthImgf.v[i]-depthImgf.v[i-1]));
 
   if(logFP) fprintf(logFP,"**** Depth histogram Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.minv,HH.maxv,HH.Avg(),
@@ -632,7 +635,7 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
 			bool erosionFlag = epochDialog->erosionCheckBox->isChecked();
 			int erosionN = epochDialog->erosionNumPassSpinBox->value();
 			int erosionSz = epochDialog->erosionSizeSlider->value() * 2 + 1;
-			std:vector<string> savedMeshVector;
+			std::vector<string> savedMeshVector;
 
 			bool firstTime=true;
 			QList<EpochModel>::iterator li;
