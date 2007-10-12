@@ -97,15 +97,16 @@ bool ScalarImage<float>::Open(const char *filename)
 		}
 		int imagesize = w*h;
 		unsigned char *correct_buffer = new unsigned char[size];
-		for (size_t i=0; i<imagesize; ++i)
+
+		for (int i=0; i<imagesize; ++i)
 		{
-			for (size_t j=0; j<sizeof(short); ++j)
+			for (int j=0; j<sizeof(short); ++j)
 			{
 				correct_buffer[sizeof(short)*i +j] = uncompressed_buffer[imagesize*j + i];
 			}
 		}
 		v.resize(w*h);
-		for (size_t i=0; i<imagesize; ++i)
+		for (int i=0; i<imagesize; ++i)
 		{
 			float a = *((unsigned short*)&correct_buffer[i*sizeof(short)]);
 			v[i] = ll+(lh-ll)*(a/65536.0f);
