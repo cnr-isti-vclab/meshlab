@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.13  2007/10/16 11:04:06  cignoni
+better init of the frame
+
 Revision 1.12  2007/10/02 10:03:03  cignoni
 wrong init in a case statement
 
@@ -99,7 +102,10 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, Q
 
 void MeshlabStdDialog::createFrame()
 {
-	if(qf)   delete qf;
+	if(qf)   {
+				delete qf;
+				stdfieldwidgets.clear();
+				}
   QFrame *newqf = new MeshlabStdDialogFrame(this);
   newqf->setFrameStyle(QFrame::Box | QFrame::Sunken);
 	newqf->setMinimumSize(75, 75);
@@ -145,7 +151,8 @@ void MeshlabStdDialog::loadFrameContent()
 	assert(qf);
 	qf->hide();	
 	setWindowTitle(curmfi->filterName(curAction));
-
+	//stdfieldwidgets.clear();
+//	qf->clear();
 	QGridLayout *gridLayout = new QGridLayout(qf);
 	qf->setLayout(gridLayout);
 
