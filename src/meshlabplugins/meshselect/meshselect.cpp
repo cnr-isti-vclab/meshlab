@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2007/10/16 20:26:49  cignoni
+changed in order to the new allocator based deleting strategy
+
 Revision 1.14  2007/10/09 11:54:07  cignoni
 added delete face and vert
 
@@ -76,6 +79,7 @@ Optional data really working. Clustering decimation totally rewrote. History sta
 #include <stdlib.h>
 #include "meshselect.h"
 #include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/trimesh/allocate.h>
 
 using namespace vcg;
 
@@ -138,28 +142,18 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   {
   case FP_SELECT_DELETE_FACE : 
 		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-      if(!(*fi).IsD() && (*fi).IsS() )
-      {
-        (*fi).SetD(); 
-        --m.cm.fn;
-      }
-      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+      if(!(*fi).IsD() && (*fi).IsS() ) tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
+			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
     break;
   case FP_SELECT_DELETE_FACEVERT : 
 		tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
     for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD() && (*fi).IsS() )
-      {
-        (*fi).SetD(); 
-        --m.cm.fn;
-      }
+					tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
 			if(!(*vi).IsD() && (*vi).IsS() )
-			{
-				(*vi).SetD(); 
-				--m.cm.vn;
-			}
+					tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
 			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
     break;
   case FP_SELECT_ALL    : tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
