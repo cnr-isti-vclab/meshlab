@@ -1,7 +1,7 @@
 
 TEMPLATE = lib
 CONFIG += plugin
-INCLUDEPATH += ../../ ../../../../sf 
+INCLUDEPATH += ../../ ../../../../sf ../../../../code/lib/glew/include
 HEADERS = rgbt.h \
           widgetRgbT.h \
           utilities.h \
