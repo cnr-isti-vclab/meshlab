@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2007/10/16 16:47:36  cignoni
+changed edgecollapse interface in order to the new allocator based deleting strategy
+
 Revision 1.7  2007/03/20 16:23:10  cignoni
 Big small change in accessing mesh interface. First step toward layers
 
@@ -654,11 +657,10 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 												constraint has been imposed during the re-computation of the other minimal */
 
 		
-	 int FaceDel=DoCollapse(this->pos, newPos ); // v0 is deleted and v1 take the new position
-
-	 m.fn-=FaceDel;
-
-	 --m.vn;
+	 //int FaceDel=
+	 DoCollapse(m, this->pos, newPos ); // v0 is deleted and v1 take the new position
+	//	 m.fn-=FaceDel;
+	// --m.vn;
 	 
 
 	vcg::TexCoord2<float> *newtcoord;
