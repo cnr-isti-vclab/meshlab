@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.100  2007/10/16 12:19:25  cignoni
+mismatch between float and absperc parameters
+
 Revision 1.99  2007/10/06 23:39:01  cignoni
 Updated used defined dialog to the new filter interface.
 
@@ -362,7 +365,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
     }
  
     bool  selected  = par.getBool("Selected");	
-    float threshold = par.getFloat("Threshold");		
+    float threshold = par.getAbsPerc("Threshold");		
 
     switch(ID(filter)) {
       case FP_LOOP_SS :
@@ -381,7 +384,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
   }
 	if (ID(filter) == FP_REMOVE_FACES_BY_EDGE ) {
     bool selected  = par.getBool("Selected");	
-    float threshold = par.getFloat("Threshold");		
+    float threshold = par.getAbsPerc("Threshold");		
 	  if(selected) tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<true>(m.cm,0,threshold );
          else    tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<false>(m.cm,0,threshold );
     m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
@@ -457,7 +460,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
  	if(ID(filter) == (FP_CLUSTERING))
 	  {
       bool selected  = par.getBool("Selected");	
-      float threshold = par.getFloat("Threshold");		
+      float threshold = par.getAbsPerc("Threshold");		
       vcg::tri::Clustering<CMeshO, vcg::tri::AverageCell<CMeshO> > Grid;
       Grid.Init(m.cm.bbox,100000,threshold);
       Grid.Add(m.cm);
