@@ -111,9 +111,9 @@ private:
     /// Additional container that is reallocated if the face container is reallocated
     FACEC *fc;
     //! Faces to add when the faces container is reallocated. The number is calculated by growNumberFace * oldNumberOfFace
-    static const float growNumberFace = 0.3;
+    static const float growNumberFace() { return 0.3; }
     //! Vertexes to add when the vertexes container is reallocated.  The number is calculated by growNumberVertex * oldNumberOfVertex
-    static const float growNumberVertex = 0.3;
+    static const float growNumberVertex() { return  0.3; } 
     
 public:
     /// Create a new TopologicalOp
@@ -708,7 +708,7 @@ private:
             //if (listFp.front()->Index() >= fc->size() - 1)
             //    listFp.clear();
             
-            int newFaces = (int)(growNumberFace * (float)fc->size());
+            int newFaces = (int)(growNumberFace() * (float)fc->size());
             newFaces += otherneeded + 1;
             int oldsize = m.face.size();
             FaceIterator it = vcg::tri::Allocator<TriMeshType>::AddFaces(m,newFaces);
@@ -750,7 +750,7 @@ private:
     {
         if (listVp.size() <= 0)
         {
-            int newVertexes = (int)(growNumberVertex * (float)vc->size());
+            int newVertexes = (int)(growNumberVertex() * (float)vc->size());
             ++newVertexes;
             VertexIterator it = vcg::tri::Allocator<TriMeshType>::AddVertices(m,newVertexes);
             if (vc)
