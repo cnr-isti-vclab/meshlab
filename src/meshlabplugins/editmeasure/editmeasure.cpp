@@ -40,7 +40,7 @@ EditMeasurePlugin::EditMeasurePlugin() {
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);
 	
-	actionList << new QAction(QIcon(":/images/icon_measure.png"),"Get Info", this);
+	actionList << new QAction(QIcon(":/images/icon_measure.png"),"Measuring Tool", this);
   foreach(QAction *editAction, actionList)
     editAction->setCheckable(true);      
 }
@@ -52,7 +52,7 @@ QList<QAction *> EditMeasurePlugin::actions() const {
 
 const QString EditMeasurePlugin::Info(QAction *action) 
 {
-  if( action->text() != tr("Get Info") ) assert (0);
+  if( action->text() != tr("Measuring Tool") ) assert (0);
 
 	return tr("Allow to measure distances between points of a model");
 }
@@ -95,6 +95,7 @@ void EditMeasurePlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 				{
 						endPoint = pt;
 						isDragging = false;		
+						suspendEditToggle();
 				}
 				else
 				{	
@@ -125,6 +126,7 @@ void EditMeasurePlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
+		glDisable(GL_DEPTH_TEST);
 				glBegin(GL_LINES);
 								glVertex2f(wStartPoint[0],wStartPoint[1]);
 								glVertex2f(cur.x(),cur.y());
@@ -149,12 +151,12 @@ else if(startPoint != endPoint)
 			glVertex(startPoint);
 			glVertex(endPoint);
 		glEnd();	
-		Point3f wStart =PixelConvert(startPoint);
-		Point3f wEnd =PixelConvert(endPoint);
+		Point3f wStart = PixelConvert(startPoint);
+		Point3f wEnd   = PixelConvert(endPoint);
 		glColor3f(1.0,1.0,1.0);
 		if(wStart[0]>wEnd[0])
-					RenderLabel(wStart[0]+5,wStart[1],QString("%1").arg(Distance(startPoint,endPoint)),gla);
-		else 	RenderLabel(wEnd[0]+5,wEnd[1]    ,QString("%1").arg(Distance(startPoint,endPoint)),gla);
+					RenderLabel(wStart[0]+5,wStart[1],QString(" %1 ").arg(Distance(startPoint,endPoint)),gla);
+		else 	RenderLabel(wEnd[0]+5,wEnd[1]    ,QString(" %1 ").arg(Distance(startPoint,endPoint)),gla);
 }
 		glPopAttrib();
   assert(!glGetError());
@@ -163,6 +165,7 @@ else if(startPoint != endPoint)
 void EditMeasurePlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla )
 {
 	gla->setCursor(QCursor(QPixmap(":/images/cur_measure.png"),15,15));	
+  connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 }
 
 void EditMeasurePlugin::RenderLabel(int x, int y, QString text,GLArea * gla)
@@ -170,7 +173,7 @@ void EditMeasurePlugin::RenderLabel(int x, int y, QString text,GLArea * gla)
  QFontMetrics fm(qFont);
  int tw = fm.width(text); //textWidthInPixels
  int th = fm.height();  //textHeightInPixels
-
+ QRect brec=fm.boundingRect(text);
  	glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT );
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
@@ -186,18 +189,18 @@ void EditMeasurePlugin::RenderLabel(int x, int y, QString text,GLArea * gla)
 	glLoadIdentity();
 				glColor4f(0,0,0,0.5);
 				glBegin(GL_QUADS);
-								glVertex2f(x,y);
-								glVertex2f(x+tw,y);
-								glVertex2f(x+tw,y-th);
-								glVertex2f(x,y-th);
+								glVertex2f(x+brec.left(),y+brec.bottom());
+								glVertex2f(x+brec.right(),y+brec.bottom());
+								glVertex2f(x+brec.right(),y+brec.top());
+								glVertex2f(x+brec.left(),y+brec.top());
 				glEnd();
 				int offset=2;
 				glColor4f(0,0,0,0.2);
 				glBegin(GL_QUADS);
-								glVertex2f(x-offset,y+offset);
-								glVertex2f(x+tw+offset,y+offset);
-								glVertex2f(x+tw+offset,y-th-offset);
-								glVertex2f(x-offset,y-th-offset);
+								glVertex2f(x+brec.left()-offset,y+brec.bottom()+offset);
+								glVertex2f(x+brec.right()+offset,y+brec.bottom()+offset);
+								glVertex2f(x+brec.right()+offset,y+brec.top()-offset);
+								glVertex2f(x+brec.left()-offset,y+brec.top()-offset);
 				glEnd();
 		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();

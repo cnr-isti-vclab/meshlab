@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.77  2007/10/17 08:31:39  cignoni
+better label and automatic suspension after the end of the measurement using slots
+
 Revision 1.76  2007/10/06 23:29:51  cignoni
 corrected management of suspeneded editing actions. Added filter toolbar
 
@@ -317,7 +320,7 @@ public:
 		setCursorTrack(0); 
 		update(); 
 	} 
-	
+public slots:
   void suspendEditToggle()
 		{	
 			if(currentEditor==0) return;
@@ -331,7 +334,7 @@ public:
 							setCursorTrack(0); 						
 			}
 		}
-		
+public:
 	void      setEdit(MeshEditInterface *edit, QAction *editor){	iEdit = edit; currentEditor=editor;}
 	QAction * getEditAction() { return currentEditor; }
 	

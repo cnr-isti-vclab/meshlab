@@ -60,6 +60,10 @@ public:
 		QFont qFont;
     bool isDragging;
 		bool haveToPick;
+
+ signals:
+
+	void suspendEditToggle();
 };
 
 #endif
