@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.95  2007/10/17 21:24:36  cignoni
+ corrected orthographic error in report string
+
  Revision 1.94  2007/04/16 09:25:30  cignoni
  ** big change **
  Added Layers managemnt.
@@ -193,7 +196,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshM
 
 bool ExtraMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
   //string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
@@ -275,8 +278,8 @@ int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
 const PluginInfo &ExtraMeshIOPlugin::Info()
 {
 	static PluginInfo ai;
-	ai.Date=tr("January 2006");
-	ai.Version = tr("0.6");
+	ai.Date=tr("Oct 2007");
+	ai.Version = tr("0.7");
 	ai.Author = ("Paolo Cignoni, Andrea Buzzelli, Elisa Cerisoli, Federico Mazzanti");
 	return ai;
  }
