@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.14  2007/10/17 21:23:30  cignoni
+added wordwrapping to the first line of the automatic dialog
+
 Revision 1.13  2007/10/16 11:04:06  cignoni
 better init of the frame
 
@@ -165,6 +168,7 @@ void MeshlabStdDialog::loadFrameContent()
 	
 	ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
 	ql->setTextFormat(Qt::RichText);
+	ql->setWordWrap(true);
 	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop);
 	
 	for(int i = 0; i < parList.count(); i++)
