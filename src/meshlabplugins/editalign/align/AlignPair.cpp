@@ -32,7 +32,7 @@
 
 #include <vcg/math/random_generator.h>
 #include <vcg/math/gen_normal.h>
-#include "point_matching.h"
+#include <vcg/math/point_matching.h>
 using namespace vcg;
 using namespace std;
 

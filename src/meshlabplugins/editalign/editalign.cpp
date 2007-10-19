@@ -165,7 +165,7 @@ static QString oldLabelButton;
 		mode = ALIGN_MOVE;
 		md->mm()->visible=false;
 		trackball.Reset();
-		trackball.center=mm->Tr*mm->cm.bbox.Center();
+		trackball.center=mm->cm.Tr*mm->cm.bbox.Center();
 		trackball.radius= mm->cm.bbox.Diag()/2.0;
 		updateButtons();
 		oldLabelButton=	alignDialog->ui.manualAlignButton->text();
@@ -178,7 +178,7 @@ static QString oldLabelButton;
 		Matrix44f tran,mtran; 
 		tran.SetTranslate(trackball.center);
 		mtran.SetTranslate(-trackball.center);
-		mm->Tr= (tran) * trackball.track.Matrix()*(mtran) * mm->Tr;
+		mm->cm.Tr= (tran) * trackball.track.Matrix()*(mtran) * mm->cm.Tr;
 		mm->visible=true;
 		alignDialog->ui.manualAlignButton->setText(oldLabelButton);
 	
@@ -219,7 +219,7 @@ void EditAlignPlugin::Process()
 
   foreach(MeshModel *mm, md->meshList)
 	{
-		trv[id]=Matrix44d::Construct(mm->Tr);
+		trv[id]=Matrix44d::Construct(mm->cm.Tr);
 		names[id]=mm->fileName;
 		OG.AddMesh<CMeshO>(mm->cm,trv[id],id);
 		++id;
@@ -308,7 +308,7 @@ void EditAlignPlugin::Process()
 
 //Now get back the results!
 for(int ii=0;ii<trout.size();++ii)
-	MM(ii)->Tr.Import(trout[ii]);
+	MM(ii)->cm.Tr.Import(trout[ii]);
 	
 	alignDialog->updateTree();
 	gla->update();
@@ -358,7 +358,6 @@ switch(mode)
 			alignDialog->ui.inspectButton->setEnabled(false);
 			alignDialog->ui.icpButton->setEnabled(false);
 			alignDialog->ui.icpParamButton->setEnabled(false);
-			alignDialog->ui.exportButton->setEnabled(false);
 			alignDialog->ui.alignTreeWidget->setEnabled(false);
 			
 		break;
@@ -367,11 +366,80 @@ switch(mode)
 			alignDialog->ui.inspectButton->setEnabled(true);
 			alignDialog->ui.icpButton->setEnabled(true);
 			alignDialog->ui.icpParamButton->setEnabled(true);
-			alignDialog->ui.exportButton->setEnabled(true);
 			alignDialog->ui.alignTreeWidget->setEnabled(true);
 			break;
 	}
 }
 
+
+
+// Se <relative> e ' true disegna i punti di allineamento dell'arco 
+// nelle posizioni delle mesh DOPO l'allineamento globale (e quindi matchano con la surf)
+// altrimenti disegna i punti di mov nella posizione data dall'allinemaneto
+// (e che quindi potrebbe non matchare con quella dopo l'allineamento globale); 
+
+void EditAlignPlugin::DrawArc( /*ArcPtr a, bool relative, const Point3d &Center, double Size */)
+{
+/*	AlignPair::Result &r=*a;
+	NodePtr fix=FindMesh(r.FixName);
+	NodePtr mov=FindMesh(r.MovName);
+	double nl=2.0*(*fix).bb.Diag()/100.0;
+	glPushAttrib(GL_ENABLE_BIT );
+	
+	glDisable(GL_LIGHTING);
+	glPushMatrix();
+	(*WorkingGroup).UnitTransform(Center, Size);
+	
+	glPushMatrix();
+	glMultMatrix((*fix).A);
+		glPointSize(5.0f);
+		glColor3f(1,0,0);
+		glBegin(GL_POINTS);
+		for(int i=0;i<r.Pfix.size();i++) glVertex(r.Pfix[i]);
+		glEnd();
+		glPointSize(1.0f);
+		glColor((*fix).mi.c);
+		if(r.Nfix.size()==r.Pfix.size()) 
+		{
+			glBegin(GL_LINES);
+			for(i=0;i<r.Pfix.size();i++) {
+				glVertex(r.Pfix[i]);
+				glVertex(r.Pfix[i]+r.Nfix[i]*nl);
+			}
+			glEnd();
+		}
+		if(!relative){
+			glPopMatrix();
+			glPushMatrix();
+			glMultMatrix((*mov).A);
+		}
+		else	glMultMatrix(r.Tr);
+		
+		glPointSize(5.0f);
+		glColor3f(0,0,1);
+		glBegin(GL_POINTS);
+		for(i=0;i<r.Pmov.size();i++) glVertex(r.Pmov[i]);
+		glEnd();
+		glPointSize(1.0f);
+		glColor((*mov).mi.c);
+		if(r.Nmov.size()==r.Pmov.size()) 
+		{
+			glBegin(GL_LINES);
+			for(i=0;i<r.Pmov.size();i++) {
+				glVertex(r.Pmov[i]);
+				glVertex(r.Pmov[i]+r.Nmov[i]*nl);
+			}
+			glEnd();
+		}
+		glPopMatrix();
+		glPopMatrix();
+		// Now Draw the histogram	
+		
+		int HSize = ViewPort[2]-100;
+		r.H.glDraw(Point4i(20,80,HSize,100),dlFont,r.as.I[0].MinDistAbs,1);
+		
+		glPopAttrib(); 
+	*/
+}
 
 Q_EXPORT_PLUGIN(EditAlignPlugin)

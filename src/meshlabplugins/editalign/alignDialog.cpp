@@ -54,14 +54,14 @@ void AlignDialog::updateTree()
 {
 	gla=edit->gla;
 	QList<MeshModel *> &meshList=gla->meshDoc.meshList;
-	qDebug("Items in list: %d", meshList.size());
+	//qDebug("Items in list: %d", meshList.size());
 	ui.alignTreeWidget->clear();
 	//ui.alignTreeWidget->setColumnCount(1);
 	M2T.clear();
 	for(int i=0;i<meshList.size();++i)
 	 {
 		QTreeWidgetItem *item;
-		qDebug("Filename %s", meshList.at(i)->fileName.c_str());
+		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
 		item = new QTreeWidgetItem(QStringList (QFileInfo(meshList.at(i)->fileName.c_str()).fileName()));
 		item->setData(1,Qt::DisplayRole,i);
 		M2T[meshList.at(i)]=item;

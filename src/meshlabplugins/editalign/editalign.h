@@ -119,9 +119,8 @@ public slots:
 		void Process();
 		void GlueHere();
 		void GlueManual();
-		
+		void EditAlignPlugin::DrawArc(/* ArcPtr a, bool relative, const Point3d &Center, double Size*/);
 
-	
 };
 
 #endif

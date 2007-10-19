@@ -31,7 +31,7 @@
 //#include<vcg/Convergence.h>
 #include "AlignPair.h"
 #include "AlignGlobal.h"
-#include "point_matching.h"
+#include <vcg/math/point_matching.h>
 
 using namespace vcg;
 using namespace std;
