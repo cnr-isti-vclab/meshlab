@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.136  2007/10/19 21:39:37  cignoni
+Avoid recreation of normals for loaded mesh with explicit per vertex normal
+
 Revision 1.135  2007/10/08 08:55:09  cignoni
 moved out code for saving of aln
 
@@ -758,7 +761,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						renderModeTextureAct->setEnabled(true);
 						GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 					}
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
+					if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+								vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);																																			 
+					else 
+								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 					updateMenus();
 					int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
