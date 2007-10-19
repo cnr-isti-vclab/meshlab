@@ -5,6 +5,7 @@ SUBDIRS       = meshfilter \
 				meshio \
 				colladaio \
 				epoch_io \
+				u3d_io\
 				meshrender \
 				render_rm \
 				meshcolorize \
