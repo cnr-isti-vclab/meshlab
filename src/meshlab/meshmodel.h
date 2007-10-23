@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.42  2007/10/23 07:50:41  cignoni
+added vertex normals to the default of a mesh. Added trBBox function
+
 Revision 1.41  2007/10/02 07:59:32  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -153,6 +156,12 @@ class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<C
 public :
 	int sfn; //The number of selected faces.
   Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
+  const Box3f &trBB() { 
+	static Box3f bb;
+	bb.SetNull();
+	bb.Add(Tr,bbox);
+		return bb;
+	}
 };
 
 /*
@@ -200,7 +209,7 @@ public:
   MeshModel() {    
     glw.m=&cm; 
     currentDataMask=MM_NONE;
-    ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS;
+    ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS | IOM_VERTNORMAL;
     busy=true;
 		visible=true;
 		cm.Tr.SetIdentity();
