@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.81  2007/10/23 08:23:10  cignoni
+removed reserved shortcut ctrl+s from selection drawing.
+
 Revision 1.80  2007/10/06 23:29:51  cignoni
 corrected management of suspeneded editing actions. Added filter toolbar
 
@@ -321,7 +324,7 @@ void MainWindow::createActions()
   setSelectionRenderingAct 	  = new QAction(QIcon(":/images/selected.png"),tr("Selected Face Rendering"),this);
 	setSelectionRenderingAct->setCheckable(true);
 	setSelectionRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
-	setSelectionRenderingAct->setShortcut(Qt::CTRL+Qt::Key_S);
+	//setSelectionRenderingAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(setSelectionRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectionRendering()));
 
 	//////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
