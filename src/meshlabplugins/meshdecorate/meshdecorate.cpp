@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.43  2007/10/23 07:16:35  cignoni
+added absolute box corner decoration
+
 Revision 1.42  2007/10/02 08:13:50  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -136,6 +139,7 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
   {
     case DP_SHOW_NORMALS      : return QString("Show Normals");
     case DP_SHOW_BOX_CORNERS  : return QString("Show Box Corners");
+    case DP_SHOW_BOX_CORNERS_ABS  : return QString("Show Box Corners (Abs)");
     case DP_SHOW_AXIS         : return QString("Show Axis");
 		case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
     default: assert(0);
@@ -145,6 +149,8 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
 
 void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, QGLWidget *gla, QFont qf)
 {
+	glPushMatrix();
+	glMultMatrix(m.cm.Tr);
 	if(a->text() == ST(DP_SHOW_NORMALS))
 	{
     glPushAttrib(GL_ENABLE_BIT );
@@ -166,8 +172,10 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*r
    glPopAttrib();
   }
   if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
-  if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m,gla,qf);
 	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m,gla,qf);
+	glPopMatrix();
+  if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m,gla,qf);
+  if(a->text() == ST(DP_SHOW_BOX_CORNERS_ABS))	DrawBBoxCorner(m,false);
 }
 
 void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QGLWidget *gla,QFont qf)
@@ -429,7 +437,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 float ExtraMeshDecoratePlugin::niceRound2(float Val,float base)	{return powf(base,ceil(log10(Val)/log10(base)));}
 float ExtraMeshDecoratePlugin::niceRound(float val)	{return powf(10.f,ceil(log10(val)));}
 
-void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
+void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
@@ -439,7 +447,14 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m)
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(1.0);
 	glColor(Color4b::Cyan);
-	Box3f b=m.cm.bbox;
+	Box3f b;
+	if(absBBoxFlag) {
+			b=m.cm.bbox;
+			glColor(Color4b::Cyan);
+	} else {
+			b=m.cm.trBB();
+			glColor(Color4b::Green);
+	}
 	Point3f mi=b.min;
 	Point3f ma=b.max;
 	Point3f d3=(b.max-b.min)/4.0;

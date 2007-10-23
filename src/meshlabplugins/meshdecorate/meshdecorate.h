@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.21  2007/10/23 07:16:34  cignoni
+added absolute box corner decoration
+
 Revision 1.20  2007/10/02 08:13:50  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -94,6 +97,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   enum {
     DP_SHOW_NORMALS,
     DP_SHOW_BOX_CORNERS,
+    DP_SHOW_BOX_CORNERS_ABS,
     DP_SHOW_AXIS,
 		DP_SHOW_QUOTED_BOX,
   };
@@ -120,6 +124,7 @@ public:
     typeList << 
     DP_SHOW_NORMALS <<
     DP_SHOW_BOX_CORNERS <<
+    DP_SHOW_BOX_CORNERS_ABS <<
     DP_SHOW_AXIS <<
     DP_SHOW_QUOTED_BOX;
 
@@ -135,7 +140,7 @@ public:
 
 	QList<QAction *> actions () const {return actionList;}
 
-  void DrawBBoxCorner(MeshModel &m);
+	void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
   void DrawAxis(MeshModel &m,QGLWidget* gla, QFont qf);
 	void DrawQuotedBox(MeshModel &m,QGLWidget *gla, QFont qf);
 
