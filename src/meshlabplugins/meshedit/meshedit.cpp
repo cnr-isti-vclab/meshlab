@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2007/10/23 07:15:19  cignoni
+switch to selection rendering done by slot and signals
+
 Revision 1.10  2007/04/16 09:25:29  cignoni
 ** big change **
 Added Layers managemnt.
@@ -260,6 +263,10 @@ void ExtraMeshEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gl
       LastSel.push_back(&*fi);
 	  
  gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));	
+
+ connect(this, SIGNAL(setSelectionRendering(bool)),gla,SLOT(setSelectionRendering(bool)) );
+
+ setSelectionRendering(true);
 
 }
 

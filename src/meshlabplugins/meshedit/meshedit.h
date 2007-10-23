@@ -57,6 +57,8 @@ public:
     QPoint prev;
     bool isDragging;
     vector<CMeshO::FacePointer> LastSel;
+signals:
+ void setSelectionRendering(bool);
 
 private:
   typedef enum {SMAdd, SMClear,SMSub} SelMode;

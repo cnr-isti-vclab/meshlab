@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.78  2007/10/23 07:15:13  cignoni
+switch to selection rendering done by slot and signals
+
 Revision 1.77  2007/10/17 08:31:39  cignoni
 better label and automatic suspension after the end of the measurement using slots
 
@@ -287,7 +290,6 @@ public:
 
 	void toggleHelpVisible()      {helpVisible = !helpVisible; update();}  
 	void setBackFaceCulling(bool enabled);
-	void setSelectionRendering(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
 	void setSnapshotSetting(const SnapshotSetting & s);
 	void setDrawMode(vcg::GLW::DrawMode mode);
@@ -321,6 +323,8 @@ public:
 		update(); 
 	} 
 public slots:
+	void setSelectionRendering(bool enabled);
+
   void suspendEditToggle()
 		{	
 			if(currentEditor==0) return;
