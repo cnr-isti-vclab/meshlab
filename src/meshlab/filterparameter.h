@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2007/10/24 10:34:26  ponchio
+removed extra FilterParameterSet:: in findParameter(QString name);
+
 Revision 1.9  2007/10/02 07:59:34  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -144,7 +147,7 @@ public:
 	void setMatrix44(QString name, vcg::Matrix44f newVal);
 	void setAbsPerc(QString name, float newVal);
 
-	FilterParameter &FilterParameterSet::findParameter(QString name);
+	FilterParameter &findParameter(QString name);
 
 	void clear() { paramList.clear(); }
 };
