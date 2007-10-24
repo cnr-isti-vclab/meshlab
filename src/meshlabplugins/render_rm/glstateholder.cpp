@@ -454,7 +454,7 @@ void GLStateHolder::setPasses( QList<RmPass> & _passes )
   for(int i =0; i < passes.size(); i++){
     for (int j = 0; j < _passes[i].fragmentUniformVariableSize(); j++){
       currUniformVar = _passes[i].getUniformVariable(j, RmPass::FRAGMENT);
-      if (!currUniformVar.type == 16) break;
+      if (!currUniformVar.type == UniformVar::SAMPLER2D) break;
       for (int k=0; k<_passes.size();k++){
         if (_passes[k].getRenderTarget().name.compare(currUniformVar.name)==0){
           qDebug() << "Pass " << _passes[i].getName() << "need " << currUniformVar.name << "from " << _passes[k].getName() << "[" << k << "->texId="<< passTextures[k]<<"]";
@@ -602,9 +602,7 @@ bool GLStateHolder::executePass(int i){
 #ifdef DEBUG
     {
       QImage img(fbo->toImage());
-      char buff[1024];
-      snprintf(buff, sizeof(buff), "render_pass%d.png", i);
-      QString img_name(buff);
+      QString img_name("render_pass.png");
       if (!img.save(img_name,"PNG"))
         qDebug() << "           error while saving" << img_name;
       else
