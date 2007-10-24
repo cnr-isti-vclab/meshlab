@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.129  2007/10/24 16:38:08  fuscof
+paintGL draw the model only during the first rendering pass
+
 Revision 1.128  2007/10/09 13:02:09  fuscof
 Initial implementation of multipass rendering.
 Please note that MeshRenderInterface has been modified to get the number of rendering passes.
@@ -326,6 +329,7 @@ void GLArea::paintGL()
 	glClearColor(1.0,1.0,1.0,0.0);	//vannini: alpha was 1.0
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 	// Set Modelview and Projection matrix
 	setView();
 
@@ -435,6 +439,7 @@ void GLArea::paintGL()
       if(iRenderer && currentShader) {
         iRenderer->Render(currentShader, *mm(), rm, this); 
       }
+      if (i == 0) /* Draw the meshlab model only in the first pass */
       foreach(MeshModel * mp, meshDoc.meshList) 
         if(mp->visible)
           mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
