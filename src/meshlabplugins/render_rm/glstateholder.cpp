@@ -1,5 +1,24 @@
 #include "glstateholder.h"
-/* #define DEBUG_MPASS */
+#include <iostream>
+using namespace std;
+#define BASE_COLOR_ATTACHMENT GL_COLOR_ATTACHMENT1_EXT
+ #define DEBUG        
+/* #define DEBUG_MPASS  */
+static void checkGLError(char* location)
+{
+  GLuint errnum;
+  const char *errstr;
+  while (errnum = glGetError()) {
+    errstr = reinterpret_cast<const char *>(gluErrorString(errnum));
+    if (errstr)
+      cout << "Error " << errstr;
+    else
+      cout << "Error " << errnum;
+    if(location) cout << " at " << location;
+    cout << endl;
+  }
+}
+
 
 int UniformValue::textureUnit = 0;
 
@@ -142,9 +161,12 @@ bool UniformValue::updateValueInGLMemory()
 				QMessageBox::critical(0, "Meshlab", "Number of active texture is greater than max number supported (which is" + QString().setNum(GL_MAX_TEXTURE_UNITS) + ")" );
 				return false;
 			}
-			glActiveTexture(GL_TEXTURE0);// + UniformValue::textureUnit );
+			glActiveTexture(GL_TEXTURE0+UniformValue::textureUnit );
 			glBindTexture( GL_TEXTURE_2D, textureId );
 			glUniform1iARB( location, UniformValue::textureUnit++ );
+#ifdef DEBUG
+      qDebug() << "Updating sampler2D " << name << " to texId=" << textureId << "[textureUnit=" << UniformValue::textureUnit <<"]" ;
+#endif
 			break;
 		}
 		case OTHER:
@@ -181,8 +203,7 @@ GLStatePassHolder::GLStatePassHolder( RmPass & pass )
 {
 
 	passName = pass.getName();
-  fbo = new QGLFramebufferObject(512,512);
-  fbo_released = true;
+  modelName = pass.getModelReference();
 
 	QString &vprog = pass.getVertex();
 	QString &fprog = pass.getFragment();
@@ -231,7 +252,6 @@ GLStatePassHolder::~GLStatePassHolder()
 		it.next();
 		delete it.value();
 	}
-  delete fbo;
 }
 
 bool GLStatePassHolder::compile() 
@@ -308,20 +328,39 @@ void GLStatePassHolder::updateUniformVariableValuesFromDialog( QString varname, 
 
 bool GLStatePassHolder::updateUniformVariableValuesInGLMemory()
 {
+  checkGLError("BEGIN: updateUniformVariableValuesInGLMemory");
 	bool ret = true;
 	UniformValue::textureUnit = 0;
 	glUseProgramObjectARB(program);
 	QMapIterator<QString,UniformValue*> it( uniformValues );
 	while( it.hasNext() ) {
-		it.next();
-		if( !it.value() -> updateValueInGLMemory() ) ret = false;
-	}
+    it.next();
+    if( !it.value() -> updateValueInGLMemory() ) ret = false;
+  }
+  checkGLError("END: updateUniformVariableValuesInGLMemory");
 	return ret;
 }
+bool GLStatePassHolder::adjustSampler2DUniformVar(QString varname, GLuint texId)
+{
+  QMapIterator<QString,UniformValue*> it( uniformValues );
+	while( it.hasNext() ) {
+    it.next();
+    if ( it.value()->type == 16 && it.value()->name.compare(varname) == 0){
+      it.value()->textureId = texId;
+      it.value()->textureLoaded = true; 
+      return true;
+    }
+  }
+  qDebug() << "ERROR:Unable to find" << varname;
+  return false;
+}
+
 
 void GLStatePassHolder::VarDump()
 {
+#ifdef DEBUG
 	qDebug() << "  Pass:" << passName << "with" << uniformValues.size() << "uniform values";
+#endif
 	QMapIterator<QString,UniformValue*> it( uniformValues );
 	while( it.hasNext() ) {
 		it.next();
@@ -329,34 +368,62 @@ void GLStatePassHolder::VarDump()
 	}
 }
 
-void GLStatePassHolder::bindTexture()
-{
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, fbo->texture());
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+void GLStatePassHolder::useProgram()
+{ 
+  checkGLError("BEGIN: useprogram");
+  updateUniformVariableValuesInGLMemory();
+  glUseProgramObjectARB( program ); qDebug() << passName;
+  checkGLError("END: useprogram");
 }
 
-void GLStatePassHolder::release()
+void GLStatePassHolder::execute()
 {
-  fbo->release(); 
-  fbo_released = true;
-#ifdef DEBUG_MPASS
-  QImage img(fbo->toImage());
-  QString img_name("render");
-  img_name.append(passName);
-  img_name.append(".png");
-  if (!img.save(img_name,"PNG"))
-    qDebug() << "           error while saving" << img_name;
-  else
-    qDebug() << "           Image " << img_name << " saved";
+  /* pseudocode: 
+   *  if (model == screenAlignedQuad){
+   *    take the previous pass and put it in a texture
+   *  }
+   * useProgram();
+   *
+   *
+   */
+#ifdef DEBUG
+  qDebug() << "Executing " << "Model="<< modelName;
+#endif
+  useProgram();
 
-#endif     
+  if (modelName.compare("ScreenAlignedQuad") == 0){
+    checkGLError("BEGIN: screenAlignedd");
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(-1,1,-1,1,-1,1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glPushAttrib(GL_ENABLE_BIT);
+    //glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_LIGHTING);
+    //glColor4f(1.0,0.5,0.3,1.0);	
+
+    glBegin(GL_QUADS);
+    {
+      glVertex2f(-1, -1);
+      glVertex2f( 1, -1);
+      glVertex2f( 1,  1);
+      glVertex2f(-1,  1);
+    }
+    glEnd();
+
+		glPopAttrib();
+		glPopMatrix(); // restore modelview
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+
+    checkGLError("END: screenAlignedd");
+  }
 
 }
-
 
 // ***************** GL STATE HOLDER ****************** //
 
@@ -365,6 +432,8 @@ GLStateHolder::~GLStateHolder( )
 {
 	for( int i = 0; i < passes.size(); i++ )
 		delete passes[i];
+  //delete passTextures;
+  delete fbo;
 }
 
 void GLStateHolder::setPasses( QList<RmPass> & _passes )
@@ -372,8 +441,31 @@ void GLStateHolder::setPasses( QList<RmPass> & _passes )
 	for( int i = 0; i < passes.size(); i++ )
 		delete passes[i];
 	passes.clear();
+  //delete passTextures;
 	for( int i = 0; i < _passes.size(); i++ )
 		passes.append( new GLStatePassHolder(_passes[i]));
+  passTextures = new GLuint[passes.size()];
+  if (!fbo) delete fbo;
+  fbo = new QGLFramebufferObject(FBO_SIZE,FBO_SIZE);
+  genPassTextures(); 
+
+  /* Now it's time to adjust sampler2D textures */
+  UniformVar currUniformVar;
+  for(int i =0; i < passes.size(); i++){
+    for (int j = 0; j < _passes[i].fragmentUniformVariableSize(); j++){
+      currUniformVar = _passes[i].getUniformVariable(j, RmPass::FRAGMENT);
+      if (!currUniformVar.type == 16) break;
+      for (int k=0; k<_passes.size();k++){
+        if (_passes[k].getRenderTarget().name.compare(currUniformVar.name)==0){
+          qDebug() << "Pass " << _passes[i].getName() << "need " << currUniformVar.name << "from " << _passes[k].getName() << "[" << k << "->texId="<< passTextures[k]<<"]";
+        if (!passes[i]->adjustSampler2DUniformVar(currUniformVar.name, passTextures[k])) 
+          qDebug() << "ERRORRRRR"; /* FIXME */
+        }
+      }
+      
+    }
+  }
+
 }
 
 bool GLStateHolder::compile() 
@@ -437,5 +529,115 @@ void GLStateHolder::VarDump()
 	qDebug() << "Passes:" << passes.size();
 	for( int i = 0; i < passes.size(); i++ )
 		passes[i] -> VarDump();
+}
+
+void GLStateHolder::genPassTextures()
+{
+  checkGLError("BEGIN: genpasstextures");
+
+  glGenTextures(passes.size(), passTextures);
+  passTextures[0] = fbo->texture();
+#ifdef DEBUG
+    printf("passTextures[%d]=%d\n", 0, passTextures[0]);
+#endif
+  for(int i=1;i<passes.size();i++)
+  {
+    glBindTexture(GL_TEXTURE_2D, passTextures[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    //create the texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FBO_SIZE, FBO_SIZE, 0, GL_RGB, GL_FLOAT, NULL);
+#ifdef DEBUG
+    printf("passTextures[%d]=%d\n", i, passTextures[i]);
+#endif
+  }
+  /* I decided to use a GL_COLOR_ATTACHMENT for each pass */
+  glEnable(GL_TEXTURE_2D);
+  glEnable(GL_DEPTH_TEST);
+
+  fbo->bind();
+
+  for (int j = 1; j<passes.size(); j++)
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT,BASE_COLOR_ATTACHMENT+j, GL_TEXTURE_2D, passTextures[j], 0);
+
+#ifdef DEBUG 
+  printf("--------GL_COLOR_ATTACHMENT0_EXT=%d\n", fbo->texture());
+
+  for(int k = 1; k < passes.size(); k++){
+    GLint id;
+    glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER_EXT, BASE_COLOR_ATTACHMENT+k,
+        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_EXT, &id);
+    printf("--------GL_COLOR_ATTACHMENT1_EXT+%d=%d\n", k, (GLuint)id);
+  }
+
+#endif
+  fbo->release();
+  checkGLError("END: genpasstextures");
+}
+
+bool GLStateHolder::executePass(int i){
+#ifdef DEBUG
+  qDebug() << "Executing pass " << i+1 << " of " << passes.size() ;
+#endif
+  if (i >= passes.size()) return false;
+  checkGLError("BEGIN: executepass");
+
+  if (currentPass == 0){ /* First pass */
+    glGetIntegerv(GL_DRAW_BUFFER, &currentDrawbuf);
+    fbo->bind();
+    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    passes[i]->updateUniformVariableValuesInGLMemory();
+    passes[i]->useProgram();
+    checkGLError("END:executepass");
+    return true;
+  }else if (currentPass == passes.size()-1){ /* Last pass */
+    glDrawBuffer(BASE_COLOR_ATTACHMENT+currentPass);
+    glEnable(GL_TEXTURE_2D);
+    passes[i]->execute();
+
+    fbo->release();
+#ifdef DEBUG
+    {
+      QImage img(fbo->toImage());
+      char buff[1024];
+      snprintf(buff, sizeof(buff), "render_pass%d.png", i);
+      QString img_name(buff);
+      if (!img.save(img_name,"PNG"))
+        qDebug() << "           error while saving" << img_name;
+      else
+        qDebug() << "           Image " << img_name << " saved";
+    }
+#endif
+    /* Display the result */
+    glDrawBuffer(currentDrawbuf);
+    {
+      glEnable(GL_TEXTURE_2D);
+      glBindTexture(GL_TEXTURE_2D, passTextures[passes.size()-1]);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+      glLoadIdentity();
+      glOrtho(-1,1,-1,1,-1,1);
+      glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(-1, -1, -0.5f);
+        glTexCoord2f(1, 0); glVertex3f( 1, -1, -0.5f);
+        glTexCoord2f(1, 1); glVertex3f( 1,  1, -0.5f);
+        glTexCoord2f(0, 1); glVertex3f(-1,  1, -0.5f);
+      glEnd();
+      glDisable(GL_TEXTURE_2D);
+
+      glPopMatrix();
+    }
+  }else{ /* I assume that every pass except the 1st use a ScreenAlignedQuad */
+    glDrawBuffer(BASE_COLOR_ATTACHMENT+currentPass);
+    glEnable(GL_TEXTURE_2D);
+    passes[i]->execute();
+  }
+  
+  checkGLError("END: execute pass");
+  return true;
 }
 

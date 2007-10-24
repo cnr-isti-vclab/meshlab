@@ -22,6 +22,8 @@
 
 #include <assert.h>
 
+#define FBO_SIZE 512
+
 
 
 // * Extends the uniform variable class of the RM Parser
@@ -58,6 +60,7 @@ class GLStatePassHolder : public QObject
 
 	public:
 		QString passName;
+    QString modelName;
 
 	private:
 	GLhandleARB vhandler;
@@ -65,11 +68,9 @@ class GLStatePassHolder : public QObject
 
 	bool setVertexProgram;
 	bool setFragmentProgram;
-  bool fbo_released;
 	QString lastError;
 
 	GLhandleARB program;
-  QGLFramebufferObject* fbo; /* output buffer */
 
 	QMap<QString, UniformValue*> uniformValues;
 
@@ -87,15 +88,12 @@ class GLStatePassHolder : public QObject
 
 		void updateUniformVariableValuesFromDialog( QString varname, int rowIdx, int colIdx, QVariant newValue );
 		bool updateUniformVariableValuesInGLMemory();
+    bool adjustSampler2DUniformVar(QString varname, GLuint texId);
 
 		void VarDump();
 
-		inline void useProgram() { glUseProgramObjectARB( program ); }
-    inline void bind() { fbo->bind(); fbo_released = false;}
-    void bindTexture();
-    void release();
-    inline bool released() { return fbo_released; }
-
+		void useProgram();
+    void execute();
 };
 
 // * This class hold the state of the rmshader render:
@@ -107,7 +105,10 @@ class GLStateHolder : public QObject
 	Q_OBJECT
 
 	QList<GLStatePassHolder*> passes;
+  GLuint* passTextures;
+  QGLFramebufferObject* fbo;
 	QString lastError;
+  GLint currentDrawbuf;
 	bool supported;
 
 	public:
@@ -115,8 +116,8 @@ class GLStateHolder : public QObject
 		bool needUpdateInGLMemory;
     int currentPass;
 
-		GLStateHolder( ) {needUpdateInGLMemory = true; supported = false; currentPass = -1;}
-		GLStateHolder( QList<RmPass> & passes ) { setPasses(passes); needUpdateInGLMemory = true; supported = false; }
+		GLStateHolder( ) { fbo = NULL; needUpdateInGLMemory = true; supported = false; currentPass = -1;}
+		GLStateHolder( QList<RmPass> & passes ) { fbo = NULL; setPasses(passes); needUpdateInGLMemory = true; supported = false; }
 		~GLStateHolder( );
 
 		void setPasses( QList<RmPass> & passes );
@@ -136,10 +137,10 @@ class GLStateHolder : public QObject
 		int passNumber() { return passes.size(); }
     inline void reset(){ needUpdateInGLMemory = true; };
 		void usePassProgram( int i ) { passes[i] -> useProgram(); }
-    void bind( int i ) { passes[i] -> bind(); }
-    void bindTexture(int i) { passes[i] ->bindTexture();}
-    void release(int i) { passes[i] -> release(); }
-    bool released(int i) { return passes[i]->released();}
+    bool executePass(int i );
+
+  private:
+    void genPassTextures();
 };
 
 

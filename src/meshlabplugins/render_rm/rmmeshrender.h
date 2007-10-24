@@ -36,7 +36,6 @@ class RmMeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 	private:
 
 		void initActionList();
-    void myWindowRendering1(int pass);
 
 	public:
 		RmMeshShaderRenderPlugin() { dialog = NULL;}

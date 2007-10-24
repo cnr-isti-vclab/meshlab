@@ -86,7 +86,9 @@ void RmShaderDialog::fillTabsWithPass( int index ) {
 				info += " render Input: " + v.name;
 				for( int k = 0; k < eff_selected -> size(); k++ )
 					if( eff_selected -> at(k).getRenderTarget().name == v.textureName ) {
-						info += " (from pass: " + eff_selected -> at(k).getName() + ")";
+            char buff[512];
+            snprintf( buff, sizeof(buff), "%d", k);
+						info += " (from pass: " + eff_selected -> at(k).getName() + ")["+buff+"]";
 						break;
 					}
 				info += "\n";

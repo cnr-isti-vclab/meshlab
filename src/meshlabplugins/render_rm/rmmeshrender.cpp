@@ -2,32 +2,11 @@
 #include <QtOpenGL>
 #include <QtGui/QImage>
 
-void RmMeshShaderRenderPlugin::myWindowRendering1(int pass){
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glColor4f(0,0,0,0);
-  glLoadIdentity();             
-  
-  holder.bindTexture(pass);
 
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0f, 1.0f);glVertex3f(-1.0f, 1.0f, 0.0f);// Top Left
-  glTexCoord2f(1.0f, 1.0f);glVertex3f( 1.0f, 1.0f, 0.0f);// Top Right
-  glTexCoord2f(1.0f, 0.0f);glVertex3f( 1.0f,-1.0f, 0.0f);// Bottom Right
-  glTexCoord2f(0.0f, 0.0f);glVertex3f(-1.0f,-1.0f, 0.0f);
-  glEnd();
 
-  glPopMatrix();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW); /* restore the model view */
-}
+static int vp[4];
 
 const PluginInfo& RmMeshShaderRenderPlugin::Info() {
-
 	static PluginInfo ai; 
 	ai.Date=tr("September 2007");
 	ai.Version = "1.0";
@@ -84,6 +63,10 @@ void RmMeshShaderRenderPlugin::initActionList() {
 
 void RmMeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla)
 {
+#ifdef DEBUG
+  qDebug() << "Init";
+#endif
+  glGetIntegerv(GL_VIEWPORT, vp);
 	if( dialog ) {
 		dialog->close();
 		delete dialog;
@@ -93,7 +76,7 @@ void RmMeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QG
 	assert(parser);
 
 	gla->makeCurrent();
-	GLenum err = glewInit();
+  GLenum err = glewInit();
 	if (GLEW_OK == err) {
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
 
@@ -126,35 +109,20 @@ void RmMeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, 
       holder.usePassProgram(0);
       return;
     }
+    glViewport(0,0,FBO_SIZE, FBO_SIZE); /* FIXME */
 
-    if (holder.currentPass == holder.passNumber())
+    if (holder.currentPass >= holder.passNumber())
       holder.currentPass = -1;
 
     if (holder.currentPass < 0)
       holder.currentPass = 0;
-
-    //qDebug() << " Rendering [" << holder.currentPass+1 << "/" << holder.passNumber() << "]" << holder.released(holder.currentPass);
-
-    if (holder.currentPass == holder.passNumber()-1){
-      holder.release(1);
-      myWindowRendering1(1); /* nothing to do */
-      holder.currentPass++;
-      return;
+#ifdef DEBUG
+    qDebug() << " Rendering [" << holder.currentPass+1 << "/" << holder.passNumber() << "]";
+#endif
+    if (holder.currentPass >= 0){ 
+      holder.executePass(holder.currentPass);
     }
 
-    if (holder.currentPass > 0){ /* A previous pass have an fbo that should be released */
-      //qDebug() << "  --release " << holder.currentPass-1;
-      holder.release(holder.currentPass-1);
-      glUseProgramObjectARB(0); /* Disable frag&shader */
-      myWindowRendering1(holder.currentPass-1);
-    }
-
-    /* At every pass I release the previous fbo and bind the current */
-    //qDebug() << "  ++bind " << holder.currentPass;
-    holder.bind(holder.currentPass);
-    glClearColor(1.0,1.0,1.0,0.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    holder.usePassProgram(holder.currentPass);
   }
   holder.currentPass++;
 
