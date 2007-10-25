@@ -66,7 +66,7 @@ void RmMeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QG
 #ifdef DEBUG
   qDebug() << "Init";
 #endif
-  glGetIntegerv(GL_VIEWPORT, vp);
+  glGetIntegerv(GL_VIEWPORT, (GLint *)vp);
 	if( dialog ) {
 		dialog->close();
 		delete dialog;
