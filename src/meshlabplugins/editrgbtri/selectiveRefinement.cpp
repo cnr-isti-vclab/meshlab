@@ -47,7 +47,7 @@ bool SelectiveRefinement::edgeNeedRefinement(RgbTriangleC& t, int EdgeIndex)
 bool SelectiveRefinement::vertexCanBeRemoved(RgbTriangleC& t, int VertexIndex)
 {
 	RgbVertexC v = t.V(VertexIndex);
-	if (!IsValidVertex(v.index))
+	if (!IsValidVertex(v.index,m,info))
 		return false;
 	
 	if (isInBox(extractCoord(t,VertexIndex)))
@@ -123,7 +123,7 @@ bool SelectiveRefinement::stepSimple()
 		RgbTriangleC t = RgbTriangleC(m,info,v.VFp()->Index());
 		int index = v.VFi();
 		
-		if (IsValidVertex(ro.v1,&t,&index))
+		if (IsValidVertex(ro.v1,m,info,&t,&index))
 		{
 			if (RgbPrimitives::vertexRemoval_Possible(t,index))
 			{
@@ -159,7 +159,7 @@ bool SelectiveRefinement::stepSimple()
 		RgbTriangleC t;
 		int index;
 		
-		if (IsValidEdge(ro.v1,ro.v2,&t,&index))
+		if (IsValidEdge(ro.v1,ro.v2,m,info,&t,&index))
 		{
 			vector<RgbTriangleC> vt;
 			RgbPrimitives::recursiveEdgeSplit(t,index,*to,&vt);
@@ -194,7 +194,7 @@ void SelectiveRefinement::stepComplex_aux(vector<RgbTriangleC>& vt)
 		{
 			int v = vt[i].V(j).index;
 			
-			if (IsValidVertex(v))
+			if (IsValidVertex(v,m,info))
 			{
 				coarseningQueue.push(RefOp(v,calculatePriorityVertexComplex(vt[i],j)));
 			}
@@ -211,7 +211,7 @@ void SelectiveRefinement::stepComplex_aux(vector<RgbTriangleC>& vt)
 			if (vt[i].getEdgeColor(j) == FaceInfo::EDGE_GREEN)
 			{
 				if ((v1 > v2)  || vt[i].getEdgeIsBorder(j))  // v1 v2 and v2 v1 are the same edge
-					if (IsValidEdge(vt[i].V(j).index,vt[i].V((j+1)%3).index))
+					if (IsValidEdge(vt[i].V(j).index,vt[i].V((j+1)%3).index,m,info))
 						refinementQueue.push(RefOp(v1,v2,calculatePriorityEdgeComplex(vt[i],j)));
 			}
 		}
@@ -245,7 +245,7 @@ bool SelectiveRefinement::stepComplex()
 				RgbTriangleC t;
 				int index;
 
-				if (IsValidVertex(ro.v1,&t,&index))
+				if (IsValidVertex(ro.v1,m,info,&t,&index))
 				{
 					if (RgbPrimitives::vertexRemoval_Possible(t,index))
 					{
@@ -282,7 +282,7 @@ bool SelectiveRefinement::stepComplex()
 		RgbTriangleC t;
 		int index;
 		
-		if (IsValidEdge(ro.v1,ro.v2,&t,&index))
+		if (IsValidEdge(ro.v1,ro.v2,m,info,&t,&index))
 		{
 			vector<RgbTriangleC> vt;
 			RgbPrimitives::recursiveEdgeSplit(t,index,*to,&vt);
@@ -309,7 +309,7 @@ void SelectiveRefinement::stop()
 	isRunning = false;
 }
 
-bool SelectiveRefinement::IsValidEdge(int v1,int v2, RgbTriangleC* t, int* ti)
+bool SelectiveRefinement::IsValidEdge(int v1,int v2, CMeshO* m,RgbInfo* info, RgbTriangleC* t, int* ti)
 {
 	assert((unsigned int)v1 < m->vert.size());
 	assert((unsigned int)v2 < m->vert.size());
@@ -353,7 +353,7 @@ bool SelectiveRefinement::IsValidEdge(int v1,int v2, RgbTriangleC* t, int* ti)
 	return false;
 }
 
-bool SelectiveRefinement::IsValidVertex(int vp, RgbTriangleC* t, int* ti)
+bool SelectiveRefinement::IsValidVertex(int vp, CMeshO* m,RgbInfo* info, RgbTriangleC* t, int* ti, bool ignoreNew)
 {
 	assert((unsigned int)vp < m->vert.size());
 	if (m->vert[vp].IsD())
@@ -367,7 +367,7 @@ bool SelectiveRefinement::IsValidVertex(int vp, RgbTriangleC* t, int* ti)
 	int tfi = v.VFi();
 	assert(tf.V(tfi).index == vp);
 
-	if (tf.getVertexIsNew(tfi))
+	if (tf.getVertexIsNew(tfi) && !ignoreNew)
 		return false;
 
 	if (t)
@@ -441,7 +441,7 @@ void SelectiveRefinement::init_queuesComplex()
 			{
 				if (f.V(v) > f.V((v+1)%3) || rt.getEdgeIsBorder(v)) // is true once for each edge
 				{
-					if (rt.getEdgeColor(v) == FaceInfo::EDGE_GREEN && IsValidEdge(rt.V(v).index,rt.V((v+1)%3).index))
+					if (rt.getEdgeColor(v) == FaceInfo::EDGE_GREEN && IsValidEdge(rt.V(v).index,rt.V((v+1)%3).index,m,info))
 					{
 						refinementQueue.push(RefOp(rt.V(v).index,rt.V((v+1)%3).index,calculatePriorityEdgeComplex(rt,v)));
 					}
@@ -466,7 +466,7 @@ void SelectiveRefinement::init_queuesComplex()
 			{
 				RgbVertexC vr = rt.V(v);
 				vr.setIsNew(false);
-				if (IsValidVertex(vr.index))
+				if (IsValidVertex(vr.index,m,info))
 				{
 					coarseningQueue.push(RefOp(rt.V(v).index,calculatePriorityVertexComplex(rt,v)));
 				}

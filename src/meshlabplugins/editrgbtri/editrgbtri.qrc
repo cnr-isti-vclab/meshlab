@@ -14,5 +14,7 @@
         <file>images/select_face_rect.png</file>
         <file>images/triangle.png</file>
         <file>images/vertex.png</file>
-    </qresource>
+        <file>images/brush.png</file>
+        <file>images/eraser.png</file>
+</qresource>
 </RCC>

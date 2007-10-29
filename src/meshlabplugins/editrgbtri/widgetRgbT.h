@@ -31,7 +31,9 @@
 enum Tool
 {
     TOOL_SELECTIONSINGLE,
-    TOOL_SELECTIONRECT
+    TOOL_SELECTIONRECT,
+    TOOL_BRUSH,
+    TOOL_ERASER
 };
 
 //! UI for the plugin
@@ -49,6 +51,9 @@ public slots:
 private slots:
     void on_bSelectionSingle_clicked(bool b);
     void on_bSelectionRect_clicked(bool b);
+    void on_bBrush_clicked(bool b);
+    void on_bEraser_clicked(bool b);
+
     void on_algo_simple_toggled(bool b);
 };
 

@@ -27,12 +27,10 @@ WidgetRgbT::WidgetRgbT(QWidget* parent,QObject* plugin) : QWidget(parent)
 
     bDebugEdgeCol->setVisible(false);
     bDebugEdgeSplit->setVisible(false);
-    bDebugCGRG->setVisible(false);
     
-    setTool(TOOL_SELECTIONSINGLE);
+    setTool(TOOL_BRUSH);
     on_algo_simple_toggled(false);
     
-    connect(bDebugCGRG,SIGNAL(clicked(bool)),plugin,SLOT(debugColorCGRG()));
     connect(bDebugEdgeCol,SIGNAL(clicked(bool)),plugin,SLOT(debugEdgeCollapse()));
     connect(bDebugEdgeSplit,SIGNAL(clicked(bool)),plugin,SLOT(debugEdgeSplit()));
     
@@ -61,12 +59,21 @@ void WidgetRgbT::setTool(Tool t)
     tool = t;
     bSelectionSingle->setChecked(false);
     bSelectionRect->setChecked(false);
+    bBrush->setChecked(false);
+    bEraser->setChecked(false);
+
     switch (t) {
         case TOOL_SELECTIONSINGLE:
             bSelectionSingle->setChecked(true);
             break;
         case TOOL_SELECTIONRECT:
             bSelectionRect->setChecked(true);
+            break;
+        case TOOL_BRUSH:
+            bBrush->setChecked(true);
+            break;
+        case TOOL_ERASER:
+            bEraser->setChecked(true);
             break;
         default:
             break;
@@ -88,4 +95,13 @@ void WidgetRgbT::on_bSelectionSingle_clicked(bool /*b*/)
 void WidgetRgbT::on_bSelectionRect_clicked(bool /*b*/)
 {
     setTool(TOOL_SELECTIONRECT);
+}
+
+void WidgetRgbT::on_bBrush_clicked(bool /*b*/)
+{
+	setTool(TOOL_BRUSH);
+}
+void WidgetRgbT::on_bEraser_clicked(bool /*b*/)
+{
+	setTool(TOOL_ERASER);
 }

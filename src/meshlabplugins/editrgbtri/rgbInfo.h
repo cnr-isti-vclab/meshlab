@@ -29,6 +29,8 @@
 #include <vcg/space/color4.h>
 #include <vcg/space/point3.h>
 #include <iostream>
+#include "vcg/simplex/faceplus/component.h"
+#include <meshlab/meshmodel.h>
 
 namespace rgbt
 {
@@ -817,6 +819,27 @@ private:
 
 };
 
+/// Wrapper for an edge identified by a triangle and an index
+template<class TRI_MESH_TYPE>
+class RgbEdge
+{
+public:
+	RgbEdge(RgbTriangle<TRI_MESH_TYPE> t, int index) : t(t), index(index) {};
+	/// An rgb triangle incident
+	RgbTriangle<TRI_MESH_TYPE> t;
+	/// Edge index on t
+	int index;
+	/// additional index used by VF, if first == 0 the common vertex is the one with the lowest index
+//	int first;
+	
+	inline int getLevel()
+	{
+		return t.getEdgeLevel(index);
+	}
+	
+//	inline 
+};
+
 /// Wrapper for RgbInfo and CMeshO that allow a trasparent access to geometrical, topological and rgb informations of a vertex
 template<class TRI_MESH_TYPE> class RgbVertex
 {
@@ -973,13 +996,94 @@ public:
     {
     	return info().given();
     }
+
+    inline int VFi()
+    {
+    	return vert().VFi();
+    }
+    
+    inline RgbTriangle<TRI_MESH_TYPE> VFp()
+    {
+    	FacePointer fp = vert().VFp();
+    	return RgbTriangleC(m,rgbInfo,fp->Index());
+    }
+    
+    typedef RgbVertex<TRI_MESH_TYPE> RgbVertexC;
+    typedef RgbTriangle<TRI_MESH_TYPE> RgbTriangleC;
+    typedef RgbEdge<TRI_MESH_TYPE> RgbEdgeC;
+    
+	void VF(std::vector<RgbEdgeC>& ledge)
+	{
+		if (ledge.size() == 0)
+			ledge.reserve(6);
+		RgbTriangleC t = VFp();
+		int VertexIndex = VFi();
+	    bool isBorder = t.getVertexIsBorder(VertexIndex);
+	    
+	    vcg::face::Pos<FaceType> pos(t.face(),t.face()->V(VertexIndex));
+
+	    if (t.getNumberOfBoundaryEdge(&(t.V(VertexIndex))) >= 2)
+	    {
+    		ledge.push_back(RgbEdgeC(t,VertexIndex));
+	    	return;
+	    }
+	    	
+	    if (isBorder)       // if is border move cw until the border is found
+	    {
+	        pos.FlipE();
+	        pos.FlipF();
+	        
+	        while (!pos.IsBorder())
+	        {
+	            pos.FlipE();
+	            pos.FlipF();
+	        }
+	        
+	        pos.FlipE();
+	    }
+	    
+	    CMeshO::FacePointer first = pos.F();
+
+	    RgbTriangleC ttmp = RgbTriangleC(t.m,t.rgbInfo,pos.F()->Index());
+	    int itmp;
+	    ttmp.containVertex(index,&itmp);
+		ledge.push_back(RgbEdgeC(ttmp,itmp));
+
+	    pos.FlipF();
+	    pos.FlipE();
+	 
+	    while(pos.F() != first)
+	    {
+		    ttmp = RgbTriangleC(t.m,t.rgbInfo,pos.F()->Index());
+		    ttmp.containVertex(index,&itmp);
+			ledge.push_back(RgbEdgeC(ttmp,itmp));
+	        
+	        if (pos.IsBorder())
+	            break;
+	        
+	        pos.FlipF();
+	        pos.FlipE();
+	    }
+	    
+	    int indexV = t.getVIndex(VertexIndex);
+	    int res;
+	    for (unsigned int i = 0; i < ledge.size(); ++i) 
+	    {
+	        assert(ledge[i].t.containVertex(indexV,&res));
+	        if (!isBorder)
+	        {
+	            assert(ledge[i].t.FF((res+2)%3).face() == ledge[(i+1)%ledge.size()].t.face());
+	        }
+	        assert(!ledge[i].t.face()->IsD());
+	    }
+	}
     
 	/// VCG Mesh
     TriMeshType* m;
     /// Rgb information container
     RgbInfo* rgbInfo;
 public:
-	/// Absolute (and common to m and rgbInfo) index of the face
+	/// Absolute (and common to m and rgbInfo) index of the vertex
     int index;
 };
 

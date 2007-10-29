@@ -140,6 +140,21 @@ public:
 	/// Max number of triangles in the mesh
 	int maxTriangles;
 	
+	/// Compute the lenght of an edge
+	static double edgeLenght(RgbTriangleC& t, int index);
+	/// Extract the lenght of the minimum edge incident at v
+	static double minEdge(RgbVertexC& v);
+	/// Extract the lenght of the maximum edge incident at v
+	static double maxEdge(RgbVertexC& v);
+	/// Extract the lenght of all the edges incident at v
+	static void VE(RgbVertexC& v, vector<double>& vv);
+	/// Get the coordinates of the point
+	static Point& extractCoord(RgbTriangleC& t, int VertexIndex);
+	/// Check if an edge is valid (the two vertex are not on the border)
+	static bool IsValidEdge(int v1,int v2, CMeshO* m,RgbInfo* info,RgbTriangleC* t = 0, int* ti = 0);
+	/// Check if a vertex is valid
+	static bool IsValidVertex(int v, CMeshO* m,RgbInfo* info, RgbTriangleC* t = 0, int* ti = 0, bool ignoreNew = false);
+	
 private:
 	/// Init procedure for the simple algorithm
 	void init_queues();
@@ -149,8 +164,6 @@ private:
 	void init();
 	/// Auxiliary funcion for stepComplex
 	void stepComplex_aux(vector<RgbTriangleC>& vt);
-	/// Compute the lenght of an edge
-	double edgeLenght(RgbTriangleC& t, int index);
 	/// Return if the edge need more refinement (used by simple algorithm)
 	bool edgeNeedRefinement(RgbTriangleC& t, int EdgeIndex);
 	/// Return if the vertex can be removed
@@ -163,24 +176,12 @@ private:
 	double calculatePriorityEdgeComplex(RgbTriangleC& t, int EdgeIndex);
 	/// Compute the priority of a vertex (complex)
 	double calculatePriorityVertexComplex(RgbTriangleC& t, int VertexIndex);
-	/// Check if an edge is valid (the two vertex are internal)
-	bool IsValidEdge(int v1,int v2, RgbTriangleC* t = 0, int* ti = 0);
-	/// Check if a vertex is valid
-	bool IsValidVertex(int v, RgbTriangleC* t = 0, int* ti = 0);
 	/// Check if p is inside box
 	bool isInBox(Point& p);
 	/// Check if the edge is completely inside the box
 	bool isInBox(RgbTriangleC& t, int EdgeIndex);
 	/// Check if the vertex is inside the box
 	bool isInBoxV(RgbTriangleC& t, int EdgeIndex);
-	/// Extract the lenght of the minimum edge incident at v
-	double minEdge(RgbVertexC& v);
-	/// Extract the lenght of the maximum edge incident at v
-	double maxEdge(RgbVertexC& v);
-	/// Extract the lenght of all the edges incident at v
-	void VE(RgbVertexC& v, vector<double>& vv);
-	/// Get the coordinates of the point
-	Point& extractCoord(RgbTriangleC& t, int VertexIndex);
 	/// Priority queue that contain refinement operation
 	priority_queue<RefOp> refinementQueue;
 	/// Priority queue that contain coarsening operation

@@ -42,6 +42,7 @@
 
 #include "selectiveRefinement.h"
 #include "topologicalOp.h"
+#include "interactiveEdit.h"
 
 namespace rgbt
 {
@@ -121,9 +122,11 @@ private:
     /// Additional info needed by RGB Triangulation
     RgbInfo* rgbInfo;
     
-    
     SelectiveRefinement* sr;
     TopologicalOpC* to;
+    InteractiveEdit* ie;
+    RgbInteractiveEdit* rgbie;
+    
     
     bool getFaceAtMouse(MeshModel &m,QPoint &mid, CMeshO::FacePointer& val);
     bool getFacesAtMouse(MeshModel &m,QPoint &mid, vector<CMeshO::FacePointer> & val);

@@ -5,24 +5,126 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>335</width>
-    <height>632</height>
+    <width>288</width>
+    <height>508</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Form</string>
   </property>
   <property name="windowIcon" >
-   <iconset resource="rgbt.qrc" >:/images/rgbt.png</iconset>
+   <iconset/>
   </property>
   <layout class="QGridLayout" >
-   <property name="margin" >
-    <number>9</number>
-   </property>
-   <property name="spacing" >
-    <number>6</number>
-   </property>
-   <item row="2" column="0" colspan="6" >
+   <item row="0" column="0" colspan="5" >
+    <widget class="QLabel" name="label" >
+     <property name="text" >
+      <string>Selection tools:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" >
+    <widget class="QToolButton" name="bSelectionSingle" >
+     <property name="toolTip" >
+      <string>Single face selector</string>
+     </property>
+     <property name="text" >
+      <string>Single Selection</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="editrgbtri.qrc" >:/images/select_face.png</iconset>
+     </property>
+     <property name="iconSize" >
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="checkable" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" >
+    <widget class="QToolButton" name="bSelectionRect" >
+     <property name="toolTip" >
+      <string>Rectangular face selector</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="editrgbtri.qrc" >:/images/select_face_rect.png</iconset>
+     </property>
+     <property name="iconSize" >
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="checkable" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2" >
+    <widget class="QToolButton" name="bBrush" >
+     <property name="toolTip" >
+      <string>Brush for mesh refinement</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="editrgbtri.qrc" >:/images/brush.png</iconset>
+     </property>
+     <property name="iconSize" >
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="checkable" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3" >
+    <widget class="QToolButton" name="bEraser" >
+     <property name="toolTip" >
+      <string>Eraser for mesh coarsening</string>
+     </property>
+     <property name="text" >
+      <string>...</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="editrgbtri.qrc" >:/images/eraser.png</iconset>
+     </property>
+     <property name="iconSize" >
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="checkable" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4" >
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0" colspan="5" >
     <widget class="QTabWidget" name="tabWidget" >
      <property name="enabled" >
       <bool>true</bool>
@@ -33,55 +135,17 @@
      <property name="usesScrollButtons" >
       <bool>true</bool>
      </property>
-     <widget class="QWidget" name="Tools" >
+     <widget class="QWidget" name="tab" >
       <attribute name="title" >
-       <string>Rgb Operations</string>
+       <string>Interactive</string>
       </attribute>
       <layout class="QGridLayout" >
-       <property name="margin" >
-        <number>9</number>
-       </property>
-       <property name="spacing" >
-        <number>6</number>
-       </property>
-       <item row="1" column="3" colspan="2" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>21</width>
-           <height>41</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="8" column="4" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="6" column="0" colspan="6" >
+       <item row="0" column="0" colspan="2" >
         <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
          <item>
-          <widget class="QLabel" name="label_6" >
+          <widget class="QLabel" name="label_2" >
            <property name="text" >
-            <string>Max Edge Level (in box)</string>
+            <string>Brush Radius (pixel)</string>
            </property>
           </widget>
          </item>
@@ -92,25 +156,65 @@
            </property>
            <property name="sizeHint" >
             <size>
-             <width>40</width>
-             <height>20</height>
+             <width>119</width>
+             <height>23</height>
             </size>
            </property>
           </spacer>
          </item>
          <item>
-          <widget class="QSpinBox" name="sMaxEdgeLevel" >
-           <property name="toolTip" >
-            <string>Max edge level inside the selection box.</string>
-           </property>
+          <widget class="QSpinBox" name="sRadius" >
            <property name="layoutDirection" >
             <enum>Qt::LeftToRight</enum>
            </property>
            <property name="alignment" >
-            <set>Qt::AlignRight</set>
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="minimum" >
+            <number>10</number>
            </property>
            <property name="maximum" >
-            <number>1000000</number>
+            <number>500</number>
+           </property>
+           <property name="value" >
+            <number>30</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0" colspan="2" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QCheckBox" name="cLevelEnabled" >
+           <property name="text" >
+            <string>Refinement Level</string>
+           </property>
+           <property name="checked" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>42</width>
+             <height>23</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sBrushLevel" >
+           <property name="alignment" >
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="maximum" >
+            <number>8</number>
            </property>
            <property name="value" >
             <number>2</number>
@@ -119,25 +223,12 @@
          </item>
         </layout>
        </item>
-       <item row="8" column="0" colspan="4" >
-        <widget class="QLabel" name="label_8" >
-         <property name="text" >
-          <string>Max Edge Lenght(in box)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="6" >
+       <item row="2" column="0" colspan="2" >
         <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
          <item>
-          <widget class="QLabel" name="label_7" >
+          <widget class="QCheckBox" name="cLengthEnabled" >
            <property name="text" >
-            <string>Max Edge Level (outside)</string>
+            <string>Edge Length</string>
            </property>
           </widget>
          </item>
@@ -148,83 +239,56 @@
            </property>
            <property name="sizeHint" >
             <size>
-             <width>40</width>
-             <height>20</height>
+             <width>41</width>
+             <height>23</height>
             </size>
            </property>
           </spacer>
          </item>
          <item>
-          <widget class="QSpinBox" name="sMinEdgeLevel" >
-           <property name="toolTip" >
-            <string>Max edge level outside the selection box.</string>
-           </property>
-           <property name="layoutDirection" >
-            <enum>Qt::LeftToRight</enum>
+          <widget class="QDoubleSpinBox" name="sBrushLength" >
+           <property name="enabled" >
+            <bool>false</bool>
            </property>
            <property name="alignment" >
-            <set>Qt::AlignRight</set>
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="readOnly" >
+            <bool>false</bool>
+           </property>
+           <property name="decimals" >
+            <number>6</number>
            </property>
            <property name="maximum" >
-            <number>1000000</number>
+            <double>9999.989999999999782</double>
+           </property>
+           <property name="value" >
+            <double>2.000000000000000</double>
            </property>
           </widget>
          </item>
         </layout>
        </item>
-       <item row="5" column="0" colspan="2" >
-        <widget class="QLabel" name="label_5" >
-         <property name="maximumSize" >
-          <size>
-           <width>91</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text" >
-          <string>Max triangles</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="5" >
-        <widget class="QToolButton" name="bPickFace" >
-         <property name="toolTip" >
-          <string>Extract the current number of triangle.</string>
-         </property>
-         <property name="text" >
-          <string>Pick</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" colspan="4" >
+       <item row="3" column="0" colspan="2" >
         <spacer>
          <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" >
           <size>
-           <width>40</width>
-           <height>20</height>
+           <width>202</width>
+           <height>71</height>
           </size>
          </property>
         </spacer>
        </item>
-       <item row="10" column="0" colspan="4" >
-        <widget class="QLabel" name="label_9" >
-         <property name="text" >
-          <string>Max Edge Lenght(outside)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="5" >
-        <widget class="QToolButton" name="bEdgeCollapse" >
-         <property name="toolTip" >
-          <string>Execute a vertex removal. Three triangle sharing a vertex must be selected.</string>
-         </property>
+       <item row="4" column="0" >
+        <widget class="QToolButton" name="bDebugEdgeCol" >
          <property name="text" >
           <string>...</string>
          </property>
          <property name="icon" >
-          <iconset resource="rgbt.qrc" >:/images/edgecollapse.png</iconset>
+          <iconset resource="editrgbtri.qrc" >:/images/edgecollapse.png</iconset>
          </property>
          <property name="iconSize" >
           <size>
@@ -234,41 +298,173 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0" >
-        <widget class="QLabel" name="label_3" >
+       <item row="4" column="1" >
+        <widget class="QToolButton" name="bDebugEdgeSplit" >
          <property name="text" >
-          <string>Edge Split</string>
+          <string>...</string>
+         </property>
+         <property name="icon" >
+          <iconset resource="editrgbtri.qrc" >:/images/edgesplit.png</iconset>
+         </property>
+         <property name="iconSize" >
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="6" >
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2" >
+      <attribute name="title" >
+       <string>Primitives</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <item row="0" column="0" >
         <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
          <item>
-          <widget class="QToolButton" name="bStart" >
-           <property name="toolTip" >
-            <string>Launch the selective refinement algorithm</string>
-           </property>
+          <widget class="QLabel" name="label_3" >
            <property name="text" >
-            <string>Start</string>
+            <string>Edge Split</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="bResume" >
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>131</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QToolButton" name="bEdgeSplit" >
            <property name="toolTip" >
-            <string>Resume a previously interrupted interactive execution.</string>
+            <string>Execute a split on a green edge. Two adjacent triangles must be selected.</string>
            </property>
            <property name="text" >
-            <string>Resume</string>
+            <string>...</string>
+           </property>
+           <property name="icon" >
+            <iconset resource="editrgbtri.qrc" >:/images/edgesplit.png</iconset>
+           </property>
+           <property name="iconSize" >
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
            </property>
           </widget>
          </item>
+        </layout>
+       </item>
+       <item row="1" column="0" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QLabel" name="label_4" >
+           <property name="text" >
+            <string>Vertex Removal</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>81</width>
+             <height>41</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QToolButton" name="bEdgeCollapse" >
+           <property name="toolTip" >
+            <string>Execute a vertex removal. Three triangle sharing a vertex must be selected.</string>
+           </property>
+           <property name="text" >
+            <string>...</string>
+           </property>
+           <property name="icon" >
+            <iconset resource="editrgbtri.qrc" >:/images/edgecollapse.png</iconset>
+           </property>
+           <property name="iconSize" >
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="0" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>51</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="Tools" >
+      <attribute name="title" >
+       <string>Selective</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <item row="0" column="0" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="1" >
+        <widget class="QToolButton" name="bStart" >
+         <property name="toolTip" >
+          <string>Launch the selective refinement algorithm</string>
+         </property>
+         <property name="text" >
+          <string>Start</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0" colspan="3" >
+        <layout class="QHBoxLayout" >
          <item>
           <widget class="QToolButton" name="bStep" >
            <property name="toolTip" >
@@ -290,6 +486,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="bResume" >
+           <property name="toolTip" >
+            <string>Resume a previously interrupted interactive execution.</string>
+           </property>
+           <property name="text" >
+            <string>Resume</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="bStop" >
            <property name="toolTip" >
             <string>End the execution of the algorith.</string>
@@ -301,93 +507,22 @@
          </item>
         </layout>
        </item>
-       <item row="10" column="5" >
-        <widget class="QToolButton" name="bPickEdgeOutside" >
-         <property name="text" >
-          <string>Pick</string>
-         </property>
-        </widget>
-       </item>
-       <item row="10" column="4" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="9" column="0" colspan="6" >
-        <widget class="QDoubleSpinBox" name="sPickEdgeBox" >
-         <property name="toolTip" >
-          <string>Max edge lenght inside the selection box.</string>
-         </property>
-         <property name="alignment" >
-          <set>Qt::AlignRight</set>
-         </property>
-         <property name="decimals" >
-          <number>6</number>
-         </property>
-         <property name="maximum" >
-          <double>9999.989999999999782</double>
-         </property>
-         <property name="singleStep" >
-          <double>1.000000000000000</double>
-         </property>
-         <property name="value" >
-          <double>0.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="5" >
-        <widget class="QToolButton" name="bEdgeSplit" >
-         <property name="toolTip" >
-          <string>Execute a split on a green edge. Two adjacent triangles must be selected.</string>
-         </property>
-         <property name="text" >
-          <string>...</string>
-         </property>
-         <property name="icon" >
-          <iconset resource="rgbt.qrc" >:/images/edgesplit.png</iconset>
-         </property>
-         <property name="iconSize" >
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="11" column="0" colspan="6" >
-        <widget class="QDoubleSpinBox" name="sPickEdgeOutside" >
-         <property name="toolTip" >
-          <string>Max edge lenght outside the selection box.</string>
-         </property>
-         <property name="alignment" >
-          <set>Qt::AlignRight</set>
-         </property>
-         <property name="decimals" >
-          <number>6</number>
-         </property>
-         <property name="maximum" >
-          <double>9999.989999999999782</double>
-         </property>
-         <property name="value" >
-          <double>10.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="6" >
+       <item row="2" column="0" colspan="3" >
         <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
          <property name="spacing" >
           <number>6</number>
+         </property>
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
          </property>
          <item>
           <widget class="QCheckBox" name="cbInteractive" >
@@ -430,14 +565,7 @@
          </item>
         </layout>
        </item>
-       <item row="8" column="5" >
-        <widget class="QToolButton" name="bPickEdgeBox" >
-         <property name="text" >
-          <string>Pick</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="6" >
+       <item row="3" column="0" colspan="3" >
         <widget class="QGroupBox" name="groupBox" >
          <property name="maximumSize" >
           <size>
@@ -452,10 +580,22 @@
           <string>Selective Refinement Algorithm</string>
          </property>
          <layout class="QGridLayout" >
-          <property name="margin" >
+          <property name="leftMargin" >
            <number>9</number>
           </property>
-          <property name="spacing" >
+          <property name="topMargin" >
+           <number>9</number>
+          </property>
+          <property name="rightMargin" >
+           <number>9</number>
+          </property>
+          <property name="bottomMargin" >
+           <number>9</number>
+          </property>
+          <property name="horizontalSpacing" >
+           <number>6</number>
+          </property>
+          <property name="verticalSpacing" >
            <number>6</number>
           </property>
           <item row="0" column="0" >
@@ -481,164 +621,228 @@
          </layout>
         </widget>
        </item>
-       <item row="5" column="2" colspan="3" >
-        <widget class="QSpinBox" name="sMaxTriangles" >
-         <property name="sizePolicy" >
-          <sizepolicy>
-           <hsizetype>7</hsizetype>
-           <vsizetype>0</vsizetype>
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="toolTip" >
-          <string>Max number of triangles in the result of a selective refinement.</string>
-         </property>
-         <property name="layoutDirection" >
-          <enum>Qt::LeftToRight</enum>
-         </property>
-         <property name="alignment" >
-          <set>Qt::AlignRight</set>
-         </property>
-         <property name="maximum" >
-          <number>1000000000</number>
-         </property>
-         <property name="singleStep" >
-          <number>1000</number>
-         </property>
-         <property name="value" >
-          <number>5000</number>
+       <item row="4" column="0" colspan="3" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QLabel" name="label_5" >
+           <property name="maximumSize" >
+            <size>
+             <width>91</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text" >
+            <string>Max triangles</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sMaxTriangles" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip" >
+            <string>Max number of triangles in the result of a selective refinement.</string>
+           </property>
+           <property name="layoutDirection" >
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignRight</set>
+           </property>
+           <property name="maximum" >
+            <number>1000000000</number>
+           </property>
+           <property name="singleStep" >
+            <number>1000</number>
+           </property>
+           <property name="value" >
+            <number>5000</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="bPickFace" >
+           <property name="toolTip" >
+            <string>Extract the current number of triangle.</string>
+           </property>
+           <property name="text" >
+            <string>Pick</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="5" column="0" colspan="3" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QLabel" name="label_6" >
+           <property name="text" >
+            <string>Max Edge Level (in box)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>16</width>
+             <height>23</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sMaxEdgeLevel" >
+           <property name="toolTip" >
+            <string>Max edge level inside the selection box.</string>
+           </property>
+           <property name="layoutDirection" >
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignRight</set>
+           </property>
+           <property name="maximum" >
+            <number>20</number>
+           </property>
+           <property name="value" >
+            <number>2</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="6" column="0" colspan="3" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QLabel" name="label_7" >
+           <property name="text" >
+            <string>Max Edge Level (outside)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sMinEdgeLevel" >
+           <property name="toolTip" >
+            <string>Max edge level outside the selection box.</string>
+           </property>
+           <property name="layoutDirection" >
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignRight</set>
+           </property>
+           <property name="maximum" >
+            <number>20</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="7" column="0" colspan="3" >
+        <widget class="QLabel" name="label_8" >
+         <property name="text" >
+          <string>Max Edge Length(in box)</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="3" >
-        <widget class="QLabel" name="label_4" >
+       <item row="8" column="0" colspan="3" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QDoubleSpinBox" name="sPickEdgeBox" >
+           <property name="toolTip" >
+            <string>Max edge lenght inside the selection box.</string>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignRight</set>
+           </property>
+           <property name="decimals" >
+            <number>6</number>
+           </property>
+           <property name="maximum" >
+            <double>9999.989999999999782</double>
+           </property>
+           <property name="singleStep" >
+            <double>1.000000000000000</double>
+           </property>
+           <property name="value" >
+            <double>0.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="bPickEdgeBox" >
+           <property name="text" >
+            <string>Pick</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="9" column="0" colspan="3" >
+        <widget class="QLabel" name="label_9" >
          <property name="text" >
-          <string>Vertex Removal</string>
+          <string>Max Edge Length(outside)</string>
          </property>
         </widget>
+       </item>
+       <item row="10" column="0" colspan="3" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QDoubleSpinBox" name="sPickEdgeOutside" >
+           <property name="toolTip" >
+            <string>Max edge lenght outside the selection box.</string>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignRight</set>
+           </property>
+           <property name="decimals" >
+            <number>6</number>
+           </property>
+           <property name="maximum" >
+            <double>9999.989999999999782</double>
+           </property>
+           <property name="value" >
+            <double>10.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="bPickEdgeOutside" >
+           <property name="text" >
+            <string>Pick</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
     </widget>
    </item>
-   <item row="0" column="0" colspan="3" >
-    <widget class="QLabel" name="label" >
-     <property name="text" >
-      <string>Selection tools:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3" >
-    <widget class="QToolButton" name="bDebugEdgeCol" >
-     <property name="text" >
-      <string>...</string>
-     </property>
-     <property name="icon" >
-      <iconset resource="rgbt.qrc" >:/images/edgecollapse.png</iconset>
-     </property>
-     <property name="iconSize" >
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="4" >
-    <widget class="QToolButton" name="bDebugEdgeSplit" >
-     <property name="text" >
-      <string>...</string>
-     </property>
-     <property name="icon" >
-      <iconset resource="rgbt.qrc" >:/images/edgesplit.png</iconset>
-     </property>
-     <property name="iconSize" >
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2" >
-    <spacer>
-     <property name="orientation" >
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" >
-      <size>
-       <width>51</width>
-       <height>41</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="5" >
-    <widget class="QToolButton" name="bDebugCGRG" >
-     <property name="text" >
-      <string>...</string>
-     </property>
-     <property name="icon" >
-      <iconset resource="rgbt.qrc" >:/images/color_red_grg.png</iconset>
-     </property>
-     <property name="iconSize" >
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" >
-    <widget class="QToolButton" name="bSelectionSingle" >
-     <property name="toolTip" >
-      <string>Single face selector</string>
-     </property>
-     <property name="text" >
-      <string>Single Selection</string>
-     </property>
-     <property name="icon" >
-      <iconset resource="rgbt.qrc" >:/images/select_face.png</iconset>
-     </property>
-     <property name="iconSize" >
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="checkable" >
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1" >
-    <widget class="QToolButton" name="bSelectionRect" >
-     <property name="toolTip" >
-      <string>Rectangular face selector</string>
-     </property>
-     <property name="text" >
-      <string>...</string>
-     </property>
-     <property name="icon" >
-      <iconset resource="rgbt.qrc" >:/images/select_face_rect.png</iconset>
-     </property>
-     <property name="iconSize" >
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="checkable" >
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>bEdgeSplit</tabstop>
-  <tabstop>bEdgeCollapse</tabstop>
   <tabstop>bStart</tabstop>
   <tabstop>bResume</tabstop>
   <tabstop>bStep</tabstop>
@@ -658,7 +862,40 @@
   <tabstop>bSelectionRect</tabstop>
  </tabstops>
  <resources>
-  <include location="rgbt.qrc" />
+  <include location="editrgbtri.qrc" />
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cLevelEnabled</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sBrushLevel</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>78</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>275</x>
+     <y>162</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cLengthEnabled</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sBrushLength</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>82</x>
+     <y>195</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>276</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -9,13 +9,18 @@ HEADERS = rgbt.h \
           rgbInfo.h \
           rgbPrimitives.h \
           selectiveRefinement.h \
-          controlPoint.h
+          controlPoint.h \
+          interactiveEdit.h
+          
 SOURCES = rgbt.cpp \
           widgetRgbT.cpp \
           utilities.cpp \
           rgbPrimitives.cpp \
           selectiveRefinement.cpp \
-          controlPoint.cpp
+          controlPoint.cpp \
+          interactiveEdit.cpp
+          
+          
 TARGET = editrgbtri
 DESTDIR = ../../meshlab/plugins
 #DEFINES += GLEW_STATIC
