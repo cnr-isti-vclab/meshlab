@@ -561,14 +561,14 @@ public:
         {
         case FaceInfo::FACE_BLUE_GGR:
         case FaceInfo::FACE_BLUE_RGG:
-            c.Import(Color4b(Color4b::DarkBlue));
+            c.Import(Color4b(0,0,80,255));
             break;
         case FaceInfo::FACE_GREEN:
-            c.Import(Color4b(Color4b::DarkGreen));
+            c.Import(Color4b(0,80,0,255));
             break;
         case FaceInfo::FACE_RED_GGR:
         case FaceInfo::FACE_RED_RGG:
-            c.Import(Color4b(Color4b::DarkRed));
+            c.Import(Color4b(80,0,0,255));
             break;
         }
         if (update)
