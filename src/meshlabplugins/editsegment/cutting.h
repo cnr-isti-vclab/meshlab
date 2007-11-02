@@ -26,6 +26,8 @@
 #include <vcg/math/histogram.h>
 #include <vcg/complex/trimesh/stat.h>
 
+#include <time.h>
+
 namespace vcg {
 
 	enum MarkType {
@@ -75,7 +77,7 @@ namespace vcg {
 
 		set<CuttingTriplet<VertexType>, MinTriplet<VertexType> > setQ; //usato come coda principale, serve a garantire l'ordinamento e allo stesso tempo a permettere la cancellazione di elementi in ordine sparso
 		multimap<VertexType*,VertexType*> VertToV; //ogni vertice inserito nella coda principale ha una coppia qui che punta al vertice che ne ha provocato l'inserimento
-		map<VertexType*,CuttingTriplet<VertexType> > VToTriplet; //ogni vertice ha una referenza alle triplette da esso inserite
+		//map<VertexType*,CuttingTriplet<VertexType> > VToTriplet; //ogni vertice ha una referenza alle triplette da esso inserite
 
 
 		float ImprovedIsophoticDist(VertexType * p, VertexType * q) {
@@ -110,6 +112,7 @@ namespace vcg {
 			return dist;
 		}
 
+		
 		void AddNearestToQ(VertexType * v, std::ofstream & file) {
 
 			float dist = 0.0f;
@@ -146,18 +149,20 @@ namespace vcg {
 
 				setQ.insert(tempTriplet);
 				VertToV.insert(make_pair(tempTriplet.v, v));
-				VToTriplet.insert(make_pair(v,tempTriplet));
+				//VToTriplet.insert(make_pair(v,tempTriplet));
 				if (file) file << "inserita tripletta con distanza: " << tempTriplet.d << std::endl;
 			}
 		}
 
-
-	public:
+public:
 
 		MeshCutting(MESH_TYPE * ms) {
 			mesh = ms;
+			
 			TDMarkPtr = new SimpleTempData<VertContainer, MarkData>((*mesh).vert);
 			TDMarkPtr->Start(MarkData());
+
+			
 			TDCurvPtr = new SimpleTempData<VertContainer, CurvData>((*mesh).vert);
 			TDCurvPtr->Start(CurvData());
 		}
@@ -172,6 +177,13 @@ namespace vcg {
 		}
 
 		void MeshCut() {
+
+			
+
+			clock_t curvature_start_t;
+			clock_t curvature_end_t;
+			clock_t end_time;
+			clock_t start_time = clock();
 
 			VertexIterator vi;
 			int vertex_to_go = 0;
@@ -192,10 +204,13 @@ namespace vcg {
 			std::ofstream file;
 			file.open("editsegment.log");
 
+
+			curvature_start_t = clock();
 			//Computing principal curvatures and directions for all vertices
 			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
 			ct.ComputeCurvatureTensor();
 			//now each vertex has principals curvatures and directions in its temp data
+			curvature_end_t = clock();
 
 			if (file) file << "Inizializzazione da input." << std::endl;
 
@@ -224,47 +239,50 @@ namespace vcg {
 					//prendo la tripletta con distanza minima
 
 					tempTriplet = *(setQ.begin());
-					assert((*TDMarkPtr)[tempTriplet.v].Mark == U);
-					(*TDMarkPtr)[tempTriplet.v].Mark = tempTriplet.m;
-					--vertex_to_go; 
+					setQ.erase(setQ.begin());
+					if ((*TDMarkPtr)[tempTriplet.v].Mark == U) {
+						(*TDMarkPtr)[tempTriplet.v].Mark = tempTriplet.m;
+						--vertex_to_go; 
 
+						if (file) file << "Estratta tripletta con distanza: " << tempTriplet.d << std::endl;
 
-					if (file) file << "Estratta tripletta con distanza: " << tempTriplet.d << std::endl;
+						//prendo tutti i vertici che avevano inserito il vertice appena estratto
+						vector<VertexType*> tempVertex;
 
-					//prendo tutti i vertici che avevano inserito il vertice appena estratto
-					vector<VertexType*> tempVertex;
+						typedef typename multimap<VertexType*,VertexType*>::const_iterator MMI;
+						pair<MMI,MMI> mm_range = VertToV.equal_range(tempTriplet.v);
+						for (MMI mm_iter = mm_range.first; mm_iter != mm_range.second; ++mm_iter) {
+							tempVertex.push_back(mm_iter->second);
+						}
 
-					typedef typename multimap<VertexType*,VertexType*>::const_iterator MMI;
-					pair<MMI,MMI> mm_range = VertToV.equal_range(tempTriplet.v);
-					for (MMI mm_iter = mm_range.first; mm_iter != mm_range.second; ++mm_iter) {
-						tempVertex.push_back(mm_iter->second);
+						VertToV.erase(tempTriplet.v);
+
+						typename vector<VertexType*>::iterator tempV_iter;
+
+						for (tempV_iter = tempVertex.begin(); tempV_iter != tempVertex.end(); tempV_iter++) {
+							AddNearestToQ((*tempV_iter), file);	
+						}
+
+						AddNearestToQ(tempTriplet.v, file);	
+						tempVertex.clear();
 					}
-
-					VertToV.erase(tempTriplet.v);
-
-					//rimuovo dalla coda tutte le triplette che sono state inserite dai vertici presi prima
-					typename vector<VertexType*>::iterator tempV_iter;
-					for (tempV_iter = tempVertex.begin(); tempV_iter != tempVertex.end(); tempV_iter++) {
-						if (setQ.find(VToTriplet[*tempV_iter]) != setQ.end())
-							setQ.erase(setQ.find(VToTriplet[*tempV_iter]));
-
-						if (VToTriplet.find(*tempV_iter) != VToTriplet.end() ) 
-							VToTriplet.erase(VToTriplet.find(*tempV_iter));
-					}
-
-					for (tempV_iter = tempVertex.begin(); tempV_iter != tempVertex.end(); tempV_iter++) {
-						AddNearestToQ((*tempV_iter), file);	
-					}
-
-					AddNearestToQ(tempTriplet.v, file);	
-					tempVertex.clear();
 				}
 			}
 
-			VToTriplet.clear();
+			//VToTriplet.clear();
 			setQ.clear();
 			VertToV.clear();
-			if (file) file.close();
+
+			end_time = clock();
+
+			int total_time = end_time - start_time;
+			int curvature_time = curvature_end_t - curvature_start_t;
+
+			if (file) {
+				file << std::endl << "tempo TOTALE impiegato: " << total_time << std::endl;
+				file << std::endl << "tempo per calcolare la CURVATURA: " << curvature_time << std::endl;
+				file.close();
+			}
 		}
 
 		void Colorize(bool selectForeground) {
