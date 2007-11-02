@@ -5,12 +5,15 @@
 #undef max
 #endif
 
+#ifdef min
+#undef min
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 
-#include <queue>
-#include <set>
+#include <vector>
 #include <math.h>
 #include <limits>
 #include <vcg/container/simple_temporary_data.h>
@@ -53,8 +56,48 @@ namespace vcg {
 	template <class VERTEX_TYPE> class MinTriplet {
 	public:
 		bool operator() (const CuttingTriplet<VERTEX_TYPE> & a, const CuttingTriplet<VERTEX_TYPE> & b) const {
-			return (a.d < b.d);
+			return (a.d > b.d);
 		}
+	};
+
+	template <class VERTEX_TYPE> class SegmentHeap {
+	private :
+		vector<CuttingTriplet<VERTEX_TYPE> > _container;
+		MinTriplet<VERTEX_TYPE> cmp;
+
+	public :
+		void push(CuttingTriplet<VERTEX_TYPE> element) {
+			_container.push_back(element);
+			push_heap(_container.begin(),_container.end(),cmp);
+		}
+
+		CuttingTriplet<VERTEX_TYPE> pop() {
+			CuttingTriplet<VERTEX_TYPE> tmp = *(_container.begin());
+			pop_heap(_container.begin(),_container.end(),cmp);
+			_container.pop_back();
+			return tmp;
+		}
+
+		void rebuild(){
+			vector<CuttingTriplet<VERTEX_TYPE> >::iterator iter;
+			int num_to_remove = 0;
+			for (iter = _container.begin(); iter != _container.end(); ++iter) {
+				if ((*iter).v->IMark() != MarkType::U) {
+					++num_to_remove;
+					pop_heap(iter,_container.end(),cmp);
+				}
+			}
+			_container.resize(_container.size() - num_to_remove);
+		}
+
+		int size() {
+			return _container.size();
+		}
+
+		bool empty() {
+			return _container.empty();
+		}
+
 	};
 
 	template <class MESH_TYPE> class MeshCutting {
@@ -67,18 +110,14 @@ namespace vcg {
 		typedef typename MESH_TYPE::CoordType CoordType;		
 		typedef typename MESH_TYPE::CoordType::ScalarType ScalarType;		
 
-		typedef priority_queue<CuttingTriplet<VertexType>, vector<CuttingTriplet<VertexType> >, MinTriplet<VertexType> > TripletQueue;
+		//typedef priority_queue<CuttingTriplet<VertexType>, vector<CuttingTriplet<VertexType> >, MinTriplet<VertexType> > TripletQueue;
+		typedef SegmentHeap<VertexType> TripletHeap;
 
 	private:
 		MESH_TYPE * mesh;
-		SimpleTempData<VertContainer, MarkData> *TDMarkPtr;
 		SimpleTempData<VertContainer, CurvData> *TDCurvPtr;
-		TripletQueue Q;
-
-		set<CuttingTriplet<VertexType>, MinTriplet<VertexType> > setQ; //usato come coda principale, serve a garantire l'ordinamento e allo stesso tempo a permettere la cancellazione di elementi in ordine sparso
-		multimap<VertexType*,VertexType*> VertToV; //ogni vertice inserito nella coda principale ha una coppia qui che punta al vertice che ne ha provocato l'inserimento
-		//map<VertexType*,CuttingTriplet<VertexType> > VToTriplet; //ogni vertice ha una referenza alle triplette da esso inserite
-
+		//TripletQueue Q;
+		TripletHeap Q;
 
 		float ImprovedIsophoticDist(VertexType * p, VertexType * q) {
 			float dist;
@@ -109,76 +148,84 @@ namespace vcg {
 
 			dist = (p->P() - q->P()).Norm() + (W1 * (p->N() - q->N()).Norm()) + (W2 * kpq);
 
+			assert(dist>=0.0f);
 			return dist;
 		}
 
-		
+
 		void AddNearestToQ(VertexType * v, std::ofstream & file) {
 
 			float dist = 0.0f;
 			float min_dist = std::numeric_limits<float>::max();
+
+			vcg::face::JumpingPos<FaceType> pos(v->VFp(), v);
+
+			VertexType* firstV = pos.VFlip();
 			VertexType* nearestV=0;
 			VertexType* tempV=0;
-			vcg::face::VFIterator<FaceType> vi(v);
 
-			FaceType * first_face = v->VFp();
-			vcg::face::Pos<FaceType> pos(first_face, v->VFi(), v);
-			pos.NextE();
-			for (;pos.F() != first_face; pos.NextE()) {
-				for (int i = 0; i < 3; ++i) {
-					tempV = pos.F()->V(i);
-					if (tempV->P() != v->P() && (*TDMarkPtr)[tempV].Mark == U) {
-						dist = ImprovedIsophoticDist(v, tempV);
-						if (dist < min_dist) {
-							min_dist = dist;
-							nearestV = tempV;
-						}	
-					}
+			do {
+				pos.NextE();
+				tempV = pos.VFlip();
+				assert(tempV->P() != v->P());
+				if (tempV->IMark() == U) {
+					dist = ImprovedIsophoticDist(v, tempV);
+					if (dist < min_dist) {
+						min_dist = dist;
+						nearestV = tempV;
+					}	
 				}
-			}
+			} while(tempV != firstV);	
 
 			if (nearestV) {
 				CuttingTriplet<VertexType> tempTriplet;
-				tempTriplet.v = nearestV;
 				tempTriplet.d = min_dist;
-				switch((*TDMarkPtr)[v].Mark) {
+				tempTriplet.v = nearestV;				
+				switch(v->IMark()) {
 					case iF: tempTriplet.m = F; break;
 					case iB: tempTriplet.m = B; break;
-					default : tempTriplet.m = (*TDMarkPtr)[v].Mark; break;
+					default : tempTriplet.m = (MarkType)v->IMark(); break;
 				}
-
-				setQ.insert(tempTriplet);
-				VertToV.insert(make_pair(tempTriplet.v, v));
-				//VToTriplet.insert(make_pair(v,tempTriplet));
-				if (file) file << "inserita tripletta con distanza: " << tempTriplet.d << std::endl;
+				
+				Q.push(tempTriplet);
+				
+				if (file) file << "Inserzione: d=" << tempTriplet.d << std::endl;
 			}
 		}
 
-public:
+		void AddNeighborhoodNearestToQ(VertexType * v, std::ofstream & file) {
+			vcg::face::JumpingPos<FaceType> pos(v->VFp(), v);
+			VertexType* firstV = pos.VFlip();
+			VertexType* tempV=0;
+
+			do {
+				pos.NextE();
+				tempV = pos.VFlip();
+				assert(tempV->P() != v->P());
+				if (tempV->IMark() != U) {
+					AddNearestToQ(tempV,file);
+				}
+			} while(tempV != firstV);	
+
+		}
+
+	public:
 
 		MeshCutting(MESH_TYPE * ms) {
 			mesh = ms;
-			
-			TDMarkPtr = new SimpleTempData<VertContainer, MarkData>((*mesh).vert);
-			TDMarkPtr->Start(MarkData());
-
-			
 			TDCurvPtr = new SimpleTempData<VertContainer, CurvData>((*mesh).vert);
 			TDCurvPtr->Start(CurvData());
 		}
 
 		~MeshCutting() {
-			TDMarkPtr->Stop();
 			TDCurvPtr->Stop();
 		}
 
 		inline void Mark(VertexType * v, MarkType m) {
-			(*TDMarkPtr)[*v].Mark = m;
+			v->IMark() = m;
 		}
 
 		void MeshCut() {
-
-			
 
 			clock_t curvature_start_t;
 			clock_t curvature_end_t;
@@ -190,8 +237,8 @@ public:
 			int inputCounter = 0;
 
 			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
-				if ( !vi->IsD() && (*TDMarkPtr)[*vi].Mark != iF && (*TDMarkPtr)[*vi].Mark != iB) {
-					(*TDMarkPtr)[*vi].Mark = U;
+				if ( !vi->IsD() && vi->IMark() != iF && vi->IMark() != iB) {
+					vi->IMark() = U;
 					++vertex_to_go;
 				} else {
 					++inputCounter;
@@ -203,8 +250,7 @@ public:
 
 			std::ofstream file;
 			file.open("editsegment.log");
-
-
+			
 			curvature_start_t = clock();
 			//Computing principal curvatures and directions for all vertices
 			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
@@ -216,63 +262,45 @@ public:
 
 			//second iteration on the marked vertex
 			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
-				if ( !vi->IsD() && ((*TDMarkPtr)[*vi].Mark != U))
+				if ( !vi->IsD() && (vi->IMark() != U))
 					AddNearestToQ(&(*vi),file);	
 			}
 
-			if (file) file << "Fine inizializzazione da input. Elementi aggiunti: " << setQ.size() << std::endl;
-
+			if (file) file << "Fine inizializzazione da input. Elementi aggiunti: " << Q.size() << std::endl;
+			
+			int step_counter = 0;
 			while (vertex_to_go != 0) {
 				//algorithm main loop
 
-				if (setQ.empty()) {
+				if (Q.empty()) {
 					if (file) file << "Coda vuota. Re-Inizializzazione." << std::endl;
 					for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
-						if ( !vi->IsD() && ((*TDMarkPtr)[*vi].Mark != U))
+						if ( !vi->IsD() && (vi->IMark() != U))
 							AddNearestToQ(&(*vi),file);	
 					}
-					if (setQ.empty()) break;
+					if (Q.empty()) break;
 				}	else {
 
 					CuttingTriplet<VertexType> tempTriplet;
 
 					//prendo la tripletta con distanza minima
 
-					tempTriplet = *(setQ.begin());
-					setQ.erase(setQ.begin());
-					if ((*TDMarkPtr)[tempTriplet.v].Mark == U) {
-						(*TDMarkPtr)[tempTriplet.v].Mark = tempTriplet.m;
+					//tempTriplet = Q.top();
+					//Q.pop();
+					tempTriplet = Q.pop();
+					
+					if (tempTriplet.v->IMark() == U) {
+						tempTriplet.v->IMark() = tempTriplet.m;
 						--vertex_to_go; 
-
-						if (file) file << "Estratta tripletta con distanza: " << tempTriplet.d << std::endl;
-
-						//prendo tutti i vertici che avevano inserito il vertice appena estratto
-						vector<VertexType*> tempVertex;
-
-						typedef typename multimap<VertexType*,VertexType*>::const_iterator MMI;
-						pair<MMI,MMI> mm_range = VertToV.equal_range(tempTriplet.v);
-						for (MMI mm_iter = mm_range.first; mm_iter != mm_range.second; ++mm_iter) {
-							tempVertex.push_back(mm_iter->second);
-						}
-
-						VertToV.erase(tempTriplet.v);
-
-						typename vector<VertexType*>::iterator tempV_iter;
-
-						for (tempV_iter = tempVertex.begin(); tempV_iter != tempVertex.end(); tempV_iter++) {
-							AddNearestToQ((*tempV_iter), file);	
-						}
-
+						if (file) file << "Estrazione: d=" << tempTriplet.d << std::endl;
 						AddNearestToQ(tempTriplet.v, file);	
-						tempVertex.clear();
-					}
+						AddNeighborhoodNearestToQ(tempTriplet.v,file);
+					} 
+					++step_counter;
+					//if (step_counter%2500 == 1) 
+					//	Q.rebuild();
 				}
 			}
-
-			//VToTriplet.clear();
-			setQ.clear();
-			VertToV.clear();
-
 			end_time = clock();
 
 			int total_time = end_time - start_time;
@@ -292,9 +320,9 @@ public:
 			queue<FaceType*> edgeFaceQueue;
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
-				if ( (*TDMarkPtr)[(*vi)].Mark == F ) vi->C() = Color4b::Yellow;
-				if ( (*TDMarkPtr)[(*vi)].Mark == B ) vi->C() = Color4b::White;
-				if ( (*TDMarkPtr)[(*vi)].Mark == U ) vi->C() = Color4b::Green;
+				if ( vi->IMark() == F ) vi->C() = Color4b::Yellow;
+				if ( vi->IMark() == B ) vi->C() = Color4b::White;
+				if ( vi->IMark() == U ) vi->C() = Color4b::Green;
 			}
 
 			int bitflag = FaceType::NewBitFlag();
@@ -309,7 +337,7 @@ public:
 
 					count = 0;
 					for (int i = 0; i<3; ++i) {
-						if ( (*TDMarkPtr)[(*fi).V(i)].Mark == F || (*TDMarkPtr)[(*fi).V(i)].Mark == iF	) ++count;
+						if ( (*fi).V(i)->IMark() == F || (*fi).V(i)->IMark() == iF	) ++count;
 					}
 					if (count == 3) {
 						(*fi).SetS();
@@ -324,8 +352,8 @@ public:
 				while(!edgeFaceQueue.empty()) {
 					FaceType * tmp_face = edgeFaceQueue.front();
 					edgeFaceQueue.pop();
-					float prod[3];
-					float max_prod = 0.0f;
+					float prod[3];   
+					float max_prod = std::numeric_limits<float>::min();
 					int max_faceid = -1;
 					for (int i=0; i<3; ++i) {
 						prod[i] = (tmp_face->N().Normalize()) * (tmp_face->FFp(i)->N().Normalize());
@@ -375,7 +403,7 @@ public:
 				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
 					count = 0;
 					for (int i = 0; i<3; ++i) {
-						if ( (*TDMarkPtr)[(*fi).V(i)].Mark == B || (*TDMarkPtr)[(*fi).V(i)].Mark == iB	) ++count;
+						if ( (*fi).V(i)->IMark() == B || (*fi).V(i)->IMark() == iB	) ++count;
 					}
 					if (count == 3) 
 						(*fi).SetS();
@@ -383,7 +411,7 @@ public:
 						(*fi).ClearS();
 				}
 			}
-			
+
 			FaceType::DeleteBitFlag(bitflag_2);
 			FaceType::DeleteBitFlag(bitflag);
 		}
@@ -416,7 +444,7 @@ public:
 			VertexIterator vi;
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
-				(*TDMarkPtr)[*vi].Mark = U;
+				vi->IMark() = U;
 				vi->C() = Color4b::White;
 				vi->Q() = 0.0f;
 			}
