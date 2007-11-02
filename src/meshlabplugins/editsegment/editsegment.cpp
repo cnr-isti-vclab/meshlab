@@ -227,15 +227,20 @@ Color4b toVcgColor(QColor c) {
 	return Color4b(c.red(),c.green(),c.blue(),255);
 }
 EditSegment::EditSegment() {
-	actionList << new QAction(QIcon(":/images/editsegment.png"),"Mesh Segmentation", this);
+	QAction* qaction = new QAction(QIcon(":/images/editsegment.png"),"Mesh Segmentation", this);
+	qaction->setCheckable(true);
+	actionList << qaction;
 	pixels = 0;
 	pen.radius = 3;
 	pen.backface = false;
 	pen.invisible = false;
 	pressed = false;
+	dragging = false;
+	first = true;
 	meshCut = 0;
 	meshCutDialog = 0;
-	glarea = 0;
+	meshcut_dock = 0;
+	//glarea = 0;
 	selectForeground = true;
 }
 EditSegment::~EditSegment(){
@@ -290,6 +295,10 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	parent->mm()->ioMask|=MeshModel::IOM_VERTCOLOR;
 
+	first = true;
+	pressed = false;
+	dragging = false;
+
 	glarea = parent;
 
 	parent->update();
@@ -304,7 +313,7 @@ void EditSegment::Decorate (QAction * ac, MeshModel & m, GLArea * gla) {
 
 	if (first) {
 		first=false;
-		if (pixels!=0) { free(pixels); }
+		if (pixels) { free(pixels); }
 		pixels=(GLfloat *)malloc(sizeof(GLfloat)*gla->curSiz.width()*gla->curSiz.height());
 		glReadPixels(0,0,gla->curSiz.width(),gla->curSiz.height(),GL_DEPTH_COMPONENT,GL_FLOAT,pixels);
 	}
@@ -318,8 +327,8 @@ void EditSegment::Decorate (QAction * ac, MeshModel & m, GLArea * gla) {
 		vector<CMeshO::FacePointer> faceSel;
 
 		getInternFaces(m,&currentSelection,&newSel,&faceSel,gla,pen,current_point,previous_point,pixels,mvmatrix,projmatrix,viewport);
-		vector<CMeshO::FacePointer>::iterator fpo;
 		
+		vector<CMeshO::FacePointer>::iterator fpo;
 		for(fpo=faceSel.begin();fpo!=faceSel.end();++fpo) {
 			for (int i=0; i<3; ++i) {
 				if (mouse_button_pressed==Qt::LeftButton) {

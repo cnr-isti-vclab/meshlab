@@ -36,7 +36,6 @@ private:
 	bool first;
 	bool dragging;
 	bool selectForeground;
-	QPoint starting_point;
 	QPoint current_point;
 	QPoint previous_point;
 	Qt::MouseButton mouse_button_pressed;
