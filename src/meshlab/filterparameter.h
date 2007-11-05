@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2007/11/05 12:03:01  cignoni
+added color as a possible parameter
+
 Revision 1.10  2007/10/24 10:34:26  ponchio
 removed extra FilterParameterSet:: in findParameter(QString name);
 
@@ -96,7 +99,8 @@ class FilterParameter
 		PARFLOAT   = 3,
 		PARSTRING  = 4,
 		PARABSPERC = 5,
-		PARMATRIX  = 6
+		PARMATRIX  = 6,
+		PARCOLOR = 7
 	};
 	
 	QString  fieldName;
@@ -131,6 +135,7 @@ public:
 	void addFloat    (QString name, float     defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addString   (QString name, QString   defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addMatrix44 (QString name, vcg::Matrix44f defaultVal, QString desc=QString(), QString tooltip=QString());
+	void addColor    (QString name, QColor defaultVal, QString desc=QString(), QString tooltip=QString());
   void addAbsPerc  (QString name, float     defaultVal, float minVal, float maxVal,  QString desc=QString(), QString tooltip=QString());
 		
 	bool				getBool(QString name);
@@ -138,6 +143,7 @@ public:
 	float				getFloat(QString name);
 	QString			getString(QString name);
 	vcg::Matrix44f		getMatrix44(QString name);
+	QColor		  getColor(QString name);
 	float		    getAbsPerc(QString name);
 	
 	void setBool(QString name, bool newVal) ;
@@ -145,6 +151,7 @@ public:
 	void setFloat(QString name, float newVal);
 	void setString(QString name, QString newVal);
 	void setMatrix44(QString name, vcg::Matrix44f newVal);
+	void setColor(QString name, QColor newVal);
 	void setAbsPerc(QString name, float newVal);
 
 	FilterParameter &findParameter(QString name);

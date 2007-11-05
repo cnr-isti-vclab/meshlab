@@ -114,7 +114,28 @@ void  FilterParameterSet::setFloat(QString name, float newVal)
 }
 
 //--------------------------------------
+void  FilterParameterSet::addColor(QString name, QColor defaultVal, QString desc, QString tooltip)
+{
+	FilterParameter p(name,desc,tooltip);
+  p.fieldVal=defaultVal.rgb(); // it is converted to an unsigned int
+	p.fieldType=FilterParameter::PARCOLOR;
+	paramList.push_back(p);		
+}
+QColor FilterParameterSet::getColor(QString name)
+{
+	FilterParameter &p=findParameter(name);
+	assert(p.fieldType == FilterParameter::PARCOLOR);
+	return QColor(QRgb(p.fieldVal.toUInt()));
+}
 
+void  FilterParameterSet::setColor(QString name, QColor newVal)
+{
+	FilterParameter &p=findParameter(name);
+	assert(p.fieldType == FilterParameter::PARCOLOR);
+	p.fieldVal=QVariant(newVal.rgb());	
+}
+
+//--------------------------------------
 
 void FilterParameterSet::addString   (QString name, QString   defaultVal, QString desc, QString tooltip)
 {
