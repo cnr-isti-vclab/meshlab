@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.15  2007/11/05 13:34:41  cignoni
+added color and Help
+
 Revision 1.14  2007/10/17 21:23:30  cignoni
 added wordwrapping to the first line of the automatic dialog
 
@@ -74,10 +77,12 @@ Added standard plugin window support
 #include "stdpardialog.h"
 
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
-	:QDockWidget(QString("Plugin"),p)
+//:QDialog(p)
+:QDockWidget(QString("Plugin"),0)
   {
 		qf = NULL;
 		clearValues();
+		//setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 }
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
@@ -98,6 +103,7 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, Q
 	{
 		curAction = NULL;
 		stdfieldwidgets.clear();
+		helpList.clear();
 		curModel = NULL;
 		curmfi = NULL;
 		curmwi = NULL;
@@ -107,12 +113,14 @@ void MeshlabStdDialog::createFrame()
 {
 	if(qf)   {
 				delete qf;
+				helpList.clear();
 				stdfieldwidgets.clear();
 				}
-  QFrame *newqf = new MeshlabStdDialogFrame(this);
-  newqf->setFrameStyle(QFrame::Box | QFrame::Sunken);
+	QFrame *newqf= new QFrame(this);
+	//setLayout(new QBoxLayout(QBoxLayout::TopToBottom,this));
 	newqf->setMinimumSize(75, 75);
-	setWidget(newqf);
+	layout()->addWidget(newqf);
+	//setWidget(newqf);
   qf = newqf;
 }
 
@@ -144,18 +152,23 @@ void MeshlabStdDialog::resetValues()
 				case FilterParameter::PARABSPERC:
 					((AbsPercWidget *)stdfieldwidgets.at(i))->setValue(fpi.fieldVal.toDouble(),fpi.min,fpi.max);
 					break;
+				case FilterParameter::PARCOLOR:
+					((QColorButton *)stdfieldwidgets.at(i))->setColor(QColor(fpi.fieldVal.toUInt()));
+					break;
+				default: assert(0);
+
 			}
 	}
 			
 }
+
+	/* creates widgets for the standard parameters */
 
 void MeshlabStdDialog::loadFrameContent()
 {
 	assert(qf);
 	qf->hide();	
 	setWindowTitle(curmfi->filterName(curAction));
-	//stdfieldwidgets.clear();
-//	qf->clear();
 	QGridLayout *gridLayout = new QGridLayout(qf);
 	qf->setLayout(gridLayout);
 
@@ -163,74 +176,98 @@ void MeshlabStdDialog::loadFrameContent()
 	QLineEdit *qle;
 	QLabel *ql;
 	AbsPercWidget *apw;
+	QColorButton *qcbt;
 	QList<FilterParameter> &parList =curParSet.paramList;
-	/* creates widgets for the standard parameters */
 	
 	ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
 	ql->setTextFormat(Qt::RichText);
 	ql->setWordWrap(true);
-	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop);
+	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
+	int baseRow=1; // all the widgets start at row 1;
+	QString descr;
 	
 	for(int i = 0; i < parList.count(); i++)
 	{
 		const FilterParameter &fpi=parList.at(i);
-		switch(parList.at(i).fieldType)
+		ql = new QLabel("<i><small>"+fpi.fieldToolTip +"</small></i>",qf);
+		ql->setTextFormat(Qt::RichText);
+		ql->setWordWrap(true);
+		ql->setVisible(false);
+		gridLayout->addWidget(ql,baseRow+i,3,1,1,Qt::AlignTop); 
+		helpList.push_back(ql);
+		
+		switch(fpi.fieldType)
 	  { 
-	  case FilterParameter::PARBOOL:
-		  qcb = new QCheckBox(fpi.fieldDesc,qf);
-		  qcb->setToolTip(fpi.fieldToolTip);		  
-		  if(fpi.fieldVal.toBool()) qcb->setCheckState(Qt::Checked);
-		  gridLayout->addWidget(qcb,i+1,0,1,2,Qt::AlignTop);
-		  stdfieldwidgets.push_back(qcb);
-		  break;
-			
-	  case FilterParameter::PARFLOAT:
-		  ql = new QLabel(fpi.fieldDesc,qf);
-		  ql->setToolTip(fpi.fieldToolTip);			  
-		  qle = new QLineEdit(QString::number(fpi.fieldVal.toDouble(),'g',3),qf); // better formatting of floating point numbers		  
-		  gridLayout->addWidget(ql,i+1,0,Qt::AlignTop);
-		  gridLayout->addWidget(qle,i+1,1,Qt::AlignTop);
-		  stdfieldwidgets.push_back(qle);
-		  break;
-	  case FilterParameter::PARINT:
-	  case FilterParameter::PARSTRING:
-		  ql = new QLabel(parList.at(i).fieldDesc,qf);
-			ql->setToolTip(fpi.fieldToolTip);		
-				  
-		  qle = new QLineEdit(fpi.fieldVal.toString(),qf);
-		  
-		  gridLayout->addWidget(ql,i+1,0,Qt::AlignTop);
-		  gridLayout->addWidget(qle,i+1,1,Qt::AlignTop);
+			case FilterParameter::PARBOOL:
+				qcb = new QCheckBox(fpi.fieldDesc,qf);
+				qcb->setToolTip(fpi.fieldToolTip);		  
+				if(fpi.fieldVal.toBool()) qcb->setCheckState(Qt::Checked);
+				gridLayout->addWidget(qcb,baseRow+i,0,1,2,Qt::AlignTop);
+				stdfieldwidgets.push_back(qcb);
+				break;
+				
+			case FilterParameter::PARFLOAT:
+				ql = new QLabel(fpi.fieldDesc,qf);
+				ql->setToolTip(fpi.fieldToolTip);			  
+				qle = new QLineEdit(QString::number(fpi.fieldVal.toDouble(),'g',3),qf); // better formatting of floating point numbers		  
+				gridLayout->addWidget(ql,baseRow+i,0,Qt::AlignTop);
+				gridLayout->addWidget(qle,baseRow+i,1,Qt::AlignTop);
+				stdfieldwidgets.push_back(qle);
+				break;
+			case FilterParameter::PARINT:
+			case FilterParameter::PARSTRING:
+				ql = new QLabel(fpi.fieldDesc,qf);
+				ql->setToolTip(fpi.fieldToolTip);		
+						
+				qle = new QLineEdit(fpi.fieldVal.toString(),qf);
+				
+				gridLayout->addWidget(ql,baseRow+i,0,Qt::AlignTop);
+				gridLayout->addWidget(qle,baseRow+i,1,Qt::AlignTop);
 
-		  stdfieldwidgets.push_back(qle);
+				stdfieldwidgets.push_back(qle);
 
-		  break;
-	  case FilterParameter::PARABSPERC:
-		  QString desc = parList.at(i).fieldDesc + " (abs and %)";
-		  ql = new QLabel(desc ,qf);
-		  ql->setToolTip(fpi.fieldToolTip);	
-		  
-		  apw = new AbsPercWidget(qf,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max);
-		  gridLayout->addWidget(ql,i+1,0,Qt::AlignTop);
-		  gridLayout->addLayout(apw,i+1,1,Qt::AlignTop);
-	  		
-		  stdfieldwidgets.push_back(apw);
+				break;
+			case FilterParameter::PARABSPERC:
+				descr = fpi.fieldDesc + " (abs and %)";
+				ql = new QLabel(descr ,qf);
+				ql->setToolTip(fpi.fieldToolTip);	
+				
+				apw = new AbsPercWidget(qf,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max);
+				gridLayout->addWidget(ql,baseRow+i,0,Qt::AlignTop);
+				gridLayout->addLayout(apw,baseRow+i,1,Qt::AlignTop);
+					
+				stdfieldwidgets.push_back(apw);
+		
+				break;
+			case FilterParameter::PARCOLOR:
+				ql = new QLabel(fpi.fieldDesc,qf);
+				ql->setToolTip(fpi.fieldToolTip);	
+				
+				qcbt = new QColorButton(qf,QColor(fpi.fieldVal.toUInt()));
+				gridLayout->addWidget(ql,baseRow+i,0,Qt::AlignTop);
+				gridLayout->addLayout(qcbt,baseRow+i,1,Qt::AlignTop);
+					
+				stdfieldwidgets.push_back(qcbt);
+		
+				break;
 
-		  break;
-	  }
+			default: assert(0);
+		} //end case
+	} // end for each parameter
 
-	}
+	int buttonRow = parList.count()+baseRow;  // the row where the line of buttons start 
 
-	int nbut = parList.count()+1;
-
+	QPushButton *helpButton = new QPushButton("Help", qf);
 	QPushButton *closeButton = new QPushButton("Close", qf);
 	QPushButton *applyButton = new QPushButton("Apply", qf);
 	QPushButton *defaultButton = new QPushButton("Default", qf);
 
-	gridLayout->addWidget(defaultButton,nbut,0,Qt::AlignBottom);
-	gridLayout->addWidget(closeButton,nbut+1,0,Qt::AlignBottom);
-	gridLayout->addWidget(applyButton,nbut+1,1,Qt::AlignBottom);
+	gridLayout->addWidget(helpButton,buttonRow,1,Qt::AlignBottom);
+	gridLayout->addWidget(defaultButton,buttonRow,0,Qt::AlignBottom);
+	gridLayout->addWidget(closeButton,buttonRow+1,0,Qt::AlignBottom);
+	gridLayout->addWidget(applyButton,buttonRow+1,1,Qt::AlignBottom);
 
+	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
 	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
 	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
 	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetValues()));
@@ -238,14 +275,18 @@ void MeshlabStdDialog::loadFrameContent()
 	qf->showNormal();	
 	qf->adjustSize();
 
-	//if(this->isHidden())
-	//{
-		this->showNormal();
-		this->adjustSize();
-	//}
-	
+	this->showNormal();
+	this->adjustSize();	
 }
 
+void MeshlabStdDialog::toggleHelp()
+{	
+	for(int i = 0; i < helpList.count(); i++)
+		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
+	
+	qf->adjustSize();
+	this->adjustSize();
+}
 
 /* click event for the apply button of the standard plugin window */
 void MeshlabStdDialog::applyClick()
@@ -273,11 +314,13 @@ void MeshlabStdDialog::applyClick()
 		  case FilterParameter::PARSTRING:
 			  curParSet.setString(sname,((QLineEdit *)stdfieldwidgets[i])->text());
 			  break;
+		  case FilterParameter::PARCOLOR:
+			  curParSet.setColor(sname,((QColorButton *)stdfieldwidgets[i])->getColor());
+			  break;
 		  }
 	  }
 
-	  curmwi->executeFilter(q,curParSet);
-		
+	  curmwi->executeFilter(q,curParSet);		
 }
 
 /* click event for the close button of the standard plugin window */
@@ -287,27 +330,46 @@ void MeshlabStdDialog::closeClick()
 	this->hide();
 }
 
-void MeshlabStdDialog::resizeEvent ( QResizeEvent *  )
-{
-	if(!this->isFloating())
-		return;
+/******************************************/ 
+// AbsPercWidget Implementation
+/******************************************/ 
+  AbsPercWidget::AbsPercWidget(QWidget *p, double defaultv, double minVal, double maxVal):QGridLayout(NULL)
+  {
+	  m_min = minVal;
+	  m_max = maxVal;
+	  absSB = new QDoubleSpinBox(p);
+	  percSB = new QDoubleSpinBox(p);
 
-	if(restorelastsize)
-	{
-		this->resize(lastsize);
-		restorelastsize = false;
+	  //absSB->setMinimum(m_min);
+	  absSB->setMaximum(m_max*2);
+	  absSB->setDecimals(3);
+	  absSB->setSingleStep((m_max-m_min)/20.0);
+	  absSB->setValue(defaultv);
 
-		// this is the only way to convince QT to refresh the window clipcontrols...
-		this->hide();
-		this->showNormal();
-	}
-	else
-	{
-		QSize siz = this->size();
-		lastsize.setWidth(siz.width());
-		lastsize.setHeight(siz.height());
-	}
-}
+	  percSB->setMinimum(0);
+	  percSB->setMaximum(200);
+		percSB->setSingleStep(0.5);
+	  percSB->setValue((100*(defaultv - m_min))/(m_max - m_min));
+		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
+		QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
+		
+		this->addWidget(absLab,0,0,Qt::AlignHCenter);
+		this->addWidget(percLab,0,1,Qt::AlignHCenter);
+		
+	  this->addWidget(absSB,1,0);
+	  this->addWidget(percSB,1,1,Qt::AlignTop);
+
+
+		connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+		connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
+  }
+
+  AbsPercWidget::~AbsPercWidget()
+  {
+	  delete absSB;
+	  delete percSB;
+  }
+
 
 void AbsPercWidget::on_absSB_valueChanged(double newv) 
 {
@@ -330,4 +392,38 @@ void AbsPercWidget::setValue(float val, float minV, float maxV)
 	absSB->setValue (val);
 	m_min=minV;
 	m_max=maxV;
+}
+
+/******************************************/ 
+// QColorButton Implementation
+/******************************************/ 
+QColorButton::QColorButton(QWidget *p, QColor newColor):QHBoxLayout()
+{
+		colorLabel = new QLabel(p);
+		colorButton = new QPushButton(p);
+		colorButton->setAutoFillBackground(true);
+		colorButton->setFlat(true);
+		setColor(newColor);
+		this->addWidget(colorLabel);
+		this->addWidget(colorButton);		
+		connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));		
+}
+
+QColor QColorButton::getColor()
+{
+	return currentColor;
+}
+
+void  QColorButton::setColor(QColor newColor)
+{
+	currentColor=newColor;
+	colorLabel->setText("("+currentColor.name()+")");
+	QPalette palette(currentColor);
+	colorButton->setPalette(palette);		 
+}
+
+void QColorButton::pickColor()
+{
+	 QColor newColor=QColorDialog::getColor(QColor(255,255,255,255));
+	 setColor(newColor);
 }

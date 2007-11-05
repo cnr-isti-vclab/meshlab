@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.10  2007/11/05 13:34:41  cignoni
+added color and Help
+
 Revision 1.9  2007/10/02 07:59:44  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -69,17 +72,22 @@ Added standard plugin window support
 #include "filterparameter.h"
 #include "interfaces.h"
 
-// frame for the standard plugin window
-class MeshlabStdDialogFrame : public QFrame
+/// Widget to enter a color. 
+class QColorButton : public QHBoxLayout
 {
-public:
-    MeshlabStdDialogFrame(QWidget *parent)
-        : QFrame(parent)
-    {
-    }
-
+	  Q_OBJECT
+		
+		QPushButton *colorButton;
+		QLabel *colorLabel;
+		QColor currentColor;
+	public:
+		QColorButton(QWidget *p, QColor newColor);
+		QColor getColor();
+		void  setColor(QColor newColor);
+							 
+	private slots:
+		void pickColor(); 
 };
-
 
 /// Widget to enter a value as a percentage or as an absolute value. 
 /// You have to specify the default value and the range of the possible values.
@@ -90,42 +98,8 @@ class AbsPercWidget : public QGridLayout
 	  Q_OBJECT
 
 public:
-  AbsPercWidget(QWidget *p, double defaultv, double minVal, double maxVal):QGridLayout(NULL)
-  {
-	  m_min = minVal;
-	  m_max = maxVal;
-	  absSB = new QDoubleSpinBox(p);
-	  percSB = new QDoubleSpinBox(p);
-
-	  //absSB->setMinimum(m_min);
-	  absSB->setMaximum(m_max*2);
-	  absSB->setDecimals(3);
-	  absSB->setSingleStep((m_max-m_min)/20.0);
-	  absSB->setValue(defaultv);
-
-	  percSB->setMinimum(0);
-	  percSB->setMaximum(200);
-		percSB->setSingleStep(0.5);
-	  percSB->setValue((100*(defaultv - m_min))/(m_max - m_min));
-		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
-		QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
-		
-		this->addWidget(absLab,0,0,Qt::AlignHCenter);
-		this->addWidget(percLab,0,1,Qt::AlignHCenter);
-		
-	  this->addWidget(absSB,1,0);
-	  this->addWidget(percSB,1,1,Qt::AlignTop);
-
-
-		connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
-		connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-  }
-
-  ~AbsPercWidget()
-  {
-	  delete absSB;
-	  delete percSB;
-  }
+  AbsPercWidget(QWidget *p, double defaultv, double minVal, double maxVal);
+  ~AbsPercWidget();
 
   float getValue();
 	void  setValue(float val, float minV, float maxV);
@@ -144,6 +118,7 @@ protected:
 
 
 // standard plugin window
+//class MeshlabStdDialog : public QDialog
 class MeshlabStdDialog : public QDockWidget
 {
 	  Q_OBJECT
@@ -155,31 +130,26 @@ public:
 	void createFrame();
 	void loadFrameContent();
 
-	void resizeEvent(QResizeEvent *e);
 	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, QAction *q, MainWindowInterface *mwi);
 
-  private slots:
+private slots:
 	void applyClick();
 	void closeClick();
   void resetValues();
+  void toggleHelp();
 
 protected:
 	QFrame *qf;
 	QAction *curAction;
+public:
 	MeshModel *curModel;
 	MeshFilterInterface *curmfi;
 	MainWindowInterface *curmwi;
 	FilterParameterSet curParSet;
 	
 	QVector<void *> stdfieldwidgets;
-	
-	bool restorelastsize;
-	QSize lastsize;
-	
+	QVector<QLabel *> helpList;
 };
-
-
-
 
 #endif
 
