@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.130  2007/11/05 22:38:55  cignoni
+Remove static map of cursors that caused the annoying deallocation bug under vs2005
+
 Revision 1.129  2007/10/24 16:38:08  fuscof
 paintGL draw the model only during the first rendering pass
 
@@ -755,12 +758,12 @@ void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
 
 void GLArea::setCursorTrack(vcg::TrackMode *tm)
 {
- static QMap<QString,QCursor> curMap;
+ //static QMap<QString,QCursor> curMap;
  if(curMap.isEmpty())
  {
   curMap[QString("")]=QCursor(Qt::ArrowCursor);	
   curMap["SphereMode"]=QCursor(QPixmap(":/images/cursors/plain_trackball.png"),1,1);	
-  curMap["PlaneMode"]=QCursor(QPixmap(":/images/cursors/plain_pan.png"),1,1);	
+  curMap["PanMode"]=QCursor(QPixmap(":/images/cursors/plain_pan.png"),1,1);	
   curMap["ScaleMode"]=QCursor(QPixmap(":/images/cursors/plain_zoom.png"),1,1);	
  }
  if(tm) setCursor(curMap[tm->Name()]);

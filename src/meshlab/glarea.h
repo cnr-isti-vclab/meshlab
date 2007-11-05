@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.79  2007/11/05 22:38:57  cignoni
+Remove static map of cursors that caused the annoying deallocation bug under vs2005
+
 Revision 1.78  2007/10/23 07:15:13  cignoni
 switch to selection rendering done by slot and signals
 
@@ -371,7 +374,7 @@ protected:
 	void hideEvent(QHideEvent * event);
 
 private:
-
+QMap<QString,QCursor> curMap;
 	void pasteTile();
 	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
     
