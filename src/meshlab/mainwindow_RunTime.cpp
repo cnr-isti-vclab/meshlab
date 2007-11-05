@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.138  2007/11/05 23:45:34  cignoni
+automatic closure of stdialog on other filters
+
 Revision 1.137  2007/11/05 13:49:52  cignoni
 better managment of the filter parameter dialog (stddialog)
 
@@ -396,8 +399,11 @@ void MainWindow::startFilter()
 	// (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
   // bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
 	FilterParameterSet parList;
-
-  if(iFilter->autoDialog(action))
+  
+	//Hide the std dialog just in case to avoid that two different filters runs mixed
+	stddialog->hide();
+  
+	if(iFilter->autoDialog(action))
 	{
 		/// Start the automatic dialog with the collected parameters
 		stddialog->showAutoDialog(iFilter, GLA()->mm(), action, this);
