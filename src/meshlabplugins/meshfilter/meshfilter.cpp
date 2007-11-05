@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.101  2007/11/05 23:44:23  cignoni
+Added tex simplification check, selection to paso doble and better comments
+
 Revision 1.100  2007/10/16 12:19:25  cignoni
 mismatch between float and absperc parameters
 
@@ -183,7 +186,7 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
   {
     case FP_LOOP_SS :                   return tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");  
     case FP_BUTTERFLY_SS :  			      return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");  
-    case FP_MIDPOINT : 			            return tr("Splits every edge in two");  
+    case FP_MIDPOINT : 			            return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint");  
     case FP_REMOVE_UNREFERENCED_VERTEX: return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");  
     case FP_REMOVE_DUPLICATED_VERTEX : 	return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");  
     case FP_REMOVE_FACES_BY_AREA : 			return tr("Removes null faces (the one with area equal to zero)");  
@@ -191,7 +194,7 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
     case FP_REMOVE_NON_MANIFOLD : 			return tr("Remove non manifold edges by removing some of the faces incident on non manifold edges");  
     case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");  
     case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller");  
-    case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing and vertex fitting smoothing, based on the paper of ...");  
+    case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals");  
     case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");  
     case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
@@ -446,14 +449,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
   if(ID(filter) == (FP_TWO_STEP_SMOOTH))
 	  {
-      //size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			int stepSmoothNum = par.getInt("stepSmoothNum");
 			float normalThr   = cos(math::ToRad(par.getFloat("normalThr")));
       int stepNormalNum = par.getInt("stepNormalNum");
-
+      bool selectedFlag = par.getBool("Selected");
       //size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
-      PasoDobleSmoothFast(m.cm, stepSmoothNum, normalThr, stepNormalNum);
+      PasoDobleSmoothFast(m.cm, stepSmoothNum, normalThr, stepNormalNum,selectedFlag);
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 
@@ -505,14 +508,18 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 
 	if (ID(filter) == (FP_QUADRIC_TEXCOORD_SIMPLIFICATION) ) {
-  
-		int TargetFaceNum = par.getInt("TargetFaceNum");		
-		lastqtex_QualityThr = par.getFloat("QualityThr");
-		lastqtex_extratw = par.getFloat("Extratcoordw");
+		if(!tri::HasPerWedgeTexCoord(m.cm))
+			QMessageBox::warning(0,"Meshlab Filtering","Warning: nothing have been done. Mesh has no Texture.");
+		else
+		{
+			int TargetFaceNum = par.getInt("TargetFaceNum");		
+			lastqtex_QualityThr = par.getFloat("QualityThr");
+			lastqtex_extratw = par.getFloat("Extratcoordw");
 
-	   QuadricTexSimplification(m.cm,TargetFaceNum,lastqtex_QualityThr,lastqtex_extratw,  cb);
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		 tri::UpdateBounding<CMeshO>::Box(m.cm);
+			QuadricTexSimplification(m.cm,TargetFaceNum,lastqtex_QualityThr,lastqtex_extratw,  cb);
+			tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+			tri::UpdateBounding<CMeshO>::Box(m.cm);
+		}
 	}
 
   if (ID(filter) == (FP_NORMAL_EXTRAPOLATION) ) {
