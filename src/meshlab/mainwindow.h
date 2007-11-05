@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.90  2007/11/05 13:49:52  cignoni
+better managment of the filter parameter dialog (stddialog)
+
 Revision 1.89  2007/10/06 23:29:51  cignoni
 corrected management of suspeneded editing actions. Added filter toolbar
 
@@ -156,8 +159,7 @@ class QScrollArea;
 class QSignalMapper;
 class QProgressDialog;
 class QHttp;
-class MeshlabStdDialog;
-class MeshlabStdDialogFrame;
+
 
 class MainWindow : public QMainWindow,MainWindowInterface
 {
@@ -226,6 +228,8 @@ private slots:
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
 	void updateMenus();
+	void updateStdDialog();
+
 	///////////Slot Menu Preferences /////////////////
 	void setCustomize();
 	///////////Slot Menu Help ////////////////////////
@@ -260,7 +264,8 @@ private:
   int idHost;
   int idGet;
   bool VerboseCheckingFlag;
-	  
+	
+	MeshlabStdDialog *stddialog;	  
 	static QProgressBar *qb;
 	QWorkspace *workspace;
 	QSignalMapper *windowMapper;
@@ -269,7 +274,6 @@ private:
 	std::vector<MeshIOInterface*> meshIOPlugins;
   QList<QAction *> editActionList;
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
-	MeshlabStdDialog *stddialog;
 
 public:
   GLArea *GLA() const {

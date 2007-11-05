@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.82  2007/11/05 13:49:52  cignoni
+better managment of the filter parameter dialog (stddialog)
+
 Revision 1.81  2007/10/23 08:23:10  cignoni
 removed reserved shortcut ctrl+s from selection drawing.
 
@@ -174,6 +177,7 @@ MainWindow::MainWindow()
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateMenus()));
 	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateWindowMenu()));
+	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateStdDialog()));
 
   httpReq=new QHttp(this);
   //connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
@@ -205,9 +209,8 @@ void MainWindow::createStdPluginWnd()
 {
 	stddialog = new MeshlabStdDialog(this);
 	stddialog->setAllowedAreas (    Qt::NoDockWidgetArea );
-	//addDockWidget(Qt::RightDockWidgetArea,stddialog);
-	stddialog->setFloating(true);
-	stddialog->move(50,100);
+	addDockWidget(Qt::RightDockWidgetArea,stddialog);
+  stddialog->setFloating(true);
 }
 
 

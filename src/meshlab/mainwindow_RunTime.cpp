@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.137  2007/11/05 13:49:52  cignoni
+better managment of the filter parameter dialog (stddialog)
+
 Revision 1.136  2007/10/19 21:39:37  cignoni
 Avoid recreation of normals for loaded mesh with explicit per vertex normal
 
@@ -162,6 +165,16 @@ void MainWindow::updateRecentFileActions()
 	}
 	for (int j = numRecentFiles; j < MAXRECENTFILES; ++j)	recentFileActs[j]->setVisible(false);
 	separatorAct->setVisible(numRecentFiles > 0);
+}
+
+// When we switch the current model (and we change the active window)
+// we have to close the stddialog.
+// this one is called when user switch current window.
+void MainWindow::updateStdDialog()
+{
+	if(stddialog==0) return;
+	if(stddialog->isHidden()) return;
+	if(stddialog->curModel != GLA()->mm()) stddialog->close();
 }
 
 void MainWindow::updateWindowMenu()
@@ -503,7 +516,7 @@ void MainWindow::applyEditMode()
 
   iEdit->StartEdit(action,*(GLA()->mm()),GLA());
 	GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
-  GLA()->setSelectionRendering(true);
+  //GLA()->setSelectionRendering(true);
   updateMenus();
 }
 
@@ -737,7 +750,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				else{
 					if(gla==0) gla=new GLArea(workspace);
 					gla->meshDoc.addMesh(mm);
-					gla->mm()->ioMask = mask;				// store mask into model structure
+					gla->mm()->ioMask |= mask;				// store mask into model structure
 					
 					gla->setFileName(fileName);
 					gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
