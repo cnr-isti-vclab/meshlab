@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.131  2007/11/09 11:23:46  cignoni
+attempts to manage 4.3 issues with fonts and opengl
+
 Revision 1.130  2007/11/05 22:38:55  cignoni
 Remove static map of cursors that caused the annoying deallocation bug under vs2005
 
@@ -528,8 +531,11 @@ void GLArea::paintGL()
 
 void GLArea::displayInfo()
 {	
+	//qFont.setStyleStrategy(QFont::PreferQuality);
+	qFont.setStyleStrategy(QFont::NoAntialias);
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(12);
+	qFont.setWeight(1);
 
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 	cs.lColor.V(3) = 128;	// set half alpha value
@@ -602,7 +608,8 @@ void GLArea::displayHelp()
   float fontSpacingV = (curSiz.height()*.01f)+3;
 	float hPosition = curSiz.width()*.1f;
 	glColor(Color4b::White);
-	qFont.setBold(true);renderText(2+hPosition-(qFont.pointSize()*9),1.5*fontSpacingV,QString("MeshLab Quick Help"),qFont);qFont.setBold(false);
+	//qFont.setBold(true);
+	renderText(2+hPosition-(qFont.pointSize()*9),1.5*fontSpacingV,QString("MeshLab Quick Help"),qFont);qFont.setBold(false);
   renderText(2,3*fontSpacingV,QString("Drag:"),qFont);								renderText(hPosition,3*fontSpacingV,QString("Rotate"),qFont);
 	renderText(2,4.5*fontSpacingV,QString("Ctrl-Drag:"),qFont);					renderText(hPosition,4.5*fontSpacingV,QString("Pan"),qFont);
 	renderText(2,6*fontSpacingV,QString("Shift-Drag:"),qFont);					renderText(hPosition,6*fontSpacingV,QString("Zoom"),qFont);
