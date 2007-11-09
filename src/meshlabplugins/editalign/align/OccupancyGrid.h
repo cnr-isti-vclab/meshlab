@@ -47,6 +47,9 @@ per ogni mesh si valuta poi quali sono le altre mesh con cui condivide maggiorme
 lo spazio e 
 
 */
+#ifndef ALIGN_OCCUPANCY_GRID_H
+#define ALIGN_OCCUPANCY_GRID_H
+
 // Necessari per SimpleOGVertex e SimpleOGFace
 #include <bitset>
 #include <algorithm>
@@ -298,3 +301,5 @@ void ChooseArcs(std::vector<std::pair<int,int> > &AV, std::vector<int> &BNV,std:
 };
 
 }
+
+#endif
