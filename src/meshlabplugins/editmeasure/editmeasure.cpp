@@ -32,6 +32,7 @@ $Log: meshedit.cpp,v $
 #include "EditMeasure.h"
 #include <wrap/gl/picking.h>
 using namespace vcg;
+ #include <QFontMetricsF>
 
 EditMeasurePlugin::EditMeasurePlugin() {
   	haveToPick=false;
@@ -171,9 +172,8 @@ void EditMeasurePlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *
 void EditMeasurePlugin::RenderLabel(int x, int y, QString text,GLArea * gla)
 {
  QFontMetrics fm(qFont);
- int tw = fm.width(text); //textWidthInPixels
- int th = fm.height();  //textHeightInPixels
  QRect brec=fm.boundingRect(text);
+//	qDebug("brec = %i %i %i %i",brec.left(),brec.right(),brec.top(),brec.bottom());
  	glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT );
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
@@ -202,14 +202,14 @@ void EditMeasurePlugin::RenderLabel(int x, int y, QString text,GLArea * gla)
 								glVertex2f(x+brec.right()+offset,y+brec.top()-offset);
 								glVertex2f(x+brec.left()-offset,y+brec.top()-offset);
 				glEnd();
+ glColor3f(1,1,1);
+ gla->renderText(x,y,0.0f,text,qFont);
 		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
 		glPopAttrib();
  
- glColor3f(1,1,1);
- gla->renderText(x,y,text,qFont);
 
  
 }
