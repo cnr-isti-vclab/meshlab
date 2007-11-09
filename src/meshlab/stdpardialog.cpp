@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.16  2007/11/09 11:27:27  cignoni
+corrected resizing strategy and hints (still not perfect)
+
 Revision 1.15  2007/11/05 13:34:41  cignoni
 added color and Help
 
@@ -118,8 +121,10 @@ void MeshlabStdDialog::createFrame()
 				}
 	QFrame *newqf= new QFrame(this);
 	//setLayout(new QBoxLayout(QBoxLayout::TopToBottom,this));
-	newqf->setMinimumSize(75, 75);
-	layout()->addWidget(newqf);
+	//newqf->setMinimumSize(75, 75);
+	//layout()->addWidget(newqf);
+	setWidget(newqf);
+	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
 	//setWidget(newqf);
   qf = newqf;
 }
@@ -283,8 +288,9 @@ void MeshlabStdDialog::toggleHelp()
 {	
 	for(int i = 0; i < helpList.count(); i++)
 		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
-	
-	qf->adjustSize();
+//	qf->updateGeometry();
+	this->updateGeometry();
+//	qf->adjustSize();
 	this->adjustSize();
 }
 
