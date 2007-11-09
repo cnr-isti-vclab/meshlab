@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.83  2007/11/09 11:26:44  cignoni
+hide the stddialog at the beginning please.
+
 Revision 1.82  2007/11/05 13:49:52  cignoni
 better managment of the filter parameter dialog (stddialog)
 
@@ -211,6 +214,7 @@ void MainWindow::createStdPluginWnd()
 	stddialog->setAllowedAreas (    Qt::NoDockWidgetArea );
 	addDockWidget(Qt::RightDockWidgetArea,stddialog);
   stddialog->setFloating(true);
+	stddialog->hide();
 }
 
 
