@@ -30,9 +30,10 @@ $Log: stdpardialog.cpp,v $
 #include <GL/glew.h>
 #include <QtGui>
 
+#include "editalign.h"
+
 #include "alignDialog.h"
 #include <meshlab/glarea.h>
-#include "editalign.h"
 
 
 AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)    
@@ -46,14 +47,15 @@ AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
 	this->setFloating(true);
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
-	
+
+	// The following connection is used to associate the click with the change of the current mesh. 
 	connect(	ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(setCurrent(QTreeWidgetItem * , int ) ) );
 }
 
-void AlignDialog::updateTree()
+void AlignDialog::updateTree(MeshTree *meshTree)
 {
 	gla=edit->gla;
-	QList<MeshModel *> &meshList=gla->meshDoc.meshList;
+	QList<MeshNode*> &meshList=meshTree->nodeList;
 	//qDebug("Items in list: %d", meshList.size());
 	ui.alignTreeWidget->clear();
 	//ui.alignTreeWidget->setColumnCount(1);
@@ -62,31 +64,34 @@ void AlignDialog::updateTree()
 	 {
 		QTreeWidgetItem *item;
 		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
-		item = new QTreeWidgetItem(QStringList (QFileInfo(meshList.at(i)->fileName.c_str()).fileName()));
+		QString meshText = QFileInfo(meshList.at(i)->m->fileName.c_str()).fileName();
+		if(meshList.value(i)->glued) 
+				meshText=meshText+"*";
+		item = new QTreeWidgetItem(QStringList (meshText));
 		item->setData(1,Qt::DisplayRole,i);
-		M2T[meshList.at(i)]=item;
+		M2T[meshList.value(i)]=item;
 		
 		ui.alignTreeWidget->insertTopLevelItem(0,item);
 	}
 	
 
 	AlignPair::Result *A;
-	for(int i=0;i< edit->ResVec.size();++i)
+	for(int i=0;i< meshTree->ResVec.size();++i)
 	{
-	  A=&(edit->ResVec[i]);
+	  A=&(meshTree->ResVec[i]);
 		QString buf=QString("Arc: %1 -> %2 A: %3 Err: %4 Sample %5 (%6)")
 		.arg((*A).FixName)
 		.arg((*A).MovName)
-		.arg(edit->OG.SVA[i].norm_area, 6,'f',3)
+		.arg(meshTree->OG.SVA[i].norm_area, 6,'f',3)
 		.arg((*A).err,                  6,'f',3)
 		.arg((*A).ap.SampleNum,6)
 		.arg((*A).as.LastSampleUsed() );// LPCTSTR lpszItem
-		QTreeWidgetItem *parent=M2T[meshList.at((*A).FixName)];
+		QTreeWidgetItem *parent=M2T[meshList.value((*A).FixName)];
 		
 		QTreeWidgetItem *item = new QTreeWidgetItem(parent);
 		item->setText(0,buf);
 		
-		parent=M2T[meshList.at((*A).MovName)];
+		parent=M2T[meshList.value((*A).MovName)];
 		item = new QTreeWidgetItem(parent);
 		item->setText(0,buf);
 	

@@ -28,30 +28,11 @@
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include "alignDialog.h" 
 #include "align/AlignPair.h" 
 #include "align/OccupancyGrid.h" 
+#include "meshtree.h"
 #include <wrap/gui/trackball.h>
-
-class MeshNode
-{
-public:
-	bool glued;
-	Matrix44d Tr;
-  MeshModel *m;
-};
-
-class MeshTree
-{
-	public:
-  QList<MeshNode> NL;
-	vcg::OccupancyGrid OG;
-	vector<AlignPair::Result> ResVec(/* OG.SVA.size()*/ );
-	vector<AlignPair::Result *> ResVecPtr;
-
-	void Process();
-};
-
+#include "alignDialog.h"
 
 class EditAlignPlugin : public QObject, public MeshEditInterface
 {
@@ -87,39 +68,30 @@ public:
 
 		virtual QList<QAction *> actions() const ;
 
-    QPoint cur;
 		QFont qFont;
-    bool haveToPick;
-		CMeshO::FacePointer curFacePtr;
   	int mode;			
 
-    AlignDialog *alignDialog; //the widget with the list of 
+    AlignDialog *alignDialog; //the widget with the list of the meshes. 
+		
 		void updateButtons();
 
 		Trackball trackball;
 		
 		MeshDocument *md; 
+		MeshTree meshTree;
 		GLArea * gla;
-		inline MeshModel* MM(int id)
-			{
-				return md->meshList.at(id);
-			}
 
 public:
-// The Alignment Data;
-	OccupancyGrid OG;
 	AlignPair::Param ap;
-	vector<AlignPair::Result> ResVec;
-	vector<AlignPair::Result *> ResVecPtr;
 		
-
 public slots:
 
 	  //void Align();
-		void Process();
-		void GlueHere();
-		void GlueManual();
-		void EditAlignPlugin::DrawArc(/* ArcPtr a, bool relative, const Point3d &Center, double Size*/);
+		void process();
+		void glueHere();
+		void glueManual();
+		void glueByPicking();
+		void DrawArc(/* ArcPtr a, bool relative, const Point3d &Center, double Size*/);
 
 };
 

@@ -1,126 +1,132 @@
 <ui version="4.0" >
  <class>alignDialog</class>
  <widget class="QWidget" name="alignDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>380</width>
+    <height>404</height>
+   </rect>
+  </property>
   <property name="windowTitle" >
    <string>Align Tool</string>
   </property>
-  <widget class="QFrame" name="frame" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>309</width>
-     <height>340</height>
-    </rect>
-   </property>
-   <property name="frameShape" >
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow" >
-    <enum>QFrame::Raised</enum>
-   </property>
-   <layout class="QVBoxLayout" >
-    <property name="margin" >
-     <number>9</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QTreeWidget" name="alignTreeWidget" >
-      <property name="font" >
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" >
-      <property name="margin" >
-       <number>0</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
+  <layout class="QHBoxLayout" >
+   <item>
+    <widget class="QFrame" name="frame" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" >
       <item>
-       <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>0</number>
+       <widget class="QTreeWidget" name="alignTreeWidget" >
+        <property name="font" >
+         <font>
+          <pointsize>10</pointsize>
+         </font>
         </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
-        <item>
-         <widget class="QPushButton" name="manualAlignButton" >
-          <property name="text" >
-           <string>Manual Rough Align</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer>
-          <property name="orientation" >
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" >
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="icpButton" >
-          <property name="text" >
-           <string>Process</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+        <column>
+         <property name="text" >
+          <string>1</string>
+         </property>
+        </column>
+       </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>0</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
+       <layout class="QHBoxLayout" >
         <item>
-         <widget class="QPushButton" name="inspectButton" >
-          <property name="text" >
-           <string>Inspect Pair</string>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QCheckBox" name="falseColorCB" >
+            <property name="text" >
+             <string>False Colors</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="manualAlignButton" >
+            <property name="text" >
+             <string>Manual Rough Align</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="glueHereButton" >
+            <property name="text" >
+             <string>Glue Here</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pointBasedAlignButton" >
+            <property name="text" >
+             <string>Point Based Align</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="icpButton" >
+            <property name="text" >
+             <string>Process</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="icpParamButton" >
-          <property name="text" >
-           <string>ICP Params</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer>
-          <property name="orientation" >
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" >
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QPushButton" name="inspectButton" >
+            <property name="text" >
+             <string>Inspect Pair</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="icpParamButton" >
+            <property name="text" >
+             <string>ICP Params</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
      </layout>
-    </item>
-   </layout>
-  </widget>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

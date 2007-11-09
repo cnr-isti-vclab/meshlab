@@ -35,6 +35,8 @@ class GLArea;
 #include <QDialog>
 class EditAlignPlugin;
 class MeshModel;
+class MeshTree;
+class MeshNode;
 
 class AlignDialog : public QDockWidget
 {
@@ -42,11 +44,11 @@ class AlignDialog : public QDockWidget
 
 	public:
 		AlignDialog(QWidget *parent = 0);
-		void updateTree();
+		void updateTree(MeshTree *meshTree);
 		Ui::alignDialog ui;
 		GLArea *gla; 
 		EditAlignPlugin *edit;
-		QMap<MeshModel *, QTreeWidgetItem *> M2T; // Model to tree hash
+		QMap<MeshNode *, QTreeWidgetItem *> M2T; // Model to tree hash
 	public slots:
 		void setCurrent(QTreeWidgetItem * item, int column );
 };

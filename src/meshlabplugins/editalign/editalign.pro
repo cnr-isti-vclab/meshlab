@@ -2,7 +2,10 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = editalign.h \
+                meshtree.h \
                 alignDialog.h \
+		AlignPairDialog.h \
+		AlignPairWidget.h \
 		align/AlignPair.h \
 		align/AlignGlobal.h \
                 align/OccupancyGrid.h \
@@ -11,13 +14,15 @@ HEADERS       = editalign.h \
                  ../../../../sf/wrap/gl/trimesh.h
 
 SOURCES       = editalign.cpp \
-                ../../meshlab/meshmodel.cpp \
-		alignDialog.cpp \
-                ../../../../sf/wrap/ply/plylib.cpp\
+                meshtree.cpp \
+                alignDialog.cpp \
+		AlignPairWidget.cpp \
                 align/AlignPair.cpp \
                 align/AlignGlobal.cpp \
                 align/OccupancyGrid.cpp \
-		 ../../../../sf/wrap/gui/trackball.cpp\
+		../../meshlab/meshmodel.cpp \
+		../../../../sf/wrap/ply/plylib.cpp\
+                 ../../../../sf/wrap/gui/trackball.cpp\
                  ../../../../sf/wrap/gui/trackmode.cpp \
                  ../../../../code/lib/glew/src/glew.c
 
