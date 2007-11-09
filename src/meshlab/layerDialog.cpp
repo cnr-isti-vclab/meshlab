@@ -64,8 +64,15 @@ void LayerDialog::toggleStatus(int row, int col)
 	gla->update();
 }
 
+void LayerDialog::showEvent ( QShowEvent * event )
+{
+	updateTable();
+}
+
+
 void LayerDialog::updateTable()
 {
+	if(!isVisible()) return;
 	QList<MeshModel *> &meshList=gla->meshDoc.meshList;
 	qDebug("Items in list: %d", meshList.size());
 	ui.layerTableWidget->setColumnCount(3);

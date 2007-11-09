@@ -45,7 +45,7 @@ class LayerDialog : public QDialog
 
 	public slots:
 		void toggleStatus(int row, int column);
-
+    void showEvent ( QShowEvent * event );
 	private:
 		Ui::layerDialog ui;
 		GLArea *gla; 
