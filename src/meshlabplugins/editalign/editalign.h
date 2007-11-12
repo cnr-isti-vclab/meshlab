@@ -44,7 +44,7 @@ class EditAlignPlugin : public QObject, public MeshEditInterface
 	enum 
 	{
 		ALIGN_IDLE = 0x01,
-		ALIGN_PICK = 0x02,
+		ALIGN_INSPECT_ARC = 0x02,
 		ALIGN_MOVE = 0x03
 	};
 		
@@ -73,7 +73,7 @@ public:
 
     AlignDialog *alignDialog; //the widget with the list of the meshes. 
 		
-		void updateButtons();
+		void toggleButtons();
 
 		Trackball trackball;
 		
@@ -85,13 +85,15 @@ public:
 	AlignPair::Param ap;
 		
 public slots:
-
-	  //void Align();
 		void process();
 		void glueHere();
+		void glueHereAll();
 		void glueManual();
 		void glueByPicking();
+		
 		void DrawArc(/* ArcPtr a, bool relative, const Point3d &Center, double Size*/);
+signals:
+	void suspendEditToggle();
 
 };
 

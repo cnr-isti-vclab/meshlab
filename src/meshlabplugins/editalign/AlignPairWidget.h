@@ -41,22 +41,25 @@ protected:
   void mouseReleaseEvent(QMouseEvent*e);
   void wheelEvent(QWheelEvent*e); 
 	void mouseDoubleClickEvent(QMouseEvent * e);
-	void drawPickedPoints(int side);
+	void drawPickedPoints(std::vector<vcg::Point3f> &, vcg::Color4b color);
 
 private:
 		/// the active mesh instance
-		MeshModel* meshLeft;
-		MeshTree* meshRight;
+		MeshNode* freeMesh;
+		MeshTree* gluedTree;
 		
 	/// the active manipulator
   vcg::Trackball trackLeft,trackRight;
 	vcg::Trackball* tt[2];
-	std::vector<Point3f> pickedPoints[2];
+public:	
+	std::vector<Point3f> freePickedPointVec;
+	std::vector<Point3f> gluedPickedPointVec;
+		
   /// mesh data structure initializer
 		bool hasToPick;
 		Point2i pointToPick;
 public:
-			void initMesh(MeshModel *left, MeshTree *right);
+			void initMesh(MeshNode *left, MeshTree *right);
 };
 
 #endif

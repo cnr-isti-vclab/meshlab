@@ -44,13 +44,24 @@ class AlignDialog : public QDockWidget
 
 	public:
 		AlignDialog(QWidget *parent = 0);
-		void updateTree(MeshTree *meshTree);
+		void updateTree();
+		void updateButtons();
+		void updateDialog();
+		void setTree(MeshTree *,MeshNode *);
+		void setCurrentNode(MeshNode *);
 		Ui::alignDialog ui;
 		GLArea *gla; 
 		EditAlignPlugin *edit;
+
+		MeshTree *meshTree;
+		MeshNode *currentNode;
 		QMap<MeshNode *, QTreeWidgetItem *> M2T; // Model to tree hash
+		
+		QMenu popupMenu;
+		
 	public slots:
 		void setCurrent(QTreeWidgetItem * item, int column );
+	 
 };
 
 

@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>404</height>
+    <width>545</width>
+    <height>610</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -24,10 +24,19 @@
      <layout class="QVBoxLayout" >
       <item>
        <widget class="QTreeWidget" name="alignTreeWidget" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+          <horstretch>0</horstretch>
+          <verstretch>2</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font" >
          <font>
           <pointsize>10</pointsize>
          </font>
+        </property>
+        <property name="selectionMode" >
+         <enum>QAbstractItemView::NoSelection</enum>
         </property>
         <column>
          <property name="text" >
@@ -50,7 +59,7 @@
           <item>
            <widget class="QPushButton" name="manualAlignButton" >
             <property name="text" >
-             <string>Manual Rough Align</string>
+             <string>Manual Rough Glue</string>
             </property>
            </widget>
           </item>
@@ -62,9 +71,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="glueHereAllButton" >
+            <property name="text" >
+             <string>Glue Here all Meshes</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pointBasedAlignButton" >
             <property name="text" >
-             <string>Point Based Align</string>
+             <string>Point Based Glueing</string>
             </property>
            </widget>
           </item>
@@ -75,8 +91,8 @@
             </property>
             <property name="sizeHint" >
              <size>
-              <width>20</width>
-              <height>40</height>
+              <width>274</width>
+              <height>16</height>
              </size>
             </property>
            </spacer>
@@ -122,6 +138,22 @@
          </layout>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="logTextEdit" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+          <horstretch>0</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font" >
+         <font>
+          <family>Courier</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

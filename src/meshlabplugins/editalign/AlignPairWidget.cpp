@@ -13,13 +13,13 @@
 #include <wrap/gl/picking.h>
 AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 {
-	meshLeft=0;
-	meshRight=0;
+	freeMesh=0;
+	gluedTree=0;
 	tt[0]=&trackLeft;
 	tt[1]=&trackRight;	
 	
-	pickedPoints[0].clear();
-	pickedPoints[1].clear();
+	freePickedPointVec.clear();
+	gluedPickedPointVec.clear();
 
 	//resize(800,400);
 	setMinimumSize(800,400);
@@ -28,10 +28,12 @@ AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 }
 
 
-void AlignPairWidget::initMesh(MeshModel *left, MeshTree *right)
+void AlignPairWidget::initMesh(MeshNode *_freeMesh, MeshTree *_gluedTree)
 {
-	meshLeft=left;
-	meshRight=right;
+	freeMesh=_freeMesh;
+	gluedTree=_gluedTree;
+	assert(freeMesh->glued==false);
+	assert(gluedTree->gluedNum()>0);
 	updateGL();
 }
 
@@ -51,7 +53,7 @@ void AlignPairWidget::paintGL ()
 	//MeshModel * mm[2]={meshLeft,meshRight};
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	if(meshLeft==0 || meshRight==0) return;
+	if(freeMesh==0 || gluedTree==0) return;
 	
 	for(int i=0;i<2;++i)
 		{
@@ -68,59 +70,61 @@ void AlignPairWidget::paintGL ()
 				tt[i]->radius= 1;
 				tt[i]->GetView();
 				tt[i]->Apply(false);
-				glPushMatrix();
 				Box3f bb;
-				if(i==0) bb=meshLeft->cm.bbox;
-				else	   bb=meshRight->bbox();
-				float d=2.0f/bb.Diag();
-				vcg::glScale(d);
-				glTranslate(-bb.Center());
-				if(i==0)
-						meshLeft->Render(GLW::DMFlat,GLW::CMPerMesh,GLW::TMNone);
-				else
-					foreach(MeshNode *mn, meshRight->nodeList) 
-						if(mn->glued) mn->m->Render(GLW::DMFlat,GLW::CMPerMesh,GLW::TMNone);
-
-						
-				drawPickedPoints(i);	
+				if(i==0) bb=freeMesh->bbox();
+				else	   bb=gluedTree->gluedBBox();
 				
-				int pickSide= ( pointToPick[0] < (width()/2) )? 0 : 1;
-				if(hasToPick && pickSide==i)
-					{	
-						Point3f pp;
-						hasToPick=false;
-						if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp)) 
+				glPushMatrix();
+						vcg::glScale(2.0f/bb.Diag());
+						glTranslate(-bb.Center());
+						if(i==0)
 						{
-							qDebug("Picked point %i %i -> %f %f %f",pointToPick[0],pointToPick[1],pp[0],pp[1],pp[2]);
-							pickedPoints[pickSide].push_back(pp);
-							hasToPick=false;
+							freeMesh->m->Render(GLW::DMFlat,GLW::CMPerMesh,GLW::TMNone);
+							drawPickedPoints(freePickedPointVec,vcg::Color4b(Color4b::Red));	
+						} else				{
+							foreach(MeshNode *mn, gluedTree->nodeList) 
+								if(mn->glued && mn != freeMesh) mn->m->Render(GLW::DMFlat,GLW::CMPerMesh,GLW::TMNone);
+							drawPickedPoints(gluedPickedPointVec,vcg::Color4b(Color4b::Blue));	
 						}
-					}
-				tt[i]->DrawPostApply();
-
+								
+						int pickSide= ( pointToPick[0] < (width()/2) )? 0 : 1;
+						if(hasToPick && pickSide==i)
+							{	
+								Point3f pp;
+								hasToPick=false;
+								if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp)) 
+								{
+									qDebug("Picked point %i %i -> %f %f %f",pointToPick[0],pointToPick[1],pp[0],pp[1],pp[2]);
+									if(pickSide == 0) freePickedPointVec.push_back(pp);
+									else gluedPickedPointVec.push_back(pp);
+									hasToPick=false;
+								}
+							}
+						tt[i]->DrawPostApply();
+				glPopMatrix();
 		} 
 }
 
-void AlignPairWidget::drawPickedPoints(int side)
+void AlignPairWidget::drawPickedPoints(std::vector<vcg::Point3f> &pointVec, vcg::Color4b color)
 {
-	glPushAttrib(GL_ENABLE_BIT | GL_POINT_BIT | GL_CURRENT_BIT);
+	glPushAttrib(GL_ENABLE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE);
-	if(side==0) glColor(vcg::Color4b(Color4b::Red));
-	if(side==1) glColor(vcg::Color4b(Color4b::Blue));
+	glDepthFunc(GL_ALWAYS);
+	//glDisable(GL_DEPTH_TEST);
 	glPointSize(3.0);
-	
-	for(int i=0; i<pickedPoints[side].size();++i)
+	glColor(color);
+	for(int i=0; i<pointVec.size();++i)
 		{
-		Point3f &pt =pickedPoints[side][i];
+			Point3f &pt =pointVec[i];
 			glBegin(GL_POINTS);
 				glVertex(pt);
 			glEnd();
-			renderText(pt[0],pt[1],pt[2],QString("%1").arg(i));
+    	renderText( pt[0],pt[1],pt[2], QString("%1").arg(i) );
 		}
-	glPopAttrib();
-	
+	glPopAttrib();	
 }
+
 void AlignPairWidget::keyReleaseEvent (QKeyEvent * e)
 {
   e->ignore ();

@@ -27,6 +27,10 @@
 #include "meshtree.h"
 #include "align/AlignGlobal.h"
 
+MeshTree::MeshTree()
+{
+	cb=vcg::DummyCallBackPos;
+}
 
 int MeshTree::gluedNum()
 {
@@ -79,8 +83,8 @@ void MeshTree::Process(AlignPair::Param ap)
 	ResVecPtr.clear();
 	AlignPair::A2Mesh Fix;
 	AlignPair::A2Mesh Mov;
-
-	fprintf(stdout,"Computed %i Arcs :\n",OG.SVA.size());
+  QString buf;
+	cb(0,qPrintable(buf.sprintf("Computed %i Arcs :\n",OG.SVA.size())));
 	int i=0;
 	for(i=0;i<OG.SVA.size() && OG.SVA[i].norm_area > .1; ++i)
   {	

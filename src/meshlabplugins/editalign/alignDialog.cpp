@@ -35,6 +35,20 @@ $Log: stdpardialog.cpp,v $
 #include "alignDialog.h"
 #include <meshlab/glarea.h>
 
+static QTextEdit *globalLogTextEdit=0;
+
+// funzione globale che scrive sul 
+bool AlignCallBackPos(const int pos, const char * message )
+{
+  assert(globalLogTextEdit);
+	
+	globalLogTextEdit->insertPlainText(QString(message));
+	globalLogTextEdit->ensureCursorVisible();
+	globalLogTextEdit->repaint();
+
+	return true;
+};
+
 
 AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)    
 { 
@@ -50,9 +64,47 @@ AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)
 
 	// The following connection is used to associate the click with the change of the current mesh. 
 	connect(	ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(setCurrent(QTreeWidgetItem * , int ) ) );
+	
+	globalLogTextEdit=ui.logTextEdit;
+  currentNode=0;
+	meshTree=0;
 }
 
-void AlignDialog::updateTree(MeshTree *meshTree)
+void AlignDialog::setCurrentNode(MeshNode *_currentNode)
+{
+	assert(meshTree);
+	assert(_currentNode == meshTree->find(_currentNode->m));
+	currentNode=_currentNode;
+	updateDialog();
+}
+
+void AlignDialog::setTree(MeshTree *_meshTree, MeshNode *_node)
+{
+	assert(meshTree==0);
+	meshTree=_meshTree;
+	meshTree->cb = AlignCallBackPos;
+	setCurrentNode(_node);
+}
+
+void AlignDialog::updateDialog()
+{
+	assert(meshTree!=0);
+	assert(currentNode == meshTree->find(currentNode->m));
+	
+	updateTree();
+	updateButtons();
+}
+
+void AlignDialog::updateButtons()
+{
+	if(currentNode->glued) ui.glueHereButton->setText("Unglue Mesh");
+										else ui.glueHereButton->setText("Glue Mesh Here");
+	
+	if(currentNode->glued) ui.pointBasedAlignButton->setDisabled(true);
+										else ui.pointBasedAlignButton->setDisabled(false);
+}
+
+void AlignDialog::updateTree()
 {
 	gla=edit->gla;
 	QList<MeshNode*> &meshList=meshTree->nodeList;
@@ -74,7 +126,7 @@ void AlignDialog::updateTree(MeshTree *meshTree)
 		ui.alignTreeWidget->insertTopLevelItem(0,item);
 	}
 	
-
+  // Second part add the arcs to the tree
 	AlignPair::Result *A;
 	for(int i=0;i< meshTree->ResVec.size();++i)
 	{
@@ -94,8 +146,6 @@ void AlignDialog::updateTree(MeshTree *meshTree)
 		parent=M2T[meshList.value((*A).MovName)];
 		item = new QTreeWidgetItem(parent);
 		item->setText(0,buf);
-	
-	
 	}
 	
 }
@@ -103,6 +153,9 @@ void AlignDialog::updateTree(MeshTree *meshTree)
 void AlignDialog::setCurrent(QTreeWidgetItem * item, int column )
 {
   int row = item->data(1,Qt::DisplayRole).toInt();
+
+	setCurrentNode(meshTree->nodeList.value(row));
+	
   gla->meshDoc.setCurrentMesh(row);
 	gla->update();
 }

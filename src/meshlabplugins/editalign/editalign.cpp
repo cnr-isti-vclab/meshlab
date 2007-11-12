@@ -29,6 +29,7 @@ $Log: meshedit.cpp,v $
 #include <math.h>
 #include <stdlib.h>
 #include <meshlab/glarea.h>
+#include <vcg/math/point_matching.h>
 //#include <meshlab/mainwindow.h>
 #include "editalign.h"
 #include <wrap/gl/pick.h>
@@ -91,11 +92,16 @@ void EditAlignPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 			break;
 			
 		case ALIGN_IDLE:
-		{		
+		{
+			m.Render(GLW::DMBox,GLW::CMPerMesh,gla->rm.textureMode);
+		}
+		case ALIGN_INSPECT_ARC: 		
+		{
+			break;
+	
 		}
 	}
 }
-
 void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla )
 {
 	md=&_gla->meshDoc;
@@ -122,26 +128,66 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 		connect(alignDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
 		connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
 		connect(alignDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
+		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
 	}
 	alignDialog->edit=this;
-	alignDialog->updateTree(& meshTree);
+	alignDialog->setTree(& meshTree, meshTree.nodeList.front());
 	alignDialog->show();
 	//alignDialog->adjustSize();
 	
 	//mainW->addDockWidget(Qt::LeftDockWidgetArea,alignDialog);
 	mode=ALIGN_IDLE;	
+	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
+
+	suspendEditToggle();
 }
 
 void EditAlignPlugin::glueByPicking()
 {
+	if(meshTree.gluedNum()<1)
+		{
+			QMessageBox::warning(0,"Align tool", "Point based aligning  requires at least one glued  mesh");
+			return;
+		}
+
+ Matrix44f oldTr = md->mm()->cm.Tr;
+ md->mm()->cm.Tr.SetIdentity();
  AlignPairDialog *dd=new AlignPairDialog();
- dd->aa->initMesh(md->mm(), &meshTree);
+ dd->aa->initMesh(meshTree.find(md->mm()), &meshTree);
  dd->exec();	
+ 
+ // i picked points sono in due sistemi di riferimento.
+ 
+ vector<Point3f> freePnt = dd->aa->freePickedPointVec; 
+ vector<Point3f> gluedPnt= dd->aa->gluedPickedPointVec; 
+ 
+ 	if(freePnt.size() != gluedPnt.size())
+		{
+			QMessageBox::warning(0,"Align tool", "Point based aligning requires at least one glued  mesh");
+			return;
+		}
+
+ Matrix44f res;
+//			A3PntFree.push_back((A3PntFree[0]+A3PntFree[1])/2.0);
+//			A3PntGlue.push_back((A3PntGlue[0]+A3PntGlue[1])/2.0);
+ PointMatching<float>::ComputeRigidMatchMatrix(res,gluedPnt,freePnt);
+	md->mm()->cm.Tr=res;
+	QString buf;
+  for(int i=0;i<freePnt.size();++i)
+		meshTree.cb(0,qPrintable(buf.sprintf("%f %f %f -- %f %f %f \n",freePnt[i][0],freePnt[i][1],freePnt[i][2],gluedPnt[i][0],gluedPnt[i][1],gluedPnt[i][2])));
+	
+//			Matrix44d old=MSel().M;
+//			//old.Invert();
+//			MSel().M=old*res;
+//			MSel().glued=true;
+//			UpdateAllViews(NULL,UPDTreeChange);		
+
 } 
 
  
 void EditAlignPlugin::glueManual()
 {
+	assert(alignDialog->currentNode->glued==false); 
 	MeshModel *mm=md->mm();
 	static QString oldLabelButton;
 	Matrix44f tran,mtran; 
@@ -149,23 +195,25 @@ void EditAlignPlugin::glueManual()
 	switch(mode)
 	{
 		case ALIGN_IDLE:
+				suspendEditToggle();
 				mode = ALIGN_MOVE;
 				md->mm()->visible=false;
 				trackball.Reset();
 				trackball.center= mm->cm.trBB().Center();
 				trackball.radius= mm->cm.trBB().Diag()/2.0;
-				updateButtons();
+				toggleButtons();
 				oldLabelButton=	alignDialog->ui.manualAlignButton->text();
 				alignDialog->ui.manualAlignButton->setText("Store transformation");
 				break;
 	
 		case ALIGN_MOVE:  // stop manual alignment and freeze the mesh
 				mode = ALIGN_IDLE;
-				updateButtons();
+				toggleButtons();
 				tran.SetTranslate(trackball.center);
 				mtran.SetTranslate(-trackball.center);
 				mm->cm.Tr= (tran) * trackball.track.Matrix()*(mtran) * mm->cm.Tr;
 				mm->visible=true;
+				alignDialog->currentNode->glued=true;
 				alignDialog->ui.manualAlignButton->setText(oldLabelButton);
 			 break;
 			
@@ -174,10 +222,22 @@ void EditAlignPlugin::glueManual()
 	gla->update();
 }
 
+
+
+
 void EditAlignPlugin::glueHere()
+{ 
+	MeshNode *mn=meshTree.find(md->mm());
+	mn->glued = !mn->glued;
+	alignDialog->updateDialog();
+}
+
+void EditAlignPlugin::glueHereAll()
 {
-	meshTree.find(md->mm())->glued=true;
-	alignDialog->updateTree(& meshTree);
+	foreach(MeshNode *mn, meshTree.nodeList)
+				mn->glued=true;
+	
+	alignDialog->updateDialog();
 }
 
 void EditAlignPlugin::process()
@@ -188,7 +248,7 @@ void EditAlignPlugin::process()
 			return;
 		}
 	meshTree.Process(ap);
-	alignDialog->updateTree(&meshTree);
+	alignDialog->updateDialog();
 	gla->update();
 }
 
@@ -221,7 +281,10 @@ void EditAlignPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &
 	}
 }
 
-void EditAlignPlugin::updateButtons()
+
+// this function toggles on and off all the buttons (according to the "modal" states of the interface),
+// do not confuse it with the updatebuttons function of the alignDialog class.
+void EditAlignPlugin::toggleButtons()
 {
 switch(mode)
 	{

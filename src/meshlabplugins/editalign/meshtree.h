@@ -50,10 +50,14 @@ public:
 class MeshTree
 {
 	public:
+	MeshTree();
+	
   QList<MeshNode *> nodeList;
 	vcg::OccupancyGrid OG;
 	std::vector<AlignPair::Result> ResVec;
 	std::vector<AlignPair::Result *> ResVecPtr;
+	vcg::CallBackPos * cb;
+	
   MeshModel *MM(unsigned int i) {return nodeList.value(i)->m;}
 	void clear()
 	{
@@ -86,6 +90,7 @@ class MeshTree
 					FullBBox.Add(Matrix44f::Construct(mp->tr()),mp->bbox());
 		return FullBBox;
 	}
+
 
 };
 #endif
