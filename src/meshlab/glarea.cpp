@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.132  2007/11/17 15:40:23  cignoni
+removed QT2VCG trackball helper
+
 Revision 1.131  2007/11/09 11:23:46  cignoni
 attempts to manage 4.3 issues with fonts and opengl
 
@@ -166,7 +169,7 @@ Removed various gl state leaking
 #include "layerDialog.h"
 
 #include <wrap/gl/picking.h>
-
+#include <wrap/qt/trackball.h>
 using namespace vcg; 
 
 GLArea::GLArea(QWidget *parent)
@@ -531,12 +534,10 @@ void GLArea::paintGL()
 
 void GLArea::displayInfo()
 {	
-	//qFont.setStyleStrategy(QFont::PreferQuality);
 	qFont.setStyleStrategy(QFont::NoAntialias);
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(12);
-	qFont.setWeight(1);
-
+//	qFont.setWeight(1);
 	glBlendFunc(GL_ONE,GL_SRC_ALPHA);
 	cs.lColor.V(3) = 128;	// set half alpha value
 	glColor(cs.lColor);
@@ -632,19 +633,6 @@ void GLArea::saveSnapshot()
 
 	takeSnapTile=true;
 	update();
-}
-
-Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
-{
-
-	int vcgbt=Trackball::BUTTON_NONE;
-	if(qtbt & Qt::LeftButton		) vcgbt |= Trackball::BUTTON_LEFT;
-	if(qtbt & Qt::RightButton		) vcgbt |= Trackball::BUTTON_RIGHT;
-	if(qtbt & Qt::MidButton			) vcgbt |= Trackball::BUTTON_MIDDLE;
-	if(modifiers & Qt::ShiftModifier   ) vcgbt |= Trackball::KEY_SHIFT;
-	if(modifiers & Qt::ControlModifier ) vcgbt |= Trackball::KEY_CTRL;
-	if(modifiers & Qt::AltModifier     ) vcgbt |= Trackball::KEY_ALT;
-	return Trackball::Button(vcgbt);
 }
 
 
