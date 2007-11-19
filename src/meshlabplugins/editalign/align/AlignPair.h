@@ -436,7 +436,7 @@ in
 
 ************************************************************************************/
 
-bool AlignPair::Align(
+bool Align(
 						A2Grid &u,
   		const Matrix44d &in,					// trasformazione Iniziale che porta i punti di mov su fix 
 						Matrix44d &out,					// trasformazione calcolata
@@ -454,7 +454,7 @@ bool InitMov(
 		Box3d &movbox,
 		const Matrix44d &in	);				
 
-static bool AlignPair::InitFix(A2Mesh *fm,
+static bool InitFix(A2Mesh *fm,
 												AlignPair::Param &pp,
 												A2Grid &u,
 												int PreferredGridSize=0);
