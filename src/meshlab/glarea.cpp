@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.133  2007/11/19 15:21:46  ponchio
+Temporary fix for QT glError bug causin an assert(glError()) to trigger.
+
 Revision 1.132  2007/11/17 15:40:23  cignoni
 removed QT2VCG trackball helper
 
@@ -529,7 +532,10 @@ void GLArea::paintGL()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
-  assert(!glGetError());
+  int error = glGetError();
+	if(error) {
+		log.Logf(GLLogStream::Info,"There are gl errors");
+	}
 }
 
 void GLArea::displayInfo()
