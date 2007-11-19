@@ -29,7 +29,7 @@ $Log: meshedit.cpp,v $
 #include <math.h>
 #include <stdlib.h>
 #include <meshlab/glarea.h>
-#include "EditMeasure.h"
+#include "editmeasure.h"
 #include <wrap/gl/picking.h>
 using namespace vcg;
  #include <QFontMetricsF>
