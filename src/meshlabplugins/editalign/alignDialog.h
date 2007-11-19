@@ -31,7 +31,7 @@ $Log: stdpardialog.cpp,v $
 
 class GLArea;
 
-#include "ui_AlignDialog.h"
+#include "ui_alignDialog.h"
 #include <QDialog>
 class EditAlignPlugin;
 class MeshModel;
