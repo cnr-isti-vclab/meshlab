@@ -25,9 +25,12 @@ win32-g++:INCLUDEPATH  += ../../../../code/lib/lib3ds-1.2.0
 CONFIG		+= debug_and_release
 # mac:CONFIG += x86 ppc
 
+unix:LIBS		+= -L../../../../code/lib/lib3ds-1.2.0/lib3ds/ -l3ds
+unix:INCLUDEPATH  += ../../../../code/lib/lib3ds-1.2.0
+
 unix{
 	CONFIG		+= warn_off debug_and_release
-#	LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
+#LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
 }
 
 mac:LIBS +=  -L../../../../code/lib/lib3ds-1.2.0/macos/ -l3ds 
