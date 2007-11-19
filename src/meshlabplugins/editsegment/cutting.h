@@ -79,10 +79,10 @@ namespace vcg {
 		}
 
 		void rebuild(){
-			vector<CuttingTriplet<VERTEX_TYPE> >::iterator iter;
+			typename vector<CuttingTriplet<VERTEX_TYPE> >::iterator iter;
 			int num_to_remove = 0;
 			for (iter = _container.begin(); iter != _container.end(); ++iter) {
-				if ((*iter).v->IMark() != MarkType::U) {
+				if ((*iter).v->IMark() != U) {
 					++num_to_remove;
 					pop_heap(iter,_container.end(),cmp);
 				}
