@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.11  2007/11/19 15:51:50  cignoni
+Added frame abstraction for reusing the std dialog mechanism
+
 Revision 1.10  2007/11/05 13:34:41  cignoni
 added color and Help
 
@@ -117,6 +120,23 @@ protected:
 };
 
 
+class StdParFrame : public QFrame
+{
+	Q_OBJECT
+public:
+StdParFrame::StdParFrame(QWidget *p);
+
+	void loadFrameContent(FilterParameterSet &curParSet);
+	void readValues(FilterParameterSet &curParSet);
+	void resetValues(FilterParameterSet &curParSet);
+
+	void toggleHelp();	
+	
+	QVector<void *> stdfieldwidgets;
+	QVector<QLabel *> helpList;
+
+};
+
 // standard plugin window
 //class MeshlabStdDialog : public QDialog
 class MeshlabStdDialog : public QDockWidget
@@ -140,6 +160,7 @@ private slots:
 
 protected:
 	QFrame *qf;
+	StdParFrame *stdParFrame;
 	QAction *curAction;
 public:
 	MeshModel *curModel;
@@ -147,8 +168,6 @@ public:
 	MainWindowInterface *curmwi;
 	FilterParameterSet curParSet;
 	
-	QVector<void *> stdfieldwidgets;
-	QVector<QLabel *> helpList;
 };
 
 #endif

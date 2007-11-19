@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.17  2007/11/19 15:51:50  cignoni
+Added frame abstraction for reusing the std dialog mechanism
+
 Revision 1.16  2007/11/09 11:27:27  cignoni
 corrected resizing strategy and hints (still not perfect)
 
@@ -84,9 +87,17 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 :QDockWidget(QString("Plugin"),0)
   {
 		qf = NULL;
+		stdParFrame=NULL;
 		clearValues();
 		//setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 }
+
+StdParFrame::StdParFrame(QWidget *p)
+//:QDialog(p)
+:QFrame(p)
+{
+}
+
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
 void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, QAction *action, MainWindowInterface *mwi)
@@ -101,12 +112,11 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, Q
 		loadFrameContent();
   }
 
-
 	void MeshlabStdDialog::clearValues()
 	{
 		curAction = NULL;
-		stdfieldwidgets.clear();
-		helpList.clear();
+//		stdfieldwidgets.clear();
+//		helpList.clear();
 		curModel = NULL;
 		curmfi = NULL;
 		curmwi = NULL;
@@ -114,11 +124,8 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, Q
 
 void MeshlabStdDialog::createFrame()
 {
-	if(qf)   {
-				delete qf;
-				helpList.clear();
-				stdfieldwidgets.clear();
-				}
+	if(qf) delete qf;
+				
 	QFrame *newqf= new QFrame(this);
 	//setLayout(new QBoxLayout(QBoxLayout::TopToBottom,this));
 	//newqf->setMinimumSize(75, 75);
@@ -137,7 +144,12 @@ void MeshlabStdDialog::resetValues()
 		
 	assert(qf);
 	assert(qf->isVisible());
-  assert(curParSet.paramList.count() == stdfieldwidgets.count());
+ // assert(curParSet.paramList.count() == stdfieldwidgets.count());
+ stdParFrame->resetValues(curParSet);
+}
+
+void StdParFrame::resetValues(FilterParameterSet &curParSet)
+{
 	QList<FilterParameter> &parList =curParSet.paramList;
 	for(int i = 0; i < parList.count(); i++)
 		{
@@ -173,9 +185,53 @@ void MeshlabStdDialog::loadFrameContent()
 {
 	assert(qf);
 	qf->hide();	
-	setWindowTitle(curmfi->filterName(curAction));
+  QLabel *ql;
+	
 	QGridLayout *gridLayout = new QGridLayout(qf);
-	qf->setLayout(gridLayout);
+	setLayout(gridLayout);
+	
+	setWindowTitle(curmfi->filterName(curAction));
+	ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
+	ql->setTextFormat(Qt::RichText);
+	ql->setWordWrap(true);
+	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
+	
+	stdParFrame = new StdParFrame(this);
+	stdParFrame->loadFrameContent(curParSet);
+  gridLayout->addWidget(stdParFrame,1,0,1,2);
+
+	int buttonRow = 2;  // the row where the line of buttons start 
+	
+	QPushButton *helpButton = new QPushButton("Help", qf);
+	QPushButton *closeButton = new QPushButton("Close", qf);
+	QPushButton *applyButton = new QPushButton("Apply", qf);
+	QPushButton *defaultButton = new QPushButton("Default", qf);
+	
+	gridLayout->addWidget(helpButton,buttonRow,1,Qt::AlignBottom);
+	gridLayout->addWidget(defaultButton,buttonRow,0,Qt::AlignBottom);
+	gridLayout->addWidget(closeButton,buttonRow+1,0,Qt::AlignBottom);
+	gridLayout->addWidget(applyButton,buttonRow+1,1,Qt::AlignBottom);
+	
+	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
+	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
+	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
+	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetValues()));
+	
+	qf->showNormal();	
+	qf->adjustSize();
+	
+	this->showNormal();
+	this->adjustSize();		
+}
+
+void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
+{
+ if(layout()) delete layout();
+	QGridLayout *gridLayout = new QGridLayout(this);
+	setLayout(gridLayout);
+  gridLayout->setColumnStretch(0,0);
+	gridLayout->setColumnStretch(1,0);
+	gridLayout->setColumnStretch(2,1);
 
 	QCheckBox *qcb;
 	QLineEdit *qle;
@@ -184,73 +240,68 @@ void MeshlabStdDialog::loadFrameContent()
 	QColorButton *qcbt;
 	QList<FilterParameter> &parList =curParSet.paramList;
 	
-	ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
-	ql->setTextFormat(Qt::RichText);
-	ql->setWordWrap(true);
-	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
-	int baseRow=1; // all the widgets start at row 1;
 	QString descr;
 	
 	for(int i = 0; i < parList.count(); i++)
 	{
 		const FilterParameter &fpi=parList.at(i);
-		ql = new QLabel("<i><small>"+fpi.fieldToolTip +"</small></i>",qf);
+		ql = new QLabel("<i><small>"+fpi.fieldToolTip +"</small></i>",this);
 		ql->setTextFormat(Qt::RichText);
 		ql->setWordWrap(true);
 		ql->setVisible(false);
-		gridLayout->addWidget(ql,baseRow+i,3,1,1,Qt::AlignTop); 
+		gridLayout->addWidget(ql,i,3,1,1,Qt::AlignTop); 
 		helpList.push_back(ql);
 		
 		switch(fpi.fieldType)
 	  { 
 			case FilterParameter::PARBOOL:
-				qcb = new QCheckBox(fpi.fieldDesc,qf);
+				qcb = new QCheckBox(fpi.fieldDesc,this);
 				qcb->setToolTip(fpi.fieldToolTip);		  
 				if(fpi.fieldVal.toBool()) qcb->setCheckState(Qt::Checked);
-				gridLayout->addWidget(qcb,baseRow+i,0,1,2,Qt::AlignTop);
+				gridLayout->addWidget(qcb,i,0,1,2,Qt::AlignTop);
 				stdfieldwidgets.push_back(qcb);
 				break;
 				
 			case FilterParameter::PARFLOAT:
-				ql = new QLabel(fpi.fieldDesc,qf);
+				ql = new QLabel(fpi.fieldDesc,this);
 				ql->setToolTip(fpi.fieldToolTip);			  
-				qle = new QLineEdit(QString::number(fpi.fieldVal.toDouble(),'g',3),qf); // better formatting of floating point numbers		  
-				gridLayout->addWidget(ql,baseRow+i,0,Qt::AlignTop);
-				gridLayout->addWidget(qle,baseRow+i,1,Qt::AlignTop);
+				qle = new QLineEdit(QString::number(fpi.fieldVal.toDouble(),'g',3),this); // better formatting of floating point numbers		  
+				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+				gridLayout->addWidget(qle,i,1,Qt::AlignTop);
 				stdfieldwidgets.push_back(qle);
 				break;
 			case FilterParameter::PARINT:
 			case FilterParameter::PARSTRING:
-				ql = new QLabel(fpi.fieldDesc,qf);
+				ql = new QLabel(fpi.fieldDesc,this);
 				ql->setToolTip(fpi.fieldToolTip);		
 						
-				qle = new QLineEdit(fpi.fieldVal.toString(),qf);
+				qle = new QLineEdit(fpi.fieldVal.toString(),this);
 				
-				gridLayout->addWidget(ql,baseRow+i,0,Qt::AlignTop);
-				gridLayout->addWidget(qle,baseRow+i,1,Qt::AlignTop);
+				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+				gridLayout->addWidget(qle,i,1,Qt::AlignTop);
 
 				stdfieldwidgets.push_back(qle);
 
 				break;
 			case FilterParameter::PARABSPERC:
 				descr = fpi.fieldDesc + " (abs and %)";
-				ql = new QLabel(descr ,qf);
+				ql = new QLabel(descr ,this);
 				ql->setToolTip(fpi.fieldToolTip);	
 				
-				apw = new AbsPercWidget(qf,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max);
-				gridLayout->addWidget(ql,baseRow+i,0,Qt::AlignTop);
-				gridLayout->addLayout(apw,baseRow+i,1,Qt::AlignTop);
+				apw = new AbsPercWidget(this,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max);
+				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+				gridLayout->addLayout(apw,i,1,Qt::AlignTop);
 					
 				stdfieldwidgets.push_back(apw);
 		
 				break;
 			case FilterParameter::PARCOLOR:
-				ql = new QLabel(fpi.fieldDesc,qf);
+				ql = new QLabel(fpi.fieldDesc,this);
 				ql->setToolTip(fpi.fieldToolTip);	
 				
-				qcbt = new QColorButton(qf,QColor(fpi.fieldVal.toUInt()));
-				gridLayout->addWidget(ql,baseRow+i,0,Qt::AlignTop);
-				gridLayout->addLayout(qcbt,baseRow+i,1,Qt::AlignTop);
+				qcbt = new QColorButton(this,QColor(fpi.fieldVal.toUInt()));
+				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+				gridLayout->addLayout(qcbt,i,1,Qt::AlignTop);
 					
 				stdfieldwidgets.push_back(qcbt);
 		
@@ -259,45 +310,27 @@ void MeshlabStdDialog::loadFrameContent()
 			default: assert(0);
 		} //end case
 	} // end for each parameter
+	showNormal();
+	adjustSize();		
+}
 
-	int buttonRow = parList.count()+baseRow;  // the row where the line of buttons start 
-
-	QPushButton *helpButton = new QPushButton("Help", qf);
-	QPushButton *closeButton = new QPushButton("Close", qf);
-	QPushButton *applyButton = new QPushButton("Apply", qf);
-	QPushButton *defaultButton = new QPushButton("Default", qf);
-
-	gridLayout->addWidget(helpButton,buttonRow,1,Qt::AlignBottom);
-	gridLayout->addWidget(defaultButton,buttonRow,0,Qt::AlignBottom);
-	gridLayout->addWidget(closeButton,buttonRow+1,0,Qt::AlignBottom);
-	gridLayout->addWidget(applyButton,buttonRow+1,1,Qt::AlignBottom);
-
-	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
-	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
-	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
-	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetValues()));
- 
-	qf->showNormal();	
-	qf->adjustSize();
-
-	this->showNormal();
-	this->adjustSize();	
+void StdParFrame::toggleHelp()
+{	
+	for(int i = 0; i < helpList.count(); i++)
+		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
+	updateGeometry();
+  adjustSize();
 }
 
 void MeshlabStdDialog::toggleHelp()
 {	
-	for(int i = 0; i < helpList.count(); i++)
-		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
-//	qf->updateGeometry();
+	stdParFrame->toggleHelp();
 	this->updateGeometry();
-//	qf->adjustSize();
 	this->adjustSize();
 }
 
-/* click event for the apply button of the standard plugin window */
-void MeshlabStdDialog::applyClick()
+void StdParFrame::readValues(FilterParameterSet &curParSet)
 {
-	  QAction *q = curAction;
 		QList<FilterParameter> &parList =curParSet.paramList;
 		
 	  for(int i = 0; i < parList.count(); i++)
@@ -325,8 +358,15 @@ void MeshlabStdDialog::applyClick()
 			  break;
 		  }
 	  }
+}
 
-	  curmwi->executeFilter(q,curParSet);		
+
+/* click event for the apply button of the standard plugin window */
+void MeshlabStdDialog::applyClick()
+{
+	QAction *q = curAction;
+	stdParFrame->readValues(curParSet);
+	curmwi->executeFilter(q,curParSet);		
 }
 
 /* click event for the close button of the standard plugin window */
