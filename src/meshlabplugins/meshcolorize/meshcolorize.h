@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.25  2007/11/19 17:08:54  ponchio
+Added triangle quality.
+
 Revision 1.24  2007/10/02 08:13:53  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -89,6 +92,7 @@ public:
       CP_MEAN,
       CP_RMS,
       CP_ABSOLUTE,
+      CP_TRIANGLE_QUALITY,
       CP_SELFINTERSECT,
       CP_BORDER,
       CP_COLOR_NON_MANIFOLD_FACE,
