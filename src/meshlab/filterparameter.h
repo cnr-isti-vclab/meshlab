@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2007/11/19 17:09:20  ponchio
+added enum value. [untested].
+
 Revision 1.11  2007/11/05 12:03:01  cignoni
 added color as a possible parameter
 
@@ -100,7 +103,8 @@ class FilterParameter
 		PARSTRING  = 4,
 		PARABSPERC = 5,
 		PARMATRIX  = 6,
-		PARCOLOR = 7
+		PARCOLOR = 7,
+		PARENUM = 8
 	};
 	
 	QString  fieldName;
@@ -113,6 +117,7 @@ class FilterParameter
   
 	float min;
   float max;
+	QStringList enumValues;
 };
 
 /*
@@ -137,6 +142,7 @@ public:
 	void addMatrix44 (QString name, vcg::Matrix44f defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addColor    (QString name, QColor defaultVal, QString desc=QString(), QString tooltip=QString());
   void addAbsPerc  (QString name, float     defaultVal, float minVal, float maxVal,  QString desc=QString(), QString tooltip=QString());
+	void addEnum     (QString name, int defaultVal, QStringList values, QString desc=QString(), QString tooltip=QString());
 		
 	bool				getBool(QString name);
 	int					getInt(QString name);
@@ -145,6 +151,7 @@ public:
 	vcg::Matrix44f		getMatrix44(QString name);
 	QColor		  getColor(QString name);
 	float		    getAbsPerc(QString name);
+  int					getEnum(QString name);
 	
 	void setBool(QString name, bool newVal) ;
 	void setInt(QString name, int newVal) ;
@@ -153,6 +160,7 @@ public:
 	void setMatrix44(QString name, vcg::Matrix44f newVal);
 	void setColor(QString name, QColor newVal);
 	void setAbsPerc(QString name, float newVal);
+	void setEnum(QString name, int newVal);
 
 	FilterParameter &findParameter(QString name);
 

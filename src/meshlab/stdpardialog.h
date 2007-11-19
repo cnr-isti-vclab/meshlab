@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.12  2007/11/19 17:09:20  ponchio
+added enum value. [untested].
+
 Revision 1.11  2007/11/19 15:51:50  cignoni
 Added frame abstraction for reusing the std dialog mechanism
 
@@ -124,7 +127,7 @@ class StdParFrame : public QFrame
 {
 	Q_OBJECT
 public:
-StdParFrame::StdParFrame(QWidget *p);
+	StdParFrame(QWidget *p);
 
 	void loadFrameContent(FilterParameterSet &curParSet);
 	void readValues(FilterParameterSet &curParSet);
@@ -136,6 +139,20 @@ StdParFrame::StdParFrame(QWidget *p);
 	QVector<QLabel *> helpList;
 
 };
+
+/// Widget to enter a color. 
+class EnumWidget : public QHBoxLayout
+{
+	  Q_OBJECT
+		
+		QComboBox *enumCombo;
+		QLabel *enumLabel;
+	public:
+		EnumWidget(QWidget *p, int newEnum);
+		int getEnum();
+		void  setEnum(int newEnum);	
+};
+
 
 // standard plugin window
 //class MeshlabStdDialog : public QDialog

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.18  2007/11/19 17:09:20  ponchio
+added enum value. [untested].
+
 Revision 1.17  2007/11/19 15:51:50  cignoni
 Added frame abstraction for reusing the std dialog mechanism
 
@@ -172,6 +175,9 @@ void StdParFrame::resetValues(FilterParameterSet &curParSet)
 				case FilterParameter::PARCOLOR:
 					((QColorButton *)stdfieldwidgets.at(i))->setColor(QColor(fpi.fieldVal.toUInt()));
 					break;
+				case FilterParameter::PARENUM:
+					((EnumWidget *)stdfieldwidgets.at(i))->setEnum(fpi.fieldVal.toUInt());
+					break;
 				default: assert(0);
 
 			}
@@ -238,6 +244,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 	QLabel *ql;
 	AbsPercWidget *apw;
 	QColorButton *qcbt;
+	EnumWidget *ew;
 	QList<FilterParameter> &parList =curParSet.paramList;
 	
 	QString descr;
@@ -306,6 +313,18 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 				stdfieldwidgets.push_back(qcbt);
 		
 				break;
+			case FilterParameter::PARENUM:
+				ql = new QLabel(fpi.fieldDesc,this);
+				ql->setToolTip(fpi.fieldToolTip);	
+				
+				ew = new EnumWidget(this, fpi.fieldVal.toUInt());
+				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+				gridLayout->addLayout(ew,i,1,Qt::AlignTop);
+					
+				stdfieldwidgets.push_back(ew);
+		
+				break;
+
 
 			default: assert(0);
 		} //end case
@@ -356,6 +375,10 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 		  case FilterParameter::PARCOLOR:
 			  curParSet.setColor(sname,((QColorButton *)stdfieldwidgets[i])->getColor());
 			  break;
+		  case FilterParameter::PARENUM:
+			  curParSet.setEnum(sname,((EnumWidget *)stdfieldwidgets[i])->getEnum());
+			  break;
+
 		  }
 	  }
 }
@@ -472,4 +495,25 @@ void QColorButton::pickColor()
 {
 	 QColor newColor=QColorDialog::getColor(QColor(255,255,255,255));
 	 setColor(newColor);
+}
+
+/******************************************/ 
+//EnumWidget Implementation
+/******************************************/ 
+EnumWidget::EnumWidget(QWidget *p, int newEnum) {
+  enumLabel = new QLabel(p);
+	enumCombo = new QComboBox(p);
+	setEnum(newEnum);
+	this->addWidget(enumLabel);
+	this->addWidget(enumLabel);		
+}
+
+int EnumWidget::getEnum()
+{
+	return enumCombo->currentIndex();
+}
+
+void EnumWidget::setEnum(int newEnum) 
+{
+	enumCombo->setCurrentIndex(newEnum);
 }

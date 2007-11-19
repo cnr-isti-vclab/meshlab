@@ -212,5 +212,11 @@ void FilterParameterSet::setAbsPerc(QString name, float newVal)
 	p.fieldVal=QVariant(double(newVal));	
 }
 
+void FilterParameterSet::setEnum(QString name, int newVal)
+{
+	FilterParameter &p=findParameter(name);
+	assert(p.fieldType == FilterParameter::PARENUM);
+	p.fieldVal=QVariant(int(newVal));	
+}
 
 
