@@ -51,7 +51,7 @@ void LayerDialog::toggleStatus(int row, int col)
   switch(col)
 	{ 
 		case 0 :
-				gla->meshDoc.setCurrentMesh(row);
+		    mw->setCurrent(row);
 				updateTable();
 				break;
 		case 1 : 
