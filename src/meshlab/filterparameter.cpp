@@ -212,6 +212,20 @@ void FilterParameterSet::setAbsPerc(QString name, float newVal)
 	p.fieldVal=QVariant(double(newVal));	
 }
 
+void FilterParameterSet::addEnum (QString name, int defaultVal, QStringList values, QString desc, QString tooltip) {
+	FilterParameter p(name,desc,tooltip);
+  p.fieldVal=defaultVal;
+	p.fieldType=FilterParameter::PARENUM;
+	p.enumValues = values;
+	paramList.push_back(p);	
+}
+
+int FilterParameterSet::getEnum(QString name) {
+	FilterParameter &p=findParameter(name);
+	assert(p.fieldType == FilterParameter::PARENUM);
+	return float(p.fieldVal.toInt());
+}
+
 void FilterParameterSet::setEnum(QString name, int newVal)
 {
 	FilterParameter &p=findParameter(name);

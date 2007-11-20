@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.19  2007/11/20 18:26:16  ponchio
+Added enum support for auto dialogs, working.
+
 Revision 1.18  2007/11/19 17:09:20  ponchio
 added enum value. [untested].
 
@@ -317,7 +320,8 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 				ql = new QLabel(fpi.fieldDesc,this);
 				ql->setToolTip(fpi.fieldToolTip);	
 				
-				ew = new EnumWidget(this, fpi.fieldVal.toUInt());
+				ew = new EnumWidget(this, fpi.fieldVal.toUInt(), fpi.enumValues);
+				qDebug("miao");
 				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
 				gridLayout->addLayout(ew,i,1,Qt::AlignTop);
 					
@@ -500,12 +504,13 @@ void QColorButton::pickColor()
 /******************************************/ 
 //EnumWidget Implementation
 /******************************************/ 
-EnumWidget::EnumWidget(QWidget *p, int newEnum) {
+EnumWidget::EnumWidget(QWidget *p, int defaultEnum, QStringList values) {
   enumLabel = new QLabel(p);
 	enumCombo = new QComboBox(p);
-	setEnum(newEnum);
+  enumCombo->addItems(values);
+	setEnum(defaultEnum);
 	this->addWidget(enumLabel);
-	this->addWidget(enumLabel);		
+	this->addWidget(enumCombo);
 }
 
 int EnumWidget::getEnum()

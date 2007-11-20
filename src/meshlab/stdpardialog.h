@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.13  2007/11/20 18:26:16  ponchio
+Added enum support for auto dialogs, working.
+
 Revision 1.12  2007/11/19 17:09:20  ponchio
 added enum value. [untested].
 
@@ -148,7 +151,7 @@ class EnumWidget : public QHBoxLayout
 		QComboBox *enumCombo;
 		QLabel *enumLabel;
 	public:
-		EnumWidget(QWidget *p, int newEnum);
+		EnumWidget(QWidget *p, int newEnum, QStringList values);
 		int getEnum();
 		void  setEnum(int newEnum);	
 };
