@@ -5,14 +5,11 @@ uniform vec3 viewDirection;
 uniform mat4 mvMatrix;
 uniform mat4 prMatrix;
 uniform int texSize;
-varying vec2 texCoord;
 
 vec4 project(vec4 coords)
 {
-   coords = (prMatrix * mvMatrix) * coords;
-   coords.xy = ( vec2(texSize) * (coords.xy + vec2(1.0)) ) / vec2(2.0);  //we assume viewport as (0,0)..(texSize,texSize)
-   coords.z = (coords.z + 1.0) / 2.0;
-   coords.a = 1.0;
+   coords = prMatrix * (mvMatrix * coords); // clip space [-1 .. 1]
+   coords.xyz = coords.xyz * 0.5 + 0.5;
    
    return coords;
 }
@@ -20,10 +17,13 @@ vec4 project(vec4 coords)
 void main(void)
 {
    vec4 R = vec4(0.0, 0.0, 0.0, 1.0);
-   vec4 N = texture2D(nTexture, floor(texCoord.xy));
-   vec4 C = texture2D(vTexture, floor(texCoord.xy));
+   vec4 N = texture2D(nTexture, floor(gl_FragCoord.xy) / float(texSize-1));
+   vec4 C = texture2D(vTexture, floor(gl_FragCoord.xy) / float(texSize-1));
+   
+   /*
    if ( all(lessThanEqual(C.xyz, vec3(0.0))) )
       discard;
+   /**/
       
    C = project(C);
    
@@ -34,8 +34,14 @@ void main(void)
     *          depthTest == vec4(1.0)
     */
 
-   if ( all(equal(shadow2DProj(dTexture, C), vec4(1.0))) )
-      R.r = dot(N.xyz,viewDirection);
-   
+   vec4 depthTest = shadow2DProj(dTexture, C);
+   //if (C.z <= depthTest.r)
+   if (depthTest.r > 0.5)
+   {
+      N = normalize(N);
+      vec3 vd = normalize(viewDirection);
+      R.r = max(dot(N.xyz,vd), 0.0);
+   }
+    
    gl_FragColor = R;
 }
