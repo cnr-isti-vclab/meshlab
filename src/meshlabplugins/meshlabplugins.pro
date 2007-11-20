@@ -16,7 +16,8 @@ SUBDIRS       = meshfilter \
 				editpaint \
 				editalign\
 				editmeasure\
-				editsegment
+				editsegment\
+				filter_ao
 		
 		
 		
