@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.134  2007/11/20 12:04:09  cignoni
+shortening and refactoring
+
 Revision 1.133  2007/11/19 15:21:46  ponchio
 Temporary fix for QT glError bug causin an assert(glError()) to trigger.
 
@@ -49,114 +52,6 @@ corrected behavior for endedit
 Revision 1.126  2007/09/15 09:06:20  cignoni
 Added notification of ortho projection
 
-Revision 1.125  2007/07/24 07:18:05  cignoni
-moved matrix Tr inside mesh class
-
-Revision 1.124  2007/07/13 15:15:52  cignoni
-Corrected bug on bbox of multiple meshes
-
-Revision 1.123  2007/07/10 07:19:11  cignoni
-** Serious Changes **
-again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
-
-Revision 1.122  2007/05/16 15:02:05  cignoni
-Better management of toggling between edit actions and camera movement
-
-Revision 1.121  2007/04/16 09:24:37  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing...
-
-Revision 1.120  2007/03/27 12:20:17  cignoni
-Revamped logging iterface, changed function names in automatic parameters, better selection handling
-
-Revision 1.119  2007/03/26 08:24:10  zifnab1974
-When a user minimizes the window using a shortcut that uses modifiers (alt, ctrl, shift), the state of the button remained "pressed" after the window was reraised. Added a hideevent which resets the button state.
-
-Revision 1.118  2007/03/20 16:22:34  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.117  2007/03/05 13:09:21  cignoni
-Removed useless clearFocus
-
-Revision 1.116  2007/03/05 11:12:56  cignoni
-correct management of release of keyboard modifiers
-
-Revision 1.115  2007/03/03 02:03:25  cignoni
-Reformatted lower bar, added number of selected faces. Updated about dialog
-
-Revision 1.114  2007/03/03 00:13:48  cignoni
-quick patch of font size
-
-Revision 1.113  2007/02/26 11:57:19  cignoni
-Re enabled on screen help, moved back far plane
-
-Revision 1.112  2007/02/26 01:20:59  cignoni
-cursor added
-
-Revision 1.111  2007/02/19 06:00:26  cignoni
-Added cast for mac compiling
-
-Revision 1.110  2006/12/21 00:37:27  cignoni
-Correctly balanced a pushmatrix/popmatrix in the snapshot case
-
-Revision 1.109  2006/12/12 00:03:19  cignoni
-Accidentally deleted a quotation mark just before the commit...
-
-Revision 1.108  2006/12/11 23:53:19  cignoni
-Corrected gl error (a glEnd in excess) and corrected help entries
-
-Revision 1.107  2006/10/26 12:06:02  corsini
-add GLlightSettings structure
-
-Revision 1.106  2006/10/10 19:55:02  cignoni
-Corrected trackball bug, changed default background color.
-
-Revision 1.105  2006/06/16 01:27:33  cignoni
-Comment
-
-Revision 1.104  2006/06/14 04:18:59  cignoni
-removed no per vertex color bug
-
-Revision 1.103  2006/06/13 13:50:01  cignoni
-Cleaned FPS management
-
-Revision 1.102  2006/06/12 15:18:36  cignoni
-toggle between last editing mode
-
-Revision 1.101  2006/06/07 08:49:25  cignoni
-Disable rendering during processing and loading
-
-Revision 1.100  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.99  2006/03/01 10:08:01  ponchio
-WHEEL_DELTA -> WHEEL_STEP
-as WHEEL_DELTA is already defined somewhere.
-
-Revision 1.98  2006/02/28 13:29:36  ponchio
-abs -> fabs
-
-Revision 1.97  2006/02/22 23:45:28  glvertex
-Bug solved in myGluPerspective. Now QuotedBox works propely.
-
-Revision 1.96  2006/02/19 22:19:00  glvertex
-Some help entries corrected
-
-Revision 1.95  2006/02/19 02:54:27  ggangemi
-Added glPushAttrib() and glPopAttrib for shader support
-
-Revision 1.94  2006/02/16 15:05:30  glvertex
-Added some entries in quickhelp
-
-Revision 1.93  2006/02/15 01:37:55  glvertex
-Restyled help
-
-Revision 1.92  2006/02/13 15:37:18  cignoni
-Restructured some functions (pasteTile, wheelevent,lightmode)
-Added DoubleClick for zoom and center. Restructured all the keyboard modifier (removed currentButton)
-Removed various gl state leaking
 
 ****************************************************************************/
 
@@ -281,20 +176,11 @@ void GLArea::pasteTile()
 			QString outfile=QString("%1/%2%3.png")
         .arg(ss.outdir)
         .arg(ss.basename)
-        .arg(ss.counter,2,10,QChar('0'));
+        .arg(ss.counter++,2,10,QChar('0'));
 			bool ret = snapBuffer.save(outfile,"PNG");		
-			if (ret)
-			{
-				ss.counter++;
-				if (ss.counter>999)
-					ss.counter=0;
-                log.Logf(GLLogStream::Info,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
-			}
-			else
-			{
-			    log.Logf(GLLogStream::Error,"Error saving %s",outfile.toLocal8Bit().constData());
-			}
-
+			if (ret) log.Logf(GLLogStream::Info,"Snapshot saved to %s",outfile.toLocal8Bit().constData());
+					else log.Logf(GLLogStream::Error,"Error saving %s",outfile.toLocal8Bit().constData());
+			
 			takeSnapTile=false;
 			snapBuffer=QImage();
 		}
