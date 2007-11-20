@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.91  2007/11/20 11:49:48  cignoni
+added setcurrent slot
+
 Revision 1.90  2007/11/05 13:49:52  cignoni
 better managment of the filter parameter dialog (stddialog)
 
@@ -182,7 +185,8 @@ public slots:
 	bool openIn(QString fileName=QString());
   bool openProject(QString fileName=QString(), GLArea *gla=0);
   void saveProject();
-	
+	 void setCurrent(int meshId);
+
 private slots:
 
 	//////////// Slot Menu File //////////////////////
@@ -245,7 +249,7 @@ private slots:
   void dropEvent ( QDropEvent * event );
   void dragEnterEvent(QDragEnterEvent *);
   void connectionDone(bool status);
-
+ 
 private:
 	void createStdPluginWnd();
 	void createActions();
