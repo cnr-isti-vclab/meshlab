@@ -24,8 +24,8 @@
 History
 
 $Log$
-Revision 1.19  2007/11/20 18:26:16  ponchio
-Added enum support for auto dialogs, working.
+Revision 1.20  2007/11/20 18:55:32  ponchio
+removed qDebug
 
 Revision 1.18  2007/11/19 17:09:20  ponchio
 added enum value. [untested].
@@ -321,7 +321,6 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 				ql->setToolTip(fpi.fieldToolTip);	
 				
 				ew = new EnumWidget(this, fpi.fieldVal.toUInt(), fpi.enumValues);
-				qDebug("miao");
 				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
 				gridLayout->addLayout(ew,i,1,Qt::AlignTop);
 					
