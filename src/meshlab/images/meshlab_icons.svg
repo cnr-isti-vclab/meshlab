@@ -22,7 +22,7 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     gridtolerance="10000"
+     gridtolerance="50"
      guidetolerance="10"
      objecttolerance="10"
      inkscape:pageopacity="0.0"
@@ -35,11 +35,12 @@
      showgrid="true"
      gridempspacing="8"
      showguides="false"
-     inkscape:grid-points="true"
+     inkscape:grid-points="false"
      inkscape:window-width="1391"
      inkscape:window-height="856"
      inkscape:window-x="49"
-     inkscape:window-y="22" />
+     inkscape:window-y="22"
+     inkscape:grid-bbox="false" />
   <metadata
      id="metadata3739">
     <rdf:RDF>
@@ -207,7 +208,7 @@
     <g
        style="font-size:16px;fill:none;stroke:black;stroke-linecap:round;stroke-linejoin:round;font-family:Times New Roman"
        id="Group_24"
-       transform="matrix(1.25,0,0,-1.25,-1.056952,484.1732)"
+       transform="matrix(1.480692,0.277825,0.277825,-1.480692,-129.2138,477.1482)"
        inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlabplugins/editmeasure/images/icon_measure.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">

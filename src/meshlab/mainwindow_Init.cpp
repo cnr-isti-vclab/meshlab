@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.84  2007/11/20 11:51:28  cignoni
+added layer icon
+
 Revision 1.83  2007/11/09 11:26:44  cignoni
 hide the stddialog at the beginning please.
 
@@ -365,7 +368,7 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
 	
-	showLayerDlgAct =  new QAction (tr("Show Layer Dialog"), this);
+	showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
 	showLayerDlgAct->setCheckable(true);
 	showLayerDlgAct->setChecked(true);
 	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));
@@ -434,6 +437,7 @@ void MainWindow::createToolBars()
 	mainToolBar->addAction(reloadAct);
 	mainToolBar->addAction(saveAsAct);
 	mainToolBar->addAction(saveSnapshotAct);
+	mainToolBar->addAction(showLayerDlgAct);
 
 	renderToolBar = addToolBar(tr("Render"));
 	//renderToolBar->setIconSize(QSize(32,32));
