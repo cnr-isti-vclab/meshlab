@@ -310,7 +310,7 @@ void AmbientOcclusionPlugin::writeTextureToFile(char* filename, GLuint textureID
 
 	FILE *f;
 	
-	fopen_s(&f, filename, "wb");
+	f=fopen(filename, "wb");
 	fwrite(pixels, sizeof(unsigned char), textureSize*channels, f);
 	fclose(f);
 
@@ -751,7 +751,7 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 		data = ba.data();
 		glShaderSource(v, 1, (const GLchar**)&data,NULL);
 		glCompileShader(v);
-		int errV;
+		GLint errV;
 		glGetShaderiv(v,GL_COMPILE_STATUS,&errV);
 		assert(errV==GL_TRUE);
 		file.close();
@@ -766,7 +766,7 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 		data = ba.data();
 		glShaderSource(f, 1, (const GLchar**)&data,NULL);
 		glCompileShader(f);
-		int errF;
+		GLint errF;
 		glGetShaderiv(f,GL_COMPILE_STATUS,&errF);
 		assert(errF==GL_TRUE);
 		file.close();
