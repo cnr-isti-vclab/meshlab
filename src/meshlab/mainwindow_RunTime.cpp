@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.139  2007/11/20 12:00:24  cignoni
+added setcurrent slot
+
 Revision 1.138  2007/11/05 23:45:34  cignoni
 automatic closure of stdialog on other filters
 
@@ -341,6 +344,14 @@ void MainWindow::dropEvent ( QDropEvent * event )
 		}
 	}
 }
+
+
+void MainWindow::setCurrent(int meshId)
+{
+	GLA()->meshDoc.setCurrentMesh(meshId);
+	stddialog->hide();
+}
+
 void MainWindow::applyLastFilter()
 {
   if(GLA()==0) return;
