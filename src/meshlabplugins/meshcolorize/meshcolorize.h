@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.26  2007/11/20 18:26:52  ponchio
+Added triangle quality with possibiliti to cohose metric.
+
 Revision 1.25  2007/11/19 17:08:54  ponchio
 Added triangle quality.
 
@@ -111,12 +114,12 @@ public:
   virtual const QString filterInfo(FilterIDType filterId);
 	virtual const PluginInfo &pluginInfo();
   virtual const FilterClass getClass(QAction *);
-	virtual bool autoDialog(QAction *) {return false;}
+	virtual bool autoDialog(QAction *);
 	virtual bool customDialog(QAction *filter) { 
 		if(ID(filter) == CP_MAP_QUALITY_INTO_COLOR ) return true;  
 			return false;
 	}
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/){}
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool getParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;

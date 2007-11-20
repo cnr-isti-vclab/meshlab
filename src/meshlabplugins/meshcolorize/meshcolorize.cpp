@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.38  2007/11/20 18:26:52  ponchio
+Added triangle quality with possibiliti to cohose metric.
+
 Revision 1.37  2007/11/19 17:08:54  ponchio
 Added triangle quality.
 
@@ -288,10 +291,24 @@ bool ExtraMeshColorizePlugin::getParameters(QAction *action, QWidget * parent, M
 
 			return true;
 		}
+		
 		default :assert(0);
 	}
 	return true;
+}
 
+void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, FilterParameterSet & par) {
+	switch(ID(a))
+  {
+	case CP_TRIANGLE_QUALITY: {
+			QStringList metrics;
+			metrics.push_back("area/max side");
+			metrics.push_back("inradius/circumradius");
+			par.addEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality."));
+			break;
+		}
+	default: assert(0);
+	}
 }
 
 bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
@@ -325,12 +342,22 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
     }  
   case CP_TRIANGLE_QUALITY:
     {
-			float min = 0;
-			float max = 0.5;//sqrt(3)/2;
-      for(unsigned int i = 0; i < m.cm.face.size(); i++) {
-        CFaceO &f = m.cm.face[i];
-				f.C().ColorRamp(min, max, QualityRadii(f.P(0), f.P(1), f.P(2)));
-      }
+			int metric = par.getEnum("Metric");
+			if(metric == 0) { //area / max edge
+				float min = 0;
+				float max = sqrt(3)/2;
+				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
+					CFaceO &f = m.cm.face[i];
+					f.C().ColorRamp(min, max, Quality(f.P(0), f.P(1), f.P(2)));
+				}
+			} else { //inradius / circumradius
+				float min = 0;
+				float max = 0.5;
+				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
+					CFaceO &f = m.cm.face[i];
+					f.C().ColorRamp(min, max, QualityRadii(f.P(0), f.P(1), f.P(2)));
+				}
+			} 
 		break;
     }
 
@@ -382,10 +409,17 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
     case   CP_COLOR_NON_TOPO_COHERENT:
         return MeshFilterInterface::VertexColoring; 
     case   CP_SELFINTERSECT:
-		case   CP_TRIANGLE_QUALITY:
+    case   CP_TRIANGLE_QUALITY:
                return MeshFilterInterface::FaceColoring; 
     default: assert(0);
               return MeshFilterInterface::Generic;
+  }
+}
+
+bool ExtraMeshColorizePlugin::autoDialog(QAction *a) {
+	switch(ID(a)) {
+  case  CP_TRIANGLE_QUALITY: return true;
+	default: return false;
   }
 }
 
