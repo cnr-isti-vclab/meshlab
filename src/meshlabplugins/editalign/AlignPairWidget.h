@@ -51,6 +51,7 @@ private:
 	/// the active manipulator
   vcg::Trackball trackLeft,trackRight;
 	vcg::Trackball* tt[2];
+	vcg::Trackball* currentTrack;
 public:	
 	std::vector<Point3f> freePickedPointVec;
 	std::vector<Point3f> gluedPickedPointVec;

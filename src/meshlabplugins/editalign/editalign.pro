@@ -6,9 +6,11 @@ HEADERS       = editalign.h \
                 alignDialog.h \
 		AlignPairDialog.h \
 		AlignPairWidget.h \
+		AlignParamDialog.h \
 		align/AlignPair.h \
 		align/AlignGlobal.h \
                 align/OccupancyGrid.h \
+		../../meshlab/stdpardialog.h \
 		 ../../../../sf/wrap/gui/trackball.h\
                  ../../../../sf/wrap/gui/trackmode.h\
                  ../../../../sf/wrap/gl/trimesh.h
@@ -17,10 +19,13 @@ SOURCES       = editalign.cpp \
                 meshtree.cpp \
                 alignDialog.cpp \
 		AlignPairWidget.cpp \
+                AlignParamDialog.cpp \
                 align/AlignPair.cpp \
                 align/AlignGlobal.cpp \
                 align/OccupancyGrid.cpp \
 		../../meshlab/meshmodel.cpp \
+		../../meshlab/stdpardialog.cpp \
+		../../meshlab/filterparameter.cpp \
 		../../../../sf/wrap/ply/plylib.cpp\
                  ../../../../sf/wrap/gui/trackball.cpp\
                  ../../../../sf/wrap/gui/trackmode.cpp \

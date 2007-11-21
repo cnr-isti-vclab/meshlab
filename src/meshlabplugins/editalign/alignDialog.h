@@ -28,15 +28,13 @@ $Log: stdpardialog.cpp,v $
 #ifndef ALIGN_DIALOG_H
 #define ALIGN_DIALOG_H
 #include <QtGui>
-
+#include "meshtree.h"
 class GLArea;
 
 #include "ui_alignDialog.h"
 #include <QDialog>
 class EditAlignPlugin;
 class MeshModel;
-class MeshTree;
-class MeshNode;
 
 class AlignDialog : public QDockWidget
 {
@@ -55,6 +53,8 @@ class AlignDialog : public QDockWidget
 
 		MeshTree *meshTree;
 		MeshNode *currentNode;
+		AlignPair::Result *currentArc;
+		
 		QMap<MeshNode *, QTreeWidgetItem *> M2T; // Model to tree hash
 		
 		QMenu popupMenu;

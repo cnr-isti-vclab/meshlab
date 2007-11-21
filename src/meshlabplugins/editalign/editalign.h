@@ -78,18 +78,22 @@ public:
 		Trackball trackball;
 		
 		MeshDocument *md; 
+		MeshNode *currentNode() {return meshTree.find(md->mm());}
 		MeshTree meshTree;
 		GLArea * gla;
 
 public:
-	AlignPair::Param ap;
-		
+	AlignPair::Param ap;  // default alignment parameters
+	
+	void buildParameterSet(FilterParameterSet &fps , AlignPair::Param &app);
+
 public slots:
 		void process();
 		void glueHere();
 		void glueHereAll();
 		void glueManual();
 		void glueByPicking();
+		void alignParam();
 		
 		void DrawArc(/* ArcPtr a, bool relative, const Point3d &Center, double Size*/);
 signals:

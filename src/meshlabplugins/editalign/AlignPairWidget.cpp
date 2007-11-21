@@ -13,6 +13,7 @@
 #include <wrap/gl/picking.h>
 AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 {
+  currentTrack=0;
 	freeMesh=0;
 	gluedTree=0;
 	tt[0]=&trackLeft;
@@ -22,7 +23,8 @@ AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 	gluedPickedPointVec.clear();
 
 	//resize(800,400);
-	setMinimumSize(800,400);
+	QRect rr= QApplication::desktop()->screenGeometry ( this );
+	setMinimumSize(rr.width()*0.8,rr.width()*0.5);
 	hasToPick=false;
 	pointToPick=Point2i(-1,-1);
 }
@@ -65,7 +67,7 @@ void AlignPairWidget::paintGL ()
 				gluPerspective(30, (AlignPairWidget::width()/2)/(float)AlignPairWidget::height(), 0.1, 100);
 				glMatrixMode(GL_MODELVIEW);
 				glLoadIdentity();
-				gluLookAt(0,0,4,   0,0,0,   0,1,0);
+				gluLookAt(0,0,6,   0,0,0,   0,1,0);
 				tt[i]->center=vcg::Point3f(0, 0, 0);
 				tt[i]->radius= 1;
 				tt[i]->GetView();
@@ -75,7 +77,7 @@ void AlignPairWidget::paintGL ()
 				else	   bb=gluedTree->gluedBBox();
 				
 				glPushMatrix();
-						vcg::glScale(2.0f/bb.Diag());
+						vcg::glScale(3.0f/bb.Diag());
 						glTranslate(-bb.Center());
 						if(i==0)
 						{
@@ -98,10 +100,11 @@ void AlignPairWidget::paintGL ()
 									if(pickSide == 0) freePickedPointVec.push_back(pp);
 									else gluedPickedPointVec.push_back(pp);
 									hasToPick=false;
+									update();
 								}
 							}
-						tt[i]->DrawPostApply();
 				glPopMatrix();
+						tt[i]->DrawPostApply();
 		} 
 }
 
@@ -153,31 +156,38 @@ void AlignPairWidget::mouseDoubleClickEvent(QMouseEvent * e)
 {
 	hasToPick=true;
 	pointToPick=Point2i(e->x(), height() -e->y());
+	updateGL ();
+
 }
 void AlignPairWidget::mousePressEvent (QMouseEvent * e)
 {
   e->accept ();
   setFocus ();
 	int index = e->x () < ( width() /2) ? 0 : 1 ;
-  tt[index]->MouseDown (e->x (), height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
-  updateGL ();
+	currentTrack = tt[index];
+  currentTrack->MouseDown (e->x (), height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
 }
 
 void AlignPairWidget::mouseMoveEvent (QMouseEvent * e)
 {
-	int index = e->x () < ( width() /2) ? 0 : 1 ;
-	
+	if(!currentTrack) {
+			qDebug("Warning useless mousemove");
+			return;
+		}
 	if (e->buttons ()) {
-    tt[index]->MouseMove (e->x (), height () - e->y ());
+    currentTrack->MouseMove (e->x (), height () - e->y ());
     updateGL ();
   }
 }
 
 void AlignPairWidget::mouseReleaseEvent (QMouseEvent * e)
 {
-	int index = e->x () < ( width() /2) ? 0 : 1 ;
-  tt[index]->MouseUp (e->x (), height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
-  updateGL ();
+		if(!currentTrack) {
+			qDebug("Warning useless mouse release");
+			return;
+		}
+  currentTrack->MouseUp (e->x (), height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
+	currentTrack=0;
 }
 
 void AlignPairWidget::wheelEvent (QWheelEvent * e)

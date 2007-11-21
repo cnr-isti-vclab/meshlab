@@ -67,6 +67,7 @@ AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)
 	
 	globalLogTextEdit=ui.logTextEdit;
   currentNode=0;
+	currentArc=0;
 	meshTree=0;
 }
 
@@ -97,11 +98,13 @@ void AlignDialog::updateDialog()
 
 void AlignDialog::updateButtons()
 {
-	if(currentNode->glued) ui.glueHereButton->setText("Unglue Mesh");
-										else ui.glueHereButton->setText("Glue Mesh Here");
-	
-	if(currentNode->glued) ui.pointBasedAlignButton->setDisabled(true);
-										else ui.pointBasedAlignButton->setDisabled(false);
+	if(currentNode->glued) 
+			ui.glueHereButton->setText("Unglue Mesh");
+	else
+		ui.glueHereButton->setText("Glue Mesh Here");
+		
+	ui.pointBasedAlignButton->setDisabled(currentNode->glued);
+	ui.manualAlignButton->setDisabled    (currentNode->glued);
 }
 
 void AlignDialog::updateTree()
@@ -118,9 +121,13 @@ void AlignDialog::updateTree()
 		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
 		QString meshText = QFileInfo(meshList.at(i)->m->fileName.c_str()).fileName();
 		if(meshList.value(i)->glued) 
+		{
 				meshText=meshText+"*";
+		}
 		item = new QTreeWidgetItem(QStringList (meshText));
 		item->setData(1,Qt::DisplayRole,i);
+		if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));
+				
 		M2T[meshList.value(i)]=item;
 		
 		ui.alignTreeWidget->insertTopLevelItem(0,item);

@@ -30,20 +30,17 @@ $Log: meshedit.cpp,v $
 #include <stdlib.h>
 #include <meshlab/glarea.h>
 #include <vcg/math/point_matching.h>
-//#include <meshlab/mainwindow.h>
 #include "editalign.h"
 #include <wrap/gl/pick.h>
 #include <wrap/qt/trackball.h>
-//#include "align/AlignPair.h" 
-//#include "align/AlignGlobal.h"
 #include "AlignPairWidget.h"
 #include "AlignPairDialog.h"
+#include "AlignParamDialog.h"
 
 using namespace vcg;
 
 EditAlignPlugin::EditAlignPlugin() {
   alignDialog=0;
-//  curFacePtr=0;
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);
 	
@@ -124,6 +121,7 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 	{
 		//alignDialog=new AlignDialog(gla->parentWidget()->parentWidget());
 		alignDialog=new AlignDialog(gla->window());
+		connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
 		connect(alignDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
 		connect(alignDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
 		connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
@@ -146,42 +144,41 @@ void EditAlignPlugin::glueByPicking()
 {
 	if(meshTree.gluedNum()<1)
 		{
-			QMessageBox::warning(0,"Align tool", "Point based aligning  requires at least one glued  mesh");
+			QMessageBox::warning(0,"Align tool", "Point based aligning requires at least one glued  mesh");
 			return;
 		}
 
  Matrix44f oldTr = md->mm()->cm.Tr;
  md->mm()->cm.Tr.SetIdentity();
  AlignPairDialog *dd=new AlignPairDialog();
- dd->aa->initMesh(meshTree.find(md->mm()), &meshTree);
+ dd->aa->initMesh(currentNode(), &meshTree);
  dd->exec();	
+ 
+ if(dd->result()==QDialog::Rejected) return;
  
  // i picked points sono in due sistemi di riferimento.
  
  vector<Point3f> freePnt = dd->aa->freePickedPointVec; 
  vector<Point3f> gluedPnt= dd->aa->gluedPickedPointVec; 
  
- 	if(freePnt.size() != gluedPnt.size())
-		{
-			QMessageBox::warning(0,"Align tool", "Point based aligning requires at least one glued  mesh");
+ 	if(freePnt.size() != gluedPnt.size())		{
+			QMessageBox::warning(0,"Align tool", "require the same number of chosen points");
 			return;
 		}
 
  Matrix44f res;
-//			A3PntFree.push_back((A3PntFree[0]+A3PntFree[1])/2.0);
-//			A3PntGlue.push_back((A3PntGlue[0]+A3PntGlue[1])/2.0);
- PointMatching<float>::ComputeRigidMatchMatrix(res,gluedPnt,freePnt);
+ PointMatching<float>::ComputeSimilarityMatchMatrix(res,gluedPnt,freePnt);
+ 
+ 
 	md->mm()->cm.Tr=res;
 	QString buf;
-  for(int i=0;i<freePnt.size();++i)
+  for(size_t i=0;i<freePnt.size();++i)
 		meshTree.cb(0,qPrintable(buf.sprintf("%f %f %f -- %f %f %f \n",freePnt[i][0],freePnt[i][1],freePnt[i][2],gluedPnt[i][0],gluedPnt[i][1],gluedPnt[i][2])));
 	
-//			Matrix44d old=MSel().M;
-//			//old.Invert();
-//			MSel().M=old*res;
-//			MSel().glued=true;
-//			UpdateAllViews(NULL,UPDTreeChange);		
-
+	assert(currentNode()->glued==false);
+	
+	currentNode()->glued=true;
+	alignDialog->updateDialog();
 } 
 
  
@@ -222,12 +219,33 @@ void EditAlignPlugin::glueManual()
 	gla->update();
 }
 
+void EditAlignPlugin::buildParameterSet(FilterParameterSet &fps , AlignPair::Param &app)
+{
+	fps.clear();
+	fps.addInt("SampleNum",app.SampleNum,"Sample Number","Number of samples that we try to choose at each ICP iteration");
+	fps.addFloat("MinDistAbs",app.MinDistAbs,"Minimal Starting Distance","For all the choosen sample on one mesh we consider for ICP only the samples nearer than this value."
+							                             "If MSD is too large outliers could be included, if it is too small convergence will be very slow. "
+							                             "A good guess is needed here, suggested values are in the range of 10-100 times of the device scanning error."
+							                             "This value is also dynamically changed by the 'Reduce Distance Factor'");
+	fps.addFloat("TrgDistAbs",app.TrgDistAbs,"Target Distance","When 50% of the choosen samples are below this distance we consider the two mesh aligned. Usually it should be a value lower than the error of the scanning device. ");
+	fps.addInt("MaxIterNum",app.MaxIterNum,"Max Iteration Num","The maximum number of iteration that the ICP is allowed to perform.");
+	fps.addBool("SamplingMode",app.SampleMode == AlignPair::Param::SMNormalEqualized,"Normal Equalized Sampling","if true (default) the sample points of icp are choosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way.");
+	fps.addFloat("ReduceFactor",app.ReduceFactor,"MSD Reduce Factor","At each ICP iteration the Minimal Starting Distance is reduced to be 5 times the <Reduce Factor> percentile of the sample distances (e.g. if RF is 0.9 the new Minimal Starting Distance is 5 times the value <X> such that 90% of the sample lies at a distance lower than <X>.");
+	fps.addBool("MatchMode",app.MatchMode == AlignPair::Param::MMRigid,"Normal Equalized Sampling","if true (default) the sample points of icp are choosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way.");
+	
+}
 
-
+void EditAlignPlugin:: alignParam()
+{
+	FilterParameterSet alignParamSet;
+	buildParameterSet(alignParamSet,ap);
+	AlignParamDialog ad(alignDialog,&alignParamSet);
+	ad.exec();
+}
 
 void EditAlignPlugin::glueHere()
 { 
-	MeshNode *mn=meshTree.find(md->mm());
+	MeshNode *mn=currentNode();
 	mn->glued = !mn->glued;
 	alignDialog->updateDialog();
 }
