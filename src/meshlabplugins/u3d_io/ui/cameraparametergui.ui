@@ -1,0 +1,199 @@
+<ui version="4.0" >
+ <class>CameraparameterguiClass</class>
+ <widget class="QFrame" name="CameraparameterguiClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>643</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Cameraparametergui</string>
+  </property>
+  <widget class="QGroupBox" name="camera_box" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>211</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <property name="title" >
+    <string>Camera Parameters</string>
+   </property>
+   <widget class="QGroupBox" name="vet_dir" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>191</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Vector From 3DModel to Camera</string>
+    </property>
+    <widget class="QLineEdit" name="vedt_x" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="vedt_y" >
+     <property name="geometry" >
+      <rect>
+       <x>70</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="vedt_z" >
+     <property name="geometry" >
+      <rect>
+       <x>130</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="mod_pos" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>160</y>
+      <width>191</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>3DModel Position</string>
+    </property>
+    <widget class="QLineEdit" name="medt_x" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="medt_y" >
+     <property name="geometry" >
+      <rect>
+       <x>70</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="medt_z" >
+     <property name="geometry" >
+      <rect>
+       <x>130</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLineEdit" name="fov_edt" >
+    <property name="geometry" >
+     <rect>
+      <x>70</x>
+      <y>30</y>
+      <width>51</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="inputMask" >
+     <string>999; </string>
+    </property>
+    <property name="text" >
+     <string>60</string>
+    </property>
+    <property name="alignment" >
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="fov_lab" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Fov angle:</string>
+    </property>
+   </widget>
+   <widget class="AngleEditWidget" name="roll_edt" >
+    <property name="geometry" >
+     <rect>
+      <x>70</x>
+      <y>60</y>
+      <width>51</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="roll_lab" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Roll angle:</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QFrame" name="opengl_ctx" >
+   <property name="geometry" >
+    <rect>
+     <x>239</x>
+     <y>19</y>
+     <width>391</width>
+     <height>271</height>
+    </rect>
+   </property>
+   <property name="frameShape" >
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow" >
+    <enum>QFrame::Plain</enum>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <customwidgets>
+  <customwidget>
+   <class>AngleEditWidget</class>
+   <extends>QLineEdit</extends>
+   <header>angleeditwidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

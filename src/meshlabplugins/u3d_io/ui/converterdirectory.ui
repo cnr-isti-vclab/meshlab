@@ -1,0 +1,42 @@
+<ui version="4.0" >
+ <class>ConverterDirectoryClass</class>
+ <widget class="QFrame" name="ConverterDirectoryClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>ConverterDirectory</string>
+  </property>
+  <widget class="QLineEdit" name="file_loc" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>291</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="browse_button" >
+   <property name="geometry" >
+    <rect>
+     <x>320</x>
+     <y>20</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Browse</string>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <resources/>
+ <connections/>
+</ui>

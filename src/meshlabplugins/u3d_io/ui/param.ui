@@ -1,0 +1,115 @@
+<ui version="4.0" >
+ <class>ParamClass</class>
+ <widget class="QDialog" name="ParamClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>738</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Param</string>
+  </property>
+  <widget class="QTreeWidget" name="tree_selector" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>161</width>
+     <height>301</height>
+    </rect>
+   </property>
+   <column>
+    <property name="text" >
+     <string>U3D Converter</string>
+    </property>
+   </column>
+   <item>
+    <property name="text" >
+     <string>Converter Directory</string>
+    </property>
+   </item>
+   <item>
+    <property name="text" >
+     <string>Latex</string>
+    </property>
+    <item>
+     <property name="text" >
+      <string>Camera Parameters</string>
+     </property>
+    </item>
+   </item>
+  </widget>
+  <widget class="FrameContainer" name="frame_container" >
+   <property name="geometry" >
+    <rect>
+     <x>180</x>
+     <y>10</y>
+     <width>531</width>
+     <height>301</height>
+    </rect>
+   </property>
+   <property name="frameShape" >
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow" >
+    <enum>QFrame::Plain</enum>
+   </property>
+  </widget>
+  <widget class="QFrame" name="button_container" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>330</y>
+     <width>701</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="frameShape" >
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow" >
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QPushButton" name="ok_button" >
+    <property name="geometry" >
+     <rect>
+      <x>510</x>
+      <y>10</y>
+      <width>77</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Ok</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="cancel_button" >
+    <property name="geometry" >
+     <rect>
+      <x>600</x>
+      <y>10</y>
+      <width>77</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Cancel</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <customwidgets>
+  <customwidget>
+   <class>FrameContainer</class>
+   <extends>QFrame</extends>
+   <header>framecontainer.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

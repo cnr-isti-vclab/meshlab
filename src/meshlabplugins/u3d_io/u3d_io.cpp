@@ -11,6 +11,7 @@
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/export_u3d.h>
+#include "param.h"
 
 
 #include <QMessageBox>
@@ -27,13 +28,18 @@ bool U3DIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m
 	string filename = QFile::encodeName(fileName).constData ();
   //std::string filename = fileName.toUtf8().data();
 	std::string ex = formatName.toUtf8().data();
+
+	Param* pw = new Param();
+	pw->show();
+	vcg::tri::io::ExporterU3D<CMeshO>::Movie15Parameters mp;
+
 	int result;
 	
-	result = vcg::tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),mask,"../../../../code/lib/U3D/Bin/Win32/Release/");
+	result = vcg::tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),"D:\\code\\lib\\U3D\\Bin\\Win32\\Release\\",mp,mask);
 
 	if(result!=0)
 	{
-		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(result)));
 		return false;
 	}
 	return true;
