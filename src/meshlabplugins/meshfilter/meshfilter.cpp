@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.102  2007/11/21 09:48:03  cignoni
+better help and color clustering
+
 Revision 1.101  2007/11/05 23:44:23  cignoni
 Added tex simplification check, selection to paso doble and better comments
 
@@ -264,7 +267,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
 		  parlst.addInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces");
-		  parlst.addFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.\nThe value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
+		  parlst.addFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
 		  parlst.addBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries");
 		  parlst.addBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface");
 		  parlst.addBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices. ");
@@ -277,9 +280,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  break;
 		case FP_CLOSE_HOLES:
 		  parlst.addInt ("MaxHoleSize",(int)30,"Max size to be closed ","The size is expressed as number of edges composing the hole boundary");
-		  parlst.addBool("Selected",m.cm.sfn>0,"Close holes with selected faces");
-		  parlst.addBool("NewFaceSelected",true,"Select the newly created faces");
-		  parlst.addBool("SelfIntersection",true,"Prevent creation of selfIntersecting faces");
+		  parlst.addBool("Selected",m.cm.sfn>0,"Close holes with selected faces","Only the holes with at least one of the boundary faces selected are closed");
+		  parlst.addBool("NewFaceSelected",true,"Select the newly created faces","After closing a hole the faces that have been created are left selected. Any previous selection is lost. Useful for example for smoothing the newly created holes.");
+		  parlst.addBool("SelfIntersection",true,"Prevent creation of selfIntersecting faces","When closing an holes it tries to prevent the creation of faces that intersect faces adjacent to the boundary of the hole. It is an heuristic, non intersetcting hole filling can be NP-complete.");
 		  break;
 		case FP_LOOP_SS:
 		case FP_BUTTERFLY_SS: 
@@ -287,7 +290,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
 		  maxVal = m.cm.bbox.Diag();
-		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Threshold");
+		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Threshold", "the size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values.");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		  break;
 		case FP_TWO_STEP_SMOOTH:
@@ -464,11 +467,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  {
       bool selected  = par.getBool("Selected");	
       float threshold = par.getAbsPerc("Threshold");		
-      vcg::tri::Clustering<CMeshO, vcg::tri::AverageCell<CMeshO> > Grid;
-      Grid.Init(m.cm.bbox,100000,threshold);
-      Grid.Add(m.cm);
-      Grid.Extract(m.cm);
-	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+				vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > Grid;
+				Grid.Init(m.cm.bbox,100000,threshold);
+				Grid.Add(m.cm);
+				Grid.Extract(m.cm);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
 
