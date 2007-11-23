@@ -75,7 +75,9 @@ public:
 private:
 	void  initTextures          (GLenum colorFormat,
 	                             GLenum depthFormat);
-	bool  initContext           (QGLWidget &qWidget);
+	bool  initContext           (QGLWidget &qWidget,
+	                             GLenum colorFormat,
+								 GLenum depthFormat);
 
 	void  vertexCoordsToTexture (MeshModel &m);
 	void  vertexCoordsToArray   (MeshModel &m,
@@ -101,8 +103,6 @@ private:
 	                             GLuint &vs,
 	                             GLuint &fs,
 	                             GLuint &pr);
-
-	void writeTextureToFile     (char* filename, GLuint textureID, int textureSize, const int channels, GLenum format, GLenum type, bool scale);
 };
 
 #endif

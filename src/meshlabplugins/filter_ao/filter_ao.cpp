@@ -155,7 +155,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	QGLWidget qWidget;
 
 	//Creates a new RC, initializes everything (glew, textures, FBO..)
-	if (!initContext(qWidget))
+	if (!initContext(qWidget, GL_RGBA16F_ARB, GL_DEPTH_COMPONENT24))
 	{
 		Log(0,"Unable to create a new GL context");
 		return false;
@@ -177,6 +177,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);
 	meshBBox = m.cm.bbox;
 	m.glw.Update();
+	GLuint meshDL = glGenLists(1);
+	glNewList(meshDL,GL_COMPILE);
+		renderMesh(m);
+	glEndList();
 
 	//Generates the views to be used
 	GenNormal<float>::Uniform(numViews,posVect);
@@ -187,7 +191,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	if (useGPU)
 	{
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, fboDepthTest );
-
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glEnable(GL_BLEND);
@@ -202,7 +205,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		setCamera(*vi);
 
 		glColorMask(0, 0, 0, 0);
-		renderMesh(m);
+		glCallList(meshDL);
 		glColorMask(1, 1, 1, 1);
 		
 		if (useGPU)
@@ -210,7 +213,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		else
 			generateOcclusionSW(vp, vn, occlusion, m.cm.vn);
 		
-		if ( c%5 == 0 )
+		if (c%5 == 0)
 			cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
 		c++;
 	}
@@ -218,25 +221,25 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	if (useGPU)
 	{
 		applyOcclusionHW(m);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
 	}
 	else
 		applyOcclusionSW(m,occlusion);
 
 
-	Log(0,"Successfully calculated ambient occlusion after %i iterations",c );
+	Log(0,"Successfully calculated ambient occlusion after %i iterations", c);
 
 
 	/********** Clean up the mess ************/
-	if (GLEW_EXT_framebuffer_object)
+	if (useGPU)
 	{
+		glDisable(GL_BLEND);
+
 		glDetachObjectARB(fboDepthTest, resultBufferText);
 		glDetachObjectARB(fboDepthTest, depthBufferText);
 		glDeleteFramebuffersEXT(1, &fboDepthTest);
-	}
 
-	if (useGPU)
-	{
 		glDetachShader(shdrID, vs);
 		glDetachShader(shdrID, fs);
 		glDeleteShader(shdrID);
@@ -261,61 +264,6 @@ void AmbientOcclusionPlugin::renderMesh(MeshModel &m)
 	glPopMatrix();
 
 	glDisable( GL_POLYGON_OFFSET_FILL );
-}
-
-void AmbientOcclusionPlugin::writeTextureToFile(char* filename, GLuint textureID, int textureSize, const int channels, GLenum format, GLenum type, bool scale)
-{
-	GLfloat *data = new GLfloat[textureSize*channels];
-	unsigned char *pixels = new unsigned char[textureSize*channels];
-
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glGetTexImage(GL_TEXTURE_2D, 0, format, type, data);
-	
-	if (scale)
-	{
-		float *fmin = new float[channels];
-		float *fmax = new float[channels];
-		float *fscale = new float[channels];
-
-		for (int i=0; i<channels; ++i)
-		{
-			fmin[i] = 10.0f;
-			fmax[i] = -10.0f;
-		}
-
-		for (int i=0; i<textureSize; ++i)
-		{
-			for (int j=0; j<channels; ++j)
-			{
-				fmin[j] = std::min(fmin[j], data[i*channels+j]);
-				fmax[j] = std::max(fmax[j], data[i*channels+j]);
-			}
-		}
-		
-		for (int i=0; i<channels; ++i)
-			fscale[i] = 1.0f / (fmax[i] - fmin[i]);
-
-		for (int i=0; i<textureSize; ++i)
-			for (int j=0; j<channels; ++j)
-				data[i*channels+j] = (data[i*channels+j] - fmin[j]) * fscale[j];
-		
-		delete [] fmin;
-		delete [] fmax;
-		delete [] fscale;
-	}
-
-	for (int i=0; i<textureSize; ++i)
-		for (int j=0; j<channels; ++j)
-			pixels[i*channels+j] = (unsigned char)(data[i*channels+j] * 255.0f);
-
-	FILE *f;
-	
-	f=fopen(filename, "wb");
-	fwrite(pixels, sizeof(unsigned char), textureSize*channels, f);
-	fclose(f);
-
-	delete [] pixels;
-	delete [] data;
 }
 
 void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat)
@@ -388,7 +336,7 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget)
+bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, GLenum colorFormat, GLenum depthFormat)
 {
 	QGLFormat qFormat = QGLFormat::defaultFormat();
 	qFormat.setAlpha(true);
@@ -412,24 +360,33 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget)
 		return false;
 	}
 
-	if (useGPU && !(GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader))
+	//*******CHECK THAT EVERYTHING IS SUPPORTED**********/
+	if (useGPU)
 	{
-		useGPU = false;
-		Log(0, "Shaders are not supported, using Software mode");
-		return false;
+		if ( !GLEW_ARB_vertex_shader || !GLEW_ARB_fragment_shader )
+		{
+			useGPU = false;
+			Log(0, "Shaders are not supported, using Software mode");
+		}
+		if ( !GLEW_EXT_framebuffer_object )
+		{
+			useGPU = false;
+			Log(0, "Framebuffer Objects are not supported, using Software mode");
+		}
 	}
 
-	//*******LOADS AMBIENT OCCLUSION SHADER*********/
+	//GL_RGBA32F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
+	initTextures(colorFormat, depthFormat);
+
+	
 	if (useGPU)
+	{
+		//*******LOAD SHADER*******/
 		set_shaders("ambient_occlusion",vs,fs,shdrID);
 
-	//GL_RGBA32F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
-	initTextures(GL_RGBA8, GL_DEPTH_COMPONENT24);
 
-	//*******INIT FBO*********/
-	if (GLEW_EXT_framebuffer_object)
-	{
-		fboDepthTest = 10;
+		//*******INIT FBO*********/
+		fboDepthTest = -1;
 		glGenFramebuffersEXT ( 1, &fboDepthTest);
 		glBindFramebufferEXT ( GL_FRAMEBUFFER_EXT, fboDepthTest);
 		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, resultBufferText, 0);
@@ -465,11 +422,6 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget)
 		}
 		
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0);
-	}
-	else
-	{
-		Log(0,"Error: Framebuffers are not supported");
-		return false;
 	}
 
 	glViewport(0.0, 0.0, textSize, textSize);
@@ -553,10 +505,47 @@ void AmbientOcclusionPlugin::setCamera(Point3f camDir)
 
 void AmbientOcclusionPlugin::generateOcclusionHW(void)
 {
-	GLfloat *mvMatrix_f = new GLfloat[16];
-	GLfloat *prMatrix_f = new GLfloat[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, mvMatrix_f);
-	glGetFloatv(GL_PROJECTION_MATRIX, prMatrix_f);
+	GLfloat *mv_pr_Matrix_f = new GLfloat[16];
+	
+	glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
+	glMatrixMode(GL_PROJECTION);
+	glMultMatrixf(mv_pr_Matrix_f);
+	glGetFloatv(GL_PROJECTION_MATRIX, mv_pr_Matrix_f);
+/*
+	**************************************
+	*** Copying manually data from the ***
+	*** depth texture into a new RGBA  ***
+	*** one, just works.. grr..        ***
+	**************************************
+
+	GLfloat *data = new GLfloat[textArea];
+	GLfloat *dataRGBA = new GLfloat[textArea*4];
+	glBindTexture(GL_TEXTURE_2D, depthBufferText);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, data);
+
+	for (int i=0; i<textArea; ++i)
+	{
+		dataRGBA[i*4+0] = data[i];
+		dataRGBA[i*4+1] = data[i];
+		dataRGBA[i*4+2] = data[i];
+		dataRGBA[i*4+3] = 1.0;
+	}
+
+	GLuint depthRGBA;
+	glGenTextures(1, &depthRGBA);
+	glBindTexture(GL_TEXTURE_2D, depthRGBA);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, 
+		textSize, textSize, 0, GL_RGBA, GL_FLOAT, dataRGBA);
+
+	delete [] data;
+	delete [] dataRGBA;
+/**/
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -567,29 +556,26 @@ void AmbientOcclusionPlugin::generateOcclusionHW(void)
 
 	glUseProgram(shdrID);
 
-	//Vertex position texture
+	//Depthmap
 	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, depthBufferText);
+	glUniform1i(glGetUniformLocation(shdrID, "dTexture"), 0);
+
+	//Vertex position texture
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, vertexCoordText);
-	glUniform1i(glGetUniformLocation(shdrID, "vTexture"), 0);
+	glUniform1i(glGetUniformLocation(shdrID, "vTexture"), 1);
 
 	//Normal direction texture
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, vertexNrmlsText);
-	glUniform1i(glGetUniformLocation(shdrID, "nTexture"), 1);
-
-	//Depthmap
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, depthBufferText);
-	glUniform1i(glGetUniformLocation(shdrID, "dTexture"), 2);
+	glBindTexture(GL_TEXTURE_2D, vertexNrmlsText);
+	glUniform1i(glGetUniformLocation(shdrID, "nTexture"), 2);
 
 	//View Direction
 	glUniform3f(glGetUniformLocation(shdrID, "viewDirection"), cameraDir.X(), cameraDir.Y(), cameraDir.Z());
 
-	//ModelView Matrix
-	glUniformMatrix4fv(glGetUniformLocation(shdrID, "mvMatrix"), 1, GL_FALSE, (const GLfloat*)mvMatrix_f);
-
-	//Projection Matrix
-	glUniformMatrix4fv(glGetUniformLocation(shdrID, "prMatrix"), 1, GL_FALSE, (const GLfloat*)prMatrix_f);
+	//ModelView-Projection Matrix
+	glUniformMatrix4fv(glGetUniformLocation(shdrID, "mvprMatrix"), 1, GL_FALSE, (const GLfloat*)mv_pr_Matrix_f);
 
 	//Texture Size
 	glUniform1i(glGetUniformLocation(shdrID, "texSize"), textSize);
@@ -598,6 +584,7 @@ void AmbientOcclusionPlugin::generateOcclusionHW(void)
 	//want a mesh-shaped hole in the middle of the S.A.Q. :)
 	glClear(GL_DEPTH_BUFFER_BIT);
 
+	//glDisable(GL_DEPTH_TEST);
 	//Screen aligned Quad
 	glBegin(GL_QUADS);
 		glVertex3f(-1.0f, -1.0f, 0.0f); //L-L
@@ -605,11 +592,11 @@ void AmbientOcclusionPlugin::generateOcclusionHW(void)
 		glVertex3f( 1.0f,  1.0f, 0.0f); //U-R
 		glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
 	glEnd();
+	//glEnable(GL_DEPTH_TEST);
 
 	glUseProgram(0);
 
-	delete [] mvMatrix_f;
-	delete [] prMatrix_f;
+	delete [] mv_pr_Matrix_f;
 }
 
 void AmbientOcclusionPlugin::generateOcclusionSW(Point3f *vp, Point3f *vn, GLfloat *occlusion, GLuint numVert)
@@ -640,7 +627,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(Point3f *vp, Point3f *vn, GLflo
 				   &resCoords[0], &resCoords[1], &resCoords[2] );
 
 		int x = floor(resCoords[0]);
-		int y = floor(resCoords[1]);
+		int y = floor(resCoords[1]);			
 		
 		if ( resCoords[2] <= (GLdouble)dFloat[textSize*y+x] )
 		{
@@ -658,21 +645,11 @@ void AmbientOcclusionPlugin::generateOcclusionSW(Point3f *vp, Point3f *vn, GLflo
 }
 void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 {
-	const float k = AMBOCC_HV / (numViews);
+	const float k = (AMBOCC_HV / numViews);
 
-	GLdouble *result = new GLdouble[textArea*4];
+	GLfloat *result = new GLfloat[textArea*4];
 	glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 	glReadPixels(0, 0, textSize, textSize, GL_RGBA, GL_FLOAT, result);
-	
-	/*
-	float fmin = 100.0, fmax = -100.0, fscale = 0.0;
-	for (int i=0; i<m.cm.vn; ++i)
-	{
-		fmin = std::min(fmin, (float)(result[i*4+0]));
-		fmax = std::max(fmax, (float)(result[i*4+0]));
-	}
-	fscale = 1.0f / (fmax - fmin);
-	/**/
 
 	for (int i = 0; i < m.cm.vn; i++)
 	{
@@ -688,16 +665,6 @@ void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 void AmbientOcclusionPlugin::applyOcclusionSW(MeshModel &m, GLfloat *aoValues)
 {
 	const float k = AMBOCC_HV / (numViews);
-
-	/*
-	float fmin = 100.0, fmax = -100.0, fscale = 0.0;
-	for (int i=0; i<m.cm.vn; ++i)
-	{
-		fmin = std::min(fmin, (float)(aoValues[i]));
-		fmax = std::max(fmax, (float)(aoValues[i]));
-	}
-	fscale = 1.0f / (fmax - fmin);
-	*/
 
 	for (int i = 0; i < m.cm.vn; i++)
 	{
