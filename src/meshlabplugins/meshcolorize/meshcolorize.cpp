@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.39  2007/11/23 15:35:19  cignoni
+disambiguated sqrt call
+
 Revision 1.38  2007/11/20 18:26:52  ponchio
 Added triangle quality with possibiliti to cohose metric.
 
@@ -345,7 +348,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			int metric = par.getEnum("Metric");
 			if(metric == 0) { //area / max edge
 				float min = 0;
-				float max = sqrt(3)/2;
+				float max = sqrt(3.0)/2.0;
 				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
 					CFaceO &f = m.cm.face[i];
 					f.C().ColorRamp(min, max, Quality(f.P(0), f.P(1), f.P(2)));
