@@ -256,7 +256,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 void AmbientOcclusionPlugin::renderMesh(MeshModel &m)
 {
 	glEnable( GL_POLYGON_OFFSET_FILL );
-	glPolygonOffset( 1.0, 1.0 );
+	if (useGPU)
+		glPolygonOffset( 1.1, 4.0 );
+	else
+		glPolygonOffset( 1.0, 1.0 );
 
 	glPushMatrix();
 		glMultMatrix(m.cm.Tr);
