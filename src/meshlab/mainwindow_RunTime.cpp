@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.140  2007/11/25 09:48:38  cignoni
+Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
+
 Revision 1.139  2007/11/20 12:00:24  cignoni
 added setcurrent slot
 
@@ -180,6 +183,11 @@ void MainWindow::updateStdDialog()
 {
 	if(stddialog==0) return;
 	if(stddialog->isHidden()) return;
+	if(GLA()==0) 
+	{
+		stddialog->close();
+		return;
+	}
 	if(stddialog->curModel != GLA()->mm()) stddialog->close();
 }
 
@@ -868,9 +876,10 @@ bool MainWindow::saveAs()
 		}
 		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 		
-		int capability = pCurrentIOPlugin->GetExportMaskCapability(extension);
+		int capability=0,defaultBits=0;
+		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
 		
-		int mask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(this->GLA()->mm(), capability);
+		int mask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(this->GLA()->mm(), capability,defaultBits);
 		if(mask == -1) 
 			return false;
 		qb->show();

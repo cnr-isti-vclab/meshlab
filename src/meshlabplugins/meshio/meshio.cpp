@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.96  2007/11/25 09:48:39  cignoni
+ Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
+
  Revision 1.95  2007/10/17 21:24:36  cignoni
  corrected orthographic error in report string
 
@@ -266,13 +269,13 @@ QList<MeshIOInterface::Format> ExtraMeshIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-int ExtraMeshIOPlugin::GetExportMaskCapability(QString &format) const
+void ExtraMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
-	if(format.toUpper() == tr("OBJ")){return vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("OFF")){return vcg::tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("3DS")){return vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
-	if(format.toUpper() == tr("WRL")){return vcg::tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
-	return 0;
+	if(format.toUpper() == tr("OBJ")){capability=defaultBits= vcg::tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("OFF")){capability=defaultBits= vcg::tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("3DS")){capability=defaultBits= vcg::tri::io::Exporter3DS<CMeshO>::GetExportMaskCapability();}
+	if(format.toUpper() == tr("WRL")){capability=defaultBits= vcg::tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
+	return;
 }
 
 const PluginInfo &ExtraMeshIOPlugin::Info()

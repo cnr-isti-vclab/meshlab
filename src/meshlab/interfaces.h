@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.62  2007/11/25 09:48:39  cignoni
+Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
+
 Revision 1.61  2007/10/09 13:02:08  fuscof
 Initial implementation of multipass rendering.
 Please note that MeshRenderInterface has been modified to get the number of rendering passes.
@@ -125,7 +128,7 @@ public:
 	
 	virtual QList<Format> importFormats() const = 0;
 	virtual QList<Format> exportFormats() const = 0;
-	virtual int GetExportMaskCapability(QString &format) const = 0;
+	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
     
   virtual bool open(
       const QString &format, // the extension of the format e.g. "PLY"

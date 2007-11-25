@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2007/11/25 09:48:39  cignoni
+ Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
+
  Revision 1.3  2006/11/29 00:59:16  cignoni
  Cleaned plugins interface; changed useless help class into a plain string
 
@@ -57,7 +60,7 @@ class ColladaIOPlugin : public QObject, public MeshIOInterface
   QList<Format> exportFormats() const;
 
 	const PluginInfo &Info();
-	int GetExportMaskCapability(QString &format) const;
+	void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
 	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, QString &fileName, MeshModel &m, const int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);

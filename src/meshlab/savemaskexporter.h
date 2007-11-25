@@ -25,6 +25,9 @@
   History
 
  $Log$
+ Revision 1.4  2007/11/25 09:48:39  cignoni
+ Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
+
  Revision 1.3  2007/03/26 08:25:10  zifnab1974
  added eol at the end of the files
 
@@ -62,12 +65,21 @@
 
 #include "meshmodel.h"
 #include "ui_savemaskexporter.h"
+//
+// Each file format exposes:
+//  a capability bit vector with all the things that it can save (the bits are the one indicated in the IOM_XXX bit mask) ; 
+//  a default bit vector that indicate what things are saved by defaults (eg. by default normals and flags are not saved in ply)
+//  a vector of optional parameters (like for example a bool for ascii/binary, a bool for choosing what  
+// This dialog allow to select what things actually save. 
+// 
+// 
+// 
 
 class SaveMaskExporterDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability);
+	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits);
 	
 	void InitDialog();
 	void SetTextureName();
@@ -88,6 +100,7 @@ private:
 	int mask;
 	int type;
 	int capability;
+	int defaultBits;
 };//end class
 
 namespace vcg {
@@ -98,9 +111,9 @@ namespace io {
 	{
 	public:	
 
-		inline static int GetMaskToExporter(MeshModel *m,int capability)
+		inline static int GetMaskToExporter(MeshModel *m, int capability, int defaultBit)
 		{
-			SaveMaskExporterDialog dialog(new QWidget(),m,capability);
+			SaveMaskExporterDialog dialog(new QWidget(),m,capability,defaultBit);
 			dialog.exec();
 			int newmask = dialog.GetNewMask();
 			dialog.close();
