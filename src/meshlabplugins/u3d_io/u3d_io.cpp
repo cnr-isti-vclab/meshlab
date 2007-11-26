@@ -30,7 +30,7 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 	std::string ex = formatName.toUtf8().data();
 
 	Param* pw = new Param();
-	pw->show();
+	pw->exec();
 	vcg::tri::io::ExporterU3D<CMeshO>::Movie15Parameters mp;
 
 	int result;
@@ -73,6 +73,7 @@ void U3DIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 	if(format.toUpper() == tr("U3D"))
 	{
 		capability=defaultBits = vcg::tri::io::ExporterU3D<CMeshO>::GetExportMaskCapability();
+		return;
 	}
 	assert(0);
 }
