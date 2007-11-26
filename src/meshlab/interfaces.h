@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.63  2007/11/26 07:35:26  cignoni
+Yet another small cosmetic change to the interface of the io filters.
+
 Revision 1.62  2007/11/25 09:48:39  cignoni
 Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
 
@@ -112,6 +115,11 @@ public:
   QString Author;
 };
 
+
+// The basic interface for opening and saving a mesh.
+// The plugins for opening and saving different mesh types must be derived from this class.
+//
+
 class MeshIOInterface
 {
 public:
@@ -128,23 +136,24 @@ public:
 	
 	virtual QList<Format> importFormats() const = 0;
 	virtual QList<Format> exportFormats() const = 0;
+	
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
     
   virtual bool open(
       const QString &format, // the extension of the format e.g. "PLY"
-			QString &fileName,
-      MeshModel &m, 
-      int &mask,             // what kind of data are found in the file (per vertex color, texture coords etc)
+			const QString &fileName,     // The name of the file to be opened
+      MeshModel &m,          // The mesh that is filled with the file content 
+      int &mask,             // a bit mask reporting what kind of data we have found in the file (per vertex color, texture coords etc)
       vcg::CallBackPos *cb=0,
       QWidget *parent=0)=0;
     
   virtual bool save(
       const QString &format, // the extension of the format e.g. "PLY"
-			QString &fileName,
+			const QString &fileName,
       MeshModel &m, 
-      const int &mask,       // what kind of data are saved
+      const int mask,       // a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
       vcg::CallBackPos *cb=0,
-      QWidget *parent= 0)=0 ; // prima istanza il dialogo di opzioni viene sempre.
+      QWidget *parent= 0)=0 ; 
 };
 
 /* this is used to callback the executeFilter() function

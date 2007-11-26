@@ -44,10 +44,10 @@ public:
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
 	virtual const PluginInfo &Info();
-	int GetExportMaskCapability(QString &format) const;
+	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
-	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent);
+	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent);
 };
 
 #endif

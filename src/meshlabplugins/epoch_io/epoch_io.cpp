@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.19  2007/11/26 07:35:26  cignoni
+ Yet another small cosmetic change to the interface of the io filters.
+
  Revision 1.18  2007/10/12 10:09:29  corsini
  signed/unsigned warning removed
 
@@ -540,7 +543,7 @@ EpochIO::EpochIO()
     delete epochDialog;
   }
 
-bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
   EpochReconstruction er;
 	
@@ -735,7 +738,7 @@ bool EpochIO::open(const QString &formatName, QString &fileName, MeshModel &m, i
 }
 
 
-bool EpochIO::save(const QString &/*formatName*/,QString &/*fileName*/, MeshModel &/*m*/, const int &/*mask*/, vcg::CallBackPos * /*cb*/, QWidget *parent)
+bool EpochIO::save(const QString &/*formatName*/,const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
 	QMessageBox::warning(parent, "Unknow type", "file's extension not supported!!!");
 	return false;

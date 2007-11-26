@@ -17,12 +17,12 @@
 #include <QMessageBox>
 using namespace vcg;
 
-bool U3DIOPlugin::open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool U3DIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
 	return false;
 }
 
-bool U3DIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
+bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
@@ -68,10 +68,13 @@ QList<MeshIOInterface::Format> U3DIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-int U3DIOPlugin::GetExportMaskCapability(QString &format) const
+void U3DIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
-	if(format.toUpper() == tr("U3D")){return vcg::tri::io::ExporterU3D<CMeshO>::GetExportMaskCapability();}
-	return 0;
+	if(format.toUpper() == tr("U3D"))
+	{
+		capability=defaultBits = vcg::tri::io::ExporterU3D<CMeshO>::GetExportMaskCapability();
+	}
+	assert(0);
 }
 
 const PluginInfo &U3DIOPlugin::Info()

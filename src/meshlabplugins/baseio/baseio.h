@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2007/11/26 07:35:25  cignoni
+ Yet another small cosmetic change to the interface of the io filters.
+
  Revision 1.2  2007/11/25 09:48:38  cignoni
  Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
 
@@ -51,8 +54,8 @@ public:
 	const PluginInfo &Info();
 	void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
-	bool open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, QString &fileName, MeshModel &m, const int& mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
+	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);
 };
 
 #endif

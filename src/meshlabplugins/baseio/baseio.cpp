@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.10  2007/11/26 07:35:25  cignoni
+ Yet another small cosmetic change to the interface of the io filters.
+
  Revision 1.9  2007/11/25 09:48:38  cignoni
  Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
 
@@ -70,7 +73,7 @@
 
 using namespace vcg;
 
-bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
 	// initializing mask
   mask = 0;
@@ -136,7 +139,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, QString &fileName, MeshMo
 	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
+bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
   string filename = QFile::encodeName(fileName).constData ();

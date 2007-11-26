@@ -38,21 +38,9 @@
 
 using namespace vcg;
 
-bool SampleIOPlugin::open(const QString &formatName, QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool SampleIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
-	if (fileName.isEmpty())
-	{
-		fileName = QFileDialog::getOpenFileName(parent,tr("Open File"),"../sample","Obj files (*.smf)");
-		if (fileName.isEmpty())
-			return false;
-
-		QFileInfo fi(fileName);
-		// this change of dir is needed for subsequent textures/materials loading
-		QDir::setCurrent(fi.absoluteDir().absolutePath());
-	}
-	string filename = fileName.toUtf8().data();
-	const char *filenm = filename.c_str();
-	int result = vcg::tri::io::ImporterSMF<CMeshO>::Open(m.cm, filenm);
+	int result = vcg::tri::io::ImporterSMF<CMeshO>::Open(m.cm, qPrintable(fileName));
 	if (result != vcg::tri::io::ImporterSMF<CMeshO>::E_NOERROR)
 	{
 		return false;
@@ -60,14 +48,11 @@ bool SampleIOPlugin::open(const QString &formatName, QString &fileName, MeshMode
 	return true;
 }
 
-bool SampleIOPlugin::save(const QString &formatName,QString &fileName, MeshModel &m, const int &mask, vcg::CallBackPos *cb, QWidget *parent)
+bool SampleIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-	string filename = fileName.toUtf8().data();
-	
-	const char* filenm = filename.c_str();
-	
-	int result = vcg::tri::io::ExporterSMF<CMeshO>::Save(m.cm,filenm,mask);
+
+	int result = vcg::tri::io::ExporterSMF<CMeshO>::Save(m.cm,qPrintable(fileName),mask);
 	if(result!=0)
 	{
 		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
@@ -93,7 +78,6 @@ QList<MeshIOInterface::Format> SampleIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("Simple Model Format"	,tr("SMF"));
-	
 	return formatList;
 }
 
@@ -101,9 +85,10 @@ QList<MeshIOInterface::Format> SampleIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-int SampleIOPlugin::GetExportMaskCapability(QString &format) const
+void SampleIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
-	return 0;
+  capability=defaultBits=0;
+	return;
 }
 
 const PluginInfo &SampleIOPlugin::Info()
