@@ -160,7 +160,7 @@ Matrix44f		FilterParameterSet::getMatrix44(QString name)
 
     assert(p.fieldType==FilterParameter::PARMATRIX);
 		assert(p.fieldVal.type()==QVariant::List);
-   
+
     Matrix44f matrix;
     QList<QVariant> matrixVals = p.fieldVal.toList();
     assert(matrixVals.size()==16);

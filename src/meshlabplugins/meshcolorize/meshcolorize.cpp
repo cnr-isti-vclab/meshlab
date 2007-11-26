@@ -23,8 +23,8 @@
 /****************************************************************************
   History
 $Log$
-Revision 1.39  2007/11/23 15:35:19  cignoni
-disambiguated sqrt call
+Revision 1.40  2007/11/26 13:33:30  ponchio
+Added Mean Ratio metric for triangle quality.
 
 Revision 1.38  2007/11/20 18:26:52  ponchio
 Added triangle quality with possibiliti to cohose metric.
@@ -307,6 +307,7 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, FilterPa
 			QStringList metrics;
 			metrics.push_back("area/max side");
 			metrics.push_back("inradius/circumradius");
+			metrics.push_back("mean ratio");
 			par.addEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality."));
 			break;
 		}
@@ -345,21 +346,30 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
     }  
   case CP_TRIANGLE_QUALITY:
     {
+			float min = 0;
+			float max = 1.0;
 			int metric = par.getEnum("Metric");
-			if(metric == 0) { //area / max edge
-				float min = 0;
-				float max = sqrt(3.0)/2.0;
+			switch(metric){ 
+			case 0: { //area / max edge
+				max = sqrt(3)/2;
 				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
 					CFaceO &f = m.cm.face[i];
 					f.C().ColorRamp(min, max, Quality(f.P(0), f.P(1), f.P(2)));
 				}
-			} else { //inradius / circumradius
-				float min = 0;
-				float max = 0.5;
+			} break;
+			case 1: { //inradius / circumradius
 				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
 					CFaceO &f = m.cm.face[i];
 					f.C().ColorRamp(min, max, QualityRadii(f.P(0), f.P(1), f.P(2)));
 				}
+			} break;
+			case 2: { //mean ratio
+				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
+					CFaceO &f = m.cm.face[i];
+					f.C().ColorRamp(min, max, QualityMeanRatio(f.P(0), f.P(1), f.P(2)));
+				}
+			} break;
+			default: assert(0);
 			} 
 		break;
     }
