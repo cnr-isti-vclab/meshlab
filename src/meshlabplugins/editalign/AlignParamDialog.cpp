@@ -1,5 +1,5 @@
 #include "AlignParamDialog.h"
-#include "stdpardialog.h"
+#include <meshlab/stdpardialog.h>
 
 
 AlignParamDialog::AlignParamDialog(QWidget *p, FilterParameterSet *_curParSet) :QDialog(p)
