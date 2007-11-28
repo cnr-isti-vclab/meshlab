@@ -20,19 +20,20 @@ INCLUDEPATH += ../../../../code/lib/lib3ds-1.3.0
 
 win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
 win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
-win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.2.0/lib3ds/lib3ds.a
+win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds/lib3ds.a
 
 CONFIG		+= debug_and_release
 # mac:CONFIG += x86 ppc
 
-unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
+# unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
 
 unix{
 	CONFIG		+= warn_off debug_and_release
 #LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
 }
 
-mac:LIBS +=  -L../../../../code/lib/lib3ds-1.3.0/ -l3ds 
+# mac:LIBS +=  -L../../../../code/lib/lib3ds-1.3.0/ -l3ds 
+mac:LIBS += ../../../../code/lib/lib3ds-1.3.0/lib3ds/lib3ds.a
 
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {
