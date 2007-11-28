@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.6  2007/11/28 10:28:39  cignoni
+ switched to lib3ds v1.3.0 stable.
+
  Revision 1.5  2006/02/09 17:20:38  buzzelli
  cleaning some comments
 
@@ -200,11 +203,19 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 				Lib3dsObjectData *d;
 				d=&node->data.object;
 
-				lib3ds_matrix_copy(translatedMatrix, mesh->matrix);
+				// Version for lib3ds-1.2.0
+				//lib3ds_matrix_copy(translatedMatrix, mesh->matrix);
+				//lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
+				//lib3ds_matrix_inv(inverseMatrix);
+				//lib3ds_matrix_translate_xyz(translatedMatrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
+				//lib3ds_matrix_mult(matrix, translatedMatrix, inverseMatrix);
+				
+				// Version for lib3ds-1.3.0
+				lib3ds_matrix_copy(matrix, mesh->matrix);
 				lib3ds_matrix_copy(inverseMatrix, mesh->matrix);
 				lib3ds_matrix_inv(inverseMatrix);
-				lib3ds_matrix_translate_xyz(translatedMatrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
-				lib3ds_matrix_mul(matrix, translatedMatrix, inverseMatrix);
+				lib3ds_matrix_translate_xyz(matrix, -d->pivot[0], -d->pivot[1], -d->pivot[2]);
+				lib3ds_matrix_mult(matrix, inverseMatrix);
 				
 
 				lib3ds_mesh_calculate_normals(mesh, normalL);
