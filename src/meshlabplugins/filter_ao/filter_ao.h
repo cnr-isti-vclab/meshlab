@@ -43,9 +43,9 @@ private:
 	Box3f   meshBBox;
 	GLuint  fboDepthTest,
 	        depthBufferText,
-			vertexCoordText,
+	        vertexCoordText,
 	        vertexNrmlsText,
-			resultBufferText;
+	        resultBufferText;
 	
 	unsigned int numViews,
 	             textSize,
@@ -77,12 +77,10 @@ private:
 	                             GLenum depthFormat);
 	bool  initContext           (QGLWidget &qWidget,
 	                             GLenum colorFormat,
-								 GLenum depthFormat);
+	                             GLenum depthFormat);
 
 	void  vertexCoordsToTexture (MeshModel &m);
-	void  vertexCoordsToArray   (MeshModel &m,
-	                             Point3f *vp,
-							     Point3f *vn);
+
 	void  renderMesh            (MeshModel &m);
 	void  setCamera             (Point3f camDir);
 
@@ -90,14 +88,12 @@ private:
 	void  stopRenderingToFBO    (void);
 
 	void  generateOcclusionHW   (void);
-	void  generateOcclusionSW   (Point3f *vp,
-	                             Point3f *vn,
-								 GLfloat *occlusion,
-								 GLuint numVert);
+	void  generateOcclusionSW   (MeshModel &m,
+	                             GLfloat *occlusion);
 
 	void  applyOcclusionHW      (MeshModel &m);
 	void  applyOcclusionSW      (MeshModel &m,
-								 GLfloat *aoValues);
+	                             GLfloat *aoValues);
 
 	void  set_shaders           (char *shaderName,
 	                             GLuint &vs,

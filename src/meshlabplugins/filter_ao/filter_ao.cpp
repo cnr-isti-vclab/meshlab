@@ -127,7 +127,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	textArea = textSize*textSize;
 	numViews = par.getInt("reqViews");
 
-	if ((unsigned int)m.cm.vn > textArea)
+	if ((useGPU) && ((unsigned int)m.cm.vn > textArea))
 	{
 		Log(0, "Too many vertices: up to %d are allowed", textArea);
 		return false;
@@ -150,8 +150,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	typedef std::vector<vcg::Point3f> vectP3f;
 	vectP3f::iterator vi;
 	vectP3f posVect;
-	Point3f *vp = new Point3f[m.cm.vn],
-	        *vn = new Point3f[m.cm.vn];
 	QGLWidget qWidget;
 
 	//Creates a new RC, initializes everything (glew, textures, FBO..)
@@ -161,16 +159,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		return false;
 	}
 
-	if(useGPU)
-		vertexCoordsToTexture( m );
-	else
-	{
-		//Yes, the loop down there is needed
-		for (int j=0; j<m.cm.vn; ++j)
-			occlusion[j] = 0.0f;
-
-		vertexCoordsToArray ( m, vp, vn );
-	}
 	
 	//Prepare mesh to be rendered
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
@@ -181,6 +169,15 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	glNewList(meshDL,GL_COMPILE);
 		renderMesh(m);
 	glEndList();
+
+	if(useGPU)
+		vertexCoordsToTexture( m );
+	else
+	{
+		//Yes, the loop down there is needed
+		for (int j=0; j<m.cm.vn; ++j)
+			occlusion[j] = 0.0f;
+	}
 
 	//Generates the views to be used
 	GenNormal<float>::Uniform(numViews,posVect);
@@ -211,7 +208,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		if (useGPU)
 			generateOcclusionHW();
 		else
-			generateOcclusionSW(vp, vn, occlusion, m.cm.vn);
+			generateOcclusionSW(m, occlusion);
 		
 		if (c%5 == 0)
 			cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
@@ -245,8 +242,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		glDeleteShader(shdrID);
 	}
 
-	delete [] vp;
-	delete [] vn;
 	delete [] occlusion;
 
 	qWidget.doneCurrent();
@@ -275,9 +270,9 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glEnable( GL_DEPTH_TEST );
 	glEnable( GL_TEXTURE_2D );
 
-	vertexCoordText = 20;
-	vertexNrmlsText = 30;
-	resultBufferText= 40;
+	vertexCoordText = 0;
+	vertexNrmlsText = 0;
+	resultBufferText= 0;
 
 	if (useGPU)
 	{
@@ -392,8 +387,8 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, GLenum colorFormat,
 		fboDepthTest = -1;
 		glGenFramebuffersEXT ( 1, &fboDepthTest);
 		glBindFramebufferEXT ( GL_FRAMEBUFFER_EXT, fboDepthTest);
-		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, resultBufferText, 0);
-		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBufferText, 0 );
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, resultBufferText, 0);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBufferText, 0 );
 
 		GLenum fboStatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 		if ( fboStatus != GL_FRAMEBUFFER_COMPLETE_EXT)
@@ -447,9 +442,11 @@ void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 		vertexPosition[i*4+3] = 1.0;
 
 		//Normal vector for each vertex
-		vertexNormals[i*4+0] = m.cm.vert[i].N().X();
-		vertexNormals[i*4+1] = m.cm.vert[i].N().Y();
-		vertexNormals[i*4+2] = m.cm.vert[i].N().Z();
+		vcg::Point3<CMeshO::ScalarType> n = m.cm.vert[i].N();
+		n.Normalize();
+		vertexNormals[i*4+0] = n.X();
+		vertexNormals[i*4+1] = n.Y();
+		vertexNormals[i*4+2] = n.Z();
 		vertexNormals[i*4+3] = 1.0;
 	}
 
@@ -465,26 +462,8 @@ void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 	glBindTexture(GL_TEXTURE_2D, vertexNrmlsText);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textSize, textSize, GL_RGBA, GL_FLOAT, vertexNormals);
 	delete [] vertexNormals;
-
-	glBindTexture(GL_TEXTURE_2D, NULL);
 }
 
-
-void AmbientOcclusionPlugin::vertexCoordsToArray(MeshModel &m, Point3f *vp, Point3f *vn)
-{
-	if (vp == NULL || vn == NULL)
-	{
-		Log(0, "Internal error: vertex and normal arrays are NULL");
-		return;
-	}
-
-	//Copies each vertex's position and normal in new vectors
-	for (int i=0; i < m.cm.vn; ++i)
-	{
-		vp[i] = m.cm.vert[i].P();
-		vn[i] = m.cm.vert[i].N();
-	}
-}
 void AmbientOcclusionPlugin::setCamera(Point3f camDir)
 {
 	cameraDir = camDir;
@@ -514,41 +493,6 @@ void AmbientOcclusionPlugin::generateOcclusionHW(void)
 	glMatrixMode(GL_PROJECTION);
 	glMultMatrixf(mv_pr_Matrix_f);
 	glGetFloatv(GL_PROJECTION_MATRIX, mv_pr_Matrix_f);
-/*
-	**************************************
-	*** Copying manually data from the ***
-	*** depth texture into a new RGBA  ***
-	*** one, just works.. grr..        ***
-	**************************************
-
-	GLfloat *data = new GLfloat[textArea];
-	GLfloat *dataRGBA = new GLfloat[textArea*4];
-	glBindTexture(GL_TEXTURE_2D, depthBufferText);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, data);
-
-	for (int i=0; i<textArea; ++i)
-	{
-		dataRGBA[i*4+0] = data[i];
-		dataRGBA[i*4+1] = data[i];
-		dataRGBA[i*4+2] = data[i];
-		dataRGBA[i*4+3] = 1.0;
-	}
-
-	GLuint depthRGBA;
-	glGenTextures(1, &depthRGBA);
-	glBindTexture(GL_TEXTURE_2D, depthRGBA);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, 
-		textSize, textSize, 0, GL_RGBA, GL_FLOAT, dataRGBA);
-
-	delete [] data;
-	delete [] dataRGBA;
-/**/
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -602,14 +546,8 @@ void AmbientOcclusionPlugin::generateOcclusionHW(void)
 	delete [] mv_pr_Matrix_f;
 }
 
-void AmbientOcclusionPlugin::generateOcclusionSW(Point3f *vp, Point3f *vn, GLfloat *occlusion, GLuint numVert)
+void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusion)
 {
-	if (vp == NULL || vn == NULL)
-	{
-		Log(0, "Internal error: vertex and normal arrays are NULL");
-		return;
-	}
-
 	GLdouble *resCoords  = new GLdouble[3];
 	GLdouble *mvMatrix_f = new GLdouble[16];
 	GLdouble *prMatrix_f = new GLdouble[16];
@@ -623,20 +561,24 @@ void AmbientOcclusionPlugin::generateOcclusionSW(Point3f *vp, Point3f *vn, GLflo
 	glReadBuffer(GL_DEPTH_ATTACHMENT_EXT);
 	glReadPixels(0, 0, textSize, textSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
-	for (unsigned int i=0; i<numVert; ++i)
+	Point3<CMeshO::ScalarType> vp;
+	Point3<CMeshO::ScalarType> vn;
+	for (unsigned int i=0; i<m.cm.vn; ++i)
 	{
-		gluProject( vp[i].X(), vp[i].Y(), vp[i].Z(),
+		vp = m.cm.vert[i].P();
+		gluProject(vp.X(), vp.Y(), vp.Z(),
 				   (const GLdouble *) mvMatrix_f, (const GLdouble *) prMatrix_f, (const GLint *) viewpSize,
 				   &resCoords[0], &resCoords[1], &resCoords[2] );
 
 		int x = floor(resCoords[0]);
-		int y = floor(resCoords[1]);			
+		int y = floor(resCoords[1]);
 		
 		if ( resCoords[2] <= (GLdouble)dFloat[textSize*y+x] )
 		{
-			vn[i].Normalize();
+			vn = m.cm.vert[i].N();
+			vn.Normalize();
 			cameraDir.Normalize();
-			occlusion[i] += max( vn[i]*cameraDir, 0.0f);
+			occlusion[i] += max(vn*cameraDir, 0.0f);
 		}
 	}
 
