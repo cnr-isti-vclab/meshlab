@@ -18,14 +18,8 @@ void main(void)
    vec4 P = project(texture2D(vTexture, floor(gl_FragCoord.xy) / float(texSize-1)));
    
    vec4 depthTest = shadow2DProj(dTexture, P);
-   if (depthTest.r >= 0.5)
-      R.r = max(dot(normalize(N).xyz, normalize(viewDirection)), 0.0);
-   
-   /*   
-   vec4 dTest = texture2D(dTexture, P.xy);
-   if (P.z <= dTest.r)
-      R.r = max(dot(normalize(N).xyz, normalize(viewDirection)), 0.0);
-   /**/
-   
+   if (depthTest.r > 0.5)
+      R.r = max(dot(N.xyz, viewDirection), 0.0);
+
    gl_FragColor = R;
 }
