@@ -58,7 +58,7 @@ public:
 	enum { FP_AMBIENT_OCCLUSION  } ;
 
 	AmbientOcclusionPlugin();
-   ~AmbientOcclusionPlugin();
+	~AmbientOcclusionPlugin();
 	
 	virtual const QString     filterName      (FilterIDType filter);
 	virtual const QString     filterInfo      (FilterIDType filter);
@@ -96,6 +96,8 @@ private:
 	                             GLuint &vs,
 	                             GLuint &fs,
 	                             GLuint &pr);
+
+	void dumpFloatTexture(QString filename, float *texdata);
 };
 
 #endif

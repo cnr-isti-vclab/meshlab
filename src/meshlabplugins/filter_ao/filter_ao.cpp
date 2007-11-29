@@ -165,10 +165,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 	meshBBox = m.cm.bbox;
 	m.glw.Update();
-	GLuint meshDL = glGenLists(1);
-	glNewList(meshDL,GL_COMPILE);
-		renderMesh(m);
-	glEndList();
 
 	if(useGPU)
 		vertexCoordsToTexture( m );
@@ -185,6 +181,8 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 
+	glEnable(GL_POLYGON_OFFSET_FILL);
+
 	if (useGPU)
 	{
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, fboDepthTest );
@@ -192,17 +190,21 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
+
+		glPolygonOffset(1.1, 4.0);
 	}
+	else
+		glPolygonOffset(1.0, 1.0);
 
 	int c=0;
 	for (vi = posVect.begin(); vi != posVect.end(); vi++)
 	{
-		glClear(GL_DEPTH_BUFFER_BIT );
+		glClear(GL_DEPTH_BUFFER_BIT);
 
 		setCamera(*vi);
 
 		glColorMask(0, 0, 0, 0);
-		glCallList(meshDL);
+		renderMesh(m);
 		glColorMask(1, 1, 1, 1);
 		
 		if (useGPU)
@@ -249,18 +251,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 }
 void AmbientOcclusionPlugin::renderMesh(MeshModel &m)
 {
-	glEnable( GL_POLYGON_OFFSET_FILL );
-	if (useGPU)
-		glPolygonOffset( 1.1, 4.0 );
-	else
-		glPolygonOffset( 1.0, 1.0 );
-
 	glPushMatrix();
 		glMultMatrix(m.cm.Tr);
 		m.glw.Draw(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMNone);
 	glPopMatrix();
-
-	glDisable( GL_POLYGON_OFFSET_FILL );
 }
 
 void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat)
@@ -483,6 +477,9 @@ void AmbientOcclusionPlugin::setCamera(Point3f camDir)
 }
 
 
+// for debug purposes
+static bool first = true;
+
 void AmbientOcclusionPlugin::generateOcclusionHW()
 {
 	GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
@@ -541,6 +538,18 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 	glEnd();
 
 	glUseProgram(0);
+
+	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> for debug purposes
+	if (first)
+	{
+		float *prova = new float[texArea*4];
+		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+		glReadPixels(0,0, texSize, texSize, GL_RGBA, GL_FLOAT, prova);
+		dumpFloatTexture("C:/temp/result.raw", prova);
+		delete [] prova;
+		first = true;
+	}
+	// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 }
 
 void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusion)
@@ -719,5 +728,13 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 	glLinkProgram(pr);
 }
 
+
+void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata)
+{
+	QFile f(filename);
+	f.open(QFile::WriteOnly);
+	f.write(reinterpret_cast<const char *>(texdata), texArea * sizeof(float));
+	f.close();
+}
 
 Q_EXPORT_PLUGIN(AmbientOcclusionPlugin)
