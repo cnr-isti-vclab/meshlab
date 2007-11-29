@@ -41,7 +41,8 @@ class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface
 private:
 	Point3f cameraDir;
 	Box3f   meshBBox;
-	GLuint  fboDepthTest,
+	GLuint  fboDepth,
+	        fboResult,
 	        depthBufferTex,
 	        vertexCoordTex,
 	        vertexNormalsTex,
@@ -79,6 +80,8 @@ private:
 	                             GLenum colorFormat,
 	                             GLenum depthFormat);
 
+	bool  checkFramebuffer();
+
 	void  vertexCoordsToTexture (MeshModel &m);
 
 	void  renderMesh            (MeshModel &m);
@@ -97,7 +100,7 @@ private:
 	                             GLuint &fs,
 	                             GLuint &pr);
 
-	void dumpFloatTexture(QString filename, float *texdata);
+	void dumpFloatTexture(QString filename, float *texdata, int elems);
 };
 
 #endif

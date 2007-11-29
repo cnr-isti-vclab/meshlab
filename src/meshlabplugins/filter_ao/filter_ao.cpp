@@ -181,36 +181,53 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 
-	glEnable(GL_POLYGON_OFFSET_FILL);
-
-	if (useGPU)
-	{
-		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, fboDepthTest );
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
-
-		glPolygonOffset(1.1, 4.0);
-	}
-	else
-		glPolygonOffset(1.0, 1.0);
-
 	int c=0;
 	for (vi = posVect.begin(); vi != posVect.end(); vi++)
 	{
-		glClear(GL_DEPTH_BUFFER_BIT);
-
 		setCamera(*vi);
 
-		glColorMask(0, 0, 0, 0);
-		renderMesh(m);
-		glColorMask(1, 1, 1, 1);
-		
 		if (useGPU)
+		{
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(2.0, 4.0);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+
+			// FIRST PASS - fill depth buffer
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboDepth);
+			glBindTexture(GL_TEXTURE_2D, depthBufferTex);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glColorMask(0, 0, 0, 0);
+			renderMesh(m);
+			glColorMask(1, 1, 1, 1);
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
+
+			// SECOND PASS - use depth buffer to check occlusion
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
 			generateOcclusionHW();
+			
+			glDisable(GL_POLYGON_OFFSET_FILL);
+		}
 		else
+		{
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(1.0f, 1.0f);
+
+			// FIRST PASS - fill depth buffer
+			glColorMask(0, 0, 0, 0);
+			renderMesh(m);
+			glColorMask(1, 1, 1, 1);
+
+			glDisable(GL_POLYGON_OFFSET_FILL);
+
+			// SECOND PASS - use depth buffer to check occlusion
 			generateOcclusionSW(m, occlusion);
+		}
 		
 		cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
 		c++;
@@ -234,9 +251,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	{
 		glDisable(GL_BLEND);
 
-		glDetachObjectARB(fboDepthTest, resultBufferTex);
-		glDetachObjectARB(fboDepthTest, depthBufferTex);
-		glDeleteFramebuffersEXT(1, &fboDepthTest);
+		glDetachObjectARB(fboDepth, depthBufferTex);
+		glDetachObjectARB(fboResult, resultBufferTex);
+		glDeleteFramebuffersEXT(1, &fboDepth);
+		glDeleteFramebuffersEXT(1, &fboResult);
 
 		glDetachShader(shdrID, vs);
 		glDetachShader(shdrID, fs);
@@ -377,45 +395,72 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, GLenum colorFormat,
 
 
 		//*******INIT FBO*********/
-		fboDepthTest = -1;
-		glGenFramebuffersEXT ( 1, &fboDepthTest);
-		glBindFramebufferEXT ( GL_FRAMEBUFFER_EXT, fboDepthTest);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, resultBufferTex, 0);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBufferTex, 0 );
 
-		GLenum fboStatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-		if ( fboStatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-		{
-			switch (fboStatus)
-			{
-				case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-					Log(0, "FBO Incomplete: Attachment");
-					break;
-				case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-					Log(0, "FBO Incomplete: Missing Attachment");
-					break;
-				case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-					Log(0, "FBO Incomplete: Dimensions");
-					break;
-				case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-					Log(0, "FBO Incomplete: Formats");
-					break;
-				case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-					Log(0, "FBO Incomplete: Draw Buffer");
-					break;
-				case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-					Log(0, "FBO Incomplete: Read Buffer");
-					break;
-				default:
-					Log(0, "Undefined FBO error");
-			}
+		// FBO for first pass (1 depth attachment)
+		fboDepth = 0;
+		glGenFramebuffersEXT(1, &fboDepth);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboDepth);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBufferTex, 0);
+
+		// only in this way it is possible to read back the depth texture correctly(!!)
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+
+		if (!checkFramebuffer())
 			return false;
-		}
 		
-		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+		// FBO for second pass (1 color attachment)
+		fboResult = 0;
+		glGenFramebuffersEXT(1, &fboResult);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, resultBufferTex, 0);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+		
+		if (!checkFramebuffer())
+			return false;
+		
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
 	glViewport(0.0, 0.0, texSize, texSize);
+
+	return true;
+}
+
+bool AmbientOcclusionPlugin::checkFramebuffer()
+{
+	GLenum fboStatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+
+	if ( fboStatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+	{
+		switch (fboStatus)
+		{
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
+			Log(0, "FBO Incomplete: Attachment");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
+			Log(0, "FBO Incomplete: Missing Attachment");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+			Log(0, "FBO Incomplete: Dimensions");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
+			Log(0, "FBO Incomplete: Formats");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
+			Log(0, "FBO Incomplete: Draw Buffer");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
+			Log(0, "FBO Incomplete: Read Buffer");
+			break;
+		default:
+			Log(0, "Undefined FBO error");
+		}
+
+		return false;
+	}
 
 	return true;
 }
@@ -477,16 +522,12 @@ void AmbientOcclusionPlugin::setCamera(Point3f camDir)
 }
 
 
-// for debug purposes
-static bool first = true;
-
 void AmbientOcclusionPlugin::generateOcclusionHW()
 {
 	GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
 	
 	glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
 	glMultMatrixf(mv_pr_Matrix_f);
 	glGetFloatv(GL_PROJECTION_MATRIX, mv_pr_Matrix_f);
 
@@ -495,7 +536,7 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 	glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();	
+	glLoadIdentity();
 
 	glUseProgram(shdrID);
 
@@ -538,18 +579,6 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 	glEnd();
 
 	glUseProgram(0);
-
-	// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> for debug purposes
-	if (first)
-	{
-		float *prova = new float[texArea*4];
-		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-		glReadPixels(0,0, texSize, texSize, GL_RGBA, GL_FLOAT, prova);
-		dumpFloatTexture("C:/temp/result.raw", prova);
-		delete [] prova;
-		first = true;
-	}
-	// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 }
 
 void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusion)
@@ -564,7 +593,6 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 	glGetDoublev(GL_PROJECTION_MATRIX, prMatrix_f);
 	glGetIntegerv(GL_VIEWPORT, viewpSize);
 
-	glReadBuffer(GL_DEPTH_ATTACHMENT_EXT);
 	glReadPixels(0, 0, texSize, texSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
 	cameraDir.Normalize();
@@ -729,11 +757,11 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 }
 
 
-void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata)
+void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata, int elems)
 {
 	QFile f(filename);
 	f.open(QFile::WriteOnly);
-	f.write(reinterpret_cast<const char *>(texdata), texArea * sizeof(float));
+	f.write(reinterpret_cast<const char *>(texdata), elems * sizeof(float));
 	f.close();
 }
 
