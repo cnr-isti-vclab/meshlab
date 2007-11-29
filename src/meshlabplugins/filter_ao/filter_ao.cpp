@@ -559,6 +559,8 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 	glReadBuffer(GL_DEPTH_ATTACHMENT_EXT);
 	glReadPixels(0, 0, textSize, textSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
+	cameraDir.Normalize();
+
 	Point3<CMeshO::ScalarType> vp;
 	Point3<CMeshO::ScalarType> vn;
 	for (unsigned int i=0; i<m.cm.vn; ++i)
@@ -574,7 +576,6 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 		if (resCoords[2] <= (GLdouble)dFloat[textSize*y+x])
 		{
 			vn = m.cm.vert[i].N();
-			cameraDir.Normalize();
 			occlusion[i] += max(vn*cameraDir, 0.0f);
 		}
 	}
