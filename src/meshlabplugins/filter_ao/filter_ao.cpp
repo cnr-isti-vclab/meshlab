@@ -162,7 +162,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	
 	//Prepare mesh to be rendered
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 	meshBBox = m.cm.bbox;
 	m.glw.Update();
 	GLuint meshDL = glGenLists(1);
@@ -210,8 +210,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		else
 			generateOcclusionSW(m, occlusion);
 		
-		if (c%5 == 0)
-			cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
+		cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
 		c++;
 	}
 
@@ -443,7 +442,6 @@ void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 
 		//Normal vector for each vertex
 		vcg::Point3<CMeshO::ScalarType> n = m.cm.vert[i].N();
-		n.Normalize();
 		vertexNormals[i*4+0] = n.X();
 		vertexNormals[i*4+1] = n.Y();
 		vertexNormals[i*4+2] = n.Z();
@@ -573,10 +571,9 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 		int x = floor(resCoords[0]);
 		int y = floor(resCoords[1]);
 		
-		if ( resCoords[2] <= (GLdouble)dFloat[textSize*y+x] )
+		if (resCoords[2] <= (GLdouble)dFloat[textSize*y+x])
 		{
 			vn = m.cm.vert[i].N();
-			vn.Normalize();
 			cameraDir.Normalize();
 			occlusion[i] += max(vn*cameraDir, 0.0f);
 		}
@@ -596,12 +593,27 @@ void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 	glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 	glReadPixels(0, 0, textSize, textSize, GL_RGBA, GL_FLOAT, result);
 
+	float maxvalue = 0.0f, minvalue = 100000.0f;
+	for (int i=0; i < m.cm.vn; i++)
+	{
+		if (result[i*4] < minvalue)
+			minvalue = result[i*4];
+
+		if (result[i*4] > maxvalue)
+			maxvalue = result[i*4];
+	}
+
+	QString text = QString("maxvalue=%1 minvalue=%2").arg(maxvalue).arg(minvalue);
+	Log(0, text.toStdString().c_str());
+
+	float scale = 255.0f / (maxvalue - minvalue);
+
 	for (int i = 0; i < m.cm.vn; i++)
 	{
-		m.cm.vert[i].Q() = result[i*4+0] * k;
-		m.cm.vert[i].C()[0] = m.cm.vert[i].Q() * 255.0f;
-		m.cm.vert[i].C()[1] = m.cm.vert[i].Q() * 255.0f;
-		m.cm.vert[i].C()[2] = m.cm.vert[i].Q() * 255.0f;
+		m.cm.vert[i].Q() = result[i*4+0];
+		m.cm.vert[i].C()[0] = (m.cm.vert[i].Q() - minvalue) * scale;
+		m.cm.vert[i].C()[1] = (m.cm.vert[i].Q() - minvalue) * scale;
+		m.cm.vert[i].C()[2] = (m.cm.vert[i].Q() - minvalue) * scale;
 	}
 
 	delete [] result;
@@ -611,12 +623,27 @@ void AmbientOcclusionPlugin::applyOcclusionSW(MeshModel &m, GLfloat *aoValues)
 {
 	const float k = AMBOCC_HV / (numViews);
 
+	float maxvalue = 0.0f, minvalue = 100000.0f;
+	for (int i=0; i < m.cm.vn; i++)
+	{
+		if (aoValues[i] < minvalue)
+			minvalue = aoValues[i];
+
+		if (aoValues[i] > maxvalue)
+			maxvalue = aoValues[i];
+	}
+
+	float scale = 255.0f / (maxvalue - minvalue);
+
+	QString text = QString("maxvalue=%1 minvalue=%2").arg(maxvalue).arg(minvalue);
+	Log(0, text.toStdString().c_str());
+
 	for (int i = 0; i < m.cm.vn; i++)
 	{
-		m.cm.vert[i].Q() = aoValues[i] * k;
-		m.cm.vert[i].C()[0] = m.cm.vert[i].Q() * 255.0f;
-		m.cm.vert[i].C()[1] = m.cm.vert[i].Q() * 255.0f;
-		m.cm.vert[i].C()[2] = m.cm.vert[i].Q() * 255.0f;
+		m.cm.vert[i].Q() = aoValues[i];
+		m.cm.vert[i].C()[0] = (m.cm.vert[i].Q() - minvalue) * scale;
+		m.cm.vert[i].C()[1] = (m.cm.vert[i].Q() - minvalue) * scale;
+		m.cm.vert[i].C()[2] = (m.cm.vert[i].Q() - minvalue) * scale;
 	}
 }
 
