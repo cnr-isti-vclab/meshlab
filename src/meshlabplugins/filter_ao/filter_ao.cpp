@@ -52,7 +52,7 @@
 
 #include <iostream>
 
-#define AMBOCC_DEFAULT_TEXT_SIZE 1024
+#define AMBOCC_DEFAULT_TEXTURE_SIZE 1024
 #define AMBOCC_DEFAULT_NUM_VIEWS 250
 #define AMBOCC_USEGPU_BY_DEFAULT false
 #define AMBOCC_HV 3.85f
@@ -68,8 +68,8 @@ AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 
 	useGPU = AMBOCC_USEGPU_BY_DEFAULT;
 	numViews = AMBOCC_DEFAULT_NUM_VIEWS;
-	textSize = AMBOCC_DEFAULT_TEXT_SIZE;
-	textArea = textSize*textSize;
+	texSize = AMBOCC_DEFAULT_TEXTURE_SIZE;
+	texArea = texSize*texSize;
 }
 
 AmbientOcclusionPlugin::~AmbientOcclusionPlugin()
@@ -113,7 +113,7 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 	{
 		case FP_AMBIENT_OCCLUSION:
 			parlst.addBool("gpuAcceleration",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration");
-			parlst.addInt("textSize",AMBOCC_DEFAULT_TEXT_SIZE,"Depth texture size(should be 2^n)");
+			parlst.addInt("texSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)");
 			parlst.addInt("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views");
 			break;
 		default: assert(0);
@@ -123,27 +123,27 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 {
 	assert(filter->text() == filterName(FP_AMBIENT_OCCLUSION));
 	useGPU = par.getBool("gpuAcceleration");
-	textSize = par.getInt("textSize");
-	textArea = textSize*textSize;
+	texSize = par.getInt("texSize");
+	texArea = texSize*texSize;
 	numViews = par.getInt("reqViews");
 
-	if ((useGPU) && ((unsigned int)m.cm.vn > textArea))
+	if ((useGPU) && ((unsigned int)m.cm.vn > texArea))
 	{
-		Log(0, "Too many vertices: up to %d are allowed", textArea);
+		Log(0, "Too many vertices: up to %d are allowed", texArea);
 		return false;
 	}
 
-	if (textSize < 15)
+	if (texSize < 15)
 	{
 		Log(0, "Texture size is too small, 16x16 used instead");
-		textSize = 16;
-		textArea = textSize*textSize;
+		texSize = 16;
+		texArea = texSize*texSize;
 	}
-	if (textSize > 1024)
+	if (texSize > 1024)
 	{
 		Log(0, "Texture size is too large, 1024x1024 used instead");
-		textSize = 1024;
-		textArea = textSize*textSize;
+		texSize = 1024;
+		texArea = texSize*texSize;
 	}
 
 	GLfloat *occlusion = new GLfloat[m.cm.vn];
@@ -232,8 +232,8 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	{
 		glDisable(GL_BLEND);
 
-		glDetachObjectARB(fboDepthTest, resultBufferText);
-		glDetachObjectARB(fboDepthTest, depthBufferText);
+		glDetachObjectARB(fboDepthTest, resultBufferTex);
+		glDetachObjectARB(fboDepthTest, depthBufferTex);
 		glDeleteFramebuffersEXT(1, &fboDepthTest);
 
 		glDetachShader(shdrID, vs);
@@ -269,15 +269,15 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glEnable( GL_DEPTH_TEST );
 	glEnable( GL_TEXTURE_2D );
 
-	vertexCoordText = 0;
-	vertexNrmlsText = 0;
-	resultBufferText= 0;
+	vertexCoordTex = 0;
+	vertexNormalsTex = 0;
+	resultBufferTex= 0;
 
 	if (useGPU)
 	{
 		//*******INIT VERTEX COORDINATES TEXTURE*********/
-		glGenTextures (1, &vertexCoordText);
-		glBindTexture(GL_TEXTURE_2D, vertexCoordText);
+		glGenTextures (1, &vertexCoordTex);
+		glBindTexture(GL_TEXTURE_2D, vertexCoordTex);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -286,11 +286,11 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-					 textSize, textSize, 0, GL_RGBA, GL_FLOAT, 0);
+					 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
 
 		//*******INIT NORMAL VECTORS TEXTURE*********/
-		glGenTextures (1, &vertexNrmlsText);
-		glBindTexture(GL_TEXTURE_2D, vertexNrmlsText);
+		glGenTextures (1, &vertexNormalsTex);
+		glBindTexture(GL_TEXTURE_2D, vertexNormalsTex);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -299,12 +299,12 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-					 textSize, textSize, 0, GL_RGBA, GL_FLOAT, 0);
+					 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
 	}
 
 	//*******INIT RESULT TEXTURE*********/
-	glGenTextures (1, &resultBufferText);
-	glBindTexture(GL_TEXTURE_2D, resultBufferText);
+	glGenTextures (1, &resultBufferTex);
+	glBindTexture(GL_TEXTURE_2D, resultBufferTex);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -312,11 +312,11 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-				 textSize, textSize, 0, GL_RGBA, GL_FLOAT, 0);
+				 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
 
 	//*******INIT DEPTH TEXTURE*********/
-	glGenTextures(1, &depthBufferText);
-	glBindTexture(GL_TEXTURE_2D, depthBufferText);
+	glGenTextures(1, &depthBufferTex);
+	glBindTexture(GL_TEXTURE_2D, depthBufferTex);
 
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,           GL_CLAMP_TO_EDGE);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,           GL_CLAMP_TO_EDGE);
@@ -327,7 +327,7 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
 
 	glTexImage2D (GL_TEXTURE_2D, 0, depthFormat,
-	              textSize, textSize, 0, 
+	              texSize, texSize, 0, 
 				  GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -346,7 +346,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, GLenum colorFormat,
 		return false;
 	}
 
-	qWidget.setFixedSize(textSize,textSize);
+	qWidget.setFixedSize(texSize,texSize);
 	qWidget.makeCurrent();
 
 	//*******INIT GLEW********/
@@ -386,8 +386,8 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, GLenum colorFormat,
 		fboDepthTest = -1;
 		glGenFramebuffersEXT ( 1, &fboDepthTest);
 		glBindFramebufferEXT ( GL_FRAMEBUFFER_EXT, fboDepthTest);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, resultBufferText, 0);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBufferText, 0 );
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, resultBufferTex, 0);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBufferTex, 0 );
 
 		GLenum fboStatus = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 		if ( fboStatus != GL_FRAMEBUFFER_COMPLETE_EXT)
@@ -421,15 +421,15 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, GLenum colorFormat,
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0);
 	}
 
-	glViewport(0.0, 0.0, textSize, textSize);
+	glViewport(0.0, 0.0, texSize, texSize);
 
 	return true;
 }
 
 void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 {
-	GLfloat *vertexPosition= new GLfloat[textArea*4];
-	GLfloat *vertexNormals = new GLfloat[textArea*4];
+	GLfloat *vertexPosition= new GLfloat[texArea*4];
+	GLfloat *vertexNormals = new GLfloat[texArea*4];
 
 	//Copies each vertex's position and normal in new vectors
 	for (int i=0; i < m.cm.vn; ++i)
@@ -452,13 +452,13 @@ void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 	//Those texture are then used to perform a GPU occlusion test with each view's depth buffer
 	
 	//Write vertex coordinates
-	glBindTexture(GL_TEXTURE_2D, vertexCoordText);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textSize, textSize, GL_RGBA, GL_FLOAT, vertexPosition);	
+	glBindTexture(GL_TEXTURE_2D, vertexCoordTex);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texSize, texSize, GL_RGBA, GL_FLOAT, vertexPosition);	
 	delete [] vertexPosition;
 
 	//Write normal directions
-	glBindTexture(GL_TEXTURE_2D, vertexNrmlsText);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textSize, textSize, GL_RGBA, GL_FLOAT, vertexNormals);
+	glBindTexture(GL_TEXTURE_2D, vertexNormalsTex);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texSize, texSize, GL_RGBA, GL_FLOAT, vertexNormals);
 	delete [] vertexNormals;
 }
 
@@ -469,7 +469,7 @@ void AmbientOcclusionPlugin::setCamera(Point3f camDir)
 	        k = 0.1f;
 	Point3f eye = meshBBox.Center() + camDir * (d+k);
 
-	glViewport(0.0, 0.0, textSize, textSize);
+	glViewport(0.0, 0.0, texSize, texSize);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -483,12 +483,13 @@ void AmbientOcclusionPlugin::setCamera(Point3f camDir)
 }
 
 
-void AmbientOcclusionPlugin::generateOcclusionHW(void)
+void AmbientOcclusionPlugin::generateOcclusionHW()
 {
-	GLfloat *mv_pr_Matrix_f = new GLfloat[16];
+	GLfloat mv_pr_Matrix_f[16];  // modelview-projection matrix
 	
 	glGetFloatv(GL_MODELVIEW_MATRIX, mv_pr_Matrix_f);
 	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 	glMultMatrixf(mv_pr_Matrix_f);
 	glGetFloatv(GL_PROJECTION_MATRIX, mv_pr_Matrix_f);
 
@@ -501,47 +502,45 @@ void AmbientOcclusionPlugin::generateOcclusionHW(void)
 
 	glUseProgram(shdrID);
 
-	//Depthmap
+	// Set depthmap
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, depthBufferText);
+	glBindTexture(GL_TEXTURE_2D, depthBufferTex);
 	glUniform1i(glGetUniformLocation(shdrID, "dTexture"), 0);
 
-	//Vertex position texture
+	// Set vertex position texture
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, vertexCoordText);
+	glBindTexture(GL_TEXTURE_2D, vertexCoordTex);
 	glUniform1i(glGetUniformLocation(shdrID, "vTexture"), 1);
 
-	//Normal direction texture
+	// Set vertex normal texture
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, vertexNrmlsText);
+	glBindTexture(GL_TEXTURE_2D, vertexNormalsTex);
 	glUniform1i(glGetUniformLocation(shdrID, "nTexture"), 2);
 
-	//View Direction
+	// Set view direction
 	glUniform3f(glGetUniformLocation(shdrID, "viewDirection"), cameraDir.X(), cameraDir.Y(), cameraDir.Z());
 
-	//ModelView-Projection Matrix
+	// Set ModelView-Projection Matrix
 	glUniformMatrix4fv(glGetUniformLocation(shdrID, "mvprMatrix"), 1, GL_FALSE, (const GLfloat*)mv_pr_Matrix_f);
 
-	//Texture Size
-	glUniform1i(glGetUniformLocation(shdrID, "texSize"), textSize);
+	// Set texture Size
+	glUniform1i(glGetUniformLocation(shdrID, "texSize"), texSize);
 
-	//Need to clear the depthBuffer if we don't
-	//want a mesh-shaped hole in the middle of the S.A.Q. :)
+	// Need to clear the depthBuffer if we don't
+	// want a mesh-shaped hole in the middle of the S.A.Q. :)
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	//glDisable(GL_DEPTH_TEST);
-	//Screen aligned Quad
+	glDisable(GL_DEPTH_TEST);
+
+	// Screen-aligned Quad
 	glBegin(GL_QUADS);
 		glVertex3f(-1.0f, -1.0f, 0.0f); //L-L
 		glVertex3f( 1.0f, -1.0f, 0.0f); //L-R
 		glVertex3f( 1.0f,  1.0f, 0.0f); //U-R
 		glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
 	glEnd();
-	//glEnable(GL_DEPTH_TEST);
 
 	glUseProgram(0);
-
-	delete [] mv_pr_Matrix_f;
 }
 
 void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusion)
@@ -550,14 +549,14 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 	GLdouble *mvMatrix_f = new GLdouble[16];
 	GLdouble *prMatrix_f = new GLdouble[16];
 	GLint    *viewpSize  = new GLint[4];
-	GLfloat  *dFloat     = new GLfloat[textArea];
+	GLfloat  *dFloat     = new GLfloat[texArea];
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix_f);
 	glGetDoublev(GL_PROJECTION_MATRIX, prMatrix_f);
 	glGetIntegerv(GL_VIEWPORT, viewpSize);
 
 	glReadBuffer(GL_DEPTH_ATTACHMENT_EXT);
-	glReadPixels(0, 0, textSize, textSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
+	glReadPixels(0, 0, texSize, texSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
 	cameraDir.Normalize();
 
@@ -573,7 +572,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 		int x = floor(resCoords[0]);
 		int y = floor(resCoords[1]);
 		
-		if (resCoords[2] <= (GLdouble)dFloat[textSize*y+x])
+		if (resCoords[2] <= (GLdouble)dFloat[texSize*y+x])
 		{
 			vn = m.cm.vert[i].N();
 			occlusion[i] += max(vn*cameraDir, 0.0f);
@@ -590,9 +589,9 @@ void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 {
 	const float k = (AMBOCC_HV / numViews);
 
-	GLfloat *result = new GLfloat[textArea*4];
+	GLfloat *result = new GLfloat[texArea*4];
 	glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-	glReadPixels(0, 0, textSize, textSize, GL_RGBA, GL_FLOAT, result);
+	glReadPixels(0, 0, texSize, texSize, GL_RGBA, GL_FLOAT, result);
 
 	float maxvalue = 0.0f, minvalue = 100000.0f;
 	for (int i=0; i < m.cm.vn; i++)

@@ -42,14 +42,14 @@ private:
 	Point3f cameraDir;
 	Box3f   meshBBox;
 	GLuint  fboDepthTest,
-	        depthBufferText,
-	        vertexCoordText,
-	        vertexNrmlsText,
-	        resultBufferText;
+	        depthBufferTex,
+	        vertexCoordTex,
+	        vertexNormalsTex,
+	        resultBufferTex;
 	
 	unsigned int numViews,
-	             textSize,
-	             textArea;
+	             texSize,
+	             texArea;
 
 	bool useGPU;
 
@@ -84,10 +84,7 @@ private:
 	void  renderMesh            (MeshModel &m);
 	void  setCamera             (Point3f camDir);
 
-	void  startRenderingToFBO   (void);
-	void  stopRenderingToFBO    (void);
-
-	void  generateOcclusionHW   (void);
+	void  generateOcclusionHW   ();
 	void  generateOcclusionSW   (MeshModel &m,
 	                             GLfloat *occlusion);
 
