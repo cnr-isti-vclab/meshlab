@@ -35,8 +35,7 @@ $Log: meshedit.cpp,v $
 #include <wrap/qt/trackball.h>
 #include "AlignPairWidget.h"
 #include "AlignPairDialog.h"
-#include "AlignParamDialog.h"
-
+#include <meshlab/stdpardialog.h>
 using namespace vcg;
 
 EditAlignPlugin::EditAlignPlugin() {
@@ -219,6 +218,19 @@ void EditAlignPlugin::glueManual()
 	gla->update();
 }
 
+// given a FilterParameterSet get back the alignment parameter  (dual of the buildParemeterSet)
+void EditAlignPlugin::retrieveParameterSet(FilterParameterSet &fps , AlignPair::Param &app)
+{
+	app.SampleNum=fps.getInt("SampleNum");
+  app.MinDistAbs=fps.getFloat("MinDistAbs");
+	app.TrgDistAbs=fps.getFloat("TrgDistAbs");
+	app.MaxIterNum=fps.getInt("MaxIterNum");
+	app.SampleMode= fps.getBool("SampleMode")?AlignPair::Param::SMNormalEqualized  : AlignPair::Param::SMRandom;
+	app.ReduceFactor=fps.getFloat("ReduceFactor");
+	app.MatchMode=fps.getBool("MatchMode")? AlignPair::Param::MMRigid : AlignPair::Param::MMClassic;	
+}
+
+// given an alignment parameter builds the corresponding FilterParameterSet (dual of the retrieveParemeterSet)
 void EditAlignPlugin::buildParameterSet(FilterParameterSet &fps , AlignPair::Param &app)
 {
 	fps.clear();
@@ -229,18 +241,21 @@ void EditAlignPlugin::buildParameterSet(FilterParameterSet &fps , AlignPair::Par
 							                             "This value is also dynamically changed by the 'Reduce Distance Factor'");
 	fps.addFloat("TrgDistAbs",app.TrgDistAbs,"Target Distance","When 50% of the choosen samples are below this distance we consider the two mesh aligned. Usually it should be a value lower than the error of the scanning device. ");
 	fps.addInt("MaxIterNum",app.MaxIterNum,"Max Iteration Num","The maximum number of iteration that the ICP is allowed to perform.");
-	fps.addBool("SamplingMode",app.SampleMode == AlignPair::Param::SMNormalEqualized,"Normal Equalized Sampling","if true (default) the sample points of icp are choosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way.");
+	fps.addBool("SampleMode",app.SampleMode == AlignPair::Param::SMNormalEqualized,"Normal Equalized Sampling","if true (default) the sample points of icp are choosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way.");
 	fps.addFloat("ReduceFactor",app.ReduceFactor,"MSD Reduce Factor","At each ICP iteration the Minimal Starting Distance is reduced to be 5 times the <Reduce Factor> percentile of the sample distances (e.g. if RF is 0.9 the new Minimal Starting Distance is 5 times the value <X> such that 90% of the sample lies at a distance lower than <X>.");
-	fps.addBool("MatchMode",app.MatchMode == AlignPair::Param::MMRigid,"Normal Equalized Sampling","if true (default) the sample points of icp are choosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way.");
-	
+	fps.addBool("MatchMode",app.MatchMode == AlignPair::Param::MMRigid,"Rigid matching","If true the ICP is cosntrained to perform matching only throug roto-translations (no scaling allowed). If false a more relaxed transformation matrix is allowed (scaling and shearing can appear).");
 }
 
 void EditAlignPlugin:: alignParam()
 {
 	FilterParameterSet alignParamSet;
-	buildParameterSet(alignParamSet,ap);
-	AlignParamDialog ad(alignDialog,&alignParamSet);
-	ad.exec();
+	buildParameterSet(alignParamSet, ap);
+	GenericParamDialog ad(alignDialog,&alignParamSet);
+	int result=ad.exec();
+	if(result != QDialog::Accepted) return;
+	
+	// Dialog accepted. get back the values
+	retrieveParameterSet(alignParamSet, ap);
 }
 
 void EditAlignPlugin::glueHere()

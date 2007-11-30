@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.14  2007/11/30 07:19:09  cignoni
+moved generic dialog to the meshlab base
+
 Revision 1.13  2007/11/20 18:26:16  ponchio
 Added enum support for auto dialogs, working.
 
@@ -154,6 +157,26 @@ class EnumWidget : public QHBoxLayout
 		EnumWidget(QWidget *p, int newEnum, QStringList values);
 		int getEnum();
 		void  setEnum(int newEnum);	
+};
+
+// This class provide a modal dialog box for asking a generic parameter set
+// It can be used by anyone needing for some values in a structred form and having some integrated help
+class GenericParamDialog: public QDialog
+{
+	Q_OBJECT 
+public:
+  GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet); 
+	
+	FilterParameterSet *curParSet;
+	FilterParameterSet *defaultParSet;
+	StdParFrame *stdParFrame;
+	
+	void createFrame();
+  void resetValues();
+	
+	public slots:	
+	void getAccept();
+	void toggleHelp();
 };
 
 

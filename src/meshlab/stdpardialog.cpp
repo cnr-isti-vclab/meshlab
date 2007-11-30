@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.21  2007/11/30 07:19:09  cignoni
+moved generic dialog to the meshlab base
+
 Revision 1.20  2007/11/20 18:55:32  ponchio
 removed qDebug
 
@@ -89,13 +92,11 @@ Added standard plugin window support
 #include "stdpardialog.h"
 
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
-//:QDialog(p)
 :QDockWidget(QString("Plugin"),0)
-  {
+{
 		qf = NULL;
 		stdParFrame=NULL;
 		clearValues();
-		//setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 }
 
 StdParFrame::StdParFrame(QWidget *p)
@@ -121,8 +122,6 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, Q
 	void MeshlabStdDialog::clearValues()
 	{
 		curAction = NULL;
-//		stdfieldwidgets.clear();
-//		helpList.clear();
 		curModel = NULL;
 		curmfi = NULL;
 		curmwi = NULL;
@@ -133,12 +132,8 @@ void MeshlabStdDialog::createFrame()
 	if(qf) delete qf;
 				
 	QFrame *newqf= new QFrame(this);
-	//setLayout(new QBoxLayout(QBoxLayout::TopToBottom,this));
-	//newqf->setMinimumSize(75, 75);
-	//layout()->addWidget(newqf);
 	setWidget(newqf);
 	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
-	//setWidget(newqf);
   qf = newqf;
 }
 
@@ -520,4 +515,59 @@ int EnumWidget::getEnum()
 void EnumWidget::setEnum(int newEnum) 
 {
 	enumCombo->setCurrentIndex(newEnum);
+}
+
+
+
+
+GenericParamDialog::GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet) :QDialog(p)
+{
+		stdParFrame=NULL;
+		curParSet=_curParSet;
+		createFrame();
+}
+
+// update the values of the widgets with the values in the paramlist;
+void GenericParamDialog::resetValues()
+{
+		stdParFrame->resetValues(*defaultParSet);
+}
+
+void GenericParamDialog::toggleHelp()
+{	
+	stdParFrame->toggleHelp();
+	this->updateGeometry();
+	this->adjustSize();
+}
+
+
+void GenericParamDialog::createFrame()
+{
+	setWindowTitle("Alignment Parameters");
+
+	QVBoxLayout *vboxLayout = new QVBoxLayout(this);
+	setLayout(vboxLayout);
+	
+	stdParFrame = new StdParFrame(this);
+	stdParFrame->loadFrameContent(*curParSet);
+  layout()->addWidget(stdParFrame);
+
+	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help  |QDialogButtonBox::Reset  | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
+	layout()->addWidget(buttonBox);
+	
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
+	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+	connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
+	
+	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+		
+	this->showNormal();
+	this->adjustSize();		
+}
+
+
+void GenericParamDialog::getAccept()
+{
+	stdParFrame->readValues(*curParSet);
+	accept();
 }

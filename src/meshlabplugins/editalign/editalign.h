@@ -85,6 +85,8 @@ public:
 public:
 	AlignPair::Param ap;  // default alignment parameters
 	
+
+	void retrieveParameterSet(FilterParameterSet &fps , AlignPair::Param &app);
 	void buildParameterSet(FilterParameterSet &fps , AlignPair::Param &app);
 
 public slots:
