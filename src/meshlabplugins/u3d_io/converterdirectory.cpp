@@ -1,4 +1,4 @@
-#include<QFileDialog.h>
+#include <QFileDialog>
 #include "converterdirectory.h"
 
 ConverterDirectory::ConverterDirectory(QWidget *parent)

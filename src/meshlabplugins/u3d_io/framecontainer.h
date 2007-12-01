@@ -2,7 +2,7 @@
 #define FRAME_CONTAINER_H
 
 #include <QFrame>
-#include "ConverterDirectory.h"
+#include "converterdirectory.h"
 #include "cameraparametergui.h"
 
 
