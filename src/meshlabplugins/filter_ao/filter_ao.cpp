@@ -46,7 +46,7 @@
 #include <QDataStream>
 #include <QString>
 #include <QFile>
-#include <gl/glew.h>
+#include <GL/glew.h>
 
 #include "filter_ao.h"
 
