@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.41  2007/12/02 07:53:51  cignoni
+disambiguated sqrt call
+
 Revision 1.40  2007/11/26 13:33:30  ponchio
 Added Mean Ratio metric for triangle quality.
 
@@ -351,7 +354,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			int metric = par.getEnum("Metric");
 			switch(metric){ 
 			case 0: { //area / max edge
-				max = sqrt(3)/2;
+				max = sqrt(3.0f)/2.0f;
 				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
 					CFaceO &f = m.cm.face[i];
 					f.C().ColorRamp(min, max, Quality(f.P(0), f.P(1), f.P(2)));
