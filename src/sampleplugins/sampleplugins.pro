@@ -1,4 +1,4 @@
 TEMPLATE      = subdirs
-SUBDIRS       = sampleedit sampleio samplefilter		
+SUBDIRS       = sampleedit sampleio samplefilter filterborder	
 		
 		
