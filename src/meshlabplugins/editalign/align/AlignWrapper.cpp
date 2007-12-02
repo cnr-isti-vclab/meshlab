@@ -42,7 +42,7 @@ void AlignWrapper::FileMatrixWrite(FILE *fp, const Matrix44d &Tr)
 		fprintf(fp,"%6.3lf %6.3lf %6.3lf %6.3lf \n",(Tr[3][0]),(Tr[3][1]),(Tr[3][2]),(Tr[3][3]));
 }
 
-int AlignWrapper::ParseAln(char  *alnfile, vector<string> &names, vector<Matrix44d> &LTr, bool RigidFlag)
+int AlignWrapper::ParseAln(const char  *alnfile, vector<string> &names, vector<Matrix44d> &LTr, bool RigidFlag)
 {
 	printf("Parsing aln file %s\n",alnfile);
 	FILE *fp=fopen(alnfile,"r");

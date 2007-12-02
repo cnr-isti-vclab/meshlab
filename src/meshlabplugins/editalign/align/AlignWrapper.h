@@ -30,7 +30,7 @@ public:
   bool CalcArc();
   bool GlobalAlign();
 
-  static int ParseAln(char  *alnfile, std::vector<std::string> &names, std::vector<Matrix44d> &LTr, bool RigidFlag=false);
+  static int ParseAln(const char  *alnfile, std::vector<std::string> &names, std::vector<Matrix44d> &LTr, bool RigidFlag=false);
   static void FileMatrixWrite(FILE *fp, const Matrix44d &Tr);
 
 };
