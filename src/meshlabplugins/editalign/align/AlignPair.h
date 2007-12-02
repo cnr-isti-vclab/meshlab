@@ -84,11 +84,6 @@ class A2Edge ;
 class A2Vertex   : public vcg::VertexSimp2<A2Vertex,A2Edge,A2Face,vcg::vert::Coord3d,vcg::vert::Normal3d,vcg::vert::BitFlags> {};
 class A2Face     : public vcg::FaceSimp2 < A2Vertex,A2Edge,A2Face,vcg::face::VertexRef, vcg::face::Normal3d, vcg::face::EdgePlane,vcg::face::Mark,vcg::face::BitFlags> {};
 class A2Mesh     : public vcg::tri::TriMesh< std::vector<A2Vertex>, std::vector<A2Face> > 
-#include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertexplus/component.h>
-#include <vcg/simplex/faceplus/base.h>
-#include <vcg/simplex/faceplus/component.h>
-#include <vcg/simplex/faceplus/component_rt.h>
 { 
 public:
   bool Import(const char *filename) { Matrix44d Tr; Tr.SetIdentity(); return Import(filename,Tr);} 
