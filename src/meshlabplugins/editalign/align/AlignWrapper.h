@@ -1,3 +1,7 @@
+#include <queue>
+#include "AlignPair.h"
+#include "OccupancyGrid.h"
+#include "AlignGlobal.h"
 
 // classe di facile uso per allineare 
 namespace vcg 

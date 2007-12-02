@@ -2,7 +2,6 @@
 #include<stdio.h>
 #include<assert.h>
 #include<time.h>
-#include <queue>
 #include <vector>
 #include <bitset>
 #include <vector>
@@ -10,23 +9,14 @@
 #include <bitset>
 #include <algorithm>
 
-#include <vcg/space/box3.h>
-#include <vcg/space/box2.h>
-#include<vcg/simplex/vertex/vertex.h>
-#include<vcg/simplex/vertex/with/vcvn.h>
+#include <vcg/math/point_matching.h>
+#include "AlignWrapper.h"
 
-#include<vcg/simplex/face/with/fcfn.h>
-#include<vcg/complex/trimesh/base.h>
 #include<vcg/complex/trimesh/update/normal.h>
 #include<vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/export_ply.h>
 
-#include "point_matching.h"
-#include "AlignPair.h"
-#include "OccupancyGrid.h"
-#include "AlignGlobal.h"
-#include "AlignWrapper.h"
 
 using namespace vcg;
 using namespace std;
