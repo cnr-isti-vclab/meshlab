@@ -50,7 +50,8 @@ private:
 	
 	unsigned int numViews,
 	             texSize,
-	             texArea;
+	             texArea,
+				 timeElapsed;
 
 	bool useGPU;
 
@@ -76,9 +77,7 @@ public:
 private:
 	void  initTextures          (GLenum colorFormat,
 	                             GLenum depthFormat);
-	bool  initContext           (QGLWidget &qWidget,
-	                             GLenum colorFormat,
-	                             GLenum depthFormat);
+	bool  initContext           (QGLWidget &qWidget);
 
 	bool  checkFramebuffer();
 
@@ -101,6 +100,9 @@ private:
 	                             GLuint &pr);
 
 	void dumpFloatTexture(QString filename, float *texdata, int elems);
+
+public slots:
+	void  timePP ();
 };
 
 #endif
