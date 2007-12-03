@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.6  2007/12/03 11:08:48  corsini
+code restyling
+
 Revision 1.5  2007/12/03 10:26:02  corsini
 code restyling
 
@@ -54,16 +57,15 @@ code restyling
 // Standard headers
 #include <assert.h>
 
+
+/* FIXME: remove this define */
+#define FBO_SIZE 512
+
 // * Extends the uniform variable class of the RM Parser
 // * to add information such as memory location and
 // * actual value
 class UniformValue : public UniformVar
 {
-
-// definitions
-public:
-
-	static const int FBO_SIZE=512;
 
 // member variables
 public:

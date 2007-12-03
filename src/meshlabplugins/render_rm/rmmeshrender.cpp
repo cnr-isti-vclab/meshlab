@@ -1,7 +1,40 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2008                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+History
+$Log$
+Revision 1.6  2007/12/03 11:08:48  corsini
+code restyling
+
+
+****************************************************************************/
+
+// Local headers
 #include "rmmeshrender.h"
+
+// Qt headers
 #include <QtOpenGL>
 #include <QtGui/QImage>
-
 
 
 static int vp[4];
@@ -56,7 +89,6 @@ void RmMeshShaderRenderPlugin::initActionList() {
 			actionList << qa;
 		}
 	}
-	//qDebug() << (successes+errors) << "RmShaders parsed. Opened correctly" << successes << "rmshaders, and get" << errors <<"errors";
 }
 
 
@@ -77,57 +109,62 @@ void RmMeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QG
 
 	gla->makeCurrent();
   GLenum err = glewInit();
-	if (GLEW_OK == err) {
-		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
+	if (GLEW_OK == err) 
+	{
+		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) 
+		{
 
-      holder.reset();
+			holder.reset();
 			dialog = new RmShaderDialog(&holder, parser, gla, rm);
 			dialog->move(10,100);
 			dialog->show();
 		}
 	}
 
-	// * clear errors, if any
+	// check errors, if any
 	glGetError();
 }
 void RmMeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla)
 {
 
-  if( holder.needUpdateInGLMemory )
-    holder.updateUniformVariableValuesInGLMemory();
+	if (holder.needUpdateInGLMemory)
+		holder.updateUniformVariableValuesInGLMemory();
 
-  if( holder.isSupported()){
+	if(holder.isSupported())
+	{
 
-    /* Handle single pass filters */
-    if (holder.passNumber() == 1){ 
-      glEnable(GL_TEXTURE_2D);
-      holder.updateUniformVariableValuesInGLMemory(0);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      holder.usePassProgram(0);
-      return;
-    }
-    glViewport(0,0,FBO_SIZE, FBO_SIZE); /* FIXME */
+		/* Handle single pass filters */
+		if (holder.passNumber() == 1)
+		{
+			glEnable(GL_TEXTURE_2D);
+			holder.updateUniformVariableValuesInGLMemory(0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			holder.usePassProgram(0);
+			return;
+		}
 
-    if (holder.currentPass >= holder.passNumber())
-      holder.currentPass = -1;
+		glViewport(0,0,FBO_SIZE,FBO_SIZE); /* FIXME */
 
-    if (holder.currentPass < 0)
-      holder.currentPass = 0;
-#ifdef DEBUG
-    qDebug() << " Rendering [" << holder.currentPass+1 << "/" << holder.passNumber() << "]";
-#endif
-    if (holder.currentPass >= 0){ 
-      holder.executePass(holder.currentPass);
-    }
+		if (holder.currentPass >= holder.passNumber())
+			holder.currentPass = -1;
 
-  }
-  holder.currentPass++;
+		if (holder.currentPass < 0)
+			holder.currentPass = 0;
 
-  // * clear errors, if any
-  glGetError();
+		if (holder.currentPass >= 0)
+		{
+			holder.executePass(holder.currentPass);
+		}
+
+	}
+
+	holder.currentPass++;
+
+	// check errors, if any
+	glGetError();
 }
 
 

@@ -209,9 +209,12 @@ GLStatePassHolder::GLStatePassHolder( RmPass & pass )
 	QString &fprog = pass.getFragment();
 	
 	GLenum err = glewInit();
-	if( vprog.isNull() ) {
+	if( vprog.isNull() ) 
+	{
 		setVertexProgram = false;
-	} else {
+	} 
+	else 
+	{
 		setVertexProgram = true;
 		vhandler = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
 		QByteArray * c = new QByteArray(vprog.toLocal8Bit());
@@ -220,9 +223,12 @@ GLStatePassHolder::GLStatePassHolder( RmPass & pass )
 		delete c;
 	}
 
-	if( fprog.isNull() ) {
+	if( fprog.isNull() ) 
+	{
 		setFragmentProgram = false;
-	} else {
+	} 
+	else 
+	{
 		setFragmentProgram = true;
 		fhandler = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 		QByteArray* c = new QByteArray(fprog.toLocal8Bit());
@@ -248,7 +254,8 @@ GLStatePassHolder::~GLStatePassHolder()
 	glDeleteObjectARB(fhandler);
 
 	QMapIterator<QString, UniformValue*> it(uniformValues);
-	while( it.hasNext() ) {
+	while( it.hasNext() ) 
+	{
 		it.next();
 		delete it.value();
 	}
@@ -268,13 +275,16 @@ bool GLStatePassHolder::compile()
 	}
 
 	GLsizei length;
-	if( !statusV ) {
+	if( !statusV ) 
+	{
 		char shlog[2048];
 		glGetShaderInfoLog(vhandler, 2048, &length, shlog);
 		lastError = "Pass \"" + passName + "\" Vertex Compiling Error (" + QString().setNum(glGetError()) + "):\n" + QString(shlog);
 		return false;
 	}
-	if( !statusF ) {
+	
+	if( !statusF ) 
+	{
 		char shlog[2048];
 		glGetShaderInfoLog(fhandler, 2048, &length, shlog);
 		lastError = "Pass \"" + passName + "\" Fragment Compiling Error (" + QString().setNum(glGetError()) + "):\n" + QString(shlog);
@@ -328,41 +338,43 @@ void GLStatePassHolder::updateUniformVariableValuesFromDialog( QString varname, 
 
 bool GLStatePassHolder::updateUniformVariableValuesInGLMemory()
 {
-  checkGLError("BEGIN: updateUniformVariableValuesInGLMemory");
+	checkGLError("BEGIN: updateUniformVariableValuesInGLMemory");
 	bool ret = true;
 	UniformValue::textureUnit = 0;
 	glUseProgramObjectARB(program);
+	
 	QMapIterator<QString,UniformValue*> it( uniformValues );
-	while( it.hasNext() ) {
-    it.next();
-    if( !it.value() -> updateValueInGLMemory() ) ret = false;
-  }
-  checkGLError("END: updateUniformVariableValuesInGLMemory");
+	while( it.hasNext() ) 
+	{
+		it.next();
+		if( !it.value() -> updateValueInGLMemory() ) ret = false;
+	}
+
+	checkGLError("END: updateUniformVariableValuesInGLMemory");
 	return ret;
 }
 bool GLStatePassHolder::adjustSampler2DUniformVar(QString varname, GLuint texId)
 {
-  QMapIterator<QString,UniformValue*> it( uniformValues );
-	while( it.hasNext() ) {
-    it.next();
-    if ( it.value()->type == 16 && it.value()->name.compare(varname) == 0){
-      it.value()->textureId = texId;
-      it.value()->textureLoaded = true; 
-      return true;
-    }
-  }
-  qDebug() << "ERROR:Unable to find" << varname;
-  return false;
+	QMapIterator<QString,UniformValue*> it( uniformValues );
+	while(it.hasNext()) 
+	{
+		it.next();
+		if ( it.value()->type == 16 && it.value()->name.compare(varname) == 0)
+		{
+			it.value()->textureId = texId;
+			it.value()->textureLoaded = true; 
+			return true;
+		}
+	}
+	return false;
 }
 
 
 void GLStatePassHolder::VarDump()
 {
-#ifdef DEBUG
-	qDebug() << "  Pass:" << passName << "with" << uniformValues.size() << "uniform values";
-#endif
 	QMapIterator<QString,UniformValue*> it( uniformValues );
-	while( it.hasNext() ) {
+	while( it.hasNext() ) 
+	{
 		it.next();
 		it.value() -> VarDump();
 	}
@@ -370,10 +382,10 @@ void GLStatePassHolder::VarDump()
 
 void GLStatePassHolder::useProgram()
 { 
-  checkGLError("BEGIN: useprogram");
-  updateUniformVariableValuesInGLMemory();
-  glUseProgramObjectARB( program ); qDebug() << passName;
-  checkGLError("END: useprogram");
+	checkGLError("BEGIN: useprogram");
+	updateUniformVariableValuesInGLMemory();
+	glUseProgramObjectARB( program ); qDebug() << passName;
+	checkGLError("END: useprogram");
 }
 
 void GLStatePassHolder::execute()
@@ -386,33 +398,29 @@ void GLStatePassHolder::execute()
    *
    *
    */
-#ifdef DEBUG
-  qDebug() << "Executing " << "Model="<< modelName;
-#endif
-  useProgram();
 
-  if (modelName.compare("ScreenAlignedQuad") == 0){
-    checkGLError("BEGIN: screenAlignedd");
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glOrtho(-1,1,-1,1,-1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glPushAttrib(GL_ENABLE_BIT);
-    //glDisable(GL_DEPTH_TEST);
-    //glDisable(GL_LIGHTING);
-    //glColor4f(1.0,0.5,0.3,1.0);	
+	useProgram();
 
-    glBegin(GL_QUADS);
-    {
-      glVertex2f(-1, -1);
-      glVertex2f( 1, -1);
-      glVertex2f( 1,  1);
-      glVertex2f(-1,  1);
-    }
-    glEnd();
+	if (modelName.compare("ScreenAlignedQuad") == 0)
+	{
+		checkGLError("BEGIN: screenAlignedd");
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(-1,1,-1,1,-1,1);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glPushAttrib(GL_ENABLE_BIT);
+
+		glBegin(GL_QUADS);
+		{
+			glVertex2f(-1, -1);
+			glVertex2f( 1, -1);
+			glVertex2f( 1,  1);
+			glVertex2f(-1,  1);
+		}
+		glEnd();
 
 		glPopAttrib();
 		glPopMatrix(); // restore modelview
@@ -420,52 +428,64 @@ void GLStatePassHolder::execute()
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 
-    checkGLError("END: screenAlignedd");
-  }
+		checkGLError("END: screenAlignedd");
+	}
 
 }
 
 // ***************** GL STATE HOLDER ****************** //
 
 
-GLStateHolder::~GLStateHolder( )
+GLStateHolder::~GLStateHolder()
 {
 	for( int i = 0; i < passes.size(); i++ )
 		delete passes[i];
-  //delete passTextures;
-  delete fbo;
+
+	//delete passTextures;
+	delete fbo;
 }
 
 void GLStateHolder::setPasses( QList<RmPass> & _passes )
 {
-	for( int i = 0; i < passes.size(); i++ )
+	// delete all passes
+	for(int i = 0; i < passes.size(); i++)
 		delete passes[i];
+
 	passes.clear();
-  //delete passTextures;
+
+	//delete passTextures;
 	for( int i = 0; i < _passes.size(); i++ )
 		passes.append( new GLStatePassHolder(_passes[i]));
-  passTextures = new GLuint[passes.size()];
-  if (!fbo) delete fbo;
-  fbo = new QGLFramebufferObject(FBO_SIZE,FBO_SIZE);
-  genPassTextures(); 
 
-  /* Now it's time to adjust sampler2D textures */
-  UniformVar currUniformVar;
-  for(int i =0; i < passes.size(); i++){
-    for (int j = 0; j < _passes[i].fragmentUniformVariableSize(); j++){
-      currUniformVar = _passes[i].getUniformVariable(j, RmPass::FRAGMENT);
-      if (!currUniformVar.type == UniformVar::SAMPLER2D) break;
-      for (int k=0; k<_passes.size();k++){
-        if (_passes[k].getRenderTarget().name.compare(currUniformVar.name)==0){
-          qDebug() << "Pass " << _passes[i].getName() << "need " << currUniformVar.name << "from " << _passes[k].getName() << "[" << k << "->texId="<< passTextures[k]<<"]";
-        if (!passes[i]->adjustSampler2DUniformVar(currUniformVar.name, passTextures[k])) 
-          qDebug() << "ERRORRRRR"; /* FIXME */
-        }
-      }
-      
-    }
-  }
+	passTextures = new GLuint[passes.size()];
 
+	if (!fbo) 
+		delete fbo;
+	fbo = new QGLFramebufferObject(FBO_SIZE,FBO_SIZE);
+	genPassTextures(); 
+
+	// Now it's time to adjust sampler2D textures
+	UniformVar currUniformVar;
+	for(int i =0; i < passes.size(); i++)
+	{
+		for (int j = 0; j < _passes[i].fragmentUniformVariableSize(); j++)
+		{
+			currUniformVar = _passes[i].getUniformVariable(j, RmPass::FRAGMENT);
+			if (!currUniformVar.type == UniformVar::SAMPLER2D) 
+				break;
+
+			for (int k=0; k<_passes.size();k++)
+			{
+				if (_passes[k].getRenderTarget().name.compare(currUniformVar.name)==0)
+				{
+					if (!passes[i]->adjustSampler2DUniformVar(currUniformVar.name, passTextures[k]))
+					{
+						//...TODO...
+					}
+				}
+			}
+		}
+	}
 }
 
 bool GLStateHolder::compile() 
@@ -533,48 +553,35 @@ void GLStateHolder::VarDump()
 
 void GLStateHolder::genPassTextures()
 {
-  checkGLError("BEGIN: genpasstextures");
+	checkGLError("BEGIN: genpasstextures");
 
-  glGenTextures(passes.size(), passTextures);
-  passTextures[0] = fbo->texture();
-#ifdef DEBUG
-    printf("passTextures[%d]=%d\n", 0, passTextures[0]);
-#endif
-  for(int i=1;i<passes.size();i++)
-  {
-    glBindTexture(GL_TEXTURE_2D, passTextures[i]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //create the texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FBO_SIZE, FBO_SIZE, 0, GL_RGB, GL_FLOAT, NULL);
-#ifdef DEBUG
-    printf("passTextures[%d]=%d\n", i, passTextures[i]);
-#endif
-  }
-  /* I decided to use a GL_COLOR_ATTACHMENT for each pass */
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_DEPTH_TEST);
+	glGenTextures(passes.size(), passTextures);
+	passTextures[0] = fbo->texture();
 
-  fbo->bind();
+	for(int i=1;i<passes.size();i++)
+	{
+		glBindTexture(GL_TEXTURE_2D, passTextures[i]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-  for (int j = 1; j<passes.size(); j++)
-    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT,BASE_COLOR_ATTACHMENT+j, GL_TEXTURE_2D, passTextures[j], 0);
+		//create the texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FBO_SIZE, FBO_SIZE, 0, GL_RGB, GL_FLOAT, NULL);
 
-#ifdef DEBUG 
-  printf("--------GL_COLOR_ATTACHMENT0_EXT=%d\n", fbo->texture());
+	}
 
-  for(int k = 1; k < passes.size(); k++){
-    GLint id;
-    glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER_EXT, BASE_COLOR_ATTACHMENT+k,
-        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_EXT, &id);
-    printf("--------GL_COLOR_ATTACHMENT1_EXT+%d=%d\n", k, (GLuint)id);
-  }
+	/* I decided to use a GL_COLOR_ATTACHMENT for each pass */
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
 
-#endif
-  fbo->release();
-  checkGLError("END: genpasstextures");
+	fbo->bind();
+
+	for (int j = 1; j<passes.size(); j++)
+		glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT,BASE_COLOR_ATTACHMENT+j, GL_TEXTURE_2D, passTextures[j], 0);
+
+	fbo->release();
+	checkGLError("END: genpasstextures");
 }
 
 bool GLStateHolder::executePass(int i){
