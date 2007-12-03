@@ -1,86 +1,127 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2008                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+History
+$Log$
+Revision 1.3  2007/12/03 10:46:06  corsini
+code restyling
+
+
+****************************************************************************/
+
+
 #ifndef __UNIFORMVAR_H__
 #define __UNIFORMVAR_H__
 
+// Local headers
+#include "GlState.h"
+
+// Qt headers
 #include <QList>
 #include <QString>
 #include <QStringList>
 #include <QDomElement>
 #include <QDebug>
 
-#include "GlState.h"
-
 
 class UniformVar
 {
-	public:
-		enum UniformType {
-			INT,								// * type integer
-			FLOAT,								// * type float
-			BOOL,								// * type bool
-			VEC2, VEC3, VEC4,					// * vector of float
-			IVEC2, IVEC3, IVEC4,				// * vector of int
-			BVEC2, BVEC3, BVEC4,				// * vector of bool
-			MAT2, MAT3, MAT4,					// * 2x2 3x3 4x4 float
-			SAMPLER1D, SAMPLER2D, SAMPLER3D,	// * 1D, 2D and 3D texture
-			SAMPLERCUBE,						// * Cube Map texture
-			SAMPLER1DSHADOW, SAMPLER2DSHADOW,	// * 1D and 2D depth-component texture
-			OTHER
-		};
+// definitions
+public:
+
+	enum UniformType {
+		INT,                                 //!< type integer
+		FLOAT,                               //!< type float
+		BOOL,                                //!< type bool
+		VEC2, VEC3, VEC4,                    //!< vector of float
+		IVEC2, IVEC3, IVEC4,                 //!< vector of int
+		BVEC2, BVEC3, BVEC4,                 //!< vector of bool
+		MAT2, MAT3, MAT4,                    //!< 2x2 3x3 4x4 float
+		SAMPLER1D, SAMPLER2D, SAMPLER3D,     //!< 1D, 2D and 3D texture
+		SAMPLERCUBE,                         //!< Cube Map texture
+		SAMPLER1DSHADOW, SAMPLER2DSHADOW,    //!< 1D and 2D depth-component texture
+		OTHER
+	};
+
+// public data members
+public: 
+
+	enum UniformType type;
+
+	QString name;
+	QString typeString;
+
+	union 
+	{
+		int ivalue;
+		float fvalue;
+		bool bvalue;
+		float vec2[2], vec3[3], vec4[4];
+		int ivec2[2], ivec3[3], ivec4[4];
+		bool bvec2[2], bvec3[3], bvec4[4];
+		float mat2[2][2], mat3[3][3], mat4[4][4];
+	};
+
+	QString representerTagName;
+
+	QString textureName;
+	QString textureFilename;
+	QList<GlState> textureGLStates;
+
+	union { int imin; float fmin; };
+	union { int imax; float fmax; };
+	union { int irealmin; float frealmin; };
+	union { int irealmax; float frealmax; };
+
+	bool minSet;
+	bool maxSet;
+	bool realminSet;
+	bool realmaxSet;
+
+	bool valid;
+
+// public methods
+public: 
+
+	void setMin( int min ) { if( (realminSet && min <= irealmin) || !realminSet) { imin = min; minSet = true; } }
+	void setMin( float min ) { if( (realminSet && min <= frealmin) || !realminSet) { fmin = min; minSet = true;} }
+	void setMax( int max ) { if( (realmaxSet && max >= irealmax) || !realmaxSet ) { imax = max; maxSet = true; } }
+	void setMax( float max ) { if( (realmaxSet && max >= frealmax) || !realmaxSet ) { fmax = max; maxSet = true; } }
+	void testRealMin( int min ) { if( !realminSet || min < irealmin ) { realminSet = true; irealmin = min; if( minSet && imin > irealmin ) minSet = false; } }
+	void testRealMin( float min ) { if( !realminSet || min < frealmin ) { realminSet = true; frealmin = min; if( minSet && fmin > frealmin ) minSet = false; } }
+	void testRealMax( int max ) { if( !realmaxSet || max > irealmax ) { realmaxSet = true; irealmax = max; if( maxSet && imax < irealmax ) maxSet = false; } }
+	void testRealMax( float max ) { if( !realmaxSet || max > irealmax ) { realmaxSet = true; frealmax = max; if( maxSet && fmax < frealmax ) maxSet = false; } }
+
+	UniformVar() { valid = false; }
+	UniformVar( QString & _name, QString & _typeString, enum UniformType _type );
+	virtual ~UniformVar(){}
+
+	bool isNull() { return !valid; }
 
 
-		enum UniformType type;
-
-		QString name;
-		QString typeString;
-
-		union {
-			int ivalue;
-			float fvalue;
-			bool bvalue;
-			float vec2[2], vec3[3], vec4[4];
-			int ivec2[2], ivec3[3], ivec4[4];
-			bool bvec2[2], bvec3[3], bvec4[4];
-			float mat2[2][2], mat3[3][3], mat4[4][4];
-		};
-
-		QString representerTagName;
-
-		QString textureName;
-		QString textureFilename;
-		QList<GlState> textureGLStates;
-
-		union { int imin; float fmin; };
-		union { int imax; float fmax; };
-		union { int irealmin; float frealmin; };
-		union { int irealmax; float frealmax; };
-
-		bool minSet;
-		bool maxSet;
-		bool realminSet;
-		bool realmaxSet;
-
-
-		void setMin( int min ) { if( (realminSet && min <= irealmin) || !realminSet) { imin = min; minSet = true; } }
-		void setMin( float min ) { if( (realminSet && min <= frealmin) || !realminSet) { fmin = min; minSet = true;} }
-		void setMax( int max ) { if( (realmaxSet && max >= irealmax) || !realmaxSet ) { imax = max; maxSet = true; } }
-		void setMax( float max ) { if( (realmaxSet && max >= frealmax) || !realmaxSet ) { fmax = max; maxSet = true; } }
-		void testRealMin( int min ) { if( !realminSet || min < irealmin ) { realminSet = true; irealmin = min; if( minSet && imin > irealmin ) minSet = false; } }
-		void testRealMin( float min ) { if( !realminSet || min < frealmin ) { realminSet = true; frealmin = min; if( minSet && fmin > frealmin ) minSet = false; } }
-		void testRealMax( int max ) { if( !realmaxSet || max > irealmax ) { realmaxSet = true; irealmax = max; if( maxSet && imax < irealmax ) maxSet = false; } }
-		void testRealMax( float max ) { if( !realmaxSet || max > irealmax ) { realmaxSet = true; frealmax = max; if( maxSet && fmax < frealmax ) maxSet = false; } }
-
-		bool valid;
-
-		UniformVar() { valid = false; }
-		UniformVar( QString & _name, QString & _typeString, enum UniformType _type );
-		virtual ~UniformVar(){}
-
-		bool isNull() { return !valid; }
-
-
-		// * we search the xml tag element that has the default value of a uniform
-		// * variable. It can happend a multiple declaration, so first we search
-		// * in the same RmOpenGLEffect (effectElement), and then in the global document root
+		//* we search the xml tag element that has the default value of a uniform
+		//* variable. It can happened a multiple declaration, so first we search
+		//* in the same RmOpenGLEffect (effectElement), and then in the global document root
 		bool getValueFromXmlDocument( QDomElement & root, bool echoNotFound = true );
 		bool getValueFromXmlDocument( QDomElement & root, QDomElement & effectElement ) {
 			if( getValueFromXmlDocument( effectElement, false ) ) return true;
@@ -105,7 +146,6 @@ class UniformVar
 
 		static bool getUniformNumberVectorFromXmlTag( QDomElement & el, int values, void * farr, bool intOrFloat, UniformVar * ptr );
 		static bool getUniformBooleanVectorFromXmlTag( QDomElement & el, int values, bool * barr);
-
 
 		void VarDump(int indent = 0, bool extendedVarDump = false);
 };
