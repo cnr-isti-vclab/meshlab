@@ -1,9 +1,43 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2008                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+History
+$Log$
+Revision 1.5  2007/12/03 10:26:02  corsini
+code restyling
+
+
+****************************************************************************/
+
 #ifndef __GLSTATEHOLDER_H__
 #define __GLSTATEHOLDER_H__
 
+// Local headers
 #include "parser/RmPass.h"
 #include "parser/UniformVar.h"
+#include <meshlab/meshmodel.h>
 
+// QT heades
 #include <QString>
 #include <QList>
 #include <QMap>
@@ -13,42 +47,48 @@
 #include <QApplication>
 #include <QImage>
 #include <QMessageBox>
-
 #include <GL/glew.h>
 #include <QGLWidget>
 #include <QGLFramebufferObject>
-#include <meshlab/meshmodel.h>
 
-
+// Standard headers
 #include <assert.h>
-
-#define FBO_SIZE 512
-
-
 
 // * Extends the uniform variable class of the RM Parser
 // * to add information such as memory location and
 // * actual value
 class UniformValue : public UniformVar
 {
-	public:
-		static int textureUnit;
 
+// definitions
+public:
 
-		UniformValue( UniformVar & var );
-		virtual ~UniformValue();
+	static const int FBO_SIZE=512;
 
-		// * the arb memory location
-		int location;
+// member variables
+public:
 
-		// * texture mappings
-		bool textureLoaded;
-		GLuint textureId;
+	static int textureUnit;
 
+	// * the arb memory location
+	int location;
 
-		void updateUniformVariableValuesFromDialog( int rowIdx, int colIdx, QVariant newValue );
-		bool updateValueInGLMemory();
-		void VarDump();
+	// * texture mappings
+	bool textureLoaded;
+	GLuint textureId;
+
+// constructor
+public:
+
+	UniformValue( UniformVar & var );
+	virtual ~UniformValue();
+
+// public methods
+public:
+
+	void updateUniformVariableValuesFromDialog( int rowIdx, int colIdx, QVariant newValue );
+	bool updateValueInGLMemory();
+	void VarDump();
 };
 
 // * It's the descriptor of a pass: it has the list 
