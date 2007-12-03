@@ -1,22 +1,59 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2008                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+History
+$Log$
+Revision 1.7  2007/12/03 11:10:26  corsini
+code restyling
+
+
+****************************************************************************/
+
+// Local headers
 #include "glstateholder.h"
+
+// Standard headers
 #include <iostream>
+
 using namespace std;
+
 #define BASE_COLOR_ATTACHMENT GL_COLOR_ATTACHMENT1_EXT
- #define DEBUG        
-/* #define DEBUG_MPASS  */
+
 static void checkGLError(char* location)
 {
-  GLuint errnum;
-  const char *errstr;
-  while (errnum = glGetError()) {
-    errstr = reinterpret_cast<const char *>(gluErrorString(errnum));
-    if (errstr)
-      cout << "Error " << errstr;
-    else
-      cout << "Error " << errnum;
-    if(location) cout << " at " << location;
-    cout << endl;
-  }
+	GLuint errnum;
+	const char *errstr;
+
+	while (errnum = glGetError()) 
+	{
+		errstr = reinterpret_cast<const char *>(gluErrorString(errnum));
+		if (errstr)
+			cout << "Error " << errstr;
+		else
+			cout << "Error " << errnum;
+		if(location) cout << " at " << location;
+		cout << endl;
+	}
 }
 
 
