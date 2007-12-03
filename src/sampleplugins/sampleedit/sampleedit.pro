@@ -14,7 +14,6 @@ RESOURCES     = sampleedit.qrc
 win32:DEFINES += NOMINMAX
 
 CONFIG		+= debug_and_release
-mac:CONFIG += x86 ppc
 
 contains(TEMPLATE,lib) {
    CONFIG(debug, debug|release) {

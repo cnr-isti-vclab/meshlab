@@ -86,6 +86,16 @@ void SampleEditPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 	glDisable(GL_DEPTH_TEST); 
 	glDisable(GL_LIGHTING);
+	glColor(Color4b::DarkRed);
+	glBegin(GL_LINE_LOOP);
+		glVertex(curFacePtr->P(0));
+		glVertex(curFacePtr->P(1));
+		glVertex(curFacePtr->P(2));
+	glEnd();
+	for(int i=0;i<3;++i)
+		gla->renderText(curFacePtr->P(i)[0],curFacePtr->P(i)[1],curFacePtr->P(i)[2],
+										QString("v%1:%2").arg(i).arg(curFacePtr->V(i) - &m.cm.vert[0]), qFont);
+	glEnable(GL_DEPTH_TEST); 
 	glColor(Color4b::Red);
 	glBegin(GL_LINE_LOOP);
 		glVertex(curFacePtr->P(0));
