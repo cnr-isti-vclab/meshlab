@@ -1,8 +1,41 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2008                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+History
+$Log$
+Revision 1.6  2007/12/03 11:56:10  corsini
+code restyling
+
+
+****************************************************************************/
+
+// Local headers
 #include "rmshaderdialog.h"
 
 
-// * we create the dialog with all the proper contents
-RmShaderDialog::RmShaderDialog(GLStateHolder * _holder, RmXmlParser * _parser, QGLWidget* gla, RenderMode &rm, QWidget *parent) : QDialog(parent)
+// we create the dialog with all the proper contents
+RmShaderDialog::RmShaderDialog(GLStateHolder * _holder, RmXmlParser * _parser, 
+															 QGLWidget* gla, RenderMode &rm, QWidget *parent): QDialog(parent)
 {
 	ui.setupUi(this);
 	parser = _parser;
@@ -13,12 +46,13 @@ RmShaderDialog::RmShaderDialog(GLStateHolder * _holder, RmXmlParser * _parser, Q
 	eff_selected = NULL;
 	pass_selected = NULL;
 
-	if( parser -> size() == 0 ) {
+	if( parser -> size() == 0 ) 
+	{
 		QMessageBox::critical(0, "Meshlab", QString("This RmShader seems to have no suitable effects"));
 		return;
 	}
 
-	// * fill the effect combo
+	// fill the effect combo
 	for( int i = 0; i < parser -> size(); i++ )
 		ui.cmbEffectSelection -> addItem( parser -> at(i).getName() );
 
@@ -42,7 +76,8 @@ RmShaderDialog::~RmShaderDialog()
 }
 
 
-void RmShaderDialog::fillDialogWithEffect( int index ) {
+void RmShaderDialog::fillDialogWithEffect( int index )
+{
 	if( index < 0 || index >= parser -> size() ) return;
 
 	eff_selected = &(parser -> at( index ));
@@ -55,16 +90,19 @@ void RmShaderDialog::fillDialogWithEffect( int index ) {
 
 	fillTabsWithPass(0);
 
-	if(!holder->compile()) {
+	if(!holder->compile()) 
+	{
 		QMessageBox::critical(0, "Meshlab", "An error occurred during shader compiling.\n" + holder->getLastError() );
-	} else
-	if(!holder->link()) {
+	} 
+	else if(!holder->link()) 
+	{
 		QMessageBox::critical(0, "Meshlab", "An error occurred during shader linking.\n" + holder->getLastError() );
 	}
 }
 
 
-void RmShaderDialog::fillTabsWithPass( int index ) {
+void RmShaderDialog::fillTabsWithPass( int index ) 
+{
 	clearTabs();
 	if( index < 0 || eff_selected == NULL || index >= eff_selected -> size() ) return;
 
@@ -81,14 +119,23 @@ void RmShaderDialog::fillTabsWithPass( int index ) {
 	for( int i = 0; i < 2; i++ )
 		for( int j = 0; j < ( i == 0 ? pass_selected -> vertexUniformVariableSize() : pass_selected -> fragmentUniformVariableSize()); j++ ) {
 			UniformVar v = pass_selected -> getUniformVariable( j, i == 0 ? RmPass::VERTEX : RmPass::FRAGMENT );
-			if( v.representerTagName == "RmRenderTarget" ) {
-				if( i == 0 ) info += "Vertex"; else info += "Fragment";
+
+			if( v.representerTagName == "RmRenderTarget" ) 
+			{
+				if( i == 0 ) 
+					info += "Vertex"; 
+				else 
+					info += "Fragment";
+
 				info += " render Input: " + v.name;
+
 				for( int k = 0; k < eff_selected -> size(); k++ )
-					if( eff_selected -> at(k).getRenderTarget().name == v.textureName ) {
+					if( eff_selected -> at(k).getRenderTarget().name == v.textureName ) 
+					{
 						info += " (from pass: " + eff_selected -> at(k).getName() + ")";
 						break;
 					}
+
 				info += "\n";
 			}
 		}
@@ -288,27 +335,34 @@ void RmShaderDialog::fillTabsWithPass( int index ) {
 		}
 
 	// * Open Gl Status in the third tab
-	if( pass_selected -> openGLStatesSize() == 0 ) {
+	if( pass_selected -> openGLStatesSize() == 0 ) 
+	{
 		QLabel * lblgl = new QLabel( "No openGL states set" );
 		ui.gridLayout3 -> addWidget( lblgl, row, 0 );
 		shown.append(lblgl);
-	} else
-	for( int i = 0, row = 0; i < pass_selected -> openGLStatesSize(); i++ ) {
-		QString str = "OpenGL state: " + pass_selected -> getOpenGLState(i).name;
-		str += " (" + QString().setNum(pass_selected -> getOpenGLState(i).state) + "): " + QString().setNum(pass_selected -> getOpenGLState(i).value);
-		QLabel * lblgl = new QLabel(str);
-		ui.gridLayout3 -> addWidget( lblgl, row++, 0 );
-		shown.append(lblgl);
+	} 
+	else
+	{
+		for( int i = 0, row = 0; i < pass_selected -> openGLStatesSize(); i++ ) 
+		{
+			QString str = "OpenGL state: " + pass_selected -> getOpenGLState(i).name;
+			str += " (" + QString().setNum(pass_selected -> getOpenGLState(i).state) + "): " + QString().setNum(pass_selected -> getOpenGLState(i).value);
+			QLabel * lblgl = new QLabel(str);
+			ui.gridLayout3 -> addWidget( lblgl, row++, 0 );
+			shown.append(lblgl);
+		}
 	}
 }
 
-void RmShaderDialog::clearTabs() {
-
-	for( int i = 0; i < shown.size(); i++ ) {
+void RmShaderDialog::clearTabs() 
+{
+	for( int i = 0; i < shown.size(); i++ ) 
+	{
 		shown[i] -> hide();
 		shown[i] -> close();
 		delete shown[i];
 	}
+
 	shown.clear();
 
 	ui.textVertex -> clear();
@@ -342,7 +396,7 @@ void RmShaderDialog::valuesChanged(const QString & varNameAndIndex )
 			if( binp ) { 
 				isTextureFileEdit = true;
 
-				// * choose the filename with a dialog
+				// choose the filename with a dialog
 				QFileDialog fd(0,"Choose new texture");
 
 				QDir texturesDir = QDir(qApp->applicationDirPath());
@@ -365,13 +419,15 @@ void RmShaderDialog::valuesChanged(const QString & varNameAndIndex )
 		if( !txt && (txt = dynamic_cast<QLineEdit*>(shown[i])) && txt -> objectName().left(len-2) != varname ) txt = NULL;
 	}
 	
-	if( val.isNull() ) {
+	if( val.isNull() )
+	{
 		qWarning( "Uniform Variable changed in the dialog, but no valid input found.. fix me! (no change done)");
 		return;
 	}
 
-	// * if it's a texture file update the info shown in the dialog
-	if( isTextureFileEdit ) {
+	// if it's a texture file update the info shown in the dialog
+	if( isTextureFileEdit ) 
+	{
 		txt -> setText( val.toString() );
 		QString label = lbl -> text();
 		int statusStart = label.indexOf("Filename: ");
@@ -385,5 +441,4 @@ void RmShaderDialog::valuesChanged(const QString & varNameAndIndex )
 
 	glarea -> updateGL();
 }
-
 

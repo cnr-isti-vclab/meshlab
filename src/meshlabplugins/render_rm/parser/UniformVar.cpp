@@ -1,6 +1,37 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2008                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+History
+$Log$
+Revision 1.2  2007/12/03 12:01:04  corsini
+code restyling
+
+
+****************************************************************************/
+
+// Local headers
 #include "UniformVar.h"
 #include "RmXmlParser.h"
-
 
 
 UniformVar::UniformVar( QString & _name, QString & _typeString, enum UniformType _type )
@@ -16,29 +47,32 @@ UniformVar::UniformVar( QString & _name, QString & _typeString, enum UniformType
 }
 
 
-
 bool UniformVar::getUniformKnownButUnimplementedTag( QDomElement & root, QString tag, QString tagname )
 {
-	if( RmXmlParser::getDomElement(root, tag, tagname ).isNull() == false ) {
+	if( RmXmlParser::getDomElement(root, tag, tagname ).isNull() == false ) 
+	{
 		representerTagName = tag;
 		return true;
 	}
 	return false;
 }
 
-// * ************************** * //
-// * 3 Common Methods for       * //
-// * xml variable value mining  * //
-// * [boolean][number][texture] * //
-// * ************************** * //
+/******************************/
+/* 3 Common Methods for       */
+/* xml variable value mining  */
+/* [boolean][number][texture] */
+/******************************/
 bool UniformVar::getUniformBooleanVectorFromTag( QDomElement & root, QString tag, int vecsize, bool * vec, bool * found )
 {
 	QDomElement el = RmXmlParser::getDomElement( root, tag, name );
-	if( !el.isNull() ) {
+	
+	if( !el.isNull() ) 
+	{
 		if( found ) *found = true;
 		representerTagName = tag;
 		return UniformVar::getUniformBooleanVectorFromXmlTag( el, vecsize, vec );
 	}
+
 	if( found ) *found = false;
 	return false;
 }
@@ -46,25 +80,35 @@ bool UniformVar::getUniformBooleanVectorFromTag( QDomElement & root, QString tag
 bool UniformVar::getUniformNumberVectorFromTag( QDomElement & root, QString tag, int vecsize, void * vec, bool intOrFloat, bool * found )
 {
 	QDomElement el = RmXmlParser::getDomElement( root, tag, name );
-	if( !el.isNull() ) {
+	
+	if( !el.isNull() ) 
+	{
 		if( found ) *found = true;
 		representerTagName = tag;
 		return UniformVar::getUniformNumberVectorFromXmlTag( el, vecsize, vec, intOrFloat, this );
 	}
-	if( found ) *found = false;
+
+	if( found ) 
+		*found = false;
+
 	return false;
 }
 
 bool UniformVar::getUniformTextureFromTag( QDomElement & root, QString tag, bool * found )
 {
 	QDomElement el = RmXmlParser::getDomElement( root, tag, textureName );
-	if( !el.isNull() ) {
+	
+	if( !el.isNull() ) 
+	{
 		if( found ) *found = true;
 		representerTagName = tag;
 		textureFilename = el.attribute("FILE_NAME");
 		return true;
 	}
-	if( found ) *found = false;
+
+	if( found ) 
+		*found = false;
+	
 	return false;
 }
 
@@ -191,7 +235,8 @@ bool UniformVar::getValueFromXmlDocument( QDomElement & root, bool echoNotFound 
 	if( getUniformKnownButUnimplementedTag( root, "RmDynamicVariable", name ))
 		return true;
 
-	if( echoNotFound ) {
+	if( echoNotFound ) 
+	{
 		qDebug() << "RmXmlParser for uniform variable" << name << "of type" << UniformVar::getStringFromUniformType(type);
 		qDebug() << "Default value not found";
 	}
@@ -311,18 +356,26 @@ void UniformVar::VarDump( int indent, bool extendedVarDump )
 		case MAT3:
 		case MAT4:
 			ret += " [matrix]";
-			if( extendedVarDump ) {
+			if( extendedVarDump ) 
+			{
 				int n = type == MAT2 ? 2 : (type == MAT3 ? 3 : 4);
 				float * mat = type == MAT2 ? (float*)mat2 : (type == MAT3 ? (float*)mat3 : (float*)mat4);
 				ret += "\n";
 
-				for( int i = 0; i < n; i++ ) {
+				for( int i = 0; i < n; i++ ) 
+				{
 					for( int k = 0; k < indent+2; k++ )
 						ret += " ";
+					
 					ret += "[ ";
-					for( int j = 0; j < n; j++ ) ret += QString().setNum( mat[i*n+j] ) + " ";
+
+					for( int j = 0; j < n; j++ ) 
+						ret += QString().setNum( mat[i*n+j] ) + " ";
+					
 					ret += "]";
-					if( i+1 < n ) ret += "\n";
+					
+					if( i+1 < n ) 
+						ret += "\n";
 				}
 			}
 			break;
@@ -348,14 +401,19 @@ void UniformVar::VarDump( int indent, bool extendedVarDump )
 				else
 				{
 					ret += "\n";
-					for( int i = 0; i < textureGLStates.size(); i++ ) {
+					for( int i = 0; i < textureGLStates.size(); i++ )
+					{
 						for( int j = 0; j < indent+2; j++ )
 							ret += " ";
+
 						ret += "\""  + textureGLStates[i].getName() + "\" (" + QString().setNum(textureGLStates[i].state).toLatin1().data() + ") => " + QString().setNum(textureGLStates[i].getValue());
-						if( i+1 < textureGLStates.size() ) ret += "\n";
+						
+						if( i+1 < textureGLStates.size() ) 
+							ret += "\n";
 					}
 				}
-			} else
+			} 
+			else
 				ret += " [openGL states: " + QString().setNum(textureGLStates.size()) + "]";
 
 			break;
@@ -375,56 +433,71 @@ bool UniformVar::getUniformNumberVectorFromXmlTag( QDomElement & el, int values,
 
 	bool ok1=true,ok2=true;
 
-	for( int i = 0; i < values; i++ )
+	for(int i = 0; i < values; i++)
 	{
 		QString attrname = "VALUE";
 		if( values > 1 ) 
 			attrname += "_" + QString().setNum(i);
 		QString attrvalue = el.attribute(attrname);
 
-		if( intOrFloat ) {
+		if( intOrFloat ) 
+		{
 			int val = attrvalue.toInt(&ok1);
-			if( ok1 ) {
+			if( ok1 ) 
+			{
 				iarr[i] = val;
 				ptr -> testRealMin(val);
 				ptr -> testRealMax(val);
 			}
-		} else {
+		} 
+		else 
+		{
 			float val = attrvalue.toFloat(&ok1);
-			if( ok1 ) {
+			if( ok1 ) 
+			{
 				farr[i] = val;
 				ptr -> testRealMin(val);
 				ptr -> testRealMax(val);
 			}
 		}
 
-		if( !ok1 ) {
+		if( !ok1 ) 
+		{
 			qDebug() << "RmXmlParser: error while reading default value for " << (intOrFloat ? "int" : "float" )<< " vector["<<values<<"]" << el.attribute("NAME") << ":" << attrname << "=>" << attrvalue;
 			return false;
 		}
 	}
 
-	if( !el.attribute( "MIN" ).isEmpty() ) {
-		if( intOrFloat ) {
+	if( !el.attribute( "MIN" ).isEmpty() ) 
+	{
+		if( intOrFloat ) 
+		{
 			int min = el.attribute("MIN").toInt(&ok1);
 			if( ok1 ) ptr -> setMin(min);
-		} else {
+		}
+		else
+		{
 			float min = el.attribute("MIN").toFloat(&ok1);
 			if( ok1 ) ptr -> setMin(min);
 		}
 	}
 
-	if( !el.attribute( "MAX" ).isEmpty() ) {
-		if( intOrFloat ) {
+	if( !el.attribute( "MAX" ).isEmpty() ) 
+	{
+		if( intOrFloat ) 
+		{
 			int max = el.attribute("MAX").toInt(&ok2);
 			if( ok2 ) ptr -> setMax(max);
-		} else {
+		}
+		else
+		{
 			float max = el.attribute("MAX").toFloat(&ok2);
 			if( ok2 ) ptr -> setMax(max);
 		}
 	}
 
-	if( !ok1 || !ok2 ) {
+	if( !ok1 || !ok2 ) 
+	{
 		qDebug() << "RmXmlParser: error while reading default value for float vector["<<values<<"]" << el.attribute("NAME");
 		qDebug() << "Min_ok("<<ok1<<") Max_ok("<<ok2<<")";
 	}
@@ -441,7 +514,9 @@ bool UniformVar::getUniformBooleanVectorFromXmlTag( QDomElement & el, int values
 			attrname += "_" + QString().setNum(i);
 
 		QString attrvalue = el.attribute(attrname);
-		if( attrvalue != "TRUE" && attrvalue != "FALSE ") {
+
+		if( attrvalue != "TRUE" && attrvalue != "FALSE") 
+		{
 			qDebug() << "RmXmlParser: error while reading default value for boolean vector["<<values<<"]" << el.attribute("NAME");
 			qDebug() << attrvalue << "is not TRUE neither FALSE";
 			return false;
