@@ -1,4 +1,37 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005-2008                                           \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+History
+$Log$
+Revision 1.2  2007/12/03 10:52:58  corsini
+code restyling
+
+
+****************************************************************************/
+
+// Local headers
 #include "RmXmlParser.h"
+
 
 bool RmXmlParser::parse( QString _filename )
 {
@@ -7,7 +40,7 @@ bool RmXmlParser::parse( QString _filename )
 	QFile file( filename );
 	effects.clear();
 
-	// * open the file.. 
+	// open the file
 	if( !file.open( QIODevice::ReadOnly | QIODevice::Text )) {
 		error = "Impossible to open the specified file: ";
 		error += filename;
@@ -18,7 +51,7 @@ bool RmXmlParser::parse( QString _filename )
 	QString errorMsg;
 	int errorLine, errorColumn;
 
-	// * .. and parse the xml document
+	// parse the xml document
 	if( !doc.setContent( &file, &errorMsg, &errorLine, &errorColumn ) ) {
 		error = QString( "Xml Parse Error ") + filename;
 		error += QString("(") + QString().setNum(errorLine) + QString(",") + QString().setNum(errorColumn) + QString("): ") + errorMsg;
@@ -27,44 +60,45 @@ bool RmXmlParser::parse( QString _filename )
 
 	QDomElement root = doc.documentElement();
 
-	// * This is what i understood and what this parser does.
-	// * the xml looks like to have one or more RmOpenGLEffect, and each one can
-	// * contain one or more RmGLPass. The uniform variables are tagged inside the
-	// * RmGLPass as RmShaderConstant or RmSampler. They are a RmShaderConstant when
-	// * the type is a "primitive" one (float int vec2, mat4 ..); if they are
-	// * a RmSampler then they probably refers to a texture. In this case inside the
-	// * RmGLPass is specified a tag RmTextureObject with the name of variable.
-	// * This tag tells us the opengl state for the texture and a texture reference.
-	// * Note, it can happend that in the source code is specified a uniform variable
-	// * that is not used: in this case no RmShaderConstant neither a RmSampler will
-	// * appear in RmGLPass.
-	// *
-	// * The values of the uniform variable (such as default value, min and max value
-	// * for RmShaderConstant, and the file name for the RmSampler) are kept in tags 
-	// * at the top level of the xml tree, and they have as tagname something like
-	// * RmMatrixVariable, RmVectorVariable, RmFloatVariable, Rm2DTextureVariable,
-	// * RmCubemapVariable etc.. according to the variable type
-	// *
+	/*
+	 * This is what i understood and what this parser does.
+	 * the xml looks like to have one or more RmOpenGLEffect, and each one can
+	 * contain one or more RmGLPass. The uniform variables are tagged inside the
+	 * RmGLPass as RmShaderConstant or RmSampler. They are a RmShaderConstant when
+	 * the type is a "primitive" one (float int vec2, mat4 ..); if they are
+	 * a RmSampler then they probably refers to a texture. In this case inside the
+	 * RmGLPass is specified a tag RmTextureObject with the name of variable.
+	 * This tag tells us the opengl state for the texture and a texture reference.
+	 * Note, it can happend that in the source code is specified a uniform variable
+	 * that is not used: in this case no RmShaderConstant neither a RmSampler will
+	 * appear in RmGLPass.
+	 *
+	 * The values of the uniform variable (such as default value, min and max value
+	 * for RmShaderConstant, and the file name for the RmSampler) are kept in tags 
+	 * at the top level of the xml tree, and they have as tagname something like
+	 * RmMatrixVariable, RmVectorVariable, RmFloatVariable, Rm2DTextureVariable,
+	 * RmCubemapVariable etc.. according to the variable type
+	 */
 
-	// * we look for RmOpenGLEffect xml tag
+	// we looking for RmOpenGLEffect xml tag
 	QDomNodeList list = root.elementsByTagName("RmOpenGLEffect");
 	for( int i = 0; i < list.size(); i++ ) {
 		QDomElement effectElement = list.at(i).toElement();
 
 		RmEffect eff(effectElement.attribute("NAME", "name not set" ));
 
-		// * each effect has a number (0-n) of RmGLPass. We search for them
+		// each effect has a number (0-n) of RmGLPass.
 		QDomNodeList passlist = effectElement.elementsByTagName( "RmGLPass" );
 		for( int j = 0; j < passlist.size(); j++ ) {
 
-			// * get the name of pass
+			// get the pass name
 			QDomNode passNode = passlist.at(j);
 			QDomElement elp = passNode.toElement();
 			bool ok;
 			int index = elp.attribute("PASS_INDEX").toInt(&ok);
 			RmPass pass( elp.attribute("NAME", "name not set" ), (ok ? index : -1));
 
-			// * get the name of model reference and its filename
+			// get the name of model reference and its filename
 			QDomElement modelRefEl = passNode.firstChildElement( "RmModelReference");
 			if( modelRefEl.isNull() == false ) {
 				pass.setModelReference( modelRefEl.attribute("NAME"));
@@ -73,7 +107,7 @@ bool RmXmlParser::parse( QString _filename )
 					pass.setModelReferenceFileName( modelDataEl.attribute("FILE_NAME"));
 			}
 
-			// * openGL state
+			// openGL state
 			QDomElement stateEl = passNode.firstChildElement( "RmRenderStateBlock");
 			if( stateEl.isNull() == false ) {
 				QDomNodeList statelist = stateEl.elementsByTagName( "RmState" );
@@ -84,7 +118,7 @@ bool RmXmlParser::parse( QString _filename )
 				}
 			}
 
-			// * get the render target
+			// get the render target
 			QDomElement renderEl = passNode.firstChildElement( "RmRenderTarget" );
 			if( renderEl.isNull() == false ) {
 				RenderTarget rt( renderEl.attribute("NAME"));
@@ -97,7 +131,7 @@ bool RmXmlParser::parse( QString _filename )
 			}
 			
 
-			// * get the source code of fragment and vertex program
+			// get the source code of fragment and vertex program
 			QDomNodeList sourcelist = elp.elementsByTagName( "RmGLShader" );
 			for( int k = 0; k < sourcelist.size(); k++ ) {
 				QDomNode elnode = sourcelist.at(k);
@@ -111,8 +145,8 @@ bool RmXmlParser::parse( QString _filename )
 				}
 			}
 
-			// * get the name of constant uniform variables and search 
-			// * in the whole document for their values
+			// get the name of constant uniform variables and search 
+			// in the whole document for their values
 			QDomNodeList constlist = elp.elementsByTagName( "RmShaderConstant" );
 			for( int k = 0; k < constlist.size(); k++ ) {
 				QString name = constlist.at(k).toElement().attribute("NAME");
@@ -128,7 +162,7 @@ bool RmXmlParser::parse( QString _filename )
 				}
 			}
 
-			// * and texture uniform variables 
+			// and texture uniform variables 
 			QDomNodeList textureObjectList = elp.elementsByTagName( "RmTextureObject" );
 			QDomNodeList samplerlist = elp.elementsByTagName( "RmSampler" );
 			for( int k = 0; k < samplerlist.size(); k++ ) {
@@ -136,7 +170,7 @@ bool RmXmlParser::parse( QString _filename )
 				QString textureName;
 				QList<GlState> GLstates;
 
-				// * First get the textureObject xml tag relative to this texture
+				// First get the textureObject xml tag relative to this texture
 				for( int q = 0; q < textureObjectList.size(); q++ ) { 
 					QDomElement textEl = textureObjectList.at(q).toElement();
 					QString toName = textEl.attribute("NAME");
@@ -145,7 +179,7 @@ bool RmXmlParser::parse( QString _filename )
 						if( !trEl.isNull() )
 							textureName = trEl.attribute("NAME");
 
-						// * save the GlStates
+						// save the GlStates
 						QDomNodeList statesList = textEl.elementsByTagName( "RmState" );
 						for( int w = 0; w < statesList.size(); w++ ) // * LOL! i,j,k,q,w used !
 							GLstates.append( statesList.at(w).toElement() );
@@ -154,7 +188,7 @@ bool RmXmlParser::parse( QString _filename )
 					}
 				}
 
-				// * then search the variable in the source code
+				// then search the variable in the source code
 				UniformVar var = pass.searchFragmentUniformVariable( name );
 				if( var.isNull() == false ) {
 					var.textureName = textureName;
