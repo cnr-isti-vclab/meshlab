@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.7  2007/12/03 11:14:55  corsini
+*** empty log message ***
+
 Revision 1.6  2007/12/03 11:08:48  corsini
 code restyling
 
@@ -62,8 +65,9 @@ void RmMeshShaderRenderPlugin::initActionList() {
 	}
 #endif
 
-	if(!shadersDir.cd("shadersrm"))  {
-		QMessageBox::information(0, "MeshLAb", "Unable to find the render monkey shaders directory.\n" "No shaders will be loaded.");
+	if(!shadersDir.cd("shadersrm"))
+	{
+		QMessageBox::information(0, "MeshLab", "Unable to find the render monkey shaders directory.\n" "No shaders will be loaded.");
 		return;
 	}
 
