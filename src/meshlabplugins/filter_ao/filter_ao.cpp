@@ -46,7 +46,7 @@
 #include <QDataStream>
 #include <QString>
 #include <QFile>
-#include <QTimer>
+#include <QTime>
 #include <gl/glew.h>
 
 #include "filter_ao.h"
@@ -70,7 +70,6 @@ AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 	numViews = AMBOCC_DEFAULT_NUM_VIEWS;
 	texSize = AMBOCC_DEFAULT_TEXTURE_SIZE;
 	texArea = texSize*texSize;
-	timeElapsed = 0;
 }
 
 AmbientOcclusionPlugin::~AmbientOcclusionPlugin()
@@ -122,12 +121,14 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 }
 bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
+	QTime timer;
+	timer.start();
+
 	assert(filter->text() == filterName(FP_AMBIENT_OCCLUSION));
 	useGPU = par.getBool("gpuAcceleration");
 	texSize = par.getInt("texSize");
 	texArea = texSize*texSize;
 	numViews = par.getInt("reqViews");
-	timeElapsed = 0;
 
 	if ( useGPU && ((unsigned int)m.cm.vn > texArea) )
 	{
@@ -151,11 +152,13 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	meshBBox = m.cm.bbox;
 	m.glw.Update();
 
+	/*
 	GLuint meshDL;
 	meshDL = glGenLists(1);
 	glNewList(meshDL, GL_COMPILE);
 		renderMesh(m);
-	glEndList();
+	glEndList()
+	*/;
 
 	if(useGPU)
 		vertexCoordsToTexture( m );
@@ -180,9 +183,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 
 	//****SETUP THE TIMER*****/
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(timePP()));
-	timer->start(10);
 
 	int c=0;
 	for (vi = posVect.begin(); vi != posVect.end(); vi++)
@@ -202,7 +202,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			glColorMask(0, 0, 0, 0);
-				glCallList(meshDL);//renderMesh(m);
+				renderMesh(m);
 			glColorMask(1, 1, 1, 1);
 
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -224,7 +224,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 
 			// FIRST PASS - fill depth buffer
 			glColorMask(0, 0, 0, 0);
-				glCallList(meshDL);//renderMesh(m);
+				renderMesh(m);
 			glColorMask(1, 1, 1, 1);
 
 			glDisable(GL_POLYGON_OFFSET_FILL);
@@ -246,9 +246,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	else
 		applyOcclusionSW(m,occlusion);
 
-	timer->stop();
-
-	Log(0,"Successfully calculated ambient occlusion after %3.2f sec", ((float)timeElapsed / 100.0) );
+	Log(0,"Successfully calculated ambient occlusion after %3.2f sec", ((float)timer.elapsed()/1000.0f) );
 
 
 	/********** Clean up the mess ************/
@@ -768,11 +766,6 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 	glAttachShader(pr,f);
 
 	glLinkProgram(pr);
-}
-
-void AmbientOcclusionPlugin::timePP()
-{
-	timeElapsed++;
 }
 void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata, int elems)
 {

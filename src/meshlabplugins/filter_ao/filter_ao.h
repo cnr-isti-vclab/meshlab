@@ -50,8 +50,7 @@ private:
 	
 	unsigned int numViews,
 	             texSize,
-	             texArea,
-				 timeElapsed;
+	             texArea;
 
 	bool useGPU;
 
@@ -101,8 +100,6 @@ private:
 
 	void dumpFloatTexture(QString filename, float *texdata, int elems);
 
-public slots:
-	void  timePP ();
 };
 
 #endif
