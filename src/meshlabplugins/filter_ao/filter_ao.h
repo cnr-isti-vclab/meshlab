@@ -40,7 +40,6 @@ class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface
 // Attributes
 private:
 	Point3f cameraDir;
-	Box3f   meshBBox;
 	GLuint  fboDepth,
 	        fboResult,
 	        depthBufferTex,
@@ -76,14 +75,16 @@ public:
 private:
 	void  initTextures          (GLenum colorFormat,
 	                             GLenum depthFormat);
-	bool  initContext           (QGLWidget &qWidget);
+	bool  initContext           (QGLWidget &qWidget,
+	                             vcg::CallBackPos *cb);
 
 	bool  checkFramebuffer();
 
 	void  vertexCoordsToTexture (MeshModel &m);
 
 	void  renderMesh            (MeshModel &m);
-	void  setCamera             (Point3f camDir);
+	void  setCamera             (Point3f camDir,
+	                             Box3f &meshBBox);
 
 	void  generateOcclusionHW   ();
 	void  generateOcclusionSW   (MeshModel &m,

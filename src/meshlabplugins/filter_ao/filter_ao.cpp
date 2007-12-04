@@ -121,8 +121,10 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 }
 bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-	QTime timer;
-	timer.start();
+	int tInitElapsed = 0;
+	QTime tInit, tAll;
+	tInit.start();
+	tAll.start();
 
 	assert(filter->text() == filterName(FP_AMBIENT_OCCLUSION));
 	useGPU = par.getBool("gpuAcceleration");
@@ -143,22 +145,22 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	QGLWidget qWidget;
 
 	//Creates a new RC, initializes everything (glew, textures, FBO..)
-	if (!initContext(qWidget))
+	if (!initContext(qWidget, cb))
 		return false;
 	
 	//Prepare mesh to be rendered
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
-	meshBBox = m.cm.bbox;
+	if (GLEW_ARB_vertex_buffer_object)
+	{
+		//m.glw.SetHint(vcg::GLW::HNUseVArray);
+		m.glw.SetHint(vcg::GLW::HNUseVBO);
+		cb(0, "Generating vertex data for VBO...");
+	}
 	m.glw.Update();
 
-	/*
-	GLuint meshDL;
-	meshDL = glGenLists(1);
-	glNewList(meshDL, GL_COMPILE);
-		renderMesh(m);
-	glEndList()
-	*/;
+	if (GLEW_ARB_vertex_buffer_object)
+		cb(100, "Generating vertex data for VBO... Done.");
 
 	if(useGPU)
 		vertexCoordsToTexture( m );
@@ -171,10 +173,13 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 
 	//Generates the views to be used just the first time
 	//(to keep view directions always the same)
+	//or if the user changed the number of requested views
 	static bool first = true;
-	if (first)
+	static int lastViews = numViews;
+	if (first || (lastViews!=numViews))
 	{
 		first = false;
+		lastViews = numViews;
 		GenNormal<float>::Uniform(numViews,posVect);
 	}
 
@@ -182,17 +187,18 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 
-	//****SETUP THE TIMER*****/
-
+	tInitElapsed = tInit.elapsed();
+	
 	int c=0;
 	for (vi = posVect.begin(); vi != posVect.end(); vi++)
 	{
-		setCamera(*vi);
+		setCamera(*vi, m.cm.bbox);
+
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.0f, 1.0f);
 
 		if (useGPU)
 		{
-			glEnable(GL_POLYGON_OFFSET_FILL);
-			glPolygonOffset(1.0, 1.0);
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
 
@@ -205,13 +211,13 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 				renderMesh(m);
 			glColorMask(1, 1, 1, 1);
 
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
 
 			// SECOND PASS - use depth buffer to check occlusion
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
+			//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
 			generateOcclusionHW();
 			
 			glDisable(GL_POLYGON_OFFSET_FILL);
@@ -219,8 +225,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		else
 		{
 			glClear(GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_POLYGON_OFFSET_FILL);
-			glPolygonOffset(1.0f, 1.0f);
 
 			// FIRST PASS - fill depth buffer
 			glColorMask(0, 0, 0, 0);
@@ -232,7 +236,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 			// SECOND PASS - use depth buffer to check occlusion
 			generateOcclusionSW(m, occlusion);
 		}
-		
+
 		cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
 		c++;
 	}
@@ -246,7 +250,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	else
 		applyOcclusionSW(m,occlusion);
 
-	Log(0,"Successfully calculated ambient occlusion after %3.2f sec", ((float)timer.elapsed()/1000.0f) );
+	Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
 
 	/********** Clean up the mess ************/
@@ -264,6 +268,8 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		glDeleteShader(shdrID);
 	}
 
+	m.glw.ClearHint(vcg::GLW::HNUseVBO);
+
 	delete [] occlusion;
 
 	qWidget.doneCurrent();
@@ -272,10 +278,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 }
 void AmbientOcclusionPlugin::renderMesh(MeshModel &m)
 {
-	glPushMatrix();
-		glMultMatrix(m.cm.Tr);
-		m.glw.Draw(vcg::GLW::DMSmooth, vcg::GLW::CMPerVert, vcg::GLW::TMNone);
-	glPopMatrix();
+	m.glw.DrawFill<vcg::GLW::NMNone, vcg::GLW::CMNone, vcg::GLW::TMNone>();
 }
 
 void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat)
@@ -348,8 +351,10 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget)
+bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *cb)
 {
+	cb(0, "Initializing: Context");
+
 	QGLFormat qFormat = QGLFormat::defaultFormat();
 	qFormat.setAlpha(true);
 	qFormat.setDepth(true);
@@ -363,6 +368,8 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget)
 
 	qWidget.setFixedSize(texSize,texSize);
 	qWidget.makeCurrent();
+
+	cb(15, "Initializing: Glew");
 
 	//*******INIT GLEW********/
 	GLint glewError = glewInit();
@@ -407,17 +414,20 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget)
 		return false;
 	}
 
+	cb(30, "Initializing: Textures");
 	//GL_RGBA32/16F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
 	initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT24);  //More than 100k different views are supported with FP16
 	
 	if (useGPU)
 	{
 		//*******LOAD SHADER*******/
+		cb(45, "Initializing: Shaders");
 		set_shaders("ambient_occlusion",vs,fs,shdrID);
 
 
 		//*******INIT FBO*********/
 
+		cb(65, "Initializing: FBOs");
 		// FBO for first pass (1 depth attachment)
 		fboDepth = 0;
 		glGenFramebuffersEXT(1, &fboDepth);
@@ -447,6 +457,8 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget)
 	}
 
 	glViewport(0.0, 0.0, texSize, texSize);
+
+	cb(100, "Initializing: Done.");
 
 	return true;
 }
@@ -523,7 +535,7 @@ void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 	delete [] vertexNormals;
 }
 
-void AmbientOcclusionPlugin::setCamera(Point3f camDir)
+void AmbientOcclusionPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
 {
 	cameraDir = camDir;
 	GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
@@ -560,6 +572,13 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	// Need to clear the depthBuffer if we don't
+	// want a mesh-shaped hole in the middle of the S.A.Q. :)
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glDisable(GL_DEPTH_TEST);
+
+
 	glUseProgram(shdrID);
 
 	// Set depthmap
@@ -585,12 +604,6 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 
 	// Set texture Size
 	glUniform1i(glGetUniformLocation(shdrID, "texSize"), texSize);
-
-	// Need to clear the depthBuffer if we don't
-	// want a mesh-shaped hole in the middle of the S.A.Q. :)
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	glDisable(GL_DEPTH_TEST);
 
 	// Screen-aligned Quad
 	glBegin(GL_QUADS);
@@ -621,7 +634,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 
 	Point3<CMeshO::ScalarType> vp;
 	Point3<CMeshO::ScalarType> vn;
-	for (unsigned int i=0; i<m.cm.vn; ++i)
+	for (int i=0; i<m.cm.vn; ++i)
 	{
 		vp = m.cm.vert[i].P();
 		gluProject(vp.X(), vp.Y(), vp.Z(),
