@@ -78,18 +78,24 @@ AmbientOcclusionPlugin::~AmbientOcclusionPlugin()
 
 const QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) 
 {
-  switch(filterId) {
+	switch(filterId)
+	{
 		case FP_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion"); 
 		default : assert(0); 
 	}
+	
+	return QString("");
 }
 
 const QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId)
 {
-  switch(filterId) {
+	switch(filterId)
+	{
 		case FP_AMBIENT_OCCLUSION :  return QString("Generates environment occlusions values for the loaded mesh"); 
 		default : assert(0); 
 	}
+
+	return QString("");
 }
 
 const PluginInfo &AmbientOcclusionPlugin::pluginInfo()
