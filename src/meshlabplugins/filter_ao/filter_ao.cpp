@@ -112,9 +112,9 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 	switch(ID(action))
 	{
 		case FP_AMBIENT_OCCLUSION:
-			parlst.addBool("gpuAcceleration",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration");
-			parlst.addInt ("texSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)");
-			parlst.addInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views");
+			parlst.addBool("gpuAcceleration",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x");
+			parlst.addInt ("texSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance");
+			parlst.addInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time");
 			break;
 		default: assert(0);
 	}
@@ -153,7 +153,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 	if (GLEW_ARB_vertex_buffer_object)
 	{
-		//m.glw.SetHint(vcg::GLW::HNUseVArray);
 		m.glw.SetHint(vcg::GLW::HNUseVBO);
 		cb(0, "Generating vertex data for VBO...");
 	}
@@ -217,7 +216,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 			glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
 
 			// SECOND PASS - use depth buffer to check occlusion
-			//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
 			generateOcclusionHW();
 			
 			glDisable(GL_POLYGON_OFFSET_FILL);
@@ -416,7 +414,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 
 	cb(30, "Initializing: Textures");
 	//GL_RGBA32/16F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
-	initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT24);  //More than 100k different views are supported with FP16
+	initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT24);
 	
 	if (useGPU)
 	{
