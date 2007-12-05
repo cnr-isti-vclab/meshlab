@@ -11,7 +11,7 @@
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/export_u3d.h>
-#include "param.h"
+#include "u3d_gui.h"
 
 
 #include <QMessageBox>
@@ -29,13 +29,24 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
   //std::string filename = fileName.toUtf8().data();
 	std::string ex = formatName.toUtf8().data();
 
-	Param* pw = new Param();
-	pw->exec();
-	vcg::tri::io::ExporterU3D<CMeshO>::Movie15Parameters mp;
+	vcg::tri::io::u3dparametersclasses::Movie15Parameters mp;
+	U3D_GUI pw(mp,parent);
+	pw.exec();
+	
+
+	QString conv_loc;
+	QSettings settings("VCG","U3D_TEST");
+	QString conv_loc_std("..\\..\\..\\..\\code\\lib\\U3D\\Bin\\Win32\\Release\\IDTFConverter.exe");
+	QString conv_key = settings.value("U3D/converter").toString();
+	if (conv_key.isNull())
+		settings.setValue("U3D/converter",conv_loc_std);
+	else 
+		conv_loc = conv_loc_std; 
+	
 
 	int result;
 	
-	result = vcg::tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),"D:\\code\\lib\\U3D\\Bin\\Win32\\Release\\",mp,mask);
+	result = vcg::tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(conv_loc),mp,mask);
 
 	if(result!=0)
 	{

@@ -2,20 +2,11 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include 
 
-FORMS         = ui/param.ui \
-				ui/cameraparametergui.ui \
-				ui/converterdirectory.ui 				
+FORMS         = ui/u3d_gui.ui 				
 HEADERS       = u3d_io.h \
-				angleeditwidget.h \
-				cameraparametergui.h \
-				converterdirectory.h \
-				framecontainer.h \
-				param.h 
+				u3d_gui.h
 SOURCES       = u3d_io.cpp \
-				cameraparametergui.cpp \
-				converterdirectory.cpp \
-				param.cpp 
-			
+				u3d_gui.cpp
 TARGET        = u3d_io
 DESTDIR       = ../../meshlab/plugins
 CONFIG		+= debug_and_release
