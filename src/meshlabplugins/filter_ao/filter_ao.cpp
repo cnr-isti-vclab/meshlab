@@ -47,7 +47,7 @@
 #include <QString>
 #include <QFile>
 #include <QTime>
-#include <gl/glew.h>
+#include <GL/glew.h>
 
 #include "filter_ao.h"
 
