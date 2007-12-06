@@ -51,7 +51,8 @@ private:
 	             texSize,
 	             texArea;
 
-	bool useGPU;
+	bool useGPU,
+	     useVBO;
 
 // Methods
 public:

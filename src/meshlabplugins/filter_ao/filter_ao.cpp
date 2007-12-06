@@ -55,9 +55,10 @@
 
 #define AMBOCC_DEFAULT_TEXTURE_SIZE 1024
 #define AMBOCC_DEFAULT_NUM_VIEWS 250
-#define AMBOCC_USEGPU_BY_DEFAULT false
+#define AMBOCC_USEGPU_BY_DEFAULT true
+#define AMBOCC_USEVBO_BY_DEFAULT true
 
-static GLuint vs, fs, shdrID, fxdShdrID, meshDL;
+static GLuint vs, fs, shdrID;
 
 AmbientOcclusionPlugin::AmbientOcclusionPlugin() 
 { 
@@ -118,7 +119,8 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 	switch(ID(action))
 	{
 		case FP_AMBIENT_OCCLUSION:
-			parlst.addBool("gpuAcceleration",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x");
+			parlst.addBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x");
+			parlst.addBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs");
 			parlst.addInt ("texSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance");
 			parlst.addInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time");
 			break;
@@ -133,10 +135,14 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	tAll.start();
 
 	assert(filter->text() == filterName(FP_AMBIENT_OCCLUSION));
-	useGPU = par.getBool("gpuAcceleration");
+	useGPU = par.getBool("useGPU");
+	useVBO = par.getBool("useVBO");
 	texSize = par.getInt("texSize");
 	texArea = texSize*texSize;
 	numViews = par.getInt("reqViews");
+
+	if (!GLEW_ARB_vertex_buffer_object)
+		useVBO = false;
 
 	if ( useGPU && ((unsigned int)m.cm.vn > texArea) )
 	{
@@ -157,7 +163,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	//Prepare mesh to be rendered
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
-	if (GLEW_ARB_vertex_buffer_object)
+	if (useVBO)
 	{
 		m.glw.SetHint(vcg::GLW::HNUseVBO);
 		cb(0, "Generating vertex data for VBO...");
@@ -272,7 +278,8 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		glDeleteShader(shdrID);
 	}
 
-	m.glw.ClearHint(vcg::GLW::HNUseVBO);
+	if (useVBO)
+		m.glw.ClearHint(vcg::GLW::HNUseVBO);
 
 	delete [] occlusion;
 
