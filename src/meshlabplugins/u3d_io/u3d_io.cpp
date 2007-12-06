@@ -22,6 +22,30 @@ bool U3DIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return false;
 }
 
+QString U3DIOPlugin::computePluginsPath()
+{
+		QDir pluginsDir(qApp->applicationDirPath());
+		#if defined(Q_OS_WIN)
+			if (pluginsDir.dirName() == "debug" || pluginsDir.dirName() == "release")
+				pluginsDir.cdUp();
+		#elif defined(Q_OS_MAC)
+		//inside macs the plugins dir can be into two places
+		// 1) inside the budnle just a level over the app
+		// 2) During develpment in the meshlab/src/meshlab dir that is 4 or 5 levels up. 
+			if (pluginsDir.dirName() == "MacOS") {
+				for(int i=0;i<6;++i){
+					//qDebug("plugins dir %s", qPrintable(pluginsDir.absolutePath()));
+					pluginsDir.cdUp();
+					if(pluginsDir.exists("plugins")) break;
+				}
+			}
+		#endif
+		pluginsDir.cd("plugins/U3D");
+		qDebug("U3D plugins dir %s", qPrintable(pluginsDir.absolutePath()));
+		return pluginsDir.absolutePath();
+}
+
+
 bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
@@ -34,19 +58,19 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 	pw.exec();
 	
 
-	QString conv_loc;
-	QSettings settings("VCG","U3D_TEST");
-	QString conv_loc_std("..\\..\\..\\..\\code\\lib\\U3D\\Bin\\Win32\\Release\\IDTFConverter.exe");
-	QString conv_key = settings.value("U3D/converter").toString();
-	if (conv_key.isNull())
-		settings.setValue("U3D/converter",conv_loc_std);
-	else 
-		conv_loc = conv_loc_std; 
+	QSettings settings;
 	
-
-	int result;
+	QString converterPath = 	computePluginsPath();
+#if defined(Q_OS_WIN)
+	converterPath += "/IDTFConverter.exe";
+#elif defined(Q_OS_MAC)
+	converterPath = converterPath +"/IDTFConverter.sh "+ converterPath;
+#endif
 	
-	result = vcg::tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(conv_loc),mp,mask);
+	if (settings.contains("U3D/converter"))
+		converterPath=settings.value("U3D/converter").toString();
+  
+	int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterPath),mp,mask);
 
 	if(result!=0)
 	{

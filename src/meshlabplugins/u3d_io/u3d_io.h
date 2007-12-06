@@ -22,6 +22,9 @@ class U3DIOPlugin : public QObject, public MeshIOInterface
 
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
 	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb=0, QWidget *parent= 0);
+	private:
+	QString computePluginsPath();
+
 };
 
 #endif
