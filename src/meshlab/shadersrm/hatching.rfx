@@ -1087,17 +1087,17 @@ void main(void)
    </RmOpenGLEffect>
    <RmVectorVariable NAME="lightDir" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE_0="0.000000" VALUE_1="0.000000" VALUE_2="1.000000" VALUE_3="0.000000" MIN="-10.000000" MAX="10.000000" CLAMP="FALSE" NORMALIZE="FALSE"/>
    <RmVectorVariable NAME="MiscParam" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE_0="6.000000" VALUE_1="0.000000" VALUE_2="0.000000" VALUE_3="1.000000" MIN="-10.000000" MAX="10.000000" CLAMP="FALSE" NORMALIZE="FALSE"/>
-   <Rm2DTextureVariable NAME="hatch0" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\Hatch0.dds" ORIGIN="0"/>
-   <Rm2DTextureVariable NAME="hatch1" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\Hatch1.dds" ORIGIN="0"/>
-   <Rm2DTextureVariable NAME="hatch2" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\Hatch2.dds" ORIGIN="0"/>
-   <Rm2DTextureVariable NAME="hatch3" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\Hatch3.dds" ORIGIN="0"/>
-   <Rm2DTextureVariable NAME="hatch4" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\Hatch4.dds" ORIGIN="0"/>
-   <Rm2DTextureVariable NAME="hatch5" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\Hatch5.dds" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="hatch0" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\hatch0.jpg" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="hatch1" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\hatch1.jpg" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="hatch2" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\hatch2.jpg" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="hatch3" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\hatch3.jpg" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="hatch4" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\hatch4.jpg" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="hatch5" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\hatch5.jpg" ORIGIN="0"/>
   </RmEffectGroup>
   <RmMatrixVariable NAME="view_matrix" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="View" VALUE_0="0.788381" VALUE_1="0.300817" VALUE_2="0.536623" VALUE_3="0.000000" VALUE_4="-0.171521" VALUE_5="0.945186" VALUE_6="-0.277855" VALUE_7="-0.000141" VALUE_8="-0.590792" VALUE_9="0.127013" VALUE_10="0.796764" VALUE_11="199.999985" VALUE_12="0.000000" VALUE_13="0.000000" VALUE_14="0.000000" VALUE_15="1.000000"/>
   <RmMatrixVariable NAME="view_proj_matrix" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="ViewProjection" VALUE_0="2.132880" VALUE_1="0.664367" VALUE_2="0.448349" VALUE_3="0.000004" VALUE_4="-0.797761" VALUE_5="2.222742" VALUE_6="0.501422" VALUE_7="-0.000433" VALUE_8="-0.120728" VALUE_9="-0.259705" VALUE_10="0.959157" VALUE_11="199.198639" VALUE_12="-0.120607" VALUE_13="-0.259445" VALUE_14="0.958197" VALUE_15="199.999451"/>
   <RmVectorVariable NAME="view_position" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="ViewPosition" VALUE_0="0.000000" VALUE_1="0.000000" VALUE_2="200.000000" VALUE_3="1.000000" MIN="-10.000000" MAX="10.000000" CLAMP="FALSE" NORMALIZE="FALSE"/>
-  <Rm2DTextureVariable NAME="ToonShaderTexture" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\Toon.bmp" ORIGIN="0"/>
+  <Rm2DTextureVariable NAME="ToonShaderTexture" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\..\..\Program Files\AMD\RenderMonkey 1.71\Examples\Media\Textures\toon.bmp" ORIGIN="0"/>
   <RmStreamMap NAME="PNT Stream Mapping" API="">
    <RmStream NAME="Binormal7" API="" STRIDE="32">
     <RmStreamChannel NAME="Position_0" API="" DATA_SIZE="12" DATA_TYPE="2" REGISTER="0" USAGE="0" USAGE_INDEX="0" ATTRIBUTE_NAME="rm_Vertex"/>
