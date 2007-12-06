@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.3  2007/12/06 14:47:04  corsini
+code restyling
+
 Revision 1.2  2007/12/03 10:52:58  corsini
 code restyling
 
@@ -82,14 +85,16 @@ bool RmXmlParser::parse( QString _filename )
 
 	// we looking for RmOpenGLEffect xml tag
 	QDomNodeList list = root.elementsByTagName("RmOpenGLEffect");
-	for( int i = 0; i < list.size(); i++ ) {
+	for( int i = 0; i < list.size(); i++ ) 
+	{
 		QDomElement effectElement = list.at(i).toElement();
 
 		RmEffect eff(effectElement.attribute("NAME", "name not set" ));
 
 		// each effect has a number (0-n) of RmGLPass.
 		QDomNodeList passlist = effectElement.elementsByTagName( "RmGLPass" );
-		for( int j = 0; j < passlist.size(); j++ ) {
+		for( int j = 0; j < passlist.size(); j++ ) 
+		{
 
 			// get the pass name
 			QDomNode passNode = passlist.at(j);
@@ -98,18 +103,10 @@ bool RmXmlParser::parse( QString _filename )
 			int index = elp.attribute("PASS_INDEX").toInt(&ok);
 			RmPass pass( elp.attribute("NAME", "name not set" ), (ok ? index : -1));
 
-			// get the name of model reference and its filename
-			QDomElement modelRefEl = passNode.firstChildElement( "RmModelReference");
-			if( modelRefEl.isNull() == false ) {
-				pass.setModelReference( modelRefEl.attribute("NAME"));
-				QDomElement modelDataEl = RmXmlParser::getDomElement( root, "RmModelData", pass.getModelReference() );
-				if( modelDataEl.isNull() == false )
-					pass.setModelReferenceFileName( modelDataEl.attribute("FILE_NAME"));
-			}
-
 			// openGL state
 			QDomElement stateEl = passNode.firstChildElement( "RmRenderStateBlock");
-			if( stateEl.isNull() == false ) {
+			if( stateEl.isNull() == false ) 
+			{
 				QDomNodeList statelist = stateEl.elementsByTagName( "RmState" );
 				for( int k = 0; k < statelist.size(); k++ ) {
 					GlState s( statelist.at(k).toElement() );
@@ -120,7 +117,8 @@ bool RmXmlParser::parse( QString _filename )
 
 			// get the render target
 			QDomElement renderEl = passNode.firstChildElement( "RmRenderTarget" );
-			if( renderEl.isNull() == false ) {
+			if( renderEl.isNull() == false ) 
+			{
 				RenderTarget rt( renderEl.attribute("NAME"));
 				rt.renderToScreen = renderEl.attribute("RENDER_TO_SCREEN") == "TRUE";
 				rt.colorClear = renderEl.attribute("COLOR_CLEAR") == "TRUE";
@@ -133,14 +131,17 @@ bool RmXmlParser::parse( QString _filename )
 
 			// get the source code of fragment and vertex program
 			QDomNodeList sourcelist = elp.elementsByTagName( "RmGLShader" );
-			for( int k = 0; k < sourcelist.size(); k++ ) {
+			for( int k = 0; k < sourcelist.size(); k++ ) 
+			{
 				QDomNode elnode = sourcelist.at(k);
 				QDomElement elsource = elnode.toElement();
 				QString name = elsource.attribute("NAME");
-				if( name == "Fragment Program" || name == "Fragment Shader" ) {
+				if( name == "Fragment Program" || name == "Fragment Shader" ) 
+				{
 					pass.setFragment( elsource.text() );
-				} else
-				if( name == "Vertex Program" || name == "Vertex Shader" ) {
+				} 
+				else if( name == "Vertex Program" || name == "Vertex Shader" ) 
+				{
 					pass.setVertex( elsource.text() );
 				}
 			}
@@ -148,15 +149,18 @@ bool RmXmlParser::parse( QString _filename )
 			// get the name of constant uniform variables and search 
 			// in the whole document for their values
 			QDomNodeList constlist = elp.elementsByTagName( "RmShaderConstant" );
-			for( int k = 0; k < constlist.size(); k++ ) {
+			for( int k = 0; k < constlist.size(); k++ ) 
+			{
 				QString name = constlist.at(k).toElement().attribute("NAME");
 				UniformVar var = pass.searchFragmentUniformVariable( name );
-				if( var.isNull() == false ) {
+				if( var.isNull() == false ) 
+				{
 					var.getValueFromXmlDocument(root, effectElement);
 					pass.addFragmentUniformVariable(var);
 				}
 				var = pass.searchVertexUniformVariable(name);
-				if( var.isNull() == false ) {
+				if( var.isNull() == false ) 
+				{
 					var.getValueFromXmlDocument(root, effectElement);
 					pass.addVertexUniformVariable(var);
 				}
@@ -165,16 +169,19 @@ bool RmXmlParser::parse( QString _filename )
 			// and texture uniform variables 
 			QDomNodeList textureObjectList = elp.elementsByTagName( "RmTextureObject" );
 			QDomNodeList samplerlist = elp.elementsByTagName( "RmSampler" );
-			for( int k = 0; k < samplerlist.size(); k++ ) {
+			for( int k = 0; k < samplerlist.size(); k++ ) 
+			{
 				QString name = samplerlist.at(k).toElement().attribute("NAME");
 				QString textureName;
 				QList<GlState> GLstates;
 
 				// First get the textureObject xml tag relative to this texture
-				for( int q = 0; q < textureObjectList.size(); q++ ) { 
+				for( int q = 0; q < textureObjectList.size(); q++ )
+				{
 					QDomElement textEl = textureObjectList.at(q).toElement();
 					QString toName = textEl.attribute("NAME");
-					if( toName == name ) {
+					if( toName == name ) 
+					{
 						QDomElement trEl = textEl.firstChildElement( "RmTextureReference");
 						if( !trEl.isNull() )
 							textureName = trEl.attribute("NAME");
@@ -190,7 +197,8 @@ bool RmXmlParser::parse( QString _filename )
 
 				// then search the variable in the source code
 				UniformVar var = pass.searchFragmentUniformVariable( name );
-				if( var.isNull() == false ) {
+				if( var.isNull() == false ) 
+				{
 					var.textureName = textureName;
 					var.textureGLStates = GLstates;
 					var.getValueFromXmlDocument(root, effectElement);
@@ -198,7 +206,8 @@ bool RmXmlParser::parse( QString _filename )
 				}
 
 				var = pass.searchVertexUniformVariable(name);
-				if( var.isNull() == false ) {
+				if( var.isNull() == false ) 
+				{
 					var.textureName = textureName;
 					var.textureGLStates = GLstates;
 					var.getValueFromXmlDocument(root, effectElement);
