@@ -1174,7 +1174,7 @@ void main(void)
   <RmFloatVariable NAME="Ks" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.940000" MIN="0.000000" MAX="2.000000" CLAMP="FALSE"/>
   <RmFloatVariable NAME="distanceScale" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.003500" MIN="0.000000" MAX="0.010000" CLAMP="FALSE"/>
   <RmFloatVariable NAME="focus" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.480000" MIN="0.000000" MAX="1.000000" CLAMP="FALSE"/>
-  <Rm2DTextureVariable NAME="Base" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\Media\Textures\Wood.dds" ORIGIN="0"/>
+  <Rm2DTextureVariable NAME="Base" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" FILE_NAME="..\Media\Textures\wood.jpg" ORIGIN="0"/>
   <RmStreamMap NAME="Stream Mapping" API="">
    <RmStream NAME="TexCoord5" API="" STRIDE="32">
     <RmStreamChannel NAME="Position_0" API="" DATA_SIZE="12" DATA_TYPE="2" REGISTER="0" USAGE="0" USAGE_INDEX="0"/>
