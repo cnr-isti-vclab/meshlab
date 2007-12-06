@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.7  2007/12/06 14:47:35  corsini
+remove model reference
+
 Revision 1.6  2007/12/03 11:56:10  corsini
 code restyling
 
@@ -112,7 +115,7 @@ void RmShaderDialog::fillTabsWithPass( int index )
 	ui.textFragment -> setText( pass_selected -> getFragment() );
 
 	// * General Info in the first tab
-	QString info = "Model reference: " + pass_selected -> getModelReference() + "\n";
+	QString info;
 	if( pass_selected -> hasRenderTarget() )
 		info += "Render Target: " + pass_selected -> getRenderTarget().name + "\n";
 
@@ -172,8 +175,9 @@ void RmShaderDialog::fillTabsWithPass( int index )
 				case UniformVar::IVEC4:
 				{
 					int n = v.type == UniformVar::INT ? 1 : (v.type == UniformVar::IVEC2 ? 2 : (v.type == UniformVar::IVEC3 ? 3 : 4 ));
-					for( int i = 0; i < n; i++ ) {
-						QSpinBox * input = new QSpinBox();
+					for( int i = 0; i < n; i++ ) 
+					{
+						QSpinBox  input = new QSpinBox();
 						input -> setObjectName( v.name + "0" + QString().setNum(i) );
 						if( v.minSet ) input -> setMinimum( v.fmin ); else input -> setMinimum( -1000 );
 						if( v.maxSet ) input -> setMaximum( v.fmax ); else input -> setMaximum( 1000 );
@@ -213,7 +217,8 @@ void RmShaderDialog::fillTabsWithPass( int index )
 				case UniformVar::VEC4:
 				{
 					int n = v.type == UniformVar::FLOAT ? 1 : (v.type == UniformVar::VEC2 ? 2 : (v.type == UniformVar::VEC3 ? 3 : 4 ));
-					for( int i = 0; i < n; i++ ) {
+					for( int i = 0; i < n; i++ ) 
+					{
 						QDoubleSpinBox * input = new QDoubleSpinBox();
 						input -> setObjectName( v.name + "0" + QString().setNum(i) );
 						input -> setDecimals(4);
@@ -287,7 +292,8 @@ void RmShaderDialog::fillTabsWithPass( int index )
 
 	// * Texture in the second tab
 	for( int ii = 0, row = 0; ii < 2; ii++ )
-		for( int jj = 0; jj < ( ii == 0 ? pass_selected -> vertexUniformVariableSize() : pass_selected -> fragmentUniformVariableSize()); jj++ ) {
+		for( int jj = 0; jj < ( ii == 0 ? pass_selected -> vertexUniformVariableSize() : pass_selected -> fragmentUniformVariableSize()); jj++ ) 
+		{
 			UniformVar v = pass_selected -> getUniformVariable( jj, ii == 0 ? RmPass::VERTEX : RmPass::FRAGMENT );
 			if( v.textureFilename.isNull() ) continue;
 
@@ -382,8 +388,10 @@ void RmShaderDialog::valuesChanged(const QString & varNameAndIndex )
 
 
 	QVariant val;
-	for( int i = 0; val.isNull() && !isTextureFileEdit && i < shown.size(); i++ ) {
-		if( shown[i] -> objectName() == varNameAndIndex ) {
+	for( int i = 0; val.isNull() && !isTextureFileEdit && i < shown.size(); i++ )
+	{
+		if( shown[i] -> objectName() == varNameAndIndex )
+		{
 			QDoubleSpinBox * dinp = dynamic_cast<QDoubleSpinBox*>(shown[i]);
 			if( dinp ) { val = QVariant(dinp -> value()); }
 			QSpinBox * sinp = dynamic_cast<QSpinBox*>(shown[i]);
