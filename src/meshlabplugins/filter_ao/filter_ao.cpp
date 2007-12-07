@@ -166,12 +166,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	{
 		m.glw.SetHint(vcg::GLW::HNUseVBO);
 		cb(0, "Generating vertex data for VBO...");
-	}
-	m.glw.Update();
-
-	if (GLEW_ARB_vertex_buffer_object)
+		m.glw.Update();
 		cb(100, "Generating vertex data for VBO... Done.");
-
+	}
+	
 	if(useGPU)
 		vertexCoordsToTexture( m );
 	else
@@ -233,6 +231,8 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		}
 		else
 		{
+			qWidget.makeCurrent();
+			glEnable(GL_DEPTH_TEST);
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			// FIRST PASS - fill depth buffer
@@ -375,6 +375,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 	qWidget.makeCurrent();
 
 	cb(15, "Initializing: Glew");
+  qWidget.makeCurrent();
 
 	//*******INIT GLEW********/
 	GLint glewError = glewInit();
@@ -464,6 +465,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 	glViewport(0.0, 0.0, texSize, texSize);
 
 	cb(100, "Initializing: Done.");
+	qWidget.makeCurrent();
 
 	return true;
 }
@@ -623,10 +625,10 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 
 void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusion)
 {
-	GLdouble *resCoords  = new GLdouble[3];
-	GLdouble *mvMatrix_f = new GLdouble[16];
-	GLdouble *prMatrix_f = new GLdouble[16];
-	GLint    *viewpSize  = new GLint[4];
+	GLdouble resCoords[3];
+	GLdouble mvMatrix_f[16];
+	GLdouble prMatrix_f[16];
+	GLint    viewpSize[4];
 	GLfloat  *dFloat     = new GLfloat[texArea];
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix_f);
@@ -635,6 +637,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 
 	glReadPixels(0, 0, texSize, texSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
+  qDebug("min and max of depth buffer %f %f",std::min_element(dFloat,dFloat+texSize),std::max_element(dFloat,dFloat+texSize));
 	cameraDir.Normalize();
 
 	Point3<CMeshO::ScalarType> vp;
@@ -656,10 +659,6 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 		}
 	}
 
-	delete [] mvMatrix_f;
-	delete [] prMatrix_f;
-	delete [] viewpSize;
-	delete [] resCoords;
 	delete [] dFloat;
 }
 void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
@@ -702,7 +701,7 @@ void AmbientOcclusionPlugin::applyOcclusionSW(MeshModel &m, GLfloat *aoValues)
 		if (aoValues[i] > maxvalue)
 			maxvalue = aoValues[i];
 	}
-
+  qDebug("Ambient Occlusion range %f..%f",minvalue,maxvalue);
 	float scale = 255.0f / (maxvalue - minvalue);
 
 	for (int i = 0; i < m.cm.vn; i++)
