@@ -161,8 +161,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		return false;
 	
 	//Prepare mesh to be rendered
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 	if (useVBO)
 	{
 		m.glw.SetHint(vcg::GLW::HNUseVBO);
@@ -294,42 +293,37 @@ void AmbientOcclusionPlugin::renderMesh(MeshModel &m)
 
 void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat)
 {
-	//*******SETS DEFAULT OPENGL STUFF**********/
-	glEnable( GL_DEPTH_TEST );
-	glEnable( GL_TEXTURE_2D );
-
 	vertexCoordTex = 0;
 	vertexNormalsTex = 0;
 	resultBufferTex= 0;
+	glEnable( GL_TEXTURE_2D );
 
-	if (useGPU)
-	{
-		//*******INIT VERTEX COORDINATES TEXTURE*********/
-		glGenTextures (1, &vertexCoordTex);
-		glBindTexture(GL_TEXTURE_2D, vertexCoordTex);
+	//*******INIT VERTEX COORDINATES TEXTURE*********/
+	glGenTextures (1, &vertexCoordTex);
+	glBindTexture(GL_TEXTURE_2D, vertexCoordTex);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-					 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
+				 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
 
-		//*******INIT NORMAL VECTORS TEXTURE*********/
-		glGenTextures (1, &vertexNormalsTex);
-		glBindTexture(GL_TEXTURE_2D, vertexNormalsTex);
+	//*******INIT NORMAL VECTORS TEXTURE*********/
+	glGenTextures (1, &vertexNormalsTex);
+	glBindTexture(GL_TEXTURE_2D, vertexNormalsTex);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-					 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
-	}
+	glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
+				 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
+
 
 	//*******INIT RESULT TEXTURE*********/
 	glGenTextures (1, &resultBufferTex);
@@ -403,6 +397,9 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 		texSize = 1024;
 		texArea = texSize*texSize;
 	}
+	//*******SETS DEFAULT OPENGL STUFF**********/
+	glEnable( GL_DEPTH_TEST );
+
 
 	//*******CHECK THAT EVERYTHING IS SUPPORTED**********/
 	if (useGPU)
@@ -417,24 +414,21 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 			Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
 			return false;
 		}
-	}
 
-	if (!GLEW_ARB_texture_float)
-	{
-		Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
-		return false;
-	}
+		if (!GLEW_ARB_texture_float )
+		{
+			Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
+			return false;
+		}
 
-	cb(30, "Initializing: Textures");
-	//GL_RGBA32/16F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
-	initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT24);
-	
-	if (useGPU)
-	{
+		cb(30, "Initializing: Textures");
+		//GL_RGBA32/16F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
+			initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT24);
+		//initTextures(GL_RGBA16F_ARB, GL_DEPTH_COMPONENT24);
+
 		//*******LOAD SHADER*******/
 		cb(45, "Initializing: Shaders");
 		set_shaders("ambient_occlusion",vs,fs,shdrID);
-
 
 		//*******INIT FBO*********/
 

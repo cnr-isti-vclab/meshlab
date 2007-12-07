@@ -66,6 +66,7 @@ public:
 	virtual const PluginInfo &pluginInfo();
 	virtual const int         getRequirements (QAction *action);
 	virtual       bool        autoDialog      (QAction *) {return true;}
+	virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::VertexColoring; };
 	virtual       void        initParameterSet(QAction *,
 	                                           MeshModel &/*m*/,
 	                                           FilterParameterSet & /*parent*/);
