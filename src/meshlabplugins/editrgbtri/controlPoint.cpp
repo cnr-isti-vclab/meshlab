@@ -280,7 +280,7 @@ void ControlPoint::assignPinf(RgbVertexC& v, bool initial)
 		v.setPinf(pinf);
 		v.setIsPinfReady(true);
 		updateP(v);
-		addPinfContributeToVV(v);
+		//addPinfContributeToVV(v);
 	}
 	
 	
@@ -366,6 +366,7 @@ void ControlPoint::updateP(RgbVertexC& v)
 {
 	if 	(v.getIsPinfReady())
 	{
+		 
 		int minLevel = minimalEdgeLevel(v);
 		Point tmp = computePkl(v,minLevel);
 		v.setCoord(tmp);
@@ -434,8 +435,8 @@ void ControlPoint::VF(RgbVertexC& v,vector<FacePointer>& vfp)
 void ControlPoint::addContribute(RgbVertexC& v,Point& p, bool update)
 {
 	//assert(v.getLevel() == 0 || v.getCount() < 6);
-	if (!(v.getLevel() == 0 || v.getCount() < 6))
-		std::cerr << "cont: " << v.getCount() << "level" << v.getLevel() << std::endl;
+	//if (!(v.getLevel() == 0 || v.getCount() < 6))
+	//	std::cerr << "cont: " << v.getCount() << "level" << v.getLevel() << std::endl;
 	
 	v.setCount(v.getCount() + 1);
 	if (!v.getIsPinfReady())
@@ -453,8 +454,8 @@ void ControlPoint::addContribute(RgbVertexC& v,Point& p, bool update)
 }
 void ControlPoint::removeContribute(RgbVertexC& v,Point& p)
 {
-	if (v.getCount() <= 0)
-		std::cerr << "conti: " << v.getCount() << std::endl;
+	//if (v.getCount() <= 0)
+	//	std::cerr << "conti: " << v.getCount() << std::endl;
 	//assert(v.getCount() > 0);
 	v.setCount(v.getCount() - 1);
 	if (!v.getIsPinfReady())
@@ -485,7 +486,7 @@ bool ControlPoint::doSplit(RgbTriangleC& fp, int EdgeIndex, int level, Topologic
 
 	if (!RgbPrimitives::IsValidEdge(v1,v2))
 	{
-		std::cerr << "different" << std::endl;
+		//std::cerr << "different" << std::endl;
 		return false; // The current split was already done by findInitialStencil
 	}
 	
@@ -522,8 +523,8 @@ bool ControlPoint::doSplit(RgbTriangleC& fp, int EdgeIndex, int level, Topologic
 	
 	if (isBorder)
 	{
-		Point psum = computePkl(stencil[0],level-1);
-		psum += computePkl(stencil[1],level-1);
+		Point psum = computePkl(stencil[0],level);
+		psum += computePkl(stencil[1],level);
 		vNew.setPinf(psum);
 		assignPinf(vNew,false);
 	}
@@ -538,7 +539,7 @@ bool ControlPoint::doSplit(RgbTriangleC& fp, int EdgeIndex, int level, Topologic
 	
 	if (vupd)
 	{
-		vupd->push_back(stencil[0]);
+ 		vupd->push_back(stencil[0]);
 		vupd->push_back(stencil[1]);
 	}
 	
@@ -657,7 +658,6 @@ void ControlPoint::searchContributeBoundary(RgbVertexC& v,bool update)
 	assert(vv.size() >= 2);
 	assert(vv[0].getIsBorder());
 	assert(vv[last].getIsBorder());
-
 	vector<RgbVertexC> vv2(2);
 	vv2[0] = vv[0];
 	vv2[1] = vv[last];

@@ -1078,6 +1078,17 @@ public:
 	    }
 	}
     
+    friend std::ostream& operator<<(std::ostream& os, RgbVertex<TriMeshType>& v)
+    {
+      os << "RgbVertexIndex " << v.index << "|";
+      
+      os << v.getCoord()[0] << " " << v.getCoord()[1] << " " << v.getCoord()[2]; 
+      
+      os << std::endl;
+      return os;
+    }
+	
+	
 	/// VCG Mesh
     TriMeshType* m;
     /// Rgb information container
