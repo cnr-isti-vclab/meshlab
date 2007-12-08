@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.8  2007/12/08 14:07:38  ggangemi
+added a ' * ' at line 180: QSpinBox * input = new QSpinBox();
+
 Revision 1.7  2007/12/06 14:47:35  corsini
 remove model reference
 
@@ -177,7 +180,7 @@ void RmShaderDialog::fillTabsWithPass( int index )
 					int n = v.type == UniformVar::INT ? 1 : (v.type == UniformVar::IVEC2 ? 2 : (v.type == UniformVar::IVEC3 ? 3 : 4 ));
 					for( int i = 0; i < n; i++ ) 
 					{
-						QSpinBox  input = new QSpinBox();
+						QSpinBox * input = new QSpinBox();
 						input -> setObjectName( v.name + "0" + QString().setNum(i) );
 						if( v.minSet ) input -> setMinimum( v.fmin ); else input -> setMinimum( -1000 );
 						if( v.maxSet ) input -> setMaximum( v.fmax ); else input -> setMaximum( 1000 );
