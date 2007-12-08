@@ -25,8 +25,7 @@ CONFIG += stl
 CONFIG += console
 #win32:LIBS	+= ../../../code/lib/glew/lib/glew32.lib 
 win32-g++{
-#LIBS	+= glew32
-#LIBPATH += ../../../code/lib/glew/lib/
+	LIBS		+= -L../../../code/lib/glew/lib -lGLEW
 }
 
 unix{
