@@ -141,9 +141,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	texArea = texSize*texSize;
 	numViews = par.getInt("reqViews");
 
-	if (!GLEW_ARB_vertex_buffer_object)
-		useVBO = false;
-
 	if ( useGPU && ((unsigned int)m.cm.vn > texArea) )
 	{
 		Log(0, "Too many vertices: up to %d are allowed", texArea);
@@ -160,6 +157,9 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	if (!initContext(qWidget, cb))
 		return false;
 	
+	if (!GLEW_ARB_vertex_buffer_object)
+		useVBO = false;
+
 	//Prepare mesh to be rendered
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 	if (useVBO)
@@ -375,7 +375,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 	qWidget.makeCurrent();
 
 	cb(15, "Initializing: Glew");
-  qWidget.makeCurrent();
+	qWidget.makeCurrent();
 
 	//*******INIT GLEW********/
 	GLint glewError = glewInit();
@@ -416,7 +416,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 			return false;
 		}
 
-		if (!GLEW_ARB_texture_float )
+		if ( !GLEW_ARB_texture_float )
 		{
 			Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
 			return false;
@@ -424,19 +424,17 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 
 		cb(30, "Initializing: Textures");
 		//GL_RGBA32/16F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
-			initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT24);
-		//initTextures(GL_RGBA16F_ARB, GL_DEPTH_COMPONENT24);
+		initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT);
 
 		//*******LOAD SHADER*******/
 		cb(45, "Initializing: Shaders");
 		set_shaders("ambient_occlusion",vs,fs,shdrID);
 
 		//*******INIT FBO*********/
-
 		cb(65, "Initializing: FBOs");
-		// FBO for first pass (1 depth attachment)
+		
 		fboDepth = 0;
-		glGenFramebuffersEXT(1, &fboDepth);
+		glGenFramebuffersEXT(1, &fboDepth);   // FBO for first pass (1 depth attachment)
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboDepth);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthBufferTex, 0);
 
@@ -448,14 +446,14 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 			return false;
 		
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		
 
-		// FBO for second pass (1 color attachment)
 		fboResult = 0;
-		glGenFramebuffersEXT(1, &fboResult);
+		glGenFramebuffersEXT(1, &fboResult);   // FBO for second pass (1 color attachment)
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, resultBufferTex, 0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-		
+
 		if (!checkFramebuffer())
 			return false;
 		
@@ -465,6 +463,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 	glViewport(0.0, 0.0, texSize, texSize);
 
 	cb(100, "Initializing: Done.");
+
 	qWidget.makeCurrent();
 
 	return true;
@@ -628,8 +627,8 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 	GLdouble resCoords[3];
 	GLdouble mvMatrix_f[16];
 	GLdouble prMatrix_f[16];
-	GLint    viewpSize[4];
-	GLfloat  *dFloat     = new GLfloat[texArea];
+	GLint viewpSize[4];
+	GLfloat *dFloat = new GLfloat[texArea];
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix_f);
 	glGetDoublev(GL_PROJECTION_MATRIX, prMatrix_f);
@@ -637,7 +636,8 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 
 	glReadPixels(0, 0, texSize, texSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
-  qDebug("min and max of depth buffer %f %f",std::min_element(dFloat,dFloat+texSize),std::max_element(dFloat,dFloat+texSize));
+	//size(dFloat) == texSize*texSize (a.k.a. texArea !!)
+	qDebug("min and max of depth buffer %f %f",std::min_element(dFloat,dFloat+texArea),std::max_element(dFloat,dFloat+texArea));
 	cameraDir.Normalize();
 
 	Point3<CMeshO::ScalarType> vp;
@@ -701,7 +701,8 @@ void AmbientOcclusionPlugin::applyOcclusionSW(MeshModel &m, GLfloat *aoValues)
 		if (aoValues[i] > maxvalue)
 			maxvalue = aoValues[i];
 	}
-  qDebug("Ambient Occlusion range %f..%f",minvalue,maxvalue);
+
+	qDebug("Ambient Occlusion range %f..%f",minvalue,maxvalue);
 	float scale = 255.0f / (maxvalue - minvalue);
 
 	for (int i = 0; i < m.cm.vn; i++)
