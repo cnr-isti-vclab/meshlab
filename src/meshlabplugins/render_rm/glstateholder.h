@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.7  2007/12/10 14:22:35  corsini
+add documentation
+
 Revision 1.6  2007/12/03 11:08:48  corsini
 code restyling
 
@@ -170,19 +173,20 @@ class GLStateHolder : public QObject
 
 		void updateUniformVariableValuesFromDialog( QString passname, QString varname, int rowIdx, int colIdx, QVariant newValue );
 
-		bool isSupported() { return supported; }
+		/// Return true if the current shader is supported
+		bool isSupported() { return supported;}
 	
 		bool updateUniformVariableValuesInGLMemory();
-    bool updateUniformVariableValuesInGLMemory(int pass_idx);
+		bool updateUniformVariableValuesInGLMemory(int pass_idx);
 		void VarDump();
 
 		int passNumber() { return passes.size(); }
-    inline void reset(){ needUpdateInGLMemory = true; };
+		inline void reset(){ needUpdateInGLMemory = true; };
 		void usePassProgram( int i ) { passes[i] -> useProgram(); }
-    bool executePass(int i );
+		bool executePass(int i );
 
-  private:
-    void genPassTextures();
+	private:
+		void genPassTextures();
 };
 
 
