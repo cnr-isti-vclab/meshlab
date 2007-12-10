@@ -1,6 +1,7 @@
 #ifndef RMSHADERRENDERPLUGIN_H
 #define RMSHADERRENDERPLUGIN_H
 
+// Qt headers
 #include <QDir>
 #include <QObject>
 #include <QAction>
@@ -11,10 +12,10 @@
 #include <QMap>
 #include <QMessageBox>
 
+// Local headers
 #include <GL/glew.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-
 #include "parser/RmXmlParser.h"
 #include "rmshaderdialog.h"
 #include "glstateholder.h"
@@ -25,7 +26,10 @@ class RmMeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 	Q_OBJECT
 	Q_INTERFACES(MeshRenderInterface)
 
-	// * map between the filename and its parser
+// private data members
+private:
+
+	/// map between the filename and its parser
 	QMap<QString, RmXmlParser*> rmsources;
 
 	QList <QAction *> actionList;
@@ -33,21 +37,24 @@ class RmMeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 	RmShaderDialog * dialog;
 	GLStateHolder holder;
 
-	private:
+// private methods
+private:
 
-		void initActionList();
+	void initActionList();
 
-	public:
-		RmMeshShaderRenderPlugin() { dialog = NULL;}
-		~RmMeshShaderRenderPlugin() { QMapIterator<QString, RmXmlParser*> i(rmsources); while( i.hasNext() ) { i.next(); delete i.value();} }
+// constructor
+public:
 
-		QList<QAction *> actions () { if(actionList.isEmpty()) initActionList(); return actionList; }
+	RmMeshShaderRenderPlugin(){dialog = NULL;}
+	~RmMeshShaderRenderPlugin(){QMapIterator<QString, RmXmlParser*> i(rmsources); while( i.hasNext() ) { i.next(); delete i.value();}}
 
-		virtual const PluginInfo &Info();
-		virtual bool isSupported() {return holder.isSupported();}
-		virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
-		virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
-    virtual int passNum() { return holder.passNumber();}
+	QList<QAction *> actions () { if(actionList.isEmpty()) initActionList(); return actionList; }
+
+	virtual const PluginInfo &Info();
+	virtual bool isSupported() {return holder.isSupported();}
+	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
+	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
+	virtual int passNum() { return holder.passNumber();}
 };
 
 #endif
