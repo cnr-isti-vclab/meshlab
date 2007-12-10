@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.8  2007/12/10 15:16:02  corsini
+code restyling
+
 Revision 1.7  2007/12/03 11:10:26  corsini
 code restyling
 
@@ -216,7 +219,6 @@ bool UniformValue::updateValueInGLMemory()
 	// else qDebug() << "Error occurred while updating: " << err;
 	return true;
 }
-
 
 void UniformValue::VarDump()
 {
@@ -605,10 +607,9 @@ void GLStateHolder::genPassTextures()
 
 		//create the texture
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FBO_SIZE, FBO_SIZE, 0, GL_RGB, GL_FLOAT, NULL);
-
 	}
 
-	/* I decided to use a GL_COLOR_ATTACHMENT for each pass */
+	// I decided to use a GL_COLOR_ATTACHMENT for each pass
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
 
@@ -620,6 +621,12 @@ void GLStateHolder::genPassTextures()
 	fbo->release();
 	checkGLError("END: genpasstextures");
 }
+
+void GLStateHolder::usePassProgram(int i)
+{ 
+	passes[i]->useProgram();
+}
+
 
 bool GLStateHolder::executePass(int i){
 #ifdef DEBUG
