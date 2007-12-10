@@ -69,6 +69,8 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 	
 	if (settings.contains("U3D/converter"))
 		converterPath=settings.value("U3D/converter").toString();
+	//else 
+	//	settings.setValue("U3D/converter",converterPath);
   
 	int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterPath),mp,mask);
 
