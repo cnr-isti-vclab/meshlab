@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.135  2007/12/10 10:26:18  corsini
+remove number of passes dependency in the main rendering cycle
+
 Revision 1.134  2007/11/20 12:04:09  cignoni
 shortening and refactoring
 
@@ -323,44 +326,46 @@ void GLArea::paintGL()
 	}
 	else glColor(Color4b::LightGray);
 	
-	if(rm.backFaceCull) glEnable(GL_CULL_FACE);
-	              else glDisable(GL_CULL_FACE);
-  if(!mm()->busy)
-  {
-    int numPass = 1;
-    if (iRenderer && currentShader){ 
-      numPass = iRenderer->passNum();
-      glPushAttrib(GL_ALL_ATTRIB_BITS);
-    }
+	if(rm.backFaceCull) 
+		glEnable(GL_CULL_FACE);
+	else 
+		glDisable(GL_CULL_FACE);
 
-    for (int i = 0; i < numPass; i++){
-      if(iRenderer && currentShader) {
-        iRenderer->Render(currentShader, *mm(), rm, this); 
-      }
-      if (i == 0) /* Draw the meshlab model only in the first pass */
-      foreach(MeshModel * mp, meshDoc.meshList) 
-        if(mp->visible)
-          mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-    }
+	if(!mm()->busy)
+	{
+		// render the current meshes
+		if (iRenderer && currentShader)
+		{
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			iRenderer->Render(currentShader, *mm(), rm, this); 
+		}
 
-	  if(iEdit) iEdit->Decorate(currentEditor,*mm(),this);
-    
+		// handle the other meshes
+		foreach(MeshModel * mp, meshDoc.meshList) 
+		{
+			if(mp->visible)
+				mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+		}
 
-	  if(iRenderer) {
-		  glPopAttrib();
-		  glUseProgramObjectARB(0);
-	  }
+		if(iEdit)
+			iEdit->Decorate(currentEditor,*mm(),this);
 
-    // Draw the selection
-    if(rm.selectedFaces)  mm()->RenderSelectedFaces();
+		if(iRenderer) 
+		{
+			glPopAttrib();
+			glUseProgramObjectARB(0);
+		}
 
-	  if(iDecoratorsList){
-		  pair<QAction *,MeshDecorateInterface *> p;
-		  foreach(p,*iDecoratorsList){p.second->Decorate(p.first,*mm(),rm,this,qFont);}
-	  }
+		// Draw the selection
+		if(rm.selectedFaces)  mm()->RenderSelectedFaces();
 
-    
-  } ///end if busy 
+		if(iDecoratorsList)
+		{
+			pair<QAction *,MeshDecorateInterface *> p;
+			foreach(p,*iDecoratorsList)
+				p.second->Decorate(p.first,*mm(),rm,this,qFont);
+		}
+	} ///end if busy 
 	
 	// ...and take a snapshot
 	if (takeSnapTile)
