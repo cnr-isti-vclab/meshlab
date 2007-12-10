@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.3  2007/12/10 14:21:02  corsini
+new version with correct layout
+
 Revision 1.2  2007/12/03 11:35:24  corsini
 code restyling
 
@@ -71,18 +74,24 @@ public:
 
 // private data members
 private:
-	Ui_RmShaderDialogClass ui;
-	QGLWidget* glarea;
-	RenderMode * rendMode;
-	RmXmlParser * parser;
 
-	RmEffect * eff_selected;
-	RmPass * pass_selected;
+	Ui_RmShaderDialogClass ui;
+
+	QGridLayout *layoutUniform;
+	QGridLayout *layoutTextures;
+	QGridLayout *layoutOpengl;
+
+	QGLWidget *glarea;
+	RenderMode *rendMode;
+	RmXmlParser *parser;
+
+	RmEffect *eff_selected;
+	RmPass *pass_selected;
 
 	QList<QWidget*> shown;
-	GLStateHolder * holder;
+	GLStateHolder *holder;
 
-	QSignalMapper * signaler;
+	QSignalMapper *signaler;
 
 // Qt slots
 public slots:
