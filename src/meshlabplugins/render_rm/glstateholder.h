@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.8  2007/12/10 15:15:46  corsini
+code re-styling
+
 Revision 1.7  2007/12/10 14:22:35  corsini
 add documentation
 
@@ -64,9 +67,11 @@ code restyling
 /* FIXME: remove this define */
 #define FBO_SIZE 512
 
-// * Extends the uniform variable class of the RM Parser
-// * to add information such as memory location and
-// * actual value
+/** 
+ * Extends the uniform variable class of the RM Parser
+ * to add information such as memory location and
+ * actual value.
+ */
 class UniformValue : public UniformVar
 {
 
@@ -75,11 +80,13 @@ public:
 
 	static int textureUnit;
 
-	// * the arb memory location
+	/// ARB memory location
 	int location;
 
-	// * texture mappings
+	/// load texture flag
 	bool textureLoaded;
+
+	/// texture id
 	GLuint textureId;
 
 // constructor
@@ -96,16 +103,19 @@ public:
 	void VarDump();
 };
 
-// * It's the descriptor of a pass: it has the list 
-// * of uniform variable with their value and memory
-// * location, and the ARB program handler
+
+/** 
+ * It is the descriptor of a pass: it has the list 
+ * of uniform variables with their value and memory
+ * location, and the ARB program handler.
+ */
 class GLStatePassHolder : public QObject
 {
 	Q_OBJECT
 
 	public:
 		QString passName;
-    QString modelName;
+		QString modelName;
 
 	private:
 	GLhandleARB vhandler;
@@ -120,8 +130,8 @@ class GLStatePassHolder : public QObject
 	QMap<QString, UniformValue*> uniformValues;
 
 	public:
-		GLStatePassHolder( RmPass & pass );
-		~GLStatePassHolder( );
+		GLStatePassHolder(RmPass & pass);
+		~GLStatePassHolder();
 
 		bool compile();
 		bool link();
@@ -133,60 +143,82 @@ class GLStatePassHolder : public QObject
 
 		void updateUniformVariableValuesFromDialog( QString varname, int rowIdx, int colIdx, QVariant newValue );
 		bool updateUniformVariableValuesInGLMemory();
-    bool adjustSampler2DUniformVar(QString varname, GLuint texId);
+		bool adjustSampler2DUniformVar(QString varname, GLuint texId);
 
 		void VarDump();
 
 		void useProgram();
-    void execute();
+		void execute();
 };
 
-// * This class hold the state of the rmshader render:
-// * it has e list of passes and for each pass it keeps the 
-// * list of uniform variable with their memory location and
-// * actual value, and the ARB program handler
+/** 
+ * This class hold the state of the rmshader render:
+ * it has e list of passes and for each pass it keeps the 
+ * list of uniform variable with their memory location and
+ * actual value, and the ARB program handler.
+ */
 class GLStateHolder : public QObject
 {
 	Q_OBJECT
 
+// private data members
+private:
+
 	QList<GLStatePassHolder*> passes;
-  GLuint* passTextures;
-  QGLFramebufferObject* fbo;
+	GLuint* passTextures;
+	QGLFramebufferObject* fbo;
 	QString lastError;
-  GLint currentDrawbuf;
+	GLint currentDrawbuf;
 	bool supported;
+	bool needUpdateInGLMemory;
+	int currentPass;
 
-	public:
+// constructor
+public:
 
-		bool needUpdateInGLMemory;
-    int currentPass;
+	GLStateHolder( ) {fbo = NULL; needUpdateInGLMemory = true; supported = false; currentPass = -1;}
+	GLStateHolder( QList<RmPass> & passes ) {fbo = NULL; setPasses(passes); needUpdateInGLMemory = true; supported = false;}
+	~GLStateHolder( );
 
-		GLStateHolder( ) { fbo = NULL; needUpdateInGLMemory = true; supported = false; currentPass = -1;}
-		GLStateHolder( QList<RmPass> & passes ) { fbo = NULL; setPasses(passes); needUpdateInGLMemory = true; supported = false; }
-		~GLStateHolder( );
+// public methods
+public:
 
-		void setPasses( QList<RmPass> & passes );
+	/// Compile all shaders
+	bool compile();
 
-		bool compile();
-		bool link();
-		QString & getLastError() { return lastError; }
+	/// Link all shaders
+	bool link();
 
-		void updateUniformVariableValuesFromDialog( QString passname, QString varname, int rowIdx, int colIdx, QVariant newValue );
+	void updateUniformVariableValuesFromDialog( QString passname, QString varname, int rowIdx, int colIdx, QVariant newValue );
+	bool updateUniformVariableValuesInGLMemory();
+	bool updateUniformVariableValuesInGLMemory(int pass_idx);
 
-		/// Return true if the current shader is supported
-		bool isSupported() { return supported;}
+	void VarDump();
+
+	void setPasses( QList<RmPass> & passes );
+
+	/// Reset OpenGL memory
+	inline void reset(){needUpdateInGLMemory = true; }
+
+	/// Return true if the current shader is supported
+	bool isSupported(){return supported;}
 	
-		bool updateUniformVariableValuesInGLMemory();
-		bool updateUniformVariableValuesInGLMemory(int pass_idx);
-		void VarDump();
+	/// Set the i-th rendering pass.
+	void usePassProgram(int i);
+	
+	/// Execute the i-th rendering pass.
+	bool executePass(int i);
 
-		int passNumber() { return passes.size(); }
-		inline void reset(){ needUpdateInGLMemory = true; };
-		void usePassProgram( int i ) { passes[i] -> useProgram(); }
-		bool executePass(int i );
+// private methods
+private:
 
-	private:
-		void genPassTextures();
+	void genPassTextures();
+
+// accessors
+public:
+
+	int passNumber(){return passes.size();}
+	QString & getLastError() {return lastError;}
 };
 
 
