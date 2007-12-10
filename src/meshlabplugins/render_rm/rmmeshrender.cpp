@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.9  2007/12/10 11:46:43  corsini
+start new version of rendering cycle
+
 Revision 1.8  2007/12/06 14:47:44  corsini
 *** empty log message ***
 
@@ -140,32 +143,31 @@ void RmMeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, 
 
 	if(holder.isSupported())
 	{
-		/* Handle single pass filters */
 		if (holder.passNumber() == 1)
 		{
+			/*** SINGLE-PASS shader ***/
+			/**************************/
+
 			glEnable(GL_TEXTURE_2D);
 			holder.updateUniformVariableValuesInGLMemory(0);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+			// setup the single-pass shader
 			holder.usePassProgram(0);
+
+			// texture generation (just in case)
+			holder.genPassTextures();
+
+			// execute it 
+			holder.executePass(0);
 			return;
 		}
-
-		glViewport(0,0,FBO_SIZE,FBO_SIZE); /* FIXME */
-
-		if (holder.currentPass >= holder.passNumber())
-			holder.currentPass = -1;
-
-		if (holder.currentPass < 0)
-			holder.currentPass = 0;
-
-		if (holder.currentPass >= 0)
+		else
 		{
-			holder.executePass(holder.currentPass);
-		}
+			/*** MULTI-PASS SHADER ***/
+			/*************************/
 
+			// ...TODO...
+		}
 	}
 
 	holder.currentPass++;
