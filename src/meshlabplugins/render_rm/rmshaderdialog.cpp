@@ -23,8 +23,8 @@
 /****************************************************************************
 History
 $Log$
-Revision 1.8  2007/12/08 14:07:38  ggangemi
-added a ' * ' at line 180: QSpinBox * input = new QSpinBox();
+Revision 1.9  2007/12/10 14:22:06  corsini
+new version with layout correct
 
 Revision 1.7  2007/12/06 14:47:35  corsini
 remove model reference
@@ -41,9 +41,18 @@ code restyling
 
 // we create the dialog with all the proper contents
 RmShaderDialog::RmShaderDialog(GLStateHolder * _holder, RmXmlParser * _parser, 
-															 QGLWidget* gla, RenderMode &rm, QWidget *parent): QDialog(parent)
+                               QGLWidget* gla, RenderMode &rm, QWidget *parent): QDialog(parent)
 {
 	ui.setupUi(this);
+
+	// make this dialog always visible
+	this->setWindowFlags(Qt::WindowStaysOnTopHint);
+
+	// customize the layout
+	layoutUniform = dynamic_cast<QGridLayout *>(ui.frameUniform->layout());
+	layoutTextures = dynamic_cast<QGridLayout *>(ui.frameTextures->layout());
+	layoutOpengl = dynamic_cast<QGridLayout *>(ui.frameOpenGL->layout());
+
 	parser = _parser;
 	holder = _holder;
 	glarea = gla;
@@ -52,7 +61,7 @@ RmShaderDialog::RmShaderDialog(GLStateHolder * _holder, RmXmlParser * _parser,
 	eff_selected = NULL;
 	pass_selected = NULL;
 
-	if( parser -> size() == 0 ) 
+	if(parser -> size() == 0) 
 	{
 		QMessageBox::critical(0, "Meshlab", QString("This RmShader seems to have no suitable effects"));
 		return;
@@ -62,10 +71,9 @@ RmShaderDialog::RmShaderDialog(GLStateHolder * _holder, RmXmlParser * _parser,
 	for( int i = 0; i < parser -> size(); i++ )
 		ui.cmbEffectSelection -> addItem( parser -> at(i).getName() );
 
-	connect( ui.cmbEffectSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(fillDialogWithEffect(int)));
-	connect( ui.cmbPassSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(fillTabsWithPass(int)));
-
-	this->setWindowFlags(Qt::WindowStaysOnTopHint);
+	// signal-slot connections
+	connect(ui.cmbEffectSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(fillDialogWithEffect(int)));
+	connect(ui.cmbPassSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(fillTabsWithPass(int)));
 	connect(ui.btnOk, SIGNAL(clicked()), this, SLOT(accept()));
 
 	signaler = NULL;
@@ -114,10 +122,13 @@ void RmShaderDialog::fillTabsWithPass( int index )
 
 	pass_selected = &(eff_selected -> at( index ));
 
+	// Set the source code of vertex shader
 	ui.textVertex -> setText( pass_selected -> getVertex() );
+
+	// Set the source code of fragment shader
 	ui.textFragment -> setText( pass_selected -> getFragment() );
 
-	// * General Info in the first tab
+	// General Info in the first tab
 	QString info;
 	if( pass_selected -> hasRenderTarget() )
 		info += "Render Target: " + pass_selected -> getRenderTarget().name + "\n";
@@ -145,21 +156,25 @@ void RmShaderDialog::fillTabsWithPass( int index )
 				info += "\n";
 			}
 		}
-	QLabel * lblinfo = new QLabel( info );
-	ui.gridLayout1 -> addWidget(lblinfo, 0, 0, 1, 5  );
-	shown.append(lblinfo);
 
-	// * any value change is sent to the state holder with this mapper
-	// * Signal are send from signaler in the form "varnameNM" where
-	// * NM is the index of row and column in case of matrix. (00 if 
-	// * it is a simple variable).
+	if (!info.isEmpty())
+	{
+		QLabel * lblinfo = new QLabel( info );
+		layoutUniform->addWidget(lblinfo, 0, 0, 1, 5);
+		shown.append(lblinfo);
+	}
+
+	// any value change is sent to the state holder with this mapper
+	// Signal are send from signaler in the form "varnameNM" where
+	// NM is the index of row and column in case of matrix. (00 if 
+	// it is a simple variable).
 	delete signaler;
 	signaler = new QSignalMapper();
 	connect(signaler, SIGNAL(mapped(const QString &)), this, SLOT(valuesChanged(const QString &)));
 
 
-	// * Uniform Variables in the first Tab
-	QList<QString> usedVarables; // * parser can give same variable twice in the vertex and fragment
+	// Uniform Variables in the first Tab
+	QList<QString> usedVarables; // parser can give same variable twice in the vertex and fragment
 	int row = 1;
 	for( int ii = 0; ii < 2; ii++ )
 		for( int jj = 0; jj < ( ii == 0 ? pass_selected -> vertexUniformVariableSize() : pass_selected -> fragmentUniformVariableSize()); jj++ ) {
@@ -180,13 +195,13 @@ void RmShaderDialog::fillTabsWithPass( int index )
 					int n = v.type == UniformVar::INT ? 1 : (v.type == UniformVar::IVEC2 ? 2 : (v.type == UniformVar::IVEC3 ? 3 : 4 ));
 					for( int i = 0; i < n; i++ ) 
 					{
-						QSpinBox * input = new QSpinBox();
-						input -> setObjectName( v.name + "0" + QString().setNum(i) );
+						QSpinBox *input = new QSpinBox();
+						input->setObjectName( v.name + "0" + QString().setNum(i) );
 						if( v.minSet ) input -> setMinimum( v.fmin ); else input -> setMinimum( -1000 );
 						if( v.maxSet ) input -> setMaximum( v.fmax ); else input -> setMaximum( 1000 );
 						input -> setSingleStep( (v.minSet && v.maxSet ) ? max(( v.imax - v.imin )/10, 1) : 1 );
 						input -> setValue( v.ivec4[i] );
-						ui.gridLayout1 -> addWidget( input, row, 1+i, 1, ((i+1)==n ? 5-n : 1) );
+						layoutUniform->addWidget(input, row, 1+i, 1, ((i+1)==n ? 5-n : 1));
 						shown.append(input);
 
 						connect(input, SIGNAL(valueChanged(int)), signaler, SLOT(map()));
@@ -206,7 +221,7 @@ void RmShaderDialog::fillTabsWithPass( int index )
 						QCheckBox * input = new QCheckBox();
 						input -> setObjectName( v.name + "0" + QString().setNum(i) );
 						input -> setCheckState( v.bvec4[i] ? Qt::Checked : Qt::Unchecked );
-						ui.gridLayout1 -> addWidget( input, row, 1+i, 1, ((i+1)==n ? 5-n : 1) );
+						layoutUniform->addWidget(input, row, 1+i, 1, ((i+1)==n ? 5-n : 1));
 						shown.append(input);
 
 						connect(input, SIGNAL(stateChanged(int)), signaler, SLOT(map()));
@@ -229,7 +244,7 @@ void RmShaderDialog::fillTabsWithPass( int index )
 						if( v.maxSet ) input -> setMaximum( v.fmax ); else input -> setMaximum( 1000 );
 						input -> setSingleStep( (v.minSet && v.maxSet ) ? max(( v.fmax - v.fmin )/10., 0.0001) : 0.0001 );
 						input -> setValue( v.vec4[i] );
-						ui.gridLayout1 -> addWidget( input, row, 1+i, 1, ((i+1)==n ? 5-n : 1) );
+						layoutUniform->addWidget( input, row, 1+i, 1, ((i+1)==n ? 5-n : 1) );
 						shown.append(input);
 
 						connect(input, SIGNAL(valueChanged(double)), signaler, SLOT(map()));
@@ -253,7 +268,7 @@ void RmShaderDialog::fillTabsWithPass( int index )
 							if( v.maxSet ) input -> setMaximum( v.fmax ); else input -> setMaximum( 1000 );
 							input -> setSingleStep( (v.minSet && v.maxSet ) ? max(( v.fmax - v.fmin )/10., 0.0001) : 0.0001 );
 							input -> setValue( v.vec4[(i*n)+j] );
-							ui.gridLayout1 -> addWidget( input, row, 1+j, 1, ((j+1)==n ? 5-n : 1) );
+							layoutUniform->addWidget(input, row, 1+j, 1, ((j+1)==n ? 5-n : 1));
 							shown.append(input);
 
 							connect(input, SIGNAL(valueChanged(double)), signaler, SLOT(map()));
@@ -266,34 +281,34 @@ void RmShaderDialog::fillTabsWithPass( int index )
 					break;
 				}
 				case UniformVar::SAMPLER1D: 
-        case UniformVar::SAMPLER2D: 
-        case UniformVar::SAMPLER3D:	
-        case UniformVar::SAMPLERCUBE: 
-        case UniformVar::SAMPLER1DSHADOW: 
-        case UniformVar::SAMPLER2DSHADOW:
+				case UniformVar::SAMPLER2D: 
+				case UniformVar::SAMPLER3D:	
+				case UniformVar::SAMPLERCUBE: 
+				case UniformVar::SAMPLER1DSHADOW: 
+				case UniformVar::SAMPLER2DSHADOW:
 				{
 					QLabel * link = new QLabel( "<font color=\"blue\">See texture tab</font>" );
-					ui.gridLayout1 -> addWidget( link, row, 1, 1, 4 );
+					layoutUniform->addWidget(link, row, 1, 1, 4);
 					shown.append(link);
 					break;
 				}
 				case UniformVar::OTHER:
 				{
 					QLabel * unimpl = new QLabel( "[Unimplemented mask]" );
-					ui.gridLayout1 -> addWidget( unimpl, row, 1, 1, 4);
+					layoutUniform->addWidget( unimpl, row, 1, 1, 4);
 					shown.append(unimpl);
 				}
 			}
 
 			QLabel * lblvar = new QLabel(varname);
-			ui.gridLayout1 -> addWidget( lblvar, row, 0 );
+			layoutUniform->addWidget( lblvar, row, 0 );
 			shown.append(lblvar);
 
 			row += 1;
 		}
 
 
-	// * Texture in the second tab
+	// Texture in the second tab
 	for( int ii = 0, row = 0; ii < 2; ii++ )
 		for( int jj = 0; jj < ( ii == 0 ? pass_selected -> vertexUniformVariableSize() : pass_selected -> fragmentUniformVariableSize()); jj++ ) 
 		{
@@ -321,12 +336,12 @@ void RmShaderDialog::fillTabsWithPass( int index )
 			QLabel * lblvar = new QLabel(varname);
 			lblvar -> setTextFormat( Qt::RichText );
 			lblvar -> setObjectName( v.name + "00" );
-			ui.gridLayout2 -> addWidget( lblvar, row++, 0, 1, 2 );
+			layoutTextures->addWidget( lblvar, row++, 0, 1, 2 );
 			shown.append(lblvar);
 
 			QLineEdit * txtChoose = new QLineEdit( textureDir.absoluteFilePath(finfo.fileName()) );
 			txtChoose -> setObjectName( v.name + "11" );
-			ui.gridLayout2 -> addWidget( txtChoose, row, 0 );
+			layoutTextures->addWidget( txtChoose, row, 0 );
 			shown.append(txtChoose);
 
 			connect(txtChoose, SIGNAL(editingFinished()), signaler, SLOT(map()));
@@ -334,7 +349,7 @@ void RmShaderDialog::fillTabsWithPass( int index )
 
 			QPushButton * btnChoose = new QPushButton( "Browse" );
 			btnChoose -> setObjectName( v.name + "22" );
-			ui.gridLayout2 -> addWidget( btnChoose, row, 1 );
+			layoutTextures->addWidget( btnChoose, row, 1 );
 			shown.append(btnChoose);
 
 			connect(btnChoose, SIGNAL(clicked()), signaler, SLOT(map()));
@@ -343,11 +358,11 @@ void RmShaderDialog::fillTabsWithPass( int index )
 			row++;
 		}
 
-	// * Open Gl Status in the third tab
+	// OpenGL Status
 	if( pass_selected -> openGLStatesSize() == 0 ) 
 	{
 		QLabel * lblgl = new QLabel( "No openGL states set" );
-		ui.gridLayout3 -> addWidget( lblgl, row, 0 );
+		layoutOpengl->addWidget( lblgl, row, 0 );
 		shown.append(lblgl);
 	} 
 	else
@@ -357,7 +372,7 @@ void RmShaderDialog::fillTabsWithPass( int index )
 			QString str = "OpenGL state: " + pass_selected -> getOpenGLState(i).name;
 			str += " (" + QString().setNum(pass_selected -> getOpenGLState(i).state) + "): " + QString().setNum(pass_selected -> getOpenGLState(i).value);
 			QLabel * lblgl = new QLabel(str);
-			ui.gridLayout3 -> addWidget( lblgl, row++, 0 );
+			layoutOpengl->addWidget( lblgl, row++, 0 );
 			shown.append(lblgl);
 		}
 	}
