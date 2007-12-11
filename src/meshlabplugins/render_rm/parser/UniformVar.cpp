@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.3  2007/12/11 16:18:56  corsini
+minor change
+
 Revision 1.2  2007/12/03 12:01:04  corsini
 code restyling
 
@@ -406,8 +409,10 @@ void UniformVar::VarDump( int indent, bool extendedVarDump )
 						for( int j = 0; j < indent+2; j++ )
 							ret += " ";
 
-						ret += "\""  + textureGLStates[i].getName() + "\" (" + QString().setNum(textureGLStates[i].state).toLatin1().data() + ") => " + QString().setNum(textureGLStates[i].getValue());
-						
+						ret += "\""  + textureGLStates[i].getName() + "\" (" + 
+							QString().setNum(textureGLStates[i].getState()).toLatin1().data() + ") => " + 
+							QString().setNum(textureGLStates[i].getValue());
+
 						if( i+1 < textureGLStates.size() ) 
 							ret += "\n";
 					}
