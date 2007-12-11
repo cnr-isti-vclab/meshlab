@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.9  2007/12/11 16:20:40  corsini
+minor changes
+
 Revision 1.8  2007/12/10 15:16:02  corsini
 code restyling
 
@@ -42,6 +45,9 @@ using namespace std;
 
 #define BASE_COLOR_ATTACHMENT GL_COLOR_ATTACHMENT1_EXT
 
+// texture unit initialization
+int UniformValue::textureUnit = 0;
+
 static void checkGLError(char* location)
 {
 	GLuint errnum;
@@ -59,10 +65,7 @@ static void checkGLError(char* location)
 	}
 }
 
-
-int UniformValue::textureUnit = 0;
-
-UniformValue::UniformValue( UniformVar & v )
+UniformValue::UniformValue(UniformVar & v)
 {
 	type = v.type;
 	name = v.name;
@@ -75,16 +78,19 @@ UniformValue::UniformValue( UniformVar & v )
 	textureGLStates = v.textureGLStates;
 	textureLoaded = false;
 
-	// * if it's a texture, try to load it from the standard path
-	if( textureFilename != "" ) {
+	// if it's a texture, try to load it from the standard path
+	if(!textureFilename.isEmpty()) 
+	{
 		QDir textureDir = QDir(qApp->applicationDirPath());
+
 #if defined(Q_OS_WIN)
 		if (textureDir.dirName() == "debug" || textureDir.dirName() == "release" || textureDir.dirName() == "plugins"  ) textureDir.cdUp();
 #elif defined(Q_OS_MAC)
 		if (textureDir.dirName() == "MacOS") { for(int i=0;i<4;++i){ textureDir.cdUp(); if(textureDir.exists("textures")) break; } }
 #endif
+
 		textureDir.cd("textures");
-		updateUniformVariableValuesFromDialog( 0, 0, QVariant( textureDir.absoluteFilePath(textureFilename)));
+		updateUniformVariableValuesFromDialog( 0, 0, QVariant(textureDir.absoluteFilePath(textureFilename)));
 	}
 }
 
@@ -133,34 +139,39 @@ void UniformValue::updateUniformVariableValuesFromDialog( int rowIdx, int colIdx
 				} 
 			} else
 				newPath = newValue.toString();
-			
 
-			// * Load the new texture from given file
-			if( textureLoaded ) 
-				glDeleteTextures( 1, &textureId);
+			// Load the new texture from given file
+			if(textureLoaded)
+				glDeleteTextures(1, &textureId);
 
 			QImage img, imgScaled, imgGL;
 			QFileInfo finfo(newPath);
-			if( finfo.exists() == false ) {
+			if(!finfo.exists()) 
+			{
 				qDebug() << "Texture" << name << "in" << newPath << ": file do not exists";
-			} else
-			if( img.load(newPath) == false ) {
+			}
+			else if(!img.load(newPath))
+			{
 				QMessageBox::critical(0, "Meshlab", newPath + ": Unsupported texture format.. implement me!");
 			}
 
-			glEnable( GL_TEXTURE_2D );
+			glEnable(GL_TEXTURE_2D);
 
 			// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
 			int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
 			int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
-			if( !img.isNull() ) imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+
+			if(!img.isNull())
+				imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+
 			imgGL=QGLWidget::convertToGLFormat(imgScaled);
 
-			glGenTextures( 1, &textureId );
-			glBindTexture( GL_TEXTURE_2D, textureId );
-			glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
+			glGenTextures(1, &textureId);
+			glBindTexture(GL_TEXTURE_2D, textureId);
+			glTexImage2D(GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits());
 
 			textureLoaded = true;
+
 			break;
 		}
 		case OTHER:
@@ -171,42 +182,49 @@ void UniformValue::updateUniformVariableValuesFromDialog( int rowIdx, int colIdx
 
 bool UniformValue::updateValueInGLMemory()
 {
-	switch(type) {
+	switch(type)
+	{
 		case INT: glUniform1iARB(location, ivalue); break;
 		case FLOAT: glUniform1fARB(location, fvalue); break;
 		case BOOL: glUniform1iARB(location, bvalue); break;
 
-		case VEC2: glUniform2fARB(location, vec2[0], vec2[1] ); break;
-		case VEC3: glUniform3fARB(location, vec3[0], vec3[1], vec3[2] ); break;
-		case VEC4: glUniform4fARB(location, vec4[0], vec4[1], vec4[2], vec4[3] ); break;
+		case VEC2: glUniform2fARB(location, vec2[0], vec2[1]); break;
+		case VEC3: glUniform3fARB(location, vec3[0], vec3[1], vec3[2]); break;
+		case VEC4: glUniform4fARB(location, vec4[0], vec4[1], vec4[2], vec4[3]); break;
 
-		case IVEC2: glUniform2iARB(location, ivec2[0], ivec2[1] ); break;
-		case IVEC3: glUniform3iARB(location, ivec3[0], ivec3[1], ivec3[2] ); break;
-		case IVEC4: glUniform4iARB(location, ivec4[0], ivec4[1], ivec4[2], ivec4[3] ); break;
+		case IVEC2: glUniform2iARB(location, ivec2[0], ivec2[1]); break;
+		case IVEC3: glUniform3iARB(location, ivec3[0], ivec3[1], ivec3[2]); break;
+		case IVEC4: glUniform4iARB(location, ivec4[0], ivec4[1], ivec4[2], ivec4[3]); break;
 
 		case BVEC2: glUniform2iARB(location, bvec2[0], bvec2[1] ); break;
-		case BVEC3: glUniform3iARB(location, bvec3[0], bvec3[1], bvec3[2] ); break;
-		case BVEC4: glUniform4iARB(location, bvec4[0], bvec4[1], bvec4[2], bvec4[3] ); break;
+		case BVEC3: glUniform3iARB(location, bvec3[0], bvec3[1], bvec3[2]); break;
+		case BVEC4: glUniform4iARB(location, bvec4[0], bvec4[1], bvec4[2], bvec4[3]); break;
 
-		case MAT2: glUniformMatrix2fvARB( location, 1, GL_FALSE, (GLfloat*)mat2 ); break;
-		case MAT3: glUniformMatrix3fvARB( location, 1, GL_FALSE, (GLfloat*)mat3 ); break;
-		case MAT4: glUniformMatrix4fvARB( location, 1, GL_FALSE, (GLfloat*)mat4 ); break;
+		case MAT2: glUniformMatrix2fvARB(location, 1, GL_FALSE, (GLfloat*)mat2); break;
+		case MAT3: glUniformMatrix3fvARB(location, 1, GL_FALSE, (GLfloat*)mat3); break;
+		case MAT4: glUniformMatrix4fvARB(location, 1, GL_FALSE, (GLfloat*)mat4); break;
 
 		case SAMPLER1D: case SAMPLER2D: case SAMPLER3D: case SAMPLERCUBE: case SAMPLER1DSHADOW: case SAMPLER2DSHADOW:
 		{
-			if( textureLoaded == false )
+			if(textureLoaded == false)
 				return false;
 
-			if( UniformValue::textureUnit >= GL_MAX_TEXTURE_UNITS ) {
+			if(textureUnit >= GL_MAX_TEXTURE_UNITS) 
+			{
 				QMessageBox::critical(0, "Meshlab", "Number of active texture is greater than max number supported (which is" + QString().setNum(GL_MAX_TEXTURE_UNITS) + ")" );
 				return false;
 			}
-			glActiveTexture(GL_TEXTURE0+UniformValue::textureUnit );
-			glBindTexture( GL_TEXTURE_2D, textureId );
-			glUniform1iARB( location, UniformValue::textureUnit++ );
+
+			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE0 + textureUnit);
+			glBindTexture(GL_TEXTURE_2D, textureId);
+			glUniform1iARB(location, textureUnit);
+			textureUnit++;
+
 #ifdef DEBUG
-      qDebug() << "Updating sampler2D " << name << " to texId=" << textureId << "[textureUnit=" << UniformValue::textureUnit <<"]" ;
+			qDebug() << "Updating sampler2D " << name << " to texId=" << textureId << "[textureUnit=" << UniformValue::textureUnit <<"]" ;
 #endif
+
 			break;
 		}
 		case OTHER:
@@ -420,11 +438,8 @@ void GLStatePassHolder::VarDump()
 }
 
 void GLStatePassHolder::useProgram()
-{ 
-	checkGLError("BEGIN: useprogram");
-	updateUniformVariableValuesInGLMemory();
-	glUseProgramObjectARB( program ); qDebug() << passName;
-	checkGLError("END: useprogram");
+{
+	glUseProgramObjectARB(program);
 }
 
 void GLStatePassHolder::execute()
@@ -556,30 +571,31 @@ void GLStateHolder::updateUniformVariableValuesFromDialog( QString passname, QSt
 {
 	needUpdateInGLMemory = true;
 	for( int i = 0; i < passes.size(); i++ )
-		if( passes[i] -> passName == passname ) {
-			passes[i] -> updateUniformVariableValuesFromDialog( varname, rowIdx, colIdx, newValue );
+		if( passes[i] -> passName == passname ) 
+		{
+			passes[i]->updateUniformVariableValuesFromDialog( varname, rowIdx, colIdx, newValue );
 			break;
 		}
 }
 
 bool GLStateHolder::updateUniformVariableValuesInGLMemory()
 {
-	bool ret = true;
 	needUpdateInGLMemory = false;
-	for( int i = 0; i < passes.size(); i++ )
-		if( !passes[i] -> updateUniformVariableValuesInGLMemory() )
+
+	bool ret = true;
+	for(int i = 0; i < passes.size(); i++)
+		if(!passes[i]->updateUniformVariableValuesInGLMemory())
 			ret = false;
-	glUseProgramObjectARB(0);
+
 	return ret;
 }
 
 bool GLStateHolder::updateUniformVariableValuesInGLMemory(int pass_idx)
 {
-  bool ret = true;
-  if (pass_idx >= passes.size()) return false;
-  if(!passes[pass_idx] -> updateUniformVariableValuesInGLMemory() )
-    ret = false;
-  return ret;
+	if (pass_idx >= passes.size()) 
+		return false;
+
+	return passes[pass_idx]->updateUniformVariableValuesInGLMemory();
 }
 
 
