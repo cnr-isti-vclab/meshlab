@@ -48,15 +48,16 @@
 #include <QFile>
 #include <QTime>
 #include <GL/glew.h>
+#include <wrap/qt/checkGLError.h>
 
 #include "filter_ao.h"
-
+#include "AOGLWidget.h"
 #include <iostream>
 
 #define AMBOCC_DEFAULT_TEXTURE_SIZE 1024
-#define AMBOCC_DEFAULT_NUM_VIEWS 250
-#define AMBOCC_USEGPU_BY_DEFAULT true
-#define AMBOCC_USEVBO_BY_DEFAULT true
+#define AMBOCC_DEFAULT_NUM_VIEWS 32
+#define AMBOCC_USEGPU_BY_DEFAULT false
+#define AMBOCC_USEVBO_BY_DEFAULT false
 
 static GLuint vs, fs, shdrID;
 
@@ -129,10 +130,6 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 }
 bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-	int tInitElapsed = 0;
-	QTime tInit, tAll;
-	tInit.start();
-	tAll.start();
 
 	assert(filter->text() == filterName(FP_AMBIENT_OCCLUSION));
 	useGPU = par.getBool("useGPU");
@@ -143,31 +140,43 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 
 	if ( useGPU && ((unsigned int)m.cm.vn > texArea) )
 	{
-		Log(0, "Too many vertices: up to %d are allowed", texArea);
+		//Log(0, "Too many vertices: up to %d are allowed", texArea);
 		return false;
 	}
 
-	GLfloat *occlusion = new GLfloat[m.cm.vn];
+	AOGLWidget *qWidget = new AOGLWidget(0,this);
+  qWidget->cb = cb;
+	qWidget->m = &m;
+	//qWidget->create();
+	qWidget->show();
+	
+		
+	////Creates a new RC, initializes everything (glew, textures, FBO..)
+	//if (!initContext(qWidget, cb))
+		return false;
+}
+	
+ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::CallBackPos *cb)
+ {
+  checkGLError::qDebug("start");
+ 	int tInitElapsed = 0;
+	QTime tInit, tAll;
+	tInit.start();
+	tAll.start();
+
+ 	GLfloat *occlusion = new GLfloat[m.cm.vn];
 	typedef std::vector<vcg::Point3f> vectP3f;
 	vectP3f::iterator vi;
 	static vectP3f posVect;
-	QGLWidget qWidget;
-
-	//Creates a new RC, initializes everything (glew, textures, FBO..)
-	if (!initContext(qWidget, cb))
-		return false;
-	
-	if (!GLEW_ARB_vertex_buffer_object)
-		useVBO = false;
-
+	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	//Prepare mesh to be rendered
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 	if (useVBO)
 	{
 		m.glw.SetHint(vcg::GLW::HNUseVBO);
-		cb(0, "Generating vertex data for VBO...");
+		//cb(0, "Generating vertex data for VBO...");
 		m.glw.Update();
-		cb(100, "Generating vertex data for VBO... Done.");
+		//cb(100, "Generating vertex data for VBO... Done.");
 	}
 	
 	if(useGPU)
@@ -231,7 +240,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		}
 		else
 		{
-			qWidget.makeCurrent();
 			glEnable(GL_DEPTH_TEST);
 			glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -246,7 +254,8 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 			generateOcclusionSW(m, occlusion);
 		}
 
-		cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
+		//cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
+		//aogl->makeCurrent();
 		c++;
 	}
 
@@ -259,7 +268,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	else
 		applyOcclusionSW(m,occlusion);
 
-	Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
+	//Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
 
 	/********** Clean up the mess ************/
@@ -282,10 +291,11 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 
 	delete [] occlusion;
 
-	qWidget.doneCurrent();
-
 	return true;
-}
+} // end processGL
+
+
+
 void AmbientOcclusionPlugin::renderMesh(MeshModel &m)
 {
 	m.glw.DrawFill<vcg::GLW::NMNone, vcg::GLW::CMNone, vcg::GLW::TMNone>();
@@ -355,46 +365,32 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
-bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *cb)
+// Called by the initgl of the aoglwidget
+bool AmbientOcclusionPlugin::initContext(QGLWidget *qWidget, vcg::CallBackPos *cb)
 {
-	cb(0, "Initializing: Context");
+	//cb(0, "Initializing: Context");
 
-	QGLFormat qFormat = QGLFormat::defaultFormat();
-	qFormat.setAlpha(true);
-	qFormat.setDepth(true);
-	qWidget.setFormat(qFormat);
 
-	if(!qWidget.isValid())
-	{
-		Log(0,"Error: Unable to create a new QGLWidget");
-		return false;
-	}
-
-	qWidget.setFixedSize(texSize,texSize);
-	qWidget.makeCurrent();
-
-	cb(15, "Initializing: Glew");
-	qWidget.makeCurrent();
+	//cb(15, "Initializing: Glew");
 
 	//*******INIT GLEW********/
 	GLint glewError = glewInit();
 	if (glewError)
 	{
-		Log(0,(const char*)glewGetErrorString(glewError));
+		//Log(0,(const char*)glewGetErrorString(glewError));
 		return false;
 	}
 
 	//*******CHECK TEX SIZE********/
 	if (texSize < 15)
 	{
-		Log(0, "Texture size is too small, 16x16 used instead");
+		//Log(0, "Texture size is too small, 16x16 used instead");
 		texSize = 16;
 		texArea = texSize*texSize;
 	}
 	if (texSize > 1024)
 	{
-		Log(0, "Texture size is too large, 1024x1024 used instead");
+		//Log(0, "Texture size is too large, 1024x1024 used instead");
 		texSize = 1024;
 		texArea = texSize*texSize;
 	}
@@ -407,31 +403,31 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 	{
 		if ( !GLEW_ARB_vertex_shader || !GLEW_ARB_fragment_shader )
 		{
-			Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
+			//Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
 			return false;
 		}
 		if ( !GLEW_EXT_framebuffer_object )
 		{
-			Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
+			//Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
 			return false;
 		}
 
 		if ( !GLEW_ARB_texture_float )
 		{
-			Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
+			//Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
 			return false;
 		}
 
-		cb(30, "Initializing: Textures");
+		//cb(30, "Initializing: Textures");
 		//GL_RGBA32/16F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
 		initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT);
 
 		//*******LOAD SHADER*******/
-		cb(45, "Initializing: Shaders");
+		//cb(45, "Initializing: Shaders");
 		set_shaders("ambient_occlusion",vs,fs,shdrID);
 
 		//*******INIT FBO*********/
-		cb(65, "Initializing: FBOs");
+		//cb(65, "Initializing: FBOs");
 		
 		fboDepth = 0;
 		glGenFramebuffersEXT(1, &fboDepth);   // FBO for first pass (1 depth attachment)
@@ -462,9 +458,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget &qWidget, vcg::CallBackPos *c
 
 	glViewport(0.0, 0.0, texSize, texSize);
 
-	cb(100, "Initializing: Done.");
-
-	qWidget.makeCurrent();
+	//cb(100, "Initializing: Done.");
 
 	return true;
 }
@@ -478,25 +472,26 @@ bool AmbientOcclusionPlugin::checkFramebuffer()
 		switch (fboStatus)
 		{
 		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-			Log(0, "FBO Incomplete: Attachment");
+			//Log(0, "FBO Incomplete: Attachment");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-			Log(0, "FBO Incomplete: Missing Attachment");
+			//Log(0, "FBO Incomplete: Missing Attachment");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-			Log(0, "FBO Incomplete: Dimensions");
+			//Log(0, "FBO Incomplete: Dimensions");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-			Log(0, "FBO Incomplete: Formats");
+			//Log(0, "FBO Incomplete: Formats");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-			Log(0, "FBO Incomplete: Draw Buffer");
+			//Log(0, "FBO Incomplete: Draw Buffer");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-			Log(0, "FBO Incomplete: Read Buffer");
+			//Log(0, "FBO Incomplete: Read Buffer");
 			break;
 		default:
-			Log(0, "Undefined FBO error");
+			//Log(0, "Undefined FBO error"); 
+			assert(0); 
 		}
 
 		return false;
@@ -637,7 +632,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 	glReadPixels(0, 0, texSize, texSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
 	//size(dFloat) == texSize*texSize (a.k.a. texArea !!)
-	qDebug("min and max of depth buffer %f %f",std::min_element(dFloat,dFloat+texArea),std::max_element(dFloat,dFloat+texArea));
+	//qDebug("min and max of depth buffer %f %f",*std::min_element(dFloat,dFloat+texArea),*std::max_element(dFloat,dFloat+texArea));
 	cameraDir.Normalize();
 
 	Point3<CMeshO::ScalarType> vp;

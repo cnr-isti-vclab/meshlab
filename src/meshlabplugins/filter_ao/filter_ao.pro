@@ -19,8 +19,8 @@ win32{
 
 OBJECTS_DIR += debug
 
-HEADERS += ./filter_ao.h
-SOURCES += ./filter_ao.cpp \
+HEADERS += ./filter_ao.h AOGLWidget.h
+SOURCES += ./filter_ao.cpp AOGLWidget.cpp \
     ../../meshlab/filterparameter.cpp \
     ../../../../code/lib/glew/src/glew.c
 

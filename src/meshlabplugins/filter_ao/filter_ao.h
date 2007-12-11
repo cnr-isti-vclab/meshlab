@@ -31,14 +31,14 @@
 #include <vcg/space/box3.h>
 #include <wrap/gl/shot.h>
 #include <wrap/gl/gl_surface.h>
-
+class AOGLWidget;
 class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
 
 // Attributes
-private:
+public:
 	Point3f cameraDir;
 	GLuint  fboDepth,
 	        fboResult,
@@ -74,12 +74,11 @@ public:
 	                                           MeshModel &m,
 	                                           FilterParameterSet & /*parent*/,
 	                                           vcg::CallBackPos * cb) ;
-private:
 	void  initTextures          (GLenum colorFormat,
 	                             GLenum depthFormat);
-	bool  initContext           (QGLWidget &qWidget,
+	bool  initContext           (QGLWidget *qWidget,
 	                             vcg::CallBackPos *cb);
-
+  bool  processGL(AOGLWidget *glw, MeshModel &m, vcg::CallBackPos *cb);
 	bool  checkFramebuffer();
 
 	void  vertexCoordsToTexture (MeshModel &m);
