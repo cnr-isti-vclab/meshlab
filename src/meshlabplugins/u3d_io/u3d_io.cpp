@@ -54,6 +54,7 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 	std::string ex = formatName.toUtf8().data();
 
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters mp;
+	mp._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
 	U3D_GUI pw(mp,parent);
 	pw.exec();
 	

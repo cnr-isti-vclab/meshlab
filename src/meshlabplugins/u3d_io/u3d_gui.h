@@ -16,6 +16,7 @@ public:
 
 private:
 	void saveParameters();
+	void defaultParameters();
 
 	Ui::U3D_GUIClass ui;
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters& _param;

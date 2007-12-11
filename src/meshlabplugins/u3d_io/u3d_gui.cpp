@@ -4,13 +4,14 @@ U3D_GUI::U3D_GUI(vcg::tri::io::u3dparametersclasses::Movie15Parameters& param,QW
 	: QDialog(parent, flags),_param(param)
 {
 	ui.setupUi(this);
+	defaultParameters();
 	saveParameters();
 }
 
 U3D_GUI::~U3D_GUI()
 {
 
-}
+} 
 
 void U3D_GUI::saveParameters()
 {
@@ -18,10 +19,10 @@ void U3D_GUI::saveParameters()
 		ui.tarx_lab->text().toFloat() - ui.posx_lnedt->text().toFloat(),
 		ui.tary_lab->text().toFloat()  - ui.posy_lnedt->text().toFloat(),
 		ui.tarz_lab->text().toFloat()  - ui.posz_lnedt->text().toFloat());
-	if (_param._campar != NULL)
-		delete _param._campar;
+	vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters* sw = _param._campar;
 	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(
-		(float) ui.fov_spn->value(),0.0f,from_target_to_camera,from_target_to_camera.Norm());
+		(float) ui.fov_spn->value(),0.0f,from_target_to_camera,from_target_to_camera.Norm(),sw->_obj_pos);
+	delete sw;
 }
 
 void U3D_GUI::on_buttonBox_accepted()
@@ -33,4 +34,20 @@ void U3D_GUI::on_buttonBox_accepted()
 void U3D_GUI::on_buttonBox_rejected()
 {
 	close();
+}
+
+void U3D_GUI::defaultParameters()
+{
+	QString tmp;
+	tmp.setNum(_param._campar->_obj_pos.X());
+	ui.tarx_lnedt->setText(tmp);
+	tmp.setNum(_param._campar->_obj_pos.Y());
+	ui.tary_lnedt->setText( tmp);
+	tmp.setNum(_param._campar->_obj_pos.Z());
+	ui.tarz_lnedt->setText(tmp);
+	tmp.setNum(0.0);
+	ui.posx_lnedt->setText(tmp);
+	ui.posy_lnedt->setText(tmp);
+	tmp.setNum(-1.0f * _param._campar->_obj_bbox_diag);
+	ui.posz_lnedt->setText(tmp);
 }
