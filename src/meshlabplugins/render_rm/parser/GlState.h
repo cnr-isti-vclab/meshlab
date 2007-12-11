@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.3  2007/12/11 16:19:10  corsini
+make private member variable with accessors
+
 Revision 1.2  2007/12/03 10:14:59  corsini
 restyling code
 
@@ -30,23 +33,31 @@ restyling code
 ****************************************************************************/
 
 
-#ifndef __GLSTATE_H__
-#define __GLSTATE_H__
+#ifndef GLSTATE_H
+#define GLSTATE_H
 
+// Qt headers
 #include <QString>
 #include <QDomElement>
 
+/**
+ * Class to handle OpenGL state (e.g. name, OpenGL code).
+ */
 class GlState
 {
 
-public:
+// private data members
+private:
 
 	QString name;
 	int state;
 	int value;
 	bool valid;
 
-	GlState( QString & _name, int _state, int _value )
+// constructor
+public:
+
+	GlState(QString _name, int _state, int _value)
 	{
 		name = _name;
 		state = _state;
@@ -54,7 +65,7 @@ public:
 		valid = true;
 	}
 
-	GlState( QDomElement xml ) 
+	GlState(QDomElement xml)
 	{
 		bool ok1,ok2;
 		name = xml.attribute("NAME");
@@ -64,11 +75,14 @@ public:
 		valid = ( xml.tagName() == "RmState" && xml.attribute("API") == "OpenGL" && ok1 && ok2 );
 	}
 
-	bool isValid() { return valid; }
-	int getValue() { return value; }
-	int getState() { return state; }
-	QString & getName() { return name; }
+// accessors 
+public:
+
+	bool isValid(){return valid;}
+	int getValue(){return value;}
+	int getState(){return state;}
+	QString getName(){return name;}
 };
 
-#endif
+#endif  /* GLSTATE_H */
 
