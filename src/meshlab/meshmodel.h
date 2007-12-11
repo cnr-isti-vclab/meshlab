@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.43  2007/12/11 17:14:43  cignoni
+removed uselss include ocf for vertex
+
 Revision 1.42  2007/10/23 07:50:41  cignoni
 added vertex normals to the default of a mesh. Added trBBox function
 
@@ -95,7 +98,6 @@ abstract pointer to fileformat's dependent additional info added
 #include <vcg/simplex/face/topology.h>
 
 #include <vcg/complex/trimesh/base.h>
-#include <vcg/simplex/vertexplus/component_ocf.h>
 #include <vcg/simplex/faceplus/component_ocf.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/flag.h>
