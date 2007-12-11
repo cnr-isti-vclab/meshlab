@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.22  2007/12/11 23:56:40  cignoni
+better resizing of dialogs
+
 Revision 1.21  2007/11/30 07:19:09  cignoni
 moved generic dialog to the meshlab base
 
@@ -233,9 +236,9 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
  if(layout()) delete layout();
 	QGridLayout *gridLayout = new QGridLayout(this);
 	setLayout(gridLayout);
-  gridLayout->setColumnStretch(0,0);
-	gridLayout->setColumnStretch(1,0);
-	gridLayout->setColumnStretch(2,1);
+//  gridLayout->setColumnStretch(0,1);
+//	gridLayout->setColumnStretch(1,1);
+//	gridLayout->setColumnStretch(2,2);
 
 	QCheckBox *qcb;
 	QLineEdit *qle;
@@ -250,10 +253,13 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 	for(int i = 0; i < parList.count(); i++)
 	{
 		const FilterParameter &fpi=parList.at(i);
-		ql = new QLabel("<i><small>"+fpi.fieldToolTip +"</small></i>",this);
+		ql = new QLabel("<small>"+fpi.fieldToolTip +"</small>",this);
 		ql->setTextFormat(Qt::RichText);
 		ql->setWordWrap(true);
 		ql->setVisible(false);
+		ql->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+		ql->setMinimumWidth(250);
+		ql->setMaximumWidth(QWIDGETSIZE_MAX);
 		gridLayout->addWidget(ql,i,3,1,1,Qt::AlignTop); 
 		helpList.push_back(ql);
 		
