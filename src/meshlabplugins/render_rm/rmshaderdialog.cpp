@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.10  2007/12/11 16:21:06  corsini
+improve textures parameters description
+
 Revision 1.9  2007/12/10 14:22:06  corsini
 new version with layout correct
 
@@ -331,7 +334,10 @@ void RmShaderDialog::fillTabsWithPass( int index )
 			varname += "Filename: " + finfo.fileName() + (f.exists() ? "" : " [<font color=\"red\">not found</font>]");
 
 			for( int k = 0; k < v.textureGLStates.size(); k++ )
-				varname += "<br>OpenGL state: " + v.textureGLStates[k].name + " (" + QString().setNum(v.textureGLStates[k].state) + "): " + QString().setNum(v.textureGLStates[k].value);
+			{
+				varname += "<br>OpenGL state: " + v.textureGLStates[k].getName() + ": " + 
+					parser->convertGlStateToString(v.textureGLStates[k]);
+			}
 
 			QLabel * lblvar = new QLabel(varname);
 			lblvar -> setTextFormat( Qt::RichText );
@@ -369,8 +375,9 @@ void RmShaderDialog::fillTabsWithPass( int index )
 	{
 		for( int i = 0, row = 0; i < pass_selected -> openGLStatesSize(); i++ ) 
 		{
-			QString str = "OpenGL state: " + pass_selected -> getOpenGLState(i).name;
-			str += " (" + QString().setNum(pass_selected -> getOpenGLState(i).state) + "): " + QString().setNum(pass_selected -> getOpenGLState(i).value);
+			QString str = "OpenGL state: " + pass_selected -> getOpenGLState(i).getName();
+			str += " (" + QString().setNum(pass_selected -> getOpenGLState(i).getState()) + "): " + 
+				QString().setNum(pass_selected -> getOpenGLState(i).getValue());
 			QLabel * lblgl = new QLabel(str);
 			layoutOpengl->addWidget( lblgl, row++, 0 );
 			shown.append(lblgl);
