@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.4  2007/12/11 16:19:37  corsini
+add mapping between rm code and opengl code
+
 Revision 1.3  2007/12/06 14:47:04  corsini
 code restyling
 
@@ -33,7 +36,124 @@ code restyling
 ****************************************************************************/
 
 // Local headers
+#include <GL/glew.h>
 #include "RmXmlParser.h"
+
+RmXmlParser::RmXmlParser()
+{
+	initializeCodeMapping();
+}
+
+RmXmlParser::RmXmlParser(QString filename)
+{
+	setFileName(filename);
+	initializeCodeMapping();
+}
+
+void RmXmlParser::initializeCodeMapping()
+{
+	// GL_TextureWrapS
+	GlParamType par("GL_CLAMP", GL_CLAMP);
+	mapcode["GL_TextureWrapS1"] = par;
+
+	par.first = "GL_CLAMP_TO_EDGE"; par.second = GL_CLAMP_TO_EDGE;
+	mapcode["GL_TextureWrapS2"] = par;
+
+	par.first = "GL_REPEAT"; par.second = GL_REPEAT;
+	mapcode["GL_TextureWrapS3"] = par;
+
+	par.first = "GL_CLAMP_TO_BORDER"; par.second = GL_CLAMP_TO_BORDER;
+	mapcode["GL_TextureWrapS4"] = par;
+
+	par.first = "GL_MIRRORED_REPEAT"; par.second = GL_MIRRORED_REPEAT;
+	mapcode["GL_TextureWrapS5"] = par;
+
+	// GL_TextureWrapT
+	mapcode["GL_TextureWrapT1"] = par;
+
+	par.first = "GL_CLAMP_TO_EDGE"; par.second = GL_CLAMP_TO_EDGE;
+	mapcode["GL_TextureWrapT2"] = par;
+
+	par.first = "GL_REPEAT"; par.second = GL_REPEAT;
+	mapcode["GL_TextureWrapT3"] = par;
+
+	par.first = "GL_CLAMP_TO_BORDER"; par.second = GL_CLAMP_TO_BORDER;
+	mapcode["GL_TextureWrapT4"] = par;
+
+	par.first = "GL_MIRRORED_REPEAT"; par.second = GL_MIRRORED_REPEAT;
+	mapcode["GL_TextureWrapT5"] = par;
+
+	// GL_TextureWrapR
+	mapcode["GL_TextureWrapR1"] = par;
+
+	par.first = "GL_CLAMP_TO_EDGE"; par.second = GL_CLAMP_TO_EDGE;
+	mapcode["GL_TextureWrapR2"] = par;
+
+	par.first = "GL_REPEAT"; par.second = GL_REPEAT;
+	mapcode["GL_TextureWrapR3"] = par;
+
+	par.first = "GL_CLAMP_TO_BORDER"; par.second = GL_CLAMP_TO_BORDER;
+	mapcode["GL_TextureWrapR4"] = par;
+
+	par.first = "GL_MIRRORED_REPEAT"; par.second = GL_MIRRORED_REPEAT;
+	mapcode["GL_TextureWrapR5"] = par;
+
+
+	// GL_TextureMagnify
+	par.first = "GL_NEAREST"; par.second = GL_NEAREST;
+	mapcode["GL_TextureMagnify0"] = par;
+
+	par.first = "GL_LINEAR"; par.second = GL_LINEAR;
+	mapcode["GL_TextureMagnify1"] = par;
+
+
+	// GL_TextureMinify
+	par.first = "GL_NEAREST"; par.second = GL_NEAREST;
+	mapcode["GL_TextureMinify0"] = par;
+
+	par.first = "GL_LINEAR"; par.second = GL_LINEAR;
+	mapcode["GL_TextureMinify1"] = par;
+
+	par.first = "GL_NEAREST_MIPMAP_NEAREST"; par.second = GL_NEAREST_MIPMAP_NEAREST;
+	mapcode["GL_TextureMinify3"] = par;
+
+	par.first = "GL_NEAREST_MIPMAP_LINEAR"; par.second = GL_NEAREST_MIPMAP_LINEAR;
+	mapcode["GL_TextureMinify4"] = par;
+
+	par.first = "GL_LINEAR_MIPMAP_NEAREST"; par.second = GL_LINEAR_MIPMAP_NEAREST;
+	mapcode["GL_TextureMinify5"] = par;
+
+	par.first = "GL_LINEAR_MIPMAP_LINEAR"; par.second = GL_LINEAR_MIPMAP_LINEAR;
+	mapcode["GL_TextureMinify6"] = par;
+}
+
+QString RmXmlParser::convertGlStateToString(GlState & glstate)
+{
+	GlParamType par;
+
+	std::string str;
+	str = glstate.getName().toStdString();
+
+	QString strvalue = QString("%1").arg(glstate.getValue());
+	str += strvalue.toStdString();
+
+	par = mapcode[str];
+	return QString::fromStdString(par.first);
+}
+
+int RmXmlParser::convertGlStateToInt(GlState & glstate)
+{
+	GlParamType par;
+
+	std::string str;
+	str = glstate.getName().toStdString();
+
+	QString strvalue = QString("%1").arg(glstate.getValue());
+	str += strvalue.toStdString();
+	
+	par = mapcode[str];
+	return par.second;
+}
 
 
 bool RmXmlParser::parse( QString _filename )
@@ -110,7 +230,7 @@ bool RmXmlParser::parse( QString _filename )
 				QDomNodeList statelist = stateEl.elementsByTagName( "RmState" );
 				for( int k = 0; k < statelist.size(); k++ ) {
 					GlState s( statelist.at(k).toElement() );
-					if( s.valid )
+					if( s.isValid() )
 						pass.addOpenGLState( s );
 				}
 			}
@@ -254,7 +374,7 @@ void RmXmlParser::VarDump( bool extendedDump )
 				qDebug() << "          with" << pass.openGLStatesSize() << "opengl states set";
 
 				for( int k = 0; k < pass.openGLStatesSize(); k++ )
-					qDebug() << "          " << pass.getOpenGLState(k).name << " (" << QString().setNum(pass.getOpenGLState(k).state).toLatin1().data() << ") =>" << pass.getOpenGLState(k).value;
+					qDebug() << "          " << pass.getOpenGLState(k).getName() << " (" << QString().setNum(pass.getOpenGLState(k).getState()).toLatin1().data() << ") =>" << pass.getOpenGLState(k).getValue();
 			}
 
 			qDebug() << "        - Fragment (" << pass.getFragment().length() << "bytes ): " << pass.getFragment().mid(0, 50).replace( "\n", " " ).replace("\r","") << "...";

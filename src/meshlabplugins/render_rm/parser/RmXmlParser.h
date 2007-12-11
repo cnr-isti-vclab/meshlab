@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.4  2007/12/11 16:19:37  corsini
+add mapping between rm code and opengl code
+
 Revision 1.3  2007/12/03 10:29:37  corsini
 code restyling
 
@@ -72,8 +75,15 @@ code restyling
  *
  * 
  */
+
 class RmXmlParser
 {
+
+// definitions
+public:
+
+	typedef std::pair<std::string, int> GlParamType;
+	typedef std::map<std::string, GlParamType> MapCodeType;
 
 // private members
 private:
@@ -84,12 +94,19 @@ private:
 
 	QList<RmEffect> effects;
 
+	MapCodeType mapcode;
+
 // ctor
 public:
 
-	RmXmlParser( ) {}
-	RmXmlParser( QString filename ) { setFileName(filename); }
-	virtual ~RmXmlParser( ){}
+	RmXmlParser();
+	RmXmlParser(QString filename);
+	virtual ~RmXmlParser(){}
+
+// private methods
+private:
+
+	void initializeCodeMapping();
 
 // public methods
 public:
@@ -110,6 +127,9 @@ public:
 		int size() { return effects.size(); }
 		RmEffect & at(int idx) { return effects[idx]; }
 		RmEffect & operator[] (int idx) { return effects[idx]; }
+
+		QString convertGlStateToString(GlState & glstate);
+		int convertGlStateToInt(GlState & glstate);
 
 		/// debug purpose
 		void VarDump( bool extendedDump = false );
