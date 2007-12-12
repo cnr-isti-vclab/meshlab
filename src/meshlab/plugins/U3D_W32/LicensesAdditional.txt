@@ -1,0 +1,55 @@
+Redistribution and use in source and binary forms of some portions of 
+the included software is governed by other licenses associated with it, 
+and not by the license contained in License.txt.  This software is 
+located in the following directories and files (embedded within them or 
+in their entirety):
+
+Source\RTL\Dependencies
+    + Fowler/Noll/Vo (FNV) Hash from Landon Curt Noll 
+      (http://www.isthe.com/chongo/tech/comp/fnv/index.html)
+
+    + JPEG library from the Independent JPEG Group 
+      (http://www.ijg.org/)
+
+    + OpenGL SDK's glext.h from Silicon Graphics, Inc. 
+      (http://oss.sgi.com/projects/ogl-sample/sdk.html)
+
+    + PNG reference library LIBPNG from Guy Eric Schalnat, 
+      Andreas Dilger, Glenn Randers-Pehrson, and others 
+      (http://www.libpng.org/pub/png/libpng.html)
+
+    + Routines for Arbitrary Precision Floating-point Arithmetic and 
+      Fast Robust Geometric Predicates (predicates.c) from Jonathan 
+      Richard Shewchuk (http://www.cs.cmu.edu/~quake/robust.html)
+      
+    + Wildcard Match module (wcmatch.h/c) from Ville Vainio 
+      (http://www.students.tut.fi/~vainio24/dl/)
+
+    + ZLIB general purpose compression library from Jean-loup Gailly 
+      and Mark Adler (http://www.gzip.org/zlib/)
+
+
+Source\RTL\Component\Generators\Glyph2D\CIFXGeom2D.h
+Source\RTL\Component\Generators\Glyph2D\CIFXQuadEdge.cpp
+Source\RTL\Component\Generators\Glyph2D\CIFXQuadEdge.h
+    + Incremental Delaunay Triangulation by Dani Lischinski in Graphics 
+      Gems IV from Academic Press (http://www.graphicsgems.org and 
+      http://www.acm.org/pubs/tog/GraphicsGems/gemsiv.zip)
+
+
+Source\RTL\Kernel\Include\IFXQuaternion.h
+Source\RTL\Kernel\DataTypes\IFXQuaternion.cpp
+Include\IFXQuaternion.h
+    + Rotating Objects Using Quaternions from Nick Bobic 
+      (http://www.gamasutra.com/features/19980703/quaternions_01.htm)
+
+
+Source\Samples\IntermediateFormat\Exporter\DllEntry.cpp
+Source\Samples\IntermediateFormat\Exporter\Exporter.cpp
+Source\Samples\IntermediateFormat\Exporter\Exporter.h
+Source\Samples\IntermediateFormat\Exporter\ExporterPlugin.cpp
+Source\Samples\IntermediateFormat\Exporter\ExporterPlugin.h
+Source\Samples\IntermediateFormat\Exporter\ExporterPluginClassDesc.cpp
+    + 3ds max 7 SDK from Discreet (http://www4.discreet.com/3dsmax/)
+
+
