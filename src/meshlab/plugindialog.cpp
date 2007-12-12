@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.15  2007/12/12 15:33:00  cignoni
+Use info() instead of name() for a better description
+
 Revision 1.14  2007/10/02 07:59:44  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -242,7 +245,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 		{
 			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iFilter->pluginInfo().Author+QString(" Date: ")+iFilter->pluginInfo().Date+QString(" Version: ")+iFilter->pluginInfo().Version);
 			else foreach(QAction *a,iFilter->actions())
-							if (actionName==a->text()) labelInfo->setText(iFilter->filterName(a));
+							if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
 		}
 		MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 		if (iRender){
