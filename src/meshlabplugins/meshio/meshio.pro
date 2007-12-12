@@ -20,7 +20,7 @@ INCLUDEPATH += ../../../../code/lib/lib3ds-1.3.0
 
 win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
 win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
-win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds/lib3ds.a
+win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds/.libs/lib3ds.a
 
 CONFIG		+= debug_and_release
 # mac:CONFIG += x86 ppc
