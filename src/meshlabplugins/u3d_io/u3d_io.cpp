@@ -28,6 +28,7 @@ QString U3DIOPlugin::computePluginsPath()
 		#if defined(Q_OS_WIN)
 			if (pluginsDir.dirName() == "debug" || pluginsDir.dirName() == "release")
 				pluginsDir.cdUp();
+			pluginsDir.cd("plugins/U3D_W32");
 		#elif defined(Q_OS_MAC)
 		//inside macs the plugins dir can be into two places
 		// 1) inside the budnle just a level over the app
@@ -39,8 +40,11 @@ QString U3DIOPlugin::computePluginsPath()
 					if(pluginsDir.exists("plugins")) break;
 				}
 			}
+				pluginsDir.cd("plugins/U3D_OSX");
+		#elif
+		// some linux guy complete this please....
+		assert(0);
 		#endif
-		pluginsDir.cd("plugins/U3D");
 		qDebug("U3D plugins dir %s", qPrintable(pluginsDir.absolutePath()));
 		return pluginsDir.absolutePath();
 }
