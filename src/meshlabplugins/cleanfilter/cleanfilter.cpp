@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.17  2007/12/13 00:19:35  cignoni
+ removed deprecated setD
+
  Revision 1.16  2007/10/02 08:13:38  cignoni
  New filter interface. Hopefully more clean and easy to use.
 
@@ -194,11 +197,11 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
   switch(ID(action))
   {
     case FP_REBUILD_SURFACE :
-		  parlst.addFloat("BallRadius",(float)maxDiag1,"Enter ball size as a diag perc. (0 autoguess))");
+		  parlst.addFloat("BallRadius",(float)maxDiag1,"Enter ball size as a diag perc. (0 autoguess))"," ");
 		  parlst.addFloat("Clustering",30.0f,"Enter clustering radius (as ball size percent)");		  
 		  parlst.addFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)");
 //		  parlst.addBool("ComputeNormal","Compute the per vertex normals using only the point set ",false);
-		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces");
+		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces","if true all the initila faces of the mesh are deleted and the whole surface is rebuilt from scratch (normals are recomputed too)");
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
 		  parlst.addAbsPerc("MinComponentDiag",m.cm.bbox.Diag()/10.0,0,m.cm.bbox.Diag(),"Enter max diameter of isolated pieces","All the connected components with a smaller diameter will be deleted");
@@ -259,18 +262,15 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
       CMeshO::VertexIterator vi;
       for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
         if(!(*vi).IsD() && (*vi).Q()<val)
-        {
-          (*vi).SetD();
-          m.cm.vn--;
-        } 
+							tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
+
+        
       CMeshO::FaceIterator fi;
       for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
                if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() ) 
-       {
-        (*fi).SetD();
-        --m.cm.fn;
-       }
-
+								 tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+								 
+      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
 	return true;
 }
