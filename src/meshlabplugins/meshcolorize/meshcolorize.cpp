@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.42  2007/12/13 17:02:41  ponchio
+Added a small help.
+
 Revision 1.41  2007/12/02 07:53:51  cignoni
 disambiguated sqrt call
 
@@ -213,7 +216,7 @@ const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId)
     case CP_MEAN :                   return tr("Colorize vertex and faces depending on equalized mean curvature.");
     case CP_RMS :                    return tr("Colorize vertex and faces depending on equalized root mean square curvature.");
     case CP_ABSOLUTE :               return tr("Colorize vertex and faces depending on equalize absolute curvature.");
-    case CP_TRIANGLE_QUALITY:        return tr("Colorize faces depending on triangle quality.");
+    case CP_TRIANGLE_QUALITY:        return tr("Colorize faces depending on triangle quality:<br/>1: minimum ratio height/edge among the edges<br/>2: ratio between radii of incenter and circumcenter<br/>3:  2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM, M transform triangle into equilateral");
     case CP_SELFINTERSECT:           return tr("Colorize only self intersecting faces.");
     case CP_BORDER :                 return tr("Colorize only border edges.");
     case CP_COLOR_NON_MANIFOLD_FACE: return tr("Colorize the non manifold edges, eg the edges where there are more than two incident faces");
@@ -312,6 +315,9 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, FilterPa
 			metrics.push_back("inradius/circumradius");
 			metrics.push_back("mean ratio");
 			par.addEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality."));
+/// transformation matrix into a regular simplex"));
+
+//			par.addEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality."));
 			break;
 		}
 	default: assert(0);
