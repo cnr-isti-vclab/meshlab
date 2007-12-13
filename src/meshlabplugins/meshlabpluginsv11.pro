@@ -19,7 +19,7 @@ SUBDIRS       = meshfilter \
 				editmeasure\
 				../sampleplugins/sampleedit \
 				../sampleplugins/samplefilter \
-				../sampleplugins/sampledecorate \
+				../sampleplugins/sampledecoration \
 				../sampleplugins/filterborder \
 				../sampleplugins/filtergeodesic \
 				../sampleplugins/filtercreateiso
