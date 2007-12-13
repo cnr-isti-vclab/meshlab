@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.136  2007/12/13 00:18:28  cignoni
+added meshCreation class of filter, and the corresponding menu new under file
+
 Revision 1.135  2007/12/10 10:26:18  corsini
 remove number of passes dependency in the main rendering cycle
 
@@ -88,7 +91,7 @@ GLArea::GLArea(QWidget *parent)
 	helpVisible=false;
 	takeSnapTile=false;
 	activeDefaultTrackball=true;
-	infoAreaVisible = false;
+	infoAreaVisible = true;
 	trackBallVisible = true;
 	currentShader = NULL;
 	lastFilterRef = NULL;

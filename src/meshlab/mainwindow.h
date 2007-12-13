@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.92  2007/12/13 00:18:28  cignoni
+added meshCreation class of filter, and the corresponding menu new under file
+
 Revision 1.91  2007/11/20 11:49:48  cignoni
 added setcurrent slot
 
@@ -304,6 +307,7 @@ private:
 
 	///////// Menus ///////////////
 	QMenu *fileMenu;
+	QMenu *fileMenuNew;
 	QMenu *filterMenu;
 	QMenu *filterMenuSelect;
   QMenu *filterMenuClean;

@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.85  2007/12/13 00:18:28  cignoni
+added meshCreation class of filter, and the corresponding menu new under file
+
 Revision 1.84  2007/11/20 11:51:28  cignoni
 added layer icon
 
@@ -466,6 +469,7 @@ void MainWindow::createMenus()
 	fileMenu->addAction(saveAsAct);
   fileMenu->addAction(saveProjectAct);
 
+	fileMenuNew = fileMenu->addMenu(tr("New"));
 	
 	fileMenu->addSeparator();
 		fileMenu->addAction(saveSnapshotAct);
@@ -626,6 +630,8 @@ pluginsDir = QDir(qApp->applicationDirPath());
               		filterMenuClean->addAction(filterAction); break;
             case MeshFilterInterface::Remeshing : 
               		filterMenuRemeshing->addAction(filterAction); break;
+						case MeshFilterInterface::MeshCreation : 
+              		fileMenuNew->addAction(filterAction); break;
             case MeshFilterInterface::Generic : 
             default:
               		filterMenu->addAction(filterAction); break;

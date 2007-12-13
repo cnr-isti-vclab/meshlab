@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.141  2007/12/13 00:18:28  cignoni
+added meshCreation class of filter, and the corresponding menu new under file
+
 Revision 1.140  2007/11/25 09:48:38  cignoni
 Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
 
@@ -402,11 +405,21 @@ void MainWindow::runFilterScript()
 
 void MainWindow::startFilter()
 {
-	if(GLA()==NULL) return;
-
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
- 
+
+	if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
+
+	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
+	{
+		int mask = 0;
+		MeshModel *mm= new MeshModel();	
+		GLArea *gla=new GLArea(workspace);
+	  gla->meshDoc.addMesh(mm);			
+		gla->setFileName("untitled.ply");
+		workspace->addWindow(gla);
+		if(workspace->isVisible()) gla->showMaximized();
+	}
 	// Ask for filter requirements (eg a filter can need topology, border flags etc)
   // and statisfy them
 	
@@ -778,8 +791,6 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					gla->mm()->ioMask |= mask;				// store mask into model structure
 					
 					gla->setFileName(fileName);
-					gla->setWindowTitle(QFileInfo(fileName).fileName()+tr("[*]"));
-					gla->infoAreaVisible=true;
 					workspace->addWindow(gla);
 					if(workspace->isVisible()) gla->showMaximized();
 					setCurrentFile(fileName);

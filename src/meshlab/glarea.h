@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.80  2007/12/13 00:18:28  cignoni
+added meshCreation class of filter, and the corresponding menu new under file
+
 Revision 1.79  2007/11/05 22:38:57  cignoni
 Remove static map of cursors that caused the annoying deallocation bug under vs2005
 
@@ -273,6 +276,8 @@ public:
 	void		setFileName(QString name)	
     {
     mm()->fileName = qPrintable(name); 
+		setWindowTitle(QFileInfo(name).fileName()+tr("[*]"));
+					
     ss.basename=QFileInfo(getFileName()).baseName().append("Snap");
 	}
 

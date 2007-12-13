@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.64  2007/12/13 00:18:28  cignoni
+added meshCreation class of filter, and the corresponding menu new under file
+
 Revision 1.63  2007/11/26 07:35:26  cignoni
 Yet another small cosmetic change to the interface of the io filters.
 
@@ -173,7 +176,7 @@ class MeshFilterInterface
 {
 public:
   typedef int FilterIDType;
-	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring} ;
+	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring, MeshCreation} ;
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action 
