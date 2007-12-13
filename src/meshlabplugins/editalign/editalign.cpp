@@ -89,7 +89,13 @@ void EditAlignPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 			
 		case ALIGN_IDLE:
 		{
-			m.Render(GLW::DMBox,GLW::CMPerMesh,gla->rm.textureMode);
+			if(alignDialog->ui.falseColorCB->isChecked())
+				gla->rm.colorMode=GLW::CMPerMesh;
+			else
+				gla->rm.colorMode=GLW::CMPerVert;
+				
+			m.Render(GLW::DMBox,GLW::CMNone,GLW::TMNone);
+				
 		}
 		case ALIGN_INSPECT_ARC: 		
 		{
@@ -126,6 +132,8 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 		connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
 		connect(alignDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
 		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
+		connect(alignDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
+
 	}
 	alignDialog->edit=this;
 	alignDialog->setTree(& meshTree, meshTree.nodeList.front());

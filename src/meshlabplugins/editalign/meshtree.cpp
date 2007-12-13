@@ -112,8 +112,8 @@ void MeshTree::Process(AlignPair::Param ap)
 		Fix.Init(Matrix44d::Identity(),false);
 	  aa.ConvertMesh<CMeshO>(MM(OG.SVA[i].t)->cm,Mov);
   
-    printf("Loaded Fix Mesh %32s vn:%8i fn:%8i\n",MM(OG.SVA[i].s)->fileName.c_str(),Fix.vn,Fix.fn);
-	  printf("Loaded Mov Mesh %32s vn:%8i fn:%8i\n",MM(OG.SVA[i].t)->fileName.c_str(),Mov.vn,Mov.fn);
+    cb(0,qPrintable(buf.sprintf("Loaded Fix Mesh %32s vn:%8i fn:%8i\n",qPrintable(QFileInfo(MM(OG.SVA[i].s)->fileName.c_str()).fileName()),Fix.vn,Fix.fn)));
+	  cb(0,qPrintable(buf.sprintf("Loaded Mov Mesh %32s vn:%8i fn:%8i\n",qPrintable(QFileInfo(MM(OG.SVA[i].t)->fileName.c_str()).fileName()),Mov.vn,Mov.fn)));
   
 
     AlignPair::A2Grid UG;
@@ -138,7 +138,7 @@ void MeshTree::Process(AlignPair::Param ap)
 	  ResVec[i].as.Dump(stdout); 
     ResVecPtr.push_back(&ResVec[i]);
     std::pair<double,double> dd=ResVec[i].ComputeAvgErr();
-    printf("Avg dd=%f -> dd=%f \n",dd.first,dd.second);
+    cb(0,qPrintable(buf.sprintf(" %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
 }
 
   vector<int> IdVec;

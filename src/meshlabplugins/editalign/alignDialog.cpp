@@ -37,7 +37,7 @@ $Log: stdpardialog.cpp,v $
 
 static QTextEdit *globalLogTextEdit=0;
 
-// funzione globale che scrive sul 
+// Global function to write on the log in the lower part of the window.
 bool AlignCallBackPos(const int pos, const char * message )
 {
   assert(globalLogTextEdit);
@@ -153,6 +153,22 @@ void AlignDialog::updateTree()
 		parent=M2T[meshList.value((*A).MovName)];
 		item = new QTreeWidgetItem(parent);
 		item->setText(0,buf);
+		
+		vector<AlignPair::Stat::IterInfo> &I= (*A).as.I;
+		QTreeWidgetItem *itemArcIter;
+		buf.sprintf("Iter - MinD - Err -   Sample - Used S. - Dist R.- Bord R. - Angl. R.   ");
+	  itemArcIter = new QTreeWidgetItem(item);
+		itemArcIter->setText(0,buf);
+		for(int qi=0;qi<I.size();++qi)
+		{
+			buf.sprintf("%02i %6.2f    %7.4f    %05i   %05i    %05i %04i %04i",
+			qi, I[qi].MinDistAbs, I[qi].pcl50,
+			I[qi].SampleTested,I[qi].SampleUsed,I[qi].DistanceDiscarded,I[qi].BorderDiscarded,I[qi].AngleDiscarded );
+			itemArcIter = new QTreeWidgetItem(item);
+			itemArcIter->setText(0,buf);
+			
+		}
+
 	}
 	
 }
