@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.65  2007/12/13 10:30:24  cignoni
+Harmless adding the interface for global preferences parameters for plugins. Still to be implemented
+
 Revision 1.64  2007/12/13 00:18:28  cignoni
 added meshCreation class of filter, and the corresponding menu new under file
 
@@ -139,6 +142,12 @@ public:
 	
 	virtual QList<Format> importFormats() const = 0;
 	virtual QList<Format> exportFormats() const = 0;
+
+		// This function is called by the framework, for each action at the loading of the plugins.
+		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
+		// If your plugins/action has no GlobalParameter, do nothing.
+	virtual void initGlobalParameterSet(QString /*format*/, FilterParameterSet & /*globalparam*/) {}
+	
 	
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
     
@@ -189,6 +198,11 @@ public:
 
 	// Generic Info about the plugin version and author.
 	virtual const PluginInfo &pluginInfo()=0;
+	
+	// This function is called by the framework, for each action at the loading of the plugins.
+	// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
+	// If your plugins/action has no GlobalParameter, do nothing.
+	virtual void initGlobalParameterSet(QAction *, FilterParameterSet & /*globalparam*/) {}
 
 	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
@@ -204,7 +218,6 @@ public:
 	// The main function that applies the selected filter with the already stabilished parameters
 	// This function is called by the framework after getting the user params 
 	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameterSet & /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
-	
   
 	//  this function returns true if the filter has parameters that must be filled with an automatically build dialog.
 	virtual bool autoDialog(QAction *) {return false;}
@@ -303,6 +316,11 @@ public:
     virtual const QString Info(QAction *)=0;
     virtual const PluginInfo &Info()=0;
 
+		// This function is called by the framework, for each action at the loading of the plugins.
+		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
+		// If your plugins/action has no GlobalParameter, do nothing.
+		virtual void initGlobalParameterSet(QAction *, FilterParameterSet & /*globalparam*/) {}		
+		
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/,QFont qf) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
