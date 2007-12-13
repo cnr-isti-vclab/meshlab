@@ -1,25 +1,28 @@
 TEMPLATE      = subdirs
 SUBDIRS       = meshfilter \
-				cleanfilter \
 				baseio\
 				meshio \
 				colladaio \
 				epoch_io \
 				u3d_io\
 				meshrender \
+				cleanfilter \
+				filter_ao \ 
+				filter_poisson \
 				meshcolorize \
+				meshselect \
 				meshdecorate \ 
 				meshedit \ 
-				meshselect \
 				editslice \
 				editpaint \
 				editalign\
 				editmeasure\
-				filter_ao \ 
 				../sampleplugins/sampleedit \
 				../sampleplugins/samplefilter \
 				../sampleplugins/sampledecorate \
-				../sampleplugins/filterborder
+				../sampleplugins/filterborder \
+				../sampleplugins/filtergeodesic \
+				../sampleplugins/filtercreateiso
 		
 		
 		
