@@ -3,8 +3,8 @@
 
 float avoidExponentialNotation(const float n,const float bboxdiag)
 {
-	float val_min = std::min(1000.0f,bboxdiag * 1000.0f);
-	return val_min * floor(n) / val_min;
+	float val_min = std::min(1000.0f,floor(bboxdiag * 1000.0f));
+	return res floor(val_min * n ) / val_min;
 }
 
 vcg::Point3f avoidExponentialNotation(const vcg::Point3f& p,const float bboxdiag)
@@ -55,7 +55,7 @@ void U3D_GUI::defaultParameters()
 {
 	QString tmp;
 	vcg::Point3f pos = avoidExponentialNotation(_param._campar->_obj_pos,_param._campar->_obj_bbox_diag);
-
+	//vcg::Point3f pos = _param._campar->_obj_pos;
 	tmp.setNum(pos.X());
 	ui.tarx_lnedt->setText(tmp);
 	tmp.setNum(pos.Y());
