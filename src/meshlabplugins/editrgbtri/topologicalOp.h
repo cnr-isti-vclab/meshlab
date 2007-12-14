@@ -104,16 +104,20 @@ private:
     TriMeshType& m;
     /// List of deleted faces that can be reused
     list<FacePointer> listFp;
+    /// Size of listFp (size() is in O(n)) 
+    int sizelistFp;
     /// List of deleted vertexes that can be reused
     list<VertexPointer> listVp;
+    /// Size of listVp (size() is in O(n))
+    int sizelistVp;
     /// Additional container that is reallocated if the vertex container is reallocated
     VERTEXC *vc;
     /// Additional container that is reallocated if the face container is reallocated
     FACEC *fc;
     //! Faces to add when the faces container is reallocated. The number is calculated by growNumberFace * oldNumberOfFace
-    static const float growNumberFace() { return 0.3; }
+    static const float growNumberFace() { return 2; }
     //! Vertexes to add when the vertexes container is reallocated.  The number is calculated by growNumberVertex * oldNumberOfVertex
-    static const float growNumberVertex() { return  0.3; } 
+    static const float growNumberVertex() { return  2; } 
     
 public:
     /// Create a new TopologicalOp
@@ -674,19 +678,29 @@ private:
     void updateLists()
     {
         listFp.clear();
+        sizelistFp = 0;
         listVp.clear();
+        sizelistVp = 0;
         
         FaceIterator fit = m.face.begin();
         while(fit != m.face.end())
         {
-            if (fit->IsD()) listFp.push_back(&*fit);
+            if (fit->IsD()) 
+            {
+            	listFp.push_back(&*fit);
+            	sizelistFp++;
+            }
             ++fit;
         }
 
         VertexIterator vit = m.vert.begin();
         while(vit != m.vert.end())
         {
-            if (vit->IsD()) listVp.push_back(&*vit);
+            if (vit->IsD()) 
+            {
+            	listVp.push_back(&*vit);
+            	sizelistVp++;
+            }
             ++vit;
         }
     }
@@ -695,7 +709,7 @@ private:
     FacePointer getNewFace(int otherneeded = 0)
     {
         assert(otherneeded >= 0);
-        if (listFp.size() <= otherneeded)
+        if (sizelistFp <= otherneeded)
         {
             list<int> l;
             
@@ -708,7 +722,7 @@ private:
             //if (listFp.front()->Index() >= fc->size() - 1)
             //    listFp.clear();
             
-            int newFaces = (int)(growNumberFace() * (float)fc->size());
+            int newFaces = (int)(growNumberFace() * m.face.size()); // (float)fc->size());
             newFaces += otherneeded + 1;
             int oldsize = m.face.size();
             FaceIterator it = vcg::tri::Allocator<TriMeshType>::AddFaces(m,newFaces);
@@ -718,14 +732,17 @@ private:
             //for (int i = oldsize; i < oldsize + newFaces; ++i)
                 
             listFp.clear();
+            sizelistFp = 0;
             for (list<int>::iterator lit = l.begin(); lit != l.end(); ++lit) 
             {
                 listFp.push_back(&m.face[*lit]);
+                sizelistFp++;
             }
             
             while(it != m.face.end())
             {
                 listFp.push_back(&*it);
+                sizelistFp++;
                 //listFp.push_back(&(m.face[i]));
                 it->SetD();
                 //m.face[i].SetD();
@@ -735,10 +752,11 @@ private:
             
         }
         
-        assert(listFp.size() > otherneeded);
+        assert(sizelistFp > otherneeded);
         
         FacePointer fp = listFp.front();
         listFp.pop_front();
+        sizelistFp--;
         assert(fp->IsD());
         fp->ClearD();
         ++(m.fn);
@@ -748,9 +766,9 @@ private:
     //! Return a new Vertex (if necessary the container is reallocated)
     VertexPointer getNewVertex()
     {
-        if (listVp.size() <= 0)
+        if (sizelistVp <= 0)
         {
-            int newVertexes = (int)(growNumberVertex() * (float)vc->size());
+            int newVertexes = (int)(growNumberVertex() * m.vert.size());//(float)vc->size());
             ++newVertexes;
             VertexIterator it = vcg::tri::Allocator<TriMeshType>::AddVertices(m,newVertexes);
             if (vc)
@@ -758,16 +776,18 @@ private:
             while(it != m.vert.end())
             {
                 listVp.push_back(&*it);
+                sizelistVp++;
                 it->SetD();
                 --(m.vn);
                 ++it;
             }
         }
         
-        assert(listVp.size() > 0);
+        assert(sizelistVp > 0);
         
         VertexPointer vp = listVp.front();
         listVp.pop_front();
+        sizelistVp--;
         assert(vp->IsD());
         vp->ClearD();
         ++(m.vn);

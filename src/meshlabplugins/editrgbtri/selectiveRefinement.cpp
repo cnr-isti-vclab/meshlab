@@ -21,7 +21,9 @@
 ****************************************************************************/
 
 #include "selectiveRefinement.h"
-
+#ifdef TIMERON
+#include "timer.h"
+#endif
 namespace rgbt
 {
 
@@ -98,13 +100,29 @@ void SelectiveRefinement::start(bool interactive, bool simpleA)
 	isCompletedCoarsening = false;
 	simpleAlgorithm = simpleA;
 	init();
+
+#ifdef TIMERON
+	timer t;
+#endif
+
+	
 	if (!interactive)
 	{
+#ifdef TIMERON
+		t.start();
+#endif
 		int i = 0;
 		while (step())
 		{
 			i++;
 		}
+#ifdef TIMERON
+		t.stop();
+		std::cerr << "----------" << std::endl;
+		std::cerr << "Step     :" << i << std::endl;
+		std::cerr << "Seconds  :" << t << std::endl;
+		std::cerr << "Step/Sec :" << (double(i)/t.get_time()) << std::endl;
+#endif		
 		stop();
 	}
 }
@@ -222,7 +240,7 @@ bool SelectiveRefinement::stepComplex()
 {
 	while (true)
 	{
-		if (coarseningQueue.size() == 0)
+		if (coarseningQueue.empty())
 		{
 			if (m->fn > maxTriangles) // 2
 			{
