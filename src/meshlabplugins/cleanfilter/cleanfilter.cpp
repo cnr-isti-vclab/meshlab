@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.18  2007/12/14 14:57:20  cignoni
+ Improved ball pivoting params and descriptions
+
  Revision 1.17  2007/12/13 00:19:35  cignoni
  removed deprecated setD
 
@@ -197,20 +200,18 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
   switch(ID(action))
   {
     case FP_REBUILD_SURFACE :
-		  parlst.addFloat("BallRadius",(float)maxDiag1,"Enter ball size as a diag perc. (0 autoguess))"," ");
-		  parlst.addFloat("Clustering",30.0f,"Enter clustering radius (as ball size percent)");		  
-		  parlst.addFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)");
-//		  parlst.addBool("ComputeNormal","Compute the per vertex normals using only the point set ",false);
-		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces","if true all the initila faces of the mesh are deleted and the whole surface is rebuilt from scratch (normals are recomputed too)");
+		  parlst.addAbsPerc("BallRadius",(float)maxDiag1,0,m.cm.bbox.Diag(),"Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled.");
+		  parlst.addFloat("Clustering",30.0f," Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it.");		  parlst.addFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling");
+		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch");
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
-		  parlst.addAbsPerc("MinComponentDiag",m.cm.bbox.Diag()/10.0,0,m.cm.bbox.Diag(),"Enter max diameter of isolated pieces","All the connected components with a smaller diameter will be deleted");
+		  parlst.addAbsPerc("MinComponentDiag",m.cm.bbox.Diag()/10.0,0,m.cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one");
 		  break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-		  parlst.addInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:");
+		  parlst.addInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one");
 		  break;
     case FP_REMOVE_WRT_Q:
-			 qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+			qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 		  parlst.addAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:");
 		  break;
 	default: assert(0);
@@ -223,54 +224,60 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 {
 	if(filter->text() == filterName(FP_REBUILD_SURFACE) )
 	  {
-      float Radius = par.getFloat("BallRadius");		
+      float Radius = par.getAbsPerc("BallRadius");		
       float Clustering = par.getFloat("Clustering");		      
-//			bool ComputeNormal = par.getBool("ComputeNormal");
-			float CreaseThr = par.getFloat("CreaseThr");
+			float CreaseThr = math::ToRad(par.getFloat("CreaseThr"));
 			bool DeleteFaces = par.getBool("DeleteFaces");
-
       if(DeleteFaces) {
 				m.cm.fn=0;
 				m.cm.face.resize(0);
       }
-			
-/*			if(ComputeNormal)
-				NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), 10,-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
-      
-		*/
-		  CreaseThr *= M_PI/180;
-		  Clustering /= 100;
+
+			int startingFn=m.cm.fn;			
+		  Clustering /= 100.0;
 			tri::BallPivoting<CMeshO> pivot(m.cm, Radius, Clustering, CreaseThr); 
       // the main processing
       pivot.BuildMesh(cb);
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+			Log(GLLogStream::Info,"Reconstructed surface. Added %i faces",m.cm.fn-startingFn); 		
 	  }
     if(filter->text() == filterName(FP_REMOVE_ISOLATED_DIAMETER) )
 	  {
       float minCC= par.getAbsPerc("MinComponentDiag");		
-      RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,minCC);
+      std::pair<int,int> delInfo= RemoveSmallConnectedComponentsDiameter<CMeshO>(m.cm,minCC);
+			Log(GLLogStream::Info,"Removed %2 connected components out of %1", delInfo.second, delInfo.first); 		
     }  	
 
     if(filter->text() == filterName(FP_REMOVE_ISOLATED_COMPLEXITY) )
 	  {
       float minCC= par.getInt("MinComponentSize");		
-      RemoveSmallConnectedComponentsSize<CMeshO>(m.cm,minCC);
+      std::pair<int,int> delInfo=RemoveSmallConnectedComponentsSize<CMeshO>(m.cm,minCC);
+			Log(GLLogStream::Info,"Removed %i connected components out of %i", delInfo.second, delInfo.first); 		
 	  }
 	if(filter->text() == filterName(FP_REMOVE_WRT_Q) )
 	  {
+			int deletedFN=0;
+			int deletedVN=0;
       float val=par.getAbsPerc("MaxQualityThr");		
       CMeshO::VertexIterator vi;
       for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-        if(!(*vi).IsD() && (*vi).Q()<val)
+						if(!(*vi).IsD() && (*vi).Q()<val)
+						{
 							tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
-
+							deletedVN++;
+						}
         
       CMeshO::FaceIterator fi;
       for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
-               if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() ) 
-								 tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+				 if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() ) 
+						 {
+								tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+								deletedFN++;
+						 }
 								 
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+			Log(GLLogStream::Info,"Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
+
 	  }
 	return true;
 }
