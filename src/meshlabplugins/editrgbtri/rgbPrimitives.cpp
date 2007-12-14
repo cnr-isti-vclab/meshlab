@@ -653,7 +653,7 @@ void RgbPrimitives::vf(RgbTriangleC& t, int VertexIndex, vectorRgbTriangle& fc)
     assert(!t.face()->V(VertexIndex)->IsD());
     
     bool isBorder = t.getVertexIsBorder(VertexIndex);
-    
+    fc.reserve(fc.size()+10);
     vcg::face::Pos<FaceType> pos(t.face(),t.face()->V(VertexIndex));
 
     if (t.getNumberOfBoundaryEdge(&(t.V(VertexIndex))) >= 2)
@@ -1251,6 +1251,7 @@ void RgbPrimitives::vertexRemovalSingle(RgbTriangleC& t, int VertexIndex)
 void RgbPrimitives::extractColor(vectorRgbTriangle& f,vectorFaceColor& c)
 {
     vector<RgbTriangleC>::iterator it;
+    c.reserve(c.size() + f.size());
     for (it = f.begin(); it < f.end(); ++it) 
     {
         c.push_back(it->getFaceColor());
