@@ -3,14 +3,15 @@
 
 float avoidExponentialNotation(const float n,const float bboxdiag)
 {
-	float val_min = std::min(1000.0f,floor(bboxdiag) * 1000.0f);
+	float val_min = std::min(1000.0f,bboxdiag * 1000.0f);
 	return val_min * floor(n) / val_min;
 }
 
 vcg::Point3f avoidExponentialNotation(const vcg::Point3f& p,const float bboxdiag)
 {
-	float val_min = std::min(1000.0f,floor(bboxdiag) * 1000.0f);
-	return vcg::Point3f(val_min * floor(p.X()) / val_min,val_min * floor(p.Y()) / val_min,val_min * floor(p.Z()) / val_min);
+	return vcg::Point3f(avoidExponentialNotation(p.X(),bboxdiag),
+											avoidExponentialNotation(p.Y(),bboxdiag),
+											avoidExponentialNotation(p.Z(),bboxdiag));
 }
 
 U3D_GUI::U3D_GUI(vcg::tri::io::u3dparametersclasses::Movie15Parameters& param,QWidget *parent, Qt::WFlags flags)
