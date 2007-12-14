@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2007/12/14 11:52:18  cignoni
+ now use the correct deleteFace/vert and returns info on the number of deleted stuff
+
  Revision 1.1  2006/11/07 09:09:28  cignoni
  First Working release, moved in from epoch svn
 
@@ -40,34 +43,38 @@
 namespace vcg
 {
 template<class MeshType>
-void RemoveSmallConnectedComponentsSize(MeshType &m, int maxCCSize)
+std::pair<int,int>  RemoveSmallConnectedComponentsSize(MeshType &m, int maxCCSize)
 {
   std::vector< std::pair<int, typename MeshType::FacePointer> > CCV;
-      int tt=vcg::tri::Clean<MeshType>::ConnectedComponents(m, CCV); 
-
+      int TotalCC=vcg::tri::Clean<MeshType>::ConnectedComponents(m, CCV); 
+			int DeletedCC=0; 
+      
       tri::ConnectedIterator<MeshType> ci;
       for(unsigned int i=0;i<CCV.size();++i)
       {
         vector<typename MeshType::FacePointer> FPV;
         if(CCV[i].first<maxCCSize)
         {
+					DeletedCC++;
           for(ci.start(m,CCV[i].second);!ci.completed();++ci)
             FPV.push_back(*ci);
           
           typename vector<typename MeshType::FacePointer>::iterator fpvi;
           for(fpvi=FPV.begin(); fpvi!=FPV.end(); ++fpvi)
-            (**fpvi).SetD();
-          m.fn-=FPV.size();
+						tri::Allocator<MeshType>::DeleteFace(m,(**fpvi));
         }
       }
+			return make_pair<int,int>(TotalCC,DeletedCC);
 }
 
+/// Remove the connected components smaller than a given diameter
+// it returns a pair with the number of connected components and the number of deleted ones.
 template<class MeshType>
-void RemoveSmallConnectedComponentsDiameter(MeshType &m, typename MeshType::ScalarType maxDiameter)
+std::pair<int,int> RemoveSmallConnectedComponentsDiameter(MeshType &m, typename MeshType::ScalarType maxDiameter)
 {
   std::vector< std::pair<int, typename MeshType::FacePointer> > CCV;
-      int tt=vcg::tri::Clean<MeshType>::ConnectedComponents(m, CCV); 
-
+      int TotalCC=vcg::tri::Clean<MeshType>::ConnectedComponents(m, CCV); 
+      int DeletedCC=0; 
       tri::ConnectedIterator<MeshType> ci;
       for(unsigned int i=0;i<CCV.size();++i)
       {
@@ -82,12 +89,13 @@ void RemoveSmallConnectedComponentsDiameter(MeshType &m, typename MeshType::Scal
         } 
         if(bb.Diag()<maxDiameter)
         {
+					DeletedCC++;
           typename vector<typename MeshType::FacePointer>::iterator fpvi;
           for(fpvi=FPV.begin(); fpvi!=FPV.end(); ++fpvi)
-            (**fpvi).SetD();
-          m.fn-=FPV.size();
+						tri::Allocator<MeshType>::DeleteFace(m,(**fpvi));
         }
       }
+			return make_pair<int,int>(TotalCC,DeletedCC);
 }
 } //end namespace
 #endif
