@@ -11,6 +11,7 @@
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/export_u3d.h>
+#include <wrap/io_trimesh/export_idtf.h>
 #include "u3d_gui.h"
 
 
@@ -57,33 +58,40 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
   //std::string filename = fileName.toUtf8().data();
 	std::string ex = formatName.toUtf8().data();
 
-	vcg::tri::io::u3dparametersclasses::Movie15Parameters mp;
-	mp._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
-	U3D_GUI pw(mp,parent);
-	pw.exec();
-	
 
-	QSettings settings;
-	
-	QString converterPath = 	computePluginsPath();
-#if defined(Q_OS_WIN)
-	converterPath += "/IDTFConverter.exe";
-#elif defined(Q_OS_MAC)
-	converterPath = converterPath +"/IDTFConverter.sh "+ converterPath;
-#endif
-	
-	if (settings.contains("U3D/converter"))
-		converterPath=settings.value("U3D/converter").toString();
-	//else 
-	//	settings.setValue("U3D/converter",converterPath);
-  
-	int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterPath),mp,mask);
-
-	if(result!=0)
+	if(formatName.toUpper() == tr("U3D"))
 	{
-		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(result)));
-		return false;
+		vcg::tri::io::u3dparametersclasses::Movie15Parameters mp;
+		mp._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
+		U3D_GUI pw(mp,parent);
+		pw.exec();
+		
+
+		QSettings settings;
+		
+		QString converterPath = 	computePluginsPath();
+	#if defined(Q_OS_WIN)
+		converterPath += "/IDTFConverter.exe";
+	#elif defined(Q_OS_MAC)
+		converterPath = converterPath +"/IDTFConverter.sh "+ converterPath;
+	#endif
+		
+		if (settings.contains("U3D/converter"))
+			converterPath=settings.value("U3D/converter").toString();
+		//else 
+		//	settings.setValue("U3D/converter",converterPath);
+	  
+		int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterPath),mp,mask);
+
+		if(result!=0)
+		{
+			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterU3D<CMeshO>::ErrorMsg(result)));
+			return false;
+		}
 	}
+	
+	if(formatName.toUpper() == tr("IDTF"))
+		int result = tri::io::ExporterIDTF<CMeshO>::Save(m.cm,filename.c_str(),mask);
 	return true;
 }
 
@@ -103,6 +111,7 @@ QList<MeshIOInterface::Format> U3DIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("U3D File Format"	,tr("U3D"));
+	formatList << Format("U3D File Format"	,tr("IDTF"));
 	return formatList;
 }
 
@@ -117,6 +126,13 @@ void U3DIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 		capability=defaultBits = vcg::tri::io::ExporterU3D<CMeshO>::GetExportMaskCapability();
 		return;
 	}
+
+	if(format.toUpper() == tr("IDTF"))
+	{
+		capability=defaultBits = vcg::tri::io::ExporterIDTF<CMeshO>::GetExportMaskCapability();
+		return;
+	}
+
 	assert(0);
 }
 

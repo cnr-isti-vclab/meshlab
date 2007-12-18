@@ -3,7 +3,7 @@
 
 float avoidExponentialNotation(const float n,const float bboxdiag)
 {
-	float val_min = std::min(1000.0f,floorf(bboxdiag * 1000.0f));
+	float val_min = std::min(1000.0f,floor(bboxdiag * 1000.0f));
 	return floor(val_min * n ) / val_min;
 }
 
