@@ -157,7 +157,7 @@ void RgbTPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent)
 				}
 
 			}
-			std::cerr << "vertex on border: " << x << std::endl;
+			//std::cerr << "vertex on border: " << x << std::endl;
 			ControlPoint::init(m.cm,*rgbInfo);
 
 			parent->update();
