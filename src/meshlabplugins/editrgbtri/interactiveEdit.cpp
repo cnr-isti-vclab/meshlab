@@ -35,33 +35,14 @@ InteractiveEdit::InteractiveEdit()
 {
 	pixels = 0;
 	first = 1;
+	isDragging = false;
+	
 }
 
 InteractiveEdit::~InteractiveEdit()
 {
 }
 
-/** same doubt as above */
-/*inline void mergePos(double percent,const float c1[3],const float c2[3], float dest[3]) {
- dest[0]=c1[0]*percent+c2[0]*(1.0-percent);
- dest[1]=c1[1]*percent+c2[1]*(1.0-percent);
- dest[2]=c1[2]*percent+c2[2]*(1.0-percent);
- }
- */
-
-/** transforms a point with a matrix */
-/*
- inline void calcCoord(float x,float y,float z,double matrix[],double *xr,double *yr,double *zr) {
- *xr=x*matrix[0]+y*matrix[4]+z*matrix[8]+matrix[12];
- *yr=x*matrix[1]+y*matrix[5]+z*matrix[9]+matrix[13];	
- *zr=x*matrix[2]+y*matrix[6]+z*matrix[10]+matrix[14];
- }
- */
-/** checks if a point (2d) is in a rect between p0 and p1 and diameter 2*radius 
- or in the circle (p0,radius) or in the circle (p1.radius) */
-//    (Cx-Ax)(Bx-Ax) + (Cy-Ay)(By-Ay)
-//r = ------------------------------
-//                  L²
 inline int isIn(const QPointF &p0, const QPointF &p1, float dx, float dy,
 		float radius, float *dist)
 {
