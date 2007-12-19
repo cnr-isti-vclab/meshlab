@@ -30,9 +30,9 @@ U3D_GUI::~U3D_GUI()
 void U3D_GUI::saveParameters()
 {
 	vcg::Point3f from_target_to_camera = vcg::Point3f(
-		ui.tarx_lab->text().toFloat() - ui.posx_lnedt->text().toFloat(),
-		ui.tary_lab->text().toFloat()  - ui.posy_lnedt->text().toFloat(),
-		ui.tarz_lab->text().toFloat()  - ui.posz_lnedt->text().toFloat());
+		- ui.posx_lnedt->text().toFloat() + ui.tarx_lab->text().toFloat(),
+		- ui.posy_lnedt->text().toFloat() + ui.tary_lab->text().toFloat(),
+		- ui.posz_lnedt->text().toFloat() + ui.tarz_lab->text().toFloat());
 	vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters* sw = _param._campar;
 	vcg::Point3f p = avoidExponentialNotation(sw->_obj_pos,_param._campar->_obj_bbox_diag);
 	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(
