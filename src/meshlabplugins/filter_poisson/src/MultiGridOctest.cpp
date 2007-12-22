@@ -80,7 +80,7 @@ void ShowUsage(char* ex)
 	printf("\t[--verbose]\n");
 }
 template<int Degree>
-int Execute(PoissonParam &Par, vector<Point3D<Real> > Pts, vector<Point3D<Real> > Nor, 	CoredVectorMeshData &mesh, Point3D<Real> &newCenter, Real &newScale, vcg::CallBackPos *cb)
+int Execute(PoissonParam &Par, std::vector<Point3D<Real> > Pts, std::vector<Point3D<Real> > Nor, 	CoredVectorMeshData &mesh, Point3D<Real> &newCenter, Real &newScale, vcg::CallBackPos *cb)
 {
 		int i;
 //	int paramNum=sizeof(paramNames)/sizeof(char*);
@@ -157,7 +157,7 @@ newScale=scale;
 	return 1;
 }
 
-int Execute2(PoissonParam &Par, vector<Point3D<Real> > Pts, vector<Point3D<Real> > Nor, 	CoredVectorMeshData &mesh, Point3D<Real> &newCenter, Real &newScale, vcg::CallBackPos *cb )
+int Execute2(PoissonParam &Par, std::vector<Point3D<Real> > Pts, std::vector<Point3D<Real> > Nor, 	CoredVectorMeshData &mesh, Point3D<Real> &newCenter, Real &newScale, vcg::CallBackPos *cb )
 {
 	return Execute<2>(Par,Pts,Nor,mesh,newCenter,newScale,cb);
 }

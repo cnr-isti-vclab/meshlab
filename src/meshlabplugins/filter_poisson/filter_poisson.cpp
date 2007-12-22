@@ -180,7 +180,8 @@ bool PoissonPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	tri::Allocator<CMeshO>::AddFaces(m.cm,mesh.triangleCount());
 
   Point3D<float> p;
-	for (int i=0; i < int(mesh.inCorePoints.size()); i++){
+	int i;
+	for (i=0; i < int(mesh.inCorePoints.size()); i++){
 		p=mesh.inCorePoints[i];
 		m.cm.vert[i].P()[0] = p.coords[0]*scale+center.coords[0];
 		m.cm.vert[i].P()[1] = p.coords[1]*scale+center.coords[1];

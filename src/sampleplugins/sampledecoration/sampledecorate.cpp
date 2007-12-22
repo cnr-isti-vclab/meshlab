@@ -86,7 +86,7 @@ void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*
 	tr[1][3]=0;
 	tr[2][3]=0;
 	tr[3][3]=1;
-	float scale = 1.0/pow(tr.Determinant(),1.0/3.0);
+	float scale = 1.0/pow(tr.Determinant(),1.0f/3.0f);
 	Matrix44f Scale; 
 	Scale.SetDiagonal(scale);
 	tr=tr*Scale;
