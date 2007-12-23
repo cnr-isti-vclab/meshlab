@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.142  2007/12/23 10:50:23  cignoni
+disable lighting for point based mesh (with no faces)
+
 Revision 1.141  2007/12/13 00:18:28  cignoni
 added meshCreation class of filter, and the corresponding menu new under file
 
@@ -815,6 +818,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					else 
 								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
+					if(gla->mm()->cm.fn==0){
+						gla->setDrawMode(vcg::GLW::DMPoints);
+						gla->setLight(false);
+					}
 					updateMenus();
 					int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
 					int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
