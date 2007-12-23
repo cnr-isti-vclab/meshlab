@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.93  2007/12/23 10:50:57  cignoni
+removed useless decl
+
 Revision 1.92  2007/12/13 00:18:28  cignoni
 added meshCreation class of filter, and the corresponding menu new under file
 
@@ -179,8 +182,6 @@ public:
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
    const QString appVer() const {return tr("1.1.0b"); }
-
-  // MaskObj maskobj;
 
 public slots:
 		 
