@@ -1,3 +1,4 @@
+config += debug_and_release
 TEMPLATE      = subdirs
 SUBDIRS       = meshlab \
-                meshlabpluginsv11
+                meshlabplugins/meshlabpluginsv11.pro
