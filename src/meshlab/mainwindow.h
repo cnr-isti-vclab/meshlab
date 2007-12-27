@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.94  2007/12/27 09:43:08  cignoni
+moved colorize filters to a submenu of the filter menu
+
 Revision 1.93  2007/12/23 10:50:57  cignoni
 removed useless decl
 
@@ -313,6 +316,8 @@ private:
 	QMenu *filterMenuSelect;
   QMenu *filterMenuClean;
   QMenu *filterMenuRemeshing;
+	QMenu *filterMenuColorize;
+
 	QMenu *editMenu;
 
   //Render Menu and SubMenu ////

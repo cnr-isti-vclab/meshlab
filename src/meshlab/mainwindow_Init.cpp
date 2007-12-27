@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.86  2007/12/27 09:43:08  cignoni
+moved colorize filters to a submenu of the filter menu
+
 Revision 1.85  2007/12/13 00:18:28  cignoni
 added meshCreation class of filter, and the corresponding menu new under file
 
@@ -492,6 +495,7 @@ void MainWindow::createMenus()
 	filterMenuSelect = filterMenu->addMenu(tr("Select"));
 	filterMenuClean  = filterMenu->addMenu(tr("Clean"));
 	filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing"));
+  filterMenuColorize = filterMenu->addMenu(tr("Colorize"));
 
 
 	
@@ -620,7 +624,7 @@ pluginsDir = QDir(qApp->applicationDirPath());
           {
             case MeshFilterInterface::FaceColoring : 
             case MeshFilterInterface::VertexColoring : 
-              		colorModeMenu->addAction(filterAction); break;
+              		filterMenuColorize->addAction(filterAction); break;
             case MeshFilterInterface::Selection : 
               		filterMenuSelect->addAction(filterAction); 
                   if(!filterAction->icon().isNull())
