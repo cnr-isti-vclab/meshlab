@@ -2,7 +2,10 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut
 HEADERS       = sampledecorate.h cubemap.h
-SOURCES       = sampledecorate.cpp cubemap.cpp ../../../../code/lib/glew/src/glew.c
+SOURCES       = sampledecorate.cpp\ 
+		cubemap.cpp \
+		../../meshlab/filterparameter.cpp \
+		../../../../code/lib/glew/src/glew.c
 
 TARGET        = sampledecorate
 DESTDIR       = ../../meshlab/plugins

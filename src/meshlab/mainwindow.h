@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.95  2008/01/04 00:46:28  cignoni
+Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
+
 Revision 1.94  2007/12/27 09:43:08  cignoni
 moved colorize filters to a submenu of the filter menu
 
@@ -173,7 +176,7 @@ class QProgressDialog;
 class QHttp;
 
 
-class MainWindow : public QMainWindow,MainWindowInterface
+class MainWindow : public QMainWindow, MainWindowInterface
 {
 	Q_OBJECT
 
@@ -284,6 +287,8 @@ private:
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
   QList<QAction *> editActionList;
+	QList<QAction *> decoratorActionList;
+
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 
 public:
@@ -396,8 +401,6 @@ private:
 	QAction *onlineHelpAct;
 	QAction *onscreenHelpAct;
 	QAction *checkUpdatesAct;
-	////////////////////////////////////////////////////
-	QList<QAction *> TotalDecoratorsList;
 	////////////////////////////////////////////////////
 };
 

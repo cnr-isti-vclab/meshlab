@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.137  2008/01/04 00:46:28  cignoni
+Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
+
 Revision 1.136  2007/12/13 00:18:28  cignoni
 added meshCreation class of filter, and the corresponding menu new under file
 
@@ -364,9 +367,14 @@ void GLArea::paintGL()
 
 		if(iDecoratorsList)
 		{
-			pair<QAction *,MeshDecorateInterface *> p;
+			pair<QAction *,FilterParameterSet *> p;
+			//assert(decorInterface);
 			foreach(p,*iDecoratorsList)
-				p.second->Decorate(p.first,*mm(),rm,this,qFont);
+			{
+				MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p.first->parent());
+				assert(decorInterface);
+				decorInterface->Decorate(p.first,*mm(),p.second,this,qFont);
+			}
 		}
 	} ///end if busy 
 	

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.22  2008/01/04 00:46:29  cignoni
+Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
+
 Revision 1.21  2007/10/23 07:16:34  cignoni
 added absolute box corner decoration
 
@@ -144,7 +147,7 @@ public:
   void DrawAxis(MeshModel &m,QGLWidget* gla, QFont qf);
 	void DrawQuotedBox(MeshModel &m,QGLWidget *gla, QFont qf);
 
-  virtual void Decorate(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla,QFont qf);
+  virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet *, QGLWidget *gla,QFont qf);
 };
 
 #endif

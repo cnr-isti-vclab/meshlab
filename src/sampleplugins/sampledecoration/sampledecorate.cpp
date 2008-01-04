@@ -59,7 +59,21 @@ const QString SampleMeshDecoratePlugin::Info(QAction *action)
 	 ai.Version=tr("1.0");
    return ai;
  }
-
+ 
+void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, FilterParameterSet *parset) 
+{
+	if(parset->findParameter("CubeMapPath")!= NULL) 
+	{
+		qDebug("CubeMapPath already setted. Doing nothing");
+		return;
+	}
+	QString cubemapDirPath = MainWindowInterface::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
+	
+	//parset->addString("CubeMapPath", "/Users/cignoni/devel/meshlab/src/meshlab/textures/cubemaps/uffizi.jpg");
+	parset->addString("CubeMapPath", cubemapDirPath);
+	
+}		
+		
 const QString SampleMeshDecoratePlugin::ST(FilterIDType filter) const
 {
   switch(filter)
@@ -70,26 +84,45 @@ const QString SampleMeshDecoratePlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, QGLWidget *gla, QFont qf)
+void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet *par, QGLWidget *gla, QFont /*qf*/)
 {
+ assert(par);
+	static QString lastname("unitialized");
   if(a->text() != ST(DP_SHOW_CUBEMAPPED_ENV))	assert(0);
+	
+	QString basename;
 	if(!cm.IsValid())
 	{
-		glewInit();
-		cm.Load("/Users/cignoni/devel/meshlab/src/sampleplugins/sampledecoration/cubemaps/uffizi.jpg");
-		cm.radius= m.cm.bbox.Diag()/2;
+		assert(par->findParameter("CubeMapPath")); 
+		if(lastname != basename ) 
+		{
+			basename=par->getString("CubeMapPath");
+			qDebug( "Current CubeMapPath Dir: %s ",qPrintable(basename)); 
+
+			glewInit();
+			bool ret = cm.Load(qPrintable(basename));
+			lastname=basename;
+			if(! ret ) 
+				QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images");
+			cm.radius= m.cm.bbox.Diag()/2;
+		}
 	}
+	if(!cm.IsValid()) return;
 	Matrix44f tr;
 	glGetv(GL_MODELVIEW_MATRIX,tr);
 	
-	tr[0][3]=0;
+	// Remove the translation from the current matrix by simply padding the last column of the matrix
+ 	tr[0][3]=0;
 	tr[1][3]=0;
 	tr[2][3]=0;
 	tr[3][3]=1;
+	
+	//Remove the scaling from the the current matrix by adding an inverse scaling matrix
 	float scale = 1.0/pow(tr.Determinant(),1.0f/3.0f);
 	Matrix44f Scale; 
 	Scale.SetDiagonal(scale);
 	tr=tr*Scale;
+	
 	glPushMatrix();
 		cm.DrawEnvCube(tr);
 	glPopMatrix();

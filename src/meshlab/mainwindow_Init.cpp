@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.87  2008/01/04 00:46:28  cignoni
+Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
+
 Revision 1.86  2007/12/27 09:43:08  cignoni
 moved colorize filters to a submenu of the filter menu
 
@@ -579,38 +582,13 @@ void MainWindow::createMenus()
 
 void MainWindow::loadPlugins()
 {
-#if defined(Q_OS_MAC)
-QDir qtPluginsDir(qApp->applicationDirPath());
-qtPluginsDir.cdUp();
-qApp->addLibraryPath(qtPluginsDir.absolutePath () );
-qDebug("qtplugins dir %s", qPrintable(qtPluginsDir.absolutePath ()));
-qDebug("qtplugins dir %s", qPrintable(qtPluginsDir.dirName ()));
-
-qtPluginsDir.cd("plugins");
-qApp->addLibraryPath(qtPluginsDir.absolutePath () );
-#endif
-pluginsDir = QDir(qApp->applicationDirPath());
-//qDebug("plugins dir %s", qPrintable(pluginsDir.dirName()));
-#if defined(Q_OS_WIN)
-	if (pluginsDir.dirName() == "debug" || pluginsDir.dirName() == "release")
-		pluginsDir.cdUp();
-#elif defined(Q_OS_MAC)
-	if (pluginsDir.dirName() == "MacOS") {
-		for(int i=0;i<6;++i){
-			//qDebug("plugins dir %s", qPrintable(pluginsDir.dirName()));
-			pluginsDir.cdUp();
-			if(pluginsDir.exists("plugins")) break;
-		}
-	}
-#endif
-	pluginsDir.cd("plugins");
+	QDir pluginsDir(getPluginDirPath());
+  qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath())); 
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
-		
+
 		if (plugin) {		
-			//MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
-						
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
       { 
@@ -626,10 +604,7 @@ pluginsDir = QDir(qApp->applicationDirPath());
             case MeshFilterInterface::VertexColoring : 
               		filterMenuColorize->addAction(filterAction); break;
             case MeshFilterInterface::Selection : 
-              		filterMenuSelect->addAction(filterAction); 
-                  if(!filterAction->icon().isNull())
-                      filterToolBar->addAction(filterAction);
-            break;
+              		filterMenuSelect->addAction(filterAction); break;
             case MeshFilterInterface::Cleaning : 
               		filterMenuClean->addAction(filterAction); break;
             case MeshFilterInterface::Remeshing : 
@@ -640,15 +615,16 @@ pluginsDir = QDir(qApp->applicationDirPath());
             default:
               		filterMenu->addAction(filterAction); break;
           }  
+					if(!filterAction->icon().isNull())
+										filterToolBar->addAction(filterAction);
         }
        }
 		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			if (iIO)
-				meshIOPlugins.push_back(iIO);
+			if (iIO) meshIOPlugins.push_back(iIO);
 
 			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
 			if (iDecorator){
-				TotalDecoratorsList=iDecorator->actions();
+				decoratorActionList+=iDecorator->actions();
 				addToMenu(iDecorator->actions(), renderMenu, SLOT(applyDecorateMode()));
 			}
 

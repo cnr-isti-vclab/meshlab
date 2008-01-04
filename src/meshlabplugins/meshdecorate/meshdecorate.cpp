@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.44  2008/01/04 00:46:29  cignoni
+Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
+
 Revision 1.43  2007/10/23 07:16:35  cignoni
 added absolute box corner decoration
 
@@ -147,7 +150,7 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, RenderMode &/*rm*/, QGLWidget *gla, QFont qf)
+void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet */*rm*/, QGLWidget *gla, QFont qf)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);

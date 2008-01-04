@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.81  2008/01/04 00:46:28  cignoni
+Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
+
 Revision 1.80  2007/12/13 00:18:28  cignoni
 added meshCreation class of filter, and the corresponding menu new under file
 
@@ -309,7 +312,7 @@ public:
 	void setLightModel();
 	void setView();
 	void resetTrackBall();
-	list<pair<QAction *,MeshDecorateInterface *> > *iDecoratorsList;
+	list<pair<QAction *,FilterParameterSet *> > *iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }

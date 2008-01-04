@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.66  2008/01/04 00:46:28  cignoni
+Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
+
 Revision 1.65  2007/12/13 10:30:24  cignoni
 Harmless adding the interface for global preferences parameters for plugins. Still to be implemented
 
@@ -98,7 +101,9 @@ added Filter History Dialogs
 #ifndef MESHLAB_INTERFACES_H
 #define MESHLAB_INTERFACES_H
 #include <QtCore>
+#include <QApplication>
 #include <QAction>
+#include <QMessageBox>
 #include "filterparameter.h"
 #include "GLLogStream.h"
 
@@ -177,6 +182,45 @@ class MainWindowInterface
 public:
 	virtual void executeFilter(QAction *, FilterParameterSet &){};
 	virtual ~MainWindowInterface(){};
+	
+	// This function is to find the dir where all the deployed stuff reside. 
+	// We mean the stuff used by default by MeshLab and that should not interest the standard user
+	// like for example the plugins directory, the textures used by the shaders, the cubemaps, the shaders etc.
+	// During development this stuff is in the meshlab/src/meshlab dir
+	// once deployed it depends on the OS
+	// - on windows is in the installation dir
+	// - on macs it is in inside the application bundle (to allow easy application moving)
+	
+	static QString getBaseDirPath()
+	{
+		QDir baseDir(qApp->applicationDirPath());
+		
+		#if defined(Q_OS_WIN)
+		// Windows: 
+		// during development with visual studio binary could be in the debug/release subdir.
+		// once deployed plugins dir is in the application directory, so 
+				if (baseDir.dirName() == "debug" || baseDir.dirName() == "release")		baseDir.cdUp();
+		#endif 
+
+		#if defined(Q_OS_MAC)
+		// Mac: during developmentwith xcode  and well deployed the binary is well buried.
+				for(int i=0;i<6;++i){
+						if(baseDir.exists("plugins")) break;
+						baseDir.cdUp();
+					}
+		#endif
+		return baseDir.absolutePath();
+	}
+	
+	static QString getPluginDirPath()
+	{
+		QDir pluginsDir(getBaseDirPath());
+		if(!pluginsDir.exists("plugins"))
+				QMessageBox::warning(0,"Meshlab Initialization","Serious error. Unable to find the plugins directory.");
+		
+		pluginsDir.cd("plugins");
+		return pluginsDir.absolutePath();
+	}
 };
 
 
@@ -319,10 +363,13 @@ public:
 		// This function is called by the framework, for each action at the loading of the plugins.
 		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
 		// If your plugins/action has no GlobalParameter, do nothing.
-		virtual void initGlobalParameterSet(QAction *, FilterParameterSet & /*globalparam*/) {}		
+		// The FilterParameterSet comes here already intialized with the values stored on the permanent storage.
+		// If a filter wants to save some permanent stuff should check its esistence here.
+	
+		virtual void initGlobalParameterSet(QAction *, FilterParameterSet */*globalparam*/) {}		
 		
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/,QFont qf) = 0;
+		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, FilterParameterSet * /*param*/, QGLWidget * /*parent*/,QFont qf) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
         
     virtual const QString ST(FilterIDType filter) const=0;

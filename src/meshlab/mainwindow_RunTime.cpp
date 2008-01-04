@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.143  2008/01/04 00:46:28  cignoni
+Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
+
 Revision 1.142  2007/12/23 10:50:23  cignoni
 disable lighting for point based mesh (with no faces)
 
@@ -320,9 +323,9 @@ void MainWindow::updateMenus()
 		setDoubleLightingAct->setChecked(rm.doubleSideLighting);
 		setSelectionRenderingAct->setChecked(rm.selectedFaces);
 
-		foreach (QAction *a,TotalDecoratorsList){a->setChecked(false);}
+		foreach (QAction *a,decoratorActionList){a->setChecked(false);}
 		if(GLA()->iDecoratorsList){
-			pair<QAction *,MeshDecorateInterface *> p;
+			pair<QAction *,FilterParameterSet *> p;
 			foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
 		}
 	}
@@ -593,25 +596,29 @@ void MainWindow::applyDecorateMode()
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal 
 
 	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
-	if(GLA()->iDecoratorsList==0){
-		GLA()->iDecoratorsList= new list<pair<QAction *,MeshDecorateInterface *> >;
-		GLA()->iDecoratorsList->push_back(make_pair(action,iDecorateTemp));
-		GLA()->log.Logf(GLLogStream::Info,"Enable Decorate mode %s",action->text().toLocal8Bit().constData());
-	}else{
-		bool found=false;
-		pair<QAction *,MeshDecorateInterface *> p;
-		foreach(p,*GLA()->iDecoratorsList){
-			if(iDecorateTemp==p.second && p.first->text()==action->text()){
-				GLA()->iDecoratorsList->remove(p);
-				GLA()->log.Logf(0,"Disabled Decorate mode %s",action->text().toLocal8Bit().constData());
-				found=true;
-			} 
-		}
-		if(!found){
-			GLA()->iDecoratorsList->push_back(make_pair(action,iDecorateTemp));
-			GLA()->log.Logf(GLLogStream::Info,"Enable Decorate mode %s",action->text().toLocal8Bit().constData());
-		}
+	if(GLA()->iDecoratorsList==0)
+		GLA()->iDecoratorsList= new list<pair<QAction *,FilterParameterSet *> >;
+
+	bool found=false;
+	pair<QAction *,FilterParameterSet *> p;
+	foreach(p,*GLA()->iDecoratorsList)
+	{
+		if(p.first->text()==action->text()){
+			delete p.second; 
+		  //p.second=0;
+			GLA()->iDecoratorsList->remove(p);
+			GLA()->log.Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+			found=true;
+		} 
 	}
+	
+	if(!found){
+	  FilterParameterSet * decoratorParams = new FilterParameterSet();
+		iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
+		GLA()->iDecoratorsList->push_back(make_pair(action,decoratorParams));
+		GLA()->log.Logf(GLLogStream::Info,"Enable Decorate mode %s",qPrintable(action->text()));
+	}
+	GLA()->update();
 }
 
 bool MainWindow::QCallBack(const int pos, const char * str)
