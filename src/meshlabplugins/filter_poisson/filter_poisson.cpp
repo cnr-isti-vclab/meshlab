@@ -92,7 +92,7 @@ const PluginInfo &PoissonPlugin::pluginInfo()
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
 	 ai.Version = tr("1.0");
-	 ai.Author = ("Paolo Cignoni");
+	 ai.Author = ("Paolo Cignoni (simply ported the original code of Michael Kazhdan and Matthew Bolitho)");
    return ai;
  }
 
@@ -108,24 +108,24 @@ void PoissonPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParamet
 {
 	 switch(ID(action))	 {
 		case FP_POISSON_RECON :  
- 		  parlst.addBool ("RecomputeNormals",
-											false,
-											"Recompute normals",
-											"Do not use the current normals, but recompute them from scratch\n\n");
- 		  parlst.addBool ("UseConfidence",
-											true,
-											"Use Quality",
-											"Use the per vertex quality as a confidence value\n");
+ 		  //parlst.addBool ("RecomputeNormals",
+			//								false,
+			//								"Recompute normals",
+			//								"Do not use the current normals, but recompute them from scratch considering the vertices of the mesh as an unstructured point cloud.");
+ 		  //parlst.addBool ("UseConfidence",
+			//								true,
+			//								"Use Quality",
+			//								"Use the per vertex quality as a confidence value\n");
 			parlst.addInt ("OctDepth",
-											5,
+											6,
 											"Octree Depth",
-											"Set the depth of the Octree used for extracting the final surface. Suggested range 5..10\n");
+											"Set the depth of the Octree used for extracting the final surface. Suggested range 5..10. Higher numbers mean higher precision in the reconstruction but also higher processing times. Be patient.\n");
 			parlst.addInt ("SolverDivide",
-											5,
+											6,
 											"Solver Divide",
 											"This integer argument specifies the depth at which a block Gauss-Seidel solver is used to solve the Laplacian equation.\n"
 											"Using this parameter helps reduce the memory overhead at the cost of a small increase in reconstruction time. \n"
-											"In practice, we have found that for reconstructions of depth 9 or higher a subdivide depth of 7 or 8 can reduce the memory usage.\n"
+											"In practice, the authors have found that for reconstructions of depth 9 or higher a subdivide depth of 7 or 8 can reduce the memory usage.\n"
 											"The default value is 8.\n");
 			parlst.addFloat ("SamplesPerNode",
 											1.0,
@@ -155,6 +155,7 @@ bool PoissonPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	CMeshO::VertexIterator vi;
 	for(vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi)
 	if(!(*vi).IsD()){
+			(*vi).N().Normalize();
 			for(int ii=0;ii<3;++ii){
 					Pts[cnt].coords[ii]=(*vi).P()[ii];
 					Nor[cnt].coords[ii]=(*vi).N()[ii];
