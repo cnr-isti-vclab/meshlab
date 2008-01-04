@@ -75,6 +75,7 @@ const QString PoissonPlugin::filterName(FilterIDType filterId)
 		case FP_POISSON_RECON :  return QString("Poisson Reconstruction"); 
 		default : assert(0); 
 	}
+	return QString("Error: Unknown Filter"); 
 }
 
 // Info() must return the longer string describing each filtering action 
@@ -85,6 +86,7 @@ const QString PoissonPlugin::filterInfo(FilterIDType filterId)
 		case FP_POISSON_RECON :  return QString("Use the points and normal to build a surface using the Poisson Surface reconstruction approach."); 
 		default : assert(0); 
 	}
+	return QString("Error: Unknown Filter"); 
 }
 
 const PluginInfo &PoissonPlugin::pluginInfo()
