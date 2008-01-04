@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.67  2008/01/04 16:39:30  cignoni
+corrected comment
+
 Revision 1.66  2008/01/04 00:46:28  cignoni
 Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
 
@@ -366,7 +369,7 @@ public:
 		// The FilterParameterSet comes here already intialized with the values stored on the permanent storage.
 		// If a filter wants to save some permanent stuff should check its esistence here.
 	
-		virtual void initGlobalParameterSet(QAction *, FilterParameterSet */*globalparam*/) {}		
+		virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/) {}		
 		
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, FilterParameterSet * /*param*/, QGLWidget * /*parent*/,QFont qf) = 0;
