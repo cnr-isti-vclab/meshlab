@@ -19,6 +19,7 @@ public:
   bool IsValid() {
 		return !( (ti == 0) && (oti[0]==0) ); 
 	}
+  void SetInvalid() { ti=0; oti[0]=0; }
 	CICubeMap() {radius=10; ti=0; for(int i=0;i<6;++i) oti[i]=0;}
 	float radius;
 

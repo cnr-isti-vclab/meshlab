@@ -181,13 +181,11 @@ bool CICubeMap::GetName(int i, QString basename, QString &filename)
 bool CICubeMap::Load(const char *basename)
 {
   if(basename==0) return false;
-	if(!GLEW_ARB_texture_cube_map) 
-			{
-				//QMessageBox::Warning(0,"Warning: Your graphics hw does not support ARB_texture_cube_map\nUsing just six textures...");
-				return LoadOld(basename);
-			}
-	else return LoadExt(basename);
-
+	bool ret;
+	if(!GLEW_ARB_texture_cube_map) ret= LoadOld(basename);
+		else ret =LoadExt(basename);
+	if(!ret) SetInvalid();
+	return ret;
 }
 
 bool CICubeMap::LoadOld(const char *basename)
