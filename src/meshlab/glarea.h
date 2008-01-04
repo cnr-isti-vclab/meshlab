@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.82  2008/01/04 18:23:24  cignoni
+Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
+
 Revision 1.81  2008/01/04 00:46:28  cignoni
 Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
 
@@ -405,10 +408,11 @@ QMap<QString,QCursor> curMap;
 
 public:
 	RenderMode rm;
-private:
 	ColorSetting cs;
 	GLLightSetting ls;
+	// view setting variables
 	float fov;
+	float ratio;
 	//float objDist; 
 	float clipRatioFar;
 	float clipRatioNear;

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.23  2008/01/04 18:23:34  cignoni
+Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
+
 Revision 1.22  2008/01/04 00:46:29  cignoni
 Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
 
@@ -144,10 +147,10 @@ public:
 	QList<QAction *> actions () const {return actionList;}
 
 	void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
-  void DrawAxis(MeshModel &m,QGLWidget* gla, QFont qf);
-	void DrawQuotedBox(MeshModel &m,QGLWidget *gla, QFont qf);
+  void DrawAxis(MeshModel &m,GLArea* gla, QFont qf);
+	void DrawQuotedBox(MeshModel &m,GLArea *gla, QFont qf);
 
-  virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet *, QGLWidget *gla,QFont qf);
+  virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet *, GLArea *gla,QFont qf);
 };
 
 #endif

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.68  2008/01/04 18:23:24  cignoni
+Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
+
 Revision 1.67  2008/01/04 16:39:30  cignoni
 corrected comment
 
@@ -372,7 +375,7 @@ public:
 		virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/) {}		
 		
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, FilterParameterSet * /*param*/, QGLWidget * /*parent*/,QFont qf) = 0;
+		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, FilterParameterSet * /*param*/, GLArea * /*parent*/,QFont qf) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
         
     virtual const QString ST(FilterIDType filter) const=0;

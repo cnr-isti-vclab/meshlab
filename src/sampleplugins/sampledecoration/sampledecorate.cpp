@@ -37,6 +37,8 @@ New small samples
 #include <QGLWidget>
 #include <wrap/gl/addons.h>
 
+#include <meshlab/glarea.h>
+
 
 
 using namespace vcg;
@@ -84,7 +86,7 @@ const QString SampleMeshDecoratePlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet *par, QGLWidget *gla, QFont /*qf*/)
+void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet *par, GLArea *gla, QFont /*qf*/)
 {
  assert(par);
 	static QString lastname("unitialized");
@@ -104,7 +106,8 @@ void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParamete
 			lastname=basename;
 			if(! ret ) 
 				QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images");
-			cm.radius= m.cm.bbox.Diag()/2;
+		//	cm.radius= m.cm.bbox.Diag()/2;
+			cm.radius=10;
 		}
 	}
 	if(!cm.IsValid()) return;
@@ -122,10 +125,22 @@ void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParamete
 	Matrix44f Scale; 
 	Scale.SetDiagonal(scale);
 	tr=tr*Scale;
-	
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	GLfloat fAspect = (GLfloat)gla->width()/ gla->height();
+	float ratio= gla->ratio;
+	if(gla->fov==5)		glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,0, 15);
+	   else    		gluPerspective(gla->fov, fAspect, .1, 20);
+
+  glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 		cm.DrawEnvCube(tr);
 	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
 }
 
 Q_EXPORT_PLUGIN(SampleMeshDecoratePlugin)

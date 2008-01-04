@@ -73,7 +73,7 @@ public:
 
 	QList<QAction *> actions () const {return actionList;}
 
-  virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet * /*parent*/ par, QGLWidget *gla,QFont qf);
+  virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet * /*parent*/ par, GLArea *gla,QFont qf);
 	virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/);	
 		
 };

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.45  2008/01/04 18:23:34  cignoni
+Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
+
 Revision 1.44  2008/01/04 00:46:29  cignoni
 Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
 
@@ -111,7 +114,7 @@ Some changes in DrawAxis in order to compile under gcc
 #include "meshdecorate.h"
 #include <QGLWidget>
 #include <wrap/gl/addons.h>
-
+#include <meshlab/glarea.h>
 using namespace vcg;
 
 const QString ExtraMeshDecoratePlugin::Info(QAction *action)
@@ -150,7 +153,7 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
   return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet */*rm*/, QGLWidget *gla, QFont qf)
+void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameterSet */*rm*/, GLArea *gla, QFont qf)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
@@ -181,7 +184,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
   if(a->text() == ST(DP_SHOW_BOX_CORNERS_ABS))	DrawBBoxCorner(m,false);
 }
 
-void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QGLWidget *gla,QFont qf)
+void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla,QFont qf)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
@@ -500,7 +503,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 }
 
  
-void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,QGLWidget* gla,QFont qf)
+void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla,QFont qf)
 {
 	float hw=m.cm.bbox.Diag()/2.0;
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );

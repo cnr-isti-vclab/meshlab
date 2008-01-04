@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.138  2008/01/04 18:23:24  cignoni
+Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
+
 Revision 1.137  2008/01/04 00:46:28  cignoni
 Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
 
@@ -807,7 +810,7 @@ void GLArea::setView()
 	glLoadIdentity();
 	// Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
 	
-	float ratio = 1.75f;
+	ratio = 1.75f;
 	float objDist = ratio / tanf(vcg::math::ToRad(fov*.5f));
 
 	nearPlane = objDist - 2.f*clipRatioNear;
