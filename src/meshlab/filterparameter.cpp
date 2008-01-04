@@ -34,16 +34,15 @@ $Log: filterparameter.h,v $
 
 using namespace vcg;
 
-FilterParameter &FilterParameterSet::findParameter(QString name)
+FilterParameter *FilterParameterSet::findParameter(QString name)
 {
-	static FilterParameter tempFP;
-  QList<FilterParameter>::iterator fpli;
+	QList<FilterParameter>::iterator fpli;
 	for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
 		if((*fpli).fieldName==name)
-				return *fpli;
+				return &*fpli;
 		
-	assert(0);
-	return tempFP;
+	//assert(0);
+	return 0;
 }
 
 //--------------------------------------
@@ -58,15 +57,16 @@ void FilterParameterSet::addBool (QString name, bool defaultVal, QString desc, Q
 
 void FilterParameterSet::setBool(QString name, bool newVal)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARBOOL);
-	p.fieldVal=QVariant(newVal);
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	p->fieldVal=QVariant(newVal);
 }
 bool FilterParameterSet::getBool(QString name)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARBOOL);
-	return p.fieldVal.toBool();
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARBOOL);
+	return p->fieldVal.toBool();
 }
 
 //--------------------------------------
@@ -80,15 +80,17 @@ void FilterParameterSet::addInt(QString name, int       defaultVal, QString desc
 }
 int	 FilterParameterSet::getInt(QString name)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARINT);
-	return p.fieldVal.toInt();
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARINT);
+	return p->fieldVal.toInt();
 }
 void FilterParameterSet::setInt(QString name, int newVal)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARINT);
-	p.fieldVal=QVariant(newVal);	
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARINT);
+	p->fieldVal=QVariant(newVal);	
 }
 
 //--------------------------------------
@@ -102,15 +104,17 @@ void  FilterParameterSet::addFloat(QString name, float defaultVal, QString desc,
 }
 float FilterParameterSet::getFloat(QString name)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARFLOAT);
-	return float(p.fieldVal.toDouble());
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARFLOAT);
+	return float(p->fieldVal.toDouble());
 }
 void  FilterParameterSet::setFloat(QString name, float newVal)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARFLOAT);
-	p.fieldVal=QVariant(double(newVal));	
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARFLOAT);
+	p->fieldVal=QVariant(double(newVal));	
 }
 
 //--------------------------------------
@@ -123,32 +127,42 @@ void  FilterParameterSet::addColor(QString name, QColor defaultVal, QString desc
 }
 QColor FilterParameterSet::getColor(QString name)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARCOLOR);
-	return QColor(QRgb(p.fieldVal.toUInt()));
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARCOLOR);
+	return QColor(QRgb(p->fieldVal.toUInt()));
 }
 
 void  FilterParameterSet::setColor(QString name, QColor newVal)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARCOLOR);
-	p.fieldVal=QVariant(newVal.rgb());	
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARCOLOR);
+	p->fieldVal=QVariant(newVal.rgb());	
 }
 
 //--------------------------------------
 
 void FilterParameterSet::addString   (QString name, QString   defaultVal, QString desc, QString tooltip)
 {
-	assert(0);
+	FilterParameter p(name,desc,tooltip);
+  p.fieldVal=defaultVal; 
+	p.fieldType=FilterParameter::PARSTRING;
+	paramList.push_back(p);		
 }
 QString FilterParameterSet::getString(QString name)
 {
-	assert(0);
-	return QString("");
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARSTRING);
+	return p->fieldVal.toString();
 }
 void FilterParameterSet::setString(QString name, QString newVal)
 {
-	assert(0);
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARSTRING);
+	p->fieldVal=QVariant(newVal);	
 }
 
 //--------------------------------------
@@ -156,18 +170,18 @@ void FilterParameterSet::setString(QString name, QString newVal)
 
 Matrix44f		FilterParameterSet::getMatrix44(QString name)
 {
-    FilterParameter &p=findParameter(name);
+	FilterParameter *p=findParameter(name);
 
-    assert(p.fieldType==FilterParameter::PARMATRIX);
-		assert(p.fieldVal.type()==QVariant::List);
+	assert(p);
+	assert(p->fieldType==FilterParameter::PARMATRIX);
+	assert(p->fieldVal.type()==QVariant::List);
 
-    Matrix44f matrix;
-    QList<QVariant> matrixVals = p.fieldVal.toList();
-    assert(matrixVals.size()==16);
-    for(int i=0;i<16;++i)
-      matrix.V()[i]=matrixVals[i].toDouble();
-        return matrix;
-
+	Matrix44f matrix;
+	QList<QVariant> matrixVals = p->fieldVal.toList();
+	assert(matrixVals.size()==16);
+	for(int i=0;i<16;++i)
+		matrix.V()[i]=matrixVals[i].toDouble();
+			return matrix;
 }
 void FilterParameterSet::addMatrix44 (QString name, Matrix44f defaultVal, QString desc, QString tooltip)
 {
@@ -201,15 +215,17 @@ void FilterParameterSet::addAbsPerc (QString name, float defaultVal, float minVa
 }
 float		FilterParameterSet::getAbsPerc(QString name)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARABSPERC);
-	return float(p.fieldVal.toDouble());
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARABSPERC);
+	return float(p->fieldVal.toDouble());
 }
 void FilterParameterSet::setAbsPerc(QString name, float newVal)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARABSPERC);
-	p.fieldVal=QVariant(double(newVal));	
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARABSPERC);
+	p->fieldVal=QVariant(double(newVal));	
 }
 
 void FilterParameterSet::addEnum (QString name, int defaultVal, QStringList values, QString desc, QString tooltip) {
@@ -221,16 +237,18 @@ void FilterParameterSet::addEnum (QString name, int defaultVal, QStringList valu
 }
 
 int FilterParameterSet::getEnum(QString name) {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARENUM);
-	return float(p.fieldVal.toInt());
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARENUM);
+	return float(p->fieldVal.toInt());
 }
 
 void FilterParameterSet::setEnum(QString name, int newVal)
 {
-	FilterParameter &p=findParameter(name);
-	assert(p.fieldType == FilterParameter::PARENUM);
-	p.fieldVal=QVariant(int(newVal));	
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARENUM);
+	p->fieldVal=QVariant(int(newVal));	
 }
 
 

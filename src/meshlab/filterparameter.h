@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2008/01/04 00:43:15  cignoni
+Changed findParameter (now it returns a pointer) and completed string parameter
+
 Revision 1.12  2007/11/19 17:09:20  ponchio
 added enum value. [untested].
 
@@ -162,7 +165,7 @@ public:
 	void setAbsPerc(QString name, float newVal);
 	void setEnum(QString name, int newVal);
 
-	FilterParameter &findParameter(QString name);
+	FilterParameter *findParameter(QString name);
 
 	void clear() { paramList.clear(); }
 };
