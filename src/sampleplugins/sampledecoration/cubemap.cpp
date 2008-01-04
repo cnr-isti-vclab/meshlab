@@ -8,7 +8,8 @@
 
 #include<QImage.h>
 #include<QGL.h>
-  
+#include <wrap/qt/checkGLError.h>
+
 using namespace vcg;
 using namespace std;
 
@@ -54,6 +55,7 @@ void CICubeMap::DrawEnvCube(Matrix44f &tr)
 
 void CICubeMap::DrawEnvCubeOld(Matrix44f &tr)
 {
+	checkGLError::qDebug("DrawEnvCubeOld: start");
 	glMatrixMode(GL_MODELVIEW);
 	glPushAttrib(GL_ENABLE_BIT|GL_CURRENT_BIT | GL_TEXTURE_BIT); 
 		
@@ -85,9 +87,9 @@ void CICubeMap::DrawEnvCubeOld(Matrix44f &tr)
   }
 	
 	glDepthMask(true);
-
-glPopMatrix();
-glPopAttrib();
+	glPopMatrix();
+	glPopAttrib();
+	checkGLError::qDebug("DrawEnvCubeOld: end");
 
 }
 
@@ -182,8 +184,9 @@ bool CICubeMap::Load(const char *basename)
 {
   if(basename==0) return false;
 	bool ret;
-	if(!GLEW_ARB_texture_cube_map) ret= LoadOld(basename);
-		else ret =LoadExt(basename);
+	if(!GLEW_ARB_texture_cube_map) 
+		ret= LoadOld(basename);
+	else ret =LoadExt(basename);
 	if(!ret) SetInvalid();
 	return ret;
 }
