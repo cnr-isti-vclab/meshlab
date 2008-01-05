@@ -186,9 +186,9 @@ namespace vcg {
 					case iB: tempTriplet.m = B; break;
 					default : tempTriplet.m = (MarkType)v->IMark(); break;
 				}
-				
+
 				Q.push(tempTriplet);
-				
+
 				if (file) file << "Inserzione: d=" << tempTriplet.d << std::endl;
 			}
 		}
@@ -250,7 +250,7 @@ namespace vcg {
 
 			std::ofstream file;
 			file.open("editsegment.log");
-			
+
 			curvature_start_t = clock();
 			//Computing principal curvatures and directions for all vertices
 			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
@@ -267,7 +267,7 @@ namespace vcg {
 			}
 
 			if (file) file << "Fine inizializzazione da input. Elementi aggiunti: " << Q.size() << std::endl;
-			
+
 			int step_counter = 0;
 			while (vertex_to_go != 0) {
 				//algorithm main loop
@@ -288,7 +288,7 @@ namespace vcg {
 					//tempTriplet = Q.top();
 					//Q.pop();
 					tempTriplet = Q.pop();
-					
+
 					if (tempTriplet.v->IMark() == U) {
 						tempTriplet.v->IMark() = tempTriplet.m;
 						--vertex_to_go; 
@@ -313,7 +313,7 @@ namespace vcg {
 			}
 		}
 
-		void Colorize(bool selectForeground) {
+		void Colorize(bool selectForeground, bool doRefine) {
 			FaceIterator fi;
 			VertexIterator vi;
 
@@ -330,7 +330,7 @@ namespace vcg {
 
 			int count;
 			if (selectForeground) {
-
+				//select foreground
 				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
 					(*fi).ClearUserBit(bitflag);
 					(*fi).ClearUserBit(bitflag_2);
@@ -341,12 +341,18 @@ namespace vcg {
 					}
 					if (count == 3) {
 						(*fi).SetS();
+					}	else {
+						if (doRefine) {
+							if (count > 0) {
+								edgeFaceQueue.push(&(*fi));
+								(*fi).SetUserBit(bitflag);
+							} else {
+								(*fi).ClearS();
+							}
+						} else {
+							(*fi).ClearS();
+						}
 					}
-					else if (count > 0) {
-						edgeFaceQueue.push(&(*fi));
-						(*fi).SetUserBit(bitflag);
-					}	else 
-						(*fi).ClearS();
 				}
 
 				while(!edgeFaceQueue.empty()) {
@@ -398,20 +404,86 @@ namespace vcg {
 							}
 						}
 					}
-				}
+				} 
+
+
 			} else {
+				//select background
 				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
+					(*fi).ClearUserBit(bitflag);
+					(*fi).ClearUserBit(bitflag_2);
 					count = 0;
 					for (int i = 0; i<3; ++i) {
 						if ( (*fi).V(i)->IMark() == B || (*fi).V(i)->IMark() == iB	) ++count;
 					}
-					if (count == 3) 
+					if (count == 3) {
 						(*fi).SetS();
-					else 
-						(*fi).ClearS();
+					}	else {
+						if (doRefine) {
+							if (count > 0) {
+								edgeFaceQueue.push(&(*fi));
+								(*fi).SetUserBit(bitflag);
+							} else {
+								(*fi).ClearS();
+							}
+						} else {
+							(*fi).ClearS();
+						}
+					}
 				}
-			}
 
+				while(!edgeFaceQueue.empty()) {
+					FaceType * tmp_face = edgeFaceQueue.front();
+					edgeFaceQueue.pop();
+					float prod[3];   
+					float max_prod = std::numeric_limits<float>::min();
+					int max_faceid = -1;
+					for (int i=0; i<3; ++i) {
+						prod[i] = (tmp_face->N().Normalize()) * (tmp_face->FFp(i)->N().Normalize());
+						if (prod[i] > max_prod) {
+							max_prod = prod[i];
+							max_faceid = i;
+						}  
+					}
+
+
+					if (!tmp_face->FFp(max_faceid)->IsUserBit(bitflag)) {
+						//faccia certa
+						if (tmp_face->FFp(max_faceid)->IsS()) {
+							tmp_face->SetS();
+						} else {
+							tmp_face->ClearS();
+						}
+						tmp_face->ClearUserBit(bitflag);
+					} else {
+						//max faccia incerta
+						//prendo la seconda
+						float sec_prod = 0.0f;
+						int sec_faceid = -1;
+						for (int i = 0; i<3; ++i) {
+							if (i != max_faceid && prod[i] > sec_prod && prod[i] > (max_prod - 0.001f) && !tmp_face->FFp(i)->IsUserBit(bitflag)) {
+								sec_prod = prod[i];
+								sec_faceid = i;
+							}  
+						}
+						if (sec_prod != 0.0f) {
+							if (tmp_face->FFp(sec_faceid)->IsS()) {
+								tmp_face->SetS();
+						} else {
+							tmp_face->ClearS();
+							}
+							tmp_face->ClearUserBit(bitflag);
+						} else {
+							if (!tmp_face->IsUserBit(bitflag_2)) {
+								edgeFaceQueue.push(tmp_face);
+								tmp_face->SetUserBit(bitflag);
+								tmp_face->SetUserBit(bitflag_2);
+							}
+						}
+					}
+				} 
+
+			}
 			FaceType::DeleteBitFlag(bitflag_2);
 			FaceType::DeleteBitFlag(bitflag);
 		}

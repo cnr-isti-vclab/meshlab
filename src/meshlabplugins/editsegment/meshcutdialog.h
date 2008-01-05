@@ -25,13 +25,18 @@ private:
 		void on_foreRadioButton_clicked();
 		void on_backRadioButton_clicked();
 
+		void on_refineCheckBox_clicked();
+
 		void on_gaussianButton_clicked();
 		void on_meanButton_clicked();
 		void on_resetButton_clicked();
+
+		
 		
 	signals:
 		void meshCutSignal();
 		void selectForegroundSignal(bool);
+		void doRefineSignal(bool);
 
 		void colorizeGaussianSignal();
 		void colorizeMeanSignal();

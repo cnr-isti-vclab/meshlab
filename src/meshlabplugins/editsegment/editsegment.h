@@ -14,6 +14,7 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include <meshcutdialog.h>
+#include <wrap/gui/trackball.h>
 
 #include <cutting.h>
 
@@ -32,10 +33,14 @@ class EditSegment : public QObject, public MeshEditInterface {
 		QList <QAction *> actionList;
 private: 
 	MeshCutting<CMeshO> * meshCut;
+
 	bool show_trackball;
 	bool first;
 	bool dragging;
+	
 	bool selectForeground;
+	bool doRefine;
+	
 	QPoint current_point;
 	QPoint previous_point;
 	Qt::MouseButton mouse_button_pressed;
@@ -80,6 +85,7 @@ public:
 public slots:
 	void MeshCutSlot();
 	void SelectForegroundSlot(bool);
+	void doRefineSlot(bool);
 
 	void ColorizeGaussianSlot();
 	void ColorizeMeanSlot();

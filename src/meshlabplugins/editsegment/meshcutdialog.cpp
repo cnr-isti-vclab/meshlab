@@ -27,6 +27,10 @@ void MeshCutDialog::on_backRadioButton_clicked() {
 	emit selectForegroundSignal(false);
 }
 
+void MeshCutDialog::on_refineCheckBox_clicked() {
+	emit doRefineSignal(ui.refineCheckBox->isChecked());
+}
+
 
 //debug function
 void MeshCutDialog::on_gaussianButton_clicked() {
