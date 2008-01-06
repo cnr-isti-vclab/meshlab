@@ -25,26 +25,13 @@ bool U3DIOPlugin::open(const QString & /*formatName*/, const QString &/*fileName
 
 QString U3DIOPlugin::computePluginsPath()
 {
-		QDir pluginsDir(qApp->applicationDirPath());
+		QDir pluginsDir(MainWindowInterface::getPluginDirPath());
 		#if defined(Q_OS_WIN)
-			if (pluginsDir.dirName() == "debug" || pluginsDir.dirName() == "release")
-				pluginsDir.cdUp();
-			pluginsDir.cd("plugins/U3D_W32");
+			pluginsDir.cd("U3D_W32");
 		#elif defined(Q_OS_MAC)
-		//inside macs the plugins dir can be into two places
-		// 1) inside the budnle just a level over the app
-		// 2) During develpment in the meshlab/src/meshlab dir that is 4 or 5 levels up. 
-			if (pluginsDir.dirName() == "MacOS") {
-				for(int i=0;i<6;++i){
-					//qDebug("plugins dir %s", qPrintable(pluginsDir.absolutePath()));
-					pluginsDir.cdUp();
-					if(pluginsDir.exists("plugins")) break;
-				}
-			}
-				pluginsDir.cd("plugins/U3D_OSX");
+				pluginsDir.cd("U3D_OSX");
 		#elif
-		// some linux guy complete this please....
-		assert(0);
+				pluginsDir.cd("U3D_LINUX");
 		#endif
 		qDebug("U3D plugins dir %s", qPrintable(pluginsDir.absolutePath()));
 		return pluginsDir.absolutePath();
@@ -53,7 +40,7 @@ QString U3DIOPlugin::computePluginsPath()
 
 bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos */*cb*/, QWidget *parent)
 {
-	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
   //std::string filename = fileName.toUtf8().data();
 	std::string ex = formatName.toUtf8().data();
@@ -61,27 +48,37 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 
 	if(formatName.toUpper() == tr("U3D"))
 	{
+		qApp->restoreOverrideCursor();	
 		vcg::tri::io::u3dparametersclasses::Movie15Parameters mp;
 		mp._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(m.cm.bbox.Center(),m.cm.bbox.Diag());
 		U3D_GUI pw(mp,parent);
 		pw.exec();
+		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
 		
 
 		QSettings settings;
 		
-		QString converterPath = 	computePluginsPath();
+		QString converterPath = computePluginsPath();
+		QString converterCommandLine;		
 	#if defined(Q_OS_WIN)
 		converterPath += "/IDTFConverter.exe";
+		converterCommandLine = converterPath;
 	#elif defined(Q_OS_MAC)
-		converterPath = converterPath +"/IDTFConverter.sh "+ converterPath;
+		converterCommandLine = converterPath +"/IDTFConverter.sh "+converterPath;
+		converterPath = converterPath +"/IDTFConverter.sh";
 	#endif
-		
 		if (settings.contains("U3D/converter"))
 			converterPath=settings.value("U3D/converter").toString();
 		//else 
 		//	settings.setValue("U3D/converter",converterPath);
-	  
-		int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterPath),mp,mask);
+	  QFileInfo converterFI(converterPath);
+		if(!converterFI.exists())
+		{
+			QMessageBox::warning(parent, tr("Saving Error"), QString("Missing converter executable '%1'").arg(converterPath));
+			return false;
+		}
+		
+		int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterCommandLine),mp,mask);
 
 		if(result!=0)
 		{
