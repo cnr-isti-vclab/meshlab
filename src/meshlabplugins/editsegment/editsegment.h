@@ -5,9 +5,9 @@
 #include <QStringList>
 #include <QList>
 #include <QDockWidget>
-#include <QHash>
 #include <QDialog>
 #include <QDebug>
+#include <QMap>
 
 #include <meshlab/glarea.h>
 #include <vcg/math/matrix44.h>
@@ -32,8 +32,6 @@ class EditSegment : public QObject, public MeshEditInterface {
 		Q_INTERFACES(MeshEditInterface)
 		QList <QAction *> actionList;
 private: 
-	MeshCutting<CMeshO> * meshCut;
-
 	bool show_trackball;
 	bool first;
 	bool dragging;
@@ -49,6 +47,9 @@ private:
 	QDockWidget *meshcut_dock;
 	MeshCutDialog * meshCutDialog;
 	GLArea * glarea;
+	MeshCutting<CMeshO> * meshCut;
+
+	QMap<GLArea *, MeshCutting<CMeshO> *> glarea_map;
 
 	vector<CMeshO::FacePointer> currentSelection;
 	GLfloat *pixels;
