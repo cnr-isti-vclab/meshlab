@@ -96,16 +96,16 @@ void SampleMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParamete
 	if(!cm.IsValid())
 	{
 		assert(par->findParameter("CubeMapPath")); 
+		basename=par->getString("CubeMapPath");
 		if(lastname != basename ) 
 		{
-			basename=par->getString("CubeMapPath");
 			qDebug( "Current CubeMapPath Dir: %s ",qPrintable(basename)); 
 
 			glewInit();
 			bool ret = cm.Load(qPrintable(basename));
 			lastname=basename;
 			if(! ret ) 
-				QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images");
+				QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + basename );
 		//	cm.radius= m.cm.bbox.Diag()/2;
 			cm.radius=10;
 		}
