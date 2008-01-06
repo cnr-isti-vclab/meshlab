@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.144  2008/01/06 20:45:11  cignoni
+busy cursor when saving
+
 Revision 1.143  2008/01/04 00:46:28  cignoni
 Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
 
@@ -907,9 +910,12 @@ bool MainWindow::saveAs()
 		int mask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(this->GLA()->mm(), capability,defaultBits);
 		if(mask == -1) 
 			return false;
+			
+		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  	
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,QCallBack,this);
 		qb->reset();
+		qApp->restoreOverrideCursor();	
 
     QSettings settings;
     int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
