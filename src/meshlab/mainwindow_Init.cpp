@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.88  2008/01/06 20:44:19  cignoni
+added correct paths for QT dynlib loading
+
 Revision 1.87  2008/01/04 00:46:28  cignoni
 Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
 
@@ -583,6 +586,10 @@ void MainWindow::createMenus()
 void MainWindow::loadPlugins()
 {
 	QDir pluginsDir(getPluginDirPath());
+	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
+	qApp->addLibraryPath(getPluginDirPath());
+	qApp->addLibraryPath(getBaseDirPath());
+	
   qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath())); 
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
