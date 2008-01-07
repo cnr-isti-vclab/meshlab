@@ -38,6 +38,8 @@ private:
 	
 	bool selectForeground;
 	bool doRefine;
+	float curvatureWeight;
+	float normalWeight;
 	
 	QPoint current_point;
 	QPoint previous_point;
@@ -87,6 +89,8 @@ public slots:
 	void MeshCutSlot();
 	void SelectForegroundSlot(bool);
 	void doRefineSlot(bool);
+	void changeNormalWeight(int);
+	void changeCurvatureWeight(int);
 
 	void ColorizeGaussianSlot();
 	void ColorizeMeanSlot();

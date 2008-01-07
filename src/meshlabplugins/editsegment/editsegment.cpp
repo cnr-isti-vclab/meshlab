@@ -244,6 +244,9 @@ EditSegment::EditSegment() {
 	meshCutDialog = 0;
 	meshcut_dock = 0;
 
+	normalWeight = 5;
+	curvatureWeight = 5;
+
 	selectForeground = true;
 	doRefine = true;
 }
@@ -302,6 +305,8 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 			SLOT(ColorizeGaussianSlot()));
 		QObject::connect(meshCutDialog, SIGNAL(colorizeMeanSignal()), this,
 			SLOT(ColorizeMeanSlot()));
+		QObject::connect(meshCutDialog, SIGNAL(normalWeightSignal(int)),this, SLOT(changeNormalWeight(int)));
+		QObject::connect(meshCutDialog, SIGNAL(curvatureWeightSignal(int)),this, SLOT(changeCurvatureWeight(int)));
 
 	}
 	meshcut_dock->setVisible(true);
@@ -502,7 +507,7 @@ void EditSegment::DrawXORCircle(MeshModel &m, GLArea * gla, bool doubleDraw) {
 
 void EditSegment::MeshCutSlot() {
 	if (meshCut) {
-		meshCut->MeshCut();
+		meshCut->MeshCut(normalWeight,curvatureWeight);
 		meshCut->Colorize(selectForeground, doRefine);
 	}
 	glarea->update();
@@ -514,6 +519,14 @@ void EditSegment::SelectForegroundSlot(bool value) {
 
 void EditSegment::doRefineSlot(bool value) {
 	doRefine = value;
+}
+
+void EditSegment::changeCurvatureWeight(int value) {
+	curvatureWeight = value;
+}
+
+void EditSegment::changeNormalWeight(int value) {
+	normalWeight = value;
 }
 
 void EditSegment::ColorizeGaussianSlot() {

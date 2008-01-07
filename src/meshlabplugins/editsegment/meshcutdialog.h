@@ -31,12 +31,15 @@ private:
 		void on_meanButton_clicked();
 		void on_resetButton_clicked();
 
-		
+		void on_normalWeightSlider_valueChanged();
+		void on_curvatureWeightSlider_valueChanged();		
 		
 	signals:
 		void meshCutSignal();
 		void selectForegroundSignal(bool);
 		void doRefineSignal(bool);
+		void normalWeightSignal(int);
+		void curvatureWeightSignal(int);
 
 		void colorizeGaussianSignal();
 		void colorizeMeanSignal();

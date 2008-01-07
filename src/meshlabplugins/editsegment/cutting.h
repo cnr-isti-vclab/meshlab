@@ -118,14 +118,13 @@ namespace vcg {
 		SimpleTempData<VertContainer, CurvData> *TDCurvPtr;
 		//TripletQueue Q;
 		TripletHeap Q;
+		float _normalWeight;
+		float _curvatureWeight;
 
 		float ImprovedIsophoticDist(VertexType * p, VertexType * q) {
 			float dist;
 			float kpq = 0.0f;
 			const float e = 2.71828182845904523536;
-
-			const float W1 = 5.0f;
-			const float W2 = 5.0f;
 
 			Matrix33<float> n_nMatrix;
 			Point3<float> ViVj = p->P() - q->P();
@@ -146,7 +145,7 @@ namespace vcg {
 			if (kpq < 0)
 				kpq = powf(e,fabs(kpq)) -1;
 
-			dist = (p->P() - q->P()).Norm() + (W1 * (p->N() - q->N()).Norm()) + (W2 * kpq);
+			dist = (p->P() - q->P()).Norm() + (_normalWeight * (p->N() - q->N()).Norm()) + (_curvatureWeight * kpq);
 
 			assert(dist>=0.0f);
 			return dist;
@@ -213,6 +212,8 @@ namespace vcg {
 
 		MeshCutting(MESH_TYPE * ms) {
 			mesh = ms;
+			_normalWeight = 5.0f;
+			_curvatureWeight = 5.0f;
 			TDCurvPtr = new SimpleTempData<VertContainer, CurvData>((*mesh).vert);
 			TDCurvPtr->Start(CurvData());
 		}
@@ -225,7 +226,10 @@ namespace vcg {
 			v->IMark() = m;
 		}
 
-		void MeshCut() {
+		void MeshCut(float NormalWeight, float CurvatureWeight) {
+
+			_normalWeight = NormalWeight;
+			_curvatureWeight = CurvatureWeight;
 
 			clock_t curvature_start_t;
 			clock_t curvature_end_t;

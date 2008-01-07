@@ -31,6 +31,13 @@ void MeshCutDialog::on_refineCheckBox_clicked() {
 	emit doRefineSignal(ui.refineCheckBox->isChecked());
 }
 
+void MeshCutDialog::on_normalWeightSlider_valueChanged() {
+	emit normalWeightSignal(ui.normalWeightSlider->value());
+}
+void MeshCutDialog::on_curvatureWeightSlider_valueChanged() {
+	emit curvatureWeightSignal(ui.curvatureWeightSlider->value());
+}		
+
 
 //debug function
 void MeshCutDialog::on_gaussianButton_clicked() {
