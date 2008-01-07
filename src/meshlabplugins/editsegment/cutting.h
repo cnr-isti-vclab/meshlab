@@ -336,6 +336,7 @@ namespace vcg {
 			if (selectForeground) {
 				//select foreground
 				for (fi = mesh->face.begin(); fi != mesh->face.end(); ++fi) {
+					(*fi).ClearS();
 					(*fi).ClearUserBit(bitflag);
 					(*fi).ClearUserBit(bitflag_2);
 
