@@ -382,10 +382,14 @@ void EditSegment::Decorate(QAction * ac, MeshModel & m, GLArea * gla) {
 				meshCut->Mark(*vi, iF);
 				(*vi)->C()
 					= toVcgColor(meshCutDialog->getForegroundColor());
-			} else {
+			} else if (mouse_button_pressed==Qt::RightButton ){
 				meshCut->Mark(*vi, iB);
 				(*vi)->C()
 					= toVcgColor(meshCutDialog->getBackgroundColor());
+			} else if (mouse_button_pressed==Qt::MidButton) {
+				meshCut->Mark(*vi, U);
+				(*vi)->C()
+					= toVcgColor(Qt::white);
 			}
 
 		}
