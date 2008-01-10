@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.23  2008/01/10 17:16:44  cignoni
+unsaved dialog has a better behaviour
+
 Revision 1.22  2007/12/11 23:56:40  cignoni
 better resizing of dialogs
 
@@ -195,7 +198,7 @@ void MeshlabStdDialog::loadFrameContent()
   QLabel *ql;
 	
 	QGridLayout *gridLayout = new QGridLayout(qf);
-	setLayout(gridLayout);
+	qf->setLayout(gridLayout);
 	
 	setWindowTitle(curmfi->filterName(curAction));
 	ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);

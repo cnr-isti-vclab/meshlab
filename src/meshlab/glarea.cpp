@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.139  2008/01/10 17:15:16  cignoni
+unsaved dialog has a better behaviour
+
 Revision 1.138  2008/01/04 18:23:24  cignoni
 Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
 
@@ -552,25 +555,19 @@ void GLArea::closeEvent(QCloseEvent *event)
 	bool close = true;
 	if(isWindowModified())
 	{
-		if(QMessageBox::question(
-                this,
-                tr("MeshLab"),
-                tr("File %1 modified.\n\n"
-                   "Continue without saving?")
-                .arg(getFileName()),
-								QMessageBox::Yes|QMessageBox::Default,
-								QMessageBox::No|QMessageBox::Escape,
-								QMessageBox::NoButton) == QMessageBox::No)
+		 QMessageBox::StandardButton ret=QMessageBox::question(
+                this,  tr("MeshLab"), tr("File '%1' modified.\n\nClose without saving?").arg(getFileName()),
+								QMessageBox::Yes|QMessageBox::No,
+								QMessageBox::No);
+		if(ret==QMessageBox::No)
 		{
 			close = false;	// don't close please!
+			event->ignore();
+			return;
 		}
 	}
-  if(getEditAction()) endEdit();
-	event->ignore();
-	if(close)
-	{
-		event->accept();
-	}
+  if(getEditAction()) endEdit();	
+	event->accept();
 }
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
