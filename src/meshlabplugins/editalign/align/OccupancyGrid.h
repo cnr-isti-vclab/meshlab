@@ -209,7 +209,7 @@ class OGMeshInfo
 {
 public:
 	enum {maxcnt =3};
-	OGMeshInfo() {Init();}
+	OGMeshInfo() {Init(); used=false;}
 	void Init() {
 		coverage=0;area=0;
 		memset(unique,0,32*4);
@@ -219,6 +219,7 @@ public:
 	int area;      // numero di voxel toccati da questa mesh
 	bool operator < (OGMeshInfo &o) const { return area<o.area;}	
 	static const int MaxStat() { return 64;}
+	bool used;
 };
 /* Classe con informazioni su un arco plausibile
 */
@@ -272,6 +273,7 @@ void AddMesh(MESH &M, const Matrix44d &Tr, int ind)
         G.Grid( Trf * Point3f::Construct((*vi).P()) ).Set(ind);
     }
 	VM[ind].Init();
+	VM[ind].used=true;
 }
 
 

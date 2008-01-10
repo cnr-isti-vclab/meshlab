@@ -42,7 +42,7 @@ using namespace vcg;
 // Nota che il bbox viene automaticamento inflatato dalla G.SetBBox();
 bool OccupancyGrid::Init(int _mn, Box3d bb, int size)
 {
-	mn=_mn;
+	mn=_mn; // the number of meshes (including all the unused ones; eg it is the range of the possible id)
 	if(mn>MeshCounter::MaxVal()) return false;
 	MeshCounter MC;
 	MC.Clear();
@@ -135,9 +135,10 @@ void OccupancyGrid::Compute()
 	// Find the best arcs
  SVA.clear();
 	for(i=0;i<mn-1;++i)
-		for(j=i+1;j<mn;++j)
-			if(VA[i+j*mn]>0)
-				SVA.push_back( OGArcInfo(i,j, VA[i+j*mn], VA[i+j*mn]/float( min(VM[i].area,VM[j].area)) )); 
+	 if(VM[i].used)
+			for(j=i+1;j<mn;++j)
+				if(VM[j].used && VA[i+j*mn]>0)
+					SVA.push_back( OGArcInfo(i,j, VA[i+j*mn], VA[i+j*mn]/float( min(VM[i].area,VM[j].area)) )); 
   
 	// Compute Mesh Coverage
 	for(i=0;i<SVA.size();++i)
@@ -183,7 +184,7 @@ void OccupancyGrid::ComputeUsefulMesh(FILE *elfp)
 	Use.clear();
 	int i,j,m,mcnt=0;
 	for(m=0;m<mn;++m) {
-			if(VM[m].area>0) {
+			if(VM[m].used && VM[m].area>0) {
 				mcnt++;
 				UpdCovg[m]=VM[m].coverage;
 				UpdArea[m]=VM[m].area;
@@ -237,7 +238,12 @@ void OccupancyGrid::Dump(FILE *fp)
 
 	fprintf(fp,"Computed %i arcs for %i meshes\n",SVA.size(),mn);
 	for(int i=0;i<VM.size();++i)
-		fprintf(fp,"mesh %3i area %6i covg %7i (%5.2f%%) uniq '%3i %3i %3i %3i %3i'\n",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area),VM[i].unique[1],VM[i].unique[2],VM[i].unique[3],VM[i].unique[4],VM[i].unique[5]);
+		{
+			if(VM[i].used) 
+					fprintf(fp,"mesh %3i area %6i covg %7i (%5.2f%%) uniq '%3i %3i %3i %3i %3i'\n",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area),VM[i].unique[1],VM[i].unique[2],VM[i].unique[3],VM[i].unique[4],VM[i].unique[5]);
+			else 
+					fprintf(fp,"mesh %3i ---- UNUSED\n",i);
+		}
 	fprintf(fp,"Computed %i Arcs :\n",SVA.size());
 	for(int i=0;i<SVA.size() && SVA[i].norm_area > .1; ++i)
 		fprintf(fp,"%4i -> %4i Area:%5i NormArea:%5.3f\n",SVA[i].s,SVA[i].t,SVA[i].area,SVA[i].norm_area);
@@ -279,7 +285,7 @@ void OccupancyGrid::ChooseArcs(vector<pair<int,int> > &AV, vector<int> &BNV, vec
 			++i;
 	}
 
-	for(i=0;i<mn;++i) if(adjcnt[i]==0) BNV.push_back(i);
+	for(i=0;i<mn;++i) if(VM[i].used && adjcnt[i]==0) BNV.push_back(i);
 }
 
 void OccupancyGrid::RemoveMesh(int id)
