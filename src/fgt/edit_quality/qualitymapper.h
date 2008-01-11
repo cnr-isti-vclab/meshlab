@@ -32,9 +32,10 @@ Beginning
 #define _QUALITY_MAPPER_PLUGIN_H_
 
 #include <QObject>
-//#include <QAction>
+#include <QAction>
 //#include <QActionGroup>
-//#include <QList>
+//#include <QStringList>
+#include <QList>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -46,10 +47,10 @@ Beginning
 #include <vcg/complex/trimesh/update/color.h> //<-- contains VertexQuality method
 
 
-class QualityMapperPlugin : public QObject, public MeshFilterInterface
+class QualityMapperPlugin : public QObject, public MeshEditInterface
 {
     Q_OBJECT
-    Q_INTERFACES(MeshFilterInterface)
+    Q_INTERFACES(MeshEditInterface)
 
 private:
 	Histogramf _histogram;
@@ -58,6 +59,23 @@ public:
     QualityMapperPlugin();
     ~QualityMapperPlugin(){};
 
+	virtual const QString Info(QAction *);
+	// Generic Info about the plug in version and author.
+    virtual const PluginInfo &Info();
+	virtual QList<QAction *> actions() const ;
+
+	// Called when the user press the first time the button 
+    virtual void StartEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+	// Called when the user press the second time the button 
+    virtual void EndEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    virtual void Decorate			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
+    virtual void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
+    virtual void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+
+
+	
+	/*
 	// The longer string describing each filtering action 
 	// (this string is used in the About plug in dialog)
 	const QString filterInfo(FilterIDType filter)
@@ -67,25 +85,22 @@ public:
 	// (this string is used also to define the menu entry)
 	const QString filterName(FilterIDType filter)
 	{	return QString("Colorize mesh vertexes by Quality following some rules");	}
-
-	// Generic Info about the plug in version and author.
-	const PluginInfo &pluginInfo();
-	//TO BE IMPLEMENTED!
+	*/
 
 /*
 		// This function is called by the framework, for each action at the loading of the plugins.
 		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
 		// If your plug ins/action has no GlobalParameter, do nothing.
 		virtual void initGlobalParameterSet(QAction *, FilterParameterSet & / *globalparam* /) {}
-*/
+
 	//TO BE IMPLEMENTED IF NECESSARY!
 
 	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
 	// For example filters that perform an action only on the selection will be placed in the Selection Class Ê
-	const FilterClass getClass(QAction *) { return MeshFilterInterface::VertexColoring; } //modified by MAL
+	const FilterClass getClass(QAction *) { return MeshEditInterface::VertexColoring; } //modified by MAL
 
-/*
+
 		// The filters can have some additional requirements on the mesh capabilities. 
 		// For example if a filters requires Face-Face Adjacency you should re-implement 
 		// this function making it returns MeshModel::MM_FACETOPO. 
@@ -93,15 +108,17 @@ public:
 		virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}*/
 	//TO BE IMPLEMENTED IF NECESSARY!
 	
-
+/*
 	// The main function that applies the selected filter with the already stabilished parameters
 	// This function is called by the framework after getting the user params 
-	bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameterSet & /*parent*/, vcg::CallBackPos * /*cb*/);
+	bool applyFilter(QAction * , MeshModel &, FilterParameterSet &, vcg::CallBackPos * );
 	//TO BE IMPLEMENTED!
+
 
 		//  this function returns true if the filter has parameters that must be filled with an automatically build dialog.
 	bool autoDialog(QAction *) {return false;}
 	//TO BE IMPLEMENTED IF NECESSARY!
+	*/
 
 	// This function is called to initialized the list of parameters. 
 	// it is called by the auto dialog framework to know the list of parameters.
