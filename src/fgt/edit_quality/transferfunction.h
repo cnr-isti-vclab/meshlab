@@ -36,7 +36,6 @@ private:
 
 public:
 	Key(float p, float u, float l);
-	~Key();
 }
 
 /* Representation of a transfer function as a triple of vectors of Keys, 
@@ -56,29 +55,17 @@ public:
 
 Key::Key(float p, float u, float l)
 {
-	assert (u<=l);
+	assert (l<=u);
 	position = p;
 	upper = u;
 	lower = l;
 }
 
-Key::~Key()
-{
-	delete position;
-	delete upper;
-	delete lower;
-}
 
 TransferFunction::TransferFunction()
 {
-	red = new vector<Key>();
-	green = new vector<Key>;
-	blue = new vector<Key>;
 }
 
 TransferFunction::~TransferFunction()
 {
-	delete red;
-	delete green;
-	delete blue;
 }
