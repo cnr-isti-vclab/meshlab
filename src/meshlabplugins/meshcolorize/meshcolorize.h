@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.27  2008/01/11 13:58:21  cignoni
+added selection of self-intersecting faces.
+
 Revision 1.26  2007/11/20 18:26:52  ponchio
 Added triangle quality with possibiliti to cohose metric.
 
@@ -96,7 +99,8 @@ public:
       CP_RMS,
       CP_ABSOLUTE,
       CP_TRIANGLE_QUALITY,
-      CP_SELFINTERSECT,
+      CP_SELFINTERSECT_SELECT,
+      CP_SELFINTERSECT_COLOR,
       CP_BORDER,
       CP_COLOR_NON_MANIFOLD_FACE,
       CP_COLOR_NON_MANIFOLD_VERTEX,

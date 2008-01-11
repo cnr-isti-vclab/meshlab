@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.43  2008/01/11 13:58:21  cignoni
+added selection of self-intersecting faces.
+
 Revision 1.42  2007/12/13 17:02:41  ponchio
 Added a small help.
 
@@ -158,6 +161,7 @@ Added copyright info
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/update/selection.h>
 #include "meshcolorize.h"
 #include "color_manifold.h"
 #include "curvature.h"
@@ -174,7 +178,8 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     CP_RMS <<
     CP_ABSOLUTE <<
     CP_TRIANGLE_QUALITY <<
-    CP_SELFINTERSECT <<
+		CP_SELFINTERSECT_SELECT <<
+		CP_SELFINTERSECT_COLOR <<
     CP_BORDER <<
     CP_COLOR_NON_MANIFOLD_FACE <<
     CP_COLOR_NON_MANIFOLD_VERTEX <<
@@ -196,7 +201,8 @@ const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) {
     case CP_RMS:                      return QString("Root mean square Curvature (equalized)");
     case CP_ABSOLUTE:                 return QString("Absolute Curvature (equalized)");
     case CP_TRIANGLE_QUALITY:         return QString("Triangle quality");
-    case CP_SELFINTERSECT:            return QString("Self Intersections");
+    case CP_SELFINTERSECT_COLOR:      return QString("Self Intersections");
+    case CP_SELFINTERSECT_SELECT:     return QString("Self Intersecting Faces");
     case CP_BORDER:                   return QString("Border");
     case CP_COLOR_NON_MANIFOLD_FACE:  return QString("Color non Manifold Faces");
     case CP_COLOR_NON_MANIFOLD_VERTEX:return QString("Color non Manifold Vertices");
@@ -217,7 +223,8 @@ const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId)
     case CP_RMS :                    return tr("Colorize vertex and faces depending on equalized root mean square curvature.");
     case CP_ABSOLUTE :               return tr("Colorize vertex and faces depending on equalize absolute curvature.");
     case CP_TRIANGLE_QUALITY:        return tr("Colorize faces depending on triangle quality:<br/>1: minimum ratio height/edge among the edges<br/>2: ratio between radii of incenter and circumcenter<br/>3:  2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM, M transform triangle into equilateral");
-    case CP_SELFINTERSECT:           return tr("Colorize only self intersecting faces.");
+    case CP_SELFINTERSECT_SELECT:    return tr("Select only self intersecting faces.");
+    case CP_SELFINTERSECT_COLOR:     return tr("Colorize only self intersecting faces.");
     case CP_BORDER :                 return tr("Colorize only border edges.");
     case CP_COLOR_NON_MANIFOLD_FACE: return tr("Colorize the non manifold edges, eg the edges where there are more than two incident faces");
     case CP_COLOR_NON_MANIFOLD_VERTEX:return tr("Colorize only non manifold edges eg. ");
@@ -247,7 +254,9 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_RMS:                      
     case CP_ABSOLUTE:                 return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
     case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR;
-    case CP_SELFINTERSECT:            return MeshModel::MM_FACEMARK | MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
+    case CP_SELFINTERSECT_SELECT:
+		case CP_SELFINTERSECT_COLOR:
+		            return MeshModel::MM_FACEMARK | MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
     case CP_BORDER:                   return MeshModel::MM_BORDERFLAG;
     case CP_COLOR_NON_MANIFOLD_FACE:       
     case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACETOPO;
@@ -383,15 +392,24 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 		break;
     }
 
-  case CP_SELFINTERSECT:
+  case CP_SELFINTERSECT_SELECT:
+	case CP_SELFINTERSECT_COLOR:
     {
       vector<CFaceO *> IntersFace;
+			vector<CFaceO *>::iterator fpi;
       tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
-      tri::UpdateColor<CMeshO>::FaceConstant(m.cm,Color4b::White);
-      vector<CFaceO *>::iterator fpi;
-      for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
-        (*fpi)->C()=Color4b::Red;
-      
+			if(ID(filter)==CP_SELFINTERSECT_COLOR) 
+				{
+					tri::UpdateColor<CMeshO>::FaceConstant(m.cm,Color4b::White);
+					for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
+						(*fpi)->C()=Color4b::Red;
+				}
+			else
+			{
+				tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   
+				for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
+					(*fpi)->SetS();
+			}
     break;  
     }
 
@@ -429,8 +447,9 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
     case   CP_RMS:
     case   CP_ABSOLUTE:
     case   CP_COLOR_NON_TOPO_COHERENT:
-        return MeshFilterInterface::VertexColoring; 
-    case   CP_SELFINTERSECT:
+        return MeshFilterInterface::VertexColoring; 			
+		case   CP_SELFINTERSECT_SELECT: return MeshFilterInterface::Selection;
+    case   CP_SELFINTERSECT_COLOR:
     case   CP_TRIANGLE_QUALITY:
                return MeshFilterInterface::FaceColoring; 
     default: assert(0);
