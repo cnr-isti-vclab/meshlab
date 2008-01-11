@@ -2,8 +2,8 @@ TEMPLATE      = lib
 CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = qualitymapper.h qualitymapperdialog.h
-SOURCES       = qualitymapper.cpp qualitymapperdialog.cpp \
+HEADERS       = qualitymapper.h qualitymapperdialog.h transferfunction.h
+SOURCES       = qualitymapper.cpp transferfunction.cpp qualitymapperdialog.cpp \
 								../../meshlab/filterparameter.cpp
 TARGET        = qualitymapper
 DESTDIR       = ../../meshlab/plugins

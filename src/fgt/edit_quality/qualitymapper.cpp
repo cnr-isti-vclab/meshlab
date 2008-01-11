@@ -152,10 +152,6 @@ void QualityMapperPlugin::initParameterSet(QAction *a,MeshModel &m, FilterParame
 // 	}
 }
 
-bool QualityMapperPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
-{
-	return true;
-}
 
 
 
