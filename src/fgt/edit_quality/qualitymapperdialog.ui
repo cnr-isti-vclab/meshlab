@@ -1,0 +1,204 @@
+<ui version="4.0" >
+ <class>QualityMapperDialogClass</class>
+ <widget class="QDialog" name="QualityMapperDialogClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>649</width>
+    <height>629</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>QualityMapperDialog</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>80</x>
+     <y>470</y>
+     <width>337</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" >
+    <item>
+     <widget class="QPushButton" name="applyButton" >
+      <property name="text" >
+       <string>Apply</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="previewButton" >
+      <property name="text" >
+       <string>Preview</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="resetButton" >
+      <property name="text" >
+       <string>Reset</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QFrame" name="transferFunctionFrame" >
+   <property name="geometry" >
+    <rect>
+     <x>50</x>
+     <y>30</y>
+     <width>511</width>
+     <height>381</height>
+    </rect>
+   </property>
+   <property name="frameShape" >
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow" >
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QPushButton" name="saveTransferFunctionButton" >
+    <property name="geometry" >
+     <rect>
+      <x>20</x>
+      <y>350</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="transferFunctionView" >
+    <property name="geometry" >
+     <rect>
+      <x>30</x>
+      <y>110</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="colorbandLabel" >
+    <property name="geometry" >
+     <rect>
+      <x>120</x>
+      <y>350</y>
+      <width>74</width>
+      <height>14</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>ColorBandLabel</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="transferFunctionEditBox" >
+    <property name="geometry" >
+     <rect>
+      <x>310</x>
+      <y>130</y>
+      <width>191</width>
+      <height>161</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Transfer Function Edit</string>
+    </property>
+    <widget class="QGroupBox" name="channelBox" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>174</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Channel</string>
+     </property>
+     <widget class="QWidget" name="" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>154</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QRadioButton" name="redButton" >
+         <property name="text" >
+          <string>Red</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="greenButton" >
+         <property name="text" >
+          <string>Green</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="blueButton" >
+         <property name="text" >
+          <string>Blue</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="selectedPointBox" >
+     <property name="geometry" >
+      <rect>
+       <x>30</x>
+       <y>70</y>
+       <width>120</width>
+       <height>80</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Selected Point</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <resources>
+  <include location="" />
+ </resources>
+ <connections/>
+</ui>

@@ -27,7 +27,7 @@ Revision 1.0 2008/01/03 MAL
 Beginning
 
 ****************************************************************************/
-#include "qualityMapper.h"
+#include "qualitymapper.h"
 #include <QtGui>
 #include <limits>
 #include <vcg/complex/trimesh/clean.h>
@@ -46,26 +46,56 @@ QualityMapperPlugin::QualityMapperPlugin()
 {
 }
 
-
-const PluginInfo &QualityMapperPlugin::pluginInfo() 
-{
-  static PluginInfo ai; 
-  ai.Date=tr("Jan 2008");
-  ai.Version = tr("1.0");
-  ai.Author = ("Alessandro Maione, Federico Bellucci");
-  return ai;
+QList<QAction *> QualityMapperPlugin::actions() const {
+	return actionList;
 }
 
+
+const QString QualityMapperPlugin::Info(QAction *action) 
+{
+  if( action->text() != tr("Get Info") ) assert (0);
+
+	return tr("Colorize mesh vertexes by Quality following some rules");
+}
+
+const PluginInfo &QualityMapperPlugin::Info() 
+{
+   static PluginInfo ai; 
+   ai.Date=tr("Jan 2008");
+	 ai.Version = tr("1.0");
+	 ai.Author = ("Alessandro Maione, Federico Bellucci");
+   return ai;
+} 
+ 
+void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+{
+	gla->update();
+	cur=event->pos();
+	haveToPick=true;
+}
+
+void QualityMapperPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
+{
+}
+
+void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla )
+{
+	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
+}
+
+
+
+/**** VECCHI METODI ****/
 
 // this function is called to fill the parameter list 
 // It is called only for filters that have a not empty list of parameters and 
 // that do not use the auto generated dialog, but want a personalized dialog.
 bool QualityMapperPlugin::getParameters(QAction *action, QWidget * parent, MeshModel &m, FilterParameterSet & par, MainWindowInterface *mw) 
 {
-/************************************************************************/
-/* CONSERVARE QUESTO!!! CREA L'ISTOGRAMMA DELLA QUALITA' DA SOLO!!      */
-/* m@l                                                                  */
-/************************************************************************/
+//************************************************************************/
+//* CONSERVARE QUESTO!!! CREA L'ISTOGRAMMA DELLA QUALITA' DA SOLO!!      */
+//* m@l                                                                  */
+//************************************************************************/
 	Histogramf H;
 	tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
 

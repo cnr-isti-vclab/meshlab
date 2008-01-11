@@ -52,6 +52,8 @@ class QualityMapperPlugin : public QObject, public MeshEditInterface
     Q_OBJECT
     Q_INTERFACES(MeshEditInterface)
 
+	QList <QAction *> actionList;
+
 private:
 	Histogramf _histogram;
 
@@ -73,7 +75,8 @@ public:
     virtual void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
     virtual void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
-
+	QPoint cur;
+	bool haveToPick;
 	
 	/*
 	// The longer string describing each filtering action 

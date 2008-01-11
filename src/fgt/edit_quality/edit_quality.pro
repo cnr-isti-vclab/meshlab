@@ -2,16 +2,16 @@ TEMPLATE      = lib
 CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = qualitymapper.h
-SOURCES       = qualitymapper.cpp \
+HEADERS       = qualitymapper.h qualitymapperdialog.h
+SOURCES       = qualitymapper.cpp qualitymapperdialog.cpp \
 								../../meshlab/filterparameter.cpp
 TARGET        = qualitymapper
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
-# FORMS va aggiunto quando viene disegnata la gui (MAL)
-# FORMS		  = qualitymapperdialog.ui
+
+FORMS		  = qualitymapperdialog.ui
 CONFIG		+= debug_and_release
 # mac:CONFIG += x86 ppc
 
