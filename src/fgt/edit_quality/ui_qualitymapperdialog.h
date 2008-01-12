@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'qualitymapperdialog.ui'
 **
-** Created: Fri 11. Jan 19:01:30 2008
+** Created: Fri 11. Jan 19:33:35 2008
 **      by: Qt User Interface Compiler version 4.3.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -14,15 +14,19 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QComboBox>
 #include <QtGui/QDialog>
 #include <QtGui/QFrame>
 #include <QtGui/QGraphicsView>
+#include <QtGui/QGridLayout>
 #include <QtGui/QGroupBox>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 #include <QtGui/QSpacerItem>
+#include <QtGui/QSpinBox>
+#include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 
 class Ui_QualityMapperDialogClass
@@ -46,7 +50,23 @@ public:
     QRadioButton *redButton;
     QRadioButton *greenButton;
     QRadioButton *blueButton;
-    QGroupBox *groupBox;
+    QWidget *widget1;
+    QVBoxLayout *vboxLayout;
+    QLabel *presetLabel;
+    QComboBox *presetComboBox;
+    QWidget *widget2;
+    QHBoxLayout *hboxLayout2;
+    QGroupBox *selectedPointBox;
+    QWidget *widget3;
+    QGridLayout *gridLayout;
+    QLabel *xLabel;
+    QSpinBox *xSpinBox;
+    QLabel *yLabel;
+    QSpinBox *ySpinBox;
+    QVBoxLayout *vboxLayout1;
+    QPushButton *addButton;
+    QPushButton *removeButton;
+    QSpacerItem *spacerItem2;
 
     void setupUi(QDialog *QualityMapperDialogClass)
     {
@@ -86,7 +106,7 @@ public:
 
     transferFunctionFrame = new QFrame(QualityMapperDialogClass);
     transferFunctionFrame->setObjectName(QString::fromUtf8("transferFunctionFrame"));
-    transferFunctionFrame->setGeometry(QRect(50, 30, 511, 381));
+    transferFunctionFrame->setGeometry(QRect(40, 10, 511, 381));
     transferFunctionFrame->setFrameShape(QFrame::StyledPanel);
     transferFunctionFrame->setFrameShadow(QFrame::Raised);
     saveTransferFunctionButton = new QPushButton(transferFunctionFrame);
@@ -100,10 +120,10 @@ public:
     colorbandLabel->setGeometry(QRect(120, 350, 74, 14));
     transferFunctionEditBox = new QGroupBox(transferFunctionFrame);
     transferFunctionEditBox->setObjectName(QString::fromUtf8("transferFunctionEditBox"));
-    transferFunctionEditBox->setGeometry(QRect(310, 130, 191, 161));
+    transferFunctionEditBox->setGeometry(QRect(300, 140, 211, 241));
     channelBox = new QGroupBox(transferFunctionEditBox);
     channelBox->setObjectName(QString::fromUtf8("channelBox"));
-    channelBox->setGeometry(QRect(10, 20, 174, 40));
+    channelBox->setGeometry(QRect(0, 70, 174, 40));
     widget = new QWidget(channelBox);
     widget->setObjectName(QString::fromUtf8("widget"));
     widget->setGeometry(QRect(10, 10, 154, 20));
@@ -127,9 +147,85 @@ public:
 
     hboxLayout1->addWidget(blueButton);
 
-    groupBox = new QGroupBox(transferFunctionEditBox);
-    groupBox->setObjectName(QString::fromUtf8("groupBox"));
-    groupBox->setGeometry(QRect(30, 70, 120, 80));
+    widget1 = new QWidget(transferFunctionEditBox);
+    widget1->setObjectName(QString::fromUtf8("widget1"));
+    widget1->setGeometry(QRect(10, 20, 161, 42));
+    vboxLayout = new QVBoxLayout(widget1);
+    vboxLayout->setSpacing(6);
+    vboxLayout->setMargin(11);
+    vboxLayout->setObjectName(QString::fromUtf8("vboxLayout"));
+    vboxLayout->setContentsMargins(0, 0, 0, 0);
+    presetLabel = new QLabel(widget1);
+    presetLabel->setObjectName(QString::fromUtf8("presetLabel"));
+
+    vboxLayout->addWidget(presetLabel);
+
+    presetComboBox = new QComboBox(widget1);
+    presetComboBox->setObjectName(QString::fromUtf8("presetComboBox"));
+
+    vboxLayout->addWidget(presetComboBox);
+
+    widget2 = new QWidget(transferFunctionEditBox);
+    widget2->setObjectName(QString::fromUtf8("widget2"));
+    widget2->setGeometry(QRect(11, 111, 174, 82));
+    hboxLayout2 = new QHBoxLayout(widget2);
+    hboxLayout2->setSpacing(6);
+    hboxLayout2->setMargin(11);
+    hboxLayout2->setObjectName(QString::fromUtf8("hboxLayout2"));
+    hboxLayout2->setContentsMargins(0, 0, 0, 0);
+    selectedPointBox = new QGroupBox(widget2);
+    selectedPointBox->setObjectName(QString::fromUtf8("selectedPointBox"));
+    widget3 = new QWidget(selectedPointBox);
+    widget3->setObjectName(QString::fromUtf8("widget3"));
+    widget3->setGeometry(QRect(10, 20, 56, 48));
+    gridLayout = new QGridLayout(widget3);
+    gridLayout->setSpacing(6);
+    gridLayout->setMargin(11);
+    gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+    gridLayout->setContentsMargins(0, 0, 0, 0);
+    xLabel = new QLabel(widget3);
+    xLabel->setObjectName(QString::fromUtf8("xLabel"));
+
+    gridLayout->addWidget(xLabel, 0, 0, 1, 1);
+
+    xSpinBox = new QSpinBox(widget3);
+    xSpinBox->setObjectName(QString::fromUtf8("xSpinBox"));
+
+    gridLayout->addWidget(xSpinBox, 0, 1, 1, 1);
+
+    yLabel = new QLabel(widget3);
+    yLabel->setObjectName(QString::fromUtf8("yLabel"));
+
+    gridLayout->addWidget(yLabel, 1, 0, 1, 1);
+
+    ySpinBox = new QSpinBox(widget3);
+    ySpinBox->setObjectName(QString::fromUtf8("ySpinBox"));
+
+    gridLayout->addWidget(ySpinBox, 1, 1, 1, 1);
+
+
+    hboxLayout2->addWidget(selectedPointBox);
+
+    vboxLayout1 = new QVBoxLayout();
+    vboxLayout1->setSpacing(6);
+    vboxLayout1->setObjectName(QString::fromUtf8("vboxLayout1"));
+    addButton = new QPushButton(widget2);
+    addButton->setObjectName(QString::fromUtf8("addButton"));
+
+    vboxLayout1->addWidget(addButton);
+
+    removeButton = new QPushButton(widget2);
+    removeButton->setObjectName(QString::fromUtf8("removeButton"));
+
+    vboxLayout1->addWidget(removeButton);
+
+    spacerItem2 = new QSpacerItem(20, 16, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+    vboxLayout1->addItem(spacerItem2);
+
+
+    hboxLayout2->addLayout(vboxLayout1);
+
 
     retranslateUi(QualityMapperDialogClass);
 
@@ -145,11 +241,16 @@ public:
     saveTransferFunctionButton->setText(QApplication::translate("QualityMapperDialogClass", "Save", 0, QApplication::UnicodeUTF8));
     colorbandLabel->setText(QApplication::translate("QualityMapperDialogClass", "ColorBandLabel", 0, QApplication::UnicodeUTF8));
     transferFunctionEditBox->setTitle(QApplication::translate("QualityMapperDialogClass", "Transfer Function Edit", 0, QApplication::UnicodeUTF8));
-    channelBox->setTitle(QApplication::translate("QualityMapperDialogClass", "Channel", 0, QApplication::UnicodeUTF8));
+    channelBox->setTitle(QApplication::translate("QualityMapperDialogClass", "Edit Channel", 0, QApplication::UnicodeUTF8));
     redButton->setText(QApplication::translate("QualityMapperDialogClass", "Red", 0, QApplication::UnicodeUTF8));
     greenButton->setText(QApplication::translate("QualityMapperDialogClass", "Green", 0, QApplication::UnicodeUTF8));
     blueButton->setText(QApplication::translate("QualityMapperDialogClass", "Blue", 0, QApplication::UnicodeUTF8));
-    groupBox->setTitle(QApplication::translate("QualityMapperDialogClass", "GroupBox", 0, QApplication::UnicodeUTF8));
+    presetLabel->setText(QApplication::translate("QualityMapperDialogClass", "Load Preset", 0, QApplication::UnicodeUTF8));
+    selectedPointBox->setTitle(QApplication::translate("QualityMapperDialogClass", "Selected Point", 0, QApplication::UnicodeUTF8));
+    xLabel->setText(QApplication::translate("QualityMapperDialogClass", "x", 0, QApplication::UnicodeUTF8));
+    yLabel->setText(QApplication::translate("QualityMapperDialogClass", "y", 0, QApplication::UnicodeUTF8));
+    addButton->setText(QApplication::translate("QualityMapperDialogClass", "Add", 0, QApplication::UnicodeUTF8));
+    removeButton->setText(QApplication::translate("QualityMapperDialogClass", "Remove", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(QualityMapperDialogClass);
     } // retranslateUi
 

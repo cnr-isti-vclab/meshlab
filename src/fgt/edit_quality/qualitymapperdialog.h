@@ -15,9 +15,9 @@ public:
 private:
 	Ui::QualityMapperDialogClass ui;
 
-// private slots:
-// 	void on_radioButton_toggled(bool);
-// 	void on_applyButton_clicked();
+private slots:
+
+
 };
 
 #endif // QUALITYMAPPERDIALOG_H

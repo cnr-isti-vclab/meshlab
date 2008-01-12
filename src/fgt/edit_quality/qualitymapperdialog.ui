@@ -74,8 +74,8 @@
   <widget class="QFrame" name="transferFunctionFrame" >
    <property name="geometry" >
     <rect>
-     <x>50</x>
-     <y>30</y>
+     <x>40</x>
+     <y>10</y>
      <width>511</width>
      <height>381</height>
     </rect>
@@ -125,10 +125,10 @@
    <widget class="QGroupBox" name="transferFunctionEditBox" >
     <property name="geometry" >
      <rect>
-      <x>310</x>
-      <y>130</y>
-      <width>191</width>
-      <height>161</height>
+      <x>300</x>
+      <y>140</y>
+      <width>211</width>
+      <height>241</height>
      </rect>
     </property>
     <property name="title" >
@@ -137,14 +137,14 @@
     <widget class="QGroupBox" name="channelBox" >
      <property name="geometry" >
       <rect>
-       <x>10</x>
-       <y>20</y>
+       <x>0</x>
+       <y>70</y>
        <width>174</width>
        <height>40</height>
       </rect>
      </property>
      <property name="title" >
-      <string>Channel</string>
+      <string>Edit Channel</string>
      </property>
      <widget class="QWidget" name="" >
       <property name="geometry" >
@@ -180,18 +180,109 @@
       </layout>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="selectedPointBox" >
+    <widget class="QWidget" name="" >
      <property name="geometry" >
       <rect>
-       <x>30</x>
-       <y>70</y>
-       <width>120</width>
-       <height>80</height>
+       <x>10</x>
+       <y>20</y>
+       <width>161</width>
+       <height>42</height>
       </rect>
      </property>
-     <property name="title" >
-      <string>Selected Point</string>
+     <layout class="QVBoxLayout" >
+      <item>
+       <widget class="QLabel" name="presetLabel" >
+        <property name="text" >
+         <string>Load Preset</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="presetComboBox" />
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="" >
+     <property name="geometry" >
+      <rect>
+       <x>11</x>
+       <y>111</y>
+       <width>174</width>
+       <height>82</height>
+      </rect>
      </property>
+     <layout class="QHBoxLayout" >
+      <item>
+       <widget class="QGroupBox" name="selectedPointBox" >
+        <property name="title" >
+         <string>Selected Point</string>
+        </property>
+        <widget class="QWidget" name="" >
+         <property name="geometry" >
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>56</width>
+           <height>48</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" >
+          <item row="0" column="0" >
+           <widget class="QLabel" name="xLabel" >
+            <property name="text" >
+             <string>x</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" >
+           <widget class="QSpinBox" name="xSpinBox" />
+          </item>
+          <item row="1" column="0" >
+           <widget class="QLabel" name="yLabel" >
+            <property name="text" >
+             <string>y</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" >
+           <widget class="QSpinBox" name="ySpinBox" />
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" >
+        <item>
+         <widget class="QPushButton" name="addButton" >
+          <property name="text" >
+           <string>Add</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="removeButton" >
+          <property name="text" >
+           <string>Remove</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>20</width>
+            <height>16</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>
