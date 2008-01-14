@@ -10,3 +10,7 @@ QualityMapperDialog::~QualityMapperDialog()
 {
 
 }
+
+
+
+

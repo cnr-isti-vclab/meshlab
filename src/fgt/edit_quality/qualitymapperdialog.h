@@ -16,6 +16,8 @@ private:
 	Ui::QualityMapperDialogClass ui;
 
 private slots:
+	
+	
 
 
 };
