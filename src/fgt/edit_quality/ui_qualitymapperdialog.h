@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'qualitymapperdialog.ui'
 **
-** Created: Sun 13. Jan 18:50:19 2008
+** Created: Mon 14. Jan 17:45:12 2008
 **      by: Qt User Interface Compiler version 4.3.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -90,7 +90,7 @@ public:
     {
     if (QualityMapperDialogClass->objectName().isEmpty())
         QualityMapperDialogClass->setObjectName(QString::fromUtf8("QualityMapperDialogClass"));
-    QualityMapperDialogClass->resize(641, 587);
+    QualityMapperDialogClass->resize(705, 591);
     layoutWidget = new QWidget(QualityMapperDialogClass);
     layoutWidget->setObjectName(QString::fromUtf8("layoutWidget"));
     layoutWidget->setGeometry(QRect(20, 0, 618, 571));
@@ -147,6 +147,7 @@ public:
     hboxLayout1->setObjectName(QString::fromUtf8("hboxLayout1"));
     redButton = new QRadioButton(channelBox);
     redButton->setObjectName(QString::fromUtf8("redButton"));
+    redButton->setChecked(true);
 
     hboxLayout1->addWidget(redButton);
 
@@ -207,7 +208,6 @@ public:
     vboxLayout5->setObjectName(QString::fromUtf8("vboxLayout5"));
     addPointButton = new QPushButton(transferFunctionEditBox);
     addPointButton->setObjectName(QString::fromUtf8("addPointButton"));
-    addPointButton->setContextMenuPolicy(Qt::CustomContextMenu);
 
     vboxLayout5->addWidget(addPointButton);
 
@@ -242,6 +242,8 @@ public:
 
     colorbandLabel = new QLabel(transferFunctionGroupBox);
     colorbandLabel->setObjectName(QString::fromUtf8("colorbandLabel"));
+    colorbandLabel->setFrameShape(QFrame::NoFrame);
+    colorbandLabel->setFrameShadow(QFrame::Plain);
 
     hboxLayout3->addWidget(colorbandLabel);
 
@@ -379,7 +381,7 @@ public:
     selectedPointBox->setTitle(QApplication::translate("QualityMapperDialogClass", "Selected Point", 0, QApplication::UnicodeUTF8));
     xLabel->setText(QApplication::translate("QualityMapperDialogClass", "x", 0, QApplication::UnicodeUTF8));
     yLabel->setText(QApplication::translate("QualityMapperDialogClass", "y", 0, QApplication::UnicodeUTF8));
-    addPointButton->setText(QApplication::translate("QualityMapperDialogClass", "Add...", 0, QApplication::UnicodeUTF8));
+    addPointButton->setText(QApplication::translate("QualityMapperDialogClass", "Add", 0, QApplication::UnicodeUTF8));
     removePointButton->setText(QApplication::translate("QualityMapperDialogClass", "Remove", 0, QApplication::UnicodeUTF8));
     saveTransferFunctionButton->setText(QApplication::translate("QualityMapperDialogClass", "Save", 0, QApplication::UnicodeUTF8));
     colorbandLabel->setText(QApplication::translate("QualityMapperDialogClass", "ColorBandLabel", 0, QApplication::UnicodeUTF8));

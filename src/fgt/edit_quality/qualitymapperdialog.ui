@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>641</width>
-    <height>587</height>
+    <width>705</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -65,6 +65,9 @@
                     <widget class="QRadioButton" name="redButton" >
                      <property name="text" >
                       <string>Red</string>
+                     </property>
+                     <property name="checked" >
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -132,11 +135,8 @@
                  <layout class="QVBoxLayout" >
                   <item>
                    <widget class="QPushButton" name="addPointButton" >
-                    <property name="contextMenuPolicy" >
-                     <enum>Qt::CustomContextMenu</enum>
-                    </property>
                     <property name="text" >
-                     <string>Add...</string>
+                     <string>Add</string>
                     </property>
                    </widget>
                   </item>
@@ -180,6 +180,12 @@
            </item>
            <item>
             <widget class="QLabel" name="colorbandLabel" >
+             <property name="frameShape" >
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow" >
+              <enum>QFrame::Plain</enum>
+             </property>
              <property name="text" >
               <string>ColorBandLabel</string>
              </property>
@@ -214,7 +220,14 @@
        <item>
         <layout class="QHBoxLayout" >
          <item>
-          <widget class="QGraphicsView" name="equalizerGraphicsView" />
+          <widget class="QGraphicsView" name="equalizerGraphicsView" >
+           <property name="frameShape" >
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow" >
+            <enum>QFrame::Sunken</enum>
+           </property>
+          </widget>
          </item>
          <item>
           <layout class="QGridLayout" >
