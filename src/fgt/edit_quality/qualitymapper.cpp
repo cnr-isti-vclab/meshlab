@@ -51,7 +51,7 @@ QualityMapperPlugin::QualityMapperPlugin()
 		pixels=0;
 		pressed=0;*/
 	
-	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"comment coming soon...", this);
+	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper. More info coming soon...", this);
 	QAction *editAction;
 	foreach(editAction, actionList)
 		editAction->setCheckable(true);
