@@ -24,11 +24,15 @@
 #define _TRANSFER_FUNCTION_H_
 
 #include <vcg/math/base.h>
+#include <vcg/space/color4.h>
 #include <vector>
 #include <algorithm>
 #include <assert.h>
 
+#include "const_types.h"
+
 using namespace std;
+using namespace vcg;
 
 
 
@@ -58,9 +62,9 @@ typedef	vector<TF_KEY>::iterator KEY_LISTiterator;
 //list of channels
 enum TF_CHANNELS
 {
-	RED = 0,
-	GREEN,
-	BLUE,
+	RED_CHANNEL = 0,
+	GREEN_CHANNEL,
+	BLUE_CHANNEL,
 	NUMBER_OF_CHANNELS
 };
 
@@ -82,14 +86,17 @@ public:
 	void	setType(TF_CHANNELS);
 	TF_CHANNELS getType();
 	TF_KEY	*addKey(float x, float y_up, float y_bot);
-	TF_KEY	*addKey(TF_KEY &new_key);
-	TF_KEY	*removeKey(float x);
+	TF_KEY	*addKey(TF_KEY& new_key);
+	float	removeKey(float x);
+	float	removeKey(TF_KEY& to_remove_key);
 	TF_KEY	*mergeKeys(float x1, float x2);
+	TF_KEY	*mergeKeys(TF_KEY key1, TF_KEY key2);
+
+	float	getChannelValuef(float x_position);
+	UINT8	getChannelValueb(float x_position);
 };
 
 
-
-#define COLOR_BAND_SIZE	1024
 
 
 //Representation of a transfer function as a triple of vectors of Keys, 
@@ -99,13 +106,16 @@ class TransferFunction
 private:
 	TfChannel	_channels[NUMBER_OF_CHANNELS];			//set of channels
 	int			_channels_order[NUMBER_OF_CHANNELS];	//array used to carry out virtual pivoting indexing
-	int			_color_band[COLOR_BAND_SIZE];
+	Color4f		_color_band[COLOR_BAND_SIZE];		/*rendere color band una classe a se stante??*/
+
+	int relative2AbsoluteVal(float relative_val, float max_val=COLOR_BAND_SIZE);
+	float absolute2RelativeVal(int absolute_val, float max_val=COLOR_BAND_SIZE);
 
 public:
 	TransferFunction(void);
 	~TransferFunction(void);
 
-	void makeColorBand();
+	void buildColorBand();
 };
 
 #endif
