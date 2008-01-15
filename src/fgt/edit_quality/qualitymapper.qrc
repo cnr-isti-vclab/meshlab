@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>images/colorband.png</file>
+        <file>images/qualitymapper.png</file>
+    </qresource>
+</RCC>

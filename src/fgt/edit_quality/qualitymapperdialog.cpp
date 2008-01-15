@@ -14,3 +14,7 @@ QualityMapperDialog::~QualityMapperDialog()
 
 
 
+
+
+
+
