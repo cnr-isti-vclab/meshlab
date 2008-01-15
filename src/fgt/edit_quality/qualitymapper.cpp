@@ -44,11 +44,21 @@ using namespace vcg;
 
 QualityMapperPlugin::QualityMapperPlugin()
 {
+/*
+		isDragging=false;
+		first=true;
+		paintbox=0;
+		pixels=0;
+		pressed=0;*/
+	
+	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"comment coming soon...", this);
+	QAction *editAction;
+	foreach(editAction, actionList)
+		editAction->setCheckable(true);
 }
 
-QList<QAction *> QualityMapperPlugin::actions() const {
-	return actionList;
-}
+QList<QAction *> QualityMapperPlugin::actions() const
+{	return actionList;	}
 
 
 const QString QualityMapperPlugin::Info(QAction *action) 

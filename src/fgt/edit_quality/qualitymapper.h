@@ -63,17 +63,17 @@ public:
 
 	virtual const QString Info(QAction *);
 	// Generic Info about the plug in version and author.
-    virtual const PluginInfo &Info();
-	virtual QList<QAction *> actions() const ;
+    const PluginInfo &Info();
+	QList<QAction *> actions() const ;
 
 	// Called when the user press the first time the button 
-    virtual void StartEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    void StartEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
 	// Called when the user press the second time the button 
-    virtual void EndEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
-    virtual void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
-    virtual void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+    void EndEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    void Decorate			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
+    void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
+    void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
 	QPoint cur;
 	bool haveToPick;
