@@ -1,0 +1,1 @@
+12.45 15/01/2008	aggiungere i riferimenti ai nuovi files del progetto al file .pro	MAL
