@@ -48,7 +48,7 @@ bool AlignCallBackPos(const int pos, const char * message )
 
 	return true;
 }
-
+// This signal is used to make a connection between the closure of the align dialog and the end of the editing in the GLArea
 void AlignDialog::closeEvent ( QCloseEvent * event )
 {
   emit closing();
@@ -67,7 +67,7 @@ AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
 
 	// The following connection is used to associate the click with the change of the current mesh. 
-	connect(	ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(setCurrent(QTreeWidgetItem * , int ) ) );
+	connect(	ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(onClickItem(QTreeWidgetItem * , int ) ) );
 	
 	globalLogTextEdit=ui.logTextEdit;
   currentNode=0;
@@ -75,12 +75,62 @@ AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)
 	meshTree=0;
 }
 
+
+void AlignDialog::setCurrentArc(AlignPair::Result *_currentArc)
+{
+	assert(meshTree);
+	
+	// First clear the backgrund of previously selected arc
+	MeshTreeWidgetItem *oldArcF= A2Tf[currentArc];
+	MeshTreeWidgetItem *oldArcB= A2Tb[currentArc];
+	if(oldArcF!=NULL)
+		{ 
+			assert(oldArcF->a == currentArc);
+			oldArcF->setBackground(0,QBrush());	
+			oldArcB->setBackground(0,QBrush());	
+		}
+	
+	// if we clicked twice on the same arc deselect it
+	if(_currentArc==currentArc) 		{
+			currentArc=0;
+			return;
+		}
+	
+	MeshTreeWidgetItem *newArcB= A2Tb[_currentArc];
+	MeshTreeWidgetItem *newArcF= A2Tf[_currentArc];
+	if(newArcB!=NULL)
+		{ 
+			assert(newArcB->a == currentArc);
+			newArcB->setBackground(0,QBrush(QColor(Qt::lightGray)));				
+			newArcF->setBackground(0,QBrush(QColor(Qt::lightGray)));				
+		}
+
+	currentArc=_currentArc;
+	updateButtons();
+}
+
+
 void AlignDialog::setCurrentNode(MeshNode *_currentNode)
 {
 	assert(meshTree);
 	assert(_currentNode == meshTree->find(_currentNode->m));
+	
+	MeshTreeWidgetItem *oldNodeItem= M2T[currentNode];
+	if(oldNodeItem!=NULL)
+		{ 
+			assert(oldNodeItem->n == currentNode);
+			oldNodeItem->setBackground(0,QBrush());	
+		}
+	
+	MeshTreeWidgetItem *newNodeItem= M2T[_currentNode];
+	if(newNodeItem!=NULL)
+		{ 
+			assert(newNodeItem->n == _currentNode);
+			newNodeItem->setBackground(0,QBrush(QColor(Qt::lightGray)));				
+		}
+
 	currentNode=_currentNode;
-	updateDialog();
+	updateButtons();
 }
 
 void AlignDialog::setTree(MeshTree *_meshTree, MeshNode *_node)
@@ -88,15 +138,13 @@ void AlignDialog::setTree(MeshTree *_meshTree, MeshNode *_node)
 	assert(meshTree==0);
 	meshTree=_meshTree;
 	meshTree->cb = AlignCallBackPos;
-	setCurrentNode(_node);
+  rebuildTree(_node);
 }
 
 void AlignDialog::updateDialog()
 {
 	assert(meshTree!=0);
 	assert(currentNode == meshTree->find(currentNode->m));
-	
-	updateTree();
 	updateButtons();
 }
 
@@ -155,23 +203,22 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, AlignPair::Result *A,
 				itemArcIter->setFont(0,fixedFont);
 				itemArcIter->setText(0,buf);
 			}
-	
 }
 
-void AlignDialog::updateTree()
+void AlignDialog::rebuildTree(MeshNode *_node)
 {
+	currentArc =0;
 	gla=edit->gla;
 	QList<MeshNode*> &meshList=meshTree->nodeList;
 	ui.alignTreeWidget->clear();
 	M2T.clear();
+	A2Tf.clear();
+	A2Tb.clear();
 	for(int i=0;i<meshList.size();++i)
 	 {
 	 		MeshTreeWidgetItem *item=new MeshTreeWidgetItem(meshList.value(i));
-
-		  if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));
-				
+		 // if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));				
 		  M2T[meshList.value(i)]=item;
-		
 		  ui.alignTreeWidget->insertTopLevelItem(0,item);
 	}
 	
@@ -182,28 +229,37 @@ void AlignDialog::updateTree()
 	for(int i=0;i< meshTree->ResVec.size();++i)
 	{
 	  A=&(meshTree->ResVec[i]);
+		// Forward arc
 	  parent=M2T[meshList.value((*A).FixName)];
 		item = new MeshTreeWidgetItem(meshTree, A, parent);
+		A2Tf[A]=item;
+		// Backward arc
 		parent=M2T[meshList.value((*A).MovName)];
 		item = new MeshTreeWidgetItem(meshTree, A, parent);
-
+		A2Tb[A]=item;
 	}
-	
+  if(_node) 		setCurrentNode(_node);	
+	else setCurrentNode(meshList.front());
 }
 
 // Called when a user click over the tree;
-void AlignDialog::setCurrent(QTreeWidgetItem * item, int column )
+void AlignDialog::onClickItem(QTreeWidgetItem * item, int column )
 {
 //  int row = item->data(1,Qt::DisplayRole).toInt();
   
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
-	if(!mItem) return;
+	if(!mItem) return; // user clicked on a iteration info (neither a node nor an arc) 
 	
 	MeshNode * nn= mItem->n;
 	if(nn)
 	{
-	setCurrentNode(nn);
-  gla->meshDoc.setCurrentMesh(nn->id);
-	gla->update();
+		setCurrentNode(nn);
+		gla->meshDoc.setCurrentMesh(nn->id);
+		gla->update();
+	}
+	else
+	{
+		assert(mItem->a);
+		setCurrentArc(mItem->a);
 	}
 }
