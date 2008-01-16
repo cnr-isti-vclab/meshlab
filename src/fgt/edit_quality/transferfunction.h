@@ -108,9 +108,6 @@ private:
 	int			_channels_order[NUMBER_OF_CHANNELS];	//array used to carry out virtual pivoting indexing
 	Color4f		_color_band[COLOR_BAND_SIZE];		/*rendere color band una classe a se stante??*/
 
-	int relative2AbsoluteVal(float relative_val, float max_val=COLOR_BAND_SIZE);
-	float absolute2RelativeVal(int absolute_val, float max_val=COLOR_BAND_SIZE);
-
 public:
 	TransferFunction(void);
 	~TransferFunction(void);

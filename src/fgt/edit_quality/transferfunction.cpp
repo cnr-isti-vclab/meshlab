@@ -112,8 +112,11 @@ float TfChannel::getChannelValuef(float x_position)
 
 UINT8 TfChannel::getChannelValueb(float x_position)
 {
-	return (UINT8)(this->getChannelValuef(x_position) * 255.0f);
+	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(x_position), 255.0f );
+//	return (UINT8)(this->getChannelValuef(x_position) * 255.0f);
 }
+
+
 
 
 
@@ -139,19 +142,11 @@ TransferFunction::~TransferFunction(void)
 {
 }
 
-//returns a relative-absolute x value conversion rounded to closer integer value
-int TransferFunction::relative2AbsoluteVal(float relative_val, float max_val)
-{	return (int)((relative_val * max_val)+0.5f);	}
-
-//returns an absolute-relative x value conversion
-float TransferFunction::absolute2RelativeVal(int absolute_val, float max_val)
-{	return (float)absolute_val / max_val;	}
-
 
 void TransferFunction::buildColorBand()
 {
 	for (int i=0; i<COLOR_BAND_SIZE; i++)
-		_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb(this->absolute2RelativeVal(i)),
-							   _channels[GREEN_CHANNEL].getChannelValueb(this->absolute2RelativeVal(i)),
-							   _channels[BLUE_CHANNEL].getChannelValueb(this->absolute2RelativeVal(i)) );
+		_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i) ),
+							   _channels[GREEN_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i) ),
+							   _channels[BLUE_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i) ) );
 }
