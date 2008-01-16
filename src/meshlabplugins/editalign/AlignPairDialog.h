@@ -15,15 +15,18 @@ class AlignPairDialog: public QDialog
 	Q_OBJECT 
 public:
 	AlignPairWidget *aa;
-
+  QCheckBox * allowScalingCB;
   AlignPairDialog (QWidget * parent = 0) : QDialog(parent)
 	{
 		QVBoxLayout *layout = new QVBoxLayout(this);
 	
 		aa=new AlignPairWidget(this);
 		QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
+		allowScalingCB = new QCheckBox("Allow Scaling");
+		allowScalingCB->setChecked(false);
 		
 		layout->addWidget(aa);
+		layout->addWidget(allowScalingCB);
 		layout->addWidget(buttonBox);
 	
 		setLayout(layout);
@@ -31,7 +34,7 @@ public:
 		connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 		connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 	}
-	
+
 	
 //	public slots:	
 };
