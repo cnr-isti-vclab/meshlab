@@ -114,7 +114,7 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
   foreach(MeshModel *mm, md->meshList)
 	{
 		mm->cm.C()=Color4b::Scatter(100, id,.2f,.7f);
-		meshTree.nodeList.push_back(new MeshNode(mm));
+		meshTree.nodeList.push_back(new MeshNode(mm,id));
 		++id;
 	}
 	gla->rm.colorMode=GLW::CMPerMesh;
@@ -143,9 +143,21 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 	//mainW->addDockWidget(Qt::LeftDockWidgetArea,alignDialog);
 	mode=ALIGN_IDLE;	
 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
-
+	
+connect(alignDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
+	
 	suspendEditToggle();
 }
+
+void EditAlignPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/)
+{
+// some cleaning at the end.
+qDebug("EndEdit: cleaning everything");
+meshTree.clear();
+assert(alignDialog);
+delete alignDialog;
+alignDialog=0;
+}    
 
 void EditAlignPlugin::glueByPicking()
 {
@@ -174,9 +186,10 @@ void EditAlignPlugin::glueByPicking()
 		}
 
  Matrix44f res;
- PointMatching<float>::ComputeSimilarityMatchMatrix(res,gluedPnt,freePnt);
- 
- 
+ if(dd->allowScalingCB->isChecked())
+			PointMatching<float>::ComputeSimilarityMatchMatrix(res,gluedPnt,freePnt);
+ else 
+			PointMatching<float>::ComputeRigidMatchMatrix(res,gluedPnt,freePnt);
 	md->mm()->cm.Tr=res;
 	QString buf;
   for(size_t i=0;i<freePnt.size();++i)

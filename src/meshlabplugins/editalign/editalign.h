@@ -60,7 +60,7 @@ public:
     virtual const PluginInfo &Info();
 
     virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
     virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
     virtual void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) ;
     virtual void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) ;
