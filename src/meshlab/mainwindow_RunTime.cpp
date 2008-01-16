@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.145  2008/01/16 01:39:55  cignoni
+added two slot for better managing the exit from editing tools
+
 Revision 1.144  2008/01/06 20:45:11  cignoni
 busy cursor when saving
 
@@ -372,6 +375,15 @@ void MainWindow::setCurrent(int meshId)
 	stddialog->hide();
 }
 
+void MainWindow::updateGL()
+{
+	GLA()->updateGL();
+}
+
+void MainWindow::endEdit()
+{
+	GLA()->endEdit(); 
+}
 void MainWindow::applyLastFilter()
 {
   if(GLA()==0) return;

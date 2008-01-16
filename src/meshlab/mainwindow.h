@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.96  2008/01/16 01:39:54  cignoni
+added two slot for better managing the exit from editing tools
+
 Revision 1.95  2008/01/04 00:46:28  cignoni
 Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
 
@@ -195,7 +198,9 @@ public slots:
 	bool openIn(QString fileName=QString());
   bool openProject(QString fileName=QString(), GLArea *gla=0);
   void saveProject();
-	 void setCurrent(int meshId);
+	void setCurrent(int meshId);
+	void updateGL();
+	void endEdit();
 
 private slots:
 
