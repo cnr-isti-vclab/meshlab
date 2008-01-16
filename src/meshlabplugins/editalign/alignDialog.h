@@ -36,6 +36,16 @@ class GLArea;
 class EditAlignPlugin;
 class MeshModel;
 
+class MeshTreeWidgetItem : public QTreeWidgetItem
+{
+	public:
+	MeshTreeWidgetItem(MeshNode *n);
+	MeshTreeWidgetItem(MeshTree* meshTree,AlignPair::Result *A,MeshTreeWidgetItem *parent);
+
+	MeshNode *n;
+	AlignPair::Result *a;
+};
+
 class AlignDialog : public QDockWidget
 {
 		Q_OBJECT
@@ -55,14 +65,17 @@ class AlignDialog : public QDockWidget
 		MeshNode *currentNode;
 		AlignPair::Result *currentArc;
 		
-		QMap<MeshNode *, QTreeWidgetItem *> M2T; // Model to tree hash
+		QMap<MeshNode *, MeshTreeWidgetItem *> M2T; // Model to tree hash
 		
 		QMenu popupMenu;
 		
+virtual void closeEvent ( QCloseEvent * event )	;
+signals:
+	void closing();
+
+
 	public slots:
 		void setCurrent(QTreeWidgetItem * item, int column );
-	 
 };
-
 
 #endif

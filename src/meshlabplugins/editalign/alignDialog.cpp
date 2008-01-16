@@ -47,8 +47,12 @@ bool AlignCallBackPos(const int pos, const char * message )
 	globalLogTextEdit->repaint();
 
 	return true;
-};
+}
 
+void AlignDialog::closeEvent ( QCloseEvent * event )
+{
+  emit closing();
+}
 
 AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)    
 { 
@@ -107,78 +111,99 @@ void AlignDialog::updateButtons()
 	ui.manualAlignButton->setDisabled    (currentNode->glued);
 }
 
+MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
+{
+		QString meshName = QFileInfo(meshNode->m->fileName.c_str()).fileName();
+		if(meshNode->glued)  	meshName+="*";
+
+		QString labelText;
+		labelText.sprintf("%s - %i",qPrintable(meshName),meshNode->id); 
+		setText(0, labelText);
+		n=meshNode;
+		a=0;
+}
+
+
+MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, AlignPair::Result *A, MeshTreeWidgetItem *parent)
+{
+		n=0;
+		a=A;
+		parent->addChild(this);
+		QString buf=QString("Arc: %1 -> %2 Area: %3 Err: %4 Sample# %5 (%6)")
+			.arg((*A).FixName)
+			.arg((*A).MovName)
+			.arg(meshTree->OG.SVA[parent->n->id].norm_area, 6,'f',3)
+			.arg((*A).err,                  6,'f',3)
+			.arg((*A).ap.SampleNum,6)
+			.arg((*A).as.LastSampleUsed() );
+			setText(0,buf);
+			
+			QFont fixedFont("Courier");
+			vector<AlignPair::Stat::IterInfo> &I= (*A).as.I;
+			QTreeWidgetItem *itemArcIter;
+			buf.sprintf("Iter - MinD -  Error - Sample - Used - DistR - BordR - AnglR  ");
+			//          " 12   123456  1234567   12345  12345   12345   12345   12345
+			itemArcIter = new QTreeWidgetItem(this);
+			itemArcIter->setFont(0,fixedFont);
+			itemArcIter->setText(0,buf);
+			for(int qi=0;qi<I.size();++qi)
+			{
+				buf.sprintf(" %02i   %6.2f  %7.4f   %05i  %05i  %5i  %5i  %5i",
+										qi, I[qi].MinDistAbs, I[qi].pcl50,
+										I[qi].SampleTested,I[qi].SampleUsed,I[qi].DistanceDiscarded,I[qi].BorderDiscarded,I[qi].AngleDiscarded );
+				itemArcIter = new QTreeWidgetItem(this);
+				itemArcIter->setFont(0,fixedFont);
+				itemArcIter->setText(0,buf);
+			}
+	
+}
+
 void AlignDialog::updateTree()
 {
 	gla=edit->gla;
 	QList<MeshNode*> &meshList=meshTree->nodeList;
-	//qDebug("Items in list: %d", meshList.size());
 	ui.alignTreeWidget->clear();
-	//ui.alignTreeWidget->setColumnCount(1);
 	M2T.clear();
 	for(int i=0;i<meshList.size();++i)
 	 {
-		QTreeWidgetItem *item;
-		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
-		QString meshText = QFileInfo(meshList.at(i)->m->fileName.c_str()).fileName();
-		if(meshList.value(i)->glued) 
-		{
-				meshText=meshText+"*";
-		}
-		item = new QTreeWidgetItem(QStringList (meshText));
-		item->setData(1,Qt::DisplayRole,i);
-		if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));
+	 		MeshTreeWidgetItem *item=new MeshTreeWidgetItem(meshList.value(i));
+
+		  if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));
 				
-		M2T[meshList.value(i)]=item;
+		  M2T[meshList.value(i)]=item;
 		
-		ui.alignTreeWidget->insertTopLevelItem(0,item);
+		  ui.alignTreeWidget->insertTopLevelItem(0,item);
 	}
 	
   // Second part add the arcs to the tree
 	AlignPair::Result *A;
+	MeshTreeWidgetItem *parent;
+	MeshTreeWidgetItem *item;
 	for(int i=0;i< meshTree->ResVec.size();++i)
 	{
 	  A=&(meshTree->ResVec[i]);
-		QString buf=QString("Arc: %1 -> %2 A: %3 Err: %4 Sample %5 (%6)")
-		.arg((*A).FixName)
-		.arg((*A).MovName)
-		.arg(meshTree->OG.SVA[i].norm_area, 6,'f',3)
-		.arg((*A).err,                  6,'f',3)
-		.arg((*A).ap.SampleNum,6)
-		.arg((*A).as.LastSampleUsed() );// LPCTSTR lpszItem
-		QTreeWidgetItem *parent=M2T[meshList.value((*A).FixName)];
-		
-		QTreeWidgetItem *item = new QTreeWidgetItem(parent);
-		item->setText(0,buf);
-		
+	  parent=M2T[meshList.value((*A).FixName)];
+		item = new MeshTreeWidgetItem(meshTree, A, parent);
 		parent=M2T[meshList.value((*A).MovName)];
-		item = new QTreeWidgetItem(parent);
-		item->setText(0,buf);
-		
-		vector<AlignPair::Stat::IterInfo> &I= (*A).as.I;
-		QTreeWidgetItem *itemArcIter;
-		buf.sprintf("Iter - MinD - Err -   Sample - Used S. - Dist R.- Bord R. - Angl. R.   ");
-	  itemArcIter = new QTreeWidgetItem(item);
-		itemArcIter->setText(0,buf);
-		for(int qi=0;qi<I.size();++qi)
-		{
-			buf.sprintf("%02i %6.2f    %7.4f    %05i   %05i    %05i %04i %04i",
-			qi, I[qi].MinDistAbs, I[qi].pcl50,
-			I[qi].SampleTested,I[qi].SampleUsed,I[qi].DistanceDiscarded,I[qi].BorderDiscarded,I[qi].AngleDiscarded );
-			itemArcIter = new QTreeWidgetItem(item);
-			itemArcIter->setText(0,buf);
-			
-		}
+		item = new MeshTreeWidgetItem(meshTree, A, parent);
 
 	}
 	
 }
 
+// Called when a user click over the tree;
 void AlignDialog::setCurrent(QTreeWidgetItem * item, int column )
 {
-  int row = item->data(1,Qt::DisplayRole).toInt();
-
-	setCurrentNode(meshTree->nodeList.value(row));
+//  int row = item->data(1,Qt::DisplayRole).toInt();
+  
+	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
+	if(!mItem) return;
 	
-  gla->meshDoc.setCurrentMesh(row);
+	MeshNode * nn= mItem->n;
+	if(nn)
+	{
+	setCurrentNode(nn);
+  gla->meshDoc.setCurrentMesh(nn->id);
 	gla->update();
+	}
 }
