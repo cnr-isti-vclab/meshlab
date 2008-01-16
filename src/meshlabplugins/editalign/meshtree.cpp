@@ -45,6 +45,16 @@ int MeshTree::gluedNum()
 	 return cnt;
 }
 
+void MeshTree::resetID()
+{
+	int cnt=0;
+	 foreach(MeshNode *mn, nodeList) 
+		{
+			mn->id= cnt;
+			cnt++;
+		}
+}
+
 void MeshTree::Process(AlignPair::Param ap)
 {
 //	ap.MaxIterNum=100;
@@ -63,21 +73,39 @@ void MeshTree::Process(AlignPair::Param ap)
 
   //Minimo esempio di codice per l'uso della funzione di allineamento.
 	//OccupancyGrid OG;
-  OG.Init(nodeList.size(), Box3d::Construct(gluedBBox()), 10000);
-
-  vector<Matrix44d> trv(nodeList.size());
+  //% OG.Init(nodeList.size(), Box3d::Construct(gluedBBox()), 10000);
+	resetID();
+	OG.Init(nodeList.size(), Box3d::Construct(gluedBBox()), 10000);
+  vector<Matrix44d> trv;
+	Matrix44d Zero44; Zero44.SetZero();
+  vector<Matrix44d> padded_trv(nodeList.size(),Zero44);
+	// matrix trv[i] is relative to mesh with id IdVec[i]
+	// if all the mesh are glued IdVec=={1,2,3,4...}
+	vector<int> IdVec;
+		
   vector<string> names(nodeList.size());
-	int id=0;
-
+	//int id=0;
+		  
   foreach(MeshNode *mn, nodeList) 
+	{
 		if(mn->glued)
 			{
 				MeshModel *mm=mn->m;
-				trv[id]=Matrix44d::Construct(mm->cm.Tr);
-				names[id]=mm->fileName;
-				OG.AddMesh<CMeshO>(mm->cm,trv[id],id);
-				++id;
+				//trv[id]=Matrix44d::Construct(mm->cm.Tr);
+				trv.push_back(Matrix44d::Construct(mm->cm.Tr));
+				padded_trv[mn->id]=trv.back();
+				IdVec.push_back(mn->id);							
+				names[mn->id]=mm->fileName;
+				OG.AddMesh<CMeshO>(mm->cm,trv.back(),mn->id);
+				printf("Added to the OG the mesh with id %i at the position %i\n",mn->id,IdVec.size()-1);
 			}
+			else printf("Mesh with id %i is not glued\n",mn->id);
+	//	++id;
+  }		
+	
+	QString buf;
+	cb(0,qPrintable(buf.sprintf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeList.size())));
+  printf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeList.size());
 	
   OG.Compute();
   OG.Dump(stdout);
@@ -88,7 +116,7 @@ void MeshTree::Process(AlignPair::Param ap)
 	ResVecPtr.clear();
 	AlignPair::A2Mesh Fix;
 	AlignPair::A2Mesh Mov;
-  QString buf;
+
 	cb(0,qPrintable(buf.sprintf("Computed %i Arcs :\n",OG.SVA.size())));
 	int i=0;
 	for(i=0;i<OG.SVA.size() && OG.SVA[i].norm_area > .1; ++i)
@@ -100,10 +128,10 @@ void MeshTree::Process(AlignPair::Param ap)
     // l'allineatore globale cambia le varie matrici di posizione di base delle mesh
     // per questo motivo si aspetta i punti nel sistema di riferimento locale della mesh fix
     // Si fanno tutti i conti rispetto al sistema di riferimento locale della mesh fix
-    Matrix44d FixM=trv[OG.SVA[i].s];
+    Matrix44d FixM=padded_trv[OG.SVA[i].s];
     Matrix44d InvFixM=Inverse(FixM);
 		
-		Matrix44d MovM=InvFixM * trv[OG.SVA[i].t];
+		Matrix44d MovM=InvFixM * padded_trv[OG.SVA[i].t];
     Matrix44d InvMovM=Inverse(MovM);
 
 	  AlignPair aa;
@@ -141,9 +169,12 @@ void MeshTree::Process(AlignPair::Param ap)
     cb(0,qPrintable(buf.sprintf(" %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
 }
 
-  vector<int> IdVec;
+  // Identity Vector. It could be simply a vector of int containing {0,1,2,3,4...}
+	// Needed for the BuildGraph.
+	// It is used to support the fact that some of the nodes could be unglued
+	vector<int> IdentVec;
   for(int i=0;i<trv.size();++i) 
-    IdVec.push_back(i);
+	    IdentVec.push_back(i);
   
   AlignGlobal AG;
   
@@ -161,7 +192,9 @@ void MeshTree::Process(AlignPair::Param ap)
  AG.GetMatrixVector(trout,IdVec);
 
 //Now get back the results!
+//for(int ii=0;ii<trout.size();++ii)
+//	MM(ii)->cm.Tr.Import(trout[ii]);	
 for(int ii=0;ii<trout.size();++ii)
-	MM(ii)->cm.Tr.Import(trout[ii]);	
+	MM(IdVec[ii])->cm.Tr.Import(trout[ii]);	
 }
 

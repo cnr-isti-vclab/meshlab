@@ -41,13 +41,15 @@ $Log: meshedit.cpp,v $
 class MeshNode
 {
 public:
-	MeshNode(MeshModel *_m)
+	MeshNode(MeshModel *_m, int _id)
 	{
 		m=_m;
+		id = _id;
 		glued=false;
 	}
-	MeshNode() { m=0;}
+	MeshNode() { m=0;id=-1;}
 	bool glued;
+	int id;
   MeshModel *m;
 	const Matrix44f &tr() const {return m->cm.Tr;}
 	const Box3f &bbox() const {return m->cm.bbox;}
@@ -65,12 +67,16 @@ class MeshTree
 	vcg::CallBackPos * cb;
 	
   MeshModel *MM(unsigned int i) {return nodeList.value(i)->m;}
+	
 	void clear()
 	{
 		foreach(MeshNode *mp, nodeList) 
 				delete mp;
 		nodeList.clear();
 	}
+
+	void MeshTree::resetID();
+
 	MeshNode *find(MeshModel *m)
 		{
 		foreach(MeshNode *mp, nodeList) 
