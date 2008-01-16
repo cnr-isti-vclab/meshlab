@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'qualitymapperdialog.ui'
 **
-** Created: Tue 15. Jan 23:05:07 2008
+** Created: Wed 16. Jan 15:11:42 2008
 **      by: Qt User Interface Compiler version 4.3.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -16,6 +16,7 @@
 #include <QtGui/QButtonGroup>
 #include <QtGui/QComboBox>
 #include <QtGui/QDialog>
+#include <QtGui/QDoubleSpinBox>
 #include <QtGui/QGraphicsView>
 #include <QtGui/QGridLayout>
 #include <QtGui/QGroupBox>
@@ -26,12 +27,10 @@
 #include <QtGui/QSpacerItem>
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
 
 class Ui_QualityMapperDialogClass
 {
 public:
-    QWidget *layoutWidget;
     QVBoxLayout *vboxLayout;
     QGroupBox *transferFunctionGroupBox;
     QVBoxLayout *vboxLayout1;
@@ -47,12 +46,13 @@ public:
     QRadioButton *blueButton;
     QHBoxLayout *hboxLayout1;
     QGroupBox *selectedPointBox;
+    QVBoxLayout *vboxLayout4;
     QGridLayout *gridLayout1;
     QLabel *xLabel;
-    QSpinBox *xSpinBox;
+    QDoubleSpinBox *xSpinBox;
     QLabel *yLabel;
-    QSpinBox *ySpinBox;
-    QVBoxLayout *vboxLayout4;
+    QDoubleSpinBox *ySpinBox;
+    QVBoxLayout *vboxLayout5;
     QPushButton *addPointButton;
     QPushButton *removePointButton;
     QLabel *colorbandLabel;
@@ -62,25 +62,23 @@ public:
     QPushButton *savePresetButton;
     QPushButton *removePresetButton;
     QGroupBox *equalizerGroupBox;
-    QHBoxLayout *hboxLayout3;
-    QVBoxLayout *vboxLayout5;
+    QGridLayout *gridLayout2;
     QGraphicsView *equalizerGraphicsView;
+    QGroupBox *groupBox;
+    QHBoxLayout *hboxLayout3;
+    QGraphicsView *gammaCorrectionGraphicsView;
     QHBoxLayout *hboxLayout4;
     QSpinBox *minSpinBox;
     QSpacerItem *spacerItem;
     QSpinBox *midSpinBox;
     QSpacerItem *spacerItem1;
     QSpinBox *maxSpinBox;
-    QGroupBox *groupBox;
-    QVBoxLayout *vboxLayout6;
-    QGraphicsView *gammaCorrectionGraphicsView;
-    QSpacerItem *spacerItem2;
     QHBoxLayout *hboxLayout5;
     QPushButton *applyButton;
     QPushButton *previewButton;
     QPushButton *resetButton;
     QPushButton *cancelButton;
-    QSpacerItem *spacerItem3;
+    QSpacerItem *spacerItem2;
 
     void setupUi(QDialog *QualityMapperDialogClass)
     {
@@ -90,15 +88,11 @@ public:
     QualityMapperDialogClass->setMinimumSize(QSize(500, 600));
     QualityMapperDialogClass->setMaximumSize(QSize(500, 600));
     QualityMapperDialogClass->setWindowIcon(QIcon(QString::fromUtf8(":/images/qualitymapper.png")));
-    layoutWidget = new QWidget(QualityMapperDialogClass);
-    layoutWidget->setObjectName(QString::fromUtf8("layoutWidget"));
-    layoutWidget->setGeometry(QRect(10, 10, 482, 585));
-    vboxLayout = new QVBoxLayout(layoutWidget);
+    vboxLayout = new QVBoxLayout(QualityMapperDialogClass);
     vboxLayout->setSpacing(6);
     vboxLayout->setMargin(11);
     vboxLayout->setObjectName(QString::fromUtf8("vboxLayout"));
-    vboxLayout->setContentsMargins(0, 0, 0, 0);
-    transferFunctionGroupBox = new QGroupBox(layoutWidget);
+    transferFunctionGroupBox = new QGroupBox(QualityMapperDialogClass);
     transferFunctionGroupBox->setObjectName(QString::fromUtf8("transferFunctionGroupBox"));
     vboxLayout1 = new QVBoxLayout(transferFunctionGroupBox);
     vboxLayout1->setSpacing(6);
@@ -151,18 +145,22 @@ public:
     hboxLayout1->setObjectName(QString::fromUtf8("hboxLayout1"));
     selectedPointBox = new QGroupBox(transferFunctionEditBox);
     selectedPointBox->setObjectName(QString::fromUtf8("selectedPointBox"));
-    gridLayout1 = new QGridLayout(selectedPointBox);
+    vboxLayout4 = new QVBoxLayout(selectedPointBox);
+    vboxLayout4->setSpacing(6);
+    vboxLayout4->setMargin(11);
+    vboxLayout4->setObjectName(QString::fromUtf8("vboxLayout4"));
+    gridLayout1 = new QGridLayout();
     gridLayout1->setSpacing(6);
-    gridLayout1->setMargin(11);
     gridLayout1->setObjectName(QString::fromUtf8("gridLayout1"));
     xLabel = new QLabel(selectedPointBox);
     xLabel->setObjectName(QString::fromUtf8("xLabel"));
 
     gridLayout1->addWidget(xLabel, 0, 0, 1, 1);
 
-    xSpinBox = new QSpinBox(selectedPointBox);
+    xSpinBox = new QDoubleSpinBox(selectedPointBox);
     xSpinBox->setObjectName(QString::fromUtf8("xSpinBox"));
     xSpinBox->setMaximum(1);
+    xSpinBox->setSingleStep(0.01);
 
     gridLayout1->addWidget(xSpinBox, 0, 1, 1, 1);
 
@@ -171,29 +169,33 @@ public:
 
     gridLayout1->addWidget(yLabel, 1, 0, 1, 1);
 
-    ySpinBox = new QSpinBox(selectedPointBox);
+    ySpinBox = new QDoubleSpinBox(selectedPointBox);
     ySpinBox->setObjectName(QString::fromUtf8("ySpinBox"));
+    ySpinBox->setMaximum(1);
 
     gridLayout1->addWidget(ySpinBox, 1, 1, 1, 1);
 
 
+    vboxLayout4->addLayout(gridLayout1);
+
+
     hboxLayout1->addWidget(selectedPointBox);
 
-    vboxLayout4 = new QVBoxLayout();
-    vboxLayout4->setSpacing(6);
-    vboxLayout4->setObjectName(QString::fromUtf8("vboxLayout4"));
+    vboxLayout5 = new QVBoxLayout();
+    vboxLayout5->setSpacing(6);
+    vboxLayout5->setObjectName(QString::fromUtf8("vboxLayout5"));
     addPointButton = new QPushButton(transferFunctionEditBox);
     addPointButton->setObjectName(QString::fromUtf8("addPointButton"));
 
-    vboxLayout4->addWidget(addPointButton);
+    vboxLayout5->addWidget(addPointButton);
 
     removePointButton = new QPushButton(transferFunctionEditBox);
     removePointButton->setObjectName(QString::fromUtf8("removePointButton"));
 
-    vboxLayout4->addWidget(removePointButton);
+    vboxLayout5->addWidget(removePointButton);
 
 
-    hboxLayout1->addLayout(vboxLayout4);
+    hboxLayout1->addLayout(vboxLayout5);
 
 
     vboxLayout3->addLayout(hboxLayout1);
@@ -249,21 +251,36 @@ public:
 
     vboxLayout->addWidget(transferFunctionGroupBox);
 
-    equalizerGroupBox = new QGroupBox(layoutWidget);
+    equalizerGroupBox = new QGroupBox(QualityMapperDialogClass);
     equalizerGroupBox->setObjectName(QString::fromUtf8("equalizerGroupBox"));
-    hboxLayout3 = new QHBoxLayout(equalizerGroupBox);
-    hboxLayout3->setSpacing(6);
-    hboxLayout3->setMargin(11);
-    hboxLayout3->setObjectName(QString::fromUtf8("hboxLayout3"));
-    vboxLayout5 = new QVBoxLayout();
-    vboxLayout5->setSpacing(6);
-    vboxLayout5->setObjectName(QString::fromUtf8("vboxLayout5"));
+    gridLayout2 = new QGridLayout(equalizerGroupBox);
+    gridLayout2->setSpacing(6);
+    gridLayout2->setMargin(11);
+    gridLayout2->setObjectName(QString::fromUtf8("gridLayout2"));
     equalizerGraphicsView = new QGraphicsView(equalizerGroupBox);
     equalizerGraphicsView->setObjectName(QString::fromUtf8("equalizerGraphicsView"));
+    equalizerGraphicsView->setMaximumSize(QSize(16777215, 200));
     equalizerGraphicsView->setFrameShape(QFrame::StyledPanel);
     equalizerGraphicsView->setFrameShadow(QFrame::Sunken);
 
-    vboxLayout5->addWidget(equalizerGraphicsView);
+    gridLayout2->addWidget(equalizerGraphicsView, 0, 0, 1, 1);
+
+    groupBox = new QGroupBox(equalizerGroupBox);
+    groupBox->setObjectName(QString::fromUtf8("groupBox"));
+    groupBox->setAlignment(Qt::AlignLeading);
+    hboxLayout3 = new QHBoxLayout(groupBox);
+    hboxLayout3->setSpacing(6);
+    hboxLayout3->setMargin(11);
+    hboxLayout3->setObjectName(QString::fromUtf8("hboxLayout3"));
+    gammaCorrectionGraphicsView = new QGraphicsView(groupBox);
+    gammaCorrectionGraphicsView->setObjectName(QString::fromUtf8("gammaCorrectionGraphicsView"));
+    gammaCorrectionGraphicsView->setMaximumSize(QSize(196, 196));
+    gammaCorrectionGraphicsView->setAlignment(Qt::AlignCenter);
+
+    hboxLayout3->addWidget(gammaCorrectionGraphicsView);
+
+
+    gridLayout2->addWidget(groupBox, 0, 1, 1, 1);
 
     hboxLayout4 = new QHBoxLayout();
     hboxLayout4->setSpacing(6);
@@ -292,31 +309,7 @@ public:
     hboxLayout4->addWidget(maxSpinBox);
 
 
-    vboxLayout5->addLayout(hboxLayout4);
-
-
-    hboxLayout3->addLayout(vboxLayout5);
-
-    groupBox = new QGroupBox(equalizerGroupBox);
-    groupBox->setObjectName(QString::fromUtf8("groupBox"));
-    groupBox->setAlignment(Qt::AlignLeading);
-    vboxLayout6 = new QVBoxLayout(groupBox);
-    vboxLayout6->setSpacing(6);
-    vboxLayout6->setMargin(11);
-    vboxLayout6->setObjectName(QString::fromUtf8("vboxLayout6"));
-    gammaCorrectionGraphicsView = new QGraphicsView(groupBox);
-    gammaCorrectionGraphicsView->setObjectName(QString::fromUtf8("gammaCorrectionGraphicsView"));
-    gammaCorrectionGraphicsView->setMaximumSize(QSize(196, 196));
-    gammaCorrectionGraphicsView->setAlignment(Qt::AlignCenter);
-
-    vboxLayout6->addWidget(gammaCorrectionGraphicsView);
-
-    spacerItem2 = new QSpacerItem(20, 51, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-    vboxLayout6->addItem(spacerItem2);
-
-
-    hboxLayout3->addWidget(groupBox);
+    gridLayout2->addLayout(hboxLayout4, 1, 0, 1, 1);
 
 
     vboxLayout->addWidget(equalizerGroupBox);
@@ -324,31 +317,31 @@ public:
     hboxLayout5 = new QHBoxLayout();
     hboxLayout5->setSpacing(6);
     hboxLayout5->setObjectName(QString::fromUtf8("hboxLayout5"));
-    applyButton = new QPushButton(layoutWidget);
+    applyButton = new QPushButton(QualityMapperDialogClass);
     applyButton->setObjectName(QString::fromUtf8("applyButton"));
     applyButton->setDefault(true);
 
     hboxLayout5->addWidget(applyButton);
 
-    previewButton = new QPushButton(layoutWidget);
+    previewButton = new QPushButton(QualityMapperDialogClass);
     previewButton->setObjectName(QString::fromUtf8("previewButton"));
     previewButton->setCheckable(true);
 
     hboxLayout5->addWidget(previewButton);
 
-    resetButton = new QPushButton(layoutWidget);
+    resetButton = new QPushButton(QualityMapperDialogClass);
     resetButton->setObjectName(QString::fromUtf8("resetButton"));
 
     hboxLayout5->addWidget(resetButton);
 
-    cancelButton = new QPushButton(layoutWidget);
+    cancelButton = new QPushButton(QualityMapperDialogClass);
     cancelButton->setObjectName(QString::fromUtf8("cancelButton"));
 
     hboxLayout5->addWidget(cancelButton);
 
-    spacerItem3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    spacerItem2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    hboxLayout5->addItem(spacerItem3);
+    hboxLayout5->addItem(spacerItem2);
 
 
     vboxLayout->addLayout(hboxLayout5);

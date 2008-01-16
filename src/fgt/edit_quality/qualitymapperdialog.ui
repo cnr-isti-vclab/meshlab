@@ -30,380 +30,373 @@
   <property name="toolTip" >
    <string>gne gne gne!</string>
   </property>
-  <widget class="QWidget" name="layoutWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>482</width>
-     <height>585</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" >
-    <item>
-     <widget class="QGroupBox" name="transferFunctionGroupBox" >
-      <property name="title" >
-       <string>Transfer Function</string>
-      </property>
-      <layout class="QVBoxLayout" >
-       <item>
-        <layout class="QGridLayout" >
-         <item row="0" column="0" >
-          <widget class="QGraphicsView" name="transferFunctionView" />
-         </item>
-         <item row="0" column="1" >
-          <widget class="QGroupBox" name="transferFunctionEditBox" >
-           <property name="title" >
-            <string>Transfer Function Edit</string>
-           </property>
-           <layout class="QVBoxLayout" >
-            <item>
-             <layout class="QVBoxLayout" >
-              <item>
-               <widget class="QGroupBox" name="channelBox" >
-                <property name="toolTip" >
-                 <string>Choose the channel to edit</string>
-                </property>
-                <property name="title" >
-                 <string>Edit Channel</string>
-                </property>
-                <layout class="QHBoxLayout" >
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QGroupBox" name="transferFunctionGroupBox" >
+     <property name="title" >
+      <string>Transfer Function</string>
+     </property>
+     <layout class="QVBoxLayout" >
+      <item>
+       <layout class="QGridLayout" >
+        <item row="0" column="0" >
+         <widget class="QGraphicsView" name="transferFunctionView" />
+        </item>
+        <item row="0" column="1" >
+         <widget class="QGroupBox" name="transferFunctionEditBox" >
+          <property name="title" >
+           <string>Transfer Function Edit</string>
+          </property>
+          <layout class="QVBoxLayout" >
+           <item>
+            <layout class="QVBoxLayout" >
+             <item>
+              <widget class="QGroupBox" name="channelBox" >
+               <property name="toolTip" >
+                <string>Choose the channel to edit</string>
+               </property>
+               <property name="title" >
+                <string>Edit Channel</string>
+               </property>
+               <layout class="QHBoxLayout" >
+                <item>
+                 <widget class="QRadioButton" name="redButton" >
+                  <property name="text" >
+                   <string>Red</string>
+                  </property>
+                  <property name="checked" >
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="greenButton" >
+                  <property name="text" >
+                   <string>Green</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="blueButton" >
+                  <property name="text" >
+                   <string>Blue</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <item>
+                <widget class="QGroupBox" name="selectedPointBox" >
+                 <property name="title" >
+                  <string>Selected Point</string>
+                 </property>
+                 <layout class="QVBoxLayout" >
+                  <item>
+                   <layout class="QGridLayout" >
+                    <item row="0" column="0" >
+                     <widget class="QLabel" name="xLabel" >
+                      <property name="text" >
+                       <string>x</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1" >
+                     <widget class="QDoubleSpinBox" name="xSpinBox" >
+                      <property name="maximum" >
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="singleStep" >
+                       <double>0.010000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0" >
+                     <widget class="QLabel" name="yLabel" >
+                      <property name="text" >
+                       <string>y</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1" >
+                     <widget class="QDoubleSpinBox" name="ySpinBox" >
+                      <property name="maximum" >
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="singleStep" >
+                       <double>0.010000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" >
                  <item>
-                  <widget class="QRadioButton" name="redButton" >
-                   <property name="text" >
-                    <string>Red</string>
+                  <widget class="QPushButton" name="addPointButton" >
+                   <property name="toolTip" >
+                    <string>Add a new point to current channel</string>
                    </property>
-                   <property name="checked" >
-                    <bool>true</bool>
+                   <property name="text" >
+                    <string>Add</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QRadioButton" name="greenButton" >
-                   <property name="text" >
-                    <string>Green</string>
+                  <widget class="QPushButton" name="removePointButton" >
+                   <property name="toolTip" >
+                    <string>Remove selected point</string>
                    </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="blueButton" >
                    <property name="text" >
-                    <string>Blue</string>
+                    <string>Remove</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
-               </widget>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" >
-                <item>
-                 <widget class="QGroupBox" name="selectedPointBox" >
-                  <property name="title" >
-                   <string>Selected Point</string>
-                  </property>
-                  <layout class="QGridLayout" >
-                   <item row="0" column="0" >
-                    <widget class="QLabel" name="xLabel" >
-                     <property name="text" >
-                      <string>x</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1" >
-                    <widget class="QSpinBox" name="xSpinBox" >
-                     <property name="maximum" >
-                      <number>1</number>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0" >
-                    <widget class="QLabel" name="yLabel" >
-                     <property name="text" >
-                      <string>y</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1" >
-                    <widget class="QSpinBox" name="ySpinBox" />
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QVBoxLayout" >
-                  <item>
-                   <widget class="QPushButton" name="addPointButton" >
-                    <property name="toolTip" >
-                     <string>Add a new point to current channel</string>
-                    </property>
-                    <property name="text" >
-                     <string>Add</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="removePointButton" >
-                    <property name="toolTip" >
-                     <string>Remove selected point</string>
-                    </property>
-                    <property name="text" >
-                     <string>Remove</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item row="1" column="0" >
-          <widget class="QLabel" name="colorbandLabel" >
-           <property name="maximumSize" >
-            <size>
-             <width>256</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="toolTip" >
-            <string>Color band</string>
-           </property>
-           <property name="frameShape" >
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="frameShadow" >
-            <enum>QFrame::Plain</enum>
-           </property>
-           <property name="text" >
-            <string/>
-           </property>
-           <property name="pixmap" >
-            <pixmap resource="qualitymapper.qrc" >:/images/colorband.png</pixmap>
-           </property>
-           <property name="scaledContents" >
-            <bool>true</bool>
-           </property>
-           <property name="alignment" >
-            <set>Qt::AlignCenter|Qt::AlignHCenter|Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1" >
-          <widget class="QGroupBox" name="presetGroupBox" >
-           <property name="title" >
-            <string>Load Preset</string>
-           </property>
-           <layout class="QHBoxLayout" >
-            <item>
-             <widget class="QComboBox" name="presetComboBox" >
-              <property name="maximumSize" >
-               <size>
-                <width>16777215</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="editable" >
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="savePresetButton" >
-              <property name="maximumSize" >
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="toolTip" >
-               <string>Add/Save preset</string>
-              </property>
-              <property name="text" >
-               <string>+</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="removePresetButton" >
-              <property name="maximumSize" >
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="toolTip" >
-               <string>Remove preset</string>
-              </property>
-              <property name="text" >
-               <string>-</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="equalizerGroupBox" >
-      <property name="title" >
-       <string>Equalizer</string>
-      </property>
-      <layout class="QHBoxLayout" >
-       <item>
-        <layout class="QVBoxLayout" >
-         <item>
-          <widget class="QGraphicsView" name="equalizerGraphicsView" >
-           <property name="frameShape" >
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow" >
-            <enum>QFrame::Sunken</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" >
-           <item>
-            <widget class="QSpinBox" name="minSpinBox" />
-           </item>
-           <item>
-            <spacer>
-             <property name="orientation" >
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" >
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="midSpinBox" />
-           </item>
-           <item>
-            <spacer>
-             <property name="orientation" >
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" >
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="maxSpinBox" />
+               </item>
+              </layout>
+             </item>
+            </layout>
            </item>
           </layout>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox" >
-         <property name="title" >
-          <string>Gamma correction</string>
-         </property>
-         <property name="alignment" >
-          <set>Qt::AlignLeading</set>
-         </property>
-         <layout class="QVBoxLayout" >
-          <item>
-           <widget class="QGraphicsView" name="gammaCorrectionGraphicsView" >
-            <property name="maximumSize" >
-             <size>
-              <width>196</width>
-              <height>196</height>
-             </size>
-            </property>
-            <property name="alignment" >
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer>
-            <property name="orientation" >
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" >
-             <size>
-              <width>20</width>
-              <height>51</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" >
-      <item>
-       <widget class="QPushButton" name="applyButton" >
-        <property name="text" >
-         <string>Apply</string>
-        </property>
-        <property name="default" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="previewButton" >
-        <property name="text" >
-         <string>Preview</string>
-        </property>
-        <property name="checkable" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="resetButton" >
-        <property name="text" >
-         <string>Reset</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cancelButton" >
-        <property name="text" >
-         <string>Cancel</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="colorbandLabel" >
+          <property name="maximumSize" >
+           <size>
+            <width>256</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip" >
+           <string>Color band</string>
+          </property>
+          <property name="frameShape" >
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow" >
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+          <property name="pixmap" >
+           <pixmap resource="qualitymapper.qrc" >:/images/colorband.png</pixmap>
+          </property>
+          <property name="scaledContents" >
+           <bool>true</bool>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter|Qt::AlignHCenter|Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QGroupBox" name="presetGroupBox" >
+          <property name="title" >
+           <string>Load Preset</string>
+          </property>
+          <layout class="QHBoxLayout" >
+           <item>
+            <widget class="QComboBox" name="presetComboBox" >
+             <property name="maximumSize" >
+              <size>
+               <width>16777215</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="editable" >
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="savePresetButton" >
+             <property name="maximumSize" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="toolTip" >
+              <string>Add/Save preset</string>
+             </property>
+             <property name="text" >
+              <string>+</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="removePresetButton" >
+             <property name="maximumSize" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="toolTip" >
+              <string>Remove preset</string>
+             </property>
+             <property name="text" >
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
-    </item>
-   </layout>
-  </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="equalizerGroupBox" >
+     <property name="title" >
+      <string>Equalizer</string>
+     </property>
+     <layout class="QGridLayout" >
+      <item row="0" column="0" >
+       <widget class="QGraphicsView" name="equalizerGraphicsView" >
+        <property name="maximumSize" >
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Sunken</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QGroupBox" name="groupBox" >
+        <property name="title" >
+         <string>Gamma correction</string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignLeading</set>
+        </property>
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QGraphicsView" name="gammaCorrectionGraphicsView" >
+           <property name="maximumSize" >
+            <size>
+             <width>196</width>
+             <height>196</height>
+            </size>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <layout class="QHBoxLayout" >
+        <item>
+         <widget class="QSpinBox" name="minSpinBox" />
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="midSpinBox" />
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="maxSpinBox" />
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QPushButton" name="applyButton" >
+       <property name="text" >
+        <string>Apply</string>
+       </property>
+       <property name="default" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="previewButton" >
+       <property name="text" >
+        <string>Preview</string>
+       </property>
+       <property name="checkable" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetButton" >
+       <property name="text" >
+        <string>Reset</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton" >
+       <property name="text" >
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <layoutdefault spacing="6" margin="11" />
  <resources>
