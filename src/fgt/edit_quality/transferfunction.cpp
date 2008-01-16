@@ -5,7 +5,10 @@ TfChannel::TfChannel()
 {}
 
 TfChannel::TfChannel(TF_CHANNELS type) : _type(type)
-{}
+{
+	//no keys, they're sorted
+	_sorted = true;
+}
 
 TfChannel::~TfChannel(void)
 {	KEYS.clear();	}
@@ -22,6 +25,9 @@ TF_KEY* TfChannel::addKey(TF_KEY &new_key)
 {
 	//inserting at the head of the list
 	KEYS.insert(KEYS.begin(), new_key);
+	if ( KEYS.size() >= 2 )
+		if ( KEYS[0] == KEYS[1] )
+			this->mergeKeys(0, 1);
 
 	return &(*KEYS.begin());
 }
@@ -67,6 +73,10 @@ float TfChannel::removeKey(float x_val)
 	return this->removeKey(to_find_key);
 }
 
+//da ottimizzare!!
+TF_KEY *TfChannel::mergeKeys(int pos1, int pos2)
+{	return this->mergeKeys( KEYS[pos1], KEYS[pos2] );	}
+
 //merges two keys together by copying opportunely y values of the keys in just one key
 //returns a pointer to the "merged key"
 TF_KEY *TfChannel::mergeKeys(TF_KEY key1, TF_KEY key2)
@@ -106,7 +116,35 @@ TF_KEY* TfChannel::mergeKeys(float x1, float x2)
 
 float TfChannel::getChannelValuef(float x_position)
 {
-	return x_position;
+	int prev_key_idx = 0;
+	int next_key_idx = 0;
+
+	//not applicable if list's empty!
+	assert(KEYS.size() == 0);
+
+	//finding upper border key for x_position
+	while ( (KEYS[next_key_idx].x < x_position) && (next_key_idx < (int)KEYS.size()) )
+		next_key_idx ++;
+
+	//controllare questo! MAL
+	assert(next_key_idx >= (int)KEYS.size());
+
+	//returns the correct value if next_key_idx equals to x_position or when there's only one key in the list
+	if ((next_key_idx == 0) || (KEYS[next_key_idx].x == x_position))
+		return KEYS[next_key_idx].junction_point();
+
+	assert(next_key_idx == 0);
+
+	if ( next_key_idx > 0 )
+		prev_key_idx = next_key_idx - 1;
+
+	//applying linear interpolation between two keys values
+
+	//angular coefficient for interpolating line
+	float m = ((KEYS[next_key_idx].junction_point() - KEYS[prev_key_idx].junction_point()) / (KEYS[next_key_idx].x - KEYS[prev_key_idx].x));
+
+	//returning f(x) value for x in the interpolating line
+	return (m * (x_position - KEYS[prev_key_idx].x)) + KEYS[next_key_idx].junction_point();
 }
 
 
@@ -115,6 +153,13 @@ UINT8 TfChannel::getChannelValueb(float x_position)
 	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(x_position), 255.0f );
 //	return (UINT8)(this->getChannelValuef(x_position) * 255.0f);
 }
+
+//tells if the keys of the channel are sorted
+bool TfChannel::isSorted()
+{	return _sorted;	}
+
+void TfChannel::sortKeys()
+{	sort(KEYS.begin(), KEYS.end());	}
 
 
 
@@ -145,8 +190,17 @@ TransferFunction::~TransferFunction(void)
 
 void TransferFunction::buildColorBand()
 {
+	//sorting keys of the channel
+	for (int i=0; i<NUMBER_OF_CHANNELS; i++)
+		if ( !_channels[i].isSorted() )
+			_channels[i].sortKeys();
+
+	float relative_pos = 0.0f; 
 	for (int i=0; i<COLOR_BAND_SIZE; i++)
-		_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i, COLOR_BAND_SIZE) ),
-							   _channels[GREEN_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i, COLOR_BAND_SIZE) ),
-							   _channels[BLUE_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i, COLOR_BAND_SIZE) ) );
+	{
+		relative_pos = absolute2RelativeValf((float)i, COLOR_BAND_SIZE);
+		_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( relative_pos ),
+							   _channels[GREEN_CHANNEL].getChannelValueb( relative_pos ),
+							   _channels[BLUE_CHANNEL].getChannelValueb( relative_pos ) );
+	}
 }

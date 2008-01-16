@@ -35,6 +35,11 @@ using namespace std;
 using namespace vcg;
 
 
+enum JUNCTION_POINT
+{
+	LOWER_Y = 0,
+	UPPER_Y
+};
 
 
 //struct used to represent each point in the transfer function.
@@ -44,13 +49,19 @@ struct TF_KEY
 	float x;
 	float y_upper;
 	float y_lower;
+	int	  junction_point_code;
+	float junction_point() { return junction_point_code == LOWER_Y ? y_lower : y_upper; }
+	
 	TF_KEY( float x_val=0.0, float y_up=0.0, float y_low=0.0 )
 	{
-		x=x_val; y_upper=y_up; y_lower=y_low;
+		x=x_val; y_upper=y_up; y_lower=y_low; junction_point_code=LOWER_Y;
 		assert (y_upper < y_lower);
 	}
+	void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; }
 	bool operator==(TF_KEY k)
 	{	return (x == k.x);	}
+	bool operator<(TF_KEY k)
+	{	return (x < k.x);	}
 };
 
 //container of TF_KEYs
@@ -74,6 +85,7 @@ class TfChannel
 {
 private:
 	TF_CHANNELS	_type;
+	bool		_sorted;
 
 public:
 	KEY_LIST	KEYS;
@@ -89,11 +101,14 @@ public:
 	TF_KEY	*addKey(TF_KEY& new_key);
 	float	removeKey(float x);
 	float	removeKey(TF_KEY& to_remove_key);
+	TF_KEY	*mergeKeys(int pos1, int pos2);
 	TF_KEY	*mergeKeys(float x1, float x2);
 	TF_KEY	*mergeKeys(TF_KEY key1, TF_KEY key2);
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
+	bool	isSorted();
+	void	sortKeys();
 };
 
 
