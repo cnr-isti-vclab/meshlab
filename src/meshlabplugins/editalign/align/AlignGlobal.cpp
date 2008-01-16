@@ -50,6 +50,8 @@ inline void LOG( FILE *fp, const char * f, ... )
 
 int AlignGlobal::ComputeConnectedComponents()
 {
+  printf("Building Connected Components on a graph with %i nodes and %i arcs\n",N.size(),A.size());
+	
 	CC.clear();
 	list<AlignGlobal::Node>::iterator li;
 	
@@ -63,8 +65,7 @@ int AlignGlobal::ComputeConnectedComponents()
 	}
 	
 	int cnt=0;
-
-
+	
 	while(!ToReach.empty())
 		{
 			SubGraphInfo sg;
@@ -443,6 +444,8 @@ bool AlignGlobal::GlobalAlign(const vector<string> &Names, 	const double epsilon
 	double change;
   int step, localmaxiter;
 	cb("Global Alignment...");
+	LOG(elfp,"----------------\n----------------\nGlobalAlignment\n");
+
 	
   queue<AlignGlobal::Node *>	Q; 
 	MakeAllDormant();
@@ -453,6 +456,8 @@ bool AlignGlobal::GlobalAlign(const vector<string> &Names, 	const double epsilon
   
   while(DormantNum()>0)
 	{
+		LOG(elfp,"---------\nGlobalAlignment loop DormantNum = %i\n",DormantNum());
+		
 		curr=ChooseDormantWithMostActiveLink ();
 
 		if(!curr) {
@@ -536,8 +541,7 @@ bool AlignGlobal::GetMatrixVector(std::vector<Matrix44d> &Tr, std::vector<int> &
 }
 
 /*
-Costruisce il grafo di allineameno.
-Assume che i 
+Build the Alignment Graphs starting from the vector of Results and from the vector of the matrix with the current starting positions.
 */
 void AlignGlobal::BuildGraph(std::vector<AlignPair::Result *> &Res, vector<Matrix44d> &Tr, vector<int> &Id)
 {
