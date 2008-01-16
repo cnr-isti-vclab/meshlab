@@ -73,9 +73,19 @@ class MeshTree
 		foreach(MeshNode *mp, nodeList) 
 				delete mp;
 		nodeList.clear();
+		ResVec.clear();
+		ResVecPtr.clear();
 	}
 
 	void MeshTree::resetID();
+
+	MeshNode *find(int id)
+		{
+		foreach(MeshNode *mp, nodeList) 
+		if(mp->id==id) return mp;
+		assert("You are trying to find an unexistent mesh");
+		return 0;
+		}
 
 	MeshNode *find(MeshModel *m)
 		{
