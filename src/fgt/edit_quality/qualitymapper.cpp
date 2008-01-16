@@ -55,6 +55,8 @@ QualityMapperPlugin::QualityMapperPlugin()
 	QAction *editAction;
 	foreach(editAction, actionList)
 		editAction->setCheckable(true);
+
+	_qualityMapperDialog = 0;
 }
 
 QList<QAction *> QualityMapperPlugin::actions() const
@@ -90,7 +92,26 @@ void QualityMapperPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 
 void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla )
 {
-	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
+//	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
+
+
+
+	if(_qualityMapperDialog==0)
+	{
+		//_qualityMapperDialog=new _qualityMapperDialog(gla->parentWidget()->parentWidget());
+		_qualityMapperDialog = new QualityMapperDialog(gla->window());
+// 		connect(_qualityMapperDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
+// 		connect(_qualityMapperDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
+// 		connect(_qualityMapperDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
+// 		connect(_qualityMapperDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
+// 		connect(_qualityMapperDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
+// 		connect(_qualityMapperDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
+// 		connect(_qualityMapperDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
+
+	}
+// 	_qualityMapperDialog->edit=this;
+// 	_qualityMapperDialog->setTree(& meshTree, meshTree.nodeList.front());
+	_qualityMapperDialog->show();
 }
 
 

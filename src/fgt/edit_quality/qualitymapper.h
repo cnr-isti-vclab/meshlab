@@ -46,22 +46,25 @@ Beginning
 //#include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h> //<-- contains VertexQuality method
 
+#include "qualitymapperdialog.h"
+
 
 class QualityMapperPlugin : public QObject, public MeshEditInterface
 {
     Q_OBJECT
     Q_INTERFACES(MeshEditInterface)
 
-	QList <QAction *> actionList;
-
 private:
+	QualityMapperDialog *_qualityMapperDialog;
+
+		QList <QAction *> actionList;
 	Histogramf _histogram;
 
 public:
     QualityMapperPlugin();
     ~QualityMapperPlugin(){};
 
-	virtual const QString Info(QAction *);
+	const QString Info(QAction *);
 	// Generic Info about the plug in version and author.
     const PluginInfo &Info();
 	QList<QAction *> actions() const ;

@@ -1,1 +1,2 @@
 12.45 15/01/2008	aggiungere i riferimenti ai nuovi files del progetto al file .pro	MAL
+22.44 15/01/2008	convertire le QSpinBox per la TranferFunction in double ones
