@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.83  2008/01/16 01:41:01  cignoni
+added endedit slot
+
 Revision 1.82  2008/01/04 18:23:24  cignoni
 Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
 
@@ -326,6 +329,7 @@ public:
 	// The decorate function of the current active editor is still called.
   // EndEdit is called only when you press again the same button or when you change editor.
 	  
+public slots:
 	void endEdit(){	
 		if(iEdit && currentEditor) 
 		{
@@ -336,7 +340,7 @@ public:
 		setCursorTrack(0); 
 		update(); 
 	} 
-public slots:
+
 	void setSelectionRendering(bool enabled);
 
   void suspendEditToggle()
