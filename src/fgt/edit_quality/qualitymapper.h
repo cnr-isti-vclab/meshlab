@@ -59,6 +59,7 @@ private:
 
 		QList <QAction *> actionList;
 	Histogramf _histogram;
+	QualityMapperSettings _qmSettings;
 
 public:
     QualityMapperPlugin();

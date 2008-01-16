@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'qualitymapperdialog.ui'
 **
-** Created: Wed 16. Jan 15:11:42 2008
+** Created: Wed 16. Jan 19:37:32 2008
 **      by: Qt User Interface Compiler version 4.3.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -25,7 +25,6 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 #include <QtGui/QSpacerItem>
-#include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
 
 class Ui_QualityMapperDialogClass
@@ -68,11 +67,11 @@ public:
     QHBoxLayout *hboxLayout3;
     QGraphicsView *gammaCorrectionGraphicsView;
     QHBoxLayout *hboxLayout4;
-    QSpinBox *minSpinBox;
+    QDoubleSpinBox *minSpinBox;
     QSpacerItem *spacerItem;
-    QSpinBox *midSpinBox;
+    QDoubleSpinBox *midSpinBox;
     QSpacerItem *spacerItem1;
-    QSpinBox *maxSpinBox;
+    QDoubleSpinBox *maxSpinBox;
     QHBoxLayout *hboxLayout5;
     QPushButton *applyButton;
     QPushButton *previewButton;
@@ -172,6 +171,7 @@ public:
     ySpinBox = new QDoubleSpinBox(selectedPointBox);
     ySpinBox->setObjectName(QString::fromUtf8("ySpinBox"));
     ySpinBox->setMaximum(1);
+    ySpinBox->setSingleStep(0.01);
 
     gridLayout1->addWidget(ySpinBox, 1, 1, 1, 1);
 
@@ -285,7 +285,7 @@ public:
     hboxLayout4 = new QHBoxLayout();
     hboxLayout4->setSpacing(6);
     hboxLayout4->setObjectName(QString::fromUtf8("hboxLayout4"));
-    minSpinBox = new QSpinBox(equalizerGroupBox);
+    minSpinBox = new QDoubleSpinBox(equalizerGroupBox);
     minSpinBox->setObjectName(QString::fromUtf8("minSpinBox"));
 
     hboxLayout4->addWidget(minSpinBox);
@@ -294,7 +294,7 @@ public:
 
     hboxLayout4->addItem(spacerItem);
 
-    midSpinBox = new QSpinBox(equalizerGroupBox);
+    midSpinBox = new QDoubleSpinBox(equalizerGroupBox);
     midSpinBox->setObjectName(QString::fromUtf8("midSpinBox"));
 
     hboxLayout4->addWidget(midSpinBox);
@@ -303,7 +303,7 @@ public:
 
     hboxLayout4->addItem(spacerItem1);
 
-    maxSpinBox = new QSpinBox(equalizerGroupBox);
+    maxSpinBox = new QDoubleSpinBox(equalizerGroupBox);
     maxSpinBox->setObjectName(QString::fromUtf8("maxSpinBox"));
 
     hboxLayout4->addWidget(maxSpinBox);
@@ -348,7 +348,8 @@ public:
 
 
     retranslateUi(QualityMapperDialogClass);
-    QObject::connect(addPointButton, SIGNAL(clicked()), addPointButton, SLOT(showMenu()));
+    QObject::connect(cancelButton, SIGNAL(clicked()), QualityMapperDialogClass, SLOT(reject()));
+    QObject::connect(applyButton, SIGNAL(clicked()), QualityMapperDialogClass, SLOT(accept()));
 
     QMetaObject::connectSlotsByName(QualityMapperDialogClass);
     } // setupUi

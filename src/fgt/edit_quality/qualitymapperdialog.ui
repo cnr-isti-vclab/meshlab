@@ -306,7 +306,7 @@
       <item row="1" column="0" >
        <layout class="QHBoxLayout" >
         <item>
-         <widget class="QSpinBox" name="minSpinBox" />
+         <widget class="QDoubleSpinBox" name="minSpinBox" />
         </item>
         <item>
          <spacer>
@@ -322,7 +322,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QSpinBox" name="midSpinBox" />
+         <widget class="QDoubleSpinBox" name="midSpinBox" />
         </item>
         <item>
          <spacer>
@@ -338,7 +338,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QSpinBox" name="maxSpinBox" />
+         <widget class="QDoubleSpinBox" name="maxSpinBox" />
         </item>
        </layout>
       </item>
@@ -405,18 +405,34 @@
  </resources>
  <connections>
   <connection>
-   <sender>addPointButton</sender>
+   <sender>cancelButton</sender>
    <signal>clicked()</signal>
-   <receiver>addPointButton</receiver>
-   <slot>showMenu()</slot>
+   <receiver>QualityMapperDialogClass</receiver>
+   <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>466</x>
-     <y>152</y>
+     <x>335</x>
+     <y>589</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>466</x>
-     <y>152</y>
+     <x>94</x>
+     <y>546</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applyButton</sender>
+   <signal>clicked()</signal>
+   <receiver>QualityMapperDialogClass</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>55</x>
+     <y>589</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>47</x>
+     <y>599</y>
     </hint>
    </hints>
   </connection>

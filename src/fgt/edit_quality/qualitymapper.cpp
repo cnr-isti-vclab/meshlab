@@ -90,7 +90,7 @@ void QualityMapperPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 {
 }
 
-void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla )
+void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
 {
 //	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 
@@ -108,83 +108,24 @@ void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea
 // 		connect(_qualityMapperDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
 // 		connect(_qualityMapperDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
 
+		Histogramf H;
+      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+			
+      Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
+      _qmSettings.meshMinQ = mmmq.minV;
+      _qmSettings.meshMaxQ = mmmq.maxV;
+	  _qmSettings.meshMidQ = H.Avg();
+			
+      // _qmSettings.histoMinQ = H.Percentile(_qmSettings.percentile/100);
+      // _qmSettings.histoMaxQ = H.Percentile(1.0f-_qmSettings.percentile/100);
+			
+      _qualityMapperDialog->setValues(_qmSettings);
+
 	}
 // 	_qualityMapperDialog->edit=this;
 // 	_qualityMapperDialog->setTree(& meshTree, meshTree.nodeList.front());
 	_qualityMapperDialog->show();
 }
-
-
-
-/**** VECCHI METODI ****/
-
-// this function is called to fill the parameter list 
-// It is called only for filters that have a not empty list of parameters and 
-// that do not use the auto generated dialog, but want a personalized dialog.
-bool QualityMapperPlugin::getParameters(QAction *action, QWidget * parent, MeshModel &m, FilterParameterSet & par, MainWindowInterface *mw) 
-{
-//************************************************************************/
-//* CONSERVARE QUESTO!!! CREA L'ISTOGRAMMA DELLA QUALITA' DA SOLO!!      */
-//* m@l                                                                  */
-//************************************************************************/
-	Histogramf H;
-	tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
-
-	Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
-
-	H.FileWrite("risultato.txt");
-
-	//probabilmente questa roba EqualizerSettings non serve...
-	EqualizerSettings eqSettings;
-	eqSettings.meshMinQ = mmmq.minV;
-	eqSettings.meshMaxQ = mmmq.maxV;
-
-	eqSettings.histoMinQ = H.Percentile(eqSettings.percentile/100);
-	eqSettings.histoMaxQ = H.Percentile(1.0f-eqSettings.percentile/100);
-
-//	EqualizerDialog eqdialog(parent);
-//	eqdialog.setValues(eqSettings);
-
-
- 	Frange FinalRange;
-// 	eqSettings=eqdialog.getValues();
-// 	if (eqSettings.useManual) 
-// 	FinalRange = Frange(eqSettings.manualMinQ,eqSettings.manualMaxQ);
-// 	else
-// 	{
-// 		FinalRange.minV=H.Percentile(eqSettings.percentile/100.0);
-// 		FinalRange.maxV=H.Percentile(1.0f-(eqSettings.percentile/100.0));
-// 	}
-
-	par.addFloat("RangeMin",FinalRange.minV);
-	par.addFloat("RangeMax",FinalRange.maxV);      
-	mw->executeFilter(action,par);
-
-	return true;
-}
-
-
-void QualityMapperPlugin::initParameterSet(QAction *a,MeshModel &m, FilterParameterSet & par)
-{
-// 	switch(ID(a))
-//   {
-// 	case CP_TRIANGLE_QUALITY: {
-// 			QStringList metrics;
-// 			metrics.push_back("area/max side");
-// 			metrics.push_back("inradius/circumradius");
-// 			metrics.push_back("mean ratio");
-// 			par.addEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality."));
-// /// transformation matrix into a regular simplex"));
-// 
-// //			par.addEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality."));
-// 			break;
-// 		}
-// 	default: assert(0);
-// 	}
-}
-
-
-
 
 Q_EXPORT_PLUGIN(QualityMapperPlugin)
   
