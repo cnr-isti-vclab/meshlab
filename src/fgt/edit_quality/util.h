@@ -1,18 +1,21 @@
-#ifndef _CONST_TYPES_H_
-#define _CONST_TYPES_H_
+#ifndef _UTIL_H_
+#define _UTIL_H_
+
+#include "const_types.h"
 
 
-//These 3 types define unsigned int of 8, 16 and 32 bits
-typedef unsigned char		UINT8;
-typedef unsigned short int	UINT16;
-typedef unsigned int		UINT32;
 
-#define UINT8size  sizeof(UINT8)
-#define	UINT16size sizeof(UINT16)
-#define	UINT32size sizeof(UINT32)
+//returns a relative-absolute x value conversion rounded to closer integer value
+int relative2AbsoluteVali(float relative_val, float max_val);
 
-#define COLOR_BAND_SIZE	1024
+//returns a relative-absolute x value conversion rounded to closer integer value
+float relative2AbsoluteValf(float relative_val, float max_val);
 
+//returns an absolute-relative x value conversion
+int absolute2RelativeVali(float absolute_val, float max_val);
+
+//returns an absolute-relative x value conversion
+float absolute2RelativeValf(float absolute_val, float max_val);
 
 
 #endif

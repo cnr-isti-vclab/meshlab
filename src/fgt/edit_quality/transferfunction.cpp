@@ -146,7 +146,7 @@ TransferFunction::~TransferFunction(void)
 void TransferFunction::buildColorBand()
 {
 	for (int i=0; i<COLOR_BAND_SIZE; i++)
-		_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i) ),
-							   _channels[GREEN_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i) ),
-							   _channels[BLUE_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i) ) );
+		_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i, COLOR_BAND_SIZE) ),
+							   _channels[GREEN_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i, COLOR_BAND_SIZE) ),
+							   _channels[BLUE_CHANNEL].getChannelValueb( absolute2RelativeValf((float)i, COLOR_BAND_SIZE) ) );
 }
