@@ -97,7 +97,7 @@ public slots:
 		void glueByPicking();
 		void alignParam();
 		
-		void DrawArc(/* ArcPtr a, bool relative, const Point3d &Center, double Size*/);
+		void DrawArc( AlignPair::Result *A );
 signals:
 	void suspendEditToggle();
 

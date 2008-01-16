@@ -95,7 +95,8 @@ void EditAlignPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 				gla->rm.colorMode=GLW::CMPerVert;
 				
 			m.Render(GLW::DMBox,GLW::CMNone,GLW::TMNone);
-				
+			if(alignDialog->currentArc!=0)
+			     DrawArc(alignDialog->currentArc);
 		}
 		case ALIGN_INSPECT_ARC: 		
 		{
@@ -132,7 +133,7 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 		connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
 		connect(alignDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
 		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
-		connect(alignDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
+		connect(alignDialog->ui.falseColorCB, SIGNAL(valueChanged(bool)) , _gla->window(),  SLOT(updateGL() ) );
 
 	}
 	alignDialog->edit=this;
@@ -198,7 +199,7 @@ void EditAlignPlugin::glueByPicking()
 	assert(currentNode()->glued==false);
 	
 	currentNode()->glued=true;
-	alignDialog->updateDialog();
+	alignDialog->rebuildTree();	
 } 
 
  
@@ -283,7 +284,7 @@ void EditAlignPlugin::glueHere()
 { 
 	MeshNode *mn=currentNode();
 	mn->glued = !mn->glued;
-	alignDialog->updateDialog();
+	alignDialog->rebuildTree();	
 }
 
 void EditAlignPlugin::glueHereAll()
@@ -291,7 +292,7 @@ void EditAlignPlugin::glueHereAll()
 	foreach(MeshNode *mn, meshTree.nodeList)
 				mn->glued=true;
 	
-	alignDialog->updateDialog();
+	alignDialog->rebuildTree();	
 }
 
 void EditAlignPlugin::process()
@@ -302,7 +303,7 @@ void EditAlignPlugin::process()
 			return;
 		}
 	meshTree.Process(ap);
-	alignDialog->updateDialog();
+	alignDialog->rebuildTree();	
 	gla->update();
 }
 
@@ -362,32 +363,28 @@ switch(mode)
 
 
 
-// Se <relative> e ' true disegna i punti di allineamento dell'arco 
-// nelle posizioni delle mesh DOPO l'allineamento globale (e quindi matchano con la surf)
-// altrimenti disegna i punti di mov nella posizione data dall'allinemaneto
-// (e che quindi potrebbe non matchare con quella dopo l'allineamento globale); 
 
-void EditAlignPlugin::DrawArc( /*ArcPtr a, bool relative, const Point3d &Center, double Size */)
-{
-/*	AlignPair::Result &r=*a;
-	NodePtr fix=FindMesh(r.FixName);
-	NodePtr mov=FindMesh(r.MovName);
-	double nl=2.0*(*fix).bb.Diag()/100.0;
+void EditAlignPlugin::DrawArc( AlignPair::Result *A )
+{	
+	unsigned int i;
+	AlignPair::Result &r=*A;
+	MeshNode *fix=meshTree.find(r.FixName);
+	MeshNode *mov=meshTree.find(r.MovName);
+	//int mov=FindMesh(r.MovName);
+	double nl=2.0*(*fix).bbox().Diag()/100.0;
 	glPushAttrib(GL_ENABLE_BIT );
 	
 	glDisable(GL_LIGHTING);
-	glPushMatrix();
-	(*WorkingGroup).UnitTransform(Center, Size);
 	
 	glPushMatrix();
-	glMultMatrix((*fix).A);
+	glMultMatrix(fix->tr());
 		glPointSize(5.0f);
 		glColor3f(1,0,0);
 		glBegin(GL_POINTS);
-		for(int i=0;i<r.Pfix.size();i++) glVertex(r.Pfix[i]);
+		for(i=0;i<r.Pfix.size();i++) glVertex(r.Pfix[i]);
 		glEnd();
 		glPointSize(1.0f);
-		glColor((*fix).mi.c);
+		//glColor((*fix).mi.c);
 		if(r.Nfix.size()==r.Pfix.size()) 
 		{
 			glBegin(GL_LINES);
@@ -397,12 +394,10 @@ void EditAlignPlugin::DrawArc( /*ArcPtr a, bool relative, const Point3d &Center,
 			}
 			glEnd();
 		}
-		if(!relative){
-			glPopMatrix();
-			glPushMatrix();
-			glMultMatrix((*mov).A);
-		}
-		else	glMultMatrix(r.Tr);
+		
+		glPopMatrix();
+		glPushMatrix();
+		glMultMatrix(mov->tr());
 		
 		glPointSize(5.0f);
 		glColor3f(0,0,1);
@@ -410,7 +405,7 @@ void EditAlignPlugin::DrawArc( /*ArcPtr a, bool relative, const Point3d &Center,
 		for(i=0;i<r.Pmov.size();i++) glVertex(r.Pmov[i]);
 		glEnd();
 		glPointSize(1.0f);
-		glColor((*mov).mi.c);
+		//glColor((*mov).mi.c);
 		if(r.Nmov.size()==r.Pmov.size()) 
 		{
 			glBegin(GL_LINES);
@@ -421,14 +416,14 @@ void EditAlignPlugin::DrawArc( /*ArcPtr a, bool relative, const Point3d &Center,
 			glEnd();
 		}
 		glPopMatrix();
-		glPopMatrix();
+		/*
 		// Now Draw the histogram	
 		
 		int HSize = ViewPort[2]-100;
 		r.H.glDraw(Point4i(20,80,HSize,100),dlFont,r.as.I[0].MinDistAbs,1);
-		
+*/		
 		glPopAttrib(); 
-	*/
+
 }
 
 Q_EXPORT_PLUGIN(EditAlignPlugin)
