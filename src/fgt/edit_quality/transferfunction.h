@@ -23,11 +23,16 @@
 #ifndef _TRANSFER_FUNCTION_H_
 #define _TRANSFER_FUNCTION_H_
 
+#define NOW_TESTING
+
+
 #include <vcg/math/base.h>
 #include <vcg/space/color4.h>
-#include <vector>
-#include <algorithm>
-#include <assert.h>
+//#include <vector>
+#include <map>
+//#include <algorithm>
+#include <cassert>
+//#include <assert.h>
 
 #include "util.h"
 
@@ -58,17 +63,19 @@ struct TF_KEY
 		assert (y_upper < y_lower);
 	}
 	void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; }
-	bool operator==(TF_KEY k)
-	{	return (x == k.x);	}
-	bool operator<(TF_KEY k)
-	{	return (x < k.x);	}
+/*
+		bool operator==(TF_KEY k)
+		{	return (x == k.x);	}
+		bool operator<(TF_KEY k)
+		{	return (x < k.x);	}*/
+	
 };
 
 //container of TF_KEYs
-typedef	vector<TF_KEY> KEY_LIST;
+typedef	map<float, TF_KEY> KEY_LIST;
 
 //iterator on TF KEYs
-typedef	vector<TF_KEY>::iterator KEY_LISTiterator;
+typedef	map<float, TF_KEY>::iterator KEY_LISTiterator;
 
 //list of channels
 enum TF_CHANNELS
@@ -85,7 +92,6 @@ class TfChannel
 {
 private:
 	TF_CHANNELS	_type;
-	bool		_sorted;
 
 public:
 	KEY_LIST	KEYS;
@@ -101,14 +107,18 @@ public:
 	TF_KEY	*addKey(TF_KEY& new_key);
 	float	removeKey(float x);
 	float	removeKey(TF_KEY& to_remove_key);
-	TF_KEY	*mergeKeys(int pos1, int pos2);
-	TF_KEY	*mergeKeys(float x1, float x2);
-	TF_KEY	*mergeKeys(TF_KEY key1, TF_KEY key2);
+// 	TF_KEY	*mergeKeys(int pos1, int pos2);
+// 	TF_KEY	*mergeKeys(float x1, float x2);
+	TF_KEY	*mergeKeys(TF_KEY& key1, TF_KEY& key2);
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
-	bool	isSorted();
-	void	sortKeys();
+
+#ifdef NOW_TESTING
+	void testInitChannel();
+#endif
+
+
 };
 
 

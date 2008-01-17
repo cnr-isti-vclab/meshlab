@@ -1,13 +1,21 @@
 #include "transferfunction.h"
 
+
 //TRANSFER FUNCTION CHANNEL
 TfChannel::TfChannel()
-{}
+{
+	//da eliminare!? MAL
+#ifdef NOW_TESTING
+	this->testInitChannel();
+#endif
+}
 
 TfChannel::TfChannel(TF_CHANNELS type) : _type(type)
 {
-	//no keys, they're sorted
-	_sorted = true;
+	//da eliminare!? MAL
+#ifdef NOW_TESTING
+	this->testInitChannel();
+#endif
 }
 
 TfChannel::~TfChannel(void)
@@ -23,13 +31,23 @@ TF_CHANNELS TfChannel::getType()
 //returns a pointer to the key just added
 TF_KEY* TfChannel::addKey(TF_KEY &new_key)
 {
-	//inserting at the head of the list
-	KEYS.insert(KEYS.begin(), new_key);
-	if ( KEYS.size() >= 2 )
-		if ( KEYS[0] == KEYS[1] )
-			this->mergeKeys(0, 1);
+	TF_KEY *added_key = &new_key;
+	KEY_LISTiterator it = KEYS.find(new_key.x);
 
-	return &(*KEYS.begin());
+	if ( it != KEYS.end() )
+		//key not present yet in the list. Adding it
+		KEYS[new_key.x] = new_key;
+	else
+		//key with the same x already present in the list. Merging them
+		added_key = this->mergeKeys(it->second, new_key);
+
+// 	//inserting at the head of the list
+// 	KEYS.insert(KEYS.begin(), new_key);
+// 	if ( KEYS.size() >= 2 )
+// 		if ( KEYS[0] == KEYS[1] )
+// 			this->mergeKeys(0, 1);
+
+	return added_key;
 }
 
 //adds to the keys list a new keys with fields passed to the method
@@ -51,12 +69,12 @@ float TfChannel::removeKey(TF_KEY& to_remove_key)
 	float result = -1.0f;
 
 	//searching key
-	KEY_LISTiterator it = find(KEYS.begin(), KEYS.end(), to_remove_key);
+	KEY_LISTiterator it = KEYS.find(to_remove_key.x);
 
 	//if found, deleting it from list
 	if ( it != KEYS.end() )
 	{
-		result = (*it).x;
+		result = it->first;
 		KEYS.erase(it);
 	}
 
@@ -73,78 +91,83 @@ float TfChannel::removeKey(float x_val)
 	return this->removeKey(to_find_key);
 }
 
-//da ottimizzare!!
-TF_KEY *TfChannel::mergeKeys(int pos1, int pos2)
-{	return this->mergeKeys( KEYS[pos1], KEYS[pos2] );	}
-
 //merges two keys together by copying opportunely y values of the keys in just one key
 //returns a pointer to the "merged key"
-TF_KEY *TfChannel::mergeKeys(TF_KEY key1, TF_KEY key2)
+TF_KEY *TfChannel::mergeKeys(TF_KEY& key1, TF_KEY& key2)
 {
-	KEY_LISTiterator it1 = std::find(KEYS.begin(), KEYS.end(), key1);
-	KEY_LISTiterator it2 = find(KEYS.begin(), KEYS.end(), key2);
+	KEY_LISTiterator it = KEYS.find(key1.x);
 
-	//key1 or key2 not found!
-	assert(( it1 == KEYS.end() ) || ( it2 == KEYS.end() ));
+	//be sure that key1 is really in the list!
+	assert(it == KEYS.end());
 
-	//at least one of two y_lower should be 0
-	if ( ( (*it1).y_lower * key2.y_lower) == 0 )
-		if ( (*it1).y_lower == 0 )
-			(*it1).y_lower = key2.y_lower;
+	TF_KEY new_key(key1.x);
 
-	//at least one of two y_upper should be 0
-	if ( ( (*it1).y_upper * key2.y_upper) == 0 )
-		if ( (*it1).y_upper == 0 )
-			(*it1).y_upper = key2.y_upper;
+	if ( key1.x == 0.0f)
+	{
+		//if add button is pressed, a new key is built with x=0
+		new_key.x = key1.x;
+		if ( ( key1.y_lower >= key2.y_lower ) &&
+			 (key1.y_upper >= key2.y_upper) )
+		{
+			new_key.y_lower = key1.y_lower;
+			new_key.y_upper = key2.y_upper;
+		}
+		else
+		{
+			new_key.y_lower = key2.y_lower;
+			new_key.y_upper = key1.y_upper;
+		}
+	}
+	else
+	{
+		//any other case
 
-	//merge done, deleting key2
-	KEYS.erase(it2);
+		//setting y_lower to the minimum of y_lower of key1 and key2
+		if ( key2.y_lower < key1.y_lower )
+			new_key.y_lower = key2.y_lower;
+		else
+			new_key.y_lower = key1.y_lower;
 
-	return &(*it1);
-}
 
-//merges two keys together by copying opportunely y values of the keys in just one key
-//returns a pointer to the "merged key"
-TF_KEY* TfChannel::mergeKeys(float x1, float x2)
-{
-	TF_KEY key1(x1);
-	TF_KEY key2(x2);
+		//setting y_lower to the maximum of y_upper of key1 and key2
+		if ( key2.y_upper > key1.y_upper )
+			new_key.y_upper = key2.y_upper;
+		else
+			new_key.y_upper = key1.y_upper;
+	}
 
-	//calling merge keys on TF_KEY objects
-	return this->mergeKeys(key1, key2);
+	new_key.junction_point_code = key1.junction_point_code;
+
+	it->second = new_key;
+
+	return &(it->second);
 }
 
 float TfChannel::getChannelValuef(float x_position)
 {
-	int prev_key_idx = 0;
-	int next_key_idx = 0;
+	float result = 0.0f;
 
-	//not applicable if list's empty!
-	assert(KEYS.size() == 0);
+	KEY_LISTiterator it = KEYS.find(x_position);
+	if ( it != KEYS.end())
+		return it->second.junction_point();
 
-	//finding upper border key for x_position
-	while ( (KEYS[next_key_idx].x < x_position) && (next_key_idx < (int)KEYS.size()) )
-		next_key_idx ++;
+ 	//finding lower border for x
+  	KEY_LISTiterator low = KEYS.lower_bound( x_position );
+  	//finding upper border for x
+  	KEY_LISTiterator up = KEYS.upper_bound( x_position );
 
-	//controllare questo! MAL
-	assert(next_key_idx >= (int)KEYS.size());
+	if ( low != KEYS.end() && up != KEYS.end() )
+	{
+		//applying linear interpolation between two keys values
 
-	//returns the correct value if next_key_idx equals to x_position or when there's only one key in the list
-	if ((next_key_idx == 0) || (KEYS[next_key_idx].x == x_position))
-		return KEYS[next_key_idx].junction_point();
+		//angular coefficient for interpolating line
+		float m = ((up->second.junction_point() - low->second.junction_point()) / (up->second.x - low->second.x));
 
-	assert(next_key_idx == 0);
+		//returning f(x) value for x in the interpolating line
+		result = (m * (x_position - low->second.x)) + up->second.junction_point();
+	}
 
-	if ( next_key_idx > 0 )
-		prev_key_idx = next_key_idx - 1;
-
-	//applying linear interpolation between two keys values
-
-	//angular coefficient for interpolating line
-	float m = ((KEYS[next_key_idx].junction_point() - KEYS[prev_key_idx].junction_point()) / (KEYS[next_key_idx].x - KEYS[prev_key_idx].x));
-
-	//returning f(x) value for x in the interpolating line
-	return (m * (x_position - KEYS[prev_key_idx].x)) + KEYS[next_key_idx].junction_point();
+	return result;
 }
 
 
@@ -154,12 +177,20 @@ UINT8 TfChannel::getChannelValueb(float x_position)
 //	return (UINT8)(this->getChannelValuef(x_position) * 255.0f);
 }
 
-//tells if the keys of the channel are sorted
-bool TfChannel::isSorted()
-{	return _sorted;	}
-
-void TfChannel::sortKeys()
-{	sort(KEYS.begin(), KEYS.end());	}
+#ifdef NOW_TESTING
+void TfChannel::testInitChannel()
+{
+	int num_of_keys = (rand() % 10) + 1;
+	float rand_x = 0.0f;
+	float rand_y = 0.0f;
+	for (int i=0; i<num_of_keys; i++)
+	{
+		rand_x = ((rand() % 100) + 1) / 100.0f;
+		rand_y = ((rand() % 100) + 1) / 100.0f;
+		this->addKey(rand_x, rand_y, rand_y+0.1f);
+	}
+}
+#endif
 
 
 
@@ -190,11 +221,6 @@ TransferFunction::~TransferFunction(void)
 
 void TransferFunction::buildColorBand()
 {
-	//sorting keys of the channel
-	for (int i=0; i<NUMBER_OF_CHANNELS; i++)
-		if ( !_channels[i].isSorted() )
-			_channels[i].sortKeys();
-
 	float relative_pos = 0.0f; 
 	for (int i=0; i<COLOR_BAND_SIZE; i++)
 	{
