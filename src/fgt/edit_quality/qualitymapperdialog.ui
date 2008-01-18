@@ -264,6 +264,12 @@
      <layout class="QGridLayout" >
       <item row="0" column="0" >
        <widget class="QGraphicsView" name="equalizerGraphicsView" >
+        <property name="minimumSize" >
+         <size>
+          <width>300</width>
+          <height>200</height>
+         </size>
+        </property>
         <property name="maximumSize" >
          <size>
           <width>16777215</width>

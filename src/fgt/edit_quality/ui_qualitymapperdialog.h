@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'qualitymapperdialog.ui'
 **
-** Created: Wed 16. Jan 19:37:32 2008
+** Created: Thu 17. Jan 22:33:05 2008
 **      by: Qt User Interface Compiler version 4.3.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -259,6 +259,7 @@ public:
     gridLayout2->setObjectName(QString::fromUtf8("gridLayout2"));
     equalizerGraphicsView = new QGraphicsView(equalizerGroupBox);
     equalizerGraphicsView->setObjectName(QString::fromUtf8("equalizerGraphicsView"));
+    equalizerGraphicsView->setMinimumSize(QSize(300, 200));
     equalizerGraphicsView->setMaximumSize(QSize(16777215, 200));
     equalizerGraphicsView->setFrameShape(QFrame::StyledPanel);
     equalizerGraphicsView->setFrameShadow(QFrame::Sunken);

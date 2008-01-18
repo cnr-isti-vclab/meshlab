@@ -2,6 +2,7 @@
 #define QUALITYMAPPERDIALOG_H
 
 #include <QDialog>
+#include <vcg/math/histogram.h>
 #include "ui_qualitymapperdialog.h"
 
 class QualityMapperSettings
@@ -36,19 +37,27 @@ class QualityMapperDialog : public QDialog
 public:
 	QualityMapperDialog(QWidget *parent = 0);
 	~QualityMapperDialog();
-	void setValues(const QualityMapperSettings& es);
+	
+	void setValues(const QualityMapperSettings& qms);
 	QualityMapperSettings getValues();
+
+	void initEqualizerHistogram(vcg::Histogramf *h);
+	void drawCartesianChartBasics(int maxRoundedY, vcg::Histogramf *h);
 
 private:
 	Ui::QualityMapperDialogClass ui;
 	QualityMapperSettings _settings;
+	QGraphicsScene _equalizerScene;
+
+	int border;
+	int chartRectangleThickness;
+	int leftBorder;
+    int rightBorder;
+    int upperBorder;
+    int lowerBorderForCartesians;
+
 
 	private slots:
-
-
-
-
-
 
 };
 

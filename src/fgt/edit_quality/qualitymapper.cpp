@@ -44,13 +44,13 @@ using namespace vcg;
 
 QualityMapperPlugin::QualityMapperPlugin()
 {
-/*
-		isDragging=false;
-		first=true;
-		paintbox=0;
-		pixels=0;
-		pressed=0;*/
-	
+	/*
+	isDragging=false;
+	first=true;
+	paintbox=0;
+	pixels=0;
+	pressed=0;*/
+
 	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper. More info coming soon...", this);
 	QAction *editAction;
 	foreach(editAction, actionList)
@@ -65,20 +65,20 @@ QList<QAction *> QualityMapperPlugin::actions() const
 
 const QString QualityMapperPlugin::Info(QAction *action) 
 {
-  if( action->text() != tr("Get Info") ) assert (0);
+	if( action->text() != tr("Get Info") ) assert (0);
 
 	return tr("Colorize mesh vertexes by Quality following some rules");
 }
 
 const PluginInfo &QualityMapperPlugin::Info() 
 {
-   static PluginInfo ai; 
-   ai.Date=tr("Jan 2008");
-	 ai.Version = tr("1.0");
-	 ai.Author = ("Alessandro Maione, Federico Bellucci");
-   return ai;
+	static PluginInfo ai; 
+	ai.Date=tr("Jan 2008");
+	ai.Version = tr("1.0");
+	ai.Author = ("Alessandro Maione, Federico Bellucci");
+	return ai;
 } 
- 
+
 void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
 	gla->update();
@@ -92,7 +92,7 @@ void QualityMapperPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 
 void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
 {
-//	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
+	//	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 
 
 
@@ -100,32 +100,33 @@ void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gl
 	{
 		//_qualityMapperDialog=new _qualityMapperDialog(gla->parentWidget()->parentWidget());
 		_qualityMapperDialog = new QualityMapperDialog(gla->window());
-// 		connect(_qualityMapperDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
-// 		connect(_qualityMapperDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
-// 		connect(_qualityMapperDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
-// 		connect(_qualityMapperDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
-// 		connect(_qualityMapperDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
-// 		connect(_qualityMapperDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
-// 		connect(_qualityMapperDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
+		// 		connect(_qualityMapperDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
+		// 		connect(_qualityMapperDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
+		// 		connect(_qualityMapperDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
+		// 		connect(_qualityMapperDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
+		// 		connect(_qualityMapperDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
+		// 		connect(_qualityMapperDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
+		// 		connect(_qualityMapperDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
 
 		Histogramf H;
-      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
-			
-      Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
-      _qmSettings.meshMinQ = mmmq.minV;
-      _qmSettings.meshMaxQ = mmmq.maxV;
-	  _qmSettings.meshMidQ = H.Avg();
-			
-      // _qmSettings.histoMinQ = H.Percentile(_qmSettings.percentile/100);
-      // _qmSettings.histoMaxQ = H.Percentile(1.0f-_qmSettings.percentile/100);
-			
-      _qualityMapperDialog->setValues(_qmSettings);
+		tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+
+		Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
+		_qmSettings.meshMinQ = mmmq.minV;
+		_qmSettings.meshMaxQ = mmmq.maxV;
+		_qmSettings.meshMidQ = H.Avg();
+
+		// _qmSettings.histoMinQ = H.Percentile(_qmSettings.percentile/100);
+		// _qmSettings.histoMaxQ = H.Percentile(1.0f-_qmSettings.percentile/100);
+
+		_qualityMapperDialog->setValues(_qmSettings);
+		_qualityMapperDialog->initEqualizerHistogram(&H);
 
 	}
-// 	_qualityMapperDialog->edit=this;
-// 	_qualityMapperDialog->setTree(& meshTree, meshTree.nodeList.front());
+	// 	_qualityMapperDialog->edit=this;
+	// 	_qualityMapperDialog->setTree(& meshTree, meshTree.nodeList.front());
 	_qualityMapperDialog->show();
 }
 
 Q_EXPORT_PLUGIN(QualityMapperPlugin)
-  
+
