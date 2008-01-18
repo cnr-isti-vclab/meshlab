@@ -29,53 +29,51 @@ TF_CHANNELS TfChannel::getType()
 
 //adds to the keys list new_key
 //returns a pointer to the key just added
-TF_KEY* TfChannel::addKey(TF_KEY &new_key)
+TF_KEY* TfChannel::addKey(float x_pos, TF_KEY &new_key)
 {
 	TF_KEY *added_key = &new_key;
-	KEY_LISTiterator it = KEYS.find(new_key.x);
+	KEY_LISTiterator it = KEYS.find(x_pos);
 
-	if ( it != KEYS.end() )
+	if ( it == KEYS.end() )
 		//key not present yet in the list. Adding it
-		KEYS[new_key.x] = new_key;
+		KEYS[x_pos] = new_key;
 	else
 		//key with the same x already present in the list. Merging them
-		added_key = this->mergeKeys(it->second, new_key);
-
-// 	//inserting at the head of the list
-// 	KEYS.insert(KEYS.begin(), new_key);
-// 	if ( KEYS.size() >= 2 )
-// 		if ( KEYS[0] == KEYS[1] )
-// 			this->mergeKeys(0, 1);
+		added_key = this->mergeKeys(x_pos, new_key);
 
 	return added_key;
 }
 
 //adds to the keys list a new keys with fields passed to the method
 //returns a pointer to the key just added
-TF_KEY* TfChannel::addKey(float x, float y_up, float y_bot)
+TF_KEY* TfChannel::addKey(float x_pos, float y_up, float y_bot)
 {
 	//building key
-	TF_KEY key(x, y_up, y_bot);
+	TF_KEY key( /*x,*/ y_up, y_bot );
 
 	//adding it to list
-	return this->addKey(key);
+	return this->addKey(x_pos, key);
 }
 
 //removes from keys list to_remove_key
 //returns the x value of the removed key or -1 if key was not found
 float TfChannel::removeKey(TF_KEY& to_remove_key)
 {
-	//not found by default
 	float result = -1.0f;
 
-	//searching key
-	KEY_LISTiterator it = KEYS.find(to_remove_key.x);
+	bool found = false;
+	KEY_LISTiterator it = KEYS.begin();
 
-	//if found, deleting it from list
-	if ( it != KEYS.end() )
+	while (( it != KEYS.end() ) && (! found ))
 	{
-		result = it->first;
-		KEYS.erase(it);
+		if ( it->second == to_remove_key )
+		{
+			found = true;
+			result = it->first;
+			KEYS.erase( it );
+		}
+		else
+			it ++;
 	}
 
 	return result;
@@ -85,62 +83,51 @@ float TfChannel::removeKey(TF_KEY& to_remove_key)
 //returns the x value of the removed key or -1 if key was not found
 float TfChannel::removeKey(float x_val)
 {
-	//searching key with proper x
-	TF_KEY to_find_key(x_val);
+	float result = -1.0f;
 
-	return this->removeKey(to_find_key);
+	//searching key with proper x
+	KEY_LISTiterator it = KEYS.find(x_val);
+
+	if ( it != KEYS.end() )
+	{
+		KEYS.erase( it );
+		result = x_val;
+	}
+
+	return result;
 }
 
 //merges two keys together by copying opportunely y values of the keys in just one key
 //returns a pointer to the "merged key"
-TF_KEY *TfChannel::mergeKeys(TF_KEY& key1, TF_KEY& key2)
+TF_KEY *TfChannel::mergeKeys(float x_pos, TF_KEY& key)
 {
-	KEY_LISTiterator it = KEYS.find(key1.x);
+	TF_KEY *result = 0;
+
+	KEY_LISTiterator it = KEYS.find(x_pos);
+
+	TF_KEY new_key(x_pos);
 
 	//be sure that key1 is really in the list!
-	assert(it == KEYS.end());
+	assert(it != KEYS.end());
 
-	TF_KEY new_key(key1.x);
+	//any other case
 
-	if ( key1.x == 0.0f)
-	{
-		//if add button is pressed, a new key is built with x=0
-		new_key.x = key1.x;
-		if ( ( key1.y_lower >= key2.y_lower ) &&
-			 (key1.y_upper >= key2.y_upper) )
-		{
-			new_key.y_lower = key1.y_lower;
-			new_key.y_upper = key2.y_upper;
-		}
-		else
-		{
-			new_key.y_lower = key2.y_lower;
-			new_key.y_upper = key1.y_upper;
-		}
-	}
-	else
-	{
-		//any other case
+	//setting y_lower to the minimum of y_lower of key1 and key2
+	new_key.y_lower = min( it->second.y_lower, key.y_lower );
 
-		//setting y_lower to the minimum of y_lower of key1 and key2
-		if ( key2.y_lower < key1.y_lower )
-			new_key.y_lower = key2.y_lower;
-		else
-			new_key.y_lower = key1.y_lower;
+	//setting y_lower to the maximum of y_upper of key1 and key2
+	new_key.y_upper = max( it->second.y_upper, key.y_upper );
 
-
-		//setting y_lower to the maximum of y_upper of key1 and key2
-		if ( key2.y_upper > key1.y_upper )
-			new_key.y_upper = key2.y_upper;
-		else
-			new_key.y_upper = key1.y_upper;
-	}
-
-	new_key.junction_point_code = key1.junction_point_code;
+	new_key.left_junction_point_code = it->second.left_junction_point_code;
+	new_key.right_junction_point_code = it->second.right_junction_point_code;
+	//new_key.junction_point_code = it->second.junction_point_code;
 
 	it->second = new_key;
 
-	return &(it->second);
+	//the address of new inserted in the list is returned
+	result = &(it->second);
+
+	return result;
 }
 
 float TfChannel::getChannelValuef(float x_position)
@@ -148,24 +135,31 @@ float TfChannel::getChannelValuef(float x_position)
 	float result = 0.0f;
 
 	KEY_LISTiterator it = KEYS.find(x_position);
-	if ( it != KEYS.end())
-		return it->second.junction_point();
 
- 	//finding lower border for x
-  	KEY_LISTiterator low = KEYS.lower_bound( x_position );
+	//if a x_position is known x, its key value is returned immediately
+	if ( it != KEYS.end())
+		return it->second.getLeftJunctionPoint();
+
   	//finding upper border for x
   	KEY_LISTiterator up = KEYS.upper_bound( x_position );
 
-	if ( low != KEYS.end() && up != KEYS.end() )
-	{
-		//applying linear interpolation between two keys values
+	assert(up != KEYS.begin());
 
-		//angular coefficient for interpolating line
-		float m = ((up->second.junction_point() - low->second.junction_point()) / (up->second.x - low->second.x));
+ 	//finding lower border for x
+	KEY_LISTiterator low = up;
+	low --;
 
-		//returning f(x) value for x in the interpolating line
-		result = (m * (x_position - low->second.x)) + up->second.junction_point();
-	}
+	if (( low->first < x_position ) && ( up->first > x_position) )
+		if ( low != KEYS.end() && up != KEYS.end() )
+		{
+			//applying linear interpolation between two keys values
+
+			//angular coefficient for interpolating line
+			float m = ((up->second.getLeftJunctionPoint() - low->second.getRightJunctionPoint()) / (up->first - low->first));
+
+			//returning f(x) value for x in the interpolating line
+			result = (m * (x_position - low->first)) + low->second.getRightJunctionPoint();
+		}
 
 	return result;
 }
@@ -183,12 +177,17 @@ void TfChannel::testInitChannel()
 	int num_of_keys = (rand() % 10) + 1;
 	float rand_x = 0.0f;
 	float rand_y = 0.0f;
+
+	//first node\key = 0
+	this->addKey(0.0f, 0.0f, 0.0f);
 	for (int i=0; i<num_of_keys; i++)
 	{
 		rand_x = ((rand() % 100) + 1) / 100.0f;
 		rand_y = ((rand() % 100) + 1) / 100.0f;
-		this->addKey(rand_x, rand_y, rand_y+0.1f);
+		this->addKey(rand_x, rand_y+1.0f, rand_y);
 	}
+	//last node\key = 0
+	this->addKey(1.0f, 0.0f, 0.0f);
 }
 #endif
 

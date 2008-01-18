@@ -1,3 +1,5 @@
 12.45 15/01/2008	aggiungere i riferimenti ai nuovi files del progetto al file .pro	MAL
 22.44 15/01/2008	convertire le QSpinBox per la TranferFunction in double ones
 19.53 16/01/2008	aggiungere alla TF_KEY un campo per capire "a quale punto (su o giù)" è attaccata la linea del grafico!
+16.51 18/01/2008	valutare il caso in cui una chiave sia legata sia "a sinistra" che "a destra" ad altre chavi. Adeguare la struttura dati di conseguenza
+16.51 18/01/2008	collassare i 2 (eventuali) nodi una chiave posta in 0.0 o 1.0 ad un solo nodo (quello di giunzione)

@@ -40,35 +40,35 @@ using namespace std;
 using namespace vcg;
 
 
-enum JUNCTION_POINT
-{
-	LOWER_Y = 0,
-	UPPER_Y
-};
+#define LOWER_Y	true
+#define UPPER_Y	(!LOWER_Y)
 
 
 //struct used to represent each point in the transfer function.
 //It's composed of a position on x axis and two values on the y axis (potentially the same)
 struct TF_KEY
 {
-	float x;
-	float y_upper;
-	float y_lower;
-	int	  junction_point_code;
-	float junction_point() { return junction_point_code == LOWER_Y ? y_lower : y_upper; }
+	float	y_upper;
+	float	y_lower;
+	bool	left_junction_point_code;
+	bool	right_junction_point_code;
+
+	float getLeftJunctionPoint() { return left_junction_point_code == LOWER_Y ? y_lower : y_upper; }
+	float getRightJunctionPoint() { return right_junction_point_code == LOWER_Y ? y_lower : y_upper; }
+	void  setLeftJunctionPoint( bool j_p )	{ left_junction_point_code = j_p; right_junction_point_code = !left_junction_point_code; }
+	void  setRightJunctionPoint( bool j_p )	{ right_junction_point_code = j_p; left_junction_point_code = !right_junction_point_code; }
 	
-	TF_KEY( float x_val=0.0, float y_up=0.0, float y_low=0.0 )
+	TF_KEY( float y_up=0.0f, float y_low=0.0f )
 	{
-		x=x_val; y_upper=y_up; y_lower=y_low; junction_point_code=LOWER_Y;
-		assert (y_upper < y_lower);
+		y_upper=y_up;
+		y_lower=y_low;
+		if ( y_upper < y_lower)
+			this->swapY();
+		this->setLeftJunctionPoint(LOWER_Y);
 	}
+
 	void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; }
-/*
-		bool operator==(TF_KEY k)
-		{	return (x == k.x);	}
-		bool operator<(TF_KEY k)
-		{	return (x < k.x);	}*/
-	
+	bool operator == (TF_KEY k)	{ return ( (y_lower == k.y_lower) && (y_upper == k.y_upper) ); }
 };
 
 //container of TF_KEYs
@@ -104,12 +104,12 @@ public:
 	void	setType(TF_CHANNELS);
 	TF_CHANNELS getType();
 	TF_KEY	*addKey(float x, float y_up, float y_bot);
-	TF_KEY	*addKey(TF_KEY& new_key);
+	TF_KEY	*addKey(float x, TF_KEY& new_key);
 	float	removeKey(float x);
 	float	removeKey(TF_KEY& to_remove_key);
 // 	TF_KEY	*mergeKeys(int pos1, int pos2);
 // 	TF_KEY	*mergeKeys(float x1, float x2);
-	TF_KEY	*mergeKeys(TF_KEY& key1, TF_KEY& key2);
+	TF_KEY	*mergeKeys(float x_pos1, TF_KEY& x_pos2);
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
