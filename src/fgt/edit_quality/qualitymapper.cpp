@@ -108,25 +108,35 @@ void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gl
 		// 		connect(_qualityMapperDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
 		// 		connect(_qualityMapperDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
 
-		Histogramf H;
-		tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+		Histogramf h;
+		QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, h, 100);
 
 		Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
 		_qmSettings.meshMinQ = mmmq.minV;
 		_qmSettings.meshMaxQ = mmmq.maxV;
-		_qmSettings.meshMidQ = H.Avg();
+		_qmSettings.meshMidQ = (mmmq.minV+mmmq.maxV)/2;
 
 		// _qmSettings.histoMinQ = H.Percentile(_qmSettings.percentile/100);
 		// _qmSettings.histoMaxQ = H.Percentile(1.0f-_qmSettings.percentile/100);
 
 		_qualityMapperDialog->setValues(_qmSettings);
-		_qualityMapperDialog->initEqualizerHistogram(&H);
+		_qualityMapperDialog->initEqualizerHistogram(&h);
 
 	}
 	// 	_qualityMapperDialog->edit=this;
 	// 	_qualityMapperDialog->setTree(& meshTree, meshTree.nodeList.front());
 	_qualityMapperDialog->show();
 }
+
+void QualityMapperPlugin::ComputePerVertexQualityHistogram( CMeshO & m, Histogramf &h, int bins=10000)    // V1.0
+      {
+        h.Clear();
+        std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m);
+        h.SetRange( minmax.first,minmax.second, bins);
+        CMeshO::VertexIterator vi;
+        for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+          if(!(*vi).IsD()) h.Add((*vi).Q());
+      }
 
 Q_EXPORT_PLUGIN(QualityMapperPlugin)
 

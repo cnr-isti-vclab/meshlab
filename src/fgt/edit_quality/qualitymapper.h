@@ -80,6 +80,8 @@ public:
 
 	QPoint cur;
 	bool haveToPick;
+
+	void ComputePerVertexQualityHistogram( CMeshO & m, Histogramf &h, int bins);
 	
 };
 

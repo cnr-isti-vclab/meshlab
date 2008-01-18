@@ -113,7 +113,7 @@ void QualityMapperDialog::initEqualizerHistogram(vcg::Histogramf *h)
 	//drawing histogram bars
 	for (int i = 0; i < h->n; i++)
 	{
-		barHeight = (float)(chartHeightForCartesians * h->H[h->R[i]]) / (float)maxRoundedY;
+		barHeight = (float)(chartHeightForCartesians * h->H[i]) / (float)maxRoundedY;
 		startBarPt.setX( leftBorder + ((barSeparator + barWidth) * i) );
 		startBarPt.setY( (float)lowerBorderForCartesians - barHeight );
 

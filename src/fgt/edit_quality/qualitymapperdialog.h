@@ -2,6 +2,16 @@
 #define QUALITYMAPPERDIALOG_H
 
 #include <QDialog>
+/*
+#include <vcg/simplex/face/pos.h>
+#include <vcg/simplex/face/topology.h>
+//#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/trimesh/closest.h>
+#include <vcg/space/index/grid_static_ptr.h>
+#include <vcg/complex/trimesh/allocate.h>
+*/
+
+#include <vcg/complex/trimesh/base.h>
 #include <vcg/math/histogram.h>
 #include "ui_qualitymapperdialog.h"
 
@@ -43,6 +53,7 @@ public:
 
 	void initEqualizerHistogram(vcg::Histogramf *h);
 	void drawCartesianChartBasics(int maxRoundedY, vcg::Histogramf *h);
+	
 
 private:
 	Ui::QualityMapperDialogClass ui;
