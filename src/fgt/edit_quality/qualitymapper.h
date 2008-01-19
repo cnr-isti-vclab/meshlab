@@ -42,11 +42,13 @@ Beginning
 #include <meshlab/glarea.h>
 
 //#include <vcg/math/base.h>
-#include <vcg/math/histogram.h>
 //#include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h> //<-- contains VertexQuality method
 
 #include "qualitymapperdialog.h"
+
+#include <vcg/math/histogram.h>
+#include "transferfunction.h"
 
 
 class QualityMapperPlugin : public QObject, public MeshEditInterface
@@ -58,6 +60,8 @@ private:
 	QualityMapperDialog *_qualityMapperDialog;
 	QList <QAction *> actionList;
 	Histogramf _histogram;
+	TransferFunction _transfer_function;
+
 	QualityMapperSettings _qmSettings;
 
 public:
@@ -72,7 +76,7 @@ public:
 	// Called when the user press the first time the button 
     void StartEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
 	// Called when the user press the second time the button 
-    void EndEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    void EndEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
     void Decorate			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
     void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
@@ -81,8 +85,7 @@ public:
 	QPoint cur;
 	bool haveToPick;
 
-	void ComputePerVertexQualityHistogram( CMeshO & m, Histogramf &h, int bins);
-	
+	void ComputePerVertexQualityHistogram( CMeshO & m, Histogramf &h, int bins);	
 };
 
 #endif

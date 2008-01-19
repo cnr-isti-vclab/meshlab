@@ -12,9 +12,16 @@
 */
 
 #include <vcg/complex/trimesh/base.h>
-#include <vcg/math/histogram.h>
 #include "ui_qualitymapperdialog.h"
 
+#include <vcg/math/histogram.h>
+
+#include "transferfunction.h"
+
+using namespace vcg;
+
+
+//questa clsse l'hai creata tu? (??) MAL
 class QualityMapperSettings
 {
 public:
@@ -51,15 +58,19 @@ public:
 	void setValues(const QualityMapperSettings& qms);
 	QualityMapperSettings getValues();
 
-	void initEqualizerHistogram(vcg::Histogramf *h);
-	void drawCartesianChartBasics(int maxRoundedY, vcg::Histogramf *h);
+	void drawCartesianChartBasics(QGraphicsScene& scene, QGraphicsView *view /*, float maxRoundedY*/);	//controllare il puntatore alla vista (!!) MAL
+	void initEqualizerHistogram(vcg::Histogramf& h);
+	void drawTransferFunction( TransferFunction& tf);
+	
 	
 
 private:
 	Ui::QualityMapperDialogClass ui;
 	QualityMapperSettings _settings;
-	QGraphicsScene _equalizerScene;
+	QGraphicsScene	_equalizerScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
+	QGraphicsScene	_transferFunctionScene;
 
+	//questi parametri variano a seconda del grafico che si sta disegnando
 	int border;
 	int chartRectangleThickness;
 	int leftBorder;

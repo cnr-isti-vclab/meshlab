@@ -201,6 +201,22 @@ void TfChannel::testInitChannel()
 //TRANSFER FUNCTION
 TransferFunction::TransferFunction(void)
 {
+	this->initTF();
+}
+
+
+TransferFunction::TransferFunction(QString colorBandFile)
+{
+	this->initTF();
+}
+
+TransferFunction::~TransferFunction(void)
+{
+}
+
+
+void TransferFunction::initTF()
+{
 	//Initializing channels types and pivoting indexes.
 	//Each index in channel order has the same value of the enum
 	for (int i=0; i<NUMBER_OF_CHANNELS; i++)
@@ -211,10 +227,6 @@ TransferFunction::TransferFunction(void)
 
 	//resetting color band value
 	memset(_color_band,0,sizeof(_color_band));
-}
-
-TransferFunction::~TransferFunction(void)
-{
 }
 
 

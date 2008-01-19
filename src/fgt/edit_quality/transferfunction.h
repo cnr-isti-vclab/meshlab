@@ -32,7 +32,10 @@
 #include <map>
 //#include <algorithm>
 #include <cassert>
+
+#include <QString>
 //#include <assert.h>
+#include "const_types.h"
 
 #include "util.h"
 
@@ -133,11 +136,15 @@ private:
 	int			_channels_order[NUMBER_OF_CHANNELS];	//array used to carry out virtual pivoting indexing
 	Color4f		_color_band[COLOR_BAND_SIZE];		/*rendere color band una classe a se stante??*/
 
+	void initTF(void);
+
 public:
 	TransferFunction(void);
+	TransferFunction(QString colorBandFile);
 	~TransferFunction(void);
 
 	void buildColorBand();
+	void saveColorBand();
 };
 
 #endif

@@ -90,11 +90,9 @@ void QualityMapperPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 {
 }
 
-void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
+void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 {
 	//	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
-
-
 
 	if(_qualityMapperDialog==0)
 	{
@@ -108,24 +106,44 @@ void QualityMapperPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gl
 		// 		connect(_qualityMapperDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
 		// 		connect(_qualityMapperDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
 
-		Histogramf h;
-		QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, h, 100);
-
-		Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
-		_qmSettings.meshMinQ = mmmq.minV;
-		_qmSettings.meshMaxQ = mmmq.maxV;
-		_qmSettings.meshMidQ = (mmmq.minV+mmmq.maxV)/2;
+//		Histogramf h;
 
 		// _qmSettings.histoMinQ = H.Percentile(_qmSettings.percentile/100);
 		// _qmSettings.histoMaxQ = H.Percentile(1.0f-_qmSettings.percentile/100);
 
-		_qualityMapperDialog->setValues(_qmSettings);
-		_qualityMapperDialog->initEqualizerHistogram(&h);
-
 	}
+
+	//building up histogram...
+	QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, _histogram, 100);
+	Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
+	//...histogram built
+
+	//setting and applying settings to dialog (??) MAL
+	_qmSettings.meshMinQ = mmmq.minV;
+	_qmSettings.meshMaxQ = mmmq.maxV;
+	_qmSettings.meshMidQ = (mmmq.minV+mmmq.maxV)/2;
+	_qualityMapperDialog->setValues(_qmSettings);
+
+	//drawing histogram in dialog(??) MAL
+	_qualityMapperDialog->initEqualizerHistogram(_histogram);
+
+	//drawing transferFunction
+	_qualityMapperDialog->drawTransferFunction( _transfer_function );
+
 	// 	_qualityMapperDialog->edit=this;
 	// 	_qualityMapperDialog->setTree(& meshTree, meshTree.nodeList.front());
+
+	//dialog ready to be displayed. Show it now!
 	_qualityMapperDialog->show();
+}
+
+void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
+{
+	if ( _qualityMapperDialog )
+	{
+		delete _qualityMapperDialog;
+		_qualityMapperDialog = 0;
+	}
 }
 
 void QualityMapperPlugin::ComputePerVertexQualityHistogram( CMeshO & m, Histogramf &h, int bins=10000)    // V1.0
