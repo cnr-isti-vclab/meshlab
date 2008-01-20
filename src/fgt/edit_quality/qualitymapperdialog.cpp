@@ -22,17 +22,6 @@ void QualityMapperDialog::setValues(const QualityMapperSettings& qms)
 	ui.minSpinBox->setValue(_settings.meshMinQ);
 	ui.midSpinBox->setValue(_settings.meshMidQ);
 	ui.maxSpinBox->setValue(_settings.meshMaxQ);
-
-	/*
-	ui.percentileSpinbox->setValue(settings.percentile);
-	ui.rangeSpinbox->setValue(settings.range);
-	ui.meshMinQlineEdit->setText(qnum.arg(settings.meshMinQ));
-	ui.meshMaxQlineEdit->setText(qnum.arg(settings.meshMaxQ));
-	ui.histoMinQlineEdit->setText(qnum.arg(settings.histoMinQ));
-	ui.histoMaxQlineEdit->setText(qnum.arg(settings.histoMaxQ));
-	ui.manualMinQlineEdit->setText(qnum.arg(settings.manualMinQ));
-	ui.manualMaxQlineEdit->setText(qnum.arg(settings.manualMaxQ));
-	ui.manualCheckBox->setChecked(settings.useManual);  */
 }
 
 QualityMapperSettings QualityMapperDialog::getValues()
@@ -40,12 +29,7 @@ QualityMapperSettings QualityMapperDialog::getValues()
 	_settings.manualMinQ=ui.minSpinBox->value();
 	_settings.manualMidQ=ui.midSpinBox->value();
 	_settings.manualMaxQ=ui.maxSpinBox->value();
-	/*
-	settings.percentile = ui.percentileSpinbox->value();
-	settings.range = ui.rangeSpinbox->value();
-	settings.useManual=ui.manualCheckBox->isChecked();
-	settings.manualMaxQ=ui.manualMaxQlineEdit->text().toFloat();
-	*/
+
 	return _settings;
 }
 
@@ -94,8 +78,6 @@ void QualityMapperDialog::drawCartesianChartBasics(QGraphicsScene& scene, QGraph
 
 
 //il nome non mi sembra giusto. Questo dovrebbe essere piuttosto drawHistogram
-//il calcolo di miY e maxY mi pare sia superflo. Se non erro già la classe histogram li ha dentro (cmq mi pare vengano calcolati in ComputePerVertexQualityMinMax)
-//se proprio vanno calcolati minY e maxY, maxY può essere inizializzato a -1 (pedantic mode)
 //_equalizerScene dovrebbe chiamarsi in realtà histogramScene
 //l'histogram e la transfer function potrebbero diventare attributi di questa classe? valutare l'impatto.
 //in generale il codice di questo metodo va ripulito un po'...
@@ -118,16 +100,11 @@ void QualityMapperDialog::initEqualizerHistogram( Histogramf& h )
 	int chartHeightForCartesians = lowerBorderForCartesians - upperBorder;
 	int yScaleStep = 5;
 
-
 	float dX = (float)chartWidth / (float)h.n;
 	float dY = (float)chartHeightForCartesians / (float)h.n;
 
-	//float maxX = float.MinValue;
-	int maxY = std::numeric_limits<int>::min();
+	int maxY = 0;
 	int minY = std::numeric_limits<int>::max();
-
-	/*std::vector<float>::iterator it;
-	for (it= h->R.begin(); it != h->R.end(); it++)*/
 
 	//processing minX, maxX, minY and maxY values
 	for (int i=0; i<h.n; i++) 
@@ -155,7 +132,7 @@ void QualityMapperDialog::initEqualizerHistogram( Histogramf& h )
 
 	//drawing chart basics
 	drawCartesianChartBasics( _equalizerScene, ui.equalizerGraphicsView );
-	QSizeF valuesStringSize;
+	//QSizeF valuesStringSize;
 	//Font f = new Font("Verdana", valuesLabelSize);
 
 	

@@ -27,9 +27,6 @@
   <property name="windowIcon" >
    <iconset resource="qualitymapper.qrc" >:/images/qualitymapper.png</iconset>
   </property>
-  <property name="toolTip" >
-   <string>gne gne gne!</string>
-  </property>
   <layout class="QVBoxLayout" >
    <item>
     <widget class="QGroupBox" name="transferFunctionGroupBox" >
@@ -312,7 +309,14 @@
       <item row="1" column="0" >
        <layout class="QHBoxLayout" >
         <item>
-         <widget class="QDoubleSpinBox" name="minSpinBox" />
+         <widget class="QDoubleSpinBox" name="minSpinBox" >
+          <property name="minimum" >
+           <double>-999.990000000000009</double>
+          </property>
+          <property name="maximum" >
+           <double>999.990000000000009</double>
+          </property>
+         </widget>
         </item>
         <item>
          <spacer>
@@ -328,7 +332,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="midSpinBox" />
+         <widget class="QDoubleSpinBox" name="midSpinBox" >
+          <property name="minimum" >
+           <double>-999.990000000000009</double>
+          </property>
+          <property name="maximum" >
+           <double>999.990000000000009</double>
+          </property>
+         </widget>
         </item>
         <item>
          <spacer>
@@ -344,7 +355,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="maxSpinBox" />
+         <widget class="QDoubleSpinBox" name="maxSpinBox" >
+          <property name="minimum" >
+           <double>-999.990000000000009</double>
+          </property>
+          <property name="maximum" >
+           <double>999.990000000000009</double>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

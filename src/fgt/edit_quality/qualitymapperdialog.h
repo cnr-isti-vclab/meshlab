@@ -22,6 +22,8 @@ using namespace vcg;
 
 
 //questa clsse l'hai creata tu? (??) MAL
+//l'ho ripresa da meshcolorize perché mi serviva per utilizzare altro codice copiato. ;-) Dobbiamo valutare se mantenerla UCCIO
+// QualityMapperSettings stores all the settings that should be inserted in QualityMapperDialog fields
 class QualityMapperSettings
 {
 public:
@@ -70,7 +72,8 @@ private:
 	QGraphicsScene	_equalizerScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
 	QGraphicsScene	_transferFunctionScene;
 
-	//questi parametri variano a seconda del grafico che si sta disegnando
+	//questi parametri variano a seconda del grafico che si sta disegnando MAL
+	//in effetti si, a parte forse border, leftBorder, rightBorder, upperBorder che potrebbero essere gli stessi UCCIO
 	int border;
 	int chartRectangleThickness;
 	int leftBorder;

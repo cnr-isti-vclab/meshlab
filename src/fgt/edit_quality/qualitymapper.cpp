@@ -31,11 +31,11 @@ Beginning
 #include <QtGui>
 #include <limits>
 #include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
+
 #include <vcg/complex/trimesh/update/flag.h>
 // #include "color_manifold.h"
-#include "../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
-#include "../../meshlabplugins/meshcolorize/equalizerDialog.h"	//for EqualizerSettings
+
+//#include "../../meshlabplugins/meshcolorize/equalizerDialog.h"	//for EqualizerSettings
 // #include "smoothcolor.h"
 #include <vcg/space/triangle3.h> //for quality
 
@@ -114,8 +114,8 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 	}
 
 	//building up histogram...
-	QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, _histogram, 100);
 	Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
+	QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, mmmq, _histogram, 100);
 	//...histogram built
 
 	//setting and applying settings to dialog (??) MAL
@@ -146,11 +146,10 @@ void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
 	}
 }
 
-void QualityMapperPlugin::ComputePerVertexQualityHistogram( CMeshO & m, Histogramf &h, int bins=10000)    // V1.0
+void QualityMapperPlugin::ComputePerVertexQualityHistogram( CMeshO & m, Frange range, Histogramf &h, int bins=10000)    // V1.0
       {
         h.Clear();
-        std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m);
-        h.SetRange( minmax.first,minmax.second, bins);
+		h.SetRange( range.minV, range.maxV, bins);
         CMeshO::VertexIterator vi;
         for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
           if(!(*vi).IsD()) h.Add((*vi).Q());

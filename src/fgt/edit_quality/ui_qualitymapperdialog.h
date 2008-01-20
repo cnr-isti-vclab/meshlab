@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'qualitymapperdialog.ui'
 **
-** Created: Thu 17. Jan 22:33:05 2008
+** Created: Sun 20. Jan 13:31:18 2008
 **      by: Qt User Interface Compiler version 4.3.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -288,6 +288,8 @@ public:
     hboxLayout4->setObjectName(QString::fromUtf8("hboxLayout4"));
     minSpinBox = new QDoubleSpinBox(equalizerGroupBox);
     minSpinBox->setObjectName(QString::fromUtf8("minSpinBox"));
+    minSpinBox->setMinimum(-999.99);
+    minSpinBox->setMaximum(999.99);
 
     hboxLayout4->addWidget(minSpinBox);
 
@@ -297,6 +299,8 @@ public:
 
     midSpinBox = new QDoubleSpinBox(equalizerGroupBox);
     midSpinBox->setObjectName(QString::fromUtf8("midSpinBox"));
+    midSpinBox->setMinimum(-999.99);
+    midSpinBox->setMaximum(999.99);
 
     hboxLayout4->addWidget(midSpinBox);
 
@@ -306,6 +310,8 @@ public:
 
     maxSpinBox = new QDoubleSpinBox(equalizerGroupBox);
     maxSpinBox->setObjectName(QString::fromUtf8("maxSpinBox"));
+    maxSpinBox->setMinimum(-999.99);
+    maxSpinBox->setMaximum(999.99);
 
     hboxLayout4->addWidget(maxSpinBox);
 
@@ -358,7 +364,6 @@ public:
     void retranslateUi(QDialog *QualityMapperDialogClass)
     {
     QualityMapperDialogClass->setWindowTitle(QApplication::translate("QualityMapperDialogClass", "Quality Mapper Dialog", 0, QApplication::UnicodeUTF8));
-    QualityMapperDialogClass->setToolTip(QApplication::translate("QualityMapperDialogClass", "gne gne gne!", 0, QApplication::UnicodeUTF8));
     transferFunctionGroupBox->setTitle(QApplication::translate("QualityMapperDialogClass", "Transfer Function", 0, QApplication::UnicodeUTF8));
     transferFunctionEditBox->setTitle(QApplication::translate("QualityMapperDialogClass", "Transfer Function Edit", 0, QApplication::UnicodeUTF8));
     channelBox->setToolTip(QApplication::translate("QualityMapperDialogClass", "Choose the channel to edit", 0, QApplication::UnicodeUTF8));
