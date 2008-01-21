@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'qualitymapperdialog.ui'
 **
-** Created: Sun 20. Jan 13:31:18 2008
+** Created: Mon 21. Jan 16:14:15 2008
 **      by: Qt User Interface Compiler version 4.3.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!

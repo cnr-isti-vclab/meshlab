@@ -46,8 +46,60 @@ public:
 		range=500;
 		meshMaxQ=meshMinQ=meshMidQ=manualMaxQ=manualMinQ=manualMidQ=0.0f;
 		//useManual=false;
-	};
+	}
 };
+
+
+//questa dovrebbe essere trasferita in util.h
+struct CHART_INFO
+{
+	int leftBorder;
+	int rightBorder;
+	int upperBorder;
+	int lowerBorder;
+	float chartWidth;
+	float chartHeight;
+	int numOfItems;
+	int	  yScaleStep;
+	int maxRoundedY;
+	float minX;
+	float maxX;
+	float minY;
+	float maxY;
+	float dX;
+	float dY;
+	float variance;						//variance of y values
+
+	CHART_INFO(int view_width, int view_height, int num_of_items=1, float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
+	{
+		assert(num_of_items != 0);
+
+		leftBorder	= CANVAS_BORDER_DISTANCE;
+		rightBorder	= view_width - CANVAS_BORDER_DISTANCE;
+		upperBorder	= CANVAS_BORDER_DISTANCE;
+		lowerBorder	= view_height - CANVAS_BORDER_DISTANCE;
+		chartWidth = rightBorder - leftBorder;
+		chartHeight = lowerBorder - upperBorder;
+		numOfItems = num_of_items;
+		yScaleStep = Y_SCALE_STEP;
+		this->updateMinMax( min_X, max_X, min_Y, max_Y );
+
+		dX = chartWidth / (float)numOfItems;
+		dY = chartHeight / (float)numOfItems;
+	}
+	inline void updateMinMax( float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
+	{
+		minX = min_X;
+		maxX = max_X;
+		minY = min_Y;
+		maxY = max_Y;
+		maxRoundedY = (int)(maxY + Y_SCALE_STEP - (relative2AbsoluteVali(maxY, maxY) % Y_SCALE_STEP));    //the highest value represented in the y values scale
+		variance = maxY - minY;          //variance of y values
+	}
+};
+
+
+
 
 class QualityMapperDialog : public QDialog
 {
@@ -60,26 +112,24 @@ public:
 	void setValues(const QualityMapperSettings& qms);
 	QualityMapperSettings getValues();
 
-	void drawCartesianChartBasics(QGraphicsScene& scene, QGraphicsView *view /*, float maxRoundedY*/);	//controllare il puntatore alla vista (!!) MAL
-	void initEqualizerHistogram(vcg::Histogramf& h);
+	void drawChartBasics(QGraphicsScene& scene, QGraphicsView *view, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
+	void initEqualizerHistogram( vcg::Histogramf& h );
 	void drawTransferFunction( TransferFunction& tf);
-	
-	
 
 private:
 	Ui::QualityMapperDialogClass ui;
 	QualityMapperSettings _settings;
+
+	CHART_INFO		*_histogram_info;
 	QGraphicsScene	_equalizerScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
+
+	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
+
 
 	//questi parametri variano a seconda del grafico che si sta disegnando MAL
 	//in effetti si, a parte forse border, leftBorder, rightBorder, upperBorder che potrebbero essere gli stessi UCCIO
-	int border;
-	int chartRectangleThickness;
-	int leftBorder;
-    int rightBorder;
-    int upperBorder;
-    int lowerBorderForCartesians;
+
 
 
 	private slots:

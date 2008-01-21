@@ -124,6 +124,7 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 	_qmSettings.meshMidQ = (mmmq.minV+mmmq.maxV)/2;
 	_qualityMapperDialog->setValues(_qmSettings);
 
+
 	//drawing histogram in dialog(??) MAL
 	_qualityMapperDialog->initEqualizerHistogram(_histogram);
 

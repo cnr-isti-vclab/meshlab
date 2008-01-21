@@ -117,6 +117,8 @@ public:
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
 
+	int		size()	{	return KEYS.size();	}
+
 #ifdef NOW_TESTING
 	void testInitChannel();
 #endif
@@ -145,6 +147,15 @@ public:
 
 	void buildColorBand();
 	void saveColorBand();
+	int size()	
+	{
+		int result = 0;
+		for (int i=0; i<NUMBER_OF_CHANNELS; i++)
+			if ( _channels[i].size() > result )
+				result = _channels[i].size();
+
+		return result;
+	}
 };
 
 #endif
