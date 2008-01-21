@@ -5,4 +5,3 @@
 16.51 18/01/2008	collassare i 2 (eventuali) nodi una chiave posta in 0.0 o 1.0 ad un solo nodo (quello di giunzione)
 23.03 19/01/2008	implementare la creazione di una Transfer Function partendo da un file csv e l'esportazione nello stesso formato
 15.33 20/01/2008	da implementare per Transfer Function: 1. se si fa doppio click in un punto vuoto del grafico va creata una nuova key in quel punto. Se si fa doppio click in su un punto della transfer function: - se il punto è l'upper o il lower di una chiave, questa collassa. - Se upper e lower coincidono, la chiave viene completamente rimossa.
-15.37 20/01/2008	rinominare il TARGET nel .pro in "editQuality" o "editQualityMapper"

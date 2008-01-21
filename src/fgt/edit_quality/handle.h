@@ -1,5 +1,5 @@
-#ifndef HANDLE_H
-#define HANDLE_H
+#ifndef _HANDLE_H_
+#define _HANDLE_H_
 
 //#include <QObject>
 #include <QGraphicsItem>
@@ -10,12 +10,12 @@ enum SHAPE
 	NUMBER_OF_SHAPES
 };
 
-class Handle : public QGraphicsItem
+class Handle : public QObject, QGraphicsItem
 {
 	Q_OBJECT
 
 public:
-	Handle(int,SHAPE);
+	Handle(int size, SHAPE shape);
 	~Handle();
 	void setSize (int size);
 	// Overriding QGraphicsItem methods
@@ -31,6 +31,9 @@ private:
 	QColor _color;
 	SHAPE _shape;
 	int _size;
+
+private slots:
+
 };
 
 #endif // HANDLE_H
