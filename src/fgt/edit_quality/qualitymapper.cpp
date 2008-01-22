@@ -126,7 +126,7 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 
 
 	//drawing histogram in dialog(??) MAL
-	_qualityMapperDialog->initEqualizerHistogram(_histogram);
+	_qualityMapperDialog->drawEqualizerHistogram(_histogram);
 
 	//drawing transferFunction
 	_qualityMapperDialog->drawTransferFunction( _transfer_function );

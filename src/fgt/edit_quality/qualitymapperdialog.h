@@ -17,6 +17,7 @@
 #include <vcg/math/histogram.h>
 
 #include "transferfunction.h"
+#include "eqhandle.h"
 
 using namespace vcg;
 
@@ -77,7 +78,7 @@ struct CHART_INFO
 		leftBorder	= CANVAS_BORDER_DISTANCE;
 		rightBorder	= view_width - CANVAS_BORDER_DISTANCE;
 		upperBorder	= CANVAS_BORDER_DISTANCE;
-		lowerBorder	= view_height - CANVAS_BORDER_DISTANCE;
+		lowerBorder	= view_height - 4*CANVAS_BORDER_DISTANCE;
 		chartWidth = rightBorder - leftBorder;
 		chartHeight = lowerBorder - upperBorder;
 		numOfItems = num_of_items;
@@ -113,7 +114,7 @@ public:
 	QualityMapperSettings getValues();
 
 	void drawChartBasics(QGraphicsScene& scene, QGraphicsView *view, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
-	void initEqualizerHistogram( vcg::Histogramf& h );
+	void drawEqualizerHistogram( vcg::Histogramf& h );
 	void drawTransferFunction( TransferFunction& tf);
 
 private:
@@ -122,13 +123,10 @@ private:
 
 	CHART_INFO		*_histogram_info;
 	QGraphicsScene	_equalizerScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
+	EqHandle		_equalizerHandles[3];
 
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
-
-
-	//questi parametri variano a seconda del grafico che si sta disegnando MAL
-	//in effetti si, a parte forse border, leftBorder, rightBorder, upperBorder che potrebbero essere gli stessi UCCIO
 
 
 

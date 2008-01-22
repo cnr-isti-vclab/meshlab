@@ -1,11 +1,10 @@
-#include <QtGui>
+
 #include "handle.h"
 
 
-Handle::Handle(int size=10, SHAPE shape=SQUARE_SHAPE)
+Handle::Handle()
 {
-	_size = size;
-	_shape = shape;
+	_size = 10;
 	_color = QColor(Qt::black);
 
 	setCursor(Qt::OpenHandCursor);
@@ -17,23 +16,19 @@ Handle::~Handle()
 
 }
 
-void Handle::setSize(int size)
+void Handle::setSize(qreal size)
 {
 	_size = size;
+}
 
+void Handle::setColor(QColor color)
+{
+	_color = color;
 }
 
 QRectF Handle::boundingRect () const
 {
 	return QRectF(-_size/2, -_size/2, _size, _size);
-}
-
-void Handle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget /*= 0*/ )
-{
-	Q_UNUSED(option);
-     Q_UNUSED(widget);
-	painter->drawRect(-_size/2, -_size/2, _size, _size);
-
 }
 
 
@@ -49,17 +44,7 @@ void Handle::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	
 } 
 
-void Handle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-	QMimeData *data = new QMimeData;
-	
-	data->setColorData(Qt::green);
 
-	QDrag *drag = new QDrag(event->widget());
-	drag->setMimeData(data);
-	drag->start();
-	//setCursor(Qt::OpenHandCursor);
-}
 
 void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {

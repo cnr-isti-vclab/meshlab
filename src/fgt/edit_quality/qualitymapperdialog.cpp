@@ -63,12 +63,10 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, QGraphicsView *
 	scene.addLine( chart_info->leftBorder, chart_info->upperBorder, chart_info->leftBorder, chart_info->lowerBorder, p );
 }
 
-
-//il nome non mi sembra giusto. Questo dovrebbe essere piuttosto drawHistogram
 //_equalizerScene dovrebbe chiamarsi in realtà histogramScene
 //l'histogram e la transfer function potrebbero diventare attributi di questa classe? valutare l'impatto.
 //in generale il codice di questo metodo va ripulito un po'...
-void QualityMapperDialog::initEqualizerHistogram( Histogramf& h )
+void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 {
 	//building histogram chart informations
 	if ( _histogram_info == 0 )
@@ -112,6 +110,20 @@ void QualityMapperDialog::initEqualizerHistogram( Histogramf& h )
 
 		//drawing histogram bar
 		_equalizerScene.addRect(startBarPt.x(), startBarPt.y(), barSize.width(), barSize.height(), drawingPen, drawingBrush);
+	}
+
+	//drawing handles
+	QColor colors[] = { QColor(Qt::red), QColor(Qt::green), QColor(Qt::blue) };
+
+	qreal xStart = _histogram_info->leftBorder;
+	qreal xPos = 0.0;
+	qreal yPos = _histogram_info->lowerBorder;
+	for (int i=0; i<3; i++)
+	{
+		xPos = xStart + _histogram_info->chartWidth/2*i;
+		_equalizerScene.addItem(&_equalizerHandles[i]);
+		_equalizerHandles[i].setColor(colors[i]);
+		_equalizerHandles[i].setPos(xPos, yPos);
 	}
 
 	ui.equalizerGraphicsView->setScene(&_equalizerScene);

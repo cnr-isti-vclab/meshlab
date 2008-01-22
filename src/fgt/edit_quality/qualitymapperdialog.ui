@@ -279,6 +279,9 @@
         <property name="frameShadow" >
          <enum>QFrame::Sunken</enum>
         </property>
+        <property name="dragMode" >
+         <enum>QGraphicsView::NoDrag</enum>
+        </property>
        </widget>
       </item>
       <item row="0" column="1" >
