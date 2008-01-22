@@ -34,9 +34,12 @@ protected:
 	qreal _size;
 
 private:
-	
+
+signals:
+	void positionChanged(QPointF);
 
 private slots:
+	
 
 };
 

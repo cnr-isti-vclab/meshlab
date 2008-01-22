@@ -97,20 +97,9 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 	if(_qualityMapperDialog==0)
 	{
 		//_qualityMapperDialog=new _qualityMapperDialog(gla->parentWidget()->parentWidget());
+
 		_qualityMapperDialog = new QualityMapperDialog(gla->window());
-		// 		connect(_qualityMapperDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
-		// 		connect(_qualityMapperDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
-		// 		connect(_qualityMapperDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
-		// 		connect(_qualityMapperDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
-		// 		connect(_qualityMapperDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
-		// 		connect(_qualityMapperDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
-		// 		connect(_qualityMapperDialog->ui.falseColorCB, SIGNAL(clicked(bool)) , _gla->window(),  SLOT(updateGL() ) );
-
-//		Histogramf h;
-
-		// _qmSettings.histoMinQ = H.Percentile(_qmSettings.percentile/100);
-		// _qmSettings.histoMaxQ = H.Percentile(1.0f-_qmSettings.percentile/100);
-
+		
 	}
 
 	//building up histogram...

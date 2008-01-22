@@ -37,3 +37,9 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	drag->start();*/
 	setCursor(Qt::OpenHandCursor);
 }
+
+void EqHandle::moveBy(double offset)
+{
+	QPointF itemPos = pos();
+	setPos(itemPos.x()+offset, itemPos.y());
+}

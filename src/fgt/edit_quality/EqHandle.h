@@ -22,6 +22,10 @@ protected:
 
 private:
 	qreal _barHeight;
+
+private slots:
+	// changing equalizer spinboxes moves the connected handle
+	void moveBy (double offset);
 };
 
 #endif // EQHANDLE_H

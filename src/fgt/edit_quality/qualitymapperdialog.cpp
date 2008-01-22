@@ -10,6 +10,11 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent)
 	ui.setupUi(this);
 	_histogram_info = 0;
 	_transferFunction_info = 0;
+
+	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(moveBy(double)));
+	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[1], SLOT(moveBy(double)));
+	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[2], SLOT(moveBy(double)));
+
 }
 
 QualityMapperDialog::~QualityMapperDialog()
