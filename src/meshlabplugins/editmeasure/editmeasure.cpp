@@ -203,16 +203,15 @@ void EditMeasurePlugin::RenderLabel(int x, int y, QString text,GLArea * gla)
 								glVertex2f(x+brec.left()-offset,y+brec.top()-offset);
 				glEnd();
  glColor3f(1,1,1);
- gla->renderText(x,y,0.0f,text,qFont);
+ gla->renderText(x,y,0.99f,text,qFont);
 		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
-		glPopAttrib();
- 
-
- 
+		glPopAttrib();  
 }
+
+
 Point3f EditMeasurePlugin::PixelConvert(vcg::Point3f pointA)
 {
 	GLint			viewportV[4];
