@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.7  2008/01/22 14:22:24  sherholz
+Changed type checking, when saving the script file, from "fieldVal.type() == Variant::" to "fieldType == FilterParameter::"; Now parameter of type AbsPerc, Color or Enum can be saved and loaded.
+
 Revision 1.6  2007/10/02 07:59:42  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -82,24 +85,44 @@ bool FilterScript::save(QString filename)
       QDomElement parElem = doc.createElement("Param");
       parElem.setAttribute("name",(*jj).fieldName);
 
-      if((*jj).fieldVal.type()==QVariant::Bool) { 
+      if((*jj).fieldType == FilterParameter::PARBOOL) { 
         parElem.setAttribute("type","Bool");
         parElem.setAttribute("value",(*jj).fieldVal.toString());
       }
-      if((*jj).fieldVal.type()==QVariant::String) {
+      if((*jj).fieldType == FilterParameter::PARSTRING) {
         parElem.setAttribute("type","String");
         parElem.setAttribute("value",(*jj).fieldVal.toString());
       }
-      if((*jj).fieldVal.type()==QVariant::Int) {
+      if((*jj).fieldType == FilterParameter::PARINT) {
         parElem.setAttribute("type","Int");
         parElem.setAttribute("value",(*jj).fieldVal.toInt());
       }
-      if((*jj).fieldVal.type()==QVariant::Double) {
+      if((*jj).fieldType == FilterParameter::PARFLOAT) {
         parElem.setAttribute("type","Float");
         parElem.setAttribute("value",(*jj).fieldVal.toString());
       }
+      if((*jj).fieldType == FilterParameter::PARABSPERC) {
+        parElem.setAttribute("type","AbsPec");
+        parElem.setAttribute("value",(*jj).fieldVal.toString());
+        parElem.setAttribute("min",QString::number((*jj).min));
+        parElem.setAttribute("max",QString::number((*jj).max));
+      }
+      if((*jj).fieldType == FilterParameter::PARCOLOR) {
+        parElem.setAttribute("type","Color");
+        parElem.setAttribute("rgb",(*jj).fieldVal.toString());
+      }
+      if((*jj).fieldType == FilterParameter::PARENUM) {
+        parElem.setAttribute("type","Enum");
+        parElem.setAttribute("value",(*jj).fieldVal.toString());
+        QStringList::iterator kk;
+        for(kk = (*jj).enumValues.begin();kk!=(*jj).enumValues.end();++kk){
+        	QDomElement sElem = doc.createElement("EnumString");
+        	sElem.setAttribute("value",(*kk));
+        	parElem.appendChild(sElem);
+        }
+      }
 
-      if((*jj).fieldVal.type()==QVariant::List) {
+      if((*jj).fieldType == FilterParameter::PARMATRIX) {
         parElem.setAttribute("type","Matrix44");
         QList<QVariant> matrixVals = (*jj).fieldVal.toList();
         for(int i=0;i<16;++i)
@@ -111,7 +134,7 @@ bool FilterScript::save(QString filename)
   }
   QFile file(filename);
   file.open(QIODevice::WriteOnly);
-	QTextStream qstream(&file);
+  QTextStream qstream(&file);
   doc.save(qstream,1);
   file.close();
   return true;
@@ -146,7 +169,16 @@ bool FilterScript::open(QString filename)
                         if(type=="Int")     par.addInt(name,np.attribute("value").toInt());
                         if(type=="Float")   par.addFloat(name,np.attribute("value").toDouble());
                         if(type=="String")  par.addString(name,np.attribute("value"));
+                        if(type=="AbsPec")  par.addAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat());
+                        if(type=="Color")	par.addColor(name,QColor::QColor(np.attribute("rgb").toUInt()));
                         if(type=="Matrix44")par.addMatrix44(name,getMatrix(&np));                        
+                        if(type=="Enum"){
+                        	QStringList list = QStringList::QStringList();
+                        	for(QDomElement ns = np.firstChildElement("EnumString"); !ns.isNull(); ns = ns.nextSiblingElement("EnumString")){
+                        		list<<ns.attribute("value");
+                        	}
+                        	par.addEnum(name,np.attribute("value").toInt(),list);
+                        }
                       }
                    actionList.append(qMakePair(name,par));
              }
