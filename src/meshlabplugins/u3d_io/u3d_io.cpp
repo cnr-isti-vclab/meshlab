@@ -30,7 +30,7 @@ QString U3DIOPlugin::computePluginsPath()
 			pluginsDir.cd("U3D_W32");
 		#elif defined(Q_OS_MAC)
 				pluginsDir.cd("U3D_OSX");
-		#elif
+		#elif defined(Q_OS_LINUX)
 				pluginsDir.cd("U3D_LINUX");
 		#endif
 		qDebug("U3D plugins dir %s", qPrintable(pluginsDir.absolutePath()));
