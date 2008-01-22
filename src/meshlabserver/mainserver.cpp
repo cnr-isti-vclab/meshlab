@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2008/01/22 14:18:27  sherholz
+Added support for .mlx filter scripts
+
 Revision 1.6  2007/04/16 10:02:15  cignoni
 Again on the cm() ->cm issue
 
@@ -55,6 +58,7 @@ Added copyright info
 #include <QApplication>
 #include "../meshlab/meshmodel.h"
 #include "../meshlab/interfaces.h"
+#include "../meshlab/filterScriptDialog.h"
 #include "../meshlab/plugin_support.h"
 
 QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
@@ -84,15 +88,15 @@ void loadPlugins()
 			//MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
 						
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-			if (iFilter)
-      { 
-        QAction *filterAction;
-        foreach(filterAction, iFilter->actions())
-          filterMap[filterAction->text()]=filterAction;
-        printf("Loaded %i filtering actions form %s\n",filterMap.size(),qPrintable(fileName));
-       }
+		  if (iFilter){ 
+			  
+	        QAction *filterAction;
+	        foreach(filterAction, iFilter->actions())
+	        filterMap[filterAction->text()]=filterAction;
+	        printf("Loaded %i filtering actions form %s\n",filterMap.size(),qPrintable(fileName));
+	       }
 		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-			if (iIO)	meshIOPlugins.push_back(iIO);
+		  if (iIO)	meshIOPlugins.push_back(iIO);
       
 
 //	    pluginfileNames += fileName;
@@ -183,17 +187,55 @@ bool Save(MeshModel &mm, QString fileName)
 }
 
 
+bool Script(MeshModel& mm, QString scriptfile){
+	
+	FilterScript scriptPtr;
+	
+	//Open/Load FilterScript 
+	
+	if (scriptfile.isEmpty())	return false;
+	scriptPtr.open(scriptfile);
+	
+	FilterScript::iterator ii;
+	for(ii = scriptPtr.actionList.begin();ii!= scriptPtr.actionList.end();++ii){
+		FilterParameterSet &par=(*ii).second;
+		QString &name = (*ii).first;
+		printf("filter: %s\n",qPrintable((*ii).first));
+		
+		QAction *action = filterMap[ (*ii).first];
+		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+		iFilter->setLog(NULL);
+		int req=iFilter->getRequirements(action);
+		mm.updateDataMask(req);
+
+		bool ret = iFilter->applyFilter( action, mm, (*ii).second, NULL);
+
+		//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
+		//GLA()->log.Logf(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
+
+	}
+	
+	
+	
+}
+
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);  
-  loadPlugins();
-  MeshModel mm;
-	if(argc>1)	
-  {
-    Open(mm,argv[1]);
-    printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
-    Save(mm,argv[2]);    
-  }
+	loadPlugins();
+	MeshModel mm;
+	if(argc==3)	
+	{
+		Open(mm,argv[1]);
+		printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
+		Save(mm,argv[2]);    
+	}else if(argc == 4){
+		Open(mm,argv[1]);
+		printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
+		printf("Apply FilterScript:\n");
+		Script(mm,argv[3]);
+		Save(mm,argv[2]);
+	}
   else exit(-1);
 
 	//return app.exec();
