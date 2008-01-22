@@ -75,38 +75,51 @@ void SampleEditPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 {
 	if(haveToPick)
 	{
+		glPushMatrix();
+		glMultMatrix(m.cm.Tr);
 		vector<CMeshO::FacePointer> NewSel;  
 		GLPickTri<CMeshO>::PickFace(cur.x(), gla->height() - cur.y(), m.cm, NewSel);
 		if(NewSel.size()>0)
-				curFacePtr=NewSel.front();
+		curFacePtr=NewSel.front();
 		haveToPick=false;
+		glPopMatrix();
 	}   
  if(curFacePtr)
  {
-	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
+	glPushMatrix();
+	glMultMatrix(m.cm.Tr);
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
+	glLineWidth(2.0f);
+	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_DEPTH_TEST); 
+	glDepthMask(GL_FALSE);
+	
 	glDisable(GL_LIGHTING);
 	glColor(Color4b::DarkRed);
-	glBegin(GL_LINE_LOOP);
-		glVertex(curFacePtr->P(0));
-		glVertex(curFacePtr->P(1));
-		glVertex(curFacePtr->P(2));
-	glEnd();
-	for(int i=0;i<3;++i)
-		gla->renderText(curFacePtr->P(i)[0],curFacePtr->P(i)[1],curFacePtr->P(i)[2],
-										QString("v%1:%2").arg(i).arg(curFacePtr->V(i) - &m.cm.vert[0]), qFont);
+	drawFace(curFacePtr,m,gla);
+	
+	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST); 
+	glDepthFunc(GL_LESS);
 	glColor(Color4b::Red);
+	drawFace(curFacePtr,m,gla);
+	glPopAttrib();
+	glPopMatrix();
+ }
+}
+
+void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla)
+{
 	glBegin(GL_LINE_LOOP);
-		glVertex(curFacePtr->P(0));
-		glVertex(curFacePtr->P(1));
-		glVertex(curFacePtr->P(2));
+		glVertex(fp->P(0));
+		glVertex(fp->P(1));
+		glVertex(fp->P(2));
 	glEnd();
 	for(int i=0;i<3;++i)
-		gla->renderText(curFacePtr->P(i)[0],curFacePtr->P(i)[1],curFacePtr->P(i)[2],
-										QString("v%1:%2").arg(i).arg(curFacePtr->V(i) - &m.cm.vert[0]), qFont);
-	glPopAttrib();
- }
+		{
+			QString buf=QString("v%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
+			gla->renderText(fp->P(i)[0], fp->P(i)[1], fp->P(i)[2], buf, qFont);
+		}
 }
 
 void SampleEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla )

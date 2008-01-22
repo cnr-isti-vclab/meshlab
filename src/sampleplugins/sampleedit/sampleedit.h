@@ -51,6 +51,8 @@ public:
     virtual void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
 		virtual QList<QAction *> actions() const ;
+		
+		void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea * gla);
 
     QPoint cur;
 		QFont qFont;
