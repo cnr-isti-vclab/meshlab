@@ -171,6 +171,43 @@ UINT8 TfChannel::getChannelValueb(float x_position)
 //	return (UINT8)(this->getChannelValuef(x_position) * 255.0f);
 }
 
+TF_KEY* TfChannel::operator [](int i)
+{
+	assert((i>=0) && (i<=this->size()));
+
+	if ( i == 0)
+	{
+		//indexing the first item of the list
+		idx_it=KEYS.begin();
+	}
+	else
+	{
+		//now indexing the successive item in the list respect to the previous one
+		if ( old_iterator_idx == i-1 )
+		{
+			idx_it ++;
+		}
+		else
+		{
+			//now indexing the previous item in the list respect to the previous one
+			if ( old_iterator_idx == i+1 )
+			{
+				idx_it --;
+			}
+			else
+			{
+				idx_it = KEYS.begin();
+				for(int k=0; k<i; k++)
+					idx_it ++;
+			}
+		}
+	}
+	old_iterator_idx = i;
+
+	return &(idx_it->second);
+}
+
+
 #ifdef NOW_TESTING
 void TfChannel::testInitChannel()
 {
@@ -230,6 +267,16 @@ void TransferFunction::initTF()
 }
 
 
+int TransferFunction::size()
+{
+	int result = 0;
+	for (int i=0; i<NUMBER_OF_CHANNELS; i++)
+		if ( _channels[i].size() > result )
+			result = _channels[i].size();
+
+	return result;
+}
+
 void TransferFunction::buildColorBand()
 {
 	float relative_pos = 0.0f; 
@@ -240,4 +287,10 @@ void TransferFunction::buildColorBand()
 							   _channels[GREEN_CHANNEL].getChannelValueb( relative_pos ),
 							   _channels[BLUE_CHANNEL].getChannelValueb( relative_pos ) );
 	}
+}
+
+
+void TransferFunction::saveColorBand()
+{
+
 }

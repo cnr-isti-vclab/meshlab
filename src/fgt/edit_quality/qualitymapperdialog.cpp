@@ -87,25 +87,8 @@ void QualityMapperDialog::initEqualizerHistogram( Histogramf& h )
 		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), h.n, h.minv, h.maxv, minY, maxY );
 	}
 
-//	_equalizerScene.addText("Hello World!");
+	//drawing axis and other basic items
 	this->drawChartBasics( _equalizerScene, ui.equalizerGraphicsView, _histogram_info );
-
-// 	assert(_histogram_info != 0);
-// 
-// 	int maxY = 0;
-// 	int minY = std::numeric_limits<int>::max();
-// 
-// 	//processing minX, maxX, minY and maxY values
-// 	for (int i=0; i<_histogram_info->numOfItems; i++) 
-// 	{
-// 		if (h.H[i] > maxY)
-// 			maxY = h.H[i];
-// 
-// 		if (h.H[i] < minY)
-// 			minY = h.H[i];
-// 	}
-
-//	_histogram_info->updateMinMax( h.minv, h.maxv, minY, maxY );
 
 	float barHeight = 0.0f;					//initializing height of the histogram bars
 	float barWidth = _histogram_info->dX;	//processing width of the histogram bars (4\5 of dX)
@@ -141,101 +124,59 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 	if ( _transferFunction_info == 0 )
 		_transferFunction_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), tf.size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
+	//drawing axis and other basic items
 	this->drawChartBasics( _transferFunctionScene, ui.transferFunctionView, _transferFunction_info );
-	_transferFunctionScene.addLine(0, 0, 100, 430, QPen(Qt::green, 3));
-	ui.transferFunctionView->setScene( &_transferFunctionScene );
 
-/*
+//	_transferFunctionScene.addLine(0, 0, 100, 430, QPen(Qt::green, 3));
 
-	float dX = Convert.ToSingle(chartWidth) / values.Length;
-	float dY = Convert.ToSingle(chartHeightForCartesians) / values.Length;
+	//questo per il momento è fisso e definito quì, ma dovrà essere gestito nella classe handle
+	int pointMarkerRadius = 1;
+	QPointF pointToRepresent;
+	QPointF previousPoint;
+	QRectF pointRect(0, 0, 2.0*pointMarkerRadius, 2.0*pointMarkerRadius );
 
-	//Single maxX = Single.MinValue;
-	float maxY = Single.MinValue;
-	float minY = Single.MaxValue;
+	QColor channelColor;
+	QPen drawingPen(Qt::black);
+	QBrush drawingBrush ( QColor(32, 32, 32), Qt::SolidPattern );
 
-	//processing minX, maxX, minY and maxY values
-	for (int i = 0; i < values.Length; i++)
-	{
-		/ *
-		if (Convert.ToSingle(values[i].xValue) > maxX)
-		maxX = Convert.ToSingle(values[i].xValue);* /
-
-		if (values[i].yValue > maxY)
-			maxY = values[i].yValue;
-
-		if (values[i].yValue < minY)
-			minY = values[i].yValue;
-	}
-
-	int maxRoundedY = Convert.ToInt32(Math.Floor(maxY + yScaleStep - (maxY % yScaleStep)));    //the highest value represented in the y values scale
-	float variance = maxY - minY;                                               //variance of y values
-	Point3f pointToRepresent = new PointF();
-	Point3f previousPoint = new PointF();
-
-	QPen drawingPen = new Pen(Color.Navy);
-	QBrush drawingBrush = new SolidBrush(Color.Navy);
-
-	Color4f valuesColor;
-	int pointMarkerRadius = 3;
-
-	//drawing chart basics
-	this->drawCartesianChartBasics( _transferFunctionScene, ui.transferFunctionView );
-	SizeF valuesStringSize;
-	Font f = new Font("Verdana", valuesLabelSize);
-	RectangleF pointRect = new RectangleF();
 
 	//drawing chart points
-	for (int i = 0; i < values.Length; i++)
+//	TfChannel *tf_c = 0;
+	TF_KEY *key = 0;
+	for(int i=0; i<NUMBER_OF_CHANNELS; i++)
 	{
-		pointToRepresent.Y = lowerBorderForCartesians - Convert.ToSingle(chartHeightForCartesians) * values[i].yValue / maxRoundedY;
-		pointToRepresent.X = leftBorder + (dX * i);
-
-		//drawing single current point
-		pointRect.X = pointToRepresent.X - pointMarkerRadius;
-		pointRect.Y = pointToRepresent.Y - pointMarkerRadius;
-		pointRect.Width = 2 * pointMarkerRadius;
-		pointRect.Height = 2 * pointMarkerRadius;
-		g.DrawEllipse(drawingPen, pointRect);
-		g.FillEllipse(drawingBrush, pointRect);
-
-		//linear interpolation between current point and previous one
-		//interpolation will not be executed if the current point is the first of the list
-		if (i > 0)
-			g.DrawLine(drawingPen, previousPoint, pointToRepresent);
-
-		//refresh of previous point.
-		//So, it's possible to interpolate linearly the current point with the previous one
-		previousPoint = pointToRepresent;
-
-		//DRAWING POINT (NUMERIC) VALUE
-		valuesStringSize = g.MeasureString(values[i].yValue.ToString(), f);
-
-		//choosing text color (red for min and max value, white else)
-		if ((values[i].yValue == maxY) || (values[i].yValue == minY))
-			valuesColor = Color.Red;
-		else
-			valuesColor = Color.Gray;
-
-		//if the point is too low...
-		if (lowerBorderForCartesians - pointToRepresent.Y < (valuesStringSize.Height + chartRectangleThickness))
-			pointToRepresent.Y -= (valuesStringSize.Height + chartRectangleThickness);
-
-		//if there's space enough between consecutive points to contain a numeric value...
-		//the value is written only if there's space enough between the bars or if the value to represent is the min or the max value
-		if ((dX >= (valuesStringSize.Width * 0.9F)) || (valuesColor == Color.Red))
+//		tf_c = tf[i];
+		for (int j=0; j<tf[i].size(); j++)
 		{
-			this.writeString(g, Convert.ToString(values[i].yValue), valuesLabelSize, valuesColor, Positions.Custom, pointToRepresent);
+			key = tf[i][j];
 		}
 	}
+/*
+		for (int i = 0; i < values.Length; i++)
+		{
+			pointToRepresent.setX(_transferFunction_info->lowerBorder - (float)_transferFunction_info->chartHeight * values[i].yValue / _transferFunction_info->maxRoundedY);
+			pointToRepresent.setY(_transferFunction_info->leftBorder + (_transferFunction_info->dX * i));
+	
+			//drawing single current point
+			pointRect.setX(pointToRepresent.x() - pointMarkerRadius );
+			pointRect.setY(pointToRepresent.y() - pointMarkerRadius );
+			_transferFunctionScene.addEllipse( pointRect, drawingPen, drawingBrush );
+	//		_transferFunctionScene.FillEllipse( drawingBrush, pointRect );
+	
+			//linear interpolation between current point and previous one
+			//interpolation will not be executed if the current point is the first of the list
+			if (i > 0)
+				_transferFunctionScene.addLine(drawingPen, previousPoint, pointToRepresent);
+	
+			//refresh of previous point.
+			//So, it's possible to interpolate linearly the current point with the previous one
+			previousPoint = pointToRepresent;
+	
+	// 		//if the point is too low...
+	// 		if (lowerBorderForCartesians - pointToRepresent.Y < (valuesStringSize.Height + chartRectangleThickness))
+	// 			pointToRepresent.Y -= (valuesStringSize.Height + chartRectangleThickness);
+		}*/
+	
 
-*/
-
-
-
-
-
-
-
-
+	ui.transferFunctionView->setScene( &_transferFunctionScene );
 }

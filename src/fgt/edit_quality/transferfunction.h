@@ -23,6 +23,7 @@
 #ifndef _TRANSFER_FUNCTION_H_
 #define _TRANSFER_FUNCTION_H_
 
+//eliminare questo define in fase di release
 #define NOW_TESTING
 
 
@@ -43,14 +44,16 @@ using namespace std;
 using namespace vcg;
 
 
-#define LOWER_Y	true
-#define UPPER_Y	(!LOWER_Y)
-
-
 //struct used to represent each point in the transfer function.
 //It's composed of a position on x axis and two values on the y axis (potentially the same)
 struct TF_KEY
 {
+	enum
+	{
+		LOWER_Y = 0,
+		UPPER_Y
+	};
+
 	float	y_upper;
 	float	y_lower;
 	bool	left_junction_point_code;
@@ -58,8 +61,8 @@ struct TF_KEY
 
 	float getLeftJunctionPoint() { return left_junction_point_code == LOWER_Y ? y_lower : y_upper; }
 	float getRightJunctionPoint() { return right_junction_point_code == LOWER_Y ? y_lower : y_upper; }
-	void  setLeftJunctionPoint( bool j_p )	{ left_junction_point_code = j_p; right_junction_point_code = !left_junction_point_code; }
-	void  setRightJunctionPoint( bool j_p )	{ right_junction_point_code = j_p; left_junction_point_code = !right_junction_point_code; }
+	void  setLeftJunctionPoint( bool j_p )	{ left_junction_point_code = j_p; right_junction_point_code = 1-left_junction_point_code; }
+	void  setRightJunctionPoint( bool j_p )	{ right_junction_point_code = j_p; left_junction_point_code = 1-right_junction_point_code; }
 	
 	TF_KEY( float y_up=0.0f, float y_low=0.0f )
 	{
@@ -74,11 +77,8 @@ struct TF_KEY
 	bool operator == (TF_KEY k)	{ return ( (y_lower == k.y_lower) && (y_upper == k.y_upper) ); }
 };
 
-//container of TF_KEYs
-typedef	map<float, TF_KEY> KEY_LIST;
+#define TF_KEYsize	sizeof(TF_KEY)
 
-//iterator on TF KEYs
-typedef	map<float, TF_KEY>::iterator KEY_LISTiterator;
 
 //list of channels
 enum TF_CHANNELS
@@ -89,16 +89,13 @@ enum TF_CHANNELS
 	NUMBER_OF_CHANNELS
 };
 
-
 //defines a to class to menage the keys for a single channel
 class TfChannel
 {
-private:
-	TF_CHANNELS	_type;
-
 public:
-	KEY_LIST	KEYS;
-	KEY_LISTiterator	_keys_it;
+	//container and iterator for TF KEYs
+	typedef	map<float, TF_KEY> KEY_LIST;
+	typedef	map<float, TF_KEY>::iterator KEY_LISTiterator;
 
 	TfChannel(void);
 	TfChannel(TF_CHANNELS type);
@@ -110,20 +107,27 @@ public:
 	TF_KEY	*addKey(float x, TF_KEY& new_key);
 	float	removeKey(float x);
 	float	removeKey(TF_KEY& to_remove_key);
-// 	TF_KEY	*mergeKeys(int pos1, int pos2);
-// 	TF_KEY	*mergeKeys(float x1, float x2);
 	TF_KEY	*mergeKeys(float x_pos1, TF_KEY& x_pos2);
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
 
-	int		size()	{	return KEYS.size();	}
+	TF_KEY* operator [](float i)	{ KEY_LISTiterator it= KEYS.find(i); if (it!=KEYS.end()) return &it->second; else return 0;}
+	TF_KEY* operator [](int i);
+	inline int size()	{	return KEYS.size();	}
 
 #ifdef NOW_TESTING
 	void testInitChannel();
 #endif
 
+private:
+	TF_CHANNELS	_type;
+	int old_iterator_idx;
 
+
+	//list of keys
+	KEY_LIST	KEYS;
+	KEY_LISTiterator idx_it;
 };
 
 
@@ -145,17 +149,10 @@ public:
 	TransferFunction(QString colorBandFile);
 	~TransferFunction(void);
 
+	TfChannel& operator [](int i)	{ return _channels[_channels_order[i]];	}
+	int size();
 	void buildColorBand();
 	void saveColorBand();
-	int size()	
-	{
-		int result = 0;
-		for (int i=0; i<NUMBER_OF_CHANNELS; i++)
-			if ( _channels[i].size() > result )
-				result = _channels[i].size();
-
-		return result;
-	}
 };
 
 #endif
