@@ -6,7 +6,7 @@
 #include "handle.h"
 
 /* Specific handle for equalizerHistogramScene 
-It can only be dragged horizzontally */
+It can only be dragged horizontally */
 class EqHandle : public Handle
 {
 	Q_OBJECT

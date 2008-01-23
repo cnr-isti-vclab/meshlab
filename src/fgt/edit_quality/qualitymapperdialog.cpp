@@ -51,15 +51,12 @@ QualityMapperSettings QualityMapperDialog::getValues()
 }
 
 
-void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, QGraphicsView *view, CHART_INFO *chart_info)
+void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *chart_info)
 {
-
-	//a valid view must be passed!
-	assert(view != 0);
-
+	//a valid chart_info must be passed
 	assert( chart_info != 0 );
 
-	QPen p( Qt::black, 2 );
+	QPen p( Qt::black, 1 );
 
 	//drawing axis
 	//x axis
@@ -91,7 +88,7 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 	}
 
 	//drawing axis and other basic items
-	this->drawChartBasics( _equalizerScene, ui.equalizerGraphicsView, _histogram_info );
+	this->drawChartBasics( _equalizerScene, _histogram_info );
 
 	float barHeight = 0.0f;					//initializing height of the histogram bars
 	float barWidth = _histogram_info->dX;	//processing width of the histogram bars (4\5 of dX)
@@ -119,17 +116,18 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 
 	//drawing handles
 	QColor colors[] = { QColor(Qt::red), QColor(Qt::green), QColor(Qt::blue) };
-
-	qreal xStart = _histogram_info->leftBorder;
-	qreal xPos = 0.0;
-	qreal yPos = _histogram_info->lowerBorder;
-	for (int i=0; i<3; i++)
-	{
-		xPos = xStart + _histogram_info->chartWidth/2*i;
-		_equalizerScene.addItem(&_equalizerHandles[i]);
-		_equalizerHandles[i].setColor(colors[i]);
-		_equalizerHandles[i].setPos(xPos, yPos);
-	}
+	
+		qreal xStart = _histogram_info->leftBorder;
+		qreal xPos = 0.0;
+		qreal yPos = _histogram_info->lowerBorder;
+		for (int i=0; i<3; i++)
+		{
+			xPos = xStart + _histogram_info->chartWidth/2.0*i;
+			_equalizerHandles[i].setColor(colors[i]);
+			_equalizerHandles[i].setPos(xPos, yPos);
+			_equalizerScene.addItem(&_equalizerHandles[i]);
+		}
+	
 
 	ui.equalizerGraphicsView->setScene(&_equalizerScene);
 }
@@ -139,18 +137,19 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 {
 	//building transfer function chart informations
 	if ( _transferFunction_info == 0 )
-		_transferFunction_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), tf.size(), 0.0f, 1.0f, 0.0f, 1.0f );
+		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), tf.size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//drawing axis and other basic items
-	this->drawChartBasics( _transferFunctionScene, ui.transferFunctionView, _transferFunction_info );
+	this->drawChartBasics( _transferFunctionScene, _transferFunction_info );
 
 //	_transferFunctionScene.addLine(0, 0, 100, 430, QPen(Qt::green, 3));
 
 	//questo per il momento è fisso e definito quì, ma dovrà essere gestito nella classe handle
-	int pointMarkerRadius = 1;
-	QPointF pointToRepresent;
+	QPointF pointToRepresentLeft;
+	QPointF pointToRepresentRight;
 	QPointF previousPoint;
-	QRectF pointRect(0, 0, 2.0*pointMarkerRadius, 2.0*pointMarkerRadius );
+	QRectF pointRectLeft(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
+	QRectF pointRectRight(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
 
 	QColor channelColor;
 	QPen drawingPen(Qt::black);
@@ -159,41 +158,58 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 
 	//drawing chart points
 //	TfChannel *tf_c = 0;
-	TF_KEY *key = 0;
-	for(int i=0; i<NUMBER_OF_CHANNELS; i++)
+	TF_CHANNEL_VALUE val;
+
+	for(int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
-//		tf_c = tf[i];
-		for (int j=0; j<tf[i].size(); j++)
+		TYPE_2_COLOR(tf[c].getType(), channelColor);
+		drawingPen.setColor( channelColor );
+		drawingBrush.setColor( channelColor );
+
+		for (int i=0; i<tf[c].size(); i++)
 		{
-			key = tf[i][j];
-		}
-	}
-/*
-		for (int i = 0; i < values.Length; i++)
-		{
-			pointToRepresent.setX(_transferFunction_info->lowerBorder - (float)_transferFunction_info->chartHeight * values[i].yValue / _transferFunction_info->maxRoundedY);
-			pointToRepresent.setY(_transferFunction_info->leftBorder + (_transferFunction_info->dX * i));
-	
+			val = tf[c][i];
+
+			pointToRepresentLeft.setX( _transferFunction_info->leftBorder + relative2AbsoluteValf( (* val.x), (float)_transferFunction_info->chartWidth ) );
+			pointToRepresentLeft.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getLeftJunctionPoint(), (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
+			pointToRepresentRight.setX( pointToRepresentLeft.x() );
+			pointToRepresentRight.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getRightJunctionPoint(), (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
+
 			//drawing single current point
-			pointRect.setX(pointToRepresent.x() - pointMarkerRadius );
-			pointRect.setY(pointToRepresent.y() - pointMarkerRadius );
-			_transferFunctionScene.addEllipse( pointRect, drawingPen, drawingBrush );
-	//		_transferFunctionScene.FillEllipse( drawingBrush, pointRect );
-	
+			pointRectLeft.setX(pointToRepresentLeft.x() - MARKERS_RADIUS );
+			pointRectLeft.setY(pointToRepresentLeft.y() - MARKERS_RADIUS );
+			pointRectLeft.setWidth(2.0*MARKERS_RADIUS);
+			pointRectLeft.setHeight(2.0*MARKERS_RADIUS);
+			_transferFunctionScene.addEllipse( pointRectLeft, drawingPen, drawingBrush );
+			if ( pointToRepresentLeft.y() != pointToRepresentRight.y() )
+			{
+				pointRectRight.setX(pointToRepresentRight.x() - MARKERS_RADIUS );
+				pointRectRight.setY(pointToRepresentRight.y() - MARKERS_RADIUS );
+				pointRectRight.setWidth(pointRectLeft.width());
+				pointRectRight.setHeight(pointRectLeft.height());
+				_transferFunctionScene.addEllipse( pointRectRight, drawingPen, drawingBrush );
+			}
+
+			//sostituire con disegno della TfHandle
+			
+			
+			//		_transferFunctionScene.FillEllipse( drawingBrush, pointRect );
+
 			//linear interpolation between current point and previous one
 			//interpolation will not be executed if the current point is the first of the list
 			if (i > 0)
-				_transferFunctionScene.addLine(drawingPen, previousPoint, pointToRepresent);
-	
+			{
+				_transferFunctionScene.addLine(previousPoint.x(), previousPoint.y(), pointToRepresentLeft.x(), pointToRepresentLeft.y(), drawingPen);
+
+				if ( pointToRepresentLeft.y() != pointRectRight.y() )
+					_transferFunctionScene.addLine( pointToRepresentLeft.x(), pointToRepresentLeft.y(), pointToRepresentRight.x(), pointToRepresentRight.y(), drawingPen );
+			}
+
 			//refresh of previous point.
 			//So, it's possible to interpolate linearly the current point with the previous one
-			previousPoint = pointToRepresent;
-	
-	// 		//if the point is too low...
-	// 		if (lowerBorderForCartesians - pointToRepresent.Y < (valuesStringSize.Height + chartRectangleThickness))
-	// 			pointToRepresent.Y -= (valuesStringSize.Height + chartRectangleThickness);
-		}*/
-	
+			previousPoint = pointToRepresentRight;
+		}
+	}
 
 	ui.transferFunctionView->setScene( &_transferFunctionScene );
 }

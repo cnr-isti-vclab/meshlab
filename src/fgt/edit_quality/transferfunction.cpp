@@ -1,5 +1,11 @@
 #include "transferfunction.h"
 
+//da eliminare!! MAL
+#ifdef NOW_TESTING
+#include <cmath>
+using namespace std;
+#endif
+
 
 //TRANSFER FUNCTION CHANNEL
 TfChannel::TfChannel()
@@ -171,40 +177,60 @@ UINT8 TfChannel::getChannelValueb(float x_position)
 //	return (UINT8)(this->getChannelValuef(x_position) * 255.0f);
 }
 
-TF_KEY* TfChannel::operator [](int i)
+
+TF_CHANNEL_VALUE& TfChannel::operator [](float idx)
+{
+	KEY_LISTiterator it= KEYS.find(idx);
+
+	if (it!=KEYS.end())
+	{
+		_ret_val.x=(float*)&(it->first);
+		_ret_val.y=&(it->second);
+	}
+	else
+	{
+		_ret_val.x = 0;
+		_ret_val.y = 0;
+	}
+	return _ret_val;
+}
+
+TF_CHANNEL_VALUE& TfChannel::operator [](int i)
 {
 	assert((i>=0) && (i<=this->size()));
 
 	if ( i == 0)
 	{
 		//indexing the first item of the list
-		idx_it=KEYS.begin();
+		_idx_it=KEYS.begin();
 	}
 	else
 	{
 		//now indexing the successive item in the list respect to the previous one
 		if ( old_iterator_idx == i-1 )
 		{
-			idx_it ++;
+			_idx_it ++;
 		}
 		else
 		{
 			//now indexing the previous item in the list respect to the previous one
 			if ( old_iterator_idx == i+1 )
 			{
-				idx_it --;
+				_idx_it --;
 			}
 			else
 			{
-				idx_it = KEYS.begin();
+				_idx_it = KEYS.begin();
 				for(int k=0; k<i; k++)
-					idx_it ++;
+					_idx_it ++;
 			}
 		}
 	}
 	old_iterator_idx = i;
+	_ret_val.x = (float*)&(_idx_it->first);
+	_ret_val.y = &(_idx_it->second);
 
-	return &(idx_it->second);
+	return _ret_val;
 }
 
 
@@ -214,6 +240,7 @@ void TfChannel::testInitChannel()
 	int num_of_keys = (rand() % 10) + 1;
 	float rand_x = 0.0f;
 	float rand_y = 0.0f;
+	float offset = 0.0f;
 
 	//first node\key = 0
 	this->addKey(0.0f, 0.0f, 0.0f);
@@ -221,9 +248,14 @@ void TfChannel::testInitChannel()
 	{
 		rand_x = ((rand() % 100) + 1) / 100.0f;
 		rand_y = ((rand() % 100) + 1) / 100.0f;
-		this->addKey(rand_x, rand_y+1.0f, rand_y);
+		offset = ((rand() % 100) + 1) / 100.0f;
+		if (offset > (1.0f-rand_y))
+			offset = (1.0f-rand_y);
+		this->addKey(rand_x,
+					rand_y + offset,
+					rand_y);
 	}
-	//last node\key = 0
+
 	this->addKey(1.0f, 0.0f, 0.0f);
 }
 #endif

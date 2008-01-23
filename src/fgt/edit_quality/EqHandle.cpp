@@ -20,8 +20,9 @@ void EqHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	Q_UNUSED(option);
     Q_UNUSED(widget);
 	painter->setPen(_color);
+	painter->setBrush(_color);
 	//painter->drawLine(0, -_size/2, 0, -_barHeight);
-	painter->drawRect(-_size/2, -_size/2, _size, _size);
+	painter->drawRect(-_size/2.0f, -_size/2.0f, _size, _size);
 }
 
 void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)

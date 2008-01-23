@@ -4,7 +4,7 @@
 
 Handle::Handle()
 {
-	_size = 10;
+	_size = 4.0f;
 	_color = QColor(Qt::black);
 
 	setCursor(Qt::OpenHandCursor);

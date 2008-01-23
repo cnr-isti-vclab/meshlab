@@ -44,25 +44,35 @@ using namespace std;
 using namespace vcg;
 
 
+#define LOWER_Y					0
+#define UPPER_Y					1
+#define NUMBER_OF_JUNCTION_Y	2
+
 //struct used to represent each point in the transfer function.
 //It's composed of a position on x axis and two values on the y axis (potentially the same)
 struct TF_KEY
 {
-	enum
-	{
-		LOWER_Y = 0,
-		UPPER_Y
-	};
-
 	float	y_upper;
 	float	y_lower;
-	bool	left_junction_point_code;
-	bool	right_junction_point_code;
+	int		left_junction_point_code;
+	int		right_junction_point_code;
 
-	float getLeftJunctionPoint() { return left_junction_point_code == LOWER_Y ? y_lower : y_upper; }
-	float getRightJunctionPoint() { return right_junction_point_code == LOWER_Y ? y_lower : y_upper; }
-	void  setLeftJunctionPoint( bool j_p )	{ left_junction_point_code = j_p; right_junction_point_code = 1-left_junction_point_code; }
-	void  setRightJunctionPoint( bool j_p )	{ right_junction_point_code = j_p; left_junction_point_code = 1-right_junction_point_code; }
+	float getLeftJunctionPoint()
+	{ 
+		if (left_junction_point_code == LOWER_Y)
+			return y_lower;
+		else
+			return y_upper;
+	}
+	float getRightJunctionPoint()
+	{
+		if (right_junction_point_code == LOWER_Y)
+			return y_lower;
+		else
+			return y_upper;
+	}
+	inline void  setLeftJunctionPoint( int j_p )	{ left_junction_point_code = j_p; right_junction_point_code = NUMBER_OF_JUNCTION_Y-left_junction_point_code-1; }
+	inline void  setRightJunctionPoint( int j_p )	{ right_junction_point_code = j_p; left_junction_point_code = NUMBER_OF_JUNCTION_Y-right_junction_point_code-1; }
 	
 	TF_KEY( float y_up=0.0f, float y_low=0.0f )
 	{
@@ -73,11 +83,19 @@ struct TF_KEY
 		this->setLeftJunctionPoint(LOWER_Y);
 	}
 
-	void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; }
+	inline void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; this->setLeftJunctionPoint(right_junction_point_code); }
 	bool operator == (TF_KEY k)	{ return ( (y_lower == k.y_lower) && (y_upper == k.y_upper) ); }
 };
 
 #define TF_KEYsize	sizeof(TF_KEY)
+
+struct TF_CHANNEL_VALUE
+{
+	float	*x;
+	TF_KEY	*y;
+	TF_CHANNEL_VALUE(float *x_val=0, TF_KEY *y_val=0)
+	{	x=x_val;	y=y_val;	}
+};
 
 
 //list of channels
@@ -88,6 +106,23 @@ enum TF_CHANNELS
 	BLUE_CHANNEL,
 	NUMBER_OF_CHANNELS
 };
+
+#define TYPE_2_COLOR(TYPE, COLOR) \
+	switch(TYPE) \
+	{ \
+	case RED_CHANNEL: \
+		COLOR = Qt::red; \
+		break; \
+	case GREEN_CHANNEL: \
+		COLOR = Qt::green; \
+		break; \
+	case BLUE_CHANNEL: \
+		COLOR = Qt::blue; \
+		break; \
+	default: \
+		COLOR = Qt::black; \
+		break; \
+	}
 
 //defines a to class to menage the keys for a single channel
 class TfChannel
@@ -112,8 +147,8 @@ public:
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
 
-	TF_KEY* operator [](float i)	{ KEY_LISTiterator it= KEYS.find(i); if (it!=KEYS.end()) return &it->second; else return 0;}
-	TF_KEY* operator [](int i);
+	TF_CHANNEL_VALUE& operator [](float idx);
+	TF_CHANNEL_VALUE& operator [](int idx);
 	inline int size()	{	return KEYS.size();	}
 
 #ifdef NOW_TESTING
@@ -123,11 +158,12 @@ public:
 private:
 	TF_CHANNELS	_type;
 	int old_iterator_idx;
+	TF_CHANNEL_VALUE _ret_val;
 
 
 	//list of keys
 	KEY_LIST	KEYS;
-	KEY_LISTiterator idx_it;
+	KEY_LISTiterator _idx_it;
 };
 
 

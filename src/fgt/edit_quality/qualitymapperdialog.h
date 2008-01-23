@@ -113,7 +113,7 @@ public:
 	void setValues(const QualityMapperSettings& qms);
 	QualityMapperSettings getValues();
 
-	void drawChartBasics(QGraphicsScene& scene, QGraphicsView *view, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
+	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
 	void drawEqualizerHistogram( vcg::Histogramf& h );
 	void drawTransferFunction( TransferFunction& tf);
 
