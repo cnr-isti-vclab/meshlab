@@ -12,11 +12,11 @@ typedef unsigned int		UINT32;
 
 #define COLOR_BAND_SIZE	1024
 
-#define CANVAS_BORDER_DISTANCE	10.0
+#define CANVAS_BORDER_DISTANCE	10.0f
 
 //da eliminare!!! MAL
 #define Y_SCALE_STEP			5
 
-#define MARKERS_RADIUS			2.0
+#define MARKERS_RADIUS			2.0f
 
 #endif

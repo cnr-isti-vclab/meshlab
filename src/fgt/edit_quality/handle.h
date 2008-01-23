@@ -21,6 +21,7 @@ public:
 	~Handle(void);
 	void setSize (qreal);
 	void setColor (QColor);
+	
 	// Overriding QGraphicsItem methods
 	QRectF boundingRect () const;
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) = 0; 
@@ -35,8 +36,7 @@ protected:
 
 private:
 
-signals:
-	void positionChanged(QPointF);
+
 
 private slots:
 	

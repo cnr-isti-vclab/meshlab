@@ -14,6 +14,9 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent)
 	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(moveBy(double)));
 	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[1], SLOT(moveBy(double)));
 	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[2], SLOT(moveBy(double)));
+	connect(&_equalizerHandles[0], SIGNAL(valueChanged(double)), ui.minSpinBox, SIGNAL(setValue(double)));
+	connect(&_equalizerHandles[1], SIGNAL(valueChanged(double)), ui.midSpinBox, SIGNAL(setValue(double)));
+	connect(&_equalizerHandles[2], SIGNAL(valueChanged(double)), ui.maxSpinBox, SIGNAL(setValue(double)));
 
 }
 
@@ -125,6 +128,8 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 			xPos = xStart + _histogram_info->chartWidth/2.0*i;
 			_equalizerHandles[i].setColor(colors[i]);
 			_equalizerHandles[i].setPos(xPos, yPos);
+			_equalizerHandles[i].setBarHeight(_histogram_info->chartHeight);
+			_equalizerHandles[i].setZValue(1);
 			_equalizerScene.addItem(&_equalizerHandles[i]);
 		}
 	

@@ -280,6 +280,9 @@
         <property name="frameShadow" >
          <enum>QFrame::Sunken</enum>
         </property>
+        <property name="renderHints" >
+         <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
+        </property>
         <property name="dragMode" >
          <enum>QGraphicsView::NoDrag</enum>
         </property>
@@ -315,10 +318,10 @@
         <item>
          <widget class="QDoubleSpinBox" name="minSpinBox" >
           <property name="minimum" >
-           <double>-999.990000000000009</double>
+           <double>-65537.000000000000000</double>
           </property>
           <property name="maximum" >
-           <double>999.990000000000009</double>
+           <double>65536.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -338,10 +341,10 @@
         <item>
          <widget class="QDoubleSpinBox" name="midSpinBox" >
           <property name="minimum" >
-           <double>-999.990000000000009</double>
+           <double>-65537.000000000000000</double>
           </property>
           <property name="maximum" >
-           <double>999.990000000000009</double>
+           <double>65536.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -361,10 +364,10 @@
         <item>
          <widget class="QDoubleSpinBox" name="maxSpinBox" >
           <property name="minimum" >
-           <double>-999.990000000000009</double>
+           <double>-65537.000000000000000</double>
           </property>
           <property name="maximum" >
-           <double>999.990000000000009</double>
+           <double>65536.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -455,7 +458,7 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>55</x>
+     <x>65</x>
      <y>589</y>
     </hint>
     <hint type="destinationlabel" >
