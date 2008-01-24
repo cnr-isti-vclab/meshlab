@@ -2,6 +2,7 @@
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
+#include <QFileDialog>
 
 //da eliminare!! MAL
 #ifdef NOW_TESTING
@@ -358,11 +359,9 @@ void TransferFunction::buildColorBand()
 
 void TransferFunction::saveColorBand( QString fn )
 {
-	QDir dir = QDir::current();
-	dir.mkdir(CSV_FILE_DIRECTORY);
+	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
 
-	QString completeFileName = QDir::currentPath() + CSV_FILE_DIRECTORY + fn + CSV_FILE_EXSTENSION;
-	QFile outFile( completeFileName );
+	QFile outFile( fileName );
 
 	if ( !outFile.open(QIODevice::WriteOnly | QIODevice::Text))
 		return;
@@ -386,4 +385,14 @@ void TransferFunction::saveColorBand( QString fn )
 	}
 
 	outFile.close();
+}
+
+
+void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
+{
+	do 
+	{
+		for (int i=0; i<NUMBER_OF_CHANNELS; i++)
+			_channels_order[i] = _channels_order[i-1] % (NUMBER_OF_CHANNELS -1);
+	} while( _channels_order[NUMBER_OF_CHANNELS-1] != ch_code );
 }

@@ -198,6 +198,13 @@ public:
 	int size();
 	void buildColorBand();
 	void saveColorBand( QString fileName );
+	void moveChannelAhead( TF_CHANNELS channel_code );
+
+	static TfChannel *GreyScaleTF() {}
+	static TfChannel *RGBScaleTF() {}
+	static TfChannel *RedScaleTF() {}
+	static TfChannel *GreenScaleTF() {}
+	static TfChannel *BlueScaleTF() {}
 };
 
 #endif
