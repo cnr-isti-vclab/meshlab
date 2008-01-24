@@ -102,23 +102,27 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 		
 	}
 
+	int numberOfBins = 100;
+
 	//building up histogram...
 	Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
-	QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, mmmq, _histogram, 100);
+	QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, mmmq, _histogram, numberOfBins);
 	//...histogram built
-
-	//setting and applying settings to dialog (??) MAL
-	_qmSettings.meshMinQ = mmmq.minV;
-	_qmSettings.meshMaxQ = mmmq.maxV;
-	_qmSettings.meshMidQ = (mmmq.minV+mmmq.maxV)/2;
-	_qualityMapperDialog->setValues(_qmSettings);
-
 
 	//drawing histogram in dialog(??) MAL
 	_qualityMapperDialog->drawEqualizerHistogram(_histogram);
 
 	//drawing transferFunction
 	_qualityMapperDialog->drawTransferFunction( _transfer_function );
+
+	/*
+	//setting and applying settings to dialog (??) MAL
+	_qmSettings.meshMinQ = mmmq.minV;
+	_qmSettings.meshMaxQ = mmmq.maxV;
+	_qmSettings.meshMidQ = (mmmq.minV+mmmq.maxV)/2;
+	_qualityMapperDialog->setValues(_qmSettings);
+	*/
+
 
 	// 	_qualityMapperDialog->edit=this;
 	// 	_qualityMapperDialog->setTree(& meshTree, meshTree.nodeList.front());

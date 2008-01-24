@@ -11,12 +11,12 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent)
 	_histogram_info = 0;
 	_transferFunction_info = 0;
 
-	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(moveBy(double)));
-	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[1], SLOT(moveBy(double)));
-	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[2], SLOT(moveBy(double)));
-	connect(&_equalizerHandles[0], SIGNAL(valueChanged(double)), ui.minSpinBox, SIGNAL(setValue(double)));
-	connect(&_equalizerHandles[1], SIGNAL(valueChanged(double)), ui.midSpinBox, SIGNAL(setValue(double)));
-	connect(&_equalizerHandles[2], SIGNAL(valueChanged(double)), ui.maxSpinBox, SIGNAL(setValue(double)));
+	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(setX(double)));
+	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[1], SLOT(setX(double)));
+	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[2], SLOT(setX(double)));
+	connect(&_equalizerHandles[0], SIGNAL(positionChanged(double)), ui.minSpinBox, SLOT(setValue(double)));
+	connect(&_equalizerHandles[1], SIGNAL(positionChanged(double)), ui.midSpinBox, SLOT(setValue(double)));
+	connect(&_equalizerHandles[2], SIGNAL(positionChanged(double)), ui.maxSpinBox, SLOT(setValue(double)));
 
 }
 
@@ -35,23 +35,24 @@ QualityMapperDialog::~QualityMapperDialog()
 	}
 }
 
+/*
 void QualityMapperDialog::setValues(const QualityMapperSettings& qms)
 {
-	_settings=qms;
-	QString qnum="%1";
-	ui.minSpinBox->setValue(_settings.meshMinQ);
-	ui.midSpinBox->setValue(_settings.meshMidQ);
-	ui.maxSpinBox->setValue(_settings.meshMaxQ);
+_settings=qms;
+QString qnum="%1";
+ui.minSpinBox->setValue(_settings.meshMinQ);
+ui.midSpinBox->setValue(_settings.meshMidQ);
+ui.maxSpinBox->setValue(_settings.meshMaxQ);
 }
 
 QualityMapperSettings QualityMapperDialog::getValues()
 {
-	_settings.manualMinQ=ui.minSpinBox->value();
-	_settings.manualMidQ=ui.midSpinBox->value();
-	_settings.manualMaxQ=ui.maxSpinBox->value();
+_settings.manualMinQ=ui.minSpinBox->value();
+_settings.manualMidQ=ui.midSpinBox->value();
+_settings.manualMaxQ=ui.maxSpinBox->value();
 
-	return _settings;
-}
+return _settings;
+}*/
 
 
 void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *chart_info)
@@ -88,6 +89,8 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 				minY = h.H[i];
 		}
 		_histogram_info = new CHART_INFO( &h, ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), h.n, h.minv, h.maxv, minY, maxY );
+
+
 	}
 
 	//drawing axis and other basic items
@@ -95,14 +98,14 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 
 	float barHeight = 0.0f;					//initializing height of the histogram bars
 	float barWidth = _histogram_info->dX;	//processing width of the histogram bars (4\5 of dX)
-//	float barSeparator = dX - barWidth;        //processing space between consecutive bars of the histogram bars (1\5 of dX)
+	//	float barSeparator = dX - barWidth;        //processing space between consecutive bars of the histogram bars (1\5 of dX)
 
 	QPen drawingPen(Qt::black);
 	QBrush drawingBrush (QColor(32, 32, 32),Qt::SolidPattern);
 
 	QPointF startBarPt;
 	QSizeF barSize;
-	
+
 	//drawing histogram bars
 	for (int i = 0; i < _histogram_info->numOfItems; i++)
 	{
@@ -119,20 +122,35 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 
 	//drawing handles
 	QColor colors[] = { QColor(Qt::red), QColor(Qt::green), QColor(Qt::blue) };
-	
-		qreal xStart = _histogram_info->leftBorder;
-		qreal xPos = 0.0;
-		qreal yPos = _histogram_info->lowerBorder;
-		for (int i=0; i<3; i++)
-		{
-			xPos = xStart + _histogram_info->chartWidth/2.0*i;
-			_equalizerHandles[i].setColor(colors[i]);
-			_equalizerHandles[i].setPos(xPos, yPos);
-			_equalizerHandles[i].setBarHeight(_histogram_info->chartHeight);
-			_equalizerHandles[i].setZValue(1);
-			_equalizerScene.addItem(&_equalizerHandles[i]);
-		}
-	
+
+	qreal xStart = _histogram_info->leftBorder;
+	qreal xPos = 0.0;
+	qreal yPos = _histogram_info->lowerBorder;
+	for (int i=0; i<3; i++)
+	{
+		xPos = xStart + _histogram_info->chartWidth/2.0*i;
+		_equalizerHandles[i].setColor(colors[i]);
+		_equalizerHandles[i].setPos(xPos, yPos);
+		_equalizerHandles[i].setBarHeight(_histogram_info->chartHeight);
+		_equalizerHandles[i].setZValue(1);
+		_equalizerHandles[i].setHistogramInfo(_histogram_info);
+		_equalizerScene.addItem(&_equalizerHandles[i]);
+	}
+
+	// Setting spinbox values
+	// (Se venissero inizializzati prima di impostare setHistogramInfo sulle handles darebbero errore nello SLOT setX delle handles.)
+	double singleStep = (_histogram_info->maxX - _histogram_info->minX) / _histogram_info->chartWidth;
+	ui.minSpinBox->setValue(_histogram_info->minX);
+	ui.minSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
+	ui.minSpinBox->setSingleStep(singleStep);
+
+	ui.midSpinBox->setValue((_histogram_info->maxX + _histogram_info->minX) / 2.0f);
+	ui.midSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
+	ui.midSpinBox->setSingleStep(singleStep);
+
+	ui.maxSpinBox->setValue(_histogram_info->maxX);
+	ui.maxSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
+	ui.maxSpinBox->setSingleStep(singleStep);
 
 	ui.equalizerGraphicsView->setScene(&_equalizerScene);
 }
@@ -147,7 +165,7 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 	//drawing axis and other basic items
 	this->drawChartBasics( _transferFunctionScene, _transferFunction_info );
 
-//	_transferFunctionScene.addLine(0, 0, 100, 430, QPen(Qt::green, 3));
+	//	_transferFunctionScene.addLine(0, 0, 100, 430, QPen(Qt::green, 3));
 
 	//questo per il momento è fisso e definito quì, ma dovrà essere gestito nella classe handle
 	QPointF pointToRepresentLeft;
@@ -162,7 +180,7 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 
 
 	//drawing chart points
-//	TfChannel *tf_c = 0;
+	//	TfChannel *tf_c = 0;
 	TF_CHANNEL_VALUE val;
 
 	for(int c=0; c<NUMBER_OF_CHANNELS; c++)
@@ -196,8 +214,8 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 			}
 
 			//sostituire con disegno della TfHandle
-			
-			
+
+
 			//		_transferFunctionScene.FillEllipse( drawingBrush, pointRect );
 
 			//linear interpolation between current point and previous one

@@ -65,8 +65,8 @@ public:
 	QualityMapperDialog(QWidget *parent = 0);
 	~QualityMapperDialog();
 	
-	void setValues(const QualityMapperSettings& qms);
-	QualityMapperSettings getValues();
+	//void setValues(const QualityMapperSettings& qms);
+	//QualityMapperSettings getValues();
 
 	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
 	void drawEqualizerHistogram( vcg::Histogramf& h );

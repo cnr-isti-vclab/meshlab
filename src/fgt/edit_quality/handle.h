@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QGraphicsItem>
 #include <QtGui>
+#include <limits>
 
 /*enum SHAPE 
 {

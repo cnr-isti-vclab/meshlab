@@ -280,6 +280,12 @@
         <property name="frameShadow" >
          <enum>QFrame::Sunken</enum>
         </property>
+        <property name="verticalScrollBarPolicy" >
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy" >
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
         <property name="dragMode" >
          <enum>QGraphicsView::NoDrag</enum>
         </property>
@@ -314,11 +320,14 @@
        <layout class="QHBoxLayout" >
         <item>
          <widget class="QDoubleSpinBox" name="minSpinBox" >
+          <property name="accelerated" >
+           <bool>true</bool>
+          </property>
           <property name="minimum" >
-           <double>-999.990000000000009</double>
+           <double>-65536.000000000000000</double>
           </property>
           <property name="maximum" >
-           <double>999.990000000000009</double>
+           <double>65535.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -337,11 +346,14 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="midSpinBox" >
+          <property name="accelerated" >
+           <bool>true</bool>
+          </property>
           <property name="minimum" >
-           <double>-999.990000000000009</double>
+           <double>-65536.000000000000000</double>
           </property>
           <property name="maximum" >
-           <double>999.990000000000009</double>
+           <double>65535.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -360,11 +372,14 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="maxSpinBox" >
+          <property name="accelerated" >
+           <bool>true</bool>
+          </property>
           <property name="minimum" >
-           <double>-999.990000000000009</double>
+           <double>-65536.000000000000000</double>
           </property>
           <property name="maximum" >
-           <double>999.990000000000009</double>
+           <double>65535.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -455,7 +470,7 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>55</x>
+     <x>65</x>
      <y>589</y>
     </hint>
     <hint type="destinationlabel" >

@@ -50,8 +50,12 @@ QRectF EqHandle::boundingRect () const
 
 void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-	QPointF oldPos = pos();
-	setPos(event->scenePos().x(), oldPos.y());
+	setCursor(Qt::OpenHandCursor);
+
+	QPointF newPos = event->scenePos();
+	if ( (newPos.x() < _histogramInfo->leftBorder) || (newPos.x() > _histogramInfo->rightBorder) )
+		return;
+	
 	/*QMimeData *data = new QMimeData;
 	
 	data->setColorData(Qt::green);
@@ -59,12 +63,24 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	QDrag *drag = new QDrag(event->widget());
 	drag->setMimeData(data);
 	drag->start();*/
-	setCursor(Qt::OpenHandCursor);
-	emit positionChanged(pos().x()-oldPos.x());
+	
+	QPointF oldPos = pos();
+	qreal handleOffset = newPos.x()-oldPos.x();
+	if (handleOffset<0)
+		handleOffset = -handleOffset;
+	
+	if (handleOffset >= std::numeric_limits<float>::epsilon())
+	{
+		setPos(newPos.x(), oldPos.y());
+		qreal percentagePos = (pos().x()-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
+		qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
+		emit positionChanged((double)newSpinboxValue);
+	}
 }
 
-void EqHandle::moveBy(double offset)
+void EqHandle::setX(double spinBoxValue)
 {
-	QPointF itemPos = pos();
-	setPos(itemPos.x()+offset, itemPos.y());
+	qreal percentageValue = (spinBoxValue -  _histogramInfo->minX) / (_histogramInfo->maxX - _histogramInfo->minX);
+	qreal newHandleX = percentageValue * _histogramInfo->chartWidth + _histogramInfo->leftBorder;
+	setPos(newHandleX, pos().y());
 }

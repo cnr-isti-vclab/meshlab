@@ -29,11 +29,11 @@ private:
 	CHART_INFO* _histogramInfo;
 
 signals:
-	void positionChanged(qreal);
+	void positionChanged(double);
 
 private slots:
 	// changing equalizer spinboxes moves the connected handle
-	void moveBy (double offset);
+	void setX (double spinBoxValue);
 };
 
 #endif // EQHANDLE_H
