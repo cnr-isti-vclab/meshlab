@@ -245,5 +245,6 @@ void QualityMapperDialog::on_addPointButton_clicked()
 void QualityMapperDialog::on_savePresetButton_clicked()
 {
 	TransferFunction *tf = (TransferFunction*)_transferFunction_info->data;
-	tf->saveColorBand( "ciuciaqui.csv");
+	QString tfName = ui.presetComboBox->currentText();
+	tf->saveColorBand( tfName );
 }

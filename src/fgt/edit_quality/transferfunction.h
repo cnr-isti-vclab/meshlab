@@ -168,7 +168,12 @@ private:
 };
 
 
-
+#ifdef WIN32
+#define CSV_FILE_DIRECTORY		"CSV\\"
+#else
+#define CSV_FILE_DIRECTORY		"CSV/"
+#endif
+#define CSV_FILE_EXSTENSION		".csv"
 #define CSV_FILE_SEPARATOR		';'
 #define CSV_FILE_COMMENT		"//"
 

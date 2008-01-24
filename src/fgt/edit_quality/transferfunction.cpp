@@ -1,4 +1,5 @@
 #include "transferfunction.h"
+#include <QDir>
 #include <QFile>
 #include <QTextStream>
 
@@ -357,7 +358,12 @@ void TransferFunction::buildColorBand()
 
 void TransferFunction::saveColorBand( QString fn )
 {
-	QFile outFile( fn );
+	QDir dir = QDir::current();
+	dir.mkdir(CSV_FILE_DIRECTORY);
+
+	QString completeFileName = QDir::currentPath() + CSV_FILE_DIRECTORY + fn + CSV_FILE_EXSTENSION;
+	QFile outFile( completeFileName );
+
 	if ( !outFile.open(QIODevice::WriteOnly | QIODevice::Text))
 		return;
 
@@ -378,5 +384,6 @@ void TransferFunction::saveColorBand( QString fn )
 		}
 		outStream << endl;
 	}
+
 	outFile.close();
 }
