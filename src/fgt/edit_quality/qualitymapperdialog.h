@@ -86,7 +86,8 @@ private:
 
 
 	private slots:
-
+	void on_savePresetButton_clicked();
+	void on_addPointButton_clicked();
 };
 
 #endif // QUALITYMAPPERDIALOG_H

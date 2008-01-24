@@ -1,4 +1,6 @@
 #include "transferfunction.h"
+#include <QFile>
+#include <QTextStream>
 
 //da eliminare!! MAL
 #ifdef NOW_TESTING
@@ -132,6 +134,37 @@ TF_KEY *TfChannel::mergeKeys(float x_pos, TF_KEY& key)
 
 	//the address of new inserted in the list is returned
 	result = &(it->second);
+
+	return result;
+}
+
+TF_KEY* TfChannel::splitKey(float x_pos)
+{
+	TF_KEY *result = 0;
+
+	KEY_LISTiterator it = KEYS.find(x_pos);
+
+	float new_y =0.0f;
+
+	if (it!=KEYS.end())
+	{
+		result = &(it->second);
+		if (result->y_upper == result->y_lower)
+		{
+			if (( result->y_lower >= 0.4f) && ( result->y_lower <= 0.6f))
+			{
+				result->y_upper = 1.0f;
+			}
+			else
+			{
+				new_y = 1.0f - result->y_lower;
+				if ( new_y > result->y_upper )
+					result->y_upper = new_y;
+				else
+					result->y_lower = new_y;
+			}
+		}
+	}
 
 	return result;
 }
@@ -322,7 +355,28 @@ void TransferFunction::buildColorBand()
 }
 
 
-void TransferFunction::saveColorBand()
+void TransferFunction::saveColorBand( QString fn )
 {
+	QFile outFile( fn );
+	if ( !outFile.open(QIODevice::WriteOnly | QIODevice::Text))
+		return;
 
+	QTextStream outStream( &outFile );
+	outStream << CSV_FILE_COMMENT << " COLOR BAND FILE STRUCTURE - first row: RED CHANNEL DATA - second row GREEN CHANNEL DATA - third row: BLUE CHANNEL DATA" << endl;
+	outStream << CSV_FILE_COMMENT << " CHANNEL DATA STRUCTURE - the channel structure is grouped in many triples. The items of each triple represent respectively: X VALUE, Y_LOWER VALUE, Y_UPPER VALUE of each node-key of the transfer function" << endl;
+
+	TF_CHANNEL_VALUE val;
+	for ( int i=0; i<NUMBER_OF_CHANNELS; i++)
+	{
+		for (int j=0; j<_channels[i].size(); j++)
+		{
+			val = _channels[i][j];
+
+			assert((val.x != 0) && (val.y != 0));
+
+			outStream << (*val.x) << CSV_FILE_SEPARATOR << val.y->y_lower << CSV_FILE_SEPARATOR << val.y->y_upper << CSV_FILE_SEPARATOR;
+		}
+		outStream << endl;
+	}
+	outFile.close();
 }

@@ -143,6 +143,7 @@ public:
 	float	removeKey(float x);
 	float	removeKey(TF_KEY& to_remove_key);
 	TF_KEY	*mergeKeys(float x_pos1, TF_KEY& x_pos2);
+	TF_KEY	*splitKey(float x_pos);
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
@@ -168,6 +169,9 @@ private:
 
 
 
+#define CSV_FILE_SEPARATOR		';'
+#define CSV_FILE_COMMENT		"//"
+
 
 //Representation of a transfer function as a triple of vectors of Keys, 
 //one for each color (RGB)
@@ -188,7 +192,7 @@ public:
 	TfChannel& operator [](int i)	{ return _channels[_channels_order[i]];	}
 	int size();
 	void buildColorBand();
-	void saveColorBand();
+	void saveColorBand( QString fileName );
 };
 
 #endif

@@ -87,7 +87,7 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 			if ( h.H[i] < minY )
 				minY = h.H[i];
 		}
-		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), h.n, h.minv, h.maxv, minY, maxY );
+		_histogram_info = new CHART_INFO( &h, ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), h.n, h.minv, h.maxv, minY, maxY );
 	}
 
 	//drawing axis and other basic items
@@ -142,7 +142,7 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 {
 	//building transfer function chart informations
 	if ( _transferFunction_info == 0 )
-		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), tf.size(), 0.0f, 1.0f, 0.0f, 1.0f );
+		_transferFunction_info = new CHART_INFO( &tf, ui.transferFunctionView->width(), ui.transferFunctionView->height(), tf.size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//drawing axis and other basic items
 	this->drawChartBasics( _transferFunctionScene, _transferFunction_info );
@@ -217,4 +217,15 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 	}
 
 	ui.transferFunctionView->setScene( &_transferFunctionScene );
+}
+
+void QualityMapperDialog::on_addPointButton_clicked()
+{
+
+}
+
+void QualityMapperDialog::on_savePresetButton_clicked()
+{
+	TransferFunction *tf = (TransferFunction*)_transferFunction_info->data;
+	tf->saveColorBand( "ciuciaqui.csv");
 }
