@@ -11,12 +11,17 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent)
 	_histogram_info = 0;
 	_transferFunction_info = 0;
 
-	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(setX(double)));
-	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[1], SLOT(setX(double)));
-	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[2], SLOT(setX(double)));
-	connect(&_equalizerHandles[0], SIGNAL(positionChanged(double)), ui.minSpinBox, SLOT(setValue(double)));
-	connect(&_equalizerHandles[1], SIGNAL(positionChanged(double)), ui.midSpinBox, SLOT(setValue(double)));
-	connect(&_equalizerHandles[2], SIGNAL(positionChanged(double)), ui.maxSpinBox, SLOT(setValue(double)));
+	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[1], SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[2], SLOT(setXBySpinBoxValueChanged(double)));
+	
+	connect(&_equalizerHandles[0], SIGNAL(positionChangedToSpinBox(double)), ui.minSpinBox, SLOT(setValue(double)));
+	connect(&_equalizerHandles[1], SIGNAL(positionChangedToSpinBox(double)), ui.midSpinBox, SLOT(setValue(double)));
+	connect(&_equalizerHandles[2], SIGNAL(positionChangedToSpinBox(double)), ui.maxSpinBox, SLOT(setValue(double)));
+	
+	connect(&_equalizerHandles[0], SIGNAL(positionChangedToMidHandle()), &_equalizerHandles[1], SLOT(moveMidHandle()));
+	connect(&_equalizerHandles[2], SIGNAL(positionChangedToMidHandle()), &_equalizerHandles[1], SLOT(moveMidHandle()));
+
 
 }
 
@@ -89,7 +94,7 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 				minY = h.H[i];
 		}
 		_histogram_info = new CHART_INFO( &h, ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), h.n, h.minv, h.maxv, minY, maxY );
-
+		//_histogram_info->data = this;
 
 	}
 
@@ -126,6 +131,7 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 	qreal xStart = _histogram_info->leftBorder;
 	qreal xPos = 0.0;
 	qreal yPos = _histogram_info->lowerBorder;
+	_equalizerMidHandlePercentilePosition = 0.5f;
 	for (int i=0; i<3; i++)
 	{
 		xPos = xStart + _histogram_info->chartWidth/2.0*i;
@@ -134,8 +140,14 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 		_equalizerHandles[i].setBarHeight(_histogram_info->chartHeight);
 		_equalizerHandles[i].setZValue(1);
 		_equalizerHandles[i].setHistogramInfo(_histogram_info);
+		_equalizerHandles[i].setHandlesPointer(_equalizerHandles);
+		_equalizerHandles[i].setMidHandlePercentilePosition(&_equalizerMidHandlePercentilePosition);
 		_equalizerScene.addItem(&_equalizerHandles[i]);
 	}
+	_equalizerHandles[0].setType(LEFT_HANDLE);
+	_equalizerHandles[1].setType(MID_HANDLE);
+	_equalizerHandles[2].setType(RIGHT_HANDLE);
+
 
 	// Setting spinbox values
 	// (Se venissero inizializzati prima di impostare setHistogramInfo sulle handles darebbero errore nello SLOT setX delle handles.)
@@ -236,6 +248,7 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 
 	ui.transferFunctionView->setScene( &_transferFunctionScene );
 }
+
 
 void QualityMapperDialog::on_addPointButton_clicked()
 {

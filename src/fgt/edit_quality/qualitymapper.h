@@ -62,10 +62,10 @@ class QualityMapperPlugin : public QObject, public MeshEditInterface
 private:
 	QualityMapperDialog *_qualityMapperDialog;
 	QList <QAction *> actionList;
-	Histogramf _histogram;
+	Histogramf _equalizer_histogram;
 	TransferFunction _transfer_function;
 
-	QualityMapperSettings _qmSettings;
+//	QualityMapperSettings _qmSettings;
 
 public:
     QualityMapperPlugin();

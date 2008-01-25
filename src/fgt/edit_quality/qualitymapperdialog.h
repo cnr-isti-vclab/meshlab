@@ -21,7 +21,7 @@
 
 using namespace vcg;
 
-
+/*
 //questa clsse l'hai creata tu? (??) MAL
 //l'ho ripresa da meshcolorize perché mi serviva per utilizzare altro codice copiato. ;-) Dobbiamo valutare se mantenerla UCCIO
 // QualityMapperSettings stores all the settings that should be inserted in QualityMapperDialog fields
@@ -49,13 +49,7 @@ public:
 		//useManual=false;
 	}
 };
-
-
-
-
-
-
-
+*/
 
 class QualityMapperDialog : public QDialog
 {
@@ -72,20 +66,25 @@ public:
 	void drawEqualizerHistogram( vcg::Histogramf& h );
 	void drawTransferFunction( TransferFunction& tf);
 
+	//EqHandle* equalizerHandles();
+	//qreal equalizerMidHandlePercentilePosition();
+
 private:
 	Ui::QualityMapperDialogClass ui;
-	QualityMapperSettings _settings;
+//	QualityMapperSettings _settings;
 
 	CHART_INFO		*_histogram_info;
 	QGraphicsScene	_equalizerScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
 	EqHandle		_equalizerHandles[3];
+	qreal			_equalizerMidHandlePercentilePosition;
 
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
 
 
 
-	private slots:
+private slots:
+	//void moveMidHandle();
 	void on_savePresetButton_clicked();
 	void on_addPointButton_clicked();
 };

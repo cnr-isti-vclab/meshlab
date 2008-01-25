@@ -106,11 +106,11 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 
 	//building up histogram...
 	Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
-	QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, mmmq, _histogram, numberOfBins);
+	QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, mmmq, _equalizer_histogram, numberOfBins);
 	//...histogram built
 
 	//drawing histogram in dialog(??) MAL
-	_qualityMapperDialog->drawEqualizerHistogram(_histogram);
+	_qualityMapperDialog->drawEqualizerHistogram(_equalizer_histogram);
 
 	//drawing transferFunction
 	_qualityMapperDialog->drawTransferFunction( _transfer_function );
