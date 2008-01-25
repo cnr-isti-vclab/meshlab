@@ -30,7 +30,7 @@ public:
 	void setType(EQUALIZER_HANDLE_TYPE);
 	void setMidHandlePercentilePosition(qreal*);
 	void setHandlesPointer(EqHandle*);
-	void moveMidHandle();
+	
 
 protected:
 	void mouseMoveEvent   (QGraphicsSceneMouseEvent *event);
@@ -43,6 +43,11 @@ private:
 	qreal*			_midHandlePercentilePosition;
 	EqHandle*		_handlesPointer;
 
+	qreal calculateMidHandlePercentilePosition(qreal newHandleX)
+	{
+		return (newHandleX - _handlesPointer[LEFT_HANDLE].pos().x()) / (_handlesPointer[RIGHT_HANDLE].pos().x() - _handlesPointer[LEFT_HANDLE].pos().x());
+	};
+
 signals:
 	void positionChangedToSpinBox(double);
 	void positionChangedToMidHandle();
@@ -50,6 +55,7 @@ signals:
 private slots:
 	// changing equalizer spinboxes moves the connected handle
 	void setXBySpinBoxValueChanged (double spinBoxValue);
+	void moveMidHandle();
 };
 
 #endif // EQHANDLE_H

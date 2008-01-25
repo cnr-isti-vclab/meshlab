@@ -82,15 +82,33 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		switch (_type)
 		{
 		case MID_HANDLE:
-			*_midHandlePercentilePosition = newPos.x() / (_handlesPointer[2].pos().x() - _handlesPointer[0].pos().x());
-			moveMidHandle();
+			if ( (newPos.x() < _handlesPointer[LEFT_HANDLE].pos().x()) || (newPos.x() > _handlesPointer[RIGHT_HANDLE].pos().x()) )
+				return;
+			*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newPos.x());
 			break;
-		default:
-			setPos(newPos.x(), oldPos.y());
-			qreal percentagePos = (pos().x()-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
-			qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
-			emit positionChangedToSpinBox((double)newSpinboxValue);
-			emit positionChangedToMidHandle();
+		case LEFT_HANDLE:
+			if (newPos.x() < _handlesPointer[RIGHT_HANDLE].pos().x()) 
+			{
+				setPos(newPos.x(), oldPos.y());
+				qreal percentagePos = (pos().x()-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
+				qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
+				emit positionChangedToSpinBox((double)newSpinboxValue);
+				emit positionChangedToMidHandle();
+			}
+
+		case RIGHT_HANDLE:
+			if (newPos.x() > _handlesPointer[LEFT_HANDLE].pos().x()) 
+			{
+				setPos(newPos.x(), oldPos.y());
+				qreal percentagePos = (pos().x()-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
+				qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
+				emit positionChangedToSpinBox((double)newSpinboxValue);
+				emit positionChangedToMidHandle();
+			}
+
+			
+
+			break;
 		}
 	}
 }
@@ -98,7 +116,9 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void EqHandle::moveMidHandle()
 {
 	assert(_type==MID_HANDLE);
-	qreal newPosX = _handlesPointer[0].pos().x() + *_midHandlePercentilePosition * (_handlesPointer[2].pos().x() - _handlesPointer[0].pos().x());
+	qreal leftHandlePos  = _handlesPointer[LEFT_HANDLE].pos().x();
+	qreal rightHandlePos = _handlesPointer[RIGHT_HANDLE].pos().x();
+	qreal newPosX = _handlesPointer[LEFT_HANDLE].pos().x() + *_midHandlePercentilePosition * (_handlesPointer[RIGHT_HANDLE].pos().x() - _handlesPointer[LEFT_HANDLE].pos().x());
 
 	setPos(newPosX, pos().y());
 
@@ -116,7 +136,7 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 	switch (_type)
 	{
 	case MID_HANDLE:
-		*_midHandlePercentilePosition = newHandleX / (_handlesPointer[2].pos().x() - _handlesPointer[0].pos().x());
+		*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newHandleX);
 		moveMidHandle();
 		break;
 	default:
