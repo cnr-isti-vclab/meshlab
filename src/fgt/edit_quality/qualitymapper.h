@@ -40,16 +40,12 @@ Beginning
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include <meshlab/glarea.h>
-
 //#include <vcg/math/base.h>
 //#include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h> //<-- contains VertexQuality method
-#include "../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
 
 #include "qualitymapperdialog.h"
-#include "transferfunction.h"
-#include <vcg/math/histogram.h>
-#include <vcg/complex/trimesh/stat.h>
+//#include "transferfunction.h"
 
 //using namespace vcg;
 
@@ -62,8 +58,7 @@ class QualityMapperPlugin : public QObject, public MeshEditInterface
 private:
 	QualityMapperDialog *_qualityMapperDialog;
 	QList <QAction *> actionList;
-	Histogramf _equalizer_histogram;
-	TransferFunction _transfer_function;
+//	TransferFunction _transfer_function;
 
 //	QualityMapperSettings _qmSettings;
 

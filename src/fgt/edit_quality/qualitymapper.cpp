@@ -95,25 +95,13 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 	//	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 
 	if(_qualityMapperDialog==0)
-	{
-		//_qualityMapperDialog=new _qualityMapperDialog(gla->parentWidget()->parentWidget());
-
-		_qualityMapperDialog = new QualityMapperDialog(gla->window());
-		
-	}
-
-	int numberOfBins = 100;
-
-	//building up histogram...
-	Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm));
-	QualityMapperPlugin::ComputePerVertexQualityHistogram(m.cm, mmmq, _equalizer_histogram, numberOfBins);
-	//...histogram built
+		_qualityMapperDialog = new QualityMapperDialog(gla->window(), &m);
 
 	//drawing histogram in dialog(??) MAL
-	_qualityMapperDialog->drawEqualizerHistogram(_equalizer_histogram);
+	_qualityMapperDialog->drawEqualizerHistogram();
 
 	//drawing transferFunction
-	_qualityMapperDialog->drawTransferFunction( _transfer_function );
+	_qualityMapperDialog->drawTransferFunction();
 
 	/*
 	//setting and applying settings to dialog (??) MAL
@@ -140,14 +128,6 @@ void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
 	}
 }
 
-void QualityMapperPlugin::ComputePerVertexQualityHistogram( CMeshO & m, Frange range, Histogramf &h, int bins=10000)    // V1.0
-      {
-        h.Clear();
-		h.SetRange( range.minV, range.maxV, bins);
-        CMeshO::VertexIterator vi;
-        for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-          if(!(*vi).IsD()) h.Add((*vi).Q());
-      }
 
 Q_EXPORT_PLUGIN(QualityMapperPlugin)
 

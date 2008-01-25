@@ -227,6 +227,19 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="loadPresetButton" >
+             <property name="maximumSize" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="text" >
+              <string>L</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="savePresetButton" >
              <property name="maximumSize" >
               <size>

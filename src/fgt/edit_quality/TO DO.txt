@@ -2,3 +2,6 @@
 15.33 20/01/2008	(*da raffinare) da implementare per Transfer Function: 1. se si fa doppio click in un punto vuoto del grafico va creata una nuova key in quel punto. Se si fa doppio click in su un punto della transfer function: - se il punto è l'upper o il lower di una chiave, questa collassa. - Se upper e lower coincidono, la chiave viene completamente rimossa.
 17.08 23/01/2008	aggiustare il layout del file ui. La view della transfer function "cade" nel pannello affianco. Lo spinbox inferiore delle opzioni della TF è smussato in basso. Allungare la colorband per allinearla con la TF.
 12.27 24/01/2008	i files CSV di default della TF dovrebbero stare in una cartella "fissa", mentre quelle create "lì er lì", pssono stare insieme alla mesh aperta
+12.33 25/01/2008	collegare la scelta del canale con moveChannelAhead della TF. Caricare le TF di default nella GUI. Aggiungere un pulsante "load" per caricare una nuova TF da un file CSV.
+15.52 25/01/2008	(!!) eliminare il campo data in CHART_INFO (!!)
+16.52 25/01/2008	(!!) spostare l'Histogram in qmdialog (!!)

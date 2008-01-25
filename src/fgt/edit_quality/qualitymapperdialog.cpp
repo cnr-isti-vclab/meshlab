@@ -3,12 +3,23 @@
 #include <QPen>
 #include <QBrush>
 
+using namespace vcg;
 
-QualityMapperDialog::QualityMapperDialog(QWidget *parent)
-: QDialog(parent)
+
+QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialog(parent), mesh(m)
 {
 	ui.setupUi(this);
+
+	//building up histogram...
+	int numberOfBins = 100;
+	_equalizer_histogram = new Histogramf();
+	Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mesh->cm));
+	this->ComputePerVertexQualityHistogram(mesh->cm, mmmq, _equalizer_histogram, numberOfBins);
+	//...histogram built
+
 	_histogram_info = 0;
+
+	_transferFunction = new TransferFunction( STARTUP_TF_TYPE );
 	_transferFunction_info = 0;
 
 	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(setXBySpinBoxValueChanged(double)));
@@ -31,6 +42,12 @@ QualityMapperDialog::~QualityMapperDialog()
 	{
 		delete _histogram_info;
 		_histogram_info = 0;
+	}
+
+	if ( _transferFunction )
+	{
+		delete _transferFunction;
+		_transferFunction = 0;
 	}
 
 	if ( _transferFunction_info )
@@ -60,12 +77,22 @@ return _settings;
 }*/
 
 
+void QualityMapperDialog::ComputePerVertexQualityHistogram( CMeshO &m, Frange range, Histogramf *h, int bins )    // V1.0
+{
+			h->Clear();
+			h->SetRange( range.minV, range.maxV, bins);
+			CMeshO::VertexIterator vi;
+			for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+				if(!(*vi).IsD()) h->Add((*vi).Q());		
+}
+
+
 void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *chart_info)
 {
 	//a valid chart_info must be passed
 	assert( chart_info != 0 );
 
-	QPen p( Qt::black, 1 );
+	QPen p( Qt::black, 2 );
 
 	//drawing axis
 	//x axis
@@ -77,7 +104,7 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 //_equalizerScene dovrebbe chiamarsi in realtà histogramScene
 //l'histogram e la transfer function potrebbero diventare attributi di questa classe? valutare l'impatto.
 //in generale il codice di questo metodo va ripulito un po'...
-void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
+void QualityMapperDialog::drawEqualizerHistogram()
 {
 	//building histogram chart informations
 	if ( _histogram_info == 0 )
@@ -85,15 +112,15 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 		//processing minY and maxY values for histogram
 		int maxY = 0;
 		int minY = std::numeric_limits<int>::max();
-		for (int i=0; i<h.n; i++) 
+		for (int i=0; i<_equalizer_histogram->n; i++) 
 		{
-			if ( h.H[i] > maxY )
-				maxY = h.H[i];
+			if ( _equalizer_histogram->H[i] > maxY )
+				maxY = _equalizer_histogram->H[i];
 
-			if ( h.H[i] < minY )
-				minY = h.H[i];
+			if ( _equalizer_histogram->H[i] < minY )
+				minY = _equalizer_histogram->H[i];
 		}
-		_histogram_info = new CHART_INFO( &h, ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), h.n, h.minv, h.maxv, minY, maxY );
+		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->n, _equalizer_histogram->minv, _equalizer_histogram->maxv, minY, maxY );
 		//_histogram_info->data = this;
 
 	}
@@ -114,7 +141,7 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 	//drawing histogram bars
 	for (int i = 0; i < _histogram_info->numOfItems; i++)
 	{
-		barHeight = (float)(_histogram_info->chartHeight * h.H[i]) / (float)_histogram_info->maxRoundedY;
+		barHeight = (float)(_histogram_info->chartHeight * _equalizer_histogram->H[i]) / (float)_histogram_info->maxRoundedY;
 		startBarPt.setX( _histogram_info->leftBorder + ( barWidth * i ) );
 		startBarPt.setY( (float)_histogram_info->lowerBorder - barHeight );
 
@@ -168,11 +195,13 @@ void QualityMapperDialog::drawEqualizerHistogram( Histogramf& h )
 }
 
 
-void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
+void QualityMapperDialog::drawTransferFunction()
 {
+	assert(_transferFunction != 0);
+
 	//building transfer function chart informations
 	if ( _transferFunction_info == 0 )
-		_transferFunction_info = new CHART_INFO( &tf, ui.transferFunctionView->width(), ui.transferFunctionView->height(), tf.size(), 0.0f, 1.0f, 0.0f, 1.0f );
+		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), _transferFunction->size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//drawing axis and other basic items
 	this->drawChartBasics( _transferFunctionScene, _transferFunction_info );
@@ -197,13 +226,13 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 
 	for(int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
-		TYPE_2_COLOR(tf[c].getType(), channelColor);
+		TYPE_2_COLOR((*_transferFunction)[c].getType(), channelColor);
 		drawingPen.setColor( channelColor );
 		drawingBrush.setColor( channelColor );
 
-		for (int i=0; i<tf[c].size(); i++)
+		for (int i=0; i<(*_transferFunction)[c].size(); i++)
 		{
-			val = tf[c][i];
+			val = (*_transferFunction)[c][i];
 
 			pointToRepresentLeft.setX( _transferFunction_info->leftBorder + relative2AbsoluteValf( (* val.x), (float)_transferFunction_info->chartWidth ) );
 			pointToRepresentLeft.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getLeftJunctionPoint(), (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
@@ -226,7 +255,6 @@ void QualityMapperDialog::drawTransferFunction(TransferFunction& tf)
 			}
 
 			//sostituire con disegno della TfHandle
-
 
 			//		_transferFunctionScene.FillEllipse( drawingBrush, pointRect );
 
@@ -257,7 +285,24 @@ void QualityMapperDialog::on_addPointButton_clicked()
 
 void QualityMapperDialog::on_savePresetButton_clicked()
 {
-	TransferFunction *tf = (TransferFunction*)_transferFunction_info->data;
 	QString tfName = ui.presetComboBox->currentText();
-	tf->saveColorBand( tfName );
+	_transferFunction->saveColorBand( tfName );
 }
+
+
+void QualityMapperDialog::on_loadPresetButton_clicked()
+{
+	QString csvFileName = QFileDialog::getOpenFileName(0, "Open Transfer Function File", QDir::currentPath(), "CSV File (*.csv)");
+	if ( !csvFileName.isNull())
+	{
+		if ( _transferFunction )
+		{
+			delete _transferFunction;
+			_transferFunction = 0;
+		}
+		_transferFunction = new TransferFunction( csvFileName );
+	}
+
+	this->drawTransferFunction();
+}
+

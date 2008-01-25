@@ -12,10 +12,13 @@
 */
 
 #include <vcg/complex/trimesh/base.h>
+#include <meshlab/meshmodel.h>
 #include "ui_qualitymapperdialog.h"
 
 #include <vcg/math/histogram.h>
-
+#include "../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
+#include <vcg/complex/trimesh/stat.h>
+#include <meshlab/glarea.h>
 #include "transferfunction.h"
 #include "eqhandle.h"
 
@@ -56,15 +59,18 @@ class QualityMapperDialog : public QDialog
 	Q_OBJECT
 
 public:
-	QualityMapperDialog(QWidget *parent = 0);
+	QualityMapperDialog(QWidget *parent=0, MeshModel *m=0);
 	~QualityMapperDialog();
 	
 	//void setValues(const QualityMapperSettings& qms);
 	//QualityMapperSettings getValues();
 
+//	inline void setMesh(MeshModel *m){ mesh=m; }
+	void ComputePerVertexQualityHistogram( CMeshO& m, Frange range, Histogramf *h, int bins=10000);
+
 	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
-	void drawEqualizerHistogram( vcg::Histogramf& h );
-	void drawTransferFunction( TransferFunction& tf);
+	void drawEqualizerHistogram();
+	void drawTransferFunction();
 
 	//EqHandle* equalizerHandles();
 	//qreal equalizerMidHandlePercentilePosition();
@@ -73,18 +79,22 @@ private:
 	Ui::QualityMapperDialogClass ui;
 //	QualityMapperSettings _settings;
 
+	Histogramf		*_equalizer_histogram;
 	CHART_INFO		*_histogram_info;
 	QGraphicsScene	_equalizerScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
-	EqHandle		_equalizerHandles[3];
-	qreal			_equalizerMidHandlePercentilePosition;
 
+	TransferFunction *_transferFunction;
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
 
+	EqHandle		_equalizerHandles[3];
+	qreal			_equalizerMidHandlePercentilePosition;
+
+	MeshModel		*mesh;
 
 
 private slots:
-	//void moveMidHandle();
+	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
 	void on_addPointButton_clicked();
 };

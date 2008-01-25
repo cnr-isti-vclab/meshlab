@@ -15,16 +15,15 @@ int absolute2RelativeVali(float absolute_val, float max_val);
 
 struct CHART_INFO
 {
-	void *data;
 	float leftBorder;
 	float rightBorder;
 	float upperBorder;
 	float lowerBorder;
 	float chartWidth;
 	float chartHeight;
-	int numOfItems;
-	int	  yScaleStep;
-	int maxRoundedY;
+	int	numOfItems;
+	int	yScaleStep;
+	int	maxRoundedY;
 	float minX;
 	float maxX;
 	float minY;
@@ -33,11 +32,10 @@ struct CHART_INFO
 	float dY;
 	float variance;						//variance of y values
 
-	CHART_INFO(void *data_=0, int view_width=0, int view_height=0, int num_of_items=1, float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
+	CHART_INFO( int view_width=0, int view_height=0, int num_of_items=1, float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
 	{
 		assert(num_of_items != 0);
 
-		data = data_;
 		leftBorder	= CANVAS_BORDER_DISTANCE;
 		rightBorder	= view_width - CANVAS_BORDER_DISTANCE;
 		upperBorder	= CANVAS_BORDER_DISTANCE;

@@ -56,10 +56,10 @@ TF_KEY* TfChannel::addKey(float x_pos, TF_KEY &new_key)
 
 //adds to the keys list a new keys with fields passed to the method
 //returns a pointer to the key just added
-TF_KEY* TfChannel::addKey(float x_pos, float y_up, float y_bot)
+TF_KEY* TfChannel::addKey(float x_pos, float y_low, float y_up)
 {
 	//building key
-	TF_KEY key( /*x,*/ y_up, y_bot );
+	TF_KEY key( /*x,*/ y_low, y_up );
 
 	//adding it to list
 	return this->addKey(x_pos, key);
@@ -287,8 +287,8 @@ void TfChannel::testInitChannel()
 		if (offset > (1.0f-rand_y))
 			offset = (1.0f-rand_y);
 		this->addKey(rand_x,
-					rand_y + offset,
-					rand_y);
+					rand_y,
+					rand_y + offset);
 	}
 
 	this->addKey(1.0f, 0.0f, 0.0f);
@@ -303,15 +303,112 @@ void TfChannel::testInitChannel()
 
 
 //TRANSFER FUNCTION
+
+//declaration of static member of TransferFunction class
+QString TransferFunction::defaultTFs[NUMBER_OF_DEFAULT_TF];
+
+
 TransferFunction::TransferFunction(void)
 {
 	this->initTF();
 }
 
-
-TransferFunction::TransferFunction(QString colorBandFile)
+TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 {
 	this->initTF();
+
+	switch(code)
+	{
+	case GREY_SCALE_TF:
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,1.0f);
+			break;
+	case RGB_TF:
+		_channels[RED_CHANNEL].addKey(0.0f,1.0f,1.0f);
+		_channels[RED_CHANNEL].addKey(0.5f,0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.5f,1.0f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		break;
+	case RED_SCALE_TF:
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		break;
+	case GREEN_SCALE_TF:
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		break;
+	case BLUE_SCALE_TF:
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		break;
+	case FLAT_TF:
+	default:
+		_channels[RED_CHANNEL].addKey(0.0f,0.5f,0.5f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.5f,0.5f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.5f,0.5f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.5f,0.5f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.5f,0.5f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.5f,0.5f);
+		break;
+	}
+}
+
+
+TransferFunction::TransferFunction(QString fileName)
+{
+	this->initTF();
+
+//	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
+
+	QFile inFile( fileName );
+
+	if ( !inFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	QTextStream inStream( &inFile );
+	QString line;
+	QStringList splittedString;
+
+	int channel_code = 0;
+	do
+	{
+		line = inStream.readLine();
+
+		//if a line is a comment, it's not processed. imply ignoring it!
+		if ( !line.startsWith(CSV_FILE_COMMENT) )
+		{
+			splittedString = line.split(CSV_FILE_SEPARATOR, QString::SkipEmptyParts);
+			assert( (splittedString.size() % NUMBER_OF_CHANNELS) == 0 );
+
+			for ( int i=0; i<splittedString.size(); i+=3 )
+				_channels[channel_code].addKey( splittedString[i].toFloat(), splittedString[i+1].toFloat(), splittedString[i+2].toFloat() );
+
+			channel_code ++;
+		}
+	} while( (!line.isNull()) && (channel_code < NUMBER_OF_CHANNELS) );
+
+	inFile.close();
 }
 
 TransferFunction::~TransferFunction(void)
@@ -331,6 +428,13 @@ void TransferFunction::initTF()
 
 	//resetting color band value
 	memset(_color_band,0,sizeof(_color_band));
+
+	defaultTFs[GREY_SCALE_TF] = "Grey Scale";
+	defaultTFs[RGB_TF] = "RGB";
+	defaultTFs[RED_SCALE_TF] = "Red Scale";
+	defaultTFs[GREEN_SCALE_TF] = "Green Scale";
+	defaultTFs[BLUE_SCALE_TF] = "Blue Scale";
+	defaultTFs[FLAT_TF] = "Flat";
 }
 
 
@@ -396,3 +500,22 @@ void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
 			_channels_order[i] = _channels_order[i-1] % (NUMBER_OF_CHANNELS -1);
 	} while( _channels_order[NUMBER_OF_CHANNELS-1] != ch_code );
 }
+
+
+TransferFunction* TransferFunction::GreyScaleTF()
+{	return new TransferFunction(GREEN_SCALE_TF);	}
+
+TransferFunction* TransferFunction::RGBTF()
+{	return new TransferFunction(RGB_TF);	}
+
+TransferFunction* TransferFunction::RedScaleTF()
+{	return new TransferFunction(RED_SCALE_TF);	}
+
+TransferFunction* TransferFunction::GreenScaleTF()
+{	return new TransferFunction(GREEN_SCALE_TF);	}
+
+TransferFunction* TransferFunction::BlueScaleTF()
+{	return new TransferFunction(BLUE_SCALE_TF);	}
+
+TransferFunction* TransferFunction::FlatTF()
+{	return new TransferFunction(FLAT_TF);	}

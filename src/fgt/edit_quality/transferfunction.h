@@ -24,7 +24,7 @@
 #define _TRANSFER_FUNCTION_H_
 
 //eliminare questo define in fase di release
-#define NOW_TESTING
+//#define NOW_TESTING
 
 
 #include <vcg/math/base.h>
@@ -74,7 +74,7 @@ struct TF_KEY
 	inline void  setLeftJunctionPoint( int j_p )	{ left_junction_point_code = j_p; right_junction_point_code = NUMBER_OF_JUNCTION_Y-left_junction_point_code-1; }
 	inline void  setRightJunctionPoint( int j_p )	{ right_junction_point_code = j_p; left_junction_point_code = NUMBER_OF_JUNCTION_Y-right_junction_point_code-1; }
 	
-	TF_KEY( float y_up=0.0f, float y_low=0.0f )
+	TF_KEY( float y_low=0.0f, float y_up=0.0f )
 	{
 		y_upper=y_up;
 		y_lower=y_low;
@@ -138,7 +138,7 @@ public:
 
 	void	setType(TF_CHANNELS);
 	TF_CHANNELS getType();
-	TF_KEY	*addKey(float x, float y_up, float y_bot);
+	TF_KEY	*addKey(float x, float y_low, float y_up);
 	TF_KEY	*addKey(float x, TF_KEY& new_key);
 	float	removeKey(float x);
 	float	removeKey(TF_KEY& to_remove_key);
@@ -174,8 +174,21 @@ private:
 #define CSV_FILE_DIRECTORY		"CSV/"
 #endif
 #define CSV_FILE_EXSTENSION		".csv"
-#define CSV_FILE_SEPARATOR		';'
+#define CSV_FILE_SEPARATOR		";"
 #define CSV_FILE_COMMENT		"//"
+
+enum DEFAULT_TRANSFER_FUNCTIONS
+{
+	GREY_SCALE_TF = 0,
+	RGB_TF,
+	RED_SCALE_TF,
+	GREEN_SCALE_TF,
+	BLUE_SCALE_TF,
+	FLAT_TF,
+	NUMBER_OF_DEFAULT_TF
+};
+
+#define STARTUP_TF_TYPE		RGB_TF
 
 
 //Representation of a transfer function as a triple of vectors of Keys, 
@@ -185,14 +198,17 @@ class TransferFunction
 private:
 	TfChannel	_channels[NUMBER_OF_CHANNELS];			//set of channels
 	int			_channels_order[NUMBER_OF_CHANNELS];	//array used to carry out virtual pivoting indexing
-	Color4f		_color_band[COLOR_BAND_SIZE];		/*rendere color band una classe a se stante??*/
+	Color4f		_color_band[COLOR_BAND_SIZE];
 
 	void initTF(void);
 
 public:
 	TransferFunction(void);
-	TransferFunction(QString colorBandFile);
+	TransferFunction(QString csvFileName);
+	TransferFunction(DEFAULT_TRANSFER_FUNCTIONS tf_code);
 	~TransferFunction(void);
+
+	static QString defaultTFs[NUMBER_OF_DEFAULT_TF];
 
 	TfChannel& operator [](int i)	{ return _channels[_channels_order[i]];	}
 	int size();
@@ -200,11 +216,12 @@ public:
 	void saveColorBand( QString fileName );
 	void moveChannelAhead( TF_CHANNELS channel_code );
 
-	static TfChannel *GreyScaleTF() {}
-	static TfChannel *RGBScaleTF() {}
-	static TfChannel *RedScaleTF() {}
-	static TfChannel *GreenScaleTF() {}
-	static TfChannel *BlueScaleTF() {}
+	static TransferFunction *GreyScaleTF();
+	static TransferFunction *RGBTF();
+	static TransferFunction *RedScaleTF();
+	static TransferFunction *GreenScaleTF();
+	static TransferFunction *BlueScaleTF();
+	static TransferFunction *FlatTF();
 };
 
 #endif
