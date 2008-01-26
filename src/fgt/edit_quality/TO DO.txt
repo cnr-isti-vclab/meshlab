@@ -5,3 +5,5 @@
 12.33 25/01/2008	collegare la scelta del canale con moveChannelAhead della TF. Caricare le TF di default nella GUI. Aggiungere un pulsante "load" per caricare una nuova TF da un file CSV.
 15.52 25/01/2008	(!!) eliminare il campo data in CHART_INFO (!!)
 16.52 25/01/2008	(!!) spostare l'Histogram in qmdialog (!!)
+18.37 25/01/2008	montare un'icona sul tasto per caricare un CSV file dal disco
+19.00 26/01/2008	testare come reagisce la lista di TFs quando vengono create, salvate e caricate

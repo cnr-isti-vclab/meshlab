@@ -50,6 +50,12 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="autoFillBackground" >
+           <bool>true</bool>
+          </property>
+          <property name="cacheMode" >
+           <set>QGraphicsView::CacheBackground</set>
+          </property>
          </widget>
         </item>
         <item row="0" column="1" >
@@ -221,6 +227,9 @@
                <height>20</height>
               </size>
              </property>
+             <property name="toolTip" >
+              <string>Transfer Functions list</string>
+             </property>
              <property name="editable" >
               <bool>true</bool>
              </property>
@@ -234,8 +243,14 @@
                <height>20</height>
               </size>
              </property>
+             <property name="toolTip" >
+              <string>click to load a Transfer Function file</string>
+             </property>
              <property name="text" >
               <string>L</string>
+             </property>
+             <property name="checkable" >
+              <bool>true</bool>
              </property>
             </widget>
            </item>

@@ -54,6 +54,19 @@ public:
 };
 */
 
+struct KNOWN_EXTERNAL_TFS
+{
+	QString path;
+	QString name;
+	KNOWN_EXTERNAL_TFS( QString p, QString n)
+	{
+		path = p;
+		name = n;
+	}
+};
+#define KNOWN_EXTERNAL_TFSsize	sizeof(KNOWN_EXTERNAL_TFS)
+
+
 class QualityMapperDialog : public QDialog
 {
 	Q_OBJECT
@@ -68,6 +81,7 @@ public:
 //	inline void setMesh(MeshModel *m){ mesh=m; }
 	void ComputePerVertexQualityHistogram( CMeshO& m, Frange range, Histogramf *h, int bins=10000);
 
+	void clearScene(QGraphicsScene *scene);
 	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
 	void drawEqualizerHistogram();
 	void drawTransferFunction();
@@ -86,14 +100,19 @@ private:
 	TransferFunction *_transferFunction;
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
+	bool			_isTransferFunctionInitialized;
+	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs;
 
 	EqHandle		_equalizerHandles[3];
 	qreal			_equalizerMidHandlePercentilePosition;
 
 	MeshModel		*mesh;
 
+	void initTF();
+
 
 private slots:
+	void on_presetComboBox_textChanged(const QString &);
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
 	void on_addPointButton_clicked();

@@ -20,6 +20,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialo
 	_histogram_info = 0;
 
 	_transferFunction = new TransferFunction( STARTUP_TF_TYPE );
+	_isTransferFunctionInitialized = false;
 	_transferFunction_info = 0;
 
 	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(setXBySpinBoxValueChanged(double)));
@@ -86,6 +87,14 @@ void QualityMapperDialog::ComputePerVertexQualityHistogram( CMeshO &m, Frange ra
 				if(!(*vi).IsD()) h->Add((*vi).Q());		
 }
 
+void QualityMapperDialog::clearScene(QGraphicsScene *scene)
+{
+	//deleting scene items
+	QList<QGraphicsItem *>allItems = _transferFunctionScene.items();
+	QGraphicsItem *item = 0;
+	foreach (item, allItems)
+		scene->removeItem( item );
+}
 
 void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *chart_info)
 {
@@ -194,9 +203,28 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	ui.equalizerGraphicsView->setScene(&_equalizerScene);
 }
 
+void QualityMapperDialog::initTF()
+{
+	if ( _transferFunction == 0 )
+		return ;
+
+	for ( int i=0; i<NUMBER_OF_DEFAULT_TF; i++ )
+		ui.presetComboBox->addItem( TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF] );
+
+	for (int i=0; i<_knownExternalTFs.size(); i++)
+		ui.presetComboBox->addItem( _knownExternalTFs.at(i).name );
+
+	_isTransferFunctionInitialized = true;
+}
+
 
 void QualityMapperDialog::drawTransferFunction()
 {
+	if ( !_isTransferFunctionInitialized )
+		this->initTF();
+	
+	this->clearScene( &_transferFunctionScene );
+
 	assert(_transferFunction != 0);
 
 	//building transfer function chart informations
@@ -287,6 +315,11 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 {
 	QString tfName = ui.presetComboBox->currentText();
 	_transferFunction->saveColorBand( tfName );
+
+	KNOWN_EXTERNAL_TFS newTF( tfName, tfName );
+	_knownExternalTFs << newTF;
+	_isTransferFunctionInitialized = false;
+	this->initTF();
 }
 
 
@@ -303,6 +336,27 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 		_transferFunction = new TransferFunction( csvFileName );
 	}
 
+	KNOWN_EXTERNAL_TFS newTF( csvFileName, csvFileName );
+	_knownExternalTFs << newTF;
+
+	_isTransferFunctionInitialized = false;
+	this->initTF();
 	this->drawTransferFunction();
 }
 
+
+
+void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
+{
+	for (int i=0; i<NUMBER_OF_DEFAULT_TF; i++)
+	{
+		if ( TransferFunction::defaultTFs[i] == newValue )
+		{
+			if ( _transferFunction )
+			{
+				delete _transferFunction;
+				_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
+			}
+		}
+	}
+}
