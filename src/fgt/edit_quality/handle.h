@@ -6,13 +6,7 @@
 #include <QtGui>
 #include <limits>
 
-/*enum SHAPE 
-{
-	SQUARE_SHAPE = 0,
-	NUMBER_OF_SHAPES
-};*/
-
-/* Drag&Drop generic handle to e used in QGrahicsScenes */
+/* Drag&Drop generic handle to be used in QGrahicsScenes */
 class Handle : public QObject, public QGraphicsItem
 {
 	Q_OBJECT

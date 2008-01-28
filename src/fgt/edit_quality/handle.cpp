@@ -28,7 +28,7 @@ void Handle::setColor(QColor color)
 
 QRectF Handle::boundingRect () const
 {
-	return QRectF(-_size/2, -_size/2, _size, _size);
+	return QRectF(-_size/2.0f, -_size/2.0f, _size, _size);
 }
 
 
