@@ -47,13 +47,13 @@ void EqHandle::setMidHandlePercentilePosition(qreal* pointer)
 void EqHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget /*= 0*/ )
 {
 	Q_UNUSED(option);
-    Q_UNUSED(widget);
+	Q_UNUSED(widget);
 	QPen pen(Qt::black);
 	pen.setWidth(2);
 	painter->setPen(_color);
 	painter->setBrush(_color);
 	painter->drawLine(0, -_size, 0, -_barHeight);
-	
+
 	painter->drawLines(_triangle);
 	painter->drawRect(-_size/2.0f, -_size, _size, _size);
 }
@@ -71,20 +71,26 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	QPointF newPos = event->scenePos();
 	if ( (newPos.x() < _histogramInfo->leftBorder) || (newPos.x() > _histogramInfo->rightBorder) )
 		return;
-		
+
 	QPointF oldPos = pos();
 	qreal handleOffset = newPos.x()-oldPos.x();
 	if (handleOffset<0)
 		handleOffset = -handleOffset;
-	
+
+	qreal leftx = _handlesPointer[LEFT_HANDLE].pos().x();
+	qreal midx =  _handlesPointer[MID_HANDLE].pos().x();
+	qreal rightx= _handlesPointer[RIGHT_HANDLE].pos().x();
+
 	if (handleOffset >= std::numeric_limits<float>::epsilon())
 	{
 		switch (_type)
 		{
 		case MID_HANDLE:
-			if ( (newPos.x() < _handlesPointer[LEFT_HANDLE].pos().x()) || (newPos.x() > _handlesPointer[RIGHT_HANDLE].pos().x()) )
-				return;
-			*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newPos.x());
+			if ( (newPos.x() > _handlesPointer[LEFT_HANDLE].pos().x()) && (newPos.x() < _handlesPointer[RIGHT_HANDLE].pos().x()) )
+			{
+				*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newPos.x());
+				moveMidHandle();
+			}
 			break;
 		case LEFT_HANDLE:
 			if (newPos.x() < _handlesPointer[RIGHT_HANDLE].pos().x()) 
@@ -95,7 +101,7 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 				emit positionChangedToSpinBox((double)newSpinboxValue);
 				emit positionChangedToMidHandle();
 			}
-
+			break;
 		case RIGHT_HANDLE:
 			if (newPos.x() > _handlesPointer[LEFT_HANDLE].pos().x()) 
 			{
@@ -105,9 +111,6 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 				emit positionChangedToSpinBox((double)newSpinboxValue);
 				emit positionChangedToMidHandle();
 			}
-
-			
-
 			break;
 		}
 	}
@@ -116,8 +119,6 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void EqHandle::moveMidHandle()
 {
 	assert(_type==MID_HANDLE);
-	qreal leftHandlePos  = _handlesPointer[LEFT_HANDLE].pos().x();
-	qreal rightHandlePos = _handlesPointer[RIGHT_HANDLE].pos().x();
 	qreal newPosX = _handlesPointer[LEFT_HANDLE].pos().x() + *_midHandlePercentilePosition * (_handlesPointer[RIGHT_HANDLE].pos().x() - _handlesPointer[LEFT_HANDLE].pos().x());
 
 	setPos(newPosX, pos().y());
@@ -132,14 +133,34 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 {
 	qreal percentageValue = (spinBoxValue -  _histogramInfo->minX) / (_histogramInfo->maxX - _histogramInfo->minX);
 	qreal newHandleX = percentageValue * _histogramInfo->chartWidth + _histogramInfo->leftBorder;
-	
+
+	qreal handleOffset = newHandleX-pos().x();
+	if (handleOffset<0)
+		handleOffset = -handleOffset;
+	// this control avoid counter invoking (?)
+	if (handleOffset < std::numeric_limits<float>::epsilon())
+		return;
+
 	switch (_type)
 	{
 	case MID_HANDLE:
-		*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newHandleX);
-		moveMidHandle();
+		if ( (newHandleX > _handlesPointer[LEFT_HANDLE].pos().x()) && (newHandleX < _handlesPointer[RIGHT_HANDLE].pos().x()) )
+		{
+			*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newHandleX);
+			moveMidHandle();
+		}
 		break;
-	default:
-		setPos(newHandleX, pos().y());
+	case LEFT_HANDLE:
+		if (newHandleX < _handlesPointer[RIGHT_HANDLE].pos().x()) 
+		{
+			setPos(newHandleX, pos().y());
+		}
+		break;
+	case RIGHT_HANDLE:
+		if (newHandleX > _handlesPointer[LEFT_HANDLE].pos().x()) 
+		{
+			setPos(newHandleX, pos().y());
+		}		
+		break;
 	}
 }

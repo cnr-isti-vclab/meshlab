@@ -170,7 +170,7 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	_equalizerMidHandlePercentilePosition = 0.5f;
 	for (int i=0; i<3; i++)
 	{
-		xPos = xStart + _histogram_info->chartWidth/2.0*i;
+		xPos = xStart + ((qreal)_histogram_info->chartWidth) / 2.0f *i;
 		_equalizerHandles[i].setColor(colors[i]);
 		_equalizerHandles[i].setPos(xPos, yPos);
 		_equalizerHandles[i].setBarHeight(_histogram_info->chartHeight);
@@ -188,17 +188,29 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	// Setting spinbox values
 	// (Se venissero inizializzati prima di impostare setHistogramInfo sulle handles darebbero errore nello SLOT setX delle handles.)
 	double singleStep = (_histogram_info->maxX - _histogram_info->minX) / _histogram_info->chartWidth;
+	double temp = singleStep;
+	int decimals = 0;
+	while (temp < 1)
+	{
+		decimals++;
+		temp *= 10;
+	}
+	decimals+=2;
+
 	ui.minSpinBox->setValue(_histogram_info->minX);
 	ui.minSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
 	ui.minSpinBox->setSingleStep(singleStep);
+	ui.minSpinBox->setDecimals(decimals);
 
 	ui.midSpinBox->setValue((_histogram_info->maxX + _histogram_info->minX) / 2.0f);
 	ui.midSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
 	ui.midSpinBox->setSingleStep(singleStep);
+	ui.midSpinBox->setDecimals(decimals);
 
 	ui.maxSpinBox->setValue(_histogram_info->maxX);
 	ui.maxSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
 	ui.maxSpinBox->setSingleStep(singleStep);
+	ui.maxSpinBox->setDecimals(decimals);
 
 	ui.equalizerGraphicsView->setScene(&_equalizerScene);
 }
