@@ -1,7 +1,7 @@
 TEMPLATE      = lib
 QT           += opengl
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 
 HEADERS       = sampledecorate.h cubemap.h
 
