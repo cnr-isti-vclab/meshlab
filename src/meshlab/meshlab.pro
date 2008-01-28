@@ -73,20 +73,11 @@ DEFINES += GLEW_STATIC
 
 INCLUDEPATH += . ../../../sf ../../../code/lib/glew/include
 CONFIG += stl
-win32-g++{
-#LIBS	+= glew32
-#LIBPATH += ../../../code/lib/glew/lib/
-}
 
 # The following define is needed in gcc to remove the asserts
 win32-g++:DEFINES += NDEBUG
 CONFIG(debug, debug|release) {
 	win32-g++:release:DEFINES -= NDEBUG
-}
-
-mac{
-# message( "We are on a mac: build universal binaries" )
-# CONFIG += x86 ppc
 }
 
 
