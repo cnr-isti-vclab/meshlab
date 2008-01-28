@@ -77,7 +77,7 @@ class MeshTree
 		ResVecPtr.clear();
 	}
 
-	void MeshTree::resetID();
+	void resetID();
 
 	MeshNode *find(int id)
 		{
