@@ -213,7 +213,7 @@ public:
 	TfChannel& operator [](int i)	{ return _channels[_channels_order[i]];	}
 	int size();
 	void buildColorBand();
-	void saveColorBand( QString fileName );
+	QString saveColorBand( QString fileName );
 	void moveChannelAhead( TF_CHANNELS channel_code );
 
 	static TransferFunction *GreyScaleTF();

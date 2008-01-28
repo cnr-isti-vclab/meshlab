@@ -2,5 +2,6 @@
     <qresource prefix="/" >
         <file>images/colorband.png</file>
         <file>images/qualitymapper.png</file>
+        <file>images/opentf.png</file>
     </qresource>
 </RCC>

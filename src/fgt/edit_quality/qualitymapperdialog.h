@@ -58,7 +58,7 @@ struct KNOWN_EXTERNAL_TFS
 {
 	QString path;
 	QString name;
-	KNOWN_EXTERNAL_TFS( QString p, QString n)
+	KNOWN_EXTERNAL_TFS( QString p="", QString n="" )
 	{
 		path = p;
 		name = n;
@@ -112,6 +112,9 @@ private:
 
 
 private slots:
+	void on_blueButton_toggled(bool checked);
+	void on_greenButton_toggled(bool checked);
+	void on_redButton_toggled(bool checked);
 	void on_presetComboBox_textChanged(const QString &);
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();

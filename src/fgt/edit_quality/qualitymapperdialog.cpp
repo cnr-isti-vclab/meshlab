@@ -34,7 +34,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialo
 	connect(&_equalizerHandles[0], SIGNAL(positionChangedToMidHandle()), &_equalizerHandles[1], SLOT(moveMidHandle()));
 	connect(&_equalizerHandles[2], SIGNAL(positionChangedToMidHandle()), &_equalizerHandles[1], SLOT(moveMidHandle()));
 
-
+	this->initTF();
 }
 
 QualityMapperDialog::~QualityMapperDialog()
@@ -102,12 +102,15 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 	assert( chart_info != 0 );
 
 	QPen p( Qt::black, 2 );
+	QGraphicsItem *current_item = 0;
 
 	//drawing axis
 	//x axis
-	scene.addLine( chart_info->leftBorder, chart_info->lowerBorder, chart_info->rightBorder, chart_info->lowerBorder, p );
+	current_item = scene.addLine( chart_info->leftBorder, chart_info->lowerBorder, chart_info->rightBorder, chart_info->lowerBorder, p );
+	current_item->setZValue( 0 );
 	//y axis
-	scene.addLine( chart_info->leftBorder, chart_info->upperBorder, chart_info->leftBorder, chart_info->lowerBorder, p );
+	current_item = scene.addLine( chart_info->leftBorder, chart_info->upperBorder, chart_info->leftBorder, chart_info->lowerBorder, p );
+	current_item->setZValue( 0 );
 }
 
 //_equalizerScene dovrebbe chiamarsi in realtà histogramScene
@@ -170,7 +173,7 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	_equalizerMidHandlePercentilePosition = 0.5f;
 	for (int i=0; i<3; i++)
 	{
-		xPos = xStart + ((qreal)_histogram_info->chartWidth) / 2.0f *i;
+		xPos = xStart + _histogram_info->chartWidth/2.0*i;
 		_equalizerHandles[i].setColor(colors[i]);
 		_equalizerHandles[i].setPos(xPos, yPos);
 		_equalizerHandles[i].setBarHeight(_histogram_info->chartHeight);
@@ -217,16 +220,38 @@ void QualityMapperDialog::drawEqualizerHistogram()
 
 void QualityMapperDialog::initTF()
 {
+//	ui.presetComboBox->disconnect(SIGNAL(textChanged()));
+//	connect(&_equalizerHandles[0], SIGNAL(positionChangedToMidHandle()), &_equalizerHandles[1], SLOT(moveMidHandle()));
+	ui.presetComboBox->blockSignals( true );
+
 	if ( _transferFunction == 0 )
 		return ;
 
+	QString itemText;
+
 	for ( int i=0; i<NUMBER_OF_DEFAULT_TF; i++ )
-		ui.presetComboBox->addItem( TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF] );
+	{
+		itemText = TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF];
+
+		//items are added to the list only if they're not present yet
+		if ( -1 == ui.presetComboBox->findText( itemText ) )
+			ui.presetComboBox->addItem( itemText );
+	}
 
 	for (int i=0; i<_knownExternalTFs.size(); i++)
-		ui.presetComboBox->addItem( _knownExternalTFs.at(i).name );
+	{
+		itemText = _knownExternalTFs.at(i).name;
+
+		//items are added to the list only if they're not present yet
+		if ( -1 == ui.presetComboBox->findText( itemText ) )
+			ui.presetComboBox->insertItem( 0, itemText );
+	}
 
 	_isTransferFunctionInitialized = true;
+	
+	ui.presetComboBox->blockSignals( false );
+
+	ui.blueButton->setChecked( true );
 }
 
 
@@ -256,13 +281,15 @@ void QualityMapperDialog::drawTransferFunction()
 	QRectF pointRectRight(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
 
 	QColor channelColor;
-	QPen drawingPen(Qt::black);
+	QPen drawingPen(Qt::black, 3);
 	QBrush drawingBrush ( QColor(32, 32, 32), Qt::SolidPattern );
 
 
 	//drawing chart points
 	//	TfChannel *tf_c = 0;
 	TF_CHANNEL_VALUE val;
+
+	QGraphicsItem *current_item = 0;
 
 	for(int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
@@ -279,36 +306,42 @@ void QualityMapperDialog::drawTransferFunction()
 			pointToRepresentRight.setX( pointToRepresentLeft.x() );
 			pointToRepresentRight.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getRightJunctionPoint(), (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
 
+
+			//linear interpolation between current point and previous one
+			//interpolation will not be executed if the current point is the first of the list
+			if (i > 0)
+			{
+				current_item = _transferFunctionScene.addLine(previousPoint.x(), previousPoint.y(), pointToRepresentLeft.x(), pointToRepresentLeft.y(), drawingPen);
+				current_item->setZValue( c + 1 );
+
+				if ( pointToRepresentLeft.y() != pointRectRight.y() )
+				{
+					current_item = _transferFunctionScene.addLine( pointToRepresentLeft.x(), pointToRepresentLeft.y(), pointToRepresentRight.x(), pointToRepresentRight.y(), drawingPen );
+					current_item->setZValue( c + 1 );
+				}
+			}
+
 			//drawing single current point
 			pointRectLeft.setX(pointToRepresentLeft.x() - MARKERS_RADIUS );
 			pointRectLeft.setY(pointToRepresentLeft.y() - MARKERS_RADIUS );
 			pointRectLeft.setWidth(2.0*MARKERS_RADIUS);
 			pointRectLeft.setHeight(2.0*MARKERS_RADIUS);
-			_transferFunctionScene.addEllipse( pointRectLeft, drawingPen, drawingBrush );
+			//sostituire con disegno della TfHandle
+			current_item = _transferFunctionScene.addEllipse( pointRectLeft, drawingPen, drawingBrush );
+			current_item->setZValue( c + 1 );
+
 			if ( pointToRepresentLeft.y() != pointToRepresentRight.y() )
 			{
 				pointRectRight.setX(pointToRepresentRight.x() - MARKERS_RADIUS );
 				pointRectRight.setY(pointToRepresentRight.y() - MARKERS_RADIUS );
 				pointRectRight.setWidth(pointRectLeft.width());
 				pointRectRight.setHeight(pointRectLeft.height());
-				_transferFunctionScene.addEllipse( pointRectRight, drawingPen, drawingBrush );
+				//sostituire con disegno della TfHandle
+				current_item = _transferFunctionScene.addEllipse( pointRectRight, drawingPen, drawingBrush );
+				current_item->setZValue( c + 1 );
 			}
 
-			//sostituire con disegno della TfHandle
-
-			//		_transferFunctionScene.FillEllipse( drawingBrush, pointRect );
-
-			//linear interpolation between current point and previous one
-			//interpolation will not be executed if the current point is the first of the list
-			if (i > 0)
-			{
-				_transferFunctionScene.addLine(previousPoint.x(), previousPoint.y(), pointToRepresentLeft.x(), pointToRepresentLeft.y(), drawingPen);
-
-				if ( pointToRepresentLeft.y() != pointRectRight.y() )
-					_transferFunctionScene.addLine( pointToRepresentLeft.x(), pointToRepresentLeft.y(), pointToRepresentRight.x(), pointToRepresentRight.y(), drawingPen );
-			}
-
-			//refresh of previous point.
+			//updating previous point.
 			//So, it's possible to interpolate linearly the current point with the previous one
 			previousPoint = pointToRepresentRight;
 		}
@@ -326,12 +359,19 @@ void QualityMapperDialog::on_addPointButton_clicked()
 void QualityMapperDialog::on_savePresetButton_clicked()
 {
 	QString tfName = ui.presetComboBox->currentText();
-	_transferFunction->saveColorBand( tfName );
+	QString tfPath = _transferFunction->saveColorBand( tfName );
+	
+	QFileInfo fi(tfPath);
+	tfName = fi.fileName();
+	QString ext = CSV_FILE_EXSTENSION;
+	if ( tfName.endsWith( ext ) )
+	tfName.remove( tfName.size() - ext.size(), ext.size() );
 
-	KNOWN_EXTERNAL_TFS newTF( tfName, tfName );
+	KNOWN_EXTERNAL_TFS newTF( tfPath, tfName );
 	_knownExternalTFs << newTF;
 	_isTransferFunctionInitialized = false;
 	this->initTF();
+	ui.presetComboBox->setCurrentIndex( 0 );
 }
 
 
@@ -348,11 +388,18 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 		_transferFunction = new TransferFunction( csvFileName );
 	}
 
-	KNOWN_EXTERNAL_TFS newTF( csvFileName, csvFileName );
+	QFileInfo fi(csvFileName);
+	QString tfName = fi.fileName();
+	QString ext = CSV_FILE_EXSTENSION;
+	if ( tfName.endsWith( ext ) )
+		tfName.remove( tfName.size() - ext.size(), ext.size() );
+
+	KNOWN_EXTERNAL_TFS newTF( csvFileName, tfName );
 	_knownExternalTFs << newTF;
 
 	_isTransferFunctionInitialized = false;
 	this->initTF();
+	ui.presetComboBox->setCurrentIndex( 0 );
 	this->drawTransferFunction();
 }
 
@@ -360,15 +407,71 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 
 void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 {
+	//searching among default TFs
 	for (int i=0; i<NUMBER_OF_DEFAULT_TF; i++)
 	{
 		if ( TransferFunction::defaultTFs[i] == newValue )
 		{
 			if ( _transferFunction )
-			{
 				delete _transferFunction;
-				_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
-			}
+
+			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
+			this->drawTransferFunction();
+			return ;
+		}
+	}
+
+	//TF selected is not a default one. Maybe it's a loaded or saved one. Searching among known external TFs
+	KNOWN_EXTERNAL_TFS external_tf;
+	for (int i=0; i<_knownExternalTFs.size(); i++)
+	{
+		external_tf = _knownExternalTFs.at(i);
+
+		if ( newValue == external_tf.name )
+		{
+			if ( _transferFunction )
+				delete _transferFunction;
+
+			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
+			this->drawTransferFunction();
+			return ;
+		}
+	}
+}
+
+void QualityMapperDialog::on_redButton_toggled(bool checked)
+{
+	if (checked)
+	{
+		if ( _transferFunction )
+		{
+			_transferFunction->moveChannelAhead( RED_CHANNEL );
+			this->drawTransferFunction();
+		}
+	}
+
+}
+
+void QualityMapperDialog::on_greenButton_toggled(bool checked)
+{
+	if (checked)
+	{
+		if ( _transferFunction )
+		{
+			_transferFunction->moveChannelAhead( GREEN_CHANNEL );
+			this->drawTransferFunction();
+		}
+	}
+}
+
+void QualityMapperDialog::on_blueButton_toggled(bool checked)
+{
+	if (checked)
+	{
+		if ( _transferFunction )
+		{
+			_transferFunction->moveChannelAhead( BLUE_CHANNEL );
+			this->drawTransferFunction();
 		}
 	}
 }

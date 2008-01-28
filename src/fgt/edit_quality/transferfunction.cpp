@@ -461,14 +461,14 @@ void TransferFunction::buildColorBand()
 }
 
 
-void TransferFunction::saveColorBand( QString fn )
+QString TransferFunction::saveColorBand( QString fn )
 {
 	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
 
 	QFile outFile( fileName );
 
 	if ( !outFile.open(QIODevice::WriteOnly | QIODevice::Text))
-		return;
+		return fileName;
 
 	QTextStream outStream( &outFile );
 	outStream << CSV_FILE_COMMENT << " COLOR BAND FILE STRUCTURE - first row: RED CHANNEL DATA - second row GREEN CHANNEL DATA - third row: BLUE CHANNEL DATA" << endl;
@@ -489,16 +489,26 @@ void TransferFunction::saveColorBand( QString fn )
 	}
 
 	outFile.close();
+
+	return fileName;
 }
 
 
 void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
 {
+	int ch_code_int = (int)ch_code;
+	assert( (ch_code_int>=0) && (ch_code_int<NUMBER_OF_CHANNELS) );
+
+	int tmp = 0;
 	do 
 	{
-		for (int i=0; i<NUMBER_OF_CHANNELS; i++)
-			_channels_order[i] = _channels_order[i-1] % (NUMBER_OF_CHANNELS -1);
-	} while( _channels_order[NUMBER_OF_CHANNELS-1] != ch_code );
+		tmp = _channels_order[NUMBER_OF_CHANNELS-1];
+		for (int i=NUMBER_OF_CHANNELS-1; i>=1; i--)
+			//_channels_order[i] = _channels_order[i-1] % (NUMBER_OF_CHANNELS -1);
+			_channels_order[i] = _channels_order[i-1];
+
+		_channels_order[0] = tmp;
+	} while( _channels_order[NUMBER_OF_CHANNELS-1] != ch_code_int );
 }
 
 
