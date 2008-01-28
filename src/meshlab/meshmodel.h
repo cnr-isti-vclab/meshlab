@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.44  2008/01/28 13:00:53  cignoni
+added delMesh method
+
 Revision 1.43  2007/12/11 17:14:43  cignoni
 removed uselss include ocf for vertex
 
@@ -370,6 +373,22 @@ MeshDocument()
 	 currentMesh=meshList.back();
 	}
 
+  bool delMesh(MeshModel *mmToDel)
+	{
+		if(meshList.size()==1) return false; 
+		QMutableListIterator<MeshModel *> i(meshList);
+		while (i.hasNext()) {
+     MeshModel *md = i.next();
+     if (md==mmToDel) 
+		  {
+         i.remove();
+				 delete mmToDel;
+			}
+		}
+		if(currentMesh == mmToDel) setCurrentMesh(0);
+		return true;
+ }
+		
   int vn() /// Sum of all the vertices of all the meshes
 	{ 
 			int tot=0;
