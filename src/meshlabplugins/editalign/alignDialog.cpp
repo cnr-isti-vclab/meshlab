@@ -100,7 +100,7 @@ void AlignDialog::setCurrentArc(AlignPair::Result *_currentArc)
 	MeshTreeWidgetItem *newArcF= A2Tf[_currentArc];
 	if(newArcB!=NULL)
 		{ 
-			assert(newArcB->a == currentArc);
+			assert(newArcB->a == _currentArc);
 			newArcB->setBackground(0,QBrush(QColor(Qt::lightGray)));				
 			newArcF->setBackground(0,QBrush(QColor(Qt::lightGray)));				
 		}
