@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.146  2008/01/28 13:02:00  cignoni
+added support for filters on collection of meshes (layer filters)
+
 Revision 1.145  2008/01/16 01:39:55  cignoni
 added two slot for better managing the exit from editing tools
 
@@ -368,6 +371,14 @@ void MainWindow::dropEvent ( QDropEvent * event )
 	}
 }
 
+void MainWindow::delCurrentMesh()
+{
+	GLA()->meshDoc.delMesh(GLA()->meshDoc.mm());
+	stddialog->hide();
+	GLA()->updateGL();
+	updateMenus();	
+}
+
 
 void MainWindow::setCurrent(int meshId)
 {
@@ -459,7 +470,7 @@ void MainWindow::startFilter()
 	if(iFilter->autoDialog(action))
 	{
 		/// Start the automatic dialog with the collected parameters
-		stddialog->showAutoDialog(iFilter, GLA()->mm(), action, this);
+		stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this);
   }
 	else if(iFilter->customDialog(action))
 	{
@@ -479,7 +490,7 @@ void MainWindow::startFilter()
 void MainWindow::executeFilter(QAction *action, FilterParameterSet &params)
 {
 
-	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());  
+	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());  
 	
   // (3) save the current filter and its parameters in the history
   GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
@@ -487,11 +498,11 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params)
   qb->show();
   iFilter->setLog(&(GLA()->log));
   // (4) Apply the Filter 
-
+	bool ret;
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
 	GLA()->mm()->busy=true;
-  bool ret=iFilter->applyFilter(action, *(GLA()->mm()), params, QCallBack);
-  GLA()->mm()->busy=false;
+	ret=iFilter->applyFilter(action,   GLA()->meshDoc, params, QCallBack);
+	GLA()->mm()->busy=false;
   qApp->restoreOverrideCursor();	
 
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)

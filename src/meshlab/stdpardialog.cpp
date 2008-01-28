@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.24  2008/01/28 13:02:00  cignoni
+added support for filters on collection of meshes (layer filters)
+
 Revision 1.23  2008/01/10 17:16:44  cignoni
 unsaved dialog has a better behaviour
 
@@ -94,7 +97,11 @@ Revision 1.0  2006/12/13 17:37:02  pirosu
 Added standard plugin window support
 
 ****************************************************************************/
-
+#include<QObject>
+#include "meshmodel.h"
+#include "interfaces.h"
+#include "mainwindow.h"
+#include "plugindialog.h"
 #include "stdpardialog.h"
 
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
@@ -113,14 +120,17 @@ StdParFrame::StdParFrame(QWidget *p)
 
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, QAction *action, MainWindowInterface *mwi)
+void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *action, MainWindowInterface *mwi)
   {
 		curAction=action;
 		curmfi=mfi;
 		curmwi=mwi;
 		curParSet.clear();
 		curModel = mm;
-		mfi->initParameterSet(action, *mm, curParSet);	
+		curMeshDoc = md;
+		
+		
+		mfi->initParameterSet(action, *md, curParSet);	
 		createFrame();
 		loadFrameContent();
   }
@@ -147,7 +157,7 @@ void MeshlabStdDialog::createFrame()
 void MeshlabStdDialog::resetValues()
 {
 	curParSet.clear();
-	curmfi->initParameterSet(curAction, *curModel, curParSet);	
+	curmfi->initParameterSet(curAction, *curMeshDoc, curParSet);	
 		
 	assert(qf);
 	assert(qf->isVisible());

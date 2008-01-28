@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.15  2008/01/28 13:02:00  cignoni
+added support for filters on collection of meshes (layer filters)
+
 Revision 1.14  2007/11/30 07:19:09  cignoni
 moved generic dialog to the meshlab base
 
@@ -78,7 +81,8 @@ Added standard plugin window support
 #include <QtCore>
 #include <QAction>
 #include <QtGui>
-#include <QDoubleSpinBox>
+#include <QObject>
+//#include <QDoubleSpinBox>
 
 #include "meshmodel.h"
 #include "filterparameter.h"
@@ -193,7 +197,7 @@ public:
 	void createFrame();
 	void loadFrameContent();
 
-	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, QAction *q, MainWindowInterface *mwi);
+	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi);
 
 private slots:
 	void applyClick();
@@ -207,6 +211,7 @@ protected:
 	QAction *curAction;
 public:
 	MeshModel *curModel;
+	MeshDocument * curMeshDoc;
 	MeshFilterInterface *curmfi;
 	MainWindowInterface *curmwi;
 	FilterParameterSet curParSet;

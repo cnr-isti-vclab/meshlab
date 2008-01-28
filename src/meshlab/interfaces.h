@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.69  2008/01/28 13:02:00  cignoni
+added support for filters on collection of meshes (layer filters)
+
 Revision 1.68  2008/01/04 18:23:24  cignoni
 Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
 
@@ -267,14 +270,21 @@ public:
 
 	// The main function that applies the selected filter with the already stabilished parameters
 	// This function is called by the framework after getting the user params 
-	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameterSet & /*parent*/, vcg::CallBackPos * /*cb*/) = 0;
-  
+	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameterSet & /* par */, vcg::CallBackPos * /*cb*/) = 0;
+ 	virtual bool applyFilter(QAction *   filter, MeshDocument &md,   FilterParameterSet & par,       vcg::CallBackPos *cb) 
+	{ 
+		return applyFilter(filter,*(md.mm()),par,cb); 
+	}
+
+ 
 	//  this function returns true if the filter has parameters that must be filled with an automatically build dialog.
 	virtual bool autoDialog(QAction *) {return false;}
 	
 	// This function is called to initialized the list of parameters. 
 	// it is called by the auto dialog framework to know the list of parameters.
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/) {}
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*par*/) {}
+	virtual void initParameterSet(QAction *filter,MeshDocument &md, FilterParameterSet &par) 
+	{initParameterSet(filter,*(md.mm()),par);}
 
 	//  this function returns true if the filter has a personally customized dialog..
 	virtual bool customDialog(QAction *) {return false;}
@@ -328,17 +338,13 @@ protected:
 			}
 		}
 
-private:
     GLLogStream *log;	
 };
 
+
 /*
-Serve per customizzare totalmente il processo di rendering
-Viene invocata al posto del rendering standard della mesh.
-- Con che stato opengl gia settato per quanto riguarda:
-    - Matrici proj e model
-    - Lighting (dir e tipo luci) 
-    - Bf cull ecc e tutto lo stato classico
+Used to customized the rendering process. Currently used only by two plugins.
+Probably should be re-factored;
 */
 
 class MeshRenderInterface
@@ -396,6 +402,12 @@ protected:
 };
 
 
+/*
+Editing Interface
+Used to provide tools that needs some kind of interaction with the mesh.
+Editing tools are exclusive (only one at a time) and can grab the mouse events and customize the rendering process.
+*/
+
 class MeshEditInterface
 {
 public:
@@ -418,10 +430,11 @@ public:
 
 };
 
-Q_DECLARE_INTERFACE(MeshIOInterface,       "vcg.meshlab.MeshIOInterface/1.0")
-Q_DECLARE_INTERFACE(MeshFilterInterface,   "vcg.meshlab.MeshFilterInterface/1.0")
-Q_DECLARE_INTERFACE(MeshRenderInterface,   "vcg.meshlab.MeshRenderInterface/1.0")
-Q_DECLARE_INTERFACE(MeshDecorateInterface, "vcg.meshlab.MeshDecorateInterface/1.0")
-Q_DECLARE_INTERFACE(MeshEditInterface,     "vcg.meshlab.MeshEditInterface/1.0")
+Q_DECLARE_INTERFACE(MeshIOInterface,						"vcg.meshlab.MeshIOInterface/1.0")
+Q_DECLARE_INTERFACE(MeshFilterInterface,				"vcg.meshlab.MeshFilterInterface/1.0")
+Q_DECLARE_INTERFACE(MeshRenderInterface,				"vcg.meshlab.MeshRenderInterface/1.0")
+Q_DECLARE_INTERFACE(MeshDecorateInterface,			"vcg.meshlab.MeshDecorateInterface/1.0")
+Q_DECLARE_INTERFACE(MeshEditInterface,					"vcg.meshlab.MeshEditInterface/1.0")
+
 
 #endif
