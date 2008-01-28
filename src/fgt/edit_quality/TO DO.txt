@@ -7,3 +7,11 @@
 16.52 25/01/2008	(!!) spostare l'Histogram in qmdialog (!!)
 18.37 25/01/2008	montare un'icona sul tasto per caricare un CSV file dal disco
 19.00 26/01/2008	testare come reagisce la lista di TFs quando vengono create, salvate e caricate
+
+
+TASKS
+
+- "estrapolare" il pezzo di istogramma compreso tra le due maniglie destra e sinistra dell'equalizzatore e visualizzarlo "al di sotto" della transfer function
+- disegnare la curva di gamma
+- applicare la color band al modello come texture (pulsante preview)
+- applicare la color band al modello come valore di colore dei vertici (pulsante apply)
