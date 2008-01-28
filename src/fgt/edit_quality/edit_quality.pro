@@ -2,8 +2,8 @@ TEMPLATE      = lib
 CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = const_types.h histogram.h qualitymapper.h qualitymapperdialog.h transferfunction.h util.h handle.h eqhandle.h
-SOURCES       = qualitymapper.cpp transferfunction.cpp qualitymapperdialog.cpp util.cpp handle.cpp eqhandle.cpp\
+HEADERS       = const_types.h histogram.h qualitymapper.h qualitymapperdialog.h transferfunction.h util.h handle.h eqhandle.h tfhandle.h
+SOURCES       = qualitymapper.cpp transferfunction.cpp qualitymapperdialog.cpp util.cpp handle.cpp eqhandle.cpp tfhandle.cpp \
 								../../meshlab/filterparameter.cpp
 TARGET        = editQuality
 DESTDIR       = ../../meshlab/plugins
