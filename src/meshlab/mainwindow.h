@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.97  2008/01/28 08:55:01  cignoni
+added delete layer functionality
+
 Revision 1.96  2008/01/16 01:39:54  cignoni
 added two slot for better managing the exit from editing tools
 
@@ -199,6 +202,7 @@ public slots:
   bool openProject(QString fileName=QString(), GLArea *gla=0);
   void saveProject();
 	void setCurrent(int meshId);
+	void delCurrentMesh();
 	void updateGL();
 	void endEdit();
 

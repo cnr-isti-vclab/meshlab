@@ -43,7 +43,9 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDialog(parent)
 	mw=qobject_cast<MainWindow *>(gla->parentWidget()->parentWidget());
 	
 	connect(	ui.layerTableWidget, SIGNAL(cellClicked(int, int)) , this,  SLOT(toggleStatus(int,int)) );
-	connect(	ui.addButton, SIGNAL(clicked()) , mw,  SLOT(openIn()) );
+	connect(	ui.addButton,    SIGNAL(clicked()) , mw,  SLOT(openIn()) );
+	connect(	ui.deleteButton, SIGNAL(clicked()) , mw,  SLOT(delCurrentMesh()) );
+
 	//connect(	ui.deleteButton, SIGNAL(cellClicked(int, int)) , this,  SLOT(openIn(int,int)) );
 }
 void LayerDialog::toggleStatus(int row, int col)
