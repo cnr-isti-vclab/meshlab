@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.14  2008/01/28 13:01:26  cignoni
+added missing include matrix44
+
 Revision 1.13  2008/01/04 00:43:15  cignoni
 Changed findParameter (now it returns a pointer) and completed string parameter
 
@@ -73,6 +76,7 @@ First ver
 #include <QMap>
 #include <QPair>
 #include <QAction>
+#include <vcg/math/matrix44.h>
 
 /*
 The Filter Parameter class 
