@@ -1,13 +1,16 @@
 TEMPLATE      = lib
+QT           += opengl
 CONFIG       += plugin
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut
+INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/
+
 HEADERS       = sampledecorate.h cubemap.h
+
 SOURCES       = sampledecorate.cpp\ 
 		cubemap.cpp \
 		../../meshlab/filterparameter.cpp \
 		../../../../code/lib/glew/src/glew.c
 
-TARGET        = sampledecorate
+TARGET        = sampledecoration
 DESTDIR       = ../../meshlab/plugins
 
 # the following line is needed to avoid mismatch between 
@@ -23,4 +26,4 @@ contains(TEMPLATE,lib) {
       else:TARGET = $$member(TARGET, 0)d
    }
 }
-QT           += opengl
+
