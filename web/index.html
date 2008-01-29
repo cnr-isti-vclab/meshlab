@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head>
 		<title>MeshLab</title>
 <meta content="Paolo Cignoni" name="author" />
-<meta content="mesh 3d processing meshlab scanning" name="keywords" />
-<meta content="Course Web page" name="description" />
+<meta content="mesh 3d processing meshlab scanning gpl open source " name="keywords" />
+<meta content="MeshLab Home Page" name="description" />
 <meta content="all" name="robots"/><link media="all" href="style.css" type="text/css" rel="stylesheet" /><link href="favicon.ico" type="image/x-icon" rel="shortcut icon" />
 <style  type="text/css">A { COLOR: #0000bb; TEXT-DECORATION: none }
 	</style>
@@ -40,28 +40,30 @@ extendible system for the processing and editing of unstructured 3D triangular
 meshes. <br/>The system is aimed to help the processing of 
 the typical not-so-small unstructured models arising in 3D scanning, providing a 
 set of tools for editing, cleaning, healing, inspecting, rendering and 
-converting this kind of meshes.<br/><br/>The project is supported by the European Network of 
-Excellence <a href="http://www.epoch-net.org/">Epoch</a> 
-and <a href="http://www.aimatshape.net/">Aim@Shape</a> 
-<br/><br/>The system is heavily based on 
+converting this kind of meshes.
+<br/>The system is heavily based on 
 the <a href="http://vcg.sourceforge.net">VCG library</a> 
 developed at the 
 <a href="http://vcg.isti.cnr.it">Visual Computing Lab</a> of <a href="http://www.isti.cnr.it" >ISTI - CNR</a>, 
 for all the core mesh processing tasks and it is available for 
-<a href="http://downloads.sourceforge.net/meshlab/MeshLabSetup_v100.exe"          > Windows</a>,
-<a href="http://downloads.sourceforge.net/meshlab/MeshLab-1.0.0-linux-i386.tar.gz"> Linux</a> and
-<a href="http://downloads.sourceforge.net/meshlab/MeshLab-1.0.0.dmg"              >MacOSX (intel only)</a>. 
+<a href="http://downloads.sourceforge.net/meshlab/MeshLabSetup_v110.exe" > Windows</a>,
+<a href="http://downloads.sourceforge.net/meshlab/MeshLabSrc_v110.tgz"   > Linux (src)</a> and
+<a href="http://downloads.sourceforge.net/meshlab/MeshLabMac_v110.dmg"   > MacOSX (intel only)</a>. 
 The MeshLab system started in late 2005 as a part of the <a 
 href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0506/index.html">FGT</a> course of the <a href="http://www.di.unipi.it" >Computer Science</a> 
 department of University of Pisa and most of the code (~15k lines) of the first 
-versions was written by a handful of students. Also this year <a 
-href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0607/index.html">FGT</a> students has continued to work to this project implementing new features. 
-The proud MeshLab <a href="#Developers" >developers</a> are listed below.</p>
+versions was written by a handful of willing students. The following years <a 
+href="http://vcg.isti.cnr.it/%7Ecignoni/FGT0607/index.html">FGT</a> students have continued to work to this project implementing more and more features. 
+The proud MeshLab <a href="#Developers" >developers</a> are listed below.
+<br/>This project have been supported by the European Networks of 
+Excellence <a href="http://www.epoch-net.org/">Epoch</a> 
+and (partially) by <a href="http://www.aimatshape.net/">Aim@Shape</a>
+</p>
 <p class="body"><a 
 href="http://sourceforge.net/project/showfiles.php?group_id=149444"></a></p>
 <p class="body">
 	<big><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">
-		Download Latest Version (5 March 2007)<b><i> V1.0.0 </i></b></a>
+		Download Latest Version (29 January 2008)<b><i> V1.1.0 </i></b></a>
 	</big>
 <a href="#History">(changes)</a></p><br/>
 <p class="body">Remember that, whenever you use MeshLab in a 
@@ -75,6 +77,8 @@ official/commercial project or in any kind of research, you should: </p>
   >users' forum</a> describing the project where MeshLab was 
   used. </li>
 </ul>
+<p class="body">Adopted License, acknowlegments and other legal issues are detailed <a href="http://meshlab.sourceforge.net/wiki/index.php/Licenses"> here.</a>
+</p>
 <h2><a name="Features"></a>Features</h2>
 <ul>
   <li>Interactive selection and deletion of portion of the 
@@ -84,7 +88,9 @@ official/commercial project or in any kind of research, you should: </p>
   <ul>
     <li>import:<b>PLY, STL, OFF, OBJ, 3DS, COLLADA, PTX</b> </li>
     <li>export:<b>PLY, STL, OFF, OBJ, 3DS, COLLADA, VRML, DXF</b></li>
-  </ul></li>
+ 	<li> Point Clouds support. Now 3D files that are composed only by points are well supported in PLY and OBJ format.</li>
+ 	<li> <b><a href="http://meshlab.sourceforge.net/wiki/index.php/U3D_support">U3D </a></b> support; MeshLab is the first open source tool to provide direct conversion of 3D meshes into the U3D format. Now you can create pdf, like <a href="http://meshlab.sourceforge.net/wiki/images/c/cc/Laurana.pdf">this</a> with 3D objects with just MeshLab and LaTeX.</li>
+ </ul></li>
   <li>Mesh <b>Cleaning</b> Filters:  
   <ul>
     <li>removal of duplicated, unreferenced vertices, null 
@@ -96,7 +102,7 @@ official/commercial project or in any kind of research, you should: </p>
   </ul></li>
   <li><b>Remeshing</b> filters: 
   <ul>
-    <li>High quality edge collapse simplfication (even meshes with texture coords preservation)</li>
+    <li>High quality edge collapse simplification (even with texture coords preservation)</li>
     <li>Surface reconstruction from points (a ball pivoting variant) </li>
     <li>Subdivision surfaces (loop and butterfly) </li>
     <li>Feature preserving smoothing and fairing filters </li>
@@ -104,15 +110,23 @@ official/commercial project or in any kind of research, you should: </p>
   <li>Various <b> Colorization/Inspection</b> filters 
   <ul>
     <li>Gaussian and mean curvature </li>
-    <li>Border edges </li>
-    <li>Non two-manifold edges </li>
+    <li>Border edges, geodesic distance, from borders</li>
+    <li>Non two-manifold edges and vertices </li>
     <li>Self intersecting faces </li>
+    <li> Ambient Occlusion. An ambient occlusion field can be computed and stored per vertex </li>
   </ul></li>
   <li>Interactive Mesh <b>Painting</b>
   <ul>
     <li>Color Painting </li>
     <li>Selection paint</li>
     <li>Smoothing</li>
+  </ul></li>
+  <li>  Measuring tool. You can take linear measures between points of the displayed meshes
+  <li> Slicing tool. A new tool that allows to export planar sections of a mesh in SVG format
+  <li> <b>3D Scanning tools</b> 
+  <ul>
+     <li> Alignment ICP based range map alignment tool, for putting meshes into the same reference space.
+     <li> Merging of multiple meshes the Poisson surface reconstruction source code (kindly provided by by Michael Kazhdan and Matthew Bolitho) have been included in.</li>
   </ul></li>
   <li>OpenGL Shader based rendering (write your own 
   shader!) compatible with Typhoon Lab's Shader Designer </li>
@@ -122,9 +136,7 @@ official/commercial project or in any kind of research, you should: </p>
   purposes. </li>
   <li>Extendible plugins based architecture, writing new 
   mesh processing functions, colorization filters and support for different file 
-  formats is quite easy! Look at <a href="http://meshlab.sourceforge.net/filter.html" 
-  >Filter-PlugIn Sample</a> or <a  href="http://meshlab.sourceforge.net/meshio.html" 
-  >MeshIO-PlugIn Sample</a> </li></ul>
+  formats is quite easy! Look at <a href="http://meshlab.cvs.sourceforge.net/meshlab/meshlab/src/sampleplugins/"> PlugIn Samples</a></li></ul>
   
 Bug reports and feature 
 requests should be filed using the sourceforge <a 
@@ -135,6 +147,28 @@ href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums
 <h2>ScreenShots</h2>
 <table style="WIDTH: 100%; TEXT-ALIGN: left" cellspacing="2" cellpadding="2" border="1">
   <tbody>
+  <tr>
+    <td colspan="2">Snapshots taken from MeshLab v <b>1.1.0</b> </td></tr>
+  <tr>
+    <td><a href="SnapMeshLab.u3d.png" ><img alt="" src="SnapMeshLab.u3d.small.jpg" /></a> 
+        </td>
+    <td>A snapshot of AcrobatReader displaying a PDF with a <a href="http://meshlab.sourceforge.net/wiki/index.php/U3D_support">U3D </a> model embedded. Support for saving meshes in U3D format is useful for creating, using latex, impressive PDFs with embedded 3D models. You simply need to convert your mesh into u3d format, include the small snip of tex code generated by MeshLab into your latex document and then compile it with pdflatex. Note that the u3d file format is quite compact; for an example this <a href="http://meshlab.sourceforge.net/wiki/images/c/cc/Laurana.pdf">PDF</a>, shown on the left image, contains the 50k triangle mesh of the Laurana's bust and it is squeezed to approx 200 kb. A zip with sources (latex and u3d file) can be found <a href="http://meshlab.sourceforge.net/wiki/images/b/bb/Laurana_tex.zip">here</a>. <br> Caveat: some pdf previewers (like the macosx 'Preview') do not fully support the pdf standard and do not display embedded 3D objects. Acrobat reader support 3D since version 7.
+    </td>
+  </tr>
+  <tr>
+    <td><a href="SnapMeshLab.AO1.png" ><img alt="" src="SnapMeshLab.AO1.small.jpg" /></a> 
+        <a href="SnapMeshLab.AO2.png" ><img alt="" src="SnapMeshLab.AO2.small.jpg" /></a> 
+        </td>
+    <td>A model without and with an ambient occlusion term. The model was photoreconstructed through the free Arc3D web service.
+    </td>
+  </tr>
+ <tr>
+    <td><a href="SnapMeshLab.align1.png" ><img alt="" src="SnapMeshLab.align1.small.jpg" /></a> 
+        <a href="SnapMeshLab.align2.png" ><img alt="" src="SnapMeshLab.align2.small.jpg" /></a> 
+        </td>
+    <td>A couple of snapshot of the new alignment system.
+    </td>
+  </tr>
   <tr>
     <td colspan="2">Snapshots taken from MeshLab v <b>1.0.0</b> </td></tr>
   <tr>
@@ -271,11 +305,12 @@ href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums
       small portion of the original rendering just to give you an idea of the 
       quality of the original 20 Mpix&nbsp;image.</td></tr></tbody></table>
 <h2><a name="Developers"></a>Developers</h2>
+(This list will be substituted with this <a href="http://meshlab.sourceforge.net/wiki/index.php/Developers">one</a> in the wikidoc)
 <ul>
   <li>Designer: <a href="http://vcg.isti.cnr.it/%7Ecignoni">Paolo Cignoni</a> </li>
   <li>Filtering Plugins: 
   <ul>
-    <li>Mario Latronico [<b>latronic</b>], Andrea Venturi [<b>giec</b>], Elisa Cerisoli [<b>e_cerisoli</b>], Marco Pirosu [<b>pirosu</b>]</li>
+    <li>Mario Latronico [<b>latronic</b>], Andrea Venturi [<b>giec</b>], Elisa Cerisoli [<b>e_cerisoli</b>], Marco Pirosu [<b>pirosu</b>], Michele Mischitelli  [<b>mischitelli</b>], Sebastian Herholz [<b> sherholz</b>] </li>
    </ul></li>
   <li>Interface Framework 
   <ul>
@@ -296,10 +331,17 @@ href="http://sourceforge.net/forum/forum.php?forum_id=499533">help public forums
   </ul></li>
   <li>Linux Porting and Epoch plugins integration: 
   <ul>
-    <li>Maarten Vergauwen [<b>zifnab1974</b>] </li>
+    <li>Maarten Vergauwen [<b>zifnab1974</b>], </li>
   </ul></li></ul>
 <h2><a name="History"></a>History</h2>
 <ul>
+  <li><i>29/01/2007</i> V 1.1.0 Release 
+  <span class="shown" id="_no_V11"><font size="-1"><a href="javascript:showNow('_V11');hideNow('_no_V11');" >
+  <b>[details]</b></a></font> </span><span class="hidden" id="_V11">
+  <a href="javascript:showNow('_no_V11');hideNow('_V11');" >
+  <b>[hide]</b></a> <font color="#777777" size="-1">	
+<pre>= New features =
+</pre>
   <li><i>04/04/2007</i> V 1.0.0 Release 
   <span class="shown" id="_no_V10"><font size="-1"><a href="javascript:showNow('_V10');hideNow('_no_V10');" >
   <b>[details]</b></a></font> </span><span class="hidden" id="_V10">
@@ -498,30 +540,59 @@ src="http://meshlab.sourceforge.net/phpmv2/phpmyvisites.js" type="text/javascrip
 in PHP/MySQL, basato su licenza GPL. <img 
 style="BORDER-RIGHT: 0px; BORDER-TOP: 0px; BORDER-LEFT: 0px; BORDER-BOTTOM: 0px" 
 alt="phpMyVisites" src="http://meshlab.sourceforge.net/phpmv2/phpmyvisites.php" /> </p></noscript></a> 
-			<!-- /phpmyvisites --></div>
-		<!-- DIV -->
+<!-- /phpmyvisites --></div>
+			
+			
+<!-- ************ DIV ************ -->
 <div id="rightcontent"><img title="MeshLab Logo" style="WIDTH: 128px; HEIGHT: 128px" alt="MeshLab Logo" src="eye_128_splash.png" /><br/><br/><a href="http://sourceforge.net/projects/meshlab/" ><img 
 style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 38px" 
 alt="SourceForge.net Logo" 
 src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2" /></a><br/>
-<p class="menu"><a href="http://meshlab.sourceforge.net/wiki">Documentation</a></p>
+<p class="menu"><a href="http://meshlab.sourceforge.net/wiki">MeshLab WikiDocs</a></p>
 <p class="menu"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444">Download V1.0.0</a></p>
-<p class="menu"><a href="http://downloads.sourceforge.net/meshlab/MeshLabSetup_v100.exe"          > - Win</a></p>
-<p class="menu"><a href="http://downloads.sourceforge.net/meshlab/MeshLab-1.0.0-linux-i386.tar.gz"> - Linux</a></p>
-<p class="menu"><a href="http://downloads.sourceforge.net/meshlab/MeshLab-1.0.0.dmg"              > - MacOSX (intel)</a></p>
-<p class="menu"><a href="stat" >CVS Statistics</a></p>
-<p class="menu"><a href="http://sourceforge.net/projects/meshlab/">Sourceforge page</a></p>
+<Small>
+<p class="menu"><a href="http://downloads.sourceforge.net/meshlab/MeshLabSetup_v110.exe" >- Windows</a></p>
+<p class="menu"><a href="http://downloads.sourceforge.net/meshlab/MeshLabSrc_v110.tgz"   >- Linux (src)</a> </p>
+<p class="menu"><a href="http://downloads.sourceforge.net/meshlab/MeshLabMac_v110.dmg"   >- MacOSX (intel only)</a></p> 
+</Small>
 <p class="menu"><a href="http://freshmeat.net/projects/meshlab/">FreshMeat page</a></p>
-<p class="menu"><a href="devel.html">Developer's Corner</a></p>
+<p class="menu"><a href="http://meshlab.sourceforge.net/wiki/index.php/Projects">Developer's Corner</a></p>
 <p class="menu"><a href="http://sourceforge.net/tracker/?group_id=149444">Bug Reporting</a></p>	
 
-<br/><a 
-href="http://vcg.isti.cnr.it"><img title="Visual Computing Lab" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 103px" alt="Visual Computing Lab logo" src="vcl.png" /></a> 
+<p>
+<a href="http://vcg.isti.cnr.it"><img title="Visual Computing Lab" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 128px; BORDER-BOTTOM: 0px solid; HEIGHT: 103px" alt="Visual Computing Lab logo" src="vcl.png" /></a> 
+<br/>
+</p>
+<p>
+
+<table style="TEXT-ALIGN: left" cellspacing="1" cellpadding="1" border="0">
+<tr><td colspan="1">
+ <a href="http://slashdot.org/bookmark.pl?url=meshlab.sourceforge.net%2Fcontent%2Fshow.php%2FMeshLab%3Fcontent%3D73418&amp;title=MeshLab" target="_blank">
+<img src="img/slashdot.png" width="16" height="16" border="0" alt="slashdot it" title="slashdot it" /> slashdot it</a>
+</td></tr>
+<tr><td colspan="1">
+ <a href="http://www.digg.com/submit?phase=2&amp;url=meshlab.sourceforge.net%2Fcontent%2Fshow.php%2FMeshLab%3Fcontent%3D73418&amp;title=MeshLab" target="_blank">
+<img src="img/digg.png" width="16" height="16" border="0" alt="digg it" title="digg it" /> digg it</a>
+</td></tr>
+  <tr>
+    <td colspan="1">
+<a href="http://del.icio.us/post?url=meshlab.sourceforge.net%2Fcontent%2Fshow.php%2FMeshLab%3Fcontent%3D73418&amp;title=MeshLab" target="_blank">
+<img src="img/delicious.png" width="16" height="16" border="0" alt="del.icio.us" title="del.icio.us" /> del.icio.us</a>
+</td></tr>
+</table>
+</p>
 <p class="menu"><a href="http://sourceforge.net/project/showfiles.php?group_id=149444"><img title="http://epoch-net.org/" style="BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; BORDER-LEFT: 0px solid; WIDTH: 100px; BORDER-BOTTOM: 0px solid; HEIGHT: 100px" alt="" src="logo_epoch.png" /></a></p>
 
-<SCRIPT type='text/javascript' language='JavaScript' src='http://www.ohloh.net/projects/5759;badge_js'></SCRIPT><br>
+<table style="TEXT-ALIGN: left" cellspacing="1" cellpadding="1" border="0">
+  <tbody>
+  <tr><td colspan="1">
+<SCRIPT type='text/javascript' language='JavaScript' src='http://www.ohloh.net/projects/5759;badge_js'></SCRIPT>
+</td></tr>
+<tr><td colspan="1">
 <SCRIPT type='text/javascript' language='JavaScript' src='http://www.ohloh.net/projects/5967;badge_js'></SCRIPT>
-
+</td></tr>
+</table>
+<br />
 </div>
 	
 </body></html>
