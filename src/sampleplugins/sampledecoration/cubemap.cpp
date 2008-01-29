@@ -209,8 +209,15 @@ bool CICubeMap::LoadOld(const char *basename)
 		
 			QImage tt; 	
 			
-		  if(!GetName(i,basename,filename)) return false;
-			if(!tt.load(filename)) return false;
+		  if(!GetName(i,basename,filename)) {
+					glPopAttrib();
+					return false;
+				}
+			if(!tt.load(filename)) {
+					glPopAttrib();
+					return false;
+				}
+
 			QImage tx = QGLWidget::convertToGLFormat ( tt);
 
 			glBindTexture(GL_TEXTURE_2D, oti[i]);
@@ -251,8 +258,17 @@ bool CICubeMap::LoadExt(const char *basename)
 		{
 			QString filename;
 			QImage tt;
-			if(!GetName(i,basename,filename)) return false;
-			if(!tt.load(filename)) return false;
+			if(!GetName(i,basename,filename)) {
+					glPopAttrib();
+					return false;
+				}
+
+			if(!tt.load(filename)) {
+					glPopAttrib();
+					QMessageBox::warning(0,"Cubemapped background decoration","Warning unable to load cube map images: " + filename );
+					return false;
+				}
+
 			QImage tx = QGLWidget::convertToGLFormat ( tt);
 
 			glTexImage2D( targets[i], 0,  3, tx.width(), tx.height(), 0,	GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
