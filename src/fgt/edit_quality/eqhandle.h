@@ -25,23 +25,31 @@ public:
 	//~EqHandle(void);
 	QRectF boundingRect () const;
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
-	void setBarHeight (qreal);
-	void setHistogramInfo (CHART_INFO*);
-	void setType(EQUALIZER_HANDLE_TYPE);
-	void setMidHandlePercentilePosition(qreal*);
-	void setHandlesPointer(EqHandle*);
+	
+	void setSize (int size) {(size%2==0) ? _size=size+1 : _size=size;};
+	void setBarHeight (qreal height) {_barHeight = height;};
+	void setHistogramInfo (CHART_INFO* info) {_histogramInfo = info;};	
+	void setType (EQUALIZER_HANDLE_TYPE type) {_type = type;};	
+	void setMidHandlePercentilePosition (qreal* pointer) {_midHandlePercentilePosition = pointer;};	
+	void setHandlesPointer (EqHandle* pointer) {_handlesPointer = pointer;};	
+	void setSpinBoxPointer (QDoubleSpinBox* pointer){_spinBoxPointer = pointer;};
 	
 
 protected:
 	void mouseMoveEvent   (QGraphicsSceneMouseEvent *event);
 
 private:
+	/*
+	qreal leftBorder;
+	qreal center = 0;
+	qreal rightBorder; */
 	qreal			_barHeight;
 	QVector<QLineF> _triangle;
 	CHART_INFO*		_histogramInfo;
 	EQUALIZER_HANDLE_TYPE _type;
 	qreal*			_midHandlePercentilePosition;
 	EqHandle*		_handlesPointer;
+	QDoubleSpinBox* _spinBoxPointer;
 
 	qreal calculateMidHandlePercentilePosition(qreal newHandleX)
 	{

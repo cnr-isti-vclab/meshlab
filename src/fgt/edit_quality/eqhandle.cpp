@@ -3,11 +3,11 @@
 EqHandle::EqHandle()
 {
 	_barHeight = 100;
-	_size = 4;
+	setSize(5);
 
-	QPointF a(-_size/2.0f,-_size);
-	QPointF b(_size/2.0f, -_size);
-	QPointF c(0,          -1.87f*_size);
+	QPointF a(-_size/2,-_size);
+	QPointF b(_size/2, -_size);
+	QPointF c(0, -1.87f*_size);
 
 	_triangle.append(QLineF(a,b));
 	_triangle.append(QLineF(b,c));
@@ -19,48 +19,24 @@ EqHandle::~EqHandle(void)
 {
 }*/
 
-void EqHandle::setBarHeight(qreal height)
-{
-	_barHeight = height;
-}
-
-void EqHandle::setHistogramInfo (CHART_INFO *info)
-{
-	_histogramInfo = info;
-}
-
-void EqHandle::setType (EQUALIZER_HANDLE_TYPE type)
-{
-	_type = type;
-}
-
-void EqHandle::setHandlesPointer(EqHandle* pointer)
-{
-	_handlesPointer = pointer;
-}
-
-void EqHandle::setMidHandlePercentilePosition(qreal* pointer)
-{
-	_midHandlePercentilePosition = pointer;
-}
 
 void EqHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget /*= 0*/ )
 {
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
-	QPen pen(Qt::black);
-	pen.setWidth(2);
+	//QPen pen(Qt::black);
+	//non sepen.setWidth(2);
 	painter->setPen(_color);
 	painter->setBrush(_color);
 	painter->drawLine(0, -_size, 0, -_barHeight);
 
 	painter->drawLines(_triangle);
-	painter->drawRect(-_size/2.0f, -_size, _size, _size);
+	painter->drawRect(-_size/2, -_size, _size, _size);
 }
 
 QRectF EqHandle::boundingRect () const
 {
-	return QRectF(-_size/2.0f, -_barHeight, _size, _barHeight);
+	return QRectF(-_size/2, -_barHeight, _size, _barHeight);
 }
 
 void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -81,6 +57,8 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	qreal midx =  _handlesPointer[MID_HANDLE].pos().x();
 	qreal rightx= _handlesPointer[RIGHT_HANDLE].pos().x();
 
+	_spinBoxPointer->blockSignals(true);
+
 	if (handleOffset >= std::numeric_limits<float>::epsilon())
 	{
 		switch (_type)
@@ -96,10 +74,15 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			if (newPos.x() < _handlesPointer[RIGHT_HANDLE].pos().x()) 
 			{
 				setPos(newPos.x(), oldPos.y());
+				// calculating new spinbox value
 				qreal percentagePos = (pos().x()-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
 				qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
+				// Changing minimum/maximum value of oppoite spinbox
+				_handlesPointer[RIGHT_HANDLE]._spinBoxPointer->setMinimum(newSpinboxValue);
+				// Emitting signals to spinbox and mid handle
 				emit positionChangedToSpinBox((double)newSpinboxValue);
 				emit positionChangedToMidHandle();
+				
 			}
 			break;
 		case RIGHT_HANDLE:
@@ -108,12 +91,14 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 				setPos(newPos.x(), oldPos.y());
 				qreal percentagePos = (pos().x()-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
 				qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
+				_handlesPointer[LEFT_HANDLE]._spinBoxPointer->setMaximum(newSpinboxValue);
 				emit positionChangedToSpinBox((double)newSpinboxValue);
 				emit positionChangedToMidHandle();
 			}
 			break;
 		}
 	}
+	_spinBoxPointer->blockSignals(false);
 }
 
 void EqHandle::moveMidHandle()
@@ -154,12 +139,16 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 		if (newHandleX < _handlesPointer[RIGHT_HANDLE].pos().x()) 
 		{
 			setPos(newHandleX, pos().y());
+			_handlesPointer[RIGHT_HANDLE]._spinBoxPointer->setMinimum(spinBoxValue);
+			emit positionChangedToMidHandle();
 		}
 		break;
 	case RIGHT_HANDLE:
 		if (newHandleX > _handlesPointer[LEFT_HANDLE].pos().x()) 
 		{
 			setPos(newHandleX, pos().y());
+			_handlesPointer[LEFT_HANDLE]._spinBoxPointer->setMaximum(spinBoxValue);
+			emit positionChangedToMidHandle();
 		}		
 		break;
 	}

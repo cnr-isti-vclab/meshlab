@@ -145,7 +145,7 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	//	float barSeparator = dX - barWidth;        //processing space between consecutive bars of the histogram bars (1\5 of dX)
 
 	QPen drawingPen(Qt::black);
-	QBrush drawingBrush (QColor(32, 32, 32),Qt::SolidPattern);
+	QBrush drawingBrush (Qt::black);
 
 	QPointF startBarPt;
 	QSizeF barSize;
@@ -174,18 +174,23 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	for (int i=0; i<3; i++)
 	{
 		xPos = xStart + _histogram_info->chartWidth/2.0*i;
-		_equalizerHandles[i].setColor(colors[i]);
+//		_equalizerHandles[i].setColor(colors[i]);
+		_equalizerHandles[i].setColor(QColor(192,192,192));
 		_equalizerHandles[i].setPos(xPos, yPos);
 		_equalizerHandles[i].setBarHeight(_histogram_info->chartHeight);
 		_equalizerHandles[i].setZValue(1);
 		_equalizerHandles[i].setHistogramInfo(_histogram_info);
 		_equalizerHandles[i].setHandlesPointer(_equalizerHandles);
 		_equalizerHandles[i].setMidHandlePercentilePosition(&_equalizerMidHandlePercentilePosition);
+		_equalizerHandles[i].setSpinBoxPointer(ui.minSpinBox);
 		_equalizerScene.addItem(&_equalizerHandles[i]);
 	}
 	_equalizerHandles[0].setType(LEFT_HANDLE);
+	_equalizerHandles[0].setSpinBoxPointer(ui.minSpinBox);
 	_equalizerHandles[1].setType(MID_HANDLE);
+	_equalizerHandles[1].setSpinBoxPointer(ui.midSpinBox);
 	_equalizerHandles[2].setType(RIGHT_HANDLE);
+	_equalizerHandles[2].setSpinBoxPointer(ui.maxSpinBox);
 
 
 	// Setting spinbox values
