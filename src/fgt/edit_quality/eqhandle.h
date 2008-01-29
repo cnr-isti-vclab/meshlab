@@ -56,9 +56,15 @@ private:
 		return (newHandleX - _handlesPointer[LEFT_HANDLE].pos().x()) / (_handlesPointer[RIGHT_HANDLE].pos().x() - _handlesPointer[LEFT_HANDLE].pos().x());
 	};
 
+	qreal calculateSpinBoxValueFromHandlePosition(qreal xPos)
+	{
+		qreal percentagePos = (xPos-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
+		return percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
+	};
+
 signals:
 	void positionChangedToSpinBox(double);
-	void positionChangedToMidHandle();
+	void positionChanged();
 
 private slots:
 	// changing equalizer spinboxes moves the connected handle

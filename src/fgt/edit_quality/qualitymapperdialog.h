@@ -86,8 +86,6 @@ public:
 	void drawEqualizerHistogram();
 	void drawTransferFunction();
 
-	//EqHandle* equalizerHandles();
-	//qreal equalizerMidHandlePercentilePosition();
 
 private:
 	Ui::QualityMapperDialogClass ui;
@@ -95,7 +93,7 @@ private:
 
 	Histogramf		*_equalizer_histogram;
 	CHART_INFO		*_histogram_info;
-	QGraphicsScene	_equalizerScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
+	QGraphicsScene	_equalizerHistogramScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
 
 	TransferFunction *_transferFunction;
 	CHART_INFO		*_transferFunction_info;
@@ -109,6 +107,9 @@ private:
 	MeshModel		*mesh;
 
 	void initTF();
+	//void drawPartialHistogram(float minValue, float maxValue);
+	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
+
 
 
 private slots:
@@ -119,6 +120,7 @@ private slots:
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
 	void on_addPointButton_clicked();
+	void on_equalizerHistogram_changed();
 };
 
 #endif // QUALITYMAPPERDIALOG_H

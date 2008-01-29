@@ -57,10 +57,12 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	qreal midx =  _handlesPointer[MID_HANDLE].pos().x();
 	qreal rightx= _handlesPointer[RIGHT_HANDLE].pos().x();
 
-	_spinBoxPointer->blockSignals(true);
+	
 
 	if (handleOffset >= std::numeric_limits<float>::epsilon())
 	{
+		
+
 		switch (_type)
 		{
 		case MID_HANDLE:
@@ -75,13 +77,14 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			{
 				setPos(newPos.x(), oldPos.y());
 				// calculating new spinbox value
-				qreal percentagePos = (pos().x()-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
-				qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
-				// Changing minimum/maximum value of oppoite spinbox
+				qreal newSpinboxValue = calculateSpinBoxValueFromHandlePosition(pos().x());
+				// Changing minimum/maximum value of opposite spinbox
 				_handlesPointer[RIGHT_HANDLE]._spinBoxPointer->setMinimum(newSpinboxValue);
 				// Emitting signals to spinbox and mid handle
+				_spinBoxPointer->blockSignals(true);
 				emit positionChangedToSpinBox((double)newSpinboxValue);
-				emit positionChangedToMidHandle();
+				_spinBoxPointer->blockSignals(false);
+				emit positionChanged();
 				
 			}
 			break;
@@ -89,30 +92,33 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			if (newPos.x() > _handlesPointer[LEFT_HANDLE].pos().x()) 
 			{
 				setPos(newPos.x(), oldPos.y());
-				qreal percentagePos = (pos().x()-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
-				qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
+				qreal newSpinboxValue = calculateSpinBoxValueFromHandlePosition(pos().x());
 				_handlesPointer[LEFT_HANDLE]._spinBoxPointer->setMaximum(newSpinboxValue);
+				_spinBoxPointer->blockSignals(true);
 				emit positionChangedToSpinBox((double)newSpinboxValue);
-				emit positionChangedToMidHandle();
+				_spinBoxPointer->blockSignals(false);
+				emit positionChanged();
 			}
 			break;
 		}
+
+		
 	}
-	_spinBoxPointer->blockSignals(false);
+	
 }
 
 void EqHandle::moveMidHandle()
 {
 	assert(_type==MID_HANDLE);
 	qreal newPosX = _handlesPointer[LEFT_HANDLE].pos().x() + *_midHandlePercentilePosition * (_handlesPointer[RIGHT_HANDLE].pos().x() - _handlesPointer[LEFT_HANDLE].pos().x());
-
 	setPos(newPosX, pos().y());
+	qreal newSpinboxValue = calculateSpinBoxValueFromHandlePosition(newPosX);
 
-	qreal percentagePos = (newPosX - _histogramInfo->leftBorder) / _histogramInfo->chartWidth;
-	qreal newSpinboxValue = percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
-	// Rischio di ricorsione?
+	_spinBoxPointer->blockSignals(true);
 	emit positionChangedToSpinBox((double)newSpinboxValue);
+	_spinBoxPointer->blockSignals(false);
 }
+
 
 void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 {
@@ -140,7 +146,7 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 		{
 			setPos(newHandleX, pos().y());
 			_handlesPointer[RIGHT_HANDLE]._spinBoxPointer->setMinimum(spinBoxValue);
-			emit positionChangedToMidHandle();
+			emit positionChanged();
 		}
 		break;
 	case RIGHT_HANDLE:
@@ -148,7 +154,7 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 		{
 			setPos(newHandleX, pos().y());
 			_handlesPointer[LEFT_HANDLE]._spinBoxPointer->setMaximum(spinBoxValue);
-			emit positionChangedToMidHandle();
+			emit positionChanged();
 		}		
 		break;
 	}

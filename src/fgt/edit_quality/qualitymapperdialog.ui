@@ -186,7 +186,7 @@
          <widget class="QLabel" name="colorbandLabel" >
           <property name="maximumSize" >
            <size>
-            <width>256</width>
+            <width>260</width>
             <height>20</height>
            </size>
           </property>
