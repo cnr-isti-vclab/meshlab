@@ -16,19 +16,10 @@ Handle::~Handle()
 
 }
 
-void Handle::setSize(qreal size)
-{
-	_size = size;
-}
-
-void Handle::setColor(QColor color)
-{
-	_color = color;
-}
 
 QRectF Handle::boundingRect () const
 {
-	return QRectF(-_size/2.0f, -_size/2.0f, _size, _size);
+	return QRectF(((qreal)-_size)/2.0f, ((qreal)-_size)/2.0f, _size, _size);
 }
 
 

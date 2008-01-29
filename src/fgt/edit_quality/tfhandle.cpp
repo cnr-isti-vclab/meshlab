@@ -19,12 +19,12 @@ void TFHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * opti
 
 	painter->setPen(_color);
 	painter->setBrush(_color);
-	painter->drawEllipse(-_size/2.0f, -_size/2.0f, _size, _size);
+	painter->drawEllipse(((qreal)-_size)/2.0f, -((qreal)_size)/2.0f, _size, _size);
 }
 
 QRectF TFHandle::boundingRect () const
 {
-	return QRectF(-_size/2.0f, -_size/2.0f, _size, _size);
+	return QRectF(((qreal)-_size)/2.0f, ((qreal)-_size)/2.0f, _size, _size);
 }
 
 void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)

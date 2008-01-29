@@ -14,8 +14,8 @@ class Handle : public QObject, public QGraphicsItem
 public:
 	Handle(void);
 	~Handle(void);
-	void setSize (qreal);
-	void setColor (QColor);
+	void setSize (int size) {_size = size;};
+	void setColor (QColor color) {_color = color;};
 	
 	// Overriding QGraphicsItem methods
 	QRectF boundingRect () const;
@@ -27,7 +27,7 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 	QColor _color;
-	qreal _size;
+	int _size;
 
 private:
 
