@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.18  2008/01/30 08:36:33  granzuglia
+ temporary colladaio interface...TO BE REPLACED!!!!
+
  Revision 1.17  2007/11/26 07:35:27  cignoni
  Yet another small cosmetic change to the interface of the io filters.
 
@@ -179,10 +182,10 @@ bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, M
 	std::string ex = formatName.toUtf8().data();
 	int result;
 	
-	if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end()) 
+	//if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end()) 
 		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
-	else 
-		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
+	//else 
+		//result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
 
 	if(result!=0)
 	{
