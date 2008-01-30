@@ -15,6 +15,9 @@ void main(void)
 {
    vec4 R = vec4(0.0, 0.0, 0.0, 1.0);
    vec4 N = texture2D(nTexture, floor(gl_FragCoord.xy) / float(texSize-1));
+   if (N.r < -1.2)
+	   discard;
+
    vec4 P = project(texture2D(vTexture, floor(gl_FragCoord.xy) / float(texSize-1)));
    
    vec4 depthTest = shadow2DProj(dTexture, P);
