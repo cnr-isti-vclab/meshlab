@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.147  2008/01/30 11:24:43  sherholz
+Fixed Bug in runFilterScript: the log was not set before applying a filter (caused crashes by some filter)
+
 Revision 1.146  2008/01/28 13:02:00  cignoni
 added support for filters on collection of meshes (layer filters)
 
@@ -422,6 +425,7 @@ void MainWindow::runFilterScript()
 
     int req=iFilter->getRequirements(action);
     GLA()->mm()->updateDataMask(req);
+    iFilter->setLog(&(GLA()->log));
     iFilter->applyFilter( action, *(GLA()->mm()), (*ii).second, QCallBack );
     GLA()->log.Logf(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
