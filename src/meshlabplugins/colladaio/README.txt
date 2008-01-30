@@ -1,2 +1,0 @@
-For importing the *.dae file we use the FCollada library ver 1.09 downloadable at http://www.feelingsoftware.com/content/view/60/73/lang,en/
-In the project's file the library is assumed to be at ..\..\..\..\code\lib\FCollada starting from the meshlab's folder.  
