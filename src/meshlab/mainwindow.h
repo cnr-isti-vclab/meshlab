@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.98  2008/01/30 11:19:47  cignoni
+Version 1.1.0
+
 Revision 1.97  2008/01/28 08:55:01  cignoni
 added delete layer functionality
 
@@ -193,7 +196,7 @@ public:
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("1.1.0b"); }
+   const QString appVer() const {return tr("1.1.0"); }
 
 public slots:
 		 
