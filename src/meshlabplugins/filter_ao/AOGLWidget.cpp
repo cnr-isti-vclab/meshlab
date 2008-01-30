@@ -13,7 +13,6 @@ AOGLWidget::AOGLWidget (QWidget * parent, AmbientOcclusionPlugin *_plugin) :QGLW
 	qFormat.setAlpha(true);
 	qFormat.setDepth(true);
 	setFormat(qFormat);
-	setFixedSize(plugin->texSize,plugin->texSize);
 	if(!isValid())
 	{
 		qDebug("Error: Unable to create a new QGLWidget");
@@ -25,7 +24,8 @@ AOGLWidget::AOGLWidget (QWidget * parent, AmbientOcclusionPlugin *_plugin) :QGLW
 
 void AOGLWidget::initializeGL ()
 {
-	plugin->initContext(this,cb);
+	plugin->initGL(cb);
+	setFixedSize(plugin->maxTexSize,plugin->maxTexSize);
 }
 
 void AOGLWidget::paintGL ()

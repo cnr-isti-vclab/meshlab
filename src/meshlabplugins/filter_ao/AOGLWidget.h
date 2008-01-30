@@ -23,15 +23,16 @@ class AOGLWidget: public QGLWidget
 {
 	Q_OBJECT 
 public:
-  AOGLWidget (QWidget * parent, AmbientOcclusionPlugin *_plugin);
+	AOGLWidget (QWidget * parent, AmbientOcclusionPlugin *_plugin);
 	AmbientOcclusionPlugin * plugin;
 	vcg::CallBackPos *cb;
 	MeshModel *m;
-	public slots:
-protected:
+	
+public slots:
+	protected:
 		/// opengl initialization and drawing calls
-	void initializeGL ();
-  void paintGL ();
+		void initializeGL ();
+		void paintGL ();
 	
 };
 

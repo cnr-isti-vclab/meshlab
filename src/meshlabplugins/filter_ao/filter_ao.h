@@ -48,8 +48,9 @@ public:
 	        resultBufferTex;
 	
 	unsigned int numViews,
-	             texSize,
-	             texArea;
+	             depthTexSize,
+	             depthTexArea,
+				 maxTexSize;
 
 	bool useGPU,
 	     useVBO;
@@ -76,16 +77,18 @@ public:
 	                                           vcg::CallBackPos * cb) ;
 	void  initTextures          (GLenum colorFormat,
 	                             GLenum depthFormat);
-	bool  initContext           (QGLWidget *qWidget,
-	                             vcg::CallBackPos *cb);
-  bool  processGL(AOGLWidget *glw, MeshModel &m, vcg::CallBackPos *cb);
+	bool  initGL                (vcg::CallBackPos *cb);
+	bool  processGL             (AOGLWidget *glw,
+	                             MeshModel &m,
+								 vcg::CallBackPos *cb);
 	bool  checkFramebuffer();
 
 	void  vertexCoordsToTexture (MeshModel &m);
 
 	void  renderMesh            (MeshModel &m);
 	void  setCamera             (Point3f camDir,
-	                             Box3f &meshBBox);
+	                             Box3f &meshBBox,
+								 GLsizei viewpSize);
 
 	void  generateOcclusionHW   ();
 	void  generateOcclusionSW   (MeshModel &m,

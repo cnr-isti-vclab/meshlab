@@ -54,6 +54,7 @@
 #include "AOGLWidget.h"
 #include <iostream>
 
+#define AMBOCC_MAX_TEXTURE_SIZE 2048
 #define AMBOCC_DEFAULT_TEXTURE_SIZE 512
 #define AMBOCC_DEFAULT_NUM_VIEWS 128
 #define AMBOCC_USEGPU_BY_DEFAULT false
@@ -70,8 +71,8 @@ AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 
 	useGPU = AMBOCC_USEGPU_BY_DEFAULT;
 	numViews = AMBOCC_DEFAULT_NUM_VIEWS;
-	texSize = AMBOCC_DEFAULT_TEXTURE_SIZE;
-	texArea = texSize*texSize;
+	depthTexSize = AMBOCC_DEFAULT_TEXTURE_SIZE;
+	depthTexArea = depthTexSize*depthTexSize;
 }
 
 AmbientOcclusionPlugin::~AmbientOcclusionPlugin()
@@ -104,7 +105,7 @@ const PluginInfo &AmbientOcclusionPlugin::pluginInfo()
 {
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.1");
+	 ai.Version = tr("1.0");
 	 ai.Author = ("Michele Mischitelli, Massimiliano Corsini");
    return ai;
  }
@@ -122,7 +123,7 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 		case FP_AMBIENT_OCCLUSION:
 			parlst.addBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x");
 			parlst.addBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs");
-			parlst.addInt ("texSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance");
+			parlst.addInt ("depthTexSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance");
 			parlst.addInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time");
 			break;
 		default: assert(0);
@@ -134,31 +135,21 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	assert(filter->text() == filterName(FP_AMBIENT_OCCLUSION));
 	useGPU = par.getBool("useGPU");
 	useVBO = par.getBool("useVBO");
-	texSize = par.getInt("texSize");
-	texArea = texSize*texSize;
+	depthTexSize = par.getInt("depthTexSize");
+	depthTexArea = depthTexSize*depthTexSize;
 	numViews = par.getInt("reqViews");
 
-	if ( useGPU && ((unsigned int)m.cm.vn > texArea) )
-	{
-		//Log(0, "Too many vertices: up to %d are allowed", texArea);
-		return false;
-	}
-
 	AOGLWidget *qWidget = new AOGLWidget(0,this);
-  qWidget->cb = cb;
+	qWidget->cb = cb;
 	qWidget->m = &m;
-	//qWidget->create();
-	qWidget->show();
+	qWidget->show();  //Ugly, but HAVE to be shown in order for it to work!
 	
-		
-	////Creates a new RC, initializes everything (glew, textures, FBO..)
-	//if (!initContext(qWidget, cb))
-		return false;
+	return true;
 }
 	
- bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::CallBackPos *cb)
- {
-  checkGLError::qDebug("start");
+bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::CallBackPos *cb)
+{
+	checkGLError::qDebug("start");
  	int tInitElapsed = 0;
 	QTime tInit, tAll;
 	tInit.start();
@@ -168,9 +159,18 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	typedef std::vector<vcg::Point3f> vectP3f;
 	vectP3f::iterator vi;
 	static vectP3f posVect;
+
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-	//Prepare mesh to be rendered
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+
+	/*
+	if ( useGPU && ((unsigned int)m.cm.vn > maxDepthTexSize) )
+	{
+		Log(0, "Too many vertices: up to %d are allowed", maxDepthTexSize);
+		return false;
+	}
+	/**/
+
 	if (useVBO)
 	{
 		m.glw.SetHint(vcg::GLW::HNUseVBO);
@@ -198,9 +198,8 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		first = false;
 		lastViews = numViews;
 		GenNormal<float>::Uniform(numViews,posVect);
+		numViews = posVect.size();
 	}
-
-	numViews = posVect.size();
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 
@@ -209,7 +208,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	int c=0;
 	for (vi = posVect.begin(); vi != posVect.end(); vi++)
 	{
-		setCamera(*vi, m.cm.bbox);
+		setCamera(*vi, m.cm.bbox, depthTexSize);
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.0f, 1.0f);
@@ -228,6 +227,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 				renderMesh(m);
 			glColorMask(1, 1, 1, 1);
 
+			setCamera(*vi, m.cm.bbox, maxTexSize);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
 
 			glEnable(GL_BLEND);
@@ -255,7 +255,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 		}
 
 		//cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
-		//aogl->makeCurrent();
 		c++;
 	}
 
@@ -268,7 +267,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	else
 		applyOcclusionSW(m,occlusion);
 
-	//Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
+	Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
 
 	/********** Clean up the mess ************/
@@ -319,7 +318,7 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-				 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
+				 maxTexSize, maxTexSize, 0, GL_RGBA, GL_FLOAT, 0);
 
 	//*******INIT NORMAL VECTORS TEXTURE*********/
 	glGenTextures (1, &vertexNormalsTex);
@@ -332,7 +331,7 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-				 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
+				 maxTexSize, maxTexSize, 0, GL_RGBA, GL_FLOAT, 0);
 
 
 	//*******INIT RESULT TEXTURE*********/
@@ -345,7 +344,7 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-				 texSize, texSize, 0, GL_RGBA, GL_FLOAT, 0);
+				 maxTexSize, maxTexSize, 0, GL_RGBA, GL_FLOAT, 0);
 
 	//*******INIT DEPTH TEXTURE*********/
 	glGenTextures(1, &depthBufferTex);
@@ -360,41 +359,45 @@ void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
 
 	glTexImage2D (GL_TEXTURE_2D, 0, depthFormat,
-	              texSize, texSize, 0, 
+	              depthTexSize, depthTexSize, 0, 
 				  GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 // Called by the initgl of the aoglwidget
-bool AmbientOcclusionPlugin::initContext(QGLWidget *qWidget, vcg::CallBackPos *cb)
+bool AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb)
 {
-	//cb(0, "Initializing: Context");
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
+	qDebug("max tex size: %d\n",maxTexSize);
 
+	maxTexSize = std::min(maxTexSize, (unsigned int)AMBOCC_MAX_TEXTURE_SIZE);
 
-	//cb(15, "Initializing: Glew");
+	//cb(0, "Initializing: Glew");
 
 	//*******INIT GLEW********/
 	GLint glewError = glewInit();
 	if (glewError)
 	{
-		//Log(0,(const char*)glewGetErrorString(glewError));
+		Log(0,(const char*)glewGetErrorString(glewError));
 		return false;
 	}
 
 	//*******CHECK TEX SIZE********/
-	if (texSize < 15)
+	if (depthTexSize < 16)
 	{
-		//Log(0, "Texture size is too small, 16x16 used instead");
-		texSize = 16;
-		texArea = texSize*texSize;
+		Log(0, "Texture size is too small, 16x16 used instead");
+		depthTexSize = 16;
+		depthTexArea = depthTexSize*depthTexSize;
 	}
-	if (texSize > 1024)
+	if (depthTexSize > maxTexSize)
 	{
-		//Log(0, "Texture size is too large, 1024x1024 used instead");
-		texSize = 1024;
-		texArea = texSize*texSize;
+		Log(0, "Texture size is too large, %dx%d used instead",maxTexSize,maxTexSize);
+		depthTexSize = maxTexSize;
+		depthTexArea = depthTexSize*depthTexSize;
 	}
-	//*******SETS DEFAULT OPENGL STUFF**********/
+
+	//*******SET DEFAULT OPENGL STUFF**********/
 	glEnable( GL_DEPTH_TEST );
 
 
@@ -403,31 +406,31 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget *qWidget, vcg::CallBackPos *c
 	{
 		if ( !GLEW_ARB_vertex_shader || !GLEW_ARB_fragment_shader )
 		{
-			//Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
+			Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
 			return false;
 		}
 		if ( !GLEW_EXT_framebuffer_object )
 		{
-			//Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
+			Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
 			return false;
 		}
 
 		if ( !GLEW_ARB_texture_float )
 		{
-			//Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
+			Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
 			return false;
 		}
 
-		//cb(30, "Initializing: Textures");
+		//cb(10, "Initializing: Textures");
 		//GL_RGBA32/16F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
 		initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT);
 
 		//*******LOAD SHADER*******/
-		//cb(45, "Initializing: Shaders");
+		//cb(30, "Initializing: Shaders");
 		set_shaders("ambient_occlusion",vs,fs,shdrID);
 
 		//*******INIT FBO*********/
-		//cb(65, "Initializing: FBOs");
+		//cb(60, "Initializing: FBOs");
 		
 		fboDepth = 0;
 		glGenFramebuffersEXT(1, &fboDepth);   // FBO for first pass (1 depth attachment)
@@ -456,7 +459,7 @@ bool AmbientOcclusionPlugin::initContext(QGLWidget *qWidget, vcg::CallBackPos *c
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
-	glViewport(0.0, 0.0, texSize, texSize);
+	glViewport(0.0, 0.0, depthTexSize, depthTexSize);
 
 	//cb(100, "Initializing: Done.");
 
@@ -502,8 +505,8 @@ bool AmbientOcclusionPlugin::checkFramebuffer()
 
 void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 {
-	GLfloat *vertexPosition= new GLfloat[texArea*4];
-	GLfloat *vertexNormals = new GLfloat[texArea*4];
+	GLfloat *vertexPosition= new GLfloat[maxTexSize*maxTexSize*4];
+	GLfloat *vertexNormals = new GLfloat[maxTexSize*maxTexSize*4];
 
 	//Copies each vertex's position and normal in new vectors
 	for (int i=0; i < m.cm.vn; ++i)
@@ -527,23 +530,23 @@ void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 	
 	//Write vertex coordinates
 	glBindTexture(GL_TEXTURE_2D, vertexCoordTex);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texSize, texSize, GL_RGBA, GL_FLOAT, vertexPosition);	
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, maxTexSize, maxTexSize, GL_RGBA, GL_FLOAT, vertexPosition);	
 	delete [] vertexPosition;
 
 	//Write normal directions
 	glBindTexture(GL_TEXTURE_2D, vertexNormalsTex);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texSize, texSize, GL_RGBA, GL_FLOAT, vertexNormals);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, maxTexSize, maxTexSize, GL_RGBA, GL_FLOAT, vertexNormals);
 	delete [] vertexNormals;
 }
 
-void AmbientOcclusionPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
+void AmbientOcclusionPlugin::setCamera(Point3f camDir, Box3f &meshBBox, GLsizei viewpSize)
 {
 	cameraDir = camDir;
 	GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
 	        k = 0.1f;
 	Point3f eye = meshBBox.Center() + camDir * (d+k);
 
-	glViewport(0.0, 0.0, texSize, texSize);
+	glViewport(0.0, 0.0, viewpSize, viewpSize);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -604,7 +607,7 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 	glUniformMatrix4fv(glGetUniformLocation(shdrID, "mvprMatrix"), 1, GL_FALSE, (const GLfloat*)mv_pr_Matrix_f);
 
 	// Set texture Size
-	glUniform1i(glGetUniformLocation(shdrID, "texSize"), texSize);
+	glUniform1i(glGetUniformLocation(shdrID, "texSize"), maxTexSize);
 
 	// Screen-aligned Quad
 	glBegin(GL_QUADS);
@@ -623,16 +626,16 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 	GLdouble mvMatrix_f[16];
 	GLdouble prMatrix_f[16];
 	GLint viewpSize[4];
-	GLfloat *dFloat = new GLfloat[texArea];
+	GLfloat *dFloat = new GLfloat[depthTexArea];
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix_f);
 	glGetDoublev(GL_PROJECTION_MATRIX, prMatrix_f);
 	glGetIntegerv(GL_VIEWPORT, viewpSize);
 
-	glReadPixels(0, 0, texSize, texSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
+	glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
-	//size(dFloat) == texSize*texSize (a.k.a. texArea !!)
-	//qDebug("min and max of depth buffer %f %f",*std::min_element(dFloat,dFloat+texArea),*std::max_element(dFloat,dFloat+texArea));
+	//size(dFloat) == depthTexSize*depthTexSize (a.k.a. depthTexArea !!)
+	//qDebug("min and max of depth buffer %f %f",*std::min_element(dFloat,dFloat+depthTexArea),*std::max_element(dFloat,dFloat+depthTexArea));
 	cameraDir.Normalize();
 
 	Point3<CMeshO::ScalarType> vp;
@@ -647,7 +650,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 		int x = floor(resCoords[0]);
 		int y = floor(resCoords[1]);
 		
-		if (resCoords[2] <= (GLdouble)dFloat[texSize*y+x])
+		if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
 		{
 			vn = m.cm.vert[i].N();
 			occlusion[i] += max(vn*cameraDir, 0.0f);
@@ -658,9 +661,9 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 }
 void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 {
-	GLfloat *result = new GLfloat[texArea*4];
+	GLfloat *result = new GLfloat[depthTexArea*4];
 	glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-	glReadPixels(0, 0, texSize, texSize, GL_RGBA, GL_FLOAT, result);
+	glReadPixels(0, 0, depthTexSize, depthTexSize, GL_RGBA, GL_FLOAT, result);
 
 	float maxvalue = 0.0f, minvalue = 100000.0f;
 	for (int i=0; i < m.cm.vn; i++)
@@ -697,7 +700,6 @@ void AmbientOcclusionPlugin::applyOcclusionSW(MeshModel &m, GLfloat *aoValues)
 			maxvalue = aoValues[i];
 	}
 
-	qDebug("Ambient Occlusion range %f..%f",minvalue,maxvalue);
 	float scale = 255.0f / (maxvalue - minvalue);
 
 	for (int i = 0; i < m.cm.vn; i++)
