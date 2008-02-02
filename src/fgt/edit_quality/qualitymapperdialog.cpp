@@ -172,6 +172,13 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 	{
 		//removing background Histogram bars of the TF
 		//questo dovrebbe implementarlo UCCIO!
+		foreach( item, _transferFunctionBg )
+		{
+			//disconnecting everything connected to TF handle before removing it
+			_transferFunctionScene.removeItem( item );
+			_removed_items << item;
+		}
+		_transferFunctionBg.clear();
 	}
 
 	if ((toClear & REMOVE_TF_LINES) == REMOVE_TF_LINES)
@@ -369,9 +376,8 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 	QPointF startBarPt;
 	QSizeF barSize;
 
-	//QGraphicsItem *current_item = 0;
-
 	//drawing histogram bars
+	QGraphicsItem *current_item = 0;
 	for (int i = minIndex; i < maxIndex; i++)
 	{
 		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->H[i]) / (float)_histogram_info->maxRoundedY;
@@ -382,7 +388,10 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 		barSize.setHeight(barHeight);
 
 		//drawing histogram bar
-		/*current_item =*/ destinationScene.addRect(startBarPt.x(), startBarPt.y(), barSize.width(), barSize.height(), drawingPen, drawingBrush);
+		current_item = destinationScene.addRect(startBarPt.x(), startBarPt.y(), barSize.width(), barSize.height(), drawingPen, drawingBrush);
+		current_item->setZValue(-1);
+		if ( &destinationScene == &_transferFunctionScene )
+			_transferFunctionBg << current_item;
 	}
 }
 
@@ -542,7 +551,7 @@ void QualityMapperDialog::drawGammaCorrection()
 
 void QualityMapperDialog::drawTransferFunction()
 {
-	this->clearItems( REMOVE_TF_LINES | DELETE_REMOVED_ITEMS );
+	this->clearItems( REMOVE_TF_LINES | REMOVE_TF_BG | DELETE_REMOVED_ITEMS );
 
 	if ( !_isTransferFunctionInitialized )
 		this->initTF();

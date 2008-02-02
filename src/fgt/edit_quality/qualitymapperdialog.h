@@ -72,6 +72,7 @@ private:
 	QGraphicsScene	_transferFunctionScene;
 	GRAPHICS_ITEMS_LIST	_transferFunctionHandles[NUMBER_OF_CHANNELS];
 	GRAPHICS_ITEMS_LIST _transferFunctionLines;
+	GRAPHICS_ITEMS_LIST _transferFunctionBg;
 	TFHandle		*_currentTfHandle;
 	bool			_isTransferFunctionInitialized;
 	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs;
