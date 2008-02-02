@@ -5,6 +5,7 @@
 #include <QGraphicsItem>
 #include <QtGui>
 #include <limits>
+#include "util.h"
 
 /* Drag&Drop generic handle to be used in QGrahicsScenes */
 class Handle : public QObject, public QGraphicsItem
@@ -14,8 +15,9 @@ class Handle : public QObject, public QGraphicsItem
 public:
 	Handle(void);
 	~Handle(void);
-	void setSize (int size) {_size = size;};
-	void setColor (QColor color) {_color = color;};
+	inline void setSize (int size) {_size = size;};
+	inline void setColor (QColor color) {_color = color;};
+	inline void setChartInfo (CHART_INFO* info) {_chartInfo = info;};	
 	
 	// Overriding QGraphicsItem methods
 	QRectF boundingRect () const;
@@ -28,6 +30,7 @@ protected:
 
 	QColor _color;
 	int _size;
+	CHART_INFO*		_chartInfo;
 
 private:
 

@@ -4,7 +4,7 @@
 //#include <QObject>
 //#include <QGraphicsItem>
 #include "handle.h"
-#include "util.h"
+//#include "util.h"
 
 enum EQUALIZER_HANDLE_TYPE
 {
@@ -22,13 +22,12 @@ class EqHandle : public Handle
 
 public:
 	EqHandle();
-	//~EqHandle(void);
+	~EqHandle(void);
 	QRectF boundingRect () const;
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
 	
 	void setSize (int size) {(size%2==0) ? _size=size+1 : _size=size;};
 	void setBarHeight (qreal height) {_barHeight = height;};
-	void setHistogramInfo (CHART_INFO* info) {_histogramInfo = info;};	
 	void setType (EQUALIZER_HANDLE_TYPE type) {_type = type;};	
 	void setMidHandlePercentilePosition (qreal* pointer) {_midHandlePercentilePosition = pointer;};	
 	void setHandlesPointer (EqHandle* pointer) {_handlesPointer = pointer;};	
@@ -45,7 +44,6 @@ private:
 	qreal rightBorder; */
 	qreal			_barHeight;
 	QVector<QLineF> _triangle;
-	CHART_INFO*		_histogramInfo;
 	EQUALIZER_HANDLE_TYPE _type;
 	qreal*			_midHandlePercentilePosition;
 	EqHandle*		_handlesPointer;
@@ -58,8 +56,8 @@ private:
 
 	qreal calculateSpinBoxValueFromHandlePosition(qreal newHandleX)
 	{
-		qreal percentagePos = (newHandleX-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
-		return percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
+		qreal percentagePos = (newHandleX-_chartInfo->leftBorder) / _chartInfo->chartWidth;
+		return percentagePos * (_chartInfo->maxX - _chartInfo->minX) + _chartInfo->minX;
 	};
 
 signals:

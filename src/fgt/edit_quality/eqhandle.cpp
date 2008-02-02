@@ -14,10 +14,9 @@ EqHandle::EqHandle()
 	_triangle.append(QLineF(c,a));
 }
 
-/*
 EqHandle::~EqHandle(void)
 {
-}*/
+}
 
 
 void EqHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget /*= 0*/ )
@@ -45,7 +44,7 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 
 	QPointF newPos = event->scenePos();
-	if ( (newPos.x() < _histogramInfo->leftBorder) || (newPos.x() > _histogramInfo->rightBorder) )
+	if ( (newPos.x() < _chartInfo->leftBorder) || (newPos.x() > _chartInfo->rightBorder) )
 		return;
 
 	QPointF oldPos = pos();
@@ -125,8 +124,8 @@ void EqHandle::moveMidHandle()
 
 void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 {
-	qreal percentageValue = (spinBoxValue -  _histogramInfo->minX) / (_histogramInfo->maxX - _histogramInfo->minX);
-	qreal newHandleX = percentageValue * _histogramInfo->chartWidth + _histogramInfo->leftBorder;
+	qreal percentageValue = (spinBoxValue -  _chartInfo->minX) / (_chartInfo->maxX - _chartInfo->minX);
+	qreal newHandleX = percentageValue * _chartInfo->chartWidth + _chartInfo->leftBorder;
 
 	qreal handleOffset = newHandleX-pos().x();
 	if (handleOffset<0)

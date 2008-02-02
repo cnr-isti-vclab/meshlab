@@ -130,8 +130,8 @@ class TfChannel
 {
 public:
 	//container and iterator for TF KEYs
-	typedef	map<float, TF_KEY> KEY_LIST;
-	typedef	map<float, TF_KEY>::iterator KEY_LISTiterator;
+	typedef	map<float, TF_KEY*> KEY_LIST;
+	typedef	map<float, TF_KEY*>::iterator KEY_LISTiterator;
 
 	TfChannel(void);
 	TfChannel(TF_CHANNELS type);
@@ -140,10 +140,10 @@ public:
 	void	setType(TF_CHANNELS);
 	TF_CHANNELS getType();
 	TF_KEY	*addKey(float x, float y_low, float y_up);
-	TF_KEY	*addKey(float x, TF_KEY& new_key);
+	TF_KEY	*addKey(float x, TF_KEY *new_key);
 	float	removeKey(float x);
-	float	removeKey(TF_KEY& to_remove_key);
-	TF_KEY	*mergeKeys(float x_pos1, TF_KEY& x_pos2);
+	float	removeKey(TF_KEY *to_remove_key);
+	TF_KEY	*mergeKeys(float x_pos1, TF_KEY *x_pos2);
 	TF_KEY	*splitKey(float x_pos);
 
 	float	getChannelValuef(float x_position);

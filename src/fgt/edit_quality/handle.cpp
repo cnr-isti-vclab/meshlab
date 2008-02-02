@@ -9,11 +9,12 @@ Handle::Handle()
 
 	setCursor(Qt::OpenHandCursor);
 	setToolTip(QString("Drag me..."));
+
+	_chartInfo = 0;
 }
 
 Handle::~Handle()
 {
-
 }
 
 

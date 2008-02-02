@@ -2,6 +2,7 @@
 #define QUALITYMAPPERDIALOG_H
 
 #include <QDialog>
+#include <QGraphicsItem>
 /*
 #include <vcg/simplex/face/pos.h>
 #include <vcg/simplex/face/topology.h>
@@ -21,6 +22,7 @@
 #include <meshlab/glarea.h>
 #include "transferfunction.h"
 #include "eqhandle.h"
+#include "tfhandle.h"
 
 using namespace vcg;
 
@@ -37,6 +39,8 @@ struct KNOWN_EXTERNAL_TFS
 };
 #define KNOWN_EXTERNAL_TFSsize	sizeof(KNOWN_EXTERNAL_TFS)
 
+
+#define GRAPHICS_ITEMS_LIST		QList<QGraphicsItem *>
 
 class QualityMapperDialog : public QDialog
 {
@@ -66,11 +70,16 @@ private:
 	TransferFunction *_transferFunction;
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
+	GRAPHICS_ITEMS_LIST	_transferFunctionHandles[NUMBER_OF_CHANNELS];
+	GRAPHICS_ITEMS_LIST _transferFunctionLines;
+	TFHandle		*_currentTfHandle;
 	bool			_isTransferFunctionInitialized;
 	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs;
 
 	EqHandle		_equalizerHandles[3];
 	qreal			_equalizerMidHandlePercentilePosition;
+
+	GRAPHICS_ITEMS_LIST _removed_items;
 
 	MeshModel		*mesh;
 
@@ -78,9 +87,10 @@ private:
 	void updateColorBand();
 	//void drawPartialHistogram(float minValue, float maxValue);
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
-	
 
-
+	GRAPHICS_ITEMS_LIST	*clearScene(QGraphicsScene *scene, int toClean=0);
+	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);
+	void				deleteRemoveItems();
 
 private slots:
 	void on_blueButton_toggled(bool checked);
@@ -91,6 +101,7 @@ private slots:
 	void on_savePresetButton_clicked();
 	void on_addPointButton_clicked();
 	void on_left_right_equalizerHistogram_handle_changed();
+	void on_TfHandle_moved(TFHandle *sender);
 	void drawGammaCorrection();
 };
 

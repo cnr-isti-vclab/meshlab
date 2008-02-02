@@ -39,9 +39,9 @@ TF_CHANNELS TfChannel::getType()
 
 //adds to the keys list new_key
 //returns a pointer to the key just added
-TF_KEY* TfChannel::addKey(float x_pos, TF_KEY &new_key)
+TF_KEY* TfChannel::addKey(float x_pos, TF_KEY *new_key)
 {
-	TF_KEY *added_key = &new_key;
+	TF_KEY *added_key = new_key;
 	KEY_LISTiterator it = KEYS.find(x_pos);
 
 	if ( it == KEYS.end() )
@@ -59,7 +59,7 @@ TF_KEY* TfChannel::addKey(float x_pos, TF_KEY &new_key)
 TF_KEY* TfChannel::addKey(float x_pos, float y_low, float y_up)
 {
 	//building key
-	TF_KEY key( /*x,*/ y_low, y_up );
+	TF_KEY *key = new TF_KEY( y_low, y_up );
 
 	//adding it to list
 	return this->addKey(x_pos, key);
@@ -67,7 +67,7 @@ TF_KEY* TfChannel::addKey(float x_pos, float y_low, float y_up)
 
 //removes from keys list to_remove_key
 //returns the x value of the removed key or -1 if key was not found
-float TfChannel::removeKey(TF_KEY& to_remove_key)
+float TfChannel::removeKey(TF_KEY *to_remove_key)
 {
 	float result = -1.0f;
 
@@ -81,6 +81,8 @@ float TfChannel::removeKey(TF_KEY& to_remove_key)
 			found = true;
 			result = it->first;
 			KEYS.erase( it );
+			delete to_remove_key;
+			to_remove_key = 0;
 		}
 		else
 			it ++;
@@ -98,10 +100,15 @@ float TfChannel::removeKey(float x_val)
 	//searching key with proper x
 	KEY_LISTiterator it = KEYS.find(x_val);
 
+	TF_KEY *toRemove = 0;
+
 	if ( it != KEYS.end() )
 	{
+		toRemove = it->second;
 		KEYS.erase( it );
 		result = x_val;
+		delete toRemove;
+		toRemove = 0;
 	}
 
 	return result;
@@ -109,13 +116,13 @@ float TfChannel::removeKey(float x_val)
 
 //merges two keys together by copying opportunely y values of the keys in just one key
 //returns a pointer to the "merged key"
-TF_KEY *TfChannel::mergeKeys(float x_pos, TF_KEY& key)
+TF_KEY *TfChannel::mergeKeys(float x_pos, TF_KEY *key)
 {
 	TF_KEY *result = 0;
 
 	KEY_LISTiterator it = KEYS.find(x_pos);
 
-	TF_KEY new_key(x_pos);
+	TF_KEY *new_key = new TF_KEY(x_pos);
 
 	//be sure that key1 is really in the list!
 	assert(it != KEYS.end());
@@ -123,19 +130,19 @@ TF_KEY *TfChannel::mergeKeys(float x_pos, TF_KEY& key)
 	//any other case
 
 	//setting y_lower to the minimum of y_lower of key1 and key2
-	new_key.y_lower = min( it->second.y_lower, key.y_lower );
+	new_key->y_lower = min( it->second->y_lower, key->y_lower );
 
 	//setting y_lower to the maximum of y_upper of key1 and key2
-	new_key.y_upper = max( it->second.y_upper, key.y_upper );
+	new_key->y_upper = max( it->second->y_upper, key->y_upper );
 
-	new_key.left_junction_point_code = it->second.left_junction_point_code;
-	new_key.right_junction_point_code = it->second.right_junction_point_code;
+	new_key->left_junction_point_code = it->second->left_junction_point_code;
+	new_key->right_junction_point_code = it->second->right_junction_point_code;
 	//new_key.junction_point_code = it->second.junction_point_code;
 
 	it->second = new_key;
 
 	//the address of new inserted in the list is returned
-	result = &(it->second);
+	result = it->second;
 
 	return result;
 }
@@ -150,7 +157,7 @@ TF_KEY* TfChannel::splitKey(float x_pos)
 
 	if (it!=KEYS.end())
 	{
-		result = &(it->second);
+		result = it->second;
 		if (result->y_upper == result->y_lower)
 		{
 			if (( result->y_lower >= 0.4f) && ( result->y_lower <= 0.6f))
@@ -179,7 +186,7 @@ float TfChannel::getChannelValuef(float x_position)
 
 	//if a x_position is known x, its key value is returned immediately
 	if ( it != KEYS.end())
-		return it->second.getLeftJunctionPoint();
+		return it->second->getLeftJunctionPoint();
 
   	//finding upper border for x
   	KEY_LISTiterator up = KEYS.upper_bound( x_position );
@@ -196,10 +203,10 @@ float TfChannel::getChannelValuef(float x_position)
 			//applying linear interpolation between two keys values
 
 			//angular coefficient for interpolating line
-			float m = ((up->second.getLeftJunctionPoint() - low->second.getRightJunctionPoint()) / (up->first - low->first));
+			float m = ((up->second->getLeftJunctionPoint() - low->second->getRightJunctionPoint()) / (up->first - low->first));
 
 			//returning f(x) value for x in the interpolating line
-			result = (m * (x_position - low->first)) + low->second.getRightJunctionPoint();
+			result = (m * (x_position - low->first)) + low->second->getRightJunctionPoint();
 		}
 
 	return result;
@@ -220,7 +227,7 @@ TF_CHANNEL_VALUE& TfChannel::operator [](float idx)
 	if (it!=KEYS.end())
 	{
 		_ret_val.x=(float*)&(it->first);
-		_ret_val.y=&(it->second);
+		_ret_val.y=it->second;
 	}
 	else
 	{
@@ -263,7 +270,7 @@ TF_CHANNEL_VALUE& TfChannel::operator [](int i)
 	}
 	old_iterator_idx = i;
 	_ret_val.x = (float*)&(_idx_it->first);
-	_ret_val.y = &(_idx_it->second);
+	_ret_val.y = _idx_it->second;
 
 	return _ret_val;
 }
