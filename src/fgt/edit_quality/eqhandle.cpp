@@ -53,10 +53,11 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	if (handleOffset<0)
 		handleOffset = -handleOffset;
 
+	/* for testing only
 	qreal leftx = _handlesPointer[LEFT_HANDLE].pos().x();
 	qreal midx =  _handlesPointer[MID_HANDLE].pos().x();
 	qreal rightx= _handlesPointer[RIGHT_HANDLE].pos().x();
-
+	*/
 	
 
 	if (handleOffset >= std::numeric_limits<float>::epsilon())
@@ -70,6 +71,7 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			{
 				*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newPos.x());
 				moveMidHandle();
+				emit positionChanged(); // for gammaCorrectionLabel
 			}
 			break;
 		case LEFT_HANDLE:
@@ -84,7 +86,7 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 				_spinBoxPointer->blockSignals(true);
 				emit positionChangedToSpinBox((double)newSpinboxValue);
 				_spinBoxPointer->blockSignals(false);
-				emit positionChanged();
+				emit positionChanged();  // for redrawing transferFunctionScene and moving mid equalizerHistogram Handle
 				
 			}
 			break;
@@ -117,6 +119,7 @@ void EqHandle::moveMidHandle()
 	_spinBoxPointer->blockSignals(true);
 	emit positionChangedToSpinBox((double)newSpinboxValue);
 	_spinBoxPointer->blockSignals(false);
+
 }
 
 

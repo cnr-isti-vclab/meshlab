@@ -24,35 +24,6 @@
 
 using namespace vcg;
 
-/*
-//questa clsse l'hai creata tu? (??) MAL
-//l'ho ripresa da meshcolorize perché mi serviva per utilizzare altro codice copiato. ;-) Dobbiamo valutare se mantenerla UCCIO
-// QualityMapperSettings stores all the settings that should be inserted in QualityMapperDialog fields
-class QualityMapperSettings
-{
-public:
-	//int percentile;
-	int range;
-	float meshMaxQ;
-	float meshMidQ;
-	float meshMinQ;
-	float manualMaxQ;
-	float manualMidQ;
-	float manualMinQ;
-	//float histoMaxQ;
-	//float histoMinQ;
-	//bool useManual;
-
-	QualityMapperSettings()
-	{
-		//percentile=20;
-		//range=10000;
-		range=500;
-		meshMaxQ=meshMinQ=meshMidQ=manualMaxQ=manualMinQ=manualMidQ=0.0f;
-		//useManual=false;
-	}
-};
-*/
 
 struct KNOWN_EXTERNAL_TFS
 {
@@ -75,9 +46,6 @@ public:
 	QualityMapperDialog(QWidget *parent=0, MeshModel *m=0);
 	~QualityMapperDialog();
 	
-	//void setValues(const QualityMapperSettings& qms);
-	//QualityMapperSettings getValues();
-
 //	inline void setMesh(MeshModel *m){ mesh=m; }
 	void ComputePerVertexQualityHistogram( CMeshO& m, Frange range, Histogramf *h, int bins=10000);
 
@@ -107,8 +75,10 @@ private:
 	MeshModel		*mesh;
 
 	void initTF();
+	void updateColorBand();
 	//void drawPartialHistogram(float minValue, float maxValue);
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
+	
 
 
 
@@ -120,7 +90,8 @@ private slots:
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
 	void on_addPointButton_clicked();
-	void on_equalizerHistogram_changed();
+	void on_left_right_equalizerHistogram_handle_changed();
+	void drawGammaCorrection();
 };
 
 #endif // QUALITYMAPPERDIALOG_H

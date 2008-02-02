@@ -35,6 +35,7 @@
 #include <cassert>
 
 #include <QString>
+#include <QColor>
 //#include <assert.h>
 #include "const_types.h"
 
@@ -198,7 +199,7 @@ class TransferFunction
 private:
 	TfChannel	_channels[NUMBER_OF_CHANNELS];			//set of channels
 	int			_channels_order[NUMBER_OF_CHANNELS];	//array used to carry out virtual pivoting indexing
-	Color4f		_color_band[COLOR_BAND_SIZE];
+	QColor		_color_band[COLOR_BAND_SIZE];
 
 	void initTF(void);
 
@@ -212,8 +213,9 @@ public:
 
 	TfChannel& operator [](int i)	{ return _channels[_channels_order[i]];	}
 	int size();
-	void buildColorBand();
+	QColor* buildColorBand();
 	QString saveColorBand( QString fileName );
+	// QColor* getColorBand(){return _color_band;};
 	void moveChannelAhead( TF_CHANNELS channel_code );
 
 	static TransferFunction *GreyScaleTF();

@@ -332,15 +332,15 @@
         </property>
         <layout class="QHBoxLayout" >
          <item>
-          <widget class="QGraphicsView" name="gammaCorrectionGraphicsView" >
-           <property name="maximumSize" >
+          <widget class="QLabel" name="gammaCorrectionLabel" >
+           <property name="minimumSize" >
             <size>
-             <width>196</width>
-             <height>196</height>
+             <width>100</width>
+             <height>100</height>
             </size>
            </property>
-           <property name="alignment" >
-            <set>Qt::AlignCenter</set>
+           <property name="text" >
+            <string>gama correction</string>
            </property>
           </widget>
          </item>

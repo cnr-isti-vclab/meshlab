@@ -2,6 +2,7 @@
 #include <limits>
 #include <QPen>
 #include <QBrush>
+#include <cmath>
 
 using namespace vcg;
 
@@ -24,25 +25,28 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialo
 	_transferFunction_info = 0;
 
 	// Connecting spinboxes to handles
-	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[0], SLOT(setXBySpinBoxValueChanged(double)));
-	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[1], SLOT(setXBySpinBoxValueChanged(double)));
-	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[2], SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[LEFT_HANDLE],  SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[MID_HANDLE],   SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[RIGHT_HANDLE], SLOT(setXBySpinBoxValueChanged(double)));
 	
 	// Connecting handles to spinboxes
-	connect(&_equalizerHandles[0], SIGNAL(positionChangedToSpinBox(double)), ui.minSpinBox, SLOT(setValue(double)));
-	connect(&_equalizerHandles[1], SIGNAL(positionChangedToSpinBox(double)), ui.midSpinBox, SLOT(setValue(double)));
-	connect(&_equalizerHandles[2], SIGNAL(positionChangedToSpinBox(double)), ui.maxSpinBox, SLOT(setValue(double)));
+	connect(&_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChangedToSpinBox(double)), ui.minSpinBox, SLOT(setValue(double)));
+	connect(&_equalizerHandles[MID_HANDLE],   SIGNAL(positionChangedToSpinBox(double)), ui.midSpinBox, SLOT(setValue(double)));
+	connect(&_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChangedToSpinBox(double)), ui.maxSpinBox, SLOT(setValue(double)));
 	
 	// Connecting left and right handles to mid handle
-	connect(&_equalizerHandles[0], SIGNAL(positionChanged()), &_equalizerHandles[1], SLOT(moveMidHandle()));
-	connect(&_equalizerHandles[2], SIGNAL(positionChanged()), &_equalizerHandles[1], SLOT(moveMidHandle()));
+	connect(&_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), &_equalizerHandles[1], SLOT(moveMidHandle()));
+	connect(&_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), &_equalizerHandles[1], SLOT(moveMidHandle()));
 
 	// Making spinboxes and handles changes redrawing transferFunctionScene
 	// Nota: non è necessario connettere anche le spinbox (UCCIO) 
-	//connect(ui.minSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_equalizerHistogram_changed()));
-	//connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_equalizerHistogram_changed()));
-	connect(&_equalizerHandles[0], SIGNAL(positionChanged()), this, SLOT(on_equalizerHistogram_changed()));
-	connect(&_equalizerHandles[2], SIGNAL(positionChanged()), this, SLOT(on_equalizerHistogram_changed()));
+	//connect(ui.minSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	//connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	connect(&_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	connect(&_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+
+	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
+	connect(&_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
 
 	this->initTF();
 }
@@ -319,6 +323,39 @@ void QualityMapperDialog::initTF()
 	ui.blueButton->setChecked( true );
 }
 
+void QualityMapperDialog::drawGammaCorrection()
+{
+	int width = 100;
+	int height = 100;
+
+	QPixmap *pixmap = new QPixmap(width, height);
+	QPainter painter(pixmap);
+
+	/*
+	double exp = _equalizerMidHandlePercentilePosition * 2;
+	double step = 1.0/width;
+	QPoint list[100];
+	for (int i=0; i<width; i++)
+		list[i] = QPoint(i, floor(pow(i*step,exp)*width));
+	
+	painter.drawPolyline(list,width);
+	*/
+
+	int c = _equalizerMidHandlePercentilePosition*width;
+	QPainterPath path;
+	path.moveTo(0, height);
+	path.quadTo(c, c, width, 0);
+	//path.cubicTo(c,c,c,c,width,0);
+
+	painter.drawPath(path);
+
+	
+	//painter.drawArc(0, 0, pixmap->width(), pixmap->height(), 0, -90*16);
+	
+	ui.gammaCorrectionLabel->setPixmap(*pixmap);
+	delete pixmap;
+}
+
 
 void QualityMapperDialog::drawTransferFunction()
 {
@@ -412,6 +449,9 @@ void QualityMapperDialog::drawTransferFunction()
 		}
 	}
 
+	// updating colorBand
+	this->updateColorBand();
+
 	// drawing partial histogram (UCCIO)
 	if (_histogram_info !=0)
 	{
@@ -421,6 +461,18 @@ void QualityMapperDialog::drawTransferFunction()
 	}
 
 	ui.transferFunctionView->setScene( &_transferFunctionScene );
+}
+
+void QualityMapperDialog::updateColorBand()
+{
+	QColor* colors = _transferFunction->buildColorBand();
+	QImage image(ui.colorbandLabel->width(), 1, QImage::Format_RGB32);
+	float step = ((float)COLOR_BAND_SIZE) / ((float)ui.colorbandLabel->width());
+
+	for (int i=0; i<image.width(); i++)
+		image.setPixel (i, 0, colors[(int)(i*step)].rgb());
+
+	ui.colorbandLabel->setPixmap(QPixmap::fromImage(image));
 }
 
 
@@ -549,10 +601,12 @@ void QualityMapperDialog::on_blueButton_toggled(bool checked)
 	}
 }
 
-void QualityMapperDialog::on_equalizerHistogram_changed()
+void QualityMapperDialog::on_left_right_equalizerHistogram_handle_changed()
 {
+
 	if ( _transferFunction )
 	{
 		this->drawTransferFunction();
 	}
 }
+

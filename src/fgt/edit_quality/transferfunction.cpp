@@ -448,16 +448,20 @@ int TransferFunction::size()
 	return result;
 }
 
-void TransferFunction::buildColorBand()
+QColor* TransferFunction::buildColorBand()
 {
 	float relative_pos = 0.0f; 
 	for (int i=0; i<COLOR_BAND_SIZE; i++)
 	{
 		relative_pos = absolute2RelativeValf((float)i, COLOR_BAND_SIZE);
-		_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( relative_pos ),
+		/*_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( relative_pos ),
 							   _channels[GREEN_CHANNEL].getChannelValueb( relative_pos ),
-							   _channels[BLUE_CHANNEL].getChannelValueb( relative_pos ) );
+							   _channels[BLUE_CHANNEL].getChannelValueb( relative_pos ) );*/
+		_color_band[i].setRgbF(_channels[RED_CHANNEL].getChannelValuef( relative_pos),
+							   _channels[GREEN_CHANNEL].getChannelValuef( relative_pos ),
+							   _channels[BLUE_CHANNEL].getChannelValuef( relative_pos ) );
 	}
+	return _color_band;
 }
 
 

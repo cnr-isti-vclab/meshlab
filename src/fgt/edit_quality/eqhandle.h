@@ -56,9 +56,9 @@ private:
 		return (newHandleX - _handlesPointer[LEFT_HANDLE].pos().x()) / (_handlesPointer[RIGHT_HANDLE].pos().x() - _handlesPointer[LEFT_HANDLE].pos().x());
 	};
 
-	qreal calculateSpinBoxValueFromHandlePosition(qreal xPos)
+	qreal calculateSpinBoxValueFromHandlePosition(qreal newHandleX)
 	{
-		qreal percentagePos = (xPos-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
+		qreal percentagePos = (newHandleX-_histogramInfo->leftBorder) / _histogramInfo->chartWidth;
 		return percentagePos * (_histogramInfo->maxX - _histogramInfo->minX) + _histogramInfo->minX;
 	};
 
