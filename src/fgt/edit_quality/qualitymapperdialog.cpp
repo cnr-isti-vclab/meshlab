@@ -183,6 +183,7 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 			_transferFunctionScene.removeItem( item );
 			_removed_items << item;
 		}
+		_transferFunctionLines.clear();
 	}
 
 	if ((toClear & REMOVE_HISTOGRAM) == REMOVE_HISTOGRAM)
@@ -600,11 +601,13 @@ void QualityMapperDialog::drawTransferFunction()
 			{
 				current_item = _transferFunctionScene.addLine(previousPoint.x(), previousPoint.y(), pointToRepresentLeft.x(), pointToRepresentLeft.y(), drawingPen);
 				current_item->setZValue( zValue );
+				_transferFunctionLines << current_item;
 
 				if ( pointToRepresentLeft.y() != pointRectRight.y() )
 				{
 					current_item = _transferFunctionScene.addLine( pointToRepresentLeft.x(), pointToRepresentLeft.y(), pointToRepresentRight.x(), pointToRepresentRight.y(), drawingPen );
 					current_item->setZValue( zValue);
+					_transferFunctionLines << current_item;
 				}
 			}
 
@@ -680,6 +683,8 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 	KNOWN_EXTERNAL_TFS newTF( tfPath, tfName );
 	_knownExternalTFs << newTF;
 	_isTransferFunctionInitialized = false;
+
+	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 	this->initTF();
 	ui.presetComboBox->setCurrentIndex( 0 );
 }
@@ -708,6 +713,7 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 	_knownExternalTFs << newTF;
 
 	_isTransferFunctionInitialized = false;
+	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 	this->initTF();
 	ui.presetComboBox->setCurrentIndex( 0 );
 	this->drawTransferFunction();
@@ -726,6 +732,7 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 				delete _transferFunction;
 
 			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
+			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 			this->drawTransferFunction();
 			return ;
 		}
@@ -743,6 +750,7 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 				delete _transferFunction;
 
 			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
+			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 			this->drawTransferFunction();
 			return ;
 		}
