@@ -25,32 +25,6 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialo
 	_transferFunction_info = 0;
 	_currentTfHandle = 0;
 
-	/*
-	// Connecting spinboxes to handles
-	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[LEFT_HANDLE],  SLOT(setXBySpinBoxValueChanged(double)));
-	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[MID_HANDLE],   SLOT(setXBySpinBoxValueChanged(double)));
-	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[RIGHT_HANDLE], SLOT(setXBySpinBoxValueChanged(double)));
-	
-	// Connecting handles to spinboxes
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChangedToSpinBox(double)), ui.minSpinBox, SLOT(setValue(double)));
-	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(positionChangedToSpinBox(double)), ui.midSpinBox, SLOT(setValue(double)));
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChangedToSpinBox(double)), ui.maxSpinBox, SLOT(setValue(double)));
-	
-	// Connecting left and right handles to mid handle
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), _equalizerHandles[MID_HANDLE], SLOT(moveMidHandle()));
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), _equalizerHandles[MID_HANDLE], SLOT(moveMidHandle()));
-
-	// Making spinboxes and handles changes redrawing transferFunctionScene
-	// Nota: non è necessario connettere anche le spinbox (UCCIO) 
-	//connect(ui.minSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	//connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-
-	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
-	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
-	*/
-
 	this->initTF();
 }
 
@@ -76,25 +50,6 @@ QualityMapperDialog::~QualityMapperDialog()
 		_transferFunction_info = 0;
 	}
 }
-
-/*
-void QualityMapperDialog::setValues(const QualityMapperSettings& qms)
-{
-_settings=qms;
-QString qnum="%1";
-ui.minSpinBox->setValue(_settings.meshMinQ);
-ui.midSpinBox->setValue(_settings.meshMidQ);
-ui.maxSpinBox->setValue(_settings.meshMaxQ);
-}
-
-QualityMapperSettings QualityMapperDialog::getValues()
-{
-_settings.manualMinQ=ui.minSpinBox->value();
-_settings.manualMidQ=ui.midSpinBox->value();
-_settings.manualMaxQ=ui.maxSpinBox->value();
-
-return _settings;
-}*/
 
 
 void QualityMapperDialog::ComputePerVertexQualityHistogram( CMeshO &m, Frange range, Histogramf *h, int bins )    // V1.0
@@ -316,7 +271,7 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	ui.maxSpinBox->setSingleStep(singleStep);
 	ui.maxSpinBox->setDecimals(decimals);
 
-	// SETTING CONNECTIONS
+	//SETTING UP CONNECTIONS
 	// Connecting spinboxes to handles
 	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[LEFT_HANDLE],  SLOT(setXBySpinBoxValueChanged(double)));
 	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[MID_HANDLE],   SLOT(setXBySpinBoxValueChanged(double)));
@@ -341,18 +296,11 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
 	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
 
+
 	ui.equalizerGraphicsView->setScene(&_equalizerHistogramScene);
 }
 
-/*void QualityMapperDialog::drawPartialHistogram(float minValue, float maxValue)
-{
-	assert ( _histogram_info != 0 );
 
-	int minIndex = _equalizer_histogram->interize(minValue);
-	int maxIndex = _equalizer_histogram->interize(maxValue);
-
-	drawHistogramBars (_transferFunctionScene, minIndex, maxIndex);
-}*/
 
 // Add histogramBars to destinationScene
 void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, int minIndex, int maxIndex, QColor color)
@@ -447,21 +395,21 @@ void QualityMapperDialog::initTF()
 			xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( (* val.x), (float)_transferFunction_info->chartWidth );
 			yLeftPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getLeftJunctionPoint(), (float)_transferFunction_info->chartHeight );
 			yRightPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getRightJunctionPoint(), (float)_transferFunction_info->chartHeight );
-			handle1 = new TFHandle(c, TFHandle::LEFT_JUNCTION_HANDLE, _transferFunction_info );
-			handle1->setColor(channelColor);
-			handle1->setPos( xPos, yLeftPos );
-			handle1->setZValue( zValue );
-			handle1->setChannel(c);
+			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), TFHandle::LEFT_JUNCTION_HANDLE, zValue );
+// 			handle1->setColor(channelColor);
+// 			handle1->setPos( xPos, yLeftPos );
+// 			handle1->setZValue( zValue );
+// 			handle1->setChannel(c);
 			_transferFunctionHandles[c] << handle1;
 			connect(handle1, SIGNAL(positionChanged()), this, SLOT(on_TfHandle_moved()));
 //			int a = _transferFunctionHandles[c].size();
 			_transferFunctionScene.addItem(handle1);
 			if ( yLeftPos != yRightPos )
 			{
-				handle2 = new TFHandle(c, TFHandle::RIGHT_JUNCTION_HANDLE, _transferFunction_info );
-				handle2->setColor(channelColor);
-				handle2->setPos( xPos, yRightPos );
-				handle2->setZValue( zValue );
+				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), TFHandle::RIGHT_JUNCTION_HANDLE, zValue );
+// 				handle2->setColor(channelColor);
+// 				handle2->setPos( xPos, yRightPos );
+// 				handle2->setZValue( zValue );
 				_transferFunctionHandles[c] << handle2;
 				connect(handle2, SIGNAL(positionChanged()), this, SLOT(on_TfHandle_moved()));
 				_transferFunctionScene.addItem(handle1);
@@ -722,8 +670,6 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 	ui.presetComboBox->setCurrentIndex( 0 );
 	this->drawTransferFunction();
 }
-
-
 
 void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 {
