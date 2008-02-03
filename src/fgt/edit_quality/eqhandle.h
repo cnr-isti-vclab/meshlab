@@ -11,7 +11,7 @@ enum EQUALIZER_HANDLE_TYPE
 	LEFT_HANDLE = 0,
 	MID_HANDLE,
 	RIGHT_HANDLE,
-	NUMBER_OF_POSITIONS
+	NUMBER_OF_EQHANDLES
 };
 
 /* Specific handle for equalizerHistogramScene 
@@ -21,34 +21,35 @@ class EqHandle : public Handle
 	Q_OBJECT
 
 public:
-	EqHandle();
+	EqHandle(CHART_INFO *environment_info, QColor color, QPointF position,   
+		EQUALIZER_HANDLE_TYPE type, EqHandle** handles, qreal* midHandlePercentilePosition, QDoubleSpinBox* spinbox,
+		int zOrder, int size);
 	~EqHandle(void);
 	QRectF boundingRect () const;
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
 	
-	void setSize (int size) {(size%2==0) ? _size=size+1 : _size=size;};
-	void setBarHeight (qreal height) {_barHeight = height;};
-	void setType (EQUALIZER_HANDLE_TYPE type) {_type = type;};	
-	void setMidHandlePercentilePosition (qreal* pointer) {_midHandlePercentilePosition = pointer;};	
-	void setHandlesPointer (EqHandle* pointer) {_handlesPointer = pointer;};	
-	void setSpinBoxPointer (QDoubleSpinBox* pointer){_spinBoxPointer = pointer;};
+	void setSize						(int size)					{(size%2==0) ? _size=size+1 : _size=size;};
+	void setBarHeight					(qreal height)				{_barHeight = height;};
+	void setType						(EQUALIZER_HANDLE_TYPE type){_type = type;};	
+	void setMidHandlePercentilePosition (qreal* pointer)			{_midHandlePercentilePosition = pointer;};	
+	void setHandlesPointer				(EqHandle** pointer)			{_handlesPointer = pointer;};	
+	void setSpinBoxPointer				(QDoubleSpinBox* pointer)	{_spinBoxPointer = pointer;};
 	
 
 protected:
 	void mouseMoveEvent   (QGraphicsSceneMouseEvent *event);
 
 private:
-	qreal			_barHeight;
-	//QVector<QLineF> _triangle;
-	QPointF			_triangle[3];
 	EQUALIZER_HANDLE_TYPE _type;
+	qreal			_barHeight;
+	QPointF			_triangle[NUMBER_OF_EQHANDLES];
 	qreal*			_midHandlePercentilePosition;
-	EqHandle*		_handlesPointer;
+	EqHandle**		_handlesPointer;
 	QDoubleSpinBox* _spinBoxPointer;
 
 	qreal calculateMidHandlePercentilePosition(qreal newHandleX)
 	{
-		return (newHandleX - _handlesPointer[LEFT_HANDLE].pos().x()) / (_handlesPointer[RIGHT_HANDLE].pos().x() - _handlesPointer[LEFT_HANDLE].pos().x());
+		return (newHandleX - _handlesPointer[LEFT_HANDLE]->pos().x()) / (_handlesPointer[RIGHT_HANDLE]->pos().x() - _handlesPointer[LEFT_HANDLE]->pos().x());
 	};
 
 	qreal calculateSpinBoxValueFromHandlePosition(qreal newHandleX)

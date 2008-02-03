@@ -77,7 +77,7 @@ private:
 	bool			_isTransferFunctionInitialized;
 	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs;
 
-	EqHandle		_equalizerHandles[3];
+	EqHandle*		_equalizerHandles[NUMBER_OF_EQHANDLES];
 	qreal			_equalizerMidHandlePercentilePosition;
 
 	GRAPHICS_ITEMS_LIST _removed_items;

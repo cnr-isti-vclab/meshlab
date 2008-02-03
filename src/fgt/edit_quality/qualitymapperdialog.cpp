@@ -26,28 +26,28 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialo
 	_currentTfHandle = 0;
 
 	// Connecting spinboxes to handles
-	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[LEFT_HANDLE],  SLOT(setXBySpinBoxValueChanged(double)));
-	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[MID_HANDLE],   SLOT(setXBySpinBoxValueChanged(double)));
-	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), &_equalizerHandles[RIGHT_HANDLE], SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[LEFT_HANDLE],  SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[MID_HANDLE],   SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[RIGHT_HANDLE], SLOT(setXBySpinBoxValueChanged(double)));
 	
 	// Connecting handles to spinboxes
-	connect(&_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChangedToSpinBox(double)), ui.minSpinBox, SLOT(setValue(double)));
-	connect(&_equalizerHandles[MID_HANDLE],   SIGNAL(positionChangedToSpinBox(double)), ui.midSpinBox, SLOT(setValue(double)));
-	connect(&_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChangedToSpinBox(double)), ui.maxSpinBox, SLOT(setValue(double)));
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChangedToSpinBox(double)), ui.minSpinBox, SLOT(setValue(double)));
+	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(positionChangedToSpinBox(double)), ui.midSpinBox, SLOT(setValue(double)));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChangedToSpinBox(double)), ui.maxSpinBox, SLOT(setValue(double)));
 	
 	// Connecting left and right handles to mid handle
-	connect(&_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), &_equalizerHandles[1], SLOT(moveMidHandle()));
-	connect(&_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), &_equalizerHandles[1], SLOT(moveMidHandle()));
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), _equalizerHandles[MID_HANDLE], SLOT(moveMidHandle()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), _equalizerHandles[MID_HANDLE], SLOT(moveMidHandle()));
 
 	// Making spinboxes and handles changes redrawing transferFunctionScene
 	// Nota: non è necessario connettere anche le spinbox (UCCIO) 
 	//connect(ui.minSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
 	//connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	connect(&_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	connect(&_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
 
 	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
-	connect(&_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
+	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
 
 	this->initTF();
 }
@@ -104,6 +104,7 @@ void QualityMapperDialog::ComputePerVertexQualityHistogram( CMeshO &m, Frange ra
 				if(!(*vi).IsD()) h->Add((*vi).Q());		
 }
 
+// ATTUALMENTE NON VIENE MAI UTILIZZATA (UCCIO)
 GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearScene(QGraphicsScene *scene, int cleanFlag)
 {
 //	_removed_items.clear();
@@ -121,7 +122,7 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearScene(QGraphicsScene *scene, int 
 	{
 		foreach (item, _removed_items)
 		{
-			if ((item != &_equalizerHandles[0]) || (item != &_equalizerHandles[1]) || (item != &_equalizerHandles[2]))
+			if ((item != _equalizerHandles[0]) || (item != _equalizerHandles[1]) || (item != _equalizerHandles[2]))
 			{
 				delete item;
 				item = 0;
@@ -161,10 +162,10 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 	{
 		//removing EQ Handles
 		//just removing! NOT DELETING!!
-		for (int i=0; i<3; i++)
+		for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 		{
-			_equalizerHistogramScene.removeItem( &_equalizerHandles[i] );
-			//_removed_items << &_equalizerHandles[i];
+			_equalizerHistogramScene.removeItem( _equalizerHandles[i] );
+			_removed_items << _equalizerHandles[i];
 		}
 	}
 
@@ -260,61 +261,26 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	//drawing axis and other basic items
 	this->drawChartBasics( _equalizerHistogramScene, _histogram_info );
 
-	/*float barHeight = 0.0f;					//initializing height of the histogram bars
-	float barWidth = _histogram_info->dX;	//processing width of the histogram bars (4\5 of dX)
-	//	float barSeparator = dX - barWidth;        //processing space between consecutive bars of the histogram bars (1\5 of dX)
-
-	QPen drawingPen(Qt::black);
-	QBrush drawingBrush (Qt::black);
-
-	QPointF startBarPt;
-	QSizeF barSize;
-
-	//drawing histogram bars
-	for (int i = 0; i < _histogram_info->numOfItems; i++)
-	{
-		barHeight = (float)(_histogram_info->chartHeight * _equalizer_histogram->H[i]) / (float)_histogram_info->maxRoundedY;
-		startBarPt.setX( _histogram_info->leftBorder + ( barWidth * i ) );
-		startBarPt.setY( (float)_histogram_info->lowerBorder - barHeight );
-
-		barSize.setWidth(barWidth);
-		barSize.setHeight(barHeight);
-
-		//drawing histogram bar
-		_equalizerHistogramScene.addRect(startBarPt.x(), startBarPt.y(), barSize.width(), barSize.height(), drawingPen, drawingBrush);
-	}*/
-
 	//drawing histogram bars
 	drawHistogramBars (_equalizerHistogramScene, _histogram_info, 0, _histogram_info->numOfItems, QColor(128,128,128));
 
-
 	//drawing handles
-	QColor colors[] = { QColor(Qt::red), QColor(Qt::green), QColor(Qt::blue) };
+	//QColor colors[] = { QColor(Qt::red), QColor(Qt::green), QColor(Qt::blue) };
+	QDoubleSpinBox* spinboxes[] = { ui.minSpinBox, ui.midSpinBox, ui.maxSpinBox };
 
 	qreal xStart = _histogram_info->leftBorder;
 	qreal xPos = 0.0;
 	qreal yPos = _histogram_info->lowerBorder;
 	_equalizerMidHandlePercentilePosition = 0.5f;
-	for (int i=0; i<3; i++)
+	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 	{
 		xPos = xStart + _histogram_info->chartWidth/2.0*i;
 //		_equalizerHandles[i].setColor(colors[i]);
-		_equalizerHandles[i].setColor(Qt::black);
-		_equalizerHandles[i].setPos(xPos, yPos);
-		_equalizerHandles[i].setBarHeight(_histogram_info->chartHeight);
-		_equalizerHandles[i].setZValue(1);
-		_equalizerHandles[i].setChartInfo(_histogram_info);
-		_equalizerHandles[i].setHandlesPointer(_equalizerHandles);
-		_equalizerHandles[i].setMidHandlePercentilePosition(&_equalizerMidHandlePercentilePosition);
-		_equalizerHandles[i].setSpinBoxPointer(ui.minSpinBox);
-		_equalizerHistogramScene.addItem(&_equalizerHandles[i]);
+		_equalizerHandles[i] = new EqHandle(_histogram_info, Qt::black, QPointF(xPos, yPos), 
+											(EQUALIZER_HANDLE_TYPE)i, _equalizerHandles, &_equalizerMidHandlePercentilePosition, spinboxes[i], 
+											1, 5);
+		_equalizerHistogramScene.addItem(_equalizerHandles[i]);
 	}
-	_equalizerHandles[LEFT_HANDLE].setType(LEFT_HANDLE);
-	_equalizerHandles[LEFT_HANDLE].setSpinBoxPointer(ui.minSpinBox);
-	_equalizerHandles[MID_HANDLE].setType(MID_HANDLE);
-	_equalizerHandles[MID_HANDLE].setSpinBoxPointer(ui.midSpinBox);
-	_equalizerHandles[RIGHT_HANDLE].setType(RIGHT_HANDLE);
-	_equalizerHandles[RIGHT_HANDLE].setSpinBoxPointer(ui.maxSpinBox);
 
 
 	// Setting spinbox values
@@ -361,6 +327,7 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	drawHistogramBars (_transferFunctionScene, minIndex, maxIndex);
 }*/
 
+// Add histogramBars to destinationScene
 void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, int minIndex, int maxIndex, QColor color)
 {
 	// Questro controllo è necessario perché se si cerca in Histogram il valore minimo viene restituito l'indice -1. Forse deve essere corretto? (UCCIO)
@@ -693,6 +660,7 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 	_knownExternalTFs << newTF;
 	_isTransferFunctionInitialized = false;
 
+	// FORSE QUANDO SI SALVA IL PRESET NON C'E' BISOGNO DI CANCELLARE TUTTO (UCCIO)
 	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 	this->initTF();
 	ui.presetComboBox->setCurrentIndex( 0 );
