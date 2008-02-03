@@ -38,12 +38,9 @@ protected:
 	void mouseMoveEvent   (QGraphicsSceneMouseEvent *event);
 
 private:
-	/*
-	qreal leftBorder;
-	qreal center = 0;
-	qreal rightBorder; */
 	qreal			_barHeight;
-	QVector<QLineF> _triangle;
+	//QVector<QLineF> _triangle;
+	QPointF			_triangle[3];
 	EQUALIZER_HANDLE_TYPE _type;
 	qreal*			_midHandlePercentilePosition;
 	EqHandle*		_handlesPointer;

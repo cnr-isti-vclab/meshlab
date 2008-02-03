@@ -5,13 +5,15 @@ EqHandle::EqHandle()
 	_barHeight = 100;
 	setSize(5);
 
-	QPointF a(-_size/2,-_size);
-	QPointF b(_size/2, -_size);
-	QPointF c(0, -1.87f*_size);
+	_triangle[0] = QPointF(-_size/2,-_size);
+	_triangle[1] = QPointF(_size/2, -_size);
+	_triangle[2] = QPointF(0, -1.87f*_size);
 
+	
+/*
 	_triangle.append(QLineF(a,b));
 	_triangle.append(QLineF(b,c));
-	_triangle.append(QLineF(c,a));
+	_triangle.append(QLineF(c,a));*/
 }
 
 EqHandle::~EqHandle(void)
@@ -28,8 +30,9 @@ void EqHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	painter->setPen(_color);
 	painter->setBrush(_color);
 	painter->drawLine(0, -_size, 0, -_barHeight);
-
-	painter->drawLines(_triangle);
+	
+	painter->drawPolygon ( _triangle, 3);
+	//painter->drawLines(_triangle);
 	painter->drawRect(-_size/2, -_size, _size, _size);
 }
 
