@@ -15,8 +15,10 @@ class TFHandle : public Handle
 
 public:
 	enum { LEFT_JUNCTION_HANDLE = 0, RIGHT_JUNCTION_HANDLE	};
-	TFHandle(int channel_code, int junction, CHART_INFO *environment_info=0);
+
+	TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, int junction, int zOrder=1, int size = DEFAULT_HANDLE_SIZE  );
 	~TFHandle(void);
+
 	QRectF boundingRect () const;
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
 	inline void setChannel(int ch_code)	{_channelCode = ch_code;}

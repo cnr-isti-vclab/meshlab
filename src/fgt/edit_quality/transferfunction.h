@@ -125,6 +125,24 @@ enum TF_CHANNELS
 		break; \
 	}
 
+#define COLOR_2_TYPE(COLOR, TYPE) \
+	switch(COLOR.value()) \
+{ \
+	case Qt::red: \
+	TYPE = RED_CHANNEL; \
+	break; \
+case Qt::green: \
+	TYPE = GREEN_CHANNEL; \
+	break; \
+case Qt::blue: \
+	TYPE = BLUE_CHANNEL; \
+	break; \
+default: \
+	TYPE = -1; \
+	break; \
+	}
+
+
 //defines a to class to menage the keys for a single channel
 class TfChannel
 {
