@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.44  2008/02/03 23:33:13  cignoni
+Corrected iteration on faces in the face-shape-quality. now respect isD
+
 Revision 1.43  2008/01/11 13:58:21  cignoni
 added selection of self-intersecting faces.
 
@@ -364,28 +367,26 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
     }  
   case CP_TRIANGLE_QUALITY:
     {
+			CMeshO::FaceIterator fi;
 			float min = 0;
 			float max = 1.0;
 			int metric = par.getEnum("Metric");
 			switch(metric){ 
 			case 0: { //area / max edge
 				max = sqrt(3.0f)/2.0f;
-				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
-					CFaceO &f = m.cm.face[i];
-					f.C().ColorRamp(min, max, Quality(f.P(0), f.P(1), f.P(2)));
-				}
+				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
+					if(!(*fi).IsD()) 
+						(*fi).C().ColorRamp(min, max, Quality((*fi).P(0), (*fi).P(1),(*fi).P(2)));
 			} break;
 			case 1: { //inradius / circumradius
-				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
-					CFaceO &f = m.cm.face[i];
-					f.C().ColorRamp(min, max, QualityRadii(f.P(0), f.P(1), f.P(2)));
-				}
+				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
+					if(!(*fi).IsD()) 
+						(*fi).C().ColorRamp(min, max, QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2)));
 			} break;
 			case 2: { //mean ratio
-				for(unsigned int i = 0; i < m.cm.face.size(); i++) {
-					CFaceO &f = m.cm.face[i];
-					f.C().ColorRamp(min, max, QualityMeanRatio(f.P(0), f.P(1), f.P(2)));
-				}
+				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
+					if(!(*fi).IsD()) 
+						(*fi).C().ColorRamp(min, max, QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2)));
 			} break;
 			default: assert(0);
 			} 
