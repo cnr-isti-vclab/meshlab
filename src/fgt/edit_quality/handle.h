@@ -13,11 +13,10 @@ class Handle : public QObject, public QGraphicsItem
 	Q_OBJECT
 
 public:
-	Handle(void);
+	Handle(CHART_INFO *environment_info, QColor color, QPointF position, int zOrder=1, int size = DEFAULT_HANDLE_SIZE  );
 	~Handle(void);
 	inline void setSize (int size) {_size = size;};
 	inline void setColor (QColor color) {_color = color;};
-	inline void setChartInfo (CHART_INFO* info) {_chartInfo = info;};	
 	
 	// Overriding QGraphicsItem methods
 	QRectF boundingRect () const;

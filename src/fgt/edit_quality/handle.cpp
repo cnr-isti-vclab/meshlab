@@ -1,16 +1,15 @@
-
 #include "handle.h"
 
 
-Handle::Handle()
+Handle::Handle(CHART_INFO *environment_info, QColor color, QPointF position, int zOrder, int size ) : _chartInfo(environment_info)
 {
-	_size = 10.0f;
-	_color = QColor(Qt::black);
+	_color = color;
+	this->setPos( position );
+	this->setZValue( zOrder );
+	_size = size;
 
 	setCursor(Qt::OpenHandCursor);
 	setToolTip(QString("Drag me..."));
-
-	_chartInfo = 0;
 }
 
 Handle::~Handle()
