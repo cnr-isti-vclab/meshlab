@@ -25,6 +25,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialo
 	_transferFunction_info = 0;
 	_currentTfHandle = 0;
 
+	/*
 	// Connecting spinboxes to handles
 	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[LEFT_HANDLE],  SLOT(setXBySpinBoxValueChanged(double)));
 	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[MID_HANDLE],   SLOT(setXBySpinBoxValueChanged(double)));
@@ -48,6 +49,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialo
 
 	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
 	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
+	*/
 
 	this->initTF();
 }
@@ -313,6 +315,31 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	ui.maxSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
 	ui.maxSpinBox->setSingleStep(singleStep);
 	ui.maxSpinBox->setDecimals(decimals);
+
+	// SETTING CONNECTIONS
+	// Connecting spinboxes to handles
+	connect(ui.minSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[LEFT_HANDLE],  SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[MID_HANDLE],   SLOT(setXBySpinBoxValueChanged(double)));
+	connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), _equalizerHandles[RIGHT_HANDLE], SLOT(setXBySpinBoxValueChanged(double)));
+	
+	// Connecting handles to spinboxes
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChangedToSpinBox(double)), ui.minSpinBox, SLOT(setValue(double)));
+	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(positionChangedToSpinBox(double)), ui.midSpinBox, SLOT(setValue(double)));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChangedToSpinBox(double)), ui.maxSpinBox, SLOT(setValue(double)));
+	
+	// Connecting left and right handles to mid handle
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), _equalizerHandles[MID_HANDLE], SLOT(moveMidHandle()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), _equalizerHandles[MID_HANDLE], SLOT(moveMidHandle()));
+
+	// Making spinboxes and handles changes redrawing transferFunctionScene
+	// Nota: non è necessario connettere anche le spinbox (UCCIO) 
+	//connect(ui.minSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	//connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+
+	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
+	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
 
 	ui.equalizerGraphicsView->setScene(&_equalizerHistogramScene);
 }
