@@ -54,14 +54,14 @@
 #include "AOGLWidget.h"
 #include <iostream>
 
-#define AMBOCC_MAX_TEXTURE_SIZE 2048
+#define AMBOCC_MAX_TEXTURE_SIZE 4096
 #define AMBOCC_DEFAULT_TEXTURE_SIZE 512
 #define AMBOCC_DEFAULT_NUM_VIEWS 128
 #define AMBOCC_USEGPU_BY_DEFAULT false
 #define AMBOCC_USEVBO_BY_DEFAULT false
 
 static GLuint vs, fs, shdrID;
-AOGLWidget *qWidget;
+
 AmbientOcclusionPlugin::AmbientOcclusionPlugin() 
 { 
 	typeList << FP_AMBIENT_OCCLUSION;
@@ -139,7 +139,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	depthTexArea = depthTexSize*depthTexSize;
 	numViews = par.getInt("reqViews");
 
-	qWidget = new AOGLWidget(0,this);
+	AOGLWidget *qWidget = new AOGLWidget(0,this);
 	qWidget->cb = cb;
 	qWidget->m = &m;
 	qWidget->show();  //Ugly, but HAVE to be shown in order for it to work!
@@ -252,7 +252,6 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 
 	if (useGPU)
 	{
-		//glViewport(0,0,maxTexSize,maxTexSize);
 		applyOcclusionHW(m);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
@@ -786,12 +785,6 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 }
 void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata, int elems)
 {
-	/*
-	QFile f(filename);
-	f.open(QFile::ReadWrite);
-	f.write(reinterpret_cast<const char *>(texdata), elems * sizeof(char));
-	f.close();
-	/**/
 	unsigned char *cdata = new unsigned char[elems];
 
 	for (int i=0; i<elems; ++i)
