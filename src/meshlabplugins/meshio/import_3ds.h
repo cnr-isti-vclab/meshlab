@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.7  2008/02/04 00:17:43  cignoni
+ Now the add of the various types check for the existence of the needed stuff (e.g. per wedge normal are added only if the mesh support them)
+
  Revision 1.6  2007/11/28 10:28:39  cignoni
  switched to lib3ds v1.3.0 stable.
 
@@ -289,7 +292,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 								textureIdx = (int)size;
 							}
 
-							if ( info.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD )
+							if (tri::HasPerWedgeTexCoord(m) && (info.mask & vcg::tri::io::Mask::IOM_WEDGTEXCOORD) )
 							{
 								// texture coordinates
 								for (int i=0; i<3; ++i)
@@ -304,7 +307,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 					}
 					else {
 						// we consider only diffuse color component, using default value
-						if( info.mask & vcg::tri::io::Mask::IOM_FACECOLOR)
+						if(tri::HasPerFaceColor(m) && (info.mask & vcg::tri::io::Mask::IOM_FACECOLOR) )
 						{
 							// assigning default face color
 							// ----------------------------
@@ -326,7 +329,7 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 					
 					for (int i=0; i<3; ++i)
 					{
-						if ( info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL )
+						if (tri::HasPerWedgeNormal(m) && ( info.mask & vcg::tri::io::Mask::IOM_WEDGNORMAL ) )
 						{
 							// assigning per wedge normal
 							// --------------------------
