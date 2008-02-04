@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2008/02/04 13:20:33  gianpaolopalma
+ Added error codes
+
  Revision 1.1  2008/02/02 13:46:00  gianpaolopalma
  Defined AdditionalInfoX3D with information required to parse correctly X3D scene
  Defined return code error
@@ -97,8 +100,9 @@ namespace io {
 			E_LOOPDEPENDENCE,		// 18
 			E_UNREFERREDTEXTCOOR,	// 19
 			E_MULTITEXT,			// 20
-			E_INVALIDFANSET,		// 21
-			E_INVALIDSTRIPSET,		// 22
+			E_INVALIDFANSTRIP,		// 21
+			E_INVALIDINDEXED,		// 22
+			E_INVALIDINDEXEDFANSTRIP, //23
 
 		};
 
@@ -128,11 +132,12 @@ namespace io {
 				"There is a loop in the dependences between the files",
 				"Texture coordinate referred to any source texture",
 				"There are more sources texture without a MultiTexture element",
-				"Invalid TriangleFanSet element",
-				"Invalid TriangleStripSet element"
+				"Invalid TriangleFanSet or TriangleStripSet element. It contains fan or strip with less than three vertex",
+				"Invalid vertex index in the index field", 
+				"Invalid IndexedTriangleFanSet or IndexedTriangleStripSet element. It contais fan or strip with less than three vertex",
 			};
 
-			if(error > 20 || error < 0) return "Unknown error";
+			if(error > 23 || error < 0) return "Unknown error";
 			else return x3d_error_msg[error];
 		};
 
