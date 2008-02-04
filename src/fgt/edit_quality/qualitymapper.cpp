@@ -27,10 +27,15 @@ Revision 1.0 2008/01/03 MAL
 Beginning
 
 ****************************************************************************/
-#include "qualitymapper.h"
+
 #include <QtGui>
 #include <limits>
+#include <meshlab/glarea.h>
+#include "qualitymapper.h"
 #include <vcg/complex/trimesh/clean.h>
+
+#include <wrap/gl/pick.h>
+#include <wrap/qt/trackball.h>
 
 #include <vcg/complex/trimesh/update/flag.h>
 // #include "color_manifold.h"
@@ -79,15 +84,63 @@ const PluginInfo &QualityMapperPlugin::Info()
 	return ai;
 } 
 
-void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+/*
+void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla)
 {
 	gla->update();
 	cur=event->pos();
 	haveToPick=true;
+}*/
+/*
+Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
+{
+
+	int vcgbt=Trackball::BUTTON_NONE;
+	if(qtbt & Qt::LeftButton)			vcgbt |= Trackball::BUTTON_LEFT;
+	if(qtbt & Qt::RightButton)			vcgbt |= Trackball::BUTTON_RIGHT;
+	if(qtbt & Qt::MidButton)			vcgbt |= Trackball::BUTTON_MIDDLE;
+	if(modifiers & Qt::ShiftModifier)	vcgbt |= Trackball::KEY_SHIFT;
+	if(modifiers & Qt::ControlModifier) vcgbt |= Trackball::KEY_CTRL;
+	if(modifiers & Qt::AltModifier)		vcgbt |= Trackball::KEY_ALT;
+
+	return Trackball::Button(vcgbt);
+}*/
+
+
+void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+{
+
+//	trackball.MouseUp(e->x(),gla->height()-e->y(), QT2VCG(e->button(), e->modifiers()));
 }
 
-void QualityMapperPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
+void QualityMapperPlugin::mousePressEvent    (QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
+{  
+	/*
+	if (  (e->button()==Qt::LeftButton)         &&
+		!(e->modifiers() & Qt::ShiftModifier) )
+		trackball.MouseDown(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()) );
+	gla->update();*/
+}
+
+void QualityMapperPlugin::mouseMoveEvent     (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
+	/*
+	if( (e->buttons()| Qt::LeftButton) &&
+		!(e->modifiers() & Qt::ShiftModifier))
+		trackball.MouseMove(e->x(),gla->height()-e->y());
+	gla->update();*/
+}
+
+void QualityMapperPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
+{
+	/*	
+	this->gla=gla;
+	//this->m=m;
+	if(!gla->isEnabled()){
+	_qualityMapperDialog->close();
+	}
+	// Do something?
+	*/
 }
 
 void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
@@ -103,13 +156,6 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 	//drawing transferFunction
 	_qualityMapperDialog->drawTransferFunction();
 
-	/*
-	//setting and applying settings to dialog (??) MAL
-	_qmSettings.meshMinQ = mmmq.minV;
-	_qmSettings.meshMaxQ = mmmq.maxV;
-	_qmSettings.meshMidQ = (mmmq.minV+mmmq.maxV)/2;
-	_qualityMapperDialog->setValues(_qmSettings);
-	*/
 
 
 	// 	_qualityMapperDialog->edit=this;

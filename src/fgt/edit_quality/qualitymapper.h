@@ -39,7 +39,11 @@ Beginning
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include <meshlab/glarea.h>
+//#include <meshlab/glarea.h>
+#include <wrap/gui/trackball.h>
+//#include <wrap/gl/pick.h>
+//#include <wrap/gl/space.h>
+
 //#include <vcg/math/base.h>
 //#include <vcg/space/triangle3.h>
 #include <vcg/complex/trimesh/update/color.h> //<-- contains VertexQuality method
@@ -58,28 +62,30 @@ class QualityMapperPlugin : public QObject, public MeshEditInterface
 private:
 	QualityMapperDialog *_qualityMapperDialog;
 	QList <QAction *> actionList;
-//	TransferFunction _transfer_function;
 
-//	QualityMapperSettings _qmSettings;
+	//GLArea * gla;
+	//MeshModel m;
+
 
 public:
     QualityMapperPlugin();
     ~QualityMapperPlugin(){};
 
-	const QString Info(QAction *);
+	virtual const QString Info(QAction *);
 	// Generic Info about the plug in version and author.
-    const PluginInfo &Info();
-	QList<QAction *> actions() const ;
+    virtual const PluginInfo &Info();
+	virtual QList<QAction *> actions() const ;
 
 	// Called when the user press the first time the button 
-    void StartEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void StartEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
 	// Called when the user press the second time the button 
-    void EndEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    void Decorate			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
-    void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) {};
-    void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+    virtual void EndEdit			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void Decorate			(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) ;
+    virtual void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) ;
+    virtual void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
+	//Trackball trackball;
 	QPoint cur;
 	bool haveToPick;
 
