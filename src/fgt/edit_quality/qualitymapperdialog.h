@@ -86,7 +86,7 @@ private:
 
 	void initTF();
 	void updateColorBand();
-	//void drawPartialHistogram(float minValue, float maxValue);
+	void drawTransferFunctionBG ();
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
 
 	GRAPHICS_ITEMS_LIST	*clearScene(QGraphicsScene *scene, int toClean=0);
@@ -101,7 +101,7 @@ private slots:
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
 	void on_addPointButton_clicked();
-	void on_left_right_equalizerHistogram_handle_changed();
+	void on_left_right_EQHandle_changed();
 	void on_TfHandle_moved(TFHandle *sender);
 	void drawGammaCorrection();
 };

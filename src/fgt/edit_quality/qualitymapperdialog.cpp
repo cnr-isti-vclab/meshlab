@@ -118,7 +118,6 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 	if ((toClear & REMOVE_EQ_HANDLE) == REMOVE_EQ_HANDLE)
 	{
 		//removing EQ Handles
-		//just removing! NOT DELETING!!
 		for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 		{
 			_equalizerHistogramScene.removeItem( _equalizerHandles[i] );
@@ -129,7 +128,6 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 	if ((toClear & REMOVE_TF_BG) == REMOVE_TF_BG)
 	{
 		//removing background Histogram bars of the TF
-		//questo dovrebbe implementarlo UCCIO!
 		foreach( item, _transferFunctionBg )
 		{
 			//disconnecting everything connected to TF handle before removing it
@@ -191,9 +189,8 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 	current_item->setZValue( 0 );
 }
 
-//_equalizerHistogramScene dovrebbe chiamarsi in realtà histogramScene
-//l'histogram e la transfer function potrebbero diventare attributi di questa classe? valutare l'impatto.
-//in generale il codice di questo metodo va ripulito un po'...
+// Add histogram bars to equalizerHistogram Scene
+// (This method is called only once)
 void QualityMapperDialog::drawEqualizerHistogram()
 {
 	//building histogram chart informations
@@ -290,12 +287,15 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	// Nota: non è necessario connettere anche le spinbox (UCCIO) 
 	//connect(ui.minSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
 	//connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_left_right_EQHandle_changed()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_left_right_EQHandle_changed()));
 
 	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
 	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
 
+	
+	this->drawGammaCorrection();
+	this->drawTransferFunctionBG();
 
 	ui.equalizerGraphicsView->setScene(&_equalizerHistogramScene);
 }
@@ -454,6 +454,8 @@ void QualityMapperDialog::initTF()
 
 	_isTransferFunctionInitialized = true;
 
+	this->drawTransferFunctionBG();
+
 	ui.blueButton->setChecked( true );
 }
 
@@ -464,16 +466,6 @@ void QualityMapperDialog::drawGammaCorrection()
 
 	QPixmap *pixmap = new QPixmap(width, height);
 	QPainter painter(pixmap);
-
-	/*
-	double exp = _equalizerMidHandlePercentilePosition * 2;
-	double step = 1.0/width;
-	QPoint list[100];
-	for (int i=0; i<width; i++)
-		list[i] = QPoint(i, floor(pow(i*step,exp)*width));
-	
-	painter.drawPolyline(list,width);
-	*/
 
 	int c = _equalizerMidHandlePercentilePosition*width;
 	QPainterPath path;
@@ -493,7 +485,7 @@ void QualityMapperDialog::drawGammaCorrection()
 
 void QualityMapperDialog::drawTransferFunction()
 {
-	this->clearItems( REMOVE_TF_LINES | REMOVE_TF_BG | DELETE_REMOVED_ITEMS );
+	this->clearItems( REMOVE_TF_LINES | /*REMOVE_TF_BG |*/ DELETE_REMOVED_ITEMS );
 
 	if ( !_isTransferFunctionInitialized )
 		this->initTF();
@@ -591,16 +583,9 @@ void QualityMapperDialog::drawTransferFunction()
 	// updating colorBand
 	this->updateColorBand();
 
-	// drawing partial histogram (UCCIO)
-	if (_histogram_info !=0)
-	{
-		int minIndex = _equalizer_histogram->Interize((float)ui.minSpinBox->value());
-		int maxIndex = _equalizer_histogram->Interize((float)ui.maxSpinBox->value());
-		drawHistogramBars (_transferFunctionScene, _transferFunction_info, minIndex, maxIndex, QColor(192,192,192));
-	}
-
 	ui.transferFunctionView->setScene( &_transferFunctionScene );
 }
+
 
 void QualityMapperDialog::updateColorBand()
 {
@@ -612,6 +597,18 @@ void QualityMapperDialog::updateColorBand()
 		image.setPixel (i, 0, colors[(int)(i*step)].rgb());
 
 	ui.colorbandLabel->setPixmap(QPixmap::fromImage(image));
+}
+
+void QualityMapperDialog::drawTransferFunctionBG ()
+{
+	this->clearItems( REMOVE_TF_BG | DELETE_REMOVED_ITEMS );
+
+	if (_histogram_info !=0)
+	{
+		int minIndex = _equalizer_histogram->Interize((float)ui.minSpinBox->value());
+		int maxIndex = _equalizer_histogram->Interize((float)ui.maxSpinBox->value());
+		drawHistogramBars (_transferFunctionScene, _transferFunction_info, minIndex, maxIndex, QColor(192,192,192));
+	}
 }
 
 
@@ -744,12 +741,12 @@ void QualityMapperDialog::on_blueButton_toggled(bool checked)
 	}
 }
 
-void QualityMapperDialog::on_left_right_equalizerHistogram_handle_changed()
+void QualityMapperDialog::on_left_right_EQHandle_changed()
 {
 
 	if ( _transferFunction )
 	{
-		this->drawTransferFunction();
+		this->drawTransferFunctionBG();
 	}
 }
 
