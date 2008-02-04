@@ -34,6 +34,7 @@ Revision 1.2  2005/06/10 16:07:29  cignoni
 #ifndef __VCG_ALIGNGLOBAL
 #define __VCG_ALIGNGLOBAL
 #include <list>
+#include <queue>
 #include <wrap/callback.h>
 namespace vcg 
 {
