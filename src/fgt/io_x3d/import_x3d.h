@@ -24,9 +24,14 @@
   History
 
  $Log$
+ Revision 1.2  2008/02/04 13:24:38  gianpaolopalma
+ Added support to follow elements: IndexedTriangleSet, IndexedTriangleFanSet, IndexedTriangleStripSet, IndexedQuadSet.
+ Improved support to QuadSet element.
+ Bug fixed in methods getColor, getNormal, getTextureCoord.
+
  Revision 1.1  2008/02/02 13:51:40  gianpaolopalma
  Defined an X3D importer that parse and load mesh data from following element:
- Shape, Appearance, Transform, TriangleSet, TriangleStripSet, TrinagleFanSet, QuadSet, Inline, ProtoInstance, ProtoDecalre, ExternProtoDecalre, ImageTexture
+ Shape, Appearance, Transform, TriangleSet, TriangleStripSet, TriangleFanSet, QuadSet, Inline, ProtoInstance, ProtoDecalre, ExternProtoDecalre, ImageTexture
 
  
  *****************************************************************************/
@@ -35,8 +40,9 @@
 
 #include<QtXml>
 #include <vcg/complex/trimesh/allocate.h>
-#include<util_x3d.h>
+#include <wrap/gl/glu_tesselator.h>
 
+#include <util_x3d.h>
 
 namespace vcg {
 namespace tri {
@@ -48,7 +54,7 @@ namespace io {
 	private:
 
 		
-		static void manageSwitchNode(QDomDocument* doc)
+		static void ManageSwitchNode(QDomDocument* doc)
 		{
 			QDomNodeList switchNodes = doc->elementsByTagName("Switch");
 			for(int sn = 0; sn < switchNodes.size(); sn++)
@@ -67,7 +73,7 @@ namespace io {
 					}
 					if (!child.isNull())
 					{
-						manageDefUse(swt, whichChoice, child);
+						ManageDefUse(swt, whichChoice, child);
 						parent.replaceChild(child, swt);
 					}
 					else
@@ -79,7 +85,7 @@ namespace io {
 			}
 		}
 		
-		static void manageLODNode(QDomDocument* doc)
+		static void ManageLODNode(QDomDocument* doc)
 		{
 			QDomNodeList lodNodes = doc->elementsByTagName("LOD");
 			for(int ln = 0; ln < lodNodes.size(); ln++)
@@ -92,7 +98,7 @@ namespace io {
 				QDomElement firstChild = lod.firstChildElement();
 				if (!firstChild.isNull())
 				{
-					manageDefUse(lod, 0, QDomElement());
+					ManageDefUse(lod, 0, QDomElement());
 					if (center != "")
 					{
 						parent.replaceChild(transform, lod);
@@ -105,7 +111,7 @@ namespace io {
 		}
 
 		
-		static int manageInlineNode(QDomDocument* doc, AdditionalInfoX3D* info)
+		static int ManageInlineNode(QDomDocument* doc, AdditionalInfoX3D* info)
 		{
 			QDomNodeList inlineNodes = doc->elementsByTagName("Inline");
 			for(int in = 0; in < inlineNodes.size(); in++)
@@ -162,7 +168,7 @@ namespace io {
 			return E_NOERROR;
 		}
 		
-		static int manageExternProtoDeclare(QDomDocument* doc, AdditionalInfoX3D* info, const QString filename)
+		static int ManageExternProtoDeclare(QDomDocument* doc, AdditionalInfoX3D* info, const QString filename)
 		{
 			QDomNodeList exProtoDeclNodes = doc->elementsByTagName("ExternProtoDeclare");
 			for(int en = 0; en < exProtoDeclNodes.size(); en++)
@@ -240,18 +246,18 @@ namespace io {
 		}
 
 		
-		static void manageDefUse(const QDomElement& swt, int whichChoice, QDomElement& res)
+		static void ManageDefUse(const QDomElement& swt, int whichChoice, QDomElement& res)
 		{
 			std::map<QString, QDomElement> def;
 			QDomNodeList ndl = swt.childNodes();
 			for(int i = 0; i < whichChoice; i++)
 				if (ndl.at(i).isElement())
-					findDEF(ndl.at(i).toElement(), def);
+					FindDEF(ndl.at(i).toElement(), def);
 			if(whichChoice > 0)
-				findAndReplaceUSE(res, def);
+				FindAndReplaceUSE(res, def);
 			for(int i = whichChoice + 1; i < ndl.size(); i++)
 				if (ndl.at(i).isElement())
-					findDEF(ndl.at(i).toElement(), def);
+					FindDEF(ndl.at(i).toElement(), def);
 			QDomElement parent = swt.parentNode().toElement();
 			bool flag = false;
 			while (!parent.isNull() && parent.tagName() != "X3D")
@@ -267,7 +273,7 @@ namespace io {
 								flag = true;
 						}
 						else
-							findAndReplaceUSE(x.at(j).toElement(), def);
+							FindAndReplaceUSE(x.at(j).toElement(), def);
 					}
 				}
 				parent = parent.parentNode().toElement();
@@ -275,7 +281,7 @@ namespace io {
 		}
 
 		
-		static void findDEF(QDomElement& elem, std::map<QString, QDomElement>& map)
+		static void FindDEF(QDomElement& elem, std::map<QString, QDomElement>& map)
 		{
 			if (elem.isNull()) return;
 			QString attrValue = elem.attribute("DEF");
@@ -284,12 +290,12 @@ namespace io {
 			QDomElement child = elem.firstChildElement();
 			while(!child.isNull())
 			{
-				findDEF(child, map);
+				FindDEF(child, map);
 				child = child.nextSiblingElement();
 			}
 		}
 		
-		static void findAndReplaceUSE (QDomElement& elem, const std::map<QString, QDomElement>& map)
+		static void FindAndReplaceUSE (QDomElement& elem, const std::map<QString, QDomElement>& map)
 		{
 			if (elem.isNull()) return;
 			QString attrValue = elem.attribute("USE");
@@ -307,7 +313,7 @@ namespace io {
 			for(int i = 0; i < children.size(); i++)
 			{
 				if (children.at(i).isElement())
-					findAndReplaceUSE(children.at(i).toElement(), map);
+					FindAndReplaceUSE(children.at(i).toElement(), map);
 			}
 		}
 
@@ -332,7 +338,7 @@ namespace io {
 			if (elem.isNull()) return false;
 			if (elem.tagName() != "TextureCoordinateGenerator") return true;
 			QString mode = elem.attribute("mode", "SPHERE");
-			if (mode == "SPHERE-LOCAL" || mode == "COORD" || mode == "NOISE")
+			if (mode == "COORD")
 				return true;
 			return false;
 		}
@@ -350,7 +356,7 @@ namespace io {
 		}
 
 		
-		static int initializeProtoDeclare(QDomElement& root, const std::map<QString, QString>& fields, const std::map<QString, QDomElement>& defMap, AdditionalInfoX3D* info)
+		static int InitializeProtoDeclare(QDomElement& root, const std::map<QString, QString>& fields, const std::map<QString, QDomElement>& defMap, AdditionalInfoX3D* info)
 		{
 			QDomElement protoInterface = root.firstChildElement("ProtoInterface");
 			QDomElement protoBody = root.firstChildElement("ProtoBody");
@@ -452,6 +458,7 @@ namespace io {
 			QString use = root.attribute("USE");
 			if (use != "")
 			{
+				//DOTO: se esiste un parent con lo stesso def ritorno root
 				std::map<QString, QDomElement>::const_iterator iter = defMap.find(use);
 				if (iter != defMap.end() && root.tagName() == iter->second.tagName())
 					return iter->second;
@@ -476,11 +483,11 @@ namespace io {
 			bool bHasPerFaceColor = false;
 			bool bHasPerFaceNormal = false;
 			
-			manageSwitchNode(doc);
-			manageLODNode(doc);
-			int result = manageInlineNode(doc, info);
+			ManageSwitchNode(doc);
+			ManageLODNode(doc);
+			int result = ManageInlineNode(doc, info);
 			if (result != E_NOERROR) return result;
-			result = manageExternProtoDeclare(doc, info, filename);
+			result = ManageExternProtoDeclare(doc, info, filename);
 			if (result != E_NOERROR) return result;
 			
 			QDomNodeList shapeNodes = doc->elementsByTagName("Shape");
@@ -623,91 +630,487 @@ namespace io {
 
 		
 		
-		static int loadTriangleSet(QDomElement geometry,
+		static int LoadSet(QDomElement geometry,
 									OpenMeshType& m,
-									const vcg::Matrix44d tMatrix,
-									std::map<QString, QDomElement>& defMap,
-									std::vector<bool> validTexture,
-									std::vector<int> indexTexture,
-									QDomNodeList textureTrasform,
+									const vcg::Matrix44f tMatrix,
+									const TextureInfo& texture,
+									const QStringList& coordList,
+									const QStringList& colorList,
+									const QStringList& normalList,
+									int colorComponent,
 									AdditionalInfoX3D* info,
 									CallBackPos *cb=0)
 		{
-			
+			QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
+			std::vector<vcg::Point4f> vertexSet;
+			int index = 0;
+			std::vector<int> vertexFaceIndex;
+			while (index + 2 < coordList.size())
+			{
+				vcg::Point4f vertex(coordList.at(index).toFloat(), coordList.at(index + 1).toFloat(), coordList.at(index + 2).toFloat(), 1.0);
+				size_t vi = 0;
+				bool found = false;
+				while (vi < vertexSet.size() && !found)
+				{
+					if (vertexSet.at(vi) == vertex)
+						found = true;
+					else
+						vi++;
+				}
+				if (!found)
+				{
+					vertexSet.push_back(vertex);
+					vertexFaceIndex.push_back(vertexSet.size() - 1);
+				}
+				else
+					vertexFaceIndex.push_back(vi);
+				index += 3;
+			}
 
+			int offset = m.vert.size();
+			vcg::tri::Allocator<OpenMeshType>::AddVertices(m, vertexSet.size());
+			for (size_t vv = 0; vv < vertexSet.size(); vv++)
+			{
+				vcg::Point4f tmp = tMatrix * vertexSet.at(vv);
+				m.vert[offset + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
+			}
+			
+			int offsetFace = m.face.size();
+			int nFace = 0;
+			if (geometry.tagName() == "TriangleSet")
+			{
+				nFace = vertexFaceIndex.size()/3;
+				vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+				for (int ff = 0; ff < nFace; ff++)
+				{
+					int faceIndex = ff + offsetFace;
+					for (int tt = 0; tt < 3; tt++)
+					{
+						m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(tt + ff*3) + offset]);
+						if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+							getNormal(normalList, (tt + ff*3)*3, m.face[faceIndex].WN(tt));
+						if (m.HasPerWedgeColor() && !colorList.isEmpty())
+							getColor(colorList, colorComponent, (tt + ff*3)*colorComponent, m.face[faceIndex].WC(tt));
+						if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+							getTextureCoord(texture, (tt + ff*3)*2, m.vert[vertexFaceIndex.at(tt + ff*3) + offset].cP(), m.face[faceIndex].WT(tt));
+					}
+					if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+						getNormal(normalList, ff*3, m.face[faceIndex].N());
+				}
+			}
+			else if (geometry.tagName() == "TriangleFanSet" || geometry.tagName() == "TriangleStripSet")
+			{
+				QStringList countList;
+				if (geometry.tagName() == "TriangleFanSet")
+					findAndParseAttribute(countList, geometry, "fanCount", "");
+				else
+					findAndParseAttribute(countList, geometry, "stripCount", "");
+				std::vector<int> count;
+				if (countList.isEmpty())
+				{
+					count.push_back(vertexFaceIndex.size());
+					nFace = vertexFaceIndex.size() > 2 ? vertexFaceIndex.size() - 2: 0;
+				}
+				else
+				{
+					for (int i = 0; i < countList.size(); i++)
+					{
+						if (countList.at(i).toInt() < 3)
+						{
+							info->lineNumberError = geometry.lineNumber();
+							return E_INVALIDFANSTRIP;
+						}
+						else
+						{
+							count.push_back(countList.at(i).toInt());
+							nFace += countList.at(i).toInt() - 2;
+						}
+					}
+				}
+				vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);									
+				int index = 0;
+				int ff = 0;
+				for (size_t ns = 0; ns < count.size() && ff < nFace; ns++)
+				{
+					int numVertex = count.at(ns);
+					int firstVertexIndex = vertexFaceIndex.at(index) + offset;
+					int secondVertexIndex = vertexFaceIndex.at(index + 1) + offset;
+					vcg::Point3f firstNormal, secondNormal;
+					if (normalPerVertex == "true" && !normalList.isEmpty())
+					{
+						getNormal(normalList, index*3, firstNormal);
+						getNormal(normalList, index*3 + 3, secondNormal);
+					}
+					vcg::Color4b firstColor, secondColor;
+					if (!colorList.isEmpty())
+					{
+						getColor(colorList, colorComponent, index*colorComponent, firstColor);
+						getColor(colorList, colorComponent, index*colorComponent + colorComponent, secondColor);
+					}
+					vcg::TexCoord2<float> firstTextCoord, secondTextCoord;
+					bool validFirst = getTextureCoord(texture, index*2, m.vert[vertexFaceIndex.at(index) + offset].cP(), firstTextCoord);
+					bool validSecond =  getTextureCoord(texture, index*2, m.vert[vertexFaceIndex.at(index + 1) + offset].cP(), secondTextCoord);
+					for(int vi = 2; vi < numVertex; vi++)
+					{
+						int faceIndex = ff + offsetFace;
+						m.face[faceIndex].V(0) = &(m.vert[firstVertexIndex]);
+						m.face[faceIndex].V(1) = &(m.vert[secondVertexIndex]);
+						if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+						{
+							m.face[faceIndex].WN(0) = firstNormal;
+							m.face[faceIndex].WN(1) = secondNormal;
+						}
+						if (m.HasPerWedgeColor() && !colorList.isEmpty())
+						{
+							m.face[faceIndex].WC(0) = firstColor;
+							m.face[faceIndex].WC(1) = secondColor;
+						}
+						if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+						{
+							if (validFirst)
+								m.face[faceIndex].WT(0) = firstTextCoord;
+							if (validSecond)
+								m.face[faceIndex].WT(1) = secondTextCoord;
+						}
+						
+						m.face[faceIndex].V(2) = &(m.vert[vertexFaceIndex.at(index + vi) + offset]);
+						if (!normalList.isEmpty())
+						{
+							if (normalPerVertex == "true" && m.HasPerWedgeNormal())
+								getNormal(normalList, (index + vi)*3, m.face[faceIndex].WN(2));
+							if (normalPerVertex == "false" && m.HasPerFaceNormal())
+								getNormal(normalList, ff*3, m.face[faceIndex].N());
+						}
+						if (!colorList.isEmpty() && m.HasPerWedgeColor())
+							getColor(colorList, colorComponent, (index + vi)*colorComponent, m.face[faceIndex].WC(2));
+						bool valid;
+						if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+							valid = getTextureCoord(texture, (index + vi)*2, m.vert[vertexFaceIndex.at(index + vi) + offset].cP(), m.face[faceIndex].WT(2)); 
+						
+						if (geometry.tagName() == "TriangleStripSet")
+						{
+							firstVertexIndex = secondVertexIndex;
+							firstColor = secondColor;
+							firstNormal = secondNormal;
+							firstTextCoord = secondTextCoord;
+							validFirst = validSecond;
+						}
+						secondVertexIndex = vertexFaceIndex.at(index + vi) + offset;
+						if (m.HasPerWedgeColor())
+							secondColor = m.face[faceIndex].WC(2);
+						if (m.HasPerWedgeNormal())
+							secondNormal = m.face[faceIndex].WN(2);
+						if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+						{
+							if (valid)
+								secondTextCoord = m.face[faceIndex].WT(2);
+							validSecond = valid;
+						}
+						ff++;
+					}
+					index += numVertex;
+				}
+			}
+			else if (geometry.tagName() == "QuadSet")
+			{
+				nFace = vertexFaceIndex.size()/4;
+				vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace * 2);
+				for (int ff = 0; ff < nFace; ff++)
+				{
+					std::vector<std::vector<vcg::Point3f>> polygonVect;
+					std::vector<Point3f> polygon;
+					for (int tt = 0; tt < 4; tt++)
+						polygon.push_back(m.vert[vertexFaceIndex.at(tt + ff*4) + offset].cP());
+					polygonVect.push_back(polygon);
+					std::vector<int> indexVect;
+					vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
+					int faceIndex = ff*2 + offsetFace;
+					size_t iv = 0;
+					while (iv + 2 < indexVect.size())
+					{
+						for (int tt = 0; tt < 3; tt++)
+						{
+							int indexVertex = indexVect.at(iv) + ff*4;
+							m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(indexVertex) + offset]);
+							if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+								getNormal(normalList, indexVertex*3, m.face[faceIndex].WN(tt));
+							if (m.HasPerWedgeColor() && !colorList.isEmpty())
+								getColor(colorList, colorComponent, indexVertex*colorComponent, m.face[faceIndex].WC(tt));
+							if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+								getTextureCoord(texture, indexVertex*2, m.vert[vertexFaceIndex.at(indexVertex) + offset].cP(), m.face[faceIndex].WT(tt)); 
+							iv++;
+						}
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							getNormal(normalList, ff*3, m.face[faceIndex].N());
+						faceIndex++;
+					}
+				}
+			}
 			return E_NOERROR;
 		}
 
 		
 
+		static int LoadIndexedSet(QDomElement geometry,
+									OpenMeshType& m,
+									const vcg::Matrix44f tMatrix,
+									const TextureInfo& texture,
+									const QStringList& coordList,
+									const QStringList& colorList,
+									const QStringList& normalList,
+									int colorComponent,
+									AdditionalInfoX3D* info,
+									CallBackPos *cb=0)
+		{
+			QStringList indexList;
+			findAndParseAttribute(indexList, geometry, "index", "");
+			if (!indexList.isEmpty())
+			{
+				QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
+				int offset = m.vert.size();
+				int nVertex = coordList.size()/3;
+				vcg::tri::Allocator<OpenMeshType>::AddVertices(m, nVertex);
+				for (int vv = 0; vv < nVertex; vv++)
+				{
+					vcg::Point4f tmp = tMatrix * vcg::Point4f(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
+					m.vert[offset + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
+					if (m.HasPerVertexNormal() && !normalList.isEmpty() && normalPerVertex == "true")
+						getNormal(normalList, vv*3, m.vert[offset + vv].N());
+					if (m.HasPerVertexColor() && !colorList.isEmpty())
+						getColor(colorList, colorComponent, vv*3, m.vert[offset + vv].C());
+					if (m.HasPerVertexTexCoord())
+						getTextureCoord(texture, vv*2, m.vert[offset + vv].cP(), m.vert[offset + vv].T());
+				}
+				int offsetFace = m.face.size();
+				int nFace = 0;
+				if (geometry.tagName() == "IndexedTriangleSet")
+				{
+					nFace = indexList.size()/3;
+					vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+					for (int ff = 0; ff < nFace; ff++)
+					{
+						int faceIndex = ff + offsetFace;
+						for (int tt = 0; tt < 3; tt++)
+						{
+							int vertIndex = indexList.at(tt + ff*3).toInt() + offset;
+							if (vertIndex >= m.vert.size())
+							{
+								info->lineNumberError = geometry.lineNumber();
+								return E_INVALIDINDEXED;
+							}
+							m.face[faceIndex].V(tt) = &(m.vert[vertIndex]);
+							if(!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+								getTextureCoord(texture, indexList.at(tt + ff*3).toInt()*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(tt));
+ 						}
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							getNormal(normalList, ff*3, m.face[faceIndex].N());
+					}
+				}								
+				else if (geometry.tagName() == "IndexedTriangleFanSet" || geometry.tagName() == "IndexedTriangleStripSet")
+				{									
+					int count = 0;
+					int pos = indexList.indexOf("-1");
+					while(pos != -1)
+					{
+						count ++;
+						int nextPos = indexList.indexOf("-1", pos+1);
+						int tmp = (nextPos == -1)? indexList.size(): nextPos;
+						if ((tmp - pos -1) < 3)
+						{
+							info->lineNumberError = geometry.lineNumber();
+							return E_INVALIDINDEXEDFANSTRIP;
+						}
+						pos = (nextPos == indexList.size() -1)? -1: nextPos;
+					}
+					int sub = count;
+					count++;
+					if (indexList.at(indexList.size()-1) == "-1")
+						sub++;
+					nFace = indexList.size() - 2*count - sub;
+					vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+					int ff = 0;
+					int firstVertexIndex;
+					int secondVertexIndex;
+					int vertIndex;
+					for (int ls = 0; ls < indexList.size() && ff < nFace; ls++)
+					{
+						if (indexList.at(ls) == "-1" || ls == 0)
+						{
+							if (ls == 0) ls = -1;
+							vertIndex = indexList.at(ls + 1).toInt() + offset;
+							if (vertIndex >= m.vert.size())
+							{
+								info->lineNumberError = geometry.lineNumber();
+								return E_INVALIDINDEXED;
+							}
+							firstVertexIndex = vertIndex;
+							vertIndex = indexList.at(ls + 2).toInt() + offset;
+							if (vertIndex >= m.vert.size())
+							{
+								info->lineNumberError = geometry.lineNumber();
+								return E_INVALIDINDEXED;
+							}
+							secondVertexIndex = vertIndex;
+							ls = ls + 3;
+						}
+						int faceIndex = ff + offsetFace;
+						m.face[faceIndex].V(0) = &(m.vert[firstVertexIndex]);
+						m.face[faceIndex].V(1) = &(m.vert[secondVertexIndex]);
+						if(!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+						{
+								getTextureCoord(texture, (firstVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(0));
+								getTextureCoord(texture, (secondVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(1));
+						}
+
+ 						vertIndex = indexList.at(ls).toInt() + offset;
+						if (vertIndex >= m.vert.size())
+						{
+							info->lineNumberError = geometry.lineNumber();
+							return E_INVALIDINDEXED;
+						}
+						m.face[faceIndex].V(2) = &(m.vert[vertIndex]);
+						if (!normalList.isEmpty() && normalPerVertex == "false")
+							getNormal(normalList, ff*3, m.face[faceIndex].N());
+						if(!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+								getTextureCoord(texture, (vertIndex - offset)*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(2));
+						if (geometry.tagName() == "IndexedTriangleStripSet")
+							firstVertexIndex = secondVertexIndex;
+						secondVertexIndex = vertIndex;
+						ff++;
+					}
+				}
+				else if (geometry.tagName() == "IndexedQuadSet")
+				{
+					nFace = indexList.size()/4;
+					vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace * 2);
+					for (int ff = 0; ff < nFace; ff++)
+					{
+						std::vector<std::vector<vcg::Point3f>> polygonVect;
+						std::vector<Point3f> polygon;
+						for (int tt = 0; tt < 4; tt++)
+							polygon.push_back(m.vert[indexList.at(tt + ff*4).toInt() + offset].cP());
+						polygonVect.push_back(polygon);
+						std::vector<int> indexVect;
+						vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
+						int faceIndex = ff*2 + offsetFace;
+						size_t iv = 0;
+						while (iv + 2 < indexVect.size())
+						{
+							for (int tt = 0; tt < 3; tt++)
+							{
+								int indexVertex = indexVect.at(iv) + ff*4;
+								m.face[faceIndex].V(tt) = &(m.vert[indexList.at(indexVertex).toInt() + offset]);
+								if(!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+									getTextureCoord(texture, indexList.at(indexVertex).toInt()*2, m.vert[indexList.at(indexVertex).toInt() + offset].cP(), m.face[faceIndex].WT(tt));
+								iv++;
+							}
+							if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+								getNormal(normalList, ff*3, m.face[faceIndex].N());
+							faceIndex++;
+						}
+					}
+				}
+			}
+			return E_NOERROR;
+		}
+
+
+
+		
+		
 		inline static vcg::Matrix33f createTextureTrasformMatrix(QDomElement elem)
 		{
 			vcg::Matrix33f matrix, tmp;
+			matrix.SetIdentity();
 			QStringList coordList, center;
 			findAndParseAttribute(center, elem, "center", "0 0");
-			assert(center.size() == 2);
-			matrix.SetIdentity();
-			matrix[0][2] = -center.at(0).toFloat();
-			matrix[1][2] = -center.at(1).toFloat();
+			if (center.size() == 2)
+			{			
+				matrix[0][2] = -center.at(0).toFloat();
+				matrix[1][2] = -center.at(1).toFloat();
+			}
 			findAndParseAttribute(coordList, elem, "scale", "1 1");
-			assert(coordList.size() == 2);
-			tmp.SetIdentity();
-			tmp[0][0] = coordList.at(0).toFloat();
-			tmp[1][1] = coordList.at(1).toFloat();
-			matrix *= tmp;
+			if(coordList.size() == 2)
+			{
+				tmp.SetIdentity();
+				tmp[0][0] = coordList.at(0).toFloat();
+				tmp[1][1] = coordList.at(1).toFloat();
+				matrix *= tmp;
+			}
 			findAndParseAttribute(coordList, elem, "rotation", "0");
-			assert(coordList.size() == 1);
-			tmp.Rotate(math::ToDeg(coordList.at(0).toFloat()), vcg::Point3f(0, 0, 1));
-			matrix *= tmp;
-			tmp.SetIdentity();
-			tmp[0][2] = center.at(0).toFloat();
-			tmp[1][2] = center.at(1).toFloat();
-			matrix *= tmp;
+			if(coordList.size() == 1)
+			{
+				tmp.Rotate(math::ToDeg(coordList.at(0).toFloat()), vcg::Point3f(0, 0, 1));
+				matrix *= tmp;
+			}
+			if (center.size() == 2)
+			{
+				tmp.SetIdentity();
+				tmp[0][2] = center.at(0).toFloat();
+				tmp[1][2] = center.at(1).toFloat();
+				matrix *= tmp;
+			}
 			findAndParseAttribute(coordList, elem, "traslation", "0 0");
-			assert(coordList.size() == 2);
-			tmp.SetIdentity();
-			tmp[0][2] = coordList.at(0).toFloat();
-			tmp[1][2] = coordList.at(1).toFloat();
-			matrix *= tmp;
+			if(coordList.size() == 2)
+			{
+				tmp.SetIdentity();
+				tmp[0][2] = coordList.at(0).toFloat();
+				tmp[1][2] = coordList.at(1).toFloat();
+				matrix *= tmp;
+			}
 			return matrix;
 		}
 		
-
 		
-		static vcg::Matrix44f createTransformMatrix(QDomElement root, vcg::Matrix44f tMatrix)
+		inline static vcg::Matrix44f createTransformMatrix(QDomElement root, vcg::Matrix44f tMatrix)
 		{
 			vcg::Matrix44f t, tmp;
+			t.SetIdentity();
 			QStringList coordList, center, scale;
 			findAndParseAttribute(coordList, root, "translation", "0 0 0");
-			assert(coordList.size() == 3);
-			t.SetTranslate(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()); 
+			if(coordList.size() == 3)
+				t.SetTranslate(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()); 
 			findAndParseAttribute(center, root, "center", "0 0 0");
-			assert(center.size() == 3);
-			tmp.SetTranslate(center.at(0).toFloat(), center.at(1).toFloat(), center.at(2).toFloat());
-			t *= tmp;
+			if(center.size() == 3)
+			{
+				tmp.SetTranslate(center.at(0).toFloat(), center.at(1).toFloat(), center.at(2).toFloat());
+				t *= tmp;
+			}
 			findAndParseAttribute(coordList, root, "rotation", "0 0 1 0");
-			assert(coordList.size() == 4);
-			tmp.SetRotate(coordList.at(3).toFloat(), vcg::Point3f(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()));
-			t *= tmp;
+			if(coordList.size() == 4)
+			{
+				tmp.SetRotate(coordList.at(3).toFloat(), vcg::Point3f(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()));
+				t *= tmp;
+			}
 			findAndParseAttribute(scale, root, "scaleOrientation", "0 0 1 0");
-			assert(scale.size() == 4);
-			tmp.SetRotate(scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
-			t *= tmp;
+			if(scale.size() == 4)
+			{
+				tmp.SetRotate(scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
+				t *= tmp;
+			}
 			findAndParseAttribute(coordList, root, "scale", "1 1 1");
-			assert(coordList.size() == 3);
-			tmp.SetScale(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat());
-			t *= tmp;
-			tmp.SetRotate(-scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
-			t *= tmp;
-			tmp.SetTranslate(-center.at(0).toFloat(), -center.at(1).toFloat(), -center.at(2).toFloat());
-			t *= tmp;
+			if(coordList.size() == 3)
+			{
+				tmp.SetScale(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat());
+				t *= tmp;
+			}
+			if(scale.size() == 4)
+			{
+				tmp.SetRotate(-scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
+				t *= tmp;
+			}
+			if(center.size() == 3)
+			{
+				tmp.SetTranslate(-center.at(0).toFloat(), -center.at(1).toFloat(), -center.at(2).toFloat());
+				t *= tmp;
+			}
 			t = tMatrix * t;
 			return t;
 		}
 
 		
 		
-		static int navigateInline(OpenMeshType& m,
+		static int NavigateInline(OpenMeshType& m,
 									QDomElement root,
 									const vcg::Matrix44f tMatrix,
 									AdditionalInfoX3D* info,
@@ -730,7 +1133,7 @@ namespace io {
 				QString path = paths.at(i).trimmed().remove(QChar('"'));
 				iter = info->inlineNodeMap.find(path);
 				if (iter != info->inlineNodeMap.end()){
-					for (int j = 0; j < info->filenameStack.size(); j++)
+					for (size_t j = 0; j < info->filenameStack.size(); j++)
 					{
 						if ( info->filenameStack[j] == path ) 
 						{
@@ -742,7 +1145,7 @@ namespace io {
 					QDomElement first = iter->second->firstChildElement("X3D");
 					std::map<QString, QDomElement> newDefMap;
 					std::map<QString, QDomElement> newProtoDeclMap;
-					int result = navigateScene(m, first, tMatrix, newDefMap, newProtoDeclMap, info, cb);
+					int result = NavigateScene(m, first, tMatrix, newDefMap, newProtoDeclMap, info, cb);
 					if (result != E_NOERROR)
 						return result;
 					info->filenameStack.pop_back();
@@ -759,7 +1162,7 @@ namespace io {
 		}
 		
 		
-		static int navigateExternProtoDeclare(QDomElement root,
+		static int NavigateExternProtoDeclare(QDomElement root,
 									const vcg::Matrix44f tMatrix,
 									std::map<QString, QDomElement>& protoDeclareMap,
 									AdditionalInfoX3D* info,
@@ -810,7 +1213,7 @@ namespace io {
 		}
 		
 		
-		static int navigateProtoInstance(OpenMeshType& m,
+		static int NavigateProtoInstance(OpenMeshType& m,
 									QDomElement root,
 									const vcg::Matrix44f tMatrix,
 									std::map<QString, QDomElement>& defMap,
@@ -850,7 +1253,7 @@ namespace io {
 					break;
 				}
 			}
-			for (int j = 0; j < info->filenameStack.size(); j++)
+			for (size_t j = 0; j < info->filenameStack.size(); j++)
 			{
 				if ( info->filenameStack[j] == filename ) 
 				{
@@ -860,12 +1263,12 @@ namespace io {
 			}
 			if (filename != "")
 				info->filenameStack.push_back(filename);
-			int result = initializeProtoDeclare(protoInstance, fields, defMap, info);
+			int result = InitializeProtoDeclare(protoInstance, fields, defMap, info);
 			if (result != E_NOERROR) return result;
 			QDomElement body = protoInstance.firstChildElement("ProtoBody");
 			std::map<QString, QDomElement> newDefMap;
 			std::map<QString, QDomElement> newProtoDeclMap;
-			result = navigateScene(m, body, tMatrix, newDefMap, newProtoDeclMap, info, cb);
+			result = NavigateScene(m, body, tMatrix, newDefMap, newProtoDeclMap, info, cb);
 			if (result != E_NOERROR)
 				return result;
 			//eliminare il nome del file dal vettore
@@ -875,34 +1278,70 @@ namespace io {
 		}		
 		
 		
-		inline static vcg::Point3f getNormal(const QStringList& list, int index)
+		inline static void getNormal(const QStringList& list, int index, vcg::Point3f& dest)
 		{
-			assert(!list.isEmpty() && index + 2 < list.size());
-			//trasformare la normale?
-			vcg::Point3f normal(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at( index+ 2).toFloat());
-			return normal;
+			if(!list.isEmpty() && (index + 2) < list.size())
+			{
+				vcg::Point3f normal(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at( index+ 2).toFloat());
+				//trasformare la normale?
+				dest = normal;
+			}
 		}
 
-		inline static vcg::Color4b getColor(const QStringList& list, int component, int index)
+		
+		inline static void getColor(const QStringList& list, int component, int index, vcg::Color4b& dest)
 		{
-			assert(!list.isEmpty() && index + component - 1 < list.size());
-			vcg::Color4f color;
-			if (component == 3)
-				color = vcg::Color4f(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at(index + 2).toFloat(), 0); 
+			if(!list.isEmpty() && (index + component - 1) < list.size())
+			{
+				vcg::Color4f color;
+				if (component == 3)
+					color = vcg::Color4f(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at(index + 2).toFloat(), 0); 
+				else
+					color = vcg::Color4f(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at(index + 2).toFloat(), list.at(index + 3).toFloat());
+				vcg::Color4b colorB;
+				colorB.Import(color);
+				dest = colorB;
+			}
+		}
+
+		
+		inline static bool getTextureCoord(const TextureInfo& textInfo, int index, const vcg::Point3f& vertex, vcg::TexCoord2<float>& dest)
+		{
+			vcg::Point3f point;
+			if (textInfo.isCoordGenerator)
+			{
+				if (textInfo.mode == "COORD")
+					point = vcg::Point3f(vertex.X(), vertex.Y(), 1.0);
+				else
+					return false;
+			}
+			else if (!textInfo.textureCoordList.isEmpty() && (index + 2) < textInfo.textureCoordList.size())
+				point = vcg::Point3f(textInfo.textureCoordList.at(index).toFloat(), textInfo.textureCoordList.at(index + 1).toFloat(), 1.0);
 			else
-				color = vcg::Color4f(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at(index + 2).toFloat(), list.at(index + 3).toFloat());
-			vcg::Color4b colorB;
-			colorB.Import(color);
-			return colorB;
+				return false;
+			point = textInfo.textureTransform * point;
+			if (!textInfo.repeatS)
+			{
+				point.X() = point.X() < 0? 0: point.X();
+				point.X() = point.X() > 1? 1: point.X();
+			}
+			else
+				point.X() = point.X() - floorf(point.X());
+			if (!textInfo.repeatT)
+			{
+				point.Y() = point.Y() < 0? 0: point.Y();
+				point.Y() = point.Y() > 1? 1: point.Y();
+			}
+			else
+				point.Y() = point.Y() - floorf(point.Y());
+			vcg::TexCoord2<float> textCoord(point.X(), point.Y());
+			dest = textCoord;
+			return true;
 		}
 
-		inline static vcg::TexCoord2<float> getTextureCoord(const QStringList& list, int index)
-		{
 
-		}
-
-
-		static int navigateScene(OpenMeshType& m,
+		
+		static int NavigateScene(OpenMeshType& m,
 									QDomElement root,
 									const vcg::Matrix44f tMatrix,
 									std::map<QString, QDomElement>& defMap,
@@ -918,31 +1357,35 @@ namespace io {
 				if (iter != defMap.end())
 				{
 					if (iter->second.tagName() == root.tagName())
-						return navigateScene(m, iter->second, tMatrix, defMap, protoDeclareMap, info, cb);
+						return NavigateScene(m, iter->second, tMatrix, defMap, protoDeclareMap, info, cb);
 					info->lineNumberError = root.lineNumber();
 					return E_MISMATCHDEFUSETYPE;
 				}
 				info->lineNumberError = root.lineNumber();
 				return E_NODEFFORUSE;
 			}
+
 			QString def = root.attribute("DEF");
 			if (def != "" && defMap.find(def) == defMap.end())
 				defMap[def] = root;
+			
 			if (root.tagName() == "Transform")
 			{
 				vcg::Matrix44f t = createTransformMatrix(root, tMatrix);
 				QDomElement child = root.firstChildElement();
 				while(!child.isNull())
 				{
-					int result = navigateScene(m, child, t, defMap, protoDeclareMap, info, cb);
+					int result = NavigateScene(m, child, t, defMap, protoDeclareMap, info, cb);
 					if (result != E_NOERROR)
 						return result;
 					child = child.nextSiblingElement();
 				}
 				return E_NOERROR;
 			}
+			
 			if (root.tagName() == "Inline")
-				return navigateInline(m, root, tMatrix, info, cb);
+				return NavigateInline(m, root, tMatrix, info, cb);
+			
 			if (root.tagName() == "ProtoDeclare")
 			{
 				QString name = root.attribute("name");
@@ -954,10 +1397,13 @@ namespace io {
 				protoDeclareMap[name] = root;
 				return E_NOERROR;
 			}
+			
 			if (root.tagName() == "ExternProtoDeclare")
-				return navigateExternProtoDeclare(root, tMatrix, protoDeclareMap, info, cb);
+				return NavigateExternProtoDeclare(root, tMatrix, protoDeclareMap, info, cb);
+			
 			if (root.tagName() == "ProtoInstance")
-				return navigateProtoInstance(m, root, tMatrix, defMap, protoDeclareMap, info, cb);
+				return NavigateProtoInstance(m, root, tMatrix, defMap, protoDeclareMap, info, cb);
+			
 			if (root.tagName() == "Shape")
 			{
 				QDomElement appearance = root.firstChildElement("Appearance");
@@ -1001,7 +1447,7 @@ namespace io {
 						while (j < paths.size() && !found)
 						{
 							QString path = paths.at(j).trimmed().remove('"');
-							int z = 0;
+							size_t z = 0;
 							while (z < info->textuxeFile.size() && !found)
 							{
 								if (info->textuxeFile.at(z) == path || info->textuxeFile.at(z) == url)
@@ -1055,7 +1501,7 @@ namespace io {
 						if (textureCoord.tagName() == "MultiTextureCoordinate")
 						{
 							QDomElement child = textureCoord.firstChildElement();
-							int i= 0;
+							size_t i= 0;
 							int j = 0;
 							while (!child.isNull())
 							{
@@ -1074,7 +1520,7 @@ namespace io {
 										QString mode = solveChild.attribute("mode", "SPHERE");
 										textureInfo[j].mode = mode;
 										textureInfo[j].parameter = solveChild.attribute("parameter");
-										textureInfo[j].isValid = (mode == "SPHERE-LOCAL" || mode == "COORD" || mode == "NOISE");
+										textureInfo[j].isValid = (mode == "COORD");
 										textureInfo[j].isCoordGenerator = true;
 									}
 									if ( i < textureTransformList.size())										
@@ -1084,7 +1530,6 @@ namespace io {
 								i++;
 								child = child.nextSiblingElement();
 							}
-								
 						}
 						else if (textureCoord.tagName() == "TextureCoordinate")
 						{
@@ -1104,252 +1549,38 @@ namespace io {
 								QString mode = textureCoord.attribute("mode", "SPHERE");
 								textureInfo[0].mode = mode;
 								textureInfo[0].parameter = textureCoord.attribute("parameter");
-								textureInfo[0].isValid = (mode == "SPHERE-LOCAL" || mode == "COORD" || mode == "NOISE");
+								textureInfo[0].isValid = (mode == "COORD");
 								textureInfo[0].isCoordGenerator = true;
 								if (textureTransformList.size() > 0)
 									textureInfo[0].textureTransform = createTextureTrasformMatrix(textureTransformList.at(0).toElement());
 							}
 						}
-						
-						QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
-						if (geometry.tagName() == "TriangleSet" || geometry.tagName() == "TriangleFanSet" || geometry.tagName() == "TriangleStripSet" || geometry.tagName() == "QuadSet")
+
+						int colorComponent = (!color.isNull() && color.tagName() == "Color")? 3: 4;
+						TextureInfo texture;
+						for (size_t i = 0; i < textureInfo.size(); i++)
 						{
-							std::vector<vcg::Point4f> vertexSet;
-							int index = 0;
-							std::vector<int> vertexFaceIndex;
-							while (index + 2 < coordList.size())
+							if (textureInfo.at(i).isValid)
 							{
-								vcg::Point4f vertex(coordList.at(index).toFloat(), coordList.at(index + 1).toFloat(), coordList.at(index + 2).toFloat(), 1.0);
-								int vi = 0;
-								bool found = false;
-								while (vi < vertexSet.size() && !found)
-								{
-									if (vertexSet.at(vi) == vertex)
-										found = true;
-									else
-										vi++;
-								}
-								if (!found)
-								{
-									vertexSet.push_back(vertex);
-									vertexFaceIndex.push_back(vertexSet.size() - 1);
-								}
-								else
-									vertexFaceIndex.push_back(vi);
-								index += 3;
+								texture = textureInfo.at(i);
+								break;
 							}
-
-							int offset = m.vert.size();
-							vcg::tri::Allocator<OpenMeshType>::AddVertices(m, vertexSet.size());
-							for (int vv = 0; vv < vertexSet.size(); vv++)
-							{
-								vcg::Point4f tmp = tMatrix * vertexSet.at(vv);
-								m.vert[offset + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
-							}
-
-							int offsetFace = m.face.size();
-							int nFace = 0;
-							int colorComponent = (color.tagName() == "Color")? 3: 4;
-							if (!colorList.isEmpty())
-								assert(colorList.size()/colorComponent >= vertexFaceIndex.size());
-							//controllare numero coordinate di texture
-							if (geometry.tagName() == "TriangleSet")
-							{
-								nFace = vertexFaceIndex.size()/3;
-								if (!normalList.isEmpty()) {
-									int n = (normalPerVertex == "true")? vertexFaceIndex.size(): nFace;
-									assert(normalList.size()/3 >= n);
-								}
-								vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
-								for (int ff = 0; ff < nFace; ff++)
-								{
-									int faceIndex = ff + offsetFace;
-									for (int tt = 0; tt < 3; tt++)
-									{
-										m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(tt + ff*3) + offset]);
-										/*if (normalPerVertex == "true" && !normalList.isEmpty())
-											m.face[faceIndex].WN(tt) = getNormal(normalList, (tt + ff*3)*3);
-										if (!colorList.isEmpty())
-											m.face[faceIndex].WC(tt) = getColor(colorList, colorComponent, (tt + ff*3)*colorComponent);*/
-										
-										//assegnare le coordinate di texture
-									}
-									if (normalPerVertex == "false" && !normalList.isEmpty())
-										m.face[faceIndex].N() = getNormal(normalList, ff*3);
-								}
-							}
-							else if (geometry.tagName() == "TriangleFanSet" || geometry.tagName() == "TriangleStripSet")
-							{
-								QStringList countList;
-								if (geometry.tagName() == "TriangleFanSet")
-									findAndParseAttribute(countList, geometry, "fanCount", "");
-								else
-									findAndParseAttribute(countList, geometry, "stripCount", "");
-								std::vector<int> count;
-								if (countList.isEmpty())
-								{
-									count.push_back(vertexFaceIndex.size());
-									nFace = vertexFaceIndex.size() > 2 ? vertexFaceIndex.size() - 2: 0;
-								}
-								else
-								{
-									for (int i = 0; i < countList.size(); i++)
-									{
-										if (countList.at(i).toInt() < 3)
-										{
-											info->lineNumberError = geometry.lineNumber();
-											return (geometry.tagName() == "TriangleFanSet")? E_INVALIDFANSET: E_INVALIDSTRIPSET;
-										}
-										else
-										{
-											count.push_back(countList.at(i).toInt());
-											nFace += countList.at(i).toInt() - 2;
-										}
-									}
-								}
-								if (!normalList.isEmpty()) {
-									int n = (normalPerVertex == "true")? vertexFaceIndex.size(): nFace;
-									assert(normalList.size()/3 >= n);
-								}
-								vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);									
-								int index = 0;
-								int ff = 0;
-								for (int ns = 0; ns < count.size() && ff < nFace; ns++)
-								{
-									int numVertex = count.at(ns);
-									CVertexO* firstVertex = &(m.vert[vertexFaceIndex.at(index) + offset]);
-									CVertexO* secondVertex = &(m.vert[vertexFaceIndex.at(index+1) + offset]);
-									vcg::Point3f firstNormal, secondNormal;
-									if (normalPerVertex == "true" && !normalList.isEmpty())
-									{
-										firstNormal = getNormal(normalList, index*3);
-										secondNormal = getNormal(normalList, index*3 + 3);
-									}
-									vcg::Color4b firstColor, secondColor;
-									if (!colorList.isEmpty())
-									{
-										firstColor = getColor(colorList, colorComponent, index*colorComponent);
-										secondColor = getColor(colorList, colorComponent, index*colorComponent + colorComponent);
-									}
-									vcg::TexCoord2<> firstTextCoord, secondTextCoord;
-									//coordinate di texture
-
-									for(int vi = 2; vi < numVertex; vi++)
-									{
-										int faceIndex = ff + offsetFace;
-										m.face[faceIndex].V(0) = firstVertex;
-										m.face[faceIndex].V(1) = secondVertex;
-										/*if (normalPerVertex == "true" && !normalList.isEmpty())
-										{
-											m.face[faceIndex].WN(0) = firstNormal;
-											m.face[faceIndex].WN(1) = secondNormal;
-										}
-										if (!colorList.isEmpty())
-										{
-											m.face[faceIndex].WC(0) = firstColor;
-											m.face[faceIndex].WC(1) = secondColor;
-										}*/
-										//coordinate di texture
-
-										m.face[faceIndex].V(2) = &(m.vert[vertexFaceIndex.at(index + vi) + offset]);
-										if (!normalList.isEmpty())
-										{
-											if (normalPerVertex == "true")
-												/*m.face[faceIndex].WN(2) = getNormal(normalList, (index + vi)*3);
-											else*/
-												m.face[faceIndex].N() = getNormal(normalList, ff*3);
-										}
-										/*if (!colorList.isEmpty())
-											m.face[faceIndex].WC(2) = getColor(colorList, colorComponent, (index + vi)*colorComponent);*/
-										
-										//assegnare le coordinate di texture
-
-										if (geometry.tagName() == "TriangleStripSet")
-										{
-											firstVertex = secondVertex;
-											firstColor = secondColor;
-											firstNormal = secondNormal;
-											firstTextCoord = secondTextCoord;
-										}
-										secondVertex = m.face[faceIndex].V(2);
-										/*secondColor = m.face[faceIndex].WC(2);
-										secondNormal = m.face[faceIndex].WN(2);*/
-										secondTextCoord;
-										ff++;
-									}
-									index += numVertex;
-								}
-							}
-							else if (geometry.tagName() == "QuadSet")
-							{
-								nFace = vertexFaceIndex.size()/4;
-								if (!normalList.isEmpty()) {
-									int n = (normalPerVertex == "true")? vertexFaceIndex.size(): nFace;
-									assert(normalList.size()/3 >= n);
-								}
-								vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace * 2);
-								for (int ff = 0; ff < nFace; ff++)
-								{
-									int faceIndex = ff*2 + offsetFace;
-									for (int tt = 0; tt < 3; tt++)
-									{
-										m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(tt + ff*4) + offset]);
-										/*if (normalPerVertex == "true" && !normalList.isEmpty())
-											m.face[faceIndex].WN(tt) = getNormal(normalList, (tt + ff*4)*3);
-										if (!colorList.isEmpty())
-											m.face[faceIndex].WC(tt) = getColor(colorList, colorComponent, (tt + ff*4)*colorComponent);*/
-										
-										//assegnare le coordinate di texture
-									}
-									if (normalPerVertex == "false" && !normalList.isEmpty())
-									{
-										vcg::Point3f normal = getNormal(normalList, ff*3);
-										m.face[faceIndex].N() = normal;
-									}
-									faceIndex++;
-									for (int tt = 0; tt < 3; tt++)
-									{
-										int index = tt;
-										if (tt != 0)
-											index++;
-										m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(index + ff*4) + offset]);
-										/*if (normalPerVertex == "true" && !normalList.isEmpty())
-											m.face[faceIndex].WN(tt) = getNormal(normalList, (index + ff*4)*3);
-										if (!colorList.isEmpty())
-											m.face[faceIndex].WC(tt) = getColor(colorList, colorComponent, (index + ff*4)*colorComponent);*/
-										
-										//assegnare le coordinate di texture
-									}
-									if (normalPerVertex == "false" && !normalList.isEmpty())
-									{
-										vcg::Point3f normal = getNormal(normalList, ff*3);
-										m.face[faceIndex].N() = normal;
-									}
-								}
-							}
-
-
-							
-
-
 						}
-						
-
+						if (geometry.tagName() == "TriangleSet" || geometry.tagName() == "TriangleFanSet" || geometry.tagName() == "TriangleStripSet" || geometry.tagName() == "QuadSet")
+							return LoadSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
+						else if (geometry.tagName() == "IndexedTriangleSet" || geometry.tagName() == "IndexedTriangleFanSet" || geometry.tagName() == "IndexedTriangleStripSet" || geometry.tagName() == "IndexedQuadSet")
+							return LoadIndexedSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
+								
 					}
-
 					geometryNode = geometryNode.nextSiblingElement();
 				}
-
-
-
-
 				return E_NOERROR;
 
 			}
 			QDomElement child = root.firstChildElement();
 			while(!child.isNull())
 			{
-				int result = navigateScene(m, child, tMatrix, defMap, protoDeclareMap, info, cb);
+				int result = NavigateScene(m, child, tMatrix, defMap, protoDeclareMap, info, cb);
 				if (result != E_NOERROR)
 					return result;
 				child = child.nextSiblingElement();
@@ -1359,10 +1590,8 @@ namespace io {
 
 
 
-
-
-public:
-
+	public:	
+	
 		static int LoadMask(const char * filename, AdditionalInfoX3D*& addinfo)
 		{
 			AdditionalInfoX3D* info = new AdditionalInfoX3D();
@@ -1401,7 +1630,7 @@ public:
 				return E_NO3DSCENE;
 			if (scene.size() > 1)
 				return E_MULTISCENE;
-			return navigateScene(m, scene.at(0).toElement(), tMatrix, defMap, protoDeclareMap, info, cb); 
+			return NavigateScene(m, scene.at(0).toElement(), tMatrix, defMap, protoDeclareMap, info, cb); 
 		}
 
 	
