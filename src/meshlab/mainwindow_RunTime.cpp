@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.148  2008/02/04 09:34:02  cignoni
+better managment of state changes when layer switching and adding files to the current layer set
+
 Revision 1.147  2008/01/30 11:24:43  sherholz
 Fixed Bug in runFilterScript: the log was not set before applying a filter (caused crashes by some filter)
 
@@ -382,10 +385,11 @@ void MainWindow::delCurrentMesh()
 	updateMenus();	
 }
 
-
+// Called when we change layer 
 void MainWindow::setCurrent(int meshId)
 {
 	GLA()->meshDoc.setCurrentMesh(meshId);
+	updateMenus();	
 	stddialog->hide();
 }
 
@@ -719,7 +723,11 @@ void MainWindow::toggleSelectionRendering()
 
 bool MainWindow::openIn(QString /* fileName */)
 {
-	return open(QString(),GLA());
+	bool wasLayerVisible=GLA()->layerDialog->isVisible();
+	GLA()->layerDialog->setVisible(false);
+	bool ret= open(QString(),GLA());
+	GLA()->layerDialog->setVisible(wasLayerVisible);
+	return ret;	
 }
 
 void MainWindow::saveProject()
@@ -828,6 +836,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				else{
 					if(gla==0) gla=new GLArea(workspace);
 					gla->meshDoc.addMesh(mm);
+					
 					gla->mm()->ioMask |= mask;				// store mask into model structure
 					
 					gla->setFileName(fileName);
