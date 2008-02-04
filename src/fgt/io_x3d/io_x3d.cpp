@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.2  2008/02/04 13:28:36  gianpaolopalma
+ Added management to texture coordinates per vertex
+
  Revision 1.1  2008/02/02 13:41:08  gianpaolopalma
  First working version
 
@@ -100,7 +103,8 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 */
 
 
-
+		if (info->mask & MeshModel::IOM_VERTTEXCOORD)
+			info->mask |= MeshModel::IOM_WEDGTEXCOORD;
 		m.Enable(info->mask);
 		/*for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
 			m.cm.textures.push_back(info->texturefile[tx].toStdString());
