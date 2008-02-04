@@ -3,7 +3,8 @@ CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include 
 HEADERS       = io_x3d.h import_x3d.h export_x3d.h util_x3d.h
 				
-SOURCES       = io_x3d.cpp 
+SOURCES       = io_x3d.cpp
+QT           += opengl 
 QT 			 += xml
 				
 TARGET        = io_x3d
