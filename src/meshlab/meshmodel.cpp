@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.30  2008/02/04 09:32:56  cignoni
+Added check to avoid drawing textures when mesh has no texture (and face color too)
+
 Revision 1.29  2007/07/24 07:17:27  cignoni
 moved matrix inside mesh class
 
@@ -64,11 +67,14 @@ Removed Optional Face Normal and added some initalization after opening
 #include <QtGlobal>
 #include <wrap/gl/math.h>
 
-bool MeshModel::Render(GLW::DrawMode dm, GLW::ColorMode _cm, GLW::TextureMode tm)
+bool MeshModel::Render(GLW::DrawMode _dm, GLW::ColorMode _cm, GLW::TextureMode _tm)
 {
   glPushMatrix();
 	glMultMatrix(cm.Tr);
-  glw.Draw(dm,_cm,tm);
+	if( (_cm == GLW::CMPerFace)  && (!tri::HasPerFaceColor(cm)) ) _cm=GLW::CMNone;
+	if( (_tm == GLW::TMPerWedge )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
+	if( (_tm == GLW::TMPerWedgeMulti )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
+  glw.Draw(_dm,_cm,_tm);
 	glPopMatrix();
   return true;
 }
