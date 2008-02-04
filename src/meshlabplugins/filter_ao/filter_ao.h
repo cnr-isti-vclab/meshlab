@@ -87,8 +87,7 @@ public:
 
 	void  renderMesh            (MeshModel &m);
 	void  setCamera             (Point3f camDir,
-	                             Box3f &meshBBox,
-								 GLsizei viewpSize);
+	                             Box3f &meshBBox);
 
 	void  generateOcclusionHW   ();
 	void  generateOcclusionSW   (MeshModel &m,

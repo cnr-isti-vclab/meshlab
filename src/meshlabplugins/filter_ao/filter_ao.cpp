@@ -61,7 +61,7 @@
 #define AMBOCC_USEVBO_BY_DEFAULT false
 
 static GLuint vs, fs, shdrID;
-
+AOGLWidget *qWidget;
 AmbientOcclusionPlugin::AmbientOcclusionPlugin() 
 { 
 	typeList << FP_AMBIENT_OCCLUSION;
@@ -139,7 +139,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	depthTexArea = depthTexSize*depthTexSize;
 	numViews = par.getInt("reqViews");
 
-	AOGLWidget *qWidget = new AOGLWidget(0,this);
+	qWidget = new AOGLWidget(0,this);
 	qWidget->cb = cb;
 	qWidget->m = &m;
 	qWidget->show();  //Ugly, but HAVE to be shown in order for it to work!
@@ -162,14 +162,6 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
-
-	/*
-	if ( useGPU && ((unsigned int)m.cm.vn > maxDepthTexSize) )
-	{
-		Log(0, "Too many vertices: up to %d are allowed", maxDepthTexSize);
-		return false;
-	}
-	/**/
 
 	if (useVBO)
 	{
@@ -208,7 +200,7 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 	int c=0;
 	for (vi = posVect.begin(); vi != posVect.end(); vi++)
 	{
-		setCamera(*vi, m.cm.bbox, depthTexSize);
+		setCamera(*vi, m.cm.bbox);
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.0f, 1.0f);
@@ -226,8 +218,8 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 			glColorMask(0, 0, 0, 0);
 				renderMesh(m);
 			glColorMask(1, 1, 1, 1);
-
-			setCamera(*vi, m.cm.bbox, maxTexSize);
+			
+			glViewport(0,0,maxTexSize,maxTexSize);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
 
 			glEnable(GL_BLEND);
@@ -260,6 +252,7 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 
 	if (useGPU)
 	{
+		//glViewport(0,0,maxTexSize,maxTexSize);
 		applyOcclusionHW(m);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
@@ -280,10 +273,16 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 		glDeleteFramebuffersEXT(1, &fboDepth);
 		glDeleteFramebuffersEXT(1, &fboResult);
 
+		glDeleteTextures(1, &vertexCoordTex);
+		glDeleteTextures(1, &vertexNormalsTex);
+		glDeleteTextures(1, &resultBufferTex);
+
 		glDetachShader(shdrID, vs);
 		glDetachShader(shdrID, fs);
 		glDeleteShader(shdrID);
 	}
+
+	glDeleteTextures(1, &depthBufferTex);
 
 	if (useVBO)
 		m.glw.ClearHint(vcg::GLW::HNUseVBO);
@@ -539,14 +538,14 @@ void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 	delete [] vertexNormals;
 }
 
-void AmbientOcclusionPlugin::setCamera(Point3f camDir, Box3f &meshBBox, GLsizei viewpSize)
+void AmbientOcclusionPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
 {
 	cameraDir = camDir;
 	GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
 	        k = 0.1f;
 	Point3f eye = meshBBox.Center() + camDir * (d+k);
 
-	glViewport(0.0, 0.0, viewpSize, viewpSize);
+	glViewport(0.0, 0.0, depthTexSize, depthTexSize);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -607,7 +606,10 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 	glUniformMatrix4fv(glGetUniformLocation(shdrID, "mvprMatrix"), 1, GL_FALSE, (const GLfloat*)mv_pr_Matrix_f);
 
 	// Set texture Size
-	glUniform1i(glGetUniformLocation(shdrID, "texSize"), maxTexSize);
+	glUniform1i(glGetUniformLocation(shdrID, "texSize"), depthTexSize);
+
+	// Set viewport Size
+	glUniform1i(glGetUniformLocation(shdrID, "viewpSize"), maxTexSize);
 
 	// Screen-aligned Quad
 	glBegin(GL_QUADS);
@@ -661,9 +663,9 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 }
 void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 {
-	GLfloat *result = new GLfloat[depthTexArea*4];
+	GLfloat *result = new GLfloat[maxTexSize*maxTexSize*4];
 	glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-	glReadPixels(0, 0, depthTexSize, depthTexSize, GL_RGBA, GL_FLOAT, result);
+	glReadPixels(0, 0, maxTexSize, maxTexSize, GL_RGBA, GL_FLOAT, result);
 
 	float maxvalue = 0.0f, minvalue = 100000.0f;
 	for (int i=0; i < m.cm.vn; i++)
@@ -784,10 +786,22 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 }
 void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata, int elems)
 {
+	/*
 	QFile f(filename);
-	f.open(QFile::WriteOnly);
-	f.write(reinterpret_cast<const char *>(texdata), elems * sizeof(float));
+	f.open(QFile::ReadWrite);
+	f.write(reinterpret_cast<const char *>(texdata), elems * sizeof(char));
 	f.close();
+	/**/
+	unsigned char *cdata = new unsigned char[elems];
+
+	for (int i=0; i<elems; ++i)
+		cdata[i] = (unsigned char)(texdata[i]*255.0);
+
+	FILE *f=fopen(reinterpret_cast<char*>(filename.data()) ,"wb+");
+	fwrite(cdata,sizeof(unsigned char),elems,f);
+	fclose(f);
+
+	delete [] cdata;
 }
 
 Q_EXPORT_PLUGIN(AmbientOcclusionPlugin)
