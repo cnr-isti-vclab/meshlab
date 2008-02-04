@@ -1,10 +1,10 @@
 
 TEMPLATE = lib
-CONFIG += plugin
+CONFIG += plugin qt
+FORMS += PaintToolbox.ui
 INCLUDEPATH += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS = editpaint.h \
-	colorwid.h \
-	ui_painttoolbox.h
+	colorwid.h 
 SOURCES = editpaint.cpp ../../../../code/lib/glew/src/glew.c \
 	paintbox.cpp
 TARGET = editpaint

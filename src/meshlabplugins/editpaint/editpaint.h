@@ -18,7 +18,7 @@ email: gfrei.andreas@gmx.net
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include <vcg/math/matrix44.h>
-#include "ui_painttoolbox.h"
+#include "ui_PaintToolbox.h"
 #include "colorwid.h"
 
 class EditPaintPlugin;
