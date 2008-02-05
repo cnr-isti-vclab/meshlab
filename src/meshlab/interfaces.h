@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.70  2008/02/05 18:04:59  benedetti
+added keyReleaseEvent and keyPressEvent to MeshEditInterface
+
 Revision 1.69  2008/01/28 13:02:00  cignoni
 added support for filters on collection of meshes (layer filters)
 
@@ -427,6 +430,8 @@ public:
 	  virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	  virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 //	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
+    virtual void keyReleaseEvent    (QAction *, QKeyEvent * e, MeshModel &/*m*/, GLArea *){};
+    virtual void keyPressEvent      (QAction *, QKeyEvent * e, MeshModel &/*m*/, GLArea *){};
 
 };
 
