@@ -246,6 +246,7 @@ public:
 	ErrorCode status;
 	bool IsValid() {return status==SUCCESS;}
 	double err;
+	float area; // the overlapping area, a percentage as computed in Occupancy Grid.
 
 	bool operator <  (const Result & rr) const {return (err< rr.err);}
 	bool operator <= (const Result & rr) const {return (err<=rr.err);}

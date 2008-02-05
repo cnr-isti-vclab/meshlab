@@ -350,7 +350,7 @@ bool AlignPair::Align(
 			} // End of point pair search
 
     int tts1=clock();
-		printf("Found %d pairs\n",(int)Pfix.size());
+		//printf("Found %d pairs\n",(int)Pfix.size());
 		//if(!ChoosePoints(Pfix,Nfix,Pmov,OPmov,ap.PassLoFilter,ap.PassHiFilter,H))		
 		if(Pfix.size()<ap.MinPointNum)
 		{
@@ -386,17 +386,17 @@ bool AlignPair::Align(
       sum_before+=Distance(Pfix[iii], out*OPmov[iii]);
       sum_after+=Distance(Pfix[iii], newout*OPmov[iii]);
     }
-    printf("Distance %f -> %f\n",sum_before/double(Pfix.size()),sum_after/double(Pfix.size()) ) ;
+    //printf("Distance %f -> %f\n",sum_before/double(Pfix.size()),sum_after/double(Pfix.size()) ) ;
    
 		// le passate successive utilizzano quindi come trasformazione iniziale questa appena trovata.
 		// Nei prossimi cicli si parte da questa matrice come iniziale.
 	  out=newout;
 
-		printf("Found Transf\n");
-		for(int kk=0; kk<4; ++kk) {
-			for(int jj=0; jj<4; ++jj) 	printf("%8.5lf ", out[kk][jj]); 
-			printf("\n");
-		}
+		//printf("Found Transf\n");
+		//for(int kk=0; kk<4; ++kk) {
+		//	for(int jj=0; jj<4; ++jj) 	printf("%8.5lf ", out[kk][jj]); 
+		//	printf("\n");
+		//}
 	  
 		assert(Pfix.size()==Pmov.size());
 		int tts2=clock();
