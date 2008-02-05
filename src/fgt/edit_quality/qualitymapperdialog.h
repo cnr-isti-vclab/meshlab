@@ -94,6 +94,7 @@ private:
 	void				deleteRemoveItems();
 
 private slots:
+	void on_previewButton_clicked();
 	void on_applyButton_clicked();
 	void on_blueButton_toggled(bool checked);
 	void on_greenButton_toggled(bool checked);

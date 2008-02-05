@@ -778,7 +778,35 @@ void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 void QualityMapperDialog::on_applyButton_clicked()
 {
 	// Colorazione della mesh
-	float RangeMin = ui.minSpinBox->value();	
-	float RangeMax = ui.maxSpinBox->value();	
-    tri::UpdateColor<CMeshO>::VertexQuality(mesh->cm,RangeMin,RangeMax);
+	float rangeMin = ui.minSpinBox->value();	
+	float rangeMax = ui.maxSpinBox->value();	
+    //tri::UpdateColor<CMeshO>::VertexQuality(mesh->cm,RangeMin,RangeMax);
+
+	CMeshO::VertexIterator vi;
+
+	float percentageQuality;
+	for(vi=mesh->cm.vert.begin(); vi!=mesh->cm.vert.end(); ++vi)		
+		if(!(*vi).IsD()) 
+		{
+			//(*vi).C().ColorRamp(minq,maxq,(*vi).Q());
+			float vertexQuality = (*vi).Q();
+			if (vertexQuality < rangeMin)
+				percentageQuality = 0.0;
+			else
+				if (vertexQuality > rangeMax)
+					percentageQuality = 1.0;
+				else
+					percentageQuality = pow( ((*vi).Q() - rangeMin) / (rangeMax - rangeMin) , (float)(2.0*_equalizerMidHandlePercentilePosition));
+
+			(*vi).C() = _transferFunction->getColorByQuality(percentageQuality);
+		}
+
+	
+}
+
+
+
+void QualityMapperDialog::on_previewButton_clicked()
+{
+	on_applyButton_clicked();
 }
