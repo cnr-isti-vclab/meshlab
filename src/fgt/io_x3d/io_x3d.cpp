@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.3  2008/02/05 16:38:55  gianpaolopalma
+ Added texture file path in the mesh
+
  Revision 1.2  2008/02/04 13:28:36  gianpaolopalma
  Added management to texture coordinates per vertex
 
@@ -69,46 +72,12 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			return false;
 		}
 		m.addinfo = info;
-		
-
-
-		/*QFile file("C:/prova.txt");
-		if (file.open(QIODevice::WriteOnly))
-		{
-			QTextStream out(&file);
-			out<<info->doc->toString();
-			out<<"\n\n";
-			std::map<QString, QDomNode*>::iterator m1_Iter, m2_Iter;
-			for ( m1_Iter = info->inlineNodeMap.begin( ); m1_Iter != info->inlineNodeMap.end(); m1_Iter++ )
-			{
-				out<<m1_Iter->first<<"\n";
-				QDomDocument d("temp1");
-				d.appendChild(*(m1_Iter->second));
-				out<<d.toString()<<"\n\n";
-			}
-			for ( m2_Iter = info->protoDeclareNodeMap.begin( ); m2_Iter != info->protoDeclareNodeMap.end(); m2_Iter++ )
-			{
-				out<<m2_Iter->first<<"\n";
-				QDomDocument d("temp2");
-				d.appendChild(*(m2_Iter->second));
-				QDomNode clone = m2_Iter->second->cloneNode(true);
-				out<<d.toString()<<"\n\n";
-			}
-			for(int tex = 0; tex < info->textuxeFile.size(); tex ++)
-				out<<info->textuxeFile[tex]<<"\n";
-
-
-
-		}
-*/
-
-
 		if (info->mask & MeshModel::IOM_VERTTEXCOORD)
 			info->mask |= MeshModel::IOM_WEDGTEXCOORD;
 		m.Enable(info->mask);
-		/*for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
-			m.cm.textures.push_back(info->texturefile[tx].toStdString());
-		*/
+		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
+			m.cm.textures.push_back(info->textureFile[tx].toStdString());
+		
 		errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nFile: %2\nLine number: %3\nError details: %4";
 		result = vcg::tri::io::ImporterX3D<CMeshO>::Open(m.cm, filename.c_str(), info);
 		if (result != vcg::tri::io::ImporterX3D<CMeshO>::E_NOERROR)
