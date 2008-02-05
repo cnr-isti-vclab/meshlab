@@ -17,6 +17,7 @@ public:
 	~Handle(void);
 	inline void setSize (int size) {_size = size;};
 	inline void setColor (QColor color) {_color = color;};
+	inline float	getSize() {return _size;}
 	
 	// Overriding QGraphicsItem methods
 	QRectF boundingRect () const;

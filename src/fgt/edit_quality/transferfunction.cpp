@@ -29,7 +29,17 @@ TfChannel::TfChannel(TF_CHANNELS type) : _type(type)
 }
 
 TfChannel::~TfChannel(void)
-{	KEYS.clear();	}
+{
+	KEY_LISTiterator it;
+	TF_KEY *k = 0;
+	for (it=KEYS.begin(); it!=KEYS.end(); it++)
+	{
+		k = *it;
+		delete k;
+		k = 0;
+	}
+	KEYS.clear();
+}
 
 void TfChannel::setType(TF_CHANNELS type)
 {	_type = type;	}
@@ -37,83 +47,64 @@ void TfChannel::setType(TF_CHANNELS type)
 TF_CHANNELS TfChannel::getType()
 {	return _type;	}
 
+
+
 //adds to the keys list new_key
 //returns a pointer to the key just added
-TF_KEY* TfChannel::addKey(float x_pos, TF_KEY *new_key)
+TF_KEY* TfChannel::addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side)
 {
-	TF_KEY *added_key = new_key;
-	KEY_LISTiterator it = KEYS.find(x_pos);
-
-	if ( it == KEYS.end() )
-		//key not present yet in the list. Adding it
-		KEYS[x_pos] = new_key;
-	else
-		//key with the same x already present in the list. Merging them
-		added_key = this->mergeKeys(x_pos, new_key);
-
-	return added_key;
+	return this->addKey(new TF_KEY(xVal, yVal, side));
 }
 
 //adds to the keys list a new keys with fields passed to the method
 //returns a pointer to the key just added
-TF_KEY* TfChannel::addKey(float x_pos, float y_low, float y_up)
+TF_KEY* TfChannel::addKey(TF_KEY *newKey)
 {
-	//building key
-	TF_KEY *key = new TF_KEY( y_low, y_up );
+	if ((KEYS.size() == 0) || (KEYS[KEYS.size()-1]->x <= newKey->x))
+	{
+		KEYS.push_back(newKey);
+		return newKey;
+	}
 
-	//adding it to list
-	return this->addKey(x_pos, key);
+	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
+	{
+		if ( (*it)->x >= newKey->x )
+		{
+			KEYS.insert(it, newKey);
+			return newKey;
+		}
+	}
+
+	return 0;
 }
 
 //removes from keys list to_remove_key
 //returns the x value of the removed key or -1 if key was not found
-float TfChannel::removeKey(TF_KEY *to_remove_key)
+void TfChannel::removeKey(int keyIdx)
 {
-	float result = -1.0f;
-
-	bool found = false;
 	KEY_LISTiterator it = KEYS.begin();
-
-	while (( it != KEYS.end() ) && (! found ))
+	if ((keyIdx >= 0) && (keyIdx<(int)KEYS.size()))
 	{
-		if ( it->second == to_remove_key )
-		{
-			found = true;
-			result = it->first;
-			KEYS.erase( it );
-			delete to_remove_key;
-			to_remove_key = 0;
-		}
-		else
-			it ++;
+		it += (keyIdx * TF_KEYsize);
+		delete *it;
+		KEYS.erase(it);
 	}
-
-	return result;
 }
 
 //removes from keys list the key whose x value is x_val
 //returns the x value of the removed key or -1 if key was not found
-float TfChannel::removeKey(float x_val)
+void TfChannel::removeKey(float xVal)
 {
-	float result = -1.0f;
-
 	//searching key with proper x
-	KEY_LISTiterator it = KEYS.find(x_val);
-
-	TF_KEY *toRemove = 0;
-
-	if ( it != KEYS.end() )
-	{
-		toRemove = it->second;
-		KEYS.erase( it );
-		result = x_val;
-		delete toRemove;
-		toRemove = 0;
-	}
-
-	return result;
+	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
+		if ( (*it)->x == xVal )
+		{
+			delete *it;
+			KEYS.erase(it);
+		}
 }
 
+#if 0
 //merges two keys together by copying opportunely y values of the keys in just one key
 //returns a pointer to the "merged key"
 TF_KEY *TfChannel::mergeKeys(float x_pos, TF_KEY *key)
@@ -177,103 +168,57 @@ TF_KEY* TfChannel::splitKey(float x_pos)
 
 	return result;
 }
+#endif
 
-float TfChannel::getChannelValuef(float x_position)
+float TfChannel::getChannelValuef(float xVal)
 {
-	float result = 0.0f;
+	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
+		if ( (*it)->x == xVal )
+			return (*it)->y;
 
-	KEY_LISTiterator it = KEYS.find(x_position);
+	return -1.0f;
+}
 
-	//if a x_position is known x, its key value is returned immediately
+
+UINT8 TfChannel::getChannelValueb(float xVal)
+{
+	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(xVal), 255.0f );
+}
+
+
+TF_KEY* TfChannel::operator [](float xVal)
+{
+	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
+		if ( (*it)->x == xVal )
+			return (*it);
+
+	return 0;
+}
+
+TF_KEY* TfChannel::operator [](int i)
+{
+	if ((i >= 0) && (i<(int)KEYS.size()))
+		return KEYS[i];
+
+	return 0;
+}
+
+#if 0
+void TfChannel::updateKey(float old_x, float new_x, float new_y)
+{
+	KEY_LISTiterator it = KEYS.find(old_x);
 	if ( it != KEYS.end())
-		return it->second->getLeftJunctionPoint();
-
-  	//finding upper border for x
-  	KEY_LISTiterator up = KEYS.upper_bound( x_position );
-
-	assert(up != KEYS.begin());
-
- 	//finding lower border for x
-	KEY_LISTiterator low = up;
-	low --;
-
-	if (( low->first < x_position ) && ( up->first > x_position) )
-		if ( low != KEYS.end() && up != KEYS.end() )
-		{
-			//applying linear interpolation between two keys values
-
-			//angular coefficient for interpolating line
-			float m = ((up->second->getLeftJunctionPoint() - low->second->getRightJunctionPoint()) / (up->first - low->first));
-
-			//returning f(x) value for x in the interpolating line
-			result = (m * (x_position - low->first)) + low->second->getRightJunctionPoint();
-		}
-
-	return result;
-}
-
-
-UINT8 TfChannel::getChannelValueb(float x_position)
-{
-	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(x_position), 255.0f );
-//	return (UINT8)(this->getChannelValuef(x_position) * 255.0f);
-}
-
-
-TF_CHANNEL_VALUE& TfChannel::operator [](float idx)
-{
-	KEY_LISTiterator it= KEYS.find(idx);
-
-	if (it!=KEYS.end())
 	{
-		_ret_val.x=(float*)&(it->first);
-		_ret_val.y=it->second;
+//		assert(it == KEYS.end());
+
+		TF_KEY *k = it->second;
+		this->removeKey(old_x);
+
+		k->y_lower = k->y_upper = new_y;
+		this->addKey(new_x, k);
 	}
-	else
-	{
-		_ret_val.x = 0;
-		_ret_val.y = 0;
-	}
-	return _ret_val;
 }
-
-TF_CHANNEL_VALUE& TfChannel::operator [](int i)
-{
-	assert((i>=0) && (i<=this->size()));
-
-	if ( i == 0)
-	{
-		//indexing the first item of the list
-		_idx_it=KEYS.begin();
-	}
-	else
-	{
-		//now indexing the successive item in the list respect to the previous one
-		if ( old_iterator_idx == i-1 )
-		{
-			_idx_it ++;
-		}
-		else
-		{
-			//now indexing the previous item in the list respect to the previous one
-			if ( old_iterator_idx == i+1 )
-			{
-				_idx_it --;
-			}
-			else
-			{
-				_idx_it = KEYS.begin();
-				for(int k=0; k<i; k++)
-					_idx_it ++;
-			}
-		}
-	}
-	old_iterator_idx = i;
-	_ret_val.x = (float*)&(_idx_it->first);
-	_ret_val.y = _idx_it->second;
-
-	return _ret_val;
-}
+#endif
 
 
 #ifdef NOW_TESTING
@@ -308,7 +253,6 @@ void TfChannel::testInitChannel()
 
 
 
-
 //TRANSFER FUNCTION
 
 //declaration of static member of TransferFunction class
@@ -327,56 +271,56 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 	switch(code)
 	{
 	case GREY_SCALE_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[RED_CHANNEL].addKey(1.0f,1.0f,1.0f);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,1.0f);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 			break;
 	case RGB_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,1.0f,1.0f);
-		_channels[RED_CHANNEL].addKey(0.5f,0.0f,0.0f);
-		_channels[RED_CHANNEL].addKey(1.0f,0.0f,0.0f);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[GREEN_CHANNEL].addKey(0.5f,1.0f,1.0f);
-		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		_channels[RED_CHANNEL].addKey(0.0f,1.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(0.5f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.5f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		break;
 	case RED_SCALE_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[RED_CHANNEL].addKey(1.0f,1.0f,1.0f);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		break;
 	case GREEN_SCALE_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[RED_CHANNEL].addKey(1.0f,0.0f,0.0f);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,1.0f);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		break;
 	case BLUE_SCALE_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[RED_CHANNEL].addKey(1.0f,0.0f,0.0f);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,0.0f);
-		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,1.0f);
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		break;
 	case FLAT_TF:
 	default:
-		_channels[RED_CHANNEL].addKey(0.0f,0.5f,0.5f);
-		_channels[RED_CHANNEL].addKey(1.0f,0.5f,0.5f);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.5f,0.5f);
-		_channels[GREEN_CHANNEL].addKey(1.0f,0.5f,0.5f);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.5f,0.5f);
-		_channels[BLUE_CHANNEL].addKey(1.0f,0.5f,0.5f);
+		_channels[RED_CHANNEL].addKey(0.0f,0.5f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(1.0f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.5f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.5f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
 		break;
 	}
 }
@@ -406,10 +350,18 @@ TransferFunction::TransferFunction(QString fileName)
 		if ( !line.startsWith(CSV_FILE_COMMENT) )
 		{
 			splittedString = line.split(CSV_FILE_SEPARATOR, QString::SkipEmptyParts);
-			assert( (splittedString.size() % NUMBER_OF_CHANNELS) == 0 );
+			assert( (splittedString.size() % 2) == 0 );
 
+			TF_KEY::JUNCTION_SIDE junctSide;
 			for ( int i=0; i<splittedString.size(); i+=3 )
-				_channels[channel_code].addKey( splittedString[i].toFloat(), splittedString[i+1].toFloat(), splittedString[i+2].toFloat() );
+			{
+				if (i==0)
+					junctSide = TF_KEY::RIGHT_JUNCTION_SIDE;
+				else
+					junctSide = TF_KEY::LEFT_JUNCTION_SIDE;
+
+				_channels[channel_code].addKey( splittedString[i].toFloat(), splittedString[i+1].toFloat(), junctSide );
+			}
 
 			channel_code ++;
 		}
@@ -485,16 +437,14 @@ QString TransferFunction::saveColorBand( QString fn )
 	outStream << CSV_FILE_COMMENT << " COLOR BAND FILE STRUCTURE - first row: RED CHANNEL DATA - second row GREEN CHANNEL DATA - third row: BLUE CHANNEL DATA" << endl;
 	outStream << CSV_FILE_COMMENT << " CHANNEL DATA STRUCTURE - the channel structure is grouped in many triples. The items of each triple represent respectively: X VALUE, Y_LOWER VALUE, Y_UPPER VALUE of each node-key of the transfer function" << endl;
 
-	TF_CHANNEL_VALUE val;
+	TF_KEY *val = 0;
 	for ( int i=0; i<NUMBER_OF_CHANNELS; i++)
 	{
 		for (int j=0; j<_channels[i].size(); j++)
 		{
 			val = _channels[i][j];
-
-			assert((val.x != 0) && (val.y != 0));
-
-			outStream << (*val.x) << CSV_FILE_SEPARATOR << val.y->y_lower << CSV_FILE_SEPARATOR << val.y->y_upper << CSV_FILE_SEPARATOR;
+			assert(val != 0);
+			outStream << val->x << CSV_FILE_SEPARATOR << val->y << CSV_FILE_SEPARATOR;
 		}
 		outStream << endl;
 	}
@@ -510,6 +460,9 @@ void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
 	int ch_code_int = (int)ch_code;
 	assert( (ch_code_int>=0) && (ch_code_int<NUMBER_OF_CHANNELS) );
 
+	if ( _channels_order[NUMBER_OF_CHANNELS-1] == ch_code_int )
+		return ;
+
 	int tmp = 0;
 	do 
 	{
@@ -520,6 +473,8 @@ void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
 
 		_channels_order[0] = tmp;
 	} while( _channels_order[NUMBER_OF_CHANNELS-1] != ch_code_int );
+
+	//spostare in avanti anche le handles!
 }
 
 

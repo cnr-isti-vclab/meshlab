@@ -109,7 +109,7 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 /*			int a = _transferFunctionHandles[i].size();*/
 			foreach( item, _transferFunctionHandles[i] )
 			{
-				//((TFHandle*)item)->disconnect();
+				((TFHandle*)item)->disconnect();
 				_transferFunctionScene.removeItem( item );
 				_removed_items << item;
 			}
@@ -120,6 +120,7 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 	if ((toClear & REMOVE_EQ_HANDLE) == REMOVE_EQ_HANDLE)
 	{
 		//removing EQ Handles
+		//just removing! NOT DELETING!!
 		for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 		{
 			_equalizerHistogramScene.removeItem( _equalizerHandles[i] );
@@ -378,7 +379,7 @@ void QualityMapperDialog::initTF()
 	this->clearItems( REMOVE_TF_HANDLE | DELETE_REMOVED_ITEMS );
 
 	//setting up handles
-	TF_CHANNEL_VALUE val;
+	TF_KEY *val = 0;
 	TFHandle *handle1 = 0;
 	TFHandle *handle2 = 0;
 	QColor channelColor;
@@ -389,22 +390,22 @@ void QualityMapperDialog::initTF()
 	for (int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
 		zValue = ((c + 1)*2.0f) + 1;
-		/*TYPE_2_COLOR( c, channelColor );*/
-		channelColor = Qt::black;
+		TYPE_2_COLOR( c, channelColor );
+//		channelColor = Qt::black;
 		for (int i=0; i<(*_transferFunction)[c].size(); i++)
 		{
 			val = (*_transferFunction)[c][i];
 
-			xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( (* val.x), (float)_transferFunction_info->chartWidth );
-			yLeftPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getLeftJunctionPoint(), (float)_transferFunction_info->chartHeight );
-			yRightPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getRightJunctionPoint(), (float)_transferFunction_info->chartHeight );
+			xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth );
+			yLeftPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
+			yRightPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
 			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), TFHandle::LEFT_JUNCTION_HANDLE, zValue );
 // 			handle1->setColor(channelColor);
 // 			handle1->setPos( xPos, yLeftPos );
-// 			handle1->setZValue( zValue );
+ 			handle1->setZValue( zValue );
 // 			handle1->setChannel(c);
 			_transferFunctionHandles[c] << handle1;
-			connect(handle1, SIGNAL(positionChanged()), this, SLOT(on_TfHandle_moved()));
+			connect(handle1, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
 //			int a = _transferFunctionHandles[c].size();
 			_transferFunctionScene.addItem(handle1);
 			if ( yLeftPos != yRightPos )
@@ -412,13 +413,14 @@ void QualityMapperDialog::initTF()
 				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), TFHandle::RIGHT_JUNCTION_HANDLE, zValue );
 // 				handle2->setColor(channelColor);
 // 				handle2->setPos( xPos, yRightPos );
-// 				handle2->setZValue( zValue );
+ 				handle2->setZValue( zValue );
 				_transferFunctionHandles[c] << handle2;
-				connect(handle2, SIGNAL(positionChanged()), this, SLOT(on_TfHandle_moved()));
+				connect(handle2, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
 				_transferFunctionScene.addItem(handle1);
 			}
 		}
 	}
+//	aggiungere le TFHandles quì controllando che nn siano già presenti nella lista di Handles per quel canale
 
 		
 /*
@@ -490,17 +492,18 @@ void QualityMapperDialog::drawTransferFunction()
 {
 	this->clearItems( REMOVE_TF_LINES | /*REMOVE_TF_BG |*/ DELETE_REMOVED_ITEMS );
 
-	if ( !_isTransferFunctionInitialized )
-		this->initTF();
-	
 	assert(_transferFunction != 0);
 
 	//building transfer function chart informations
 	if ( _transferFunction_info == 0 )
 		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), _transferFunction->size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
-	//drawing axis and other basic items
-	this->drawChartBasics( _transferFunctionScene, _transferFunction_info );
+	if ( !_isTransferFunctionInitialized )
+	{
+		this->initTF();
+		//drawing axis and other basic items
+		this->drawChartBasics( _transferFunctionScene, _transferFunction_info );
+	}
 
 	//	_transferFunctionScene.addLine(0, 0, 100, 430, QPen(Qt::green, 3));
 
@@ -508,8 +511,8 @@ void QualityMapperDialog::drawTransferFunction()
 	QPointF pointToRepresentLeft;
 	QPointF pointToRepresentRight;
 	QPointF previousPoint;
-	QRectF pointRectLeft(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
-	QRectF pointRectRight(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
+//	QRectF pointRectLeft(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
+//	QRectF pointRectRight(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
 
 	QColor channelColor;
 	QPen drawingPen(Qt::black, 3);
@@ -518,7 +521,7 @@ void QualityMapperDialog::drawTransferFunction()
 
 	//drawing chart points
 	//	TfChannel *tf_c = 0;
-	TF_CHANNEL_VALUE val;
+	TF_KEY *val = 0;
 
 	QGraphicsItem *current_item = 0;
 	qreal zValue = 0;
@@ -535,10 +538,10 @@ void QualityMapperDialog::drawTransferFunction()
 		{
 			val = (*_transferFunction)[c][i];
 
-			pointToRepresentLeft.setX( _transferFunction_info->leftBorder + relative2AbsoluteValf( (* val.x), (float)_transferFunction_info->chartWidth ) );
-			pointToRepresentLeft.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getLeftJunctionPoint(), (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
+			pointToRepresentLeft.setX( _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth ) );
+			pointToRepresentLeft.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
 			pointToRepresentRight.setX( pointToRepresentLeft.x() );
-			pointToRepresentRight.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val.y->getRightJunctionPoint(), (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
+			pointToRepresentRight.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
 
 
 			//linear interpolation between current point and previous one
@@ -549,7 +552,7 @@ void QualityMapperDialog::drawTransferFunction()
 				current_item->setZValue( zValue );
 				_transferFunctionLines << current_item;
 
-				if ( pointToRepresentLeft.y() != pointRectRight.y() )
+				if ( pointToRepresentLeft.y() != pointToRepresentRight.y() )
 				{
 					current_item = _transferFunctionScene.addLine( pointToRepresentLeft.x(), pointToRepresentLeft.y(), pointToRepresentRight.x(), pointToRepresentRight.y(), drawingPen );
 					current_item->setZValue( zValue);
@@ -558,20 +561,24 @@ void QualityMapperDialog::drawTransferFunction()
 			}
 
 			//drawing single current point
-			pointRectLeft.setX(pointToRepresentLeft.x() - MARKERS_RADIUS );
-			pointRectLeft.setY(pointToRepresentLeft.y() - MARKERS_RADIUS );
-			pointRectLeft.setWidth(2.0*MARKERS_RADIUS);
-			pointRectLeft.setHeight(2.0*MARKERS_RADIUS);
+/*
+						pointRectLeft.setX(pointToRepresentLeft.x() - MARKERS_RADIUS );
+						pointRectLeft.setY(pointToRepresentLeft.y() - MARKERS_RADIUS );
+						pointRectLeft.setWidth(2.0*MARKERS_RADIUS);
+						pointRectLeft.setHeight(2.0*MARKERS_RADIUS);*/
+			
 			//sostituire con disegno della TfHandle
 			//current_item = _transferFunctionScene.addEllipse( pointRectLeft, drawingPen, drawingBrush );
 			//current_item->setZValue( zValue );
 
 			if ( pointToRepresentLeft.y() != pointToRepresentRight.y() )
 			{
-				pointRectRight.setX(pointToRepresentRight.x() - MARKERS_RADIUS );
-				pointRectRight.setY(pointToRepresentRight.y() - MARKERS_RADIUS );
-				pointRectRight.setWidth(pointRectLeft.width());
-				pointRectRight.setHeight(pointRectLeft.height());
+/*
+								pointRectRight.setX(pointToRepresentRight.x() - MARKERS_RADIUS );
+								pointRectRight.setY(pointToRepresentRight.y() - MARKERS_RADIUS );
+								pointRectRight.setWidth(pointRectLeft.width());
+								pointRectRight.setHeight(pointRectLeft.height());*/
+				
 				//sostituire con disegno della TfHandle
 				//current_item = _transferFunctionScene.addEllipse( pointRectRight, drawingPen, drawingBrush );
 				//current_item->setZValue( zValue );
@@ -683,6 +690,7 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 
 			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
 			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
+			this->initTF(); //aded by MAL 04\02\08
 			this->drawTransferFunction();
 			return ;
 		}
@@ -755,11 +763,15 @@ void QualityMapperDialog::on_left_right_EQHandle_changed()
 
 void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 {
-/*
-	la TFHandle sender deve aggiornare la propria posizione nel KEYS del canale d'appartenenza
-	(*_transferFunction)[sender->getChannel()][sender]
-*/
+	sender->blockSignals( true );
+	float oldX = sender->getXKey();
+	QPointF scenePos = sender->scenePos();
+	float newX = absolute2RelativeValf( scenePos.x() + (sender->getSize()/2.0f), _transferFunction_info->leftBorder + _transferFunction_info->rightBorder );
+	float newY = 1.0f - absolute2RelativeValf( scenePos.y() + (sender->getSize()/2.0f), _transferFunction_info->upperBorder + _transferFunction_info->lowerBorder );
+	sender->updateKeyCoord( newX, newY );
+//	_transferFunction->getChannel(sender->getChannel()).updateKey( oldX, newX, newY );
 	this->drawTransferFunction();
+	sender->blockSignals( false );
 }
 
 

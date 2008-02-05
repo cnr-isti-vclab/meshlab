@@ -19,12 +19,13 @@ public:
 	TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, int junction, int zOrder=1, int size = DEFAULT_HANDLE_SIZE  );
 	~TFHandle(void);
 
-	QRectF boundingRect () const;
+	QRectF boundingRect (void) const;
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
 	inline void setChannel(int ch_code)	{_channelCode = ch_code;}
 	inline int getChannel(void) {return _channelCode;}
-	inline float getXPosition(void)	{return _xPosition;}
-	inline float getYPosition(void)	{return _yPosition;}
+	inline float getXKey(void)	{return _xPosition;}
+	inline float getYKey(void)	{return _yPosition;}
+	inline void updateKeyCoord( float x, float y)	{_xPosition=x; _yPosition=y;}
 	
 
 protected:
@@ -37,7 +38,7 @@ private:
 	int		_junction_side;
 
 signals:
-	void positionChanged();
+	void positionChanged(TFHandle*);
 
 
 private slots:

@@ -30,7 +30,7 @@
 #include <vcg/math/base.h>
 #include <vcg/space/color4.h>
 //#include <vector>
-#include <map>
+#include <vector>
 //#include <algorithm>
 #include <cassert>
 
@@ -53,50 +53,63 @@ using namespace vcg;
 //It's composed of a position on x axis and two values on the y axis (potentially the same)
 struct TF_KEY
 {
-	float	y_upper;
-	float	y_lower;
-	int		left_junction_point_code;
-	int		right_junction_point_code;
-
-	float getLeftJunctionPoint()
-	{ 
-		if (left_junction_point_code == LOWER_Y)
-			return y_lower;
-		else
-			return y_upper;
-	}
-	float getRightJunctionPoint()
+	enum JUNCTION_SIDE
 	{
-		if (right_junction_point_code == LOWER_Y)
-			return y_lower;
-		else
-			return y_upper;
-	}
-	inline void  setLeftJunctionPoint( int j_p )	{ left_junction_point_code = j_p; right_junction_point_code = NUMBER_OF_JUNCTION_Y-left_junction_point_code-1; }
-	inline void  setRightJunctionPoint( int j_p )	{ right_junction_point_code = j_p; left_junction_point_code = NUMBER_OF_JUNCTION_Y-right_junction_point_code-1; }
+		LEFT_JUNCTION_SIDE = 0,
+		RIGHT_JUNCTION_SIDE
+	};
+	float	x;
+	float	y;
+	JUNCTION_SIDE		junctionSide;
+// 	float	y_upper;
+// 	float	y_lower;
+// 	int		left_junction_point_code;
+// 	int		right_junction_point_code;
+
+// 	float getLeftJunctionPoint()
+// 	{ 
+// 		if (left_junction_point_code == LOWER_Y)
+// 			return y_lower;
+// 		else
+// 			return y_upper;
+// 	}
+// 	float getRightJunctionPoint()
+// 	{
+// 		if (right_junction_point_code == LOWER_Y)
+// 			return y_lower;
+// 		else
+// 			return y_upper;
+// 	}
+// 	inline void  setLeftJunctionPoint( int j_p )	{ left_junction_point_code = j_p; right_junction_point_code = NUMBER_OF_JUNCTION_Y-left_junction_point_code-1; }
+// 	inline void  setRightJunctionPoint( int j_p )	{ right_junction_point_code = j_p; left_junction_point_code = NUMBER_OF_JUNCTION_Y-right_junction_point_code-1; }
 	
-	TF_KEY( float y_low=0.0f, float y_up=0.0f )
+	TF_KEY( float xVal=0.0f, float yVal=0.0f, JUNCTION_SIDE junction=LEFT_JUNCTION_SIDE )
 	{
-		y_upper=y_up;
-		y_lower=y_low;
-		if ( y_upper < y_lower)
-			this->swapY();
-		this->setLeftJunctionPoint(LOWER_Y);
+		x = xVal;
+		y = yVal;
+		junctionSide = junction;
+/*
+				y_upper=y_up;
+				y_lower=y_low;
+				if ( y_upper < y_lower)
+					this->swapY();
+				this->setLeftJunctionPoint(LOWER_Y);*/
+		
 	}
 
-	inline void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; this->setLeftJunctionPoint(right_junction_point_code); }
-	bool operator == (TF_KEY k)	{ return ( (y_lower == k.y_lower) && (y_upper == k.y_upper) ); }
+// 	inline void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; this->setLeftJunctionPoint(right_junction_point_code); }
+// 	bool operator == (TF_KEY k)	{ return ( (y_lower == k.y_lower) && (y_upper == k.y_upper) ); }
 };
 
 #define TF_KEYsize	sizeof(TF_KEY)
 
-struct TF_CHANNEL_VALUE
-{
-	float	*x;
-	TF_KEY	*y;
-	TF_CHANNEL_VALUE(float *x_val=0, TF_KEY *y_val=0)
-	{	x=x_val;	y=y_val;	}
-};
+// struct TF_CHANNEL_VALUE
+// {
+// 	float	*x;
+// 	TF_KEY	*y;
+// 	TF_CHANNEL_VALUE(float *x_val=0, TF_KEY *y_val=0)
+// 	{	x=x_val;	y=y_val;	}
+// };
 
 
 //list of channels
@@ -126,20 +139,25 @@ enum TF_CHANNELS
 	}
 
 #define COLOR_2_TYPE(COLOR, TYPE) \
-	switch(COLOR.value()) \
+if ( COLOR == Qt::red) \
 { \
-	case Qt::red: \
 	TYPE = RED_CHANNEL; \
-	break; \
-case Qt::green: \
-	TYPE = GREEN_CHANNEL; \
-	break; \
-case Qt::blue: \
-	TYPE = BLUE_CHANNEL; \
-	break; \
-default: \
-	TYPE = -1; \
-	break; \
+} \
+	else \
+	{ \
+		if ( COLOR == Qt::green) \
+		{ \
+			TYPE = GREEN_CHANNEL; \
+		} \
+		else \
+		{ \
+			if ( color == Qt::blue) \
+			{ \
+				TYPE =  BLUE_CHANNEL; \
+			} \
+			else \
+				TYPE = -1; \
+		} \
 	}
 
 
@@ -147,9 +165,11 @@ default: \
 class TfChannel
 {
 public:
+/*	enum { LEFT_JUNCTION_SIDE = 0, RIGHT_JUNCTION_SIDE	};*/
+
 	//container and iterator for TF KEYs
-	typedef	map<float, TF_KEY*> KEY_LIST;
-	typedef	map<float, TF_KEY*>::iterator KEY_LISTiterator;
+	typedef	vector<TF_KEY*> KEY_LIST;
+	typedef	vector<TF_KEY*>::iterator KEY_LISTiterator;
 
 	TfChannel(void);
 	TfChannel(TF_CHANNELS type);
@@ -157,19 +177,25 @@ public:
 
 	void	setType(TF_CHANNELS);
 	TF_CHANNELS getType();
-	TF_KEY	*addKey(float x, float y_low, float y_up);
-	TF_KEY	*addKey(float x, TF_KEY *new_key);
-	float	removeKey(float x);
-	float	removeKey(TF_KEY *to_remove_key);
-	TF_KEY	*mergeKeys(float x_pos1, TF_KEY *x_pos2);
-	TF_KEY	*splitKey(float x_pos);
+	TF_KEY	*addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side);
+	TF_KEY	*addKey(TF_KEY *newKey);
+//	TF_KEY	*addKey(float x, float y_low, float y_up);
+//	TF_KEY	*addKey(float x, TF_KEY *new_key);
+	void	removeKey(int x);
+	void	removeKey(float x);
+//	float	removeKey(TF_KEY *to_remove_key);
+// 	TF_KEY	*mergeKeys(float x_pos1, TF_KEY *x_pos2);
+// 	TF_KEY	*splitKey(float x_pos);
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
 
-	TF_CHANNEL_VALUE& operator [](float idx);
-	TF_CHANNEL_VALUE& operator [](int idx);
+	TF_KEY* operator [](float idx);
+	TF_KEY* operator [](int idx);
+	
 	inline int size()	{	return KEYS.size();	}
+
+//	void	updateKey( float old_x, float new_x, float new_y);
 
 #ifdef NOW_TESTING
 	void testInitChannel();
@@ -177,13 +203,13 @@ public:
 
 private:
 	TF_CHANNELS	_type;
-	int old_iterator_idx;
-	TF_CHANNEL_VALUE _ret_val;
+//	int old_iterator_idx;
+//	TF_CHANNEL_VALUE _ret_val;
 
 
 	//list of keys
 	KEY_LIST	KEYS;
-	KEY_LISTiterator _idx_it;
+//	KEY_LISTiterator _idx_it; //reserved fo [] operator works (better you don't touch it! :-) )
 };
 
 
@@ -229,6 +255,7 @@ public:
 
 	static QString defaultTFs[NUMBER_OF_DEFAULT_TF];
 
+	TfChannel &getChannel( int channel_code ) {return _channels[channel_code];}
 	TfChannel& operator [](int i)	{ return _channels[_channels_order[i]];	}
 	int size();
 	QColor* buildColorBand();

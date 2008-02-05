@@ -4,7 +4,8 @@
 TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, int junction, int zOrder, int size  )
 	: Handle(environment_info, color, position, zOrder, size  )
 {
-	COLOR_2_TYPE( _color, _channelCode );
+	COLOR_2_TYPE(color, _channelCode);
+
 	if ( _chartInfo != 0)
 	{
 		_xPosition = absolute2RelativeValf( this->x(), _chartInfo->leftBorder + _chartInfo->rightBorder );
@@ -26,7 +27,8 @@ void TFHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * opti
 
 	painter->setPen(_color);
 	painter->setBrush(_color);
-	painter->drawEllipse(((qreal)-_size)/2.0f, -((qreal)_size)/2.0f, _size, _size);
+	//painter->drawEllipse(((qreal)-_size)/2.0f, -((qreal)_size)/2.0f, _size, _size);
+	painter->drawRect(((qreal)-_size)/2.0f, -((qreal)_size)/2.0f, _size, _size);
 }
 
 QRectF TFHandle::boundingRect () const
@@ -39,10 +41,14 @@ void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	setCursor(Qt::OpenHandCursor);
 
 	QPointF newPos = event->scenePos();
-	setPos(newPos);
+	newPos.setX(newPos.x()-(_size/2.0f));
+	newPos.setY(newPos.y()-(_size/2.0f));
 
-	_xPosition = absolute2RelativeValf( newPos.x(), _chartInfo->leftBorder + _chartInfo->rightBorder );
-	_yPosition = absolute2RelativeValf( newPos.y(), _chartInfo->upperBorder + _chartInfo->lowerBorder );
-
-	emit positionChanged();
+	//the handl can be moved only INSIDE the TF scene
+	if (( newPos.x() >= _chartInfo->leftBorder ) && ( newPos.x() <= _chartInfo->rightBorder ) &&
+		( newPos.y() >= _chartInfo->upperBorder ) && ( newPos.y() <= _chartInfo->lowerBorder ))
+	{
+		this->setPos(newPos);
+		emit positionChanged(this);
+	}
 }
