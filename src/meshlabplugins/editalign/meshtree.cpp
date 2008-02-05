@@ -45,6 +45,7 @@ int MeshTree::gluedNum()
 	 return cnt;
 }
 
+// Assign to each mesh (glued and not glued) an unique id
 void MeshTree::resetID()
 {
 	int cnt=0;
@@ -74,30 +75,31 @@ void MeshTree::Process(AlignPair::Param ap)
   //Minimo esempio di codice per l'uso della funzione di allineamento.
 	//OccupancyGrid OG;
   //% OG.Init(nodeList.size(), Box3d::Construct(gluedBBox()), 10000);
-	resetID();
+
+	resetID(); 	// Assign to each mesh (glued and not glued) an unique id
 	OG.Init(nodeList.size(), Box3d::Construct(gluedBBox()), 10000);
-  vector<Matrix44d> trv;
+  
 	Matrix44d Zero44; Zero44.SetZero();
-  vector<Matrix44d> padded_trv(nodeList.size(),Zero44);
+  vector<Matrix44d> PaddedTrVec(nodeList.size(),Zero44);
 	// matrix trv[i] is relative to mesh with id IdVec[i]
-	// if all the mesh are glued IdVec=={1,2,3,4...}
-	vector<int> IdVec;
+	// if all the mesh are glued GluedIdVec=={1,2,3,4...}
+	vector<int> GluedIdVec;
+	vector<Matrix44d> GluedTrVec;
 		
   vector<string> names(nodeList.size());
-	//int id=0;
 		  
   foreach(MeshNode *mn, nodeList) 
 	{
 		if(mn->glued)
 			{
 				MeshModel *mm=mn->m;
-				//trv[id]=Matrix44d::Construct(mm->cm.Tr);
-				trv.push_back(Matrix44d::Construct(mm->cm.Tr));
-				padded_trv[mn->id]=trv.back();
-				IdVec.push_back(mn->id);							
+				GluedIdVec.push_back(mn->id);							
+				GluedTrVec.push_back(Matrix44d::Construct(mm->cm.Tr));
+				OG.AddMesh<CMeshO>(mm->cm, GluedTrVec.back(), GluedIdVec.back());
+				
+				PaddedTrVec[mn->id]=GluedTrVec.back();
 				names[mn->id]=mm->fileName;
-				OG.AddMesh<CMeshO>(mm->cm,trv.back(),mn->id);
-				printf("Added to the OG the mesh with id %i at the position %i\n",mn->id,IdVec.size()-1);
+				printf("Added to the OG the mesh with id %i at the position %i\n",mn->id,GluedIdVec.size()-1);
 			}
 			else printf("Mesh with id %i is not glued\n",mn->id);
 	//	++id;
@@ -128,10 +130,10 @@ void MeshTree::Process(AlignPair::Param ap)
     // l'allineatore globale cambia le varie matrici di posizione di base delle mesh
     // per questo motivo si aspetta i punti nel sistema di riferimento locale della mesh fix
     // Si fanno tutti i conti rispetto al sistema di riferimento locale della mesh fix
-    Matrix44d FixM=padded_trv[OG.SVA[i].s];
+    Matrix44d FixM=PaddedTrVec[OG.SVA[i].s];
     Matrix44d InvFixM=Inverse(FixM);
 		
-		Matrix44d MovM=InvFixM * padded_trv[OG.SVA[i].t];
+		Matrix44d MovM=InvFixM * PaddedTrVec[OG.SVA[i].t];
     Matrix44d InvMovM=Inverse(MovM);
 
 	  AlignPair aa;
@@ -163,38 +165,36 @@ void MeshTree::Process(AlignPair::Param ap)
     aa.Align(In,UG,ResVec[i]);
     ResVec[i].FixName=OG.SVA[i].s;
     ResVec[i].MovName=OG.SVA[i].t;
-	  ResVec[i].as.Dump(stdout); 
-    ResVecPtr.push_back(&ResVec[i]);
+	  ResVec[i].as.Dump(stdout);
+		ResVec[i].area= OG.SVA[i].norm_area;
+    if( ResVec[i].IsValid() )
+			ResVecPtr.push_back(&ResVec[i]);
     std::pair<double,double> dd=ResVec[i].ComputeAvgErr();
-    cb(0,qPrintable(buf.sprintf(" %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
+    if( ResVec[i].IsValid() ) 
+			cb(0,qPrintable(buf.sprintf(" %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
+		else 
+			cb(0,qPrintable(buf.sprintf(" %2i -> %2i Failed Alignment\n",OG.SVA[i].s,OG.SVA[i].t)));
+		
 }
-
-  // Identity Vector. It could be simply a vector of int containing {0,1,2,3,4...}
-	// Needed for the BuildGraph.
-	// It is used to support the fact that some of the nodes could be unglued
-	vector<int> IdentVec;
-  for(int i=0;i<trv.size();++i) 
-	    IdentVec.push_back(i);
+  // now cut the ResVec vector to the only computed result (the arcs with area > .1)
+	ResVec.resize(i);
   
-  AlignGlobal AG;
+	AlignGlobal AG;
   
-  AG.BuildGraph(ResVecPtr,trv,IdVec);
-  
- 
+  AG.BuildGraph(ResVecPtr, GluedTrVec, GluedIdVec);
+   
  int maxiter = 1000;
  float StartGlobErr = 0.001f;
  while(!AG.GlobalAlign(names, 	StartGlobErr, 100, true, stdout)){
-	StartGlobErr*=2;
-		AG.BuildGraph(ResVecPtr,trv,IdVec);
+  	StartGlobErr*=2;
+		AG.BuildGraph(ResVecPtr,GluedTrVec, GluedIdVec);
 	}
 
- vector<Matrix44d> trout(trv.size());
- AG.GetMatrixVector(trout,IdVec);
+ vector<Matrix44d> GluedTrVecOut(GluedTrVec.size());
+ AG.GetMatrixVector(GluedTrVecOut,GluedIdVec);
 
 //Now get back the results!
-//for(int ii=0;ii<trout.size();++ii)
-//	MM(ii)->cm.Tr.Import(trout[ii]);	
-for(int ii=0;ii<trout.size();++ii)
-	MM(IdVec[ii])->cm.Tr.Import(trout[ii]);	
+for(int ii=0;ii<GluedTrVecOut.size();++ii)
+	MM(GluedIdVec[ii])->cm.Tr.Import(GluedTrVecOut[ii]);	
 }
 

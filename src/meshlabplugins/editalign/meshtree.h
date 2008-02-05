@@ -83,7 +83,7 @@ class MeshTree
 		{
 		foreach(MeshNode *mp, nodeList) 
 		if(mp->id==id) return mp;
-		assert("You are trying to find an unexistent mesh");
+		assert("You are trying to find an unexistent mesh"==0);
 		return 0;
 		}
 
@@ -91,7 +91,7 @@ class MeshTree
 		{
 		foreach(MeshNode *mp, nodeList) 
 		if(mp->m==m) return mp;
-		assert("You are trying to find an unexistent mesh");
+		assert("You are trying to find an unexistent mesh"==0);
 		return 0;
 		}
 	int gluedNum();
