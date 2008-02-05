@@ -235,7 +235,7 @@ void EditAlignPlugin::glueManual()
 				alignDialog->ui.manualAlignButton->setText(oldLabelButton);
 			 break;
 			
-		default : assert("entered in the GlueManual slot in the wrong state");
+		default : assert("entered in the GlueManual slot in the wrong state"==0);
 		}
 	gla->update();
 }
