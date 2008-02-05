@@ -260,6 +260,7 @@ public:
 	int size();
 	QColor* buildColorBand();
 	QString saveColorBand( QString fileName );
+	Color4b getColorByQuality (float percentageQuality);
 	// QColor* getColorBand(){return _color_band;};
 	void moveChannelAhead( TF_CHANNELS channel_code );
 

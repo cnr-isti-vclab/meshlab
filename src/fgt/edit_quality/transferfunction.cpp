@@ -172,11 +172,54 @@ TF_KEY* TfChannel::splitKey(float x_pos)
 
 float TfChannel::getChannelValuef(float xVal)
 {
-	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
-		if ( (*it)->x == xVal )
-			return (*it)->y;
+	float result = 0.0f;
 
-	return -1.0f;
+	//if a x_position is known x, its key value is returned immediately
+	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
+		if ( (*it)->x >= xVal )
+			if ( (*it)->x == xVal )
+				return (*it)->y;
+			else
+			{
+				float x2 = (*it)->x;
+				float y2 = (*it)->y;
+				it--;
+				float x1 = (*it)->x;
+				float y1 = (*it)->y;
+
+				if (( x1 < xVal ) && ( x2 > xVal) )
+				{
+					//applying linear interpolation between two keys values
+
+					//angular coefficient for interpolating line
+					float m = (y2-y1) / (x2-x1);
+
+					//returning f(x) value for x in the interpolating line
+					result = m * (xVal - x1) + y1;
+				}
+				break;
+			}
+	
+	//if ( it != KEYS.end())		return it->second->getLeftJunctionPoint();
+
+	/*
+	//finding lower border for x
+	KEY_LISTiterator low = up;
+	low --;
+
+	if (( (*low)->x < xVal ) && ( (*up)->x > xVal) )
+		if ( low != KEYS.end() && up != KEYS.end() )
+		{
+			//applying linear interpolation between two keys values
+
+			//angular coefficient for interpolating line
+			float m = (((*up)->y - (*low)->y) / ((*up)->x - (*low)->x));
+
+			//returning f(x) value for x in the interpolating line
+			result = (m * (x_position - (*low)->xcazzo)) + low->second->getRightJunctionPoint();
+		}
+*/
+	return result;
 }
 
 
@@ -209,7 +252,7 @@ void TfChannel::updateKey(float old_x, float new_x, float new_y)
 	KEY_LISTiterator it = KEYS.find(old_x);
 	if ( it != KEYS.end())
 	{
-//		assert(it == KEYS.end());
+		//		assert(it == KEYS.end());
 
 		TF_KEY *k = it->second;
 		this->removeKey(old_x);
@@ -239,8 +282,8 @@ void TfChannel::testInitChannel()
 		if (offset > (1.0f-rand_y))
 			offset = (1.0f-rand_y);
 		this->addKey(rand_x,
-					rand_y,
-					rand_y + offset);
+			rand_y,
+			rand_y + offset);
 	}
 
 	this->addKey(1.0f, 0.0f, 0.0f);
@@ -277,7 +320,7 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-			break;
+		break;
 	case RGB_TF:
 		_channels[RED_CHANNEL].addKey(0.0f,1.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
 		_channels[RED_CHANNEL].addKey(0.5f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
@@ -330,7 +373,7 @@ TransferFunction::TransferFunction(QString fileName)
 {
 	this->initTF();
 
-//	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
+	//	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
 
 	QFile inFile( fileName );
 
@@ -414,13 +457,21 @@ QColor* TransferFunction::buildColorBand()
 	{
 		relative_pos = absolute2RelativeValf((float)i, COLOR_BAND_SIZE);
 		/*_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( relative_pos ),
-							   _channels[GREEN_CHANNEL].getChannelValueb( relative_pos ),
-							   _channels[BLUE_CHANNEL].getChannelValueb( relative_pos ) );*/
+		_channels[GREEN_CHANNEL].getChannelValueb( relative_pos ),
+		_channels[BLUE_CHANNEL].getChannelValueb( relative_pos ) );*/
 		_color_band[i].setRgbF(_channels[RED_CHANNEL].getChannelValuef( relative_pos),
-							   _channels[GREEN_CHANNEL].getChannelValuef( relative_pos ),
-							   _channels[BLUE_CHANNEL].getChannelValuef( relative_pos ) );
+			_channels[GREEN_CHANNEL].getChannelValuef( relative_pos ),
+			_channels[BLUE_CHANNEL].getChannelValuef( relative_pos ) );
 	}
 	return _color_band;
+}
+
+Color4b TransferFunction::getColorByQuality (float percentageQuality)
+{
+	return Color4b(_channels[RED_CHANNEL].getChannelValueb( percentageQuality ), 
+		_channels[GREEN_CHANNEL].getChannelValueb( percentageQuality ), 
+		_channels[BLUE_CHANNEL].getChannelValueb( percentageQuality ),
+		255 );
 }
 
 
