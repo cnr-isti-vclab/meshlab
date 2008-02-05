@@ -4,6 +4,8 @@
 #include <QBrush>
 #include <cmath>
 
+#include <vcg/complex/trimesh/update/color.h>
+
 using namespace vcg;
 
 
@@ -292,6 +294,7 @@ void QualityMapperDialog::drawEqualizerHistogram()
 
 	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
 	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
+	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), this, SLOT(drawGammaCorrection()) );
 
 	
 	this->drawGammaCorrection();
@@ -757,4 +760,13 @@ void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 	(*_transferFunction)[sender->getChannel()][sender]
 */
 	this->drawTransferFunction();
+}
+
+
+void QualityMapperDialog::on_applyButton_clicked()
+{
+	// Colorazione della mesh
+	float RangeMin = ui.minSpinBox->value();	
+	float RangeMax = ui.maxSpinBox->value();	
+    tri::UpdateColor<CMeshO>::VertexQuality(mesh->cm,RangeMin,RangeMax);
 }
