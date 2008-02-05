@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.140  2008/02/05 18:06:47  benedetti
+added calls to editing plugins' keyReleaseEvent and keyPressEvent
+
 Revision 1.139  2008/01/10 17:15:16  cignoni
 unsaved dialog has a better behaviour
 
@@ -573,17 +576,23 @@ void GLArea::closeEvent(QCloseEvent *event)
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
 	e->ignore();
+	if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(currentEditor,e,*mm(),this);
+	else{
       if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
       if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
       if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+  }
 }	
 
 void GLArea::keyPressEvent ( QKeyEvent * e )
 {
 	e->ignore();
+	if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(currentEditor,e,*mm(),this);
+	else{
       if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
       if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
       if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+  }
 }
 
 void GLArea::mousePressEvent(QMouseEvent*e)
