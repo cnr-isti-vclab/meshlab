@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2008/02/05 16:46:20  gianpaolopalma
+ Added error codes
+
  Revision 1.2  2008/02/04 13:20:33  gianpaolopalma
  Added error codes
 
@@ -53,7 +56,7 @@ namespace io {
 
 		std::map<QString, QDomNode*> protoDeclareNodeMap;
 
-		std::vector<QString> textuxeFile;
+		std::vector<QString> textureFile;
 
 		int lineNumberError;
 		std::vector<QString> filenameStack;
@@ -98,11 +101,14 @@ namespace io {
 			E_MULTINAMEPROTODECL,   // 16
 			E_MISMATCHDEFUSETYPE,	// 17
 			E_LOOPDEPENDENCE,		// 18
-			E_UNREFERREDTEXTCOOR,	// 19
-			E_MULTITEXT,			// 20
-			E_INVALIDFANSTRIP,		// 21
-			E_INVALIDINDEXED,		// 22
-			E_INVALIDINDEXEDFANSTRIP, //23
+			E_MULTITEXT,			// 19
+			E_INVALIDFANSTRIP,		// 20
+			E_INVALIDINDEXED,		// 21
+			E_INVALIDINDEXEDFANSTRIP, // 23
+			E_INVALIDELEVATIONGRID, // 22
+			E_INVALIDINDEXFACESET, // 24
+			E_INVALIDINDEXFACESETCOORD, //25
+			E_INVALIDDEFUSE, // 26
 
 		};
 
@@ -130,14 +136,17 @@ namespace io {
 				"There are more ProroDeclare and ExternProtoDeclare elements with the same name",
 				"Distint type between DEF and USE",
 				"There is a loop in the dependences between the files",
-				"Texture coordinate referred to any source texture",
 				"There are more sources texture without a MultiTexture element",
 				"Invalid TriangleFanSet or TriangleStripSet element. It contains fan or strip with less than three vertex",
 				"Invalid vertex index in the index field", 
 				"Invalid IndexedTriangleFanSet or IndexedTriangleStripSet element. It contais fan or strip with less than three vertex",
+				"Invalid ElevationGrid element. There isn't enough height value",
+				"Invalid IndexedFaceSet element. There are face with less than three vertex",
+				"Invalid vertex index in the coordIndex field",
+				"Illegal use of DEF and USE fields"
 			};
 
-			if(error > 23 || error < 0) return "Unknown error";
+			if(error > 27 || error < 0) return "Unknown error";
 			else return x3d_error_msg[error];
 		};
 
