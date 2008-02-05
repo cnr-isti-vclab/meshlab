@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.3  2008/02/05 16:47:49  gianpaolopalma
+ Added support to follow ElevationGrid and IndexedFaceSet
+ Bug fixed in the method solveDefUse
+
  Revision 1.2  2008/02/04 13:24:38  gianpaolopalma
  Added support to follow elements: IndexedTriangleSet, IndexedTriangleFanSet, IndexedTriangleStripSet, IndexedQuadSet.
  Improved support to QuadSet element.
@@ -40,6 +44,7 @@
 
 #include<QtXml>
 #include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/trimesh/create/platonic.h>
 #include <wrap/gl/glu_tesselator.h>
 
 #include <util_x3d.h>
@@ -452,21 +457,46 @@ namespace io {
 		}
 
 		
-		inline static QDomElement solveDefUse(QDomElement root, std::map<QString, QDomElement>& defMap)
+		inline static int solveDefUse(QDomElement root, std::map<QString, QDomElement>& defMap, QDomElement& dest, AdditionalInfoX3D* info)
 		{
-			if (root.isNull()) return root;
+			if (root.isNull())
+			{
+				dest = root;
+				return E_NOERROR;
+			}
 			QString use = root.attribute("USE");
 			if (use != "")
 			{
-				//DOTO: se esiste un parent con lo stesso def ritorno root
+				QDomNode parent = root.parentNode();
+				while(!parent.isNull())
+				{
+					if (parent.toElement().attribute("DEF") == use && parent.toElement().tagName() == root.tagName())
+					{
+						info->lineNumberError = root.lineNumber();
+						return E_INVALIDDEFUSE;
+					}
+					parent = parent.parentNode();
+				}
 				std::map<QString, QDomElement>::const_iterator iter = defMap.find(use);
-				if (iter != defMap.end() && root.tagName() == iter->second.tagName())
-					return iter->second;
+				if (iter != defMap.end())
+				{
+					if (root.tagName() == iter->second.tagName())
+					{
+						dest = iter->second;
+						return E_NOERROR;
+					}
+					else
+					{
+						info->lineNumberError = root.lineNumber();
+						return E_MISMATCHDEFUSETYPE;
+					}
+				}
 			}
 			QString def = root.attribute("DEF");
 			if (def != "" && defMap.find(def) == defMap.end())
 				defMap[def] = root;
-			return root;
+			dest = root;
+			return E_NOERROR;
 		}
 
 
@@ -495,6 +525,7 @@ namespace io {
 			{
 				QDomElement shape = shapeNodes.at(s).toElement();
 				QDomElement appearance = shape.firstChildElement("Appearance");
+				std::vector<QString> textureFile;
 				if (!appearance.isNull())
 				{
 					QDomNodeList texture;
@@ -517,13 +548,13 @@ namespace io {
 								QString path = paths.at(j).trimmed().remove('"');
 								if(QFile::exists(path))
 								{
-									info->textuxeFile.push_back(path);
+									textureFile.push_back(path);
 									load = true;
 								}
 								j++;
 							}
 							if (!load)
-								info->textuxeFile.push_back(url);
+								textureFile.push_back(url);
 						}
 					}
 				}
@@ -533,8 +564,9 @@ namespace io {
 					QString tagName = geometry.tagName();
 					QString coorTag[] = {"Coordinate", "CoordinateDouble"};
 					QDomElement coordinate = findNode(coorTag, 2, geometry);
-					if (!coordinate.isNull() && (coordinate.attribute("point") != ""))
+					if ((!coordinate.isNull() && (coordinate.attribute("point") != "")) || (tagName == "ElevationGrid"))
 					{
+						bool copyTextureFile = true;
 						QString colorTag[] = {"Color", "ColorRGBA"};
 						QDomElement color = findNode(colorTag, 2, geometry);
 						QDomElement normal = geometry.firstChildElement("Normal");
@@ -545,14 +577,19 @@ namespace io {
  						bool textureSup = isTextCoorGenSupported(textureCoor);
 						if (tagName == "IndexedTriangleFanSet" || tagName == "IndexedTriangleSet" || tagName == "IndexedTriangleStripSet" || tagName == "IndexedQuadSet")
 						{
-							if (!color.isNull()) bHasPerVertexColor = true;
-							if (textureSup) bHasPerVertexText = true;
-							if (!normal.isNull())
+							QStringList coordIndex;
+							findAndParseAttribute(coordIndex, geometry, "index", "");
+							if (!coordIndex.isEmpty())
 							{
-								if (normalPerVertex == "true")
-									bHasPerVertexNormal = true;
-								else
-									bHasPerFaceNormal = true;
+								if (!color.isNull()) bHasPerVertexColor = true;
+								if (textureSup) bHasPerVertexText = true;
+								if (!normal.isNull())
+								{
+									if (normalPerVertex == "true")
+										bHasPerVertexNormal = true;
+									else
+										bHasPerFaceNormal = true;
+								}
 							}
 						}
 						else if (tagName == "TriangleFanSet" || tagName == "TriangleSet" || tagName == "TriangleStripSet" || tagName == "QuadSet")
@@ -569,20 +606,38 @@ namespace io {
 						}
 						else if (tagName == "IndexedFaceSet")
 						{
-							if (textureSup) bHasPerWedgeTexCoord = true;
-							if (!color.isNull())
+							QStringList colorIndex, normalIndex, texCoordIndex, coordIndex;
+							findAndParseAttribute(colorIndex, geometry, "colorIndex", "");
+							findAndParseAttribute(normalIndex, geometry, "normalIndex", "");
+							findAndParseAttribute(texCoordIndex, geometry, "texCoordIndex", "");
+							findAndParseAttribute(coordIndex, geometry, "coordIndex", "");
+							if (!coordIndex.isEmpty())
 							{
-								if (colorPerVertex == "true")
-									bHasPerWedgeColor = true;
-								else
-									bHasPerFaceColor = true;
-							}
-							if (!normal.isNull())
-							{
-								if (normalPerVertex == "true")
-									bHasPerWedgeTexCoord = true;
-								else
-									bHasPerFaceNormal = true;
+								if (textureSup)
+								{
+									if (!texCoordIndex.isEmpty())
+										bHasPerWedgeTexCoord = true;
+									else
+										bHasPerVertexText = true;
+								}
+								if (!color.isNull())
+								{
+									if (colorPerVertex == "true" && !colorIndex.isEmpty())
+										bHasPerWedgeColor = true;
+									else if (colorPerVertex == "true" && colorIndex.isEmpty())
+										bHasPerVertexColor = true;
+									else
+										bHasPerFaceColor = true;
+								}
+								if (!normal.isNull())
+								{
+									if (normalPerVertex == "true" && !normalIndex.isEmpty())
+										bHasPerWedgeTexCoord = true;
+									else if (normalPerVertex == "true" && normalIndex.isEmpty())
+										bHasPerVertexNormal = true;
+									else
+										bHasPerFaceNormal = true;
+								}
 							}
 						}
 						else if (tagName == "ElevationGrid")
@@ -602,9 +657,14 @@ namespace io {
 								else
 									bHasPerFaceNormal = true;
 							}
-
 						}
-					}
+						else
+							copyTextureFile = false;
+						if (copyTextureFile)
+							for (int i = 0; i < textureFile.size(); i++)
+								info->textureFile.push_back(textureFile.at(i));
+							
+						}
 					geometry = geometry.nextSiblingElement();
 				}
 			}
@@ -988,7 +1048,15 @@ namespace io {
 						std::vector<std::vector<vcg::Point3f>> polygonVect;
 						std::vector<Point3f> polygon;
 						for (int tt = 0; tt < 4; tt++)
+						{
+							int vertIndex = indexList.at(tt + ff*4).toInt() + offset;
+							if (vertIndex >= m.vert.size())
+							{
+								info->lineNumberError = geometry.lineNumber();
+								return E_INVALIDINDEXED;
+							}
 							polygon.push_back(m.vert[indexList.at(tt + ff*4).toInt() + offset].cP());
+						}
 						polygonVect.push_back(polygon);
 						std::vector<int> indexVect;
 						vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
@@ -1017,6 +1085,279 @@ namespace io {
 
 
 		
+		
+		static int LoadElevationGrid(QDomElement geometry,
+									OpenMeshType& m,
+									const vcg::Matrix44f tMatrix,
+									const TextureInfo& texture,
+									const QStringList& colorList,
+									const QStringList& normalList,
+									int colorComponent,
+									AdditionalInfoX3D* info,
+									CallBackPos *cb=0)
+		{
+			QString colorPerVertex = geometry.attribute("colorPerVertex", "true");
+			QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
+			int xDimension = geometry.attribute("xDimension", "0").toInt();
+			int zDimension = geometry.attribute("zDimension", "0").toInt();
+			float xSpacing = geometry.attribute("xSpacing", "1.0").toFloat();
+			float zSpacing = geometry.attribute("zSpacing", "1.0").toFloat();
+			QStringList heightList;
+			findAndParseAttribute(heightList, geometry, "height", "");
+			if (xDimension <= 0 || zDimension <= 0) return E_NOERROR;
+			if (heightList.size() < (xDimension * zDimension))
+			{
+				info->lineNumberError = geometry.lineNumber();
+				return E_INVALIDELEVATIONGRID;
+			}
+			std::vector<float> heightVector;
+			for (int i = 0; i < heightList.size(); i++)
+				heightVector.push_back(heightList.at(i).toFloat());
+			int offsetVertex = m.vert.size();
+			int offsetFace = m.face.size();
+			vcg::tri::Allocator<OpenMeshType>::AddVertices(m, xDimension * zDimension);
+			vcg::tri::Allocator<OpenMeshType>::AddFaces(m, (xDimension - 1)*(zDimension - 1)*2);
+			int index = 0;
+			for (int i=0; i < zDimension; i++)
+			{
+				for (int j=0; j < xDimension; j++)
+				{
+					vcg::Point4f in(j * xSpacing, heightVector[i * xDimension + j], i * zSpacing, 1.0);
+					in = tMatrix * in;
+					index = i * xDimension + j;
+					m.vert[index + offsetVertex].P()= vcg::Point3f(in.X(), in.Y(), in.Z());
+					if (m.HasPerVertexColor() && colorPerVertex == "true" && !colorList.isEmpty())
+						getColor(colorList, colorComponent, index * colorComponent, m.vert[index + offsetVertex].C());
+					if (m.HasPerVertexNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+						getNormal(normalList, index * 3, m.vert[index + offsetVertex].N());
+					if (m.HasPerVertexTexCoord())
+						getTextureCoord(texture, index * 2, m.vert[index + offsetVertex].cP(), m.vert[index + offsetVertex].T());
+				}
+			}
+			for (int i = 0; i < zDimension - 1; i++)
+			{
+				for (int j = 0; j < xDimension - 1; j++)
+				{
+					index = 2 * (i * (xDimension - 1) + j);
+					m.face[index + offsetFace].V(0) = &(m.vert[i * xDimension + j + offsetVertex]);
+					m.face[index + offsetFace].V(1) = &(m.vert[(i + 1) * xDimension + j + 1 + offsetVertex]);
+					m.face[index + offsetFace].V(2) = &(m.vert[i * xDimension + j + 1 + offsetVertex]);
+					if (m.HasPerFaceColor() && colorPerVertex == "false" && !colorList.isEmpty())
+						getColor(colorList, colorComponent, index * colorComponent, m.face[index +offsetFace].C());
+					if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+						getNormal(normalList, index * 3, m.face[index + offsetFace].N());
+					if (!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+					{
+						getTextureCoord(texture, (i * xDimension + j)*2, m.vert[i * xDimension + j + offsetVertex].cP(), m.face[index + offsetFace].WT(0));
+						getTextureCoord(texture, ((i + 1) * xDimension + j + 1)*2, m.vert[(i + 1) * xDimension + j + 1 + offsetVertex].cP(), m.face[index + offsetFace].WT(1));
+						getTextureCoord(texture, (i * xDimension + j + 1)*2, m.vert[i * xDimension + j + 1 + offsetVertex].cP(), m.face[index + offsetFace].WT(2));
+					}
+					index++;
+					m.face[index + offsetFace].V(0) = &(m.vert[i * xDimension + j + offsetVertex]);
+					m.face[index + offsetFace].V(1) = &(m.vert[(i + 1) * xDimension + j + offsetVertex]);
+					m.face[index + offsetFace].V(2) = &(m.vert[(i + 1) * xDimension + j + 1 + offsetVertex]);
+					if (m.HasPerFaceColor() && colorPerVertex == "false" && !colorList.isEmpty())
+						getColor(colorList, colorComponent, index * colorComponent, m.face[index +offsetFace].C());
+					if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+						getNormal(normalList, index * 3, m.face[index + offsetFace].N());
+					if (!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+					{
+						getTextureCoord(texture, (i * xDimension + j)*2, m.vert[i * xDimension + j + offsetVertex].cP(), m.face[index + offsetFace].WT(0));
+						getTextureCoord(texture, ((i + 1) * xDimension + j)*2, m.vert[(i + 1) * xDimension + j + offsetVertex].cP(), m.face[index + offsetFace].WT(1));
+						getTextureCoord(texture, ((i + 1) * xDimension + j + 1)*2, m.vert[(i + 1) * xDimension + j + 1 + offsetVertex].cP(), m.face[index + offsetFace].WT(2));
+					}
+				}
+			}
+			return E_NOERROR;
+		}
+
+
+
+
+		
+		
+		static int LoadIndexedFaceSet(QDomElement geometry,
+									OpenMeshType& m,
+									const vcg::Matrix44f tMatrix,
+									const TextureInfo& texture,
+									const QStringList& coordList,
+									const QStringList& colorList,
+									const QStringList& normalList,
+									int colorComponent,
+									AdditionalInfoX3D* info,
+									CallBackPos *cb=0)
+		{
+			QStringList coordIndex;
+			findAndParseAttribute(coordIndex, geometry, "coordIndex", "");
+			if (!coordIndex.isEmpty())
+			{
+				QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
+				QString colorPerVertex = geometry.attribute("colorPerVertex", "true");
+				QStringList colorIndex, normalIndex, texCoordIndex;
+				findAndParseAttribute(colorIndex, geometry, "colorIndex", "");
+				findAndParseAttribute(normalIndex, geometry, "normalIndex", "");
+				findAndParseAttribute(texCoordIndex, geometry, "texCoordIndex", "");
+				int offset = m.vert.size();
+				int nVertex = coordList.size()/3;
+				vcg::tri::Allocator<OpenMeshType>::AddVertices(m, nVertex);
+				for (int vv = 0; vv < nVertex; vv++)
+				{
+					vcg::Point4f tmp = tMatrix * vcg::Point4f(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
+					m.vert[offset + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
+					if (m.HasPerVertexColor() && colorPerVertex == "true" && !colorList.isEmpty() && colorIndex.isEmpty())
+						getColor(colorList, colorComponent, vv*colorComponent, m.vert[offset + vv].C());
+					if (m.HasPerVertexNormal() && normalPerVertex == "true" && !normalList.isEmpty() && normalIndex.isEmpty())
+						getNormal(normalList, vv * 3, m.vert[offset + vv].N());
+					if (m.HasPerVertexTexCoord() && texCoordIndex.isEmpty())
+						getTextureCoord(texture, vv * 2, m.vert[offset + vv].cP(), m.vert[offset + vv].T());
+				}
+				int ci = 0;
+				int initPolygon;
+				int nPolygon = 0;
+				while(ci < coordIndex.size())
+				{
+					initPolygon = ci;
+					std::vector<std::vector<vcg::Point3f>> polygonVect;
+					std::vector<Point3f> polygon;
+					while(ci < coordIndex.size() && coordIndex.at(ci) != "-1")
+					{
+						int n = coordIndex.at(ci).toInt() + offset;
+						if (n >= m.vert.size())
+						{
+							info->lineNumberError = geometry.lineNumber();
+							return E_INVALIDINDEXFACESETCOORD;
+						}
+						polygon.push_back(m.vert[n].cP());
+						ci++;
+					}
+					if (ci - initPolygon < 3)
+					{
+						info->lineNumberError = geometry.lineNumber();
+						return E_INVALIDINDEXFACESET;
+					}
+					ci++;
+					polygonVect.push_back(polygon);
+					std::vector<int> indexVect;
+					vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
+					int nFace = indexVect.size()/3;
+					int offsetFace = m.face.size();
+					vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+					for (int ff = 0; ff < nFace; ff++)
+					{
+						for (int tt = 0; tt < 3; tt++)
+						{
+							int index = coordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt();
+							m.face[ff + offsetFace].V(tt) = &(m.vert[index + offset]);
+							if (m.HasPerWedgeColor() && colorPerVertex == "true" && !colorList.isEmpty() && !colorIndex.isEmpty())
+							{
+								if (!colorIndex.isEmpty() && index < colorIndex.size())
+									getColor(colorList, colorComponent, colorIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * colorComponent, m.face[ff + offsetFace].WC(tt));
+							}
+							if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+							{
+								if (!normalIndex.isEmpty() && index < normalIndex.size())
+									getNormal(normalList, normalIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * 3, m.face[ff + offsetFace].WN(tt));
+							}
+							if(m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+							{
+								if (texCoordIndex.isEmpty() && !m.HasPerVertexTexCoord())
+									getTextureCoord(texture, index*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(tt));
+								else if (!texCoordIndex.isEmpty())
+									getTextureCoord(texture, texCoordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt()*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(tt)); 
+							}
+						}
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+						{
+							if (!normalIndex.isEmpty() && ff < normalIndex.size() && normalIndex.at(ff).toInt() > -1)
+								getNormal(normalList, normalIndex.at(nPolygon).toInt() * 3, m.face[ff + offsetFace].N());
+							else
+								getNormal(normalList, nPolygon*3, m.face[ff + offsetFace].N());
+						}
+						if(m.HasPerFaceColor() && colorPerVertex == "false" && !colorList.isEmpty())
+						{
+							if (!colorIndex.isEmpty() && ff < colorIndex.size() && colorIndex.at(ff).toInt() > -1)
+								getColor(colorList, colorComponent, colorIndex.at(nPolygon).toInt() * colorComponent, m.face[ff + offsetFace].C());
+							else
+								getColor(colorList, colorComponent, nPolygon*colorComponent, m.face[ff + offsetFace].C());
+						}
+					}
+					nPolygon++;
+				}
+			}
+			return E_NOERROR;
+		}
+
+
+
+		static int LoadAppearance(const QDomElement& root, std::vector<bool>& validTexture, std::vector<TextureInfo>& textureInfo, QDomNodeList& textTransfList, std::map<QString, QDomElement>& defMap, AdditionalInfoX3D* info)
+		{
+			QDomElement appearance = root.firstChildElement("Appearance");
+			if (!appearance.isNull())
+			{
+				int result = solveDefUse(appearance, defMap, appearance, info);
+				if (result != E_NOERROR) return result;
+				QDomNodeList texture;
+				QDomElement multiTexture = appearance.firstChildElement("MultiTexture");
+				if (!multiTexture.isNull())
+				{
+					result= solveDefUse(multiTexture, defMap, multiTexture, info);
+					if (result != E_NOERROR) return result;
+					QDomElement child = multiTexture.firstChildElement();
+					while (!child.isNull())
+					{
+						validTexture.push_back((child.tagName() == "ImageTexture"));
+						child = child.nextSiblingElement();
+					}
+					texture = multiTexture.elementsByTagName("ImageTexture");
+				}
+				else
+				{
+					texture = appearance.elementsByTagName("ImageTexture");
+					if (texture.size() > 1)
+					{
+						info->lineNumberError = appearance.lineNumber();
+						return E_MULTITEXT;
+					}
+					validTexture.push_back(!texture.isEmpty());
+				}
+				for (int i = 0; i < texture.size(); i++)
+				{
+					QDomElement imageTexture = texture.at(i).toElement();
+					result = solveDefUse(imageTexture, defMap, imageTexture, info);
+					if (result != E_NOERROR) return result;
+					QString url = imageTexture.attribute("url");
+					QStringList paths = url.split(" ", QString::SkipEmptyParts);
+					int j = 0;
+					bool found = false;
+					while (j < paths.size() && !found)
+					{
+						QString path = paths.at(j).trimmed().remove('"');
+						size_t z = 0;
+						while (z < info->textureFile.size() && !found)
+						{
+							if (info->textureFile.at(z) == path || info->textureFile.at(z) == url)
+							{
+								TextureInfo tInfo = TextureInfo();
+								tInfo.textureIndex = z;
+								tInfo.repeatS = (imageTexture.attribute("repeatS", "true") == "true");
+								tInfo.repeatT = (imageTexture.attribute("repeatT", "true") == "true");
+								textureInfo.push_back(tInfo);
+								found = true;
+							}
+							z++;
+						}
+						j++;
+					}
+					if (!found){
+						TextureInfo tInfo = TextureInfo();
+						tInfo.isValid = false;
+						textureInfo.push_back(tInfo);
+					}
+				}
+				textTransfList = appearance.elementsByTagName("TextureTransform");
+			}
+			return E_NOERROR;
+		}
 		
 		inline static vcg::Matrix33f createTextureTrasformMatrix(QDomElement elem)
 		{
@@ -1311,11 +1652,11 @@ namespace io {
 			if (textInfo.isCoordGenerator)
 			{
 				if (textInfo.mode == "COORD")
-					point = vcg::Point3f(vertex.X(), vertex.Y(), 1.0);
+					point = vcg::Point3f(vertex.X(), vertex.Y(), 0.0);
 				else
 					return false;
 			}
-			else if (!textInfo.textureCoordList.isEmpty() && (index + 2) < textInfo.textureCoordList.size())
+			else if (!textInfo.textureCoordList.isEmpty() && (index + 1) < textInfo.textureCoordList.size())
 				point = vcg::Point3f(textInfo.textureCoordList.at(index).toFloat(), textInfo.textureCoordList.at(index + 1).toFloat(), 1.0);
 			else
 				return false;
@@ -1326,15 +1667,16 @@ namespace io {
 				point.X() = point.X() > 1? 1: point.X();
 			}
 			else
-				point.X() = point.X() - floorf(point.X());
+				point.X() = (point.X() != floorf(point.X()))? (point.X() - floorf(point.X())): point.X();
 			if (!textInfo.repeatT)
 			{
 				point.Y() = point.Y() < 0? 0: point.Y();
 				point.Y() = point.Y() > 1? 1: point.Y();
 			}
 			else
-				point.Y() = point.Y() - floorf(point.Y());
+				point.Y() = (point.Y() != floorf(point.Y()))? (point.Y() - floorf(point.Y())): point.Y();
 			vcg::TexCoord2<float> textCoord(point.X(), point.Y());
+			textCoord.N() = textInfo.textureIndex;
 			dest = textCoord;
 			return true;
 		}
@@ -1350,25 +1692,8 @@ namespace io {
 									CallBackPos *cb=0)
 		{
 			if (root.isNull()) return E_NOERROR;
-			QString use = root.attribute("USE");
-			if (use != "")
-			{
-				std::map<QString, QDomElement>::const_iterator iter = defMap.find(use);
-				if (iter != defMap.end())
-				{
-					if (iter->second.tagName() == root.tagName())
-						return NavigateScene(m, iter->second, tMatrix, defMap, protoDeclareMap, info, cb);
-					info->lineNumberError = root.lineNumber();
-					return E_MISMATCHDEFUSETYPE;
-				}
-				info->lineNumberError = root.lineNumber();
-				return E_NODEFFORUSE;
-			}
-
-			QString def = root.attribute("DEF");
-			if (def != "" && defMap.find(def) == defMap.end())
-				defMap[def] = root;
-			
+			int result = solveDefUse(root, defMap, root, info);
+			if (result != E_NOERROR) return result;
 			if (root.tagName() == "Transform")
 			{
 				vcg::Matrix44f t = createTransformMatrix(root, tMatrix);
@@ -1406,98 +1731,42 @@ namespace io {
 			
 			if (root.tagName() == "Shape")
 			{
-				QDomElement appearance = root.firstChildElement("Appearance");
 				std::vector<bool> validTexture;
 				std::vector<TextureInfo> textureInfo;
 				QDomNodeList textureTransformList;
-				if (!appearance.isNull())
-				{
-					appearance = solveDefUse(appearance, defMap);
-					QDomNodeList texture;
-					QDomElement multiTexture = appearance.firstChildElement("MultiTexture");
-					if (!multiTexture.isNull())
-					{
-						multiTexture = solveDefUse(multiTexture, defMap);
-						QDomElement child = multiTexture.firstChildElement();
-						while (!child.isNull())
-						{
-							validTexture.push_back((child.tagName() == "ImageTexture"));
-							child = child.nextSiblingElement();
-						}
-						texture = multiTexture.elementsByTagName("ImageTexture");
-					}
-					else
-					{
-						texture = appearance.elementsByTagName("ImageTexture");
-						if (texture.size() > 1)
-						{
-							info->lineNumberError = appearance.lineNumber();
-							return E_MULTITEXT;
-						}
-						validTexture.push_back(!texture.isEmpty());
-					}
-					for (int i = 0; i < texture.size(); i++)
-					{
-						QDomElement imageTexture = texture.at(i).toElement();
-						imageTexture = solveDefUse(imageTexture, defMap);
-						QString url = imageTexture.attribute("url");
-						QStringList paths = url.split(" ", QString::SkipEmptyParts);
-						int j = 0;
-						bool found = false;
-						while (j < paths.size() && !found)
-						{
-							QString path = paths.at(j).trimmed().remove('"');
-							size_t z = 0;
-							while (z < info->textuxeFile.size() && !found)
-							{
-								if (info->textuxeFile.at(z) == path || info->textuxeFile.at(z) == url)
-								{
-									TextureInfo tInfo = TextureInfo();
-									tInfo.textureIndex = z;
-									tInfo.repeatS = (imageTexture.attribute("repeatS", "true") == "true");
-									tInfo.repeatT = (imageTexture.attribute("repeatT", "true") == "true");
-									textureInfo.push_back(tInfo);
-									found = true;
-								}
-								z++;
-							}
-							j++;
-						}
-						if (!found){
-							TextureInfo tInfo = TextureInfo();
-							tInfo.isValid = false;
-							textureInfo.push_back(tInfo);
-						}
-					}
-					textureTransformList = appearance.elementsByTagName("TextureTransform");
-				}
-
+				int result = LoadAppearance(root, validTexture, textureInfo, textureTransformList, defMap, info);
+				if (result != E_NOERROR) return result;
 				QDomElement geometryNode = root.firstChildElement();
 				while (!geometryNode.isNull())
 				{
-					QDomElement geometry = solveDefUse(geometryNode, defMap);
+					QDomElement geometry;
+					result = solveDefUse(geometryNode, defMap, geometry, info);
+					if (result != E_NOERROR) return result;
 					QString coordTag[] = {"Coordinate", "CoordinateDouble"};
 					QDomElement coordinate = findNode(coordTag, 2, geometry);
-					if (!coordinate.isNull()&& (coordinate.attribute("point") != ""))
+					if ((!coordinate.isNull() && (coordinate.attribute("point") != "")) || (geometry.tagName() == "ElevationGrid"))
 					{
-						coordinate = solveDefUse(coordinate, defMap);
+						result = solveDefUse(coordinate, defMap, coordinate, info);
+						if (result != E_NOERROR) return result;
 						QStringList coordList;
 						findAndParseAttribute(coordList, coordinate, "point", "");
 
 						QString colorTag[] = {"Color", "ColorRGBA"};
 						QDomElement color = findNode(colorTag, 2, geometry);
-						color = solveDefUse(color, defMap);
+						result = solveDefUse(color, defMap, color, info);
+						if (result != E_NOERROR) return result;
 						QStringList colorList;
 						findAndParseAttribute(colorList, color, "color", "");
 
 						QDomElement normal = geometry.firstChildElement("Normal");
-						normal = solveDefUse(normal, defMap);
+						result = solveDefUse(normal, defMap, normal, info);
+						if (result != E_NOERROR) return result;
 						QStringList normalList;
 						findAndParseAttribute(normalList, normal, "vector", "");
 						
 						QString textCoorTag[] = {"TextureCoordinate", "MultiTextureCoordinate", "TextureCoordinateGenerator"};
 						QDomElement textureCoord = findNode(textCoorTag, 3, geometry);
-						textureCoord = solveDefUse(textureCoord, defMap);
+						result = solveDefUse(textureCoord, defMap, textureCoord, info);
 						if (textureCoord.tagName() == "MultiTextureCoordinate")
 						{
 							QDomElement child = textureCoord.firstChildElement();
@@ -1506,7 +1775,8 @@ namespace io {
 							while (!child.isNull())
 							{
 								if (i >= validTexture.size()) break;
-								QDomElement solveChild = solveDefUse(child, defMap);
+								QDomElement solveChild; 
+								result = solveDefUse(child, defMap, solveChild, info);
 								if (validTexture.at(i))
 								{
 									if (solveChild.tagName() == "TextureCoordinate")
@@ -1570,7 +1840,10 @@ namespace io {
 							return LoadSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
 						else if (geometry.tagName() == "IndexedTriangleSet" || geometry.tagName() == "IndexedTriangleFanSet" || geometry.tagName() == "IndexedTriangleStripSet" || geometry.tagName() == "IndexedQuadSet")
 							return LoadIndexedSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
-								
+						else if (geometry.tagName() == "ElevationGrid")
+							return LoadElevationGrid(geometry, m, tMatrix, texture, colorList, normalList, colorComponent, info, cb);
+						else if (geometry.tagName() == "IndexedFaceSet")
+							return LoadIndexedFaceSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
 					}
 					geometryNode = geometryNode.nextSiblingElement();
 				}
