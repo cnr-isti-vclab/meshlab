@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.149  2008/02/06 09:56:37  cignoni
+Corrected bug in the display of plugins info
+
 Revision 1.148  2008/02/04 09:34:02  cignoni
 better managment of state changes when layer switching and adding files to the current layer set
 
@@ -991,7 +994,8 @@ void MainWindow::about()
 
 void MainWindow::aboutPlugins()
 {
-	PluginDialog dialog(pluginsDir.path(), pluginFileNames, this);
+	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath())); 
+	PluginDialog dialog(pluginsDir.absolutePath(), pluginFileNames, this);
 	dialog.exec();
 }
 

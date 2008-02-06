@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.89  2008/02/06 09:56:37  cignoni
+Corrected bug in the display of plugins info
+
 Revision 1.88  2008/01/06 20:44:19  cignoni
 added correct paths for QT dynlib loading
 
@@ -585,7 +588,7 @@ void MainWindow::createMenus()
 
 void MainWindow::loadPlugins()
 {
-	QDir pluginsDir(getPluginDirPath());
+	pluginsDir=QDir(getPluginDirPath());
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
 	qApp->addLibraryPath(getPluginDirPath());
 	qApp->addLibraryPath(getBaseDirPath());

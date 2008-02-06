@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.16  2008/02/06 09:56:37  cignoni
+Corrected bug in the display of plugins info
+
 Revision 1.15  2007/12/12 15:33:00  cignoni
 Use info() instead of name() for a better description
 
@@ -211,6 +214,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 	else parent=item->text(0);
 	QString fileName=pathDirectory+"/"+parent;
 	QPluginLoader loader(fileName);
+	qDebug(qPrintable("Trying to load the plugin "+fileName));
 	QObject *plugin = loader.instance();
 	if (plugin) {
 		MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
