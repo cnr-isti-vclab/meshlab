@@ -14,9 +14,7 @@ class TFHandle : public Handle
 	Q_OBJECT
 
 public:
-	enum { LEFT_JUNCTION_HANDLE = 0, RIGHT_JUNCTION_HANDLE	};
-
-	TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, int junction, int zOrder=1, int size = DEFAULT_HANDLE_SIZE  );
+	TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, TF_KEY *myKey, int zOrder=1, int size = DEFAULT_HANDLE_SIZE  );
 	~TFHandle(void);
 
 	QRectF boundingRect (void) const;
@@ -35,7 +33,7 @@ private:
 	int		_channelCode;
 	float	_xPosition;
 	float	_yPosition;
-	int		_junction_side;
+	TF_KEY *_myKey;
 
 signals:
 	void positionChanged(TFHandle*);

@@ -8,3 +8,10 @@
 17.00 31/01/2008	(UCCIO) implementare la rimozione del BG della TF (UCCIO)
 16.14 02/02/2008	sarebbe il caso che le EqHandles venissero allocate dinamicamente e che il loro costruttore cambiasse per allinearsi a quello di TfHandle (in questo modo, si potrebbe ridefinire direttamente quello di Handle, minimizzando il codice)
 15.34 03/02/2008	modificare EQHandle e TFHandle per allinearle alla nuova definizione di Handle. Handle(CHART_INFO *environment_info, QColor color, QPointF position, int zOrder=1, int size = DEFAULT_HANDLE_SIZE  );
+0.05 06/02/2008		aggiornare lo z-order delle Tf Handles
+0.05 06/02/2008		collegare gli spinbox alle TFHandles sia in lettura che in scrittura
+0.06 06/02/2008		rendere selettiva la cancellazione delle linee quando la TF handle viene mossa
+0.07 06/02/2008		(!!!) controllare che per ogni x in KEYS ci siano AL PIU' 2 valori di y (!!!)
+0.07 06/02/2008		(!!!) implementare lo swap tra le handles quando una vien sovrapposta alle altre (!!!)
+0.29 06/02/2008		forse KEY dovrebbe contenere delle TF_KEY, e non TF_KEY*... indagare...
+1.40 06/02/2008		(!!!) ricntrollare il moveAhead (!!!)

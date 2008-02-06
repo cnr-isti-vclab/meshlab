@@ -60,22 +60,22 @@ TF_KEY* TfChannel::addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side)
 //returns a pointer to the key just added
 TF_KEY* TfChannel::addKey(TF_KEY *newKey)
 {
-	if ((KEYS.size() == 0) || (KEYS[KEYS.size()-1]->x <= newKey->x))
-	{
-		KEYS.push_back(newKey);
-		return newKey;
-	}
-
 	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
 	{
 		if ( (*it)->x >= newKey->x )
 		{
+			//RIGHT JUNCTION POINT FOR A KEY MUST BE POSITIONED BEFORE A LEFT ONE
+			if ( (*it)->x == newKey->x )
+				if ( ((*it)->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE ) && (newKey->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE ) )
+					it ++;
+
 			KEYS.insert(it, newKey);
 			return newKey;
 		}
 	}
 
-	return 0;
+	KEYS.push_back(newKey);
+	return newKey;
 }
 
 //removes from keys list to_remove_key
@@ -216,7 +216,7 @@ float TfChannel::getChannelValuef(float xVal)
 			float m = (((*up)->y - (*low)->y) / ((*up)->x - (*low)->x));
 
 			//returning f(x) value for x in the interpolating line
-			result = (m * (x_position - (*low)->xcazzo)) + low->second->getRightJunctionPoint();
+			result = (m * (x_position - (*low)->x)) + low->second->getRightJunctionPoint();
 		}
 */
 	return result;
@@ -331,6 +331,12 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
 		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		//added for test
+		_channels[RED_CHANNEL].addKey(0.5f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.5f,0.7f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.75f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.75f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.2f,0.3f,TF_KEY::LEFT_JUNCTION_SIDE);
 		break;
 	case RED_SCALE_TF:
 		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
@@ -396,7 +402,7 @@ TransferFunction::TransferFunction(QString fileName)
 			assert( (splittedString.size() % 2) == 0 );
 
 			TF_KEY::JUNCTION_SIDE junctSide;
-			for ( int i=0; i<splittedString.size(); i+=3 )
+			for ( int i=0; i<splittedString.size(); i+=2 )
 			{
 				if (i==0)
 					junctSide = TF_KEY::RIGHT_JUNCTION_SIDE;
@@ -524,8 +530,6 @@ void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
 
 		_channels_order[0] = tmp;
 	} while( _channels_order[NUMBER_OF_CHANNELS-1] != ch_code_int );
-
-	//spostare in avanti anche le handles!
 }
 
 

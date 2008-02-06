@@ -92,6 +92,7 @@ private:
 	GRAPHICS_ITEMS_LIST	*clearScene(QGraphicsScene *scene, int toClean=0);
 	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);
 	void				deleteRemoveItems();
+	void				moveAheadChannel( TF_CHANNELS channelCode );
 
 private slots:
 	void on_previewButton_clicked();

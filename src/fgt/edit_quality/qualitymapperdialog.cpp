@@ -187,9 +187,11 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 	//x axis
 	current_item = scene.addLine( chart_info->leftBorder, chart_info->lowerBorder, chart_info->rightBorder, chart_info->lowerBorder, p );
 	current_item->setZValue( 0 );
+	_transferFunctionLines << current_item;
 	//y axis
 	current_item = scene.addLine( chart_info->leftBorder, chart_info->upperBorder, chart_info->leftBorder, chart_info->lowerBorder, p );
 	current_item->setZValue( 0 );
+	_transferFunctionLines << current_item;
 }
 
 // Add histogram bars to equalizerHistogram Scene
@@ -387,63 +389,36 @@ void QualityMapperDialog::initTF()
 	qreal yLeftPos = 0;
 	qreal yRightPos = 0;
 	qreal zValue = 0;
+	int channelType = 0;
 	for (int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
 		zValue = ((c + 1)*2.0f) + 1;
-		TYPE_2_COLOR( c, channelColor );
-//		channelColor = Qt::black;
+		channelType = (*_transferFunction)[c].getType();
+		TYPE_2_COLOR( channelType, channelColor );
+
 		for (int i=0; i<(*_transferFunction)[c].size(); i++)
 		{
-			val = (*_transferFunction)[c][i];
+			val = (*_transferFunction)[channelType][i];
 
 			xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth );
 			yLeftPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
 			yRightPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
-			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), TFHandle::LEFT_JUNCTION_HANDLE, zValue );
-// 			handle1->setColor(channelColor);
-// 			handle1->setPos( xPos, yLeftPos );
+			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), val, zValue );
  			handle1->setZValue( zValue );
-// 			handle1->setChannel(c);
-			_transferFunctionHandles[c] << handle1;
+			_transferFunctionHandles[channelType] << handle1;
 			connect(handle1, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
-//			int a = _transferFunctionHandles[c].size();
 			_transferFunctionScene.addItem(handle1);
 			if ( yLeftPos != yRightPos )
 			{
-				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), TFHandle::RIGHT_JUNCTION_HANDLE, zValue );
-// 				handle2->setColor(channelColor);
-// 				handle2->setPos( xPos, yRightPos );
+				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), val, zValue );
  				handle2->setZValue( zValue );
-				_transferFunctionHandles[c] << handle2;
+				_transferFunctionHandles[channelType] << handle2;
 				connect(handle2, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
 				_transferFunctionScene.addItem(handle1);
 			}
 		}
 	}
 //	aggiungere le TFHandles quì controllando che nn siano già presenti nella lista di Handles per quel canale
-
-		
-/*
-
-		xPos = xStart + _histogram_info->chartWidth/2.0*i;
-		//		_equalizerHandles[i].setColor(colors[i]);
-		_equalizerHandles[ffi].setColor(Qt::black);
-		_equalizerHandles[ffi].setPos(xPos, yPos);
-		_equalizerHandles[ffi].setBarHeight(_histogram_info->chartHeight);
-		_equalizerHandles[ffi].setZValue(1);
-		_equalizerHandles[ffi].setHistogramInfo(_histogram_info);
-		_equalizerHandles[ffi].setHandlesPointer(_equalizerHandles);
-		_equalizerHandles[fffi].setMidHandlePercentilePosition(&_equalizerMidHandlePercentilePosition);
-		_equalizerHandles[ffi].setSpinBoxPointer(ui.minSpinBox);
-		_equalizerHistogramScene.addItem(&_equalizerHandles[fi]);
-	}
-	_equalizerHandles[LEFT_HANDLE].setType(LEFT_HANDLE);
-	_equalizerHandles[LEFT_HANDLE].setSpinBoxPointer(ui.minSpinBox);
-	_equalizerHandles[MID_HANDLE].setType(MID_HANDLE);
-	_equalizerHandles[MID_HANDLE].setSpinBoxPointer(ui.midSpinBox);
-	_equalizerHandles[RIGHT_HANDLE].setType(RIGHT_HANDLE);
-	_equalizerHandles[RIGHT_HANDLE].setSpinBoxPointer(ui.maxSpinBox);
-*/
 
 	//adding to TF Scene TFlines and TFHandles
 	if ( ! _transferFunctionScene.items().contains(_transferFunctionHandles[0][0]) )
@@ -490,7 +465,7 @@ void QualityMapperDialog::drawGammaCorrection()
 
 void QualityMapperDialog::drawTransferFunction()
 {
-	this->clearItems( REMOVE_TF_LINES | /*REMOVE_TF_BG |*/ DELETE_REMOVED_ITEMS );
+	this->clearItems( REMOVE_TF_LINES | DELETE_REMOVED_ITEMS );
 
 	assert(_transferFunction != 0);
 
@@ -499,94 +474,43 @@ void QualityMapperDialog::drawTransferFunction()
 		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), _transferFunction->size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
 	if ( !_isTransferFunctionInitialized )
-	{
 		this->initTF();
-		//drawing axis and other basic items
-		this->drawChartBasics( _transferFunctionScene, _transferFunction_info );
-	}
 
-	//	_transferFunctionScene.addLine(0, 0, 100, 430, QPen(Qt::green, 3));
-
-	//questo per il momento è fisso e definito quì, ma dovrà essere gestito nella classe handle
-	QPointF pointToRepresentLeft;
-	QPointF pointToRepresentRight;
-	QPointF previousPoint;
-//	QRectF pointRectLeft(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
-//	QRectF pointRectRight(0, 0, 2.0*MARKERS_RADIUS, 2.0*MARKERS_RADIUS );
+	//drawing axis and other basic items
+	this->drawChartBasics( _transferFunctionScene, _transferFunction_info );
 
 	QColor channelColor;
 	QPen drawingPen(Qt::black, 3);
-	QBrush drawingBrush ( QColor(32, 32, 32), Qt::SolidPattern );
 
-
-	//drawing chart points
-	//	TfChannel *tf_c = 0;
 	TF_KEY *val = 0;
-
-	QGraphicsItem *current_item = 0;
+	QGraphicsItem *item = 0;
+	QGraphicsItem *handle1 = 0;
+	QGraphicsItem *handle2 = 0;
 	qreal zValue = 0;
+	int channelType = 0;
 
 	for(int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
-		//items removed, building new ones
-		TYPE_2_COLOR((*_transferFunction)[c].getType(), channelColor);
+		channelType = (*_transferFunction)[c].getType();
+		TYPE_2_COLOR(channelType, channelColor);
 		drawingPen.setColor( channelColor );
-		drawingBrush.setColor( channelColor );
-		zValue = ((c + 1)*2.0f);
+		zValue = ((channelType + 1)*2.0f);
 
-		for (int i=0; i<(*_transferFunction)[c].size(); i++)
+		QPointF pos1;
+		QPointF pos2;
+		for (int i=0; i<_transferFunctionHandles[channelType].size(); i++)
 		{
-			val = (*_transferFunction)[c][i];
-
-			pointToRepresentLeft.setX( _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth ) );
-			pointToRepresentLeft.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
-			pointToRepresentRight.setX( pointToRepresentLeft.x() );
-			pointToRepresentRight.setY( _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight ) /*/ _transferFunction_info->maxRoundedY*/ );
-
-
-			//linear interpolation between current point and previous one
-			//interpolation will not be executed if the current point is the first of the list
-			if (i > 0)
+			handle1 = _transferFunctionHandles[channelType][i];
+			if ( (i+1)<_transferFunctionHandles[channelType].size() )
 			{
-				current_item = _transferFunctionScene.addLine(previousPoint.x(), previousPoint.y(), pointToRepresentLeft.x(), pointToRepresentLeft.y(), drawingPen);
-				current_item->setZValue( zValue );
-				_transferFunctionLines << current_item;
+				handle2 = _transferFunctionHandles[channelType][i+1];
 
-				if ( pointToRepresentLeft.y() != pointToRepresentRight.y() )
-				{
-					current_item = _transferFunctionScene.addLine( pointToRepresentLeft.x(), pointToRepresentLeft.y(), pointToRepresentRight.x(), pointToRepresentRight.y(), drawingPen );
-					current_item->setZValue( zValue);
-					_transferFunctionLines << current_item;
-				}
+				pos1 = handle1->scenePos();
+				pos2 = handle2->scenePos();
+				item = _transferFunctionScene.addLine( handle1->scenePos().x(), handle1->scenePos().y(), handle2->scenePos().x(), handle2->scenePos().y(), drawingPen );
+				item->setZValue( zValue );
+				_transferFunctionLines << item;
 			}
-
-			//drawing single current point
-/*
-						pointRectLeft.setX(pointToRepresentLeft.x() - MARKERS_RADIUS );
-						pointRectLeft.setY(pointToRepresentLeft.y() - MARKERS_RADIUS );
-						pointRectLeft.setWidth(2.0*MARKERS_RADIUS);
-						pointRectLeft.setHeight(2.0*MARKERS_RADIUS);*/
-			
-			//sostituire con disegno della TfHandle
-			//current_item = _transferFunctionScene.addEllipse( pointRectLeft, drawingPen, drawingBrush );
-			//current_item->setZValue( zValue );
-
-			if ( pointToRepresentLeft.y() != pointToRepresentRight.y() )
-			{
-/*
-								pointRectRight.setX(pointToRepresentRight.x() - MARKERS_RADIUS );
-								pointRectRight.setY(pointToRepresentRight.y() - MARKERS_RADIUS );
-								pointRectRight.setWidth(pointRectLeft.width());
-								pointRectRight.setHeight(pointRectLeft.height());*/
-				
-				//sostituire con disegno della TfHandle
-				//current_item = _transferFunctionScene.addEllipse( pointRectRight, drawingPen, drawingBrush );
-				//current_item->setZValue( zValue );
-			}
-
-			//updating previous point.
-			//So, it's possible to interpolate linearly the current point with the previous one
-			previousPoint = pointToRepresentRight;
 		}
 	}
 
@@ -672,7 +596,7 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 	_knownExternalTFs << newTF;
 
 	_isTransferFunctionInitialized = false;
-	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
+/*	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );*/
 	this->initTF();
 	ui.presetComboBox->setCurrentIndex( 0 );
 	this->drawTransferFunction();
@@ -689,7 +613,7 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 				delete _transferFunction;
 
 			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
-			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
+//			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 			this->initTF(); //aded by MAL 04\02\08
 			this->drawTransferFunction();
 			return ;
@@ -707,8 +631,9 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 			if ( _transferFunction )
 				delete _transferFunction;
 
-			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
-			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
+			_transferFunction = new TransferFunction( external_tf.path );
+//			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
+			this->initTF(); //aded by MAL 04\02\08
 			this->drawTransferFunction();
 			return ;
 		}
@@ -718,39 +643,39 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 void QualityMapperDialog::on_redButton_toggled(bool checked)
 {
 	if (checked)
-	{
-		if ( _transferFunction )
-		{
-			_transferFunction->moveChannelAhead( RED_CHANNEL );
-			this->drawTransferFunction();
-		}
-	}
-
+		this->moveAheadChannel( RED_CHANNEL );
 }
 
 void QualityMapperDialog::on_greenButton_toggled(bool checked)
 {
 	if (checked)
-	{
-		if ( _transferFunction )
-		{
-			_transferFunction->moveChannelAhead( GREEN_CHANNEL );
-			this->drawTransferFunction();
-		}
-	}
+		this->moveAheadChannel( GREEN_CHANNEL );
 }
 
 void QualityMapperDialog::on_blueButton_toggled(bool checked)
 {
-	if (checked)
+	if (checked)	
+		this->moveAheadChannel( BLUE_CHANNEL );
+}
+
+void QualityMapperDialog::moveAheadChannel( TF_CHANNELS channelCode )
+{
+	if ( _transferFunction )
 	{
-		if ( _transferFunction )
-		{
-			_transferFunction->moveChannelAhead( BLUE_CHANNEL );
-			this->drawTransferFunction();
-		}
+		//changing drawing order for channel lines
+		_transferFunction->moveChannelAhead( channelCode );
+
+		//changing z order of TF handles
+		QGraphicsItem *item = 0;
+		for (int i=0; i<NUMBER_OF_CHANNELS; i++)
+			foreach( item, _transferFunctionHandles[i] )
+				item->setZValue( ((i + 1)*2.0f) + 1 );
+
+		//all done. Drawing updated TF
+		this->drawTransferFunction();
 	}
 }
+
 
 void QualityMapperDialog::on_left_right_EQHandle_changed()
 {
@@ -764,11 +689,11 @@ void QualityMapperDialog::on_left_right_EQHandle_changed()
 void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 {
 	sender->blockSignals( true );
-	float oldX = sender->getXKey();
-	QPointF scenePos = sender->scenePos();
-	float newX = absolute2RelativeValf( scenePos.x() + (sender->getSize()/2.0f), _transferFunction_info->leftBorder + _transferFunction_info->rightBorder );
-	float newY = 1.0f - absolute2RelativeValf( scenePos.y() + (sender->getSize()/2.0f), _transferFunction_info->upperBorder + _transferFunction_info->lowerBorder );
-	sender->updateKeyCoord( newX, newY );
+// 	float oldX = sender->getXKey();
+// 	QPointF scenePos = sender->scenePos();
+// 	float newX = absolute2RelativeValf( scenePos.x() + (sender->getSize()/2.0f), _transferFunction_info->leftBorder + _transferFunction_info->rightBorder );
+// 	float newY = 1.0f - absolute2RelativeValf( scenePos.y() + (sender->getSize()/2.0f), _transferFunction_info->upperBorder + _transferFunction_info->lowerBorder );
+//	sender->updateKeyCoord( newX, newY );
 //	_transferFunction->getChannel(sender->getChannel()).updateKey( oldX, newX, newY );
 	this->drawTransferFunction();
 	sender->blockSignals( false );

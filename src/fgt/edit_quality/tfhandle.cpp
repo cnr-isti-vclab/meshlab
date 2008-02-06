@@ -1,7 +1,7 @@
 #include "TFHandle.h"
 
 //TFHandle::TFHandle(int channel_code, int junction, CHART_INFO *environment_info) : _channelCode(channel_code), _junction_side(junction)
-TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, int junction, int zOrder, int size  )
+TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, TF_KEY *myKey, int zOrder, int size  )
 	: Handle(environment_info, color, position, zOrder, size  )
 {
 	COLOR_2_TYPE(color, _channelCode);
@@ -11,7 +11,7 @@ TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position,
 		_xPosition = absolute2RelativeValf( this->x(), _chartInfo->leftBorder + _chartInfo->rightBorder );
 		_yPosition = absolute2RelativeValf( this->y(), _chartInfo->upperBorder + _chartInfo->lowerBorder );
 	}
-	_junction_side = junction;	
+	_myKey = myKey;
 }
 
 TFHandle::~TFHandle(void)
@@ -44,11 +44,16 @@ void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	newPos.setX(newPos.x()-(_size/2.0f));
 	newPos.setY(newPos.y()-(_size/2.0f));
 
-	//the handl can be moved only INSIDE the TF scene
+	//the handle can be moved only INSIDE the TF scene
 	if (( newPos.x() >= _chartInfo->leftBorder ) && ( newPos.x() <= _chartInfo->rightBorder ) &&
 		( newPos.y() >= _chartInfo->upperBorder ) && ( newPos.y() <= _chartInfo->lowerBorder ))
 	{
 		this->setPos(newPos);
+
+		_myKey->x = absolute2RelativeValf( newPos.x(), _chartInfo->chartWidth );
+		_myKey->y = absolute2RelativeValf( newPos.y(), _chartInfo->chartHeight );
+
+
 		emit positionChanged(this);
 	}
 }
