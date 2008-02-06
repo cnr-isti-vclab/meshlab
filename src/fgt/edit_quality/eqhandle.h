@@ -26,7 +26,7 @@ public:
 		int zOrder, int size);
 	~EqHandle(void);
 	QRectF boundingRect () const;
-	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
+	virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
 	
 	void setSize						(int size)					{(size%2==0) ? _size=size+1 : _size=size;};
 	void setBarHeight					(qreal height)				{_barHeight = height;};

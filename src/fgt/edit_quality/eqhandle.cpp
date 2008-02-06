@@ -26,8 +26,8 @@ EqHandle::~EqHandle(void)
 
 void EqHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget /*= 0*/ )
 {
-	Q_UNUSED(option);
-	Q_UNUSED(widget);
+	//Q_UNUSED(option);
+	//Q_UNUSED(widget);
 	//QPen pen(Qt::black);
 	//non sepen.setWidth(2);
 	painter->setPen(_color);

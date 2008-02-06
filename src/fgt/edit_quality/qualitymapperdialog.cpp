@@ -459,6 +459,7 @@ void QualityMapperDialog::drawGammaCorrection()
 	//painter.drawArc(0, 0, pixmap->width(), pixmap->height(), 0, -90*16);
 	
 	ui.gammaCorrectionLabel->setPixmap(*pixmap);
+	painter.end();
 	delete pixmap;
 }
 
