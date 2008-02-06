@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.4  2008/02/06 13:09:10  gianpaolopalma
+ Updated vertexs and faces number in addinfo
+
  Revision 1.3  2008/02/05 16:38:55  gianpaolopalma
  Added texture file path in the mesh
 
@@ -109,6 +112,9 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	}
 	if (someTextureNotFound)
 		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
+	
+	m.addinfo->numvert = m.cm.vert.size();
+	m.addinfo->numface = m.cm.face.size();
 
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	if (!normalsUpdated) 
@@ -123,7 +129,7 @@ bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshM
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
-	if(formatName.toUpper() == tr("3DS"))
+	if(formatName.toUpper() == tr("X3D"))
 	{
 		int result = vcg::tri::io::ExporterX3D<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
 		if(result!=0)
