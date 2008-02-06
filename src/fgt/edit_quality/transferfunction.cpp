@@ -332,11 +332,13 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		//added for test
+/*
 		_channels[RED_CHANNEL].addKey(0.5f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
 		_channels[GREEN_CHANNEL].addKey(0.5f,0.7f,TF_KEY::RIGHT_JUNCTION_SIDE);
 		_channels[GREEN_CHANNEL].addKey(0.75f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		_channels[GREEN_CHANNEL].addKey(0.75f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.2f,0.3f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[GREEN_CHANNEL].addKey(0.2f,0.3f,TF_KEY::LEFT_JUNCTION_SIDE);*/
+
 		break;
 	case RED_SCALE_TF:
 		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);

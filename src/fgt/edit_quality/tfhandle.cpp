@@ -51,7 +51,7 @@ void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		this->setPos(newPos);
 
 		_myKey->x = absolute2RelativeValf( newPos.x(), _chartInfo->chartWidth );
-		_myKey->y = absolute2RelativeValf( newPos.y(), _chartInfo->chartHeight );
+		_myKey->y = absolute2RelativeValf( _chartInfo->chartHeight - newPos.y(), _chartInfo->chartHeight );
 
 
 		emit positionChanged(this);

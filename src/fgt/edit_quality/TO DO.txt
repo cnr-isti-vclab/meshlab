@@ -15,3 +15,4 @@
 0.07 06/02/2008		(!!!) implementare lo swap tra le handles quando una vien sovrapposta alle altre (!!!)
 0.29 06/02/2008		forse KEY dovrebbe contenere delle TF_KEY, e non TF_KEY*... indagare...
 1.40 06/02/2008		(!!!) ricntrollare il moveAhead (!!!)
+9.51 06/02/2008		se voglio salvare una colorband e poi ci ripenso e clicco annulla crasha
