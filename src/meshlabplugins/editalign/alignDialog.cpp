@@ -44,7 +44,8 @@ bool AlignCallBackPos(const int pos, const char * message )
 	
 	globalLogTextEdit->insertPlainText(QString(message));
 	globalLogTextEdit->ensureCursorVisible();
-	globalLogTextEdit->repaint();
+	globalLogTextEdit->update();
+	qApp->processEvents();
 
 	return true;
 }
@@ -180,8 +181,8 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, AlignPair::Result *A,
 		QString buf=QString("Arc: %1 -> %2 Area: %3 Err: %4 Sample# %5 (%6)")
 			.arg((*A).FixName)
 			.arg((*A).MovName)
-			.arg(meshTree->OG.SVA[parent->n->id].norm_area, 6,'f',3)
-			.arg((*A).err,                  6,'f',3)
+			.arg((*A).area, 6,'f',3)
+			.arg((*A).err,  6,'f',3)
 			.arg((*A).ap.SampleNum,6)
 			.arg((*A).as.LastSampleUsed() );
 			setText(0,buf);
@@ -261,5 +262,6 @@ void AlignDialog::onClickItem(QTreeWidgetItem * item, int column )
 	{
 		assert(mItem->a);
 		setCurrentArc(mItem->a);
+		gla->update();
 	}
 }
