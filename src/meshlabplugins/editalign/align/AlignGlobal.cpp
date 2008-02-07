@@ -308,9 +308,9 @@ double AlignGlobal::Node::AlignWithActiveAdj(bool Rigid)
 {
 	list<VirtAlign *>::iterator li;
 
-//	printf("Moving node %i with respect to nodes:",id);
-//	for(li=Adj.begin();li!=Adj.end();++li) if((*li)->Adj(this)->Active) printf(" %i,",(*li)->Adj(this)->id);
-//	printf("\n");
+	printf("--- AlignWithActiveAdj --- \nMoving node %i with respect to nodes:",id);
+	for(li=Adj.begin();li!=Adj.end();++li) if((*li)->Adj(this)->Active) printf(" %i,",(*li)->Adj(this)->id);
+	printf("\n");
 
   //printf("Base Matrix of Node %i\n",id);print(M);
 	
@@ -364,7 +364,8 @@ double AlignGlobal::Node::AlignWithActiveAdj(bool Rigid)
 	// infatti se considero un punto della mesh originale applicarci la nuova matricie significa fare
 	// p * M * out
 
-  M=M*out;
+  // M=M*out; //--Orig
+	M=out*M;
 
 
  // come ultimo step occorre applicare la matrice trovata a tutti gli allineamenti in gioco.
@@ -444,40 +445,37 @@ bool AlignGlobal::GlobalAlign(const vector<string> &Names, 	const double epsilon
 	double change;
   int step, localmaxiter;
 	cb("Global Alignment...");
-	LOG(elfp,"----------------\n----------------\nGlobalAlignment\n");
-
+	LOG(elfp,"----------------\n----------------\nGlobalAlignment (eps %7.3f)\n",epsilon);
 	
   queue<AlignGlobal::Node *>	Q; 
 	MakeAllDormant();
 	AlignGlobal::Node *curr=ChooseDormantWithMostDormantLink(); 
 	curr->Active=true;  
 	int cursid=curr->sid;
-	LOG(elfp,"Starting eps = %f with node %i '%s' with %i dormant link\n",epsilon, curr->id,Names[curr->id].c_str(),curr->DormantAdjNum());
+	LOG(elfp,"Root node %i '%s' with %i dormant link\n", curr->id, Names[curr->id].c_str(),curr->DormantAdjNum());
   
   while(DormantNum()>0)
 	{
 		LOG(elfp,"---------\nGlobalAlignment loop DormantNum = %i\n",DormantNum());
 		
 		curr=ChooseDormantWithMostActiveLink ();
-
 		if(!curr) {
 			// la componente connessa e' finita e si passa alla successiva cercando un dormant con tutti dormant.
 			LOG(elfp,"\nCompleted Connected Component %i\n",cursid);
 			LOG(elfp,"\nDormant Num: %i\n",DormantNum());
   	  
 			curr=ChooseDormantWithMostDormantLink ();
-			if(curr==0) LOG(elfp,"\nFailed ChooseDormantWithMostDormantLink, choosen id:%i\n" ,0);
-		        else  LOG(elfp,"\nCompleted ChooseDormantWithMostDormantLink, choosen id:%i\n" ,curr->id);
-  	  if(curr==0) 	break; // non ci sono piu' componenti connesse composte da piu' di una singola mesh.
-
-			curr->Active=true;  
+			if(curr==0) {
+										LOG(elfp,"\nFailed ChooseDormantWithMostDormantLink, choosen id:%i\n" ,0);
+										break; // non ci sono piu' componenti connesse composte da piu' di una singola mesh.
+									}
+		           else LOG(elfp,"\nCompleted ChooseDormantWithMostDormantLink, choosen id:%i\n" ,curr->id);
+  	  curr->Active=true;  
 			cursid=curr->sid;
 			curr=ChooseDormantWithMostActiveLink ();
-			assert(curr);
 			if(curr==0) LOG(elfp,"\nFailed    ChooseDormantWithMostActiveLink, choosen id:%i\n" ,0);
-		        else  LOG(elfp,"\nCompleted ChooseDormantWithMostActiveLink, choosen id:%i\n" ,curr->id);
-  	 
-		};
+		        else  LOG(elfp,"\nCompleted ChooseDormantWithMostActiveLink, choosen id:%i\n" ,curr->id);  	 
+		}  
 		
     LOG(elfp,"\nAdded node %i '%s' with %i/%i Active link\n",curr->id,Names[curr->id].c_str(),curr->ActiveAdjNum(),curr->Adj.size());
   	curr->Active=true;
@@ -495,12 +493,12 @@ bool AlignGlobal::GlobalAlign(const vector<string> &Names, 	const double epsilon
 		 change=curr->AlignWithActiveAdj(Rigid);
 		 step++;
 		 LOG(elfp,"     Step %5i Queue size %5i Moved %4i  err %10.4f\n",step,Q.size(),curr->id,change);
-		 if(change>epsilon) curr->PushBackActiveAdj(Q);
-		 if(change>epsilon*1000)
-		 {
-			 //printf("Megapezza Warning\n\n");
-			 return false;
-		 }
+		 if(change>epsilon)
+				{  
+						curr->PushBackActiveAdj(Q);
+						LOG(elfp,"         Large Change pushing back active nodes adj to %i to Q (new size %i)\n",curr->id,Q.size());
+						if(change>epsilon*1000)  printf("Large Change Warning\n\n");
+		 		}
      if(step>localmaxiter) return false;
 		 if(step>maxiter) return false;
 		}
@@ -585,33 +583,29 @@ void AlignGlobal::BuildGraph(std::vector<AlignPair::Result *> &Res, vector<Matri
 			tv->FixN=(*ri).Nfix;
 			tv->MovN=(*ri).Nmov;
 			
-/*
+		/*
 
-	Siano:
-	Pf e Pm   i punti sulle mesh fix e mov nei sist di rif originali
-	Pft e Pmt i punti sulle mesh fix e mov dopo le trasf correnti; 
-	Mf e Mm  le trasf che portano le  mesh fix e mov nelle posizioni correnti; 
-	If e Im  le trasf inverse di cui sopra 
-	Vale:
-	Pft = Mf*Pf  e Pmt = Mm*Pm
-   Pf = If*Pft e Pm = Im*Pmt 
+			Siano:
+			Pf e Pm   i punti sulle mesh fix e mov nei sist di rif originali
+			Pft e Pmt i punti sulle mesh fix e mov dopo le trasf correnti; 
+			Mf e Mm  le trasf che portano le  mesh fix e mov nelle posizioni correnti; 
+			If e Im  le trasf inverse di cui sopra 
+			Vale:
+			Pft = Mf*Pf  e Pmt = Mm*Pm
+			 Pf = If*Pft e Pm = Im*Pmt 
 
-	       Res *   Pm     =         pf;
-	       Res * Im * Pmt =      If * Pft
-	  Mf * Res * Im * Pmt = Mf * If * Pft 
-	(Mf * Res * Im) * Pmt = Pft 
+						 Res *   Pm     =         Pf;
+						 Res * Im * Pmt =      If * Pft
+				Mf * Res * Im * Pmt = Mf * If * Pft 
+			(Mf * Res * Im) * Pmt = Pft 
 
-*/
-	Matrix44d Mm=Tr[Id2I[(*ri).MovName]]; 
-	Matrix44d Mf=Tr[Id2I[(*ri).FixName]]; 
-	Matrix44d Im=Inverse(Mm);
-	Matrix44d If=Inverse(Mf);
-	
-	Matrix44d NewTr = Mf * (*ri).Tr * Im;
-	//Matrix44d NewTr = Im * (*ri).Tr * Mf;
-
-
-
+		*/
+			Matrix44d Mm=Tr[Id2I[(*ri).MovName]]; 
+			Matrix44d Mf=Tr[Id2I[(*ri).FixName]]; 
+			Matrix44d Im=Inverse(Mm);
+			Matrix44d If=Inverse(Mf);
+			
+			Matrix44d NewTr = Mf * (*ri).Tr * Im; // --- orig
 
 			tv->M2F=NewTr;
 			tv->F2M=Inverse(NewTr);
@@ -619,5 +613,6 @@ void AlignGlobal::BuildGraph(std::vector<AlignPair::Result *> &Res, vector<Matri
       assert(tv->Check());
 			A.push_back(tv);
 		}
+			
 	ComputeConnectedComponents();
-	}
+}
