@@ -58,24 +58,6 @@ void MeshTree::resetID()
 
 void MeshTree::Process(AlignPair::Param ap)
 {
-//	ap.MaxIterNum=100;
-//	ap.MinDistAbs = aln.MinDist;
-//	ap.TrgDistAbs = aln.TrgDist;;
-//	ap.SampleNum = aln.SampleNum;
-//    ap.SampleMode = AlignPair::Param::SMRandom;
-//	ap.MaxPointNum = aln.MaxPointNum;
-//	ap.MinPointNum = aln.MinPointNum;
-//    ap.MaxAngleRad=math::ToRad(aln.MaxAngleDeg);
-//	if(aln.RigidFlag) ap.MatchMode = AlignPair::Param::MMRigid;
-//				   else ap.MatchMode = AlignPair::Param::MMFast;
-//	ap.ReduceFactor = aln.ReduceFactor;
-//    ap.PassLoFilter=0;
-//	ap.EndStepNum=aln.EndStepNum;
-
-  //Minimo esempio di codice per l'uso della funzione di allineamento.
-	//OccupancyGrid OG;
-  //% OG.Init(nodeList.size(), Box3d::Construct(gluedBBox()), 10000);
-
 	resetID(); 	// Assign to each mesh (glued and not glued) an unique id
 	OG.Init(nodeList.size(), Box3d::Construct(gluedBBox()), 10000);
   
@@ -107,8 +89,7 @@ void MeshTree::Process(AlignPair::Param ap)
 	
 	QString buf;
 	cb(0,qPrintable(buf.sprintf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeList.size())));
-  printf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeList.size());
-	
+  
   OG.Compute();
   OG.Dump(stdout);
 
@@ -160,8 +141,6 @@ void MeshTree::Process(AlignPair::Param ap)
 	  Matrix44d In;
 	  In.SetIdentity();
     In=MovM;
-    printf("Starting Alingment with an initial matrix :\n");
-    //AlignWrapper::FileMatrixWrite(stdout,In);
     aa.Align(In,UG,ResVec[i]);
     ResVec[i].FixName=OG.SVA[i].s;
     ResVec[i].MovName=OG.SVA[i].t;
@@ -179,6 +158,9 @@ void MeshTree::Process(AlignPair::Param ap)
   // now cut the ResVec vector to the only computed result (the arcs with area > .1)
 	ResVec.resize(i);
   
+	cb(0,qPrintable(buf.sprintf("Completed Mesh-Mesh Alignment\n")));
+	cb(0,qPrintable(buf.sprintf("Starting Global Alignment\n")));
+		
 	AlignGlobal AG;
   
   AG.BuildGraph(ResVecPtr, GluedTrVec, GluedIdVec);
@@ -196,5 +178,8 @@ void MeshTree::Process(AlignPair::Param ap)
 //Now get back the results!
 for(int ii=0;ii<GluedTrVecOut.size();++ii)
 	MM(GluedIdVec[ii])->cm.Tr.Import(GluedTrVecOut[ii]);	
+
+cb(0,qPrintable(buf.sprintf("Completed Global Alignment (error bound %6.4f\n",StartGlobErr)));
+
 }
 
