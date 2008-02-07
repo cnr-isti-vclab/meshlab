@@ -134,6 +134,7 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 		connect(alignDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
 		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
 		connect(alignDialog->ui.falseColorCB, SIGNAL(valueChanged(bool)) , _gla->window(),  SLOT(updateGL() ) );
+		connect(alignDialog->ui.recalcButton, SIGNAL(clicked()) , this,  SLOT(recalcCurrentArc() ) );
 
 	}
 	alignDialog->edit=this;
@@ -303,6 +304,12 @@ void EditAlignPlugin::process()
 			return;
 		}
 	meshTree.Process(ap);
+	alignDialog->rebuildTree();	
+	gla->update();
+}
+
+void EditAlignPlugin::recalcCurrentArc()
+{
 	alignDialog->rebuildTree();	
 	gla->update();
 }

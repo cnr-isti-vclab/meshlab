@@ -91,6 +91,7 @@ public:
 
 public slots:
 		void process();
+		void recalcCurrentArc();
 		void glueHere();
 		void glueHereAll();
 		void glueManual();

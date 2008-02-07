@@ -112,9 +112,9 @@
         <item>
          <layout class="QVBoxLayout" >
           <item>
-           <widget class="QPushButton" name="inspectButton" >
+           <widget class="QPushButton" name="recalcButton" >
             <property name="text" >
-             <string>Inspect Pair</string>
+             <string>Recalc Pairwise</string>
             </property>
            </widget>
           </item>
