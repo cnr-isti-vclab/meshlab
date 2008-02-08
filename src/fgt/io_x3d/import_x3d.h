@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.6  2008/02/08 17:04:32  gianpaolopalma
+ Added methods to reduce loading time of X3D scene from the file
+
  Revision 1.5  2008/02/06 16:52:58  gianpaolopalma
  Added comments
 
@@ -51,6 +54,7 @@
 
 #include<QtXml>
 #include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/create/platonic.h>
 #include <wrap/gl/glu_tesselator.h>
 
@@ -65,6 +69,7 @@ namespace io {
 	{
 	private:
 
+		
 		//search all Switch nodes and replace everyone with the child marked in the whichChoice attribute
 		static void ManageSwitchNode(QDomDocument* doc)
 		{
@@ -548,9 +553,55 @@ namespace io {
 			return E_NOERROR;
 		}
 
+		
+		
+		//Check if the geometry defined in the 'root' is already parsed
+		inline static bool loadSubMesh(QDomElement& root, OpenMeshType& m, const std::map<QString, OpenMeshType*> subMeshMap, const vcg::Matrix44f matrix, AdditionalInfoX3D* info, CallBackPos *cb)
+		{
+			static int random = 0;
+			if (root.isNull()) return false;
+			QString def = root.attribute("DEF", "");
+			if (def == "")
+			{
+				//Add attribute DEF
+				QString defValue = "AutoGenDef#%1";
+				root.setAttribute("DEF", defValue.arg(random++));
+				return true;
+			}
+			std::map<QString, OpenMeshType*>::const_iterator iter = subMeshMap.find(def);
+			if (iter != subMeshMap.end())
+			{
+				//The geometry is already parsed
+				OpenMeshType* subMesh = iter->second;
+				int offsetVertex = m.vert.size();
+				int offsetFace = m.face.size();
+				//Append subMesh of the geometry to main mesh
+				vcg::tri::Append<OpenMeshType, OpenMeshType>::Mesh(m, *subMesh);
+				//Trasform vertex and normal per vertex
+				for (size_t i = offsetVertex; i < m.vert.size(); i++)
+				{
+					vcg::Point4f vertex = matrix * vcg::Point4f(m.vert[i].P().X(), m.vert[i].P().Y(), m.vert[i].P().Z(), 1);
+					m.vert[i].P() = vcg::Point3f(vertex.X(), vertex.Y(), vertex.Z());
+					if (m.HasPerVertexNormal())
+						transformNormal(m.vert[i].N(), matrix, m.vert[i].N());
+				}
+				//Trasform normal per wedge and per face
+				for (size_t i = offsetFace; i < m.face.size(); i++)
+				{
+					for (int tt = 0; tt < 3 && m.HasPerWedgeNormal(); tt++)
+						transformNormal(m.face[i].WN(tt), matrix, m.face[i].WN(tt));
+					if (m.HasPerFaceNormal())
+						transformNormal(m.face[i].N(), matrix, m.face[i].N());
+				}
+				info->numvert++;
+				if ((cb !=NULL) && (info->numvert % 10)==0) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
+				return false;
+			}
+			return true;
+		}
 
 		
-
+		
 		//Load default value of color and texture coordinate in the vertex
 		inline static void loadDefaultValuePerVertex(typename OpenMeshType::VertexPointer vertex, const OpenMeshType m, int mask)
 		{
@@ -671,7 +722,6 @@ namespace io {
 							findAndParseAttribute(coordIndex, geometry, "index", "");
 							if (!coordIndex.isEmpty())
 							{
-								info->numface++;
 								if (!color.isNull()) bHasPerVertexColor = true;
 								if (textureSup) 
 									bHasPerVertexText = true;
@@ -688,7 +738,6 @@ namespace io {
 						}
 						else if (tagName == "TriangleFanSet" || tagName == "TriangleSet" || tagName == "TriangleStripSet" || tagName == "QuadSet")
 						{
-							info->numface++;
 							if (!color.isNull()) bHasPerWedgeColor = true;
 							if (textureSup) 
 								bHasPerWedgeTexCoord = true;
@@ -711,7 +760,6 @@ namespace io {
 							findAndParseAttribute(coordIndex, geometry, "coordIndex", "");
 							if (!coordIndex.isEmpty())
 							{
-								info->numface++;
 								if (textureSup)
 								{
 									if (!texCoordIndex.isEmpty())
@@ -746,7 +794,6 @@ namespace io {
 							int xDimension = geometry.attribute("xDimension", "0").toInt();
 							int zDimension = geometry.attribute("zDimension", "0").toInt();
 							info->numvert += xDimension * zDimension;
-							info->numface++;
 							if (textureSup) 
 								bHasPerVertexText = true;
 							else
@@ -768,7 +815,6 @@ namespace io {
 						}
 						else if (tagName == "PointSet" && !color.isNull())
 						{
-							info->numface++;
 							bHasPerVertexColor = true;
 							copyTextureFile = false;
 						}
@@ -780,12 +826,12 @@ namespace io {
 								info->textureFile.push_back(textureFile.at(i));
 						}
 					}
-					else if (tagName == "TriangleSet2D" || tagName == "Polypoint2D")
-						info->numface++;
 					geometry = geometry.nextSiblingElement();
 				}
 			}
 			
+			std::map<QString, QDomElement> defUse;
+			info->numface = countObject(doc->firstChildElement(), defUse);
 			//set mask
 			if (bHasPerWedgeTexCoord) 
 				info->mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
@@ -807,6 +853,33 @@ namespace io {
 		}
 
 		
+
+		//Return the number of x3d object in the scene
+		static int countObject(const QDomElement& root, std::map<QString, QDomElement>& defUse)
+		{
+			if (root.isNull()) return 0;
+			int n = 0;
+			if (root.tagName() == "Shape")
+				return ++n;
+			if (root.attribute("DEF") != "")
+				defUse[root.attribute("DEF")] = root;
+			else if (root.attribute("USE") != "")
+			{
+				std::map<QString, QDomElement>::const_iterator iter = defUse.find(root.attribute("USE"));
+				if (iter != defUse.end())
+				{
+					n += countObject(iter->second, defUse);
+					return n;
+				}
+			}
+			QDomElement child = root.firstChildElement();
+			while(!child.isNull())
+			{
+				n += countObject(child, defUse);
+				child = child.nextSiblingElement();
+			}
+			return n;
+		}
 		
 		//Load in the mesh the geometry defined in the nodes TriangleSet, TriangleFanSet, TriangleStripSet, and QuadSet
 		static int LoadSet(QDomElement geometry,
@@ -817,11 +890,10 @@ namespace io {
 									const QStringList& colorList,
 									const QStringList& normalList,
 									int colorComponent,
+									OpenMeshType* subMesh,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
-			info->numvert++;
-			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(20 + 60*(info->numvert)/max<int>(info->numface, info->numvert), "Loading X3D Object...");
 			QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
 			std::vector<vcg::Point4f> vertexSet;
 			int index = 0;
@@ -851,19 +923,27 @@ namespace io {
 			//Load vertexs in the mesh
 			int offset = m.vert.size();
 			vcg::tri::Allocator<OpenMeshType>::AddVertices(m, vertexSet.size());
+			vcg::tri::Allocator<OpenMeshType>::AddVertices(*subMesh, vertexSet.size());
+			std::vector<int> remap(m.vert.size(), -1);
 			for (size_t vv = 0; vv < vertexSet.size(); vv++)
 			{
 				vcg::Point4f tmp = tMatrix * vertexSet.at(vv);
 				m.vert[offset + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
-				loadDefaultValuePerVertex(&(m.vert[offset + vv]), m, info->mask); 
+				loadDefaultValuePerVertex(&(m.vert[offset + vv]), m, info->mask);
+				//Load vertex in the subMesh
+				vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportVertex(subMesh->vert[vv], m.vert[offset + vv]);
+				(*subMesh).vert[vv].P() = vcg::Point3f(vertexSet.at(vv).X(), vertexSet.at(vv).Y(), vertexSet.at(vv).Z());
+				remap[offset + vv] = vv;
 			}
 			//Load faces in the mesh
 			int offsetFace = m.face.size();
 			int nFace = 0;
+			vcg::Point3f normals[3];
 			if (geometry.tagName() == "TriangleSet")
 			{
 				nFace = vertexFaceIndex.size()/3;
 				vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+				vcg::tri::Allocator<OpenMeshType>::AddFaces(*subMesh, nFace);
 				for (int ff = 0; ff < nFace; ff++)
 				{
 					int faceIndex = ff + offsetFace;
@@ -873,7 +953,10 @@ namespace io {
 						m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(tt + ff*3) + offset]);
 						//Load normal per wedge
 						if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
-							getNormal(normalList, (tt + ff*3)*3, m.face[faceIndex].WN(tt), tMatrix);
+						{
+							getNormal(normalList, (tt + ff*3)*3, normals[tt], vcg::Matrix44f::Identity());
+							transformNormal(normals[tt], tMatrix, m.face[faceIndex].WN(tt));
+						}
 						//Load color per wedge
 						if (m.HasPerWedgeColor() && !colorList.isEmpty())
 							getColor(colorList, colorComponent, (tt + ff*3)*colorComponent, m.face[faceIndex].WC(tt));
@@ -883,7 +966,18 @@ namespace io {
 					}
 					//Load normal per face
 					if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
-						getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
+					{
+						getNormal(normalList, ff*3, normals[0], vcg::Matrix44f::Identity());
+						transformNormal(normals[0], tMatrix, m.face[faceIndex].N());
+					}
+					//Copy face in the subMesh
+					vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportFace((*subMesh), m, subMesh->face[ff], m.face[ff + offsetFace], remap);
+					for (int i = 0; i < 3; i++)
+						if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+							subMesh->face[ff].WN(i) = normals[i];
+						 
+					if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+						subMesh->face[ff].N() = normals[0];
 				}
 			}
 			else if (geometry.tagName() == "TriangleFanSet" || geometry.tagName() == "TriangleStripSet")
@@ -916,7 +1010,8 @@ namespace io {
 						}
 					}
 				}
-				vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);									
+				vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+				vcg::tri::Allocator<OpenMeshType>::AddFaces(*subMesh, nFace);
 				int index = 0;
 				int ff = 0;
 				//For each fan or strip
@@ -929,8 +1024,8 @@ namespace io {
 					vcg::Point3f firstNormal, secondNormal;
 					if (normalPerVertex == "true" && !normalList.isEmpty())
 					{
-						getNormal(normalList, index*3, firstNormal, tMatrix);
-						getNormal(normalList, index*3 + 3, secondNormal, tMatrix);
+						getNormal(normalList, index*3, firstNormal, vcg::Matrix44f::Identity());
+						getNormal(normalList, index*3 + 3, secondNormal, vcg::Matrix44f::Identity());
 					}
 					vcg::Color4b firstColor, secondColor;
 					if (!colorList.isEmpty())
@@ -950,8 +1045,10 @@ namespace io {
 						m.face[faceIndex].V(1) = &(m.vert[secondVertexIndex]);
 						if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
 						{
-							m.face[faceIndex].WN(0) = firstNormal;
-							m.face[faceIndex].WN(1) = secondNormal;
+							transformNormal(firstNormal, tMatrix, m.face[faceIndex].WN(0));
+							transformNormal(secondNormal, tMatrix, m.face[faceIndex].WN(1));
+							normals[0] = firstNormal;
+							normals[1] = secondNormal;
 						}
 						if (m.HasPerWedgeColor() && !colorList.isEmpty())
 						{
@@ -970,9 +1067,15 @@ namespace io {
 						if (!normalList.isEmpty())
 						{
 							if (normalPerVertex == "true" && m.HasPerWedgeNormal())
-								getNormal(normalList, (index + vi)*3, m.face[faceIndex].WN(2), tMatrix);
+							{
+								getNormal(normalList, (index + vi)*3, normals[2], vcg::Matrix44f::Identity());
+								transformNormal(normals[2], tMatrix, m.face[faceIndex].WN(2));
+							}
 							if (normalPerVertex == "false" && m.HasPerFaceNormal())
-								getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
+							{
+								getNormal(normalList, ff*3, normals[0], vcg::Matrix44f::Identity());
+								transformNormal(normals[0], tMatrix, m.face[faceIndex].N());
+							}
 						}
 						if (!colorList.isEmpty() && m.HasPerWedgeColor())
 							getColor(colorList, colorComponent, (index + vi)*colorComponent, m.face[faceIndex].WC(2));
@@ -1000,6 +1103,14 @@ namespace io {
 								secondTextCoord = m.face[faceIndex].WT(2);
 							validSecond = valid;
 						}
+
+						//Copy face in the subMesh
+						vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportFace((*subMesh), m, subMesh->face[ff], m.face[faceIndex], remap);
+						if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+							for (int i = 0; i < 3; i++)
+								subMesh->face[ff].WN(i) = normals[i];
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							subMesh->face[ff].N() = normals[0];
 						ff++;
 					}
 					index += numVertex;
@@ -1009,6 +1120,7 @@ namespace io {
 			{
 				nFace = vertexFaceIndex.size()/4;
 				vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace * 2);
+				vcg::tri::Allocator<OpenMeshType>::AddFaces(*subMesh, nFace * 2);
 				for (int ff = 0; ff < nFace; ff++)
 				{
 					//Tesselate the quadrangular face
@@ -1031,7 +1143,10 @@ namespace io {
 							m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(indexVertex) + offset]);
 							//Load normal per wedge
 							if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
-								getNormal(normalList, indexVertex*3, m.face[faceIndex].WN(tt), tMatrix);
+							{
+								getNormal(normalList, indexVertex*3, normals[tt], vcg::Matrix44f::Identity());
+								transformNormal(normals[tt], tMatrix, m.face[faceIndex].WN(tt));
+							}
 							//Load color per wedge
 							if (m.HasPerWedgeColor() && !colorList.isEmpty())
 								getColor(colorList, colorComponent, indexVertex*colorComponent, m.face[faceIndex].WC(tt));
@@ -1042,11 +1157,24 @@ namespace io {
 						}
 						//Load normal per face
 						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
-							getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
+						{
+							getNormal(normalList, ff*3, normals[0], vcg::Matrix44f::Identity());
+							transformNormal(normals[0], tMatrix, m.face[faceIndex].N());
+						}
+
+						//Copy face in the subMesh
+						vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportFace((*subMesh), m, subMesh->face[faceIndex - offsetFace], m.face[faceIndex], remap);
+						if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+							for (int i = 0; i < 3; i++)
+								subMesh->face[faceIndex - offsetFace].WN(i) = normals[i];
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							subMesh->face[faceIndex - offsetFace].N() = normals[0];
 						faceIndex++;
 					}
 				}
 			}
+			info->numvert++;
+			if ((cb !=NULL) && (info->numvert % 10)==0) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
 			return E_NOERROR;
 		}
 
@@ -1061,11 +1189,10 @@ namespace io {
 									const QStringList& colorList,
 									const QStringList& normalList,
 									int colorComponent,
+									OpenMeshType* subMesh,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
-			info->numvert++;
-			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(20 + 60*(info->numvert)/max<int>(info->numface, info->numvert), "Loading X3D Object...");
 			QStringList indexList;
 			findAndParseAttribute(indexList, geometry, "index", "");
 			if (!indexList.isEmpty())
@@ -1075,6 +1202,8 @@ namespace io {
 				int offset = m.vert.size();
 				int nVertex = coordList.size()/3;
 				vcg::tri::Allocator<OpenMeshType>::AddVertices(m, nVertex);
+				vcg::tri::Allocator<OpenMeshType>::AddVertices(*subMesh, nVertex);
+				std::vector<int> remap(m.vert.size(), -1);
 				for (int vv = 0; vv < nVertex; vv++)
 				{
 					vcg::Point4f tmp = tMatrix * vcg::Point4f(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
@@ -1089,6 +1218,12 @@ namespace io {
 					//Load texture coordinate per vertex
 					if (m.HasPerVertexTexCoord())
 						getTextureCoord(texture, vv*2, m.vert[offset + vv].cP(), m.vert[offset + vv].T(), tMatrix);
+					//Load vertex in the subMesh
+					vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportVertex(subMesh->vert[vv], m.vert[offset + vv]);
+					(*subMesh).vert[vv].P() = vcg::Point3f(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat());
+					if (m.HasPerVertexNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+						getNormal(normalList, vv*3, subMesh->vert[vv].N(), vcg::Matrix44f::Identity());
+					remap[offset + vv] = vv;
 				}
 				//Load face in the mesh
 				int offsetFace = m.face.size();
@@ -1097,6 +1232,7 @@ namespace io {
 				{
 					nFace = indexList.size()/3;
 					vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+					vcg::tri::Allocator<OpenMeshType>::AddFaces(*subMesh, nFace);
 					for (int ff = 0; ff < nFace; ff++)
 					{
 						int faceIndex = ff + offsetFace;
@@ -1117,6 +1253,11 @@ namespace io {
 						//Load normal per face
 						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
 							getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
+
+						//Copy face in the subMesh
+						vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportFace((*subMesh), m, subMesh->face[ff], m.face[ff + offsetFace], remap);
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							getNormal(normalList, ff*3, subMesh->face[ff].N(), vcg::Matrix44f::Identity());
 					}
 				}								
 				else if (geometry.tagName() == "IndexedTriangleFanSet" || geometry.tagName() == "IndexedTriangleStripSet")
@@ -1142,6 +1283,7 @@ namespace io {
 						sub++;
 					nFace = indexList.size() - 2*count - sub;
 					vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+					vcg::tri::Allocator<OpenMeshType>::AddFaces(*subMesh, nFace);
 					int ff = 0;
 					int firstVertexIndex;
 					int secondVertexIndex;
@@ -1187,13 +1329,18 @@ namespace io {
 						}
 						m.face[faceIndex].V(2) = &(m.vert[vertIndex]);
 						//Load normal per face
-						if (!normalList.isEmpty() && normalPerVertex == "false")
+						if (m.HasPerFaceNormal() && !normalList.isEmpty() && normalPerVertex == "false")
 							getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
 						if(!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-								getTextureCoord(texture, (vertIndex - offset)*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(2), tMatrix);
+							getTextureCoord(texture, (vertIndex - offset)*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(2), tMatrix);
 						if (geometry.tagName() == "IndexedTriangleStripSet")
 							firstVertexIndex = secondVertexIndex;
 						secondVertexIndex = vertIndex;
+
+						//Copy face in the subMesh
+						vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportFace((*subMesh), m, subMesh->face[ff], m.face[faceIndex], remap);
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							getNormal(normalList, ff*3, subMesh->face[ff].N(), vcg::Matrix44f::Identity());
 						ff++;
 					}
 				}
@@ -1201,6 +1348,7 @@ namespace io {
 				{
 					nFace = indexList.size()/4;
 					vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace * 2);
+					vcg::tri::Allocator<OpenMeshType>::AddFaces(*subMesh, nFace * 2);
 					for (int ff = 0; ff < nFace; ff++)
 					{
 						//Tessellate the quadrangular face
@@ -1237,11 +1385,17 @@ namespace io {
 							//Load normal per face
 							if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
 								getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
+							//Load face in the subMesh
+							vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportFace((*subMesh), m, subMesh->face[faceIndex - offsetFace], m.face[faceIndex], remap);
+							if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							getNormal(normalList, ff*3, subMesh->face[faceIndex - offsetFace].N(), vcg::Matrix44f::Identity());
 							faceIndex++;
 						}
 					}
 				}
 			}
+			info->numvert++;
+			if ((cb !=NULL) && (info->numvert % 10)==0) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
 			return E_NOERROR;
 		}
 
@@ -1256,10 +1410,8 @@ namespace io {
 									const QStringList& normalList,
 									int colorComponent,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
-			info->numvert++;
-			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(20 + 60*(info->numvert)/max<int>(info->numface, info->numvert), "Loading X3D Object...");
 			QString colorPerVertex = geometry.attribute("colorPerVertex", "true");
 			QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
 			int xDimension = geometry.attribute("xDimension", "0").toInt();
@@ -1309,46 +1461,36 @@ namespace io {
 			{
 				for (int j = 0; j < xDimension - 1; j++)
 				{
-					//Load first face
 					index = 2 * (i * (xDimension - 1) + j);
-					loadDefaultValuePerFace(&(m.face[index + offsetFace]), m, info->mask);
-					m.face[index + offsetFace].V(0) = &(m.vert[i * xDimension + j + offsetVertex]);
-					m.face[index + offsetFace].V(1) = &(m.vert[(i + 1) * xDimension + j + 1 + offsetVertex]);
-					m.face[index + offsetFace].V(2) = &(m.vert[i * xDimension + j + 1 + offsetVertex]);
-					//Load color per face
-					if (m.HasPerFaceColor() && colorPerVertex == "false" && !colorList.isEmpty())
-						getColor(colorList, colorComponent, index * colorComponent, m.face[index +offsetFace].C());
-					//Load normal per face
-					if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
-						getNormal(normalList, index * 3, m.face[index + offsetFace].N(), tMatrix);
-					//Load texture coordinate per wedge
-					if (!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+					//Load first face
+					for (int ff = 0; ff < 2; ff++)
 					{
-						getTextureCoord(texture, (i * xDimension + j)*2, m.vert[i * xDimension + j + offsetVertex].cP(), m.face[index + offsetFace].WT(0), tMatrix);
-						getTextureCoord(texture, ((i + 1) * xDimension + j + 1)*2, m.vert[(i + 1) * xDimension + j + 1 + offsetVertex].cP(), m.face[index + offsetFace].WT(1), tMatrix);
-						getTextureCoord(texture, (i * xDimension + j + 1)*2, m.vert[i * xDimension + j + 1 + offsetVertex].cP(), m.face[index + offsetFace].WT(2), tMatrix);
-					}
-					//Load second face
-					index++;
-					loadDefaultValuePerFace(&(m.face[index + offsetFace]), m, info->mask);
-					m.face[index + offsetFace].V(0) = &(m.vert[i * xDimension + j + offsetVertex]);
-					m.face[index + offsetFace].V(1) = &(m.vert[(i + 1) * xDimension + j + offsetVertex]);
-					m.face[index + offsetFace].V(2) = &(m.vert[(i + 1) * xDimension + j + 1 + offsetVertex]);
-					//Load color per face
-					if (m.HasPerFaceColor() && colorPerVertex == "false" && !colorList.isEmpty())
-						getColor(colorList, colorComponent, index * colorComponent, m.face[index +offsetFace].C());
-					//Load normal per face
-					if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
-						getNormal(normalList, index * 3, m.face[index + offsetFace].N(), tMatrix);
-					//Load texture coordinate per wedge
-					if (!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-					{
-						getTextureCoord(texture, (i * xDimension + j)*2, m.vert[i * xDimension + j + offsetVertex].cP(), m.face[index + offsetFace].WT(0), tMatrix);
-						getTextureCoord(texture, ((i + 1) * xDimension + j)*2, m.vert[(i + 1) * xDimension + j + offsetVertex].cP(), m.face[index + offsetFace].WT(1), tMatrix);
-						getTextureCoord(texture, ((i + 1) * xDimension + j + 1)*2, m.vert[(i + 1) * xDimension + j + 1 + offsetVertex].cP(), m.face[index + offsetFace].WT(2), tMatrix);
+						int val[3][2] = {{i, j}, {i+1, j+1}, {i, j+1}};
+						if (ff == 1)
+						{
+							val[1][1] = j;
+							val[2][0] = i+1;
+						}
+						loadDefaultValuePerFace(&(m.face[index + offsetFace]), m, info->mask);
+						for (int tt = 0; tt < 3; tt++)
+						{
+							m.face[index + offsetFace].V(tt) = &(m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex]);
+							//Load texture coordinate per wedge
+							if (!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
+								getTextureCoord(texture, (val[tt][0] * xDimension + val[tt][1])*2, m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex].cP(), m.face[index + offsetFace].WT(0), tMatrix);
+						}
+						//Load color per face
+						if (m.HasPerFaceColor() && colorPerVertex == "false" && !colorList.isEmpty())
+							getColor(colorList, colorComponent, (index + ff) * colorComponent, m.face[index + offsetFace].C());
+						//Load normal per face
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							getNormal(normalList, (index + ff) * 3, m.face[index + offsetFace].N(), tMatrix);
+						index++;
 					}
 				}
 			}
+			info->numvert++;
+			if ((cb !=NULL) && (info->numvert % 10)==0) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
 			return E_NOERROR;
 		}
 
@@ -1363,11 +1505,10 @@ namespace io {
 									const QStringList& colorList,
 									const QStringList& normalList,
 									int colorComponent,
+									OpenMeshType* subMesh,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
-			info->numvert++;
-			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(20 + 60*(info->numvert)/max<int>(info->numface, info->numvert), "Loading X3D Object...");
 			QStringList coordIndex;
 			findAndParseAttribute(coordIndex, geometry, "coordIndex", "");
 			if (!coordIndex.isEmpty())
@@ -1382,6 +1523,8 @@ namespace io {
 				int nVertex = coordList.size()/3;
 				//Load vertex in the mesh
 				vcg::tri::Allocator<OpenMeshType>::AddVertices(m, nVertex);
+				vcg::tri::Allocator<OpenMeshType>::AddVertices(*subMesh, nVertex);
+				std::vector<int> remap(m.vert.size(), -1);
 				for (int vv = 0; vv < nVertex; vv++)
 				{
 					vcg::Point4f tmp = tMatrix * vcg::Point4f(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
@@ -1396,10 +1539,17 @@ namespace io {
 					//Load texture coordinate per vertex
 					if (m.HasPerVertexTexCoord() && texCoordIndex.isEmpty())
 						getTextureCoord(texture, vv * 2, m.vert[offset + vv].cP(), m.vert[offset + vv].T(), tMatrix);
+					//Load vertex in the subMesh
+					vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportVertex(subMesh->vert[vv], m.vert[offset + vv]);
+					(*subMesh).vert[vv].P() = vcg::Point3f(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat());
+					if (m.HasPerVertexNormal() && normalPerVertex == "true" && !normalList.isEmpty() && normalIndex.isEmpty())
+						getNormal(normalList, vv*3, subMesh->vert[vv].N(), vcg::Matrix44f::Identity());
+					remap[offset + vv] = vv;
 				}
 				int ci = 0;
 				int initPolygon;
 				int nPolygon = 0;
+				int smFaceIndex = 0;
 				//For each polygon
 				while(ci < coordIndex.size())
 				{
@@ -1427,11 +1577,20 @@ namespace io {
 					//Tesselate polygon
 					polygonVect.push_back(polygon);
 					std::vector<int> indexVect;
-					vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
+					if (polygonVect.size() == 3)
+					{
+						indexVect.push_back(0);
+						indexVect.push_back(1);
+						indexVect.push_back(2);
+					}
+					else
+						vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
 					//Load the face obtained by tessellation
 					int nFace = indexVect.size()/3;
 					int offsetFace = m.face.size();
 					vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
+					vcg::tri::Allocator<OpenMeshType>::AddFaces((*subMesh), nFace);
+					vcg::Point3f normals[3];
 					for (int ff = 0; ff < nFace; ff++)
 					{
 						loadDefaultValuePerFace(&(m.face[ff + offsetFace]), m, info->mask);
@@ -1440,16 +1599,13 @@ namespace io {
 							int index = coordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt();
 							m.face[ff + offsetFace].V(tt) = &(m.vert[index + offset]);
 							//Load per wedge color
-							if (m.HasPerWedgeColor() && colorPerVertex == "true" && !colorList.isEmpty() && !colorIndex.isEmpty())
-							{
-								if (!colorIndex.isEmpty() && index < colorIndex.size())
+							if (m.HasPerWedgeColor() && colorPerVertex == "true" && !colorList.isEmpty() && !colorIndex.isEmpty() && index < colorIndex.size())
 									getColor(colorList, colorComponent, colorIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * colorComponent, m.face[ff + offsetFace].WC(tt));
-							}
 							//Load per wedge normal
-							if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty())
+							if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty() && !normalIndex.isEmpty() && index < normalIndex.size())
 							{
-								if (!normalIndex.isEmpty() && index < normalIndex.size())
-									getNormal(normalList, normalIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * 3, m.face[ff + offsetFace].WN(tt), tMatrix);
+								getNormal(normalList, normalIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * 3, normals[tt], vcg::Matrix44f::Identity());
+								transformNormal(normals[tt], tMatrix, m.face[ff + offsetFace].WN(tt));
 							}
 							//Load per wegde texture coordinate
 							if(m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
@@ -1464,9 +1620,10 @@ namespace io {
 						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
 						{
 							if (!normalIndex.isEmpty() && ff < normalIndex.size() && normalIndex.at(ff).toInt() > -1)
-								getNormal(normalList, normalIndex.at(nPolygon).toInt() * 3, m.face[ff + offsetFace].N(), tMatrix);
+								getNormal(normalList, normalIndex.at(nPolygon).toInt() * 3, normals[0], vcg::Matrix44f::Identity());
 							else
-								getNormal(normalList, nPolygon*3, m.face[ff + offsetFace].N(), tMatrix);
+								getNormal(normalList, nPolygon*3, normals[0], vcg::Matrix44f::Identity());
+							transformNormal(normals[0], tMatrix, m.face[ff + offsetFace].N());
 						}
 						//Load per face color
 						if(m.HasPerFaceColor() && colorPerVertex == "false" && !colorList.isEmpty())
@@ -1476,10 +1633,20 @@ namespace io {
 							else
 								getColor(colorList, colorComponent, nPolygon*colorComponent, m.face[ff + offsetFace].C());
 						}
+						//Copy face in the subMesh
+						vcg::tri::Append<OpenMeshType, OpenMeshType>::ImportFace((*subMesh), m, subMesh->face[smFaceIndex], m.face[ff + offsetFace], remap);
+						if (m.HasPerWedgeNormal() && normalPerVertex == "true" && !normalList.isEmpty() && !normalIndex.isEmpty())
+							for (int i = 0; i < 3; i++)
+								subMesh->face[smFaceIndex].WN(i) = normals[i];
+						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+							subMesh->face[smFaceIndex].N() = normals[0];
+						smFaceIndex++;
 					}
 					nPolygon++;
 				}
 			}
+			info->numvert++;
+			if (cb !=NULL) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
 			return E_NOERROR;
 		}
 
@@ -1493,10 +1660,8 @@ namespace io {
 									const QStringList& colorList,
 									int colorComponent,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
-			info->numvert++;
-			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(20 + 60*(info->numvert)/max<int>(info->numface, info->numvert), "Loading X3D Object...");
 			//Load vertex in the mesh
 			int offset = m.vert.size();
 			int nVertex = coordList.size()/3;
@@ -1511,6 +1676,8 @@ namespace io {
 				if (m.HasPerVertexColor() && !colorList.isEmpty())
 					getColor(colorList, colorComponent, vv*colorComponent, m.vert[vv + offset].C());
 			}
+			info->numvert++;
+			if ((cb !=NULL) && (info->numvert % 10)==0) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
 			return E_NOERROR;
 		}
 		
@@ -1520,10 +1687,8 @@ namespace io {
 									OpenMeshType& m,
 									const vcg::Matrix44f tMatrix,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
-			info->numvert++;
-			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(20 + 60*(info->numvert)/max<int>(info->numface, info->numvert), "Loading X3D Object...");
 			//Load vertex in the mesh
 			int offset = m.vert.size();
 			QStringList pointList;
@@ -1540,6 +1705,8 @@ namespace io {
 					loadDefaultValuePerVertex(&(m.vert[vv + offset]), m, info->mask);
 				}
 			}
+			info->numvert++;
+			if ((cb !=NULL) && (info->numvert % 10)==0) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
 			return E_NOERROR;
 		}
 
@@ -1550,10 +1717,8 @@ namespace io {
 									OpenMeshType& m,
 									const vcg::Matrix44f tMatrix,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
-			info->numvert++;
-			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(20 + 60*(info->numvert)/max<int>(info->numface, info->numvert), "Loading X3D Object...");
 			QStringList vertices;
 			findAndParseAttribute(vertices, geometry, "vertices", "");
 			if (!vertices.isEmpty())
@@ -1604,6 +1769,8 @@ namespace io {
 						m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(tt + ff*3) + offsetVertex]);
 				}
 			}
+			info->numvert++;
+			if ((cb !=NULL) && (info->numvert % 10)==0) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
 			return E_NOERROR;
 		}
 		
@@ -1688,13 +1855,13 @@ namespace io {
 			vcg::Matrix33f matrix, tmp;
 			matrix.SetIdentity();
 			QStringList coordList, center;
-			findAndParseAttribute(center, elem, "center", "0 0");
+			findAndParseAttribute(center, elem, "center", "");
 			if (center.size() == 2)
 			{			
 				matrix[0][2] = -center.at(0).toFloat();
 				matrix[1][2] = -center.at(1).toFloat();
 			}
-			findAndParseAttribute(coordList, elem, "scale", "1 1");
+			findAndParseAttribute(coordList, elem, "scale", "");
 			if(coordList.size() == 2)
 			{
 				tmp.SetIdentity();
@@ -1702,7 +1869,7 @@ namespace io {
 				tmp[1][1] = coordList.at(1).toFloat();
 				matrix *= tmp;
 			}
-			findAndParseAttribute(coordList, elem, "rotation", "0");
+			findAndParseAttribute(coordList, elem, "rotation", "");
 			if(coordList.size() == 1)
 			{
 				tmp.Rotate(math::ToDeg(coordList.at(0).toFloat()), vcg::Point3f(0, 0, 1));
@@ -1715,7 +1882,7 @@ namespace io {
 				tmp[1][2] = center.at(1).toFloat();
 				matrix *= tmp;
 			}
-			findAndParseAttribute(coordList, elem, "traslation", "0 0");
+			findAndParseAttribute(coordList, elem, "traslation", "");
 			if(coordList.size() == 2)
 			{
 				tmp.SetIdentity();
@@ -1733,28 +1900,28 @@ namespace io {
 			vcg::Matrix44f t, tmp;
 			t.SetIdentity();
 			QStringList coordList, center, scale;
-			findAndParseAttribute(coordList, root, "translation", "0 0 0");
+			findAndParseAttribute(coordList, root, "translation", "");
 			if(coordList.size() == 3)
 				t.SetTranslate(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()); 
-			findAndParseAttribute(center, root, "center", "0 0 0");
+			findAndParseAttribute(center, root, "center", "");
 			if(center.size() == 3)
 			{
 				tmp.SetTranslate(center.at(0).toFloat(), center.at(1).toFloat(), center.at(2).toFloat());
 				t *= tmp;
 			}
-			findAndParseAttribute(coordList, root, "rotation", "0 0 1 0");
+			findAndParseAttribute(coordList, root, "rotation", "");
 			if(coordList.size() == 4)
 			{
 				tmp.SetRotate(coordList.at(3).toFloat(), vcg::Point3f(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()));
 				t *= tmp;
 			}
-			findAndParseAttribute(scale, root, "scaleOrientation", "0 0 1 0");
+			findAndParseAttribute(scale, root, "scaleOrientation", "");
 			if(scale.size() == 4)
 			{
 				tmp.SetRotate(scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
 				t *= tmp;
 			}
-			findAndParseAttribute(coordList, root, "scale", "1 1 1");
+			findAndParseAttribute(coordList, root, "scale", "");
 			if(coordList.size() == 3)
 			{
 				tmp.SetScale(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat());
@@ -1780,8 +1947,9 @@ namespace io {
 		static int NavigateInline(OpenMeshType& m,
 									QDomElement root,
 									const vcg::Matrix44f tMatrix,
+									std::map<QString, OpenMeshType*>& subMeshMap,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
 			QString load = root.attribute("load", "true");
 			if (load != "true") return E_NOERROR;
@@ -1814,7 +1982,7 @@ namespace io {
 					QDomElement first = iter->second->firstChildElement("X3D");
 					std::map<QString, QDomElement> newDefMap;
 					std::map<QString, QDomElement> newProtoDeclMap;
-					int result = NavigateScene(m, first, tMatrix, newDefMap, newProtoDeclMap, info, cb);
+					int result = NavigateScene(m, first, tMatrix, newDefMap, newProtoDeclMap, subMeshMap, info, cb);
 					if (result != E_NOERROR)
 						return result;
 					info->filenameStack.pop_back();
@@ -1888,8 +2056,9 @@ namespace io {
 									const vcg::Matrix44f tMatrix,
 									std::map<QString, QDomElement>& defMap,
 									std::map<QString, QDomElement>& protoDeclareMap,
+									std::map<QString, OpenMeshType*>& subMeshMap,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
 			QString name = root.attribute("name");
 			std::map<QString, QString> fields;
@@ -1941,7 +2110,7 @@ namespace io {
 			QDomElement body = protoInstance.firstChildElement("ProtoBody");
 			std::map<QString, QDomElement> newDefMap;
 			std::map<QString, QDomElement> newProtoDeclMap;
-			result = NavigateScene(m, body, tMatrix, newDefMap, newProtoDeclMap, info, cb);
+			result = NavigateScene(m, body, tMatrix, newDefMap, newProtoDeclMap, subMeshMap, info, cb);
 			if (result != E_NOERROR)
 				return result;
 			if (filename != "")
@@ -1949,6 +2118,22 @@ namespace io {
 			return E_NOERROR;
 		}		
 		
+		//Transform the input normal
+		inline static void transformNormal(const vcg::Point3f& normal, const vcg::Matrix44f& tMatrix, vcg::Point3f& dest)
+		{
+			vcg::Matrix44f intr44 = vcg::Inverse(tMatrix);
+			vcg::Transpose(intr44);
+			Matrix33f intr33;
+			for(unsigned int rr = 0; rr < 2; ++rr)
+			{
+				for(unsigned int cc = 0;cc < 2;++cc)
+				intr33[rr][cc] = intr44[rr][cc];
+			}
+			dest = intr33 * normal;
+			dest.Normalize();
+		}
+
+
 		
 		//If the index is valid, return the normal of index 'index'
 		inline static void getNormal(const QStringList& list, int index, vcg::Point3f& dest, const vcg::Matrix44f& tMatrix)
@@ -1956,7 +2141,8 @@ namespace io {
 			if(!list.isEmpty() && (index + 2) < list.size())
 			{
 				vcg::Point3f normal(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at( index+ 2).toFloat());
-				vcg::Matrix44f intr44 = vcg::Inverse(tMatrix);
+				transformNormal(normal, tMatrix, dest);
+				/*vcg::Matrix44f intr44 = vcg::Inverse(tMatrix);
 				vcg::Transpose(intr44);
 				Matrix33f intr33;
 				for(unsigned int rr = 0; rr < 2; ++rr)
@@ -1965,7 +2151,7 @@ namespace io {
 					intr33[rr][cc] = intr44[rr][cc];
 				}
 				normal = intr33 * normal;
-				dest = normal.Normalize();
+				dest = normal.Normalize();*/
 			}
 		}
 
@@ -2042,8 +2228,9 @@ namespace io {
 									const vcg::Matrix44f tMatrix,
 									std::map<QString, QDomElement>& defMap,
 									std::map<QString, QDomElement>& protoDeclareMap,
+									std::map<QString, OpenMeshType*>& subMeshMap,
 									AdditionalInfoX3D* info,
-									CallBackPos *cb=0)
+									CallBackPos *cb)
 		{
 			if (root.isNull()) return E_NOERROR;
 			int result = solveDefUse(root, defMap, root, info);
@@ -2054,7 +2241,7 @@ namespace io {
 				QDomElement child = root.firstChildElement();
 				while(!child.isNull())
 				{
-					int result = NavigateScene(m, child, t, defMap, protoDeclareMap, info, cb);
+					int result = NavigateScene(m, child, t, defMap, protoDeclareMap, subMeshMap, info, cb);
 					if (result != E_NOERROR)
 						return result;
 					child = child.nextSiblingElement();
@@ -2063,7 +2250,7 @@ namespace io {
 			}
 			
 			if (root.tagName() == "Inline")
-				return NavigateInline(m, root, tMatrix, info, cb);
+				return NavigateInline(m, root, tMatrix, subMeshMap, info, cb);
 			
 			if (root.tagName() == "ProtoDeclare")
 			{
@@ -2081,10 +2268,12 @@ namespace io {
 				return NavigateExternProtoDeclare(root, tMatrix, protoDeclareMap, info);
 			
 			if (root.tagName() == "ProtoInstance")
-				return NavigateProtoInstance(m, root, tMatrix, defMap, protoDeclareMap, info, cb);
+				return NavigateProtoInstance(m, root, tMatrix, defMap, protoDeclareMap, subMeshMap, info, cb);
 			
 			if (root.tagName() == "Shape")
 			{
+				if (!loadSubMesh(root, m, subMeshMap, tMatrix, info, cb)) return E_NOERROR;
+				QString def = root.attribute("DEF");
 				std::vector<bool> validTexture;
 				std::vector<TextureInfo> textureInfo;
 				QDomNodeList textureTransformList;
@@ -2193,17 +2382,26 @@ namespace io {
 								break;
 							}
 						}
+						OpenMeshType* subMesh = new OpenMeshType();
+						if (info->mask & MeshModel::IOM_WEDGTEXCOORD)
+							(*subMesh).face.EnableWedgeTex();
+						if (info->mask & MeshModel::IOM_FACECOLOR)
+							(*subMesh).face.EnableColor();
+						result = -1;
 						//Load geometry in the mesh
 						if (geometry.tagName() == "TriangleSet" || geometry.tagName() == "TriangleFanSet" || geometry.tagName() == "TriangleStripSet" || geometry.tagName() == "QuadSet")
-							return LoadSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
+							result = LoadSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, subMesh, info, cb);
 						else if (geometry.tagName() == "IndexedTriangleSet" || geometry.tagName() == "IndexedTriangleFanSet" || geometry.tagName() == "IndexedTriangleStripSet" || geometry.tagName() == "IndexedQuadSet")
-							return LoadIndexedSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
+							result = LoadIndexedSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, subMesh, info, cb);
 						else if (geometry.tagName() == "ElevationGrid")
 							return LoadElevationGrid(geometry, m, tMatrix, texture, colorList, normalList, colorComponent, info, cb);
 						else if (geometry.tagName() == "IndexedFaceSet")
-							return LoadIndexedFaceSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
+							result = LoadIndexedFaceSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, subMesh, info, cb);
 						else if (geometry.tagName() == "PointSet")
 							return LoadPointSet(geometry, m, tMatrix, coordList, colorList, colorComponent, info, cb);
+						if (result == E_NOERROR && def != "")
+							subMeshMap[def] = subMesh;
+						if (result != -1) return result; 
 					}
 					else if (geometry.tagName() == "Polypoint2D")
 						return LoadPolypoint2D(geometry, m, tMatrix, info, cb);
@@ -2217,7 +2415,7 @@ namespace io {
 			QDomElement child = root.firstChildElement();
 			while(!child.isNull())
 			{
-				int result = NavigateScene(m, child, tMatrix, defMap, protoDeclareMap, info, cb);
+				int result = NavigateScene(m, child, tMatrix, defMap, protoDeclareMap, subMeshMap, info, cb);
 				if (result != E_NOERROR)
 					return result;
 				child = child.nextSiblingElement();
@@ -2253,7 +2451,7 @@ namespace io {
 
 		
 		//merge all meshes in the x3d's file in the templeted mesh m
-		static int Open(OpenMeshType& m, const char* filename, AdditionalInfoX3D*& info, CallBackPos *cb=0)
+		static int Open(OpenMeshType& m, const char* filename, AdditionalInfoX3D*& info, CallBackPos *cb)
 		{
 			vcg::Matrix44f tMatrix;
 			tMatrix.SetIdentity();
@@ -2261,15 +2459,20 @@ namespace io {
 			matrixStack.push_back(tMatrix);
 			std::map<QString, QDomElement> defMap;
 			std::map<QString, QDomElement> protoDeclareMap;
+			std::map<QString, OpenMeshType*> subMeshMap;
 			QDomNodeList scene = info->doc->elementsByTagName("Scene");
 			info->filenameStack.clear();
 			info->filenameStack.push_back(QString(filename));
-			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(20, "Loading X3D Object...");
+			if ((cb !=NULL) && (info->numvert % 5)==0) (*cb)(10, "Loading X3D Object...");
 			if (scene.size() == 0)
 				return E_NO3DSCENE;
 			if (scene.size() > 1)
 				return E_MULTISCENE;
-			return NavigateScene(m, scene.at(0).toElement(), tMatrix, defMap, protoDeclareMap, info, cb); 
+			int result = NavigateScene(m, scene.at(0).toElement(), tMatrix, defMap, protoDeclareMap, subMeshMap, info, cb);
+			std::map<QString, OpenMeshType*>::const_iterator iter;
+			for(iter= subMeshMap.begin(); iter != subMeshMap.end(); iter++)
+				delete(iter->second);
+			return result;
 		}
 
 	
