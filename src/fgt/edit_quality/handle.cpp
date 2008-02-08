@@ -40,4 +40,5 @@ void Handle::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
 	setCursor(Qt::OpenHandCursor);
+	emit handleReleased();
 }

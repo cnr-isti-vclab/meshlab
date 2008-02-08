@@ -1,7 +1,7 @@
 #ifndef QUALITYMAPPERDIALOG_H
 #define QUALITYMAPPERDIALOG_H
 
-#include <QDialog>
+#include <QDockWidget>
 #include <QGraphicsItem>
 /*
 #include <vcg/simplex/face/pos.h>
@@ -42,12 +42,12 @@ struct KNOWN_EXTERNAL_TFS
 
 #define GRAPHICS_ITEMS_LIST		QList<QGraphicsItem *>
 
-class QualityMapperDialog : public QDialog
+class QualityMapperDialog : public QDockWidget
 {
 	Q_OBJECT
 
 public:
-	QualityMapperDialog(QWidget *parent=0, MeshModel *m=0);
+	QualityMapperDialog(QWidget *parent=0, MeshModel *m=0, GLArea *gla=0);
 	~QualityMapperDialog();
 	
 //	inline void setMesh(MeshModel *m){ mesh=m; }
@@ -83,6 +83,7 @@ private:
 	GRAPHICS_ITEMS_LIST _removed_items;
 
 	MeshModel		*mesh;
+	GLArea			*gla;
 
 	void initTF();
 	void updateColorBand();
@@ -93,6 +94,9 @@ private:
 	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);
 	void				deleteRemoveItems();
 	void				moveAheadChannel( TF_CHANNELS channelCode );
+
+signals:
+	void suspendEditToggle();
 
 private slots:
 	void on_previewButton_clicked();
@@ -106,6 +110,7 @@ private slots:
 	void on_addPointButton_clicked();
 	void on_left_right_EQHandle_changed();
 	void on_TfHandle_moved(TFHandle *sender);
+	void on_handle_released();
 	void drawGammaCorrection();
 };
 

@@ -33,8 +33,10 @@ protected:
 	CHART_INFO*		_chartInfo;
 
 private:
+	
 
-
+signals:
+	void handleReleased();
 
 private slots:
 	

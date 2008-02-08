@@ -148,7 +148,7 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 	//	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 
 	if(_qualityMapperDialog==0)
-		_qualityMapperDialog = new QualityMapperDialog(gla->window(), &m);
+		_qualityMapperDialog = new QualityMapperDialog(gla->window(), &m, gla);
 
 	//drawing histogram
 	_qualityMapperDialog->drawEqualizerHistogram();
@@ -156,10 +156,6 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 	//drawing transferFunction
 	_qualityMapperDialog->drawTransferFunction();
 
-
-
-	// 	_qualityMapperDialog->edit=this;
-	// 	_qualityMapperDialog->setTree(& meshTree, meshTree.nodeList.front());
 
 	//dialog ready to be displayed. Show it now!
 	_qualityMapperDialog->show();

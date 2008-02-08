@@ -9,9 +9,19 @@
 using namespace vcg;
 
 
-QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialog(parent), mesh(m)
+QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *gla) : QDockWidget(parent), mesh(m)
 {
 	ui.setupUi(this);
+
+	this->setWidget(ui.frame);
+	/*this->setFeatures(QDockWidget::AllDockWidgetFeatures);
+	this->setAllowedAreas(Qt::LeftDockWidgetArea);*/
+	this->setFloating(true);
+	// Setting dialog position in top right corner
+	QPoint p=parent->mapToGlobal(QPoint(0,0));
+	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
+
+	this->gla = gla;
 
 	//building up histogram...
 	int numberOfBins = 100;
@@ -28,6 +38,13 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m) : QDialo
 	_currentTfHandle = 0;
 
 	this->initTF();
+
+	//connect(this, SIGNAL(closing()),gla,SLOT(endEdit()) );
+
+	// toggle Trackball button (?)
+	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
+	emit suspendEditToggle();
+	//gla->suspendEditToggle();
 }
 
 QualityMapperDialog::~QualityMapperDialog()
@@ -299,6 +316,12 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
 	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), this, SLOT(drawGammaCorrection()) );
 
+	// Connecting handles to preview method
+	connect(_equalizerHandles[LEFT_HANDLE], SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
+	connect(_equalizerHandles[MID_HANDLE], SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
+	connect(ui.brightnesslSlider, SIGNAL(sliderReleased()), this, SLOT(on_handle_released()));
+
 	
 	this->drawGammaCorrection();
 	this->drawTransferFunctionBG();
@@ -407,6 +430,7 @@ void QualityMapperDialog::initTF()
  			handle1->setZValue( zValue );
 			_transferFunctionHandles[channelType] << handle1;
 			connect(handle1, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
+			connect(handle1, SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
 			_transferFunctionScene.addItem(handle1);
 			if ( yLeftPos != yRightPos )
 			{
@@ -414,6 +438,7 @@ void QualityMapperDialog::initTF()
  				handle2->setZValue( zValue );
 				_transferFunctionHandles[channelType] << handle2;
 				connect(handle2, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
+				connect(handle2, SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
 				_transferFunctionScene.addItem(handle1);
 			}
 		}
@@ -571,6 +596,8 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 	this->initTF();
 	ui.presetComboBox->setCurrentIndex( 0 );
+	if (ui.previewButton->isChecked()) //added by FB 07\02\08
+				on_applyButton_clicked();
 }
 
 
@@ -601,6 +628,8 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 	this->initTF();
 	ui.presetComboBox->setCurrentIndex( 0 );
 	this->drawTransferFunction();
+	if (ui.previewButton->isChecked()) //added by FB 07\02\08
+		on_applyButton_clicked();
 }
 
 void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
@@ -615,8 +644,10 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 
 			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
 //			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
-			this->initTF(); //aded by MAL 04\02\08
+			this->initTF(); //added by MAL 04\02\08
 			this->drawTransferFunction();
+			if (ui.previewButton->isChecked()) //added by FB 07\02\08
+				on_applyButton_clicked();
 			return ;
 		}
 	}
@@ -634,8 +665,10 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 
 			_transferFunction = new TransferFunction( external_tf.path );
 //			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
-			this->initTF(); //aded by MAL 04\02\08
+			this->initTF(); //added by MAL 04\02\08
 			this->drawTransferFunction();
+			if (ui.previewButton->isChecked()) //added by FB 07\02\08
+				on_applyButton_clicked();
 			return ;
 		}
 	}
@@ -711,6 +744,9 @@ void QualityMapperDialog::on_applyButton_clicked()
 	CMeshO::VertexIterator vi;
 
 	float percentageQuality;
+	// brightness value between 0 and 2
+	float brightness = (1.0f - (float)(ui.brightnesslSlider->value())/(float)(ui.brightnesslSlider->maximum()) )*2.0;
+	Color4b currentColor;
 	for(vi=mesh->cm.vert.begin(); vi!=mesh->cm.vert.end(); ++vi)		
 		if(!(*vi).IsD()) 
 		{
@@ -724,13 +760,27 @@ void QualityMapperDialog::on_applyButton_clicked()
 				else
 					percentageQuality = pow( ((*vi).Q() - rangeMin) / (rangeMax - rangeMin) , (float)(2.0*_equalizerMidHandlePercentilePosition));
 
-			(*vi).C() = _transferFunction->getColorByQuality(percentageQuality);
+			currentColor = _transferFunction->getColorByQuality(percentageQuality);
+			
+			if (brightness!=1.0f) //Applying brightness to each color channel
+				if (brightness<1.0f)
+					for (int i=0; i<3; i++) 
+						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
+				else
+					for (int i=0; i<3; i++) 
+						currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
+
+			(*vi).C() = currentColor;
 		}
 
-	
+	gla->update();
 }
 
-
+void QualityMapperDialog::on_handle_released()
+{
+	if (ui.previewButton->isChecked())
+		on_applyButton_clicked();
+}
 
 void QualityMapperDialog::on_previewButton_clicked()
 {
