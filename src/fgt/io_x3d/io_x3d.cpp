@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.5  2008/02/08 17:02:09  gianpaolopalma
+ Improved memory management
+
  Revision 1.4  2008/02/06 13:09:10  gianpaolopalma
  Updated vertexs and faces number in addinfo
 
@@ -74,7 +77,6 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
-		m.addinfo = info;
 		if (info->mask & MeshModel::IOM_VERTTEXCOORD)
 			info->mask |= MeshModel::IOM_WEDGTEXCOORD;
 		m.Enable(info->mask);
@@ -82,7 +84,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			m.cm.textures.push_back(info->textureFile[tx].toStdString());
 		
 		errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nFile: %2\nLine number: %3\nError details: %4";
-		result = vcg::tri::io::ImporterX3D<CMeshO>::Open(m.cm, filename.c_str(), info);
+		result = vcg::tri::io::ImporterX3D<CMeshO>::Open(m.cm, filename.c_str(), info, cb);
 		if (result != vcg::tri::io::ImporterX3D<CMeshO>::E_NOERROR)
 		{
 			QString fileError = info->filenameStack[info->filenameStack.size()-1];
@@ -94,6 +96,9 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		if(info->mask & MeshModel::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 		mask = info->mask;
+		delete(info);
+		m.addinfo = new vcg::tri::io::AdditionalInfoX3D();
+		m.addinfo->mask = mask; 
 	}
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
@@ -121,9 +126,10 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
 	if (cb != NULL)	(*cb)(99, "Done");
-
+	
 	return true;
 }
+
 
 bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
@@ -159,7 +165,7 @@ QList<MeshIOInterface::Format> IoX3DPlugin::importFormats() const
 QList<MeshIOInterface::Format> IoX3DPlugin::exportFormats() const
 {
 	QList<Format> formatList;
-	formatList << Format("X3D File Format"	,tr("X3D"));
+	formatList << Format("X3D File Format", tr("X3D"));
 	return formatList;
 }
 
@@ -175,6 +181,7 @@ void IoX3DPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 	}
 	assert(0);
 }
+
 
 const PluginInfo &IoX3DPlugin::Info()
 {
