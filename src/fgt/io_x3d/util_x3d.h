@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2008/02/08 17:00:21  gianpaolopalma
+ New deconstructor in AdditionInfoX3D class
+
  Revision 1.3  2008/02/05 16:46:20  gianpaolopalma
  Added error codes
 
@@ -67,12 +70,18 @@ namespace io {
 			mask	= 0;
 			numvert = 0;
 			numface = 0;
-			doc = NULL;
+			doc = 0;
 		}
 
 		~AdditionalInfoX3D()
 		{
-			delete doc;
+			if (doc)
+				delete doc;
+			std::map<QString,QDomNode*>::const_iterator iter;
+			for (iter = inlineNodeMap.begin(); iter != inlineNodeMap.end(); iter++)
+				delete(iter->second);
+			for (iter = protoDeclareNodeMap.begin(); iter != protoDeclareNodeMap.end(); iter++)
+				delete(iter->second);
 		}
 	};
 
@@ -153,7 +162,8 @@ namespace io {
 		
 	};
 
-
+	
+	
 	class TextureInfo
 	{
 	public:
