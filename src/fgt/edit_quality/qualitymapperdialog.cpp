@@ -400,8 +400,11 @@ void QualityMapperDialog::initTF()
 		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), _transferFunction->size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//removing old TF graphics items
-
 	this->clearItems( REMOVE_TF_HANDLE | DELETE_REMOVED_ITEMS );
+
+	//passing to TFHandles the pointer to the current Transfer Function
+	assert(_transferFunction != 0);
+	TFHandle::setTransferFunction(_transferFunction);
 
 	//setting up handles
 	TF_KEY *val = 0;
@@ -426,19 +429,17 @@ void QualityMapperDialog::initTF()
 			xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth );
 			yLeftPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
 			yRightPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
-			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), val, zValue );
+			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), i, zValue );
  			handle1->setZValue( zValue );
 			_transferFunctionHandles[channelType] << handle1;
 			connect(handle1, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
-			connect(handle1, SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
 			_transferFunctionScene.addItem(handle1);
 			if ( yLeftPos != yRightPos )
 			{
-				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), val, zValue );
+				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), i, zValue );
  				handle2->setZValue( zValue );
 				_transferFunctionHandles[channelType] << handle2;
 				connect(handle2, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
-				connect(handle2, SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
 				_transferFunctionScene.addItem(handle1);
 			}
 		}
@@ -520,16 +521,18 @@ void QualityMapperDialog::drawTransferFunction()
 		channelType = (*_transferFunction)[c].getType();
 		TYPE_2_COLOR(channelType, channelColor);
 		drawingPen.setColor( channelColor );
-		zValue = ((channelType + 1)*2.0f);
+		zValue = ((c + 1)*2.0f);
 
 		QPointF pos1;
 		QPointF pos2;
 		for (int i=0; i<_transferFunctionHandles[channelType].size(); i++)
 		{
 			handle1 = _transferFunctionHandles[channelType][i];
+			handle1->setZValue( zValue);
 			if ( (i+1)<_transferFunctionHandles[channelType].size() )
 			{
 				handle2 = _transferFunctionHandles[channelType][i+1];
+				handle1->setZValue( zValue);
 
 				pos1 = handle1->scenePos();
 				pos2 = handle2->scenePos();
@@ -581,6 +584,8 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 {
 	QString tfName = ui.presetComboBox->currentText();
 	QString tfPath = _transferFunction->saveColorBand( tfName );
+	if (tfPath == "")
+		return ;
 	
 	QFileInfo fi(tfPath);
 	tfName = fi.fileName();
@@ -596,8 +601,6 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 	this->initTF();
 	ui.presetComboBox->setCurrentIndex( 0 );
-	if (ui.previewButton->isChecked()) //added by FB 07\02\08
-				on_applyButton_clicked();
 }
 
 
@@ -729,6 +732,34 @@ void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 // 	float newY = 1.0f - absolute2RelativeValf( scenePos.y() + (sender->getSize()/2.0f), _transferFunction_info->upperBorder + _transferFunction_info->lowerBorder );
 //	sender->updateKeyCoord( newX, newY );
 //	_transferFunction->getChannel(sender->getChannel()).updateKey( oldX, newX, newY );
+	if (sender->toSwap())
+	{
+		int handle1Idx = 0;
+		int handle2Idx = 0;
+		for (int i=0; i<_transferFunctionHandles[sender->getChannel()].size(); i++)
+		{
+			if ( ( _transferFunctionHandles[sender->getChannel()][i]->getMyKeyIndex() == sender->getMyKeyIndex() ) )
+				handle1Idx = i;
+			if ( _transferFunctionHandles[sender->getChannel()][i]->getMyKeyIndex() == sender->getToSwapIndex() )
+				handle2Idx = i;
+		}
+/*
+				int handle1Idx = _transferFunctionHandles[sender->getChannel()].indexOf(sender);
+				int handle2Idx = 0;
+				TFHandle *handle = 0;
+				for (int i=0; i<_transferFunctionHandles[sender->getChannel()].size(); i++)
+				{
+					handle = (TFHandle *)_transferFunctionHandles[sender->getChannel()][i];
+					if ( handle->getMyKeyIndex() == sender->getToSwapIndex() )
+					{
+						handle2Idx = i;
+						i=_transferFunctionHandles[sender->getChannel()].size();
+					}
+		//			_transferFunctionHandles[sender->getChannel()]/ *.indexOf((*_transferFunction)[sender->getChannel()][sender->getToSwapIndex()]);* /
+				}*/
+		
+		_transferFunctionHandles[sender->getChannel()].swap(handle1Idx, handle2Idx);
+	}
 	this->drawTransferFunction();
 	sender->blockSignals( false );
 }

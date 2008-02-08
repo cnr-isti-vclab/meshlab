@@ -41,6 +41,7 @@ struct KNOWN_EXTERNAL_TFS
 
 
 #define GRAPHICS_ITEMS_LIST		QList<QGraphicsItem *>
+#define TF_HANDLES_LIST			QList<TFHandle*>
 
 class QualityMapperDialog : public QDockWidget
 {
@@ -70,7 +71,7 @@ private:
 	TransferFunction *_transferFunction;
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
-	GRAPHICS_ITEMS_LIST	_transferFunctionHandles[NUMBER_OF_CHANNELS];
+	TF_HANDLES_LIST	_transferFunctionHandles[NUMBER_OF_CHANNELS];
 	GRAPHICS_ITEMS_LIST _transferFunctionLines;
 	GRAPHICS_ITEMS_LIST _transferFunctionBg;
 	TFHandle		*_currentTfHandle;

@@ -228,6 +228,60 @@ UINT8 TfChannel::getChannelValueb(float xVal)
 	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(xVal), 255.0f );
 }
 
+//this method is called by TFHandle and is used to update the TfHandle position from graphics to logical level.
+//When the key value is updated, the keys list must be checked to restore the sorting and the right alternation of LEFT\RIGHT JUNCTION SIDE keys
+int TfChannel::updateKey(int idx, float newX, float newY )
+{
+	int result = idx;
+
+	//out of boundaries
+	if (( idx<0 ) || (idx>=(int)KEYS.size()))
+		return -1;
+
+	//updating key values
+	KEYS[idx]->x = newX;
+	KEYS[idx]->y = newY;
+
+	//now checking to restore the sorting and the alternation of LEFT\RIGHT JUNCTION SIDE keys
+
+	int prev = idx-1;
+	int next = idx+1;
+	TF_KEY *tmp = 0;
+
+	if ( prev >= 0)
+	{
+		//swapping if prev is >= then the new value
+/*
+			 		if ( ( KEYS[prev]->x > newX ) || 
+			 			 / *(* /(KEYS[prev]->x == newX) / *&& (KEYS[prev]->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE) && (KEYS[idx]->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE))* / )*/
+			 
+		if ( KEYS[prev]->x > newX )
+		{
+			tmp = KEYS[prev];
+			KEYS[prev] = KEYS[idx];
+			KEYS[idx] = tmp;
+			return prev;
+		}
+	}
+
+	if ( next < (int)KEYS.size() )
+	{
+		//swapping if prev is >= then the new value
+		/*
+			if ( ( KEYS[next]->x < newX ) || 
+						/ *(* /(KEYS[next]->x == newX) / *&& (KEYS[next]->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE) && (KEYS[idx]->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE))* / )*/
+		if ( KEYS[next]->x < newX )
+		{
+			tmp = KEYS[next];
+			KEYS[next] = KEYS[idx];
+			KEYS[idx] = tmp;
+			return next;
+		}
+	}
+
+	return result;
+}
+
 
 TF_KEY* TfChannel::operator [](float xVal)
 {
@@ -332,12 +386,11 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		//added for test
-/*
 		_channels[RED_CHANNEL].addKey(0.5f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.5f,0.7f,TF_KEY::RIGHT_JUNCTION_SIDE);
+//		_channels[GREEN_CHANNEL].addKey(0.5f,0.7f,TF_KEY::RIGHT_JUNCTION_SIDE);
 		_channels[GREEN_CHANNEL].addKey(0.75f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 		_channels[GREEN_CHANNEL].addKey(0.75f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.2f,0.3f,TF_KEY::LEFT_JUNCTION_SIDE);*/
+		_channels[GREEN_CHANNEL].addKey(0.2f,0.3f,TF_KEY::LEFT_JUNCTION_SIDE);
 
 		break;
 	case RED_SCALE_TF:

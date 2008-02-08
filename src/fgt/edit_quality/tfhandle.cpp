@@ -1,7 +1,10 @@
 #include "TFHandle.h"
 
+//declaratio of static member of TFHandle class
+TransferFunction* TFHandle::_tf = 0;
+
 //TFHandle::TFHandle(int channel_code, int junction, CHART_INFO *environment_info) : _channelCode(channel_code), _junction_side(junction)
-TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, TF_KEY *myKey, int zOrder, int size  )
+TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position, int myKeyIdx, int zOrder, int size  )
 	: Handle(environment_info, color, position, zOrder, size  )
 {
 	COLOR_2_TYPE(color, _channelCode);
@@ -11,7 +14,9 @@ TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position,
 		_xPosition = absolute2RelativeValf( this->x(), _chartInfo->leftBorder + _chartInfo->rightBorder );
 		_yPosition = absolute2RelativeValf( this->y(), _chartInfo->upperBorder + _chartInfo->lowerBorder );
 	}
-	_myKey = myKey;
+	_myKeyIndex = myKeyIdx;
+	_toSwapIndex = _myKeyIndex;
+	_toSwap = false;
 }
 
 TFHandle::~TFHandle(void)
@@ -50,10 +55,23 @@ void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	{
 		this->setPos(newPos);
 
-		_myKey->x = absolute2RelativeValf( newPos.x(), _chartInfo->chartWidth );
-		_myKey->y = absolute2RelativeValf( _chartInfo->chartHeight - newPos.y(), _chartInfo->chartHeight );
-
+		assert(_tf != 0);
+		//updating the value of the key represented by this handle and updating the whole keys vector too
+		_toSwapIndex = (*_tf)[this->getChannel()].updateKey( _myKeyIndex, absolute2RelativeValf( newPos.x(), _chartInfo->chartWidth ), absolute2RelativeValf( _chartInfo->chartHeight - newPos.y(), _chartInfo->chartHeight ) );
+		_toSwap = (_myKeyIndex != _toSwapIndex);
 
 		emit positionChanged(this);
+		
+
+/*
+		_myKey->x = absolute2RelativeValf( newPos.x(), _chartInfo->chartWidth );
+		_myKey->y = absolute2RelativeValf( _chartInfo->chartHeight - newPos.y(), _chartInfo->chartHeight );
+*/
+		
 	}
+}
+
+
+void TFHandle::mousePressEvent(QGraphicsSceneMouseEvent * event)
+{
 }

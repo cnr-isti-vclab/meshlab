@@ -190,6 +190,8 @@ public:
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
 
+	int		updateKey( int idx, float newX, float newY );
+
 	TF_KEY* operator [](float idx);
 	TF_KEY* operator [](int idx);
 	
