@@ -42,8 +42,8 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *
 	//connect(this, SIGNAL(closing()),gla,SLOT(endEdit()) );
 
 	// toggle Trackball button (?)
-	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
-	emit suspendEditToggle();
+// 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
+// 		emit suspendEditToggle();
 	//gla->suspendEditToggle();
 }
 
@@ -68,6 +68,7 @@ QualityMapperDialog::~QualityMapperDialog()
 		delete _transferFunction_info;
 		_transferFunction_info = 0;
 	}
+//	this->disconnect();
 }
 
 
@@ -433,6 +434,7 @@ void QualityMapperDialog::initTF()
  			handle1->setZValue( zValue );
 			_transferFunctionHandles[channelType] << handle1;
 			connect(handle1, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
+			connect(handle1, SIGNAL(clicked(TFHandle*)), this, SLOT(on_TfHandle_clicked(TFHandle*)));
 			_transferFunctionScene.addItem(handle1);
 			if ( yLeftPos != yRightPos )
 			{
@@ -726,42 +728,29 @@ void QualityMapperDialog::on_left_right_EQHandle_changed()
 void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 {
 	sender->blockSignals( true );
-// 	float oldX = sender->getXKey();
-// 	QPointF scenePos = sender->scenePos();
-// 	float newX = absolute2RelativeValf( scenePos.x() + (sender->getSize()/2.0f), _transferFunction_info->leftBorder + _transferFunction_info->rightBorder );
-// 	float newY = 1.0f - absolute2RelativeValf( scenePos.y() + (sender->getSize()/2.0f), _transferFunction_info->upperBorder + _transferFunction_info->lowerBorder );
-//	sender->updateKeyCoord( newX, newY );
-//	_transferFunction->getChannel(sender->getChannel()).updateKey( oldX, newX, newY );
-	if (sender->toSwap())
-	{
-		int handle1Idx = 0;
-		int handle2Idx = 0;
-		for (int i=0; i<_transferFunctionHandles[sender->getChannel()].size(); i++)
-		{
-			if ( ( _transferFunctionHandles[sender->getChannel()][i]->getMyKeyIndex() == sender->getMyKeyIndex() ) )
-				handle1Idx = i;
-			if ( _transferFunctionHandles[sender->getChannel()][i]->getMyKeyIndex() == sender->getToSwapIndex() )
-				handle2Idx = i;
-		}
-/*
-				int handle1Idx = _transferFunctionHandles[sender->getChannel()].indexOf(sender);
-				int handle2Idx = 0;
-				TFHandle *handle = 0;
-				for (int i=0; i<_transferFunctionHandles[sender->getChannel()].size(); i++)
-				{
-					handle = (TFHandle *)_transferFunctionHandles[sender->getChannel()][i];
-					if ( handle->getMyKeyIndex() == sender->getToSwapIndex() )
-					{
-						handle2Idx = i;
-						i=_transferFunctionHandles[sender->getChannel()].size();
-					}
-		//			_transferFunctionHandles[sender->getChannel()]/ *.indexOf((*_transferFunction)[sender->getChannel()][sender->getToSwapIndex()]);* /
-				}*/
-		
-		_transferFunctionHandles[sender->getChannel()].swap(handle1Idx, handle2Idx);
-	}
+
+	//setting position spinboxes to Handle position
+	ui.xSpinBox->blockSignals( true );
+	ui.xSpinBox->setValue(sender->getRelativeX());
+	ui.xSpinBox->blockSignals( false );
+	ui.ySpinBox->blockSignals( true );
+	ui.ySpinBox->setValue(sender->getRelativeY());
+	ui.ySpinBox->blockSignals( false );
+
+	this->manageTfHandleMove(sender);
+
 	this->drawTransferFunction();
 	sender->blockSignals( false );
+}
+
+void QualityMapperDialog::on_TfHandle_clicked(TFHandle *sender)
+{
+	//updating currentTfHandle to sender
+	_currentTfHandle = sender;
+
+	//setting position spinboxes to Handle position
+	ui.xSpinBox->setValue(_currentTfHandle->getRelativeX());
+	ui.ySpinBox->setValue(_currentTfHandle->getRelativeY());
 }
 
 
@@ -816,4 +805,46 @@ void QualityMapperDialog::on_handle_released()
 void QualityMapperDialog::on_previewButton_clicked()
 {
 	on_applyButton_clicked();
+}
+
+void QualityMapperDialog::on_xSpinBox_valueChanged(double newX)
+{
+	if (_currentTfHandle)
+	{
+		_currentTfHandle->setPos(_transferFunction_info->leftBorder+relative2AbsoluteValf(newX,_transferFunction_info->chartWidth), _currentTfHandle->scenePos().y());
+		_currentTfHandle->updateTfHandlesState(_currentTfHandle->scenePos());
+		this->manageTfHandleMove(_currentTfHandle);
+		this->drawTransferFunction();
+	}
+}
+
+void QualityMapperDialog::on_ySpinBox_valueChanged(double newY)
+{
+	if (_currentTfHandle)
+	{
+		_currentTfHandle->setPos(_currentTfHandle->scenePos().x(), _transferFunction_info->chartHeight+_transferFunction_info->upperBorder-relative2AbsoluteValf(newY,_transferFunction_info->chartHeight));
+		_currentTfHandle->updateTfHandlesState(_currentTfHandle->scenePos());
+		this->manageTfHandleMove(_currentTfHandle);
+		this->drawTransferFunction();
+	}
+}
+
+
+void QualityMapperDialog::manageTfHandleMove(TFHandle*handle)
+{
+	if (handle->toSwap())
+	{
+		int handle1Idx = 0;
+		int handle2Idx = 0;
+		for (int i=0; i<_transferFunctionHandles[handle->getChannel()].size(); i++)
+		{
+			if ( ( _transferFunctionHandles[handle->getChannel()][i]->getMyKeyIndex() == handle->getMyKeyIndex() ) )
+				handle1Idx = i;
+			if ( _transferFunctionHandles[handle->getChannel()][i]->getMyKeyIndex() == handle->getToSwapIndex() )
+				handle2Idx = i;
+		}
+		//	int handle1Idx = _transferFunctionHandles[sender->getChannel()].indexOf(sender);
+
+		_transferFunctionHandles[handle->getChannel()].swap(handle1Idx, handle2Idx);
+	}
 }

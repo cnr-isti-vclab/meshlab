@@ -6,9 +6,7 @@
 #include "transferfunction.h"
 
 
-
-/* Specific handle for transgerFunctionScene 
-*/
+/* Specific handle for TransferFunctionScene*/
 class TFHandle : public Handle
 {
 	Q_OBJECT
@@ -21,13 +19,13 @@ public:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
 	inline void setChannel(int ch_code)	{_channelCode = ch_code;}
 	inline int getChannel(void) {return _channelCode;}
-	inline float getXKey(void)	{return _xPosition;}
-	inline float getYKey(void)	{return _yPosition;}
-	inline int getMyKeyIndex()	{return _myKeyIndex;}
-	inline int getToSwapIndex()	{return _toSwapIndex;}
-	inline bool toSwap()		{return _toSwap;}
-	inline void updateKeyCoord( float x, float y)	{_xPosition=x; _yPosition=y;}
+	inline float getRelativeX(void)	{return absolute2RelativeValf( this->scenePos().x()-_chartInfo->leftBorder, _chartInfo->chartWidth );}
+	inline float getRelativeY(void)	{return 1.0f-absolute2RelativeValf( this->scenePos().y()-_chartInfo->upperBorder, _chartInfo->chartHeight );}
+	inline int getMyKeyIndex(void)	{return _myKeyIndex;}
+	inline int getToSwapIndex(void)	{return _toSwapIndex;}
+	inline bool toSwap(void)		{return _toSwap;}
 	static void setTransferFunction(TransferFunction *tf)	{_tf = tf;}
+	void updateTfHandlesState(QPointF newTfHanldePos);
 	
 
 protected:
@@ -36,8 +34,6 @@ protected:
 
 private:
 	int		_channelCode;
-	float	_xPosition;
-	float	_yPosition;
 	int		_myKeyIndex;
 	int		_toSwapIndex;
 	bool	_toSwap;

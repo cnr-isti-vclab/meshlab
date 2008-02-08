@@ -8,12 +8,6 @@ TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position,
 	: Handle(environment_info, color, position, zOrder, size  )
 {
 	COLOR_2_TYPE(color, _channelCode);
-
-	if ( _chartInfo != 0)
-	{
-		_xPosition = absolute2RelativeValf( this->x(), _chartInfo->leftBorder + _chartInfo->rightBorder );
-		_yPosition = absolute2RelativeValf( this->y(), _chartInfo->upperBorder + _chartInfo->lowerBorder );
-	}
 	_myKeyIndex = myKeyIdx;
 	_toSwapIndex = _myKeyIndex;
 	_toSwap = false;
@@ -55,23 +49,22 @@ void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	{
 		this->setPos(newPos);
 
-		assert(_tf != 0);
-		//updating the value of the key represented by this handle and updating the whole keys vector too
-		_toSwapIndex = (*_tf)[this->getChannel()].updateKey( _myKeyIndex, absolute2RelativeValf( newPos.x(), _chartInfo->chartWidth ), absolute2RelativeValf( _chartInfo->chartHeight - newPos.y(), _chartInfo->chartHeight ) );
-		_toSwap = (_myKeyIndex != _toSwapIndex);
+		this->updateTfHandlesState(newPos);
 
-		emit positionChanged(this);
-		
-
-/*
-		_myKey->x = absolute2RelativeValf( newPos.x(), _chartInfo->chartWidth );
-		_myKey->y = absolute2RelativeValf( _chartInfo->chartHeight - newPos.y(), _chartInfo->chartHeight );
-*/
-		
+		emit positionChanged(this);	
 	}
+}
+
+void TFHandle::updateTfHandlesState(QPointF newPos)
+{
+	assert(_tf != 0);
+	//updating the value of the key represented by this handle and updating the whole keys vector too
+	_toSwapIndex = (*_tf)[this->getChannel()].updateKey( _myKeyIndex, absolute2RelativeValf( newPos.x()-_chartInfo->leftBorder, _chartInfo->chartWidth ), absolute2RelativeValf( _chartInfo->chartHeight-newPos.y()-_chartInfo->upperBorder, _chartInfo->chartHeight ) );
+	_toSwap = (_myKeyIndex != _toSwapIndex);
 }
 
 
 void TFHandle::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
+	emit clicked(this);
 }

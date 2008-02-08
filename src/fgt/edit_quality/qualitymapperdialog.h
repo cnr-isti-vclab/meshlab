@@ -72,9 +72,9 @@ private:
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
 	TF_HANDLES_LIST	_transferFunctionHandles[NUMBER_OF_CHANNELS];
+	TFHandle		*_currentTfHandle;
 	GRAPHICS_ITEMS_LIST _transferFunctionLines;
 	GRAPHICS_ITEMS_LIST _transferFunctionBg;
-	TFHandle		*_currentTfHandle;
 	bool			_isTransferFunctionInitialized;
 	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs;
 
@@ -95,23 +95,34 @@ private:
 	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);
 	void				deleteRemoveItems();
 	void				moveAheadChannel( TF_CHANNELS channelCode );
+	void				manageTfHandleMove(TFHandle*handleToManage);
 
 signals:
 	void suspendEditToggle();
 
 private slots:
+	void on_ySpinBox_valueChanged(double);
+	void on_xSpinBox_valueChanged(double);
 	void on_previewButton_clicked();
 	void on_applyButton_clicked();
+
 	void on_blueButton_toggled(bool checked);
 	void on_greenButton_toggled(bool checked);
 	void on_redButton_toggled(bool checked);
+
 	void on_presetComboBox_textChanged(const QString &);
+
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
+
 	void on_addPointButton_clicked();
+
 	void on_left_right_EQHandle_changed();
-	void on_TfHandle_moved(TFHandle *sender);
 	void on_handle_released();
+
+	void on_TfHandle_moved(TFHandle *sender);
+	void on_TfHandle_clicked(TFHandle *sender);
+	
 	void drawGammaCorrection();
 };
 
