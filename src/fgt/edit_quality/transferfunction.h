@@ -96,7 +96,6 @@ struct TF_KEY
 				if ( y_upper < y_lower)
 					this->swapY();
 				this->setLeftJunctionPoint(LOWER_Y);*/
-		
 	}
 
 // 	inline void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; this->setLeftJunctionPoint(right_junction_point_code); }
@@ -178,7 +177,7 @@ public:
 	~TfChannel(void);
 
 	void	setType(TF_CHANNELS);
-	TF_CHANNELS getType();
+	TF_CHANNELS getType(void);
 	TF_KEY	*addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side);
 	TF_KEY	*addKey(TF_KEY *newKey);
 //	TF_KEY	*addKey(float x, float y_low, float y_up);
@@ -192,12 +191,12 @@ public:
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
 
-	int		updateKey( int idx, float newX, float newY );
+	void	updateKeysOrder(void);
 
 	TF_KEY* operator [](float idx);
 	TF_KEY* operator [](int idx);
 	
-	inline int size()	{	return KEYS.size();	}
+	inline int size(void)	{	return KEYS.size();	}
 
 //	void	updateKey( float old_x, float new_x, float new_y);
 
@@ -275,5 +274,7 @@ public:
 	static TransferFunction *BlueScaleTF();
 	static TransferFunction *FlatTF();
 };
+
+bool TfKeyPCompare(TF_KEY*k1, TF_KEY*k2);
 
 #endif

@@ -8,6 +8,11 @@
 
 using namespace vcg;
 
+bool TfHandleCompare(TFHandle*h1, TFHandle*h2)
+{
+	return (h1->getRelativeX() < h2->getRelativeX());
+}
+
 
 QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *gla) : QDockWidget(parent), mesh(m)
 {
@@ -480,7 +485,7 @@ void QualityMapperDialog::initTF()
 			xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth );
 			yLeftPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
 			yRightPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
-			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), i, zValue );
+			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), val, zValue );
  			handle1->setZValue( zValue );
 			_transferFunctionHandles[channelType] << handle1;
 			connect(handle1, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
@@ -488,7 +493,7 @@ void QualityMapperDialog::initTF()
 			_transferFunctionScene.addItem(handle1);
 			if ( yLeftPos != yRightPos )
 			{
-				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), i, zValue );
+				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), val, zValue );
  				handle2->setZValue( zValue );
 				_transferFunctionHandles[channelType] << handle2;
 				connect(handle2, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
@@ -639,73 +644,102 @@ void QualityMapperDialog::on_addPointButton_clicked()
 
 void QualityMapperDialog::on_savePresetButton_clicked()
 {
+	//setting default save name
 	QString tfName = ui.presetComboBox->currentText();
+	//user chooses the file to load
 	QString tfPath = _transferFunction->saveColorBand( tfName );
-	if (tfPath == "")
+
+	//user didn't select anything. Nothing to do.
+	if (tfPath.isNull())
 		return ;
-	
+
+	//building file info
 	QFileInfo fi(tfPath);
 	tfName = fi.fileName();
 	QString ext = CSV_FILE_EXSTENSION;
 	if ( tfName.endsWith( ext ) )
 	tfName.remove( tfName.size() - ext.size(), ext.size() );
 
+	//adding external file to the list of known ones
 	KNOWN_EXTERNAL_TFS newTF( tfPath, tfName );
 	_knownExternalTFs << newTF;
-	_isTransferFunctionInitialized = false;
 
 	// FORSE QUANDO SI SALVA IL PRESET NON C'E' BISOGNO DI CANCELLARE TUTTO (UCCIO)
 	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
+
+	//preparing TF to work
+	_isTransferFunctionInitialized = false;
 	this->initTF();
 	ui.presetComboBox->setCurrentIndex( 0 );
 }
 
-
+//callback for loading a new TF from an external CSV file
 void QualityMapperDialog::on_loadPresetButton_clicked()
 {
+	//user chooses the file to load
 	QString csvFileName = QFileDialog::getOpenFileName(0, "Open Transfer Function File", QDir::currentPath(), "CSV File (*.csv)");
-	if ( !csvFileName.isNull())
-	{
-		if ( _transferFunction )
-		{
-			delete _transferFunction;
-			_transferFunction = 0;
-		}
-		_transferFunction = new TransferFunction( csvFileName );
-	}
 
+	//user didn't select anything. Nothing to do.
+	if (csvFileName.isNull())
+		return ;
+
+	//deleting any previous TF object
+	if ( _transferFunction )
+		delete _transferFunction;
+
+	//building new TF object from external file
+	_transferFunction = new TransferFunction( csvFileName );
+
+	//building file info
 	QFileInfo fi(csvFileName);
 	QString tfName = fi.fileName();
 	QString ext = CSV_FILE_EXSTENSION;
 	if ( tfName.endsWith( ext ) )
 		tfName.remove( tfName.size() - ext.size(), ext.size() );
 
+	//adding external file to the list of known ones
 	KNOWN_EXTERNAL_TFS newTF( csvFileName, tfName );
 	_knownExternalTFs << newTF;
 
+	//preparing TF to work
 	_isTransferFunctionInitialized = false;
-/*	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );*/
 	this->initTF();
+
+	//setting combo box to TF just built
 	ui.presetComboBox->setCurrentIndex( 0 );
+
+	//drawing new TF
 	this->drawTransferFunction();
+
+	//applying preview if necessary
 	if (ui.previewButton->isChecked()) //added by FB 07\02\08
 		on_applyButton_clicked();
 }
 
+//callback to manage the user selection of a TF from combo box
+//builds a new TF joined to newValue. It searches first among the default ones, then among the external file ones
 void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 {
-	//searching among default TFs
+	//searching newValue among default TFs
 	for (int i=0; i<NUMBER_OF_DEFAULT_TF; i++)
 	{
+		//found it!
 		if ( TransferFunction::defaultTFs[i] == newValue )
 		{
+			//deleting any previous TF object
 			if ( _transferFunction )
 				delete _transferFunction;
 
+			//building a new one
 			_transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS)i );
-//			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
+
+			//preparing TF to work
 			this->initTF(); //added by MAL 04\02\08
+
+			//drawing new TF
 			this->drawTransferFunction();
+
+			//applying preview if necessary
 			if (ui.previewButton->isChecked()) //added by FB 07\02\08
 				on_applyButton_clicked();
 			return ;
@@ -718,15 +752,23 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 	{
 		external_tf = _knownExternalTFs.at(i);
 
+		//found it!
 		if ( newValue == external_tf.name )
 		{
+			//deleting any previous TF object
 			if ( _transferFunction )
 				delete _transferFunction;
 
+			//building new TF object from external file
 			_transferFunction = new TransferFunction( external_tf.path );
-//			this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
+
+			//preparing TF to work
 			this->initTF(); //added by MAL 04\02\08
+
+			//drawing new TF
 			this->drawTransferFunction();
+
+			//applying preview if necessary
 			if (ui.previewButton->isChecked()) //added by FB 07\02\08
 				on_applyButton_clicked();
 			return ;
@@ -734,26 +776,34 @@ void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
 	}
 }
 
+//callback for RED radio button
 void QualityMapperDialog::on_redButton_toggled(bool checked)
 {
+	//if checked moves ahead the RED CHANNEL TF items
 	if (checked)
 		this->moveAheadChannel( RED_CHANNEL );
 }
 
+//callback for GREEN radio button
 void QualityMapperDialog::on_greenButton_toggled(bool checked)
 {
+	//if checked moves ahead the GREEN CHANNEL TF items
 	if (checked)
 		this->moveAheadChannel( GREEN_CHANNEL );
 }
 
+//callback for BLUE radio button
 void QualityMapperDialog::on_blueButton_toggled(bool checked)
 {
+	//if checked moves ahead the BLUE CHANNEL TF items
 	if (checked)	
 		this->moveAheadChannel( BLUE_CHANNEL );
 }
 
+//bring in first plane the TfHandles and Tf lines of the channel passed to it
 void QualityMapperDialog::moveAheadChannel( TF_CHANNELS channelCode )
 {
+	//if Transfer Function object instanced
 	if ( _transferFunction )
 	{
 		//changing drawing order for channel lines
@@ -780,24 +830,33 @@ void QualityMapperDialog::on_EQHandle_moved()
 	}
 }
 
+//callback to manage move of a TfHandle object
+//updates the object position in the position spinboxes, restores the correct order among the TfHandle objects and refreshes the TF scene
 void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 {
+	//suspending signals from sender
 	sender->blockSignals( true );
 
 	//setting position spinboxes to Handle position
 	ui.xSpinBox->blockSignals( true );
 	ui.xSpinBox->setValue(sender->getRelativeX());
 	ui.xSpinBox->blockSignals( false );
+
 	ui.ySpinBox->blockSignals( true );
 	ui.ySpinBox->setValue(sender->getRelativeY());
 	ui.ySpinBox->blockSignals( false );
 
-	this->manageTfHandleMove(sender);
-
+	//updating correct order among Tf Handle objets
+	this->updateTfHandlesOrder(sender->getChannel());
+	//refreshing Tf scene
 	this->drawTransferFunction();
+
+	//all done. Unlocking sender signals
 	sender->blockSignals( false );
 }
 
+//callback to manage click on a TfHandle object
+//updates the currenttfHandle attribute and refresh the position spinboxes
 void QualityMapperDialog::on_TfHandle_clicked(TFHandle *sender)
 {
 	//updating currentTfHandle to sender
@@ -862,44 +921,43 @@ void QualityMapperDialog::on_previewButton_clicked()
 	on_applyButton_clicked();
 }
 
+//callback that manages the value change of current Handle y position
 void QualityMapperDialog::on_xSpinBox_valueChanged(double newX)
 {
+	// if any handle is selected
 	if (_currentTfHandle)
 	{
+		//updating handle position in the scene
 		_currentTfHandle->setPos(_transferFunction_info->leftBorder+relative2AbsoluteValf(newX,_transferFunction_info->chartWidth), _currentTfHandle->scenePos().y());
+		//updating the Tf Handle position at logical level (update of joined TF_KEY)
 		_currentTfHandle->updateTfHandlesState(_currentTfHandle->scenePos());
-		this->manageTfHandleMove(_currentTfHandle);
+		//restoring the correct order for TfHandles (they're drawn in the same order as they're stored)
+		this->updateTfHandlesOrder(_currentTfHandle->getChannel());
+		//refresh of TF
 		this->drawTransferFunction();
 	}
 }
 
+//callback that manages the value change of current Handle y position
 void QualityMapperDialog::on_ySpinBox_valueChanged(double newY)
 {
+	// if any handle is selected
 	if (_currentTfHandle)
 	{
+		//updating handle position in the scene
 		_currentTfHandle->setPos(_currentTfHandle->scenePos().x(), _transferFunction_info->chartHeight+_transferFunction_info->upperBorder-relative2AbsoluteValf(newY,_transferFunction_info->chartHeight));
+		//updating the Tf Handle position at logical level (update of joined TF_KEY)
 		_currentTfHandle->updateTfHandlesState(_currentTfHandle->scenePos());
-		this->manageTfHandleMove(_currentTfHandle);
+		//restoring the correct order for TfHandles (they're drawn in the same order as they're stored)
+		this->updateTfHandlesOrder(_currentTfHandle->getChannel());
+		//refresh of TF
 		this->drawTransferFunction();
 	}
 }
 
-
-void QualityMapperDialog::manageTfHandleMove(TFHandle*handle)
+//orders the TfHandles by the x value of the joined TF_KEY
+void QualityMapperDialog::updateTfHandlesOrder(int channelCode)
 {
-	if (handle->toSwap())
-	{
-		int handle1Idx = 0;
-		int handle2Idx = 0;
-		for (int i=0; i<_transferFunctionHandles[handle->getChannel()].size(); i++)
-		{
-			if ( ( _transferFunctionHandles[handle->getChannel()][i]->getMyKeyIndex() == handle->getMyKeyIndex() ) )
-				handle1Idx = i;
-			if ( _transferFunctionHandles[handle->getChannel()][i]->getMyKeyIndex() == handle->getToSwapIndex() )
-				handle2Idx = i;
-		}
-		//	int handle1Idx = _transferFunctionHandles[sender->getChannel()].indexOf(sender);
-
-		_transferFunctionHandles[handle->getChannel()].swap(handle1Idx, handle2Idx);
-	}
+	//ordering TfHandles list (sort is used because of the tiny number of elements to manage)
+	qSort(_transferFunctionHandles[channelCode].begin(), _transferFunctionHandles[channelCode].end(), TfHandleCompare);
 }

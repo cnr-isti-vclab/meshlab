@@ -1,15 +1,8 @@
-15.33 20/01/2008	(*da raffinare) da implementare per Transfer Function: 1. se si fa doppio click in un punto vuoto del grafico va creata una nuova key in quel punto. Se si fa doppio click in su un punto della transfer function: - se il punto è l'upper o il lower di una chiave, questa collassa. - Se upper e lower coincidono, la chiave viene completamente rimossa.
-17.08 23/01/2008	aggiustare il layout del file ui. La view della transfer function "cade" nel pannello affianco. Lo spinbox inferiore delle opzioni della TF è smussato in basso. 
-17.45 30/01/2008	definire lo Z-order per le barre dell'istogramma di sopra e sotto
-15.42 31/01/2008	modifiche per la TF: le handles non devono mai essere distrutte. Le "lines" della TF devono essere distrutte ad ogni draw. Le barre dell'istogramma di BG della TF devono essere distrutte e ridisegnate quando le handles dell'Histogram vengono mosse
-15.45 31/01/2008	(??) modificare lo zeta order in modo che l'istogramma venga disegnato ditro gli assi cartesiani (??)
-16.30 31/01/2008	(!!!!) IMPORTANTISSIMO!! In seguito alle ultime modifiche, clearScene e clearItems distruggono gli items solo se gli viene chiesto esplicitamente. Di default li rimuovono semplicemente dalla scena d'appartenenza. Per chiedere di distruggere anche gli elementi rimossi: per clearScene passare come 2° parametro DELETE_REMOVED_ITEM. Per clearItems passare in pipe insieme ai codici degli elementi da eliminare DELETE_REMOVED_ITEM. Entrambi restituiscono un puntatore ad una lista degli items rimossi (GRAPHICS_ITEMS_LIST*). La lista in questione è _removed_items (privata) (!!!!)
+15.33 20/01/2008	(*da raffinare) da implementare per Transfer Function:
+				1. se si fa doppio click in un punto vuoto del grafico va creata una nuova key in quel punto.
+				2. quando si clicca su ADD, dove va creata la nuova TFHandle??
 17.00 31/01/2008	(UCCIO) implementare la rimozione del BG della TF (UCCIO)
-16.14 02/02/2008	sarebbe il caso che le EqHandles venissero allocate dinamicamente e che il loro costruttore cambiasse per allinearsi a quello di TfHandle (in questo modo, si potrebbe ridefinire direttamente quello di Handle, minimizzando il codice)
-15.34 03/02/2008	modificare EQHandle e TFHandle per allinearle alla nuova definizione di Handle. Handle(CHART_INFO *environment_info, QColor color, QPointF position, int zOrder=1, int size = DEFAULT_HANDLE_SIZE  );
-0.05 06/02/2008		aggiornare lo z-order delle Tf Handles
-0.05 06/02/2008		collegare gli spinbox alle TFHandles sia in lettura che in scrittura
-0.06 06/02/2008		rendere selettiva la cancellazione delle linee quando la TF handle viene mossa
-0.07 06/02/2008		(!!!) controllare che per ogni x in KEYS ci siano AL PIU' 2 valori di y (!!!)
-0.07 06/02/2008		(!!!) implementare lo swap tra le handles quando una vien sovrapposta alle altre (!!!)
 0.29 06/02/2008		forse KEY dovrebbe contenere delle TF_KEY, e non TF_KEY*... indagare...
+12.48 09/02/2008	rimuovere dal .pro i files come filterparameter (mai usati!)
+18.00 09/02/2008	aggiungere la preview anche quando si muovono le TFHandles
+

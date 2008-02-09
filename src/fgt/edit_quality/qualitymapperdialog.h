@@ -97,7 +97,7 @@ private:
 	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);
 	void				deleteRemoveItems();
 	void				moveAheadChannel( TF_CHANNELS channelCode );
-	void				manageTfHandleMove(TFHandle*handleToManage);
+	void				updateTfHandlesOrder(int channelCode);
 
 signals:
 	void suspendEditToggle();
@@ -127,5 +127,7 @@ private slots:
 	
 	void drawGammaCorrection();
 };
+
+bool TfHandleCompare(TFHandle*h1, TFHandle*h2);
 
 #endif // QUALITYMAPPERDIALOG_H

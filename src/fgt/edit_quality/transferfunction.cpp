@@ -4,11 +4,16 @@
 #include <QTextStream>
 #include <QFileDialog>
 
+#include <algorithm>
+
 //da eliminare!! MAL
 #ifdef NOW_TESTING
 #include <cmath>
 using namespace std;
 #endif
+
+bool TfKeyPCompare(TF_KEY*k1, TF_KEY*k2)
+{	return (k1->x < k2->x);	}
 
 
 //TRANSFER FUNCTION CHANNEL
@@ -234,59 +239,61 @@ UINT8 TfChannel::getChannelValueb(float xVal)
 
 //this method is called by TFHandle and is used to update the TfHandle position from graphics to logical level.
 //When the key value is updated, the keys list must be checked to restore the sorting and the right alternation of LEFT\RIGHT JUNCTION SIDE keys
-int TfChannel::updateKey(int idx, float newX, float newY )
+void TfChannel::updateKeysOrder()
 {
-	assert(newX>=0.0f);
-	assert(newY>=0.0f);
-
-	int result = idx;
-
-	//out of boundaries
-	if (( idx<0 ) || (idx>=(int)KEYS.size()))
-		return -1;
-
-	//updating key values
-	KEYS[idx]->x = newX;
-	KEYS[idx]->y = newY;
-
-	//now checking to restore the sorting and the alternation of LEFT\RIGHT JUNCTION SIDE keys
-
-	int prev = idx-1;
-	int next = idx+1;
-	TF_KEY *tmp = 0;
-
-	if ( prev >= 0)
-	{
-		//swapping if prev is >= then the new value
+	sort(KEYS.begin(), KEYS.end(), TfKeyPCompare);
 /*
-			 		if ( ( KEYS[prev]->x > newX ) || 
-			 			 / *(* /(KEYS[prev]->x == newX) / *&& (KEYS[prev]->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE) && (KEYS[idx]->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE))* / )*/
-			 
-		if ( KEYS[prev]->x > newX )
+		assert(newX>=0.0f);
+		assert(newY>=0.0f);
+	
+		int result = idx;
+	
+		//out of boundaries
+		if (( idx<0 ) || (idx>=(int)KEYS.size()))
+			return -1;
+	
+		//updating key values
+		KEYS[idx]->x = newX;
+		KEYS[idx]->y = newY;
+	
+		sort(KEYS.begin(), KEYS.end(), TfKeyPCompare);
+	
+		//now checking to restore the sorting and the alternation of LEFT\RIGHT JUNCTION SIDE keys
+	
+		int prev = idx-1;
+		int next = idx+1;
+		TF_KEY *tmp = 0;
+	
+		if ( prev >= 0)
 		{
-			tmp = KEYS[prev];
-			KEYS[prev] = KEYS[idx];
-			KEYS[idx] = tmp;
-			return prev;
+			//swapping if prev is >= then the new value
+	/ *
+				 		if ( ( KEYS[prev]->x > newX ) || 
+				 			 / *(* /(KEYS[prev]->x == newX) / *&& (KEYS[prev]->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE) && (KEYS[idx]->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE))* / )* /
+				 
+			if ( KEYS[prev]->x > newX )
+			{
+				tmp = KEYS[prev];
+				KEYS[prev] = KEYS[idx];
+				KEYS[idx] = tmp;
+				return prev;
+			}
 		}
-	}
-
-	if ( next < (int)KEYS.size() )
-	{
-		//swapping if prev is >= then the new value
-		/*
-			if ( ( KEYS[next]->x < newX ) || 
-						/ *(* /(KEYS[next]->x == newX) / *&& (KEYS[next]->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE) && (KEYS[idx]->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE))* / )*/
-		if ( KEYS[next]->x < newX )
+	
+		if ( next < (int)KEYS.size() )
 		{
-			tmp = KEYS[next];
-			KEYS[next] = KEYS[idx];
-			KEYS[idx] = tmp;
-			return next;
-		}
-	}
-
-	return result;
+			//swapping if prev is >= then the new value
+			/ *
+				if ( ( KEYS[next]->x < newX ) || 
+							/ *(* /(KEYS[next]->x == newX) / *&& (KEYS[next]->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE) && (KEYS[idx]->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE))* / )* /
+			if ( KEYS[next]->x < newX )
+			{
+				tmp = KEYS[next];
+				KEYS[next] = KEYS[idx];
+				KEYS[idx] = tmp;
+				return next;
+			}
+		}*/
 }
 
 
@@ -395,7 +402,7 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		//added for test
 // 		_channels[RED_CHANNEL].addKey(0.5f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
 //		_channels[GREEN_CHANNEL].addKey(0.5f,0.7f,TF_KEY::RIGHT_JUNCTION_SIDE);
-// 		_channels[GREEN_CHANNEL].addKey(0.75f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+ 		_channels[GREEN_CHANNEL].addKey(0.75f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
 // 		_channels[GREEN_CHANNEL].addKey(0.75f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
 // 		_channels[GREEN_CHANNEL].addKey(0.2f,0.3f,TF_KEY::LEFT_JUNCTION_SIDE);
 
