@@ -90,6 +90,8 @@ private:
 	void updateColorBand();
 	void drawTransferFunctionBG ();
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
+	//void drawHistogramBarsSTRETCHED (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
+
 
 	GRAPHICS_ITEMS_LIST	*clearScene(QGraphicsScene *scene, int toClean=0);
 	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);
@@ -116,8 +118,8 @@ private slots:
 	void on_savePresetButton_clicked();
 
 	void on_addPointButton_clicked();
+	void on_EQHandle_moved();
 
-	void on_left_right_EQHandle_changed();
 	void on_handle_released();
 
 	void on_TfHandle_moved(TFHandle *sender);

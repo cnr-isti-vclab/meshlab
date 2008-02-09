@@ -42,8 +42,10 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *
 	//connect(this, SIGNAL(closing()),gla,SLOT(endEdit()) );
 
 	// toggle Trackball button (?)
-// 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
-// 		emit suspendEditToggle();
+
+	//connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
+	//emit suspendEditToggle();
+
 	//gla->suspendEditToggle();
 }
 
@@ -310,8 +312,9 @@ void QualityMapperDialog::drawEqualizerHistogram()
 	// Nota: non è necessario connettere anche le spinbox (UCCIO) 
 	//connect(ui.minSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
 	//connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_left_right_EQHandle_changed()));
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_left_right_EQHandle_changed()));
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
+	connect(_equalizerHandles[MID_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
 
 	// Connecting mid equalizerHistogram handle to gammaCorrectionLabel
 	connect(_equalizerHandles[MID_HANDLE], SIGNAL(positionChanged()), this, SLOT(drawGammaCorrection()) );
@@ -331,10 +334,15 @@ void QualityMapperDialog::drawEqualizerHistogram()
 }
 
 
-
+/*
 // Add histogramBars to destinationScene
 void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, int minIndex, int maxIndex, QColor color)
 {
+	if (&destinationScene == &(this->_transferFunctionScene))
+	{
+		this->drawHistogramBarsSTRETCHED(destinationScene, chartInfo, minIndex, maxIndex, color);
+		return;
+	}
 	// Questro controllo è necessario perché se si cerca in Histogram il valore minimo viene restituito l'indice -1. Forse deve essere corretto? (UCCIO)
 	if (minIndex<0)
 		minIndex = 0;
@@ -346,7 +354,6 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 	QBrush drawingBrush (color);
 
 	QPointF startBarPt;
-	QSizeF barSize;
 
 	//drawing histogram bars
 	QGraphicsItem *current_item = 0;
@@ -356,16 +363,59 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 		startBarPt.setX( chartInfo->leftBorder + ( barWidth * (i-minIndex) ) );
 		startBarPt.setY( (float)chartInfo->lowerBorder - barHeight );
 
-		barSize.setWidth(barWidth);
-		barSize.setHeight(barHeight);
-
 		//drawing histogram bar
-		current_item = destinationScene.addRect(startBarPt.x(), startBarPt.y(), barSize.width(), barSize.height(), drawingPen, drawingBrush);
+		current_item = destinationScene.addRect(startBarPt.x(), startBarPt.y(), barWidth, barHeight, drawingPen, drawingBrush);
 		current_item->setZValue(-1);
 		if ( &destinationScene == &_transferFunctionScene )
 			_transferFunctionBg << current_item;
 	}
+}*/
+
+// Add histogramBars to destinationScene with GAMMA-STRETCHING
+void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, int minIndex, int maxIndex, QColor color)
+{
+	// Questro controllo è necessario perché se si cerca in Histogram il valore minimo viene restituito l'indice -1. Forse deve essere corretto? (UCCIO)
+	if (minIndex<0)
+		minIndex = 0;
+	float barHeight = 0.0f;	//initializing height of the histogram bars
+	float barWidth  = chartInfo->chartWidth / (float)(maxIndex-minIndex);	//processing width of the histogram bars (4\5 of dX)
+	//	float barSeparator = dX - barWidth; //processing space between consecutive bars of the histogram bars (1\5 of dX)
+
+	int numberOfItems = maxIndex - minIndex;
+	float exp = log10(0.5f) / log10((float)_equalizerMidHandlePercentilePosition);
+
+	QPen drawingPen(color);
+	QBrush drawingBrush (color);
+
+	QPointF startBarPt;
+
+	//drawing histogram bars
+	QGraphicsItem *current_item = 0;
+
+	for (int i = minIndex; i < maxIndex; i++)
+	{
+		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->H[i]) / (float)_histogram_info->maxRoundedY;
+		
+		startBarPt.setY( (float)chartInfo->lowerBorder - barHeight );
+
+		//drawing histogram bar
+		if ( &destinationScene == &_transferFunctionScene )
+		{
+			startBarPt.setX( chartInfo->leftBorder + relative2AbsoluteValf(pow( absolute2RelativeValf(i-minIndex,numberOfItems ), exp ), chartInfo->chartWidth) );
+			current_item = destinationScene.addLine(startBarPt.x(), startBarPt.y(), startBarPt.x(), (float)chartInfo->lowerBorder, drawingPen);
+			_transferFunctionBg << current_item;
+		}
+		else
+		{
+			startBarPt.setX( chartInfo->leftBorder + ( barWidth * (i-minIndex) ) );
+			current_item = destinationScene.addRect(startBarPt.x(), startBarPt.y(), barWidth, barHeight, drawingPen, drawingBrush);
+		}
+		
+		current_item->setZValue(-1);
+			
+	}
 }
+
 
 void QualityMapperDialog::initTF()
 {
@@ -469,12 +519,17 @@ void QualityMapperDialog::initTF()
 
 void QualityMapperDialog::drawGammaCorrection()
 {
-	int width = 100;
-	int height = 100;
+	int width = ui.gammaCorrectionLabel->width();
+	int height = ui.gammaCorrectionLabel->height();
 
 	QPixmap *pixmap = new QPixmap(width, height);
 	QPainter painter(pixmap);
 
+	painter.setPen(QColor(128,128,128));
+	painter.drawLine(0,height-1,width-1,0);
+
+	painter.setPen(Qt::black);
+	painter.drawRect(0,0,width-1,height-1);
 	int c = _equalizerMidHandlePercentilePosition*width;
 	QPainterPath path;
 	path.moveTo(0, height);
@@ -716,7 +771,7 @@ void QualityMapperDialog::moveAheadChannel( TF_CHANNELS channelCode )
 }
 
 
-void QualityMapperDialog::on_left_right_EQHandle_changed()
+void QualityMapperDialog::on_EQHandle_moved()
 {
 
 	if ( _transferFunction )
