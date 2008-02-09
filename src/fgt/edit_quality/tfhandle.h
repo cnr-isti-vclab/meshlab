@@ -22,6 +22,8 @@ public:
 	inline TF_KEY *getMyKey(void)	{return _myKey;}
 	inline float getRelativeX(void)	{return _myKey->x;}
 	inline float getRelativeY(void)	{return _myKey->y;}
+	inline void setCurrentlSelected( bool selected ){_currentlySelected=selected;}
+	inline bool isCurrentlySelected()	{return _currentlySelected;}
 //	inline int getToSwapIndex(void)	{return _toSwapIndex;}
 /*	inline bool toSwap(void)		{return _toSwap;}*/
 	static void setTransferFunction(TransferFunction *tf)	{_tf = tf;}
@@ -35,9 +37,8 @@ protected:
 private:
 	int		_channelCode;
 	TF_KEY	*_myKey;
-// 	int		_toSwapIndex;
-// 	bool	_toSwap;
 	static TransferFunction *_tf;
+	bool	_currentlySelected;
 
 signals:
 	void clicked(TFHandle*);

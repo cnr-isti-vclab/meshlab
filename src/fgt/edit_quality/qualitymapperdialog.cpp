@@ -571,7 +571,6 @@ void QualityMapperDialog::drawTransferFunction()
 	QColor channelColor;
 	QPen drawingPen(Qt::black, 3);
 
-	TF_KEY *val = 0;
 	QGraphicsItem *item = 0;
 	QGraphicsItem *handle1 = 0;
 	QGraphicsItem *handle2 = 0;
@@ -859,8 +858,12 @@ void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 //updates the currenttfHandle attribute and refresh the position spinboxes
 void QualityMapperDialog::on_TfHandle_clicked(TFHandle *sender)
 {
+	if (_currentTfHandle)
+		_currentTfHandle->setCurrentlSelected( false );
+
 	//updating currentTfHandle to sender
 	_currentTfHandle = sender;
+	_currentTfHandle->setCurrentlSelected( true );
 
 	//setting position spinboxes to Handle position
 	ui.xSpinBox->setValue(_currentTfHandle->getRelativeX());

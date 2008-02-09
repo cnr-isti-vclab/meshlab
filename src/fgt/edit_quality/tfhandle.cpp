@@ -9,6 +9,7 @@ TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position,
 {
 	COLOR_2_TYPE(color, _channelCode);
 	_myKey = myKey;
+	_currentlySelected = false;
 /*
 		_toSwapIndex = _myKeyIndex;
 		_toSwap = false;*/
@@ -26,9 +27,17 @@ void TFHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
 
-	painter->setPen(_color);
-	painter->setBrush(_color);
-	//painter->drawEllipse(((qreal)-_size)/2.0f, -((qreal)_size)/2.0f, _size, _size);
+	if (_currentlySelected)
+	{
+		painter->setPen(_color.darker());
+		painter->setBrush(_color.darker());
+	}
+	else
+	{
+		painter->setPen(_color);
+		painter->setBrush(_color);
+	}
+
 	painter->drawRect(((qreal)-_size)/2.0f, -((qreal)_size)/2.0f, _size, _size);
 }
 
