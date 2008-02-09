@@ -59,7 +59,7 @@ void TFHandle::updateTfHandlesState(QPointF newPos)
 {
 	assert(_tf != 0);
 	//updating the value of the key represented by this handle and updating the whole keys vector too
-	_toSwapIndex = (*_tf)[this->getChannel()].updateKey( _myKeyIndex, absolute2RelativeValf( newPos.x()-_chartInfo->leftBorder, _chartInfo->chartWidth ), absolute2RelativeValf( _chartInfo->chartHeight-newPos.y()-_chartInfo->upperBorder, _chartInfo->chartHeight ) );
+	_toSwapIndex = (*_tf)[this->getChannel()].updateKey( _myKeyIndex, absolute2RelativeValf( newPos.x()-_chartInfo->leftBorder, _chartInfo->chartWidth ), 1.0f-absolute2RelativeValf( newPos.y()-_chartInfo->upperBorder, _chartInfo->chartHeight ) );
 	_toSwap = (_myKeyIndex != _toSwapIndex);
 }
 

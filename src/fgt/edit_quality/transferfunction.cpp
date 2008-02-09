@@ -53,6 +53,8 @@ TF_CHANNELS TfChannel::getType()
 //returns a pointer to the key just added
 TF_KEY* TfChannel::addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side)
 {
+	assert(xVal>=0.0f);
+	assert(yVal>=0.0f);
 	return this->addKey(new TF_KEY(xVal, yVal, side));
 }
 
@@ -60,6 +62,8 @@ TF_KEY* TfChannel::addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side)
 //returns a pointer to the key just added
 TF_KEY* TfChannel::addKey(TF_KEY *newKey)
 {
+	assert(newKey->x>=0);
+	assert(newKey->y>=0);
 	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
 	{
 		if ( (*it)->x >= newKey->x )
@@ -232,6 +236,9 @@ UINT8 TfChannel::getChannelValueb(float xVal)
 //When the key value is updated, the keys list must be checked to restore the sorting and the right alternation of LEFT\RIGHT JUNCTION SIDE keys
 int TfChannel::updateKey(int idx, float newX, float newY )
 {
+	assert(newX>=0.0f);
+	assert(newY>=0.0f);
+
 	int result = idx;
 
 	//out of boundaries

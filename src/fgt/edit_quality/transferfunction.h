@@ -85,6 +85,8 @@ struct TF_KEY
 	
 	TF_KEY( float xVal=0.0f, float yVal=0.0f, JUNCTION_SIDE junction=LEFT_JUNCTION_SIDE )
 	{
+		assert(xVal>=0.0f);
+		assert(yVal>=0.0f);
 		x = xVal;
 		y = yVal;
 		junctionSide = junction;
