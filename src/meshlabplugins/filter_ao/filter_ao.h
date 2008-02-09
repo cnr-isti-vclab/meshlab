@@ -38,22 +38,27 @@ class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 // Attributes
-public:
+protected:
 	Point3f cameraDir;
 	GLuint  fboDepth,
 	        fboResult,
 	        depthBufferTex,
 	        vertexCoordTex,
 	        vertexNormalsTex,
-	        resultBufferTex;
+	       *resultBufferTex;
+
+	GLenum *resultBufferMRT;
 	
 	unsigned int numViews,
 	             depthTexSize,
 	             depthTexArea,
-				 maxTexSize;
+				 numTexPages;
 
 	bool useGPU,
-	     useVBO;
+	     useVBO,
+		 errInit;
+public:
+	unsigned int maxTexSize;
 
 // Methods
 public:
@@ -77,7 +82,8 @@ public:
 	                                           vcg::CallBackPos * cb) ;
 	void  initTextures          (GLenum colorFormat,
 	                             GLenum depthFormat);
-	bool  initGL                (vcg::CallBackPos *cb);
+	void  initGL                (vcg::CallBackPos *cb,
+	                             unsigned int numVertices);
 	bool  processGL             (AOGLWidget *glw,
 	                             MeshModel &m,
 								 vcg::CallBackPos *cb);

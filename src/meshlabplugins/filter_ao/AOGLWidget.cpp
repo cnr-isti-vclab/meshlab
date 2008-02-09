@@ -24,7 +24,8 @@ AOGLWidget::AOGLWidget (QWidget * parent, AmbientOcclusionPlugin *_plugin) :QGLW
 
 void AOGLWidget::initializeGL ()
 {
-	plugin->initGL(cb);
+	plugin->initGL(cb,m->cm.vn);
+
 	setFixedSize(plugin->maxTexSize,plugin->maxTexSize);
 }
 
