@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.103  2008/02/10 09:32:39  cignoni
+added a missing clear border flag in remove non manifold
+
 Revision 1.102  2007/11/21 09:48:03  cignoni
 better help and color clustering
 
@@ -423,6 +426,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	    
 			if(nonManif) Log(GLLogStream::Info, "Removed %d Non Manifold Faces", nonManif);
 							else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
+							
+			 m.clearDataMask(MeshModel::MM_BORDERFLAG);				
 	  }
 
 	if(ID(filter) == (FP_REORIENT) )
