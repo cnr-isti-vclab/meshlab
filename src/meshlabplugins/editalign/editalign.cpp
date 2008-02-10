@@ -352,7 +352,7 @@ switch(mode)
 	{
 	case	ALIGN_MOVE:
 			alignDialog->ui.manualAlignButton->setEnabled(true);
-			alignDialog->ui.inspectButton->setEnabled(false);
+			alignDialog->ui.recalcButton->setEnabled(false);
 			alignDialog->ui.icpButton->setEnabled(false);
 			alignDialog->ui.icpParamButton->setEnabled(false);
 			alignDialog->ui.alignTreeWidget->setEnabled(false);
@@ -360,7 +360,7 @@ switch(mode)
 		break;
 	case	ALIGN_IDLE:
 			alignDialog->ui.manualAlignButton->setEnabled(true);
-			alignDialog->ui.inspectButton->setEnabled(true);
+			alignDialog->ui.recalcButton->setEnabled(true);
 			alignDialog->ui.icpButton->setEnabled(true);
 			alignDialog->ui.icpParamButton->setEnabled(true);
 			alignDialog->ui.alignTreeWidget->setEnabled(true);
