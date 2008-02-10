@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2008/02/10 15:22:57  cignoni
+slightly revised the way of parameter passing
+
 Revision 1.7  2008/01/22 14:18:27  sherholz
 Added support for .mlx filter scripts
 
@@ -64,8 +67,14 @@ Added copyright info
 QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
 std::vector<MeshIOInterface*> meshIOPlugins;
  
+// Here we need a better way to find the plugins directory. 
+// To be implemented:
+// use the QSettings togheter with MeshLab. 
+// When meshlab starts if he find the plugins write the absolute path of that directory in a persistent qsetting place. 
+// Here we use that QSetting. If it is not set we remember to run meshlab first once. 
+// in this way it works safely on mac too and allows the user to put the small meshlabserver binary wherever they desire (/usr/local/bin). 
 
-void loadPlugins()
+void loadPlugins(FILE *fp=0)
 {
 	QDir pluginsDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
@@ -85,21 +94,19 @@ void loadPlugins()
 		QObject *plugin = loader.instance();
 		
 		if (plugin) {		
-			//MeshColorizeInterface *iColor = qobject_cast<MeshColorizeInterface *>(plugin);
-						
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 		  if (iFilter){ 
-			  
 	        QAction *filterAction;
 	        foreach(filterAction, iFilter->actions())
-	        filterMap[filterAction->text()]=filterAction;
+						{
+							filterMap[filterAction->text()]=filterAction;
+							//if(fp)
+							 printf( "*'''%s''': %s\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
+						}
 	        printf("Loaded %i filtering actions form %s\n",filterMap.size(),qPrintable(fileName));
 	       }
 		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
 		  if (iIO)	meshIOPlugins.push_back(iIO);
-      
-
-//	    pluginfileNames += fileName;
 		}
 	}
    printf("Total %i filtering actions\n",filterMap.size());
@@ -143,7 +150,6 @@ bool Open(MeshModel &mm, QString fileName)
   return true;
 }
 /*
- sintassi 
  meshlab -i mesh -o mesh -f filtro
 
 
@@ -215,8 +221,24 @@ bool Script(MeshModel& mm, QString scriptfile){
 
 	}
 	
-	
-	
+}
+
+void Usage()
+{
+  printf(
+		"\nUsage:\n"
+		"         meshlabserver arg1 arg2 ...  \n"
+		"where args can be: \n"
+		" -i filename  mesh that has to be loaded\n" 
+		" -o filename  mesh where to write the result\n"
+	  " -s filename  script to be applied\n"
+		"\nNotes:\n\n"
+		"There must be exactly one input mesh and at most one output mesh.\n"
+		"Script is optional and must be in the format saved by MeshLab.\n"
+		"The format of the output mesh is guessed by the used extension.\n"
+		);
+	exit(-1);
+
 }
 
 int main(int argc, char *argv[])
@@ -224,20 +246,36 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);  
 	loadPlugins();
 	MeshModel mm;
-	if(argc==3)	
+	QString meshNameIn,meshNameOut,scriptName;
+	if(argc<3) Usage();
+	int i=1;
+	while(i<argc)
 	{
-		Open(mm,argv[1]);
-		printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
-		Save(mm,argv[2]);    
-	}else if(argc == 4){
-		Open(mm,argv[1]);
-		printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
-		printf("Apply FilterScript:\n");
-		Script(mm,argv[3]);
-		Save(mm,argv[2]);
+		if(argv[i][0] !='-') Usage();
+		switch(argv[i][1])
+			{
+        case 'i' :  meshNameIn= argv[i+1];printf("Input mesh  %s\n",qPrintable(meshNameIn)); i+=2; break; 
+        case 'o' :  meshNameOut=argv[i+1];printf("output mesh  %s\n",qPrintable(meshNameOut));i+=2; break; 
+        case 's' :  scriptName= argv[i+1];printf("script %s\n",qPrintable(scriptName));i+=2; break; 
+			}
 	}
-  else exit(-1);
-
-	//return app.exec();
+		if(meshNameIn.isEmpty()) {
+			printf("No input mesh\n"); exit(-1);
+		}
+		if(meshNameOut.isEmpty()) {
+			printf("No output mesh\n"); exit(-1);
+		}
+		
+		Open(mm,meshNameIn);
+		printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
+		
+		if(!scriptName.isEmpty())
+		{
+			printf("Apply FilterScript:\n");
+			Script(mm,scriptName);
+		}
+		
+		Save(mm,meshNameOut);    
+		printf("Mesh saved is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
 }
 
