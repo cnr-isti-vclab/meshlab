@@ -106,7 +106,7 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 	//QStringList convfile;
 	//vcg::tri::io::TGA_Exporter::convertTexturesFiles(m.cm,curr,convfile);
 	QStringList textures_to_be_restored;
-	QStringList lst = vcg::tri::io::ExporterIDTF<CMeshO>::covertInTGATextures(m.cm,QDir::tempPath(),textures_to_be_restored);
+	QStringList lst = vcg::tri::io::ExporterIDTF<CMeshO>::convertInTGATextures(m.cm,QDir::tempPath(),textures_to_be_restored);
 
 	if(formatName.toUpper() == tr("U3D"))
 
