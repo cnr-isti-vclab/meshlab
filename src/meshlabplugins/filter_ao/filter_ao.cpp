@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.28  2008/02/10 09:39:38  cignoni
+changed fopen_s into fopen to allow again compiling with non microsfot compilers
+
 Revision 1.27  2008/02/09 17:55:19  mischitelli
 - Introducing rendering to multiple render targets. In order to allow more vertices to be processed by the hardware, MRTs became a necessity. In this way we can multiply by 4 or even by 8 (GF 8xxx +) the maximum number of vertices processed.
 - Texture size for vertices and normals are choosen automatically, picking the smallest one possible in order to greatly speeding up the calculations.
@@ -878,7 +881,7 @@ void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata, 
 		cdata[i] = (unsigned char)(texdata[i]*255.0);
 
 	FILE *f;
-	fopen_s(&f, reinterpret_cast<char*>(filename.data()) ,"wb+");
+	f=fopen(qPrintable(filename) ,"wb+");
 	fwrite(cdata,sizeof(unsigned char),elems,f);
 	fclose(f);
 
