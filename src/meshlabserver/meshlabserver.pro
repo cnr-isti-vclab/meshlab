@@ -6,13 +6,13 @@ HEADERS        = ../meshlab/interfaces.h \
 SOURCES        = mainserver.cpp \
                  ../meshlab/filterscript.cpp \
                  ../meshlab/filterparameter.cpp \
-                 ../meshlab/plugin_support.cpp 
-
+                 ../meshlab/plugin_support.cpp \
+                 ../../../code/lib/glew/src/glew.c
 
 # to add windows icon 
 RC_FILE = ../meshlab/meshlab.rc
 
-QT           += xml
+QT           += xml opengl
 
 # the following line is needed to avoid mismatch between 
 # the awful min/max macros of windows and the limits max
@@ -23,15 +23,6 @@ DEFINES += GLEW_STATIC
 INCLUDEPATH += . ../../../sf ../../../code/lib/glew/include
 CONFIG += stl 
 CONFIG += console
-#win32:LIBS	+= ../../../code/lib/glew/lib/glew32.lib 
-win32-g++{
-	LIBS		+= -L../../../code/lib/glew/lib -lGLEW
-}
 
-unix{
-	LIBS		+= -L../../../code/lib/glew/lib -lGLEW
-	QMAKE_CC	 = gcc
-	QMAKE_CXX	 = g++
-	QMAKE_LINK	 = gcc
-	CONFIG		+= warn_off debug_and_release
-}
+# Mac specific Config required to avoid to make application bundles
+CONFIG -= app_bundle
