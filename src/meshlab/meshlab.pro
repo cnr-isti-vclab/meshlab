@@ -58,6 +58,12 @@ RESOURCES     = meshlab.qrc
 # to add windows icon 
 RC_FILE = meshlab.rc
 
+
+### the xml info list 
+### the next time the app open a new extension
+QMAKE_INFO_PLIST = ../install/info.plist
+
+
 # to add MacOS icon 
 ICON = images/meshlab.icns
 
