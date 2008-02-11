@@ -10,10 +10,7 @@ TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position,
 	COLOR_2_TYPE(color, _channelCode);
 	_myKey = myKey;
 	_currentlySelected = false;
-/*
-		_toSwapIndex = _myKeyIndex;
-		_toSwap = false;*/
-	
+	this->setZValue( zOrder );
 }
 
 TFHandle::~TFHandle(void)
@@ -83,4 +80,9 @@ void TFHandle::updateTfHandlesState(QPointF newPos)
 void TFHandle::mousePressEvent(QGraphicsSceneMouseEvent *)
 {
 	emit clicked(this);
+}
+
+void TFHandle::mouseDoubleClickEvent (QGraphicsSceneMouseEvent *event)
+{
+	emit doubleClicked(this);
 }

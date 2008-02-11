@@ -8,9 +8,14 @@
 
 using namespace vcg;
 
+//returns true if relative x of h1 is < then x of h2.
+//if x values of h1 and h2 are the same, true is returned if relative y of h1 is < then relative y of h2
 bool TfHandleCompare(TFHandle*h1, TFHandle*h2)
 {
-	return (h1->getRelativeX() < h2->getRelativeX());
+	if (h1->getRelativeX() == h2->getRelativeX())
+		return (h1->getRelativeY() < h2->getRelativeY());
+	else
+		return (h1->getRelativeX() < h2->getRelativeX());
 }
 
 
@@ -464,44 +469,24 @@ void QualityMapperDialog::initTF()
 
 	//setting up handles
 	TF_KEY *val = 0;
-	TFHandle *handle1 = 0;
-	TFHandle *handle2 = 0;
 	QColor channelColor;
-	qreal xPos = 0;
-	qreal yLeftPos = 0;
-	qreal yRightPos = 0;
 	qreal zValue = 0;
 	int channelType = 0;
 	for (int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
-		zValue = ((c + 1)*2.0f) + 1;
+		zValue = ((i + 1)*2.0f) + 1;
 		channelType = (*_transferFunction)[c].getType();
 		TYPE_2_COLOR( channelType, channelColor );
 
 		for (int i=0; i<(*_transferFunction)[c].size(); i++)
 		{
 			val = (*_transferFunction)[channelType][i];
-
-			xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth );
-			yLeftPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
-			yRightPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
-			handle1 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yLeftPos), val, zValue );
- 			handle1->setZValue( zValue );
-			_transferFunctionHandles[channelType] << handle1;
-			connect(handle1, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
-			connect(handle1, SIGNAL(clicked(TFHandle*)), this, SLOT(on_TfHandle_clicked(TFHandle*)));
-			_transferFunctionScene.addItem(handle1);
-			if ( yLeftPos != yRightPos )
-			{
-				handle2 = new TFHandle( _transferFunction_info, channelColor, QPointF(xPos, yRightPos), val, zValue );
- 				handle2->setZValue( zValue );
-				_transferFunctionHandles[channelType] << handle2;
-				connect(handle2, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
-				_transferFunctionScene.addItem(handle1);
-			}
+			this->addTfHandle( channelType,
+							   QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight )), 
+							   val,
+							   zValue );
 		}
 	}
-//	aggiungere le TFHandles quì controllando che nn siano già presenti nella lista di Handles per quel canale
 
 	//adding to TF Scene TFlines and TFHandles
 	if ( ! _transferFunctionScene.items().contains(_transferFunctionHandles[0][0]) )
@@ -597,6 +582,10 @@ void QualityMapperDialog::drawTransferFunction()
 
 				pos1 = handle1->scenePos();
 				pos2 = handle2->scenePos();
+				if (( handle1 == _currentTfHandle ) || (handle2 == _currentTfHandle) )
+					drawingPen.setColor( channelColor.lighter() );
+				else
+					drawingPen.setColor( channelColor );
 				item = _transferFunctionScene.addLine( handle1->scenePos().x(), handle1->scenePos().y(), handle2->scenePos().x(), handle2->scenePos().y(), drawingPen );
 				item->setZValue( zValue );
 				_transferFunctionLines << item;
@@ -638,7 +627,24 @@ void QualityMapperDialog::drawTransferFunctionBG ()
 
 void QualityMapperDialog::on_addPointButton_clicked()
 {
+	//getting channel for new handle:
+	int channelCode = -1;
+	
+	if ( _currentTfHandle != 0)
+		//if an handle was already selected let's use the same channel of the selected one
+		channelCode = _currentTfHandle->getChannel();
+	else
+		//else, let's use the more ahead channel in TF
+		channelCode = _transferFunction->getFirstPlaneChanel();
 
+	TF_KEY *val = new TF_KEY(0.0f, 0.5f, TF_KEY::LEFT_JUNCTION_SIDE);
+	(*_transferFunction)[channelCode].addKey(val);
+	float xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth );
+	float yPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
+	TFHandle *newHandle = this->addTfHandle(channelCode, QPointF(xPos, yPos), val, ((channelCode + 1)*2.0f) + 1 );
+
+	_currentTfHandle = newHandle;
+//	this->drawTransferFunction();
 }
 
 void QualityMapperDialog::on_savePresetButton_clicked()
@@ -845,9 +851,40 @@ void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 	ui.ySpinBox->setValue(sender->getRelativeY());
 	ui.ySpinBox->blockSignals( false );
 
-	//updating correct order among Tf Handle objets
+	TF_KEY *firstKey = 0;
+	TF_KEY *newKey = 0;
+	if ( (*_transferFunction)[sender->getChannel()].size() > 0 )
+	{
+		firstKey = (*_transferFunction)[sender->getChannel()][0];
+		if ( ! (*_transferFunction)[sender->getChannel()].isHead(firstKey) )
+		{
+			newKey = new TF_KEY(0.0f, 0.0f, TF_KEY::LEFT_JUNCTION_SIDE);
+			(*_transferFunction)[sender->getChannel()].addKey(newKey);
+			this->addTfHandle( sender->getChannel(),
+							   QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartHeight )), 
+							   newKey,
+							   ((sender->getChannel() + 1)*2.0f) + 1 );
+		}
+	}
+
+	TF_KEY *lastKey = 0;
+	if ( (*_transferFunction)[sender->getChannel()].size() > 0 )
+	{
+		lastKey = (*_transferFunction)[sender->getChannel()][(*_transferFunction)[sender->getChannel()].size()-1];
+		if ( ! (*_transferFunction)[sender->getChannel()].isTail(lastKey) )
+		{
+			newKey = new TF_KEY(1.0f, 0.0f, TF_KEY::LEFT_JUNCTION_SIDE);
+			(*_transferFunction)[sender->getChannel()].addKey(newKey);
+			this->addTfHandle( sender->getChannel(),
+							   QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 1.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartHeight )), 
+							   	newKey,
+								((sender->getChannel() + 1)*2.0f) + 1);
+		}
+	}
+
+	//updating correct order among TF Handle objects
 	this->updateTfHandlesOrder(sender->getChannel());
-	//refreshing Tf scene
+	//refreshing TF scene
 	this->drawTransferFunction();
 
 	//all done. Unlocking sender signals
@@ -869,6 +906,18 @@ void QualityMapperDialog::on_TfHandle_clicked(TFHandle *sender)
 	ui.xSpinBox->setValue(_currentTfHandle->getRelativeX());
 	ui.ySpinBox->setValue(_currentTfHandle->getRelativeY());
 }
+
+//callback to manage double-click on a TfHandle object
+//updates the currenttfHandle attribute and refresh the position spinboxes
+void QualityMapperDialog::on_TfHandle_doubleClicked(TFHandle *sender)
+{
+	//updating currentTfHandle to sender
+	_currentTfHandle = sender;
+
+	//removing sender
+	this->removeTfHandle(_currentTfHandle);
+}
+
 
 
 void QualityMapperDialog::on_applyButton_clicked()
@@ -963,4 +1012,62 @@ void QualityMapperDialog::updateTfHandlesOrder(int channelCode)
 {
 	//ordering TfHandles list (sort is used because of the tiny number of elements to manage)
 	qSort(_transferFunctionHandles[channelCode].begin(), _transferFunctionHandles[channelCode].end(), TfHandleCompare);
+}
+
+void QualityMapperDialog::on_removePointButton_clicked()
+{
+	if ( _currentTfHandle != 0)
+		this->removeTfHandle(_currentTfHandle);
+}
+
+
+TFHandle* QualityMapperDialog::addTfHandle(int channelCode, QPointF handlePos, TF_KEY *key, int zOrder )
+{
+	QColor channelColor;
+	TYPE_2_COLOR(channelCode, channelColor);
+
+	return this->addTfHandle( new TFHandle( _transferFunction_info, channelColor, handlePos, key, zOrder ) );
+}
+
+TFHandle* QualityMapperDialog::addTfHandle(TFHandle *handle)
+{
+	_transferFunctionHandles[handle->getChannel()] << handle;
+	connect(handle, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
+	connect(handle, SIGNAL(clicked(TFHandle*)), this, SLOT(on_TfHandle_clicked(TFHandle*)));
+	connect(handle, SIGNAL(doubleClicked(TFHandle*)), this, SLOT(on_TfHandle_doubleClicked(TFHandle*)));
+	_transferFunctionScene.addItem(handle);
+
+	return handle;
+}
+
+TFHandle* QualityMapperDialog::removeTfHandle(TFHandle *handle)
+{
+	if ( handle == 0)
+		return handle;
+
+	//removing TF Handle item from scene
+	_transferFunctionScene.removeItem( handle );
+
+	//removing it from TfHandles list
+	for (int i=0; i<_transferFunctionHandles[handle->getChannel()].size(); i++)
+	{
+		if ( _transferFunctionHandles[handle->getChannel()][i] == handle )
+		{
+			_transferFunctionHandles[handle->getChannel()].removeAt(i);
+			break;
+		}
+	}
+
+	//destroying joined logical key
+	(*_transferFunction)[_currentTfHandle->getChannel()].removeKey(handle->getMyKey());
+
+	//disconnecting and destroying it
+	handle->disconnect();
+	delete handle;
+	handle = 0;
+
+	//refreshing TF
+	this->drawTransferFunction();
+
+	return handle;
 }

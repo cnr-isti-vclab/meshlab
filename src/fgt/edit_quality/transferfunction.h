@@ -180,17 +180,14 @@ public:
 	TF_CHANNELS getType(void);
 	TF_KEY	*addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side);
 	TF_KEY	*addKey(TF_KEY *newKey);
-//	TF_KEY	*addKey(float x, float y_low, float y_up);
-//	TF_KEY	*addKey(float x, TF_KEY *new_key);
-	void	removeKey(int x);
-	void	removeKey(float x);
-//	float	removeKey(TF_KEY *to_remove_key);
-// 	TF_KEY	*mergeKeys(float x_pos1, TF_KEY *x_pos2);
-// 	TF_KEY	*splitKey(float x_pos);
+	void	removeKey(int index);
+	void	removeKey(TF_KEY *key);
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
 
+	bool	isHead(TF_KEY *key);
+	bool	isTail(TF_KEY *key);
 	void	updateKeysOrder(void);
 
 	TF_KEY* operator [](float idx);
@@ -266,6 +263,7 @@ public:
 	Color4b getColorByQuality (float percentageQuality);
 	// QColor* getColorBand(){return _color_band;};
 	void moveChannelAhead( TF_CHANNELS channel_code );
+	inline int	getFirstPlaneChanel(void) { return _channels_order[NUMBER_OF_CHANNELS-1]; }
 
 	static TransferFunction *GreyScaleTF();
 	static TransferFunction *RGBTF();

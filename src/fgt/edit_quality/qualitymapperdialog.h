@@ -98,11 +98,15 @@ private:
 	void				deleteRemoveItems();
 	void				moveAheadChannel( TF_CHANNELS channelCode );
 	void				updateTfHandlesOrder(int channelCode);
+	TFHandle			*addTfHandle(int channelCode, QPointF handlePos, TF_KEY *key, int zOrder );
+	TFHandle			*addTfHandle(TFHandle *handle);
+	TFHandle			*removeTfHandle(TFHandle *handle);
 
 signals:
 	void suspendEditToggle();
 
 private slots:
+	void on_removePointButton_clicked();
 	void on_ySpinBox_valueChanged(double);
 	void on_xSpinBox_valueChanged(double);
 	void on_previewButton_clicked();
@@ -124,6 +128,7 @@ private slots:
 
 	void on_TfHandle_moved(TFHandle *sender);
 	void on_TfHandle_clicked(TFHandle *sender);
+	void on_TfHandle_doubleClicked(TFHandle *sender);
 	
 	void drawGammaCorrection();
 };

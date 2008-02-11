@@ -102,14 +102,15 @@ void TfChannel::removeKey(int keyIdx)
 
 //removes from keys list the key whose x value is x_val
 //returns the x value of the removed key or -1 if key was not found
-void TfChannel::removeKey(float xVal)
+void TfChannel::removeKey(TF_KEY *toRemoveKey)
 {
 	//searching key with proper x
 	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
-		if ( (*it)->x == xVal )
+		if ( (*it) == toRemoveKey )
 		{
 			delete *it;
 			KEYS.erase(it);
+			break;
 		}
 }
 
@@ -235,6 +236,43 @@ float TfChannel::getChannelValuef(float xVal)
 UINT8 TfChannel::getChannelValueb(float xVal)
 {
 	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(xVal), 255.0f );
+}
+
+//returns true if the key has x=0.0
+bool TfChannel::isHead(TF_KEY *key)
+{
+	bool result = false;
+
+	/*
+	if ( key->x == 0.0f)
+		{
+			for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
+			{
+				if ( (*it)->x == 0.0f )
+					zeroCounter ++;
+	
+				if ( (*it)->x > 0.0f )
+					break;
+			}
+			if ( zeroCounter == 1)
+				result = true;
+		}*/
+	if ( key->x == 0.0f )
+		result = true;
+	
+
+	return result;
+}
+
+//returns true if the key has x=1.0
+bool TfChannel::isTail(TF_KEY *key)
+{
+	bool result = false;
+
+	if ( key->x == 1.0f )
+		result = true;
+
+	return result;
 }
 
 //this method is called by TFHandle and is used to update the TfHandle position from graphics to logical level.

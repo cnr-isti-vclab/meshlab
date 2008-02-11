@@ -32,7 +32,8 @@ public:
 
 protected:
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-	void mousePressEvent(QGraphicsSceneMouseEvent * event);
+	void mousePressEvent(QGraphicsSceneMouseEvent *event);
+	void mouseDoubleClickEvent (QGraphicsSceneMouseEvent *event);
 
 private:
 	int		_channelCode;
@@ -42,6 +43,7 @@ private:
 
 signals:
 	void clicked(TFHandle*);
+	void doubleClicked(TFHandle*);
 	void positionChanged(TFHandle*);
 
 
