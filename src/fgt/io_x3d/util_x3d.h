@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.5  2008/02/11 09:23:03  gianpaolopalma
+ Changed error code
+
  Revision 1.4  2008/02/08 17:00:21  gianpaolopalma
  New deconstructor in AdditionInfoX3D class
 
@@ -129,16 +132,16 @@ namespace io {
 				"No errors",
 				"Can't open file",
 				"Invalid XML file",
-				"There isn't any scene in X3D file",
+				"There isn't a Scene element in X3D file",
 				"The file contains more Scene elements",
-				"There isn't any DEF for the USE",
+				"There isn't a precede DEF for the USE",
 				"Invalid Inline element. File not found",
 				"Invalid url in Inline element",
 				"Invalid url in ExternProtoDeclare element",
 				"Invalid ExternProtoDeclare. File not found",
 				"Invalid field initialization in ProtoInstance element",
-				"There isn't any ExternProtoDeclare or ProtoDeclare in the file for the ProtoInstance",
-				"Invalid ProtoDeclare. There isn't any ProtoInterface or any ProtoBody",
+				"There isn't an ExternProtoDeclare or ProtoDeclare for the ProtoInstance",
+				"Invalid ProtoDeclare. There isn't a ProtoInterface or a ProtoBody",
 				"Invalid field declaration in ProtoInterface element",
 				"Invalid IS element in ProtoBody elment",
 				"Invalid DEF in ProtoInstance field", 
@@ -155,7 +158,7 @@ namespace io {
 				"Illegal use of DEF and USE fields"
 			};
 
-			if(error > 27 || error < 0) return "Unknown error";
+			if(error > 26 || error < 0) return "Unknown error";
 			else return x3d_error_msg[error];
 		};
 
