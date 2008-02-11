@@ -24,6 +24,10 @@
 History
 
 $Log$
+Revision 1.29  2008/02/11 18:09:50  mischitelli
+- Improved portability on systems with less powerful hardware
+- Added a fallback to FP16 blending for hardware that doesn't support it on FP32 render targets.
+
 Revision 1.28  2008/02/10 09:39:38  cignoni
 changed fopen_s into fopen to allow again compiling with non microsfot compilers
 
@@ -163,7 +167,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	return !errInit;
 }
 	
-bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::CallBackPos *cb)
+bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m)
 {
 	if (errInit)
 		return false;
@@ -182,16 +186,24 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+
 	if (useVBO)
 	{
 		m.glw.SetHint(vcg::GLW::HNUseVBO);
-		//cb(0, "Generating vertex data for VBO...");
 		m.glw.Update();
-		//cb(100, "Generating vertex data for VBO... Done.");
 	}
 	
 	if(useGPU)
+	{	
 		vertexCoordsToTexture( m );
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
+	}
 	else
 	{
 		//Yes, the loop down there is needed
@@ -212,8 +224,6 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 		numViews = posVect.size();
 	}
 
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-
 	tInitElapsed = tInit.elapsed();
 	
 	int c=0;
@@ -227,30 +237,28 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 		if (useGPU)
 		{
 			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LEQUAL);
 
 			// FIRST PASS - fill depth buffer
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboDepth);
-			//glBindTexture(GL_TEXTURE_2D, depthBufferTex); ///// non dovrebbe servire a na mazza
+			glViewport(0,0,depthTexSize,depthTexSize);
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			glColorMask(0, 0, 0, 0);
 				renderMesh(m);
 			glColorMask(1, 1, 1, 1);
+
+			glDisable(GL_POLYGON_OFFSET_FILL);
 			
+			// SECOND PASS - use depth buffer to check occlusion
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboResult);
 			glViewport(0,0,maxTexSize,maxTexSize);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
-
-			// SECOND PASS - use depth buffer to check occlusion
 			generateOcclusionHW();
-			
-			glDisable(GL_POLYGON_OFFSET_FILL);
 		}
 		else
 		{
-			glEnable(GL_DEPTH_TEST);
+			if(glIsEnabled(GL_BLEND))
+				glDisable(GL_BLEND);
+
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			// FIRST PASS - fill depth buffer
@@ -264,8 +272,6 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 			generateOcclusionSW(m, occlusion);
 		}
 
-		//cb( 100*c/posVect.size() , "Calculating Ambient Occlusion...");
-		c++;
 	}
 
 	if (useGPU)
@@ -275,7 +281,7 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
 	}
 	else
-		applyOcclusionSW(m,occlusion);
+		applyOcclusionSW(m, occlusion);
 
 	Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
@@ -287,12 +293,12 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vcg::Call
 
 		glUseProgram(0);
 
-		glDeleteFramebuffersEXT(1, &fboDepth);
-		glDeleteFramebuffersEXT(1, &fboResult);
-
 		glDeleteTextures(1, &vertexCoordTex);
 		glDeleteTextures(1, &vertexNormalsTex);
 		glDeleteTextures(numTexPages, resultBufferTex);
+
+		glDeleteFramebuffersEXT(1, &fboDepth);
+		glDeleteFramebuffersEXT(1, &fboResult);
 
 		glDetachShader(shdrID, vs);
 		glDetachShader(shdrID, fs);
@@ -316,102 +322,22 @@ void AmbientOcclusionPlugin::renderMesh(MeshModel &m)
 	m.glw.DrawFill<vcg::GLW::NMNone, vcg::GLW::CMNone, vcg::GLW::TMNone>();
 }
 
-void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum depthFormat)
-{
-	unsigned int potTexSize = 0;
-
-	vertexCoordTex   = 0;
-	vertexNormalsTex = 0;
-	resultBufferTex  = new GLuint[numTexPages];
-
-	//**** find nearest POT size for numTexPages in order to use it as depth size in 3D Textures ****/
-	for (potTexSize=1; potTexSize<numTexPages; potTexSize*=2);
-
-
-	glGenTextures (1, &vertexCoordTex);
-	glGenTextures (1, &vertexNormalsTex);
-	glGenTextures (numTexPages, resultBufferTex);
-
-	//*******INIT VERTEX COORDINATES TEXTURE - 3D *********/
-	glBindTexture(GL_TEXTURE_3D, vertexCoordTex);
-
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	glTexImage3D(GL_TEXTURE_3D, 0, colorFormat, 
-		maxTexSize, maxTexSize, potTexSize, 0, GL_RGBA, GL_FLOAT, 0);
-
-
-	//*******INIT NORMAL VECTORS TEXTURE - 3D *********/
-	glBindTexture(GL_TEXTURE_3D, vertexNormalsTex);
-
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	glTexImage3D(GL_TEXTURE_3D, 0, colorFormat, 
-		maxTexSize, maxTexSize, potTexSize, 0, GL_RGBA, GL_FLOAT, 0);
-
-
-	//*******INIT RESULT TEXTURE - 2D Array *********/
-	for (unsigned int i=0; i<numTexPages; ++i)
-	{
-		glBindTexture(GL_TEXTURE_2D, resultBufferTex[i]);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, 
-			maxTexSize, maxTexSize, 0, GL_RGBA, GL_FLOAT, 0);
-	}
-
-	//*******INIT DEPTH TEXTURE*********/
-	glGenTextures(1, &depthBufferTex);
-	glBindTexture(GL_TEXTURE_2D, depthBufferTex);
-
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,           GL_CLAMP_TO_EDGE);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,           GL_CLAMP_TO_EDGE);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,       GL_NEAREST);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,       GL_NEAREST);
-	glTexParameteri (GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB,   GL_LUMINANCE);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
-
-	glTexImage2D (GL_TEXTURE_2D, 0, depthFormat,
-	              depthTexSize, depthTexSize, 0, 
-				  GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertices)
 {
-	//*******INIT GLEW********/
-	//cb(0, "Initializing: Glew");
-	GLint glewError = glewInit();
-	if (glewError)
+	//******* INIT GLEW ********/
+	cb(0, "Initializing: Glew and Hardware Capabilities");
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
 	{
-		Log(0,(const char*)glewGetErrorString(glewError));
+		Log(0,(const char*)glewGetErrorString(err));
 		errInit = true;
 		return;
 	}
-	
-	//*******QUERY HARDWARE FOR: MAX TEX SIZE********/
+
+	//******* QUERY HARDWARE FOR: MAX TEX SIZE ********/
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
 	maxTexSize = std::min(maxTexSize, (unsigned int)AMBOCC_MAX_TEXTURE_SIZE);
 
-	//*******QUERY HARDWARE FOR: MAX NUMBER OF MRTs *********/
-	unsigned int maxTexPages=1;
-	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, reinterpret_cast<GLint*>(&maxTexPages) );
 
 	if (depthTexSize < 16)
 	{
@@ -425,43 +351,73 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 		depthTexSize = maxTexSize;
 		depthTexArea = depthTexSize*depthTexSize;
 	}
-	if ((maxTexSize*maxTexSize*maxTexPages) < numVertices && useGPU)
-	{
-		Log(0, "That's a really huge model, I can't handle it in hardware, sorry..");
-		errInit = true;
-		return;
-	}
-
-	//*******SET DEFAULT OPENGL STUFF**********/
+	
+	//******* SET DEFAULT OPENGL STUFF **********/
 	glEnable( GL_DEPTH_TEST );
 	glEnable( GL_TEXTURE_2D );
 	glEnable( GL_TEXTURE_3D_EXT );
 
 
-	//*******CHECK THAT EVERYTHING IS SUPPORTED**********/
+	//******* CHECK THAT EVERYTHING IS SUPPORTED **********/
 	if (useGPU)
 	{
-		if ( !GLEW_ARB_vertex_shader || !GLEW_ARB_fragment_shader )
+		GLenum colorFormat = GL_RGBA32F_ARB;
+		GLenum dataTypeFP = GL_FLOAT;
+
+		if (!glewIsSupported("GL_ARB_vertex_shader GL_ARB_fragment_shader"))
 		{
-			Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
-			errInit = true;
-			return;
+			if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
+			{
+				Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
+				errInit = true;
+				return;
+			}
 		}
-		if ( !GLEW_EXT_framebuffer_object )
+		if ( !glewIsSupported("GL_EXT_framebuffer_object") )
 		{
 			Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
 			errInit = true;
 			return;
 		}
 
-		if ( !GLEW_ARB_texture_float )
+		if ( !glewIsSupported("GL_ARB_texture_float") )
 		{
-			Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
+			if ( glewIsSupported("GL_ATI_texture_float") )
+			{
+				colorFormat = 0x8814; //RGBA_FLOAT32_ATI
+			}
+			else
+			{
+				if ( glewIsSupported("GL_ARB_half_float_pixel") )
+				{
+					Log(0,"Warning: your hardware doesn't support blending on FP32 textures; using FP16 instead");
+					colorFormat = GL_RGBA16F_ARB;
+					dataTypeFP = GL_HALF_FLOAT_ARB;
+					
+				}
+				else
+				{
+					Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
+					errInit = true;
+					return;
+				}
+			}
+		}
+
+
+		//******* QUERY HARDWARE FOR: MAX NUMBER OF MRTs *********/
+		unsigned int maxTexPages=1;
+		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, reinterpret_cast<GLint*>(&maxTexPages) );
+
+		//******* CHECK MODEL SIZE ***********/
+		if ((maxTexSize*maxTexSize*maxTexPages) < numVertices && useGPU)
+		{
+			Log(0, "That's a really huge model, I can't handle it in hardware, sorry..");
 			errInit = true;
 			return;
 		}
 
-		//*******FIND BEST COMPROMISE BETWEEN TEX SIZE AND MRTs********/
+		//******* FIND BEST COMPROMISE BETWEEN TEX SIZE AND MRTs ********/
 		unsigned int smartTexSize;
 		for (smartTexSize=64; (smartTexSize*smartTexSize) < (numVertices/maxTexPages); smartTexSize*=2 );
 		
@@ -473,22 +429,25 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 			return;
 		}
 
+		//******* LOAD SHADERS *******/
+		cb(30, "Initializing: Shaders and Textures");
+
+		if (maxTexPages == 4)
+			set_shaders("ambient_occlusion4",vs,fs,shdrID);
+		else
+			set_shaders("ambient_occlusion8",vs,fs,shdrID);  //geforce 8+
+
+
 		maxTexSize = smartTexSize;
 		numTexPages = std::min( (numVertices / (smartTexSize*smartTexSize))+1, maxTexPages);
 		resultBufferTex = new GLuint[numTexPages];
 		resultBufferMRT = new GLenum[numTexPages];
 
-
-		//*******LOAD SHADER*******/
-		//cb(30, "Initializing: Shaders");
-		set_shaders("ambient_occlusion",vs,fs,shdrID);
-
-		//*******INIT TEXTURES **********/
-		//GL_RGBA32/16F_ARB works on nv40+(GeForce6 or newer) and ATI hardware
-		initTextures(GL_RGBA32F_ARB, GL_DEPTH_COMPONENT);
+		//******* INIT TEXTURES **********/
+		initTextures(colorFormat, dataTypeFP);
 
 		//*******INIT FBO*********/
-		//cb(60, "Initializing: FBOs");
+		cb(60, "Initializing: Framebuffer Objects");
 		
 		fboDepth = 0;
 		glGenFramebuffersEXT(1, &fboDepth);   // FBO for first pass (1 depth attachment)
@@ -530,7 +489,80 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 
 	glViewport(0.0, 0.0, depthTexSize, depthTexSize);
 
-	//cb(100, "Initializing: Done.");
+	cb(100, "Initializing: Done.");
+}
+
+void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum dataTypeFP)
+{
+	unsigned int potTexSize = 0;
+
+	vertexCoordTex   = 0;
+	vertexNormalsTex = 0;
+	resultBufferTex  = new GLuint[numTexPages];
+
+	//**** find nearest POT size for numTexPages in order to use it as depth size in 3D Textures ****/
+	for (potTexSize=1; potTexSize<numTexPages; potTexSize*=2);
+
+	glGenTextures (1, &depthBufferTex);
+	glGenTextures (1, &vertexCoordTex);
+	glGenTextures (1, &vertexNormalsTex);
+	glGenTextures (numTexPages, resultBufferTex);
+
+	
+	//*******INIT DEPTH TEXTURE - 2D *********/
+	glBindTexture(GL_TEXTURE_2D, depthBufferTex);
+
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,           GL_CLAMP_TO_EDGE);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,           GL_CLAMP_TO_EDGE);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,       GL_NEAREST);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,       GL_NEAREST);
+	glTexParameteri (GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB,   GL_LUMINANCE);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
+
+	glTexImage2D (GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, depthTexSize, depthTexSize, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0);
+
+
+	//*******INIT VERTEX COORDINATES TEXTURE - 3D *********/
+	glBindTexture(GL_TEXTURE_3D, vertexCoordTex);
+
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	glTexImage3D(GL_TEXTURE_3D, 0, colorFormat, maxTexSize, maxTexSize, potTexSize, 0, GL_RGBA, dataTypeFP, 0);
+
+
+	//*******INIT NORMAL VECTORS TEXTURE - 3D *********/
+	glBindTexture(GL_TEXTURE_3D, vertexNormalsTex);
+
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	glTexImage3D(GL_TEXTURE_3D, 0, colorFormat, maxTexSize, maxTexSize, potTexSize, 0, GL_RGBA, dataTypeFP, 0);
+
+
+	//*******INIT RESULT TEXTURE - 2D Array *********/
+	for (unsigned int i=0; i<numTexPages; ++i)
+	{
+		glBindTexture(GL_TEXTURE_2D, resultBufferTex[i]);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, colorFormat, maxTexSize, maxTexSize, 0, GL_RGBA, dataTypeFP, 0);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 bool AmbientOcclusionPlugin::checkFramebuffer()
@@ -542,25 +574,25 @@ bool AmbientOcclusionPlugin::checkFramebuffer()
 		switch (fboStatus)
 		{
 		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-			//Log(0, "FBO Incomplete: Attachment");
+			Log(0, "FBO Incomplete: Attachment");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-			//Log(0, "FBO Incomplete: Missing Attachment");
+			Log(0, "FBO Incomplete: Missing Attachment");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-			//Log(0, "FBO Incomplete: Dimensions");
+			Log(0, "FBO Incomplete: Dimensions");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-			//Log(0, "FBO Incomplete: Formats");
+			Log(0, "FBO Incomplete: Formats");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-			//Log(0, "FBO Incomplete: Draw Buffer");
+			Log(0, "FBO Incomplete: Draw Buffer");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-			//Log(0, "FBO Incomplete: Read Buffer");
+			Log(0, "FBO Incomplete: Read Buffer");
 			break;
 		default:
-			//Log(0, "Undefined FBO error"); 
+			Log(0, "Undefined FBO error"); 
 			assert(0); 
 		}
 
@@ -675,13 +707,13 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 	glUniformMatrix4fv(glGetUniformLocation(shdrID, "mvprMatrix"), 1, GL_FALSE, (const GLfloat*)mv_pr_Matrix_f);
 
 	// Set total number of texture pages
-	glUniform1i(glGetUniformLocation(shdrID, "numTexPages"), numTexPages);
+	glUniform1f(glGetUniformLocation(shdrID, "numTexPages"), static_cast<float>(numTexPages) );
 
 	// Set texture Size
-	glUniform1i(glGetUniformLocation(shdrID, "texSize"), depthTexSize);
+	glUniform1f(glGetUniformLocation(shdrID, "texSize"), static_cast<float>(depthTexSize) );
 
 	// Set viewport Size
-	glUniform1i(glGetUniformLocation(shdrID, "viewpSize"), maxTexSize);
+	glUniform1f(glGetUniformLocation(shdrID, "viewpSize"), static_cast<float>(maxTexSize) );
 
 	// Screen-aligned Quad
 	glBegin(GL_QUADS);
@@ -708,8 +740,6 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 
 	glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
-	//size(dFloat) == depthTexSize*depthTexSize (a.k.a. depthTexArea !!)
-	//qDebug("min and max of depth buffer %f %f",*std::min_element(dFloat,dFloat+depthTexArea),*std::max_element(dFloat,dFloat+depthTexArea));
 	cameraDir.Normalize();
 
 	Point3<CMeshO::ScalarType> vp;
@@ -723,12 +753,10 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 
 		int x = floor(resCoords[0]);
 		int y = floor(resCoords[1]);
-
-		vn = m.cm.vert[i].N();
 		
 		if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
 		{
-			//vn = m.cm.vert[i].N();
+			vn = m.cm.vert[i].N();
 			occlusion[i] += max(vn*cameraDir, 0.0f);
 		}
 	}
@@ -792,14 +820,19 @@ void AmbientOcclusionPlugin::applyOcclusionSW(MeshModel &m, GLfloat *aoValues)
 	}
 
 	float scale = 255.0f / (maxvalue - minvalue);
+	char scaledValue = 0;
 
 	for (int i = 0; i < m.cm.vn; i++)
 	{
 		m.cm.vert[i].Q() = aoValues[i];
-		m.cm.vert[i].C()[0] = (m.cm.vert[i].Q() - minvalue) * scale;
-		m.cm.vert[i].C()[1] = (m.cm.vert[i].Q() - minvalue) * scale;
-		m.cm.vert[i].C()[2] = (m.cm.vert[i].Q() - minvalue) * scale;
+
+		scaledValue = (char)((m.cm.vert[i].Q() - minvalue) * scale);
+
+		m.cm.vert[i].C()[0] = scaledValue;
+		m.cm.vert[i].C()[1] = scaledValue;
+		m.cm.vert[i].C()[2] = scaledValue;
 	}
+
 }
 
 void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f, GLuint &pr)
@@ -832,10 +865,14 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 	v = glCreateShader(GL_VERTEX_SHADER);
 
 	QString fileName(shaderName);
+	QChar nMRT;
 	QByteArray ba;
 	QFile file;
 	char *data;
 
+	nMRT = fileName.at(fileName.size()-1);
+	
+	fileName = fileName.left(fileName.size()-1);
 	fileName.append(".vert");
 	file.setFileName(shadersDir.absoluteFilePath(fileName));
 	if (file.open(QIODevice::ReadOnly))
@@ -851,7 +888,9 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 		file.close();
 	}
 
-	fileName.replace(QString(".vert"), QString(".frag"));
+	fileName = fileName.left(fileName.size()-5);
+	fileName.append(nMRT);
+	fileName.append(".frag");
 	file.setFileName(shadersDir.absoluteFilePath(fileName));
 	if (file.open(QIODevice::ReadOnly))
 	{

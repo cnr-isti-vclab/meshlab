@@ -50,7 +50,6 @@ protected:
 	GLenum *resultBufferMRT;
 	
 	unsigned int numViews,
-	             depthTexSize,
 	             depthTexArea,
 				 numTexPages;
 
@@ -58,7 +57,8 @@ protected:
 	     useVBO,
 		 errInit;
 public:
-	unsigned int maxTexSize;
+	unsigned int depthTexSize,
+	             maxTexSize;
 
 // Methods
 public:
@@ -81,12 +81,11 @@ public:
 	                                           FilterParameterSet & /*parent*/,
 	                                           vcg::CallBackPos * cb) ;
 	void  initTextures          (GLenum colorFormat,
-	                             GLenum depthFormat);
+	                             GLenum dataTypeFP);
 	void  initGL                (vcg::CallBackPos *cb,
 	                             unsigned int numVertices);
 	bool  processGL             (AOGLWidget *glw,
-	                             MeshModel &m,
-								 vcg::CallBackPos *cb);
+	                             MeshModel &m);
 	bool  checkFramebuffer();
 
 	void  vertexCoordsToTexture (MeshModel &m);
