@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.30  2008/02/11 18:55:21  mischitelli
+- Small changes for improved ATI support
+
 Revision 1.29  2008/02/11 18:09:50  mischitelli
 - Improved portability on systems with less powerful hardware
 - Added a fallback to FP16 blending for hardware that doesn't support it on FP32 render targets.
@@ -384,7 +387,14 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 		{
 			if ( glewIsSupported("GL_ATI_texture_float") )
 			{
-				colorFormat = 0x8814; //RGBA_FLOAT32_ATI
+				if ( glewIsSupported("EXT_gpu_shader4") )
+					colorFormat = 0x8814; //RGBA_FLOAT32_ATI on HD2k or HD3k cards
+				else
+				{
+					Log(0,"Warning: your hardware doesn't support blending on FP32 textures; using FP16 instead");
+					colorFormat = 0x881A; //RGBA_FLOAT16_ATI on X1k or older cards
+					dataTypeFP = GL_HALF_FLOAT_ARB;
+				}
 			}
 			else
 			{
