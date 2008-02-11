@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.6  2008/02/11 09:28:33  gianpaolopalma
+ return error code if file doesn't contain geometry
+
  Revision 1.5  2008/02/08 17:02:09  gianpaolopalma
  Improved memory management
 
@@ -91,6 +94,12 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			QString lineError;
 			lineError.setNum(info->lineNumberError);
 			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName, fileError, lineError, vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
+			return false;
+		}
+		if (m.cm.vert.size() == 0)
+		{
+			errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: File without a geometry";
+			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName));
 			return false;
 		}
 		if(info->mask & MeshModel::IOM_WEDGNORMAL)
