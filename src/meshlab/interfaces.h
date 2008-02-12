@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.71  2008/02/12 14:20:33  cignoni
+changed the function getParameter into the more meaningful getCustomParameter
+
 Revision 1.70  2008/02/05 18:04:59  benedetti
 added keyReleaseEvent and keyPressEvent to MeshEditInterface
 
@@ -292,9 +295,9 @@ public:
 	//  this function returns true if the filter has a personally customized dialog..
 	virtual bool customDialog(QAction *) {return false;}
 	
-	// This function is invokes the custom dialog of a filter and when has the params 
+	// This function is invoked for filters with a custom dialog of a filter and when has the params 
 	// it notify it to the mainwindow with the collected parameters
-	virtual bool getParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw) 
+	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw) 
 	{
 		assert(mw);
 		mw->executeFilter(action,params);

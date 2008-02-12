@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.150  2008/02/12 14:20:33  cignoni
+changed the function getParameter into the more meaningful getCustomParameter
+
 Revision 1.149  2008/02/06 09:56:37  cignoni
 Corrected bug in the display of plugins info
 
@@ -485,8 +488,10 @@ void MainWindow::startFilter()
   }
 	else if(iFilter->customDialog(action))
 	{
-		/// Start the custom dialog with the collected parameters
-		iFilter->getParameters(action, GLA(),*(GLA()->mm()), parList, this);
+		// Start the custom dialog with the collected parameters
+		// the filter should try to mimics the behaviour of the autodialog.
+		// invoking hte execute filter function of the mainwindow each time that the user press apply
+		iFilter->getCustomParameters(action, GLA(),*(GLA()->mm()), parList, this);
   }	
 	else executeFilter(action,parList);
 }

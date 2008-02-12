@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.28  2008/02/12 14:20:33  cignoni
+changed the function getParameter into the more meaningful getCustomParameter
+
 Revision 1.27  2008/01/11 13:58:21  cignoni
 added selection of self-intersecting faces.
 
@@ -124,7 +127,7 @@ public:
 			return false;
 	}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
-	virtual bool getParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
+	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
