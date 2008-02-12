@@ -131,7 +131,7 @@ namespace vcg {
 			Point3<float> Tij;
 
 			Point3<float> n = p->N();
-			n = n.Normalize();
+			//n = n.Normalize();
 			n_nMatrix.ExternalProduct(n, n);
 
 			Tij = (n_nMatrix * ViVj).Normalize();
@@ -324,8 +324,8 @@ namespace vcg {
 			queue<FaceType*> edgeFaceQueue;
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
-				if ( vi->IMark() == F ) vi->C() = Color4b::Yellow;
-				if ( vi->IMark() == B ) vi->C() = Color4b::White;
+				if ( vi->IMark() == F ) vi->C() = Color4b::Magenta;
+				if ( vi->IMark() == B ) vi->C() = Color4b::Yellow;
 				if ( vi->IMark() == U ) vi->C() = Color4b::Green;
 			}
 

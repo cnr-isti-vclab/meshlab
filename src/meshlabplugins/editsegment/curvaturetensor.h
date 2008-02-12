@@ -56,7 +56,7 @@ namespace vcg {
 		};
 
 		void ComputeCurvatureTensor() {
-			vcg::tri::UpdateNormals<MESH_TYPE>::PerVertex(*mesh);
+			vcg::tri::UpdateNormals<MESH_TYPE>::PerVertexNormalized(*mesh);
 
 			VertexIterator vi;
 
@@ -67,7 +67,7 @@ namespace vcg {
 					VertexType * central_vertex = &(*vi);
 
 					std::vector<float> weights;
-					std::vector<float> curvatures;
+					//std::vector<float> curvatures;
 					std::vector<AdjVertex> vertices;
 
 					vcg::face::JumpingPos<FaceType> pos((*vi).VFp(), central_vertex);
@@ -121,11 +121,11 @@ namespace vcg {
 					M.SetZero();
 					for (int i = 0; i < vertices.size(); ++i) {
 						Point3f edge = (central_vertex->P() - vertices[i].vert->P());
-						curvatures.push_back(2.0f * ((central_vertex->N() * edge) / edge.SquaredNorm() ) );
-
+						//curvatures.push_back(2.0f * ((central_vertex->N() * edge) / edge.SquaredNorm() ) );
+						float curvature = (2.0f * (central_vertex->N() * edge) ) / edge.SquaredNorm();
 						Point3f T = (Tp*edge).Normalize();
 						tempMatrix.ExternalProduct(T,T);
-						M += tempMatrix * weights[i] * curvatures[i] ;
+						M += tempMatrix * weights[i] * curvature ;
 					}
 
 					Point3f W;
@@ -217,8 +217,8 @@ namespace vcg {
 
 					(*TDCurvPtr)[*vi].T1 = Principal_Direction1;
 					(*TDCurvPtr)[*vi].T2 = Principal_Direction2;
-					(*TDCurvPtr)[*vi].k1 = Principal_Curvature1;
-					(*TDCurvPtr)[*vi].k2 = Principal_Curvature2;
+					(*TDCurvPtr)[*vi].k1 = -Principal_Curvature1;
+					(*TDCurvPtr)[*vi].k2 = -Principal_Curvature2;
 
 				}
 			}
