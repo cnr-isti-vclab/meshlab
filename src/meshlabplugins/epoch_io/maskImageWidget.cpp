@@ -128,6 +128,7 @@ namespace ui
 		QImage image_to_use = image;
 		pimpl_->realwidth_ = image.width();
 		pimpl_->realheight_ = image.height();
+		qDebug("maskImageWidget::Init real wxh %i x%i",pimpl_->realwidth_,pimpl_->realheight_);
 		QDesktopWidget *desktop(QApplication::desktop());
 		if (image.width() > (desktop->width() * .8) ||
 				image.height() > (desktop->height() * .8))

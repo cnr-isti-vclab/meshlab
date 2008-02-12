@@ -26,7 +26,7 @@ public:
   static QString ThumbName(QString &imageName);
 
 	bool BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps,
-		bool dilation, int dilationPasses, int dilationSize, bool erosion, int erosionPasses, int erosionSize);
+		bool dilation, int dilationPasses, int dilationSize, bool erosion, int erosionPasses, int erosionSize,float scalingFactor);
   void SmartSubSample(int subsampleFactor, FloatImage &fli, CharImage &chi, FloatImage &subD,FloatImage &subQ, int minCount);
   void AddCameraIcon(CMeshO &m);
   bool CombineHandMadeMaskAndCount(CharImage &qualityImg, QString maskName );

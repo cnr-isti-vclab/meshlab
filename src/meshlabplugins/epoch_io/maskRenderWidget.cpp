@@ -122,6 +122,7 @@ namespace ui
 
   maskRenderWidget::maskRenderWidget(const QImage& image, QWidget *parent) : QWidget(parent), pimpl_(new Impl)
   {
+	  qDebug("MaskRenderWidget started with an image %i x %i",image.width(),image.height());
     setAttribute(Qt::WA_StaticContents);
     setBackgroundRole(QPalette::Base);
     setImage(image);
@@ -307,7 +308,9 @@ namespace ui
 
   QImage maskRenderWidget::getMask(int w, int h) const
   {
-    return pimpl_->foreground_.alphaChannel().scaled(w, h, Qt::KeepAspectRatio);
+//    return pimpl_->foreground_.alphaChannel().scaled(w, h, Qt::KeepAspectRatio);
+    return pimpl_->foreground_.alphaChannel().scaled(w, h); // changed to this becouse sometimes for rounding error did not create the original size.
+
   }
 
 

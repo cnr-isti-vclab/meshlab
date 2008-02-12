@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.20  2008/02/12 21:59:02  cignoni
+ removed mask bug and added scaling of maps
+
  Revision 1.19  2007/11/26 07:35:26  cignoni
  Yet another small cosmetic change to the interface of the io filters.
 
@@ -108,6 +111,7 @@
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/clustering.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/hole.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/export_ply.h>
@@ -194,16 +198,16 @@ float EpochModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
 bool EpochModel::CombineHandMadeMaskAndCount(CharImage &CountImg, QString maskName )
 {
 	QImage maskImg(maskName);
-
+  qDebug("Trying to read maskname %s",qPrintable(maskName));
 	if(maskImg.isNull()) 
 		return false;
 
-	if(maskImg.width()!= CountImg.w) 
+	if( (maskImg.width()!= CountImg.w)  || (maskImg.height()!= CountImg.h) )
+	{
+		qDebug("Warning mask and images does not match! %i %i vs %i %i",maskImg.width(),CountImg.w,maskImg.height(),CountImg.h);
 		return false;
-
-	if(maskImg.height()!= CountImg.h) 
-		return false;
-
+	}
+	
 	for(int j=0;j<maskImg.height();++j)
 		for(int i=0;i<maskImg.width();++i)
 			if(qRed(maskImg.pixel(i,j))>128)
@@ -373,7 +377,7 @@ it takes a depth map, a count map,
 
 bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps,
 													 bool dilation, int dilationPasses, int dilationSize, 
-													 bool erosion, int erosionPasses, int erosionSize)
+													 bool erosion, int erosionPasses, int erosionSize,float scalingFactor)
 {
   FloatImage depthImgf;
   CharImage countImgc;
@@ -483,6 +487,10 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 //  Matrix44d Rot;
 //  Rot.SetRotate(M_PI,Point3d(1,0,0));
 //  vcg::tri::UpdatePosition<CMeshO>::Matrix(m, Rot);
+
+	Matrix44f scaleMat;
+	scaleMat.SetScale(scalingFactor,scalingFactor,scalingFactor);
+	vcg::tri::UpdatePosition<CMeshO>::Matrix(m, scaleMat);
 
     return true;
 }
@@ -641,6 +649,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 			bool erosionFlag = epochDialog->erosionCheckBox->isChecked();
 			int erosionN = epochDialog->erosionNumPassSpinBox->value();
 			int erosionSz = epochDialog->erosionSizeSlider->value() * 2 + 1;
+			float scalingFactor = epochDialog->scaleLineEdit->text().toFloat();
 			std::vector<string> savedMeshVector;
 
 			bool firstTime=true;
@@ -653,7 +662,7 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 						mm.Clear();
 						int tt0=clock();
 						(*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps, 
-							dilationFlag, dilationN, dilationSz, erosionFlag, erosionN, erosionSz);
+							dilationFlag, dilationN, dilationSz, erosionFlag, erosionN, erosionSz,scalingFactor);
 						int tt1=clock();
 						if(logFP) fprintf(logFP,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
 

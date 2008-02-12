@@ -182,8 +182,11 @@ void v3dImportDialog::on_imageTableWidget_itemDoubleClicked(QTableWidgetItem * i
   int row= imageTableWidget->row(item);
   int col= imageTableWidget->column(item);
   if(col!=2) return;
-
-	ui::maskImageWidget masker(QImage(er->modelList[row].textureName));
+  qDebug("DoubleClicked on image %s",qPrintable(er->modelList[row].textureName));
+	QImage ttt(er->modelList[row].textureName);
+	qDebug("'%s' %i x %i",qPrintable(er->modelList[row].textureName),ttt.width(),ttt.height());
+	//ui::maskImageWidget masker(QImage(er->modelList[row].textureName));
+	ui::maskImageWidget masker(ttt);
 	if (QFile::exists(er->modelList[row].maskName))
 		masker.loadMask(er->modelList[row].maskName);
 
