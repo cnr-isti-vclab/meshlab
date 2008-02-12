@@ -107,6 +107,10 @@ void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, FilterPar
 											"Recompute normals",
 											"Toggle the recomputation of the normals after the random displacement.\n\n"
 											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect.");
+			parlst.addAbsPerc("Displacement",
+												m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),
+												"Max displacement",
+												"The vertex are displaced of a vector whose norm is bounded by this value");
 											break;
 											
 		default : assert(0); 
@@ -119,16 +123,16 @@ bool ExtraSamplePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 {
 	//MeshModel &m=*md->mm();
 	srand(time(NULL)); 
-	const float max_displacement = m.cm.bbox.Diag()/100;
+	const float max_displacement =par.getAbsPerc("Displacement");
 
  	for(unsigned int i = 0; i< m.cm.vert.size(); i++){
 		 // Typical usage of the callback for showing a nice progress bar in the bottom. 
 		 // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
 		  cb(100*i/m.cm.vert.size(), "Randomly Displacing...");
 
-		float rndax = (float(rand())/RAND_MAX)*max_displacement;
-		float rnday = (float(rand())/RAND_MAX)*max_displacement;
-		float rndaz = (float(rand())/RAND_MAX)*max_displacement;
+		float rndax = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
+		float rnday = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
+		float rndaz = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
 		m.cm.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);		
 	}
 	
