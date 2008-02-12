@@ -434,9 +434,9 @@ void QualityMapperDialog::initTF()
 //	ui.presetComboBox->disconnect(SIGNAL(textChanged()));
 //	connect(&_equalizerHandles[0], SIGNAL(positionChanged()), &_equalizerHandles[1], SLOT(moveMidHandle()));
 	ui.presetComboBox->blockSignals( true );
-
+  int i;
 	QString itemText;
-	for ( int i=0; i<NUMBER_OF_DEFAULT_TF; i++ )
+	for (i=0; i<NUMBER_OF_DEFAULT_TF; i++ )
 	{
 		itemText = TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF];
 
