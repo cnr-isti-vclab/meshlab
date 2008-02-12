@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.31  2008/02/12 14:23:11  cignoni
+correct drawing selection bug
+
 Revision 1.30  2008/02/04 09:32:56  cignoni
 Added check to avoid drawing textures when mesh has no texture (and face color too)
 
@@ -91,7 +94,8 @@ bool MeshModel::RenderSelectedFaces()
   glColor4f(1.0f,0.0,0.0,.3f);
   glPolygonOffset(-1.0, -1);
   CMeshO::FaceIterator fi;
-  glBegin(GL_TRIANGLES);
+	glPushMatrix();
+	glMultMatrix(cm.Tr);glBegin(GL_TRIANGLES);
 	cm.sfn=0;
 	for(fi=cm.face.begin();fi!=cm.face.end();++fi)
     if(!(*fi).IsD() && (*fi).IsS())
@@ -102,6 +106,7 @@ bool MeshModel::RenderSelectedFaces()
 			++cm.sfn;
     }
   glEnd();
+	glPopMatrix();
 	glPopAttrib();
   return true;
 }
