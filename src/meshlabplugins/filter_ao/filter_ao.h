@@ -47,7 +47,9 @@ protected:
 	        vertexNormalsTex,
 	       *resultBufferTex;
 
-	GLenum *resultBufferMRT;
+	GLenum *resultBufferMRT,
+		    colorFormat,
+	        dataTypeFP;
 	
 	unsigned int numViews,
 	             depthTexArea,
@@ -80,8 +82,7 @@ public:
 	                                           MeshModel &m,
 	                                           FilterParameterSet & /*parent*/,
 	                                           vcg::CallBackPos * cb) ;
-	void  initTextures          (GLenum colorFormat,
-	                             GLenum dataTypeFP);
+	void  initTextures          (void);
 	void  initGL                (vcg::CallBackPos *cb,
 	                             unsigned int numVertices);
 	bool  processGL             (AOGLWidget *glw,

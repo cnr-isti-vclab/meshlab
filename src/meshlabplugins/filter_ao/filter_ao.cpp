@@ -24,6 +24,11 @@
 History
 
 $Log$
+Revision 1.31  2008/02/12 14:39:56  mischitelli
+- Disabled the FP16 path since needs rewriting good part of the code: need time!
+- GPU version works only with FP32 blending capable hardware: aka Shader Model 4.0!
+- CPU version should work anyway
+
 Revision 1.30  2008/02/11 18:55:21  mischitelli
 - Small changes for improved ATI support
 
@@ -96,6 +101,9 @@ AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 	depthTexSize = AMBOCC_DEFAULT_TEXTURE_SIZE;
 	depthTexArea = depthTexSize*depthTexSize;
 	maxTexSize = 16;
+
+	colorFormat = GL_RGBA32F_ARB;
+	dataTypeFP = GL_FLOAT;
 }
 
 AmbientOcclusionPlugin::~AmbientOcclusionPlugin()
@@ -364,9 +372,6 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 	//******* CHECK THAT EVERYTHING IS SUPPORTED **********/
 	if (useGPU)
 	{
-		GLenum colorFormat = GL_RGBA32F_ARB;
-		GLenum dataTypeFP = GL_FLOAT;
-
 		if (!glewIsSupported("GL_ARB_vertex_shader GL_ARB_fragment_shader"))
 		{
 			if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
@@ -383,39 +388,28 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 			return;
 		}
 
-		if ( !glewIsSupported("GL_ARB_texture_float") )
+		if ( glewIsSupported("GL_ARB_texture_float") )
 		{
-			if ( glewIsSupported("GL_ATI_texture_float") )
+			if ( !glewIsSupported("GL_EXT_gpu_shader4") )   //Only DX10-grade cards support FP32 blending
 			{
-				if ( glewIsSupported("EXT_gpu_shader4") )
-					colorFormat = 0x8814; //RGBA_FLOAT32_ATI on HD2k or HD3k cards
-				else
-				{
-					Log(0,"Warning: your hardware doesn't support blending on FP32 textures; using FP16 instead");
-					colorFormat = 0x881A; //RGBA_FLOAT16_ATI on X1k or older cards
-					dataTypeFP = GL_HALF_FLOAT_ARB;
-				}
+				//colorFormat = GL_RGB16F_ARB;
+				//dataTypeFP = GL_HALF_FLOAT_ARB;
+
+				Log(0,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
+				errInit = true;
+				return;
 			}
-			else
-			{
-				if ( glewIsSupported("GL_ARB_half_float_pixel") )
-				{
-					Log(0,"Warning: your hardware doesn't support blending on FP32 textures; using FP16 instead");
-					colorFormat = GL_RGBA16F_ARB;
-					dataTypeFP = GL_HALF_FLOAT_ARB;
-					
-				}
-				else
-				{
-					Log(0,"Your hardware doesn't support FP16/32 textures, which are required for hw occlusion");
-					errInit = true;
-					return;
-				}
-			}
+
+			colorFormat = GL_RGB32F_ARB;
+			dataTypeFP = GL_FLOAT;
+		}
+		else
+		{
+			Log(0,"Your hardware doesn't support floating point textures, which are required for hw occlusion");
+			errInit = true;
+			return;
 		}
 
-
-		//******* QUERY HARDWARE FOR: MAX NUMBER OF MRTs *********/
 		unsigned int maxTexPages=1;
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, reinterpret_cast<GLint*>(&maxTexPages) );
 
@@ -454,7 +448,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 		resultBufferMRT = new GLenum[numTexPages];
 
 		//******* INIT TEXTURES **********/
-		initTextures(colorFormat, dataTypeFP);
+		initTextures();
 
 		//*******INIT FBO*********/
 		cb(60, "Initializing: Framebuffer Objects");
@@ -502,7 +496,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 	cb(100, "Initializing: Done.");
 }
 
-void AmbientOcclusionPlugin::initTextures(GLenum colorFormat, GLenum dataTypeFP)
+void AmbientOcclusionPlugin::initTextures()
 {
 	unsigned int potTexSize = 0;
 
@@ -639,11 +633,11 @@ void AmbientOcclusionPlugin::vertexCoordsToTexture(MeshModel &m)
 
 	//Write vertex coordinates
 	glBindTexture(GL_TEXTURE_3D_EXT, vertexCoordTex);
-	glTexSubImage3D(GL_TEXTURE_3D_EXT, 0, 0, 0, 0, maxTexSize, maxTexSize, numTexPages, GL_RGBA, GL_FLOAT, vertexPosition);
+	glTexSubImage3D(GL_TEXTURE_3D_EXT, 0, 0, 0, 0, maxTexSize, maxTexSize, numTexPages, GL_RGBA, dataTypeFP, vertexPosition);
 
 	//Write normal directions
 	glBindTexture(GL_TEXTURE_3D_EXT, vertexNormalsTex);
-	glTexSubImage3D(GL_TEXTURE_3D_EXT, 0, 0, 0, 0, maxTexSize, maxTexSize, numTexPages, GL_RGBA, GL_FLOAT, vertexNormals);
+	glTexSubImage3D(GL_TEXTURE_3D_EXT, 0, 0, 0, 0, maxTexSize, maxTexSize, numTexPages, GL_RGBA, dataTypeFP, vertexNormals);
 
 	delete [] vertexNormals;
 	delete [] vertexPosition;
