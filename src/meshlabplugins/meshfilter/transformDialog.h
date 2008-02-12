@@ -26,6 +26,9 @@
 /*
 
 $Log$
+Revision 1.4  2008/02/12 14:21:39  cignoni
+changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
+
 Revision 1.3  2007/10/06 23:39:01  cignoni
 Updated used defined dialog to the new filter interface.
 
@@ -71,9 +74,10 @@ Revision 1.4  2006/01/17 14:18:03  mariolatronico
 #include "ui_transformDialog.h"
 #include <vcg/math/matrix44.h>
 #include <meshlab/meshmodel.h> // for CMeshO
+#include <meshlab/interfaces.h> // for CMeshO
 
 using vcg::Matrix44f;
-#define PI 3.14159265
+//#define PI 3.14159265
 
 /*
  *	Naming conventions for widgets:
@@ -110,6 +114,7 @@ private slots:
 	void on_rotateLE_textChanged(const QString &text);
 	// do the real count when ok button is pressed
   void on_applyButton_clicked();
+  void on_closeAndFreezeButton_clicked();
 	
 	// move mesh center to origin
 	// simply updates the move line edit
@@ -121,7 +126,7 @@ private slots:
 	// Rotate X / Z Up push buttons: simply fill Rotate fields
 	void on_rotateZUpPB_clicked();
 	void on_rotateXUpPB_clicked();
-	void freeze();
+	//void freeze();
 	
 public:
 
@@ -130,7 +135,10 @@ public:
 	
 	// used to compute transformation on meshfilter.cpp
 	Matrix44f& getTransformation();
-	void setMesh(MeshModel &m);
+	void setMesh(CMeshO *mesh);
+	void updateMatrixWidget();
+	void setMainWindow(MainWindowInterface *mw) {curmwi=mw;}
+	void setAction(QAction *act) {curact=act;}
 	QString& getLog();
 private: // members
   CMeshO *mesh;
@@ -154,8 +162,9 @@ private: // functions
 
 	void resizeEvent ( QResizeEvent * event );
 	void showEvent ( QShowEvent * event );
-	
 
+	MainWindowInterface *curmwi;
+	QAction *curact;
 };
 
 #endif // TRANSFORM_DIALOG_H

@@ -26,6 +26,9 @@
 
 /*
 $Log$
+Revision 1.6  2008/02/12 14:21:39  cignoni
+changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
+
 Revision 1.5  2007/10/06 23:39:01  cignoni
 Updated used defined dialog to the new filter interface.
 
@@ -63,11 +66,14 @@ Revision 1.7  2006/01/22 16:40:38  mariolatronico
 
 */
 
-#include "transformDialog.h"
-#include <vcg/complex/trimesh/update/bounding.h>
 #include <QRegExp>
 #include <QRegExpValidator>
 #include <QtGui>
+
+#include "transformDialog.h"
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/position.h>
+
 TransformDialog::TransformDialog() : QDialog() {
 	
 	setupUi(this);
@@ -150,21 +156,24 @@ vcg::Matrix44f& TransformDialog::getTransformation() {
 	return matrix;
 }
 
-void TransformDialog::setMesh(MeshModel &m) {
-	matrix=m.cm.Tr;
-	CMeshO *mesh=&m.cm;
-	this->mesh = mesh;
+void TransformDialog::setMesh(CMeshO *_mesh) {
+	matrix=_mesh->Tr;
+	this->mesh = _mesh;
 	this->bbox = mesh->bbox;
 	vcg::tri::UpdateBounding<CMeshO>::Box(*mesh);
 
  	minBbox = mesh->bbox.min;
  	maxBbox = mesh->bbox.max;
 	
+  updateMatrixWidget();
+														 
+}
+
+void TransformDialog::updateMatrixWidget()
+{
 		for(int ii=0;ii<4;++ii)
 			for(int jj=0;jj<4;++jj)
-				tableWidget->setItem(ii,jj,new QTableWidgetItem(QString::number(m.cm.Tr[ii][jj])) );
-
-														 
+				tableWidget->setItem(ii,jj,new QTableWidgetItem(QString::number(mesh->Tr[ii][jj])) );
 }
 
 QString& TransformDialog::getLog() {
@@ -322,25 +331,25 @@ void TransformDialog::on_applyButton_clicked() {
 
 		}
 		bool isNumber = false;
-		float rotateVal = rotateLE->text().toFloat(&isNumber);
+		float rotateValDeg = rotateLE->text().toFloat(&isNumber);
 		if ( ! isNumber ) {
 			log += "Invalid values entered";
 			reject();
 			return;
 		}
-		log += QString(" %1 degrees").arg(rotateVal);
+		log += QString(" %1 degrees").arg(rotateValDeg);
 		// SetTranslate, SetScale and SetRotate set initially the identity
 		if (centerRotateRB->isChecked()) // rotate around obj center
 		{
 			Matrix44f transMat = currentMatrix.SetTranslate(  bbox.Center() );
 			// ANGLE MUST BE IN RADIANS !!!!
-			Matrix44f rotMat = currentMatrix.SetRotate(rotateVal * PI / 180.0, axisPoint);
+			Matrix44f rotMat = currentMatrix.SetRotate(math::ToRad(rotateValDeg), axisPoint);
 			Matrix44f trans2Mat = currentMatrix.SetTranslate( -  bbox.Center() );
 			currentMatrix = transMat * rotMat * trans2Mat;	
 		} else {
 			
 			// ANGLE MUST BE IN RADIANS !!!!
-			currentMatrix.SetRotate(rotateVal * PI / 180.0, axisPoint);
+			currentMatrix.SetRotate(math::ToRad(rotateValDeg), axisPoint);
 		}
 	}
 	if (whichTransform == TR_SCALE) {
@@ -371,7 +380,13 @@ void TransformDialog::on_applyButton_clicked() {
 	// the values in the line edit widgets
 	if(absoluteRB->isChecked()) matrix = currentMatrix; 
 	else matrix=matrix*currentMatrix;
-	accept();
+	
+	Matrix44f matrixDlg = getTransformation();
+  FilterParameterSet params;
+	params.addMatrix44("Transform",matrixDlg);
+	curmwi->executeFilter(curact,params);
+  updateMatrixWidget();
+//	accept();
 	
 }
 
@@ -414,6 +429,14 @@ void TransformDialog::on_rotateZUpPB_clicked()
 }
 
 // Freezing means that 
-void TransformDialog::freeze (  )
+void TransformDialog::on_closeAndFreezeButton_clicked (  )
 {
+ on_applyButton_clicked();
+ vcg::tri::UpdatePosition<CMeshO>::Matrix(*mesh, mesh->Tr);
+ matrix.SetIdentity();
+ mesh->Tr.SetIdentity();
+ vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(*mesh);
+ vcg::tri::UpdateBounding<CMeshO>::Box(*mesh);
+ updateMatrixWidget();
+ accept();
 }

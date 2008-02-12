@@ -22,6 +22,9 @@
 ****************************************************************************/
 /* History
 $Log$
+Revision 1.46  2008/02/12 14:21:39  cignoni
+changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
+
 Revision 1.45  2007/10/02 08:13:45  cignoni
 New filter interface. Hopefully more clean and easy to use.
 
@@ -133,7 +136,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	virtual bool customDialog(QAction *filter);
 	
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
-	virtual bool getParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
+	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	

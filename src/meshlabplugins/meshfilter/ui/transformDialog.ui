@@ -16,20 +16,8 @@
    <iconset>../../../meshlab/images/eye128.png</iconset>
   </property>
   <layout class="QVBoxLayout" >
-   <property name="margin" >
-    <number>9</number>
-   </property>
-   <property name="spacing" >
-    <number>6</number>
-   </property>
    <item>
     <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
      <item>
       <widget class="QRadioButton" name="isRotateRB" >
        <property name="text" >
@@ -55,48 +43,18 @@
    </item>
    <item>
     <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
      <item>
       <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <property name="spacing" >
-        <number>6</number>
-       </property>
        <item>
         <widget class="QGroupBox" name="rotateBox" >
          <property name="title" >
           <string>Rotate</string>
          </property>
          <layout class="QVBoxLayout" >
-          <property name="margin" >
-           <number>9</number>
-          </property>
-          <property name="spacing" >
-           <number>6</number>
-          </property>
           <item>
            <layout class="QHBoxLayout" >
-            <property name="margin" >
-             <number>0</number>
-            </property>
-            <property name="spacing" >
-             <number>6</number>
-            </property>
             <item>
              <layout class="QVBoxLayout" >
-              <property name="margin" >
-               <number>0</number>
-              </property>
-              <property name="spacing" >
-               <number>6</number>
-              </property>
               <item>
                <widget class="QRadioButton" name="xAxisRB" >
                 <property name="text" >
@@ -163,12 +121,6 @@
              <string>Rotation Center</string>
             </property>
             <layout class="QGridLayout" >
-             <property name="margin" >
-              <number>9</number>
-             </property>
-             <property name="spacing" >
-              <number>6</number>
-             </property>
              <item row="1" column="0" >
               <widget class="QRadioButton" name="originRotateRB" >
                <property name="text" >
@@ -222,12 +174,6 @@
           <string>Transformation mode</string>
          </property>
          <layout class="QVBoxLayout" >
-          <property name="margin" >
-           <number>9</number>
-          </property>
-          <property name="spacing" >
-           <number>6</number>
-          </property>
           <item>
            <widget class="QRadioButton" name="absoluteRB" >
             <property name="text" >
@@ -252,40 +198,16 @@
      </item>
      <item>
       <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <property name="spacing" >
-        <number>6</number>
-       </property>
        <item>
         <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
          <item>
           <widget class="QGroupBox" name="moveBox" >
            <property name="title" >
             <string>Move</string>
            </property>
            <layout class="QVBoxLayout" >
-            <property name="margin" >
-             <number>9</number>
-            </property>
-            <property name="spacing" >
-             <number>6</number>
-            </property>
             <item>
              <layout class="QGridLayout" >
-              <property name="margin" >
-               <number>0</number>
-              </property>
-              <property name="spacing" >
-               <number>6</number>
-              </property>
               <item row="2" column="1" >
                <widget class="QLineEdit" name="zMoveLE" />
               </item>
@@ -356,20 +278,8 @@
             <string>Scale</string>
            </property>
            <layout class="QGridLayout" >
-            <property name="margin" >
-             <number>9</number>
-            </property>
-            <property name="spacing" >
-             <number>6</number>
-            </property>
             <item row="0" column="0" >
              <layout class="QGridLayout" >
-              <property name="margin" >
-               <number>0</number>
-              </property>
-              <property name="spacing" >
-               <number>6</number>
-              </property>
               <item row="2" column="0" >
                <widget class="QLabel" name="zScaleLBL" >
                 <property name="text" >
@@ -439,11 +349,20 @@
           <string>Current Transformation Matrix</string>
          </property>
          <layout class="QVBoxLayout" >
-          <property name="margin" >
-           <number>4</number>
-          </property>
           <property name="spacing" >
            <number>3</number>
+          </property>
+          <property name="leftMargin" >
+           <number>4</number>
+          </property>
+          <property name="topMargin" >
+           <number>4</number>
+          </property>
+          <property name="rightMargin" >
+           <number>4</number>
+          </property>
+          <property name="bottomMargin" >
+           <number>4</number>
           </property>
           <item>
            <widget class="QTableWidget" name="tableWidget" >
@@ -459,18 +378,10 @@
        </item>
        <item>
         <layout class="QGridLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
          <item row="1" column="0" >
           <widget class="QLabel" name="bboxMaxLBL" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>5</hsizetype>
-             <vsizetype>5</vsizetype>
+            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
              <horstretch>1</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -497,9 +408,7 @@
          <item row="1" column="1" >
           <widget class="QLabel" name="bboxValueMaxLBL" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>5</hsizetype>
-             <vsizetype>5</vsizetype>
+            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
              <horstretch>2</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -530,12 +439,6 @@
    </item>
    <item>
     <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
      <item>
       <spacer>
        <property name="orientation" >
@@ -553,6 +456,13 @@
       <widget class="QPushButton" name="applyButton" >
        <property name="text" >
         <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeAndFreezeButton" >
+       <property name="text" >
+        <string>Close and Freeze</string>
        </property>
       </widget>
      </item>
@@ -575,13 +485,13 @@
      <property name="html" >
       <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:11pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:13pt;">&lt;span style=" font-size:11pt;">MeshLab keeps for each layer/mesh a current trasformation matrix &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;">: &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;"> is used in rendering and alignment. The &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;"> matrix is usually &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">NOT&lt;/span>&lt;span style=" font-size:11pt;"> saved when you export the mesh into a generic format.&lt;/span>&lt;/p>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:11pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:13pt;">&lt;span style=" font-size:11pt;">MeshLab keeps for each layer/mesh a current trasformation matrix &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;">: &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;"> is used in rendering and alignment. The &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;"> matrix is usually &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">NOT&lt;/span>&lt;span style=" font-size:11pt;"> saved when you export the mesh into a generic format. With this dialog you can change &lt;/span>&lt;span style=" font-size:11pt; font-weight:600; font-style:italic;">T&lt;/span>&lt;span style=" font-size:11pt;">  &lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">When the transformation mode is set to relative all the computations involves the &lt;span style=" font-weight:600; font-style:italic;">T&lt;/span> Matrix:&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">- &lt;span style=" font-weight:600; font-style:italic;">Relative&lt;/span>: the transformation specified in the top part is multiplied by the current matrix &lt;span style=" font-weight:600; font-style:italic;">T&lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600; font-style:italic;">- Absolute: the transformation specified in the top part is used as the  new matrix T&lt;/p>
 &lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">With this dialog you can change &lt;span style=" font-weight:600; font-style:italic;">T&lt;/span>  &lt;/p>
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">When the transformation mode is set to relative all the computations involves the &lt;span style=" font-weight:600; font-style:italic;">T&lt;/span> Matrix (e.g. the &lt;/p>
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600; font-style:italic;">Important Note&lt;/span>:&lt;/p>
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">To actually change the coords of the mesh and baking the matrix into the mesh itself you have to use the &lt;span style=" font-weight:600; font-style:italic;">freeze&lt;/span> filter (in that case &lt;span style=" font-weight:600; font-style:italic;">T&lt;/span> become the Identity).&lt;/p>&lt;/body>&lt;/html></string>
      </property>
     </widget>
