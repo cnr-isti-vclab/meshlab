@@ -56,7 +56,7 @@ public:
 
 	void clearScene(QGraphicsScene *scene);
 	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
-	void drawEqualizerHistogram();
+	void initEqualizerHistogram();
 	void drawTransferFunction();
 
 
@@ -67,6 +67,9 @@ private:
 	Histogramf		*_equalizer_histogram;
 	CHART_INFO		*_histogram_info;
 	QGraphicsScene	_equalizerHistogramScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
+	EqHandle*		_equalizerHandles[NUMBER_OF_EQHANDLES];
+	qreal			_equalizerMidHandlePercentilePosition;
+	GRAPHICS_ITEMS_LIST _equalizerHistogramBars;
 
 	TransferFunction *_transferFunction;
 	CHART_INFO		*_transferFunction_info;
@@ -78,8 +81,6 @@ private:
 	bool			_isTransferFunctionInitialized;
 	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs;
 
-	EqHandle*		_equalizerHandles[NUMBER_OF_EQHANDLES];
-	qreal			_equalizerMidHandlePercentilePosition;
 
 	GRAPHICS_ITEMS_LIST _removed_items;
 
@@ -130,6 +131,7 @@ private slots:
 	void on_TfHandle_clicked(TFHandle *sender);
 	void on_TfHandle_doubleClicked(TFHandle *sender);
 	
+	void drawEqualizerHistogram();
 	void drawGammaCorrection();
 };
 

@@ -52,15 +52,21 @@ private:
 		return (newHandleX - _handlesPointer[LEFT_HANDLE]->pos().x()) / (_handlesPointer[RIGHT_HANDLE]->pos().x() - _handlesPointer[LEFT_HANDLE]->pos().x());
 	};
 
-	qreal calculateSpinBoxValueFromHandlePosition(qreal newHandleX)
+	qreal positionToQuality(qreal newHandleX)
 	{
 		qreal percentagePos = (newHandleX-_chartInfo->leftBorder) / _chartInfo->chartWidth;
-		return percentagePos * (_chartInfo->maxX - _chartInfo->minX) + _chartInfo->minX;
+		assert( (percentagePos>=-1.0f) && (percentagePos<=2.0f) );
+		float maxX = (_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value() > _chartInfo->maxX)?_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value():_chartInfo->maxX;
+		float minX = (_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value()  < _chartInfo->minX)?_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value() :_chartInfo->minX;
+		return percentagePos * (maxX - minX)+minX;
+		//return percentagePos * (_chartInfo->maxX - _chartInfo->minX) + _chartInfo->minX;
+		//return percentagePos * (_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value() - _handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value()) +  _handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value();
 	};
 
 signals:
 	void positionChangedToSpinBox(double);
 	void positionChanged();
+	void invalidateHistogram();
 
 private slots:
 	// changing equalizer spinboxes moves the connected handle

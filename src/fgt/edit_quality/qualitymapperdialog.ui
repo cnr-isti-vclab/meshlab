@@ -52,6 +52,15 @@
             <property name="autoFillBackground" >
              <bool>true</bool>
             </property>
+            <property name="verticalScrollBarPolicy" >
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy" >
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="renderHints" >
+             <set>QPainter::Antialiasing</set>
+            </property>
             <property name="cacheMode" >
              <set>QGraphicsView::CacheBackground</set>
             </property>
@@ -293,6 +302,9 @@
             </property>
             <property name="horizontalScrollBarPolicy" >
              <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="renderHints" >
+             <set>QPainter::Antialiasing</set>
             </property>
             <property name="dragMode" >
              <enum>QGraphicsView::NoDrag</enum>
