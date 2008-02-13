@@ -5,4 +5,4 @@
 0.29 06/02/2008		forse KEY dovrebbe contenere delle TF_KEY, e non TF_KEY*... indagare...
 12.48 09/02/2008	rimuovere dal .pro i files come filterparameter (mai usati!)
 18.00 09/02/2008	aggiungere la preview anche quando si muovono le TFHandles
-
+12.46 12/02/2008	(BUG REPORT)creo qualche TfHandle. (le sposto.) Ne cancello una. Clicco su un'altra handle (di un altro canale) CRASH! (BUG REPORT)

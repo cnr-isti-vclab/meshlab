@@ -12,10 +12,7 @@ using namespace vcg;
 //if x values of h1 and h2 are the same, true is returned if relative y of h1 is < then relative y of h2
 bool TfHandleCompare(TFHandle*h1, TFHandle*h2)
 {
-	if (h1->getRelativeX() == h2->getRelativeX())
-		return (h1->getRelativeY() < h2->getRelativeY());
-	else
-		return (h1->getRelativeX() < h2->getRelativeX());
+	return (h1->getRelativeX() <= h2->getRelativeX());
 }
 
 
@@ -861,36 +858,7 @@ void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 	ui.ySpinBox->setValue(sender->getRelativeY());
 	ui.ySpinBox->blockSignals( false );
 
-	TF_KEY *firstKey = 0;
-	TF_KEY *newKey = 0;
-	if ( (*_transferFunction)[sender->getChannel()].size() > 0 )
-	{
-		firstKey = (*_transferFunction)[sender->getChannel()][0];
-		if ( ! (*_transferFunction)[sender->getChannel()].isHead(firstKey) )
-		{
-			newKey = new TF_KEY(0.0f, 0.0f, TF_KEY::LEFT_JUNCTION_SIDE);
-			(*_transferFunction)[sender->getChannel()].addKey(newKey);
-			this->addTfHandle( sender->getChannel(),
-							   QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartHeight )), 
-							   newKey,
-							   ((sender->getChannel() + 1)*2.0f) + 1 );
-		}
-	}
-
-	TF_KEY *lastKey = 0;
-	if ( (*_transferFunction)[sender->getChannel()].size() > 0 )
-	{
-		lastKey = (*_transferFunction)[sender->getChannel()][(*_transferFunction)[sender->getChannel()].size()-1];
-		if ( ! (*_transferFunction)[sender->getChannel()].isTail(lastKey) )
-		{
-			newKey = new TF_KEY(1.0f, 0.0f, TF_KEY::LEFT_JUNCTION_SIDE);
-			(*_transferFunction)[sender->getChannel()].addKey(newKey);
-			this->addTfHandle( sender->getChannel(),
-							   QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 1.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartHeight )), 
-							   	newKey,
-								((sender->getChannel() + 1)*2.0f) + 1);
-		}
-	}
+	this->manageBorderTfHandles(sender);
 
 	//updating correct order among TF Handle objects
 	this->updateTfHandlesOrder(sender->getChannel());
@@ -899,6 +867,47 @@ void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 
 	//all done. Unlocking sender signals
 	sender->blockSignals( false );
+}
+
+
+void QualityMapperDialog::manageBorderTfHandles(TFHandle *handle)
+{
+	TF_KEY *firstKey = 0;
+	TF_KEY *newKey = 0;
+	if ( (*_transferFunction)[handle->getChannel()].size() > 0 )
+	{
+		firstKey = (*_transferFunction)[handle->getChannel()][0];
+		if ( handle->getMyKey() == firstKey )
+		{
+			if ( ! (*_transferFunction)[handle->getChannel()].isHead(/*firstKey*/handle->getMyKey()) )
+			{
+				newKey = new TF_KEY(0.0f, handle->getRelativeY(), TF_KEY::LEFT_JUNCTION_SIDE);
+				(*_transferFunction)[handle->getChannel()].addKey(newKey);
+				this->addTfHandle( handle->getChannel(),
+					QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( handle->getRelativeY(), (float)_transferFunction_info->chartHeight )), 
+					newKey,
+					((handle->getChannel() + 1)*2.0f) + 1 );
+			}
+		}
+	}
+
+	TF_KEY *lastKey = 0;
+	if ( (*_transferFunction)[handle->getChannel()].size() > 0 )
+	{
+		lastKey = (*_transferFunction)[handle->getChannel()][(*_transferFunction)[handle->getChannel()].size()-1];
+		if ( handle->getMyKey() == lastKey )
+		{
+			if ( ! (*_transferFunction)[handle->getChannel()].isTail(/*lastKey*/handle->getMyKey()) )
+			{
+				newKey = new TF_KEY(1.0f, handle->getRelativeY(), TF_KEY::LEFT_JUNCTION_SIDE);
+				(*_transferFunction)[handle->getChannel()].addKey(newKey);
+				this->addTfHandle( handle->getChannel(),
+					QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 1.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( handle->getRelativeY(), (float)_transferFunction_info->chartHeight )), 
+					newKey,
+					((handle->getChannel() + 1)*2.0f) + 1);
+			}
+		}
+	}
 }
 
 //callback to manage click on a TfHandle object
@@ -925,7 +934,7 @@ void QualityMapperDialog::on_TfHandle_doubleClicked(TFHandle *sender)
 	_currentTfHandle = sender;
 
 	//removing sender
-	this->removeTfHandle(_currentTfHandle);
+	_currentTfHandle = this->removeTfHandle(_currentTfHandle);
 }
 
 
@@ -993,6 +1002,7 @@ void QualityMapperDialog::on_xSpinBox_valueChanged(double newX)
 		_currentTfHandle->setPos(_transferFunction_info->leftBorder+relative2AbsoluteValf(newX,_transferFunction_info->chartWidth), _currentTfHandle->scenePos().y());
 		//updating the Tf Handle position at logical level (update of joined TF_KEY)
 		_currentTfHandle->updateTfHandlesState(_currentTfHandle->scenePos());
+		this->manageBorderTfHandles(_currentTfHandle);
 		//restoring the correct order for TfHandles (they're drawn in the same order as they're stored)
 		this->updateTfHandlesOrder(_currentTfHandle->getChannel());
 		//refresh of TF
@@ -1011,6 +1021,7 @@ void QualityMapperDialog::on_ySpinBox_valueChanged(double newY)
 		//updating the Tf Handle position at logical level (update of joined TF_KEY)
 		_currentTfHandle->updateTfHandlesState(_currentTfHandle->scenePos());
 		//restoring the correct order for TfHandles (they're drawn in the same order as they're stored)
+		this->manageBorderTfHandles(_currentTfHandle);
 		this->updateTfHandlesOrder(_currentTfHandle->getChannel());
 		//refresh of TF
 		this->drawTransferFunction();
@@ -1027,7 +1038,7 @@ void QualityMapperDialog::updateTfHandlesOrder(int channelCode)
 void QualityMapperDialog::on_removePointButton_clicked()
 {
 	if ( _currentTfHandle != 0)
-		this->removeTfHandle(_currentTfHandle);
+		_currentTfHandle = this->removeTfHandle(_currentTfHandle);
 }
 
 

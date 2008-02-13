@@ -241,38 +241,15 @@ UINT8 TfChannel::getChannelValueb(float xVal)
 //returns true if the key has x=0.0
 bool TfChannel::isHead(TF_KEY *key)
 {
-	bool result = false;
-
-	/*
-	if ( key->x == 0.0f)
-		{
-			for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
-			{
-				if ( (*it)->x == 0.0f )
-					zeroCounter ++;
-	
-				if ( (*it)->x > 0.0f )
-					break;
-			}
-			if ( zeroCounter == 1)
-				result = true;
-		}*/
-	if ( key->x == 0.0f )
-		result = true;
-	
-
-	return result;
+	assert(key!=0);
+	return ( key->x == 0.0f );
 }
 
 //returns true if the key has x=1.0
 bool TfChannel::isTail(TF_KEY *key)
 {
-	bool result = false;
-
-	if ( key->x == 1.0f )
-		result = true;
-
-	return result;
+	assert(key!=0);
+	return ( key->x == 1.0f );
 }
 
 //this method is called by TFHandle and is used to update the TfHandle position from graphics to logical level.

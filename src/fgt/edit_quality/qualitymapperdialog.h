@@ -98,6 +98,7 @@ private:
 	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);
 	void				deleteRemoveItems();
 	void				moveAheadChannel( TF_CHANNELS channelCode );
+	void				manageBorderTfHandles(TFHandle *sender);
 	void				updateTfHandlesOrder(int channelCode);
 	TFHandle			*addTfHandle(int channelCode, QPointF handlePos, TF_KEY *key, int zOrder );
 	TFHandle			*addTfHandle(TFHandle *handle);
