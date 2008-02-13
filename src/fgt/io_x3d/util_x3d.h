@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.6  2008/02/13 15:23:56  gianpaolopalma
+ Added error code
+ Added vector to manage the assignment of texture index
+
  Revision 1.5  2008/02/11 09:23:03  gianpaolopalma
  Changed error code
 
@@ -63,6 +67,8 @@ namespace io {
 		std::map<QString, QDomNode*> protoDeclareNodeMap;
 
 		std::vector<QString> textureFile;
+
+		std::vector<bool> useTexture;
 
 		int lineNumberError;
 		std::vector<QString> filenameStack;
@@ -121,6 +127,10 @@ namespace io {
 			E_INVALIDINDEXFACESET, // 24
 			E_INVALIDINDEXFACESETCOORD, //25
 			E_INVALIDDEFUSE, // 26
+			E_INVALIDSAVECOLOR, //27
+			E_INVALIDSAVENORMAL, //28
+			E_INVALIDSAVETEXCOORD, //29
+			E_NOGEOMETRY //30
 
 		};
 
@@ -155,10 +165,14 @@ namespace io {
 				"Invalid ElevationGrid element. There isn't enough height value",
 				"Invalid IndexedFaceSet element. There are face with less than three vertex",
 				"Invalid vertex index in the coordIndex field",
-				"Illegal use of DEF and USE fields"
+				"Illegal use of DEF and USE fields",
+				"Invalid save color options. You must choose one options among color per vertex, color per face and color per wedge",
+				"Invalid save normal options. You must choose one options among normal per vertex, normal per face and normal per wedge",
+				"Invalid save texture coordinate options. You must choose one options among texture coordinate per vertex and texture coordinate per wedge",
+				"Mesh whitout a geometry"
 			};
 
-			if(error > 26 || error < 0) return "Unknown error";
+			if(error > 29 || error < 0) return "Unknown error";
 			else return x3d_error_msg[error];
 		};
 
