@@ -874,15 +874,15 @@ void QualityMapperDialog::manageBorderTfHandles(TFHandle *handle)
 {
 	TF_KEY *firstKey = 0;
 	TF_KEY *newKey = 0;
-	if ( (*_transferFunction)[handle->getChannel()].size() > 0 )
+	if ( _transferFunction->getChannel(handle->getChannel()).size() > 0 )
 	{
-		firstKey = (*_transferFunction)[handle->getChannel()][0];
+		firstKey = _transferFunction->getChannel(handle->getChannel())[0];
 		if ( handle->getMyKey() == firstKey )
 		{
-			if ( ! (*_transferFunction)[handle->getChannel()].isHead(/*firstKey*/handle->getMyKey()) )
+			if ( ! _transferFunction->getChannel(handle->getChannel()).isHead(/*firstKey*/handle->getMyKey()) )
 			{
 				newKey = new TF_KEY(0.0f, handle->getRelativeY(), TF_KEY::LEFT_JUNCTION_SIDE);
-				(*_transferFunction)[handle->getChannel()].addKey(newKey);
+				_transferFunction->getChannel(handle->getChannel()).addKey(newKey);
 				this->addTfHandle( handle->getChannel(),
 					QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( handle->getRelativeY(), (float)_transferFunction_info->chartHeight )), 
 					newKey,
@@ -892,15 +892,15 @@ void QualityMapperDialog::manageBorderTfHandles(TFHandle *handle)
 	}
 
 	TF_KEY *lastKey = 0;
-	if ( (*_transferFunction)[handle->getChannel()].size() > 0 )
+	if ( _transferFunction->getChannel(handle->getChannel()).size() > 0 )
 	{
-		lastKey = (*_transferFunction)[handle->getChannel()][(*_transferFunction)[handle->getChannel()].size()-1];
+		lastKey = _transferFunction->getChannel(handle->getChannel())[_transferFunction->getChannel(handle->getChannel()).size()-1];
 		if ( handle->getMyKey() == lastKey )
 		{
-			if ( ! (*_transferFunction)[handle->getChannel()].isTail(/*lastKey*/handle->getMyKey()) )
+			if ( ! _transferFunction->getChannel(handle->getChannel()).isTail(/*lastKey*/handle->getMyKey()) )
 			{
 				newKey = new TF_KEY(1.0f, handle->getRelativeY(), TF_KEY::LEFT_JUNCTION_SIDE);
-				(*_transferFunction)[handle->getChannel()].addKey(newKey);
+				_transferFunction->getChannel(handle->getChannel()).addKey(newKey);
 				this->addTfHandle( handle->getChannel(),
 					QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 1.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( handle->getRelativeY(), (float)_transferFunction_info->chartHeight )), 
 					newKey,
