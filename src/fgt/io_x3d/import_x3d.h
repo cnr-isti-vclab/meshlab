@@ -24,6 +24,11 @@
   History
 
  $Log$
+ Revision 1.8  2008/02/13 15:11:03  gianpaolopalma
+ Bug fixed in the attribute parsing
+ Bug fixed in the assignment of texture index
+ Added support to attribute ccw
+
  Revision 1.7  2008/02/11 09:31:13  gianpaolopalma
  Big change.
  Inserted changes to reduce the loading time of X3D file
@@ -58,7 +63,6 @@
 
 #include<QtXml>
 #include <vcg/complex/trimesh/allocate.h>
-#include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/create/platonic.h>
 #include <wrap/gl/glu_tesselator.h>
 
@@ -406,8 +410,8 @@ namespace io {
 				return;
 			}
 			QString value = elem.attribute(attribute, defValue);
-			value.remove(",");
-			list = value.split(" ", QString::SkipEmptyParts);
+			value.replace(",", " ");
+			list = value.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 		}
 
 		
@@ -564,7 +568,7 @@ namespace io {
 		inline static void loadDefaultValuePerVertex(typename OpenMeshType::VertexPointer vertex, const OpenMeshType m, int mask)
 		{
 			if (mask & MeshModel::IOM_VERTCOLOR && m.HasPerVertexColor())
-				vertex->C() = vcg::Color4b(255, 255, 255, 0);
+				vertex->C() = vcg::Color4b(vcg::Color4b::White);
 			if (mask & MeshModel::IOM_VERTTEXCOORD && m.HasPerVertexTexCoord())
 			{
 				vertex->T() = vcg::TexCoord2<float>(0, 0);
@@ -578,10 +582,10 @@ namespace io {
 		inline static void loadDefaultValuePerFace(typename OpenMeshType::FacePointer face, const OpenMeshType m, int mask)
 		{
 			if (mask & MeshModel::IOM_FACECOLOR && m.HasPerFaceColor())
-				face->C() = vcg::Color4b(255, 255, 255, 0);
+				face->C() = vcg::Color4b(vcg::Color4b::White);
 			if (mask & MeshModel::IOM_WEDGCOLOR && m.HasPerWedgeColor())
 				for(int i = 0; i < 3; i++)
-					face->WC(i) = vcg::Color4b(255, 255, 255, 0);
+					face->WC(i) = vcg::Color4b(vcg::Color4b::White);
 			if (mask & MeshModel::IOM_WEDGTEXCOORD && m.HasPerWedgeTexCoord())
 			{
 				for(int i = 0; i < 3; i++)
@@ -859,6 +863,7 @@ namespace io {
 									CallBackPos *cb)
 		{
 			QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
+			QString ccw = geometry.attribute("ccw", "true");
 			std::vector<vcg::Point4f> vertexSet;
 			int index = 0;
 			std::vector<int> vertexFaceIndex;
@@ -905,16 +910,19 @@ namespace io {
 					int faceIndex = ff + offsetFace;
 					for (int tt = 0; tt < 3; tt++)
 					{
-						m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(tt + ff*3) + offset]);
+						int vertIndexPerFace = tt;
+						if (ccw == "false")
+							vertIndexPerFace = 2 - tt;
+						m.face[faceIndex].V(vertIndexPerFace) = &(m.vert[vertexFaceIndex.at(tt + ff*3) + offset]);
 						//Load normal per wedge
 						if (m.HasPerWedgeNormal() && (info->mask & MeshModel::IOM_WEDGNORMAL) && normalPerVertex == "true")
-							getNormal(normalList, (tt + ff*3)*3, m.face[faceIndex].WN(tt), tMatrix);
+							getNormal(normalList, (tt + ff*3)*3, m.face[faceIndex].WN(vertIndexPerFace), tMatrix);
 						//Load color per wedge
 						if (m.HasPerWedgeColor() && (info->mask & MeshModel::IOM_WEDGCOLOR))
-							getColor(colorList, colorComponent, (tt + ff*3)*colorComponent, m.face[faceIndex].WC(tt));
+							getColor(colorList, colorComponent, (tt + ff*3)*colorComponent, m.face[faceIndex].WC(vertIndexPerFace));
 						//Load textureCoordinate per wedge
 						if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-							getTextureCoord(texture, (tt + ff*3)*2, m.vert[vertexFaceIndex.at(tt + ff*3) + offset].cP(), m.face[faceIndex].WT(tt), tMatrix);
+							getTextureCoord(texture, (tt + ff*3)*2, m.vert[vertexFaceIndex.at(tt + ff*3) + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix);
 					}
 					//Load normal per face
 					if (m.HasPerFaceNormal() && normalPerVertex == "false" && (info->mask & MeshModel::IOM_FACENORMAL))
@@ -976,35 +984,38 @@ namespace io {
 					getTextureCoord(texture, index*2, m.vert[vertexFaceIndex.at(index + 1) + offset].cP(), secondTextCoord, tMatrix);
 					for(int vi = 2; vi < numVertex; vi++)
 					{
+						int vertIndexPerFace = 0;
+						if (ccw == "false")
+							vertIndexPerFace = 2;
 						//Load vertex per face and load color, normal and texture coordinate per wedge
 						int faceIndex = ff + offsetFace;
-						m.face[faceIndex].V(0) = &(m.vert[firstVertexIndex]);
+						m.face[faceIndex].V(vertIndexPerFace) = &(m.vert[firstVertexIndex]);
 						m.face[faceIndex].V(1) = &(m.vert[secondVertexIndex]);
 						if (m.HasPerWedgeNormal() && (info->mask & MeshModel::IOM_WEDGNORMAL) && normalPerVertex == "true" )
 						{
-							m.face[faceIndex].WN(0) = firstNormal;
+							m.face[faceIndex].WN(vertIndexPerFace) = firstNormal;
 							m.face[faceIndex].WN(1) = secondNormal;
 						}
 						if (m.HasPerWedgeColor() && (info->mask & MeshModel::IOM_WEDGCOLOR))
 						{
-							m.face[faceIndex].WC(0) = firstColor;
+							m.face[faceIndex].WC(vertIndexPerFace) = firstColor;
 							m.face[faceIndex].WC(1) = secondColor;
 						}
 						if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
 						{
-							m.face[faceIndex].WT(0) = firstTextCoord;
+							m.face[faceIndex].WT(vertIndexPerFace) = firstTextCoord;
 							m.face[faceIndex].WT(1) = secondTextCoord;
 						}
 						
-						m.face[faceIndex].V(2) = &(m.vert[vertexFaceIndex.at(index + vi) + offset]);
+						m.face[faceIndex].V(2 - vertIndexPerFace) = &(m.vert[vertexFaceIndex.at(index + vi) + offset]);
 						if ((info->mask & MeshModel::IOM_WEDGNORMAL) && normalPerVertex == "true" && m.HasPerWedgeNormal())
-							getNormal(normalList, (index + vi)*3, m.face[faceIndex].WN(2), tMatrix);
+							getNormal(normalList, (index + vi)*3, m.face[faceIndex].WN(2 - vertIndexPerFace), tMatrix);
 						if ((info->mask & MeshModel::IOM_FACENORMAL) && normalPerVertex == "false" && m.HasPerFaceNormal())
 							getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
 						if ((info->mask & MeshModel::IOM_WEDGCOLOR) && m.HasPerWedgeColor())
-							getColor(colorList, colorComponent, (index + vi)*colorComponent, m.face[faceIndex].WC(2));
+							getColor(colorList, colorComponent, (index + vi)*colorComponent, m.face[faceIndex].WC(2 - vertIndexPerFace));
 						if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-							getTextureCoord(texture, (index + vi)*2, m.vert[vertexFaceIndex.at(index + vi) + offset].cP(), m.face[faceIndex].WT(2), tMatrix); 
+							getTextureCoord(texture, (index + vi)*2, m.vert[vertexFaceIndex.at(index + vi) + offset].cP(), m.face[faceIndex].WT(2 - vertIndexPerFace), tMatrix); 
 						
 						//Update first two vertex for the next face
 						if (geometry.tagName() == "TriangleStripSet")
@@ -1016,11 +1027,11 @@ namespace io {
 						}
 						secondVertexIndex = vertexFaceIndex.at(index + vi) + offset;
 						if (m.HasPerWedgeColor())
-							secondColor = m.face[faceIndex].WC(2);
+							secondColor = m.face[faceIndex].WC(2 - vertIndexPerFace);
 						if (m.HasPerWedgeNormal())
-							secondNormal = m.face[faceIndex].WN(2);
+							secondNormal = m.face[faceIndex].WN(2 - vertIndexPerFace);
 						if (m.HasPerWedgeTexCoord())
-								secondTextCoord = m.face[faceIndex].WT(2);
+								secondTextCoord = m.face[faceIndex].WT(2 - vertIndexPerFace);
 						ff++;
 					}
 					index += numVertex;
@@ -1055,17 +1066,20 @@ namespace io {
 					{
 						for (int tt = 0; tt < 3; tt++)
 						{
+							int vertIndexPerFace = tt;
+							if (ccw == "false")
+								vertIndexPerFace = 2 - tt;
 							int indexVertex = indexVect.at(iv) + ff*4;
-							m.face[faceIndex].V(tt) = &(m.vert[vertexFaceIndex.at(indexVertex) + offset]);
+							m.face[faceIndex].V(vertIndexPerFace) = &(m.vert[vertexFaceIndex.at(indexVertex) + offset]);
 							//Load normal per wedge
 							if (m.HasPerWedgeNormal() && (info->mask & MeshModel::IOM_WEDGNORMAL) && normalPerVertex == "true")
-								getNormal(normalList, indexVertex*3, m.face[faceIndex].WN(tt), tMatrix);
+								getNormal(normalList, indexVertex*3, m.face[faceIndex].WN(vertIndexPerFace), tMatrix);
 							//Load color per wedge
 							if (m.HasPerWedgeColor() && (info->mask & MeshModel::IOM_WEDGCOLOR))
-								getColor(colorList, colorComponent, indexVertex*colorComponent, m.face[faceIndex].WC(tt));
+								getColor(colorList, colorComponent, indexVertex*colorComponent, m.face[faceIndex].WC(vertIndexPerFace));
 							//Load texture coordinate per wedge
 							if (m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-								getTextureCoord(texture, indexVertex*2, m.vert[vertexFaceIndex.at(indexVertex) + offset].cP(), m.face[faceIndex].WT(tt), tMatrix); 
+								getTextureCoord(texture, indexVertex*2, m.vert[vertexFaceIndex.at(indexVertex) + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix); 
 							iv++;
 						}
 						//Load normal per face
@@ -1099,6 +1113,7 @@ namespace io {
 			if (!indexList.isEmpty())
 			{
 				QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
+				QString ccw = geometry.attribute("ccw", "true");
 				//Load vertex in the mesh
 				int offset = m.vert.size();
 				int nVertex = coordList.size()/3;
@@ -1129,24 +1144,27 @@ namespace io {
 						int faceIndex = ff + offsetFace;
 						for (int tt = 0; tt < 3; tt++)
 						{
+							int vertIndexPerFace = tt;
+							if (ccw == "false")
+								vertIndexPerFace = 2 - tt;
 							int vertIndex = indexList.at(tt + ff*3).toInt() + offset;
 							if (vertIndex >= m.vert.size())
 							{
 								info->lineNumberError = geometry.lineNumber();
 								return E_INVALIDINDEXED;
 							}
-							m.face[faceIndex].V(tt) = &(m.vert[vertIndex]);
+							m.face[faceIndex].V(vertIndexPerFace) = &(m.vert[vertIndex]);
 							//Load texture coordinate per wedge
 							if (!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-								getTextureCoord(texture, indexList.at(tt + ff*3).toInt()*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(tt), tMatrix);
+								getTextureCoord(texture, indexList.at(tt + ff*3).toInt()*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix);
 							if (m.HasPerWedgeColor() && (info->mask & MeshModel::IOM_WEDGCOLOR))
-								m.face[faceIndex].WC(tt) = vcg::Color4b(255, 255, 255, 0);
+								m.face[faceIndex].WC(vertIndexPerFace) = vcg::Color4b(vcg::Color4b::White);
  						}
 						//Load normal per face
 						if (m.HasPerFaceNormal() && normalPerVertex == "false" && (info->mask & MeshModel::IOM_FACENORMAL))
 							getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
 						if (m.HasPerFaceColor() && (info->mask & MeshModel::IOM_FACECOLOR))
-							m.face[faceIndex].C() = vcg::Color4b(255, 255, 255, 0);
+							m.face[faceIndex].C() = vcg::Color4b(vcg::Color4b::White);
 					}
 				}								
 				else if (geometry.tagName() == "IndexedTriangleFanSet" || geometry.tagName() == "IndexedTriangleStripSet")
@@ -1199,12 +1217,15 @@ namespace io {
 							ls = ls + 3;
 						}
 						//Load vertex per face and load color, normal and texture coordinate per wedge
+						int vertIndexPerFace = 0;
+						if (ccw == "false")
+							vertIndexPerFace = 2;
 						int faceIndex = ff + offsetFace;
-						m.face[faceIndex].V(0) = &(m.vert[firstVertexIndex]);
+						m.face[faceIndex].V(vertIndexPerFace) = &(m.vert[firstVertexIndex]);
 						m.face[faceIndex].V(1) = &(m.vert[secondVertexIndex]);
 						if(!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
 						{
-								getTextureCoord(texture, (firstVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(0), tMatrix);
+								getTextureCoord(texture, (firstVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix);
 								getTextureCoord(texture, (secondVertexIndex - offset)*2, m.vert[firstVertexIndex].cP(), m.face[faceIndex].WT(1), tMatrix);
 						}
 
@@ -1214,22 +1235,22 @@ namespace io {
 							info->lineNumberError = geometry.lineNumber();
 							return E_INVALIDINDEXED;
 						}
-						m.face[faceIndex].V(2) = &(m.vert[vertIndex]);
+						m.face[faceIndex].V(2 - vertIndexPerFace) = &(m.vert[vertIndex]);
 						//Load normal per face
 						if (m.HasPerFaceNormal() && (info->mask & MeshModel::IOM_FACENORMAL) && normalPerVertex == "false")
 							getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
 						if(!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-							getTextureCoord(texture, (vertIndex - offset)*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(2), tMatrix);
+							getTextureCoord(texture, (vertIndex - offset)*2, m.vert[vertIndex].cP(), m.face[faceIndex].WT(2 - vertIndexPerFace), tMatrix);
 						if (geometry.tagName() == "IndexedTriangleStripSet")
 							firstVertexIndex = secondVertexIndex;
 						secondVertexIndex = vertIndex;
 						if (m.HasPerFaceColor() && (info->mask & MeshModel::IOM_FACECOLOR))
-							m.face[faceIndex].C() = vcg::Color4b(255, 255, 255, 0);
+							m.face[faceIndex].C() = vcg::Color4b(vcg::Color4b::White);
 						if (m.HasPerWedgeColor() && (info->mask & MeshModel::IOM_WEDGCOLOR))
 						{
-								m.face[faceIndex].WC(0) = vcg::Color4b(255, 255, 255, 0);
-								m.face[faceIndex].WC(1) = vcg::Color4b(255, 255, 255, 0);
-								m.face[faceIndex].WC(2) = vcg::Color4b(255, 255, 255, 0);
+								m.face[faceIndex].WC(0) = vcg::Color4b(vcg::Color4b::White);
+								m.face[faceIndex].WC(1) = vcg::Color4b(vcg::Color4b::White);
+								m.face[faceIndex].WC(2) = vcg::Color4b(vcg::Color4b::White);
 						}
 						ff++;
 					}
@@ -1271,20 +1292,23 @@ namespace io {
 						{
 							for (int tt = 0; tt < 3; tt++)
 							{
+								int vertIndexPerFace = tt;
+								if (ccw == "false")
+									vertIndexPerFace = 2 - tt;
 								int indexVertex = indexVect.at(iv) + ff*4;
-								m.face[faceIndex].V(tt) = &(m.vert[indexList.at(indexVertex).toInt() + offset]);
+								m.face[faceIndex].V(vertIndexPerFace) = &(m.vert[indexList.at(indexVertex).toInt() + offset]);
 								//Load texture coordinate per wedge
 								if(!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-									getTextureCoord(texture, indexList.at(indexVertex).toInt()*2, m.vert[indexList.at(indexVertex).toInt() + offset].cP(), m.face[faceIndex].WT(tt), tMatrix);
+									getTextureCoord(texture, indexList.at(indexVertex).toInt()*2, m.vert[indexList.at(indexVertex).toInt() + offset].cP(), m.face[faceIndex].WT(vertIndexPerFace), tMatrix);
 								if (m.HasPerWedgeColor() && (info->mask & MeshModel::IOM_WEDGCOLOR))
-									m.face[faceIndex].WC(tt) = vcg::Color4b(255, 255, 255, 0);
+									m.face[faceIndex].WC(vertIndexPerFace) = vcg::Color4b(vcg::Color4b::White);
 								iv++;
 							}
 							//Load normal per face
 							if (m.HasPerFaceNormal() && normalPerVertex == "false" && (info->mask & MeshModel::IOM_FACENORMAL))
 								getNormal(normalList, ff*3, m.face[faceIndex].N(), tMatrix);
 							if (m.HasPerFaceColor() && (info->mask & MeshModel::IOM_FACECOLOR))
-								m.face[faceIndex].C() = vcg::Color4b(255, 255, 255, 0);
+								m.face[faceIndex].C() = vcg::Color4b(vcg::Color4b::White);
 							faceIndex++;
 						}
 					}
@@ -1310,6 +1334,7 @@ namespace io {
 		{
 			QString colorPerVertex = geometry.attribute("colorPerVertex", "true");
 			QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
+			QString ccw = geometry.attribute("ccw", "true");
 			int xDimension = geometry.attribute("xDimension", "0").toInt();
 			int zDimension = geometry.attribute("zDimension", "0").toInt();
 			float xSpacing = geometry.attribute("xSpacing", "1.0").toFloat();
@@ -1347,7 +1372,7 @@ namespace io {
 						if (colorPerVertex == "true")
 							getColor(colorList, colorComponent, index * colorComponent, m.vert[index + offsetVertex].C());
 						else
-							m.vert[index + offsetVertex].C() = vcg::Color4b(255, 255, 255, 0);
+							m.vert[index + offsetVertex].C() = vcg::Color4b(vcg::Color4b::White);
 					}
 					//Load normal per vertex
 					if (m.HasPerVertexNormal() && normalPerVertex == "true" && (info->mask & MeshModel::IOM_VERTNORMAL))
@@ -1375,23 +1400,26 @@ namespace io {
 						loadDefaultValuePerFace(&(m.face[index + offsetFace]), m, info->mask);
 						for (int tt = 0; tt < 3; tt++)
 						{
-							m.face[index + offsetFace].V(tt) = &(m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex]);
+							int vertIndexPerFace = tt;
+							if (ccw == "false")
+								vertIndexPerFace = 2 - tt;
+							m.face[index + offsetFace].V(vertIndexPerFace) = &(m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex]);
 							//Load texture coordinate per wedge
 							if (!m.HasPerVertexTexCoord() && m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
-								getTextureCoord(texture, (val[tt][0] * xDimension + val[tt][1])*2, m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex].cP(), m.face[index + offsetFace].WT(0), tMatrix);
+								getTextureCoord(texture, (val[tt][0] * xDimension + val[tt][1])*2, m.vert[val[tt][0] * xDimension + val[tt][1] + offsetVertex].cP(), m.face[index + offsetFace].WT(vertIndexPerFace), tMatrix);
 							if (m.HasPerWedgeColor() && (info->mask & MeshModel::IOM_WEDGCOLOR))
-								m.face[index + offsetFace].WC(tt) = vcg::Color4b(255, 255, 255, 0);
+								m.face[index + offsetFace].WC(vertIndexPerFace) = vcg::Color4b(vcg::Color4b::White);
 						}
 						//Load color per face
-						if (m.HasPerFaceColor() && !colorList.isEmpty())
+						if (m.HasPerFaceColor() && (info->mask & MeshModel::IOM_FACECOLOR))
 						{
 							if (colorPerVertex == "false")
 								getColor(colorList, colorComponent, (index + ff) * colorComponent, m.face[index + offsetFace].C());
 							else
-								m.face[index + offsetFace].C() = vcg::Color4b(255, 255, 255, 0);
+								m.face[index + offsetFace].C() = vcg::Color4b(vcg::Color4b::White);
 						}
 						//Load normal per face
-						if (m.HasPerFaceNormal() && normalPerVertex == "false" && !normalList.isEmpty())
+						if (m.HasPerFaceNormal() &&  (info->mask & MeshModel::IOM_FACENORMAL) && normalPerVertex == "false")
 							getNormal(normalList, (index + ff) * 3, m.face[index + offsetFace].N(), tMatrix);
 						index++;
 					}
@@ -1422,6 +1450,7 @@ namespace io {
 			{
 				QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
 				QString colorPerVertex = geometry.attribute("colorPerVertex", "true");
+				QString ccw = geometry.attribute("ccw", "true");
 				QStringList colorIndex, normalIndex, texCoordIndex;
 				findAndParseAttribute(colorIndex, geometry, "colorIndex", "");
 				findAndParseAttribute(normalIndex, geometry, "normalIndex", "");
@@ -1440,7 +1469,7 @@ namespace io {
 						if (colorPerVertex == "true")
 							getColor(colorList, colorComponent, vv*colorComponent, m.vert[offset + vv].C());
 						else
-							m.vert[offset + vv].C() = vcg::Color4b(255, 255, 255, 0);
+							m.vert[offset + vv].C() = vcg::Color4b(vcg::Color4b::White);
 					}
 					//Load normal per vertex
 					if (m.HasPerVertexNormal() && normalPerVertex == "true" && (info->mask & MeshModel::IOM_VERTNORMAL))
@@ -1504,27 +1533,30 @@ namespace io {
 					{
 						for (int tt = 0; tt < 3; tt++)
 						{
+							int vertIndexPerFace = tt;
+							if (ccw == "false")
+								vertIndexPerFace = 2 - tt;
 							int index = coordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt();
-							m.face[ff + offsetFace].V(tt) = &(m.vert[index + offset]);
+							m.face[ff + offsetFace].V(vertIndexPerFace) = &(m.vert[index + offset]);
 							//Load per wedge color
 							if (m.HasPerWedgeColor() && (info->mask & MeshModel::IOM_WEDGCOLOR))
 							{
 								if (index < colorIndex.size() && colorPerVertex == "true")
-									getColor(colorList, colorComponent, colorIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * colorComponent, m.face[ff + offsetFace].WC(tt));
+									getColor(colorList, colorComponent, colorIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * colorComponent, m.face[ff + offsetFace].WC(vertIndexPerFace));
 								else
-									m.face[ff + offsetFace].WC(tt) = vcg::Color4b(255, 255, 255, 0);
+									m.face[ff + offsetFace].WC(vertIndexPerFace) = vcg::Color4b(vcg::Color4b::White);
 							}
 							//Load per wedge normal
 							if (m.HasPerWedgeNormal() && normalPerVertex == "true" && (info->mask & MeshModel::IOM_WEDGNORMAL) && index < normalIndex.size())
-								getNormal(normalList, normalIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * 3, m.face[ff + offsetFace].WN(tt), tMatrix);
+								getNormal(normalList, normalIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt() * 3, m.face[ff + offsetFace].WN(vertIndexPerFace), tMatrix);
 								
 							//Load per wegde texture coordinate
 							if(m.HasPerWedgeTexCoord() && (info->mask & MeshModel::IOM_WEDGTEXCOORD))
 							{
 								if (texCoordIndex.isEmpty() && !m.HasPerVertexTexCoord())
-									getTextureCoord(texture, index*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(tt), tMatrix);
+									getTextureCoord(texture, index*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix);
 								else if (!texCoordIndex.isEmpty() && index < texCoordIndex.size())
-									getTextureCoord(texture, texCoordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt()*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(tt), tMatrix); 
+									getTextureCoord(texture, texCoordIndex.at(indexVect.at(tt + ff*3) + initPolygon).toInt()*2, m.vert[index + offset].cP(), m.face[ff + offsetFace].WT(vertIndexPerFace), tMatrix); 
 								else
 								{
 									m.face[ff + offsetFace].WT(tt) = vcg::TexCoord2<float>(0, 0);
@@ -1551,7 +1583,7 @@ namespace io {
 									getColor(colorList, colorComponent, j*colorComponent, m.face[ff + offsetFace].C());
 							}
 							else
-								m.face[ff + offsetFace].C() = vcg::Color4b(255, 255, 255, 0);
+								m.face[ff + offsetFace].C() = vcg::Color4b(vcg::Color4b::White);
 						}
 					}
 					offsetFace += nFace;
@@ -1740,9 +1772,10 @@ namespace io {
 						size_t z = 0;
 						while (z < info->textureFile.size() && !found)
 						{
-							if (info->textureFile.at(z) == path || info->textureFile.at(z) == url)
+							if (!info->useTexture[z] && (info->textureFile.at(z) == path || info->textureFile.at(z) == url))
 							{
 								TextureInfo tInfo = TextureInfo();
+								info->useTexture[z] = true;
 								tInfo.textureIndex = z;
 								tInfo.repeatS = (imageTexture.attribute("repeatS", "true") == "true");
 								tInfo.repeatT = (imageTexture.attribute("repeatT", "true") == "true");
@@ -2016,16 +2049,19 @@ namespace io {
 					return E_LOOPDEPENDENCE;
 				}
 			}
-			//Initialize ProtoDeclare node
-			QDomDocument docChild(filename);
-			QFile file(filename.split("#", QString::SkipEmptyParts).at(0).trimmed());
-			file.open(QIODevice::ReadOnly);
-			docChild.setContent(&file);
+			
 			std::map<QString, QDomElement> newProtoDeclMap;
-			QDomNodeList exProtoDeclare = docChild.elementsByTagName("ExternProtoDeclare");
-			for (int j = 0; j < exProtoDeclare.size(); j++)
-				NavigateExternProtoDeclare(exProtoDeclare.at(j).toElement(), tMatrix, newProtoDeclMap, info); 
-
+			//Initialize ProtoDeclare node
+			if (filename != "")
+			{
+				QDomDocument docChild(filename);
+				QFile file(filename.split("#", QString::SkipEmptyParts).at(0));
+				file.open(QIODevice::ReadOnly);
+				docChild.setContent(&file);
+				QDomNodeList exProtoDeclare = docChild.elementsByTagName("ExternProtoDeclare");
+				for (int j = 0; j < exProtoDeclare.size(); j++)
+					NavigateExternProtoDeclare(exProtoDeclare.at(j).toElement(), tMatrix, newProtoDeclMap, info); 
+			}
 			int result = InitializeProtoDeclare(protoInstance, fields, defMap, info);
 			if (result != E_NOERROR) return result;
 			QDomElement body = protoInstance.firstChildElement("ProtoBody");
@@ -2070,7 +2106,7 @@ namespace io {
 			{
 				vcg::Color4f color;
 				if (component == 3)
-					color = vcg::Color4f(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at(index + 2).toFloat(), 0); 
+					color = vcg::Color4f(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at(index + 2).toFloat(), 1); 
 				else
 					color = vcg::Color4f(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at(index + 2).toFloat(), list.at(index + 3).toFloat());
 				vcg::Color4b colorB;
@@ -2078,7 +2114,7 @@ namespace io {
 				dest = colorB;
 			}
 			else
-				dest = vcg::Color4b(255, 255, 255, 0);
+				dest = vcg::Color4b(vcg::Color4b::White);
 		}
 
 		
@@ -2358,7 +2394,7 @@ namespace io {
 
 		
 		//merge all meshes in the x3d's file in the templeted mesh m
-		static int Open(OpenMeshType& m, const char* filename, AdditionalInfoX3D*& info, CallBackPos *cb)
+		static int Open(OpenMeshType& m, const char* filename, AdditionalInfoX3D*& info, CallBackPos *cb = 0)
 		{
 			vcg::Matrix44f tMatrix;
 			tMatrix.SetIdentity();
@@ -2369,6 +2405,7 @@ namespace io {
 			QDomNodeList scene = info->doc->elementsByTagName("Scene");
 			info->filenameStack.clear();
 			info->filenameStack.push_back(QString(filename));
+			info->useTexture = std::vector<bool>(info->textureFile.size(), false);
 			if (cb !=NULL) (*cb)(10, "Loading X3D Object...");
 			if (scene.size() == 0)
 				return E_NO3DSCENE;
