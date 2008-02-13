@@ -51,8 +51,8 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *
 
 	// toggle Trackball button (?)
 
-	//connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
-	//emit suspendEditToggle();
+	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
+	suspendEditToggle();
 
 	//gla->suspendEditToggle();
 }
