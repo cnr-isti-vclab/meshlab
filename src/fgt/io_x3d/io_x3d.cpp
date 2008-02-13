@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.7  2008/02/13 15:18:20  gianpaolopalma
+ Updating mesh mask accoding to mesh data supported
+
  Revision 1.6  2008/02/11 09:28:33  gianpaolopalma
  return error code if file doesn't contain geometry
 
@@ -81,7 +84,14 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			return false;
 		}
 		if (info->mask & MeshModel::IOM_VERTTEXCOORD)
+		{
 			info->mask |= MeshModel::IOM_WEDGTEXCOORD;
+			info->mask &=(~MeshModel::IOM_VERTTEXCOORD);
+		}
+		if (info->mask & MeshModel::IOM_WEDGCOLOR)
+			info->mask &=(~MeshModel::IOM_WEDGCOLOR);
+		if (info->mask & MeshModel::IOM_WEDGNORMAL)
+			info->mask &=(~MeshModel::IOM_WEDGNORMAL);
 		m.Enable(info->mask);
 		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
 			m.cm.textures.push_back(info->textureFile[tx].toStdString());
@@ -132,7 +142,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	if (!normalsUpdated) 
-		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);		// updates normals
 
 	if (cb != NULL)	(*cb)(99, "Done");
 	
@@ -142,11 +152,11 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 
 bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
+	QString errorMsgFormat = "Error encountered while exportering file:\n%1\n\nError details: %2";
 	string filename = QFile::encodeName(fileName).constData ();
 	if(formatName.toUpper() == tr("X3D"))
 	{
-		int result = vcg::tri::io::ExporterX3D<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
+		int result = vcg::tri::io::ExporterX3D<CMeshO>::Save(m.cm, filename.c_str(), mask, cb);
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterX3D<CMeshO>::ErrorMsg(result)));
@@ -185,7 +195,8 @@ QList<MeshIOInterface::Format> IoX3DPlugin::exportFormats() const
 void IoX3DPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
 	if(format.toUpper() == tr("X3D")){
-		capability = defaultBits = vcg::tri::io::ExporterX3D<CMeshO>::GetExportMaskCapability();
+		capability = vcg::tri::io::ExporterX3D<CMeshO>::GetExportMaskCapability();
+		defaultBits = 0;
 		return; 
 	}
 	assert(0);
