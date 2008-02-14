@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.8  2008/02/14 13:00:22  gianpaolopalma
+ Changed assignment of defaultBits in the method GetExportMaskCapability
+
  Revision 1.7  2008/02/13 15:18:20  gianpaolopalma
  Updating mesh mask accoding to mesh data supported
 
@@ -142,7 +145,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	if (!normalsUpdated) 
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);		// updates normals
+		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
 
 	if (cb != NULL)	(*cb)(99, "Done");
 	
@@ -162,6 +165,7 @@ bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshM
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterX3D<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
+		if (cb !=NULL) (*cb)(99, "Saving X3D File...");
 		return true;
 	}
 	assert(0);
@@ -195,8 +199,7 @@ QList<MeshIOInterface::Format> IoX3DPlugin::exportFormats() const
 void IoX3DPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
 	if(format.toUpper() == tr("X3D")){
-		capability = vcg::tri::io::ExporterX3D<CMeshO>::GetExportMaskCapability();
-		defaultBits = 0;
+		capability = defaultBits = vcg::tri::io::ExporterX3D<CMeshO>::GetExportMaskCapability();
 		return; 
 	}
 	assert(0);
@@ -206,7 +209,7 @@ void IoX3DPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 const PluginInfo &IoX3DPlugin::Info()
 {
 	static PluginInfo ai;
-	ai.Date=tr("January 2008");
+	ai.Date=tr("February 2008");
 	ai.Version = tr("0.1");
 	ai.Author = ("Gianpaolo Palma");
 	return ai;
