@@ -24,14 +24,17 @@
   History
 
  $Log$
+ Revision 1.9  2008/02/14 13:05:21  gianpaolopalma
+ Changed updating progress bar in the method LoadIndexedFaceSet
+ Bug fixed in the method LoadMaskByDom
+
  Revision 1.8  2008/02/13 15:11:03  gianpaolopalma
  Bug fixed in the attribute parsing
  Bug fixed in the assignment of texture index
  Added support to attribute ccw
 
  Revision 1.7  2008/02/11 09:31:13  gianpaolopalma
- Big change.
- Inserted changes to reduce the loading time of X3D file
+ Big change to reduce the loading time of X3D file
 
  Revision 1.6  2008/02/08 17:04:32  gianpaolopalma
  Added methods to reduce loading time of X3D scene from the file
@@ -689,7 +692,7 @@ namespace io {
 							if (!coordIndex.isEmpty())
 							{
 								if (!color.isNull() && !colorList.isEmpty()) bHasPerVertexColor = true;
-								if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty())) 
+								if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty()) && textureFile.size()>0) 
 									bHasPerVertexText = true;
 								else 
 									copyTextureFile = false;
@@ -705,7 +708,7 @@ namespace io {
 						else if (tagName == "TriangleFanSet" || tagName == "TriangleSet" || tagName == "TriangleStripSet" || tagName == "QuadSet")
 						{
 							if (!color.isNull() && !colorList.isEmpty()) bHasPerWedgeColor = true;
-							if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty()))
+							if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty()) && textureFile.size()>0)
 								bHasPerWedgeTexCoord = true;
 							else
 								copyTextureFile = false;
@@ -726,7 +729,7 @@ namespace io {
 							findAndParseAttribute(coordIndex, geometry, "coordIndex", "");
 							if (!coordIndex.isEmpty())
 							{
-								if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty()))
+								if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty()) && textureFile.size()>0)
 								{
 									if (!texCoordIndex.isEmpty())
 										bHasPerWedgeTexCoord = true;
@@ -761,7 +764,7 @@ namespace io {
 							int zDimension = geometry.attribute("zDimension", "0").toInt();
 							if (xDimension != 0 && zDimension!=0)
 							{
-								if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty())) 
+								if (!textureCoor.isNull() && (textureGenSup || !textureList.isEmpty()) && textureFile.size()>0) 
 									bHasPerVertexText = true;
 								else
 									copyTextureFile = false;
@@ -1477,6 +1480,7 @@ namespace io {
 					//Load texture coordinate per vertex
 					if (m.HasPerVertexTexCoord() && (info->mask & MeshModel::IOM_VERTCOORD))
 						getTextureCoord(texture, vv * 2, m.vert[offset + vv].cP(), m.vert[offset + vv].T(), tMatrix);
+					if (cb !=NULL && (vv%1000 == 0)) (*cb)(10 + 80*info->numvert/info->numface + 81*vv/(2*nVertex*info->numface), "Loading X3D Object...");
 				}
 				
 				int ci = 0;
@@ -1521,6 +1525,8 @@ namespace io {
 					nFace += indexVect.size()/3;
 				}
 				int offsetFace = m.face.size();
+				int x = offsetFace;
+				int y = nFace;
 				vcg::tri::Allocator<OpenMeshType>::AddFaces(m, nFace);
 				for (int j = 0; j < objVect.size(); j++)
 				{
@@ -1585,6 +1591,7 @@ namespace io {
 							else
 								m.face[ff + offsetFace].C() = vcg::Color4b(vcg::Color4b::White);
 						}
+						if (cb !=NULL && ((offsetFace - x + ff)%1000 == 0)) (*cb)(10 + 80*info->numvert/info->numface + 81/(2*info->numface) + 81*(offsetFace - x + ff)/(2*info->numface*y), "Loading X3D Object...");
 					}
 					offsetFace += nFace;
 				}
