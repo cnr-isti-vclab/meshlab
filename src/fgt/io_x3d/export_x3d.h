@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2008/02/14 13:09:53  gianpaolopalma
+ Code refactoring to reduce time to save the mesh in X3D files
+
  Revision 1.2  2008/02/13 15:25:08  gianpaolopalma
  First working version
 
@@ -46,8 +49,11 @@ namespace io {
 	{
 	private:
 
-		/*Generate the following xml code:
+		typedef vcg::Point3f x3dPointType;
+		typedef vcg::Color4b x3dColorType;
+		typedef vcg::TexCoord2<> x3dTexCoordType;
 
+		/*Generate the following xml code:
 		<X3D profile='Immersive' version='3.1' xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance' xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.1.xsd'>
 			<head>
 				<meta content='*enter filename' name='title'/>
@@ -86,78 +92,75 @@ namespace io {
 			return scene;
 		}
 
-	template<class T>
-	static int findInsert(std::vector<T>& list, const T& val, bool multi = false)
+	
+	/*If separator is true create the following string:
+			list[0] + " " + list[1] + " " + list[2] + " -1 " + ...+ " -1 " +list[i] + " " + list[i+1] + " " + list[i+2] + " -1"
+		othewise:
+			list[0] + " " + list[1] + " " + ... + list[i]
+	*/
+	inline static void getString(const std::vector<QString>& list, QString& ret, bool separator = true)
 	{
-		int index;
-		if (multi)
+		if (list.size() > 0)
 		{
-			index = list.size();
-			list.push_back(val);
-		}
-		else
-		{
-			std::vector<T>::const_iterator iter = find(list.begin(), list.end(), val);
-			if (iter == list.end())
+			ret.reserve(list.size() * (list[0].length() + 2));
+			ret.append(list[0]);
+			for (size_t i = 1; i < list.size(); i++)
 			{
-				index = list.size();
-				list.push_back(val);
+				ret.append(" " + list[i]);
+				if (separator && ((i + 1) % 3) == 0)
+					ret.append(" " + QString::number(-1));
 			}
-			else
-				index = iter - list.begin();
+			ret.squeeze();
 		}
-		return index;
-	}
-	
-	
-	inline static void getString(const std::vector<QString>& list, QString& ret)
-	{
-		ret.reserve(list.size() * 3);
-		for (int i = 0; i < list.size(); i++)
-		{
-			ret.append(list[i] + " ");
-			if (((i + 1) % 3) == 0)
-				ret.append(QString::number(-1) + " ");
-		}
-		ret.squeeze();
 	}
 
 	
-	inline static void getPointString(const std::vector<vcg::Point3f>& list, QString& ret)
+
+	//Create the following string from a point:		p[0] + " " + p[1] + " " + p[2]
+	inline static QString pointToString(const x3dPointType& p)
 	{
-		ret.reserve(list.size()*30);
-		for (int i = 0; i < list.size(); i++)
-			for (int j = 0; j < 3; j++)
-				ret.append(QString::number(list[i][j]) + " ");
-		ret.squeeze();
+		QString str;
+		for (int j = 0; j < 3; j++)
+			str.append(QString::number(p[j]) + " ");
+		str.remove(str.size()-1, 1);
+		return str;
 	}
 
+	
 
-
-	inline static void getColorString(const std::vector<vcg::Color4b>& list, QString& ret)
+	//Create the following string from a color:		c[0] + " " + c[1] + " " + c[2] + " " + c[3]
+	inline static QString colorToString(const x3dColorType& c)
 	{
-		ret.reserve(list.size()*16);
-		for (int i = 0; i < list.size(); i++)
-			for (int j = 0; j < 4; j++)
-				ret.append(QString::number(list[i][j]/255.0f) + " ");
-		ret.squeeze();
+		QString str;
+		vcg::Color4f color;
+		color.Import(c);
+		for (int j = 0; j < 4; j++)
+			str.append(QString::number(color[j]) + " ");
+		str.remove(str.size()-1, 1);
+		return str;
 	}
 
+	
 
-
-
-	inline static void getTextCoordString(const std::vector<vcg::TexCoord2<>>& list, QString& ret)
+	//Create the following string:		t.U()+ " " + t.V()
+	inline static QString texCoordToString(const x3dTexCoordType& t)
 	{
-		ret.reserve(list.size()*20);
-		for (int i = 0; i < list.size(); i++)
-			ret.append(QString::number(list[i].U()) + " " + QString::number(list[i].V()) + " ");
-		ret.squeeze();
+		QString str;
+		str.append(QString::number(t.U()) + " ");
+		str.append(QString::number(t.V()));
+		return str;
 	}
+
 	
 	public:
 
+
 		static int Save(SaveMeshType& m, const char * filename, const int mask, CallBackPos *cb=0)
 		{
+			QFile file(filename);
+			if (!file.open(QIODevice::WriteOnly))
+				return E_CANTOPEN;
+			int nFace = 0;
 			bool bHasPerWedgeTexCoord = (mask & MeshModel::IOM_WEDGTEXCOORD) && m.HasPerWedgeTexCoord();
 			bool bHasPerWedgeNormal = (mask & MeshModel::IOM_WEDGNORMAL) && m.HasPerWedgeNormal();
 			bool bHasPerWedgeColor = (mask & MeshModel::IOM_WEDGCOLOR) && m.HasPerWedgeColor();
@@ -181,6 +184,7 @@ namespace io {
 			typename SaveMeshType::FaceIterator fi;
 			if (bHasPerWedgeTexCoord || bHasPerVertexTexCoord)
 			{
+				//Search objects in the mesh(an object is a portion of mesh with the same texture index) 
 				for (fi = m.face.begin(); fi != m.face.end(); fi++)
 				{
 					if (!fi->IsD())
@@ -202,12 +206,15 @@ namespace io {
 				object.push_back(m.face.begin());
 			object.push_back(m.face.end());
 			std::set<typename SaveMeshType::VertexType::CoordType> vertexSet;
-			for (int i = 0; i < object.size() - 1; i++)
+			if (cb !=NULL) (*cb)(10, "Saving X3D File...");
+			//Create a Shape element for each object
+			for (size_t i = 0; i < object.size() - 1; i++)
 			{
 				std::vector<QString> vertexIndex, colorIndex, normalIndex, textureCoordIndex;
-				std::vector<vcg::Point3f> vertexList, normalList;
-				std::vector<vcg::Color4b> colorList;
-				std::vector<vcg::TexCoord2<>> texCoordList;
+				std::vector<QString> vertexValue, colorValue, normalValue, textureCoordValue;
+				std::map<x3dPointType, int> vertexMap, normalMap;
+				std::map<x3dColorType, int> colorMap;
+				std::map<x3dTexCoordType, int> texCoordMap;
 				QDomElement shape = doc.createElement("Shape");
 				int indexTexture = -1;
 				if (bHasPerVertexTexCoord)
@@ -224,96 +231,129 @@ namespace io {
 				}
 				QDomElement geometry = doc.createElement("IndexedFaceSet");
 				geometry.setAttribute("solid", "false");
+				int indexVertex = 0;
+				int indexColor = 0;
+				int indexNormal = 0;
+				int indexTexCoord = 0;
 				for (fi = object[i]; fi != object[i+1]; fi++)
 				{
-					//typename SaveMeshType::FaceType face = (*fi);
+					nFace++;
 					for (int tt = 0; tt < 3; tt++)
 					{
-						int tmpSize = vertexList.size();
-						int indexVert = findInsert<vcg::Point3f>(vertexList, fi->cP(tt));
-						vertexIndex.push_back(QString::number(indexVert));
-						vertexSet.insert(fi->P(tt));
-						int index;
+						bool newVertex = false;
+						std::map<x3dPointType, int>::iterator pointIter = vertexMap.find(fi->P(tt));
+						if (pointIter == vertexMap.end())
+						{
+							vertexIndex.push_back(QString::number(indexVertex));
+							vertexValue.push_back(pointToString(fi->P(tt)));
+							vertexMap[fi->P(tt)] = indexVertex++;
+							vertexSet.insert(fi->P(tt));
+							newVertex = true;
+						}
+						else
+							vertexIndex.push_back(QString::number(pointIter->second));
 						if (bHasPerWedgeColor)
 						{
-							index = findInsert<vcg::Color4b>(colorList, fi->WC(tt));
-							colorIndex.push_back(QString::number(index));					
+							std::map<x3dColorType, int>::iterator colorIter = colorMap.find(fi->WC(tt));
+							if (colorIter == colorMap.end())
+							{
+								colorIndex.push_back(QString::number(indexColor));
+								colorValue.push_back(colorToString(fi->WC(tt)));
+								colorMap[fi->WC(tt)] = indexColor++;
+							}
+							else
+								colorIndex.push_back(QString::number(colorIter->second));
 						}
 						if (bHasPerWedgeNormal)
 						{
-							index = findInsert<vcg::Point3f>(normalList, fi->cWN(tt));
-							normalIndex.push_back(QString::number(index));			
+							std::map<x3dPointType, int>::iterator normalIter = normalMap.find(fi->WN(tt));
+							if (normalIter == normalMap.end())
+							{
+								normalIndex.push_back(QString::number(indexNormal));
+								normalValue.push_back(pointToString(fi->WN(tt)));
+								normalMap[fi->WN(tt)] = indexNormal++;
+							}	
+							else
+								normalIndex.push_back(QString::number(normalIter->second));
 						}
 						if (bHasPerWedgeTexCoord)
 						{
-							index = findInsert<vcg::TexCoord2<>>(texCoordList, fi->cWT(tt));
-							textureCoordIndex.push_back(QString::number(index));			
+							std::map<x3dTexCoordType, int>::iterator texIter = texCoordMap.find(fi->WT(tt));
+							if (texIter == texCoordMap.end())
+							{
+								textureCoordIndex.push_back(QString::number(indexTexCoord));
+								textureCoordValue.push_back(texCoordToString(fi->WT(tt)));
+								texCoordMap[fi->WT(tt)] = indexTexCoord++;
+							}
+							else
+								textureCoordIndex.push_back(QString::number(texIter->second));
 						}
-						if (indexVert >= tmpSize)
+						if (newVertex)
 						{
 							if (bHasPerVertexColor)
-								findInsert<vcg::Color4b>(colorList, fi->cV(tt)->C(), true);
+								colorValue.push_back(colorToString(fi->cV(tt)->C()));
 							if (bHasPerVertexNormal)
-								findInsert<vcg::Point3f>(normalList, fi->cV(tt)->cN(), true);
+								normalValue.push_back(pointToString(fi->cV(tt)->cN()));
 							if (bHasPerVertexTexCoord)
-								findInsert<vcg::TexCoord2<>>(texCoordList, fi->cV(tt)->T(), true);
+								textureCoordValue.push_back(texCoordToString(fi->cV(tt)->T()));
 						}
 					}
 					if (bHasPerFaceColor)
-						findInsert<vcg::Color4b>(colorList, fi->C());
+						colorValue.push_back(colorToString(fi->C()));
 					if (bHasPerFaceNormal)
-						findInsert<vcg::Point3f>(normalList, fi->cN());
+						normalValue.push_back(pointToString(fi->N()));
+					if (cb !=NULL && nFace%1000 == 0) (*cb)(10 + 60*nFace/m.face.size(), "Saving X3D File..."); 
 				}
-				QString vertIndexValue, vertCoordValue;
-				getString(vertexIndex, vertIndexValue);
-				getPointString(vertexList, vertCoordValue);
+				QString vertIndexStr, vertCoordStr;
+				getString(vertexIndex, vertIndexStr);
+				getString(vertexValue, vertCoordStr, false);
 				QDomElement coordinate = doc.createElement("Coordinate");
-				coordinate.setAttribute("point", vertCoordValue);
+				coordinate.setAttribute("point", vertCoordStr);
 				geometry.appendChild(coordinate);
-				geometry.setAttribute("coordIndex", vertIndexValue);
+				geometry.setAttribute("coordIndex", vertIndexStr);
 				if (bHasPerWedgeColor || bHasPerVertexColor || bHasPerFaceColor)
 				{
-					QString colorValue;
-					getColorString(colorList, colorValue);
+					QString colorValueStr;
+					getString(colorValue, colorValueStr, false);
 					QDomElement color = doc.createElement("ColorRGBA");
-					color.setAttribute("color", colorValue);
+					color.setAttribute("color", colorValueStr);
 					if (bHasPerFaceColor)
 						geometry.setAttribute("colorPerVertex", "false");
 					if (bHasPerWedgeColor)
 					{
-						QString colorIndexString;
-						getString(colorIndex, colorIndexString);
-						geometry.setAttribute("colorIndex", colorIndexString);
+						QString colorIndexStr;
+						getString(colorIndex, colorIndexStr);
+						geometry.setAttribute("colorIndex", colorIndexStr);
 					}
 					geometry.appendChild(color);
 				}
 				if (bHasPerWedgeNormal || bHasPerVertexNormal || bHasPerFaceNormal)
 				{
-					QString normalValue;
-					getPointString(normalList, normalValue);
+					QString normalValueStr;
+					getString(normalValue, normalValueStr, false);
 					QDomElement normal = doc.createElement("Normal");
-					normal.setAttribute("vector", normalValue);
+					normal.setAttribute("vector", normalValueStr);
 					if (bHasPerFaceNormal)
 						geometry.setAttribute("normalPerVertex", "false");
 					if (bHasPerWedgeNormal)
 					{
-						QString normalIndexString;
-						getString(normalIndex, normalIndexString);
-						geometry.setAttribute("normalIndex", normalIndexString);
+						QString normalIndexStr;
+						getString(normalIndex, normalIndexStr);
+						geometry.setAttribute("normalIndex", normalIndexStr);
 					}
 					geometry.appendChild(normal);
 				}
 				if (indexTexture != -1 && (bHasPerWedgeTexCoord || bHasPerVertexTexCoord))
 				{
-					QString texCoordValue;
-					getTextCoordString(texCoordList, texCoordValue);
+					QString texCoordValueStr;
+					getString(textureCoordValue, texCoordValueStr, false);
 					QDomElement textureCoord = doc.createElement("TextureCoordinate");
-					textureCoord.setAttribute("point", texCoordValue);
+					textureCoord.setAttribute("point", texCoordValueStr);
 					if (bHasPerWedgeTexCoord)
 					{
-						QString texCoordIndexString;
-						getString(textureCoordIndex, texCoordIndexString);
-						geometry.setAttribute("texCoordIndex", texCoordIndexString);
+						QString texCoordIndexStr;
+						getString(textureCoordIndex, texCoordIndexStr);
+						geometry.setAttribute("texCoordIndex", texCoordIndexStr);
 					}
 					geometry.appendChild(textureCoord);
 				}
@@ -321,48 +361,48 @@ namespace io {
 				scene.appendChild(shape);
 			}
 			typename SaveMeshType::VertexIterator vi;
-			std::vector<vcg::Point3f> pointVect;
-			std::vector<vcg::Color4b> colorVect;
+			std::vector<QString> pointVect;
+			std::vector<QString> colorVect;
+			//Create a PoinrSet element for all isolated vertex
 			for (vi = m.vert.begin(); vi != m.vert.end(); vi++)
 			{
 				if (!vi->IsD() && vertexSet.find(vi->P()) == vertexSet.end())
 				{
-					pointVect.push_back(vi->P());
+					pointVect.push_back(pointToString(vi->P()));
 					if (bHasPerVertexColor)
-						findInsert<vcg::Color4b>(colorVect, vi->C());
+						colorVect.push_back(colorToString(vi->C()));
 				}
+				if (cb !=NULL && ((vi - m.vert.begin())%1000 == 0)) (*cb)(70 + 25*(vi - m.vert.begin())/m.vert.size(), "Saving X3D File...");
 			}
 			if (pointVect.size() != 0)
 			{
 				QDomElement shape = doc.createElement("Shape");
 				QDomElement pointSet = doc.createElement("PointSet");
 				QDomElement coord = doc.createElement("Coordinate");
-				QString coordValue;
-				getPointString(pointVect, coordValue);
-				coord.setAttribute("point", coordValue);
+				QString coordValueStr;
+				getString(pointVect, coordValueStr, false);
+				coord.setAttribute("point", coordValueStr);
 				pointSet.appendChild(coord);
 				if (colorVect.size() != 0)
 				{
 					QDomElement color = doc.createElement("ColorRGBA");
-					QString colorValue;
-					getColorString(colorVect, colorValue);
-					color.setAttribute("color", colorValue);
+					QString colorValueStr;
+					getString(colorVect, colorValueStr, false); 
+					color.setAttribute("color", colorValueStr);
 					pointSet.appendChild(color);
 				}
 				shape.appendChild(pointSet);
 				scene.appendChild(shape);
 			}
-			QFile file(filename);
-			if (!file.open(QIODevice::WriteOnly))
-				return E_CANTOPEN;
+			//Print the file
 			QTextStream out(&file);
 			out << doc.toString();
 			file.close();
-
 			return E_NOERROR;
 		}
-
-
+		
+		
+		
 		static int GetExportMaskCapability()
 		{
 			int capability = 0;
@@ -377,8 +417,6 @@ namespace io {
 			capability |= MeshModel::IOM_WEDGTEXCOORD;
 			capability |= MeshModel::IOM_WEDGNORMAL;
 			capability |= MeshModel::IOM_WEDGCOLOR;
-			//capability |= MeshModel::IOM_WEDGTEXMULTI;
-
 			return capability;
 		}
 	};
