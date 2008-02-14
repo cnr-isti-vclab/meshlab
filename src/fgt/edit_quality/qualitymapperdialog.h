@@ -59,6 +59,8 @@ public:
 	void initEqualizerHistogram();
 	void drawTransferFunction();
 
+protected:
+	void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
 	Ui::QualityMapperDialogClass ui;

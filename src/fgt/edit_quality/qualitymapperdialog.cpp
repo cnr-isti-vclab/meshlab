@@ -434,17 +434,21 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 }
 
 
+//this method prepares the Transfer Function unit to work
 void QualityMapperDialog::initTF()
 {
 	assert(_transferFunction != 0);
 
-//	ui.presetComboBox->disconnect(SIGNAL(textChanged()));
-//	connect(&_equalizerHandles[0], SIGNAL(positionChanged()), &_equalizerHandles[1], SLOT(moveMidHandle()));
+	//UPDATE OF PRESET COMBO BOX STATE
+
+	//blocking comboBox signals
 	ui.presetComboBox->blockSignals( true );
-  int i;
+
+	//adding default TFs text to comboBox
 	QString itemText;
-	for (i=0; i<NUMBER_OF_DEFAULT_TF; i++ )
+	for (int i=0; i<NUMBER_OF_DEFAULT_TF; i++ )
 	{
+		//fetching default TF text
 		itemText = TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF];
 
 		//items are added to the list only if they're not present yet
@@ -452,8 +456,11 @@ void QualityMapperDialog::initTF()
 			ui.presetComboBox->addItem( itemText );
 	}
 
+	//adding to comboBox "Known External TFs", i.e. TFs previously loaded from external TF Files
+	//for each external file TF the system stores the path of the file and its name (this one is added to comboBox)
 	for (int i=0; i<_knownExternalTFs.size(); i++)
 	{
+		//fetching KETF from KETFs list
 		itemText = _knownExternalTFs.at(i).name;
 
 		//items are added to the list only if they're not present yet
@@ -461,14 +468,15 @@ void QualityMapperDialog::initTF()
 			ui.presetComboBox->insertItem( 0, itemText );
 	}
 	
+	//comboBox operations complete. Re-enabling signals for comboBox
 	ui.presetComboBox->blockSignals( false );
 
-	//building transfer function chart informations
+	//building transfer function chart informations (if necessary)
 	if ( _transferFunction_info == 0 )
 		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), _transferFunction->size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
-	//removing old TF graphics items
-	this->clearItems( REMOVE_TF_HANDLE | DELETE_REMOVED_ITEMS );
+	//removing and deleting any old TF graphics item (TF lines and handles)
+	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 
 	//passing to TFHandles the pointer to the current Transfer Function
 	assert(_transferFunction != 0);
@@ -481,36 +489,46 @@ void QualityMapperDialog::initTF()
 	int channelType = 0;
 	for (int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
-		zValue = ((i + 1)*2.0f) + 1;
-		channelType = (*_transferFunction)[c].getType();
-		TYPE_2_COLOR( channelType, channelColor );
+// 		//fetching channelType
+// 		channelType = (*_transferFunction)[c].getType();
 
-		for (int i=0; i<(*_transferFunction)[c].size(); i++)
+		//processing z value
+		zValue = (((*_transferFunction)[c].getType() + 1)*2.0f) + 1;
+		TYPE_2_COLOR( c, channelColor );
+
+		for (int i=0; i<_transferFunction->getChannel(c).size(); i++)
 		{
-			val = (*_transferFunction)[channelType][i];
-			this->addTfHandle( channelType,
+			val = _transferFunction->getChannel(c)[i];
+			this->addTfHandle( c,
 							   QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight )), 
 							   val,
 							   zValue );
 		}
 	}
 
-	//adding to TF Scene TFlines and TFHandles
+	//adding to TF Scene TFHandles
+	//if handles are not already in the transferFunctionScene, they're added to it
 	if ( ! _transferFunctionScene.items().contains(_transferFunctionHandles[0][0]) )
 		for (int i=0; i<NUMBER_OF_CHANNELS; i++)
 			if ( _transferFunctionHandles[i].size() > 0 )
 				for (int h=0; h<_transferFunctionHandles[i].size(); h++)
 					_transferFunctionScene.addItem( _transferFunctionHandles[i][h] );
 
-	if ( _transferFunctionLines.size() > 0 )
-		if (!_transferFunctionScene.items().contains( _transferFunctionLines[0] ) )
-			for ( int l=0; l<_transferFunctionLines.size(); l++ )
-				_transferFunctionScene.addItem( _transferFunctionLines[l] );
+	//no TfHande selected yet
+	_currentTfHandle = 0;
 
+// 	if ( _transferFunctionLines.size() > 0 )
+// 		if (!_transferFunctionScene.items().contains( _transferFunctionLines[0] ) )
+// 			for ( int l=0; l<_transferFunctionLines.size(); l++ )
+// 				_transferFunctionScene.addItem( _transferFunctionLines[l] );
+
+	//all done
 	_isTransferFunctionInitialized = true;
 
+	//refreshing TF BG
 	this->drawTransferFunctionBG();
 
+	//initializing forward channel to BLUE
 	ui.blueButton->setChecked( true );
 }
 
@@ -634,24 +652,7 @@ void QualityMapperDialog::drawTransferFunctionBG ()
 
 void QualityMapperDialog::on_addPointButton_clicked()
 {
-	//getting channel for new handle:
-	int channelCode = -1;
-	
-	if ( _currentTfHandle != 0)
-		//if an handle was already selected let's use the same channel of the selected one
-		channelCode = _currentTfHandle->getChannel();
-	else
-		//else, let's use the more ahead channel in TF
-		channelCode = _transferFunction->getFirstPlaneChanel();
 
-	TF_KEY *val = new TF_KEY(0.0f, 0.5f, TF_KEY::LEFT_JUNCTION_SIDE);
-	(*_transferFunction)[channelCode].addKey(val);
-	float xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth );
-	float yPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
-	TFHandle *newHandle = this->addTfHandle(channelCode, QPointF(xPos, yPos), val, ((channelCode + 1)*2.0f) + 1 );
-
-	_currentTfHandle = newHandle;
-//	this->drawTransferFunction();
 }
 
 void QualityMapperDialog::on_savePresetButton_clicked()
@@ -1062,8 +1063,10 @@ TFHandle* QualityMapperDialog::addTfHandle(TFHandle *handle)
 	return handle;
 }
 
+//remove a TFHandle from the scene (and at logical level too)
 TFHandle* QualityMapperDialog::removeTfHandle(TFHandle *handle)
 {
+	//no handle. Nothing to do.
 	if ( handle == 0)
 		return handle;
 
@@ -1081,15 +1084,43 @@ TFHandle* QualityMapperDialog::removeTfHandle(TFHandle *handle)
 	}
 
 	//destroying joined logical key
-	(*_transferFunction)[_currentTfHandle->getChannel()].removeKey(handle->getMyKey());
+	_transferFunction->getChannel(_currentTfHandle->getChannel()).removeKey(handle->getMyKey());
 
-	//disconnecting and destroying it
+	//disconnecting and destroying handle
 	handle->disconnect();
 	delete handle;
 	handle = 0;
 
+	//no more traces of handle...
 	//refreshing TF
 	this->drawTransferFunction();
 
 	return handle;
+}
+
+
+void QualityMapperDialog::mouseDoubleClickEvent(QMouseEvent *event)
+{
+	QPointF clickPos = event->pos();
+	if ( ui.transferFunctionView->sceneRect().contains(clickPos) )
+	{
+		//getting channel for new handle:
+		int channelCode = -1;
+
+		if ( _currentTfHandle != 0)
+			//if an handle was already selected let's use the same channel of the selected one
+			channelCode = _currentTfHandle->getChannel();
+		else
+			//else, let's use the more ahead channel in TF
+			channelCode = _transferFunction->getFirstPlaneChanel();
+
+		TF_KEY *val = new TF_KEY(0.0f, 0.5f, TF_KEY::LEFT_JUNCTION_SIDE);
+		_transferFunction->getChannel(channelCode).addKey(val);
+		float xPos = _transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth );
+		float yPos = _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight );
+		TFHandle *newHandle = this->addTfHandle(channelCode, QPointF(xPos, yPos), val, ((channelCode + 1)*2.0f) + 1 );
+
+		_currentTfHandle = newHandle;
+		//	this->drawTransferFunction();
+	}
 }
