@@ -67,7 +67,6 @@ namespace vcg {
 					VertexType * central_vertex = &(*vi);
 
 					std::vector<float> weights;
-					//std::vector<float> curvatures;
 					std::vector<AdjVertex> vertices;
 
 					vcg::face::JumpingPos<FaceType> pos((*vi).VFp(), central_vertex);
@@ -121,7 +120,6 @@ namespace vcg {
 					M.SetZero();
 					for (int i = 0; i < vertices.size(); ++i) {
 						Point3f edge = (central_vertex->P() - vertices[i].vert->P());
-						//curvatures.push_back(2.0f * ((central_vertex->N() * edge) / edge.SquaredNorm() ) );
 						float curvature = (2.0f * (central_vertex->N() * edge) ) / edge.SquaredNorm();
 						Point3f T = (Tp*edge).Normalize();
 						tempMatrix.ExternalProduct(T,T);
@@ -146,6 +144,7 @@ namespace vcg {
 
 					Matrix33f QtMQ = (Qt * M * Q);
 
+					Point3f bl = Q.GetColumn(0);
 					Point3f T1 = Q.GetColumn(1);
 					Point3f T2 = Q.GetColumn(2);
 

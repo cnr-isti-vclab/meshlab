@@ -299,8 +299,10 @@ namespace vcg {
 						if (file) file << "Estrazione: d=" << tempTriplet.d << std::endl;
 						AddNearestToQ(tempTriplet.v, file);	
 						AddNeighborhoodNearestToQ(tempTriplet.v,file);
-					} 
-					++step_counter;
+					} else {
+						if (file) file << "Estrazione: Elemento nullo" << std::endl;
+					}
+					//++step_counter;
 					//if (step_counter%2500 == 1) 
 					//	Q.rebuild();
 				}
@@ -324,8 +326,8 @@ namespace vcg {
 			queue<FaceType*> edgeFaceQueue;
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
-				if ( vi->IMark() == F ) vi->C() = Color4b::Magenta;
-				if ( vi->IMark() == B ) vi->C() = Color4b::Yellow;
+				if ( vi->IMark() == F ) vi->C() = Color4b::Yellow;
+				if ( vi->IMark() == B ) vi->C() = Color4b::LightGray;
 				if ( vi->IMark() == U ) vi->C() = Color4b::Green;
 			}
 
