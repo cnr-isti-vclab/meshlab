@@ -108,7 +108,7 @@
                </layout>
               </widget>
              </item>
-             <item rowspan="2" row="1" column="0" >
+             <item row="1" column="0" >
               <widget class="QGroupBox" name="selectedPointBox" >
                <property name="title" >
                 <string>Selected Point</string>
@@ -158,23 +158,22 @@
               </widget>
              </item>
              <item row="1" column="1" >
-              <widget class="QPushButton" name="addPointButton" >
-               <property name="toolTip" >
-                <string>Add a new point to current channel</string>
+              <widget class="QGroupBox" name="qualityBox" >
+               <property name="title" >
+                <string>Quality</string>
                </property>
-               <property name="text" >
-                <string>Add</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1" >
-              <widget class="QPushButton" name="removePointButton" >
-               <property name="toolTip" >
-                <string>Remove selected point</string>
-               </property>
-               <property name="text" >
-                <string>Remove</string>
-               </property>
+               <layout class="QGridLayout" >
+                <item row="0" column="0" >
+                 <widget class="QLabel" name="xQualityLabel" >
+                  <property name="text" >
+                   <string>x-quality</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0" >
+                 <widget class="QLabel" name="invisibleQualityLabel" />
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>
