@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.10  2008/02/15 01:07:36  gianpaolopalma
+ Bug fixed in the texture index assignment
+
  Revision 1.9  2008/02/14 13:05:21  gianpaolopalma
  Changed updating progress bar in the method LoadIndexedFaceSet
  Bug fixed in the method LoadMaskByDom
@@ -1776,20 +1779,29 @@ namespace io {
 					while (j < paths.size() && !found)
 					{
 						QString path = paths.at(j).trimmed().remove('"');
+						int indexTex = -1;
 						size_t z = 0;
 						while (z < info->textureFile.size() && !found)
 						{
-							if (!info->useTexture[z] && (info->textureFile.at(z) == path || info->textureFile.at(z) == url))
+							if (info->textureFile.at(z) == path || info->textureFile.at(z) == url)
 							{
-								TextureInfo tInfo = TextureInfo();
-								info->useTexture[z] = true;
-								tInfo.textureIndex = z;
-								tInfo.repeatS = (imageTexture.attribute("repeatS", "true") == "true");
-								tInfo.repeatT = (imageTexture.attribute("repeatT", "true") == "true");
-								textureInfo.push_back(tInfo);
-								found = true;
+								indexTex = z;
+								if (!info->useTexture[z])
+								{
+									found = true;
+									info->useTexture[z] = true;
+								}
 							}
 							z++;
+						}
+						if (found || indexTex != -1)
+						{
+							TextureInfo tInfo = TextureInfo();
+							tInfo.textureIndex = indexTex;
+							tInfo.repeatS = (imageTexture.attribute("repeatS", "true") == "true");
+							tInfo.repeatT = (imageTexture.attribute("repeatT", "true") == "true");
+							textureInfo.push_back(tInfo);
+							found = true;
 						}
 						j++;
 					}
