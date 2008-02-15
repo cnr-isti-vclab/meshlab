@@ -50,18 +50,11 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 
 	QPointF newPos = event->scenePos();
-	/*
-	if ( (newPos.x() < _chartInfo->leftBorder) || (newPos.x() > _chartInfo->rightBorder) )
-		return;
-*/
+	//if ( (newPos.x() < _chartInfo->leftBorder) || (newPos.x() > _chartInfo->rightBorder) )	return;
+
+	QPointF lastScenePos = event->lastScenePos();
 	QPointF oldPos = pos();
 	qreal handleOffset = abs(newPos.x()-oldPos.x());
-
-	/* for testing only
-	qreal leftx = _handlesPointer[LEFT_HANDLE]->pos().x();
-	qreal midx =  _handlesPointer[MID_HANDLE]->pos().x();
-	qreal rightx= _handlesPointer[RIGHT_HANDLE]->pos().x();
-	*/
 
 	if (handleOffset >= std::numeric_limits<float>::epsilon())
 	{
@@ -101,27 +94,18 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 					emit positionChangedToSpinBox((double)newQualityValue);
 					_spinBoxPointer->blockSignals(false);
 
-					if (  newQualityValue < _chartInfo->minX )
-						emit invalidateHistogram();
-					else
+					if ( newQualityValue > _chartInfo->minX )
 					{
+						emit insideHistogram(true); // for redrawing equalizerHistogram bars, if needed
 						setPos(newPos.x(), oldPos.y());
-						emit positionChanged();  // for redrawing transferFunctionScene and moving mid equalizerHistogram Handle
-					}					
+						emit positionChanged();  // for redrawing transferFunctionScene and moving  equalizerHistogram midHandle
+					}
+					else
+						emit insideHistogram(false);
 				}
 			}
 			break;
 		case RIGHT_HANDLE:
-			/*if (newPos.x() > _handlesPointer[LEFT_HANDLE]->pos().x()) 
-			{
-				setPos(newPos.x(), oldPos.y());
-				qreal newSpinboxValue = positionToQuality(pos().x());
-				_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->setMaximum(newSpinboxValue);
-				_spinBoxPointer->blockSignals(true);
-				emit positionChangedToSpinBox((double)newSpinboxValue);
-				_spinBoxPointer->blockSignals(false);
-				emit positionChanged();
-			}*/
 			{
 				// calculating new spinbox value
 				qreal newQualityValue = positionToQuality(newPos.x());
@@ -137,16 +121,16 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 					emit positionChangedToSpinBox((double)newQualityValue);
 					_spinBoxPointer->blockSignals(false);
 
-					if (  newQualityValue > _chartInfo->maxX )
-						emit invalidateHistogram();
-					else
+					if ( newQualityValue < _chartInfo->maxX )
 					{
+						emit insideHistogram(true); // for redrawing equalizerHistogram bars, if needed
 						setPos(newPos.x(), oldPos.y());
-						emit positionChanged();  // for redrawing transferFunctionScene and moving mid equalizerHistogram Handle
-					}					
+						emit positionChanged();  // for redrawing transferFunctionScene and moving  equalizerHistogram midHandle
+					}
+					else
+						emit insideHistogram(false);
 				}
 			}
-
 			break;
 		}
 
@@ -199,9 +183,10 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 		if (newHandleX < _handlesPointer[RIGHT_HANDLE]->pos().x()) 
 		{
 			if ( /*(pos().x() < _chartInfo->leftBorder) ||*/ newHandleX < _chartInfo->leftBorder )
-				emit invalidateHistogram();
+				emit insideHistogram(false);
 			else
 			{
+				emit insideHistogram(true);
 				setPos(newHandleX, pos().y());
 				_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->setMinimum(spinBoxValue);
 				emit positionChanged();
@@ -209,19 +194,13 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 		}
 		break;
 	case RIGHT_HANDLE:
-		/*if (newHandleX > _handlesPointer[LEFT_HANDLE]->pos().x()) 
-		{
-
-			setPos(newHandleX, pos().y());
-			_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->setMaximum(spinBoxValue);
-			emit positionChanged();
-		}*/
 		if (newHandleX > _handlesPointer[LEFT_HANDLE]->pos().x()) 
 		{
 			if ( /*(pos().x() < _chartInfo->leftBorder) ||*/ newHandleX > _chartInfo->rightBorder )
-				emit invalidateHistogram();
+				emit insideHistogram(false);
 			else
 			{
+				emit insideHistogram(true);
 				setPos(newHandleX, pos().y());
 				_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->setMaximum(spinBoxValue);
 				emit positionChanged();

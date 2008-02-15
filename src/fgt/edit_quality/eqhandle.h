@@ -66,7 +66,7 @@ private:
 signals:
 	void positionChangedToSpinBox(double);
 	void positionChanged();
-	void invalidateHistogram();
+	void insideHistogram(bool);
 
 private slots:
 	// changing equalizer spinboxes moves the connected handle

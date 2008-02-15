@@ -15,6 +15,22 @@ bool TfHandleCompare(TFHandle*h1, TFHandle*h2)
 	return (h1->getRelativeX() <= h2->getRelativeX());
 }
 
+pair<int,int> QualityMapperDialog::computeHistogramMinMaxY (Histogramf* histogram)
+{
+	int maxY = 0;
+	int minY = std::numeric_limits<int>::max();
+	for (int i=0; i<histogram->n; i++) 
+	{
+		if ( histogram->H[i] > maxY )
+			maxY = histogram->H[i];
+
+		if ( histogram->H[i] < minY )
+			minY = histogram->H[i];
+	}
+	pair<int,int> minMaxY(minY,maxY);
+	return minMaxY;
+}
+
 
 QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *gla) : QDockWidget(parent), mesh(m)
 {
@@ -84,11 +100,11 @@ QualityMapperDialog::~QualityMapperDialog()
 
 void QualityMapperDialog::ComputePerVertexQualityHistogram( CMeshO &m, Frange range, Histogramf *h, int bins )    // V1.0
 {
-			h->Clear();
-			h->SetRange( range.minV, range.maxV, bins);
-			CMeshO::VertexIterator vi;
-			for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-				if(!(*vi).IsD()) h->Add((*vi).Q());		
+	h->Clear();
+	h->SetRange( range.minV, range.maxV, bins);
+	CMeshO::VertexIterator vi;
+	for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+		if(!(*vi).IsD()) h->Add((*vi).Q());		
 }
 
 // ATTUALMENTE NON VIENE MAI UTILIZZATA (UCCIO)
@@ -235,10 +251,9 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 void QualityMapperDialog::initEqualizerHistogram()
 {
 	_equalizer_histogram = 0;
+	_handleWasInsideHistogram = true;
 
-	drawEqualizerHistogram();
-	drawGammaCorrection();
-	drawTransferFunctionBG();
+	drawEqualizerHistogram(true);
 
 	//DRAWING HANDLES
 	QDoubleSpinBox* spinboxes[] = { ui.minSpinBox, ui.midSpinBox, ui.maxSpinBox };
@@ -287,7 +302,7 @@ void QualityMapperDialog::initEqualizerHistogram()
 
 	ui.maxSpinBox->setValue(_histogram_info->maxX);
 	//ui.maxSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
-	ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
+	ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
 	ui.maxSpinBox->setSingleStep(singleStep);
 	ui.maxSpinBox->setDecimals(decimals);
 
@@ -319,62 +334,61 @@ void QualityMapperDialog::initEqualizerHistogram()
 	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), this, SLOT(drawGammaCorrection()) );
 	
 	// Connecting eqHandles to histogram drawing
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(invalidateHistogram()), this, SLOT(drawEqualizerHistogram()) );
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(invalidateHistogram()), this, SLOT(drawEqualizerHistogram()) );
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(insideHistogram(bool)), this, SLOT(drawEqualizerHistogram(bool)) );
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(insideHistogram(bool)), this, SLOT(drawEqualizerHistogram(bool)) );
 
 	// Connecting handles to preview method
 	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
 	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
 	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
 	connect(ui.brightnesslSlider, SIGNAL(sliderReleased()), this, SLOT(on_handle_released()));
-	
 
 	ui.equalizerGraphicsView->setScene(&_equalizerHistogramScene);
 
+	drawGammaCorrection();
+	drawTransferFunctionBG();
 }
 
 // Add histogram bars to equalizerHistogram Scene
-void QualityMapperDialog::drawEqualizerHistogram()
+void QualityMapperDialog::drawEqualizerHistogram(bool handleIsInsideHistogram)
 {
-	this->clearItems( REMOVE_EQ_HISTOGRAM | DELETE_REMOVED_ITEMS );
 
 	//building up histogram...
 	int numberOfBins = 200;
+	
 	if (_equalizer_histogram == 0)
 	{
+		// This block is called only the first time
 		_equalizer_histogram = new Histogramf();
 		Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mesh->cm));
 		this->ComputePerVertexQualityHistogram(mesh->cm, mmmq, _equalizer_histogram, numberOfBins);
 
-			//building histogram chart informations
-		//if ( _histogram_info == 0 )
-		//{
-			//processing minY and maxY values for histogram
-			int maxY = 0;
-			int minY = std::numeric_limits<int>::max();
-			for (int i=0; i<_equalizer_histogram->n; i++) 
-			{
-				if ( _equalizer_histogram->H[i] > maxY )
-					maxY = _equalizer_histogram->H[i];
-
-				if ( _equalizer_histogram->H[i] < minY )
-					minY = _equalizer_histogram->H[i];
-			}
-			_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->n, _equalizer_histogram->minv, _equalizer_histogram->maxv, minY, maxY );
-			//_histogram_info->data = this;
-
-		//}
+		//building histogram chart informations
+		//processing minY and maxY values for histogram
+		pair<int,int> minMaxY = computeHistogramMinMaxY(_equalizer_histogram);
+		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->n, _equalizer_histogram->minv, _equalizer_histogram->maxv, minMaxY.first, minMaxY.second );
 
 		//drawing axis and other basic items
 		this->drawChartBasics( _equalizerHistogramScene, _histogram_info );
 	}
 	else
 	{
-		_equalizer_histogram->Clear();
+		// if histogram doesn't need to be redrawn, return
+		if (handleIsInsideHistogram && _handleWasInsideHistogram) 
+			return;
+		
+		_handleWasInsideHistogram = handleIsInsideHistogram;
+
+		this->clearItems( REMOVE_EQ_HISTOGRAM | DELETE_REMOVED_ITEMS );
+		//_equalizer_histogram->Clear();
 		float minX = (_histogram_info->minX<ui.minSpinBox->value())?_histogram_info->minX:ui.minSpinBox->value();
 		float maxX = (_histogram_info->maxX>ui.maxSpinBox->value())?_histogram_info->maxX:ui.maxSpinBox->value();
 		Frange mmmq(minX, maxX);
 		this->ComputePerVertexQualityHistogram(mesh->cm, mmmq, _equalizer_histogram, numberOfBins);
+
+		pair<int,int> minMaxY = computeHistogramMinMaxY(_equalizer_histogram);
+		_histogram_info->minY = minMaxY.first;
+		_histogram_info->maxY = minMaxY.second;
 	}
 	//...histogram built
 
@@ -410,7 +424,7 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 
 	for (int i = minIndex; i < maxIndex; i++)
 	{
-		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->H[i]) / (float)_histogram_info->maxRoundedY;
+		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->H[i]) / (float)_histogram_info->maxY;
 		
 		startBarPt.setY( (float)chartInfo->lowerBorder - barHeight );
 
@@ -640,7 +654,11 @@ void QualityMapperDialog::updateColorBand()
 void QualityMapperDialog::drawTransferFunctionBG ()
 {
 	this->clearItems( REMOVE_TF_BG | DELETE_REMOVED_ITEMS );
-
+	
+	// JUST FOR TEST
+	float minspinboxvalue = ui.minSpinBox->value();
+	float maxspinboxvalue = ui.maxSpinBox->value();
+	
 	if (_histogram_info !=0)
 	{
 		int minIndex = _equalizer_histogram->Interize((float)ui.minSpinBox->value());

@@ -59,8 +59,13 @@ public:
 	void initEqualizerHistogram();
 	void drawTransferFunction();
 
+
+	static pair<int,int> computeHistogramMinMaxY (Histogramf*);
+
+
 protected:
 	void mouseDoubleClickEvent(QMouseEvent *event);
+
 
 private:
 	Ui::QualityMapperDialogClass ui;
@@ -71,6 +76,7 @@ private:
 	QGraphicsScene	_equalizerHistogramScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
 	EqHandle*		_equalizerHandles[NUMBER_OF_EQHANDLES];
 	qreal			_equalizerMidHandlePercentilePosition;
+	bool			_handleWasInsideHistogram;
 	GRAPHICS_ITEMS_LIST _equalizerHistogramBars;
 
 	TransferFunction *_transferFunction;
@@ -134,7 +140,7 @@ private slots:
 	void on_TfHandle_clicked(TFHandle *sender);
 	void on_TfHandle_doubleClicked(TFHandle *sender);
 	
-	void drawEqualizerHistogram();
+	void drawEqualizerHistogram(bool handleInsideHistogram);
 	void drawGammaCorrection();
 };
 
