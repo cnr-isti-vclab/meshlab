@@ -2,13 +2,13 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.0.0"
+!define PRODUCT_VERSION "1.1.0"
 !define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\4.2.2"
+!define QT_BASE "C:\Qt\4.3.3"
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -43,7 +43,7 @@
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabSetup.exe"
+OutFile "MeshLabSetup_v110.exe"
 InstallDir "$PROGRAMFILES\VCG\MeshLab"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -60,20 +60,49 @@ Section "MainSection" SEC01
   File "..\meshlab\shaders\*.gdp"
   File "..\meshlab\shaders\*.vert"
   SetOutPath "$INSTDIR\plugins"
+  ; IO Plugins (5)
   File "..\meshlab\plugins\baseio.dll"
-  File "..\meshlab\plugins\cleanfilter.dll"
-  File "..\meshlab\plugins\colladaio.dll"
-  File "..\meshlab\plugins\editpaint.dll"
   File "..\meshlab\plugins\epoch_io.dll"
-  File "..\meshlab\plugins\meshcolorize.dll"
-  File "..\meshlab\plugins\meshdecorate.dll"
-  File "..\meshlab\plugins\meshedit.dll"
-  File "..\meshlab\plugins\meshfilter.dll"
+  File "..\meshlab\plugins\colladaio.dll"
   File "..\meshlab\plugins\meshio.dll"
-  File "..\meshlab\plugins\meshrender.dll"
+  File "..\meshlab\plugins\u3d_io.dll"
+  ; filter plugins (10)
+  File "..\meshlab\plugins\cleanfilter.dll"
+  File "..\meshlab\plugins\meshfilter.dll"
+  File "..\meshlab\plugins\meshcolorize.dll"
   File "..\meshlab\plugins\meshselect.dll"
+  File "..\meshlab\plugins\samplefilter.dll"
+  File "..\meshlab\plugins\samplefilterdoc.dll"
+  File "..\meshlab\plugins\filtergeodesic.dll"
+  File "..\meshlab\plugins\filtercreateiso.dll"
+  File "..\meshlab\plugins\filterborder.dll"
+  File "..\meshlab\plugins\filter_poisson.dll"
+  File "..\meshlab\plugins\filter_ao.dll"
+  ; edit plugins (6)
+  File "..\meshlab\plugins\editalign.dll"
+  File "..\meshlab\plugins\editmeasure.dll"
+  File "..\meshlab\plugins\editpaint.dll"
+  File "..\meshlab\plugins\editslice.dll"
+  File "..\meshlab\plugins\meshedit.dll"
+  File "..\meshlab\plugins\sampleedit.dll"
+  ; decorate plugins (2)
+  File "..\meshlab\plugins\meshdecorate.dll"
+  File "..\meshlab\plugins\sampledecoration.dll"
+  ; render plugins (1)
+  File "..\meshlab\plugins\meshrender.dll"
+  
+  ; All the U3D binary stuff
+  SetOutPath "$INSTDIR\plugins\U3D_W32"
+  File "..\meshlab\plugins\U3D_W32\IDTFConverter.exe"
+  File "..\meshlab\plugins\U3D_W32\*.dll"
+  File "..\meshlab\plugins\U3D_W32\*.txt"
+  SetOutPath "$INSTDIR\plugins\U3D_W32\plugins"
+  File "..\meshlab\plugins\U3D_W32\*.dll"
+
   SetOutPath "$INSTDIR\textures"
   File "..\meshlab\textures\chrome.png"
+  SetOutPath "$INSTDIR\textures\cubemaps"
+  File "..\meshlab\textures\cubemaps\uffizi*.jpg"
   SetOutPath "$INSTDIR\samples"
   File "..\sample\texturedknot.ply"
   File "..\sample\texturedknot.obj"
@@ -84,7 +113,9 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\samples\images"
   File "..\sample\images\duckCM.jpg"
   SetOutPath "$INSTDIR\imageformats"
-  File ${QT_BASE}\plugins\imageformats\qjpeg1.dll
+  File ${QT_BASE}\plugins\imageformats\qjpeg4.dll
+  File ${QT_BASE}\plugins\imageformats\qgif4.dll
+  File ${QT_BASE}\plugins\imageformats\qtiff4.dll
   SetOutPath "$INSTDIR"
   File "${QT_BASE}\bin\QtCore4.dll"
   File "${QT_BASE}\bin\QtGui4.dll"
@@ -149,9 +180,12 @@ Section Uninstall
   RMDir "$INSTDIR\CVS"
   RMDir "$INSTDIR\imageformats"
   RMDir "$INSTDIR\plugins"
+  RMDir "$INSTDIR\plugins\U3D_W32"
+  RMDir "$INSTDIR\plugins\U3D_W32\plugins"
   RMDir "$INSTDIR\samples\images"
   RMDir "$INSTDIR\samples"
   RMDir "$INSTDIR\textures"
+  RMDir "$INSTDIR\textures\cubemaps"
   RMDir "$INSTDIR\shaders"
   RMDir "$INSTDIR"
 
