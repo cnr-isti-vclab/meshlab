@@ -24,6 +24,12 @@
   History
 
  $Log$
+ Revision 1.5  2008/02/15 08:27:44  cignoni
+ - '>> 'changed into '> >'
+ - Used HasPerFaceSomething(M) instead of M.HasPerFaceSomething() that is deprecated.
+ - many unsigned warning removed
+ - added const to some functions parameters (FindDEF, FindAndReplaceUSE ...)
+
  Revision 1.4  2008/02/15 01:09:06  gianpaolopalma
  Added control to check if face is deleted
 
@@ -164,14 +170,14 @@ namespace io {
 			if (!file.open(QIODevice::WriteOnly))
 				return E_CANTOPEN;
 			int nFace = 0;
-			bool bHasPerWedgeTexCoord = (mask & MeshModel::IOM_WEDGTEXCOORD) && m.HasPerWedgeTexCoord();
-			bool bHasPerWedgeNormal = (mask & MeshModel::IOM_WEDGNORMAL) && m.HasPerWedgeNormal();
-			bool bHasPerWedgeColor = (mask & MeshModel::IOM_WEDGCOLOR) && m.HasPerWedgeColor();
+			bool bHasPerWedgeTexCoord = (mask & MeshModel::IOM_WEDGTEXCOORD) && HasPerWedgeTexCoord(m);
+			bool bHasPerWedgeNormal = (mask & MeshModel::IOM_WEDGNORMAL) && HasPerWedgeNormal(m);
+			bool bHasPerWedgeColor = (mask & MeshModel::IOM_WEDGCOLOR) && HasPerWedgeColor(m);
 			bool bHasPerVertexColor	= (mask & MeshModel::IOM_VERTCOLOR) && m.HasPerVertexColor();
 			bool bHasPerVertexNormal = (mask & MeshModel::IOM_VERTNORMAL) && m.HasPerVertexNormal();
 			bool bHasPerVertexTexCoord = (mask & MeshModel::IOM_VERTTEXCOORD) && m.HasPerVertexTexCoord();
-			bool bHasPerFaceColor = (mask & MeshModel::IOM_FACECOLOR) && m.HasPerFaceColor();
-			bool bHasPerFaceNormal = (mask & MeshModel::IOM_FACENORMAL) && m.HasPerFaceNormal();
+			bool bHasPerFaceColor = (mask & MeshModel::IOM_FACECOLOR) && HasPerFaceColor(m);
+			bool bHasPerFaceNormal = (mask & MeshModel::IOM_FACENORMAL) && HasPerFaceNormal(m);
 			if (bHasPerWedgeTexCoord && bHasPerVertexTexCoord)
 				return E_INVALIDSAVETEXCOORD;
 			if ((bHasPerVertexColor && (bHasPerWedgeColor || bHasPerFaceColor)) || (bHasPerWedgeColor && bHasPerFaceColor))
@@ -224,7 +230,7 @@ namespace io {
 					indexTexture = object[i]->cV(0)->T().N();
 				else if (bHasPerWedgeTexCoord)
 					indexTexture = object[i]->cWT(0).N();
-				if (indexTexture > -1 && indexTexture < m.textures.size())
+				if (indexTexture > -1 && indexTexture < int( m.textures.size()))
 				{
 					QDomElement appearance = doc.createElement("Appearance");
 					QDomElement imageTexture = doc.createElement("ImageTexture");

@@ -23,6 +23,12 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.9  2008/02/15 08:27:44  cignoni
+ - '>> 'changed into '> >'
+ - Used HasPerFaceSomething(M) instead of M.HasPerFaceSomething() that is deprecated.
+ - many unsigned warning removed
+ - added const to some functions parameters (FindDEF, FindAndReplaceUSE ...)
+
  Revision 1.8  2008/02/14 13:00:22  gianpaolopalma
  Changed assignment of defaultBits in the method GetExportMaskCapability
 
@@ -52,10 +58,11 @@
 #include <QtGui>
 #include <QtXml>
 
+
+#include "io_x3d.h"
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
 
-#include "io_x3d.h"
 #include "import_x3d.h"
 #include "export_x3d.h"
 
