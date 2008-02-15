@@ -5,13 +5,16 @@
 #include <cassert>
 
 
-//this functions return a relative-absolute value conversion perspectively as float and int (rounded to closer integer value)
+//theess functions return a relative-absolute value conversion perspectively as float and int (rounded to closer integer value)
 float relative2AbsoluteValf(float relative_val, float max_val);
 int relative2AbsoluteVali(float relative_val, float max_val);
 
-//this functions return a absolute-relative value conversion perspectively as float and int (rounded to closer integer value)
+//theese functions return a absolute-relative value conversion perspectively as float and int (rounded to closer integer value)
 float absolute2RelativeValf(float absolute_val, float max_val);
 int absolute2RelativeVali(float absolute_val, float max_val);
+
+// Converts a relative value in an absolute one after applying an exponential funcion val^exp
+float relative2QualityValf(float relative_val, float min_q, float max_q, float exp);
 
 struct CHART_INFO
 {
