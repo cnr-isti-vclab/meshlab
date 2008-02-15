@@ -21,7 +21,7 @@ float relative2QualityValf(float relative_val, float min_q, float max_q, float e
 { 
 	assert( (relative_val>=-1.0f) && (relative_val<=2.0f) );
 	assert( (exp>=0) && (exp<=1) );
-	assert(min_q<=max_q)
+	assert(min_q<=max_q);
 	relative_val = pow( relative_val, exp );
 	return ( relative_val * (max_q - min_q) ) + min_q;
 }

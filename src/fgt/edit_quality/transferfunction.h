@@ -53,64 +53,18 @@ using namespace vcg;
 //It's composed of a position on x axis and two values on the y axis (potentially the same)
 struct TF_KEY
 {
-	enum JUNCTION_SIDE
-	{
-		LEFT_JUNCTION_SIDE = 0,
-		RIGHT_JUNCTION_SIDE
-	};
 	float	x;
 	float	y;
-	JUNCTION_SIDE		junctionSide;
-// 	float	y_upper;
-// 	float	y_lower;
-// 	int		left_junction_point_code;
-// 	int		right_junction_point_code;
-
-// 	float getLeftJunctionPoint()
-// 	{ 
-// 		if (left_junction_point_code == LOWER_Y)
-// 			return y_lower;
-// 		else
-// 			return y_upper;
-// 	}
-// 	float getRightJunctionPoint()
-// 	{
-// 		if (right_junction_point_code == LOWER_Y)
-// 			return y_lower;
-// 		else
-// 			return y_upper;
-// 	}
-// 	inline void  setLeftJunctionPoint( int j_p )	{ left_junction_point_code = j_p; right_junction_point_code = NUMBER_OF_JUNCTION_Y-left_junction_point_code-1; }
-// 	inline void  setRightJunctionPoint( int j_p )	{ right_junction_point_code = j_p; left_junction_point_code = NUMBER_OF_JUNCTION_Y-right_junction_point_code-1; }
 	
-	TF_KEY( float xVal=0.0f, float yVal=0.0f, JUNCTION_SIDE junction=LEFT_JUNCTION_SIDE )
+	TF_KEY( float xVal=0.0f, float yVal=0.0f )
 	{
 		assert(xVal>=0.0f);
 		assert(yVal>=0.0f);
 		x = xVal;
 		y = yVal;
-		junctionSide = junction;
-/*
-				y_upper=y_up;
-				y_lower=y_low;
-				if ( y_upper < y_lower)
-					this->swapY();
-				this->setLeftJunctionPoint(LOWER_Y);*/
 	}
-
-// 	inline void swapY() { float tmp=y_lower; y_lower=y_upper; y_upper=tmp; this->setLeftJunctionPoint(right_junction_point_code); }
-// 	bool operator == (TF_KEY k)	{ return ( (y_lower == k.y_lower) && (y_upper == k.y_upper) ); }
 };
-
 #define TF_KEYsize	sizeof(TF_KEY)
-
-// struct TF_CHANNEL_VALUE
-// {
-// 	float	*x;
-// 	TF_KEY	*y;
-// 	TF_CHANNEL_VALUE(float *x_val=0, TF_KEY *y_val=0)
-// 	{	x=x_val;	y=y_val;	}
-// };
 
 
 //list of channels
@@ -178,7 +132,7 @@ public:
 
 	void	setType(TF_CHANNELS);
 	TF_CHANNELS getType(void);
-	TF_KEY	*addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side);
+	TF_KEY	*addKey(float xVal, float yVal);
 	TF_KEY	*addKey(TF_KEY *newKey);
 	void	removeKey(int index);
 	void	removeKey(TF_KEY *key);

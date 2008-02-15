@@ -156,9 +156,10 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 	//drawing transferFunction
 	_qualityMapperDialog->drawTransferFunction();
 
-
 	//dialog ready to be displayed. Show it now!
 	_qualityMapperDialog->show();
+
+	connect(_qualityMapperDialog, SIGNAL(closingDialog()),gla,SLOT(endEdit()) );
 }
 
 void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )

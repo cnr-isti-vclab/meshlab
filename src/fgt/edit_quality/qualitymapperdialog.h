@@ -39,6 +39,44 @@ struct KNOWN_EXTERNAL_TFS
 };
 #define KNOWN_EXTERNAL_TFSsize	sizeof(KNOWN_EXTERNAL_TFS)
 
+class TFDoubleClickCatcher : public QObject, public QGraphicsItem
+{
+	Q_OBJECT
+
+private:
+	CHART_INFO		*_environmentInfo;
+	QGraphicsView	*_myView;
+	QRectF			_boundingRect;
+
+protected:
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+
+public:
+	TFDoubleClickCatcher(/*QGraphicsView *view*/CHART_INFO *environmentInfo) : _environmentInfo(environmentInfo)
+	{
+		assert(environmentInfo);
+		_boundingRect.setX(_environmentInfo->leftBorder);
+		_boundingRect.setY(_environmentInfo->upperBorder);
+		_boundingRect.setWidth(_environmentInfo->chartWidth);
+		_boundingRect.setHeight(_environmentInfo->chartHeight);
+	}
+	~TFDoubleClickCatcher(){_environmentInfo = 0;}
+	// Overriding QGraphicsItem methods
+	QRectF boundingRect () const
+	{
+		return _boundingRect;
+	}
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+	{
+// 		painter->setPen(QColor(100,212,136));
+// 		painter->setBrush(QColor(32,64,128));
+// 		painter->drawRect(_boundingRect);
+	}
+
+ signals:
+ 	void TFdoubleClicked(QPointF);
+};
+
 
 #define GRAPHICS_ITEMS_LIST		QList<QGraphicsItem *>
 #define TF_HANDLES_LIST			QList<TFHandle*>
@@ -61,12 +99,6 @@ public:
 
 
 	static pair<int,int> computeHistogramMinMaxY (Histogramf*);
-
-
-protected:
-	void mouseDoubleClickEvent(QMouseEvent *event);
-
-
 private:
 	Ui::QualityMapperDialogClass ui;
 //	QualityMapperSettings _settings;
@@ -82,6 +114,7 @@ private:
 	TransferFunction *_transferFunction;
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
+	TFDoubleClickCatcher *_tfCatcher;
 	TF_HANDLES_LIST	_transferFunctionHandles[NUMBER_OF_CHANNELS];
 	TFHandle		*_currentTfHandle;
 	GRAPHICS_ITEMS_LIST _transferFunctionLines;
@@ -114,6 +147,7 @@ private:
 
 signals:
 	void suspendEditToggle();
+	void closingDialog();
 
 private slots:
 	void on_removePointButton_clicked();
@@ -139,6 +173,7 @@ private slots:
 	void on_TfHandle_moved(TFHandle *sender);
 	void on_TfHandle_clicked(TFHandle *sender);
 	void on_TfHandle_doubleClicked(TFHandle *sender);
+	void on_TF_view_doubleClicked(QPointF pos);
 	
 	void drawEqualizerHistogram(bool handleInsideHistogram);
 	void drawGammaCorrection();

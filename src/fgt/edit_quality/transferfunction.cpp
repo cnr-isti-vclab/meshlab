@@ -56,11 +56,11 @@ TF_CHANNELS TfChannel::getType()
 
 //adds to the keys list new_key
 //returns a pointer to the key just added
-TF_KEY* TfChannel::addKey(float xVal, float yVal, TF_KEY::JUNCTION_SIDE side)
+TF_KEY* TfChannel::addKey(float xVal, float yVal)
 {
 	assert(xVal>=0.0f);
 	assert(yVal>=0.0f);
-	return this->addKey(new TF_KEY(xVal, yVal, side));
+	return this->addKey(new TF_KEY(xVal, yVal));
 }
 
 //adds to the keys list a new keys with fields passed to the method
@@ -73,11 +73,6 @@ TF_KEY* TfChannel::addKey(TF_KEY *newKey)
 	{
 		if ( (*it)->x >= newKey->x )
 		{
-			//RIGHT JUNCTION POINT FOR A KEY MUST BE POSITIONED BEFORE A LEFT ONE
-			if ( (*it)->x == newKey->x )
-				if ( ((*it)->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE ) && (newKey->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE ) )
-					it ++;
-
 			KEYS.insert(it, newKey);
 			return newKey;
 		}
@@ -397,23 +392,23 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 	switch(code)
 	{
 	case GREY_SCALE_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[RED_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f);
 		break;
 	case RGB_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,1.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[RED_CHANNEL].addKey(0.5f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[RED_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.5f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(0.0f,1.0f);
+		_channels[RED_CHANNEL].addKey(0.5f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.5f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f);
 		//added for test
 // 		_channels[RED_CHANNEL].addKey(0.5f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
 //		_channels[GREEN_CHANNEL].addKey(0.5f,0.7f,TF_KEY::RIGHT_JUNCTION_SIDE);
@@ -423,37 +418,37 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 
 		break;
 	case RED_SCALE_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[RED_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f);
 		break;
 	case GREEN_SCALE_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[RED_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,1.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f);
 		break;
 	case BLUE_SCALE_TF:
-		_channels[RED_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[RED_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f);
 		break;
 	case FLAT_TF:
 	default:
-		_channels[RED_CHANNEL].addKey(0.0f,0.5f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[RED_CHANNEL].addKey(1.0f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(0.0f,0.5f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[GREEN_CHANNEL].addKey(1.0f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(0.0f,0.5f,TF_KEY::RIGHT_JUNCTION_SIDE);
-		_channels[BLUE_CHANNEL].addKey(1.0f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
+		_channels[RED_CHANNEL].addKey(0.0f,0.5f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.5f);
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.5f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.5f);
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.5f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.5f);
 		break;
 	}
 }
@@ -485,16 +480,8 @@ TransferFunction::TransferFunction(QString fileName)
 			splittedString = line.split(CSV_FILE_SEPARATOR, QString::SkipEmptyParts);
 			assert( (splittedString.size() % 2) == 0 );
 
-			TF_KEY::JUNCTION_SIDE junctSide;
 			for ( int i=0; i<splittedString.size(); i+=2 )
-			{
-				if (i==0)
-					junctSide = TF_KEY::RIGHT_JUNCTION_SIDE;
-				else
-					junctSide = TF_KEY::LEFT_JUNCTION_SIDE;
-
-				_channels[channel_code].addKey( splittedString[i].toFloat(), splittedString[i+1].toFloat(), junctSide );
-			}
+				_channels[channel_code].addKey( splittedString[i].toFloat(), splittedString[i+1].toFloat() );
 
 			channel_code ++;
 		}
