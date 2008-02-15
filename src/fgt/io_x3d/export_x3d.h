@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.4  2008/02/15 01:09:06  gianpaolopalma
+ Added control to check if face is deleted
+
  Revision 1.3  2008/02/14 13:09:53  gianpaolopalma
  Code refactoring to reduce time to save the mesh in X3D files
 
@@ -238,71 +241,74 @@ namespace io {
 				for (fi = object[i]; fi != object[i+1]; fi++)
 				{
 					nFace++;
-					for (int tt = 0; tt < 3; tt++)
+					if(!fi->IsD())
 					{
-						bool newVertex = false;
-						std::map<x3dPointType, int>::iterator pointIter = vertexMap.find(fi->P(tt));
-						if (pointIter == vertexMap.end())
+						for (int tt = 0; tt < 3; tt++)
 						{
-							vertexIndex.push_back(QString::number(indexVertex));
-							vertexValue.push_back(pointToString(fi->P(tt)));
-							vertexMap[fi->P(tt)] = indexVertex++;
-							vertexSet.insert(fi->P(tt));
-							newVertex = true;
-						}
-						else
-							vertexIndex.push_back(QString::number(pointIter->second));
-						if (bHasPerWedgeColor)
-						{
-							std::map<x3dColorType, int>::iterator colorIter = colorMap.find(fi->WC(tt));
-							if (colorIter == colorMap.end())
+							bool newVertex = false;
+							std::map<x3dPointType, int>::iterator pointIter = vertexMap.find(fi->P(tt));
+							if (pointIter == vertexMap.end())
 							{
-								colorIndex.push_back(QString::number(indexColor));
-								colorValue.push_back(colorToString(fi->WC(tt)));
-								colorMap[fi->WC(tt)] = indexColor++;
+								vertexIndex.push_back(QString::number(indexVertex));
+								vertexValue.push_back(pointToString(fi->P(tt)));
+								vertexMap[fi->P(tt)] = indexVertex++;
+								vertexSet.insert(fi->P(tt));
+								newVertex = true;
 							}
 							else
-								colorIndex.push_back(QString::number(colorIter->second));
-						}
-						if (bHasPerWedgeNormal)
-						{
-							std::map<x3dPointType, int>::iterator normalIter = normalMap.find(fi->WN(tt));
-							if (normalIter == normalMap.end())
+								vertexIndex.push_back(QString::number(pointIter->second));
+							if (bHasPerWedgeColor)
 							{
-								normalIndex.push_back(QString::number(indexNormal));
-								normalValue.push_back(pointToString(fi->WN(tt)));
-								normalMap[fi->WN(tt)] = indexNormal++;
-							}	
-							else
-								normalIndex.push_back(QString::number(normalIter->second));
-						}
-						if (bHasPerWedgeTexCoord)
-						{
-							std::map<x3dTexCoordType, int>::iterator texIter = texCoordMap.find(fi->WT(tt));
-							if (texIter == texCoordMap.end())
-							{
-								textureCoordIndex.push_back(QString::number(indexTexCoord));
-								textureCoordValue.push_back(texCoordToString(fi->WT(tt)));
-								texCoordMap[fi->WT(tt)] = indexTexCoord++;
+								std::map<x3dColorType, int>::iterator colorIter = colorMap.find(fi->WC(tt));
+								if (colorIter == colorMap.end())
+								{
+									colorIndex.push_back(QString::number(indexColor));
+									colorValue.push_back(colorToString(fi->WC(tt)));
+									colorMap[fi->WC(tt)] = indexColor++;
+								}
+								else
+									colorIndex.push_back(QString::number(colorIter->second));
 							}
-							else
-								textureCoordIndex.push_back(QString::number(texIter->second));
+							if (bHasPerWedgeNormal)
+							{
+								std::map<x3dPointType, int>::iterator normalIter = normalMap.find(fi->WN(tt));
+								if (normalIter == normalMap.end())
+								{
+									normalIndex.push_back(QString::number(indexNormal));
+									normalValue.push_back(pointToString(fi->WN(tt)));
+									normalMap[fi->WN(tt)] = indexNormal++;
+								}	
+								else
+									normalIndex.push_back(QString::number(normalIter->second));
+							}
+							if (bHasPerWedgeTexCoord)
+							{
+								std::map<x3dTexCoordType, int>::iterator texIter = texCoordMap.find(fi->WT(tt));
+								if (texIter == texCoordMap.end())
+								{
+									textureCoordIndex.push_back(QString::number(indexTexCoord));
+									textureCoordValue.push_back(texCoordToString(fi->WT(tt)));
+									texCoordMap[fi->WT(tt)] = indexTexCoord++;
+								}
+								else
+									textureCoordIndex.push_back(QString::number(texIter->second));
+							}
+							if (newVertex)
+							{
+								if (bHasPerVertexColor)
+									colorValue.push_back(colorToString(fi->cV(tt)->C()));
+								if (bHasPerVertexNormal)
+									normalValue.push_back(pointToString(fi->cV(tt)->cN()));
+								if (bHasPerVertexTexCoord)
+									textureCoordValue.push_back(texCoordToString(fi->cV(tt)->T()));
+							}
 						}
-						if (newVertex)
-						{
-							if (bHasPerVertexColor)
-								colorValue.push_back(colorToString(fi->cV(tt)->C()));
-							if (bHasPerVertexNormal)
-								normalValue.push_back(pointToString(fi->cV(tt)->cN()));
-							if (bHasPerVertexTexCoord)
-								textureCoordValue.push_back(texCoordToString(fi->cV(tt)->T()));
-						}
+						if (bHasPerFaceColor)
+							colorValue.push_back(colorToString(fi->C()));
+						if (bHasPerFaceNormal)
+							normalValue.push_back(pointToString(fi->N()));
+						if (cb !=NULL && nFace%1000 == 0) (*cb)(10 + 60*nFace/m.face.size(), "Saving X3D File..."); 
 					}
-					if (bHasPerFaceColor)
-						colorValue.push_back(colorToString(fi->C()));
-					if (bHasPerFaceNormal)
-						normalValue.push_back(pointToString(fi->N()));
-					if (cb !=NULL && nFace%1000 == 0) (*cb)(10 + 60*nFace/m.face.size(), "Saving X3D File..."); 
 				}
 				QString vertIndexStr, vertCoordStr;
 				getString(vertexIndex, vertIndexStr);
