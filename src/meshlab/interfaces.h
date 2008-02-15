@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.72  2008/02/15 08:22:24  cignoni
+removed unused param from virtual empty functions
+
 Revision 1.71  2008/02/12 14:20:33  cignoni
 changed the function getParameter into the more meaningful getCustomParameter
 
@@ -433,8 +436,8 @@ public:
 	  virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	  virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 //	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
-    virtual void keyReleaseEvent    (QAction *, QKeyEvent * e, MeshModel &/*m*/, GLArea *){};
-    virtual void keyPressEvent      (QAction *, QKeyEvent * e, MeshModel &/*m*/, GLArea *){};
+    virtual void keyReleaseEvent    (QAction *, QKeyEvent *, MeshModel &/*m*/, GLArea *){};
+    virtual void keyPressEvent      (QAction *, QKeyEvent *, MeshModel &/*m*/, GLArea *){};
 
 };
 
