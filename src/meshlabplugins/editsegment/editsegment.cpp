@@ -389,7 +389,7 @@ void EditSegment::Decorate(QAction * ac, MeshModel & m, GLArea * gla) {
 			} else if (mouse_button_pressed==Qt::MidButton) {
 				meshCut->Mark(*vi, U);
 				(*vi)->C()
-					= toVcgColor(Qt::white);
+					= toVcgColor(Qt::lightGray);
 			}
 
 		}

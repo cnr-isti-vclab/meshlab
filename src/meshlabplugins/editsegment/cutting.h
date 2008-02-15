@@ -142,12 +142,12 @@ namespace vcg {
 			//k = k1 * cos^2(@) + k2 * sin^2(@); @ = angle between T1 and direction P->Q projected onto the plane N
 			kpq = ((*TDCurvPtr)[*p].k1 * cos) + ((*TDCurvPtr)[*p].k2 * (1 - cos));
 
-			if (kpq < 0)
-				kpq = powf(e,fabs(kpq)) -1;
-
+			if (kpq < 0) 
+				//kpq = powf(e,fabs(kpq)) -1;
+				//kpq = powf(kpq,2);
+				kpq = powf(e,sqrt(fabs(kpq))) -1;
 			dist = (p->P() - q->P()).Norm() + (_normalWeight * (p->N() - q->N()).Norm()) + (_curvatureWeight * kpq);
 
-			assert(dist>=0.0f);
 			return dist;
 		}
 
@@ -169,10 +169,10 @@ namespace vcg {
 				assert(tempV->P() != v->P());
 				if (tempV->IMark() == U) {
 					dist = ImprovedIsophoticDist(v, tempV);
-					if (dist < min_dist) {
+					if (dist <= min_dist) {
 						min_dist = dist;
 						nearestV = tempV;
-					}	
+					}
 				}
 			} while(tempV != firstV);	
 
@@ -185,10 +185,10 @@ namespace vcg {
 					case iB: tempTriplet.m = B; break;
 					default : tempTriplet.m = (MarkType)v->IMark(); break;
 				}
-
 				Q.push(tempTriplet);
-
 				if (file) file << "Inserzione: d=" << tempTriplet.d << std::endl;
+			} else {
+				if (file) file << "Nessun Elemento Inserito" << std::endl;
 			}
 		}
 
@@ -293,6 +293,7 @@ namespace vcg {
 					//Q.pop();
 					tempTriplet = Q.pop();
 
+					//controlla se il vertice estratto è ancora valido o se è stato già marchiato in precedenza
 					if (tempTriplet.v->IMark() == U) {
 						tempTriplet.v->IMark() = tempTriplet.m;
 						--vertex_to_go; 
@@ -524,7 +525,7 @@ namespace vcg {
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
 				vi->IMark() = U;
-				vi->C() = Color4b::White;
+				vi->C() = Color4b::LightGray;
 				vi->Q() = 0.0f;
 			}
 
