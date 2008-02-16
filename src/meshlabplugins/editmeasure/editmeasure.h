@@ -1,22 +1,28 @@
 /****************************************************************************
-**
-** Copyright (C) 2005-2005 Trolltech AS. All rights reserved.
-**
-** This file is part of the example classes of the Qt Toolkit.
-**
-** Licensees holding valid Qt Commercial licenses may use this file in
-** accordance with the Qt Commercial License Agreement provided with the
-** Software.
-**
-** See http://www.trolltech.com/pricing.html or email sales@trolltech.com for
-** information about Qt Commercial License Agreements.
-**
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
+ * MeshLab                                                           o o     *
+ * A versatile mesh processing toolbox                             o     o   *
+ *                                                                _   O  _   *
+ * Copyright(C) 2008                                                \/)\/    *
+ * Visual Computing Lab                                            /\/|      *
+ * ISTI - Italian National Research Council                           |      *
+ *                                                                    \      *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the GNU General Public License as published by      *
+ * the Free Software Foundation; either version 2 of the License, or         *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+ * for more details.                                                         *
+ *                                                                           *
+ ****************************************************************************/
+/****************************************************************************
+  History
+$Log: editmeasure.h,v $
 ****************************************************************************/
 
 #ifndef EditMeasurePLUGIN_H
@@ -28,42 +34,32 @@
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <wrap/gui/rubberband.h>
 
 class EditMeasurePlugin : public QObject, public MeshEditInterface
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
-	
-  QList <QAction *> actionList;
-		
+  Q_OBJECT
+  Q_INTERFACES(MeshEditInterface)
+
 public:
-    EditMeasurePlugin();
-    virtual ~EditMeasurePlugin() {}
-
-    virtual const QString Info(QAction *);
-    virtual const PluginInfo &Info();
-
-    virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ){}
-    virtual void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * );
-    virtual void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-
-		virtual QList<QAction *> actions() const ;
-
-		Point3f PixelConvert(vcg::Point3f pointA);
-		void RenderLabel(int x, int y, QString text,GLArea * gla);
-
-    QPoint cur,qStartPoint;
-    Point3f startPoint, endPoint; // if the two points are equal no line is drawn;
-		QFont qFont;
-    bool isDragging;
-		bool haveToPick;
-
- signals:
-
-	void suspendEditToggle();
+  EditMeasurePlugin();
+  virtual ~EditMeasurePlugin() {}
+  virtual const QString Info(QAction *);
+  virtual const PluginInfo &Info();
+  virtual void StartEdit(QAction *, MeshModel &, GLArea *);
+  virtual void EndEdit(QAction *, MeshModel &, GLArea *);
+  virtual void Decorate(QAction *, MeshModel &, GLArea *);
+  virtual void mousePressEvent (QAction *, QMouseEvent *, MeshModel &, GLArea * );
+  virtual void mouseMoveEvent (QAction *, QMouseEvent *, MeshModel &, GLArea * );
+  virtual void mouseReleaseEvent (QAction *, QMouseEvent *event, MeshModel &, GLArea * );
+  virtual QList<QAction *> actions() const ;
+private:
+  QList <QAction *> actionList;
+  QFont qFont;
+  Rubberband rubberband;
+  bool was_ready;
+signals:
+  void suspendEditToggle();
 };
 
 #endif
