@@ -6,11 +6,11 @@
 
 #include <algorithm>
 
-//da eliminare!! MAL
 #ifdef NOW_TESTING
 #include <cmath>
-using namespace std;
 #endif
+
+using namespace std;
 
 bool TfKeyPCompare(TF_KEY*k1, TF_KEY*k2)
 {	return (k1->x < k2->x);	}
@@ -27,7 +27,6 @@ TfChannel::TfChannel()
 
 TfChannel::TfChannel(TF_CHANNELS type) : _type(type)
 {
-	//da eliminare!? MAL
 #ifdef NOW_TESTING
 	this->testInitChannel();
 #endif
@@ -109,71 +108,6 @@ void TfChannel::removeKey(TF_KEY *toRemoveKey)
 		}
 }
 
-#if 0
-//merges two keys together by copying opportunely y values of the keys in just one key
-//returns a pointer to the "merged key"
-TF_KEY *TfChannel::mergeKeys(float x_pos, TF_KEY *key)
-{
-	TF_KEY *result = 0;
-
-	KEY_LISTiterator it = KEYS.find(x_pos);
-
-	TF_KEY *new_key = new TF_KEY(x_pos);
-
-	//be sure that key1 is really in the list!
-	assert(it != KEYS.end());
-
-	//any other case
-
-	//setting y_lower to the minimum of y_lower of key1 and key2
-	new_key->y_lower = min( it->second->y_lower, key->y_lower );
-
-	//setting y_lower to the maximum of y_upper of key1 and key2
-	new_key->y_upper = max( it->second->y_upper, key->y_upper );
-
-	new_key->left_junction_point_code = it->second->left_junction_point_code;
-	new_key->right_junction_point_code = it->second->right_junction_point_code;
-	//new_key.junction_point_code = it->second.junction_point_code;
-
-	it->second = new_key;
-
-	//the address of new inserted in the list is returned
-	result = it->second;
-
-	return result;
-}
-
-TF_KEY* TfChannel::splitKey(float x_pos)
-{
-	TF_KEY *result = 0;
-
-	KEY_LISTiterator it = KEYS.find(x_pos);
-
-	float new_y =0.0f;
-
-	if (it!=KEYS.end())
-	{
-		result = it->second;
-		if (result->y_upper == result->y_lower)
-		{
-			if (( result->y_lower >= 0.4f) && ( result->y_lower <= 0.6f))
-			{
-				result->y_upper = 1.0f;
-			}
-			else
-			{
-				new_y = 1.0f - result->y_lower;
-				if ( new_y > result->y_upper )
-					result->y_upper = new_y;
-				else
-					result->y_lower = new_y;
-			}
-		}
-	}
-
-	return result;
-}
-#endif
 
 float TfChannel::getChannelValuef(float xVal)
 {
@@ -204,34 +138,13 @@ float TfChannel::getChannelValuef(float xVal)
 				}
 				break;
 			}
-	
-	//if ( it != KEYS.end())		return it->second->getLeftJunctionPoint();
 
-	/*
-	//finding lower border for x
-	KEY_LISTiterator low = up;
-	low --;
-
-	if (( (*low)->x < xVal ) && ( (*up)->x > xVal) )
-		if ( low != KEYS.end() && up != KEYS.end() )
-		{
-			//applying linear interpolation between two keys values
-
-			//angular coefficient for interpolating line
-			float m = (((*up)->y - (*low)->y) / ((*up)->x - (*low)->x));
-
-			//returning f(x) value for x in the interpolating line
-			result = (m * (x_position - (*low)->x)) + low->second->getRightJunctionPoint();
-		}
-*/
 	return result;
 }
 
 
 UINT8 TfChannel::getChannelValueb(float xVal)
-{
-	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(xVal), 255.0f );
-}
+{	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(xVal), 255.0f );	}
 
 //returns true if the key has x=0.0
 bool TfChannel::isHead(TF_KEY *key)
@@ -250,61 +163,7 @@ bool TfChannel::isTail(TF_KEY *key)
 //this method is called by TFHandle and is used to update the TfHandle position from graphics to logical level.
 //When the key value is updated, the keys list must be checked to restore the sorting and the right alternation of LEFT\RIGHT JUNCTION SIDE keys
 void TfChannel::updateKeysOrder()
-{
-	sort(KEYS.begin(), KEYS.end(), TfKeyPCompare);
-/*
-		assert(newX>=0.0f);
-		assert(newY>=0.0f);
-	
-		int result = idx;
-	
-		//out of boundaries
-		if (( idx<0 ) || (idx>=(int)KEYS.size()))
-			return -1;
-	
-		//updating key values
-		KEYS[idx]->x = newX;
-		KEYS[idx]->y = newY;
-	
-		sort(KEYS.begin(), KEYS.end(), TfKeyPCompare);
-	
-		//now checking to restore the sorting and the alternation of LEFT\RIGHT JUNCTION SIDE keys
-	
-		int prev = idx-1;
-		int next = idx+1;
-		TF_KEY *tmp = 0;
-	
-		if ( prev >= 0)
-		{
-			//swapping if prev is >= then the new value
-	/ *
-				 		if ( ( KEYS[prev]->x > newX ) || 
-				 			 / *(* /(KEYS[prev]->x == newX) / *&& (KEYS[prev]->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE) && (KEYS[idx]->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE))* / )* /
-				 
-			if ( KEYS[prev]->x > newX )
-			{
-				tmp = KEYS[prev];
-				KEYS[prev] = KEYS[idx];
-				KEYS[idx] = tmp;
-				return prev;
-			}
-		}
-	
-		if ( next < (int)KEYS.size() )
-		{
-			//swapping if prev is >= then the new value
-			/ *
-				if ( ( KEYS[next]->x < newX ) || 
-							/ *(* /(KEYS[next]->x == newX) / *&& (KEYS[next]->junctionSide == TF_KEY::RIGHT_JUNCTION_SIDE) && (KEYS[idx]->junctionSide == TF_KEY::LEFT_JUNCTION_SIDE))* / )* /
-			if ( KEYS[next]->x < newX )
-			{
-				tmp = KEYS[next];
-				KEYS[next] = KEYS[idx];
-				KEYS[idx] = tmp;
-				return next;
-			}
-		}*/
-}
+{	sort(KEYS.begin(), KEYS.end(), TfKeyPCompare);	}
 
 
 TF_KEY* TfChannel::operator [](float xVal)
@@ -533,12 +392,9 @@ QColor* TransferFunction::buildColorBand()
 	for (int i=0; i<COLOR_BAND_SIZE; i++)
 	{
 		relative_pos = absolute2RelativeValf((float)i, COLOR_BAND_SIZE);
-		/*_color_band[i].SetRGB( _channels[RED_CHANNEL].getChannelValueb( relative_pos ),
-		_channels[GREEN_CHANNEL].getChannelValueb( relative_pos ),
-		_channels[BLUE_CHANNEL].getChannelValueb( relative_pos ) );*/
-		_color_band[i].setRgbF(_channels[RED_CHANNEL].getChannelValuef( relative_pos),
-			_channels[GREEN_CHANNEL].getChannelValuef( relative_pos ),
-			_channels[BLUE_CHANNEL].getChannelValuef( relative_pos ) );
+		_color_band[i].setRgbF( _channels[RED_CHANNEL].getChannelValuef( relative_pos),
+								_channels[GREEN_CHANNEL].getChannelValuef( relative_pos ),
+								_channels[BLUE_CHANNEL].getChannelValuef( relative_pos ) );
 	}
 	return _color_band;
 }
@@ -551,8 +407,7 @@ Color4b TransferFunction::getColorByQuality (float percentageQuality)
 		255 );
 }
 
-
-QString TransferFunction::saveColorBand( QString fn )
+QString TransferFunction::saveColorBand( QString fn, EQUALIZER_INFO& info  )
 {
 	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
 
@@ -576,6 +431,9 @@ QString TransferFunction::saveColorBand( QString fn )
 		}
 		outStream << endl;
 	}
+
+	outStream << CSV_FILE_COMMENT << "THE FOLLOWING 4 VALUES REPRESENT EQUALIZER SETTINGS - the first and the third values represent respectively the minimum and the maximum quality values used in histogram, the second one represent the position (in percentage) of the middle quality, and the last one represent the level of brightness" << endl;
+	outStream << info.minQualityVal << CSV_FILE_SEPARATOR << info.midQualityPercentage << CSV_FILE_SEPARATOR << info.maxQualityVal << CSV_FILE_SEPARATOR << info.brightness << CSV_FILE_SEPARATOR << endl;
 
 	outFile.close();
 
@@ -602,22 +460,3 @@ void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
 		_channels_order[0] = tmp;
 	} while( _channels_order[NUMBER_OF_CHANNELS-1] != ch_code_int );
 }
-
-
-TransferFunction* TransferFunction::GreyScaleTF()
-{	return new TransferFunction(GREEN_SCALE_TF);	}
-
-TransferFunction* TransferFunction::RGBTF()
-{	return new TransferFunction(RGB_TF);	}
-
-TransferFunction* TransferFunction::RedScaleTF()
-{	return new TransferFunction(RED_SCALE_TF);	}
-
-TransferFunction* TransferFunction::GreenScaleTF()
-{	return new TransferFunction(GREEN_SCALE_TF);	}
-
-TransferFunction* TransferFunction::BlueScaleTF()
-{	return new TransferFunction(BLUE_SCALE_TF);	}
-
-TransferFunction* TransferFunction::FlatTF()
-{	return new TransferFunction(FLAT_TF);	}

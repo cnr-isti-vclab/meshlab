@@ -212,19 +212,12 @@ public:
 	TfChannel &getChannel( int channel_code ) {return _channels[channel_code];}
 	TfChannel& operator [](int i)	{ return _channels[_channels_order[i]];	}
 	int size();
-	QColor* buildColorBand();
-	QString saveColorBand( QString fileName );
+	QColor* buildColorBand(void);
+	QString saveColorBand( QString fileName, EQUALIZER_INFO& equalizerInfo );
 	Color4b getColorByQuality (float percentageQuality);
 	// QColor* getColorBand(){return _color_band;};
 	void moveChannelAhead( TF_CHANNELS channel_code );
 	inline int	getFirstPlaneChanel(void) { return _channels_order[NUMBER_OF_CHANNELS-1]; }
-
-	static TransferFunction *GreyScaleTF();
-	static TransferFunction *RGBTF();
-	static TransferFunction *RedScaleTF();
-	static TransferFunction *GreenScaleTF();
-	static TransferFunction *BlueScaleTF();
-	static TransferFunction *FlatTF();
 };
 
 bool TfKeyPCompare(TF_KEY*k1, TF_KEY*k2);

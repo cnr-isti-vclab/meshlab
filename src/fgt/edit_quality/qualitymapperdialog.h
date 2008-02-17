@@ -118,6 +118,7 @@ private:
 	TFDoubleClickCatcher *_tfCatcher;
 	TF_HANDLES_LIST	_transferFunctionHandles[NUMBER_OF_CHANNELS];
 	TFHandle		*_currentTfHandle;
+	QString			_currentTfHandleQualityValue;
 	GRAPHICS_ITEMS_LIST _transferFunctionLines;
 	GRAPHICS_ITEMS_LIST _transferFunctionBg;
 	bool			_isTransferFunctionInitialized;
@@ -144,13 +145,13 @@ private:
 	TFHandle			*addTfHandle(int channelCode, QPointF handlePos, TF_KEY *key, int zOrder );
 	TFHandle			*addTfHandle(TFHandle *handle);
 	TFHandle			*removeTfHandle(TFHandle *handle);
+	void				updateXQualityLabel(float xRelativeTFPosition);
 
 signals:
 	void suspendEditToggle();
 	void closingDialog();
 
 private slots:
-	void on_removePointButton_clicked();
 	void on_ySpinBox_valueChanged(double);
 	void on_xSpinBox_valueChanged(double);
 	
@@ -165,8 +166,6 @@ private slots:
 	void on_presetComboBox_textChanged(const QString &);
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
-
-	void on_addPointButton_clicked();
 
 	void on_Handle_released();
 

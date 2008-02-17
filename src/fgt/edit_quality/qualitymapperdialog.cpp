@@ -79,6 +79,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *
 	suspendEditToggle();
 
 	//gla->suspendEditToggle();
+	_equalizer_histogram = 0;
 }
 
 //class destructor
@@ -289,7 +290,12 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 // (This method is called only once)
 void QualityMapperDialog::initEqualizerHistogram()
 {
-	_equalizer_histogram = 0;
+	if (_equalizer_histogram) //added by MAL 17\02\08
+	{
+//		_equalizer_histogram->disconnect();	//added by MAL 17\02\08
+		delete _equalizer_histogram;		//added by MAL 17\02\08
+		_equalizer_histogram = 0;
+	}
 	_leftHandleWasInsideHistogram = true;
 	_rightHandleWasInsideHistogram = true;
 
@@ -313,7 +319,7 @@ void QualityMapperDialog::initEqualizerHistogram()
 	}
 
 
-	// SETTING SPNBOX VALUES
+	// SETTING SPNIBOX VALUES
 	// (Se venissero inizializzati prima di impostare setHistogramInfo sulle handles darebbero errore nello SLOT setX delle handles.)
 	double singleStep = (_histogram_info->maxX - _histogram_info->minX) / _histogram_info->chartWidth;
 	int decimals = 0;
@@ -722,17 +728,19 @@ void QualityMapperDialog::drawTransferFunctionBG ()
 }
 
 
-void QualityMapperDialog::on_addPointButton_clicked()
-{
-
-}
 
 void QualityMapperDialog::on_savePresetButton_clicked()
 {
 	//setting default save name
 	QString tfName = ui.presetComboBox->currentText();
-	//user chooses the file to load
-	QString tfPath = _transferFunction->saveColorBand( tfName );
+	//user chooses the file to save and saves it onto disk
+	EQUALIZER_INFO eqInfo;
+	eqInfo.minQualityVal = ui.minSpinBox->value();
+	eqInfo.midQualityPercentage = _equalizerMidHandlePercentilePosition;
+	eqInfo.maxQualityVal = ui.maxSpinBox->value();
+	eqInfo.brightness = ui.brightnessSlider->value();
+	
+	QString tfPath = _transferFunction->saveColorBand( tfName, eqInfo );
 
 	//user didn't select anything. Nothing to do.
 	if (tfPath.isNull())
@@ -792,6 +800,9 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 
 	//setting combo box to TF just built
 	ui.presetComboBox->setCurrentIndex( 0 );
+
+	//setting equalizer values
+	//METTERE QUì IL SETTAGGIO DELL'EQUALIZZATORE IN BASE AI VALORI LETTI DAL CSV FILE DI INGRESSO
 
 	//drawing new TF
 	this->drawTransferFunction();
@@ -940,8 +951,9 @@ void QualityMapperDialog::on_TfHandle_moved(TFHandle *sender)
 
 	//all done. Unlocking sender signals
 	sender->blockSignals( false );
-}
 
+	this->updateXQualityLabel(sender->getRelativeX());
+}
 
 void QualityMapperDialog::manageBorderTfHandles(TFHandle *handle)
 {
@@ -997,6 +1009,8 @@ void QualityMapperDialog::on_TfHandle_clicked(TFHandle *sender)
 	//setting position spinboxes to Handle position
 	ui.xSpinBox->setValue(_currentTfHandle->getRelativeX());
 	ui.ySpinBox->setValue(_currentTfHandle->getRelativeY());
+
+	this->updateXQualityLabel(_currentTfHandle->getRelativeX());
 }
 
 //callback to manage double-click on a TfHandle object
@@ -1110,11 +1124,6 @@ void QualityMapperDialog::updateTfHandlesOrder(int channelCode)
 	qSort(_transferFunctionHandles[channelCode].begin(), _transferFunctionHandles[channelCode].end(), TfHandleCompare);
 }
 
-void QualityMapperDialog::on_removePointButton_clicked()
-{
-	if ( _currentTfHandle != 0)
-		_currentTfHandle = this->removeTfHandle(_currentTfHandle);
-}
 
 void QualityMapperDialog::on_resetButton_clicked()
 {
@@ -1240,4 +1249,14 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 	this->updateTfHandlesOrder(newHandle->getChannel());
 	//refreshing TF scene
 	this->drawTransferFunction();
+
+	this->updateXQualityLabel(_currentTfHandle->getRelativeX());
 }
+
+void QualityMapperDialog::updateXQualityLabel(float xPos)
+{
+	float exp = log10(0.5f) / log10((float)_equalizerMidHandlePercentilePosition);
+	_currentTfHandleQualityValue.setNum(relative2QualityValf(xPos, ui.minSpinBox->value(), ui.maxSpinBox->value(), exp));
+	ui.xQualityLabel->setText(_currentTfHandleQualityValue);
+}
+

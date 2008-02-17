@@ -31,4 +31,12 @@ typedef unsigned int		UINT32;
 
 #define DEFAULT_HANDLE_SIZE	6
 
+struct EQUALIZER_INFO
+{
+	float minQualityVal;
+	float midQualityPercentage;
+	float maxQualityVal;
+	int brightness;
+};
+
 #endif
