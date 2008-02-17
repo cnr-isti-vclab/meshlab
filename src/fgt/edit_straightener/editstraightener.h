@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2008/02/17 20:57:33  benedetti
+updated following new specs (still got to clean up)
+
 Revision 1.1  2008/02/16 14:29:35  benedetti
 first version
 
@@ -48,6 +51,11 @@ class DrawAxes;
 class DrawPhantom;
 class UndoSystem;
 
+/*!
+  @brief The straightener editing plugin.
+  
+  
+ */
 class EditStraightener : public QObject, public MeshEditInterface
 {
   Q_OBJECT
@@ -72,47 +80,48 @@ private:
   //types:
   typedef enum { ES_Normal = 0,
                  ES_DrawOnMesh = 1,
-                 ES_FreehandMeshDragging = 2
+                 ES_FreehandAxisDragging = 2,
+                 ES_FreehandMeshDragging = 3
                } EditStraightenerMode;
   // data:
   QList <QAction *> actionList;
-  CoordinateFrame *base;
-  ActiveCoordinateFrame *candidate;
   EditStraightenerDialog *dialog;
   QDockWidget *dialog_dock;
   GLArea* gla;
   MeshModel* mm;
   float refsize;
   EditStraightenerMode currentmode;
-  DrawAxes *drawaxes;
-  DrawPhantom *drawphantom;
+  MovableCoordinateFrame *origin;
+  CoordinateFrame *old_origin;
+  ActiveCoordinateFrame *dragged_origin;
+  DrawPhantom *dragged_mesh;
+  DrawAxes *drawned_axes;  
   UndoSystem *undosystem;
   // friends:
   friend class UndoSystem;
   
 public slots:
+  void on_begin_action();
   void on_apply();
   void on_freeze();
   void on_undo();
-  void on_reset_axes();
-  void on_reset_origin();  
-  void on_flip(Point3f);
+  void on_rot(float,Point3f);
   void on_align_with_view();
   void on_move_axis_to_bbox(int,float);
   void on_center_on_trackball();
-  void on_draw_on_mesh(bool,bool);
-  void on_get_xy_plane_from_selection();
-  void on_freehand_mesh_dragging(bool);
+  void on_draw_on_mesh(bool,char,char);
+  void on_freehand_axis_dragging(bool);
   void on_set_snap(float);
+  void on_freehand_mesh_dragging(bool);
+  void on_get_plane_from_selection(char,char);
   void on_update_show(bool,bool,bool,bool,bool,bool,bool,bool);
-  void on_begin_action();
-
 };
 
 class DrawAxes
 {
 public:
-  DrawAxes(bool);
+  char firstchar,secondchar;
+  DrawAxes(char ch1,char ch2=' ');
   virtual ~DrawAxes() {}
   void Render(QGLWidget *);
   void mouseMove(QPoint);
@@ -129,6 +138,7 @@ private:
   DrawAxesPhase currentphase;
   bool twoaxes;
   Rubberband first,second;
+  QString label1,label2;
 };
 
 class DrawPhantom
@@ -156,13 +166,13 @@ public:
   void BeginAction();
   void Undo();
   bool CanUndo();
-  void SaveCandidate();
+//  void SaveCandidate();
   void SaveTR();
   void SaveFreeze();
 private:
   // types:
   typedef enum { US_MARK = 0,
-  	             US_CANDIDATE = 1,
+//  	             US_CANDIDATE = 1,
 	             US_TR = 2,
 	             US_FREEZE = 3
 	           } UndoType;  

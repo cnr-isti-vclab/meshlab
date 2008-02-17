@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2008/02/17 20:57:33  benedetti
+updated following new specs (still got to clean up)
+
 Revision 1.1  2008/02/16 14:29:35  benedetti
 first version
 
@@ -47,10 +50,10 @@ first version
 using namespace vcg;
 
 EditStraightener::EditStraightener()
-:actionList(),base(NULL),candidate(NULL),
-dialog(NULL),dialog_dock(NULL),
+:actionList(),dialog(NULL),dialog_dock(NULL),
 gla(NULL),mm(NULL),refsize(0),currentmode(ES_Normal),
-drawaxes(NULL),drawphantom(NULL),undosystem(NULL)
+origin(NULL),old_origin(NULL),dragged_origin(NULL),
+dragged_mesh(NULL),drawned_axes(NULL),undosystem(NULL)
 {
   actionList << new QAction(QIcon(":/images/icon_straightener.png"),"Straighten up a mesh", this);
   foreach(QAction *editAction, actionList)
@@ -90,21 +93,13 @@ void EditStraightener::StartEdit(QAction *a, MeshModel &m, GLArea *g )
 
   refsize=mm->cm.bbox.Diag()/2.0;
 
-  assert(base==NULL); 
-  base=new CoordinateFrame(refsize);
-  base->basecolor=Color4b(128,128,0,255);
-  base->xcolor=Color4b(128,0,0,255);
-  base->ycolor=Color4b(0,128,0,255);
-  base->zcolor=Color4b(0,0,128,255);
-  base->linewidth=1;
-
-  assert(candidate==NULL);
-  candidate=new ActiveCoordinateFrame(refsize);
-  candidate->basecolor=Color4b(255,255,0,255);
-  candidate->xcolor=Color4b(255,0,0,255);
-  candidate->ycolor=Color4b(0,255,0,255);
-  candidate->zcolor=Color4b(0,0,255,255);  
-  candidate->linewidth=3;
+  assert(origin==NULL); 
+  origin=new MovableCoordinateFrame(refsize);
+  origin->basecolor=Color4b(170,170,0,255);
+  origin->xcolor=Color4b(170,0,0,255);
+  origin->ycolor=Color4b(0,170,0,255);
+  origin->zcolor=Color4b(0,0,170,255);
+  origin->linewidth=1.5;
 
   currentmode=ES_Normal;
 
@@ -120,36 +115,34 @@ void EditStraightener::StartEdit(QAction *a, MeshModel &m, GLArea *g )
   int h = dialog->height();  
   dialog_dock->setGeometry(x,y,w,h);
   dialog_dock->setFloating(true);
+  connect(dialog, SIGNAL( begin_action() ),
+          this, SLOT( on_begin_action() ) );
   connect(dialog, SIGNAL( apply() ),
           this, SLOT( on_apply() ) );
   connect(dialog, SIGNAL( freeze() ),
           this, SLOT( on_freeze() ) );
   connect(dialog, SIGNAL( undo() ),
           this, SLOT( on_undo() ) );
-  connect(dialog, SIGNAL( reset_axes() ),
-          this, SLOT( on_reset_axes() ) );
-  connect(dialog, SIGNAL( reset_origin() ),
-          this, SLOT( on_reset_origin() ) );
-  connect(dialog, SIGNAL( flip(Point3f) ),
-          this, SLOT( on_flip(Point3f) ) );
+  connect(dialog, SIGNAL( rot(float,Point3f) ),
+          this, SLOT( on_rot(float,Point3f) ) );
   connect(dialog, SIGNAL( align_with_view() ),
           this, SLOT( on_align_with_view() ) );
   connect(dialog, SIGNAL( move_axis_to_bbox(int,float) ),
           this, SLOT( on_move_axis_to_bbox(int,float) ) );
   connect(dialog, SIGNAL( center_on_trackball() ),
           this, SLOT( on_center_on_trackball() ) );
-  connect(dialog, SIGNAL( draw_on_mesh(bool,bool) ),
-          this, SLOT( on_draw_on_mesh(bool,bool) ) );
-  connect(dialog, SIGNAL( get_xy_plane_from_selection() ),
-          this, SLOT( on_get_xy_plane_from_selection() ) );
-  connect(dialog, SIGNAL( freehand_mesh_dragging(bool) ),
-          this, SLOT( on_freehand_mesh_dragging(bool) ) );
+  connect(dialog, SIGNAL( draw_on_mesh(bool,char,char) ),
+          this, SLOT( on_draw_on_mesh(bool,char,char) ) );
+  connect(dialog, SIGNAL( freehand_axis_dragging(bool) ),
+          this, SLOT( on_freehand_axis_dragging(bool) ) );
   connect(dialog, SIGNAL( set_snap(float) ),
           this, SLOT( on_set_snap(float) ) );
+  connect(dialog, SIGNAL( freehand_mesh_dragging(bool) ),
+          this, SLOT( on_freehand_mesh_dragging(bool) ) );
+  connect(dialog, SIGNAL( get_plane_from_selection(char,char) ),
+          this, SLOT( on_get_plane_from_selection(char,char) ) );
   connect(dialog, SIGNAL( update_show(bool,bool,bool,bool,bool,bool,bool,bool) ),
           this, SLOT( on_update_show(bool,bool,bool,bool,bool,bool,bool,bool) ) );
-   connect(dialog, SIGNAL( begin_action() ),
-          this, SLOT( on_begin_action() ) );
           
   dialog->shoutShow();
 
@@ -160,45 +153,21 @@ void EditStraightener::StartEdit(QAction *a, MeshModel &m, GLArea *g )
   undosystem=new UndoSystem(this);
 
   gla->update();
-  assert((base!=NULL) && (candidate!=NULL));
+  assert(origin!=NULL);
 }
 
 void EditStraightener::EndEdit(QAction *, MeshModel &, GLArea *)
 {
-  if (dialog!=NULL) { 
-    delete dialog; 
-    delete dialog_dock; 
-    dialog=NULL;
-    dialog_dock=NULL;
-  }
+  if (dialog!=NULL) { delete dialog; dialog=NULL; }
+  if (dialog_dock!=NULL) { delete dialog_dock; dialog_dock=NULL; }
+  if (origin!=NULL) { delete origin; origin=NULL; }
+  if (old_origin!=NULL) { delete old_origin; old_origin=NULL; }
+  if (dragged_origin!=NULL) { delete dragged_origin; dragged_origin=NULL; }
+  if (dragged_mesh!=NULL) { delete dragged_mesh; dragged_mesh=NULL; }
+  if (drawned_axes!=NULL) { delete drawned_axes; drawned_axes=NULL; }
+  if (undosystem!=NULL) { delete undosystem; undosystem=NULL; }
   
-  if(base!=NULL) {
-     delete base;
-     base=NULL;
-  }
-  
-  if(candidate!=NULL) {
-     delete candidate;
-     candidate=NULL;
-  }
-  
-  if(drawaxes!=NULL) {
-     delete drawaxes;
-     drawaxes=NULL;
-  }
-  
-  if(drawphantom!=NULL) {
-     delete drawphantom;
-     drawphantom=NULL;
-  }
-
-  if(undosystem!=NULL) {
-     delete undosystem;
-     undosystem=NULL;
-  }
-  
-  if(gla!=NULL)
-    gla->update();
+  if(gla!=NULL) gla->update();
   gla=NULL;
   mm=NULL;
 }
@@ -207,24 +176,28 @@ void EditStraightener::Decorate(QAction *, MeshModel &, GLArea *)
 {
   dialog->updateSfn(mm->cm.sfn);
 
-  base->Render(gla);
+  if (currentmode == ES_FreehandAxisDragging){
+    old_origin->Render(gla);
+    dragged_origin->Render(gla);
+  } else {
+    origin->Render(gla);
+  }
   
-  if(drawphantom!=NULL)
-    drawphantom->Render();
-  else
-    candidate->Render(gla);
+  if(currentmode == ES_FreehandMeshDragging)
+    dragged_mesh->Render();
 
-  if(drawaxes!=NULL){
-    drawaxes->Render(gla);
-    if (drawaxes->IsReady()){
+  if( (currentmode == ES_DrawOnMesh) && (drawned_axes!=NULL) ){
+    drawned_axes->Render(gla);
+    if (drawned_axes->IsReady()){
       Point3f a1,a2,b1,b2;  
-      drawaxes->GetAxes(a1,a2,b1,b2);
-      undosystem->SaveCandidate();
-      candidate->AlignWith(a2-a1,b2-b1); 
-      delete drawaxes;
-      drawaxes=NULL;
+      drawned_axes->GetAxes(a1,a2,b1,b2);
+      origin->AlignWith(a2-a1,b2-b1,drawned_axes->firstchar,drawned_axes->secondchar); 
+      delete drawned_axes;
+      drawned_axes=NULL;
       currentmode=ES_Normal;
       dialog->endSpecialMode();
+      on_apply();
+      gla->trackball.Reset();
       gla->update();
     }
   }
@@ -234,14 +207,11 @@ void EditStraightener::Decorate(QAction *, MeshModel &, GLArea *)
 void EditStraightener::mousePressEvent(QAction *, QMouseEvent *e, MeshModel &, GLArea * )
 {
   switch (currentmode) {
-    case ES_Normal:
-      undosystem->BeginAction();
-      undosystem->SaveCandidate();
-      candidate->MouseDown(e->pos(), e->x(), gla->height() - e->y(), QT2VCG(e->button(), e->modifiers()));
+    case ES_FreehandAxisDragging:
+      dragged_origin->MouseDown(e->pos(), e->x(), gla->height() - e->y(), QT2VCG(e->button(), e->modifiers()));
       break;
     case ES_FreehandMeshDragging:
-      assert(drawphantom!=NULL);
-      drawphantom->MouseDown(e->x(), gla->height() - e->y(), QT2VCG(e->button(), e->modifiers()));
+      dragged_mesh->MouseDown(e->x(), gla->height() - e->y(), QT2VCG(e->button(), e->modifiers()));
       break;
     default:
       break;
@@ -252,16 +222,14 @@ void EditStraightener::mousePressEvent(QAction *, QMouseEvent *e, MeshModel &, G
 void EditStraightener::mouseMoveEvent(QAction *, QMouseEvent *e, MeshModel &, GLArea * )
 {
   switch (currentmode) {
-    case ES_Normal:
-      candidate->MouseMove(e->pos(), e->x (),gla->height () - e->y ());
+    case ES_FreehandAxisDragging:
+      dragged_origin->MouseMove(e->pos(), e->x (),gla->height () - e->y ());
       break;
     case ES_DrawOnMesh:
-      assert(drawaxes!=NULL);
-      drawaxes->mouseMove(e->pos());
+      drawned_axes->mouseMove(e->pos());
       break;
     case ES_FreehandMeshDragging:
-      assert(drawphantom!=NULL);
-      drawphantom->MouseMove(e->x (),gla->height () - e->y ());
+      dragged_mesh->MouseMove(e->x (),gla->height () - e->y ());
       break;
     default:
       break;
@@ -272,16 +240,14 @@ void EditStraightener::mouseMoveEvent(QAction *, QMouseEvent *e, MeshModel &, GL
 void EditStraightener::mouseReleaseEvent(QAction *,QMouseEvent *e, MeshModel &, GLArea *)
 {
   switch (currentmode) {
-    case ES_Normal:
-      candidate->MouseUp(e->x (),gla->height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
+    case ES_FreehandAxisDragging:
+      dragged_origin->MouseUp(e->x (),gla->height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
       break;
     case ES_DrawOnMesh:
-      assert(drawaxes!=NULL);
-      drawaxes->mouseRelease(e->pos());
+      drawned_axes->mouseRelease(e->pos());
       break;
     case ES_FreehandMeshDragging:
-      assert(drawphantom!=NULL);
-      drawphantom->MouseUp(e->x (),gla->height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
+      dragged_mesh->MouseUp(e->x (),gla->height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
       break;
     default:
       break;
@@ -303,12 +269,11 @@ void EditStraightener::keyReleaseEvent (QAction *, QKeyEvent * e, MeshModel &, G
     return;
   }
   switch (currentmode) {
-    case ES_Normal:
-      candidate->ButtonUp(button);
+    case ES_FreehandAxisDragging:
+      dragged_origin->ButtonUp(button);
       break;
     case ES_FreehandMeshDragging:
-      assert(drawphantom!=NULL);
-      drawphantom->ButtonUp(button);
+      dragged_mesh->ButtonUp(button);
     default:
       break;
   }
@@ -330,12 +295,11 @@ void EditStraightener::keyPressEvent (QAction *, QKeyEvent * e, MeshModel &, GLA
     return;
   }
   switch (currentmode) {
-    case ES_Normal:
-      candidate->ButtonDown(button);
+    case ES_FreehandAxisDragging:
+      dragged_origin->ButtonDown(button);
       break;
     case ES_FreehandMeshDragging:
-      assert(drawphantom!=NULL);
-      drawphantom->ButtonDown(button);
+      dragged_mesh->ButtonDown(button);
     default:
       break;
   }
@@ -346,9 +310,8 @@ void EditStraightener::keyPressEvent (QAction *, QKeyEvent * e, MeshModel &, GLA
 void EditStraightener::on_apply()
 {
   Matrix44f tr; 
-  candidate->GetTransform(tr);
-  undosystem->SaveCandidate();
-  candidate->Reset(true,true);
+  origin->GetTransform(tr);
+  origin->Reset(true,true);
   undosystem->SaveTR();
   mm->cm.Tr = Inverse(tr) * mm->cm.Tr ;
   gla->update();
@@ -374,42 +337,26 @@ void EditStraightener::on_undo()
   gla->update();
 }
 
-void EditStraightener::on_reset_axes()
-{
-  undosystem->SaveCandidate();
-  candidate->Reset(false,true);
-  gla->update();
-}
 
-void EditStraightener::on_reset_origin()
+void EditStraightener::on_rot(float angle_deg,Point3f axis)
 {
-  undosystem->SaveCandidate();
-  candidate->Reset(true,false);
-  gla->update();
-}
-
-
-void EditStraightener::on_flip(Point3f axis)
-{
-  undosystem->SaveCandidate();
-  candidate->Flip(axis);
+  origin->Rot(angle_deg,axis);
   gla->update();
 }
 
 void EditStraightener::on_align_with_view()
 {
-  undosystem->SaveCandidate();
-  candidate->SetRotation(Inverse(gla->trackball.track.rot));  
+  origin->SetRotation(Inverse(gla->trackball.track.rot));  
+  gla->trackball.Reset();
   gla->update();
 }
 
 void EditStraightener::on_move_axis_to_bbox(int axis, float value)
 {
   Box3f bbox = mm->cm.trBB();
-  Point3f p = candidate->GetPosition();
+  Point3f p = origin->GetPosition();
   p[axis]=bbox.min[axis] + (bbox.max[axis]-bbox.min[axis]) * value;
-  undosystem->SaveCandidate();
-  candidate->SetPosition(p);
+  origin->SetPosition(p);
   gla->update();
 }
 
@@ -418,27 +365,86 @@ void EditStraightener::on_center_on_trackball()
   Box3f bbox;
   foreach(MeshModel * m, gla->meshDoc.meshList) 
     bbox.Add(m->cm.trBB());
-  undosystem->SaveCandidate();
-  candidate->SetPosition(bbox.Center()-(gla->trackball.track.tra) * (0.5*bbox.Diag()));
+  origin->SetPosition(bbox.Center()-(gla->trackball.track.tra) * (0.5*bbox.Diag()));
   gla->update();
 }
 
-void EditStraightener::on_draw_on_mesh(bool twoaxes,bool begin)
+void EditStraightener::on_draw_on_mesh(bool begin,char c1,char c2)
 {
   if(begin){
     assert(currentmode==ES_Normal);
-  	drawaxes = new DrawAxes(twoaxes);
+    drawned_axes = new DrawAxes(c1,c2);
     currentmode=ES_DrawOnMesh;
   } else {
     assert(currentmode==ES_DrawOnMesh);
-    delete drawaxes;
-    drawaxes=NULL;
+    delete drawned_axes;
+    drawned_axes=NULL;
     currentmode=ES_Normal;
   }
   gla->update();
 }
 
-void EditStraightener::on_get_xy_plane_from_selection()
+void EditStraightener::on_freehand_axis_dragging(bool begin)
+{
+  if(begin){
+    assert(currentmode==ES_Normal);
+    assert(old_origin==NULL); 
+    assert(dragged_origin==NULL);
+    old_origin=new CoordinateFrame(refsize);
+    old_origin->basecolor=Color4b(128,128,0,255);
+    old_origin->xcolor=Color4b(128,0,0,255);
+    old_origin->ycolor=Color4b(0,128,0,255);
+    old_origin->zcolor=Color4b(0,0,128,255);
+    old_origin->linewidth=1;
+    dragged_origin=new ActiveCoordinateFrame(refsize);
+    dragged_origin->basecolor=Color4b(255,255,0,255);
+    dragged_origin->xcolor=Color4b(255,0,0,255);
+    dragged_origin->ycolor=Color4b(0,255,0,255);
+    dragged_origin->zcolor=Color4b(0,0,255,255);  
+    dragged_origin->linewidth=3;
+    dragged_origin->SetSnap(dialog->getSnap());
+    dialog->shoutShow();
+    currentmode=ES_FreehandAxisDragging;
+  } else {
+    assert(currentmode==ES_FreehandAxisDragging);
+    origin->SetPosition(dragged_origin->GetPosition());
+    origin->SetRotation(dragged_origin->GetRotation());
+    delete (old_origin); old_origin=NULL;
+    delete (dragged_origin); dragged_origin=NULL;
+    currentmode=ES_Normal;
+    on_apply(); 
+  }
+  gla->update();
+}
+
+void EditStraightener::on_set_snap(float rot_snap_deg)
+{
+  if(dragged_origin!=NULL)
+    dragged_origin->SetSnap(rot_snap_deg);
+  gla->update();
+}
+
+void EditStraightener::on_freehand_mesh_dragging(bool begin)
+{
+  if(begin){
+    assert(currentmode==ES_Normal);
+  	dragged_mesh = new DrawPhantom(mm,refsize);
+    currentmode=ES_FreehandMeshDragging;
+  } else {
+    assert(currentmode==ES_FreehandMeshDragging);
+    assert(dragged_mesh!=NULL);
+    Matrix44f tr;
+    tr=dragged_mesh->manipulator->track.Matrix(); 
+    undosystem->SaveTR();
+    mm->cm.Tr = mm->cm.Tr * tr ;    
+    delete dragged_mesh;
+    dragged_mesh=NULL;
+    currentmode=ES_Normal;
+  }
+  gla->update();
+}
+
+void EditStraightener::on_get_plane_from_selection(char normal,char preserve)
 {
   assert(mm->cm.sfn > 0);
  
@@ -450,7 +456,7 @@ void EditStraightener::on_get_xy_plane_from_selection()
   CMeshO::VertexIterator vi;
   for(vi=mm->cm.vert.begin();vi!=mm->cm.vert.end();++vi)
     if(!(*vi).IsD() && (*vi).IsS() ){
-  	  Point3f p=(*vi).P();
+  	  Point3f p=mm->cm.Tr * (*vi).P();
       bbox.Add(p);
       selected_pts.push_back(p);
     }  
@@ -458,51 +464,27 @@ void EditStraightener::on_get_xy_plane_from_selection()
   Plane3f plane;
   PlaneFittingPoints(selected_pts,plane); //calcolo il piano di fitting
 
-  undosystem->SaveCandidate();
-  candidate->SetPosition(plane.Projection(bbox.Center()));
-  candidate->AlignWith(plane.Direction(),Point3f(0,0,0));   
-  gla->update();
-}
-
-void EditStraightener::on_freehand_mesh_dragging(bool begin)
-{
-  if(begin){
-    assert(currentmode==ES_Normal);
-    undosystem->SaveCandidate();
-    candidate->Reset(true,true);
-  	drawphantom = new DrawPhantom(mm,refsize);
-    currentmode=ES_FreehandMeshDragging;
-  } else {
-    assert(currentmode==ES_FreehandMeshDragging);
-    assert(drawphantom!=NULL);
-    Matrix44f tr;
-    tr=drawphantom->manipulator->track.Matrix(); 
-
-    undosystem->SaveTR();
-    mm->cm.Tr = mm->cm.Tr * tr ;    
-    delete drawphantom;
-    drawphantom=NULL;
-    currentmode=ES_Normal;
-  }
-  gla->update();
-}
-
-void EditStraightener::on_set_snap(float rot_snap_deg)
-{
-  candidate->SetSnap(rot_snap_deg);
+  origin->SetPosition(plane.Projection(bbox.Center()));
+  origin->AlignWith(plane.Direction(),Point3f(0,0,0),normal,preserve);   //TODO:sistemare!!
+  
   gla->update();
 }
 
 void EditStraightener::on_update_show(bool ba, bool bl, bool bv, bool ca, bool cl, bool cv, bool m, bool r)
 {
-  base->drawaxis=ba;
-  base->drawlabels=bl;
-  base->drawvalues=bv;
-  candidate->drawaxis=ca;
-  candidate->drawlabels=cl;
-  candidate->drawvalues=cv;
-  candidate->drawmoves=m;
-  candidate->drawrotations=r;
+  origin->drawaxis=ba;
+  origin->drawlabels=bl;
+  origin->drawvalues=bv;
+  if(dragged_origin!=NULL){
+  	old_origin->drawaxis=ba;
+  	old_origin->drawlabels=bl;
+  	old_origin->drawvalues=bv;
+    dragged_origin->drawaxis=ca;
+    dragged_origin->drawlabels=cl;
+    dragged_origin->drawvalues=cv;
+    dragged_origin->drawmoves=m;
+    dragged_origin->drawrotations=r;
+  }
   gla->update();
 }
 
@@ -513,12 +495,26 @@ void EditStraightener::on_begin_action()
 
 //////////////////////////////////////////////////////////////
 
-DrawAxes::DrawAxes(bool b)
-:currentphase(DA_BEGIN),twoaxes(b),
-first(Color4b(128,128,255,255)),
-second(Color4b(128,255,128,255))
+DrawAxes::DrawAxes(char ch1,char ch2)
+:firstchar(ch1),secondchar(ch2),
+currentphase(DA_BEGIN),twoaxes(true),
+first(Color4b(0,0,0,0)),second(Color4b(0,0,0,0)),
+label1(QChar(ch1)),label2(QChar(ch2))
 {
-
+  Color4b xc(255,128,128,255),yc(128,255,128,255),zc(128,128,255,255);
+  switch(ch1){
+    case 'X': first=Rubberband(xc); break;
+    case 'Y': first=Rubberband(yc); break;
+    case 'Z': first=Rubberband(zc); break;
+    default: assert(0);
+  }
+  switch(ch2){
+    case 'X': second=Rubberband(xc); break;
+    case 'Y': second=Rubberband(yc); break;
+    case 'Z': second=Rubberband(zc); break;
+    case ' ': twoaxes=false; break;
+    default: assert(0);
+  }
 }
 
 void DrawAxes::Render(QGLWidget *glw)
@@ -529,12 +525,12 @@ void DrawAxes::Render(QGLWidget *glw)
     case DA_BEGIN:
       if(first.IsReady())
         currentphase=DA_DONE_FIRST;
-      else first.RenderLabel("Z",glw);
+      else first.RenderLabel(label1,glw);
       break;
     case DA_DONE_FIRST:
       if(second.IsReady())
         currentphase=DA_DONE_SECOND;
-      else second.RenderLabel("Y",glw);
+      else second.RenderLabel(label2,glw);
       break;
     case DA_DONE_SECOND:
       break;
@@ -579,6 +575,8 @@ void DrawAxes::GetAxes(Point3f &f1,Point3f &f2,Point3f &s1,Point3f &s2)
     s1=s2=Point3f(0,0,0);
   }
 }
+
+///////////////////////////////////
 
 DrawPhantom::DrawPhantom(MeshModel* mm,float refsize)
 {
@@ -684,7 +682,7 @@ void UndoSystem::BeginAction()
   if(marks>MAX_MARKS)
     limitmarks();
   if(marks==1)
-    es->dialog->enableUndo();
+    es->dialog->SetUndo(true);
 }
 
 void UndoSystem::Undo()
@@ -696,7 +694,7 @@ void UndoSystem::Undo()
   undotype_vec.pop_back();
   marks--;
   if(marks==0)
-    es->dialog->disableUndo();  
+    es->dialog->SetUndo(false);  
 }
 
 bool UndoSystem::CanUndo()
@@ -704,13 +702,13 @@ bool UndoSystem::CanUndo()
   return marks>0;
 }
 
-void UndoSystem::SaveCandidate()
-{
-  assert(undotype_vec.size()>0);
-  undotype_vec.push_back(US_CANDIDATE);
-  pos_vec.push_back(es->candidate->GetPosition());
-  rot_vec.push_back(es->candidate->GetRotation());
-}
+//void UndoSystem::SaveCandidate()
+//{
+//  assert(undotype_vec.size()>0);
+//  undotype_vec.push_back(US_CANDIDATE);
+//  pos_vec.push_back(es->candidate->GetPosition());
+//  rot_vec.push_back(es->candidate->GetRotation());
+//}
 
 void UndoSystem::SaveTR()
 {
@@ -733,12 +731,12 @@ bool UndoSystem::revert()
   switch(undotype){
   	case US_MARK:
   	  return false;
-    case US_CANDIDATE:
-      es->candidate->SetPosition(pos_vec.back());
-      es->candidate->SetRotation(rot_vec.back());  
-      pos_vec.pop_back();
-      rot_vec.pop_back();
-      break;
+//    case US_CANDIDATE:
+//      es->candidate->SetPosition(pos_vec.back());
+//      es->candidate->SetRotation(rot_vec.back());  
+//      pos_vec.pop_back();
+//      rot_vec.pop_back();
+//      break;
     case US_TR:
       es->mm->cm.Tr=tr_vec.back();
       tr_vec.pop_back();
@@ -768,10 +766,10 @@ void UndoSystem::limitmarks()
     switch(undotype_vec.front()){
       case US_MARK:
         return;
-      case US_CANDIDATE:
-        pos_vec.pop_front();
-        rot_vec.pop_front();
-        break;
+//      case US_CANDIDATE:
+//        pos_vec.pop_front();
+//        rot_vec.pop_front();
+//        break;
       case US_TR:
         tr_vec.pop_front();
         break;
