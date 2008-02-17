@@ -166,6 +166,7 @@ void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
 {
 	if ( _qualityMapperDialog )
 	{
+		_qualityMapperDialog->disconnect();
 		delete _qualityMapperDialog;
 		_qualityMapperDialog = 0;
 	}

@@ -11,14 +11,11 @@ using namespace vcg;
 //returns true if relative x of h1 is < then x of h2.
 //if x values of h1 and h2 are the same, true is returned if relative y of h1 is < then relative y of h2
 bool TfHandleCompare(TFHandle*h1, TFHandle*h2)
-{
-	return (h1->getRelativeX() <= h2->getRelativeX());
-}
+{	return (h1->getRelativeX() <= h2->getRelativeX());	}
 
+//callback to manage the double-click of TFDoubleClickCatcher object
 void TFDoubleClickCatcher::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
-{
-	emit TFdoubleClicked(event->scenePos());
-}
+{	emit TFdoubleClicked(event->scenePos());	}
 
 pair<int,int> QualityMapperDialog::computeHistogramMinMaxY (Histogramf* histogram)
 {
@@ -36,7 +33,7 @@ pair<int,int> QualityMapperDialog::computeHistogramMinMaxY (Histogramf* histogra
 	return minMaxY;
 }
 
-
+//class constructor
 QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *gla) : QDockWidget(parent), mesh(m)
 {
 	ui.setupUi(this);
@@ -61,14 +58,17 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *
 
 	_histogram_info = 0;
 
+	//building default Transfer Function
 	_transferFunction = new TransferFunction( STARTUP_TF_TYPE );
 	_isTransferFunctionInitialized = false;
 	_transferFunction_info = 0;
 	_currentTfHandle = 0;
-
+	//initializing Transfer Function
 	this->initTF();
 
-	_tfCatcher = new TFDoubleClickCatcher(/*ui.transferFunctionView*/_transferFunction_info);
+	//building a catcher for double click in empty areas of transfer function view
+	//and adding it to the scene
+	_tfCatcher = new TFDoubleClickCatcher(_transferFunction_info);
 	_transferFunctionScene.addItem(_tfCatcher);
 	connect(_tfCatcher, SIGNAL(TFdoubleClicked(QPointF)), this, SLOT(on_TF_view_doubleClicked(QPointF)));
 
@@ -82,29 +82,43 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *
 	//gla->suspendEditToggle();
 }
 
+//class destructor
 QualityMapperDialog::~QualityMapperDialog()
 {
+	//removing from scene and deleting each graphical object
 	this->clearItems(REMOVE_ALL_ITEMS | DELETE_REMOVED_ITEMS);
 
+	//destroying info about histogram chart
 	if ( _histogram_info )
 	{
 		delete _histogram_info;
 		_histogram_info = 0;
 	}
 
+	//destroying transfer function object
 	if ( _transferFunction )
 	{
 		delete _transferFunction;
 		_transferFunction = 0;
 	}
 
+	//destroying info about histogram chart
 	if ( _transferFunction_info )
 	{
 		delete _transferFunction_info;
 		_transferFunction_info = 0;
 	}
+
+	//destroying transfer function double-click catcher
+	if ( _tfCatcher )
+	{
+		delete _tfCatcher;
+		_tfCatcher = 0;
+	}
+	
 //	this->disconnect();
 
+	//sending closing dialog, to call EndEdit of plugin
 	emit closingDialog();
 }
 
@@ -136,11 +150,8 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearScene(QGraphicsScene *scene, int 
 	{
 		foreach (item, _removed_items)
 		{
-			if ((item != _equalizerHandles[0]) || (item != _equalizerHandles[1]) || (item != _equalizerHandles[2]))
-			{
-				delete item;
-				item = 0;
-			}
+			delete item;
+			item = 0;
 		}
 	}
 
@@ -148,9 +159,10 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearScene(QGraphicsScene *scene, int 
 }
 
 
-//this method clears some particular types of items from dialog.
-//toClear value represent the logical OR of some macros that define what to clear
-//returns a list of poiters to Items removed (NOT DELETED!!)
+//this method clears some particular types of graphical items from dialog.
+//toClear value represents the logical OR of some macros that define what to clear
+//returns a list of pointers to Items removed (NOT DELETED!!)
+//If DELETE_REMOVED_ITEMS is passed in toClear flag, the items are destroyed too and the list returned is empty
 GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 {
 	_removed_items.clear();
@@ -161,7 +173,6 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 		//removing TF Handles
 		for (int i=0; i<NUMBER_OF_CHANNELS; i++)
 		{
-/*			int a = _transferFunctionHandles[i].size();*/
 			foreach( item, _transferFunctionHandles[i] )
 			{
 				((TFHandle*)item)->disconnect();
@@ -178,8 +189,25 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 		//just removing! NOT DELETING!!
 		for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 		{
-			_equalizerHistogramScene.removeItem( _equalizerHandles[i] );
-			_removed_items << _equalizerHandles[i];
+			if ( _equalizerHandles[i] )
+			{
+				_equalizerHandles[i]->disconnect();
+				_equalizerHistogramScene.removeItem( (QGraphicsItem*)_equalizerHandles[i] );
+				_removed_items << _equalizerHandles[i];
+			}
+		}
+
+		if ((toClear & DELETE_REMOVED_ITEMS) == DELETE_REMOVED_ITEMS)
+		{
+			for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
+			{
+				if ( _equalizerHandles[i] )
+				{
+					delete _equalizerHandles[i];
+					_equalizerHandles[i] = 0;
+					_removed_items.removeLast();
+				}
+			}
 		}
 	}
 
@@ -238,6 +266,7 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 	return &_removed_items;
 }
 
+//draws the charts basics (axis)
 void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *chart_info)
 {
 	//a valid chart_info must be passed
@@ -280,7 +309,7 @@ void QualityMapperDialog::initEqualizerHistogram()
 		_equalizerHandles[i] = new EqHandle(_histogram_info, Qt::black, QPointF(xPos, yPos), 
 											(EQUALIZER_HANDLE_TYPE)i, _equalizerHandles, &_equalizerMidHandlePercentilePosition, spinboxes[i], 
 											1, 5);
-		_equalizerHistogramScene.addItem(_equalizerHandles[i]);
+		_equalizerHistogramScene.addItem((QGraphicsItem*)_equalizerHandles[i]);
 	}
 
 
@@ -541,11 +570,6 @@ void QualityMapperDialog::initTF()
 	//no TfHande selected yet
 	_currentTfHandle = 0;
 
-// 	if ( _transferFunctionLines.size() > 0 )
-// 		if (!_transferFunctionScene.items().contains( _transferFunctionLines[0] ) )
-// 			for ( int l=0; l<_transferFunctionLines.size(); l++ )
-// 				_transferFunctionScene.addItem( _transferFunctionLines[l] );
-
 	//all done
 	_isTransferFunctionInitialized = true;
 
@@ -585,17 +609,20 @@ void QualityMapperDialog::drawGammaCorrection()
 	delete pixmap;
 }
 
-
+//draws the Transfer Function in the transfer function view
 void QualityMapperDialog::drawTransferFunction()
 {
+	//before drawing, old TF lines are removed and destroyed
 	this->clearItems( REMOVE_TF_LINES | DELETE_REMOVED_ITEMS );
 
+	//TF must exist!
 	assert(_transferFunction != 0);
 
 	//building transfer function chart informations
 	if ( _transferFunction_info == 0 )
 		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), _transferFunction->size(), 0.0f, 1.0f, 0.0f, 1.0f );
 
+	//is necessary, initialize TF
 	if ( !_isTransferFunctionInitialized )
 		this->initTF();
 
@@ -611,38 +638,54 @@ void QualityMapperDialog::drawTransferFunction()
 	qreal zValue = 0;
 	int channelType = 0;
 
+	//for each channel
 	for(int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
+		//processing correct channel type (the correct order is obtained through the [] operator of TransferFunction class)
 		channelType = (*_transferFunction)[c].getType();
+		//converting channel code in the proper color
 		TYPE_2_COLOR(channelType, channelColor);
+		//pen colo is set to proper color
 		drawingPen.setColor( channelColor );
+		//z order for lines
 		zValue = ((c + 1)*2.0f);
 
 		QPointF pos1;
 		QPointF pos2;
+		//for each TfHandle of the current channel
 		for (int i=0; i<_transferFunctionHandles[channelType].size(); i++)
 		{
+			//fetch the i-th handle
 			handle1 = _transferFunctionHandles[channelType][i];
+			//setting z-order in the scene
 			handle1->setZValue( zValue);
+			//if there's another handle after this in the sequence
 			if ( (i+1)<_transferFunctionHandles[channelType].size() )
 			{
+				//fetching 2nd handle
 				handle2 = _transferFunctionHandles[channelType][i+1];
-				handle1->setZValue( zValue);
+				//setting z-order
+				handle1->setZValue( zValue+1 );	//modified by MAL 15/02/08
 
+				//fetching positions of handles
 				pos1 = handle1->scenePos();
 				pos2 = handle2->scenePos();
+				//hilighting line if it touches the currently selected handle
 				if (( handle1 == _currentTfHandle ) || (handle2 == _currentTfHandle) )
 					drawingPen.setColor( channelColor.lighter() );
 				else
 					drawingPen.setColor( channelColor );
+				//tracing line between the 2 handles
 				item = _transferFunctionScene.addLine( handle1->scenePos().x(), handle1->scenePos().y(), handle2->scenePos().x(), handle2->scenePos().y(), drawingPen );
+				//setting z-order of line
 				item->setZValue( zValue );
+				//adding line to lines list
 				_transferFunctionLines << item;
 			}
 		}
 	}
 
-	// updating colorBand
+	// updating Color Band
 	this->updateColorBand();
 
 	ui.transferFunctionView->setScene( &_transferFunctionScene );
@@ -1086,7 +1129,7 @@ TFHandle* QualityMapperDialog::addTfHandle(TFHandle *handle)
 	connect(handle, SIGNAL(clicked(TFHandle*)), this, SLOT(on_TfHandle_clicked(TFHandle*)));
 	connect(handle, SIGNAL(doubleClicked(TFHandle*)), this, SLOT(on_TfHandle_doubleClicked(TFHandle*)));
 	connect(handle, SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
-	_transferFunctionScene.addItem(handle);
+	_transferFunctionScene.addItem((QGraphicsItem*)handle);
 
 	return handle;
 }
