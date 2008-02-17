@@ -24,12 +24,9 @@ EqHandle::~EqHandle(void)
 }
 
 
-void EqHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget /*= 0*/ )
+void EqHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/ )
 {
-	//Q_UNUSED(option);
-	//Q_UNUSED(widget);
 	//QPen pen(Qt::black);
-	//non sepen.setWidth(2);
 	painter->setPen(_color);
 	painter->setBrush(_color);
 	painter->drawLine(0, -_size, 0, -_barHeight);
@@ -48,13 +45,8 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
 	setCursor(Qt::OpenHandCursor);
 
-
 	QPointF newPos = event->scenePos();
-	//if ( (newPos.x() < _chartInfo->leftBorder) || (newPos.x() > _chartInfo->rightBorder) )	return;
-
-	QPointF lastScenePos = event->lastScenePos();
-	QPointF oldPos = pos();
-	qreal handleOffset = abs(newPos.x()-oldPos.x());
+	qreal handleOffset = abs(newPos.x()-pos().x());
 
 	if (handleOffset >= std::numeric_limits<float>::epsilon())
 	{
@@ -65,7 +57,6 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			{
 				*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newPos.x());
 				moveMidHandle();
-				emit positionChanged(); // for gammaCorrectionLabel
 			}
 			break;
 		case LEFT_HANDLE:
@@ -89,19 +80,23 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 				{					
 					// Changing minimum/maximum value of opposite spinbox
 					_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->setMinimum(newQualityValue);
+					_handlesPointer[MID_HANDLE]->_spinBoxPointer->setMinimum(newQualityValue);
+
 					// Emitting signals to spinbox and mid handle
 					_spinBoxPointer->blockSignals(true);
 					emit positionChangedToSpinBox((double)newQualityValue);
 					_spinBoxPointer->blockSignals(false);
 
-					if ( newQualityValue > _chartInfo->minX )
+					if ( newQualityValue >= _chartInfo->minX )
 					{
-						emit insideHistogram(true); // for redrawing equalizerHistogram bars, if needed
-						setPos(newPos.x(), oldPos.y());
-						emit positionChanged();  // for redrawing transferFunctionScene and moving  equalizerHistogram midHandle
+						emit insideHistogram(this,true); // for redrawing equalizerHistogram bars, if needed
+						setPos(newPos.x(), pos().y());
 					}
 					else
-						emit insideHistogram(false);
+						emit insideHistogram(this,false);
+
+					emit positionChanged();  // for redrawing transferFunctionScene and moving  equalizerHistogram midHandle
+
 				}
 			}
 			break;
@@ -109,34 +104,34 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			{
 				// calculating new spinbox value
 				qreal newQualityValue = positionToQuality(newPos.x());
-				if (newQualityValue > _spinBoxPointer->maximum()) 
+				if (newQualityValue > _spinBoxPointer->maximum()) // Why this control??? It seems to be never reached!
 					break;
 				
 				if (newPos.x() > _handlesPointer[LEFT_HANDLE]->pos().x()) 
-				{					
+				{		
 					// Changing minimum/maximum value of opposite spinbox
 					_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->setMaximum(newQualityValue);
+					_handlesPointer[MID_HANDLE]->_spinBoxPointer->setMaximum(newQualityValue);
+
 					// Emitting signals to spinbox and mid handle
 					_spinBoxPointer->blockSignals(true);
 					emit positionChangedToSpinBox((double)newQualityValue);
 					_spinBoxPointer->blockSignals(false);
 
-					if ( newQualityValue < _chartInfo->maxX )
+					if ( newQualityValue <= _chartInfo->maxX )
 					{
-						emit insideHistogram(true); // for redrawing equalizerHistogram bars, if needed
-						setPos(newPos.x(), oldPos.y());
-						emit positionChanged();  // for redrawing transferFunctionScene and moving  equalizerHistogram midHandle
+						emit insideHistogram(this,true); // for redrawing equalizerHistogram bars, if needed
+						setPos(newPos.x(), pos().y());
 					}
 					else
-						emit insideHistogram(false);
+						emit insideHistogram(this,false);
+
+					emit positionChanged();  // for redrawing transferFunctionScene and moving  equalizerHistogram midHandle
 				}
 			}
 			break;
 		}
-
-		
 	}
-	
 }
 
 void EqHandle::moveMidHandle()
@@ -150,22 +145,25 @@ void EqHandle::moveMidHandle()
 	emit positionChangedToSpinBox((double)newSpinboxValue);
 	_spinBoxPointer->blockSignals(false);
 
+	emit positionChanged(); // for gammaCorrectionLabel
 }
 
 
 void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 {
-	qreal percentageValue = (spinBoxValue -  _chartInfo->minX) / (_chartInfo->maxX - _chartInfo->minX);
-	qreal newHandleX = percentageValue * _chartInfo->chartWidth + _chartInfo->leftBorder;
-
+	float maxQ = (_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value() > _chartInfo->maxX)?_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value():_chartInfo->maxX;
+	float minQ = (_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value()  < _chartInfo->minX)?_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value() :_chartInfo->minX;
+	qreal newHandleX;
+	/*
 	qreal handleOffset = abs(newHandleX-pos().x());
 	// this control avoid counter invoking (?)
 	if (handleOffset < std::numeric_limits<float>::epsilon())
-		return;
+		return;*/
 
 	switch (_type)
 	{
 	case MID_HANDLE:
+		newHandleX = qualityToPosition(spinBoxValue, minQ, maxQ);
 		if ( (newHandleX > _handlesPointer[LEFT_HANDLE]->pos().x()) && (newHandleX < _handlesPointer[RIGHT_HANDLE]->pos().x()) )
 		{
 			*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newHandleX);
@@ -173,37 +171,37 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 		}
 		break;
 	case LEFT_HANDLE:
-		/*
+		newHandleX = qualityToPosition(spinBoxValue, _chartInfo->minX, _chartInfo->maxX);
 		if (newHandleX < _handlesPointer[RIGHT_HANDLE]->pos().x()) 
 		{
-			setPos(newHandleX, pos().y());
+			// Changing minimum/maximum value of other spinboxes
 			_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->setMinimum(spinBoxValue);
-			emit positionChanged();
-		}*/
-		if (newHandleX < _handlesPointer[RIGHT_HANDLE]->pos().x()) 
-		{
-			if ( /*(pos().x() < _chartInfo->leftBorder) ||*/ newHandleX < _chartInfo->leftBorder )
-				emit insideHistogram(false);
+			_handlesPointer[MID_HANDLE]->_spinBoxPointer->setMinimum(spinBoxValue);
+			if ( newHandleX < _chartInfo->leftBorder )
+				emit insideHistogram(this,false);
 			else
 			{
-				emit insideHistogram(true);
+				emit insideHistogram(this,true); // invalidates equalizerHistogram scene
 				setPos(newHandleX, pos().y());
-				_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->setMinimum(spinBoxValue);
-				emit positionChanged();
+				emit positionChanged(); // signal for drawGammaCorrection and minSpinBox
 			}
+			
 		}
 		break;
 	case RIGHT_HANDLE:
+		newHandleX = qualityToPosition(spinBoxValue, _chartInfo->minX, _chartInfo->maxX);
 		if (newHandleX > _handlesPointer[LEFT_HANDLE]->pos().x()) 
 		{
-			if ( /*(pos().x() < _chartInfo->leftBorder) ||*/ newHandleX > _chartInfo->rightBorder )
-				emit insideHistogram(false);
+			// Changing minimum/maximum value of other spinboxes
+			_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->setMaximum(spinBoxValue);
+			_handlesPointer[MID_HANDLE]->_spinBoxPointer->setMaximum(spinBoxValue);
+			if ( newHandleX > _chartInfo->rightBorder )
+				emit insideHistogram(this,false);
 			else
 			{
-				emit insideHistogram(true);
+				emit insideHistogram(this,true); // invalidates equalizerHistogram scene
 				setPos(newHandleX, pos().y());
-				_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->setMaximum(spinBoxValue);
-				emit positionChanged();
+				emit positionChanged(); // signal for drawGammaCorrection and maxSpinBox
 			}
 		}
 		break;

@@ -59,14 +59,18 @@ private:
 		float maxX = (_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value() > _chartInfo->maxX)?_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value():_chartInfo->maxX;
 		float minX = (_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value()  < _chartInfo->minX)?_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value() :_chartInfo->minX;
 		return percentagePos * (maxX - minX)+minX;
-		//return percentagePos * (_chartInfo->maxX - _chartInfo->minX) + _chartInfo->minX;
-		//return percentagePos * (_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value() - _handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value()) +  _handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value();
+	};
+
+	qreal qualityToPosition(float quality, float minQ, float maxQ)
+	{
+		qreal percentageValue = (quality -  minQ) / (maxQ - minQ);
+		return percentageValue * _chartInfo->chartWidth + _chartInfo->leftBorder;
 	};
 
 signals:
 	void positionChangedToSpinBox(double);
 	void positionChanged();
-	void insideHistogram(bool);
+	void insideHistogram(EqHandle *sender, bool insideHistogram);
 
 private slots:
 	// changing equalizer spinboxes moves the connected handle

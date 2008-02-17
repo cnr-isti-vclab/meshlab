@@ -2,7 +2,6 @@
 #include <limits>
 #include <QPen>
 #include <QBrush>
-#include <cmath>
 
 #include <vcg/complex/trimesh/update/color.h>
 
@@ -291,9 +290,10 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 void QualityMapperDialog::initEqualizerHistogram()
 {
 	_equalizer_histogram = 0;
-	_handleWasInsideHistogram = true;
+	_leftHandleWasInsideHistogram = true;
+	_rightHandleWasInsideHistogram = true;
 
-	drawEqualizerHistogram(true);
+	drawEqualizerHistogram(true, true);
 
 	//DRAWING HANDLES
 	QDoubleSpinBox* spinboxes[] = { ui.minSpinBox, ui.midSpinBox, ui.maxSpinBox };
@@ -374,14 +374,14 @@ void QualityMapperDialog::initEqualizerHistogram()
 	connect(ui.midSpinBox, SIGNAL(valueChanged(double)), this, SLOT(drawGammaCorrection()) );
 	
 	// Connecting eqHandles to histogram drawing
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(insideHistogram(bool)), this, SLOT(drawEqualizerHistogram(bool)) );
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(insideHistogram(bool)), this, SLOT(drawEqualizerHistogram(bool)) );
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(insideHistogram(EqHandle*,bool)), this, SLOT(on_EqHandle_crossing_histogram(EqHandle*,bool)) );
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(insideHistogram(EqHandle*,bool)), this, SLOT(on_EqHandle_crossing_histogram(EqHandle*,bool)) );
 
 	// Connecting handles to preview method
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
-	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
-	connect(ui.brightnesslSlider, SIGNAL(sliderReleased()), this, SLOT(on_handle_released()));
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
+	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
+	connect(ui.brightnessSlider, SIGNAL(sliderReleased()), this, SLOT(on_Handle_released()));
 
 	ui.equalizerGraphicsView->setScene(&_equalizerHistogramScene);
 
@@ -390,7 +390,7 @@ void QualityMapperDialog::initEqualizerHistogram()
 }
 
 // Add histogram bars to equalizerHistogram Scene
-void QualityMapperDialog::drawEqualizerHistogram(bool handleIsInsideHistogram)
+void QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogram, bool rightHandleIsInsideHistogram)
 {
 
 	//building up histogram...
@@ -414,10 +414,11 @@ void QualityMapperDialog::drawEqualizerHistogram(bool handleIsInsideHistogram)
 	else
 	{
 		// if histogram doesn't need to be redrawn, return
-		if (handleIsInsideHistogram && _handleWasInsideHistogram) 
+		if ( (leftHandleIsInsideHistogram && _leftHandleWasInsideHistogram) && (rightHandleIsInsideHistogram && _rightHandleWasInsideHistogram) )
 			return;
 		
-		_handleWasInsideHistogram = handleIsInsideHistogram;
+		_leftHandleWasInsideHistogram = leftHandleIsInsideHistogram;
+		_rightHandleWasInsideHistogram = rightHandleIsInsideHistogram;
 
 		this->clearItems( REMOVE_EQ_HISTOGRAM | DELETE_REMOVED_ITEMS );
 		//_equalizer_histogram->Clear();
@@ -1022,7 +1023,7 @@ void QualityMapperDialog::on_applyButton_clicked()
 
 	float percentageQuality;
 	// brightness value between 0 and 2
-	float brightness = (1.0f - (float)(ui.brightnesslSlider->value())/(float)(ui.brightnesslSlider->maximum()) )*2.0;
+	float brightness = (1.0f - (float)(ui.brightnessSlider->value())/(float)(ui.brightnessSlider->maximum()) )*2.0;
 	Color4b currentColor;
 	for(vi=mesh->cm.vert.begin(); vi!=mesh->cm.vert.end(); ++vi)		
 		if(!(*vi).IsD()) 
@@ -1042,10 +1043,12 @@ void QualityMapperDialog::on_applyButton_clicked()
 			if (brightness!=1.0f) //Applying brightness to each color channel
 				if (brightness<1.0f)
 					for (int i=0; i<3; i++) 
-						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
+						//currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
+						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i]+1,257.0f),brightness), 255.0f);
 				else
 					for (int i=0; i<3; i++) 
-						currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
+						//currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
+						currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i]+1,257.0f),2-brightness), 255.0f);
 
 			(*vi).C() = currentColor;
 		}
@@ -1053,7 +1056,7 @@ void QualityMapperDialog::on_applyButton_clicked()
 	gla->update();
 }
 
-void QualityMapperDialog::on_handle_released()
+void QualityMapperDialog::on_Handle_released()
 {
 	if (ui.previewButton->isChecked())
 		on_applyButton_clicked();
@@ -1113,6 +1116,47 @@ void QualityMapperDialog::on_removePointButton_clicked()
 		_currentTfHandle = this->removeTfHandle(_currentTfHandle);
 }
 
+void QualityMapperDialog::on_resetButton_clicked()
+{
+	// Resetting brightnessSlider position
+	ui.brightnessSlider->setSliderPosition(50);
+
+	// Resetting equalizerHistogram spinboxes values
+	ui.minSpinBox->setValue(_histogram_info->minX);
+	ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
+
+	ui.maxSpinBox->setValue(_histogram_info->maxX);
+	ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
+
+	ui.midSpinBox->setValue((_histogram_info->maxX + _histogram_info->minX) / 2.0f);
+	ui.midSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
+
+	// Because of approximation error it is necessary to directly update handles poistion, transferFunctionBG and gammaCorrection
+
+	qreal xStart = _histogram_info->leftBorder;
+	qreal xPos = 0.0f;
+	qreal yPos = _histogram_info->lowerBorder;
+	_equalizerMidHandlePercentilePosition = 0.5f;
+	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
+	{
+		xPos = xStart + _histogram_info->chartWidth/2.0f*i;
+		_equalizerHandles[i]->setPos(xPos,yPos);
+	}
+
+	drawGammaCorrection();
+	drawTransferFunctionBG();
+	if (ui.previewButton->isChecked())
+		on_applyButton_clicked();
+}
+
+// Method invoked when moving left/right EqHandles, 
+void QualityMapperDialog::on_EqHandle_crossing_histogram(EqHandle* sender, bool insideHistogram)
+{
+	if (sender = _equalizerHandles[LEFT_HANDLE])
+		drawEqualizerHistogram(insideHistogram, _rightHandleWasInsideHistogram);
+	else
+		drawEqualizerHistogram(_leftHandleWasInsideHistogram, insideHistogram);
+}
 
 TFHandle* QualityMapperDialog::addTfHandle(int channelCode, QPointF handlePos, TF_KEY *key, int zOrder )
 {
@@ -1128,7 +1172,7 @@ TFHandle* QualityMapperDialog::addTfHandle(TFHandle *handle)
 	connect(handle, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
 	connect(handle, SIGNAL(clicked(TFHandle*)), this, SLOT(on_TfHandle_clicked(TFHandle*)));
 	connect(handle, SIGNAL(doubleClicked(TFHandle*)), this, SLOT(on_TfHandle_doubleClicked(TFHandle*)));
-	connect(handle, SIGNAL(handleReleased()), this, SLOT(on_handle_released()));
+	connect(handle, SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
 	_transferFunctionScene.addItem((QGraphicsItem*)handle);
 
 	return handle;
@@ -1197,4 +1241,3 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 	//refreshing TF scene
 	this->drawTransferFunction();
 }
-

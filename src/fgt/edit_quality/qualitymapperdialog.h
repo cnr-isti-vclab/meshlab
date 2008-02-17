@@ -108,7 +108,8 @@ private:
 	QGraphicsScene	_equalizerHistogramScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
 	EqHandle*		_equalizerHandles[NUMBER_OF_EQHANDLES];
 	qreal			_equalizerMidHandlePercentilePosition;
-	bool			_handleWasInsideHistogram;
+	bool			_leftHandleWasInsideHistogram;
+	bool			_rightHandleWasInsideHistogram;
 	GRAPHICS_ITEMS_LIST _equalizerHistogramBars;
 
 	TransferFunction *_transferFunction;
@@ -131,9 +132,8 @@ private:
 	void initTF();
 	void updateColorBand();
 	void drawTransferFunctionBG ();
+	void drawEqualizerHistogram(bool leftHandleInsideHistogram, bool rightHandleInsideHistogram);
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
-	//void drawHistogramBarsSTRETCHED (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
-
 
 	GRAPHICS_ITEMS_LIST	*clearScene(QGraphicsScene *scene, int toClean=0);
 	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);
@@ -153,29 +153,31 @@ private slots:
 	void on_removePointButton_clicked();
 	void on_ySpinBox_valueChanged(double);
 	void on_xSpinBox_valueChanged(double);
+	
 	void on_previewButton_clicked();
 	void on_applyButton_clicked();
+	void on_resetButton_clicked();
 
 	void on_blueButton_toggled(bool checked);
 	void on_greenButton_toggled(bool checked);
 	void on_redButton_toggled(bool checked);
 
 	void on_presetComboBox_textChanged(const QString &);
-
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
 
 	void on_addPointButton_clicked();
-	void on_EQHandle_moved();
 
-	void on_handle_released();
+	void on_Handle_released();
+
+	void on_EQHandle_moved();
+	void on_EqHandle_crossing_histogram(EqHandle*,bool);
 
 	void on_TfHandle_moved(TFHandle *sender);
 	void on_TfHandle_clicked(TFHandle *sender);
 	void on_TfHandle_doubleClicked(TFHandle *sender);
 	void on_TF_view_doubleClicked(QPointF pos);
 	
-	void drawEqualizerHistogram(bool handleInsideHistogram);
 	void drawGammaCorrection();
 };
 
