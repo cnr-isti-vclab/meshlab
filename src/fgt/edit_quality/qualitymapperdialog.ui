@@ -218,12 +218,6 @@
             <layout class="QHBoxLayout" >
              <item>
               <widget class="QComboBox" name="presetComboBox" >
-               <property name="maximumSize" >
-                <size>
-                 <width>16777215</width>
-                 <height>24</height>
-                </size>
-               </property>
                <property name="toolTip" >
                 <string>Transfer Functions list</string>
                </property>
@@ -236,8 +230,8 @@
               <widget class="QPushButton" name="loadPresetButton" >
                <property name="maximumSize" >
                 <size>
-                 <width>24</width>
-                 <height>24</height>
+                 <width>30</width>
+                 <height>16777215</height>
                 </size>
                </property>
                <property name="toolTip" >
@@ -252,8 +246,8 @@
               <widget class="QPushButton" name="savePresetButton" >
                <property name="maximumSize" >
                 <size>
-                 <width>24</width>
-                 <height>24</height>
+                 <width>30</width>
+                 <height>16777215</height>
                 </size>
                </property>
                <property name="toolTip" >
@@ -427,7 +421,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="brightnesslSlider" >
+              <widget class="QSlider" name="brightnessSlider" >
                <property name="maximum" >
                 <number>100</number>
                </property>
@@ -483,14 +477,7 @@
          <item>
           <widget class="QPushButton" name="resetButton" >
            <property name="text" >
-            <string>Reset</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="cancelButton" >
-           <property name="text" >
-            <string>Cancel</string>
+            <string>Reset Histogram</string>
            </property>
           </widget>
          </item>
