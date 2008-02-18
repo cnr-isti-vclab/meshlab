@@ -23,7 +23,9 @@ SUBDIRS       = meshfilter \
 				../sampleplugins/filterborder \
 				../sampleplugins/filtergeodesic \
 				../sampleplugins/filtercreateiso \
-				../fgt/edit_quality
+				../fgt/edit_quality \
+				../fgt/edit_quality/filter_quality 
+				
 				
 				
 		
