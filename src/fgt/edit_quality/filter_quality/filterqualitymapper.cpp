@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2008/02/18 18:18:54  amaione
+*** empty log message ***
+
 Revision 1.1  2008/02/18 18:05:20  amaione
 UPDATED PERSONAL PROJECTS FILES
 AND
@@ -110,7 +113,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 {
 	 switch(ID(action))	 {
 		case FP_MOVE_VERTEX : 
-			parlst.addString("nome", "valore di default", "descrizione", "tooltip");
+//			parlst.addString("nome", "valore di default", "descrizione", "tooltip");
 //  		  parlst.addBool ("UpdateNormals",
 // 											true,
 // 											"Recompute normals",
