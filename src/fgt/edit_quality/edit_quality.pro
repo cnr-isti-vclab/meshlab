@@ -3,7 +3,6 @@ CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = const_types.h \
-		histogram.h \
 		qualitymapper.h \
 		qualitymapperdialog.h \
 		transferfunction.h \

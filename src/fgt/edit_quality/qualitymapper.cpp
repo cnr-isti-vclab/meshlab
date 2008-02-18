@@ -35,7 +35,7 @@ Beginning
 #include <vcg/complex/trimesh/clean.h>
 
 #include <wrap/gl/pick.h>
-#include <wrap/qt/trackball.h>
+//#include <wrap/qt/trackball.h>
 
 #include <vcg/complex/trimesh/update/flag.h>
 // #include "color_manifold.h"
@@ -49,13 +49,6 @@ using namespace vcg;
 
 QualityMapperPlugin::QualityMapperPlugin()
 {
-	/*
-	isDragging=false;
-	first=true;
-	paintbox=0;
-	pixels=0;
-	pressed=0;*/
-
 	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper. More info coming soon...", this);
 	QAction *editAction;
 	foreach(editAction, actionList)
@@ -84,63 +77,21 @@ const PluginInfo &QualityMapperPlugin::Info()
 	return ai;
 } 
 
-/*
-void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla)
+
+void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent *, MeshModel &, GLArea *)
 {
-	gla->update();
-	cur=event->pos();
-	haveToPick=true;
-}*/
-/*
-Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
-{
-
-	int vcgbt=Trackball::BUTTON_NONE;
-	if(qtbt & Qt::LeftButton)			vcgbt |= Trackball::BUTTON_LEFT;
-	if(qtbt & Qt::RightButton)			vcgbt |= Trackball::BUTTON_RIGHT;
-	if(qtbt & Qt::MidButton)			vcgbt |= Trackball::BUTTON_MIDDLE;
-	if(modifiers & Qt::ShiftModifier)	vcgbt |= Trackball::KEY_SHIFT;
-	if(modifiers & Qt::ControlModifier) vcgbt |= Trackball::KEY_CTRL;
-	if(modifiers & Qt::AltModifier)		vcgbt |= Trackball::KEY_ALT;
-
-	return Trackball::Button(vcgbt);
-}*/
-
-
-void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
-{
-
-//	trackball.MouseUp(e->x(),gla->height()-e->y(), QT2VCG(e->button(), e->modifiers()));
 }
 
-void QualityMapperPlugin::mousePressEvent    (QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
+void QualityMapperPlugin::mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea *)
 {  
-	/*
-	if (  (e->button()==Qt::LeftButton)         &&
-		!(e->modifiers() & Qt::ShiftModifier) )
-		trackball.MouseDown(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()) );
-	gla->update();*/
 }
 
-void QualityMapperPlugin::mouseMoveEvent     (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+void QualityMapperPlugin::mouseMoveEvent     (QAction *,QMouseEvent *, MeshModel &, GLArea *)
 {
-	/*
-	if( (e->buttons()| Qt::LeftButton) &&
-		!(e->modifiers() & Qt::ShiftModifier))
-		trackball.MouseMove(e->x(),gla->height()-e->y());
-	gla->update();*/
 }
 
-void QualityMapperPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
+void QualityMapperPlugin::Decorate(QAction *, MeshModel&, GLArea *)
 {
-	/*	
-	this->gla=gla;
-	//this->m=m;
-	if(!gla->isEnabled()){
-	_qualityMapperDialog->close();
-	}
-	// Do something?
-	*/
 }
 
 void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
@@ -151,10 +102,18 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
 		_qualityMapperDialog = new QualityMapperDialog(gla->window(), &m, gla);
 
 	//drawing histogram
-	_qualityMapperDialog->initEqualizerHistogram();
+	//bool ret = _qualityMapperDialog->initEqualizerHistogram();
+	if ( !_qualityMapperDialog->initEqualizerHistogram() )
+	{
+		EndEdit(mode, m, gla);
+		return;
+	}
+
 
 	//drawing transferFunction
 	_qualityMapperDialog->drawTransferFunction();
+
+
 
 	//dialog ready to be displayed. Show it now!
 	_qualityMapperDialog->show();

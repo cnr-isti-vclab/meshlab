@@ -183,9 +183,8 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 			{
 				emit insideHistogram(this,true); // invalidates equalizerHistogram scene
 				setPos(newHandleX, pos().y());
-				emit positionChanged(); // signal for drawGammaCorrection and minSpinBox
 			}
-			
+			emit positionChanged();  // for redrawing transferFunctionScene and moving  equalizerHistogram midHandle
 		}
 		break;
 	case RIGHT_HANDLE:
@@ -201,8 +200,8 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 			{
 				emit insideHistogram(this,true); // invalidates equalizerHistogram scene
 				setPos(newHandleX, pos().y());
-				emit positionChanged(); // signal for drawGammaCorrection and maxSpinBox
 			}
+			emit positionChanged();  // for redrawing transferFunctionScene and moving  equalizerHistogram midHandle
 		}
 		break;
 	}

@@ -56,6 +56,8 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *
 	//...histogram built*/
 
 	_histogram_info = 0;
+	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
+		_equalizerHandles[i] = 0;
 
 	//building default Transfer Function
 	_transferFunction = new TransferFunction( STARTUP_TF_TYPE );
@@ -288,7 +290,7 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 
 // Initializes equalizerHistogramView
 // (This method is called only once)
-void QualityMapperDialog::initEqualizerHistogram()
+bool QualityMapperDialog::initEqualizerHistogram()
 {
 	if (_equalizer_histogram) //added by MAL 17\02\08
 	{
@@ -299,7 +301,8 @@ void QualityMapperDialog::initEqualizerHistogram()
 	_leftHandleWasInsideHistogram = true;
 	_rightHandleWasInsideHistogram = true;
 
-	drawEqualizerHistogram(true, true);
+	if ( !drawEqualizerHistogram(true, true) )
+		return false;
 
 	//DRAWING HANDLES
 	QDoubleSpinBox* spinboxes[] = { ui.minSpinBox, ui.midSpinBox, ui.maxSpinBox };
@@ -369,8 +372,6 @@ void QualityMapperDialog::initEqualizerHistogram()
 
 	// Making spinboxes and handles changes redrawing transferFunctionScene
 	// Nota: non è necessario connettere anche le spinbox (UCCIO) 
-	//connect(ui.minSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
-	//connect(ui.maxSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_left_right_equalizerHistogram_handle_changed()));
 	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
 	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
 	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
@@ -393,10 +394,12 @@ void QualityMapperDialog::initEqualizerHistogram()
 
 	drawGammaCorrection();
 	drawTransferFunctionBG();
+
+	return true;
 }
 
 // Add histogram bars to equalizerHistogram Scene
-void QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogram, bool rightHandleIsInsideHistogram)
+bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogram, bool rightHandleIsInsideHistogram)
 {
 
 	//building up histogram...
@@ -406,8 +409,13 @@ void QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 	{
 		// This block is called only the first time
 		_equalizer_histogram = new Histogramf();
-		Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mesh->cm));
-		this->ComputePerVertexQualityHistogram(mesh->cm, mmmq, _equalizer_histogram, numberOfBins);
+		Frange histogramRange(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mesh->cm));
+		this->ComputePerVertexQualityHistogram(mesh->cm, histogramRange, _equalizer_histogram, numberOfBins);
+		if (histogramRange.minV == histogramRange.maxV)
+		{
+			int ret = QMessageBox::warning(this, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 
+			return false;
+		}
 
 		//building histogram chart informations
 		//processing minY and maxY values for histogram
@@ -421,7 +429,7 @@ void QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 	{
 		// if histogram doesn't need to be redrawn, return
 		if ( (leftHandleIsInsideHistogram && _leftHandleWasInsideHistogram) && (rightHandleIsInsideHistogram && _rightHandleWasInsideHistogram) )
-			return;
+			return true;
 		
 		_leftHandleWasInsideHistogram = leftHandleIsInsideHistogram;
 		_rightHandleWasInsideHistogram = rightHandleIsInsideHistogram;
@@ -445,6 +453,7 @@ void QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 //	this->drawGammaCorrection();
 	this->drawTransferFunctionBG();
 
+	return true;
 }
 
 
@@ -715,9 +724,9 @@ void QualityMapperDialog::drawTransferFunctionBG ()
 {
 	this->clearItems( REMOVE_TF_BG | DELETE_REMOVED_ITEMS );
 	
-	// JUST FOR TEST
+	/*// JUST FOR TEST
 	float minspinboxvalue = ui.minSpinBox->value();
-	float maxspinboxvalue = ui.maxSpinBox->value();
+	float maxspinboxvalue = ui.maxSpinBox->value();*/
 	
 	if (_histogram_info !=0)
 	{
@@ -967,9 +976,11 @@ void QualityMapperDialog::on_EQHandle_moved()
 {
 
 	if ( _transferFunction )
-	{
 		this->drawTransferFunctionBG();
-	}
+
+	if ( _currentTfHandle )
+		//updating x-quality Label
+		this->updateXQualityLabel(_currentTfHandle->getRelativeX());
 }
 
 //callback to manage move of a TfHandle object

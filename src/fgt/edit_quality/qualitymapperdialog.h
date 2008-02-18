@@ -66,12 +66,7 @@ public:
 	{
 		return _boundingRect;
 	}
-	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-	{
-// 		painter->setPen(QColor(100,212,136));
-// 		painter->setBrush(QColor(32,64,128));
-// 		painter->drawRect(_boundingRect);
-	}
+	void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *)	{}
 
  signals:
  	void TFdoubleClicked(QPointF);
@@ -94,7 +89,7 @@ public:
 
 	void clearScene(QGraphicsScene *scene);
 	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
-	void initEqualizerHistogram();
+	bool initEqualizerHistogram();
 	void drawTransferFunction();
 
 
@@ -133,7 +128,7 @@ private:
 	void initTF();
 	void updateColorBand();
 	void drawTransferFunctionBG ();
-	void drawEqualizerHistogram(bool leftHandleInsideHistogram, bool rightHandleInsideHistogram);
+	bool drawEqualizerHistogram(bool leftHandleInsideHistogram, bool rightHandleInsideHistogram);
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
 
 	GRAPHICS_ITEMS_LIST	*clearScene(QGraphicsScene *scene, int toClean=0);
