@@ -1,8 +1,2 @@
-15.33 20/01/2008	(*da raffinare) da implementare per Transfer Function:
-				1. se si fa doppio click in un punto vuoto del grafico va creata una nuova key in quel punto.
-				2. quando si clicca su ADD, dove va creata la nuova TFHandle??
 17.00 31/01/2008	(UCCIO) implementare la rimozione del BG della TF (UCCIO)
-0.29 06/02/2008		forse KEY dovrebbe contenere delle TF_KEY, e non TF_KEY*... indagare...
-12.48 09/02/2008	rimuovere dal .pro i files come filterparameter (mai usati!)
-18.00 09/02/2008	aggiungere la preview anche quando si muovono le TFHandles
-12.46 12/02/2008	(BUG REPORT)creo qualche TfHandle. (le sposto.) Ne cancello una. Clicco su un'altra handle (di un altro canale) CRASH! (BUG REPORT)
+

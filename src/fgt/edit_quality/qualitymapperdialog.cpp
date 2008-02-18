@@ -1011,6 +1011,9 @@ void QualityMapperDialog::on_TfHandle_clicked(TFHandle *sender)
 	ui.ySpinBox->setValue(_currentTfHandle->getRelativeY());
 
 	this->updateXQualityLabel(_currentTfHandle->getRelativeX());
+	//applying preview if necessary
+	if (ui.previewButton->isChecked()) //added by FB 07\02\08
+		on_applyButton_clicked();
 }
 
 //callback to manage double-click on a TfHandle object
@@ -1022,6 +1025,9 @@ void QualityMapperDialog::on_TfHandle_doubleClicked(TFHandle *sender)
 
 	//removing sender
 	_currentTfHandle = this->removeTfHandle(_currentTfHandle);
+	//applying preview if necessary
+	if (ui.previewButton->isChecked()) //added by FB 07\02\08
+		on_applyButton_clicked();
 }
 
 
@@ -1072,7 +1078,8 @@ void QualityMapperDialog::on_applyButton_clicked()
 
 void QualityMapperDialog::on_Handle_released()
 {
-	if (ui.previewButton->isChecked())
+	//applying preview if necessary
+	if (ui.previewButton->isChecked()) //added by FB 07\02\08
 		on_applyButton_clicked();
 }
 
@@ -1098,6 +1105,9 @@ void QualityMapperDialog::on_xSpinBox_valueChanged(double newX)
 		this->updateXQualityLabel(_currentTfHandle->getRelativeX());
 		//refresh of TF
 		this->drawTransferFunction();
+		//applying preview if necessary
+		if (ui.previewButton->isChecked()) //added by FB 07\02\08
+			on_applyButton_clicked();
 	}
 }
 
@@ -1116,6 +1126,9 @@ void QualityMapperDialog::on_ySpinBox_valueChanged(double newY)
 		this->updateTfHandlesOrder(_currentTfHandle->getChannel());
 		//refresh of TF
 		this->drawTransferFunction();
+		//applying preview if necessary
+		if (ui.previewButton->isChecked()) //added by FB 07\02\08
+			on_applyButton_clicked();
 	}
 }
 
@@ -1253,6 +1266,10 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 	this->drawTransferFunction();
 
 	this->updateXQualityLabel(_currentTfHandle->getRelativeX());
+
+	//applying preview if necessary
+	if (ui.previewButton->isChecked()) //added by FB 07\02\08
+		on_applyButton_clicked();
 }
 
 void QualityMapperDialog::updateXQualityLabel(float xPos)
