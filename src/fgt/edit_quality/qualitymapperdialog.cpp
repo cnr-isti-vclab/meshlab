@@ -1094,6 +1094,8 @@ void QualityMapperDialog::on_xSpinBox_valueChanged(double newX)
 		this->manageBorderTfHandles(_currentTfHandle);
 		//restoring the correct order for TfHandles (they're drawn in the same order as they're stored)
 		this->updateTfHandlesOrder(_currentTfHandle->getChannel());
+		//updating x-quality Label
+		this->updateXQualityLabel(_currentTfHandle->getRelativeX());
 		//refresh of TF
 		this->drawTransferFunction();
 	}
@@ -1255,7 +1257,7 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 
 void QualityMapperDialog::updateXQualityLabel(float xPos)
 {
-	float exp = log10(0.5f) / log10((float)_equalizerMidHandlePercentilePosition);
+	float exp = log10((float)_equalizerMidHandlePercentilePosition) / log10(0.5f);
 	_currentTfHandleQualityValue.setNum(relative2QualityValf(xPos, ui.minSpinBox->value(), ui.maxSpinBox->value(), exp));
 	ui.xQualityLabel->setText(_currentTfHandleQualityValue);
 }
