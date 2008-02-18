@@ -1,7 +1,7 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 CONFIG += stl
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
+INCLUDEPATH  += ../../.. ../../../../../sf ../../../../../code/lib/glew/include
 HEADERS       = ../const_types.h \
 								../histogram.h \
 								../transferfunction.h \

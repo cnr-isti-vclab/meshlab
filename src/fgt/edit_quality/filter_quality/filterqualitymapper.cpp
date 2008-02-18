@@ -23,6 +23,13 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2008/02/18 18:50:11  amaione
+filter_quality.pro:
+- updated include paths
+
+filterqualitymapper.cpp:
+- added parameters to filter gui
+
 Revision 1.2  2008/02/18 18:18:54  amaione
 *** empty log message ***
 
@@ -77,7 +84,7 @@ QualityMapperFilter::QualityMapperFilter()
 const QString QualityMapperFilter::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
-		case FP_MOVE_VERTEX :  return QString("Quality Mapper plugin applier"); 
+		case FP_MOVE_VERTEX :  return QString("Quality Mapper edit applier"); 
 		default : assert(0); 
 	}
 }
@@ -113,7 +120,11 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 {
 	 switch(ID(action))	 {
 		case FP_MOVE_VERTEX : 
-//			parlst.addString("nome", "valore di default", "descrizione", "tooltip");
+			parlst.addString("inputFile", "", "CSV input File" );
+			parlst.addFloat("minQualityVal", 0.0f, "Minimum mesh quality" );
+			parlst.addFloat("maxQualityVal", 100.0f, "Maximum mesh quality" );
+			parlst.addAbsPerc("midHandlePos", 0.5f, 0.0f, 1.0f, "Middle quality percentage position", "defines the percentage position of middle quality value");
+			parlst.addInt("brightness", 50, "mesh brightness" );
 //  		  parlst.addBool ("UpdateNormals",
 // 											true,
 // 											"Recompute normals",
