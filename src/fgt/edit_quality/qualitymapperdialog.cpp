@@ -802,7 +802,10 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 	ui.presetComboBox->setCurrentIndex( 0 );
 
 	//setting equalizer values
-	//METTERE QUì IL SETTAGGIO DELL'EQUALIZZATORE IN BASE AI VALORI LETTI DAL CSV FILE DI INGRESSO
+	EQUALIZER_INFO eqData;
+	this->loadEqualizerInfo(csvFileName, &eqData);
+	this->setEqualizerParameters(eqData);
+/*	on_resetButton_clicked(csvFileName, &eqData);*/
 
 	//drawing new TF
 	this->drawTransferFunction();
@@ -810,6 +813,49 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 	//applying preview if necessary
 	if (ui.previewButton->isChecked()) //added by FB 07\02\08
 		on_applyButton_clicked();
+}
+
+void QualityMapperDialog::loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
+{
+	QFile inFile( fileName );
+
+	if ( !inFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	QTextStream inStream( &inFile );
+	QString line;
+	QStringList splittedString;
+
+	int channel_code = 0;
+	do
+	{
+		line = inStream.readLine();
+
+		//if a line is a comment, it's not processed. imply ignoring it!
+		if ( !line.startsWith(CSV_FILE_COMMENT) )
+			channel_code ++;
+	} while( (!line.isNull()) && (channel_code < NUMBER_OF_CHANNELS) );
+
+	do
+	{
+		line = inStream.readLine();
+
+		//if a line is a comment, it's not processed. imply ignoring it!
+		if ( !line.startsWith(CSV_FILE_COMMENT) )
+		{
+			splittedString = line.split(CSV_FILE_SEPARATOR, QString::SkipEmptyParts);
+			assert(splittedString.size() == 4);
+
+			data->minQualityVal = splittedString[0].toFloat();
+			data->midQualityPercentage = splittedString[1].toFloat();
+			data->maxQualityVal = splittedString[2].toFloat();
+			data->brightness = splittedString[3].toFloat();
+
+			break;
+		}
+	} while(!line.isNull());
+
+	inFile.close();
 }
 
 //callback to manage the user selection of a TF from combo box
@@ -1142,35 +1188,13 @@ void QualityMapperDialog::updateTfHandlesOrder(int channelCode)
 
 void QualityMapperDialog::on_resetButton_clicked()
 {
-	// Resetting brightnessSlider position
-	ui.brightnessSlider->setSliderPosition(50);
-
-	// Resetting equalizerHistogram spinboxes values
-	ui.minSpinBox->setValue(_histogram_info->minX);
-	ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
-
-	ui.maxSpinBox->setValue(_histogram_info->maxX);
-	ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
-
-	ui.midSpinBox->setValue((_histogram_info->maxX + _histogram_info->minX) / 2.0f);
-	ui.midSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
-
-	// Because of approximation error it is necessary to directly update handles poistion, transferFunctionBG and gammaCorrection
-
-	qreal xStart = _histogram_info->leftBorder;
-	qreal xPos = 0.0f;
-	qreal yPos = _histogram_info->lowerBorder;
-	_equalizerMidHandlePercentilePosition = 0.5f;
-	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
-	{
-		xPos = xStart + _histogram_info->chartWidth/2.0f*i;
-		_equalizerHandles[i]->setPos(xPos,yPos);
-	}
-
-	drawGammaCorrection();
-	drawTransferFunctionBG();
-	if (ui.previewButton->isChecked())
-		on_applyButton_clicked();
+	assert(_histogram_info != 0);
+	EQUALIZER_INFO data;
+	data.brightness = 50;
+	data.minQualityVal = _histogram_info->minX;
+	data.maxQualityVal = _histogram_info->maxX;
+	data.midQualityPercentage = 0.5f;
+	this->setEqualizerParameters(data);
 }
 
 // Method invoked when moving left/right EqHandles, 
@@ -1277,5 +1301,38 @@ void QualityMapperDialog::updateXQualityLabel(float xPos)
 	float exp = log10((float)_equalizerMidHandlePercentilePosition) / log10(0.5f);
 	_currentTfHandleQualityValue.setNum(relative2QualityValf(xPos, ui.minSpinBox->value(), ui.maxSpinBox->value(), exp));
 	ui.xQualityLabel->setText(_currentTfHandleQualityValue);
+}
+
+void QualityMapperDialog::setEqualizerParameters(EQUALIZER_INFO data)
+{
+	// Resetting brightnessSlider position
+	ui.brightnessSlider->setSliderPosition(data.brightness);
+
+	// Resetting equalizerHistogram spinboxes values
+	ui.minSpinBox->setValue(data.minQualityVal);
+	ui.minSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
+
+	ui.maxSpinBox->setValue(data.maxQualityVal);
+	ui.maxSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
+
+	ui.midSpinBox->setValue(((data.maxQualityVal - data.minQualityVal) * data.midQualityPercentage) + data.minQualityVal);
+	ui.midSpinBox->setRange(data.minQualityVal, data.maxQualityVal);
+
+	// Because of approximation error it is necessary to directly update handles position, transferFunctionBG and gammaCorrection
+
+	qreal xStart = _histogram_info->leftBorder;
+	qreal xPos = 0.0f;
+	qreal yPos = _histogram_info->lowerBorder;
+	_equalizerMidHandlePercentilePosition = data.midQualityPercentage;
+	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
+	{
+		xPos = xStart + _histogram_info->chartWidth/2.0f*i;
+		_equalizerHandles[i]->setPos(xPos,yPos);
+	}
+
+	drawGammaCorrection();
+	drawTransferFunctionBG();
+	if (ui.previewButton->isChecked())
+		on_applyButton_clicked();
 }
 

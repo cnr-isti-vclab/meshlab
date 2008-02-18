@@ -146,6 +146,8 @@ private:
 	TFHandle			*addTfHandle(TFHandle *handle);
 	TFHandle			*removeTfHandle(TFHandle *handle);
 	void				updateXQualityLabel(float xRelativeTFPosition);
+	void				setEqualizerParameters(EQUALIZER_INFO data);
+	void				loadEqualizerInfo(QString inFileName, EQUALIZER_INFO *data);
 
 signals:
 	void suspendEditToggle();
