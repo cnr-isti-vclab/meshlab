@@ -79,15 +79,24 @@ namespace vcg {
 		}
 
 		void rebuild(){
-			typename vector<CuttingTriplet<VERTEX_TYPE> >::iterator iter;
+			typename vector<CuttingTriplet<VERTEX_TYPE> >::iterator iter = _container.begin();
+			typename vector<CuttingTriplet<VERTEX_TYPE> >::iterator last = _container.end();
+			//last punta all'ultimo elemento valido
+			--last;
 			int num_to_remove = 0;
-			for (iter = _container.begin(); iter != _container.end(); ++iter) {
+			
+			while (iter != last){
 				if ((*iter).v->IMark() != U) {
+					//elemento già marchiato, si può rimuovere dalla coda
+					*iter = *last;
+					--last;
 					++num_to_remove;
-					pop_heap(iter,_container.end(),cmp);
-				}
+				}	else {
+					++iter;
+				}		
 			}
 			_container.resize(_container.size() - num_to_remove);
+			make_heap(_container.begin(), _container.end(), cmp);
 		}
 
 		int size() {
@@ -130,9 +139,7 @@ namespace vcg {
 			Point3<float> ViVj = p->P() - q->P();
 			Point3<float> Tij;
 
-			Point3<float> n = p->N();
-			//n = n.Normalize();
-			n_nMatrix.ExternalProduct(n, n);
+			n_nMatrix.ExternalProduct(p->N(), p->N());
 
 			Tij = (n_nMatrix * ViVj).Normalize();
 
@@ -288,9 +295,6 @@ namespace vcg {
 					CuttingTriplet<VertexType> tempTriplet;
 
 					//prendo la tripletta con distanza minima
-
-					//tempTriplet = Q.top();
-					//Q.pop();
 					tempTriplet = Q.pop();
 
 					//controlla se il vertice estratto è ancora valido o se è stato già marchiato in precedenza
@@ -303,9 +307,14 @@ namespace vcg {
 					} else {
 						if (file) file << "Estrazione: Elemento nullo" << std::endl;
 					}
-					//++step_counter;
-					//if (step_counter%2500 == 1) 
-					//	Q.rebuild();
+					
+					//rimozione degli elementi inutili nella coda
+					++step_counter;
+					if (step_counter%5000 == 4999) {
+						int old_size = Q.size();
+						Q.rebuild();
+						if (file) file << "Rebuild: Coda -> " << old_size << " - Elementi cancellati -> " << old_size - Q.size() << std::endl;
+					}
 				}
 			}
 			end_time = clock();
