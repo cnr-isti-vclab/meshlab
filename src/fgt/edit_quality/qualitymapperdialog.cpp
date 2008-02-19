@@ -281,11 +281,17 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 	//x axis
 	current_item = scene.addLine( chart_info->leftBorder, chart_info->lowerBorder, chart_info->rightBorder, chart_info->lowerBorder, p );
 	current_item->setZValue( 0 );
-	_transferFunctionLines << current_item;
+	if (chart_info == _transferFunction_info)
+		_transferFunctionLines << current_item;
+	else
+		_equalizerHistogramBars << current_item;
 	//y axis
 	current_item = scene.addLine( chart_info->leftBorder, chart_info->upperBorder, chart_info->leftBorder, chart_info->lowerBorder, p );
 	current_item->setZValue( 0 );
-	_transferFunctionLines << current_item;
+	if (chart_info == _transferFunction_info)
+		_transferFunctionLines << current_item;
+	else
+		_equalizerHistogramBars << current_item;
 }
 
 // Initializes equalizerHistogramView

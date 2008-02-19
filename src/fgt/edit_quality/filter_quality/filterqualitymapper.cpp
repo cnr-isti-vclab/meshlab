@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2008/02/19 16:03:46  amaione
+fixed bug about axis draw in equalizer histogram
+
 Revision 1.3  2008/02/18 18:50:11  amaione
 filter_quality.pro:
 - updated include paths
@@ -125,15 +128,6 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 			parlst.addFloat("maxQualityVal", 100.0f, "Maximum mesh quality" );
 			parlst.addAbsPerc("midHandlePos", 0.5f, 0.0f, 1.0f, "Middle quality percentage position", "defines the percentage position of middle quality value");
 			parlst.addInt("brightness", 50, "mesh brightness" );
-//  		  parlst.addBool ("UpdateNormals",
-// 											true,
-// 											"Recompute normals",
-// 											"Toggle the recomputation of the normals after the random displacement.\n\n"
-// 											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect.");
-// 			parlst.addAbsPerc("Displacement",
-// 												m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),
-// 												"Max displacement",
-// 												"The vertex are displaced of a vector whose norm is bounded by this value");
 			break;
 											
 		default : assert(0); 
