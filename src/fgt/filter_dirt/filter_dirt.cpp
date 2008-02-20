@@ -29,6 +29,7 @@
 #include <vcg/complex/trimesh/update/color.h>
 
 #include <stdlib.h>
+#include <time.h>
 
 using namespace vcg;
 
@@ -80,15 +81,15 @@ const PluginInfo &FilterDirt::pluginInfo()
 
 const int FilterDirt::getRequirements(QAction *action)
 {
-	return MeshModel::MM_FACECOLOR;
+	return MeshModel::MM_FACECOLOR | MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACETOPO;
 }
 
 
 bool FilterDirt::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
 {
-	/*Select a random face and check only angle between face normal and mesh's -Y axe for now*/
+	/*Select a random face and check only angle between face normal and mesh's -Y, try to move dust over face for 100 iteration*/
 	/* 
-		Problema: Non sono riuscito a capire perchè (*di)->C()=vcg::Color4b::Blue; (come le funzioni vcg::tri::UpdateColor) 
+		Problema: Non sono riuscito a capire perchè face->C()=vcg::Color4b::Blue; (come le funzioni vcg::tri::UpdateColor) 
 		non funziona se prima non applico un filtro di tipo Colorize che modifica il colore delle facce
 		(triangle intersection, triangle qualitity, etc...). Ritorno in getRequest MM_FACECOLOR, per sicurezza ho
 		provato anche con MM_ALL.
@@ -98,11 +99,14 @@ bool FilterDirt::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &
 		a guardare cosa succede ma sono solo riuscito a vedere che il colore della faccia viene effettivamente modificato.
 
 		TODO:
-		 *Muovere i ton lungo la superfice per un certo numero di iterazioni
+		 *Muovere i ton lungo la superfice per un certo numero di iterazioni (per ora questo avviene muovendosi una faccia per iterazione)
+		 *La quantità di movimento deve dipendere dalla pendenza (della faccia) e dall'attrito della superfice (parametro utente)
 		 *fornire interfaccia per selezionare numero di ton e numero di iterazioni
 	     *Modificare flag vertici per tenere traccia della quantità di dust
 		 e per modificarne il colore alla fine delle iterazioni
 	*/
+	//init rand seed
+	srand ( time(NULL) );
 
 	//pointer to face where are dust ton 
 	vector<CFaceO*> dustTon;
@@ -113,6 +117,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &
 
 	int randomFace=0;
 
+	/*
 	//select random face 
 	for (int cont=0; cont<defaultDustTon; ++cont)
 	{
@@ -121,21 +126,97 @@ bool FilterDirt::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &
 			dustTon.push_back(&fi[randomFace]);
 		else
 			--cont;
-	}
-	
-	vcg::Point3f dustDirection;
+	}*/
 
-	for (di=dustTon.begin(); di!=dustTon.end(); ++di)
+	CFaceO* face = NULL;
+
+	//for now it take only a random face and check a casual point over
+	do
 	{
-		//color face for debug
-		(*di)->C()=vcg::Color4b::Blue;
-		//get vector direction to move dust over face
-		dustDirection = ((*di)->N() ^ vcg::Point3f(0,-1,0)) ^ (*di)->N();
+		face = &fi[rand()%m.cm.fn];
+	}
+	while (face->IsD());
+
+	assert (face!=NULL);
+
+	vcg::tri::UpdateColor<CMeshO>::FaceConstant(m.cm);
+
+	bool ottuso = false, border= false;
+
+	//find a casual point over face
+	float a = (float)(rand()%100);
+	float b = (float)(rand()%(int)(100-a))/100;
+	a /= 100;
+	float c = 1.0f - (a + b);
+	vcg::Point3f casualPoint = (face->V(0)->P()*a) + (face->V(1)->P()*b) + (face->V(2)->P()*c);	
+
+	for (int i=0; i<100 && !ottuso && !border; ++i)
+	{
+		//get dust direction over face
+		vcg::Point3f dustDirection = (face->N().Normalize() ^  vcg::Point3f(0,-1,0)) ^ face->N().Normalize();
 		//check if selected face angle between normal and -Y axe
-		if (!(vcg::Angle((*di)->N(),vcg::Point3f(0,-1,0))<M_PI/2))
-			Log(0,"angolo tra vettore normale e -Y acuto");
+		if (!(vcg::Angle(face->N(),vcg::Point3f(0,-1,0))<M_PI/2))
+		{
+			vcg::Point3f casualDirection = casualPoint + dustDirection*100;
+			//color face for debug
+			if (i==0)
+				face->C()=vcg::Color4b::Green;
+			else
+				face->C()=vcg::Color4b::Blue;
+
+			//find wedge incident with dust direction
+			vcg::Point3f vertDist[3];
+			
+			for (int k=0; k<3; k++)
+				vertDist[k] = face->V(k)->P() - casualDirection;
+
+			int minDist1=0;		
+			int minDist2=1;
+			for (int k=1; k<3; ++k)
+			{
+				if (vertDist[k].Norm()<vertDist[minDist1].Norm())
+				{
+					minDist2=minDist1;
+					minDist1=k;
+				}
+			}				
+			for (int k=2; k>=0; --k)
+			{
+				if ((k!=minDist1) && (vertDist[k].Norm()<vertDist[minDist2].Norm()))
+					minDist2=k;
+			}
+
+			//get point over wedge and select next face
+			vcg::Point3f q;
+			vcg::PSDist<float>(casualPoint,face->V(minDist1)->P(),face->V(minDist2)->P(),q);
+
+			int nextFace;
+			if ((minDist1 == 0 && minDist2 == 1) || (minDist1 == 1 && minDist2 == 0) )
+				nextFace = 0;
+			else if ((minDist1 == 1 && minDist2 == 2) || (minDist1 == 2 && minDist2 == 1))
+				nextFace = 1;
+			else
+				nextFace = 2;
+
+			if (face == face->FFp(nextFace))
+			{
+				border = true;
+				Log (0, "[%d] trovato bordo", i);
+				face->C()=vcg::Color4b::Red;
+			}
+			else
+				face = face->FFp(nextFace);
+			
+			//for now i get q, this point isn't right because isn't point incident between dustDirection and face wedge 
+			//but is min distance between p and wedge
+			casualPoint = q;
+		}
 		else
-			Log(0,"angolo tra vettore normale e -Y ottuso");
+		{
+			Log(0,"[%d] angolo tra vettore normale e -Y ottuso", i);
+			face->C()=vcg::Color4b::Red;
+			ottuso = true;
+		}
 	}
 
 	return true;
