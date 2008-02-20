@@ -20,8 +20,6 @@
 
 struct Penn {
 	float radius;
-	int paintutensil;
-	int painttype;
 	bool backface;
 	bool invisible;
 };
@@ -91,6 +89,7 @@ public slots:
 	void doRefineSlot(bool);
 	void changeNormalWeight(int);
 	void changeCurvatureWeight(int);
+	void changePenRadius(int);
 
 	void ColorizeGaussianSlot();
 	void ColorizeMeanSlot();

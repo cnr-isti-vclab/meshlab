@@ -38,6 +38,9 @@ void MeshCutDialog::on_curvatureWeightSlider_valueChanged() {
 	emit curvatureWeightSignal(ui.curvatureWeightSlider->value());
 }		
 
+void MeshCutDialog::on_penRadiusSlider_valueChanged() {
+	emit penRadiusSignal(ui.penRadiusSlider->value());
+}
 
 //debug function
 void MeshCutDialog::on_gaussianButton_clicked() {

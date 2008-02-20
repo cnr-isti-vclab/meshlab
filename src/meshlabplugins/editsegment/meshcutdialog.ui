@@ -31,8 +31,8 @@
     <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
-       <x>10</x>
-       <y>14</y>
+       <x>12</x>
+       <y>16</y>
        <width>116</width>
        <height>153</height>
       </rect>
@@ -74,14 +74,14 @@
       <item>
        <layout class="QVBoxLayout" >
         <item>
-         <widget class="QLabel" name="pennLabel" >
+         <widget class="QLabel" name="penLabel" >
           <property name="text" >
-           <string>Penn Radius</string>
+           <string>Pen Radius</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="pennSlider" >
+         <widget class="QSlider" name="penRadiusSlider" >
           <property name="maximum" >
            <number>10</number>
           </property>
@@ -125,10 +125,10 @@
     <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
-       <x>0</x>
-       <y>12</y>
+       <x>1</x>
+       <y>13</y>
        <width>132</width>
-       <height>226</height>
+       <height>224</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
@@ -211,64 +211,60 @@
       <item>
        <layout class="QVBoxLayout" >
         <item>
-         <layout class="QVBoxLayout" >
-          <item>
-           <widget class="QLabel" name="label" >
-            <property name="text" >
-             <string>Normal Weight</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="normalWeightSlider" >
-            <property name="maximum" >
-             <number>10</number>
-            </property>
-            <property name="pageStep" >
-             <number>2</number>
-            </property>
-            <property name="value" >
-             <number>5</number>
-            </property>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickInterval" >
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLabel" name="label" >
+          <property name="text" >
+           <string>Normal Weight</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" >
-          <item>
-           <widget class="QLabel" name="label_2" >
-            <property name="text" >
-             <string>Curvature Weight</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="curvatureWeightSlider" >
-            <property name="maximum" >
-             <number>10</number>
-            </property>
-            <property name="pageStep" >
-             <number>2</number>
-            </property>
-            <property name="value" >
-             <number>5</number>
-            </property>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickInterval" >
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QSlider" name="normalWeightSlider" >
+          <property name="maximum" >
+           <number>10</number>
+          </property>
+          <property name="pageStep" >
+           <number>2</number>
+          </property>
+          <property name="value" >
+           <number>5</number>
+          </property>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="tickInterval" >
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" >
+        <item>
+         <widget class="QLabel" name="label_2" >
+          <property name="text" >
+           <string>Curvature Weight</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="curvatureWeightSlider" >
+          <property name="maximum" >
+           <number>10</number>
+          </property>
+          <property name="pageStep" >
+           <number>2</number>
+          </property>
+          <property name="value" >
+           <number>5</number>
+          </property>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="tickInterval" >
+           <number>1</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

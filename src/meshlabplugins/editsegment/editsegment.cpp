@@ -275,9 +275,6 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 	parent->setCursor(QCursor(
 		QPixmap(":/images/editsegment_cursor.png", "PNG"), 1, 1));
 
-	/*if (!meshCut)
-	meshCut = new MeshCutting<CMeshO>(&m.cm);*/
-
 	if (!glarea_map.contains(parent)) {
 		glarea_map.insert(parent, new MeshCutting<CMeshO>(&m.cm));
 	}
@@ -307,7 +304,7 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 			SLOT(ColorizeMeanSlot()));
 		QObject::connect(meshCutDialog, SIGNAL(normalWeightSignal(int)),this, SLOT(changeNormalWeight(int)));
 		QObject::connect(meshCutDialog, SIGNAL(curvatureWeightSignal(int)),this, SLOT(changeCurvatureWeight(int)));
-
+		QObject::connect(meshCutDialog, SIGNAL(penRadiusSignal(int)),this, SLOT(changePenRadius(int)));
 	}
 	meshcut_dock->setVisible(true);
 	meshcut_dock->layout()->update();
@@ -531,6 +528,10 @@ void EditSegment::changeCurvatureWeight(int value) {
 
 void EditSegment::changeNormalWeight(int value) {
 	normalWeight = value;
+}
+
+void EditSegment::changePenRadius(int value) {
+	pen.radius = value;
 }
 
 void EditSegment::ColorizeGaussianSlot() {

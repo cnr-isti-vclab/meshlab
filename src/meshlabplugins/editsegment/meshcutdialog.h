@@ -34,12 +34,16 @@ private:
 		void on_normalWeightSlider_valueChanged();
 		void on_curvatureWeightSlider_valueChanged();		
 		
+		void on_penRadiusSlider_valueChanged();
+		
 	signals:
 		void meshCutSignal();
 		void selectForegroundSignal(bool);
 		void doRefineSignal(bool);
 		void normalWeightSignal(int);
 		void curvatureWeightSignal(int);
+		
+		void penRadiusSignal(int);
 
 		void colorizeGaussianSignal();
 		void colorizeMeanSignal();
