@@ -804,6 +804,7 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 	//setting equalizer values
 	EQUALIZER_INFO eqData;
 	loadEqualizerInfo(csvFileName, &eqData);
+	eqData.brightness = ui.brightnessSlider->maximum() * (1.0f - (eqData.brightness / 2.0f));
 	this->setEqualizerParameters(eqData);
 /*	on_resetButton_clicked(csvFileName, &eqData);*/
 
