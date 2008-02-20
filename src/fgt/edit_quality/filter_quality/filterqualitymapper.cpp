@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2008/02/20 14:52:57  fbellucci
+Refactoring of method necessary ti FilterQualityMapper
+
 Revision 1.4  2008/02/19 16:03:46  amaione
 fixed bug about axis draw in equalizer histogram
 
@@ -70,13 +73,14 @@ add samplefilter
 
 #include "filterqualitymapper.h"
 
+
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
 QualityMapperFilter::QualityMapperFilter() 
 { 
-	typeList << FP_MOVE_VERTEX;
+	typeList << FP_QUALITY_MAPPER;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -87,7 +91,7 @@ QualityMapperFilter::QualityMapperFilter()
 const QString QualityMapperFilter::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
-		case FP_MOVE_VERTEX :  return QString("Quality Mapper edit applier"); 
+		case FP_QUALITY_MAPPER :  return QString("Quality Mapper edit applier"); 
 		default : assert(0); 
 	}
 }
@@ -97,7 +101,7 @@ const QString QualityMapperFilter::filterName(FilterIDType filterId)
 const QString QualityMapperFilter::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_MOVE_VERTEX :  return QString("Edits color of mesh vertexes using Quality Mapper edit functionalities"); 
+		case FP_QUALITY_MAPPER :  return QString("Edits color of mesh vertexes using Quality Mapper edit functionalities"); 
 		default : assert(0); 
 	}
 }
@@ -121,13 +125,29 @@ const PluginInfo &QualityMapperFilter::pluginInfo()
 void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
 //void QualityMapperFilter::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
+	QString csvFileName = 0;
 	 switch(ID(action))	 {
-		case FP_MOVE_VERTEX : 
-			parlst.addString("inputFile", "", "CSV input File" );
-			parlst.addFloat("minQualityVal", 0.0f, "Minimum mesh quality" );
-			parlst.addFloat("maxQualityVal", 100.0f, "Maximum mesh quality" );
-			parlst.addAbsPerc("midHandlePos", 0.5f, 0.0f, 1.0f, "Middle quality percentage position", "defines the percentage position of middle quality value");
-			parlst.addInt("brightness", 50, "mesh brightness" );
+		case FP_QUALITY_MAPPER :
+			//user chooses the file to load
+			csvFileName = QFileDialog::getOpenFileName(0, "Open Input CSV File", QDir::currentPath(), "CSV File (*.csv)");
+
+			EQUALIZER_INFO eqData;
+			eqData.minQualityVal = 0.0f;
+			eqData.midQualityPercentage = 0.5f;
+			eqData.maxQualityVal = 100.0f;
+			eqData.brightness = 50;
+
+			if (!csvFileName.isNull())
+			{
+				//setting equalizer values
+				QualityMapperDialog::loadEqualizerInfo(csvFileName, &eqData);
+			}
+
+			parlst.addString("csvFileName", csvFileName, "CSV input File" );
+			parlst.addFloat("minQualityVal", eqData.minQualityVal, "Minimum mesh quality" );
+			parlst.addFloat("maxQualityVal", eqData.maxQualityVal, "Maximum mesh quality" );
+			parlst.addAbsPerc("midHandlePos", eqData.midQualityPercentage, 0.0f, 1.0f, "Middle quality percentage position", "defines the percentage position of middle quality value");
+			parlst.addInt("brightness", eqData.brightness, "mesh brightness" );
 			break;
 											
 		default : assert(0); 
@@ -138,31 +158,22 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 // Move Vertex of a random quantity
 bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-	//MeshModel &m=*md->mm();
-	srand(time(NULL)); 
-	const float max_displacement =par.getAbsPerc("Displacement");
+	QString csvFileName = par.getString("csvFileName");
+	if (!csvFileName.isNull())
+	{
+		//building new TF object from external file
+		TransferFunction transferFunction( csvFileName );
 
- 	for(unsigned int i = 0; i< m.cm.vert.size(); i++){
-		 // Typical usage of the callback for showing a nice progress bar in the bottom. 
-		 // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
-		  cb(100*i/m.cm.vert.size(), "Randomly Displacing...");
+		QualityMapperDialog::applyColorByVertexQuality(m, &transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), par.getFloat("midHandlePos"), par.getFloat("brightness"));
 
-		float rndax = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-		float rnday = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-		float rndaz = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-		m.cm.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);		
+		// Log function dump textual info in the lower part of the MeshLab screen. 
+		//Log(0,"Successfully displaced %i vertices",m.cm.vn);
+
+		return true;
 	}
-	
-	// Log function dump textual info in the lower part of the MeshLab screen. 
-	Log(0,"Successfully displaced %i vertices",m.cm.vn);
-	
-	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
-	if(par.getBool("UpdateNormals"))	
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
-  
-	return true;
+	else
+		return false;
 }
+
 
 Q_EXPORT_PLUGIN(QualityMapperFilter)

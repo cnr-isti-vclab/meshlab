@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.2  2008/02/20 14:52:57  fbellucci
+Refactoring of method necessary ti FilterQualityMapper
+
 Revision 1.1  2008/02/18 18:05:20  amaione
 UPDATED PERSONAL PROJECTS FILES
 AND
@@ -47,13 +50,17 @@ add sampleplugins
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
+#include "../transferfunction.h"
+#include "../qualitymapperdialog.h"
+
+
 class QualityMapperFilter : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_MOVE_VERTEX  } ;
+	enum { FP_QUALITY_MAPPER  } ;
 
 	QualityMapperFilter();
 	

@@ -3,20 +3,15 @@ CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../../.. ../../../../../sf ../../../../../code/lib/glew/include
 HEADERS       = ../const_types.h \
-								../histogram.h \
 								../transferfunction.h \
 								../util.h \
-								../handle.h \
-								../eqhandle.h \
-								../tfhandle.h \
+								../qualitymapperdialog.h \
 								filterqualitymapper.h \
 								../../../meshlab/filterparameter.h 
 
 SOURCES       = ../transferfunction.cpp \
 								../util.cpp \
-								../handle.cpp \
-								../eqhandle.cpp \
-								../tfhandle.cpp \
+								../qualitymapperdialog.cpp \
 								filterqualitymapper.cpp \
 								../../../meshlab/filterparameter.cpp
 

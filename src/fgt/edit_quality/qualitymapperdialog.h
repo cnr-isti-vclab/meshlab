@@ -94,6 +94,12 @@ public:
 
 
 	static pair<int,int> computeHistogramMinMaxY (Histogramf*);
+	// Apply colors to mesh vertexes by quality
+	static void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness);
+	// Opens a CSV file and gets its equalizer parameters
+	static void loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data);
+
+
 private:
 	Ui::QualityMapperDialogClass ui;
 //	QualityMapperSettings _settings;
@@ -142,7 +148,7 @@ private:
 	TFHandle			*removeTfHandle(TFHandle *handle);
 	void				updateXQualityLabel(float xRelativeTFPosition);
 	void				setEqualizerParameters(EQUALIZER_INFO data);
-	void				loadEqualizerInfo(QString inFileName, EQUALIZER_INFO *data);
+	//void				loadEqualizerInfo(QString inFileName, EQUALIZER_INFO *data);
 
 signals:
 	void suspendEditToggle();

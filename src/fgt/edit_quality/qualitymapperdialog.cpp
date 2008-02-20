@@ -32,6 +32,84 @@ pair<int,int> QualityMapperDialog::computeHistogramMinMaxY (Histogramf* histogra
 	return minMaxY;
 }
 
+void QualityMapperDialog::loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
+{
+	QFile inFile( fileName );
+
+	if ( !inFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	QTextStream inStream( &inFile );
+	QString line;
+	QStringList splittedString;
+
+	int channel_code = 0;
+	do
+	{
+		line = inStream.readLine();
+
+		//if a line is a comment, it's not processed. imply ignoring it!
+		if ( !line.startsWith(CSV_FILE_COMMENT) )
+			channel_code ++;
+	} while( (!line.isNull()) && (channel_code < NUMBER_OF_CHANNELS) );
+
+	do
+	{
+		line = inStream.readLine();
+
+		//if a line is a comment, it's not processed. imply ignoring it!
+		if ( !line.startsWith(CSV_FILE_COMMENT) )
+		{
+			splittedString = line.split(CSV_FILE_SEPARATOR, QString::SkipEmptyParts);
+			assert(splittedString.size() == 4);
+
+			data->minQualityVal = splittedString[0].toFloat();
+			data->midQualityPercentage = splittedString[1].toFloat();
+			data->maxQualityVal = splittedString[2].toFloat();
+			data->brightness = splittedString[3].toFloat();
+
+			break;
+		}
+	} while(!line.isNull());
+
+	inFile.close();
+}
+
+
+void QualityMapperDialog::applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness)
+{
+	CMeshO::VertexIterator vi;
+	float percentageQuality;
+	Color4b currentColor;
+
+	for(vi=mesh.cm.vert.begin(); vi!=mesh.cm.vert.end(); ++vi)		
+		if(!(*vi).IsD()) 
+		{
+			float vertexQuality = (*vi).Q();
+			if (vertexQuality < minQuality)
+				percentageQuality = 0.0;
+			else
+				if (vertexQuality > maxQuality)
+					percentageQuality = 1.0;
+				else
+					percentageQuality = pow( ((*vi).Q() - minQuality) / (maxQuality - minQuality) , (float)(2.0*midHandlePercentilePosition));
+
+			currentColor = transferFunction->getColorByQuality(percentageQuality);
+			
+			if (brightness!=1.0f) //Applying brightness to each color channel
+				if (brightness<1.0f)
+					for (int i=0; i<3; i++) 
+						//currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
+						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i]+1,257.0f),brightness), 255.0f);
+				else
+					for (int i=0; i<3; i++) 
+						//currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
+						currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i]+1,257.0f),2-brightness), 255.0f);
+
+			(*vi).C() = currentColor;
+		}
+}
+
 //class constructor
 QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *gla) : QDockWidget(parent), mesh(m)
 {
@@ -818,7 +896,7 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 
 	//setting equalizer values
 	EQUALIZER_INFO eqData;
-	this->loadEqualizerInfo(csvFileName, &eqData);
+	loadEqualizerInfo(csvFileName, &eqData);
 	this->setEqualizerParameters(eqData);
 /*	on_resetButton_clicked(csvFileName, &eqData);*/
 
@@ -830,48 +908,6 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 		on_applyButton_clicked();
 }
 
-void QualityMapperDialog::loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
-{
-	QFile inFile( fileName );
-
-	if ( !inFile.open(QIODevice::ReadOnly | QIODevice::Text))
-		return;
-
-	QTextStream inStream( &inFile );
-	QString line;
-	QStringList splittedString;
-
-	int channel_code = 0;
-	do
-	{
-		line = inStream.readLine();
-
-		//if a line is a comment, it's not processed. imply ignoring it!
-		if ( !line.startsWith(CSV_FILE_COMMENT) )
-			channel_code ++;
-	} while( (!line.isNull()) && (channel_code < NUMBER_OF_CHANNELS) );
-
-	do
-	{
-		line = inStream.readLine();
-
-		//if a line is a comment, it's not processed. imply ignoring it!
-		if ( !line.startsWith(CSV_FILE_COMMENT) )
-		{
-			splittedString = line.split(CSV_FILE_SEPARATOR, QString::SkipEmptyParts);
-			assert(splittedString.size() == 4);
-
-			data->minQualityVal = splittedString[0].toFloat();
-			data->midQualityPercentage = splittedString[1].toFloat();
-			data->maxQualityVal = splittedString[2].toFloat();
-			data->brightness = splittedString[3].toFloat();
-
-			break;
-		}
-	} while(!line.isNull());
-
-	inFile.close();
-}
 
 //callback to manage the user selection of a TF from combo box
 //builds a new TF joined to newValue. It searches first among the default ones, then among the external file ones
@@ -1095,7 +1131,7 @@ void QualityMapperDialog::on_TfHandle_doubleClicked(TFHandle *sender)
 
 
 
-void QualityMapperDialog::on_applyButton_clicked()
+/*void QualityMapperDialog::on_applyButton_clicked()
 {
 	// Colorazione della mesh
 	float rangeMin = ui.minSpinBox->value();	
@@ -1137,7 +1173,22 @@ void QualityMapperDialog::on_applyButton_clicked()
 		}
 
 	gla->update();
+}*/
+
+void QualityMapperDialog::on_applyButton_clicked()
+{
+	float minQuality = ui.minSpinBox->value();	
+	float maxQuality = ui.maxSpinBox->value();	
+
+	// brightness value between 0 and 2
+	float brightness = (1.0f - (float)(ui.brightnessSlider->value())/(float)(ui.brightnessSlider->maximum()) )*2.0;
+
+	applyColorByVertexQuality((MeshModel&)mesh, _transferFunction, minQuality, maxQuality, (float)_equalizerMidHandlePercentilePosition, brightness);
+
+	gla->update();
 }
+
+
 
 void QualityMapperDialog::on_Handle_released()
 {
