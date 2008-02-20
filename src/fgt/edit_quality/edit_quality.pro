@@ -2,19 +2,22 @@ TEMPLATE      = lib
 CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = const_types.h \
+HEADERS       = common/const_types.h \
 		qualitymapper.h \
 		qualitymapperdialog.h \
-		transferfunction.h \
-		util.h \
+		common/transferfunction.h \
+		common/util.h \
+		common/meshmethods.h\
 		handle.h \
 		eqhandle.h \
 		tfhandle.h
 
 SOURCES       = qualitymapper.cpp\
-		transferfunction.cpp\
 		qualitymapperdialog.cpp\
-		util.cpp handle.cpp\
+		common/transferfunction.cpp\
+		common/util.cpp \
+		common/meshmethods.cpp\
+		handle.cpp\
 		eqhandle.cpp \
 		tfhandle.cpp 
 

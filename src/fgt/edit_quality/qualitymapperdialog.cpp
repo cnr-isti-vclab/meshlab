@@ -16,102 +16,9 @@ bool TfHandleCompare(TFHandle*h1, TFHandle*h2)
 void TFDoubleClickCatcher::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {	emit TFdoubleClicked(event->scenePos());	}
 
-pair<int,int> QualityMapperDialog::computeHistogramMinMaxY (Histogramf* histogram)
-{
-	int maxY = 0;
-	int minY = std::numeric_limits<int>::max();
-	for (int i=0; i<histogram->n; i++) 
-	{
-		if ( histogram->H[i] > maxY )
-			maxY = histogram->H[i];
-
-		if ( histogram->H[i] < minY )
-			minY = histogram->H[i];
-	}
-	pair<int,int> minMaxY(minY,maxY);
-	return minMaxY;
-}
-
-void QualityMapperDialog::loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
-{
-	QFile inFile( fileName );
-
-	if ( !inFile.open(QIODevice::ReadOnly | QIODevice::Text))
-		return;
-
-	QTextStream inStream( &inFile );
-	QString line;
-	QStringList splittedString;
-
-	int channel_code = 0;
-	do
-	{
-		line = inStream.readLine();
-
-		//if a line is a comment, it's not processed. imply ignoring it!
-		if ( !line.startsWith(CSV_FILE_COMMENT) )
-			channel_code ++;
-	} while( (!line.isNull()) && (channel_code < NUMBER_OF_CHANNELS) );
-
-	do
-	{
-		line = inStream.readLine();
-
-		//if a line is a comment, it's not processed. imply ignoring it!
-		if ( !line.startsWith(CSV_FILE_COMMENT) )
-		{
-			splittedString = line.split(CSV_FILE_SEPARATOR, QString::SkipEmptyParts);
-			assert(splittedString.size() == 4);
-
-			data->minQualityVal = splittedString[0].toFloat();
-			data->midQualityPercentage = splittedString[1].toFloat();
-			data->maxQualityVal = splittedString[2].toFloat();
-			data->brightness = splittedString[3].toFloat();
-
-			break;
-		}
-	} while(!line.isNull());
-
-	inFile.close();
-}
-
-
-void QualityMapperDialog::applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness)
-{
-	CMeshO::VertexIterator vi;
-	float percentageQuality;
-	Color4b currentColor;
-
-	for(vi=mesh.cm.vert.begin(); vi!=mesh.cm.vert.end(); ++vi)		
-		if(!(*vi).IsD()) 
-		{
-			float vertexQuality = (*vi).Q();
-			if (vertexQuality < minQuality)
-				percentageQuality = 0.0;
-			else
-				if (vertexQuality > maxQuality)
-					percentageQuality = 1.0;
-				else
-					percentageQuality = pow( ((*vi).Q() - minQuality) / (maxQuality - minQuality) , (float)(2.0*midHandlePercentilePosition));
-
-			currentColor = transferFunction->getColorByQuality(percentageQuality);
-			
-			if (brightness!=1.0f) //Applying brightness to each color channel
-				if (brightness<1.0f)
-					for (int i=0; i<3; i++) 
-						//currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
-						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i]+1,257.0f),brightness), 255.0f);
-				else
-					for (int i=0; i<3; i++) 
-						//currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
-						currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i]+1,257.0f),2-brightness), 255.0f);
-
-			(*vi).C() = currentColor;
-		}
-}
 
 //class constructor
-QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel *m, GLArea *gla) : QDockWidget(parent), mesh(m)
+QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla) : QDockWidget(parent), mesh(m)
 {
 	ui.setupUi(this);
 
@@ -493,8 +400,8 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 	{
 		// This block is called only the first time
 		_equalizer_histogram = new Histogramf();
-		Frange histogramRange(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mesh->cm));
-		this->ComputePerVertexQualityHistogram(mesh->cm, histogramRange, _equalizer_histogram, numberOfBins);
+		Frange histogramRange(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mesh.cm));
+		this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, numberOfBins);
 		if (histogramRange.minV == histogramRange.maxV)
 		{
 			int ret = QMessageBox::warning(this, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 
@@ -523,7 +430,7 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		float minX = (_histogram_info->minX<ui.minSpinBox->value())?_histogram_info->minX:ui.minSpinBox->value();
 		float maxX = (_histogram_info->maxX>ui.maxSpinBox->value())?_histogram_info->maxX:ui.maxSpinBox->value();
 		Frange mmmq(minX, maxX);
-		this->ComputePerVertexQualityHistogram(mesh->cm, mmmq, _equalizer_histogram, numberOfBins);
+		this->ComputePerVertexQualityHistogram(mesh.cm, mmmq, _equalizer_histogram, numberOfBins);
 
 		pair<int,int> minMaxY = computeHistogramMinMaxY(_equalizer_histogram);
 		_histogram_info->minY = minMaxY.first;
@@ -831,7 +738,7 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 	eqInfo.minQualityVal = ui.minSpinBox->value();
 	eqInfo.midQualityPercentage = _equalizerMidHandlePercentilePosition;
 	eqInfo.maxQualityVal = ui.maxSpinBox->value();
-	eqInfo.brightness = ui.brightnessSlider->value();
+	eqInfo.brightness = (1.0f - (float)(ui.brightnessSlider->value())/(float)(ui.brightnessSlider->maximum()) )*2.0;
 	
 	QString tfPath = _transferFunction->saveColorBand( tfName, eqInfo );
 

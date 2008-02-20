@@ -23,6 +23,16 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2008/02/20 17:23:00  fbellucci
+-changed folders\files organizations. Added Common folder to contain files used by both projects
+
+-many minor changed due to update of incude file paths
+
+- changed representation of brightness level value in csv files
+- fixed bug in apply method of filter
+
+-other minor changes
+
 Revision 1.5  2008/02/20 14:52:57  fbellucci
 Refactoring of method necessary ti FilterQualityMapper
 
@@ -135,19 +145,19 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 			eqData.minQualityVal = 0.0f;
 			eqData.midQualityPercentage = 0.5f;
 			eqData.maxQualityVal = 100.0f;
-			eqData.brightness = 50;
+			eqData.brightness = 1.0f;
 
 			if (!csvFileName.isNull())
 			{
 				//setting equalizer values
-				QualityMapperDialog::loadEqualizerInfo(csvFileName, &eqData);
+				loadEqualizerInfo(csvFileName, &eqData);
 			}
 
 			parlst.addString("csvFileName", csvFileName, "CSV input File" );
 			parlst.addFloat("minQualityVal", eqData.minQualityVal, "Minimum mesh quality" );
 			parlst.addFloat("maxQualityVal", eqData.maxQualityVal, "Maximum mesh quality" );
 			parlst.addAbsPerc("midHandlePos", eqData.midQualityPercentage, 0.0f, 1.0f, "Middle quality percentage position", "defines the percentage position of middle quality value");
-			parlst.addInt("brightness", eqData.brightness, "mesh brightness" );
+			parlst.addFloat("brightness", eqData.brightness, "mesh brightness" );
 			break;
 											
 		default : assert(0); 
@@ -163,8 +173,7 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	{
 		//building new TF object from external file
 		TransferFunction transferFunction( csvFileName );
-
-		QualityMapperDialog::applyColorByVertexQuality(m, &transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), par.getFloat("midHandlePos"), par.getFloat("brightness"));
+		applyColorByVertexQuality(m, &transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), par.getAbsPerc("midHandlePos"), par.getFloat("brightness"));
 
 		// Log function dump textual info in the lower part of the MeshLab screen. 
 		//Log(0,"Successfully displaced %i vertices",m.cm.vn);

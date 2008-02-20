@@ -1,10 +1,7 @@
 #ifndef _EQHANDLE_H_
 #define _EQHANDLE_H_
 
-//#include <QObject>
-//#include <QGraphicsItem>
 #include "handle.h"
-//#include "util.h"
 
 enum EQUALIZER_HANDLE_TYPE
 {

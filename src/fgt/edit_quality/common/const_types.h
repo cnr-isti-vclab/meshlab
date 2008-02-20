@@ -36,7 +36,7 @@ struct EQUALIZER_INFO
 	float minQualityVal;
 	float midQualityPercentage;
 	float maxQualityVal;
-	int brightness;
+	float brightness;
 };
 
 #endif

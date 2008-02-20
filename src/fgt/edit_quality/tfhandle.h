@@ -2,8 +2,7 @@
 #define _TFHANDLE_H_
 
 #include "handle.h"
-#include "util.h"
-#include "transferfunction.h"
+#include "common/transferfunction.h"
 
 
 /* Specific handle for TransferFunctionScene*/

@@ -94,12 +94,12 @@ void QualityMapperPlugin::Decorate(QAction *, MeshModel&, GLArea *)
 {
 }
 
-void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel &m, GLArea *gla )
+void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel& m, GLArea *gla )
 {
 	//	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 
 	if(_qualityMapperDialog==0)
-		_qualityMapperDialog = new QualityMapperDialog(gla->window(), &m, gla);
+		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla);
 
 	//drawing histogram
 	//bool ret = _qualityMapperDialog->initEqualizerHistogram();

@@ -5,7 +5,7 @@
 #include <QGraphicsItem>
 #include <QtGui>
 #include <limits>
-#include "util.h"
+#include "common/util.h"
 
 /* Drag&Drop generic handle to be used in QGrahicsScenes */
 class Handle : public QObject, public QGraphicsItem

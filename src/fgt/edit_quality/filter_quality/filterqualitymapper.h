@@ -23,6 +23,16 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2008/02/20 17:23:00  fbellucci
+-changed folders\files organizations. Added Common folder to contain files used by both projects
+
+-many minor changed due to update of incude file paths
+
+- changed representation of brightness level value in csv files
+- fixed bug in apply method of filter
+
+-other minor changes
+
 Revision 1.2  2008/02/20 14:52:57  fbellucci
 Refactoring of method necessary ti FilterQualityMapper
 
@@ -50,8 +60,8 @@ add sampleplugins
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-#include "../transferfunction.h"
-#include "../qualitymapperdialog.h"
+#include "../common/transferfunction.h"
+#include "../common/meshmethods.h"
 
 
 class QualityMapperFilter : public QObject, public MeshFilterInterface

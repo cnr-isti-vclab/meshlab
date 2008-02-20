@@ -2,16 +2,16 @@ TEMPLATE      = lib
 CONFIG       += plugin
 CONFIG += stl
 INCLUDEPATH  += ../../.. ../../../../../sf ../../../../../code/lib/glew/include
-HEADERS       = ../const_types.h \
-								../transferfunction.h \
-								../util.h \
-								../qualitymapperdialog.h \
+HEADERS       = ../common/const_types.h \
+								../common/transferfunction.h \
+								../common/util.h \
+								../common/meshmethods.h \
 								filterqualitymapper.h \
 								../../../meshlab/filterparameter.h 
 
-SOURCES       = ../transferfunction.cpp \
-								../util.cpp \
-								../qualitymapperdialog.cpp \
+SOURCES       = ../common/transferfunction.cpp \
+								../common/util.cpp \
+								../common/meshmethods.cpp \
 								filterqualitymapper.cpp \
 								../../../meshlab/filterparameter.cpp
 

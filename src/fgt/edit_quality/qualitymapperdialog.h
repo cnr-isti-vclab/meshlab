@@ -20,7 +20,8 @@
 #include "../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
 #include <vcg/complex/trimesh/stat.h>
 #include <meshlab/glarea.h>
-#include "transferfunction.h"
+#include "common/transferfunction.h"
+#include "common/meshmethods.h"
 #include "eqhandle.h"
 #include "tfhandle.h"
 
@@ -81,7 +82,7 @@ class QualityMapperDialog : public QDockWidget
 	Q_OBJECT
 
 public:
-	QualityMapperDialog(QWidget *parent=0, MeshModel *m=0, GLArea *gla=0);
+	QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla=0);
 	~QualityMapperDialog();
 	
 //	inline void setMesh(MeshModel *m){ mesh=m; }
@@ -93,11 +94,6 @@ public:
 	void drawTransferFunction();
 
 
-	static pair<int,int> computeHistogramMinMaxY (Histogramf*);
-	// Apply colors to mesh vertexes by quality
-	static void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness);
-	// Opens a CSV file and gets its equalizer parameters
-	static void loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data);
 
 
 private:
@@ -128,7 +124,7 @@ private:
 
 	GRAPHICS_ITEMS_LIST _removed_items;
 
-	MeshModel		*mesh;
+	MeshModel&		mesh;
 	GLArea			*gla;
 
 	void initTF();
