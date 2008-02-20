@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.10  2008/02/20 21:59:37  gianpaolopalma
+ Added support to file .x3dv and .wrl
+
  Revision 1.9  2008/02/15 08:27:44  cignoni
  - '>> 'changed into '> >'
  - Used HasPerFaceSomething(M) instead of M.HasPerFaceSomething() that is deprecated.
@@ -82,12 +85,16 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 
 	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nFile: %2\nError details: %3";
 	string filename = QFile::encodeName(fileName).constData ();
-  	bool normalsUpdated = false;
-	if(formatName.toUpper() == tr("X3D"))
+  bool normalsUpdated = false;
+	if(formatName.toUpper() == tr("X3D") || formatName.toUpper() == tr("X3DV") || formatName.toUpper() == tr("WRL"))
 	{
 		m.addinfo = NULL;
 		vcg::tri::io::AdditionalInfoX3D* info = NULL;
-		int result = vcg::tri::io::ImporterX3D<CMeshO>::LoadMask(filename.c_str(), info); 
+		int result;
+		if (formatName.toUpper() == tr("X3D"))
+			result = vcg::tri::io::ImporterX3D<CMeshO>::LoadMask(filename.c_str(), info); 
+		else
+			result = vcg::tri::io::ImporterX3D<CMeshO>::LoadMaskVrml(filename.c_str(), info);
 		if ( result != vcg::tri::io::ImporterX3D<CMeshO>::E_NOERROR)
 		{
 			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
@@ -185,7 +192,9 @@ bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshM
 QList<MeshIOInterface::Format> IoX3DPlugin::importFormats() const
 {
 	QList<Format> formatList;
-	formatList << Format("X3D File Format", tr("X3D"));
+	formatList << Format("X3D File Format - XML encoding", tr("X3D"));
+	formatList << Format("X3D File Format - VRML encoding", tr("X3DV"));
+	formatList << Format("VRML File Format", tr("WRL"));
 	return formatList;
 }
 

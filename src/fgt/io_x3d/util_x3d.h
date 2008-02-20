@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.7  2008/02/20 21:59:01  gianpaolopalma
+ Added support to file .x3dv and .wrl
+
  Revision 1.6  2008/02/13 15:23:56  gianpaolopalma
  Added error code
  Added vector to manage the assignment of texture index
@@ -94,6 +97,9 @@ namespace io {
 		}
 	};
 
+
+	static char* errorStr;
+
 	class UtilX3D
 	{
 	public:
@@ -130,11 +136,10 @@ namespace io {
 			E_INVALIDSAVECOLOR, //27
 			E_INVALIDSAVENORMAL, //28
 			E_INVALIDSAVETEXCOORD, //29
-			E_NOGEOMETRY //30
-
+			E_NOGEOMETRY, //30
+			E_VRMLPARSERERROR	//31
 		};
-
-
+		
 		static const char *ErrorMsg(int error)
 		{
 			static const char * x3d_error_msg[] =
@@ -172,7 +177,8 @@ namespace io {
 				"Mesh whitout a geometry"
 			};
 
-			if(error > 29 || error < 0) return "Unknown error";
+			if(error > 31 || error < 0) return "Unknown error";
+			else if (error == 31) return errorStr;
 			else return x3d_error_msg[error];
 		};
 
