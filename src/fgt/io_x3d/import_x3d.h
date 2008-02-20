@@ -24,6 +24,10 @@
   History
 
  $Log$
+ Revision 1.12  2008/02/20 21:58:11  gianpaolopalma
+ Added support to file .x3dv and .wrl
+ Bug fixed in the management of ProtoInstance node
+
  Revision 1.11  2008/02/15 08:27:44  cignoni
  - '>> 'changed into '> >'
  - Used HasPerFaceSomething(M) instead of M.HasPerFaceSomething() that is deprecated.
@@ -79,6 +83,7 @@
 #include <wrap/gl/glu_tesselator.h>
 
 #include <util_x3d.h>
+#include <vrml/Parser.h>
 
 #include <set>
 
@@ -171,6 +176,7 @@ namespace io {
 					QStringList paths = url.split(" ", QString::SkipEmptyParts);
 					int i = 0;
 					bool found = false;
+					QStringList vrmlPaths = QStringList();
 					while (i < paths.size() && !found)
 					{
 						QString path = paths.at(i).trimmed().remove(QChar('"'));
@@ -199,7 +205,7 @@ namespace io {
 								QFile file(path);
 								if (file.open(QIODevice::ReadOnly))
 								{
-									//load components mesh info from file linked in Inline node
+									//load components mesh info from file .x3d linked in Inline node
 									info->filenameStack.push_back(path);
 									if (!docChild->setContent(&file)) 
 										return E_INVALIDXML;
@@ -211,8 +217,29 @@ namespace io {
 									found = true;
 								}
 							}
+							else if (load && (fi.suffix().toLower() == "x3dv" || fi.suffix().toLower() == "wrl"))
+								vrmlPaths.push_back(path);
 						}
 						i++;
+					}
+					int j = 0;
+					//load components mesh info from file .x3dv e .wrl
+					while(j < vrmlPaths.size() && !found)
+					{
+						QDomDocument* document = new QDomDocument();
+						int result = ParseVrml(vrmlPaths.at(j).toStdString().c_str(), document);
+						if (result == E_NOERROR)
+						{
+							info->filenameStack.push_back(vrmlPaths.at(j));
+							info->inlineNodeMap[vrmlPaths.at(j)] = document;
+							int result = LoadMaskByDom(document, info, vrmlPaths.at(j));
+							if (result != E_NOERROR) return result;
+							info->filenameStack.pop_back();
+							found = true;
+						}
+						else
+							delete document;
+						j++;
 					}
 				}
 			}
@@ -231,6 +258,7 @@ namespace io {
 				QStringList paths = url.split(" ", QString::SkipEmptyParts);
 				int i = 0;
 				bool found = false;
+				QStringList vrmlPaths = QStringList();
 				while (i < paths.size() && !found)
 				{
 					//get file path and prototype name 
@@ -294,9 +322,47 @@ namespace io {
 									}
 								}
 							}
+							else if (load && (fi.suffix().toLower() == "x3dv" || fi.suffix().toLower() == "wrl"))
+								vrmlPaths.push_back(str);
 						}
 					}
 					i++;
+				}
+				int t = 0;
+				while (t < vrmlPaths.size() && !found)
+				{
+					QDomDocument* document = new QDomDocument();
+					QStringList list = vrmlPaths.at(i).split("#", QString::SkipEmptyParts);
+					QString path = list.at(0);
+					QString protoName = "";
+					if (list.size()>1)
+						protoName = list.at(1);
+					int result = ParseVrml(path.toStdString().c_str(), document);
+					if (result == E_NOERROR)
+					{					
+						//search the ProtoDeclare node of the prototype
+						QDomNodeList prototypes = document->elementsByTagName("ProtoDeclare");
+						int j = 0;
+						while (j < prototypes.size() && !found)
+						{
+							QDomElement elem = prototypes.at(j).toElement();
+							if (elem.attribute("name") == protoName)
+							{
+								//load components mesh info from prototype
+								found = true;
+								QDomDocument* x = new QDomDocument(protoName);
+								x->appendChild(elem.cloneNode());
+								info->filenameStack.push_back(QFileInfo(path).fileName() + "#" + protoName);
+								info->protoDeclareNodeMap[QFileInfo(path).fileName() + "#" + protoName] = x;
+								int result = LoadMaskByDom(document, info, QFileInfo(path).fileName());
+								if (result != E_NOERROR) return result;
+								info->filenameStack.pop_back();
+							}
+							j++;
+						}
+					}
+					else
+						delete document;
 				}
 			}
 			return E_NOERROR;
@@ -430,7 +496,7 @@ namespace io {
 		
 
 		//Initialize a ProtoDeclare node with the fields received in input from a ProtoInstance node
-		static int InitializeProtoDeclare(QDomElement& root, const std::map<QString, QString>& fields, const std::map<QString, QDomElement>& defMap, AdditionalInfoX3D* info)
+		static int InitializeProtoDeclare(QDomElement& root, const std::map<QString, QString>& fields, const std::map<QString, QDomElement>& fieldsNode, const std::map<QString, QDomElement>& defMap, AdditionalInfoX3D* info)
 		{
 			QDomElement protoInterface = root.firstChildElement("ProtoInterface");
 			QDomElement protoBody = root.firstChildElement("ProtoBody");
@@ -440,7 +506,7 @@ namespace io {
 				return E_INVALIDPROTODECL;
 			}
 			std::map<QString, QString> defField;
-			std::map<QString, QString> defNodeField;
+			std::map<QString, QDomElement> defNodeField;
 			//Get fields attribute(name, type, accessType, value) from the ProtoInterface node 
 			QDomElement child = protoInterface.firstChildElement("field");
 			while (!child.isNull())
@@ -457,14 +523,14 @@ namespace io {
 				if (fAccType != "outputOnly")
 				{
 					if (fType == "SFNode" || fType == "MFNode")
-						defNodeField[fName] = fValue;
+						defNodeField[fName] = child;
 					else
 						defField[fName] = fValue;
 				}
 				child = child.nextSiblingElement("field");
 			}
 			QDomNodeList isList = protoBody.elementsByTagName("IS");
-			std::map<QString, QString>::const_iterator iterDefField;
+			std::map<QString, QDomElement>::const_iterator iterDefField;
 			std::map<QString, QString>::const_iterator iterValue;
 			//Replace IS connectors with the values of fields
 			for (int i = 0; i < isList.size(); i++)
@@ -486,13 +552,26 @@ namespace io {
 					iterValue = fields.find(protoField);
 					if (iterDefField == defNodeField.end())
 					{
-						iterDefField = defField.find(protoField);
-						if (iterDefField != defField.end())
+						std::map<QString, QString>::const_iterator iterDefFieldValue = defField.find(protoField);
+						if (iterDefFieldValue != defField.end())
 						{
-							if (iterValue != fields.end())
-								parent.setAttribute(nodeField, iterValue->second);
-							else if (iterDefField->second != "")
-								parent.setAttribute(nodeField, iterDefField->second);
+							if (parent.tagName() != "ProtoInstance")
+							{
+								if (iterValue != fields.end())
+									parent.setAttribute(nodeField, iterValue->second);
+								else if (iterDefFieldValue->second != "")
+									parent.setAttribute(nodeField, iterDefFieldValue->second);
+							}
+							else
+							{
+								QDomElement newFieldValue = info->doc->createElement("fieldValue");
+								newFieldValue.setAttribute("name", nodeField);
+								if (iterValue != fields.end())
+									newFieldValue.setAttribute("value", iterValue->second);
+								else if (iterDefFieldValue->second != "")
+									newFieldValue.setAttribute("value", iterDefFieldValue->second);
+								parent.insertAfter(newFieldValue, is);
+							}
 						}
 					}
 					else
@@ -512,7 +591,23 @@ namespace io {
 									return E_INVALIDDEFINFIELD;
 								}
 								QDomElement cloneDef = iterDefMap->second.cloneNode(true).toElement();
-								parent.insertAfter(cloneDef, is);
+								parent.insertBefore(cloneDef, is);
+							}
+						}
+						else 
+						{
+							std::map<QString, QDomElement>::const_iterator iterValueNode = fieldsNode.find(protoField);
+							QDomElement fieldNode;
+							if (iterValueNode != fieldsNode.end())
+								fieldNode = iterValueNode->second;
+							else
+								fieldNode = iterDefField->second;
+							QDomElement child = fieldNode.firstChildElement();
+							while (!child.isNull())
+							{
+								QDomElement cloneNode = child.cloneNode().toElement();
+								parent.insertBefore(cloneNode, is);
+								child = child.nextSiblingElement();
 							}
 						}
 					}
@@ -2035,18 +2130,22 @@ namespace io {
 		{
 			QString name = root.attribute("name");
 			std::map<QString, QString> fields;
+			std::map<QString, QDomElement> fieldsNode;
 			//Get the initialization of ProtoInstance's field
 			QDomElement child = root.firstChildElement("fieldValue");
 			while (!child.isNull())
 			{
 				QString fName = child.attribute("name");
 				QString fValue = child.attribute("value");
-				if (fName =="" || fValue == "")
+				if (fName =="" || (fValue == "" && child.firstChildElement().isNull()))
 				{
 					info->lineNumberError = root.lineNumber();
 					return E_INVALIDINSTFIELD;
 				}
-				fields[fName] = fValue;
+				if (!child.firstChildElement().isNull())
+					fieldsNode[fName] = child;
+				else
+					fields[fName] = fValue;
 				child = child.nextSiblingElement("fieldValue");
 			}
 			std::map<QString, QDomElement>::const_iterator iter = protoDeclareMap.find(name);
@@ -2088,11 +2187,10 @@ namespace io {
 				for (int j = 0; j < exProtoDeclare.size(); j++)
 					NavigateExternProtoDeclare(exProtoDeclare.at(j).toElement(), tMatrix, newProtoDeclMap, info); 
 			}
-			int result = InitializeProtoDeclare(protoInstance, fields, defMap, info);
+			int result = InitializeProtoDeclare(protoInstance, fields, fieldsNode, defMap, info);
 			if (result != E_NOERROR) return result;
 			QDomElement body = protoInstance.firstChildElement("ProtoBody");
 			std::map<QString, QDomElement> newDefMap;
-			
 			if (filename != "")
 				info->filenameStack.push_back(filename);
 			result = NavigateScene(m, body, tMatrix, newDefMap, newProtoDeclMap, info, cb);
@@ -2392,9 +2490,38 @@ namespace io {
 			return E_NOERROR;
 		}
 
+		
+		
+		//Tralate a VRML file in X3D file with XML encoding
+		static int ParseVrml(const char * filename, QDomDocument* root)
+		{
+			wchar_t *file = coco_string_create(filename);
+			try 
+			{
+				VrmlTranslator::Scanner scanner(file);
+				VrmlTranslator::Parser parser(&scanner);
+				//root = new QDomDocument(filename);
+				parser.doc = root;
+				parser.Parse();
+				if (parser.errors->count != 0) 
+				{
+					errorStr = coco_string_create_char(parser.errors->stringError);
+					return E_VRMLPARSERERROR;
+				}
+				//root = parser.doc;
+			}
+			catch (char* str)
+			{
+				errorStr = str;
+				return E_VRMLPARSERERROR;
+			}
+			coco_string_delete(file);
+			return E_NOERROR;
+		}
 
+	
 
-	public:	
+public:	
 	
 		//Get information from x3d file about the components necessary in the mesh to load the geometry
 		static int LoadMask(const char * filename, AdditionalInfoX3D*& addinfo)
@@ -2419,7 +2546,8 @@ namespace io {
 		}
 
 		
-		//merge all meshes in the x3d's file in the templeted mesh m
+
+		//Merge all meshes in the x3d's file in the templeted mesh m
 		static int Open(OpenMeshType& m, const char* filename, AdditionalInfoX3D*& info, CallBackPos *cb = 0)
 		{
 			vcg::Matrix44f tMatrix;
@@ -2441,6 +2569,48 @@ namespace io {
 		}
 
 	
+
+		//Get information from vrml file about the components necessary in the mesh to load the geometry
+		static int LoadMaskVrml(const char * filename, AdditionalInfoX3D*& addinfo)
+		{
+			AdditionalInfoX3D* info = new AdditionalInfoX3D();
+			info->filenameStack.push_back(QString(filename));
+			info->mask = 0;
+			info->filename = QString(filename);
+			addinfo = info;
+			QDomDocument* document = new QDomDocument(filename);
+			int result = ParseVrml(filename, document);
+			if (result != E_NOERROR) 
+			{	
+				delete document;
+				return result;
+			}
+			info->doc = document;
+			return LoadMaskByDom(document, info, info->filename);
+			/*wchar_t *file = coco_string_create(filename);
+			try 
+			{
+				VrmlTranslator::Scanner scanner(file);
+				VrmlTranslator::Parser parser(&scanner);
+				parser.doc = new QDomDocument();
+				parser.Parse();
+				if (parser.errors->count != 0) 
+				{
+					errorStr = coco_string_create_char(parser.errors->stringError);
+					return E_VRMLPARSERERROR;
+				}
+				info->doc = parser.doc;
+				return LoadMaskByDom(parser.doc, info, info->filename);
+			}
+			catch (char* str)
+			{
+				errorStr = str;
+				return E_VRMLPARSERERROR;
+			}
+			coco_string_delete(file);*/
+			return E_NOERROR;
+		}
+
 	};
 }
 }
