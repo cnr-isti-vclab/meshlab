@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>138</width>
-    <height>237</height>
+    <width>139</width>
+    <height>269</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -18,7 +18,7 @@
      <x>0</x>
      <y>0</y>
      <width>141</width>
-     <height>241</height>
+     <height>271</height>
     </rect>
    </property>
    <property name="currentIndex" >
@@ -28,13 +28,13 @@
     <attribute name="title" >
      <string>Basic</string>
     </attribute>
-    <widget class="QWidget" name="" >
+    <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
        <x>10</x>
-       <y>13</y>
-       <width>114</width>
-       <height>198</height>
+       <y>14</y>
+       <width>116</width>
+       <height>153</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
@@ -74,64 +74,30 @@
       <item>
        <layout class="QVBoxLayout" >
         <item>
-         <layout class="QVBoxLayout" >
-          <item>
-           <widget class="QLabel" name="label" >
-            <property name="text" >
-             <string>Normal Weight</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="normalWeightSlider" >
-            <property name="maximum" >
-             <number>10</number>
-            </property>
-            <property name="pageStep" >
-             <number>2</number>
-            </property>
-            <property name="value" >
-             <number>5</number>
-            </property>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickInterval" >
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLabel" name="pennLabel" >
+          <property name="text" >
+           <string>Penn Radius</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" >
-          <item>
-           <widget class="QLabel" name="label_2" >
-            <property name="text" >
-             <string>Curvature Weight</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="curvatureWeightSlider" >
-            <property name="maximum" >
-             <number>10</number>
-            </property>
-            <property name="pageStep" >
-             <number>2</number>
-            </property>
-            <property name="value" >
-             <number>5</number>
-            </property>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickInterval" >
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QSlider" name="pennSlider" >
+          <property name="maximum" >
+           <number>10</number>
+          </property>
+          <property name="singleStep" >
+           <number>1</number>
+          </property>
+          <property name="pageStep" >
+           <number>2</number>
+          </property>
+          <property name="value" >
+           <number>5</number>
+          </property>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -159,10 +125,10 @@
     <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
-       <x>1</x>
-       <y>11</y>
+       <x>0</x>
+       <y>12</y>
        <width>132</width>
-       <height>129</height>
+       <height>226</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
@@ -239,6 +205,70 @@
            </size>
           </property>
          </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" >
+        <item>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QLabel" name="label" >
+            <property name="text" >
+             <string>Normal Weight</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="normalWeightSlider" >
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="pageStep" >
+             <number>2</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickInterval" >
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QLabel" name="label_2" >
+            <property name="text" >
+             <string>Curvature Weight</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="curvatureWeightSlider" >
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="pageStep" >
+             <number>2</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickInterval" >
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
