@@ -29,7 +29,7 @@ FIRST RELEASE
 
 #include "TFHandle.h"
 
-//declaratio of static member of TFHandle class
+//declaration of static member of TFHandle class
 TransferFunction* TFHandle::_tf = 0;
 
 //TFHandle::TFHandle(int channel_code, int junction, CHART_INFO *environment_info) : _channelCode(channel_code), _junction_side(junction)
@@ -47,12 +47,13 @@ TFHandle::~TFHandle(void)
 }
 
 
-
+//paint callback
 void TFHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget /*= 0*/ )
 {
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
 
+	//if the handle is the currently selected one a darker color is used to draw it
 	if (_currentlySelected)
 	{
 		painter->setPen(_color.darker());
@@ -60,6 +61,7 @@ void TFHandle::paint ( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	}
 	else
 	{
+		//else, simply use normal channel color
 		painter->setPen(_color);
 		painter->setBrush(_color);
 	}
@@ -72,10 +74,12 @@ QRectF TFHandle::boundingRect () const
 	return QRectF(((qreal)-_size)/2.0f, ((qreal)-_size)/2.0f, _size, _size);
 }
 
+//callback to manage the mouse move
 void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
 	setCursor(Qt::OpenHandCursor);
 
+	//fetching new position in the scene
 	QPointF newPos = event->scenePos();
 	newPos.setX(newPos.x()-(_size/2.0f));
 	newPos.setY(newPos.y()-(_size/2.0f));
@@ -84,24 +88,25 @@ void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	if (( newPos.x() >= _chartInfo->leftBorder ) && ( newPos.x() <= _chartInfo->rightBorder ) &&
 		( newPos.y() >= _chartInfo->upperBorder ) && ( newPos.y() <= _chartInfo->lowerBorder ))
 	{
+		//updating new position in the scene
 		this->setPos(newPos);
 
+		//updating the position at logical state of the handle
 		this->updateTfHandlesState(newPos);
 
 		emit positionChanged(this);	
 	}
 }
 
+//updates the position at logical state of the handle
 void TFHandle::updateTfHandlesState(QPointF newPos)
 {
 	assert(_tf != 0);
-/*
-		//updating the value of the key represented by this handle and updating the whole keys vector too
-		_toSwapIndex = (*_tf)[this->getChannel()].updateKeysOrder( _myKeyIndex, absolute2RelativeValf( newPos.x()-_chartInfo->leftBorder, _chartInfo->chartWidth ), 1.0f-absolute2RelativeValf( newPos.y()-_chartInfo->upperBorder, _chartInfo->chartHeight ) );
-		_toSwap = (_myKeyIndex != _toSwapIndex);*/
-	
+	//updating the position at logical state
 	_myKey->x = absolute2RelativeValf( newPos.x()-_chartInfo->leftBorder, _chartInfo->chartWidth );
 	_myKey->y = 1.0f-absolute2RelativeValf( newPos.y()-_chartInfo->upperBorder, _chartInfo->chartHeight );
+
+	//key changed... restoring correct order
 	(*_tf)[this->getChannel()].updateKeysOrder();
 }
 

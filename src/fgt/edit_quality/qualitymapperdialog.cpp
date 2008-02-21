@@ -61,14 +61,6 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 
 	this->gla = gla;
 
-	/* MOVED TO drawEqualizerHistogram
-	//building up histogram...
-	int numberOfBins = 100;
-	_equalizer_histogram = new Histogramf();
-	Frange mmmq(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mesh->cm));
-	this->ComputePerVertexQualityHistogram(mesh->cm, mmmq, _equalizer_histogram, numberOfBins);
-	//...histogram built*/
-
 	_histogram_info = 0;
 	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 		_equalizerHandles[i] = 0;
@@ -148,11 +140,10 @@ void QualityMapperDialog::ComputePerVertexQualityHistogram( CMeshO &m, Frange ra
 		if(!(*vi).IsD()) h->Add((*vi).Q());		
 }
 
-// ATTUALMENTE NON VIENE MAI UTILIZZATA (UCCIO)
+//clears the whole scene by removing and\or deleting all its items
+//returns a pointer to the list of removed items
 GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearScene(QGraphicsScene *scene, int cleanFlag)
 {
-//	_removed_items.clear();
-
 	//deleting scene items
 	GRAPHICS_ITEMS_LIST allItems = _transferFunctionScene.items();
 	QGraphicsItem *item = 0;
@@ -162,6 +153,7 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearScene(QGraphicsScene *scene, int 
 		_removed_items << item;
 	}
 
+	//deleting if necessary
 	if ((cleanFlag & DELETE_REMOVED_ITEMS) == DELETE_REMOVED_ITEMS)
 	{
 		foreach (item, _removed_items)
@@ -334,7 +326,6 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 	{
 		xPos = xStart + _histogram_info->chartWidth/2.0f*i;
-//		_equalizerHandles[i].setColor(colors[i]);
 		_equalizerHandles[i] = new EqHandle(_histogram_info, Qt::black, QPointF(xPos, yPos), 
 											(EQUALIZER_HANDLE_TYPE)i, _equalizerHandles, &_equalizerMidHandlePercentilePosition, spinboxes[i], 
 											1, 5);
@@ -578,13 +569,11 @@ void QualityMapperDialog::initTF()
 	qreal zValue = 0;
 	for (int c=0; c<NUMBER_OF_CHANNELS; c++)
 	{
-// 		//fetching channelType
-// 		channelType = (*_transferFunction)[c].getType();
-
 		//processing z value
 		zValue = (((*_transferFunction)[c].getType() + 1)*2.0f) + 1;
 		TYPE_2_COLOR( c, channelColor );
 
+		//adding to the TF view the TFHandles corresponding to the logical channel keys
 		for (int i=0; i<_transferFunction->getChannel(c).size(); i++)
 		{
 			val = _transferFunction->getChannel(c)[i];
@@ -756,8 +745,7 @@ void QualityMapperDialog::drawTransferFunctionBG ()
 	}
 }
 
-
-
+//callback for save button click
 void QualityMapperDialog::on_savePresetButton_clicked()
 {
 	//setting default save name
@@ -1211,21 +1199,32 @@ void QualityMapperDialog::on_EqHandle_crossing_histogram(EqHandle* sender, bool 
 		drawEqualizerHistogram(_leftHandleWasInsideHistogram, insideHistogram);
 }
 
+//adds a TFHandle to the TF scene with the properties defined by passed parameters
+//returns a pointer to the handle just added
 TFHandle* QualityMapperDialog::addTfHandle(int channelCode, QPointF handlePos, TF_KEY *key, int zOrder )
 {
 	QColor channelColor;
+
+	//converting channel code into proper color
 	TYPE_2_COLOR(channelCode, channelColor);
 
 	return this->addTfHandle( new TFHandle( _transferFunction_info, channelColor, handlePos, key, zOrder ) );
 }
 
+//adds a TFHandle to the TF scene with the properties defined by passed parameters
+//returns a pointer to the handle just added
 TFHandle* QualityMapperDialog::addTfHandle(TFHandle *handle)
 {
+	//adding new handle to list of TF Handless of the belonging channel
 	_transferFunctionHandles[handle->getChannel()] << handle;
+
+	//preparing handle to manage events
 	connect(handle, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
 	connect(handle, SIGNAL(clicked(TFHandle*)), this, SLOT(on_TfHandle_clicked(TFHandle*)));
 	connect(handle, SIGNAL(doubleClicked(TFHandle*)), this, SLOT(on_TfHandle_doubleClicked(TFHandle*)));
 	connect(handle, SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
+
+	//adding handle to scene
 	_transferFunctionScene.addItem((QGraphicsItem*)handle);
 
 	return handle;
@@ -1301,6 +1300,7 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 		on_applyButton_clicked();
 }
 
+//writes in the x-quality label the quality value corresponding to the position of the currently selected TF handle
 void QualityMapperDialog::updateXQualityLabel(float xPos)
 {
 	float exp = log10((float)_equalizerMidHandlePercentilePosition) / log10(0.5f);
