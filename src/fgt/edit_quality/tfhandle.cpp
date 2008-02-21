@@ -113,5 +113,6 @@ void TFHandle::mousePressEvent(QGraphicsSceneMouseEvent *)
 
 void TFHandle::mouseDoubleClickEvent (QGraphicsSceneMouseEvent *event)
 {
+	Q_UNUSED(event);
 	emit doubleClicked(this);
 }

@@ -35,20 +35,26 @@ FIRST RELEASE
 
 #include <algorithm>
 
+//used just for testing
+//define NOW_TESTING macro to use some testing options
 #ifdef NOW_TESTING
 #include <cmath>
 #endif
 
 using namespace std;
 
+//function used to define < relations among TF_KEYs elements
 bool TfKeyPCompare(TF_KEY*k1, TF_KEY*k2)
 {	return (k1->x < k2->x);	}
 
 
-//TRANSFER FUNCTION CHANNEL
+
+
+
+//TRANSFER FUNCTION CHANNEL CODE
+
 TfChannel::TfChannel()
 {
-	//da eliminare!? MAL
 #ifdef NOW_TESTING
 	this->testInitChannel();
 #endif
@@ -63,6 +69,7 @@ TfChannel::TfChannel(TF_CHANNELS type) : _type(type)
 
 TfChannel::~TfChannel(void)
 {
+	//destroying TF_KEYs
 	KEY_LISTiterator it;
 	TF_KEY *k = 0;
 	for (it=KEYS.begin(); it!=KEYS.end(); it++)
@@ -71,16 +78,18 @@ TfChannel::~TfChannel(void)
 		delete k;
 		k = 0;
 	}
+
+	//resetting keys list
 	KEYS.clear();
 }
 
+//sets the type of the channel (channel code, defined using a TF_CHANNELS list member)
 void TfChannel::setType(TF_CHANNELS type)
 {	_type = type;	}
 
+//returns the type of channel (channel code defined by TF_CHANNELS list)
 TF_CHANNELS TfChannel::getType()
 {	return _type;	}
-
-
 
 //adds to the keys list new_key
 //returns a pointer to the key just added
@@ -97,6 +106,8 @@ TF_KEY* TfChannel::addKey(TF_KEY *newKey)
 {
 	assert(newKey->x>=0);
 	assert(newKey->y>=0);
+	//inserting the key in the correct position
+	//x value order is kept
 	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
 	{
 		if ( (*it)->x >= newKey->x )
@@ -106,12 +117,13 @@ TF_KEY* TfChannel::addKey(TF_KEY *newKey)
 		}
 	}
 
+	//greatest x ever
+	//adding new key at the end of the list
 	KEYS.push_back(newKey);
 	return newKey;
 }
 
-//removes from keys list to_remove_key
-//returns the x value of the removed key or -1 if key was not found
+//removes from keys list the key at index keyIdx
 void TfChannel::removeKey(int keyIdx)
 {
 	KEY_LISTiterator it = KEYS.begin();
@@ -123,21 +135,23 @@ void TfChannel::removeKey(int keyIdx)
 	}
 }
 
-//removes from keys list the key whose x value is x_val
-//returns the x value of the removed key or -1 if key was not found
+//removes from keys list the key pointer is toRemoveKey
 void TfChannel::removeKey(TF_KEY *toRemoveKey)
 {
-	//searching key with proper x
+	//searching key in the list...
 	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
 		if ( (*it) == toRemoveKey )
 		{
+			//found it. Deleting
 			delete *it;
 			KEYS.erase(it);
 			break;
 		}
 }
 
-
+//returns the value (as float) of the transfer function for a certain channel in a given point (xVal)
+//if the xVal value respond to the x of a key present in the list, the corresponding y value is returned,
+//else linear interpolation is effected and the resulting value is returned
 float TfChannel::getChannelValuef(float xVal)
 {
 	float result = 0.0f;
@@ -149,9 +163,15 @@ float TfChannel::getChannelValuef(float xVal)
 				return (*it)->y;
 			else
 			{
+				//xVal is not the x of a key...
+				//the returning value will be obtained through linear interpolation between closest x-value keys in the list
+
+				//acquiring position of right key
 				float x2 = (*it)->x;
 				float y2 = (*it)->y;
 				it--;
+
+				//acquiring position of left key
 				float x1 = (*it)->x;
 				float y1 = (*it)->y;
 
@@ -171,7 +191,9 @@ float TfChannel::getChannelValuef(float xVal)
 	return result;
 }
 
-
+//returns the value (as unsigned char) of the transfer function for a certain channel in a given point (xVal)
+//if the xVal value respond to the x of a key present in the list, the corresponding y value is returned,
+//else linear interpolation is effected and the resulting value is returned
 UINT8 TfChannel::getChannelValueb(float xVal)
 {	return (UINT8)relative2AbsoluteVali( this->getChannelValuef(xVal), 255.0f );	}
 
@@ -194,9 +216,10 @@ bool TfChannel::isTail(TF_KEY *key)
 void TfChannel::updateKeysOrder()
 {	sort(KEYS.begin(), KEYS.end(), TfKeyPCompare);	}
 
-
+//operator redefinition. Returns the key in the key list whose x-value equals xVal
 TF_KEY* TfChannel::operator [](float xVal)
 {
+	//looking in the list for the key with the proper x
 	for (KEY_LISTiterator it=KEYS.begin(); it!=KEYS.end(); it++)
 		if ( (*it)->x == xVal )
 			return (*it);
@@ -204,6 +227,7 @@ TF_KEY* TfChannel::operator [](float xVal)
 	return 0;
 }
 
+//operator redefinition. Returns the key in the key list whose index equals i
 TF_KEY* TfChannel::operator [](int i)
 {
 	if ((i >= 0) && (i<(int)KEYS.size()))
@@ -212,25 +236,9 @@ TF_KEY* TfChannel::operator [](int i)
 	return 0;
 }
 
-#if 0
-void TfChannel::updateKey(float old_x, float new_x, float new_y)
-{
-	KEY_LISTiterator it = KEYS.find(old_x);
-	if ( it != KEYS.end())
-	{
-		//		assert(it == KEYS.end());
-
-		TF_KEY *k = it->second;
-		this->removeKey(old_x);
-
-		k->y_lower = k->y_upper = new_y;
-		this->addKey(new_x, k);
-	}
-}
-#endif
-
-
+//CODE USED FOR TESTING (define NOW_TESTING macro to use it)
 #ifdef NOW_TESTING
+//addes random key to channel
 void TfChannel::testInitChannel()
 {
 	int num_of_keys = (rand() % 10) + 1;
@@ -262,7 +270,7 @@ void TfChannel::testInitChannel()
 
 
 
-//TRANSFER FUNCTION
+//TRANSFER FUNCTION CODE
 
 //declaration of static member of TransferFunction class
 QString TransferFunction::defaultTFs[NUMBER_OF_DEFAULT_TF];
@@ -273,6 +281,8 @@ TransferFunction::TransferFunction(void)
 	this->initTF();
 }
 
+//this overloaded constructor configures the Transfer Function object according to the transfer function code passed to it
+//(the code passed must be an item of the DEFAULT_TRANSFER_FUNCTIONS values list)
 TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 {
 	this->initTF();
@@ -297,13 +307,6 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f);
 		_channels[BLUE_CHANNEL].addKey(0.5f,0.0f);
 		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f);
-		//added for test
-// 		_channels[RED_CHANNEL].addKey(0.5f,0.5f,TF_KEY::LEFT_JUNCTION_SIDE);
-//		_channels[GREEN_CHANNEL].addKey(0.5f,0.7f,TF_KEY::RIGHT_JUNCTION_SIDE);
-// 		_channels[GREEN_CHANNEL].addKey(0.75f,1.0f,TF_KEY::LEFT_JUNCTION_SIDE);
-// 		_channels[GREEN_CHANNEL].addKey(0.75f,0.0f,TF_KEY::RIGHT_JUNCTION_SIDE);
-// 		_channels[GREEN_CHANNEL].addKey(0.2f,0.3f,TF_KEY::LEFT_JUNCTION_SIDE);
-
 		break;
 	case RED_SCALE_TF:
 		_channels[RED_CHANNEL].addKey(0.0f,0.0f);
@@ -341,12 +344,10 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 	}
 }
 
-
+//this overloaded constructor configures the Transfer Function using the info present in an external CSV file
 TransferFunction::TransferFunction(QString fileName)
 {
 	this->initTF();
-
-	//	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
 
 	QFile inFile( fileName );
 
@@ -357,6 +358,7 @@ TransferFunction::TransferFunction(QString fileName)
 	QString line;
 	QStringList splittedString;
 
+	//each not-commented line of the file represent the values to build-up a channel
 	int channel_code = 0;
 	do
 	{
@@ -365,12 +367,15 @@ TransferFunction::TransferFunction(QString fileName)
 		//if a line is a comment, it's not processed. imply ignoring it!
 		if ( !line.startsWith(CSV_FILE_COMMENT) )
 		{
+			//a channel line found. Splitting it to find the values
 			splittedString = line.split(CSV_FILE_SEPARATOR, QString::SkipEmptyParts);
 			assert( (splittedString.size() % 2) == 0 );
 
+			//for each couple of values a key is built and added to the current channel
 			for ( int i=0; i<splittedString.size(); i+=2 )
 				_channels[channel_code].addKey( splittedString[i].toFloat(), splittedString[i+1].toFloat() );
 
+			//trying to load data for the next channel
 			channel_code ++;
 		}
 	} while( (!line.isNull()) && (channel_code < NUMBER_OF_CHANNELS) );
@@ -382,7 +387,7 @@ TransferFunction::~TransferFunction(void)
 {
 }
 
-
+//initializes the Transfer Function at startup
 void TransferFunction::initTF()
 {
 	//Initializing channels types and pivoting indexes.
@@ -396,6 +401,7 @@ void TransferFunction::initTF()
 	//resetting color band value
 	memset(_color_band,0,sizeof(_color_band));
 
+	//setting default transfer functions names
 	defaultTFs[GREY_SCALE_TF] = "Grey Scale";
 	defaultTFs[RGB_TF] = "RGB";
 	defaultTFs[RED_SCALE_TF] = "Red Scale";
@@ -404,7 +410,7 @@ void TransferFunction::initTF()
 	defaultTFs[FLAT_TF] = "Flat";
 }
 
-
+//returns the size of the TF. It's defined as the maximum size of each channel
 int TransferFunction::size()
 {
 	int result = 0;
@@ -415,19 +421,26 @@ int TransferFunction::size()
 	return result;
 }
 
+//Builds the color band by setting the proper color for each item
+//returns a pointer to the color band built
 QColor* TransferFunction::buildColorBand()
 {
 	float relative_pos = 0.0f; 
 	for (int i=0; i<COLOR_BAND_SIZE; i++)
 	{
+		//converting the index in relative TF x-coordinate
 		relative_pos = absolute2RelativeValf((float)i, COLOR_BAND_SIZE);
+
+		//setting the color of the color band with the color resulting by evaluation of the TF for each channel
 		_color_band[i].setRgbF( _channels[RED_CHANNEL].getChannelValuef( relative_pos),
 								_channels[GREEN_CHANNEL].getChannelValuef( relative_pos ),
 								_channels[BLUE_CHANNEL].getChannelValuef( relative_pos ) );
 	}
+
 	return _color_band;
 }
 
+//converts a quality percentage value into a color
 Color4b TransferFunction::getColorByQuality (float percentageQuality)
 {
 	return Color4b(_channels[RED_CHANNEL].getChannelValueb( percentageQuality ), 
@@ -436,8 +449,12 @@ Color4b TransferFunction::getColorByQuality (float percentageQuality)
 		255 );
 }
 
+//saves the current color band onto an external file
+//moreover it saves info about the equalizer state
+//returns the name of the file
 QString TransferFunction::saveColorBand( QString fn, EQUALIZER_INFO& info  )
 {
+	//acquiring save file
 	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
 
 	QFile outFile( fileName );
@@ -446,21 +463,27 @@ QString TransferFunction::saveColorBand( QString fn, EQUALIZER_INFO& info  )
 		return fileName;
 
 	QTextStream outStream( &outFile );
+	//writing file header (info about file structure)
 	outStream << CSV_FILE_COMMENT << " COLOR BAND FILE STRUCTURE - first row: RED CHANNEL DATA - second row GREEN CHANNEL DATA - third row: BLUE CHANNEL DATA" << endl;
 	outStream << CSV_FILE_COMMENT << " CHANNEL DATA STRUCTURE - the channel structure is grouped in many triples. The items of each triple represent respectively: X VALUE, Y_LOWER VALUE, Y_UPPER VALUE of each node-key of the transfer function" << endl;
 
 	TF_KEY *val = 0;
+	//for each channel...
 	for ( int i=0; i<NUMBER_OF_CHANNELS; i++)
 	{
+		//...for each key of the channel...
 		for (int j=0; j<_channels[i].size(); j++)
 		{
+			//saving the values couple
 			val = _channels[i][j];
 			assert(val != 0);
 			outStream << val->x << CSV_FILE_SEPARATOR << val->y << CSV_FILE_SEPARATOR;
 		}
+		//one channel-per-row
 		outStream << endl;
 	}
 
+	//saving equalizer info too (only one line is needed)
 	outStream << CSV_FILE_COMMENT << "THE FOLLOWING 4 VALUES REPRESENT EQUALIZER SETTINGS - the first and the third values represent respectively the minimum and the maximum quality values used in histogram, the second one represent the position (in percentage) of the middle quality, and the last one represent the level of brightness as a floating point number (0 copletely dark, 1 original brightness, 2 completely white)" << endl;
 	outStream << info.minQualityVal << CSV_FILE_SEPARATOR << info.midQualityPercentage << CSV_FILE_SEPARATOR << info.maxQualityVal << CSV_FILE_SEPARATOR << info.brightness << CSV_FILE_SEPARATOR << endl;
 
@@ -469,7 +492,8 @@ QString TransferFunction::saveColorBand( QString fn, EQUALIZER_INFO& info  )
 	return fileName;
 }
 
-
+//"moving" the channel identified by ch_code to first plane.
+//This operation simply implies the circular shift of the channel_order pivot indexes untill the selected channel code is in the last position of the array
 void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
 {
 	int ch_code_int = (int)ch_code;

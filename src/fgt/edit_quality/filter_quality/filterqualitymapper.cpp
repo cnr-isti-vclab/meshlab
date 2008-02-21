@@ -63,6 +63,7 @@ const QString QualityMapperFilter::filterName(FilterIDType filterId)
 		case FP_QUALITY_MAPPER :  return QString("Quality Mapper edit applier"); 
 		default : assert(0); 
 	}
+  return QString("");
 }
 
 // Info() must return the longer string describing each filtering action 
@@ -73,6 +74,7 @@ const QString QualityMapperFilter::filterInfo(FilterIDType filterId)
 		case FP_QUALITY_MAPPER :  return QString("Edits color of mesh vertexes using Quality Mapper edit functionalities"); 
 		default : assert(0); 
 	}
+  return QString("");
 }
 
 const PluginInfo &QualityMapperFilter::pluginInfo()
@@ -94,6 +96,7 @@ const PluginInfo &QualityMapperFilter::pluginInfo()
 void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
 //void QualityMapperFilter::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
+	Q_UNUSED(m);
 	QString csvFileName = 0;
 	 switch(ID(action))	 {
 		case FP_QUALITY_MAPPER :
@@ -127,6 +130,8 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 // Move Vertex of a random quantity
 bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
+	Q_UNUSED(filter);
+	Q_UNUSED(cb);
 	QString csvFileName = par.getString("csvFileName");
 	if (!csvFileName.isNull())
 	{
