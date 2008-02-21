@@ -52,6 +52,9 @@ Coco/R itself) does not fall under the GNU General Public License.
 /****************************************************************************
  History
  $Log$
+ Revision 1.2  2008/02/21 13:04:09  gianpaolopalma
+ Fixed compile error
+
  Revision 1.1  2008/02/20 22:02:00  gianpaolopalma
  First working version of Vrml to X3D translator
 
@@ -171,6 +174,9 @@ Coco/R itself) does not fall under the GNU General Public License.
 /****************************************************************************
  History
  $Log$
+ Revision 1.2  2008/02/21 13:04:09  gianpaolopalma
+ Fixed compile error
+
  Revision 1.1  2008/02/20 22:02:00  gianpaolopalma
  First working version of Vrml to X3D translator
 
@@ -294,7 +300,7 @@ void Errors::SynErr(int line, int col, int n) {
 		break;
 	}
 	wchar_t str[100];
-	swprintf(str, L"-- line %d col %d: %ls\n", line, col, s);
+	coco_swprintf(str, 100, L"-- line %d col %d: %ls\n", line, col, s);
 	stringError = coco_string_create_append(stringError, str);
 	coco_string_delete(s);
 	count++;
@@ -302,7 +308,7 @@ void Errors::SynErr(int line, int col, int n) {
 
 void Errors::Error(int line, int col, const wchar_t *s) {
 	wchar_t str[100];
-	swprintf(str, L"-- line %d col %d: %ls\n", line, col, s);
+	coco_swprintf(str, 100, L"-- line %d col %d: %ls\n", line, col, s);
 	stringError = coco_string_create_append(stringError, str);
 	count++;
 }

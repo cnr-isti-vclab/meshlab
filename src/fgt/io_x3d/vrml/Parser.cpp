@@ -24,7 +24,10 @@
 /****************************************************************************
  History
  $Log$
- Revision 1.1  2008/02/20 22:01:59  gianpaolopalma
+ Revision 1.2  2008/02/21 13:04:09  gianpaolopalma
+ Fixed compile error
+
+ Revision 1.1  2008/02/20 22:02:00  gianpaolopalma
  First working version of Vrml to X3D translator
 
 *****************************************************************************/
@@ -741,9 +744,9 @@ void Parser::NodeBodyElement(QDomElement& parent, bool flag) {
 }
 
 void Parser::ScriptBodyElement() {
-		QString str;
+		QString str; QDomElement elem;
 		if (StartOf(6)) {
-			NodeBodyElement(QDomElement(), false);
+			NodeBodyElement(elem, false);
 		} else if (la->kind == 26 || la->kind == 27) {
 			if (la->kind == 26) {
 				Get();
@@ -777,7 +780,7 @@ void Parser::ScriptBodyElement() {
 			FieldType(str);
 			InitializeOnlyId(str);
 			if (StartOf(8)) {
-				FieldValue(QDomElement(), "", false);
+				FieldValue(elem, "", false);
 			} else if (la->kind == 39) {
 				Get();
 				InitializeOnlyId(str);
@@ -1132,7 +1135,7 @@ void Errors::SynErr(int line, int col, int n) {
 		break;
 	}
 	wchar_t str[100];
-	swprintf(str, L"-- line %d col %d: %ls\n", line, col, s);
+	coco_swprintf(str, 100, L"-- line %d col %d: %ls\n", line, col, s);
 	stringError = coco_string_create_append(stringError, str);
 	coco_string_delete(s);
 	count++;
@@ -1140,7 +1143,7 @@ void Errors::SynErr(int line, int col, int n) {
 
 void Errors::Error(int line, int col, const wchar_t *s) {
 	wchar_t str[100];
-	swprintf(str, L"-- line %d col %d: %ls\n", line, col, s);
+	coco_swprintf(str, 100, L"-- line %d col %d: %ls\n", line, col, s);
 	stringError = coco_string_create_append(stringError, str);
 	count++;
 }

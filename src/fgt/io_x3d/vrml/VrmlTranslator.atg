@@ -355,11 +355,11 @@ ScriptBody
 	}.
 
 	
-ScriptBodyElement 							(.QString str;.)
-=	NodeBodyElement<QDomElement(), false>
+ScriptBodyElement 							(.QString str; QDomElement elem;.)
+=	NodeBodyElement<elem, false>
 	|("inputOnly" | "eventIn") FieldType<str> InputOnlyId<str> ["IS" InputOnlyId<str>]
 	|("outputOnly" | "eventOut") FieldType<str> OutputOnlyId<str> ["IS" OutputOnlyId<str>]
-	|("initializeOnly" | "field") FieldType<str> InitializeOnlyId<str> (FieldValue<QDomElement(), "", false> | "IS" InitializeOnlyId<str>)
+	|("initializeOnly" | "field") FieldType<str> InitializeOnlyId<str> (FieldValue<elem, "", false> | "IS" InitializeOnlyId<str>)
 	|("inputOutput" | "exposedField") FieldType<str> InputOutputId<str> "IS" InputOutputId<str>.
 	
 	

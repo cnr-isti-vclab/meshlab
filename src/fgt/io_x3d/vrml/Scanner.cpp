@@ -24,6 +24,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.2  2008/02/21 13:04:10  gianpaolopalma
+ Fixed compile error
+
  Revision 1.1  2008/02/20 22:02:00  gianpaolopalma
  First working version of Vrml to X3D translator
 
