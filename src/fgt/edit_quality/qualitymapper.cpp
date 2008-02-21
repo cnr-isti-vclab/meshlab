@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
+* This program is free software; you can redistribute it and/or modify      *   
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -22,9 +22,8 @@
 ****************************************************************************/
 /****************************************************************************
 History
-Log: qualityMapper.cpp
-Revision 1.0 2008/01/03 MAL
-Beginning
+Revision 1.0 2008/02/20 Alessandro Maione, Federico Bellucci
+FIRST RELEASE
 
 ****************************************************************************/
 
@@ -33,27 +32,21 @@ Beginning
 #include <meshlab/glarea.h>
 #include "qualitymapper.h"
 #include <vcg/complex/trimesh/clean.h>
-
 #include <wrap/gl/pick.h>
-//#include <wrap/qt/trackball.h>
-
 #include <vcg/complex/trimesh/update/flag.h>
-// #include "color_manifold.h"
-
-//#include "../../meshlabplugins/meshcolorize/equalizerDialog.h"	//for EqualizerSettings
-// #include "smoothcolor.h"
 #include <vcg/space/triangle3.h> //for quality
 
-//using namespace std;
 using namespace vcg;
 
 QualityMapperPlugin::QualityMapperPlugin()
 {
+	//setting-up plugin
 	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper. More info coming soon...", this);
 	QAction *editAction;
 	foreach(editAction, actionList)
 		editAction->setCheckable(true);
 
+	//initializing dialog pointer
 	_qualityMapperDialog = 0;
 }
 
@@ -96,8 +89,6 @@ void QualityMapperPlugin::Decorate(QAction *, MeshModel&, GLArea *)
 
 void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel& m, GLArea *gla )
 {
-	//	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
-
 	if(_qualityMapperDialog==0)
 		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla);
 
@@ -109,11 +100,8 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel& m, GLArea *gla )
 		return;
 	}
 
-
 	//drawing transferFunction
 	_qualityMapperDialog->drawTransferFunction();
-
-
 
 	//dialog ready to be displayed. Show it now!
 	_qualityMapperDialog->show();
@@ -123,9 +111,12 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel& m, GLArea *gla )
 
 void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
 {
+	//if a dialog exists, it's time to destroy it
 	if ( _qualityMapperDialog )
 	{
+		//disconnecting...
 		_qualityMapperDialog->disconnect();
+		//...and deleting dialog
 		delete _qualityMapperDialog;
 		_qualityMapperDialog = 0;
 	}

@@ -21,50 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 /****************************************************************************
-  History
-$Log$
-Revision 1.6  2008/02/20 17:23:00  fbellucci
--changed folders\files organizations. Added Common folder to contain files used by both projects
-
--many minor changed due to update of incude file paths
-
-- changed representation of brightness level value in csv files
-- fixed bug in apply method of filter
-
--other minor changes
-
-Revision 1.5  2008/02/20 14:52:57  fbellucci
-Refactoring of method necessary ti FilterQualityMapper
-
-Revision 1.4  2008/02/19 16:03:46  amaione
-fixed bug about axis draw in equalizer histogram
-
-Revision 1.3  2008/02/18 18:50:11  amaione
-filter_quality.pro:
-- updated include paths
-
-filterqualitymapper.cpp:
-- added parameters to filter gui
-
-Revision 1.2  2008/02/18 18:18:54  amaione
-*** empty log message ***
-
-Revision 1.1  2008/02/18 18:05:20  amaione
-UPDATED PERSONAL PROJECTS FILES
-AND
-ADDED PROJECT AND SRC FILES FOR FILTER QUALITY
-
-Revision 1.1  2008/02/18 17:14:40  amaione
-ADDED SKELETON FILES FOR QUALITY MAPPER FILTER
-
-Revision 1.3  2006/11/29 00:59:20  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.2  2006/11/27 06:57:21  cignoni
-Wrong way of using the __DATE__ preprocessor symbol
-
-Revision 1.1  2006/09/25 09:24:39  e_cerisoli
-add samplefilter
+History
+Revision 1.0 2008/02/20 Alessandro Maione, Federico Bellucci
+FIRST RELEASE
 
 ****************************************************************************/
 

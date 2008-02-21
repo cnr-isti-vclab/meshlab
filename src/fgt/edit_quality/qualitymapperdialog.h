@@ -1,21 +1,40 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+/****************************************************************************
+History
+Revision 1.0 2008/02/20 Alessandro Maione, Federico Bellucci
+FIRST RELEASE
+
+****************************************************************************/
+
 #ifndef QUALITYMAPPERDIALOG_H
 #define QUALITYMAPPERDIALOG_H
 
 #include <QDockWidget>
 #include <QGraphicsItem>
-/*
-#include <vcg/simplex/face/pos.h>
-#include <vcg/simplex/face/topology.h>
-//#include <vcg/complex/trimesh/base.h>
-#include <vcg/complex/trimesh/closest.h>
-#include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/complex/trimesh/allocate.h>
-*/
-
 #include <vcg/complex/trimesh/base.h>
 #include <meshlab/meshmodel.h>
 #include "ui_qualitymapperdialog.h"
-
 #include <vcg/math/histogram.h>
 #include "../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
 #include <vcg/complex/trimesh/stat.h>
@@ -28,6 +47,9 @@
 using namespace vcg;
 
 
+//struct used to store info about external TF files
+//when a user saves and\or loads an external CSV file, the info about it (path and name) are saved and stored in a list
+//So, if the info contained into the file are needed again, it's possible to access to it at any time
 struct KNOWN_EXTERNAL_TFS
 {
 	QString path;
@@ -40,6 +62,8 @@ struct KNOWN_EXTERNAL_TFS
 };
 #define KNOWN_EXTERNAL_TFSsize	sizeof(KNOWN_EXTERNAL_TFS)
 
+//this class defines an invisible graphics item that lies on the BG of TF view
+//Its porpoise is to catch the double-clicks on the view and send a massage to dialog that will manage it
 class TFDoubleClickCatcher : public QObject, public QGraphicsItem
 {
 	Q_OBJECT
@@ -53,9 +77,10 @@ protected:
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
 public:
-	TFDoubleClickCatcher(/*QGraphicsView *view*/CHART_INFO *environmentInfo) : _environmentInfo(environmentInfo)
+	TFDoubleClickCatcher(CHART_INFO *environmentInfo) : _environmentInfo(environmentInfo)
 	{
 		assert(environmentInfo);
+		//setting graphics
 		_boundingRect.setX(_environmentInfo->leftBorder);
 		_boundingRect.setY(_environmentInfo->upperBorder);
 		_boundingRect.setWidth(_environmentInfo->chartWidth);
@@ -64,19 +89,19 @@ public:
 	~TFDoubleClickCatcher(){_environmentInfo = 0;}
 	// Overriding QGraphicsItem methods
 	QRectF boundingRect () const
-	{
-		return _boundingRect;
-	}
+	{	return _boundingRect;	}
+	//nothing to paint... I'm invisible!!
 	void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *)	{}
 
  signals:
  	void TFdoubleClicked(QPointF);
 };
 
-
+//macros to make slier code below! :-)
 #define GRAPHICS_ITEMS_LIST		QList<QGraphicsItem *>
 #define TF_HANDLES_LIST			QList<TFHandle*>
 
+//this class define the dialog of the plugin
 class QualityMapperDialog : public QDockWidget
 {
 	Q_OBJECT
@@ -85,30 +110,29 @@ public:
 	QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla=0);
 	~QualityMapperDialog();
 	
-//	inline void setMesh(MeshModel *m){ mesh=m; }
 	void ComputePerVertexQualityHistogram( CMeshO& m, Frange range, Histogramf *h, int bins=10000);
-
 	void clearScene(QGraphicsScene *scene);
-	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );	//controllare il puntatore alla vista (!!) MAL
-	bool initEqualizerHistogram();
-	void drawTransferFunction();
+	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );
+	bool initEqualizerHistogram(void);
+	void drawTransferFunction(void);
 
 
 
 
 private:
 	Ui::QualityMapperDialogClass ui;
-//	QualityMapperSettings _settings;
 
+	//Equalizer-Histogram items
 	Histogramf		*_equalizer_histogram;
 	CHART_INFO		*_histogram_info;
-	QGraphicsScene	_equalizerHistogramScene;	//questo equivale a graphics di .NET. O ne conserviamo una sola e la utilizziamo per disegnare tutto, o ne creiamo una ogni volta che dobbiamo disegnare qualcosa. forse sbaglio in pieno(??) indagare MAL
+	QGraphicsScene	_equalizerHistogramScene;
 	EqHandle*		_equalizerHandles[NUMBER_OF_EQHANDLES];
 	qreal			_equalizerMidHandlePercentilePosition;
 	bool			_leftHandleWasInsideHistogram;
 	bool			_rightHandleWasInsideHistogram;
 	GRAPHICS_ITEMS_LIST _equalizerHistogramBars;
 
+	//Transfer Function items
 	TransferFunction *_transferFunction;
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
@@ -119,17 +143,22 @@ private:
 	GRAPHICS_ITEMS_LIST _transferFunctionLines;
 	GRAPHICS_ITEMS_LIST _transferFunctionBg;
 	bool			_isTransferFunctionInitialized;
+
+	//list of external CSV files info
 	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs;
 
-
+	//list of removed graphics items
 	GRAPHICS_ITEMS_LIST _removed_items;
 
+	//reference to current mesh
 	MeshModel&		mesh;
+
+	//pointer to GL Area object
 	GLArea			*gla;
 
-	void initTF();
-	void updateColorBand();
-	void drawTransferFunctionBG ();
+	void initTF(void);
+	void updateColorBand(void);
+	void drawTransferFunctionBG(void);
 	bool drawEqualizerHistogram(bool leftHandleInsideHistogram, bool rightHandleInsideHistogram);
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
 
@@ -144,7 +173,6 @@ private:
 	TFHandle			*removeTfHandle(TFHandle *handle);
 	void				updateXQualityLabel(float xRelativeTFPosition);
 	void				setEqualizerParameters(EQUALIZER_INFO data);
-	//void				loadEqualizerInfo(QString inFileName, EQUALIZER_INFO *data);
 
 signals:
 	void suspendEditToggle();
@@ -176,7 +204,7 @@ private slots:
 	void on_TfHandle_doubleClicked(TFHandle *sender);
 	void on_TF_view_doubleClicked(QPointF pos);
 	
-	void drawGammaCorrection();
+	void drawGammaCorrection(void);
 };
 
 bool TfHandleCompare(TFHandle*h1, TFHandle*h2);
