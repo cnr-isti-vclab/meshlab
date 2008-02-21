@@ -46,9 +46,8 @@ int absolute2RelativeVali(float absolute_val, float max_val);
 // Converts a relative value in an absolute one after applying an exponential function val^exp
 float relative2QualityValf(float relative_val, float min_q, float max_q, float exp);
 
-
-
-
+//struct containing info about a chart (at graphics level)
+//It stores info about borders, size and so on...
 struct CHART_INFO
 {
 	float leftBorder;

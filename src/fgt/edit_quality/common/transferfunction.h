@@ -30,22 +30,13 @@ FIRST RELEASE
 #ifndef _TRANSFER_FUNCTION_H_
 #define _TRANSFER_FUNCTION_H_
 
-//eliminare questo define in fase di release
-//#define NOW_TESTING
-
-
 #include <vcg/math/base.h>
 #include <vcg/space/color4.h>
-//#include <vector>
 #include <vector>
-//#include <algorithm>
 #include <cassert>
-
 #include <QString>
 #include <QColor>
-//#include <assert.h>
 #include "const_types.h"
-
 #include "util.h"
 
 using namespace std;
@@ -83,6 +74,7 @@ enum TF_CHANNELS
 	NUMBER_OF_CHANNELS
 };
 
+//macro to convert a type (channel code) into the respective color
 #define TYPE_2_COLOR(TYPE, COLOR) \
 	switch(TYPE) \
 	{ \
@@ -100,6 +92,7 @@ enum TF_CHANNELS
 		break; \
 	}
 
+//macro to convert a color (channel color) into the respective channel code
 #define COLOR_2_TYPE(COLOR, TYPE) \
 if ( COLOR == Qt::red) \
 { \
@@ -127,8 +120,6 @@ if ( COLOR == Qt::red) \
 class TfChannel
 {
 public:
-/*	enum { LEFT_JUNCTION_SIDE = 0, RIGHT_JUNCTION_SIDE	};*/
-
 	//container and iterator for TF KEYs
 	typedef	vector<TF_KEY*> KEY_LIST;
 	typedef	vector<TF_KEY*>::iterator KEY_LISTiterator;
@@ -137,12 +128,12 @@ public:
 	TfChannel(TF_CHANNELS type);
 	~TfChannel(void);
 
-	void	setType(TF_CHANNELS);
-	TF_CHANNELS getType(void);
-	TF_KEY	*addKey(float xVal, float yVal);
-	TF_KEY	*addKey(TF_KEY *newKey);
-	void	removeKey(int index);
-	void	removeKey(TF_KEY *key);
+	void		setType(TF_CHANNELS);
+	TF_CHANNELS	getType(void);
+	TF_KEY		*addKey(float xVal, float yVal);
+	TF_KEY		*addKey(TF_KEY *newKey);
+	void		removeKey(int index);
+	void		removeKey(TF_KEY *key);
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
@@ -156,21 +147,16 @@ public:
 	
 	inline int size(void)	{	return KEYS.size();	}
 
-//	void	updateKey( float old_x, float new_x, float new_y);
-
 #ifdef NOW_TESTING
 	void testInitChannel();
 #endif
 
 private:
+	//this code represent a unique id used for each channel.
 	TF_CHANNELS	_type;
-//	int old_iterator_idx;
-//	TF_CHANNEL_VALUE _ret_val;
-
 
 	//list of keys
 	KEY_LIST	KEYS;
-//	KEY_LISTiterator _idx_it; //reserved fo [] operator works (better you don't touch it! :-) )
 };
 
 
@@ -183,6 +169,9 @@ private:
 #define CSV_FILE_SEPARATOR		";"
 #define CSV_FILE_COMMENT		"//"
 
+//list of default transfer function
+//An overloaded constructor of Transfer Function takes a value of this list as parameter
+//to build the correspondent default Transfer Function
 enum DEFAULT_TRANSFER_FUNCTIONS
 {
 	GREY_SCALE_TF = 0,
@@ -194,17 +183,19 @@ enum DEFAULT_TRANSFER_FUNCTIONS
 	NUMBER_OF_DEFAULT_TF
 };
 
+//code of the default startup Transfer Function
+//When the plugin is launched, a TF is built using this code
 #define STARTUP_TF_TYPE		RGB_TF
 
 
-//Representation of a transfer function as a triple of vectors of Keys, 
-//one for each color (RGB)
+//Representation of a Transfer Function as a set of channels
+//At the moment, the Transfer Function contains 3 channels (RGB)
 class TransferFunction
 {
 private:
 	TfChannel	_channels[NUMBER_OF_CHANNELS];			//set of channels
 	int			_channels_order[NUMBER_OF_CHANNELS];	//array used to carry out virtual pivoting indexing
-	QColor		_color_band[COLOR_BAND_SIZE];
+	QColor		_color_band[COLOR_BAND_SIZE];			//array of colors used for preview color band
 
 	void initTF(void);
 
@@ -216,15 +207,14 @@ public:
 
 	static QString defaultTFs[NUMBER_OF_DEFAULT_TF];
 
-	TfChannel &getChannel( int channel_code ) {return _channels[channel_code];}
-	TfChannel& operator [](int i)	{ return _channels[_channels_order[i]];	}
+	TfChannel&	getChannel(int channel_code)	{return _channels[channel_code];}
+	TfChannel&	operator [](int i)				{ return _channels[_channels_order[i]];	}
 	int size();
 	QColor* buildColorBand(void);
-	QString saveColorBand( QString fileName, EQUALIZER_INFO& equalizerInfo );
-	Color4b getColorByQuality (float percentageQuality);
-	// QColor* getColorBand(){return _color_band;};
-	void moveChannelAhead( TF_CHANNELS channel_code );
-	inline int	getFirstPlaneChanel(void) { return _channels_order[NUMBER_OF_CHANNELS-1]; }
+	QString saveColorBand(QString fileName, EQUALIZER_INFO& equalizerInfo);
+	Color4b getColorByQuality(float percentageQuality);
+	void moveChannelAhead(TF_CHANNELS channel_code);
+	inline int	getFirstPlaneChanel(void)		{ return _channels_order[NUMBER_OF_CHANNELS-1]; }
 };
 
 bool TfKeyPCompare(TF_KEY*k1, TF_KEY*k2);
