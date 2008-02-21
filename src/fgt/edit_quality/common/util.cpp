@@ -48,10 +48,10 @@ int absolute2RelativeVali(float absolute_val, float max_val)
 
 float relative2QualityValf(float relative_val, float min_q, float max_q, float exp)
 { 
-	assert( (relative_val>=-1.0f) && (relative_val<=2.0f) );
+	assert( (relative_val>=0.0f) && (relative_val<=1.0f) );
 	assert(min_q<=max_q);
-	relative_val = pow( relative_val, exp );
-	return ( relative_val * (max_q - min_q) ) + min_q;
+	relative_val = pow( relative_val, exp ); // applying exponential function to relative val
+	return ( relative_val * (max_q - min_q) ) + min_q;// Converting relative val in absolute quality
 }
 
 
