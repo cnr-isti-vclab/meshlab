@@ -440,7 +440,7 @@ QColor* TransferFunction::buildColorBand()
 	return _color_band;
 }
 
-//converts a quality percentage value into a color
+//converts a quality percentage value into a color depending on the transfer function channels values
 Color4b TransferFunction::getColorByQuality (float percentageQuality)
 {
 	return Color4b(_channels[RED_CHANNEL].getChannelValueb( percentageQuality ), 

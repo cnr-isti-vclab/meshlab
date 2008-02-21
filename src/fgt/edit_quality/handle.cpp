@@ -38,7 +38,7 @@ Handle::Handle(CHART_INFO *environment_info, QColor color, QPointF position, int
 	_size = size;
 
 	setCursor(Qt::OpenHandCursor);
-	setToolTip(QString("Drag me..."));
+	//setToolTip(QString("Drag me..."));
 }
 
 Handle::~Handle()
@@ -58,12 +58,8 @@ void Handle::mousePressEvent(QGraphicsSceneMouseEvent *event)
          event->ignore();
          return;
      }
-
      setCursor(Qt::ClosedHandCursor);
-
-	
 } 
-
 
 
 void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
