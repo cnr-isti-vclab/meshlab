@@ -34,7 +34,6 @@ FIRST RELEASE
 #include <QTextStream>
 
 
-
 pair<int,int> computeHistogramMinMaxY (Histogramf* histogram)
 {
 	int maxY = 0;
@@ -94,7 +93,6 @@ void loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
 	inFile.close();
 }
 
-
 void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness)
 {
 	CMeshO::VertexIterator vi;
@@ -106,26 +104,24 @@ void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFuncti
 		{
 			float vertexQuality = (*vi).Q();
 			if (vertexQuality < minQuality)
-				percentageQuality = 0.0;
+				percentageQuality = 0.0f;
 			else
 				if (vertexQuality > maxQuality)
-					percentageQuality = 1.0;
+					percentageQuality = 1.0f;
 				else
-					percentageQuality = pow( ((*vi).Q() - minQuality) / (maxQuality - minQuality) , (float)(2.0*midHandlePercentilePosition));
+					// calcultating relative quality and applying exponential function: rel(Q)^exp, exp=2*midHandleRelPos
+					percentageQuality = pow( ((*vi).Q() - minQuality) / (maxQuality - minQuality) , (float)(2.0f*midHandlePercentilePosition));
 
 			currentColor = transferFunction->getColorByQuality(percentageQuality);
 			
-			if (brightness!=1.0f) //Applying brightness to each color channel
+			if (brightness!=1.0f) //Applying brightness to each color channel, 0<brightness<2, 1=normale brightness, 0=white, 2=black
 				if (brightness<1.0f)
 					for (int i=0; i<NUMBER_OF_CHANNELS; i++) 
-						//currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
-						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i]+1,257.0f),brightness), 255.0f);
+						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
 				else
 					for (int i=0; i<NUMBER_OF_CHANNELS; i++) 
-						//currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
-						currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i]+1,257.0f),2-brightness), 255.0f);
+						currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
 
-			Color4b old = (*vi).C();
 			(*vi).C() = currentColor;
 		}
 }

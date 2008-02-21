@@ -51,10 +51,11 @@ public:
 		EQUALIZER_HANDLE_TYPE type, EqHandle** handles, qreal* midHandlePercentilePosition, QDoubleSpinBox* spinbox,
 		int zOrder, int size);
 	~EqHandle(void);
+
 	QRectF boundingRect () const;
 	virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget); 
 	
-	void setSize						(int size)					{(size%2==0) ? _size=size+1 : _size=size;};
+	void setSize						(int size)					{(size%2==0) ? _size=size+1 : _size=size;}; // Size should be aleays odd
 	void setBarHeight					(qreal height)				{_barHeight = height;};
 	void setType						(EQUALIZER_HANDLE_TYPE type){_type = type;};	
 	void setMidHandlePercentilePosition (qreal* pointer)			{_midHandlePercentilePosition = pointer;};	
@@ -67,26 +68,29 @@ protected:
 
 private:
 	EQUALIZER_HANDLE_TYPE _type;
-	qreal			_barHeight;
-	QPointF			_triangle[NUMBER_OF_EQHANDLES];
-	qreal*			_midHandlePercentilePosition;
-	EqHandle**		_handlesPointer;
-	QDoubleSpinBox* _spinBoxPointer;
+	qreal			_barHeight;						// Length of the vertical bar over the EqHandle
+	QPointF			_triangle[NUMBER_OF_EQHANDLES]; 
 
+	// Pointers to QualityMapperDialog variables
+	qreal*			_midHandlePercentilePosition;	// relative position of the mid EqHandle
+	EqHandle**		_handlesPointer;				// array of the three EqHandles
+	QDoubleSpinBox* _spinBoxPointer;				// spinbox associated to the EqHandle
+
+	// computes mid EqHandle percentile position from new absolute position
 	qreal calculateMidHandlePercentilePosition(qreal newHandleX)
-	{
-		return (newHandleX - _handlesPointer[LEFT_HANDLE]->pos().x()) / (_handlesPointer[RIGHT_HANDLE]->pos().x() - _handlesPointer[LEFT_HANDLE]->pos().x());
-	};
+	{ return (newHandleX - _handlesPointer[LEFT_HANDLE]->pos().x()) / (_handlesPointer[RIGHT_HANDLE]->pos().x() - _handlesPointer[LEFT_HANDLE]->pos().x());	};
 
+	// computes quality from handle absolute position
 	qreal positionToQuality(qreal newHandleX)
 	{
 		qreal percentagePos = (newHandleX-_chartInfo->leftBorder) / _chartInfo->chartWidth;
-		assert( (percentagePos>=-1.0f) && (percentagePos<=2.0f) );
+		// assert( (percentagePos>=-1.0f) && (percentagePos<=2.0f) );
 		float maxX = (_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value() > _chartInfo->maxX)?_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value():_chartInfo->maxX;
 		float minX = (_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value()  < _chartInfo->minX)?_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value() :_chartInfo->minX;
 		return percentagePos * (maxX - minX)+minX;
 	};
 
+	// computes handle absolute position from quality
 	qreal qualityToPosition(float quality, float minQ, float maxQ)
 	{
 		qreal percentageValue = (quality -  minQ) / (maxQ - minQ);
@@ -96,11 +100,11 @@ private:
 signals:
 	void positionChangedToSpinBox(double);
 	void positionChanged();
-	void insideHistogram(EqHandle *sender, bool insideHistogram);
+	void insideHistogram(EqHandle *sender, bool insideHistogram);// emitted when EqHandle is moved, with 'insideHistogram' true if it is moved "inside" histogram, else false
 
 private slots:
-	// changing equalizer spinboxes moves the connected handle
-	void setXBySpinBoxValueChanged (double spinBoxValue);
+	
+	void setXBySpinBoxValueChanged (double spinBoxValue); // changing equalizer spinboxes moves the connected handle
 	void moveMidHandle();
 };
 
