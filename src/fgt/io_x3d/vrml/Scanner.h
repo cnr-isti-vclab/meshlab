@@ -24,6 +24,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.3  2008/02/22 17:58:42  cignoni
+ New version of coco_swprintf that supports also mingw compiler
+
  Revision 1.2  2008/02/21 13:04:10  gianpaolopalma
  Fixed compile error
 
@@ -46,15 +49,21 @@
 #include <fcntl.h>
 #endif
 
-#if _MSC_VER >= 1400
-#define coco_swprintf swprintf_s
-#elif _MSC_VER >= 1300
-#define coco_swprintf _snwprintf
-#elif defined __GNUC__
-#define coco_swprintf swprintf
-#else 
-#error unknown compiler!
-#endif 
+#ifdef WIN32
+  #ifndef __MINGW32__
+    #if _MSC_VER >= 1400
+      #define coco_swprintf swprintf_s
+    #elif _MSC_VER >= 1300
+       #define coco_swprintf _snwprintf
+    #else 
+       #error unknown compiler!
+    #endif
+   #else
+     #define coco_swprintf _snwprintf
+   #endif
+#elif defined __GNUC__                 // Linux
+  #define coco_swprintf swprintf
+#endif
 
 #define COCO_WCHAR_MAX 65535
 #define MIN_BUFFER_LENGTH 1024
