@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2008/02/22 20:24:42  benedetti
+refactored, cleaned up a bit, few feats added
+
 Revision 1.2  2008/02/17 20:57:33  benedetti
 updated following new specs (still got to clean up)
 
@@ -52,6 +55,7 @@ public:
   virtual ~EditStraightenerDialog() {}
 
   void SetUndo(bool);
+  void SetFreeze(bool value);
   void endSpecialMode();
   void updateSfn(int);
   void shoutShow();
@@ -61,7 +65,9 @@ private:
   Ui::straightenerToolBox ui;
   bool special_mode_active;
   bool undo_enabled;
+  bool freeze_enabled;
   int sfn;
+  bool was_an_action_on_slider;
   
   void updateEnabled();
   void draw_toggled(bool, char, char ,QPushButton *);
@@ -76,6 +82,7 @@ public slots:
   void on_rotate90onXPushButton_clicked();
   void on_rotate90onYPushButton_clicked();
   void on_rotate90onZPushButton_clicked();
+  void on_alignWithViewPushButton_clicked();
 
   // origin tab
   void on_bboxXSlider_sliderPressed();
@@ -87,6 +94,9 @@ public slots:
   void on_bboxXSlider_sliderReleased();
   void on_bboxYSlider_sliderReleased();
   void on_bboxZSlider_sliderReleased();
+  void on_bboxXSlider_actionTriggered(int);
+  void on_bboxYSlider_actionTriggered(int);
+  void on_bboxZSlider_actionTriggered(int);
   void on_centerOnBboxPushButton_clicked();
   void on_centerOnTrackballPushButton_clicked();
 
@@ -105,9 +115,9 @@ public slots:
   void on_getXYPlaneFromSelectionPushButton_clicked();
   void on_getYZPlaneFromSelectionPushButton_clicked();
   void on_getZXPlaneFromSelectionPushButton_clicked();
-  void on_alignWithViewPushButton_clicked();
 
   // show tab
+  void on_specialBboxCheckBox_clicked();
   void on_baseShowAxesCheckBox_clicked();
   void on_baseShowLabelsCheckBox_clicked();
   void on_baseShowValuesCheckBox_clicked();
@@ -135,7 +145,7 @@ signals:
   void set_snap(float);
   void freehand_mesh_dragging(bool);
   void get_plane_from_selection(char,char);
-  void update_show(bool,bool,bool,bool,bool,bool,bool,bool);
+  void update_show(bool,bool,bool,bool,bool,bool,bool,bool,bool);
 };
 
 #endif /*EDITSTRAIGHTENERDIALOG_H*/

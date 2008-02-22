@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2008/02/22 20:24:42  benedetti
+refactored, cleaned up a bit, few feats added
+
 Revision 1.2  2008/02/17 20:57:33  benedetti
 updated following new specs (still got to clean up)
 
@@ -97,8 +100,11 @@ private:
   DrawPhantom *dragged_mesh;
   DrawAxes *drawned_axes;  
   UndoSystem *undosystem;
+  bool draw_bbox;
   // friends:
   friend class UndoSystem;
+  //functions:
+  bool freezable();
   
 public slots:
   void on_begin_action();
@@ -114,7 +120,7 @@ public slots:
   void on_set_snap(float);
   void on_freehand_mesh_dragging(bool);
   void on_get_plane_from_selection(char,char);
-  void on_update_show(bool,bool,bool,bool,bool,bool,bool,bool);
+  void on_update_show(bool,bool,bool,bool,bool,bool,bool,bool,bool);
 };
 
 class DrawAxes
@@ -155,7 +161,6 @@ public:
   Trackball *manipulator;
 private:
   GlTrimesh < CMeshO > glmesh;
-  Matrix44f tr;
 };
 
 class UndoSystem
@@ -172,9 +177,8 @@ public:
 private:
   // types:
   typedef enum { US_MARK = 0,
-//  	             US_CANDIDATE = 1,
-	             US_TR = 2,
-	             US_FREEZE = 3
+	             US_TR = 1,
+	             US_FREEZE = 2
 	           } UndoType;  
   // data:
   const static int MAX_MARKS=100;
@@ -182,8 +186,6 @@ private:
   EditStraightener const *es;
   QVector<UndoType> undotype_vec;
   QVector<Matrix44f> tr_vec;
-  QVector<Point3f> pos_vec;
-  QVector<Quaternionf> rot_vec;
   // functions:
   bool revert();
   void limitmarks();

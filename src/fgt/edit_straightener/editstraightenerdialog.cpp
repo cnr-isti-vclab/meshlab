@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2008/02/22 20:24:42  benedetti
+refactored, cleaned up a bit, few feats added
+
 Revision 1.2  2008/02/17 20:57:33  benedetti
 updated following new specs (still got to clean up)
 
@@ -37,7 +40,8 @@ first version
 using namespace vcg;
 
 EditStraightenerDialog::EditStraightenerDialog(QWidget *parent)
-  :QWidget(parent),special_mode_active(false),undo_enabled(false),sfn(0)
+  :QWidget(parent),special_mode_active(false),undo_enabled(false),
+freeze_enabled(false),sfn(0),was_an_action_on_slider(false)
 {
   ui.setupUi(this);
   updateEnabled();
@@ -48,6 +52,14 @@ void EditStraightenerDialog::SetUndo(bool value)
   if(undo_enabled==value)
     return;
   undo_enabled=value;
+  updateEnabled();
+}
+
+void EditStraightenerDialog::SetFreeze(bool value)
+{
+  if(freeze_enabled==value)
+    return;
+  freeze_enabled=value;
   updateEnabled();
 }
 
@@ -77,7 +89,8 @@ void EditStraightenerDialog::updateSfn(int n)
 
 void EditStraightenerDialog::shoutShow()
 {
-  emit update_show(ui.baseShowAxesCheckBox->isChecked(),
+  emit update_show(ui.specialBboxCheckBox->isChecked(),
+                   ui.baseShowAxesCheckBox->isChecked(),
                    ui.baseShowLabelsCheckBox->isChecked(),
                    ui.baseShowValuesCheckBox->isChecked(),
                    ui.currentShowAxesCheckBox->isChecked(),
@@ -97,6 +110,7 @@ void EditStraightenerDialog::updateEnabled()
   ui.swapGroupBox->setEnabled(!special_mode_active);
   ui.flipGroupBox->setEnabled(!special_mode_active);
   ui.rotate90GroupBox->setEnabled(!special_mode_active);
+  ui.alignWithViewPushButton->setEnabled(!special_mode_active);
   ui.moveWrtBboxGroupBox->setEnabled(!special_mode_active);
   ui.centerOnGroupBox->setEnabled(!special_mode_active);
   ui.freehandAxisGroupBox->setEnabled(!special_mode_active);
@@ -109,17 +123,12 @@ void EditStraightenerDialog::updateEnabled()
   ui.drawYAndZAxesOnMeshPushButton->setEnabled(!special_mode_active);
   ui.drawZAndXAxesOnMeshPushButton->setEnabled(!special_mode_active);
   ui.getPlaneFomSelectionGroupBox->setEnabled(!special_mode_active && (sfn > 0)); // different
-  ui.alignWithViewPushButton->setEnabled(!special_mode_active);
-  ui.baseShowGroupBox->setEnabled(!special_mode_active);
-  ui.currentShowGroupBox->setEnabled(!special_mode_active);
   ui.undoPushButton->setEnabled(!special_mode_active && undo_enabled); // different
-  ui.freezePushButton->setEnabled(!special_mode_active);
+  ui.freezePushButton->setEnabled(!special_mode_active && freeze_enabled); // different
 }
 
 void EditStraightenerDialog::draw_toggled(bool checked,char c1,char c2,QPushButton *button)
 {
-  if(checked)
-    emit begin_action();
   if(special_mode_active==checked)
     return;
   special_mode_active=checked;
@@ -132,65 +141,52 @@ void EditStraightenerDialog::draw_toggled(bool checked,char c1,char c2,QPushButt
 // slots
 void EditStraightenerDialog::on_swapXwithYPushButton_clicked()
 {
-  emit begin_action();
   emit rot(180,Point3f(1,1,0));
-  emit apply();
 }
 
 void EditStraightenerDialog::on_swapYwithZPushButton_clicked()
 {
-  emit begin_action();
   emit rot(180,Point3f(0,1,1));
-  emit apply();
 }
 
 void EditStraightenerDialog::on_swapZwithXPushButton_clicked()
 {
-  emit begin_action();
   emit rot(180,Point3f(1,0,1));
-  emit apply();
 }
 
 void EditStraightenerDialog::on_flipXandYPushButton_clicked()
 {
-  emit begin_action();
   emit rot(180,Point3f(0,0,1));
-  emit apply();
 }
 
 void EditStraightenerDialog::on_flipYandZPushButton_clicked()
 {
-  emit begin_action();
   emit rot(180,Point3f(1,0,0));
-  emit apply();
 }
 
 void EditStraightenerDialog::on_flipZandXPushButton_clicked()
 {
-  emit begin_action();
   emit rot(180,Point3f(0,1,0));
-  emit apply();
 }
 
 void EditStraightenerDialog::on_rotate90onXPushButton_clicked()
 {
-  emit begin_action();
   emit rot(90,Point3f(1,0,0));
-  emit apply();
 }
 
 void EditStraightenerDialog::on_rotate90onYPushButton_clicked()
 {
-  emit begin_action();
   emit rot(90,Point3f(0,1,0));
-  emit apply();
 }
 
 void EditStraightenerDialog::on_rotate90onZPushButton_clicked()
 {
-  emit begin_action();
   emit rot(90,Point3f(0,0,1));
-  emit apply();
+}
+
+void EditStraightenerDialog::on_alignWithViewPushButton_clicked()
+{
+  emit align_with_view();
 }
 
 void EditStraightenerDialog::on_bboxXSlider_sliderPressed()
@@ -211,16 +207,28 @@ void EditStraightenerDialog::on_bboxZSlider_sliderPressed()
 void EditStraightenerDialog::on_bboxXSlider_valueChanged(int value)
 {
   emit move_axis_to_bbox(0,value/100.0f);
+  if(was_an_action_on_slider){
+  	emit apply();
+    was_an_action_on_slider=false;
+  }
 }
 
 void EditStraightenerDialog::on_bboxYSlider_valueChanged(int value)
 {
   emit move_axis_to_bbox(1,value/100.0f);
+  if(was_an_action_on_slider){
+  	emit apply();
+    was_an_action_on_slider=false;
+  }
 }
 
 void EditStraightenerDialog::on_bboxZSlider_valueChanged(int value)
 {
   emit move_axis_to_bbox(2,value/100.0f);
+  if(was_an_action_on_slider){
+  	emit apply();
+    was_an_action_on_slider=false;
+  }
 }
 
 void EditStraightenerDialog::on_bboxXSlider_sliderReleased()
@@ -236,6 +244,30 @@ void EditStraightenerDialog::on_bboxYSlider_sliderReleased()
 void EditStraightenerDialog::on_bboxZSlider_sliderReleased()
 {
   emit apply();
+}
+
+void EditStraightenerDialog::on_bboxXSlider_actionTriggered(int action)
+{
+  if(action==QAbstractSlider::SliderMove)
+    return;
+  was_an_action_on_slider=true;
+  emit begin_action();
+}
+
+void EditStraightenerDialog::on_bboxYSlider_actionTriggered(int action)
+{
+  if(action==QAbstractSlider::SliderMove)
+    return;
+  was_an_action_on_slider=true;
+  emit begin_action();
+}
+
+void EditStraightenerDialog::on_bboxZSlider_actionTriggered(int action)
+{
+  if(action==QAbstractSlider::SliderMove)
+    return;
+  was_an_action_on_slider=true;
+  emit begin_action();
 }
 
 void EditStraightenerDialog::on_centerOnBboxPushButton_clicked()
@@ -256,15 +288,11 @@ void EditStraightenerDialog::on_centerOnBboxPushButton_clicked()
 
 void EditStraightenerDialog::on_centerOnTrackballPushButton_clicked()
 {
-  emit begin_action();
   emit center_on_trackball();
-  emit apply(); 
 }
 
 void EditStraightenerDialog::on_freehandAxisDraggingPushButton_toggled(bool checked)
 {
-  if(checked)
-    emit begin_action();
   if(special_mode_active==checked)
     return;
   special_mode_active=checked;
@@ -283,8 +311,6 @@ void EditStraightenerDialog::on_snapRotationDoubleSpinBox_valueChanged(double va
 
 void EditStraightenerDialog::on_freehandMeshDraggingPushButton_toggled(bool checked)
 {
-  if(checked)
-    emit begin_action();
   if(special_mode_active==checked)
     return;
   special_mode_active=checked;
@@ -325,30 +351,22 @@ void EditStraightenerDialog::on_drawZAndXAxesOnMeshPushButton_toggled(bool check
 
 void EditStraightenerDialog::on_getXYPlaneFromSelectionPushButton_clicked()
 {
-  emit begin_action();
   emit get_plane_from_selection('Z','X');
-  emit apply(); 
 }
 
 void EditStraightenerDialog::on_getYZPlaneFromSelectionPushButton_clicked()
 {
-  emit begin_action();
   emit get_plane_from_selection('X','Y');
-  emit apply(); 
 }
 
 void EditStraightenerDialog::on_getZXPlaneFromSelectionPushButton_clicked()
 {
-  emit begin_action();
   emit get_plane_from_selection('Y','Z');
-  emit apply(); 
 }
 
-void EditStraightenerDialog::on_alignWithViewPushButton_clicked()
+void EditStraightenerDialog::on_specialBboxCheckBox_clicked()
 {
-  emit begin_action();
-  emit align_with_view();
-  emit apply();
+  shoutShow();
 }
 
 void EditStraightenerDialog::on_baseShowAxesCheckBox_clicked()
@@ -393,8 +411,6 @@ void EditStraightenerDialog::on_rotationShowCheckBox_clicked()
 
 void EditStraightenerDialog::on_freezePushButton_clicked()
 {
-  emit begin_action();
-  emit apply();
   emit freeze();
 }
 

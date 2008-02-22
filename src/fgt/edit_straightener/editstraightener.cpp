@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2008/02/22 20:24:42  benedetti
+refactored, cleaned up a bit, few feats added
+
 Revision 1.2  2008/02/17 20:57:33  benedetti
 updated following new specs (still got to clean up)
 
@@ -53,7 +56,7 @@ EditStraightener::EditStraightener()
 :actionList(),dialog(NULL),dialog_dock(NULL),
 gla(NULL),mm(NULL),refsize(0),currentmode(ES_Normal),
 origin(NULL),old_origin(NULL),dragged_origin(NULL),
-dragged_mesh(NULL),drawned_axes(NULL),undosystem(NULL)
+dragged_mesh(NULL),drawned_axes(NULL),undosystem(NULL),draw_bbox(true)
 {
   actionList << new QAction(QIcon(":/images/icon_straightener.png"),"Straighten up a mesh", this);
   foreach(QAction *editAction, actionList)
@@ -141,10 +144,11 @@ void EditStraightener::StartEdit(QAction *a, MeshModel &m, GLArea *g )
           this, SLOT( on_freehand_mesh_dragging(bool) ) );
   connect(dialog, SIGNAL( get_plane_from_selection(char,char) ),
           this, SLOT( on_get_plane_from_selection(char,char) ) );
-  connect(dialog, SIGNAL( update_show(bool,bool,bool,bool,bool,bool,bool,bool) ),
-          this, SLOT( on_update_show(bool,bool,bool,bool,bool,bool,bool,bool) ) );
+  connect(dialog, SIGNAL( update_show(bool,bool,bool,bool,bool,bool,bool,bool,bool) ),
+          this, SLOT( on_update_show(bool,bool,bool,bool,bool,bool,bool,bool,bool) ) );
           
   dialog->shoutShow();
+  dialog->SetFreeze(freezable());
 
   dialog_dock->setVisible(true);
   dialog_dock->layout()->update();
@@ -167,7 +171,10 @@ void EditStraightener::EndEdit(QAction *, MeshModel &, GLArea *)
   if (drawned_axes!=NULL) { delete drawned_axes; drawned_axes=NULL; }
   if (undosystem!=NULL) { delete undosystem; undosystem=NULL; }
   
-  if(gla!=NULL) gla->update();
+  if(gla!=NULL){
+     gla->releaseKeyboard();
+  	 gla->update();
+  }
   gla=NULL;
   mm=NULL;
 }
@@ -192,15 +199,90 @@ void EditStraightener::Decorate(QAction *, MeshModel &, GLArea *)
       Point3f a1,a2,b1,b2;  
       drawned_axes->GetAxes(a1,a2,b1,b2);
       origin->AlignWith(a2-a1,b2-b1,drawned_axes->firstchar,drawned_axes->secondchar); 
+      on_apply();
       delete drawned_axes;
       drawned_axes=NULL;
       currentmode=ES_Normal;
       dialog->endSpecialMode();
-      on_apply();
       gla->trackball.Reset();
       gla->update();
     }
   }
+  
+  if(draw_bbox){
+  	Box3f bbox = mm->cm.trBB();
+  	float mx=bbox.min[0],my=bbox.min[1],mz=bbox.min[2];
+  	float Mx=bbox.max[0],My=bbox.max[1],Mz=bbox.max[2];
+    float x=math::Clamp(.0f,mx,Mx);
+    float y=math::Clamp(.0f,my,My);
+    float z=math::Clamp(.0f,mz,Mz);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
+    glLineWidth(2);
+    glPointSize(5);
+    glBegin(GL_LINES);
+      glColor(Color4b(85,0,0,255)); // x negativi
+      glVertex3f(mx,my,mz); glVertex3f(x,my,mz);
+      glVertex3f(mx,my,Mz); glVertex3f(x,my,Mz);
+      glVertex3f(mx,My,mz); glVertex3f(x,My,mz);
+      glVertex3f(mx,My,Mz); glVertex3f(x,My,Mz);
+      glColor(Color4b(170,85,85,255)); // x positivi
+      glVertex3f(x,my,mz); glVertex3f(Mx,my,mz);
+      glVertex3f(x,my,Mz); glVertex3f(Mx,my,Mz);
+      glVertex3f(x,My,mz); glVertex3f(Mx,My,mz);
+      glVertex3f(x,My,Mz); glVertex3f(Mx,My,Mz);
+      glColor(Color4b(0,85,0,255)); // y negativi
+      glVertex3f(mx,my,mz); glVertex3f(mx,y,mz);
+      glVertex3f(mx,my,Mz); glVertex3f(mx,y,Mz);
+      glVertex3f(Mx,my,mz); glVertex3f(Mx,y,mz);
+      glVertex3f(Mx,my,Mz); glVertex3f(Mx,y,Mz);
+      glColor(Color4b(85,170,85,255)); // y positivi
+      glVertex3f(mx,y,mz); glVertex3f(mx,My,mz);
+      glVertex3f(mx,y,Mz); glVertex3f(mx,My,Mz);
+      glVertex3f(Mx,y,mz); glVertex3f(Mx,My,mz);
+      glVertex3f(Mx,y,Mz); glVertex3f(Mx,My,Mz);
+      glColor(Color4b(0,0,85,255)); // z negativi
+      glVertex3f(mx,my,mz); glVertex3f(mx,my,z);
+      glVertex3f(mx,My,mz); glVertex3f(mx,My,z);
+      glVertex3f(Mx,my,mz); glVertex3f(Mx,my,z);
+      glVertex3f(Mx,My,mz); glVertex3f(Mx,My,z);
+      glColor(Color4b(85,85,170,255)); // z positivi
+      glVertex3f(mx,my,z); glVertex3f(mx,my,Mz);
+      glVertex3f(mx,My,z); glVertex3f(mx,My,Mz);
+      glVertex3f(Mx,my,z); glVertex3f(Mx,my,Mz);
+      glVertex3f(Mx,My,z); glVertex3f(Mx,My,Mz);
+    glEnd();
+    glBegin(GL_POINTS);
+      if((mx<0)&&(Mx>0)){
+        glColor(Color4b(255,170,170,255));
+        glVertex3f(x,my,mz);
+        glVertex3f(x,my,Mz);
+        glVertex3f(x,My,mz);
+        glVertex3f(x,My,Mz);
+      }
+      if((my<0)&&(My>0)){
+        glColor(Color4b(170,255,170,255));
+        glVertex3f(mx,y,mz);
+        glVertex3f(mx,y,Mz);
+        glVertex3f(Mx,y,mz);
+        glVertex3f(Mx,y,Mz);
+      }
+      if((mz<0)&&(Mz>0)){
+        glColor(Color4b(170,170,255,255));
+        glVertex3f(mx,my,z);
+        glVertex3f(mx,My,z);
+        glVertex3f(Mx,my,z);
+        glVertex3f(Mx,My,z);
+      }
+    glEnd();
+    glPopAttrib();  
+  }
+  
   assert(!glGetError());
 }
 
@@ -208,7 +290,7 @@ void EditStraightener::mousePressEvent(QAction *, QMouseEvent *e, MeshModel &, G
 {
   switch (currentmode) {
     case ES_FreehandAxisDragging:
-      dragged_origin->MouseDown(e->pos(), e->x(), gla->height() - e->y(), QT2VCG(e->button(), e->modifiers()));
+      dragged_origin->MouseDown(e->x(), gla->height() - e->y(), QT2VCG(e->button(), e->modifiers()));
       break;
     case ES_FreehandMeshDragging:
       dragged_mesh->MouseDown(e->x(), gla->height() - e->y(), QT2VCG(e->button(), e->modifiers()));
@@ -223,7 +305,7 @@ void EditStraightener::mouseMoveEvent(QAction *, QMouseEvent *e, MeshModel &, GL
 {
   switch (currentmode) {
     case ES_FreehandAxisDragging:
-      dragged_origin->MouseMove(e->pos(), e->x (),gla->height () - e->y ());
+      dragged_origin->MouseMove(e->x (),gla->height () - e->y ());
       break;
     case ES_DrawOnMesh:
       drawned_axes->mouseMove(e->pos());
@@ -241,7 +323,7 @@ void EditStraightener::mouseReleaseEvent(QAction *,QMouseEvent *e, MeshModel &, 
 {
   switch (currentmode) {
     case ES_FreehandAxisDragging:
-      dragged_origin->MouseUp(e->x (),gla->height () - e->y (), QT2VCG (e->button (), e->modifiers ()));
+      dragged_origin->MouseUp(e->x (),gla->height () - e->y (), QT2VCG (e->button (), 0));
       break;
     case ES_DrawOnMesh:
       drawned_axes->mouseRelease(e->pos());
@@ -265,6 +347,7 @@ void EditStraightener::keyReleaseEvent (QAction *, QKeyEvent * e, MeshModel &, G
   } else if (e->key () == Qt::Key_Alt) {
     button = QT2VCG (Qt::NoButton, Qt::AltModifier);
   } else {
+    e->ignore();
     gla->update();
     return;
   }
@@ -275,7 +358,7 @@ void EditStraightener::keyReleaseEvent (QAction *, QKeyEvent * e, MeshModel &, G
     case ES_FreehandMeshDragging:
       dragged_mesh->ButtonUp(button);
     default:
-      break;
+      e->ignore();
   }
   gla->update();
 }
@@ -291,6 +374,7 @@ void EditStraightener::keyPressEvent (QAction *, QKeyEvent * e, MeshModel &, GLA
   } else if (e->key () == Qt::Key_Alt) {
     button = QT2VCG (Qt::NoButton, Qt::AltModifier);
   } else {
+    e->ignore();
     gla->update();
     return;
   }
@@ -301,24 +385,50 @@ void EditStraightener::keyPressEvent (QAction *, QKeyEvent * e, MeshModel &, GLA
     case ES_FreehandMeshDragging:
       dragged_mesh->ButtonDown(button);
     default:
-      break;
+      e->ignore();
   }
   gla->update();
 }
 
+bool EditStraightener::freezable()
+{
+  const float EPSILON=1e-4;
+  for(int i=0;i<4;i++)
+    for(int j=0;j<4;j++)
+      if( math::Abs(mm->cm.Tr[i][j] - (i==j?1:0)) > EPSILON)
+        return true;
+  return false;
+}
+
 // slots:
+void EditStraightener::on_begin_action()
+{
+  if((origin->GetPosition()!=Point3f(0,0,0))||
+     (origin->GetRotation()!=Quaternionf(0,Point3f(1,0,0))))
+    qDebug("something's wrong on begin action");  
+  else
+   qDebug("begin action");
+  undosystem->BeginAction();
+}
+
 void EditStraightener::on_apply()
 {
+  qDebug("applying");
   Matrix44f tr; 
   origin->GetTransform(tr);
   origin->Reset(true,true);
   undosystem->SaveTR();
   mm->cm.Tr = Inverse(tr) * mm->cm.Tr ;
+  dialog->SetFreeze(freezable());
   gla->update();
 }
 
 void EditStraightener::on_freeze()
 {
+  assert(origin->GetPosition()==Point3f(0,0,0));
+  assert(origin->GetRotation()==Quaternionf(0,Point3f(1,0,0)));
+  on_begin_action();
+  qDebug("freezing");
   gla->setWindowModified(true);
   undosystem->SaveFreeze();
   tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
@@ -326,6 +436,7 @@ void EditStraightener::on_freeze()
   tri::UpdateBounding<CMeshO>::Box(mm->cm);
   undosystem->SaveTR();
   mm->cm.Tr.SetIdentity();
+  dialog->SetFreeze(false);
   gla->trackball.Reset();
   gla->update();
 }
@@ -333,20 +444,26 @@ void EditStraightener::on_freeze()
 void EditStraightener::on_undo()
 {
   assert(undosystem->CanUndo());
+  qDebug("undoing");
   undosystem->Undo();
+  dialog->SetFreeze(freezable());
   gla->update();
 }
 
 
 void EditStraightener::on_rot(float angle_deg,Point3f axis)
 {
+  on_begin_action();
   origin->Rot(angle_deg,axis);
+  on_apply();
   gla->update();
 }
 
 void EditStraightener::on_align_with_view()
 {
+  on_begin_action();
   origin->SetRotation(Inverse(gla->trackball.track.rot));  
+  on_apply();
   gla->trackball.Reset();
   gla->update();
 }
@@ -356,7 +473,7 @@ void EditStraightener::on_move_axis_to_bbox(int axis, float value)
   Box3f bbox = mm->cm.trBB();
   Point3f p = origin->GetPosition();
   p[axis]=bbox.min[axis] + (bbox.max[axis]-bbox.min[axis]) * value;
-  origin->SetPosition(p);
+  origin->SetPosition(p); // della parte begin_action\apply si occupa EditStraightenerDialog
   gla->update();
 }
 
@@ -365,7 +482,9 @@ void EditStraightener::on_center_on_trackball()
   Box3f bbox;
   foreach(MeshModel * m, gla->meshDoc.meshList) 
     bbox.Add(m->cm.trBB());
+  on_begin_action();
   origin->SetPosition(bbox.Center()-(gla->trackball.track.tra) * (0.5*bbox.Diag()));
+  on_apply();
   gla->update();
 }
 
@@ -373,12 +492,14 @@ void EditStraightener::on_draw_on_mesh(bool begin,char c1,char c2)
 {
   if(begin){
     assert(currentmode==ES_Normal);
+    on_begin_action();
     drawned_axes = new DrawAxes(c1,c2);
     currentmode=ES_DrawOnMesh;
   } else {
     assert(currentmode==ES_DrawOnMesh);
     delete drawned_axes;
     drawned_axes=NULL;
+    on_undo();
     currentmode=ES_Normal;
   }
   gla->update();
@@ -390,6 +511,9 @@ void EditStraightener::on_freehand_axis_dragging(bool begin)
     assert(currentmode==ES_Normal);
     assert(old_origin==NULL); 
     assert(dragged_origin==NULL);
+    on_begin_action();    
+    gla->setMouseTracking(true);
+    gla->grabKeyboard ();    
     old_origin=new CoordinateFrame(refsize);
     old_origin->basecolor=Color4b(128,128,0,255);
     old_origin->xcolor=Color4b(128,0,0,255);
@@ -412,6 +536,8 @@ void EditStraightener::on_freehand_axis_dragging(bool begin)
     delete (old_origin); old_origin=NULL;
     delete (dragged_origin); dragged_origin=NULL;
     currentmode=ES_Normal;
+    gla->releaseKeyboard();
+    gla->setMouseTracking(false);
     on_apply(); 
   }
   gla->update();
@@ -424,19 +550,42 @@ void EditStraightener::on_set_snap(float rot_snap_deg)
   gla->update();
 }
 
+void dbgm(const char* s,const Matrix44f &m){
+  qDebug("%-20s:%+3.2f %+3.2f %+3.2f %+3.2f",s ,m[0][0],m[0][1],m[0][2],m[0][3]);
+  qDebug("%-20s %+3.2f %+3.2f %+3.2f %+3.2f","",m[1][0],m[1][1],m[1][2],m[1][3]);
+  qDebug("%-20s %+3.2f %+3.2f %+3.2f %+3.2f","",m[2][0],m[2][1],m[2][2],m[2][3]);
+  qDebug("%-20s %+3.2f %+3.2f %+3.2f %+3.2f\n","",m[3][0],m[3][1],m[3][2],m[3][3]);
+}
+
+void dbgp(const char* s,const Point3f &p){
+  qDebug("%-20s: %+3.2f %+3.2f %+3.2f\n",s,p[0],p[1],p[2]);
+}
+
+void dbgq(const char* s,const Quaternionf &q){
+  float angle;
+  Point3f axis;
+  q.ToAxis(angle,axis);
+  qDebug("%-20s: %+3.2f on %+3.2f %+3.2f %+3.2f\n",s,angle*180.0/M_PI,axis[0],axis[1],axis[2]);
+}
+void dbgf(const char* s,const float f){
+  qDebug("%-20s: %+3.2f\n",s,f);
+}
+
 void EditStraightener::on_freehand_mesh_dragging(bool begin)
 {
   if(begin){
     assert(currentmode==ES_Normal);
+    on_begin_action();
   	dragged_mesh = new DrawPhantom(mm,refsize);
     currentmode=ES_FreehandMeshDragging;
   } else {
     assert(currentmode==ES_FreehandMeshDragging);
     assert(dragged_mesh!=NULL);
     Matrix44f tr;
-    tr=dragged_mesh->manipulator->track.Matrix(); 
+    tr=dragged_mesh->manipulator->track.Matrix();
     undosystem->SaveTR();
-    mm->cm.Tr = mm->cm.Tr * tr ;    
+    //mm->cm.Tr =  tr ; // commentato nell'attesa di risolvere il problema tra Matrix e Similarity
+    on_apply(); 
     delete dragged_mesh;
     dragged_mesh=NULL;
     currentmode=ES_Normal;
@@ -464,14 +613,17 @@ void EditStraightener::on_get_plane_from_selection(char normal,char preserve)
   Plane3f plane;
   PlaneFittingPoints(selected_pts,plane); //calcolo il piano di fitting
 
+  on_begin_action();
   origin->SetPosition(plane.Projection(bbox.Center()));
-  origin->AlignWith(plane.Direction(),Point3f(0,0,0),normal,preserve);   //TODO:sistemare!!
+  origin->AlignWith(plane.Direction(),Point3f(0,0,0),normal,preserve);
+  on_apply(); 
   
   gla->update();
 }
 
-void EditStraightener::on_update_show(bool ba, bool bl, bool bv, bool ca, bool cl, bool cv, bool m, bool r)
+void EditStraightener::on_update_show(bool db,bool ba, bool bl, bool bv, bool ca, bool cl, bool cv, bool m, bool r)
 {
+  draw_bbox=db;
   origin->drawaxis=ba;
   origin->drawlabels=bl;
   origin->drawvalues=bv;
@@ -486,11 +638,6 @@ void EditStraightener::on_update_show(bool ba, bool bl, bool bv, bool ca, bool c
     dragged_origin->drawrotations=r;
   }
   gla->update();
-}
-
-void EditStraightener::on_begin_action()
-{
-  undosystem->BeginAction();
 }
 
 //////////////////////////////////////////////////////////////
@@ -582,10 +729,19 @@ DrawPhantom::DrawPhantom(MeshModel* mm,float refsize)
 {
   glmesh.m = &(mm->cm);
   glmesh.Update ();
-  tr = mm->cm.Tr;
-  manipulator = new Trackball();   
+  manipulator = new Trackball();
   manipulator->radius = refsize;
-  manipulator->center = Inverse(tr) * mm->cm.trBB().Center() ;
+  manipulator->center = mm->cm.trBB().Center() ;
+  dbgp("manipulator->center",manipulator->center);
+  dbgm("mm->cm.Tr",mm->cm.Tr);
+  Matrix44f mc1,mc2,mf;
+  mc1.SetTranslate( manipulator->center);
+  mc2.SetTranslate(-manipulator->center);
+  mf = mc1 * mm->cm.Tr * mc2;
+  dbgm("mf",mf);
+  manipulator->track.FromMatrix(mf);  // non funzionera` nulla finche non va questo
+  dbgm("manipulator->track",manipulator->track.Matrix());
+
   // rifaccio i modi senza le scalature
   std::map<int, TrackMode *>::iterator it;
   for(it = manipulator->modes.begin(); it != manipulator->modes.end(); it++)
@@ -615,10 +771,23 @@ void DrawPhantom::Render()
   glPushMatrix();
   glPushAttrib (GL_ALL_ATTRIB_BITS);
   
-  glMultMatrix(tr);
-  
   manipulator->GetView();
   manipulator->Apply(true);  
+
+  glDisable(GL_LIGHTING);// axes are for debugging...
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_LINE_SMOOTH);
+  glEnable(GL_POINT_SMOOTH);
+  glLineWidth(5);
+  glPointSize(10);
+  glColor3f(1,1,1); glBegin(GL_POINTS); glVertex3f(0,0,0); glEnd(); 
+  glColor3f(1,.7,.7); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(10,0,0);glEnd();
+  glColor3f(.7,1,.7); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(0,10,0);glEnd();
+  glColor3f(.7,.7,1); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(0,0,10);glEnd();
+  glLineWidth(1);
+  glPointSize(1); // end debugging part
  
   float amb[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
   float col[4] = { 0.5f, 0.5f, 0.8f, 1.0f };
@@ -636,11 +805,11 @@ void DrawPhantom::Render()
   glMaterialfv (GL_FRONT_AND_BACK, GL_DIFFUSE, col);
   glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR,spe);
 
-  glmesh.Draw < GLW::DMWire , GLW::CMNone, GLW::TMNone > (); 
+  glmesh.Draw < GLW::DMWire , GLW::CMNone, GLW::TMNone > ();
   
   glPopAttrib ();
   glPopMatrix();
-  assert(!glGetError());
+  assert(!glGetError());  
 }
 
 void DrawPhantom::MouseDown(int x, int y, /*Button*/ int button)
@@ -671,7 +840,7 @@ void DrawPhantom::ButtonDown(int button)
 ////////////////////////////////////
 
 UndoSystem::UndoSystem(EditStraightener const *e)
-:marks(0),es(e),undotype_vec(),tr_vec(),pos_vec(),rot_vec()
+:marks(0),es(e),undotype_vec(),tr_vec()
 { 
 }
 
@@ -702,14 +871,6 @@ bool UndoSystem::CanUndo()
   return marks>0;
 }
 
-//void UndoSystem::SaveCandidate()
-//{
-//  assert(undotype_vec.size()>0);
-//  undotype_vec.push_back(US_CANDIDATE);
-//  pos_vec.push_back(es->candidate->GetPosition());
-//  rot_vec.push_back(es->candidate->GetRotation());
-//}
-
 void UndoSystem::SaveTR()
 {
   assert(undotype_vec.size()>0);
@@ -731,12 +892,6 @@ bool UndoSystem::revert()
   switch(undotype){
   	case US_MARK:
   	  return false;
-//    case US_CANDIDATE:
-//      es->candidate->SetPosition(pos_vec.back());
-//      es->candidate->SetRotation(rot_vec.back());  
-//      pos_vec.pop_back();
-//      rot_vec.pop_back();
-//      break;
     case US_TR:
       es->mm->cm.Tr=tr_vec.back();
       tr_vec.pop_back();
@@ -766,10 +921,6 @@ void UndoSystem::limitmarks()
     switch(undotype_vec.front()){
       case US_MARK:
         return;
-//      case US_CANDIDATE:
-//        pos_vec.pop_front();
-//        rot_vec.pop_front();
-//        break;
       case US_TR:
         tr_vec.pop_front();
         break;
