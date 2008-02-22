@@ -48,6 +48,9 @@ typedef unsigned int		UINT32;
 //minimum step used to round float values in histogram
 #define Y_SCALE_STEP			5
 
+#define NUMBER_OF_HISTOGRAM_BINS 200
+
+
 //set of macros used to tell to clearItems method what to remove and\or delete
 //each macro refers to a particular type of graphic item
 #define REMOVE_TF_HANDLE	0x00000001
