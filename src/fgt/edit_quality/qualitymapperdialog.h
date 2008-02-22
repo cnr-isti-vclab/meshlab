@@ -116,15 +116,12 @@ public:
 	bool initEqualizerHistogram(void);
 	void drawTransferFunction(void);
 
-
-
-
 private:
 	Ui::QualityMapperDialogClass ui;
 
 	//Equalizer-Histogram items
-	Histogramf		*_equalizer_histogram;
-	CHART_INFO		*_histogram_info;
+	Histogramf		*_equalizer_histogram;	// It changes if handles go "outside" histogram
+	CHART_INFO		*_histogram_info;		// Its values minX and maxX never change
 	QGraphicsScene	_equalizerHistogramScene;
 	EqHandle*		_equalizerHandles[NUMBER_OF_EQHANDLES];
 	qreal			_equalizerMidHandlePercentilePosition;
@@ -143,18 +140,12 @@ private:
 	GRAPHICS_ITEMS_LIST _transferFunctionLines;
 	GRAPHICS_ITEMS_LIST _transferFunctionBg;
 	bool			_isTransferFunctionInitialized;
+	
+	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs; //list of external CSV files info
+	GRAPHICS_ITEMS_LIST _removed_items; //list of removed graphics items
 
-	//list of external CSV files info
-	QList<KNOWN_EXTERNAL_TFS>		_knownExternalTFs;
-
-	//list of removed graphics items
-	GRAPHICS_ITEMS_LIST _removed_items;
-
-	//reference to current mesh
-	MeshModel&		mesh;
-
-	//pointer to GL Area object
-	GLArea			*gla;
+	MeshModel&		mesh; //reference to current mesh
+	GLArea			*gla; //pointer to GL Area object
 
 	void initTF(void);
 	void updateColorBand(void);

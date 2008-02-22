@@ -214,11 +214,15 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 			// if left handle is "inside" histogram
 			if ( newHandleX >= _chartInfo->leftBorder )
 			{
-				emit insideHistogram(this,true); // for redrawing equalizerHistogram bars, if needed
 				setPos(newHandleX, pos().y());
+				emit insideHistogram(this,true); // for redrawing equalizerHistogram bars, if needed
 			}
 			else
+			{
+				setPos(_chartInfo->leftBorder, pos().y());
 				emit insideHistogram(this,false);
+			}
+
 
 			emit positionChanged();  // for redrawing transferFunctionScene and moving midHandle
 		}
@@ -234,11 +238,16 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 			// if right handle is "inside" histogram
 			if ( newHandleX <= _chartInfo->rightBorder )
 			{
-				emit insideHistogram(this,true); // invalidates equalizerHistogram scene
 				setPos(newHandleX, pos().y());
+				emit insideHistogram(this,true); // invalidates equalizerHistogram scene
 			}
 			else
+			{
+				setPos(_chartInfo->rightBorder, pos().y());
 				emit insideHistogram(this,false);
+			}
+
+
 
 			emit positionChanged();  // for redrawing transferFunctionScene and moving midHandle
 		}

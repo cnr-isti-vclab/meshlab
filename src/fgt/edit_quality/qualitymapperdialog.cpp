@@ -52,8 +52,6 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 	ui.setupUi(this);
 
 	this->setWidget(ui.frame);
-	/*this->setFeatures(QDockWidget::AllDockWidgetFeatures);
-	this->setAllowedAreas(Qt::LeftDockWidgetArea);*/
 	this->setFloating(true);
 	// Setting dialog position in top right corner
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
@@ -62,6 +60,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 	this->gla = gla;
 
 	_histogram_info = 0;
+	_equalizer_histogram = 0;
 	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 		_equalizerHandles[i] = 0;
 
@@ -79,15 +78,9 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 	_transferFunctionScene.addItem(_tfCatcher);
 	connect(_tfCatcher, SIGNAL(TFdoubleClicked(QPointF)), this, SLOT(on_TF_view_doubleClicked(QPointF)));
 
-	//connect(this, SIGNAL(closing()),gla,SLOT(endEdit()) );
-
-	// toggle Trackball button (?)
-
+	// toggling Trackball button
 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 	suspendEditToggle();
-
-	//gla->suspendEditToggle();
-	_equalizer_histogram = 0;
 }
 
 //class destructor
@@ -130,7 +123,7 @@ QualityMapperDialog::~QualityMapperDialog()
 	emit closingDialog();
 }
 
-
+/* Resets histogram and builds a new one */
 void QualityMapperDialog::ComputePerVertexQualityHistogram( CMeshO &m, Frange range, Histogramf *h, int bins )    // V1.0
 {
 	h->Clear();
@@ -167,10 +160,12 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearScene(QGraphicsScene *scene, int 
 }
 
 
-//this method clears some particular types of graphical items from dialog.
-//toClear value represents the logical OR of some macros that define what to clear
-//returns a list of pointers to Items removed (NOT DELETED!!)
-//If DELETE_REMOVED_ITEMS is passed in toClear flag, the items are destroyed too and the list returned is empty
+/*
+Clears some particular types of graphical items from dialog.
+toClear value represents the logical OR of some macros that define what to clear
+returns a list of pointers to Items removed (NOT DELETED!!)
+If DELETE_REMOVED_ITEMS is passed in toClear flag, the items are destroyed too and the list returned is empty
+*/
 GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 {
 	_removed_items.clear();
@@ -194,7 +189,6 @@ GRAPHICS_ITEMS_LIST* QualityMapperDialog::clearItems(int toClear)
 	if ((toClear & REMOVE_EQ_HANDLE) == REMOVE_EQ_HANDLE)
 	{
 		//removing EQ Handles
-		//just removing! NOT DELETING!!
 		for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 		{
 			if ( _equalizerHandles[i] )
@@ -349,22 +343,22 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	}
 	decimals+=2;
 
+	ui.minSpinBox->setDecimals(decimals);
 	ui.minSpinBox->setValue(_histogram_info->minX);
 	//ui.minSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
 	ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
 	ui.minSpinBox->setSingleStep(singleStep);
-	ui.minSpinBox->setDecimals(decimals);
 
+	ui.midSpinBox->setDecimals(decimals);
 	ui.midSpinBox->setValue((_histogram_info->maxX + _histogram_info->minX) / 2.0f);
 	ui.midSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
 	ui.midSpinBox->setSingleStep(singleStep);
-	ui.midSpinBox->setDecimals(decimals);
 
+	ui.maxSpinBox->setDecimals(decimals);
 	ui.maxSpinBox->setValue(_histogram_info->maxX);
 	//ui.maxSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
 	ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
 	ui.maxSpinBox->setSingleStep(singleStep);
-	ui.maxSpinBox->setDecimals(decimals);
 
 	//SETTING UP CONNECTIONS
 	// Connecting spinboxes to handles
@@ -382,7 +376,7 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), _equalizerHandles[MID_HANDLE], SLOT(moveMidHandle()));
 
 	// Making spinboxes and handles changes redrawing transferFunctionScene
-	// Nota: non è necessario connettere anche le spinbox (UCCIO) 
+	// NotE: it is not necessary to connect spinboxes too
 	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
 	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
 	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChanged()), this, SLOT(on_EQHandle_moved()));
@@ -410,18 +404,15 @@ bool QualityMapperDialog::initEqualizerHistogram()
 }
 
 // Add histogram bars to equalizerHistogram Scene
+// Return false if mesh has no quality => dialog will not be built
 bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogram, bool rightHandleIsInsideHistogram)
 {
-
-	//building up histogram...
-	int numberOfBins = 200;
-	
 	if (_equalizer_histogram == 0)
 	{
 		// This block is called only the first time
 		_equalizer_histogram = new Histogramf();
 		Frange histogramRange(tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mesh.cm));
-		this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, numberOfBins);
+		this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, NUMBER_OF_HISTOGRAM_BINS);
 		if (histogramRange.minV == histogramRange.maxV)
 		{
 			QMessageBox::warning(this, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 
@@ -429,12 +420,8 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		}
 
 		//building histogram chart informations
-		//processing minY and maxY values for histogram
-		pair<int,int> minMaxY = computeHistogramMinMaxY(_equalizer_histogram);
+		pair<int,int> minMaxY = computeHistogramMinMaxY(_equalizer_histogram);//processing minY and maxY values for histogram
 		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->n, _equalizer_histogram->minv, _equalizer_histogram->maxv, minMaxY.first, minMaxY.second );
-
-		//drawing axis and other basic items
-		this->drawChartBasics( _equalizerHistogramScene, _histogram_info );
 	}
 	else
 	{
@@ -442,21 +429,27 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		if ( (leftHandleIsInsideHistogram && _leftHandleWasInsideHistogram) && (rightHandleIsInsideHistogram && _rightHandleWasInsideHistogram) )
 			return true;
 		
+		// Updating flags _leftHandleWasInsideHistogram [right] with new values
 		_leftHandleWasInsideHistogram = leftHandleIsInsideHistogram;
 		_rightHandleWasInsideHistogram = rightHandleIsInsideHistogram;
 
-		this->clearItems( REMOVE_EQ_HISTOGRAM | DELETE_REMOVED_ITEMS );
-		//_equalizer_histogram->Clear();
+		this->clearItems( REMOVE_EQ_HISTOGRAM | DELETE_REMOVED_ITEMS ); // removing and deleting histogram bars
+
+		// Calculating new Histogram
 		float minX = (_histogram_info->minX<ui.minSpinBox->value())?_histogram_info->minX:ui.minSpinBox->value();
 		float maxX = (_histogram_info->maxX>ui.maxSpinBox->value())?_histogram_info->maxX:ui.maxSpinBox->value();
-		Frange mmmq(minX, maxX);
-		this->ComputePerVertexQualityHistogram(mesh.cm, mmmq, _equalizer_histogram, numberOfBins);
+		Frange histogramRange(minX, maxX);
+		this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, NUMBER_OF_HISTOGRAM_BINS);
 
+		// Only minY and maxY are modified in _histogram_info
 		pair<int,int> minMaxY = computeHistogramMinMaxY(_equalizer_histogram);
 		_histogram_info->minY = minMaxY.first;
 		_histogram_info->maxY = minMaxY.second;
 	}
 	//...histogram built
+
+	//drawing axis and other basic items
+	this->drawChartBasics( _equalizerHistogramScene, _histogram_info );
 
 	//drawing histogram bars
 	this->drawHistogramBars (_equalizerHistogramScene, _histogram_info, 0, _histogram_info->numOfItems, QColor(128,128,128));
@@ -471,19 +464,20 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 // Add histogramBars to destinationScene with GAMMA-STRETCHING
 void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, int minIndex, int maxIndex, QColor color)
 {
-	// Questro controllo è necessario perché se si cerca in Histogram il valore minimo viene restituito l'indice -1. Forse deve essere corretto? (UCCIO)
+	// This control is necessary because Histogram returns -1 if we search the minimum value. Maybe it should be fixed
 	if (minIndex<0)
 		minIndex = 0;
+
 	float barHeight = 0.0f;	//initializing height of the histogram bars
-	float barWidth  = chartInfo->chartWidth / (float)(maxIndex-minIndex);	//processing width of the histogram bars (4\5 of dX)
-	//	float barSeparator = dX - barWidth; //processing space between consecutive bars of the histogram bars (1\5 of dX)
+	float barWidth  = chartInfo->chartWidth / (float)(maxIndex-minIndex);	//processing width of the histogram bars 
 
 	int numberOfItems = maxIndex - minIndex;
+
+	// exp is such that: _equalizerMidHandlePercentilePosition^exp = 0.5
 	float exp = log10(0.5f) / log10((float)_equalizerMidHandlePercentilePosition);
 
 	QPen drawingPen(color);
 	QBrush drawingBrush (color);
-
 	QPointF startBarPt;
 
 	//drawing histogram bars
@@ -491,6 +485,7 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 
 	for (int i = minIndex; i < maxIndex; i++)
 	{
+		// Setting barHeight proportional to max height
 		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->H[i]) / (float)_histogram_info->maxY;
 		
 		startBarPt.setY( (float)chartInfo->lowerBorder - barHeight );
@@ -498,24 +493,24 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 		//drawing histogram bar
 		if ( &destinationScene == &_transferFunctionScene )
 		{
+			// Histogram bars positions are calculted applying an exponential function: relIndex^exp
 			startBarPt.setX( chartInfo->leftBorder + relative2AbsoluteValf(pow( absolute2RelativeValf(i-minIndex,numberOfItems ), exp ), chartInfo->chartWidth) );
 			current_item = destinationScene.addLine(startBarPt.x(), startBarPt.y(), startBarPt.x(), (float)chartInfo->lowerBorder, drawingPen);
 			_transferFunctionBg << current_item;
 		}
-		else
+		else // ( &destinationScene == &_equalizerHistogramScene )
 		{
+			// histogram bars are added all at same distance
 			startBarPt.setX( chartInfo->leftBorder + ( barWidth * (i-minIndex) ) );
 			current_item = destinationScene.addRect(startBarPt.x(), startBarPt.y(), barWidth, barHeight, drawingPen, drawingBrush);
 			_equalizerHistogramBars << current_item;
 		}
-		
 		current_item->setZValue(-1);
-			
 	}
 }
 
 
-//this method prepares the Transfer Function unit to work
+//Prepares the Transfer Function unit to work
 void QualityMapperDialog::initTF()
 {
 	assert(_transferFunction != 0);
@@ -605,6 +600,9 @@ void QualityMapperDialog::initTF()
 	ui.blueButton->setChecked( true );
 }
 
+/*
+Draws gammaCorrection only depending on equalizerMidHandlePercentilePosition and using a quadric spline
+*/
 void QualityMapperDialog::drawGammaCorrection()
 {
 	int width = ui.gammaCorrectionLabel->width();
@@ -616,18 +614,16 @@ void QualityMapperDialog::drawGammaCorrection()
 	painter.setPen(QColor(128,128,128));
 	painter.drawLine(0,height-1,width-1,0);
 
+	// Painting the border
 	painter.setPen(Qt::black);
 	painter.drawRect(0,0,width-1,height-1);
+
+	// Painting the spline representing the exponential funcion: x^exp, 0<=x<=1
 	int c = _equalizerMidHandlePercentilePosition*width;
 	QPainterPath path;
 	path.moveTo(0, height);
 	path.quadTo(c, c, width, 0);
-	//path.cubicTo(c,c,c,c,width,0);
-
 	painter.drawPath(path);
-
-	
-	//painter.drawArc(0, 0, pixmap->width(), pixmap->height(), 0, -90*16);
 	
 	ui.gammaCorrectionLabel->setPixmap(*pixmap);
 	painter.end();
@@ -716,27 +712,32 @@ void QualityMapperDialog::drawTransferFunction()
 	ui.transferFunctionView->setScene( &_transferFunctionScene );
 }
 
-
+/*
+Updates color band label
+*/
 void QualityMapperDialog::updateColorBand()
 {
+	// Calculating the vector of colors representing the transfer function
 	QColor* colors = _transferFunction->buildColorBand();
+
+	// Building the image that will represent to be inserted in the label
 	QImage image(ui.colorbandLabel->width(), 1, QImage::Format_RGB32);
 	float step = ((float)COLOR_BAND_SIZE) / ((float)ui.colorbandLabel->width());
 
+	// Setting each pixel of the image
 	for (int i=0; i<image.width(); i++)
 		image.setPixel (i, 0, colors[(int)(i*step)].rgb());
 
 	ui.colorbandLabel->setPixmap(QPixmap::fromImage(image));
 }
 
+/*
+Draws the partial histogram as background of the transfer funtion scene
+*/
 void QualityMapperDialog::drawTransferFunctionBG ()
 {
 	this->clearItems( REMOVE_TF_BG | DELETE_REMOVED_ITEMS );
-	
-	/*// JUST FOR TEST
-	float minspinboxvalue = ui.minSpinBox->value();
-	float maxspinboxvalue = ui.maxSpinBox->value();*/
-	
+		
 	if (_histogram_info !=0)
 	{
 		int minIndex = _equalizer_histogram->Interize((float)ui.minSpinBox->value());
@@ -774,7 +775,6 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 	KNOWN_EXTERNAL_TFS newTF( tfPath, tfName );
 	_knownExternalTFs << newTF;
 
-	// FORSE QUANDO SI SALVA IL PRESET NON C'E' BISOGNO DI CANCELLARE TUTTO (UCCIO)
 	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
 
 	//preparing TF to work
@@ -938,11 +938,13 @@ void QualityMapperDialog::moveAheadChannel( TF_CHANNELS channelCode )
 	}
 }
 
-
+/*
+Redraws histogram background of transfer funtion scene and updates x-quality Label
+*/
 void QualityMapperDialog::on_EQHandle_moved()
 {
-
 	if ( _transferFunction )
+		// Redrawing histogram background of transfer funtion scene
 		this->drawTransferFunctionBG();
 
 	if ( _currentTfHandle )
@@ -1056,49 +1058,6 @@ void QualityMapperDialog::on_TfHandle_doubleClicked(TFHandle *sender)
 
 
 
-/*void QualityMapperDialog::on_applyButton_clicked()
-{
-	// Colorazione della mesh
-	float rangeMin = ui.minSpinBox->value();	
-	float rangeMax = ui.maxSpinBox->value();	
-    //tri::UpdateColor<CMeshO>::VertexQuality(mesh->cm,RangeMin,RangeMax);
-
-	CMeshO::VertexIterator vi;
-
-	float percentageQuality;
-	// brightness value between 0 and 2
-	float brightness = (1.0f - (float)(ui.brightnessSlider->value())/(float)(ui.brightnessSlider->maximum()) )*2.0;
-	Color4b currentColor;
-	for(vi=mesh->cm.vert.begin(); vi!=mesh->cm.vert.end(); ++vi)		
-		if(!(*vi).IsD()) 
-		{
-			//(*vi).C().ColorRamp(minq,maxq,(*vi).Q());
-			float vertexQuality = (*vi).Q();
-			if (vertexQuality < rangeMin)
-				percentageQuality = 0.0;
-			else
-				if (vertexQuality > rangeMax)
-					percentageQuality = 1.0;
-				else
-					percentageQuality = pow( ((*vi).Q() - rangeMin) / (rangeMax - rangeMin) , (float)(2.0*_equalizerMidHandlePercentilePosition));
-
-			currentColor = _transferFunction->getColorByQuality(percentageQuality);
-			
-			if (brightness!=1.0f) //Applying brightness to each color channel
-				if (brightness<1.0f)
-					for (int i=0; i<3; i++) 
-						//currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
-						currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i]+1,257.0f),brightness), 255.0f);
-				else
-					for (int i=0; i<3; i++) 
-						//currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
-						currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i]+1,257.0f),2-brightness), 255.0f);
-
-			(*vi).C() = currentColor;
-		}
-
-	gla->update();
-}*/
 
 void QualityMapperDialog::on_applyButton_clicked()
 {
@@ -1113,18 +1072,20 @@ void QualityMapperDialog::on_applyButton_clicked()
 	gla->update();
 }
 
-
-
+/* 
+If preview button is toggled, apply color to mesh when a generic handle is released
+*/
 void QualityMapperDialog::on_Handle_released()
 {
 	//applying preview if necessary
-	if (ui.previewButton->isChecked()) //added by FB 07\02\08
+	if (ui.previewButton->isChecked())
 		on_applyButton_clicked();
 }
 
 void QualityMapperDialog::on_previewButton_clicked()
 {
-	on_applyButton_clicked();
+	if (ui.previewButton->isChecked())
+		on_applyButton_clicked();
 }
 
 //callback that manages the value change of current Handle y position
@@ -1179,6 +1140,7 @@ void QualityMapperDialog::updateTfHandlesOrder(int channelCode)
 }
 
 
+//Resets original positions and values of equalizer handles, spinboxes and brightness slider
 void QualityMapperDialog::on_resetButton_clicked()
 {
 	assert(_histogram_info != 0);
@@ -1190,7 +1152,7 @@ void QualityMapperDialog::on_resetButton_clicked()
 	this->setEqualizerParameters(data);
 }
 
-// Method invoked when moving left/right EqHandles, 
+// Method invoked when moving left/right EqHandles. It calls drawEqualizerHistogram with the correct parameters
 void QualityMapperDialog::on_EqHandle_crossing_histogram(EqHandle* sender, bool insideHistogram)
 {
 	if (sender = _equalizerHandles[LEFT_HANDLE])
@@ -1303,11 +1265,13 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 //writes in the x-quality label the quality value corresponding to the position of the currently selected TF handle
 void QualityMapperDialog::updateXQualityLabel(float xPos)
 {
+	// exp = log_0.5 (_equalizerMidHandlePercentilePosition)
 	float exp = log10((float)_equalizerMidHandlePercentilePosition) / log10(0.5f);
 	_currentTfHandleQualityValue.setNum(relative2QualityValf(xPos, ui.minSpinBox->value(), ui.maxSpinBox->value(), exp));
 	ui.xQualityLabel->setText(_currentTfHandleQualityValue);
 }
 
+// Resets original positions and values of equalizer handles, spinboxes and brightness slider
 void QualityMapperDialog::setEqualizerParameters(EQUALIZER_INFO data)
 {
 	// Resetting brightnessSlider position
@@ -1320,20 +1284,8 @@ void QualityMapperDialog::setEqualizerParameters(EQUALIZER_INFO data)
 	ui.maxSpinBox->setValue(data.maxQualityVal);
 	ui.maxSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
 
-	ui.midSpinBox->setValue(((data.maxQualityVal - data.minQualityVal) * data.midQualityPercentage) + data.minQualityVal);
-	ui.midSpinBox->setRange(data.minQualityVal, data.maxQualityVal);
-
-	// Because of approximation error it is necessary to directly update handles position, transferFunctionBG and gammaCorrection
-
-	qreal xStart = _histogram_info->leftBorder;
-	qreal xPos = 0.0f;
-	qreal yPos = _histogram_info->lowerBorder;
-	_equalizerMidHandlePercentilePosition = data.midQualityPercentage;
-	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
-	{
-		xPos = xStart + _histogram_info->chartWidth/2.0f*i;
-		_equalizerHandles[i]->setPos(xPos,yPos);
-	}
+	ui.midSpinBox->setValue(((ui.maxSpinBox->value() - ui.minSpinBox->value()) * data.midQualityPercentage) + ui.minSpinBox->value());
+	ui.midSpinBox->setRange(ui.minSpinBox->value(), ui.maxSpinBox->value());
 
 	drawGammaCorrection();
 	drawTransferFunctionBG();
