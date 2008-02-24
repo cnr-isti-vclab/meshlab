@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2008/02/24 18:08:50  cignoni
+added -h and --help standard options
+
 Revision 1.6  2007/03/27 12:20:09  cignoni
 Revamped logging iterface, changed function names in automatic parameters, better selection handling
 
@@ -49,6 +52,26 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);
 	QCoreApplication::setOrganizationName("VCG");
   QCoreApplication::setApplicationName("MeshLab");
+	
+		if(argc>1)	
+		{
+			QString helpOpt1="-h";
+			QString helpOpt2="--help";
+			if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
+			{
+				printf("\n\n"
+							 "    MeshLab: an open source mesh processing system\n"
+							 "          Paolo Cignoni (and many many others) \n"
+							 "              Visual Computing Lab\n"
+							 "                  ISTI - CNR \n\n"
+							 "usage:\n\n"
+							 "    meshlab [meshfile] \n\n"
+							 "Look at --- http://meshlab.sourceforge.net/wiki --- for a longer documentation\n\n"
+							 );
+			exit(-1);
+			}
+		}
+	
   MainWindow window;
   window.showMaximized();
 
@@ -57,7 +80,19 @@ int main(int argc, char *argv[])
   filterObj->mainWindow=&window;
 	app.installEventFilter(filterObj);
 	app.processEvents();
-	if(argc>1)	window.open(argv[1]);
+	if(argc>1)	
+	{
+		QString helpOpt1="-h";
+		QString helpOpt2="--help";
+		if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
+		printf(
+			"usage:\n"
+			"meshlab <meshfile>\n"
+			"Look at http://meshlab.sourceforge.net/wiki\n"
+			"for a longer documentation\n"
+		);
+		window.open(argv[1]);
+	}
 	else 	if(filterObj->noEvent) window.open();
  
 	return app.exec();
