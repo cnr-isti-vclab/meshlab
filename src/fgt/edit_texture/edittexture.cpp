@@ -320,8 +320,9 @@ void EditTexturePlugin::InitTexture(MeshModel &m)
 			{
 				Q.push_back(&*fi);
 				actualID++;	// The component is disconnected -> changes the ID
-				CVertexO::DeleteBitFlag(visBit);	// Needed to create new vertex structure if a vertex is used in
-			}										// more than one component, so it will be replicated
+				for(unsigned ii = 0; ii < m.cm.vert.size(); ii++)
+					m.cm.vert[ii].ClearUserBit(visBit);	// Needed to create new vertex structure if a vertex is used in
+			}											// more than one component, so it will be replicated
 
 			for (; i < Q.size(); i++)
 			{

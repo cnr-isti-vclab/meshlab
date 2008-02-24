@@ -95,24 +95,37 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 		// Draw the selected component 
 		if (highComp != -1 && mode == Face)
 		{
+			/* Visit the 'grid' of vertexes and step by step change the value of the counter.
+			   If the counter reach 0 the vertex will not be drawn anymore.
+			*/
+			// <---- FIX
+			painter.setBrush(Qt::red);
+			painter.setOpacity(0.5);
 			for (unsigned y = 0; y < connected.size(); y++)
 			{
-				QVector<QPoint> p;
-				if (!map[connected[y]].IsV())
+				if (map[connected[y]].GetCount() > 0)
 				{
-					p.push_back(map[y].GetVertex().center());
-					map[y].SetV();
-					for (int yy = 0; yy < map[connected[y]].GetAdjSize(); yy++)
+					QVector<QPoint> p;
+					int y1 = 0, y2 = 1;
+					while (map[connected[y]].GetCount() > 0)
 					{
-						p.push_back(map[map[connected[y]].GetAdjAt(yy)].GetVertex().center());
-						map[map[connected[y]].GetAdjAt(yy)].SetV();
+						//if (map[map[connected[y]].GetAdjAt(y1)].GetCount() > 0 && map[map[connected[y]].GetAdjAt(y2)].GetCount() > 0)
+						{
+							p.push_back(map[connected[y]].GetVertex().center());
+							p.push_back(map[map[connected[y]].GetAdjAt(y1)].GetVertex().center());
+							p.push_back(map[map[connected[y]].GetAdjAt(y2)].GetVertex().center());		
+							map[connected[y]].Decrease();
+							map[map[connected[y]].GetAdjAt(y1)].Decrease();
+							map[map[connected[y]].GetAdjAt(y2)].Decrease();
+							painter.drawPolygon(QPolygon(p));
+							p.clear();				
+							if (!map[map[connected[y]].GetAdjAt(y1)].ContainAdj(map[connected[y]].GetAdjAt((y2+1)%map[connected[y]].GetAdjSize()))) y1 = y2;
+							y2 = (y2+1)%map[connected[y]].GetAdjSize();
+						}
 					}
 				}
-				painter.setBrush(Qt::red);
-				painter.setOpacity(0.5);
-				painter.drawPolygon(QPolygon(p));
 			}
-			for (unsigned y = 0; y < connected.size(); y++) map[y].ClearV();
+			for (unsigned y = 0; y < connected.size(); y++) map[connected[y]].Reset();
 		}
 		// Draw the lines...
 		for (unsigned i = 0; i < map.size(); i++)

@@ -21,6 +21,7 @@ class Container
 			punt = p;
 			face.push_back(f);
 			wt.push_back(wtindex);
+			count = 1;
 		};
 		~Container(){};
 		void SetVertex(QRect r) {rect = r;};
@@ -42,7 +43,13 @@ class Container
 		};
 		int GetAdjAt(int index) {return adj[index];};
 		int GetAdjSize() {return adj.size();};
-		void AddFace(CFaceO* f) {face.push_back(f);};
+		bool ContainAdj(int val)
+		{
+			for(unsigned i = 0; i < adj.size(); i++)
+				if (adj[i] == val) return true;
+			return false;
+		}
+		void AddFace(CFaceO* f) {face.push_back(f); count++;};
 		CFaceO* GetFaceAt(int index) {return face[index];};
 		unsigned GetFaceSize() {return face.size();};
 		void SetCompID(int val) {idcomp = val;};
@@ -51,6 +58,9 @@ class Container
 		CVertexO* GetPointer() {return punt;};
 		void AddWT(unsigned wtindex) {wt.push_back(wtindex);};
 		unsigned GetWTAt(int index) {return wt[index];};
+		unsigned GetCount() {return count;}
+		void Decrease() {--count;};
+		void Reset() {count = adj.size()-1;};
 
 	private:
 		QRect rect;				// Rectangle of the projected vertex
@@ -61,6 +71,7 @@ class Container
 		CVertexO* punt;			// Pointer to the real vertex
 		vector<CFaceO*> face;	// Set of faces that refer to the vertex
 		vector<unsigned> wt;	// Set of WT indexes of the faces
+		unsigned count;
 };
 
 #endif
