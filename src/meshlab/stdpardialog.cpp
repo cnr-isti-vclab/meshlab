@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.25  2008/02/25 14:51:01  ponchio
+added parent window reference durinc creation
+
 Revision 1.24  2008/01/28 13:02:00  cignoni
 added support for filters on collection of meshes (layer filters)
 
@@ -105,7 +108,7 @@ Added standard plugin window support
 #include "stdpardialog.h"
 
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
-:QDockWidget(QString("Plugin"),0)
+:QDockWidget(QString("Plugin"), p)
 {
 		qf = NULL;
 		stdParFrame=NULL;
