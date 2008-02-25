@@ -60,7 +60,7 @@ QualityMapperFilter::QualityMapperFilter()
 const QString QualityMapperFilter::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
-		case FP_QUALITY_MAPPER :  return QString("Quality Mapper edit applier"); 
+		case FP_QUALITY_MAPPER :  return QString("Quality Mapper applier"); 
 		default : assert(0); 
 	}
   return QString("");
@@ -119,7 +119,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 			parlst.addFloat("minQualityVal", eqData.minQualityVal, "Minimum mesh quality" );
 			parlst.addFloat("maxQualityVal", eqData.maxQualityVal, "Maximum mesh quality" );
 			parlst.addAbsPerc("midHandlePos", eqData.midQualityPercentage, 0.0f, 1.0f, "Middle quality percentage position", "defines the percentage position of middle quality value");
-			parlst.addFloat("brightness", eqData.brightness, "mesh brightness" );
+			parlst.addFloat("brightness", eqData.brightness, "Mesh brightness", "must be between 0 and 2");
 			break;
 											
 		default : assert(0); 
@@ -127,7 +127,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 }
 
 // The Real Core Function doing the actual mesh processing.
-// Move Vertex of a random quantity
+// Apply color to mesh vertexes
 bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
 	Q_UNUSED(filter);
@@ -137,10 +137,8 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	{
 		//building new TF object from external file
 		TransferFunction transferFunction( csvFileName );
+		// Applying colors
 		applyColorByVertexQuality(m, &transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), par.getAbsPerc("midHandlePos"), par.getFloat("brightness"));
-
-		// Log function dump textual info in the lower part of the MeshLab screen. 
-		//Log(0,"Successfully displaced %i vertices",m.cm.vn);
 
 		return true;
 	}
