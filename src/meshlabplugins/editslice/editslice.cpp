@@ -122,6 +122,7 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 	dialogsliceobj->hide();
 	Matrix44f mat_trac_rotation ; 
 	trackball_slice.track.rot.ToMatrix( mat_trac_rotation ); //rotation Matrix of the plans' trackball 
+        Invert(mat_trac_rotation);
 	Point3f* dir=new Point3f(1,0,0);   //the plans' normal vector init 
 	(*dir)= mat_trac_rotation * (*dir); //rotation of the directions vector 
 	Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
