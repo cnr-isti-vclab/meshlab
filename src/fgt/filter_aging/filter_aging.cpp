@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 
-#include <math.h>
+//#include <vcg/complex/trimesh/update/selection.h>     // DEBUG
 
 #include "filter_aging.h"
 
@@ -79,11 +79,11 @@ const PluginInfo &GeometryAgingPlugin::pluginInfo()
 
 
 // Initializes the list of parameters (called by the auto dialog framework)
-void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &model, FilterParameterSet &params)
+void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params)
 {
     switch(ID(action)) {
         case FP_ERODE:
-            
+            params.addFloat("AngleThreshold", 60.0, "Angle Threshold", "The minimum angle between two adjacent faces to consider the edge they are sharing.");
             break;
         default:
             assert(0);
@@ -92,36 +92,43 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &model, Fi
 
 
 // The Real Core Function doing the actual mesh processing
-bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &model, FilterParameterSet &params, vcg::CallBackPos *cb)
+bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb)
 {
     CMeshO::FaceIterator fi;
-    int fcount;
     int border = 0;
     int chips = 0;
-    
+    float angleThreshold = params.getFloat("AngleThreshold");
+    bool hasSel = hasSelected(m);
+        
     //srand(time(NULL)); 
     
     // first tour to clear V bits
-    for(fi=model.cm.face.begin(); fi!=model.cm.face.end(); ++fi)
+    for(fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi)
         (*fi).ClearV();
+    //tri::UpdateSelection<CMeshO>::ClearFace(m.cm);        // DEBUG
     
     // I'm looking for edges whose incident faces normals make an angle of at least
     // 60 degrees (or other threshold value chosen by the user).
     // I'm also interested in border edges.
-    for(fi=model.cm.face.begin(), fcount=0; fi!=model.cm.face.end(); ++fi, ++fcount) {
+    for(fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
          // Typical usage of the callback for showing a nice progress bar in the bottom. 
          // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
         //cb(100*vcount/model.cm.vert.size(), "Exploring the mesh...");
         
         if(!(*fi).IsD()) {
+            if(hasSel && !(*fi).IsS()) continue;    // some faces of the mesh are selected but not the current one
             for(int j=0; j<3; j++) {
                 if((*fi).FFp(j)->IsV()) continue;   // face already visited
-                if((*fi).FFp(j) == &(*fi))           // found border edge
+                if(hasSel && !(*fi).FFp(j)->IsS()) continue;    // some faces of the mesh are selected, the current one too, but not its j-th neighbour
+                if(/*(*fi).FFp(j) == &(*fi)*/(*fi).IsB(j)) {         // found border edge
                     border++;
+                //    (*fi).SetS();                 // DEBUG
+                //    (*fi).FFp(j)->SetS();         // DEBUG
+                }
                 else {      // this is not a border edge
                     // the angle between the two face normals in degrees
                     // TODO: check non 2-manifold cases, it's all ok? or there are problems?
-                    float ffangle = vcg::Angle((*fi).N(), (*fi).FFp(j)->N())*180/M_PI;
+                    double ffangle = vcg::Angle((*fi).N(), (*fi).FFp(j)->N())*180/M_PI;
                     Point3<CVertexO::ScalarType> y, median;
                     CVertexO *f1p, *f2p;        // the 2 points not shared by the 2 faces
                     
@@ -138,7 +145,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &model, FilterP
                     else
                         f2p = (*fi).FFp(j)->V(1);
                     
-                    y = (*fi).N() ^ (*fi).FFp(j)->N();
+                    y = (*fi).N().Normalize() ^ (*fi).FFp(j)->N().Normalize();
                     median = y ^ (Point3<CVertexO::ScalarType>(f1p->P() - f2p->P()));
                     
                     /* There are always 2 cases wich produce the same angle value:
@@ -150,9 +157,13 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &model, FilterP
                         while in the second case it lies in a convex area.
                         I need a way to know wich is the current case.
                         This is done comparing ffangle with the angle between the 
-                        normal to the current face and the median vector. */
-                    if(ffangle > 60 && vcg::AngleN((*fi).N(), median)*180/M_PI < ffangle)
+                        normal to the current face and the median vector. 
+                    */
+                    if(ffangle-angleThreshold >= -0.001  && vcg::Angle((*fi).N(), median)*180/M_PI < ffangle) {
                         chips++;
+                    //    (*fi).SetS();                 // DEBUG
+                    //    (*fi).FFp(j)->SetS();         // DEBUG
+                    }
                 }
             }
             (*fi).SetV();
@@ -160,13 +171,24 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &model, FilterP
     }
     
     // clear V bits again
-    for(fi=model.cm.face.begin(); fi!=model.cm.face.end(); ++fi)
+    for(fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi)
         (*fi).ClearV();
     
     // Log function dump textual info in the lower part of the MeshLab screen. 
-    Log(0,"Successfully visited %i faces. Found %i border edges and %i internal edges to erode.", fcount, border, chips);       // DEBUG
+    Log(0,"Found %i border edges and %i internal edges to erode.", border, chips);       // DEBUG
     
     return true;
+}
+
+
+// checks the mesh looking for selected faces
+bool GeometryAgingPlugin::hasSelected(MeshModel &m)
+{
+    CMeshO::FaceIterator fi;
+    for(fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi) {
+		if(!(*fi).IsD() && (*fi).IsS()) return true;
+	}
+	return false;
 }
 
 Q_EXPORT_PLUGIN(GeometryAgingPlugin)
