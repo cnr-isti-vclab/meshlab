@@ -407,7 +407,7 @@
           <item row="0" column="0" >
            <widget class="QGroupBox" name="LightGroupBox" >
             <property name="title" >
-             <string>GroupBox</string>
+             <string>Brightness</string>
             </property>
             <property name="alignment" >
              <set>Qt::AlignCenter|Qt::AlignHCenter|Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
