@@ -21,7 +21,7 @@ public:
 	TextureEditor(QWidget *parent = 0);
 	~TextureEditor();
 
-	void AddRenderArea(QString texture, vector<Container> map, bool or);
+	void AddRenderArea(QString texture, vector<Container> map, bool outOfRange);
 	void AddEmptyRenderArea();
 	void Reset();
 	void SetProgress(int val);
