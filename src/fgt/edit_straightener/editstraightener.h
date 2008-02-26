@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2008/02/26 21:35:34  benedetti
+corrected after quaternion/similarity/trackball changes
+
 Revision 1.3  2008/02/22 20:24:42  benedetti
 refactored, cleaned up a bit, few feats added
 
@@ -159,6 +162,7 @@ public:
   void ButtonUp(int);
   void ButtonDown(int);
   Trackball *manipulator;
+  Matrix44f tr;
 private:
   GlTrimesh < CMeshO > glmesh;
 };
