@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2008/02/26 21:35:17  benedetti
+corrected after quaternion/similarity/trackball changes, on_freehand_mesh_dragging still doesn't work
+
 Revision 1.3  2008/02/22 20:24:42  benedetti
 refactored, cleaned up a bit, few feats added
 
@@ -462,7 +465,7 @@ void EditStraightener::on_rot(float angle_deg,Point3f axis)
 void EditStraightener::on_align_with_view()
 {
   on_begin_action();
-  origin->SetRotation(Inverse(gla->trackball.track.rot));  
+  origin->SetRotation(gla->trackball.track.rot);  
   on_apply();
   gla->trackball.Reset();
   gla->update();
@@ -551,24 +554,24 @@ void EditStraightener::on_set_snap(float rot_snap_deg)
 }
 
 void dbgm(const char* s,const Matrix44f &m){
-  qDebug("%-20s:%+3.2f %+3.2f %+3.2f %+3.2f",s ,m[0][0],m[0][1],m[0][2],m[0][3]);
-  qDebug("%-20s %+3.2f %+3.2f %+3.2f %+3.2f","",m[1][0],m[1][1],m[1][2],m[1][3]);
-  qDebug("%-20s %+3.2f %+3.2f %+3.2f %+3.2f","",m[2][0],m[2][1],m[2][2],m[2][3]);
-  qDebug("%-20s %+3.2f %+3.2f %+3.2f %+3.2f\n","",m[3][0],m[3][1],m[3][2],m[3][3]);
+  qDebug("%-30s: %+3.2f %+3.2f %+3.2f %+3.2f",s ,m[0][0],m[0][1],m[0][2],m[0][3]);
+  qDebug("%-30s  %+3.2f %+3.2f %+3.2f %+3.2f","",m[1][0],m[1][1],m[1][2],m[1][3]);
+  qDebug("%-30s  %+3.2f %+3.2f %+3.2f %+3.2f","",m[2][0],m[2][1],m[2][2],m[2][3]);
+  qDebug("%-30s  %+3.2f %+3.2f %+3.2f %+3.2f\n","",m[3][0],m[3][1],m[3][2],m[3][3]);
 }
 
 void dbgp(const char* s,const Point3f &p){
-  qDebug("%-20s: %+3.2f %+3.2f %+3.2f\n",s,p[0],p[1],p[2]);
+  qDebug("%-30s: %+3.2f %+3.2f %+3.2f\n",s,p[0],p[1],p[2]);
 }
 
 void dbgq(const char* s,const Quaternionf &q){
   float angle;
   Point3f axis;
   q.ToAxis(angle,axis);
-  qDebug("%-20s: %+3.2f on %+3.2f %+3.2f %+3.2f\n",s,angle*180.0/M_PI,axis[0],axis[1],axis[2]);
+  qDebug("%-30s: %+3.2f on %+3.2f %+3.2f %+3.2f\n",s,angle*180.0/M_PI,axis[0],axis[1],axis[2]);
 }
 void dbgf(const char* s,const float f){
-  qDebug("%-20s: %+3.2f\n",s,f);
+  qDebug("%-30s: %+3.2f\n",s,f);
 }
 
 void EditStraightener::on_freehand_mesh_dragging(bool begin)
@@ -581,10 +584,38 @@ void EditStraightener::on_freehand_mesh_dragging(bool begin)
   } else {
     assert(currentmode==ES_FreehandMeshDragging);
     assert(dragged_mesh!=NULL);
-    Matrix44f tr;
-    tr=dragged_mesh->manipulator->track.Matrix();
+    qDebug("###############ending a mesh drag###################");
+    dbgm("mm->cm.Tr",mm->cm.Tr);
+//    dbgp("mm->cm.trBB().Center()",mm->cm.trBB().Center());
+//    dbgp("dm->manip->center",dragged_mesh->manipulator->center);
+//    dbgf("dm->manip->track.sca",dragged_mesh->manipulator->track.sca);
+    dbgq("dm->manip->track.rot",dragged_mesh->manipulator->track.rot);
+//    dbgp("dm->manip->track.tra",dragged_mesh->manipulator->track.tra);
+
+    Point3f ScVOut(0,0,0),ShVOut(0,0,0),RtVOut(0,0,0),TrVOut(0,0,0);	
+    Matrix44f d = mm->cm.Tr;
+    bool tr_was_decomponible;
+    tr_was_decomponible = Decompose(d,ScVOut,ShVOut,RtVOut,TrVOut);
+    assert(tr_was_decomponible);
+    Matrix44f Scl, Sxy, Sxz, Syz, Rtx, Rty, Rtz, Trn;
+    Scl.SetScale(ScVOut);
+    Sxy.SetShearXY(ShVOut[0]);
+    Sxz.SetShearXZ(ShVOut[1]);
+    Syz.SetShearYZ(ShVOut[2]);
+    Rtx.SetRotate(math::ToRad(RtVOut[0]),Point3f(1,0,0));
+    Rty.SetRotate(math::ToRad(RtVOut[1]),Point3f(0,1,0));
+    Rtz.SetRotate(math::ToRad(RtVOut[2]),Point3f(0,0,1));
+    Trn.SetTranslate(TrVOut);
+    // mm->cm.Tr should be equal to  Trn * Rtx*Rty*Rtz  * Syz*Sxz*Sxy * Scl ;		
+    Quaternionf tr_rot;
+    tr_rot.FromMatrix(Rtx*Rty*Rtz);
+    dbgq("tr_rot",tr_rot);
+    Matrix44f new_rot; (tr_rot * dragged_mesh->manipulator->track.rot).ToMatrix(new_rot);
+    dbgq("tr_rot * dm->manip->track.rot",(tr_rot * dragged_mesh->manipulator->track.rot));
+
     undosystem->SaveTR();
-    //mm->cm.Tr =  tr ; // commentato nell'attesa di risolvere il problema tra Matrix e Similarity
+    mm->cm.Tr =  Trn * new_rot  * Syz*Sxz*Sxy * Scl; //per ora ignoro tutte le tra e sca
+    dbgm("NEW mm->cm.Tr",mm->cm.Tr);
     on_apply(); 
     delete dragged_mesh;
     dragged_mesh=NULL;
@@ -729,18 +760,10 @@ DrawPhantom::DrawPhantom(MeshModel* mm,float refsize)
 {
   glmesh.m = &(mm->cm);
   glmesh.Update ();
+  tr=mm->cm.Tr;
   manipulator = new Trackball();
   manipulator->radius = refsize;
-  manipulator->center = mm->cm.trBB().Center() ;
-  dbgp("manipulator->center",manipulator->center);
-  dbgm("mm->cm.Tr",mm->cm.Tr);
-  Matrix44f mc1,mc2,mf;
-  mc1.SetTranslate( manipulator->center);
-  mc2.SetTranslate(-manipulator->center);
-  mf = mc1 * mm->cm.Tr * mc2;
-  dbgm("mf",mf);
-  manipulator->track.FromMatrix(mf);  // non funzionera` nulla finche non va questo
-  dbgm("manipulator->track",manipulator->track.Matrix());
+  manipulator->center = Inverse(tr) * mm->cm.trBB().Center() ;
 
   // rifaccio i modi senza le scalature
   std::map<int, TrackMode *>::iterator it;
@@ -771,6 +794,8 @@ void DrawPhantom::Render()
   glPushMatrix();
   glPushAttrib (GL_ALL_ATTRIB_BITS);
   
+  glMultMatrix(tr);
+  
   manipulator->GetView();
   manipulator->Apply(true);  
 
@@ -786,6 +811,7 @@ void DrawPhantom::Render()
   glColor3f(1,.7,.7); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(10,0,0);glEnd();
   glColor3f(.7,1,.7); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(0,10,0);glEnd();
   glColor3f(.7,.7,1); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(0,0,10);glEnd();
+  glColor3f(1,0,1); glBegin(GL_POINTS); glVertex(manipulator->center); glEnd(); 
   glLineWidth(1);
   glPointSize(1); // end debugging part
  
