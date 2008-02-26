@@ -25,6 +25,8 @@ SUBDIRS       = meshfilter \
 				../sampleplugins/filtergeodesic \
 				../sampleplugins/filtercreateiso \
 				../fgt/edit_quality \
+				../fgt/edit_quality/filter_quality \
+				../fgt/edit_texture\
 				../fgt/edit_straightener \
 				../fgt/io_x3d
 		
