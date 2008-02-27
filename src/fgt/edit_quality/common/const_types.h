@@ -76,4 +76,6 @@ struct EQUALIZER_INFO
 	float brightness;
 };
 
+#define QUALITY_LABEL_DIGITS_NUM	8
+
 #endif

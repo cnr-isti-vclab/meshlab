@@ -78,7 +78,7 @@
                 <string>Choose the foreground channel in the Transfer Function</string>
                </property>
                <property name="title" >
-                <string>Foreground Channel</string>
+                <string>Edit Channel</string>
                </property>
                <layout class="QHBoxLayout" >
                 <item>

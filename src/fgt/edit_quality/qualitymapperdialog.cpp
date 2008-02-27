@@ -1267,7 +1267,20 @@ void QualityMapperDialog::updateXQualityLabel(float xPos)
 {
 	// exp = log_0.5 (_equalizerMidHandlePercentilePosition)
 	float exp = log10((float)_equalizerMidHandlePercentilePosition) / log10(0.5f);
+	string precision;
+
 	_currentTfHandleQualityValue.setNum(relative2QualityValf(xPos, ui.minSpinBox->value(), ui.maxSpinBox->value(), exp));
+	if (_currentTfHandleQualityValue.size() < QUALITY_LABEL_DIGITS_NUM)
+	{
+		int pos = 0;
+		QChar paddedZeros[] = {'0','0','0','0','0','0'};
+		if((pos = _currentTfHandleQualityValue.indexOf('.')) == -1)
+		{
+			_currentTfHandleQualityValue.append('.');
+			pos = _currentTfHandleQualityValue.size() - 1;
+		}
+			_currentTfHandleQualityValue.insert(pos, paddedZeros, QUALITY_LABEL_DIGITS_NUM-_currentTfHandleQualityValue.size());
+	}
 	ui.xQualityLabel->setText(_currentTfHandleQualityValue);
 }
 
