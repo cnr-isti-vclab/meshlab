@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2008/02/27 14:50:24  benedetti
+fixed on_freehand_mesh_dragging, minor cleanups, now all functionality works
+
 Revision 1.4  2008/02/26 21:35:17  benedetti
 corrected after quaternion/similarity/trackball changes, on_freehand_mesh_dragging still doesn't work
 
@@ -229,54 +232,66 @@ void EditStraightener::Decorate(QAction *, MeshModel &, GLArea *)
     glLineWidth(2);
     glPointSize(5);
     glBegin(GL_LINES);
-      glColor(Color4b(85,0,0,255)); // x negativi
-      glVertex3f(mx,my,mz); glVertex3f(x,my,mz);
-      glVertex3f(mx,my,Mz); glVertex3f(x,my,Mz);
-      glVertex3f(mx,My,mz); glVertex3f(x,My,mz);
-      glVertex3f(mx,My,Mz); glVertex3f(x,My,Mz);
-      glColor(Color4b(170,85,85,255)); // x positivi
-      glVertex3f(x,my,mz); glVertex3f(Mx,my,mz);
-      glVertex3f(x,my,Mz); glVertex3f(Mx,my,Mz);
-      glVertex3f(x,My,mz); glVertex3f(Mx,My,mz);
-      glVertex3f(x,My,Mz); glVertex3f(Mx,My,Mz);
-      glColor(Color4b(0,85,0,255)); // y negativi
-      glVertex3f(mx,my,mz); glVertex3f(mx,y,mz);
-      glVertex3f(mx,my,Mz); glVertex3f(mx,y,Mz);
-      glVertex3f(Mx,my,mz); glVertex3f(Mx,y,mz);
-      glVertex3f(Mx,my,Mz); glVertex3f(Mx,y,Mz);
-      glColor(Color4b(85,170,85,255)); // y positivi
-      glVertex3f(mx,y,mz); glVertex3f(mx,My,mz);
-      glVertex3f(mx,y,Mz); glVertex3f(mx,My,Mz);
-      glVertex3f(Mx,y,mz); glVertex3f(Mx,My,mz);
-      glVertex3f(Mx,y,Mz); glVertex3f(Mx,My,Mz);
-      glColor(Color4b(0,0,85,255)); // z negativi
-      glVertex3f(mx,my,mz); glVertex3f(mx,my,z);
-      glVertex3f(mx,My,mz); glVertex3f(mx,My,z);
-      glVertex3f(Mx,my,mz); glVertex3f(Mx,my,z);
-      glVertex3f(Mx,My,mz); glVertex3f(Mx,My,z);
-      glColor(Color4b(85,85,170,255)); // z positivi
-      glVertex3f(mx,my,z); glVertex3f(mx,my,Mz);
-      glVertex3f(mx,My,z); glVertex3f(mx,My,Mz);
-      glVertex3f(Mx,my,z); glVertex3f(Mx,my,Mz);
-      glVertex3f(Mx,My,z); glVertex3f(Mx,My,Mz);
+      if(mx<0){ // negative x
+        glColor3f(.3f,.0f,.0f);
+        glVertex3f(mx,my,mz); glVertex3f(x,my,mz);
+        glVertex3f(mx,my,Mz); glVertex3f(x,my,Mz);
+        glVertex3f(mx,My,mz); glVertex3f(x,My,mz);
+        glVertex3f(mx,My,Mz); glVertex3f(x,My,Mz);
+      }
+      if(Mx>0){ // positive x
+        glColor3f(.6f,.3f,.3f);
+        glVertex3f(x,my,mz); glVertex3f(Mx,my,mz);
+        glVertex3f(x,my,Mz); glVertex3f(Mx,my,Mz);
+        glVertex3f(x,My,mz); glVertex3f(Mx,My,mz);
+        glVertex3f(x,My,Mz); glVertex3f(Mx,My,Mz);
+      }
+      if(my<0){ // negative y
+        glColor3f(.0f,.3f,.0f);
+        glVertex3f(mx,my,mz); glVertex3f(mx,y,mz);
+        glVertex3f(mx,my,Mz); glVertex3f(mx,y,Mz);
+        glVertex3f(Mx,my,mz); glVertex3f(Mx,y,mz);
+        glVertex3f(Mx,my,Mz); glVertex3f(Mx,y,Mz);
+      }
+      if(My>0) { // positive y
+        glColor3f(.3f,.6f,.3f);
+        glVertex3f(mx,y,mz); glVertex3f(mx,My,mz);
+        glVertex3f(mx,y,Mz); glVertex3f(mx,My,Mz);
+        glVertex3f(Mx,y,mz); glVertex3f(Mx,My,mz);
+        glVertex3f(Mx,y,Mz); glVertex3f(Mx,My,Mz);
+      }
+      if(mz<0) { // negative z
+        glColor3f(.0f,.0f,.3f);
+        glVertex3f(mx,my,mz); glVertex3f(mx,my,z);
+        glVertex3f(mx,My,mz); glVertex3f(mx,My,z);
+        glVertex3f(Mx,my,mz); glVertex3f(Mx,my,z);
+        glVertex3f(Mx,My,mz); glVertex3f(Mx,My,z);
+      }
+      if(Mz>0) { // positive z
+        glColor3f(.3f,.3f,.6f);
+        glVertex3f(mx,my,z); glVertex3f(mx,my,Mz);
+        glVertex3f(mx,My,z); glVertex3f(mx,My,Mz);
+        glVertex3f(Mx,my,z); glVertex3f(Mx,my,Mz);
+        glVertex3f(Mx,My,z); glVertex3f(Mx,My,Mz);
+      }
     glEnd();
     glBegin(GL_POINTS);
-      if((mx<0)&&(Mx>0)){
-        glColor(Color4b(255,170,170,255));
+      if((mx<0)&&(Mx>0)){ // x crosses 0
+        glColor3f(1.0f,.6f,.6f);
         glVertex3f(x,my,mz);
         glVertex3f(x,my,Mz);
         glVertex3f(x,My,mz);
         glVertex3f(x,My,Mz);
       }
-      if((my<0)&&(My>0)){
-        glColor(Color4b(170,255,170,255));
+      if((my<0)&&(My>0)){ // y crosses 0
+        glColor3f(.6f,1.0f,.6f);
         glVertex3f(mx,y,mz);
         glVertex3f(mx,y,Mz);
         glVertex3f(Mx,y,mz);
         glVertex3f(Mx,y,Mz);
       }
-      if((mz<0)&&(Mz>0)){
-        glColor(Color4b(170,170,255,255));
+      if((mz<0)&&(Mz>0)){ // z crosses 0
+        glColor3f(.6f,.6f,1.0f);
         glVertex3f(mx,my,z);
         glVertex3f(mx,My,z);
         glVertex3f(Mx,my,z);
@@ -406,17 +421,13 @@ bool EditStraightener::freezable()
 // slots:
 void EditStraightener::on_begin_action()
 {
-  if((origin->GetPosition()!=Point3f(0,0,0))||
-     (origin->GetRotation()!=Quaternionf(0,Point3f(1,0,0))))
-    qDebug("something's wrong on begin action");  
-  else
-   qDebug("begin action");
+  assert(origin->GetPosition()==Point3f(0,0,0));
+  assert(origin->GetRotation()==Quaternionf(0,Point3f(1,0,0)));
   undosystem->BeginAction();
 }
 
 void EditStraightener::on_apply()
 {
-  qDebug("applying");
   Matrix44f tr; 
   origin->GetTransform(tr);
   origin->Reset(true,true);
@@ -431,7 +442,6 @@ void EditStraightener::on_freeze()
   assert(origin->GetPosition()==Point3f(0,0,0));
   assert(origin->GetRotation()==Quaternionf(0,Point3f(1,0,0)));
   on_begin_action();
-  qDebug("freezing");
   gla->setWindowModified(true);
   undosystem->SaveFreeze();
   tri::UpdatePosition<CMeshO>::Matrix(mm->cm, mm->cm.Tr);
@@ -447,7 +457,6 @@ void EditStraightener::on_freeze()
 void EditStraightener::on_undo()
 {
   assert(undosystem->CanUndo());
-  qDebug("undoing");
   undosystem->Undo();
   dialog->SetFreeze(freezable());
   gla->update();
@@ -553,27 +562,6 @@ void EditStraightener::on_set_snap(float rot_snap_deg)
   gla->update();
 }
 
-void dbgm(const char* s,const Matrix44f &m){
-  qDebug("%-30s: %+3.2f %+3.2f %+3.2f %+3.2f",s ,m[0][0],m[0][1],m[0][2],m[0][3]);
-  qDebug("%-30s  %+3.2f %+3.2f %+3.2f %+3.2f","",m[1][0],m[1][1],m[1][2],m[1][3]);
-  qDebug("%-30s  %+3.2f %+3.2f %+3.2f %+3.2f","",m[2][0],m[2][1],m[2][2],m[2][3]);
-  qDebug("%-30s  %+3.2f %+3.2f %+3.2f %+3.2f\n","",m[3][0],m[3][1],m[3][2],m[3][3]);
-}
-
-void dbgp(const char* s,const Point3f &p){
-  qDebug("%-30s: %+3.2f %+3.2f %+3.2f\n",s,p[0],p[1],p[2]);
-}
-
-void dbgq(const char* s,const Quaternionf &q){
-  float angle;
-  Point3f axis;
-  q.ToAxis(angle,axis);
-  qDebug("%-30s: %+3.2f on %+3.2f %+3.2f %+3.2f\n",s,angle*180.0/M_PI,axis[0],axis[1],axis[2]);
-}
-void dbgf(const char* s,const float f){
-  qDebug("%-30s: %+3.2f\n",s,f);
-}
-
 void EditStraightener::on_freehand_mesh_dragging(bool begin)
 {
   if(begin){
@@ -584,38 +572,12 @@ void EditStraightener::on_freehand_mesh_dragging(bool begin)
   } else {
     assert(currentmode==ES_FreehandMeshDragging);
     assert(dragged_mesh!=NULL);
-    qDebug("###############ending a mesh drag###################");
-    dbgm("mm->cm.Tr",mm->cm.Tr);
-//    dbgp("mm->cm.trBB().Center()",mm->cm.trBB().Center());
-//    dbgp("dm->manip->center",dragged_mesh->manipulator->center);
-//    dbgf("dm->manip->track.sca",dragged_mesh->manipulator->track.sca);
-    dbgq("dm->manip->track.rot",dragged_mesh->manipulator->track.rot);
-//    dbgp("dm->manip->track.tra",dragged_mesh->manipulator->track.tra);
-
-    Point3f ScVOut(0,0,0),ShVOut(0,0,0),RtVOut(0,0,0),TrVOut(0,0,0);	
-    Matrix44f d = mm->cm.Tr;
-    bool tr_was_decomponible;
-    tr_was_decomponible = Decompose(d,ScVOut,ShVOut,RtVOut,TrVOut);
-    assert(tr_was_decomponible);
-    Matrix44f Scl, Sxy, Sxz, Syz, Rtx, Rty, Rtz, Trn;
-    Scl.SetScale(ScVOut);
-    Sxy.SetShearXY(ShVOut[0]);
-    Sxz.SetShearXZ(ShVOut[1]);
-    Syz.SetShearYZ(ShVOut[2]);
-    Rtx.SetRotate(math::ToRad(RtVOut[0]),Point3f(1,0,0));
-    Rty.SetRotate(math::ToRad(RtVOut[1]),Point3f(0,1,0));
-    Rtz.SetRotate(math::ToRad(RtVOut[2]),Point3f(0,0,1));
-    Trn.SetTranslate(TrVOut);
-    // mm->cm.Tr should be equal to  Trn * Rtx*Rty*Rtz  * Syz*Sxz*Sxy * Scl ;		
-    Quaternionf tr_rot;
-    tr_rot.FromMatrix(Rtx*Rty*Rtz);
-    dbgq("tr_rot",tr_rot);
-    Matrix44f new_rot; (tr_rot * dragged_mesh->manipulator->track.rot).ToMatrix(new_rot);
-    dbgq("tr_rot * dm->manip->track.rot",(tr_rot * dragged_mesh->manipulator->track.rot));
-
+    Matrix44f a,b,c;
+    a.SetTranslate( dragged_mesh->manipulator->center);
+    b = dragged_mesh->manipulator->track.Matrix();
+    c.SetTranslate(-dragged_mesh->manipulator->center);    
     undosystem->SaveTR();
-    mm->cm.Tr =  Trn * new_rot  * Syz*Sxz*Sxy * Scl; //per ora ignoro tutte le tra e sca
-    dbgm("NEW mm->cm.Tr",mm->cm.Tr);
+    mm->cm.Tr = mm->cm.Tr * a * b * c;
     on_apply(); 
     delete dragged_mesh;
     dragged_mesh=NULL;
@@ -636,10 +598,10 @@ void EditStraightener::on_get_plane_from_selection(char normal,char preserve)
   CMeshO::VertexIterator vi;
   for(vi=mm->cm.vert.begin();vi!=mm->cm.vert.end();++vi)
     if(!(*vi).IsD() && (*vi).IsS() ){
-  	  Point3f p=mm->cm.Tr * (*vi).P();
+  	  Point3f p = mm->cm.Tr * (*vi).P();
       bbox.Add(p);
       selected_pts.push_back(p);
-    }  
+    }
 
   Plane3f plane;
   PlaneFittingPoints(selected_pts,plane); //calcolo il piano di fitting
@@ -799,22 +761,6 @@ void DrawPhantom::Render()
   manipulator->GetView();
   manipulator->Apply(true);  
 
-  glDisable(GL_LIGHTING);// axes are for debugging...
-  glDisable(GL_TEXTURE_2D);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_LINE_SMOOTH);
-  glEnable(GL_POINT_SMOOTH);
-  glLineWidth(5);
-  glPointSize(10);
-  glColor3f(1,1,1); glBegin(GL_POINTS); glVertex3f(0,0,0); glEnd(); 
-  glColor3f(1,.7,.7); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(10,0,0);glEnd();
-  glColor3f(.7,1,.7); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(0,10,0);glEnd();
-  glColor3f(.7,.7,1); glBegin(GL_LINES);glVertex3f(0,0,0);glVertex3f(0,0,10);glEnd();
-  glColor3f(1,0,1); glBegin(GL_POINTS); glVertex(manipulator->center); glEnd(); 
-  glLineWidth(1);
-  glPointSize(1); // end debugging part
- 
   float amb[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
   float col[4] = { 0.5f, 0.5f, 0.8f, 1.0f };
   float spe[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
