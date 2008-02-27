@@ -22,7 +22,12 @@
 ****************************************************************************/
 
 
+#include <map>
+#include <vector>
+#include <iostream>        // DEBUG
+
 //#include <vcg/complex/trimesh/update/selection.h>     // DEBUG
+#include <vcg/complex/trimesh/allocate.h>
 
 #include "filter_aging.h"
 
@@ -95,14 +100,14 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb)
 {
     CMeshO::FaceIterator fi;
-    int border = 0;
+    int borderNum = 0;
     int chips = 0;
     float angleThreshold = params.getFloat("AngleThreshold");
     bool hasSel = hasSelected(m);
-        
-    //srand(time(NULL)); 
+    typedef std::pair<CMeshO::FacePointer, int> sedge;      // selected edge
+    map<sedge, vector<EroderPoint>* > edge2Eroder; 
     
-    // first tour to clear V bits
+    // first loop to clear V bits
     for(fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi)
         (*fi).ClearV();
     //tri::UpdateSelection<CMeshO>::ClearFace(m.cm);        // DEBUG
@@ -121,7 +126,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
                 if((*fi).FFp(j)->IsV()) continue;   // face already visited
                 if(hasSel && !(*fi).FFp(j)->IsS()) continue;    // some faces of the mesh are selected, the current one too, but not its j-th neighbour
                 if(/*(*fi).FFp(j) == &(*fi)*/(*fi).IsB(j)) {         // found border edge
-                    border++;
+                    borderNum++;
+                    edge2Eroder[sedge(&(*fi), j)] = generateEdgeEroder(true, vcg::Distance((*fi).P0(j), (*fi).P1(j)));
                 //    (*fi).SetS();                 // DEBUG
                 //    (*fi).FFp(j)->SetS();         // DEBUG
                 }
@@ -129,21 +135,12 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
                     // the angle between the two face normals in degrees
                     // TODO: check non 2-manifold cases, it's all ok? or there are problems?
                     double ffangle = vcg::Angle((*fi).N(), (*fi).FFp(j)->N())*180/M_PI;
-                    Point3<CVertexO::ScalarType> y, median;
-                    CVertexO *f1p, *f2p;        // the 2 points not shared by the 2 faces
                     
-                    if(j == 0)
-                        f1p = (*fi).V(2);
-                    else if(j == 1)
-                        f1p = (*fi).V(0);
-                    else
-                        f1p = (*fi).V(1);
-                    if((*fi).FFi(j) == 0)
-                        f2p = (*fi).FFp(j)->V(2);
-                    else if((*fi).FFi(j) == 1)
-                        f2p = (*fi).FFp(j)->V(0);
-                    else
-                        f2p = (*fi).FFp(j)->V(1);
+                    // the 2 points not shared between the 2 faces
+                    CVertexO *f1p = (*fi).V2(j);
+                    CVertexO *f2p = (*fi).FFp(j)->V2((*fi).FFi(j));
+                    
+                    Point3<CVertexO::ScalarType> y, median;
                     
                     y = (*fi).N().Normalize() ^ (*fi).FFp(j)->N().Normalize();
                     median = y ^ (Point3<CVertexO::ScalarType>(f1p->P() - f2p->P()));
@@ -170,12 +167,95 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
         }
     }
     
+    // erode border edges
+    /*if(borderNum > 0) {
+	    CMeshO::VertexIterator lastv = tri::Allocator<CMeshO>::AddVertices(m.cm, borderNum);
+        CMeshO::FaceIterator lastf = tri::Allocator<CMeshO>::AddFaces(m.cm, borderNum);
+        for(map<sedge, vector<EroderPoint>* >::iterator it = edge2Eroder.begin(); it != edge2Eroder.end(); ++it) {
+            if((*it).first.first->IsB((*it).first.second)) {        // border face
+                CMeshO::FacePointer f = (*it).first.first;
+                int z = (*it).first.second;
+                vector<EroderPoint>* e = (*it).second;
+                vector<CMeshO::VertexPointer> vv;
+                vector<CMeshO::FacePointer> fv;
+                vector<CMeshO::FaceType::TexCoordType> wtt;
+                
+                for(unsigned int j=0; j<3; j++)
+                    vv.push_back(f->V((z+j)%3));
+                
+                for(unsigned int i=0; i<e->size(); i++) {
+                    (*lastv).P() = f->V(z)->P() * (1.0f - e->at(i).yrel) + f->V1(z)->P() * e->at(i).yrel;
+                    if(CMeshO::HasPerVertexNormal())
+                        (*lastv).N()= (f->V(z)->N() * (1.0f - e->at(i).yrel) + f->V1(z)->N() * e->at(i).yrel).Normalize();
+                    if(CMeshO::HasPerVertexColor())
+                        (*lastv).C().lerp(f->V(z)->C(), f->V1(z)->C(), e->at(i).yrel);
+                    vv.push_back(&*lastv);
+                    ++lastv;
+                }
+                
+                fv.push_back(f);
+                for(unsigned int i=0; i<vv.size()-3; i++) {
+                    fv.push_back(&*lastf);
+                    ++lastf;
+                }
+                
+                if(tri::HasPerWedgeTexCoord(m.cm)) {
+                    for(unsigned int i=0; i<3; i++)
+				        wtt.push_back(f->WT(i));
+                    CMeshO::FaceType::TexCoordType t0 = f->WT(z);
+                    CMeshO::FaceType::TexCoordType t1 = f->WT((z+1)%3);
+                    assert(t0.n() == t1.n());
+				    for(unsigned int i=0; i<e->size(); i++) {
+                        CMeshO::FaceType::TexCoordType tmp;
+                        tmp.n() = t0.n();
+                        tmp.t() = (t0.t() * (1.0f - e->at(i).yrel) + t1.t() * e->at(i).yrel);
+                        wtt.push_back(tmp);
+                    }
+                }
+                
+                int orgflag = f->UberFlags();
+                for(unsigned int i=0; i<fv.size(); i++) {
+                    fv.at(i)->V(0) = vv.at((i>0?2+i:i));
+                    fv.at(i)->V(1) = vv.at((i<fv.size()-1?3+i:1));
+                    fv.at(i)->V(2) = vv.at(2);
+                    if(tri::HasPerWedgeTexCoord(m.cm)) {
+					    fv.at(i)->WT(0) = wtt.at((i>0?2+i:i));
+                        fv.at(i)->WT(1) = wtt.at((i<fv.size()-1?3+i:1));
+                        fv.at(i)->WT(2) = wtt.at(2);
+                    }
+                }
+                
+                for(unsigned int i=0; i<fv.size(); i++) {
+                    if(orgflag & (CMeshO::FaceType::BORDER0 << z))
+                        fv.at(i)->SetB(0);
+                    else
+                        fv.at(i)->ClearB(0);
+                    fv.at(i)->ClearB(1);
+                    fv.at(i)->ClearB(2);
+                }
+                if(orgflag & (CMeshO::FaceType::BORDER0 << z+1))
+                    fv.at(fv.size()-1)->SetB(1);
+                else
+                    fv.at(fv.size()-1)->ClearB(1);
+                if(orgflag & (CMeshO::FaceType::BORDER0 << z+2))
+                    fv.at(0)->SetB(2);
+                else
+                    fv.at(0)->ClearB(2);
+            }
+        }
+    }
+    vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);*/
+    //vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+    
     // clear V bits again
     for(fi=m.cm.face.begin(); fi!=m.cm.face.end(); ++fi)
         (*fi).ClearV();
     
-    // Log function dump textual info in the lower part of the MeshLab screen. 
-    Log(0,"Found %i border edges and %i internal edges to erode.", border, chips);       // DEBUG
+    // Log function dump textual info in the lower part of the MeshLab screen
+    Log(0,"Found %i border edges and %i internal edges to erode.", borderNum, chips);       // DEBUG
+    
+    for(map<sedge, vector<EroderPoint>* >::iterator it = edge2Eroder.begin(); it != edge2Eroder.end(); ++it)
+        delete it->second;
     
     return true;
 }
@@ -190,5 +270,23 @@ bool GeometryAgingPlugin::hasSelected(MeshModel &m)
 	}
 	return false;
 }
+
+
+// randomly creates a vector of eroderPoints and returns a pointer to it
+vector<GeometryAgingPlugin::EroderPoint>* GeometryAgingPlugin::generateEdgeEroder(bool border, float len)
+{
+    vector<EroderPoint>* e = new vector<EroderPoint>();
+    
+    srand(time(NULL));
+    
+    //std::cout << "len: " << len << std::endl;           // DEBUG
+    if(border)
+        e->push_back(GeometryAgingPlugin::EroderPoint(0.5, 0.0));
+    /*else
+        e->push_back(GeometryAgingPlugin::EroderPoint(0.5, 0.0, 0.0));*/
+    
+    return e;
+}
+
 
 Q_EXPORT_PLUGIN(GeometryAgingPlugin)

@@ -39,6 +39,16 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 
     public:
         enum {FP_ERODE};
+        typedef struct EP{
+            float lx;       // x offset along the surface of the face on the left side of the edge
+            float rx;       // x offset along the surface of the face on the right side of the edge
+            float yrel;     // y relative position between the two edge vertexes
+            EP(float yrel, float lx, float rx=0.0) {
+                this->yrel = yrel;
+                this->lx = lx;
+                this->rx = rx;
+            }
+        } EroderPoint;
 
         GeometryAgingPlugin();
         virtual ~GeometryAgingPlugin();
@@ -53,6 +63,8 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
         
     protected:
         virtual bool hasSelected(MeshModel &m);
+        vector<EroderPoint>* generateEdgeEroder(bool border, float len);
+        
 };
 
 
