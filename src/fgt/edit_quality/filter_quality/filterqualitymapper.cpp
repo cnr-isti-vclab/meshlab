@@ -31,7 +31,6 @@ FIRST RELEASE
 
 #include <math.h>
 #include <stdlib.h>
-//#include <time.h>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
