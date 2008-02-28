@@ -118,6 +118,8 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * g
 	for(int i=0;i<3;++i)
 		{
 			QString buf=QString("v%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
+			if(vcg::tri::HasPerWedgeTexCoord(m.cm)) 
+					buf+=QString(" \nuv(%3 %4)id:%5").arg(fp->WT(i).U()).arg(fp->WT(i).V()).arg(fp->WT(i).N());
 			gla->renderText(fp->P(i)[0], fp->P(i)[1], fp->P(i)[2], buf, qFont);
 		}
 }
