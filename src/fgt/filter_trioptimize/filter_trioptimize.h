@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2007                                                \/)\/    *
+* Copyright(C) 2005                                                \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,3 +20,38 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+
+#ifndef TRIOPTIMIZEFILTERSPLUGIN_H
+#define TRIOPTIMIZEFILTERSPLUGIN_H
+
+#include <QObject>
+
+#include <meshlab/meshmodel.h>
+#include <meshlab/interfaces.h>
+
+class TriOptimizePlugin : public QObject, public MeshFilterInterface
+{
+	Q_OBJECT
+	Q_INTERFACES(MeshFilterInterface)
+
+public:
+	enum { 
+		// normal flip - improve triangles quality
+		FP_EDGE_FLIP
+	};
+
+	TriOptimizePlugin();
+	
+	virtual const QString filterName(FilterIDType filter);
+	virtual const QString filterInfo(FilterIDType filter);
+	virtual const PluginInfo &pluginInfo();
+	virtual bool autoDialog(QAction *) {return true;}
+	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &/*parent*/, vcg::CallBackPos * cb) ;
+	
+	virtual const int getRequirements(QAction *) {
+		return (MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+	}
+};
+
+#endif

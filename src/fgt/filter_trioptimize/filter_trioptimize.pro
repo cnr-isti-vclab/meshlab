@@ -2,13 +2,13 @@ TEMPLATE      = lib
 QT           += opengl
 CONFIG       += plugin
 INCLUDEPATH  +=  ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = filter_dirt.h
+HEADERS       = filter_trioptimize.h
 
-SOURCES       = filter_dirt.cpp \ 
+SOURCES       = filter_trioptimize.cpp \ 
 		../../meshlab/filterparameter.cpp \
 		../../../../code/lib/glew/src/glew.c
 
-TARGET        = filter_dirt
+TARGET        = filter_trioptimize
 
 DESTDIR       = ../../meshlab/plugins
 
