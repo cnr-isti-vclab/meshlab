@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.73  2008/02/28 10:33:21  cignoni
+Added errorMsg  exchange mechaninsm to the interface of filter plugins to allow the passage of error reports between the filter and the framework.
+
 Revision 1.72  2008/02/15 08:22:24  cignoni
 removed unused param from virtual empty functions
 
@@ -279,6 +282,8 @@ public:
 
 	// The main function that applies the selected filter with the already stabilished parameters
 	// This function is called by the framework after getting the user params 
+	// NO GUI interaction should be done here. No dialog asking, no messagebox errors. 
+	// this function will also be called by the commandline framework.
 	virtual bool applyFilter(QAction * /*filter*/, MeshModel &/*m*/, FilterParameterSet & /* par */, vcg::CallBackPos * /*cb*/) = 0;
  	virtual bool applyFilter(QAction *   filter, MeshDocument &md,   FilterParameterSet & par,       vcg::CallBackPos *cb) 
 	{ 
@@ -308,7 +313,11 @@ public:
 	}	
 
   /// Standard stuff that usually should not be redefined. 
-	  void setLog(GLLogStream *log) { this->log = log ; }
+	void setLog(GLLogStream *log) { this->log = log ; }
+		
+	/// This function is invoked by the framework when the apply filter fails to give some info to the user about the fiter failure
+	/// Failing filters should put some meaningful information inside the errorMessage string.
+	const QString &errorMsg() {return this->errorMessage;}
 
     virtual const FilterIDType ID(QAction *a)
   	{
@@ -348,6 +357,9 @@ protected:
 		}
 
     GLLogStream *log;	
+		
+		// this string is used to pass back to the framework error messages in case of failure of a filter apply.
+		QString errorMessage;
 };
 
 

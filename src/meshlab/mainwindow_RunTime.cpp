@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.151  2008/02/28 10:33:21  cignoni
+Added errorMsg  exchange mechaninsm to the interface of filter plugins to allow the passage of error reports between the filter and the framework.
+
 Revision 1.150  2008/02/12 14:20:33  cignoni
 changed the function getParameter into the more meaningful getCustomParameter
 
@@ -531,7 +534,10 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params)
 		lastFilterAct->setText(QString("Apply filter ") + action->text());  
 		lastFilterAct->setEnabled(true);
 	}
-
+  else // filter has failed. show the message error.
+	{
+		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(action->text())+iFilter->errorMsg()); // text
+	}
   // at the end for filters that change the color set the appropriate color mode
   if(iFilter->getClass(action)==MeshFilterInterface::FaceColoring ) {
     GLA()->setColorMode(vcg::GLW::CMPerFace);
