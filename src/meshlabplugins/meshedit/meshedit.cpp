@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.12  2008/02/28 09:57:40  cignoni
+corrected bug: wrong selection when Tr matrix != identity
+
 Revision 1.11  2007/10/23 07:15:19  cignoni
 switch to selection rendering done by slot and signals
 
@@ -228,11 +231,13 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
    CMeshO::FaceIterator fi;
     for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD()) (*fi).ClearS();
-
+		
+		glPushMatrix();
+		glMultMatrix(m.cm.Tr);
     GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, NewSel, wid.x(), wid.y());
     qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
     qDebug("Pickface: Got  %i on %i",NewSel.size(),m.cm.face.size());
-   
+		glPopMatrix();
     switch(selMode)
     { 
       case SMSub :
