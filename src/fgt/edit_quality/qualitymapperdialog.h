@@ -32,13 +32,12 @@ FIRST RELEASE
 
 #include <QDockWidget>
 #include <QGraphicsItem>
-#include <vcg/complex/trimesh/base.h>
 #include <meshlab/meshmodel.h>
-#include "ui_qualitymapperdialog.h"
 #include <vcg/math/histogram.h>
 #include "../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
-#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax
 #include <meshlab/glarea.h>
+#include "ui_qualitymapperdialog.h"
 #include "common/transferfunction.h"
 #include "common/meshmethods.h"
 #include "eqhandle.h"

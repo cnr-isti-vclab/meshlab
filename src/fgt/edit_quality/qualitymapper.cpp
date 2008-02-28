@@ -31,9 +31,6 @@ FIRST RELEASE
 #include <limits>
 #include <meshlab/glarea.h>
 #include "qualitymapper.h"
-#include <vcg/complex/trimesh/clean.h>
-#include <wrap/gl/pick.h>
-#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/space/triangle3.h> //for quality
 
 using namespace vcg;

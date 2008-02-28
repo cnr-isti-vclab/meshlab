@@ -36,7 +36,7 @@ FIRST RELEASE
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include <vcg/complex/trimesh/update/color.h>
+//#include <vcg/complex/trimesh/update/color.h>
 #include "qualitymapperdialog.h"
 
 //This class defines the plugin interface

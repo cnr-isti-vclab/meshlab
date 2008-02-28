@@ -35,7 +35,7 @@ FIRST RELEASE
 #include <vcg/math/histogram.h>
 #include <meshlab/meshmodel.h>
 #include <cassert>
-#include <utility>
+#include <utility> // for pair<T,T>
 
 #include <QString>
 
