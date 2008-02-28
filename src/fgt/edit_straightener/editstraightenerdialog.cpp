@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2008/02/28 10:12:32  benedetti
+fixed sliders behaviour
+
 Revision 1.3  2008/02/22 20:24:42  benedetti
 refactored, cleaned up a bit, few feats added
 
@@ -41,7 +44,7 @@ using namespace vcg;
 
 EditStraightenerDialog::EditStraightenerDialog(QWidget *parent)
   :QWidget(parent),special_mode_active(false),undo_enabled(false),
-freeze_enabled(false),sfn(0),was_an_action_on_slider(false)
+freeze_enabled(false),sfn(0),single_slider_action(true)
 {
   ui.setupUi(this);
   updateEnabled();
@@ -192,88 +195,70 @@ void EditStraightenerDialog::on_alignWithViewPushButton_clicked()
 void EditStraightenerDialog::on_bboxXSlider_sliderPressed()
 {
   emit begin_action();
+  single_slider_action=false;
 }
 
 void EditStraightenerDialog::on_bboxYSlider_sliderPressed()
 {
   emit begin_action();
+  single_slider_action=false;
 }
 
 void EditStraightenerDialog::on_bboxZSlider_sliderPressed()
 {
   emit begin_action();
+  single_slider_action=false;
 }
 
 void EditStraightenerDialog::on_bboxXSlider_valueChanged(int value)
 {
+  if (single_slider_action)
+    emit begin_action();
   emit move_axis_to_bbox(0,value/100.0f);
-  if(was_an_action_on_slider){
+  if (single_slider_action)
   	emit apply();
-    was_an_action_on_slider=false;
-  }
 }
 
 void EditStraightenerDialog::on_bboxYSlider_valueChanged(int value)
 {
+  if (single_slider_action)
+    emit begin_action();
   emit move_axis_to_bbox(1,value/100.0f);
-  if(was_an_action_on_slider){
+  if (single_slider_action)
   	emit apply();
-    was_an_action_on_slider=false;
-  }
 }
 
 void EditStraightenerDialog::on_bboxZSlider_valueChanged(int value)
 {
+  if (single_slider_action)
+    emit begin_action();
   emit move_axis_to_bbox(2,value/100.0f);
-  if(was_an_action_on_slider){
+  if (single_slider_action)
   	emit apply();
-    was_an_action_on_slider=false;
-  }
 }
 
 void EditStraightenerDialog::on_bboxXSlider_sliderReleased()
 {
+  single_slider_action=true;
   emit apply();
 }
 
 void EditStraightenerDialog::on_bboxYSlider_sliderReleased()
 {
+  single_slider_action=true;
   emit apply();
 }
 
 void EditStraightenerDialog::on_bboxZSlider_sliderReleased()
 {
+  single_slider_action=true;
   emit apply();
-}
-
-void EditStraightenerDialog::on_bboxXSlider_actionTriggered(int action)
-{
-  if(action==QAbstractSlider::SliderMove)
-    return;
-  was_an_action_on_slider=true;
-  emit begin_action();
-}
-
-void EditStraightenerDialog::on_bboxYSlider_actionTriggered(int action)
-{
-  if(action==QAbstractSlider::SliderMove)
-    return;
-  was_an_action_on_slider=true;
-  emit begin_action();
-}
-
-void EditStraightenerDialog::on_bboxZSlider_actionTriggered(int action)
-{
-  if(action==QAbstractSlider::SliderMove)
-    return;
-  was_an_action_on_slider=true;
-  emit begin_action();
 }
 
 void EditStraightenerDialog::on_centerOnBboxPushButton_clicked()
 {
   emit begin_action();
-  
+  single_slider_action=false;
   if(ui.bboxXSlider->value()==50) emit move_axis_to_bbox(0,0.5f);
   else ui.bboxXSlider->setValue(50);
   
@@ -282,7 +267,7 @@ void EditStraightenerDialog::on_centerOnBboxPushButton_clicked()
   
   if(ui.bboxZSlider->value()==50) emit move_axis_to_bbox(2,0.5f);
   else ui.bboxZSlider->setValue(50);
-  
+  single_slider_action=true;
   emit apply(); 
 }
 
