@@ -1234,11 +1234,13 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 	//getting channel for new handle:
 	int channelCode = -1;
 
-	if ( _currentTfHandle != 0)
-		//if an handle was already selected let's use the same channel of the selected one
-		channelCode = _currentTfHandle->getChannel();
-	else
-		//else, let's use the more ahead channel in TF
+//	if ( _currentTfHandle != 0)
+//		//if an handle was already selected let's use the same channel of the selected one
+//		channelCode = _currentTfHandle->getChannel();
+//	else
+//changed by MAL 28\02\08
+
+	//let's use the more ahead channel in TF
 		channelCode = _transferFunction->getFirstPlaneChanel();
 
 	float xPos = pos.x() - _transferFunction_info->leftBorder;
