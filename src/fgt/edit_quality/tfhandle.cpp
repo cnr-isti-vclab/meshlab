@@ -27,7 +27,7 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#include "TFHandle.h"
+#include "tfhandle.h"
 
 //declaration of static member of TFHandle class
 TransferFunction* TFHandle::_tf = 0;

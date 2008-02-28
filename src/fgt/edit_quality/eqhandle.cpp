@@ -27,7 +27,7 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#include "EqHandle.h"
+#include "eqhandle.h"
 
 EqHandle::EqHandle(CHART_INFO *environment_info, QColor color, QPointF position, 
 				   EQUALIZER_HANDLE_TYPE type, EqHandle** handles, qreal* midHandlePercentilePosition, QDoubleSpinBox* spinbox,
