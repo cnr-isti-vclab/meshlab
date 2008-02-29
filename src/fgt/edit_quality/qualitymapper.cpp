@@ -67,23 +67,6 @@ const PluginInfo &QualityMapperPlugin::Info()
 	return ai;
 } 
 
-
-void QualityMapperPlugin::mouseReleaseEvent  (QAction *,QMouseEvent *, MeshModel &, GLArea *)
-{
-}
-
-void QualityMapperPlugin::mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea *)
-{  
-}
-
-void QualityMapperPlugin::mouseMoveEvent     (QAction *,QMouseEvent *, MeshModel &, GLArea *)
-{
-}
-
-void QualityMapperPlugin::Decorate(QAction *, MeshModel&, GLArea *)
-{
-}
-
 void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel& m, GLArea *gla )
 {
 	if(_qualityMapperDialog==0)

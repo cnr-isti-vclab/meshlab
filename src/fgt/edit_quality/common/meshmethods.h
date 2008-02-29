@@ -42,8 +42,6 @@ FIRST RELEASE
 using namespace std;
 using namespace vcg;
 
-pair<int,int> computeHistogramMinMaxY (Histogramf*);
-
 // Applies colors to mesh vertexes by quality
 void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness);
 

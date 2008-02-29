@@ -420,8 +420,7 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		}
 
 		//building histogram chart informations
-		pair<int,int> minMaxY = computeHistogramMinMaxY(_equalizer_histogram);//processing minY and maxY values for histogram
-		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->n, _equalizer_histogram->minv, _equalizer_histogram->maxv, minMaxY.first, minMaxY.second );
+		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->n, _equalizer_histogram->minv, _equalizer_histogram->maxv, 0, _equalizer_histogram->MaxCount());
 	}
 	else
 	{
@@ -442,9 +441,7 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, NUMBER_OF_HISTOGRAM_BINS);
 
 		// Only minY and maxY are modified in _histogram_info
-		pair<int,int> minMaxY = computeHistogramMinMaxY(_equalizer_histogram);
-		_histogram_info->minY = minMaxY.first;
-		_histogram_info->maxY = minMaxY.second;
+		_histogram_info->maxY = _equalizer_histogram->MaxCount();
 	}
 	//...histogram built
 

@@ -33,23 +33,6 @@ FIRST RELEASE
 #include <QFile>
 #include <QTextStream>
 
-
-pair<int,int> computeHistogramMinMaxY (Histogramf* histogram)
-{
-	int maxY = 0;
-	int minY = std::numeric_limits<int>::max();
-	for (int i=0; i<histogram->n; i++) 
-	{
-		if ( histogram->H[i] > maxY )
-			maxY = histogram->H[i];
-
-		if ( histogram->H[i] < minY )
-			minY = histogram->H[i];
-	}
-	pair<int,int> minMaxY(minY,maxY);
-	return minMaxY;
-}
-
 void loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
 {
 	QFile inFile( fileName );
