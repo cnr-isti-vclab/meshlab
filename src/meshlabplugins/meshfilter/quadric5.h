@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.3  2008/02/29 20:37:27  pirosu
+fixed zero area faces management
+
 Revision 1.2  2007/03/20 15:51:15  cignoni
 Update to the new texture syntax
 
@@ -92,54 +95,73 @@ public:
 	// The geometric quadric is added to the parameter qgeo
 	void byFace(FaceType &f, math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
 	{
-		// computes the geometrical quadric
-		byFace(f,true);
+		double q = QualityFace(f);
+		
+		// if quality==0 then the geometrical quadric has just zeroes
+		if(q)
+		{
+			// computes the geometrical quadric
+			byFace(f,true);
 
-		q1.a[0] += a[0];
-		q1.a[1] += a[1];
-		q1.a[2] += a[2];
-		q1.a[3] += a[5];
-		q1.a[4] += a[6];
+			q1.a[0] += a[0];
+			q1.a[1] += a[1];
+			q1.a[2] += a[2];
+			q1.a[3] += a[5];
+			q1.a[4] += a[6];
 
-		q1.a[5] += a[9];
+			q1.a[5] += a[9];
 
-		q1.b[0] += b[0];
-		q1.b[1] += b[1];
-		q1.b[2] += b[2];
+			q1.b[0] += b[0];
+			q1.b[1] += b[1];
+			q1.b[2] += b[2];
 
-		q1.c += c;
+			q1.c += c;
 
-		q2.a[0] += a[0];
-		q2.a[1] += a[1];
-		q2.a[2] += a[2];
-		q2.a[3] += a[5];
-		q2.a[4] += a[6];
+			q2.a[0] += a[0];
+			q2.a[1] += a[1];
+			q2.a[2] += a[2];
+			q2.a[3] += a[5];
+			q2.a[4] += a[6];
 
-		q2.a[5] += a[9];
+			q2.a[5] += a[9];
 
-		q2.b[0] += b[0];
-		q2.b[1] += b[1];
-		q2.b[2] += b[2];
+			q2.b[0] += b[0];
+			q2.b[1] += b[1];
+			q2.b[2] += b[2];
 
-		q2.c += c;
+			q2.c += c;
 
-		q3.a[0] += a[0];
-		q3.a[1] += a[1];
-		q3.a[2] += a[2];
-		q3.a[3] += a[5];
-		q3.a[4] += a[6];
+			q3.a[0] += a[0];
+			q3.a[1] += a[1];
+			q3.a[2] += a[2];
+			q3.a[3] += a[5];
+			q3.a[4] += a[6];
 
-		q3.a[5] += a[9];
+			q3.a[5] += a[9];
 
-		q3.b[0] += b[0];
-		q3.b[1] += b[1];
-		q3.b[2] += b[2];
+			q3.b[0] += b[0];
+			q3.b[1] += b[1];
+			q3.b[2] += b[2];
 
-		q3.c += c;
+			q3.c += c;
 
+			assert(q1.IsValid());
+			assert(q2.IsValid());
+			assert(q3.IsValid());
 
-		// computes the real quadric
-		byFace(f,false);
+			byFace(f,false); // computes the real quadric
+		}
+		else if(
+			(f.WT(1).u()-f.WT(0).u()) * (f.WT(2).v()-f.WT(0).v()) -
+			(f.WT(2).u()-f.WT(0).u()) * (f.WT(1).v()-f.WT(0).v())
+			)
+			byFace(f,false); // computes the real quadric
+		else // the area is zero also in the texture space
+		{
+			a[0]=a[1]=a[2]=a[3]=a[4]=a[5]=a[6]=a[7]=a[8]=a[9]=a[10]=a[11]=a[12]=a[13]=a[14]=0;
+			b[0]=b[1]=b[2]=b[3]=b[4]=0;
+			c=0;
+		}
 	}
 	
 	// Computes the geometrical quadric if onlygeo == true and the real quadric if onlygeo == false
@@ -213,7 +235,6 @@ public:
 			r[4] = 0;
 		}
 
-
 		//  computes e1
 		sub_vec5(q,p,e1);
 		normalize_vec5(e1);
@@ -265,8 +286,7 @@ public:
 		//  computes c
 		c = inproduct5(p,p)-pe1*pe1-pe2*pe2;
 
-		
-		
+		assert(IsValid());
 	}
 
 	bool Gauss55( ScalarType x[], ScalarType C[5][5+1] )
