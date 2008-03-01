@@ -33,12 +33,15 @@ FIRST RELEASE
 #include <QFile>
 #include <QTextStream>
 
-void loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
+// Opens a CSV file and gets its equalizer parameters
+//returns a negative value if some error occurred, a positive value else
+int loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
 {
+	int result = fileName.size();
 	QFile inFile( fileName );
 
 	if ( !inFile.open(QIODevice::ReadOnly | QIODevice::Text))
-		return;
+		return -1;
 
 	QTextStream inStream( &inFile );
 	QString line;
@@ -74,6 +77,8 @@ void loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
 	} while(!line.isNull());
 
 	inFile.close();
+
+	return result;
 }
 
 void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness)

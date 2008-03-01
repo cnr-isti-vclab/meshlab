@@ -46,7 +46,8 @@ using namespace vcg;
 void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness);
 
 // Opens a CSV file and gets its equalizer parameters
-void loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data);
+//returns a negative value if some error occurred, a positive value else
+int loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data);
 
 
 #endif
