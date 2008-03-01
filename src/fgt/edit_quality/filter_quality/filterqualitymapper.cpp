@@ -28,15 +28,9 @@ FIRST RELEASE
 ****************************************************************************/
 
 #include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
 #include "filterqualitymapper.h"
-
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -91,33 +85,20 @@ const PluginInfo &QualityMapperFilter::pluginInfo()
 void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
 //void QualityMapperFilter::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
-	Q_UNUSED(m);
-	QString csvFileName = 0;
 	 switch(ID(action))	 {
 		case FP_QUALITY_MAPPER :
-			//user chooses the file to load
-			csvFileName = QFileDialog::getOpenFileName(0, "Open Input CSV File", QDir::currentPath(), "CSV File (*.csv)");
-
-			EQUALIZER_INFO eqData;
-			eqData.minQualityVal = 0.0f;
-			eqData.midQualityPercentage = 0.5f;
-			eqData.maxQualityVal = 100.0f;
-			eqData.brightness = 1.0f;
-
-			if (!csvFileName.isNull())
 			{
-				//setting equalizer values
-				loadEqualizerInfo(csvFileName, &eqData);
-			}
+				_meshMinMaxQuality = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 
-			parlst.addString("csvFileName", csvFileName, "CSV input File" );
-			parlst.addFloat("minQualityVal", eqData.minQualityVal, "Minimum mesh quality" );
-			parlst.addFloat("maxQualityVal", eqData.maxQualityVal, "Maximum mesh quality" );
-			parlst.addAbsPerc("midHandlePos", eqData.midQualityPercentage, 0.0f, 1.0f, "Middle quality percentage position", "defines the percentage position of middle quality value");
-			parlst.addFloat("brightness", eqData.brightness, "Mesh brightness", "must be between 0 and 2");
+				parlst.addString("csvFileName", "", "CSV input File" );
+				parlst.addFloat("minQualityVal", _meshMinMaxQuality.minV, "Minimum mesh quality" );
+				parlst.addFloat("maxQualityVal", _meshMinMaxQuality.maxV, "Maximum mesh quality" );
+				parlst.addFloat("midHandlePos", _meshMinMaxQuality.minV + ((_meshMinMaxQuality.maxV-_meshMinMaxQuality.minV)/2.0f), "Middle quality percentage position", "defines the percentage position of middle quality value" );
+				parlst.addFloat("brightness", 1.0f, "Mesh brightness", "must be between 0 and 2. 0 represents a completely dark mesh, 1 represents a mesh colorized with pure colors, 2 represents a completely bright mesh");
+			}
 			break;
 											
-		default : assert(0); 
+		default : assert(0); break;
 	}
 }
 
@@ -128,12 +109,34 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	Q_UNUSED(filter);
 	Q_UNUSED(cb);
 	QString csvFileName = par.getString("csvFileName");
-	if (!csvFileName.isNull())
+
+	EQUALIZER_INFO eqData;
+	eqData.minQualityVal = par.getFloat("minQualityVal");
+	eqData.midQualityPercentage = par.getFloat("midHandlePos");
+	eqData.maxQualityVal = par.getFloat("maxQualityVal");
+	eqData.brightness = 1.0f;
+
+	if ( csvFileName != "" )
 	{
-		//building new TF object from external file
-		TransferFunction transferFunction( csvFileName );
-		// Applying colors
-		applyColorByVertexQuality(m, &transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), par.getAbsPerc("midHandlePos"), par.getFloat("brightness"));
+		//setting equalizer values
+		if ( loadEqualizerInfo(csvFileName, &eqData) > 0 )
+		{
+			par.setFloat("minQualityVal", eqData.minQualityVal );
+			par.setFloat("maxQualityVal", eqData.maxQualityVal );
+			par.setFloat("midHandlePos", _meshMinMaxQuality.minV + ((_meshMinMaxQuality.maxV-_meshMinMaxQuality.minV)/eqData.midQualityPercentage));
+			par.setFloat("brightness", eqData.brightness);
+
+			//building new TF object from external file
+			TransferFunction transferFunction( par.getString("csvFileName") );
+			// Applying colors
+			applyColorByVertexQuality(m, &transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), par.getFloat("midHandlePos"), par.getFloat("brightness"));
+		}
+		else
+		{
+			QErrorMessage fileNotFoundError(0);
+			fileNotFoundError.showMessage("Something went wrong while trying to open the file specified");
+			return false;
+		}
 
 		return true;
 	}

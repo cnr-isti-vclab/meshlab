@@ -36,13 +36,22 @@ FIRST RELEASE
 #include <meshlab/interfaces.h>
 
 #include "../common/transferfunction.h"
+#include <vcg/complex/trimesh/stat.h> // for ComputePerVertexQualityMinMax
+#include "../../../meshlabplugins/meshcolorize/curvature.h"		//<--contains Frange
 #include "../common/meshmethods.h"
+
+using namespace vcg;
+using namespace std;
+
 
 
 class QualityMapperFilter : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
+
+private:
+	Frange _meshMinMaxQuality;
 
 public:
 	enum { FP_QUALITY_MAPPER  } ;
