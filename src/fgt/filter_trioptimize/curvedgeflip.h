@@ -28,13 +28,10 @@
 class CurvEdgeFlip; // forward declaration
 
 
-/*
-	This flip happens only if decreases the curvature of the surface
-*/
-
-class CurvEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, CurvEdgeFlip > {
+/* This flip happens only if decreases the curvature of the surface */
+class CurvEdgeFlip : public vcg::tri::TriEdgeFlip<CMeshO, CurvEdgeFlip > {
 	protected:
-		typedef vcg::tri::PlanarEdgeFlip<CMeshO, CurvEdgeFlip > Parent;
+		typedef vcg::tri::TriEdgeFlip<CMeshO, CurvEdgeFlip > Parent;
 	
 	public:
 		CurvEdgeFlip() {}

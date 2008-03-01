@@ -54,7 +54,7 @@ TriOptimizePlugin::TriOptimizePlugin()
 // (this string is used also to define the menu entry)
 const QString TriOptimizePlugin::filterName(FilterIDType filterId) 
 {
-  switch(filterId) {
+	switch(filterId) {
 		case FP_EDGE_FLIP:    return QString("Edge flipping optimization");
 		default : assert(0); 
 	}
@@ -109,18 +109,15 @@ void TriOptimizePlugin::initParameterSet(QAction *action,MeshModel &m, FilterPar
 bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
 	vcg::LocalOptimization<CMeshO> optimization(m.cm);
-	cb(1,"Initializing simplification");
+	//cb(1,"Initializing simplification");
 	optimization.Init<CurvEdgeFlip>();
-	//optimization.SetTargetMetric(0.0f);
-	//optimization.SetTargetSimplices(m.cm.fn);
-	optimization.SetTimeBudget(0.1f);
+	
+	// stop when flips become harmful:
+	// != 0.0f to avoid same flips in every run 
+	optimization.SetTargetMetric(-0.001f);
 	optimization.DoOptimization();
 	//optimization.Finalize<CurvEdgeFlip>();
-	
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	
-	/*if(par.getBool("UpdateNormals"))	
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);*/
   
 	return true;
 }
