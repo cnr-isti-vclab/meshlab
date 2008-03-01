@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -27,26 +27,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-#include <vcg/complex/local_optimization/tri_edge_flip.h>
-
-#include <vcg/complex/trimesh/clean.h>
+/*#include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/bounding.h>*/
 
 #include "filter_trioptimize.h"
+#include "curvedgeflip.h"
 
-class MyEdgeFlip; // forward declaration
-class MyEdgeFlip : public vcg::tri::TriEdgeFlip<CMeshO, MyEdgeFlip > {
-	public:
-		MyEdgeFlip(PosType pos, int mark) {
-			_pos = pos;
-			_localMark = mark;
-			_priority = ComputePriority();
-		};
-};
+#include <vcg/complex/trimesh/update/normal.h>
 
 
 // Constructor usually performs only two simple tasks of filling the two lists 
@@ -121,13 +109,18 @@ void TriOptimizePlugin::initParameterSet(QAction *action,MeshModel &m, FilterPar
 bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
 	vcg::LocalOptimization<CMeshO> optimization(m.cm);
-	optimization.Init<MyEdgeFlip>();
-	while(optimization.DoOptimization());
+	cb(1,"Initializing simplification");
+	optimization.Init<CurvEdgeFlip>();
+	//optimization.SetTargetMetric(0.0f);
+	//optimization.SetTargetSimplices(m.cm.fn);
+	optimization.SetTimeBudget(0.1f);
+	while(optimization.DoOptimization() && ;
+	//optimization.Finalize<CurvEdgeFlip>();
+	
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	
 	/*if(par.getBool("UpdateNormals"))	
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);*/
-	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);*/
   
 	return true;
 }
