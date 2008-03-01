@@ -114,7 +114,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 	//optimization.SetTargetMetric(0.0f);
 	//optimization.SetTargetSimplices(m.cm.fn);
 	optimization.SetTimeBudget(0.1f);
-	while(optimization.DoOptimization() && ;
+	optimization.DoOptimization();
 	//optimization.Finalize<CurvEdgeFlip>();
 	
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
