@@ -50,6 +50,9 @@ typedef unsigned int		UINT32;
 
 #define NUMBER_OF_HISTOGRAM_BINS 200
 
+// The defalut percentile for clamping equalizer histogram
+#define CLAMP_PERCENTILE 90
+
 
 //set of macros used to tell to clearItems method what to remove and\or delete
 //each macro refers to a particular type of graphic item

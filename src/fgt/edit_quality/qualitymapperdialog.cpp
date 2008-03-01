@@ -329,36 +329,7 @@ bool QualityMapperDialog::initEqualizerHistogram()
 
 	// SETTING SPNIBOX VALUES
 	// (Se venissero inizializzati prima di impostare setHistogramInfo sulle handles darebbero errore nello SLOT setX delle handles.)
-	double singleStep = (_histogram_info->maxX - _histogram_info->minX) / _histogram_info->chartWidth;
-	int decimals = 0;
-	if (singleStep > std::numeric_limits<float>::epsilon())
-	{	
-		double temp = singleStep;
-		while (temp < 0.1)
-		{
-			decimals++;
-			temp *= 10;
-		}
-		
-	}
-	decimals+=2;
-
-	ui.minSpinBox->setDecimals(decimals);
-	ui.minSpinBox->setValue(_histogram_info->minX);
-	//ui.minSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
-	ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
-	ui.minSpinBox->setSingleStep(singleStep);
-
-	ui.midSpinBox->setDecimals(decimals);
-	ui.midSpinBox->setValue((_histogram_info->maxX + _histogram_info->minX) / 2.0f);
-	ui.midSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
-	ui.midSpinBox->setSingleStep(singleStep);
-
-	ui.maxSpinBox->setDecimals(decimals);
-	ui.maxSpinBox->setValue(_histogram_info->maxX);
-	//ui.maxSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
-	ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
-	ui.maxSpinBox->setSingleStep(singleStep);
+	initEqualizerSpinboxes();
 
 	//SETTING UP CONNECTIONS
 	// Connecting spinboxes to handles
@@ -394,6 +365,10 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
 	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
 	connect(ui.brightnessSlider, SIGNAL(sliderReleased()), this, SLOT(on_Handle_released()));
+	connect(ui.minSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
+	connect(ui.midSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
+	connect(ui.maxSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
+
 
 	ui.equalizerGraphicsView->setScene(&_equalizerHistogramScene);
 
@@ -401,6 +376,41 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	drawTransferFunctionBG();
 
 	return true;
+}
+
+void QualityMapperDialog::initEqualizerSpinboxes()
+{
+	double singleStep = (_histogram_info->maxX - _histogram_info->minX) / _histogram_info->chartWidth;
+	int decimals = 0;
+	if (singleStep > std::numeric_limits<float>::epsilon())
+	{	
+		double temp = singleStep;
+		while (temp < 0.1)
+		{
+			decimals++;
+			temp *= 10;
+		}
+		
+	}
+	decimals+=2;
+
+	ui.minSpinBox->setDecimals(decimals);
+	ui.minSpinBox->setValue(_histogram_info->minX);
+	//ui.minSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
+	ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
+	ui.minSpinBox->setSingleStep(singleStep);
+
+	ui.maxSpinBox->setDecimals(decimals);
+	ui.maxSpinBox->setValue(_histogram_info->maxX);
+	//ui.maxSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
+	ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
+	ui.maxSpinBox->setSingleStep(singleStep);
+
+	ui.midSpinBox->setDecimals(decimals);
+	ui.midSpinBox->setValue((_histogram_info->maxX + _histogram_info->minX) / 2.0f);
+	ui.midSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
+	ui.midSpinBox->setSingleStep(singleStep);
+
 }
 
 // Add histogram bars to equalizerHistogram Scene
@@ -1261,6 +1271,20 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 		on_applyButton_clicked();
 }
 
+// Cut unuseful tails from equalizer histogram
+void QualityMapperDialog::on_clampButton_clicked()
+{
+	_leftHandleWasInsideHistogram = false;
+	_rightHandleWasInsideHistogram = false;
+
+	// Calculate new Min e Max values
+	_histogram_info->minX = _equalizer_histogram->Percentile((float)ui.clampHistogramSpinBox->value()/100.0f);
+	_histogram_info->maxX = _equalizer_histogram->Percentile(1.0f-(float)ui.clampHistogramSpinBox->value()/100.0f);
+
+	initEqualizerSpinboxes(); // reset Spinboxes and handles
+	drawEqualizerHistogram(true, true); // redrawing histogram
+}
+
 //writes in the x-quality label the quality value corresponding to the position of the currently selected TF handle
 void QualityMapperDialog::updateXQualityLabel(float xPos)
 {
@@ -1302,3 +1326,11 @@ void QualityMapperDialog::setEqualizerParameters(EQUALIZER_INFO data)
 		on_applyButton_clicked();
 }
 
+
+
+
+
+void QualityMapperDialog::on_brightnessSlider_valueChanged(int value)
+{
+	ui.brightessSpinBox->setValue((double)value/50.0);
+}

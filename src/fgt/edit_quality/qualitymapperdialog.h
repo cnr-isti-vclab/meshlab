@@ -150,6 +150,7 @@ private:
 	void updateColorBand(void);
 	void drawTransferFunctionBG(void);
 	bool drawEqualizerHistogram(bool leftHandleInsideHistogram, bool rightHandleInsideHistogram);
+	void initEqualizerSpinboxes();
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
 
 	GRAPHICS_ITEMS_LIST	*clearScene(QGraphicsScene *scene, int toClean=0);
@@ -169,6 +170,8 @@ signals:
 	void closingDialog();
 
 private slots:
+	void on_brightnessSlider_valueChanged(int);
+	void on_clampButton_clicked();
 	void on_ySpinBox_valueChanged(double);
 	void on_xSpinBox_valueChanged(double);
 	
