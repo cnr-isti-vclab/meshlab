@@ -27,8 +27,8 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#ifndef QUALITYMAPPERDIALOG_H
-#define QUALITYMAPPERDIALOG_H
+#ifndef _QUALITYMAPPER_DIALOG_H_
+#define _QUALITYMAPPER_DIALOG_H_
 
 #include <QDockWidget>
 #include <QGraphicsItem>
