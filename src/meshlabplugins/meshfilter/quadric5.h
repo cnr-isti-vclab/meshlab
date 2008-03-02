@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.4  2008/03/02 15:15:50  pirosu
+loss of precision management
+
 Revision 1.3  2008/02/29 20:37:27  pirosu
 fixed zero area faces management
 
@@ -89,6 +92,17 @@ public:
 		b[4] = 0;
 
 		c    = 0;
+	}
+
+	void swapv(ScalarType *vv, ScalarType *ww)
+	{
+		ScalarType tmp;
+		for(int i = 0; i < 5; i++)
+		{
+			tmp = vv[i];
+			vv[i] = ww[i];
+			ww[i] = tmp;
+		}
 	}
 
 	// computes the real quadric and the geometric quadric using the face
@@ -235,58 +249,88 @@ public:
 			r[4] = 0;
 		}
 
-		//  computes e1
-		sub_vec5(q,p,e1);
-		normalize_vec5(e1);
-		
-		//  computes e2
-		sub_vec5(r,p,diffe);
-		outproduct5(e1,diffe,tmpmat);
-		prod_matvec5(tmpmat,e1,tmpvec);
-		sub_vec5(diffe,tmpvec,e2);
-		normalize_vec5(e2);
+		/*
+		When c is very close to 0, loss of precision causes it to be computed as a negative number,
+		which is invalid for a quadric. Vertex switches are performed in order to try to obtain a smaller
+		loss of precision
+		*/
+		for(int i = 0; i < 6; i++) // tries the 6! configurations
+		{
+			switch(i)
+			{
+			case 0:
+				break;
+			case 1:
+			case 3:
+			case 5:
+				swapv(q,r);
+				break;
+			case 2:
+			case 4:
+				swapv(p,r);
+				break;
+			default:
+				assert(0);
+			}
+
+			//  computes e1
+			sub_vec5(q,p,e1);
+			normalize_vec5(e1);
+			
+			//  computes e2
+			sub_vec5(r,p,diffe);
+			outproduct5(e1,diffe,tmpmat);
+			prod_matvec5(tmpmat,e1,tmpvec);
+			sub_vec5(diffe,tmpvec,e2);
+			normalize_vec5(e2);
 
 
-		// computes A
-		a[0] = 1;
-		a[1] = 0;
-		a[2] = 0;
-		a[3] = 0;
-		a[4] = 0;
-		a[5] = 1;
-		a[6] = 0;
-		a[7] = 0;
-		a[8] = 0;
-		a[9] = 1;
-		a[10] = 0;
-		a[11] = 0;
-		a[12] = 1;
-		a[13] = 0;
-		a[14] = 1;
+			// computes A
+			a[0] = 1;
+			a[1] = 0;
+			a[2] = 0;
+			a[3] = 0;
+			a[4] = 0;
+			a[5] = 1;
+			a[6] = 0;
+			a[7] = 0;
+			a[8] = 0;
+			a[9] = 1;
+			a[10] = 0;
+			a[11] = 0;
+			a[12] = 1;
+			a[13] = 0;
+			a[14] = 1;
 
-		symprod_vvt5(tmpsymmat,e1);
-		sub_symmat5(a,tmpsymmat);
-		symprod_vvt5(tmpsymmat,e2);
-		sub_symmat5(a,tmpsymmat);
+			symprod_vvt5(tmpsymmat,e1);
+			sub_symmat5(a,tmpsymmat);
+			symprod_vvt5(tmpsymmat,e2);
+			sub_symmat5(a,tmpsymmat);
 
 
-		pe1 = inproduct5(p,e1);
-		pe2 = inproduct5(p,e2);
-		
-		//  computes b
+			pe1 = inproduct5(p,e1);
+			pe2 = inproduct5(p,e2);
+			
+			//  computes b
 
-		tmpvec[0] = pe1*e1[0] + pe2*e2[0]; 
-		tmpvec[1] = pe1*e1[1] + pe2*e2[1]; 
-		tmpvec[2] = pe1*e1[2] + pe2*e2[2]; 
-		tmpvec[3] = pe1*e1[3] + pe2*e2[3]; 
-		tmpvec[4] = pe1*e1[4] + pe2*e2[4];
+			tmpvec[0] = pe1*e1[0] + pe2*e2[0]; 
+			tmpvec[1] = pe1*e1[1] + pe2*e2[1]; 
+			tmpvec[2] = pe1*e1[2] + pe2*e2[2]; 
+			tmpvec[3] = pe1*e1[3] + pe2*e2[3]; 
+			tmpvec[4] = pe1*e1[4] + pe2*e2[4];
 
-		sub_vec5(tmpvec,p,b);
+			sub_vec5(tmpvec,p,b);
 
-		//  computes c
-		c = inproduct5(p,p)-pe1*pe1-pe2*pe2;
+			//  computes c
+			c = inproduct5(p,p)-pe1*pe1-pe2*pe2;
 
-		assert(IsValid());
+			if(IsValid())return;
+		}
+		// failed to find a valid vertex switch
+
+		assert(-c <= 1e-8); // small error
+
+		c = 0; // rounds up to zero
 	}
 
 	bool Gauss55( ScalarType x[], ScalarType C[5][5+1] )
