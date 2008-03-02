@@ -30,6 +30,7 @@ INCLUDEPATH += ../../../../sf
 SOURCES += ../../../../sf/wrap/gui/trackball.cpp
 SOURCES += ../../../../sf/wrap/gui/trackmode.cpp 
 SOURCES += ../../../../sf/wrap/gui/coordinateframe.cpp 
+SOURCES += ../../../../sf/wrap/gui/activecoordinateframe.cpp 
 SOURCES += ../../../../sf/wrap/gui/rubberband.cpp 
 
 # Compile glew

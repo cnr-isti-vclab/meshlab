@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2008/03/02 16:48:46  benedetti
+Fixed after coordinateframe/activecoordinateframe file splitting
+
 Revision 1.4  2008/02/26 21:35:34  benedetti
 corrected after quaternion/similarity/trackball changes
 
@@ -45,7 +48,7 @@ first version
 #include <QList>
 #include <QDockWidget>
 
-#include <wrap/gui/coordinateframe.h>
+#include <wrap/gui/activecoordinateframe.h>
 #include <wrap/gui/rubberband.h>
 
 #include <meshlab/meshmodel.h>
