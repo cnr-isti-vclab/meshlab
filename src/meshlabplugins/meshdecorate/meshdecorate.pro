@@ -2,7 +2,7 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/glut
 HEADERS       = meshdecorate.h
-SOURCES       = meshdecorate.cpp
+SOURCES       = meshdecorate.cpp ../../../../sf/wrap/gui/coordinateframe.cpp
 TARGET        = meshdecorate
 DESTDIR       = ../../meshlab/plugins
 # the following line is needed to avoid mismatch between 

@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.24  2008/03/02 16:55:26  benedetti
+removed DrawAxis() in favor of VCG's CoordinateFrame class
+
 Revision 1.23  2008/01/04 18:23:34  cignoni
 Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
 
@@ -91,6 +94,7 @@ Starting quoted box (simply draws xyz axes)
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <wrap/gui/coordinateframe.h>
 //#include "../../meshlab/mainwindow.h"
 
 class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
@@ -116,7 +120,6 @@ private:
 
 	float calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,GLint *vp);
 
-	void	drawTickedLine(const Point3d &p1,const Point3d &p2,float dim,float tickDist);
 	void	drawQuotedLine(const Point3d &a,const Point3d &b,float aVal, float bVal,float tickDist,QGLWidget *gla, QFont qf);
 
 	void	chooseX(Box3f &box,double *modelview,double *projection,GLint *viewport,Point3d &x1,Point3d &x2);
@@ -147,7 +150,6 @@ public:
 	QList<QAction *> actions () const {return actionList;}
 
 	void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
-  void DrawAxis(MeshModel &m,GLArea* gla, QFont qf);
 	void DrawQuotedBox(MeshModel &m,GLArea *gla, QFont qf);
 
   virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet *, GLArea *gla,QFont qf);

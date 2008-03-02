@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.46  2008/03/02 16:55:26  benedetti
+removed DrawAxis() in favor of VCG's CoordinateFrame class
+
 Revision 1.45  2008/01/04 18:23:34  cignoni
 Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
 
@@ -180,7 +183,7 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
   if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
 	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m,gla,qf);
 	glPopMatrix();
-  if(a->text() == ST(DP_SHOW_AXIS))					DrawAxis(m,gla,qf);
+  if(a->text() == ST(DP_SHOW_AXIS))	CoordinateFrame(m.cm.bbox.Diag()/2.0).Render(gla);
   if(a->text() == ST(DP_SHOW_BOX_CORNERS_ABS))	DrawBBoxCorner(m,false);
 }
 
@@ -361,31 +364,6 @@ float ExtraMeshDecoratePlugin::calcSlope(const Point3d &a,const Point3d &b,float
 	return nslope;
 }
 
-
-void ExtraMeshDecoratePlugin::drawTickedLine(const Point3d &a,const Point3d &b, float dim,float tickDist)
-{
-	Point3d v(b-a);
-	v = v /dim; // normalize without computing square roots and powers
-	glBegin(GL_POINTS);
-	float i;
-  qDebug("drawTickedLine %f",tickDist);
-	for(i=tickDist;i<dim;i+=tickDist)
-		glVertex3f(a[0] + i*v[0],a[1] + i*v[1],a[2] + i*v[2]);
-	glEnd();
-
-	// Draws bigger ticks at 0 and at max size
-	glPushAttrib(GL_POINT_BIT);
-	glPointSize(6);
-	
-	glBegin(GL_POINTS);
-			glVertex(a);		// Zero
-			glVertex3f(a[0] + dim*v[0],a[1] + dim*v[1],a[2] + dim*v[2]);
-	glEnd();
-
-	glPopAttrib();
-}
-
-
 void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickDist,QGLWidget *gla, QFont qf)
 {  
   qDebug("drawQuotedLine %f",tickDist);
@@ -499,63 +477,6 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 	glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]+zz[0],ma[1]+zz[1],ma[2]-d3[2]);
 
 	glEnd();
-	glPopAttrib();
-}
-
- 
-void ExtraMeshDecoratePlugin::DrawAxis(MeshModel &m,GLArea* gla,QFont qf)
-{
-	float hw=m.cm.bbox.Diag()/2.0;
-	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
-	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POINT_SMOOTH);
-	glLineWidth(2.0);
-	glPointSize(3.f);
-
-	// Get gl state values
-	double mm[16],mp[16];
-	GLint vp[4];
-
-	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
-	glGetDoublev(GL_PROJECTION_MATRIX,mp);
-	glGetIntegerv(GL_VIEWPORT,vp);
-
-	Point3d a(hw,0,0);Point3d b(0,hw,0);Point3d c(0,0,hw);
-
-	glBegin(GL_LINES);
-		glColor(Color4b::Red); 		glVertex(-a);glVertex(a);
-		glColor(Color4b::Green);	glVertex(-b);glVertex(b);
-		glColor(Color4b::Blue);		glVertex(-c);glVertex(c);
-	glEnd();
-
-	glColor(Color4b::White);
-	drawTickedLine(-a,a,2*hw,calcSlope(-a,a,2*hw,10,mm,mp,vp));	// Draws x axis
-	drawTickedLine(-b,b,2*hw,calcSlope(-b,b,2*hw,10,mm,mp,vp));	// Draws y axis
-	drawTickedLine(-c,c,2*hw,calcSlope(-c,c,2*hw,10,mm,mp,vp));	// Draws z axis
-
-	float sf = hw*0.02f; // scale factor hw / 50
-	glPushMatrix();
-		glTranslate(a);  glScalef(sf,sf,sf);	Add_Ons::Cone(10,3,1,true);
-	glPopMatrix();
-	
-	glPushMatrix();
-		glTranslate(b);	glRotatef(90,0,0,1); glScalef(sf,sf,sf); Add_Ons::Cone(10,3,1,true);
-	glPopMatrix();
-	
-	glPushMatrix();
-		glTranslate(c);	glRotatef(-90,0,1,0);	glScalef(sf,sf,sf);	Add_Ons::Cone(10,3,1,true);
-	glPopMatrix();
-
-	//QFont f(gla->getFont());
-	qf.setBold(true);
-	glColor(Color4b::Red);	 gla->renderText(hw+(sf*3),0,0,QString("X"),qf);
-	glColor(Color4b::Green); gla->renderText(0,hw+(sf*3),0,QString("Y"),qf);
-	glColor(Color4b::Blue);  gla->renderText(0,0,hw+(sf*3),QString("Z"),qf);
-
 	glPopAttrib();
 }
 
