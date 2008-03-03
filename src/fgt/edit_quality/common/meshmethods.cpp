@@ -71,7 +71,6 @@ int loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
 			data->midQualityPercentage = splittedString[1].toFloat();
 			data->maxQualityVal = splittedString[2].toFloat();
 			data->brightness = splittedString[3].toFloat();
-
 			break;
 		}
 	} while(!line.isNull());

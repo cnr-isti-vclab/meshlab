@@ -75,6 +75,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 	//building a catcher for double click in empty areas of transfer function view
 	//and adding it to the scene
 	_tfCatcher = new TFDoubleClickCatcher(_transferFunction_info);
+	_tfCatcher->setZValue(0);
 	_transferFunctionScene.addItem(_tfCatcher);
 	connect(_tfCatcher, SIGNAL(TFdoubleClicked(QPointF)), this, SLOT(on_TF_view_doubleClicked(QPointF)));
 
@@ -1043,6 +1044,9 @@ void QualityMapperDialog::on_TfHandle_clicked(TFHandle *sender)
 	ui.xSpinBox->setValue(_currentTfHandle->getRelativeX());
 	ui.ySpinBox->setValue(_currentTfHandle->getRelativeY());
 
+	//moving handle channel in foreground
+	this->moveAheadChannel((TF_CHANNELS)sender->getChannel());
+
 	this->updateXQualityLabel(_currentTfHandle->getRelativeX());
 	//applying preview if necessary
 	if (ui.previewButton->isChecked()) //added by FB 07\02\08
@@ -1257,7 +1261,12 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 	_transferFunction->getChannel(channelCode).addKey(val);
 	TFHandle *newHandle = this->addTfHandle(channelCode, pos, val, ((channelCode + 1)*2.0f) + 1 );
 
+	if (_currentTfHandle)
+		_currentTfHandle->setCurrentlSelected( false );
+
+	//updating currentTfHandle to sender
 	_currentTfHandle = newHandle;
+	_currentTfHandle->setCurrentlSelected( true );
 
 	//updating correct order among TF Handle objects
 	this->updateTfHandlesOrder(newHandle->getChannel());

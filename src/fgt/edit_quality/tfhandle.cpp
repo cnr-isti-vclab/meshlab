@@ -40,6 +40,9 @@ TFHandle::TFHandle(CHART_INFO *environment_info, QColor color, QPointF position,
 	_myKey = myKey;
 	_currentlySelected = false;
 	this->setZValue( zOrder );
+
+	//updating the position at logical state of the handle
+	this->updateTfHandlesState(position);
 }
 
 TFHandle::~TFHandle(void)
