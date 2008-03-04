@@ -38,7 +38,7 @@ using namespace vcg;
 QualityMapperPlugin::QualityMapperPlugin()
 {
 	//setting-up plugin
-	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper. More info coming soon...", this);
+	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper", this);
 	QAction *editAction;
 	foreach(editAction, actionList)
 		editAction->setCheckable(true);
@@ -55,7 +55,7 @@ const QString QualityMapperPlugin::Info(QAction *action)
 {
 	if( action->text() != tr("Get Info") ) assert (0);
 
-	return tr("Colorize mesh vertexes by Quality following some rules");
+	return tr("Colorize mesh vertexes by Quality");
 }
 
 const PluginInfo &QualityMapperPlugin::Info() 
