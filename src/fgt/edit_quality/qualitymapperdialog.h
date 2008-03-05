@@ -151,7 +151,7 @@ private:
 	void drawTransferFunctionBG(void);
 	bool drawEqualizerHistogram(bool leftHandleInsideHistogram, bool rightHandleInsideHistogram);
 	void initEqualizerSpinboxes();
-	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, int minIndex, int maxIndex, QColor color = QColor(Qt::black));
+	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, float minIndex, float maxIndex, QColor color = QColor(Qt::black));
 
 	GRAPHICS_ITEMS_LIST	*clearScene(QGraphicsScene *scene, int toClean=0);
 	GRAPHICS_ITEMS_LIST	*clearItems(int itemsToClear);

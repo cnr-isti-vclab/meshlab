@@ -48,7 +48,7 @@ typedef unsigned int		UINT32;
 //minimum step used to round float values in histogram
 #define Y_SCALE_STEP			5
 
-#define NUMBER_OF_HISTOGRAM_BINS 200
+#define NUMBER_OF_HISTOGRAM_BINS 50000
 
 // The defalut percentile for clamping equalizer histogram
 #define CLAMP_PERCENTILE 90

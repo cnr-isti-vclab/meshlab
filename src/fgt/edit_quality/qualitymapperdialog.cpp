@@ -431,7 +431,7 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		}
 
 		//building histogram chart informations
-		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->n, _equalizer_histogram->minv, _equalizer_histogram->maxv, 0, _equalizer_histogram->MaxCount());
+		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, _equalizer_histogram->MaxCount());
 	}
 	else
 	{
@@ -449,7 +449,7 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		float minX = (_histogram_info->minX<ui.minSpinBox->value())?_histogram_info->minX:ui.minSpinBox->value();
 		float maxX = (_histogram_info->maxX>ui.maxSpinBox->value())?_histogram_info->maxX:ui.maxSpinBox->value();
 		Frange histogramRange(minX, maxX);
-		this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, NUMBER_OF_HISTOGRAM_BINS);
+		//this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, NUMBER_OF_HISTOGRAM_BINS);
 
 		// Only minY and maxY are modified in _histogram_info
 		_histogram_info->maxY = _equalizer_histogram->MaxCount();
@@ -470,16 +470,13 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 
 
 // Add histogramBars to destinationScene with GAMMA-STRETCHING
-void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, int minIndex, int maxIndex, QColor color)
+void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, float minVal, float maxVal, QColor color)
 {
-	// This control is necessary because Histogram returns -1 if we search the minimum value. Maybe it should be fixed
-	if (minIndex<0)
-		minIndex = 0;
-
+	const int barNum=100;
 	float barHeight = 0.0f;	//initializing height of the histogram bars
-	float barWidth  = chartInfo->chartWidth / (float)(maxIndex-minIndex);	//processing width of the histogram bars 
+	float barWidth  = chartInfo->chartWidth / (float)(barNum);	//processing width of the histogram bars 
 
-	int numberOfItems = maxIndex - minIndex;
+//	int numberOfItems = maxIndex - minIndex;
 
 	// exp is such that: _equalizerMidHandlePercentilePosition^exp = 0.5
 	float exp = log10(0.5f) / log10((float)_equalizerMidHandlePercentilePosition);
@@ -490,11 +487,11 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 
 	//drawing histogram bars
 	QGraphicsItem *current_item = 0;
-
-	for (int i = minIndex; i < maxIndex; i++)
+  float barRange = (maxVal-minVal)/barNum;
+	for (int i = 0; i < barNum; i++)
 	{
 		// Setting barHeight proportional to max height
-		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->H[i]) / (float)_histogram_info->maxY;
+		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->BinCount( minVal+i*barRange, barRange) ) / (float)_histogram_info->maxY;
 		
 		startBarPt.setY( (float)chartInfo->lowerBorder - barHeight );
 
@@ -502,14 +499,14 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 		if ( &destinationScene == &_transferFunctionScene )
 		{
 			// Histogram bars positions are calculted applying an exponential function: relIndex^exp
-			startBarPt.setX( chartInfo->leftBorder + relative2AbsoluteValf(pow( absolute2RelativeValf(i-minIndex,numberOfItems ), exp ), chartInfo->chartWidth) );
+			startBarPt.setX( chartInfo->leftBorder + relative2AbsoluteValf(pow( absolute2RelativeValf(i,barNum ), exp ), chartInfo->chartWidth) );
 			current_item = destinationScene.addLine(startBarPt.x(), startBarPt.y(), startBarPt.x(), (float)chartInfo->lowerBorder, drawingPen);
 			_transferFunctionBg << current_item;
 		}
 		else // ( &destinationScene == &_equalizerHistogramScene )
 		{
 			// histogram bars are added all at same distance
-			startBarPt.setX( chartInfo->leftBorder + ( barWidth * (i-minIndex) ) );
+			startBarPt.setX( chartInfo->leftBorder + ( barWidth * (i) ) );
 			current_item = destinationScene.addRect(startBarPt.x(), startBarPt.y(), barWidth, barHeight, drawingPen, drawingBrush);
 			_equalizerHistogramBars << current_item;
 		}
@@ -557,7 +554,7 @@ void QualityMapperDialog::initTF()
 
 	//building transfer function chart informations (if necessary)
 	if ( _transferFunction_info == 0 )
-		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), _transferFunction->size(), 0.0f, 1.0f, 0.0f, 1.0f );
+		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), /*_transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//removing and deleting any old TF graphics item (TF lines and handles)
 	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
@@ -649,7 +646,7 @@ void QualityMapperDialog::drawTransferFunction()
 
 	//building transfer function chart informations
 	if ( _transferFunction_info == 0 )
-		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), _transferFunction->size(), 0.0f, 1.0f, 0.0f, 1.0f );
+		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), /* _transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//is necessary, initialize TF
 	if ( !_isTransferFunctionInitialized )
@@ -748,9 +745,10 @@ void QualityMapperDialog::drawTransferFunctionBG ()
 		
 	if (_histogram_info !=0)
 	{
-		int minIndex = _equalizer_histogram->Interize((float)ui.minSpinBox->value());
-		int maxIndex = _equalizer_histogram->Interize((float)ui.maxSpinBox->value());
-		drawHistogramBars (_transferFunctionScene, _transferFunction_info, minIndex, maxIndex, QColor(192,192,192));
+	//	int minIndex = _equalizer_histogram->Interize((float)ui.minSpinBox->value());
+	//	int maxIndex = _equalizer_histogram->Interize((float)ui.maxSpinBox->value());
+	//	drawHistogramBars (_transferFunctionScene, _transferFunction_info, minIndex, maxIndex, QColor(192,192,192));
+		drawHistogramBars (_transferFunctionScene, _transferFunction_info, (float)ui.minSpinBox->value(), (float)ui.maxSpinBox->value(), QColor(192,192,192));
 	}
 }
 
