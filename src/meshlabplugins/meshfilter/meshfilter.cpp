@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.105  2008/03/06 08:25:04  cignoni
+updated to the error message reporting style for filters
+
 Revision 1.104  2008/02/12 14:21:39  cignoni
 changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
 
@@ -373,8 +376,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if( getClass(filter)==Remeshing)
   {
-    if ( ! vcg::tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
-      QMessageBox::warning(0, QString("Can't continue"), QString("Mesh faces not 2 manifold")); // text
+    if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+      errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
       return false; // can't continue, mesh can't be processed
     }
  
@@ -488,14 +491,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	if (ID(filter) == (FP_INVERT_FACES) ) 
 	{
 	  tri::Clean<CMeshO>::FlipMesh(m.cm);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
     m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	}
 
 	if (ID(filter) == (FP_FREEZE_TRANSFORM) ) {
-		vcg::tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+		tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		tri::UpdateBounding<CMeshO>::Box(m.cm);
 		m.cm.Tr.SetIdentity();
 	}
 	if (ID(filter) == (FP_TRANSFORM) ) {
@@ -522,17 +525,22 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if (ID(filter) == (FP_QUADRIC_TEXCOORD_SIMPLIFICATION) ) {
 		if(!tri::HasPerWedgeTexCoord(m.cm))
-			QMessageBox::warning(0,"Meshlab Filtering","Warning: nothing have been done. Mesh has no Texture.");
-		else
 		{
-			int TargetFaceNum = par.getInt("TargetFaceNum");		
-			lastqtex_QualityThr = par.getFloat("QualityThr");
-			lastqtex_extratw = par.getFloat("Extratcoordw");
-
-			QuadricTexSimplification(m.cm,TargetFaceNum,lastqtex_QualityThr,lastqtex_extratw,  cb);
-			tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-			tri::UpdateBounding<CMeshO>::Box(m.cm);
+			errorMessage="Warning: nothing have been done. Mesh has no Texture.";
+			return false;
 		}
+		if ( ! tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) ) {
+      errorMessage = "Mesh has some inconsistent tex coords (some faces without texture)"; // text
+      return false; // can't continue, mesh can't be processed
+    }
+		
+		int TargetFaceNum = par.getInt("TargetFaceNum");		
+		lastqtex_QualityThr = par.getFloat("QualityThr");
+		lastqtex_extratw = par.getFloat("Extratcoordw");
+
+		QuadricTexSimplification(m.cm,TargetFaceNum,lastqtex_QualityThr,lastqtex_extratw,  cb);
+		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
 
   if (ID(filter) == (FP_NORMAL_EXTRAPOLATION) ) {
