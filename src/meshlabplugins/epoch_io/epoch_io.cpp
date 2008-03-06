@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.21  2008/03/06 08:20:50  cignoni
+ updated to the new histogram
+
  Revision 1.20  2008/02/12 21:59:02  cignoni
  removed mask bug and added scaling of maps
 
@@ -156,7 +159,7 @@ void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float
   for(int i=1; i < static_cast<int>(depthImgf.v.size()); ++i)
     HH.Add(fabs(depthImgf.v[i]-depth.v[i-1]));
 
-  if(logFP) fprintf(logFP,"**** Depth histogram 2 Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.minv,HH.maxv,HH.Avg(),
+  if(logFP) fprintf(logFP,"**** Depth histogram 2 Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.MinV(),HH.MaxV(),HH.Avg(),
         HH.Percentile(.1),HH.Percentile(.25),HH.Percentile(.5),HH.Percentile(.75),HH.Percentile(.9));
 
   int deletedCnt=0;
@@ -172,7 +175,7 @@ void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float
         }
 		}
 
-	countImgf.convertToQImage().save("C:/temp/filteredcount.jpg","jpg");
+	countImgf.convertToQImage().save("tmp_filteredcount.jpg","jpg");
   
   if(logFP) fprintf(logFP,"**** depthFilter: deleted %i on %i\n",deletedCnt,w*h);
 
@@ -186,7 +189,7 @@ float EpochModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
   for(unsigned int i=1; i < static_cast<unsigned int>(depthImgf.v.size()); ++i)
     HH.Add(fabs(depthImgf.v[i]-depthImgf.v[i-1]));
 
-  if(logFP) fprintf(logFP,"**** Depth histogram Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.minv,HH.maxv,HH.Avg(),
+  if(logFP) fprintf(logFP,"**** Depth histogram Min %f Max %f Avg %f Percentiles ((10)%f (25)%f (50)%f (75)%f (90)%f)\n",HH.MinV(),HH.MaxV(),HH.Avg(),
         HH.Percentile(.1),HH.Percentile(.25),HH.Percentile(.5),HH.Percentile(.75),HH.Percentile(.9));
   
   return HH.Percentile(percentile);
@@ -343,8 +346,8 @@ void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, QImage &Orig
 			mask2.Val(x, y) = min(255, avg / ((2 * wsize + 1)* (2 * wsize +1)));
 		}
   
-  mask.convertToQImage().save("C:/temp/testmask.jpg","jpg");
-  mask2.convertToQImage().save("C:/temp/testmaskSmooth.jpg","jpg");
+  mask.convertToQImage().save("tmp_testmask.jpg","jpg");
+  mask2.convertToQImage().save("tmp_testmaskSmooth.jpg","jpg");
 
 	// erosion filter (7 x 7)
 	int minimum;
@@ -361,8 +364,8 @@ void EpochModel::GenerateGradientSmoothingMask(int subsampleFactor, QImage &Orig
 			mask.Val(x, y) = minimum;
 		}
   
-	grad.convertToQImage().save("C:/temp/test.jpg","jpg");
-	mask.convertToQImage().save("C:/temp/testmaskeroded.jpg","jpg");
+	grad.convertToQImage().save("tmp_test.jpg","jpg");
+	mask.convertToQImage().save("tmp_testmaskeroded.jpg","jpg");
 }
 
 /*
@@ -400,7 +403,7 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
   CharImage FeatureMask; // the subsampled image with (quality == features)
   GenerateGradientSmoothingMask(subsampleFactor, TextureImg, FeatureMask);
 
-  depthSubf.convertToQImage().save("C:/temp/depth.jpg", "jpg");
+  depthSubf.convertToQImage().save("tmp_depth.jpg", "jpg");
 
   int ttt2=clock();
   if(logFP) fprintf(logFP,"**** Buildmesh: SubSample and Gradient %i\n",ttt2-ttt1);
