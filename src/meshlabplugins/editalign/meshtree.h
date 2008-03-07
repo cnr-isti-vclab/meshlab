@@ -51,7 +51,7 @@ public:
 	bool glued;
 	int id;
   MeshModel *m;
-	const Matrix44f &tr() const {return m->cm.Tr;}
+	Matrix44f &tr() {return m->cm.Tr;}
 	const Box3f &bbox() const {return m->cm.bbox;}
 };
 
@@ -97,7 +97,11 @@ class MeshTree
 	int gluedNum();
 
 	
-	void Process(AlignPair::Param ap);
+	void Process(AlignPair::Param &ap);
+	void ProcessGlobal(AlignPair::Param &ap);
+	void ProcessArc(int fixId, int movId, AlignPair::Result &result, AlignPair::Param ap);
+	void ProcessArc(int fixId, int movId, Matrix44d &MovToFix, AlignPair::Result &result, AlignPair::Param ap);
+
 	inline Box3f bbox() {
 		Box3f FullBBox;
 		foreach(MeshNode *mp, nodeList) 
