@@ -25,6 +25,8 @@ public:
 		allowScalingCB = new QCheckBox("Allow Scaling");
 		allowScalingCB->setChecked(false);
 		
+		QLabel *helpLabel = new QLabel("Choose at least 4 matching pair of points on the two meshes. <br>Double Click over each mesh to add new points. Choose points in consistent order");
+		layout->addWidget(helpLabel);
 		layout->addWidget(aa);
 		layout->addWidget(allowScalingCB);
 		layout->addWidget(buttonBox);

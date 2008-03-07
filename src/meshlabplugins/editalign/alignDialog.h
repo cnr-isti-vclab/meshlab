@@ -52,11 +52,11 @@ class AlignDialog : public QDockWidget
 
 	public:
 		AlignDialog(QWidget *parent = 0);
-		void rebuildTree(MeshNode* _node=0);
+		void rebuildTree();
 		void updateButtons();
 		void updateDialog();
-		void setTree(MeshTree *,MeshNode *);
-		void setCurrentNode(MeshNode *);
+		void setTree(MeshTree *);
+		void updateCurrentNodeBackground();
 		void setCurrentArc(AlignPair::Result *currentArc);
 		
 		Ui::alignDialog ui;
@@ -64,7 +64,7 @@ class AlignDialog : public QDockWidget
 		EditAlignPlugin *edit;
 
 		MeshTree *meshTree;
-		MeshNode *currentNode;
+		MeshNode *currentNode(); 
 		AlignPair::Result *currentArc;
 		
 		QMap<MeshNode *,           MeshTreeWidgetItem *> M2T; // MeshNode to treeitem hash

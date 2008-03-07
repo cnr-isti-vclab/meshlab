@@ -138,16 +138,15 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 
 	}
 	alignDialog->edit=this;
-	alignDialog->setTree(& meshTree, meshTree.nodeList.front());
+	//alignDialog->setCurrentNode(meshTree.find(gla->mm()) );
+	alignDialog->setTree(& meshTree);
 	alignDialog->show();
 	//alignDialog->adjustSize();
 	
 	//mainW->addDockWidget(Qt::LeftDockWidgetArea,alignDialog);
 	mode=ALIGN_IDLE;	
 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
-	
-connect(alignDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
-	
+	connect(alignDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
 	suspendEditToggle();
 }
 
@@ -182,7 +181,7 @@ void EditAlignPlugin::glueByPicking()
  vector<Point3f> freePnt = dd->aa->freePickedPointVec; 
  vector<Point3f> gluedPnt= dd->aa->gluedPickedPointVec; 
  
- 	if(freePnt.size() != gluedPnt.size())		{
+ 	if( (freePnt.size() != gluedPnt.size())	|| (freePnt.size()==0) )	{
 			QMessageBox::warning(0,"Align tool", "require the same number of chosen points");
 			return;
 		}
@@ -192,10 +191,12 @@ void EditAlignPlugin::glueByPicking()
 			PointMatching<float>::ComputeSimilarityMatchMatrix(res,gluedPnt,freePnt);
  else 
 			PointMatching<float>::ComputeRigidMatchMatrix(res,gluedPnt,freePnt);
-	md->mm()->cm.Tr=res;
+			
+	//md->mm()->cm.Tr=res;
+	currentNode()->tr()=res;
 	QString buf;
-  for(size_t i=0;i<freePnt.size();++i)
-		meshTree.cb(0,qPrintable(buf.sprintf("%f %f %f -- %f %f %f \n",freePnt[i][0],freePnt[i][1],freePnt[i][2],gluedPnt[i][0],gluedPnt[i][1],gluedPnt[i][2])));
+ // for(size_t i=0;i<freePnt.size();++i)
+ //		meshTree.cb(0,qPrintable(buf.sprintf("%f %f %f -- %f %f %f \n",freePnt[i][0],freePnt[i][1],freePnt[i][2],gluedPnt[i][0],gluedPnt[i][1],gluedPnt[i][2])));
 	
 	assert(currentNode()->glued==false);
 	
@@ -206,7 +207,7 @@ void EditAlignPlugin::glueByPicking()
  
 void EditAlignPlugin::glueManual()
 {
-	assert(alignDialog->currentNode->glued==false); 
+	assert(currentNode()->glued==false); 
 	MeshModel *mm=md->mm();
 	static QString oldLabelButton;
 	Matrix44f tran,mtran; 
@@ -232,7 +233,7 @@ void EditAlignPlugin::glueManual()
 				mtran.SetTranslate(-trackball.center);
 				mm->cm.Tr= (tran) * trackball.track.Matrix()*(mtran) * mm->cm.Tr;
 				mm->visible=true;
-				alignDialog->currentNode->glued=true;
+				currentNode()->glued=true;
 				alignDialog->ui.manualAlignButton->setText(oldLabelButton);
 			 break;
 			
@@ -272,13 +273,18 @@ void EditAlignPlugin::buildParameterSet(FilterParameterSet &fps , AlignPair::Par
 void EditAlignPlugin:: alignParam()
 {
 	FilterParameterSet alignParamSet;
-	buildParameterSet(alignParamSet, ap);
+	if(currentArc()) buildParameterSet(alignParamSet, currentArc()->ap);	
+							else buildParameterSet(alignParamSet, defaultAP);
+							
 	GenericParamDialog ad(alignDialog,&alignParamSet);
+	
 	int result=ad.exec();
 	if(result != QDialog::Accepted) return;
 	
 	// Dialog accepted. get back the values
-	retrieveParameterSet(alignParamSet, ap);
+	if(currentArc()) retrieveParameterSet(alignParamSet, currentArc()->ap);
+							else retrieveParameterSet(alignParamSet, defaultAP);
+
 }
 
 void EditAlignPlugin::glueHere()
@@ -303,13 +309,18 @@ void EditAlignPlugin::process()
 			QMessageBox::warning(0,"Align tool", "Process can work only when more than two meshes have been glued");
 			return;
 		}
-	meshTree.Process(ap);
+	meshTree.Process(defaultAP);
 	alignDialog->rebuildTree();	
 	gla->update();
 }
 
 void EditAlignPlugin::recalcCurrentArc()
 {
+  assert(currentArc());
+	
+	meshTree.ProcessArc(currentArc()->FixName,currentArc()->MovName,*currentArc(),currentArc()->ap);
+	meshTree.ProcessGlobal(currentArc()->ap);
+	
 	alignDialog->rebuildTree();	
 	gla->update();
 }

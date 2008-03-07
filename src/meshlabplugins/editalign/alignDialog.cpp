@@ -37,6 +37,8 @@ $Log: stdpardialog.cpp,v $
 
 static QTextEdit *globalLogTextEdit=0;
 
+MeshNode *AlignDialog::currentNode() {return edit->currentNode();}
+
 // Global function to write on the log in the lower part of the window.
 bool AlignCallBackPos(const int pos, const char * message )
 {
@@ -71,8 +73,7 @@ AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)
 	connect(	ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(onClickItem(QTreeWidgetItem * , int ) ) );
 	
 	globalLogTextEdit=ui.logTextEdit;
-  currentNode=0;
-	currentArc=0;
+  currentArc=0;
 	meshTree=0;
 }
 
@@ -102,62 +103,56 @@ void AlignDialog::setCurrentArc(AlignPair::Result *_currentArc)
 	if(newArcB!=NULL)
 		{ 
 			assert(newArcB->a == _currentArc);
-			newArcB->setBackground(0,QBrush(QColor(Qt::lightGray)));				
-			newArcF->setBackground(0,QBrush(QColor(Qt::lightGray)));				
+			newArcB->setBackground(0,QBrush(QColor("#d0ffff")));				
+			newArcF->setBackground(0,QBrush(QColor("#c0ffff")));				
 		}
 
 	currentArc=_currentArc;
-	updateButtons();
 }
 
 
-void AlignDialog::setCurrentNode(MeshNode *_currentNode)
+void AlignDialog::updateCurrentNodeBackground()
 {
+  static MeshNode *lastCurrentNode=0;
 	assert(meshTree);
-	assert(_currentNode == meshTree->find(_currentNode->m));
+
+	if(lastCurrentNode)
+		 M2T[lastCurrentNode]->setBackground(0,QBrush());	
 	
-	MeshTreeWidgetItem *oldNodeItem= M2T[currentNode];
-	if(oldNodeItem!=NULL)
-		{ 
-			assert(oldNodeItem->n == currentNode);
-			oldNodeItem->setBackground(0,QBrush());	
-		}
-	
-	MeshTreeWidgetItem *newNodeItem= M2T[_currentNode];
+	MeshTreeWidgetItem *newNodeItem= M2T[currentNode()];
 	if(newNodeItem!=NULL)
 		{ 
-			assert(newNodeItem->n == _currentNode);
-			newNodeItem->setBackground(0,QBrush(QColor(Qt::lightGray)));				
+			newNodeItem->setBackground(0,QBrush(QColor(Qt::lightGray)));			
+			lastCurrentNode=	currentNode();
 		}
-
-	currentNode=_currentNode;
-	updateButtons();
 }
 
-void AlignDialog::setTree(MeshTree *_meshTree, MeshNode *_node)
+void AlignDialog::setTree(MeshTree *_meshTree)
 {
 	assert(meshTree==0);
 	meshTree=_meshTree;
 	meshTree->cb = AlignCallBackPos;
-  rebuildTree(_node);
+  rebuildTree();
 }
 
 void AlignDialog::updateDialog()
 {
 	assert(meshTree!=0);
-	assert(currentNode == meshTree->find(currentNode->m));
+	assert(currentNode() == meshTree->find(currentNode()->m));
 	updateButtons();
 }
 
 void AlignDialog::updateButtons()
 {
-	if(currentNode->glued) 
-			ui.glueHereButton->setText("Unglue Mesh");
-	else
-		ui.glueHereButton->setText("Glue Mesh Here");
+	if(currentNode()->glued)  ui.glueHereButton->setText("Unglue Mesh");
+	                     else ui.glueHereButton->setText("Glue Mesh Here");
 		
-	ui.pointBasedAlignButton->setDisabled(currentNode->glued);
-	ui.manualAlignButton->setDisabled    (currentNode->glued);
+	ui.pointBasedAlignButton->setDisabled(currentNode()->glued);
+	ui.manualAlignButton->setDisabled    (currentNode()->glued);
+	ui.recalcButton->setDisabled    (currentArc==0);
+	if(currentArc==0) 	ui.icpParamButton->setText("Default Align. Param");
+	               else ui.icpParamButton->setText("Current Arc Align. Param");
+
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
@@ -206,7 +201,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, AlignPair::Result *A,
 			}
 }
 
-void AlignDialog::rebuildTree(MeshNode *_node)
+void AlignDialog::rebuildTree()
 {
 	currentArc =0;
 	gla=edit->gla;
@@ -239,8 +234,9 @@ void AlignDialog::rebuildTree(MeshNode *_node)
 		item = new MeshTreeWidgetItem(meshTree, A, parent);
 		A2Tb[A]=item;
 	}
-  if(_node) 		setCurrentNode(_node);	
-	else setCurrentNode(meshList.front());
+	assert(currentNode());
+	updateCurrentNodeBackground();
+	updateButtons();
 }
 
 // Called when a user click over the tree;
@@ -252,16 +248,13 @@ void AlignDialog::onClickItem(QTreeWidgetItem * item, int column )
 	if(!mItem) return; // user clicked on a iteration info (neither a node nor an arc) 
 	
 	MeshNode * nn= mItem->n;
-	if(nn)
-	{
-		setCurrentNode(nn);
+	if(nn) {
 		gla->meshDoc.setCurrentMesh(nn->id);
-		gla->update();
-	}
-	else
-	{
+		updateCurrentNodeBackground();
+	} else {
 		assert(mItem->a);
 		setCurrentArc(mItem->a);
-		gla->update();
 	}
+	gla->update();
+	updateButtons();
 }

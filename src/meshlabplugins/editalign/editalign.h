@@ -79,11 +79,12 @@ public:
 		
 		MeshDocument *md; 
 		MeshNode *currentNode() {return meshTree.find(md->mm());}
+		AlignPair::Result *currentArc() {return  alignDialog->currentArc;};
 		MeshTree meshTree;
 		GLArea * gla;
 
 public:
-	AlignPair::Param ap;  // default alignment parameters
+	AlignPair::Param defaultAP;  // default alignment parameters
 	
 
 	void retrieveParameterSet(FilterParameterSet &fps , AlignPair::Param &app);
