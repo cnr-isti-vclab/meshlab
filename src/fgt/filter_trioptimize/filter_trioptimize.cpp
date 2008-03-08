@@ -34,8 +34,17 @@
 #include "filter_trioptimize.h"
 #include "curvedgeflip.h"
 
+#include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/normal.h>
 
+class MyCurvEdgeFlip;
+class MyCurvEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, MyCurvEdgeFlip >
+{
+protected:
+	typedef vcg::tri::CurvEdgeFlip<CMeshO, MyCurvEdgeFlip > Parent;
+public:
+	MyCurvEdgeFlip(PosType pos, int mark) : Parent(pos, mark) {}
+};
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
@@ -55,9 +64,16 @@ TriOptimizePlugin::TriOptimizePlugin()
 const QString TriOptimizePlugin::filterName(FilterIDType filterId) 
 {
 	switch(filterId) {
-		case FP_EDGE_FLIP:    return QString("Edge flipping optimization");
+		case FP_EDGE_FLIP:  return QString("Edge flipping optimization");
 		default : assert(0); 
 	}
+}
+
+const int TriOptimizePlugin::getRequirements(QAction *)
+{
+	return (MeshModel::MM_FACETOPO |
+	         MeshModel::MM_VERTFACETOPO |
+	         MeshModel::MM_BORDERFLAG);
 }
 
 // Info() must return the longer string describing each filtering action 
@@ -92,6 +108,13 @@ void TriOptimizePlugin::initParameterSet(QAction *action,MeshModel &m, FilterPar
 {
 	switch(ID(action))	 {
 		case FP_EDGE_FLIP:
+			parlst.addBool(
+					"selection",
+					false,
+					"Update selection",
+					"Apply edge flip optimization on selected faces"
+					);
+			//parlst.addBool("Prepare update ")
 			/*parlst.addBool (
 				"UpdateNormals",
 				true,
@@ -108,17 +131,28 @@ void TriOptimizePlugin::initParameterSet(QAction *action,MeshModel &m, FilterPar
 // Run mesh optimization
 bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
+	// to fix topology relations
+	// TODO: make this as optional
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+	vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+	vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+	//vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+	
+	// temporary test
+	vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
+	vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
+	
 	vcg::LocalOptimization<CMeshO> optimization(m.cm);
-	//cb(1,"Initializing simplification");
-	optimization.Init<CurvEdgeFlip>();
+	optimization.Init<MyCurvEdgeFlip>();
 	
 	// stop when flips become harmful:
-	// != 0.0f to avoid same flips in every run 
-	optimization.SetTargetMetric(-0.001f);
+	// != 0.0f to avoid same flips in every run
+	 // TODO: set a better limit
+	optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
 	optimization.DoOptimization();
 	//optimization.Finalize<CurvEdgeFlip>();
+	 
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-  
 	return true;
 }
 

@@ -48,10 +48,7 @@ public:
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &/*parent*/, vcg::CallBackPos * cb) ;
-	
-	virtual const int getRequirements(QAction *) {
-		return (MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-	}
+	virtual const int getRequirements(QAction *);
 };
 
 #endif
