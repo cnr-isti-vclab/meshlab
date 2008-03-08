@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.8  2008/03/08 17:22:57  cignoni
+added plugins path settings for macs
+
 Revision 1.7  2008/02/24 18:08:50  cignoni
 added -h and --help standard options
 
@@ -50,6 +53,13 @@ Added copyright info
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
+	
+#if defined(Q_OS_MAC)
+	QDir dir(QApplication::applicationDirPath());
+	dir.cdUp();
+	dir.cd("plugins");
+	QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+#endif
 	QCoreApplication::setOrganizationName("VCG");
   QCoreApplication::setApplicationName("MeshLab");
 	
