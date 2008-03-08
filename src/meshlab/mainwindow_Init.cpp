@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.90  2008/03/08 17:25:10  cignoni
+added define for disabling auto test of updated versions
+
 Revision 1.89  2008/02/06 09:56:37  cignoni
 Corrected bug in the display of plugins info
 
@@ -695,8 +698,9 @@ void MainWindow::setCurrentFile(const QString &fileName)
   
 	if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
   {
+#if not defined(__DISABLE_AUTO_STATS__)
 		checkForUpdates(false);
-		
+#endif		
 		int congratsMeshCounter = settings.value("congratsMeshCounter",0).toInt(); 
 		if(loadedMeshCounter > congratsMeshCounter + 100 ) 
 			{
