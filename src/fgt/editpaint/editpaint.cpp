@@ -71,14 +71,14 @@ const PluginInfo &EditPaintPlugin::Info() {
 
 void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent) 
 {
-	QDockWidget* paint_dock = new QDockWidget(parent->window());
-	paintbox = new Paintbox(paint_dock);
-	paint_dock->setAllowedAreas(Qt::NoDockWidgetArea);
-	paint_dock->setWidget(paintbox);
+	dock = new QDockWidget(parent->window());
+	paintbox = new Paintbox(dock);
+	dock->setAllowedAreas(Qt::NoDockWidgetArea);
+	dock->setWidget(paintbox);
 	QPoint p=parent->window()->mapToGlobal(QPoint(0,0));
-	paint_dock->setGeometry(-5+p.x()+parent->window()->width()-paintbox->width(),p.y(),paintbox->width(),200);
-	paint_dock->setFloating(true);
-	paint_dock->setVisible(true);
+	dock->setGeometry(-5+p.x()+parent->window()->width()-paintbox->width(),p.y(),paintbox->width(),200);
+	dock->setFloating(true);
+	dock->setVisible(true);
 
 	tri::UpdateBounding<CMeshO>::Box(m.cm);
 	
@@ -104,6 +104,7 @@ void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*p
 	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
 	delete paintbox;
 	delete selection;
+	delete dock;
 }
 
 void EditPaintPlugin::mousePressEvent(QAction * , QMouseEvent * event, MeshModel &, GLArea * gla) 

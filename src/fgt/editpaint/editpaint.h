@@ -89,6 +89,7 @@ private:
 
 	QQueue<QMouseEvent> event_queue; /*< Queue used to store UI events in order to postpone their processing during a Decorate call*/
 	
+	QDockWidget* dock; 
 	Paintbox* paintbox; /*< The current Paintbox*/
 	
 	GLArea * glarea; /*< current glarea */
