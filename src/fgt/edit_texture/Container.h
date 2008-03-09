@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <QRect>
+#include <QHash>
 #include <meshlab/meshmodel.h>
 
 using namespace std;
@@ -22,6 +23,7 @@ class Container
 			face.push_back(f);
 			wt.push_back(wtindex);
 			count = 1;
+			imark.push_back(0);
 		};
 		~Container(){};
 		void SetVertex(QRect r) {rect = r;};
@@ -34,22 +36,22 @@ class Container
 		bool IsV() {return marca;};
 		void SetV() {marca = true;};
 		void ClearV() {marca = false;};
-		void AddAdj(int val) 
+		void AddAdj(CVertexO* val) 
 		{
 			unsigned i = 0;
 			for(; i < adj.size(); i++)
 				if (adj[i] == val) break;
 			if (i == adj.size())adj.push_back(val);
 		};
-		int GetAdjAt(int index) {return adj[index];};
+		CVertexO* GetAdjAt(int index) {return adj[index];};
 		int GetAdjSize() {return adj.size();};
-		bool ContainAdj(int val)
+		bool ContainAdj(CVertexO* val)
 		{
 			for(unsigned i = 0; i < adj.size(); i++)
 				if (adj[i] == val) return true;
 			return false;
 		}
-		void AddFace(CFaceO* f) {face.push_back(f); count++;};
+		void AddFace(CFaceO* f) {face.push_back(f); count++; imark.push_back(0);};
 		CFaceO* GetFaceAt(int index) {return face[index];};
 		unsigned GetFaceSize() {return face.size();};
 		void SetCompID(int val) {idcomp = val;};
@@ -61,17 +63,20 @@ class Container
 		unsigned GetCount() {return count;}
 		void Decrease() {--count;};
 		void Reset() {count = adj.size()-1;};
+		void Mark(unsigned i) {imark[i]++;};
+		unsigned GetMark(unsigned i) {return imark[i];};
 
 	private:
 		QRect rect;				// Rectangle of the projected vertex
 		float cu,cv;			// Values of the coord
 		bool marca;				// Visit mark
-		vector<int> adj;		// Set of adjacent faces
+		vector<CVertexO*> adj;		// Set of adjacent faces
 		int idcomp;				// Id of the component of the vertex
 		CVertexO* punt;			// Pointer to the real vertex
 		vector<CFaceO*> face;	// Set of faces that refer to the vertex
 		vector<unsigned> wt;	// Set of WT indexes of the faces
 		unsigned count;
+		vector<unsigned> imark;
 };
 
 #endif

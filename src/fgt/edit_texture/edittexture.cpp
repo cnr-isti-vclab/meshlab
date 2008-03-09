@@ -298,19 +298,21 @@ void EditTexturePlugin::InitTexture(MeshModel &m)
 	if (!m.cm.textures.empty())
 	{
 		// Procedure:
-		vector< vector<Container> > param; 
+		vector< QHash<CVertexO*, Container> > param; 
 		vector<bool> outofrange;
 		int actualID = -1;		// ID of the component
 		for (unsigned i = 0; i < m.cm.textures.size(); i++)	// init the vectors
 		{
 			vector<Container> tmp;
-			param.push_back(tmp);
+			param.push_back(QHash<CVertexO*, Container>());
 			outofrange.push_back(false);
 		}
 
-		vector<CMeshO::FacePointer> Q;	// Set of selected face
+		vector<CFaceO*> Q;	// Set of selected face
 		CMeshO::FaceIterator fi;
 		vector<CVertexO*> V;			// Set (3) of the vertex in the actual face
+
+		vector<vector<int>> ver;
 		
 		unsigned i = 0;
 		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
@@ -331,26 +333,6 @@ void EditTexturePlugin::InitTexture(MeshModel &m)
 				V.push_back(Q[i]->V(1));
 				V.push_back(Q[i]->V(2));
 
-				// Search for vertex indexes in the param vector, if a vertex isn't already visited it wille be the next
-				// added to the vector...
-				int nb[3]; nb[0] = -1; nb[1] = -1; nb[2] = -1;
-				int count = 0;
-				if (!V[0]->IsUserBit(visBit)) {nb[0] = param[Q[i]->WT(0).n()].size() + count; count++;}
-				if (!V[1]->IsUserBit(visBit)) {nb[1] = param[Q[i]->WT(1).n()].size() + count; count++;}
-				if (!V[2]->IsUserBit(visBit)) {nb[2] = param[Q[i]->WT(2).n()].size() + count; count++;}
-				for (unsigned y = 0; y < param[Q[i]->WT(0).n()].size(); y++)
-				{
-					if (nb[0] != -1 && nb[1] != -1 && nb[2] != -1) break;	// I've find all the indexes 
-					for (int yy = 0; yy < 3; yy++)
-					{
-						if (param[Q[i]->WT(0).n()][y].GetPointer() == V[yy] && param[Q[i]->WT(0).n()][y].GetCompID() == actualID)
-						{
-							nb[yy] = y;
-							break;
-						}
-					}
-				}
-
 				for (int j = 0; j < 3; j++)
 				{
 					CVertexO* pv = V[j];
@@ -365,17 +347,17 @@ void EditTexturePlugin::InitTexture(MeshModel &m)
 						// but for the Y axis I must subtract the screen height for the conversion...
 						QRect r = QRect(u * AREADIM - RADIUS/2, (AREADIM - (v * AREADIM)) - RADIUS/2, RADIUS, RADIUS);
 						Container a = Container(actualID, u, v, r, pv, Q[i], j);
-						a.AddAdj(nb[(j+1)%3]);
-						a.AddAdj(nb[(j+2)%3]);
-						param[Q[i]->WT(0).n()].push_back(a);
+						a.AddAdj(V[(j+1)%3]);
+						a.AddAdj(V[(j+2)%3]);
+						param[Q[i]->WT(0).n()][pv] = a;
 						pv->SetUserBit(visBit);
 					}
 					else	// Add a new adj to the existing vertex
 					{
-						param[Q[i]->WT(0).n()][nb[j]].AddAdj(nb[(j+1)%3]);
-						param[Q[i]->WT(0).n()][nb[j]].AddAdj(nb[(j+2)%3]);
-						param[Q[i]->WT(0).n()][nb[j]].AddFace(Q[i]);
-						param[Q[i]->WT(0).n()][nb[j]].AddWT(j);
+						param[Q[i]->WT(0).n()][pv].AddAdj(V[(j+1)%3]);
+						param[Q[i]->WT(0).n()][pv].AddAdj(V[(j+2)%3]);
+						param[Q[i]->WT(0).n()][pv].AddFace(Q[i]);
+						param[Q[i]->WT(0).n()][pv].AddWT(j);
 					}
 				}
 				Q[i]->SetV();

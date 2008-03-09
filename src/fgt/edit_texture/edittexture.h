@@ -9,7 +9,7 @@
 #include <meshlab/interfaces.h>
 #include "textureeditor.h"
 #include "ui_textureeditor.h"
-#include "container.h"
+#include "Container.h"
 
 class EditTexturePlugin : public QObject, public MeshEditInterface
 {

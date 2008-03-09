@@ -4,11 +4,12 @@
 #include <QBrush>
 #include <QPen>
 #include <QPixmap>
-#include <QWidget>
 
-#include "container.h"
+#include "Container.h"
 
 #include <stdio.h>
+#include <QGLWidget>
+
 
 #define AREADIM 300
 #define TEXTX 125
@@ -24,7 +25,7 @@
 
 using namespace std;
 
-class RenderArea : public QWidget
+class RenderArea : public QGLWidget
 {
     Q_OBJECT
 
@@ -32,11 +33,11 @@ public:
 	enum Mode { Point, Face, Smooth };
 
     RenderArea(QWidget *parent = 0, QString textureName = QString(), 
-		vector<Container> map = vector<Container>(), 
+		QHash<CVertexO*, Container> map = QHash<CVertexO*, Container>(), 
 		bool outOfRange = false);
 	~RenderArea();
 
-	vector<Container> map;	// Vector of UV Vertexes
+	QHash<CVertexO*, Container> map;	// Vector of UV Vertexes
 	vector<int> connected;	// Vector of indexes of face connected selected by user
 
 	bool isDragging;
@@ -54,7 +55,7 @@ public:
     void setBrush(const QBrush &brush);
     void setAntialiased(bool antialiased);
 	void setTexture(QString path);
-	void SetUVMap(vector<Container> uv);
+	void SetUVMap(QHash<CVertexO*, Container> uv);
 	void ChangeMode(int index);
 	void RemapRepeat();
 	void RemapClamp();

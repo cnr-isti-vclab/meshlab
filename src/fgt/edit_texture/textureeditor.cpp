@@ -56,7 +56,7 @@ void TextureEditor::on_remapRB_toggled(bool t)
 	}
 }
 
-void TextureEditor::AddRenderArea(QString texture, vector<Container> map, bool outOfRange)
+void TextureEditor::AddRenderArea(QString texture, QHash<CVertexO*,Container> map, bool outOfRange)
 {
 	// Add a RenderArea widget to the TabWidget
 	QString name = QString(texture);
@@ -94,12 +94,13 @@ void TextureEditor::AddEmptyRenderArea()
 void TextureEditor::on_applyButton_clicked()
 {
 	// Change the uv coord of the model reading the RenderArea structure
+	/*
 	ui.StatusLabel->setText(QString("Saving..."));
 	int value = 0;
 	ui.progressBar->setValue(value);
 	for (int i = 0; i < ui.tabWidget->count(); i++)
 	{
-		vector<Container> tmp = ((RenderArea*)ui.tabWidget->widget(i)->childAt(MARGIN,MARGIN))->map;
+		QHash<CVertexO*, Container> tmp = ((RenderArea*)ui.tabWidget->widget(i)->childAt(MARGIN,MARGIN))->map;
 		for (unsigned j = 0; j < tmp.size(); j++)
 		{
 			ui.progressBar->setValue(++value);
@@ -115,6 +116,7 @@ void TextureEditor::on_applyButton_clicked()
 	ui.progressBar->setValue(0);
 	ui.StatusLabel->setText(QString("Idle"));
 	area->update();
+	*/
 }
 
 void TextureEditor::on_tabWidget_currentChanged(int)

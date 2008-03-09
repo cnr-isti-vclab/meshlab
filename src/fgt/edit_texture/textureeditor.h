@@ -7,7 +7,7 @@
 #include <meshlab/glarea.h>
 #include "ui_textureeditor.h"
 #include "renderarea.h"
-#include "container.h"
+#include "Container.h"
 
 #define MARGIN 5
 
@@ -21,7 +21,7 @@ public:
 	TextureEditor(QWidget *parent = 0);
 	~TextureEditor();
 
-	void AddRenderArea(QString texture, vector<Container> map, bool outOfRange);
+	void AddRenderArea(QString texture, QHash<CVertexO*, Container> map, bool outOfRange);
 	void AddEmptyRenderArea();
 	void Reset();
 	void SetProgress(int val);

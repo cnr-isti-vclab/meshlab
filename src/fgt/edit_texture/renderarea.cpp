@@ -2,7 +2,9 @@
 #include "renderarea.h"
 #include "textureeditor.h"
 
-RenderArea::RenderArea(QWidget *parent, QString textureName, vector<Container> uvmap, bool outRange) : QWidget(parent)
+static unsigned COUNTER = 0;
+
+RenderArea::RenderArea(QWidget *parent, QString textureName, QHash<CVertexO*,Container> uvmap, bool outRange) : QGLWidget(parent)
 {
     antialiased = true;
     setBackgroundRole(QPalette::Base);
@@ -54,7 +56,7 @@ void RenderArea::setTexture(QString path)
 	fileName = path;
 }
 
-void RenderArea::SetUVMap(vector<Container> uv)
+void RenderArea::SetUVMap(QHash<CVertexO*, Container> uv)
 {
 	map = uv;
 }
@@ -93,40 +95,8 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 	if (map.size() > 0)
 	{
 		// Draw the selected component 
-		if (highComp != -1 && mode == Face)
-		{
-			/* Visit the 'grid' of vertexes and step by step change the value of the counter.
-			   If the counter reach 0 the vertex will not be drawn anymore.
-			*/
-			// <---- FIX
-			painter.setBrush(Qt::red);
-			painter.setOpacity(0.5);
-			for (unsigned y = 0; y < connected.size(); y++)
-			{
-				if (map[connected[y]].GetCount() > 0)
-				{
-					QVector<QPoint> p;
-					int y1 = 0, y2 = 1;
-					while (map[connected[y]].GetCount() > 0)
-					{
-						//if (map[map[connected[y]].GetAdjAt(y1)].GetCount() > 0 && map[map[connected[y]].GetAdjAt(y2)].GetCount() > 0)
-						{
-							p.push_back(map[connected[y]].GetVertex().center());
-							p.push_back(map[map[connected[y]].GetAdjAt(y1)].GetVertex().center());
-							p.push_back(map[map[connected[y]].GetAdjAt(y2)].GetVertex().center());		
-							map[connected[y]].Decrease();
-							map[map[connected[y]].GetAdjAt(y1)].Decrease();
-							map[map[connected[y]].GetAdjAt(y2)].Decrease();
-							painter.drawPolygon(QPolygon(p));
-							p.clear();				
-							if (!map[map[connected[y]].GetAdjAt(y1)].ContainAdj(map[connected[y]].GetAdjAt((y2+1)%map[connected[y]].GetAdjSize()))) y1 = y2;
-							y2 = (y2+1)%map[connected[y]].GetAdjSize();
-						}
-					}
-				}
-			}
-			for (unsigned y = 0; y < connected.size(); y++) map[connected[y]].Reset();
-		}
+		
+		/*
 		// Draw the lines...
 		for (unsigned i = 0; i < map.size(); i++)
 		{
@@ -136,14 +106,17 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 				if (d > i)	painter.drawLine(map[i].GetVertex().center(),map[d].GetVertex().center());
 			}	
 		}
+		*/
 		// ...and the vertexes (as a circle)
-		for (unsigned i = 0; i < map.size(); i++)
+		QHashIterator<CVertexO*, Container> i(map);
+		while (i.hasNext())
 		{
+			i.next();
 			painter.setOpacity(1.0);
 			painter.setBrush(Qt::yellow);
-			if ((i == highClick && mode == Point) || (i == highComp && mode == Face)) painter.setBrush(Qt::blue);
-			else if (i == highlightedPoint) painter.setBrush(Qt::red);
-			painter.drawEllipse(map[i].GetVertex());
+			//if ((i == highClick && mode == Point) || (i == highComp && mode == Face)) painter.setBrush(Qt::blue);
+			//else if (i == highlightedPoint) painter.setBrush(Qt::red);
+			painter.drawEllipse((&(Container)i.value())->GetVertex());
 		}
 	}
     painter.setPen(palette().dark().color());
@@ -153,6 +126,7 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
 void RenderArea::mousePressEvent(QMouseEvent *event)
 {
+	/*
 	switch(mode)
 	{
 		case Point:
@@ -189,18 +163,20 @@ void RenderArea::mousePressEvent(QMouseEvent *event)
 			}
 			this->update();
 			break;
-	}
+	}*/
 }
 
 void RenderArea::mouseReleaseEvent(QMouseEvent *)
 {
+	/*
 	isDragging = false;
 	if(highlightedPoint != -1) this->update(map[highlightedPoint].GetVertex());
-	if (mode == Face && moved) {UpdateUV(); moved = false;}
+	if (mode == Face && moved) {UpdateUV(); moved = false;}*/
 }
 
 void RenderArea::mouseMoveEvent(QMouseEvent *event)
 {
+	/*
 	if (isDragging)
 	{
 		QPoint tmp = event->pos();
@@ -258,10 +234,12 @@ void RenderArea::mouseMoveEvent(QMouseEvent *event)
 		}
 	}
 	return;
+	*/
 }
 
 void RenderArea::RemapRepeat()
 {
+	/*
 	// Remap the uv in 9 planes: the main plain is in the middle, the coordinates over 
 	// the border will be mapped in the other planes
 	out = true;
@@ -273,10 +251,12 @@ void RenderArea::RemapRepeat()
 		map[i].SetVertex(GetRepeatVertex(u,v,i));
 	}
 	this->update();
+	*/
 }
 
 void RenderArea::RemapClamp()
 {
+	/*
 	// Remap the uv coord out of border using clamp method
 	out = false;
 	for (unsigned i = 0; i < map.size(); i++)
@@ -286,10 +266,12 @@ void RenderArea::RemapClamp()
 		map[i].SetVertex(GetClampVertex(u, v, i));
 	}
 	this->update();
+	*/
 }
 
 void RenderArea::RemapMod()
 {
+	/*
 	// Remap the uv coord out of border using mod function
 	out = false;
 	for (unsigned i = 0; i < map.size(); i++)
@@ -304,10 +286,12 @@ void RenderArea::RemapMod()
 		UpdateSingleUV(i, u, v);
 	}
 	this->update();
+	*/
 }
 
 void RenderArea::UpdateVertex(float u, float v)
 {
+	/*
 	// Update the position of the vertexes from user spin box input
 	QRect r;
 	if (!out) r = GetClampVertex(u, v, -1);
@@ -316,10 +300,12 @@ void RenderArea::UpdateVertex(float u, float v)
 	map[highClick].SetV(v);
 	map[highClick].SetVertex(r);
 	this->update();
+	*/
 }
 
 void RenderArea::VisitConnected()
 {
+	/*
 	// Visit the vertex-tree and initialize the vector 'connected' adding the index of the face with FF adjacency.
 	connected.clear();
 	int id = map[highComp].GetCompID();
@@ -327,6 +313,7 @@ void RenderArea::VisitConnected()
 	{
 		if (map[i].GetCompID() == id) connected.push_back(i);
 	}
+	*/
 }
 
 void RenderArea::ChangeMode(int index)
@@ -347,8 +334,10 @@ void RenderArea::ChangeMode(int index)
 	this->update();
 }
 
+
 void RenderArea::UpdateComponentPos(int x, int y)
 {
+	/*
 	// Update the position of all vertexes of the connected component
 	for (unsigned i = 0; i < connected.size(); i++)
 	{
@@ -359,10 +348,12 @@ void RenderArea::UpdateComponentPos(int x, int y)
 	}
 	this->update();
 	// The UV Coord will be updated after mouse-release event
+	*/
 }
 
 void RenderArea::RotateComponent(float alfa)
 {
+	/*
 	// Calcolate the new position of the vertex of the selected component after a rotation.
 	// The rotation is done around the selected vertex (= highComp)
 	QPoint origin = map[highComp].GetVertex().center();
@@ -380,10 +371,12 @@ void RenderArea::RotateComponent(float alfa)
 			(float)(AREADIM - map[connected[i]].GetVertex().center().y()) / AREADIM);
 	}
 	this->update();
+	*/
 }
 
 void RenderArea::ScaleComponent(int perc)
 {
+	/*
 	// Scale the selected component. The origin is set to the selected vertex ( = highComp)
 	QPoint origin = map[highComp].GetVertex().center();
 	map[highComp].SetV();
@@ -402,10 +395,12 @@ void RenderArea::ScaleComponent(int perc)
 			(float)(AREADIM - map[connected[i]].GetVertex().center().y()) / AREADIM);
 	}
 	this->update();
+	*/
 }
 
 void RenderArea::UpdateUV()
 {
+	/*
 	// After a move of component, re-calculate the new UV coordinates
 	for (unsigned i = 0; i < connected.size(); i++)
 	{
@@ -413,10 +408,12 @@ void RenderArea::UpdateUV()
 		float v = (float)(AREADIM - map[connected[i]].GetVertex().center().y()) / AREADIM;
 		UpdateSingleUV(connected[i], u, v);
 	}
+	*/
 }
 
 void RenderArea::UpdateSingleUV(int index, float u, float v)
 {
+	/*
 	// Update the UV Coord of the vertex map[index]
 	if (!out)
 	{
@@ -430,10 +427,12 @@ void RenderArea::UpdateSingleUV(int index, float u, float v)
 	}
 	map[index].SetU(u);
 	map[index].SetV(v);
+	*/
 }
 
 QRect RenderArea::GetRepeatVertex(float u, float v, int index)
 {
+	/*
 	// Return the new position of the vertex in the RenderArea space in 'Repeat' mode.
 	// If the passed index is valid, also update the UV coord
 	// The function is called from the Remap (--> change UV) and from the UpdateVertex
@@ -478,10 +477,13 @@ QRect RenderArea::GetRepeatVertex(float u, float v, int index)
 		map[index].SetV(realv);	
 	}
 	return QRect(u  - RADIUS/2, AREADIM - v - RADIUS/2, RADIUS, RADIUS);
+	*/
+	return QRect();
 }
 
 QRect RenderArea::GetClampVertex(float u, float v, int index)
 {
+	/*
 	// Return the new position of the vertex in the RenderArea space in 'Clamp' mode.
 	// If the passed index is valid, also update the UV coord
 	// The function is called from the Remap (--> change UV) and from the UpdateVertex
@@ -491,4 +493,6 @@ QRect RenderArea::GetClampVertex(float u, float v, int index)
 	else if (v > 1) v = 1;
 	if (index != -1) UpdateSingleUV(index, u, v);
 	return QRect(u * AREADIM - RADIUS/2, (AREADIM - (v * AREADIM)) - RADIUS/2, RADIUS, RADIUS);
+	*/
+	return QRect();
 }
