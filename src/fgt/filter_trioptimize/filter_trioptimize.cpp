@@ -27,6 +27,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+
+//#include <qstringlist.h>
 /*#include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>*/
@@ -37,13 +39,39 @@
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/normal.h>
 
-class MyCurvEdgeFlip;
-class MyCurvEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, MyCurvEdgeFlip >
+// instancing templates
+/*template class CurvData<NSMCurvEval>;
+template class CurvData<MeanCurvEval>;
+template class CurvData<AbsCurvEval>;
+
+typedef CurvData<NSMCurvEval>  NSMCurv;
+typedef CurvData<MeanCurvEval> MeanCurv;
+typedef CurvData<AbsCurvEval>  AbsCurv;*/
+
+// forward declarations
+class NSMCEdgeFlip;
+class MeanCEdgeFlip;
+class AbsCEdgeFlip;
+
+class NSMCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, NSMCEdgeFlip, NSMCurvEval >
 {
-protected:
-	typedef vcg::tri::CurvEdgeFlip<CMeshO, MyCurvEdgeFlip > Parent;
 public:
-	MyCurvEdgeFlip(PosType pos, int mark) : Parent(pos, mark) {}
+	NSMCEdgeFlip(PosType pos, int mark) : 
+		vcg::tri::CurvEdgeFlip<CMeshO, NSMCEdgeFlip, NSMCurvEval >(pos, mark) {}
+};
+
+class MeanCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, MeanCEdgeFlip, MeanCurvEval >
+{
+public:
+	MeanCEdgeFlip(PosType pos, int mark) : 
+		vcg::tri::CurvEdgeFlip<CMeshO, MeanCEdgeFlip, MeanCurvEval >(pos, mark) {}
+};
+
+class AbsCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, AbsCEdgeFlip, AbsCurvEval >
+{
+public:
+	AbsCEdgeFlip(PosType pos, int mark) : 
+		vcg::tri::CurvEdgeFlip<CMeshO, AbsCEdgeFlip, AbsCurvEval >(pos, mark) {}
 };
 
 // Constructor usually performs only two simple tasks of filling the two lists 
@@ -106,23 +134,27 @@ const PluginInfo &TriOptimizePlugin::pluginInfo()
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void TriOptimizePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
 {
-	switch(ID(action))	 {
-		case FP_EDGE_FLIP:
+	switch(ID(action)) {
+		case FP_EDGE_FLIP: {
 			parlst.addBool(
-					"selection",
-					false,
-					"Update selection",
-					"Apply edge flip optimization on selected faces"
-					);
-			//parlst.addBool("Prepare update ")
-			/*parlst.addBool (
-				"UpdateNormals",
-				true,
-				"Recompute normals",
-				"Toggle the recomputation of the normals after the random displacement.\n\n"
-				"If disabled the face normals will remains unchanged resulting in a visually pleasant effect."
-			);*/
+			        "selection",
+			        false,
+			        "Update selection",
+			        "Apply edge flip optimization on selected faces"
+			        );
+			
+			QStringList metrics;
+			metrics.push_back("Mean curvature");
+			metrics.push_back("Normalized squared mean curvature");
+			metrics.push_back("Absolute curvature");
+			parlst.addEnum(
+			        "metric",
+			        0,
+			        metrics,
+			        tr("Metric:"),
+			        tr("various ways to compute surface curvature on vertexes"));
 			break;
+		}
 		default : assert(0); 
 	}
 }
@@ -142,8 +174,16 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 	vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
 	vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
 	
+	
+	
 	vcg::LocalOptimization<CMeshO> optimization(m.cm);
-	optimization.Init<MyCurvEdgeFlip>();
+	
+	int metric = par.getEnum("metric");
+	switch(metric) {
+		case 0: optimization.Init<MeanCEdgeFlip>(); break;
+		case 1: optimization.Init<NSMCEdgeFlip>();  break;
+		case 2: optimization.Init<AbsCEdgeFlip>();  break;
+	}
 	
 	// stop when flips become harmful:
 	// != 0.0f to avoid same flips in every run
@@ -151,7 +191,8 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 	optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
 	optimization.DoOptimization();
 	//optimization.Finalize<CurvEdgeFlip>();
-	 
+	
+	
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	return true;
 }
