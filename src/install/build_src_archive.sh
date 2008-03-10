@@ -4,7 +4,8 @@
 # so your command line should be something like:     source meshlab/src/install/build_src_archive.sh
 # when the script ends you should have a tgz with all the needed sources
 #
-find meshlab code/lib/glew sf | egrep -v  -e CVS -e /ui_ -e build -e /moc_ -e /qrc_ -e /test/ -e MeshLabBundle -e docs/ -e /web/ -e /apps/ -e\# | egrep -e  [.]cpp$ -e [.]c$ -e  [.]h$ -e  [.]pro$ -e [.]ui$ -e [.]png$ -e [.]qrc$ -e [.]vert$ -e [.]frag$ -e [.]gdp$ -e [.]txt$ -e [.]icns$ -e images/100mesh.html -e inl$ > list.txt
+cp meshlab/src/install/building_meshlab.txt ./how_to_compile.txt
+find meshlab code/lib/glew sf ./how_to_compile.txt | egrep -v  -e CVS -e /ui_ -e build -e /moc_ -e /php -e meshlabv12.pro -e /qrc_ -e /test/ -e MeshLabBundle -e docs/ -e /web/ -e /apps/ -e\# | egrep -e  [.]cpp$ -e [.]c$ -e  [.]h$ -e  [.]pro$ -e [.]ui$ -e [.]png$ -e [.]qrc$ -e [.]vert$ -e [.]frag$ -e [.]gdp$ -e [.]txt$ -e [.]icns$ -e images/100mesh.html -e inl$ > list.txt
 #
-gnutar -c -v -z  -T ./list.txt -f meshlab.tgz 
+gnutar -c -v -z  -T ./list.txt -f meshlab_`date +"%Y%m%d"`.tgz 
 
