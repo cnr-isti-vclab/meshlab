@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.91  2008/03/10 09:39:51  cignoni
+better disabling of functionalities when no mesh is loaded
+
 Revision 1.90  2008/03/08 17:25:10  cignoni
 added define for disabling auto test of updated versions
 
@@ -211,8 +214,7 @@ MainWindow::MainWindow()
 	createMenus();
 	createToolBars();
   createStdPluginWnd();
-	updateMenus();
-  setAcceptDrops(true);
+	setAcceptDrops(true);
   workspace->setAcceptDrops(true);
 	setWindowTitle(appName());
 	loadPlugins();
@@ -223,6 +225,8 @@ MainWindow::MainWindow()
   qb->setMinimum(0);
 	//qb->reset();
 	statusBar()->addPermanentWidget(qb,0);
+	updateMenus();
+  
   //qb->setAutoClose(true);
   //qb->setMinimumDuration(0);
   //qb->reset();

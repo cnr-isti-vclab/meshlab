@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.152  2008/03/10 09:39:51  cignoni
+better disabling of functionalities when no mesh is loaded
+
 Revision 1.151  2008/02/28 10:33:21  cignoni
 Added errorMsg  exchange mechaninsm to the interface of filter plugins to allow the passage of error reports between the filter and the framework.
 
@@ -263,6 +266,7 @@ void MainWindow::setColorMode(QAction *qa)
 void MainWindow::updateMenus()
 {
 	bool active = (bool) !workspace->windowList().empty() && workspace->activeWindow();
+	openInAct->setEnabled(active);
 	closeAct->setEnabled(active);
 	reloadAct->setEnabled(active);
 	saveAsAct->setEnabled(active);
@@ -281,79 +285,89 @@ void MainWindow::updateMenus()
 	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 	if(active){
-		const RenderMode &rm=GLA()->getCurrentRenderMode();
-		switch (rm.drawMode) {
-			case GLW::DMBox:				renderBboxAct->setChecked(true);                break;
-			case GLW::DMPoints:			renderModePointsAct->setChecked(true);      		break;
-			case GLW::DMWire: 			renderModeWireAct->setChecked(true);      			break;
-			case GLW::DMFlat:				renderModeFlatAct->setChecked(true);    				break;
-			case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
-			case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
-			case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
-		default: break;
-		}
-    colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm()->cm)); 
-		switch (rm.colorMode)
-		{
-			case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
-			case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
-  		case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
-  		default: break;
-		}
-
-		lastFilterAct->setEnabled(false);
-		if(GLA()->getLastAppliedFilter() != NULL)
-		{
-			lastFilterAct->setText(QString("Apply filter ") + GLA()->getLastAppliedFilter()->text());
-			lastFilterAct->setEnabled(true);
-		}
-		else
-		{
-			lastFilterAct->setText(QString("Apply filter "));
-		}
-
-
-    // Management of the editing toolbar
-		// when you enter in a editing mode you can toggle between editing 
-		// and camera moving by esc;
-		// you exit from editing mode by pressing again the editing button
-		// When you are in a editing mode all the other editing are disabled.
-		
-    foreach (QAction *a,editActionList)
-         {
-						a->setChecked(false); 
-						a->setEnabled( GLA()->getEditAction() == NULL ); 
-				 }
-
-    suspendEditModeAct->setChecked(GLA()->suspendedEditor);
-		suspendEditModeAct->setDisabled(GLA()->getEditAction() == NULL);
-
-    if(GLA()->getEditAction())   
-				{
-						GLA()->getEditAction()->setChecked(! GLA()->suspendedEditor);
-						GLA()->getEditAction()->setEnabled(true);
+				const RenderMode &rm=GLA()->getCurrentRenderMode();
+				switch (rm.drawMode) {
+					case GLW::DMBox:				renderBboxAct->setChecked(true);                break;
+					case GLW::DMPoints:			renderModePointsAct->setChecked(true);      		break;
+					case GLW::DMWire: 			renderModeWireAct->setChecked(true);      			break;
+					case GLW::DMFlat:				renderModeFlatAct->setChecked(true);    				break;
+					case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
+					case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
+					case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
+				default: break;
 				}
-		
-		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
-		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
-		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
-		renderModeTextureAct->setEnabled(GLA()->mm() && !GLA()->mm()->cm.textures.empty());
-		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
-		
-		setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
-		setLightAct->setChecked(rm.lighting);
+				colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm()->cm)); 
+				switch (rm.colorMode)
+				{
+					case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
+					case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
+					case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
+					default: break;
+				}
 
-		setFancyLightingAct->setChecked(rm.fancyLighting);
-		setDoubleLightingAct->setChecked(rm.doubleSideLighting);
-		setSelectionRenderingAct->setChecked(rm.selectedFaces);
+				lastFilterAct->setEnabled(false);
+				if(GLA()->getLastAppliedFilter() != NULL)
+				{
+					lastFilterAct->setText(QString("Apply filter ") + GLA()->getLastAppliedFilter()->text());
+					lastFilterAct->setEnabled(true);
+				}
+				else
+				{
+					lastFilterAct->setText(QString("Apply filter "));
+				}
 
-		foreach (QAction *a,decoratorActionList){a->setChecked(false);}
-		if(GLA()->iDecoratorsList){
-			pair<QAction *,FilterParameterSet *> p;
-			foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
+
+				// Management of the editing toolbar
+				// when you enter in a editing mode you can toggle between editing 
+				// and camera moving by esc;
+				// you exit from editing mode by pressing again the editing button
+				// When you are in a editing mode all the other editing are disabled.
+				
+				foreach (QAction *a,editActionList)
+						 {
+								a->setChecked(false); 
+								a->setEnabled( GLA()->getEditAction() == NULL ); 
+						 }
+
+				suspendEditModeAct->setChecked(GLA()->suspendedEditor);
+				suspendEditModeAct->setDisabled(GLA()->getEditAction() == NULL);
+
+				if(GLA()->getEditAction())   
+						{
+								GLA()->getEditAction()->setChecked(! GLA()->suspendedEditor);
+								GLA()->getEditAction()->setEnabled(true);
+						}
+				
+				showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
+				showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
+				backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
+				renderModeTextureAct->setEnabled(GLA()->mm() && !GLA()->mm()->cm.textures.empty());
+				renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
+				
+				setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
+				setLightAct->setChecked(rm.lighting);
+
+				setFancyLightingAct->setChecked(rm.fancyLighting);
+				setDoubleLightingAct->setChecked(rm.doubleSideLighting);
+				setSelectionRenderingAct->setChecked(rm.selectedFaces);
+
+				foreach (QAction *a,decoratorActionList){a->setChecked(false);}
+				if(GLA()->iDecoratorsList){
+					pair<QAction *,FilterParameterSet *> p;
+					foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
+				}
+				
+	} // if active
+	else
+	{
+		foreach (QAction *a,editActionList)					
+		{			
+				a->setEnabled(false); 
 		}
+		foreach (QAction *a,decoratorActionList)
+				a->setEnabled(false); 
+
 	}
-	
 	
 	if(GLA()) 
 	{
