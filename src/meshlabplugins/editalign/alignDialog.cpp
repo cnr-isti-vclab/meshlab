@@ -116,7 +116,7 @@ void AlignDialog::updateCurrentNodeBackground()
   static MeshNode *lastCurrentNode=0;
 	assert(meshTree);
 
-	if(lastCurrentNode)
+	if(lastCurrentNode && M2T[lastCurrentNode])
 		 M2T[lastCurrentNode]->setBackground(0,QBrush());	
 	
 	MeshTreeWidgetItem *newNodeItem= M2T[currentNode()];
