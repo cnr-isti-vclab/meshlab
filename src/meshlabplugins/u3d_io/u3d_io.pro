@@ -4,7 +4,8 @@ INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 
 FORMS         = ui/u3d_gui.ui 				
 HEADERS       = u3d_io.h \
-				u3d_gui.h
+				u3d_gui.h \
+				../../../../sf/wrap/io_trimesh/export_u3d.h
 SOURCES       = u3d_io.cpp \
 				u3d_gui.cpp
 TARGET        = u3d_io
