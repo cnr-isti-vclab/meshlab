@@ -1,4 +1,4 @@
-#include<gl/glew.h>
+#include<GL/glew.h>
 #include<vcg/space/point3.h>
 #include<vcg/math/matrix44.h>
 #include<wrap/gl/space.h>
@@ -6,8 +6,8 @@
 
 #include<string>
 
-#include<QImage.h>
-#include<QGL.h>
+#include<QImage>
+#include<QtOpenGL>
 #include <wrap/qt/checkGLError.h>
 
 using namespace vcg;
