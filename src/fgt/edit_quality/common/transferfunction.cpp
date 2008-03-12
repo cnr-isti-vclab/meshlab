@@ -455,7 +455,7 @@ Color4b TransferFunction::getColorByQuality (float percentageQuality)
 QString TransferFunction::saveColorBand( QString fn, EQUALIZER_INFO& info  )
 {
 	//acquiring save file
-	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, "CSV File (*.csv)" );
+	QString fileName = QFileDialog::getSaveFileName( 0, "Save Transfer Function File", fn + CSV_FILE_EXSTENSION, QString("Quality Mapper File (*") + QString(CSV_FILE_EXSTENSION) + QString(")") );
 
 	QFile outFile( fileName );
 

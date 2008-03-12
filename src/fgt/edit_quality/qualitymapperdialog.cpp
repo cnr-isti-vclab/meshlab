@@ -793,7 +793,7 @@ void QualityMapperDialog::on_savePresetButton_clicked()
 void QualityMapperDialog::on_loadPresetButton_clicked()
 {
 	//user chooses the file to load
-	QString csvFileName = QFileDialog::getOpenFileName(0, "Open Transfer Function File", QDir::currentPath(), "CSV File (*.csv)");
+	QString csvFileName = QFileDialog::getOpenFileName(0, "Open Transfer Function File", QDir::currentPath(), QString("Quality Mapper File (*") + QString(CSV_FILE_EXSTENSION) + QString(")") );
 
 	//user didn't select anything. Nothing to do.
 	if (csvFileName.isNull())

@@ -165,7 +165,7 @@ private:
 #else
 #define CSV_FILE_DIRECTORY		"CSV/"
 #endif
-#define CSV_FILE_EXSTENSION		".csv"
+#define CSV_FILE_EXSTENSION		".qmap"
 #define CSV_FILE_SEPARATOR		";"
 #define CSV_FILE_COMMENT		"//"
 
