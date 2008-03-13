@@ -13,6 +13,7 @@ SUBDIRS       = meshfilter \
 				meshselect \
 				meshdecorate \ 
 				meshedit \ 
+				meshsplitter \
 				editslice \
 				editpaint \
 				editalign\
