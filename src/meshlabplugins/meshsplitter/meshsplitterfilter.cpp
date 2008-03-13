@@ -160,6 +160,7 @@ bool MeshSplitterFilterPlugin::applyFilter(QAction *filter, MeshDocument &md, Fi
 	for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
 		face::ComputeNormalizedNormal(*fi);	
 	tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
+	destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
 	destMesh->busy=false;												// ready to be used
 
 	return true;
