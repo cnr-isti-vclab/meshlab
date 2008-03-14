@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.153  2008/03/14 15:22:28  corsini
+fix decoration menu
+
 Revision 1.152  2008/03/10 09:39:51  cignoni
 better disabling of functionalities when no mesh is loaded
 
@@ -351,7 +354,8 @@ void MainWindow::updateMenus()
 				setDoubleLightingAct->setChecked(rm.doubleSideLighting);
 				setSelectionRenderingAct->setChecked(rm.selectedFaces);
 
-				foreach (QAction *a,decoratorActionList){a->setChecked(false);}
+				foreach (QAction *a,decoratorActionList){a->setChecked(false);a->setEnabled(true);}
+				
 				if(GLA()->iDecoratorsList){
 					pair<QAction *,FilterParameterSet *> p;
 					foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
