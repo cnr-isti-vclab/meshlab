@@ -359,19 +359,6 @@ void EditSegment::Decorate(QAction * ac, MeshModel & m, GLArea * gla) {
 			current_point, previous_point, pixels, mvmatrix, projmatrix,
 			viewport);
 
-		/*vector<CMeshO::FacePointer>::iterator fpo;
-		for(fpo=faceSel.begin();fpo!=faceSel.end();++fpo) {
-		for (int i=0; i<3; ++i) {
-		if (mouse_button_pressed==Qt::LeftButton) {
-		meshCut->Mark((*fpo)->V(i), iF);
-		(*fpo)->V(i)->C() = toVcgColor(meshCutDialog->getForegroundColor());
-		}	else {
-		meshCut->Mark((*fpo)->V(i), iB);
-		(*fpo)->V(i)->C() = toVcgColor(meshCutDialog->getBackgroundColor());
-		}
-		}
-		}*/
-
 		vector<CMeshO::VertexPointer>::iterator vi;
 		for (vi=newSel.begin(); vi!=newSel.end(); ++vi) {
 

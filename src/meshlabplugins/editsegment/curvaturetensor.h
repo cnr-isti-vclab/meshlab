@@ -144,7 +144,6 @@ namespace vcg {
 
 					Matrix33f QtMQ = (Qt * M * Q);
 
-					Point3f bl = Q.GetColumn(0);
 					Point3f T1 = Q.GetColumn(1);
 					Point3f T2 = Q.GetColumn(2);
 
