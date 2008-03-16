@@ -4,17 +4,15 @@
 #include <QBrush>
 #include <QPen>
 #include <QPixmap>
-
-#include "Container.h"
-
+#include <meshlab/meshmodel.h>
+#include <wrap/gui/trackball.h>
 #include <stdio.h>
 #include <QGLWidget>
 
-
-#define AREADIM 300
-#define TEXTX 125
-#define TEXTY 150
-#define TRANSLATE +0.5
+#define AREADIM 400
+#define TEXTX 175
+#define TEXTY 200
+#define TRANSLATE 5
 #define RADIUS 10
 
 #define NO_CHANGE -1
@@ -32,30 +30,24 @@ class RenderArea : public QGLWidget
 public:
 	enum Mode { Point, Face, Smooth };
 
-    RenderArea(QWidget *parent = 0, QString textureName = QString(), 
-		QHash<CVertexO*, Container> map = QHash<CVertexO*, Container>(), 
-		bool outOfRange = false);
+    RenderArea(QWidget *parent = 0, QString path = QString(), MeshModel *m = 0, unsigned textNum = 0);
 	~RenderArea();
 
-	QHash<CVertexO*, Container> map;	// Vector of UV Vertexes
 	vector<int> connected;	// Vector of indexes of face connected selected by user
 
 	bool isDragging;
 	int highlightedPoint,	// Vertex highlighted when the mouse move over it
 		highComp,			// Index of the vertex element of connected component
 		highClick;			// Clicked vertex
+	bool out;
 
-	bool out;				// Indicates if exists uv coord < 0 or > 1
 	Mode mode;				// Action type
-
-	QString fileName;		// Name of the texture
 
 public:
     void setPen(const QPen &pen);
     void setBrush(const QBrush &brush);
     void setAntialiased(bool antialiased);
 	void setTexture(QString path);
-	void SetUVMap(QHash<CVertexO*, Container> uv);
 	void ChangeMode(int index);
 	void RemapRepeat();
 	void RemapClamp();
@@ -72,13 +64,24 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
+	void mouseDoubleClickEvent(QMouseEvent *event);
+	void wheelEvent(QWheelEvent*e);
 
 private:
-    QPen pen;
-    QBrush brush;
 	bool antialiased;	// Antialiasing 
-    QImage image;		// Background image
-	bool moved;			// Indicates if user has moved a component -> update of position
+    QImage image;		// Background texture
+	unsigned textNum;	// Number of tab (--> index in 'textures' vector)
+	QString fileName;	// Name of the texture
+	MeshModel *model;	// Ref to the model (for upate)
+
+	// Trackball data
+	vcg::Trackball *tb;
+	Point2f viewport;
+	float oldX, oldY;
+	int tmpX, tmpY;
+
+	QPen pen;			// For 2D painting
+    QBrush brush;
 
 	void VisitConnected();
 	QRect GetRepeatVertex(float u, float v, int index);

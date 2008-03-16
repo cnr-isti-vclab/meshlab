@@ -56,7 +56,7 @@ void TextureEditor::on_remapRB_toggled(bool t)
 	}
 }
 
-void TextureEditor::AddRenderArea(QString texture, QHash<CVertexO*,Container> map, bool outOfRange)
+void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 {
 	// Add a RenderArea widget to the TabWidget
 	QString name = QString(texture);
@@ -64,7 +64,7 @@ void TextureEditor::AddRenderArea(QString texture, QHash<CVertexO*,Container> ma
 	name.remove(0,i+1);
 
 	QTabBar *t = new QTabBar(ui.tabWidget);
-	RenderArea *ra= new RenderArea(t, texture, map, outOfRange);
+	RenderArea *ra= new RenderArea(t, texture, m, index);
 	ra->ChangeMode(ui.tabWidgetEdit->currentIndex());
 	ra->setGeometry(MARGIN,MARGIN,AREADIM,AREADIM);
 	ui.tabWidget->addTab(t, name);
@@ -73,7 +73,6 @@ void TextureEditor::AddRenderArea(QString texture, QHash<CVertexO*,Container> ma
 		ui.tabWidget->removeTab(0);
 		first = ra;
 		ra->show();
-		if (!outOfRange){ ui.vertRB->setChecked(true); ui.faceRB->setChecked(false); }
 	}
 	countPage++;
 	QObject::connect(ra, SIGNAL(UpdateStat(float,float,int,int, int)),this, SLOT(UpStat(float,float,int,int, int)));

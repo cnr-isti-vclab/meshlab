@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>331</width>
-    <height>668</height>
+    <width>434</width>
+    <height>772</height>
    </rect>
   </property>
   <property name="minimumSize" >
@@ -18,11 +18,29 @@
   <property name="windowTitle" >
    <string>TextureEditor</string>
   </property>
+  <widget class="QTabWidget" name="tabWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>415</width>
+     <height>435</height>
+    </rect>
+   </property>
+   <property name="currentIndex" >
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="tab" >
+    <attribute name="title" >
+     <string>Texture</string>
+    </attribute>
+   </widget>
+  </widget>
   <widget class="QGroupBox" name="groupBox" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>350</y>
+     <y>450</y>
      <width>311</width>
      <height>41</height>
     </rect>
@@ -30,22 +48,6 @@
    <property name="title" >
     <string> Border managment </string>
    </property>
-   <widget class="QRadioButton" name="faceRB" >
-    <property name="geometry" >
-     <rect>
-      <x>12</x>
-      <y>15</y>
-      <width>61</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Repeat</string>
-    </property>
-    <property name="checked" >
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QRadioButton" name="vertRB" >
     <property name="geometry" >
      <rect>
@@ -72,12 +74,28 @@
      <string>Modulus</string>
     </property>
    </widget>
+   <widget class="QRadioButton" name="faceRB" >
+    <property name="geometry" >
+     <rect>
+      <x>12</x>
+      <y>15</y>
+      <width>61</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Repeat</string>
+    </property>
+    <property name="checked" >
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="groupBox_2" >
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>398</y>
+     <y>500</y>
      <width>311</width>
      <height>261</height>
     </rect>
@@ -694,24 +712,6 @@
       <string>   Smooth   </string>
      </attribute>
     </widget>
-   </widget>
-  </widget>
-  <widget class="QTabWidget" name="tabWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>315</width>
-     <height>335</height>
-    </rect>
-   </property>
-   <property name="currentIndex" >
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="tab" >
-    <attribute name="title" >
-     <string>Texture</string>
-    </attribute>
    </widget>
   </widget>
  </widget>

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'textureeditor.ui'
 **
-** Created: Sun 9. Mar 11:18:35 2008
+** Created: Sun 16. Mar 11:36:51 2008
 **      by: Qt User Interface Compiler version 4.2.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -28,10 +28,12 @@
 class Ui_TextureEditorClass
 {
 public:
+    QTabWidget *tabWidget;
+    QWidget *tab;
     QGroupBox *groupBox;
-    QRadioButton *faceRB;
     QRadioButton *vertRB;
     QRadioButton *remapRB;
+    QRadioButton *faceRB;
     QGroupBox *groupBox_2;
     QPushButton *applyButton;
     QProgressBar *progressBar;
@@ -67,29 +69,33 @@ public:
     QLabel *label_6;
     QLabel *LabelFaceNum;
     QWidget *tab_smooth;
-    QTabWidget *tabWidget;
-    QWidget *tab;
 
     void setupUi(QWidget *TextureEditorClass)
     {
     TextureEditorClass->setObjectName(QString::fromUtf8("TextureEditorClass"));
     TextureEditorClass->setMinimumSize(QSize(331, 668));
+    tabWidget = new QTabWidget(TextureEditorClass);
+    tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
+    tabWidget->setGeometry(QRect(10, 10, 415, 435));
+    tab = new QWidget();
+    tab->setObjectName(QString::fromUtf8("tab"));
+    tabWidget->addTab(tab, QApplication::translate("TextureEditorClass", "Texture", 0, QApplication::UnicodeUTF8));
     groupBox = new QGroupBox(TextureEditorClass);
     groupBox->setObjectName(QString::fromUtf8("groupBox"));
-    groupBox->setGeometry(QRect(10, 350, 311, 41));
-    faceRB = new QRadioButton(groupBox);
-    faceRB->setObjectName(QString::fromUtf8("faceRB"));
-    faceRB->setGeometry(QRect(12, 15, 61, 19));
-    faceRB->setChecked(true);
+    groupBox->setGeometry(QRect(10, 450, 311, 41));
     vertRB = new QRadioButton(groupBox);
     vertRB->setObjectName(QString::fromUtf8("vertRB"));
     vertRB->setGeometry(QRect(106, 15, 81, 19));
     remapRB = new QRadioButton(groupBox);
     remapRB->setObjectName(QString::fromUtf8("remapRB"));
     remapRB->setGeometry(QRect(199, 15, 81, 19));
+    faceRB = new QRadioButton(groupBox);
+    faceRB->setObjectName(QString::fromUtf8("faceRB"));
+    faceRB->setGeometry(QRect(12, 15, 61, 19));
+    faceRB->setChecked(true);
     groupBox_2 = new QGroupBox(TextureEditorClass);
     groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
-    groupBox_2->setGeometry(QRect(10, 398, 311, 261));
+    groupBox_2->setGeometry(QRect(10, 500, 311, 261));
     applyButton = new QPushButton(groupBox_2);
     applyButton->setObjectName(QString::fromUtf8("applyButton"));
     applyButton->setGeometry(QRect(10, 230, 100, 25));
@@ -316,25 +322,19 @@ public:
     tab_smooth = new QWidget();
     tab_smooth->setObjectName(QString::fromUtf8("tab_smooth"));
     tabWidgetEdit->addTab(tab_smooth, QApplication::translate("TextureEditorClass", "   Smooth   ", 0, QApplication::UnicodeUTF8));
-    tabWidget = new QTabWidget(TextureEditorClass);
-    tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
-    tabWidget->setGeometry(QRect(10, 10, 315, 335));
-    tab = new QWidget();
-    tab->setObjectName(QString::fromUtf8("tab"));
-    tabWidget->addTab(tab, QApplication::translate("TextureEditorClass", "Texture", 0, QApplication::UnicodeUTF8));
 
     retranslateUi(TextureEditorClass);
 
-    QSize size(331, 668);
+    QSize size(434, 772);
     size = size.expandedTo(TextureEditorClass->minimumSizeHint());
     TextureEditorClass->resize(size);
 
     QObject::connect(spinBoxAngle, SIGNAL(valueChanged(int)), angle, SLOT(setValue(int)));
     QObject::connect(angle, SIGNAL(valueChanged(int)), spinBoxAngle, SLOT(setValue(int)));
 
+    tabWidget->setCurrentIndex(0);
     tabWidgetEdit->setCurrentIndex(0);
     tabWidget_2->setCurrentIndex(0);
-    tabWidget->setCurrentIndex(0);
 
 
     QMetaObject::connectSlotsByName(TextureEditorClass);
@@ -343,10 +343,11 @@ public:
     void retranslateUi(QWidget *TextureEditorClass)
     {
     TextureEditorClass->setWindowTitle(QApplication::translate("TextureEditorClass", "TextureEditor", 0, QApplication::UnicodeUTF8));
+    tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("TextureEditorClass", "Texture", 0, QApplication::UnicodeUTF8));
     groupBox->setTitle(QApplication::translate("TextureEditorClass", " Border managment ", 0, QApplication::UnicodeUTF8));
-    faceRB->setText(QApplication::translate("TextureEditorClass", "Repeat", 0, QApplication::UnicodeUTF8));
     vertRB->setText(QApplication::translate("TextureEditorClass", "Clamp", 0, QApplication::UnicodeUTF8));
     remapRB->setText(QApplication::translate("TextureEditorClass", "Modulus", 0, QApplication::UnicodeUTF8));
+    faceRB->setText(QApplication::translate("TextureEditorClass", "Repeat", 0, QApplication::UnicodeUTF8));
     groupBox_2->setTitle(QApplication::translate("TextureEditorClass", " UV Map editing ", 0, QApplication::UnicodeUTF8));
     applyButton->setText(QApplication::translate("TextureEditorClass", "Save Changes", 0, QApplication::UnicodeUTF8));
     StatusLabel->setText(QApplication::translate("TextureEditorClass", "Loading...", 0, QApplication::UnicodeUTF8));
@@ -372,7 +373,6 @@ public:
     LabelFaceNum->setText(QApplication::translate("TextureEditorClass", "0", 0, QApplication::UnicodeUTF8));
     tabWidgetEdit->setTabText(tabWidgetEdit->indexOf(tab_comp), QApplication::translate("TextureEditorClass", "Connected component", 0, QApplication::UnicodeUTF8));
     tabWidgetEdit->setTabText(tabWidgetEdit->indexOf(tab_smooth), QApplication::translate("TextureEditorClass", "   Smooth   ", 0, QApplication::UnicodeUTF8));
-    tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("TextureEditorClass", "Texture", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(TextureEditorClass);
     } // retranslateUi
 

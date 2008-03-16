@@ -51,7 +51,7 @@ const PluginInfo &EditTexturePlugin::Info()
 {
 	static PluginInfo ai; 
 	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.8b");
+	ai.Version = tr("0.1a");
 	ai.Author = ("Riccardo Dini");
     return ai;
 }
@@ -177,8 +177,8 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 	for(ff = m.cm.face.begin(); ff != m.cm.face.end(); ++ff)
 		if(!(*ff).IsD() && (*ff).IsS()) FaceSel.push_back(&*ff);
 	// Reset the flag
-	m.cm.face.EnableFFAdjacency();
-	tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+	//m.cm.face.EnableFFAdjacency();
+	//tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	CMeshO::FaceIterator fi;
 	for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) (*fi).ClearS();
 
@@ -260,141 +260,12 @@ void EditTexturePlugin::DrawXORRect(GLArea *gla)
 
 void EditTexturePlugin::InitTexture(MeshModel &m)
 {
-	// FIX: Add multi texture support	<-----
-	/* This function is the core of the plugin. It create the support structure for the vertex 
-	(position, adjacency...) and initialize the RenderArea object(s).
-	Pseudo-code:
-	Set Q = {};
-	Foreach face f
-		if (f is selected & not visited) Q += f; change ID;
-		foreach face f1 in Q
-			foreach vertex v in f1
-				Find adjacent vertex
-				create Container 
-				v->visited;
-			f1->visited;
-			foreach face fa adjacent to f1
-				if (fa has the same UV on f1.WT & fa not visited) Q += fa;
-	Reset flags; */
-
 	// Get the textures folder
 	QString s = QString(m.fileName.c_str());
-	int st;
-	for (st = s.length() - 1; st >= 0; st--) if (s.at(st) == QChar('/')) break;
-	s.remove(st+1, s.size() - st -1);
-
-	// Create the flag needed to the visit	
-	int insBit = CFaceO::NewBitFlag();
-    for(unsigned i = 0; i < m.cm.face.size(); i++)
-        m.cm.face[i].ClearUserBit(insBit);
-	int visBit = CVertexO::NewBitFlag();
-    for(unsigned i = 0; i < m.cm.vert.size(); i++)
-        m.cm.vert[i].ClearUserBit(visBit);
-	
-	// Progress bar
-	int step = 0;
-	widget->SetProgressMax(m.cm.face.size());
-
-	if (!m.cm.textures.empty())
-	{
-		// Procedure:
-		vector< QHash<CVertexO*, Container> > param; 
-		vector<bool> outofrange;
-		int actualID = -1;		// ID of the component
-		for (unsigned i = 0; i < m.cm.textures.size(); i++)	// init the vectors
-		{
-			vector<Container> tmp;
-			param.push_back(QHash<CVertexO*, Container>());
-			outofrange.push_back(false);
-		}
-
-		vector<CFaceO*> Q;	// Set of selected face
-		CMeshO::FaceIterator fi;
-		vector<CVertexO*> V;			// Set (3) of the vertex in the actual face
-
-		vector<vector<int>> ver;
-		
-		unsigned i = 0;
-		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
-		{
-			// Add a disconnected vertex, if selected
-			if (!(*fi).IsV() && (*fi).IsS() && !(*fi).IsD()) 
-			{
-				Q.push_back(&*fi);
-				actualID++;	// The component is disconnected -> changes the ID
-				for(unsigned ii = 0; ii < m.cm.vert.size(); ii++)
-					m.cm.vert[ii].ClearUserBit(visBit);	// Needed to create new vertex structure if a vertex is used in
-			}											// more than one component, so it will be replicated
-
-			for (; i < Q.size(); i++)
-			{
-				V.clear();
-				V.push_back(Q[i]->V(0));
-				V.push_back(Q[i]->V(1));
-				V.push_back(Q[i]->V(2));
-
-				for (int j = 0; j < 3; j++)
-				{
-					CVertexO* pv = V[j];
-					if (!pv->IsUserBit(visBit))	// Create a new structure
-					{
-						float u = Q[i]->WT(j).u();
-						float v = Q[i]->WT(j).v();
-						// In case of texture out of border I can only remap the uv after the a complete scan
-						if ((u < 0 || u > 1 || v < 0 || v > 1) && !outofrange[Q[i]->WT(0).n()]) outofrange[Q[i]->WT(0).n()] = true; 
-						// The origin (x,y) of the Render Area coordinate is at the top-left of the screen, but
-						// the  origin of the texture (u,v) is at the bottom-left, so there aren't problem with X, 
-						// but for the Y axis I must subtract the screen height for the conversion...
-						QRect r = QRect(u * AREADIM - RADIUS/2, (AREADIM - (v * AREADIM)) - RADIUS/2, RADIUS, RADIUS);
-						Container a = Container(actualID, u, v, r, pv, Q[i], j);
-						a.AddAdj(V[(j+1)%3]);
-						a.AddAdj(V[(j+2)%3]);
-						param[Q[i]->WT(0).n()][pv] = a;
-						pv->SetUserBit(visBit);
-					}
-					else	// Add a new adj to the existing vertex
-					{
-						param[Q[i]->WT(0).n()][pv].AddAdj(V[(j+1)%3]);
-						param[Q[i]->WT(0).n()][pv].AddAdj(V[(j+2)%3]);
-						param[Q[i]->WT(0).n()][pv].AddFace(Q[i]);
-						param[Q[i]->WT(0).n()][pv].AddWT(j);
-					}
-				}
-				Q[i]->SetV();
-				// Search the adjacent faces
-				for (int y = 0; y < 3; y++)
-				{
-					CFaceO* pf = Q[i]->FFp(y);
-					if (pf->IsS() && Q[i] != pf && !pf->IsV() && !pf->IsD())
-					{
-						// Check if the actual face and the adjacent one have the same texture coord
-						bool connectedComp = false;
-						if (pf->WT(0) == Q[i]->WT(0) || pf->WT(0) == Q[i]->WT(1) || pf->WT(0) == Q[i]->WT(2) ||
-							pf->WT(1) == Q[i]->WT(0) || pf->WT(1) == Q[i]->WT(1) || pf->WT(1) == Q[i]->WT(2) ||
-							pf->WT(2) == Q[i]->WT(0) || pf->WT(2) == Q[i]->WT(1) || pf->WT(2) == Q[i]->WT(2))
-							connectedComp = true;
-						if (connectedComp && !pf->IsUserBit(insBit))
-						{
-							Q.push_back(pf);
-							pf->SetUserBit(insBit);
-						}
-					}
-				}
-				widget->SetProgress(++step);
-			}
-		}
-		// Reset flag 'Visited'
-		for (unsigned h = 0; h < m.cm.face.size(); h++) m.cm.face[h].ClearV();
-		CFaceO::DeleteBitFlag(insBit);
-		CVertexO::DeleteBitFlag(visBit);
-
-		// Create the RenderArea object
-		for (unsigned i = 0; i < param.size(); i++)
-			if (param[i].size() > 0) widget->AddRenderArea(s+m.cm.textures[i].c_str(), param[i], outofrange[i]);
-	}
-	else widget->AddEmptyRenderArea();
-	widget->SetProgress(0);
-	widget->SetStatusText("Idle");
+	// Add the tab
+    for(unsigned i = 0; i < m.cm.textures.size(); i++)
+		widget->AddRenderArea(m.cm.textures[i].c_str(), &m, i);
+	vcg::Trackball tb;
 }
 
 Q_EXPORT_PLUGIN(EditTexturePlugin)

@@ -3,11 +3,9 @@
 
 #include <stdio.h>
 #include <QWidget>
-#include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
 #include "ui_textureeditor.h"
 #include "renderarea.h"
-#include "Container.h"
 
 #define MARGIN 5
 
@@ -21,7 +19,7 @@ public:
 	TextureEditor(QWidget *parent = 0);
 	~TextureEditor();
 
-	void AddRenderArea(QString texture, QHash<CVertexO*, Container> map, bool outOfRange);
+	void AddRenderArea(QString texture, MeshModel *m, unsigned ind);
 	void AddEmptyRenderArea();
 	void Reset();
 	void SetProgress(int val);
@@ -31,7 +29,6 @@ public:
 	RenderArea *first;	// Ref to the first RA
 	MeshModel *model;	// Ref to the model (for upate)
 	GLArea *area;		// Ref to the GLArea (for refresh)
-
 
 private:
 	Ui::TextureEditorClass ui;

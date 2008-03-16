@@ -1,32 +1,39 @@
 #include <QtGui>
 #include "renderarea.h"
 #include "textureeditor.h"
+#include <wrap/qt/trackball.h>
+#include <wrap/gui/trackball.cpp>
+#include <math.h>
+#include <stdlib.h>
 
-static unsigned COUNTER = 0;
-
-RenderArea::RenderArea(QWidget *parent, QString textureName, QHash<CVertexO*,Container> uvmap, bool outRange) : QGLWidget(parent)
+RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsigned tnum) : QGLWidget(parent)
 {
     antialiased = true;
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
+	image = QImage();
 	if(textureName != QString())
 	{
 		if (QFile(textureName).exists()) image = QImage(textureName);
 		else textureName = QString();
 	}
-	out = outRange;
-	map = uvmap;
+	textNum = tnum;
 	isDragging = false;
 	highlightedPoint = -1;
 	highComp = -1;
 	highClick = -1;
-	mode = Point;
-	moved = false;
 
-	if (out) RemapRepeat();
+	model = m;
+	oldX = 0; oldY = 0;
+	viewport = Point2f(0,0);
+	tb = new Trackball();
+	tb->center = Point3f(0, 0, 0);
+	tb->radius = 1;
+
+	brush = QBrush(Qt::green);
 
 	this->setMouseTracking(true);
-	this->setCursor(Qt::CrossCursor);
+	this->setCursor(Qt::PointingHandCursor);
 	this->setAttribute(Qt::WA_NoSystemBackground);
 }
 
@@ -56,186 +63,133 @@ void RenderArea::setTexture(QString path)
 	fileName = path;
 }
 
-void RenderArea::SetUVMap(QHash<CVertexO*, Container> uv)
-{
-	map = uv;
-}
-
-void RenderArea::paintEvent(QPaintEvent * /* event */)
+void RenderArea::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.setPen(pen);
+    painter.setPen(QPen(brush,2));	// <--- customizzabile???
     painter.setBrush(brush);
     painter.setRenderHint(QPainter::Antialiasing, antialiased);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-    //painter.translate(TRANSLATE, TRANSLATE);
+	
+	painter.begin(painter.device());	// Initialize a GL context
+	
+	tb->GetView();
+	tb->Apply(true);
 
+	int maxX = 0, maxY = 0, minX = 0, minY = 0;	// For texCoord out of border
 	if (image != QImage())
 	{
-		// Background texture
-		if (out)
+	    glEnable(GL_COLOR_LOGIC_OP);
+		glLogicOp(GL_XOR);
+		glEnable(GL_DEPTH_TEST);
+	    glColor3f(1,1,1);
+		glLineWidth(2);
+		for (unsigned i = 0; i < model->cm.face.size(); i++)
 		{
-			// Draw 9 planes..
-			for (int i = 0; i < 3; i++)
-				for (int j = 0; j < 3; j++)
-					painter.drawImage(QRect(0 + AREADIM/3 * i,0 + AREADIM/3 * j, AREADIM/3,AREADIM/3),image,QRect(0,0,image.width(),image.height()));
-			// ..and the bounds
-			painter.setPen(Qt::red);
-			painter.drawLine(QPoint(0,AREADIM/3), QPoint(AREADIM,AREADIM/3));
-			painter.drawLine(QPoint(0,2*AREADIM/3), QPoint(AREADIM,2*AREADIM/3));
-			painter.drawLine(QPoint(AREADIM/3,0), QPoint(AREADIM/3,AREADIM));
-			painter.drawLine(QPoint(2*AREADIM/3,0), QPoint(2*AREADIM/3,AREADIM));
-			painter.setPen(pen);
-
+			// While drawning, it counts the number of 'planes'
+			if (model->cm.face[i].WT(0).u() > maxX || model->cm.face[i].WT(1).u() > maxX || model->cm.face[i].WT(2).u() > maxX)	maxX++;
+			if (model->cm.face[i].WT(0).v() > maxY || model->cm.face[i].WT(1).v() > maxY || model->cm.face[i].WT(2).v() > maxY)	maxY++;
+			if (model->cm.face[i].WT(0).u() < minX || model->cm.face[i].WT(1).u() < minX || model->cm.face[i].WT(2).u() < minX)	minX--;
+			if (model->cm.face[i].WT(0).v() < minY || model->cm.face[i].WT(1).v() < minY || model->cm.face[i].WT(2).v() < minY)	minY--;
+			// First draw the model in u,v space
+			if (model->cm.face[i].IsS() && model->cm.face[i].WT(0).n() == textNum)
+			{
+				glBegin(GL_LINE_LOOP);
+					glVertex3f(model->cm.face[i].WT(0).u() * AREADIM, AREADIM - (model->cm.face[i].WT(0).v() * AREADIM), 1);
+					glVertex3f(model->cm.face[i].WT(1).u() * AREADIM, AREADIM - (model->cm.face[i].WT(1).v() * AREADIM), 1);
+					glVertex3f(model->cm.face[i].WT(2).u() * AREADIM, AREADIM - (model->cm.face[i].WT(2).v() * AREADIM), 1);
+				glEnd();
+			}
 		}
-		else painter.drawImage(QRect(0,0,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
+		glDisable(GL_LOGIC_OP);
+		glDisable(GL_COLOR_LOGIC_OP);
+
+		// Draw the background behind the model
+		for (int x = minX; x < maxX; x++) 
+			for (int y = minY; y < maxY; y++)
+				painter.drawImage(QRect(x*AREADIM,-y*AREADIM,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
+		
+		// and the axis, always in first plane
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0, AREADIM, AREADIM,0,-1,1);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		// Line and text (native Qt)
+		painter.drawLine(0,AREADIM,AREADIM,AREADIM);
+		painter.drawLine(0,AREADIM,0,0);
+		painter.drawText(TRANSLATE, AREADIM - TRANSLATE, QString("(%1,%2)").arg((float)-viewport.X()/AREADIM).arg((float)viewport.Y()/AREADIM));
+		painter.drawText(TRANSLATE, TRANSLATE*3, QString("(%1,%2)").arg((float)-viewport.X()/AREADIM).arg((float)viewport.Y()/AREADIM + 1));
+		painter.drawText(AREADIM - TRANSLATE*18, AREADIM - TRANSLATE, QString("(%1,%2)").arg((float)-(viewport.X()/AREADIM) + 1).arg((float)viewport.Y()/AREADIM));
+		painter.drawText(TRANSLATE, TRANSLATE*6, QString("V"));
+		painter.drawText(AREADIM - TRANSLATE*23, AREADIM - TRANSLATE, QString("U"));
+		glDisable(GL_LOGIC_OP);
+	  	glPopAttrib();
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
 	}
 	else painter.drawText(TEXTX, TEXTY, tr("NO TEXTURE"));
 
-	if (map.size() > 0)
-	{
-		// Draw the selected component 
-		
-		/*
-		// Draw the lines...
-		for (unsigned i = 0; i < map.size(); i++)
-		{
-			for (int jj = 0; jj < map[i].GetAdjSize(); jj++)
-			{
-				unsigned d = map[i].GetAdjAt(jj);
-				if (d > i)	painter.drawLine(map[i].GetVertex().center(),map[d].GetVertex().center());
-			}	
-		}
-		*/
-		// ...and the vertexes (as a circle)
-		QHashIterator<CVertexO*, Container> i(map);
-		while (i.hasNext())
-		{
-			i.next();
-			painter.setOpacity(1.0);
-			painter.setBrush(Qt::yellow);
-			//if ((i == highClick && mode == Point) || (i == highComp && mode == Face)) painter.setBrush(Qt::blue);
-			//else if (i == highlightedPoint) painter.setBrush(Qt::red);
-			painter.drawEllipse((&(Container)i.value())->GetVertex());
-		}
-	}
     painter.setPen(palette().dark().color());
     painter.setBrush(Qt::NoBrush);
     painter.drawRect(QRect(0, 0, width()-1, height()-1));
+
+	painter.end();
 }
 
-void RenderArea::mousePressEvent(QMouseEvent *event)
+// Mouse Event:
+void RenderArea::mousePressEvent(QMouseEvent *e)
 {
-	/*
-	switch(mode)
+	oldX = e->x(); oldY = e->y();
+	tmpX = viewport.X(); tmpY = viewport.Y();
+	tb->MouseDown(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
+	this->update();
+}
+
+void RenderArea::mouseReleaseEvent(QMouseEvent *e)
+{
+	tb->MouseUp(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
+	this->update();
+}
+
+void RenderArea::mouseMoveEvent(QMouseEvent *e)
+{
+	if((e->buttons() & Qt::LeftButton))
 	{
-		case Point:
-			if (highlightedPoint != -1) 
-			{
-				isDragging = true;
-				this->update(map[highlightedPoint].GetVertex());
-				if (highClick != -1) this->update(map[highClick].GetVertex());
-				highClick = highlightedPoint;
-				emit UpdateStat(map[highlightedPoint].GetU(), map[highlightedPoint].GetV(), map[highClick].GetCompID(), map[highClick].GetCompID(), NO_CHANGE);
-			}
-			else
-			{
-				if (highClick != -1) {this->update(map[highClick].GetVertex()); highClick = -1;}
-				emit UpdateStat(0.0,0.0, RESET, RESET, NO_CHANGE);
-			}
-			break;
-		case Face:
-			if (highlightedPoint != -1) 
-			{
-				isDragging = true;
-				if (highlightedPoint != highComp)
-				{
-					highComp = highlightedPoint;
-					VisitConnected();
-				}
-				emit UpdateStat(NO_CHANGE, NO_CHANGE, ENABLECMD, ENABLECMD, connected.size());
-			}
-			else 
-			{
-				isDragging = false;
-				highComp = -1;
-				emit UpdateStat(IGNORECMD, IGNORECMD, DISABLECMD, DISABLECMD, NO_CHANGE);
-			}
-			this->update();
-			break;
-	}*/
-}
-
-void RenderArea::mouseReleaseEvent(QMouseEvent *)
-{
-	/*
-	isDragging = false;
-	if(highlightedPoint != -1) this->update(map[highlightedPoint].GetVertex());
-	if (mode == Face && moved) {UpdateUV(); moved = false;}*/
-}
-
-void RenderArea::mouseMoveEvent(QMouseEvent *event)
-{
-	/*
-	if (isDragging)
-	{
-		QPoint tmp = event->pos();
-		QRect r = map[highlightedPoint].GetVertex();
-		if (event->pos().x() < 0) tmp.setX(0);
-		if (event->pos().x() > AREADIM) tmp.setX(AREADIM);
-		if (event->pos().y() < 0) tmp.setY(0);
-		if (event->pos().y() > AREADIM) tmp.setY(AREADIM);
-		switch(mode)
-		{
-		case Point:
-			r.moveCenter(tmp);
-			map[highlightedPoint].SetVertex(r);
-			if (!out) 
-			{
-				map[highlightedPoint].SetU((float)map[highlightedPoint].GetVertex().center().x() / AREADIM);
-				map[highlightedPoint].SetV((float)(AREADIM - map[highlightedPoint].GetVertex().center().y()) / AREADIM);
-			}
-			else 
-			{
-				map[highlightedPoint].SetU(((float)map[highlightedPoint].GetVertex().center().x() / (AREADIM / 3)) - 1);
-				map[highlightedPoint].SetV(((float)(AREADIM - map[highlightedPoint].GetVertex().center().y()) / (AREADIM / 3)) - 1);
-			}
-			emit UpdateStat(map[highlightedPoint].GetU(),map[highlightedPoint].GetV(), map[highlightedPoint].GetCompID(), IGNORECMD, NO_CHANGE);
-			this->update();
-			break;
-		case Face:
-			int x = tmp.x() - r.center().x();
-			int y = tmp.y() - r.center().y();
-			UpdateComponentPos(x,y);
-			moved = true;
-			break;
-		}
+		tb->track.SetTranslate(Point3f(tmpX + oldX - e->x(), tmpY + oldY - e->y(), 0));
+		viewport = Point2f(tmpX + oldX - e->x(), tmpY + oldY - e->y());
+		this->update();
 	}
-	else
-	{
-		for (unsigned i = 0; i < map.size(); i++)
-		{
-			if (map[i].GetVertex().contains(event->pos()))
-			{
-				if (i != highlightedPoint)
-				{
-					// There are some problems if vertex are near, so I update a larger area..
-					if (highlightedPoint != -1) this->update(map[highlightedPoint].GetVertex());
-					highlightedPoint = i;
-					this->update(map[highlightedPoint].GetVertex());
-				}
-				return;
-			}
-		}
-		if (highlightedPoint != -1)
-		{
-			this->update(map[highlightedPoint].GetVertex());
-			highlightedPoint = -1;
-		}
-	}
-	return;
-	*/
 }
+
+void RenderArea::mouseDoubleClickEvent(QMouseEvent *)
+{
+	// Reset of the trackball
+	tb->center = Point3f(0, 0, 0);
+	viewport = Point2f(0,0);
+	oldX = 0; oldY = 0;
+	tb->track.SetTranslate(Point3f(0,0,0));
+	// <--- reset dello zoom
+	this->update();
+}
+
+void RenderArea::wheelEvent(QWheelEvent*e)
+{
+	// Zoom
+	float WHEEL_STEP = 120.0f;
+	float notch = (float)e->delta()/WHEEL_STEP;
+    tb->MouseWheel(notch, QTWheel2VCG(e->modifiers())); 
+	tb->track.SetScale(notch);	// <---- ???? parametro ????
+	this->update();
+}		
 
 void RenderArea::RemapRepeat()
 {
@@ -496,3 +450,5 @@ QRect RenderArea::GetClampVertex(float u, float v, int index)
 	*/
 	return QRect();
 }
+
+
