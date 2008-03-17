@@ -147,12 +147,6 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 
 				//building new TF object from external file
 				transferFunction = new TransferFunction( par.getString("csvFileName") );
-
-// 				//converting mid handle pos value to perc pos
-// 				float midHandlePerc = (eqData.maxQualityVal - eqData.minQualityVal) / (par.getFloat("midHandlePos") - eqData.minQualityVal);
-// 
-// 				// Applying colors
-// 				applyColorByVertexQuality(m, &transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), eqData.midQualityPercentage, par.getFloat("brightness"));
 			}
 			else
 			{
@@ -174,12 +168,10 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 		transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS) tfId );
 	}
 
-	//converting mid handle pos value to perc pos
-//	float midHandlePerc = (eqData.maxQualityVal - eqData.minQualityVal) / (par.getFloat("midHandlePos") - eqData.minQualityVal);
-
 	// Applying colors
 	applyColorByVertexQuality(m, transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), eqData.midQualityPercentage, par.getFloat("brightness"));
 
+	//all done, deleting transfer function object
 	if ( transferFunction )
 	{
 		delete transferFunction;
