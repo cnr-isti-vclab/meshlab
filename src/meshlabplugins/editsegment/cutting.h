@@ -159,7 +159,7 @@ namespace vcg {
 		}
 
 
-		void AddNearestToQ(VertexType * v, std::ofstream & file) {
+		void AddNearestToQ(VertexType * v /*,std::ofstream & file*/) {
 
 			float dist = 0.0f;
 			float min_dist = std::numeric_limits<float>::max();
@@ -193,13 +193,13 @@ namespace vcg {
 					default : tempTriplet.m = (MarkType)v->IMark(); break;
 				}
 				Q.push(tempTriplet);
-				if (file) file << "Inserzione: d=" << tempTriplet.d << std::endl;
+				//if (file) file << "Inserzione: d=" << tempTriplet.d << std::endl;
 			} else {
-				if (file) file << "Nessun Elemento Inserito" << std::endl;
+				//if (file) file << "Nessun Elemento Inserito" << std::endl;
 			}
 		}
 
-		void AddNeighborhoodNearestToQ(VertexType * v, std::ofstream & file) {
+		void AddNeighborhoodNearestToQ(VertexType * v /*,std::ofstream & file*/) {
 			vcg::face::JumpingPos<FaceType> pos(v->VFp(), v);
 			VertexType* firstV = pos.VFlip();
 			VertexType* tempV=0;
@@ -209,7 +209,7 @@ namespace vcg {
 				tempV = pos.VFlip();
 				assert(tempV->P() != v->P());
 				if (tempV->IMark() != U) {
-					AddNearestToQ(tempV,file);
+					AddNearestToQ(tempV/*,file*/);
 				}
 			} while(tempV != firstV);	
 
@@ -269,25 +269,27 @@ namespace vcg {
 			//now each vertex has principals curvatures and directions in its temp data
 			curvature_end_t = clock();
 
-			if (file) file << "Inizializzazione da input." << std::endl;
+			//if (file) file << "Inizializzazione da input." << std::endl;
 
 			//second iteration on the marked vertex
 			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
 				if ( !vi->IsD() && (vi->IMark() != U))
-					AddNearestToQ(&(*vi),file);	
+					//AddNearestToQ(&(*vi),file);	
+					AddNearestToQ(&(*vi));	
 			}
 
-			if (file) file << "Fine inizializzazione da input. Elementi aggiunti: " << Q.size() << std::endl;
+			//if (file) file << "Fine inizializzazione da input. Elementi aggiunti: " << Q.size() << std::endl;
 
 			int step_counter = 0;
 			while (vertex_to_go != 0) {
 				//algorithm main loop
 
 				if (Q.empty()) {
-					if (file) file << "Coda vuota. Re-Inizializzazione." << std::endl;
+					//if (file) file << "Coda vuota. Re-Inizializzazione." << std::endl;
 					for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
 						if ( !vi->IsD() && (vi->IMark() != U))
-							AddNearestToQ(&(*vi),file);	
+							//AddNearestToQ(&(*vi),file);	
+							AddNearestToQ(&(*vi));
 					}
 					if (Q.empty()) break;
 				}	else {
@@ -301,16 +303,16 @@ namespace vcg {
 					if (tempTriplet.v->IMark() == U) {
 						tempTriplet.v->IMark() = tempTriplet.m;
 						--vertex_to_go; 
-						if (file) file << "Estrazione: d=" << tempTriplet.d << std::endl;
-						AddNearestToQ(tempTriplet.v, file);	
-						AddNeighborhoodNearestToQ(tempTriplet.v,file);
+						//if (file) file << "Estrazione: d=" << tempTriplet.d << std::endl;
+						AddNearestToQ(tempTriplet.v/*, file*/);	
+						AddNeighborhoodNearestToQ(tempTriplet.v/*,file*/);
 					} else {
-						if (file) file << "Estrazione: Elemento nullo" << std::endl;
+						//if (file) file << "Estrazione: Elemento nullo" << std::endl;
 					}
 					
 					//rimozione degli elementi inutili nella coda
 					++step_counter;
-					if (step_counter%5000 == 4999) {
+					if (step_counter%20000 == 19999) {
 						int old_size = Q.size();
 						Q.rebuild();
 						if (file) file << "Rebuild: Coda -> " << old_size << " - Elementi cancellati -> " << old_size - Q.size() << std::endl;
