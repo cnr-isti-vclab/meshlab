@@ -24,6 +24,7 @@
 #ifndef __CURVEDGEFLIP
 #define __CURVEDGEFLIP
 
+#include <vcg/container/simple_temporary_data.h>
 #include <vcg/complex/local_optimization/tri_edge_flip.h>
 #include <vcg/space/triangle3.h>
 #include <vcg/space/point3.h>
@@ -55,6 +56,8 @@ protected:
 	typedef TriEdgeFlip<TRIMESH_TYPE, MYTYPE > Parent;
 	typedef typename vcg::Triangle3<ScalarType> TriangleType;
 	
+	typedef typename TRIMESH_TYPE::VertContainer VertContainer;
+	
 	// New curvature precomputed for the vertexes of the faces 
 	// adjacent to edge to be flipped
 	ScalarType _cv0, _cv1, _cv2, _cv3;
@@ -74,21 +77,33 @@ protected:
 		float s02 = SquaredDistance(v2->P(), v0->P());
 		
 		// voronoi cell of vertex i
-		if ((ang0 < M_PI) && (ang1 < M_PI) && (ang2 < M_PI)) // non obctuse
-			res.A += (s02 * (1.0 / tan(ang1)) + s01 * (1.0 / tan(ang2) ));
+		if ((ang0 < M_PI/2) && (ang1 < M_PI/2) && (ang2 < M_PI/2)) // non obctuse
+			res.A += (s02 * (0.125 / tan(ang1)) + s01 * (0.125 / tan(ang2) ));
 		else {
+			VertexPointer obctvert;
+			
+			if(ang0 >= M_PI/2) obctvert = v0;
+			else if(ang1 >= M_PI/2) obctvert = v1;
+			else if(ang2 >= M_PI/2) obctvert = v2;
+			
 			// obctuse
-			TriangleType triangle(v0->P(), v1->P(), v2->P());
-			res.A += (0.5f * DoubleArea(triangle) -
-			         (s02 * tan(ang1) + s01 * tan(ang2)) );
+			if(obctvert == v0) {
+				TriangleType triangle(v0->P(), v1->P(), v2->P());
+				res.A += (0.5f * DoubleArea(triangle) -
+				         (s01 * 0.125 * tan(ang1) + s02 * 0.125 * tan(ang2)) );
+			}
+			else {
+				float e = SquaredDistance(v0->P(), obctvert->P());
+				res.A += (e * 0.125 * tan(ang0));
+			}
 		}
 		
 		res.K += ang0;
 		
 		ang1 = (Angle(fNormal, v1->N()));
 		ang2 = (Angle(fNormal, v2->N()));
-		res.H += ( Distance(v0->P(), v1->P()) * ang1 + 
-				   Distance(v0->P(), v2->P()) * ang2 );
+		res.H += ( (Distance(v0->P(), v1->P()) / 2.0) * ang1 + 
+				   (Distance(v0->P(), v2->P()) / 2.0) * ang2 );
 		
 		return res;
 	}
@@ -198,7 +213,6 @@ public:
 		cd3 = FaceCurv(v3, v2, v0, n1) + FaceCurv(v3, v1, v2, n2) + Curvature(v3, f1, f2);
 		
 		CURVEVAL curveval;
-		
 		_cv0 = curveval(cd0);
 		_cv1 = curveval(cd1);
 		_cv2 = curveval(cd2);
@@ -215,24 +229,38 @@ public:
 		
 		heap.clear();
 		
+		SimpleTempData<VertContainer, CurvData> tdcurv(mesh.vert);
+		tdcurv.Start();
+		
+		
 		// initialize vertex quality with vertex curvature
-		VertexIterator vi;
+		/*VertexIterator vi;
 		for(vi = mesh.vert.begin(); vi != mesh.vert.end(); ++vi)
-			(*vi).Q() = curveval(Curvature(&*vi));
+			(*vi).Q() = curveval(Curvature(&*vi));*/
 		
 		FaceIterator fi;
+		
+		for(fi = mesh.face.begin(); fi != mesh.face.end(); ++fi) {
+			if(!(*fi).IsD()) {
+				for(unsigned int i = 0; i < 3; i++)
+					tdcurv[(*fi).V0(i)] += FaceCurv((*fi).V0(i), (*fi).V1(i), (*fi).V2(i), (*fi).N());
+			}
+		}
+		
+		VertexIterator vi;
+		for(vi = mesh.vert.begin(); vi != mesh.vert.end(); ++vi)
+			(*vi).Q() = curveval(tdcurv[vi]);
+		
+		tdcurv.Stop();
+		
+		//FaceIterator fi;
 		for(fi = mesh.face.begin(); fi != mesh.face.end(); ++fi)
 			if(!(*fi).IsD()) {
 				for(unsigned int i = 0; i < 3; i++) {
 					VertexPointer v0 = (*fi).V0(i);
 					VertexPointer v1 = (*fi).V1(i);
-					if (v1 - v0 > 0) {
+					if (v1 - v0 > 0)
 						InsertIfConvenient(heap, PosType(&*fi, i), mesh.IMark());
-						/*MYTYPE* newflip = new MYTYPE(PosType(&*fi, i), mesh.IMark());
-						if(newflip->Priority() < 0 && newflip->IsFeasible())
-							heap.push_back(HeapElem(newflip));
-						else delete newflip;*/
-					}
 				}
 			}
 	}
@@ -278,14 +306,10 @@ public:
 			
 			do {
 				if(epos.F() != face1 && epos.FFlip() != face1 && 
-				   epos.F() != face2 && epos.FFlip() != face2) {
+				   epos.F() != face2 && epos.FFlip() != face2)
 					InsertIfConvenient(heap, epos, this->GlobalMark());
-					/*MYTYPE* newflip = new MYTYPE(epos, this->GlobalMark());
-					if(newflip->Priority() < 0 && newflip->IsFeasible())
-						heap.push_back(HeapElem());
-					else delete newflip;*/
-				}
 				epos.NextE();
+				assert(epos.V() == startpos.V() || epos.VFlip() == startpos.V());
 			} while(epos != startpos && !epos.IsBorder());
 		}
 		
@@ -296,14 +320,10 @@ public:
 		} while(epos != pos && !epos.IsBorder());
 		
 		do {
-			if(epos.F() != face2 && epos.FFlip() != face2) {
+			if(epos.F() != face2 && epos.FFlip() != face2)
 				InsertIfConvenient(heap, epos, this->GlobalMark());
-				/*MYTYPE* newflip = new MYTYPE(epos, this->GlobalMark());
-				if(newflip->Priority() < 0 && newflip->IsFeasible())
-					heap.push_back(HeapElem());
-				else delete newflip;*/
-			}
 			epos.NextE();
+			assert(epos.V() == pos.V() || epos.VFlip() == pos.V());
 		} while(epos != pos && !epos.IsBorder());
 		
 		std::push_heap(heap.begin(),heap.end());

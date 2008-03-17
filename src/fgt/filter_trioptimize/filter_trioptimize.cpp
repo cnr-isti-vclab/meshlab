@@ -174,9 +174,9 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 	vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
 	vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
 	
-	
-	
 	vcg::LocalOptimization<CMeshO> optimization(m.cm);
+	
+	Log(0, "initializing vertex curvature...", optimization.nPerfmormedOps);
 	
 	int metric = par.getEnum("metric");
 	switch(metric) {
@@ -190,10 +190,13 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 	 // TODO: set a better limit
 	optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
 	optimization.DoOptimization();
+	
 	//optimization.Finalize<CurvEdgeFlip>();
 	
-	
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+	
+	Log(0, "%i edge flips performed.", optimization.nPerfmormedOps);
+	
 	return true;
 }
 
