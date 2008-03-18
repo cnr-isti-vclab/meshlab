@@ -215,9 +215,8 @@ namespace vcg {
 
 					(*TDCurvPtr)[*vi].T1 = Principal_Direction1;
 					(*TDCurvPtr)[*vi].T2 = Principal_Direction2;
-					(*TDCurvPtr)[*vi].k1 = -Principal_Curvature1;
-					(*TDCurvPtr)[*vi].k2 = -Principal_Curvature2;
-
+					(*TDCurvPtr)[*vi].k1 = Principal_Curvature1;
+					(*TDCurvPtr)[*vi].k2 = Principal_Curvature2;
 				}
 			}
 		}
