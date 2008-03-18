@@ -119,13 +119,12 @@ namespace vcg {
 		typedef typename MESH_TYPE::CoordType CoordType;		
 		typedef typename MESH_TYPE::CoordType::ScalarType ScalarType;		
 
-		//typedef priority_queue<CuttingTriplet<VertexType>, vector<CuttingTriplet<VertexType> >, MinTriplet<VertexType> > TripletQueue;
 		typedef SegmentHeap<VertexType> TripletHeap;
 
 	private:
 		MESH_TYPE * mesh;
 		SimpleTempData<VertContainer, CurvData> *TDCurvPtr;
-		//TripletQueue Q;
+		
 		TripletHeap Q;
 		float _normalWeight;
 		float _curvatureWeight;
@@ -159,7 +158,9 @@ namespace vcg {
 		}
 
 
-		void AddNearestToQ(VertexType * v /*,std::ofstream & file*/) {
+		
+			//prende solo il più vicino
+			void AddNearestToQ(VertexType * v) {
 
 			float dist = 0.0f;
 			float min_dist = std::numeric_limits<float>::max();
@@ -193,11 +194,39 @@ namespace vcg {
 					default : tempTriplet.m = (MarkType)v->IMark(); break;
 				}
 				Q.push(tempTriplet);
-				//if (file) file << "Inserzione: d=" << tempTriplet.d << std::endl;
-			} else {
-				//if (file) file << "Nessun Elemento Inserito" << std::endl;
 			}
 		}
+		/* 
+		//prende tutti i vicini
+		void AddNearestToQ(VertexType * vs) {
+
+			float dist = 0.0f;
+			
+			vcg::face::JumpingPos<FaceType> pos(v->VFp(), v);
+
+			VertexType* firstV = pos.VFlip();
+			
+			VertexType* tempV=0;
+
+			do {
+				pos.NextE();
+				tempV = pos.VFlip();
+				assert(tempV->P() != v->P());
+				if (tempV->IMark() == U) {
+					dist = ImprovedIsophoticDist(v, tempV);
+					
+					CuttingTriplet<VertexType> tempTriplet;
+					tempTriplet.d = dist;
+					tempTriplet.v = tempV;				
+					switch(v->IMark()) {
+						case iF: tempTriplet.m = F; break;
+						case iB: tempTriplet.m = B; break;
+						default : tempTriplet.m = (MarkType)v->IMark(); break;
+					}
+					Q.push(tempTriplet);
+				}
+			} while(tempV != firstV);	
+		}*/
 
 		void AddNeighborhoodNearestToQ(VertexType * v /*,std::ofstream & file*/) {
 			vcg::face::JumpingPos<FaceType> pos(v->VFp(), v);
@@ -312,7 +341,7 @@ namespace vcg {
 					
 					//rimozione degli elementi inutili nella coda
 					++step_counter;
-					if (step_counter%20000 == 19999) {
+					if (step_counter%30000 == 29999) {
 						int old_size = Q.size();
 						Q.rebuild();
 						if (file) file << "Rebuild: Coda -> " << old_size << " - Elementi cancellati -> " << old_size - Q.size() << std::endl;
@@ -325,8 +354,8 @@ namespace vcg {
 			int curvature_time = curvature_end_t - curvature_start_t;
 
 			if (file) {
-				file << std::endl << "tempo TOTALE impiegato: " << total_time << std::endl;
-				file << std::endl << "tempo per calcolare la CURVATURA: " << curvature_time << std::endl;
+				file << "Tempo TOTALE impiegato: " << total_time << std::endl;
+				file << "Tempo per la CURVATURA: " << curvature_time << std::endl;
 				file.close();
 			}
 		}
@@ -339,7 +368,7 @@ namespace vcg {
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
 				if ( vi->IMark() == F ) vi->C() = Color4b::Yellow;
-				if ( vi->IMark() == B ) vi->C() = Color4b::LightGray;
+				if ( vi->IMark() == B ) vi->C() = Color4b::White;
 				if ( vi->IMark() == U ) vi->C() = Color4b::Green;
 			}
 
@@ -536,7 +565,7 @@ namespace vcg {
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
 				vi->IMark() = U;
-				vi->C() = Color4b::LightGray;
+				vi->C() = Color4b::White;
 				vi->Q() = 0.0f;
 			}
 
