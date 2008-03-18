@@ -5,28 +5,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>323</width>
-    <height>270</height>
+    <width>329</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>U3D_GUI</string>
   </property>
-  <layout class="QGridLayout" >
-   <item row="0" column="0" >
-    <spacer>
-     <property name="orientation" >
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" >
-      <size>
-       <width>305</width>
-       <height>16</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="0" >
+  <layout class="QVBoxLayout" >
+   <item>
     <widget class="QGroupBox" name="campar_box" >
      <property name="title" >
       <string>Camera Parameters</string>
@@ -239,7 +226,50 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0" >
+   <item>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="title" >
+      <string>Compression</string>
+     </property>
+     <layout class="QHBoxLayout" >
+      <item>
+       <layout class="QHBoxLayout" >
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label" >
+          <property name="text" >
+           <string>U3D quality 0..1000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="qualitySpinBox" >
+          <property name="maximum" >
+           <number>1000</number>
+          </property>
+          <property name="value" >
+           <number>500</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <spacer>
      <property name="orientation" >
       <enum>Qt::Vertical</enum>
@@ -252,7 +282,7 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="0" >
+   <item>
     <layout class="QHBoxLayout" >
      <property name="spacing" >
       <number>6</number>

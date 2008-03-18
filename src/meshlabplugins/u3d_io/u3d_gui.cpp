@@ -37,6 +37,8 @@ void U3D_GUI::saveParameters()
 	vcg::Point3f p = avoidExponentialNotation(sw->_obj_pos,_param._campar->_obj_bbox_diag);
 	_param._campar = new vcg::tri::io::u3dparametersclasses::Movie15Parameters::CameraParameters(
 		(float) ui.fov_spn->value(),0.0f,from_target_to_camera,from_target_to_camera.Norm(),sw->_obj_bbox_diag,p);
+	_param.positionQuality = ui.qualitySpinBox->value();
+
 	delete sw;
 }
 

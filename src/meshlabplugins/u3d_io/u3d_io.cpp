@@ -41,6 +41,9 @@ QString U3DIOPlugin::computePluginsPath()
 
 bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos */*cb*/, QWidget *parent)
 {
+  vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();
   //std::string filename = fileName.toUtf8().data();
@@ -69,7 +72,7 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		U3D_GUI pw(mp,parent);
 		pw.exec();
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
-		
+		qDebug("Quality parameter %i",mp.positionQuality);
 
 		QSettings settings;
 		
