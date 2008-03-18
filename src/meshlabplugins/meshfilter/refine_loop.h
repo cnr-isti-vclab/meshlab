@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.14  2008/03/18 10:30:20  cignoni
+added color interpolation
+
 Revision 1.13  2007/03/20 15:51:16  cignoni
 Update to the new texture syntax
 
@@ -163,6 +166,9 @@ struct OddPointLoop : public std::unary_function<face::Pos<typename MESH_TYPE::F
 		l = &he.v->P();
 		he.FlipV();
 		r = &he.v->P();
+
+		if( MESH_TYPE::HasPerVertexColor())
+			nv.C().lerp(ep.f->V(ep.z)->C(),ep.f->V1(ep.z)->C(),.5f);
 
 		if (he.IsBorder()) {
 			nv.P() = ((*l)*0.5 + (*r)*0.5);
