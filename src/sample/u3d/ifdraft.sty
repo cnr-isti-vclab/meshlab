@@ -1,0 +1,68 @@
+%%
+%% This is file `ifdraft.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% ifdraft.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 1999, 2005, 2006 by
+%%    Heiko Oberdiek <oberdiek@uni-freiburg.de>
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3 of this license or (at your option) any later
+%% version. The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%% 
+%% This work has the LPPL maintenance status "maintained".
+%% 
+%% This Current Maintainer of this work is Heiko Oberdiek.
+%% 
+%% This work consists of the main source file ifdraft.dtx
+%% and the derived files
+%%    ifdraft.sty, ifdraft.pdf, ifdraft.ins, ifdraft.drv.
+%% 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ifdraft}%
+  [2006/02/20 v1.2 Switch for option draft (HO)]
+\newif\if@draft
+\newif\if@option@draft
+\newif\if@option@final
+\DeclareOption{draft}{%
+  \@drafttrue
+  \@option@drafttrue
+}
+\DeclareOption{final}{%
+  \@draftfalse
+  \@option@finaltrue
+}
+\ProcessOptions*\relax
+\newcommand*{\ifdraft}{%
+  \if@draft
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+\newcommand*{\ifoptiondraft}{%
+  \if@option@draft
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+\newcommand*{\ifoptionfinal}{%
+  \if@option@final
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+\endinput
+%%
+%% End of file `ifdraft.sty'.
