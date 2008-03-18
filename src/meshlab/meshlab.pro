@@ -66,6 +66,7 @@ QMAKE_INFO_PLIST = ../install/info.plist
 
 # to add MacOS icon 
 ICON = images/meshlab.icns
+ICON += images/meshlab_obj.icns
 
 QT           += opengl 
 QT           += xml
