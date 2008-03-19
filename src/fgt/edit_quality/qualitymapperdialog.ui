@@ -534,7 +534,7 @@
               </property>
               <property name="sizeHint" >
                <size>
-                <width>40</width>
+                <width>16</width>
                 <height>20</height>
                </size>
               </property>
@@ -554,13 +554,20 @@
              </widget>
             </item>
             <item>
+             <widget class="QLineEdit" name="midPercentage" >
+              <property name="text" >
+               <string>%</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer>
               <property name="orientation" >
                <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeHint" >
                <size>
-                <width>40</width>
+                <width>16</width>
                 <height>20</height>
                </size>
               </property>

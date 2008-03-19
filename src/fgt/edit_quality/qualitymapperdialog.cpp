@@ -63,6 +63,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 	_equalizer_histogram = 0;
 	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 		_equalizerHandles[i] = 0;
+	_signalDir = UNKNOWN_DIRECTION;
 
 	//building default Transfer Function
 	_transferFunction = new TransferFunction( STARTUP_TF_TYPE );
@@ -341,6 +342,7 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	// Connecting handles to spinboxes
 	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(positionChangedToSpinBox(double)), ui.minSpinBox, SLOT(setValue(double)));
 	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(positionChangedToSpinBox(double)), ui.midSpinBox, SLOT(setValue(double)));
+	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(positionChangedToSpinBox(double)), this, SLOT(on_midSpinBox_valueChanged(double)));
 	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(positionChangedToSpinBox(double)), ui.maxSpinBox, SLOT(setValue(double)));
 	
 	// Connecting left and right handles to mid handle
@@ -1340,4 +1342,37 @@ void QualityMapperDialog::setEqualizerParameters(EQUALIZER_INFO data)
 void QualityMapperDialog::on_brightnessSlider_valueChanged(int value)
 {
 	ui.brightessSpinBox->setValue((double)value/50.0);
+}
+
+void QualityMapperDialog::on_midSpinBox_valueChanged(double)
+{
+	if ( _signalDir != LABEL2SPINBOX )
+		ui.midPercentage->blockSignals( true );
+	QString val;
+	val.setNum( 100.0f * absolute2RelativeValf( ui.midSpinBox->value(), ui.maxSpinBox->value() - ui.minSpinBox->value() ), 'g', 4 );
+	ui.midPercentage->setText( val + "%" );
+	if ( _signalDir != LABEL2SPINBOX )
+		ui.midPercentage->blockSignals( false );
+
+	_signalDir = SPINBOX2LABEL;
+}
+
+void QualityMapperDialog::on_midPercentage_textEdited(QString newText)
+{
+	bool conversionPossible;
+	float numericValue = newText.toFloat(&conversionPossible);
+
+	if ( _signalDir != SPINBOX2LABEL )
+		ui.midSpinBox->blockSignals( true );
+	if ((conversionPossible) && (numericValue>=0) && (numericValue<=100) )
+	{
+		ui.midSpinBox->setValue( relative2AbsoluteValf(numericValue, ui.maxSpinBox->value() - ui.minSpinBox->value()) / 100.0f );
+		_equalizerHandles[MID_HANDLE]->setXBySpinBoxValueChanged(ui.midSpinBox->value());
+	}
+	else
+		QMessageBox::warning(this, tr("Wrong text value"), tr("The value inserted in the text area has a bad range value or is of a not compatible type"), QMessageBox::Ok); 
+	if ( _signalDir != SPINBOX2LABEL )
+		ui.midSpinBox->blockSignals( false );
+
+	_signalDir = LABEL2SPINBOX;
 }

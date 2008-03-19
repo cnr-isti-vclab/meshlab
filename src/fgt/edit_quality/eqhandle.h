@@ -104,8 +104,10 @@ signals:
 
 private slots:
 	
-	void setXBySpinBoxValueChanged (double spinBoxValue); // changing equalizer spinboxes moves the connected handle
 	void moveMidHandle();
+
+public slots:
+	void setXBySpinBoxValueChanged (double spinBoxValue); // changing equalizer spinboxes moves the connected handle
 };
 
 #endif // EQHANDLE_H

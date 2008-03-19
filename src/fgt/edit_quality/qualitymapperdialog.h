@@ -100,6 +100,13 @@ public:
 #define GRAPHICS_ITEMS_LIST		QList<QGraphicsItem *>
 #define TF_HANDLES_LIST			QList<TFHandle*>
 
+enum MID_HANDLE_SIGNAL_DIRECTION
+{
+	UNKNOWN_DIRECTION = 0,
+	SPINBOX2LABEL,
+	LABEL2SPINBOX
+};
+
 //this class define the dialog of the plugin
 class QualityMapperDialog : public QDockWidget
 {
@@ -127,6 +134,7 @@ private:
 	bool			_leftHandleWasInsideHistogram;
 	bool			_rightHandleWasInsideHistogram;
 	GRAPHICS_ITEMS_LIST _equalizerHistogramBars;
+	MID_HANDLE_SIGNAL_DIRECTION	_signalDir;
 
 	//Transfer Function items
 	TransferFunction *_transferFunction;
@@ -170,6 +178,8 @@ signals:
 	void closingDialog();
 
 private slots:
+	void on_midPercentage_textEdited(QString);
+	void on_midSpinBox_valueChanged(double);
 	void on_brightnessSlider_valueChanged(int);
 	void on_clampButton_clicked();
 	void on_ySpinBox_valueChanged(double);
