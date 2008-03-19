@@ -5,14 +5,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>612</width>
-    <height>696</height>
+    <width>599</width>
+    <height>623</height>
    </rect>
   </property>
   <property name="sizePolicy" >
-   <sizepolicy>
-    <hsizetype>0</hsizetype>
-    <vsizetype>0</vsizetype>
+   <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -39,22 +37,8 @@
    <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" >
-   <property name="margin" >
-    <number>9</number>
-   </property>
-   <property name="spacing" >
-    <number>6</number>
-   </property>
    <item>
     <widget class="QGroupBox" name="groupBoxSx" >
-     <property name="sizePolicy" >
-      <sizepolicy>
-       <hsizetype>1</hsizetype>
-       <vsizetype>1</vsizetype>
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="title" >
       <string/>
      </property>
@@ -62,20 +46,23 @@
       <bool>false</bool>
      </property>
      <layout class="QHBoxLayout" >
-      <property name="margin" >
+      <property name="spacing" >
        <number>0</number>
       </property>
-      <property name="spacing" >
+      <property name="leftMargin" >
+       <number>0</number>
+      </property>
+      <property name="topMargin" >
+       <number>0</number>
+      </property>
+      <property name="rightMargin" >
+       <number>0</number>
+      </property>
+      <property name="bottomMargin" >
        <number>0</number>
       </property>
       <item>
        <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>0</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
         <item>
          <widget class="QLabel" name="labelMLLogo" >
           <property name="text" >
@@ -96,8 +83,8 @@
           </property>
           <property name="sizeHint" >
            <size>
-            <width>256</width>
-            <height>40</height>
+            <width>20</width>
+            <height>5</height>
            </size>
           </property>
          </spacer>
@@ -138,25 +125,32 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>20</width>
+            <height>5</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
       </item>
       <item>
        <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>0</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
         <item>
          <widget class="QLabel" name="labelMLDescription" >
           <property name="text" >
            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:13pt;">&lt;span style=" font-size:11pt; font-weight:600;">General Info&lt;/span>&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt; font-weight:600;">&lt;span style=" font-weight:400;">MeshLab is an extendible mesh processing system, aimed to the user assisted cleaning, filtering, editing and rendering of unstructured 3D triangular meshes. &lt;/span>&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;">The tool found its natural use for the processiing of the meshes that usually arise in 3D scanning. The system is heavily based on the VCG library (vcg.sf.net). The current version of Meshlab was developed during the FGT (Foundation of Three-dimensional Graphics) course of the Computer Science department of the University of Pisa.&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg';">&lt;span style=" font-size:11pt; font-weight:600;">General Info&lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt; font-weight:600;">&lt;span style=" font-weight:400;">MeshLab is an extendible mesh processing system, aimed to the user assisted cleaning, filtering, editing and rendering of unstructured 3D triangular meshes.&lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;">The tool found its natural use for the processiing of the meshes that usually arise in 3D scanning. The system is heavily based on the VCG library (http://vcg.sf.net).&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="wordWrap" >
            <bool>true</bool>
@@ -166,7 +160,18 @@ p, li { white-space: pre-wrap; }
         <item>
          <widget class="QLabel" name="labelReferences" >
           <property name="text" >
-           <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:MS Shell Dlg; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">References&lt;/span>&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;">&lt;span style=" font-weight:400;">Please, when using this tool, cite the following reference: MeshLab Visual Computing Lab - ISTI - CNR http://meshlab.sourceforge.net/ For any general question about the use of this software please contact: &lt;/span>&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-style:italic;">&lt;a href="mailto:p.cignoni@isti.cnr.it?subject=[MeshLab] Info request"> Paolo Cignoni ( p.cignoni@isti.cnr.it )&lt;/a>&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+           <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg';">&lt;span style=" font-size:11pt; font-weight:600;">References&lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt; font-weight:600;">&lt;span style=" font-weight:400;">Please, when using this tool, cite the following reference:&lt;/span>&lt;/p>
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;">&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;"> MeshLab&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;"> Visual Computing Lab - ISTI - CNR&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;"> http://meshlab.sourceforge.net/ &lt;/p>
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;">&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;">For any general question about the use of this software please contact: &lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:11pt;">&lt;a href="mailto:p.cignoni@isti.cnr.it?subject=[MeshLab] Info request">&lt;span style=" font-style:italic; text-decoration: underline; color:#0000ff;"> Paolo Cignoni ( p.cignoni@isti.cnr.it )&lt;/span>&lt;/a>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="wordWrap" >
            <bool>true</bool>
@@ -181,11 +186,17 @@ p, li { white-space: pre-wrap; }
           <property name="text" >
            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:8pt;">&lt;span style=" font-size:10pt; font-weight:600;">Authors&lt;/span>&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt; font-weight:600;">&lt;span style=" font-weight:400;">P. Cignoni and&lt;/span>&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">(in strict alphabetic order)&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">E. Cerisoli, M. Corsini, V. Fiorin, A. Gfrei, G. Gangemi, M. Latronico, F. Mazzanti, A. Mochi, M. Pirosu, F. Ponchio, D. Portelli, G. Ranzuglia, D. Vacca, F. Vannini, A. Venturi, M. Vergauwen&lt;/p>&lt;/body>&lt;/html></string>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt; font-weight:600;">&lt;span style=" font-weight:400;">Main Designer: Paolo Cignoni &lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">Stable Contributors&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">    * Marco Callieri&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">    * Massimiliano Corsini&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">    * Fabio Ganovelli&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">    * Guido Ranzuglia &lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">And a long growing list of authors available at:&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">http://meshlab.sourceforge.net/wiki/index.php/Developers&lt;/p>
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="wordWrap" >
            <bool>true</bool>
@@ -199,56 +210,35 @@ p, li { white-space: pre-wrap; }
    </item>
    <item>
     <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
      <item>
-      <widget class="QGroupBox" name="groupBoxBtm" >
-       <property name="flat" >
-        <bool>false</bool>
-       </property>
-       <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>0</number>
-        </property>
-        <property name="spacing" >
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="labelVCGLogo_4" >
-          <property name="minimumSize" >
-           <size>
-            <width>186</width>
-            <height>150</height>
-           </size>
-          </property>
-          <property name="maximumSize" >
-           <size>
-            <width>100</width>
-            <height>113</height>
-           </size>
-          </property>
-          <property name="text" >
-           <string/>
-          </property>
-          <property name="pixmap" >
-           <pixmap resource="../meshlab.qrc" >:/images/logo.png</pixmap>
-          </property>
-          <property name="scaledContents" >
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="labelVCGDescription" >
-          <property name="text" >
-           <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QLabel" name="labelVCGLogo_4" >
+         <property name="minimumSize" >
+          <size>
+           <width>186</width>
+           <height>150</height>
+          </size>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+         <property name="pixmap" >
+          <pixmap resource="../meshlab.qrc" >:/images/logo.png</pixmap>
+         </property>
+         <property name="scaledContents" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelVCGDescription" >
+         <property name="text" >
+          <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:8pt;">&lt;span style=" font-size:10pt; font-weight:600;">VCGLib&lt;/span>&lt;/p>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:8pt;">&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt; font-weight:600;">VCGLib&lt;/p>
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt; font-weight:600;">&lt;span style=" font-weight:400;">http://vcg.sf.net &lt;/span>&lt;/p>
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">Visual and Computer Graphics Library&lt;/p>
 &lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">&lt;/p>
@@ -256,265 +246,111 @@ p, li { white-space: pre-wrap; }
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">&lt;span style=" font-weight:600;">Visual Computing Lab &lt;/span>&lt;/p>
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">http://vcg.isti.cnr.it &lt;/p>
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:10pt;">ISTI - Italian National Research Council&lt;/p>&lt;/body>&lt;/html></string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QGroupBox" name="groupBox" >
-       <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>9</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" >
-          <property name="margin" >
-           <number>0</number>
-          </property>
-          <property name="spacing" >
-           <number>6</number>
-          </property>
-          <item>
-           <layout class="QVBoxLayout" >
-            <property name="margin" >
-             <number>0</number>
-            </property>
-            <property name="spacing" >
-             <number>6</number>
-            </property>
-            <item>
-             <spacer>
-              <property name="orientation" >
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" >
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" >
-              <property name="margin" >
-               <number>0</number>
-              </property>
-              <property name="spacing" >
-               <number>6</number>
-              </property>
-              <item>
-               <spacer>
-                <property name="orientation" >
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" >
-                 <size>
-                  <width>31</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QLabel" name="labelVCGLogo_2" >
-                <property name="minimumSize" >
-                 <size>
-                  <width>100</width>
-                  <height>125</height>
-                 </size>
-                </property>
-                <property name="maximumSize" >
-                 <size>
-                  <width>100</width>
-                  <height>125</height>
-                 </size>
-                </property>
-                <property name="text" >
-                 <string/>
-                </property>
-                <property name="pixmap" >
-                 <pixmap resource="../meshlab.qrc" >:/images/logo_epoch.png</pixmap>
-                </property>
-                <property name="scaledContents" >
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer>
-                <property name="orientation" >
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" >
-                 <size>
-                  <width>31</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="QLabel" name="label" >
-              <property name="font" >
-               <font>
-                <pointsize>11</pointsize>
-               </font>
-              </property>
-              <property name="text" >
-               <string>partially supported
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" >
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>16</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="labelVCGLogo_2" >
+           <property name="minimumSize" >
+            <size>
+             <width>100</width>
+             <height>125</height>
+            </size>
+           </property>
+           <property name="pixmap" >
+            <pixmap resource="../meshlab.qrc" >:/images/logo_epoch.png</pixmap>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>16</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label" >
+         <property name="font" >
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text" >
+          <string>partially supported
 by the Epoch 
 network of excellence</string>
-              </property>
-              <property name="alignment" >
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" >
-            <property name="margin" >
-             <number>0</number>
-            </property>
-            <property name="spacing" >
-             <number>6</number>
-            </property>
-            <item>
-             <spacer>
-              <property name="orientation" >
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" >
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" >
-              <property name="margin" >
-               <number>0</number>
-              </property>
-              <property name="spacing" >
-               <number>6</number>
-              </property>
-              <item>
-               <spacer>
-                <property name="orientation" >
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" >
-                 <size>
-                  <width>31</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QLabel" name="labelVCGLogo_3" >
-                <property name="minimumSize" >
-                 <size>
-                  <width>121</width>
-                  <height>125</height>
-                 </size>
-                </property>
-                <property name="maximumSize" >
-                 <size>
-                  <width>121</width>
-                  <height>125</height>
-                 </size>
-                </property>
-                <property name="text" >
-                 <string/>
-                </property>
-                <property name="pixmap" >
-                 <pixmap resource="../meshlab.qrc" >:/images/logo_aimatshape.png</pixmap>
-                </property>
-                <property name="scaledContents" >
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer>
-                <property name="orientation" >
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" >
-                 <size>
-                  <width>31</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_2" >
-              <property name="font" >
-               <font>
-                <pointsize>11</pointsize>
-               </font>
-              </property>
-              <property name="text" >
-               <string>partially supported
-by the Aim @ Shape 
-network of excellence</string>
-              </property>
-              <property name="alignment" >
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" >
-          <property name="margin" >
-           <number>0</number>
-          </property>
-          <property name="spacing" >
-           <number>6</number>
-          </property>
-          <item>
-           <spacer>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" >
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="okButton" >
-            <property name="text" >
-             <string>OK</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>2</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="okButton" >
+           <property name="text" >
+            <string>OK</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
