@@ -36,6 +36,7 @@
 #include "filter_trioptimize.h"
 #include "curvedgeflip.h"
 
+#include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/normal.h>
 
@@ -74,6 +75,24 @@ public:
 		vcg::tri::CurvEdgeFlip<CMeshO, AbsCEdgeFlip, AbsCurvEval >(pos, mark) {}
 };
 
+// forward declarations
+class MyTriEdgeFlip;
+class MyPlanarEdgeFlip;
+
+class MyTriEdgeFlip : public vcg::tri::TriEdgeFlip<CMeshO, MyTriEdgeFlip>
+{
+public:
+	MyTriEdgeFlip(PosType pos, int mark) : 
+		vcg::tri::TriEdgeFlip<CMeshO, MyTriEdgeFlip>(pos, mark) {}
+};
+
+class MyPlanarEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, MyPlanarEdgeFlip>
+{
+public:	
+	MyPlanarEdgeFlip(PosType pos, int mark) : 
+		vcg::tri::PlanarEdgeFlip<CMeshO, MyPlanarEdgeFlip>(pos, mark) {}
+};
+
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to
@@ -110,7 +129,7 @@ const QString TriOptimizePlugin::filterInfo(FilterIDType filterId)
 {
 	switch(filterId) {
 		case FP_EDGE_FLIP:
-			return QString("Mesh optimization by edge flipping, which improves triangles quality");
+			return QString("Mesh optimization by edge flipping, to improve mesh curvature or triangle quality");
 		default : assert(0); 
 	}
 }
@@ -132,29 +151,39 @@ const PluginInfo &TriOptimizePlugin::pluginInfo()
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void TriOptimizePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
+void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet & parlst)
 {
 	switch(ID(action)) {
 		case FP_EDGE_FLIP: {
-			parlst.addBool(
-			        "selection",
-			        false,
-			        "Update selection",
-			        "Apply edge flip optimization on selected faces"
-			        );
+			parlst.addBool("selection", false, "Update selection",
+					"Apply edge flip optimization on selected faces");
 			
-			QStringList metrics;
-			metrics.push_back("Mean curvature");
-			metrics.push_back("Normalized squared mean curvature");
-			metrics.push_back("Absolute curvature");
-			parlst.addEnum(
-			        "metric",
-			        0,
-			        metrics,
-			        tr("Metric:"),
-			        tr("various ways to compute surface curvature on vertexes"));
+			parlst.addBool("cflips", true, "Curvature flips",
+					"Do edge flips based on local curvature minimization");
+			
+			parlst.addBool("pflips", true, "Planar flips",
+					"Do edge flips to improve adjacent almost planar faces");
+			
+			parlst.addAbsPerc("pthreshold", 1.0f, 0.1f, 90.0f,
+					"Planar threshold (degrees)",
+					"angle threshold for planar faces");
+			
+			QStringList cmetrics;
+			cmetrics.push_back("mean");
+			cmetrics.push_back("norm squared");
+			cmetrics.push_back("absolute");
+			parlst.addEnum("curvtype", 0, cmetrics, tr("Curvature:"),
+					tr("various ways to compute surface curvature on vertexes"));
+			
+			QStringList pmetrics;
+			pmetrics.push_back("by quality");
+			pmetrics.push_back("delaunay");
+			parlst.addEnum("planartype", 0, pmetrics, tr("Planar:"),
+					tr("types of planar edge flips"));
+			
 			break;
 		}
+		
 		default : assert(0); 
 	}
 }
@@ -162,7 +191,11 @@ void TriOptimizePlugin::initParameterSet(QAction *action,MeshModel &m, FilterPar
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
 bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
-{
+{	
+	int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+	if(delvert) Log(GLLogStream::Info, "Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
+	tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+
 	// to fix topology relations
 	// TODO: make this as optional
 	vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
@@ -170,32 +203,63 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 	vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 	//vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
 	
+	Log(GLLogStream::Info, "Mesh preprocessing done");
+	
 	// temporary test
 	vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
 	vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
 	
 	vcg::LocalOptimization<CMeshO> optimization(m.cm);
 	
-	Log(0, "initializing vertex curvature...", optimization.nPerfmormedOps);
+	time_t start = clock();
 	
-	int metric = par.getEnum("metric");
-	switch(metric) {
-		case 0: optimization.Init<MeanCEdgeFlip>(); break;
-		case 1: optimization.Init<NSMCEdgeFlip>();  break;
-		case 2: optimization.Init<AbsCEdgeFlip>();  break;
+	if(par.getBool("cflips")) {
+		//Log(0, "initializing vertex curvature...", optimization.nPerfmormedOps);
+		
+		int metric = par.getEnum("curvtype");
+		switch(metric) {
+			case 0: optimization.Init<MeanCEdgeFlip>(); break;
+			case 1: optimization.Init<NSMCEdgeFlip>();  break;
+			case 2: optimization.Init<AbsCEdgeFlip>();  break;
+		}
+		
+		// stop when flips become harmful:
+		// != 0.0f to avoid same flips in every run
+		// TODO: set a better limit
+		optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
+		optimization.DoOptimization();
+		
+		Log(0, "%i curvature edge flips performed in %i sec.",
+				optimization.nPerfmormedOps, (int) (clock() - start) / 1000000);
 	}
 	
-	// stop when flips become harmful:
-	// != 0.0f to avoid same flips in every run
-	 // TODO: set a better limit
-	optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
-	optimization.DoOptimization();
+	
+	start = clock();
+	if(par.getBool("pflips")) {
+		//Log(0, "initializing vertex curvature...", optimization.nPerfmormedOps);
+				
+		MyPlanarEdgeFlip::CoplanarAngleThresholdDeg() = par.getAbsPerc("pthreshold");
+		
+		int metric = par.getEnum("planartype");
+		switch(metric) {
+			case 0: optimization.Init<MyPlanarEdgeFlip>(); break;
+			case 1: optimization.Init<MyTriEdgeFlip>();    break;
+		}
+		
+		// stop when flips become harmful:
+		// != 0.0f to avoid same flips in every run
+		// TODO: set a better limit
+		optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
+		optimization.DoOptimization();
+		
+		Log(0, "%i planar edge flips performed in %i sec.",
+				optimization.nPerfmormedOps, (int) (clock() - start) / 1000000);
+	}
+	
 	
 	//optimization.Finalize<CurvEdgeFlip>();
 	
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	
-	Log(0, "%i edge flips performed.", optimization.nPerfmormedOps);
 	
 	return true;
 }
