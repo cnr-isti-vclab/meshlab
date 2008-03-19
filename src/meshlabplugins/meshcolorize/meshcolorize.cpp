@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.46  2008/03/19 05:23:01  cignoni
+Added pre-cleaning before computing curvature to avoid degenerate cases
+
 Revision 1.45  2008/02/12 14:20:33  cignoni
 changed the function getParameter into the more meaningful getCustomParameter
 
@@ -354,6 +357,10 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
   case CP_RMS:
   case CP_ABSOLUTE:
     {
+			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+			if(delvert) Log(GLLogStream::Info, "Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
+			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+
       Curvature<CMeshO> c(m.cm);
       switch (ID(filter)){
           case CP_GAUSSIAN: c.MapGaussianCurvatureIntoQuality();    break;
@@ -365,7 +372,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
       Histogramf H;
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
       tri::UpdateColor<CMeshO>::VertexQuality(m.cm,H.Percentile(0.1),H.Percentile(0.9));
-      
+      Log(GLLogStream::Info, "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1),H.Percentile(0.9));
     break;
     }  
   case CP_TRIANGLE_QUALITY:
