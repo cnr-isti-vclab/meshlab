@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.10  2008/03/19 05:21:07  cignoni
+Added robustness tests for avoid degenerate cases
+
 Revision 1.9  2006/05/25 04:57:45  cignoni
 Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
 Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
@@ -164,42 +167,43 @@ namespace vcg
         angle0 = math::Abs(Angle(	(*fi).P(1)-(*fi).P(0),(*fi).P(2)-(*fi).P(0) ));
         angle1 = math::Abs(Angle(	(*fi).P(0)-(*fi).P(1),(*fi).P(2)-(*fi).P(1) ));
         angle2 = M_PI-(angle0+angle1);
-        
-        e01 = ( (*fi).V(1)->P() - (*fi).V(0)->P() ) * (*fi).V(0)->N();
-        e12 = ( (*fi).V(2)->P() - (*fi).V(1)->P() ) * (*fi).V(1)->N();
-        e20 = ( (*fi).V(0)->P() - (*fi).V(2)->P() ) * (*fi).V(2)->N();
-        
-        area0 = ( e20 * (1.0/tan(angle1)) + e01 * (1.0/tan(angle2)) ) / 4.0;
-	      area1 = ( e01 * (1.0/tan(angle2)) + e12 * (1.0/tan(angle0)) ) / 4.0;
-	      area2 = ( e12 * (1.0/tan(angle0)) + e20 * (1.0/tan(angle1)) ) / 4.0;
-          
-        (*TDCurvPtr)[(*fi).V(0)].H  += area0;
-	      (*TDCurvPtr)[(*fi).V(1)].H  += area1;
-	      (*TDCurvPtr)[(*fi).V(2)].H  += area2;
+				if(angle0>0 && angle1>0 && angle2>0)
+				{        
+						e01 = ( (*fi).V(1)->P() - (*fi).V(0)->P() ) * (*fi).V(0)->N();
+						e12 = ( (*fi).V(2)->P() - (*fi).V(1)->P() ) * (*fi).V(1)->N();
+						e20 = ( (*fi).V(0)->P() - (*fi).V(2)->P() ) * (*fi).V(2)->N();
+						
+						area0 = ( e20 * (1.0/tan(angle1)) + e01 * (1.0/tan(angle2)) ) / 4.0;
+						area1 = ( e01 * (1.0/tan(angle2)) + e12 * (1.0/tan(angle0)) ) / 4.0;
+						area2 = ( e12 * (1.0/tan(angle0)) + e20 * (1.0/tan(angle1)) ) / 4.0;
+							
+						(*TDCurvPtr)[(*fi).V(0)].H  += area0;
+						(*TDCurvPtr)[(*fi).V(1)].H  += area1;
+						(*TDCurvPtr)[(*fi).V(2)].H  += area2;
 
-        (*TDCurvPtr)[(*fi).V(0)].K -= angle0;
-        (*TDCurvPtr)[(*fi).V(1)].K -= angle1;
-        (*TDCurvPtr)[(*fi).V(2)].K -= angle2;
+						(*TDCurvPtr)[(*fi).V(0)].K -= angle0;
+						(*TDCurvPtr)[(*fi).V(1)].K -= angle1;
+						(*TDCurvPtr)[(*fi).V(2)].K -= angle2;
 
-        
-        for(int i=0;i<3;i++)
-		    {
-			    if(vcg::face::IsBorder((*fi), i))
-			    {
-				    CoordType e1,e2;
-				    vcg::face::Pos<FaceType> hp(&*fi, i, (*fi).V(i));
-				    vcg::face::Pos<FaceType> hp1=hp;
-				    
-            hp1.FlipV();
-    	      e1=hp1.v->P() - hp.v->P();
-				    hp1.FlipV();
-				    hp1.NextB();
-				    e2=hp1.v->P() - hp.v->P();
-            (*TDCurvPtr)[(*fi).V(i)].K -= math::Abs(Angle(e1,e2));
-			    }
-	      }
-      }
-         
+						
+						for(int i=0;i<3;i++)
+						{
+							if(vcg::face::IsBorder((*fi), i))
+							{
+								CoordType e1,e2;
+								vcg::face::Pos<FaceType> hp(&*fi, i, (*fi).V(i));
+								vcg::face::Pos<FaceType> hp1=hp;
+								
+								hp1.FlipV();
+								e1=hp1.v->P() - hp.v->P();
+								hp1.FlipV();
+								hp1.NextB();
+								e2=hp1.v->P() - hp.v->P();
+								(*TDCurvPtr)[(*fi).V(i)].K -= math::Abs(Angle(e1,e2));
+							}
+						}
+					}
+         }
       for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/)
       {
         if((*TDAreaPtr)[*vi].A<=std::numeric_limits<float>::epsilon())
@@ -209,8 +213,12 @@ namespace vcg
         }
         else
         {
+					assert(!((*TDCurvPtr)[*vi].H!=(*TDCurvPtr)[*vi].H));
+					assert(!((*TDCurvPtr)[*vi].K!=(*TDCurvPtr)[*vi].K));
           (*TDCurvPtr)[*vi].H /= (*TDAreaPtr)[*vi].A;
           (*TDCurvPtr)[*vi].K /= (*TDAreaPtr)[*vi].A;
+					assert(!((*TDCurvPtr)[*vi].H!=(*TDCurvPtr)[*vi].H));
+					assert(!((*TDCurvPtr)[*vi].K!=(*TDCurvPtr)[*vi].K));
         }
       }
     }
@@ -263,19 +271,22 @@ namespace vcg
 
       //Compute sqrt(4*H^2-2K)
 	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/)
-        (*vi).Q()=math::Sqrt((4.0f * powf((*TDCurvPtr)[*vi].H, 2.0f)) - ((*TDCurvPtr)[*vi].K * 2.0f));
+        (*vi).Q()=math::Sqrt(math::Abs((4.0f * powf((*TDCurvPtr)[*vi].H, 2.0f)) - ((*TDCurvPtr)[*vi].K * 2.0f)));
     }
 
     void MapAbsoluteCurvatureIntoQuality()
     {
       VertexIterator vi;
-      float t;
+      float h,k,t;
 
       //Compute abs(H+sqrt(H*H-K)) + abs(H-sqrt(H*H-K))
 	    for(vi=(*ms).vert.begin(); vi!=(*ms).vert.end(); ++vi) if(!(*vi).IsD() /*&& !(*vi).IsB()*/)
       {
-        t=math::Sqrt(powf((*TDCurvPtr)[*vi].H, 2.0f) - (*TDCurvPtr)[*vi].K);
-        (*vi).Q()= math::Abs((*TDCurvPtr)[*vi].H + t) + math::Abs((*TDCurvPtr)[*vi].H - t);
+				h=(*TDCurvPtr)[*vi].H;
+				k=(*TDCurvPtr)[*vi].K;
+        t=math::Sqrt(math::Abs(powf(h, 2.0f) - k));
+        (*vi).Q()= math::Abs(h + t) + math::Abs((*TDCurvPtr)[*vi].H - t);
+				assert(!((*vi).Q() != (*vi).Q()));
       }
     }
 
