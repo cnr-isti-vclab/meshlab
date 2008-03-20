@@ -28,7 +28,7 @@ class RenderArea : public QGLWidget
     Q_OBJECT
 
 public:
-	enum Mode { Point, Face, Smooth };
+	enum Mode { View, Edit, Select };
 
     RenderArea(QWidget *parent = 0, QString path = QString(), MeshModel *m = 0, unsigned textNum = 0);
 	~RenderArea();
@@ -40,8 +40,6 @@ public:
 		highComp,			// Index of the vertex element of connected component
 		highClick;			// Clicked vertex
 	bool out;
-
-	Mode mode;				// Action type
 
 public:
     void setPen(const QPen &pen);
@@ -74,6 +72,8 @@ private:
 	QString fileName;	// Name of the texture
 	MeshModel *model;	// Ref to the model (for upate)
 
+	Mode mode;			// Action type
+
 	// Trackball data
 	vcg::Trackball *tb;
 	Point2f viewport;
@@ -83,6 +83,10 @@ private:
 	QPen pen;			// For 2D painting
     QBrush brush;
 
+	int panX, panY, tpanX, tpanY, oldPX, oldPY;	// Temp for axis
+	int maxX, maxY, minX, minY;	// For texCoord out of border
+
+	void ResetTrack();
 	void VisitConnected();
 	QRect GetRepeatVertex(float u, float v, int index);
 	QRect GetClampVertex(float u, float v, int index);

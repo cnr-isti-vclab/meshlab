@@ -2,7 +2,8 @@ TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
 HEADERS       = edittexture.h textureeditor.h renderarea.h ui_textureeditor.h ../../../../sf/wrap/gui/trackball.h
-SOURCES       = edittexture.cpp ../../../../code/lib/glew/src/glew.c textureeditor.cpp renderarea.cpp ../../../../sf/wrap/gui/trackball.cpp
+SOURCES       = edittexture.cpp ../../../../code/lib/glew/src/glew.c textureeditor.cpp renderarea.cpp ../../../../sf/wrap/gui/trackball.cpp ../../../../sf/wrap/gui/trackmode.cpp
+
 TARGET        = edit_texture
 DESTDIR       = ../../meshlab/plugins
 DEFINES += GLEW_STATIC

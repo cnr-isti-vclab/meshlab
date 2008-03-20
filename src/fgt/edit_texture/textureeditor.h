@@ -39,6 +39,10 @@ private:
 	void HandleSpinBoxXY();
 
 private slots:
+	void on_editButton_clicked();
+	void on_moveButton_clicked();
+	void on_selectButton_clicked();
+	void on_optionButton_clicked();
 	void on_ApplyScale_clicked();
 	void on_ApplyRotate_clicked();
 	void on_spinBoxY_valueChanged(int);
@@ -51,6 +55,8 @@ private slots:
 	void on_remapRB_toggled(bool);
 	void on_vertRB_toggled(bool);
 	void on_faceRB_toggled(bool);
+	void on_clampButton_clicked();
+	void on_modulusButton_clicked();
 
 public slots:
 	void UpStat(float u, float v, int faceN, int vertN, int countFace);

@@ -2,7 +2,6 @@
 #include "renderarea.h"
 #include "textureeditor.h"
 #include <wrap/qt/trackball.h>
-#include <wrap/gui/trackball.cpp>
 #include <math.h>
 #include <stdlib.h>
 
@@ -29,8 +28,11 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	tb = new Trackball();
 	tb->center = Point3f(0, 0, 0);
 	tb->radius = 1;
+	panX = 0; panY = 0;
+	oldPX = 0; oldPY = 0;
 
 	brush = QBrush(Qt::green);
+	mode = View;
 
 	this->setMouseTracking(true);
 	this->setCursor(Qt::PointingHandCursor);
@@ -76,7 +78,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 	tb->GetView();
 	tb->Apply(true);
 
-	int maxX = 0, maxY = 0, minX = 0, minY = 0;	// For texCoord out of border
+	maxX = 0; maxY = 0; minX = 0; minY = 0;
 	if (image != QImage())
 	{
 	    glEnable(GL_COLOR_LOGIC_OP);
@@ -86,14 +88,15 @@ void RenderArea::paintEvent(QPaintEvent *)
 		glLineWidth(2);
 		for (unsigned i = 0; i < model->cm.face.size(); i++)
 		{
-			// While drawning, it counts the number of 'planes'
-			if (model->cm.face[i].WT(0).u() > maxX || model->cm.face[i].WT(1).u() > maxX || model->cm.face[i].WT(2).u() > maxX)	maxX++;
-			if (model->cm.face[i].WT(0).v() > maxY || model->cm.face[i].WT(1).v() > maxY || model->cm.face[i].WT(2).v() > maxY)	maxY++;
-			if (model->cm.face[i].WT(0).u() < minX || model->cm.face[i].WT(1).u() < minX || model->cm.face[i].WT(2).u() < minX)	minX--;
-			if (model->cm.face[i].WT(0).v() < minY || model->cm.face[i].WT(1).v() < minY || model->cm.face[i].WT(2).v() < minY)	minY--;
 			// First draw the model in u,v space
 			if (model->cm.face[i].IsS() && model->cm.face[i].WT(0).n() == textNum)
 			{
+				// While drawning, it counts the number of 'planes'
+				if (model->cm.face[i].WT(0).u() > maxX || model->cm.face[i].WT(1).u() > maxX || model->cm.face[i].WT(2).u() > maxX)	maxX++;
+				if (model->cm.face[i].WT(0).v() > maxY || model->cm.face[i].WT(1).v() > maxY || model->cm.face[i].WT(2).v() > maxY)	maxY++;
+				if (model->cm.face[i].WT(0).u() < minX || model->cm.face[i].WT(1).u() < minX || model->cm.face[i].WT(2).u() < minX)	minX--;
+				if (model->cm.face[i].WT(0).v() < minY || model->cm.face[i].WT(1).v() < minY || model->cm.face[i].WT(2).v() < minY)	minY--;
+
 				glBegin(GL_LINE_LOOP);
 					glVertex3f(model->cm.face[i].WT(0).u() * AREADIM, AREADIM - (model->cm.face[i].WT(0).v() * AREADIM), 1);
 					glVertex3f(model->cm.face[i].WT(1).u() * AREADIM, AREADIM - (model->cm.face[i].WT(1).v() * AREADIM), 1);
@@ -105,10 +108,14 @@ void RenderArea::paintEvent(QPaintEvent *)
 		glDisable(GL_COLOR_LOGIC_OP);
 
 		// Draw the background behind the model
-		for (int x = minX; x < maxX; x++) 
-			for (int y = minY; y < maxY; y++)
-				painter.drawImage(QRect(x*AREADIM,-y*AREADIM,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
-		
+		if (minX != 0 || minY != 0 || maxX != 0 || maxY != 0)
+		{
+			for (int x = minX; x < maxX; x++) 
+				for (int y = minY; y < maxY; y++)
+					painter.drawImage(QRect(x*AREADIM + panX,-y*AREADIM + panY,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
+		}
+		else painter.drawImage(QRect(0,0,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
+
 		// and the axis, always in first plane
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
@@ -148,47 +155,77 @@ void RenderArea::paintEvent(QPaintEvent *)
 // Mouse Event:
 void RenderArea::mousePressEvent(QMouseEvent *e)
 {
-	oldX = e->x(); oldY = e->y();
-	tmpX = viewport.X(); tmpY = viewport.Y();
-	tb->MouseDown(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
-	this->update();
+	switch(mode)
+	{
+		case View:
+			oldX = e->x(); oldY = e->y();
+			tmpX = viewport.X(); tmpY = viewport.Y();
+			tb->MouseDown(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
+			this->update();
+			break;
+		case Edit:
+			tpanX = e->x();
+			tpanY = e->y();
+			break;
+	}
 }
 
 void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 {
-	tb->MouseUp(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
-	this->update();
+	switch(mode)
+	{
+		case View:
+			tb->MouseUp(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
+			this->update();
+			break;
+		case Edit:
+			oldPX = panX;
+			oldPY = panY;
+			UpdateUV();
+			break;
+	}
 }
 
 void RenderArea::mouseMoveEvent(QMouseEvent *e)
 {
-	if((e->buttons() & Qt::LeftButton))
+	if((e->buttons() & Qt::LeftButton))	// <---- Se non ci sono facce selezionate -> non si fa nulla
 	{
-		tb->track.SetTranslate(Point3f(tmpX + oldX - e->x(), tmpY + oldY - e->y(), 0));
-		viewport = Point2f(tmpX + oldX - e->x(), tmpY + oldY - e->y());
-		this->update();
+		switch(mode)
+		{
+			case View:
+				tb->track.SetTranslate(Point3f(tmpX + oldX - e->x(), tmpY + oldY - e->y(), 0));
+				viewport = Point2f(tmpX + oldX - e->x(), tmpY + oldY - e->y());
+				this->update();
+				break;
+			case Edit:
+				panX = oldPX + tpanX - e->x();
+				panY = oldPY + tpanY - e->y();
+				this->update();
+				break;
+		}
 	}
 }
 
 void RenderArea::mouseDoubleClickEvent(QMouseEvent *)
 {
-	// Reset of the trackball
-	tb->center = Point3f(0, 0, 0);
-	viewport = Point2f(0,0);
-	oldX = 0; oldY = 0;
-	tb->track.SetTranslate(Point3f(0,0,0));
+	ResetTrack();
 	// <--- reset dello zoom
 	this->update();
 }
 
 void RenderArea::wheelEvent(QWheelEvent*e)
 {
-	// Zoom
-	float WHEEL_STEP = 120.0f;
-	float notch = (float)e->delta()/WHEEL_STEP;
-    tb->MouseWheel(notch, QTWheel2VCG(e->modifiers())); 
-	tb->track.SetScale(notch);	// <---- ???? parametro ????
-	this->update();
+	switch(mode)
+	{
+		case View:
+			// Zoom
+			float WHEEL_STEP = 120.0f;
+			float notch = (float)e->delta()/WHEEL_STEP;
+		    tb->MouseWheel(notch, QTWheel2VCG(e->modifiers())); 
+			tb->track.SetScale(notch);	// <---- ???? parametro ????
+			this->update();
+			break;
+	}
 }		
 
 void RenderArea::RemapRepeat()
@@ -210,37 +247,50 @@ void RenderArea::RemapRepeat()
 
 void RenderArea::RemapClamp()
 {
-	/*
 	// Remap the uv coord out of border using clamp method
-	out = false;
-	for (unsigned i = 0; i < map.size(); i++)
+	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		float u = map[i].GetU();
-		float v = map[i].GetV();
-		map[i].SetVertex(GetClampVertex(u, v, i));
+		if (model->cm.face[i].WT(0).n() == textNum)
+		{
+			for (unsigned j = 0; j < 3; j++)
+			{
+				if (model->cm.face[i].WT(j).u() > 1) model->cm.face[i].WT(j).u() = 1;
+				else if (model->cm.face[i].WT(j).u() < 0) model->cm.face[i].WT(j).u() = 0;
+				if (model->cm.face[i].WT(j).v() > 1) model->cm.face[i].WT(j).v() = 1;
+				else if (model->cm.face[i].WT(j).v() < 0) model->cm.face[i].WT(j).v() = 0;
+			}
+		}
 	}
+	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
+	ResetTrack();
 	this->update();
-	*/
+	emit UpdateStat(0,0,0,0,0);	// <--------
 }
 
 void RenderArea::RemapMod()
 {
-	/*
 	// Remap the uv coord out of border using mod function
-	out = false;
-	for (unsigned i = 0; i < map.size(); i++)
+	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		float u = map[i].GetU();
-		float v = map[i].GetV();
-		if (u < 0) {while (u<0) u++;}
-		else if (u > 1) {while (u>1) u--;}
-		if (v < 0) {while(v<0) v++;}
-		else if (v > 1) {while(v>1) v--;}
-		map[i].SetVertex(QRect(u * AREADIM - RADIUS/2, (AREADIM - (v * AREADIM)) - RADIUS/2, RADIUS, RADIUS));
-		UpdateSingleUV(i, u, v);
+		if (model->cm.face[i].WT(0).n() == textNum)
+		{
+			for (unsigned j = 0; j < 3; j++)
+			{
+				float u = model->cm.face[i].WT(j).u();
+				float v = model->cm.face[i].WT(j).v();
+				if (u < 0) u = u + (int)u + 1;
+				else if (u > 1) u = u - (int)u;
+				if (v < 0) v = v + (int)v + 1; 
+				else if (v > 1) v = v - (int)v;
+				model->cm.face[i].WT(j).u() = u;
+				model->cm.face[i].WT(j).v() = v;
+			}
+		}
 	}
+	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
+	ResetTrack();
 	this->update();
-	*/
+	emit UpdateStat(0,0,0,0,0);	// <--------
 }
 
 void RenderArea::UpdateVertex(float u, float v)
@@ -276,13 +326,28 @@ void RenderArea::ChangeMode(int index)
 	switch(index)
 	{
 		case 0:
-			mode = Point;
+			if (mode != View)
+			{
+				mode = View;
+				this->setCursor(Qt::PointingHandCursor);
+			}
 			break;
 		case 1:
-			mode = Face;
+			if (mode != Edit)
+			{
+				mode = Edit;
+				this->setCursor(QCursor(QBitmap(":/images/sel_move.png")));
+			}
 			break;
 		case 2:
-			mode = Smooth;
+			if (mode != Select)
+			{
+				mode = Select;
+				this->setCursor(Qt::CrossCursor);
+			}
+			break;
+		default:
+			this->setCursor(Qt::ArrowCursor);
 			break;
 	}
 	this->update();
@@ -354,15 +419,22 @@ void RenderArea::ScaleComponent(int perc)
 
 void RenderArea::UpdateUV()
 {
-	/*
 	// After a move of component, re-calculate the new UV coordinates
-	for (unsigned i = 0; i < connected.size(); i++)
+	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		float u = (float)map[connected[i]].GetVertex().center().x() / AREADIM;
-		float v = (float)(AREADIM - map[connected[i]].GetVertex().center().y()) / AREADIM;
-		UpdateSingleUV(connected[i], u, v);
+		if (model->cm.face[i].WT(0).n() == textNum)
+		{
+			for (unsigned j = 0; j < 3; j++)
+			{
+				model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)panX/AREADIM;
+				model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)panY/AREADIM;
+			}
+		}
 	}
-	*/
+	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
+	ResetTrack();
+	this->update();
+	emit UpdateStat(0,0,0,0,0);	// <--------
 }
 
 void RenderArea::UpdateSingleUV(int index, float u, float v)
@@ -451,4 +523,11 @@ QRect RenderArea::GetClampVertex(float u, float v, int index)
 	return QRect();
 }
 
-
+void RenderArea::ResetTrack()
+{
+	// Reset the center of the trackball
+	tb->center = Point3f(0, 0, 0);
+	viewport = Point2f(0,0);
+	oldX = 0; oldY = 0;
+	tb->track.SetTranslate(Point3f(0,0,0));
+}

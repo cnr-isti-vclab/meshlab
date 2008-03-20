@@ -198,6 +198,7 @@ void TextureEditor::UpStat(float u, float v, int faceN, int vertN, int countFace
 	if (countFace > 0) ui.LabelFaceNum->setText(QString("%1").arg(countFace));
 	else ui.LabelFaceNum->setText(QString("0"));
 	lock = false;
+	area->update();
 }
 
 
@@ -268,3 +269,35 @@ void TextureEditor::on_ApplyScale_clicked()
 	if (a != -1 && ui.spinBoxScale->value() != 100) 
 		((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ScaleComponent(ui.spinBoxScale->value());
 }
+
+void TextureEditor::on_moveButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(0);
+
+}
+
+void TextureEditor::on_editButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(1);
+}
+
+void TextureEditor::on_selectButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
+}
+
+void TextureEditor::on_optionButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(3);
+}
+
+void TextureEditor::on_clampButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->RemapClamp();
+}
+
+void TextureEditor::on_modulusButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->RemapMod();
+}
+

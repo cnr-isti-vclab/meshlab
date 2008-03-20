@@ -36,58 +36,94 @@
     </attribute>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox" >
+  <widget class="QPushButton" name="modulusButton" >
+   <property name="geometry" >
+    <rect>
+     <x>340</x>
+     <y>610</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Modulus</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="clampButton" >
+   <property name="geometry" >
+    <rect>
+     <x>340</x>
+     <y>580</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Clamp</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3" >
    <property name="geometry" >
     <rect>
      <x>10</x>
      <y>450</y>
-     <width>311</width>
-     <height>41</height>
+     <width>411</width>
+     <height>71</height>
     </rect>
    </property>
    <property name="title" >
-    <string> Border managment </string>
+    <string> Action selection </string>
    </property>
-   <widget class="QRadioButton" name="vertRB" >
+   <widget class="QPushButton" name="moveButton" >
     <property name="geometry" >
      <rect>
-      <x>106</x>
-      <y>15</y>
-      <width>81</width>
-      <height>19</height>
+      <x>20</x>
+      <y>20</y>
+      <width>70</width>
+      <height>40</height>
      </rect>
     </property>
     <property name="text" >
-     <string>Clamp</string>
+     <string>View</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="remapRB" >
+   <widget class="QPushButton" name="selectButton" >
     <property name="geometry" >
      <rect>
-      <x>199</x>
-      <y>15</y>
-      <width>81</width>
-      <height>19</height>
+      <x>120</x>
+      <y>20</y>
+      <width>70</width>
+      <height>40</height>
      </rect>
     </property>
     <property name="text" >
-     <string>Modulus</string>
+     <string>Select</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="faceRB" >
+   <widget class="QPushButton" name="editButton" >
     <property name="geometry" >
      <rect>
-      <x>12</x>
-      <y>15</y>
-      <width>61</width>
-      <height>19</height>
+      <x>220</x>
+      <y>20</y>
+      <width>70</width>
+      <height>40</height>
      </rect>
     </property>
     <property name="text" >
-     <string>Repeat</string>
+     <string>Edit</string>
     </property>
-    <property name="checked" >
-     <bool>true</bool>
+   </widget>
+   <widget class="QPushButton" name="optionButton" >
+    <property name="geometry" >
+     <rect>
+      <x>320</x>
+      <y>20</y>
+      <width>70</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Option</string>
     </property>
    </widget>
   </widget>
@@ -95,51 +131,19 @@
    <property name="geometry" >
     <rect>
      <x>10</x>
-     <y>500</y>
+     <y>530</y>
      <width>311</width>
-     <height>261</height>
+     <height>231</height>
     </rect>
    </property>
    <property name="title" >
     <string> UV Map editing </string>
    </property>
-   <widget class="QPushButton" name="applyButton" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>230</y>
-      <width>100</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Save Changes</string>
-    </property>
-   </widget>
-   <widget class="QProgressBar" name="progressBar" >
-    <property name="geometry" >
-     <rect>
-      <x>200</x>
-      <y>230</y>
-      <width>100</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="maximum" >
-     <number>100</number>
-    </property>
-    <property name="value" >
-     <number>0</number>
-    </property>
-    <property name="orientation" >
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
    <widget class="QLabel" name="StatusLabel" >
     <property name="geometry" >
      <rect>
       <x>120</x>
-      <y>230</y>
+      <y>200</y>
       <width>71</width>
       <height>21</height>
      </rect>
@@ -162,13 +166,32 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
+   <widget class="QProgressBar" name="progressBar" >
+    <property name="geometry" >
+     <rect>
+      <x>200</x>
+      <y>200</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="maximum" >
+     <number>100</number>
+    </property>
+    <property name="value" >
+     <number>0</number>
+    </property>
+    <property name="orientation" >
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
    <widget class="QTabWidget" name="tabWidgetEdit" >
     <property name="geometry" >
      <rect>
       <x>10</x>
       <y>20</y>
       <width>293</width>
-      <height>201</height>
+      <height>171</height>
      </rect>
     </property>
     <property name="currentIndex" >
@@ -178,30 +201,6 @@
      <attribute name="title" >
       <string>Single Points</string>
      </attribute>
-     <widget class="QLabel" name="label_11" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>101</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="font" >
-       <font>
-        <family>MS Shell Dlg 2</family>
-        <pointsize>10</pointsize>
-        <weight>50</weight>
-        <italic>false</italic>
-        <bold>false</bold>
-        <underline>false</underline>
-        <strikeout>false</strikeout>
-       </font>
-      </property>
-      <property name="text" >
-       <string>UV Coordinates:</string>
-      </property>
-     </widget>
      <widget class="QDoubleSpinBox" name="SpinBoxU" >
       <property name="enabled" >
        <bool>false</bool>
@@ -294,11 +293,138 @@
        <string>V:</string>
       </property>
      </widget>
+     <widget class="QGroupBox" name="groupBox" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>100</y>
+        <width>261</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="title" >
+       <string> Border managment </string>
+      </property>
+      <widget class="QRadioButton" name="vertRB" >
+       <property name="geometry" >
+        <rect>
+         <x>106</x>
+         <y>15</y>
+         <width>81</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Clamp</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="remapRB" >
+       <property name="geometry" >
+        <rect>
+         <x>199</x>
+         <y>15</y>
+         <width>81</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Modulus</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="faceRB" >
+       <property name="geometry" >
+        <rect>
+         <x>12</x>
+         <y>15</y>
+         <width>61</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Repeat</string>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="label_11" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>101</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="font" >
+       <font>
+        <family>MS Shell Dlg 2</family>
+        <pointsize>10</pointsize>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+        <underline>false</underline>
+        <strikeout>false</strikeout>
+       </font>
+      </property>
+      <property name="text" >
+       <string>UV Coordinates:</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_comp" >
      <attribute name="title" >
       <string>Connected component</string>
      </attribute>
+     <widget class="QLabel" name="LabelFaceNum" >
+      <property name="geometry" >
+       <rect>
+        <x>140</x>
+        <y>10</y>
+        <width>61</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="font" >
+       <font>
+        <family>MS Shell Dlg 2</family>
+        <pointsize>10</pointsize>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+        <underline>false</underline>
+        <strikeout>false</strikeout>
+       </font>
+      </property>
+      <property name="text" >
+       <string>0</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_6" >
+      <property name="geometry" >
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>111</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="font" >
+       <font>
+        <family>MS Shell Dlg 2</family>
+        <pointsize>10</pointsize>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+        <underline>false</underline>
+        <strikeout>false</strikeout>
+       </font>
+      </property>
+      <property name="text" >
+       <string>Selected Vertexes:</string>
+      </property>
+     </widget>
      <widget class="QTabWidget" name="tabWidget_2" >
       <property name="windowModality" >
        <enum>Qt::NonModal</enum>
@@ -306,13 +432,13 @@
       <property name="geometry" >
        <rect>
         <x>10</x>
-        <y>40</y>
-        <width>272</width>
-        <height>131</height>
+        <y>30</y>
+        <width>276</width>
+        <height>111</height>
        </rect>
       </property>
       <property name="currentIndex" >
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons" >
        <bool>false</bool>
@@ -339,42 +465,6 @@
          <string>Move selected component</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_12" >
-        <property name="geometry" >
-         <rect>
-          <x>130</x>
-          <y>40</y>
-          <width>16</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="font" >
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text" >
-         <string>X =</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_13" >
-        <property name="geometry" >
-         <rect>
-          <x>130</x>
-          <y>70</y>
-          <width>16</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="font" >
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text" >
-         <string>Y =</string>
-        </property>
-       </widget>
        <widget class="QLabel" name="label_2" >
         <property name="geometry" >
          <rect>
@@ -399,8 +489,8 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>160</x>
-          <y>40</y>
+          <x>200</x>
+          <y>20</y>
           <width>46</width>
           <height>22</height>
          </rect>
@@ -418,8 +508,8 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>160</x>
-          <y>70</y>
+          <x>200</x>
+          <y>50</y>
           <width>46</width>
           <height>22</height>
          </rect>
@@ -431,18 +521,13 @@
          <number>-300</number>
         </property>
        </widget>
-      </widget>
-      <widget class="QWidget" name="tab_3" >
-       <attribute name="title" >
-        <string>       Rotate      </string>
-       </attribute>
-       <widget class="QLabel" name="label_15" >
+       <widget class="QLabel" name="label_13" >
         <property name="geometry" >
          <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>193</width>
-          <height>17</height>
+          <x>180</x>
+          <y>50</y>
+          <width>16</width>
+          <height>16</height>
          </rect>
         </property>
         <property name="font" >
@@ -451,16 +536,39 @@
          </font>
         </property>
         <property name="text" >
-         <string>Rotate around the selected vertex</string>
+         <string>Y =</string>
         </property>
        </widget>
+       <widget class="QLabel" name="label_12" >
+        <property name="geometry" >
+         <rect>
+          <x>180</x>
+          <y>20</y>
+          <width>16</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font" >
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text" >
+         <string>X =</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_3" >
+       <attribute name="title" >
+        <string>       Rotate      </string>
+       </attribute>
        <widget class="QLabel" name="label_14" >
         <property name="geometry" >
          <rect>
           <x>10</x>
-          <y>40</y>
+          <y>30</y>
           <width>41</width>
-          <height>17</height>
+          <height>21</height>
          </rect>
         </property>
         <property name="font" >
@@ -470,22 +578,6 @@
         </property>
         <property name="text" >
          <string>Angle:</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="ApplyRotate" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>180</x>
-          <y>70</y>
-          <width>75</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Apply</string>
         </property>
        </widget>
        <widget class="QDial" name="angle" >
@@ -498,7 +590,7 @@
         <property name="geometry" >
          <rect>
           <x>70</x>
-          <y>40</y>
+          <y>30</y>
           <width>55</width>
           <height>55</height>
          </rect>
@@ -544,7 +636,7 @@
         <property name="geometry" >
          <rect>
           <x>10</x>
-          <y>70</y>
+          <y>60</y>
           <width>46</width>
           <height>22</height>
          </rect>
@@ -554,6 +646,40 @@
         </property>
         <property name="minimum" >
          <number>-360</number>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="ApplyRotate" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="geometry" >
+         <rect>
+          <x>140</x>
+          <y>50</y>
+          <width>75</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Apply</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_15" >
+        <property name="geometry" >
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>193</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font" >
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text" >
+         <string>Rotate around the selected vertex</string>
         </property>
        </widget>
       </widget>
@@ -658,60 +784,25 @@
        </widget>
       </widget>
      </widget>
-     <widget class="QLabel" name="label_6" >
-      <property name="geometry" >
-       <rect>
-        <x>20</x>
-        <y>10</y>
-        <width>111</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="font" >
-       <font>
-        <family>MS Shell Dlg 2</family>
-        <pointsize>10</pointsize>
-        <weight>50</weight>
-        <italic>false</italic>
-        <bold>false</bold>
-        <underline>false</underline>
-        <strikeout>false</strikeout>
-       </font>
-      </property>
-      <property name="text" >
-       <string>Selected Vertexes:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="LabelFaceNum" >
-      <property name="geometry" >
-       <rect>
-        <x>140</x>
-        <y>10</y>
-        <width>61</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="font" >
-       <font>
-        <family>MS Shell Dlg 2</family>
-        <pointsize>10</pointsize>
-        <weight>50</weight>
-        <italic>false</italic>
-        <bold>false</bold>
-        <underline>false</underline>
-        <strikeout>false</strikeout>
-       </font>
-      </property>
-      <property name="text" >
-       <string>0</string>
-      </property>
-     </widget>
     </widget>
     <widget class="QWidget" name="tab_smooth" >
      <attribute name="title" >
       <string>   Smooth   </string>
      </attribute>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="applyButton" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>200</y>
+      <width>100</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Save Changes</string>
+    </property>
    </widget>
   </widget>
  </widget>
