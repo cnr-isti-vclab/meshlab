@@ -364,14 +364,17 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(insideHistogram(EqHandle*,bool)), this, SLOT(on_EqHandle_crossing_histogram(EqHandle*,bool)) );
 
 	// Connecting handles to preview method
-	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
-	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
-	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
-	connect(ui.brightnessSlider, SIGNAL(sliderReleased()), this, SLOT(on_Handle_released()));
+	connect(_equalizerHandles[LEFT_HANDLE],  SIGNAL(handleReleased()), this, SLOT(meshColorPreview()));
+	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(handleReleased()), this, SLOT(meshColorPreview()));
+	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(handleReleased()), this, SLOT(meshColorPreview()));
+	connect(ui.brightnessSlider,             SIGNAL(sliderReleased()), this, SLOT(meshColorPreview()));
+	connect(ui.brightessSpinBox,         SIGNAL(valueChanged(double)), this, SLOT(meshColorPreview()));
 	connect(ui.minSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
 	connect(ui.midSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
 	connect(ui.maxSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
 
+	// Connecting brightessSpinBox to brightnessSlider
+	connect(ui.brightessSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_brightessSpinBox_valueChanged()));
 
 	ui.equalizerGraphicsView->setScene(&_equalizerHistogramScene);
 
@@ -433,7 +436,8 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		}
 
 		//building histogram chart informations
-		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, _equalizer_histogram->MaxCount());
+		int maxY = computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV());
+		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, maxY);
 	}
 	else
 	{
@@ -448,21 +452,23 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		this->clearItems( REMOVE_EQ_HISTOGRAM | DELETE_REMOVED_ITEMS ); // removing and deleting histogram bars
 
 		// Calculating new Histogram
-		float minX = (_histogram_info->minX<ui.minSpinBox->value())?_histogram_info->minX:ui.minSpinBox->value();
-		float maxX = (_histogram_info->maxX>ui.maxSpinBox->value())?_histogram_info->maxX:ui.maxSpinBox->value();
-		Frange histogramRange(minX, maxX);
+		//float minX = (_histogram_info->minX<ui.minSpinBox->value())?_histogram_info->minX:ui.minSpinBox->value();
+		//float maxX = (_histogram_info->maxX>ui.maxSpinBox->value())?_histogram_info->maxX:ui.maxSpinBox->value();
+		//Frange histogramRange(minX, maxX);
 		//this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, NUMBER_OF_HISTOGRAM_BINS);
-
 		// Only minY and maxY are modified in _histogram_info
-		_histogram_info->maxY = _equalizer_histogram->MaxCount();
+		//_histogram_info->maxY = computeEqualizerMaxY(_equalizer_histogram, minX, maxX);
 	}
-	//...histogram built
+
+	float minX = (_histogram_info->minX<ui.minSpinBox->value())?_histogram_info->minX:ui.minSpinBox->value();
+	float maxX = (_histogram_info->maxX>ui.maxSpinBox->value())?_histogram_info->maxX:ui.maxSpinBox->value();
+	_histogram_info->maxY = computeEqualizerMaxY(_equalizer_histogram, minX, maxX);
 
 	//drawing axis and other basic items
 	this->drawChartBasics( _equalizerHistogramScene, _histogram_info );
 
 	//drawing histogram bars
-	this->drawHistogramBars (_equalizerHistogramScene, _histogram_info, 0, _histogram_info->numOfItems, QColor(128,128,128));
+	this->drawHistogramBars (_equalizerHistogramScene, _histogram_info, minX, maxX, QColor(192,192,192));
 
 //	this->drawGammaCorrection();
 	this->drawTransferFunctionBG();
@@ -470,15 +476,25 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 	return true;
 }
 
+int QualityMapperDialog::computeEqualizerMaxY (Histogramf *h, float minX, float maxX)
+{
+	float barRange = (maxX-minX)/(float)NUMBER_OF_HISTOGRAM_BARS;
+	int maxY = 0;
+	int currentY;
+	for (int i=0; i<NUMBER_OF_HISTOGRAM_BARS; i++)
+	{
+		currentY = h->BinCount( minX+i*barRange, barRange );
+		if (currentY>maxY)
+			maxY = currentY;
+	}
+	return maxY;
+}
 
 // Add histogramBars to destinationScene with GAMMA-STRETCHING
 void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, float minVal, float maxVal, QColor color)
 {
-	const int barNum=100;
 	float barHeight = 0.0f;	//initializing height of the histogram bars
-	float barWidth  = chartInfo->chartWidth / (float)(barNum);	//processing width of the histogram bars 
-
-//	int numberOfItems = maxIndex - minIndex;
+	float barWidth  = chartInfo->chartWidth / (float)(NUMBER_OF_HISTOGRAM_BARS);	//processing width of the histogram bars 
 
 	// exp is such that: _equalizerMidHandlePercentilePosition^exp = 0.5
 	float exp = log10(0.5f) / log10((float)_equalizerMidHandlePercentilePosition);
@@ -489,11 +505,11 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 
 	//drawing histogram bars
 	QGraphicsItem *current_item = 0;
-  float barRange = (maxVal-minVal)/barNum;
-	for (int i = 0; i < barNum; i++)
+	float barRange = (maxVal-minVal)/(float)NUMBER_OF_HISTOGRAM_BARS;
+	for (int i = 0; i < NUMBER_OF_HISTOGRAM_BARS; i++)
 	{
 		// Setting barHeight proportional to max height
-		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->BinCount( minVal+i*barRange, barRange) ) / (float)_histogram_info->maxY;
+		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->BinCount( minVal+i*barRange, barRange) ) / (float)chartInfo->maxY;
 		
 		startBarPt.setY( (float)chartInfo->lowerBorder - barHeight );
 
@@ -501,7 +517,7 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 		if ( &destinationScene == &_transferFunctionScene )
 		{
 			// Histogram bars positions are calculted applying an exponential function: relIndex^exp
-			startBarPt.setX( chartInfo->leftBorder + relative2AbsoluteValf(pow( absolute2RelativeValf(i,barNum ), exp ), chartInfo->chartWidth) );
+			startBarPt.setX( chartInfo->leftBorder + relative2AbsoluteValf(pow( absolute2RelativeValf(i,NUMBER_OF_HISTOGRAM_BARS ), exp ), chartInfo->chartWidth) );
 			current_item = destinationScene.addLine(startBarPt.x(), startBarPt.y(), startBarPt.x(), (float)chartInfo->lowerBorder, drawingPen);
 			_transferFunctionBg << current_item;
 		}
@@ -750,6 +766,8 @@ void QualityMapperDialog::drawTransferFunctionBG ()
 	//	int minIndex = _equalizer_histogram->Interize((float)ui.minSpinBox->value());
 	//	int maxIndex = _equalizer_histogram->Interize((float)ui.maxSpinBox->value());
 	//	drawHistogramBars (_transferFunctionScene, _transferFunction_info, minIndex, maxIndex, QColor(192,192,192));
+
+		_transferFunction_info->maxY = this->computeEqualizerMaxY(_equalizer_histogram, (float)ui.minSpinBox->value(), (float)ui.maxSpinBox->value());
 		drawHistogramBars (_transferFunctionScene, _transferFunction_info, (float)ui.minSpinBox->value(), (float)ui.maxSpinBox->value(), QColor(192,192,192));
 	}
 }
@@ -1086,7 +1104,7 @@ void QualityMapperDialog::on_applyButton_clicked()
 /* 
 If preview button is toggled, apply color to mesh when a generic handle is released
 */
-void QualityMapperDialog::on_Handle_released()
+void QualityMapperDialog::meshColorPreview()
 {
 	//applying preview if necessary
 	if (ui.previewButton->isChecked())
@@ -1195,7 +1213,7 @@ TFHandle* QualityMapperDialog::addTfHandle(TFHandle *handle)
 	connect(handle, SIGNAL(positionChanged(TFHandle*)), this, SLOT(on_TfHandle_moved(TFHandle*)));
 	connect(handle, SIGNAL(clicked(TFHandle*)), this, SLOT(on_TfHandle_clicked(TFHandle*)));
 	connect(handle, SIGNAL(doubleClicked(TFHandle*)), this, SLOT(on_TfHandle_doubleClicked(TFHandle*)));
-	connect(handle, SIGNAL(handleReleased()), this, SLOT(on_Handle_released()));
+	connect(handle, SIGNAL(handleReleased()), this, SLOT(meshColorPreview()));
 
 	//adding handle to scene
 	_transferFunctionScene.addItem((QGraphicsItem*)handle);
@@ -1292,6 +1310,10 @@ void QualityMapperDialog::on_clampButton_clicked()
 
 	initEqualizerSpinboxes(); // reset Spinboxes and handles
 	drawEqualizerHistogram(true, true); // redrawing histogram
+
+	//applying preview if necessary
+	if (ui.previewButton->isChecked()) //added by FB 21\03\08
+		on_applyButton_clicked();
 }
 
 //writes in the x-quality label the quality value corresponding to the position of the currently selected TF handle
@@ -1341,7 +1363,16 @@ void QualityMapperDialog::setEqualizerParameters(EQUALIZER_INFO data)
 
 void QualityMapperDialog::on_brightnessSlider_valueChanged(int value)
 {
+	ui.brightessSpinBox->blockSignals(true);
 	ui.brightessSpinBox->setValue((double)value/50.0);
+	ui.brightessSpinBox->blockSignals(false);
+}
+
+void QualityMapperDialog::on_brightessSpinBox_valueChanged(double value)
+{
+	ui.brightnessSlider->blockSignals(true);
+	ui.brightnessSlider->setValue(value*50);
+	ui.brightnessSlider->blockSignals(false);
 }
 
 void QualityMapperDialog::on_midSpinBox_valueChanged(double)

@@ -116,7 +116,7 @@ public:
 	QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla=0);
 	~QualityMapperDialog();
 	
-	void ComputePerVertexQualityHistogram( CMeshO& m, Frange range, Histogramf *h, int bins=10000);
+	void ComputePerVertexQualityHistogram( CMeshO& m, Frange range, Histogramf *h, int bins=50000);
 	void clearScene(QGraphicsScene *scene);
 	void drawChartBasics(QGraphicsScene& scene, CHART_INFO *current_chart_info );
 	bool initEqualizerHistogram(void);
@@ -158,6 +158,7 @@ private:
 	void updateColorBand(void);
 	void drawTransferFunctionBG(void);
 	bool drawEqualizerHistogram(bool leftHandleInsideHistogram, bool rightHandleInsideHistogram);
+	int  computeEqualizerMaxY (Histogramf *h, float minX, float maxX);
 	void initEqualizerSpinboxes();
 	void drawHistogramBars (QGraphicsScene&, CHART_INFO*, float minIndex, float maxIndex, QColor color = QColor(Qt::black));
 
@@ -181,6 +182,7 @@ private slots:
 	void on_midPercentage_textEdited(QString);
 	void on_midSpinBox_valueChanged(double);
 	void on_brightnessSlider_valueChanged(int);
+	void on_brightessSpinBox_valueChanged(double);
 	void on_clampButton_clicked();
 	void on_ySpinBox_valueChanged(double);
 	void on_xSpinBox_valueChanged(double);
@@ -197,7 +199,7 @@ private slots:
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
 
-	void on_Handle_released();
+	void meshColorPreview();
 
 	void on_EQHandle_moved();
 	void on_EqHandle_crossing_histogram(EqHandle*,bool);

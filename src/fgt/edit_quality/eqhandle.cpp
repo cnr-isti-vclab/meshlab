@@ -94,6 +94,7 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 				*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newPos.x());
 				moveMidHandle();
 			}
+			emit positionChanged(); // for gammaCorrectionLabel
 			break;
 		case LEFT_HANDLE:
 			{
@@ -180,7 +181,7 @@ void EqHandle::moveMidHandle()
 	emit positionChangedToSpinBox((double)newSpinboxValue);
 	_spinBoxPointer->blockSignals(false);
 
-	emit positionChanged(); // for gammaCorrectionLabel
+	//emit positionChanged(); // for gammaCorrectionLabel
 }
 
 /* 
