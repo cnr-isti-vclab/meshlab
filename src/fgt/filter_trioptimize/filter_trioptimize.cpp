@@ -39,6 +39,7 @@
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/curvature.h>
 
 // instancing templates
 /*template class CurvData<NSMCurvEval>;
@@ -211,16 +212,27 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 	
 	vcg::LocalOptimization<CMeshO> optimization(m.cm);
 	
+	float pthr = par.getAbsPerc("pthreshold");
 	time_t start = clock();
 	
 	if(par.getBool("cflips")) {
 		//Log(0, "initializing vertex curvature...", optimization.nPerfmormedOps);
+		//vcg::tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m.cm);
 		
 		int metric = par.getEnum("curvtype");
-		switch(metric) {
-			case 0: optimization.Init<MeanCEdgeFlip>(); break;
-			case 1: optimization.Init<NSMCEdgeFlip>();  break;
-			case 2: optimization.Init<AbsCEdgeFlip>();  break;
+		switch (metric) {
+			case 0:
+				MeanCEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
+				optimization.Init<MeanCEdgeFlip>();
+				break;
+			case 1:
+				NSMCEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
+				optimization.Init<NSMCEdgeFlip>();
+				break;
+			case 2:
+				AbsCEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
+				optimization.Init<AbsCEdgeFlip>();
+				break;
 		}
 		
 		// stop when flips become harmful:
@@ -229,7 +241,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 		optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
 		optimization.DoOptimization();
 		
-		Log(0, "%i curvature edge flips performed in %i sec.",
+		Log(GLLogStream::Info, "%i curvature edge flips performed in %i sec.",
 				optimization.nPerfmormedOps, (int) (clock() - start) / 1000000);
 	}
 	
@@ -237,13 +249,16 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 	start = clock();
 	if(par.getBool("pflips")) {
 		//Log(0, "initializing vertex curvature...", optimization.nPerfmormedOps);
-				
-		MyPlanarEdgeFlip::CoplanarAngleThresholdDeg() = par.getAbsPerc("pthreshold");
-		
 		int metric = par.getEnum("planartype");
-		switch(metric) {
-			case 0: optimization.Init<MyPlanarEdgeFlip>(); break;
-			case 1: optimization.Init<MyTriEdgeFlip>();    break;
+		switch (metric) {
+			case 0:
+				MyPlanarEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
+				optimization.Init<MyPlanarEdgeFlip>();
+				break;
+			case 1:
+				MyTriEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
+				optimization.Init<MyTriEdgeFlip>();
+				break;
 		}
 		
 		// stop when flips become harmful:
@@ -252,7 +267,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 		optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
 		optimization.DoOptimization();
 		
-		Log(0, "%i planar edge flips performed in %i sec.",
+		Log(GLLogStream::Info, "%i planar edge flips performed in %i sec.",
 				optimization.nPerfmormedOps, (int) (clock() - start) / 1000000);
 	}
 	
