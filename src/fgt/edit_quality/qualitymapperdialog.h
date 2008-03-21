@@ -179,7 +179,7 @@ signals:
 	void closingDialog();
 
 private slots:
-	void on_midPercentage_textEdited(QString);
+	void on_midPercentageLine_editingFinished();
 	void on_midSpinBox_valueChanged(double);
 	void on_brightnessSlider_valueChanged(int);
 	void on_brightessSpinBox_valueChanged(double);

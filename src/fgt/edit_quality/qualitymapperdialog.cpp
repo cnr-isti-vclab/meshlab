@@ -1377,21 +1377,25 @@ void QualityMapperDialog::on_brightessSpinBox_valueChanged(double value)
 
 void QualityMapperDialog::on_midSpinBox_valueChanged(double)
 {
+	_signalDir = SPINBOX2LABEL;
+
 	if ( _signalDir != LABEL2SPINBOX )
-		ui.midPercentage->blockSignals( true );
+		ui.midPercentageLine->blockSignals( true );
 	QString val;
 	val.setNum( 100.0f * absolute2RelativeValf( ui.midSpinBox->value(), ui.maxSpinBox->value() - ui.minSpinBox->value() ), 'g', 4 );
-	ui.midPercentage->setText( val + "%" );
+	ui.midPercentageLine->setText( val );
 	if ( _signalDir != LABEL2SPINBOX )
-		ui.midPercentage->blockSignals( false );
+		ui.midPercentageLine->blockSignals( false );
 
-	_signalDir = SPINBOX2LABEL;
+	_signalDir = UNKNOWN_DIRECTION;
 }
 
-void QualityMapperDialog::on_midPercentage_textEdited(QString newText)
+void QualityMapperDialog::on_midPercentageLine_editingFinished()
 {
 	bool conversionPossible;
-	float numericValue = newText.toFloat(&conversionPossible);
+	float numericValue = ui.midPercentageLine->text().toFloat(&conversionPossible);
+
+	_signalDir = LABEL2SPINBOX;
 
 	if ( _signalDir != SPINBOX2LABEL )
 		ui.midSpinBox->blockSignals( true );
@@ -1405,5 +1409,5 @@ void QualityMapperDialog::on_midPercentage_textEdited(QString newText)
 	if ( _signalDir != SPINBOX2LABEL )
 		ui.midSpinBox->blockSignals( false );
 
-	_signalDir = LABEL2SPINBOX;
+	_signalDir = UNKNOWN_DIRECTION;
 }
