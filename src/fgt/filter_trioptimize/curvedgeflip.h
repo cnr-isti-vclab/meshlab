@@ -41,21 +41,21 @@ template <class TRIMESH_TYPE, class MYTYPE, class CURVEVAL>
 class CurvEdgeFlip : public TriEdgeFlip<TRIMESH_TYPE, MYTYPE>
 {
 protected:
-	typedef typename TRIMESH_TYPE::FaceType       FaceType;
-	typedef typename TRIMESH_TYPE::FacePointer    FacePointer;
-	typedef typename TRIMESH_TYPE::FaceIterator   FaceIterator;
+	typedef typename TRIMESH_TYPE::FaceType FaceType;
+	typedef typename TRIMESH_TYPE::FacePointer FacePointer;
+	typedef typename TRIMESH_TYPE::FaceIterator FaceIterator;
 	typedef typename TRIMESH_TYPE::VertexIterator VertexIterator;
-	typedef typename TRIMESH_TYPE::VertexType     VertexType;
-	typedef typename TRIMESH_TYPE::ScalarType     ScalarType;
-	typedef typename TRIMESH_TYPE::VertexPointer  VertexPointer;
-	typedef typename TRIMESH_TYPE::CoordType      CoordType;
-	typedef vcg::face::Pos<FaceType>              PosType;
+	typedef typename TRIMESH_TYPE::VertexType VertexType;
+	typedef typename TRIMESH_TYPE::ScalarType ScalarType;
+	typedef typename TRIMESH_TYPE::VertexPointer VertexPointer;
+	typedef typename TRIMESH_TYPE::CoordType CoordType;
+	typedef vcg::face::Pos<FaceType> PosType;
 	typedef vcg::face::VFIterator<FaceType> VFIteratorType;
 	typedef typename LocalOptimization<TRIMESH_TYPE>::HeapElem HeapElem;
 	typedef typename LocalOptimization<TRIMESH_TYPE>::HeapType HeapType;
-	typedef TriEdgeFlip<TRIMESH_TYPE, MYTYPE > Parent;
+	typedef TriEdgeFlip<TRIMESH_TYPE, MYTYPE> Parent;
 	typedef typename vcg::Triangle3<ScalarType> TriangleType;
-	
+
 	typedef typename TRIMESH_TYPE::VertContainer VertContainer;
 	
 	// New curvature precomputed for the vertexes of the faces 
@@ -170,6 +170,14 @@ public:
 		// do the flip
 		vcg::face::FlipEdge(*this->_pos.f, this->_pos.z);	
 	}
+	
+	virtual bool IsFeasible()
+	{
+		if (math::ToDeg(Angle(this->_pos.FFlip()->cN(), this->_pos.F()->cN()) ) <= this->CoplanarAngleThresholdDeg() )
+			return false;
+		
+		return vcg::face::CheckFlipEdge(*this->_pos.f, this->_pos.z);
+	}
 
 	ScalarType ComputePriority()
 	{
@@ -194,12 +202,13 @@ public:
 		v0 = this->_pos.F()->V0(i);
 		v1 = this->_pos.F()->V1(i);
 		v2 = this->_pos.F()->V2(i);
+		v3 = this->_pos.F()->FFp(i)->V2(this->_pos.F()->FFi(i));
 		
-		PosType app = this->_pos;
+		/*PosType app = this->_pos;
 		app.FlipF(); app.FlipE(); app.FlipV();
-		v3 = app.V();
+		v3 = app.V();*/
 		
-		FacePointer f2 = app.F();
+		FacePointer f2 = this->_pos.F()->FFp(i);
 		
 		// save sum of curvatures of ve
 		float cbefore = v0->Q() + v1->Q() + v2->Q() + v3->Q();
@@ -257,9 +266,7 @@ public:
 		for(fi = mesh.face.begin(); fi != mesh.face.end(); ++fi)
 			if(!(*fi).IsD()) {
 				for(unsigned int i = 0; i < 3; i++) {
-					VertexPointer v0 = (*fi).V0(i);
-					VertexPointer v1 = (*fi).V1(i);
-					if (v1 - v0 > 0)
+					if ((*fi).V1(i) - (*fi).V0(i) > 0)
 						InsertIfConvenient(heap, PosType(&*fi, i), mesh.IMark());
 				}
 			}
@@ -274,7 +281,7 @@ public:
 		// face involved in the flip operation, except the edge just flipped
 		
 		// index of the edge just flipped
-		int flipped = (this->_pos.I() + 1)  % 3;
+		int flipped = (this->_pos.I() + 1) % 3;
 		PosType pos(this->_pos.f, flipped);
 		pos.FlipF(); pos.FlipE(); pos.FlipV();
 		
@@ -326,7 +333,7 @@ public:
 			assert(epos.V() == pos.V() || epos.VFlip() == pos.V());
 		} while(epos != pos && !epos.IsBorder());
 		
-		std::push_heap(heap.begin(),heap.end());
+		std::push_heap(heap.begin(), heap.end());
 		//*/
 	}
 }; // end CurvEdgeFlip class
