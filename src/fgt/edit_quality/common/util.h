@@ -75,7 +75,7 @@ struct CHART_INFO
 		lowerBorder	= view_height - CANVAS_BORDER_DISTANCE;
 		chartWidth = rightBorder - leftBorder;
 		chartHeight = lowerBorder - upperBorder;
-		numOfItems = 100;//num_of_items;
+		numOfItems = NUMBER_OF_HISTOGRAM_BARS;
 		yScaleStep = Y_SCALE_STEP;
 		minX = min_X;
 		maxX = max_X;
