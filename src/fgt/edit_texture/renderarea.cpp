@@ -17,12 +17,9 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 		else textureName = QString();
 	}
 	textNum = tnum;
-	isDragging = false;
-	highlightedPoint = -1;
-	highComp = -1;
-	highClick = -1;
-
 	model = m;
+
+	// Init
 	oldX = 0; oldY = 0;
 	viewport = Point2f(0,0);
 	tb = new Trackball();
@@ -33,6 +30,8 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 
 	brush = QBrush(Qt::green);
 	mode = View;
+	editMode = Move;
+	origin = QPoint();
 
 	this->setMouseTracking(true);
 	this->setCursor(Qt::PointingHandCursor);
@@ -98,9 +97,9 @@ void RenderArea::paintEvent(QPaintEvent *)
 				if (model->cm.face[i].WT(0).v() < minY || model->cm.face[i].WT(1).v() < minY || model->cm.face[i].WT(2).v() < minY)	minY--;
 
 				glBegin(GL_LINE_LOOP);
-					glVertex3f(model->cm.face[i].WT(0).u() * AREADIM, AREADIM - (model->cm.face[i].WT(0).v() * AREADIM), 1);
-					glVertex3f(model->cm.face[i].WT(1).u() * AREADIM, AREADIM - (model->cm.face[i].WT(1).v() * AREADIM), 1);
-					glVertex3f(model->cm.face[i].WT(2).u() * AREADIM, AREADIM - (model->cm.face[i].WT(2).v() * AREADIM), 1);
+					glVertex3f(model->cm.face[i].WT(0).u() * AREADIM - panX, AREADIM - (model->cm.face[i].WT(0).v() * AREADIM) - panY, 1);
+					glVertex3f(model->cm.face[i].WT(1).u() * AREADIM - panX, AREADIM - (model->cm.face[i].WT(1).v() * AREADIM) - panY, 1);
+					glVertex3f(model->cm.face[i].WT(2).u() * AREADIM - panX, AREADIM - (model->cm.face[i].WT(2).v() * AREADIM) - panY, 1);
 				glEnd();
 			}
 		}
@@ -112,7 +111,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 		{
 			for (int x = minX; x < maxX; x++) 
 				for (int y = minY; y < maxY; y++)
-					painter.drawImage(QRect(x*AREADIM + panX,-y*AREADIM + panY,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
+					painter.drawImage(QRect(x*AREADIM,-y*AREADIM,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
 		}
 		else painter.drawImage(QRect(0,0,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
 
@@ -120,7 +119,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		glOrtho(0, AREADIM, AREADIM,0,-1,1);
+		glOrtho(0,AREADIM,AREADIM,0,-1,1);
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
@@ -136,6 +135,13 @@ void RenderArea::paintEvent(QPaintEvent *)
 		painter.drawText(AREADIM - TRANSLATE*18, AREADIM - TRANSLATE, QString("(%1,%2)").arg((float)-(viewport.X()/AREADIM) + 1).arg((float)viewport.Y()/AREADIM));
 		painter.drawText(TRANSLATE, TRANSLATE*6, QString("V"));
 		painter.drawText(AREADIM - TRANSLATE*23, AREADIM - TRANSLATE, QString("U"));
+		// and the origin of the scale and rotation
+		if (origin != QPoint())
+		{
+			painter.setPen(QPen(QBrush(Qt::black),1));
+			painter.setBrush(QBrush(Qt::yellow));
+			painter.drawEllipse(originR);
+		}
 		glDisable(GL_LOGIC_OP);
 	  	glPopAttrib();
 		glPopMatrix();
@@ -164,8 +170,19 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 			this->update();
 			break;
 		case Edit:
-			tpanX = e->x();
-			tpanY = e->y();
+			switch(editMode)
+			{
+				case Move:
+					tpanX = e->x();
+					tpanY = e->y();
+					break;
+				case Choose:
+					origin = QPointF((float)(e->x() - viewport.X())/AREADIM, (float)(AREADIM - e->y() + viewport.Y())/AREADIM);
+					originR = QRect(e->x()-RADIUS/2, e->y()-RADIUS/2, RADIUS, RADIUS);
+					this->update(originR);
+					break;
+
+			}
 			break;
 	}
 }
@@ -198,9 +215,12 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 				this->update();
 				break;
 			case Edit:
-				panX = oldPX + tpanX - e->x();
-				panY = oldPY + tpanY - e->y();
-				this->update();
+				if (editMode == Move)
+				{
+					panX = oldPX + tpanX - e->x();
+					panY = oldPY + tpanY - e->y();
+					this->update();
+				}
 				break;
 		}
 	}
@@ -226,23 +246,6 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 			this->update();
 			break;
 	}
-}		
-
-void RenderArea::RemapRepeat()
-{
-	/*
-	// Remap the uv in 9 planes: the main plain is in the middle, the coordinates over 
-	// the border will be mapped in the other planes
-	out = true;
-	for (unsigned i = 0; i < map.size(); i++)
-	{
-		// Cast needed to precision...
-		float u = map[i].GetU();
-		float v = map[i].GetV();
-		map[i].SetVertex(GetRepeatVertex(u,v,i));
-	}
-	this->update();
-	*/
 }
 
 void RenderArea::RemapClamp()
@@ -293,36 +296,10 @@ void RenderArea::RemapMod()
 	emit UpdateStat(0,0,0,0,0);	// <--------
 }
 
-void RenderArea::UpdateVertex(float u, float v)
-{
-	/*
-	// Update the position of the vertexes from user spin box input
-	QRect r;
-	if (!out) r = GetClampVertex(u, v, -1);
-	else r = GetRepeatVertex(u, v, -1);
-	map[highClick].SetU(u);
-	map[highClick].SetV(v);
-	map[highClick].SetVertex(r);
-	this->update();
-	*/
-}
-
-void RenderArea::VisitConnected()
-{
-	/*
-	// Visit the vertex-tree and initialize the vector 'connected' adding the index of the face with FF adjacency.
-	connected.clear();
-	int id = map[highComp].GetCompID();
-	for (unsigned i = 0; i < map.size(); i++)
-	{
-		if (map[i].GetCompID() == id) connected.push_back(i);
-	}
-	*/
-}
-
 void RenderArea::ChangeMode(int index)
 {
 	// Change the selection mode
+	origin = QPoint();
 	switch(index)
 	{
 		case 0:
@@ -353,68 +330,58 @@ void RenderArea::ChangeMode(int index)
 	this->update();
 }
 
-
-void RenderArea::UpdateComponentPos(int x, int y)
+void RenderArea::ChangeEditMode(int index)
 {
-	/*
-	// Update the position of all vertexes of the connected component
-	for (unsigned i = 0; i < connected.size(); i++)
-	{
-		// The MoveCenter func create some approximation errors....
-		QPoint p = map[connected[i]].GetVertex().topLeft();
-		QRect n = QRect(p.x() + x , p.y() + y, RADIUS, RADIUS);
-		map[connected[i]].SetVertex(n);
-	}
-	this->update();
-	// The UV Coord will be updated after mouse-release event
-	*/
+	// Change the function of the mouse press
+	if (index == 0) editMode = Move;
+	else editMode = Choose;
 }
 
 void RenderArea::RotateComponent(float alfa)
 {
-	/*
 	// Calcolate the new position of the vertex of the selected component after a rotation.
-	// The rotation is done around the selected vertex (= highComp)
-	QPoint origin = map[highComp].GetVertex().center();
-	float theta = -alfa * 3.14159f / 180.0f;	// Convert degree to radiant. PI is a finite number -> lost of precision
-	for (unsigned i = 0; i < connected.size(); i++)
+	// The rotation is done around the selected point
+	if (origin != QPoint())
 	{
-		int x = origin.x() + ((map[connected[i]].GetVertex().center().x() - origin.x()) * cos(theta)
-			- ((map[connected[i]].GetVertex().center().y() - origin.y()) * sin(theta)));
-		int y = origin.y() + ((map[connected[i]].GetVertex().center().y() - origin.y()) * cos(theta) 
-			+ ((map[connected[i]].GetVertex().center().x() - origin.x()) * sin(theta)));
-		QRect n = map[connected[i]].GetVertex();
-		n.moveCenter(QPoint(x, y));
-		map[connected[i]].SetVertex(n);
-		UpdateSingleUV(connected[i], (float)map[connected[i]].GetVertex().center().x() / AREADIM,
-			(float)(AREADIM - map[connected[i]].GetVertex().center().y()) / AREADIM);
+		float theta = alfa * 3.14159f / 180.0f; // Convert degree to radiant. PI is a finite number -> lost of precision
+		float sinv = sin(theta);
+		float cosv = cos(theta);
+		for (unsigned i = 0; i < model->cm.face.size(); i++)
+		{
+			if (model->cm.face[i].WT(0).n() == textNum)
+			for (unsigned j = 0; j < 3; j++)
+			{
+				float u = origin.x() + (cosv * (model->cm.face[i].WT(j).u() - origin.x()) - sinv * (model->cm.face[i].WT(j).v() - origin.y()));
+				float v = origin.y() + (sinv * (model->cm.face[i].WT(j).u() - origin.x()) + cosv * (model->cm.face[i].WT(j).v() - origin.y()));
+				model->cm.face[i].WT(j).u() = u;
+				model->cm.face[i].WT(j).v() = v;
+			}
+		}
+		this->update();
+		emit UpdateStat(0,0,0,0,0);	// <--------
 	}
-	this->update();
-	*/
 }
 
 void RenderArea::ScaleComponent(int perc)
 {
-	/*
-	// Scale the selected component. The origin is set to the selected vertex ( = highComp)
-	QPoint origin = map[highComp].GetVertex().center();
-	map[highComp].SetV();
-	float p = (float) perc / 100.0f;
-	for (unsigned i = 0; i < connected.size(); i++)
+	// Scale the selected component. The origin is set to the clicked point
+	if (origin != QPoint())
 	{
-		QPoint next = map[connected[i]].GetVertex().center();
-		int x = origin.x() + (map[connected[i]].GetVertex().center().x() - origin.x()) * p;
-		int y = origin.y() + (map[connected[i]].GetVertex().center().y() - origin.y()) * p;
-		if (x < 0) x = 0; else if (x > AREADIM) x = AREADIM;
-		if (y < 0) y = 0; else if (y > AREADIM) y = AREADIM;
-		QRect n = map[connected[i]].GetVertex();
-		n.moveCenter(QPoint(x, y));
-		map[connected[i]].SetVertex(n);
-		UpdateSingleUV(connected[i], (float)map[connected[i]].GetVertex().center().x() / AREADIM,
-			(float)(AREADIM - map[connected[i]].GetVertex().center().y()) / AREADIM);
+		float p = (float) perc / 100.0f;
+		for (unsigned i = 0; i < model->cm.face.size(); i++)
+		{
+			if (model->cm.face[i].WT(0).n() == textNum)
+			for (unsigned j = 0; j < 3; j++)
+			{
+				float x = origin.x() + (model->cm.face[i].WT(j).u() - origin.x()) * p;
+				float y = origin.y() + (model->cm.face[i].WT(j).v() - origin.y()) * p;
+				model->cm.face[i].WT(j).u() = x;
+				model->cm.face[i].WT(j).v() = y;
+			}
+		}
 	}
 	this->update();
-	*/
+	emit UpdateStat(0,0,0,0,0);
 }
 
 void RenderArea::UpdateUV()
@@ -432,95 +399,8 @@ void RenderArea::UpdateUV()
 		}
 	}
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
-	ResetTrack();
 	this->update();
 	emit UpdateStat(0,0,0,0,0);	// <--------
-}
-
-void RenderArea::UpdateSingleUV(int index, float u, float v)
-{
-	/*
-	// Update the UV Coord of the vertex map[index]
-	if (!out)
-	{
-		if (u < 0.0f) u = 0.0f; else if (u > 1.0f) u = 1.0f;
-		if (v < 0.0f) v = 0.0f; else if (v > 1.0f) v = 1.0f;
-	}
-	else
-	{
-		u = (u * 3) - 1;
-		v = (v * 3) - 1;
-	}
-	map[index].SetU(u);
-	map[index].SetV(v);
-	*/
-}
-
-QRect RenderArea::GetRepeatVertex(float u, float v, int index)
-{
-	/*
-	// Return the new position of the vertex in the RenderArea space in 'Repeat' mode.
-	// If the passed index is valid, also update the UV coord
-	// The function is called from the Remap (--> change UV) and from the UpdateVertex
-	float realu, realv;
-	if (u < 0) 
-	{
-		while (u < 0) u++; 
-		realu = u; 
-		u = (float)u * AREADIM/3;
-	}
-	else if (u > 1) 
-	{ 
-		while (u > 1) u--; 
-		realu = u; 
-		u = (float)u * AREADIM/3 + 2*AREADIM/3; 
-	}
-	else 
-	{
-		realu = u; 
-		u = (float) u * AREADIM/3 + AREADIM/3;
-	}
-	if (v < 0) 
-	{
-		while (v < 0) v++; 
-		realv = v; 
-		v = (float)v * AREADIM/3;
-	}
-	else if (v > 1) 
-	{ 
-		while (v > 1) v--; 
-		realv = v; 
-		v = (float)v * AREADIM/3 + 2*AREADIM/3; 
-	}
-	else 
-	{
-		realv = v; 
-		v = (float)v * AREADIM/3 + AREADIM/3;
-	}
-	if (index != -1) 
-	{
-		map[index].SetU(realu);
-		map[index].SetV(realv);	
-	}
-	return QRect(u  - RADIUS/2, AREADIM - v - RADIUS/2, RADIUS, RADIUS);
-	*/
-	return QRect();
-}
-
-QRect RenderArea::GetClampVertex(float u, float v, int index)
-{
-	/*
-	// Return the new position of the vertex in the RenderArea space in 'Clamp' mode.
-	// If the passed index is valid, also update the UV coord
-	// The function is called from the Remap (--> change UV) and from the UpdateVertex
-	if (u < 0) u = 0;
-	else if (u > 1) u = 1;
-	if (v < 0) v = 0;
-	else if (v > 1) v = 1;
-	if (index != -1) UpdateSingleUV(index, u, v);
-	return QRect(u * AREADIM - RADIUS/2, (AREADIM - (v * AREADIM)) - RADIUS/2, RADIUS, RADIUS);
-	*/
-	return QRect();
 }
 
 void RenderArea::ResetTrack()

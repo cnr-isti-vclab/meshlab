@@ -43,20 +43,12 @@ private slots:
 	void on_moveButton_clicked();
 	void on_selectButton_clicked();
 	void on_optionButton_clicked();
-	void on_ApplyScale_clicked();
-	void on_ApplyRotate_clicked();
-	void on_spinBoxY_valueChanged(int);
-	void on_spinBoxX_valueChanged(int);
-	void on_tabWidgetEdit_currentChanged(int);
-	void on_SpinBoxV_valueChanged(double);
-	void on_SpinBoxU_valueChanged(double);
-	void on_tabWidget_currentChanged(int);
-	void on_applyButton_clicked();
-	void on_remapRB_toggled(bool);
-	void on_vertRB_toggled(bool);
-	void on_faceRB_toggled(bool);
+	void on_scaleButton_clicked();
+	void on_rotateButton_clicked();
 	void on_clampButton_clicked();
 	void on_modulusButton_clicked();
+	void on_radioButtonMove_toggled(bool t);
+	void on_radioButtonSelect_toggled(bool t);
 
 public slots:
 	void UpStat(float u, float v, int faceN, int vertN, int countFace);

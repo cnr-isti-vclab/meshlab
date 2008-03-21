@@ -29,17 +29,10 @@ class RenderArea : public QGLWidget
 
 public:
 	enum Mode { View, Edit, Select };
+	enum EditMode { Move, Choose };
 
     RenderArea(QWidget *parent = 0, QString path = QString(), MeshModel *m = 0, unsigned textNum = 0);
 	~RenderArea();
-
-	vector<int> connected;	// Vector of indexes of face connected selected by user
-
-	bool isDragging;
-	int highlightedPoint,	// Vertex highlighted when the mouse move over it
-		highComp,			// Index of the vertex element of connected component
-		highClick;			// Clicked vertex
-	bool out;
 
 public:
     void setPen(const QPen &pen);
@@ -47,13 +40,9 @@ public:
     void setAntialiased(bool antialiased);
 	void setTexture(QString path);
 	void ChangeMode(int index);
-	void RemapRepeat();
+	void ChangeEditMode(int index);
 	void RemapClamp();
 	void RemapMod();
-	void UpdateUV();
-	void UpdateVertex(float u, float v);
-	void UpdateSingleUV(int index, float u, float v);
-	void UpdateComponentPos(int x, int y);
 	void RotateComponent(float theta);
 	void ScaleComponent(int percent);
 
@@ -73,6 +62,7 @@ private:
 	MeshModel *model;	// Ref to the model (for upate)
 
 	Mode mode;			// Action type
+	EditMode editMode;
 
 	// Trackball data
 	vcg::Trackball *tb;
@@ -86,10 +76,11 @@ private:
 	int panX, panY, tpanX, tpanY, oldPX, oldPY;	// Temp for axis
 	int maxX, maxY, minX, minY;	// For texCoord out of border
 
+	QPointF origin;		// Origin for scale/rotate editing
+	QRect originR;
+
+	void UpdateUV();
 	void ResetTrack();
-	void VisitConnected();
-	QRect GetRepeatVertex(float u, float v, int index);
-	QRect GetClampVertex(float u, float v, int index);
 
 signals:
 	void UpdateStat(float u, float v, int faceN, int vertN, int countFace);
