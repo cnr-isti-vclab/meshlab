@@ -307,8 +307,14 @@
              </item>
              <item row="1" column="0" colspan="2" >
               <widget class="QDoubleSpinBox" name="brightessSpinBox" >
+               <property name="accelerated" >
+                <bool>true</bool>
+               </property>
                <property name="maximum" >
                 <double>2.000000000000000</double>
+               </property>
+               <property name="singleStep" >
+                <double>0.010000000000000</double>
                </property>
                <property name="value" >
                 <double>1.000000000000000</double>
@@ -409,6 +415,9 @@
               <width>16777215</width>
               <height>200</height>
              </size>
+            </property>
+            <property name="autoFillBackground" >
+             <bool>true</bool>
             </property>
             <property name="frameShape" >
              <enum>QFrame::StyledPanel</enum>

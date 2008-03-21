@@ -65,8 +65,6 @@ public:
 
 	QPoint cur;
 	bool haveToPick;
-
-	void ComputePerVertexQualityHistogram( CMeshO & m, vcg::Frange range, Histogramf &h, int bins);	
 };
 
 #endif
