@@ -49,6 +49,7 @@ typedef unsigned int		UINT32;
 #define Y_SCALE_STEP			5
 
 #define NUMBER_OF_HISTOGRAM_BINS 50000
+#define NUMBER_OF_HISTOGRAM_BARS 100
 
 // The defalut percentile for clamping equalizer histogram
 #define CLAMP_PERCENTILE 90
