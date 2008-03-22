@@ -82,7 +82,8 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		converterPath += "/IDTFConverter.exe";
 		converterCommandLine = converterPath;
 	#elif defined(Q_OS_MAC)
-		converterCommandLine = converterPath +"/IDTFConverter.sh "+converterPath;
+		converterPath.replace(QString(" "),QString("\\ "));
+		converterCommandLine = "\""+converterPath +"/IDTFConverter.sh"+ "\" \"" + converterPath+"\"";
 		converterPath = converterPath +"/IDTFConverter.sh";
 	#endif
 		if (settings.contains("U3D/converter"))
@@ -124,7 +125,7 @@ QList<MeshIOInterface::Format> U3DIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
 	formatList << Format("U3D File Format"	,tr("U3D"));
-	formatList << Format("U3D File Format"	,tr("IDTF"));
+	formatList << Format("IDTF File Format"	,tr("IDTF"));
 	return formatList;
 }
 
