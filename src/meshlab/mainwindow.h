@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.100  2008/03/22 08:05:14  cignoni
+Version 1.1.1
+
 Revision 1.99  2008/02/02 15:56:38  cignoni
 Version 1.1.1b
 
@@ -199,7 +202,7 @@ public:
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("1.1.1b"); }
+   const QString appVer() const {return tr("1.1.1"); }
 
 public slots:
 		 
