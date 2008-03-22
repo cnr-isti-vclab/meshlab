@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.154  2008/03/22 07:38:55  cignoni
+To avoid that a filter changes something assumed by the current editing tool, before actually starting the filter we close the current editing tool (if any).
+
 Revision 1.153  2008/03/14 15:22:28  corsini
 fix decoration menu
 
@@ -477,6 +480,11 @@ void MainWindow::startFilter()
 
 	if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
 
+  // In order to avoid that a filter changes something assumed by the current editing tool, 
+	// before actually starting the filter we close the current editing tool (if any).
+	GLA()->endEdit();
+	updateMenus();
+	
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		int mask = 0;
