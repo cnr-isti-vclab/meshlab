@@ -66,7 +66,9 @@ QMAKE_INFO_PLIST = ../install/info.plist
 
 # to add MacOS icon 
 ICON = images/meshlab.icns
-ICON += images/meshlab_obj.icns
+# note that to add the file icons on the mac the following line does not work. 
+# You have to copy the file by hand into the meshlab.app/Contents/Resources directory.
+# ICON += images/meshlab_obj.icns
 
 QT           += opengl 
 QT           += xml
