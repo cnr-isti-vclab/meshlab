@@ -1382,7 +1382,7 @@ void QualityMapperDialog::on_midSpinBox_valueChanged(double)
 	if ( _signalDir != LABEL2SPINBOX )
 		ui.midPercentageLine->blockSignals( true );
 	QString val;
-	val.setNum( 100.0f * absolute2RelativeValf( ui.midSpinBox->value(), ui.maxSpinBox->value() - ui.minSpinBox->value() ), 'g', 4 );
+	val.setNum( 100.0f * absolute2RelativeValf( ui.midSpinBox->value() - ui.minSpinBox->value(), ui.maxSpinBox->value() - ui.minSpinBox->value() ), 'g', 4 );
 	ui.midPercentageLine->setText( val );
 	if ( _signalDir != LABEL2SPINBOX )
 		ui.midPercentageLine->blockSignals( false );
