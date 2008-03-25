@@ -32,14 +32,12 @@ public:
 
 private:
 	Ui::TextureEditorClass ui;
-	int oldX, oldY;		// Value stored to calcolate difference
-	double oldU, oldV;	
-	bool lock;			// Used to avoid double call of function..
-	void HandleSpinBoxUV();
-	void HandleSpinBoxXY();
+	int initialDim;
+	void ResetLayout();
 
 private slots:
 	void on_editButton_clicked();
+	void on_optimizeButton_clicked();
 	void on_moveButton_clicked();
 	void on_selectButton_clicked();
 	void on_optionButton_clicked();
@@ -47,8 +45,11 @@ private slots:
 	void on_rotateButton_clicked();
 	void on_clampButton_clicked();
 	void on_modulusButton_clicked();
+	void on_buttonClear_clicked();
 	void on_radioButtonMove_toggled(bool t);
 	void on_radioButtonSelect_toggled(bool t);
+	void on_radioButtonArea_toggled(bool t);
+	void on_radioButtonConnected_toggled(bool t);
 
 public slots:
 	void UpStat(float u, float v, int faceN, int vertN, int countFace);

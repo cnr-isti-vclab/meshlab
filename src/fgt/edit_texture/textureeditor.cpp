@@ -6,9 +6,13 @@ static int countPage = 1;	// Number of Tab in the texture's TabWidgets
 TextureEditor::TextureEditor(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
-	oldX = 0; oldY = 0;
-	oldU = -1; oldV = -1;
-	lock = false;
+	ui.groupBoxUVMapEdit->setVisible(false);
+	ui.groupBoxSelect->setVisible(false);
+	ui.groupBoxOptimize->setVisible(false);
+	ui.groupBoxOption->setVisible(false);
+	this->resize(this->width(), this->height() - ui.groupBoxUVMapEdit->sizeHint().height() 
+		- ui.groupBoxSelect->sizeHint().height() - ui.groupBoxOptimize->sizeHint().height());
+	initialDim = this->height() - 20;
 }
 
 TextureEditor::~TextureEditor()
@@ -23,7 +27,6 @@ void TextureEditor::Reset()
 	first = 0;
 }
 
-
 void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 {
 	// Add a RenderArea widget to the TabWidget
@@ -33,7 +36,7 @@ void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 
 	QTabBar *t = new QTabBar(ui.tabWidget);
 	RenderArea *ra= new RenderArea(t, texture, m, index);
-	ra->setGeometry(MARGIN,MARGIN,AREADIM,AREADIM);
+	ra->setGeometry(MARGIN,MARGIN,400,400);
 	ui.tabWidget->addTab(t, name);
 	if (countPage == 1)
 	{
@@ -51,7 +54,7 @@ void TextureEditor::AddEmptyRenderArea()
 	// Add an empty render area (the model doesn't has any texture)
 	RenderArea *ra= new RenderArea(ui.tabWidget->widget(0));
 	first = ra;
-	ra->setGeometry(MARGIN,MARGIN,AREADIM,AREADIM);
+	ra->setGeometry(MARGIN,MARGIN,400,400);
 	ra->show();
 }
 
@@ -86,37 +89,47 @@ void TextureEditor::SetStatusText(QString text)
 void TextureEditor::on_moveButton_clicked()
 {
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(0);
+	// This button does not hide the current panel...
 	ui.editButton->setChecked(false);
-	ui.selectButton->setChecked(false);
 	ui.optionButton->setChecked(false);
+	ui.selectButton->setChecked(false);
+	ui.optimizeButton->setChecked(false);
 	ui.moveButton->setChecked(true);
 }
 
 void TextureEditor::on_editButton_clicked()
 {
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(1);
-	ui.moveButton->setChecked(false);
-	ui.selectButton->setChecked(false);
-	ui.optionButton->setChecked(false);
+	ResetLayout();
 	ui.editButton->setChecked(true);
+	ui.groupBoxUVMapEdit->setVisible(true);
+	//this->setMinimumHeight(initialDim + n);
+	this->resize(this->width(), initialDim + ui.groupBoxUVMapEdit->sizeHint().height());
 }
 
 void TextureEditor::on_selectButton_clicked()
 {
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
-	ui.editButton->setChecked(false);
-	ui.moveButton->setChecked(false);
-	ui.optionButton->setChecked(false);
+	ResetLayout();
 	ui.selectButton->setChecked(true);
+	ui.groupBoxSelect->setVisible(true);
+	this->resize(this->width(),initialDim + ui.groupBoxSelect->sizeHint().height());
+}
+
+void TextureEditor::on_optimizeButton_clicked()
+{
+	ResetLayout();
+	ui.optimizeButton->setChecked(true);
+	ui.groupBoxOptimize->setVisible(true);
+	this->resize(this->width(),initialDim + ui.groupBoxOptimize->sizeHint().height());
 }
 
 void TextureEditor::on_optionButton_clicked()
 {
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(3);
-	ui.editButton->setChecked(false);
-	ui.selectButton->setChecked(false);
-	ui.moveButton->setChecked(false);
+	ResetLayout();
 	ui.optionButton->setChecked(true);
+	ui.groupBoxOption->setVisible(true);
+	this->resize(this->width(),initialDim + ui.groupBoxOption->sizeHint().height());
 }
 
 void TextureEditor::on_clampButton_clicked()
@@ -141,6 +154,11 @@ void TextureEditor::on_scaleButton_clicked()
 		((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ScaleComponent(ui.spinBoxScale->value());
 }
 
+void TextureEditor::on_buttonClear_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ClearSelection();
+}
+
 // Radio buttons
 void TextureEditor::on_radioButtonMove_toggled(bool t)
 {
@@ -158,4 +176,38 @@ void TextureEditor::on_radioButtonSelect_toggled(bool t)
 		ui.radioButtonMove->setChecked(false);
 		((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeEditMode(1);
 	}
+}
+
+void TextureEditor::on_radioButtonArea_toggled(bool t)
+{
+	if (t)
+	{
+		ui.radioButtonConnected->setChecked(false);
+		((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(0);
+	}
+}
+
+void TextureEditor::on_radioButtonConnected_toggled(bool t)
+{
+	if (t)
+	{
+		ui.radioButtonArea->setChecked(false);
+		((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(1);
+	}
+}
+
+void TextureEditor::ResetLayout()
+{
+	// Reset the layout of the widget:
+	// uncheck all the buttons
+	ui.editButton->setChecked(false);
+	ui.moveButton->setChecked(false);
+	ui.optionButton->setChecked(false);
+	ui.selectButton->setChecked(false);
+	ui.optimizeButton->setChecked(false);
+	// Hide all the group box
+	ui.groupBoxSelect->hide();
+	ui.groupBoxUVMapEdit->hide();
+	ui.groupBoxOptimize->hide();
+	ui.groupBoxOption->hide();
 }

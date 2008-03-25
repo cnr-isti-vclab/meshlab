@@ -18,6 +18,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	}
 	textNum = tnum;
 	model = m;
+	AREADIM = 400;
 
 	// Init
 	oldX = 0; oldY = 0;
@@ -31,7 +32,13 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	brush = QBrush(Qt::green);
 	mode = View;
 	editMode = Move;
-	origin = QPoint();
+	origin = QPointF();
+	start = QPoint();
+	end = QPoint();
+
+	selectMode = Area;
+	selBit = CFaceO::NewBitFlag();
+	selected = false;
 
 	this->setMouseTracking(true);
 	this->setCursor(Qt::PointingHandCursor);
@@ -71,7 +78,6 @@ void RenderArea::paintEvent(QPaintEvent *)
     painter.setBrush(brush);
     painter.setRenderHint(QPainter::Antialiasing, antialiased);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-	
 	painter.begin(painter.device());	// Initialize a GL context
 	
 	tb->GetView();
@@ -81,12 +87,12 @@ void RenderArea::paintEvent(QPaintEvent *)
 	if (image != QImage())
 	{
 	    glEnable(GL_COLOR_LOGIC_OP);
-		glLogicOp(GL_XOR);
 		glEnable(GL_DEPTH_TEST);
-	    glColor3f(1,1,1);
 		glLineWidth(2);
 		for (unsigned i = 0; i < model->cm.face.size(); i++)
 		{
+			glLogicOp(GL_XOR);
+			glColor3f(1,1,1);
 			// First draw the model in u,v space
 			if (model->cm.face[i].IsS() && model->cm.face[i].WT(0).n() == textNum)
 			{
@@ -96,11 +102,26 @@ void RenderArea::paintEvent(QPaintEvent *)
 				if (model->cm.face[i].WT(0).u() < minX || model->cm.face[i].WT(1).u() < minX || model->cm.face[i].WT(2).u() < minX)	minX--;
 				if (model->cm.face[i].WT(0).v() < minY || model->cm.face[i].WT(1).v() < minY || model->cm.face[i].WT(2).v() < minY)	minY--;
 
+				// Draw the edge of faces
 				glBegin(GL_LINE_LOOP);
-					glVertex3f(model->cm.face[i].WT(0).u() * AREADIM - panX, AREADIM - (model->cm.face[i].WT(0).v() * AREADIM) - panY, 1);
-					glVertex3f(model->cm.face[i].WT(1).u() * AREADIM - panX, AREADIM - (model->cm.face[i].WT(1).v() * AREADIM) - panY, 1);
-					glVertex3f(model->cm.face[i].WT(2).u() * AREADIM - panX, AREADIM - (model->cm.face[i].WT(2).v() * AREADIM) - panY, 1);
+				for (int j = 0; j < 3; j++)
+				{
+					if (selected && !model->cm.face[i].IsUserBit(selBit))
+						glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);	
+					else glVertex3f(model->cm.face[i].WT(j).u() * AREADIM - panX, AREADIM - (model->cm.face[i].WT(j).v() * AREADIM) - panY, 1);	 
+				}
 				glEnd();
+
+				// Draw the selected faces
+				if (selected && model->cm.face[i].IsUserBit(selBit))
+				{
+					glLogicOp(GL_AND);
+					glColor3f(1,0,0);
+					glBegin(GL_TRIANGLES);
+						for (int j = 0; j < 3; j++)
+							glVertex3f(model->cm.face[i].WT(j).u() * AREADIM - panX, AREADIM - (model->cm.face[i].WT(j).v() * AREADIM) - panY, 1);
+					glEnd();
+				}
 			}
 		}
 		glDisable(GL_LOGIC_OP);
@@ -135,12 +156,19 @@ void RenderArea::paintEvent(QPaintEvent *)
 		painter.drawText(AREADIM - TRANSLATE*18, AREADIM - TRANSLATE, QString("(%1,%2)").arg((float)-(viewport.X()/AREADIM) + 1).arg((float)viewport.Y()/AREADIM));
 		painter.drawText(TRANSLATE, TRANSLATE*6, QString("V"));
 		painter.drawText(AREADIM - TRANSLATE*23, AREADIM - TRANSLATE, QString("U"));
-		// and the origin of the scale and rotation
-		if (origin != QPoint())
+		// The origin of the scale and rotation
+		if (origin != QPointF())
 		{
 			painter.setPen(QPen(QBrush(Qt::black),1));
 			painter.setBrush(QBrush(Qt::yellow));
 			painter.drawEllipse(originR);
+		}
+		// The rectangle of selection
+		if (start != QPoint() && end != QPoint())
+		{
+			painter.setPen(QPen(QBrush(Qt::gray),1));
+			painter.setBrush(QBrush(Qt::NoBrush));
+			painter.drawRect(area);
 		}
 		glDisable(GL_LOGIC_OP);
 	  	glPopAttrib();
@@ -153,7 +181,6 @@ void RenderArea::paintEvent(QPaintEvent *)
 
     painter.setPen(palette().dark().color());
     painter.setBrush(Qt::NoBrush);
-    painter.drawRect(QRect(0, 0, width()-1, height()-1));
 
 	painter.end();
 }
@@ -184,6 +211,10 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 
 			}
 			break;
+		case Select:
+			start = e->pos();
+			end = e->pos();
+			break;
 	}
 }
 
@@ -199,6 +230,13 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 			oldPX = panX;
 			oldPY = panY;
 			UpdateUV();
+			break;
+		case Select:
+			QRect tmp = area;
+			start = QPoint();
+			end = QPoint();
+			area = QRect();
+			this->update(tmp);
 			break;
 	}
 }
@@ -221,6 +259,15 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 					panY = oldPY + tpanY - e->y();
 					this->update();
 				}
+				break;
+			case Select:
+				end = e->pos();
+				int x1, x2, y1, y2;
+				if (start.x() < end.x()) {x1 = start.x(); x2 = end.x();} else {x1 = end.x(); x2 = start.x();}
+				if (start.y() < end.y()) {y1 = start.y(); y2 = end.y();} else {y1 = end.y(); y2 = start.y();}
+				area = QRect(x1,y1,x2-x1,y2-y1);
+				if (selectMode == Area) SelectFaces();
+				this->update(area);
 				break;
 		}
 	}
@@ -337,6 +384,13 @@ void RenderArea::ChangeEditMode(int index)
 	else editMode = Choose;
 }
 
+void RenderArea::ChangeSelectMode(int index)
+{
+	// Change the function of the mouse selection
+	if (index == 0) selectMode = Area;
+	else selectMode = Connected;
+}
+
 void RenderArea::RotateComponent(float alfa)
 {
 	// Calcolate the new position of the vertex of the selected component after a rotation.
@@ -348,7 +402,7 @@ void RenderArea::RotateComponent(float alfa)
 		float cosv = cos(theta);
 		for (unsigned i = 0; i < model->cm.face.size(); i++)
 		{
-			if (model->cm.face[i].WT(0).n() == textNum)
+			if (model->cm.face[i].WT(0).n() == textNum && (!selected || (selected && model->cm.face[i].IsUserBit(selBit))))
 			for (unsigned j = 0; j < 3; j++)
 			{
 				float u = origin.x() + (cosv * (model->cm.face[i].WT(j).u() - origin.x()) - sinv * (model->cm.face[i].WT(j).v() - origin.y()));
@@ -370,7 +424,7 @@ void RenderArea::ScaleComponent(int perc)
 		float p = (float) perc / 100.0f;
 		for (unsigned i = 0; i < model->cm.face.size(); i++)
 		{
-			if (model->cm.face[i].WT(0).n() == textNum)
+			if (model->cm.face[i].WT(0).n() == textNum && (!selected || (selected && model->cm.face[i].IsUserBit(selBit))))
 			for (unsigned j = 0; j < 3; j++)
 			{
 				float x = origin.x() + (model->cm.face[i].WT(j).u() - origin.x()) * p;
@@ -389,7 +443,7 @@ void RenderArea::UpdateUV()
 	// After a move of component, re-calculate the new UV coordinates
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		if (model->cm.face[i].WT(0).n() == textNum)
+		if (model->cm.face[i].WT(0).n() == textNum && (!selected || (selected && model->cm.face[i].IsUserBit(selBit))))
 		{
 			for (unsigned j = 0; j < 3; j++)
 			{
@@ -410,4 +464,40 @@ void RenderArea::ResetTrack()
 	viewport = Point2f(0,0);
 	oldX = 0; oldY = 0;
 	tb->track.SetTranslate(Point3f(0,0,0));
+}
+
+void RenderArea::SetDimension(int dim)
+{
+	// Change the dimension of the control
+	AREADIM = dim;
+	this->setSizeIncrement(dim,dim);
+	this->update();
+}
+
+void RenderArea::SelectFaces()
+{
+	// Check if a face is inside the rectangle of selection
+	CMeshO::FaceIterator fi;
+	QRegion a = QRegion(QRect(area.x() - panX, area.y() - panY, area.width(), area.height()));
+	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
+	{
+        (*fi).ClearUserBit(selBit);
+		QVector<QPoint> t = QVector<QPoint>(); 
+		t.push_back(QPoint((*fi).WT(0).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(0).v() * AREADIM) + viewport.Y()));
+		t.push_back(QPoint((*fi).WT(1).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(1).v() * AREADIM) + viewport.Y()));
+		t.push_back(QPoint((*fi).WT(2).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(2).v() * AREADIM) + viewport.Y()));
+		QRegion r = QRegion(QPolygon(t));
+		if (r.intersects(area))
+		{
+			(*fi).SetUserBit(selBit);
+			if (!selected) selected = true;	// <---- MANCA il reset
+		}
+	}
+}
+
+void RenderArea::ClearSelection()
+{
+	// Remove the selction of face
+	selected = false;
+	this->update();
 }

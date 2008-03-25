@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <QGLWidget>
 
-#define AREADIM 400
 #define TEXTX 175
 #define TEXTY 200
 #define TRANSLATE 5
@@ -30,6 +29,7 @@ class RenderArea : public QGLWidget
 public:
 	enum Mode { View, Edit, Select };
 	enum EditMode { Move, Choose };
+	enum SelectMode { Area, Connected };
 
     RenderArea(QWidget *parent = 0, QString path = QString(), MeshModel *m = 0, unsigned textNum = 0);
 	~RenderArea();
@@ -41,10 +41,13 @@ public:
 	void setTexture(QString path);
 	void ChangeMode(int index);
 	void ChangeEditMode(int index);
+	void ChangeSelectMode(int index);
 	void RemapClamp();
 	void RemapMod();
 	void RotateComponent(float theta);
 	void ScaleComponent(int percent);
+	void SetDimension(int dim);
+	void ClearSelection();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -63,6 +66,7 @@ private:
 
 	Mode mode;			// Action type
 	EditMode editMode;
+	SelectMode selectMode;
 
 	// Trackball data
 	vcg::Trackball *tb;
@@ -76,11 +80,20 @@ private:
 	int panX, panY, tpanX, tpanY, oldPX, oldPY;	// Temp for axis
 	int maxX, maxY, minX, minY;	// For texCoord out of border
 
+	int selBit;
+	bool selected;
+
 	QPointF origin;		// Origin for scale/rotate editing
 	QRect originR;
 
+	QPoint start, end;	// Selection area
+	QRect area;
+
+	int AREADIM;
+
 	void UpdateUV();
 	void ResetTrack();
+	void SelectFaces();
 
 signals:
 	void UpdateStat(float u, float v, int faceN, int vertN, int countFace);

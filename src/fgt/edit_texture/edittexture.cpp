@@ -130,7 +130,7 @@ void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshMod
 	gla->update();
 }
 
-void EditTexturePlugin::Decorate(QAction *ac, MeshModel &m, GLArea *gla)
+void EditTexturePlugin::Decorate(QAction *, MeshModel &m, GLArea *gla)
 {
 	QPoint mid, wid;
 	vector<CMeshO::FacePointer> NewFaceSel;
