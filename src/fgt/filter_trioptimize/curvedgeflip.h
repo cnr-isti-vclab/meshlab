@@ -176,6 +176,20 @@ public:
 		if (math::ToDeg(Angle(this->_pos.FFlip()->cN(), this->_pos.F()->cN()) ) <= this->CoplanarAngleThresholdDeg() )
 			return false;
 		
+		CoordType v0, v1, v2, v3;
+		int i = this->_pos.I();
+		v0 = this->_pos.F()->V0(i)->P();
+		v1 = this->_pos.F()->V1(i)->P();
+		v2 = this->_pos.F()->V2(i)->P();
+		v3 = this->_pos.F()->FFp(i)->V2(this->_pos.F()->FFi(i))->P();
+		
+		// Take the parallelogram formed by the adjacent faces of edge
+		// If a corner of the parallelogram on extreme of edge to flip is >= 180
+		// the flip produce two identical faces - avoid this
+		if( (Angle(v2 - v0, v1 - v0) + Angle(v3 - v0, v1 - v0) >= M_PI) ||
+		     (Angle(v2 - v1, v0 - v1) + Angle(v3 - v1, v0 - v1) >= M_PI))
+			return false;
+		
 		return vcg::face::CheckFlipEdge(*this->_pos.f, this->_pos.z);
 	}
 
@@ -204,13 +218,9 @@ public:
 		v2 = this->_pos.F()->V2(i);
 		v3 = this->_pos.F()->FFp(i)->V2(this->_pos.F()->FFi(i));
 		
-		/*PosType app = this->_pos;
-		app.FlipF(); app.FlipE(); app.FlipV();
-		v3 = app.V();*/
-		
 		FacePointer f2 = this->_pos.F()->FFp(i);
 		
-		// save sum of curvatures of ve
+		// save sum of curvatures of vertexes
 		float cbefore = v0->Q() + v1->Q() + v2->Q() + v3->Q();
 		
 		CurvData cd0, cd1, cd2, cd3;
@@ -239,8 +249,7 @@ public:
 		heap.clear();
 		
 		SimpleTempData<VertContainer, CurvData> tdcurv(mesh.vert);
-		tdcurv.Start();
-		
+		tdcurv.Start(); 
 		
 		// initialize vertex quality with vertex curvature
 		/*VertexIterator vi;
@@ -272,70 +281,49 @@ public:
 			}
 	}
 	
-	void UpdateHeap(HeapType &heap)
+	void UpdateHeap(HeapType& heap)
 	{
 		this->GlobalMark()++;
 		
+		FacePointer f1 = this->_pos.F();
 		// The flip creates a diagonal edge on index _pos.I() + 1
-		// We must push on heap every edge of the mesh with a vertex in a
-		// face involved in the flip operation, except the edge just flipped
+		// We must push on heap every edge 2 - neighbor to the flipped edge
 		
-		// index of the edge just flipped
 		int flipped = (this->_pos.I() + 1) % 3;
-		PosType pos(this->_pos.f, flipped);
-		pos.FlipF(); pos.FlipE(); pos.FlipV();
+		PosType startpos(this->_pos.f, flipped);
+		FacePointer f2 = (FacePointer) startpos.FFlip();
+
+		assert(!startpos.IsBorder());
 		
-		FacePointer face1 = this->_pos.F();
+		PosType pos;
 		
-		face1->V(0)->IMark() = this->GlobalMark();
-		face1->V(1)->IMark() = this->GlobalMark();
-		face1->V(2)->IMark() = this->GlobalMark();
-		pos.V()->IMark() = this->GlobalMark();
-		
-		FacePointer face2 = pos.F();
-		
-		// edges of the first face, except the flipped edge
-		for(int i = 0; i < 3; i++) if(i != flipped)
-			heap.push_back(new MYTYPE(PosType(face1, i), this->GlobalMark()));
-		
-		// edges of the second face, except the flipped edge
-		for(int i = 0; i < 3; i++) if(i != face1->FFi(flipped))
-			heap.push_back(new MYTYPE(PosType(face2, i), this->GlobalMark()));
-		
-		// every edge with v0, v1 v3 of face1
-		for(int i = 0; i < 3; i++) {
-			PosType startpos(face1, i);
-			PosType epos = startpos;
-			
-			do { // go to the first border (if there is one)
-				epos.NextE();
-			} while(epos != startpos && !epos.IsBorder());
-			
-			do {
-				if(epos.F() != face1 && epos.FFlip() != face1 && 
-				   epos.F() != face2 && epos.FFlip() != face2)
-					InsertIfConvenient(heap, epos, this->GlobalMark());
-				epos.NextE();
-				assert(epos.V() == startpos.V() || epos.VFlip() == startpos.V());
-			} while(epos != startpos && !epos.IsBorder());
+		for (int i = 0; i < 3; i++) if (i != flipped) {
+			pos = PosType(f1, i);
+			if (!pos.IsBorder()) {
+				pos.FlipF();
+				for (int j = 0; j != 3; j++) {
+					pos.F()->V0(j)->IMark() = this->GlobalMark();
+					InsertIfConvenient(heap, PosType(pos.F(), j),
+					                   this->GlobalMark());
+				}
+			}
 		}
 		
-		PosType epos = pos;
+		flipped = this->_pos.F()->FFi(flipped);
 		
-		do { // go to the first border (if there is one)
-			epos.NextE();
-		} while(epos != pos && !epos.IsBorder());
-		
-		do {
-			if(epos.F() != face2 && epos.FFlip() != face2)
-				InsertIfConvenient(heap, epos, this->GlobalMark());
-			epos.NextE();
-			assert(epos.V() == pos.V() || epos.VFlip() == pos.V());
-		} while(epos != pos && !epos.IsBorder());
-		
-		std::push_heap(heap.begin(), heap.end());
-		//*/
+		for (int i = 0; i < 3; i++) if (i != flipped) {
+			pos = PosType(f2, i);
+			if (!pos.IsBorder()) {
+				pos.FlipF();
+				for (int j = 0; j != 3; j++) {
+					pos.F()->V0(j)->IMark() = this->GlobalMark();
+					InsertIfConvenient(heap, PosType(pos.F(), j),
+					                   this->GlobalMark());
+				}
+			}
+		}
 	}
+	
 }; // end CurvEdgeFlip class
 
 
