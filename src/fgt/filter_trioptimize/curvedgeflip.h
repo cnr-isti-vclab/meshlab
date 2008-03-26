@@ -322,6 +322,8 @@ public:
 				}
 			}
 		}
+		
+		std::push_heap(heap.begin(), heap.end());
 	}
 	
 }; // end CurvEdgeFlip class
