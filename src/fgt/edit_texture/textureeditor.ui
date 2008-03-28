@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>453</width>
-    <height>954</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -45,8 +45,28 @@
       </property>
       <item>
        <widget class="QPushButton" name="moveButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Allow pan and zoom on the UV Space</string>
+        </property>
         <property name="text" >
-         <string>View</string>
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selpan.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
         </property>
         <property name="checkable" >
          <bool>true</bool>
@@ -57,9 +77,42 @@
        </widget>
       </item>
       <item>
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>16</width>
+          <height>56</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QPushButton" name="selectButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Allow the selection of face inside a dragged area</string>
+        </property>
         <property name="text" >
-         <string>Select</string>
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selarea.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
         </property>
         <property name="checkable" >
          <bool>true</bool>
@@ -67,17 +120,71 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="editButton" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>16</width>
+          <height>56</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="connectedButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Allow the selection of connected component</string>
+        </property>
         <property name="text" >
-         <string>Edit</string>
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selcon.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
         </property>
         <property name="checkable" >
          <bool>true</bool>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>16</width>
+          <height>56</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
        <widget class="QPushButton" name="optimizeButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text" >
          <string>Optimize</string>
         </property>
@@ -87,7 +194,28 @@
        </widget>
       </item>
       <item>
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>16</width>
+          <height>56</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QPushButton" name="optionButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text" >
          <string>Option</string>
         </property>
@@ -100,18 +228,18 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBoxUVMapEdit" >
+    <widget class="QGroupBox" name="groupBoxOptimize" >
      <property name="title" >
-      <string> UV Map editing </string>
+      <string> Optimize </string>
      </property>
-     <layout class="QGridLayout" >
+     <layout class="QHBoxLayout" >
       <property name="margin" >
        <number>9</number>
       </property>
       <property name="spacing" >
        <number>6</number>
       </property>
-      <item row="1" column="0" >
+      <item>
        <widget class="QGroupBox" name="groupBox_4" >
         <property name="title" >
          <string> Remap </string>
@@ -140,126 +268,60 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="2" >
-       <widget class="QGroupBox" name="groupBox_5" >
-        <property name="title" >
-         <string> Rotate </string>
-        </property>
-        <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>9</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
-         <item>
-          <widget class="QSpinBox" name="spinBoxAngle" >
-           <property name="maximum" >
-            <number>360</number>
-           </property>
-           <property name="minimum" >
-            <number>-360</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2" >
-           <property name="text" >
-            <string>degree</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer>
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rotateButton" >
-           <property name="text" >
-            <string>Apply</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="0" column="0" >
+      <item>
        <widget class="QGroupBox" name="groupBox" >
         <property name="title" >
-         <string> Mode </string>
+         <string> Smooth texture coordinates </string>
         </property>
-        <layout class="QVBoxLayout" >
+        <layout class="QGridLayout" >
          <property name="margin" >
           <number>9</number>
          </property>
          <property name="spacing" >
           <number>6</number>
          </property>
-         <item>
-          <widget class="QRadioButton" name="radioButtonMove" >
+         <item row="0" column="3" >
+          <widget class="QPushButton" name="smoothButton" >
            <property name="text" >
-            <string>Move component</string>
-           </property>
-           <property name="checked" >
-            <bool>true</bool>
+            <string>Apply</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QRadioButton" name="radioButtonSelect" >
+         <item row="0" column="0" >
+          <widget class="QLabel" name="label_5" >
            <property name="text" >
-            <string>Select origin</string>
+            <string>Alfa:</string>
            </property>
           </widget>
          </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="1" column="2" >
-       <widget class="QGroupBox" name="groupBox_6" >
-        <property name="title" >
-         <string> Scale </string>
-        </property>
-        <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>9</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
-         <item>
-          <widget class="QSpinBox" name="spinBoxScale" >
-           <property name="maximum" >
-            <number>300</number>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="StatusLabel" >
+           <property name="font" >
+            <font>
+             <family>MS Shell Dlg 2</family>
+             <pointsize>10</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+             <underline>false</underline>
+             <strikeout>false</strikeout>
+            </font>
            </property>
-           <property name="minimum" >
-            <number>10</number>
-           </property>
-           <property name="singleStep" >
-            <number>5</number>
-           </property>
-           <property name="value" >
-            <number>100</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label" >
            <property name="text" >
-            <string>%</string>
+            <string>Loading...</string>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="buddy" >
+            <cstring></cstring>
            </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="1" >
+          <widget class="QSpinBox" name="spinBoxAlfa" />
+         </item>
+         <item row="0" column="2" >
           <spacer>
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
@@ -272,160 +334,20 @@
            </property>
           </spacer>
          </item>
-         <item>
-          <widget class="QPushButton" name="scaleButton" >
-           <property name="text" >
-            <string>Apply</string>
+         <item row="1" column="1" colspan="3" >
+          <widget class="QProgressBar" name="progressBar" >
+           <property name="maximum" >
+            <number>100</number>
+           </property>
+           <property name="value" >
+            <number>0</number>
+           </property>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
         </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBoxSelect" >
-     <property name="title" >
-      <string> Select mode  </string>
-     </property>
-     <layout class="QHBoxLayout" >
-      <property name="margin" >
-       <number>9</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QRadioButton" name="radioButtonArea" >
-        <property name="text" >
-         <string>Area</string>
-        </property>
-        <property name="checked" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="radioButtonConnected" >
-        <property name="text" >
-         <string>Connected component</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="buttonClear" >
-        <property name="text" >
-         <string>  Clear selection  </string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBoxOptimize" >
-     <property name="title" >
-      <string> Optimize </string>
-     </property>
-     <layout class="QGridLayout" >
-      <property name="margin" >
-       <number>9</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item row="0" column="6" >
-       <widget class="QPushButton" name="smoothButton" >
-        <property name="text" >
-         <string>Apply</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4" >
-       <widget class="QSpinBox" name="spinBoxAlfa" />
-      </item>
-      <item row="0" column="3" >
-       <widget class="QLabel" name="label_5" >
-        <property name="text" >
-         <string>Alfa:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2" >
-       <widget class="QLabel" name="label_4" >
-        <property name="font" >
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text" >
-         <string>Smooth texture cootdinates</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="7" >
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="4" colspan="4" >
-       <widget class="QProgressBar" name="progressBar" >
-        <property name="maximum" >
-         <number>100</number>
-        </property>
-        <property name="value" >
-         <number>0</number>
-        </property>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="3" >
-       <widget class="QLabel" name="StatusLabel" >
-        <property name="font" >
-         <font>
-          <family>MS Shell Dlg 2</family>
-          <pointsize>10</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-          <underline>false</underline>
-          <strikeout>false</strikeout>
-         </font>
-        </property>
-        <property name="text" >
-         <string>Loading...</string>
-        </property>
-        <property name="alignment" >
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="buddy" >
-         <cstring></cstring>
-        </property>
        </widget>
       </item>
      </layout>
@@ -478,6 +400,8 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11" />
- <resources/>
+ <resources>
+  <include location="meshlab.qrc" />
+ </resources>
  <connections/>
 </ui>

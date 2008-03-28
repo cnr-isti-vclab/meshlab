@@ -13,6 +13,7 @@
 #define TEXTY 200
 #define TRANSLATE 5
 #define RADIUS 10
+#define RECTDIM 30
 
 #define NO_CHANGE -1
 #define RESET -2
@@ -28,7 +29,7 @@ class RenderArea : public QGLWidget
 
 public:
 	enum Mode { View, Edit, Select };
-	enum EditMode { Move, Choose };
+	enum EditMode { Scale, Rotate, NoEdit };
 	enum SelectMode { Area, Connected };
 
     RenderArea(QWidget *parent = 0, QString path = QString(), MeshModel *m = 0, unsigned textNum = 0);
@@ -40,7 +41,6 @@ public:
     void setAntialiased(bool antialiased);
 	void setTexture(QString path);
 	void ChangeMode(int index);
-	void ChangeEditMode(int index);
 	void ChangeSelectMode(int index);
 	void RemapClamp();
 	void RemapMod();
@@ -83,11 +83,22 @@ private:
 	int selBit;
 	bool selected;
 
-	QPointF origin;		// Origin for scale/rotate editing
+	QPointF origin;		// Origin for rotate editing
 	QRect originR;
+	int orX, orY;
 
 	QPoint start, end;	// Selection area
 	QRect area;
+
+	// Info for interactive editing
+	vector<QRect> selRect;
+	QRect selection;
+	QPoint selStart, selOld, selEnd;
+	int posX, posY;
+	float degree, scaling;
+	int highlighted, pressed;
+
+	QImage rot, scal;
 
 	int AREADIM;
 
