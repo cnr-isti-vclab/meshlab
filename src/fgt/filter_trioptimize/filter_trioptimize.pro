@@ -2,7 +2,8 @@ TEMPLATE      = lib
 QT           += opengl
 CONFIG       += plugin
 INCLUDEPATH  +=  ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = filter_trioptimize.h curvedgeflip.h curvdata.h
+HEADERS       = filter_trioptimize.h curvedgeflip.h curvdata.h \
+		laplacianadjust.h
 
 SOURCES       = filter_trioptimize.cpp \ 
 		../../meshlab/filterparameter.cpp \

@@ -36,8 +36,11 @@ class TriOptimizePlugin : public QObject, public MeshFilterInterface
 
 public:
 	enum { 
-		// normal flip - improve triangles quality
-		FP_EDGE_FLIP
+		// mesh improvement by edge flipping
+		FP_EDGE_FLIP,
+		
+		// Laplacian smooth that do not moves vertices far from the surface
+		FP_NEAR_LAPLACIAN_SMOOTH
 	};
 
 	TriOptimizePlugin();
