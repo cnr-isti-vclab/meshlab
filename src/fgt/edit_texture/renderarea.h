@@ -44,10 +44,7 @@ public:
 	void ChangeSelectMode(int index);
 	void RemapClamp();
 	void RemapMod();
-	void RotateComponent(float theta);
-	void ScaleComponent(int percent);
 	void SetDimension(int dim);
-	void ClearSelection();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -94,9 +91,11 @@ private:
 	vector<QRect> selRect;
 	QRect selection;
 	QPoint selStart, selOld, selEnd;
-	int posX, posY;
-	float degree, scaling;
+	int posX, posY, rectX, rectY, oldSRX, oldSRY;
+	float degree, scaleX, scaleY;
 	int highlighted, pressed;
+	QPointF oScale;
+	int initVX, initVY;
 
 	QImage rot, scal;
 
@@ -105,6 +104,12 @@ private:
 	void UpdateUV();
 	void ResetTrack();
 	void SelectFaces();
+	void HandleScale(QPoint e);
+	void HandleRotate(QPoint e);
+	void RotateComponent(float theta);
+	void ScaleComponent(float percentX, float percentY);
+	void RecalculateSelectionArea();
+	void UpdateSelectionArea(int x, int y);
 
 signals:
 	void UpdateStat(float u, float v, int faceN, int vertN, int countFace);
