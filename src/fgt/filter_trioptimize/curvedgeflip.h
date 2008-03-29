@@ -128,6 +128,7 @@ protected:
 		return curv;
 	}
 	
+	
 	static void InsertIfConvenient(HeapType& heap, const PosType& p, int mark)
 	{
 		MYTYPE* newflip = new MYTYPE(p, mark);
@@ -146,6 +147,7 @@ public:
 		this->_priority = ComputePriority();
 	}
 	
+	
 	CurvEdgeFlip(CurvEdgeFlip &par)
 	{
 		this->_pos = par.GetPos();
@@ -154,22 +156,21 @@ public:
 	}
 	
 	// temporary empty (flip is already done in constructor)
-	void Execute(TRIMESH_TYPE &m)
+	void Execute(TRIMESH_TYPE &/*m*/)
 	{
 		int i = this->_pos.I();
-		
-		PosType app = this->_pos;
-		app.FlipF(); app.FlipE(); app.FlipV();
+		FacePointer f = this->_pos.F();
 		
 		// save precomputed curvature in vertex quality
-		this->_pos.F()->V0(i)->Q() = _cv0;
-		this->_pos.F()->V1(i)->Q() = _cv1;
-		this->_pos.F()->V2(i)->Q() = _cv2;
-		app.V()->Q() = _cv3;
+		f->V0(i)->Q() = _cv0;
+		f->V1(i)->Q() = _cv1;
+		f->V2(i)->Q() = _cv2;
+		f->FFp(i)->V2(f->FFi(i))->Q() = _cv3;
 		
 		// do the flip
 		vcg::face::FlipEdge(*this->_pos.f, this->_pos.z);	
 	}
+	
 	
 	virtual bool IsFeasible()
 	{
@@ -178,21 +179,23 @@ public:
 		
 		CoordType v0, v1, v2, v3;
 		int i = this->_pos.I();
-		v0 = this->_pos.F()->V0(i)->P();
-		v1 = this->_pos.F()->V1(i)->P();
-		v2 = this->_pos.F()->V2(i)->P();
-		v3 = this->_pos.F()->FFp(i)->V2(this->_pos.F()->FFi(i))->P();
+		FacePointer f = this->_pos.F();
+		v0 = f->P0(i);
+		v1 = f->P1(i);
+		v2 = f->P2(i);
+		v3 = f->FFp(i)->P2(f->FFi(i));
 		
 		// Take the parallelogram formed by the adjacent faces of edge
 		// If a corner of the parallelogram on extreme of edge to flip is >= 180
-		// the flip produce two identical faces - avoid this
+		// the flip will produce two identical faces - avoid this
 		if( (Angle(v2 - v0, v1 - v0) + Angle(v3 - v0, v1 - v0) >= M_PI) ||
-		     (Angle(v2 - v1, v0 - v1) + Angle(v3 - v1, v0 - v1) >= M_PI))
+		    (Angle(v2 - v1, v0 - v1) + Angle(v3 - v1, v0 - v1) >= M_PI))
 			return false;
 		
 		return vcg::face::CheckFlipEdge(*this->_pos.f, this->_pos.z);
 	}
 
+	
 	ScalarType ComputePriority()
 	{
 		/*
@@ -212,13 +215,12 @@ public:
 		int i = this->_pos.I();
 		
 		FacePointer f1 = this->_pos.F();
-		
-		v0 = this->_pos.F()->V0(i);
-		v1 = this->_pos.F()->V1(i);
-		v2 = this->_pos.F()->V2(i);
-		v3 = this->_pos.F()->FFp(i)->V2(this->_pos.F()->FFi(i));
+		v0 = f1->V0(i);
+		v1 = f1->V1(i);
+		v2 = f1->V2(i);
 		
 		FacePointer f2 = this->_pos.F()->FFp(i);
+		v3 = f2->V2(f1->FFi(i));
 		
 		// save sum of curvatures of vertexes
 		float cbefore = v0->Q() + v1->Q() + v2->Q() + v3->Q();
@@ -241,6 +243,7 @@ public:
 		this->_priority = (cafter - cbefore);
 		return this->_priority;
 	}
+	
 	
 	static void Init(TRIMESH_TYPE &mesh, HeapType &heap)
 	{
@@ -280,6 +283,7 @@ public:
 				}
 			}
 	}
+	
 	
 	void UpdateHeap(HeapType& heap)
 	{

@@ -118,7 +118,7 @@ const QString TriOptimizePlugin::filterName(FilterIDType filterId)
 		case FP_EDGE_FLIP:
 			return tr("Edge flipping optimization");
 		case FP_NEAR_LAPLACIAN_SMOOTH:
-			return tr("Laplacian smooth (surface preserving)");
+			return tr("Laplacian smooth (surface preserve)");
 		default:
 			assert(0);
 	}
@@ -135,6 +135,7 @@ const int TriOptimizePlugin::getRequirements(QAction *action)
 			return MeshModel::MM_BORDERFLAG;
 	}
 	
+	return 0;
 }
 
 // Info() must return the longer string describing each filtering action 
@@ -171,7 +172,7 @@ const PluginInfo &TriOptimizePlugin::pluginInfo()
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet & parlst)
+void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/, FilterParameterSet & parlst)
 {
 	switch(ID(action)) {
 		case FP_EDGE_FLIP: {
@@ -206,8 +207,8 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, FilterPa
 		
 		case FP_NEAR_LAPLACIAN_SMOOTH:
 			parlst.addAbsPerc("dthreshold", 1.0f, 0.0f, 3.0f,
-					tr("Max Displacement (degrees)"),
-					tr("maximum mean normal angle displacement from old to new faces"));
+					tr("Max Displacement"),
+					tr("maximum mean normal angle displacement (degrees) from old to new faces"));
 			parlst.addInt("iterations", 1, "Iterations",
 					"number of laplacian smooth iterations in every run");
 			break;
@@ -218,7 +219,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m, FilterPa
 
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
-bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos */*cb*/)
 {
 	switch (ID(filter)) {
 		case FP_EDGE_FLIP: {

@@ -131,8 +131,6 @@ void LaplacianAdjust(MESH_TYPE &m,
 			 (*vi).P()=(*vi).P()*(1.0-q) + (TD[*vi].sum/TD[*vi].cnt)*q;
 			 }
 			 }*/
-
-		int movedVert = 0;
 		
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 			if (!(*vi).IsD() && TD[*vi].cnt>0)
