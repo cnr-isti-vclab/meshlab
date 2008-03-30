@@ -90,16 +90,19 @@ private:
 	// Info for interactive editing
 	vector<QRect> selRect;
 	QRect selection;
-	QPoint selStart, selOld, selEnd;
+	QPoint selStart, selEnd;
 	int posX, posY, rectX, rectY, oldSRX, oldSRY;
 	float degree, scaleX, scaleY;
 	int highlighted, pressed;
 	QPointF oScale;
 	int initVX, initVY;
+	float B2, Rm, Rq;
 
 	QImage rot, scal;
 
 	int AREADIM;
+
+	float zoom;
 
 	void UpdateUV();
 	void ResetTrack();

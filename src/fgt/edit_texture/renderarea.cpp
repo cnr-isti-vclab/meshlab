@@ -47,7 +47,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 
 	selRect = vector<QRect>();
 	for (int i = 0; i < 4; i++) selRect.push_back(QRect(0,0,RECTDIM,RECTDIM));
-	selStart = QPoint(0,0); selOld = QPoint(0,0); selEnd = QPoint(0,0);
+	selStart = QPoint(0,0); selEnd = QPoint(0,0);
 	degree = 0.0f;
 	highlighted = NOSEL;
 	pressed = NOSEL;
@@ -56,6 +56,8 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	scaleX = 1; scaleY = 1;
 	orX = 0; orY = 0;
 	initVX = 0; initVY = 0;
+
+	zoom = 0;
 
 	rot = QImage(QString(":/images/rotate.png"));
 	scal = QImage(QString(":/images/scale.png"));
@@ -267,6 +269,9 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 				else if (highlighted == 2) perno = 1;
 				else perno = 0;
 				oScale = QPointF((float)(selRect[perno].center().x() - viewport.X())/AREADIM, (float)(AREADIM - selRect[perno].center().y() + viewport.Y())/AREADIM);
+				B2 = (float)(rectX - originR.center().x())*(rectX - originR.center().x()) + (rectY - originR.center().y())*(rectY - originR.center().y());
+				Rm = (float)(rectY - originR.center().y()) / (rectX - originR.center().x());
+				Rq = (float) rectY - Rm * rectX;
 			}
 		case Select:
 			start = e->pos();
@@ -316,7 +321,8 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 				}
 				else if (scaleX != 1 && scaleY != 1) 
 				{
-					ScaleComponent(scaleX, scaleY); 
+					ScaleComponent(scaleX, scaleY);
+					RecalculateSelectionArea();
 					scaleX = 1; 
 					scaleY = 1;
 					oScale = QPointF(0,0);
@@ -342,12 +348,12 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 
 void RenderArea::mouseMoveEvent(QMouseEvent *e)
 {
-	if((e->buttons() & Qt::LeftButton))	// <---- Se non ci sono facce selezionate -> non si fa nulla
+	if((e->buttons() & Qt::LeftButton))
 	{
 		switch(mode)
 		{
 			case View:
-				tb->track.SetTranslate(Point3f(tmpX - oldX + e->x(), tmpY - oldY + e->y(), 0));
+				tb->Translate(Point3f(- oldX + e->x(), - oldY + e->y(), zoom));
 				viewport = Point2f(tmpX - oldX + e->x(), tmpY - oldY + e->y());
 				this->update();
 				break;
@@ -438,12 +444,11 @@ void RenderArea::mouseDoubleClickEvent(QMouseEvent *e)
 {
 	switch(mode)
 	{
-		case View:
+		case View:	// Reset trackball position
 			ResetTrack();
-			// <----- reset dello zoom
 			this->update();
 			break;
-		case Edit:
+		case Edit:	// Change edit mode
 			if (selection.contains(e->pos()))
 			{
 				if (editMode == Rotate) editMode = Scale;
@@ -458,12 +463,11 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 {
 	switch(mode)
 	{
-		case View:
-			// Zoom
+		case View: // Zoom
 			float WHEEL_STEP = 120.0f;
-			float notch = (float)e->delta()/WHEEL_STEP;
-		    tb->MouseWheel(notch, QTWheel2VCG(e->modifiers())); 
-			tb->track.SetScale(notch);	// <---- ???? parametro ????
+			zoom = (float)-e->delta()/WHEEL_STEP;
+		    tb->MouseWheel(zoom, QTWheel2VCG(e->modifiers()));
+			oldX = tmpX; oldY = tmpX;
 			this->update();
 			break;
 	}
@@ -656,23 +660,25 @@ void RenderArea::SelectFaces()
 	selected = false;
 	selection = QRect();
 	CMeshO::FaceIterator fi;
-	QRegion a = QRegion(QRect(area.x() - panX, area.y() - panY, area.width(), area.height()));
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
-        (*fi).ClearUserBit(selBit);
-		QVector<QPoint> t = QVector<QPoint>(); 
-		t.push_back(QPoint((*fi).WT(0).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(0).v() * AREADIM) + viewport.Y()));
-		t.push_back(QPoint((*fi).WT(1).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(1).v() * AREADIM) + viewport.Y()));
-		t.push_back(QPoint((*fi).WT(2).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(2).v() * AREADIM) + viewport.Y()));
-		QRegion r = QRegion(QPolygon(t));
-		if (r.intersects(area))
+		if ((*fi).WT(0).n() == textNum)
 		{
-			(*fi).SetUserBit(selBit);
-			if (r.boundingRect().topLeft().x() < selStart.x()) selStart.setX(r.boundingRect().topLeft().x());
-			if (r.boundingRect().topLeft().y() < selStart.y()) selStart.setY(r.boundingRect().topLeft().y());
-			if (r.boundingRect().bottomRight().x() > selEnd.x()) selEnd.setX(r.boundingRect().bottomRight().x());
-			if (r.boundingRect().bottomRight().y() > selEnd.y()) selEnd.setY(r.boundingRect().bottomRight().y());
-			if (!selected) selected = true;
+	       (*fi).ClearUserBit(selBit);
+			QVector<QPoint> t = QVector<QPoint>(); 
+			t.push_back(QPoint((*fi).WT(0).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(0).v() * AREADIM) + viewport.Y()));
+			t.push_back(QPoint((*fi).WT(1).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(1).v() * AREADIM) + viewport.Y()));
+			t.push_back(QPoint((*fi).WT(2).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(2).v() * AREADIM) + viewport.Y()));
+			QRegion r = QRegion(QPolygon(t));
+			if (r.intersects(area))
+			{
+				(*fi).SetUserBit(selBit);
+				if (r.boundingRect().topLeft().x() < selStart.x()) selStart.setX(r.boundingRect().topLeft().x());
+				if (r.boundingRect().topLeft().y() < selStart.y()) selStart.setY(r.boundingRect().topLeft().y());
+				if (r.boundingRect().bottomRight().x() > selEnd.x()) selEnd.setX(r.boundingRect().bottomRight().x());
+				if (r.boundingRect().bottomRight().y() > selEnd.y()) selEnd.setY(r.boundingRect().bottomRight().y());
+				if (!selected) selected = true;
+			}
 		}
 	}
 	origin = QPointF((float)(selection.center().x() - viewport.X())/AREADIM, (float)(AREADIM - selection.center().y() + viewport.Y())/AREADIM);
@@ -746,16 +752,31 @@ void RenderArea::HandleScale(QPoint e)
 void RenderArea::HandleRotate(QPoint e)
 {
 	// Calculate the angle of rotazion
-	float B = rectY - e.y();
-	float A = (float)sqrt((rectX - origin.x())*(rectX - origin.x()) + (rectY - origin.y())*(rectY - origin.y()));
-	float C = rectX - e.x();
-	degree = atan(B/A) + atan(C/A);
+	float A2 = (e.x() - originR.center().x())*(e.x() - originR.center().x()) + (e.y() - originR.center().y())*(e.y() - originR.center().y());
+	float C2 = (rectX - e.x())*(rectX - e.x()) + (rectY - e.y()) * (rectY -e.y());
+	degree = acos((C2 - A2 - B2) / (-2*sqrt(A2)*sqrt(B2)));
+	float ny = (float) (e.x() - Rq) / Rm;
+	switch(highlighted)
+	{
+	case 0:
+		if ( ny > e.y()) degree = -degree;
+		break;
+	case 1:
+		if (ny < e.y()) degree = -degree;
+		break;
+	case 2:
+		if (ny > e.y()) degree = -degree;
+		break;
+	case 3:
+		if (ny < e.y()) degree = -degree;
+		break;
+	}
 	this->update();
 }
 
 void RenderArea::RecalculateSelectionArea()
 {
-	// Find the new size of the selection rectangle after a rotation
+	// Find the new size of the selection rectangle after a rotation or a scale
 	selStart = QPoint(MAX,MAX);
 	selEnd = QPoint(0,0);
 	CMeshO::FaceIterator fi;
