@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>139</width>
+    <width>167</width>
     <height>269</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>141</width>
+     <width>181</width>
      <height>271</height>
     </rect>
    </property>
@@ -28,13 +28,13 @@
     <attribute name="title" >
      <string>Basic</string>
     </attribute>
-    <widget class="QWidget" name="layoutWidget" >
+    <widget class="QWidget" name="" >
      <property name="geometry" >
       <rect>
-       <x>12</x>
-       <y>16</y>
-       <width>116</width>
-       <height>153</height>
+       <x>10</x>
+       <y>18</y>
+       <width>138</width>
+       <height>184</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
@@ -81,23 +81,37 @@
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="penRadiusSlider" >
-          <property name="maximum" >
-           <number>10</number>
-          </property>
-          <property name="singleStep" >
-           <number>1</number>
-          </property>
-          <property name="pageStep" >
-           <number>2</number>
-          </property>
-          <property name="value" >
-           <number>5</number>
-          </property>
-          <property name="orientation" >
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" >
+          <item>
+           <widget class="QSlider" name="penRadiusSlider" >
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="singleStep" >
+             <number>1</number>
+            </property>
+            <property name="pageStep" >
+             <number>2</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="penRadiusSpinBox" >
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -105,6 +119,13 @@
        <widget class="QPushButton" name="meshSegmentButton" >
         <property name="text" >
          <string>Start Segmentation</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="updateCurvatureButton" >
+        <property name="text" >
+         <string>Update Curvature</string>
         </property>
        </widget>
       </item>
@@ -122,13 +143,13 @@
     <attribute name="title" >
      <string>Advanced</string>
     </attribute>
-    <widget class="QWidget" name="layoutWidget" >
+    <widget class="QWidget" name="" >
      <property name="geometry" >
       <rect>
-       <x>1</x>
-       <y>13</y>
-       <width>132</width>
-       <height>224</height>
+       <x>12</x>
+       <y>12</y>
+       <width>138</width>
+       <height>170</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
@@ -218,23 +239,37 @@
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="normalWeightSlider" >
-          <property name="maximum" >
-           <number>10</number>
-          </property>
-          <property name="pageStep" >
-           <number>2</number>
-          </property>
-          <property name="value" >
-           <number>5</number>
-          </property>
-          <property name="orientation" >
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="tickInterval" >
-           <number>1</number>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" >
+          <item>
+           <widget class="QSlider" name="normalWeightSlider" >
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="pageStep" >
+             <number>2</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickInterval" >
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="normalWeightSpinBox" >
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -248,26 +283,57 @@
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="curvatureWeightSlider" >
-          <property name="maximum" >
-           <number>10</number>
-          </property>
-          <property name="pageStep" >
-           <number>2</number>
-          </property>
-          <property name="value" >
-           <number>5</number>
-          </property>
-          <property name="orientation" >
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="tickInterval" >
-           <number>1</number>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" >
+          <item>
+           <widget class="QSlider" name="curvatureWeightSlider" >
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="pageStep" >
+             <number>2</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickInterval" >
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="curvatureWeightSpinBox" >
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="debugTab" >
+    <attribute name="title" >
+     <string>Debug</string>
+    </attribute>
+    <widget class="QWidget" name="" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>141</width>
+       <height>54</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" >
       <item>
        <widget class="QPushButton" name="gaussianButton" >
         <property name="text" >
@@ -298,5 +364,102 @@
  <resources>
   <include location="meshlab.qrc" />
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>penRadiusSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>penRadiusSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>88</x>
+     <y>120</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>116</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>penRadiusSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>penRadiusSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>123</x>
+     <y>129</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>89</x>
+     <y>130</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>normalWeightSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>normalWeightSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>77</x>
+     <y>141</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>100</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>normalWeightSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>normalWeightSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>115</x>
+     <y>151</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>79</x>
+     <y>153</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>curvatureWeightSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>curvatureWeightSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>78</x>
+     <y>191</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>104</x>
+     <y>192</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>curvatureWeightSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>curvatureWeightSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>118</x>
+     <y>201</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>79</x>
+     <y>201</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

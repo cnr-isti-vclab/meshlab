@@ -85,6 +85,7 @@ public:
 
 public slots:
 	void MeshCutSlot();
+	void UpdateCurvatureSlot();
 	void SelectForegroundSlot(bool);
 	void doRefineSlot(bool);
 	void changeNormalWeight(int);

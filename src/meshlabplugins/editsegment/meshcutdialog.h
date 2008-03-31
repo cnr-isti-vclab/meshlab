@@ -22,6 +22,8 @@ private:
 
 	public slots:
 		void on_meshSegmentButton_clicked();
+		void on_updateCurvatureButton_clicked();
+		
 		void on_foreRadioButton_clicked();
 		void on_backRadioButton_clicked();
 
@@ -38,6 +40,8 @@ private:
 		
 	signals:
 		void meshCutSignal();
+		void updateCurvatureSignal();
+		
 		void selectForegroundSignal(bool);
 		void doRefineSignal(bool);
 		void normalWeightSignal(int);

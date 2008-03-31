@@ -84,7 +84,7 @@ namespace vcg {
 			//last punta all'ultimo elemento valido
 			--last;
 			int num_to_remove = 0;
-			
+
 			while (iter != last){
 				if ((*iter).v->IMark() != U) {
 					//elemento già marchiato, si può rimuovere dalla coda
@@ -124,7 +124,9 @@ namespace vcg {
 	private:
 		MESH_TYPE * mesh;
 		SimpleTempData<VertContainer, CurvData> *TDCurvPtr;
-		
+
+		bool curvatureUpdate;
+
 		TripletHeap Q;
 		float _normalWeight;
 		float _curvatureWeight;
@@ -158,9 +160,9 @@ namespace vcg {
 		}
 
 
-		
-			//prende solo il più vicino
-			void AddNearestToQ(VertexType * v) {
+
+		//prende solo il più vicino
+		void AddNearestToQ(VertexType * v) {
 
 			float dist = 0.0f;
 			float min_dist = std::numeric_limits<float>::max();
@@ -196,37 +198,7 @@ namespace vcg {
 				Q.push(tempTriplet);
 			}
 		}
-		/* 
-		//prende tutti i vicini
-		void AddNearestToQ(VertexType * vs) {
 
-			float dist = 0.0f;
-			
-			vcg::face::JumpingPos<FaceType> pos(v->VFp(), v);
-
-			VertexType* firstV = pos.VFlip();
-			
-			VertexType* tempV=0;
-
-			do {
-				pos.NextE();
-				tempV = pos.VFlip();
-				assert(tempV->P() != v->P());
-				if (tempV->IMark() == U) {
-					dist = ImprovedIsophoticDist(v, tempV);
-					
-					CuttingTriplet<VertexType> tempTriplet;
-					tempTriplet.d = dist;
-					tempTriplet.v = tempV;				
-					switch(v->IMark()) {
-						case iF: tempTriplet.m = F; break;
-						case iB: tempTriplet.m = B; break;
-						default : tempTriplet.m = (MarkType)v->IMark(); break;
-					}
-					Q.push(tempTriplet);
-				}
-			} while(tempV != firstV);	
-		}*/
 
 		void AddNeighborhoodNearestToQ(VertexType * v /*,std::ofstream & file*/) {
 			vcg::face::JumpingPos<FaceType> pos(v->VFp(), v);
@@ -252,6 +224,7 @@ namespace vcg {
 			_curvatureWeight = 5.0f;
 			TDCurvPtr = new SimpleTempData<VertContainer, CurvData>((*mesh).vert);
 			TDCurvPtr->Start(CurvData());
+			curvatureUpdate = false;
 		}
 
 		~MeshCutting() {
@@ -292,32 +265,29 @@ namespace vcg {
 			file.open("editsegment.log");
 
 			curvature_start_t = clock();
-			//Computing principal curvatures and directions for all vertices
-			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
-			ct.ComputeCurvatureTensor();
-			//now each vertex has principals curvatures and directions in its temp data
-			curvature_end_t = clock();
 
-			//if (file) file << "Inizializzazione da input." << std::endl;
+			if (!curvatureUpdate) {
+				//Computing principal curvatures and directions for all vertices
+				vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
+				ct.ComputeCurvatureTensor();
+				curvatureUpdate = true;
+				//now each vertex has principals curvatures and directions in its temp data
+			}
+			curvature_end_t = clock();
 
 			//second iteration on the marked vertex
 			for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
 				if ( !vi->IsD() && (vi->IMark() != U))
-					//AddNearestToQ(&(*vi),file);	
 					AddNearestToQ(&(*vi));	
 			}
-
-			//if (file) file << "Fine inizializzazione da input. Elementi aggiunti: " << Q.size() << std::endl;
 
 			int step_counter = 0;
 			while (vertex_to_go != 0) {
 				//algorithm main loop
 
 				if (Q.empty()) {
-					//if (file) file << "Coda vuota. Re-Inizializzazione." << std::endl;
 					for (vi=(*mesh).vert.begin(); vi!=(*mesh).vert.end(); ++vi) {
 						if ( !vi->IsD() && (vi->IMark() != U))
-							//AddNearestToQ(&(*vi),file);	
 							AddNearestToQ(&(*vi));
 					}
 					if (Q.empty()) break;
@@ -332,13 +302,10 @@ namespace vcg {
 					if (tempTriplet.v->IMark() == U) {
 						tempTriplet.v->IMark() = tempTriplet.m;
 						--vertex_to_go; 
-						//if (file) file << "Estrazione: d=" << tempTriplet.d << std::endl;
 						AddNearestToQ(tempTriplet.v/*, file*/);	
 						AddNeighborhoodNearestToQ(tempTriplet.v/*,file*/);
-					} else {
-						//if (file) file << "Estrazione: Elemento nullo" << std::endl;
-					}
-					
+					} 
+
 					//rimozione degli elementi inutili nella coda
 					++step_counter;
 					if (step_counter%30000 == 29999) {
@@ -358,6 +325,12 @@ namespace vcg {
 				file << "Tempo per la CURVATURA: " << curvature_time << std::endl;
 				file.close();
 			}
+		}
+
+		void UpdateCurvature()
+		{
+			vcg::CurvatureTensor<MESH_TYPE>ct(mesh, TDCurvPtr);
+			ct.ComputeCurvatureTensor();
 		}
 
 		void Colorize(bool selectForeground, bool doRefine) {
@@ -517,8 +490,8 @@ namespace vcg {
 						if (sec_prod != 0.0f) {
 							if (tmp_face->FFp(sec_faceid)->IsS()) {
 								tmp_face->SetS();
-						} else {
-							tmp_face->ClearS();
+							} else {
+								tmp_face->ClearS();
 							}
 							tmp_face->ClearUserBit(bitflag);
 						} else {

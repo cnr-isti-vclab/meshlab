@@ -292,6 +292,9 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 		meshcut_dock->setFloating(true);
 		QObject::connect(meshCutDialog, SIGNAL(meshCutSignal()), this,
 			SLOT(MeshCutSlot()));
+			
+		QObject::connect(meshCutDialog, SIGNAL(updateCurvatureSignal()), this,
+			SLOT(UpdateCurvatureSlot()));
 		QObject::connect(meshCutDialog, SIGNAL(selectForegroundSignal(bool)),this, SLOT(SelectForegroundSlot(bool)));
 
 		QObject::connect(meshCutDialog, SIGNAL(doRefineSignal(bool)),this, SLOT(doRefineSlot(bool)));
@@ -499,6 +502,12 @@ void EditSegment::MeshCutSlot() {
 		meshCut->Colorize(selectForeground, doRefine);
 	}
 	glarea->update();
+}
+
+void EditSegment::UpdateCurvatureSlot() {
+	if (meshCut) {
+		meshCut->UpdateCurvature();
+	}
 }
 
 void EditSegment::SelectForegroundSlot(bool value) {

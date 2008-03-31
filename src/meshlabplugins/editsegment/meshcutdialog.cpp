@@ -18,6 +18,10 @@ void MeshCutDialog::on_meshSegmentButton_clicked() {
 	emit meshCutSignal();
 }
 
+void MeshCutDialog::on_updateCurvatureButton_clicked() {
+	emit updateCurvatureSignal();
+}
+
 void MeshCutDialog::on_foreRadioButton_clicked() {
 	emit selectForegroundSignal(true);
 }
