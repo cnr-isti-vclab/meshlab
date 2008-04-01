@@ -28,6 +28,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	// Init
 	oldX = 0; oldY = 0;
 	viewport = Point2f(0,0);
+	tmpX = 0; tmpY = 0;
 	tb = new Trackball();
 	tb->center = Point3f(0, 0, 0);
 	tb->radius = 1;
@@ -57,7 +58,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	orX = 0; orY = 0;
 	initVX = 0; initVY = 0;
 
-	zoom = 0;
+	zoom = 1;
 
 	rot = QImage(QString(":/images/rotate.png"));
 	scal = QImage(QString(":/images/scale.png"));
@@ -130,8 +131,8 @@ void RenderArea::paintEvent(QPaintEvent *)
 				{
 					if (selected && !model->cm.face[i].IsUserBit(selBit))
 						glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);	
-					else glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX, 
-							AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY, 1);							
+					else glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX/zoom, 
+							AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY/zoom, 1);							
 				}
 				glEnd();
 
@@ -144,10 +145,10 @@ void RenderArea::paintEvent(QPaintEvent *)
 						for (int j = 0; j < 3; j++)
 						{
 							if (editMode == Scale)
-								glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX, 
-									AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY, 1);							
-							else glVertex3f((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - panX,
-								AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - panY, 1);
+								glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX/zoom, 
+									AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY/zoom, 1);							
+							else glVertex3f((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - panX/zoom,
+								AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - panY/zoom, 1);
 						}
 					glEnd();
 				}
@@ -268,7 +269,7 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 				else if (highlighted == 1) perno = 2;
 				else if (highlighted == 2) perno = 1;
 				else perno = 0;
-				oScale = QPointF((float)(selRect[perno].center().x() - viewport.X())/AREADIM, (float)(AREADIM - selRect[perno].center().y() + viewport.Y())/AREADIM);
+				oScale = QPointF((float)(selRect[perno].center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selRect[perno].center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
 				B2 = (float)(rectX - originR.center().x())*(rectX - originR.center().x()) + (rectY - originR.center().y())*(rectY - originR.center().y());
 				Rm = (float)(rectY - originR.center().y()) / (rectX - originR.center().x());
 				Rq = (float) rectY - Rm * rectX;
@@ -285,8 +286,8 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 	switch(mode)
 	{
 		case View:
-			tb->MouseUp(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
-			this->update();
+			//tb->MouseUp(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
+			//this->update();
 			if (selection != QRect()) 
 			{
 				UpdateSelectionArea(viewport.X() - initVX, viewport.Y() - initVY);
@@ -300,14 +301,15 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 			if (pressed == ORIGINRECT)	// Drag origin -> Update the position of the rectangle of rotation and the real point in UV
 			{
 				originR = QRect(originR.x() - posX - orX, originR.y() - posY - orY, RADIUS, RADIUS);
-				origin = QPointF((float)(originR.center().x() - viewport.X())/AREADIM, (float)(AREADIM - originR.center().y() + viewport.Y())/AREADIM);
+				origin = QPointF((float)(originR.center().x() - viewport.X())/(AREADIM*zoom), (float)((AREADIM*zoom) - originR.center().y() + viewport.Y())/(AREADIM*zoom));
 				orX = 0; orY = 0;
 			}
 			else if (pressed == SELECTIONRECT && posX != 0)	// Drag selection -> Update the position of the selection area and the rotatation rect
 			{
 				selection = QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height());
+				realSel = QRect(selection.x()/zoom, selection.y()/zoom, selection.width()/zoom, selection.height()/zoom);
 				originR.moveCenter(QPoint(originR.center().x() - posX, originR.center().y() - posY));
-				origin = QPointF((float)(originR.center().x() - viewport.X())/AREADIM, (float)(AREADIM - originR.center().y() + viewport.Y())/AREADIM);
+				origin = QPointF((float)(originR.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y())/(AREADIM*zoom));
 				posX = 0; posY = 0;
 				UpdateUV();
 			}
@@ -336,8 +338,9 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 			if (selected)
 			{
 				selection = QRect(selStart, selEnd);
+				realSel = QRect(selection.x()/zoom, selection.y(), selection.width()/zoom, selection.height()/zoom);
 				UpdateSelectionArea(0,0);
-				origin = QPointF((float)(selection.center().x() - viewport.X())/AREADIM, (float)(AREADIM - selection.center().y() + viewport.Y())/AREADIM);
+				origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
 				originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
 				this->ChangeMode(1);
 				this->update(selection);
@@ -350,11 +353,12 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 {
 	if((e->buttons() & Qt::LeftButton))
 	{
+		int sx = (e->x() - oldX)/zoom, sy = (e->y() - oldY)/zoom;
 		switch(mode)
 		{
 			case View:
 				tb->Translate(Point3f(- oldX + e->x(), - oldY + e->y(), zoom));
-				viewport = Point2f(tmpX - oldX + e->x(), tmpY - oldY + e->y());
+				viewport = Point2f(tmpX + sx, tmpY + sy);
 				this->update();
 				break;
 			case Edit:
@@ -445,7 +449,8 @@ void RenderArea::mouseDoubleClickEvent(QMouseEvent *e)
 	switch(mode)
 	{
 		case View:	// Reset trackball position
-			ResetTrack();
+			ResetTrack(true);
+			zoom = 1;
 			this->update();
 			break;
 		case Edit:	// Change edit mode
@@ -461,15 +466,17 @@ void RenderArea::mouseDoubleClickEvent(QMouseEvent *e)
 
 void RenderArea::wheelEvent(QWheelEvent*e)
 {
-	switch(mode)
+	//if (mode == View || mode == Edit) // Zoom
 	{
-		case View: // Zoom
-			float WHEEL_STEP = 120.0f;
-			zoom = (float)-e->delta()/WHEEL_STEP;
-		    tb->MouseWheel(zoom, QTWheel2VCG(e->modifiers()));
-			oldX = tmpX; oldY = tmpX;
-			this->update();
-			break;
+		ResetTrack(false);
+		if (e->delta() > 0) zoom += 0.25;
+		else zoom -= 0.25;
+		tb->Scale(zoom);
+		selection = QRect(realSel.x()*zoom, realSel.y()*zoom, realSel.width()*zoom, realSel.height()*zoom);
+		UpdateSelectionArea(0,0);
+		originR.moveCenter(selection.center());
+		origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
+		this->update();
 	}
 }
 
@@ -491,7 +498,7 @@ void RenderArea::RemapClamp()
 		}
 	}
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
-	ResetTrack();
+	ResetTrack(true);
 	this->update();
 	emit UpdateStat(0,0,0,0,0);	// <--------
 }
@@ -518,7 +525,7 @@ void RenderArea::RemapMod()
 		}
 	}
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
-	ResetTrack();
+	ResetTrack(true);
 	this->update();
 	emit UpdateStat(0,0,0,0,0);	// <--------
 }
@@ -625,8 +632,8 @@ void RenderArea::UpdateUV()
 		{
 			for (unsigned j = 0; j < 3; j++)
 			{
-				model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)panX/AREADIM;
-				model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)panY/AREADIM;
+				model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)panX/(AREADIM*zoom);
+				model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)panY/(AREADIM*zoom);
 			}
 		}
 	}
@@ -635,13 +642,14 @@ void RenderArea::UpdateUV()
 	emit UpdateStat(0,0,0,0,0);	// <--------
 }
 
-void RenderArea::ResetTrack()
+void RenderArea::ResetTrack(bool resetViewPort)
 {
 	// Reset the center of the trackball
 	tb->center = Point3f(0, 0, 0);
-	viewport = Point2f(0,0);
+	tb->track.SetScale(1);
+	if (resetViewPort) viewport = Point2f(0,0);
 	oldX = 0; oldY = 0;
-	tb->track.SetTranslate(Point3f(0,0,0));
+	tb->track.SetTranslate(Point3f(viewport.X(), viewport.Y(), 1));
 }
 
 void RenderArea::SetDimension(int dim)
@@ -666,9 +674,9 @@ void RenderArea::SelectFaces()
 		{
 	       (*fi).ClearUserBit(selBit);
 			QVector<QPoint> t = QVector<QPoint>(); 
-			t.push_back(QPoint((*fi).WT(0).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(0).v() * AREADIM) + viewport.Y()));
-			t.push_back(QPoint((*fi).WT(1).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(1).v() * AREADIM) + viewport.Y()));
-			t.push_back(QPoint((*fi).WT(2).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(2).v() * AREADIM) + viewport.Y()));
+			t.push_back(QPoint((*fi).WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(QPoint((*fi).WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(QPoint((*fi).WT(2).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(2).v() * AREADIM*zoom) + viewport.Y()*zoom));
 			QRegion r = QRegion(QPolygon(t));
 			if (r.intersects(area))
 			{
@@ -681,7 +689,7 @@ void RenderArea::SelectFaces()
 			}
 		}
 	}
-	origin = QPointF((float)(selection.center().x() - viewport.X())/AREADIM, (float)(AREADIM - selection.center().y() + viewport.Y())/AREADIM);
+	origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
 	originR.moveCenter(selection.center());
 }
 
@@ -740,7 +748,7 @@ void RenderArea::HandleScale(QPoint e)
 	this->update(selRect[highlighted]);
 	this->update(selRect[(highlighted+2)%selRect.size()]);
 	originR.moveCenter(selection.center());
-	origin = QPointF((float)(originR.center().x() - viewport.X())/AREADIM, (float)(AREADIM - originR.center().y() + viewport.Y())/AREADIM);
+	origin = QPointF((float)(originR.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y())/(AREADIM*zoom));
 	
 	// calculate scaling
 	scaleX = (float)selection.width() / oldSRX;
@@ -785,9 +793,9 @@ void RenderArea::RecalculateSelectionArea()
 		if ((*fi).IsUserBit(selBit))
 		{
 			QVector<QPoint> t = QVector<QPoint>(); 
-			t.push_back(QPoint((*fi).WT(0).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(0).v() * AREADIM) + viewport.Y()));
-			t.push_back(QPoint((*fi).WT(1).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(1).v() * AREADIM) + viewport.Y()));
-			t.push_back(QPoint((*fi).WT(2).u() * AREADIM + viewport.X(), AREADIM - ((*fi).WT(2).v() * AREADIM) + viewport.Y()));
+			t.push_back(QPoint((*fi).WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(QPoint((*fi).WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(QPoint((*fi).WT(2).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(2).v() * AREADIM*zoom) + viewport.Y()*zoom));
 			QRegion r = QRegion(QPolygon(t));
 			if (r.boundingRect().topLeft().x() < selStart.x()) selStart.setX(r.boundingRect().topLeft().x());
 			if (r.boundingRect().topLeft().y() < selStart.y()) selStart.setY(r.boundingRect().topLeft().y());
@@ -802,7 +810,7 @@ void RenderArea::RecalculateSelectionArea()
 void RenderArea::UpdateSelectionArea(int x, int y)
 {
 	// Update the buttons of the selection area
-	selection.moveCenter(QPoint(selection.center().x() + x, selection.center().y() + y));
+	selection.moveCenter(QPoint(selection.center().x() + x*zoom, selection.center().y() + y*zoom));
 	selRect[0].moveCenter(selection.topLeft());
 	selRect[1].moveCenter(selection.topRight());
 	selRect[2].moveCenter(selection.bottomLeft());

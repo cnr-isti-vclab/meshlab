@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>453</width>
-    <height>760</height>
+    <width>443</width>
+    <height>748</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -64,8 +64,8 @@
         </property>
         <property name="iconSize" >
          <size>
-          <width>48</width>
-          <height>48</height>
+          <width>32</width>
+          <height>32</height>
          </size>
         </property>
         <property name="checkable" >
@@ -83,8 +83,8 @@
         </property>
         <property name="sizeHint" >
          <size>
-          <width>16</width>
-          <height>56</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>
@@ -110,8 +110,8 @@
         </property>
         <property name="iconSize" >
          <size>
-          <width>48</width>
-          <height>48</height>
+          <width>32</width>
+          <height>32</height>
          </size>
         </property>
         <property name="checkable" >
@@ -126,8 +126,8 @@
         </property>
         <property name="sizeHint" >
          <size>
-          <width>16</width>
-          <height>56</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>
@@ -153,8 +153,8 @@
         </property>
         <property name="iconSize" >
          <size>
-          <width>48</width>
-          <height>48</height>
+          <width>32</width>
+          <height>32</height>
          </size>
         </property>
         <property name="checkable" >
@@ -169,8 +169,8 @@
         </property>
         <property name="sizeHint" >
          <size>
-          <width>16</width>
-          <height>56</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>
@@ -200,8 +200,8 @@
         </property>
         <property name="sizeHint" >
          <size>
-          <width>16</width>
-          <height>56</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>

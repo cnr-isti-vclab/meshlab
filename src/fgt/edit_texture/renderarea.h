@@ -89,11 +89,11 @@ private:
 
 	// Info for interactive editing
 	vector<QRect> selRect;
-	QRect selection;
+	QRect selection, realSel;
 	QPoint selStart, selEnd;
 	int posX, posY, rectX, rectY, oldSRX, oldSRY;
 	float degree, scaleX, scaleY;
-	int highlighted, pressed;
+	int highlighted, pressed, oldDelta;
 	QPointF oScale;
 	int initVX, initVY;
 	float B2, Rm, Rq;
@@ -105,7 +105,7 @@ private:
 	float zoom;
 
 	void UpdateUV();
-	void ResetTrack();
+	void ResetTrack(bool reset);
 	void SelectFaces();
 	void HandleScale(QPoint e);
 	void HandleRotate(QPoint e);
