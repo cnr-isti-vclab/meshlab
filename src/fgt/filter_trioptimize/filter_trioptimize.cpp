@@ -41,16 +41,7 @@
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/selection.h>
-#include <vcg/complex/trimesh/update/curvature.h>
-
-// instancing templates
-/*template class CurvData<NSMCurvEval>;
-template class CurvData<MeanCurvEval>;
-template class CurvData<AbsCurvEval>;
-
-typedef CurvData<NSMCurvEval>  NSMCurv;
-typedef CurvData<MeanCurvEval> MeanCurv;
-typedef CurvData<AbsCurvEval>  AbsCurv;*/
+//#include <vcg/complex/trimesh/update/curvature.h>
 
 // forward declarations
 class NSMCEdgeFlip;
@@ -80,20 +71,37 @@ public:
 
 // forward declarations
 class MyTriEdgeFlip;
-class MyPlanarEdgeFlip;
+//class MyPlanarEdgeFlip;
+class QualityEdgeFlip;
+class QualityRadiiEdgeFlip;
+class QualityMeanRatioEdgeFlip;
 
-class MyTriEdgeFlip : public vcg::tri::TriEdgeFlip<CMeshO, MyTriEdgeFlip>
+class MyTriEdgeFlip : public vcg::tri::TriEdgeFlip<CMeshO, MyTriEdgeFlip >
 {
 public:
 	MyTriEdgeFlip(PosType pos, int mark) : 
 		vcg::tri::TriEdgeFlip<CMeshO, MyTriEdgeFlip>(pos, mark) {}
 };
 
-class MyPlanarEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, MyPlanarEdgeFlip>
+class QualityEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, QualityEdgeFlip >
 {
 public:	
-	MyPlanarEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::PlanarEdgeFlip<CMeshO, MyPlanarEdgeFlip>(pos, mark) {}
+	QualityEdgeFlip(PosType pos, int mark) : 
+		vcg::tri::PlanarEdgeFlip<CMeshO, QualityEdgeFlip>(pos, mark) {}
+};
+
+class QualityRadiiEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, QualityRadiiEdgeFlip, QualityRadii >
+{
+public:	
+	QualityRadiiEdgeFlip(PosType pos, int mark) : 
+		vcg::tri::PlanarEdgeFlip<CMeshO, QualityRadiiEdgeFlip, QualityRadii>(pos, mark) {}
+};
+
+class QualityMeanRatioEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, QualityMeanRatioEdgeFlip, QualityMeanRatio >
+{
+public:	
+	QualityMeanRatioEdgeFlip(PosType pos, int mark) : 
+		vcg::tri::PlanarEdgeFlip<CMeshO, QualityMeanRatioEdgeFlip, QualityMeanRatio>(pos, mark) {}
 };
 
 
@@ -197,10 +205,12 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/, Filt
 					tr("various ways to compute surface curvature on vertexes"));
 			
 			QStringList pmetrics;
-			pmetrics.push_back("by quality");
+			pmetrics.push_back("area/max side");
+			pmetrics.push_back("inradius/circumradius");
+			pmetrics.push_back("mean ratio");
 			pmetrics.push_back("delaunay");
 			parlst.addEnum("planartype", 0, pmetrics, tr("Planar"),
-					tr("types of planar edge flips"));
+					tr("Choose a metric to compute triangle quality."));
 			
 			break;
 		}
@@ -221,6 +231,9 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/, Filt
 // Run mesh optimization
 bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos */*cb*/)
 {
+	float epsilon = std::numeric_limits<float>::epsilon();
+	size_t cnt = tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+	
 	switch (ID(filter)) {
 		case FP_EDGE_FLIP: {
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
@@ -236,10 +249,6 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 			vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
 			vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-			//vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
-
-			Log(GLLogStream::Info, "Mesh preprocessing done");
-			
 			
 			// temporary test
 			vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
@@ -272,7 +281,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 				
 				// stop when flips become harmful: != 0.0f to avoid same flips in every run
 				// TODO: set a better limit
-				optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
+				optimization.SetTargetMetric(-epsilon);
 				optimization.DoOptimization();
 				
 				Log(GLLogStream::Info,
@@ -287,10 +296,18 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 				int metric = par.getEnum("planartype");
 				switch (metric) {
 					case 0:
-						MyPlanarEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-						optimization.Init<MyPlanarEdgeFlip>();
+						QualityEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
+						optimization.Init<QualityEdgeFlip>();
 						break;
 					case 1:
+						QualityRadiiEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
+						optimization.Init<QualityRadiiEdgeFlip>();
+						break;
+					case 2:
+						QualityMeanRatioEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
+						optimization.Init<QualityMeanRatioEdgeFlip>();
+						break;
+					case 3:
 						MyTriEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
 						optimization.Init<MyTriEdgeFlip>();
 						break;
@@ -300,7 +317,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 				// stop when flips become harmful:
 				// != 0.0f to avoid same flips in every run
 				// TODO: set a better limit
-				optimization.SetTargetMetric(-std::numeric_limits<float>::epsilon());
+				optimization.SetTargetMetric(-epsilon);
 				optimization.DoOptimization();
 				
 				Log(GLLogStream::Info,
@@ -308,7 +325,6 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 						optimization.nPerfmormedOps,
 						(int) (clock() - start) / 1000000);
 			}
-			
 			
 			//optimization.Finalize<CurvEdgeFlip>();
 
@@ -318,7 +334,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamet
 		case FP_NEAR_LAPLACIAN_SMOOTH: {
 			int iterations = par.getInt("iterations");
 			float dthreshold = par.getAbsPerc("dthreshold");
-			size_t cnt = tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+			//size_t cnt = tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			if (cnt > 0) LaplacianAdjust(m.cm, iterations, dthreshold, true);
 			else LaplacianAdjust(m.cm, iterations, dthreshold, false);
 			tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);

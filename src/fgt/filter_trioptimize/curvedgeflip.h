@@ -100,8 +100,8 @@ protected:
 		
 		res.K += ang0;
 		
-		ang1 = (Angle(fNormal, v1->N()));
-		ang2 = (Angle(fNormal, v2->N()));
+		ang1 = math::Abs(Angle(fNormal, v1->N()));
+		ang2 = math::Abs(Angle(fNormal, v2->N()));
 		res.H += ( (Distance(v0->P(), v1->P()) / 2.0) * ang1 + 
 				   (Distance(v0->P(), v2->P()) / 2.0) * ang2 );
 		
@@ -132,8 +132,10 @@ protected:
 	static void InsertIfConvenient(HeapType& heap, const PosType& p, int mark)
 	{
 		MYTYPE* newflip = new MYTYPE(p, mark);
-		if(newflip->Priority() < 0 && newflip->IsFeasible())
+		if(newflip->Priority() < 0 && newflip->IsFeasible()) {
 			heap.push_back(HeapElem(newflip));
+			std::push_heap(heap.begin(), heap.end());
+		}
 		else delete newflip;
 	}
 	
@@ -326,8 +328,6 @@ public:
 				}
 			}
 		}
-		
-		std::push_heap(heap.begin(), heap.end());
 	}
 	
 }; // end CurvEdgeFlip class
