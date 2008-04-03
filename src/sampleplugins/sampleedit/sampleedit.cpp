@@ -34,7 +34,6 @@ $Log: meshedit.cpp,v $
 using namespace vcg;
 
 SampleEditPlugin::SampleEditPlugin() {
-  curFacePtr=0;
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);
 	
@@ -128,6 +127,7 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * g
 
 void SampleEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla )
 {
+  curFacePtr=0;
 	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 }
 
