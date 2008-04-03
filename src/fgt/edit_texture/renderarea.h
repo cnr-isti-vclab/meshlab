@@ -89,7 +89,7 @@ private:
 
 	// Info for interactive editing
 	vector<QRect> selRect;
-	QRect selection, realSel;
+	QRect selection;
 	QPoint selStart, selEnd;
 	int posX, posY, rectX, rectY, oldSRX, oldSRY;
 	float degree, scaleX, scaleY;

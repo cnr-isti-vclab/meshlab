@@ -102,7 +102,7 @@ void RenderArea::paintEvent(QPaintEvent *)
     painter.setRenderHint(QPainter::Antialiasing, antialiased);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 	painter.begin(painter.device());	// Initialize a GL context
-
+	
 	tb->GetView();
 	tb->Apply(true);
 
@@ -286,14 +286,12 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 	switch(mode)
 	{
 		case View:
-			//tb->MouseUp(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
-			//this->update();
 			if (selection != QRect()) 
 			{
-				UpdateSelectionArea(viewport.X() - initVX, viewport.Y() - initVY);
+				UpdateSelectionArea((viewport.X() - initVX)*zoom, (viewport.Y() - initVY)*zoom);
 				originR.moveCenter(QPoint(originR.x() + viewport.X() - initVX, originR.y() + viewport.Y() - initVY));
-				initVX = viewport.X(); initVY = viewport.Y();
 			}
+			initVX = viewport.X(); initVY = viewport.Y();
 			break;
 		case Edit:
 			oldPX = panX;
@@ -307,7 +305,6 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 			else if (pressed == SELECTIONRECT && posX != 0)	// Drag selection -> Update the position of the selection area and the rotatation rect
 			{
 				selection = QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height());
-				realSel = QRect(selection.x()/zoom, selection.y()/zoom, selection.width()/zoom, selection.height()/zoom);
 				originR.moveCenter(QPoint(originR.center().x() - posX, originR.center().y() - posY));
 				origin = QPointF((float)(originR.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y())/(AREADIM*zoom));
 				posX = 0; posY = 0;
@@ -335,15 +332,21 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 			start = QPoint();
 			end = QPoint();
 			area = QRect();
-			if (selected)
+			if (selectMode == Area)
 			{
-				selection = QRect(selStart, selEnd);
-				realSel = QRect(selection.x()/zoom, selection.y(), selection.width()/zoom, selection.height()/zoom);
-				UpdateSelectionArea(0,0);
-				origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
-				originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
-				this->ChangeMode(1);
-				this->update(selection);
+				if (selected)
+				{
+					selection = QRect(selStart, selEnd);
+					UpdateSelectionArea(0,0);
+					origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
+					originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
+					this->ChangeMode(1);
+					this->update(selection);
+				}
+			}
+			else // Connected
+			{
+				// <---------
 			}
 			break;
 	}
@@ -375,8 +378,8 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 						selRect[1].moveCenter(QPoint(selection.topRight().x() - posX, selection.topRight().y() - posY));
 						selRect[2].moveCenter(QPoint(selection.bottomLeft().x() - posX, selection.bottomLeft().y() - posY));
 						selRect[3].moveCenter(QPoint(selection.bottomRight().x() - posX, selection.bottomRight().y() - posY));
-						this->update();
 					}
+					this->update();
 				}
 				else if (pressed == ORIGINRECT)
 				{
@@ -398,13 +401,20 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 				}
 				break;
 			case Select:
-				end = e->pos();
-				int x1, x2, y1, y2;
-				if (start.x() < end.x()) {x1 = start.x(); x2 = end.x();} else {x1 = end.x(); x2 = start.x();}
-				if (start.y() < end.y()) {y1 = start.y(); y2 = end.y();} else {y1 = end.y(); y2 = start.y();}
-				area = QRect(x1,y1,x2-x1,y2-y1);
-				if (selectMode == Area) SelectFaces();
-				this->update(area);
+				if (selectMode == Area)
+				{
+					end = e->pos();
+					int x1, x2, y1, y2;
+					if (start.x() < end.x()) {x1 = start.x(); x2 = end.x();} else {x1 = end.x(); x2 = start.x();}
+					if (start.y() < end.y()) {y1 = start.y(); y2 = end.y();} else {y1 = end.y(); y2 = start.y();}
+					area = QRect(x1,y1,x2-x1,y2-y1);
+					if (selectMode == Area) SelectFaces();
+					this->update(area);
+				}
+				else
+				{
+					// <-------
+				}
 				break;
 		}
 	}
@@ -449,8 +459,9 @@ void RenderArea::mouseDoubleClickEvent(QMouseEvent *e)
 	switch(mode)
 	{
 		case View:	// Reset trackball position
-			ResetTrack(true);
 			zoom = 1;
+			ResetTrack(true);
+			if (selected) RecalculateSelectionArea();
 			this->update();
 			break;
 		case Edit:	// Change edit mode
@@ -466,18 +477,16 @@ void RenderArea::mouseDoubleClickEvent(QMouseEvent *e)
 
 void RenderArea::wheelEvent(QWheelEvent*e)
 {
-	//if (mode == View || mode == Edit) // Zoom
-	{
-		ResetTrack(false);
-		if (e->delta() > 0) zoom += 0.25;
-		else zoom -= 0.25;
-		tb->Scale(zoom);
-		selection = QRect(realSel.x()*zoom, realSel.y()*zoom, realSel.width()*zoom, realSel.height()*zoom);
-		UpdateSelectionArea(0,0);
-		originR.moveCenter(selection.center());
-		origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
-		this->update();
-	}
+	// Handle the zoom
+	ResetTrack(false);
+	if (e->delta() > 0) zoom += 0.25;
+	else zoom -= 0.25;
+	tb->Scale(zoom);
+	RecalculateSelectionArea();
+	UpdateSelectionArea(0,0);
+	originR.moveCenter(selection.center());
+	origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
+	this->update();
 }
 
 void RenderArea::RemapClamp()
@@ -644,7 +653,7 @@ void RenderArea::UpdateUV()
 
 void RenderArea::ResetTrack(bool resetViewPort)
 {
-	// Reset the center of the trackball
+	// Reset the viewport of the trackball
 	tb->center = Point3f(0, 0, 0);
 	tb->track.SetScale(1);
 	if (resetViewPort) viewport = Point2f(0,0);
@@ -664,7 +673,7 @@ void RenderArea::SelectFaces()
 {
 	// Check if a face is inside the rectangle of selection and mark it
 	selStart = QPoint(MAX,MAX);
-	selEnd = QPoint(0,0);
+	selEnd = QPoint(-MAX,-MAX);
 	selected = false;
 	selection = QRect();
 	CMeshO::FaceIterator fi;
@@ -689,8 +698,6 @@ void RenderArea::SelectFaces()
 			}
 		}
 	}
-	origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
-	originR.moveCenter(selection.center());
 }
 
 void RenderArea::HandleScale(QPoint e)
@@ -704,8 +711,11 @@ void RenderArea::HandleScale(QPoint e)
 			if (tx > selection.x() + selection.width() - RECTDIM) tx = selection.x() + selection.width() - RECTDIM;
 			if (ty > selection.y() + selection.height() - RECTDIM) ty = selection.y() + selection.height() - RECTDIM;
 			selRect[0].moveCenter(QPoint(tx, ty));
-			selRect[2].moveCenter(QPoint(selRect[0].center().x(), selRect[2].center().y()));
-			selRect[1].moveCenter(QPoint(selRect[1].center().x(), selRect[0].center().y()));
+			//selRect[2].moveCenter(QPoint(tx, selRect[2].center().y())); // THERE IS A BUG IN QT: movecenter doesn't work
+			//selRect[1].moveCenter(QPoint(selRect[1].center().x(),ty));     if coords are negative.......
+			selRect[2] = QRect(tx - RECTDIM/2, selRect[2].y(), RECTDIM, RECTDIM);
+			selRect[1] = QRect(selRect[1].x(), ty - RECTDIM/2, RECTDIM, RECTDIM);
+
 			selection.setTopLeft(selRect[0].center());
 			selection.setBottomLeft(selRect[2].center());
 			selection.setTopRight(selRect[1].center());
@@ -715,8 +725,10 @@ void RenderArea::HandleScale(QPoint e)
 			if (tx < selection.x() + RECTDIM) tx = selection.x() +  RECTDIM;
 			if (ty > selection.y() + selection.height() - RECTDIM) ty = selection.y() + selection.height() - RECTDIM;
 			selRect[1].moveCenter(QPoint(tx, ty));
-			selRect[3].moveCenter(QPoint(selRect[1].center().x(), selRect[3].center().y()));
-			selRect[0].moveCenter(QPoint(selRect[0].center().x(), selRect[1].center().y()));
+			//selRect[3].moveCenter(QPoint(tx, selRect[3].center().y()));
+			//selRect[0].moveCenter(QPoint(selRect[0].center().x(), ty));	
+			selRect[3] = QRect(tx - RECTDIM/2, selRect[3].y(), RECTDIM, RECTDIM);
+			selRect[0] = QRect(selRect[0].x(), ty - RECTDIM/2, RECTDIM, RECTDIM);
 			selection.setTopRight(selRect[1].center());
 			selection.setTopLeft(selRect[0].center());
 			selection.setBottomRight(selRect[3].center());
@@ -726,8 +738,11 @@ void RenderArea::HandleScale(QPoint e)
 			if (tx > selection.x() + selection.width() - RECTDIM) tx = selection.x() + selection.width() - RECTDIM;
 			if (ty < selection.y() + RECTDIM) ty = selection.y() + RECTDIM;
 			selRect[2].moveCenter(QPoint(tx, ty));
-			selRect[0].moveCenter(QPoint(selRect[2].center().x(), selRect[0].center().y()));
-			selRect[3].moveCenter(QPoint(selRect[3].center().x(), selRect[2].center().y()));
+			//selRect[0].moveCenter(QPoint(tx, selRect[0].center().y()));
+			//selRect[3].moveCenter(QPoint(selRect[3].center().x(), ty));
+			selRect[0] = QRect(tx - RECTDIM/2, selRect[0].y(), RECTDIM, RECTDIM);
+			selRect[3] = QRect(selRect[3].x(), ty - RECTDIM/2, RECTDIM, RECTDIM);
+
 			selection.setTopLeft(selRect[0].center());
 			selection.setBottomLeft(selRect[2].center());
 			selection.setBottomRight(selRect[3].center());
@@ -737,8 +752,11 @@ void RenderArea::HandleScale(QPoint e)
 			if (tx < selection.x() + RECTDIM) tx = selection.x() + RECTDIM;
 			if (ty < selection.y() + RECTDIM) ty = selection.y() + RECTDIM;
 			selRect[3].moveCenter(QPoint(tx, ty));
-			selRect[1].moveCenter(QPoint(selRect[3].center().x(), selRect[1].center().y()));
-			selRect[2].moveCenter(QPoint(selRect[2].center().x(), selRect[3].center().y()));
+			//selRect[1].moveCenter(QPoint(tx, selRect[1].center().y()));
+			//selRect[2].moveCenter(QPoint(selRect[2].center().x(), ty));
+			selRect[1] = QRect(tx - RECTDIM/2, selRect[1].y(), RECTDIM, RECTDIM);
+			selRect[2] = QRect(selRect[2].x(), ty - RECTDIM/2, RECTDIM, RECTDIM);
+
 			selection.setTopRight(selRect[1].center());
 			selection.setBottomLeft(selRect[2].center());
 			selection.setBottomRight(selRect[3].center());
@@ -786,7 +804,7 @@ void RenderArea::RecalculateSelectionArea()
 {
 	// Find the new size of the selection rectangle after a rotation or a scale
 	selStart = QPoint(MAX,MAX);
-	selEnd = QPoint(0,0);
+	selEnd = QPoint(-MAX,-MAX);
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
@@ -803,14 +821,17 @@ void RenderArea::RecalculateSelectionArea()
 			if (r.boundingRect().bottomRight().y() > selEnd.y()) selEnd.setY(r.boundingRect().bottomRight().y());
 		}
 	}
-	selection = QRect(selStart, selEnd);
-	UpdateSelectionArea(0,0);
+	if (selected)
+	{
+		selection = QRect(selStart, selEnd);
+		UpdateSelectionArea(0,0);
+	}
 }
 
 void RenderArea::UpdateSelectionArea(int x, int y)
 {
 	// Update the buttons of the selection area
-	selection.moveCenter(QPoint(selection.center().x() + x*zoom, selection.center().y() + y*zoom));
+	selection.moveCenter(QPoint(selection.center().x() + x, selection.center().y() + y));
 	selRect[0].moveCenter(selection.topLeft());
 	selRect[1].moveCenter(selection.topRight());
 	selRect[2].moveCenter(selection.bottomLeft());
