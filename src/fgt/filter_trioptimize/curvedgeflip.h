@@ -29,6 +29,8 @@
 #include <vcg/space/triangle3.h>
 #include <vcg/space/point3.h>
 
+#include <vcg/complex/trimesh/update/normal.h>
+
 #include "curvdata.h"
 
 namespace vcg
@@ -61,6 +63,7 @@ protected:
 	// New curvature precomputed for the vertexes of the faces 
 	// adjacent to edge to be flipped
 	ScalarType _cv0, _cv1, _cv2, _cv3;
+	//CoordType _nv0, _nv1, _nv2, _nv3;
 	
 	static CurvData FaceCurv(VertexPointer v0,
 	                      VertexPointer v1,
@@ -160,14 +163,31 @@ public:
 	// temporary empty (flip is already done in constructor)
 	void Execute(TRIMESH_TYPE &/*m*/)
 	{
+		VertexPointer v0, v1, v2, v3;
 		int i = this->_pos.I();
-		FacePointer f = this->_pos.F();
+		
+		FacePointer f1 = this->_pos.F();
+		v0 = f1->V0(i);
+		v1 = f1->V1(i);
+		v2 = f1->V2(i);
+		
+		FacePointer f2 = this->_pos.F()->FFp(i);
+		v3 = f2->V2(f1->FFi(i));
 		
 		// save precomputed curvature in vertex quality
-		f->V0(i)->Q() = _cv0;
-		f->V1(i)->Q() = _cv1;
-		f->V2(i)->Q() = _cv2;
-		f->FFp(i)->V2(f->FFi(i))->Q() = _cv3;
+		v0->Q() = _cv0;
+		v1->Q() = _cv1;
+		v2->Q() = _cv2;
+		v3->Q() = _cv3;
+		
+		CoordType n1 = Normal(v0->P(), v3->P(), v2->P());
+		CoordType n2 = Normal(v1->P(), v2->P(), v3->P());
+		
+		// compute and update normals on vertices after flip
+		v0->N() = v0->N() - f1->N() - f2->N() + n1;
+		v1->N() = v1->N() - f1->N() - f2->N() + n2;
+		v2->N() = v2->N() - f1->N() + n1 + n2;
+		v3->N() = v3->N() - f2->N() + n1 + n2;;
 		
 		// do the flip
 		vcg::face::FlipEdge(*this->_pos.f, this->_pos.z);	
@@ -226,15 +246,35 @@ public:
 		
 		// save sum of curvatures of vertexes
 		float cbefore = v0->Q() + v1->Q() + v2->Q() + v3->Q();
+
+		// saving current vertex normals
+		CoordType nv0orig = v0->N();
+		CoordType nv1orig = v1->N();
+		CoordType nv2orig = v2->N();
+		CoordType nv3orig = v3->N();
 		
 		CurvData cd0, cd1, cd2, cd3;
-		CoordType n1 = NormalizedNormal(v0->P(), v3->P(), v2->P());
-		CoordType n2 = NormalizedNormal(v1->P(), v2->P(), v3->P());
+		CoordType n1 = Normal(v0->P(), v3->P(), v2->P());
+		CoordType n2 = Normal(v1->P(), v2->P(), v3->P());
+
+		// new vertex normal after the flip
+		// set this now to evaluate new curvatures
+		v0->N() = nv0orig - f1->N() - f2->N() + n1;
+		v1->N() = nv1orig - f1->N() - f2->N() + n2;
+		v2->N() = nv2orig - f1->N() + n1 + n2;
+		v3->N() = nv3orig - f2->N() + n1 + n2;
+
 		cd0 = FaceCurv(v0, v3, v2, n1) + Curvature(v0, f1, f2);
 		cd1 = FaceCurv(v1, v2, v3, n2) + Curvature(v1, f1, f2);
 		cd2 = FaceCurv(v2, v0, v3, n1) + FaceCurv(v2, v3, v1, n2) + Curvature(v2, f1, f2);
 		cd3 = FaceCurv(v3, v2, v0, n1) + FaceCurv(v3, v1, v2, n2) + Curvature(v3, f1, f2);
 		
+		// restore original pervertex normals after computation
+		v0->N() = nv0orig;
+		v1->N() = nv1orig;
+		v2->N() = nv2orig;
+		v3->N() = nv3orig;
+
 		CURVEVAL curveval;
 		_cv0 = curveval(cd0);
 		_cv1 = curveval(cd1);
@@ -252,6 +292,9 @@ public:
 		CURVEVAL curveval;
 		
 		heap.clear();
+		
+		// comuputing edge flip priority require non normalized vertex normals
+		vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertexPerFace(mesh);
 		
 		SimpleTempData<VertContainer, CurvData> tdcurv(mesh.vert);
 		tdcurv.Start(); 
