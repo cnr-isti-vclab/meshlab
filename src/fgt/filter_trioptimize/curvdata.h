@@ -23,7 +23,8 @@
 #ifndef __CURVDATA
 #define __CURVDATA
 
-
+namespace vcg
+{
 class CurvData
 {
 public:
@@ -92,4 +93,5 @@ public:
 	}
 };
 
+} //end namespace vcg
 #endif // __CURVDATA

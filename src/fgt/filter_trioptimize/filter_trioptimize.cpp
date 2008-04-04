@@ -42,6 +42,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/selection.h>
 //#include <vcg/complex/trimesh/update/curvature.h>
+using namespace vcg;
 
 // forward declarations
 class NSMCEdgeFlip;
