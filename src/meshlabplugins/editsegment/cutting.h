@@ -1,14 +1,6 @@
 #ifndef MESHCUTTING_H
 #define MESHCUTTING_H
 
-#ifdef max
-#undef max
-#endif
-
-#ifdef min
-#undef min
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -62,7 +54,7 @@ namespace vcg {
 
 	template <class VERTEX_TYPE> class SegmentHeap {
 	private :
-		vector<CuttingTriplet<VERTEX_TYPE> > _container;
+		std::vector<CuttingTriplet<VERTEX_TYPE> > _container;
 		MinTriplet<VERTEX_TYPE> cmp;
 
 	public :
@@ -79,8 +71,8 @@ namespace vcg {
 		}
 
 		void rebuild(){
-			typename vector<CuttingTriplet<VERTEX_TYPE> >::iterator iter = _container.begin();
-			typename vector<CuttingTriplet<VERTEX_TYPE> >::iterator last = _container.end();
+			typename std::vector<CuttingTriplet<VERTEX_TYPE> >::iterator iter = _container.begin();
+			typename std::vector<CuttingTriplet<VERTEX_TYPE> >::iterator last = _container.end();
 			//last punta all'ultimo elemento valido
 			--last;
 			int num_to_remove = 0;
@@ -337,7 +329,7 @@ namespace vcg {
 			FaceIterator fi;
 			VertexIterator vi;
 
-			queue<FaceType*> edgeFaceQueue;
+			std::queue<FaceType*> edgeFaceQueue;
 
 			for (vi = mesh->vert.begin(); vi != mesh->vert.end(); ++vi) {
 				if ( vi->IMark() == F ) vi->C() = Color4b::Yellow;

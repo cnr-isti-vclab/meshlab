@@ -47,11 +47,11 @@ private:
 	QDockWidget *meshcut_dock;
 	MeshCutDialog * meshCutDialog;
 	GLArea * glarea;
-	MeshCutting<CMeshO> * meshCut;
+	vcg::MeshCutting<CMeshO> * meshCut;
 
-	QMap<GLArea *, MeshCutting<CMeshO> *> glarea_map;
+	QMap<GLArea *, vcg::MeshCutting<CMeshO> *> glarea_map;
 
-	vector<CMeshO::FacePointer> currentSelection;
+	std::vector<CMeshO::FacePointer> currentSelection;
 	GLfloat *pixels;
 
 	double mvmatrix[16]; //modelview

@@ -68,6 +68,7 @@ The first version contains:
 #include<vcg/complex/trimesh/update/bounding.h>
 //#include <vcg/space/triangle3.h>
 
+using namespace std;
 using namespace vcg;
 
 EditPaintPlugin::EditPaintPlugin() {
@@ -137,7 +138,7 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 	paint_dock->setVisible(true);
 	paint_dock->layout()->update();
 	//m.updateDataMask(MeshModel::MM_FACETOPO);
-	m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+	m.updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK );
 
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	parent->mm()->ioMask|=MeshModel::IOM_VERTCOLOR;

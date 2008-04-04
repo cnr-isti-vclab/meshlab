@@ -1,5 +1,6 @@
 #include <editsegment.h>
 
+using namespace std;
 using namespace vcg;
 
 inline bool isFront(const QPointF &a, const QPointF &b, const QPointF &c) {
@@ -312,8 +313,8 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 	meshcut_dock->setVisible(true);
 	meshcut_dock->layout()->update();
 
-	m.updateDataMask(MeshModel::MM_VERTFACETOPO);
-	m.updateDataMask(MeshModel::MM_FACETOPO);
+	m.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK );
+
 
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	parent->mm()->ioMask|=MeshModel::IOM_VERTCOLOR;

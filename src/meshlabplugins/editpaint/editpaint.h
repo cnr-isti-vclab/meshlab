@@ -42,7 +42,7 @@ struct Penn {
 
 struct UndoItem {
 	CVertexO * vertex;
-	Color4b original;
+	vcg::Color4b original;
 };
 
 struct Vert_Data {
@@ -52,12 +52,12 @@ struct Vert_Data {
 
 struct Vert_Data_2 {
 	float distance;
-	Color4b color;
+	vcg::Color4b color;
 };
 
 struct Vert_Data_3{
 	float pos[3];
-	Color4b color;
+	vcg::Color4b color;
 };
 
 /** the main class of the plugin */
@@ -97,8 +97,8 @@ private:
 	GLint viewport[4]; //viewport
 	GLfloat *pixels; // the z-buffer
 	int inverse_y; // gla->curSiz.height()-cur.y() TODO probably removable
-	vector<CMeshO::FacePointer> tempSel; //to use when needed
-	vector<CMeshO::FacePointer> curSel; //the faces i am painting on
+	std::vector<CMeshO::FacePointer> tempSel; //to use when needed
+	std::vector<CMeshO::FacePointer> curSel; //the faces i am painting on
 	QHash<CVertexO *,Vert_Data_2> visited_vertexes; //the vertexes i am painting on
 	Penn pen; //contains informations about the painting mode, color, type ...
 	PaintToolbox *paintbox; //the widget with the painting stuff
@@ -111,7 +111,7 @@ private:
 	void drawLine(GLArea * gla); // to draw a xor-line from start to cur, used for gradient
 	void fillGradient(MeshModel &,GLArea * gla);
 	bool getFaceAtMouse(MeshModel &,CMeshO::FacePointer &);
-	bool getFacesAtMouse(MeshModel &,vector<CMeshO::FacePointer> &);
+	bool getFacesAtMouse(MeshModel &,std::vector<CMeshO::FacePointer> &);
 	bool getVertexAtMouse(MeshModel &,CMeshO::VertexPointer &);
 	bool getVertexesAtMouse();
 	void fillFrom(MeshModel &,CFaceO *);
@@ -151,9 +151,9 @@ public slots:
 there is still some error, and at the moment it manages only color undo, but not vertex-pos undo */
 class ColorUndo {
 private:
-	vector<vector<UndoItem> *> undos; // the vector of the undo's
-	vector<vector<UndoItem> *> redos; // the vector of the redo's
-	vector<UndoItem> * temp_vector;   // the vector of the not yet added single undos
+	std::vector< std::vector<UndoItem> *> undos; // the vector of the undo's
+	std::vector< std::vector<UndoItem> *> redos; // the vector of the redo's
+	std::vector<UndoItem> * temp_vector;   // the vector of the not yet added single undos
 public:
 	/** adds the single undos as unified undo and checks if there are more then 15 undos, 
 		in that case it removes the first undo */
@@ -163,7 +163,7 @@ public:
 		for (int lauf=0; lauf<redos.size(); lauf++) { redos[lauf]->clear(); delete redos[lauf];}
 		redos.clear();
 		undos.push_back(temp_vector);
-		temp_vector=new vector<UndoItem>();
+		temp_vector=new std::vector<UndoItem>();
 	}
 	void undo();
 	void redo();
@@ -178,7 +178,7 @@ public:
 	bool hasRedo() { return redos.size()!=0; }
 	/** adds a single item */
 	inline void addItem(UndoItem u) { temp_vector->push_back(u); } 
-	ColorUndo() { temp_vector=new vector<UndoItem>();}
+	ColorUndo() { temp_vector=new std::vector<UndoItem>();}
 };
 
 /** manages the paint window */
@@ -186,8 +186,8 @@ class PaintToolbox : public QWidget {
 Q_OBJECT
 public:
 	PaintToolbox ( /*const QString & title,*/ QWidget * parent = 0, Qt::WindowFlags flags = 0 );
-	Color4b getColor(Qt::MouseButton);
-	void setColor(Color4b,Qt::MouseButton);
+	vcg::Color4b getColor(Qt::MouseButton);
+	void setColor(vcg::Color4b,Qt::MouseButton);
 	void setColor(int,int,int,Qt::MouseButton mouse);
 	double getRadius() { if (ui.tabWidget->currentIndex()==1) return ui.pen_radius_2->value(); return ui.pen_radius->value(); }
 	int paintType() { if (ui.tabWidget->currentIndex()==1) return ui.pen_type_2->currentIndex()+1; return ui.pen_type->currentIndex()+1; }

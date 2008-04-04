@@ -9,6 +9,8 @@ email: gfrei.andreas@gmx.net
 #include <QPainter>
 #include <QColorDialog>
 
+using namespace std;
+using namespace vcg;
 
 Color4b to4b(QColor c) {
 	return Color4b(c.red(),c.green(),c.blue(),255);
