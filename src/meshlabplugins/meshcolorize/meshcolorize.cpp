@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.47  2008/04/04 13:15:58  cignoni
+Switched to the new vcg library curvature computation method
+
 Revision 1.46  2008/03/19 05:23:01  cignoni
 Added pre-cleaning before computing curvature to avoid degenerate cases
 
@@ -167,16 +170,20 @@ Added copyright info
 ****************************************************************************/
 #include <QtGui>
 #include <limits>
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/stat.h>
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/update/selection.h>
 #include "meshcolorize.h"
 #include "color_manifold.h"
 #include "curvature.h"
 #include "smoothcolor.h"
-#include <vcg/space/triangle3.h> //for quality
 
+#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/trimesh/update/curvature.h>
+#include <vcg/complex/trimesh/update/quality.h>
+
+
+using namespace std;
 using namespace vcg;
 
 ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
@@ -261,7 +268,7 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_GAUSSIAN:                 
     case CP_MEAN:                     
     case CP_RMS:                      
-    case CP_ABSOLUTE:                 return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
+    case CP_ABSOLUTE:                 return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_CURV;
     case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR;
     case CP_SELFINTERSECT_SELECT:
 		case CP_SELFINTERSECT_COLOR:
@@ -360,13 +367,13 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			if(delvert) Log(GLLogStream::Info, "Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-
-      Curvature<CMeshO> c(m.cm);
+			tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m.cm);
+      //Curvature<CMeshO> c(m.cm);
       switch (ID(filter)){
-          case CP_GAUSSIAN: c.MapGaussianCurvatureIntoQuality();    break;
-          case CP_MEAN:     c.MapMeanCurvatureIntoQuality();        break;
-          case CP_RMS:      c.MapRMSCurvatureIntoQuality();         break;
-          case CP_ABSOLUTE: c.MapAbsoluteCurvatureIntoQuality();    break;
+          case CP_GAUSSIAN: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvature(m.cm);    break;
+          case CP_MEAN:     tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m.cm);         break;
+          case CP_RMS:      tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m.cm);         break;
+          case CP_ABSOLUTE: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m.cm);         break;
       }      
       
       Histogramf H;
