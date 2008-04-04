@@ -18,7 +18,7 @@ class FilterScript
 public:
   bool open(QString filename);
   bool save(QString filename);
-  Matrix44f getMatrix(QDomElement *n);
+  vcg::Matrix44f getMatrix(QDomElement *n);
   
   QList< QPair< QString , FilterParameterSet> > actionList;
   typedef QList< QPair<QString, FilterParameterSet> >::iterator iterator;

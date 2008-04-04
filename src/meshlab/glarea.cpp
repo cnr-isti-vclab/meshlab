@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.141  2008/04/04 10:07:12  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.140  2008/02/05 18:06:47  benedetti
 added calls to editing plugins' keyReleaseEvent and keyPressEvent
 
@@ -86,6 +89,8 @@ Added notification of ortho projection
 
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
+
+using namespace std; 
 using namespace vcg; 
 
 GLArea::GLArea(QWidget *parent)

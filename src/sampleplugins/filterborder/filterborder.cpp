@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.2  2008/04/04 10:03:52  cignoni
+ Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
  Revision 1.1  2007/12/02 07:57:48  cignoni
  Added the new sample filter plugin that removes border faces
 
@@ -36,6 +39,7 @@
 #include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/clean.h>
 
+using namespace std;
 using namespace vcg;
 
 FilterBorder::FilterBorder() 

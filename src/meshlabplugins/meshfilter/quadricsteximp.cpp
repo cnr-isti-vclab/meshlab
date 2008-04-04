@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.9  2008/04/04 10:03:51  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.8  2007/10/16 16:47:36  cignoni
 changed edgecollapse interface in order to the new allocator based deleting strategy
 
@@ -62,13 +65,12 @@ Added Quadric Simplification(with textures) Filter
 #include "algebra5.h"
 #include "quadric5.h"
 
-typedef	SimpleTempData<CMeshO::VertContainer, QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > > Quadric5Temp;
-typedef	SimpleTempData<CMeshO::VertContainer, math::Quadric<double> > QuadricTemp;
-
 using namespace vcg;
 using namespace std;
 using namespace vcg::tri;
 
+typedef	SimpleTempData<CMeshO::VertContainer, QVector<QPair<vcg::TexCoord2<float>,Quadric5<double> > > > Quadric5Temp;
+typedef	SimpleTempData<CMeshO::VertContainer, math::Quadric<double> > QuadricTemp;
 
 class TriEdgeCollapseQuadricTexParameter
 {

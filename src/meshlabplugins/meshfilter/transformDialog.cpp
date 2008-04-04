@@ -26,6 +26,9 @@
 
 /*
 $Log$
+Revision 1.7  2008/04/04 10:03:50  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.6  2008/02/12 14:21:39  cignoni
 changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
 
@@ -65,7 +68,6 @@ Revision 1.7  2006/01/22 16:40:38  mariolatronico
 - added rotate around origini / object center
 
 */
-
 #include <QRegExp>
 #include <QRegExpValidator>
 #include <QtGui>
@@ -73,6 +75,8 @@ Revision 1.7  2006/01/22 16:40:38  mariolatronico
 #include "transformDialog.h"
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/position.h>
+using namespace std;
+using namespace vcg;
 
 TransformDialog::TransformDialog() : QDialog() {
 	

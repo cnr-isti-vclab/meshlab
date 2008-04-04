@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.32  2008/04/04 10:03:54  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.31  2008/02/12 14:23:11  cignoni
 correct drawing selection bug
 
@@ -69,6 +72,7 @@ Removed Optional Face Normal and added some initalization after opening
 #include <QString>
 #include <QtGlobal>
 #include <wrap/gl/math.h>
+using namespace vcg;
 
 bool MeshModel::Render(GLW::DrawMode _dm, GLW::ColorMode _cm, GLW::TextureMode _tm)
 {

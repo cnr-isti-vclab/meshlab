@@ -26,6 +26,9 @@
 /*
 
 $Log$
+Revision 1.5  2008/04/04 10:03:51  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.4  2008/02/12 14:21:39  cignoni
 changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
 
@@ -134,7 +137,7 @@ public:
 	~TransformDialog();
 	
 	// used to compute transformation on meshfilter.cpp
-	Matrix44f& getTransformation();
+	vcg::Matrix44f& getTransformation();
 	void setMesh(CMeshO *mesh);
 	void updateMatrixWidget();
 	void setMainWindow(MainWindowInterface *mw) {curmwi=mw;}
@@ -142,14 +145,14 @@ public:
 	QString& getLog();
 private: // members
   CMeshO *mesh;
-	Point3f minBbox, maxBbox; // min and max of bounding box
-	Box3f bbox; // the mesh bounding box
+	vcg::Point3f minBbox, maxBbox; // min and max of bounding box
+	vcg::Box3f bbox; // the mesh bounding box
   QButtonGroup *whichTransformBG;
   QButtonGroup *rotateBG;
 	enum AxisType {AXIS_X,AXIS_Y,AXIS_Z}  rotateAxis;
   enum TransformType { TR_MOVE, TR_ROTATE, TR_SCALE } whichTransform; 
   // store the transformation
-	Matrix44f matrix;
+	vcg::Matrix44f matrix;
 	bool uniformScale; // true if want same scale for X,Y,Z
 	QString log; // used to store string to log
 private: // functions

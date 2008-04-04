@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.155  2008/04/04 10:07:08  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.154  2008/03/22 07:38:55  cignoni
 To avoid that a filter changes something assumed by the current editing tool, before actually starting the filter we close the current editing tool (if any).
 
@@ -202,6 +205,8 @@ Added Drag n drog opening of files (thanks to Valentino Fiorin)
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/clean.h>
 
+using namespace std;
+using namespace vcg;
 
 void MainWindow::updateRecentFileActions()
 {

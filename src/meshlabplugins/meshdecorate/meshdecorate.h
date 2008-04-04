@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.25  2008/04/04 10:03:49  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.24  2008/03/02 16:55:26  benedetti
 removed DrawAxis() in favor of VCG's CoordinateFrame class
 
@@ -118,13 +121,13 @@ private:
 	float niceRound2(float value,float base);
 	float niceRound(float value);
 
-	float calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,GLint *vp);
+	float calcSlope(const vcg::Point3d &a,const vcg::Point3d &b,float dim,int spacing,double *mm,double *mp,GLint *vp);
 
-	void	drawQuotedLine(const Point3d &a,const Point3d &b,float aVal, float bVal,float tickDist,QGLWidget *gla, QFont qf);
+	void	drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QGLWidget *gla, QFont qf);
 
-	void	chooseX(Box3f &box,double *modelview,double *projection,GLint *viewport,Point3d &x1,Point3d &x2);
-	void	chooseY(Box3f &box,double *modelview,double *projection,GLint *viewport,Point3d &y1,Point3d &y2);
-	void	chooseZ(Box3f &box,double *modelview,double *projection,GLint *viewport,Point3d &z1,Point3d &z2);
+	void	chooseX(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &x1,vcg::Point3d &x2);
+	void	chooseY(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
+	void	chooseZ(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
 
 public:
      

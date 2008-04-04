@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.5  2008/04/04 10:03:51  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.4  2008/03/02 15:15:50  pirosu
 loss of precision management
 
@@ -44,8 +47,9 @@ Added Quadric Simplification(with textures) Filter
 #include "algebra5.h"
 #include <vcg/math/quadric.h>
 
-using namespace vcg::math;
-
+namespace vcg
+{
+	
 template<typename  Scalar>
 class Quadric5
 {
@@ -107,7 +111,7 @@ public:
 
 	// computes the real quadric and the geometric quadric using the face
 	// The geometric quadric is added to the parameter qgeo
-	void byFace(FaceType &f, math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
+	void byFace(FaceType &f, vcg::math::Quadric<double> &q1, math::Quadric<double> &q2, math::Quadric<double> &q3)
 	{
 		double q = QualityFace(f);
 		
@@ -274,15 +278,15 @@ public:
 			}
 
 			//  computes e1
-			sub_vec5(q,p,e1);
-			normalize_vec5(e1);
+			math::sub_vec5(q,p,e1);
+			math::normalize_vec5(e1);
 			
 			//  computes e2
-			sub_vec5(r,p,diffe);
-			outproduct5(e1,diffe,tmpmat);
-			prod_matvec5(tmpmat,e1,tmpvec);
-			sub_vec5(diffe,tmpvec,e2);
-			normalize_vec5(e2);
+			math::sub_vec5(r,p,diffe);
+			math::outproduct5(e1,diffe,tmpmat);
+			math::prod_matvec5(tmpmat,e1,tmpvec);
+			math::sub_vec5(diffe,tmpvec,e2);
+			math::normalize_vec5(e2);
 
 
 			// computes A
@@ -302,14 +306,14 @@ public:
 			a[13] = 0;
 			a[14] = 1;
 
-			symprod_vvt5(tmpsymmat,e1);
-			sub_symmat5(a,tmpsymmat);
-			symprod_vvt5(tmpsymmat,e2);
-			sub_symmat5(a,tmpsymmat);
+			math::symprod_vvt5(tmpsymmat,e1);
+			math::sub_symmat5(a,tmpsymmat);
+			math::symprod_vvt5(tmpsymmat,e2);
+			math::sub_symmat5(a,tmpsymmat);
 
 
-			pe1 = inproduct5(p,e1);
-			pe2 = inproduct5(p,e2);
+			pe1 = math::inproduct5(p,e1);
+			pe2 = math::inproduct5(p,e2);
 			
 			//  computes b
 
@@ -319,10 +323,10 @@ public:
 			tmpvec[3] = pe1*e1[3] + pe2*e2[3]; 
 			tmpvec[4] = pe1*e1[4] + pe2*e2[4];
 
-			sub_vec5(tmpvec,p,b);
+			math::sub_vec5(tmpvec,p,b);
 
 			//  computes c
-			c = inproduct5(p,p)-pe1*pe1-pe2*pe2;
+			c = math::inproduct5(p,p)-pe1*pe1-pe2*pe2;
 
 			if(IsValid())return;
 		}
@@ -596,12 +600,12 @@ computes bad the priority......this should be adjusted with the extra weight use
 
 		tmpmat[4][4] = a[14];
 
-		prod_matvec5(tmpmat,v,tmpvec);
+		math::prod_matvec5(tmpmat,v,tmpvec);
 
-		return  inproduct5(v,tmpvec) + 2*inproduct5(b,v) + c;
+		return  math::inproduct5(v,tmpvec) + 2*math::inproduct5(b,v) + c;
 
 	}
 };
 
-
+} // end namespace vcg;
 #endif

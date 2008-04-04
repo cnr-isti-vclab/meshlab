@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.98  2008/04/04 10:03:53  cignoni
+ Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
  Revision 1.97  2007/11/26 07:35:26  cignoni
  Yet another small cosmetic change to the interface of the io filters.
 
@@ -83,6 +86,7 @@
 
 #include <QMessageBox>
 
+using namespace std;
 using namespace vcg;
 
 bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)

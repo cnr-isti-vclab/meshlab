@@ -95,12 +95,12 @@ public:
 
 static bool SaveALN(const char *alnfile, std::vector<std::string> &names)
 {
-	std::vector<Matrix44f> Tr(names.size());
+	std::vector<vcg::Matrix44f> Tr(names.size());
 	for(int i=0; i < static_cast<int>(Tr.size()); ++i) Tr[i].SetIdentity();
 	return SaveALN(alnfile,names, Tr);
 }
 template <class matrixfloat>
-static bool SaveALN(const char *alnfile, std::vector<std::string> &names, std::vector<Matrix44 <matrixfloat> > &Tr)
+static bool SaveALN(const char *alnfile, std::vector<std::string> &names, std::vector<vcg::Matrix44<matrixfloat> > &Tr)
 {
  // printf("Saving aln file %s\n",alnfile);
   FILE *fp=fopen(alnfile,"w");

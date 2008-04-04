@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.84  2008/04/04 10:07:10  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.83  2008/01/16 01:41:01  cignoni
 added endedit slot
 
@@ -217,15 +220,15 @@ class ColorSetting
 {
 public:
 	
-	Color4b bColorBottom;
-	Color4b bColorTop;
-	Color4b lColor;
+	vcg::Color4b bColorBottom;
+	vcg::Color4b bColorTop;
+	vcg::Color4b lColor;
 
 	ColorSetting()
 	{
-		bColorBottom=Color4b(64,64,128,1);	
-		bColorTop=Color4b(0,0,0,1);
-		lColor=Color4b(128,16,16,1);
+		bColorBottom=vcg::Color4b(64,64,128,1);	
+		bColorTop=vcg::Color4b(0,0,0,1);
+		lColor=vcg::Color4b(128,16,16,1);
 
     //bColorBottom=Color4b(192,192,192,1);	
 		//bColorTop=Color4b(255,255,255,1);
@@ -318,7 +321,7 @@ public:
 	void setLightModel();
 	void setView();
 	void resetTrackBall();
-	list<pair<QAction *,FilterParameterSet *> > *iDecoratorsList;
+	std::list<std::pair<QAction *,FilterParameterSet *> > *iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
@@ -397,7 +400,7 @@ QMap<QString,QCursor> curMap;
 	bool	trackBallVisible;		// Draws the trackball ?
 	bool  activeDefaultTrackball; // keep track on active trackball
 	bool  hasToPick;         // has to pick during the next redraw.
-	Point2i pointToPick;
+	vcg::Point2i pointToPick;
 
 	//shader support
 	MeshRenderInterface *iRenderer;

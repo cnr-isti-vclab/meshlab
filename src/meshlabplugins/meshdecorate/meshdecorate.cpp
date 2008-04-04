@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.47  2008/04/04 10:03:50  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.46  2008/03/02 16:55:26  benedetti
 removed DrawAxis() in favor of VCG's CoordinateFrame class
 
@@ -119,6 +122,7 @@ Some changes in DrawAxis in order to compile under gcc
 #include <wrap/gl/addons.h>
 #include <meshlab/glarea.h>
 using namespace vcg;
+using namespace std;
 
 const QString ExtraMeshDecoratePlugin::Info(QAction *action)
  {

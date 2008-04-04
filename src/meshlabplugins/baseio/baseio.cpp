@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.11  2008/04/04 10:07:14  cignoni
+ Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
  Revision 1.10  2007/11/26 07:35:25  cignoni
  Yet another small cosmetic change to the interface of the io filters.
 
@@ -71,6 +74,7 @@
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/clean.h>
 
+using namespace std;
 using namespace vcg;
 
 bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)

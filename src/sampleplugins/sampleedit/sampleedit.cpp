@@ -31,6 +31,8 @@ $Log: meshedit.cpp,v $
 #include <meshlab/glarea.h>
 #include "sampleedit.h"
 #include <wrap/gl/pick.h>
+
+using namespace std;
 using namespace vcg;
 
 SampleEditPlugin::SampleEditPlugin() {
