@@ -23,6 +23,8 @@
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
+
+using namespace std;
 using namespace vcg;
 
 

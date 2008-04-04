@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.32  2008/04/04 14:08:13  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.31  2008/02/12 14:39:56  mischitelli
 - Disabled the FP16 path since needs rewriting good part of the code: need time!
 - GPU version works only with FP32 blending capable hardware: aka Shader Model 4.0!
@@ -87,6 +90,8 @@ Revision 1.27  2008/02/09 17:55:19  mischitelli
 #define AMBOCC_USEGPU_BY_DEFAULT false
 #define AMBOCC_USEVBO_BY_DEFAULT false
 
+using namespace std;
+using namespace vcg;
 static GLuint vs, fs, shdrID;
 
 AmbientOcclusionPlugin::AmbientOcclusionPlugin() 

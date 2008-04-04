@@ -39,7 +39,7 @@ class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface
 
 // Attributes
 protected:
-	Point3f cameraDir;
+	vcg::Point3f cameraDir;
 	GLuint  fboDepth,
 	        fboResult,
 	        depthBufferTex,
@@ -92,8 +92,8 @@ public:
 	void  vertexCoordsToTexture (MeshModel &m);
 
 	void  renderMesh            (MeshModel &m);
-	void  setCamera             (Point3f camDir,
-	                             Box3f &meshBBox);
+	void  setCamera             (vcg::Point3f camDir,
+	                             vcg::Box3f &meshBBox);
 
 	void  generateOcclusionHW   ();
 	void  generateOcclusionSW   (MeshModel &m,

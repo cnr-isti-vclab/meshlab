@@ -26,7 +26,7 @@ public:
 	}
 
 public:
-  void setEpochReconstruction(EpochReconstruction *_er,CallBackPos *cb);
+  void setEpochReconstruction(EpochReconstruction *_er,vcg::CallBackPos *cb);
 	bool exportToPLY;  /// when true all the selected range maps are exported as separated ply
 
 public slots:

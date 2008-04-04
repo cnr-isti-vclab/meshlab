@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.3  2008/04/04 14:08:17  cignoni
+ Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
  Revision 1.2  2007/12/14 11:52:18  cignoni
  now use the correct deleteFace/vert and returns info on the number of deleted stuff
 
@@ -52,19 +55,19 @@ std::pair<int,int>  RemoveSmallConnectedComponentsSize(MeshType &m, int maxCCSiz
       tri::ConnectedIterator<MeshType> ci;
       for(unsigned int i=0;i<CCV.size();++i)
       {
-        vector<typename MeshType::FacePointer> FPV;
+        std::vector<typename MeshType::FacePointer> FPV;
         if(CCV[i].first<maxCCSize)
         {
 					DeletedCC++;
           for(ci.start(m,CCV[i].second);!ci.completed();++ci)
             FPV.push_back(*ci);
           
-          typename vector<typename MeshType::FacePointer>::iterator fpvi;
+          typename std::vector<typename MeshType::FacePointer>::iterator fpvi;
           for(fpvi=FPV.begin(); fpvi!=FPV.end(); ++fpvi)
 						tri::Allocator<MeshType>::DeleteFace(m,(**fpvi));
         }
       }
-			return make_pair<int,int>(TotalCC,DeletedCC);
+			return std::make_pair<int,int>(TotalCC,DeletedCC);
 }
 
 /// Remove the connected components smaller than a given diameter
@@ -79,7 +82,7 @@ std::pair<int,int> RemoveSmallConnectedComponentsDiameter(MeshType &m, typename 
       for(unsigned int i=0;i<CCV.size();++i)
       {
         Box3f bb;
-        vector<typename MeshType::FacePointer> FPV;
+        std::vector<typename MeshType::FacePointer> FPV;
         for(ci.start(m,CCV[i].second);!ci.completed();++ci)
         {
             FPV.push_back(*ci);
@@ -90,12 +93,12 @@ std::pair<int,int> RemoveSmallConnectedComponentsDiameter(MeshType &m, typename 
         if(bb.Diag()<maxDiameter)
         {
 					DeletedCC++;
-          typename vector<typename MeshType::FacePointer>::iterator fpvi;
+          typename std::vector<typename MeshType::FacePointer>::iterator fpvi;
           for(fpvi=FPV.begin(); fpvi!=FPV.end(); ++fpvi)
 						tri::Allocator<MeshType>::DeleteFace(m,(**fpvi));
         }
       }
-			return make_pair<int,int>(TotalCC,DeletedCC);
+			return std::make_pair<int,int>(TotalCC,DeletedCC);
 }
 } //end namespace
 #endif

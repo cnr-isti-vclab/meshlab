@@ -41,6 +41,9 @@
 
 #include "filter_splitter.h"
 
+using namespace std;
+using namespace vcg;
+
 // Constructor 
 FilterSplitterPlugin::FilterSplitterPlugin() 
 { 

@@ -26,6 +26,7 @@
 
 #include "v3dImportDialog.h"
 #include "maskImageWidget.h"
+using namespace vcg;
 
 // small helper function for generating a color ramp pixmap to be used in the import dialog.
 

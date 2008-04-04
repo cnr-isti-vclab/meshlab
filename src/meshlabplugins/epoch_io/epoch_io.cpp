@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.22  2008/04/04 14:08:07  cignoni
+ Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
  Revision 1.21  2008/03/06 08:20:50  cignoni
  updated to the new histogram
 
@@ -122,6 +125,7 @@
 #include <meshlab/alnParser.h>
 
 FILE *logFP=0; 
+using namespace std;
 using namespace vcg;
 
 void EpochModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 

@@ -40,6 +40,7 @@ Added the new sample filter plugin that removes border faces
 #include <apps/sample/trimesh_isosurface/simple_volume.h>
 #include <apps/sample/trimesh_isosurface/trivial_walker.h>
 
+using namespace std;
 using namespace vcg;
 
 FilterCreateIso::FilterCreateIso() 

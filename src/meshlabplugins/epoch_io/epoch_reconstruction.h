@@ -21,7 +21,7 @@ public:
   QString depthName;
   QString textureName;
   QString countName;
-  EpochCamera cam;
+  vcg::EpochCamera cam;
   bool Init(QDomNode &node);
   static QString ThumbName(QString &imageName);
 

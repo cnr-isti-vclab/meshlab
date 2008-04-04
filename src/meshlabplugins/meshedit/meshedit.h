@@ -56,7 +56,7 @@ public:
     QPoint cur;
     QPoint prev;
     bool isDragging;
-    vector<CMeshO::FacePointer> LastSel;
+    std::vector<CMeshO::FacePointer> LastSel;
 signals:
  void setSelectionRendering(bool);
 

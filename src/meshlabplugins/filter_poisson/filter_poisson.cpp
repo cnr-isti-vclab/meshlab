@@ -52,6 +52,9 @@ add samplefilter
 #include "src/Geometry.h"
 #include "src/PoissonParam.h"
 
+using namespace std;
+using namespace vcg;
+
 int Execute2(PoissonParam &Par, vector<Point3D<float> > Pts, vector<Point3D<float> > Nor, 	CoredVectorMeshData &mesh, Point3D<float> &newCenter, float &newScale, vcg::CallBackPos *cb );
 
 

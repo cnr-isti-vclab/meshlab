@@ -1,12 +1,13 @@
 
-
+namespace vcg
+{
 class EpochCamera
 {
 public:
   Matrix33d K;      // parametri intriseci camera
   Matrix33d Kinv;   
 
-  vector<double> k;
+  std::vector<double> k;
   Matrix33d R;
   Matrix44d TR; // [R | -Rt] e.g. la matrice in cui
   Matrix44d TRinv;
@@ -20,3 +21,4 @@ public:
   bool Open(const char * filename);
 };
 
+}

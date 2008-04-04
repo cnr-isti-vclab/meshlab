@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.13  2008/04/04 14:08:15  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.12  2008/02/28 09:57:40  cignoni
 corrected bug: wrong selection when Tr matrix != identity
 
@@ -72,6 +75,8 @@ Optional data really working. Clustering decimation totally rewrote. History sta
 #include "meshedit.h"
 #include <wrap/gl/pick.h>
 #include<limits>
+
+using namespace std;
 using namespace vcg;
 
 ExtraMeshEditPlugin::ExtraMeshEditPlugin() {

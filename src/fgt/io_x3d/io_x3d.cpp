@@ -23,6 +23,9 @@
 /****************************************************************************
  History
  $Log$
+ Revision 1.11  2008/04/04 14:08:23  cignoni
+ Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
  Revision 1.10  2008/02/20 21:59:37  gianpaolopalma
  Added support to file .x3dv and .wrl
 
@@ -73,6 +76,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
+using namespace std;
 using namespace vcg;
 
 bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
