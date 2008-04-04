@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.45  2008/04/04 10:03:13  cignoni
+BIG CHANGE: now also the vertex vector has optional components (mark, and curvature components)
+Removed the dangerous 'using namespace' (never put them in .h files!)
+
 Revision 1.44  2008/01/28 13:00:53  cignoni
 added delMesh method
 
@@ -96,12 +100,13 @@ abstract pointer to fileformat's dependent additional info added
 #include <time.h>
 
 #include <vcg/simplex/vertexplus/base.h>
+#include <vcg/simplex/vertexplus/component_ocf.h>
 #include <vcg/simplex/edge/edge.h>
 #include <vcg/simplex/faceplus/base.h>
+#include <vcg/simplex/faceplus/component_ocf.h>
 #include <vcg/simplex/face/topology.h>
 
 #include <vcg/complex/trimesh/base.h>
-#include <vcg/simplex/faceplus/component_ocf.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/flag.h>
 
@@ -110,31 +115,32 @@ abstract pointer to fileformat's dependent additional info added
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/additionalinfo.h>
 #include <QList>
-using namespace vcg;
-using namespace std;
 
 class CEdge;   
 class CFaceO;
 class CVertexO;
 
-//Vert Mem Occupancy  --- 44b ---
+//Vert Mem Occupancy  --- 40b ---
 
-class CVertexO  : public VertexSimp2< CVertexO, CEdge, CFaceO, 
-  vert::Coord3f,     /* 12b */ 
-  vert::BitFlags,    /*  4b */
-  vert::Normal3f,    /* 12b */
-  vert::Qualityf,    /*  4b */
-  vert::VFAdj,       /*  4b */
-  vert::Mark,        /*  4b */
-  vert::Color4b      /*  4b */
+class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO, 
+	vcg::vert::InfoOcf,      /* 4b */
+  vcg::vert::Coord3f,     /* 12b */ 
+  vcg::vert::BitFlags,    /*  4b */
+  vcg::vert::Normal3f,    /* 12b */
+  vcg::vert::Qualityf,    /*  4b */
+  vcg::vert::Color4b,      /*  4b */
+  vcg::vert::VFAdjOcf,    /*  0b */
+  vcg::vert::MarkOcf,     /*  0b */
+  vcg::vert::CurvaturefOcf, /*  0b */
+  vcg::vert::CurvatureDirfOcf  /*  0b */
   >{ 
 };
 
   
-class CEdge : public Edge<CEdge,CVertexO> {
+class CEdge : public vcg::Edge<CEdge,CVertexO> {
 public:
   inline CEdge() {};
-  inline CEdge( CVertexO * v0, CVertexO * v1):Edge<CEdge,CVertexO>(v0,v1){};
+  inline CEdge( CVertexO * v0, CVertexO * v1):vcg::Edge<CEdge,CVertexO>(v0,v1){};
   static inline CEdge OrderedEdge(VertexType* v0,VertexType* v1){
    if(v0<v1) return CEdge(v0,v1);
    else return CEdge(v1,v0);
@@ -145,24 +151,24 @@ public:
 
 //Face Mem Occupancy  --- 32b ---
 
-class CFaceO    : public FaceSimp2<  CVertexO, CEdge, CFaceO,  
-      face::InfoOcf,              /* 4b */
-      face::VertexRef,            /*12b */
-      face::BitFlags,             /* 4b */
-      face::Normal3f,             /*12b */
-      face::MarkOcf,              /* 0b */
-      face::Color4bOcf,           /* 0b */
-      face::FFAdjOcf,             /* 0b */
-      face::VFAdjOcf,             /* 0b */
-      face::WedgeTexCoordfOcf      /* 0b */
+class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,  
+      vcg::face::InfoOcf,              /* 4b */
+      vcg::face::VertexRef,            /*12b */
+      vcg::face::BitFlags,             /* 4b */
+      vcg::face::Normal3f,             /*12b */
+      vcg::face::MarkOcf,              /* 0b */
+      vcg::face::Color4bOcf,           /* 0b */
+      vcg::face::FFAdjOcf,             /* 0b */
+      vcg::face::VFAdjOcf,             /* 0b */
+      vcg::face::WedgeTexCoordfOcf      /* 0b */
     > {};
 
-class CMeshO    : public vcg::tri::TriMesh< vector<CVertexO>, face::vector_ocf<CFaceO> > {
+class CMeshO    : public vcg::tri::TriMesh< vcg::vert::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > {
 public :
 	int sfn; //The number of selected faces.
-  Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
-  const Box3f &trBB() { 
-	static Box3f bb;
+  vcg::Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
+  const vcg::Box3f &trBB() { 
+	static vcg::Box3f bb;
 	bb.SetNull();
 	bb.Add(Tr,bbox);
 		return bb;
@@ -175,7 +181,7 @@ The base class for representing a single mesh.
 It contains a single vcg mesh object with some additional information for keeping track of its origin and of what info it has. 
 */
 
-class MeshModel : public tri::io::Mask
+class MeshModel : public vcg::tri::io::Mask
 {
 public:
 
@@ -185,15 +191,18 @@ public:
                     MM_WEDGTEXCOORD  = 0x0004,
                     MM_FACECOLOR     = 0x0008,
                     MM_FACEMARK      = 0x0010,
-                    MM_VERTFACETOPO  = 0x0020,
+                    MM_VERTMARK      = 0x0020,
+                    MM_VERTFACETOPO  = 0x0040,
+										MM_CURV          = 0x0080,
+										MM_CURVDIR       = 0x0100,
                     MM_ALL           = 0xffff} ;
 
 
   CMeshO cm;
 
 public:
-  GlTrimesh<CMeshO> glw;
-  vector<Color4b> originalVertexColor;
+  vcg::GlTrimesh<CMeshO> glw;
+  std::vector<vcg::Color4b> originalVertexColor;
 	std::string fileName;
 
   // Bitmask denoting what fields are currently kept updated in mesh
@@ -220,13 +229,13 @@ public:
 		cm.Tr.SetIdentity();
 		cm.sfn=0;
   }
-  bool Render(GLW::DrawMode dm, GLW::ColorMode cm, GLW::TextureMode tm);
+  bool Render(vcg::GLW::DrawMode dm, vcg::GLW::ColorMode cm, vcg::GLW::TextureMode tm);
   bool RenderSelectedFaces();
 
   inline void storeVertexColor()
   {
     originalVertexColor.resize(cm.vert.size());
-    vector<Color4b>::iterator ci;
+    std::vector<vcg::Color4b>::iterator ci;
 	  CMeshO::VertexIterator vi;
 	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
       (*ci)=(*vi).C();
@@ -235,7 +244,7 @@ public:
   {
     if(originalVertexColor.empty()) return;
     if(originalVertexColor.size() != cm.vert.size()) return;
-    vector<Color4b>::iterator ci;
+    std::vector<vcg::Color4b>::iterator ci;
 	  CMeshO::VertexIterator vi;
 	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
       (*vi).C()=(*ci);
@@ -266,19 +275,20 @@ public:
    {
     cm.face.EnableFFAdjacency();
     currentDataMask |= MM_FACETOPO;
-	  tri::UpdateTopology<CMeshO>::FaceFace(cm);
+	  vcg::tri::UpdateTopology<CMeshO>::FaceFace(cm);
    }
    if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && (currentDataMask& MM_VERTFACETOPO)==0)			
    {
+		cm.vert.EnableVFAdjacency();
     cm.face.EnableVFAdjacency();
     currentDataMask |= MM_VERTFACETOPO;
-	  tri::UpdateTopology<CMeshO>::VertexFace(cm);
+	  vcg::tri::UpdateTopology<CMeshO>::VertexFace(cm);
    }
    if( ( (neededDataMask & MM_BORDERFLAG)!=0) && (currentDataMask& MM_BORDERFLAG)==0)			
    {
-     if(currentDataMask& MM_FACETOPO) tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
-     else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
-		 tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
+     if(currentDataMask& MM_FACETOPO) vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
+     else vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
+		 vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
 
      currentDataMask |= MM_BORDERFLAG;
    }
@@ -297,6 +307,21 @@ public:
     cm.face.EnableMark();
     currentDataMask |= MM_FACEMARK;
    }
+	 if( ( (neededDataMask & MM_VERTMARK)!=0) && (currentDataMask& MM_VERTMARK)==0)			
+		{
+			cm.vert.EnableMark();
+			currentDataMask |= MM_VERTMARK;
+		}
+		if( ( (neededDataMask & MM_CURV)!=0) && (currentDataMask& MM_CURV)==0)			
+		{
+			cm.vert.EnableCurvature();
+			currentDataMask |= MM_CURV;
+		}
+		if( ( (neededDataMask & MM_CURVDIR)!=0) && (currentDataMask& MM_CURVDIR)==0)			
+		{
+			cm.vert.EnableCurvatureDir();
+			currentDataMask |= MM_CURVDIR;
+		}
   }
 
    void clearDataMask(int neededDataMask)
@@ -324,9 +349,9 @@ public:
 		
 		RenderMode()
 		{
-      drawMode	= GLW::DMFlat;
-			colorMode = GLW::CMNone;
-			textureMode = GLW::TMNone;
+      drawMode	= vcg::GLW::DMFlat;
+			colorMode = vcg::GLW::CMNone;
+			textureMode = vcg::GLW::TMNone;
 
 			lighting = true;
 			backFaceCull = false;
@@ -403,9 +428,9 @@ MeshDocument()
 			return tot;
 	}		
 
- Box3f bbox()
+ vcg::Box3f bbox()
  {
-		Box3f FullBBox;
+		vcg::Box3f FullBBox;
 		foreach(MeshModel * mp, meshList) 
 			FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
 		return FullBBox;
