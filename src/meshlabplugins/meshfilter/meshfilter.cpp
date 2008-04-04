@@ -22,6 +22,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.107  2008/04/04 13:22:30  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h, and added a manifoldness check on the reorient tool.
+
 Revision 1.106  2008/03/18 10:33:53  cignoni
 added Post-Simplification cleaning filter, improved help
 
@@ -86,6 +89,7 @@ Interfaces are changing again...
 #include "../../meshlab/GLLogStream.h"
 #include "../../meshlab/LogStream.h"
 
+using namespace std;
 using namespace vcg;
 
 void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool PreserveNormal, bool OptimalPlacement, bool Selected, CallBackPos *cb);
@@ -259,7 +263,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_INVERT_FACES:         return 0;
     case FP_QUADRIC_SIMPLIFICATION:
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
-		return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
+		return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_VERTMARK ;
     default: assert(0); 
   }
   return 0;
@@ -456,7 +460,16 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  {
 	    bool oriented;
 	    bool orientable;
-	    tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
+			if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+					errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness"; // text
+					return false; // can't continue, mesh can't be processed
+			}
+
+	    tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable); 
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+			vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
+			
+//			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
