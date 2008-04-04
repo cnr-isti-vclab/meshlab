@@ -58,7 +58,7 @@ public:
 	virtual QList<QAction *> actions() const ;
     virtual void StartEdit(QAction*, MeshModel&, GLArea*);
     virtual void EndEdit(QAction*, MeshModel&, GLArea*);
-    virtual void Decorate(QAction*, MeshModel&, GLArea*){};
+    virtual void Decorate(QAction*, MeshModel&, GLArea*);
     virtual void mousePressEvent(QAction*, QMouseEvent*, MeshModel&, GLArea*) {};
     virtual void mouseMoveEvent(QAction*, QMouseEvent*, MeshModel&, GLArea*) {};
     virtual void mouseReleaseEvent(QAction*, QMouseEvent *event, MeshModel&, GLArea*){};

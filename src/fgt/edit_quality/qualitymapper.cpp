@@ -102,6 +102,10 @@ void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
 	}
 }
 
+void QualityMapperPlugin::Decorate(QAction*, MeshModel&, GLArea*)
+{
+
+}
 
 Q_EXPORT_PLUGIN(QualityMapperPlugin)
 
