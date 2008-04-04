@@ -42,6 +42,8 @@ $Log: samplefilter.cpp,v $
 
 #include "samplefilterdoc.h"
 
+using namespace vcg;
+using namespace std;
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly

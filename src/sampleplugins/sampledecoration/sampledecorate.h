@@ -53,7 +53,7 @@ class SampleMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   virtual const QString ST(FilterIDType filter) const;
 
 private:
-CICubeMap cm;
+vcg::CICubeMap cm;
 public:
      
 	SampleMeshDecoratePlugin()

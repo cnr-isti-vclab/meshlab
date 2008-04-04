@@ -5,7 +5,7 @@
 #include <QMessageBox>
 #define DECFACTOR 100000.0f
 
-
+using namespace vcg;
 
 ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QWidget *parent)
 : QDialog(parent)

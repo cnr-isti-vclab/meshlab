@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.25  2008/04/04 14:16:05  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.24  2007/09/09 17:56:13  ldpmatic
 Minor changes to avoid memory leak.
 Added two glGetError() to avoid MeshLab to crash when the plugin encounters some error on its way
@@ -98,6 +101,7 @@ Added copyright info
 #include <QGLWidget>
 #include <QTextStream>
 
+using namespace std;
 using namespace vcg;
 
 void MeshShaderRenderPlugin::initActionList() {

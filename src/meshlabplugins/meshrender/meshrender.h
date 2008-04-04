@@ -23,6 +23,9 @@
 /****************************************************************************
 History
 $Log$
+Revision 1.22  2008/04/04 14:16:02  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.21  2007/10/09 13:02:08  fuscof
 Initial implementation of multipass rendering.
 Please note that MeshRenderInterface has been modified to get the number of rendering passes.
@@ -116,7 +119,7 @@ class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 	GLhandleARB v;
 	GLhandleARB f;
 
-	map<QString, ShaderInfo> shaders;
+	std::map<QString, ShaderInfo> shaders;
 
 	bool supported;
 	QList <QAction *> actionList;

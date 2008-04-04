@@ -17,6 +17,7 @@
 
 
 #include <QMessageBox>
+using namespace std;
 using namespace vcg;
 
 bool U3DIOPlugin::open(const QString & /*formatName*/, const QString &/*fileName*/, MeshModel &/*m*/, int& /*mask*/, CallBackPos */*cb*/, QWidget */*parent*/)
