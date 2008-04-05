@@ -161,7 +161,7 @@ public:
 	}
 	
 	// temporary empty (flip is already done in constructor)
-	void Execute(TRIMESH_TYPE &/*m*/)
+	void Execute(TRIMESH_TYPE& /*m*/)
 	{
 		VertexPointer v0, v1, v2, v3;
 		int i = this->_pos.I();
@@ -187,10 +187,24 @@ public:
 		v0->N() = v0->N() - f1->N() - f2->N() + n1;
 		v1->N() = v1->N() - f1->N() - f2->N() + n2;
 		v2->N() = v2->N() - f1->N() + n1 + n2;
-		v3->N() = v3->N() - f2->N() + n1 + n2;;
+		v3->N() = v3->N() - f2->N() + n1 + n2;
+		
+		int j = f1->FFi(i);
+		
+		// fix VF adjacency - detach
+		assert(f1->V1(i) == v1);
+		vcg::face::VFDetach(*f1, (i + 1) % 3); // detach v1 from f1
+		assert(f2->V1(j) == v0);
+		vcg::face::VFDetach(*f2, (j + 1) % 3); // detach v0 from f2
 		
 		// do the flip
-		vcg::face::FlipEdge(*this->_pos.f, this->_pos.z);	
+		vcg::face::FlipEdge(*this->_pos.f, this->_pos.z);
+		
+		// fix VF adjacency - append
+		assert(f2->V1(j) == v2);
+		vcg::face::VFAppend(f2, (j + 1) % 3); // attach v2 with f2
+		assert(f1->V1(i) == v3);
+		vcg::face::VFAppend(f1, (i + 1) % 3); // attach v3 with f1
 	}
 	
 	
@@ -244,6 +258,8 @@ public:
 		FacePointer f2 = this->_pos.F()->FFp(i);
 		v3 = f2->V2(f1->FFi(i));
 		
+		CURVEVAL curveval;
+		
 		// save sum of curvatures of vertexes
 		float cbefore = v0->Q() + v1->Q() + v2->Q() + v3->Q();
 
@@ -263,7 +279,7 @@ public:
 		v1->N() = nv1orig - f1->N() - f2->N() + n2;
 		v2->N() = nv2orig - f1->N() + n1 + n2;
 		v3->N() = nv3orig - f2->N() + n1 + n2;
-
+		
 		cd0 = FaceCurv(v0, v3, v2, n1) + Curvature(v0, f1, f2);
 		cd1 = FaceCurv(v1, v2, v3, n2) + Curvature(v1, f1, f2);
 		cd2 = FaceCurv(v2, v0, v3, n1) + FaceCurv(v2, v3, v1, n2) + Curvature(v2, f1, f2);
@@ -275,7 +291,6 @@ public:
 		v2->N() = nv2orig;
 		v3->N() = nv3orig;
 
-		CURVEVAL curveval;
 		_cv0 = curveval(cd0);
 		_cv1 = curveval(cd1);
 		_cv2 = curveval(cd2);
@@ -294,7 +309,7 @@ public:
 		heap.clear();
 		
 		// comuputing edge flip priority require non normalized vertex normals
-		vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertexPerFace(mesh);
+		vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertex(mesh);
 		
 		SimpleTempData<VertContainer, CurvData> tdcurv(mesh.vert);
 		tdcurv.Start(); 
