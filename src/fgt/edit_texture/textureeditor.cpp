@@ -29,7 +29,7 @@ void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 
 	QTabBar *t = new QTabBar(ui.tabWidget);
 	RenderArea *ra= new RenderArea(t, texture, m, index);
-	ra->setGeometry(MARGIN,MARGIN,400,400);
+	ra->setGeometry(MARGIN,MARGIN,MAXW,MAXH);
 	ui.tabWidget->addTab(t, name);
 	if (countPage == 1)
 	{
@@ -38,7 +38,7 @@ void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 		ra->show();
 	}
 	countPage++;
-	QObject::connect(ra, SIGNAL(UpdateStat(float,float,int,int, int)),this, SLOT(UpStat(float,float,int,int, int)));
+	QObject::connect(ra, SIGNAL(UpdateModel()),this, SLOT(UpdateModel()));
 
 }
 
@@ -51,10 +51,9 @@ void TextureEditor::AddEmptyRenderArea()
 	ra->show();
 }
 
-void TextureEditor::UpStat(float u, float v, int faceN, int vertN, int countFace)
+void TextureEditor::UpdateModel()
 {
-	// Manage the update of the controls from RenderArea to the editor, also enable/disable controls
-	// <----- TODO
+	// Update the mesh after an edit
 	area->update();
 }
 
@@ -91,7 +90,7 @@ void TextureEditor::on_connectedButton_clicked()
 	ResetLayout();
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(1);
-	ui.moveButton->setChecked(true);
+	ui.connectedButton->setChecked(true);
 }
 
 void TextureEditor::on_selectButton_clicked()
@@ -102,16 +101,12 @@ void TextureEditor::on_selectButton_clicked()
 	ui.selectButton->setChecked(true);
 }
 
-void TextureEditor::on_optimizeButton_clicked()
+void TextureEditor::on_vertexButton_clicked()
 {
 	ResetLayout();
-	ui.optimizeButton->setChecked(true);
-}
-
-void TextureEditor::on_optionButton_clicked()
-{
-	ResetLayout();
-	ui.optionButton->setChecked(true);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(2);
+	ui.vertexButton->setChecked(true);
 }
 
 void TextureEditor::on_clampButton_clicked()
@@ -129,7 +124,7 @@ void TextureEditor::ResetLayout()
 	// uncheck all the buttons
 	ui.connectedButton->setChecked(false);
 	ui.moveButton->setChecked(false);
-	ui.optionButton->setChecked(false);
 	ui.selectButton->setChecked(false);
-	ui.optimizeButton->setChecked(false);
+	ui.vertexButton->setChecked(false);
 }
+

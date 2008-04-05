@@ -15,12 +15,6 @@
 #define RADIUS 10
 #define RECTDIM 30
 
-#define NO_CHANGE -1
-#define RESET -2
-#define IGNORECMD -3
-#define ENABLECMD -4
-#define DISABLECMD -5
-
 using namespace std;
 
 class RenderArea : public QGLWidget
@@ -30,7 +24,7 @@ class RenderArea : public QGLWidget
 public:
 	enum Mode { View, Edit, Select };
 	enum EditMode { Scale, Rotate, NoEdit };
-	enum SelectMode { Area, Connected };
+	enum SelectMode { Area, Connected, Vertex };
 
     RenderArea(QWidget *parent = 0, QString path = QString(), MeshModel *m = 0, unsigned textNum = 0);
 	~RenderArea();
@@ -44,7 +38,6 @@ public:
 	void ChangeSelectMode(int index);
 	void RemapClamp();
 	void RemapMod();
-	void SetDimension(int dim);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -52,7 +45,7 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseDoubleClickEvent(QMouseEvent *event);
-	void wheelEvent(QWheelEvent*e);
+	void wheelEvent(QWheelEvent *event);
 
 private:
 	bool antialiased;	// Antialiasing 
@@ -77,32 +70,30 @@ private:
 	int panX, panY, tpanX, tpanY, oldPX, oldPY;	// Temp for axis
 	int maxX, maxY, minX, minY;	// For texCoord out of border
 
-	int selBit;
-	bool selected;
+	int selBit;			// User bit: idicates if a face is selected for editing
+	bool selected;		// Indicates if the are some selected faces
 
 	QPointF origin;		// Origin for rotate editing
 	QRect originR;
 	int orX, orY;
 
 	QPoint start, end;	// Selection area
-	QRect area;
+	QRect area;			// Dragged rectangle
 
 	// Info for interactive editing
-	vector<QRect> selRect;
-	QRect selection;
+	vector<QRect> selRect;	// Vector of buttons area
+	QRect selection;		// Selection area
 	QPoint selStart, selEnd;
-	int posX, posY, rectX, rectY, oldSRX, oldSRY;
-	float degree, scaleX, scaleY;
-	int highlighted, pressed, oldDelta;
-	QPointF oScale;
-	int initVX, initVY;
-	float B2, Rm, Rq;
+	int posX, posY, rectX, rectY, oldSRX, oldSRY;	// Stored value
+	float degree, scaleX, scaleY;					// Value for edit
+	int highlighted, pressed, oldDelta;	// Info about mouse
+	QPointF oScale;			// Point of origin for scaling
+	int initVX, initVY;		// Old values of viewport
+	float B2, Rm, Rq;		// Params for line intersection
 
-	QImage rot, scal;
+	QImage rot, scal;		// Images for buttons
 
-	int AREADIM;
-
-	float zoom;
+	float zoom;				// Actual value of zoom
 
 	void UpdateUV();
 	void ResetTrack(bool reset);
@@ -115,7 +106,7 @@ private:
 	void UpdateSelectionArea(int x, int y);
 
 signals:
-	void UpdateStat(float u, float v, int faceN, int vertN, int countFace);
+	void UpdateModel();
 
 };
 

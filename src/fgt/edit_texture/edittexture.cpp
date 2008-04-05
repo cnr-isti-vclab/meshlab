@@ -51,7 +51,7 @@ const PluginInfo &EditTexturePlugin::Info()
 {
 	static PluginInfo ai; 
 	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.7.3");
+	ai.Version = tr("0.8");
 	ai.Author = ("Riccardo Dini");
     return ai;
 }
@@ -116,7 +116,6 @@ void EditTexturePlugin::mouseMoveEvent (QAction *,QMouseEvent * event, MeshModel
 			glFlush();
 	    }
 	}
-
 }
   
 void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla)
@@ -176,9 +175,7 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 	CMeshO::FaceIterator ff;
 	for(ff = m.cm.face.begin(); ff != m.cm.face.end(); ++ff)
 		if(!(*ff).IsD() && (*ff).IsS()) FaceSel.push_back(&*ff);
-	// Reset the flag
-	//m.cm.face.EnableFFAdjacency();
-	//tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+
 	CMeshO::FaceIterator fi;
 	for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) (*fi).ClearS();
 
@@ -227,7 +224,7 @@ void EditTexturePlugin::EndEdit(QAction * , MeshModel &m , GLArea * )
 
 void EditTexturePlugin::DrawXORRect(GLArea *gla)
 {	
-/*	Draw the rectangle of the selection area */
+	//	Draw the rectangle of the selection area 
     glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -252,7 +249,7 @@ void EditTexturePlugin::DrawXORRect(GLArea *gla)
 
     glDisable(GL_LOGIC_OP);
   	glPopAttrib();
-	glPopMatrix(); // restore modelview
+	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
@@ -260,12 +257,10 @@ void EditTexturePlugin::DrawXORRect(GLArea *gla)
 
 void EditTexturePlugin::InitTexture(MeshModel &m)
 {
-	// Get the textures folder
+	// Get the textures name and add the tab
 	QString s = QString(m.fileName.c_str());
-	// Add the tab
     for(unsigned i = 0; i < m.cm.textures.size(); i++)
 		widget->AddRenderArea(m.cm.textures[i].c_str(), &m, i);
-	vcg::Trackball tb;
 }
 
 Q_EXPORT_PLUGIN(EditTexturePlugin)

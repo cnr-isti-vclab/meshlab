@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>443</width>
-    <height>748</height>
+    <width>439</width>
+    <height>686</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -43,6 +43,19 @@
       <property name="spacing" >
        <number>6</number>
       </property>
+      <item>
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item>
        <widget class="QPushButton" name="moveButton" >
         <property name="sizePolicy" >
@@ -100,7 +113,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Allow the selection of face inside a dragged area</string>
+         <string>Allow the selection of faces inside a dragged area</string>
         </property>
         <property name="text" >
          <string/>
@@ -176,7 +189,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="optimizeButton" >
+       <widget class="QPushButton" name="vertexButton" >
         <property name="sizePolicy" >
          <sizepolicy>
           <hsizetype>0</hsizetype>
@@ -185,8 +198,20 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip" >
+         <string>Allow the selection of vertexes inside a dragged area</string>
+        </property>
         <property name="text" >
-         <string>Optimize</string>
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selver.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
         <property name="checkable" >
          <bool>true</bool>
@@ -205,24 +230,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="optionButton" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>0</hsizetype>
-          <vsizetype>0</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text" >
-         <string>Option</string>
-        </property>
-        <property name="checkable" >
-         <bool>true</bool>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>
@@ -349,50 +356,6 @@
          </item>
         </layout>
        </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBoxOption" >
-     <property name="title" >
-      <string> Options </string>
-     </property>
-     <layout class="QGridLayout" >
-      <property name="margin" >
-       <number>9</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item row="0" column="2" >
-       <widget class="QSpinBox" name="spinBox_2" />
-      </item>
-      <item row="0" column="0" >
-       <widget class="QLabel" name="label_3" >
-        <property name="text" >
-         <string>Color:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3" >
-       <widget class="QSpinBox" name="spinBox_3" />
-      </item>
-      <item row="0" column="1" >
-       <widget class="QSpinBox" name="spinBox" />
-      </item>
-      <item row="0" column="4" >
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>

@@ -10,5 +10,6 @@
         <file>images/selarea.png</file>
         <file>images/selcon.png</file>
         <file>images/selpan.png</file>
+        <file>images/selver.png</file>
     </qresource>
 </RCC>

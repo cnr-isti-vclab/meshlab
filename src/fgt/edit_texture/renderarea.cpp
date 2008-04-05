@@ -9,6 +9,7 @@
 #define ORIGINRECT 200
 #define MAX 100000
 #define NOSEL -1
+#define AREADIM 400
 
 RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsigned tnum) : QGLWidget(parent)
 {
@@ -23,8 +24,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	}
 	textNum = tnum;
 	model = m;
-	AREADIM = 400;
-
+	
 	// Init
 	oldX = 0; oldY = 0;
 	viewport = Point2f(0,0);
@@ -131,9 +131,12 @@ void RenderArea::paintEvent(QPaintEvent *)
 				{
 					if (selected && !model->cm.face[i].IsUserBit(selBit))
 						glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);	
-					else glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX/zoom, 
-							AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY/zoom, 1);							
-				}
+					else if (editMode == Scale)
+								glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX/zoom, 
+									AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY/zoom, 1);							
+						 else glVertex3f((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - panX/zoom,
+								AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - panY/zoom, 1);
+						}
 				glEnd();
 
 				// Draw the selected faces
@@ -170,7 +173,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		glOrtho(0,AREADIM,AREADIM,0,-1,1);
+		glOrtho(0,this->width(),this->height(),0,-1,1);
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
@@ -179,11 +182,15 @@ void RenderArea::paintEvent(QPaintEvent *)
 		glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
 		// Line and text (native Qt)
-		painter.drawLine(0,AREADIM,AREADIM,AREADIM);
-		painter.drawLine(0,AREADIM,0,0);
-		painter.drawText(TRANSLATE, AREADIM - TRANSLATE, QString("(%1,%2)").arg((float)-viewport.X()/AREADIM).arg((float)viewport.Y()/AREADIM));
+		int w = this->visibleRegion().boundingRect().width();
+		int h = this->visibleRegion().boundingRect().height();
+		painter.drawLine(0,h,w,h);
+		painter.drawLine(0,h,0,0);
+		// Calculate the coords and draw it
+		float c0 = (float)(w-viewport.X())/AREADIM, c1 = (float)(AREADIM - h + viewport.Y())/AREADIM;
+		painter.drawText(TRANSLATE, h - TRANSLATE, QString("(%1,%2)").arg((float)-viewport.X()/AREADIM).arg((float)(AREADIM - h + viewport.Y())/AREADIM));
 		painter.drawText(TRANSLATE, TRANSLATE*3, QString("(%1,%2)").arg((float)-viewport.X()/AREADIM).arg((float)viewport.Y()/AREADIM + 1));
-		painter.drawText(AREADIM - TRANSLATE*18, AREADIM - TRANSLATE, QString("(%1,%2)").arg((float)-(viewport.X()/AREADIM) + 1).arg((float)viewport.Y()/AREADIM));
+		painter.drawText(w - TRANSLATE*18, h - TRANSLATE, QString("(%1,%2)").arg(c0).arg(c1));
 		painter.drawText(TRANSLATE, TRANSLATE*6, QString("V"));
 		painter.drawText(AREADIM - TRANSLATE*23, AREADIM - TRANSLATE, QString("U"));
 
@@ -281,7 +288,7 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 	}
 }
 
-void RenderArea::mouseReleaseEvent(QMouseEvent *e)
+void RenderArea::mouseReleaseEvent(QMouseEvent *)
 {
 	switch(mode)
 	{
@@ -344,7 +351,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 					this->update(selection);
 				}
 			}
-			else // Connected
+			else if (selectMode == Connected)
 			{
 				// <---------
 			}
@@ -385,13 +392,15 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 				{
 					// Move the origin rect inside the selection area
 					orX = tpanX - e->x();
-					int tx = originR.center().x() - orX;
+					/*int tx = originR.center().x() - orX;
 					if (tx < selection.x()) orX = - selection.x() + originR.center().x();
 					else if (tx > selection.x() + selection.width()) orX = originR.center().x() - (selection.x() + selection.width());
+					*/
 					orY = tpanY - e->y();
-					int ty = originR.y() - posY - orY;
+					/*int ty = originR.y() - posY - orY;
 					if (ty < selection.y()) orY = - selection.y() + originR.center().y();
 					else if (ty > selection.y() + selection.height()) orY = originR.center().y() - (selection.y() + selection.height());
+					*/
 					this->update(originR);
 				}
 				else if (pressed > NOSEL && pressed < selRect.size())  
@@ -408,10 +417,10 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 					if (start.x() < end.x()) {x1 = start.x(); x2 = end.x();} else {x1 = end.x(); x2 = start.x();}
 					if (start.y() < end.y()) {y1 = start.y(); y2 = end.y();} else {y1 = end.y(); y2 = start.y();}
 					area = QRect(x1,y1,x2-x1,y2-y1);
-					if (selectMode == Area) SelectFaces();
+					SelectFaces();
 					this->update(area);
 				}
-				else
+				else if (selectMode == Connected)
 				{
 					// <-------
 				}
@@ -509,7 +518,7 @@ void RenderArea::RemapClamp()
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
 	ResetTrack(true);
 	this->update();
-	emit UpdateStat(0,0,0,0,0);	// <--------
+	emit UpdateModel();
 }
 
 void RenderArea::RemapMod()
@@ -536,7 +545,7 @@ void RenderArea::RemapMod()
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
 	ResetTrack(true);
 	this->update();
-	emit UpdateStat(0,0,0,0,0);	// <--------
+	emit UpdateModel();
 }
 
 void RenderArea::ChangeMode(int index)
@@ -574,8 +583,10 @@ void RenderArea::ChangeMode(int index)
 				}
 			}
 			break;
-		case 3:
+		case 3:	// For internal use... reset the selction
 			mode = Select;
+			for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
+			selection = QRect();
 			this->setCursor(Qt::CrossCursor);
 			break;
 	}
@@ -585,8 +596,21 @@ void RenderArea::ChangeMode(int index)
 void RenderArea::ChangeSelectMode(int index)
 {
 	// Change the function of the mouse selection
-	if (index == 0) selectMode = Area;
-	else selectMode = Connected;
+	switch(index)
+	{
+		case 0:
+			selectMode = Area;
+			break;
+		case 1:
+			selectMode = Connected;
+			break;
+		case 2:
+			selectMode = Vertex;
+			break;
+		default:
+			selectMode = Area;
+			break;
+	}
 }
 
 void RenderArea::RotateComponent(float alfa)
@@ -610,7 +634,7 @@ void RenderArea::RotateComponent(float alfa)
 			}
 		}
 		this->update();
-		emit UpdateStat(0,0,0,0,0);	// <--------
+		emit UpdateModel();
 	}
 }
 
@@ -629,7 +653,7 @@ void RenderArea::ScaleComponent(float percX, float percY)
 		}
 	}
 	this->update();
-	emit UpdateStat(0,0,0,0,0);
+	emit UpdateModel();
 }
 
 void RenderArea::UpdateUV()
@@ -648,7 +672,7 @@ void RenderArea::UpdateUV()
 	}
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
 	this->update();
-	emit UpdateStat(0,0,0,0,0);	// <--------
+	emit UpdateModel();
 }
 
 void RenderArea::ResetTrack(bool resetViewPort)
@@ -659,14 +683,6 @@ void RenderArea::ResetTrack(bool resetViewPort)
 	if (resetViewPort) viewport = Point2f(0,0);
 	oldX = 0; oldY = 0;
 	tb->track.SetTranslate(Point3f(viewport.X(), viewport.Y(), 1));
-}
-
-void RenderArea::SetDimension(int dim)
-{
-	// Change the dimension of the control
-	AREADIM = dim;
-	// <-------- resize e cambio areadim
-	this->update();
 }
 
 void RenderArea::SelectFaces()

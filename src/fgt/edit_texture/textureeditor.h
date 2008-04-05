@@ -8,6 +8,8 @@
 #include "renderarea.h"
 
 #define MARGIN 5
+#define MAXW 1400
+#define MAXH 1000
 
 using namespace std;
 
@@ -36,18 +38,15 @@ private:
 
 private slots:
 	void on_connectedButton_clicked();
-	void on_optimizeButton_clicked();
 	void on_moveButton_clicked();
 	void on_selectButton_clicked();
-	void on_optionButton_clicked();
+	void on_vertexButton_clicked();
 	void on_clampButton_clicked();
 	void on_modulusButton_clicked();
 
 public slots:
-	void UpStat(float u, float v, int faceN, int vertN, int countFace);
+	void UpdateModel();
 
-signals:
-	void updateUV(float u, float v);
 };
 
 #endif // TEXTUREEDITOR_H
