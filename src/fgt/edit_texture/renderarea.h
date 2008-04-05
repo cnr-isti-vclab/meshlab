@@ -16,6 +16,7 @@
 #define RECTDIM 30
 
 using namespace std;
+using namespace vcg;
 
 class RenderArea : public QGLWidget
 {
@@ -60,7 +61,7 @@ private:
 
 	// Trackball data
 	vcg::Trackball *tb;
-	Point2f viewport;
+	vcg::Point2f viewport;
 	float oldX, oldY;
 	int tmpX, tmpY;
 
@@ -70,8 +71,8 @@ private:
 	int panX, panY, tpanX, tpanY, oldPX, oldPY;	// Temp for axis
 	int maxX, maxY, minX, minY;	// For texCoord out of border
 
-	int selBit;			// User bit: idicates if a face is selected for editing
-	bool selected;		// Indicates if the are some selected faces
+	int selBit, selVertBit;		// User bit: idicates if a face/vertex is selected for editing
+	bool selected, selectedV;	// Indicates if the are some selected faces
 
 	QPointF origin;		// Origin for rotate editing
 	QRect originR;
@@ -98,6 +99,7 @@ private:
 	void UpdateUV();
 	void ResetTrack(bool reset);
 	void SelectFaces();
+	void SelectVertexes();
 	void HandleScale(QPoint e);
 	void HandleRotate(QPoint e);
 	void RotateComponent(float theta);

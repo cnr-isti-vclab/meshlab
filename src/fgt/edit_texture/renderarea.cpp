@@ -27,7 +27,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	
 	// Init
 	oldX = 0; oldY = 0;
-	viewport = Point2f(0,0);
+	viewport = vcg::Point2f(0,0);
 	tmpX = 0; tmpY = 0;
 	tb = new Trackball();
 	tb->center = Point3f(0, 0, 0);
@@ -97,7 +97,7 @@ void RenderArea::setTexture(QString path)
 void RenderArea::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.setPen(QPen(brush,2));	// <--- customizzabile???
+    painter.setPen(QPen(brush,2));
     painter.setBrush(brush);
     painter.setRenderHint(QPainter::Antialiasing, antialiased);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
@@ -339,21 +339,25 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *)
 			start = QPoint();
 			end = QPoint();
 			area = QRect();
-			if (selectMode == Area)
+			switch (selectMode)
 			{
-				if (selected)
-				{
-					selection = QRect(selStart, selEnd);
-					UpdateSelectionArea(0,0);
-					origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
-					originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
-					this->ChangeMode(1);
-					this->update(selection);
-				}
-			}
-			else if (selectMode == Connected)
-			{
-				// <---------
+				case Area:
+					if (selected)
+					{
+						selection = QRect(selStart, selEnd);
+						UpdateSelectionArea(0,0);
+						origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
+						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
+						this->ChangeMode(1);
+						this->update(selection);
+					}
+					break;
+				case Connected:
+					// <---------
+					break;
+				case Vertex:
+
+					break;
 			}
 			break;
 	}
@@ -410,19 +414,20 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 				}
 				break;
 			case Select:
-				if (selectMode == Area)
+				if (selectMode == Connected)
+				{
+					// <---- 
+				}
+				else
 				{
 					end = e->pos();
 					int x1, x2, y1, y2;
 					if (start.x() < end.x()) {x1 = start.x(); x2 = end.x();} else {x1 = end.x(); x2 = start.x();}
 					if (start.y() < end.y()) {y1 = start.y(); y2 = end.y();} else {y1 = end.y(); y2 = start.y();}
 					area = QRect(x1,y1,x2-x1,y2-y1);
-					SelectFaces();
+					if (selectMode == Area) SelectFaces();
+					else SelectVertexes();
 					this->update(area);
-				}
-				else if (selectMode == Connected)
-				{
-					// <-------
 				}
 				break;
 		}
@@ -697,7 +702,7 @@ void RenderArea::SelectFaces()
 	{
 		if ((*fi).WT(0).n() == textNum)
 		{
-	       (*fi).ClearUserBit(selBit);
+	        (*fi).ClearUserBit(selBit);
 			QVector<QPoint> t = QVector<QPoint>(); 
 			t.push_back(QPoint((*fi).WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom));
 			t.push_back(QPoint((*fi).WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom));
@@ -714,6 +719,47 @@ void RenderArea::SelectFaces()
 			}
 		}
 	}
+}
+
+void RenderArea::SelectVertexes()
+{
+	// Check if a vertex is inside the rectangle of selection
+	CMeshO::FaceIterator fi;
+	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
+	{
+		if ((*fi).WT(0).n() == textNum)
+		{
+	        (*fi).ClearUserBit(selVertBit);
+			QVector<QPoint> t = QVector<QPoint>(); 
+			QPoint a = QPoint((*fi).WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom);
+			QPoint b = QPoint((*fi).WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom);
+			QPoint c = QPoint((*fi).WT(2).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(2).v() * AREADIM*zoom) + viewport.Y()*zoom);
+			t.push_back(a);
+			t.push_back(b);
+			t.push_back(c);
+			QRegion r = QRegion(QPolygon(t));
+			if (r.intersects(area))
+			{
+				if (area.contains(a)) (*fi).V(0)->SetUserBit(selVertBit);
+				if (area.contains(b)) (*fi).V(1)->SetUserBit(selVertBit);
+				if (area.contains(c)) (*fi).V(2)->SetUserBit(selVertBit);
+
+				if (a.x() < selStart.x()) selStart.setX(a.x());
+				else if (b.x() < selStart.x()) selStart.setX(b.x());
+				else if (c.x() < selStart.x()) selStart.setX(c.x());			
+				if (a.y() < selStart.y()) selStart.setX(a.y());
+				else if (b.y() < selStart.y()) selStart.setX(b.y());
+				else if (c.y() < selStart.y()) selStart.setX(c.y());
+				if (a.x() > selEnd.x()) selEnd.setX(a.x());
+				else if (b.x() > selEnd.x()) selEnd.setX(b.x());
+				else if (c.x() > selEnd.x()) selEnd.setX(c.x());				
+				if (a.y() > selEnd.y()) selEnd.setX(a.y());
+				else if (b.y() > selEnd.y()) selEnd.setX(b.y());
+				else if (c.y() > selEnd.y()) selEnd.setX(c.y());
+				if (!selectedV) selectedV = true;
+			}
+		}
+	}	
 }
 
 void RenderArea::HandleScale(QPoint e)
