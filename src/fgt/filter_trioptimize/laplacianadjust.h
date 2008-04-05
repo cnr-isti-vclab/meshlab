@@ -27,6 +27,7 @@
 #include <vcg/container/simple_temporary_data.h>
 #include <vcg/space/point3.h>
 #include <vcg/simplex/face/topology.h>
+#include <vcg/complex/trimesh/update/flag.h>
 
 namespace vcg
 {
@@ -59,6 +60,10 @@ void LaplacianAdjust(MESH_TYPE &m,
 	lpz.cnt = 1;
 	lpz.dsp = 0;
 	TD.Start(lpz);
+	
+	// to preserve surface shape, we do not move border vertices - mark them
+	vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace(m);
+	
 	for (int i=0; i<step; ++i) {
 		typename MESH_TYPE::VertexIterator vi;
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
@@ -106,15 +111,11 @@ void LaplacianAdjust(MESH_TYPE &m,
 		for (fi = m.face.begin(); fi != m.face.end(); ++fi) {
 			if (!(*fi).IsD()) {
 				for (int j = 0; j < 3; ++j) {
-					if (face::IsBorder((*fi), j)) {
-						TD[(*fi).V(j)].dsp  = std::numeric_limits<typename MESH_TYPE::ScalarType>::max();
-						TD[(*fi).V1(j)].dsp = std::numeric_limits<typename MESH_TYPE::ScalarType>::max();
-					}
-					else {
-						Point3<typename MESH_TYPE::ScalarType> newPoint = TD[(*fi).V(j)].sum / (float) TD[(*fi).V(j)].cnt;
-						Point3<typename MESH_TYPE::ScalarType> newNormal = ((newPoint - (*fi).P1(j)) ^ (newPoint - (*fi).P2(j))).Normalize();
-						TD[(*fi).V(j)].dsp += Angle((*fi).N(), newNormal);
-					}
+					typename MESH_TYPE::CoordType newPoint =
+						TD[(*fi).V(j)].sum / (float) TD[(*fi).V(j)].cnt;
+					typename MESH_TYPE::CoordType newNormal =
+						((newPoint - (*fi).P1(j)) ^ (newPoint - (*fi).P2(j))).Normalize();
+					TD[(*fi).V(j)].dsp += Angle((*fi).N(), newNormal);
 				}
 			}
 		}
@@ -134,7 +135,7 @@ void LaplacianAdjust(MESH_TYPE &m,
 		
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 			if (!(*vi).IsD() && TD[*vi].cnt>0)
-				if (!SmoothSelected || (*vi).IsS())
+				if ((!SmoothSelected || (*vi).IsS()) && !(*vi).IsB())
 					if (math::ToDeg(TD[*vi].dsp / (float) TD[*vi].cnt) < threshold)
 						(*vi).P() = TD[*vi].sum / (float) TD[*vi].cnt;
 	}
