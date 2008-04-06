@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.11  2008/04/06 06:52:22  cignoni
+Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
+
 Revision 1.10  2008/03/19 05:21:07  cignoni
 Added robustness tests for avoid degenerate cases
 
@@ -97,7 +100,7 @@ namespace vcg
   {
   public:
     Frange(){}
-    Frange(pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
+    Frange(std::pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
     Frange(float _min,float _max):minV(_min),maxV(_max){}
 
     float minV;
