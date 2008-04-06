@@ -23,7 +23,7 @@ class RenderArea : public QGLWidget
     Q_OBJECT
 
 public:
-	enum Mode { View, Edit, Select };
+	enum Mode { View, Edit, EditVert, Select };
 	enum EditMode { Scale, Rotate, NoEdit };
 	enum SelectMode { Area, Connected, Vertex };
 
@@ -68,10 +68,10 @@ private:
 	QPen pen;			// For 2D painting
     QBrush brush;
 
-	int panX, panY, tpanX, tpanY, oldPX, oldPY;	// Temp for axis
+	int panX, panY, tpanX, tpanY, oldPX, oldPY, posVX, posVY;	// Temp for axis
 	int maxX, maxY, minX, minY;	// For texCoord out of border
 
-	int selBit, selVertBit;		// User bit: idicates if a face/vertex is selected for editing
+	int selBit, selVertBit, selFaceBit;		// User bit: idicates if a face/vertex is selected for editing
 	bool selected, selectedV;	// Indicates if the are some selected faces
 
 	QPointF origin;		// Origin for rotate editing
@@ -83,6 +83,7 @@ private:
 
 	// Info for interactive editing
 	vector<QRect> selRect;	// Vector of buttons area
+	QRect vertRect;			// Rectangle for vertex
 	QRect selection;		// Selection area
 	QPoint selStart, selEnd;
 	int posX, posY, rectX, rectY, oldSRX, oldSRY;	// Stored value
@@ -97,6 +98,7 @@ private:
 	float zoom;				// Actual value of zoom
 
 	void UpdateUV();
+	void UpdateVertex();
 	void ResetTrack(bool reset);
 	void SelectFaces();
 	void SelectVertexes();

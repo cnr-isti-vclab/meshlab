@@ -34,6 +34,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	tb->radius = 1;
 	panX = 0; panY = 0;
 	oldPX = 0; oldPY = 0;
+	posVX = 0; posVY = 0;
 
 	brush = QBrush(Qt::green);
 	mode = View;
@@ -44,8 +45,12 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 
 	selectMode = Area;
 	selBit = CFaceO::NewBitFlag();
+	selVertBit = CEdge::NewBitFlag();
+	selFaceBit = CFaceO::NewBitFlag();
 	selected = false;
+	selectedV = false;
 
+	vertRect = QRect(0,0,RADIUS,RADIUS);
 	selRect = vector<QRect>();
 	for (int i = 0; i < 4; i++) selRect.push_back(QRect(0,0,RECTDIM,RECTDIM));
 	selStart = QPoint(0,0); selEnd = QPoint(0,0);
@@ -68,7 +73,12 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	this->setAttribute(Qt::WA_NoSystemBackground);
 }
 
-RenderArea::~RenderArea(){CFaceO::DeleteBitFlag(selBit);}
+RenderArea::~RenderArea()
+{
+	CFaceO::DeleteBitFlag(selBit);
+	CFaceO::DeleteBitFlag(selFaceBit);
+	CVertexO::DeleteBitFlag(selVertBit);
+}
 
 void RenderArea::setPen(const QPen &pen)
 {
@@ -129,14 +139,21 @@ void RenderArea::paintEvent(QPaintEvent *)
 				glBegin(GL_LINE_LOOP);
 				for (int j = 0; j < 3; j++)
 				{
-					if (selected && !model->cm.face[i].IsUserBit(selBit))
-						glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);	
-					else if (editMode == Scale)
-								glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX/zoom, 
+					if (mode != EditVert)
+					{
+						if (selected && !model->cm.face[i].IsUserBit(selBit))
+							glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);	
+						else if (editMode == Scale) glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX/zoom, 
 									AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY/zoom, 1);							
-						 else glVertex3f((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - panX/zoom,
-								AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - panY/zoom, 1);
-						}
+							 else glVertex3f((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - panX/zoom,
+									AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - panY/zoom, 1);
+					}
+					else
+					{
+						if (selectedV && !model->cm.face[i].V(j)->IsUserBit(selVertBit)) glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);
+						else glVertex3f(model->cm.face[i].WT(j).u() * AREADIM - posVX, AREADIM - (model->cm.face[i].WT(j).v() * AREADIM + posVY), 1);
+					}
+				}
 				glEnd();
 
 				// Draw the selected faces
@@ -145,15 +162,26 @@ void RenderArea::paintEvent(QPaintEvent *)
 					glLogicOp(GL_AND);
 					glColor3f(1,0,0);
 					glBegin(GL_TRIANGLES);
-						for (int j = 0; j < 3; j++)
-						{
-							if (editMode == Scale)
-								glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX/zoom, 
-									AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY/zoom, 1);							
-							else glVertex3f((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - panX/zoom,
-								AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - panY/zoom, 1);
-						}
+					for (int j = 0; j < 3; j++)
+					{
+						if (editMode == Scale)
+							glVertex3f((oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * scaleX) * AREADIM - panX/zoom, 
+								AREADIM - ((oScale.y() + (model->cm.face[i].WT(j).v() - oScale.y()) * scaleY) * AREADIM) - panY/zoom, 1);							
+						else glVertex3f((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - panX/zoom,
+							AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - panY/zoom, 1);
+					}
 					glEnd();
+				}
+
+				// Draw the selected vertex <--------
+				if (selectedV)
+				{
+					painter.setBrush(QBrush(Qt::red));
+					for (int j = 0; j < 3; j++)
+					{
+						if(model->cm.face[i].V(j)->IsUserBit(selVertBit) && model->cm.face[i].IsUserBit(selFaceBit))
+							painter.drawEllipse(QRect(model->cm.face[i].WT(j).u() * AREADIM - RADIUS/2 - posVX, AREADIM - model->cm.face[i].WT(j).v() * AREADIM - RADIUS/2 - posVY, RADIUS, RADIUS));
+					}
 				}
 			}
 		}
@@ -202,32 +230,37 @@ void RenderArea::paintEvent(QPaintEvent *)
 			painter.drawRect(area);
 		}
 
-		// The rectangle of editing
-		if (selection != QRect() && mode == Edit)
+		if (selection != QRect() && (mode == Edit || mode == EditVert))
 		{
+			// The rectangle of editing
 			painter.setPen(QPen(QBrush(Qt::yellow),2));
 			painter.setBrush(QBrush(Qt::NoBrush));
-			painter.drawRect(QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height()));
-			// Rectangle on the corner
-			painter.setPen(QPen(QBrush(Qt::black),1));
-			for (unsigned l = 0; l < selRect.size(); l++)
+			if (mode == Edit)
 			{
-				if (l == highlighted) painter.setBrush(QBrush(Qt::yellow));
-				else painter.setBrush(QBrush(Qt::NoBrush));
-				painter.drawRect(selRect[l]);
-				if (editMode == Scale) painter.drawImage(selRect[l],scal,QRect(0,0,scal.width(),scal.height()));
-				else painter.drawImage(selRect[l],rot,QRect(0,0,rot.width(),rot.height()));
-			}
-
-			// and the origin of the rotation
-			if (editMode == Rotate)
-			{
+				painter.drawRect(QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height()));
+				// Rectangle on the corner
 				painter.setPen(QPen(QBrush(Qt::black),1));
-				if (highlighted == ORIGINRECT) painter.setBrush(QBrush(Qt::blue));
-				else painter.setBrush(QBrush(Qt::yellow));
-				painter.drawEllipse(QRect(originR.x() - posX - orX, originR.y() - posY - orY, RADIUS, RADIUS));
+				for (unsigned l = 0; l < selRect.size(); l++)
+				{
+					if (l == highlighted) painter.setBrush(QBrush(Qt::yellow));
+					else painter.setBrush(QBrush(Qt::NoBrush));
+					painter.drawRect(selRect[l]);
+					if (editMode == Scale) painter.drawImage(selRect[l],scal,QRect(0,0,scal.width(),scal.height()));
+					else painter.drawImage(selRect[l],rot,QRect(0,0,rot.width(),rot.height()));
+				}
+	
+				// and the origin of the rotation
+				if (editMode == Rotate)
+				{
+					painter.setPen(QPen(QBrush(Qt::black),1));
+					if (highlighted == ORIGINRECT) painter.setBrush(QBrush(Qt::blue));
+					else painter.setBrush(QBrush(Qt::yellow));
+					painter.drawEllipse(QRect(originR.x() - posX - orX, originR.y() - posY - orY, RADIUS, RADIUS));
+				}
 			}
+			else painter.drawRect(QRect(selection.x() - posVX, selection.y() - posVY, selection.width(), selection.height()));
 		}
+
 		glDisable(GL_LOGIC_OP);
 	  	glPopAttrib();
 		glPopMatrix();
@@ -246,11 +279,12 @@ void RenderArea::paintEvent(QPaintEvent *)
 // Mouse Event:
 void RenderArea::mousePressEvent(QMouseEvent *e)
 {
-	if (mode == Edit && highlighted == NOSEL) 
+	if ((mode == Edit || mode == EditVert) && highlighted == NOSEL) 
 	{
 		this->ChangeMode(3);
 		pressed = NOSEL;
 		selected = false;
+		selectedV = false;
 	}
 	switch(mode)
 	{
@@ -264,7 +298,7 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 			tpanX = e->x();
 			tpanY = e->y();
 			pressed = highlighted;
-			if (highlighted > NOSEL && highlighted < selRect.size())
+			if (highlighted > NOSEL && highlighted < selRect.size() && mode == Edit)
 			{
 				rectX = selRect[highlighted].center().x();
 				rectY = selRect[highlighted].center().y();
@@ -281,6 +315,11 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 				Rm = (float)(rectY - originR.center().y()) / (rectX - originR.center().x());
 				Rq = (float) rectY - Rm * rectX;
 			}
+		case EditVert:
+			tpanX = e->x();
+			tpanY = e->y();
+			pressed = highlighted;
+			break;
 		case Select:
 			start = e->pos();
 			end = e->pos();
@@ -315,7 +354,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *)
 				originR.moveCenter(QPoint(originR.center().x() - posX, originR.center().y() - posY));
 				origin = QPointF((float)(originR.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y())/(AREADIM*zoom));
 				posX = 0; posY = 0;
-				UpdateUV();
+				if (selected) UpdateUV();
 			}
 			else if (pressed > NOSEL && pressed < selRect.size())
 			{
@@ -335,6 +374,10 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *)
 				}
 			}
 			break;
+		case EditVert:
+			selection = QRect(selection.x() - posVX, selection.y() - posVY, selection.width(), selection.height());
+			if (selectedV) UpdateVertex();
+			break;
 		case Select:
 			start = QPoint();
 			end = QPoint();
@@ -353,10 +396,15 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *)
 					}
 					break;
 				case Connected:
-					// <---------
+					// <-------
 					break;
 				case Vertex:
-
+					if (selectedV)
+					{
+						selection = QRect(QPoint(selStart.x() - RADIUS/2, selStart.y() - RADIUS/2), QPoint(selEnd.x() + RADIUS/2, selEnd.y() + RADIUS/2));
+						this->ChangeMode(4);
+						this->update(selection);
+					}
 					break;
 			}
 			break;
@@ -413,6 +461,15 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 					else HandleRotate(e->pos());
 				}
 				break;
+			case EditVert:
+				if (pressed == SELECTIONRECT)
+				{
+					// Move the selection ara
+					posVX = tpanX - e->x();
+					posVY = tpanY - e->y();
+				}
+				this->update();
+				break;
 			case Select:
 				if (selectMode == Connected)
 				{
@@ -434,11 +491,11 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 	}
 	else 
 	{
-		if (mode == Edit)
+		if (mode == Edit || mode == EditVert)
 		{
 			for (unsigned y = 0; y < selRect.size(); y++)
 			{
-				if (selRect[y].contains(e->pos()))
+				if (selRect[y].contains(e->pos()) && mode == Edit)
 				{
 					if (highlighted != y) this->update(selRect[y]);
 					highlighted = y;
@@ -577,7 +634,8 @@ void RenderArea::ChangeMode(int index)
 			{
 				if (selection != QRect())
 				{
-					mode = Edit; 
+					if (selectMode == Vertex) mode = EditVert;
+					else mode = Edit; 
 					selected = true;
 					this->setCursor(QCursor(QBitmap(":/images/sel_move.png")));
 				}
@@ -594,6 +652,22 @@ void RenderArea::ChangeMode(int index)
 			selection = QRect();
 			this->setCursor(Qt::CrossCursor);
 			break;
+		case 4:
+			if (mode != EditVert)
+			{
+				if (selection != QRect())
+				{
+					mode = EditVert; 
+					selectedV = true;
+					this->setCursor(QCursor(QBitmap(":/images/sel_move.png")));
+				}
+				else
+				{
+					mode = Select;
+					this->setCursor(Qt::CrossCursor);
+				}
+			}
+			break;
 	}
 	this->update();
 }
@@ -604,18 +678,28 @@ void RenderArea::ChangeSelectMode(int index)
 	switch(index)
 	{
 		case 0:
+			if (selectMode != Area) selection = QRect();
 			selectMode = Area;
 			break;
 		case 1:
+			if (selectMode != Connected) selection = QRect();
 			selectMode = Connected;
 			break;
 		case 2:
+			if (selectMode != Vertex) selection = QRect();
 			selectMode = Vertex;
 			break;
 		default:
 			selectMode = Area;
 			break;
 	}
+	if (selectedV && selectMode != Vertex)
+	{
+		for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.vert[i].ClearUserBit(selVertBit);
+		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selFaceBit);
+	}
+	if (selected && selectMode == Vertex)
+		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 }
 
 void RenderArea::RotateComponent(float alfa)
@@ -666,7 +750,7 @@ void RenderArea::UpdateUV()
 	// After a move of component, re-calculate the new UV coordinates
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		if (model->cm.face[i].WT(0).n() == textNum && (!selected || (selected && model->cm.face[i].IsUserBit(selBit))))
+		if (model->cm.face[i].WT(0).n() == textNum && model->cm.face[i].IsUserBit(selBit))
 		{
 			for (unsigned j = 0; j < 3; j++)
 			{
@@ -676,6 +760,28 @@ void RenderArea::UpdateUV()
 		}
 	}
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
+	this->update();
+	emit UpdateModel();
+}
+
+void RenderArea::UpdateVertex()
+{
+	// After a move of vertex, re-calculate the new UV coordinates
+	for (unsigned i = 0; i < model->cm.face.size(); i++)
+	{
+		if (model->cm.face[i].WT(0).n() == textNum && model->cm.face[i].IsUserBit(selFaceBit))
+		{
+			for (unsigned j = 0; j < 3; j++)
+			{
+				if (model->cm.face[i].V(j)->IsUserBit(selVertBit))
+				{
+					model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)posVX/(AREADIM*zoom);
+					model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)posVY/(AREADIM*zoom);
+				}
+			}
+		}
+	}
+	tpanX = 0; tpanY = 0; posVX = 0; posVY = 0;
 	this->update();
 	emit UpdateModel();
 }
@@ -724,42 +830,35 @@ void RenderArea::SelectFaces()
 void RenderArea::SelectVertexes()
 {
 	// Check if a vertex is inside the rectangle of selection
+	selStart = QPoint(MAX,MAX);
+	selEnd = QPoint(-MAX,-MAX);
+	selectedV = false;
+	selection = QRect();
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
 		if ((*fi).WT(0).n() == textNum)
 		{
-	        (*fi).ClearUserBit(selVertBit);
-			QVector<QPoint> t = QVector<QPoint>(); 
-			QPoint a = QPoint((*fi).WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom);
-			QPoint b = QPoint((*fi).WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom);
-			QPoint c = QPoint((*fi).WT(2).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(2).v() * AREADIM*zoom) + viewport.Y()*zoom);
-			t.push_back(a);
-			t.push_back(b);
-			t.push_back(c);
-			QRegion r = QRegion(QPolygon(t));
-			if (r.intersects(area))
+			for (int j = 0; j < 3; j++)
 			{
-				if (area.contains(a)) (*fi).V(0)->SetUserBit(selVertBit);
-				if (area.contains(b)) (*fi).V(1)->SetUserBit(selVertBit);
-				if (area.contains(c)) (*fi).V(2)->SetUserBit(selVertBit);
-
-				if (a.x() < selStart.x()) selStart.setX(a.x());
-				else if (b.x() < selStart.x()) selStart.setX(b.x());
-				else if (c.x() < selStart.x()) selStart.setX(c.x());			
-				if (a.y() < selStart.y()) selStart.setX(a.y());
-				else if (b.y() < selStart.y()) selStart.setX(b.y());
-				else if (c.y() < selStart.y()) selStart.setX(c.y());
-				if (a.x() > selEnd.x()) selEnd.setX(a.x());
-				else if (b.x() > selEnd.x()) selEnd.setX(b.x());
-				else if (c.x() > selEnd.x()) selEnd.setX(c.x());				
-				if (a.y() > selEnd.y()) selEnd.setX(a.y());
-				else if (b.y() > selEnd.y()) selEnd.setX(b.y());
-				else if (c.y() > selEnd.y()) selEnd.setX(c.y());
-				if (!selectedV) selectedV = true;
+				QPoint tmp = QPoint((*fi).WT(j).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(j).v() * AREADIM*zoom) + viewport.Y()*zoom);
+				if (area.contains(tmp))
+				{
+					// <-------
+					/* c'è un problema: i vertici sono condivisi ergo in caso di vertice comune a 2 facce,
+					ma con coordinate uv diverse tra wedge (comp disconnesse), se ne marco uno per una faccia
+					automaticamente marco anche l'altro!!! esiste un flag per i bordi?*/
+					(*fi).V(j)->SetUserBit(selVertBit);
+					(*fi).SetUserBit(selFaceBit);
+					if (tmp.x() < selStart.x()) selStart.setX(tmp.x());
+					if (tmp.y() < selStart.y()) selStart.setY(tmp.y());
+					if (tmp.x() > selEnd.x()) selEnd.setX(tmp.x());
+					if (tmp.y() > selEnd.y()) selEnd.setY(tmp.y());
+					if (!selectedV) selectedV = true;
+				}
 			}
 		}
-	}	
+	}
 }
 
 void RenderArea::HandleScale(QPoint e)

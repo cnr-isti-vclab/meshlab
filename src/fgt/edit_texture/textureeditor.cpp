@@ -88,24 +88,24 @@ void TextureEditor::on_moveButton_clicked()
 void TextureEditor::on_connectedButton_clicked()
 {
 	ResetLayout();
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(1);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
 	ui.connectedButton->setChecked(true);
 }
 
 void TextureEditor::on_selectButton_clicked()
 {
 	ResetLayout();
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(0);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
 	ui.selectButton->setChecked(true);
 }
 
 void TextureEditor::on_vertexButton_clicked()
 {
 	ResetLayout();
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(2);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
 	ui.vertexButton->setChecked(true);
 }
 
