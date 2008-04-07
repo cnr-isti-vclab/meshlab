@@ -132,10 +132,10 @@ protected:
 	}
 	
 	
-	static void InsertIfConvenient(HeapType& heap, const PosType& p, int mark)
+	static void InsertIfConvenient(HeapType& heap, PosType p, int mark)
 	{
 		MYTYPE* newflip = new MYTYPE(p, mark);
-		if(newflip->Priority() < 0 && newflip->IsFeasible()) {
+		if(newflip->Priority() < 0 && newflip->IsFeasible() && p.F()->IsW() && p.FFlip()->IsW()) {
 			heap.push_back(HeapElem(newflip));
 			std::push_heap(heap.begin(), heap.end());
 		}
@@ -258,8 +258,6 @@ public:
 		FacePointer f2 = this->_pos.F()->FFp(i);
 		v3 = f2->V2(f1->FFi(i));
 		
-		CURVEVAL curveval;
-		
 		// save sum of curvatures of vertexes
 		float cbefore = v0->Q() + v1->Q() + v2->Q() + v3->Q();
 
@@ -291,6 +289,8 @@ public:
 		v2->N() = nv2orig;
 		v3->N() = nv3orig;
 
+		CURVEVAL curveval;
+		
 		_cv0 = curveval(cd0);
 		_cv1 = curveval(cd1);
 		_cv2 = curveval(cd2);
@@ -302,46 +302,40 @@ public:
 	}
 	
 	
-	static void Init(TRIMESH_TYPE &mesh, HeapType &heap)
+	static void Init(TRIMESH_TYPE &m, HeapType &heap)
 	{
 		CURVEVAL curveval;
 		
 		heap.clear();
 		
 		// comuputing edge flip priority require non normalized vertex normals
-		vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertex(mesh);
+		vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertex(m);
 		
-		SimpleTempData<VertContainer, CurvData> tdcurv(mesh.vert);
-		tdcurv.Start(); 
-		
-		// initialize vertex quality with vertex curvature
-		/*VertexIterator vi;
-		for(vi = mesh.vert.begin(); vi != mesh.vert.end(); ++vi)
-			(*vi).Q() = curveval(Curvature(&*vi));*/
-		
-		FaceIterator fi;
-		
-		for(fi = mesh.face.begin(); fi != mesh.face.end(); ++fi) {
-			if(!(*fi).IsD()) {
-				for(unsigned int i = 0; i < 3; i++)
-					tdcurv[(*fi).V0(i)] += FaceCurv((*fi).V0(i), (*fi).V1(i), (*fi).V2(i), (*fi).N());
-			}
-		}
-		
-		VertexIterator vi;
-		for(vi = mesh.vert.begin(); vi != mesh.vert.end(); ++vi)
-			(*vi).Q() = curveval(tdcurv[vi]);
-		
-		tdcurv.Stop();
+		/*SimpleTempData<VertContainer, CurvData> tdcurv(m.vert);
+		tdcurv.Start();*/
 		
 		//FaceIterator fi;
-		for(fi = mesh.face.begin(); fi != mesh.face.end(); ++fi)
-			if(!(*fi).IsD()) {
-				for(unsigned int i = 0; i < 3; i++) {
+		
+		/*for(fi = m.face.begin(); fi != m.face.end(); ++fi)
+			if(!(*fi).IsD())
+				for(unsigned int i = 0; i < 3; i++)
+					tdcurv[(*fi).V0(i)] += FaceCurv((*fi).V0(i), (*fi).V1(i),
+					                                (*fi).V2(i), (*fi).N());*/
+		
+		VertexIterator vi;
+		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+			if(!(*vi).IsD() && (*vi).IsW())
+				(*vi).Q() = curveval(Curvature(&(*vi)));
+			//(*vi).Q() = curveval(tdcurv[vi]);
+		
+		//tdcurv.Stop();
+		
+		FaceIterator fi;
+		for(fi = m.face.begin(); fi != m.face.end(); ++fi)
+			if(!(*fi).IsD())
+				for(unsigned int i = 0; i < 3; i++)
 					if ((*fi).V1(i) - (*fi).V0(i) > 0)
-						InsertIfConvenient(heap, PosType(&*fi, i), mesh.IMark());
-				}
-			}
+						InsertIfConvenient(heap, PosType(&*fi, i), m.IMark());
 	}
 	
 	

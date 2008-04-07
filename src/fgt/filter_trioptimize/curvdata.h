@@ -65,7 +65,6 @@ class NSMCurvEval
 public:
 	float operator() (const CurvData& c)
 	{
-		//return (powf(c.H / 8.0, 2.0f) / (c.A / 8.0));
 		return (powf(c.H / 4.0, 2.0f) / c.A);
 	}
 };
@@ -86,8 +85,6 @@ public:
 	float operator() (const CurvData& c)
 	{
 		float k = 2 * M_PI - c.K;
-		//if(k > 0) return 2.0 * (c.H / 8.0);
-		//else return 2.0 * math::Sqrt(powf(c.H / 8.0, 2.0) - (c.A / 8.0 * k / 8.0));
 		if(k > 0) return 2.0 * (c.H / 4.0);
 		else return 2.0 * math::Sqrt(powf(c.H / 4.0, 2.0) - (c.A * k));
 	}

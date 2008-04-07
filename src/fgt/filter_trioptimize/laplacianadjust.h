@@ -43,15 +43,15 @@ public:
 	FLT cnt;
 };
 
-// Classical Laplacian Smoothing. Each vertex can be moved onto the average of the adjacent vertices.
-// Can smooth only the selected vertices and weight the smoothing according to the quality 
-// In the latter case 0 means that the vertex is not moved and 1 means that the vertex is moved onto the computed position.
+// Laplacian Smoothing that praserve surface shape. Each vertex can be moved
+// onto the average of the adjacent vertices, only if still (almost) lies on 
+// the original surface. Smooth only selected vertices, if selection = true
 
 template<class MESH_TYPE>
 void LaplacianAdjust(MESH_TYPE &m,
                      int step,
                      float threshold = 1.0,
-                     bool SmoothSelected = false)
+                     bool selection = false)
 {
 	SimpleTempData<typename MESH_TYPE::VertContainer,LaplacianAdjustInfo<typename MESH_TYPE::ScalarType> >
 			TD(m.vert);
@@ -62,54 +62,33 @@ void LaplacianAdjust(MESH_TYPE &m,
 	TD.Start(lpz);
 	
 	// to preserve surface shape, we do not move border vertices - mark them
-	vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace(m);
+	//vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace(m);
 	
-	for (int i=0; i<step; ++i) {
+	for (int i = 0; i < step; ++i) {
 		typename MESH_TYPE::VertexIterator vi;
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 			TD[*vi].sum = (*vi).P();
 		
 		typename MESH_TYPE::FaceIterator fi;
 		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
-			if (!(*fi).IsD())
+			if (!(*fi).IsD() && (!selection || (*fi).IsS()))
 				for (int j = 0; j < 3; ++j)
 					if (!(*fi).IsB(j)) {
 						TD[(*fi).V(j)].sum += (*fi).V1(j)->P();
 						TD[(*fi).V1(j)].sum += (*fi).V(j)->P();
 						++TD[(*fi).V(j)].cnt;
 						++TD[(*fi).V1(j)].cnt;
-					}
-		
-		
-		// si azzaera i dati per i vertici di bordo
-		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
-			if (!(*fi).IsD())
-				for (int j = 0; j <3; ++j)
-					if ((*fi).IsB(j)) {
-						//TD[(*fi).V(j)]=lpz;
-						//TD[(*fi).V1(j)]=lpz;
-						TD[(*fi).V0(j)].sum = (*fi).P0(j);
-						TD[(*fi).V1(j)].sum = (*fi).P1(j);
+					} else {
+						// not 
+						
 						TD[(*fi).V0(j)].cnt = 1;
 						TD[(*fi).V1(j)].cnt = 1;
 					}
 		
 		
-		// se l'edge j e' di bordo si deve mediare solo con gli adiacenti
-		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
-			if (!(*fi).IsD())
-				for (int j = 0; j < 3; ++j)
-					if ((*fi).IsB(j)) {
-						TD[(*fi).V(j)].sum += (*fi).V1(j)->P();
-						TD[(*fi).V1(j)].sum += (*fi).V(j)->P();
-						++TD[(*fi).V(j)].cnt;
-						++TD[(*fi).V1(j)].cnt;
-					}
-		
-		
-		// calculate displacement sum from 
+		// compute sum of normal diplacement from old to new faces  
 		for (fi = m.face.begin(); fi != m.face.end(); ++fi) {
-			if (!(*fi).IsD()) {
+			if (!(*fi).IsD() && (!selection || (*fi).IsS())) {
 				for (int j = 0; j < 3; ++j) {
 					typename MESH_TYPE::CoordType newPoint =
 						TD[(*fi).V(j)].sum / (float) TD[(*fi).V(j)].cnt;
@@ -126,7 +105,7 @@ void LaplacianAdjust(MESH_TYPE &m,
 			 assert(tri::HasPerVertexQuality(m));
 			 for(vi=m.vert.begin();vi!=m.vert.end();++vi)
 			 if(!(*vi).IsD() && TD[*vi].cnt>0 )
-			 if(!SmoothSelected || (*vi).IsS())
+			 if(!selection || (*vi).IsS())
 			 {
 			 float q=1.0-(*vi).Q();
 			 (*vi).P()=(*vi).P()*(1.0-q) + (TD[*vi].sum/TD[*vi].cnt)*q;
@@ -135,7 +114,7 @@ void LaplacianAdjust(MESH_TYPE &m,
 		
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 			if (!(*vi).IsD() && TD[*vi].cnt>0)
-				if ((!SmoothSelected || (*vi).IsS()) && !(*vi).IsB())
+				if (!selection || (*vi).IsS())
 					if (math::ToDeg(TD[*vi].dsp / (float) TD[*vi].cnt) < threshold)
 						(*vi).P() = TD[*vi].sum / (float) TD[*vi].cnt;
 	}
