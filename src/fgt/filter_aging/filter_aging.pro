@@ -1,7 +1,8 @@
 TEMPLATE      = lib
 CONFIG       += plugin
 INCLUDEPATH  +=  ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = filter_aging.h
+HEADERS       = filter_aging.h \
+		edgepred.h
 SOURCES       = filter_aging.cpp \
                 ../../meshlab/filterparameter.cpp
 TARGET        = filter_aging
