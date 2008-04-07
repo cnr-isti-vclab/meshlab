@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.29  2008/04/07 10:33:56  cignoni
+added texture border colorization filter
+
 Revision 1.28  2008/02/12 14:20:33  cignoni
 changed the function getParameter into the more meaningful getCustomParameter
 
@@ -105,6 +108,7 @@ public:
       CP_SELFINTERSECT_SELECT,
       CP_SELFINTERSECT_COLOR,
       CP_BORDER,
+      CP_TEXBORDER,
       CP_COLOR_NON_MANIFOLD_FACE,
       CP_COLOR_NON_MANIFOLD_VERTEX,
       CP_SMOOTH,
