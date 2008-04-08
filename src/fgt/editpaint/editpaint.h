@@ -68,9 +68,9 @@ public slots:
 	void update();
 	
 private:
-	void updateSelection(MeshModel &m, vector< pair<CVertexO *, float> > * vertex_result = NULL);
+	void updateSelection(MeshModel &m, std::vector< std::pair<CVertexO *, float> > * vertex_result = NULL);
 	
-	void paint(vector< pair<CVertexO *, float> > * vertices);
+	void paint(std::vector< std::pair<CVertexO *, float> > * vertices);
 	void fill(MeshModel & m,CFaceO * face);
 	void gradient(MeshModel & m,GLArea * gla);
 	
@@ -94,11 +94,11 @@ private:
 	
 	GLArea * glarea; /*< current glarea */
 	
-	vector<CMeshO::FacePointer> * selection; //currently selected faces
-	QHash<CVertexO *, pair<Color4b, float> > visited_vertices; //active vertices during paint
+	std::vector<CMeshO::FacePointer> * selection; //currently selected faces
+	QHash<CVertexO *, std::pair<vcg::Color4b, float> > visited_vertices; //active vertices during paint
 	
-	vector<QPointF> * circle;
-	vector<QPointF> * dense_circle;
+	std::vector<QPointF> * circle;
+	std::vector<QPointF> * dense_circle;
 };
 
 /**
@@ -111,17 +111,17 @@ class SingleColorUndo : public QUndoCommand
 {
 	
 public:
-	SingleColorUndo(CVertexO * v, Color4b c, QUndoCommand * parent = 0) : QUndoCommand(parent){
+	SingleColorUndo(CVertexO * v, vcg::Color4b c, QUndoCommand * parent = 0) : QUndoCommand(parent){
 		vertex = v; original = c; // setText("Single Vertex Color Change");
 	}
 	
-	virtual void undo() {Color4b temp = vertex->C(); vertex->C() = original; original = temp;}
+	virtual void undo() { vcg::Color4b temp = vertex->C(); vertex->C() = original; original = temp;}
 	virtual void redo() {undo();}
 	virtual int id() {return COLOR_PAINT;}
 	
 private:
 	CVertexO* vertex;
-	Color4b original;
+	 vcg::Color4b original;
 };
 
 /**
@@ -154,12 +154,12 @@ private :
  *  
  * O(1) complexity
  */
-inline void applyColor(CVertexO * vertex, const Color4b& newcol, int opac)
+inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
 {
-	Color4b orig = vertex->C();
+	 vcg::Color4b orig = vertex->C();
 	
 	for (int i = 0; i < 4; i ++) 
-		orig[i] = min(255,( (newcol[i]-orig[i])*opac + orig[i]*(100) )/100);
+		orig[i] = std::min(255,( (newcol[i]-orig[i])*opac + orig[i]*(100) )/100);
 	
 	vertex->C() = orig;
 }
@@ -169,10 +169,10 @@ inline void applyColor(CVertexO * vertex, const Color4b& newcol, int opac)
  * 
  * O(1) complexity 
  */
-inline void mergeColors(double percent,const Color4b& c1,const Color4b& c2,Color4b* dest)
+inline void mergeColors(double percent,const vcg::Color4b& c1,const vcg::Color4b& c2, vcg::Color4b* dest)
 {
 	for (int i = 0; i < 4; i ++)
-		(*dest)[i] = (char)min(255.0,((c1[i]-c2[i])*percent+c2[i]));
+		(*dest)[i] = (char)std::min(255.0,((c1[i]-c2[i])*percent+c2[i]));
 }
 
 /** 
@@ -299,7 +299,7 @@ inline bool isIn(const QPointF &p0,const QPointF &p1,float dx,float dy,float rad
 	float y0=(dy-p0.y());
 	float bla0=x0*x0+y0*y0;
 	if (bla0<radius*radius) { 
-		if (found) *dist=min((*dist),(float)sqrt(bla0)/radius);
+		if (found) *dist=std::min((*dist),(float)sqrt(bla0)/radius);
 		else *dist=sqrt(bla0)/radius;
 		return true;
 	}
@@ -415,7 +415,7 @@ inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCe
  */
 inline void displaceAlongNormal(CVertexO* vp, float displacement)
 {
-	(*vp).P() += Point3f( ((*vp).N().Ext(0)) * displacement, ((*vp).N().Ext(1)) * displacement, ((*vp).N().Ext(2)) * displacement);
+	(*vp).P() += vcg::Point3f( ((*vp).N().Ext(0)) * displacement, ((*vp).N().Ext(1)) * displacement, ((*vp).N().Ext(2)) * displacement);
 }
 
 /**
@@ -434,7 +434,7 @@ inline bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value, QPoint& 
 
 	//TODO e se i vertici sono stati cancellati? (IsD())
 	
-	if (GLPickTri<CMeshO>::PickNearestFace(cursor.x(), cursor.y(), m.cm, fp, 2, 2)) 
+	if (vcg::GLPickTri<CMeshO>::PickNearestFace(cursor.x(), cursor.y(), m.cm, fp, 2, 2)) 
 	{
 		
 		QPointF point[3];
@@ -461,7 +461,7 @@ inline bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value, QPoint& 
 /** 
  * calcs the surrounding faces of a vertex with VF topology
  */
-inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos,vector<CFaceO *> *surround) {
+inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos, std::vector<CFaceO *> *surround) {
 	CVertexO * vert=fac->V(vert_pos);
 	int pos=vert->VFi();
 	CFaceO * first_fac=vert->VFp();
@@ -489,10 +489,10 @@ inline bool hasSelected(MeshModel &m) {
 void drawNormalPercentualCircle(GLArea *, QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float );
 void drawVertex(CVertexO* );
 void drawLine(GLArea *, QPoint &, QPoint &);
-void drawSimplePolyLine(GLArea * gla, QPoint & gl_cur, float scale, vector<QPointF> * points);
-void drawPercentualPolyLine(GLArea * , QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float , vector<QPointF> * );
+void drawSimplePolyLine(GLArea * gla, QPoint & gl_cur, float scale, std::vector<QPointF> * points);
+void drawPercentualPolyLine(GLArea * , QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float , std::vector<QPointF> * );
 
-vector<QPointF> * generateCircle(int segments = 18);
-vector<QPointF> * generateSquare();
+std::vector<QPointF> * generateCircle(int segments = 18);
+std::vector<QPointF> * generateSquare();
 
 #endif

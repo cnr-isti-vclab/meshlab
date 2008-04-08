@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.19  2008/04/08 10:16:04  cignoni
+ added missing std:: and vcg::
+
  Revision 1.18  2007/12/14 14:57:20  cignoni
  Improved ball pivoting params and descriptions
 
@@ -109,7 +112,7 @@
 #include <vcg/complex/trimesh/create/ball_pivoting.h>
 
 #include <vcg/space/normal_extrapolation.h>
-
+using namespace std;
 using namespace vcg;
 
 CleanFilter::CleanFilter() 

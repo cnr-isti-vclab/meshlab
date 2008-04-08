@@ -33,6 +33,7 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/topology.h>
 
+using namespace std;
 using namespace vcg;
 
 EditPaintPlugin::EditPaintPlugin() 

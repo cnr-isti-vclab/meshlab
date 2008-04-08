@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.19  2008/04/08 10:16:04  cignoni
+ added missing std:: and vcg::
+
  Revision 1.18  2008/01/30 08:36:33  granzuglia
  temporary colladaio interface...TO BE REPLACED!!!!
 
@@ -97,12 +100,8 @@
 #include <wrap/io_trimesh/import_dae.h>
 #include <wrap/io_trimesh/export_dae.h>
 
-
-
-
-
-
 #include <QMessageBox>
+using namespace std;
 using namespace vcg;
 
 bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
