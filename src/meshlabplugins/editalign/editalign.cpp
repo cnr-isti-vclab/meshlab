@@ -178,8 +178,8 @@ void EditAlignPlugin::glueByPicking()
  
  // i picked points sono in due sistemi di riferimento.
  
- vector<Point3f> freePnt = dd->aa->freePickedPointVec; 
- vector<Point3f> gluedPnt= dd->aa->gluedPickedPointVec; 
+ std::vector<vcg::Point3f>freePnt = dd->aa->freePickedPointVec; 
+ std::vector<vcg::Point3f>gluedPnt= dd->aa->gluedPickedPointVec; 
  
  	if( (freePnt.size() != gluedPnt.size())	|| (freePnt.size()==0) )	{
 			QMessageBox::warning(0,"Align tool", "require the same number of chosen points");
@@ -382,7 +382,7 @@ switch(mode)
 
 
 
-void EditAlignPlugin::DrawArc( AlignPair::Result *A )
+void EditAlignPlugin::DrawArc( vcg::AlignPair::Result *A )
 {	
 	unsigned int i;
 	AlignPair::Result &r=*A;

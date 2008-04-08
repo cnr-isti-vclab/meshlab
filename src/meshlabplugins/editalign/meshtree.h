@@ -50,9 +50,9 @@ public:
 	MeshNode() { m=0;id=-1;}
 	bool glued;
 	int id;
-  MeshModel *m;
-	Matrix44f &tr() {return m->cm.Tr;}
-	const Box3f &bbox() const {return m->cm.bbox;}
+	MeshModel *m;
+	vcg::Matrix44f &tr() {return m->cm.Tr;}
+	const vcg::Box3f &bbox() const {return m->cm.bbox;}
 };
 
 class MeshTree
@@ -62,8 +62,8 @@ class MeshTree
 	
   QList<MeshNode *> nodeList;
 	vcg::OccupancyGrid OG;
-	std::vector<AlignPair::Result> ResVec;
-	std::vector<AlignPair::Result *> ResVecPtr;
+	std::vector<vcg::AlignPair::Result> ResVec;
+	std::vector<vcg::AlignPair::Result *> ResVecPtr;
 	vcg::CallBackPos * cb;
 	
   MeshModel *MM(unsigned int i) {return nodeList.value(i)->m;}
@@ -97,23 +97,23 @@ class MeshTree
 	int gluedNum();
 
 	
-	void Process(AlignPair::Param &ap);
-	void ProcessGlobal(AlignPair::Param &ap);
-	void ProcessArc(int fixId, int movId, AlignPair::Result &result, AlignPair::Param ap);
-	void ProcessArc(int fixId, int movId, Matrix44d &MovToFix, AlignPair::Result &result, AlignPair::Param ap);
+	void Process(vcg::AlignPair::Param &ap);
+	void ProcessGlobal(vcg::AlignPair::Param &ap);
+	void ProcessArc(int fixId, int movId, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap);
+	void ProcessArc(int fixId, int movId, vcg::Matrix44d &MovToFix, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap);
 
-	inline Box3f bbox() {
-		Box3f FullBBox;
+	inline vcg::Box3f bbox() {
+		vcg::Box3f FullBBox;
 		foreach(MeshNode *mp, nodeList) 
-			FullBBox.Add(Matrix44f::Construct(mp->tr()),mp->bbox());
+			FullBBox.Add(vcg::Matrix44f::Construct(mp->tr()),mp->bbox());
 		return FullBBox;
  }
 
-	inline Box3f gluedBBox() {
-		Box3f FullBBox;
+	inline vcg::Box3f gluedBBox() {
+		vcg::Box3f FullBBox;
 		foreach(MeshNode *mp, nodeList) 
 			if(mp->glued)
-					FullBBox.Add(Matrix44f::Construct(mp->tr()),mp->bbox());
+					FullBBox.Add(vcg::Matrix44f::Construct(mp->tr()),mp->bbox());
 		return FullBBox;
 	}
 

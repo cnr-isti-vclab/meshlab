@@ -56,54 +56,54 @@ void MeshTree::resetID()
 		}
 }
 
-void MeshTree::ProcessArc(int fixId, int movId, AlignPair::Result &result, AlignPair::Param ap)
+void MeshTree::ProcessArc(int fixId, int movId, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap)
 {
     // l'allineatore globale cambia le varie matrici di posizione di base delle mesh
     // per questo motivo si aspetta i punti nel sistema di riferimento locale della mesh fix
     // Si fanno tutti i conti rispetto al sistema di riferimento locale della mesh fix
-    Matrix44d FixM=Matrix44d::Construct(find(fixId)->tr());		
-		Matrix44d MovM=Matrix44d::Construct(find(movId)->tr());		
-		Matrix44d MovToFix = Inverse(FixM) * MovM;
+	vcg::Matrix44d FixM=vcg::Matrix44d::Construct(find(fixId)->tr());		
+	vcg::Matrix44d MovM=vcg::Matrix44d::Construct(find(movId)->tr());		
+	vcg::Matrix44d MovToFix = Inverse(FixM) * MovM;
     
-		ProcessArc(fixId,movId,MovToFix,result,ap);
+	ProcessArc(fixId,movId,MovToFix,result,ap);
 }
 
-void MeshTree::ProcessArc(int fixId, int movId, Matrix44d &MovM, AlignPair::Result &result, AlignPair::Param ap)
+void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap)
 {
-		Matrix44d Ident; Ident.SetIdentity();
-		AlignPair::A2Mesh Fix;
-		AlignPair::A2Mesh Mov;
+	vcg::Matrix44d Ident; Ident.SetIdentity();
+	vcg::AlignPair::A2Mesh Fix;
+	vcg::AlignPair::A2Mesh Mov;
 
-	  AlignPair aa;
+	vcg::AlignPair aa;
 
-	  aa.ConvertMesh<CMeshO>(MM(fixId)->cm,Fix);
-		Fix.Init(Matrix44d::Identity(),false);
-	  aa.ConvertMesh<CMeshO>(MM(movId)->cm,Mov);
+	aa.ConvertMesh<CMeshO>(MM(fixId)->cm,Fix);
+	Fix.Init(vcg::Matrix44d::Identity(),false);
+	aa.ConvertMesh<CMeshO>(MM(movId)->cm,Mov);
   	QString buf;
     //cb(0,qPrintable(buf.sprintf("Loaded Fix Mesh %32s vn:%8i fn:%8i\n",qPrintable(QFileInfo(MM(fixId)->fileName.c_str()).fileName()),Fix.vn,Fix.fn)));
 	  //cb(0,qPrintable(buf.sprintf("Loaded Mov Mesh %32s vn:%8i fn:%8i\n",qPrintable(QFileInfo(MM(movId)->fileName.c_str()).fileName()),Mov.vn,Mov.fn)));
 
-    AlignPair::A2Grid UG;
-	  AlignPair::InitFix(&Fix, ap, UG);
+  	vcg::AlignPair::A2Grid UG;
+  	vcg::AlignPair::InitFix(&Fix, ap, UG);
 	  
-	  vector<AlignPair::A2Vertex> tmpmv;     
+	std::vector<vcg::AlignPair::A2Vertex> tmpmv;     
 
-	  aa.ConvertVertex(Mov.vert,tmpmv);
-	  aa.SampleMovVert(tmpmv, ap.SampleNum, ap.SampleMode);
+	aa.ConvertVertex(Mov.vert,tmpmv);
+	aa.SampleMovVert(tmpmv, ap.SampleNum, ap.SampleMode);
    
-	  aa.mov=&tmpmv;
-	  aa.fix=&Fix;
+	aa.mov=&tmpmv;
+	aa.fix=&Fix;
     aa.ap = ap;
-	  Matrix44d In;
-	  In.SetIdentity();
+    vcg::Matrix44d In;
+	In.SetIdentity();
     In=MovM;
     aa.Align(In,UG,result);
     result.FixName=fixId;
     result.MovName=movId;
-	  result.as.Dump(stdout);
+	result.as.Dump(stdout);
 }
 
-void MeshTree::Process(AlignPair::Param &ap)
+void MeshTree::Process(vcg::AlignPair::Param &ap)
 {
 	QString buf;
 	cb(0,qPrintable(buf.sprintf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeList.size())));
@@ -112,10 +112,10 @@ void MeshTree::Process(AlignPair::Param &ap)
 	
 	/******* Occupancy Grid Computation *************/
 	cb(0,qPrintable(buf.sprintf("Computing Overlaps %i glued meshes...\n",gluedNum() )));
-	OG.Init(nodeList.size(), Box3d::Construct(gluedBBox()), 10000);
+	OG.Init(nodeList.size(), vcg::Box3d::Construct(gluedBBox()), 10000);
 	foreach(MeshNode *mn, nodeList) 
 		if(mn->glued)
-				OG.AddMesh<CMeshO>(mn->m->cm, Matrix44d::Construct(mn->tr()), mn->id);
+				OG.AddMesh<CMeshO>(mn->m->cm, vcg::Matrix44d::Construct(mn->tr()), mn->id);
 	
 	OG.Compute();
   OG.Dump(stdout);
@@ -151,51 +151,51 @@ void MeshTree::Process(AlignPair::Param &ap)
 	ProcessGlobal(ap);
 	
 }
-	
-	void MeshTree::ProcessGlobal(AlignPair::Param &ap)
+
+void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 {
 	QString buf;
 	/************** Preparing Matrices for global alignment *************/
 	cb(0,qPrintable(buf.sprintf("Starting Global Alignment\n")));
 
-  Matrix44d Zero44; Zero44.SetZero();
-  vector<Matrix44d> PaddedTrVec(nodeList.size(),Zero44);
+	vcg::Matrix44d Zero44; Zero44.SetZero();
+	std::vector<vcg::Matrix44d> PaddedTrVec(nodeList.size(),Zero44);
 	// matrix trv[i] is relative to mesh with id IdVec[i]
 	// if all the mesh are glued GluedIdVec=={1,2,3,4...}
-	vector<int> GluedIdVec;
-	vector<Matrix44d> GluedTrVec;
+	std::vector<int> GluedIdVec;
+	std::vector<vcg::Matrix44d> GluedTrVec;
 		
-  vector<string> names(nodeList.size());
+	std::vector<std::string> names(nodeList.size());
 	
 	foreach(MeshNode *mn, nodeList) 
 	{
 		if(mn->glued)
 		{
 			GluedIdVec.push_back(mn->id);							
-			GluedTrVec.push_back(Matrix44d::Construct(mn->tr()));				
+			GluedTrVec.push_back(vcg::Matrix44d::Construct(mn->tr()));				
 			PaddedTrVec[mn->id]=GluedTrVec.back();
 			names[mn->id]=mn->m->fileName;
 		}
-  }		
+	}		
 		
-	AlignGlobal AG;
-  AG.BuildGraph(ResVecPtr, GluedTrVec, GluedIdVec);
+	vcg::AlignGlobal AG;
+	AG.BuildGraph(ResVecPtr, GluedTrVec, GluedIdVec);
    
- int maxiter = 1000;
- float StartGlobErr = 0.001f;
- while(!AG.GlobalAlign(names, 	StartGlobErr, 100, true, stdout)){
-  	StartGlobErr*=2;
+	int maxiter = 1000;
+	float StartGlobErr = 0.001f;
+	while(!AG.GlobalAlign(names, 	StartGlobErr, 100, true, stdout)){
+		StartGlobErr*=2;
 		AG.BuildGraph(ResVecPtr,GluedTrVec, GluedIdVec);
 	}
 
- vector<Matrix44d> GluedTrVecOut(GluedTrVec.size());
- AG.GetMatrixVector(GluedTrVecOut,GluedIdVec);
+	std::vector<vcg::Matrix44d> GluedTrVecOut(GluedTrVec.size());
+	AG.GetMatrixVector(GluedTrVecOut,GluedIdVec);
 
-//Now get back the results!
-for(int ii=0;ii<GluedTrVecOut.size();++ii)
-	MM(GluedIdVec[ii])->cm.Tr.Import(GluedTrVecOut[ii]);	
+	//Now get back the results!
+	for(int ii=0;ii<GluedTrVecOut.size();++ii)
+		MM(GluedIdVec[ii])->cm.Tr.Import(GluedTrVecOut[ii]);	
 
-cb(0,qPrintable(buf.sprintf("Completed Global Alignment (error bound %6.4f)\n",StartGlobErr)));
+	cb(0,qPrintable(buf.sprintf("Completed Global Alignment (error bound %6.4f)\n",StartGlobErr)));
 
 }
 

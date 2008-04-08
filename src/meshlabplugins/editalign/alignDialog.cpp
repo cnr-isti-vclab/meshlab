@@ -78,7 +78,7 @@ AlignDialog::AlignDialog(QWidget *parent )    : QDockWidget(parent)
 }
 
 
-void AlignDialog::setCurrentArc(AlignPair::Result *_currentArc)
+void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 {
 	assert(meshTree);
 	
@@ -168,7 +168,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
 }
 
 
-MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, AlignPair::Result *A, MeshTreeWidgetItem *parent)
+MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, vcg::AlignPair::Result *A, MeshTreeWidgetItem *parent)
 {
 		n=0;
 		a=A;
@@ -183,7 +183,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, AlignPair::Result *A,
 			setText(0,buf);
 			
 			QFont fixedFont("Courier");
-			vector<AlignPair::Stat::IterInfo> &I= (*A).as.I;
+			std::vector<vcg::AlignPair::Stat::IterInfo> &I= (*A).as.I;
 			QTreeWidgetItem *itemArcIter;
 			buf.sprintf("Iter - MinD -  Error - Sample - Used - DistR - BordR - AnglR  ");
 			//          " 12   123456  1234567   12345  12345   12345   12345   12345
@@ -219,7 +219,7 @@ void AlignDialog::rebuildTree()
 	}
 	
   // Second part add the arcs to the tree
-	AlignPair::Result *A;
+	vcg::AlignPair::Result *A;
 	MeshTreeWidgetItem *parent;
 	MeshTreeWidgetItem *item;
 	for(int i=0;i< meshTree->ResVec.size();++i)

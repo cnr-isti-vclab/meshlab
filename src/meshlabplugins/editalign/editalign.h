@@ -75,20 +75,20 @@ public:
 		
 		void toggleButtons();
 
-		Trackball trackball;
+		vcg::Trackball trackball;
 		
 		MeshDocument *md; 
 		MeshNode *currentNode() {return meshTree.find(md->mm());}
-		AlignPair::Result *currentArc() {return  alignDialog->currentArc;};
+		vcg::AlignPair::Result *currentArc() {return  alignDialog->currentArc;};
 		MeshTree meshTree;
 		GLArea * gla;
 
 public:
-	AlignPair::Param defaultAP;  // default alignment parameters
+	vcg::AlignPair::Param defaultAP;  // default alignment parameters
 	
 
-	void retrieveParameterSet(FilterParameterSet &fps , AlignPair::Param &app);
-	void buildParameterSet(FilterParameterSet &fps , AlignPair::Param &app);
+	void retrieveParameterSet(FilterParameterSet &fps , vcg::AlignPair::Param &app);
+	void buildParameterSet(FilterParameterSet &fps , vcg::AlignPair::Param &app);
 
 public slots:
 		void process();
@@ -99,7 +99,7 @@ public slots:
 		void glueByPicking();
 		void alignParam();
 		
-		void DrawArc( AlignPair::Result *A );
+		void DrawArc( vcg::AlignPair::Result *A );
 signals:
 	void suspendEditToggle();
 

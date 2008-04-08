@@ -40,10 +40,10 @@ class MeshTreeWidgetItem : public QTreeWidgetItem
 {
 	public:
 	MeshTreeWidgetItem(MeshNode *n);
-	MeshTreeWidgetItem(MeshTree* meshTree,AlignPair::Result *A,MeshTreeWidgetItem *parent);
+	MeshTreeWidgetItem(MeshTree* meshTree,vcg::AlignPair::Result *A,MeshTreeWidgetItem *parent);
 
 	MeshNode *n;
-	AlignPair::Result *a;
+	vcg::AlignPair::Result *a;
 };
 
 class AlignDialog : public QDockWidget
@@ -57,7 +57,7 @@ class AlignDialog : public QDockWidget
 		void updateDialog();
 		void setTree(MeshTree *);
 		void updateCurrentNodeBackground();
-		void setCurrentArc(AlignPair::Result *currentArc);
+		void setCurrentArc(vcg::AlignPair::Result *currentArc);
 		
 		Ui::alignDialog ui;
 		GLArea *gla; 
@@ -65,11 +65,11 @@ class AlignDialog : public QDockWidget
 
 		MeshTree *meshTree;
 		MeshNode *currentNode(); 
-		AlignPair::Result *currentArc;
+		vcg::AlignPair::Result *currentArc;
 		
 		QMap<MeshNode *,           MeshTreeWidgetItem *> M2T; // MeshNode to treeitem hash
-		QMap<AlignPair::Result  *, MeshTreeWidgetItem *> A2Tf; // Arc to treeitem hash  (forward)
-		QMap<AlignPair::Result  *, MeshTreeWidgetItem *> A2Tb; // Arc to treeitem hash  (backward)
+		QMap<vcg::AlignPair::Result  *, MeshTreeWidgetItem *> A2Tf; // Arc to treeitem hash  (forward)
+		QMap<vcg::AlignPair::Result  *, MeshTreeWidgetItem *> A2Tb; // Arc to treeitem hash  (backward)
 		
 		QMenu popupMenu;
 		

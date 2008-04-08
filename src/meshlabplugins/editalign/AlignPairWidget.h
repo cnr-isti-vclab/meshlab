@@ -53,12 +53,12 @@ private:
 	vcg::Trackball* tt[2];
 	vcg::Trackball* currentTrack;
 public:	
-	std::vector<Point3f> freePickedPointVec;
-	std::vector<Point3f> gluedPickedPointVec;
+	std::vector<vcg::Point3f> freePickedPointVec;
+	std::vector<vcg::Point3f> gluedPickedPointVec;
 		
   /// mesh data structure initializer
 		bool hasToPick;
-		Point2i pointToPick;
+		vcg::Point2i pointToPick;
 public:
 			void initMesh(MeshNode *left, MeshTree *right);
 };

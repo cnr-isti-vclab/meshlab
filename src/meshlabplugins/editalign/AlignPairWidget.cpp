@@ -26,7 +26,7 @@ AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 	QRect rr= QApplication::desktop()->screenGeometry ( this );
 	setMinimumSize(rr.width()*0.8,rr.width()*0.5);
 	hasToPick=false;
-	pointToPick=Point2i(-1,-1);
+	pointToPick=vcg::Point2i(-1,-1);
 }
 
 
@@ -72,7 +72,7 @@ void AlignPairWidget::paintGL ()
 				tt[i]->radius= 1;
 				tt[i]->GetView();
 				tt[i]->Apply(false);
-				Box3f bb;
+				vcg::Box3f bb;
 				if(i==0) bb=freeMesh->bbox();
 				else	   bb=gluedTree->gluedBBox();
 				
@@ -81,20 +81,20 @@ void AlignPairWidget::paintGL ()
 						glTranslate(-bb.Center());
 						if(i==0)
 						{
-							freeMesh->m->Render(GLW::DMFlat,GLW::CMPerMesh,GLW::TMNone);
-							drawPickedPoints(freePickedPointVec,vcg::Color4b(Color4b::Red));	
+							freeMesh->m->Render(vcg::GLW::DMFlat,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
+							drawPickedPoints(freePickedPointVec,vcg::Color4b(vcg::Color4b::Red));	
 						} else				{
 							foreach(MeshNode *mn, gluedTree->nodeList) 
-								if(mn->glued && mn != freeMesh) mn->m->Render(GLW::DMFlat,GLW::CMPerMesh,GLW::TMNone);
-							drawPickedPoints(gluedPickedPointVec,vcg::Color4b(Color4b::Blue));	
+								if(mn->glued && mn != freeMesh) mn->m->Render(vcg::GLW::DMFlat,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
+							drawPickedPoints(gluedPickedPointVec,vcg::Color4b(vcg::Color4b::Blue));	
 						}
 								
 						int pickSide= ( pointToPick[0] < (width()/2) )? 0 : 1;
 						if(hasToPick && pickSide==i)
 							{	
-								Point3f pp;
+							vcg::Point3f pp;
 								hasToPick=false;
-								if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp)) 
+								if(vcg::Pick<vcg::Point3f>(pointToPick[0],pointToPick[1],pp)) 
 								{
 									qDebug("Picked point %i %i -> %f %f %f",pointToPick[0],pointToPick[1],pp[0],pp[1],pp[2]);
 									if(pickSide == 0) freePickedPointVec.push_back(pp);
@@ -119,7 +119,7 @@ void AlignPairWidget::drawPickedPoints(std::vector<vcg::Point3f> &pointVec, vcg:
 	glColor(color);
 	for(int i=0; i<pointVec.size();++i)
 		{
-			Point3f &pt =pointVec[i];
+		vcg::Point3f &pt =pointVec[i];
 			glBegin(GL_POINTS);
 				glVertex(pt);
 			glEnd();
@@ -155,7 +155,7 @@ void AlignPairWidget::keyPressEvent (QKeyEvent * e)
 void AlignPairWidget::mouseDoubleClickEvent(QMouseEvent * e)
 {
 	hasToPick=true;
-	pointToPick=Point2i(e->x(), height() -e->y());
+	pointToPick=vcg::Point2i(e->x(), height() -e->y());
 	updateGL ();
 
 }
