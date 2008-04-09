@@ -25,11 +25,11 @@ class AgingEdgePred
 		}
 	
 		bool operator()(face::Pos<CMeshO::FaceType> ep) const {
-			return (lenp(ep) && qaTest(ep));
+			return (lenp(ep) && qaEdgeTest(ep));
 		}
 		
-		bool qaTest(face::Pos<CMeshO::FaceType> ep) const {
-			return (type==ANGLE?testAngle(ep):(type==QUALITY?testQuality(ep):false));
+		bool qaVertTest(face::Pos<CMeshO::FaceType> ep) const {
+			return (type==ANGLE?testAngle(ep):(type==QUALITY?(ep.f->V(ep.z)->Q()>thVal):false));
 		}
 		
 		
@@ -37,6 +37,10 @@ class AgingEdgePred
 		EdgeLen<CMeshO, CMeshO::ScalarType> lenp;
 		float thVal;
 		int type;
+		
+		bool qaEdgeTest(face::Pos<CMeshO::FaceType> ep) const {
+			return (type==ANGLE?testAngle(ep):(type==QUALITY?testQuality(ep):false));
+		}
 		
 		bool testAngle(face::Pos<CMeshO::FaceType> ep) const {
 			if(ep.f->IsB(ep.z)) return true;
@@ -65,41 +69,12 @@ class AgingEdgePred
 			   normal to the current face and the median vector. 
 			*/
 			return (ffangle-thVal >= -0.001  && vcg::Angle(ep.f->N(), median) * 180 / M_PI < ffangle);
-			//return false;
 		}
 		
 		bool testQuality(face::Pos<CMeshO::FaceType> ep) const {
-			return (ep.f->V(ep.z)->Q() > thVal && ep.f->V1(ep.z)->Q() > thVal);
+			return (ep.f->V(ep.z)->Q() > thVal || ep.f->V1(ep.z)->Q() > thVal);
 		}
 };
 
-
-/*
-class AgingFacePred
-{
-	public:
-		AgingFacePred() {
-			edgeTest = AgingEdgePred(AgingEdgePred::QUALITY, 1.0, 1.0);
-		}
-
-		AgingFacePred(int type, float lenTh, float thVal = 0.0) {
-			edgeTest = AgingEdgePred(type, lenTh, thVal);
-		}
-		
-		bool operator()(face::Pos<CMeshO::FaceType> ep) const {
-			return (edgeTest(ep) && edgeTest(face::Pos<CMeshO::FaceType>(ep.f, (ep.z+1)%3)) &&
-					 edgeTest(face::Pos<CMeshO::FaceType>(ep.f, (ep.z+2)%3)));
-		}
-
-		bool qaTest(face::Pos<CMeshO::FaceType> ep) const {
-			return (edgeTest.qaTest(ep) && edgeTest.qaTest(face::Pos<CMeshO::FaceType>(ep.f, (ep.z+1)%3)) &&
-					 edgeTest.qaTest(face::Pos<CMeshO::FaceType>(ep.f, (ep.z+2)%3)));
-		}
-		
-				
-	protected:
-		AgingEdgePred edgeTest;
-};
-*/
 
 #endif /*EDGEPRED_H_*/
