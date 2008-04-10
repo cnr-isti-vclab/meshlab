@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.92  2008/04/10 11:07:42  cignoni
+added tooltip to decorations
+
 Revision 1.91  2008/03/10 09:39:51  cignoni
 better disabling of functionalities when no mesh is loaded
 
@@ -641,8 +644,14 @@ void MainWindow::loadPlugins()
 
 			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
 			if (iDecorator){
-				decoratorActionList+=iDecorator->actions();
-				addToMenu(iDecorator->actions(), renderMenu, SLOT(applyDecorateMode()));
+				QAction *decoratorAction;
+        decoratorActionList+=iDecorator->actions();
+				foreach(decoratorAction, iDecorator->actions())
+						{
+								connect(decoratorAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
+								decoratorAction->setToolTip(iDecorator->Info(decoratorAction));
+								renderMenu->addAction(decoratorAction);
+						}
 			}
 
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
