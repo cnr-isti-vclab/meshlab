@@ -215,8 +215,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 						intnum = intersFace.size();
 					else
 						fcount += intnum - intersFace.size(); 
-					if(cb) (*cb)((fcount/intnum)*100, "Deleting mesh intersections...");
 					if(intersFace.empty()) break;
+					if(cb) (*cb)((fcount/intnum)*100, "Deleting mesh intersections...");
 					for(fpi=intersFace.begin(); fpi!=intersFace.end(); fpi++) {
 						for(int i=0; i<3; i++) {
 							it = displaced.find((*fpi)->V(i));
