@@ -10,6 +10,7 @@
 #define MAX 100000
 #define NOSEL -1
 #define AREADIM 400
+#define HRECT 6
 
 RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsigned tnum) : QGLWidget(parent)
 {
@@ -45,8 +46,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 
 	selectMode = Area;
 	selBit = CFaceO::NewBitFlag();
-	selVertBit = CEdge::NewBitFlag();
-	selFaceBit = CFaceO::NewBitFlag();
+	selVertBit = CVertexO::NewBitFlag();
 	selected = false;
 	selectedV = false;
 
@@ -76,7 +76,6 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 RenderArea::~RenderArea()
 {
 	CFaceO::DeleteBitFlag(selBit);
-	CFaceO::DeleteBitFlag(selFaceBit);
 	CVertexO::DeleteBitFlag(selVertBit);
 }
 
@@ -150,8 +149,9 @@ void RenderArea::paintEvent(QPaintEvent *)
 					}
 					else
 					{
-						if (selectedV && !model->cm.face[i].V(j)->IsUserBit(selVertBit)) glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);
-						else glVertex3f(model->cm.face[i].WT(j).u() * AREADIM - posVX, AREADIM - (model->cm.face[i].WT(j).v() * AREADIM + posVY), 1);
+						if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(), model->cm.face[i].WT(j).v())) && model->cm.face[i].V(j)->IsUserBit(selVertBit))
+							glVertex3f(model->cm.face[i].WT(j).u() * AREADIM - posVX/zoom, AREADIM - (model->cm.face[i].WT(j).v() * AREADIM + posVY/zoom), 1);
+						else glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);
 					}
 				}
 				glEnd();
@@ -173,15 +173,20 @@ void RenderArea::paintEvent(QPaintEvent *)
 					glEnd();
 				}
 
-				// Draw the selected vertex <--------
+				// Draw the selected vertex
 				if (selectedV)
 				{
-					painter.setBrush(QBrush(Qt::red));
+					glDisable(GL_COLOR_LOGIC_OP);
 					for (int j = 0; j < 3; j++)
 					{
-						if(model->cm.face[i].V(j)->IsUserBit(selVertBit) && model->cm.face[i].IsUserBit(selFaceBit))
-							painter.drawEllipse(QRect(model->cm.face[i].WT(j).u() * AREADIM - RADIUS/2 - posVX, AREADIM - model->cm.face[i].WT(j).v() * AREADIM - RADIUS/2 - posVY, RADIUS, RADIUS));
+						if(areaUV.contains(QPointF(model->cm.face[i].WT(j).u(), model->cm.face[i].WT(j).v())) && model->cm.face[i].V(j)->IsUserBit(selVertBit))
+						{
+							glColor3f(1,0,0);
+							DrawCircle(QPoint(model->cm.face[i].WT(j).u() * AREADIM - posVX/zoom, AREADIM - model->cm.face[i].WT(j).v() * AREADIM - posVY/zoom));
+							glColor3f(0,0,0);
+						}
 					}
+					glEnable(GL_COLOR_LOGIC_OP);
 				}
 			}
 		}
@@ -215,10 +220,10 @@ void RenderArea::paintEvent(QPaintEvent *)
 		painter.drawLine(0,h,w,h);
 		painter.drawLine(0,h,0,0);
 		// Calculate the coords and draw it
-		float c0 = (float)(w-viewport.X())/AREADIM, c1 = (float)(AREADIM - h + viewport.Y())/AREADIM;
-		painter.drawText(TRANSLATE, h - TRANSLATE, QString("(%1,%2)").arg((float)-viewport.X()/AREADIM).arg((float)(AREADIM - h + viewport.Y())/AREADIM));
-		painter.drawText(TRANSLATE, TRANSLATE*3, QString("(%1,%2)").arg((float)-viewport.X()/AREADIM).arg((float)viewport.Y()/AREADIM + 1));
-		painter.drawText(w - TRANSLATE*18, h - TRANSLATE, QString("(%1,%2)").arg(c0).arg(c1));
+		float ox = (float)-viewport.X()*zoom/(AREADIM*zoom), oy = (float)(AREADIM*zoom - h + viewport.Y()*zoom)/(AREADIM*zoom);
+		/*O:*/painter.drawText(TRANSLATE, h - TRANSLATE, QString("(%1,%2)").arg(ox).arg(oy));
+		/*Y:*/painter.drawText(TRANSLATE, TRANSLATE*3, QString("(%1,%2)").arg(ox).arg(oy + 1.0f/zoom));
+		/*X:*/painter.drawText(w - TRANSLATE*18, h - TRANSLATE, QString("(%1,%2)").arg((float)(w-viewport.X()*zoom)/(AREADIM*zoom)).arg(oy));
 		painter.drawText(TRANSLATE, TRANSLATE*6, QString("V"));
 		painter.drawText(AREADIM - TRANSLATE*23, AREADIM - TRANSLATE, QString("U"));
 
@@ -258,7 +263,18 @@ void RenderArea::paintEvent(QPaintEvent *)
 					painter.drawEllipse(QRect(originR.x() - posX - orX, originR.y() - posY - orY, RADIUS, RADIUS));
 				}
 			}
-			else painter.drawRect(QRect(selection.x() - posVX, selection.y() - posVY, selection.width(), selection.height()));
+			else 
+			{
+				painter.drawRect(QRect(selection.x() - posVX, selection.y() - posVY, selection.width(), selection.height()));
+				painter.fillRect(QRect(selection.x() - HRECT/2 - posVX, selection.y() - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
+				painter.fillRect(QRect(selection.x() + selection.width() - HRECT/2 - posVX, selection.y() - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
+				painter.fillRect(QRect(selection.x() - HRECT/2 - posVX, selection.y() + selection.height() - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
+				painter.fillRect(QRect(selection.x() + selection.width() - HRECT/2 - posVX, selection.y() + selection.height() - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
+				painter.fillRect(QRect(selection.x() - HRECT/2 - posVX + selection.width()/2, selection.y() - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
+				painter.fillRect(QRect(selection.x() - HRECT/2 - posVX, selection.y() - HRECT/2 - posVY + selection.height()/2, HRECT, HRECT), QBrush(Qt::black));
+				painter.fillRect(QRect(selection.x() - HRECT/2 - posVX + selection.width(), selection.y() + selection.height()/2 - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
+				painter.fillRect(QRect(selection.x() + selection.width()/2 - HRECT/2 - posVX, selection.y() + selection.height() - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));			
+			}
 		}
 
 		glDisable(GL_LOGIC_OP);
@@ -345,14 +361,14 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *)
 			if (pressed == ORIGINRECT)	// Drag origin -> Update the position of the rectangle of rotation and the real point in UV
 			{
 				originR = QRect(originR.x() - posX - orX, originR.y() - posY - orY, RADIUS, RADIUS);
-				origin = QPointF((float)(originR.center().x() - viewport.X())/(AREADIM*zoom), (float)((AREADIM*zoom) - originR.center().y() + viewport.Y())/(AREADIM*zoom));
+				origin = QPointF((float)(originR.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)((AREADIM*zoom) - originR.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
 				orX = 0; orY = 0;
 			}
 			else if (pressed == SELECTIONRECT && posX != 0)	// Drag selection -> Update the position of the selection area and the rotatation rect
 			{
 				selection = QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height());
 				originR.moveCenter(QPoint(originR.center().x() - posX, originR.center().y() - posY));
-				origin = QPointF((float)(originR.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y())/(AREADIM*zoom));
+				origin = QPointF((float)(originR.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
 				posX = 0; posY = 0;
 				if (selected) UpdateUV();
 			}
@@ -389,7 +405,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *)
 					{
 						selection = QRect(selStart, selEnd);
 						UpdateSelectionArea(0,0);
-						origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
+						origin = QPointF((float)(selection.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
 						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
 						this->ChangeMode(1);
 						this->update(selection);
@@ -405,6 +421,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *)
 						this->ChangeMode(4);
 						this->update(selection);
 					}
+					else this->update();
 					break;
 			}
 			break;
@@ -549,15 +566,26 @@ void RenderArea::mouseDoubleClickEvent(QMouseEvent *e)
 void RenderArea::wheelEvent(QWheelEvent*e)
 {
 	// Handle the zoom
-	ResetTrack(false);
+	float oldZoom = zoom;
 	if (e->delta() > 0) zoom += 0.25;
-	else zoom -= 0.25;
-	tb->Scale(zoom);
-	RecalculateSelectionArea();
-	UpdateSelectionArea(0,0);
-	originR.moveCenter(selection.center());
-	origin = QPointF((float)(selection.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y())/(AREADIM*zoom));
-	this->update();
+	else if (zoom != 0.25f) zoom -= 0.25;
+	// Change the viewport, putting the center of the screen on the mouseposition
+	if (zoom != oldZoom)
+	{
+		viewport = Point2f(viewport.X() - e->x()/oldZoom + (this->visibleRegion().boundingRect().width()/zoom)/2,
+			viewport.Y() - e->y()/oldZoom + (this->visibleRegion().boundingRect().height()/zoom)/2);
+		ResetTrack(false);
+		tb->Scale(zoom);
+		if (selectedV) UpdateVertexSelection();
+		else 
+		{
+			RecalculateSelectionArea();
+			UpdateSelectionArea(0,0);
+			originR.moveCenter(QPoint(origin.x() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (origin.y() * AREADIM*zoom) + viewport.Y()*zoom));
+			origin = QPointF((float)(originR.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+		}
+		this->update();
+	}
 }
 
 void RenderArea::RemapClamp()
@@ -693,12 +721,12 @@ void RenderArea::ChangeSelectMode(int index)
 			selectMode = Area;
 			break;
 	}
-	if (selectedV && selectMode != Vertex)
+	if (selectedV && selectMode != Vertex) 
 	{
+		areaUV = QRectF();
 		for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.vert[i].ClearUserBit(selVertBit);
-		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selFaceBit);
 	}
-	if (selected && selectMode == Vertex)
+	if (selected && selectMode == Vertex) 
 		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 }
 
@@ -769,18 +797,17 @@ void RenderArea::UpdateVertex()
 	// After a move of vertex, re-calculate the new UV coordinates
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		if (model->cm.face[i].WT(0).n() == textNum && model->cm.face[i].IsUserBit(selFaceBit))
+		for (unsigned j = 0; j < 3; j++)
 		{
-			for (unsigned j = 0; j < 3; j++)
+			if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(),model->cm.face[i].WT(j).v()))
+				&& model->cm.face[i].V(j)->IsUserBit(selVertBit))
 			{
-				if (model->cm.face[i].V(j)->IsUserBit(selVertBit))
-				{
-					model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)posVX/(AREADIM*zoom);
-					model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)posVY/(AREADIM*zoom);
-				}
+				model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)posVX/(AREADIM*zoom);
+				model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)posVY/(AREADIM*zoom);
 			}
 		}
 	}
+	areaUV.moveCenter(QPointF(areaUV.center().x() - (float)posVX/(AREADIM*zoom), areaUV.center().y() + (float)posVY/(AREADIM*zoom)));
 	tpanX = 0; tpanY = 0; posVX = 0; posVY = 0;
 	this->update();
 	emit UpdateModel();
@@ -834,6 +861,9 @@ void RenderArea::SelectVertexes()
 	selEnd = QPoint(-MAX,-MAX);
 	selectedV = false;
 	selection = QRect();
+	QPointF a = QPointF((float)(area.x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - area.y() + viewport.Y()*zoom)/(AREADIM*zoom));
+	QPointF b = QPointF((float)(area.bottomRight().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - area.bottomRight().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+	areaUV = QRectF(a, QSizeF(b.x()-a.x(), b.y()-a.y()));
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
@@ -841,15 +871,11 @@ void RenderArea::SelectVertexes()
 		{
 			for (int j = 0; j < 3; j++)
 			{
+				(*fi).V(j)->ClearUserBit(selVertBit);
 				QPoint tmp = QPoint((*fi).WT(j).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(j).v() * AREADIM*zoom) + viewport.Y()*zoom);
 				if (area.contains(tmp))
 				{
-					// <-------
-					/* c'è un problema: i vertici sono condivisi ergo in caso di vertice comune a 2 facce,
-					ma con coordinate uv diverse tra wedge (comp disconnesse), se ne marco uno per una faccia
-					automaticamente marco anche l'altro!!! esiste un flag per i bordi?*/
 					(*fi).V(j)->SetUserBit(selVertBit);
-					(*fi).SetUserBit(selFaceBit);
 					if (tmp.x() < selStart.x()) selStart.setX(tmp.x());
 					if (tmp.y() < selStart.y()) selStart.setY(tmp.y());
 					if (tmp.x() > selEnd.x()) selEnd.setX(tmp.x());
@@ -859,6 +885,12 @@ void RenderArea::SelectVertexes()
 			}
 		}
 	}
+}
+
+void RenderArea::SelectConnectedComponent()
+{
+	// Select a series of faces with the same UV coord on the edge
+	// TODO <-----
 }
 
 void RenderArea::HandleScale(QPoint e)
@@ -876,7 +908,6 @@ void RenderArea::HandleScale(QPoint e)
 			//selRect[1].moveCenter(QPoint(selRect[1].center().x(),ty));     if coords are negative.......
 			selRect[2] = QRect(tx - RECTDIM/2, selRect[2].y(), RECTDIM, RECTDIM);
 			selRect[1] = QRect(selRect[1].x(), ty - RECTDIM/2, RECTDIM, RECTDIM);
-
 			selection.setTopLeft(selRect[0].center());
 			selection.setBottomLeft(selRect[2].center());
 			selection.setTopRight(selRect[1].center());
@@ -903,7 +934,6 @@ void RenderArea::HandleScale(QPoint e)
 			//selRect[3].moveCenter(QPoint(selRect[3].center().x(), ty));
 			selRect[0] = QRect(tx - RECTDIM/2, selRect[0].y(), RECTDIM, RECTDIM);
 			selRect[3] = QRect(selRect[3].x(), ty - RECTDIM/2, RECTDIM, RECTDIM);
-
 			selection.setTopLeft(selRect[0].center());
 			selection.setBottomLeft(selRect[2].center());
 			selection.setBottomRight(selRect[3].center());
@@ -917,7 +947,6 @@ void RenderArea::HandleScale(QPoint e)
 			//selRect[2].moveCenter(QPoint(selRect[2].center().x(), ty));
 			selRect[1] = QRect(tx - RECTDIM/2, selRect[1].y(), RECTDIM, RECTDIM);
 			selRect[2] = QRect(selRect[2].x(), ty - RECTDIM/2, RECTDIM, RECTDIM);
-
 			selection.setTopRight(selRect[1].center());
 			selection.setBottomLeft(selRect[2].center());
 			selection.setBottomRight(selRect[3].center());
@@ -927,7 +956,7 @@ void RenderArea::HandleScale(QPoint e)
 	this->update(selRect[highlighted]);
 	this->update(selRect[(highlighted+2)%selRect.size()]);
 	originR.moveCenter(selection.center());
-	origin = QPointF((float)(originR.center().x() - viewport.X())/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y())/(AREADIM*zoom));
+	origin = QPointF((float)(originR.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
 	
 	// calculate scaling
 	scaleX = (float)selection.width() / oldSRX;
@@ -997,4 +1026,50 @@ void RenderArea::UpdateSelectionArea(int x, int y)
 	selRect[1].moveCenter(selection.topRight());
 	selRect[2].moveCenter(selection.bottomLeft());
 	selRect[3].moveCenter(selection.bottomRight());
+}
+
+void RenderArea::UpdateVertexSelection()
+{
+	// Recalcultate the rectangle for selection of vertexes
+	selStart = QPoint(MAX,MAX);
+	selEnd = QPoint(-MAX,-MAX);
+	selectedV = false;
+	selection = QRect();
+	CMeshO::FaceIterator fi;
+	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
+	{
+		if ((*fi).WT(0).n() == textNum)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				QPoint tmp = QPoint((*fi).WT(j).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(j).v() * AREADIM*zoom) + viewport.Y()*zoom);
+				if ((*fi).V(j)->IsUserBit(selVertBit))
+				{
+					if (tmp.x() < selStart.x()) selStart.setX(tmp.x());
+					if (tmp.y() < selStart.y()) selStart.setY(tmp.y());
+					if (tmp.x() > selEnd.x()) selEnd.setX(tmp.x());
+					if (tmp.y() > selEnd.y()) selEnd.setY(tmp.y());
+					if (!selectedV) selectedV = true;
+				}
+			}
+		}
+	}
+	selection = QRect(QPoint(selStart.x() - RADIUS/2, selStart.y() - RADIUS/2), QPoint(selEnd.x() + RADIUS/2, selEnd.y() + RADIUS/2));
+	QPointF a = QPointF((float)(selection.x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selection.y() + viewport.Y()*zoom)/(AREADIM*zoom));
+	QPointF b = QPointF((float)(selection.bottomRight().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selection.bottomRight().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+	areaUV = QRectF(a, QSizeF(b.x()-a.x(), b.y()-a.y()));
+}
+ 
+void RenderArea::DrawCircle(QPoint origin)
+{
+	// Draw a circle
+	float DEG2RAD = 3.14159f/180.0f;
+	float r = (float)RADIUS/2/zoom;
+	glBegin(GL_TRIANGLE_FAN);
+	for (int i = 0; i < 360; i++)
+	{
+		float degInRad = i*DEG2RAD;
+		glVertex3f(origin.x() + cos(degInRad)*r,origin.y() + sin(degInRad)*r,1.1f);
+	}
+	glEnd();
 }

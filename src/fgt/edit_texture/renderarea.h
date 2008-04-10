@@ -71,7 +71,7 @@ private:
 	int panX, panY, tpanX, tpanY, oldPX, oldPY, posVX, posVY;	// Temp for axis
 	int maxX, maxY, minX, minY;	// For texCoord out of border
 
-	int selBit, selVertBit, selFaceBit;		// User bit: idicates if a face/vertex is selected for editing
+	int selBit, selVertBit;		// User bit: idicates if a face/vertex is selected for editing
 	bool selected, selectedV;	// Indicates if the are some selected faces
 
 	QPointF origin;		// Origin for rotate editing
@@ -80,6 +80,8 @@ private:
 
 	QPoint start, end;	// Selection area
 	QRect area;			// Dragged rectangle
+
+	QRectF areaUV;
 
 	// Info for interactive editing
 	vector<QRect> selRect;	// Vector of buttons area
@@ -101,6 +103,7 @@ private:
 	void UpdateVertex();
 	void ResetTrack(bool reset);
 	void SelectFaces();
+	void SelectConnectedComponent();
 	void SelectVertexes();
 	void HandleScale(QPoint e);
 	void HandleRotate(QPoint e);
@@ -108,6 +111,8 @@ private:
 	void ScaleComponent(float percentX, float percentY);
 	void RecalculateSelectionArea();
 	void UpdateSelectionArea(int x, int y);
+	void UpdateVertexSelection();
+	void DrawCircle(QPoint origin);
 
 signals:
 	void UpdateModel();

@@ -37,6 +37,7 @@ class EditTexturePlugin : public QObject, public MeshEditInterface
 						SMSub
 					 } SelMode;
 		SelMode selMode;
+
 		bool isDragging;// Indicates if the user is selecting faces
 		QPoint start;	// Point for the selection area
 		QPoint cur;
@@ -51,11 +52,8 @@ class EditTexturePlugin : public QObject, public MeshEditInterface
 		void DrawXORRect(GLArea * gla);
 		void InitTexture(MeshModel &m);
 	
-		QString debug;
-
 	signals:
 		void setSelectionRendering(bool);
-
 };
 
 #endif

@@ -35,6 +35,7 @@ public:
 private:
 	Ui::TextureEditorClass ui;
 	void ResetLayout();
+	void SmoothTextureCoordinates();
 
 private slots:
 	void on_connectedButton_clicked();
@@ -43,6 +44,7 @@ private slots:
 	void on_vertexButton_clicked();
 	void on_clampButton_clicked();
 	void on_modulusButton_clicked();
+	void on_smoothButton_clicked();
 
 public slots:
 	void UpdateModel();

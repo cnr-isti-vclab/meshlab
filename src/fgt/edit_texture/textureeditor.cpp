@@ -77,6 +77,20 @@ void TextureEditor::SetStatusText(QString text)
 	ui.StatusLabel->setText(text);
 }
 
+void TextureEditor::ResetLayout()
+{
+	// uncheck all the buttons
+	ui.connectedButton->setChecked(false);
+	ui.moveButton->setChecked(false);
+	ui.selectButton->setChecked(false);
+	ui.vertexButton->setChecked(false);
+}
+
+void TextureEditor::SmoothTextureCoordinates()
+{
+	// <-------
+}
+
 // Buttons
 void TextureEditor::on_moveButton_clicked()
 {
@@ -119,12 +133,8 @@ void TextureEditor::on_modulusButton_clicked()
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->RemapMod();
 }
 
-void TextureEditor::ResetLayout()
+void TextureEditor::on_smoothButton_clicked()
 {
-	// uncheck all the buttons
-	ui.connectedButton->setChecked(false);
-	ui.moveButton->setChecked(false);
-	ui.selectButton->setChecked(false);
-	ui.vertexButton->setChecked(false);
+	// Apply the smooth
+	SmoothTextureCoordinates();
 }
-
