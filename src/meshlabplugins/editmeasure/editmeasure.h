@@ -56,7 +56,7 @@ public:
 private:
   QList <QAction *> actionList;
   QFont qFont;
-  Rubberband rubberband;
+  vcg::Rubberband rubberband;
   bool was_ready;
 signals:
   void suspendEditToggle();
