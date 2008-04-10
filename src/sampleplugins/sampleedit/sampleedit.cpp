@@ -31,6 +31,7 @@ $Log: meshedit.cpp,v $
 #include <meshlab/glarea.h>
 #include "sampleedit.h"
 #include <wrap/gl/pick.h>
+#include<vcg/complex/trimesh/append.h>
 
 using namespace std;
 using namespace vcg;
@@ -116,6 +117,10 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * g
 		glVertex(fp->P(1));
 		glVertex(fp->P(2));
 	glEnd();
+	
+	QString buf=QString("f%1 (%3 %4 %5)").arg(tri::Index(m.cm,fp)).arg(tri::Index(m.cm,fp->V(0))).arg(tri::Index(m.cm,fp->V(1))).arg(tri::Index(m.cm,fp->V(2)));
+	Point3f c=Barycenter(*fp);
+	gla->renderText(c[0], c[1], c[2], buf, qFont);
 	for(int i=0;i<3;++i)
 		{
 			QString buf=QString("v%1:%2 (%3 %4 %5)").arg(i).arg(fp->V(i) - &m.cm.vert[0]).arg(fp->P(i)[0]).arg(fp->P(i)[1]).arg(fp->P(i)[2]);
