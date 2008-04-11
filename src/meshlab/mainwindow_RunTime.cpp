@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.156  2008/04/11 10:09:13  cignoni
+added start decorate call
+
 Revision 1.155  2008/04/04 10:07:08  cignoni
 Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
@@ -694,7 +697,9 @@ void MainWindow::applyDecorateMode()
 	if(!found){
 	  FilterParameterSet * decoratorParams = new FilterParameterSet();
 		iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
+		iDecorateTemp->StartDecorate(action,*GLA()->mm(),GLA());
 		GLA()->iDecoratorsList->push_back(make_pair(action,decoratorParams));
+		
 		GLA()->log.Logf(GLLogStream::Info,"Enable Decorate mode %s",qPrintable(action->text()));
 	}
 	GLA()->update();
