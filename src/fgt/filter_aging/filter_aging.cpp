@@ -250,7 +250,7 @@ double GeometryAgingPlugin::generateNoiseValue(int style, const CVertexO::Scalar
 		case LINEAR:
 		case SINUSOIDAL:
 			for(int i=0; i<8; i++) {
-				double p = pow(2, i);
+				float p = pow(2.0f, i);
 				noise += math::Perlin::Noise(p*x, p*y, p*z) / p;
 			}
 			noise /= 2.0;
