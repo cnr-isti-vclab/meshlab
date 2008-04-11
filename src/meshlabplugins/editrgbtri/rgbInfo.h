@@ -129,6 +129,17 @@ public:
     {
     	count = c;
     }
+    /// Get the number of incident edges in the base mesh
+    inline int getBaseArity()
+    {
+    	return arity;
+    }
+    /// Set the number of incident edges in the base mesh
+    inline void setBaseArity(int a)
+    {
+    	arity = a;
+    }
+    
     /// Return true if Pinf is already computed
     inline bool getIsPinfReady()
     {
@@ -204,6 +215,8 @@ private:
     list<int> cGiven;
     /// Indicates if the vertex is on the border of the mesh
     bool isBorder;
+    /// Number of incident edge in the base mesh
+    int arity;
     
 };
 
@@ -345,6 +358,9 @@ public:
             el[0] = getFaceLevel();
             el[1] = getFaceLevel();
             el[2] = getFaceLevel();
+            va[0] = 2;
+            va[1] = 2;
+            va[2] = 2;
             break;
         case FaceInfo::FACE_RED_GGR:
             z = maxLevelVertex();
@@ -354,6 +370,10 @@ public:
             el[(0+z)%3] = getFaceLevel()+1;
             el[(1+z)%3] = getFaceLevel();
             el[(2+z)%3] = getFaceLevel();
+            va[(0+z)%3] = 3;
+            va[(1+z)%3] = 2;
+            va[(2+z)%3] = 1;
+            
             break;
         case FaceInfo::FACE_RED_RGG:
             z = maxLevelVertex();
@@ -363,6 +383,9 @@ public:
             el[(0+z)%3] = getFaceLevel();
             el[(1+z)%3] = getFaceLevel();
             el[(2+z)%3] = getFaceLevel()+1;
+            va[(0+z)%3] = 3;
+            va[(1+z)%3] = 1;
+            va[(2+z)%3] = 2;
             break;
         case FaceInfo::FACE_BLUE_GGR:
             z = minLevelVertex();
@@ -372,6 +395,9 @@ public:
             el[(0+z)%3] = getFaceLevel()+1;
             el[(1+z)%3] = getFaceLevel()+1;
             el[(2+z)%3] = getFaceLevel();
+            va[(0+z)%3] = 1;
+            va[(1+z)%3] = 4;
+            va[(2+z)%3] = 1;
             break;
         case FaceInfo::FACE_BLUE_RGG:
             z = minLevelVertex();
@@ -381,9 +407,11 @@ public:
             el[(0+z)%3] = getFaceLevel();
             el[(1+z)%3] = getFaceLevel()+1;
             el[(2+z)%3] = getFaceLevel()+1;
+            va[(0+z)%3] = 1;
+            va[(1+z)%3] = 1;
+            va[(2+z)%3] = 4;
             break;
         }
-        
     }
     
     /// Return the i vertex of the triangle 
@@ -498,17 +526,6 @@ public:
         return false;
     }
     
-    /// Check if ot is in relation FF with the triangle
-    inline bool isAdjacent(RgbTriangle& ot)
-    {
-        for (int i = 0; i < 3; ++i) 
-        {
-            if (FF(i).face() == ot.face())
-                return true;
-        }
-        return false;
-    }
-    
     /// Extract an edge as a sorted pair of vertex
     inline VertexPair extractVertexFromEdge(int i)
     {
@@ -555,6 +572,9 @@ public:
     {
         using vcg::Color4b;
         info()->setColor(fc);
+        
+#ifdef RGBCOLOR 
+        
         Color4b& c = face()->C();
 
         switch (fc)
@@ -571,6 +591,7 @@ public:
             c.Import(Color4b(80,0,0,255));
             break;
         }
+#endif
         if (update)
             updateInfo();
     }
@@ -732,65 +753,14 @@ public:
     	assert (vArray[i].index == getIndex(face()->V(i)));
     	return getIndex(face()->V(i));
     }
-    /// Search in vector vt a common vertex of all the triangles. If index is != 0, index is set to the common vertex otherwise only true or false is returned.
-    inline bool findCommonVertex(std::vector<RgbTriangle<TRI_MESH_TYPE> >& vt,int* index = 0)
+    
+    /// Return the level of the i-th edge
+    inline int getAngle(int i)
     {
-    	if (vt.size() < 3)
-    		return false;
-
-    	for (int i = 0; i < 3; ++i) 
-    	{
-    		int v = this->V(i).index;
-    		typename std::vector<RgbTriangle<TRI_MESH_TYPE> >::iterator it = vt.begin();
-    		typename std::vector<RgbTriangle<TRI_MESH_TYPE> >::iterator end = vt.end();
-    		++it; // skip the first
-    		bool isCommon = true;
-    		for (; it != end; ++it) 
-    		{
-    			bool isInTriangle = false;
-    			for (int j = 0; j < 3; ++j) 
-    			{
-
-    				if ((*it).V(j).index == v)
-    					isInTriangle = true;
-    			}
-    			if (!isInTriangle)
-    				isCommon = false;
-
-    		}
-
-    		if (isCommon)
-    		{
-    			if(index)
-    			{
-    				*index = i;
-    			}
-    			return true;
-    		}
-    	}
-
-    	return false;
+        assert(i>=0 && i<= 2);
+        return va[i];
     }
     
-    //! Overload operator << (debug)
-    friend std::ostream& operator<<(std::ostream& os, RgbTriangle<TriMeshType>& p)
-    {
-      os << "Index " << p.index << std::endl;
-      os << "F: "  << "R:" << p.isRed() << "G:" << p.isGreen() << "B:" << p.isBlue() << " " << p.getFaceLevel() << " " << p.index << std::endl;
-      os << "V0: " << " " << p.getVl(0) << " " << p.getVIndex(0) << " Border:" << p.getVertexIsBorder(0) << "\t";
-      os << "V1: " << " " << p.getVl(1) << " " << p.getVIndex(1) << " Border:" << p.getVertexIsBorder(1) << "\t";
-      os << "V2: " << " " << p.getVl(2) << " " << p.getVIndex(2) << " Border:" << p.getVertexIsBorder(2) << "\t" << std::endl;
-      RgbTriangle<TriMeshType> t0 = p.FF(0);
-      RgbTriangle<TriMeshType> t1 = p.FF(1);
-      RgbTriangle<TriMeshType> t2 = p.FF(2);
-      os << "E0: " << " " << p.getEdgeLevel(0) << " " << "R:" << (p.getEdgeColor(0) == FaceInfo::EDGE_RED) << "G:"  << (p.getEdgeColor(0) == FaceInfo::EDGE_GREEN) << "Border: " << (p.getEdgeIsBorder(0)) << " FF: " << t0.index << "\t";
-      os << "E1: " << " " << p.getEdgeLevel(1) << " " << "R:" << (p.getEdgeColor(1) == FaceInfo::EDGE_RED) << "G:"  << (p.getEdgeColor(1) == FaceInfo::EDGE_GREEN) << "Border: " << (p.getEdgeIsBorder(1)) << " FF: " << t1.index << "\t";
-      os << "E2: " << " " << p.getEdgeLevel(2) << " " << "R:" << (p.getEdgeColor(2) == FaceInfo::EDGE_RED) << "G:"  << (p.getEdgeColor(2) == FaceInfo::EDGE_GREEN) << "Border: " << (p.getEdgeIsBorder(2)) << " FF: " << t2.index << "\t";
-
-      
-      os << std::endl;
-      return os;
-    }
     /// VCG Mesh
     TriMeshType* m;
     /// Rgb information
@@ -815,6 +785,8 @@ private:
     EdgeColor ec[3];
     /// Level of the edges
     int el[3];
+    /// Angle size
+    int va[3];
 
 
 };
@@ -866,7 +838,7 @@ public:
         m(&M), rgbInfo(&Info), index(VertexIndex)
     {
     }
-    /// Costruct a new RGBVertex for the vertex of index VertexIndex
+    /// Costruct a new RGBVertex for the vertex initialized with a vertex pointer
     RgbVertex(TriMeshType& M, RgbInfo& Info, VertexPointer vp) :
         m(&M), rgbInfo(&Info)
     {
@@ -1002,6 +974,11 @@ public:
     	return vert().VFi();
     }
     
+    inline VertexType* vp()
+    {
+    	return &(m->vert[index]);
+    }
+    
     inline RgbTriangle<TRI_MESH_TYPE> VFp()
     {
     	FacePointer fp = vert().VFp();
@@ -1045,7 +1022,7 @@ public:
 	    CMeshO::FacePointer first = pos.F();
 
 	    RgbTriangleC ttmp = RgbTriangleC(t.m,t.rgbInfo,pos.F()->Index());
-	    int itmp;
+	    int itmp = 0;
 	    ttmp.containVertex(index,&itmp);
 		ledge.push_back(RgbEdgeC(ttmp,itmp));
 
@@ -1088,7 +1065,17 @@ public:
       return os;
     }
 	
-	
+    /// Get the number of incident edges in the base mesh
+    inline int getBaseArity()
+    {
+    	return info().getBaseArity();
+    }
+    /// Set the number of incident edges in the base mesh
+    inline void setBaseArity(int a)
+    {
+    	info().setBaseArity(a);
+    }
+    
 	/// VCG Mesh
     TriMeshType* m;
     /// Rgb information container

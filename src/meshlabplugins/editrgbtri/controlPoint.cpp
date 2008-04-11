@@ -73,147 +73,11 @@ void ControlPoint::init(TriMeshType& m, RgbInfo& info)
 
 }
 
-ControlPoint::RgbVertexC ControlPoint::findOppositeVertex(RgbTriangleC& tin, int EdgeIndex, vector<RgbVertexC>* firstVertexes)
-{
-	int count = 0;
-	RgbTriangleC t = tin;
-	int ti = EdgeIndex;
-	while (true)
-	{
-		if (t.isGreen())
-		{
-			return t.V((ti+2)%3);
-		}
-		assert(t.isRed());
-		{
-			if ((count == 0) && firstVertexes)
-			{
-				firstVertexes->push_back(t.V((ti+2)%3));
-			}
-			int rei = -1;
-	        for (int i = 0; i < 3; ++i) 
-	        {
-	            if (t.getEdgeColor(i) == FaceInfo::EDGE_RED)
-	                rei = i;
-	        }
-	        assert(rei >= 0 && rei <= 2);
-	        
-	        RgbTriangleC t1 = t.FF(rei);
-	        int t1i = t.FFi(rei);
-	        
-	        assert(t1.isRed() || t1.isBlue());
-	        
-	        if (t1.isRed())
-	        {
-	        	return t1.V((t1i+2)%3);
-	        }
-	        else
-	        {
-	        	assert(t1.isBlue());
-	        	RgbTriangleC t2;
-	        	int t2i;
-	        	// isBlue
-	        	if (t1.containVertex(t.V((ti+1)%3).index))
-	        	{
-	        		t2 = t1.FF((t1i+2)%3);
-	        		t2i = t1.FFi((t1i+2)%3);
-	    			if ((count == 0) && firstVertexes)
-	    			{
-	    				firstVertexes->push_back(t1.V((t1i+2)%3));
-	    			}
-
-	        	}
-	        	else
-	        	{
-	        		assert(t1.containVertex(t.V(ti).index));
-	        		t2 = t1.FF((t1i+1)%3);
-	        		t2i = t1.FFi((t1i+1)%3);
-	    			if ((count == 0) && firstVertexes)
-	    			{
-	    				firstVertexes->push_back(t1.V((t1i+2)%3));
-	    			}
-	        	}
-	        	
-	        	t = t2;
-	        	ti = t2i;
-	        	t.updateInfo();
-	        	assert(t.isGreen() || t.isRed());
-	        	
-	        }
-			
-		}
-		++count;
-	}
-}
-
-void ControlPoint::splitGreenEdgeIfNeeded(RgbVertexC& v, int minLevel, TopologicalOpC& to)
-{
-	if ((v.getLevel() == minLevel -1) || (v.getIsPinfReady()) || v.getIsMarked() || v.getIsBorder())
-		return;
-	
-	v.setIsMarked(true);
-	
-	bool split = true;
-	while(split)
-	{
-		split = false;
-		int level;
-	    int i;
-
-		FacePointer fp = v.vert().VFp();
-		int fi = v.vert().VFi();
-	    vcg::face::Pos<FaceType> pos(fp,fi);
-	    CMeshO::FacePointer first = pos.F(); 
-
-	    RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
-	    assert(tmp.containVertex(v.index));
-	    tmp.containVertex(v.index,&i);
-	    assert(i>=0 && i<= 2);
-	    level = tmp.getEdgeLevel(i); 
-	    
-	    if (level < (minLevel - 1)  && tmp.getEdgeColor(i) == FaceInfo::EDGE_GREEN)
-	    {
-	    	split = RgbPrimitives::recursiveEdgeSplit(tmp,i,to);
-	    	if (split)
-	    	    continue;
-	    }
-	    
-	    pos.FlipF();
-	    pos.FlipE();
-	    
-	    while(pos.F() && (pos.F() != first))
-	    {
-	        RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
-	        assert(tmp.containVertex(v.index));
-	        tmp.containVertex(v.index,&i);
-	        assert(i>=0 && i<= 2);
-	        
-	        level = tmp.getEdgeLevel(i);
-		    if (level < (minLevel -1 ) && tmp.getEdgeColor(i) == FaceInfo::EDGE_GREEN)
-		    {
-		    	split = RgbPrimitives::recursiveEdgeSplit(tmp,i,to);
-		    	if (split)
-		    	    break;
-		    }
-
-	        pos.FlipF();
-	        pos.FlipE();
-	        assert(pos.F()->V(0) == fp->V(fi) || pos.F()->V(1) == fp->V(fi) || pos.F()->V(2) == fp->V(fi));
-	        assert(!fp->IsD());
-	    }
-	    
-	    
-	}
-	
-	v.setIsMarked(false);
-	assert(v.getIsPinfReady());
-}
-
 void ControlPoint::findInitialStencil(RgbTriangleC& t, int EdgeIndex,int level, TopologicalOpC& to, vector<RgbVertexC>* indexes,vector<RgbVertexC>* firstVertex)
 {
 	bool isBorder = t.getEdgeIsBorder(EdgeIndex);
 	
-	RgbVertexC c1 = findOppositeVertex(t,EdgeIndex,firstVertex);
+	RgbVertexC c1 = RgbPrimitives::findOppositeVertex(t,EdgeIndex,firstVertex);
 	
 	RgbTriangleC ot;
 	int oi;
@@ -223,14 +87,14 @@ void ControlPoint::findInitialStencil(RgbTriangleC& t, int EdgeIndex,int level, 
 	{
 		ot = t.FF(EdgeIndex);
 		oi = t.FFi(EdgeIndex);
-		c2 = findOppositeVertex(ot,oi,firstVertex);
+		c2 = RgbPrimitives::findOppositeVertex(ot,oi,firstVertex);
 	}
 	
-	splitGreenEdgeIfNeeded(t.V(EdgeIndex),level,to);
-	splitGreenEdgeIfNeeded(t.V((EdgeIndex+1)%3),level,to);
-	splitGreenEdgeIfNeeded(c1,level,to);
+	RgbPrimitives::splitGreenEdgeIfNeeded(t.V(EdgeIndex),level,to);
+	RgbPrimitives::splitGreenEdgeIfNeeded(t.V((EdgeIndex+1)%3),level,to);
+	RgbPrimitives::splitGreenEdgeIfNeeded(c1,level,to);
 	if (!isBorder)
-		splitGreenEdgeIfNeeded(c2,level,to);
+		RgbPrimitives::splitGreenEdgeIfNeeded(c2,level,to);
 	
 	if (indexes)
 	{
@@ -371,66 +235,9 @@ void ControlPoint::updateP(RgbVertexC& v)
 		Point tmp = computePkl(v,minLevel);
 		v.setCoord(tmp);
 	}
-	
-	vector<FacePointer> vfp;
-	vfp.reserve(6);
-	VF(v,vfp);
-	Point3f vnorm(0,0,0);
-	int count = 0;
-	for (unsigned int i = 0; i < vfp.size(); ++i) 
-	{
-		vcg::face::ComputeNormal(*(vfp[i]));
-		vnorm += vfp[i]->cN();
-		++count;
-	}
-	vnorm /= count; 
-	v.vert().N() = vnorm;
+	RgbPrimitives::updateNormal(v);
 }
 
-void ControlPoint::VF(RgbVertexC& v,vector<FacePointer>& vfp)
-{
-    assert(!v.vert().IsD());
-	bool isBorder = v.getIsBorder();
-    
-    vcg::face::Pos<FaceType> pos(v.vert().VFp(),v.vert().VFi());
-    
-    RgbTriangleC t = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
-    
-    if (t.getNumberOfBoundaryEdge(&v) >= 2)
-    {
-    	vfp.push_back(pos.F());
-    	return;
-    }
-
-    if (isBorder)       // if is border move cw until the border is found
-    {
-        pos.FlipE();
-        pos.FlipF();
-        
-        while (!pos.IsBorder())
-        {
-            pos.FlipE();
-            pos.FlipF();
-        }
-        
-        pos.FlipE();
-    }
-
-    
-    CMeshO::FacePointer first = pos.F(); 
-    vfp.push_back(pos.F());
-    pos.FlipF();
-    pos.FlipE();
-    
-    while(pos.F() && (pos.F() != first))
-    {
-    	vfp.push_back(pos.F());
-        
-        pos.FlipF();
-        pos.FlipE();
-    }
-    
-}
 
 void ControlPoint::addContribute(RgbVertexC& v,Point& p, bool update)
 {
@@ -633,7 +440,7 @@ void ControlPoint::searchContribute(RgbVertexC& v,bool update)
 	vector<RgbVertexC> vv;
 	vv.reserve(6);
 	
-	VV(v,vv);
+	RgbPrimitives::VV(v,vv);
 	
 	for (unsigned int i = 0; i < vv.size(); ++i) 
 	{
@@ -651,7 +458,7 @@ void ControlPoint::searchContributeBoundary(RgbVertexC& v,bool update)
 	vector<RgbVertexC> vv;
 	vv.reserve(6);
 	
-	VV(v,vv,false);
+	RgbPrimitives::VV(v,vv,false);
 
 	int last = vv.size() -1;
 	
@@ -686,7 +493,7 @@ void ControlPoint::addPinfContributeToVV(RgbVertexC& v)
 	vector<RgbVertexC> vv;
 	vv.reserve(6);
 	
-	VV(v,vv,true);
+	RgbPrimitives::VV(v,vv,true);
 	
 	for (unsigned int i = 0; i < vv.size(); ++i) 
 	{
@@ -712,61 +519,10 @@ void ControlPoint::doCollapse(RgbTriangleC& fp, int EdgeIndex, TopologicalOpC& t
 
 }
 
-unsigned int ControlPoint::vertexRank(RgbVertexC& v)
-{
-	int rank;
-	if (v.getLevel() > 0)
-	{
-		rank = 6;
-	}
-	else
-	{
-		rank = v.getCount();
-	}
-	return rank;
-}
-
-int ControlPoint::vertexRank_aux(RgbVertexC& v)
-{
-	int count = 0;
-	assert(!v.getIsBorder());
-	FacePointer fp = v.vert().VFp();
-	int fi = v.vert().VFi();
-    vcg::face::Pos<FaceType> pos(fp,fi);
-    CMeshO::FacePointer first = pos.F(); 
-    ++count;
-    pos.FlipF();
-    pos.FlipE();
-    
-    while(pos.F() && (pos.F() != first))
-    {
-        ++count;
-        pos.FlipF();
-        pos.FlipE();
-        assert(pos.F()->V(0) == fp->V(fi) || pos.F()->V(1) == fp->V(fi) || pos.F()->V(2) == fp->V(fi));
-        assert(!fp->IsD());
-    }
-    return count;
-}
-
-int ControlPoint::findVertexInFace(FacePointer fp, VertexPointer vp)
-{
-	if (fp->V(0) == vp)
-		return 0;
-	else
-	if (fp->V(1) == vp)
-		return 1;
-	else
-	if (fp->V(2) == vp)
-		return 2;
-	
-	return -1;
-}
-
 int ControlPoint::minimalEdgeLevel(RgbVertexC& v)
 {
 	int level;
-    int i;
+    int i = 0;
 
     bool isBorder = v.getIsBorder();
 	FacePointer fp = v.vert().VFp();
@@ -836,118 +592,6 @@ int ControlPoint::minimalEdgeLevel(RgbVertexC& v)
     return level;
 }
 
-void ControlPoint::VV(RgbVertexC& v, vector<RgbVertexC>& vv, bool onlyGreenEdge)
-{
-	// This VV is cw
-
-	int i;
-	FacePointer fp = v.vert().VFp();
-	int fi = v.vert().VFi(); 
-	assert(fp->V(fi) == &(v.vert()));
-	bool isBorder = v.getIsBorder();
-	
-    vcg::face::Pos<FaceType> pos(fp,fi);
-    
-    RgbTriangleC t = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
-    
-    if (t.getNumberOfBoundaryEdge(&v) >= 2)
-    {
-    	int index;
-    	bool res = t.containVertex(v.index, &index);
-    	assert(res);
-    	
-    	if (!onlyGreenEdge)
-        {
-        	vv.push_back(t.V((index+1)%3));
-        	vv.push_back(t.V((index+2)%3));
-        }
-        else
-        {
-        	if ((t.getEdgeColor(index) == FaceInfo::EDGE_GREEN) && (t.getEdgeLevel(index) > t.getVl(index)))
-        	{
-        		vv.push_back(t.V((index+1)%3));
-        	}
-        	if ((t.getEdgeColor((index+2)%3) == FaceInfo::EDGE_GREEN) && (t.getEdgeLevel((index+2)%3) > t.getVl((index))))
-        	{
-        		vv.push_back(t.V((index+2)%3));
-        	}
-        }
-
-    	return;
-    }
-
-    if (isBorder)       // if is border move ccw until the border is found
-    {
-        pos.FlipE();
-        pos.FlipF();
-        
-        while (!pos.IsBorder())
-        {
-            pos.FlipE();
-            pos.FlipF();
-        }
-        
-        pos.FlipE();
-    }
-
-    CMeshO::FacePointer first = pos.F();     
-    
-    RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
-
-    assert(tmp.containVertex(v.index));
-    tmp.containVertex(v.index,&i);
-    assert(i>=0 && i<= 2);
-    assert(tmp.V(i).index == v.index);
-
-    if (!onlyGreenEdge)
-    {
-        if (isBorder)
-        	vv.push_back(tmp.V((i+2)%3)); // we cannot scan all the triangle around the vertex, 
-        								  // we have to save the last vertex
-    	vv.push_back(tmp.V((i+1)%3));
-    }
-    else
-    {
-    	if (isBorder && (tmp.getEdgeColor((i+2)%3) == FaceInfo::EDGE_GREEN) && (tmp.getEdgeLevel((i+2)%3) > tmp.getVl(i)))
-    		vv.push_back(tmp.V((i+2)%3));
-
-    	if ((tmp.getEdgeColor(i) == FaceInfo::EDGE_GREEN) && (tmp.getEdgeLevel(i) > tmp.getVl(i)))
-    		vv.push_back(tmp.V((i+1)%3));
-    }
-     
-    
-    pos.FlipF();
-    pos.FlipE();
-    
-    while(pos.F() != first)
-    {
-        RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
-        assert(tmp.containVertex(v.index));
-        tmp.containVertex(v.index,&i);
-        assert(i>=0 && i<= 2);
-        
-        if (!onlyGreenEdge)
-        {
-        	vv.push_back(tmp.V((i+1)%3));
-        }
-        else
-        {
-        	if ((tmp.getEdgeColor(i) == FaceInfo::EDGE_GREEN) && (tmp.getEdgeLevel(i) > tmp.getVl(i)))
-        		vv.push_back(tmp.V((i+1)%3));
-        }
-        
-        if (pos.IsBorder())
-        {
-            break;
-        }
-        
-        pos.FlipF();
-        pos.FlipE();
-        assert(pos.F()->V(0) == fp->V(fi) || pos.F()->V(1) == fp->V(fi) || pos.F()->V(2) == fp->V(fi));
-        assert(!fp->IsD());
-    }
-}
-
 void ControlPoint::vertexRemovalUpdate(RgbVertexC& v)
 {
 	list<RgbVertexC> l;
@@ -983,5 +627,20 @@ void ControlPoint::cleanTakenList(RgbVertexC& v)
 		removeFromLists(v,orig);
 	}
 }
+
+unsigned int ControlPoint::vertexRank(RgbVertexC& v)
+{
+	int rank;
+	if (v.getLevel() > 0)
+	{
+		rank = 6;
+	}
+	else
+	{
+		rank = v.getCount();
+	}
+	return rank;
+}
+
 
 }

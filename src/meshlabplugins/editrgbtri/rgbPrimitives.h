@@ -28,9 +28,11 @@
 #include "topologicalOp.h"
 #include <vcg/space/point3.h>
 #include "controlPoint.h"
+#include "modButterfly.h"
 
 namespace rgbt
 {
+
 
 /// Class that contain static functions for coarsening and refining operations on rgb triangulation
 class RgbPrimitives
@@ -76,24 +78,26 @@ class RgbPrimitives
     typedef vector<FaceInfo::FaceColor> vectorFaceColor;
     /// Vector of RgbTriangle 
     typedef vector<RgbTriangleC> vectorRgbTriangle;
+    /// Pos
+        typedef vcg::face::Pos<FaceType> Pos;
+        
+
     
 public:
+	
+    typedef enum {
+    	LOOP,
+    	MODBUTFLY
+    } subtype;
+	
 	/// Test a triangle for correctness in level of its vertexes
 	static bool triangleVertexCorrectness(RgbTriangleC& t);
 	/// Test a triangle for correctness in respect with adjacent triangle
 	static bool triangleAdjCorrectness(RgbTriangleC& t);
 	/// Globally test the correctess of a triangle
 	static bool triangleCorrectness(RgbTriangleC& t);
-	/// Make a green triangle at level level
-	static void g_Make(RgbTriangleC& t, int level);
-	/// Make a red_rgg triangle at level level
-	static void r_rgg_Make(RgbTriangleC& t, int level);
-	/// Make a red_ggr triangle at level level
-	static void r_ggr_Make(RgbTriangleC& t, int level);
-	/// Make a blue_rgg triangle at level level
-	static void b_rgg_Make(RgbTriangleC& t, int level);
-	/// Make a blue_ggr triangle at level level
-	static void b_ggr_Make(RgbTriangleC& t, int level);
+	/// Test a triangle correctness in respect to the angles around its vertexes
+	static bool triangleVertexAngleCorrectness(RgbTriangleC& t);
 	/// Test if it's possible to perform a gg-split
 	static bool gg_Split_Possible(RgbTriangleC& t, int EdgeIndex);
 	/// Test if it's possible to perform a rg-split
@@ -102,14 +106,6 @@ public:
 	static bool rr_Split_Possible(RgbTriangleC& t, int EdgeIndex);
 	/// Test if it's possible to perfomr an edge split
 	static bool edgeSplit_Possible(RgbTriangleC& t, int EdgeIndex);
-	/// Perform a single gg-split (do not check if the split is valid)
-	static void gg_SplitSingle(RgbTriangleC& t, int EdgeIndex);
-	/// Perform a single rg-split (do not check if the split is valid)
-	static void rg_SplitSingle(RgbTriangleC& t, int EdgeIndex);
-	/// Perform a single rr-split (do not check if the split is valid)
-	static void rr_SplitSingle(RgbTriangleC& t, int EdgeIndex);
-	/// Perform a single edge split (check if the split is possible, if not the call has no effect)
-	static void edgeSplitSingle(RgbTriangleC& t, int EdgeIndex);
 	/// Perform a gg-split using to for topology operation (do not check if the split is valid)
     static void gg_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt = 0);
     /// Perform a rg-split using to for topology operation (do not check if the split is valid)
@@ -126,9 +122,6 @@ public:
     /// Wrapper for recursiveEdgeSplitVV
     static bool recursiveEdgeSplit(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to, vector<RgbTriangleC>* vtr = 0);
 
-    /// Always perform a single edge split on a green edge, eventually causing other split (if the edge is red the call has no effect)
-    static bool recursiveEdgeSplitSingle(RgbTriangleC& t, int EdgeIndex);
-    
     /// Test if it's possible to perform a bb-swap
 	static bool bb_Swap_Possible(RgbTriangleC& t, int EdgeIndex);
 	/// Perform a bb-swap (do not check if the edge is valid)
@@ -158,8 +151,6 @@ public:
 	static bool gg_Swap_Possible(RgbTriangleC& t, int VertexIndex);
 	/// Test if it's possible to remove the specified vertex
 	static bool vertexRemoval_Possible(RgbTriangleC& t, int VertexIndex);
-	/// Perform a rr merge: set the correct color and level at triangle t
-    static void rr_Merge(int level, RgbTriangleC& t);
     /// Perform a gb merge: set the correct color and level at triangle t
     static void gb_Merge(int level, FaceInfo::FaceColor color , RgbTriangleC& t);
     /// Perform a r4 merge (do not check if the merge is valid)
@@ -179,17 +170,6 @@ public:
     /// Perform a vertex removal (check if the removal is possible, if not the call has no effect)
     static void vertexRemoval(RgbTriangleC& t, int VertexIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt = 0);
     /// Perform a single r4_Merge
-    static void r4_MergeSingle(RgbTriangleC& t, int VertexIndex);
-    /// Perform a single r2gb_Merge
-    static void r2gb_MergeSingle(RgbTriangleC& t, int VertexIndex);
-    /// Perform a single gbgb_Merge
-    static void gbgb_MergeSingle(RgbTriangleC& t, int VertexIndex);
-    /// Perform a single g2b2_Merge
-    static void g2b2_MergeSingle(RgbTriangleC& t, int VertexIndex);
-    /// Perform (if possible) a single vertex removal using a gg_swap
-    static void gg_SwapSingle(RgbTriangleC& t, int VertexIndex);
-    /// Perform a single vertex removal (check if the removal is possible, if not the call has no effect)
-    static void vertexRemovalSingle(RgbTriangleC& t, int VertexIndex);
 
     /// Auxiliary function for case gg-swap 4g1b
     static void gg_Swap_4g1b(RgbTriangleC& t, int VertexIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt = 0);
@@ -218,11 +198,6 @@ public:
 	static bool brb2g_Swap_Possible(RgbTriangleC& t, int VertexIndex);
     /// Perform a r2gb merge (do not check if the merge is valid)
     static void brb2g_Swap(RgbTriangleC& t, int VertexIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt = 0);
-    
-    /// rb_Pattern removal possible
-    static bool rb_Pattern_Removal_Possible(RgbTriangleC& t, int VertexIndex);
-    /// rb_Pattern removal
-    static void rb_Pattern_Removal(RgbTriangleC& t, int VertexIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt = 0);
     
     /// Check if the vertex is an internal vertex (the link is a closed chain of edge)
     static bool isVertexInternal(RgbTriangleC& t, int VertexIndex);
@@ -255,17 +230,48 @@ public:
     /// Perform a b_gb_Merge (do not check if the merge is valid)
     static void b_gb_Merge(RgbTriangleC& t, int VertexIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt = 0);
     
+	/// Find the 3 vertexes of the same level of the corresponding triangle
+	static RgbVertexC findOppositeVertex(RgbTriangleC& t, int EdgeIndex, vector<RgbVertexC>* firstVertexes);
     
+	/// Split all the green edges incident in v if they have a level < of the parameter level - 1
+	static void splitGreenEdgeIfNeeded(RgbVertexC& v, int level, TopologicalOpC& to);
+	
+	/// Split all the red edges incident in v if they have a level < of the parameter level - 1
+	static void splitRedEdgeIfNeeded(RgbVertexC& v, int level, TopologicalOpC& to);
+
+    /// Extract the face in ccw order around the vertex v
+    static void VF(RgbVertexC& v,vector<FacePointer>& vfp);
+
+    /// Update the normal of v
+    static void updateNormal(RgbVertexC& v);
+    
+    //! Return the VV relation
+    static void VV(RgbVertexC& v, vector<RgbVertexC>& vv, bool onlyGreenEdge = false);
+
+    //! Return the number of incident edges in the base mesh (the BaseArity fields in RgbVertex must have been initialized)
+    static unsigned int baseIncidentEdges(RgbVertexC& v);
+
+    /// Type of Subdivision Surface
+    static subtype stype;
+
 private:
+
+    //! Wrapper for the true edgeSplit. This function choose the type of subdivision surface to use
+	/* Return true if on the current edge was performed only a topological split
+	 * return false if a complete split (with update on rgb Info) was performed.
+	 */ 
+    static bool doSplit(RgbTriangleC& fp, int EdgeIndex, int level, TopologicalOpC& to , vector<FacePointer> *vfp = 0, RgbVertexC* vNewInserted = 0, vector<RgbVertexC>* vcont = 0, vector<RgbVertexC>* vupd = 0);
+    //! Wrapper for the edge collapse. This function choose the type of subdivision surface to use
+    static void doCollapse(RgbTriangleC& fp, int EdgeIndex, TopologicalOpC& to, Point3<ScalarType> *p = 0, vector<FacePointer> *vfp = 0);
 	
 	/// Extract colors from a vector of RgbTriangle 
     static void extractColor(vectorRgbTriangle& f,vectorFaceColor& c);
     /// Find the index of the first face that has its color equal to color
     static int findColorIndex(vectorFaceColor& vc,FaceInfo::FaceColor color);
-    /// Auxiliary function that search the edge vp in the triangle vector t and save the results in et and ei
-    static bool findEdgeInTriangleV(vector<RgbTriangleC>& vt, VertexPair& vp, RgbTriangleC& et, int& ei);
     /// Auxiliary function for EdgeSplit, split the passed triangle recursively
     static void recursiveEdgeSplitAux(RgbVertexC& v1, RgbVertexC& v2, TopologicalOpC& to, vector<RgbTriangleC>* vt);
+    /// Auxiliary function used after every split 
+    static void distributeContribute(vector<RgbVertexC>& vCont,RgbVertexC& vNew,vector<RgbVertexC>& vUpd);
     /// Color Pattern
     static vector<FaceInfo::FaceColor>* r4p;
     /// Color Pattern

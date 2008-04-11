@@ -31,7 +31,6 @@
 enum Tool
 {
     TOOL_SELECTIONSINGLE,
-    TOOL_SELECTIONRECT,
     TOOL_BRUSH,
     TOOL_ERASER
 };
@@ -50,11 +49,8 @@ public slots:
 	
 private slots:
     void on_bSelectionSingle_clicked(bool b);
-    void on_bSelectionRect_clicked(bool b);
     void on_bBrush_clicked(bool b);
     void on_bEraser_clicked(bool b);
-
-    void on_algo_simple_toggled(bool b);
 };
 
 #endif /*WIDGETRGBT_H_*/

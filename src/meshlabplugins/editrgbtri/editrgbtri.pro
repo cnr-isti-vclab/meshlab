@@ -1,34 +1,38 @@
-
 TEMPLATE = lib
 CONFIG += plugin
 INCLUDEPATH += ../../ ../../../../sf ../../../../code/lib/glew/include
 HEADERS = rgbt.h \
           widgetRgbT.h \
-          utilities.h \
           topologicalOp.h \
           rgbInfo.h \
           rgbPrimitives.h \
-          selectiveRefinement.h \
           controlPoint.h \
-          interactiveEdit.h
+          interactiveEdit.h \
+          modButterfly.h \
+          subdialog.h
           
 SOURCES = rgbt.cpp \
           widgetRgbT.cpp \
-          utilities.cpp \
           rgbPrimitives.cpp \
-          selectiveRefinement.cpp \
           controlPoint.cpp \
-          interactiveEdit.cpp
+          interactiveEdit.cpp \
+          modButterfly.cpp \
+          subdialog.cpp
           
           
 TARGET = editrgbtri
 DESTDIR = ../../meshlab/plugins
-#DEFINES += GLEW_STATIC
+DEFINES += GLEW_STATIC
 DEFINES += NDEBUG
+#Enable/Disable performance statistics
+#DEFINES += TIMERON
+# Enable/Disable face coloring
+#DEFINES += RGBCOLOR
+
 QT += opengl
-#QMAKE_CXXFLAGS += -O2
+QMAKE_CXXFLAGS += -O2
 RESOURCES = editrgbtri.qrc
-FORMS += widgetRgbT.ui
+FORMS += widgetRgbT.ui subDialog.ui
 
 CONFIG += debug_and_release
 #CONFIG += debug

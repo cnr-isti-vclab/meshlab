@@ -100,7 +100,7 @@ public:
 	bool has_track; // to restore the trackball settings
 	 
 	
-	void DrawXORCircle(MeshModel &m,GLArea * gla, bool doubleDraw); // draws the circle which represents the pen
+	void DrawXORCircle(GLArea * gla, bool doubleDraw); // draws the circle which represents the pen
 	void getInternFaces(MeshModel & m,list<int> *actual,vector<Vert_Data> * risult, vector<CMeshO::FacePointer> * face_risult,
 		GLArea * gla,Penn &pen,QPoint &cur, QPoint &prev, GLfloat * pixels,
 		double mvmatrix[16],double projmatrix[16],GLint viewport[4]);
@@ -171,6 +171,12 @@ public:
 
 	void processVertex(int v, int* level, double* lenght);
 	void processEdge(int v1, int v2, int* level, double* lenght);
+	
+	static double maxEdge(RgbVertexC& v);
+	static double edgeLenght(RgbTriangleC& t, int index);
+	static bool IsValidVertex(int vp, CMeshO* m,RgbInfo* info, RgbTriangleC* t, int* ti, bool ignoreNew);
+	static bool IsValidEdge(int v1,int v2, CMeshO* m,RgbInfo* info, RgbTriangleC* t, int* ti);
+	static void VE(RgbVertexC& v, vector<double>& vv);
 	
 private:
 	

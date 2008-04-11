@@ -80,16 +80,11 @@ public:
 	/// Compute the Pinf of the base vertexes
 	static void init(TriMeshType& m, RgbInfo& info);
 	
-	/// Auxiliary function used by findInitialStencil, perform the search in one direction
-	static void splitGreenEdgeIfNeeded(RgbVertexC& v, int level, TopologicalOpC& to);
-
 	/// find the 4 vertexes of the stencil
     /**
      * firstVertex return the eventual point that can contribute to the Pinf of the newvertex
      */
 	static void findInitialStencil(RgbTriangleC& t, int EdgeIndex,int level, TopologicalOpC& to, vector<RgbVertexC>* indexes = 0,vector<RgbVertexC>* firstVertexes = 0);
-	/// Find the 3 vertexes of the same level of the corresponding triangle
-	static RgbVertexC findOppositeVertex(RgbTriangleC& t, int EdgeIndex, vector<RgbVertexC>* firstVertexes);
 	/// Compute and assign PInf (it perform split on the green edge if necessary)
 	static void assignPinf(RgbVertexC& v,bool initial = false);
 	/// Recompute Pkl with k the minimal level of incident edges
@@ -122,18 +117,10 @@ public:
 	 */ 
     static bool doSplit(RgbTriangleC& fp, int EdgeIndex, int level, TopologicalOpC& to , vector<FacePointer> *vfp = 0, RgbVertexC* vNewInserted = 0, vector<RgbVertexC>* vcont = 0, vector<RgbVertexC>* vupd = 0);
 	
-    //! Perform an edge split with the correct computation of the new vertex coordinates
+    //! Perform an edge collapse
     static void doCollapse(RgbTriangleC& fp, int EdgeIndex, TopologicalOpC& to, Point3<ScalarType> *p = 0, vector<FacePointer> *vfp = 0);
-    //! Count the number of incident edges (not use any relation if vertex level > 0)
-    static unsigned int vertexRank(RgbVertexC& v);
-    //! Count the number of incident edges using the Vf* and FF relation
-    static int vertexRank_aux(RgbVertexC& v);
     //! Return the minimal level of incident edge
     static int minimalEdgeLevel(RgbVertexC& v);
-    //! Return the VV relation
-    static void VV(RgbVertexC& v, vector<RgbVertexC>& vv, bool onlyGreenEdge = false);
-    //! Extract the edge number from fp
-    int findVertexInFace(FacePointer fp, VertexPointer vp);
     /// Search in VV relation all vertexes that contribute on Pinf of v
     static void searchContribute(RgbVertexC& v, bool update = true);
     /// Search in VV relation the two boundary vertexes that contribute on Pinf of v when v is on the Boundary
@@ -144,8 +131,6 @@ public:
     //static void removeContributeToVV(RgbVertexC& v);
     /// If possible add the contribute of orig to dest. If Execute is equal to false do not perform the operation, only return true if possible false otherwise.
     static bool addContributeIfPossible(RgbVertexC& dest, RgbVertexC& orig, bool execute = true);
-    /// Extract the face in ccw order around the vertex v
-    static void VF(RgbVertexC& v,vector<FacePointer>& vfp);
     /// Add the vertex orig to the taken list of dest and the vertex dest to the given list of orig
     static void addToLists(RgbVertexC& dest, RgbVertexC& orig);
     /// Remove the vertex orig to the taken list of dest and the vertex dest to the given list of orig
@@ -159,6 +144,9 @@ public:
     static void vertexRemovalUpdate(RgbVertexC& v);
     /// Clear the taken list removing all the links
     static void cleanTakenList(RgbVertexC& v);
+    
+    //! Count the number of incident edges (not use any relation if vertex level > 0)
+    static unsigned int vertexRank(RgbVertexC& v);
 };
 
 }

@@ -41,6 +41,8 @@ vector<FaceInfo::FaceColor>* RgbPrimitives::s4g1bggr = 0;
 vector<FaceInfo::FaceColor>* RgbPrimitives::s4g1brgg = 0;
 vector<FaceInfo::FaceColor>* RgbPrimitives::s3g2rp = 0;
 
+RgbPrimitives::subtype RgbPrimitives::stype = MODBUTFLY;
+
 bool RgbPrimitives::triangleVertexCorrectness(RgbTriangleC& t)
 {
     int vl[3];
@@ -77,39 +79,33 @@ bool RgbPrimitives::triangleAdjCorrectness(RgbTriangleC& t)
     return true;
 }
 
+bool RgbPrimitives::triangleVertexAngleCorrectness(RgbTriangleC& t)
+{
+	bool res = true;
+	for (int i=0; i<3;i++)
+	{
+		RgbVertexC& v = t.V(i);
+		if (!v.getIsBorder())
+		{
+			int rank = ModButterfly::baseArity(v);
+			Pos p = Pos(t.face(),i);
+			ModButterfly::rotate(v,p,2*rank);
+			
+			assert(p.v == v.vp());
+			assert(p.f == t.face());
+			assert(p.z == i);
+			res == res && (p.v == v.vp()) && (p.f == t.face()) && (p.z == i);
+		}
+	}
+	return res;
+}
+
 bool RgbPrimitives::triangleCorrectness(RgbTriangleC& t)
 {
     bool a = triangleAdjCorrectness(t);
     bool v = triangleVertexCorrectness(t);
-    return a && v;
-}
-
-void RgbPrimitives::g_Make(RgbTriangleC& t, int level)
-{
-    t.setFaceColor(FaceInfo::FACE_GREEN);
-    t.setFaceLevel(level);
-}
-void RgbPrimitives::r_rgg_Make(RgbTriangleC& t, int level)
-{
-    t.setFaceColor(FaceInfo::FACE_RED_RGG);
-    t.setFaceLevel(level);
-}
-void RgbPrimitives::r_ggr_Make(RgbTriangleC& t, int level)
-{
-    t.setFaceColor(FaceInfo::FACE_RED_GGR);
-    t.setFaceLevel(level);
-}
-
-void RgbPrimitives::b_rgg_Make(RgbTriangleC& t, int level)
-{
-    t.setFaceColor(FaceInfo::FACE_RED_RGG);
-    t.setFaceLevel(level);
-}
-
-void RgbPrimitives::b_ggr_Make(RgbTriangleC& t, int level)
-{
-    t.setFaceColor(FaceInfo::FACE_RED_GGR);
-    t.setFaceLevel(level);
+    bool angle = triangleVertexAngleCorrectness(t);
+    return a && v && angle;
 }
 
 bool RgbPrimitives::gg_Split_Possible(RgbTriangleC& t, int EdgeIndex)
@@ -215,46 +211,46 @@ bool RgbPrimitives::edgeSplit_Possible(RgbTriangleC& t, int EdgeIndex)
 	);
 }
 
-void RgbPrimitives::gg_SplitSingle(RgbTriangleC& t, int EdgeIndex)
+bool RgbPrimitives::doSplit(RgbTriangleC& fp, int EdgeIndex, int level, TopologicalOpC& to, vector<FacePointer> *vfp, RgbVertexC* vNewInserted, vector<RgbVertexC>* vcont, vector<RgbVertexC>* vupd)
 {
-    TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    gg_Split(t,EdgeIndex,to);
+	switch (stype)
+	{
+	case LOOP:
+		return ControlPoint::doSplit(fp, EdgeIndex, level, to, vfp, vNewInserted, vcont, vupd);
+	case MODBUTFLY:
+		return ModButterfly::doSplit(fp, EdgeIndex, level, to, vfp);
+	default:
+		return false;		
+	}
 }
 
-void RgbPrimitives::rg_SplitSingle(RgbTriangleC& t, int EdgeIndex)
+void RgbPrimitives::doCollapse(RgbTriangleC& fp, int EdgeIndex, TopologicalOpC& to, Point3<ScalarType> *p, vector<FacePointer> *vfp)
 {
-	TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    rg_Split(t,EdgeIndex,to);
+	switch (stype)
+	{
+	case LOOP:
+		ControlPoint::doCollapse(fp, EdgeIndex, to, p, vfp);
+		break;
+	case MODBUTFLY:
+		ModButterfly::doCollapse(fp, EdgeIndex, to, p, vfp);
+		break;
+	}
 }
 
-void RgbPrimitives::rr_SplitSingle(RgbTriangleC& t, int EdgeIndex)
+void RgbPrimitives::distributeContribute(vector<RgbVertexC>& vCont,RgbVertexC& vNew,vector<RgbVertexC>& vUpd)
 {
-	TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    rr_Split(t,EdgeIndex,to);
-}
-
-void RgbPrimitives::edgeSplitSingle(RgbTriangleC& t, int EdgeIndex)
-{
-	TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    edgeSplit(t,EdgeIndex,to);
-}
-
-bool RgbPrimitives::findEdgeInTriangleV(vector<RgbTriangleC>& vt, VertexPair& vp, RgbTriangleC& et, int& ei)
-{
-    	int index;
-    	// start from the last = most recent inserted triangle
-    	for (unsigned int i = 0; i < vt.size(); ++i) 
-    	{
-    		int i2 = (vt.size()-1)-i;
-        	if (vt[i2].containEdge(vp,&index))
-        	{
-        		et = vt[i2];
-        		ei = index;
-        		return true;
-        	}
-		}
-    	return false;
-    
+    for (unsigned int i = 0; i < vCont.size(); ++i) 
+    {
+    	ControlPoint::addContributeIfPossible(vNew,vCont[i]);
+	}
+    for (unsigned int i = 0; i < vCont.size(); ++i) 
+    {
+    	ControlPoint::addContributeIfPossible(vCont[i],vNew);
+	}
+    for (unsigned int i = 0; i < vUpd.size(); ++i) 
+    {
+    	ControlPoint::updateP(vUpd[i]);
+	}
 }
 
 void RgbPrimitives::gg_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt)
@@ -269,7 +265,7 @@ void RgbPrimitives::gg_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to,
     vector<RgbVertexC> vCont;
     vector<RgbVertexC> vUpd;
 
-    bool todo = ControlPoint::doSplit(t,EdgeIndex,l+1,to,&vfp,&vNew,&vCont,&vUpd);
+    bool todo = RgbPrimitives::doSplit(t,EdgeIndex,l+1,to,&vfp,&vNew,&vCont,&vUpd);
     
     if (!todo)
     	return; // The update on rgb is already done by doSplit
@@ -294,19 +290,9 @@ void RgbPrimitives::gg_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to,
     	vt->push_back(t2);
     	vt->push_back(t3);
     }
-    
-    for (unsigned int i = 0; i < vCont.size(); ++i) 
-    {
-    	ControlPoint::addContributeIfPossible(vNew,vCont[i]);
-	}
-    for (unsigned int i = 0; i < vCont.size(); ++i) 
-    {
-    	ControlPoint::addContributeIfPossible(vCont[i],vNew);
-	}
-    for (unsigned int i = 0; i < vUpd.size(); ++i) 
-    {
-    	ControlPoint::updateP(vUpd[i]);
-	}
+
+    if (stype == LOOP)
+    	distributeContribute(vCont,vNew,vUpd);
 }
 
 void RgbPrimitives::rg_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt)
@@ -345,7 +331,7 @@ void RgbPrimitives::rg_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to,
     vector<RgbVertexC> vUpd;
     
     // Execute the split
-    bool todo = ControlPoint::doSplit(*tp,ti,l+1,to,&vfp,&vNew,&vCont,&vUpd);
+    bool todo = RgbPrimitives::doSplit(*tp,ti,l+1,to,&vfp,&vNew,&vCont,&vUpd);
     if (!todo)
     	return; // The update on rgb is already done by doSplit
     
@@ -383,19 +369,8 @@ void RgbPrimitives::rg_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to,
         bb_Swap_If_Needed(t3,vt);
     }
     
-    for (unsigned int i = 0; i < vCont.size(); ++i) 
-    {
-    	ControlPoint::addContributeIfPossible(vNew,vCont[i]);
-	}
-    for (unsigned int i = 0; i < vCont.size(); ++i) 
-    {
-    	ControlPoint::addContributeIfPossible(vCont[i],vNew);
-	}
-    for (unsigned int i = 0; i < vUpd.size(); ++i) 
-    {
-    	ControlPoint::updateP(vUpd[i]);
-	}
-
+    if (stype == LOOP)
+    	distributeContribute(vCont,vNew,vUpd);
     return;
 }
 
@@ -431,7 +406,7 @@ void RgbPrimitives::rr_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to,
     vector<RgbVertexC> vCont;
     vector<RgbVertexC> vUpd;
     
-    bool todo = ControlPoint::doSplit(*tp,ti,l+1,to,&vfp,&vNew,&vCont,&vUpd);
+    bool todo = RgbPrimitives::doSplit(*tp,ti,l+1,to,&vfp,&vNew,&vCont,&vUpd);
     if (!todo)
     	return; // The update on rgb is already done by doSplit
 
@@ -474,20 +449,9 @@ void RgbPrimitives::rr_Split(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to,
     
     bb_Swap_If_Needed(*vb[0],vt);
     bb_Swap_If_Needed(*vb[1],vt);
-    
-    for (unsigned int i = 0; i < vCont.size(); ++i) 
-    {
-    	ControlPoint::addContributeIfPossible(vNew,vCont[i]);
-	}
-    for (unsigned int i = 0; i < vCont.size(); ++i) 
-    {
-    	ControlPoint::addContributeIfPossible(vCont[i],vNew);
-	}
-    for (unsigned int i = 0; i < vUpd.size(); ++i) 
-    {
-    	ControlPoint::updateP(vUpd[i]);
-	}
 
+    if (stype == LOOP)
+    	distributeContribute(vCont,vNew,vUpd);
     return;
 }
 
@@ -500,7 +464,7 @@ bool RgbPrimitives::edgeSplit(RgbTriangleC& t, int EdgeIndex, TopologicalOpC& to
 	RgbTriangleC t2;
 	int ti2;
 	
-	if (!t.getEdgeIsBorder(EdgeIndex))
+	if ((stype == LOOP) && !t.getEdgeIsBorder(EdgeIndex))
 	    ControlPoint::findInitialStencil(t,EdgeIndex,l+1,to);
 	
 	if (!IsValidEdge(v1,v2,&t2,&ti2)) 
@@ -878,7 +842,7 @@ void RgbPrimitives::r4_Merge(RgbTriangleC& t, int VertexIndex, TopologicalOpC& t
     int mi = f0->maxLevelEdge();
     RgbTriangleC rgbtemp = f0->FF(mi);
     int rgbtempi = f0->face()->FFi(mi);
-    ControlPoint::doCollapse(rgbtemp,rgbtempi,to);
+    RgbPrimitives::doCollapse(rgbtemp,rgbtempi,to);
     
     f1->setFaceColor(FaceInfo::FACE_GREEN,false);
     f2->setFaceColor(FaceInfo::FACE_GREEN,false);
@@ -926,7 +890,7 @@ void RgbPrimitives::r2gb_Merge(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
     int mi = f0->maxLevelEdge();
     RgbTriangleC rgbtemp = f0->FF(mi);
     int rgbtempi = f0->face()->FFi(mi);
-    ControlPoint::doCollapse(rgbtemp,rgbtempi,to);
+    RgbPrimitives::doCollapse(rgbtemp,rgbtempi,to);
     
     if (isr2gb1)
     {
@@ -1032,12 +996,12 @@ void RgbPrimitives::gbgb_Merge(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
         // gbgb-2 merge
         RgbTriangleC rgbtemp = f3->FF(mi);
         int rgbtempi = f3->face()->FFi(mi);
-        ControlPoint::doCollapse(rgbtemp,rgbtempi,to);
+        RgbPrimitives::doCollapse(rgbtemp,rgbtempi,to);
     }
     else
     {
         // gbgb-1 merge
-        ControlPoint::doCollapse(*f3,mi,to);
+    	RgbPrimitives::doCollapse(*f3,mi,to);
     }
 
     gb_Merge(l,bluetype,*f0);
@@ -1101,7 +1065,7 @@ void RgbPrimitives::g2b2_Merge(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
     
     int mi = f2->minLevelVertex();
     
-    ControlPoint::doCollapse(*f2,mi,to);
+    RgbPrimitives::doCollapse(*f2,mi,to);
     
     gb_Merge(l,bluetypeu,*f0);
     gb_Merge(l,bluetypel,*f1);
@@ -1141,7 +1105,12 @@ void RgbPrimitives::vertexRemoval(RgbTriangleC& t, int VertexIndex, TopologicalO
 	
 	RgbVertexC v = t.V(VertexIndex);
 	vector<RgbVertexC> vv;
-	vv.reserve(6);
+	if (stype == LOOP)
+	{
+		vv.reserve(6);
+		RgbPrimitives::VV(v,vv,false);
+		ControlPoint::vertexRemovalUpdate(v);
+	}
 	
 	bool modified = false;
 	if (!t.V(VertexIndex).getIsBorder())
@@ -1149,43 +1118,31 @@ void RgbPrimitives::vertexRemoval(RgbTriangleC& t, int VertexIndex, TopologicalO
 	
         if (r4_Merge_Possible(t,VertexIndex))
         {
-        	ControlPoint::VV(v,vv,false);
-        	ControlPoint::vertexRemovalUpdate(v);
             r4_Merge(t,VertexIndex,to,vt);
             modified = true;
         }
         else if (r2gb_Merge_Possible(t,VertexIndex))
         {
-        	ControlPoint::VV(v,vv,false);
-        	ControlPoint::vertexRemovalUpdate(v);
             r2gb_Merge(t,VertexIndex,to,vt);
             modified = true;
         }
         else if (gbgb_Merge_Possible(t,VertexIndex))
         {
-        	ControlPoint::VV(v,vv,false);
-        	ControlPoint::vertexRemovalUpdate(v);
             gbgb_Merge(t,VertexIndex,to,vt);
             modified = true;
         }
         else if (g2b2_Merge_Possible(t,VertexIndex))
         {
-        	ControlPoint::VV(v,vv,false);
-        	ControlPoint::vertexRemovalUpdate(v);
             g2b2_Merge(t,VertexIndex,to,vt);
             modified = true;
         }
         else if (gg_Swap_Possible(t,VertexIndex))
         {
-        	ControlPoint::VV(v,vv,false);
-        	ControlPoint::vertexRemovalUpdate(v);
             gg_Swap(t,VertexIndex,to,vt);
             modified = true;
         }
         else if (brb2g_Swap_Possible(t,VertexIndex))
         {
-        	ControlPoint::VV(v,vv,false);
-        	ControlPoint::vertexRemovalUpdate(v);
             brb2g_Swap(t,VertexIndex,to,vt);
             modified = true;
         }
@@ -1194,58 +1151,23 @@ void RgbPrimitives::vertexRemoval(RgbTriangleC& t, int VertexIndex, TopologicalO
 	{
         if (b_r2_Merge_Possible(t,VertexIndex))
         {
-            ControlPoint::VV(v,vv,false);
-            ControlPoint::vertexRemovalUpdate(v);
             b_r2_Merge(t,VertexIndex,to,vt);
             modified = true;
         }
         else if (b_gb_Merge_Possible(t,VertexIndex))
         {
-            ControlPoint::VV(v,vv,false);
-            ControlPoint::vertexRemovalUpdate(v);
             b_gb_Merge(t,VertexIndex,to,vt);
             modified = true;
         }
 	}
         
-    if (modified)
+    if ((stype == LOOP) && modified)
     {
     	for (unsigned int i = 0; i < vv.size(); ++i) 
     	{
     		ControlPoint::updateP(vv[i]);
 		}
     }
-}
-
-void RgbPrimitives::r4_MergeSingle(RgbTriangleC& t, int VertexIndex)
-{
-    TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    r4_Merge(t,VertexIndex,to);
-}
-void RgbPrimitives::r2gb_MergeSingle(RgbTriangleC& t, int VertexIndex)
-{
-    TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    r2gb_Merge(t,VertexIndex,to);
-}
-void RgbPrimitives::gbgb_MergeSingle(RgbTriangleC& t, int VertexIndex)
-{
-    TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    gbgb_Merge(t,VertexIndex,to);
-}
-void RgbPrimitives::g2b2_MergeSingle(RgbTriangleC& t, int VertexIndex)
-{
-    TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    g2b2_Merge(t,VertexIndex,to);
-}
-void RgbPrimitives::gg_SwapSingle(RgbTriangleC& t, int VertexIndex)
-{
-    TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    gg_Swap(t,VertexIndex,to);
-}
-void RgbPrimitives::vertexRemovalSingle(RgbTriangleC& t, int VertexIndex)
-{
-    TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    vertexRemoval(t,VertexIndex,to);
 }
 
 void RgbPrimitives::extractColor(vectorRgbTriangle& f,vectorFaceColor& c)
@@ -1267,12 +1189,6 @@ int RgbPrimitives::findColorIndex(vectorFaceColor& vc,FaceInfo::FaceColor color)
     }
     assert(0);
     return -1;
-}
-
-void RgbPrimitives::rr_Merge(int level, RgbTriangleC& t)
-{
-    t.setFaceLevel(level);
-    t.setFaceColor(FaceInfo::FACE_GREEN);
 }
 
 void RgbPrimitives::gb_Merge(int level, FaceInfo::FaceColor color , RgbTriangleC& t)
@@ -1371,7 +1287,7 @@ void RgbPrimitives::gg_Swap_4g1b(RgbTriangleC& t, int VertexIndex, TopologicalOp
     vector<int> extVertex(fc.size());
     vector<int> sharedVertex(fc.size());
     
-    int res;
+    int res = 0;
     int nVertexLowLevel = 0;
     for (unsigned int i = 0; i < fc.size(); ++i) 
     {
@@ -1443,7 +1359,7 @@ void RgbPrimitives::gg_Swap_3g2r(RgbTriangleC& t, int VertexIndex, TopologicalOp
 	vector<int> extVertex(fc.size());
 	vector<int> sharedVertex(fc.size());
 	
-	int res;
+	int res = 0;
 	int nVertexLowLevel = 0;
 	for (unsigned int i = 0; i < fc.size(); ++i) 
 	{
@@ -1485,7 +1401,7 @@ void RgbPrimitives::gg_Swap_6g(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
     
     int k = 0;
     
-    int res;
+    int res = 0;
     int nVertexLowLevel = 0;
     for (unsigned int i = 0; i < fc.size(); ++i) 
     {
@@ -1502,10 +1418,8 @@ void RgbPrimitives::gg_Swap_6g(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
     assert(nVertexLowLevel == 2);
     
     RgbTriangleC* f0 = &fc[(k+0)%6];
-    //RgbTriangleC* f1 = &fc[(k+1)%6];
     RgbTriangleC* f2 = &fc[(k+2)%6];
     RgbTriangleC* f3 = &fc[(k+3)%6];
-    //RgbTriangleC* f4 = &fc[(k+4)%6];
 
     assert(gg_SwapAuxPossible(*f0,(sharedVertex[(k+0)%6]+2)%3));
 	gg_SwapAux(*f0,(sharedVertex[(k+0)%6]+2)%3,vt);
@@ -1692,7 +1606,7 @@ bool RgbPrimitives::gg_Swap_6g_Possible(RgbTriangleC& t, int VertexIndex)
     int vertexAbsoluteIndex = t.V(VertexIndex).index;
     for (unsigned int i = 0; i < fc.size(); ++i) 
     {
-    	int res;
+    	int res = 0;
         fc[i].containVertex(vertexAbsoluteIndex,&res);
         if (fc[i].getVl((res+1)%3) <= level-1)
         {
@@ -1720,7 +1634,10 @@ bool RgbPrimitives::IsValidEdge(RgbVertexC& rgbv1,RgbVertexC& rgbv2, RgbTriangle
 	assert((unsigned int)v2 < m->vert.size());
 	
 	if (m->vert[v1].IsD() || m->vert[v2].IsD())
+	{
+		//std::cerr << "DELETED" << std::endl;
 		return false;
+	}
 	
 	VertexType& v = m->vert[v1];
 	RgbTriangleC tf = RgbTriangleC(m,info,v.VFp()->Index());
@@ -1823,10 +1740,15 @@ bool RgbPrimitives::recursiveEdgeSplitVV(RgbVertexC& v1,RgbVertexC& v2, Topologi
 	int EdgeIndex;
 	
 	if (!IsValidEdge(v1,v2,&t,&EdgeIndex))
+	{
 		return false;
+	}
+		
 	
 	if (t.getEdgeColor(EdgeIndex) == FaceInfo::EDGE_RED)
+	{
 		return false;
+	}
 	
 	if (edgeSplit_Possible(t,EdgeIndex))
 	{
@@ -1854,87 +1776,11 @@ bool RgbPrimitives::recursiveEdgeSplitVV(RgbVertexC& v1,RgbVertexC& v2, Topologi
 	
 	if (edgeSplit_Possible(t,EdgeIndex))
 	{
+		// std::cerr << "POSSIBLE2" << std::endl;
 		return edgeSplit(t,EdgeIndex,to,vt);
 	}
 	
 	return false;
-}
-
-bool RgbPrimitives::recursiveEdgeSplitSingle(RgbTriangleC& t, int EdgeIndex)
-{
-    TopologicalOpC to = TopologicalOpC(*(t.m),&t.rgbInfo->vert,&t.rgbInfo->face);
-    return recursiveEdgeSplit(t,EdgeIndex,to);
-}
-
-
-bool RgbPrimitives::rb_Pattern_Removal_Possible(RgbTriangleC& t, int VertexIndex)
-{
-    assert(VertexIndex>=0 && VertexIndex <= 2);
-    
-    if (t.V(VertexIndex).getIsBorder())
-        return false;   // Vertex is on the border
-    
-	if (!isVertexInternal(t,VertexIndex))
-		return false;
-	
-    vectorRgbTriangle fc;
-    vf(t,VertexIndex,fc);
-    int vindex = t.V(VertexIndex).index;
-    
-    for (unsigned int i = 0; i < fc.size(); ++i) 
-    {
-    	RgbTriangleC& intern = fc[i];
-    	if (!intern.isGreen())
-    		return false;
-    	
-    	int res;
-    	intern.containVertex(vindex,&res);
-    	if (!intern.FF((res+1)%3).isBlue())
-    		return false;
-	}
-    
-    return true;
-    
-}
-
-void RgbPrimitives::rb_Pattern_Removal(RgbTriangleC& t, int VertexIndex, TopologicalOpC& to, vector<RgbTriangleC>* vt)
-{
-	assert(rb_Pattern_Removal_Possible(t,VertexIndex));
-	
-    vectorRgbTriangle fc;
-    vf(t,VertexIndex,fc);
-    int vindex = t.V(VertexIndex).index;
-    
-    vectorRgbTriangle vb;
-    
-    for (unsigned int i = 0; i < fc.size(); ++i) 
-    {
-    	RgbTriangleC& intern = fc[i];
-    	assert(intern.isGreen());
-    	int res;
-    	intern.containVertex(vindex,&res);
-    	RgbTriangleC blue = intern.FF((res+1)%3);
-    	assert(blue.isBlue());
-    	vb.push_back(blue);
-	}
-    
-    for (unsigned int i = 0; i < vb.size(); ++i) 
-    {
-    	RgbTriangleC& blue = vb[i];
-    	blue.updateInfo();
-    	if (blue.isBlue())
-    	{
-    		for (int j = 0; j < 3; ++j) 
-    		{
-    			if (blue.getEdgeColor(j) == FaceInfo::EDGE_GREEN && blue.FF(j).isRed())
-    			{
-    				recursiveEdgeSplit(blue,j,to,vt);
-    				break;
-    			}
-			}
-    	}
-	}
-    
 }
 
 bool RgbPrimitives::isVertexInternal(RgbVertexC& v)
@@ -2123,7 +1969,7 @@ void RgbPrimitives::brb2g_Swap(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
     RgbTriangleC& green = fc[(ri+2)%5];
     assert(green.isGreen());
     
-    int greeni;
+    int greeni = 0;
     assert(green.containVertex(v.index));
     green.containVertex(v.index,&greeni);
     
@@ -2157,7 +2003,7 @@ void RgbPrimitives::b_g_Bisection(RgbTriangleC& t, int EdgeIndex, TopologicalOpC
         vector<RgbVertexC> vUpd;
 
 
-        bool todo = ControlPoint::doSplit(t,EdgeIndex,l+1,to,&vfp,&vNew,&vCont,&vUpd);
+        bool todo = RgbPrimitives::doSplit(t,EdgeIndex,l+1,to,&vfp,&vNew,&vCont,&vUpd);
         
         if (!todo)
             return; // The update on rgb is already done by doSplit
@@ -2175,18 +2021,9 @@ void RgbPrimitives::b_g_Bisection(RgbTriangleC& t, int EdgeIndex, TopologicalOpC
             vt->push_back(t0);
             vt->push_back(t2);
         }
-        for (unsigned int i = 0; i < vCont.size(); ++i) 
-        {
-            ControlPoint::addContributeIfPossible(vNew,vCont[i]);
-        }
-        for (unsigned int i = 0; i < vCont.size(); ++i) 
-        {
-            ControlPoint::addContributeIfPossible(vCont[i],vNew);
-        }
-        for (unsigned int i = 0; i < vUpd.size(); ++i) 
-        {
-            ControlPoint::updateP(vUpd[i]);
-        }
+
+        if (stype == LOOP)
+        	distributeContribute(vCont,vNew,vUpd);
 }
 
 bool RgbPrimitives::b_r_Bisection_Possible(RgbTriangleC& t, int EdgeIndex)
@@ -2223,7 +2060,7 @@ void RgbPrimitives::b_r_Bisection(RgbTriangleC& t, int EdgeIndex, TopologicalOpC
     vector<RgbVertexC> vCont;
     vector<RgbVertexC> vUpd;
     
-    bool todo = ControlPoint::doSplit(*tp,ti,l+1,to,&vfp,&vNew,&vCont,&vUpd);
+    bool todo = RgbPrimitives::doSplit(*tp,ti,l+1,to,&vfp,&vNew,&vCont,&vUpd);
     if (!todo)
         return; // The update on rgb is already done by doSplit
 
@@ -2252,19 +2089,8 @@ void RgbPrimitives::b_r_Bisection(RgbTriangleC& t, int EdgeIndex, TopologicalOpC
     }
     bb_Swap_If_Needed(*vb[0],vt);
     
-    for (unsigned int i = 0; i < vCont.size(); ++i) 
-    {
-        ControlPoint::addContributeIfPossible(vNew,vCont[i]);
-    }
-    for (unsigned int i = 0; i < vCont.size(); ++i) 
-    {
-        ControlPoint::addContributeIfPossible(vCont[i],vNew);
-    }
-    for (unsigned int i = 0; i < vUpd.size(); ++i) 
-    {
-        ControlPoint::updateP(vUpd[i]);
-    }
-    
+    if (stype == LOOP)
+    	distributeContribute(vCont,vNew,vUpd);
     return;
     
 }
@@ -2309,7 +2135,7 @@ void RgbPrimitives::b_r2_Merge(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
     assert(f1->getFaceColor() == FaceInfo::FACE_RED_GGR);
     
     int fi = (f0->maxLevelVertex()+2)%3;
-    ControlPoint::doCollapse(*f0,fi,to);
+    RgbPrimitives::doCollapse(*f0,fi,to);
 
     f1->setFaceColor(FaceInfo::FACE_GREEN,false);
     f1->setFaceLevel(l);
@@ -2412,7 +2238,7 @@ void RgbPrimitives::b_gb_Merge(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
     assert(fi != -1);
     
     assert(!fc[1].face()->IsD());
-    ControlPoint::doCollapse(fc[1],fi,to);
+    RgbPrimitives::doCollapse(fc[1],fi,to);
 
     if (isBlueRGG)
         fc[0].setFaceColor(FaceInfo::FACE_RED_GGR,false);
@@ -2438,6 +2264,493 @@ void RgbPrimitives::b_gb_Merge(RgbTriangleC& t, int VertexIndex, TopologicalOpC&
         vt->push_back(fc[0].FF(2));
     }
     
+}
+
+RgbPrimitives::RgbVertexC RgbPrimitives::findOppositeVertex(RgbTriangleC& tin, int EdgeIndex, vector<RgbVertexC>* firstVertexes)
+{
+	int count = 0;
+	RgbTriangleC t = tin;
+	int ti = EdgeIndex;
+	while (true)
+	{
+		if (t.isGreen())
+		{
+			return t.V((ti+2)%3);
+		}
+		assert(t.isRed());
+		{
+			if ((count == 0) && firstVertexes)
+			{
+				firstVertexes->push_back(t.V((ti+2)%3));
+			}
+			int rei = -1;
+	        for (int i = 0; i < 3; ++i) 
+	        {
+	            if (t.getEdgeColor(i) == FaceInfo::EDGE_RED)
+	                rei = i;
+	        }
+	        assert(rei >= 0 && rei <= 2);
+	        
+	        RgbTriangleC t1 = t.FF(rei);
+	        int t1i = t.FFi(rei);
+	        
+	        assert(t1.isRed() || t1.isBlue());
+	        
+	        if (t1.isRed())
+	        {
+	        	return t1.V((t1i+2)%3);
+	        }
+	        else
+	        {
+	        	assert(t1.isBlue());
+	        	RgbTriangleC t2;
+	        	int t2i;
+	        	// isBlue
+	        	if (t1.containVertex(t.V((ti+1)%3).index))
+	        	{
+	        		t2 = t1.FF((t1i+2)%3);
+	        		t2i = t1.FFi((t1i+2)%3);
+	    			if ((count == 0) && firstVertexes)
+	    			{
+	    				firstVertexes->push_back(t1.V((t1i+2)%3));
+	    			}
+
+	        	}
+	        	else
+	        	{
+	        		assert(t1.containVertex(t.V(ti).index));
+	        		t2 = t1.FF((t1i+1)%3);
+	        		t2i = t1.FFi((t1i+1)%3);
+	    			if ((count == 0) && firstVertexes)
+	    			{
+	    				firstVertexes->push_back(t1.V((t1i+2)%3));
+	    			}
+	        	}
+	        	
+	        	t = t2;
+	        	ti = t2i;
+	        	t.updateInfo();
+	        	assert(t.isGreen() || t.isRed());
+	        	
+	        }
+			
+		}
+		++count;
+	}
+}
+
+void RgbPrimitives::splitGreenEdgeIfNeeded(RgbVertexC& v, int minLevel, TopologicalOpC& to)
+{
+	if (stype == LOOP)
+	{
+		if ((v.getLevel() == minLevel -1) || (v.getIsPinfReady()) || v.getIsMarked())
+			return;
+	}
+	else 
+	{
+		if (v.getIsMarked())
+			return;
+	}
+	
+	v.setIsMarked(true);
+	
+	bool split = true;
+	while(split)
+	{
+		split = false;
+		int level;
+	    int i = 0;
+
+		FacePointer fp = v.vert().VFp();
+		int fi = v.vert().VFi();
+	    vcg::face::Pos<FaceType> pos(fp,fi);
+	    
+	    if (v.getIsBorder())       // if is border move cw until the border is found
+	    {
+	        pos.FlipE();
+	        pos.FlipF();
+	        
+	        while (!pos.IsBorder())
+	        {
+	            pos.FlipE();
+	            pos.FlipF();
+	        }
+	        
+	        pos.FlipE();
+	    }
+
+	    CMeshO::FacePointer first = pos.F(); 
+
+	    RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+	    assert(tmp.containVertex(v.index));
+	    tmp.containVertex(v.index,&i);
+	    assert(i>=0 && i<= 2);
+	    level = tmp.getEdgeLevel(i); 
+	    
+	    if (level < (minLevel - 1)  && tmp.getEdgeColor(i) == FaceInfo::EDGE_GREEN)
+	    {
+	    	split = RgbPrimitives::recursiveEdgeSplit(tmp,i,to);
+	    	if (split)
+	    	    continue;
+	    }
+	    
+	    pos.FlipF();
+	    pos.FlipE();
+	    
+	    while(pos.F() && (pos.F() != first))
+	    {
+	        RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+	        assert(tmp.containVertex(v.index));
+	        tmp.containVertex(v.index,&i);
+	        assert(i>=0 && i<= 2);
+	        
+	        level = tmp.getEdgeLevel(i);
+		    if (level < (minLevel -1 ) && tmp.getEdgeColor(i) == FaceInfo::EDGE_GREEN)
+		    {
+		    	split = RgbPrimitives::recursiveEdgeSplit(tmp,i,to);
+		    	if (split)
+		    	    break;
+		    }
+
+	        pos.FlipF();
+	        pos.FlipE();
+	        assert(pos.F()->V(0) == fp->V(fi) || pos.F()->V(1) == fp->V(fi) || pos.F()->V(2) == fp->V(fi));
+	        assert(!fp->IsD());
+	    }
+	    
+	    
+	}
+	
+	v.setIsMarked(false);
+	if (RgbPrimitives::stype == LOOP)
+	{
+		assert(v.getIsPinfReady());
+	}
+}
+
+void RgbPrimitives::splitRedEdgeIfNeeded(RgbVertexC& v, int minLevel, TopologicalOpC& to)
+{
+	bool split = true;
+	
+	while(split)
+	{
+		split = false;
+		int level;
+	    int i = 0;
+
+		FacePointer fp = v.vert().VFp();
+		int fi = v.vert().VFi();
+	    vcg::face::Pos<FaceType> pos(fp,fi);
+	    
+	    if (v.getIsBorder())       // if is border move cw until the border is found
+	    {
+	        pos.FlipE();
+	        pos.FlipF();
+	        
+	        while (!pos.IsBorder())
+	        {
+	            pos.FlipE();
+	            pos.FlipF();
+	        }
+	        
+	        pos.FlipE();
+	    }
+	    
+	    CMeshO::FacePointer first = pos.F(); 
+
+	    RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+	    assert(tmp.containVertex(v.index));
+	    tmp.containVertex(v.index,&i);
+	    assert(i>=0 && i<= 2);
+        // ----------
+        level = tmp.getEdgeLevel(i);
+	    if (level < (minLevel - 1)  && tmp.getEdgeColor(i) == FaceInfo::EDGE_RED)
+	    {
+	    	if (tmp.isRed())
+	    	{
+    			assert(tmp.getEdgeColor((i+1)%3) == FaceInfo::EDGE_GREEN);
+    			assert(tmp.getEdgeColor((i+2)%3) == FaceInfo::EDGE_GREEN);
+    			assert(tmp.getEdgeColor((i)%3) == FaceInfo::EDGE_RED);
+
+    			if (tmp.getEdgeLevel((i+1)%3) <= tmp.getEdgeLevel((i+2)%3))
+	    		{
+	    			split = RgbPrimitives::recursiveEdgeSplit(tmp,(i+1)%3,to);
+	    		}
+	    		else
+	    		{
+	    			split = RgbPrimitives::recursiveEdgeSplit(tmp,(i+2)%3,to);
+	    		}
+	    			
+	    	}
+	    	if (split)
+	    	    continue;
+	    	
+	    	RgbTriangleC tmp2 = tmp.FF(i);
+	    	int i2 = tmp.FFi(i);
+	    	if (tmp2.isRed())
+	    	{
+    			assert(tmp2.getEdgeColor((i2+1)%3) == FaceInfo::EDGE_GREEN);
+    			assert(tmp2.getEdgeColor((i2+2)%3) == FaceInfo::EDGE_GREEN);
+    			assert(tmp2.getEdgeColor((i2)%3) == FaceInfo::EDGE_RED);
+    			
+	    		if (tmp2.getEdgeLevel((i2+1)%3) <= tmp2.getEdgeLevel((i2+2)%3))
+	    		{
+	    			split = RgbPrimitives::recursiveEdgeSplit(tmp2,(i2+1)%3,to);
+	    		}
+	    		else
+	    		{
+	    			split = RgbPrimitives::recursiveEdgeSplit(tmp2,(i2+2)%3,to);
+	    		}
+	    			
+	    	}
+	    	assert(split);
+	    	if (split)
+	    	    continue;
+	    	
+	    }
+	    // ----------
+	    
+	    pos.FlipF();
+	    pos.FlipE();
+	    
+	    while(pos.F() && (pos.F() != first))
+	    {
+	        RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+	        assert(tmp.containVertex(v.index));
+	        tmp.containVertex(v.index,&i);
+	        assert(i>=0 && i<= 2);
+	        // ----------
+	        level = tmp.getEdgeLevel(i);
+		    if (level < (minLevel - 1)  && tmp.getEdgeColor(i) == FaceInfo::EDGE_RED)
+		    {
+		    	if (tmp.isRed())
+		    	{
+		    		if (tmp.getEdgeLevel((i+1)%3) < tmp.getEdgeLevel((i+2)%3))
+		    		{
+		    			split = RgbPrimitives::recursiveEdgeSplit(tmp,(i+1)%3,to);
+		    		}
+		    		else
+		    		{
+		    			split = RgbPrimitives::recursiveEdgeSplit(tmp,(i+2)%3,to);
+		    		}
+		    			
+		    	}
+		    	if (split)
+		    	    break;
+		    	
+		    	RgbTriangleC tmp2 = tmp.FF(i);
+		    	int i2 = tmp.FFi(i);
+		    	if (tmp2.isRed())
+		    	{
+		    		if (tmp2.getEdgeLevel((i2+1)%3) < tmp2.getEdgeLevel((i2+2)%3))
+		    			split = RgbPrimitives::recursiveEdgeSplit(tmp2,(i2+1)%3,to);
+		    		else
+		    			split = RgbPrimitives::recursiveEdgeSplit(tmp2,(i2+2)%3,to);
+		    			
+		    	}
+		    	if (split)
+		    	    break;
+		    	
+		    }
+	    	if (split)
+	    	    continue;
+		    // ----------
+	        pos.FlipF();
+	        pos.FlipE();
+	        assert(pos.F()->V(0) == fp->V(fi) || pos.F()->V(1) == fp->V(fi) || pos.F()->V(2) == fp->V(fi));
+	        assert(!fp->IsD());
+	    }
+	    
+	    
+	}
+}
+
+void RgbPrimitives::VF(RgbVertexC& v,vector<FacePointer>& vfp)
+{
+    assert(!v.vert().IsD());
+	bool isBorder = v.getIsBorder();
+    
+    vcg::face::Pos<FaceType> pos(v.vert().VFp(),v.vert().VFi());
+    
+    RgbTriangleC t = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+    
+    if (t.getNumberOfBoundaryEdge(&v) >= 2)
+    {
+    	vfp.push_back(pos.F());
+    	return;
+    }
+
+    if (isBorder)       // if is border move cw until the border is found
+    {
+        pos.FlipE();
+        pos.FlipF();
+        
+        while (!pos.IsBorder())
+        {
+            pos.FlipE();
+            pos.FlipF();
+        }
+        
+        pos.FlipE();
+    }
+
+    
+    CMeshO::FacePointer first = pos.F(); 
+    vfp.push_back(pos.F());
+    pos.FlipF();
+    pos.FlipE();
+    
+    while(pos.F() && (pos.F() != first))
+    {
+    	vfp.push_back(pos.F());
+        
+        pos.FlipF();
+        pos.FlipE();
+    }
+    
+}
+
+void RgbPrimitives::updateNormal(RgbVertexC& v)
+{
+	vector<FacePointer> vfp;
+	vfp.reserve(6);
+	RgbPrimitives::VF(v,vfp);
+	Point3f vnorm(0,0,0);
+	int count = 0;
+	for (unsigned int i = 0; i < vfp.size(); ++i) 
+	{
+		vcg::face::ComputeNormal(*(vfp[i]));
+		vnorm += vfp[i]->cN();
+		++count;
+	}
+	vnorm /= count; 
+	v.vert().N() = vnorm;
+}
+
+void RgbPrimitives::VV(RgbVertexC& v, vector<RgbVertexC>& vv, bool onlyGreenEdge)
+{
+	// This VV is cw
+
+	int i = 0;
+	FacePointer fp = v.vert().VFp();
+	int fi = v.vert().VFi(); 
+	assert(fp->V(fi) == &(v.vert()));
+	bool isBorder = v.getIsBorder();
+	
+    vcg::face::Pos<FaceType> pos(fp,fi);
+    
+    RgbTriangleC t = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+    
+    if (t.getNumberOfBoundaryEdge(&v) >= 2)
+    {
+    	int index;
+    	bool res = t.containVertex(v.index, &index);
+    	assert(res);
+    	
+    	if (!onlyGreenEdge)
+        {
+        	vv.push_back(t.V((index+1)%3));
+        	vv.push_back(t.V((index+2)%3));
+        }
+        else
+        {
+        	if ((t.getEdgeColor(index) == FaceInfo::EDGE_GREEN) && (t.getEdgeLevel(index) > t.getVl(index)))
+        	{
+        		vv.push_back(t.V((index+1)%3));
+        	}
+        	if ((t.getEdgeColor((index+2)%3) == FaceInfo::EDGE_GREEN) && (t.getEdgeLevel((index+2)%3) > t.getVl((index))))
+        	{
+        		vv.push_back(t.V((index+2)%3));
+        	}
+        }
+
+    	return;
+    }
+
+    if (isBorder)       // if is border move ccw until the border is found
+    {
+        pos.FlipE();
+        pos.FlipF();
+        
+        while (!pos.IsBorder())
+        {
+            pos.FlipE();
+            pos.FlipF();
+        }
+        
+        pos.FlipE();
+    }
+
+    CMeshO::FacePointer first = pos.F();     
+    
+    RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+
+    assert(tmp.containVertex(v.index));
+    tmp.containVertex(v.index,&i);
+    assert(i>=0 && i<= 2);
+    assert(tmp.V(i).index == v.index);
+
+    if (!onlyGreenEdge)
+    {
+        if (isBorder)
+        	vv.push_back(tmp.V((i+2)%3)); // we cannot scan all the triangle around the vertex, 
+        								  // we have to save the last vertex
+    	vv.push_back(tmp.V((i+1)%3));
+    }
+    else
+    {
+    	if (isBorder && (tmp.getEdgeColor((i+2)%3) == FaceInfo::EDGE_GREEN) && (tmp.getEdgeLevel((i+2)%3) > tmp.getVl(i)))
+    		vv.push_back(tmp.V((i+2)%3));
+
+    	if ((tmp.getEdgeColor(i) == FaceInfo::EDGE_GREEN) && (tmp.getEdgeLevel(i) > tmp.getVl(i)))
+    		vv.push_back(tmp.V((i+1)%3));
+    }
+     
+    
+    pos.FlipF();
+    pos.FlipE();
+    
+    while(pos.F() != first)
+    {
+        RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+        assert(tmp.containVertex(v.index));
+        tmp.containVertex(v.index,&i);
+        assert(i>=0 && i<= 2);
+        
+        if (!onlyGreenEdge)
+        {
+        	vv.push_back(tmp.V((i+1)%3));
+        }
+        else
+        {
+        	if ((tmp.getEdgeColor(i) == FaceInfo::EDGE_GREEN) && (tmp.getEdgeLevel(i) > tmp.getVl(i)))
+        		vv.push_back(tmp.V((i+1)%3));
+        }
+        
+        if (pos.IsBorder())
+        {
+            break;
+        }
+        
+        pos.FlipF();
+        pos.FlipE();
+        assert(pos.F()->V(0) == fp->V(fi) || pos.F()->V(1) == fp->V(fi) || pos.F()->V(2) == fp->V(fi));
+        assert(!fp->IsD());
+    }
+}
+
+unsigned int RgbPrimitives::baseIncidentEdges(RgbVertexC& v)
+{
+	int rank;
+	if (v.getLevel() > 0)
+	{
+		rank = 6;
+	}
+	else
+	{
+		rank = v.getBaseArity();
+	}
+	return rank;
 }
 
 }

@@ -26,7 +26,6 @@
  ****************************************************************************/
 
 #include "interactiveEdit.h"
-#include "selectiveRefinement.h"
 
 namespace rgbt
 {
@@ -90,7 +89,7 @@ inline int isIn(const QPointF &p0, const QPointF &p1, float dx, float dy,
 	if (bla0<radius*radius)
 	{
 		if (found==1)
-			*dist=min((*dist), (float)sqrt(bla0)/radius);
+			*dist=std::min((*dist), (float)sqrt(bla0)/radius);
 		else
 			*dist=sqrt(bla0)/radius;
 		return 1;
@@ -182,7 +181,7 @@ inline bool lineHitsCircle(QPointF& LineStart, QPointF& LineEnd,
 	}
 }
 
-void InteractiveEdit::DrawXORCircle(MeshModel &m,GLArea * gla, bool doubleDraw)
+void InteractiveEdit::DrawXORCircle(GLArea * gla, bool doubleDraw)
 {
 	int PEZ=18;
 	/** paint the normal circle in pixel-mode */
@@ -359,7 +358,7 @@ bool RgbInteractiveEdit::vertexToRemove(RgbVertexC& v, int* level, double* lengh
 	
 	if (lenght)
 	{
-		double edgelenght = SelectiveRefinement::maxEdge(v);
+		double edgelenght = maxEdge(v);
 		blenght = edgelenght < *lenght;
 	}
 	else
@@ -384,7 +383,7 @@ bool RgbInteractiveEdit::edgeToSplit(RgbTriangleC& t,int index, int* level, doub
 	
 	if (lenght)
 	{
-		double edgelenght = SelectiveRefinement::edgeLenght(t,index);
+		double edgelenght = edgeLenght(t,index);
 		blenght = edgelenght > *lenght;
 	}
 	else
@@ -404,7 +403,7 @@ void RgbInteractiveEdit::processVertex(int v, int* level, double* lenght)
 {
 	RgbTriangleC t;
 	int index;
-	if (SelectiveRefinement::IsValidVertex(v,m,info,&t,&index,true))
+	if (IsValidVertex(v,m,info,&t,&index,true))
 	{
 		if (vertexToRemove(t.V(index),level,lenght))
 		{
@@ -423,7 +422,7 @@ void RgbInteractiveEdit::processEdge(int v1,int v2, int* level, double* lenght)
 	RgbTriangleC t;
 	int index;
 
-	if (SelectiveRefinement::IsValidEdge(v1,v2,m,info,&t,&index))
+	if (IsValidEdge(v1,v2,m,info,&t,&index))
 	{
 		if (edgeToSplit(t,index,level,lenght))
 		{
@@ -462,6 +461,131 @@ bool RgbInteractiveEdit::maxEdgeLevel(RgbVertexC& v)
 			tmp = l;
 	}
 	return tmp;
+}
+
+double RgbInteractiveEdit::maxEdge(RgbVertexC& v)
+{
+	vector<double> vv;
+	vv.reserve(6);
+	VE(v,vv);
+	double value = vv[0];
+	for (unsigned int i = 1; i < vv.size(); ++i) 
+	{
+		if (vv[i] > value)
+			value = vv[i];
+	}
+	return value;
+}
+
+double RgbInteractiveEdit::edgeLenght(RgbTriangleC& t, int index)
+{
+	Point v1 = t.getVertexCoord(index);
+	Point v2 = t.getVertexCoord((index+1)%3);
+	return (v2-v1).Norm();
+}
+
+bool RgbInteractiveEdit::IsValidVertex(int vp, CMeshO* m,RgbInfo* info, RgbTriangleC* t, int* ti, bool ignoreNew)
+{
+	assert((unsigned int)vp < m->vert.size());
+	if (m->vert[vp].IsD())
+		return false;
+	VertexType& v = m->vert[vp];
+	if (!v.VFp())
+		return false;
+
+	RgbTriangleC tf = RgbTriangleC(m,info,v.VFp()->Index());
+	assert(!tf.face()->IsD());
+	int tfi = v.VFi();
+	assert(tf.V(tfi).index == vp);
+
+	if (tf.getVertexIsNew(tfi) && !ignoreNew)
+		return false;
+
+	if (t)
+		*t = tf;
+	if (ti)
+		*ti = tfi;
+	
+	return true;
+}
+
+bool RgbInteractiveEdit::IsValidEdge(int v1,int v2, CMeshO* m,RgbInfo* info, RgbTriangleC* t, int* ti)
+{
+	assert((unsigned int)v1 < m->vert.size());
+	assert((unsigned int)v2 < m->vert.size());
+	
+	if (m->vert[v1].IsD() || m->vert[v2].IsD())
+		return false;
+	
+	VertexType& v = m->vert[v1];
+	RgbTriangleC tf = RgbTriangleC(m,info,v.VFp()->Index());
+	int tfi = v.VFi();
+	assert(tf.V(tfi).index == v1);
+
+	VertexType& va = m->vert[v2];
+	RgbTriangleC tfa = RgbTriangleC(m,info,va.VFp()->Index());
+	int tfia = va.VFi();
+	assert(tfa.V(tfia).index == v2);
+	
+	vector<RgbTriangleC> vf;
+	RgbPrimitives::vf(tf,tfi,vf);
+	
+	for (unsigned int i = 0; i < vf.size(); ++i) 
+	{
+		RgbTriangleC& tt = vf[i];
+		int k = 0;
+		while(tt.V(k).index != v1)
+		{
+			assert(k <= 2);
+			k++;
+		}
+		
+		if (tt.V((k+1)%3).index == v2)
+		{
+			if (t)
+				*t = tt;
+			if (ti)
+				*ti = k;
+			return true;
+		}
+		
+	}
+	return false;
+}
+
+void RgbInteractiveEdit::VE(RgbVertexC& v, vector<double>& vv)
+{
+    int i;
+
+	FacePointer fp = v.vert().VFp();
+	int fi = v.vert().VFi();
+    vcg::face::Pos<FaceType> pos(fp,fi);
+    CMeshO::FacePointer first = pos.F(); 
+
+    RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+    assert(tmp.containVertex(v.index));
+    tmp.containVertex(v.index,&i);
+    assert(i>=0 && i<= 2);
+    
+    vv.push_back(edgeLenght(tmp,i));
+    
+    pos.FlipF();
+    pos.FlipE();
+    
+    while(pos.F() && (pos.F() != first))
+    {
+        RgbTriangleC tmp = RgbTriangleC(v.m,v.rgbInfo,pos.F()->Index());
+        assert(tmp.containVertex(v.index));
+        tmp.containVertex(v.index,&i);
+        assert(i>=0 && i<= 2);
+
+        vv.push_back(edgeLenght(tmp,i));
+        
+        pos.FlipF();
+        pos.FlipE();
+        assert(pos.F()->V(0) == fp->V(fi) || pos.F()->V(1) == fp->V(fi) || pos.F()->V(2) == fp->V(fi));
+        assert(!fp->IsD());
+    }
 }
 
 }

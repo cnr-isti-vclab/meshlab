@@ -25,29 +25,10 @@ WidgetRgbT::WidgetRgbT(QWidget* parent,QObject* plugin) : QWidget(parent)
 {
     setupUi(this);
 
-    bDebugEdgeCol->setVisible(false);
-    bDebugEdgeSplit->setVisible(false);
-    
     setTool(TOOL_BRUSH);
-    on_algo_simple_toggled(false);
-    
-    connect(bDebugEdgeCol,SIGNAL(clicked(bool)),plugin,SLOT(debugEdgeCollapse()));
-    connect(bDebugEdgeSplit,SIGNAL(clicked(bool)),plugin,SLOT(debugEdgeSplit()));
     
     connect(bEdgeSplit,SIGNAL(clicked(bool)),plugin,SLOT(edgeSplit()));
     connect(bEdgeCollapse,SIGNAL(clicked(bool)),plugin,SLOT(vertexRemoval()));
-
-    connect(bStart,SIGNAL(clicked(bool)),plugin,SLOT(start()));
-    connect(bStop,SIGNAL(clicked(bool)),plugin,SLOT(stop()));
-    connect(bStep,SIGNAL(clicked(bool)),plugin,SLOT(step()));
-    connect(bPause,SIGNAL(clicked(bool)),plugin,SLOT(pause()));
-    connect(bResume,SIGNAL(clicked(bool)),plugin,SLOT(resume()));
-    
-    connect(bPickEdgeOutside,SIGNAL(clicked(bool)),plugin,SLOT(pickEdgeOutside()));
-    connect(bPickEdgeBox,SIGNAL(clicked(bool)),plugin,SLOT(pickEdgeBox()));
-    
-    connect(bPickFace,SIGNAL(clicked(bool)),plugin,SLOT(pickFace()));
-    
 }
 
 WidgetRgbT::~WidgetRgbT()
@@ -58,7 +39,6 @@ void WidgetRgbT::setTool(Tool t)
 {
     tool = t;
     bSelectionSingle->setChecked(false);
-    bSelectionRect->setChecked(false);
     bBrush->setChecked(false);
     bEraser->setChecked(false);
 
@@ -66,35 +46,22 @@ void WidgetRgbT::setTool(Tool t)
         case TOOL_SELECTIONSINGLE:
             bSelectionSingle->setChecked(true);
             break;
-        case TOOL_SELECTIONRECT:
-            bSelectionRect->setChecked(true);
-            break;
         case TOOL_BRUSH:
             bBrush->setChecked(true);
+            sBrushLevel->setValue(2);
             break;
         case TOOL_ERASER:
             bEraser->setChecked(true);
+            sBrushLevel->setValue(0);
             break;
         default:
             break;
     }
 }
 
-void WidgetRgbT::on_algo_simple_toggled(bool /*b*/)
-{
-    
-    sMaxEdgeLevel->setEnabled(algo_simple->isChecked());
-    sMinEdgeLevel->setEnabled(algo_simple->isChecked());
-}
-
 void WidgetRgbT::on_bSelectionSingle_clicked(bool /*b*/)
 {
     setTool(TOOL_SELECTIONSINGLE);
-}
-
-void WidgetRgbT::on_bSelectionRect_clicked(bool /*b*/)
-{
-    setTool(TOOL_SELECTIONRECT);
 }
 
 void WidgetRgbT::on_bBrush_clicked(bool /*b*/)

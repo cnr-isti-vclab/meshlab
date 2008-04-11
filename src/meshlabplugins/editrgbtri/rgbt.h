@@ -38,16 +38,12 @@
 
 #include "widgetRgbT.h"
 #include "rgbInfo.h"
-#include "utilities.h"
 
-#include "selectiveRefinement.h"
 #include "topologicalOp.h"
 #include "interactiveEdit.h"
 
 namespace rgbt
 {
-
-class SelRefThread;
 
 /** the main class of the plugin */
 class RgbTPlugin : public QObject, public MeshEditInterface
@@ -63,8 +59,11 @@ public:
     
     typedef RgbTriangle<CMeshO> RgbTriangleC;
     typedef RgbVertex<CMeshO> RgbVertexC;
-    typedef Utilities::EdgeFIType EdgeFIType;
     typedef CMeshO::FacePointer FacePointer;
+	typedef CMeshO::VertexPointer VertexPointer;
+    typedef EdgeFI<FacePointer> EdgeFIType;
+    typedef Point3<float> PointType;
+    
     
     RgbTPlugin();
     virtual ~RgbTPlugin();
@@ -89,17 +88,7 @@ public slots:
     void edgeSplit();
     void vertexRemoval();
     
-    void start();
-    void stop();
-    void step();
-    void resume();
-    void pause();
-    
-    void startThread();    
-    void killThread();
-    
     void pickEdgeOutside();
-    void pickEdgeBox();
     void pickFace();
     
     
@@ -122,7 +111,6 @@ private:
     /// Additional info needed by RGB Triangulation
     RgbInfo* rgbInfo;
     
-    SelectiveRefinement* sr;
     TopologicalOpC* to;
     InteractiveEdit* ie;
     RgbInteractiveEdit* rgbie;
@@ -136,30 +124,18 @@ private:
     bool pickEdgeLenght(double& d);
     
     void DrawXORRect(GLArea * gla, bool doubleDraw);
+
+    // Extract the common edge between 2 triangles
+    bool commonEdge(CMeshO::FacePointer fp1, CMeshO::FacePointer fp2, EdgeFIType* edge = 0);
+    // Extract the common vertex
+    bool commonVertex(vector<FacePointer> fc, EdgeFIType* vert = 0);
+    
     
     QPoint startp;
     QPoint prevp;
 
-    SelRefThread* srThread;
-
 };
 
-class SelRefThread : public QThread
-{
-public:
-	SelRefThread(GLArea* gla, SelectiveRefinement* sr,int delay) : gla(gla), sr(sr), delay(delay) 
-	{
-		assert(gla);
-		assert(sr);
-	} 
-	void run();
-	
-	bool reqTerm;
-private:
-	GLArea* gla;
-	SelectiveRefinement* sr;
-	int delay;
-};
 
 }
 

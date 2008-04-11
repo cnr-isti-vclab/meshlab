@@ -37,6 +37,8 @@ namespace rgbt
 {
 
 using std::list;
+using namespace vcg;
+using std::vector;
 
 /// Identify an Edge by the pair Face, Index on the face
 template<class FacePointer> class EdgeFI
@@ -153,16 +155,16 @@ public:
         getAllFacesAroundVertex(f0p,(f0i+1)%3,vec,BOUNDARY);
         
         FacePointer f00p = 0;
-        int f00i;
+        int f00i = -1;
         FacePointer f01p = 0;
-        int f01i;
+        int f01i = -1;
 
         FacePointer f1p = 0;
         int f1i;
         FacePointer f10p = 0;
-        int f10i;
+        int f10i = -1;
         FacePointer f11p = 0;
-        int f11i;
+        int f11i = -1;
 
         if (f0p->FFp((f0i+2)%3) != f0p) // it exists a triangle f00
         {
@@ -442,15 +444,7 @@ public:
             f3p = getNewFace(0); 
             f3i = 0;
         }
-        
-        Color4b& c = f2p->C();
-        c.Import(Color4b(Color4b::DarkGreen));
-        if (!BOUNDARY)
-        {
-            Color4b& c2 = f3p->C();
-            c2.Import(Color4b(Color4b::DarkGreen));
-        }
-        
+
         VertexPointer v2 = getNewVertex();
         v2->P() = p;
         
@@ -717,20 +711,13 @@ private:
             {
                 l.push_back((*lit2)->Index());
             }
-            //std::cerr << fc->size() << std::endl; 
-            
-            //if (listFp.front()->Index() >= fc->size() - 1)
-            //    listFp.clear();
             
             int newFaces = (int)(growNumberFace() * m.face.size()); // (float)fc->size());
             newFaces += otherneeded + 1;
-            int oldsize = m.face.size();
             FaceIterator it = vcg::tri::Allocator<TriMeshType>::AddFaces(m,newFaces);
             if (fc)
             	fc->resize(fc->size()+newFaces);
                        
-            //for (int i = oldsize; i < oldsize + newFaces; ++i)
-                
             listFp.clear();
             sizelistFp = 0;
             for (list<int>::iterator lit = l.begin(); lit != l.end(); ++lit) 
@@ -743,9 +730,7 @@ private:
             {
                 listFp.push_back(&*it);
                 sizelistFp++;
-                //listFp.push_back(&(m.face[i]));
                 it->SetD();
-                //m.face[i].SetD();
                 --(m.fn);
                 ++it;
             }
@@ -812,14 +797,13 @@ bool FFCorrectness(FacePointer fp)
 template <class FacePointer>
 static bool VFCorrectness(FacePointer fp)
 {
-	return (VFCorrectnessP(fp->V(0),0) && VFCorrectnessP(fp->V(1),1) && VFCorrectnessP(fp->V(2),2)); 
+	return (VFCorrectnessP(fp->V(0)) && VFCorrectnessP(fp->V(1)) && VFCorrectnessP(fp->V(2))); 
 }
 
 //! Test for the VF Correctness of a vertex
 template <class VertexPointer>
-static bool VFCorrectnessP(VertexPointer vp, int i)
+static bool VFCorrectnessP(VertexPointer vp)
 {
-	//std::cerr << "VF: " << i << std::endl;
 	if (vp->IsD())
 		return false;
 	if (vp->VFp()->IsD())
