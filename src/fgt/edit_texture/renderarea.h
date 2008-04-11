@@ -39,6 +39,7 @@ public:
 	void ChangeSelectMode(int index);
 	void RemapClamp();
 	void RemapMod();
+	void ClearSelection();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -103,7 +104,7 @@ private:
 	void UpdateVertex();
 	void ResetTrack(bool reset);
 	void SelectFaces();
-	void SelectConnectedComponent();
+	void SelectConnectedComponent(QPoint e);
 	void SelectVertexes();
 	void HandleScale(QPoint e);
 	void HandleRotate(QPoint e);

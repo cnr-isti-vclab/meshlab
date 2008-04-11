@@ -133,6 +133,15 @@ void TextureEditor::on_modulusButton_clicked()
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->RemapMod();
 }
 
+void TextureEditor::on_cancelButton_clicked()
+{
+	ResetLayout();
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ClearSelection();
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(0);
+	ui.cancelButton->setChecked(false);
+	ui.moveButton->setChecked(true);
+}
+
 void TextureEditor::on_smoothButton_clicked()
 {
 	// Apply the smooth

@@ -45,6 +45,7 @@ private slots:
 	void on_clampButton_clicked();
 	void on_modulusButton_clicked();
 	void on_smoothButton_clicked();
+	void on_cancelButton_clicked();
 
 public slots:
 	void UpdateModel();

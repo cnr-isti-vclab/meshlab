@@ -12,6 +12,8 @@
 #define AREADIM 400
 #define HRECT 6
 
+static bool updateTopology = false;	// To update the topology only one time
+
 RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsigned tnum) : QGLWidget(parent)
 {
     antialiased = true;
@@ -301,6 +303,7 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 		pressed = NOSEL;
 		selected = false;
 		selectedV = false;
+		selVertBit = CVertexO::NewBitFlag();
 	}
 	switch(mode)
 	{
@@ -343,7 +346,7 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 	}
 }
 
-void RenderArea::mouseReleaseEvent(QMouseEvent *)
+void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 {
 	switch(mode)
 	{
@@ -412,7 +415,16 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *)
 					}
 					break;
 				case Connected:
-					// <-------
+					SelectConnectedComponent(e->pos());
+					if (selected)
+					{
+						selection = QRect(selStart, selEnd);
+						UpdateSelectionArea(0,0);
+						origin = QPointF((float)(selection.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
+						this->ChangeMode(1);
+						this->update();
+					}
 					break;
 				case Vertex:
 					if (selectedV)
@@ -488,11 +500,7 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 				this->update();
 				break;
 			case Select:
-				if (selectMode == Connected)
-				{
-					// <---- 
-				}
-				else
+				if (selectMode != Connected)
 				{
 					end = e->pos();
 					int x1, x2, y1, y2;
@@ -706,11 +714,11 @@ void RenderArea::ChangeSelectMode(int index)
 	switch(index)
 	{
 		case 0:
-			if (selectMode != Area) selection = QRect();
+			if (selectMode != Area && selectMode != Connected) selection = QRect();
 			selectMode = Area;
 			break;
 		case 1:
-			if (selectMode != Connected) selection = QRect();
+			if (selectMode != Connected && selectMode != Area) selection = QRect();
 			selectMode = Connected;
 			break;
 		case 2:
@@ -724,10 +732,9 @@ void RenderArea::ChangeSelectMode(int index)
 	if (selectedV && selectMode != Vertex) 
 	{
 		areaUV = QRectF();
-		for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.vert[i].ClearUserBit(selVertBit);
+		selVertBit = CVertexO::NewBitFlag();
 	}
-	if (selected && selectMode == Vertex) 
-		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
+	if (selected && selectMode == Vertex) selBit = CFaceO::NewBitFlag();
 }
 
 void RenderArea::RotateComponent(float alfa)
@@ -871,7 +878,6 @@ void RenderArea::SelectVertexes()
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				(*fi).V(j)->ClearUserBit(selVertBit);
 				QPoint tmp = QPoint((*fi).WT(j).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(j).v() * AREADIM*zoom) + viewport.Y()*zoom);
 				if (area.contains(tmp))
 				{
@@ -887,10 +893,77 @@ void RenderArea::SelectVertexes()
 	}
 }
 
-void RenderArea::SelectConnectedComponent()
+void RenderArea::SelectConnectedComponent(QPoint e)
 {
-	// Select a series of faces with the same UV coord on the edge
-	// TODO <-----
+	// Select a series of faces with the same UV coord on the edge	
+	if(!model->cm.face.FFAdjacencyEnabled)
+	{
+		model->cm.face.EnableFFAdjacency();
+		if (!updateTopology) 
+		{
+			vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+			updateTopology = true;
+		}
+	}
+	selStart = QPoint(MAX,MAX);
+	selEnd = QPoint(-MAX,-MAX);
+	selected = false;
+	selBit = CFaceO::NewBitFlag();
+	int index = 0;
+	vector<CFaceO*> Q = vector<CFaceO*>();
+	
+	// Search the clicked face
+	for(unsigned i = 0; i < model->cm.face.size(); i++)
+	{
+		if (model->cm.face[i].WT(0).n() == textNum)
+		{
+			QVector<QPoint> t = QVector<QPoint>(); 
+			t.push_back(QPoint(model->cm.face[i].WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (model->cm.face[i].WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(QPoint(model->cm.face[i].WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (model->cm.face[i].WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(QPoint(model->cm.face[i].WT(2).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (model->cm.face[i].WT(2).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			QRegion r = QRegion(QPolygon(t));
+			if (r.contains(e))
+			{
+				Q.push_back(&model->cm.face[i]);
+				model->cm.face[i].SetUserBit(selBit);
+				selStart.setX(r.boundingRect().topLeft().x());
+				selStart.setY(r.boundingRect().topLeft().y());
+				selEnd.setX(r.boundingRect().bottomRight().x());
+				selEnd.setY(r.boundingRect().bottomRight().y());
+				break;
+			}
+		}
+	}
+	
+	while (index < Q.size())
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			CFaceO* p = Q[index]->FFp(j);
+			if (!p->IsUserBit(selBit) && (Q[index]->WT(0) == p->WT(0) || Q[index]->WT(0) == p->WT(1) || Q[index]->WT(0) == p->WT(2) || 
+				Q[index]->WT(1) == p->WT(0) || Q[index]->WT(1) == p->WT(1) || Q[index]->WT(1) == p->WT(2) || 
+				Q[index]->WT(2) == p->WT(0) || Q[index]->WT(2) == p->WT(1) || Q[index]->WT(2) == p->WT(2)))
+			{
+				p->SetUserBit(selBit);
+				Q.push_back(p);
+				QPoint tmp = QPoint(p->WT(j).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (p->WT(j).v() * AREADIM*zoom) + viewport.Y()*zoom);
+				if (tmp.x() < selStart.x()) selStart.setX(tmp.x());
+				if (tmp.y() < selStart.y()) selStart.setY(tmp.y());
+				if (tmp.x() > selEnd.x()) selEnd.setX(tmp.x());
+				if (tmp.y() > selEnd.y()) selEnd.setY(tmp.y());
+				selected = true;
+			}
+		}
+		index++;
+	}
+}
+
+void RenderArea::ClearSelection()
+{
+	// Clear every selection
+	selBit = CFaceO::NewBitFlag();
+	selVertBit = CVertexO::NewBitFlag();
+	selection = QRect();
 }
 
 void RenderArea::HandleScale(QPoint e)
