@@ -164,21 +164,13 @@ bool ModButterfly::doSplit(RgbTriangleC& fp, int EdgeIndex, int level, Topologic
     	else
     	{
 	    	// Additional split
-	    	Pos ptemp = Pos(fp.face(),EdgeIndex);
-	    	rotate(v1,ptemp,2);
-	    	RgbVertexC vtemp1 = move(v1,ptemp,maxlevel);
-	    	
-	    	ptemp = Pos(fp.face(),EdgeIndex);
-	    	ptemp.FlipV();
-	    	ptemp.FlipF();
-	    	rotate(v2,ptemp,2);
-	    	RgbVertexC vtemp2 = move(v2,ptemp,maxlevel);
-	    	
-	    	RgbPrimitives::splitGreenEdgeIfNeeded(vtemp1,maxlevel+1,to);
-	    	RgbPrimitives::splitGreenEdgeIfNeeded(vtemp2,maxlevel+1,to);
-	    	
-	    	RgbPrimitives::splitRedEdgeIfNeeded(vtemp1,maxlevel+1,to);
-	    	RgbPrimitives::splitRedEdgeIfNeeded(vtemp2,maxlevel+1,to);
+
+	    	RgbPrimitives::splitGreenEdgeIfNeeded(v1,maxlevel+1,to);
+	    	RgbPrimitives::splitGreenEdgeIfNeeded(v2,maxlevel+1,to);
+	    	RgbPrimitives::splitRedEdgeIfNeeded(v1,maxlevel+1,to);
+	    	RgbPrimitives::splitRedEdgeIfNeeded(v2,maxlevel+1,to);
+	    	RgbPrimitives::splitGreenEdgeIfNeeded(v1,maxlevel+1,to);
+	    	RgbPrimitives::splitGreenEdgeIfNeeded(v2,maxlevel+1,to);
 	    	RgbPrimitives::splitRedEdgeIfNeeded(v1,maxlevel+1,to);
 	    	RgbPrimitives::splitRedEdgeIfNeeded(v2,maxlevel+1,to);
 	    	

@@ -81,15 +81,9 @@ public:
     virtual QList<QAction *> actions() const;
     
 public slots:
-    void debugColorCGRG();
-    void debugEdgeCollapse();
-    void debugEdgeSplit();
     
     void edgeSplit();
     void vertexRemoval();
-    
-    void pickEdgeOutside();
-    void pickFace();
     
     
 private:
