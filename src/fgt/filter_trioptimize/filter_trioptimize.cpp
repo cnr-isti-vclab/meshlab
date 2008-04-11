@@ -317,9 +317,6 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 				   "Optimizing...");
 			} while (optimiz.currMetric < -epsilon && !optimiz.h.empty());
 
-			cb(100, "End");
-			nflips += optimiz.nPerfmormedOps;
-
 			Log(GLLogStream::Info,
 			    "%d curvature edge flips performed in %.2f sec.",
 			    nflips, (clock() - start) / (float) CLOCKS_PER_SEC);
