@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.74  2008/04/11 10:07:39  cignoni
+added another class (smoothing)
+made more uniform naming of start/end function for decoration
+
 Revision 1.73  2008/02/28 10:33:21  cignoni
 Added errorMsg  exchange mechaninsm to the interface of filter plugins to allow the passage of error reports between the filter and the framework.
 
@@ -250,7 +254,7 @@ class MeshFilterInterface
 {
 public:
   typedef int FilterIDType;
-	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring, MeshCreation} ;
+	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring, MeshCreation, Smoothing} ;
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action 
@@ -401,9 +405,9 @@ public:
 	
 		virtual void initGlobalParameterSet(QAction *, FilterParameterSet * /*globalparam*/) {}		
 		
-    virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+    virtual void StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, FilterParameterSet * /*param*/, GLArea * /*parent*/,QFont qf) = 0;
-		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+		virtual void EndDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
         
     virtual const QString ST(FilterIDType filter) const=0;
     virtual const FilterIDType ID(QAction *a)
