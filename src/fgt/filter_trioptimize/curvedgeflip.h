@@ -164,7 +164,7 @@ public:
 	void Execute(TRIMESH_TYPE& /*m*/)
 	{
 		VertexPointer v0, v1, v2, v3;
-		int i = this->_pos.I();
+		int i = this->_pos.E();
 		
 		FacePointer f1 = this->_pos.F();
 		v0 = f1->V0(i);
@@ -214,7 +214,7 @@ public:
 			return false;
 		
 		CoordType v0, v1, v2, v3;
-		int i = this->_pos.I();
+		int i = this->_pos.E();
 		FacePointer f = this->_pos.F();
 		v0 = f->P0(i);
 		v1 = f->P1(i);
@@ -248,7 +248,7 @@ public:
 			return std::numeric_limits<ScalarType>::infinity();
 		
 		VertexPointer v0, v1, v2, v3;
-		int i = this->_pos.I();
+		int i = this->_pos.E();
 		
 		FacePointer f1 = this->_pos.F();
 		v0 = f1->V0(i);
@@ -347,7 +347,7 @@ public:
 		// The flip creates a diagonal edge on index _pos.I() + 1
 		// We must push on heap every edge 2 - neighbor to the flipped edge
 		
-		int flipped = (this->_pos.I() + 1) % 3;
+		int flipped = (this->_pos.E() + 1) % 3;
 		PosType startpos(this->_pos.f, flipped);
 		FacePointer f2 = (FacePointer) startpos.FFlip();
 
