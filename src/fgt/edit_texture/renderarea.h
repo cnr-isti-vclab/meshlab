@@ -81,12 +81,11 @@ private:
 
 	QPoint start, end;	// Selection area
 	QRect area;			// Dragged rectangle
-
-	QRectF areaUV;
+	QRectF areaUV;		// Area of selected vertexes
 
 	// Info for interactive editing
 	vector<QRect> selRect;	// Vector of buttons area
-	QRect vertRect;			// Rectangle for vertex
+	QRect vertRect;			// Rectangle for vertexes
 	QRect selection;		// Selection area
 	QPoint selStart, selEnd;
 	int posX, posY, rectX, rectY, oldSRX, oldSRY;	// Stored value
@@ -113,7 +112,10 @@ private:
 	void RecalculateSelectionArea();
 	void UpdateSelectionArea(int x, int y);
 	void UpdateVertexSelection();
+	QPointF ToUVSpace(int x, int y);
+	QPoint ToScreenSpace(float u, float v);
 	void DrawCircle(QPoint origin);
+	void UpdateBoundingArea(QPoint topLeft, QPoint topRight);
 
 signals:
 	void UpdateModel();

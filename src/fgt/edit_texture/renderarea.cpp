@@ -329,7 +329,7 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 				else if (highlighted == 1) perno = 2;
 				else if (highlighted == 2) perno = 1;
 				else perno = 0;
-				oScale = QPointF((float)(selRect[perno].center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selRect[perno].center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+				oScale = ToUVSpace(selRect[perno].center().x(), selRect[perno].center().y());
 				B2 = (float)(rectX - originR.center().x())*(rectX - originR.center().x()) + (rectY - originR.center().y())*(rectY - originR.center().y());
 				Rm = (float)(rectY - originR.center().y()) / (rectX - originR.center().x());
 				Rq = (float) rectY - Rm * rectX;
@@ -364,14 +364,14 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 			if (pressed == ORIGINRECT)	// Drag origin -> Update the position of the rectangle of rotation and the real point in UV
 			{
 				originR = QRect(originR.x() - posX - orX, originR.y() - posY - orY, RADIUS, RADIUS);
-				origin = QPointF((float)(originR.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)((AREADIM*zoom) - originR.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+				origin = ToUVSpace(originR.center().x(), originR.center().y());
 				orX = 0; orY = 0;
 			}
 			else if (pressed == SELECTIONRECT && posX != 0)	// Drag selection -> Update the position of the selection area and the rotatation rect
 			{
 				selection = QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height());
 				originR.moveCenter(QPoint(originR.center().x() - posX, originR.center().y() - posY));
-				origin = QPointF((float)(originR.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+				origin = ToUVSpace(originR.center().x(), originR.center().y());
 				posX = 0; posY = 0;
 				if (selected) UpdateUV();
 			}
@@ -408,7 +408,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 					{
 						selection = QRect(selStart, selEnd);
 						UpdateSelectionArea(0,0);
-						origin = QPointF((float)(selection.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+						origin = ToUVSpace(selection.center().x(), selection.center().y());
 						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
 						this->ChangeMode(1);
 						this->update(selection);
@@ -420,7 +420,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 					{
 						selection = QRect(selStart, selEnd);
 						UpdateSelectionArea(0,0);
-						origin = QPointF((float)(selection.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selection.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+						origin = ToUVSpace(selection.center().x(), selection.center().y());
 						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
 						this->ChangeMode(1);
 						this->update();
@@ -565,7 +565,7 @@ void RenderArea::mouseDoubleClickEvent(QMouseEvent *e)
 			{
 				if (editMode == Rotate) editMode = Scale;
 				else editMode = Rotate;
-				this->update(originR);
+				this->update();
 			}
 			break;
 	}
@@ -589,8 +589,8 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 		{
 			RecalculateSelectionArea();
 			UpdateSelectionArea(0,0);
-			originR.moveCenter(QPoint(origin.x() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (origin.y() * AREADIM*zoom) + viewport.Y()*zoom));
-			origin = QPointF((float)(originR.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+			originR.moveCenter(ToScreenSpace(origin.x(), origin.y()));
+			origin = ToUVSpace(originR.center().x(), originR.center().y());		
 		}
 		this->update();
 	}
@@ -844,17 +844,14 @@ void RenderArea::SelectFaces()
 		{
 	        (*fi).ClearUserBit(selBit);
 			QVector<QPoint> t = QVector<QPoint>(); 
-			t.push_back(QPoint((*fi).WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom));
-			t.push_back(QPoint((*fi).WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom));
-			t.push_back(QPoint((*fi).WT(2).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(2).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(ToScreenSpace((*fi).WT(0).u(), (*fi).WT(0).v()));
+			t.push_back(ToScreenSpace((*fi).WT(1).u(), (*fi).WT(1).v()));
+			t.push_back(ToScreenSpace((*fi).WT(2).u(), (*fi).WT(2).v()));
 			QRegion r = QRegion(QPolygon(t));
 			if (r.intersects(area))
 			{
 				(*fi).SetUserBit(selBit);
-				if (r.boundingRect().topLeft().x() < selStart.x()) selStart.setX(r.boundingRect().topLeft().x());
-				if (r.boundingRect().topLeft().y() < selStart.y()) selStart.setY(r.boundingRect().topLeft().y());
-				if (r.boundingRect().bottomRight().x() > selEnd.x()) selEnd.setX(r.boundingRect().bottomRight().x());
-				if (r.boundingRect().bottomRight().y() > selEnd.y()) selEnd.setY(r.boundingRect().bottomRight().y());
+				UpdateBoundingArea(r.boundingRect().topLeft(), r.boundingRect().bottomRight());
 				if (!selected) selected = true;
 			}
 		}
@@ -868,8 +865,8 @@ void RenderArea::SelectVertexes()
 	selEnd = QPoint(-MAX,-MAX);
 	selectedV = false;
 	selection = QRect();
-	QPointF a = QPointF((float)(area.x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - area.y() + viewport.Y()*zoom)/(AREADIM*zoom));
-	QPointF b = QPointF((float)(area.bottomRight().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - area.bottomRight().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+	QPointF a = ToUVSpace(area.x(), area.y());
+	QPointF b = ToUVSpace(area.bottomRight().x(),area.bottomRight().y());
 	areaUV = QRectF(a, QSizeF(b.x()-a.x(), b.y()-a.y()));
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
@@ -878,14 +875,11 @@ void RenderArea::SelectVertexes()
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				QPoint tmp = QPoint((*fi).WT(j).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(j).v() * AREADIM*zoom) + viewport.Y()*zoom);
+				QPoint tmp = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
 				if (area.contains(tmp))
 				{
 					(*fi).V(j)->SetUserBit(selVertBit);
-					if (tmp.x() < selStart.x()) selStart.setX(tmp.x());
-					if (tmp.y() < selStart.y()) selStart.setY(tmp.y());
-					if (tmp.x() > selEnd.x()) selEnd.setX(tmp.x());
-					if (tmp.y() > selEnd.y()) selEnd.setY(tmp.y());
+					UpdateBoundingArea(tmp, tmp);
 					if (!selectedV) selectedV = true;
 				}
 			}
@@ -896,14 +890,11 @@ void RenderArea::SelectVertexes()
 void RenderArea::SelectConnectedComponent(QPoint e)
 {
 	// Select a series of faces with the same UV coord on the edge	
-	if(!model->cm.face.FFAdjacencyEnabled)
+	if (!updateTopology) 
 	{
-		model->cm.face.EnableFFAdjacency();
-		if (!updateTopology) 
-		{
-			vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
-			updateTopology = true;
-		}
+		if(!model->cm.face.FFAdjacencyEnabled) model->cm.face.EnableFFAdjacency();
+		vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+		updateTopology = true;
 	}
 	selStart = QPoint(MAX,MAX);
 	selEnd = QPoint(-MAX,-MAX);
@@ -918,18 +909,15 @@ void RenderArea::SelectConnectedComponent(QPoint e)
 		if (model->cm.face[i].WT(0).n() == textNum)
 		{
 			QVector<QPoint> t = QVector<QPoint>(); 
-			t.push_back(QPoint(model->cm.face[i].WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (model->cm.face[i].WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom));
-			t.push_back(QPoint(model->cm.face[i].WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (model->cm.face[i].WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom));
-			t.push_back(QPoint(model->cm.face[i].WT(2).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (model->cm.face[i].WT(2).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(ToScreenSpace(model->cm.face[i].WT(0).u(), model->cm.face[i].WT(0).v()));
+			t.push_back(ToScreenSpace(model->cm.face[i].WT(1).u(), model->cm.face[i].WT(1).v()));
+			t.push_back(ToScreenSpace(model->cm.face[i].WT(2).u(), model->cm.face[i].WT(2).v()));
 			QRegion r = QRegion(QPolygon(t));
 			if (r.contains(e))
 			{
 				Q.push_back(&model->cm.face[i]);
 				model->cm.face[i].SetUserBit(selBit);
-				selStart.setX(r.boundingRect().topLeft().x());
-				selStart.setY(r.boundingRect().topLeft().y());
-				selEnd.setX(r.boundingRect().bottomRight().x());
-				selEnd.setY(r.boundingRect().bottomRight().y());
+				UpdateBoundingArea(r.boundingRect().topLeft(), r.boundingRect().bottomRight());
 				break;
 			}
 		}
@@ -946,11 +934,8 @@ void RenderArea::SelectConnectedComponent(QPoint e)
 			{
 				p->SetUserBit(selBit);
 				Q.push_back(p);
-				QPoint tmp = QPoint(p->WT(j).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (p->WT(j).v() * AREADIM*zoom) + viewport.Y()*zoom);
-				if (tmp.x() < selStart.x()) selStart.setX(tmp.x());
-				if (tmp.y() < selStart.y()) selStart.setY(tmp.y());
-				if (tmp.x() > selEnd.x()) selEnd.setX(tmp.x());
-				if (tmp.y() > selEnd.y()) selEnd.setY(tmp.y());
+				QPoint tmp = ToScreenSpace(p->WT(j).u(), p->WT(j).v());
+				UpdateBoundingArea(tmp, tmp);
 				selected = true;
 			}
 		}
@@ -1029,8 +1014,7 @@ void RenderArea::HandleScale(QPoint e)
 	this->update(selRect[highlighted]);
 	this->update(selRect[(highlighted+2)%selRect.size()]);
 	originR.moveCenter(selection.center());
-	origin = QPointF((float)(originR.center().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - originR.center().y() + viewport.Y()*zoom)/(AREADIM*zoom));
-	
+	origin = ToUVSpace(originR.center().x(), originR.center().y());
 	// calculate scaling
 	scaleX = (float)selection.width() / oldSRX;
 	scaleY = (float)selection.height() / oldSRY;
@@ -1044,14 +1028,15 @@ void RenderArea::HandleRotate(QPoint e)
 	float A2 = (e.x() - originR.center().x())*(e.x() - originR.center().x()) + (e.y() - originR.center().y())*(e.y() - originR.center().y());
 	float C2 = (rectX - e.x())*(rectX - e.x()) + (rectY - e.y()) * (rectY -e.y());
 	degree = acos((C2 - A2 - B2) / (-2*sqrt(A2)*sqrt(B2)));
-	float ny = (float) (e.x() - Rq) / Rm;
+	float ny = (float) Rm * e.x() + Rq;
 	switch(highlighted)
 	{
 	case 0:
-		if ( ny > e.y()) degree = -degree;
+		if (ny > e.y()) degree = -degree;
 		break;
 	case 1:
-		if (ny < e.y()) degree = -degree;
+		if (ny < e.y()) 
+			degree = -degree;
 		break;
 	case 2:
 		if (ny > e.y()) degree = -degree;
@@ -1074,14 +1059,11 @@ void RenderArea::RecalculateSelectionArea()
 		if ((*fi).IsUserBit(selBit))
 		{
 			QVector<QPoint> t = QVector<QPoint>(); 
-			t.push_back(QPoint((*fi).WT(0).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(0).v() * AREADIM*zoom) + viewport.Y()*zoom));
-			t.push_back(QPoint((*fi).WT(1).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(1).v() * AREADIM*zoom) + viewport.Y()*zoom));
-			t.push_back(QPoint((*fi).WT(2).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(2).v() * AREADIM*zoom) + viewport.Y()*zoom));
+			t.push_back(ToScreenSpace((*fi).WT(0).u(), (*fi).WT(0).v()));
+			t.push_back(ToScreenSpace((*fi).WT(1).u(), (*fi).WT(1).v()));
+			t.push_back(ToScreenSpace((*fi).WT(2).u(), (*fi).WT(2).v()));
 			QRegion r = QRegion(QPolygon(t));
-			if (r.boundingRect().topLeft().x() < selStart.x()) selStart.setX(r.boundingRect().topLeft().x());
-			if (r.boundingRect().topLeft().y() < selStart.y()) selStart.setY(r.boundingRect().topLeft().y());
-			if (r.boundingRect().bottomRight().x() > selEnd.x()) selEnd.setX(r.boundingRect().bottomRight().x());
-			if (r.boundingRect().bottomRight().y() > selEnd.y()) selEnd.setY(r.boundingRect().bottomRight().y());
+			UpdateBoundingArea(r.boundingRect().topLeft(), r.boundingRect().bottomRight());
 		}
 	}
 	if (selected)
@@ -1115,24 +1097,33 @@ void RenderArea::UpdateVertexSelection()
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				QPoint tmp = QPoint((*fi).WT(j).u() * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - ((*fi).WT(j).v() * AREADIM*zoom) + viewport.Y()*zoom);
+				QPoint tmp = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
 				if ((*fi).V(j)->IsUserBit(selVertBit))
 				{
-					if (tmp.x() < selStart.x()) selStart.setX(tmp.x());
-					if (tmp.y() < selStart.y()) selStart.setY(tmp.y());
-					if (tmp.x() > selEnd.x()) selEnd.setX(tmp.x());
-					if (tmp.y() > selEnd.y()) selEnd.setY(tmp.y());
+					UpdateBoundingArea(tmp,tmp);
 					if (!selectedV) selectedV = true;
 				}
 			}
 		}
 	}
 	selection = QRect(QPoint(selStart.x() - RADIUS/2, selStart.y() - RADIUS/2), QPoint(selEnd.x() + RADIUS/2, selEnd.y() + RADIUS/2));
-	QPointF a = QPointF((float)(selection.x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selection.y() + viewport.Y()*zoom)/(AREADIM*zoom));
-	QPointF b = QPointF((float)(selection.bottomRight().x() - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - selection.bottomRight().y() + viewport.Y()*zoom)/(AREADIM*zoom));
+	QPointF a = ToUVSpace(selection.x(), selection.y());
+	QPointF b = ToUVSpace(selection.bottomRight().x(),selection.bottomRight().y());
 	areaUV = QRectF(a, QSizeF(b.x()-a.x(), b.y()-a.y()));
 }
- 
+
+QPointF RenderArea::ToUVSpace(int x, int y)
+{
+	// Convert a point from screen-space to uv-space
+	return QPointF((float)(x - viewport.X()*zoom)/(AREADIM*zoom), (float)(AREADIM*zoom - y + viewport.Y()*zoom)/(AREADIM*zoom));
+}
+
+QPoint RenderArea::ToScreenSpace(float u, float v)
+{
+	// Convert a point from uv-space to screen space
+	return QPoint(u * AREADIM*zoom + viewport.X()*zoom, AREADIM*zoom - (v * AREADIM*zoom) + viewport.Y()*zoom);
+}
+
 void RenderArea::DrawCircle(QPoint origin)
 {
 	// Draw a circle
@@ -1145,4 +1136,13 @@ void RenderArea::DrawCircle(QPoint origin)
 		glVertex3f(origin.x() + cos(degInRad)*r,origin.y() + sin(degInRad)*r,1.1f);
 	}
 	glEnd();
+}
+
+void RenderArea::UpdateBoundingArea(QPoint topLeft, QPoint topRight)
+{
+	// Update the bounding box (selection rectangle) of the selected faces/vertexes
+	if (topLeft.x() < selStart.x()) selStart.setX(topLeft.x());
+	if (topLeft.y() < selStart.y()) selStart.setY(topLeft.y());
+	if (topRight.x() > selEnd.x()) selEnd.setX(topRight.x());
+	if (topRight.y() > selEnd.y()) selEnd.setY(topRight.y());
 }
