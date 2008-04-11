@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.26  2008/04/11 10:11:55  cignoni
+added visualization of vertex and face label
+
 Revision 1.25  2008/04/04 10:03:49  cignoni
 Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
@@ -113,6 +116,8 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_BOX_CORNERS_ABS,
     DP_SHOW_AXIS,
 		DP_SHOW_QUOTED_BOX,
+		DP_SHOW_VERT_LABEL, 
+		DP_SHOW_FACE_LABEL,
   };
 
   virtual const QString ST(FilterIDType filter) const;
@@ -120,8 +125,6 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 private:
 	float niceRound2(float value,float base);
 	float niceRound(float value);
-
-	float calcSlope(const vcg::Point3d &a,const vcg::Point3d &b,float dim,int spacing,double *mm,double *mp,GLint *vp);
 
 	void	drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QGLWidget *gla, QFont qf);
 
@@ -138,7 +141,9 @@ public:
     DP_SHOW_BOX_CORNERS <<
     DP_SHOW_BOX_CORNERS_ABS <<
     DP_SHOW_AXIS <<
-    DP_SHOW_QUOTED_BOX;
+    DP_SHOW_QUOTED_BOX <<
+		DP_SHOW_VERT_LABEL << 
+		DP_SHOW_FACE_LABEL;
 
     FilterIDType tt;
     foreach(tt , types()){
@@ -154,8 +159,14 @@ public:
 
 	void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
 	void DrawQuotedBox(MeshModel &m,GLArea *gla, QFont qf);
-
+	void DrawVertLabel(MeshModel &m, QGLWidget *gla, QFont qf);
+	void DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf);
+  
+	QHash<MeshModel *, bool> isMeshOk;
+	
   virtual void Decorate(QAction *a, MeshModel &m, FilterParameterSet *, GLArea *gla,QFont qf);
+	 virtual void StartDecorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+		
 };
 
 #endif

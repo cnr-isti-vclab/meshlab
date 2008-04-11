@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.48  2008/04/11 10:11:55  cignoni
+added visualization of vertex and face label
+
 Revision 1.47  2008/04/04 10:03:50  cignoni
 Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
@@ -130,8 +133,11 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
   {
     case DP_SHOW_AXIS :      return tr("Draws XYZ axes in world coordinates");
     case DP_SHOW_BOX_CORNERS:return tr("Draws object's bounding box corners");
+		case DP_SHOW_BOX_CORNERS_ABS  : return QString("Show Box Corners (Abs)");
     case DP_SHOW_NORMALS:    return tr("Draws object vertex normals");
     case DP_SHOW_QUOTED_BOX: return tr("Draws quoted box");
+    case DP_SHOW_VERT_LABEL: return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
+    case DP_SHOW_FACE_LABEL: return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
 	 }
   assert(0);
   return QString();
@@ -155,6 +161,9 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
     case DP_SHOW_BOX_CORNERS_ABS  : return QString("Show Box Corners (Abs)");
     case DP_SHOW_AXIS         : return QString("Show Axis");
 		case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
+		case DP_SHOW_VERT_LABEL: return tr("Show Vertex Label");
+    case DP_SHOW_FACE_LABEL: return tr("Show Face Label");
+
     default: assert(0);
   }
   return QString("error!");
@@ -186,6 +195,9 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
   }
   if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
 	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m,gla,qf);
+	if(a->text() == ST(DP_SHOW_VERT_LABEL))	DrawVertLabel(m,gla,qf);
+  if(a->text() == ST(DP_SHOW_FACE_LABEL))	DrawFaceLabel(m,gla,qf);
+
 	glPopMatrix();
   if(a->text() == ST(DP_SHOW_AXIS))	CoordinateFrame(m.cm.bbox.Diag()/2.0).Render(gla);
   if(a->text() == ST(DP_SHOW_BOX_CORNERS_ABS))	DrawBBoxCorner(m,false);
@@ -226,21 +238,21 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,GLArea *gla,QFont qf)
 	glPushMatrix();
 	glScalef(1,s,s);
 	glTranslatef(0,c[1]/s-c[1],c[2]/s-c[2]);
-	drawQuotedLine(p1,p2,b.min[0],b.max[0],calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws x axis
+	drawQuotedLine(p1,p2,b.min[0],b.max[0],CoordinateFrame::calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws x axis
 	glPopMatrix();
 
 	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
 	glPushMatrix();
 	glScalef(s,1,s);
 	glTranslatef(c[0]/s-c[0],0,c[2]/s-c[2]);
-	drawQuotedLine(p1,p2,b.min[1],b.max[1],calcSlope(p1,p2,b.DimY(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws y axis
+	drawQuotedLine(p1,p2,b.min[1],b.max[1],CoordinateFrame::calcSlope(p1,p2,b.DimY(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws y axis
 	glPopMatrix();
 
 	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate	
 	glPushMatrix();
 	glScalef(s,s,1);
 	glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
-	drawQuotedLine(p2,p1,b.min[2],b.max[2],calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws z axis
+	drawQuotedLine(p2,p1,b.min[2],b.max[2],CoordinateFrame::calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws z axis
 	glPopMatrix();
 
 	glPopAttrib();
@@ -348,30 +360,8 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,GLint *vp
 	}
 }
 
-float ExtraMeshDecoratePlugin::calcSlope(const Point3d &a,const Point3d &b,float dim,int spacing,double *mm,double *mp,GLint *vp)
-{
- 	Point3d p1,p2;
-
-	gluProject(a[0],a[1],a[2],mm,mp,vp,&p1[0],&p1[1],&p1[2]);
-	gluProject(b[0],b[1],b[2],mm,mp,vp,&p2[0],&p2[1],&p2[2]);
-	p1[2]=p2[2]=0;
-
-	float tickNum = spacing/Distance(p2,p1);// pxl spacing
-	float slope = dim*tickNum;
-	//slope = vcg::math::Min<float>(niceRound(slope), 0.5*niceRound(2*slope));
-  qDebug("slope %f nice %f 0.5f*nice(2*slope) %f 0.2f*nice(5*slope)%f",slope,niceRound(slope), 0.5f*niceRound(2.0f*slope),0.2f*niceRound(5.0f*slope));
-	float nslope = min(
-          min(niceRound(slope), 0.5f*niceRound(2.0f*slope)), 
-                                0.2f*niceRound(5.0f*slope));
-	nslope = vcg::math::Max<float>(niceRound(dim*.001f),nslope); // prevent too small slope
-  qDebug("choosen %f ",nslope);
-	return nslope;
-}
-
 void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickDist,QGLWidget *gla, QFont qf)
 {  
-  qDebug("drawQuotedLine %f",tickDist);
-
   float firstTick;
   if(aVal > 0) firstTick = aVal - fmod(aVal,tickDist) + tickDist;
           else firstTick = aVal - fmod(aVal,tickDist);
@@ -380,28 +370,31 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
   tickDistTen=tickDist /10.0f;
   if(aVal > 0) firstTickTen = aVal - fmod(aVal,tickDistTen) + tickDistTen;
           else firstTickTen = aVal - fmod(aVal,tickDistTen);          
-  
+
+  int neededZeros=0;
+					
   Point3d Zero = a-((b-a)/(bVal-aVal))*aVal; 
 	Point3d v(b-a);
   v.Normalize();
+  if(tickDist > 0)   // Draw lines only if the two endpoint are not coincident
+	{
+					neededZeros = ceil(max(0.0,-log10(double(tickDist))));
+					glPointSize(3);
+					float i;
+					glBegin(GL_POINTS);
+					for(i=firstTick;i<bVal;i+=tickDist)
+						glVertex(Zero+v*i);
+					glEnd();
 
-  glPointSize(3);
-	float i;
-	glBegin(GL_POINTS);
-	for(i=firstTick;i<bVal;i+=tickDist)
-		glVertex(Zero+v*i);
-	glEnd();
+					for(i=firstTick;i<bVal;i+=tickDist)
+						gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),qf);		
 
- 	int neededZeros=ceil(max(0.0,-log10(double(tickDist))));
-	for(i=firstTick;i<bVal;i+=tickDist)
-    gla->renderText(Zero[0]+i*v[0],Zero[1]+i*v[1],Zero[2]+i*v[2],tr("%1").arg(i,3+neededZeros,'f',neededZeros),qf);		
-
- glPointSize(1);
- glBegin(GL_POINTS);
-    for(i=firstTickTen;i<=bVal;i+=tickDistTen)
-  		glVertex(Zero+v*i);
- glEnd();
-
+				 glPointSize(1);
+				 glBegin(GL_POINTS);
+						for(i=firstTickTen;i<=bVal;i+=tickDistTen)
+							glVertex(Zero+v*i);
+				 glEnd();
+	}
 
 	// Draws bigger ticks at 0 and at max size
 	glPushAttrib(GL_POINT_BIT);
@@ -417,8 +410,8 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 
 	// bold font at beginning and at the end
 	qf.setBold(true);
-	gla->renderText(a[0],a[1],a[2],tr("%1").arg(aVal,3+neededZeros,'f',neededZeros+2 ),qf);
-	gla->renderText(b[0],b[1],b[2],tr("%1").arg(bVal,3+neededZeros,'f',neededZeros+2 ),qf);
+	gla->renderText(a[0],a[1],a[2],tr("%1").arg(aVal,5+neededZeros,'f',neededZeros+2 ),qf);
+	gla->renderText(b[0],b[1],b[2],tr("%1").arg(bVal,5+neededZeros,'f',neededZeros+2 ),qf);
 }
 
 
@@ -482,6 +475,58 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 
 	glEnd();
 	glPopAttrib();
+}
+
+
+
+void ExtraMeshDecoratePlugin::StartDecorate(QAction * action, MeshModel &m, GLArea *)
+{	
+	if( ID(action) == DP_SHOW_VERT_LABEL || ID(action) == DP_SHOW_FACE_LABEL)
+				{
+					if(m.cm.vn <1000 && m.cm.fn<2000) {
+									isMeshOk[&m] = true;
+									return;
+						}					
+					QMessageBox::StandardButton ret=QMessageBox::question(0,"","Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW <br> Do you REALLY want this? ",QMessageBox::Yes|QMessageBox::No);
+					if(ret==QMessageBox::Yes) isMeshOk[&m] = true; 
+					else isMeshOk[&m] = false;
+				}
+}
+void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont qf)
+{
+	assert(isMeshOk.contains(&m));
+	glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
+	glDepthFunc(GL_ALWAYS);
+	glDisable(GL_LIGHTING);
+	glColor3f(.4,.4,.4);
+	if(isMeshOk[&m])
+	{
+				for(size_t i=0;i<m.cm.face.size();++i)
+					if(!m.cm.face[i].IsD())
+							{
+								Point3f bar=Barycenter(m.cm.face[i]);
+								gla->renderText(bar[0],bar[1],bar[2],tr("%1").arg(i),qf);		
+							}
+	}
+	glPopAttrib();
+}
+
+
+void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QGLWidget *gla, QFont qf)
+{
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
+	glDepthFunc(GL_ALWAYS);
+	glDisable(GL_LIGHTING);
+	glColor3f(.4,.4,.4);
+	assert(isMeshOk.contains(&m));
+	if(isMeshOk[&m])
+			{
+					for(size_t i=0;i<m.cm.vert.size();++i){
+								if(!m.cm.vert[i].IsD())
+											gla->renderText(m.cm.vert[i].P()[0],m.cm.vert[i].P()[1],m.cm.vert[i].P()[2],tr("%1").arg(i),qf);		
+					}
+			}	
+	glPopAttrib();			
 }
 
 Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)
