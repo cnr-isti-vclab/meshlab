@@ -161,18 +161,18 @@ public:
 	}
 	
 	// temporary empty (flip is already done in constructor)
-	void Execute(TRIMESH_TYPE& /*m*/)
+	void Execute(TRIMESH_TYPE& m)
 	{
 		VertexPointer v0, v1, v2, v3;
 		int i = this->_pos.E();
-		
 		FacePointer f1 = this->_pos.F();
+		int j = f1->FFi(i);
+		FacePointer f2 = f1->FFp(i);
+		
 		v0 = f1->V0(i);
 		v1 = f1->V1(i);
 		v2 = f1->V2(i);
-		
-		FacePointer f2 = this->_pos.F()->FFp(i);
-		v3 = f2->V2(f1->FFi(i));
+		v3 = f2->V2(j);
 		
 		// save precomputed curvature in vertex quality
 		v0->Q() = _cv0;
@@ -189,27 +189,34 @@ public:
 		v2->N() = v2->N() - f1->N() + n1 + n2;
 		v3->N() = v3->N() - f2->N() + n1 + n2;
 		
-		int j = f1->FFi(i);
-		
 		// fix VF adjacency - detach
 		assert(f1->V1(i) == v1);
 		vcg::face::VFDetach(*f1, (i + 1) % 3); // detach v1 from f1
 		assert(f2->V1(j) == v0);
 		vcg::face::VFDetach(*f2, (j + 1) % 3); // detach v0 from f2
-		
+
 		// do the flip
-		vcg::face::FlipEdge(*this->_pos.f, this->_pos.z);
-		
+		vcg::face::FlipEdge(*this->_pos.F(), this->_pos.E());
+
 		// fix VF adjacency - append
 		assert(f2->V1(j) == v2);
 		vcg::face::VFAppend(f2, (j + 1) % 3); // attach v2 with f2
 		assert(f1->V1(i) == v3);
 		vcg::face::VFAppend(f1, (i + 1) % 3); // attach v3 with f1
+
+		// avoid texture coordinates swap after flip 
+		if (tri::HasPerWedgeTexCoord(m)) {
+			f2->WT((j + 1) % 3) = f1->WT((i + 2) % 3);
+			f1->WT((i + 1) % 3) = f2->WT((j + 2) % 3);
+		}
 	}
 	
 	
 	virtual bool IsFeasible()
 	{
+		if(!vcg::face::CheckFlipEdge(*this->_pos.F(), this->_pos.E()))
+			return false;
+		
 		if (math::ToDeg(Angle(this->_pos.FFlip()->cN(), this->_pos.F()->cN()) ) <= this->CoplanarAngleThresholdDeg() )
 			return false;
 		
@@ -228,7 +235,11 @@ public:
 		    (Angle(v2 - v1, v0 - v1) + Angle(v3 - v1, v0 - v1) >= M_PI))
 			return false;
 		
-		return vcg::face::CheckFlipEdge(*this->_pos.f, this->_pos.z);
+		// if any of two faces adj to edge in non writable, the flip is unfeasible
+		if (!this->_pos.F()->IsW() || !this->_pos.F()->FFp(i)->IsW())
+			return false;
+		
+		return true;
 	}
 
 	
@@ -305,35 +316,21 @@ public:
 	static void Init(TRIMESH_TYPE &m, HeapType &heap)
 	{
 		CURVEVAL curveval;
-		
+
 		heap.clear();
-		
+
 		// comuputing edge flip priority require non normalized vertex normals
 		vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertex(m);
-		
-		/*SimpleTempData<VertContainer, CurvData> tdcurv(m.vert);
-		tdcurv.Start();*/
-		
-		//FaceIterator fi;
-		
-		/*for(fi = m.face.begin(); fi != m.face.end(); ++fi)
-			if(!(*fi).IsD())
-				for(unsigned int i = 0; i < 3; i++)
-					tdcurv[(*fi).V0(i)] += FaceCurv((*fi).V0(i), (*fi).V1(i),
-					                                (*fi).V2(i), (*fi).N());*/
-		
+
 		VertexIterator vi;
-		for(vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-			if(!(*vi).IsD() && (*vi).IsW())
+		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+			if (!(*vi).IsD() && (*vi).IsW())
 				(*vi).Q() = curveval(Curvature(&(*vi)));
-			//(*vi).Q() = curveval(tdcurv[vi]);
-		
-		//tdcurv.Stop();
-		
+
 		FaceIterator fi;
-		for(fi = m.face.begin(); fi != m.face.end(); ++fi)
-			if(!(*fi).IsD())
-				for(unsigned int i = 0; i < 3; i++)
+		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
+			if (!(*fi).IsD())
+				for (unsigned int i = 0; i < 3; i++)
 					if ((*fi).V1(i) - (*fi).V0(i) > 0)
 						InsertIfConvenient(heap, PosType(&*fi, i), m.IMark());
 	}
@@ -348,7 +345,7 @@ public:
 		// We must push on heap every edge 2 - neighbor to the flipped edge
 		
 		int flipped = (this->_pos.E() + 1) % 3;
-		PosType startpos(this->_pos.f, flipped);
+		PosType startpos(this->_pos.F(), flipped);
 		FacePointer f2 = (FacePointer) startpos.FFlip();
 
 		assert(!startpos.IsBorder());

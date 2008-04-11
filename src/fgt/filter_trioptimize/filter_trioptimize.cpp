@@ -27,116 +27,85 @@
 #include <stdlib.h>
 #include <time.h>
 
-
-//#include <qstringlist.h>
-/*#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>*/
-
 #include "laplacianadjust.h"
 #include "filter_trioptimize.h"
 #include "curvedgeflip.h"
-
-//#include <vcg/space/triangle3.h>
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/selection.h>
-//#include <vcg/complex/trimesh/update/curvature.h>
-using namespace vcg;
 
 using namespace vcg;
 
 // forward declarations
-class NSMCEdgeFlip;
-class MeanCEdgeFlip;
-class AbsCEdgeFlip;
+class NSMCEFlip;
+class MeanCEFlip;
+class AbsCEFlip;
 
-class NSMCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, NSMCEdgeFlip, NSMCurvEval >
+class NSMCEFlip : public vcg::tri::CurvEdgeFlip<CMeshO, NSMCEFlip, NSMCEval >
 {
 public:
-	NSMCEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, NSMCEdgeFlip, NSMCurvEval >(pos, mark) {}
+	NSMCEFlip(PosType pos, int mark) : 
+		vcg::tri::CurvEdgeFlip<CMeshO, NSMCEFlip, NSMCEval >(pos, mark) {}
 };
 
-class MeanCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, MeanCEdgeFlip, MeanCurvEval >
+class MeanCEFlip : public vcg::tri::CurvEdgeFlip<CMeshO, MeanCEFlip, MeanCEval >
 {
 public:
-	MeanCEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, MeanCEdgeFlip, MeanCurvEval >(pos, mark) {}
+	MeanCEFlip(PosType pos, int mark) : 
+		vcg::tri::CurvEdgeFlip<CMeshO, MeanCEFlip, MeanCEval >(pos, mark) {}
 };
 
-class AbsCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, AbsCEdgeFlip, AbsCurvEval >
+class AbsCEFlip : public vcg::tri::CurvEdgeFlip<CMeshO, AbsCEFlip, AbsCEval >
 {
 public:
-	AbsCEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, AbsCEdgeFlip, AbsCurvEval >(pos, mark) {}
+	AbsCEFlip(PosType pos, int mark) : 
+		vcg::tri::CurvEdgeFlip<CMeshO, AbsCEFlip, AbsCEval >(pos, mark) {}
 };
-
-/*typedef CurvData<CMeshO::ScalarType> CurvType;
-
-class NSMCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, NSMCEdgeFlip, NSMCurvEval<CurvType> >
-{
-public:
-	NSMCEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, NSMCEdgeFlip, NSMCurvEval<CurvType> >(pos, mark) {}
-};
-
-class MeanCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, MeanCEdgeFlip, MeanCurvEval<CurvType> >
-{
-public:
-	MeanCEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, MeanCEdgeFlip, MeanCurvEval<CurvType> >(pos, mark) {}
-};
-
-class AbsCEdgeFlip : public vcg::tri::CurvEdgeFlip<CMeshO, AbsCEdgeFlip, AbsCurvEval<CurvType> >
-{
-public:
-	AbsCEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::CurvEdgeFlip<CMeshO, AbsCEdgeFlip, AbsCurvEval<CurvType> >(pos, mark) {}
-};*/
 
 // forward declarations
-class MyTriEdgeFlip;
-class MyTopoEdgeFlip;
-class QualityEdgeFlip;
-class QualityRadiiEdgeFlip;
-class QualityMeanRatioEdgeFlip;
+class MyTriEFlip;
+class MyTopoEFlip;
+class QEFlip;
+class QRadiiEFlip;
+class QMeanRatioEFlip;
 
-class MyTriEdgeFlip : public vcg::tri::TriEdgeFlip<CMeshO, MyTriEdgeFlip >
+class MyTriEFlip : public vcg::tri::TriEdgeFlip<CMeshO, MyTriEFlip>
 {
 public:
-	MyTriEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::TriEdgeFlip<CMeshO, MyTriEdgeFlip>(pos, mark) {}
+	MyTriEFlip(PosType pos, int mark) :
+		vcg::tri::TriEdgeFlip<CMeshO, MyTriEFlip>(pos, mark) {}
 };
 
-class MyTopoEdgeFlip : public vcg::tri::TopoEdgeFlip<CMeshO, MyTopoEdgeFlip >
+class MyTopoEFlip : public vcg::tri::TopoEdgeFlip<CMeshO, MyTopoEFlip>
 {
 public:
-	MyTopoEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::TopoEdgeFlip<CMeshO, MyTopoEdgeFlip>(pos, mark) {}
-}; 
-
-class QualityEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, QualityEdgeFlip >
-{
-public:	
-	QualityEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::PlanarEdgeFlip<CMeshO, QualityEdgeFlip>(pos, mark) {}
+	MyTopoEFlip(PosType pos, int mark) :
+		vcg::tri::TopoEdgeFlip<CMeshO, MyTopoEFlip>(pos, mark) {}
 };
 
-class QualityRadiiEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, QualityRadiiEdgeFlip, QualityRadii >
+class QEFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, QEFlip>
 {
-public:	
-	QualityRadiiEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::PlanarEdgeFlip<CMeshO, QualityRadiiEdgeFlip, QualityRadii>(pos, mark) {}
+public:
+	QEFlip(PosType pos, int mark) :
+		vcg::tri::PlanarEdgeFlip<CMeshO, QEFlip>(pos, mark) {}
 };
 
-class QualityMeanRatioEdgeFlip : public vcg::tri::PlanarEdgeFlip<CMeshO, QualityMeanRatioEdgeFlip, QualityMeanRatio >
+class QRadiiEFlip :
+public vcg::tri::PlanarEdgeFlip<CMeshO, QRadiiEFlip, QualityRadii>
 {
-public:	
-	QualityMeanRatioEdgeFlip(PosType pos, int mark) : 
-		vcg::tri::PlanarEdgeFlip<CMeshO, QualityMeanRatioEdgeFlip, QualityMeanRatio>(pos, mark) {}
+public:
+	QRadiiEFlip(PosType pos, int mark) :
+		vcg::tri::PlanarEdgeFlip<CMeshO, QRadiiEFlip, QualityRadii>(pos, mark) {}
+};
+
+class QMeanRatioEFlip :
+public vcg::tri::PlanarEdgeFlip<CMeshO, QMeanRatioEFlip, QualityMeanRatio>
+{
+public:
+	QMeanRatioEFlip(PosType pos, int mark) :
+		vcg::tri::PlanarEdgeFlip<CMeshO, QMeanRatioEFlip, QualityMeanRatio>(pos, mark) {}
 };
 
 
@@ -171,10 +140,10 @@ const int TriOptimizePlugin::getRequirements(QAction *action)
 {
 	switch (ID(action)) {
 		case FP_EDGE_FLIP:
-			return MeshModel::MM_FACETOPO | 
-					   MeshModel::MM_VERTFACETOPO |
-					   MeshModel::MM_VERTMARK |
-					   MeshModel::MM_BORDERFLAG;
+			return MeshModel::MM_FACETOPO |
+			       MeshModel::MM_VERTFACETOPO | 
+			       MeshModel::MM_VERTMARK | 
+			       MeshModel::MM_BORDERFLAG;
 		case FP_NEAR_LAPLACIAN_SMOOTH:
 			return MeshModel::MM_BORDERFLAG;
 	}
@@ -216,7 +185,8 @@ const PluginInfo &TriOptimizePlugin::pluginInfo()
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/, FilterParameterSet & parlst)
+void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
+                                         FilterParameterSet & parlst)
 {
 	if (ID(action) == FP_EDGE_FLIP) {
 		parlst.addBool("selection", false, tr("Update selection"),
@@ -225,7 +195,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/, Filt
 		parlst.addBool("cflips", true, tr("Curvature flips"),
 				tr("Do edge flips based on local curvature minimization"));
 		
-		parlst.addBool("pflips", true, tr("Planar flips"),
+		parlst.addBool("pflips", false, tr("Planar flips"),
 				tr("Do edge flips to improve adjacent almost planar faces"));
 		
 		parlst.addAbsPerc("pthreshold", 1.0f, 0.1f, 90.0f,
@@ -257,150 +227,171 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/, Filt
 				tr("maximum mean normal angle displacement (degrees)"
 				   "from old to new faces"));
 		parlst.addInt("iterations", 1, "Iterations",
-				"number of laplacian smooth iterations in every run");
+				tr("number of laplacian smooth iterations in every run"));
 	}
 }
 
 // The Real Core Function doing the actual mesh processing.
 // Run mesh optimization
-bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos */*cb*/)
+bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
+                                    FilterParameterSet & par,
+                                    vcg::CallBackPos *cb)
 {
 	float epsilon = std::numeric_limits<float>::epsilon();
-	
+
 	if (ID(filter) == FP_EDGE_FLIP) {
-		int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+		
+		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+			errorMessage = "Mesh has some not 2-manifold faces,"
+			               " edge flips requires manifoldness";
+			return false; // can't continue, mesh can't be processed
+		}
+		
+		cb(1, "Initializing...");
+		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		if (delvert)
 			Log(GLLogStream::Info,
 			    "Pre-Curvature Cleaning: Removed %d unreferenced vertices",
 			    delvert);
-		
+
 		tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-		
-		// to fix topology relations
-		// TODO: make this as optional
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-		vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		
-		// temporary test
-		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
-		vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
-		
-		vcg::LocalOptimization<CMeshO> optimization(m.cm);
+		vcg::LocalOptimization<CMeshO> optimiz(m.cm);
 		float pthr = par.getAbsPerc("pthreshold");
 		time_t start = clock();
-		
+
 		if (par.getBool("selection")) {
 			// Mark not writable un-selected faces
 			CMeshO::FaceIterator fi;
 			for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				if (!(*fi).IsD()) {
 					if (!(*fi).IsS()) (*fi).ClearW();
-					else(*fi).SetW();
+					else (*fi).SetW();
 				}
-			
+
 			// select vertices with at least one incident face selected
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
-			
+
 			// Mark not writable un-selected vertices
 			CMeshO::VertexIterator vi;
 			for (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
-				if (!(*vi).IsD())
+				if (!(*vi).IsD()) {
 					if (!(*vi).IsS()) (*vi).ClearW();
 					else (*vi).SetW();
+				}
 		}
-		
+
 		if (par.getBool("cflips")) {
+			// VF adjacency needed for edge flips based on vertex curvature 
+			vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+
 			int metric = par.getEnum("curvtype");
 			switch (metric) {
 				case 0:
-					MeanCEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimization.Init<MeanCEdgeFlip>();
+					MeanCEFlip::CoplanarAngleThresholdDeg() = pthr;
+					optimiz.Init<MeanCEFlip>();
 					break;
 				case 1:
-					NSMCEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimization.Init<NSMCEdgeFlip>();
+					NSMCEFlip::CoplanarAngleThresholdDeg() = pthr;
+					optimiz.Init<NSMCEFlip>();
 					break;
 				case 2:
-					AbsCEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimization.Init<AbsCEdgeFlip>();
+					AbsCEFlip::CoplanarAngleThresholdDeg() = pthr;
+					optimiz.Init<AbsCEFlip>();
 					break;
 			}
-			
-			// stop when flips become harmful: != 0.0f to avoid same flips in every run
+
+			// stop when flips become harmful
 			// TODO: set a better limit
-			optimization.SetTargetMetric(-epsilon);
-			optimization.DoOptimization();
-			
+			int n = optimiz.h.size();
+			optimiz.SetTargetMetric(-epsilon);
+			optimiz.SetTimeBudget(0.01f);
+			unsigned int nflips = 0;
+
+			do {
+				optimiz.DoOptimization();
+				nflips += optimiz.nPerfmormedOps;
+				cb((int) (((n - optimiz.h.size()) / (float) n) * 100), 
+				   "Optimizing...");
+			} while (optimiz.currMetric < -epsilon && !optimiz.h.empty());
+
+			cb(100, "End");
+			nflips += optimiz.nPerfmormedOps;
+
 			Log(GLLogStream::Info,
-					"%i curvature edge flips performed in %i sec.",
-					optimization.nPerfmormedOps,
-					(int) (clock() - start) / 1000000);
+			    "%d curvature edge flips performed in %.2f sec.",
+			    nflips, (clock() - start) / (float) CLOCKS_PER_SEC);
 		}
-		
+
 		start = clock();
 		if (par.getBool("pflips")) {
 			int metric = par.getEnum("planartype");
 			switch (metric) {
 				case 0:
-					QualityEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimization.Init<QualityEdgeFlip>();
+					QEFlip::CoplanarAngleThresholdDeg() = pthr;
+					optimiz.Init<QEFlip>();
 					break;
 				case 1:
-					QualityRadiiEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimization.Init<QualityRadiiEdgeFlip>();
+					QRadiiEFlip::CoplanarAngleThresholdDeg() = pthr;
+					optimiz.Init<QRadiiEFlip>();
 					break;
 				case 2:
-					QualityMeanRatioEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimization.Init<QualityMeanRatioEdgeFlip>();
+					QMeanRatioEFlip::CoplanarAngleThresholdDeg() = pthr;
+					optimiz.Init<QMeanRatioEFlip>();
 					break;
 				case 3:
-					MyTriEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimization.Init<MyTriEdgeFlip>();
+					MyTriEFlip::CoplanarAngleThresholdDeg() = pthr;
+					optimiz.Init<MyTriEFlip>();
 					break;
 				case 4:
-					MyTopoEdgeFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimization.Init<MyTopoEdgeFlip>();
+					MyTopoEFlip::CoplanarAngleThresholdDeg() = pthr;
+					optimiz.Init<MyTopoEFlip>();
 					break;
 			}
-			
+
+			cb(1, "Optimizing...");
 			// stop when flips become harmful:
 			// != 0.0f to avoid same flips in every run
 			// TODO: set a better limit
-			optimization.SetTargetMetric(-epsilon);
-			optimization.DoOptimization();
-			
-			Log(GLLogStream::Info, "%i planar edge flips performed in %i sec.",
-			    optimization.nPerfmormedOps,
-			    (int) (clock() - start) / 1000000);
+			optimiz.SetTargetMetric(-epsilon);
+			optimiz.DoOptimization();
+
+			Log(GLLogStream::Info,
+			    "%d planar edge flips performed in %.2f sec.",
+			    optimiz.nPerfmormedOps,
+			    (clock() - start) / (float) CLOCKS_PER_SEC);
 		}
-		
-		//optimization.Finalize<CurvEdgeFlip>();
+
+		//optimiz.Finalize<CurvEdgeFlip>();
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		
+
 		// Clear Writable flags
 		if (par.getBool("selection")) {
 			CMeshO::FaceIterator fi;
 			for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
-				if (!(*fi).IsD()) (*fi).SetW();
-			
+				if (!(*fi).IsD())
+					(*fi).SetW();
+
 			CMeshO::VertexIterator vi;
 			for (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
-				if (!(*vi).IsD()) (*vi).SetW();
+				if (!(*vi).IsD())
+					(*vi).SetW();
 		}
 	}
-	
+
 	if (ID(filter) == FP_NEAR_LAPLACIAN_SMOOTH) {
-		bool sel = par.getBool("selection");
-		if(sel)
+		bool selection = par.getBool("selection");
+		if (selection)
 			vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-		
+
 		int iternum = par.getInt("iterations");
 		float dthreshold = par.getAbsPerc("dthreshold");
-		LaplacianAdjust(m.cm, iternum, dthreshold, sel);
+		LaplacianAdjust(m.cm, iternum, dthreshold, selection);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	}
-	
+
 	return true;
 }
 

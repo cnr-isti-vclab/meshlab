@@ -60,7 +60,7 @@ public:
 };
 
 
-class NSMCurvEval
+class NSMCEval
 {
 public:
 	float operator() (const CurvData& c)
@@ -69,17 +69,16 @@ public:
 	}
 };
 
-class MeanCurvEval
+class MeanCEval
 {
 public:
 	float operator() (const CurvData& c)
 	{
-		//return (c.H / 8.0);
 		return (c.H / 4.0);
 	}
 };
 
-class AbsCurvEval
+class AbsCEval
 {
 public:
 	float operator() (const CurvData& c)
