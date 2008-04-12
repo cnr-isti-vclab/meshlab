@@ -40,6 +40,7 @@ public:
 	void RemapClamp();
 	void RemapMod();
 	void ClearSelection();
+	void InvertSelection();
 
 protected:
     void paintEvent(QPaintEvent *event);

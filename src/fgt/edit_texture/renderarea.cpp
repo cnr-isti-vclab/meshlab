@@ -951,6 +951,34 @@ void RenderArea::ClearSelection()
 	selection = QRect();
 }
 
+void RenderArea::InvertSelection()
+{
+	// Invert selected faces
+	if (selected)
+	{
+		for (unsigned i = 0; i < model->cm.face.size(); i++)
+		{
+			if (model->cm.face[i].WT(0).n() == textNum)
+			{
+				if (model->cm.face[i].IsUserBit(selBit)) model->cm.face[i].ClearUserBit(selBit);
+				else model->cm.face[i].SetUserBit(selBit);
+			}
+		}
+		RecalculateSelectionArea();
+		this->update();
+	}
+	else if (selectedV)
+	{
+		for (unsigned i = 0; i < model->cm.vert.size(); i++)
+		{
+			if (model->cm.vert[i].IsUserBit(selVertBit)) model->cm.vert[i].ClearUserBit(selVertBit);
+			else model->cm.vert[i].SetUserBit(selVertBit);
+		}
+		UpdateVertexSelection();
+		this->update();
+	}
+}
+
 void RenderArea::HandleScale(QPoint e)
 {
 	// Move the rectangle of scaling and resize the selction area
@@ -1133,7 +1161,7 @@ void RenderArea::DrawCircle(QPoint origin)
 	for (int i = 0; i < 360; i++)
 	{
 		float degInRad = i*DEG2RAD;
-		glVertex3f(origin.x() + cos(degInRad)*r,origin.y() + sin(degInRad)*r,1.1f);
+		glVertex3f(origin.x() + cos(degInRad)*r,origin.y() + sin(degInRad)*r,2.0f);
 	}
 	glEnd();
 }

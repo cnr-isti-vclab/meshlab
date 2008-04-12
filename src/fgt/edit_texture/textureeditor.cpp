@@ -133,6 +133,11 @@ void TextureEditor::on_modulusButton_clicked()
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->RemapMod();
 }
 
+void TextureEditor::on_invertButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->InvertSelection();
+}
+
 void TextureEditor::on_cancelButton_clicked()
 {
 	ResetLayout();
