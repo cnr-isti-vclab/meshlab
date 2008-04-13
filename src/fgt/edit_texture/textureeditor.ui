@@ -308,6 +308,12 @@
       </property>
       <item>
        <widget class="QGroupBox" name="groupBox_4" >
+        <property name="maximumSize" >
+         <size>
+          <width>90</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="title" >
          <string> Remap </string>
         </property>
@@ -320,6 +326,15 @@
          </property>
          <item>
           <widget class="QPushButton" name="clampButton" >
+           <property name="maximumSize" >
+            <size>
+             <width>70</width>
+             <height>23</height>
+            </size>
+           </property>
+           <property name="toolTip" >
+            <string>Clamp texture coordinates of of border</string>
+           </property>
            <property name="text" >
             <string>Clamp</string>
            </property>
@@ -327,6 +342,15 @@
          </item>
          <item>
           <widget class="QPushButton" name="modulusButton" >
+           <property name="maximumSize" >
+            <size>
+             <width>70</width>
+             <height>23</height>
+            </size>
+           </property>
+           <property name="toolTip" >
+            <string>Apply moudlus operator to texture coordinates out of border</string>
+           </property>
            <property name="text" >
             <string>Modulus</string>
            </property>
@@ -347,17 +371,59 @@
          <property name="spacing" >
           <number>6</number>
          </property>
+         <item row="0" column="2" >
+          <widget class="QLabel" name="label_5" >
+           <property name="text" >
+            <string>Alfa:</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="3" >
+          <widget class="QDoubleSpinBox" name="spinBoxAlfa" >
+           <property name="decimals" >
+            <number>1</number>
+           </property>
+           <property name="maximum" >
+            <double>1.000000000000000</double>
+           </property>
+           <property name="singleStep" >
+            <double>0.100000000000000</double>
+           </property>
+           <property name="value" >
+            <double>0.300000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4" >
           <widget class="QPushButton" name="smoothButton" >
            <property name="text" >
             <string>Apply</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label_5" >
-           <property name="text" >
-            <string>Alfa:</string>
+         <item row="0" column="1" >
+          <widget class="QSpinBox" name="spinBoxIteration" >
+           <property name="maximum" >
+            <number>10</number>
+           </property>
+           <property name="minimum" >
+            <number>1</number>
+           </property>
+           <property name="value" >
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" colspan="4" >
+          <widget class="QProgressBar" name="progressBar" >
+           <property name="maximum" >
+            <number>100</number>
+           </property>
+           <property name="value" >
+            <number>0</number>
+           </property>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
@@ -385,32 +451,10 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1" >
-          <widget class="QSpinBox" name="spinBoxAlfa" />
-         </item>
-         <item row="0" column="2" >
-          <spacer>
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="1" column="1" colspan="3" >
-          <widget class="QProgressBar" name="progressBar" >
-           <property name="maximum" >
-            <number>100</number>
-           </property>
-           <property name="value" >
-            <number>0</number>
-           </property>
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
+         <item row="0" column="0" >
+          <widget class="QLabel" name="label" >
+           <property name="text" >
+            <string>Iteration:</string>
            </property>
           </widget>
          </item>
@@ -423,6 +467,20 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11" />
+ <tabstops>
+  <tabstop>moveButton</tabstop>
+  <tabstop>selectButton</tabstop>
+  <tabstop>connectedButton</tabstop>
+  <tabstop>vertexButton</tabstop>
+  <tabstop>invertButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>clampButton</tabstop>
+  <tabstop>modulusButton</tabstop>
+  <tabstop>spinBoxIteration</tabstop>
+  <tabstop>spinBoxAlfa</tabstop>
+  <tabstop>smoothButton</tabstop>
+  <tabstop>tabWidget</tabstop>
+ </tabstops>
  <resources>
   <include location="meshlab.qrc" />
  </resources>

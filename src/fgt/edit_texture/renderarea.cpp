@@ -224,7 +224,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 		// Calculate the coords and draw it
 		float ox = (float)-viewport.X()*zoom/(AREADIM*zoom), oy = (float)(AREADIM*zoom - h + viewport.Y()*zoom)/(AREADIM*zoom);
 		/*O:*/painter.drawText(TRANSLATE, h - TRANSLATE, QString("(%1,%2)").arg(ox).arg(oy));
-		/*Y:*/painter.drawText(TRANSLATE, TRANSLATE*3, QString("(%1,%2)").arg(ox).arg(oy + 1.0f/zoom));
+		/*Y:*/painter.drawText(TRANSLATE, TRANSLATE*3, QString("(%1,%2)").arg(ox).arg((float)(AREADIM*zoom + viewport.Y()*zoom)/(AREADIM*zoom)));
 		/*X:*/painter.drawText(w - TRANSLATE*18, h - TRANSLATE, QString("(%1,%2)").arg((float)(w-viewport.X()*zoom)/(AREADIM*zoom)).arg(oy));
 		painter.drawText(TRANSLATE, TRANSLATE*6, QString("V"));
 		painter.drawText(AREADIM - TRANSLATE*23, AREADIM - TRANSLATE, QString("U"));
@@ -304,6 +304,7 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 		selected = false;
 		selectedV = false;
 		selVertBit = CVertexO::NewBitFlag();
+		selBit = CFaceO::NewBitFlag();
 	}
 	switch(mode)
 	{
@@ -670,14 +671,25 @@ void RenderArea::ChangeMode(int index)
 			{
 				if (selection != QRect())
 				{
-					if (selectMode == Vertex) mode = EditVert;
-					else mode = Edit; 
-					selected = true;
+					if (selectMode == Vertex) 
+					{
+						mode = EditVert;
+						selectedV = true;
+						selBit = CFaceO::NewBitFlag();
+					}
+					else 
+					{
+						mode = Edit; 
+						selected = true;
+						selVertBit = CVertexO::NewBitFlag();
+					}
 					this->setCursor(QCursor(QBitmap(":/images/sel_move.png")));
 				}
 				else
 				{
 					mode = Select;
+					selBit = CFaceO::NewBitFlag();
+					selVertBit = CVertexO::NewBitFlag();
 					this->setCursor(Qt::CrossCursor);
 				}
 			}
@@ -733,8 +745,13 @@ void RenderArea::ChangeSelectMode(int index)
 	{
 		areaUV = QRectF();
 		selVertBit = CVertexO::NewBitFlag();
+		selectedV = false;
 	}
-	if (selected && selectMode == Vertex) selBit = CFaceO::NewBitFlag();
+	if (selected && selectMode == Vertex) 
+	{
+		selected = false;
+		selBit = CFaceO::NewBitFlag();
+	}
 }
 
 void RenderArea::RotateComponent(float alfa)
@@ -965,6 +982,8 @@ void RenderArea::InvertSelection()
 			}
 		}
 		RecalculateSelectionArea();
+		originR.moveCenter(selection.center());
+		origin = ToUVSpace(originR.center().x(), originR.center().y());
 		this->update();
 	}
 	else if (selectedV)
