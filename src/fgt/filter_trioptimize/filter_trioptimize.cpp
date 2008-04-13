@@ -237,10 +237,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
                                     FilterParameterSet & par,
                                     vcg::CallBackPos *cb)
 {
-	float epsilon = std::numeric_limits<float>::epsilon();
-
 	if (ID(filter) == FP_EDGE_FLIP) {
-		
 		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
 			errorMessage = "Mesh has some not 2-manifold faces,"
 			               " edge flips requires manifoldness";
@@ -255,8 +252,11 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			    delvert);
 
 		tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+		
+		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
 		
 		vcg::LocalOptimization<CMeshO> optimiz(m.cm);
 		float pthr = par.getAbsPerc("pthreshold");
@@ -286,6 +286,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 		if (par.getBool("cflips")) {
 			// VF adjacency needed for edge flips based on vertex curvature 
 			vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+			vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
 
 			int metric = par.getEnum("curvtype");
 			switch (metric) {
@@ -303,10 +304,9 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 					break;
 			}
 
-			// stop when flips become harmful
-			// TODO: set a better limit
 			int n = optimiz.h.size();
-			optimiz.SetTargetMetric(-epsilon);
+			// stop when flips become harmful
+			optimiz.SetTargetMetric(0);
 			optimiz.SetTimeBudget(0.01f);
 			unsigned int nflips = 0;
 
@@ -315,7 +315,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 				nflips += optimiz.nPerfmormedOps;
 				cb((int) (((n - optimiz.h.size()) / (float) n) * 100), 
 				   "Optimizing...");
-			} while (optimiz.currMetric < -epsilon && !optimiz.h.empty());
+			} while (optimiz.currMetric < 0 && !optimiz.h.empty());
 
 			Log(GLLogStream::Info,
 			    "%d curvature edge flips performed in %.2f sec.",
@@ -349,10 +349,8 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			}
 
 			cb(1, "Optimizing...");
-			// stop when flips become harmful:
-			// != 0.0f to avoid same flips in every run
-			// TODO: set a better limit
-			optimiz.SetTargetMetric(-epsilon);
+			// stop when flips become harmful
+			optimiz.SetTargetMetric(0);
 			optimiz.DoOptimization();
 
 			Log(GLLogStream::Info,
@@ -360,8 +358,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			    optimiz.nPerfmormedOps,
 			    (clock() - start) / (float) CLOCKS_PER_SEC);
 		}
-
-		//optimiz.Finalize<CurvEdgeFlip>();
+		
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 
 		// Clear Writable flags

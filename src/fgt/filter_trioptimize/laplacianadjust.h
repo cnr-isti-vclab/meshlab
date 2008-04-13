@@ -62,14 +62,13 @@ template<class MESH_TYPE>void LaplacianAdjust(MESH_TYPE &m, int step,
 	lpz.dsp = 0;
 	TD.Start(lpz);
 
-	// to preserve surface shape, we do not move border vertices - mark them
-	//vcg::tri::UpdateFlags<MESH_TYPE>::VertexBorderFromFace(m);
-
 	for (int i = 0; i < step; ++i) {
+		// initialize sum
 		typename MESH_TYPE::VertexIterator vi;
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 			TD[*vi].sum = (*vi).P();
 
+		// compute sum
 		typename MESH_TYPE::FaceIterator fi;
 		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
 			if (!(*fi).IsD() && (!selection || (*fi).IsS()))
@@ -97,19 +96,7 @@ template<class MESH_TYPE>void LaplacianAdjust(MESH_TYPE &m, int step,
 			}
 		}
 
-		/*if(QualityWeight>0)
-		 { // quality weighted smoothing
-		 // We assume that weights are in the 0..1 range.
-		 assert(tri::HasPerVertexQuality(m));
-		 for(vi=m.vert.begin();vi!=m.vert.end();++vi)
-		 if(!(*vi).IsD() && TD[*vi].cnt>0 )
-		 if(!selection || (*vi).IsS())
-		 {
-		 float q=1.0-(*vi).Q();
-		 (*vi).P()=(*vi).P()*(1.0-q) + (TD[*vi].sum/TD[*vi].cnt)*q;
-		 }
-		 }*/
-
+		// move vertices (only if the mean normal displacement is < thr)
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 			if (!(*vi).IsD() && TD[*vi].cnt>0)
 				if (!selection || (*vi).IsS())

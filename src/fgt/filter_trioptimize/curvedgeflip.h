@@ -38,7 +38,12 @@ namespace vcg
 namespace tri
 {
 
-/* This flip happens only if decreases the curvature of the surface */
+/* 
+ * This flip happens only if decreases the curvature of the surface
+ * Edge flip optimization based on the paper
+ * "optimizing 3d triangulations using discrete curvature analysis"
+ * http://www2.in.tu-clausthal.de/~hormann/papers/Dyn.2001.OTU.pdf
+ */
 template <class TRIMESH_TYPE, class MYTYPE, class CURVEVAL>
 class CurvEdgeFlip : public TriEdgeFlip<TRIMESH_TYPE, MYTYPE>
 {
@@ -63,7 +68,7 @@ protected:
 	// New curvature precomputed for the vertexes of the faces 
 	// adjacent to edge to be flipped
 	ScalarType _cv0, _cv1, _cv2, _cv3;
-	//CoordType _nv0, _nv1, _nv2, _nv3;
+	
 	
 	static CurvData FaceCurv(VertexPointer v0,
 	                      VertexPointer v1,
@@ -111,7 +116,9 @@ protected:
 		return res;
 	}
 	
-	// f1, f2 --> this faces are to be ignored
+	/* Compute vertex curvature walking around a verte with VF adjacency
+	 * f1, f2 --> this faces are to be ignored
+	 * */
 	static CurvData Curvature(VertexPointer v, FacePointer f1 = NULL, FacePointer f2 = NULL)
 	{		
 		CurvData curv;
@@ -132,7 +139,7 @@ protected:
 	}
 	
 	
-	static void InsertIfConvenient(HeapType& heap, PosType p, int mark)
+	static void InsertIfConvenient(HeapType& heap, PosType& p, int mark)
 	{
 		MYTYPE* newflip = new MYTYPE(p, mark);
 		if(newflip->Priority() < 0 && newflip->IsFeasible() && p.F()->IsW() && p.FFlip()->IsW()) {
@@ -316,7 +323,6 @@ public:
 	static void Init(TRIMESH_TYPE &m, HeapType &heap)
 	{
 		CURVEVAL curveval;
-
 		heap.clear();
 
 		// comuputing edge flip priority require non normalized vertex normals
@@ -331,8 +337,10 @@ public:
 		for (fi = m.face.begin(); fi != m.face.end(); ++fi)
 			if (!(*fi).IsD())
 				for (unsigned int i = 0; i < 3; i++)
-					if ((*fi).V1(i) - (*fi).V0(i) > 0)
-						InsertIfConvenient(heap, PosType(&*fi, i), m.IMark());
+					if ((*fi).V1(i) - (*fi).V0(i) > 0) {
+						PosType newpos(&*fi, i);
+						InsertIfConvenient(heap, newpos, m.IMark());
+					}
 	}
 	
 	
@@ -341,39 +349,38 @@ public:
 		this->GlobalMark()++;
 		
 		FacePointer f1 = this->_pos.F();
+		
 		// The flip creates a diagonal edge on index _pos.I() + 1
 		// We must push on heap every edge 2 - neighbor to the flipped edge
-		
+		// (see the paper)
 		int flipped = (this->_pos.E() + 1) % 3;
 		PosType startpos(this->_pos.F(), flipped);
 		FacePointer f2 = (FacePointer) startpos.FFlip();
-
-		assert(!startpos.IsBorder());
 		
 		PosType pos;
 		
+		// push on heap every edge of faces adjacent to f1
 		for (int i = 0; i < 3; i++) if (i != flipped) {
 			pos = PosType(f1, i);
 			if (!pos.IsBorder()) {
 				pos.FlipF();
-				for (int j = 0; j != 3; j++) {
+				for (int j = 0; j < 3; j++) {
 					pos.F()->V0(j)->IMark() = this->GlobalMark();
-					InsertIfConvenient(heap, PosType(pos.F(), j),
-					                   this->GlobalMark());
+					PosType newpos(pos.F(), j);
+					InsertIfConvenient(heap, newpos, this->GlobalMark());
 				}
 			}
 		}
 		
-		flipped = this->_pos.F()->FFi(flipped);
-		
-		for (int i = 0; i < 3; i++) if (i != flipped) {
+		// push on heap every edge of faces adjacent to f2
+		for (int i = 0; i < 3; i++) if (i != this->_pos.F()->FFi(flipped)) {
 			pos = PosType(f2, i);
 			if (!pos.IsBorder()) {
 				pos.FlipF();
-				for (int j = 0; j != 3; j++) {
+				for (int j = 0; j < 3; j++) {
 					pos.F()->V0(j)->IMark() = this->GlobalMark();
-					InsertIfConvenient(heap, PosType(pos.F(), j),
-					                   this->GlobalMark());
+					PosType newpos(pos.F(), j);
+					InsertIfConvenient(heap, newpos, this->GlobalMark());
 				}
 			}
 		}
