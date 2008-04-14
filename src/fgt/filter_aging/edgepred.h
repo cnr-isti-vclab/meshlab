@@ -48,14 +48,16 @@ class AgingEdgePred
 			// the angle between the two face normals in degrees
 			double ffangle = vcg::Angle(ep.f->N(), ep.f->FFp(ep.z)->N()) * 180 / M_PI;
 			
-			// the 2 points not shared between the 2 faces
-			CVertexO *f1p = ep.f->V2(ep.z);
-			CVertexO *f2p = ep.f->FFp(ep.z)->V2(ep.f->FFi(ep.z));
-			
-			Point3<CVertexO::ScalarType> y, median;
-			
-			y = ep.f->N().Normalize() ^ ep.f->FFp(ep.z)->N().Normalize();
-			median = y ^ (Point3<CVertexO::ScalarType>(f1p->P() - f2p->P()));
+			Point3<CVertexO::ScalarType> edge;		// vector along edge
+			double seAngle;		// angle between the edge vector and the normal of one of the two faces
+			if(ep.f->V(ep.z) < ep.f->V1(ep.z)) {
+				edge = Point3<CVertexO::ScalarType>(ep.f->V1(ep.z)->P() - ep.f->V(ep.z)->P());
+				seAngle = vcg::Angle(edge ^ ep.f->N(), ep.f->FFp(ep.z)->N()) * 180 / M_PI;
+			}
+			else {
+				edge = Point3<CVertexO::ScalarType>(ep.f->V(ep.z)->P() - ep.f->V1(ep.z)->P());
+				seAngle = vcg::Angle(edge ^ ep.f->FFp(ep.z)->N(), ep.f->N()) * 180 / M_PI;
+			}
 			
 			/* There are always 2 cases wich produce the same angle value:
 						 ___|_		    ____
@@ -65,10 +67,9 @@ class AgingEdgePred
 			   In the first case the edge lies in a concave area of the mesh
 			   while in the second case it lies in a convex area.
 			   We need a way to know wich is the current case.
-			   This is done comparing ffangle with the angle between the 
-			   normal to the current face and the median vector. 
+			   This is done comparing seAngle with thVal.
 			*/
-			return (ffangle-thVal >= -0.001  && vcg::Angle(ep.f->N(), median) * 180 / M_PI < ffangle);
+			return (ffangle-thVal >= -0.001  && seAngle-thVal <= 0.001);
 		}
 		
 		bool testQuality(face::Pos<CMeshO::FaceType> ep) const {
