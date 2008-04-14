@@ -24,7 +24,6 @@
 
 #include <map>
 #include <vector>
-//#include <iostream>		// DEBUG
 
 #include "filter_aging.h"
 
@@ -118,6 +117,14 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 					"The maximum depth of a chip.");
 			params.addEnum("ChipStyle", 0, styles, "Chip Style", "Mesh erosion style to use. Different styles are defined \
 					passing different parameters to the noise function \nthat generates displacement values.");
+			params.addFloat("DelIntersMaxIter", 8, "Max iterations to delete self intersections",
+					"When eroding the mesh sometimes may happen that a face\n \
+					 intersects another area of the mesh, generating awful \n \
+					 artefacts. To avoid this, the vertexes of that face \n \
+					 will gradually be moved back to their original positions.\n \
+					 This parameter represents the maximum number of iterations\n \
+					 that the plugin can do to try to correct these errors (0 to\n \
+					 ignore the check).");
 			params.addBool("Selected", m.cm.sfn>0, "Affect only selected faces", 
 					"The aging procedure will be applied to the selected faces only.");
 			break;
@@ -141,6 +148,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	float edgeLenTreshold = params.getAbsPerc("EdgeLenThreshold");
 	float chipDepth = params.getAbsPerc("ChipDepth");
 	int chipStyle = params.getEnum("ChipStyle");
+	float intersMaxIter = params.getFloat("DelIntersMaxIter");
 	bool selected = params.getBool("Selected");
 	
 	AgingEdgePred ep;					// edge predicate
@@ -184,7 +192,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 							dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
 							angleFactor = 1.0;
 						}
-						else { 
+						else {
 							if(useQuality)
 								dispDir = Point3<CVertexO::ScalarType>(((*fi).N() + (*fi).FFp(j)->N()).Normalize());
 							else
@@ -206,8 +214,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 				DispMap::iterator it;
 				int intnum;
 				fcount = 0;
-				// user parameter instead 20 as max iteration limit?
-				for(int t=0; t<20; t++) {
+				for(int t=0; t<intersMaxIter; t++) {
 					intersFace.clear();
 					std::vector<CFaceO *>::iterator fpi;
 					tri::Clean<CMeshO>::SelfIntersections(m.cm, intersFace);
@@ -223,7 +230,6 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 							if(it != displaced.end())
 								(*fpi)->V(i)->P() = ((*fpi)->V(i)->P()+(*it).second)/2.0;
 						}
-						if(displaced.empty()) break;
 					}
 				}
 			}
