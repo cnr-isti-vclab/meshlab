@@ -104,7 +104,47 @@ void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
 
 void QualityMapperPlugin::Decorate(QAction*, MeshModel&, GLArea*)
 {
+// Draw a vertical bar 
+// Enter in 2D screen Mode again
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(-1,1,-1,1,-1,1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	
+	const float barTop    = - 0.60f;
+	const float barBottom =   0.60f;
+	const float barLeft   = - 0.90f;
+	const float barRight  = - 0.85f;
+	const int steps = 100;
+	const float delta = (barTop-barBottom)/steps;
+	glColor4f(.3f,.3f,.3f,.3f);
+	glBegin(GL_QUAD_STRIP);
 
+	for(int i=0;i<steps;++i)
+		{
+			glVertex2f(barLeft,barBottom+delta*i); glVertex2f(barRight,barBottom+delta*i);
+			Color4b cc = _qualityMapperDialog->_transferFunction->getColorByQuality(float(i)/float(steps));
+			cc[3]=64;
+			glColor(cc);
+		}
+		glVertex2f(barLeft,barTop); glVertex2f(barRight,barTop);
+	glEnd();
+		
+	
+	// Closing 2D
+	glPopAttrib();
+	glPopMatrix(); // restore modelview
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
 }
 
 Q_EXPORT_PLUGIN(QualityMapperPlugin)

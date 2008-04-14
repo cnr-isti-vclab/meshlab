@@ -137,7 +137,9 @@ private:
 	MID_HANDLE_SIGNAL_DIRECTION	_signalDir;
 
 	//Transfer Function items
+public:
 	TransferFunction *_transferFunction;
+private:
 	CHART_INFO		*_transferFunction_info;
 	QGraphicsScene	_transferFunctionScene;
 	TFDoubleClickCatcher *_tfCatcher;
