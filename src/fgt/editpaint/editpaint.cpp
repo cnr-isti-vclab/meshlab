@@ -89,6 +89,7 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	
 	m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 	m.updateDataMask(MeshModel::MM_FACEMARK);
+	m.updateDataMask(MeshModel::MM_VERTMARK);
 	
 	if ((m.currentDataMask & MeshModel::IOM_VERTCOLOR) == 0)
 	{
@@ -270,7 +271,8 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 				updateSelection(m, & vertices);			
 				
 				if (event.type() == QEvent::MouseButtonPress) { displaced_vertices.clear(); paintbox->getUndoStack()->beginMacro("Pull"); }
-				else if (event.type() == QEvent::MouseMove) sculpt(& vertices, 1 / (float) m.cm.bbox.Diag());
+				else if (event.type() == QEvent::MouseMove){ 
+					sculpt(m, & vertices);}
 				else if (event.type() == QEvent::MouseButtonRelease) paintbox->getUndoStack()->endMacro();
 				break;
 				
@@ -280,7 +282,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 				updateSelection(m, & vertices);			
 				
 				if (event.type() == QEvent::MouseButtonPress) { displaced_vertices.clear(); paintbox->getUndoStack()->beginMacro("Push"); }
-				else if (event.type() == QEvent::MouseMove) sculpt(& vertices, - 1 / (float) m.cm.bbox.Diag());
+				else if (event.type() == QEvent::MouseMove) sculpt(m, & vertices);
 				else if (event.type() == QEvent::MouseButtonRelease) paintbox->getUndoStack()->endMacro();
 				break;
 				
@@ -475,11 +477,11 @@ void EditPaintPlugin::smooth(vector< pair<CVertexO *, VertexDistance> > * vertic
 }
 
 //TODO Begin modularization of paint to allow different tools to leverage the same architecture
-void EditPaintPlugin::sculpt(vector< pair<CVertexO *, VertexDistance> > * vertices, float s)
+void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, VertexDistance> > * vertices)
 {
-	int opac = paintbox->getOpacity();
+	int opac = 1.0;
 	int decrease_pos = paintbox->getHardness();
-	float strength = s * paintbox->getDisplacement() / (float) 100;
+	float strength = m.cm.bbox.Diag() * paintbox->getDisplacement() / 1000.0;
 	
 	Point3f normal(0.0, 0.0, 0.0);
 	
@@ -488,7 +490,16 @@ void EditPaintPlugin::sculpt(vector< pair<CVertexO *, VertexDistance> > * vertic
 	{
 		normal += vertices->at(k).first->N() / vertices->size();
 	}
-			
+	
+	if (normal[0] == normal[1] && normal[1] == normal[2] && normal[2] == 0) {
+		qDebug() << "Prayer culo";
+		return;
+	}
+	
+	qDebug() << strength;
+		
+	qDebug() << normal[0] << " " << normal[1] << " " << normal[2];
+	
 	for (unsigned int k = 0; k < vertices->size(); k++)
 	{
 		pair<CVertexO *, VertexDistance> data = vertices->at(k);
@@ -503,8 +514,13 @@ void EditPaintPlugin::sculpt(vector< pair<CVertexO *, VertexDistance> > * vertic
 			
 			paintbox->getUndoStack()->push(new SinglePositionUndo(data.first, data.first->P()));
 
+			qDebug() << "Position before push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
+			qDebug() << "strength" << strength;
+			
 			displaceAlongVector(data.first, normal, (opac * op) * strength);
-					
+			
+			qDebug() << "Position after push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
+			
 		} else if (displaced_vertices[data.first].second < opac * op) 
 		{
 			displaced_vertices[data.first].second = opac * op;

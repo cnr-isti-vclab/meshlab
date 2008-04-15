@@ -79,7 +79,7 @@ private:
 	void updateSelection(MeshModel &m, std::vector< std::pair<CVertexO *, VertexDistance> > * vertex_result = NULL);
 	
 	void paint(std::vector< std::pair<CVertexO *, VertexDistance> > * vertices);
-	void sculpt(std::vector< std::pair<CVertexO *, VertexDistance> > * vertices, float strength);
+	void sculpt(MeshModel &, std::vector< std::pair<CVertexO *, VertexDistance> > * vertices);
 	void smooth(std::vector< std::pair<CVertexO *, VertexDistance> > * vertices);
 	void fill(MeshModel & m,CFaceO * face);
 	void gradient(MeshModel & m,GLArea * gla);
@@ -118,6 +118,8 @@ private:
 	
 	int mark;
 
+	PaintOptions options;
+	
 	std::vector<QPointF> * circle;
 	std::vector<QPointF> * dense_circle;
 	std::vector<QPointF> * square;
