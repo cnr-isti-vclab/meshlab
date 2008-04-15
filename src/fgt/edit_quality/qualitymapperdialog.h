@@ -122,6 +122,11 @@ public:
 	bool initEqualizerHistogram(void);
 	void drawTransferFunction(void);
 
+	float minQuality() {return ui.minSpinBox->value();};
+	float maxQuality() {return ui.maxSpinBox->value();};
+	float relativeMidQuality() {return _equalizerMidHandlePercentilePosition;};
+	float brightness() {return (1.0f - (float)(ui.brightnessSlider->value())/(float)(ui.brightnessSlider->maximum()) )*2.0;};
+
 private:
 	Ui::QualityMapperDialogClass ui;
 

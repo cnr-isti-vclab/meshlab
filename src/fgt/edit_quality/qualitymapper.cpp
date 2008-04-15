@@ -128,14 +128,23 @@ void QualityMapperPlugin::Decorate(QAction*, MeshModel&, GLArea*)
 	glColor4f(.3f,.3f,.3f,.3f);
 	glBegin(GL_QUAD_STRIP);
 
+
+	float maxQuality = _qualityMapperDialog->maxQuality();
+	float minQuality = _qualityMapperDialog->minQuality();
+	float brightness = _qualityMapperDialog->brightness();
+	float relativeMidQuality = _qualityMapperDialog->relativeMidQuality();
+	float step = (float)(maxQuality - minQuality)/(float)steps;
+	float curQ;
 	for(int i=0;i<steps;++i)
-		{
-			glVertex2f(barLeft,barBottom+delta*i); glVertex2f(barRight,barBottom+delta*i);
-			Color4b cc = _qualityMapperDialog->_transferFunction->getColorByQuality(float(i)/float(steps));
-			cc[3]=64;
-			glColor(cc);
-		}
-		glVertex2f(barLeft,barTop); glVertex2f(barRight,barTop);
+	{
+		glVertex2f(barLeft,barBottom+delta*i); glVertex2f(barRight,barBottom+delta*i);
+		curQ = float(i)*step + minQuality;
+		// Color4b cc = _qualityMapperDialog->_transferFunction->getColorByQuality(float(i)/float(steps));
+		Color4b cc = _qualityMapperDialog->_transferFunction->getColorByQuality(curQ, minQuality, maxQuality, relativeMidQuality, brightness);
+		cc[3]=64;
+		glColor(cc);
+	}
+	glVertex2f(barLeft,barTop); glVertex2f(barRight,barTop);
 	glEnd();
 		
 	

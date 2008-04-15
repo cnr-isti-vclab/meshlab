@@ -449,6 +449,34 @@ Color4b TransferFunction::getColorByQuality (float percentageQuality)
 		255 );
 }
 
+//converts a quality value into a color depending on the transfer function channels values, min quality, max quality, mid quality and brightness
+Color4b TransferFunction::getColorByQuality (float absoluteQuality, float minQuality, float maxQuality, float midRelativeQuality, float brightness)
+{
+	float percentageQuality;
+	Color4b currentColor;
+
+	if (absoluteQuality < minQuality)
+		percentageQuality = 0.0f;
+	else
+		if (absoluteQuality > maxQuality)
+			percentageQuality = 1.0f;
+		else
+			// calcultating relative quality and applying exponential function: rel(Q)^exp, exp=2*midHandleRelPos
+			percentageQuality = pow( (absoluteQuality - minQuality) / (maxQuality - minQuality) , (float)(2.0f*midRelativeQuality));
+
+	currentColor = getColorByQuality(percentageQuality);
+	
+	if (brightness!=1.0f) //Applying brightness to each color channel, 0<brightness<2, 1=normale brightness, 0=white, 2=black
+		if (brightness<1.0f)
+			for (int i=0; i<NUMBER_OF_CHANNELS; i++) 
+				currentColor[i] = relative2AbsoluteVali(pow(absolute2RelativeValf(currentColor[i],255.0f),brightness), 255.0f);
+		else
+			for (int i=0; i<NUMBER_OF_CHANNELS; i++) 
+				currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
+
+	return currentColor;
+}
+
 //saves the current color band onto an external file
 //moreover it saves info about the equalizer state
 //returns the name of the file

@@ -80,6 +80,7 @@ int loadEqualizerInfo(QString fileName, EQUALIZER_INFO *data)
 	return result;
 }
 
+/*
 void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness)
 {
 	CMeshO::VertexIterator vi;
@@ -111,4 +112,15 @@ void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFuncti
 
 			(*vi).C() = currentColor;
 		}
+}*/
+
+void applyColorByVertexQuality(MeshModel& mesh, TransferFunction *transferFunction, float minQuality, float maxQuality, float midHandlePercentilePosition, float brightness)
+{
+	CMeshO::VertexIterator vi;
+	float percentageQuality;
+	Color4b currentColor;
+
+	for(vi=mesh.cm.vert.begin(); vi!=mesh.cm.vert.end(); ++vi)		
+		if(!(*vi).IsD()) 
+			(*vi).C() = transferFunction->getColorByQuality ((*vi).Q(), minQuality, maxQuality, midHandlePercentilePosition, brightness);
 }

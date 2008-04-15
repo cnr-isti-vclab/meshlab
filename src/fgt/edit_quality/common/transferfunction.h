@@ -213,6 +213,7 @@ public:
 	QColor* buildColorBand(void);
 	QString saveColorBand(QString fileName, EQUALIZER_INFO& equalizerInfo);
 	Color4b getColorByQuality(float percentageQuality);
+	Color4b getColorByQuality(float absoluteQuality, float minQuality, float maxQuality, float midRelativeQuality, float brightness);
 	void moveChannelAhead(TF_CHANNELS channel_code);
 	inline int	getFirstPlaneChanel(void)		{ return _channels_order[NUMBER_OF_CHANNELS-1]; }
 };
