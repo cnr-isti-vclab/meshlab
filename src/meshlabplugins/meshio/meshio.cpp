@@ -24,6 +24,9 @@
   History
 
  $Log$
+ Revision 1.99  2008/04/15 10:45:51  cignoni
+ Added support of color in off files
+
  Revision 1.98  2008/04/04 10:03:53  cignoni
  Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
@@ -145,6 +148,11 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
 	}
 	else if (formatName.toUpper() == tr("OFF"))
 	{
+		int loadMask;
+		if (!vcg::tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(),loadMask))
+			return false;
+    m.Enable(loadMask);
+		
 		int result = vcg::tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)  // OFFCodes enum is protected
 		{
