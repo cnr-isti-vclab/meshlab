@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>547</width>
+    <width>504</width>
     <height>704</height>
    </rect>
   </property>
@@ -58,14 +58,14 @@
               </property>
               <property name="minimumSize" >
                <size>
-                <width>300</width>
-                <height>200</height>
+                <width>100</width>
+                <height>20</height>
                </size>
               </property>
               <property name="maximumSize" >
                <size>
-                <width>300</width>
-                <height>200</height>
+                <width>800</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="autoFillBackground" >
@@ -132,9 +132,6 @@
           </item>
           <item>
            <layout class="QVBoxLayout" >
-            <property name="spacing" >
-             <number>3</number>
-            </property>
             <item>
              <widget class="QGroupBox" name="channelBox" >
               <property name="sizePolicy" >
@@ -274,6 +271,9 @@
                      <pointsize>10</pointsize>
                     </font>
                    </property>
+                   <property name="text" >
+                    <string>quality</string>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -355,14 +355,14 @@
              <widget class="QGraphicsView" name="equalizerGraphicsView" >
               <property name="minimumSize" >
                <size>
-                <width>300</width>
-                <height>200</height>
+                <width>100</width>
+                <height>100</height>
                </size>
               </property>
               <property name="maximumSize" >
                <size>
-                <width>300</width>
-                <height>200</height>
+                <width>16777215</width>
+                <height>2000</height>
                </size>
               </property>
               <property name="autoFillBackground" >
@@ -515,9 +515,6 @@
           </item>
           <item>
            <layout class="QVBoxLayout" >
-            <property name="spacing" >
-             <number>3</number>
-            </property>
             <item>
              <widget class="QGroupBox" name="groupBox_2" >
               <property name="title" >
@@ -564,18 +561,6 @@
                <string>Clamp Histogram</string>
               </property>
               <layout class="QHBoxLayout" >
-               <property name="leftMargin" >
-                <number>5</number>
-               </property>
-               <property name="topMargin" >
-                <number>5</number>
-               </property>
-               <property name="rightMargin" >
-                <number>5</number>
-               </property>
-               <property name="bottomMargin" >
-                <number>5</number>
-               </property>
                <item>
                 <widget class="QPushButton" name="clampButton" >
                  <property name="text" >
@@ -606,37 +591,6 @@
                <string>Brightness</string>
               </property>
               <layout class="QVBoxLayout" >
-               <property name="leftMargin" >
-                <number>5</number>
-               </property>
-               <property name="topMargin" >
-                <number>5</number>
-               </property>
-               <property name="rightMargin" >
-                <number>5</number>
-               </property>
-               <property name="bottomMargin" >
-                <number>5</number>
-               </property>
-               <item>
-                <widget class="QSlider" name="brightnessSlider" >
-                 <property name="maximum" >
-                  <number>100</number>
-                 </property>
-                 <property name="sliderPosition" >
-                  <number>50</number>
-                 </property>
-                 <property name="orientation" >
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="tickPosition" >
-                  <enum>QSlider::TicksAbove</enum>
-                 </property>
-                 <property name="tickInterval" >
-                  <number>50</number>
-                 </property>
-                </widget>
-               </item>
                <item>
                 <layout class="QHBoxLayout" >
                  <item>
@@ -649,7 +603,7 @@
                    </property>
                    <property name="font" >
                     <font>
-                     <pointsize>8</pointsize>
+                     <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text" >
@@ -661,51 +615,23 @@
                   </widget>
                  </item>
                  <item>
-                  <spacer>
+                  <widget class="QSlider" name="brightnessSlider" >
+                   <property name="maximum" >
+                    <number>100</number>
+                   </property>
+                   <property name="sliderPosition" >
+                    <number>50</number>
+                   </property>
                    <property name="orientation" >
                     <enum>Qt::Horizontal</enum>
                    </property>
-                   <property name="sizeHint" >
-                    <size>
-                     <width>20</width>
-                     <height>10</height>
-                    </size>
+                   <property name="tickPosition" >
+                    <enum>QSlider::TicksAbove</enum>
                    </property>
-                  </spacer>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_4" >
-                   <property name="maximumSize" >
-                    <size>
-                     <width>10</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="font" >
-                    <font>
-                     <pointsize>8</pointsize>
-                    </font>
-                   </property>
-                   <property name="text" >
-                    <string>1</string>
-                   </property>
-                   <property name="alignment" >
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   <property name="tickInterval" >
+                    <number>50</number>
                    </property>
                   </widget>
-                 </item>
-                 <item>
-                  <spacer>
-                   <property name="orientation" >
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" >
-                    <size>
-                     <width>20</width>
-                     <height>10</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                  <item>
                   <widget class="QLabel" name="label_3" >
@@ -717,7 +643,7 @@
                    </property>
                    <property name="font" >
                     <font>
-                     <pointsize>8</pointsize>
+                     <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text" >
