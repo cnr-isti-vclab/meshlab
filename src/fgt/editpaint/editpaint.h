@@ -62,17 +62,24 @@ public:
 	virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+//	virtual void tabletEvent		(QAction *, QTabletEvent *, MeshModel & , GLArea *); //TODO Make them come!	glarea
 	virtual QList<QAction *> actions() const ;
 
 public slots:
 	void update();
 	
 private:
-	void updateSelection(MeshModel &m, std::vector< std::pair<CVertexO *, float> > * vertex_result = NULL);
+	struct VertexDistance { QPoint position; QPointF rel_position; float distance;};
 	
-	void paint(std::vector< std::pair<CVertexO *, float> > * vertices);
+	void updateSelection(MeshModel &m, vector< pair<CVertexO *, VertexDistance> > * vertex_result = NULL);
+	
+	void paint(vector< pair<CVertexO *, VertexDistance> > * vertices);
+	void sculpt(vector< pair<CVertexO *, VertexDistance> > * vertices, float strength);
+	void smooth(vector< pair<CVertexO *, VertexDistance> > * vertices);
 	void fill(MeshModel & m,CFaceO * face);
 	void gradient(MeshModel & m,GLArea * gla);
+	
+	void projectCursor(MeshModel & m, GLArea * gla);
 	
 	QPoint cursor; /*< indicates the last known cursor position (for now) */
 	QPoint gl_cursor; //same cursor but in OpenGl coordinates
@@ -84,8 +91,11 @@ private:
 	GLint viewport[4];
 	
 	GLfloat* zbuffer; /*< last known zbuffer, always kept up-to-date */
-
-	Qt::MouseButton button;
+	
+	GLubyte* color_buffer; /*< buffer used as color source in cloning*/
+	GLfloat* clone_zbuffer; /*<buffer to determine if the source is legal or not */
+	
+	Qt::MouseButton button; //TODO Check its usefulness
 
 	QQueue<QMouseEvent> event_queue; /*< Queue used to store UI events in order to postpone their processing during a Decorate call*/
 	
@@ -94,11 +104,19 @@ private:
 	
 	GLArea * glarea; /*< current glarea */
 	
-	std::vector<CMeshO::FacePointer> * selection; //currently selected faces
-	QHash<CVertexO *, std::pair<vcg::Color4b, float> > visited_vertices; //active vertices during paint
+	vector<CMeshO::FacePointer> * selection; //currently selected faces
+	vector< pair<CVertexO *, VertexDistance> > vertices; //touched vertices during last updateSelection
+	QHash<CVertexO *, pair<Color4b, float> > visited_vertices; //active vertices during painting
+	QHash<CVertexO *, pair<Point3f, float> > displaced_vertices; //active vertices during sculpting
 	
-	std::vector<QPointF> * circle;
-	std::vector<QPointF> * dense_circle;
+	bool disable_decorate;
+	
+	int mark;
+
+	vector<QPointF> * circle;
+	vector<QPointF> * dense_circle;
+	vector<QPointF> * square;
+	vector<QPointF> * dense_square;
 };
 
 /**
@@ -111,18 +129,38 @@ class SingleColorUndo : public QUndoCommand
 {
 	
 public:
-	SingleColorUndo(CVertexO * v, vcg::Color4b c, QUndoCommand * parent = 0) : QUndoCommand(parent){
+	SingleColorUndo(CVertexO * v, Color4b c, QUndoCommand * parent = 0) : QUndoCommand(parent){
 		vertex = v; original = c; // setText("Single Vertex Color Change");
 	}
 	
-	virtual void undo() { vcg::Color4b temp = vertex->C(); vertex->C() = original; original = temp;}
+	virtual void undo() {Color4b temp = vertex->C(); vertex->C() = original; original = temp;}
 	virtual void redo() {undo();}
 	virtual int id() {return COLOR_PAINT;}
 	
 private:
 	CVertexO* vertex;
-	 vcg::Color4b original;
+	Color4b original;
 };
+
+//TODO Create MultipleColorUndo
+
+class SinglePositionUndo : public QUndoCommand
+{
+	
+public:
+	SinglePositionUndo(CVertexO * v, Point3f p, QUndoCommand * parent = 0) : QUndoCommand(parent){
+		vertex = v; original = p;
+	}
+	
+	virtual void undo() {Point3f temp = vertex->P(); vertex->P() = original; original = temp;}
+	virtual void redo() {undo();}
+	virtual int id() {return MESH_PULL;}
+	
+private:
+	CVertexO* vertex;
+	Point3f original;
+};
+
 
 /**
  * Undoes changes in selected faces.
@@ -154,12 +192,12 @@ private :
  *  
  * O(1) complexity
  */
-inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
+inline void applyColor(CVertexO * vertex, const Color4b& newcol, int opac)
 {
-	 vcg::Color4b orig = vertex->C();
+	Color4b orig = vertex->C();
 	
 	for (int i = 0; i < 4; i ++) 
-		orig[i] = std::min(255,( (newcol[i]-orig[i])*opac + orig[i]*(100) )/100);
+		orig[i] = min(255,( (newcol[i]-orig[i])*opac + orig[i]*(100) )/100);
 	
 	vertex->C() = orig;
 }
@@ -169,10 +207,10 @@ inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
  * 
  * O(1) complexity 
  */
-inline void mergeColors(double percent,const vcg::Color4b& c1,const vcg::Color4b& c2, vcg::Color4b* dest)
+inline void mergeColors(double percent,const Color4b& c1,const Color4b& c2,Color4b* dest)
 {
 	for (int i = 0; i < 4; i ++)
-		(*dest)[i] = (char)std::min(255.0,((c1[i]-c2[i])*percent+c2[i]));
+		(*dest)[i] = (char)min(255.0,((c1[i]-c2[i])*percent+c2[i]));
 }
 
 /** 
@@ -231,7 +269,7 @@ inline int getNearest(QPointF center, QPointF *points, int num)
 }
 
 /** 
- * Checks if a point (dx, dy) is contained in either:
+ * Checks if a point (x, y) is contained in either:
  * 
  * a) the rectangle aligned to the segment connecting p0 to p1
  *    whose height is the distance between p0 and p1 and width
@@ -240,7 +278,7 @@ inline int getNearest(QPointF center, QPointF *points, int num)
  * c) the circle centered in p1 with same radius 
  *
  * To check condition (a): let v be the vector going from p0 to p1
- * and w the vector from p0 to (dx, dy). If theta is the angle between
+ * and w the vector from p0 to (x, y). If theta is the angle between
  * v and w, then: 
  * 
  *     |v| |w| cos(theta)     |w|
@@ -251,36 +289,42 @@ inline int getNearest(QPointF center, QPointF *points, int num)
  * of vector w on vector v.
  * 
  * Since w' = v * r is the projection of w on v, pf = p0 + w' is
- * the orthogonal projection of (dx, dy) on the segment 
- * connecting p0 to p1. If the distance between (dx, dy) and pf is less
- * than radius, then (dx, dy) lays inside the rectangle  
+ * the orthogonal projection of (x, y) on the segment 
+ * connecting p0 to p1. If the distance between (x, y) and pf is less
+ * than radius, then (x, y) lays inside the rectangle  
  *  
  */
-inline bool isIn(const QPointF &p0,const QPointF &p1,float dx,float dy,float radius,float *dist)
+inline bool isIn(const QPointF &p0,const QPointF &p1, float x,float y,float radius, float *dist, QPointF &pos)
 {
-	if (p0 != p1) //(a) condition needs not to be tested: rectangle is null
+	float radius_sq = radius * radius;
+	
+	if (p0 != p1) //otherwise condition (a) needs not to be tested: rectangle is null
 	{ 
 		float v_x = (p1.x()-p0.x()); 
 		float v_y = (p1.y()-p0.y());
 		
 		float v_length_squared = v_x * v_x + v_y * v_y;
 		
-		float w_x = dx - p0.x(); 
-		float w_y = dy - p0.y();
+		float w_x = x - p0.x(); 
+		float w_y = y - p0.y();
 			
-		float prod = w_x * v_x + w_y * v_y; //scalar product of v and w 
+		float v_dot_w = w_x * v_x + w_y * v_y; //scalar product of v and w 
 		
-		float r = prod / v_length_squared;
+		float r = v_dot_w / v_length_squared;
 		
 		float pf_x = p0.x() + r * v_x;
 		float pf_y = p0.y() + r * v_y;
 	
-		float delta_x = pf_x - dx;
-		float delta_y = pf_y - dy; 
+		float delta_x = x - pf_x;
+		float delta_y = y - pf_y; 
 	
-		if (r >= 0 && r <= 1 && (delta_x * delta_x + delta_y * delta_y < radius * radius)) 
+		if (r >= 0 && r <= 1 && (delta_x * delta_x + delta_y * delta_y < radius_sq)) 
 		{ 
-			*dist = sqrt(delta_x * delta_x + delta_y * delta_y)/radius; 
+			float delta_len = sqrt(delta_x * delta_x + delta_y * delta_y); 
+			
+			*dist = delta_len / radius;
+			pos.setY(delta_y / radius);
+			pos.setX(delta_x / radius); 
 			return true; 
 		}
 	}
@@ -288,21 +332,43 @@ inline bool isIn(const QPointF &p0,const QPointF &p1,float dx,float dy,float rad
 	// there could be some problem when point is nearer p0 or p1 and viceversa
 	// so i have to check both. is only needed with smooth_borders
 	bool found = false;
-	float x1=(dx-p1.x());
-	float y1=(dy-p1.y());
-	float bla1=x1*x1+y1*y1;
-	if (bla1<radius*radius) { *dist=sqrt(bla1)/radius; found = true; }
-
-	if (p0 == p1) return found;
-
-	float x0=(dx-p0.x());
-	float y0=(dy-p0.y());
-	float bla0=x0*x0+y0*y0;
-	if (bla0<radius*radius) { 
-		if (found) *dist=std::min((*dist),(float)sqrt(bla0)/radius);
-		else *dist=sqrt(bla0)/radius;
-		return true;
+	float dx=(x-p1.x());
+	float dy=(y-p1.y());
+	float delta_len_sq =dx*dx+dy*dy;
+	
+	if (delta_len_sq < radius_sq) 
+	{ 
+		float delta_len = sqrt(delta_len_sq);
+		*dist = delta_len; 
+		pos.setY(dy / radius);
+		pos.setX(dx / radius);
+		found = true; 
 	}
+
+	if (p0 == p1){
+		*dist /= radius;
+		return found;
+	}
+
+	dx=(x-p0.x());
+	dy=(y-p0.y());
+	delta_len_sq =dx*dx+dy*dy;
+	
+	if (delta_len_sq < radius_sq) 
+	{	
+		float delta_len = sqrt(delta_len_sq);
+		if ( (found && delta_len < pos.x() ) || !found)	
+		{
+			*dist = delta_len;
+		//	pos.setY(x / delta_len );
+			pos.setY(dy / radius);
+			pos.setX(dx / radius);
+		}
+		found = true;
+	}
+	
+	*dist /= radius;
+	
 	return found;
 }
 
@@ -351,7 +417,7 @@ inline bool isFront(const QPointF &a,const QPointF &b,const QPointF &c) {
  * Let L(t) = LineStart + (t * Direction) the parametric equation
  * of the line, with 0 <= t <= 1 and Dircetion = LineEnd - LineStart
  * 
- * Let |P - CircleCenter|² = radius² the equation of the circle. Then, substituting L(t) to P
+ * Let |P - CircleCenter|² = radius² be the equation of the circle. Then, substituting L(t) to P
  * 
  * |LineStart + (t * Direction) - CircleCenter|² = radius²
  * 
@@ -365,17 +431,14 @@ inline bool isFront(const QPointF &a,const QPointF &b,const QPointF &c) {
  * 
  * if d < 0 there are no intersection, if d = 0 there is one, if d > 0 there are two.
  */ 
-inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCenter, float radius, QPointF* const pOut = 0) 
+inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCenter, float radius) 
 {
 	const float radius_sq = radius * radius;
 	QPointF Delta = LineStart - CircleCenter;
 	
 	float delta_length_sq = Delta.x()*Delta.x()+Delta.y()*Delta.y();
 	
-	if(delta_length_sq <= radius_sq) { /// startpoint is in circle
-		if(pOut) *pOut = LineStart;
-		return true;
-	}
+	if(delta_length_sq <= radius_sq) return true;
 	
 	QPointF Direction = LineEnd - LineStart;
 	
@@ -390,18 +453,12 @@ inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCe
 	{ 
 		const float s = - direction_dot_delta / direction_length_sq;
 		if(s < 0.0f || s > 1.0f) return false;
-		else {
-			if(pOut) *pOut = LineStart + s * Direction;
-			return true;
-		}
+		else return true;
 	}else //two intersections 
 	{
 		const float s = (- direction_dot_delta - sqrtf(d)) / direction_length_sq; //only one intersection is chosen
 		if(s < 0.0f || s > 1.0f) return false;
-		else {
-			if(pOut) *pOut = LineStart + s * Direction;
-			return true;
-		}
+		else return true;
 	}
 }
 
@@ -413,9 +470,9 @@ inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCe
  * 
  * O(1)
  */
-inline void displaceAlongNormal(CVertexO* vp, float displacement)
+inline void displaceAlongVector(CVertexO* vp, Point3f vector, float displacement)
 {
-	(*vp).P() += vcg::Point3f( ((*vp).N().Ext(0)) * displacement, ((*vp).N().Ext(1)) * displacement, ((*vp).N().Ext(2)) * displacement);
+	(*vp).P() += vector * displacement;
 }
 
 /**
@@ -434,7 +491,7 @@ inline bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value, QPoint& 
 
 	//TODO e se i vertici sono stati cancellati? (IsD())
 	
-	if (vcg::GLPickTri<CMeshO>::PickNearestFace(cursor.x(), cursor.y(), m.cm, fp, 2, 2)) 
+	if (GLPickTri<CMeshO>::PickNearestFace(cursor.x(), cursor.y(), m.cm, fp, 2, 2)) 
 	{
 		
 		QPointF point[3];
@@ -461,7 +518,7 @@ inline bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value, QPoint& 
 /** 
  * calcs the surrounding faces of a vertex with VF topology
  */
-inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos, std::vector<CFaceO *> *surround) {
+inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos,vector<CFaceO *> *surround) {
 	CVertexO * vert=fac->V(vert_pos);
 	int pos=vert->VFi();
 	CFaceO * first_fac=vert->VFp();
@@ -478,21 +535,44 @@ inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos, std::vector<CFaceO 
 
 inline bool hasSelected(MeshModel &m) {
 	CMeshO::FaceIterator fi;
-	for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) {
+	for(fi=m.cm.face.begin();fi!=m.cm.face.end();fi++) {
 		if (!(*fi).IsD() && (*fi).IsS()) return true;
 	}
 	return false;
 }
 
+inline void updateNormal(CVertexO * v) 
+{
+	CFaceO * f = v->VFp();
+	CFaceO * one_face = f;
+	int pos = v->VFi();
+	v->N()[0]=0;v->N()[1]=0;v->N()[2]=0;
+	do {
+		CFaceO * temp=one_face->VFp(pos);
+		if (one_face!=0 && !one_face->IsD()) 
+		{
+			for (int lauf=0; lauf<3; lauf++) 
+				if (pos!=lauf) { 
+					v->N()+=one_face->V(lauf)->cN();
+				}
+			face::ComputeNormalizedNormal(*one_face);
+			pos=one_face->VFi(pos);
+		}
+		one_face=temp;
+	} while (one_face!=f && one_face!=0);
+	v->N().Normalize();
+}
+
 /*********OpenGL Drawing Routines************/
+
 
 void drawNormalPercentualCircle(GLArea *, QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float );
 void drawVertex(CVertexO* );
 void drawLine(GLArea *, QPoint &, QPoint &);
-void drawSimplePolyLine(GLArea * gla, QPoint & gl_cur, float scale, std::vector<QPointF> * points);
-void drawPercentualPolyLine(GLArea * , QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float , std::vector<QPointF> * );
+void drawSimplePolyLine(GLArea * gla, QPoint & gl_cur, float scale, vector<QPointF> * points);
+void drawPercentualPolyLine(GLArea * , QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float , vector<QPointF> * );
 
-std::vector<QPointF> * generateCircle(int segments = 18);
-std::vector<QPointF> * generateSquare();
+vector<QPointF> * generateCircle(int segments = 18);
+vector<QPointF> * generateSquare(int segments = 1);
 
 #endif

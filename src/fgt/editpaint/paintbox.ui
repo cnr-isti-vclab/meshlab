@@ -18,8 +18,64 @@
   <property name="windowTitle" >
    <string>Vertex Painting</string>
   </property>
-  <layout class="QGridLayout" >
-   <item row="0" column="0" >
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QFrame" name="frame_2" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" >
+      <item>
+       <widget class="QToolButton" name="undo_button" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text" >
+         <string>Undo</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/undo-24.png</iconset>
+        </property>
+        <property name="toolButtonStyle" >
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="redo_button" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text" >
+         <string>Redo</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/redo-24.png</iconset>
+        </property>
+        <property name="toolButtonStyle" >
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QTabWidget" name="tabs_container" >
      <property name="sizePolicy" >
       <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
@@ -113,7 +169,7 @@
           <item>
            <widget class="QToolButton" name="smooth_button" >
             <property name="enabled" >
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text" >
              <string>...</string>
@@ -441,55 +497,27 @@
         </widget>
        </item>
        <item row="2" column="1" >
-        <widget class="QFrame" name="undo_frame" >
+        <widget class="QFrame" name="frame" >
          <property name="frameShape" >
           <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="frameShadow" >
           <enum>QFrame::Raised</enum>
          </property>
-         <widget class="QToolButton" name="redo_button" >
-          <property name="enabled" >
-           <bool>false</bool>
-          </property>
+         <widget class="QGraphicsView" name="brush_viewer" >
           <property name="geometry" >
            <rect>
-            <x>11</x>
-            <y>47</y>
-            <width>131</width>
-            <height>30</height>
+            <x>34</x>
+            <y>4</y>
+            <width>81</width>
+            <height>81</height>
            </rect>
           </property>
-          <property name="text" >
-           <string>Redo</string>
+          <property name="verticalScrollBarPolicy" >
+           <enum>Qt::ScrollBarAlwaysOff</enum>
           </property>
-          <property name="icon" >
-           <iconset resource="meshlab.qrc" >:/images/redo-24.png</iconset>
-          </property>
-          <property name="toolButtonStyle" >
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
-         </widget>
-         <widget class="QToolButton" name="undo_button" >
-          <property name="enabled" >
-           <bool>false</bool>
-          </property>
-          <property name="geometry" >
-           <rect>
-            <x>11</x>
-            <y>11</y>
-            <width>131</width>
-            <height>30</height>
-           </rect>
-          </property>
-          <property name="text" >
-           <string>Undo</string>
-          </property>
-          <property name="icon" >
-           <iconset resource="meshlab.qrc" >:/images/undo-24.png</iconset>
-          </property>
-          <property name="toolButtonStyle" >
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
+          <property name="horizontalScrollBarPolicy" >
+           <enum>Qt::ScrollBarAlwaysOff</enum>
           </property>
          </widget>
         </widget>
@@ -703,7 +731,7 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="2" colspan="3" >
            <widget class="QComboBox" name="brush_box" >
             <property name="enabled" >
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy" >
              <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
@@ -719,7 +747,20 @@ p, li { white-space: pre-wrap; }
               <string>Circle</string>
              </property>
              <property name="icon" >
-              <iconset resource="meshlab.qrc" >:/brushes/circle.png</iconset>
+              <iconset resource="meshlab.qrc" >:/images/circle.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Square</string>
+             </property>
+             <property name="icon" >
+              <iconset resource="meshlab.qrc" >:/images/square.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Pixmap</string>
              </property>
             </item>
            </widget>
@@ -1050,6 +1091,35 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item row="9" column="0" colspan="2" >
+        <widget class="QFrame" name="clone_source_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QGraphicsView" name="clone_source_view" >
+            <property name="verticalScrollBarPolicy" >
+             <enum>Qt::ScrollBarAsNeeded</enum>
+            </property>
+            <property name="optimizationFlags" >
+             <enum>QGraphicsView::DontAdjustForAntialiasing</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clone_source_load_button" >
+            <property name="text" >
+             <string>Load From File</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="10" column="0" colspan="2" >
         <spacer>
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -1121,7 +1191,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QToolButton" name="mesh_smooth_button" >
             <property name="enabled" >
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text" >
              <string>...</string>
@@ -1156,7 +1226,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QToolButton" name="mesh_add_button" >
             <property name="enabled" >
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text" >
              <string>...</string>
@@ -1193,68 +1263,6 @@ p, li { white-space: pre-wrap; }
          <property name="orientation" >
           <enum>Qt::Horizontal</enum>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="mesh_undo_frame" >
-         <property name="frameShape" >
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow" >
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" >
-          <item>
-           <widget class="QToolButton" name="mesh_undo_button" >
-            <property name="enabled" >
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="layoutDirection" >
-             <enum>Qt::RightToLeft</enum>
-            </property>
-            <property name="text" >
-             <string>Undo</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/undo-24.png</iconset>
-            </property>
-            <property name="toolButtonStyle" >
-             <enum>Qt::ToolButtonTextBesideIcon</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="mesh_redo_button" >
-            <property name="enabled" >
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="layoutDirection" >
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text" >
-             <string>Redo</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/redo-24.png</iconset>
-            </property>
-            <property name="toolButtonStyle" >
-             <enum>Qt::ToolButtonTextBesideIcon</enum>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </item>
        <item>
@@ -1364,7 +1372,20 @@ p, li { white-space: pre-wrap; }
               <string>Circle</string>
              </property>
              <property name="icon" >
-              <iconset resource="meshlab.qrc" >:/brushes/circle.png</iconset>
+              <iconset resource="meshlab.qrc" >:/images/circle.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Square</string>
+             </property>
+             <property name="icon" >
+              <iconset resource="meshlab.qrc" >:/images/square.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Pixmap</string>
              </property>
             </item>
            </widget>
@@ -1518,7 +1539,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <widget class="QFrame" name="mesh_displacement_frame" >
          <property name="enabled" >
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="frameShape" >
           <enum>QFrame::StyledPanel</enum>
@@ -1714,12 +1735,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>204</x>
+     <y>177</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>322</x>
+     <y>183</y>
     </hint>
    </hints>
   </connection>
@@ -1730,12 +1751,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>228</x>
+     <y>264</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>322</x>
+     <y>270</y>
     </hint>
    </hints>
   </connection>
@@ -1746,12 +1767,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>222</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>322</x>
+     <y>419</y>
     </hint>
    </hints>
   </connection>
@@ -1762,12 +1783,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>322</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>222</x>
+     <y>413</y>
     </hint>
    </hints>
   </connection>
@@ -1778,12 +1799,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>322</x>
+     <y>183</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>204</x>
+     <y>177</y>
     </hint>
    </hints>
   </connection>
@@ -1798,8 +1819,8 @@ p, li { white-space: pre-wrap; }
      <y>199</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>263</x>
-     <y>199</y>
+     <x>322</x>
+     <y>215</y>
     </hint>
    </hints>
   </connection>
@@ -1814,8 +1835,8 @@ p, li { white-space: pre-wrap; }
      <y>197</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>247</x>
-     <y>197</y>
+     <x>261</x>
+     <y>212</y>
     </hint>
    </hints>
   </connection>
@@ -1826,12 +1847,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>228</x>
+     <y>297</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>322</x>
+     <y>303</y>
     </hint>
    </hints>
   </connection>
@@ -1842,12 +1863,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>322</x>
+     <y>303</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>228</x>
+     <y>297</y>
     </hint>
    </hints>
   </connection>
@@ -1858,12 +1879,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>322</x>
+     <y>270</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>228</x>
+     <y>264</y>
     </hint>
    </hints>
   </connection>
@@ -1878,8 +1899,8 @@ p, li { white-space: pre-wrap; }
      <y>273</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>261</x>
-     <y>275</y>
+     <x>322</x>
+     <y>285</y>
     </hint>
    </hints>
   </connection>
@@ -1890,8 +1911,8 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>265</x>
-     <y>270</y>
+     <x>322</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel" >
      <x>247</x>
@@ -1926,8 +1947,8 @@ p, li { white-space: pre-wrap; }
      <y>51</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>47</x>
-     <y>56</y>
+     <x>67</x>
+     <y>257</y>
     </hint>
    </hints>
   </connection>
@@ -1974,8 +1995,8 @@ p, li { white-space: pre-wrap; }
      <y>47</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>49</x>
-     <y>183</y>
+     <x>60</x>
+     <y>217</y>
     </hint>
    </hints>
   </connection>
@@ -2070,8 +2091,8 @@ p, li { white-space: pre-wrap; }
      <y>56</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>130</x>
-     <y>180</y>
+     <x>141</x>
+     <y>214</y>
     </hint>
    </hints>
   </connection>
@@ -2098,12 +2119,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>55</x>
-     <y>50</y>
+     <x>87</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>96</x>
-     <y>56</y>
+     <x>116</x>
+     <y>194</y>
     </hint>
    </hints>
   </connection>
@@ -2130,8 +2151,8 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>131</x>
-     <y>42</y>
+     <x>161</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel" >
      <x>165</x>
@@ -2166,8 +2187,8 @@ p, li { white-space: pre-wrap; }
      <y>49</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>123</x>
+     <y>438</y>
     </hint>
    </hints>
   </connection>
@@ -2178,12 +2199,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>161</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>123</x>
+     <y>438</y>
     </hint>
    </hints>
   </connection>
@@ -2198,8 +2219,8 @@ p, li { white-space: pre-wrap; }
      <y>53</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>123</x>
+     <y>257</y>
     </hint>
    </hints>
   </connection>
@@ -2214,8 +2235,8 @@ p, li { white-space: pre-wrap; }
      <y>56</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>123</x>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2226,12 +2247,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>161</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>123</x>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2242,12 +2263,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>161</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>103</x>
-     <y>56</y>
+     <x>123</x>
+     <y>257</y>
     </hint>
    </hints>
   </connection>
@@ -2262,8 +2283,8 @@ p, li { white-space: pre-wrap; }
      <y>56</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>42</x>
-     <y>56</y>
+     <x>62</x>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2278,8 +2299,8 @@ p, li { white-space: pre-wrap; }
      <y>56</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>72</x>
-     <y>56</y>
+     <x>92</x>
+     <y>257</y>
     </hint>
    </hints>
   </connection>
