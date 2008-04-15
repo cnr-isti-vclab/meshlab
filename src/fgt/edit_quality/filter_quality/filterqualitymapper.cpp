@@ -90,10 +90,9 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 			{
 				_meshMinMaxQuality = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 
-				parlst.addString("csvFileName", "", "CSV input File" );
-				parlst.addFloat("minQualityVal", _meshMinMaxQuality.minV, "Minimum mesh quality" );
-				parlst.addFloat("maxQualityVal", _meshMinMaxQuality.maxV, "Maximum mesh quality" );
-				parlst.addFloat("midHandlePos", _meshMinMaxQuality.minV + ((_meshMinMaxQuality.maxV-_meshMinMaxQuality.minV)/2.0f), "Middle quality percentage position", "defines the percentage position of middle quality value" );
+				parlst.addFloat("minQualityVal", _meshMinMaxQuality.minV, "Minimum mesh quality","The specified quality value is mapped in the <b>lower</b> end of the choosen color scale. Default value the minumum quality value found on the mesh."  );
+				parlst.addFloat("maxQualityVal", _meshMinMaxQuality.maxV, "Maximum mesh quality","The specified quality value is mapped in the <b>upper</b> end of the choosen color scale. Default value the maximum quality value found on the mesh." );
+				parlst.addFloat("midHandlePos", 50, "Gamma biasing (0..100)", "Define a gamma compression of the quality values, by setting the position of the middle of the color scale. Value defined as a percentage (0..100). Default value is 50, that corresponds to a linear mapping." );
 				parlst.addFloat("brightness", 1.0f, "Mesh brightness", "must be between 0 and 2. 0 represents a completely dark mesh, 1 represents a mesh colorized with pure colors, 2 represents a completely bright mesh");
 				//setting default transfer functions names
 				TransferFunction::defaultTFs[GREY_SCALE_TF] = "Grey Scale";
@@ -104,13 +103,14 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, FilterP
 				TransferFunction::defaultTFs[FLAT_TF] = "Flat";
 
 				QStringList tfList;
-				tfList << "Text Transfer Function";
+				tfList << "Custom Transfer Function File";
 				for (int i=0; i<NUMBER_OF_DEFAULT_TF; i++ )
 					//fetching and adding default TFs to TFList
 					tfList << TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF];
-
-				parlst.addEnum( "TFsList", 0, tfList, "Transfer Function type to apply to filter", "choose the Transfer Function to apply to filter" );
-			}
+				
+				parlst.addEnum( "TFsList", 1, tfList, "Transfer Function type to apply to filter", "choose the Transfer Function to apply to filter" );
+				parlst.addString("csvFileName", "", "Custom TF Filename", "Filename of the transfer function to be loaded, used only if you have chosed the Custom Transfer Function." );
+				}
 			break;
 											
 		default : assert(0); break;
@@ -131,14 +131,18 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	eqData.brightness = par.getFloat("brightness");
 	TransferFunction *transferFunction = 0;
 
-	if ( par.getEnum("TFsList") == 0 )
+	if ( par.getEnum("TFsList") != 0 )
+	{
+		//default TF
+		//building new TF object from default Tf type
+		int tfId = ((par.getEnum("TFsList")-1) + STARTUP_TF_TYPE) % NUMBER_OF_DEFAULT_TF;
+		transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS) tfId );
+	}
+	else
 	{
 		//text TF
 		QString csvFileName = par.getString("csvFileName");
-		if ( csvFileName != "" )
-		{
-			//setting equalizer values
-			if ( loadEqualizerInfo(csvFileName, &eqData) > 0 )
+		if ( csvFileName != "" &&  loadEqualizerInfo(csvFileName, &eqData) > 0 )
 			{
 				par.setFloat("minQualityVal", eqData.minQualityVal );
 				par.setFloat("maxQualityVal", eqData.maxQualityVal );
@@ -150,26 +154,12 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			}
 			else
 			{
-				QErrorMessage fileNotFoundError(0);
-				fileNotFoundError.showMessage("Something went wrong while trying to open the file specified");
+				errorMessage = "Something went wrong while trying to open the specified transfer function file";
 				return false;
 			}
-		}
-		else
-		{
-			return false;
-		}
 	}
-	else
-	{
-		//default TF
-		//building new TF object from default Tf type
-		int tfId = ((par.getEnum("TFsList")-1) + STARTUP_TF_TYPE) % NUMBER_OF_DEFAULT_TF;
-		transferFunction = new TransferFunction( (DEFAULT_TRANSFER_FUNCTIONS) tfId );
-	}
-
 	// Applying colors
-	applyColorByVertexQuality(m, transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), eqData.midQualityPercentage, par.getFloat("brightness"));
+	applyColorByVertexQuality(m, transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), eqData.midQualityPercentage/100.0, par.getFloat("brightness"));
 
 	//all done, deleting transfer function object
 	if ( transferFunction )
