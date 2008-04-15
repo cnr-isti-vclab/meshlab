@@ -58,14 +58,14 @@
               </property>
               <property name="minimumSize" >
                <size>
-                <width>100</width>
-                <height>20</height>
+                <width>300</width>
+                <height>200</height>
                </size>
               </property>
               <property name="maximumSize" >
                <size>
-                <width>400</width>
-                <height>16777215</height>
+                <width>300</width>
+                <height>200</height>
                </size>
               </property>
               <property name="autoFillBackground" >
@@ -132,6 +132,9 @@
           </item>
           <item>
            <layout class="QVBoxLayout" >
+            <property name="spacing" >
+             <number>3</number>
+            </property>
             <item>
              <widget class="QGroupBox" name="channelBox" >
               <property name="sizePolicy" >
@@ -352,14 +355,14 @@
              <widget class="QGraphicsView" name="equalizerGraphicsView" >
               <property name="minimumSize" >
                <size>
-                <width>100</width>
-                <height>100</height>
+                <width>300</width>
+                <height>200</height>
                </size>
               </property>
               <property name="maximumSize" >
                <size>
-                <width>16777215</width>
-                <height>2000</height>
+                <width>300</width>
+                <height>200</height>
                </size>
               </property>
               <property name="autoFillBackground" >
@@ -512,6 +515,9 @@
           </item>
           <item>
            <layout class="QVBoxLayout" >
+            <property name="spacing" >
+             <number>3</number>
+            </property>
             <item>
              <widget class="QGroupBox" name="groupBox_2" >
               <property name="title" >
@@ -558,6 +564,18 @@
                <string>Clamp Histogram</string>
               </property>
               <layout class="QHBoxLayout" >
+               <property name="leftMargin" >
+                <number>5</number>
+               </property>
+               <property name="topMargin" >
+                <number>5</number>
+               </property>
+               <property name="rightMargin" >
+                <number>5</number>
+               </property>
+               <property name="bottomMargin" >
+                <number>5</number>
+               </property>
                <item>
                 <widget class="QPushButton" name="clampButton" >
                  <property name="text" >
@@ -588,6 +606,18 @@
                <string>Brightness</string>
               </property>
               <layout class="QVBoxLayout" >
+               <property name="leftMargin" >
+                <number>5</number>
+               </property>
+               <property name="topMargin" >
+                <number>5</number>
+               </property>
+               <property name="rightMargin" >
+                <number>5</number>
+               </property>
+               <property name="bottomMargin" >
+                <number>5</number>
+               </property>
                <item>
                 <widget class="QSlider" name="brightnessSlider" >
                  <property name="maximum" >
