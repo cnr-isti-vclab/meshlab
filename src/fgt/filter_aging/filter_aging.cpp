@@ -22,21 +22,21 @@
 ****************************************************************************/
 
 
+/* Standard includes */
 #include <map>
 #include <vector>
 
+/* Local includes */
 #include "filter_aging.h"
 
+/* VCG includes */
 #include <vcg/complex/trimesh/update/position.h>
-#include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/math/perlin_noise.h>
 #include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/closest.h>
-#include <vcg/space/index/grid_static_ptr.h>
 
 
-// Constructor 
+/* Constructor */
 GeometryAgingPlugin::GeometryAgingPlugin() 
 { 
 	typeList << FP_ERODE;
@@ -46,13 +46,13 @@ GeometryAgingPlugin::GeometryAgingPlugin()
 }
 
 
-// Destructor 
+/* Destructor */
 GeometryAgingPlugin::~GeometryAgingPlugin() 
 { 
 }
 
 
-// Returns the very short string describing each filtering action
+/* Returns the very short string describing each filtering action */
 const QString GeometryAgingPlugin::filterName(FilterIDType filterId) 
 {
 	switch(filterId) {
@@ -64,7 +64,7 @@ const QString GeometryAgingPlugin::filterName(FilterIDType filterId)
 }
 
 
-// Returns the longer string describing each filtering action
+/* Returns the longer string describing each filtering action */
 const QString GeometryAgingPlugin::filterInfo(FilterIDType filterId) 
 {
 	switch(filterId) {
@@ -76,7 +76,7 @@ const QString GeometryAgingPlugin::filterInfo(FilterIDType filterId)
 }
 
 
-// Returns plugin info
+/* Returns plugin info */
 const PluginInfo &GeometryAgingPlugin::pluginInfo() 
 {
 	static PluginInfo ai;
@@ -87,16 +87,17 @@ const PluginInfo &GeometryAgingPlugin::pluginInfo()
  }
 
 
-// Initializes the list of parameters (called by the auto dialog framework)
+/* Initializes the list of parameters (called by the auto dialog framework) */
 void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params)
 {
 	std::pair<float,float> qRange;
+	// retrieve mesh quality range
 	if(m.cm.HasPerVertexQuality())
 		qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 	else
 		qRange = std::pair<float,float>(0.0, 255.0);
+	// styles list (short descriptions)
 	QStringList styles;
-	// TODO: find better strings to list styles 
 	styles.append("Simple     (1 function) ");
 	styles.append("Linear     (8 functions)");
 	styles.append("Sinusoidal (8 functions)");
@@ -134,37 +135,32 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 }
 
 
-// The Real Core Function doing the actual mesh processing
+/* The Real Core Function doing the actual mesh processing */
 bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb)
 {
 	bool useQuality = params.getBool("UseQuality");
+	
 	if(useQuality && !m.cm.HasPerVertexQuality()) {
 		errorMessage = QString("This mesh doesn't have per vertex quality informations.");
 		return false;
 	}
 	
-	float qualityThreshold = params.getAbsPerc("QualityThreshold");
-	float angleThreshold = params.getAbsPerc("AngleThreshold");
+	float thresholdValue = params.getAbsPerc((useQuality?"QualityThreshold":"AngleThreshold"));
 	float edgeLenTreshold = params.getAbsPerc("EdgeLenThreshold");
 	float chipDepth = params.getAbsPerc("ChipDepth");
 	int chipStyle = params.getEnum("ChipStyle");
 	float intersMaxIter = params.getFloat("DelIntersMaxIter");
 	bool selected = params.getBool("Selected");
 	
-	AgingEdgePred ep;					// edge predicate
+	// edge predicate
+	AgingEdgePred ep = AgingEdgePred((useQuality?AgingEdgePred::QUALITY:AgingEdgePred::ANGLE), edgeLenTreshold, thresholdValue);
 	CMeshO::FaceIterator fi, endfi;
 	CMeshO::VertexIterator vi;
 	int fcount = 1;					// face counter (to update progress bar)
 	
-	//typedef std::pair<int, Point3<CVertexO::ScalarType> > vertOff;
 	typedef std::map<CVertexO*, Point3<CVertexO::ScalarType> > DispMap;
 	DispMap displaced;					// displaced vertexes and their displacement offset 
 	std::vector<CFaceO*> intersFace;	// self intersecting mesh faces (after displacement)
-	
-	if(useQuality)
-		ep = AgingEdgePred(AgingEdgePred::QUALITY, edgeLenTreshold, qualityThreshold);
-	else
-		ep = AgingEdgePred(AgingEdgePred::ANGLE, edgeLenTreshold, angleThreshold);
 	
 	srand(time(NULL));
 	
@@ -183,9 +179,11 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 					  (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) { 
 						double noise;							// noise value
 						Point3<CVertexO::ScalarType> dispDir;	// displacement direction
-						float angleFactor;
+						float angleFactor;			// angle multiply factor in [0,1] range
+													// (greater angle -> deeper chip)
 						
 						noise = generateNoiseValue(chipStyle, (*fi).V(j)->P().X(), (*fi).V(j)->P().Y(), (*fi).V(j)->P().Z());
+						// no negative values allowed (negative noise would generate hills, not chips)
 						noise *= (noise>=0.0?1.0:-1.0);
 						
 						if((*fi).IsB(j)) {
@@ -193,10 +191,10 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 							angleFactor = 1.0;
 						}
 						else {
-							if(useQuality)
+							//if(useQuality)
 								dispDir = Point3<CVertexO::ScalarType>(((*fi).N() + (*fi).FFp(j)->N()).Normalize());
-							else
-								dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
+							//else
+							//	dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
 							angleFactor = (sin(vcg::Angle((*fi).N(), (*fi).FFp(j)->N()))/2 + 0.5);
 						}
 						
@@ -212,26 +210,21 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			// avoid mesh self intersection
 			if(!displaced.empty()) {
 				DispMap::iterator it;
-				int intnum;
-				fcount = 0;
 				for(int t=0; t<intersMaxIter; t++) {
 					intersFace.clear();
-					std::vector<CFaceO *>::iterator fpi;
+					if(cb) (*cb)((int)((t/intersMaxIter)*100), "Deleting mesh intersections...");
 					tri::Clean<CMeshO>::SelfIntersections(m.cm, intersFace);
-					if(t == 0) 
-						intnum = intersFace.size();
-					else
-						fcount += intnum - intersFace.size(); 
 					if(intersFace.empty()) break;
-					if(cb) (*cb)((fcount/intnum)*100, "Deleting mesh intersections...");
-					for(fpi=intersFace.begin(); fpi!=intersFace.end(); fpi++) {
+					for(std::vector<CFaceO *>::iterator fpi=intersFace.begin(); fpi!=intersFace.end(); fpi++) {
 						for(int i=0; i<3; i++) {
 							it = displaced.find((*fpi)->V(i));
 							if(it != displaced.end())
+								// gradually move back the vertex to its original position
 								(*fpi)->V(i)->P() = ((*fpi)->V(i)->P()+(*it).second)/2.0;
 						}
 					}
 				}
+				if(cb) (*cb)(100, "Deleting mesh intersections...");
 			}
 			
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
@@ -243,7 +236,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 }
 
 
-// returns a noise value
+/* Returns a noise value using the selected style */
 double GeometryAgingPlugin::generateNoiseValue(int style, const CVertexO::ScalarType &x, 
 											const CVertexO::ScalarType &y, const CVertexO::ScalarType &z)
 {
@@ -259,15 +252,11 @@ double GeometryAgingPlugin::generateNoiseValue(int style, const CVertexO::Scalar
 				float p = pow(2.0f, i);
 				noise += math::Perlin::Noise(p*x, p*y, p*z) / p;
 			}
-			noise /= 2.0;
-			noise *= (noise>=0.0?1.0:-1.0);
 			break;
 	}
 
-	if(style == 2) {
-		noise /= 4.0;
+	if(style == SINUSOIDAL)
 		noise = sin(x + noise);
-	}
 	
 	return noise;
 }
