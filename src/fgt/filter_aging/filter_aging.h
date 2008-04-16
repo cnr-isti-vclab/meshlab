@@ -49,13 +49,14 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 		virtual const QString filterInfo(FilterIDType filter);
 		virtual const QString filterName(FilterIDType filter);
 		virtual const PluginInfo &pluginInfo();
-		virtual const int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK |MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);}
+		virtual const int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK | MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);}
 		virtual bool autoDialog(QAction *) {return true;}
 		virtual void initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params);
 		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb);
 		
 	protected:
-		enum {SIMPLE=0, LINEAR=1, SINUSOIDAL=2};
+		enum NoiseType {SIMPLE=0, LINEAR=1, SINUSOIDAL=2};
+		void RefineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb);
 		double generateNoiseValue(int style, const CVertexO::ScalarType &x, const CVertexO::ScalarType &y, const CVertexO::ScalarType &z);
 };
 

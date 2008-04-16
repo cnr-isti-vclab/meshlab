@@ -31,6 +31,7 @@
 
 /* VCG includes */
 #include <vcg/complex/trimesh/update/position.h>
+#include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/math/perlin_noise.h>
 #include <vcg/complex/trimesh/clean.h>
@@ -164,9 +165,9 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	bool selected = params.getBool("Selected");
 	
 	// edge predicate
-	AgingEdgePred ep = AgingEdgePred((useQuality?AgingEdgePred::QUALITY:AgingEdgePred::ANGLE), edgeLenTreshold, thresholdValue);
-	CMeshO::FaceIterator fi, endfi;
-	CMeshO::VertexIterator vi;
+	AgingEdgePred ep = AgingEdgePred((useQuality?AgingEdgePred::QUALITY:AgingEdgePred::ANGLE), 
+									 selected, edgeLenTreshold, thresholdValue);
+	
 	int fcount = 1;					// face counter (to update progress bar)
 	
 	typedef std::map<CVertexO*, Point3<CVertexO::ScalarType> > DispMap;
@@ -178,11 +179,10 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	switch(ID(filter)) {
 		case FP_ERODE:
 			// refine needed edges
-			while(RefineE<CMeshO, MidPoint<CMeshO>, AgingEdgePred>(m.cm, MidPoint<CMeshO>(), ep, selected, cb))
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+			RefineMesh(m.cm, ep, selected, cb);
 			
 			// displace vertexes
-			for(fi = m.cm.face.begin(), endfi=m.cm.face.end(); fi != endfi; fi++) {
+			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
 				if(cb) (*cb)((fcount++/m.cm.fn)*100, "Aging..."); 
 				if((*fi).IsD()) continue;
 				for(int j=0; j<3; j++) {
@@ -245,6 +245,46 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			return true;
 		default:
 			assert(0);
+	}
+}
+
+
+/* Refines the mesh where needed.
+ * When we work on the selection with a quality predicate we have to do some
+ * additional checks to avoid infinite loops: we set the V bit on all the selected 
+ * faces, we dilate the selection, we call the refine function, and then we
+ * erode the selection to obtain the original selected area. The predicate doesn't
+ * allow the refinement of an edge between two selected faces without the V bit 
+ * setted. In this way we are able to refine also the esges on the  borders of the 
+ * selection (without this operation the refineE function always returns true). */
+void GeometryAgingPlugin::RefineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb)
+{
+	bool ref = true;
+	CMeshO::FaceIterator fi;
+	
+	// clear V bit on all faces
+	if(selection && ep.getType()==AgingEdgePred::QUALITY)
+		for(fi = m.face.begin(); fi!=m.face.end(); fi++)
+			if(!(*fi).IsD()) (*fi).ClearV();
+	while(ref) {
+		if(selection && ep.getType()==AgingEdgePred::QUALITY) {
+			// set V bit on selected faces
+			for(fi = m.face.begin(); fi!=m.face.end(); fi++)
+				if(!(*fi).IsD() && (*fi).IsS()) (*fi).SetV();
+			// dilate selection
+			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m);  
+			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
+		}
+		ref = RefineE<CMeshO, MidPoint<CMeshO>, AgingEdgePred>(m, MidPoint<CMeshO>(), ep, selection, cb);
+		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
+		if(selection && ep.getType()==AgingEdgePred::QUALITY) {
+			// erode selection
+			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m);
+			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m);
+			// clear V bit on all faces
+			for(fi = m.face.begin(); fi!=m.face.end(); fi++)
+				if(!(*fi).IsD()) (*fi).ClearV();
+		}
 	}
 }
 
