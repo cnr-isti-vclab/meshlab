@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.16  2008/04/16 12:05:51  cignoni
+option for title of the dialog
+
 Revision 1.15  2008/01/28 13:02:00  cignoni
 added support for filters on collection of meshes (layer filters)
 
@@ -169,7 +172,7 @@ class GenericParamDialog: public QDialog
 {
 	Q_OBJECT 
 public:
-  GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet); 
+  GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title=QString()); 
 	
 	FilterParameterSet *curParSet;
 	FilterParameterSet *defaultParSet;

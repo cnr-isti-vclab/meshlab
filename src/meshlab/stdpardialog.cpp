@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.26  2008/04/16 12:05:50  cignoni
+option for title of the dialog
+
 Revision 1.25  2008/02/25 14:51:01  ponchio
 added parent window reference durinc creation
 
@@ -542,11 +545,13 @@ void EnumWidget::setEnum(int newEnum)
 
 
 
-GenericParamDialog::GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet) :QDialog(p)
+GenericParamDialog::GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title) :QDialog(p)
 {
 		stdParFrame=NULL;
 		curParSet=_curParSet;
 		createFrame();
+		if(!title.isEmpty())
+				setWindowTitle(title);
 }
 
 // update the values of the widgets with the values in the paramlist;
@@ -565,8 +570,6 @@ void GenericParamDialog::toggleHelp()
 
 void GenericParamDialog::createFrame()
 {
-	setWindowTitle("Alignment Parameters");
-
 	QVBoxLayout *vboxLayout = new QVBoxLayout(this);
 	setLayout(vboxLayout);
 	
