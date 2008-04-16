@@ -276,7 +276,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 				else if (event.type() == QEvent::MouseButtonRelease) paintbox->getUndoStack()->endMacro();
 				break;
 				
-			case MESH_PUSH :glarea->setLight(false);
+			case MESH_PUSH : // glarea->setLight(false);
 			
 				projectCursor(m, glarea);
 				updateSelection(m, & vertices);			
@@ -373,7 +373,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 
 void EditPaintPlugin::smooth(vector< pair<CVertexO *, VertexDistance> > * vertices)
 {
-	QHash <CVertexO *, pair<float[3], Color4b> > originals;
+	QHash <CVertexO *, pair<Point3f, Color4b> > originals;
 	
 	Color4b newcol, destCol;
 	int opac = paintbox->getOpacity();
@@ -389,7 +389,7 @@ void EditPaintPlugin::smooth(vector< pair<CVertexO *, VertexDistance> > * vertic
 		CVertexO * v = data.first;
 		VertexDistance * vd = & data.second;
 
-		pair<float[3], Color4b> pc_data; //save its color and position
+		pair<Point3f, Color4b> pc_data; //save its color and position
 		
 		for (int k = 0; k < 4; k++) pc_data.second[k] = v->C()[k];
 		for (int k = 0; k < 3; k++) pc_data.first[k] = v->P()[k];
@@ -423,7 +423,7 @@ void EditPaintPlugin::smooth(vector< pair<CVertexO *, VertexDistance> > * vertic
 						Color4b tco = v->C();
 						if (originals.contains(v)) 
 						{
-							pair<float[3], Color4b> pc_data_k = originals[v];
+							pair<Point3f, Color4b> pc_data_k = originals[v];
 									
 							tco = pc_data_k.second;
 							
