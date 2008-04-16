@@ -105,19 +105,29 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 	switch(ID(action)) {
 		case FP_ERODE:
 			params.addBool("UseQuality", m.cm.HasPerVertexQuality(), "Use per vertex quality values", 
-					"Use per vertex quality values to find the areas to erode.\n Useful after applying ambient occlusion filter.");
-			params.addAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*2/3, qRange.first, qRange.second,  "Quality threshold", 
-					"When you decide to use per vertex quality values, \n this parameter represents the minimum quality value \n \
+					"Use per vertex quality values to find the areas to erode.\n \
+					Useful after applying ambient occlusion filter.");
+			params.addAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*2/3, 
+					qRange.first, qRange.second,  "Quality threshold", 
+					"When you decide to use per vertex quality values, \n \
+					this parameter represents the minimum quality value \n \
 					two vertexes must have to consider the edge they are sharing.");
 			params.addAbsPerc("AngleThreshold", 60.0, 10.0, 170.0,  "Angle threshold (deg)", 
-					"If you decide not to use per vertex quality values, \nthe angle between two adjacent faces will be considered.\n \
-					This parameter represents the minimum angle between two adjacent\n faces to consider the edge they are sharing.");
-			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0.0, m.cm.bbox.Diag()*0.5,"Edge len threshold", 
+					"If you decide not to use per vertex quality values, \n\
+					the angle between two adjacent faces will be considered.\n \
+					This parameter represents the minimum angle between two adjacent\n \
+					faces to consider the edge they are sharing.");
+			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0.0, 
+					m.cm.bbox.Diag()*0.5,"Edge len threshold", 
 					"The minimum length of an edge. Useful to avoid the creation of too many small faces.");
-			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.004, 0.0, m.cm.bbox.Diag()*0.1,"Max chip depth", 
-					"The maximum depth of a chip.");
-			params.addEnum("ChipStyle", 0, styles, "Chip Style", "Mesh erosion style to use. Different styles are defined \
+			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.004, 0.0, m.cm.bbox.Diag()*0.1,
+					"Max chip depth", "The maximum depth of a chip.");
+			params.addEnum("ChipStyle", 0, styles, "Chip Style", 
+					"Mesh erosion style to use. Different styles are defined \
 					passing different parameters to the noise function \nthat generates displacement values.");
+			params.addAbsPerc("NoiseClamp", 0.0, 0.0, 1.0, "Noise clamp threshold",
+					"All the noise values smaller than this parameters will be \n\
+					considered as 0.");
 			params.addFloat("DelIntersMaxIter", 8, "Max iterations to delete self intersections",
 					"When eroding the mesh sometimes may happen that a face\n \
 					 intersects another area of the mesh, generating awful \n \
@@ -149,6 +159,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	float edgeLenTreshold = params.getAbsPerc("EdgeLenThreshold");
 	float chipDepth = params.getAbsPerc("ChipDepth");
 	int chipStyle = params.getEnum("ChipStyle");
+	float noiseClamp = params.getAbsPerc("NoiseClamp");
 	float intersMaxIter = params.getFloat("DelIntersMaxIter");
 	bool selected = params.getBool("Selected");
 	
@@ -183,18 +194,20 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 													// (greater angle -> deeper chip)
 						
 						noise = generateNoiseValue(chipStyle, (*fi).V(j)->P().X(), (*fi).V(j)->P().Y(), (*fi).V(j)->P().Z());
-						// no negative values allowed (negative noise would generate hills, not chips)
+						// no negative values allowed (negative noise generates hills, not chips)
 						noise *= (noise>=0.0?1.0:-1.0);
+						// only values bigger than noiseClamp will be considered
+						noise = (noise<noiseClamp?0.0:noise);
 						
 						if((*fi).IsB(j)) {
 							dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
 							angleFactor = 1.0;
 						}
 						else {
-							//if(useQuality)
+							if(useQuality)
 								dispDir = Point3<CVertexO::ScalarType>(((*fi).N() + (*fi).FFp(j)->N()).Normalize());
-							//else
-							//	dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
+							else
+								dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
 							angleFactor = (sin(vcg::Angle((*fi).N(), (*fi).FFp(j)->N()))/2 + 0.5);
 						}
 						
