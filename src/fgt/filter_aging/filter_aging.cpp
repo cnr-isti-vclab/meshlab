@@ -166,7 +166,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	
 	// edge predicate
 	AgingEdgePred ep = AgingEdgePred((useQuality?AgingEdgePred::QUALITY:AgingEdgePred::ANGLE), 
-									 selected, edgeLenTreshold, thresholdValue);
+									 (selected && useQuality), edgeLenTreshold, thresholdValue);
 	
 	int fcount = 1;					// face counter (to update progress bar)
 	
