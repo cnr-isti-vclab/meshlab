@@ -112,16 +112,23 @@
         <item>
          <layout class="QVBoxLayout" >
           <item>
-           <widget class="QPushButton" name="recalcButton" >
+           <widget class="QPushButton" name="icpParamButton" >
             <property name="text" >
-             <string>Recalc Pairwise</string>
+             <string>Default ICP Params</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="icpParamButton" >
+           <widget class="QPushButton" name="icpParamCurrentButton" >
             <property name="text" >
-             <string>ICP Params</string>
+             <string>Param Current Arc </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="recalcButton" >
+            <property name="text" >
+             <string>Recalc Current Arc</string>
             </property>
            </widget>
           </item>
@@ -155,6 +162,9 @@
           <family>Courier</family>
           <pointsize>9</pointsize>
          </font>
+        </property>
+        <property name="readOnly" >
+         <bool>true</bool>
         </property>
        </widget>
       </item>

@@ -150,9 +150,7 @@ void AlignDialog::updateButtons()
 	ui.pointBasedAlignButton->setDisabled(currentNode()->glued);
 	ui.manualAlignButton->setDisabled    (currentNode()->glued);
 	ui.recalcButton->setDisabled    (currentArc==0);
-	if(currentArc==0) 	ui.icpParamButton->setText("Default Align. Param");
-	               else ui.icpParamButton->setText("Current Arc Align. Param");
-
+	ui.icpParamCurrentButton->setDisabled    (currentArc==0);
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)

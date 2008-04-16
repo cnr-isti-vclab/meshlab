@@ -98,6 +98,7 @@ public slots:
 		void glueManual();
 		void glueByPicking();
 		void alignParam();
+		void alignParamCurrent();
 		
 		void DrawArc( vcg::AlignPair::Result *A );
 signals:

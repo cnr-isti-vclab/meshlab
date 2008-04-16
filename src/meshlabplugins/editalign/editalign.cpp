@@ -128,6 +128,7 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 		//alignDialog=new AlignDialog(gla->parentWidget()->parentWidget());
 		alignDialog=new AlignDialog(gla->window());
 		connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
+		connect(alignDialog->ui.icpParamCurrentButton,SIGNAL(clicked()),this,SLOT(alignParamCurrent()));
 		connect(alignDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
 		connect(alignDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
 		connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
@@ -270,21 +271,33 @@ void EditAlignPlugin::buildParameterSet(FilterParameterSet &fps , AlignPair::Par
 	fps.addBool("MatchMode",app.MatchMode == AlignPair::Param::MMRigid,"Rigid matching","If true the ICP is cosntrained to perform matching only throug roto-translations (no scaling allowed). If false a more relaxed transformation matrix is allowed (scaling and shearing can appear).");
 }
 
-void EditAlignPlugin:: alignParam()
+void EditAlignPlugin:: alignParamCurrent()
 {
-	FilterParameterSet alignParamSet;
-	if(currentArc()) buildParameterSet(alignParamSet, currentArc()->ap);	
-							else buildParameterSet(alignParamSet, defaultAP);
-							
-	GenericParamDialog ad(alignDialog,&alignParamSet);
+  assert(currentArc());
 	
+	FilterParameterSet alignParamSet;
+	QString titleString=QString("Current Arc (%1 -> %2) Alignment Parameters").arg(currentArc()->MovName).arg(currentArc()->FixName);
+  buildParameterSet(alignParamSet, currentArc()->ap);	
+												
+	GenericParamDialog ad(alignDialog,&alignParamSet,titleString);
 	int result=ad.exec();
 	if(result != QDialog::Accepted) return;
 	
 	// Dialog accepted. get back the values
-	if(currentArc()) retrieveParameterSet(alignParamSet, currentArc()->ap);
-							else retrieveParameterSet(alignParamSet, defaultAP);
+  retrieveParameterSet(alignParamSet, currentArc()->ap);
+}
 
+void EditAlignPlugin:: alignParam()
+{
+	FilterParameterSet alignParamSet;
+	buildParameterSet(alignParamSet, defaultAP);
+							
+	GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
+	int result=ad.exec();
+	if(result != QDialog::Accepted) return;
+	
+	// Dialog accepted. get back the values
+	retrieveParameterSet(alignParamSet, defaultAP);
 }
 
 void EditAlignPlugin::glueHere()
