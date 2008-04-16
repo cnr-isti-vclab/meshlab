@@ -148,8 +148,20 @@ void MeshTree::Process(vcg::AlignPair::Param &ap)
   
 	cb(0,qPrintable(buf.sprintf("Completed Mesh-Mesh Alignment\n")));
 	
-	ProcessGlobal(ap);
+	//if there are no arcs at all complain and return
+	if(ResVec.size()==0) {
+				cb(0,qPrintable(buf.sprintf("\n Failure. There are no overlapping meshes?\n No candidate alignment arcs. Nothing Done.\n")));
+				return;
+	}
 	
+	
+	//if there are no valid arcs complain and return
+	if(ResVecPtr.size()==0) {
+				cb(0,qPrintable(buf.sprintf("\n Failure. No succesful arc among candidate Alignment arcs. Nothing Done.\n")));
+				return;
+	}
+	
+	ProcessGlobal(ap);	
 }
 
 void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
