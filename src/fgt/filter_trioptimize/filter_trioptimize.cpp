@@ -206,7 +206,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
 		cmetrics.push_back("mean");
 		cmetrics.push_back("norm squared");
 		cmetrics.push_back("absolute");
-		parlst.addEnum("curvtype", 0, cmetrics, tr("Curvature"),
+		parlst.addEnum("curvtype", 0, cmetrics, tr("Curvature metric"),
 				tr("Choose a metric to compute surface curvature on vertices"));
 		
 		QStringList pmetrics;
@@ -215,7 +215,7 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
 		pmetrics.push_back("mean ratio");
 		pmetrics.push_back("delaunay");
 		pmetrics.push_back("topology");
-		parlst.addEnum("planartype", 0, pmetrics, tr("Planar"),
+		parlst.addEnum("planartype", 0, pmetrics, tr("Planar metric"),
 				tr("Choose a metric to compute triangle quality."));
 	}
 	
@@ -237,6 +237,8 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
                                     FilterParameterSet & par,
                                     vcg::CallBackPos *cb)
 {
+	float limit = -std::numeric_limits<float>::epsilon();
+	
 	if (ID(filter) == FP_EDGE_FLIP) {
 		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
 			errorMessage = "Mesh has some not 2-manifold faces,"
@@ -306,7 +308,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 
 			int n = optimiz.h.size();
 			// stop when flips become harmful
-			optimiz.SetTargetMetric(0);
+			optimiz.SetTargetMetric(limit);
 			optimiz.SetTimeBudget(0.01f);
 			unsigned int nflips = 0;
 
@@ -315,7 +317,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 				nflips += optimiz.nPerfmormedOps;
 				cb((int) (((n - optimiz.h.size()) / (float) n) * 100), 
 				   "Optimizing...");
-			} while (optimiz.currMetric < 0 && !optimiz.h.empty());
+			} while (optimiz.currMetric < limit && !optimiz.h.empty());
 
 			Log(GLLogStream::Info,
 			    "%d curvature edge flips performed in %.2f sec.",
@@ -350,7 +352,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 
 			cb(1, "Optimizing...");
 			// stop when flips become harmful
-			optimiz.SetTargetMetric(0);
+			optimiz.SetTargetMetric(limit);
 			optimiz.DoOptimization();
 
 			Log(GLLogStream::Info,
