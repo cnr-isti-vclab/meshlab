@@ -45,7 +45,7 @@ namespace tri
  * http://www2.in.tu-clausthal.de/~hormann/papers/Dyn.2001.OTU.pdf
  */
 template <class TRIMESH_TYPE, class MYTYPE, class CURVEVAL>
-class CurvEdgeFlip : public TriEdgeFlip<TRIMESH_TYPE, MYTYPE>
+class CurvEdgeFlip : public TopoEdgeFlip<TRIMESH_TYPE, MYTYPE>
 {
 protected:
 	typedef typename TRIMESH_TYPE::FaceType FaceType;
@@ -136,17 +136,6 @@ protected:
 		}
 		
 		return curv;
-	}
-	
-	
-	static void InsertIfConvenient(HeapType& heap, PosType& p, int mark)
-	{
-		MYTYPE* newflip = new MYTYPE(p, mark);
-		if(newflip->Priority() < 0 && newflip->IsFeasible() && p.F()->IsW() && p.FFlip()->IsW()) {
-			heap.push_back(HeapElem(newflip));
-			std::push_heap(heap.begin(), heap.end());
-		}
-		else delete newflip;
 	}
 	
 public:
@@ -339,53 +328,9 @@ public:
 				for (unsigned int i = 0; i < 3; i++)
 					if ((*fi).V1(i) - (*fi).V0(i) > 0) {
 						PosType newpos(&*fi, i);
-						InsertIfConvenient(heap, newpos, m.IMark());
+						Insert(heap, newpos, m.IMark());
 					}
 	}
-	
-	
-	void UpdateHeap(HeapType& heap)
-	{
-		this->GlobalMark()++;
-		
-		FacePointer f1 = this->_pos.F();
-		
-		// The flip creates a diagonal edge on index _pos.I() + 1
-		// We must push on heap every edge 2 - neighbor to the flipped edge
-		// (see the paper)
-		int flipped = (this->_pos.E() + 1) % 3;
-		PosType startpos(this->_pos.F(), flipped);
-		FacePointer f2 = (FacePointer) startpos.FFlip();
-		
-		PosType pos;
-		
-		// push on heap every edge of faces adjacent to f1
-		for (int i = 0; i < 3; i++) if (i != flipped) {
-			pos = PosType(f1, i);
-			if (!pos.IsBorder()) {
-				pos.FlipF();
-				for (int j = 0; j < 3; j++) {
-					pos.F()->V0(j)->IMark() = this->GlobalMark();
-					PosType newpos(pos.F(), j);
-					InsertIfConvenient(heap, newpos, this->GlobalMark());
-				}
-			}
-		}
-		
-		// push on heap every edge of faces adjacent to f2
-		for (int i = 0; i < 3; i++) if (i != this->_pos.F()->FFi(flipped)) {
-			pos = PosType(f2, i);
-			if (!pos.IsBorder()) {
-				pos.FlipF();
-				for (int j = 0; j < 3; j++) {
-					pos.F()->V0(j)->IMark() = this->GlobalMark();
-					PosType newpos(pos.F(), j);
-					InsertIfConvenient(heap, newpos, this->GlobalMark());
-				}
-			}
-		}
-	}
-	
 }; // end CurvEdgeFlip class
 
 
