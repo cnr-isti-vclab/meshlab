@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.27  2008/04/18 17:42:19  cignoni
+added showing of facenormals
+
 Revision 1.26  2008/04/11 10:11:55  cignoni
 added visualization of vertex and face label
 
@@ -111,7 +114,8 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   virtual const PluginInfo &Info();
   
   enum {
-    DP_SHOW_NORMALS,
+    DP_SHOW_FACE_NORMALS,
+    DP_SHOW_VERT_NORMALS,
     DP_SHOW_BOX_CORNERS,
     DP_SHOW_BOX_CORNERS_ABS,
     DP_SHOW_AXIS,
@@ -137,7 +141,8 @@ public:
 	ExtraMeshDecoratePlugin()
 	{
     typeList << 
-    DP_SHOW_NORMALS <<
+    DP_SHOW_FACE_NORMALS <<
+    DP_SHOW_VERT_NORMALS <<
     DP_SHOW_BOX_CORNERS <<
     DP_SHOW_BOX_CORNERS_ABS <<
     DP_SHOW_AXIS <<

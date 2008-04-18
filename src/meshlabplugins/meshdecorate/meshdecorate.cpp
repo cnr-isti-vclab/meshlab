@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.49  2008/04/18 17:42:19  cignoni
+added showing of facenormals
+
 Revision 1.48  2008/04/11 10:11:55  cignoni
 added visualization of vertex and face label
 
@@ -134,7 +137,8 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
     case DP_SHOW_AXIS :      return tr("Draws XYZ axes in world coordinates");
     case DP_SHOW_BOX_CORNERS:return tr("Draws object's bounding box corners");
 		case DP_SHOW_BOX_CORNERS_ABS  : return QString("Show Box Corners (Abs)");
-    case DP_SHOW_NORMALS:    return tr("Draws object vertex normals");
+    case DP_SHOW_VERT_NORMALS:    return tr("Draws object vertex normals");
+    case DP_SHOW_FACE_NORMALS:    return tr("Draws object face normals");
     case DP_SHOW_QUOTED_BOX: return tr("Draws quoted box");
     case DP_SHOW_VERT_LABEL: return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
     case DP_SHOW_FACE_LABEL: return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
@@ -156,7 +160,8 @@ const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
 {
   switch(filter)
   {
-    case DP_SHOW_NORMALS      : return QString("Show Normals");
+    case DP_SHOW_VERT_NORMALS      : return QString("Show Vertex Normals");
+    case DP_SHOW_FACE_NORMALS      : return QString("Show Face Normals");
     case DP_SHOW_BOX_CORNERS  : return QString("Show Box Corners");
     case DP_SHOW_BOX_CORNERS_ABS  : return QString("Show Box Corners (Abs)");
     case DP_SHOW_AXIS         : return QString("Show Axis");
@@ -173,27 +178,42 @@ void ExtraMeshDecoratePlugin::Decorate(QAction *a, MeshModel &m, FilterParameter
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
-	if(a->text() == ST(DP_SHOW_NORMALS))
+	if(ID(a) == DP_SHOW_FACE_NORMALS || ID(a) == DP_SHOW_VERT_NORMALS )
 	{
     glPushAttrib(GL_ENABLE_BIT );
     float LineLen = m.cm.bbox.Diag()/20.0;
     CMeshO::VertexIterator vi;
+    CMeshO::FaceIterator fi;
     glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_LINES);
-		glColor4f(.4f,.4f,1.f,.6f);
-    for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) 
-      if(!(*vi).IsD())
-        {
-          glVertex((*vi).P());
-          glVertex((*vi).P()+(*vi).N()*LineLen);
-        }
-    glEnd();
+
+		if(ID(a) == DP_SHOW_VERT_NORMALS) 
+			{
+				glColor4f(.4f,.4f,1.f,.6f);
+					for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+					{
+						glVertex((*vi).P());
+						glVertex((*vi).P()+(*vi).N()*LineLen);
+					}
+			}
+		else // ID(a) == DP_SHOW_FACE_NORMALS) 
+		{
+			glColor4f(.1f,.4f,4.f,.6f);
+			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+			{
+				Point3f b=Barycenter(*fi);
+				glVertex(b);
+				glVertex(b+(*fi).N()*LineLen);
+			}
+		}
+			
+	 glEnd();
    glPopAttrib();
   }
-  if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
+	if(a->text() == ST(DP_SHOW_BOX_CORNERS))	DrawBBoxCorner(m);
 	if(a->text() == ST(DP_SHOW_QUOTED_BOX))		DrawQuotedBox(m,gla,qf);
 	if(a->text() == ST(DP_SHOW_VERT_LABEL))	DrawVertLabel(m,gla,qf);
   if(a->text() == ST(DP_SHOW_FACE_LABEL))	DrawFaceLabel(m,gla,qf);
