@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.93  2008/04/18 17:39:34  cignoni
+added menus for the new filter classes (smoothing, normal, quality)
+
 Revision 1.92  2008/04/10 11:07:42  cignoni
 added tooltip to decorations
 
@@ -515,8 +518,9 @@ void MainWindow::createMenus()
 	filterMenuClean  = filterMenu->addMenu(tr("Clean"));
 	filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing"));
   filterMenuColorize = filterMenu->addMenu(tr("Colorize"));
-
-
+	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing"));
+  filterMenuQuality = filterMenu->addMenu(tr("Quality"));
+  filterMenuNormal = filterMenu->addMenu(tr("Normal and Orientation"));
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
@@ -629,6 +633,12 @@ void MainWindow::loadPlugins()
               		filterMenuClean->addAction(filterAction); break;
             case MeshFilterInterface::Remeshing : 
               		filterMenuRemeshing->addAction(filterAction); break;
+            case MeshFilterInterface::Smoothing : 
+              		filterMenuSmoothing->addAction(filterAction); break;
+            case MeshFilterInterface::Normal : 
+              		filterMenuNormal->addAction(filterAction); break;
+            case MeshFilterInterface::Quality : 
+              		filterMenuQuality->addAction(filterAction); break;
 						case MeshFilterInterface::MeshCreation : 
               		fileMenuNew->addAction(filterAction); break;
             case MeshFilterInterface::Generic : 

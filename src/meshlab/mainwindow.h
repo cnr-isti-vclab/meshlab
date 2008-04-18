@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.101  2008/04/18 17:39:34  cignoni
+added menus for the new filter classes (smoothing, normal, quality)
+
 Revision 1.100  2008/03/22 08:05:14  cignoni
 Version 1.1.1
 
@@ -340,6 +343,9 @@ private:
   QMenu *filterMenuClean;
   QMenu *filterMenuRemeshing;
 	QMenu *filterMenuColorize;
+  QMenu *filterMenuSmoothing;
+  QMenu *filterMenuQuality;
+	QMenu *filterMenuNormal;
 
 	QMenu *editMenu;
 
