@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.75  2008/04/18 17:36:37  cignoni
+added some filter classes (smoothing, normal, quality)
+
 Revision 1.74  2008/04/11 10:07:39  cignoni
 added another class (smoothing)
 made more uniform naming of start/end function for decoration
@@ -254,7 +257,7 @@ class MeshFilterInterface
 {
 public:
   typedef int FilterIDType;
-	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring, MeshCreation, Smoothing} ;
+	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring, MeshCreation, Smoothing, Quality, Normal} ;
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action 
