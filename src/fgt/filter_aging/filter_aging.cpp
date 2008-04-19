@@ -166,7 +166,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	
 	// edge predicate
 	AgingEdgePred ep = AgingEdgePred((useQuality?AgingEdgePred::QUALITY:AgingEdgePred::ANGLE), 
-									 (selected && useQuality), edgeLenTreshold, thresholdValue);
+									 selected, edgeLenTreshold, thresholdValue);
 	
 	int fcount = 1;					// face counter (to update progress bar)
 	
@@ -181,6 +181,9 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			// refine needed edges
 			RefineMesh(m.cm, ep, selected, cb);
 			
+			// vertexes along selection border will not be displaced 
+			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+			
 			// displace vertexes
 			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
 				if(cb) (*cb)((fcount++/m.cm.fn)*100, "Aging..."); 
@@ -190,8 +193,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 					  (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) { 
 						double noise;							// noise value
 						Point3<CVertexO::ScalarType> dispDir;	// displacement direction
-						float angleFactor;			// angle multiply factor in [0,1] range
-													// (greater angle -> deeper chip)
+						float angleFactor;		// angle multiply factor in [0,1] range
+												// (greater angle -> deeper chip)
 						
 						noise = generateNoiseValue(chipStyle, (*fi).V(j)->P().X(), (*fi).V(j)->P().Y(), (*fi).V(j)->P().Z());
 						// no negative values allowed (negative noise generates hills, not chips)
@@ -220,7 +223,10 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 				}
 			}
 			
-			// avoid mesh self intersection
+			// readjust selection
+			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
+			
+			// avoid mesh self intersections
 			if(!displaced.empty()) {
 				DispMap::iterator it;
 				for(int t=0; t<intersMaxIter; t++) {
@@ -250,42 +256,57 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 
 
 /* Refines the mesh where needed.
- * When we work on the selection with a quality predicate we have to do some
- * additional checks to avoid infinite loops: we set the V bit on all the selected 
- * faces, we dilate the selection, we call the refine function, and then we
- * erode the selection to obtain the original selected area. The predicate doesn't
- * allow the refinement of an edge between two selected faces without the V bit 
- * setted. In this way we are able to refine also the esges on the  borders of the 
- * selection (without this operation the refineE function always returns true). */
+ * In two cases we need to perform additional checks to avoid problems.
+ * The first one is when we are working on the selection with a quality predicate 
+ * while the second one is when we are working with an angle predicate. */
 void GeometryAgingPlugin::RefineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb)
 {
 	bool ref = true;
 	CMeshO::FaceIterator fi;
 	
-	// clear V bit on all faces
-	if(selection && ep.getType()==AgingEdgePred::QUALITY)
-		for(fi = m.face.begin(); fi!=m.face.end(); fi++)
-			if(!(*fi).IsD()) (*fi).ClearV();
+	// allocate 2 user bits over faces
+	ep.allocateBits();
+	
+	// clear user bits on all faces
+	for(fi = m.face.begin(); fi!=m.face.end(); fi++) if(!(*fi).IsD()) {
+		(*fi).ClearUserBit(ep.selbit);
+		(*fi).ClearUserBit(ep.angbit);
+	}
+	
 	while(ref) {
-		if(selection && ep.getType()==AgingEdgePred::QUALITY) {
-			// set V bit on selected faces
-			for(fi = m.face.begin(); fi!=m.face.end(); fi++)
-				if(!(*fi).IsD() && (*fi).IsS()) (*fi).SetV();
+		if(selection) {
+			// set selbit bit on selected faces
+			for(fi=m.face.begin(); fi!=m.face.end(); fi++)
+				if(!(*fi).IsD() && (*fi).IsS()) (*fi).SetUserBit(ep.selbit);
 			// dilate selection
-			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m);  
+			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m);
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
 		}
+		// mark faces to refine setting angbit (angle predicate only)
+		if(ep.getType()==AgingEdgePred::ANGLE)
+			for(fi = m.face.begin(); fi!=m.face.end(); fi++) if(!(*fi).IsD())
+				for(int j=0; j<3; j++)
+					if(!selection || ((*fi).IsS() && (*fi).FFp(j)->IsS()))
+						ep.markFaceAngle(face::Pos<CMeshO::FaceType>(&*fi,j));
+		
 		ref = RefineE<CMeshO, MidPoint<CMeshO>, AgingEdgePred>(m, MidPoint<CMeshO>(), ep, selection, cb);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
-		if(selection && ep.getType()==AgingEdgePred::QUALITY) {
+		
+		if(selection) {
 			// erode selection
 			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m);
 			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m);
-			// clear V bit on all faces
-			for(fi = m.face.begin(); fi!=m.face.end(); fi++)
-				if(!(*fi).IsD()) (*fi).ClearV();
+		}
+		
+		// clear user bits on all faces
+		for(fi=m.face.begin(); fi!=m.face.end(); fi++) if(!(*fi).IsD()) {
+			(*fi).ClearUserBit(ep.selbit);
+			(*fi).ClearUserBit(ep.angbit);
 		}
 	}
+	
+	// delete the 2 user bits previously allocated
+	ep.deallocateBits();
 }
 
 

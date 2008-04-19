@@ -2,6 +2,9 @@
 #define EDGEPRED_H_
 
 
+#include <vector>
+
+
 using namespace vcg;
 
 
@@ -16,6 +19,7 @@ class AgingEdgePred
 			this->thVal = 1.0;
 			this->type = QUALITY;
 			this->selection = false;
+			angbit = selbit = -1;
 		}
 		
 		AgingEdgePred(int type, bool sel, float lenTh, float thVal = 0.0) {
@@ -24,23 +28,58 @@ class AgingEdgePred
 			this->thVal = thVal;
 			this->type = type;
 			this->selection = sel;
+			angbit = selbit = -1;
 		}
 		
 		// Main method to test predicates over edges (used by RefineE function)
 		bool operator()(face::Pos<CMeshO::FaceType> ep) const {
-			if(selection && !ep.f->IsV() && !ep.f->FFp(ep.z)->IsV()) return false;
+			// first special case: this avoids to refine an edge between two faces
+			// that have been selected by the dilate selection function
+			if(selection && selbit!=-1 && !ep.f->IsUserBit(selbit) && !ep.f->FFp(ep.z)->IsUserBit(selbit)) 
+				return false;
+			// second special case: when in a face there is (at least) one edge 
+			// the respects the angle predicate then all the edges of that face
+			// have to be refined
+			if(type==ANGLE && angbit!=-1 && (ep.f->IsUserBit(angbit) || 
+			  ep.f->FFp(ep.z)->IsUserBit(angbit))) 
+				return lenp(ep);
+			// no special cases: normal predicate test
 			return (lenp(ep) && qaEdgeTest(ep));
 		}
 		
 		// Tests angle predicate over the edge if type is angle; if type is quality 
 		// tests quality predicate but only on the first of the two vertexes of the edge
 		bool qaVertTest(face::Pos<CMeshO::FaceType> ep) const {
-			return (type==ANGLE?testAngle(ep):(type==QUALITY?(ep.f->V(ep.z)->Q()>thVal):false));
+			if(type == ANGLE) if(!selection || ep.f->V(ep.z)->IsS()) return testAngle(ep);
+			if(type == QUALITY) return (ep.f->V(ep.z)->Q()>thVal);
+			return false;
 		}
 		
 		// Returns the type of the predicate
 		int getType() { return type; }
 		
+		// use length and angle predicates to set angbit user bit over one face
+		void markFaceAngle(face::Pos<CMeshO::FaceType> ep) {
+			if(angbit == -1 || selbit == -1 || type != ANGLE) return;
+			if(lenp(ep) && testAngle(ep))
+				ep.f->SetUserBit(angbit);
+		}
+		
+		// Allocates two new user bits over the mesh faces
+		void allocateBits() {
+			selbit = CFaceO::NewBitFlag();
+			angbit = CFaceO::NewBitFlag();
+		}
+		
+		// Deallocates the two user bits from the mesh faces
+		void deallocateBits() {
+			CFaceO::DeleteBitFlag(angbit);
+			CFaceO::DeleteBitFlag(selbit);
+			angbit = selbit = -1;
+		}
+		
+		int selbit;		// face user bit used when working on selections
+		int angbit;		// face user bit used when predicate type is angle
 		
 	protected:
 		EdgeLen<CMeshO, CMeshO::ScalarType> lenp;		// edge len predicate object
