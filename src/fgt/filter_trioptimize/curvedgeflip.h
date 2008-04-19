@@ -199,6 +199,10 @@ public:
 		vcg::face::VFAppend(f2, (j + 1) % 3); // attach v2 with f2
 		assert(f1->V1(i) == v3);
 		vcg::face::VFAppend(f1, (i + 1) % 3); // attach v3 with f1
+		
+		// update face normals after the flip
+		f1->N() = n1;
+		f2->N() = n2;
 
 		// avoid texture coordinates swap after flip 
 		if (tri::HasPerWedgeTexCoord(m)) {
