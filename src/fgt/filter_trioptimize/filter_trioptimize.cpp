@@ -215,14 +215,16 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
 		cmetrics.push_back("mean");
 		cmetrics.push_back("norm squared");
 		cmetrics.push_back("absolute");
+		
 		parlst.addEnum("curvtype", 0, cmetrics, tr("Curvature metric"),
-				tr("Choose a metric to compute surface curvature on vertices\n"
-				   "H = mean curv, K = gaussian curv, A = area per vertex\n\n"
-				   "1: Mean curvature = H\n"
-				   "2: Norm squared mean curvature = (H * H) / A\n"
-				   "3: Absolute curvature:\n"
-				   "       if(K >= 0) return 2 * H\n"
-				   "       else return 2 * sqrt(H ^ 2 - A * K)\n"));
+		        tr("<p style=\'white-space:pre\'>"
+			        "Choose a metric to compute surface curvature on vertices<br>"
+			        "H = mean curv, K = gaussian curv, A = area per vertex<br><br>"
+			        "1: Mean curvature = H<br>"
+			        "2: Norm squared mean curvature = (H * H) / A<br>"
+			        "3: Absolute curvature:<br>"
+			        "     if(K >= 0) return 2 * H<br>"
+			        "     else return 2 * sqrt(H ^ 2 - A * K)"));
 		
 		QStringList pmetrics;
 		pmetrics.push_back("area/max side");
@@ -231,15 +233,16 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
 		pmetrics.push_back("delaunay");
 		pmetrics.push_back("topology");
 		parlst.addEnum("planartype", 0, pmetrics, tr("Planar metric"),
-				tr("Choose a metric to define the planar flip operation\n\n"
-				   "Triangle quality based\n"
-				   "1: minimum ratio height/edge among the edges\n"
-				   "2: ratio between radii of incenter and circumcenter\n"
-				   "3: 2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM,\n"
-				   "   M transform triangle into equilateral\n\n"
-				   "Others\n"
-				   "4: Do the flip to make two faces a Delaunay triangulation\n"
-				   "5: Do the flip to improve local topology\n"));
+		        tr("<p style=\'white-space:pre\'>"
+			        "Choose a metric to define the planar flip operation<br><br>"
+			        "Triangle quality based<br>"
+			        "1: minimum ratio height/edge among the edges<br>"
+			        "2: ratio between radii of incenter and circumcenter<br>"
+			        "3: 2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM,<br>"
+			        "     M transform triangle into equilateral<br><br>"
+			        "Others<br>"
+			        "4: Fix the Delaunay condition between two faces<br>"
+			        "5: Do the flip to improve local topology<br>"));
 	}
 	
 	if (ID(action) == FP_NEAR_LAPLACIAN_SMOOTH) {
