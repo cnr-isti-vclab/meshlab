@@ -25,7 +25,6 @@ public:
 	void AddEmptyRenderArea();
 	void Reset();
 	void SetProgress(int val);
-	void SetStatusText(QString text);
 	void SetProgressMax(int val);
 
 	RenderArea *first;	// Ref to the first RA
@@ -46,7 +45,9 @@ private slots:
 	void on_modulusButton_clicked();
 	void on_smoothButton_clicked();
 	void on_cancelButton_clicked();
-	void on_invertButton_clicked();
+	void on_invertButton_clicked();	
+	void on_flipHButton_clicked();
+	void on_flipVButton_clicked();
 
 public slots:
 	void UpdateModel();

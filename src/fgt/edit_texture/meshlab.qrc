@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/" >
         <file>images/edit_texture.png</file>
+        <file>images/flipH.png</file>
+        <file>images/flipV.png</file>
         <file>images/invertsel.png</file>
         <file>images/rotate.png</file>
         <file>images/scale.png</file>

@@ -41,6 +41,7 @@ public:
 	void RemapMod();
 	void ClearSelection();
 	void InvertSelection();
+	void Flip(bool mode);
 
 protected:
     void paintEvent(QPaintEvent *event);

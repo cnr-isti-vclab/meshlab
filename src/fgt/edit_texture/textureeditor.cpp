@@ -71,12 +71,6 @@ void TextureEditor::SetProgressMax(int val)
 	ui.progressBar->setMaximum(val);
 }
 
-void TextureEditor::SetStatusText(QString text)
-{
-	// Change the text of the status label
-	ui.StatusLabel->setText(text);
-}
-
 void TextureEditor::ResetLayout()
 {
 	// uncheck all the buttons
@@ -89,6 +83,7 @@ void TextureEditor::ResetLayout()
 void TextureEditor::SmoothTextureCoordinates()
 {
 	// <-------
+	
 }
 
 // Buttons
@@ -146,6 +141,17 @@ void TextureEditor::on_cancelButton_clicked()
 	ui.cancelButton->setChecked(false);
 	ui.moveButton->setChecked(true);
 }
+
+void TextureEditor::on_flipHButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->Flip(true);
+}
+
+void TextureEditor::on_flipVButton_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->Flip(false);
+}
+
 
 void TextureEditor::on_smoothButton_clicked()
 {

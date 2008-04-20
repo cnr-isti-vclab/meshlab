@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>439</width>
-    <height>686</height>
+    <height>732</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -36,14 +36,143 @@
      <property name="title" >
       <string> Action selection </string>
      </property>
-     <layout class="QHBoxLayout" >
+     <layout class="QGridLayout" >
       <property name="margin" >
        <number>9</number>
       </property>
       <property name="spacing" >
        <number>6</number>
       </property>
-      <item>
+      <item row="0" column="5" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="3" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="1" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="6" >
+       <widget class="QPushButton" name="vertexButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Allow the selection of vertexes inside a dragged area</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selver.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4" >
+       <widget class="QPushButton" name="connectedButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Allow the selection of connected component</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selcon.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" >
+       <widget class="QPushButton" name="selectButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Allow the selection of faces inside a dragged area</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selarea.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" >
        <widget class="QPushButton" name="moveButton" >
         <property name="sizePolicy" >
          <sizepolicy>
@@ -76,21 +205,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="selectButton" >
+      <item row="1" column="6" >
+       <widget class="QPushButton" name="cancelButton" >
         <property name="sizePolicy" >
          <sizepolicy>
           <hsizetype>0</hsizetype>
@@ -100,13 +216,13 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Allow the selection of faces inside a dragged area</string>
+         <string>Unselect any selected faces/vertexes</string>
         </property>
         <property name="text" >
          <string/>
         </property>
         <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/selarea.png</iconset>
+         <iconset resource="meshlab.qrc" >:/images/selcanc.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -119,106 +235,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="connectedButton" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>0</hsizetype>
-          <vsizetype>0</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip" >
-         <string>Allow the selection of connected component</string>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/selcon.png</iconset>
-        </property>
-        <property name="iconSize" >
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="checkable" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="vertexButton" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>0</hsizetype>
-          <vsizetype>0</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip" >
-         <string>Allow the selection of vertexes inside a dragged area</string>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/selver.png</iconset>
-        </property>
-        <property name="iconSize" >
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="checkable" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
+      <item row="1" column="4" >
        <widget class="QPushButton" name="invertButton" >
         <property name="sizePolicy" >
          <sizepolicy>
@@ -248,21 +265,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cancelButton" >
+      <item row="1" column="2" >
+       <widget class="QPushButton" name="flipVButton" >
         <property name="sizePolicy" >
          <sizepolicy>
           <hsizetype>0</hsizetype>
@@ -272,13 +276,13 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Unselect any selected faces/vertexes</string>
+         <string>Flip selected faces vertically</string>
         </property>
         <property name="text" >
          <string/>
         </property>
         <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/selcanc.png</iconset>
+         <iconset resource="meshlab.qrc" >:/images/flipV.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -287,7 +291,37 @@
          </size>
         </property>
         <property name="checkable" >
-         <bool>true</bool>
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QPushButton" name="flipHButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Flip selected faces horizzontally</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/flipH.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -371,14 +405,14 @@
          <property name="spacing" >
           <number>6</number>
          </property>
-         <item row="0" column="2" >
-          <widget class="QLabel" name="label_5" >
+         <item row="0" column="0" >
+          <widget class="QLabel" name="label" >
            <property name="text" >
-            <string>Alfa:</string>
+            <string>Iteration:</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="3" >
+         <item row="0" column="6" >
           <widget class="QDoubleSpinBox" name="spinBoxAlfa" >
            <property name="decimals" >
             <number>1</number>
@@ -394,14 +428,27 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="4" >
-          <widget class="QPushButton" name="smoothButton" >
+         <item row="0" column="3" >
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="4" colspan="2" >
+          <widget class="QLabel" name="label_5" >
            <property name="text" >
-            <string>Apply</string>
+            <string>Alfa:</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1" >
+         <item row="0" column="2" >
           <widget class="QSpinBox" name="spinBoxIteration" >
            <property name="maximum" >
             <number>10</number>
@@ -414,47 +461,20 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="1" colspan="4" >
-          <widget class="QProgressBar" name="progressBar" >
-           <property name="maximum" >
-            <number>100</number>
+         <item row="1" column="5" colspan="2" >
+          <widget class="QPushButton" name="smoothButton" >
+           <property name="text" >
+            <string>Apply</string>
            </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="5" >
+          <widget class="QProgressBar" name="progressBar" >
            <property name="value" >
             <number>0</number>
            </property>
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" >
-          <widget class="QLabel" name="StatusLabel" >
-           <property name="font" >
-            <font>
-             <family>MS Shell Dlg 2</family>
-             <pointsize>10</pointsize>
-             <weight>50</weight>
-             <italic>false</italic>
-             <bold>false</bold>
-             <underline>false</underline>
-             <strikeout>false</strikeout>
-            </font>
-           </property>
-           <property name="text" >
-            <string>Loading...</string>
-           </property>
-           <property name="alignment" >
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-           <property name="buddy" >
-            <cstring></cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label" >
-           <property name="text" >
-            <string>Iteration:</string>
            </property>
           </widget>
          </item>

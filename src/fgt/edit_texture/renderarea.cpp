@@ -227,7 +227,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 		/*Y:*/painter.drawText(TRANSLATE, TRANSLATE*3, QString("(%1,%2)").arg(ox).arg((float)(AREADIM*zoom + viewport.Y()*zoom)/(AREADIM*zoom)));
 		/*X:*/painter.drawText(w - TRANSLATE*18, h - TRANSLATE, QString("(%1,%2)").arg((float)(w-viewport.X()*zoom)/(AREADIM*zoom)).arg(oy));
 		painter.drawText(TRANSLATE, TRANSLATE*6, QString("V"));
-		painter.drawText(AREADIM - TRANSLATE*23, AREADIM - TRANSLATE, QString("U"));
+		painter.drawText(w - TRANSLATE*23, h - TRANSLATE, QString("U"));
 
 		// Draw the rectangle of selection
 		if (start != QPoint() && end != QPoint())
@@ -994,6 +994,30 @@ void RenderArea::InvertSelection()
 			else model->cm.vert[i].SetUserBit(selVertBit);
 		}
 		UpdateVertexSelection();
+		this->update();
+	}
+}
+
+void RenderArea::Flip(bool mode)
+{
+	if (selected)
+	{
+		QPointF mid = ToUVSpace(selection.center().x(), selection.center().y());
+		for (unsigned i = 0; i < model->cm.face.size(); i++)
+		{
+			if (model->cm.face[i].WT(0).n() == textNum)
+			{
+				if (model->cm.face[i].IsUserBit(selBit))
+				{
+					for (int j = 0; j < 3; j++)
+					{
+						if (mode) model->cm.face[i].WT(j).u() = 2.0f * mid.x() - model->cm.face[i].WT(j).u();
+						else model->cm.face[i].WT(j).v() = 2.0f * mid.y() - model->cm.face[i].WT(j).v();
+					}
+				}		
+			}
+		}
+		RecalculateSelectionArea();
 		this->update();
 	}
 }
