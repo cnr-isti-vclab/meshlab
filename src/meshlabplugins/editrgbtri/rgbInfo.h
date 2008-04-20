@@ -592,6 +592,15 @@ public:
             break;
         }
 #endif
+        
+#ifndef RGBCOLOR 
+        
+        Color4b& c = face()->C();
+
+        c.Import(Color4b(255,255,255,255));
+#endif
+        
+        
         if (update)
             updateInfo();
     }
