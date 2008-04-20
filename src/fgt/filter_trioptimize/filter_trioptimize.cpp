@@ -180,8 +180,8 @@ const PluginInfo &TriOptimizePlugin::pluginInfo()
 const TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(QAction *action)
 {
 	switch(ID(action)) {
-		case FP_EDGE_FLIP:             return 	MeshFilterInterface::Remeshing;
-		case FP_NEAR_LAPLACIAN_SMOOTH: return 	MeshFilterInterface::Smoothing;
+		case FP_EDGE_FLIP:             return MeshFilterInterface::Remeshing;
+		case FP_NEAR_LAPLACIAN_SMOOTH: return MeshFilterInterface::Smoothing;
 	}
  return MeshFilterInterface::Generic;
 }
@@ -216,7 +216,13 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
 		cmetrics.push_back("norm squared");
 		cmetrics.push_back("absolute");
 		parlst.addEnum("curvtype", 0, cmetrics, tr("Curvature metric"),
-				tr("Choose a metric to compute surface curvature on vertices"));
+				tr("Choose a metric to compute surface curvature on vertices\n"
+				   "H = mean curv, K = gaussian curv, A = area per vertex\n\n"
+				   "1: Mean curvature = H\n"
+				   "2: Norm squared mean curvature = (H * H) / A\n"
+				   "3: Absolute curvature:\n"
+				   "       if(K >= 0) return 2 * H\n"
+				   "       else return 2 * sqrt(H ^ 2 - A * K)\n"));
 		
 		QStringList pmetrics;
 		pmetrics.push_back("area/max side");
@@ -225,7 +231,15 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
 		pmetrics.push_back("delaunay");
 		pmetrics.push_back("topology");
 		parlst.addEnum("planartype", 0, pmetrics, tr("Planar metric"),
-				tr("Choose a metric to compute triangle quality."));
+				tr("Choose a metric to define the planar flip operation\n\n"
+				   "Triangle quality based\n"
+				   "1: minimum ratio height/edge among the edges\n"
+				   "2: ratio between radii of incenter and circumcenter\n"
+				   "3: 2*sqrt(a, b)/(a+b), a, b the eigenvalues of M^tM,\n"
+				   "   M transform triangle into equilateral\n\n"
+				   "Others\n"
+				   "4: Do the flip to make two faces a Delaunay triangulation\n"
+				   "5: Do the flip to improve local topology\n"));
 	}
 	
 	if (ID(action) == FP_NEAR_LAPLACIAN_SMOOTH) {
@@ -255,7 +269,6 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			return false; // can't continue, mesh can't be processed
 		}
 		
-		cb(1, "Initializing...");
 		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		if (delvert)
 			Log(GLLogStream::Info,
@@ -314,23 +327,16 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 					optimiz.Init<AbsCEFlip>();
 					break;
 			}
-
-			int n = optimiz.h.size();
+			
 			// stop when flips become harmful
 			optimiz.SetTargetMetric(limit);
-			optimiz.SetTimeBudget(0.01f);
-			unsigned int nflips = 0;
-
-			do {
-				optimiz.DoOptimization();
-				nflips += optimiz.nPerfmormedOps;
-				cb((int) (((n - optimiz.h.size()) / (float) n) * 100), 
-				   "Optimizing...");
-			} while (optimiz.currMetric < limit && !optimiz.h.empty());
+			optimiz.DoOptimization();
+			optimiz.h.clear();
 
 			Log(GLLogStream::Info,
 			    "%d curvature edge flips performed in %.2f sec.",
-			    nflips, (clock() - start) / (float) CLOCKS_PER_SEC);
+			    optimiz.nPerfmormedOps,
+			    (clock() - start) / (float) CLOCKS_PER_SEC);
 		}
 
 		start = clock();
@@ -358,11 +364,11 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 					optimiz.Init<MyTopoEFlip>();
 					break;
 			}
-
-			cb(1, "Optimizing...");
+			
 			// stop when flips become harmful
 			optimiz.SetTargetMetric(limit);
 			optimiz.DoOptimization();
+			optimiz.h.clear();
 
 			Log(GLLogStream::Info,
 			    "%d planar edge flips performed in %.2f sec.",
@@ -372,17 +378,21 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 		
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 
-		// Clear Writable flags
 		if (par.getBool("selection")) {
+			// Clear Writable flags (faces)
 			CMeshO::FaceIterator fi;
 			for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				if (!(*fi).IsD())
 					(*fi).SetW();
 
+			// Clear Writable flags (vertices)
 			CMeshO::VertexIterator vi;
 			for (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				if (!(*vi).IsD())
 					(*vi).SetW();
+			
+			// restore "default" selection  for vertices
+			vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 		}
 	}
 
