@@ -127,7 +127,7 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 					"Mesh erosion style to use. Different styles are defined \
 					passing different parameters to the noise function \nthat generates displacement values.");
 			params.addAbsPerc("NoiseClamp", 0.0, 0.0, 1.0, "Noise clamp threshold",
-					"All the noise values smaller than this parameters will be \n\
+					"All the noise values smaller than this parameter will be \n\
 					considered as 0.");
 			params.addFloat("DelIntersMaxIter", 8, "Max iterations to delete self intersections",
 					"When eroding the mesh sometimes may happen that a face\n \
@@ -197,8 +197,6 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 												// (greater angle -> deeper chip)
 						
 						noise = generateNoiseValue(chipStyle, (*fi).V(j)->P().X(), (*fi).V(j)->P().Y(), (*fi).V(j)->P().Z());
-						// no negative values allowed (negative noise generates hills, not chips)
-						noise *= (noise>=0.0?1.0:-1.0);
 						// only values bigger than noiseClamp will be considered
 						noise = (noise<noiseClamp?0.0:noise);
 						
@@ -310,7 +308,7 @@ void GeometryAgingPlugin::RefineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 }
 
 
-/* Returns a noise value using the selected style */
+/* Returns a noise value in range [0,1] using the selected style */
 double GeometryAgingPlugin::generateNoiseValue(int style, const CVertexO::ScalarType &x, 
 											const CVertexO::ScalarType &y, const CVertexO::ScalarType &z)
 {
@@ -324,13 +322,20 @@ double GeometryAgingPlugin::generateNoiseValue(int style, const CVertexO::Scalar
 		case SINUSOIDAL:
 			for(int i=0; i<8; i++) {
 				float p = pow(2.0f, i);
-				noise += math::Perlin::Noise(p*x, p*y, p*z) / p;
+				double tmp = math::Perlin::Noise(p*x, p*y, p*z) / p;
+				tmp *= (tmp>=0.0?1.0:-1.0);
+				noise += tmp;
 			}
 			break;
 	}
-
-	if(style == SINUSOIDAL)
+	
+	if(style == LINEAR)
+		noise /= 8;
+	else if(style == SINUSOIDAL)
 		noise = sin(x + noise);
+	
+	// no negative values allowed (negative noise generates hills, not chips)
+	noise *= (noise>=0.0?1.0:-1.0);
 	
 	return noise;
 }
