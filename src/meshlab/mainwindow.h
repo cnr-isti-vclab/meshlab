@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.102  2008/04/22 09:07:09  cignoni
+1.2.0b version string
+
 Revision 1.101  2008/04/18 17:39:34  cignoni
 added menus for the new filter classes (smoothing, normal, quality)
 
@@ -205,7 +208,7 @@ public:
   MainWindow();
    static bool QCallBack(const int pos, const char * str);
 	 const QString appName() const {return tr("MeshLab v")+appVer(); }
-   const QString appVer() const {return tr("1.1.1"); }
+   const QString appVer() const {return tr("1.2.0b"); }
 
 public slots:
 		 
