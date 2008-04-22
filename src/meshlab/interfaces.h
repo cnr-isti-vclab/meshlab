@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.77  2008/04/22 16:15:45  bernabei
+By default, tablet events are treated as mouse events
+
 Revision 1.76  2008/04/22 14:54:39  bernabei
 Added support for tablet events
 
@@ -135,6 +138,7 @@ added Filter History Dialogs
 #include <QApplication>
 #include <QAction>
 #include <QMessageBox>
+#include <QTabletEvent>
 #include "filterparameter.h"
 #include "GLLogStream.h"
 
@@ -460,7 +464,7 @@ public:
 //	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
     virtual void keyReleaseEvent    (QAction *, QKeyEvent *, MeshModel &/*m*/, GLArea *){};
     virtual void keyPressEvent      (QAction *, QKeyEvent *, MeshModel &/*m*/, GLArea *){};
-    virtual void tabletEvent		(QAction *, QTabletEvent *, MeshModel &/*m*/, GLArea *){};
+    virtual void tabletEvent		(QAction *, QTabletEvent * e, MeshModel &/*m*/, GLArea *){e->ignore();};
 
 };
 

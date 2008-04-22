@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.143  2008/04/22 16:15:45  bernabei
+By default, tablet events are treated as mouse events
+
 Revision 1.142  2008/04/22 14:54:38  bernabei
 Added support for tablet events
 
@@ -656,6 +659,7 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 void GLArea::tabletEvent(QTabletEvent*e)
 {
 	if(iEdit && !suspendedEditor) iEdit->tabletEvent(currentEditor,e,*mm(),this);
+	else e->ignore();
 }
 
 void GLArea::wheelEvent(QWheelEvent*e)
