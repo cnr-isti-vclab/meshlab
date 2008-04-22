@@ -24,6 +24,9 @@
   History
 
 $Log$
+Revision 1.85  2008/04/22 14:54:38  bernabei
+Added support for tablet events
+
 Revision 1.84  2008/04/04 10:07:10  cignoni
 Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
@@ -387,6 +390,7 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *event);
   void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
+	void tabletEvent(QTabletEvent *e);
 	bool drawSelection;
 
 	void hideEvent(QHideEvent * event);

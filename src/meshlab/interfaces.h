@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.76  2008/04/22 14:54:39  bernabei
+Added support for tablet events
+
 Revision 1.75  2008/04/18 17:36:37  cignoni
 added some filter classes (smoothing, normal, quality)
 
@@ -278,7 +281,7 @@ public:
 
 	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
-	// For example filters that perform an action only on the selection will be placed in the Selection Class Ê
+	// For example filters that perform an action only on the selection will be placed in the Selection Class ï¿½
 	virtual const FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
 	
 	// The filters can have some additional requirements on the mesh capabiliteis. 
@@ -457,6 +460,7 @@ public:
 //	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
     virtual void keyReleaseEvent    (QAction *, QKeyEvent *, MeshModel &/*m*/, GLArea *){};
     virtual void keyPressEvent      (QAction *, QKeyEvent *, MeshModel &/*m*/, GLArea *){};
+    virtual void tabletEvent		(QAction *, QTabletEvent *, MeshModel &/*m*/, GLArea *){};
 
 };
 

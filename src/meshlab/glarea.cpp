@@ -24,6 +24,9 @@
 History
 
 $Log$
+Revision 1.142  2008/04/22 14:54:38  bernabei
+Added support for tablet events
+
 Revision 1.141  2008/04/04 10:07:12  cignoni
 Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
@@ -647,6 +650,12 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
         }
 	
 	update();
+}
+
+//Processing of tablet events, interesting only for painting plugins
+void GLArea::tabletEvent(QTabletEvent*e)
+{
+	if(iEdit && !suspendedEditor) iEdit->tabletEvent(currentEditor,e,*mm(),this);
 }
 
 void GLArea::wheelEvent(QWheelEvent*e)
