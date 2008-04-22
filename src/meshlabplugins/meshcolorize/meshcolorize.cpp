@@ -23,6 +23,10 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.49  2008/04/22 16:02:51  bernabei
+forced vcg namespace use, as Quality was interpreted by gcc as one of the values of the FilterClass
+enumeration
+
 Revision 1.48  2008/04/07 10:33:56  cignoni
 added texture border colorization filter
 
@@ -400,17 +404,17 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 				max = sqrt(3.0f)/2.0f;
 				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
 					if(!(*fi).IsD()) 
-						(*fi).C().ColorRamp(min, max, Quality((*fi).P(0), (*fi).P(1),(*fi).P(2)));
+						(*fi).C().ColorRamp(min, max, vcg::Quality((*fi).P(0), (*fi).P(1),(*fi).P(2)));
 			} break;
 			case 1: { //inradius / circumradius
 				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
 					if(!(*fi).IsD()) 
-						(*fi).C().ColorRamp(min, max, QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2)));
+						(*fi).C().ColorRamp(min, max, vcg::QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2)));
 			} break;
 			case 2: { //mean ratio
 				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) 
 					if(!(*fi).IsD()) 
-						(*fi).C().ColorRamp(min, max, QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2)));
+						(*fi).C().ColorRamp(min, max, vcg::QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2)));
 			} break;
 			default: assert(0);
 			} 
