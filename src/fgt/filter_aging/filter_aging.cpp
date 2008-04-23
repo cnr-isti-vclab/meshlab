@@ -129,9 +129,8 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 					"passing different parameters to the noise function \nthat generates displacement values.");
 			params.addAbsPerc("NoiseFreqScale", m.cm.bbox.Diag()*0.055, m.cm.bbox.Diag()*0.01,
 					m.cm.bbox.Diag()*0.1, "Noise frequency scale",
-					"Changes the noise frequency scale. This affects the distance" \
-					"between the chips and their dimensions (Linear and Sinusoidal" \
-					"styles only).");
+					"Changes the noise frequency scale. This affects chip dimensions" \
+					"and the distance between chips (Linear and Sinusoidal styles only).");
 			params.addFloat("NoiseClamp", 0.5, "Noise clamp threshold [0..1]",
 					"All the noise values smaller than this parameter will be \n "\
 					"considered as 0.");
