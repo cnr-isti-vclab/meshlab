@@ -174,6 +174,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	int chipStyle = params.getEnum("ChipStyle");
 	float noiseFreq = params.getAbsPerc("NoiseFreqScale");
 	float noiseClamp = params.getFloat("NoiseClamp");
+	if(noiseClamp < 0.0) noiseClamp = 0.0;
+	if(noiseClamp > 1.0) noiseClamp = 1.0;
 	float intersMaxIter = params.getFloat("DelIntersMaxIter");
 	bool selected = params.getBool("Selected");
 	
