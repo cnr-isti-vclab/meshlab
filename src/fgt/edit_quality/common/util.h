@@ -67,7 +67,12 @@ struct CHART_INFO
 
 	CHART_INFO( int view_width=0, int view_height=0, float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
 	{
-		//assert(num_of_items != 0);
+		this->updateChartInfo(view_width, view_height, min_X, max_X, min_Y, max_Y);
+	}
+	
+	void updateChartInfo( int view_width=0, int view_height=0, float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
+	{
+		assert(numOfItems != 0);
 
 		leftBorder	= CANVAS_BORDER_DISTANCE;
 		rightBorder	= view_width - CANVAS_BORDER_DISTANCE;

@@ -219,6 +219,7 @@ private slots:
 	void drawGammaCorrection(void);
 };
 
+
 bool TfHandleCompare(TFHandle*h1, TFHandle*h2);
 
 #endif // QUALITYMAPPERDIALOG_H

@@ -82,6 +82,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 
 	// toggling Trackball button
 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
+
 	suspendEditToggle();
 }
 
@@ -368,7 +369,7 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	connect(_equalizerHandles[MID_HANDLE],   SIGNAL(handleReleased()), this, SLOT(meshColorPreview()));
 	connect(_equalizerHandles[RIGHT_HANDLE], SIGNAL(handleReleased()), this, SLOT(meshColorPreview()));
 	connect(ui.brightnessSlider,             SIGNAL(sliderReleased()), this, SLOT(meshColorPreview()));
-	connect(ui.brightessSpinBox,         SIGNAL(valueChanged(double)), this, SLOT(meshColorPreview()));
+	connect(ui.brightessSpinBox,			 SIGNAL(valueChanged(double)), this, SLOT(meshColorPreview()));
 	connect(ui.minSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
 	connect(ui.midSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
 	connect(ui.maxSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
@@ -434,13 +435,14 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 			QMessageBox::warning(this, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 
 			return false;
 		}
-
 		//building histogram chart informations
-		int maxY = computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV());
-		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, maxY);
+		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV()) );
 	}
 	else
 	{
+		//added by MAL 23/04/08
+		_transferFunction_info->updateChartInfo( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV()) );
+
 		// if histogram doesn't need to be redrawn, return
 		if ( (leftHandleIsInsideHistogram && _leftHandleWasInsideHistogram) && (rightHandleIsInsideHistogram && _rightHandleWasInsideHistogram) )
 			return true;
@@ -665,6 +667,9 @@ void QualityMapperDialog::drawTransferFunction()
 	//building transfer function chart informations
 	if ( _transferFunction_info == 0 )
 		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), /* _transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
+	else
+		// added by MAL 23/04/08
+		_transferFunction_info->updateChartInfo( ui.transferFunctionView->width(), ui.transferFunctionView->height(), /* _transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//is necessary, initialize TF
 	if ( !_isTransferFunctionInitialized )
@@ -714,7 +719,7 @@ void QualityMapperDialog::drawTransferFunction()
 				//fetching positions of handles
 				pos1 = handle1->scenePos();
 				pos2 = handle2->scenePos();
-				//hilighting line if it touches the currently selected handle
+				//highlighting line if it touches the currently selected handle
 				if (( handle1 == _currentTfHandle ) || (handle2 == _currentTfHandle) )
 					drawingPen.setColor( channelColor.lighter() );
 				else
