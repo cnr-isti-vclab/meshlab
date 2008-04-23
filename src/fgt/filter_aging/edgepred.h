@@ -41,7 +41,7 @@ class AgingEdgePred
 			// the respects the angle predicate then all the edges of that face
 			// have to be refined
 			if(type==ANGLE && angbit!=-1 && (ep.f->IsUserBit(angbit) || 
-			  ep.f->FFp(ep.z)->IsUserBit(angbit))) 
+			  ep.f->FFp(ep.z)->IsUserBit(angbit) || (ep.f->V(ep.z)->IsV() || ep.f->V1(ep.z)->IsV()))) 
 				return lenp(ep);
 			// no special cases: normal predicate test
 			return (lenp(ep) && qaEdgeTest(ep));
@@ -50,7 +50,17 @@ class AgingEdgePred
 		// Tests angle predicate over the edge if type is angle; if type is quality 
 		// tests quality predicate but only on the first of the two vertexes of the edge
 		bool qaVertTest(face::Pos<CMeshO::FaceType> ep) const {
-			if(type == ANGLE) if(!selection || ep.f->V(ep.z)->IsS()) return testAngle(ep);
+			if(type == ANGLE) {
+				if(!selection || ep.f->V(ep.z)->IsS()) {
+					bool res = testAngle(ep);
+					for(int i=0; i<2 && !res; i++) {
+						ep.FlipV();
+						ep.FlipE();
+						res = testAngle(ep);
+					}
+					return res;
+				}
+			}
 			if(type == QUALITY) return (ep.f->V(ep.z)->Q()>thVal);
 			return false;
 		}
@@ -61,8 +71,11 @@ class AgingEdgePred
 		// use length and angle predicates to set angbit user bit over one face
 		void markFaceAngle(face::Pos<CMeshO::FaceType> ep) {
 			if(angbit == -1 || selbit == -1 || type != ANGLE) return;
-			if(lenp(ep) && testAngle(ep))
+			if(lenp(ep) && testAngle(ep)) {
 				ep.f->SetUserBit(angbit);
+				ep.f->V(ep.z)->SetV();
+				ep.f->V1(ep.z)->SetV();
+			}
 		}
 		
 		// Allocates two new user bits over the mesh faces
