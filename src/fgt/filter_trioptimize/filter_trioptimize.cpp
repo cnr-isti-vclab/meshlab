@@ -143,7 +143,8 @@ const int TriOptimizePlugin::getRequirements(QAction *action)
 			return MeshModel::MM_FACETOPO |
 			       MeshModel::MM_VERTFACETOPO | 
 			       MeshModel::MM_VERTMARK | 
-			       MeshModel::MM_BORDERFLAG;
+			       MeshModel::MM_BORDERFLAG |
+			       MeshModel::MM_CURV;
 		case FP_NEAR_LAPLACIAN_SMOOTH:
 			return MeshModel::MM_BORDERFLAG;
 	}
