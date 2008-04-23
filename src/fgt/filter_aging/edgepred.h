@@ -50,17 +50,7 @@ class AgingEdgePred
 		// Tests angle predicate over the edge if type is angle; if type is quality 
 		// tests quality predicate but only on the first of the two vertexes of the edge
 		bool qaVertTest(face::Pos<CMeshO::FaceType> ep) const {
-			if(type == ANGLE) {
-				if(!selection || ep.f->V(ep.z)->IsS()) {
-					bool res = testAngle(ep);
-					for(int i=0; i<2 && !res; i++) {
-						ep.FlipV();
-						ep.FlipE();
-						res = testAngle(ep);
-					}
-					return res;
-				}
-			}
+			if(type == ANGLE) if(!selection || ep.f->V(ep.z)->IsS()) return testAngle(ep);
 			if(type == QUALITY) return (ep.f->V(ep.z)->Q()>thVal);
 			return false;
 		}
