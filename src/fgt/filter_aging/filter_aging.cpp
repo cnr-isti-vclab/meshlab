@@ -96,7 +96,7 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 	if(m.cm.HasPerVertexQuality())
 		qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 	else
-		qRange = std::pair<float,float>(0.0, 255.0);
+		qRange = std::pair<float,float>(0.0, 0.0);
 	// styles list (short descriptions)
 	QStringList styles;
 	styles.append("Simple     (1 function) ");
@@ -105,38 +105,44 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 	
 	switch(ID(action)) {
 		case FP_ERODE:
-			params.addBool("UseQuality", m.cm.HasPerVertexQuality(), "Use per vertex quality values", 
-					"Use per vertex quality values to find the areas to erode.\n \
-					Useful after applying ambient occlusion filter.");
+			params.addBool("UseQuality", m.cm.HasPerVertexQuality() && qRange.second>qRange.first, 
+					"Use per vertex quality values", 
+					"Use per vertex quality values to find the areas to erode.\n" \
+					"Useful after applying ambient occlusion filter.");
 			params.addAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*2/3, 
-					qRange.first, qRange.second,  "Quality threshold", 
-					"When you decide to use per vertex quality values, \n \
-					this parameter represents the minimum quality value \n \
-					two vertexes must have to consider the edge they are sharing.");
-			params.addAbsPerc("AngleThreshold", 60.0, 10.0, 170.0,  "Angle threshold (deg)", 
-					"If you decide not to use per vertex quality values, \n\
-					the angle between two adjacent faces will be considered.\n \
-					This parameter represents the minimum angle between two adjacent\n \
-					faces to consider the edge they are sharing.");
+					qRange.first, qRange.second,  "Min quality threshold", 
+					"When you decide to use per vertex quality values, \n" \
+					"this parameter represents the minimum quality value \n" \
+					"two vertexes must have to consider the edge they are sharing.");
+			params.addFloat("AngleThreshold", 60.0, "Min angle threshold (deg)",
+					"If you decide not to use per vertex quality values, \n" \
+					"the angle between two adjacent faces will be considered.\n" \
+					"This parameter represents the minimum angle between two adjacent\n" \
+					"faces to consider the edge they are sharing.");
 			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0.0, 
 					m.cm.bbox.Diag()*0.5,"Edge len threshold", 
 					"The minimum length of an edge. Useful to avoid the creation of too many small faces.");
-			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.004, 0.0, m.cm.bbox.Diag()*0.1,
+			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.012, 0.0, m.cm.bbox.Diag()*0.05,
 					"Max chip depth", "The maximum depth of a chip.");
 			params.addEnum("ChipStyle", 0, styles, "Chip Style", 
-					"Mesh erosion style to use. Different styles are defined \
-					passing different parameters to the noise function \nthat generates displacement values.");
-			params.addAbsPerc("NoiseClamp", 0.0, 0.0, 1.0, "Noise clamp threshold",
-					"All the noise values smaller than this parameter will be \n\
-					considered as 0.");
+					"Mesh erosion style to use. Different styles are defined " \
+					"passing different parameters to the noise function \nthat generates displacement values.");
+			params.addAbsPerc("NoiseFreqScale", m.cm.bbox.Diag()*0.055, m.cm.bbox.Diag()*0.01,
+					m.cm.bbox.Diag()*0.1, "Noise frequency scale",
+					"Changes the noise frequency scale. This affects the distance" \
+					"between the chips and their dimensions (Linear and Sinusoidal" \
+					"styles only).");
+			params.addFloat("NoiseClamp", 0.5, "Noise clamp threshold [0..1]",
+					"All the noise values smaller than this parameter will be \n "\
+					"considered as 0.");
 			params.addFloat("DelIntersMaxIter", 8, "Max iterations to delete self intersections",
-					"When eroding the mesh sometimes may happen that a face\n \
-					 intersects another area of the mesh, generating awful \n \
-					 artefacts. To avoid this, the vertexes of that face \n \
-					 will gradually be moved back to their original positions.\n \
-					 This parameter represents the maximum number of iterations\n \
-					 that the plugin can do to try to correct these errors (0 to\n \
-					 ignore the check).");
+					"When eroding the mesh sometimes may happen that a face\n" \
+					"intersects another area of the mesh, generating awful \n" \
+					"artefacts. To avoid this, the vertexes of that face \n" \
+					"will gradually be moved back to their original positions.\n" \
+					"This parameter represents the maximum number of iterations\n" \
+					"that the plugin can do to try to correct these errors (0 to\n" \
+					"ignore the check).");
 			params.addBool("Selected", m.cm.sfn>0, "Affect only selected faces", 
 					"The aging procedure will be applied to the selected faces only.");
 			break;
@@ -156,11 +162,19 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 		return false;
 	}
 	
-	float thresholdValue = params.getAbsPerc((useQuality?"QualityThreshold":"AngleThreshold"));
+	float thresholdValue;
+	if(useQuality)
+		thresholdValue = params.getAbsPerc("QualityThreshold");
+	else {
+		thresholdValue = params.getFloat("AngleThreshold");
+		while(thresholdValue >= 360.0) thresholdValue -= 360;
+		while(thresholdValue < 0.0) thresholdValue += 360;
+	}
 	float edgeLenTreshold = params.getAbsPerc("EdgeLenThreshold");
 	float chipDepth = params.getAbsPerc("ChipDepth");
 	int chipStyle = params.getEnum("ChipStyle");
-	float noiseClamp = params.getAbsPerc("NoiseClamp");
+	float noiseFreq = params.getAbsPerc("NoiseFreqScale");
+	float noiseClamp = params.getFloat("NoiseClamp");
 	float intersMaxIter = params.getFloat("DelIntersMaxIter");
 	bool selected = params.getBool("Selected");
 	
@@ -179,10 +193,14 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	switch(ID(filter)) {
 		case FP_ERODE:
 			// refine needed edges
-			RefineMesh(m.cm, ep, selected, cb);
+			refineMesh(m.cm, ep, selected, cb);
 			
 			// vertexes along selection border will not be displaced 
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+			
+			// clear vertexes V bit (will be used to mark the vertexes as displaced) 
+			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
+				(*vi).ClearV();
 			
 			// displace vertexes
 			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
@@ -190,25 +208,23 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 				if((*fi).IsD()) continue;
 				for(int j=0; j<3; j++) {
 					if(ep.qaVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  && 
-					  (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) { 
+					  !(*fi).V(j)->IsV() &&
+					  (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
 						double noise;							// noise value
 						Point3<CVertexO::ScalarType> dispDir;	// displacement direction
 						float angleFactor;		// angle multiply factor in [0,1] range
 												// (greater angle -> deeper chip)
 						
-						noise = generateNoiseValue(chipStyle, (*fi).V(j)->P().X(), (*fi).V(j)->P().Y(), (*fi).V(j)->P().Z());
+						noise = generateNoiseValue(chipStyle, noiseFreq, (*fi).V(j)->P().X(), (*fi).V(j)->P().Y(), (*fi).V(j)->P().Z());
 						// only values bigger than noiseClamp will be considered
 						noise = (noise<noiseClamp?0.0:noise);
 						
 						if((*fi).IsB(j)) {
 							dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
-							angleFactor = 1.0;
+							angleFactor = 0.25;
 						}
 						else {
-							if(useQuality)
-								dispDir = Point3<CVertexO::ScalarType>(((*fi).N() + (*fi).FFp(j)->N()).Normalize());
-							else
-								dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
+							dispDir = Point3<CVertexO::ScalarType>(((*fi).N() + (*fi).FFp(j)->N()).Normalize());
 							angleFactor = (sin(vcg::Angle((*fi).N(), (*fi).FFp(j)->N()))/2 + 0.5);
 						}
 						
@@ -217,6 +233,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 						if(displaced.find((*fi).V(j)) == displaced.end())
 							displaced.insert(std::pair<CVertexO*, Point3<CVertexO::ScalarType> >((*fi).V(j), (*fi).V(j)->P()));
 						(*fi).V(j)->P() += offset;
+						// mark as visited (displaced)
+						(*fi).V(j)->SetV();
 					}
 				}
 			}
@@ -246,6 +264,10 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			
+			// clear vertexes V bit again
+			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
+				(*vi).ClearV();
+			
 			return true;
 		default:
 			assert(0);
@@ -257,7 +279,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
  * In two cases we need to perform additional checks to avoid problems.
  * The first one is when we are working on the selection with a quality predicate 
  * while the second one is when we are working with an angle predicate. */
-void GeometryAgingPlugin::RefineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb)
+void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb)
 {
 	bool ref = true;
 	CMeshO::FaceIterator fi;
@@ -270,6 +292,10 @@ void GeometryAgingPlugin::RefineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 		(*fi).ClearUserBit(ep.selbit);
 		(*fi).ClearUserBit(ep.angbit);
 	}
+	
+	// clear vertexes V bit
+	for(CMeshO::VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); vi++)
+		(*vi).ClearV();
 	
 	while(ref) {
 		if(selection) {
@@ -309,7 +335,7 @@ void GeometryAgingPlugin::RefineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 
 
 /* Returns a noise value in range [0,1] using the selected style */
-double GeometryAgingPlugin::generateNoiseValue(int style, const CVertexO::ScalarType &x, 
+double GeometryAgingPlugin::generateNoiseValue(int style, float freqScale, const CVertexO::ScalarType &x, 
 											const CVertexO::ScalarType &y, const CVertexO::ScalarType &z)
 {
 	double noise = .0;
@@ -321,7 +347,7 @@ double GeometryAgingPlugin::generateNoiseValue(int style, const CVertexO::Scalar
 		case LINEAR:
 		case SINUSOIDAL:
 			for(int i=0; i<8; i++) {
-				float p = pow(2.0f, i);
+				float p = pow(freqScale, i);
 				double tmp = math::Perlin::Noise(p*x, p*y, p*z) / p;
 				tmp *= (tmp>=0.0?1.0:-1.0);
 				noise += tmp;
