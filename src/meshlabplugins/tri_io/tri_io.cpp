@@ -29,8 +29,7 @@
 
 #include "tri_io.h"
 
-#include <wrap/io_trimesh/export_smf.h>
-#include <wrap/io_trimesh/import_smf.h>
+#include <wrap/io_trimesh/import_asc.h>
 #include <wrap/io_trimesh/export.h>
 
 #include <QMessageBox>
@@ -42,24 +41,25 @@ bool parseTRI(const std::string &filename, CMeshO &m);
 
 bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
 {
-	mask |= MeshModel::IOM_WEDGTEXCOORD;
-	m.Enable(mask);
-	
-	bool result = parseTRI(qPrintable(fileName), m.cm);
-	return true;
+	bool result;
+	if(formatName.toUpper() == tr("TRI"))
+		{
+			mask |= MeshModel::IOM_WEDGTEXCOORD;
+			m.Enable(mask);			
+			result = parseTRI(qPrintable(fileName), m.cm);
+		}
+	if(formatName.toUpper() == tr("ASC"))
+		{
+		tri::io::ImporterASC<CMeshO>::Open(m.cm, qPrintable(fileName),cb);
+		return true;
+		}
+	return result;
 }
 
 bool TriIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
 {
-	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-
-	int result = vcg::tri::io::ExporterSMF<CMeshO>::Save(m.cm,qPrintable(fileName),mask);
-	if(result!=0)
-	{
-		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
-		return false;
-	}
-	return true;
+	assert(0);
+	return false;
 }
 
 /*
@@ -68,7 +68,9 @@ bool TriIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 QList<MeshIOInterface::Format> TriIOPlugin::importFormats() const
 {
 	QList<Format> formatList;
-	formatList << Format("Simple Model Format", tr("TRI"));
+	formatList 
+		<< Format("TRI (photogrammetric reconstructions)", tr("TRI")) 
+	  << Format("ASC (ascii triplets of points)", tr("ASC"));
 	return formatList;
 }
 
@@ -78,7 +80,6 @@ QList<MeshIOInterface::Format> TriIOPlugin::importFormats() const
 QList<MeshIOInterface::Format> TriIOPlugin::exportFormats() const
 {
 	QList<Format> formatList;
-	formatList << Format("Simple Model Format"	,tr("TRI"));
 	return formatList;
 }
 
@@ -96,7 +97,7 @@ const PluginInfo &TriIOPlugin::Info()
 {
 	static PluginInfo ai;
 	ai.Date=tr("Feb 2008");
-	ai.Version = tr("0.1");
+	ai.Version = tr("0.2");
 	ai.Author = ("Paolo Cignoni");
 	return ai;
  }
