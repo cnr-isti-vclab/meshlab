@@ -201,7 +201,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			
 			// clear vertexes V bit (will be used to mark the vertexes as displaced) 
 			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
-				(*vi).ClearV();
+				if(!(*vi).IsD()) (*vi).ClearV();
 			
 			// displace vertexes
 			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
@@ -247,7 +247,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			if(!displaced.empty()) {
 				DispMap::iterator it;
 				for(int t=0; t<intersMaxIter; t++) {
-					intersFace.clear();
+					//intersFace.clear();
 					if(cb) (*cb)((int)((t/intersMaxIter)*100), "Deleting mesh intersections...");
 					tri::Clean<CMeshO>::SelfIntersections(m.cm, intersFace);
 					if(intersFace.empty()) break;
@@ -261,13 +261,13 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 					}
 				}
 				if(cb) (*cb)(100, "Deleting mesh intersections...");
+				
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			}
-			
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			
 			// clear vertexes V bit again
 			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
-				(*vi).ClearV();
+				if(!(*vi).IsD()) (*vi).ClearV();
 			
 			return true;
 		default:
@@ -296,7 +296,7 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 	
 	// clear vertexes V bit
 	for(CMeshO::VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); vi++)
-		(*vi).ClearV();
+		if(!(*vi).IsD()) (*vi).ClearV();
 	
 	while(ref) {
 		if(selection) {
@@ -315,7 +315,7 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 						ep.markFaceAngle(face::Pos<CMeshO::FaceType>(&*fi,j));
 		
 		ref = RefineE<CMeshO, MidPoint<CMeshO>, AgingEdgePred>(m, MidPoint<CMeshO>(), ep, selection, cb);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
+		if(ref) vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
 		
 		if(selection) {
 			// erode selection
