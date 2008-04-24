@@ -77,41 +77,31 @@ protected:
 	{
 		CurvData res;
 		
-		float ang0 = math::Abs(Angle(v1->P() - v0->P(), v2->P() - v0->P() ));
-		float ang1 = math::Abs(Angle(v0->P() - v1->P(), v2->P() - v1->P() ));
-		float ang2 = M_PI - (ang0 + ang1);
+		float ang0 = math::Abs(Angle(v1->P() - v0->P(), v2->P() - v0->P()));
+		float ang1 = math::Abs(Angle(v0->P() - v1->P(), v2->P() - v1->P()));
+		float ang2 = M_PI - ang0 - ang1;
 		
 		float s01 = SquaredDistance(v1->P(), v0->P());
 		float s02 = SquaredDistance(v2->P(), v0->P());
 		
-		// voronoi cell of vertex i
-		if ((ang0 < M_PI/2) && (ang1 < M_PI/2) && (ang2 < M_PI/2)) // non obctuse
-			res.A += (s02 * (0.125 / tan(ang1)) + s01 * (0.125 / tan(ang2) ));
-		else {
-			VertexPointer obctvert;
-			
-			if(ang0 >= M_PI/2) obctvert = v0;
-			else if(ang1 >= M_PI/2) obctvert = v1;
-			else if(ang2 >= M_PI/2) obctvert = v2;
-			
-			// obctuse
-			if(obctvert == v0) {
-				TriangleType triangle(v0->P(), v1->P(), v2->P());
-				res.A += (0.5f * DoubleArea(triangle) -
-				         (s01 * 0.125 * tan(ang1) + s02 * 0.125 * tan(ang2)) );
-			}
-			else {
-				float e = SquaredDistance(v0->P(), obctvert->P());
-				res.A += (e * 0.125 * tan(ang0));
-			}
-		}
+		// voronoi cell of vertex
+		if (ang0 >= M_PI/2) {
+			TriangleType triangle(v0->P(), v1->P(), v2->P());
+			res.A += (0.5f * DoubleArea(triangle) -
+					(s01 * tan(ang1) + s02 * tan(ang2)) / 8.0 );
+		} else if (ang1 >= M_PI/2)
+			res.A += (s01 * tan(ang0)) / 8.0;
+		else if (ang2 >= M_PI/2)
+			res.A += (s02 * tan(ang0) / 8.0);
+		else // non obctuse triangle
+			res.A += ((s02 / tan(ang1)) + (s01 / tan(ang2))) / 8.0;
 		
 		res.K += ang0;
 		
 		ang1 = math::Abs(Angle(fNormal, v1->N()));
 		ang2 = math::Abs(Angle(fNormal, v2->N()));
-		res.H += ( (Distance(v0->P(), v1->P()) / 2.0) * ang1 + 
-				   (Distance(v0->P(), v2->P()) / 2.0) * ang2 );
+		res.H += ( (math::Sqrt(s01) / 2.0) * ang1 + 
+				   (math::Sqrt(s02) / 2.0) * ang2 );
 		
 		return res;
 	}
@@ -159,16 +149,12 @@ public:
 	// temporary empty (flip is already done in constructor)
 	void Execute(TRIMESH_TYPE& m)
 	{
-		VertexPointer v0, v1, v2, v3;
 		int i = this->_pos.E();
 		FacePointer f1 = this->_pos.F();
 		int j = f1->FFi(i);
 		FacePointer f2 = f1->FFp(i);
-		
-		v0 = f1->V0(i);
-		v1 = f1->V1(i);
-		v2 = f1->V2(i);
-		v3 = f2->V2(j);
+		VertexPointer v0 = f1->V0(i), v1 = f1->V1(i),
+		              v2 = f1->V2(i), v3 = f2->V2(j);
 		
 		// save precomputed curvature in vertex quality
 		v0->Q() = _cv0;

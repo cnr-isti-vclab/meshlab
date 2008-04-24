@@ -143,8 +143,7 @@ const int TriOptimizePlugin::getRequirements(QAction *action)
 			return MeshModel::MM_FACETOPO |
 			       MeshModel::MM_VERTFACETOPO | 
 			       MeshModel::MM_VERTMARK | 
-			       MeshModel::MM_BORDERFLAG |
-			       MeshModel::MM_CURV;
+			       MeshModel::MM_BORDERFLAG;
 		case FP_NEAR_LAPLACIAN_SMOOTH:
 			return MeshModel::MM_BORDERFLAG;
 	}
@@ -195,11 +194,11 @@ const TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(QAction *action
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &/*m*/,
+void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m,
                                          FilterParameterSet & parlst)
 {
 	if (ID(action) == FP_EDGE_FLIP) {
-		parlst.addBool("selection", false, tr("Update selection"),
+		parlst.addBool("selection", m.cm.sfn > 0, tr("Update selection"),
 				tr("Apply edge flip optimization on selected faces only"));
 		
 		parlst.addBool("cflips", true, tr("Curvature flips"),
@@ -283,8 +282,6 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		
-		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
 		
 		vcg::LocalOptimization<CMeshO> optimiz(m.cm);
 		float pthr = par.getAbsPerc("pthreshold");
