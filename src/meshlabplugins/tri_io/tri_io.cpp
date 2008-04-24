@@ -46,7 +46,7 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		{
 			mask |= MeshModel::IOM_WEDGTEXCOORD;
 			m.Enable(mask);			
-			result = parseTRI(qPrintable(fileName), m.cm);
+			return parseTRI(qPrintable(fileName), m.cm);
 		}
 	if(formatName.toUpper() == tr("ASC"))
 		{
@@ -250,16 +250,17 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 			QStringList numList = infoPNG.split(" ", QString::SkipEmptyParts);
 			qDebug("Found %i numbers for %i faces",numList.size(),numFaces);
 			for (int i = 0; i < numFaces ; ++i) 
-			{
-				for(int j=0;j<3;++j)
-				{
-					float s=(numList.at(i*6+j*2+0).toInt())/float(texturePNG.width());
-					float t=(numList.at(i*6+j*2+1).toInt())/float(texturePNG.height());
-					m.face[i].WT(j).U()=s;				
-					m.face[i].WT(j).V()=1.0-t;				
-					m.face[i].WT(j).N()=0;
-				}
-			}
+						{
+							for(int j=0;j<3;++j)
+									{
+										float s=(numList.at(i*6+j*2+0).toInt())/float(texturePNG.width());
+										float t=(numList.at(i*6+j*2+1).toInt())/float(texturePNG.height());
+										m.face[i].WT(j).U()=s;				
+										m.face[i].WT(j).V()=1.0-t;				
+										m.face[i].WT(j).N()=0;
+									}
+						}
+			return true;
 		}
 	}
 
