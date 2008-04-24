@@ -282,14 +282,14 @@ void QualityMapperDialog::drawChartBasics(QGraphicsScene& scene, CHART_INFO *cha
 
 	//drawing axis
 	//x axis
-	current_item = scene.addLine( chart_info->leftBorder, chart_info->lowerBorder, chart_info->rightBorder, chart_info->lowerBorder, p );
+	current_item = scene.addLine( chart_info->leftBorder(), chart_info->lowerBorder(), chart_info->rightBorder(), chart_info->lowerBorder(), p );
 	current_item->setZValue( 0 );
 	if (chart_info == _transferFunction_info)
 		_transferFunctionLines << current_item;
 	else
 		_equalizerHistogramBars << current_item;
 	//y axis
-	current_item = scene.addLine( chart_info->leftBorder, chart_info->upperBorder, chart_info->leftBorder, chart_info->lowerBorder, p );
+	current_item = scene.addLine( chart_info->leftBorder(), chart_info->upperBorder(), chart_info->leftBorder(), chart_info->lowerBorder(), p );
 	current_item->setZValue( 0 );
 	if (chart_info == _transferFunction_info)
 		_transferFunctionLines << current_item;
@@ -316,13 +316,13 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	//DRAWING HANDLES
 	QDoubleSpinBox* spinboxes[] = { ui.minSpinBox, ui.midSpinBox, ui.maxSpinBox };
 
-	qreal xStart = _histogram_info->leftBorder;
+	qreal xStart = _histogram_info->leftBorder();
 	qreal xPos = 0.0f;
-	qreal yPos = _histogram_info->lowerBorder;
+	qreal yPos = _histogram_info->lowerBorder();
 	_equalizerMidHandlePercentilePosition = 0.5f;
 	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
 	{
-		xPos = xStart + _histogram_info->chartWidth/2.0f*i;
+		xPos = xStart + _histogram_info->chartWidth()/2.0f*i;
 		_equalizerHandles[i] = new EqHandle(_histogram_info, Qt::black, QPointF(xPos, yPos), 
 											(EQUALIZER_HANDLE_TYPE)i, _equalizerHandles, &_equalizerMidHandlePercentilePosition, spinboxes[i], 
 											1, 5);
@@ -387,7 +387,7 @@ bool QualityMapperDialog::initEqualizerHistogram()
 
 void QualityMapperDialog::initEqualizerSpinboxes()
 {
-	double singleStep = (_histogram_info->maxX - _histogram_info->minX) / _histogram_info->chartWidth;
+	double singleStep = (_histogram_info->maxX - _histogram_info->minX) / _histogram_info->chartWidth();
 	int decimals = 0;
 	if (singleStep > std::numeric_limits<float>::epsilon())
 	{	
@@ -436,12 +436,12 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 			return false;
 		}
 		//building histogram chart informations
-		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV()) );
+		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV()) );
 	}
 	else
 	{
 		//added by MAL 23/04/08
-		_transferFunction_info->updateChartInfo( ui.equalizerGraphicsView->width(), ui.equalizerGraphicsView->height(), _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV()) );
+		_transferFunction_info->updateChartInfo(_equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV()) );
 
 		// if histogram doesn't need to be redrawn, return
 		if ( (leftHandleIsInsideHistogram && _leftHandleWasInsideHistogram) && (rightHandleIsInsideHistogram && _rightHandleWasInsideHistogram) )
@@ -496,7 +496,7 @@ int QualityMapperDialog::computeEqualizerMaxY (Histogramf *h, float minX, float 
 void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, CHART_INFO *chartInfo, float minVal, float maxVal, QColor color)
 {
 	float barHeight = 0.0f;	//initializing height of the histogram bars
-	float barWidth  = chartInfo->chartWidth / (float)(NUMBER_OF_HISTOGRAM_BARS);	//processing width of the histogram bars 
+	float barWidth  = chartInfo->chartWidth() / (float)(NUMBER_OF_HISTOGRAM_BARS);	//processing width of the histogram bars 
 
 	// exp is such that: _equalizerMidHandlePercentilePosition^exp = 0.5
 	float exp = log10(0.5f) / log10((float)_equalizerMidHandlePercentilePosition);
@@ -511,22 +511,22 @@ void QualityMapperDialog::drawHistogramBars (QGraphicsScene& destinationScene, C
 	for (int i = 0; i < NUMBER_OF_HISTOGRAM_BARS; i++)
 	{
 		// Setting barHeight proportional to max height
-		barHeight = (float)(chartInfo->chartHeight * _equalizer_histogram->BinCount( minVal+i*barRange, barRange) ) / (float)chartInfo->maxY;
+		barHeight = (float)(chartInfo->chartHeight() * _equalizer_histogram->BinCount( minVal+i*barRange, barRange) ) / (float)chartInfo->maxY;
 		
-		startBarPt.setY( (float)chartInfo->lowerBorder - barHeight );
+		startBarPt.setY( (float)chartInfo->lowerBorder() - barHeight );
 
 		//drawing histogram bar
 		if ( &destinationScene == &_transferFunctionScene )
 		{
 			// Histogram bars positions are calculted applying an exponential function: relIndex^exp
-			startBarPt.setX( chartInfo->leftBorder + relative2AbsoluteValf(pow( absolute2RelativeValf(i,NUMBER_OF_HISTOGRAM_BARS ), exp ), chartInfo->chartWidth) );
-			current_item = destinationScene.addLine(startBarPt.x(), startBarPt.y(), startBarPt.x(), (float)chartInfo->lowerBorder, drawingPen);
+			startBarPt.setX( chartInfo->leftBorder() + relative2AbsoluteValf(pow( absolute2RelativeValf(i,NUMBER_OF_HISTOGRAM_BARS ), exp ), chartInfo->chartWidth()) );
+			current_item = destinationScene.addLine(startBarPt.x(), startBarPt.y(), startBarPt.x(), (float)chartInfo->lowerBorder(), drawingPen);
 			_transferFunctionBg << current_item;
 		}
 		else // ( &destinationScene == &_equalizerHistogramScene )
 		{
 			// histogram bars are added all at same distance
-			startBarPt.setX( chartInfo->leftBorder + ( barWidth * (i) ) );
+			startBarPt.setX( chartInfo->leftBorder() + ( barWidth * (i) ) );
 			current_item = destinationScene.addRect(startBarPt.x(), startBarPt.y(), barWidth, barHeight, drawingPen, drawingBrush);
 			_equalizerHistogramBars << current_item;
 		}
@@ -574,7 +574,7 @@ void QualityMapperDialog::initTF()
 
 	//building transfer function chart informations (if necessary)
 	if ( _transferFunction_info == 0 )
-		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), /*_transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
+		_transferFunction_info = new CHART_INFO( ui.transferFunctionView, /*_transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//removing and deleting any old TF graphics item (TF lines and handles)
 	this->clearItems( REMOVE_TF_ALL | DELETE_REMOVED_ITEMS );
@@ -598,7 +598,7 @@ void QualityMapperDialog::initTF()
 		{
 			val = _transferFunction->getChannel(c)[i];
 			this->addTfHandle( c,
-							   QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight )), 
+							   QPointF(_transferFunction_info->leftBorder() + relative2AbsoluteValf( val->x, (float)_transferFunction_info->chartWidth() ), _transferFunction_info->lowerBorder() - relative2AbsoluteValf( val->y, (float)_transferFunction_info->chartHeight() )), 
 							   val,
 							   zValue );
 		}
@@ -666,10 +666,10 @@ void QualityMapperDialog::drawTransferFunction()
 
 	//building transfer function chart informations
 	if ( _transferFunction_info == 0 )
-		_transferFunction_info = new CHART_INFO( ui.transferFunctionView->width(), ui.transferFunctionView->height(), /* _transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
+		_transferFunction_info = new CHART_INFO( ui.transferFunctionView, /* _transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
 	else
 		// added by MAL 23/04/08
-		_transferFunction_info->updateChartInfo( ui.transferFunctionView->width(), ui.transferFunctionView->height(), /* _transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
+		_transferFunction_info->updateChartInfo( /* _transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
 
 	//is necessary, initialize TF
 	if ( !_isTransferFunctionInitialized )
@@ -1026,7 +1026,7 @@ void QualityMapperDialog::manageBorderTfHandles(TFHandle *handle)
 				newKey = new TF_KEY(0.0f, handle->getRelativeY());
 				_transferFunction->getChannel(handle->getChannel()).addKey(newKey);
 				this->addTfHandle( handle->getChannel(),
-					QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( handle->getRelativeY(), (float)_transferFunction_info->chartHeight )), 
+					QPointF(_transferFunction_info->leftBorder() + relative2AbsoluteValf( 0.0f, (float)_transferFunction_info->chartWidth() ), _transferFunction_info->lowerBorder() - relative2AbsoluteValf( handle->getRelativeY(), (float)_transferFunction_info->chartHeight() )), 
 					newKey,
 					((handle->getChannel() + 1)*2.0f) + 1 );
 			}
@@ -1044,7 +1044,7 @@ void QualityMapperDialog::manageBorderTfHandles(TFHandle *handle)
 				newKey = new TF_KEY(1.0f, handle->getRelativeY());
 				_transferFunction->getChannel(handle->getChannel()).addKey(newKey);
 				this->addTfHandle( handle->getChannel(),
-					QPointF(_transferFunction_info->leftBorder + relative2AbsoluteValf( 1.0f, (float)_transferFunction_info->chartWidth ), _transferFunction_info->lowerBorder - relative2AbsoluteValf( handle->getRelativeY(), (float)_transferFunction_info->chartHeight )), 
+					QPointF(_transferFunction_info->leftBorder() + relative2AbsoluteValf( 1.0f, (float)_transferFunction_info->chartWidth() ), _transferFunction_info->lowerBorder() - relative2AbsoluteValf( handle->getRelativeY(), (float)_transferFunction_info->chartHeight() )), 
 					newKey,
 					((handle->getChannel() + 1)*2.0f) + 1);
 			}
@@ -1129,7 +1129,7 @@ void QualityMapperDialog::on_xSpinBox_valueChanged(double newX)
 	if (_currentTfHandle)
 	{
 		//updating handle position in the scene
-		_currentTfHandle->setPos(_transferFunction_info->leftBorder+relative2AbsoluteValf(newX,_transferFunction_info->chartWidth), _currentTfHandle->scenePos().y());
+		_currentTfHandle->setPos(_transferFunction_info->leftBorder()+relative2AbsoluteValf(newX,_transferFunction_info->chartWidth()), _currentTfHandle->scenePos().y());
 		//updating the Tf Handle position at logical level (update of joined TF_KEY)
 		_currentTfHandle->updateTfHandlesState(_currentTfHandle->scenePos());
 		this->manageBorderTfHandles(_currentTfHandle);
@@ -1152,7 +1152,7 @@ void QualityMapperDialog::on_ySpinBox_valueChanged(double newY)
 	if (_currentTfHandle)
 	{
 		//updating handle position in the scene
-		_currentTfHandle->setPos(_currentTfHandle->scenePos().x(), _transferFunction_info->chartHeight+_transferFunction_info->upperBorder-relative2AbsoluteValf(newY,_transferFunction_info->chartHeight));
+		_currentTfHandle->setPos(_currentTfHandle->scenePos().x(), _transferFunction_info->chartHeight()+_transferFunction_info->upperBorder()-relative2AbsoluteValf(newY,_transferFunction_info->chartHeight()));
 		//updating the Tf Handle position at logical level (update of joined TF_KEY)
 		_currentTfHandle->updateTfHandlesState(_currentTfHandle->scenePos());
 		//restoring the correct order for TfHandles (they're drawn in the same order as they're stored)
@@ -1277,10 +1277,10 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 	//let's use the more ahead channel in TF
 		channelCode = _transferFunction->getFirstPlaneChanel();
 
-	float xPos = pos.x() - _transferFunction_info->leftBorder;
-	float yPos = pos.y() - _transferFunction_info->upperBorder;
-	TF_KEY *val = new TF_KEY(absolute2RelativeValf(xPos, _transferFunction_info->chartWidth),
-							 absolute2RelativeValf(yPos, _transferFunction_info->chartHeight));
+	float xPos = pos.x() - _transferFunction_info->leftBorder();
+	float yPos = pos.y() - _transferFunction_info->upperBorder();
+	TF_KEY *val = new TF_KEY(absolute2RelativeValf(xPos, _transferFunction_info->chartWidth()),
+							 absolute2RelativeValf(yPos, _transferFunction_info->chartHeight()));
 	_transferFunction->getChannel(channelCode).addKey(val);
 	TFHandle *newHandle = this->addTfHandle(channelCode, pos, val, ((channelCode + 1)*2.0f) + 1 );
 

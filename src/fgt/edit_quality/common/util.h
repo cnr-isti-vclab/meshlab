@@ -32,8 +32,8 @@ FIRST RELEASE
 
 #include "const_types.h"
 
-
 #include <cassert>
+#include<QGraphicsView>
 
 //these functions return a relative-absolute value conversion respectively in float and int (rounded to closer integer value)
 float relative2AbsoluteValf(float relative_val, float max_val);
@@ -50,45 +50,37 @@ float relative2QualityValf(float relative_val, float min_q, float max_q, float e
 //It stores info about borders, size and so on...
 struct CHART_INFO
 {
-	float leftBorder;
-	float rightBorder;
-	float upperBorder;
-	float lowerBorder;
-	float chartWidth;
-	float chartHeight;
+	QGraphicsView *qgv;
+	inline float leftBorder() { return qgv->width() - CANVAS_BORDER_DISTANCE; } 
+	inline float rightBorder()      { return  CANVAS_BORDER_DISTANCE; } 
+	inline float upperBorder()  { return  CANVAS_BORDER_DISTANCE; } 
+	inline float lowerBorder() 		 { return qgv->height() - CANVAS_BORDER_DISTANCE; } 
+	inline float chartWidth() 		{ return   rightBorder() - leftBorder(); }
+	inline float chartHeight()  { return  lowerBorder() - upperBorder(); }
 	int	numOfItems;
 	int	yScaleStep;
+	inline float dX() {return chartWidth() / (float)numOfItems; }
+	inline float dY() {return chartHeight() / (float)numOfItems; }
+
 	float minX;
 	float maxX;
 	float minY;
 	float maxY;
-	float dX;
-	float dY;
 
-	CHART_INFO( int view_width=0, int view_height=0, float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
+	CHART_INFO(QGraphicsView *_qgv,float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
 	{
-		this->updateChartInfo(view_width, view_height, min_X, max_X, min_Y, max_Y);
+		qgv=_qgv;
+		this->updateChartInfo( min_X, max_X, min_Y, max_Y);
 	}
 	
-	void updateChartInfo( int view_width=0, int view_height=0, float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
+	void updateChartInfo( float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
 	{
-		assert(numOfItems != 0);
-
-		leftBorder	= CANVAS_BORDER_DISTANCE;
-		rightBorder	= view_width - CANVAS_BORDER_DISTANCE;
-		upperBorder	= CANVAS_BORDER_DISTANCE;
-		lowerBorder	= view_height - CANVAS_BORDER_DISTANCE;
-		chartWidth = rightBorder - leftBorder;
-		chartHeight = lowerBorder - upperBorder;
 		numOfItems = NUMBER_OF_HISTOGRAM_BARS;
 		yScaleStep = Y_SCALE_STEP;
 		minX = min_X;
 		maxX = max_X;
 		minY = min_Y;
 		maxY = max_Y;
-		
-		dX = chartWidth / (float)numOfItems;
-		dY = chartHeight / (float)numOfItems;
 	}
 };
 

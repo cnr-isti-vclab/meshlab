@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>504</width>
-    <height>704</height>
+    <width>644</width>
+    <height>674</height>
    </rect>
   </property>
   <property name="font" >
@@ -36,12 +36,6 @@
       <layout class="QVBoxLayout" >
        <item>
         <widget class="QGroupBox" name="transferFunctionGroupBox" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="MinimumExpanding" hsizetype="MinimumExpanding" >
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="title" >
           <string>Transfer Function</string>
          </property>
@@ -50,24 +44,6 @@
            <layout class="QVBoxLayout" >
             <item>
              <widget class="QGraphicsView" name="transferFunctionView" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
-                <horstretch>2</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize" >
-               <size>
-                <width>100</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>800</width>
-                <height>16777215</height>
-               </size>
-              </property>
               <property name="autoFillBackground" >
                <bool>true</bool>
               </property>
@@ -89,19 +65,13 @@
              <widget class="QLabel" name="colorbandLabel" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Preferred" hsizetype="Ignored" >
-                <horstretch>2</horstretch>
+                <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="minimumSize" >
                <size>
-                <width>100</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>512</width>
+                <width>0</width>
                 <height>20</height>
                </size>
               </property>
@@ -353,18 +323,6 @@
            <layout class="QVBoxLayout" >
             <item>
              <widget class="QGraphicsView" name="equalizerGraphicsView" >
-              <property name="minimumSize" >
-               <size>
-                <width>100</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>16777215</width>
-                <height>2000</height>
-               </size>
-              </property>
               <property name="autoFillBackground" >
                <bool>true</bool>
               </property>
@@ -385,6 +343,9 @@
               </property>
               <property name="dragMode" >
                <enum>QGraphicsView::NoDrag</enum>
+              </property>
+              <property name="viewportUpdateMode" >
+               <enum>QGraphicsView::SmartViewportUpdate</enum>
               </property>
              </widget>
             </item>
@@ -520,19 +481,7 @@
               <property name="title" >
                <string>Gamma Correction</string>
               </property>
-              <layout class="QVBoxLayout" >
-               <property name="leftMargin" >
-                <number>5</number>
-               </property>
-               <property name="topMargin" >
-                <number>5</number>
-               </property>
-               <property name="rightMargin" >
-                <number>5</number>
-               </property>
-               <property name="bottomMargin" >
-                <number>5</number>
-               </property>
+              <layout class="QHBoxLayout" >
                <item>
                 <widget class="QLabel" name="gammaCorrectionLabel" >
                  <property name="minimumSize" >
@@ -551,6 +500,19 @@
                   <string>gama correction view</string>
                  </property>
                 </widget>
+               </item>
+               <item>
+                <spacer>
+                 <property name="orientation" >
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" >
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </widget>

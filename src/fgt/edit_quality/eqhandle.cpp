@@ -36,7 +36,7 @@ EqHandle::EqHandle(CHART_INFO *environment_info, QColor color, QPointF position,
 {
 	setSize(size);
 	_type = type;
-	_barHeight = environment_info->chartHeight;
+	_barHeight = environment_info->chartHeight();
 
 	_handlesPointer = handles;
 	_midHandlePercentilePosition = midHandlePercentilePosition;
@@ -213,14 +213,14 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 			_handlesPointer[MID_HANDLE]->_spinBoxPointer->setMinimum(spinBoxValue);
 
 			// if left handle is "inside" histogram
-			if ( newHandleX >= _chartInfo->leftBorder )
+			if ( newHandleX >= _chartInfo->leftBorder() )
 			{
 				setPos(newHandleX, pos().y());
 				emit insideHistogram(this,true); // for redrawing equalizerHistogram bars, if needed
 			}
 			else
 			{
-				setPos(_chartInfo->leftBorder, pos().y());
+				setPos(_chartInfo->leftBorder(), pos().y());
 				emit insideHistogram(this,false);
 			}
 
@@ -237,14 +237,14 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 			_handlesPointer[MID_HANDLE]->_spinBoxPointer->setMaximum(spinBoxValue);
 
 			// if right handle is "inside" histogram
-			if ( newHandleX <= _chartInfo->rightBorder )
+			if ( newHandleX <= _chartInfo->rightBorder() )
 			{
 				setPos(newHandleX, pos().y());
 				emit insideHistogram(this,true); // invalidates equalizerHistogram scene
 			}
 			else
 			{
-				setPos(_chartInfo->rightBorder, pos().y());
+				setPos(_chartInfo->rightBorder(), pos().y());
 				emit insideHistogram(this,false);
 			}
 

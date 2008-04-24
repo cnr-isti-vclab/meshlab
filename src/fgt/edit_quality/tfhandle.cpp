@@ -88,8 +88,8 @@ void TFHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	newPos.setY(newPos.y()-(_size/2.0f));
 
 	//the handle can be moved only INSIDE the TF scene
-	if (( newPos.x() >= _chartInfo->leftBorder ) && ( newPos.x() <= _chartInfo->rightBorder ) &&
-		( newPos.y() >= _chartInfo->upperBorder ) && ( newPos.y() <= _chartInfo->lowerBorder ))
+	if (( newPos.x() >= _chartInfo->leftBorder() ) && ( newPos.x() <= _chartInfo->rightBorder() ) &&
+		( newPos.y() >= _chartInfo->upperBorder() ) && ( newPos.y() <= _chartInfo->lowerBorder() ))
 	{
 		//updating new position in the scene
 		this->setPos(newPos);
@@ -106,8 +106,8 @@ void TFHandle::updateTfHandlesState(QPointF newPos)
 {
 	assert(_tf != 0);
 	//updating the position at logical state
-	_myKey->x = absolute2RelativeValf( newPos.x()-_chartInfo->leftBorder, _chartInfo->chartWidth );
-	_myKey->y = 1.0f-absolute2RelativeValf( newPos.y()-_chartInfo->upperBorder, _chartInfo->chartHeight );
+	_myKey->x = absolute2RelativeValf( newPos.x()-_chartInfo->leftBorder(), _chartInfo->chartWidth() );
+	_myKey->y = 1.0f-absolute2RelativeValf( newPos.y()-_chartInfo->upperBorder(), _chartInfo->chartHeight() );
 
 	//key changed... restoring correct order
 	(*_tf)[this->getChannel()].updateKeysOrder();

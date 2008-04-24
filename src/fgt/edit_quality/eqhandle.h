@@ -83,7 +83,7 @@ private:
 	// computes quality from handle absolute position
 	qreal positionToQuality(qreal newHandleX)
 	{
-		qreal percentagePos = (newHandleX-_chartInfo->leftBorder) / _chartInfo->chartWidth;
+		qreal percentagePos = (newHandleX-_chartInfo->leftBorder()) / _chartInfo->chartWidth();
 		// assert( (percentagePos>=-1.0f) && (percentagePos<=2.0f) );
 		float maxX = (_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value() > _chartInfo->maxX)?_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value():_chartInfo->maxX;
 		float minX = (_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value()  < _chartInfo->minX)?_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value() :_chartInfo->minX;
@@ -94,7 +94,7 @@ private:
 	qreal qualityToPosition(float quality, float minQ, float maxQ)
 	{
 		qreal percentageValue = (quality -  minQ) / (maxQ - minQ);
-		return percentageValue * _chartInfo->chartWidth + _chartInfo->leftBorder;
+		return percentageValue * _chartInfo->chartWidth() + _chartInfo->leftBorder();
 	};
 
 signals:

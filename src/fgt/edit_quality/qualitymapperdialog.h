@@ -80,10 +80,10 @@ public:
 	{
 		assert(environmentInfo);
 		//setting graphics
-		_boundingRect.setX(_environmentInfo->leftBorder);
-		_boundingRect.setY(_environmentInfo->upperBorder);
-		_boundingRect.setWidth(_environmentInfo->chartWidth);
-		_boundingRect.setHeight(_environmentInfo->chartHeight);
+		_boundingRect.setX(_environmentInfo->leftBorder());
+		_boundingRect.setY(_environmentInfo->upperBorder());
+		_boundingRect.setWidth(_environmentInfo->chartWidth());
+		_boundingRect.setHeight(_environmentInfo->chartHeight());
 	}
 	~TFDoubleClickCatcher(){_environmentInfo = 0;}
 	// Overriding QGraphicsItem methods
