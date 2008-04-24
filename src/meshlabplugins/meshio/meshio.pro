@@ -25,13 +25,11 @@ win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/msvc8/release/lib3ds-1_
 win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds/.libs/lib3ds.a
 
 CONFIG		+= debug_and_release
-# mac:CONFIG += x86 ppc
 
-# unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
 
 unix{
-	CONFIG		+= warn_off debug_and_release
-#LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
+	CONFIG		+= warn_off
+	LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/ -l3ds
 }
 
 # mac:LIBS +=  -L../../../../code/lib/lib3ds-1.3.0/ -l3ds 
