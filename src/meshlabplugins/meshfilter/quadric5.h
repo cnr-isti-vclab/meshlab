@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.7  2008/04/26 13:45:48  pirosu
+improved loss of precision minimization
+
 Revision 1.6  2008/04/26 12:50:32  pirosu
 commented assert
 
@@ -188,6 +191,8 @@ public:
 	// Computes the geometrical quadric if onlygeo == true and the real quadric if onlygeo == false
 	void byFace(FaceType &fi, bool onlygeo)
 	{
+		double minerror = std::numeric_limits<double>::max();
+		int minerror_index = 0;
 		ScalarType pe1;
 		ScalarType pe2;
 		ScalarType tmpmat[5][5];  
@@ -259,9 +264,9 @@ public:
 		/*
 		When c is very close to 0, loss of precision causes it to be computed as a negative number,
 		which is invalid for a quadric. Vertex switches are performed in order to try to obtain a smaller
-		loss of precision
+		loss of precision. The one with the smallest error is chosen.
 		*/
-		for(int i = 0; i < 6; i++) // tries the 6! configurations
+		for(int i = 0; i < 7; i++) // tries the 6! configurations and chooses the one with the smallest error
 		{
 			switch(i)
 			{
@@ -275,6 +280,29 @@ public:
 			case 2:
 			case 4:
 				swapv(p,r);
+				break;
+			case 6: // every swap has loss of precision
+				swapv(p,r);
+				for(int j = 0; j <= minerror_index; j++)
+				{
+					switch(j)
+					{
+					case 0:
+						break;
+					case 1:
+					case 3:
+					case 5:
+						swapv(q,r);
+						break;
+					case 2:
+					case 4:
+						swapv(p,r);
+						break;
+					default:
+						assert(0);
+					}
+				}
+				minerror_index = -1;
 				break;
 			default:
 				assert(0);
@@ -331,7 +359,15 @@ public:
 			//  computes c
 			c = math::inproduct5(p,p)-pe1*pe1-pe2*pe2;
 
-			if(IsValid())return;
+			if(IsValid())
+				return;
+			else if (minerror_index == -1) // the one with the smallest error has been computed
+				break;
+			else if(-c < minerror)
+			{
+				minerror = -c;
+				minerror_index = i;
+			}
 		}
 		// failed to find a valid vertex switch
 
