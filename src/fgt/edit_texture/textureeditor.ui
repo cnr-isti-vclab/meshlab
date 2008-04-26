@@ -43,47 +43,8 @@
       <property name="spacing" >
        <number>6</number>
       </property>
-      <item row="0" column="5" >
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="3" >
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="1" >
-       <spacer>
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" >
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="6" >
-       <widget class="QPushButton" name="vertexButton" >
+      <item row="1" column="0" colspan="2" >
+       <widget class="QPushButton" name="unifySetButton" >
         <property name="sizePolicy" >
          <sizepolicy>
           <hsizetype>0</hsizetype>
@@ -93,13 +54,245 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Allow the selection of vertexes inside a dragged area</string>
+         <string>Unify a set of vertexes</string>
         </property>
         <property name="text" >
          <string/>
         </property>
         <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/selver.png</iconset>
+         <iconset resource="meshlab.qrc" >:/images/unify.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>false</bool>
+        </property>
+        <property name="checked" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="2" >
+       <widget class="QPushButton" name="flipHButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Flip selected faces horizzontally</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/flipH.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4" >
+       <widget class="QPushButton" name="flipVButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Flip selected faces vertically</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/flipV.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="6" >
+       <widget class="QPushButton" name="invertButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Invert selected faces/vertexes</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/invertsel.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="8" >
+       <widget class="QPushButton" name="cancelButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Unselect any selected faces/vertexes</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selcanc.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="8" >
+       <widget class="QPushButton" name="unify2Button" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Collapse a couple of vertexes</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/collapse.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>false</bool>
+        </property>
+        <property name="checked" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" >
+       <widget class="QPushButton" name="moveButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Allow pan and zoom on the UV Space</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selpan.png</iconset>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" >
+       <widget class="QPushButton" name="selectButton" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>0</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip" >
+         <string>Allow the selection of faces inside a dragged area</string>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >:/images/selarea.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -142,8 +335,8 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2" >
-       <widget class="QPushButton" name="selectButton" >
+      <item row="0" column="6" >
+       <widget class="QPushButton" name="vertexButton" >
         <property name="sizePolicy" >
          <sizepolicy>
           <hsizetype>0</hsizetype>
@@ -153,13 +346,13 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Allow the selection of faces inside a dragged area</string>
+         <string>Allow the selection of vertexes inside a dragged area</string>
         </property>
         <property name="text" >
          <string/>
         </property>
         <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/selarea.png</iconset>
+         <iconset resource="meshlab.qrc" >:/images/selver.png</iconset>
         </property>
         <property name="iconSize" >
          <size>
@@ -172,158 +365,44 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0" >
-       <widget class="QPushButton" name="moveButton" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>0</hsizetype>
-          <vsizetype>0</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="0" column="1" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="toolTip" >
-         <string>Allow pan and zoom on the UV Space</string>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/selpan.png</iconset>
-        </property>
-        <property name="iconSize" >
+        <property name="sizeHint" >
          <size>
-          <width>32</width>
-          <height>32</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
-        <property name="checkable" >
-         <bool>true</bool>
-        </property>
-        <property name="checked" >
-         <bool>true</bool>
-        </property>
-       </widget>
+       </spacer>
       </item>
-      <item row="1" column="6" >
-       <widget class="QPushButton" name="cancelButton" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>0</hsizetype>
-          <vsizetype>0</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="0" column="3" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="toolTip" >
-         <string>Unselect any selected faces/vertexes</string>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/selcanc.png</iconset>
-        </property>
-        <property name="iconSize" >
+        <property name="sizeHint" >
          <size>
-          <width>32</width>
-          <height>32</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
-        <property name="checkable" >
-         <bool>true</bool>
-        </property>
-       </widget>
+       </spacer>
       </item>
-      <item row="1" column="4" >
-       <widget class="QPushButton" name="invertButton" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>0</hsizetype>
-          <vsizetype>0</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="0" column="5" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="toolTip" >
-         <string>Invert selected faces/vertexes</string>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/invertsel.png</iconset>
-        </property>
-        <property name="iconSize" >
+        <property name="sizeHint" >
          <size>
-          <width>32</width>
-          <height>32</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
-        <property name="checkable" >
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2" >
-       <widget class="QPushButton" name="flipVButton" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>0</hsizetype>
-          <vsizetype>0</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip" >
-         <string>Flip selected faces vertically</string>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/flipV.png</iconset>
-        </property>
-        <property name="iconSize" >
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="checkable" >
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" >
-       <widget class="QPushButton" name="flipHButton" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>0</hsizetype>
-          <vsizetype>0</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip" >
-         <string>Flip selected faces horizzontally</string>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/flipH.png</iconset>
-        </property>
-        <property name="iconSize" >
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="checkable" >
-         <bool>false</bool>
-        </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
     </widget>

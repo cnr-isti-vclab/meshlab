@@ -26,6 +26,7 @@ public:
 	void Reset();
 	void SetProgress(int val);
 	void SetProgressMax(int val);
+	void SelectFromModel();
 
 	RenderArea *first;	// Ref to the first RA
 	MeshModel *model;	// Ref to the model (for upate)
@@ -37,6 +38,7 @@ private:
 	void SmoothTextureCoordinates();
 
 private slots:
+	void on_tabWidget_currentChanged(int index);
 	void on_connectedButton_clicked();
 	void on_moveButton_clicked();
 	void on_selectButton_clicked();
@@ -48,6 +50,8 @@ private slots:
 	void on_invertButton_clicked();	
 	void on_flipHButton_clicked();
 	void on_flipVButton_clicked();
+	void on_unify2Button_clicked();
+	void on_unifySetButton_clicked();
 
 public slots:
 	void UpdateModel();

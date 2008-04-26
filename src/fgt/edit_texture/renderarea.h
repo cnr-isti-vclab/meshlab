@@ -13,6 +13,7 @@
 #define TEXTY 200
 #define TRANSLATE 5
 #define RADIUS 10
+#define VRADIUS 4
 #define RECTDIM 30
 
 using namespace std;
@@ -42,6 +43,8 @@ public:
 	void ClearSelection();
 	void InvertSelection();
 	void Flip(bool mode);
+	void ImportSelection();
+	void UnifyCouple();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -50,6 +53,7 @@ protected:
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseDoubleClickEvent(QMouseEvent *event);
 	void wheelEvent(QWheelEvent *event);
+	void keyPressEvent(QKeyEvent *event);
 
 private:
 	bool antialiased;	// Antialiasing 
@@ -101,6 +105,8 @@ private:
 
 	float zoom;				// Actual value of zoom
 
+	int VCount;				// Vertex counter
+
 	void UpdateUV();
 	void UpdateVertex();
 	void ResetTrack(bool reset);
@@ -113,11 +119,14 @@ private:
 	void ScaleComponent(float percentX, float percentY);
 	void RecalculateSelectionArea();
 	void UpdateSelectionArea(int x, int y);
+	void UpdateSelectionAreaV(int x, int y);
 	void UpdateVertexSelection();
 	QPointF ToUVSpace(int x, int y);
 	QPoint ToScreenSpace(float u, float v);
 	void DrawCircle(QPoint origin);
 	void UpdateBoundingArea(QPoint topLeft, QPoint topRight);
+	void CountVertexes();
+	void ShowFaces();
 
 signals:
 	void UpdateModel();

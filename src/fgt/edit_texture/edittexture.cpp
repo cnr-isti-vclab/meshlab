@@ -122,9 +122,11 @@ void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshMod
     prev = cur;
     cur = event->pos();
 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));
-	isDragging = false;
-	widget->Reset(); 
-	InitTexture(m);
+	if (isDragging)
+	{
+		widget->SelectFromModel();
+		isDragging = false;
+	}
 	gla->update();
 }
 
@@ -170,6 +172,10 @@ void EditTexturePlugin::Decorate(QAction *, MeshModel &m, GLArea *gla)
 
 void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
 {
+	// Set up the model
+	m.cm.face.EnableFFAdjacency();
+	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
+
 	FaceSel.clear();
 	CMeshO::FaceIterator ff;
 	for(ff = m.cm.face.begin(); ff != m.cm.face.end(); ++ff)
@@ -201,7 +207,6 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 	widget->area = gla;
 	
 	// Initialize the texture using the intere model
-	for (unsigned i = 0; i < m.cm.face.size(); i++) m.cm.face[i].SetS();
 	InitTexture(m);
 
 	gla->update();
@@ -217,8 +222,6 @@ void EditTexturePlugin::EndEdit(QAction * , MeshModel &m , GLArea * )
 		widget = 0;
 		dock = 0;
 	 }
-	// Clear the selection
-	for (unsigned i = 0; i < m.cm.face.size(); i++) m.cm.face[i].ClearS();
 }
 
 void EditTexturePlugin::DrawXORRect(GLArea *gla)
@@ -257,9 +260,12 @@ void EditTexturePlugin::DrawXORRect(GLArea *gla)
 void EditTexturePlugin::InitTexture(MeshModel &m)
 {
 	// Get the textures name and add the tab
-	QString s = QString(m.fileName.c_str());
-    for(unsigned i = 0; i < m.cm.textures.size(); i++)
-		widget->AddRenderArea(m.cm.textures[i].c_str(), &m, i);
+	if (m.cm.textures.size() > 0)
+	{
+		for(unsigned i = 0; i < m.cm.textures.size(); i++)
+			widget->AddRenderArea(m.cm.textures[i].c_str(), &m, i);
+	}
+	else widget->AddEmptyRenderArea();
 }
 
 Q_EXPORT_PLUGIN(EditTexturePlugin)

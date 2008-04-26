@@ -1,5 +1,7 @@
 #include <QTabBar>
 #include "textureeditor.h"
+#include<vcg/complex/trimesh/textcoord_optimization.h>
+
 
 static int countPage = 1;	// Number of Tab in the texture's TabWidgets
 
@@ -23,14 +25,13 @@ void TextureEditor::Reset()
 void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 {
 	// Add a RenderArea widget to the TabWidget
-	QString name = QString(texture);
-	int i; for (i = texture.length() - 1; i >= 0; i--) if (texture.at(i) == QChar('/')) break;
-	name.remove(0,i+1);
+	int id = area->mm()->glw.TMId.back();
+	
 
 	QTabBar *t = new QTabBar(ui.tabWidget);
 	RenderArea *ra= new RenderArea(t, texture, m, index);
 	ra->setGeometry(MARGIN,MARGIN,MAXW,MAXH);
-	ui.tabWidget->addTab(t, name);
+	ui.tabWidget->addTab(t, texture);
 	if (countPage == 1)
 	{
 		ui.tabWidget->removeTab(0);
@@ -51,12 +52,20 @@ void TextureEditor::AddEmptyRenderArea()
 	ra->show();
 }
 
+void TextureEditor::SelectFromModel()
+{
+	// Update the Render Area according to the select faces from the model
+	for (int i = 0; i < countPage-1; i++)
+		((RenderArea*)ui.tabWidget->widget(i)->childAt(MARGIN,MARGIN))->ImportSelection();
+	ResetLayout();
+	ui.selectButton->setChecked(true);
+}
+
 void TextureEditor::UpdateModel()
 {
 	// Update the mesh after an edit
 	area->update();
 }
-
 
 void TextureEditor::SetProgress(int val)
 {
@@ -83,7 +92,7 @@ void TextureEditor::ResetLayout()
 void TextureEditor::SmoothTextureCoordinates()
 {
 	// <-------
-	
+	//vcg::tri::SmoothTextureCoords(model->cm);
 }
 
 // Buttons
@@ -152,9 +161,28 @@ void TextureEditor::on_flipVButton_clicked()
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->Flip(false);
 }
 
+void TextureEditor::on_unify2Button_clicked()
+{
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->UnifyCouple();
+}
+
+void TextureEditor::on_unifySetButton_clicked()
+{
+	//((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->UnifySet();
+}
 
 void TextureEditor::on_smoothButton_clicked()
 {
 	// Apply the smooth
 	SmoothTextureCoordinates();
+}
+
+void TextureEditor::on_tabWidget_currentChanged(int index)
+{
+	int button = 0, mode = -1;
+	if (ui.selectButton->isChecked()) {button = 2; mode = 0;}
+	else if (ui.connectedButton->isChecked()) {button = 2; mode = 1;}
+	else if (ui.vertexButton->isChecked()) {button = 2; mode = 2;}
+	((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->ChangeMode(button);
+	if (mode != -1) ((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->ChangeSelectMode(mode);
 }
