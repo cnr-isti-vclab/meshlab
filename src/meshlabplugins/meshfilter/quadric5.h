@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.6  2008/04/26 12:50:32  pirosu
+commented assert
+
 Revision 1.5  2008/04/04 10:03:51  cignoni
 Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
@@ -332,7 +335,7 @@ public:
 		}
 		// failed to find a valid vertex switch
 
-		assert(-c <= 1e-8); // small error
+		// assert(-c <= 1e-8); // small error
 
 		c = 0; // rounds up to zero
 	}
