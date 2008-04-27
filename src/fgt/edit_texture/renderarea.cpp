@@ -11,6 +11,8 @@
 #define NOSEL -1
 #define AREADIM 400
 #define HRECT 6
+#define MINZOOM 0.1
+#define MAXZOOM 7
 
 RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsigned tnum) : QGLWidget(parent)
 {
@@ -71,6 +73,8 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	this->setMouseTracking(true);
 	this->setCursor(Qt::PointingHandCursor);
 	this->setAttribute(Qt::WA_NoSystemBackground);
+	this->setAttribute(Qt::WA_KeyCompression, true);
+	this->setFocusPolicy(Qt::ClickFocus);
 }
 
 RenderArea::~RenderArea()
@@ -468,9 +472,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 				case Vertex:
 					if (selectedV)
 					{
-						//CountVertexes();
-						// <--------
-						VCount = 2;
+						CountVertexes();
 						selection = QRect(QPoint(selStart.x() - RADIUS/2, selStart.y() - RADIUS/2), QPoint(selEnd.x() + RADIUS/2, selEnd.y() + RADIUS/2));
 						if (VCount > 1)
 						{
@@ -646,9 +648,9 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 	bool scale = false;
 	if (e->delta() > 0) 
 	{
-		if (zoom/0.75 < 6) { zoom /= 0.75; scale = true; }
+		if (zoom/0.75 < MAXZOOM) { zoom /= 0.75; scale = true; }
 	}
-	else if (zoom*0.75 > 0.1) { zoom *= 0.75; scale = true; }
+	else if (zoom*0.75 > MINZOOM) { zoom *= 0.75; scale = true; }
 	if (scale)
 	{
 		// Change the viewport, putting the center of the screen on the mouseposition
@@ -675,15 +677,8 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 
 void RenderArea::keyPressEvent(QKeyEvent *e)
 {
-	// <-----
-	if(e->modifiers() == Qt::ControlModifier && e->key() == Qt::Key_H)
-	{
-		zoom = 1;
-		ResetTrack(true);
-		if (selected) RecalculateSelectionArea();
-		else if (selectedV) UpdateVertexSelection();
-		this->update();
-	}
+	if (e->key() == Qt::Key_H) ResetPosition();
+	else e->ignore();
 }
 
 void RenderArea::RemapClamp()
@@ -752,7 +747,7 @@ void RenderArea::ChangeMode(int index)
 			if (mode != Edit)
 			{
 				mode = Edit;
-				this->setCursor(QCursor(QBitmap(":/images/sel_move.png")));
+				this->setCursor(Qt::SizeAllCursor);
 			}
 			break;
 		case 2:
@@ -772,7 +767,7 @@ void RenderArea::ChangeMode(int index)
 						selected = true;
 						selVertBit = CVertexO::NewBitFlag();
 					}
-					this->setCursor(QCursor(QBitmap(":/images/sel_move.png")));
+					this->setCursor(Qt::SizeAllCursor);
 				}
 				else
 				{
@@ -840,6 +835,8 @@ void RenderArea::ChangeSelectMode(int index)
 	{
 		selected = false;
 		selBit = CFaceO::NewBitFlag();
+		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearS();
+		emit UpdateModel();
 	}
 }
 
@@ -1127,39 +1124,23 @@ void RenderArea::Flip(bool mode)
 
 void RenderArea::UnifyCouple()
 {
-	// <------
+	// Calculate the average coordinates and unify a couple of vertexes
 	if (VCount == 2)
 	{
-		int i1 = -1, j1, i2 = -1, j2;
-		for (unsigned i = 0; i < model->cm.face.size(); i++)
-		{
-			if (i2 != -1) break;
-			for (unsigned j = 0; j < 3; j++)
-			{
-				if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(),model->cm.face[i].WT(j).v()))
-					&& model->cm.face[i].V(j)->IsUserBit(selVertBit))
-				{
-					if (i1 == -1) {i1 = i; j1 = j;}
-					else {i2 = i; j2 = j; break;}
-				}
-			}
-		}
-		float tu = (model->cm.face[i1].WT(j1).u() + model->cm.face[i2].WT(j2).u())/2.0;
-		float tv = (model->cm.face[i1].WT(j1).v() + model->cm.face[i2].WT(j2).v())/2.0;
+		float tu = (vc1.u() + vc2.u())/2.0;
+		float tv = (vc1.v() + vc2.v())/2.0;
 
 		for (unsigned i = 0; i < model->cm.face.size(); i++)
 		{
 			for (unsigned j = 0; j < 3; j++)
 			{
-				if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(),model->cm.face[i].WT(j).v()))
-					&& model->cm.face[i].V(j)->IsUserBit(selVertBit))
+				if (model->cm.face[i].V(j) == collapse1 || model->cm.face[i].V(j) == collapse2)
 				{
 					model->cm.face[i].WT(j).u() = tu;
 					model->cm.face[i].WT(j).v() = tv;
 				}
 			}
 		}
-
 		selectedV = false;
 		selVertBit = CVertexO::NewBitFlag();
 		areaUV = QRectF();
@@ -1168,6 +1149,13 @@ void RenderArea::UnifyCouple()
 		this->update();
 		emit UpdateModel();
 	}
+}
+
+void RenderArea::UnifySet()
+{
+	// Unify a set of vertexes
+	// <------
+
 }
 
 void RenderArea::HandleScale(QPoint e)
@@ -1388,7 +1376,7 @@ void RenderArea::ImportSelection()
 		{
 			if (!selected) selected = true;
 			(*fi).SetUserBit(selBit);
-			QVector<QPoint> t = QVector<QPoint>(); 
+			QVector<QPoint> t = QVector<QPoint>();
 			t.push_back(ToScreenSpace((*fi).WT(0).u(), (*fi).WT(0).v()));
 			t.push_back(ToScreenSpace((*fi).WT(1).u(), (*fi).WT(1).v()));
 			t.push_back(ToScreenSpace((*fi).WT(2).u(), (*fi).WT(2).v()));
@@ -1409,34 +1397,41 @@ void RenderArea::ImportSelection()
 
 void RenderArea::CountVertexes()
 {
-	model->cm.face.EnableVFAdjacency();
-	vcg::tri::UpdateTopology<CMeshO>::VertexFace(model->cm);
-
-	
-	// Count the number of selected UV vertexes
+	// Count the number of selected UV vertexes (not so easy)
 	VCount = 0;
-
+	collapse1 = 0;
+	collapse2 = 0;
 	CMeshO::FaceIterator fi;
+	vector< TexCoord2<float> > tmpCoord = vector< TexCoord2<float> >();
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
 		if ((*fi).WT(0).n() == textNum)
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				if ((*fi).V(j)->IsUserBit(selBit) && !(*fi).V(j)->IsV())
+				if ((*fi).V(j)->IsUserBit(selVertBit))
 				{
-					(*fi).V(j)->SetV();
-					VCount++;
-					TexCoord2<float> tc = (*fi).WT(j);
-
-
-					//vcg::face::VFIterator<vcg::TriMeshType::FaceType> vfi((*fi).V(j));
+					if (!isInside(tmpCoord, (*fi).WT(j)) && areaUV.contains(QPointF((*fi).WT(j).u(), (*fi).WT(j).v())))
+					{
+						VCount++;
+						if (collapse1 == 0) {collapse1 = (*fi).V(j); vc1 = (*fi).WT(j); }
+						else if (collapse2 == 0) {collapse2 = (*fi).V(j); vc2 = (*fi).WT(j); }
+						tmpCoord.push_back((*fi).WT(j));
+					}
 				}
 			}
-
 		}
 	}
-	for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.vert[i].ClearV();
+}
+
+bool RenderArea::isInside(vector<TexCoord2<float> > tmpCoord, TexCoord2<float> act)
+{
+	// Support function for search in a vector
+	for (unsigned i = 0; i < tmpCoord.size(); i++)
+	{
+		if (tmpCoord[i] == act) return true;
+	}
+	return false;
 }
 
 void RenderArea::ShowFaces()
@@ -1447,4 +1442,14 @@ void RenderArea::ShowFaces()
 		if (model->cm.face[i].IsUserBit(selBit)) model->cm.face[i].SetS();
 		else model->cm.face[i].ClearS();
 	}
+}
+
+void RenderArea::ResetPosition()
+{
+	// Reset the position of the viewport
+	zoom = 1;
+	ResetTrack(true);
+	if (selected) RecalculateSelectionArea();
+	else if (selectedV) UpdateVertexSelection();
+	this->update();
 }

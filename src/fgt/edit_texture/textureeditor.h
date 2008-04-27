@@ -56,6 +56,9 @@ private slots:
 public slots:
 	void UpdateModel();
 
+protected:
+	void keyPressEvent(QKeyEvent *event);
+
 };
 
 #endif // TEXTUREEDITOR_H

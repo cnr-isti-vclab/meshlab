@@ -168,13 +168,19 @@ void TextureEditor::on_unify2Button_clicked()
 
 void TextureEditor::on_unifySetButton_clicked()
 {
-	//((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->UnifySet();
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->UnifySet();
 }
 
 void TextureEditor::on_smoothButton_clicked()
 {
 	// Apply the smooth
 	SmoothTextureCoordinates();
+}
+
+void TextureEditor::keyPressEvent(QKeyEvent *e)
+{
+	if (e->key() == Qt::Key_H) ((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ResetPosition();
+	else e->ignore();
 }
 
 void TextureEditor::on_tabWidget_currentChanged(int index)

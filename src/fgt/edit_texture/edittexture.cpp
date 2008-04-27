@@ -173,7 +173,7 @@ void EditTexturePlugin::Decorate(QAction *, MeshModel &m, GLArea *gla)
 void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
 {
 	// Set up the model
-	m.cm.face.EnableFFAdjacency();
+	if (!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
 	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
 
 	FaceSel.clear();
@@ -215,6 +215,7 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 void EditTexturePlugin::EndEdit(QAction * , MeshModel &m , GLArea * )
 {
 	// Delete the widget
+	for (unsigned i = 0; i < m.cm.face.size(); i++) m.cm.face[i].ClearS();
 	if (widget != 0) 
 	{ 
 		delete widget; 

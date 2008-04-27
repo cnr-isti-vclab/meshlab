@@ -54,7 +54,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Unify a set of vertexes</string>
+         <string>Choose and unify a set of vertexes</string>
         </property>
         <property name="text" >
          <string/>
@@ -177,7 +177,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Unselect any selected faces/vertexes</string>
+         <string>Clear selected faces/vertexes</string>
         </property>
         <property name="text" >
          <string/>

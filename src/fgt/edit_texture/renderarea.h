@@ -8,6 +8,7 @@
 #include <wrap/gui/trackball.h>
 #include <stdio.h>
 #include <QGLWidget>
+#include <QShortcut>
 
 #define TEXTX 175
 #define TEXTY 200
@@ -45,6 +46,8 @@ public:
 	void Flip(bool mode);
 	void ImportSelection();
 	void UnifyCouple();
+	void UnifySet();
+	void ResetPosition();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -106,6 +109,9 @@ private:
 	float zoom;				// Actual value of zoom
 
 	int VCount;				// Vertex counter
+	CVertexO *collapse1;	// Pointer to vertex for collapse
+	CVertexO *collapse2;
+	TexCoord2<float> vc1, vc2;
 
 	void UpdateUV();
 	void UpdateVertex();
@@ -126,6 +132,7 @@ private:
 	void DrawCircle(QPoint origin);
 	void UpdateBoundingArea(QPoint topLeft, QPoint topRight);
 	void CountVertexes();
+	bool isInside(vector<TexCoord2<float>>, TexCoord2<float>);
 	void ShowFaces();
 
 signals:
