@@ -23,6 +23,9 @@
 /****************************************************************************
   History
 $Log$
+Revision 1.50  2008/04/28 15:06:28  cignoni
+removed use of smoothcolor
+
 Revision 1.49  2008/04/22 16:02:51  bernabei
 forced vcg namespace use, as Quality was interpreted by gcc as one of the values of the FilterClass
 enumeration
@@ -180,10 +183,10 @@ Added copyright info
 #include "meshcolorize.h"
 #include "color_manifold.h"
 #include "curvature.h"
-#include "smoothcolor.h"
 
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/stat.h>
+#include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/curvature.h>
