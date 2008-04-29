@@ -87,6 +87,7 @@ void TextureEditor::ResetLayout()
 	ui.moveButton->setChecked(false);
 	ui.selectButton->setChecked(false);
 	ui.vertexButton->setChecked(false);
+	ui.unifySetButton->setChecked(false);
 }
 
 void TextureEditor::SmoothTextureCoordinates()
@@ -99,31 +100,31 @@ void TextureEditor::SmoothTextureCoordinates()
 void TextureEditor::on_moveButton_clicked()
 {
 	ResetLayout();
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(0);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(VIEWMODE);
 	ui.moveButton->setChecked(true);
 }
 
 void TextureEditor::on_connectedButton_clicked()
 {
 	ResetLayout();
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(1);
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(SELECTCONNECTED);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(SELECTMODE);
 	ui.connectedButton->setChecked(true);
 }
 
 void TextureEditor::on_selectButton_clicked()
 {
 	ResetLayout();
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(0);
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(SELECTAREA);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(SELECTMODE);
 	ui.selectButton->setChecked(true);
 }
 
 void TextureEditor::on_vertexButton_clicked()
 {
 	ResetLayout();
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(2);
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(2);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(SELECTVERTEX);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(SELECTMODE);
 	ui.vertexButton->setChecked(true);
 }
 
@@ -146,7 +147,7 @@ void TextureEditor::on_cancelButton_clicked()
 {
 	ResetLayout();
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ClearSelection();
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(0);
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(VIEWMODE);
 	ui.cancelButton->setChecked(false);
 	ui.moveButton->setChecked(true);
 }
@@ -168,7 +169,9 @@ void TextureEditor::on_unify2Button_clicked()
 
 void TextureEditor::on_unifySetButton_clicked()
 {
-	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->UnifySet();
+	ResetLayout();
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(UNIFYMODE);
+	ui.unifySetButton->setChecked(true);
 }
 
 void TextureEditor::on_smoothButton_clicked()

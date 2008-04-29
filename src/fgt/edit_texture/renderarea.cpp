@@ -64,6 +64,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	scaleX = 1; scaleY = 1;
 	orX = 0; orY = 0;
 	initVX = 0; initVY = 0;
+	locked = false;
 
 	zoom = 1;
 
@@ -79,8 +80,8 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 
 RenderArea::~RenderArea()
 {
-	CFaceO::DeleteBitFlag(selBit);
-	CVertexO::DeleteBitFlag(selVertBit);
+	//CFaceO::DeleteBitFlag(selBit);
+	//CVertexO::DeleteBitFlag(selVertBit);
 }
 
 void RenderArea::setPen(const QPen &pen)
@@ -179,22 +180,37 @@ void RenderArea::paintEvent(QPaintEvent *)
 				}
 
 				// Draw the selected vertex
-				if (selectedV)
+				if (selectedV && mode != UnifyVert)
 				{
 					glDisable(GL_COLOR_LOGIC_OP);
+					glColor3f(1,0,0);
 					for (int j = 0; j < 3; j++)
-					{
+					{	
 						if(areaUV.contains(QPointF(model->cm.face[i].WT(j).u(), model->cm.face[i].WT(j).v())) && model->cm.face[i].V(j)->IsUserBit(selVertBit))
 						{
-							glColor3f(1,0,0);
 							DrawCircle(QPoint((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - posVX/zoom,
 								AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - posVY/zoom));
-							glColor3f(0,0,0);
 						}
 					}
+					glColor3f(0,0,0);
 					glEnable(GL_COLOR_LOGIC_OP);
 				}
 			}
+		}
+		if (mode == UnifyVert) 
+		{
+			glDisable(GL_COLOR_LOGIC_OP);
+			glColor3f(1,0,0);
+			if (uvertA != QPoint()) DrawCircle(QPoint((origin.x() + (cos(degree) * (tua - origin.x()) - sin(degree) * (tva - origin.y()))) * AREADIM - posVX/zoom,
+										AREADIM - ((origin.y() + (sin(degree) * (tua - origin.x()) + cos(degree) * (tva - origin.y()))) * AREADIM) - posVY/zoom));
+			if (uvertB != QPoint()) DrawCircle(QPoint((origin.x() + (cos(degree) * (tub - origin.x()) - sin(degree) * (tvb - origin.y()))) * AREADIM - posVX/zoom,
+										AREADIM - ((origin.y() + (sin(degree) * (tub - origin.x()) + cos(degree) * (tvb - origin.y()))) * AREADIM) - posVY/zoom));
+			if (uvertA1 != QPoint()) DrawCircle(QPoint((origin.x() + (cos(degree) * (tua1 - origin.x()) - sin(degree) * (tva1 - origin.y()))) * AREADIM - posVX/zoom,
+										AREADIM - ((origin.y() + (sin(degree) * (tua1 - origin.x()) + cos(degree) * (tva1 - origin.y()))) * AREADIM) - posVY/zoom));
+			if (uvertB1 != QPoint()) DrawCircle(QPoint((origin.x() + (cos(degree) * (tub1 - origin.x()) - sin(degree) * (tvb1 - origin.y()))) * AREADIM - posVX/zoom,
+										AREADIM - ((origin.y() + (sin(degree) * (tub1 - origin.x()) + cos(degree) * (tvb1 - origin.y()))) * AREADIM) - posVY/zoom));
+			glColor3f(0,0,0);
+			glEnable(GL_COLOR_LOGIC_OP);
 		}
 		glDisable(GL_LOGIC_OP);
 		glDisable(GL_COLOR_LOGIC_OP);
@@ -241,47 +257,87 @@ void RenderArea::paintEvent(QPaintEvent *)
 			painter.drawRect(area);
 		}
 
-		if (selection != QRect() && (mode == Edit || mode == EditVert))
+		if (mode != UnifyVert)
 		{
-			// The rectangle of editing
-			painter.setPen(QPen(QBrush(Qt::yellow),2));
-			painter.setBrush(QBrush(Qt::NoBrush));
-			if (mode == Edit)
+			if (selection != QRect() && (mode == Edit || mode == EditVert))
 			{
-				painter.drawRect(QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height()));
-			}
-			else 
-			{
-				painter.drawRect(QRect(selection.x() - posVX, selection.y() - posVY, selection.width(), selection.height()));
-				/*painter.fillRect(QRect(selection.x() - HRECT/2 - posVX + selection.width()/2, selection.y() - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
-				painter.fillRect(QRect(selection.x() - HRECT/2 - posVX, selection.y() - HRECT/2 - posVY + selection.height()/2, HRECT, HRECT), QBrush(Qt::black));
-				painter.fillRect(QRect(selection.x() - HRECT/2 - posVX + selection.width(), selection.y() + selection.height()/2 - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
-				painter.fillRect(QRect(selection.x() + selection.width()/2 - HRECT/2 - posVX, selection.y() + selection.height() - HRECT/2 - posVY, HRECT, HRECT), QBrush(Qt::black));
-				*/
-			}
+				// The rectangle of editing
+				painter.setPen(QPen(QBrush(Qt::yellow),2));
+				painter.setBrush(QBrush(Qt::NoBrush));
+				if (mode == Edit)
+				{
+					painter.drawRect(QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height()));
+				}
+				else 
+				{
+					painter.drawRect(QRect(selection.x() - posVX, selection.y() - posVY, selection.width(), selection.height()));
+				}
 
-			if (mode == Edit || (mode == EditVert && VCount > 1))
-			{
-				// Rectangle on the corner
-				painter.setPen(QPen(QBrush(Qt::black),1));
-				for (unsigned l = 0; l < selRect.size(); l++)
+				if (mode == Edit || (mode == EditVert && VCount > 1))
 				{
-					if (l == highlighted) painter.setBrush(QBrush(Qt::yellow));
-					else painter.setBrush(QBrush(Qt::NoBrush));
-					painter.drawRect(selRect[l]);
-					if (editMode == Scale && mode == Edit) painter.drawImage(selRect[l],scal,QRect(0,0,scal.width(),scal.height()));
-					else painter.drawImage(selRect[l],rot,QRect(0,0,rot.width(),rot.height()));
-				}
-	
-				// and the origin of the rotation
-				if ((editMode == Rotate && mode == Edit) || mode == EditVert)
-				{
+					// Rectangle on the corner
 					painter.setPen(QPen(QBrush(Qt::black),1));
-					if (highlighted == ORIGINRECT) painter.setBrush(QBrush(Qt::blue));
-					else painter.setBrush(QBrush(Qt::yellow));
-					if (mode == Edit) painter.drawEllipse(QRect(originR.x() - posX - orX, originR.y() - posY - orY, RADIUS, RADIUS));
-					else painter.drawEllipse(QRect(originR.x() - posVX - orX, originR.y() - posVY - orY, RADIUS, RADIUS));
+					for (unsigned l = 0; l < selRect.size(); l++)
+					{
+						if (l == highlighted) painter.setBrush(QBrush(Qt::yellow));
+						else painter.setBrush(QBrush(Qt::NoBrush));
+						painter.drawRect(selRect[l]);
+						if (editMode == Scale && mode == Edit) painter.drawImage(selRect[l],scal,QRect(0,0,scal.width(),scal.height()));
+						else painter.drawImage(selRect[l],rot,QRect(0,0,rot.width(),rot.height()));
+					}
+	
+					// and the origin of the rotation
+					if ((editMode == Rotate && mode == Edit) || mode == EditVert)
+					{
+						painter.setPen(QPen(QBrush(Qt::black),1));
+						if (highlighted == ORIGINRECT) painter.setBrush(QBrush(Qt::blue));
+						else painter.setBrush(QBrush(Qt::yellow));
+						if (mode == Edit) painter.drawEllipse(QRect(originR.x() - posX - orX, originR.y() - posY - orY, RADIUS, RADIUS));
+						else painter.drawEllipse(QRect(originR.x() - posVX - orX, originR.y() - posVY - orY, RADIUS, RADIUS));
+					}
 				}
+			}
+		}
+		else
+		{
+			// Draw the rectangles for unify
+			if (unifyRA != QRect())
+			{
+				painter.setPen(QPen(QBrush(Qt::blue),1));
+				painter.setBrush(QBrush(Qt::NoBrush));
+				painter.drawRect(unifyRA);
+				painter.drawText(unifyRA.center().x() - RADIUS*2, unifyRA.center().y(), tr("A"));
+			}
+			if (unifyRB != QRect())
+			{
+				painter.setPen(QPen(QBrush(Qt::blue),1));
+				painter.setBrush(QBrush(Qt::NoBrush));
+				painter.drawRect(unifyRB);
+				painter.drawText(unifyRB.center().x() - RADIUS*2, unifyRB.center().y(), tr("B"));
+			}
+			if (unifyRA != QRect() && unifyRB != QRect())
+			{
+				painter.setPen(QPen(QBrush(Qt::blue),1));
+				painter.drawLine(unifyRA.center(), unifyRB.center());
+			}
+			if (unifyRA1 != QRect())
+			{
+				painter.setPen(QPen(QBrush(Qt::blue),1));
+				painter.setBrush(QBrush(Qt::NoBrush));
+				painter.drawRect(unifyRA1);
+				painter.drawText(unifyRA1.center().x() - RADIUS*2, unifyRA1.center().y(), tr("A'"));
+			}
+			if (unifyRB1 != QRect())
+			{
+				painter.setPen(QPen(QBrush(Qt::blue),1));
+				painter.setBrush(QBrush(Qt::NoBrush));
+				painter.drawRect(unifyRB1);
+				painter.drawText(unifyRB1.center().x() - RADIUS*2, unifyRB1.center().y(), tr("B'"));
+			}
+			if (unifyRA1 != QRect() && unifyRB1 != QRect())
+			{
+				painter.setPen(QPen(QBrush(Qt::blue),1));
+				painter.drawLine(unifyRA1.center(), unifyRB1.center());
 			}
 		}
 
@@ -305,12 +361,13 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 {
 	if ((mode == Edit || mode == EditVert) && highlighted == NOSEL) 
 	{
-		this->ChangeMode(3);
+		this->ChangeMode(SPECIALMODE);
 		pressed = NOSEL;
 		selected = false;
 		selectedV = false;
 		selVertBit = CVertexO::NewBitFlag();
-		selBit = CFaceO::NewBitFlag();
+		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
+		//selBit = CFaceO::NewBitFlag();
 	}
 	switch(mode)
 	{
@@ -360,6 +417,10 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 			pressed = highlighted;
 			break;
 		case Select:
+			start = e->pos();
+			end = e->pos();
+			break;
+		case UnifyVert:
 			start = e->pos();
 			end = e->pos();
 			break;
@@ -430,8 +491,13 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 			}
 			else if (pressed > NOSEL && pressed < selRect.size())
 			{
+				selStart = QPoint(MAX,MAX);
+				selEnd = QPoint(-MAX,-MAX);
 				RotateComponent(degree);
-				UpdateVertexSelection();
+				selection = QRect(QPoint(selStart.x() - VRADIUS, selStart.y() - VRADIUS), QPoint(selEnd.x() + VRADIUS, selEnd.y() + VRADIUS));
+				QPointF a = ToUVSpace(selection.x(), selection.y());
+				QPointF b = ToUVSpace(selection.bottomRight().x(),selection.bottomRight().y());
+				areaUV = QRectF(a, QSizeF(b.x()-a.x(), b.y()-a.y()));
 				UpdateSelectionAreaV(0,0);
 				degree = 0;
 			}
@@ -449,7 +515,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 						UpdateSelectionArea(0,0);
 						origin = ToUVSpace(selection.center().x(), selection.center().y());
 						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
-						this->ChangeMode(1);
+						this->ChangeMode(EDITFACEMODE);
 						this->update(selection);
 						this->ShowFaces();
 						emit UpdateModel();
@@ -463,7 +529,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 						UpdateSelectionArea(0,0);
 						origin = ToUVSpace(selection.center().x(), selection.center().y());
 						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
-						this->ChangeMode(1);
+						this->ChangeMode(EDITFACEMODE);
 						this->update();
 						this->ShowFaces();
 						emit UpdateModel();
@@ -480,12 +546,18 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 							origin = ToUVSpace(selection.center().x(), selection.center().y());
 							originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
 						}
-						this->ChangeMode(4);
+						this->ChangeMode(EDITVERTEXMODE);
 						this->update();
 					}
 					else this->update();
 					break;
 			}
+			break;
+		case UnifyVert:
+			area = QRect();
+			locked = false;
+			if (unifyRB1 != QRect()) UnifySet();
+			this->update();
 			break;
 	}
 }
@@ -579,6 +651,15 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 					this->update(area);
 				}
 				break;
+			case UnifyVert:
+				end = e->pos();
+				int x1, x2, y1, y2;
+				if (start.x() < end.x()) {x1 = start.x(); x2 = end.x();} else {x1 = end.x(); x2 = start.x();}
+				if (start.y() < end.y()) {y1 = start.y(); y2 = end.y();} else {y1 = end.y(); y2 = start.y();}
+				area = QRect(x1,y1,x2-x1,y2-y1);
+				if (!locked) SelectVertexes();
+				this->update();
+				break;
 		}
 	}
 	else 
@@ -661,8 +742,12 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 		tb->Scale(zoom);
 		if (selectedV) 
 		{
-			UpdateVertexSelection();
-			UpdateSelectionAreaV(0,0);
+			if (mode == UnifyVert) UpdateUnify();
+			else
+			{
+				UpdateVertexSelection();
+				UpdateSelectionAreaV(0,0);
+			}
 		}
 		else 
 		{
@@ -731,26 +816,37 @@ void RenderArea::RemapMod()
 	emit UpdateModel();
 }
 
-void RenderArea::ChangeMode(int index)
+void RenderArea::ChangeMode(int modenumber)
 {
 	// Change the selection mode
-	switch(index)
+	if (mode == UnifyVert && modenumber != UNIFYMODE)
 	{
-		case 0:
+		unifyRA = QRect();
+		unifyRA1 = QRect();
+		unifyRB = QRect();
+		unifyRB1 = QRect();
+		uvertA = QPoint();
+		uvertA1 = QPoint();
+		uvertB = QPoint();
+		uvertB1 = QPoint();
+	}
+	switch(modenumber)
+	{
+		case VIEWMODE:
 			if (mode != View)
 			{
 				mode = View;
 				this->setCursor(Qt::PointingHandCursor);
 			}
 			break;
-		case 1:
+		case EDITFACEMODE:
 			if (mode != Edit)
 			{
 				mode = Edit;
 				this->setCursor(Qt::SizeAllCursor);
 			}
 			break;
-		case 2:
+		case SELECTMODE:
 			if (mode != Select)
 			{
 				if (selection != QRect())
@@ -759,7 +855,8 @@ void RenderArea::ChangeMode(int index)
 					{
 						mode = EditVert;
 						selectedV = true;
-						selBit = CFaceO::NewBitFlag();
+						//selBit = CFaceO::NewBitFlag();
+						for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 					}
 					else 
 					{
@@ -772,26 +869,27 @@ void RenderArea::ChangeMode(int index)
 				else
 				{
 					mode = Select;
-					selBit = CFaceO::NewBitFlag();
+					for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
+					//selBit = CFaceO::NewBitFlag();
 					selVertBit = CVertexO::NewBitFlag();
 					this->setCursor(Qt::CrossCursor);
 				}
 			}
 			break;
-		case 3:	// For internal use... reset the selction
+		case SPECIALMODE:	// For internal use... reset the selction
 			mode = Select;
 			for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 			selection = QRect();
 			this->setCursor(Qt::CrossCursor);
 			break;
-		case 4:
+		case EDITVERTEXMODE:
 			if (mode != EditVert)
 			{
 				if (selection != QRect())
 				{
 					mode = EditVert; 
 					selectedV = true;
-					this->setCursor(QCursor(QBitmap(":/images/sel_move.png")));
+					this->setCursor(Qt::SizeAllCursor);
 				}
 				else
 				{
@@ -800,24 +898,46 @@ void RenderArea::ChangeMode(int index)
 				}
 			}
 			break;
+		case UNIFYMODE:
+			if (mode != UnifyVert)
+			{
+				mode = UnifyVert;
+				unifyRA = QRect();
+				unifyRA1 = QRect();
+				unifyRB = QRect();
+				unifyRB1 = QRect();
+				uvertA = QPoint();
+				uvertA1 = QPoint();
+				uvertB = QPoint();
+				uvertB1 = QPoint();
+				if (selected) 
+					{for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearS();}
+				selected = false;
+				selectedV = false;
+				//selBit = CFaceO::NewBitFlag();
+				for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
+				selVertBit = CVertexO::NewBitFlag();
+				this->setCursor(Qt::CrossCursor);
+			}
+			break;
 	}
 	this->update();
 }
 
-void RenderArea::ChangeSelectMode(int index)
+void RenderArea::ChangeSelectMode(int selectindex)
 {
 	// Change the function of the mouse selection
-	switch(index)
+	switch(selectindex)
 	{
-		case 0:
+		case SELECTAREA:
 			if (selectMode != Area && selectMode != Connected) selection = QRect();
 			selectMode = Area;
 			break;
-		case 1:
+		case SELECTCONNECTED:
 			if (selectMode != Connected && selectMode != Area) selection = QRect();
 			selectMode = Connected;
 			break;
-		case 2:
+		case SELECTVERTEX:
 			if (selectMode != Vertex) selection = QRect();
 			selectMode = Vertex;
 			break;
@@ -834,7 +954,8 @@ void RenderArea::ChangeSelectMode(int index)
 	if (selected && selectMode == Vertex) 
 	{
 		selected = false;
-		selBit = CFaceO::NewBitFlag();
+		//selBit = CFaceO::NewBitFlag();
+		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 		for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearS();
 		emit UpdateModel();
 	}
@@ -875,6 +996,8 @@ void RenderArea::RotateComponent(float theta)
 						float v = origin.y() + (sinv * (model->cm.face[i].WT(j).u() - origin.x()) + cosv * (model->cm.face[i].WT(j).v() - origin.y()));
 						model->cm.face[i].WT(j).u() = u;
 						model->cm.face[i].WT(j).v() = v;
+						QPoint tmp = ToScreenSpace(u, v);
+						UpdateBoundingArea(tmp,tmp);
 					}
 				}
 			}
@@ -1003,6 +1126,39 @@ void RenderArea::SelectVertexes()
 					(*fi).V(j)->SetUserBit(selVertBit);
 					UpdateBoundingArea(tmp, tmp);
 					if (!selectedV) selectedV = true;
+					if (mode == UnifyVert && !locked)
+					{
+						locked = true;
+						if (unifyRA == QRect())
+						{ 
+							unifyRA = QRect(QPoint(selStart.x() - VRADIUS, selStart.y() - VRADIUS), QPoint(selEnd.x() + VRADIUS, selEnd.y() + VRADIUS));
+							unifyA = (*fi).V(j);
+							uvertA = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
+							tua = (*fi).WT(j).u(); tva = (*fi).WT(j).v();
+						}
+						else if (unifyRB == QRect()) 
+						{ 
+							unifyRB = QRect(QPoint(selStart.x() - VRADIUS, selStart.y() - VRADIUS), QPoint(selEnd.x() + VRADIUS, selEnd.y() + VRADIUS));
+							unifyB = (*fi).V(j);
+							uvertB = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
+							tub = (*fi).WT(j).u(); tvb = (*fi).WT(j).v();
+						}
+						else if (unifyRA1 == QRect()) 
+						{ 
+							unifyRA1 = QRect(QPoint(selStart.x() - VRADIUS, selStart.y() - VRADIUS), QPoint(selEnd.x() + VRADIUS, selEnd.y() + VRADIUS)); 
+							unifyA1 = (*fi).V(j);
+							uvertA1 = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
+							tua1 = (*fi).WT(j).u(); tva1 = (*fi).WT(j).v();
+						}
+						else if (unifyRB1 == QRect()) 
+						{ 
+							unifyRB1 = QRect(QPoint(selStart.x() - VRADIUS, selStart.y() - VRADIUS), QPoint(selEnd.x() + VRADIUS, selEnd.y() + VRADIUS)); 
+							unifyB1 = (*fi).V(j);
+							uvertB1 = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
+							tub1 = (*fi).WT(j).u(); tvb1 = (*fi).WT(j).v();
+						}
+						return;
+					}
 				}
 			}
 		}
@@ -1015,7 +1171,8 @@ void RenderArea::SelectConnectedComponent(QPoint e)
 	selStart = QPoint(MAX,MAX);
 	selEnd = QPoint(-MAX,-MAX);
 	selected = false;
-	selBit = CFaceO::NewBitFlag();
+	//selBit = CFaceO::NewBitFlag();
+	for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 	int index = 0;
 	vector<CFaceO*> Q = vector<CFaceO*>();
 	
@@ -1063,9 +1220,16 @@ void RenderArea::SelectConnectedComponent(QPoint e)
 void RenderArea::ClearSelection()
 {
 	// Clear every selection
-	selBit = CFaceO::NewBitFlag();
+	//selBit = CFaceO::NewBitFlag();
+	for (unsigned i = 0; i < model->cm.face.size(); i++) 
+	{ 
+		model->cm.face[i].ClearUserBit(selBit);
+		model->cm.face[i].ClearS();
+	}
 	selVertBit = CVertexO::NewBitFlag();
 	selection = QRect();
+	this->update();
+	emit UpdateModel();
 }
 
 void RenderArea::InvertSelection()
@@ -1145,7 +1309,7 @@ void RenderArea::UnifyCouple()
 		selVertBit = CVertexO::NewBitFlag();
 		areaUV = QRectF();
 		selection = QRect();
-		this->ChangeMode(2);
+		this->ChangeMode(SELECTMODE);
 		this->update();
 		emit UpdateModel();
 	}
@@ -1155,7 +1319,18 @@ void RenderArea::UnifySet()
 {
 	// Unify a set of vertexes
 	// <------
-
+	
+	
+	
+	selectedV = false;
+	selVertBit = CVertexO::NewBitFlag();
+	areaUV = QRectF();
+	selection = QRect();
+	unifyA = 0; unifyB = 0; unifyA1 = 0; unifyB1 = 0;
+	uvertA = QPoint(); uvertA1 = QPoint(); uvertB = QPoint(); uvertB1 = QPoint();
+	unifyRA = QRect(); unifyRA1 = QRect(); unifyRB = QRect(); unifyRB1 = QRect();
+	this->update();
+	emit UpdateModel();
 }
 
 void RenderArea::HandleScale(QPoint e)
@@ -1329,6 +1504,31 @@ void RenderArea::UpdateVertexSelection()
 	areaUV = QRectF(a, QSizeF(b.x()-a.x(), b.y()-a.y()));
 }
 
+void RenderArea::UpdateUnify()
+{
+	// Update the Unify infrastructure after a zoom
+	if (unifyRA != QRect())
+	{
+		unifyRA.moveCenter(ToScreenSpace(tua, tva));
+		uvertA = unifyRA.topLeft();
+	}
+	if (unifyRA1 != QRect())
+	{
+		unifyRA1.moveCenter(ToScreenSpace(tua1, tva1));
+		uvertA1 = unifyRA1.center();
+	}
+	if (unifyRB != QRect())
+	{
+		unifyRB.moveCenter(ToScreenSpace(tub, tvb));
+		uvertB = unifyRB.center();
+	}
+	if (unifyRB1 != QRect())
+	{
+		unifyRB1.moveCenter(ToScreenSpace(tub1, tvb1));
+		uvertB1 = unifyRB1.center();
+	}
+}
+
 QPointF RenderArea::ToUVSpace(int x, int y)
 {
 	// Convert a point from screen-space to uv-space
@@ -1366,7 +1566,9 @@ void RenderArea::UpdateBoundingArea(QPoint topLeft, QPoint topRight)
 
 void RenderArea::ImportSelection()
 {
-	selBit = CFaceO::NewBitFlag();
+	// Import the face selected from the meshlab GLArea to the pluging
+	//selBit = CFaceO::NewBitFlag();
+	for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 	selStart = QPoint(MAX,MAX);
 	selEnd = QPoint(-MAX,-MAX);
 	CMeshO::FaceIterator fi;
@@ -1391,13 +1593,13 @@ void RenderArea::ImportSelection()
 		originR.moveCenter(ToScreenSpace(origin.x(), origin.y()));
 		origin = ToUVSpace(originR.center().x(), originR.center().y());
 	}
-	ChangeMode(1);
+	ChangeMode(EDITFACEMODE);
 	this->update();
 }
 
 void RenderArea::CountVertexes()
 {
-	// Count the number of selected UV vertexes (not so easy)
+	// Count the number of selected UV vertexes (not so easy...)
 	VCount = 0;
 	collapse1 = 0;
 	collapse2 = 0;

@@ -16,6 +16,15 @@
 #define RADIUS 10
 #define VRADIUS 4
 #define RECTDIM 30
+#define VIEWMODE 0
+#define EDITFACEMODE 1
+#define SELECTMODE 2
+#define SPECIALMODE 3
+#define EDITVERTEXMODE 4
+#define UNIFYMODE 5
+#define SELECTAREA 0
+#define SELECTCONNECTED 1
+#define SELECTVERTEX 2
 
 using namespace std;
 using namespace vcg;
@@ -25,7 +34,7 @@ class RenderArea : public QGLWidget
     Q_OBJECT
 
 public:
-	enum Mode { View, Edit, EditVert, Select };
+	enum Mode { View, Edit, EditVert, Select, UnifyVert };
 	enum EditMode { Scale, Rotate, NoEdit };
 	enum SelectMode { Area, Connected, Vertex };
 
@@ -109,9 +118,14 @@ private:
 	float zoom;				// Actual value of zoom
 
 	int VCount;				// Vertex counter
-	CVertexO *collapse1;	// Pointer to vertex for collapse
-	CVertexO *collapse2;
+	CVertexO *collapse1,	// Pointer to vertex for collapse
+			 *collapse2;
 	TexCoord2<float> vc1, vc2;
+	CVertexO *unifyA, *unifyA1, *unifyB, *unifyB1;	// Pointer to unify segment
+	QRect unifyRA, unifyRA1, unifyRB, unifyRB1;
+	QPoint uvertA, uvertB, uvertA1, uvertB1;
+	float tua, tva, tub, tvb, tua1, tva1, tub1, tvb1;
+	bool locked;
 
 	void UpdateUV();
 	void UpdateVertex();
@@ -134,6 +148,7 @@ private:
 	void CountVertexes();
 	bool isInside(vector<TexCoord2<float>>, TexCoord2<float>);
 	void ShowFaces();
+	void UpdateUnify();
 
 signals:
 	void UpdateModel();
