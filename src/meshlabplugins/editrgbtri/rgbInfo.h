@@ -559,6 +559,7 @@ public:
                 return extractVertexFromEdge(i);
         }
         assert(0);
+				return VertexPair();
     }
     
     /// Get the face color

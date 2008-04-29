@@ -299,8 +299,8 @@ private:
 };
 
 /// Check if the second vector is equal to the first (the 2 vectors can be not aligned)
-template<template<class> class CONTAINER, class ELEMTYPE>
-static bool isMatch(CONTAINER<ELEMTYPE>& cont, CONTAINER<ELEMTYPE>& pattern)
+template<class CONTAINER>
+static bool isMatch(CONTAINER& cont, CONTAINER& pattern)
 {
     if (cont.size() != pattern.size())
         return false;
