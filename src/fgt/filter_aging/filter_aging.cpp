@@ -219,8 +219,11 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 						float angleFactor;		// angle multiply factor in [0,1] range
 												// (greater angle -> deeper chip)
 						
-						// local coordinates in the normalized bounding box
-						Point3<CVertexO::ScalarType> p = m.cm.bbox.GlobalToLocal((*fi).V(j)->P());
+						Point3<CVertexO::ScalarType> p;
+						if(chipStyle == SIMPLE)
+							p = (*fi).V(j)->P();	// world coordinates
+						else	// local coordinates in the normalized bounding box
+							p = m.cm.bbox.GlobalToLocal((*fi).V(j)->P());
 						noise = generateNoiseValue(chipStyle, noiseFreq, p.X(), p.Y(), p.Z());
 						// only values bigger than noiseClamp will be considered
 						noise = (noise<noiseClamp?0.0:noise);
