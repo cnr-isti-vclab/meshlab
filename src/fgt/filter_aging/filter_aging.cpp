@@ -119,10 +119,10 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 					"the angle between two adjacent faces will be considered.\n" \
 					"This parameter represents the minimum angle between two adjacent\n" \
 					"faces to consider the edge they are sharing.");
-			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0.0, 
+			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, m.cm.bbox.Diag()*0.001, 
 					m.cm.bbox.Diag()*0.5,"Edge len threshold", 
 					"The minimum length of an edge. Useful to avoid the creation of too many small faces.");
-			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.012, 0.0, m.cm.bbox.Diag()*0.05,
+			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.012, m.cm.bbox.Diag()*0.001, m.cm.bbox.Diag()*0.05,
 					"Max chip depth", "The maximum depth of a chip.");
 			params.addEnum("ChipStyle", 0, styles, "Chip Style", 
 					"Mesh erosion style to use. Different styles are defined " \
@@ -169,7 +169,9 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 		while(thresholdValue < 0.0) thresholdValue += 360;
 	}
 	float edgeLenTreshold = params.getAbsPerc("EdgeLenThreshold");
+	if(edgeLenTreshold == 0.0) edgeLenTreshold = m.cm.bbox.Diag()*0.02;
 	float chipDepth = params.getAbsPerc("ChipDepth");
+	if(chipDepth == 0.0) chipDepth = m.cm.bbox.Diag()*0.012;
 	int chipStyle = params.getEnum("ChipStyle");
 	float noiseFreq = params.getAbsPerc("NoiseFreqScale");
 	// noiseFreq multiplied by the diagonal of the normalized bounding box
