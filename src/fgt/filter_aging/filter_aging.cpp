@@ -127,8 +127,7 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 			params.addEnum("ChipStyle", 0, styles, "Chip Style", 
 					"Mesh erosion style to use. Different styles are defined " \
 					"passing different parameters to the noise function \nthat generates displacement values.");
-			params.addAbsPerc("NoiseFreqScale", m.cm.bbox.Diag()*0.055, m.cm.bbox.Diag()*0.01,
-					m.cm.bbox.Diag()*0.1, "Noise frequency scale",
+			params.addAbsPerc("NoiseFreqScale", 0.255, 0.001, 0.5, "Noise frequency scale",
 					"Changes the noise frequency scale. This affects chip dimensions" \
 					"and the distance between chips (Linear and Sinusoidal styles only).");
 			params.addFloat("NoiseClamp", 0.5, "Noise clamp threshold [0..1]",
@@ -173,6 +172,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	float chipDepth = params.getAbsPerc("ChipDepth");
 	int chipStyle = params.getEnum("ChipStyle");
 	float noiseFreq = params.getAbsPerc("NoiseFreqScale");
+	// noiseFreq multiplied by the diagonal of the normalized bounding box
+	noiseFreq *= Distance(Point3<CVertexO::ScalarType>(1,1,1), Point3<CVertexO::ScalarType>(0,0,0));
 	float noiseClamp = params.getFloat("NoiseClamp");
 	if(noiseClamp < 0.0) noiseClamp = 0.0;
 	if(noiseClamp > 1.0) noiseClamp = 1.0;
@@ -216,7 +217,9 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 						float angleFactor;		// angle multiply factor in [0,1] range
 												// (greater angle -> deeper chip)
 						
-						noise = generateNoiseValue(chipStyle, noiseFreq, (*fi).V(j)->P().X(), (*fi).V(j)->P().Y(), (*fi).V(j)->P().Z());
+						// local coordinates in the normalized bounding box
+						Point3<CVertexO::ScalarType> p = m.cm.bbox.GlobalToLocal((*fi).V(j)->P());
+						noise = generateNoiseValue(chipStyle, noiseFreq, p.X(), p.Y(), p.Z());
 						// only values bigger than noiseClamp will be considered
 						noise = (noise<noiseClamp?0.0:noise);
 						
@@ -347,7 +350,7 @@ double GeometryAgingPlugin::generateNoiseValue(int style, float freqScale, const
 			break;
 		case LINEAR:
 		case SINUSOIDAL:
-			for(int i=0; i<8; i++) {
+			for(int i=1; i<9; i++) {
 				float p = pow(freqScale, i);
 				double tmp = math::Perlin::Noise(p*x, p*y, p*z) / p;
 				tmp *= (tmp>=0.0?1.0:-1.0);
