@@ -119,17 +119,19 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 					"the angle between two adjacent faces will be considered.\n" \
 					"This parameter represents the minimum angle between two adjacent\n" \
 					"faces to consider the edge they are sharing.");
-			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, m.cm.bbox.Diag()*0.001, 
-					m.cm.bbox.Diag()*0.5,"Edge len threshold", 
+			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0,m.cm.bbox.Diag()*0.5,
+					"Edge len threshold", 
 					"The minimum length of an edge. Useful to avoid the creation of too many small faces.");
-			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.012, m.cm.bbox.Diag()*0.001, m.cm.bbox.Diag()*0.05,
+			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.05, 0, m.cm.bbox.Diag(),
 					"Max chip depth", "The maximum depth of a chip.");
-			params.addEnum("ChipStyle", 0, styles, "Chip Style", 
-					"Mesh erosion style to use. Different styles are defined " \
-					"passing different parameters to the noise function \nthat generates displacement values.");
-			params.addAbsPerc("NoiseFreqScale", 0.255, 0.001, 0.5, "Noise frequency scale",
+			params.addInt("Octaves", 3, "Fractal Octaves", 
+					"The number of octaves that are used in the generation of the fractal noise using Perlin noise; reasonalble values are in the 1..8 range. Setting it to 1 means using a simple Perlin Noise.");
+//			params.addEnum("ChipStyle", 0, styles, "Chip Style", 
+//					"Mesh erosion style to use. Different styles are defined " \
+//					"passing different parameters to the noise function \nthat generates displacement values.");
+			params.addAbsPerc("NoiseFreqScale", m.cm.bbox.Diag()/10, 0, m.cm.bbox.Diag(), "Noise frequency scale",
 					"Changes the noise frequency scale. This affects chip dimensions" \
-					"and the distance between chips (Linear and Sinusoidal styles only).");
+					"and the distance between chips, the value denotes the average values between two dents. Smaller number means small and frequent chips.");
 			params.addFloat("NoiseClamp", 0.5, "Noise clamp threshold [0..1]",
 					"All the noise values smaller than this parameter will be \n "\
 					"considered as 0.");
@@ -172,10 +174,11 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	if(edgeLenTreshold == 0.0) edgeLenTreshold = m.cm.bbox.Diag()*0.02;
 	float chipDepth = params.getAbsPerc("ChipDepth");
 	if(chipDepth == 0.0) chipDepth = m.cm.bbox.Diag()*0.012;
-	int chipStyle = params.getEnum("ChipStyle");
-	float noiseFreq = params.getAbsPerc("NoiseFreqScale");
+	//int chipStyle = params.getEnum("ChipStyle");
+	int octaves = params.getInt("Octaves");
+	float noiseScale = params.getAbsPerc("NoiseFreqScale");
 	// noiseFreq multiplied by the diagonal of the normalized bounding box
-	noiseFreq *= Distance(Point3<CVertexO::ScalarType>(1,1,1), Point3<CVertexO::ScalarType>(0,0,0));
+	//noiseFreq *= Distance(Point3<CVertexO::ScalarType>(1,1,1), Point3<CVertexO::ScalarType>(0,0,0));
 	float noiseClamp = params.getFloat("NoiseClamp");
 	if(noiseClamp < 0.0) noiseClamp = 0.0;
 	if(noiseClamp > 1.0) noiseClamp = 1.0;
@@ -219,14 +222,10 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 						float angleFactor;		// angle multiply factor in [0,1] range
 												// (greater angle -> deeper chip)
 						
-						Point3<CVertexO::ScalarType> p;
-						if(chipStyle == SIMPLE)
-							p = (*fi).V(j)->P();	// world coordinates
-						else	// local coordinates in the normalized bounding box
-							p = m.cm.bbox.GlobalToLocal((*fi).V(j)->P());
-						noise = generateNoiseValue(chipStyle, noiseFreq, p.X(), p.Y(), p.Z());
+						Point3f p = (*fi).V(j)->P()/noiseScale;
+						noise = generateNoiseValue(octaves, p);
 						// only values bigger than noiseClamp will be considered
-						noise = (noise<noiseClamp?0.0:noise);
+						noise = (noise<noiseClamp?0.0:(noise-noiseClamp));
 						
 						if((*fi).IsB(j)) {
 							dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
@@ -344,35 +343,17 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 
 
 /* Returns a noise value in range [0,1] using the selected style */
-double GeometryAgingPlugin::generateNoiseValue(int style, float freqScale, const CVertexO::ScalarType &x, 
-											const CVertexO::ScalarType &y, const CVertexO::ScalarType &z)
+double GeometryAgingPlugin::generateNoiseValue(int Octaves, const CVertexO::CoordType &p)
 {
 	double noise = .0;
-	
-	switch(style) {
-		case SIMPLE:
-			noise = math::Perlin::Noise(x, y, z);
-			break;
-		case LINEAR:
-		case SINUSOIDAL:
-			for(int i=1; i<9; i++) {
-				float p = pow(freqScale, i);
-				double tmp = math::Perlin::Noise(p*x, p*y, p*z) / p;
-				tmp *= (tmp>=0.0?1.0:-1.0);
+	float freq = 1.0;
+	for(int i=0; i<Octaves; i++) {
+				double tmp = math::Perlin::Noise(freq*p.X(), freq*p.Y(), freq*p.Z()) / freq;
+		    freq*=2;
 				noise += tmp;
 			}
-			break;
-	}
-	
-	if(style == LINEAR)
-		noise /= 8;
-	else if(style == SINUSOIDAL)
-		noise = sin(x + noise);
-	
-	// no negative values allowed (negative noise generates hills, not chips)
-	noise *= (noise>=0.0?1.0:-1.0);
-	
-	return noise;
+	// no negative values allowed (negative noise generates hills, not chips)	
+	return fabs(noise);
 }
 
 

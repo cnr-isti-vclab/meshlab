@@ -57,7 +57,8 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 	protected:
 		enum NoiseType {SIMPLE=0, LINEAR=1, SINUSOIDAL=2};
 		void refineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb);
-		double generateNoiseValue(int style, float freqScale, const CVertexO::ScalarType &x, const CVertexO::ScalarType &y, const CVertexO::ScalarType &z);
+		double generateNoiseValue(int Octaves, const CVertexO::CoordType &p);
+		//double generateNoiseValue(int style, float freqScale, const CVertexO::ScalarType &x, const CVertexO::ScalarType &y, const CVertexO::ScalarType &z);
 };
 
 
