@@ -146,7 +146,7 @@ private:
 	void DrawCircle(QPoint origin);
 	void UpdateBoundingArea(QPoint topLeft, QPoint topRight);
 	void CountVertexes();
-	bool isInside(vector<TexCoord2<float>>, TexCoord2<float>);
+	bool isInside(vector<TexCoord2<float> >, TexCoord2<float>);
 	void ShowFaces();
 	void UpdateUnify();
 
