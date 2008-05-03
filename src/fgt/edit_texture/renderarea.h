@@ -125,7 +125,12 @@ private:
 	QRect unifyRA, unifyRA1, unifyRB, unifyRB1;
 	QPoint uvertA, uvertB, uvertA1, uvertB1;
 	float tua, tva, tub, tvb, tua1, tva1, tub1, tvb1;
+	CFaceO *firstface, *firstface1;
 	bool locked;
+
+	vector<CVertexO*> path, path1;			// Set of vertex of the path
+	vector<Point2f> drawnPath, drawnPath1;	// Set of UV coords found in the path
+	bool drawP, drawP1;
 
 	void UpdateUV();
 	void UpdateVertex();
@@ -149,6 +154,7 @@ private:
 	bool isInside(vector<TexCoord2<float> >, TexCoord2<float>);
 	void ShowFaces();
 	void UpdateUnify();
+	vector<CVertexO*> FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN);
 
 signals:
 	void UpdateModel();

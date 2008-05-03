@@ -94,6 +94,7 @@ void TextureEditor::SmoothTextureCoordinates()
 {
 	// <-------
 	//vcg::tri::SmoothTextureCoords(model->cm);
+
 }
 
 // Buttons

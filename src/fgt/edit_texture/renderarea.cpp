@@ -65,6 +65,12 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	orX = 0; orY = 0;
 	initVX = 0; initVY = 0;
 	locked = false;
+	drawnPath =	vector<Point2f>();
+	drawnPath1 = vector<Point2f>();
+	drawP = false;
+	drawP1 = false;
+	path =	vector<CVertexO*>();
+	path1 =	vector<CVertexO*>();
 
 	zoom = 1;
 
@@ -338,6 +344,22 @@ void RenderArea::paintEvent(QPaintEvent *)
 			{
 				painter.setPen(QPen(QBrush(Qt::blue),1));
 				painter.drawLine(unifyRA1.center(), unifyRB1.center());
+			}
+			if (drawP)
+			{
+				painter.setPen(QPen(QBrush(Qt::red),2));
+				for (unsigned k = 0; k < drawnPath.size()-1; k++)
+				{
+					painter.drawLine(ToScreenSpace(drawnPath[k].X(), drawnPath[k].Y()), ToScreenSpace(drawnPath[k+1].X(),drawnPath[k+1].Y()));			
+				}
+			}
+			if (drawP1)
+			{
+				painter.setPen(QPen(QBrush(Qt::red),2));
+				for (unsigned k = 0; k < drawnPath1.size()-1; k++)
+				{
+					painter.drawLine(ToScreenSpace(drawnPath1[k].X(), drawnPath1[k].Y()), ToScreenSpace(drawnPath1[k+1].X(),drawnPath1[k+1].Y()));
+				}
 			}
 		}
 
@@ -771,7 +793,7 @@ void RenderArea::RemapClamp()
 	// Remap the uv coord out of border using clamp method
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		if (model->cm.face[i].WT(0).n() == textNum)
+		if (model->cm.face[i].WT(0).n() == textNum && !model->cm.face[i].IsD())
 		{
 			model->cm.face[i].ClearUserBit(selBit);
 			for (unsigned j = 0; j < 3; j++)
@@ -794,7 +816,7 @@ void RenderArea::RemapMod()
 	// Remap the uv coord out of border using mod function
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		if (model->cm.face[i].WT(0).n() == textNum)
+		if (model->cm.face[i].WT(0).n() == textNum && !model->cm.face[i].IsD())
 		{
 			model->cm.face[i].ClearUserBit(selBit);
 			for (unsigned j = 0; j < 3; j++)
@@ -910,7 +932,7 @@ void RenderArea::ChangeMode(int modenumber)
 				uvertA1 = QPoint();
 				uvertB = QPoint();
 				uvertB1 = QPoint();
-				if (selected) 
+				if (selected)
 					{for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearS();}
 				selected = false;
 				selectedV = false;
@@ -918,6 +940,14 @@ void RenderArea::ChangeMode(int modenumber)
 				for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 				selVertBit = CVertexO::NewBitFlag();
 				this->setCursor(Qt::CrossCursor);
+				model->cm.face.EnableVFAdjacency();
+				model->cm.vert.EnableVFAdjacency();
+				model->cm.face.EnableFFAdjacency();
+				vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+				vcg::tri::UpdateTopology<CMeshO>::VertexFace(model->cm);
+				model->clearDataMask(MeshModel::MM_BORDERFLAG);
+				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
+				vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(model->cm);
 			}
 			break;
 	}
@@ -973,7 +1003,7 @@ void RenderArea::RotateComponent(float theta)
 		{
 			for (unsigned i = 0; i < model->cm.face.size(); i++)
 			{
-				if (model->cm.face[i].WT(0).n() == textNum && (!selected || (selected && model->cm.face[i].IsUserBit(selBit))))
+				if (model->cm.face[i].WT(0).n() == textNum && !model->cm.face[i].IsD() && (!selected || (selected && model->cm.face[i].IsUserBit(selBit))))
 				for (unsigned j = 0; j < 3; j++)
 				{
 					float u = origin.x() + (cosv * (model->cm.face[i].WT(j).u() - origin.x()) - sinv * (model->cm.face[i].WT(j).v() - origin.y()));
@@ -990,7 +1020,7 @@ void RenderArea::RotateComponent(float theta)
 				for (unsigned j = 0; j < 3; j++)
 				{
 					if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(),model->cm.face[i].WT(j).v()))
-						&& model->cm.face[i].V(j)->IsUserBit(selVertBit))
+						&& model->cm.face[i].V(j)->IsUserBit(selVertBit) && !model->cm.face[i].V(j)->IsD())
 					{
 						float u = origin.x() + (cosv * (model->cm.face[i].WT(j).u() - origin.x()) - sinv * (model->cm.face[i].WT(j).v() - origin.y()));
 						float v = origin.y() + (sinv * (model->cm.face[i].WT(j).u() - origin.x()) + cosv * (model->cm.face[i].WT(j).v() - origin.y()));
@@ -1012,7 +1042,7 @@ void RenderArea::ScaleComponent(float percX, float percY)
 	// Scale the selected component. The origin is set to the clicked point
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		if (model->cm.face[i].WT(0).n() == textNum && selected && model->cm.face[i].IsUserBit(selBit))
+		if (model->cm.face[i].WT(0).n() == textNum && selected && model->cm.face[i].IsUserBit(selBit) && !model->cm.face[i].IsD())
 		for (unsigned j = 0; j < 3; j++)
 		{
 			float x = oScale.x() + (model->cm.face[i].WT(j).u() - oScale.x()) * percX;
@@ -1030,7 +1060,7 @@ void RenderArea::UpdateUV()
 	// After a move of component, re-calculate the new UV coordinates
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		if (model->cm.face[i].WT(0).n() == textNum && model->cm.face[i].IsUserBit(selBit))
+		if (model->cm.face[i].WT(0).n() == textNum && model->cm.face[i].IsUserBit(selBit)  && !model->cm.face[i].IsD())
 		{
 			for (unsigned j = 0; j < 3; j++)
 			{
@@ -1052,7 +1082,7 @@ void RenderArea::UpdateVertex()
 		for (unsigned j = 0; j < 3; j++)
 		{
 			if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(),model->cm.face[i].WT(j).v()))
-				&& model->cm.face[i].V(j)->IsUserBit(selVertBit))
+				&& model->cm.face[i].V(j)->IsUserBit(selVertBit) && !model->cm.face[i].V(j)->IsD())
 			{
 				model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)posVX/(AREADIM*zoom);
 				model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)posVY/(AREADIM*zoom);
@@ -1085,7 +1115,7 @@ void RenderArea::SelectFaces()
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
-		if ((*fi).WT(0).n() == textNum)
+		if ((*fi).WT(0).n() == textNum && !(*fi).IsD())
 		{
 	        (*fi).ClearUserBit(selBit);
 			QVector<QPoint> t = QVector<QPoint>(); 
@@ -1116,7 +1146,7 @@ void RenderArea::SelectVertexes()
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
-		if ((*fi).WT(0).n() == textNum)
+		if ((*fi).WT(0).n() == textNum && !(*fi).IsD())
 		{
 			for (int j = 0; j < 3; j++)
 			{
@@ -1133,8 +1163,11 @@ void RenderArea::SelectVertexes()
 						{ 
 							unifyRA = QRect(QPoint(selStart.x() - VRADIUS, selStart.y() - VRADIUS), QPoint(selEnd.x() + VRADIUS, selEnd.y() + VRADIUS));
 							unifyA = (*fi).V(j);
+							firstface = &(*fi);
 							uvertA = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
 							tua = (*fi).WT(j).u(); tva = (*fi).WT(j).v();
+							drawnPath.clear();
+							drawnPath.push_back(Point2f(tua,tva));
 						}
 						else if (unifyRB == QRect()) 
 						{ 
@@ -1142,13 +1175,20 @@ void RenderArea::SelectVertexes()
 							unifyB = (*fi).V(j);
 							uvertB = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
 							tub = (*fi).WT(j).u(); tvb = (*fi).WT(j).v();
+							path.clear();
+							path = FindPath(unifyA, unifyB, firstface, 0);
+							drawP = true;
+							this->update();
 						}
 						else if (unifyRA1 == QRect()) 
 						{ 
+							firstface1 = &(*fi);
 							unifyRA1 = QRect(QPoint(selStart.x() - VRADIUS, selStart.y() - VRADIUS), QPoint(selEnd.x() + VRADIUS, selEnd.y() + VRADIUS)); 
 							unifyA1 = (*fi).V(j);
 							uvertA1 = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
 							tua1 = (*fi).WT(j).u(); tva1 = (*fi).WT(j).v();
+							drawnPath1.clear();
+							drawnPath1.push_back(Point2f(tua1,tva1));
 						}
 						else if (unifyRB1 == QRect()) 
 						{ 
@@ -1156,6 +1196,10 @@ void RenderArea::SelectVertexes()
 							unifyB1 = (*fi).V(j);
 							uvertB1 = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
 							tub1 = (*fi).WT(j).u(); tvb1 = (*fi).WT(j).v();
+							path1.clear();
+							path1 = FindPath(unifyA1, unifyB1, firstface1, 1);
+							drawP1 = true;
+							this->update();
 						}
 						return;
 					}
@@ -1318,19 +1362,168 @@ void RenderArea::UnifyCouple()
 void RenderArea::UnifySet()
 {
 	// Unify a set of vertexes
-	// <------
-	
-	
-	
+	if (path.size() == path1.size() && path.size() > 2)
+	{
+		for (unsigned i = 0; i < path.size(); i++)
+		{
+			float mu = (drawnPath[i].X() + drawnPath1[i].X())/2.0;
+			float mv = (drawnPath[i].Y() + drawnPath1[i].Y())/2.0;
+			int n = path[i]->VFi();
+			CFaceO *next = path[i]->VFp();
+			while (n != -1)
+			{
+				if (drawnPath[i].X() == next->WT(n).u() && drawnPath[i].Y() == next->WT(n).v())
+				{
+					next->WT(n).u() = mu;
+					next->WT(n).v() = mv;
+				}
+				CFaceO* previus = next;
+				next = next->VFp(n);
+				n = previus->VFi(n);
+				if (next == 0) break;
+			}
+			int n1 = path1[i]->VFi();
+			CFaceO *next1 = path1[i]->VFp();
+			while (n1 != -1)
+			{
+				if (drawnPath1[i].X() == next1->WT(n1).u() && drawnPath1[i].Y() == next1->WT(n1).v())
+				{
+					next1->WT(n1).u() = mu;
+					next1->WT(n1).v() = mv;
+				}
+				CFaceO* previus1 = next1;
+				next1 = next1->VFp(n1);
+				n1 = previus1->VFi(n1);
+				if (next1 == 0) break;
+			}
+		}
+		vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+	}
 	selectedV = false;
-	selVertBit = CVertexO::NewBitFlag();
+	for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.vert[i].ClearUserBit(selVertBit);
 	areaUV = QRectF();
 	selection = QRect();
 	unifyA = 0; unifyB = 0; unifyA1 = 0; unifyB1 = 0;
+	firstface = 0; firstface1 = 0;
+	drawP = false; drawP1 = false;
 	uvertA = QPoint(); uvertA1 = QPoint(); uvertB = QPoint(); uvertB1 = QPoint();
 	unifyRA = QRect(); unifyRA1 = QRect(); unifyRB = QRect(); unifyRB1 = QRect();
 	this->update();
 	emit UpdateModel();
+}
+
+vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN)
+{
+	// Find a path from the selected vertex, walking only on border edge...
+	vector<CVertexO*> path = vector<CVertexO*>();
+	int index = 0;
+	vector<CFaceO*> Q = vector<CFaceO*>();
+	Q.push_back(first);
+	path.push_back(begin);
+	first->SetV();
+	bool finish = false;
+	int notcontrol = -1;
+	int lastadd = 0, lastex = -1;
+	if (begin->IsB() && end->IsB())
+	while (index < Q.size())
+	{
+		bool excluded = false;
+		int oldsize = Q.size();
+		CFaceO* p = Q[index];
+		if (!p->IsV() || (p->IsV() && index == 0))
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				if (p->IsB(j) && j != notcontrol)
+				{
+					notcontrol = j;
+					CVertexO *tmp1 = p->V(j);
+					CVertexO *tmp2 = p->V((j+1)%3);
+					bool added = false;
+					int n, oldn;
+					CFaceO *next, *previus;
+					float tu, tv;
+					if (tmp1 == path[path.size()-1])
+					{
+						path.push_back(tmp2);
+						if (pathN == 0) drawnPath.push_back(Point2f(p->WT((j+1)%3).u(),p->WT((j+1)%3).v()));
+						else drawnPath1.push_back(Point2f(p->WT((j+1)%3).u(),p->WT((j+1)%3).v()));
+						if (tmp2 == end) {finish = true; break;}
+						n = tmp2->VFi(), oldn = (j+1)%3;
+						next = tmp2->VFp(), previus = p;
+						added = true;
+						lastadd = index; lastex = j;
+					}
+					else if (tmp2 == path[path.size()-1])
+					{
+						path.push_back(tmp1);
+						if (pathN == 0) drawnPath.push_back(Point2f(p->WT(j).u(),p->WT(j).v()));
+						else drawnPath1.push_back(Point2f(p->WT(j).u(),p->WT(j).v()));
+						if (tmp1 == end) {finish = true; break;}
+						n = tmp1->VFi(), oldn = j;
+						next = tmp1->VFp(), previus = p;
+						added = true;
+						lastadd = index; lastex = j;
+					}
+					if (added)
+					{
+						tu = p->WT(oldn).u(); tv = p->WT(oldn).v();
+						while (n != -1)
+						{
+							if (tu == next->WT(n).u() && tv == next->WT(n).v() && next != p && !next->IsV()) 
+								Q.push_back(next);
+							previus = next;
+							oldn = n;
+							next = next->VFp(n);
+							n = previus->VFi(n);
+							if (next == 0) break;
+						}
+						break;
+					}
+					else excluded = true;
+				}
+			}
+			p->SetV();
+			if (!p->IsB(0) && !p->IsB(1) && !p->IsB(2) && index != 0) excluded = true;
+		}
+		if (finish) break;
+		if (oldsize == Q.size() && !excluded)
+		{
+			if (index == 0)	// A lot of problems if the first face hasn't border edge....
+			{
+				int n, oldn;
+				for (int c = 0; c < 3; c++)
+				{
+					if (Q[0]->V(c) == begin) n = c;
+				}
+				float tu = Q[0]->WT(n).u(), tv = Q[0]->WT(n).v();
+				CFaceO* next, *previus;
+				oldn = n; n = begin->VFi();
+				next = begin->VFp(), previus = Q[0];
+				while (n != -1)
+				{
+					if (tu == next->WT(n).u() && tv == next->WT(n).v() && next != Q[0]) 
+						Q.push_back(next);
+					previus = next;
+					oldn = n;
+					next = next->VFp(n);
+					n = previus->VFi(n);
+					if (next == 0) break;
+				}
+			}
+			else if (index == Q.size()-1) {index = lastadd; p->ClearV();}	// Force to search again the same face...
+		}
+		else notcontrol = -1;
+		index++;
+		if (index == Q.size() && end != path[path.size()-1]) 
+		{
+			index = lastadd; 
+			notcontrol = lastex;
+			Q[index]->ClearV();
+		}
+	}
+	for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearV();
+	return path;
 }
 
 void RenderArea::HandleScale(QPoint e)
@@ -1438,7 +1631,7 @@ void RenderArea::RecalculateSelectionArea()
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
-		if ((*fi).IsUserBit(selBit))
+		if ((*fi).IsUserBit(selBit) && !(*fi).IsD())
 		{
 			QVector<QPoint> t = QVector<QPoint>(); 
 			t.push_back(ToScreenSpace((*fi).WT(0).u(), (*fi).WT(0).v()));
@@ -1485,7 +1678,7 @@ void RenderArea::UpdateVertexSelection()
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
-		if ((*fi).WT(0).n() == textNum)
+		if ((*fi).WT(0).n() == textNum && !(*fi).IsD())
 		{
 			for (int j = 0; j < 3; j++)
 			{
@@ -1574,7 +1767,7 @@ void RenderArea::ImportSelection()
 	CMeshO::FaceIterator fi;
 	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
 	{
-		if ((*fi).IsS())
+		if ((*fi).IsS() && !(*fi).IsD())
 		{
 			if (!selected) selected = true;
 			(*fi).SetUserBit(selBit);
