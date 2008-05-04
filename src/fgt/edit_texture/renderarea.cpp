@@ -943,11 +943,7 @@ void RenderArea::ChangeMode(int modenumber)
 				model->cm.face.EnableVFAdjacency();
 				model->cm.vert.EnableVFAdjacency();
 				model->cm.face.EnableFFAdjacency();
-				vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
-				vcg::tri::UpdateTopology<CMeshO>::VertexFace(model->cm);
-				model->clearDataMask(MeshModel::MM_BORDERFLAG);
-				vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
-				vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(model->cm);
+				UpdateUnifyTopology();
 			}
 			break;
 	}
@@ -1176,8 +1172,11 @@ void RenderArea::SelectVertexes()
 							uvertB = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
 							tub = (*fi).WT(j).u(); tvb = (*fi).WT(j).v();
 							path.clear();
-							path = FindPath(unifyA, unifyB, firstface, 0);
-							drawP = true;
+							if (unifyA->IsB() && unifyB->IsB())
+							{
+								path = FindPath(unifyA, unifyB, firstface, 0);
+								drawP = true;
+							}
 							this->update();
 						}
 						else if (unifyRA1 == QRect()) 
@@ -1197,8 +1196,11 @@ void RenderArea::SelectVertexes()
 							uvertB1 = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
 							tub1 = (*fi).WT(j).u(); tvb1 = (*fi).WT(j).v();
 							path1.clear();
-							path1 = FindPath(unifyA1, unifyB1, firstface1, 1);
-							drawP1 = true;
+							if (unifyA1->IsB() && unifyB1->IsB())
+							{
+								path1 = FindPath(unifyA1, unifyB1, firstface1, 1);
+								drawP1 = true;
+							}
 							this->update();
 						}
 						return;
@@ -1363,7 +1365,7 @@ void RenderArea::UnifyCouple()
 void RenderArea::UnifySet()
 {
 	// Unify a set of vertexes
-	if (path.size() == path1.size())
+	if (path.size() == path1.size() && drawP && drawP1)
 	{
 		for (unsigned i = 0; i < path.size(); i++)
 		{
@@ -1398,7 +1400,7 @@ void RenderArea::UnifySet()
 				if (next1 == 0) break;
 			}
 		}
-		vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+		UpdateUnifyTopology();
 	}
 	selectedV = false;
 	for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.vert[i].ClearUserBit(selVertBit);
@@ -1818,6 +1820,16 @@ void RenderArea::CountVertexes()
 			}
 		}
 	}
+}
+
+void RenderArea::UpdateUnifyTopology()
+{
+	// Update the topology needed for unify of edge
+	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+	vcg::tri::UpdateTopology<CMeshO>::VertexFace(model->cm);
+	model->clearDataMask(MeshModel::MM_BORDERFLAG);
+	vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
+	vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(model->cm);
 }
 
 bool RenderArea::isInside(vector<TexCoord2<float> > tmpCoord, TexCoord2<float> act)

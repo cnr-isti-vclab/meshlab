@@ -155,6 +155,7 @@ private:
 	void ShowFaces();
 	void UpdateUnify();
 	vector<CVertexO*> FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN);
+	void UpdateUnifyTopology();
 
 signals:
 	void UpdateModel();
