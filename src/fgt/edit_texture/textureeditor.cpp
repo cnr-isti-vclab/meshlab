@@ -1,7 +1,5 @@
 #include <QTabBar>
 #include "textureeditor.h"
-#include<vcg/complex/trimesh/textcoord_optimization.h>
-
 
 static int countPage = 1;	// Number of Tab in the texture's TabWidgets
 
@@ -25,9 +23,6 @@ void TextureEditor::Reset()
 void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 {
 	// Add a RenderArea widget to the TabWidget
-	int id = area->mm()->glw.TMId.back();
-	
-
 	QTabBar *t = new QTabBar(ui.tabWidget);
 	RenderArea *ra= new RenderArea(t, texture, m, index);
 	ra->setGeometry(MARGIN,MARGIN,MAXW,MAXH);
@@ -67,19 +62,6 @@ void TextureEditor::UpdateModel()
 	area->update();
 }
 
-void TextureEditor::SetProgress(int val)
-{
-	// Change the value of the progress bar
-	ui.progressBar->setValue(val);
-	ui.progressBar->update();
-}
-
-void TextureEditor::SetProgressMax(int val)
-{
-	// Set the max of progress bar
-	ui.progressBar->setMaximum(val);
-}
-
 void TextureEditor::ResetLayout()
 {
 	// uncheck all the buttons
@@ -92,9 +74,13 @@ void TextureEditor::ResetLayout()
 
 void TextureEditor::SmoothTextureCoordinates()
 {
-	// <-------
-	//vcg::tri::SmoothTextureCoords(model->cm);
-
+	// Set up the smooth function
+	float alpha = -1;
+	if (ui.checkBox->isChecked()) alpha = ui.spinBoxAlfa->value();
+	for (int i = 0; i < ui.spinBoxIteration->value(); i++)
+		SmoothTextureWEdgeCoords(model->cm, alpha);
+	area->update();
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->update();
 }
 
 // Buttons
@@ -195,4 +181,11 @@ void TextureEditor::on_tabWidget_currentChanged(int index)
 	else if (ui.vertexButton->isChecked()) {button = 2; mode = 2;}
 	((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->ChangeMode(button);
 	if (mode != -1) ((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->ChangeSelectMode(mode);
+}
+
+void TextureEditor::on_checkBox_stateChanged()
+{
+	bool s = ui.checkBox->isChecked();
+	ui.label_5->setEnabled(s);
+	ui.spinBoxAlfa->setEnabled(s);
 }

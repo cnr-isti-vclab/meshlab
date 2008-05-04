@@ -54,7 +54,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Choose and unify a set of vertexes</string>
+         <string>Choose and unify a set of disconnected edges</string>
         </property>
         <property name="text" >
          <string/>
@@ -484,50 +484,7 @@
          <property name="spacing" >
           <number>6</number>
          </property>
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label" >
-           <property name="text" >
-            <string>Iteration:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="6" >
-          <widget class="QDoubleSpinBox" name="spinBoxAlfa" >
-           <property name="decimals" >
-            <number>1</number>
-           </property>
-           <property name="maximum" >
-            <double>1.000000000000000</double>
-           </property>
-           <property name="singleStep" >
-            <double>0.100000000000000</double>
-           </property>
-           <property name="value" >
-            <double>0.300000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3" >
-          <spacer>
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" >
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="4" colspan="2" >
-          <widget class="QLabel" name="label_5" >
-           <property name="text" >
-            <string>Alfa:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2" >
+         <item row="0" column="4" >
           <widget class="QSpinBox" name="spinBoxIteration" >
            <property name="maximum" >
             <number>10</number>
@@ -540,20 +497,56 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="5" colspan="2" >
+         <item row="1" column="3" colspan="2" >
           <widget class="QPushButton" name="smoothButton" >
            <property name="text" >
             <string>Apply</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" colspan="5" >
-          <widget class="QProgressBar" name="progressBar" >
-           <property name="value" >
-            <number>0</number>
+         <item row="0" column="3" >
+          <widget class="QLabel" name="label" >
+           <property name="text" >
+            <string>Iteration:</string>
            </property>
-           <property name="orientation" >
-            <enum>Qt::Horizontal</enum>
+          </widget>
+         </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="label_5" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="text" >
+            <string>Alfa:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2" >
+          <widget class="QCheckBox" name="checkBox" >
+           <property name="text" >
+            <string>Set Alpha</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QDoubleSpinBox" name="spinBoxAlfa" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="decimals" >
+            <number>1</number>
+           </property>
+           <property name="maximum" >
+            <double>1.000000000000000</double>
+           </property>
+           <property name="minimum" >
+            <double>0.100000000000000</double>
+           </property>
+           <property name="singleStep" >
+            <double>0.100000000000000</double>
+           </property>
+           <property name="value" >
+            <double>0.300000000000000</double>
            </property>
           </widget>
          </item>

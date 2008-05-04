@@ -22,7 +22,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	image = QImage();
 	if(textureName != QString())
 	{
-		if (QFile(textureName).exists()) image = QImage(textureName);
+		if (QFile(textureName).exists())image = QImage(textureName);
 		else textureName = QString();
 	}
 	textNum = tnum;
@@ -122,7 +122,7 @@ void RenderArea::paintEvent(QPaintEvent *)
     painter.setRenderHint(QPainter::Antialiasing, antialiased);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 	//painter.begin(painter.device());	// Initialize a GL context
-	
+
 	tb->GetView();
 	tb->Apply(true);
 
@@ -1308,6 +1308,7 @@ void RenderArea::InvertSelection()
 
 void RenderArea::Flip(bool mode)
 {
+	// Flip the selected faces
 	if (selected)
 	{
 		QPointF mid = ToUVSpace(selection.center().x(), selection.center().y());
@@ -1362,7 +1363,7 @@ void RenderArea::UnifyCouple()
 void RenderArea::UnifySet()
 {
 	// Unify a set of vertexes
-	if (path.size() == path1.size() && path.size() > 2)
+	if (path.size() == path1.size())
 	{
 		for (unsigned i = 0; i < path.size(); i++)
 		{
