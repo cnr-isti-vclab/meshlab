@@ -1,12 +1,12 @@
 TEMPLATE      = lib
 CONFIG       += plugin 
 INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include
-HEADERS       = filterunsharp.h \
+HEADERS       = filter_unsharp.h \
 		../../../../sf/vcg/complex/trimesh/crease_cut.h
 				
-SOURCES       = filterunsharp.cpp\ 
+SOURCES       = filter_unsharp.cpp\ 
 		../../meshlab/filterparameter.cpp
-TARGET        = filterunsharp
+TARGET        = filter_unsharp
 DESTDIR       = ../../meshlab/plugins
 
 CONFIG		+= debug_and_release
