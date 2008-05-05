@@ -93,8 +93,8 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
 		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
 		case FP_FACE_NORMAL_SMOOTHING:	    return tr("Smooth Face Normals without touching the position of the vertices."); 
   	case FP_UNSHARP_NORMAL:				return tr("Unsharpen the normals, putting in more evidence normal variations"); 
-  	case FP_UNSHARP_GEOMETRY:	    return tr("Cut the mesh along crease edges, duplicating the vertices as necessary."); 
-  	case FP_UNSHARP_COLOR:	    return tr("Cut the mesh along crease edges, duplicating the vertices as necessary."); 
+  	case FP_UNSHARP_GEOMETRY:	    return tr("Unsharpen the color, putting in more evidence normal variations"); 
+  	case FP_UNSHARP_COLOR:	    return tr("Unsharpen the normals, putting in more evidence normal variations"); 
 		case FP_RECOMPUTE_VERTEX_NORMAL : return tr("Recompute vertex normals as an area weighted average of the adjacent faces");
   	default: assert(0);
   }
@@ -132,6 +132,8 @@ const int FilterUnsharp::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
+		case FP_UNSHARP_GEOMETRY:	
+		case FP_UNSHARP_COLOR:	return MeshModel::MM_BORDERFLAG;
     case FP_CREASE_CUT :	return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
 		case FP_UNSHARP_NORMAL:		
 		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
@@ -145,14 +147,13 @@ const int FilterUnsharp::getRequirements(QAction *action)
 
 bool FilterUnsharp::autoDialog(QAction *action) 
 {
- switch(ID(action))
+	switch(ID(action))
 	{
-//    case FP_CREASE_CUT :	return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
-		case FP_UNSHARP_NORMAL:		return true;
-//		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
-//		case FP_FACE_NORMAL_NORMALIZE:	    return 0; 
-	 }
-return false;
+	 case FP_UNSHARP_GEOMETRY:		
+	 case FP_UNSHARP_COLOR:	
+	 case FP_UNSHARP_NORMAL:		return true;
+	}
+	return false;
 }
 void FilterUnsharp::initParameterSet(QAction *action, MeshModel &/*m*/, FilterParameterSet & parlst)
 {
@@ -160,6 +161,10 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &/*m*/, FilterPa
 		parlst.addBool("recalc", false, tr("Recompute Normals"), tr("Recompute normals from scratch before the unsharp masking"));
 		parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
 		parlst.addInt("iterations", 5, "Iterations", 	tr("number of laplacian face smooth iterations in every run"));
+	}
+	if (ID(action) == FP_UNSHARP_GEOMETRY || ID(action) == FP_UNSHARP_COLOR) {
+		parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
+		parlst.addInt("iterations", 5, "Iterations", 	tr("number of laplacian smooth iterations in every run"));
 	}
 }
 
@@ -193,7 +198,40 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 				for(int i=0;i<m.cm.fn;++i)
 					m.cm.face[i].N() = normalOrig[i] + (normalOrig[i] - m.cm.face[i].N())*alpha;
 				
-			}
+			}	break;
+	case FP_UNSHARP_GEOMETRY:			
+			{	
+				float alpha=par.getFloat("weight");
+				int smoothIter = par.getInt("iterations");
+				
+				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+				vector<Point3f> geomOrig(m.cm.vn);
+				for(int i=0;i<m.cm.vn;++i)
+					geomOrig[i]=m.cm.vert[i].P();
+				
+				LaplacianSmooth(m.cm,1);
+				
+				for(int i=0;i<m.cm.vn;++i)
+					m.cm.vert[i].P()=geomOrig[i] + (geomOrig[i] - m.cm.vert[i].P())*alpha;				
+					
+				tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);
+				
+			}	break;
+	case FP_UNSHARP_COLOR:			
+			{	
+				float alpha=par.getFloat("weight");
+				int smoothIter = par.getInt("iterations");
+				
+				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+				vector<Color4f> colorOrig(m.cm.vn);
+				for(int i=0;i<m.cm.vn;++i)
+					colorOrig[i].Import(m.cm.vert[i].C());
+				
+				LaplacianSmoothColor(m.cm,smoothIter);
+				
+				for(int i=0;i<m.cm.vn;++i)
+					m.cm.vert[i].C().Import(colorOrig[i] + (colorOrig[i] - Color4f::Construct(m.cm.vert[i].C()))*alpha);				
+			}	break;
 	case FP_FACE_NORMAL_NORMALIZE :
 		tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
 			 break;
