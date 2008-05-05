@@ -31,6 +31,7 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include <vcg/complex/trimesh/refine.h>
+#include <vcg/space/index/grid_static_ptr.h>
 
 #include "edgepred.h"
 
@@ -58,7 +59,7 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 		enum NoiseType {SIMPLE=0, LINEAR=1, SINUSOIDAL=2};
 		void refineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb);
 		double generateNoiseValue(int Octaves, const CVertexO::CoordType &p);
-		//double generateNoiseValue(int style, float freqScale, const CVertexO::ScalarType &x, const CVertexO::ScalarType &y, const CVertexO::ScalarType &z);
+		bool faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceType> p, GridStaticPtr<CFaceO, CMeshO::ScalarType> &gM);
 };
 
 

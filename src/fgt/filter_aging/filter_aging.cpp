@@ -97,27 +97,22 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 		qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 	else
 		qRange = std::pair<float,float>(0.0, 0.0);
-	// styles list (short descriptions)
-	QStringList styles;
-	styles.append("Simple     (1 function) ");
-	styles.append("Linear     (8 functions)");
-	styles.append("Sinusoidal (8 functions)");
 	
 	switch(ID(action)) {
 		case FP_ERODE:
 			params.addBool("UseQuality", m.cm.HasPerVertexQuality() && qRange.second>qRange.first, 
 					"Use per vertex quality values", 
-					"Use per vertex quality values to find the areas to erode.\n" \
+					"Use per vertex quality values to find the areas to erode.\n"
 					"Useful after applying ambient occlusion filter.");
 			params.addAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*2/3, 
-					qRange.first, qRange.second,  "Min quality threshold", 
-					"When you decide to use per vertex quality values, \n" \
-					"this parameter represents the minimum quality value \n" \
+					qRange.first, qRange.second,  "Min quality threshold",
+					"When you decide to use per vertex quality values, \n"
+					"this parameter represents the minimum quality value \n"
 					"two vertexes must have to consider the edge they are sharing.");
 			params.addFloat("AngleThreshold", 60.0, "Min angle threshold (deg)",
-					"If you decide not to use per vertex quality values, \n" \
-					"the angle between two adjacent faces will be considered.\n" \
-					"This parameter represents the minimum angle between two adjacent\n" \
+					"If you decide not to use per vertex quality values, \n"
+					"the angle between two adjacent faces will be considered. \n"
+					"This parameter represents the minimum angle between two adjacent \n"
 					"faces to consider the edge they are sharing.");
 			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0,m.cm.bbox.Diag()*0.5,
 					"Edge len threshold", 
@@ -125,24 +120,22 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 			params.addAbsPerc("ChipDepth", m.cm.bbox.Diag()*0.05, 0, m.cm.bbox.Diag(),
 					"Max chip depth", "The maximum depth of a chip.");
 			params.addInt("Octaves", 3, "Fractal Octaves", 
-					"The number of octaves that are used in the generation of the fractal noise using Perlin noise; reasonalble values are in the 1..8 range. Setting it to 1 means using a simple Perlin Noise.");
-//			params.addEnum("ChipStyle", 0, styles, "Chip Style", 
-//					"Mesh erosion style to use. Different styles are defined " \
-//					"passing different parameters to the noise function \nthat generates displacement values.");
+					"The number of octaves that are used in the generation of the \n"
+					"fractal noise using Perlin noise; reasonalble values are in the \n"
+					"1..8 range. Setting it to 1 means using a simple Perlin Noise.");
 			params.addAbsPerc("NoiseFreqScale", m.cm.bbox.Diag()/10, 0, m.cm.bbox.Diag(), "Noise frequency scale",
-					"Changes the noise frequency scale. This affects chip dimensions" \
-					"and the distance between chips, the value denotes the average values between two dents. Smaller number means small and frequent chips.");
+					"Changes the noise frequency scale: this affects chip dimensions and \n"
+					"the distance between chips. The value denotes the average values \n"
+					"between two dents. Smaller number means small and frequent chips.");
 			params.addFloat("NoiseClamp", 0.5, "Noise clamp threshold [0..1]",
-					"All the noise values smaller than this parameter will be \n "\
+					"All the noise values smaller than this parameter will be \n "
 					"considered as 0.");
-			params.addFloat("DelIntersMaxIter", 8, "Max iterations to delete self intersections",
-					"When eroding the mesh sometimes may happen that a face\n" \
-					"intersects another area of the mesh, generating awful \n" \
-					"artefacts. To avoid this, the vertexes of that face \n" \
-					"will gradually be moved back to their original positions.\n" \
-					"This parameter represents the maximum number of iterations\n" \
-					"that the plugin can do to try to correct these errors (0 to\n" \
-					"ignore the check).");
+			params.addFloat("DisplacementSteps", 10, "Displacement steps",
+					"The whole displacement process is performed as a sequence of small \n"
+					"offsets applyed on each vertex. This parameter represents the number \n"
+					"of steps into which the displacement process will be splitted. \n"
+					"Useful to avoid the introduction of self intersections. \n"
+					"Bigger number means better accuracy.");
 			params.addBool("Selected", m.cm.sfn>0, "Affect only selected faces", 
 					"The aging procedure will be applied to the selected faces only.");
 			break;
@@ -173,29 +166,19 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	float edgeLenTreshold = params.getAbsPerc("EdgeLenThreshold");
 	if(edgeLenTreshold == 0.0) edgeLenTreshold = m.cm.bbox.Diag()*0.02;
 	float chipDepth = params.getAbsPerc("ChipDepth");
-	if(chipDepth == 0.0) chipDepth = m.cm.bbox.Diag()*0.012;
-	//int chipStyle = params.getEnum("ChipStyle");
+	if(chipDepth == 0.0) chipDepth = m.cm.bbox.Diag()*0.05;
 	int octaves = params.getInt("Octaves");
 	float noiseScale = params.getAbsPerc("NoiseFreqScale");
-	// noiseFreq multiplied by the diagonal of the normalized bounding box
-	//noiseFreq *= Distance(Point3<CVertexO::ScalarType>(1,1,1), Point3<CVertexO::ScalarType>(0,0,0));
 	float noiseClamp = params.getFloat("NoiseClamp");
 	if(noiseClamp < 0.0) noiseClamp = 0.0;
 	if(noiseClamp > 1.0) noiseClamp = 1.0;
-	float intersMaxIter = params.getFloat("DelIntersMaxIter");
+	int dispSteps = (int)params.getFloat("DisplacementSteps");
 	bool selected = params.getBool("Selected");
 	
 	// edge predicate
 	AgingEdgePred ep = AgingEdgePred((useQuality?AgingEdgePred::QUALITY:AgingEdgePred::ANGLE), 
 									 selected, edgeLenTreshold, thresholdValue);
-	
-	int fcount = 1;					// face counter (to update progress bar)
-	
-	typedef std::map<CVertexO*, Point3<CVertexO::ScalarType> > DispMap;
-	DispMap displaced;					// displaced vertexes and their displacement offset 
-	std::vector<CFaceO*> intersFace;	// self intersecting mesh faces (after displacement)
-	
-	srand(time(NULL));
+	int fcount = 1;		// face counter (to update progress bar)
 	
 	switch(ID(filter)) {
 		case FP_ERODE:
@@ -210,71 +193,50 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 				if(!(*vi).IsD()) (*vi).ClearV();
 			
 			// displace vertexes
-			for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
-				if(cb) (*cb)((fcount++/m.cm.fn)*100, "Aging..."); 
-				if((*fi).IsD()) continue;
-				for(int j=0; j<3; j++) {
-					if(ep.qaVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  && 
-					  !(*fi).V(j)->IsV() &&
-					  (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
-						double noise;							// noise value
-						Point3<CVertexO::ScalarType> dispDir;	// displacement direction
-						float angleFactor;		// angle multiply factor in [0,1] range
-												// (greater angle -> deeper chip)
-						
-						Point3f p = (*fi).V(j)->P()/noiseScale;
-						noise = generateNoiseValue(octaves, p);
-						// only values bigger than noiseClamp will be considered
-						noise = (noise<noiseClamp?0.0:(noise-noiseClamp));
-						
-						if((*fi).IsB(j)) {
-							dispDir = Point3<CVertexO::ScalarType>((*fi).N().Normalize());
-							angleFactor = 0.25;
+			for(int i=0; i<dispSteps; i++) {
+				GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
+				gM.Set(m.cm.face.begin(), m.cm.face.end());
+				
+				for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
+					if(cb) (*cb)(((fcount++/dispSteps)/m.cm.fn)*100, "Aging...");
+					if((*fi).IsD()) continue;
+					for(int j=0; j<3; j++) {
+						if(ep.qaVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  &&
+						  !(*fi).V(j)->IsV() &&		
+						  (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
+							double noise;						// noise value
+							Point3f dispDir = (*fi).V(j)->N();	// displacement direction
+
+							Point3f p = (*fi).V(j)->P() / noiseScale;
+							noise = generateNoiseValue(octaves, p);
+							// only values bigger than noiseClamp will be considered
+							noise = (noise<noiseClamp?0.0:(noise-noiseClamp));
+
+							// displacement offset
+							Point3f offset = -(dispDir * chipDepth * noise) / dispSteps;
+
+							(*fi).V(j)->P() += offset;
+							if(faceIntersections(m.cm, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
+								(*fi).V(j)->P() -= offset;
+
+							// mark as visited (displaced)
+							(*fi).V(j)->SetV();
 						}
-						else {
-							dispDir = Point3<CVertexO::ScalarType>(((*fi).N() + (*fi).FFp(j)->N()).Normalize());
-							angleFactor = (sin(vcg::Angle((*fi).N(), (*fi).FFp(j)->N()))/2 + 0.5);
-						}
-						
-						// displacement offset
-						Point3<CVertexO::ScalarType> offset = -(dispDir * chipDepth * noise * angleFactor);
-						if(displaced.find((*fi).V(j)) == displaced.end())
-							displaced.insert(std::pair<CVertexO*, Point3<CVertexO::ScalarType> >((*fi).V(j), (*fi).V(j)->P()));
-						(*fi).V(j)->P() += offset;
-						// mark as visited (displaced)
-						(*fi).V(j)->SetV();
 					}
 				}
+				// clear vertexes V bit again
+				for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
+					if(!(*vi).IsD()) (*vi).ClearV();
+				
+				// update vertex normals
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 			}
 			
 			// readjust selection
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
 			
-			// avoid mesh self intersections
-			if(!displaced.empty()) {
-				DispMap::iterator it;
-				for(int t=0; t<intersMaxIter; t++) {
-					//intersFace.clear();
-					if(cb) (*cb)((int)((t/intersMaxIter)*100), "Deleting mesh intersections...");
-					tri::Clean<CMeshO>::SelfIntersections(m.cm, intersFace);
-					if(intersFace.empty()) break;
-					for(std::vector<CFaceO *>::iterator fpi=intersFace.begin(); fpi!=intersFace.end(); fpi++) {
-						for(int i=0; i<3; i++) {
-							it = displaced.find((*fpi)->V(i));
-							if(it != displaced.end())
-								// gradually move back the vertex to its original position
-								(*fpi)->V(i)->P() = ((*fpi)->V(i)->P()+(*it).second)/2.0;
-						}
-					}
-				}
-				if(cb) (*cb)(100, "Deleting mesh intersections...");
-				
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-			}
-			
-			// clear vertexes V bit again
-			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
-				if(!(*vi).IsD()) (*vi).ClearV();
+			// update all normals (face and vertex) before return
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			
 			return true;
 		default:
@@ -285,7 +247,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 
 /* Refines the mesh where needed.
  * In two cases we need to perform additional checks to avoid problems.
- * The first one is when we are working on the selection with a quality predicate 
+ * The first one is when we are working on the selection 
  * while the second one is when we are working with an angle predicate. */
 void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb)
 {
@@ -314,7 +276,7 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m);
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
 		}
-		// mark faces to refine setting angbit (angle predicate only)
+		// mark faces to refine, setting angbit (angle predicate only)
 		if(ep.getType()==AgingEdgePred::ANGLE)
 			for(fi = m.face.begin(); fi!=m.face.end(); fi++) if(!(*fi).IsD())
 				for(int j=0; j<3; j++)
@@ -322,7 +284,7 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 						ep.markFaceAngle(face::Pos<CMeshO::FaceType>(&*fi,j));
 		
 		ref = RefineE<CMeshO, MidPoint<CMeshO>, AgingEdgePred>(m, MidPoint<CMeshO>(), ep, selection, cb);
-		if(ref) vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
+		if(ref) vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m);
 		
 		if(selection) {
 			// erode selection
@@ -348,12 +310,36 @@ double GeometryAgingPlugin::generateNoiseValue(int Octaves, const CVertexO::Coor
 	double noise = .0;
 	float freq = 1.0;
 	for(int i=0; i<Octaves; i++) {
-				double tmp = math::Perlin::Noise(freq*p.X(), freq*p.Y(), freq*p.Z()) / freq;
-		    freq*=2;
-				noise += tmp;
-			}
+		noise += math::Perlin::Noise(freq*p.X(), freq*p.Y(), freq*p.Z()) / freq;
+		freq *= 2;
+	}
 	// no negative values allowed (negative noise generates hills, not chips)	
 	return fabs(noise);
+}
+
+
+/* Tests if the faces incident on the current vertex intersect some other face of the mesh */
+bool GeometryAgingPlugin::faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceType> p, GridStaticPtr<CFaceO, CMeshO::ScalarType> &gM)
+{
+	Box3<CMeshO::ScalarType> bbox;
+	std::vector<CFaceO*> inBox;
+	CFaceO* start = p.f;
+	
+	do {
+		// test current face intersections
+		p.f->GetBBox(bbox);
+		trimesh::GetInBoxFace(m, gM, bbox, inBox);
+		std::vector<CFaceO*>::iterator fib;
+		for(fib=inBox.begin(); fib!=inBox.end(); fib++)
+			if(*fib != p.f)
+				if(tri::Clean<CMeshO>::TestIntersection(p.f, *fib))
+					return true;
+		// move to the next face
+		p.FlipE();
+		p.FlipF();
+	} while(p.f != start);
+	
+	return false;
 }
 
 
