@@ -323,7 +323,13 @@ bool GeometryAgingPlugin::faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceTyp
 {
 	Box3<CMeshO::ScalarType> bbox;
 	std::vector<CFaceO*> inBox;
-	CFaceO* start = p.f;
+	face::Pos<CMeshO::FaceType> start(p);
+	
+	// look for a border face (if any)
+	do
+		p.NextE();
+	while(p != start && !p.IsBorder());
+	start = p;
 	
 	do {
 		// test current face intersections
@@ -335,9 +341,8 @@ bool GeometryAgingPlugin::faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceTyp
 				if(tri::Clean<CMeshO>::TestIntersection(p.f, *fib))
 					return true;
 		// move to the next face
-		p.FlipE();
-		p.FlipF();
-	} while(p.f != start);
+		p.NextE();
+	} while(p != start && !p.IsBorder());
 	
 	return false;
 }
