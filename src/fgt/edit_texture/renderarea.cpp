@@ -851,6 +851,10 @@ void RenderArea::ChangeMode(int modenumber)
 		uvertA1 = QPoint();
 		uvertB = QPoint();
 		uvertB1 = QPoint();
+		drawnPath.clear();
+		drawnPath1.clear();
+		drawP = false;
+		drawP1 = false;
 	}
 	switch(modenumber)
 	{
@@ -865,6 +869,7 @@ void RenderArea::ChangeMode(int modenumber)
 			if (mode != Edit)
 			{
 				mode = Edit;
+				highlighted = SELECTIONRECT;
 				this->setCursor(Qt::SizeAllCursor);
 			}
 			break;
@@ -1219,7 +1224,7 @@ void RenderArea::SelectConnectedComponent(QPoint e)
 	selected = false;
 	//selBit = CFaceO::NewBitFlag();
 	for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
-	int index = 0;
+	unsigned index = 0;
 	vector<CFaceO*> Q = vector<CFaceO*>();
 	
 	// Search the clicked face
@@ -1417,9 +1422,9 @@ void RenderArea::UnifySet()
 
 vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN)
 {
-	// Find a path from the selected vertex, walking only on border edge...
+	// Find a path from the selected vertex, walking ANTI-CLOCKWISE only on border edge...
 	vector<CVertexO*> path = vector<CVertexO*>();
-	int index = 0;
+	unsigned index = 0;
 	vector<CFaceO*> Q = vector<CFaceO*>();
 	Q.push_back(first);
 	path.push_back(begin);
@@ -1427,12 +1432,47 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 	bool finish = false;
 	int notcontrol = -1;
 	int lastadd = 0, lastex = -1;
+	/* Add all the adjacent faces to the vertex.
+	   For each face in queue
+	     if the edge is a border one and contains the last added vertex and is anti-clockwise
+		    enqueue all adjacent faces 
+			add the vertex other to the path
+	*/
+	float tu, tv;
+	if (pathN == 0) {tu = tua; tv = tva;}
+	else {tu = tua1; tv = tva1;}
+	CFaceO* nextb, *previusb;
+	int nb = begin->VFi();
+	nextb = begin->VFp(), previusb = first;
+	while (nb != -1)
+	{
+		if (tu == nextb->WT(nb).u() && tv == nextb->WT(nb).v() && nextb != first) Q.push_back(nextb);
+		previusb = nextb;
+		nextb = nextb->VFp(nb);
+		nb = previusb->VFi(nb);
+		if (nextb == 0) break;
+	}
+	bool verso;
+	if (pathN == 0) 
+	{
+		if (tua < tub) verso = true;
+		else verso = false;
+	}
+	else
+	{
+		if (tua1 < tub1) verso = true;
+		else verso = false;
+	}
+
 	if (begin->IsB() && end->IsB())
 	while (index < Q.size())
 	{
 		bool excluded = false;
 		int oldsize = Q.size();
 		CFaceO* p = Q[index];
+		float oldu;
+		if (pathN == 0) oldu = tua;
+		else oldu = tua1;
 		if (!p->IsV() || (p->IsV() && index == 0))
 		{
 			for (int j = 0; j < 3; j++)
@@ -1446,8 +1486,9 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 					int n, oldn;
 					CFaceO *next, *previus;
 					float tu, tv;
-					if (tmp1 == path[path.size()-1])
+					if (tmp1 == path[path.size()-1] && ((verso && p->WT(j).u() >= oldu) || (!verso && p->WT(j).u() <= oldu)))
 					{
+						oldu = p->WT(j).u();
 						path.push_back(tmp2);
 						if (pathN == 0) drawnPath.push_back(Point2f(p->WT((j+1)%3).u(),p->WT((j+1)%3).v()));
 						else drawnPath1.push_back(Point2f(p->WT((j+1)%3).u(),p->WT((j+1)%3).v()));
@@ -1457,8 +1498,9 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 						added = true;
 						lastadd = index; lastex = j;
 					}
-					else if (tmp2 == path[path.size()-1])
+					else if (tmp2 == path[path.size()-1] && ((verso && p->WT(j).u() >= oldu) || (!verso && p->WT(j).u() <= oldu)))
 					{
+						oldu = p->WT(j).u();
 						path.push_back(tmp1);
 						if (pathN == 0) drawnPath.push_back(Point2f(p->WT(j).u(),p->WT(j).v()));
 						else drawnPath1.push_back(Point2f(p->WT(j).u(),p->WT(j).v()));
@@ -1470,6 +1512,7 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 					}
 					if (added)
 					{
+						index = Q.size()-1;
 						tu = p->WT(oldn).u(); tv = p->WT(oldn).v();
 						while (n != -1)
 						{
@@ -1490,31 +1533,10 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 			if (!p->IsB(0) && !p->IsB(1) && !p->IsB(2) && index != 0) excluded = true;
 		}
 		if (finish) break;
+		// casi degeneri...
 		if (oldsize == Q.size() && !excluded)
 		{
-			if (index == 0)	// A lot of problems if the first face hasn't border edge....
-			{
-				int n, oldn;
-				for (int c = 0; c < 3; c++)
-				{
-					if (Q[0]->V(c) == begin) n = c;
-				}
-				float tu = Q[0]->WT(n).u(), tv = Q[0]->WT(n).v();
-				CFaceO* next, *previus;
-				oldn = n; n = begin->VFi();
-				next = begin->VFp(), previus = Q[0];
-				while (n != -1)
-				{
-					if (tu == next->WT(n).u() && tv == next->WT(n).v() && next != Q[0]) 
-						Q.push_back(next);
-					previus = next;
-					oldn = n;
-					next = next->VFp(n);
-					n = previus->VFi(n);
-					if (next == 0) break;
-				}
-			}
-			else if (index == Q.size()-1) {index = lastadd; p->ClearV();}	// Force to search again the same face...
+			if (index == Q.size()-1) {index = lastadd; p->ClearV();}	// Force to search again the same face...
 		}
 		else notcontrol = -1;
 		index++;
@@ -1525,6 +1547,7 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 			Q[index]->ClearV();
 		}
 	}
+
 	for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearV();
 	return path;
 }

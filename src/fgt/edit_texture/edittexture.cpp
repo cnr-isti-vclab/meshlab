@@ -117,7 +117,7 @@ void EditTexturePlugin::mouseMoveEvent (QAction *,QMouseEvent * event, MeshModel
 	}
 }
   
-void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla)
+void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
     prev = cur;
     cur = event->pos();
