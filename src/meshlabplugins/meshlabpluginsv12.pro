@@ -4,8 +4,8 @@ SUBDIRS       = meshfilter \
 				meshio \
 				colladaio \
 				epoch_io \
-				u3d_io\
-				tri_io\
+				io_u3d\
+				io_tri\
 				meshrender \
 				cleanfilter \
 				filter_ao \ 
