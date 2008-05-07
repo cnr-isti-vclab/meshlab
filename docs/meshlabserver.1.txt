@@ -2,11 +2,23 @@
 .SH NAME 
 MeshLab - a tool for mesh inspection, processing, and conversion
 .SH SYNOPSYS
-meshlab [filename]
+meshlabserver [args]
 .SH DESCRIPTION
 MeshLab is an open source, portable, and extensible system for the processing and editing of unstructured 3D triangular meshes.The system is aimed to help the processing of the typical not-so-small unstructured models arising in 3D scanning, providing a set of tools for editing, cleaning, healing, inspecting, rendering and converting this kind of meshes.The system is based on the VCG library developed at the Visual Computing Lab of ISTI - CNR.
+
+.SH OPTIONS
+.l
+\fI meshlabserver\fP accepts the following options:
+.TP 8
+.B \-i meshfilename 
+The mesh that has to be loaded
+.B \-o meshfilename 
+The mesh where to write the result
+.B \-s scriptfilename 
+an optional script to be applied to the mesh before saving it.
+
 .SH SEE ALSO
-meshlabserver (1)
+meshlab (1)
 
 .SH COPYRIGHT
 MeshLab Copyright \(co 2005-2008 by Visual Computing Lab - ISTI CNR 
