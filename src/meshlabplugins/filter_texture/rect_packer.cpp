@@ -4,15 +4,7 @@
 
 #include "rect_packer.h"
 
-inline int min( const int a, const int b )
-{
-   return a<b ? a:b ;
-}
-
-inline int max( const int a, const int b )
-{
-   return a>b ? a:b ;
-}
+using namespace std;
 
 class point2iConf
 {
@@ -36,21 +28,20 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
     assert(max_size[1]>0);
 
 
-    int gdim = max_size[0]*max_size[1];		// Size dell griglia
-
+    int gdim = max_size[0]*max_size[1];		// grid size
     int i,j,x,y;
 
 	posiz.resize(n);
-    for(i=0;i<n;i++)				// Azzero le posizioni
+    for(i=0;i<n;i++)				// reset initial positions
 		posiz[i][0] = -1;
 
 
-    std::vector<int> grid(gdim);			// Creazione griglia
+    std::vector<int> grid(gdim);			// grid creation
 	for(i=0;i<gdim;++i) grid[i] = 0;
 
 #define Grid(q,w)	(grid[(q)+(w)*max_size[0]])
 
-    std::vector<int> perm(n);			// Creazione permutazione
+    std::vector<int> perm(n);			// permutation creation
     for(i=0;i<n;i++) perm[i] = i;
 	point2iConf conf(sizes);
 	sort(perm.begin(),perm.end(),conf);
@@ -59,7 +50,7 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 	   sizes[perm[0]][1]>max_size[1] )
 	   return false;
 
-		// Posiziono il primo
+		// Find the position of the first one
     j = perm[0];
     global_size[0] = sizes[j][0];
     global_size[1] = sizes[j][1];
@@ -75,7 +66,7 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 	    grid[x+y*max_size[0]] = j+1;
     }
 
-		// Posiziono tutti gli altri
+		// Lets position all the others
     for(i=1;i<n;++i)
     {
 		j = perm[i];
@@ -87,12 +78,12 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 
         besta = -1;
 
-        int sx = sizes[j][0];	// Pe comodita' mi copio la dimensione
+        int sx = sizes[j][0];	// it is easier to copy the sizes
 		int sy = sizes[j][1];
 		assert(sx>0);
 		assert(sy>0);
 
-			// Calcolo la posizione limite
+			// limit positions
 		int lx = min(global_size[0],max_size[0]-sx);
 		int ly = min(global_size[1],max_size[1]-sy);
 
@@ -107,7 +98,7 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 			{
 				int px;
                 int c;
-					// Controllo intersezione
+					// intersection check
                 c = Grid(x,y+sy-1);
 				if(!c) c = Grid(x+sx-1,y+sy-1);
 				if(!c)
@@ -119,7 +110,7 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 					}
 				}
 
-				if(c)	// Salto il rettangolo
+				if(c)	// do not consider this rectangle
 				{
 					--c;
 					assert(c>=0);
@@ -171,7 +162,7 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 	}
 
 #if 0
-	// Codice di debugging
+	// debugging code: it saves into a simple bitmap the computed packing.
 FILE * fp = fopen("debpack.ppm","wb");
 fprintf(fp,"P6\n%d %d\n255\n",global_size[0],global_size[1]);
 for(j=0;j<global_size[1];++j)
