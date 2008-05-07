@@ -6,6 +6,7 @@ SUBDIRS       = meshfilter \
 				epoch_io \
 				io_u3d\
 				io_tri\
+				io_x3d \
 				meshrender \
 				cleanfilter \
 				filter_ao \ 
@@ -22,6 +23,7 @@ SUBDIRS       = meshfilter \
 				editmeasure\
 				editrgbtri\
 				editsegment\
+				edit_straightener \
 				../sampleplugins/sampleedit \
 				../sampleplugins/samplefilter \
 				../sampleplugins/samplefilterdoc \
@@ -34,10 +36,8 @@ SUBDIRS       = meshfilter \
 				../fgt/filter_dirt \
 				../fgt/edit_quality \
 				../fgt/edit_quality/filter_quality \
-				../fgt/edit_straightener \
 				../fgt/edit_texture\
-				../fgt/editpaint\
-				../fgt/io_x3d
+				../fgt/editpaint
 
 		
 		
