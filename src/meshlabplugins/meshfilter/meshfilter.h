@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 /* History
-$Log$
+$Log: meshfilter.h,v $
 Revision 1.46  2008/02/12 14:21:39  cignoni
 changed the function getParameter into the more meaningful getCustomParameter and added the freeze option
 
@@ -109,7 +109,8 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 				  FP_REMOVE_FACES_BY_EDGE,
           FP_REMOVE_NON_MANIFOLD,
           FP_LAPLACIAN_SMOOTH, 
-          FP_HC_LAPLACIAN_SMOOTH, 
+          FP_HC_LAPLACIAN_SMOOTH,
+					FP_SD_LAPLACIAN_SMOOTH, 
           FP_TWO_STEP_SMOOTH, 
           FP_CLUSTERING, 
           FP_QUADRIC_SIMPLIFICATION,

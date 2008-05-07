@@ -21,7 +21,7 @@
  ****************************************************************************/
 /****************************************************************************
   History
-$Log$
+$Log: meshfilter.cpp,v $
 Revision 1.107  2008/04/04 13:22:30  cignoni
 Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h, and added a manifoldness check on the reorient tool.
 
@@ -104,7 +104,8 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_REMOVE_FACES_BY_AREA<<
     FP_REMOVE_FACES_BY_EDGE<<
     FP_LAPLACIAN_SMOOTH<< 
-    FP_HC_LAPLACIAN_SMOOTH<< 
+    FP_HC_LAPLACIAN_SMOOTH<<
+		FP_SD_LAPLACIAN_SMOOTH<< 
     FP_TWO_STEP_SMOOTH<< 
     FP_CLUSTERING<< 
     FP_QUADRIC_SIMPLIFICATION<<
@@ -153,6 +154,12 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_LOOP_SS :
     case FP_MIDPOINT :
          return MeshFilterInterface::Remeshing; 
+		case FP_SD_LAPLACIAN_SMOOTH:
+		case FP_HC_LAPLACIAN_SMOOTH:
+		case FP_LAPLACIAN_SMOOTH:
+		case FP_TWO_STEP_SMOOTH:
+			return MeshFilterInterface::Smoothing; 
+
 
     default : return MeshFilterInterface::Generic;
   }
@@ -171,6 +178,7 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 	case FP_REMOVE_FACES_BY_EDGE :				return QString("Remove Faces with edges longer than...");
   case FP_LAPLACIAN_SMOOTH :						return QString("Laplacian Smooth");
   case FP_HC_LAPLACIAN_SMOOTH :					return QString("HC Laplacian Smooth");
+  case FP_SD_LAPLACIAN_SMOOTH :					return QString("ScaleDependent Laplacian Smooth");
   case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
 	case FP_QUADRIC_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation");
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation (with texture)");
@@ -212,7 +220,8 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
     case FP_REMOVE_FACES_BY_EDGE : 			return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");  
     case FP_REMOVE_NON_MANIFOLD : 			return tr("Remove non manifold edges by removing some of the faces incident on non manifold edges");  
     case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");  
-    case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Müller");  
+    case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Muller");  
+    case FP_SD_LAPLACIAN_SMOOTH : 			return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, based on the Fujiwara extended umbrella operator");  
     case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals");  
     case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");  
     case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
@@ -249,6 +258,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_CLOSE_HOLES :
            return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
     case FP_HC_LAPLACIAN_SMOOTH:  
+    case FP_SD_LAPLACIAN_SMOOTH:  
     case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_BORDERFLAG;
     case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
     case FP_REORIENT:             return MeshModel::MM_FACETOPO;
@@ -324,6 +334,13 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 			parlst.addInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "Number of iteration of normal smoothing step. The larger the better and (the slower)");
       parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		break;
+		case FP_LAPLACIAN_SMOOTH:
+		case FP_SD_LAPLACIAN_SMOOTH:
+			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
+			maxVal = m.cm.bbox.Diag();
+		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"delta", "");
+      parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+		break;
 			 }
 }
 
@@ -342,6 +359,8 @@ bool ExtraMeshFilterPlugin::autoDialog(QAction *action)
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
 		case FP_TWO_STEP_SMOOTH:
+		case FP_LAPLACIAN_SMOOTH:
+		case FP_SD_LAPLACIAN_SMOOTH:
 		  return true;
   	 }
   return false;
@@ -475,9 +494,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 
 	if(ID(filter) == (FP_LAPLACIAN_SMOOTH))
 	  {
-      size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      if(cnt>0) LaplacianSmooth(m.cm,1,true);
+		int stepSmoothNum = par.getInt("stepSmoothNum");
+			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      if(cnt>0) LaplacianSmooth(m.cm,stepSmoothNum,true);
       else LaplacianSmooth(m.cm,1,false);
+			 Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+	  }
+
+	if(ID(filter) == (FP_SD_LAPLACIAN_SMOOTH))
+	  {
+			int stepSmoothNum = par.getInt("stepSmoothNum");
+			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      if(cnt>0) LaplacianSmooth_AngleWeighted(m.cm,stepSmoothNum,true);
+      else LaplacianSmooth_AngleWeighted(m.cm,stepSmoothNum,false);
 			 Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
