@@ -34,7 +34,7 @@
 *****************************************************************************/
 #include <Qt>
 #include <QtGui>
-#include "FilterUnsharp.h"
+#include "filter_unsharp.h"
 
 #include <vcg/complex/trimesh/update/quality.h>
 #include <vcg/complex/trimesh/update/color.h>
@@ -49,6 +49,7 @@ using namespace std;
 FilterUnsharp::FilterUnsharp() 
 {
   typeList <<  FP_CREASE_CUT << 
+		FP_VERTEX_QUALITY_SMOOTHING<<
 		FP_FACE_NORMAL_SMOOTHING<<
 		FP_UNSHARP_NORMAL<<
 		FP_UNSHARP_GEOMETRY<<
@@ -75,6 +76,7 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
 	  case FP_CREASE_CUT :					return QString("Cut mesh along crease");
   	case FP_FACE_NORMAL_NORMALIZE:	    return QString("Normalize Face Normal"); 
   	case FP_FACE_NORMAL_SMOOTHING:	    return QString("Smooth Face Normals"); 
+  	case FP_VERTEX_QUALITY_SMOOTHING:	    return QString("Smooth vertex quality"); 
   	case FP_UNSHARP_NORMAL:				return QString("UnSharp Normals"); 
   	case FP_UNSHARP_GEOMETRY:	    return QString("UnSharp Geometry"); 
   	case FP_UNSHARP_COLOR:	      return QString("UnSharp Color"); 
@@ -91,6 +93,7 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
   {
 		case FP_CREASE_CUT:						return tr("Cut the mesh along crease edges, duplicating the vertices as necessary."); 
 		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
+		case FP_VERTEX_QUALITY_SMOOTHING:	    return tr("Smooth Face Normals without touching the position of the vertices."); 
 		case FP_FACE_NORMAL_SMOOTHING:	    return tr("Smooth Face Normals without touching the position of the vertices."); 
   	case FP_UNSHARP_NORMAL:				return tr("Unsharpen the normals, putting in more evidence normal variations"); 
   	case FP_UNSHARP_GEOMETRY:	    return tr("Unsharpen the color, putting in more evidence normal variations"); 
@@ -107,13 +110,14 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
   {
     case FP_CREASE_CUT :
       return MeshFilterInterface::Generic;     
-			case FP_FACE_NORMAL_NORMALIZE:	  
 	case FP_FACE_NORMAL_SMOOTHING:	  
+	case FP_VERTEX_QUALITY_SMOOTHING:
 	case FP_UNSHARP_NORMAL:				
 	case FP_UNSHARP_GEOMETRY:	    
 	case FP_UNSHARP_COLOR:	    
 	case FP_RECOMPUTE_VERTEX_NORMAL : return 	MeshFilterInterface::Smoothing;
-			
+			case FP_FACE_NORMAL_NORMALIZE:	  return MeshFilterInterface::Normal;
+
     default : return MeshFilterInterface::Generic;
   }
 }
@@ -133,10 +137,11 @@ const int FilterUnsharp::getRequirements(QAction *action)
   switch(ID(action))
   {
 		case FP_UNSHARP_GEOMETRY:	
+		case FP_VERTEX_QUALITY_SMOOTHING:
 		case FP_UNSHARP_COLOR:	return MeshModel::MM_BORDERFLAG;
     case FP_CREASE_CUT :	return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
-		case FP_UNSHARP_NORMAL:		
-		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
+		case FP_UNSHARP_NORMAL:		return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
+		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
 		case FP_RECOMPUTE_VERTEX_NORMAL :
 		case FP_FACE_NORMAL_NORMALIZE:	    return 0; 
 			
@@ -177,7 +182,10 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			 m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 			break;
   case FP_FACE_NORMAL_SMOOTHING :
-				 FaceNormalSmooth(m.cm);
+				 FaceNormalSmoothFF(m.cm);
+			 break;
+  case FP_VERTEX_QUALITY_SMOOTHING :
+				 VertexQualitySmooth(m.cm);
 			 break;
 	case FP_RECOMPUTE_VERTEX_NORMAL : 
 			tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
@@ -193,7 +201,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 					normalOrig[i]=m.cm.face[i].cN();
 				
 				for(int i=0;i<smoothIter;++i)
-						FaceNormalSmooth(m.cm);
+						FaceNormalSmoothFF(m.cm);
 				
 				for(int i=0;i<m.cm.fn;++i)
 					m.cm.face[i].N() = normalOrig[i] + (normalOrig[i] - m.cm.face[i].N())*alpha;
