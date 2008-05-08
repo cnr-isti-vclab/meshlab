@@ -32,10 +32,11 @@
 /* VCG includes */
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/selection.h>
+#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/stat.h>
 #include <vcg/math/perlin_noise.h>
 #include <vcg/complex/trimesh/clean.h>
-
+#include <vcg/complex/trimesh/smooth.h>
 
 /* Constructor */
 GeometryAgingPlugin::GeometryAgingPlugin() 
@@ -178,7 +179,6 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	// edge predicate
 	AgingEdgePred ep = AgingEdgePred((useQuality?AgingEdgePred::QUALITY:AgingEdgePred::ANGLE), 
 									 selected, edgeLenTreshold, thresholdValue);
-	int fcount = 1;		// face counter (to update progress bar)
 	
 	switch(ID(filter)) {
 		case FP_ERODE:
@@ -189,55 +189,58 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			
 			// clear vertexes V bit (will be used to mark the vertexes as displaced) 
-			for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
-				if(!(*vi).IsD()) (*vi).ClearV();
+			tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
 			
 			// displace vertexes
 			for(int i=0; i<dispSteps; i++) {
 				GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
 				gM.Set(m.cm.face.begin(), m.cm.face.end());
 				
+				if(cb) (*cb)( (i+1)*100/dispSteps, "Aging...");
+
+				// blend toghether face normals and recompute vertex normal from these normals 
+				// to get smoother offest directions 
+				FaceNormalSmoothFF(m.cm,3); 
+				tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+				tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
+
 				for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
-					if(cb) (*cb)(((fcount++/dispSteps)/m.cm.fn)*100, "Aging...");
 					if((*fi).IsD()) continue;
 					for(int j=0; j<3; j++) {
 						if(ep.qaVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  &&
-						  !(*fi).V(j)->IsV() &&		
-						  (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
-							double noise;						// noise value
-							Point3f dispDir = (*fi).V(j)->N();	// displacement direction
+						   !(*fi).V(j)->IsV() &&		
+						   (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) 
+								{
+										double noise;						// noise value
+										Point3f dispDir = (*fi).V(j)->N();	// displacement direction
 
-							Point3f p = (*fi).V(j)->P() / noiseScale;
-							noise = generateNoiseValue(octaves, p);
-							// only values bigger than noiseClamp will be considered
-							noise = (noise<noiseClamp?0.0:(noise-noiseClamp));
+										Point3f p = (*fi).V(j)->P() / noiseScale;
+										noise = generateNoiseValue(octaves, p);
+										// only values bigger than noiseClamp will be considered
+										noise = (noise<noiseClamp?0.0:(noise-noiseClamp));
 
-							// displacement offset
-							Point3f offset = -(dispDir * chipDepth * noise) / dispSteps;
+										// displacement offset
+										Point3f offset = -(dispDir * chipDepth * noise) / dispSteps;
 
-							(*fi).V(j)->P() += offset;
-							if(faceIntersections(m.cm, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
-								(*fi).V(j)->P() -= offset;
+										(*fi).V(j)->P() += offset;
+										if(faceIntersections(m.cm, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
+											(*fi).V(j)->P() -= offset;
 
-							// mark as visited (displaced)
-							(*fi).V(j)->SetV();
-						}
+										// mark as visited (displaced)
+										(*fi).V(j)->SetV();
+								}
 					}
 				}
 				// clear vertexes V bit again
-				for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
-					if(!(*vi).IsD()) (*vi).ClearV();
-				
+				tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
+
 				// update vertex normals
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			}
 			
 			// readjust selection
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
-			
-			// update all normals (face and vertex) before return
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-			
+						
 			return true;
 		default:
 			assert(0);
