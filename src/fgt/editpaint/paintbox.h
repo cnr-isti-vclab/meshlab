@@ -117,60 +117,45 @@ public:
 	void setForegroundColor(QColor & c);
 	void setBackgroundColor(QColor & c);
 	
-	//TODO Refactor
-	QGraphicsScene * getCloneScene() {return clone_source_view->scene();}
-	QGraphicsPixmapItem * getClonePixmap() {return item;}
-	void setClonePixmap(QImage & image)
-	{
-		if (item != NULL) getCloneScene()->removeItem(item);
-		item = getCloneScene()->addPixmap(QPixmap::fromImage(image));
-	}
-	void setPixmapCenter(qreal x, qreal y)
-	{
-		item->setPos(x + clone_source_view->width()/2.0, y + clone_source_view->height()/2.0);
-	}
+	//Brush preview
+	void refreshBrushPreview();
 	
-	void restorePreviousType()
-	{
-		//TODO Only works as long as types are declared in the same order as buttons
-		dynamic_cast<QToolButton *>(hboxLayout1->itemAt(previous_type)->widget())->toggle() ;
-	}
+	//Cloning
+	inline QGraphicsScene * getCloneScene() {return clone_source_view->scene();}
+	inline QGraphicsPixmapItem * getClonePixmap() {return item;}
+	
+	void setClonePixmap(QImage & image);
+	void setPixmapCenter(qreal x, qreal y);
+	void loadClonePixmap();
+	void restorePreviousType();
+
+signals: 
+	void undo();
+	void redo();
+	void typeChange(ToolType t);
 	
 public slots: 
-	void on_pen_button_toggled(bool checked) {if(checked) active[COLOR_TAB] = COLOR_PAINT;}
-	void on_fill_button_toggled(bool checked) {if(checked) active[COLOR_TAB] = COLOR_FILL;}
-	void on_gradient_button_toggled(bool checked) {if(checked) active[COLOR_TAB] = COLOR_GRADIENT;}
-	void on_smooth_button_toggled(bool checked){if(checked) active[COLOR_TAB] = COLOR_SMOOTH;}
-	void on_clone_button_toggled(bool checked){if(checked) active[COLOR_TAB] = COLOR_CLONE;}
-	void on_pick_button_toggled(bool checked){if(checked) {previous_type = active[COLOR_TAB]; active[COLOR_TAB] = COLOR_PICK;}}
-	void on_mesh_pick_button_toggled(bool checked){if(checked) active[MESH_TAB] = MESH_SELECT;}
-	void on_mesh_smooth_button_toggled(bool checked){if(checked) active[MESH_TAB] = MESH_SMOOTH;}
-	void on_mesh_sculpt_button_toggled(bool checked){if(checked) active[MESH_TAB] = MESH_PUSH;}
-	void on_mesh_add_button_toggled(bool checked){if(checked) active[MESH_TAB] = MESH_PULL;}
+	void on_pen_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_PAINT; emit typeChange(active[COLOR_TAB]);}}
+	void on_fill_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_FILL;emit typeChange(active[COLOR_TAB]);}}
+	void on_gradient_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_GRADIENT; emit typeChange(active[COLOR_TAB]);}}
+	void on_smooth_button_toggled(bool checked){if(checked) {active[COLOR_TAB] = COLOR_SMOOTH;emit typeChange(active[COLOR_TAB]);}}
+	void on_clone_button_toggled(bool checked){if(checked) {active[COLOR_TAB] = COLOR_CLONE;emit typeChange(active[COLOR_TAB]);}}
+	void on_pick_button_toggled(bool checked){if(checked) {previous_type = active[COLOR_TAB]; active[COLOR_TAB] = COLOR_PICK; emit typeChange(active[COLOR_TAB]);}}
+	void on_mesh_pick_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_SELECT; emit typeChange(active[MESH_TAB]);}}
+	void on_mesh_smooth_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_SMOOTH; emit typeChange(active[MESH_TAB]);}}
+	void on_mesh_sculpt_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_PUSH; emit typeChange(active[MESH_TAB]);}}
+	void on_mesh_add_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_PULL; emit typeChange(active[MESH_TAB]);}}
 	void on_undo_button_toggled(bool checked){if(checked) emit undo();}
 	void on_redo_button_toggled(bool checked){if(checked) emit redo();}
 	void on_mesh_undo_button_toggled(bool checked){if(checked) emit undo();}
 	void on_mesh_redo_button_toggled(bool checked){if(checked) emit redo();}
 	void on_default_colors_clicked();
 	void on_switch_colors_clicked();
-	void on_brush_box_currentIndexChanged(int);
-	
-	//TODO Brutti!!!
-	void on_hardness_slider_valueChanged(int i){on_brush_box_currentIndexChanged(i);}
-	void on_size_slider_valueChanged(int i){on_brush_box_currentIndexChanged(i);}
-	
-	void on_clone_source_load_button_clicked(){QString s = QFileDialog::getOpenFileName(this,
-		     tr("Open Image"), "", tr("Image Files (*.png *.jpg *.bmp)"));
-		if (!s.isNull()) {
-			QPixmap pixmap(s);
-			getCloneScene()->addPixmap(pixmap);
-		}	
-	}
-	
-	
-signals: 
-	void undo();
-	void redo();
+	void on_brush_box_currentIndexChanged(int){refreshBrushPreview();}
+	void on_hardness_slider_valueChanged(int){refreshBrushPreview();}
+	void on_size_slider_valueChanged(int){refreshBrushPreview();}
+	void on_clone_source_load_button_clicked(){loadClonePixmap();}
+
 };
 
 
@@ -211,6 +196,9 @@ inline float brush(Brush b, float distance, float dx, float dy, float hardness)
 	return op;
 }
 
+/**
+ * Rasterizes a given brush at the given hardness as a w x h image
+ */
 inline QImage raster(Brush b, int w, int h, float hardness)
 {
 	float cx = w/2.0;

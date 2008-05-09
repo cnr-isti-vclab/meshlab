@@ -53,8 +53,7 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 				(qreal)(clone_source_view->height()/2), pen)->setZValue(1);
 		
 */	
-	//TODO BRUTTO!!!!!!!!!!!
-	on_brush_box_currentIndexChanged(0);
+	refreshBrushPreview();
 }
 
 void Paintbox::setUndoStack(QUndoStack * qus)
@@ -83,18 +82,45 @@ void Paintbox::on_switch_colors_clicked()
 	background_frame->setColor(temp);
 }
 
-void Paintbox::on_brush_box_currentIndexChanged(int i)
+void Paintbox::setClonePixmap(QImage & image)
 {
+	if (item != NULL) getCloneScene()->removeItem(item);
+	item = getCloneScene()->addPixmap(QPixmap::fromImage(image));
+}
+	
+void Paintbox::setPixmapCenter(qreal x, qreal y)
+{
+	item->setPos(x + clone_source_view->width()/2.0, y + clone_source_view->height()/2.0);
+}
 
+void Paintbox::loadClonePixmap()
+{
+	QString s = QFileDialog::getOpenFileName(this,
+		tr("Open Image"), "", tr("Image Files (*.png *.jpg *.bmp)"));
+	if (!s.isNull()) 
+	{
+		QPixmap pixmap(s);
+		item = getCloneScene()->addPixmap(pixmap);
+	}	
+}
+	
+void Paintbox::restorePreviousType()
+{
+	//TODO Only works as long as types are declared in the same order as buttons!
+	dynamic_cast<QToolButton *>(hboxLayout1->itemAt(previous_type)->widget())->toggle() ;
+}
+
+void Paintbox::refreshBrushPreview()
+{
 	if (item != NULL) brush_viewer->scene()->removeItem(item);
-	
-	item = brush_viewer->scene()->addPixmap(QPixmap::fromImage(
-			raster(getBrush(), (int) ((brush_viewer->width()-2) * size_slider->value() / 100.0), 
-					(int)((brush_viewer->height()-2) * size_slider->value() / 100.0), getHardness())
-			)
-	);
-	
-	brush_viewer->setSceneRect(item->boundingRect());
+		
+		item = brush_viewer->scene()->addPixmap(QPixmap::fromImage(
+				raster(getBrush(), (int) ((brush_viewer->width()-2) * size_slider->value() / 100.0), 
+						(int)((brush_viewer->height()-2) * size_slider->value() / 100.0), getHardness())
+				)
+		);
+		
+		brush_viewer->setSceneRect(item->boundingRect());
 }
 
 void Paintbox::setForegroundColor(QColor & c)
