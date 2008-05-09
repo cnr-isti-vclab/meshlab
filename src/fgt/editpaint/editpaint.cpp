@@ -125,20 +125,30 @@ void EditPaintPlugin::mousePressEvent(QAction * , QMouseEvent * event, MeshModel
 {
 	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
 	event_queue.enqueue(*event);
+	pushInputEvent(event->type(), event->pos(), event->modifiers(), 1, event->button(), gla);	
 	gla->update();
 }
 
-void EditPaintPlugin::mouseMoveEvent(QAction *, QMouseEvent* event, MeshModel & m, GLArea * gla) 
+void EditPaintPlugin::mouseMoveEvent(QAction *, QMouseEvent* event, MeshModel & , GLArea * gla) 
 {
 	event_queue.enqueue(*event);
+	pushInputEvent(event->type(), event->pos(), event->modifiers(), latest_event.pressure, event->button(), gla);
 	gla->update();
 }
 
 void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &, GLArea * gla) 
 {
 	event_queue.enqueue(*event);
+	pushInputEvent(event->type(), event->pos(), event->modifiers(), 0, event->button(), gla);
 	gla->update();
 }
+
+void EditPaintPlugin::tabletEvent(QAction *, QTabletEvent * event, MeshModel & , GLArea * gla)
+{
+	event->accept();
+	pushInputEvent(event->type(), event->pos(), event->modifiers(), event->pressure(), latest_event.button, gla);
+	gla->update();
+} 
 
 void EditPaintPlugin::projectCursor(MeshModel & m, GLArea * gla)
 {
@@ -158,9 +168,9 @@ void EditPaintPlugin::setToolType(ToolType t)
 	switch(current_type)
 	{
 		case COLOR_PAINT:
-			current_settings = EPP_PICK_VERTICES | EPP_DRAW_CURSOR;
+			current_options = EPP_PICK_VERTICES | EPP_DRAW_CURSOR;
 		default:
-			current_settings = EPP_NONE;
+			current_options = EPP_NONE;
 	}
 }
 

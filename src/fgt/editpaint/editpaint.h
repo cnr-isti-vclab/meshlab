@@ -35,6 +35,7 @@
 
 
 #include <wrap/gl/pick.h>
+#include <meshlab/glarea.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include <vcg/math/matrix44.h>
@@ -74,7 +75,7 @@ public:
 	virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-//	virtual void tabletEvent		(QAction *, QTabletEvent *, MeshModel & , GLArea *); //TODO Make them come!	glarea
+	virtual void tabletEvent		(QAction *, QTabletEvent *, MeshModel & , GLArea *);
 	virtual QList<QAction *> actions() const ;
 
 public slots:
@@ -126,16 +127,46 @@ private:
 	
 	int mark;
 
-	PaintOptions options;
-	
 	std::vector<QPointF> * circle;
 	std::vector<QPointF> * dense_circle;
 	std::vector<QPointF> * square;
 	std::vector<QPointF> * dense_square;
 	
-	ToolType 		current_type;
-	int 			current_settings;
+	//New code under this line---
 	
+	//Memoization of type and type-settings
+	ToolType 		current_type;
+	int			 	current_options;
+	
+	//Input Events Handling:
+	struct InputEvent { 
+		Qt::MouseButton 		button;
+		QEvent::Type 			type;
+		QPoint					position;
+		QPoint					gl_position;
+		Qt::KeyboardModifiers	modifiers;
+		qreal					pressure;
+		bool					processed;
+		bool					valid;
+	};
+
+	InputEvent 		latest_event;
+	InputEvent		previous_event;
+	
+	inline void pushInputEvent(QEvent::Type t, QPoint p, 
+			Qt::KeyboardModifiers k, qreal pres, Qt::MouseButton b, GLArea * gla)
+	{
+		if (latest_event.processed) previous_event = latest_event;
+				
+		latest_event.type = t;
+		latest_event.position = p;
+		latest_event.gl_position = QPoint(p.x(), gla->curSiz.height() - p.y());
+		latest_event.modifiers = k;
+		latest_event.button = b;
+		latest_event.pressure = pres;
+		latest_event.processed = false;
+		latest_event.valid = true;
+	}
 };
 
 /**
