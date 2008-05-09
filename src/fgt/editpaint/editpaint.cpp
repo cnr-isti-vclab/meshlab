@@ -152,6 +152,18 @@ void EditPaintPlugin::projectCursor(MeshModel & m, GLArea * gla)
 	}
 }
 
+void EditPaintPlugin::setToolType(ToolType t)
+{
+	current_type = t;
+	switch(current_type)
+	{
+		case COLOR_PAINT:
+			current_settings = EPP_PICK_VERTICES | EPP_DRAW_CURSOR;
+		default:
+			current_settings = EPP_NONE;
+	}
+}
+
 /**
  * Since only on a Decorate call it is possible to obtain correct values
  * from OpenGL, all operations are performed during the execution of this

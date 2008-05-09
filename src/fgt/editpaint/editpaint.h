@@ -41,10 +41,17 @@
 
 #include "paintbox.h"
 
+/**
+ * These options are chosen by each tool in the method setToolType(TolType t)
+ */
 enum PaintOptions {
-	EPP_NONE 			= 0x0000,
-	EPP_FIND_VERTICES 	= 0x0001,
+	EPP_NONE 			= 0x00000,
+	EPP_PICK_FACES		= 0x00001, //On press, pick faces		
+	EPP_PICK_VERTICES 	= 0x00003, //On press, find the vertices (implies face picking too)
+	EPP_AVG_NORMAL		= 0x00007, //During vertex picking, find the average normal of all vertices (implies vertex picking)
+	EPP_DRAW_CURSOR		= 0x00008  //On mouse move display a shape representing the given cursor
 };
+
 
 /**
  * EditPaint plugin main class (MeshEditing plugin)
@@ -72,6 +79,7 @@ public:
 
 public slots:
 	void update();
+	void setToolType(ToolType t);
 	
 private:
 	struct VertexDistance { QPoint position; QPointF rel_position; float distance;};
@@ -124,6 +132,10 @@ private:
 	std::vector<QPointF> * dense_circle;
 	std::vector<QPointF> * square;
 	std::vector<QPointF> * dense_square;
+	
+	ToolType 		current_type;
+	int 			current_settings;
+	
 };
 
 /**
