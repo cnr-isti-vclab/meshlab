@@ -31,6 +31,7 @@
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/topology.h>
+#include <vcg/math/perlin_noise.h>
 
 using namespace std;
 using namespace vcg;
@@ -43,19 +44,14 @@ EditPaintPlugin::EditPaintPlugin()
 	editAction->setCheckable(true);
 	zbuffer = NULL;
 	color_buffer = NULL;
-	mark = 0;
-	disable_decorate = false;
-	circle = generateCircle();
-	dense_circle = generateCircle(64);
-	square = generateSquare();
-	dense_square = generateSquare(16);
+	clone_zbuffer = NULL;
+	generateCircle(circle);
+	generateCircle(dense_circle, 64);
+	generateSquare(square);
+	generateSquare(dense_square, 16);
 }
 
-EditPaintPlugin::~EditPaintPlugin() 
-{
-	delete circle;
-	delete dense_circle;
-}
+EditPaintPlugin::~EditPaintPlugin() {}
 
 QList<QAction *> EditPaintPlugin::actions() const {
 	return actionList;
@@ -97,18 +93,30 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 		for (CMeshO::VertexIterator i = m.cm.vert.begin(); i != m.cm.vert.end(); i++) (*i).C() = color;
 	}
 	
-	parent->mm()->ioMask|=MeshModel::IOM_VERTQUALITY;
-	parent->mm()->ioMask|=MeshModel::IOM_VERTCOLOR;
+	m.cm.InitFaceIMark();
+	m.cm.InitVertexIMark();
+	
+	parent->mm()->ioMask |= MeshModel::IOM_VERTQUALITY;
+	parent->mm()->ioMask |= MeshModel::IOM_VERTCOLOR;
+	parent->mm()->ioMask |= MeshModel::IOM_VERTNORMAL;
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	
 	QObject::connect(paintbox, SIGNAL(undo()), this, SLOT(update()));
 	QObject::connect(paintbox, SIGNAL(redo()), this, SLOT(update()));
+	QObject::connect(paintbox, SIGNAL(typeChange(ToolType)), this, SLOT(setToolType(ToolType)));
 
 	parent->update();
 	
 	selection = new vector<CMeshO::FacePointer>();
+	latest_event.pressure = 0.0;
+	
+	setToolType(COLOR_PAINT);
 	
 	glarea = parent;
+	buffer_width = glarea->curSiz.width();
+	buffer_height = glarea->curSiz.height();
+	glarea->setMouseTracking(true);
+	
 }
 
 void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) 
@@ -124,21 +132,18 @@ void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*p
 void EditPaintPlugin::mousePressEvent(QAction * , QMouseEvent * event, MeshModel &, GLArea * gla) 
 {
 	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
-	event_queue.enqueue(*event);
 	pushInputEvent(event->type(), event->pos(), event->modifiers(), 1, event->button(), gla);	
 	gla->update();
 }
 
 void EditPaintPlugin::mouseMoveEvent(QAction *, QMouseEvent* event, MeshModel & , GLArea * gla) 
 {
-	event_queue.enqueue(*event);
-	pushInputEvent(event->type(), event->pos(), event->modifiers(), latest_event.pressure, event->button(), gla);
+	pushInputEvent(event->type(), event->pos(), event->modifiers(), latest_event.pressure, latest_event.button, gla);
 	gla->update();
 }
 
 void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &, GLArea * gla) 
 {
-	event_queue.enqueue(*event);
 	pushInputEvent(event->type(), event->pos(), event->modifiers(), 0, event->button(), gla);
 	gla->update();
 }
@@ -150,45 +155,57 @@ void EditPaintPlugin::tabletEvent(QAction *, QTabletEvent * event, MeshModel & ,
 	gla->update();
 } 
 
-void EditPaintPlugin::projectCursor(MeshModel & m, GLArea * gla)
-{
-	if (paintbox->getSizeUnit() == 0){ 
-		if (paintbox->getBrush() == CIRCLE) drawSimplePolyLine(gla, cursor, paintbox->getSize(), circle);
-		if (paintbox->getBrush() == SQUARE) drawSimplePolyLine(gla, cursor, paintbox->getSize(), square);
-	}
-	if (paintbox->getSizeUnit() == 1) { 
-		if (paintbox->getBrush() == CIRCLE) drawPercentualPolyLine(gla, gl_cursor, m, zbuffer, modelview_matrix, projection_matrix, viewport, paintbox->getRadius(), dense_circle);				
-		if (paintbox->getBrush() == SQUARE) drawPercentualPolyLine(gla, gl_cursor, m, zbuffer, modelview_matrix, projection_matrix, viewport, paintbox->getRadius(), dense_square);
-	}
-}
-
 void EditPaintPlugin::setToolType(ToolType t)
 {
 	current_type = t;
+	
 	switch(current_type)
 	{
+		case MESH_SELECT :
+			current_options = EPP_PICK_FACES | EPP_DRAW_CURSOR;
+			break;
+			
 		case COLOR_PAINT:
+		case COLOR_NOISE:
+		case COLOR_CLONE:
+		case COLOR_SMOOTH :
+		case MESH_SMOOTH :
 			current_options = EPP_PICK_VERTICES | EPP_DRAW_CURSOR;
+			break;
+		
+		case MESH_PULL:
+		case MESH_PUSH:
+			current_options = EPP_PICK_VERTICES | EPP_AVG_NORMAL | EPP_DRAW_CURSOR;
+			break;
+			
+		case COLOR_FILL:
+		case COLOR_GRADIENT:
+		case COLOR_PICK :
 		default:
 			current_options = EPP_NONE;
 	}
+}
+
+void EditPaintPlugin::setBrushSettings(int size, int opacity, int hardness)
+{
+	current_brush.size = size;
+	current_brush.opacity = opacity;
+	current_brush.hardness = hardness;
 }
 
 /**
  * Since only on a Decorate call it is possible to obtain correct values
  * from OpenGL, all operations are performed during the execution of this
  * method and not where mouse events are processed.
- * 
- * TODO If update() is called from within the loop on events, there will be a "read ahead" of
- * events that will disrupt the status
+ *
  */
 void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla) 
-{
-	if (disable_decorate) return;
-	
+{	
 	glarea = gla;
 	
-	if (event_queue.isEmpty()) return;
+	if (!latest_event.valid) return;
+
+	latest_event.processed = true;
 	
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelview_matrix);
 	glGetDoublev(GL_PROJECTION_MATRIX, projection_matrix);
@@ -196,204 +213,215 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 	viewport[0] = viewport[1] = 0;
 	viewport[2] = gla->curSiz.width(); viewport[3] = gla->curSiz.height();
 
-	//TODO We maybe can avoid this, I don't know
 	if (zbuffer == NULL)
 	{
 		zbuffer = new GLfloat[gla->curSiz.width()*gla->curSiz.height()];
 		glReadPixels(0,0,gla->curSiz.width(), gla->curSiz.height(), GL_DEPTH_COMPONENT, GL_FLOAT, zbuffer);	
 	}
-
-	while (!event_queue.isEmpty()) 
+	
+	if (current_options & EPP_DRAW_CURSOR)
 	{
-		QMouseEvent event = event_queue.dequeue();
+		//TODO Compute only when needed!!!!!!!!!!!!!!
+		current_brush.size = paintbox->getSize();
+		current_brush.radius = (paintbox->getRadius() * m.cm.bbox.Diag() * 0.5);
+		current_brush.opacity = paintbox->getOpacity() * latest_event.pressure;
+		current_brush.hardness = paintbox->getHardness() * latest_event.pressure;
 		
-		if (event.type() == QEvent::MouseButtonPress) button = event.button();
+		if (paintbox->getSizeUnit() == 0) 
+			drawSimplePolyLine(gla, latest_event.position, paintbox->getSize(), 
+					(paintbox->getBrush() == CIRCLE) ? & circle : & square);
+		else
+			drawPercentualPolyLine(glarea, latest_event.gl_position, m, zbuffer, modelview_matrix, projection_matrix, viewport, current_brush.radius, 
+					(paintbox->getBrush() == CIRCLE) ? & dense_circle : & dense_square );
+	}
+	
+	if (latest_event.pressure > 0)
+	{	
+		if (current_options & EPP_PICK_VERTICES) 
+		{ 
+			vertices.clear(); 
+			updateSelection(m, & vertices); 
+		}else if (current_options & EPP_PICK_FACES) updateSelection(m);
 		
-		prev_cursor = cursor; //TODO what if the cursor was not initialized??? 
-		cursor = event.pos();
-		gl_cursor.setX(cursor.x()); gl_cursor.setY(gla->curSiz.height() - cursor.y());
-		
-		switch (paintbox->getCurrentType())
+		if (previous_event.pressure == 0)
 		{
-			case COLOR_FILL :
-				if (event.type() == QEvent::MouseButtonRelease) 
-				{
-					CFaceO * face;
-					if(GLPickTri<CMeshO>::PickNearestFace(gl_cursor.x(), 
-						gl_cursor.y(), m.cm, face, 2, 2))
-					{
-						fill(m, face);
-						gla->update();
+			qDebug() << "On Down";
+			/*******ON BRUSH DOWN*********/
+			switch (current_type)
+			{
+				case COLOR_PAINT:
+					{	
+						painted_vertices.clear();
+						QColor newcol = (latest_event.button == Qt::LeftButton) ? 
+							paintbox->getForegroundColor() : 
+							paintbox->getBackgroundColor();
+						color[0] = newcol.red(); color[1] = newcol.green(); 
+						color[2] = newcol.blue(); color[3] = newcol.alpha();
+						paintbox->getUndoStack()->beginMacro("Color Paint");
+						paint(& vertices);
 					}
-				}
-				continue;
+					break;
 				
-			case COLOR_PICK :
-				if (event.type() == QEvent::MouseButtonRelease)
-				{
-					QColor color;
-					CVertexO * temp_vert=0;
-					if (paintbox->getPickMode() == 0) {
-						if (getVertexAtMouse(m,temp_vert, gl_cursor, modelview_matrix, projection_matrix, viewport)) 
-						{	
-							color.setRgb(temp_vert->C()[0], temp_vert->C()[1], temp_vert->C()[2], 255);
-							(button == Qt::LeftButton) ? paintbox->setForegroundColor(color) : paintbox->setBackgroundColor(color);
-						} 
-					} else 
+				case COLOR_CLONE :
+					if (latest_event.modifiers & Qt::ControlModifier || 
+							latest_event.button == Qt::RightButton)
 					{
-						GLubyte pixel[3];
-						glReadPixels( gl_cursor.x(), gl_cursor.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE,(void *)pixel);
-						color.setRgb(pixel[0], pixel[1], pixel[2], 255);
-						(button == Qt::LeftButton) ? paintbox->setForegroundColor(color) : paintbox->setBackgroundColor(color);
+						if (color_buffer != NULL) delete color_buffer;
+						if (clone_zbuffer != NULL) delete clone_zbuffer;
+						color_buffer = NULL, clone_zbuffer = NULL;
+						glarea->getCurrentRenderMode().lighting = false;
+						current_options &= ~EPP_DRAW_CURSOR; 
+						glarea->update();
 					}
-					paintbox->restorePreviousType(); 
-				}			 
-				continue;
-				
-			case COLOR_GRADIENT :
-				if (event.type() == QEvent::MouseButtonPress) {start_cursor.setX(cursor.x()); start_cursor.setY(cursor.y()); }
-				else if (event.type() == QEvent::MouseMove ) drawLine(gla, start_cursor, cursor);
-				else if (event.type() == QEvent::MouseButtonRelease){
-					gradient(m, gla);
-					gla->update();
-				}
-				continue;
-				
-			default :
-				break;
-		}
-		
-		
-		vertices.clear(); //TODO don't need vertices for face selection!
-		
-		switch (paintbox->getCurrentType())
-		{
-			case MESH_SELECT:
-				projectCursor(m, glarea);
-				updateSelection(m);			
-						
-				if (event.type() == QEvent::MouseButtonPress)
-				{
-					paintbox->getUndoStack()->beginMacro("Select");
-				}else if (event.type() == QEvent::MouseButtonRelease) 
-				{
-					paintbox->getUndoStack()->endMacro(); 
-				} else if (event.type() == QEvent::MouseMove){
-					for(vector<CMeshO::FacePointer>::iterator fpi = selection->begin(); fpi != selection->end(); ++fpi) 
-					{
-						paintbox->getUndoStack()->push(new SelectionUndo((*fpi), (*fpi)->IsS()));
-						if (button == Qt::LeftButton)(*fpi)->SetS();
-						else (*fpi)->ClearS();
-					}
-				}
-				break;
-			
-			case MESH_PULL :
-				projectCursor(m, glarea);
-				updateSelection(m, & vertices);			
-				
-				if (event.type() == QEvent::MouseButtonPress) { displaced_vertices.clear(); paintbox->getUndoStack()->beginMacro("Pull"); }
-				else if (event.type() == QEvent::MouseMove){ 
-					sculpt(m, & vertices);}
-				else if (event.type() == QEvent::MouseButtonRelease) paintbox->getUndoStack()->endMacro();
-				break;
-				
-			case MESH_PUSH : // glarea->setLight(false);
-			
-				projectCursor(m, glarea);
-				updateSelection(m, & vertices);			
-				
-				if (event.type() == QEvent::MouseButtonPress) { displaced_vertices.clear(); paintbox->getUndoStack()->beginMacro("Push"); }
-				else if (event.type() == QEvent::MouseMove) sculpt(m, & vertices);
-				else if (event.type() == QEvent::MouseButtonRelease) paintbox->getUndoStack()->endMacro();
-				break;
-				
-				
-			case COLOR_PAINT :
-				projectCursor(m, glarea);
-				updateSelection(m, & vertices);
-				
-				if (event.type() == QEvent::MouseButtonPress)
-				{
-					paintbox->getUndoStack()->beginMacro("Paint");
-					visited_vertices.clear();
-					paint(& vertices);
-				}
-				else if (event.type() == QEvent::MouseMove) paint(& vertices);
-				else if (event.type() == QEvent::MouseButtonRelease) paintbox->getUndoStack()->endMacro();
-				
-				break;
-			
-			case COLOR_SMOOTH:
-			case MESH_SMOOTH:
-				projectCursor(m, glarea);
-				updateSelection(m, & vertices);
-				
-				if (event.type() == QEvent::MouseButtonPress)
-				{
-					paintbox->getUndoStack()->beginMacro("Smooth");
-					mark++; //TODO BAD mark usage
-				}
-				else if (event.type() == QEvent::MouseMove) smooth(& vertices);
-				else if (event.type() == QEvent::MouseButtonRelease) paintbox->getUndoStack()->endMacro();				
-				break;
-				
-			case COLOR_CLONE :
-				if (event.type() == QEvent::MouseButtonPress && button == Qt::RightButton)
-				{
-					if (color_buffer != NULL) delete color_buffer;
-					disable_decorate = true;
-					glarea->update();
-					color_buffer = new GLubyte[gla->curSiz.width()*gla->curSiz.height()*3];
-					clone_zbuffer = new GLfloat[gla->curSiz.width()*gla->curSiz.height()];
-					glReadPixels(0,0,gla->curSiz.width(), gla->curSiz.height(), GL_RGB, GL_UNSIGNED_BYTE, color_buffer);
-					glReadPixels(0,0,gla->curSiz.width(), gla->curSiz.height(), GL_DEPTH_COMPONENT, GL_FLOAT, clone_zbuffer);
-					start_cursor.setX(gl_cursor.x()); start_cursor.setY(gl_cursor.y()); //storing now source click position
-					
-					//TODO refactor
-					QImage image(glarea->width(), glarea->height(), QImage::Format_RGB32); 
-					for (int x = 0; x < glarea->width(); x++){
-						for (int y = 0; y < glarea->height(); y++){
-							int index = (y * glarea->width() + x)*3;
-							image.setPixel(x, glarea->height() - y, qRgb((int)color_buffer[index], (int)color_buffer[index + 1], (int)color_buffer[index + 2]));
+					else {
+						if (color_buffer != NULL)
+						{
+							painted_vertices.clear();
+							clone_start.setX(clone_start.x() - latest_event.gl_position.x());
+							clone_start.setY(clone_start.y() - latest_event.gl_position.y());
+							paintbox->getUndoStack()->beginMacro("Color Clone");
+							paint( & vertices);
+						}else if (paintbox->isPixmapAvailable())
+						{
+							paintbox->getPixmapBuffer(color_buffer, clone_zbuffer, buffer_width, buffer_height);
+							clone_start.setX(0);
+							clone_start.setY(0);
+							painted_vertices.clear();
+							paintbox->getUndoStack()->beginMacro("Color Clone");
+							
+							paint( & vertices);
 						}
 					}
+					break;
 					
-					paintbox->setClonePixmap(image);
-					paintbox->setPixmapCenter(-cursor.x(), -cursor.y());
-					disable_decorate = false;
-				}else if (event.type() == QEvent::MouseButtonPress && button == Qt::LeftButton)
-				{
-					projectCursor(m, glarea);
-					updateSelection(m, & vertices);
-					paintbox->getUndoStack()->beginMacro("Clone");
-					visited_vertices.clear();
-					start_cursor.setX(start_cursor.x() - gl_cursor.x()); start_cursor.setY(start_cursor.y() - gl_cursor.y());
+				case COLOR_NOISE :
+					painted_vertices.clear();
+					break;
+					
+				case COLOR_GRADIENT:
+					gradient_start = latest_event.position;
+					break;
+					
+				case MESH_PULL:
+				case MESH_PUSH :
+					displaced_vertices.clear();
+					sculpt(m, & vertices);
+					break;
+					
+				case COLOR_SMOOTH:
+					paintbox->getUndoStack()->beginMacro("Color Smooth");
+					smoothed_vertices.clear();
+				case MESH_SMOOTH:
+					m.cm.UnMarkAll();
+					break;
+					
+				default :
+					break;
+			}
+		}else
+		{
+			qDebug() << "On Move";
+			/*******ON BRUSH MOVE (UNDER CLICK)*********/
+			switch (current_type)
+			{
+				case COLOR_PAINT:
+					paint(& vertices);
+					break;
+					
+				case COLOR_CLONE :
+					paintbox->setPixmapCenter(-latest_event.position.x() - clone_start.x(), -latest_event.position.y() + clone_start.y()  );
+					if (color_buffer != NULL) paint( & vertices);
+					break;
+					
+				case COLOR_NOISE :
+					break;
+					
+				case COLOR_GRADIENT:
+					drawLine(glarea, gradient_start, latest_event.position);
+					break;
 				
-				}else if (event.type() == QEvent::MouseMove && button == Qt::LeftButton)
-				{
-					projectCursor(m, glarea);
-					updateSelection(m, & vertices);
-					paintbox->setPixmapCenter(-cursor.x() - start_cursor.x(), -cursor.y() + start_cursor.y() );
-					paint( & vertices);
-				}else if (event.type() == QEvent::MouseButtonRelease && button == Qt::LeftButton)
-				{
-					projectCursor(m, glarea);
-					updateSelection(m, & vertices);
+				case MESH_SELECT:
+					for(vector<CMeshO::FacePointer>::iterator fpi = selection->begin(); fpi != selection->end(); ++fpi) 
+					{
+						if (latest_event.button == Qt::LeftButton)(*fpi)->SetS();
+						else (*fpi)->ClearS();
+					}
+					
+				case MESH_PUSH:
+				case MESH_PULL:
+					sculpt(m, & vertices);
+					break;
+				
+				case COLOR_SMOOTH:
+				case MESH_SMOOTH:
+					smooth(& vertices);
+					break;
+					
+				default :
+					break;
+			}
+		}
+		
+	}else
+	{
+		if (previous_event.pressure > 0)
+		{
+			/*******ON BRUSH UP*********/
+			switch (current_type)
+			{
+				case COLOR_FILL:
+					CFaceO * face;
+					if(GLPickTri<CMeshO>::PickNearestFace(latest_event.gl_position.x(), latest_event.gl_position.y(), m.cm, face, 2, 2))
+					{
+						fill(m, face);
+						glarea->update();
+					}
+					break;
+					
+				case COLOR_NOISE :
+					break;
+					
+				case COLOR_PICK :
+					{
+						QColor color;
+						CVertexO * temp_vert = NULL;
+						if (paintbox->getPickMode() == 0) {
+							if (getVertexAtMouse(m,temp_vert, latest_event.gl_position, modelview_matrix, projection_matrix, viewport)) 
+							{	
+								color.setRgb(temp_vert->C()[0], temp_vert->C()[1], temp_vert->C()[2], 255);
+								(latest_event.button == Qt::LeftButton) ? paintbox->setForegroundColor(color) : paintbox->setBackgroundColor(color);
+							} 
+						} else 
+						{
+							GLubyte pixel[3];
+							glReadPixels( latest_event.gl_position.x(), latest_event.gl_position.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE,(void *)pixel);
+							color.setRgb(pixel[0], pixel[1], pixel[2], 255);
+							(latest_event.button == Qt::LeftButton) ? paintbox->setForegroundColor(color) : paintbox->setBackgroundColor(color);
+						}
+						paintbox->restorePreviousType();
+					}
+					break;
+					
+				case COLOR_GRADIENT:
+					gradient(m, gla);
+					gla->update();
+					break;
+					
+				case COLOR_CLONE:
+					if (latest_event.modifiers & Qt::ControlModifier || 
+						latest_event.button == Qt::RightButton) capture();
+				case COLOR_SMOOTH :
+				case COLOR_PAINT:
 					paintbox->getUndoStack()->endMacro();
-				}
-				break;
-			case COLOR_NOISE :
-				//TODO Perlin noise application
-				
-			default :
-				break;
+				default :
+					break;	
+			}
 		}
 	}
 }
 
 
-void EditPaintPlugin::smooth(vector< pair<CVertexO *, VertexDistance> > * vertices)
+inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * vertices)
 {
 	QHash <CVertexO *, pair<Point3f, Color4b> > originals;
 	
@@ -406,21 +434,21 @@ void EditPaintPlugin::smooth(vector< pair<CVertexO *, VertexDistance> > * vertic
 
 	for (unsigned int k = 0; k < vertices->size(); k++) //forach selected vertices
 	{
-		pair<CVertexO *, VertexDistance> data = vertices->at(k);
+		pair<CVertexO *, PickingData> data = vertices->at(k);
 		
 		CVertexO * v = data.first;
-		VertexDistance * vd = & data.second;
+		PickingData * vd = & data.second;
 
 		pair<Point3f, Color4b> pc_data; //save its color and position
 		
 		for (int k = 0; k < 4; k++) pc_data.second[k] = v->C()[k];
 		for (int k = 0; k < 3; k++) pc_data.first[k] = v->P()[k];
 
-		if (v->IMark() != mark)
+		if (!smoothed_vertices.contains(v))
 		{
 			if (paintbox->getCurrentType() == COLOR_SMOOTH) paintbox->getUndoStack()->push(new SingleColorUndo(v, v->C()));
 			else paintbox->getUndoStack()->push(new SinglePositionUndo(v, v->P()));
-			v->IMark() = mark;
+			smoothed_vertices.insert(v,v);
 		} 
 	
 		if (!originals.contains(v)) originals.insert(v, pc_data); //save original color/position data
@@ -498,102 +526,112 @@ void EditPaintPlugin::smooth(vector< pair<CVertexO *, VertexDistance> > * vertic
 	}
 }
 
-//TODO Begin modularization of paint to allow different tools to leverage the same architecture
-void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, VertexDistance> > * vertices)
+inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, PickingData> > * vertices)
 {
-	int opac = 1.0;
-	int decrease_pos = paintbox->getHardness();
+//	int opac = 1.0;
+	float decrease_pos = paintbox->getHardness() / 100.0;
 	float strength = m.cm.bbox.Diag() * paintbox->getDisplacement() / 1000.0;
 	
-	Point3f normal(0.0, 0.0, 0.0);
-	
-	//TODO Normal should be calculated during updateSelection
-	for (unsigned int k = 0; k < vertices->size(); k++)
-	{
-		normal += vertices->at(k).first->N() / vertices->size();
-	}
-	
 	if (normal[0] == normal[1] && normal[1] == normal[2] && normal[2] == 0) {
-		qDebug() << "Prayer culo";
 		return;
 	}
 	
-	qDebug() << strength;
-		
-	qDebug() << normal[0] << " " << normal[1] << " " << normal[2];
-	
 	for (unsigned int k = 0; k < vertices->size(); k++)
 	{
-		pair<CVertexO *, VertexDistance> data = vertices->at(k);
+		pair<CVertexO *, PickingData> data = vertices->at(k);
 		
-		float op = brush(paintbox->getBrush(), data.second.distance, data.second.rel_position.x(), data.second.rel_position.y(), decrease_pos);
+		float op = brush(paintbox->getBrush(), data.second.distance, data.second.rel_position.x(), data.second.rel_position.y(), decrease_pos * 100);
+		
+		//TODO Precalculate this monster!
+		float gauss = strength * exp(-(op - 1.0)*(op - 1.0) * 8.0 );
 		
 		if (!displaced_vertices.contains(data.first)) 
 		{
 			displaced_vertices.insert(data.first, pair<Point3f, float>(
 				Point3f(data.first->P()[0], data.first->P()[1], data.first->P()[2]),
-				opac * op) );
+				gauss) );
 			
-			paintbox->getUndoStack()->push(new SinglePositionUndo(data.first, data.first->P()));
-
 			qDebug() << "Position before push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
 			qDebug() << "strength" << strength;
 			
-			displaceAlongVector(data.first, normal, (opac * op) * strength);
+			displaceAlongVector(data.first, normal, gauss);
 			
 			qDebug() << "Position after push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
 			
-		} else if (displaced_vertices[data.first].second < opac * op) 
+		} else if (displaced_vertices[data.first].second < gauss) 
 		{
-			displaced_vertices[data.first].second = opac * op;
+			displaced_vertices[data.first].second = gauss;
 			Point3f temp = displaced_vertices[data.first].first;
 			data.first->P()[0]=temp[0]; data.first->P()[1]=temp[1]; data.first->P()[2]=temp[2];
-			displaceAlongVector(data.first, normal, (opac * op)* strength);	
+			displaceAlongVector(data.first, normal, gauss);	
 		}
 	}
 	
 	for (unsigned int k = 0; k < vertices->size(); k++) updateNormal(vertices->at(k).first);
 }
 
+inline void EditPaintPlugin::capture()
+{
+	color_buffer = new GLubyte[glarea->curSiz.width()*glarea->curSiz.height()*3];
+	clone_zbuffer = new GLfloat[glarea->curSiz.width()*glarea->curSiz.height()];
+	glReadPixels(0,0,glarea->curSiz.width(), glarea->curSiz.height(), GL_RGB, GL_UNSIGNED_BYTE, color_buffer);
+	glReadPixels(0,0,glarea->curSiz.width(), glarea->curSiz.height(), GL_DEPTH_COMPONENT, GL_FLOAT, clone_zbuffer);
+	buffer_height = glarea->curSiz.height();
+	buffer_width = glarea->curSiz.width();
+	
+	clone_start.setX(latest_event.gl_position.x()); 
+	clone_start.setY(latest_event.gl_position.y()); //storing now source click position
+	
+	QImage image(glarea->width(), glarea->height(), QImage::Format_RGB32); 
+	for (int x = 0; x < glarea->width(); x++){
+		for (int y = 0; y < glarea->height(); y++){
+			int index = (y * glarea->width() + x)*3;
+			image.setPixel(x, glarea->height() - y, qRgb((int)color_buffer[index], (int)color_buffer[index + 1], (int)color_buffer[index + 2]));
+		}
+	}
+	glarea->getCurrentRenderMode().lighting = true;
+	current_options |= EPP_DRAW_CURSOR;
+	paintbox->setClonePixmap(image);
+	paintbox->setPixmapCenter(-latest_event.position.x(), -latest_event.position.y());
+}
+
 /**
  * Painting and Cloning
  */
-void EditPaintPlugin::paint(vector< pair<CVertexO *, VertexDistance> > * vertices)
+inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * vertices)
 {
-	int opac = paintbox->getOpacity();
-	int decrease_pos = paintbox->getHardness();
+	int opac = current_brush.opacity; //TODO legacy assignment
+	int decrease_pos = current_brush.hardness; //TODO legacy assignment
 	
 	int index = 0;
-	Color4b color;
-	
-	if (paintbox->getCurrentType() == COLOR_PAINT){
-		QColor newcol = (button == Qt::LeftButton) ? paintbox->getForegroundColor() : paintbox->getBackgroundColor();
-		color[0] = newcol.red(); color[1] = newcol.green(); color[2] = newcol.blue(); color[3] = newcol.alpha();
-	}
 	
 	for (unsigned int k = 0; k < vertices->size(); k++)
 	{
-		pair<CVertexO *, VertexDistance> data = vertices->at(k);
+		pair<CVertexO *, PickingData> data = vertices->at(k);
 		
 		float op = brush(paintbox->getBrush(), data.second.distance, data.second.rel_position.x(), data.second.rel_position.y(), decrease_pos);
 		
-		if (!visited_vertices.contains(data.first)) 
+		if (!painted_vertices.contains(data.first)) 
 		{
-			visited_vertices.insert(data.first, pair<Color4b, float>(
+			painted_vertices.insert(data.first, pair<Color4b, int>(
 				Color4b(data.first->C()[0], data.first->C()[1], data.first->C()[2], data.first->C()[3]),
-				op*opac) );
+				(int)(op*opac)) );
 			
 			paintbox->getUndoStack()->push(new SingleColorUndo(data.first, data.first->C()));
 			
 			if (paintbox->getCurrentType() == COLOR_CLONE)
 			{
-				index = ((data.second.position.y() + start_cursor.y()) * viewport[2] +
-								data.second.position.x() + start_cursor.x())*3;
-				 			
-				//TODO Optimize the division by three
-				if (index < glarea->curSiz.width()*glarea->curSiz.height()*3 - 3 && index > 0)
+				index = ((data.second.position.y() + clone_start.y()) * buffer_width +
+								data.second.position.x() + clone_start.x());
+				 qDebug() << "index " << index;
+				 qDebug() << "buffer_width " << buffer_width;
+				 qDebug() << "buffer height " << buffer_height;
+
+				if (index < buffer_width * buffer_height - 1 && index > 0)
 				{
-					if (clone_zbuffer[index / 3] < 1.0){
+					qDebug() << "clone_zbuffer " << clone_zbuffer[index];
+					if (clone_zbuffer[index] < 1.0){
+						index *= 3;
 						color[0] = color_buffer[index]; color[1] = color_buffer[index + 1]; color[2] = color_buffer[index + 2];		
 						applyColor(data.first, color, (int)(op * opac));
 				
@@ -601,25 +639,51 @@ void EditPaintPlugin::paint(vector< pair<CVertexO *, VertexDistance> > * vertice
 				}
 			}else applyColor(data.first, color, (int)(op * opac) );
 			
-		} else if (visited_vertices[data.first].second < op * opac) 
+		} else if (painted_vertices[data.first].second < (int)(op * opac)) 
 		{
-			visited_vertices[data.first].second = op * opac;
-			Color4b temp = visited_vertices[data.first].first;
+			painted_vertices[data.first].second = (int)(op * opac);
+			Color4b temp = painted_vertices[data.first].first;
 			data.first->C()[0]=temp[0]; data.first->C()[1]=temp[1]; data.first->C()[2]=temp[2];
 			
+			paintbox->getUndoStack()->push(new SingleColorUndo(data.first, data.first->C()));
+						
 			if (paintbox->getCurrentType() == COLOR_CLONE) //TODO refactor in a method
 			{
-				index = ((data.second.position.y() + start_cursor.y()) * viewport[2] +
-							data.second.position.x() + start_cursor.x())*3;
-							 			
-				if (index < glarea->curSiz.width()*glarea->curSiz.height()*3 - 3 && index > 0)
+				index = ((data.second.position.y() + clone_start.y()) * buffer_width +
+								data.second.position.x() + clone_start.x());
+				 			
+
+				if (index < buffer_width * buffer_height - 1 && index > 0)
 				{
-					if (clone_zbuffer[index / 3] < 1.0){
+					if (clone_zbuffer[index] < 1.0){
+						index *= 3;
 						color[0] = color_buffer[index]; color[1] = color_buffer[index + 1]; color[2] = color_buffer[index + 2];		
 						applyColor(data.first, color, (int)(op * opac));
+				
 					}
 				}
 			}else applyColor(data.first, color, (int)(op * opac) );	
+		}
+	}
+}
+
+inline void EditPaintPlugin::noise(std::vector< std::pair<CVertexO *, PickingData> > * vertices)
+{
+	double scaler = 8.0;
+	double opacity = 0.5;
+	for (unsigned int k = 0; k < vertices->size(); k++)
+	{	
+		pair<CVertexO *, PickingData> data = vertices->at(k);
+		if (!painted_vertices.contains(data.first))
+		{				
+			double noise = vcg::math::Perlin::Noise(data.first->P()[0] * scaler,
+					data.first->P()[1] * scaler, data.first->P()[2] * scaler);
+			data.first->C()[0] += (int)(noise * 255 * opacity);
+			data.first->C()[1] += (int)(noise * 255 * opacity);
+			data.first->C()[2] += (int)(noise * 255 * opacity);
+			painted_vertices.insert(data.first, pair<Color4b, int>(
+					Color4b(data.first->C()[0], data.first->C()[1], data.first->C()[2], data.first->C()[3]),
+					(int)(noise * 255 * opacity)));
 		}
 	}
 }
@@ -629,7 +693,7 @@ void EditPaintPlugin::paint(vector< pair<CVertexO *, VertexDistance> > * vertice
  * If face is selected, it will fill only the selected area, 
  * otherwise only the non selected area 
  */
-void EditPaintPlugin::fill(MeshModel & ,CFaceO * face) 
+inline void EditPaintPlugin::fill(MeshModel & ,CFaceO * face) 
 {
 	QHash <CFaceO *,CFaceO *> visited;
 	QHash <CVertexO *,CVertexO *> temp;
@@ -638,12 +702,10 @@ void EditPaintPlugin::fill(MeshModel & ,CFaceO * face)
 	temp_po.push_back(face);
 	visited.insert(face,face);
 	int opac=paintbox->getOpacity();
-	QColor newcol = (button == Qt::LeftButton) ? paintbox->getForegroundColor() : paintbox->getBackgroundColor();
+	QColor newcol = (latest_event.button == Qt::LeftButton) ? paintbox->getForegroundColor() : paintbox->getBackgroundColor();
 
 	Color4b color(newcol.red(), newcol.green(), newcol.blue(), newcol.alpha());
-	
-//	std::cout << newcol.red() <<" "<< newcol.green() <<" "<< newcol.blue() << std::endl;
-	
+
 	paintbox->getUndoStack()->beginMacro("Fill Color");
 	
 	for (unsigned int lauf2 = 0; lauf2 < temp_po.size(); lauf2++) {
@@ -674,9 +736,9 @@ void EditPaintPlugin::fill(MeshModel & ,CFaceO * face)
 	paintbox->getUndoStack()->endMacro();
 }
 
-void EditPaintPlugin::gradient(MeshModel & m,GLArea * gla) {
+inline void EditPaintPlugin::gradient(MeshModel & m,GLArea * gla) {
 	
-	QPoint p = start_cursor - cursor;
+	QPoint p = gradient_start - latest_event.position;
 
 	QHash <CVertexO *,CVertexO *> temp;
 
@@ -687,8 +749,8 @@ void EditPaintPlugin::gradient(MeshModel & m,GLArea * gla) {
 	Color4b c1(qc1.red(), qc1.green(), qc1.blue(), qc1.alpha());
 	Color4b c2(qc2.red(), qc2.green(), qc2.blue(), qc2.alpha());
 	
-	QPointF p1(start_cursor.x(),gla->curSiz.height() - start_cursor.y());
-	QPointF p0(gl_cursor);
+	QPointF p1(gradient_start.x(),gla->curSiz.height() - gradient_start.y());
+	QPointF p0(latest_event.gl_position);
 	
 	float x2=(p1.x()-p0.x());
 	float y2=(p1.y()-p0.y());
@@ -769,7 +831,7 @@ void EditPaintPlugin::gradient(MeshModel & m,GLArea * gla) {
  * It's inlined because it's only called once, inside Decorate.
  * Should it be called in other places, the inlining must be removed!
  */ 
-inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO *, VertexDistance> > * vertex_result)
+inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO *, PickingData> > * vertex_result)
 {
 	vector<CMeshO::FacePointer>::iterator fpi;
 	vector<CMeshO::FacePointer> temp; //TODO maybe temp can be placed inside the class for better performance
@@ -777,7 +839,9 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 	vector <CFaceO *> surround; /*< surrounding faces of a given face*/
 	surround.reserve(6);
 	
-	mark++;
+	if (current_options & EPP_AVG_NORMAL ) normal = Point3f(0.0, 0.0, 0.0);
+	
+	m.cm.UnMarkAll();
 	
 	if (selection->size() == 0) {
 		CMeshO::FaceIterator fi;
@@ -799,8 +863,8 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 	
 	selection->clear();
 
-	QPointF gl_cursorf = QPointF(gl_cursor);
-	QPointF gl_prev_cursorf = QPointF(prev_cursor.x(),glarea->curSiz.height() - prev_cursor.y());
+	QPointF gl_cursorf = QPointF(latest_event.gl_position);
+	QPointF gl_prev_cursorf = QPointF(previous_event.gl_position);
 
 	QPointF p[3],z[3]; //p stores vertex coordinates in screen space, z the corresponding depth value
 	double tx,ty,tz;
@@ -808,8 +872,6 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 	bool backface = paintbox->getPaintBackFace();
 	bool invisible = paintbox->getPaintInvisible();
 	bool percentual = paintbox->getSizeUnit() == 1;
-	float pen_radius = paintbox->getRadius();
-	int pen_size = paintbox->getSize();
 	
 	double EPSILON = 0.003;
 	
@@ -868,20 +930,23 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 		{
 			for (int j=0; j<3; j++) if (invisible || (z[j].x() <= z[j].y() + EPSILON))
 			{
-				VertexDistance vd; //TODO make it a pointer
-
-				float radius = percentual ? (pen_radius * scale_fac * viewport[3] * fov / distance[j]) : pen_size;
+				PickingData vd; //TODO make it a pointer
+				
+				float radius = percentual ? vcg::math::Abs(current_brush.radius * scale_fac * viewport[3] * fov / distance[j]) : current_brush.size;
 				
 				if (isIn(gl_cursorf, gl_prev_cursorf, p[j].x(), p[j].y(), radius , & vd.distance, vd.rel_position)) 
 				{
 					intern = true;
 					if (vertex_result == NULL) continue;
-					else if (fac->V(j)->IMark() != mark)
+					else if (!m.cm.IsMarked(fac->V(j)))
 					{
 						vd.position.setX((int)p[j].x()); vd.position.setY((int)p[j].y());
-						pair<CVertexO *, VertexDistance> data(fac->V(j), vd);
+						pair<CVertexO *, PickingData> data(fac->V(j), vd);
 						vertex_result->push_back(data);
-						fac->V(j)->IMark() = mark;
+						
+						if (current_options & EPP_AVG_NORMAL ) normal += fac->V(j)->N();
+						
+						m.cm.Mark(fac->V(j));
 					}
 				}
 				
@@ -898,22 +963,24 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
 			} 
 		}
 		
-		if (intern && fac->IMark() != mark) 
+		if (intern && !m.cm.IsMarked(fac)) 
 		{
-			fac->IMark() = mark;
+			m.cm.Mark(fac);
 			selection->push_back(fac);
 			surround.clear();
 			for (int lauf=0; lauf<3; lauf++) getSurroundingFacesVF(fac,lauf,&surround);
 
 			for (unsigned int lauf3=0; lauf3<surround.size(); lauf3++)
 			{
-				if (surround[lauf3]->IMark() != mark) 
+				if (!m.cm.IsMarked(surround[lauf3])) 
 				{
 						temp.push_back(surround[lauf3]);
 				} 
 			}
 		}
 	} //end of for each face loop
+	
+	if (current_options & EPP_AVG_NORMAL ) normal /= vertex_result->size();
 }
 
 /**
@@ -936,7 +1003,7 @@ Q_EXPORT_PLUGIN(EditPaintPlugin)
 /**
  * Draw a red vertex
  */
-void drawVertex(CVertexO* vp)
+/*void drawVertex(CVertexO* vp)
 {
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
@@ -947,7 +1014,7 @@ void drawVertex(CVertexO* vp)
 	glEnd();
 	glEnable(GL_DEPTH_TEST);
 	glPopAttrib();
-}
+}*/
 
 /** 
  * draws the xor-line 
@@ -987,7 +1054,7 @@ void drawLine(GLArea * gla, QPoint & start, QPoint & cur) {
  * Draw a circle projected on the surface of the mesh oriented with
  * the avarage normal. This will eventually substitute drawPercentualCircle
  */
-void drawNormalPercentualCircle(GLArea * , QPoint &glcur, MeshModel &m, GLfloat* ,
+/*void drawNormalPercentualCircle(GLArea * , QPoint &glcur, MeshModel &m, GLfloat* ,
 		double* mvmatrix, double* prmatrix, GLint* vmatrix, float )
 {
 	glPushAttrib(GL_ENABLE_BIT);
@@ -1007,7 +1074,7 @@ void drawNormalPercentualCircle(GLArea * , QPoint &glcur, MeshModel &m, GLfloat*
 	
 //	std::cout << "3D: " << x << " " << y << " " << z << std::endl;
 	
-	gluProject(x, y, z, mvmatrix, prmatrix, vmatrix, &sx, &sy, &sz);
+//	gluProject(x, y, z, mvmatrix, prmatrix, vmatrix, &sx, &sy, &sz);
 	
 //	std::cout << "re2D: " << sx << " " << sy << " " << sz << std::endl;
 	
@@ -1017,7 +1084,7 @@ void drawNormalPercentualCircle(GLArea * , QPoint &glcur, MeshModel &m, GLfloat*
 	glPointSize(6.0);
 	glBegin(GL_POINTS);
 		glColor3f(1.0f, 0.0f, 0.0f); //red
-		glVertex3d(x, y, z);
+	//	glVertex3d(x, y, z);
 	glEnd();
 	glEnable(GL_DEPTH_TEST);
 	glPopAttrib(); //---End of Point Drawing
@@ -1087,7 +1154,7 @@ void drawNormalPercentualCircle(GLArea * , QPoint &glcur, MeshModel &m, GLfloat*
 	}
 	
 	glPopAttrib();
-}
+} */
 
 void drawSimplePolyLine(GLArea * gla, QPoint & cur, float scale, vector<QPointF> * points)
 {
@@ -1159,7 +1226,7 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 	
 	float diag = m.cm.bbox.Diag() * DSCALER;
 
-	float radius = scale * m.cm.bbox.Diag() * 0.5;
+	float radius = scale; //TODO leftover
 	
 	QPointF * proj_points = new QPointF[points->size()]; //TODO hope it works on windows!
 	
@@ -1252,49 +1319,46 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 }
 
 //each side is divided in given segments
-vector<QPointF> * generatePolygon(int sides, int segments)
-{
-	vector<QPointF> * temp = new vector<QPointF>();
-		
+void generatePolygon(std::vector<QPointF> & vertices, int sides, int segments)
+{	
 	float step = sides / 2.0;
 	
 	float start_angle = M_PI / sides;
 	
 	for (int k = 0; k < sides; k++)
 	{
-		temp->push_back(QPointF(sin((M_PI * (float)k / step) + start_angle), cos((M_PI * (float)k / step) + start_angle)));
+		vertices.push_back(QPointF(sin((M_PI * (float)k / step) + start_angle), cos((M_PI * (float)k / step) + start_angle)));
 	}
 	
 	if (segments > 1)
 	{
-		vector<QPointF> * result = new vector<QPointF>();
 		int sk;
 		for (int k = 0; k < sides; k++  )
 		{
 			sk = (k + 1) % sides;
-			QPointF kv = temp->at(k);
-			QPointF skv = temp->at(sk);
+			QPointF kv = vertices.at(k);
+			QPointF skv =vertices.at(sk);
 			QPointF d = (skv - kv)/segments;
-			result->push_back(kv);
+			vertices.push_back(kv);
 			for (int j = 1; j < segments; j++)
 			{
-				result->push_back(kv + d * j);
+				vertices.push_back(kv + d * j);
 			}
 		}
-		return result;
-	}else return temp;
+		vertices.erase(vertices.begin(), vertices.begin() + sides);
+	}
 }
 
 /**
  * Generates the same circle points that Gfrei's algorithm does
  */ 
-vector<QPointF> * generateCircle(int segments)
+void generateCircle(std::vector<QPointF> & vertices, int segments)
 {
-	return generatePolygon(segments, 1);
+	return generatePolygon(vertices, segments, 1);
 }
 
-vector<QPointF> * generateSquare(int segments)
+void generateSquare(std::vector<QPointF> & vertices, int segments)
 {
-	return generatePolygon(4, segments);	
+	return generatePolygon(vertices, 4, segments);	
 }
 
