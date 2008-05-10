@@ -24,7 +24,10 @@
 #ifndef PAINTBOX_H_
 #define PAINTBOX_H_
 
+#include <vector>
+
 #include <vcg/math/base.h>
+#include <GL/glew.h>
 #include "ui_paintbox.h"
 
 /**
@@ -61,6 +64,7 @@ private:
 	ToolType previous_type;
 
 	QGraphicsPixmapItem * item;
+	bool pixmap_available;
 	
 	inline int getCurrentTab() {return tabs_container->currentIndex();}
 	
@@ -112,6 +116,7 @@ public:
 	inline int getDirection() {return mesh_displacement_direction->currentIndex();}
 	inline QUndoStack * getUndoStack() {return stack;}
 	
+	
 	void setUndoStack(QUndoStack * qus);
 	
 	void setForegroundColor(QColor & c);
@@ -123,7 +128,9 @@ public:
 	//Cloning
 	inline QGraphicsScene * getCloneScene() {return clone_source_view->scene();}
 	inline QGraphicsPixmapItem * getClonePixmap() {return item;}
-	
+	void getPixmapBuffer(GLubyte * & cbuffer, GLfloat* & zbuffer, int & w, int & h);
+	inline bool isPixmapAvailable(){return pixmap_available;}
+	 
 	void setClonePixmap(QImage & image);
 	void setPixmapCenter(qreal x, qreal y);
 	void loadClonePixmap();
@@ -133,22 +140,21 @@ signals:
 	void undo();
 	void redo();
 	void typeChange(ToolType t);
+	void brushSettingsChange(int size, int opacity, int hardness);
 	
 public slots: 
 	void on_pen_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_PAINT; emit typeChange(active[COLOR_TAB]);}}
 	void on_fill_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_FILL;emit typeChange(active[COLOR_TAB]);}}
 	void on_gradient_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_GRADIENT; emit typeChange(active[COLOR_TAB]);}}
 	void on_smooth_button_toggled(bool checked){if(checked) {active[COLOR_TAB] = COLOR_SMOOTH;emit typeChange(active[COLOR_TAB]);}}
-	void on_clone_button_toggled(bool checked){if(checked) {active[COLOR_TAB] = COLOR_CLONE;emit typeChange(active[COLOR_TAB]);}}
+	void on_clone_button_toggled(bool checked){if(checked) {active[COLOR_TAB] = COLOR_CLONE; emit typeChange(active[COLOR_TAB]);} clone_source_frame->setVisible(checked);}
 	void on_pick_button_toggled(bool checked){if(checked) {previous_type = active[COLOR_TAB]; active[COLOR_TAB] = COLOR_PICK; emit typeChange(active[COLOR_TAB]);}}
 	void on_mesh_pick_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_SELECT; emit typeChange(active[MESH_TAB]);}}
 	void on_mesh_smooth_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_SMOOTH; emit typeChange(active[MESH_TAB]);}}
 	void on_mesh_sculpt_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_PUSH; emit typeChange(active[MESH_TAB]);}}
 	void on_mesh_add_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_PULL; emit typeChange(active[MESH_TAB]);}}
-	void on_undo_button_toggled(bool checked){if(checked) emit undo();}
-	void on_redo_button_toggled(bool checked){if(checked) emit redo();}
-	void on_mesh_undo_button_toggled(bool checked){if(checked) emit undo();}
-	void on_mesh_redo_button_toggled(bool checked){if(checked) emit redo();}
+	void on_undo_button_clicked(){emit undo();}
+	void on_redo_button_clicked(){emit redo();}
 	void on_default_colors_clicked();
 	void on_switch_colors_clicked();
 	void on_brush_box_currentIndexChanged(int){refreshBrushPreview();}
@@ -158,6 +164,7 @@ public slots:
 
 };
 
+/******Brush Shapes******/ 
 
 /**
  * Returns the "value" of the brush at the given distance from the center
