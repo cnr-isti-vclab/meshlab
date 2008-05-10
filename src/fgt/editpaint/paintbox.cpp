@@ -40,7 +40,11 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	brush_viewer->setScene(new QGraphicsScene());
 	clone_source_view->setScene(new QGraphicsScene());
 	
+	clone_source_frame->setVisible(false);
+	
 	item = NULL;
+	pixmap_available = false;
+	
 /*	QPen pen;
 	getCloneScene()->addLine((qreal)(clone_source_view->width()/2 ), 
 			(qreal)(clone_source_view->height()/2 + 8), 
@@ -101,9 +105,36 @@ void Paintbox::loadClonePixmap()
 	{
 		QPixmap pixmap(s);
 		item = getCloneScene()->addPixmap(pixmap);
+		pixmap_available = true;
 	}	
 }
+
+void Paintbox::getPixmapBuffer(GLubyte * & buffer, GLfloat* & zbuffer, int & w, int & h)
+{
+	QImage image = item->pixmap().toImage();
 	
+	buffer = new GLubyte[image.size().height() * image.size().width() * 3];
+	zbuffer = new GLfloat[image.size().height() * image.size().width()];
+	
+	qDebug() << "at least initialized";
+	
+	for (int x = 0; x < image.size().width(); x++){
+			for (int y = 0; y < image.size().height(); y++)
+			{
+				int index = (y * image.size().width() + x);
+				zbuffer[index] = 0.0;
+				index *= 3;
+				buffer[index] = qRed(image.pixel(x, y));
+				buffer[index + 1] = qGreen(image.pixel(x, y));
+				buffer[index + 2] = qBlue(image.pixel(x, y));
+			}
+		}
+	w = image.size().width();
+	h = image.size().height();
+	qDebug() << "in paintbox, zbuffer[0] " << zbuffer[0];
+	qDebug() << "and filled!";
+}
+
 void Paintbox::restorePreviousType()
 {
 	//TODO Only works as long as types are declared in the same order as buttons!
