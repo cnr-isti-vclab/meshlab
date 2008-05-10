@@ -81,56 +81,31 @@ public:
 public slots:
 	void update();
 	void setToolType(ToolType t);
+	void setBrushSettings(int size, int opacity, int hardness);
 	
 private:
-	struct VertexDistance { QPoint position; QPointF rel_position; float distance;};
+	struct PickingData { QPoint position; QPointF rel_position; float distance;};
 	
-	void updateSelection(MeshModel &m, std::vector< std::pair<CVertexO *, VertexDistance> > * vertex_result = NULL);
-	
-	void paint(std::vector< std::pair<CVertexO *, VertexDistance> > * vertices);
-	void sculpt(MeshModel &, std::vector< std::pair<CVertexO *, VertexDistance> > * vertices);
-	void smooth(std::vector< std::pair<CVertexO *, VertexDistance> > * vertices);
-	void fill(MeshModel & m,CFaceO * face);
-	void gradient(MeshModel & m,GLArea * gla);
-	
-	void projectCursor(MeshModel & m, GLArea * gla);
-	
-	QPoint cursor; /*< indicates the last known cursor position (for now) */
-	QPoint gl_cursor; //same cursor but in OpenGl coordinates
-	QPoint start_cursor; //indicates last position at mouse click
-	QPoint prev_cursor; //indicates previous position of cursor before last mouse move
+	void updateSelection(MeshModel &m, std::vector< std::pair<CVertexO *, PickingData> > * vertex_result = NULL);
 	
 	double modelview_matrix[16]; //modelview
 	double projection_matrix[16]; //projection
 	GLint viewport[4];
 	
+	GLArea * glarea;
 	GLfloat* zbuffer; /*< last known zbuffer, always kept up-to-date */
-	
-	GLubyte* color_buffer; /*< buffer used as color source in cloning*/
-	GLfloat* clone_zbuffer; /*<buffer to determine if the source is legal or not */
-	
-	Qt::MouseButton button; //TODO Check its usefulness
 
-	QQueue<QMouseEvent> event_queue; /*< Queue used to store UI events in order to postpone their processing during a Decorate call*/
-	
 	QDockWidget* dock; 
 	Paintbox* paintbox; /*< The current Paintbox*/
 	
-	GLArea * glarea; /*< current glarea */
-	
 	std::vector<CMeshO::FacePointer> * selection; //currently selected faces
-	std::vector< std::pair<CVertexO *, VertexDistance> > vertices; //touched vertices during last updateSelection
-	QHash<CVertexO *, std::pair<vcg::Color4b, float> > visited_vertices; //active vertices during painting
-	QHash<CVertexO *, std::pair<vcg::Point3f, float> > displaced_vertices; //active vertices during sculpting
+	std::vector< std::pair<CVertexO *, PickingData> > vertices; //touched vertices during last updateSelection
+	vcg::Point3f normal; //average normal of all vertices in "vertices"
 	
-	bool disable_decorate;
-	
-	int mark;
-
-	std::vector<QPointF> * circle;
-	std::vector<QPointF> * dense_circle;
-	std::vector<QPointF> * square;
-	std::vector<QPointF> * dense_square;
+	std::vector<QPointF> circle;
+	std::vector<QPointF> dense_circle;
+	std::vector<QPointF> square;
+	std::vector<QPointF> dense_square;
 	
 	//New code under this line---
 	
@@ -167,6 +142,55 @@ private:
 		latest_event.processed = false;
 		latest_event.valid = true;
 	}
+	
+	//Brush frequently accessed setting memoization
+	struct Brush{
+		int 	size;
+		int 	opacity;
+		int 	hardness;
+		float	radius;
+		bool	size_map;
+		bool	opacity_map;
+		bool	hardness_map;
+	};
+	
+	Brush current_brush;
+	
+	/****** Painting and Cloning Tools ******/
+	void paint(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
+	void capture();
+	QHash<CVertexO *, std::pair<vcg::Color4b, int> >	painted_vertices; /*<active vertices during painting */
+	
+	vcg::Color4b	color;
+	GLubyte* 		color_buffer; /*< buffer used as color source in cloning*/
+	GLfloat* 		clone_zbuffer; /*<buffer to determine if the source is legal or not */
+	QPoint 			clone_start;
+	int				buffer_width;
+	int				buffer_height;
+		
+	
+	/****** Pull and Push Tools ******/
+	void sculpt(MeshModel &, std::vector< std::pair<CVertexO *, PickingData> > * vertices);
+	
+	QHash<CVertexO *, std::pair<vcg::Point3f, float> > displaced_vertices; /*<active vertices during sculpting */
+
+	
+	/****** Gradient Tool ******/
+	void gradient(MeshModel & m,GLArea * gla);
+	
+	QPoint gradient_start;
+	
+	
+	/****** Color and Position Smoothing ******/
+	void smooth(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
+	QHash<CVertexO *, CVertexO *> smoothed_vertices;
+	
+	/****** Color Fill ******/
+	void fill(MeshModel & m,CFaceO * face);
+		
+	
+	/****** Color Noise *****/
+	void noise(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
 };
 
 /**
@@ -407,7 +431,7 @@ inline bool isIn(const QPointF &p0,const QPointF &p1, float x,float y,float radi
 	if (delta_len_sq < radius_sq) 
 	{	
 		float delta_len = sqrt(delta_len_sq);
-		if ( (found && delta_len < pos.x() ) || !found)	
+		if ( (found && delta_len < *dist ) || !found)	
 		{
 			*dist = delta_len;
 		//	pos.setY(x / delta_len );
@@ -420,7 +444,7 @@ inline bool isIn(const QPointF &p0,const QPointF &p1, float x,float y,float radi
 	*dist /= radius;
 	
 	return found;
-}
+} 
 
 inline bool pointInTriangle(const float p_x,const float p_y,const float a_x,const float a_y,
 		const float b_x,const float b_y,const float c_x,const float c_y) 
@@ -622,7 +646,7 @@ void drawLine(GLArea *, QPoint &, QPoint &);
 void drawSimplePolyLine(GLArea * gla, QPoint & gl_cur, float scale, std::vector<QPointF> * points);
 void drawPercentualPolyLine(GLArea * , QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float , std::vector<QPointF> * );
 
-std::vector<QPointF> * generateCircle(int segments = 18);
-std::vector<QPointF> * generateSquare(int segments = 1);
+void generateCircle(std::vector<QPointF> &, int segments = 18);
+void generateSquare(std::vector<QPointF> &, int segments = 1);
 
 #endif
