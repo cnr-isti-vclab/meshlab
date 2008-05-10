@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>354</width>
-    <height>721</height>
+    <height>952</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -43,7 +43,8 @@
          <string>Undo</string>
         </property>
         <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/undo-24.png</iconset>
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/undo-24.png</normaloff>:/images/undo-24.png</iconset>
         </property>
         <property name="toolButtonStyle" >
          <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -65,7 +66,8 @@
          <string>Redo</string>
         </property>
         <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/redo-24.png</iconset>
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/redo-24.png</normaloff>:/images/redo-24.png</iconset>
         </property>
         <property name="toolButtonStyle" >
          <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -93,6 +95,14 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>332</width>
+        <height>848</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>Painting</string>
       </attribute>
@@ -103,16 +113,7 @@
           <enum>Qt::LeftToRight</enum>
          </property>
          <layout class="QHBoxLayout" >
-          <property name="leftMargin" >
-           <number>0</number>
-          </property>
-          <property name="topMargin" >
-           <number>0</number>
-          </property>
-          <property name="rightMargin" >
-           <number>0</number>
-          </property>
-          <property name="bottomMargin" >
+          <property name="margin" >
            <number>0</number>
           </property>
           <item>
@@ -121,7 +122,8 @@
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/paintbrush-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/paintbrush-22.png</normaloff>:/images/paintbrush-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -140,7 +142,8 @@
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/bucket-fill-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/bucket-fill-22.png</normaloff>:/images/bucket-fill-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -156,7 +159,8 @@
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/blend-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/blend-22.png</normaloff>:/images/blend-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -175,7 +179,8 @@
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/blur-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -194,7 +199,8 @@
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/clone-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/clone-22.png</normaloff>:/images/clone-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -213,7 +219,8 @@
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/color-picker-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/color-picker-22.png</normaloff>:/images/color-picker-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -228,7 +235,7 @@
             <property name="orientation" >
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeHint" >
+            <property name="sizeHint" stdset="0" >
              <size>
               <width>40</width>
               <height>20</height>
@@ -279,7 +286,8 @@
            <string>...</string>
           </property>
           <property name="icon" >
-           <iconset resource="meshlab.qrc" >:/images/bw.png</iconset>
+           <iconset resource="meshlab.qrc" >
+            <normaloff>:/images/bw.png</normaloff>:/images/bw.png</iconset>
           </property>
           <property name="iconSize" >
            <size>
@@ -304,7 +312,8 @@
            <string>...</string>
           </property>
           <property name="icon" >
-           <iconset resource="meshlab.qrc" >:/images/swap-colors-12.png</iconset>
+           <iconset resource="meshlab.qrc" >
+            <normaloff>:/images/swap-colors-12.png</normaloff>:/images/swap-colors-12.png</iconset>
           </property>
           <property name="iconSize" >
            <size>
@@ -537,22 +546,10 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" >
-          <property name="leftMargin" >
+          <property name="margin" >
            <number>9</number>
           </property>
-          <property name="topMargin" >
-           <number>9</number>
-          </property>
-          <property name="rightMargin" >
-           <number>9</number>
-          </property>
-          <property name="bottomMargin" >
-           <number>9</number>
-          </property>
-          <property name="horizontalSpacing" >
-           <number>6</number>
-          </property>
-          <property name="verticalSpacing" >
+          <property name="spacing" >
            <number>6</number>
           </property>
           <item row="0" column="2" >
@@ -637,22 +634,10 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" >
-          <property name="leftMargin" >
+          <property name="margin" >
            <number>9</number>
           </property>
-          <property name="topMargin" >
-           <number>9</number>
-          </property>
-          <property name="rightMargin" >
-           <number>9</number>
-          </property>
-          <property name="bottomMargin" >
-           <number>9</number>
-          </property>
-          <property name="horizontalSpacing" >
-           <number>6</number>
-          </property>
-          <property name="verticalSpacing" >
+          <property name="spacing" >
            <number>6</number>
           </property>
           <item row="0" column="1" >
@@ -747,7 +732,8 @@ p, li { white-space: pre-wrap; }
               <string>Circle</string>
              </property>
              <property name="icon" >
-              <iconset resource="meshlab.qrc" >:/images/circle.png</iconset>
+              <iconset resource="meshlab.qrc" >
+               <normaloff>:/images/circle.png</normaloff>:/images/circle.png</iconset>
              </property>
             </item>
             <item>
@@ -755,7 +741,8 @@ p, li { white-space: pre-wrap; }
               <string>Square</string>
              </property>
              <property name="icon" >
-              <iconset resource="meshlab.qrc" >:/images/square.png</iconset>
+              <iconset resource="meshlab.qrc" >
+               <normaloff>:/images/square.png</normaloff>:/images/square.png</iconset>
              </property>
             </item>
             <item>
@@ -915,22 +902,10 @@ p, li { white-space: pre-wrap; }
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" >
-          <property name="leftMargin" >
+          <property name="margin" >
            <number>9</number>
           </property>
-          <property name="topMargin" >
-           <number>9</number>
-          </property>
-          <property name="rightMargin" >
-           <number>9</number>
-          </property>
-          <property name="bottomMargin" >
-           <number>9</number>
-          </property>
-          <property name="horizontalSpacing" >
-           <number>6</number>
-          </property>
-          <property name="verticalSpacing" >
+          <property name="spacing" >
            <number>6</number>
           </property>
           <item row="0" column="1" >
@@ -978,22 +953,10 @@ p, li { white-space: pre-wrap; }
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" >
-          <property name="leftMargin" >
+          <property name="margin" >
            <number>9</number>
           </property>
-          <property name="topMargin" >
-           <number>9</number>
-          </property>
-          <property name="rightMargin" >
-           <number>9</number>
-          </property>
-          <property name="bottomMargin" >
-           <number>9</number>
-          </property>
-          <property name="horizontalSpacing" >
-           <number>6</number>
-          </property>
-          <property name="verticalSpacing" >
+          <property name="spacing" >
            <number>6</number>
           </property>
           <item row="0" column="0" >
@@ -1102,10 +1065,16 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QGraphicsView" name="clone_source_view" >
             <property name="verticalScrollBarPolicy" >
-             <enum>Qt::ScrollBarAsNeeded</enum>
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy" >
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="interactive" >
+             <bool>false</bool>
             </property>
             <property name="optimizationFlags" >
-             <enum>QGraphicsView::DontAdjustForAntialiasing</enum>
+             <set>QGraphicsView::DontAdjustForAntialiasing</set>
             </property>
            </widget>
           </item>
@@ -1124,7 +1093,7 @@ p, li { white-space: pre-wrap; }
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0" >
           <size>
            <width>311</width>
            <height>61</height>
@@ -1135,6 +1104,14 @@ p, li { white-space: pre-wrap; }
       </layout>
      </widget>
      <widget class="QWidget" name="tab_2" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>332</width>
+        <height>848</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>Selecting &amp;&amp; Editing</string>
       </attribute>
@@ -1154,16 +1131,7 @@ p, li { white-space: pre-wrap; }
           </size>
          </property>
          <layout class="QHBoxLayout" >
-          <property name="leftMargin" >
-           <number>0</number>
-          </property>
-          <property name="topMargin" >
-           <number>0</number>
-          </property>
-          <property name="rightMargin" >
-           <number>0</number>
-          </property>
-          <property name="bottomMargin" >
+          <property name="margin" >
            <number>0</number>
           </property>
           <item>
@@ -1175,7 +1143,8 @@ p, li { white-space: pre-wrap; }
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/pickbrush-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/pickbrush-22.png</normaloff>:/images/pickbrush-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -1197,7 +1166,8 @@ p, li { white-space: pre-wrap; }
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/blur-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -1213,7 +1183,8 @@ p, li { white-space: pre-wrap; }
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/sculpt-22.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/sculpt-22.png</normaloff>:/images/sculpt-22.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -1232,7 +1203,8 @@ p, li { white-space: pre-wrap; }
              <string>...</string>
             </property>
             <property name="icon" >
-             <iconset resource="meshlab.qrc" >:/images/add-24.png</iconset>
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/add-24.png</normaloff>:/images/add-24.png</iconset>
             </property>
             <property name="checkable" >
              <bool>true</bool>
@@ -1247,7 +1219,7 @@ p, li { white-space: pre-wrap; }
             <property name="orientation" >
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeHint" >
+            <property name="sizeHint" stdset="0" >
              <size>
               <width>40</width>
               <height>20</height>
@@ -1274,22 +1246,10 @@ p, li { white-space: pre-wrap; }
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" >
-          <property name="leftMargin" >
+          <property name="margin" >
            <number>9</number>
           </property>
-          <property name="topMargin" >
-           <number>9</number>
-          </property>
-          <property name="rightMargin" >
-           <number>9</number>
-          </property>
-          <property name="bottomMargin" >
-           <number>9</number>
-          </property>
-          <property name="horizontalSpacing" >
-           <number>6</number>
-          </property>
-          <property name="verticalSpacing" >
+          <property name="spacing" >
            <number>6</number>
           </property>
           <item row="0" column="1" >
@@ -1372,7 +1332,8 @@ p, li { white-space: pre-wrap; }
               <string>Circle</string>
              </property>
              <property name="icon" >
-              <iconset resource="meshlab.qrc" >:/images/circle.png</iconset>
+              <iconset resource="meshlab.qrc" >
+               <normaloff>:/images/circle.png</normaloff>:/images/circle.png</iconset>
              </property>
             </item>
             <item>
@@ -1380,7 +1341,8 @@ p, li { white-space: pre-wrap; }
               <string>Square</string>
              </property>
              <property name="icon" >
-              <iconset resource="meshlab.qrc" >:/images/square.png</iconset>
+              <iconset resource="meshlab.qrc" >
+               <normaloff>:/images/square.png</normaloff>:/images/square.png</iconset>
              </property>
             </item>
             <item>
@@ -1637,7 +1599,7 @@ p, li { white-space: pre-wrap; }
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0" >
           <size>
            <width>314</width>
            <height>151</height>
@@ -1648,26 +1610,22 @@ p, li { white-space: pre-wrap; }
       </layout>
      </widget>
      <widget class="QWidget" name="tab_3" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>640</width>
+        <height>320</height>
+       </rect>
+      </property>
       <attribute name="title" >
        <string>Configuration</string>
       </attribute>
       <layout class="QGridLayout" >
-       <property name="leftMargin" >
+       <property name="margin" >
         <number>9</number>
        </property>
-       <property name="topMargin" >
-        <number>9</number>
-       </property>
-       <property name="rightMargin" >
-        <number>9</number>
-       </property>
-       <property name="bottomMargin" >
-        <number>9</number>
-       </property>
-       <property name="horizontalSpacing" >
-        <number>6</number>
-       </property>
-       <property name="verticalSpacing" >
+       <property name="spacing" >
         <number>6</number>
        </property>
        <item row="0" column="1" >
@@ -1702,7 +1660,7 @@ p, li { white-space: pre-wrap; }
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0" >
           <size>
            <width>20</width>
            <height>40</height>
