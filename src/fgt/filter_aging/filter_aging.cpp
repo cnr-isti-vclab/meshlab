@@ -197,46 +197,51 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 				gM.Set(m.cm.face.begin(), m.cm.face.end());
 				
 				if(cb) (*cb)( (i+1)*100/dispSteps, "Aging...");
-
-				// blend toghether face normals and recompute vertex normal from these normals 
-				// to get smoother offest directions 
-				FaceNormalSmoothFF(m.cm,3); 
-				tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
-				tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
-
+				
+				if(useQuality) {
+					// blend toghether face normals and recompute vertex normal from these normals 
+					// to get smoother offest directions
+					FaceNormalSmoothFF(m.cm, 3); 
+					tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+					tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
+				}
+				else
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+				
 				for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
 					if((*fi).IsD()) continue;
 					for(int j=0; j<3; j++) {
 						if(ep.qaVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  &&
 						   !(*fi).V(j)->IsV() &&		
-						   (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) 
-								{
-										double noise;						// noise value
-										Point3f dispDir = (*fi).V(j)->N();	// displacement direction
-
-										Point3f p = (*fi).V(j)->P() / noiseScale;
-										noise = generateNoiseValue(octaves, p);
-										// only values bigger than noiseClamp will be considered
-										noise = (noise<noiseClamp?0.0:(noise-noiseClamp));
-
-										// displacement offset
-										Point3f offset = -(dispDir * chipDepth * noise) / dispSteps;
-
-										(*fi).V(j)->P() += offset;
-										if(faceIntersections(m.cm, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
-											(*fi).V(j)->P() -= offset;
-
-										// mark as visited (displaced)
-										(*fi).V(j)->SetV();
-								}
+						   (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
+								double noise;						// noise value
+								Point3f dispDir = (*fi).V(j)->N();	// displacement direction
+								
+								Point3f p = (*fi).V(j)->P() / noiseScale;
+								noise = generateNoiseValue(octaves, p);
+								// only values bigger than noiseClamp will be considered
+								noise = (noise<noiseClamp?0.0:(noise-noiseClamp));
+								
+								// displacement offset
+								Point3f offset = -(dispDir * chipDepth * noise) / dispSteps;
+								
+								(*fi).V(j)->P() += offset;
+								if(faceIntersections(m.cm, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
+									(*fi).V(j)->P() -= offset;
+								
+								// mark as visited (displaced)
+								(*fi).V(j)->SetV();
+							}
 					}
 				}
 				// clear vertexes V bit again
 				tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
-
-				// update vertex normals
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			}
+			
+			// update normals
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+			
+			smoothPeaks(m.cm, selected, edgeLenTreshold);
 			
 			// readjust selection
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
@@ -267,8 +272,7 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 	}
 	
 	// clear vertexes V bit
-	for(CMeshO::VertexIterator vi=m.vert.begin(); vi!=m.vert.end(); vi++)
-		if(!(*vi).IsD()) (*vi).ClearV();
+	tri::UpdateFlags<CMeshO>::VertexClearV(m);
 	
 	while(ref) {
 		if(selection) {
@@ -348,6 +352,38 @@ bool GeometryAgingPlugin::faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceTyp
 	} while(p != start && !p.IsBorder());
 	
 	return false;
+}
+
+
+/* Smooths higher and thinner peaks (edges whose incident faces form an angle
+ * greater than 150 degrees) */
+void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, float edgeLenTreshold)
+{
+	AgingEdgePred aep = AgingEdgePred(AgingEdgePred::ANGLE, selected, edgeLenTreshold, 150.0);
+	GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
+	gM.Set(m.face.begin(), m.face.end());
+	
+	for(CMeshO::FaceIterator fi=m.face.begin(); fi!=m.face.end(); fi++) {
+		if((*fi).IsD()) continue;
+		for(int j=0; j<3; j++) {
+			if(aep.qaVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  &&
+			   !(*fi).V(j)->IsV() &&
+			   (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
+					Point3f cpos = Point3f(((*fi).V2(j)->P() + (*fi).FFp(j)->V2((*fi).FFi(j))->P()) / 2.0);
+					Point3f oldpos = (*fi).V(j)->P();
+					Point3f dirj = Point3f(((*fi).V(j)->P() - (*fi).V1(j)->P()) / 2.0);
+					(*fi).V(j)->P() = cpos + dirj;
+					if(faceIntersections(m, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
+						(*fi).V(j)->P() = oldpos;
+					(*fi).V(j)->SetV();
+			}
+		}
+	}
+	
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
+	
+	// clear vertexes V bit again
+	tri::UpdateFlags<CMeshO>::VertexClearV(m);
 }
 
 

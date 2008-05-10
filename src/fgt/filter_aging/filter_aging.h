@@ -60,6 +60,7 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 		void refineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb);
 		double generateNoiseValue(int Octaves, const CVertexO::CoordType &p);
 		bool faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceType> p, GridStaticPtr<CFaceO, CMeshO::ScalarType> &gM);
+		void smoothPeaks(CMeshO &m, bool selected, float edgeLenTreshold);
 };
 
 
