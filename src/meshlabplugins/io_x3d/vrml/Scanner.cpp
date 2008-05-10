@@ -24,8 +24,8 @@
 /****************************************************************************
  History
  $Log$
- Revision 1.2  2008/02/21 13:04:10  gianpaolopalma
- Fixed compile error
+ Revision 1.2  2008/02/22 17:58:42  cignoni
+ New version of coco_swprintf that supports also mingw compiler
 
  Revision 1.1  2008/02/20 22:02:00  gianpaolopalma
  First working version of Vrml to X3D translator

@@ -492,19 +492,22 @@ MultiValue <QDomElement& parent, QString fieldName, bool flag>  (.QString value;
 	"]".
 
 MultiNumber<QString& value>
-= 	(intCont|realCont)			(.value.append(coco_string_create_char(t->val));.)
-	{[","](intCont|realCont)	(.value.append(" "); value.append(coco_string_create_char(t->val));.)
-	}.
+= 	(intCont|realCont)		(.value.append(coco_string_create_char(t->val));.)
+	[","]
+	{(intCont|realCont)			(.value.append(" "); value.append(coco_string_create_char(t->val));.)
+	[","]}.
 
 MultiString<QString& value>
 = 	(string)				(.value.append(coco_string_create_char(t->val));.)
-	{[","]string			(.value.append(" "); value.append(coco_string_create_char(t->val));.)
-	}.
+	[","]
+	{string						(.value.append(" "); value.append(coco_string_create_char(t->val));.)
+	[","]}.
 
 MultiBool<QString& value>
 = 	("TRUE"|"SALVE")			(.value.append(coco_string_create_char(t->val));.)
-	{[","]("TRUE"|"FALSE")		(.value.append(" "); value.append(coco_string_create_char(t->val));.)
-	}.
+	[","]
+	{("TRUE"|"FALSE")		(.value.append(" "); value.append(coco_string_create_char(t->val));.)
+	[","]}.
 
 
  

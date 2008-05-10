@@ -907,28 +907,34 @@ void Parser::MultiNumber(QString& value) {
 			Get();
 		} else SynErr(105);
 		value.append(coco_string_create_char(t->val));
-		while (la->kind == 2 || la->kind == 3 || la->kind == 37) {
+		if (la->kind == 37) {
+			Get();
+		}
+		while (la->kind == 2 || la->kind == 3) {
+			if (la->kind == 2) {
+				Get();
+			} else {
+				Get();
+			}
+			value.append(" "); value.append(coco_string_create_char(t->val));
 			if (la->kind == 37) {
 				Get();
 			}
-			if (la->kind == 2) {
-				Get();
-			} else if (la->kind == 3) {
-				Get();
-			} else SynErr(106);
-			value.append(" "); value.append(coco_string_create_char(t->val));
 		}
 }
 
 void Parser::MultiString(QString& value) {
 		Expect(4);
 		value.append(coco_string_create_char(t->val));
-		while (la->kind == 4 || la->kind == 37) {
+		if (la->kind == 37) {
+			Get();
+		}
+		while (la->kind == 4) {
+			Get();
+			value.append(" "); value.append(coco_string_create_char(t->val));
 			if (la->kind == 37) {
 				Get();
 			}
-			Expect(4);
-			value.append(" "); value.append(coco_string_create_char(t->val));
 		}
 }
 
@@ -937,18 +943,21 @@ void Parser::MultiBool(QString& value) {
 			Get();
 		} else if (la->kind == 84) {
 			Get();
-		} else SynErr(107);
+		} else SynErr(106);
 		value.append(coco_string_create_char(t->val));
-		while (la->kind == 37 || la->kind == 82 || la->kind == 83) {
+		if (la->kind == 37) {
+			Get();
+		}
+		while (la->kind == 82 || la->kind == 83) {
+			if (la->kind == 82) {
+				Get();
+			} else {
+				Get();
+			}
+			value.append(" "); value.append(coco_string_create_char(t->val));
 			if (la->kind == 37) {
 				Get();
 			}
-			if (la->kind == 82) {
-				Get();
-			} else if (la->kind == 83) {
-				Get();
-			} else SynErr(108);
-			value.append(" "); value.append(coco_string_create_char(t->val));
 		}
 }
 
@@ -1122,9 +1131,7 @@ void Errors::SynErr(int line, int col, int n) {
 			case 103: s = coco_string_create(L"invalid SingleValue"); break;
 			case 104: s = coco_string_create(L"invalid MultiValue"); break;
 			case 105: s = coco_string_create(L"invalid MultiNumber"); break;
-			case 106: s = coco_string_create(L"invalid MultiNumber"); break;
-			case 107: s = coco_string_create(L"invalid MultiBool"); break;
-			case 108: s = coco_string_create(L"invalid MultiBool"); break;
+			case 106: s = coco_string_create(L"invalid MultiBool"); break;
 
 		default:
 		{
