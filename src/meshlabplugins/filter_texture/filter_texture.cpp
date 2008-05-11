@@ -87,7 +87,7 @@ const PluginInfo &FilterTexturePlugin::pluginInfo()
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterTexturePlugin::initParameterSet(QAction *action,MeshDocument &m, FilterParameterSet &parlst) 
+void FilterTexturePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet &parlst) 
 //void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	 switch(ID(action))	 {
@@ -97,7 +97,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action,MeshDocument &m, Filt
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &par, vcg::CallBackPos * cb)
+bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &par, vcg::CallBackPos * cb)
 {
 	//this function takes every texture in the model and creates a single texture composed of all the individual textures - necessary before calling the Quadric-with-texture filter
 	//QT has support for all the major image formats (GIF/JPEG/PNG/BMP/TIFF) - though you need to compile QT with -qt-gif to get GIF support (on Ubuntu the package for qt already has this - check your /usr/share/qt4/plugins/imageformats folder)
@@ -161,5 +161,26 @@ bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &par, vcg::Ca
 	//update display-load texture atlas?
 	return result;
 }
+
+const int FilterTexturePlugin::getRequirements(QAction *action)
+{
+  switch(ID(action))
+  {
+    case FP_MAKE_ATLAS :	return MeshModel::MM_BORDERFLAG; // <-- ADD YOUR REQUIREMENT HERE 
+    default: assert(0);
+  }
+  return 0;
+}
+
+const FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
+{
+  switch(ID(a))
+  {
+    case FP_MAKE_ATLAS :
+      return MeshFilterInterface::Generic;     
+    default : return MeshFilterInterface::Generic;
+  }
+}
+
 
 Q_EXPORT_PLUGIN(FilterTexturePlugin)
