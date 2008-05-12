@@ -816,6 +816,9 @@ void Parser::SingleValue(QDomElement& parent, QString fieldName, bool flag) {
 					Get();
 				} else SynErr(102);
 				value.append(coco_string_create_char(t->val));
+				if (la->kind == 37) {
+					Get();
+				}
 				while (la->kind == 2 || la->kind == 3) {
 					if (la->kind == 2) {
 						Get();
@@ -823,6 +826,9 @@ void Parser::SingleValue(QDomElement& parent, QString fieldName, bool flag) {
 						Get();
 					}
 					value.append(" "); value.append(coco_string_create_char(t->val));
+					if (la->kind == 37) {
+						Get();
+					}
 				}
 			} else if (la->kind == 82) {
 				Get();
@@ -878,6 +884,9 @@ void Parser::MultiValue(QDomElement& parent, QString fieldName, bool flag) {
 		} else if (StartOf(11)) {
 			while (StartOf(2)) {
 				NodeStatement(tmpParent);
+				if (la->kind == 37) {
+					Get();
+				}
 			}
 			QDomElement child;
 			QDomNodeList list = tmpParent.childNodes();

@@ -90,7 +90,7 @@ TOKENS
 	id = idFirstChar {idRestChar}.
 	intCont	= ['+'|'-']( digit {digit} | ("0x" | "0X") hexDigit {hexDigit}).
 	realCont = ['+'|'-'] ("." digit {digit} [("e" | "E") ["+" | "-"] digit {digit}]
-			| digit {digit} ( "." digit {digit} [("e" | "E" ) ["+" | "-"] digit {digit} ] | ("e" | "E") ["+" | "-"] digit {digit})).
+			| digit {digit} ( "." {digit} [("e" | "E" ) ["+" | "-"] digit {digit} ] | ("e" | "E") ["+" | "-"] digit {digit})).
 	string = "\""  { regularStringChar
           | "\\\'" | "\\\"" | "\\\\" | "\\0" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
           | "\\x" hexDigit [hexDigit] [hexDigit] [hexDigit]
@@ -431,8 +431,8 @@ FieldValue <QDomElement& parent, QString fieldName, bool flag>
 SingleValue <QDomElement& parent, QString fieldName, bool flag>  (.QString value; QDomElement tmpParent = doc->createElement("tmp");.)
 = 	(string														(.value.append(coco_string_create_char(t->val)); value.remove("\"");.)
 	| (intCont|realCont)										(.value.append(coco_string_create_char(t->val));.)
-	{(intCont|realCont)											(.value.append(" "); value.append(coco_string_create_char(t->val));.)
-	}
+	[","]{(intCont|realCont)											(.value.append(" "); value.append(coco_string_create_char(t->val));.)
+	[","]}
 	| "TRUE"													(.value = "true";.)
 	| "FALSE"													(.value = "false";.)
 		)														(.if (flag)
@@ -471,7 +471,7 @@ MultiValue <QDomElement& parent, QString fieldName, bool flag>  (.QString value;
 																  else
 																    parent.setAttribute(fieldName, value);
 																.)
-	|{NodeStatement<tmpParent>}									(.QDomElement child;
+	|{NodeStatement<tmpParent>[","]}									(.QDomElement child;
 																  QDomNodeList list = tmpParent.childNodes();
 																  QDomElement field = doc->createElement("field");
 																  field.setAttribute("name", fieldName);

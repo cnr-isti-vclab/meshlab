@@ -457,19 +457,19 @@ void Scanner::Init() {
 	for (i = 124; i <= 124; ++i) start.set(i, 1);
 	for (i = 126; i <= 126; ++i) start.set(i, 1);
 	for (i = 128; i <= 65535; ++i) start.set(i, 1);
-	for (i = 49; i <= 57; ++i) start.set(i, 36);
-	start.set(48, 37);
-	for (i = 43; i <= 43; ++i) start.set(i, 38);
-	for (i = 45; i <= 45; ++i) start.set(i, 38);
-	start.set(46, 52);
-	start.set(34, 17);
-	start.set(86, 39);
-	start.set(35, 46);
-	start.set(91, 47);
-	start.set(93, 48);
-	start.set(123, 49);
-	start.set(125, 50);
-	start.set(44, 51);
+	for (i = 49; i <= 57; ++i) start.set(i, 35);
+	start.set(48, 36);
+	for (i = 43; i <= 43; ++i) start.set(i, 37);
+	for (i = 45; i <= 45; ++i) start.set(i, 37);
+	start.set(46, 51);
+	start.set(34, 16);
+	start.set(86, 38);
+	start.set(35, 45);
+	start.set(91, 46);
+	start.set(93, 47);
+	start.set(123, 48);
+	start.set(125, 49);
+	start.set(44, 50);
 		start.set(Buffer::EoF, -1);
 	keywords.set(L"X3D", 8);
 	keywords.set(L"VRML", 9);
@@ -711,55 +711,55 @@ Token* Scanner::NextToken() {
 			else {t->kind = 3; break;}
 		case 9:
 			case_9:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_10;}
-			else {t->kind = noSym; break;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_9;}
+			else if (ch == L'E' || ch == L'e') {AddCh(); goto case_10;}
+			else {t->kind = 3; break;}
 		case 10:
 			case_10:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_10;}
-			else if (ch == L'E' || ch == L'e') {AddCh(); goto case_11;}
-			else {t->kind = 3; break;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_12;}
+			else if (ch == L'+' || ch == L'-') {AddCh(); goto case_11;}
+			else {t->kind = noSym; break;}
 		case 11:
 			case_11:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_13;}
-			else if (ch == L'+' || ch == L'-') {AddCh(); goto case_12;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_12;}
 			else {t->kind = noSym; break;}
 		case 12:
 			case_12:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_13;}
-			else {t->kind = noSym; break;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_12;}
+			else {t->kind = 3; break;}
 		case 13:
 			case_13:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_13;}
-			else {t->kind = 3; break;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_15;}
+			else if (ch == L'+' || ch == L'-') {AddCh(); goto case_14;}
+			else {t->kind = noSym; break;}
 		case 14:
 			case_14:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_16;}
-			else if (ch == L'+' || ch == L'-') {AddCh(); goto case_15;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_15;}
 			else {t->kind = noSym; break;}
 		case 15:
 			case_15:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_16;}
-			else {t->kind = noSym; break;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_15;}
+			else {t->kind = 3; break;}
 		case 16:
 			case_16:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_16;}
-			else {t->kind = 3; break;}
+			if (ch <= L'!' || ch >= L'#' && ch <= L'[' || ch >= L']' && ch <= 65535) {AddCh(); goto case_16;}
+			else if (ch == L'"') {AddCh(); goto case_31;}
+			else if (ch == 92) {AddCh(); goto case_39;}
+			else {t->kind = noSym; break;}
 		case 17:
 			case_17:
-			if (ch <= L'!' || ch >= L'#' && ch <= L'[' || ch >= L']' && ch <= 65535) {AddCh(); goto case_17;}
-			else if (ch == L'"') {AddCh(); goto case_32;}
-			else if (ch == 92) {AddCh(); goto case_40;}
+			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_18;}
 			else {t->kind = noSym; break;}
 		case 18:
 			case_18:
-			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_19;}
+			if (ch <= L'!' || ch >= L'#' && ch <= L'/' || ch >= L':' && ch <= L'@' || ch >= L'G' && ch <= L'[' || ch >= L']' && ch <= L'`' || ch >= L'g' && ch <= 65535) {AddCh(); goto case_16;}
+			else if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_40;}
+			else if (ch == L'"') {AddCh(); goto case_31;}
+			else if (ch == 92) {AddCh(); goto case_39;}
 			else {t->kind = noSym; break;}
 		case 19:
 			case_19:
-			if (ch <= L'!' || ch >= L'#' && ch <= L'/' || ch >= L':' && ch <= L'@' || ch >= L'G' && ch <= L'[' || ch >= L']' && ch <= L'`' || ch >= L'g' && ch <= 65535) {AddCh(); goto case_17;}
-			else if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_41;}
-			else if (ch == L'"') {AddCh(); goto case_32;}
-			else if (ch == 92) {AddCh(); goto case_40;}
+			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_20;}
 			else {t->kind = noSym; break;}
 		case 20:
 			case_20:
@@ -771,11 +771,11 @@ Token* Scanner::NextToken() {
 			else {t->kind = noSym; break;}
 		case 22:
 			case_22:
-			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_23;}
+			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_16;}
 			else {t->kind = noSym; break;}
 		case 23:
 			case_23:
-			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_17;}
+			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_24;}
 			else {t->kind = noSym; break;}
 		case 24:
 			case_24:
@@ -803,95 +803,91 @@ Token* Scanner::NextToken() {
 			else {t->kind = noSym; break;}
 		case 30:
 			case_30:
-			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_31;}
+			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_16;}
 			else {t->kind = noSym; break;}
 		case 31:
 			case_31:
-			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_17;}
-			else {t->kind = noSym; break;}
+			{t->kind = 4; break;}
 		case 32:
 			case_32:
-			{t->kind = 4; break;}
+			{t->kind = 5; break;}
 		case 33:
 			case_33:
-			{t->kind = 5; break;}
+			if (ch == L'0') {AddCh(); goto case_34;}
+			else {t->kind = noSym; break;}
 		case 34:
 			case_34:
-			if (ch == L'0') {AddCh(); goto case_35;}
-			else {t->kind = noSym; break;}
+			{t->kind = 6; break;}
 		case 35:
 			case_35:
-			{t->kind = 6; break;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_35;}
+			else if (ch == L'.') {AddCh(); goto case_9;}
+			else if (ch == L'E' || ch == L'e') {AddCh(); goto case_13;}
+			else {t->kind = 2; break;}
 		case 36:
 			case_36:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_36;}
-			else if (ch == L'.') {AddCh(); goto case_9;}
-			else if (ch == L'E' || ch == L'e') {AddCh(); goto case_14;}
-			else {t->kind = 2; break;}
-		case 37:
-			case_37:
-			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_36;}
+			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_35;}
 			else if (ch == L'X' || ch == L'x') {AddCh(); goto case_2;}
 			else if (ch == L'.') {AddCh(); goto case_9;}
-			else if (ch == L'E' || ch == L'e') {AddCh(); goto case_14;}
+			else if (ch == L'E' || ch == L'e') {AddCh(); goto case_13;}
 			else {t->kind = 2; break;}
-		case 38:
-			if (ch >= L'1' && ch <= L'9') {AddCh(); goto case_36;}
-			else if (ch == L'0') {AddCh(); goto case_37;}
+		case 37:
+			if (ch >= L'1' && ch <= L'9') {AddCh(); goto case_35;}
+			else if (ch == L'0') {AddCh(); goto case_36;}
 			else if (ch == L'.') {AddCh(); goto case_4;}
 			else {t->kind = noSym; break;}
-		case 39:
+		case 38:
 			if (ch == L'!' || ch >= L'$' && ch <= L'&' || ch >= L'(' && ch <= L'+' || ch == L'-' || ch >= L'/' && ch <= L'1' || ch >= L'4' && ch <= L'Z' || ch >= L'^' && ch <= L'z' || ch == L'|' || ch == L'~' || ch >= 128 && ch <= 65535) {AddCh(); goto case_1;}
-			else if (ch == L'3') {AddCh(); goto case_43;}
-			else if (ch == L'2') {AddCh(); goto case_44;}
+			else if (ch == L'3') {AddCh(); goto case_42;}
+			else if (ch == L'2') {AddCh(); goto case_43;}
 			else {t->kind = 1; wchar_t *literal = coco_string_create(tval, 0, tlen); t->kind = keywords.get(literal, t->kind); coco_string_delete(literal); break;}
+		case 39:
+			case_39:
+			if (ch == L'"' || ch == 39 || ch == L'0' || ch == 92 || ch >= L'a' && ch <= L'b' || ch == L'f' || ch == L'n' || ch == L'r' || ch == L't' || ch == L'v') {AddCh(); goto case_16;}
+			else if (ch == L'x') {AddCh(); goto case_17;}
+			else if (ch == L'u') {AddCh(); goto case_19;}
+			else if (ch == L'U') {AddCh(); goto case_23;}
+			else {t->kind = noSym; break;}
 		case 40:
 			case_40:
-			if (ch == L'"' || ch == 39 || ch == L'0' || ch == 92 || ch >= L'a' && ch <= L'b' || ch == L'f' || ch == L'n' || ch == L'r' || ch == L't' || ch == L'v') {AddCh(); goto case_17;}
-			else if (ch == L'x') {AddCh(); goto case_18;}
-			else if (ch == L'u') {AddCh(); goto case_20;}
-			else if (ch == L'U') {AddCh(); goto case_24;}
+			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_41;}
+			else if (ch <= L'!' || ch >= L'#' && ch <= L'/' || ch >= L':' && ch <= L'@' || ch >= L'G' && ch <= L'[' || ch >= L']' && ch <= L'`' || ch >= L'g' && ch <= 65535) {AddCh(); goto case_16;}
+			else if (ch == L'"') {AddCh(); goto case_31;}
+			else if (ch == 92) {AddCh(); goto case_39;}
 			else {t->kind = noSym; break;}
 		case 41:
 			case_41:
-			if (ch >= L'0' && ch <= L'9' || ch >= L'A' && ch <= L'F' || ch >= L'a' && ch <= L'f') {AddCh(); goto case_42;}
-			else if (ch <= L'!' || ch >= L'#' && ch <= L'/' || ch >= L':' && ch <= L'@' || ch >= L'G' && ch <= L'[' || ch >= L']' && ch <= L'`' || ch >= L'g' && ch <= 65535) {AddCh(); goto case_17;}
-			else if (ch == L'"') {AddCh(); goto case_32;}
-			else if (ch == 92) {AddCh(); goto case_40;}
+			if (ch <= L'!' || ch >= L'#' && ch <= L'[' || ch >= L']' && ch <= 65535) {AddCh(); goto case_16;}
+			else if (ch == L'"') {AddCh(); goto case_31;}
+			else if (ch == 92) {AddCh(); goto case_39;}
 			else {t->kind = noSym; break;}
 		case 42:
 			case_42:
-			if (ch <= L'!' || ch >= L'#' && ch <= L'[' || ch >= L']' && ch <= 65535) {AddCh(); goto case_17;}
-			else if (ch == L'"') {AddCh(); goto case_32;}
-			else if (ch == 92) {AddCh(); goto case_40;}
-			else {t->kind = noSym; break;}
+			if (ch == L'!' || ch >= L'$' && ch <= L'&' || ch >= L'(' && ch <= L'+' || ch == L'-' || ch >= L'/' && ch <= L'Z' || ch >= L'^' && ch <= L'z' || ch == L'|' || ch == L'~' || ch >= 128 && ch <= 65535) {AddCh(); goto case_1;}
+			else if (ch == L'.') {AddCh(); goto case_44;}
+			else {t->kind = 1; wchar_t *literal = coco_string_create(tval, 0, tlen); t->kind = keywords.get(literal, t->kind); coco_string_delete(literal); break;}
 		case 43:
 			case_43:
 			if (ch == L'!' || ch >= L'$' && ch <= L'&' || ch >= L'(' && ch <= L'+' || ch == L'-' || ch >= L'/' && ch <= L'Z' || ch >= L'^' && ch <= L'z' || ch == L'|' || ch == L'~' || ch >= 128 && ch <= 65535) {AddCh(); goto case_1;}
-			else if (ch == L'.') {AddCh(); goto case_45;}
+			else if (ch == L'.') {AddCh(); goto case_33;}
 			else {t->kind = 1; wchar_t *literal = coco_string_create(tval, 0, tlen); t->kind = keywords.get(literal, t->kind); coco_string_delete(literal); break;}
 		case 44:
 			case_44:
-			if (ch == L'!' || ch >= L'$' && ch <= L'&' || ch >= L'(' && ch <= L'+' || ch == L'-' || ch >= L'/' && ch <= L'Z' || ch >= L'^' && ch <= L'z' || ch == L'|' || ch == L'~' || ch >= 128 && ch <= 65535) {AddCh(); goto case_1;}
-			else if (ch == L'.') {AddCh(); goto case_34;}
-			else {t->kind = 1; wchar_t *literal = coco_string_create(tval, 0, tlen); t->kind = keywords.get(literal, t->kind); coco_string_delete(literal); break;}
-		case 45:
-			case_45:
-			if (ch >= L'0' && ch <= L'2') {AddCh(); goto case_33;}
+			if (ch >= L'0' && ch <= L'2') {AddCh(); goto case_32;}
 			else {t->kind = noSym; break;}
-		case 46:
+		case 45:
 			{t->kind = 7; break;}
-		case 47:
+		case 46:
 			{t->kind = 22; break;}
-		case 48:
+		case 47:
 			{t->kind = 23; break;}
-		case 49:
+		case 48:
 			{t->kind = 24; break;}
-		case 50:
+		case 49:
 			{t->kind = 25; break;}
-		case 51:
+		case 50:
 			{t->kind = 37; break;}
-		case 52:
+		case 51:
 			if (ch >= L'0' && ch <= L'9') {AddCh(); goto case_5;}
 			else {t->kind = 17; break;}
 
