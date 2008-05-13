@@ -127,6 +127,7 @@ private:
 	float tua, tva, tub, tvb, tua1, tva1, tub1, tvb1;
 	CFaceO *firstface, *firstface1;
 	bool locked;
+	GLuint id;
 
 	vector<CVertexO*> path, path1;			// Set of vertex of the path
 	vector<Point2f> drawnPath, drawnPath1;	// Set of UV coords found in the path

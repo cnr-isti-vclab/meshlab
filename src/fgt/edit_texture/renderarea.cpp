@@ -12,21 +12,29 @@
 #define AREADIM 400
 #define HRECT 6
 #define MINZOOM 0.1
-#define MAXZOOM 7
+#define MAXZOOM 20
 
 RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsigned tnum) : QGLWidget(parent)
 {
     antialiased = true;
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
+	textNum = tnum;
+	model = m;
 	image = QImage();
 	if(textureName != QString())
 	{
-		if (QFile(textureName).exists())image = QImage(textureName);
+		if (QFile(textureName).exists())
+		{
+			image = QImage(textureName);
+			int bestW = pow(2.0,floor(::log(double(image.width()))/::log(2.0)));
+			int bestH = pow(2.0,floor(::log(double(image.height()))/::log(2.0)));
+			QImage imgGL=image.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+			glGenTextures(1, &id);
+			image = imgGL;
+		}
 		else textureName = QString();
 	}
-	textNum = tnum;
-	model = m;
 	
 	// Init
 	oldX = 0; oldY = 0;
@@ -224,11 +232,32 @@ void RenderArea::paintEvent(QPaintEvent *)
 		// Draw the background behind the model
 		if (minX != 0 || minY != 0 || maxX != 0 || maxY != 0)
 		{
-			for (int x = minX; x < maxX; x++) 
-				for (int y = minY; y < maxY; y++)
-					painter.drawImage(QRect(x*AREADIM,-y*AREADIM,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
+			glColor3f(1,1,1);
+			glBindTexture(GL_TEXTURE_2D, id);
+			glTexImage2D(GL_TEXTURE_2D, 0, 3, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			gluBuild2DMipmaps(GL_TEXTURE_2D, 3, image.width(), image.height(), GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			glEnable(GL_TEXTURE_2D);
+			for (int x = minX; x < maxX; x++)
+			{
+				for (int y = minY; y < maxY; y++)			
+				{
+				    glBegin(GL_QUADS);
+						glTexCoord2f(0.0,0.0); 
+						glVertex3f(0.0 + x*AREADIM,0.0 - y*AREADIM,0.0);
+						glTexCoord2f(1.0,0.0); 
+						glVertex3f(1.0*AREADIM + x*AREADIM,0.0 - y*AREADIM,0.0);
+						glTexCoord2f(1.0,1.0); 
+						glVertex3f(1.0*AREADIM + x*AREADIM,1.0*AREADIM - y*AREADIM,0.0);
+						glTexCoord2f(0.0,1.0); 
+						glVertex3f(0.0 + x*AREADIM,1.0*AREADIM - y*AREADIM,0.0);
+					glEnd();
+				}
+			}
+			glDisable(GL_TEXTURE_2D);
 		}
-		else painter.drawImage(QRect(0,0,AREADIM,AREADIM),image,QRect(0,0,image.width(),image.height()));
 
 		// and the axis, always in first plane
 		glMatrixMode(GL_PROJECTION);
@@ -889,25 +918,37 @@ void RenderArea::ChangeMode(int modenumber)
 					{
 						mode = Edit; 
 						selected = true;
-						selVertBit = CVertexO::NewBitFlag();
+						//selVertBit = CVertexO::NewBitFlag();
+						for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.face[i].ClearUserBit(selVertBit);
 					}
 					this->setCursor(Qt::SizeAllCursor);
 				}
 				else
 				{
 					mode = Select;
-					for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
+					for (unsigned i = 0; i < model->cm.face.size(); i++) 
+					{
+						model->cm.face[i].ClearUserBit(selBit);
+						model->cm.face[i].ClearS();
+					}
 					//selBit = CFaceO::NewBitFlag();
-					selVertBit = CVertexO::NewBitFlag();
+					for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.face[i].ClearUserBit(selVertBit);
+					//selVertBit = CVertexO::NewBitFlag();
+					emit UpdateModel();
 					this->setCursor(Qt::CrossCursor);
 				}
 			}
 			break;
 		case SPECIALMODE:	// For internal use... reset the selction
 			mode = Select;
-			for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
+			for (unsigned i = 0; i < model->cm.face.size(); i++) 
+			{
+				model->cm.face[i].ClearUserBit(selBit);
+				model->cm.face[i].ClearS();
+			}
 			selection = QRect();
 			this->setCursor(Qt::CrossCursor);
+			emit UpdateModel();
 			break;
 		case EDITVERTEXMODE:
 			if (mode != EditVert)
@@ -939,6 +980,7 @@ void RenderArea::ChangeMode(int modenumber)
 				uvertB1 = QPoint();
 				if (selected)
 					{for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearS();}
+				selection = QRect();
 				selected = false;
 				selectedV = false;
 				//selBit = CFaceO::NewBitFlag();

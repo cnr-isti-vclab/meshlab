@@ -19,9 +19,10 @@ EditTexturePlugin::EditTexturePlugin()
 {
 	isDragging = false;
 	widget = 0;
+	pluginName = QString("Texture Parametrization Tool");
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(14);
-	actionList << new QAction(QIcon(":/images/edit_texture.png"),"Edit UV Map", this);
+	actionList << new QAction(QIcon(":/images/edit_texture.png"),pluginName, this);
 	QAction *editAction;
 	foreach(editAction, actionList) editAction->setCheckable(true);
 }
@@ -42,7 +43,7 @@ QList<QAction *> EditTexturePlugin::actions() const
 
 const QString EditTexturePlugin::Info(QAction *action) 
 {
-	if(action->text() != tr("Edit UV Map")) assert (0);
+	if(action->text() != pluginName) assert (0);
 	return tr("Edit texture coordinates of the selected area");
 }
 
@@ -63,7 +64,7 @@ void EditTexturePlugin::mousePressEvent (QAction *, QMouseEvent * event, MeshMod
     else if(event->modifiers() == Qt::ShiftModifier) selMode = SMSub;
 	else selMode = SMClear;
 	// Change the appearance of the cursor
-	switch(selMode)	// (in StartEdit func this doesn't work...)
+	switch(selMode)
 	{
 		case SMAdd:	// CTRL + Mouse
 			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"),1,1));

@@ -410,7 +410,7 @@
    <item>
     <widget class="QGroupBox" name="groupBoxOptimize" >
      <property name="title" >
-      <string> Optimize </string>
+      <string> Optimization </string>
      </property>
      <layout class="QHBoxLayout" >
       <property name="margin" >

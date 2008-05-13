@@ -45,6 +45,7 @@ class EditTexturePlugin : public QObject, public MeshEditInterface
 		TextureEditor* widget;
 		QDockWidget* dock;
 		QFont qFont;
+		QString pluginName;
 		vector<CMeshO::FacePointer> FaceSel;	// Set of selected faces
 
 		Ui::TextureEditorClass ui;
