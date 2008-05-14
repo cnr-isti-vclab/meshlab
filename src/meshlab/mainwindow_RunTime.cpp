@@ -23,7 +23,7 @@
 /****************************************************************************
 History
 
-$Log$
+$Log: mainwindow_RunTime.cpp,v $
 Revision 1.156  2008/04/11 10:09:13  cignoni
 added start decorate call
 
@@ -912,7 +912,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
 								vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);																																			 
 					else 
-								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(mm->cm);																																			 
+								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);																																			 
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 					if(gla->mm()->cm.fn==0){
 						gla->setDrawMode(vcg::GLW::DMPoints);
@@ -963,7 +963,8 @@ bool MainWindow::saveAs()
 	QString fileName;
 
 	if (fileName.isEmpty())
-		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
+				//fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
+					fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->fileName.c_str(), filters.join("\n"));
 	
 	bool ret = false;
 
