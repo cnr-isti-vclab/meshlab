@@ -33,6 +33,7 @@ unix{
 }
 
 # mac:LIBS +=  -L../../../../code/lib/lib3ds-1.3.0/ -l3ds 
+mac:LIBS -= -l3ds 
 mac:LIBS += ../../../../code/lib/lib3ds-1.3.0/lib3ds/lib3ds.a
 
 contains(TEMPLATE,lib) {
