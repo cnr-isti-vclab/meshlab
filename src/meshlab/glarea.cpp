@@ -23,7 +23,7 @@
 /****************************************************************************
 History
 
-$Log$
+$Log: glarea.cpp,v $
 Revision 1.143  2008/04/22 16:15:45  bernabei
 By default, tablet events are treated as mouse events
 
@@ -111,6 +111,7 @@ GLArea::GLArea(QWidget *parent)
 	cfps=0;
   lastTime=0;
   hasToPick=false;
+	hasToUpdateTexture=false;
 	helpVisible=false;
 	takeSnapTile=false;
 	activeDefaultTrackball=true;
@@ -713,11 +714,19 @@ void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 	rm.colorMode = mode;
 	updateGL();
 }
+void GLArea::updateTexture()
+{
+	hasToUpdateTexture = true;
+}
 
 // Texture loading done during the first paint.
 void GLArea::initTexture()
 {
-  if(!mm()->cm.textures.empty() && mm()->glw.TMId.empty()){
+  if(hasToUpdateTexture)
+		{
+		  hasToUpdateTexture = false;	
+		}
+	if(!mm()->cm.textures.empty() && mm()->glw.TMId.empty()){
 		glEnable(GL_TEXTURE_2D);
 		for(unsigned int i =0; i< mm()->cm.textures.size();++i){
 			QImage img, imgScaled, imgGL;
@@ -725,11 +734,11 @@ void GLArea::initTexture()
       // image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
       int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
       int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
+			
+			qDebug("texture[ %i ] =  %s ( %i x %i )",	mm()->cm.textures[i].c_str(),i , imgGL.width(), imgGL.height());
       imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 			imgGL=convertToGLFormat(imgScaled);
-			qDebug("loaded texture %s. with id %i w %i  h %i",mm()->cm.textures[i].c_str(),i, imgGL.width(), imgGL.height());
 			mm()->glw.TMId.push_back(0);
-
 			glGenTextures( 1, (GLuint*)&(mm()->glw.TMId.back()) );
 			glBindTexture( GL_TEXTURE_2D, mm()->glw.TMId.back() );
 			glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
@@ -738,8 +747,7 @@ void GLArea::initTexture()
 			
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-			qDebug("loaded texture %s. in %i",mm()->cm.textures[i].c_str(),mm()->glw.TMId[i]);
+			qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",mm()->glw.TMId.back() ,imgGL.width(), imgGL.height());
 		}
 	}
 	glDisable(GL_TEXTURE_2D);

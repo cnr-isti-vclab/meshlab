@@ -23,7 +23,7 @@
 /****************************************************************************
   History
 
-$Log$
+$Log: glarea.h,v $
 Revision 1.85  2008/04/22 14:54:38  bernabei
 Added support for tablet events
 
@@ -336,6 +336,8 @@ public:
   // EndEdit is called only when you press again the same button or when you change editor.
 	  
 public slots:
+  void updateTexture(); // slot for forcing the texture reload. 
+	
 	void endEdit(){	
 		if(iEdit && currentEditor) 
 		{
@@ -403,7 +405,8 @@ QMap<QString,QCursor> curMap;
 	bool  helpVisible;				// Help on screen	
 	bool	trackBallVisible;		// Draws the trackball ?
 	bool  activeDefaultTrackball; // keep track on active trackball
-	bool  hasToPick;         // has to pick during the next redraw.
+	bool	hasToUpdateTexture;			// has to reload textures at the next redraw
+	bool  hasToPick;							// has to pick during the next redraw.
 	vcg::Point2i pointToPick;
 
 	//shader support
