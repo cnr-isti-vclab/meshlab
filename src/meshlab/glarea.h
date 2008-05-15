@@ -315,9 +315,6 @@ public:
 	void setBackFaceCulling(bool enabled);
 	void setCustomSetting(const ColorSetting & s);
 	void setSnapshotSetting(const SnapshotSetting & s);
-	void setDrawMode(vcg::GLW::DrawMode mode);
-	void setColorMode(vcg::GLW::ColorMode mode);
-	void setTextureMode(vcg::GLW::TextureMode mode);
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
 	void saveSnapshot();
@@ -336,7 +333,12 @@ public:
   // EndEdit is called only when you press again the same button or when you change editor.
 	  
 public slots:
-  void updateTexture(); // slot for forcing the texture reload. 
+	void updateTexture(); // slot for forcing the texture reload. 
+	
+	//slots for changing the draw rendering and texturing mode
+	void setDrawMode(vcg::GLW::DrawMode mode); 
+	void setColorMode(vcg::GLW::ColorMode mode);
+	void setTextureMode(vcg::GLW::TextureMode mode);
 	
 	void endEdit(){	
 		if(iEdit && currentEditor) 

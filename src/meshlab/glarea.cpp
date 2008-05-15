@@ -721,22 +721,25 @@ void GLArea::updateTexture()
 
 // Texture loading done during the first paint.
 void GLArea::initTexture()
-{
-  if(hasToUpdateTexture)
-		{
-		  hasToUpdateTexture = false;	
-		}
+{  
+	if(hasToUpdateTexture)
+	{
+		mm()->glw.TMId.clear();
+		qDebug("Beware: deleting the texutres could lead to problems for shared textures.");
+		hasToUpdateTexture = false;	
+	}
+
 	if(!mm()->cm.textures.empty() && mm()->glw.TMId.empty()){
 		glEnable(GL_TEXTURE_2D);
 		for(unsigned int i =0; i< mm()->cm.textures.size();++i){
 			QImage img, imgScaled, imgGL;
 			img.load(mm()->cm.textures[i].c_str());
-      // image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
-      int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
-      int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
+			// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
+			int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
+			int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
 			
-			qDebug("texture[ %i ] =  %s ( %i x %i )",	mm()->cm.textures[i].c_str(),i , imgGL.width(), imgGL.height());
-      imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+			qDebug("texture[ %i ] =  %s ( %i x %i )",	i,mm()->cm.textures[i].c_str(), imgGL.width(), imgGL.height());
+			imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 			imgGL=convertToGLFormat(imgScaled);
 			mm()->glw.TMId.push_back(0);
 			glGenTextures( 1, (GLuint*)&(mm()->glw.TMId.back()) );
