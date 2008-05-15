@@ -438,10 +438,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
   }
 	if (ID(filter) == FP_REMOVE_FACES_BY_EDGE ) {
     bool selected  = par.getBool("Selected");	
-    float threshold = par.getAbsPerc("Threshold");		
-	  if(selected) tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<true>(m.cm,0,threshold );
-         else    tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<false>(m.cm,0,threshold );
+    float threshold = par.getAbsPerc("Threshold");	
+		int delFaceNum;	
+	  if(selected) delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<true>(m.cm,0,threshold );
+         else    delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<false>(m.cm,0,threshold );
     m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+		Log(GLLogStream::Info, "Removed %d faces with and edge longer than %f",delFaceNum,threshold);
 	}
 
   if(ID(filter) == (FP_REMOVE_FACES_BY_AREA) )
