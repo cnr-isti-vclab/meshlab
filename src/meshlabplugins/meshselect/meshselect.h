@@ -20,29 +20,9 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/* History
-$Log$
-Revision 1.8  2007/10/09 11:54:06  cignoni
-added delete face and vert
 
-Revision 1.7  2007/10/02 08:13:46  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.6  2007/04/16 09:25:30  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing again...
-
-Revision 1.5  2007/02/08 15:59:46  cignoni
-Added Border selection filters
-
-Revision 1.4  2006/11/29 00:59:20  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-****************************************************************************/
-
-#ifndef EDITPLUGIN_H
-#define EDITPLUGIN_H
+#ifndef FILTER_SELECT_H
+#define FILTER_SELECT_H
 
 #include <QObject>
 #include <QStringList>
@@ -70,7 +50,9 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 		FP_SELECT_DELETE_FACEVERT, 
 		FP_SELECT_ERODE, 
 		FP_SELECT_DILATE, 
-		FP_SELECT_BORDER_FACES
+		FP_SELECT_BORDER_FACES,
+		FP_SELECT_BY_QUALITY,
+		FP_SELECT_BY_RANGE
 	} ;
 
 	SelectionFilterPlugin();
@@ -80,15 +62,11 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 	virtual const PluginInfo &pluginInfo();
   
   virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
-  
+  void initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &parlst);
+	bool autoDialog(QAction *action);
+
 	virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-		
-	
-protected:
-
-//	ActionInfo *ai;
-
 };
 
 #endif

@@ -20,66 +20,13 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.15  2007/10/16 20:26:49  cignoni
-changed in order to the new allocator based deleting strategy
-
-Revision 1.14  2007/10/09 11:54:07  cignoni
-added delete face and vert
-
-Revision 1.13  2007/10/02 08:13:48  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.12  2007/04/16 10:16:25  cignoni
-Added missing info on filtering actions
-
-Revision 1.11  2007/04/16 09:25:30  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing again...
-
-Revision 1.10  2007/03/20 16:23:10  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.9  2007/02/08 23:46:18  pirosu
-merged srcpar and par in the GetStdParameters() function
-
-Revision 1.8  2007/02/08 15:59:46  cignoni
-Added Border selection filters
-
-Revision 1.7  2006/11/29 00:59:20  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.6  2006/11/27 06:57:21  cignoni
-Wrong way of using the __DATE__ preprocessor symbol
-
-Revision 1.5  2006/11/07 09:22:32  cignoni
-Wrote correct Help strings, and added required cleardatamask
-
-Revision 1.4  2006/10/16 08:57:16  cignoni
-Rewrote for using the new update/selection helper class. Added Selection dilate and erode
-
-Revision 1.3  2006/06/18 21:26:30  cignoni
-delete selected face icon
-
-Revision 1.2  2006/06/12 15:18:56  cignoni
-Shortcut to delete selected face
-
-Revision 1.1  2006/05/25 04:57:46  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-
-****************************************************************************/
 #include <QtGui>
 
 #include <math.h>
 #include <stdlib.h>
 #include "meshselect.h"
 #include <vcg/complex/trimesh/update/selection.h>
-#include <vcg/complex/trimesh/allocate.h>
+#include <vcg/complex/trimesh/stat.h>
 
 using namespace vcg;
 
@@ -95,6 +42,8 @@ const QString SelectionFilterPlugin::filterName(FilterIDType filter)
 	  case FP_SELECT_ERODE :		           return QString("Erode Selection");
 	  case FP_SELECT_DILATE :		           return QString("Dilate Selection");
 	  case FP_SELECT_BORDER_FACES:		     return QString("Select Border Faces");
+	  case FP_SELECT_BY_QUALITY :		       return QString("Select by Quality");
+	  case FP_SELECT_BY_RANGE:						 return QString("Select by Coord range");
   }
   return QString("Unknown filter");
 }
@@ -109,7 +58,9 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     FP_SELECT_ERODE <<
     FP_SELECT_DILATE <<
     FP_SELECT_BORDER_FACES <<
-    FP_SELECT_INVERT;
+		FP_SELECT_INVERT <<
+		FP_SELECT_BY_QUALITY
+;
   
   FilterIDType tt;
   
@@ -131,6 +82,32 @@ SelectionFilterPlugin::~SelectionFilterPlugin()
 	for (int i = 0; i < actionList.count() ; i++ ) {
 		delete actionList.at(i);
 	}
+}
+void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &parlst)
+{
+		switch(ID(action))
+		{
+			case FP_SELECT_BY_QUALITY: 
+					{
+						std::pair<float,float> minmax =  tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm); 
+						float minq=minmax.first;
+						float maxq=minmax.second;
+						parlst.addAbsPerc("minQ",minq*.75+maxq*.25,minq,maxq,"Min Quality", "Minimum acceptable quality value");
+						parlst.addAbsPerc("maxQ",minq*.25+maxq*.75,minq,maxq,"Max Quality", "Maximum acceptable quality value");
+					}
+					break;
+		}
+}
+// Return true if the specified action has an automatic dialog.
+// return false if the action has no parameters or has an self generated dialog.
+bool SelectionFilterPlugin::autoDialog(QAction *action)
+{
+	 switch(ID(action))
+	 {
+		 case FP_SELECT_BY_QUALITY:
+			 return true;
+	 }
+  return false;
 }
 
 
@@ -167,6 +144,14 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   break;
   case FP_SELECT_BORDER_FACES: tri::UpdateSelection<CMeshO>::FaceFromBorder(m.cm);  
   break;
+  case FP_SELECT_BY_QUALITY: 
+		{
+			float minQ = par.getAbsPerc("minQ");	
+			float maxQ = par.getAbsPerc("maxQ");	
+			tri::UpdateSelection<CMeshO>::VertexFromQualityRange(m.cm, minQ, maxQ);  
+			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
+		}
+	break;
   
 
   default:  assert(0);
@@ -186,6 +171,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
     case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");  
     case FP_SELECT_ALL    : return tr("Select all the faces of the current mesh");  
     case FP_SELECT_BORDER_FACES    : return tr("Select all the faces on the boundary");  
+    case FP_SELECT_BY_QUALITY    : return tr("Select all the faces with all the vertexes within the specified quality range");  
   }  
   assert(0);
   return QString();
