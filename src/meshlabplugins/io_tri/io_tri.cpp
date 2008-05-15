@@ -27,7 +27,7 @@
 #include <Qt>
 #include <QtGui>
 
-#include "tri_io.h"
+#include "io_tri.h"
 
 #include <wrap/io_trimesh/import_asc.h>
 #include <wrap/io_trimesh/export.h>

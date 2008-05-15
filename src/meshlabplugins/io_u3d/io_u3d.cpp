@@ -4,7 +4,7 @@
 #include <Qt>
 #include <QtGui>
 
-#include "u3d_io.h"
+#include "io_u3d.h"
 
 //#include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
