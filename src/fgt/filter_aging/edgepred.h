@@ -4,129 +4,122 @@
 
 #include <vector>
 
+#include <meshlab/meshmodel.h>
+
 
 using namespace vcg;
 
 
-class AgingEdgePred
+class QualityEdgePred
 {
 	public:
-		enum {ANGLE, QUALITY};		// predicate type allowed values
-		
-		AgingEdgePred() {
-			lenp = EdgeLen <CMeshO, CMeshO::ScalarType>();
+		QualityEdgePred() {
+			lenp = EdgeLen<CMeshO, CMeshO::ScalarType>();
 			lenp.thr2 = 1.0;
-			this->thVal = 1.0;
-			this->type = QUALITY;
+			this->qthVal = 1.0;
 			this->selection = false;
-			angbit = selbit = -1;
+			selbit = -1;
 		}
 		
-		AgingEdgePred(int type, bool sel, float lenTh, float thVal = 0.0) {
-			lenp = EdgeLen <CMeshO, CMeshO::ScalarType>();
+		QualityEdgePred(bool sel, float lenTh, float qthVal) {
+			lenp = EdgeLen<CMeshO, CMeshO::ScalarType>();
 			lenp.thr2 = lenTh * lenTh;
-			this->thVal = thVal;
-			this->type = type;
+			this->qthVal = qthVal;
 			this->selection = sel;
-			angbit = selbit = -1;
+			selbit = -1;
 		}
 		
 		// Main method to test predicates over edges (used by RefineE function)
 		bool operator()(face::Pos<CMeshO::FaceType> ep) const {
-			// first special case: this avoids to refine an edge between two faces
+			// special case: this avoids to refine an edge between two faces
 			// that have been selected by the dilate selection function
 			if(selection && selbit!=-1 && !ep.f->IsUserBit(selbit) && !ep.f->FFp(ep.z)->IsUserBit(selbit)) 
 				return false;
-			// second special case: when in a face there is (at least) one edge 
-			// the respects the angle predicate then all the edges of that face
-			// have to be refined
-			if(type==ANGLE && angbit!=-1 && (ep.f->IsUserBit(angbit) || 
-			  ep.f->FFp(ep.z)->IsUserBit(angbit) || (ep.f->V(ep.z)->IsV() || ep.f->V1(ep.z)->IsV()))) 
-				return lenp(ep);
 			// no special cases: normal predicate test
-			return (lenp(ep) && qaEdgeTest(ep));
+			return (lenp(ep) && testQuality(ep));
 		}
 		
-		// Tests angle predicate over the edge if type is angle; if type is quality 
-		// tests quality predicate but only on the first of the two vertexes of the edge
-		bool qaVertTest(face::Pos<CMeshO::FaceType> ep) const {
-			if(type == ANGLE) if(!selection || ep.f->V(ep.z)->IsS()) return testAngle(ep);
-			if(type == QUALITY) return (ep.f->V(ep.z)->Q()>thVal);
-			return false;
-		}
-		
-		// Returns the type of the predicate
-		int getType() { return type; }
-		
-		// use length and angle predicates to set angbit user bit over one face
-		void markFaceAngle(face::Pos<CMeshO::FaceType> ep) {
-			if(angbit == -1 || selbit == -1 || type != ANGLE) return;
-			if(lenp(ep) && testAngle(ep)) {
-				ep.f->SetUserBit(angbit);
-				ep.f->V(ep.z)->SetV();
-				ep.f->V1(ep.z)->SetV();
-			}
+		// Tests quality predicate but only on the first of the two vertexes of the edge
+		bool qVertTest(face::Pos<CMeshO::FaceType> ep) const {
+			return (ep.f->V(ep.z)->Q() > qthVal);
 		}
 		
 		// Allocates two new user bits over the mesh faces
-		void allocateBits() {
+		void allocateSelBit() {
 			selbit = CFaceO::NewBitFlag();
-			angbit = CFaceO::NewBitFlag();
+		}
+		
+		// Clear sel user bit on all the mesh faces
+		void clearSelBit(CMeshO &m) {
+			if(selbit == -1) return;
+			for(CMeshO::FaceIterator fi = m.face.begin(); fi!=m.face.end(); fi++) 
+				if(!(*fi).IsD()) (*fi).ClearUserBit(selbit);
+		}
+		
+		// Set sel bit on face f 
+		void setFaceSelBit(CFaceO* f) {
+			if(selbit == -1) return;
+			f->SetUserBit(selbit);
 		}
 		
 		// Deallocates the two user bits from the mesh faces
-		void deallocateBits() {
-			CFaceO::DeleteBitFlag(angbit);
+		void deallocateSelBit() {
 			CFaceO::DeleteBitFlag(selbit);
-			angbit = selbit = -1;
+			selbit = -1;
 		}
-		
-		int selbit;		// face user bit used when working on selections
-		int angbit;		// face user bit used when predicate type is angle
 		
 	protected:
-		EdgeLen<CMeshO, CMeshO::ScalarType> lenp;		// edge len predicate object
-		float thVal;					// edge value threshold (angle or quality)
-		int type;						// predicate type (angle or quality)
-		bool selection;				// working on the selection only
-		 
-		bool qaEdgeTest(face::Pos<CMeshO::FaceType> ep) const {
-			return (type==ANGLE?testAngle(ep):(type==QUALITY?testQuality(ep):false));
+		EdgeLen<CMeshO, CMeshO::ScalarType> lenp;	// edge len predicate object
+		float qthVal;			// edge quality threshold value
+		bool selection;		// working on the selection only
+		int selbit;			// face user bit used when working on selections
+		
+		bool testQuality(face::Pos<CMeshO::FaceType> ep) const {
+			return (ep.f->V(ep.z)->Q() > qthVal || ep.f->V1(ep.z)->Q() > qthVal);
+		}
+};
+
+
+class AngleEdgePred 
+{
+	public:
+		AngleEdgePred(float thVal) {
+			this->athVal = thVal;
 		}
 		
-		bool testAngle(face::Pos<CMeshO::FaceType> ep) const {
+		// tests angle predicate over current edge
+		bool operator()(face::Pos<CMeshO::FaceType> ep) const {
 			if(ep.f->IsB(ep.z)) return true;
-			
+
 			// the angle between the two face normals in degrees
-			double ffangle = vcg::Angle(ep.f->N(), ep.f->FFp(ep.z)->N()) * 180 / M_PI;
-			
+			double ffangle = math::ToDeg(vcg::Angle(ep.f->N(), ep.f->FFp(ep.z)->N()));
+
 			Point3<CVertexO::ScalarType> edge;		// vector along edge
 			double seAngle;		// angle between the edge vector and the normal of one of the two faces
 			if(ep.f->V(ep.z) < ep.f->V1(ep.z)) {
 				edge = Point3<CVertexO::ScalarType>(ep.f->V1(ep.z)->P() - ep.f->V(ep.z)->P());
-				seAngle = vcg::Angle(edge ^ ep.f->N(), ep.f->FFp(ep.z)->N()) * 180 / M_PI;
+				seAngle = math::ToDeg(vcg::Angle(edge ^ ep.f->N(), ep.f->FFp(ep.z)->N()));
 			}
 			else {
 				edge = Point3<CVertexO::ScalarType>(ep.f->V(ep.z)->P() - ep.f->V1(ep.z)->P());
-				seAngle = vcg::Angle(edge ^ ep.f->FFp(ep.z)->N(), ep.f->N()) * 180 / M_PI;
+				seAngle = math::ToDeg(vcg::Angle(edge ^ ep.f->FFp(ep.z)->N(), ep.f->N()));
 			}
-			
-			/* There are always 2 cases wich produce the same angle value:
-						 ___|_		    ____
-						|			   |  |
-					   -|			   |-
+
+			/*  There are always 2 cases wich produce the same angle value:
+								 ___|_		    ____
+								|			   |  |
+							   -|			   |-
 				
-			   In the first case the edge lies in a concave area of the mesh
-			   while in the second case it lies in a convex area.
-			   We need a way to know wich is the current case.
-			   This is done comparing seAngle with thVal.
+				In the first case the edge lies in a concave area of the mesh
+				while in the second case it lies in a convex area.
+				We need a way to know wich is the current case.
+				This is done comparing seAngle with thVal.
 			*/
-			return (ffangle-thVal >= -0.001  && seAngle-thVal <= 0.001);
+			return (ffangle-athVal >= -0.001  && seAngle-athVal <= 0.001);
 		}
 		
-		bool testQuality(face::Pos<CMeshO::FaceType> ep) const {
-			return (ep.f->V(ep.z)->Q() > thVal || ep.f->V1(ep.z)->Q() > thVal);
-		}
+	protected:
+		float athVal;			// edge angle threshold value
 };
 
 

@@ -33,10 +33,13 @@
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/update/curvature.h>
+#include <vcg/complex/trimesh/update/quality.h>
 #include <vcg/complex/trimesh/stat.h>
-#include <vcg/math/perlin_noise.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/smooth.h>
+#include <vcg/math/perlin_noise.h>
+
 
 /* Constructor */
 GeometryAgingPlugin::GeometryAgingPlugin() 
@@ -92,7 +95,7 @@ const PluginInfo &GeometryAgingPlugin::pluginInfo()
 /* Initializes the list of parameters (called by the auto dialog framework) */
 void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params)
 {
-	std::pair<float,float> qRange;
+	std::pair<float,float> qRange;	// mesh quality range
 	// retrieve mesh quality range
 	if(m.cm.HasPerVertexQuality())
 		qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
@@ -101,20 +104,20 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 	
 	switch(ID(action)) {
 		case FP_ERODE:
-			params.addBool("UseQuality", m.cm.HasPerVertexQuality() && qRange.second>qRange.first, 
-					"Use per vertex quality values", 
-					"Use per vertex quality values to find the areas to erode.\n"
-					"Useful after applying ambient occlusion filter.");
-			params.addAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*2/3, 
-					qRange.first, qRange.second,  "Min quality threshold",
-					"When you decide to use per vertex quality values, \n"
-					"this parameter represents the minimum quality value \n"
-					"two vertexes must have to consider the edge they are sharing.");
-			params.addFloat("AngleThreshold", 60.0, "Min angle threshold (deg)",
-					"If you decide not to use per vertex quality values, \n"
-					"the angle between two adjacent faces will be considered. \n"
-					"This parameter represents the minimum angle between two adjacent \n"
-					"faces to consider the edge they are sharing.");
+			params.addBool("ComputeCurvature", qRange.second<=qRange.first, 
+					"Compute quality from curvature", 
+					"Compute per vertex quality values using mesh mean curvature \n"
+					"algorithm. In this way only the areas with higher curvature \n"
+					"will be eroded. If not checked, the quality values already \n"
+					"present over the mesh will be used.");
+			params.addBool("SmoothQuality", false, "Smooth vertex quality", 
+					"Smooth per vertex quality values. This allows to extend the \n"
+					"area affected by the erosion process.");
+			params.addFloat("QualityThreshold", 0.66, "Min quality threshold [0..1]",
+					"Represents the minimum quality value (in the range [0..1] \n"
+					"where 0 is the smaller quality value and 1 is the bigger quality \n"
+					"value) two vertexes must have to consider the edge they are \n"
+					"sharing.");
 			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0,m.cm.bbox.Diag()*0.5,
 					"Edge len threshold", 
 					"The minimum length of an edge. Useful to avoid the creation of too many small faces.");
@@ -148,40 +151,51 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 
 /* The Real Core Function doing the actual mesh processing */
 bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb)
-{
-	bool useQuality = params.getBool("UseQuality");
+{	
+	bool curvature = params.getBool("ComputeCurvature");
 	
-	if(useQuality && !m.cm.HasPerVertexQuality()) {
+	if(!m.cm.HasPerVertexQuality()) {
 		errorMessage = QString("This mesh doesn't have per vertex quality informations.");
 		return false;
 	}
 	
-	float thresholdValue;
-	if(useQuality)
-		thresholdValue = params.getAbsPerc("QualityThreshold");
-	else {
-		thresholdValue = params.getFloat("AngleThreshold");
-		while(thresholdValue >= 360.0) thresholdValue -= 360;
-		while(thresholdValue < 0.0) thresholdValue += 360;
-	}
+	// other plugin parameters
+	bool smoothQ = params.getBool("SmoothQuality");
+	float qthFactor = params.getFloat("QualityThreshold");
 	float edgeLenTreshold = params.getAbsPerc("EdgeLenThreshold");
-	if(edgeLenTreshold == 0.0) edgeLenTreshold = m.cm.bbox.Diag()*0.02;
 	float chipDepth = params.getAbsPerc("ChipDepth");
-	if(chipDepth == 0.0) chipDepth = m.cm.bbox.Diag()*0.05;
 	int octaves = params.getInt("Octaves");
 	float noiseScale = params.getAbsPerc("NoiseFreqScale");
 	float noiseClamp = params.getFloat("NoiseClamp");
-	if(noiseClamp < 0.0) noiseClamp = 0.0;
-	if(noiseClamp > 1.0) noiseClamp = 1.0;
 	int dispSteps = (int)params.getFloat("DisplacementSteps");
 	bool selected = params.getBool("Selected");
 	
-	// edge predicate
-	AgingEdgePred ep = AgingEdgePred((useQuality?AgingEdgePred::QUALITY:AgingEdgePred::ANGLE), 
-									 selected, edgeLenTreshold, thresholdValue);
+	// error checking on parameters values
+	if(edgeLenTreshold == 0.0) edgeLenTreshold = m.cm.bbox.Diag()*0.02;
+	if(chipDepth == 0.0) chipDepth = m.cm.bbox.Diag()*0.05;
+	noiseClamp = math::Clamp<float>(noiseClamp, 0.0, 1.0);
+	qthFactor = math::Clamp<float>(qthFactor, 0.0, 1.0);
+	
+	QualityEdgePred ep;					// edge predicate
+	std::pair<float,float> qRange;	// mesh quality range
 	
 	switch(ID(filter)) {
 		case FP_ERODE:
+			// compute mesh quality, if requested
+			if(curvature) {
+				if(cb) (*cb)(0, "Computing quality values...");
+				computeMeanCurvature(m.cm);
+			}
+			if(smoothQ) VertexQualitySmooth(m.cm);
+			
+			qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+			if(!curvature && qRange.second <= qRange.first) {
+				errorMessage = QString("Vertex quality informations have not yet been computed on this mesh.");
+				return false;
+			}
+			
+			ep = QualityEdgePred(selected, edgeLenTreshold, qRange.first+(qRange.second-qRange.first)*qthFactor);
+			
 			// refine needed edges
 			refineMesh(m.cm, ep, selected, cb);
 			
@@ -198,20 +212,16 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 				
 				if(cb) (*cb)( (i+1)*100/dispSteps, "Aging...");
 				
-				if(useQuality) {
-					// blend toghether face normals and recompute vertex normal from these normals 
-					// to get smoother offest directions
-					FaceNormalSmoothFF(m.cm, 3); 
-					tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
-					tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
-				}
-				else
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+				// blend toghether face normals and recompute vertex normal from these normals 
+				// to get smoother offest directions
+				FaceNormalSmoothFF(m.cm, 3); 
+				tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+				tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
 				
 				for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
 					if((*fi).IsD()) continue;
 					for(int j=0; j<3; j++) {
-						if(ep.qaVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  &&
+						if(ep.qVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  &&
 						   !(*fi).V(j)->IsV() &&		
 						   (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
 								double noise;						// noise value
@@ -241,7 +251,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			// update normals
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			
-			smoothPeaks(m.cm, selected, edgeLenTreshold);
+			smoothPeaks(m.cm, selected);
 			
 			// readjust selection
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
@@ -254,43 +264,30 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 
 
 /* Refines the mesh where needed.
- * In two cases we need to perform additional checks to avoid problems.
- * The first one is when we are working on the selection 
- * while the second one is when we are working with an angle predicate. */
-void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb)
+ * In one cases we need to perform additional checks to avoid problems:
+ * when we are working on the selection. */
+void GeometryAgingPlugin::refineMesh(CMeshO &m, QualityEdgePred &ep, bool selection, vcg::CallBackPos *cb)
 {
 	bool ref = true;
 	CMeshO::FaceIterator fi;
 	
-	// allocate 2 user bits over faces
-	ep.allocateBits();
+	// allocate selection user bit over faces
+	ep.allocateSelBit();
 	
-	// clear user bits on all faces
-	for(fi = m.face.begin(); fi!=m.face.end(); fi++) if(!(*fi).IsD()) {
-		(*fi).ClearUserBit(ep.selbit);
-		(*fi).ClearUserBit(ep.angbit);
-	}
-	
-	// clear vertexes V bit
-	tri::UpdateFlags<CMeshO>::VertexClearV(m);
+	// clear sel user bit on all faces
+	ep.clearSelBit(m);
 	
 	while(ref) {
 		if(selection) {
 			// set selbit bit on selected faces
 			for(fi=m.face.begin(); fi!=m.face.end(); fi++)
-				if(!(*fi).IsD() && (*fi).IsS()) (*fi).SetUserBit(ep.selbit);
+				if(!(*fi).IsD() && (*fi).IsS()) ep.setFaceSelBit(&*fi);
 			// dilate selection
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m);
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
 		}
-		// mark faces to refine, setting angbit (angle predicate only)
-		if(ep.getType()==AgingEdgePred::ANGLE)
-			for(fi = m.face.begin(); fi!=m.face.end(); fi++) if(!(*fi).IsD())
-				for(int j=0; j<3; j++)
-					if(!selection || ((*fi).IsS() && (*fi).FFp(j)->IsS()))
-						ep.markFaceAngle(face::Pos<CMeshO::FaceType>(&*fi,j));
 		
-		ref = RefineE<CMeshO, MidPoint<CMeshO>, AgingEdgePred>(m, MidPoint<CMeshO>(), ep, selection, cb);
+		ref = RefineE<CMeshO, MidPoint<CMeshO>, QualityEdgePred>(m, MidPoint<CMeshO>(), ep, selection, cb);
 		if(ref) vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m);
 		
 		if(selection) {
@@ -299,15 +296,12 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, AgingEdgePred &ep, bool selectio
 			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m);
 		}
 		
-		// clear user bits on all faces
-		for(fi=m.face.begin(); fi!=m.face.end(); fi++) if(!(*fi).IsD()) {
-			(*fi).ClearUserBit(ep.selbit);
-			(*fi).ClearUserBit(ep.angbit);
-		}
+		// clear sel user bit on all faces
+		ep.clearSelBit(m);
 	}
 	
 	// delete the 2 user bits previously allocated
-	ep.deallocateBits();
+	ep.deallocateSelBit();
 }
 
 
@@ -357,17 +351,16 @@ bool GeometryAgingPlugin::faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceTyp
 
 /* Smooths higher and thinner peaks (edges whose incident faces form an angle
  * greater than 150 degrees) */
-void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, float edgeLenTreshold)
+void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected)
 {
-	AgingEdgePred aep = AgingEdgePred(AgingEdgePred::ANGLE, selected, edgeLenTreshold, 150.0);
+	AngleEdgePred aep = AngleEdgePred(150.0);
 	GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
 	gM.Set(m.face.begin(), m.face.end());
 	
 	for(CMeshO::FaceIterator fi=m.face.begin(); fi!=m.face.end(); fi++) {
 		if((*fi).IsD()) continue;
 		for(int j=0; j<3; j++) {
-			if(aep.qaVertTest(face::Pos<CMeshO::FaceType>(&*fi,j))  &&
-			   !(*fi).V(j)->IsV() &&
+			if(aep(face::Pos<CMeshO::FaceType>(&*fi,j)) && !(*fi).V(j)->IsV() &&
 			   (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
 					Point3f cpos = Point3f(((*fi).V2(j)->P() + (*fi).FFp(j)->V2((*fi).FFi(j))->P()) / 2.0);
 					Point3f oldpos = (*fi).V(j)->P();
@@ -384,6 +377,17 @@ void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, float edgeLenTre
 	
 	// clear vertexes V bit again
 	tri::UpdateFlags<CMeshO>::VertexClearV(m);
+}
+
+
+/* Compute per vertex quality values using mean curvature */
+void GeometryAgingPlugin::computeMeanCurvature(CMeshO &m) 
+{
+	int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m);
+	if(delvert) Log(GLLogStream::Info, "Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
+	tri::Allocator<CMeshO>::CompactVertexVector(m);
+	tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m);
+	tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m);
 }
 
 

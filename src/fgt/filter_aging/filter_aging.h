@@ -50,17 +50,18 @@ class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 		virtual const QString filterInfo(FilterIDType filter);
 		virtual const QString filterName(FilterIDType filter);
 		virtual const PluginInfo &pluginInfo();
-		virtual const int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK | MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);}
+		virtual const int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK | 
+				MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_CURV);}
 		virtual bool autoDialog(QAction *) {return true;}
 		virtual void initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params);
 		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &params, vcg::CallBackPos *cb);
 		
 	protected:
-		enum NoiseType {SIMPLE=0, LINEAR=1, SINUSOIDAL=2};
-		void refineMesh(CMeshO &m, AgingEdgePred &ep, bool selection, vcg::CallBackPos *cb);
+		void refineMesh(CMeshO &m, QualityEdgePred &ep, bool selection, vcg::CallBackPos *cb);
 		double generateNoiseValue(int Octaves, const CVertexO::CoordType &p);
 		bool faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceType> p, GridStaticPtr<CFaceO, CMeshO::ScalarType> &gM);
-		void smoothPeaks(CMeshO &m, bool selected, float edgeLenTreshold);
+		void smoothPeaks(CMeshO &m, bool selected);
+		void computeMeanCurvature(CMeshO &m);
 };
 
 
