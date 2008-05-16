@@ -145,7 +145,7 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 			params.addBool("StoreDisplacement", false, "Store erosion informations",
 					"Select this option if you want to store the erosion informations \n"
 					"over the mesh. A new attribute will be added to each vertex \n"
-					"containing the displacement offset applied to that vertex.");
+					"to contain the displacement offset applied to that vertex.");
 			break;
 		default:
 			assert(0);
