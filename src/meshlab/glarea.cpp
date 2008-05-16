@@ -92,6 +92,7 @@ Added notification of ortho projection
 #include "interfaces.h"
 #include "glarea.h"
 #include "layerDialog.h"
+#include "mainwindow.h"
 
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
@@ -102,15 +103,15 @@ using namespace vcg;
 GLArea::GLArea(QWidget *parent)
 : QGLWidget(parent)
 {
-  animMode=AnimNone;
+	animMode=AnimNone;
 	iRenderer=0; //Shader support
 	iDecoratorsList=0;
 	iEdit=0;
 	currentEditor=0;
 	suspendedEditor=false;
 	cfps=0;
-  lastTime=0;
-  hasToPick=false;
+	lastTime=0;
+	hasToPick=false;
 	hasToUpdateTexture=false;
 	helpVisible=false;
 	takeSnapTile=false;
@@ -130,7 +131,21 @@ GLArea::GLArea(QWidget *parent)
 	nearPlane = .2f;
 	farPlane = 5.f;
 	layerDialog = new LayerDialog(this);
+	
+	/*getting the meshlab MainWindow from parent, which is QWorkspace.
+	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
+	*which takes care about the window frame (its parent is the QWorkspace again).
+	*/
+	MainWindow* mainwindow = dynamic_cast<MainWindow*>(parent->parentWidget());
+	//connecting the MainWindow Slots to GLArea signal (simple passthrough)
+	if(mainwindow != NULL){
+		connect(this,SIGNAL(updateMainWindowMenus()),mainwindow,SLOT(updateMenus()));
+	}else{
+		qDebug("The parent of the GLArea parent is not a pointer to the meshlab MainWindow.");
 	}
+
+
+}
 		
 
 /*

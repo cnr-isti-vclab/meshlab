@@ -267,7 +267,7 @@ public:
 
 private:
 public:
-  LayerDialog *layerDialog;
+	LayerDialog *layerDialog;
   // Layer Management stuff. 
 	MeshDocument meshDoc;
 	MeshModel *mm(){return meshDoc.mm();}
@@ -334,7 +334,7 @@ public:
 	  
 public slots:
 	void updateTexture(); // slot for forcing the texture reload. 
-	
+		
 	//slots for changing the draw rendering and texturing mode
 	void setDrawMode(vcg::GLW::DrawMode mode); 
 	void setColorMode(vcg::GLW::ColorMode mode);
@@ -366,17 +366,22 @@ public slots:
 							setCursorTrack(0); 						
 			}
 		}
+  
+signals:
+	void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
+
+  
 public:
 	void      setEdit(MeshEditInterface *edit, QAction *editor){	iEdit = edit; currentEditor=editor;}
 	QAction * getEditAction() { return currentEditor; }
 	
 	void closeEvent(QCloseEvent *event);
-  float lastRenderingTime() { return lastTime;}
+	float lastRenderingTime() { return lastTime;}
 
 	float getFov() { return fov; }
 
 	bool	infoAreaVisible;		// Draws the lower info area ?
-  bool  suspendedEditor;
+	bool  suspendedEditor;
 protected:
 
 	void initializeGL();
@@ -392,7 +397,7 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
-  void mouseDoubleClickEvent ( QMouseEvent * event ) ;
+	void mouseDoubleClickEvent ( QMouseEvent * event ) ;
 	void wheelEvent(QWheelEvent*e);
 	void tabletEvent(QTabletEvent *e);
 	bool drawSelection;
@@ -400,7 +405,7 @@ protected:
 	void hideEvent(QHideEvent * event);
 
 private:
-QMap<QString,QCursor> curMap;
+	QMap<QString,QCursor> curMap;
 	void pasteTile();
 	void myGluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
     
@@ -444,8 +449,8 @@ private:
 	QImage tileBuffer;
 	bool takeSnapTile;
   
-  enum AnimMode { AnimNone, AnimSpin, AnimInterp};
-  AnimMode animMode; 
+	enum AnimMode { AnimNone, AnimSpin, AnimInterp};
+	AnimMode animMode; 
 	int tileCol, tileRow, totalCols, totalRows;
 	void setCursorTrack(vcg::TrackMode *tm);
 
