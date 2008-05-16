@@ -142,6 +142,10 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 					"Bigger number means better accuracy.");
 			params.addBool("Selected", m.cm.sfn>0, "Affect only selected faces", 
 					"The aging procedure will be applied to the selected faces only.");
+			params.addBool("StoreDisplacement", false, "Store erosion informations",
+					"Select this option if you want to store the erosion informations \n"
+					"over the mesh. A new attribute will be added to each vertex \n"
+					"containing the displacement offset applied to that vertex.");
 			break;
 		default:
 			assert(0);
@@ -169,6 +173,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	float noiseClamp = params.getFloat("NoiseClamp");
 	int dispSteps = (int)params.getFloat("DisplacementSteps");
 	bool selected = params.getBool("Selected");
+	bool storeDispl = params.getBool("StoreDisplacement");
 	
 	// error checking on parameters values
 	if(edgeLenTreshold == 0.0) edgeLenTreshold = m.cm.bbox.Diag()*0.02;
@@ -176,28 +181,40 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	noiseClamp = math::Clamp<float>(noiseClamp, 0.0, 1.0);
 	qthFactor = math::Clamp<float>(qthFactor, 0.0, 1.0);
 	
-	QualityEdgePred ep;					// edge predicate
-	std::pair<float,float> qRange;	// mesh quality range
-	
 	switch(ID(filter)) {
-		case FP_ERODE:
+		case FP_ERODE: {
 			// compute mesh quality, if requested
 			if(curvature) {
 				if(cb) (*cb)(0, "Computing quality values...");
 				computeMeanCurvature(m.cm);
 			}
-			if(smoothQ) VertexQualitySmooth(m.cm);
 			
-			qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+			// eventually, smooth quality values
+			if(smoothQ) tri::Smooth<CMeshO>::VertexQualityLaplacian(m.cm);
+			
+			// mesh quality check
+			std::pair<float, float> qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 			if(!curvature && qRange.second <= qRange.first) {
 				errorMessage = QString("Vertex quality informations have not yet been computed on this mesh.");
 				return false;
 			}
 			
-			ep = QualityEdgePred(selected, edgeLenTreshold, qRange.first+(qRange.second-qRange.first)*qthFactor);
+			// edge predicate
+			QualityEdgePred ep = QualityEdgePred(selected, edgeLenTreshold, qRange.first+(qRange.second-qRange.first)*qthFactor);
 			
 			// refine needed edges
 			refineMesh(m.cm, ep, selected, cb);
+			
+			// if requested, add erosion attribute to vertexes and initialize it
+			if(storeDispl) {
+				CMeshO::PerVertexAttributeHandle<Point3f> vah = 
+						(tri::HasPerVertexAttribute(m.cm, "Erosion") ?
+						 tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "Erosion") :
+						 tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f>(m.cm, std::string("Erosion")));
+				for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
+					vah[vi] = Point3f(0.0, 0.0, 0.0);
+			}
+			CMeshO::PerVertexAttributeHandle<Point3f> vah = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "Erosion");
 			
 			// vertexes along selection border will not be displaced 
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
@@ -214,7 +231,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 				
 				// blend toghether face normals and recompute vertex normal from these normals 
 				// to get smoother offest directions
-				FaceNormalSmoothFF(m.cm, 3); 
+				tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm, 3); 
 				tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 				tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
 				
@@ -238,6 +255,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 								(*fi).V(j)->P() += offset;
 								if(faceIntersections(m.cm, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
 									(*fi).V(j)->P() -= offset;
+								else if(storeDispl)	// store displacement
+									vah[(*fi).V(j)] = vah[(*fi).V(j)] + offset;
 								
 								// mark as visited (displaced)
 								(*fi).V(j)->SetV();
@@ -257,6 +276,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
 						
 			return true;
+		}
 		default:
 			assert(0);
 	}
@@ -356,18 +376,23 @@ void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected)
 	AngleEdgePred aep = AngleEdgePred(150.0);
 	GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
 	gM.Set(m.face.begin(), m.face.end());
+	CMeshO::PerVertexAttributeHandle<Point3f> vah = 
+		vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, "Erosion");;
+	bool hasErosion = vcg::tri::HasPerVertexAttribute(m, "Erosion"); 
 	
 	for(CMeshO::FaceIterator fi=m.face.begin(); fi!=m.face.end(); fi++) {
 		if((*fi).IsD()) continue;
 		for(int j=0; j<3; j++) {
 			if(aep(face::Pos<CMeshO::FaceType>(&*fi,j)) && !(*fi).V(j)->IsV() &&
 			   (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
-					Point3f cpos = Point3f(((*fi).V2(j)->P() + (*fi).FFp(j)->V2((*fi).FFi(j))->P()) / 2.0);
+					Point3f middlepos = Point3f(((*fi).V2(j)->P() + (*fi).FFp(j)->V2((*fi).FFi(j))->P()) / 2.0);
 					Point3f oldpos = (*fi).V(j)->P();
 					Point3f dirj = Point3f(((*fi).V(j)->P() - (*fi).V1(j)->P()) / 2.0);
-					(*fi).V(j)->P() = cpos + dirj;
+					(*fi).V(j)->P() = middlepos + dirj;
 					if(faceIntersections(m, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
 						(*fi).V(j)->P() = oldpos;
+					else if(hasErosion)		// update stored displacement
+						vah[(*fi).V(j)] += ((*fi).V(j)->P() - oldpos);
 					(*fi).V(j)->SetV();
 			}
 		}
