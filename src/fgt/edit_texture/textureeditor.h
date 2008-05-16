@@ -67,10 +67,7 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m, float alpha)
 
 	vcg::SimpleTempData<typename MESH_TYPE::VertContainer, int> div(m.vert);
 	vcg::SimpleTempData<typename MESH_TYPE::VertContainer, Point2f > sum(m.vert);
-  
-	div.Start();
-	sum.Start();
-  
+    
 	for (typename MESH_TYPE::VertexIterator v = m.vert.begin(); v != m.vert.end(); v++) 
 	{
 		sum[v] = Point2f(0,0);
@@ -105,10 +102,7 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m, float alpha)
 				}
 			}
 		}
-	}
-	
-	div.Stop();
-	sum.Stop();
+	}	
 }
 
 };

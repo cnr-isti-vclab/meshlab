@@ -214,13 +214,12 @@ namespace vcg {
 			mesh = ms;
 			_normalWeight = 5.0f;
 			_curvatureWeight = 5.0f;
-			TDCurvPtr = new SimpleTempData<VertContainer, CurvData>((*mesh).vert);
-			TDCurvPtr->Start(CurvData());
+			TDCurvPtr = new SimpleTempData<VertContainer, CurvData>((*mesh).vert,CurvData());
 			curvatureUpdate = false;
 		}
 
 		~MeshCutting() {
-			TDCurvPtr->Stop();
+			delete TDCurvPtr;
 		}
 
 		inline void Mark(VertexType * v, MarkType m) {
