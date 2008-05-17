@@ -231,6 +231,23 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="perlin_button" >
+            <property name="text" >
+             <string>...</string>
+            </property>
+            <property name="icon" >
+             <iconset resource="meshlab.qrc" >
+              <normaloff>:/images/perlin.png</normaloff>:/images/perlin.png</iconset>
+            </property>
+            <property name="checkable" >
+             <bool>true</bool>
+            </property>
+            <property name="autoExclusive" >
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer>
             <property name="orientation" >
              <enum>Qt::Horizontal</enum>
@@ -1071,7 +1088,10 @@ p, li { white-space: pre-wrap; }
              <enum>Qt::ScrollBarAlwaysOff</enum>
             </property>
             <property name="interactive" >
-             <bool>false</bool>
+             <bool>true</bool>
+            </property>
+            <property name="dragMode" >
+             <enum>QGraphicsView::ScrollHandDrag</enum>
             </property>
             <property name="optimizationFlags" >
              <set>QGraphicsView::DontAdjustForAntialiasing</set>
@@ -1614,8 +1634,8 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>640</width>
-        <height>320</height>
+        <width>332</width>
+        <height>848</height>
        </rect>
       </property>
       <attribute name="title" >
