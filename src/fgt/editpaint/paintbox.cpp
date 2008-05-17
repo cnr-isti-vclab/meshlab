@@ -39,24 +39,13 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	
 	brush_viewer->setScene(new QGraphicsScene());
 	clone_source_view->setScene(new QGraphicsScene());
+	clone_source_view->centerOn(0, 0);
 	
 	clone_source_frame->setVisible(false);
 	
 	item = NULL;
 	pixmap_available = false;
 	
-/*	QPen pen;
-	getCloneScene()->addLine((qreal)(clone_source_view->width()/2 ), 
-			(qreal)(clone_source_view->height()/2 + 8), 
-			(qreal)(clone_source_view->width()/2), 
-			(qreal)(clone_source_view->height()/2 - 8), pen)->setZValue(1);
-	
-	getCloneScene()->addLine((qreal)(clone_source_view->width()/2 + 8), 
-				(qreal)(clone_source_view->height()/2 ), 
-				(qreal)(clone_source_view->width()/2 - 8), 
-				(qreal)(clone_source_view->height()/2), pen)->setZValue(1);
-		
-*/	
 	refreshBrushPreview();
 }
 
@@ -90,11 +79,17 @@ void Paintbox::setClonePixmap(QImage & image)
 {
 	if (item != NULL) getCloneScene()->removeItem(item);
 	item = getCloneScene()->addPixmap(QPixmap::fromImage(image));
+	item->setPos(0, 0);
+	clone_source_view->centerOn(0, 0);
+	QPen pen;
+	getCloneScene()->addLine(0, 8, 0, -8, pen);
+	getCloneScene()->addLine(8, 0, -8, 0, pen);	
 }
 	
 void Paintbox::setPixmapCenter(qreal x, qreal y)
 {
-	item->setPos(x + clone_source_view->width()/2.0, y + clone_source_view->height()/2.0);
+	item->setPos(x /*+ clone_source_view->width()/2.0*/, y /*+ clone_source_view->height()/2.0*/);
+	clone_source_view->centerOn(0, 0);
 }
 
 void Paintbox::loadClonePixmap()
@@ -104,8 +99,15 @@ void Paintbox::loadClonePixmap()
 	if (!s.isNull()) 
 	{
 		QPixmap pixmap(s);
+		if (item != NULL) getCloneScene()->removeItem(item);
 		item = getCloneScene()->addPixmap(pixmap);
+		item->setPos(0, 0);
+		item->setOffset(-pixmap.width()/2.0, -pixmap.height()/2.0);
+		clone_source_view->centerOn(0, 0);
 		pixmap_available = true;
+		QPen pen;
+		getCloneScene()->addLine(0, 8, 0, -8, pen);
+		getCloneScene()->addLine(8, 0, -8, 0, pen);	
 	}	
 }
 
