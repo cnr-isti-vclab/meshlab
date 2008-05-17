@@ -245,8 +245,10 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 		
 		if (previous_event.pressure == 0)
 		{
-			qDebug() << "On Down";
-			/*******ON BRUSH DOWN*********/
+			/*************************
+			 *     ON BRUSH DOWN     *
+			 *************************/
+			
 			switch (current_type)
 			{
 				case COLOR_PAINT:
@@ -277,15 +279,15 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 						if (color_buffer != NULL)
 						{
 							painted_vertices.clear();
-							clone_start.setX(clone_start.x() - latest_event.gl_position.x());
-							clone_start.setY(clone_start.y() - latest_event.gl_position.y());
+							clone_delta.setX(source_delta.x() - latest_event.position.x());
+							clone_delta.setY(- (source_delta.y() - latest_event.position.y()));
 							paintbox->getUndoStack()->beginMacro("Color Clone");
 							paint( & vertices);
 						}else if (paintbox->isPixmapAvailable())
 						{
 							paintbox->getPixmapBuffer(color_buffer, clone_zbuffer, buffer_width, buffer_height);
-							clone_start.setX(0);
-							clone_start.setY(0);
+							clone_delta.setX(buffer_width/2);
+							clone_delta.setY(buffer_height/2);
 							painted_vertices.clear();
 							paintbox->getUndoStack()->beginMacro("Color Clone");
 							
@@ -320,8 +322,10 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 			}
 		}else
 		{
-			qDebug() << "On Move";
-			/*******ON BRUSH MOVE (UNDER CLICK)*********/
+			/*************************
+			 *     ON BRUSH MOVE     *
+			 *************************/
+			
 			switch (current_type)
 			{
 				case COLOR_PAINT:
@@ -329,7 +333,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					break;
 					
 				case COLOR_CLONE :
-					paintbox->setPixmapCenter(-latest_event.position.x() - clone_start.x(), -latest_event.position.y() + clone_start.y()  );
+					paintbox->setPixmapCenter(-latest_event.position.x() - clone_delta.x(), -latest_event.position.y() + clone_delta.y()  );
 					if (color_buffer != NULL) paint( & vertices);
 					break;
 					
@@ -366,7 +370,10 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 	{
 		if (previous_event.pressure > 0)
 		{
-			/*******ON BRUSH UP*********/
+			/*************************
+			 *      ON BRUSH UP      *
+			 *************************/
+						
 			switch (current_type)
 			{
 				case COLOR_FILL:
@@ -579,8 +586,11 @@ inline void EditPaintPlugin::capture()
 	buffer_height = glarea->curSiz.height();
 	buffer_width = glarea->curSiz.width();
 	
-	clone_start.setX(latest_event.gl_position.x()); 
-	clone_start.setY(latest_event.gl_position.y()); //storing now source click position
+	source_delta.setX(latest_event.position.x());
+	source_delta.setY(latest_event.position.y());
+	
+//	clone_delta.setX(latest_event.gl_position.x()); 
+//	clone_delta.setY(latest_event.gl_position.y()); //storing now source click position
 	
 	QImage image(glarea->width(), glarea->height(), QImage::Format_RGB32); 
 	for (int x = 0; x < glarea->width(); x++){
@@ -592,7 +602,8 @@ inline void EditPaintPlugin::capture()
 	glarea->getCurrentRenderMode().lighting = true;
 	current_options |= EPP_DRAW_CURSOR;
 	paintbox->setClonePixmap(image);
-	paintbox->setPixmapCenter(-latest_event.position.x(), -latest_event.position.y());
+	paintbox->setPixmapCenter(-source_delta.x(), -source_delta.y());
+//	glarea->update();
 }
 
 /**
@@ -621,8 +632,8 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 			
 			if (paintbox->getCurrentType() == COLOR_CLONE)
 			{
-				index = ((data.second.position.y() + clone_start.y()) * buffer_width +
-								data.second.position.x() + clone_start.x());
+				index = ((data.second.position.y() + clone_delta.y()) * buffer_width +
+								data.second.position.x() + clone_delta.x());
 				 qDebug() << "index " << index;
 				 qDebug() << "buffer_width " << buffer_width;
 				 qDebug() << "buffer height " << buffer_height;
@@ -649,8 +660,8 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 						
 			if (paintbox->getCurrentType() == COLOR_CLONE) //TODO refactor in a method
 			{
-				index = ((data.second.position.y() + clone_start.y()) * buffer_width +
-								data.second.position.x() + clone_start.x());
+				index = ((data.second.position.y() + clone_delta.y()) * buffer_width +
+								data.second.position.x() + clone_delta.x());
 				 			
 
 				if (index < buffer_width * buffer_height - 1 && index > 0)

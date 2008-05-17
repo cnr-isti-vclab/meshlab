@@ -164,7 +164,8 @@ private:
 	vcg::Color4b	color;
 	GLubyte* 		color_buffer; /*< buffer used as color source in cloning*/
 	GLfloat* 		clone_zbuffer; /*<buffer to determine if the source is legal or not */
-	QPoint 			clone_start;
+	QPoint 			clone_delta;
+	QPoint			source_delta;
 	int				buffer_width;
 	int				buffer_height;
 		
