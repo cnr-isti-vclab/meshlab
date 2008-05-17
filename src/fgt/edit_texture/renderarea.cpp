@@ -11,17 +11,17 @@
 #define NOSEL -1
 #define AREADIM 400
 #define HRECT 6
-#define MINZOOM 0.1
-#define MAXZOOM 20
 
 RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsigned tnum) : QGLWidget(parent)
 {
+	// Parameters
     antialiased = true;
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
 	textNum = tnum;
 	model = m;
 	image = QImage();
+	fileName = textureName;
 	if(textureName != QString())
 	{
 		if (QFile(textureName).exists())
@@ -36,7 +36,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 		else textureName = QString();
 	}
 	
-	// Init
+	// Initialization
 	oldX = 0; oldY = 0;
 	viewport = vcg::Point2f(0,0);
 	tmpX = 0; tmpY = 0;
@@ -49,6 +49,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 
 	brush = QBrush(Qt::green);
 	mode = View;
+	oldMode = NoMode;
 	editMode = Scale;
 	origin = QPointF();
 	start = QPoint();
@@ -98,28 +99,39 @@ RenderArea::~RenderArea()
 	//CVertexO::DeleteBitFlag(selVertBit);
 }
 
+// Change the Pen of the RenderArea
 void RenderArea::setPen(const QPen &pen)
 {
     this->pen = pen;
     update();
 }
 
+// Chanhe the Brush of the RenderArea
 void RenderArea::setBrush(const QBrush &brush)
 {
     this->brush = brush;
     update();
 }
 
+// Set the Antialiased property
 void RenderArea::setAntialiased(bool antialiased)
 {
     this->antialiased = antialiased;
     update();
 }
 
+// Change the background texture
 void RenderArea::setTexture(QString path)
 {
 	image = QImage(path);
 	fileName = path;
+	this->update();
+}
+
+// Returns the name of the background image
+QString RenderArea::GetTextureName()
+{
+	return fileName;
 }
 
 void RenderArea::paintEvent(QPaintEvent *)
@@ -391,7 +403,6 @@ void RenderArea::paintEvent(QPaintEvent *)
 				}
 			}
 		}
-
 		glDisable(GL_LOGIC_OP);
 	  	glPopAttrib();
 		glPopMatrix();
@@ -410,6 +421,8 @@ void RenderArea::paintEvent(QPaintEvent *)
 // Mouse Event:
 void RenderArea::mousePressEvent(QMouseEvent *e)
 {
+	if((e->buttons() & Qt::LeftButton))
+	{
 	if ((mode == Edit || mode == EditVert) && highlighted == NOSEL) 
 	{
 		this->ChangeMode(SPECIALMODE);
@@ -476,6 +489,17 @@ void RenderArea::mousePressEvent(QMouseEvent *e)
 			end = e->pos();
 			break;
 	}
+	}
+	else if((e->buttons() & Qt::MidButton))
+	{
+		// Pan
+		oldMode = mode;
+		this->ChangeMode(VIEWMODE);
+		oldX = e->x(); oldY = e->y();
+		tmpX = viewport.X(); tmpY = viewport.Y();
+		tb->MouseDown(e->x(), AREADIM-e->y(), QT2VCG(e->button(), e->modifiers()));
+		this->update();
+	}
 }
 
 void RenderArea::mouseReleaseEvent(QMouseEvent *e)
@@ -490,6 +514,11 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 				origin = ToUVSpace(originR.center().x(), originR.center().y());
 			}
 			initVX = viewport.X(); initVY = viewport.Y();
+			if (oldMode != NoMode)
+			{
+				this->ChangeMode(oldMode);
+				oldMode = NoMode;
+			}
 			break;
 		case Edit:
 			oldPX = panX;
@@ -615,9 +644,9 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 
 void RenderArea::mouseMoveEvent(QMouseEvent *e)
 {
+	int sx = (e->x() - oldX)/zoom, sy = (e->y() - oldY)/zoom;
 	if((e->buttons() & Qt::LeftButton))
 	{
-		int sx = (e->x() - oldX)/zoom, sy = (e->y() - oldY)/zoom;
 		switch(mode)
 		{
 			case View:
@@ -713,7 +742,14 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 				break;
 		}
 	}
-	else 
+	else if((e->buttons() & Qt::MidButton))
+	{
+		// Pan
+		tb->Translate(Point3f(- oldX + e->x(), - oldY + e->y(), zoom));
+		viewport = Point2f(tmpX + sx, tmpY + sy);
+		this->update();
+	}
+	else
 	{
 		if (mode == Edit || mode == EditVert)
 		{
@@ -780,9 +816,14 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 	bool scale = false;
 	if (e->delta() > 0) 
 	{
-		if (zoom/0.75 < MAXZOOM) { zoom /= 0.75; scale = true; }
+		zoom /= 0.75; 
+		scale = true;
 	}
-	else if (zoom*0.75 > MINZOOM) { zoom *= 0.75; scale = true; }
+	else
+	{ 
+		zoom *= 0.75; 
+		scale = true; 
+	}
 	if (scale)
 	{
 		// Change the viewport, putting the center of the screen on the mouseposition
@@ -817,9 +858,9 @@ void RenderArea::keyPressEvent(QKeyEvent *e)
 	else e->ignore();
 }
 
+// Remap the uv coord out of border using clamp method
 void RenderArea::RemapClamp()
 {
-	// Remap the uv coord out of border using clamp method
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
 		if (model->cm.face[i].WT(0).n() == textNum && !model->cm.face[i].IsD())
@@ -840,9 +881,9 @@ void RenderArea::RemapClamp()
 	emit UpdateModel();
 }
 
+// Remap the uv coord out of border using mod function
 void RenderArea::RemapMod()
 {
-	// Remap the uv coord out of border using mod function
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
 		if (model->cm.face[i].WT(0).n() == textNum && !model->cm.face[i].IsD())
@@ -867,9 +908,9 @@ void RenderArea::RemapMod()
 	emit UpdateModel();
 }
 
+// Change the tool's action mode
 void RenderArea::ChangeMode(int modenumber)
 {
-	// Change the selection mode
 	if (mode == UnifyVert && modenumber != UNIFYMODE)
 	{
 		unifyRA = QRect();
@@ -919,7 +960,7 @@ void RenderArea::ChangeMode(int modenumber)
 						mode = Edit; 
 						selected = true;
 						//selVertBit = CVertexO::NewBitFlag();
-						for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.face[i].ClearUserBit(selVertBit);
+						for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.vert[i].ClearUserBit(selVertBit);
 					}
 					this->setCursor(Qt::SizeAllCursor);
 				}
@@ -932,7 +973,7 @@ void RenderArea::ChangeMode(int modenumber)
 						model->cm.face[i].ClearS();
 					}
 					//selBit = CFaceO::NewBitFlag();
-					for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.face[i].ClearUserBit(selVertBit);
+					for (unsigned i = 0; i < model->cm.vert.size(); i++) model->cm.vert[i].ClearUserBit(selVertBit);
 					//selVertBit = CVertexO::NewBitFlag();
 					emit UpdateModel();
 					this->setCursor(Qt::CrossCursor);
@@ -997,9 +1038,9 @@ void RenderArea::ChangeMode(int modenumber)
 	this->update();
 }
 
+// Change the selection function
 void RenderArea::ChangeSelectMode(int selectindex)
 {
-	// Change the function of the mouse selection
 	switch(selectindex)
 	{
 		case SELECTAREA:
@@ -1310,9 +1351,9 @@ void RenderArea::SelectConnectedComponent(QPoint e)
 	}
 }
 
+// Clear every selected faces or vertexes
 void RenderArea::ClearSelection()
 {
-	// Clear every selection
 	//selBit = CFaceO::NewBitFlag();
 	for (unsigned i = 0; i < model->cm.face.size(); i++) 
 	{ 
@@ -1325,9 +1366,9 @@ void RenderArea::ClearSelection()
 	emit UpdateModel();
 }
 
+// Invert selected faces
 void RenderArea::InvertSelection()
 {
-	// Invert selected faces
 	if (selected)
 	{
 		for (unsigned i = 0; i < model->cm.face.size(); i++)
@@ -1355,9 +1396,9 @@ void RenderArea::InvertSelection()
 	}
 }
 
+// Flip the selected faces (mode = true -> horizontal, mode = false -> vertical)
 void RenderArea::Flip(bool mode)
 {
-	// Flip the selected faces
 	if (selected)
 	{
 		QPointF mid = ToUVSpace(selection.center().x(), selection.center().y());
@@ -1380,6 +1421,7 @@ void RenderArea::Flip(bool mode)
 	}
 }
 
+// Collapse a couple of vertexes
 void RenderArea::UnifyCouple()
 {
 	// Calculate the average coordinates and unify a couple of vertexes
@@ -1409,6 +1451,7 @@ void RenderArea::UnifyCouple()
 	}
 }
 
+// Unify a set of border vertexes among the selected path
 void RenderArea::UnifySet()
 {
 	// Unify a set of vertexes
@@ -1464,7 +1507,7 @@ void RenderArea::UnifySet()
 
 vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN)
 {
-	// Find a path from the selected vertex, walking ANTI-CLOCKWISE only on border edge...
+	// Find a path from the selected vertex, walking from LEFT TO RIGHT only on border edge...
 	vector<CVertexO*> path = vector<CVertexO*>();
 	unsigned index = 0;
 	vector<CFaceO*> Q = vector<CFaceO*>();
@@ -1474,11 +1517,11 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 	bool finish = false;
 	int notcontrol = -1;
 	int lastadd = 0, lastex = -1;
-	/* Add all the adjacent faces to the vertex.
+	/* Enqueue all the adjacent faces to the vertex.
 	   For each face in queue
-	     if the edge is a border one and contains the last added vertex and is anti-clockwise
-		    enqueue all adjacent faces 
-			add the vertex other to the path
+	     if the edge is a border one and contains the last added vertex and is on the right
+		    enqueue all adjacent faces to the other vertex
+			add the other vertex to the path
 	*/
 	float tu, tv;
 	if (pathN == 0) {tu = tua; tv = tva;}
@@ -1804,7 +1847,7 @@ QPoint RenderArea::ToScreenSpace(float u, float v)
 
 void RenderArea::DrawCircle(QPoint origin)
 {
-	// Draw a circle
+	// Draw a circle in the RenderArea using openGL
 	float DEG2RAD = 3.14159f/180.0f;
 	float r = (float)VRADIUS/zoom;
 	glBegin(GL_TRIANGLE_FAN);
@@ -1825,9 +1868,9 @@ void RenderArea::UpdateBoundingArea(QPoint topLeft, QPoint topRight)
 	if (topRight.y() > selEnd.y()) selEnd.setY(topRight.y());
 }
 
+// Import the face selected from the meshlab GLArea in the pluging
 void RenderArea::ImportSelection()
 {
-	// Import the face selected from the meshlab GLArea to the pluging
 	//selBit = CFaceO::NewBitFlag();
 	for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 	selStart = QPoint(MAX,MAX);
@@ -1917,9 +1960,9 @@ void RenderArea::ShowFaces()
 	}
 }
 
+// Reset the position of the viewport
 void RenderArea::ResetPosition()
 {
-	// Reset the position of the viewport
 	zoom = 1;
 	ResetTrack(true);
 	if (selected) RecalculateSelectionArea();

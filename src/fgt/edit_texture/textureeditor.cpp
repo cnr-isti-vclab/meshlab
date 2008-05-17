@@ -1,11 +1,16 @@
 #include <QTabBar>
 #include "textureeditor.h"
+#include <qfiledialog.h>
+#include <meshlab/glarea.h>
 
 static int countPage = 1;	// Number of Tab in the texture's TabWidgets
 
-TextureEditor::TextureEditor(QWidget *parent) : QWidget(parent)
+TextureEditor::TextureEditor(QWidget *parent, MeshModel *m, GLArea *gla) : QWidget(parent)
 {
 	ui.setupUi(this);
+	area = gla;
+	model = m;
+	QObject::connect(this, SIGNAL(updateTexture(void)), gla, SLOT(updateTexture(void)));
 }
 
 TextureEditor::~TextureEditor()
@@ -17,7 +22,6 @@ void TextureEditor::Reset()
 {
 	for (int i = 1; i < countPage; i++) ui.tabWidget->removeTab(i);
 	countPage = 1;
-	first = 0;
 }
 
 void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
@@ -30,19 +34,17 @@ void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 	if (countPage == 1)
 	{
 		ui.tabWidget->removeTab(0);
-		first = ra;
 		ra->show();
+		ui.labelName->setText(texture);
 	}
 	countPage++;
 	QObject::connect(ra, SIGNAL(UpdateModel()),this, SLOT(UpdateModel()));
-
 }
 
 void TextureEditor::AddEmptyRenderArea()
 {
 	// Add an empty render area (the model doesn't has any texture)
 	RenderArea *ra= new RenderArea(ui.tabWidget->widget(0));
-	first = ra;
 	ra->setGeometry(MARGIN,MARGIN,400,400);
 	ra->show();
 }
@@ -167,6 +169,24 @@ void TextureEditor::on_smoothButton_clicked()
 	SmoothTextureCoordinates();
 }
 
+void TextureEditor::on_browseButton_clicked()
+{
+	QString t = QFileDialog::getOpenFileName(this->parentWidget(), tr("Open Image File"), ".");
+	int j = t.lastIndexOf(QChar('/'));
+	QString s = t.mid(j+1, t.length() - j - 1);
+	if (s.size() > 0)
+	{
+		int i = ui.tabWidget->currentIndex();
+		model->cm.textures[i] = s.toStdString();
+		ui.tabWidget->setTabText(i,s);
+		((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->setTexture(s);
+		((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->update();
+		ui.labelName->setText(s);
+		emit updateTexture();
+		area->update();
+	}
+}
+
 void TextureEditor::keyPressEvent(QKeyEvent *e)
 {
 	if (e->key() == Qt::Key_H) ((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ResetPosition();
@@ -181,6 +201,7 @@ void TextureEditor::on_tabWidget_currentChanged(int index)
 	else if (ui.vertexButton->isChecked()) {button = 2; mode = 2;}
 	((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->ChangeMode(button);
 	if (mode != -1) ((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->ChangeSelectMode(mode);
+	ui.labelName->setText(((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->GetTextureName());
 }
 
 void TextureEditor::on_checkBox_stateChanged()

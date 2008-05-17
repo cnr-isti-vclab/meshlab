@@ -33,133 +33,133 @@ class RenderArea : public QGLWidget
 {
     Q_OBJECT
 
-public:
-	enum Mode { View, Edit, EditVert, Select, UnifyVert };
-	enum EditMode { Scale, Rotate, NoEdit };
-	enum SelectMode { Area, Connected, Vertex };
+	public:
+		enum Mode { View, Edit, EditVert, Select, UnifyVert, NoMode };
+		enum EditMode { Scale, Rotate, NoEdit };
+		enum SelectMode { Area, Connected, Vertex };
 
-    RenderArea(QWidget *parent = 0, QString path = QString(), MeshModel *m = 0, unsigned textNum = 0);
-	~RenderArea();
+		RenderArea(QWidget *parent = 0, QString path = QString(), MeshModel *m = 0, unsigned textNum = 0);
+		~RenderArea();
 
-public:
-    void setPen(const QPen &pen);
-    void setBrush(const QBrush &brush);
-    void setAntialiased(bool antialiased);
-	void setTexture(QString path);
-	void ChangeMode(int index);
-	void ChangeSelectMode(int index);
-	void RemapClamp();
-	void RemapMod();
-	void ClearSelection();
-	void InvertSelection();
-	void Flip(bool mode);
-	void ImportSelection();
-	void UnifyCouple();
-	void UnifySet();
-	void ResetPosition();
+		void setPen(const QPen &pen);
+		void setBrush(const QBrush &brush);
+		void setAntialiased(bool antialiased);
+		void setTexture(QString path);
+		void ChangeMode(int index);
+		void ChangeSelectMode(int index);
+		void RemapClamp();
+		void RemapMod();
+		void ClearSelection();
+		void InvertSelection();
+		void Flip(bool mode);
+		void ImportSelection();
+		void UnifyCouple();
+		void UnifySet();
+		void ResetPosition();
+		QString GetTextureName();
 
-protected:
-    void paintEvent(QPaintEvent *event);
-	void mousePressEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void mouseDoubleClickEvent(QMouseEvent *event);
-	void wheelEvent(QWheelEvent *event);
-	void keyPressEvent(QKeyEvent *event);
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void mousePressEvent(QMouseEvent *event);
+		void mouseReleaseEvent(QMouseEvent *event);
+		void mouseMoveEvent(QMouseEvent *event);
+		void mouseDoubleClickEvent(QMouseEvent *event);
+		void wheelEvent(QWheelEvent *event);
+		void keyPressEvent(QKeyEvent *event);
 
-private:
-	bool antialiased;	// Antialiasing 
-    QImage image;		// Background texture
-	unsigned textNum;	// Number of tab (--> index in 'textures' vector)
-	QString fileName;	// Name of the texture
-	MeshModel *model;	// Ref to the model (for upate)
+	private:
+		bool antialiased;	// Antialiasing 
+		QImage image;		// Background texture
+		unsigned textNum;	// Number of tab (--> index in 'textures' vector)
+		QString fileName;	// Name of the texture
+		MeshModel *model;	// Ref to the model (for upate)
 
-	Mode mode;			// Action type
-	EditMode editMode;
-	SelectMode selectMode;
+		Mode mode, oldMode;			// Action type
+		EditMode editMode;
+		SelectMode selectMode;
 
-	// Trackball data
-	vcg::Trackball *tb;
-	vcg::Point2f viewport;
-	float oldX, oldY;
-	int tmpX, tmpY;
+		// Trackball data
+		vcg::Trackball *tb;
+		vcg::Point2f viewport;
+		float oldX, oldY;
+		int tmpX, tmpY;
 
-	QPen pen;			// For 2D painting
-    QBrush brush;
+		QPen pen;			// For 2D painting
+		QBrush brush;
 
-	int panX, panY, tpanX, tpanY, oldPX, oldPY, posVX, posVY;	// Temp for axis
-	int maxX, maxY, minX, minY;	// For texCoord out of border
+		int panX, panY, tpanX, tpanY, oldPX, oldPY, posVX, posVY;	// Temp for axis
+		int maxX, maxY, minX, minY;	// For texCoord out of border
 
-	int selBit, selVertBit;		// User bit: idicates if a face/vertex is selected for editing
-	bool selected, selectedV;	// Indicates if the are some selected faces
+		int selBit, selVertBit;		// User bit: idicates if a face/vertex is selected for editing
+		bool selected, selectedV;	// Indicates if the are some selected faces
 
-	QPointF origin;		// Origin for rotate editing
-	QRect originR;
-	int orX, orY;
+		QPointF origin;		// Origin for rotate editing
+		QRect originR;
+		int orX, orY;
 
-	QPoint start, end;	// Selection area
-	QRect area;			// Dragged rectangle
-	QRectF areaUV;		// Area of selected vertexes
+		QPoint start, end;	// Selection area
+		QRect area;			// Dragged rectangle
+		QRectF areaUV;		// Area of selected vertexes
 
-	// Info for interactive editing
-	vector<QRect> selRect;	// Vector of buttons area
-	QRect vertRect;			// Rectangle for vertexes
-	QRect selection;		// Selection area
-	QPoint selStart, selEnd;
-	int posX, posY, rectX, rectY, oldSRX, oldSRY;	// Stored value
-	float degree, scaleX, scaleY;					// Value for edit
-	int highlighted, pressed, oldDelta;	// Info about mouse
-	QPointF oScale;			// Point of origin for scaling
-	int initVX, initVY;		// Old values of viewport
-	float B2, Rm, Rq;		// Params for line intersection
+		// Info for interactive editing
+		vector<QRect> selRect;	// Vector of buttons area
+		QRect vertRect;			// Rectangle for vertexes
+		QRect selection;		// Selection area
+		QPoint selStart, selEnd;
+		int posX, posY, rectX, rectY, oldSRX, oldSRY;	// Stored value
+		float degree, scaleX, scaleY;					// Value for edit
+		int highlighted, pressed, oldDelta;	// Info about mouse
+		QPointF oScale;			// Point of origin for scaling
+		int initVX, initVY;		// Old values of viewport
+		float B2, Rm, Rq;		// Params for line intersection
 
-	QImage rot, scal;		// Images for buttons
+		QImage rot, scal;		// Images for buttons
 
-	float zoom;				// Actual value of zoom
+		float zoom;				// Actual value of zoom
 
-	int VCount;				// Vertex counter
-	CVertexO *collapse1,	// Pointer to vertex for collapse
-			 *collapse2;
-	TexCoord2<float> vc1, vc2;
-	CVertexO *unifyA, *unifyA1, *unifyB, *unifyB1;	// Pointer to unify segment
-	QRect unifyRA, unifyRA1, unifyRB, unifyRB1;
-	QPoint uvertA, uvertB, uvertA1, uvertB1;
-	float tua, tva, tub, tvb, tua1, tva1, tub1, tvb1;
-	CFaceO *firstface, *firstface1;
-	bool locked;
-	GLuint id;
+		int VCount;				// Vertex counter
+		CVertexO *collapse1,	// Pointer to vertex for collapse
+				 *collapse2;
+		TexCoord2<float> vc1, vc2;
+		CVertexO *unifyA, *unifyA1, *unifyB, *unifyB1;	// Pointer to unify segment
+		QRect unifyRA, unifyRA1, unifyRB, unifyRB1;
+		QPoint uvertA, uvertB, uvertA1, uvertB1;
+		float tua, tva, tub, tvb, tua1, tva1, tub1, tvb1;
+		CFaceO *firstface, *firstface1;
+		bool locked;
+		GLuint id;
 
-	vector<CVertexO*> path, path1;			// Set of vertex of the path
-	vector<Point2f> drawnPath, drawnPath1;	// Set of UV coords found in the path
-	bool drawP, drawP1;
+		vector<CVertexO*> path, path1;			// Set of vertex of the path
+		vector<Point2f> drawnPath, drawnPath1;	// Set of UV coords found in the path
+		bool drawP, drawP1;
 
-	void UpdateUV();
-	void UpdateVertex();
-	void ResetTrack(bool reset);
-	void SelectFaces();
-	void SelectConnectedComponent(QPoint e);
-	void SelectVertexes();
-	void HandleScale(QPoint e);
-	void HandleRotate(QPoint e);
-	void RotateComponent(float theta);
-	void ScaleComponent(float percentX, float percentY);
-	void RecalculateSelectionArea();
-	void UpdateSelectionArea(int x, int y);
-	void UpdateSelectionAreaV(int x, int y);
-	void UpdateVertexSelection();
-	QPointF ToUVSpace(int x, int y);
-	QPoint ToScreenSpace(float u, float v);
-	void DrawCircle(QPoint origin);
-	void UpdateBoundingArea(QPoint topLeft, QPoint topRight);
-	void CountVertexes();
-	bool isInside(vector<TexCoord2<float> >, TexCoord2<float>);
-	void ShowFaces();
-	void UpdateUnify();
-	vector<CVertexO*> FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN);
-	void UpdateUnifyTopology();
+		void UpdateUV();
+		void UpdateVertex();
+		void ResetTrack(bool reset);
+		void SelectFaces();
+		void SelectConnectedComponent(QPoint e);
+		void SelectVertexes();
+		void HandleScale(QPoint e);
+		void HandleRotate(QPoint e);
+		void RotateComponent(float theta);
+		void ScaleComponent(float percentX, float percentY);
+		void RecalculateSelectionArea();
+		void UpdateSelectionArea(int x, int y);
+		void UpdateSelectionAreaV(int x, int y);
+		void UpdateVertexSelection();
+		QPointF ToUVSpace(int x, int y);
+		QPoint ToScreenSpace(float u, float v);
+		void DrawCircle(QPoint origin);
+		void UpdateBoundingArea(QPoint topLeft, QPoint topRight);
+		void CountVertexes();
+		bool isInside(vector<TexCoord2<float> >, TexCoord2<float>);
+		void ShowFaces();
+		void UpdateUnify();
+		vector<CVertexO*> FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN);
+		void UpdateUnifyTopology();
 
-signals:
-	void UpdateModel();
+	signals:
+		void UpdateModel();
 
 };
 

@@ -6,7 +6,8 @@
 #include <meshlab/glarea.h>
 #include "ui_textureeditor.h"
 #include "renderarea.h"
-#include <vcg/container/simple_temporary_data.h>
+#include <vcg/container/simple_temporary_data.h>	// da rimuovere una volta spostato smooth
+#include <vcg/complex/trimesh/textcoord_optimization.h>
 
 #define MARGIN 5
 #define MAXW 1400
@@ -18,48 +19,50 @@ class TextureEditor : public QWidget
 {
 	Q_OBJECT
 
-public:
-	TextureEditor(QWidget *parent = 0);
-	~TextureEditor();
+	public:
+		TextureEditor(QWidget *parent = 0, MeshModel *m = 0, GLArea *gla = 0);
+		~TextureEditor();
 
-	void AddRenderArea(QString texture, MeshModel *m, unsigned ind);
-	void AddEmptyRenderArea();
-	void Reset();
-	void SelectFromModel();
+		void AddRenderArea(QString texture, MeshModel *m, unsigned ind);
+		void AddEmptyRenderArea();
+		void Reset();
+		void SelectFromModel();
 
-	RenderArea *first;	// Ref to the first RA
-	MeshModel *model;	// Ref to the model (for upate)
-	GLArea *area;		// Ref to the GLArea (for refresh)
+	private:
+		Ui::TextureEditorClass ui;
+		void ResetLayout();
+		void SmoothTextureCoordinates();
+		MeshModel *model;	// Ref to the model (for upate)
+		GLArea *area;		// Ref to the GLArea (for refresh)
 
-private:
-	Ui::TextureEditorClass ui;
-	void ResetLayout();
-	void SmoothTextureCoordinates();
+	private slots:
+		void on_tabWidget_currentChanged(int index);
+		void on_connectedButton_clicked();
+		void on_moveButton_clicked();
+		void on_selectButton_clicked();
+		void on_vertexButton_clicked();
+		void on_clampButton_clicked();
+		void on_modulusButton_clicked();
+		void on_smoothButton_clicked();
+		void on_cancelButton_clicked();
+		void on_invertButton_clicked();	
+		void on_flipHButton_clicked();
+		void on_flipVButton_clicked();
+		void on_unify2Button_clicked();
+		void on_unifySetButton_clicked();
+		void on_checkBox_stateChanged();
+		void on_browseButton_clicked();
 
-private slots:
-	void on_tabWidget_currentChanged(int index);
-	void on_connectedButton_clicked();
-	void on_moveButton_clicked();
-	void on_selectButton_clicked();
-	void on_vertexButton_clicked();
-	void on_clampButton_clicked();
-	void on_modulusButton_clicked();
-	void on_smoothButton_clicked();
-	void on_cancelButton_clicked();
-	void on_invertButton_clicked();	
-	void on_flipHButton_clicked();
-	void on_flipVButton_clicked();
-	void on_unify2Button_clicked();
-	void on_unifySetButton_clicked();
-	void on_checkBox_stateChanged();
+	public slots:
+		void UpdateModel();
 
-public slots:
-	void UpdateModel();
+	signals:
+		void updateTexture();
 
-protected:
-	void keyPressEvent(QKeyEvent *event);
+	protected:
+		void keyPressEvent(QKeyEvent *event);
 
-
+// Da mettere in VCG
 template<class MESH_TYPE>
 void SmoothTextureWEdgeCoords(MESH_TYPE &m, float alpha)
 {
@@ -67,7 +70,7 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m, float alpha)
 
 	vcg::SimpleTempData<typename MESH_TYPE::VertContainer, int> div(m.vert);
 	vcg::SimpleTempData<typename MESH_TYPE::VertContainer, Point2f > sum(m.vert);
-    
+
 	for (typename MESH_TYPE::VertexIterator v = m.vert.begin(); v != m.vert.end(); v++) 
 	{
 		sum[v] = Point2f(0,0);
@@ -102,7 +105,7 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m, float alpha)
 				}
 			}
 		}
-	}	
+	}
 }
 
 };

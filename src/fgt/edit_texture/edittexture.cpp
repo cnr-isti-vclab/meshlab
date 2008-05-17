@@ -29,6 +29,7 @@ EditTexturePlugin::EditTexturePlugin()
 
 EditTexturePlugin::~EditTexturePlugin() 
 {
+	// Delete the tool widget
 	if (widget != 0) 
 	{
 		delete widget;
@@ -51,7 +52,7 @@ const PluginInfo &EditTexturePlugin::Info()
 {
 	static PluginInfo ai; 
 	ai.Date=tr(__DATE__);
-	ai.Version = tr("1.0.1");
+	ai.Version = tr("1.1.3");
 	ai.Author = ("Riccardo Dini");
     return ai;
 }
@@ -193,20 +194,17 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 	// Create an istance of the interface
 	if (widget == 0) 
 	{ 
-		widget = new TextureEditor(gla->window());
+		widget = new TextureEditor(gla->window(), &m, gla);
 		dock = new QDockWidget(gla->window());
 		dock->setAllowedAreas(Qt::NoDockWidgetArea);
 		dock->setWidget(widget);
 		QPoint p = gla->window()->mapToGlobal(QPoint(0,0));
 		dock->setGeometry(-5+p.x()+gla->window()->width()-widget->width(),p.y(),widget->width(),widget->height());
-		dock->setFloating(true);
-		QObject::connect(widget, SIGNAL(changeSelectMode(int)), this, SLOT(SelectMode(int)));
+		dock->setFloating(true);		
 	}
 	dock->setVisible(true);
 	dock->layout()->update();	
-	widget->model = &m;
-	widget->area = gla;
-	
+
 	// Initialize the texture using the intere model
 	InitTexture(m);
 
