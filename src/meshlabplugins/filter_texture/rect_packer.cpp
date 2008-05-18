@@ -9,9 +9,9 @@ using namespace std;
 class point2iConf
 {
 public:
-	const std::vector<point2i> & v;
+	const std::vector<Point2i> & v;
 
-	inline point2iConf( const std::vector<point2i> & nv ) : v(nv) { }
+	inline point2iConf( const std::vector<Point2i> & nv ) : v(nv) { }
 
 	inline bool operator() ( int a, int b )
 	{
@@ -20,9 +20,9 @@ public:
 	}
 };
 
-bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_size, std::vector<point2i> & posiz, point2i & global_size)
+bool rect_packer::pack(const std::vector<Point2i> & sizes, const Point2i & max_size, std::vector<Point2i> & posiz, Point2i & global_size)
 {
-	int n = (int)(sizes.size());	
+	int n = (int)(sizes.size());
     assert(n>0);
     assert(max_size[0]>0);
     assert(max_size[1]>0);
@@ -39,7 +39,7 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 
 #define Grid(q,w)	(grid[(q)+(w)*max_size[0]])
 
-    std::vector<int> perm(n);			// permutation creation
+    std::vector<int> perm(n);			// permutation creation - vector, one element for each size in sizes - this is what you want the result of
     for(i=0;i<n;i++) perm[i] = i;
 	point2iConf conf(sizes);
 	sort(perm.begin(),perm.end(),conf);
@@ -144,10 +144,10 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 			return false;
 		}
 
-		posiz[j][0] = bestx;
-		posiz[j][1] = besty;
-		global_size[0] = bestsx;
-		global_size[1] = bestsy;
+		posiz[j][0] = bestx;//new U offset for texture at position j
+		posiz[j][1] = besty;//new V offset for texture at position j
+		global_size[0] = bestsx;//holds smallest encompassing width for texture atlas
+		global_size[1] = bestsy;//holds smallest encompassing height for texture atlas
 		for(y=posiz[j][1];y<posiz[j][1]+sy;y++)
 			for(x=posiz[j][0];x<posiz[j][0]+sx;x++)
 			{
@@ -160,7 +160,7 @@ bool rect_packer::pack(const std::vector<point2i> & sizes, const point2i & max_s
 	}
 
 #if 0
-	// debugging code: it saves into a simple bitmap the computed packing.
+// debugging code: it saves into a simple bitmap the computed packing.
 FILE * fp = fopen("debpack.ppm","wb");
 fprintf(fp,"P6\n%d %d\n255\n",global_size[0],global_size[1]);
 for(j=0;j<global_size[1];++j)
@@ -177,7 +177,6 @@ for(i=0;i<global_size[0];++i)
 }
 fclose(fp);
 #endif
-
 
 #undef Grid
 

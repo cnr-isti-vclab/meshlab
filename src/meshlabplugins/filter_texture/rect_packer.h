@@ -3,7 +3,9 @@
 
 #include <vector>
 
-#include "point2.h"
+#include <vcg/space/point2.h>
+
+using namespace vcg;
 
 class rect_packer
 {
@@ -11,7 +13,7 @@ class rect_packer
 
 		typedef rect_packer this_type;
 
-		static bool pack(const std::vector<point2i> & sizes, const point2i & max_size, std::vector<point2i> & posiz, point2i & global_size);
+		static bool pack(const std::vector<Point2i> & sizes, const Point2i & max_size, std::vector<Point2i> & posiz, Point2i & global_size);
 };
 
 #endif // RECT_PACKER_H

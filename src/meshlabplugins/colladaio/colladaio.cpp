@@ -131,11 +131,10 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 		
 		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),m.addinfo);
 		
-		
-
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
 		{
-			QMessageBox::critical(parent, tr("DAE Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result)));
+			//QMessageBox::critical(parent, tr("DAE Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result)));
+			qDebug() << "DAE Opening Error" << vcg::tri::io::ImporterDAE<CMeshO>::ErrorMsg(result) << endl;
 			return false;
 		}
 		else _mp.push_back(&m);
@@ -144,10 +143,9 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 			normalsUpdated = true;
 		mask = info->mask;
 	}
-
 	
-	// verify if texture files are present
-	QString missingTextureFilesMsg = "The following texture files were not found:\n";
+	// verify if texture files are present - NOT NECESSARY AS WHEN LOAD TEXTURES IN GLAREA.CPP WILL TELL YOU IF NULL
+	/*QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;
 	for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
 	{
@@ -162,7 +160,7 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 			fclose (pFile);
 	}
 	if (someTextureNotFound)
-		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
+		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);*/
 
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	if (!normalsUpdated) 
@@ -181,14 +179,15 @@ bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, M
 	std::string ex = formatName.toUtf8().data();
 	int result;
 	
-	//if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end()) 
+	//if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end())
 		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
 	//else 
 		//result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),m.addinfo,mask);
 
 	if(result!=0)
 	{
-		QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+		//QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result)));
+		qDebug() << "Saving Error" << vcg::tri::io::Exporter<CMeshO>::ErrorMsg(result) << endl;
 		return false;
 	}
 	return true;
@@ -235,6 +234,5 @@ const PluginInfo &ColladaIOPlugin::Info()
 	ai.Author = ("Guido Ranzuglia");
 	return ai;
  }
-
 
 Q_EXPORT_PLUGIN(ColladaIOPlugin)

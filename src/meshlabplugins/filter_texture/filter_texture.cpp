@@ -36,6 +36,7 @@ $Log: samplefilter.cpp,v $
 #include <meshlab/interfaces.h>
 
 #include "filter_texture.h"
+#include "rect_packer.h"
 
 using namespace vcg;
 using namespace std;
@@ -91,7 +92,9 @@ void FilterTexturePlugin::initParameterSet(QAction *action,MeshModel &m, FilterP
 //void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	 switch(ID(action))	 {
-		default : assert(0); 
+		default : 
+			parlst.addInt  ("Xmax",2880 ,"Maximum width of texture atlas");//add to parList
+			parlst.addInt  ("Ymax", 2880,"Maximum height of texture atlas");//add to parList
 	}
 }
 
@@ -105,18 +108,39 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	//the general 'packing problem' is NP-complete, so you have to use a heuristic or genetic algorithm to get an approximate answer
 	//this is not an optimal packing - we are not rotating textures, for example
 	//TODO:how read image data from images already loaded into Meshlab, to prevent from opening files again?
-	//TODO:improve atlas-generation algorithm so it tries to minimize whitespace (though saved PNG files don't increase in file size due to whitespace)
+	//TODO:improve atlas-generation algorithm so it tries to minimize whitespace (though transparent-background PNG files don't increase in file size due to whitespace)
+	qDebug() << "called filterTexture applyFilter" << endl;
 	int totalWidth=0, totalHeight=0;
 	int numTextures = m.cm.textures.size();
+	
+	Point2i global_size;
+	std::vector<Point2i> posiz;
+	Point2i max_size;
+	max_size[0] = par.getInt("Xmax");
+	max_size[1] = par.getInt("Ymax");
+	std::vector<Point2i> sizes;
+	Point2i size;
+	
 	if ((numTextures == 0)||(numTextures == 1))
+	{
+		qDebug() << "filterTexture failed - # textures < 2" << endl;
 		return false;//return false if numTextures == 0 or 1 (no need for an atlas)
+	}
 	QPixmap images[numTextures];//array of images
 	for (unsigned textureIdx = 0; textureIdx < numTextures; ++textureIdx)//iterate through textures, loading each
 	{
 		images[textureIdx] = QPixmap(m.cm.textures[textureIdx].c_str());//loads image, if fails is a null image. will guess extension from file name
-		totalWidth += images[textureIdx].width();//get total x dimensions
-		totalHeight += images[textureIdx].height();//get total y dimensions
+		size[0] = images[textureIdx].width();
+		size[1] = images[textureIdx].height();
+		sizes[textureIdx] = size;
+		totalWidth += size[0];
+		totalHeight += size[1];//get total y dimensions
+		qDebug() << "filterTexture loaded image: " << m.cm.textures[textureIdx].c_str() << endl;
+		qDebug() << "total width: " << totalWidth << endl;
+		qDebug() << "total height: " << totalHeight << endl;
 	}
+	
+	rect_packer::pack(sizes, max_size, posiz, global_size);//try std::rect_packer::pack or pack
 	
 	std::map<int, int> Xoffset;//stl map mapping texture indeces to new U offsets
 	std::map<int, int> Yoffset;//stl map mapping texture indeces to new V offsets
@@ -133,8 +157,9 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	for (int index=0; index<numTextures; ++index)
 	{
 		painter.drawPixmap(currentX, 0, images[index]);//use drawPixmap instead of deprecated bitBlt() to paste image to a certain position in the texture atlas
-		currentX += images[index].width();
 		Xoffset[index] = currentX;//as do, add index & coords to 'conversions' map
+		qDebug() << "inserted texture into atlas at position: " << currentX << endl;
+		currentX += images[index].width();
 	}
 	
 	int tmpX=0,tmpY=0;
@@ -147,15 +172,22 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			if (mat!=-1)
 				fit->WT(0).N() = 0;//re-assign N to 0 (only one texture now)
 			tmpX = Xoffset[mat];//retrieve offsets (currently only x)
+			qDebug() << "tmpX: " << tmpX << endl;
 			for(unsigned int ii = 0; ii < 3;++ii)//UVs are per-vertex?
 			{
-				fit->WT(ii).U() = (fit->WT(ii).U()*images[mat].width() + tmpX)/dimension;//offset U by coord in map array, then normalize (between 0 & 1)
-				fit->WT(ii).V() = (fit->WT(ii).V()*images[mat].height() + tmpY)/dimension;//offset V by coord in map array, then normalize (between 0 & 1)
+				qDebug() << "original U: " << fit->WT(ii).U() << "original V: " << fit->WT(ii).V() << endl;
+				//if uv > 1 means want it tiled/repeated
+				//is the 0,0 origin at top-left, bottom-left, or center?  seen all 3 - how else get negative UV coord?
+				//ajust texture coordinates by half a pixel to avoid filtering artifacts?s
+				fit->WT(ii).U() = (fit->WT(ii).U()*images[mat].width() + tmpX)/dimension;//offset U by coord in map array, u*width is pixel, tmpX is offset, need 2 normalize (between 0 & 1)?
+				fit->WT(ii).V() = 0.5;//(fit->WT(ii).V()*images[mat].height() + tmpY)/dimension;//offset V by coord in map array
+				qDebug() << "new U: " << fit->WT(ii).U() << "new V: " << fit->WT(ii).V() << endl;
 			}
 		}
 	}
 	
 	bool result = atlas.save("texture.png","PNG",0);//save image, highest compression
+	qDebug() << "saved texture atlas" << endl;
 	m.cm.textures.clear();//empty mm.cm.textures vector
 	m.cm.textures.push_back("texture.png");//add the texture atlas (at position 0)
 	//update display-load texture atlas?
