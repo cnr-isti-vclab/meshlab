@@ -20,6 +20,12 @@ public:
 	}
 };
 
+/*
+1)  'sizes' is a vector of points corresponding to the width/height of each texture
+2)  'max_size' is a single point that represents the maximum height/width of the texture atlas you want to create
+3)  'posiz' is a vector of points that indicate for each texture in 'sizes', where to place this texture in the texture atlas (initially this would be empty)
+4)  'global_size' represents the minimum height/width necessary to encompass the resulting texture atlas (initially null)
+*/
 bool rect_packer::pack(const std::vector<Point2i> & sizes, const Point2i & max_size, std::vector<Point2i> & posiz, Point2i & global_size)
 {
 	int n = (int)(sizes.size());

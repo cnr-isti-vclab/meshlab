@@ -130,36 +130,22 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	for (unsigned textureIdx = 0; textureIdx < numTextures; ++textureIdx)//iterate through textures, loading each
 	{
 		images[textureIdx] = QPixmap(m.cm.textures[textureIdx].c_str());//loads image, if fails is a null image. will guess extension from file name
-		size[0] = images[textureIdx].width();
-		size[1] = images[textureIdx].height();
-		sizes[textureIdx] = size;
-		totalWidth += size[0];
-		totalHeight += size[1];//get total y dimensions
+		size = Point2i(images[textureIdx].width(), images[textureIdx].height());
+		sizes.push_back(size);
 		qDebug() << "filterTexture loaded image: " << m.cm.textures[textureIdx].c_str() << endl;
-		qDebug() << "total width: " << totalWidth << endl;
-		qDebug() << "total height: " << totalHeight << endl;
 	}
 	
-	rect_packer::pack(sizes, max_size, posiz, global_size);//try std::rect_packer::pack or pack
+	rect_packer::pack(sizes, max_size, posiz, global_size);//will return UV offsets in posiz & minimum height/width required to cover all textures in global_size
+	qDebug() << "global_size, x:" << global_size[0] << "global_size, y:" << global_size[1] << endl;
 	
-	std::map<int, int> Xoffset;//stl map mapping texture indeces to new U offsets
-	std::map<int, int> Yoffset;//stl map mapping texture indeces to new V offsets
-	//query with conversions[integer variable] (will return null array if no match?), or .find
-	//set with conversions.insert
-	
-	int dimension;
-	totalWidth > totalHeight ? dimension = totalWidth : dimension = totalHeight;//if/else shortcut: if totalWidth is greater than totalHeight, assign dimension to totalWidth, otherwise totalHeight
-	QImage atlas = QImage(dimension, dimension, QImage::Format_ARGB32);//make a square texture of that dimension
+	QImage atlas = QImage(global_size[0], global_size[1], QImage::Format_ARGB32);//make a square texture of that dimension
 
 	//insert textures one after another in one row, starting at 0,0
 	QPainter painter(&atlas);
-	int currentX=0; //currentY=0;
 	for (int index=0; index<numTextures; ++index)
 	{
-		painter.drawPixmap(currentX, 0, images[index]);//use drawPixmap instead of deprecated bitBlt() to paste image to a certain position in the texture atlas
-		Xoffset[index] = currentX;//as do, add index & coords to 'conversions' map
-		qDebug() << "inserted texture into atlas at position: " << currentX << endl;
-		currentX += images[index].width();
+		painter.drawPixmap(posiz[index][0], posiz[index][1], images[index]);//use drawPixmap instead of deprecated bitBlt() to paste image to a certain position in the texture atlas
+		qDebug() << "inserted texture into atlas at position: " << posiz[index][0] << " " << posiz[index][1] << endl;
 	}
 	
 	int tmpX=0,tmpY=0;
@@ -171,16 +157,14 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			int mat = fit->WT(0).N();//fit->cWT the 'c' is for const
 			if (mat!=-1)
 				fit->WT(0).N() = 0;//re-assign N to 0 (only one texture now)
-			tmpX = Xoffset[mat];//retrieve offsets (currently only x)
-			qDebug() << "tmpX: " << tmpX << endl;
 			for(unsigned int ii = 0; ii < 3;++ii)//UVs are per-vertex?
 			{
 				qDebug() << "original U: " << fit->WT(ii).U() << "original V: " << fit->WT(ii).V() << endl;
 				//if uv > 1 means want it tiled/repeated
 				//is the 0,0 origin at top-left, bottom-left, or center?  seen all 3 - how else get negative UV coord?
-				//ajust texture coordinates by half a pixel to avoid filtering artifacts?s
-				fit->WT(ii).U() = (fit->WT(ii).U()*images[mat].width() + tmpX)/dimension;//offset U by coord in map array, u*width is pixel, tmpX is offset, need 2 normalize (between 0 & 1)?
-				fit->WT(ii).V() = 0.5;//(fit->WT(ii).V()*images[mat].height() + tmpY)/dimension;//offset V by coord in map array
+				//adjust texture coordinates by half a pixel to avoid filtering artifacts?
+				fit->WT(ii).U() = (fit->WT(ii).U()*images[mat].width() + posiz[mat][0])/global_size[0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1 unless repeating)
+				fit->WT(ii).V() = (fit->WT(ii).V()*images[mat].height() + posiz[mat][1])/global_size[1];//offset V by coord in posiz
 				qDebug() << "new U: " << fit->WT(ii).U() << "new V: " << fit->WT(ii).V() << endl;
 			}
 		}
