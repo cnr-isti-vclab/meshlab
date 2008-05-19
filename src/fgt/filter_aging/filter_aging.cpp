@@ -270,7 +270,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			// update normals
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			
-			smoothPeaks(m.cm, selected);
+			smoothPeaks(m.cm, selected, storeDispl);
 			
 			// readjust selection
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
@@ -371,14 +371,13 @@ bool GeometryAgingPlugin::faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceTyp
 
 /* Smooths higher and thinner peaks (edges whose incident faces form an angle
  * greater than 150 degrees) */
-void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected)
+void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, bool updateErosionAttr)
 {
 	AngleEdgePred aep = AngleEdgePred(150.0);
 	GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
 	gM.Set(m.face.begin(), m.face.end());
 	CMeshO::PerVertexAttributeHandle<Point3f> vah = 
-		vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, "Erosion");;
-	bool hasErosion = vcg::tri::HasPerVertexAttribute(m, "Erosion"); 
+		vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, "Erosion");
 	
 	for(CMeshO::FaceIterator fi=m.face.begin(); fi!=m.face.end(); fi++) {
 		if((*fi).IsD()) continue;
@@ -391,7 +390,7 @@ void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected)
 					(*fi).V(j)->P() = middlepos + dirj;
 					if(faceIntersections(m, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
 						(*fi).V(j)->P() = oldpos;
-					else if(hasErosion)		// update stored displacement
+					else if(updateErosionAttr)		// update stored displacement
 						vah[(*fi).V(j)] += ((*fi).V(j)->P() - oldpos);
 					(*fi).V(j)->SetV();
 			}
