@@ -469,7 +469,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
      m.restoreVertexColor();
      break;
   case CP_SMOOTH:
-     LaplacianSmoothColor(m.cm,1);
+		 tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,1);
      break;
  }
 	return true;

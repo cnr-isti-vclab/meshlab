@@ -498,8 +498,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  {
 		int stepSmoothNum = par.getInt("stepSmoothNum");
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      if(cnt>0) LaplacianSmooth(m.cm,stepSmoothNum,true);
-      else LaplacianSmooth(m.cm,1,false);
+      if(cnt>0) tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,true);
+      else tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,1,false);
 			 Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
@@ -508,18 +508,16 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  {
 			int stepSmoothNum = par.getInt("stepSmoothNum");
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      if(cnt>0) LaplacianSmooth_AngleWeighted(m.cm,stepSmoothNum,true);
-      else LaplacianSmooth_AngleWeighted(m.cm,stepSmoothNum,false);
-			 Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+			tri::Smooth<CMeshO>::VertexCoordLaplacianAngleWeighted(m.cm,stepSmoothNum,cnt>0);
+			Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
 	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 
 	if(ID(filter) == (FP_HC_LAPLACIAN_SMOOTH))
 	  {
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      if(cnt>0) HCSmooth(m.cm,1,true);
-      else HCSmooth(m.cm,1,false);
-	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+      tri::Smooth<CMeshO>::VertexCoordLaplacianHC(m.cm,1,cnt>0);
+      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 
   if(ID(filter) == (FP_TWO_STEP_SMOOTH))
@@ -533,7 +531,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       bool selectedFlag = par.getBool("Selected");
       //size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
-      PasoDobleSmoothFast(m.cm, stepSmoothNum, normalThr, stepNormalNum,selectedFlag);
+      tri::Smooth<CMeshO>::VertexCoordPasoDobleFast(m.cm, stepSmoothNum, normalThr, stepNormalNum,selectedFlag);
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 

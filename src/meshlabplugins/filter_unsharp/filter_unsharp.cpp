@@ -182,10 +182,10 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 			 m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 			break;
   case FP_FACE_NORMAL_SMOOTHING :
-				 FaceNormalSmoothFF(m.cm);
+				 tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm);
 			 break;
   case FP_VERTEX_QUALITY_SMOOTHING :
-				 VertexQualitySmooth(m.cm);
+				 tri::Smooth<CMeshO>::VertexQualityLaplacian(m.cm);
 			 break;
 	case FP_RECOMPUTE_VERTEX_NORMAL : 
 			tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
@@ -201,7 +201,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 					normalOrig[i]=m.cm.face[i].cN();
 				
 				for(int i=0;i<smoothIter;++i)
-						FaceNormalSmoothFF(m.cm);
+						tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm);
 				
 				for(int i=0;i<m.cm.fn;++i)
 					m.cm.face[i].N() = normalOrig[i] + (normalOrig[i] - m.cm.face[i].N())*alpha;
@@ -217,7 +217,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 				for(int i=0;i<m.cm.vn;++i)
 					geomOrig[i]=m.cm.vert[i].P();
 				
-				LaplacianSmooth(m.cm,1);
+				tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,1);
 				
 				for(int i=0;i<m.cm.vn;++i)
 					m.cm.vert[i].P()=geomOrig[i] + (geomOrig[i] - m.cm.vert[i].P())*alpha;				
@@ -235,7 +235,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 				for(int i=0;i<m.cm.vn;++i)
 					colorOrig[i].Import(m.cm.vert[i].C());
 				
-				LaplacianSmoothColor(m.cm,smoothIter);
+					tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,smoothIter);
 				
 				for(int i=0;i<m.cm.vn;++i)
 					m.cm.vert[i].C().Import(colorOrig[i] + (colorOrig[i] - Color4f::Construct(m.cm.vert[i].C()))*alpha);				

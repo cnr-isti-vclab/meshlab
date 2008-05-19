@@ -96,11 +96,10 @@ namespace vcg{
    
     tri::UpdateColor<MESH_TYPE>::VertexConstant(m, Color4b::White);
 
-    SimpleTempData<typename MESH_TYPE::VertContainer, int > TD(m.vert);
+    SimpleTempData<typename MESH_TYPE::VertContainer, int > TD(m.vert,0);
 
   	// primo loop, si conta quanti facce incidono su ogni vertice...
 
-    TD.Start(0);
     for (fi = m.face.begin(); fi != m.face.end(); ++fi)	if (!fi->IsD())
     {
       TD[(*fi).V(0)]++;
@@ -143,7 +142,6 @@ namespace vcg{
     }
 
     
-    TD.Stop();
 	}
 
 

@@ -99,10 +99,9 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,
 {
   math::Quadric<double> QZero;
   QZero.Zero();
-  QuadricTemp TD(m.vert);
+  QuadricTemp TD(m.vert,QZero);
   QHelper::TDp()=&TD;
 
-  TD.Start(QZero);
   MyTriEdgeCollapse::SetDefaultParams();
   //MyTriEdgeCollapse::SetHint(MyTriEdgeCollapse::HNHasVFTopology);
   //MyTriEdgeCollapse::SetHint(MyTriEdgeCollapse::HNHasBorderFlag);

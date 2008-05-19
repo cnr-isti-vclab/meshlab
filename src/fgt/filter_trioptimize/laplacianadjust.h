@@ -55,12 +55,11 @@ template<class MESH_TYPE>void LaplacianAdjust(MESH_TYPE &m, int step,
 	typedef typename MESH_TYPE::VertContainer VertContainer;
 	typedef LaplacianAdjustInfo<typename MESH_TYPE::ScalarType> LInfo;
 	
-	SimpleTempData<VertContainer, LInfo > TD(m.vert);
 	LInfo lpz;
 	lpz.sum = typename MESH_TYPE::CoordType(0,0,0);
 	lpz.cnt = 1;
 	lpz.dsp = 0;
-	TD.Start(lpz);
+	SimpleTempData<VertContainer, LInfo > TD(m.vert,lpz);
 
 	for (int i = 0; i < step; ++i) {
 		// initialize sum
@@ -103,8 +102,6 @@ template<class MESH_TYPE>void LaplacianAdjust(MESH_TYPE &m, int step,
 					if (math::ToDeg(TD[*vi].dsp / (float) TD[*vi].cnt) < thr)
 						(*vi).P() = TD[*vi].sum / (float) TD[*vi].cnt;
 	}
-
-	TD.Stop();
 }
 
 } // end tri namespace

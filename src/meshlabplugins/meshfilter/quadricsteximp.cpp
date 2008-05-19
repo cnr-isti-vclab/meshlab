@@ -760,25 +760,19 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, fl
 {
 	math::Quadric<double> QZero;
 	QZero.Zero();
-	QuadricTemp TD3(m.vert);
+	QuadricTemp TD3(m.vert,QZero);
 	QuadricTexHelper::TDp3()=&TD3;
-
-	TD3.Start(QZero);
 
 	
 	QVector <QPair<vcg::TexCoord2<float>,Quadric5<double> > > qv;
 
-     Quadric5Temp TD(m.vert);
-    QuadricTexHelper::TDp()=&TD;
-    TD.Start(qv);
+	Quadric5Temp TD(m.vert,qv);
+	QuadricTexHelper::TDp()=&TD;
 
+	MyTriEdgeCollapseQTex::SetDefaultParams();
 
-	  MyTriEdgeCollapseQTex::SetDefaultParams();
-
-	  MyTriEdgeCollapseQTex::Params().QualityThr=QualityThr;
+	MyTriEdgeCollapseQTex::Params().QualityThr=QualityThr;
 	  
-	  
-
 	MyTriEdgeCollapseQTex::Params().ExtraTCoordWeight = extratexw;
 
 
