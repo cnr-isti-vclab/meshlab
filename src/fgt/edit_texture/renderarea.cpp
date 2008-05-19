@@ -410,7 +410,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 	}
-	else painter.drawText(TEXTX, TEXTY, tr("NO TEXTURE"));
+	else painter.drawText(this->visibleRegion().boundingRect().width()/2 - FMETRICX, this->visibleRegion().boundingRect().height()/2 - FMETRICY, tr("NO TEXTURE"));
 
     painter.setPen(palette().dark().color());
     painter.setBrush(Qt::NoBrush);
@@ -596,7 +596,6 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 						origin = ToUVSpace(selection.center().x(), selection.center().y());
 						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
 						this->ChangeMode(EDITFACEMODE);
-						this->update(selection);
 						this->ShowFaces();
 						emit UpdateModel();
 					}
@@ -610,7 +609,6 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 						origin = ToUVSpace(selection.center().x(), selection.center().y());
 						originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
 						this->ChangeMode(EDITFACEMODE);
-						this->update();
 						this->ShowFaces();
 						emit UpdateModel();
 					}
@@ -627,11 +625,10 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *e)
 							originR = QRect(selection.center().x()-RADIUS/2, selection.center().y()-RADIUS/2, RADIUS, RADIUS);
 						}
 						this->ChangeMode(EDITVERTEXMODE);
-						this->update();
 					}
-					else this->update();
 					break;
 			}
+			this->update();
 			break;
 		case UnifyVert:
 			area = QRect();

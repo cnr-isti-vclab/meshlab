@@ -12,6 +12,8 @@
 
 #define TEXTX 175
 #define TEXTY 200
+#define FMETRICX 30
+#define FMETRICY 10
 #define TRANSLATE 5
 #define RADIUS 10
 #define VRADIUS 4
