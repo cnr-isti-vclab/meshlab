@@ -249,10 +249,10 @@ void MainWindow::updateWindowMenu()
 	windowsMenu->addAction(windowsTileAct);
 	windowsMenu->addAction(windowsCascadeAct);
 	windowsMenu->addAction(windowsNextAct);
-	windowsNextAct->setEnabled(workspace->windowList().size()>1);
-
-	QWidgetList windows = workspace->windowList();
-
+	windowsNextAct->setEnabled(mdiarea-> subWindowList().size()>1);
+	
+	QList<QMdiSubWindow*> windows = mdiarea->subWindowList();
+	
 	if(windows.size() > 0)
 			windowsMenu->addSeparator();
 
@@ -262,7 +262,7 @@ void MainWindow::updateWindowMenu()
 		QString text = tr("&%1. %2").arg(i+1).arg(QFileInfo(w->windowTitle()).fileName());
 		QAction *action  = windowsMenu->addAction(text);
 		action->setCheckable(true);
-		action->setChecked(w == workspace->activeWindow());
+		action->setChecked(w == mdiarea->currentSubWindow());
 		// Connect the signal to activate the selected window
 		connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
 		windowMapper->setMapping(action, w);
@@ -279,7 +279,7 @@ void MainWindow::setColorMode(QAction *qa)
 
 void MainWindow::updateMenus()
 {
-	bool active = (bool) !workspace->windowList().empty() && workspace->activeWindow();
+	bool active = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
 	openInAct->setEnabled(active);
 	closeAct->setEnabled(active);
 	reloadAct->setEnabled(active);
@@ -291,7 +291,7 @@ void MainWindow::updateMenus()
 	fullScreenAct->setEnabled(active);
 	trackBallMenu->setEnabled(active);
 	logMenu->setEnabled(active);
-  windowsMenu->setEnabled(active);
+	windowsMenu->setEnabled(active);
 	preferencesMenu->setEnabled(active);
 	
 	renderToolBar->setEnabled(active);
@@ -388,7 +388,7 @@ void MainWindow::updateMenus()
 	{
 		showLayerDlgAct->setChecked(GLA()->layerDialog->isVisible());
 		//if(GLA()->layerDialog->isVisible())
-					GLA()->layerDialog->updateTable();
+		GLA()->layerDialog->updateTable();
 	}
 }
 
@@ -495,13 +495,14 @@ void MainWindow::startFilter()
 	
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
+		qDebug("MeshCreation");
 		int mask = 0;
 		MeshModel *mm= new MeshModel();	
-		GLArea *gla=new GLArea(workspace);
-	  gla->meshDoc.addMesh(mm);			
+		GLArea *gla=new GLArea(mdiarea);
+		gla->meshDoc.addMesh(mm);			
 		gla->setFileName("untitled.ply");
-		workspace->addWindow(gla);
-		if(workspace->isVisible()) gla->showMaximized();
+		mdiarea->addSubWindow(gla);
+		if(mdiarea->isVisible()) gla->showMaximized();
 	}
 	// Ask for filter requirements (eg a filter can need topology, border flags etc)
   // and statisfy them
@@ -846,7 +847,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	else fileNameList.push_back(fileName);
 	if (fileNameList.isEmpty())	return false;
 	
-  foreach(fileName,fileNameList)
+	foreach(fileName,fileNameList)
 	{
 			QFileInfo fi(fileName);
 			if(fi.suffix().toLower()=="aln") openProject(fileName, NULL);
@@ -884,14 +885,19 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla*/))
 					delete mm;
 				else{
-					if(gla==0) gla=new GLArea(workspace);
+					bool newGla = false;
+					if(gla==0){
+						gla=new GLArea(mdiarea);
+						newGla =true;
+					}
 					gla->meshDoc.addMesh(mm);
 					
 					gla->mm()->ioMask |= mask;				// store mask into model structure
-					
 					gla->setFileName(fileName);
-					workspace->addWindow(gla);
-					if(workspace->isVisible()) gla->showMaximized();
+					if(newGla){
+						mdiarea->addSubWindow(gla);
+					}
+					if(mdiarea->isVisible()) gla->showMaximized();
 					setCurrentFile(fileName);
 					
 					if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
@@ -928,6 +934,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				}
 			}
 	}// end foreach file of the input list
+	GLA()->update();
 	qb->reset();
 	return true;
 }
@@ -945,7 +952,7 @@ void MainWindow::reload()
 	QString file = GLA()->getFileName();
 
 	// close current window
-	workspace->closeActiveWindow();
+	mdiarea->closeActiveSubWindow();
 
 	// open a new window with old file
 	open(file);
@@ -1113,9 +1120,9 @@ void MainWindow::fullScreen(){
 	  setWindowState(windowState()^Qt::WindowFullScreen);
 	  bool found=true;
 	  //Caso di piu' finestre aperte in tile:
-	  if((workspace->windowList()).size()>1){
-		  foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
-		  if (found)workspace->tile();
+	  if((mdiarea->subWindowList()).size()>1){
+		  foreach(QWidget *w,mdiarea->subWindowList()){if(w->isMaximized()) found=false;}
+		  if (found)mdiarea->tileSubWindows();
 	  }
   }
   else
@@ -1127,9 +1134,9 @@ void MainWindow::fullScreen(){
 		setWindowState(windowState()^ Qt::WindowFullScreen);
 		bool found=true;
 		//Caso di piu' finestre aperte in tile:
-		if((workspace->windowList()).size()>1){
-			foreach(QWidget *w,workspace->windowList()){if(w->isMaximized()) found=false;}
-			if (found){workspace->tile();}
+		if((mdiarea->subWindowList()).size()>1){
+			foreach(QWidget *w,mdiarea->subWindowList()){if(w->isMaximized()) found=false;}
+			if (found){mdiarea->tileSubWindows();}
 		}
 		fullScreenAct->setChecked(false);
   }

@@ -179,7 +179,8 @@ Added Apply Last Filter action
 
 #include <QDir>
 #include <QMainWindow>
-#include <QWorkspace>
+//#include <QWorkspace>
+#include <QMdiArea>
 #include <QStringList>
 #include <QColorDialog>
 #include "meshmodel.h"
@@ -214,8 +215,8 @@ public slots:
 		 
 	bool open(QString fileName=QString(), GLArea *gla=0);
 	bool openIn(QString fileName=QString());
-  bool openProject(QString fileName=QString(), GLArea *gla=0);
-  void saveProject();
+	bool openProject(QString fileName=QString(), GLArea *gla=0);
+	void saveProject();
 	void setCurrent(int meshId);
 	void delCurrentMesh();
 	void updateGL();
@@ -224,12 +225,12 @@ public slots:
 private slots:
 
 	//////////// Slot Menu File //////////////////////
-  void reload();
+	void reload();
 	void openRecentFile();							
 	bool saveAs();
 	bool saveSnapshot(); 
 	///////////Slot Menu Edit ////////////////////////
-  void applyEditMode();
+	void applyEditMode();
 	void suspendEditMode();
 	///////////Slot Menu Filter ////////////////////////
 	void startFilter();
@@ -253,7 +254,7 @@ private slots:
 	void applyRenderMode();
 	//void applyColorMode();
 	void toggleBackFaceCulling();
-  void toggleSelectionRendering();
+	void toggleSelectionRendering();
 	void applyDecorateMode();
 	///////////Slot Menu View ////////////////////////
 	void fullScreen();
@@ -273,17 +274,20 @@ private slots:
 	///////////Slot Menu Help ////////////////////////
 	void about();
 	void aboutPlugins();	
-  void helpOnline();
+	void helpOnline();
 	void helpOnscreen();
 	void submitBug();
 	void checkForUpdates(bool verboseFlag=true);
 	 
 	///////////Slot General Purpose ////////////////////////
 
-  void dropEvent ( QDropEvent * event );
-  void dragEnterEvent(QDragEnterEvent *);
-  void connectionDone(bool status);
- 
+	void dropEvent ( QDropEvent * event );
+	void dragEnterEvent(QDragEnterEvent *);
+	void connectionDone(bool status);
+	
+	///////////Solt Wrapper for QMdiArea //////////////////
+	void wrapSetActiveSubWindow(QWidget* window);
+	
 private:
 	void createStdPluginWnd();
 	void createActions();
@@ -298,33 +302,32 @@ private:
 
 
 	QHttp *httpReq;
-  QBuffer myLocalBuf;
-  int idHost;
-  int idGet;
-  bool VerboseCheckingFlag;
+	QBuffer myLocalBuf;
+	int idHost;
+	int idGet;
+	bool VerboseCheckingFlag;
 	
 	MeshlabStdDialog *stddialog;	  
 	static QProgressBar *qb;
-	QWorkspace *workspace;
+	QMdiArea *mdiarea;
 	QSignalMapper *windowMapper;
-  QDir pluginsDir;
+	QDir pluginsDir;
 	QStringList pluginFileNames;
 	std::vector<MeshIOInterface*> meshIOPlugins;
-  QList<QAction *> editActionList;
+	QList<QAction *> editActionList;
 	QList<QAction *> decoratorActionList;
 
 	QByteArray toolbarState;								//stato delle toolbar e dockwidgets
 
 public:
-  GLArea *GLA() const {
-   	  if(workspace->activeWindow()==0) return 0;
-			GLArea *glw = qobject_cast<GLArea *>(workspace->activeWindow()); 
-			if(glw) return glw;
-			glw = qobject_cast<GLArea *>(workspace->activeWindow()->parentWidget());
-			assert(glw);
-			return glw;
-			
-			}
+	GLArea *GLA() const {
+	  if(mdiarea->currentSubWindow()==0) return 0;
+	  GLArea *glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow()); 
+	  if(glw) return glw;
+	  glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow()->widget());
+	  assert(glw);
+	  return glw;	
+	}
   QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
   static QStatusBar *&globalStatusBar()
   {

@@ -202,40 +202,42 @@ QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
 {
-	workspace = new QWorkspace(this);
-	setCentralWidget(workspace);
+	//workspace = new QWorkspace(this);
+	mdiarea = new QMdiArea(this),
+	//setCentralWidget(workspace);
+	setCentralWidget(mdiarea);
 	windowMapper = new QSignalMapper(this);	
 	// Permette di passare da una finestra all'altra e tenere aggiornato il workspace
-	connect(windowMapper, SIGNAL(mapped(QWidget *)),workspace, SLOT(setActiveWindow(QWidget *)));
+	connect(windowMapper, SIGNAL(mapped(QWidget*)),this, SLOT(wrapSetActiveSubWindow(QWidget *)));
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
-	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateMenus()));
-	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateWindowMenu()));
-	connect(workspace, SIGNAL(windowActivated(QWidget *)),this, SLOT(updateStdDialog()));
+	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateMenus()));
+	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateWindowMenu()));
+	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateStdDialog()));
 
-  httpReq=new QHttp(this);
-  //connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
-  connect(httpReq, SIGNAL(done(bool)), this, SLOT(connectionDone(bool)));
+	httpReq=new QHttp(this);
+	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
+	connect(httpReq, SIGNAL(done(bool)), this, SLOT(connectionDone(bool)));
 
 	createActions();
 	createMenus();
 	createToolBars();
-  createStdPluginWnd();
+	createStdPluginWnd();
 	setAcceptDrops(true);
-  workspace->setAcceptDrops(true);
+	mdiarea->setAcceptDrops(true);
 	setWindowTitle(appName());
 	loadPlugins();
-  setStatusBar(new QStatusBar(this));
-  globalStatusBar()=statusBar();
-  qb=new QProgressBar(this);
-  qb->setMaximum(100);
-  qb->setMinimum(0);
+	setStatusBar(new QStatusBar(this));
+	globalStatusBar()=statusBar();
+	qb=new QProgressBar(this);
+	qb->setMaximum(100);
+	qb->setMinimum(0);
 	//qb->reset();
 	statusBar()->addPermanentWidget(qb,0);
 	updateMenus();
   
-  //qb->setAutoClose(true);
-  //qb->setMinimumDuration(0);
-  //qb->reset();
+	//qb->setAutoClose(true);
+	//qb->setMinimumDuration(0);
+	//qb->reset();
 }
 
 // creates the standard plugin window
@@ -244,7 +246,7 @@ void MainWindow::createStdPluginWnd()
 	stddialog = new MeshlabStdDialog(this);
 	stddialog->setAllowedAreas (    Qt::NoDockWidgetArea );
 	addDockWidget(Qt::RightDockWidgetArea,stddialog);
-  stddialog->setFloating(true);
+	stddialog->setFloating(true);
 	stddialog->hide();
 }
 
@@ -252,24 +254,23 @@ void MainWindow::createStdPluginWnd()
 void MainWindow::createActions()
 {
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
-  openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
+	openAct = new QAction(QIcon(":/images/open.png"),tr("&Open..."), this);
 	openAct->setShortcutContext(Qt::ApplicationShortcut);
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 	
-  openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open inside..."), this);
+	openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open inside..."), this);
 	connect(openInAct, SIGNAL(triggered()), this, SLOT(openIn()));
 	
 	openProjectAct = new QAction(QIcon(":/images/openPrj.png"),tr("&Open project..."), this);
 	connect(openProjectAct, SIGNAL(triggered()), this, SLOT(openProject()));
 
-  closeAct = new QAction(tr("&Close"), this);
+	closeAct = new QAction(tr("&Close"), this);
 	closeAct->setShortcutContext(Qt::ApplicationShortcut);
 	closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
-	connect(closeAct, SIGNAL(triggered()),workspace, SLOT(closeActiveWindow()));
+	connect(closeAct, SIGNAL(triggered()),mdiarea, SLOT(closeActiveSubWindow()));
 
-
-  reloadAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
+	reloadAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
 	reloadAct->setShortcutContext(Qt::ApplicationShortcut);
 	reloadAct->setShortcut(Qt::CTRL+Qt::Key_R);
 	connect(reloadAct, SIGNAL(triggered()), this, SLOT(reload()));
@@ -359,7 +360,7 @@ void MainWindow::createActions()
 	backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
 	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
 
-  setSelectionRenderingAct 	  = new QAction(QIcon(":/images/selected.png"),tr("Selected Face Rendering"),this);
+	setSelectionRenderingAct 	  = new QAction(QIcon(":/images/selected.png"),tr("Selected Face Rendering"),this);
 	setSelectionRenderingAct->setCheckable(true);
 	setSelectionRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
 	//setSelectionRenderingAct->setShortcut(Qt::CTRL+Qt::Key_S);
@@ -402,8 +403,8 @@ void MainWindow::createActions()
 	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));
 
 
-  //////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
-  suspendEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
+	//////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
+	suspendEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
 	suspendEditModeAct->setShortcut(Qt::Key_Escape);
 	suspendEditModeAct->setCheckable(true);
 	suspendEditModeAct->setChecked(true);
@@ -411,16 +412,16 @@ void MainWindow::createActions()
 
 	//////////////Action Menu WINDOWS /////////////////////////////////////////////////////////////////////////
 	windowsTileAct = new QAction(tr("&Tile"), this);
-	connect(windowsTileAct, SIGNAL(triggered()), workspace, SLOT(tile()));
+	connect(windowsTileAct, SIGNAL(triggered()), mdiarea, SLOT(tileSubWindows()));
 
 	windowsCascadeAct = new QAction(tr("&Cascade"), this);
-	connect(windowsCascadeAct, SIGNAL(triggered()), workspace, SLOT(cascade()));
+	connect(windowsCascadeAct, SIGNAL(triggered()), mdiarea, SLOT(cascadeSubWindows()));
 
-  windowsNextAct = new QAction(tr("&Next"), this);
-	connect(windowsNextAct, SIGNAL(triggered()), workspace, SLOT(activateNextWindow()));
+	windowsNextAct = new QAction(tr("&Next"), this);
+	connect(windowsNextAct, SIGNAL(triggered()), mdiarea, SLOT(activateNextSubWindow()));
 
 	closeAllAct = new QAction(tr("Close &All Windows"), this);
-	connect(closeAllAct, SIGNAL(triggered()),workspace, SLOT(closeAllWindows()));
+	connect(closeAllAct, SIGNAL(triggered()),mdiarea, SLOT(closeAllSubWindows()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
 	lastFilterAct = new QAction(tr("Apply filter"),this);
@@ -429,7 +430,7 @@ void MainWindow::createActions()
 	lastFilterAct->setEnabled(false);
 	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
 	
-  showFilterScriptAct = new QAction(tr("Show current filter script"),this);
+	showFilterScriptAct = new QAction(tr("Show current filter script"),this);
 	showFilterScriptAct->setEnabled(true);
 	connect(showFilterScriptAct, SIGNAL(triggered()), this, SLOT(showFilterScript()));
 	
@@ -474,11 +475,11 @@ void MainWindow::createToolBars()
 	renderToolBar->addAction(setLightAct);
 	renderToolBar->addAction(setSelectionRenderingAct);
 
-  editToolBar = addToolBar(tr("Edit"));
+	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
 	editToolBar->addSeparator();
 
-  filterToolBar = addToolBar(tr("Action"));
+	filterToolBar = addToolBar(tr("Action"));
 }
 
 
@@ -492,12 +493,12 @@ void MainWindow::createMenus()
 	fileMenu->addAction(closeAct);
 	fileMenu->addAction(reloadAct);
 	fileMenu->addAction(saveAsAct);
-  fileMenu->addAction(saveProjectAct);
+	fileMenu->addAction(saveProjectAct);
 
 	fileMenuNew = fileMenu->addMenu(tr("New"));
 	
 	fileMenu->addSeparator();
-		fileMenu->addAction(saveSnapshotAct);
+	fileMenu->addAction(saveSnapshotAct);
 	separatorAct = fileMenu->addSeparator();
 	
 	for (int i = 0; i < MAXRECENTFILES; ++i) fileMenu->addAction(recentFileActs[i]);
@@ -512,15 +513,15 @@ void MainWindow::createMenus()
   //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	filterMenu->addAction(lastFilterAct);
-  filterMenu->addAction(showFilterScriptAct);
+	filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addSeparator();
 	filterMenuSelect = filterMenu->addMenu(tr("Select"));
 	filterMenuClean  = filterMenu->addMenu(tr("Clean"));
 	filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing"));
-  filterMenuColorize = filterMenu->addMenu(tr("Colorize"));
+	filterMenuColorize = filterMenu->addMenu(tr("Colorize"));
 	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing"));
-  filterMenuQuality = filterMenu->addMenu(tr("Quality"));
-  filterMenuNormal = filterMenu->addMenu(tr("Normal and Orientation"));
+	filterMenuQuality = filterMenu->addMenu(tr("Quality"));
+	filterMenuNormal = filterMenu->addMenu(tr("Normal and Orientation"));
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
@@ -607,7 +608,7 @@ void MainWindow::loadPlugins()
 	qApp->addLibraryPath(getPluginDirPath());
 	qApp->addLibraryPath(getBaseDirPath());
 	
-  qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath())); 
+	qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath())); 
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
@@ -620,7 +621,7 @@ void MainWindow::loadPlugins()
         foreach(filterAction, iFilter->actions())
         {
           filterMap[filterAction->text()]=filterAction;
-					filterAction->setToolTip(iFilter->filterInfo(filterAction));
+          filterAction->setToolTip(iFilter->filterInfo(filterAction));
           connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
           switch(iFilter->getClass(filterAction))
           {
@@ -655,7 +656,7 @@ void MainWindow::loadPlugins()
 			MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
 			if (iDecorator){
 				QAction *decoratorAction;
-        decoratorActionList+=iDecorator->actions();
+				decoratorActionList+=iDecorator->actions();
 				foreach(decoratorAction, iDecorator->actions())
 						{
 								connect(decoratorAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
@@ -669,7 +670,7 @@ void MainWindow::loadPlugins()
 			  addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
 
 			MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
-      QAction *editAction;
+			QAction *editAction;
 			if (iEdit)
         foreach(editAction, iEdit->actions())
         {
@@ -682,7 +683,8 @@ void MainWindow::loadPlugins()
       pluginFileNames += fileName;
 		}
 	}
-	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && workspace->activeWindow());
+	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && mdiarea->activeSubWindow());
+
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
@@ -712,8 +714,8 @@ void MainWindow::setCurrentFile(const QString &fileName)
 		if (mainWin) mainWin->updateRecentFileActions();
 	}
 
-  settings.setValue("totalKV",          settings.value("totalKV",0).toInt()           + (GLA()->mm()->cm.vn)/1000);
-  settings.setValue("loadedMeshCounter",settings.value("loadedMeshCounter",0).toInt() + 1);
+	settings.setValue("totalKV",          settings.value("totalKV",0).toInt()           + (GLA()->mm()->cm.vn)/1000);
+	settings.setValue("loadedMeshCounter",settings.value("loadedMeshCounter",0).toInt() + 1);
   
 	int loadedMeshCounter    = settings.value("loadedMeshCounter",20).toInt(); 
 	int connectionInterval   = settings.value("connectionInterval",20).toInt();
@@ -748,19 +750,19 @@ void MainWindow::setCurrentFile(const QString &fileName)
 
 void MainWindow::checkForUpdates(bool verboseFlag)
 {
-  VerboseCheckingFlag=verboseFlag;
+	VerboseCheckingFlag=verboseFlag;
 	QSettings settings;
-  int totalKV=settings.value("totalKV",0).toInt();
-  int connectionInterval=settings.value("connectionInterval",20).toInt();
-  settings.setValue("connectionInterval",connectionInterval);
-  int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
-  int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
-  QString UID=settings.value("UID",QString("")).toString();
-  if(UID.isEmpty())
-  {
-    UID=QUuid::createUuid ().toString();
-    settings.setValue("UID",UID);
-  }
+	int totalKV=settings.value("totalKV",0).toInt();
+	int connectionInterval=settings.value("connectionInterval",20).toInt();
+	settings.setValue("connectionInterval",connectionInterval);
+	int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
+	int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
+	QString UID=settings.value("UID",QString("")).toString();
+	if(UID.isEmpty())
+	{
+		UID=QUuid::createUuid ().toString();
+		settings.setValue("UID",UID);
+	}
 
 #ifdef _DEBUG_PHP
     QString BaseCommand("/~cignoni/meshlab_d.php");
@@ -785,15 +787,15 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 
 void MainWindow::connectionDone(bool status)
 {
-        QString answer=myLocalBuf.data();
-        if(answer.left(3)==QString("NEW"))
-						QMessageBox::information(this,"MeshLab Version Checking",answer.remove(0,3));
-						else if (VerboseCheckingFlag) QMessageBox::information(this,"MeshLab Version Checking","Your MeshLab version is the most recent one.");
+	QString answer=myLocalBuf.data();
+	if(answer.left(3)==QString("NEW"))
+		QMessageBox::information(this,"MeshLab Version Checking",answer.remove(0,3));
+	else if (VerboseCheckingFlag) QMessageBox::information(this,"MeshLab Version Checking","Your MeshLab version is the most recent one.");
 						
-        myLocalBuf.close();
-        QSettings settings;
-        int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
-        settings.setValue("lastComunicatedValue",loadedMeshCounter);
+	myLocalBuf.close();
+	QSettings settings;
+	int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
+	settings.setValue("lastComunicatedValue",loadedMeshCounter);
 }	
 
 
@@ -806,18 +808,29 @@ void MainWindow::submitBug()
 	mb.setText(tr("If Meshlab closed in unexpected way (e.g. it crashed badly) and"
 						 "if you are able to repeat the bug, please consider to submit a report using the SourceForge tracking system.\n"
 						  ) );
-		mb.setInformativeText(	tr(
-		         "Hints for a good, useful bug report:\n"
-						 "- Be verbose and descriptive\n"
-						 "- Report meshlab version and OS\n"
-						 "- Describe the sequence of actions that bring you to the crash.\n"
-						 "- Consider submitting the mesh file causing a particular crash.\n"
-						 ) );
+	mb.setInformativeText(	tr(
+	         "Hints for a good, useful bug report:\n"
+					 "- Be verbose and descriptive\n"
+					 "- Report meshlab version and OS\n"
+					 "- Describe the sequence of actions that bring you to the crash.\n"
+					 "- Consider submitting the mesh file causing a particular crash.\n"
+					 ) );
 
 	mb.exec();
 
- if (mb.clickedButton() == submitBug) 
-	QDesktopServices::openUrl(QUrl("http://sourceforge.net/tracker/?func=add&group_id=149444&atid=774731"));
+	if (mb.clickedButton() == submitBug) 
+		QDesktopServices::openUrl(QUrl("http://sourceforge.net/tracker/?func=add&group_id=149444&atid=774731"));
 					 
 }
+
+void MainWindow::wrapSetActiveSubWindow(QWidget* window){
+	QMdiSubWindow* subwindow;
+	subwindow = dynamic_cast<QMdiSubWindow*>(window);
+	if(subwindow!= NULL){
+		mdiarea->setActiveSubWindow(subwindow);
+	}else{
+		qDebug("Type of window is not a QMdiSubWindow*");
+	}
+}
+
 
