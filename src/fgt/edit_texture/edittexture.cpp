@@ -176,7 +176,7 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 {
 	// Set up the model
 	if (!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
-	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
+	if (vcg::tri::HasPerWedgeTexCoord(m.cm)) vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
 
 	FaceSel.clear();
 	CMeshO::FaceIterator ff;
