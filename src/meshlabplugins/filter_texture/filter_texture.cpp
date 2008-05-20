@@ -95,6 +95,10 @@ void FilterTexturePlugin::initParameterSet(QAction *action,MeshModel &m, FilterP
 		default : 
 			parlst.addInt  ("Xmax",2880 ,"Maximum width of texture atlas");//add to parList
 			parlst.addInt  ("Ymax", 2880,"Maximum height of texture atlas");//add to parList
+			QStringList algoList;
+			algoList.push_front("copied tiles");
+			algoList.push_front("resampled tiles");
+			parlst.addEnum( "algoList", 0, algoList, "which algorithm to use for the texture atlas", "choose the algorithm to use for the texture atlas" );//parlst.addBool use high resolution atlas (large file size) or lowest-common-denominator resolution (smaller file size)
 	}
 }
 
@@ -118,7 +122,10 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	Point2i max_size;
 	max_size[0] = par.getInt("Xmax");
 	max_size[1] = par.getInt("Ymax");
-	std::vector<Point2i> sizes;
+	std::vector<Point2i> sizes, splitsize;
+	std::vector< std::vector<Point2i> > splitSizes;//vector of vectors, for when textures won't all fit into one atlas
+	std::vector< std::vector<Point2i> > splitPosiz;//vector of vectors, for when textures won't all fit into one atlas
+	std::vector<Point2i> splitglobalSizes;//vector of points for when textures won't all fit into one atlas
 	Point2i size;
 	
 	if ((numTextures == 0)||(numTextures == 1))
@@ -135,19 +142,66 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 		qDebug() << "filterTexture loaded image: " << m.cm.textures[textureIdx].c_str() << endl;
 	}
 	
-	rect_packer::pack(sizes, max_size, posiz, global_size);//will return UV offsets in posiz & minimum height/width required to cover all textures in global_size
-	qDebug() << "global_size, x:" << global_size[0] << "global_size, y:" << global_size[1] << endl;
-	
-	QImage atlas = QImage(global_size[0], global_size[1], QImage::Format_ARGB32);//make a square texture of that dimension
-
-	//insert textures one after another in one row, starting at 0,0
-	QPainter painter(&atlas);
-	for (int index=0; index<numTextures; ++index)
+	bool made = false;
+	int numAtlases = 0;
+	int sizesIndeces = sizes.size();
+	int length;
+	std::map<int, int> whichAtlas;//an stl map that maps material numbers to texture atlas numbers
+	while (made==false && numAtlases<=sizesIndeces)
 	{
-		painter.drawPixmap(posiz[index][0], posiz[index][1], images[index]);//use drawPixmap instead of deprecated bitBlt() to paste image to a certain position in the texture atlas
-		qDebug() << "inserted texture into atlas at position: " << posiz[index][0] << " " << posiz[index][1] << endl;
+		numAtlases++;
+		whichAtlas.clear();//for re-use
+		for (int c= 0; c<numAtlases; c++)
+		{
+			splitPosiz.push_back(sizes);//add a placeholder that will be written over
+			splitglobalSizes.push_back(Point2i(0,0));//add a placeholder that will be written over
+			made = made && rect_packer::pack(splitSizes[c], max_size, splitPosiz[c], splitglobalSizes[c]);//will return UV offsets in posiz & minimum height/width required to cover all textures in global_size.  returns false if failed to fit all the textures into the atlas.  && with itself to make sure all atlases were generated ok, not just 1.  each has own posiz & global_size for using to offset UVs later
+		}
+		if (made==false)
+		{
+			//numAtlases is how many times have to split - ie 1 split in 2, 2 split in 3, etc.
+			length = sizesIndeces/(numAtlases+1);//length of each split
+			for (int counter=0; counter<sizesIndeces; counter++)//for-loop vector
+			{
+				if (counter % length == 0)//if at a multiple of length, add vector to vector of vectors
+				{
+					if (counter!=0)
+						splitSizes.push_back(splitsize);//insert if not at 0
+					splitsize.clear();//if counter==0, clear local vector
+					whichAtlas[counter] = splitSizes.size() - 1;//for mapping textures to atlases later
+				}
+				else
+					whichAtlas[counter] = splitSizes.size();//for mapping textures to atlases later
+				splitsize[counter % length] = sizes[counter];
+			}
+		}
 	}
+	if (made==false)
+		return false;//textures just couldn't fit in given texture atlas dimensions, even one texture in its own atlas
 	
+	QImage atlas;
+	int index;
+	QString filename;
+	bool result;
+	for (int c=0; c<numAtlases; c++)
+	{
+		atlas = QImage(splitglobalSizes[c][0], splitglobalSizes[c][1], QImage::Format_ARGB32);//make a texture of that dimension
+		//insert textures one after another in one row, starting at 0,0 (origin in top-left corner)
+		QPainter painter(&atlas);
+		for (index=0; index<length; ++index)
+		{
+			painter.drawPixmap(splitPosiz[c][index][0], splitPosiz[c][index][1], images[c*length+index]);//use drawPixmap instead of deprecated bitBlt() to paste image to a certain position in the texture atlas
+			//qDebug() << "inserted texture into atlas at position: " << posiz[index][0] << " " << posiz[index][1] << endl;
+		}
+		
+		filename = "texture" + QString::number(numAtlases) + ".png";
+		result = atlas.save(filename,"PNG",0);//save image, highest compression
+		qDebug() << "saved texture atlas" << endl;
+		m.cm.textures.clear();//empty mm.cm.textures vector
+		m.cm.textures.push_back(filename.toStdString());//add the texture atlas (at position 0)
+		//update display-load texture atlas?
+	}
+		
 	int tmpX=0,tmpY=0;
 	CMeshO::FaceIterator fit;
 	for (fit=m.cm.face.begin(); fit != m.cm.face.end(); ++fit)//iterate through faces with textures
@@ -156,25 +210,18 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 		{
 			int mat = fit->WT(0).N();//fit->cWT the 'c' is for const
 			if (mat!=-1)
-				fit->WT(0).N() = 0;//re-assign N to 0 (only one texture now)
-			for(unsigned int ii = 0; ii < 3;++ii)//UVs are per-vertex?
+				fit->WT(0).N() = whichAtlas[mat];//re-assign N to number of texture atlas
+			for (unsigned int ii = 0; ii < 3;++ii)//UVs are per-vertex?
 			{
 				qDebug() << "original U: " << fit->WT(ii).U() << "original V: " << fit->WT(ii).V() << endl;
 				//if uv > 1 means want it tiled/repeated
-				//is the 0,0 origin at top-left, bottom-left, or center?  seen all 3 - how else get negative UV coord?
 				//adjust texture coordinates by half a pixel to avoid filtering artifacts?
-				fit->WT(ii).U() = (fit->WT(ii).U()*images[mat].width() + posiz[mat][0])/global_size[0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1 unless repeating)
-				fit->WT(ii).V() = (fit->WT(ii).V()*images[mat].height() + posiz[mat][1])/global_size[1];//offset V by coord in posiz
+				fit->WT(ii).U() = (fit->WT(ii).U()*images[mat].width() + splitPosiz[whichAtlas[mat]][mat % length][0])/splitglobalSizes[whichAtlas[mat]][0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1 unless repeating)
+				fit->WT(ii).V() = (fit->WT(ii).V()*images[mat].height() + splitPosiz[whichAtlas[mat]][mat % length][1])/splitglobalSizes[whichAtlas[mat]][1];//offset V by coord in posiz
 				qDebug() << "new U: " << fit->WT(ii).U() << "new V: " << fit->WT(ii).V() << endl;
 			}
 		}
 	}
-	
-	bool result = atlas.save("texture.png","PNG",0);//save image, highest compression
-	qDebug() << "saved texture atlas" << endl;
-	m.cm.textures.clear();//empty mm.cm.textures vector
-	m.cm.textures.push_back("texture.png");//add the texture atlas (at position 0)
-	//update display-load texture atlas?
 	return result;
 }
 
