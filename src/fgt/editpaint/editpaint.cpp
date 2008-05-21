@@ -266,6 +266,8 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					break;
 				
 				case COLOR_CLONE :
+					
+					//Clone Source Acquisition
 					if (latest_event.modifiers & Qt::ControlModifier || 
 							latest_event.button == Qt::RightButton)
 					{
@@ -276,28 +278,26 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 						current_options &= ~EPP_DRAW_CURSOR; 
 						glarea->update();
 					}
+					
+					//Clone Painting
 					else {
-						if (color_buffer != NULL)
-						{
-							painted_vertices.clear();
-						//	clone_delta.setX(source_delta.x() - latest_event.position.x());
-						//	clone_delta.setY(- (source_delta.y() - latest_event.position.y()));
-							apply_start = latest_event.position;
-							paintbox->getUndoStack()->beginMacro("Color Clone");
-							paint( & vertices);
-						}else if (paintbox->isPixmapAvailable())
+						//There's a new image to get
+						if (paintbox->isNewPixmapAvailable())
 						{
 							paintbox->getPixmapBuffer(color_buffer, clone_zbuffer, buffer_width, buffer_height);
 							source_delta.setX(buffer_width/2);
 							source_delta.setY(buffer_height/2);
-					//		clone_delta.setX(source_delta.x() - latest_event.position.x());
-					//		clone_delta.setY((source_delta.y() - latest_event.position.y()));
-					//		clone_delta.setX(0);
-					//		clone_delta.setY(0);
 							apply_start = latest_event.position;
 							painted_vertices.clear();
 							paintbox->getUndoStack()->beginMacro("Color Clone");
-							
+														
+							paint( & vertices);
+						}else if (color_buffer != NULL)
+						//There's still something in the buffer
+						{
+							painted_vertices.clear();
+							apply_start = latest_event.position;
+							paintbox->getUndoStack()->beginMacro("Color Clone");
 							paint( & vertices);
 						}
 					}

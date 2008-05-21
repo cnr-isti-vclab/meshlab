@@ -132,6 +132,7 @@ void Paintbox::getPixmapBuffer(GLubyte * & buffer, GLfloat* & zbuffer, int & w, 
 		}
 	w = image.size().width();
 	h = image.size().height();
+	pixmap_available = false;
 }
 
 void Paintbox::restorePreviousType()

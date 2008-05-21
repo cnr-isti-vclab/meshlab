@@ -109,7 +109,7 @@ public:
 	inline QGraphicsScene * getCloneScene() {return clone_source_view->scene();}
 	inline QGraphicsPixmapItem * getClonePixmap() {return item;}
 	void getPixmapBuffer(GLubyte * & cbuffer, GLfloat* & zbuffer, int & w, int & h);
-	inline bool isPixmapAvailable(){return pixmap_available;}
+	inline bool isNewPixmapAvailable(){return pixmap_available;}
 	 
 	void setClonePixmap(QImage & image);
 	void setPixmapCenter(qreal x, qreal y);
