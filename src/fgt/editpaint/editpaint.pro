@@ -1,7 +1,7 @@
 TEMPLATE = lib
 CONFIG += plugin
 INCLUDEPATH += ../.. \
-    ../../../../sf \
+    ../../../../vcglib \
     ../../../../code/lib/glew/include
 HEADERS = colorframe.h \
     paintbox.h \
