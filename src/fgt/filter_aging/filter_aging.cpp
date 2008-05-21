@@ -95,17 +95,23 @@ const PluginInfo &GeometryAgingPlugin::pluginInfo()
 /* Initializes the list of parameters (called by the auto dialog framework) */
 void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params)
 {
+	bool noQ = true;		// vertex quality fields not initialized
 	std::pair<float,float> qRange;	// mesh quality range
 	// retrieve mesh quality range
-	if(m.cm.HasPerVertexQuality())
+	if(m.cm.HasPerVertexQuality()) {
 		qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+		noQ = (qRange.second <= qRange.first);
+		if(noQ) {
+			computeMeanCurvature(m.cm);
+			qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+		}
+	}
 	else
 		qRange = std::pair<float,float>(0.0, 0.0);
 	
 	switch(ID(action)) {
 		case FP_ERODE:
-			params.addBool("ComputeCurvature", qRange.second<=qRange.first, 
-					"Compute quality from curvature", 
+			params.addBool("ComputeCurvature", noQ, "Compute quality from curvature", 
 					"Compute per vertex quality values using mesh mean curvature \n"
 					"algorithm. In this way only the areas with higher curvature \n"
 					"will be eroded. If not checked, the quality values already \n"
@@ -113,11 +119,10 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, Filter
 			params.addBool("SmoothQuality", false, "Smooth vertex quality", 
 					"Smooth per vertex quality values. This allows to extend the \n"
 					"area affected by the erosion process.");
-			params.addFloat("QualityThreshold", 0.66, "Min quality threshold [0..1]",
-					"Represents the minimum quality value (in the range [0..1] \n"
-					"where 0 is the smaller quality value and 1 is the bigger quality \n"
-					"value) two vertexes must have to consider the edge they are \n"
-					"sharing.");
+			params.addAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*0.66,
+					qRange.first, qRange.second, "Min quality threshold",
+					"Represents the minimum quality value two vertexes must have \n"
+					"to consider the edge they are sharing.");
 			params.addAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0,m.cm.bbox.Diag()*0.5,
 					"Edge len threshold", 
 					"The minimum length of an edge. Useful to avoid the creation of too many small faces.");
@@ -165,8 +170,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	
 	// other plugin parameters
 	bool smoothQ = params.getBool("SmoothQuality");
-	float qthFactor = params.getFloat("QualityThreshold");
-	float edgeLenTreshold = params.getAbsPerc("EdgeLenThreshold");
+	float qualityTh = params.getAbsPerc("QualityThreshold");
+	float edgeLenTh = params.getAbsPerc("EdgeLenThreshold");
 	float chipDepth = params.getAbsPerc("ChipDepth");
 	int octaves = params.getInt("Octaves");
 	float noiseScale = params.getAbsPerc("NoiseFreqScale");
@@ -176,13 +181,16 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	bool storeDispl = params.getBool("StoreDisplacement");
 	
 	// error checking on parameters values
-	if(edgeLenTreshold == 0.0) edgeLenTreshold = m.cm.bbox.Diag()*0.02;
+	if(edgeLenTh == 0.0) edgeLenTh = m.cm.bbox.Diag()*0.02;
 	if(chipDepth == 0.0) chipDepth = m.cm.bbox.Diag()*0.05;
 	noiseClamp = math::Clamp<float>(noiseClamp, 0.0, 1.0);
-	qthFactor = math::Clamp<float>(qthFactor, 0.0, 1.0);
 	
 	switch(ID(filter)) {
 		case FP_ERODE: {
+			// quality threshold percentage value
+			std::pair<float, float> qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+			float qperc = (qualityTh-qRange.first) / (qRange.second-qRange.first);
+			
 			// compute mesh quality, if requested
 			if(curvature) {
 				if(cb) (*cb)(0, "Computing quality values...");
@@ -192,15 +200,16 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			// eventually, smooth quality values
 			if(smoothQ) tri::Smooth<CMeshO>::VertexQualityLaplacian(m.cm);
 			
-			// mesh quality check
-			std::pair<float, float> qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
-			if(!curvature && qRange.second <= qRange.first) {
-				errorMessage = QString("Vertex quality informations have not yet been computed on this mesh.");
-				return false;
+			// if quality values have been recomputed quality threshold may not 
+			// be valid, so we recompute its absolute value using the percentage
+			// value chosen by the user
+			if(curvature || smoothQ) {
+				qRange = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+				qualityTh = qRange.first + (qRange.second-qRange.first) * qperc;
 			}
 			
 			// edge predicate
-			QualityEdgePred ep = QualityEdgePred(selected, edgeLenTreshold, qRange.first+(qRange.second-qRange.first)*qthFactor);
+			QualityEdgePred ep = QualityEdgePred(selected, edgeLenTh, qualityTh);
 			
 			// refine needed edges
 			refineMesh(m.cm, ep, selected, cb);
