@@ -88,6 +88,7 @@ public:
 	inline int getGradientType() { return gradient_type->currentIndex(); }
 	inline int getGradientForm() { return gradient_form->currentIndex(); }
 	inline int getPickMode() { return pick_mode->currentIndex(); }
+	inline float getNoiseSize() {return noise_slider->value();}
 	inline bool getPressureDisplacement() {return displacement_box->isChecked();}
 	inline bool getPressureHardness() {return hardness_box->isChecked();}
 	inline bool getPressureSize() {return size_box->isChecked(); }

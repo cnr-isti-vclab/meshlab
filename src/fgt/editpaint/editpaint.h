@@ -156,10 +156,11 @@ private:
 	
 	Brush current_brush;
 	
-	/****** Painting and Cloning Tools ******/
+	/****** Painting, Cloning and Noise Tools ******/
 	void paint(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
 	void capture();
 	bool accessCloneBuffer(int, int, vcg::Color4b &);
+	void computeNoiseColor(CVertexO * , vcg::Color4b &);
 	QHash<CVertexO *, std::pair<vcg::Color4b, int> >	painted_vertices; /*<active vertices during painting */
 	
 	vcg::Color4b	color;
@@ -190,10 +191,6 @@ private:
 	
 	/****** Color Fill ******/
 	void fill(MeshModel & m,CFaceO * face);
-		
-	
-	/****** Color Noise *****/
-	void noise(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
 };
 
 /**

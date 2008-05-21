@@ -393,7 +393,7 @@
       <property name="geometry" >
        <rect>
         <x>0</x>
-        <y>-536</y>
+        <y>-499</y>
         <width>337</width>
         <height>1148</height>
        </rect>
@@ -1147,14 +1147,14 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
-           <widget class="QSlider" name="horizontalSlider" >
+           <widget class="QSlider" name="noise_slider" >
             <property name="orientation" >
              <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_2" />
+           <widget class="QSpinBox" name="noise_box" />
           </item>
          </layout>
         </widget>
@@ -1324,12 +1324,6 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
          </layout>
-         <zorder>label_7</zorder>
-         <zorder>opacity_box</zorder>
-         <zorder>size_box</zorder>
-         <zorder>displacement_box</zorder>
-         <zorder>hardness_box</zorder>
-         <zorder>label_2</zorder>
         </widget>
        </item>
        <item row="13" column="0" colspan="2" >
@@ -2096,9 +2090,9 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>horizontalSlider</sender>
+   <sender>noise_slider</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>spinBox_2</receiver>
+   <receiver>noise_box</receiver>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
@@ -2112,9 +2106,9 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>spinBox_2</sender>
+   <sender>noise_box</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>horizontalSlider</receiver>
+   <receiver>noise_slider</receiver>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >

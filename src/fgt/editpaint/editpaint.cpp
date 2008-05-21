@@ -305,6 +305,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					
 				case COLOR_NOISE :
 					painted_vertices.clear();
+					paintbox->getUndoStack()->beginMacro("Color Noise");
 					break;
 					
 				case COLOR_GRADIENT:
@@ -349,7 +350,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					break;
 					
 				case COLOR_NOISE :
-					noise(& vertices);
+					paint(& vertices);
 					break;
 					
 				case COLOR_GRADIENT:
@@ -396,9 +397,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 						glarea->update();
 					}
 					break;
-					
-				case COLOR_NOISE :
-					break;
+
 					
 				case COLOR_PICK :
 					{
@@ -428,8 +427,9 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					
 				case COLOR_CLONE:
 					if (latest_event.modifiers & Qt::ControlModifier || 
-						latest_event.button == Qt::RightButton) capture();
+						latest_event.button == Qt::RightButton) {capture(); break;}
 				case COLOR_SMOOTH :
+				case COLOR_NOISE :
 				case COLOR_PAINT:
 					paintbox->getUndoStack()->endMacro();
 				default :
@@ -616,17 +616,11 @@ inline void EditPaintPlugin::capture()
 
 inline bool EditPaintPlugin::accessCloneBuffer(int vertex_x, int vertex_y, vcg::Color4b & color)
 {
-	qDebug() << "source_delta: ( " << source_delta.x() << ", " << source_delta.y() <<")";
-	qDebug() << "apply_start: ( " << apply_start.x() << ", " << apply_start.y() <<")";
-		
-	
 	int y =  buffer_height - source_delta.y() +	(vertex_y + apply_start.y() - glarea->curSiz.height());
 	int x =  source_delta.x() +	(vertex_x - apply_start.x());
 	
 	int index = y * buffer_width + x;
-									
-	qDebug() << "buffer: ( " << x << ", " << y <<")";
-				
+			
 	if (index < buffer_width * buffer_height - 1 && index > 0)
 	{
 		if (clone_zbuffer[index] < 1.0)
@@ -640,7 +634,7 @@ inline bool EditPaintPlugin::accessCloneBuffer(int vertex_x, int vertex_y, vcg::
 }
 
 /**
- * Painting and Cloning
+ * Painting, Cloning and Noise!
  */
 inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * vertices)
 {
@@ -658,6 +652,9 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 			if (paintbox->getCurrentType() == COLOR_CLONE) 
 				if (!accessCloneBuffer(data.second.position.x(), data.second.position.y(), color)) return;
 			
+			if (paintbox->getCurrentType() == COLOR_NOISE)
+				computeNoiseColor(data.first, color);
+			
 			painted_vertices.insert(data.first, pair<Color4b, int>(
 				Color4b(data.first->C()[0], data.first->C()[1], data.first->C()[2], data.first->C()[3]),
 				(int)(op*opac)) );
@@ -671,6 +668,9 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 			if (paintbox->getCurrentType() == COLOR_CLONE) 
 				if (!accessCloneBuffer(data.second.position.x(), data.second.position.y(), color)) return;
 			
+			if (paintbox->getCurrentType() == COLOR_NOISE)
+				computeNoiseColor(data.first, color);
+			
 			painted_vertices[data.first].second = (int)(op * opac);
 			Color4b temp = painted_vertices[data.first].first;
 			data.first->C()[0]=temp[0]; data.first->C()[1]=temp[1]; data.first->C()[2]=temp[2];
@@ -682,31 +682,23 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 	}
 }
 
-inline void EditPaintPlugin::noise(std::vector< std::pair<CVertexO *, PickingData> > * vertices)
+inline void EditPaintPlugin::computeNoiseColor(CVertexO * vert, vcg::Color4b & col)
 {
-	double scaler = 8.0; //parameter
-	double opacity = 0.5; //from paintbox
-	for (unsigned int k = 0; k < vertices->size(); k++)
-	{	
-		pair<CVertexO *, PickingData> data = vertices->at(k);
-		if (!painted_vertices.contains(data.first))
-		{				
-			double noise = vcg::math::Perlin::Noise(data.first->P()[0] * scaler,
-					data.first->P()[1] * scaler, data.first->P()[2] * scaler);
-			
-			//TODO test code to be refactored 
-			Color4b forecolor(paintbox->getForegroundColor().red(), paintbox->getForegroundColor().green(), paintbox->getForegroundColor().blue(), paintbox->getForegroundColor().alpha());
-			Color4b backcolor(paintbox->getBackgroundColor().red(), paintbox->getBackgroundColor().green(), paintbox->getBackgroundColor().blue(), paintbox->getBackgroundColor().alpha());
-			Color4b * color = new Color4b();
-			mergeColors(noise, forecolor, backcolor, color);
-			
-			painted_vertices.insert(data.first, pair<Color4b, int>(
-					Color4b(data.first->C()[0], data.first->C()[1], data.first->C()[2], data.first->C()[3]),
-					(int)(noise * 255 * opacity)));
-			
-			applyColor(data.first, * color, opacity * 255);
-			delete color;
-		}
+	float scaler = paintbox->getNoiseSize()/100.0; //parameter TODO to be cahced
+	
+	double noise = vcg::math::Perlin::Noise(vert->P()[0] * scaler, vert->P()[1] * scaler, vert->P()[2] * scaler);
+
+	Color4b forecolor(paintbox->getForegroundColor().red(), paintbox->getForegroundColor().green(), paintbox->getForegroundColor().blue(), paintbox->getForegroundColor().alpha());
+				
+	//TODO test code to be refactored 
+	if (paintbox->getGradientType() == 0)
+	{
+		Color4b backcolor(paintbox->getBackgroundColor().red(), paintbox->getBackgroundColor().green(), paintbox->getBackgroundColor().blue(), paintbox->getBackgroundColor().alpha());
+		mergeColors(noise, forecolor, backcolor, & col);
+	}else 
+	{
+		//TODO don't be absurd
+		mergeColors(noise, forecolor, vert->C(), & col);
 	}
 }
 
