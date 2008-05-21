@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>354</width>
-    <height>952</height>
+    <width>389</width>
+    <height>669</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -18,16 +18,43 @@
   <property name="windowTitle" >
    <string>Vertex Painting</string>
   </property>
-  <layout class="QVBoxLayout" >
-   <item>
+  <layout class="QGridLayout" name="gridLayout" >
+   <property name="leftMargin" >
+    <number>3</number>
+   </property>
+   <property name="topMargin" >
+    <number>3</number>
+   </property>
+   <property name="rightMargin" >
+    <number>3</number>
+   </property>
+   <property name="horizontalSpacing" >
+    <number>0</number>
+   </property>
+   <property name="verticalSpacing" >
+    <number>3</number>
+   </property>
+   <item row="0" column="0" colspan="2" >
     <widget class="QFrame" name="frame_2" >
      <property name="frameShape" >
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow" >
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QHBoxLayout" >
+      <property name="leftMargin" >
+       <number>0</number>
+      </property>
+      <property name="topMargin" >
+       <number>3</number>
+      </property>
+      <property name="rightMargin" >
+       <number>0</number>
+      </property>
+      <property name="bottomMargin" >
+       <number>3</number>
+      </property>
       <item>
        <widget class="QToolButton" name="undo_button" >
         <property name="enabled" >
@@ -77,206 +104,302 @@
      </layout>
     </widget>
    </item>
-   <item>
-    <widget class="QTabWidget" name="tabs_container" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+   <item row="1" column="0" colspan="2" >
+    <widget class="Line" name="line_2" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
      </property>
-     <property name="minimumSize" >
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
+    </widget>
+   </item>
+   <item row="2" column="0" >
+    <widget class="QFrame" name="frame_3" >
+     <property name="enabled" >
+      <bool>true</bool>
      </property>
-     <property name="currentIndex" >
-      <number>0</number>
+     <property name="frameShape" >
+      <enum>QFrame::NoFrame</enum>
      </property>
-     <widget class="QWidget" name="tab" >
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout" >
+      <property name="spacing" >
+       <number>3</number>
+      </property>
+      <property name="leftMargin" >
+       <number>0</number>
+      </property>
+      <property name="rightMargin" >
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QToolButton" name="pen_button" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/paintbrush-22.png</normaloff>:/images/paintbrush-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="fill_button" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/bucket-fill-22.png</normaloff>:/images/bucket-fill-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="gradient_button" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/blend-22.png</normaloff>:/images/blend-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="smooth_button" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="clone_button" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/clone-22.png</normaloff>:/images/clone-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="pick_button" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/color-picker-22.png</normaloff>:/images/color-picker-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="perlin_button" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/perlin.png</normaloff>:/images/perlin.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_3" >
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType" >
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="mesh_pick_button" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/pickbrush-22.png</normaloff>:/images/pickbrush-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="checked" >
+         <bool>false</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="mesh_smooth_button" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="mesh_sculpt_button" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/sculpt-22.png</normaloff>:/images/sculpt-22.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="mesh_add_button" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="meshlab.qrc" >
+          <normaloff>:/images/add-24.png</normaloff>:/images/add-24.png</iconset>
+        </property>
+        <property name="checkable" >
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_2" >
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>20</width>
+          <height>185</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="1" >
+    <widget class="QScrollArea" name="scrollArea" >
+     <property name="frameShape" >
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="verticalScrollBarPolicy" >
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy" >
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="widgetResizable" >
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents" >
       <property name="geometry" >
        <rect>
         <x>0</x>
-        <y>0</y>
-        <width>332</width>
-        <height>848</height>
+        <y>-536</y>
+        <width>337</width>
+        <height>1148</height>
        </rect>
       </property>
-      <attribute name="title" >
-       <string>Painting</string>
-      </attribute>
-      <layout class="QGridLayout" >
-       <item row="0" column="0" colspan="2" >
-        <widget class="QWidget" native="1" name="widget" >
-         <property name="layoutDirection" >
-          <enum>Qt::LeftToRight</enum>
-         </property>
-         <layout class="QHBoxLayout" >
-          <property name="margin" >
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QToolButton" name="pen_button" >
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/paintbrush-22.png</normaloff>:/images/paintbrush-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="checked" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="fill_button" >
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/bucket-fill-22.png</normaloff>:/images/bucket-fill-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="gradient_button" >
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/blend-22.png</normaloff>:/images/blend-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="smooth_button" >
-            <property name="enabled" >
-             <bool>true</bool>
-            </property>
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="clone_button" >
-            <property name="enabled" >
-             <bool>true</bool>
-            </property>
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/clone-22.png</normaloff>:/images/clone-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="pick_button" >
-            <property name="enabled" >
-             <bool>true</bool>
-            </property>
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/color-picker-22.png</normaloff>:/images/color-picker-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="perlin_button" >
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/perlin.png</normaloff>:/images/perlin.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2" >
-        <widget class="Line" name="line" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" >
+      <layout class="QGridLayout" name="gridLayout_2" >
+       <item row="0" column="0" >
         <widget class="QFrame" name="color_frame" >
          <property name="minimumSize" >
           <size>
@@ -522,7 +645,7 @@
          </widget>
         </widget>
        </item>
-       <item row="2" column="1" >
+       <item row="0" column="1" >
         <widget class="QFrame" name="frame" >
          <property name="frameShape" >
           <enum>QFrame::StyledPanel</enum>
@@ -548,7 +671,51 @@
          </widget>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2" >
+       <item row="1" column="0" colspan="2" >
+        <widget class="QFrame" name="clone_source_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QGraphicsView" name="clone_source_view" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="MinimumExpanding" hsizetype="Expanding" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="verticalScrollBarPolicy" >
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy" >
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="interactive" >
+             <bool>true</bool>
+            </property>
+            <property name="dragMode" >
+             <enum>QGraphicsView::ScrollHandDrag</enum>
+            </property>
+            <property name="optimizationFlags" >
+             <set>QGraphicsView::DontAdjustForAntialiasing</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clone_source_load_button" >
+            <property name="text" >
+             <string>Load From File</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2" >
         <widget class="QFrame" name="pen_frame" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
@@ -636,7 +803,7 @@
          </layout>
         </widget>
        </item>
-       <item row="4" column="0" colspan="2" >
+       <item row="3" column="0" colspan="2" >
         <widget class="QFrame" name="smooth_frame" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
@@ -706,6 +873,59 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item row="5" column="0" colspan="2" >
+        <widget class="QFrame" name="mesh_displacement_frame" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" >
+          <item row="0" column="0" >
+           <widget class="QLabel" name="label_6" >
+            <property name="text" >
+             <string>Displacement</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" >
+           <widget class="QSlider" name="mesh_displacement_slider" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" >
+           <widget class="QSpinBox" name="spinBox" />
+          </item>
+          <item row="1" column="0" >
+           <widget class="QLabel" name="label_8" >
+            <property name="text" >
+             <string>Direction</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2" >
+           <widget class="QComboBox" name="mesh_displacement_direction" >
+            <item>
+             <property name="text" >
+              <string>Averaged Normals</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Per Vertex Normals</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2" >
         <widget class="QFrame" name="pen_extra_frame" >
          <property name="enabled" >
           <bool>true</bool>
@@ -910,7 +1130,36 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="6" column="0" colspan="2" >
+       <item row="7" column="0" colspan="2" >
+        <widget class="QFrame" name="noise_frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2" >
+          <item>
+           <widget class="QLabel" name="label_5" >
+            <property name="text" >
+             <string>Noise Scale</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="horizontalSlider" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox_2" />
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="8" column="0" colspan="2" >
         <widget class="QFrame" name="pick_frame" >
          <property name="frameShape" >
           <enum>QFrame::StyledPanel</enum>
@@ -955,7 +1204,7 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="7" column="0" colspan="2" >
+       <item row="9" column="0" colspan="2" >
         <widget class="QFrame" name="gradient_frame" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
@@ -1027,7 +1276,7 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="8" column="0" colspan="2" >
+       <item row="11" column="0" colspan="2" >
         <widget class="QFrame" name="pressure_frame" >
          <property name="enabled" >
           <bool>false</bool>
@@ -1046,639 +1295,50 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="1" column="0" >
+          <item row="2" column="0" >
            <widget class="QCheckBox" name="opacity_box" >
             <property name="text" >
              <string>Opacity</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" >
-           <widget class="QCheckBox" name="hardness_box" >
-            <property name="text" >
-             <string>Hardness</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2" >
+          <item row="2" column="2" >
            <widget class="QCheckBox" name="size_box" >
             <property name="text" >
              <string>Size</string>
             </property>
            </widget>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="9" column="0" colspan="2" >
-        <widget class="QFrame" name="clone_source_frame" >
-         <property name="frameShape" >
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow" >
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QVBoxLayout" >
-          <item>
-           <widget class="QGraphicsView" name="clone_source_view" >
-            <property name="verticalScrollBarPolicy" >
-             <enum>Qt::ScrollBarAlwaysOff</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy" >
-             <enum>Qt::ScrollBarAlwaysOff</enum>
-            </property>
-            <property name="interactive" >
-             <bool>true</bool>
-            </property>
-            <property name="dragMode" >
-             <enum>QGraphicsView::ScrollHandDrag</enum>
-            </property>
-            <property name="optimizationFlags" >
-             <set>QGraphicsView::DontAdjustForAntialiasing</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="clone_source_load_button" >
-            <property name="text" >
-             <string>Load From File</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="10" column="0" colspan="2" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>311</width>
-           <height>61</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_2" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>332</width>
-        <height>848</height>
-       </rect>
-      </property>
-      <attribute name="title" >
-       <string>Selecting &amp;&amp; Editing</string>
-      </attribute>
-      <layout class="QVBoxLayout" >
-       <item>
-        <widget class="QWidget" native="1" name="widget_2" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize" >
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <layout class="QHBoxLayout" >
-          <property name="margin" >
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QToolButton" name="mesh_pick_button" >
-            <property name="enabled" >
-             <bool>true</bool>
-            </property>
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/pickbrush-22.png</normaloff>:/images/pickbrush-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="checked" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="mesh_smooth_button" >
-            <property name="enabled" >
-             <bool>true</bool>
-            </property>
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="mesh_sculpt_button" >
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/sculpt-22.png</normaloff>:/images/sculpt-22.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="mesh_add_button" >
-            <property name="enabled" >
-             <bool>true</bool>
-            </property>
-            <property name="text" >
-             <string>...</string>
-            </property>
-            <property name="icon" >
-             <iconset resource="meshlab.qrc" >
-              <normaloff>:/images/add-24.png</normaloff>:/images/add-24.png</iconset>
-            </property>
-            <property name="checkable" >
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive" >
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="Line" name="line_2" >
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="mesh_smooth_frame" >
-         <property name="frameShape" >
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow" >
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" >
-          <property name="margin" >
-           <number>9</number>
-          </property>
-          <property name="spacing" >
-           <number>6</number>
-          </property>
-          <item row="0" column="1" >
-           <widget class="QSlider" name="mesh_percentual_slider" >
-            <property name="toolTip" >
-             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
-            </property>
-            <property name="maximum" >
-             <number>100</number>
-            </property>
-            <property name="value" >
-             <number>25</number>
-            </property>
-            <property name="sliderPosition" >
-             <number>25</number>
-            </property>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" >
-           <widget class="QLabel" name="label_percentual_2" >
-            <property name="text" >
-             <string>Percentual</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" >
-           <widget class="QSpinBox" name="percentual_box_2" >
-            <property name="toolTip" >
-             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
-            </property>
-            <property name="maximum" >
-             <number>100</number>
-            </property>
-            <property name="value" >
-             <number>25</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="mesh_pen_extra_frame" >
-         <property name="enabled" >
-          <bool>true</bool>
-         </property>
-         <property name="frameShape" >
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow" >
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" >
-          <item row="0" column="0" >
-           <widget class="QLabel" name="label_pen_2" >
-            <property name="text" >
-             <string>Brush</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" colspan="3" >
-           <widget class="QComboBox" name="mesh_brush_box" >
-            <property name="enabled" >
-             <bool>false</bool>
-            </property>
-            <property name="editable" >
-             <bool>false</bool>
-            </property>
-            <item>
-             <property name="text" >
-              <string>Circle</string>
-             </property>
-             <property name="icon" >
-              <iconset resource="meshlab.qrc" >
-               <normaloff>:/images/circle.png</normaloff>:/images/circle.png</iconset>
-             </property>
-            </item>
-            <item>
-             <property name="text" >
-              <string>Square</string>
-             </property>
-             <property name="icon" >
-              <iconset resource="meshlab.qrc" >
-               <normaloff>:/images/square.png</normaloff>:/images/square.png</iconset>
-             </property>
-            </item>
-            <item>
-             <property name="text" >
-              <string>Pixmap</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2" >
-           <widget class="QLabel" name="label_percentual_6" >
-            <property name="text" >
-             <string>Hardness</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2" colspan="2" >
-           <widget class="QSlider" name="mesh_hardness_slider" >
-            <property name="toolTip" >
-             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
-            </property>
-            <property name="maximum" >
-             <number>100</number>
-            </property>
-            <property name="value" >
-             <number>50</number>
-            </property>
-            <property name="sliderPosition" >
-             <number>50</number>
-            </property>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4" >
-           <widget class="QSpinBox" name="decrease_box_2" >
-            <property name="toolTip" >
-             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
-            </property>
-            <property name="maximum" >
-             <number>100</number>
-            </property>
-            <property name="value" >
-             <number>47</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2" >
-           <widget class="QLabel" name="label_percentual_7" >
-            <property name="text" >
-             <string>Size</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2" colspan="2" >
-           <widget class="QSlider" name="mesh_size_slider" >
-            <property name="toolTip" >
-             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
-            </property>
-            <property name="maximum" >
-             <number>100</number>
-            </property>
-            <property name="value" >
-             <number>50</number>
-            </property>
-            <property name="sliderPosition" >
-             <number>50</number>
-            </property>
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4" >
-           <widget class="QSpinBox" name="decrease_box_4" >
-            <property name="toolTip" >
-             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;/body>&lt;/html></string>
-            </property>
-            <property name="maximum" >
-             <number>100</number>
-            </property>
-            <property name="value" >
-             <number>47</number>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="2" >
-           <widget class="QLabel" name="label_percentual_8" >
-            <property name="text" >
-             <string>Units</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2" colspan="3" >
-           <widget class="QComboBox" name="mesh_pen_unit" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <item>
-             <property name="text" >
-              <string>pixel</string>
-             </property>
-            </item>
-            <item>
-             <property name="text" >
-              <string>percentual of bbox diagonal</string>
-             </property>
-            </item>
-            <item>
-             <property name="text" >
-              <string>percentual of bbox height</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="4" column="0" >
-           <widget class="QLabel" name="label_5" >
-            <property name="text" >
-             <string>Paint on:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1" colspan="2" >
-           <widget class="QCheckBox" name="backface_culling_2" >
-            <property name="text" >
-             <string>backfaces</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="3" colspan="2" >
-           <widget class="QCheckBox" name="invisible_painting_2" >
-            <property name="text" >
-             <string>hidden polygons</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="mesh_displacement_frame" >
-         <property name="enabled" >
-          <bool>true</bool>
-         </property>
-         <property name="frameShape" >
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow" >
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" >
-          <item row="0" column="0" >
-           <widget class="QLabel" name="label_6" >
-            <property name="text" >
-             <string>Displacement</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" >
-           <widget class="QSlider" name="mesh_displacement_slider" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" >
-           <widget class="QSpinBox" name="spinBox" />
-          </item>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="label_8" >
-            <property name="text" >
-             <string>Direction</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" colspan="2" >
-           <widget class="QComboBox" name="mesh_displacement_direction" >
-            <item>
-             <property name="text" >
-              <string>Averaged Normals</string>
-             </property>
-            </item>
-            <item>
-             <property name="text" >
-              <string>Per Vertex Normals</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="mesh_pressure_frame" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="frameShape" >
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow" >
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" >
-          <item row="0" column="0" colspan="3" >
-           <widget class="QLabel" name="label_9" >
-            <property name="text" >
-             <string>Pen pressure maps to:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" >
+          <item row="1" column="2" >
            <widget class="QCheckBox" name="displacement_box" >
             <property name="text" >
              <string>Displacement</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" >
-           <widget class="QCheckBox" name="mesh_hardness_box" >
+          <item row="1" column="0" >
+           <widget class="QCheckBox" name="hardness_box" >
             <property name="text" >
              <string>Hardness</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="2" >
-           <widget class="QCheckBox" name="mesh_size_box" >
-            <property name="text" >
-             <string>Size</string>
-            </property>
-           </widget>
-          </item>
          </layout>
+         <zorder>label_7</zorder>
+         <zorder>opacity_box</zorder>
+         <zorder>size_box</zorder>
+         <zorder>displacement_box</zorder>
+         <zorder>hardness_box</zorder>
+         <zorder>label_2</zorder>
         </widget>
        </item>
-       <item>
-        <spacer>
+       <item row="13" column="0" colspan="2" >
+        <spacer name="verticalSpacer" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>314</width>
-           <height>151</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_3" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>332</width>
-        <height>848</height>
-       </rect>
-      </property>
-      <attribute name="title" >
-       <string>Configuration</string>
-      </attribute>
-      <layout class="QGridLayout" >
-       <property name="margin" >
-        <number>9</number>
-       </property>
-       <property name="spacing" >
-        <number>6</number>
-       </property>
-       <item row="0" column="1" >
-        <widget class="QComboBox" name="search_mode" >
-         <property name="toolTip" >
-          <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">fast:&lt;/span> works better with big meshes, but can loose some vertexes when faces are not direct connected&lt;br />&lt;span style=" font-weight:600;">slow but accurate: &lt;/span>sholud be used with small meshes, because it finds every vertex during painting&lt;/p>&lt;/body>&lt;/html></string>
-         </property>
-         <item>
-          <property name="text" >
-           <string>fast</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>slow but accurate</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="0" column="0" >
-        <widget class="QLabel" name="label_2" >
-         <property name="text" >
-          <string>Vertex search:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0" >
           <size>
@@ -1687,6 +1347,47 @@ p, li { white-space: pre-wrap; }
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="10" column="0" colspan="2" >
+        <widget class="QFrame" name="frame_4" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout" >
+          <item>
+           <widget class="QLabel" name="label_2" >
+            <property name="text" >
+             <string>Vertex search:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="search_mode" >
+            <property name="toolTip" >
+             <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal; text-decoration:none;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">fast:&lt;/span> works better with big meshes, but can loose some vertexes when faces are not direct connected&lt;br />&lt;span style=" font-weight:600;">slow but accurate: &lt;/span>sholud be used with small meshes, because it finds every vertex during painting&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <item>
+             <property name="text" >
+              <string>fast</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>slow but accurate</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+         <zorder>search_mode</zorder>
+         <zorder>label_2</zorder>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -1707,50 +1408,18 @@ p, li { white-space: pre-wrap; }
  </resources>
  <connections>
   <connection>
-   <sender>mesh_percentual_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>percentual_box_2</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>204</x>
-     <y>177</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>322</x>
-     <y>183</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_hardness_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>decrease_box_2</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>228</x>
-     <y>264</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>322</x>
-     <y>270</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>mesh_displacement_slider</sender>
    <signal>valueChanged(int)</signal>
    <receiver>spinBox</receiver>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>222</x>
-     <y>413</y>
+     <x>293</x>
+     <y>39</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>322</x>
-     <y>419</y>
+     <x>350</x>
+     <y>33</y>
     </hint>
    </hints>
   </connection>
@@ -1761,28 +1430,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>322</x>
-     <y>419</y>
+     <x>350</x>
+     <y>33</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>222</x>
-     <y>413</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>percentual_box_2</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>mesh_percentual_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>322</x>
-     <y>183</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>204</x>
-     <y>177</y>
+     <x>293</x>
+     <y>39</y>
     </hint>
    </hints>
   </connection>
@@ -1793,12 +1446,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>237</x>
-     <y>199</y>
+     <x>293</x>
+     <y>-106</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>322</x>
-     <y>215</y>
+     <x>350</x>
+     <y>-112</y>
     </hint>
    </hints>
   </connection>
@@ -1809,60 +1462,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>286</x>
-     <y>197</y>
+     <x>350</x>
+     <y>-112</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>261</x>
-     <y>212</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_size_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>decrease_box_4</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>228</x>
-     <y>297</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>322</x>
-     <y>303</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>decrease_box_4</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>mesh_size_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>322</x>
-     <y>303</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>228</x>
-     <y>297</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>decrease_box_2</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>mesh_hardness_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>322</x>
-     <y>270</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>228</x>
-     <y>264</y>
+     <x>293</x>
+     <y>-106</y>
     </hint>
    </hints>
   </connection>
@@ -1873,12 +1478,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>231</x>
-     <y>273</y>
+     <x>293</x>
+     <y>-17</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>322</x>
-     <y>285</y>
+     <x>350</x>
+     <y>-23</y>
     </hint>
    </hints>
   </connection>
@@ -1889,12 +1494,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>322</x>
-     <y>285</y>
+     <x>350</x>
+     <y>-23</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>247</x>
-     <y>271</y>
+     <x>293</x>
+     <y>-17</y>
     </hint>
    </hints>
   </connection>
@@ -1905,28 +1510,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>213</x>
-     <y>354</y>
+     <x>287</x>
+     <y>161</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>265</x>
-     <y>351</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_pick_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mesh_pen_extra_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>24</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>67</x>
-     <y>257</y>
+     <x>350</x>
+     <y>155</y>
     </hint>
    </hints>
   </connection>
@@ -1937,12 +1526,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>268</x>
-     <y>357</y>
+     <x>350</x>
+     <y>155</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>246</x>
-     <y>356</y>
+     <x>287</x>
+     <y>161</y>
     </hint>
    </hints>
   </connection>
@@ -1953,12 +1542,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>225</x>
-     <y>386</y>
+     <x>287</x>
+     <y>195</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>263</x>
-     <y>385</y>
+     <x>350</x>
+     <y>189</y>
     </hint>
    </hints>
   </connection>
@@ -1969,12 +1558,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>25</x>
-     <y>47</y>
+     <x>28</x>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>60</x>
-     <y>217</y>
+     <x>92</x>
+     <y>-73</y>
     </hint>
    </hints>
   </connection>
@@ -1985,12 +1574,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>28</x>
-     <y>53</y>
+     <x>31</x>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>32</x>
-     <y>601</y>
+     <x>96</x>
+     <y>490</y>
     </hint>
    </hints>
   </connection>
@@ -2001,12 +1590,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>24</x>
-     <y>49</y>
+     <x>27</x>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>30</x>
-     <y>306</y>
+     <x>94</x>
+     <y>161</y>
     </hint>
    </hints>
   </connection>
@@ -2017,12 +1606,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>268</x>
-     <y>388</y>
+     <x>350</x>
+     <y>189</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>238</x>
-     <y>387</y>
+     <x>287</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
@@ -2033,12 +1622,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>108</x>
-     <y>51</y>
+     <x>33</x>
+     <y>152</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>102</x>
-     <y>527</y>
+     <x>166</x>
+     <y>402</y>
     </hint>
    </hints>
   </connection>
@@ -2049,12 +1638,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>63</x>
-     <y>54</y>
+     <x>33</x>
+     <y>119</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>85</x>
-     <y>185</y>
+     <x>117</x>
+     <y>-73</y>
     </hint>
    </hints>
   </connection>
@@ -2065,12 +1654,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>101</x>
-     <y>56</y>
+     <x>33</x>
+     <y>152</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>141</x>
-     <y>214</y>
+     <x>173</x>
+     <y>-73</y>
     </hint>
    </hints>
   </connection>
@@ -2081,28 +1670,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>139</x>
-     <y>53</y>
+     <x>33</x>
+     <y>185</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>160</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_smooth_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mesh_smooth_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>87</x>
-     <y>72</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>116</x>
-     <y>194</y>
+     <x>224</x>
+     <y>-34</y>
     </hint>
    </hints>
   </connection>
@@ -2113,12 +1686,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>147</x>
-     <y>45</y>
+     <x>33</x>
+     <y>185</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>143</x>
-     <y>307</y>
+     <x>207</x>
+     <y>161</y>
     </hint>
    </hints>
   </connection>
@@ -2129,12 +1702,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>161</x>
-     <y>72</y>
+     <x>33</x>
+     <y>185</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>165</x>
-     <y>600</y>
+     <x>229</x>
+     <y>490</y>
     </hint>
    </hints>
   </connection>
@@ -2145,12 +1718,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>216</x>
-     <y>58</y>
+     <x>33</x>
+     <y>251</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>310</x>
-     <y>478</y>
+     <x>361</x>
+     <y>297</y>
     </hint>
    </hints>
   </connection>
@@ -2161,12 +1734,12 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>100</x>
-     <y>49</y>
+     <x>33</x>
+     <y>426</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>123</x>
-     <y>438</y>
+     <x>187</x>
+     <y>72</y>
     </hint>
    </hints>
   </connection>
@@ -2177,108 +1750,396 @@ p, li { white-space: pre-wrap; }
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>161</x>
+     <x>33</x>
+     <y>459</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>187</x>
      <y>72</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>123</x>
-     <y>438</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_sculpt_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mesh_pen_extra_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>100</x>
-     <y>53</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>123</x>
-     <y>257</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_sculpt_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mesh_pressure_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>102</x>
-     <y>56</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>123</x>
-     <y>525</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_add_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mesh_pressure_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>161</x>
-     <y>72</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>123</x>
-     <y>525</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_add_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mesh_pen_extra_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>161</x>
-     <y>72</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>123</x>
-     <y>257</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>mesh_pick_button</sender>
    <signal>toggled(bool)</signal>
-   <receiver>mesh_pressure_frame</receiver>
+   <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>27</x>
-     <y>56</y>
+     <x>16</x>
+     <y>347</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>62</x>
-     <y>525</y>
+     <x>156</x>
+     <y>161</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>mesh_smooth_button</sender>
    <signal>toggled(bool)</signal>
-   <receiver>mesh_pen_extra_frame</receiver>
+   <receiver>pen_extra_frame</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>67</x>
-     <y>56</y>
+     <x>19</x>
+     <y>383</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>92</x>
-     <y>257</y>
+     <x>136</x>
+     <y>161</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_sculpt_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pen_extra_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>21</x>
+     <y>407</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>174</x>
+     <y>161</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_add_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pen_extra_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>28</x>
+     <y>445</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>79</x>
+     <y>161</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_sculpt_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mesh_displacement_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>11</x>
+     <y>411</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>80</x>
+     <y>72</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_add_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mesh_displacement_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>19</x>
+     <y>456</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>79</x>
+     <y>72</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_smooth_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>smooth_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>19</x>
+     <y>371</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>110</x>
+     <y>-34</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_pick_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pressure_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>31</x>
+     <y>343</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>86</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_sculpt_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pressure_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>26</x>
+     <y>414</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>78</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_add_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pressure_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>30</x>
+     <y>445</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>86</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mesh_sculpt_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pressure_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>21</x>
+     <y>407</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>80</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clone_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>clone_source_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>17</x>
+     <y>201</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>361</x>
+     <y>-377</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clone_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pen_extra_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>24</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>293</x>
+     <y>161</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clone_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pen_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>19</x>
+     <y>206</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>234</x>
+     <y>-73</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clone_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pressure_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>18</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>234</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>perlin_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pen_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>31</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>211</x>
+     <y>-68</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>perlin_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pen_extra_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>19</x>
+     <y>270</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>216</x>
+     <y>167</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>perlin_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>gradient_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>8</x>
+     <y>270</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>145</x>
+     <y>411</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>perlin_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pressure_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>12</x>
+     <y>277</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>123</x>
+     <y>492</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>perlin_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>gradient_form</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>8</x>
+     <y>258</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>350</x>
+     <y>396</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gradient_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>gradient_form</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>20</x>
+     <y>138</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>350</x>
+     <y>396</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>spinBox_2</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>207</x>
+     <y>624</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>332</x>
+     <y>632</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_2</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>horizontalSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>317</x>
+     <y>616</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>243</x>
+     <y>619</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>perlin_button</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>noise_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>19</x>
+     <y>273</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>154</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
