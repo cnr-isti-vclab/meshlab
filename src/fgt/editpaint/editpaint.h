@@ -159,6 +159,7 @@ private:
 	/****** Painting and Cloning Tools ******/
 	void paint(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
 	void capture();
+	bool accessCloneBuffer(int, int, vcg::Color4b &);
 	QHash<CVertexO *, std::pair<vcg::Color4b, int> >	painted_vertices; /*<active vertices during painting */
 	
 	vcg::Color4b	color;
@@ -166,6 +167,7 @@ private:
 	GLfloat* 		clone_zbuffer; /*<buffer to determine if the source is legal or not */
 	QPoint 			clone_delta;
 	QPoint			source_delta;
+	QPoint			apply_start;
 	int				buffer_width;
 	int				buffer_height;
 		

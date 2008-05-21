@@ -31,6 +31,7 @@
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/topology.h>
+#include <wrap/io_trimesh/io_mask.h>
 #include <vcg/math/perlin_noise.h>
 
 using namespace std;
@@ -76,8 +77,8 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	paintbox = new Paintbox(dock);
 	dock->setAllowedAreas(Qt::NoDockWidgetArea);
 	dock->setWidget(paintbox);
-	QPoint p=parent->window()->mapToGlobal(QPoint(0,0));
-	dock->setGeometry(-5+p.x()+parent->window()->width()-paintbox->width(),p.y(),paintbox->width(),200);
+	QPoint p=parent->mapToGlobal(QPoint(0,0));
+	dock->setGeometry(5 + p.x(), p.y() + 5 , paintbox->width(), parent->height() - 10);
 	dock->setFloating(true);
 	dock->setVisible(true);
 
@@ -87,7 +88,7 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	m.updateDataMask(MeshModel::MM_FACEMARK);
 	m.updateDataMask(MeshModel::MM_VERTMARK);
 	
-	if ((m.currentDataMask & MeshModel::IOM_VERTCOLOR) == 0)
+	if (!(m.currentDataMask & vcg::tri::io::Mask::IOM_VERTCOLOR))
 	{
 		Color4b color(100, 100, 100, 255);
 		for (CMeshO::VertexIterator i = m.cm.vert.begin(); i != m.cm.vert.end(); i++) (*i).C() = color;
@@ -96,9 +97,9 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	m.cm.InitFaceIMark();
 	m.cm.InitVertexIMark();
 	
-	parent->mm()->ioMask |= MeshModel::IOM_VERTQUALITY;
-	parent->mm()->ioMask |= MeshModel::IOM_VERTCOLOR;
-	parent->mm()->ioMask |= MeshModel::IOM_VERTNORMAL;
+	m.ioMask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+	m.ioMask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+	m.ioMask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	
 	QObject::connect(paintbox, SIGNAL(undo()), this, SLOT(update()));
@@ -203,7 +204,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 {	
 	glarea = gla;
 	
-	if (!latest_event.valid) return;
+	if (!latest_event.valid || latest_event.processed) return;
 
 	latest_event.processed = true;
 	
@@ -279,15 +280,21 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 						if (color_buffer != NULL)
 						{
 							painted_vertices.clear();
-							clone_delta.setX(source_delta.x() - latest_event.position.x());
-							clone_delta.setY(- (source_delta.y() - latest_event.position.y()));
+						//	clone_delta.setX(source_delta.x() - latest_event.position.x());
+						//	clone_delta.setY(- (source_delta.y() - latest_event.position.y()));
+							apply_start = latest_event.position;
 							paintbox->getUndoStack()->beginMacro("Color Clone");
 							paint( & vertices);
 						}else if (paintbox->isPixmapAvailable())
 						{
 							paintbox->getPixmapBuffer(color_buffer, clone_zbuffer, buffer_width, buffer_height);
-							clone_delta.setX(buffer_width/2);
-							clone_delta.setY(buffer_height/2);
+							source_delta.setX(buffer_width/2);
+							source_delta.setY(buffer_height/2);
+					//		clone_delta.setX(source_delta.x() - latest_event.position.x());
+					//		clone_delta.setY((source_delta.y() - latest_event.position.y()));
+					//		clone_delta.setX(0);
+					//		clone_delta.setY(0);
+							apply_start = latest_event.position;
 							painted_vertices.clear();
 							paintbox->getUndoStack()->beginMacro("Color Clone");
 							
@@ -333,11 +340,16 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					break;
 					
 				case COLOR_CLONE :
-					paintbox->setPixmapCenter(-latest_event.position.x() - clone_delta.x(), -latest_event.position.y() + clone_delta.y()  );
+				//	paintbox->setPixmapCenter(-latest_event.position.x() - clone_delta.x(), -latest_event.position.y() - clone_delta.y()  );
+					paintbox->setPixmapCenter(
+							-(source_delta.x() + /*clone_delta.x()+*/ latest_event.position.x() - apply_start.x()), 
+							-(source_delta.y() + /*clone_delta.y()+*/ latest_event.position.y() - apply_start.y()));
+					qDebug() << "pixmap: ( " << (source_delta.x() + /*clone_delta.x()+*/ latest_event.position.x() - apply_start.x()) << ", " << (source_delta.y() + /*clone_delta.y()+*/ latest_event.position.y() - apply_start.y()) <<")";
 					if (color_buffer != NULL) paint( & vertices);
 					break;
 					
 				case COLOR_NOISE :
+					noise(& vertices);
 					break;
 					
 				case COLOR_GRADIENT:
@@ -586,24 +598,45 @@ inline void EditPaintPlugin::capture()
 	buffer_height = glarea->curSiz.height();
 	buffer_width = glarea->curSiz.width();
 	
-	source_delta.setX(latest_event.position.x());
-	source_delta.setY(latest_event.position.y());
-	
-//	clone_delta.setX(latest_event.gl_position.x()); 
-//	clone_delta.setY(latest_event.gl_position.y()); //storing now source click position
+	source_delta = latest_event.position;
 	
 	QImage image(glarea->width(), glarea->height(), QImage::Format_RGB32); 
 	for (int x = 0; x < glarea->width(); x++){
 		for (int y = 0; y < glarea->height(); y++){
 			int index = (y * glarea->width() + x)*3;
-			image.setPixel(x, glarea->height() - y, qRgb((int)color_buffer[index], (int)color_buffer[index + 1], (int)color_buffer[index + 2]));
+			image.setPixel(x, glarea->height() - y -1, qRgb((int)color_buffer[index], (int)color_buffer[index + 1], (int)color_buffer[index + 2]));
 		}
 	}
 	glarea->getCurrentRenderMode().lighting = true;
 	current_options |= EPP_DRAW_CURSOR;
 	paintbox->setClonePixmap(image);
 	paintbox->setPixmapCenter(-source_delta.x(), -source_delta.y());
-//	glarea->update();
+	glarea->update();
+}
+
+inline bool EditPaintPlugin::accessCloneBuffer(int vertex_x, int vertex_y, vcg::Color4b & color)
+{
+	qDebug() << "source_delta: ( " << source_delta.x() << ", " << source_delta.y() <<")";
+	qDebug() << "apply_start: ( " << apply_start.x() << ", " << apply_start.y() <<")";
+		
+	
+	int y =  buffer_height - source_delta.y() +	(vertex_y + apply_start.y() - glarea->curSiz.height());
+	int x =  source_delta.x() +	(vertex_x - apply_start.x());
+	
+	int index = y * buffer_width + x;
+									
+	qDebug() << "buffer: ( " << x << ", " << y <<")";
+				
+	if (index < buffer_width * buffer_height - 1 && index > 0)
+	{
+		if (clone_zbuffer[index] < 1.0)
+		{
+			index *= 3;
+			color[0] = color_buffer[index]; color[1] = color_buffer[index + 1]; color[2] = color_buffer[index + 2];
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
@@ -613,9 +646,7 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 {
 	int opac = current_brush.opacity; //TODO legacy assignment
 	int decrease_pos = current_brush.hardness; //TODO legacy assignment
-	
-	int index = 0;
-	
+
 	for (unsigned int k = 0; k < vertices->size(); k++)
 	{
 		pair<CVertexO *, PickingData> data = vertices->at(k);
@@ -624,64 +655,37 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 		
 		if (!painted_vertices.contains(data.first)) 
 		{
+			if (paintbox->getCurrentType() == COLOR_CLONE) 
+				if (!accessCloneBuffer(data.second.position.x(), data.second.position.y(), color)) return;
+			
 			painted_vertices.insert(data.first, pair<Color4b, int>(
 				Color4b(data.first->C()[0], data.first->C()[1], data.first->C()[2], data.first->C()[3]),
 				(int)(op*opac)) );
 			
 			paintbox->getUndoStack()->push(new SingleColorUndo(data.first, data.first->C()));
 			
-			if (paintbox->getCurrentType() == COLOR_CLONE)
-			{
-				index = ((data.second.position.y() + clone_delta.y()) * buffer_width +
-								data.second.position.x() + clone_delta.x());
-				 qDebug() << "index " << index;
-				 qDebug() << "buffer_width " << buffer_width;
-				 qDebug() << "buffer height " << buffer_height;
-
-				if (index < buffer_width * buffer_height - 1 && index > 0)
-				{
-					qDebug() << "clone_zbuffer " << clone_zbuffer[index];
-					if (clone_zbuffer[index] < 1.0){
-						index *= 3;
-						color[0] = color_buffer[index]; color[1] = color_buffer[index + 1]; color[2] = color_buffer[index + 2];		
-						applyColor(data.first, color, (int)(op * opac));
-				
-					}
-				}
-			}else applyColor(data.first, color, (int)(op * opac) );
+			applyColor(data.first, color, (int)(op * opac) );
 			
 		} else if (painted_vertices[data.first].second < (int)(op * opac)) 
 		{
+			if (paintbox->getCurrentType() == COLOR_CLONE) 
+				if (!accessCloneBuffer(data.second.position.x(), data.second.position.y(), color)) return;
+			
 			painted_vertices[data.first].second = (int)(op * opac);
 			Color4b temp = painted_vertices[data.first].first;
 			data.first->C()[0]=temp[0]; data.first->C()[1]=temp[1]; data.first->C()[2]=temp[2];
 			
 			paintbox->getUndoStack()->push(new SingleColorUndo(data.first, data.first->C()));
-						
-			if (paintbox->getCurrentType() == COLOR_CLONE) //TODO refactor in a method
-			{
-				index = ((data.second.position.y() + clone_delta.y()) * buffer_width +
-								data.second.position.x() + clone_delta.x());
-				 			
-
-				if (index < buffer_width * buffer_height - 1 && index > 0)
-				{
-					if (clone_zbuffer[index] < 1.0){
-						index *= 3;
-						color[0] = color_buffer[index]; color[1] = color_buffer[index + 1]; color[2] = color_buffer[index + 2];		
-						applyColor(data.first, color, (int)(op * opac));
-				
-					}
-				}
-			}else applyColor(data.first, color, (int)(op * opac) );	
+			
+			applyColor(data.first, color, (int)(op * opac) );	
 		}
 	}
 }
 
 inline void EditPaintPlugin::noise(std::vector< std::pair<CVertexO *, PickingData> > * vertices)
 {
-	double scaler = 8.0;
-	double opacity = 0.5;
+	double scaler = 8.0; //parameter
+	double opacity = 0.5; //from paintbox
 	for (unsigned int k = 0; k < vertices->size(); k++)
 	{	
 		pair<CVertexO *, PickingData> data = vertices->at(k);
@@ -689,12 +693,19 @@ inline void EditPaintPlugin::noise(std::vector< std::pair<CVertexO *, PickingDat
 		{				
 			double noise = vcg::math::Perlin::Noise(data.first->P()[0] * scaler,
 					data.first->P()[1] * scaler, data.first->P()[2] * scaler);
-			data.first->C()[0] += (int)(noise * 255 * opacity);
-			data.first->C()[1] += (int)(noise * 255 * opacity);
-			data.first->C()[2] += (int)(noise * 255 * opacity);
+			
+			//TODO test code to be refactored 
+			Color4b forecolor(paintbox->getForegroundColor().red(), paintbox->getForegroundColor().green(), paintbox->getForegroundColor().blue(), paintbox->getForegroundColor().alpha());
+			Color4b backcolor(paintbox->getBackgroundColor().red(), paintbox->getBackgroundColor().green(), paintbox->getBackgroundColor().blue(), paintbox->getBackgroundColor().alpha());
+			Color4b * color = new Color4b();
+			mergeColors(noise, forecolor, backcolor, color);
+			
 			painted_vertices.insert(data.first, pair<Color4b, int>(
 					Color4b(data.first->C()[0], data.first->C()[1], data.first->C()[2], data.first->C()[3]),
 					(int)(noise * 255 * opacity)));
+			
+			applyColor(data.first, * color, opacity * 255);
+			delete color;
 		}
 	}
 }

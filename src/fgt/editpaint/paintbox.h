@@ -58,15 +58,13 @@ class Paintbox : public QWidget, private Ui::Paintbox
 	Q_OBJECT
 
 private:
-	ToolType active[2]; //the active tool for each page
+	ToolType active; //the active tool for each page
 	QUndoStack * stack;
 	
 	ToolType previous_type;
 
 	QGraphicsPixmapItem * item;
 	bool pixmap_available;
-	
-	inline int getCurrentTab() {return tabs_container->currentIndex();}
 	
 public:	
 	Paintbox(QWidget * parent = 0, Qt::WindowFlags flags = 0);
@@ -76,41 +74,23 @@ public:
 	inline QColor getForegroundColor() {return foreground_frame->getColor();}
 	inline QColor getBackgroundColor() {return background_frame->getColor();}
 	
-	inline ToolType getCurrentType() {return active[tabs_container->currentIndex()];}
-	inline int getSize() {
-		if (getCurrentTab()==MESH_TAB) return mesh_size_slider->value(); 
-		else return size_slider->value();}
+	inline ToolType getCurrentType() {return active;}
+	inline int getSize() {return size_slider->value();}
 	inline double getRadius() {return (double)getSize() / 100.0;}
-	inline int getSizeUnit() { 
-		if (getCurrentTab()==MESH_TAB) return mesh_pen_unit->currentIndex();
-		else return pen_unit->currentIndex();}
-	inline Brush getBrush() {
-		if (getCurrentTab()==MESH_TAB) return (Brush)mesh_brush_box->currentIndex();
-		else return (Brush)brush_box->currentIndex();}
+	inline int getSizeUnit() {return pen_unit->currentIndex();}
+	inline Brush getBrush() {return (Brush)brush_box->currentIndex();}
 	inline int getSearchMode() { return search_mode->currentIndex() + 1; } 
 	inline int getOpacity() {return opacity_slider->value();}
-	inline int getSmoothPercentual() {
-		if (getCurrentTab()==MESH_TAB) return mesh_percentual_slider->value(); 
-		else return percentual_slider->value();}
-	inline int getHardness() {
-		if (getCurrentTab() == MESH_TAB) return mesh_hardness_slider->value();
-		else return hardness_slider->value();}
-	inline bool getPaintBackFace() {
-		if (getCurrentTab() == MESH_TAB) return backface_culling_2->isChecked();
-		else return backface_culling->isChecked();}
-	inline bool getPaintInvisible() { 
-		if (getCurrentTab() == MESH_TAB) return invisible_painting_2->isChecked();
-		else return invisible_painting->isChecked(); }
+	inline int getSmoothPercentual() {return percentual_slider->value();}
+	inline int getHardness() {return hardness_slider->value();}
+	inline bool getPaintBackFace() {return backface_culling->isChecked();}
+	inline bool getPaintInvisible() {return invisible_painting->isChecked(); }
 	inline int getGradientType() { return gradient_type->currentIndex(); }
 	inline int getGradientForm() { return gradient_form->currentIndex(); }
 	inline int getPickMode() { return pick_mode->currentIndex(); }
 	inline bool getPressureDisplacement() {return displacement_box->isChecked();}
-	inline bool getPressureHardness() {
-		if (getCurrentTab() == MESH_TAB) return mesh_hardness_box->isChecked();
-		else return hardness_box->isChecked(); }
-	inline bool getPressureSize() {
-		if (getCurrentTab() == MESH_TAB) return mesh_size_box->isChecked();
-		else return size_box->isChecked(); }
+	inline bool getPressureHardness() {return hardness_box->isChecked();}
+	inline bool getPressureSize() {return size_box->isChecked(); }
 	inline bool getPressureOpacity() {return opacity_box->isChecked();}
 	inline int getDisplacement() {return mesh_displacement_slider->value();}
 	inline int getDirection() {return mesh_displacement_direction->currentIndex();}
@@ -143,16 +123,17 @@ signals:
 	void brushSettingsChange(int size, int opacity, int hardness);
 	
 public slots: 
-	void on_pen_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_PAINT; emit typeChange(active[COLOR_TAB]);}}
-	void on_fill_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_FILL;emit typeChange(active[COLOR_TAB]);}}
-	void on_gradient_button_toggled(bool checked) {if(checked) {active[COLOR_TAB] = COLOR_GRADIENT; emit typeChange(active[COLOR_TAB]);}}
-	void on_smooth_button_toggled(bool checked){if(checked) {active[COLOR_TAB] = COLOR_SMOOTH;emit typeChange(active[COLOR_TAB]);}}
-	void on_clone_button_toggled(bool checked){if(checked) {active[COLOR_TAB] = COLOR_CLONE; emit typeChange(active[COLOR_TAB]);} clone_source_frame->setVisible(checked);}
-	void on_pick_button_toggled(bool checked){if(checked) {previous_type = active[COLOR_TAB]; active[COLOR_TAB] = COLOR_PICK; emit typeChange(active[COLOR_TAB]);}}
-	void on_mesh_pick_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_SELECT; emit typeChange(active[MESH_TAB]);}}
-	void on_mesh_smooth_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_SMOOTH; emit typeChange(active[MESH_TAB]);}}
-	void on_mesh_sculpt_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_PUSH; emit typeChange(active[MESH_TAB]);}}
-	void on_mesh_add_button_toggled(bool checked){if(checked) {active[MESH_TAB] = MESH_PULL; emit typeChange(active[MESH_TAB]);}}
+	void on_pen_button_toggled(bool checked) {if(checked) {active = COLOR_PAINT; emit typeChange(active);}}
+	void on_fill_button_toggled(bool checked) {if(checked) {active = COLOR_FILL;emit typeChange(active);}}
+	void on_gradient_button_toggled(bool checked) {if(checked) {active = COLOR_GRADIENT; emit typeChange(active);}}
+	void on_smooth_button_toggled(bool checked){if(checked) {active = COLOR_SMOOTH;emit typeChange(active);}}
+	void on_clone_button_toggled(bool checked){if(checked) {active = COLOR_CLONE; emit typeChange(active);} clone_source_frame->setVisible(checked);}
+	void on_pick_button_toggled(bool checked){if(checked) {previous_type = active; active = COLOR_PICK; emit typeChange(active);}}
+	void on_mesh_pick_button_toggled(bool checked){if(checked) {active = MESH_SELECT; emit typeChange(active);}}
+	void on_mesh_smooth_button_toggled(bool checked){if(checked) {active = MESH_SMOOTH; emit typeChange(active);}}
+	void on_mesh_sculpt_button_toggled(bool checked){if(checked) {active = MESH_PUSH; emit typeChange(active);}}
+	void on_mesh_add_button_toggled(bool checked){if(checked) {active = MESH_PULL; emit typeChange(active);}}
+	void on_perlin_button_toggled(bool checked){if(checked) {active = COLOR_NOISE; emit typeChange(active);}}
 	void on_undo_button_clicked(){emit undo();}
 	void on_redo_button_clicked(){emit redo();}
 	void on_default_colors_clicked();

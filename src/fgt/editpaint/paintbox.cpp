@@ -29,19 +29,20 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	
 	setUndoStack(new QUndoStack(this));	
 	
-	active[0] = COLOR_PAINT; active[1] = MESH_SELECT;
+	active = COLOR_PAINT;
 	gradient_frame->setHidden(true);
 	pick_frame->setHidden(true);
 	smooth_frame->setHidden(true);
-
+	mesh_displacement_frame->setHidden(true);
+	clone_source_frame->setHidden(true);
+	noise_frame->setHidden(true);
+	
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
-	setGeometry(p.x()+parent->width()-width(),p.y(),width(), 100);
+	setGeometry(p.x()+parent->width()-width(),p.y(),width(), parent->height());
 	
 	brush_viewer->setScene(new QGraphicsScene());
 	clone_source_view->setScene(new QGraphicsScene());
 	clone_source_view->centerOn(0, 0);
-	
-	clone_source_frame->setVisible(false);
 	
 	item = NULL;
 	pixmap_available = false;
@@ -101,8 +102,8 @@ void Paintbox::loadClonePixmap()
 		QPixmap pixmap(s);
 		if (item != NULL) getCloneScene()->removeItem(item);
 		item = getCloneScene()->addPixmap(pixmap);
-		item->setPos(0, 0);
-		item->setOffset(-pixmap.width()/2.0, -pixmap.height()/2.0);
+		item->setPos(-pixmap.width()/2.0, -pixmap.height()/2.0);
+		getCloneScene()->setSceneRect(-pixmap.width()/2.0, -pixmap.height()/2.0, pixmap.width(), pixmap.height());
 		clone_source_view->centerOn(0, 0);
 		pixmap_available = true;
 		QPen pen;
@@ -117,30 +118,26 @@ void Paintbox::getPixmapBuffer(GLubyte * & buffer, GLfloat* & zbuffer, int & w, 
 	
 	buffer = new GLubyte[image.size().height() * image.size().width() * 3];
 	zbuffer = new GLfloat[image.size().height() * image.size().width()];
-	
-	qDebug() << "at least initialized";
-	
+
 	for (int x = 0; x < image.size().width(); x++){
 			for (int y = 0; y < image.size().height(); y++)
 			{
-				int index = (y * image.size().width() + x);
+				int index = y * image.size().width() + x;
 				zbuffer[index] = 0.0;
 				index *= 3;
-				buffer[index] = qRed(image.pixel(x, y));
-				buffer[index + 1] = qGreen(image.pixel(x, y));
-				buffer[index + 2] = qBlue(image.pixel(x, y));
+				buffer[index] = qRed(image.pixel(x, image.size().height() - 1 - y ));
+				buffer[index + 1] = qGreen(image.pixel(x, image.size().height()- 1 - y));
+				buffer[index + 2] = qBlue(image.pixel(x, image.size().height()- 1 - y));
 			}
 		}
 	w = image.size().width();
 	h = image.size().height();
-	qDebug() << "in paintbox, zbuffer[0] " << zbuffer[0];
-	qDebug() << "and filled!";
 }
 
 void Paintbox::restorePreviousType()
 {
 	//TODO Only works as long as types are declared in the same order as buttons!
-	dynamic_cast<QToolButton *>(hboxLayout1->itemAt(previous_type)->widget())->toggle() ;
+	dynamic_cast<QToolButton *>(verticalLayout->itemAt(previous_type)->widget())->toggle() ;
 }
 
 void Paintbox::refreshBrushPreview()
