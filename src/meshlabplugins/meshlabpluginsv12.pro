@@ -3,8 +3,6 @@ SUBDIRS       = meshfilter \
 				baseio\
 				meshio \
 				colladaio \
-				epoch_io \
-				io_u3d\
 				io_tri\
 				io_x3d \
 				meshrender \
@@ -17,7 +15,6 @@ SUBDIRS       = meshfilter \
 				meshselect \
 				meshdecorate \ 
 				meshedit \ 
-				editslice \
 				editpaint \
 				editalign\
 				editmeasure\
