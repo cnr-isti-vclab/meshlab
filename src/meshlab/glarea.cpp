@@ -523,6 +523,9 @@ void GLArea::displayInfo()
 			 else renderText(rightCol,startPos+1*lineSpacing,QString("FOV: Ortho"),qFont);
 	if ((cfps>0) && (cfps<500)) 
 			renderText(rightCol,startPos+2*lineSpacing,QString("FPS: %1").arg(cfps,7,'f',1),qFont);
+	if ((clipRatioNear!=1) || (clipRatioFar!=1)) 
+			renderText(rightCol,startPos+3*lineSpacing,QString("Clipping: N:%1 F:%2").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1),qFont);
+
 }
 
 
