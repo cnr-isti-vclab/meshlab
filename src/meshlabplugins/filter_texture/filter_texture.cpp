@@ -171,9 +171,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	int xPos, yPos;
 	for (c=0; c<numTextures; c++)//iterate through textures, loading each
 	{
+		qDebug() << "@ top of numtextures for loop" << endl;
 		images[c] = QPixmap(m.cm.textures[c].c_str());//loads image, if fails is a null image. will guess extension from file name
-		if ((maxdiffUV[c][0]>1) || (maxdiffUV[c][1]>1))//tiling texture
+		if ((maxdiffUV[c][0]>1) || (maxdiffUV[c][1]>1))//tiling texture, if uv > 1 means want it tiled/repeated
 		{
+			maxdiffUV[c][0]++;//incrementing by one unit to allow for the original unit to still be present - so when span is 2, will create an image of 3* the original
+			maxdiffUV[c][1]++;//this will allow for a UV coordinate of .9 with a span of 2 = 2.9
 			tiledimages[c] = QImage(maxdiffUV[c][0]*images[c].width(), maxdiffUV[c][1]*images[c].height(), QImage::Format_ARGB32);//doesn't need to be ceiling (ceil function) - doesn't matter if texture is not a complete copy
 			QPainter painter(&tiledimages[c]);//TODO: how move initialization outside of for loop?
 			//now draw into the image however many times necessary
@@ -184,13 +187,19 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 					painter.drawPixmap(xPos, yPos, images[c]);//x & y position to insert top-left corner at, which image to insert
 				}
 			}
+			painter.~QPainter();//destroys - otherwise will crash if resample tiledimage
 			if (algo==1)//resampled tiles
+			{
+				qDebug() << "resampling" << endl;
 				tiledimages[c] = tiledimages[c].scaled(images[c].width(), images[c].height());//resample image to original size
+			}
 			images[c] = QPixmap::fromImage(tiledimages[c]);//not necessary to write file if stays in memory
+			qDebug() << "converted image to pixmap" << endl;
 		}
+		qDebug() << "trying 2 intiialize size" << endl;
 		size = Point2i(images[c].width(), images[c].height());
 		sizes.push_back(size);
-		qDebug() << "filterTexture loaded image: " << m.cm.textures[c].c_str() << endl;
+		qDebug() << "filterTexture loaded image: " << m.cm.textures[c].c_str() << "with (tiled) size: " << size[0] << " " << size[1] << endl;
 	}
 	
 	bool made = false;
@@ -221,28 +230,23 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			}
 			qDebug() << "rect_packer::pack returned: " << made << endl;
 		}
-		length = sizesIndeces/(numAtlases);//length of each split, numAtlases is how many times have to split
-		whichAtlas.clear();
-		for (c=0; c<sizesIndeces; c++)//for-loop vector
-			whichAtlas[c] = int(c/length);//for mapping textures to atlases later.  if have 12 textures in first atlas, 13th will give you value >1, 11th will give you value <1 = 0, which is right as 1st atlas at position 0
+		length = sizesIndeces/numAtlases;//length of each split, numAtlases is how many times have to split
 		if (made==false)//need to split the vector of sizes into half
 		{
-			splitSizes.clear();
-			for (c=0; c<sizesIndeces; c++)//for-loop vector
+			whichAtlas.clear();
+			for (c=0; c<splitSizes.size(); c+=2)//iterate through each vector in splitSizes, increment by two so will not land on the vector you just inserted
 			{
-				if (c % length == 0)//if at a multiple of length, add vector to vector of vectors
-				{
-					if (c!=0)
-						splitSizes.push_back(splitsize);//insert if not at 0
-					splitsize.clear();//if counter==0, clear local vector
-				}
-				splitsize[c % length] = sizes[c];
+				splitsize = splitSizes[c];//first make a copy of the vector
+				splitsize.erase(splitsize.begin(),splitsize.begin()+splitsize.size()/2);//from which to delete the first half of the elements.  will this delete the last element?
+				splitSizes[c].resize(splitSizes[c].size()/2);//then resize the original vector by half
+				splitSizes.insert(splitSizes.begin()+c+1, splitsize);//add the new vector after the original, c starts at 0 so need to add 1
 			}
 		}
 	}
 	if (made==false)
 		return false;//textures just couldn't fit in given texture atlas dimensions, even one texture in its own atlas
 	
+	qDebug() << "returned false, continuing" << endl;
 	QImage atlas;
 	int index;
 	QString filename;
@@ -266,6 +270,9 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 		//update display-load texture atlas?
 	}
 
+	float minU, minV;
+	int minUwhole, minVwhole;
+	float minUdec, minVdec;
 	for (fit=m.cm.face.begin(); fit != m.cm.face.end(); ++fit)//iterate through faces with textures
 	{
 		if (!(*fit).IsD())//only iterates over non-deleted faces
@@ -274,14 +281,65 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 			if (mat!=-1)//only re-assign texture if face has a texture material to begin with
 			{
 				fit->WT(0).N() = whichAtlas[mat];//re-assign N to number of texture atlas
-				for (unsigned int ii = 0; ii < 3;++ii)//UVs are per-vertex?
+				//if all UV coordinates are less than the maximum span of U or V and >=0, just divide by max span of U or V and have the new normalized coordinate
+				if ((((fit->WT(0).U() <= maxdiffUV[mat][0]) && (fit->WT(0).V() <= maxdiffUV[mat][1])) && ((fit->WT(1).U() <= maxdiffUV[mat][0]) && (fit->WT(1).V() <= maxdiffUV[mat][1])) && ((fit->WT(2).U() <= maxdiffUV[mat][0]) && (fit->WT(2).V() <= maxdiffUV[mat][1]))) && (((fit->WT(0).U()>0) && (fit->WT(0).V()>0)) && ((fit->WT(1).U()>0) && (fit->WT(1).V()>0)) && ((fit->WT(2).U()>0) && (fit->WT(2).V()>0))))
 				{
-					qDebug() << "original U: " << fit->WT(ii).U() << "original V: " << fit->WT(ii).V() << endl;
-					//if uv > 1 means want it tiled/repeated
-					//adjust texture coordinates by half a pixel to avoid filtering artifacts?
-					fit->WT(ii).U() = (fit->WT(ii).U()*images[mat].width() + splitPosiz[whichAtlas[mat]][mat % length][0])/splitglobalSizes[whichAtlas[mat]][0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1 unless repeating)
-					fit->WT(ii).V() = (fit->WT(ii).V()*images[mat].height() + splitPosiz[whichAtlas[mat]][mat % length][1])/splitglobalSizes[whichAtlas[mat]][1];//offset V by coord in posiz
-					qDebug() << "new U: " << fit->WT(ii).U() << "new V: " << fit->WT(ii).V() << endl;
+					for (c=0; c<3; ++c)
+					{
+						fit->WT(c).U() /= maxdiffUV[mat][0];
+						fit->WT(c).V() /= maxdiffUV[mat][1];
+					}
+				}
+				else//otherwise, need to reposition UV coordinates close to the origin by letting smallest U,V be between 0-1 (by using its decimal) and subtracting its whole number from the other values
+				{
+					//find minimum U
+					minU = fit->WT(0).U();
+					if (fit->WT(1).U() < minU) minU = fit->WT(1).U();
+					if (fit->WT(2).U() < minU) minU = fit->WT(2).U();
+					//find minimum V
+					minV = fit->WT(0).V();
+					if (fit->WT(1).V() < minV) minV = fit->WT(1).V();
+					if (fit->WT(2).V() < minV) minV = fit->WT(2).V();
+					//get minimum U's whole number
+					minUwhole = int(minU);
+					//get minimum V's whole number
+					minVwhole = int(minV);
+					//get minimum U's decimal
+					minUdec = minU - minUwhole;
+					//get minimum V's decimal
+					minVdec = minV - minVwhole;
+					
+					//now reposition UVs so that the smallest U,V is in the 0-1 box and others are translated accordingly
+					for (c=0; c<3; ++c)
+					{
+						//negative UV coordinates do not mirror the texture, just continue in u-v plane
+						//negative U coordinate of -.2 equivalent to + U coordinate of 1-.2 = .8
+						//4 cases depending on whether or not minU/minV is positive or negative - 4 quadrants
+						//can't just flip negative values along an axis - as that would reverse the direction of the triangle's texture
+						if (minUwhole<0)
+						{
+							//correct U
+							minUwhole = minU - (1 + minUdec);//subtracting min U gets you to 0, (1+ (-)minUdec) gets you to the negative correction
+						}
+						if (minVwhole<0)
+						{
+							//correct V
+							minVwhole = minV - (1 + minVdec);
+						}
+						//do subtractions now - should get a result between 0 & 1
+						fit->WT(c).U() -= minUwhole;
+						fit->WT(c).V() -= minVwhole;
+						if (((fit->WT(c).U() > 1)||(fit->WT(c).V() > 1))||((fit->WT(c).U() < 0)||(fit->WT(c).V() < 0)))
+							qDebug() << "uv outside of 0-1 box" << endl;
+					}
+				}
+				
+				for (c= 0; c < 3;++c)//UVs are per-vertex?
+				{
+					qDebug() << "original U: " << fit->WT(c).U() << "original V: " << fit->WT(c).V() << endl;
+					fit->WT(c).U() = (fit->WT(c).U()*images[mat].width() + splitPosiz[whichAtlas[mat]][mat % length][0])/splitglobalSizes[whichAtlas[mat]][0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1 unless repeating)
+					fit->WT(c).V() = (fit->WT(c).V()*images[mat].height() + splitPosiz[whichAtlas[mat]][mat % length][1])/splitglobalSizes[whichAtlas[mat]][1];//offset V by coord in posiz
+					qDebug() << "new U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
 				}
 			}
 		}

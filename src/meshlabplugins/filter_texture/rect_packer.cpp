@@ -29,7 +29,9 @@ public:
 bool rect_packer::pack(const std::vector<Point2i> & sizes, const Point2i & max_size, std::vector<Point2i> & posiz, Point2i & global_size)
 {
 	int n = (int)(sizes.size());
-    assert(n>0);
+	if (n<=0)
+		return false;
+    //assert(n>0);
     assert(max_size[0]>0);
     assert(max_size[1]>0);
 
