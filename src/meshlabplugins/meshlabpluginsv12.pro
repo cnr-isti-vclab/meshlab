@@ -13,10 +13,11 @@ SUBDIRS       = meshfilter \
 				filter_poisson \
 				filter_unsharp \
 				filter_splitter \
+				filter_texture \
 				meshcolorize \
 				meshselect \
 				meshdecorate \ 
-				meshedit \
+				edit_select \
 				editslice\ 
 				editpaint \
 				editalign\

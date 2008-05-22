@@ -1,25 +1,15 @@
-TEMPLATE = lib
-CONFIG += plugin
-INCLUDEPATH += ../.. \
-    ../../../../vcglib \
-    ../../../../code/lib/glew/include
+include (../../shared.pri)
+
+QT += opengl
+
 HEADERS = colorframe.h \
     paintbox.h \
     editpaint.h
 SOURCES = paintbox.cpp \
     editpaint.cpp \
-    ../../../../code/lib/glew/src/glew.c
+	$$GLEWCODE
 TARGET = zpaint
-DESTDIR = ../../meshlab/plugins
-DEFINES += GLEW_STATIC
-QT += opengl
-RESOURCES = meshlab.qrc
-CONFIG += debug_and_release
 
-# mac:CONFIG += x86 ppc
-contains(TEMPLATE,lib):CONFIG(debug, debug|release) { 
-    unix:TARGET = $$member(TARGET, 0)_debug
-    else:TARGET = $$member(TARGET, 0)d
-}
-win32:DEFINES += NOMINMAX
+RESOURCES = meshlab.qrc
+
 FORMS = paintbox.ui

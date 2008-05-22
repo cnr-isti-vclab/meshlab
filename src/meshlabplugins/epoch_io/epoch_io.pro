@@ -1,6 +1,7 @@
+include (../../shared.pri)
+
 TEMPLATE      = lib
 CONFIG       += plugin 
-INCLUDEPATH  += ../.. ../../../../sf ../../../../code/lib/glew/include ../../../../code/lib/bzip2-1.0.3
 
 FORMS         = ui/v3dImportDialog.ui
 HEADERS       = epoch_io.h \
@@ -22,26 +23,21 @@ SOURCES       = epoch_io.cpp \
                 maskImageWidget.cpp \
                 fillImage.cpp \
 		../../../../sf/wrap/ply/plylib.cpp
-
                 
 TARGET        = epoch_io
 DESTDIR       = ../../meshlab/plugins
 QT           += xml
-CONFIG		+= debug_and_release
-# mac:CONFIG += x86 ppc
 
 win32-msvc.net:LIBS 	   += ../../../../code/lib/bzip2-1.0.3/libbz2.lib
 win32-msvc2005:LIBS	   += ../../../../code/lib/bzip2-1.0.4/win32/lib/bzip2.lib
-win32-msvc2005:INCLUDEPATH -= ../../../../code/lib/bzip2-1.0.3
-win32-msvc2005:INCLUDEPATH += ../../../../code/lib/bzip2-1.0.4/win32/include
-
 win32-g++:LIBS	+= ../../../../code/lib/bzip2-1.0.3/libbz2.a
 
-# The following define is needed in gcc to remove the asserts
-win32-g++:DEFINES += NDEBUG
-CONFIG(debug, debug|release) {
-	win32-g++:release:DEFINES -= NDEBUG
-}
+win32-msvc2005:INCLUDEPATH -= ../../../../code/lib/bzip2-1.0.3
+win32-msvc2005:INCLUDEPATH += ../../../../code/lib/bzip2-1.0.4/win32/include
+win32-g++:INCLUDEPATH  += ../../../../code/lib/bzip2-1.0.3
+
+mac:LIBS   += -lbz2
+unix:LIBS += -lbz2
 
 CONFIG(release, debug|release) {
 	win32-g++:release:QMAKE_CXXFLAGS -= -O2
@@ -49,16 +45,3 @@ CONFIG(release, debug|release) {
 	win32-g++:release:QMAKE_CXXFLAGS += -O3 -mtune=pentium3 -ffast-math
 }	
 
-# the following line is needed to avoid mismatch between 
-# the awful min/max macros of windows and the limits max
-win32:DEFINES += NOMINMAX
-mac:LIBS   += -lbz2
-unix:LIBS += -lbz2
-
-
-contains(TEMPLATE,lib) {
-   CONFIG(debug, debug|release) {
-      unix:TARGET = $$member(TARGET, 0)_debug
-      else:TARGET = $$member(TARGET, 0)d
-   }
-}
