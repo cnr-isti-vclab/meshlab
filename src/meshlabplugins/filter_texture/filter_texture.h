@@ -33,6 +33,7 @@ $Log: sampleplugins.h,v $
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include "rect_packer.h"
 
 class FilterTexturePlugin : public QObject, public MeshFilterInterface
 {
@@ -49,11 +50,16 @@ public:
 	virtual const PluginInfo &pluginInfo();
 
 	virtual const FilterClass getClass(QAction *);
-  virtual const int getRequirements(QAction *);
+	virtual const int getRequirements(QAction *);
 
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &m, FilterParameterSet &parlst);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &par, vcg::CallBackPos * cb);
+	virtual void maxFaceSpan(float maxdiffUV[][2], MeshModel &m, int &mat, CMeshO::FaceIterator &fit);
+	virtual void copyTiles(QPixmap images[], QImage tiledimages[], int &numTextures, int &c, float maxdiffUV[][2], MeshModel &m, int &algo, std::vector<Point2i>& sizes, Point2i &size);
+	virtual void positionTextures(bool &made, int &numAtlases, int &sizesIndeces, int &length, std::map<int, int> &whichAtlas, std::vector< std::vector<Point2i> > &splitSizes, Point2i max_size, int &c, std::vector<Point2i> splitsize, std::vector< std::vector<Point2i> > splitPosiz, std::vector<Point2i> splitglobalSizes, std::vector<Point2i> sizes);
+	virtual void createAtlas(QImage &atlas, int &index, int &c, QString &filename, bool &result, int &numAtlases, MeshModel &m, int &length, QPixmap images[], std::vector< std::vector<Point2i> > splitPosiz, std::vector<Point2i> splitglobalSizes);
+	virtual void adjustUVCoords(int &mat, int &c, int &length, CMeshO::FaceIterator &fit, std::vector< std::vector<Point2i> > splitPosiz, std::vector<Point2i> splitglobalSizes, MeshModel &m, float maxdiffUV[][2], std::map<int, int> &whichAtlas, QPixmap images[]);
 };
 
 #endif
