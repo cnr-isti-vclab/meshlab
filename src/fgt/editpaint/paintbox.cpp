@@ -47,6 +47,15 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	item = NULL;
 	pixmap_available = false;
 	
+	//QT 4.3 Workaround
+	
+	QScrollArea * scrollArea = new QScrollArea(this);
+	widget->setParent(scrollArea);
+	scrollArea->setWidget(widget);
+//	scrollArea->setGeometry(widget->geometry());
+	gridLayout->addWidget(scrollArea, 2, 1, 1, 1);
+	
+	
 	refreshBrushPreview();
 }
 
@@ -138,7 +147,7 @@ void Paintbox::getPixmapBuffer(GLubyte * & buffer, GLfloat* & zbuffer, int & w, 
 void Paintbox::restorePreviousType()
 {
 	//TODO Only works as long as types are declared in the same order as buttons!
-	dynamic_cast<QToolButton *>(verticalLayout->itemAt(previous_type)->widget())->toggle() ;
+//	dynamic_cast<QToolButton *>(verticalLayout->itemAt(previous_type)->widget())->toggle() ;
 }
 
 void Paintbox::refreshBrushPreview()
