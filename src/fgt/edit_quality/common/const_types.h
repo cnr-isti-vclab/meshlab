@@ -82,4 +82,5 @@ struct EQUALIZER_INFO
 
 #define QUALITY_LABEL_DIGITS_NUM	8
 
+
 #endif
