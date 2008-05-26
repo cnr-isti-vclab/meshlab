@@ -37,9 +37,6 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	clone_source_frame->setHidden(true);
 	noise_frame->setHidden(true);
 	
-	QPoint p=parent->mapToGlobal(QPoint(0,0));
-	setGeometry(p.x()+parent->width()-width(),p.y(),width(), parent->height());
-	
 	brush_viewer->setScene(new QGraphicsScene());
 	clone_source_view->setScene(new QGraphicsScene());
 	clone_source_view->centerOn(0, 0);
@@ -47,14 +44,20 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	item = NULL;
 	pixmap_available = false;
 	
-	//QT 4.3 Workaround
-	
+	//******QT 4.3 Workaround**********
 	QScrollArea * scrollArea = new QScrollArea(this);
-	widget->setParent(scrollArea);
 	scrollArea->setWidget(widget);
-//	scrollArea->setGeometry(widget->geometry());
+	static_cast<QGridLayout * >(widget->layout())->addItem(new QSpacerItem(0, 20, QSizePolicy::Minimum, QSizePolicy::Expanding), 11, 0, 1, 2);
+	widget->layout()->setSizeConstraint(QLayout::SetMinimumSize);
+	widget->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding));
+	scrollArea->setFrameStyle(QFrame::NoFrame);
+	scrollArea->setWidgetResizable(true);
+	scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	gridLayout->addWidget(scrollArea, 2, 1, 1, 1);
+	//**********************************
 	
+	QPoint p = parent->mapToGlobal(QPoint(0,0));
+	setGeometry(p.x()+parent->width()-width(),p.y(),width(), parent->height());
 	
 	refreshBrushPreview();
 }
