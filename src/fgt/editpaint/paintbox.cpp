@@ -46,18 +46,16 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	
 	//******QT 4.3 Workaround**********
 	QScrollArea * scrollArea = new QScrollArea(this);
+	gridLayout->removeWidget(widget);
 	scrollArea->setWidget(widget);
 	static_cast<QGridLayout * >(widget->layout())->addItem(new QSpacerItem(0, 20, QSizePolicy::Minimum, QSizePolicy::Expanding), 11, 0, 1, 2);
-	widget->layout()->setSizeConstraint(QLayout::SetMinimumSize);
-	widget->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding));
+	widget->setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Expanding));
 	scrollArea->setFrameStyle(QFrame::NoFrame);
 	scrollArea->setWidgetResizable(true);
 	scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	scrollArea->adjustSize();
 	gridLayout->addWidget(scrollArea, 2, 1, 1, 1);
 	//**********************************
-	
-	QPoint p = parent->mapToGlobal(QPoint(0,0));
-	setGeometry(p.x()+parent->width()-width(),p.y(),width(), parent->height());
 	
 	refreshBrushPreview();
 }
