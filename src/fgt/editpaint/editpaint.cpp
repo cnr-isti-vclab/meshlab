@@ -124,6 +124,7 @@ void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*p
 {
 	QObject::disconnect(paintbox, SIGNAL(undo()), this, SLOT(update()));
 	QObject::disconnect(paintbox, SIGNAL(redo()), this, SLOT(update()));
+	glarea->setMouseTracking(false);
 	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
 	delete paintbox;
 	delete selection;
