@@ -22,7 +22,7 @@ SOURCES       = epoch_io.cpp \
                 maskRenderWidget.cpp \
                 maskImageWidget.cpp \
                 fillImage.cpp \
-		../../../../sf/wrap/ply/plylib.cpp
+		$$VCGDIR/wrap/ply/plylib.cpp
                 
 TARGET        = epoch_io
 DESTDIR       = ../../meshlab/plugins
