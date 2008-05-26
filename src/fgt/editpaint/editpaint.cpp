@@ -686,19 +686,20 @@ inline void EditPaintPlugin::computeNoiseColor(CVertexO * vert, vcg::Color4b & c
 {
 	float scaler = paintbox->getNoiseSize()/100.0; //parameter TODO to be cahced
 	
-	double noise = vcg::math::Perlin::Noise(vert->P()[0] * scaler, vert->P()[1] * scaler, vert->P()[2] * scaler);
+	double noise = vcg::math::Abs(vcg::math::Perlin::Noise(vert->P()[0] * scaler, vert->P()[1] * scaler, vert->P()[2] * scaler));
 
 	Color4b forecolor(paintbox->getForegroundColor().red(), paintbox->getForegroundColor().green(), paintbox->getForegroundColor().blue(), paintbox->getForegroundColor().alpha());
-				
+
 	//TODO test code to be refactored 
 	if (paintbox->getGradientType() == 0)
 	{
 		Color4b backcolor(paintbox->getBackgroundColor().red(), paintbox->getBackgroundColor().green(), paintbox->getBackgroundColor().blue(), paintbox->getBackgroundColor().alpha());
-		mergeColors(noise, forecolor, backcolor, & col);
+		for (int i = 0; i < 4; i ++)
+			col[i] = forecolor[i] * noise + backcolor[i] * (1.0 - noise);
 	}else 
 	{
-		//TODO don't be absurd
-		mergeColors(noise, forecolor, vert->C(), & col);
+		for (int i = 0; i < 4; i ++)
+			col[i] = forecolor[i] * noise + vert->C()[i] * (1.0 - noise);
 	}
 }
 
