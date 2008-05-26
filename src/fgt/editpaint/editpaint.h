@@ -222,17 +222,19 @@ class SinglePositionUndo : public QUndoCommand
 {
 	
 public:
-	SinglePositionUndo(CVertexO * v, vcg::Point3f p, QUndoCommand * parent = 0) : QUndoCommand(parent){
-		vertex = v; original = p;
+	SinglePositionUndo(CVertexO * v, vcg::Point3f p, vcg::Point3f n, QUndoCommand * parent = 0) : QUndoCommand(parent){
+		vertex = v; original = p; normal = n;
 	}
 	
-	virtual void undo() {vcg::Point3f temp = vertex->P(); vertex->P() = original; original = temp;}
+	virtual void undo() {vcg::Point3f temp = vertex->P(); vertex->P() = original; original = temp;
+						 temp = vertex->N(); vertex->N() = normal; normal = temp;}
 	virtual void redo() {undo();}
 	virtual int id() {return MESH_PULL;}
 	
 private:
 	CVertexO* vertex;
 	vcg::Point3f original;
+	vcg::Point3f normal;
 };
 
 
@@ -625,11 +627,13 @@ inline void updateNormal(CVertexO * v)
 		CFaceO * temp=one_face->VFp(pos);
 		if (one_face!=0 && !one_face->IsD()) 
 		{
-			for (int lauf=0; lauf<3; lauf++) 
+			vcg::face::ComputeNormalizedNormal(*one_face);
+	/*		for (int lauf=0; lauf<3; lauf++) 
 				if (pos!=lauf) { 
 					v->N()+=one_face->V(lauf)->cN();
-				}
-			vcg::face::ComputeNormalizedNormal(*one_face);
+				} 
+			vcg::face::ComputeNormalizedNormal(*one_face); */
+			v->N() += one_face->N();
 			pos=one_face->VFi(pos);
 		}
 		one_face=temp;
