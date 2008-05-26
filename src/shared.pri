@@ -4,7 +4,7 @@ CONFIG *= debug_and_release
 TEMPLATE      = lib
 CONFIG       += plugin
 
-VCGDIR  = ../../../../sf
+VCGDIR  = ../../../../vcglib
 GLEWDIR = ../../../../code/lib/glew 
 GLEWCODE = $$GLEWDIR/src/glew.c
 DEFINES *= GLEW_STATIC
