@@ -90,7 +90,7 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	
 	if (!(m.currentDataMask & vcg::tri::io::Mask::IOM_VERTCOLOR))
 	{
-		Color4b color(100, 100, 100, 255);
+		Color4b color(150, 150, 150, 255);
 		for (CMeshO::VertexIterator i = m.cm.vert.begin(); i != m.cm.vert.end(); i++) (*i).C() = color;
 	}
 	
@@ -100,6 +100,8 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	m.ioMask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
 	m.ioMask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 	m.ioMask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
+	m.ioMask |= vcg::tri::io::Mask::IOM_FACENORMAL;
+	
 	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
 	
 	QObject::connect(paintbox, SIGNAL(undo()), this, SLOT(update()));
@@ -316,6 +318,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 				case MESH_PULL:
 				case MESH_PUSH :
 					displaced_vertices.clear();
+					paintbox->getUndoStack()->beginMacro("Mesh Sculpting");
 					sculpt(m, & vertices);
 					break;
 					
@@ -432,6 +435,8 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 				case COLOR_SMOOTH :
 				case COLOR_NOISE :
 				case COLOR_PAINT:
+				case MESH_PUSH:
+				case MESH_PULL:
 					paintbox->getUndoStack()->endMacro();
 				default :
 					break;	
@@ -467,7 +472,7 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 		if (!smoothed_vertices.contains(v))
 		{
 			if (paintbox->getCurrentType() == COLOR_SMOOTH) paintbox->getUndoStack()->push(new SingleColorUndo(v, v->C()));
-			else paintbox->getUndoStack()->push(new SinglePositionUndo(v, v->P()));
+			else paintbox->getUndoStack()->push(new SinglePositionUndo(v, v->P(), v->N()));
 			smoothed_vertices.insert(v,v);
 		} 
 	
@@ -571,23 +576,28 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 				Point3f(data.first->P()[0], data.first->P()[1], data.first->P()[2]),
 				gauss) );
 			
-			qDebug() << "Position before push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
-			qDebug() << "strength" << strength;
+	//		qDebug() << "Position before push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
+	//		qDebug() << "strength" << strength;
 			
-			displaceAlongVector(data.first, normal, gauss);
+			paintbox->getUndoStack()->push(new SinglePositionUndo(data.first, data.first->P(), data.first->N()));
+			displaceAlongVector(data.first, normal, gauss);		
+			updateNormal(data.first);
 			
-			qDebug() << "Position after push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
+	//		qDebug() << "Position after push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
 			
 		} else if (displaced_vertices[data.first].second < gauss) 
 		{
 			displaced_vertices[data.first].second = gauss;
 			Point3f temp = displaced_vertices[data.first].first;
 			data.first->P()[0]=temp[0]; data.first->P()[1]=temp[1]; data.first->P()[2]=temp[2];
+			paintbox->getUndoStack()->push(new SinglePositionUndo(data.first, data.first->P(), data.first->N()));
 			displaceAlongVector(data.first, normal, gauss);	
+			updateNormal(data.first);
+						
 		}
 	}
 	
-	for (unsigned int k = 0; k < vertices->size(); k++) updateNormal(vertices->at(k).first);
+//	for (unsigned int k = 0; k < vertices->size(); k++) updateNormal(vertices->at(k).first);
 }
 
 inline void EditPaintPlugin::capture()
