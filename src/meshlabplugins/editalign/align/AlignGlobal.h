@@ -1,36 +1,26 @@
-/*#***************************************************************************
- * AlignGlobal.h                                                     o o      *
- *                                                                o     o    *
- * Visual Computing Group                                         _  O  _    *
- * IEI Institute, CNUCE Institute, CNR Pisa                        \/)\/     *
- *                                                                /\/|       *
- * Copyright(C) 1999 by Paolo Cignoni, Paolo Pingi, Claudio Rocchini |       *
- * All rights reserved.                                              \       *
- *                                                                           *
- * Permission  to use, copy, modify, distribute  and sell this  software and *
- * its documentation for any purpose is hereby granted without fee, provided *
- * that  the above copyright notice appear  in all copies and that both that *
- * copyright   notice  and  this  permission  notice  appear  in  supporting *
- * documentation. the author makes  no representations about the suitability *
- * of this software for any purpose. It is provided  "as is" without express *
- * or implied warranty.                                                      *
- *                                                                           *
- *****************************************************************************/
 /****************************************************************************
-  History
-$Log: AlignGlobal.h,v $
-Revision 1.1  2005/09/23 14:52:24  ganovell
-added to code from sand/box cignoni, added optionally definable
-namespace, added optional compilation as exectuable
-
-Revision 1.1  2005/08/26 01:34:17  cignoni
-First Working Release of align stuff
-
-Revision 1.2  2005/06/10 16:07:29  cignoni
-*** empty log message ***
-
-
+* VCGLib                                                            o o     *
+* Visual and Computer Graphics Library                            o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2004                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
 ****************************************************************************/
+
 #ifndef __VCG_ALIGNGLOBAL
 #define __VCG_ALIGNGLOBAL
 #include <list>
