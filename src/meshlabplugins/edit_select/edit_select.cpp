@@ -20,59 +20,13 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.13  2008/04/04 14:08:15  cignoni
-Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
 
-Revision 1.12  2008/02/28 09:57:40  cignoni
-corrected bug: wrong selection when Tr matrix != identity
-
-Revision 1.11  2007/10/23 07:15:19  cignoni
-switch to selection rendering done by slot and signals
-
-Revision 1.10  2007/04/16 09:25:29  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing again...
-
-Revision 1.9  2007/03/20 16:23:09  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.8  2007/02/26 01:05:11  cignoni
-cursor added
-
-Revision 1.7  2006/11/29 00:59:18  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.6  2006/11/27 06:57:20  cignoni
-Wrong way of using the __DATE__ preprocessor symbol
-
-Revision 1.5  2006/11/07 09:22:31  cignoni
-Wrote correct Help strings, and added required cleardatamask
-
-Revision 1.4  2006/06/13 13:50:01  cignoni
-Cleaned FPS management
-
-Revision 1.3  2006/06/12 15:19:51  cignoni
-Correct bug in the update of the selection during dragging
-
-Revision 1.2  2006/06/07 08:48:11  cignoni
-Added selection modes: clean/Add (ctrl) / Sub (shift)
-
-Revision 1.1  2006/05/25 04:57:46  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-
-****************************************************************************/
 #include <QtGui>
 
 #include <math.h>
 #include <stdlib.h>
 #include <meshlab/glarea.h>
-#include "meshedit.h"
+#include "edit_select.h"
 #include <wrap/gl/pick.h>
 #include<limits>
 
@@ -112,7 +66,7 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
   void ExtraMeshEditPlugin::mousePressEvent    (QAction *, QMouseEvent * event, MeshModel &m, GLArea * gla)
   {
     LastSel.clear();
-
+		
     if(event->modifiers() == Qt::ControlModifier || 
        event->modifiers() == Qt::ShiftModifier )
       {
@@ -136,17 +90,11 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
     prev=cur;
     cur=event->pos();
     isDragging = true;
-    
-    // now the management of the update 
-    //static int lastMouse=0;
-    static int lastRendering=clock();
-    int curT = clock();
-    qDebug("mouseMoveEvent: curt %i last %i",curT,lastRendering);
-    if(gla->lastRenderingTime() < 50 || (curT - lastRendering) > 1000 )
+
+    // to avoid too frequent rendering 
+    if(gla->lastRenderingTime() < 200 )
     {
-      lastRendering=curT;
       gla->update();
-      qDebug("mouseMoveEvent: ----");
     }
     else{
       gla->makeCurrent();
