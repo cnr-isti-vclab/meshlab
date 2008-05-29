@@ -378,6 +378,11 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
   case CP_RMS:
   case CP_ABSOLUTE:
     {
+			if ( ! tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+				errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
+				return false; // can't continue, mesh can't be processed
+			}
+			
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			if(delvert) Log(GLLogStream::Info, "Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
