@@ -14,6 +14,7 @@ SUBDIRS       = meshfilter \
 				filter_unsharp \
 				filter_splitter \
 				filter_texture \
+				filter_sampling \
 				meshcolorize \
 				meshselect \
 				meshdecorate \ 
