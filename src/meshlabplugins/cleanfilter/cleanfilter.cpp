@@ -188,7 +188,7 @@ const int CleanFilter::getRequirements(QAction *action)
   switch(ID(action))
   {
     case FP_REMOVE_WRT_Q:
-    case FP_REBUILD_SURFACE :	return MeshModel::MM_BORDERFLAG;
+    case FP_REBUILD_SURFACE :	return MeshModel::MM_BORDERFLAG  | MeshModel::MM_VERTMARK;
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
         return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK;
