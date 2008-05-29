@@ -50,7 +50,11 @@ using namespace std;
 
 SampleFilterDocPlugin::SampleFilterDocPlugin() 
 { 
-	typeList << FP_GENERATE_SAMPLING;
+	typeList 
+			<< FP_ELEMENT_SAMPLING 
+		  << FP_MONTECARLO_SAMPLING
+			<< FP_HAUSDORFF_DISTANCE
+	;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -61,7 +65,9 @@ SampleFilterDocPlugin::SampleFilterDocPlugin()
 const QString SampleFilterDocPlugin::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
-		case FP_GENERATE_SAMPLING :  return QString("Point Sampling"); 
+		case FP_ELEMENT_SAMPLING    :  return QString("Mesh Element Sampling"); 
+		case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling"); 
+		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
 		default : assert(0); 
 	}
 }
@@ -71,7 +77,9 @@ const QString SampleFilterDocPlugin::filterName(FilterIDType filterId)
 const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_GENERATE_SAMPLING :  return QString("create a new layer populated with a point sampling of the current mesh"); 
+		case FP_ELEMENT_SAMPLING    :  return QString("Create a new layer populated with a point sampling of the current mesh, a sample for each element of the mesh is generated"); 
+		case FP_MONTECARLO_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way"); 
+		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
 		default : assert(0); 
 	}
 }
@@ -87,22 +95,32 @@ const PluginInfo &SampleFilterDocPlugin::pluginInfo()
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define, 
+// For each parameter you need to define, 
 // - the name of the parameter, 
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void SampleFilterDocPlugin::initParameterSet(QAction *action, MeshDocument & m, FilterParameterSet & parlst) 
-//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	 switch(ID(action))	 {
-		case FP_GENERATE_SAMPLING :  
+		case FP_MONTECARLO_SAMPLING :  
  		  parlst.addInt ("SampleNum",
 											m.mm()->cm.vn,
 											"Number of samples",
 											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
+			parlst.addBool("Weighted",
+										 false,
+										 "Quality Weighted Sampling",
+										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
 											break;
-											
+		case FP_ELEMENT_SAMPLING :  
+			parlst.addEnum("Sampling", 0, 
+									QStringList() << "VertexSampling" << "Edge Sampling" << "Face Sampling", 
+									tr("Element to sample:"), 
+									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
+			break;
+			
+			
 		default : assert(0); 
 	}
 }
@@ -129,17 +147,35 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 {
 	switch(ID(action))
 		{
-		case FP_GENERATE_SAMPLING :  
+		case FP_ELEMENT_SAMPLING :  
+		{
 			MeshModel *mm= new MeshModel();	
 			MeshModel *curMM= md.mm();				
-			md.addMesh(mm); // After Adding a mesh to a MeshDocument the new meshi is the current one 
 			MyPointSampler mps(&(mm->cm));
-//			tri::SurfaceSampling<CMeshO,MyPointSampler>::AllVertex(curMM->cm,mps);
-//			tri::SurfaceSampling<CMeshO,MyPointSampler>::AllEdge(curMM->cm,mps);
-			tri::SurfaceSampling<CMeshO,MyPointSampler>::Montecarlo(curMM->cm,mps,100000);
+			md.addMesh(mm); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+			switch(par.getEnum("Sampling"))
+				{
+					case 0 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllVertex(curMM->cm,mps); break;
+					case 1 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllEdge(curMM->cm,mps);break;
+					case 2 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllFace(curMM->cm,mps);break;
+				}
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-
 			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);		
+		}
+			break;
+		case FP_MONTECARLO_SAMPLING :  
+			{
+				MeshModel *mm= new MeshModel();	
+				MeshModel *curMM= md.mm();				
+				MyPointSampler mps(&(mm->cm));
+				md.addMesh(mm); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+				if(par.getBool("Weighted")) tri::SurfaceSampling<CMeshO,MyPointSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+				else tri::SurfaceSampling<CMeshO,MyPointSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+				vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+				Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
+			}
+			break;
+		case FP_HAUSDORFF_DISTANCE :  		  
 			break;
 		}
 		

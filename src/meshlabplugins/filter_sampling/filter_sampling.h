@@ -45,7 +45,11 @@ class SampleFilterDocPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_GENERATE_SAMPLING  } ;
+	enum {
+				FP_ELEMENT_SAMPLING,
+				FP_MONTECARLO_SAMPLING,
+				FP_HAUSDORFF_DISTANCE 
+			} ;
 
 	SampleFilterDocPlugin();
 	
