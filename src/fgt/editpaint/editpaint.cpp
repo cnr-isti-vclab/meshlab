@@ -226,8 +226,8 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 	if (current_options & EPP_DRAW_CURSOR)
 	{
 		//TODO Compute only when needed!!!!!!!!!!!!!!
-		current_brush.size = paintbox->getSize();
-		current_brush.radius = (paintbox->getRadius() * m.cm.bbox.Diag() * 0.5);
+		current_brush.size = paintbox->getSize() * latest_event.pressure;
+		current_brush.radius = (paintbox->getRadius() * m.cm.bbox.Diag() * 0.5) * latest_event.pressure;
 		current_brush.opacity = paintbox->getOpacity() * latest_event.pressure;
 		current_brush.hardness = paintbox->getHardness() * latest_event.pressure;
 		
@@ -308,6 +308,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					
 				case COLOR_NOISE :
 					painted_vertices.clear();
+					noise_scale = paintbox->getNoiseSize()/100.0;
 					paintbox->getUndoStack()->beginMacro("Color Noise");
 					break;
 					
@@ -672,7 +673,7 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 			
 			paintbox->getUndoStack()->push(new SingleColorUndo(data.first, data.first->C()));
 			
-			applyColor(data.first, color, (int)(op * opac) );
+			applyColor(data.first, color, (int)(op * opac));
 			
 		} else if (painted_vertices[data.first].second < (int)(op * opac)) 
 		{
@@ -695,7 +696,7 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 
 inline void EditPaintPlugin::computeNoiseColor(CVertexO * vert, vcg::Color4b & col)
 {
-	float scaler = paintbox->getNoiseSize()/100.0; //parameter TODO to be cahced
+	float scaler = noise_scale; //parameter TODO to be cahced
 	
 	double noise = vcg::math::Abs(vcg::math::Perlin::Noise(vert->P()[0] * scaler, vert->P()[1] * scaler, vert->P()[2] * scaler));
 

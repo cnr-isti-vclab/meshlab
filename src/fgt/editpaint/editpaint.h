@@ -164,6 +164,7 @@ private:
 	QHash<CVertexO *, std::pair<vcg::Color4b, int> >	painted_vertices; /*<active vertices during painting */
 	
 	vcg::Color4b	color;
+	
 	GLubyte* 		color_buffer; /*< buffer used as color source in cloning*/
 	GLfloat* 		clone_zbuffer; /*<buffer to determine if the source is legal or not */
 	QPoint 			clone_delta;
@@ -172,7 +173,7 @@ private:
 	int				buffer_width;
 	int				buffer_height;
 		
-	
+	float			noise_scale;
 	/****** Pull and Push Tools ******/
 	void sculpt(MeshModel &, std::vector< std::pair<CVertexO *, PickingData> > * vertices);
 	
@@ -268,14 +269,15 @@ private :
  *  
  * O(1) complexity
  */
-inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
+inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac, bool on_quality = false)
 {
-	vcg::Color4b orig = vertex->C();
+	vcg::Color4b orig = on_quality ? vcg::Color4b(vertex->Q(), vertex->Q(), vertex->Q(), 255) : vertex->C();
 	
 	for (int i = 0; i < 4; i ++) 
 		orig[i] = vcg::math::Min(255,( (newcol[i]-orig[i])*opac + orig[i]*(100) )/100);
 	
-	vertex->C() = orig;
+	if (on_quality) vertex->Q() = orig[0];
+	else vertex->C() = orig;
 }
 
 /**  
