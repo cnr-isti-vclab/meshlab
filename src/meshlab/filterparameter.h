@@ -77,6 +77,8 @@ First ver
 #include <QPair>
 #include <QAction>
 #include <vcg/math/matrix44.h>
+#include <meshlab/meshmodel.h>
+
 
 /*
 The Filter Parameter class 
@@ -112,7 +114,8 @@ class FilterParameter
 		PARMATRIX  = 6,
 		PARCOLOR = 7,
 		PARENUM = 8,
-		PARFLOATLIST = 9
+		PARMESH = 9,
+		PARFLOATLIST = 10
 	};
 	
 	QString  fieldName;
@@ -125,6 +128,7 @@ class FilterParameter
   
 	float min;
   float max;
+	void *pointerVal;
 	QStringList enumValues;
 };
 
@@ -149,8 +153,9 @@ public:
 	void addString   (QString name, QString   defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addMatrix44 (QString name, vcg::Matrix44f defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addColor    (QString name, QColor defaultVal, QString desc=QString(), QString tooltip=QString());
-  void addAbsPerc  (QString name, float     defaultVal, float minVal, float maxVal,  QString desc=QString(), QString tooltip=QString());
+	void addAbsPerc  (QString name, float     defaultVal, float minVal, float maxVal,  QString desc=QString(), QString tooltip=QString());
 	void addEnum     (QString name, int defaultVal, QStringList values, QString desc=QString(), QString tooltip=QString());
+	void addMesh     (QString name, MeshModel* m,  QString desc=QString(), QString tooltip=QString());		
 	void addFloatList(QString name, QList<float> &defaultValue, QString desc=QString(), QString tooltip=QString());
 		
 	bool				getBool(QString name);
@@ -160,7 +165,9 @@ public:
 	vcg::Matrix44f		getMatrix44(QString name);
 	QColor		  getColor(QString name);
 	float		    getAbsPerc(QString name);
-  int					getEnum(QString name);
+  	int					getEnum(QString name);
+
+	MeshModel*  getMesh(QString name);
 	QList<float> getFloatList(QString name);
 	
 	void setBool(QString name, bool newVal) ;
@@ -171,6 +178,7 @@ public:
 	void setColor(QString name, QColor newVal);
 	void setAbsPerc(QString name, float newVal);
 	void setEnum(QString name, int newVal);
+	void setMesh(QString name, MeshModel* newVal);
 	void setFloatList(QString name, QList<float> &newValue);
 
 	FilterParameter *findParameter(QString name);

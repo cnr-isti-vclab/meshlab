@@ -142,7 +142,7 @@ class StdParFrame : public QFrame
 public:
 	StdParFrame(QWidget *p);
 
-	void loadFrameContent(FilterParameterSet &curParSet);
+	void loadFrameContent(FilterParameterSet &curParSet,MeshDocument *mdPt = 0);
 	void readValues(FilterParameterSet &curParSet);
 	void resetValues(FilterParameterSet &curParSet);
 
@@ -153,7 +153,7 @@ public:
 
 };
 
-/// Widget to enter a color. 
+/// Widget to select an entry from a list
 class EnumWidget : public QHBoxLayout
 {
 	  Q_OBJECT
@@ -161,10 +161,24 @@ class EnumWidget : public QHBoxLayout
 		QComboBox *enumCombo;
 		QLabel *enumLabel;
 	public:
+		EnumWidget(){};		
 		EnumWidget(QWidget *p, int newEnum, QStringList values);
+		void Init(QWidget *p, int newEnum, QStringList values);
 		int getEnum();
 		void  setEnum(int newEnum);	
 };
+
+
+
+/// Widget to select a Layer the current one
+class MeshEnumWidget : public EnumWidget
+{
+public:
+		MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument &md);
+		inline int getMesh() {return getEnum();}
+		inline void  setMesh(int newEnum) {setEnum(newEnum);}
+};
+
 
 class QVariantListWidget : public QHBoxLayout
 {
@@ -189,6 +203,7 @@ private:
 	QTableWidget *tableWidget;
 	
 };
+
 
 // This class provide a modal dialog box for asking a generic parameter set
 // It can be used by anyone needing for some values in a structred form and having some integrated help
@@ -222,7 +237,7 @@ public:
 
 	void clearValues();
 	void createFrame();
-	void loadFrameContent();
+	void loadFrameContent(MeshDocument *mdPt=0);
 
 	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi);
 

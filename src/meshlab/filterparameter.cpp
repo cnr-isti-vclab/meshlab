@@ -282,6 +282,32 @@ QList<float> FilterParameterSet::getFloatList(QString name)
 	return floatList;
 }
 
+
+/* ---- */
+
+void FilterParameterSet::addMesh (QString name, MeshModel *defaultVal, QString desc, QString tooltip) {
+	FilterParameter p(name,desc,tooltip);
+  p.pointerVal= defaultVal;
+	p.fieldType=FilterParameter::PARMESH;
+	paramList.push_back(p);	
+}
+
+MeshModel * FilterParameterSet::getMesh(QString name) {
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARMESH);
+	return (MeshModel *)(p->pointerVal);
+}
+
+void FilterParameterSet::setMesh(QString name, MeshModel * newVal)
+{
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARMESH);
+	p->pointerVal= newVal;
+}
+
+
 void FilterParameterSet::setFloatList(QString name, QList<float> &newValue)
 {
 	FilterParameter *p = findParameter(name);
@@ -296,3 +322,4 @@ void FilterParameterSet::setFloatList(QString name, QList<float> &newValue)
 	}
 	p->fieldVal = tempList;
 }
+

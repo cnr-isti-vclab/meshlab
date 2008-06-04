@@ -107,7 +107,7 @@ Added standard plugin window support
 #include "meshmodel.h"
 #include "interfaces.h"
 #include "mainwindow.h"
-#include "plugindialog.h"
+//#include "plugindialog.h"
 #include "stdpardialog.h"
 
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
@@ -126,19 +126,19 @@ StdParFrame::StdParFrame(QWidget *p)
 
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *action, MainWindowInterface *mwi)
+void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindowInterface *mwi)
   {
 		curAction=action;
 		curmfi=mfi;
 		curmwi=mwi;
 		curParSet.clear();
 		curModel = mm;
-		curMeshDoc = md;
+		curMeshDoc = mdp;
 		
 		
-		mfi->initParameterSet(action, *md, curParSet);	
+		mfi->initParameterSet(action, *mdp, curParSet);	
 		createFrame();
-		loadFrameContent();
+		loadFrameContent(mdp);
   }
 
 	void MeshlabStdDialog::clearValues()
@@ -213,7 +213,7 @@ void StdParFrame::resetValues(FilterParameterSet &curParSet)
 
 	/* creates widgets for the standard parameters */
 
-void MeshlabStdDialog::loadFrameContent()
+void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 {
 	assert(qf);
 	qf->hide();	
@@ -229,7 +229,7 @@ void MeshlabStdDialog::loadFrameContent()
 	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
 	
 	stdParFrame = new StdParFrame(this);
-	stdParFrame->loadFrameContent(curParSet);
+	stdParFrame->loadFrameContent(curParSet,mdPt);
   gridLayout->addWidget(stdParFrame,1,0,1,2);
 
 	int buttonRow = 2;  // the row where the line of buttons start 
@@ -256,7 +256,7 @@ void MeshlabStdDialog::loadFrameContent()
 	this->adjustSize();		
 }
 
-void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
+void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *mdPt)
 {
  if(layout()) delete layout();
 	QGridLayout *gridLayout = new QGridLayout(this);
@@ -271,6 +271,8 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 	AbsPercWidget *apw;
 	QColorButton *qcbt;
 	QLayout *layout;
+	MeshEnumWidget *mew;
+	
 	QList<FilterParameter> &parList =curParSet.paramList;
 	
 	QString descr;
@@ -353,6 +355,21 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 				stdfieldwidgets.push_back(layout);
 		
 				break;
+
+			case FilterParameter::PARMESH:
+				assert(mdPt);
+				ql = new QLabel(fpi.fieldDesc,this);
+				ql->setToolTip(fpi.fieldToolTip);	
+				
+				mew = new MeshEnumWidget(this, (MeshModel *)(fpi.pointerVal), *mdPt);
+				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+				gridLayout->addLayout(mew,i,1,Qt::AlignTop);				
+				stdfieldwidgets.push_back(mew);
+				
+				
+				break;
+
+
 			case FilterParameter::PARFLOATLIST:
 				{
 					ql = new QLabel(fpi.fieldDesc,this);
@@ -380,6 +397,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 					stdfieldwidgets.push_back(layout);
 				}			
 				break;
+
 
 			default: assert(0);
 		} //end case
@@ -560,6 +578,11 @@ void QColorButton::pickColor()
 //EnumWidget Implementation
 /******************************************/ 
 EnumWidget::EnumWidget(QWidget *p, int defaultEnum, QStringList values) {
+	Init(p,defaultEnum,values);
+}
+
+void EnumWidget::Init(QWidget *p, int defaultEnum, QStringList values)
+{
   enumLabel = new QLabel(p);
 	enumCombo = new QComboBox(p);
   enumCombo->addItems(values);
@@ -576,6 +599,25 @@ int EnumWidget::getEnum()
 void EnumWidget::setEnum(int newEnum) 
 {
 	enumCombo->setCurrentIndex(newEnum);
+}
+
+
+/******************************************/ 
+//MeshEnumWidget Implementation
+/******************************************/ 
+MeshEnumWidget::MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument &md)
+{ 
+	QStringList meshNames;
+	int defaultMeshIndex=-1;
+	for(int i=0;i<md.meshList.size();++i)
+	 {
+		QString shortName(QFileInfo(md.meshList.at(i)->fileName.c_str()).fileName());
+		meshNames.push_back(shortName);
+		if(md.meshList.at(i) == defaultMesh) defaultMeshIndex = i;
+	 }
+	assert(defaultMeshIndex != -1);
+	
+	Init(p,defaultMeshIndex,meshNames);
 }
 
 /****************************************** 
@@ -609,6 +651,7 @@ QList<QVariant> QVariantListWidget::getList()
 	
 	return values;	
 }
+
 
 void QVariantListWidget::setList(QList<QVariant> &values)
 {	
