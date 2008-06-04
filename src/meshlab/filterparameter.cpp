@@ -251,4 +251,48 @@ void FilterParameterSet::setEnum(QString name, int newVal)
 	p->fieldVal=QVariant(int(newVal));	
 }
 
+void FilterParameterSet::addFloatList(QString name, QList<float> &defaultValue, QString desc, QString tooltip)
+{
+	FilterParameter p(name,desc,tooltip);
+	
+	QList<QVariant> tempList;
+	for(int i = 0; i < defaultValue.size(); ++i)
+	{
+		//if you put the float in directly int converts to a double which we do not want
+		tempList.push_back(QVariant(QString().setNum(defaultValue.at(i), 'g', 12)));
+		//qDebug() << "putting down " << QString().setNum(defaultValue.at(i), 'g', 12) ;
+	}
+	
+	p.fieldVal = tempList;
+	p.fieldType = FilterParameter::PARFLOATLIST;
+	paramList.push_back(p);
+}
 
+QList<float> FilterParameterSet::getFloatList(QString name)
+{
+	FilterParameter *p = findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARFLOATLIST);
+	
+	QList<float> floatList;
+	QList<QVariant> internalList = p->fieldVal.toList();
+	for(int i = 0; i < internalList.size(); ++i)
+		floatList.push_back(internalList.at(i).toString().toFloat());	
+	
+	return floatList;
+}
+
+void FilterParameterSet::setFloatList(QString name, QList<float> &newValue)
+{
+	FilterParameter *p = findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARFLOATLIST);
+	
+	QList<QVariant> tempList;
+	for(int i = 0; i < newValue.size(); ++i)
+	{
+		tempList.push_back(QVariant(QString().setNum(newValue.at(i), 'g', 12)));
+		//qDebug() << "insetfloatlist " << QVariant(QString().setNum(newValue.at(i), 'g', 12));
+	}
+	p->fieldVal = tempList;
+}

@@ -166,6 +166,30 @@ class EnumWidget : public QHBoxLayout
 		void  setEnum(int newEnum);	
 };
 
+class QVariantListWidget : public QHBoxLayout
+{
+	Q_OBJECT
+public:
+	QVariantListWidget(QWidget *parent, QList<QVariant> &values);
+	
+	//get the values listed in this widget
+	QList<QVariant> getList();
+	
+	//set the values this widget lists
+	void setList(QList<QVariant> &values);
+	
+public slots:
+	//add a new row for input at the end
+	void addRow();
+	
+	//remove the last row of the table widget
+	void removeRow();
+	
+private:
+	QTableWidget *tableWidget;
+	
+};
+
 // This class provide a modal dialog box for asking a generic parameter set
 // It can be used by anyone needing for some values in a structred form and having some integrated help
 class GenericParamDialog: public QDialog

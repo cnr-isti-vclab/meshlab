@@ -198,6 +198,12 @@ void StdParFrame::resetValues(FilterParameterSet &curParSet)
 				case FilterParameter::PARENUM:
 					((EnumWidget *)stdfieldwidgets.at(i))->setEnum(fpi.fieldVal.toUInt());
 					break;
+				case FilterParameter::PARFLOATLIST: 
+					{
+						QList<QVariant> list = fpi.fieldVal.toList();
+						((QVariantListWidget *)stdfieldwidgets.at(i))->setList(list);
+					}
+					break;
 				default: assert(0);
 
 			}
@@ -264,7 +270,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 	QLabel *ql;
 	AbsPercWidget *apw;
 	QColorButton *qcbt;
-	EnumWidget *ew;
+	QLayout *layout;
 	QList<FilterParameter> &parList =curParSet.paramList;
 	
 	QString descr;
@@ -340,14 +346,40 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet)
 				ql = new QLabel(fpi.fieldDesc,this);
 				ql->setToolTip(fpi.fieldToolTip);	
 				
-				ew = new EnumWidget(this, fpi.fieldVal.toUInt(), fpi.enumValues);
+				layout = new EnumWidget(this, fpi.fieldVal.toUInt(), fpi.enumValues);
 				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
-				gridLayout->addLayout(ew,i,1,Qt::AlignTop);
+				gridLayout->addLayout(layout,i,1,Qt::AlignTop);
 					
-				stdfieldwidgets.push_back(ew);
+				stdfieldwidgets.push_back(layout);
 		
 				break;
-
+			case FilterParameter::PARFLOATLIST:
+				{
+					ql = new QLabel(fpi.fieldDesc,this);
+					ql->setToolTip(fpi.fieldToolTip);	
+						
+					QToolButton *addButton = new QToolButton(this);
+					addButton->setText("Add Row");
+					QToolButton *removeButton = new QToolButton(this);
+					removeButton->setText("Remove Row");
+					
+					QVBoxLayout *leftLayout = new QVBoxLayout(this);
+					leftLayout->addWidget(ql);
+					leftLayout->addWidget(addButton);
+					leftLayout->addWidget(removeButton);
+					
+					QList<QVariant> list = fpi.fieldVal.toList();
+					
+					layout = new QVariantListWidget(this, list);
+					gridLayout->addLayout(leftLayout,i,0,Qt::AlignTop);
+					gridLayout->addLayout(layout,i,1,Qt::AlignTop);
+										
+					connect(addButton, SIGNAL(clicked()), layout, SLOT(addRow()));
+					connect(removeButton, SIGNAL(clicked()), layout, SLOT(removeRow()));
+					
+					stdfieldwidgets.push_back(layout);
+				}			
+				break;
 
 			default: assert(0);
 		} //end case
@@ -400,6 +432,10 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 			  break;
 		  case FilterParameter::PARENUM:
 			  curParSet.setEnum(sname,((EnumWidget *)stdfieldwidgets[i])->getEnum());
+			  break;
+		  case FilterParameter::PARFLOATLIST:
+			  FilterParameter *p = curParSet.findParameter(sname);
+			  p->fieldVal = ((QVariantListWidget *)stdfieldwidgets[i])->getList();
 			  break;
 
 		  }
@@ -542,8 +578,75 @@ void EnumWidget::setEnum(int newEnum)
 	enumCombo->setCurrentIndex(newEnum);
 }
 
+/****************************************** 
+ QVariantListWidget Implementation
+******************************************/
+QVariantListWidget::QVariantListWidget(QWidget *parent, QList<QVariant> &values)
+{
+	tableWidget = new QTableWidget(parent);
+	tableWidget->setColumnCount(1);
+	tableWidget->setRowCount(values.size() );
+	tableWidget->setMaximumSize(135, 180);
+	tableWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+	tableWidget->horizontalHeader()->setDisabled(true);
+	
+	setList(values);
+	
+	this->addWidget(tableWidget);
+}
+	
+QList<QVariant> QVariantListWidget::getList()
+{
+	QList<QVariant> values;
+	
+	for(int i = 0; i < tableWidget->rowCount(); i++)
+	{
+		QString rowValue = tableWidget->item(i,0)->text(); 
 
+		//if the row was not blank
+		if("" != rowValue) values.push_back(QVariant(rowValue));  
+	}
+	
+	return values;	
+}
 
+void QVariantListWidget::setList(QList<QVariant> &values)
+{	
+	tableWidget->clearContents();
+	tableWidget->setRowCount(values.size() );
+	for(int i = 0; i < values.size(); i++)
+	{
+		tableWidget->setItem(i, 0, new QTableWidgetItem(values.at(i).toString()));
+	}
+}
+
+void QVariantListWidget::addRow()
+{
+	int count = tableWidget->rowCount();
+	
+	//insert a new row at the end
+	tableWidget->insertRow(count);
+	
+	//fill row with something so that it can be removed if left blank... qt forces us to do this
+	tableWidget->setItem(count, 0, new QTableWidgetItem(""));
+}
+	
+	
+void QVariantListWidget::removeRow()
+{
+	QList<QTableWidgetItem *> items = tableWidget->selectedItems();
+	
+	if(items.size() == 0){
+		//remove the last row if none are selected
+		tableWidget->removeRow(tableWidget->rowCount()-1);
+	} else
+	{
+		//remove each selected row
+		for(int i = 0; i < items.size(); i++){
+			tableWidget->removeRow(items.at(i)->row());
+		}
+	}
+}
 
 GenericParamDialog::GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title) :QDialog(p)
 {

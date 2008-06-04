@@ -66,6 +66,15 @@ added Filter History Dialogs
 
 using namespace vcg; 
 
+const QString FilterScript::Type = "type";
+const QString FilterScript::Value = "value";
+
+//chose "val" since it is already used and should be replaced by a constant
+const QString FilterScript::Item = "val";
+	
+//constants for the type names
+const QString FilterScript::FloatList = "FloatList";
+
 bool FilterScript::save(QString filename)
 {
 
@@ -128,6 +137,19 @@ bool FilterScript::save(QString filename)
         for(int i=0;i<16;++i)
           parElem.setAttribute(QString("val")+QString::number(i),matrixVals[i].toString());
       }
+
+      if((*jj).fieldType == FilterParameter::PARFLOATLIST)
+      {
+    	parElem.setAttribute(Type,FloatList);
+    	QList<QVariant> values = (*jj).fieldVal.toList();
+    	for(int i=0; i < values.size(); ++i)
+    	{
+    	  QDomElement listElement = doc.createElement(Item);
+    	  listElement.setAttribute(Value,values[i].toString());
+          parElem.appendChild(listElement);
+        }
+      }
+      
       tag.appendChild(parElem);
     }
     root.appendChild(tag);
@@ -179,7 +201,19 @@ bool FilterScript::open(QString filename)
                         	}
                         	par.addEnum(name,np.attribute("value").toInt(),list);
                         }
-                      }
+                      
+                        if(type == FloatList)
+                        {
+                    	  QList<float> values;
+                    	  for(QDomElement listItem = np.firstChildElement(Item);
+                            !listItem.isNull();
+                            listItem = listItem.nextSiblingElement(Item))
+                    	  {
+                            values.append(listItem.attribute(Value).toFloat()); 
+                          }
+                    	  par.addFloatList(name,values);
+                        }
+                   }
                    actionList.append(qMakePair(name,par));
              }
           }

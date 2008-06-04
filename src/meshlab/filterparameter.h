@@ -111,7 +111,8 @@ class FilterParameter
 		PARABSPERC = 5,
 		PARMATRIX  = 6,
 		PARCOLOR = 7,
-		PARENUM = 8
+		PARENUM = 8,
+		PARFLOATLIST = 9
 	};
 	
 	QString  fieldName;
@@ -150,6 +151,7 @@ public:
 	void addColor    (QString name, QColor defaultVal, QString desc=QString(), QString tooltip=QString());
   void addAbsPerc  (QString name, float     defaultVal, float minVal, float maxVal,  QString desc=QString(), QString tooltip=QString());
 	void addEnum     (QString name, int defaultVal, QStringList values, QString desc=QString(), QString tooltip=QString());
+	void addFloatList(QString name, QList<float> &defaultValue, QString desc=QString(), QString tooltip=QString());
 		
 	bool				getBool(QString name);
 	int					getInt(QString name);
@@ -159,6 +161,7 @@ public:
 	QColor		  getColor(QString name);
 	float		    getAbsPerc(QString name);
   int					getEnum(QString name);
+	QList<float> getFloatList(QString name);
 	
 	void setBool(QString name, bool newVal) ;
 	void setInt(QString name, int newVal) ;
@@ -168,6 +171,7 @@ public:
 	void setColor(QString name, QColor newVal);
 	void setAbsPerc(QString name, float newVal);
 	void setEnum(QString name, int newVal);
+	void setFloatList(QString name, QList<float> &newValue);
 
 	FilterParameter *findParameter(QString name);
 

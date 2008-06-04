@@ -22,6 +22,16 @@ public:
   
   QList< QPair< QString , FilterParameterSet> > actionList;
   typedef QList< QPair<QString, FilterParameterSet> >::iterator iterator;
+
+private:
+	//constant strings to make future additions to this class less error prone
+	static const QString Type;
+	static const QString Value;
+	static const QString Item;
+	
+	//constants for the type names
+	static const QString FloatList;
+  
 };
 
 #endif
