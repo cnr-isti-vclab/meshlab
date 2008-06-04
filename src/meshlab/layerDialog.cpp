@@ -59,7 +59,8 @@ void LayerDialog::toggleStatus(int row, int col)
 		case 1 : 
 		{
 			QList<MeshModel *> &meshList=gla->meshDoc.meshList;
-			meshList.at(row)->visible = ! meshList.at(row)->visible ;
+			if(meshList.at(row)->visible)  meshList.at(row)->visible = false;
+			else   meshList.at(row)->visible = true;
 			updateTable();	
 		}
 	}
@@ -77,6 +78,7 @@ void LayerDialog::updateTable()
 	if(!isVisible()) return;
 	QList<MeshModel *> &meshList=gla->meshDoc.meshList;
 	qDebug("Items in list: %d", meshList.size());
+	ui.layerTableWidget->clear();
 	ui.layerTableWidget->setColumnCount(3);
 	ui.layerTableWidget->setRowCount(meshList.size());
 	ui.layerTableWidget->horizontalHeader()->hide();
@@ -90,12 +92,9 @@ void LayerDialog::updateTable()
 		
 		item = new QTableWidgetItem(QFileInfo(meshList.at(i)->fileName.c_str()).fileName());
 		if(meshList.at(i)==gla->mm()) {
-//						item->setSelected(true);
 						item->setBackground(QBrush(Qt::yellow));
 						item->setForeground(QBrush(Qt::blue));	
-						}						
-	
-//					else item->setSelected(false);
+						}							
   	ui.layerTableWidget->setItem(i,0,item );
 		
 		if(meshList.at(i)->visible){
