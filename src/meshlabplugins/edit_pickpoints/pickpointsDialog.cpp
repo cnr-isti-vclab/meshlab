@@ -118,7 +118,6 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	headerNames << "Point Name" << "X" << "Y" << "Z";
 	
 	ui.pickedPointsTreeWidget->setHeaderLabels(headerNames);
-
 	
 	//init some variables
 	
@@ -139,7 +138,7 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	connect(ui.loadPointsButton, SIGNAL(clicked()), this, SLOT(loadPoints()));
 	connect(ui.clearButton, SIGNAL(clicked()), this, SLOT(clearPoints()));
 	connect(ui.saveTemplateButton, SIGNAL(clicked()), this, SLOT(savePointTemplate()));
-	connect(ui.loadTemplateButton, SIGNAL(clicked()), this, SLOT(loadPickPointsTemplate()));
+	connect(ui.loadTemplateButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndloadTemplate()));
 	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearPickPointsTemplate()));
 	connect(ui.addPointToTemplateButton, SIGNAL(clicked()), this, SLOT(addPointToTemplate()));
 
@@ -166,8 +165,11 @@ PickedPointTreeWidgetItem * PickPointsDialog::addPoint(Point3f point){
 				if(NULL != item){
 					//set the next item to be selected
 					ui.pickedPointsTreeWidget->setCurrentItem(item);
+				} else
+				{
+					//if we just picked the last point go into move mode
+					togglePickMode(false);
 				}
-				
 			}
 		} else {
 			widgetItem =
@@ -257,6 +259,34 @@ void PickPointsDialog::clearAllPointsFromTreeWidget(){
 	PickedPointTreeWidgetItem::pointCounter = 0;
 }
 
+
+void PickPointsDialog::loadPickPointsTemplate(QString filename){
+	//clear the points tree
+	clearAllPointsFromTreeWidget();
+		
+	qDebug() << "load " << filename;
+	
+	std::vector<QString> pointNameVector;
+	
+	PickPointsTemplate::load(filename, &pointNameVector);
+	
+	for(int i = 0; i < pointNameVector.size(); i++){
+		PickedPointTreeWidgetItem *widgetItem =
+			new PickedPointTreeWidgetItem(pointNameVector.at(i));
+			
+		pickedPointTreeWidgetItemVector.push_back(widgetItem);
+
+		ui.pickedPointsTreeWidget->addTopLevelItem(widgetItem);
+	}
+	
+	//select the first item in the list if it exists
+	if(pickedPointTreeWidgetItemVector.size() > 0){
+		ui.pickedPointsTreeWidget->setCurrentItem(pickedPointTreeWidgetItemVector.at(0));
+	}
+	
+	templateLoaded = true;
+}
+
 std::vector<PickedPointTreeWidgetItem*>& PickPointsDialog::getPickedPointTreeWidgetItemVector(){
 	return pickedPointTreeWidgetItemVector;
 }
@@ -281,6 +311,9 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 	if(NULL == meshModel){
 		return;
 	}
+	
+	//make sure we start in pick mode
+	ui.pickPointModeRadioButton->setChecked(true);
 	
 	/*
 	//Load the points from meta data if they are there
@@ -313,11 +346,27 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 			qDebug() << "problem with cast!!";
 		}
 		
-	}*/
+	} else {*/
+	
+	//try loading the default template if there are not saved points already
+	tryLoadingDefaultTemplate();
+	
+	//}
 }
 
 MeshModel* PickPointsDialog::getCurrentMeshModel(){
 	return meshModel;
+}
+
+//loads the default template if there is one
+void PickPointsDialog::tryLoadingDefaultTemplate()
+{
+	QString filename = PickPointsTemplate::getDefaultTemplateFileName();
+	QFile file(filename);
+	
+	if(file.exists()){
+		loadPickPointsTemplate(filename);
+	}
 }
 
 void PickPointsDialog::removeHighlightedPoint(){
@@ -393,9 +442,13 @@ void PickPointsDialog::togglePickMode(bool checked){
 	//qDebug() << "Toggle pick mode " << checked;
 	
 	if(checked){
-		currentMode = ADD_POINT;	
+		currentMode = ADD_POINT;
+		//make sure radio button reflects this change
+		ui.pickPointModeRadioButton->setChecked(true);
 	} else {
 		currentMode = MOVE_POINT;
+		//make sure radio button reflects the change
+		ui.movePointRadioButton->setChecked(true);
 	}
 }
 
@@ -485,7 +538,7 @@ void PickPointsDialog::savePointTemplate(){
 	}
 	
 	//default if for the filename to be that of the default template
-	QString filename = QDir::homePath() + "/.pickPointsTemplate.xml";
+	QString filename = PickPointsTemplate::getDefaultTemplateFileName();
 	qDebug() << "default " << filename;
 	if(!ui.defaultTemplateCheckBox->isChecked())
 	{
@@ -494,35 +547,18 @@ void PickPointsDialog::savePointTemplate(){
 	PickPointsTemplate::save(filename, &pointNameVector);
 
 	templateLoaded = true;
+	
+	if(ui.defaultTemplateCheckBox->isChecked())
+	{
+		QMessageBox::information(this,  "MeshLab", "Default Template Saved!",
+		               		QMessageBox::Ok);
+	}
 }
 
-void PickPointsDialog::loadPickPointsTemplate(){
-	//clear the points tree
-	clearAllPointsFromTreeWidget();
-
+void PickPointsDialog::askUserForFileAndloadTemplate()
+{
 	QString filename = QFileDialog::getOpenFileName(this,tr("Load File"),".", "*"+PickPointsTemplate::fileExtension);
-				
-	qDebug() << "load " << filename;
-	
-	std::vector<QString> pointNameVector;
-	
-	PickPointsTemplate::load(filename, &pointNameVector);
-	
-	for(int i = 0; i < pointNameVector.size(); i++){
-		PickedPointTreeWidgetItem *widgetItem =
-			new PickedPointTreeWidgetItem(pointNameVector.at(i));
-			
-		pickedPointTreeWidgetItemVector.push_back(widgetItem);
-
-		ui.pickedPointsTreeWidget->addTopLevelItem(widgetItem);
-	}
-	
-	//select the first item in the list if it exists
-	if(pickedPointTreeWidgetItemVector.size() > 0){
-		ui.pickedPointsTreeWidget->setCurrentItem(pickedPointTreeWidgetItemVector.at(0));
-	}
-	
-	templateLoaded = true;
+	loadPickPointsTemplate(filename);
 }
 
 void PickPointsDialog::clearPickPointsTemplate(){

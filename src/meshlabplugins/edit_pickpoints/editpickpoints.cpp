@@ -116,6 +116,7 @@ void EditPickPointsPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *
 		pickPointsDialog = new PickPointsDialog(this, gla->window());
 	}
 	
+	//set the current mesh
 	pickPointsDialog->setCurrentMeshModel(&mm);
 	
 	//show the dialog

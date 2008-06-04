@@ -16,6 +16,8 @@ public:
 	
 	static bool load(QString filename, std::vector<QString> *pointNameVector);
 	
+	static QString getDefaultTemplateFileName();
+	
 	//extension of the filetype for PickPointsTemplate
 	static const QString fileExtension;
 	

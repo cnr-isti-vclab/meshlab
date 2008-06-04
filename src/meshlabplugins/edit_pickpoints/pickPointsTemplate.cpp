@@ -88,3 +88,8 @@ bool PickPointsTemplate::load(QString filename,
 	}
 	return true;
 }
+
+QString PickPointsTemplate::getDefaultTemplateFileName()
+{
+	return QDir::homePath() + "/.pickPointsTemplate.xml";
+}

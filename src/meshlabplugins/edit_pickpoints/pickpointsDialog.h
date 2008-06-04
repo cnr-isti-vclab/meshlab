@@ -103,6 +103,12 @@ private:
 	//makes the picked point tree widget empty
 	void clearAllPointsFromTreeWidget();
 	
+	//loads the default template if there is one
+	void tryLoadingDefaultTemplate();
+	
+	//load a point template
+	void loadPickPointsTemplate(QString filename);
+	
 	//the current mode of the GUI
 	Mode currentMode;
 	
@@ -150,7 +156,7 @@ private slots:
 	void savePointTemplate();
 	
 	//load a point template
-	void loadPickPointsTemplate();
+	void askUserForFileAndloadTemplate();
 	
 	//clear the loaded template if one is loaded
 	void clearPickPointsTemplate();
