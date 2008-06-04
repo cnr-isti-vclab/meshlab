@@ -87,8 +87,8 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 	m.updateDataMask(MeshModel::MM_FACEMARK);
 	m.updateDataMask(MeshModel::MM_VERTMARK);
-	
-	if (!(m.currentDataMask & vcg::tri::io::Mask::IOM_VERTCOLOR))
+
+	if (!(m.ioMask & vcg::tri::io::Mask::IOM_VERTCOLOR))
 	{
 		Color4b color(150, 150, 150, 255);
 		for (CMeshO::VertexIterator i = m.cm.vert.begin(); i != m.cm.vert.end(); i++) (*i).C() = color;
