@@ -151,8 +151,6 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 		face::ComputeNormalizedNormal(*fi);	
 	tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
 	destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
-	destMesh->busy=false;												// ready to be used
-
 	return true;
 }
 
