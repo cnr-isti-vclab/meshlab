@@ -213,21 +213,19 @@ public:
   // it is composed by OR-ing IOM_XXXX enums (defined in tri::io::Mask)
   int ioMask;
 	
-  bool busy;    // used in processing. To disable access to the mesh by the rendering thread
 	bool visible; // used in rendering; Needed for toggling on and off the meshes
-	
-	
+		
   //abstract pointer to fileformat's dependent additional info
   AdditionalInfo* addinfo;
 
-  MeshModel() {    
+  MeshModel(const char *meshName=0) {    
     glw.m=&cm; 
     currentDataMask=MM_NONE;
     ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS | IOM_VERTNORMAL;
-    busy=true;
-		visible=true;
+    visible=true;
 		cm.Tr.SetIdentity();
 		cm.sfn=0;
+		if(meshName) fileName=meshName;
   }
   bool Render(vcg::GLW::DrawMode dm, vcg::GLW::ColorMode cm, vcg::GLW::TextureMode tm);
   bool RenderSelectedFaces();
@@ -368,6 +366,7 @@ public :
 MeshDocument()
 	{
 		currentMesh = NULL;
+		busy=false;
 	}
  
  ~MeshDocument()
@@ -391,11 +390,20 @@ MeshDocument()
   QList<MeshModel *> meshList;	
 	
 	int size() const {return meshList.size();}
+	bool busy;    // used in processing. To disable access to the mesh by the rendering thread
 
-	void addMesh(MeshModel *mm)
+	MeshModel *addNewMesh(const char *meshName)
 	{
-	 meshList.push_back(mm);
-	 currentMesh=meshList.back();
+		MeshModel *newMesh=new MeshModel(meshName);
+		meshList.push_back(newMesh);
+		currentMesh=meshList.back();
+		return newMesh;
+	}
+	
+	void addMesh(MeshModel *newMesh)
+	{
+		meshList.push_back(newMesh);
+		currentMesh=meshList.back();
 	}
 
   bool delMesh(MeshModel *mmToDel)
