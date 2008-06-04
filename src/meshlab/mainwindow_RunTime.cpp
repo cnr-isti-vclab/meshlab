@@ -554,9 +554,9 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params)
   // (4) Apply the Filter 
 	bool ret;
   qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
-	GLA()->mm()->busy=true;
+	GLA()->meshDoc.busy=true;
 	ret=iFilter->applyFilter(action,   GLA()->meshDoc, params, QCallBack);
-	GLA()->mm()->busy=false;
+	GLA()->meshDoc.busy=false;
   qApp->restoreOverrideCursor();	
 
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
@@ -930,7 +930,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					
 					if(delVertNum>0 || delFaceNum>0 ) 
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
-					GLA()->mm()->busy=false;
+					GLA()->meshDoc.busy=false;
 				}
 			}
 	}// end foreach file of the input list
