@@ -13,7 +13,6 @@ HEADERS        = interfaces.h \
                  saveSnapshotDialog.h \
                  savemaskexporter.h \
                  changetexturename.h \
-                 GenericELDialog.h \
                  layerDialog.h \
                  stdpardialog.h \
                  ../../../sf/wrap/gui/trackball.h\
@@ -45,11 +44,10 @@ FORMS          =    ui/layerDialog.ui \
                     ui/filterScriptDialog.ui \
                     ui/customDialog.ui\
                     ui/lightingProperties.ui \
-					ui/savesnapshotDialog.ui\						 
+					ui/savesnapshotDialog.ui\
 					ui/aboutDialog.ui \
 					ui/renametexture.ui \
 					ui/savemaskexporter.ui \
-					ui/GenericELDialog.ui  \
 					ui/congratsDialog.ui
 
 
