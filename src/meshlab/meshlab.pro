@@ -80,7 +80,7 @@ win32:DEFINES += NOMINMAX
 
 DEFINES += GLEW_STATIC
 
-INCLUDEPATH += . ../../../sf ../../../code/lib/glew/include
+INCLUDEPATH += . .. ../../../vcglib ../../../code/lib/glew/include
 CONFIG += stl
 
 # The following define is needed in gcc to remove the asserts
