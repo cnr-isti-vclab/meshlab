@@ -19,9 +19,11 @@ SUBDIRS       = meshfilter \
 				meshselect \
 				meshdecorate \ 
 				edit_select \
-				editslice\ 
+				edit_morpher \
+				edit_pickpoints \
+				editslice \ 
 				editpaint \
-				editalign\
+				editalign \
 				editmeasure\
 				editrgbtri\
 				editsegment\
