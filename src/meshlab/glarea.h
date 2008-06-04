@@ -272,7 +272,6 @@ public:
 	MeshDocument meshDoc;
 	MeshModel *mm(){return meshDoc.mm();}
  
-	//void addMesh(MeshModel *mm);
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
 	GLLogStream log;

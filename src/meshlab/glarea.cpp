@@ -373,7 +373,7 @@ void GLArea::paintGL()
 	else 
 		glDisable(GL_CULL_FACE);
 
-	if(!mm()->busy)
+	if(!meshDoc.busy)
 	{
 		// render the current meshes
 		if (iRenderer && currentShader)
@@ -645,7 +645,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
-	if(e->buttons() | Qt::LeftButton) 
+	if((e->buttons() == Qt::NoButton) || (e->buttons() & Qt::LeftButton) || (e->buttons() & Qt::RightButton) )
 	{
       if(iEdit && !suspendedEditor) iEdit->mouseMoveEvent(currentEditor,e,*mm(),this);
       else {
