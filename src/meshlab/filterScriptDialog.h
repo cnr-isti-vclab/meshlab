@@ -49,6 +49,19 @@ private slots:
 	void clearScript();	
 	void saveScript();	
 	void openScript();	
+	
+	//moves the filter selected in scriptListWidget up in the script
+	void moveSelectedFilterUp();
+	
+	//moves the filter selected in scriptListWidget down in the script
+	void moveSelectedFilterDown();
+	
+	//removes the selected filter from the script
+	void removeSelectedFilter();
+	
+	//edit the parameters of the selected filter
+	void editSelectedFilterParameters();
+	
 private:
 	Ui::scriptDialog ui;
   FilterScript *scriptPtr;

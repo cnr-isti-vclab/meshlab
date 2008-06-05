@@ -45,6 +45,11 @@ FilterParameter *FilterParameterSet::findParameter(QString name)
 	return 0;
 }
 
+void FilterParameterSet::removeParameter(QString name){
+	paramList.removeAll(*findParameter(name));
+}
+
+
 //--------------------------------------
 
 void FilterParameterSet::addBool (QString name, bool defaultVal, QString desc, QString tooltip)

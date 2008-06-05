@@ -102,6 +102,7 @@ class FilterParameter
 		fieldName=name;
 		fieldDesc=desc;
 		fieldToolTip=tooltip;
+		pointerVal = 0;
 	}
 	
 	enum ParType
@@ -130,6 +131,27 @@ class FilterParameter
   float max;
 	void *pointerVal;
 	QStringList enumValues;
+	
+	//set the value to be that of the input paramter
+	//needed because min, max, enumValues complicate things
+	void setValue(const FilterParameter &inputParameter)
+	{
+		fieldVal = inputParameter.fieldVal;
+		min = inputParameter.min;
+		max = inputParameter.max;
+		pointerVal = inputParameter.pointerVal;
+	
+		//clear any old values
+		enumValues.clear();
+		//add all the new ones
+		enumValues += inputParameter.enumValues;
+	}
+	
+	//an equals operator that compares the field name and field type
+	bool operator==(const FilterParameter &inputParameter) const
+	{
+		return (fieldName == inputParameter.fieldName);
+	}
 };
 
 /*
@@ -183,6 +205,9 @@ public:
 
 	FilterParameter *findParameter(QString name);
 
+	//remove a parameter from the set by name
+	void removeParameter(QString name);
+	
 	void clear() { paramList.clear(); }
 };
 
