@@ -703,7 +703,7 @@ GenericParamDialog::GenericParamDialog(QWidget *p, FilterParameterSet *_curParSe
 // update the values of the widgets with the values in the paramlist;
 void GenericParamDialog::resetValues()
 {
-		stdParFrame->resetValues(*defaultParSet);
+	stdParFrame->resetValues(*curParSet);
 }
 
 void GenericParamDialog::toggleHelp()
@@ -723,12 +723,15 @@ void GenericParamDialog::createFrame()
 	stdParFrame->loadFrameContent(*curParSet);
   layout()->addWidget(stdParFrame);
 
-	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help  |QDialogButtonBox::Reset  | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
+	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
+	//add the reset button so we can get its signals
+	QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
 	layout()->addWidget(buttonBox);
 	
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 	connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
+	connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
 	
 	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
 		

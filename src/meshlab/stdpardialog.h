@@ -214,15 +214,16 @@ public:
   GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title=QString()); 
 	
 	FilterParameterSet *curParSet;
-	FilterParameterSet *defaultParSet;
 	StdParFrame *stdParFrame;
 	
 	void createFrame();
-  void resetValues();
 	
 	public slots:	
 	void getAccept();
 	void toggleHelp();
+	
+	//reset the values on the gui back to the ones originally given to the dialog
+	void resetValues();
 };
 
 
