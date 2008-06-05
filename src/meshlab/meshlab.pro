@@ -1,3 +1,9 @@
+VCGDIR  = ../../../vcglib
+GLEWDIR = ../../../code/lib/glew 
+GLEWCODE = $$GLEWDIR/src/glew.c
+DEFINES *= GLEW_STATIC
+
+INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
 HEADERS        = interfaces.h \
 		 GLLogStream.h \
                  mainwindow.h \
@@ -15,9 +21,9 @@ HEADERS        = interfaces.h \
                  changetexturename.h \
                  layerDialog.h \
                  stdpardialog.h \
-                 ../../../sf/wrap/gui/trackball.h\
-                 ../../../sf/wrap/gui/trackmode.h\
-                 ../../../sf/wrap/gl/trimesh.h
+                 $$VCGDIR/wrap/gui/trackball.h\
+                 $$VCGDIR/wrap/gui/trackmode.h\
+                 $$VCGDIR/wrap/gl/trimesh.h
 SOURCES        = main.cpp \
                  mainwindow_Init.cpp \
                  mainwindow_RunTime.cpp\
@@ -36,9 +42,9 @@ SOURCES        = main.cpp \
                  savemaskexporter.cpp \
                  changetexturename.cpp \
                  stdpardialog.cpp \
-                 ../../../sf/wrap/gui/trackball.cpp\
-                 ../../../sf/wrap/gui/trackmode.cpp \
-                 ../../../code/lib/glew/src/glew.c
+                 $$VCGDIR/wrap/gui/trackball.cpp\
+                 $$VCGDIR/wrap/gui/trackmode.cpp \
+                 $$GLEWCODE
 
 FORMS          =    ui/layerDialog.ui \
                     ui/filterScriptDialog.ui \

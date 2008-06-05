@@ -5,7 +5,7 @@ SOURCES       = edit_select.cpp $$GLEWCODE
 TARGET        = edit_select
 
 QT           += opengl
-RESOURCES     = meshlab.qrc
+RESOURCES     = edit_select.qrc
 
 
 

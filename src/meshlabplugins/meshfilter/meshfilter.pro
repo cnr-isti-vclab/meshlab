@@ -1,7 +1,7 @@
 include (../../shared.pri)
 
 HEADERS       = transformDialog.h \
-                ../../../../sf/vcg/complex/trimesh/clean.h \
+                $$VCGDIR/vcg/complex/trimesh/clean.h \
                 ../../meshlab/interfaces.h \
                 meshfilter.h 
 
