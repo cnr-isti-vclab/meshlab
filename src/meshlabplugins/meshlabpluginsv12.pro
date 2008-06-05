@@ -37,7 +37,6 @@ SUBDIRS       = meshfilter \
 				../sampleplugins/filtercreateiso \
 				../fgt/filter_trioptimize \
 				../fgt/filter_aging \
-				../fgt/filter_dirt \
 				../fgt/edit_quality \
 				../fgt/edit_quality/filter_quality \
 				../fgt/edit_texture\
