@@ -88,7 +88,6 @@ missing std and and all the other gcc detected syntax errors
 #include <meshlab/interfaces.h>
 //#include "decimatorDialog.h"
 #include "transformDialog.h"
-#include "../../meshlab/GenericELDialog.h"
 #include "../../meshlab/GLLogStream.h"
 
 class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
