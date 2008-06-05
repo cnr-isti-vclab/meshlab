@@ -39,9 +39,6 @@ FIRST RELEASE
 #include "const_types.h"
 #include "util.h"
 
-using namespace std;
-using namespace vcg;
-
 
 #define LOWER_Y					0
 #define UPPER_Y					1
@@ -121,8 +118,8 @@ class TfChannel
 {
 public:
 	//container and iterator for TF KEYs
-	typedef	vector<TF_KEY*> KEY_LIST;
-	typedef	vector<TF_KEY*>::iterator KEY_LISTiterator;
+	typedef	std::vector<TF_KEY*> KEY_LIST;
+	typedef	std::vector<TF_KEY*>::iterator KEY_LISTiterator;
 
 	TfChannel(void);
 	TfChannel(TF_CHANNELS type);
@@ -212,8 +209,8 @@ public:
 	int size();
 	QColor* buildColorBand(void);
 	QString saveColorBand(QString fileName, EQUALIZER_INFO& equalizerInfo);
-	Color4b getColorByQuality(float percentageQuality);
-	Color4b getColorByQuality(float absoluteQuality, float minQuality, float maxQuality, float midRelativeQuality, float brightness);
+	vcg::Color4b getColorByQuality(float percentageQuality);
+	vcg::Color4b getColorByQuality(float absoluteQuality, float minQuality, float maxQuality, float midRelativeQuality, float brightness);
 	void moveChannelAhead(TF_CHANNELS channel_code);
 	inline int	getFirstPlaneChanel(void)		{ return _channels_order[NUMBER_OF_CHANNELS-1]; }
 };

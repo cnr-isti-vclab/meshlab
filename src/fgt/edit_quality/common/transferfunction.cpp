@@ -42,6 +42,7 @@ FIRST RELEASE
 #endif
 
 using namespace std;
+using namespace vcg;
 
 //function used to define < relations among TF_KEYs elements
 bool TfKeyPCompare(TF_KEY*k1, TF_KEY*k2)
