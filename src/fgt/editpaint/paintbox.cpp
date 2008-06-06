@@ -38,6 +38,7 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	noise_frame->setHidden(true);
 	
 	brush_viewer->setScene(new QGraphicsScene());
+	
 	clone_source_view->setScene(new QGraphicsScene());
 	clone_source_view->centerOn(0, 0);
 	
@@ -56,6 +57,8 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	scrollArea->adjustSize();
 	gridLayout->addWidget(scrollArea, 2, 1, 1, 1);
 	//**********************************
+	
+	QObject::connect(clone_source_view, SIGNAL(positionChanged(double, double)), this, SLOT(movePixmapDelta(double, double)));
 	
 	refreshBrushPreview();
 }
@@ -103,6 +106,30 @@ void Paintbox::setPixmapCenter(qreal x, qreal y)
 	clone_source_view->centerOn(0, 0);
 }
 
+void Paintbox::setPixmapDelta(double x, double y)
+{
+	item_delta.setX(x);
+	item_delta.setY(y);
+	setPixmapOffset(0, 0);
+}
+
+QPoint Paintbox::getPixmapDelta()
+{
+	return item_delta;
+}
+
+void Paintbox::movePixmapDelta(double x, double y)
+{
+	item_delta.setX(item_delta.x() - x);
+	item_delta.setY(item_delta.y() - y);
+}
+
+void Paintbox::setPixmapOffset(qreal x, qreal y)
+{
+	item->setPos(- item_delta.x() - x, - item_delta.y() - y);
+	clone_source_view->centerOn(0, 0);
+}
+
 void Paintbox::loadClonePixmap()
 {
 	QString s = QFileDialog::getOpenFileName(this,
@@ -112,7 +139,8 @@ void Paintbox::loadClonePixmap()
 		QPixmap pixmap(s);
 		if (item != NULL) getCloneScene()->removeItem(item);
 		item = getCloneScene()->addPixmap(pixmap);
-		item->setPos(-pixmap.width()/2.0, -pixmap.height()/2.0);
+	//	item->setPos(-pixmap.width()/2.0, -pixmap.height()/2.0);
+		setPixmapDelta(pixmap.width()/2.0, pixmap.height()/2.0);
 		getCloneScene()->setSceneRect(-pixmap.width()/2.0, -pixmap.height()/2.0, pixmap.width(), pixmap.height());
 		clone_source_view->centerOn(0, 0);
 		pixmap_available = true;
@@ -130,16 +158,16 @@ void Paintbox::getPixmapBuffer(GLubyte * & buffer, GLfloat* & zbuffer, int & w, 
 	zbuffer = new GLfloat[image.size().height() * image.size().width()];
 
 	for (int x = 0; x < image.size().width(); x++){
-			for (int y = 0; y < image.size().height(); y++)
-			{
-				int index = y * image.size().width() + x;
-				zbuffer[index] = 0.0;
-				index *= 3;
-				buffer[index] = qRed(image.pixel(x, image.size().height() - 1 - y ));
-				buffer[index + 1] = qGreen(image.pixel(x, image.size().height()- 1 - y));
-				buffer[index + 2] = qBlue(image.pixel(x, image.size().height()- 1 - y));
-			}
+		for (int y = 0; y < image.size().height(); y++)
+		{
+			int index = y * image.size().width() + x;
+			zbuffer[index] = 0.0;
+			index *= 3;
+			buffer[index] = qRed(image.pixel(x, image.size().height() - 1 - y ));
+			buffer[index + 1] = qGreen(image.pixel(x, image.size().height()- 1 - y));
+			buffer[index + 2] = qBlue(image.pixel(x, image.size().height()- 1 - y));
 		}
+	}
 	w = image.size().width();
 	h = image.size().height();
 	pixmap_available = false;
@@ -148,7 +176,12 @@ void Paintbox::getPixmapBuffer(GLubyte * & buffer, GLfloat* & zbuffer, int & w, 
 void Paintbox::restorePreviousType()
 {
 	//TODO Only works as long as types are declared in the same order as buttons!
-//	dynamic_cast<QToolButton *>(verticalLayout->itemAt(previous_type)->widget())->toggle() ;
+	
+	//Qt 4.4
+	//dynamic_cast<QToolButton *>(verticalLayout->itemAt(previous_type)->widget())->toggle() ;
+
+	//Qt 4.3
+	dynamic_cast<QToolButton *>(vboxLayout->itemAt(previous_type)->widget())->toggle() ;
 }
 
 void Paintbox::refreshBrushPreview()

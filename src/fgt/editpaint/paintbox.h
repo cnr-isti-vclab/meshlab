@@ -65,6 +65,7 @@ private:
 
 	QGraphicsPixmapItem * item;
 	bool pixmap_available;
+	QPoint item_delta;
 	
 public:	
 	Paintbox(QWidget * parent = 0, Qt::WindowFlags flags = 0);
@@ -114,6 +115,8 @@ public:
 	 
 	void setClonePixmap(QImage & image);
 	void setPixmapCenter(qreal x, qreal y);
+	QPoint getPixmapDelta();
+	void setPixmapOffset(qreal x, qreal y);
 	void loadClonePixmap();
 	void restorePreviousType();
 
@@ -144,6 +147,8 @@ public slots:
 	void on_size_slider_valueChanged(int){refreshBrushPreview();}
 	void on_clone_source_load_button_clicked(){loadClonePixmap();}
 
+	void setPixmapDelta(double x, double y);
+	void movePixmapDelta(double x, double y);
 };
 
 /******Brush Shapes******/ 
