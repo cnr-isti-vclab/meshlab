@@ -288,8 +288,9 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 						if (paintbox->isNewPixmapAvailable())
 						{
 							paintbox->getPixmapBuffer(color_buffer, clone_zbuffer, buffer_width, buffer_height);
-							source_delta.setX(buffer_width/2);
-							source_delta.setY(buffer_height/2);
+					//		source_delta.setX(buffer_width/2);
+					//		source_delta.setY(buffer_height/2);
+							source_delta = paintbox->getPixmapDelta();
 							apply_start = latest_event.position;
 							painted_vertices.clear();
 							paintbox->getUndoStack()->beginMacro("Color Clone");
@@ -299,6 +300,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 						//There's still something in the buffer
 						{
 							painted_vertices.clear();
+							source_delta = paintbox->getPixmapDelta();
 							apply_start = latest_event.position;
 							paintbox->getUndoStack()->beginMacro("Color Clone");
 							paint( & vertices);
@@ -341,19 +343,18 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 			
 			switch (current_type)
 			{
-				case COLOR_PAINT:
-					paint(& vertices);
-					break;
-					
+			
 				case COLOR_CLONE :
 				//	paintbox->setPixmapCenter(-latest_event.position.x() - clone_delta.x(), -latest_event.position.y() - clone_delta.y()  );
-					paintbox->setPixmapCenter(
-							-(source_delta.x() + /*clone_delta.x()+*/ latest_event.position.x() - apply_start.x()), 
-							-(source_delta.y() + /*clone_delta.y()+*/ latest_event.position.y() - apply_start.y()));
-					qDebug() << "pixmap: ( " << (source_delta.x() + /*clone_delta.x()+*/ latest_event.position.x() - apply_start.x()) << ", " << (source_delta.y() + /*clone_delta.y()+*/ latest_event.position.y() - apply_start.y()) <<")";
-					if (color_buffer != NULL) paint( & vertices);
+					paintbox->setPixmapOffset(latest_event.position.x() - apply_start.x(), latest_event.position.y() - apply_start.y());
+				/*	paintbox->setPixmapCenter(
+							-(source_delta.x() +  latest_event.position.x() - apply_start.x()), 
+							-(source_delta.y() +  latest_event.position.y() - apply_start.y()));
+					qDebug() << "pixmap: ( " << (source_delta.x() + latest_event.position.x() - apply_start.x()) << ", " << (source_delta.y() +  latest_event.position.y() - apply_start.y()) <<")";
+				*/	if (color_buffer != NULL) paint( & vertices);
 					break;
-					
+				
+				case COLOR_PAINT:
 				case COLOR_NOISE :
 					paint(& vertices);
 					break;
@@ -368,6 +369,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 						if (latest_event.button == Qt::LeftButton)(*fpi)->SetS();
 						else (*fpi)->ClearS();
 					}
+					break;
 					
 				case MESH_PUSH:
 				case MESH_PULL:
@@ -611,6 +613,7 @@ inline void EditPaintPlugin::capture()
 	buffer_width = glarea->curSiz.width();
 	
 	source_delta = latest_event.position;
+	paintbox->setPixmapDelta(source_delta.x(), source_delta.y());
 	
 	QImage image(glarea->width(), glarea->height(), QImage::Format_RGB32); 
 	for (int x = 0; x < glarea->width(); x++){
