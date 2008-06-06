@@ -629,7 +629,9 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 {
   e->accept();
 	setFocus();
-  if(iEdit && !suspendedEditor)  iEdit->mousePressEvent(currentEditor,e,*mm(),this);
+	
+  if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
+		  iEdit->mousePressEvent(currentEditor,e,*mm(),this);
   else {          
 	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
           (e->button()==Qt::LeftButton) )
@@ -645,9 +647,8 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
-	if((e->buttons() == Qt::NoButton) || (e->buttons() & Qt::LeftButton) || (e->buttons() & Qt::RightButton) )
-	{
-      if(iEdit && !suspendedEditor) iEdit->mouseMoveEvent(currentEditor,e,*mm(),this);
+      if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
+    		  	iEdit->mouseMoveEvent(currentEditor,e,*mm(),this);
       else {
 		    if (isDefaultTrackBall()) 
 			{
@@ -657,14 +658,14 @@ void GLArea::mouseMoveEvent(QMouseEvent*e)
 		    else trackball_light.MouseMove(e->x(),height()-e->y());
         update();
       }
-	}
 }
-// When mouse is released we set the correct mouse curson
+// When mouse is released we set the correct mouse cursor
 void GLArea::mouseReleaseEvent(QMouseEvent*e)
 {
   //clearFocus();
 	activeDefaultTrackball=true;
-	if(iEdit && !suspendedEditor) iEdit->mouseReleaseEvent(currentEditor,e,*mm(),this);
+	if( (iEdit && !suspendedEditor) && (e->button() != Qt::MidButton) )
+			iEdit->mouseReleaseEvent(currentEditor,e,*mm(),this);
     else {
           if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	        else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
