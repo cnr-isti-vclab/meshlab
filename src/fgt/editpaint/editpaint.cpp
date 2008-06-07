@@ -605,9 +605,9 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 
 inline void EditPaintPlugin::capture()
 {
-	color_buffer = new GLubyte[glarea->curSiz.width()*glarea->curSiz.height()*3];
+	color_buffer = new GLubyte[glarea->curSiz.width()*glarea->curSiz.height()*4];
 	clone_zbuffer = new GLfloat[glarea->curSiz.width()*glarea->curSiz.height()];
-	glReadPixels(0,0,glarea->curSiz.width(), glarea->curSiz.height(), GL_RGB, GL_UNSIGNED_BYTE, color_buffer);
+	glReadPixels(0,0,glarea->curSiz.width(), glarea->curSiz.height(), GL_RGBA, GL_UNSIGNED_BYTE, color_buffer);
 	glReadPixels(0,0,glarea->curSiz.width(), glarea->curSiz.height(), GL_DEPTH_COMPONENT, GL_FLOAT, clone_zbuffer);
 	buffer_height = glarea->curSiz.height();
 	buffer_width = glarea->curSiz.width();
@@ -615,11 +615,11 @@ inline void EditPaintPlugin::capture()
 	source_delta = latest_event.position;
 	paintbox->setPixmapDelta(source_delta.x(), source_delta.y());
 	
-	QImage image(glarea->width(), glarea->height(), QImage::Format_RGB32); 
+	QImage image(glarea->width(), glarea->height(), QImage::Format_ARGB32); 
 	for (int x = 0; x < glarea->width(); x++){
 		for (int y = 0; y < glarea->height(); y++){
-			int index = (y * glarea->width() + x)*3;
-			image.setPixel(x, glarea->height() - y -1, qRgb((int)color_buffer[index], (int)color_buffer[index + 1], (int)color_buffer[index + 2]));
+			int index = (y * glarea->width() + x)*4;
+			image.setPixel(x, glarea->height() - y -1, qRgba((int)color_buffer[index], (int)color_buffer[index + 1], (int)color_buffer[index + 2], (int)color_buffer[index + 3]));
 		}
 	}
 	glarea->getCurrentRenderMode().lighting = true;
@@ -640,8 +640,8 @@ inline bool EditPaintPlugin::accessCloneBuffer(int vertex_x, int vertex_y, vcg::
 	{
 		if (clone_zbuffer[index] < 1.0)
 		{
-			index *= 3;
-			color[0] = color_buffer[index]; color[1] = color_buffer[index + 1]; color[2] = color_buffer[index + 2];
+			index *= 4;
+			color[0] = color_buffer[index]; color[1] = color_buffer[index + 1]; color[2] = color_buffer[index + 2], color[3] = color_buffer[index + 3];
 			return true;
 		}
 	}
@@ -676,7 +676,7 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 			
 			paintbox->getUndoStack()->push(new SingleColorUndo(data.first, data.first->C()));
 			
-			applyColor(data.first, color, (int)(op * opac));
+			applyColor(data.first, color, (int)(op * opac  ));
 			
 		} else if (painted_vertices[data.first].second < (int)(op * opac)) 
 		{

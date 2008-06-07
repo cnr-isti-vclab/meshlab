@@ -269,15 +269,16 @@ private :
  *  
  * O(1) complexity
  */
-inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac, bool on_quality = false)
+inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
 {
-	vcg::Color4b orig = on_quality ? vcg::Color4b(vertex->Q(), vertex->Q(), vertex->Q(), 255) : vertex->C();
+	vcg::Color4b orig =  vertex->C();
 	
-	for (int i = 0; i < 4; i ++) 
-		orig[i] = vcg::math::Min(255,( (newcol[i]-orig[i])*opac + orig[i]*(100) )/100);
+	opac *= ((float)newcol[3]/255.0);
 	
-	if (on_quality) vertex->Q() = orig[0];
-	else vertex->C() = orig;
+	for (int i = 0; i < 3; i ++) 
+		orig[i] = vcg::math::Min(255, ( (newcol[i]-orig[i]) * opac + orig[i] * 100 ) / 100);
+	
+	vertex->C() = orig;
 }
 
 /**  

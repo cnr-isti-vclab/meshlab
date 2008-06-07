@@ -154,7 +154,7 @@ void Paintbox::getPixmapBuffer(GLubyte * & buffer, GLfloat* & zbuffer, int & w, 
 {
 	QImage image = item->pixmap().toImage();
 	
-	buffer = new GLubyte[image.size().height() * image.size().width() * 3];
+	buffer = new GLubyte[image.size().height() * image.size().width() * 4];
 	zbuffer = new GLfloat[image.size().height() * image.size().width()];
 
 	for (int x = 0; x < image.size().width(); x++){
@@ -162,10 +162,11 @@ void Paintbox::getPixmapBuffer(GLubyte * & buffer, GLfloat* & zbuffer, int & w, 
 		{
 			int index = y * image.size().width() + x;
 			zbuffer[index] = 0.0;
-			index *= 3;
+			index *= 4;
 			buffer[index] = qRed(image.pixel(x, image.size().height() - 1 - y ));
 			buffer[index + 1] = qGreen(image.pixel(x, image.size().height()- 1 - y));
 			buffer[index + 2] = qBlue(image.pixel(x, image.size().height()- 1 - y));
+			buffer[index + 3] = qAlpha(image.pixel(x, image.size().height()- 1 - y));
 		}
 	}
 	w = image.size().width();
