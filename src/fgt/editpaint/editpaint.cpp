@@ -312,7 +312,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					
 				case COLOR_NOISE :
 					painted_vertices.clear();
-					noise_scale = paintbox->getNoiseSize()/100.0;
+					noise_scale = paintbox->getNoiseSize() * 10 / m.cm.bbox.Diag();
 					paintbox->getUndoStack()->beginMacro("Color Noise");
 					break;
 					
@@ -564,6 +564,8 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 	float decrease_pos = paintbox->getHardness() / 100.0;
 	float strength = m.cm.bbox.Diag() * paintbox->getDisplacement() / 1000.0;
 	
+	if (latest_event.button == Qt::RightButton) strength = - strength;
+	
 	if (normal[0] == normal[1] && normal[1] == normal[2] && normal[2] == 0) {
 		return;
 	}
@@ -575,7 +577,7 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 		float op = brush(paintbox->getBrush(), data.second.distance, data.second.rel_position.x(), data.second.rel_position.y(), decrease_pos * 100);
 		
 		//TODO Precalculate this monster!
-		float gauss = strength * exp(-(op - 1.0)*(op - 1.0) * 8.0 );
+		float gauss = (strength * exp(-(op - 1.0)*(op - 1.0) * 8.0 ));
 		
 		if (!displaced_vertices.contains(data.first)) 
 		{
@@ -592,7 +594,9 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 			
 	//		qDebug() << "Position after push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
 			
-		} else if (displaced_vertices[data.first].second < gauss) 
+		} else if ((latest_event.button == Qt::RightButton) 
+				? displaced_vertices[data.first].second > gauss 
+				: displaced_vertices[data.first].second < gauss) 
 		{
 			displaced_vertices[data.first].second = gauss;
 			Point3f temp = displaced_vertices[data.first].first;
