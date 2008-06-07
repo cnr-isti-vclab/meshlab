@@ -636,7 +636,7 @@ inline bool EditPaintPlugin::accessCloneBuffer(int vertex_x, int vertex_y, vcg::
 	
 	int index = y * buffer_width + x;
 			
-	if (index < buffer_width * buffer_height - 1 && index > 0)
+	if (x < buffer_width && y < buffer_height && x >= 0 && y >= 0)
 	{
 		if (clone_zbuffer[index] < 1.0)
 		{
