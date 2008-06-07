@@ -64,6 +64,8 @@ private:
 	ToolType previous_type;
 
 	QGraphicsPixmapItem * item;
+	QGraphicsItem * scenegroup;
+	QGraphicsItem * crosshair;
 	bool pixmap_available;
 	QPoint item_delta;
 	

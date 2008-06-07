@@ -42,6 +42,23 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	clone_source_view->setScene(new QGraphicsScene());
 	clone_source_view->centerOn(0, 0);
 	
+	scenegroup = new QGraphicsItemGroup(NULL, getCloneScene());
+	crosshair = new QGraphicsItemGroup(scenegroup);
+	crosshair->setZValue(2);
+	QPen pen;
+	pen.setWidth(3);
+	pen.setColor(QColor(qRgb(255, 255, 255)));
+	QGraphicsItem * p = getCloneScene()->addLine(0, 8, 0, -8, pen);
+	p->setParentItem(crosshair);
+	QGraphicsItem * c = getCloneScene()->addLine(8, 0, -8, 0, pen);
+	c->setParentItem(p); p = c;
+	pen.setWidth(1);
+	pen.setColor(QColor(qRgb(0, 0, 0)));
+	c = getCloneScene()->addLine(0, 8, 0, -8, pen);
+	c->setParentItem(p); p = c;
+	c = getCloneScene()->addLine(8, 0, -8, 0, pen);
+	c->setParentItem(p); p = c;
+	
 	item = NULL;
 	pixmap_available = false;
 	
@@ -93,6 +110,7 @@ void Paintbox::setClonePixmap(QImage & image)
 {
 	if (item != NULL) getCloneScene()->removeItem(item);
 	item = getCloneScene()->addPixmap(QPixmap::fromImage(image));
+	item->setParentItem(scenegroup);
 	item->setPos(0, 0);
 	clone_source_view->centerOn(0, 0);
 	QPen pen;
@@ -139,14 +157,12 @@ void Paintbox::loadClonePixmap()
 		QPixmap pixmap(s);
 		if (item != NULL) getCloneScene()->removeItem(item);
 		item = getCloneScene()->addPixmap(pixmap);
-	//	item->setPos(-pixmap.width()/2.0, -pixmap.height()/2.0);
+		item->setParentItem(scenegroup);
 		setPixmapDelta(pixmap.width()/2.0, pixmap.height()/2.0);
 		getCloneScene()->setSceneRect(-pixmap.width()/2.0, -pixmap.height()/2.0, pixmap.width(), pixmap.height());
 		clone_source_view->centerOn(0, 0);
 		pixmap_available = true;
-		QPen pen;
-		getCloneScene()->addLine(0, 8, 0, -8, pen);
-		getCloneScene()->addLine(8, 0, -8, 0, pen);	
+		
 	}	
 }
 

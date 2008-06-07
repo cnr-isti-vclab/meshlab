@@ -32,6 +32,11 @@ public :
 		emit positionChanged(last_pos.x() - start_pos.x(), last_pos.y() - start_pos.y());
 	}
 	
+	virtual void wheelEvent(QWheelEvent *)
+	{
+		
+	}
+	
 signals:
 	void positionChanged(double x, double y);
 		
