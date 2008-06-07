@@ -1,15 +1,12 @@
 include (../../shared.pri)
-
 QT += opengl
-
-HEADERS = colorframe.h \
+HEADERS = cloneview.h \
+    colorframe.h \
     paintbox.h \
     editpaint.h
 SOURCES = paintbox.cpp \
     editpaint.cpp \
-	$$GLEWCODE
+    $$GLEWCODE
 TARGET = zpaint
-
 RESOURCES = meshlab.qrc
-
 FORMS = paintbox.ui
