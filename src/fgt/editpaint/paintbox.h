@@ -64,8 +64,6 @@ private:
 	ToolType previous_type;
 
 	QGraphicsPixmapItem * item;
-	QGraphicsItem * scenegroup;
-	QGraphicsItem * crosshair;
 	bool pixmap_available;
 	QPoint item_delta;
 	
@@ -116,7 +114,7 @@ public:
 	inline bool isNewPixmapAvailable(){return pixmap_available;}
 	 
 	void setClonePixmap(QImage & image);
-	void setPixmapCenter(qreal x, qreal y);
+//	void setPixmapCenter(qreal x, qreal y);
 	QPoint getPixmapDelta();
 	void setPixmapOffset(qreal x, qreal y);
 	void loadClonePixmap();

@@ -291,6 +291,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 					//		source_delta.setX(buffer_width/2);
 					//		source_delta.setY(buffer_height/2);
 							source_delta = paintbox->getPixmapDelta();
+							paintbox->setPixmapOffset(0, 0);
 							apply_start = latest_event.position;
 							painted_vertices.clear();
 							paintbox->getUndoStack()->beginMacro("Color Clone");
@@ -301,6 +302,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 						{
 							painted_vertices.clear();
 							source_delta = paintbox->getPixmapDelta();
+							paintbox->setPixmapOffset(0, 0);
 							apply_start = latest_event.position;
 							paintbox->getUndoStack()->beginMacro("Color Clone");
 							paint( & vertices);
@@ -435,6 +437,8 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 				case COLOR_CLONE:
 					if (latest_event.modifiers & Qt::ControlModifier || 
 						latest_event.button == Qt::RightButton) {capture(); break;}
+					else
+						paintbox->movePixmapDelta(-latest_event.position.x() + apply_start.x(), -latest_event.position.y() + apply_start.y());
 				case COLOR_SMOOTH :
 				case COLOR_NOISE :
 				case COLOR_PAINT:
@@ -599,8 +603,6 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 						
 		}
 	}
-	
-//	for (unsigned int k = 0; k < vertices->size(); k++) updateNormal(vertices->at(k).first);
 }
 
 inline void EditPaintPlugin::capture()
@@ -613,7 +615,6 @@ inline void EditPaintPlugin::capture()
 	buffer_width = glarea->curSiz.width();
 	
 	source_delta = latest_event.position;
-	paintbox->setPixmapDelta(source_delta.x(), source_delta.y());
 	
 	QImage image(glarea->width(), glarea->height(), QImage::Format_ARGB32); 
 	for (int x = 0; x < glarea->width(); x++){
@@ -625,7 +626,9 @@ inline void EditPaintPlugin::capture()
 	glarea->getCurrentRenderMode().lighting = true;
 	current_options |= EPP_DRAW_CURSOR;
 	paintbox->setClonePixmap(image);
-	paintbox->setPixmapCenter(-source_delta.x(), -source_delta.y());
+	paintbox->setPixmapDelta(source_delta.x(), source_delta.y());
+		
+//	paintbox->setPixmapCenter(-source_delta.x(), -source_delta.y());
 	glarea->update();
 }
 
