@@ -726,7 +726,7 @@
         </property>
         <layout class="QVBoxLayout" >
          <item>
-          <widget class="QGraphicsView" name="clone_source_view" >
+          <widget class="CloneView" name="clone_source_view" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="MinimumExpanding" hsizetype="Expanding" >
              <horstretch>0</horstretch>
@@ -1461,6 +1461,11 @@ p, li { white-space: pre-wrap; }
    <extends>QFrame</extends>
    <header location="global" >colorframe.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CloneView</class>
+   <extends>QGraphicsView</extends>
+   <header location="global" >cloneview.h</header>
   </customwidget>
  </customwidgets>
  <resources>
