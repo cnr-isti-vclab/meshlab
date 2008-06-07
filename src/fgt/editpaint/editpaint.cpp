@@ -330,7 +330,11 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 				case COLOR_SMOOTH:
 					paintbox->getUndoStack()->beginMacro("Color Smooth");
 					smoothed_vertices.clear();
+					m.cm.UnMarkAll();
+					break;
 				case MESH_SMOOTH:
+					paintbox->getUndoStack()->beginMacro("Mesh Smooth");
+					smoothed_vertices.clear();
 					m.cm.UnMarkAll();
 					break;
 					
@@ -347,13 +351,8 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 			{
 			
 				case COLOR_CLONE :
-				//	paintbox->setPixmapCenter(-latest_event.position.x() - clone_delta.x(), -latest_event.position.y() - clone_delta.y()  );
 					paintbox->setPixmapOffset(latest_event.position.x() - apply_start.x(), latest_event.position.y() - apply_start.y());
-				/*	paintbox->setPixmapCenter(
-							-(source_delta.x() +  latest_event.position.x() - apply_start.x()), 
-							-(source_delta.y() +  latest_event.position.y() - apply_start.y()));
-					qDebug() << "pixmap: ( " << (source_delta.x() + latest_event.position.x() - apply_start.x()) << ", " << (source_delta.y() +  latest_event.position.y() - apply_start.y()) <<")";
-				*/	if (color_buffer != NULL) paint( & vertices);
+					if (color_buffer != NULL) paint( & vertices);
 					break;
 				
 				case COLOR_PAINT:
@@ -442,6 +441,7 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 				case COLOR_SMOOTH :
 				case COLOR_NOISE :
 				case COLOR_PAINT:
+				case MESH_SMOOTH :
 				case MESH_PUSH:
 				case MESH_PULL:
 					paintbox->getUndoStack()->endMacro();
@@ -584,16 +584,11 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 			displaced_vertices.insert(data.first, pair<Point3f, float>(
 				Point3f(data.first->P()[0], data.first->P()[1], data.first->P()[2]),
 				gauss) );
-			
-	//		qDebug() << "Position before push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
-	//		qDebug() << "strength" << strength;
-			
+
 			paintbox->getUndoStack()->push(new SinglePositionUndo(data.first, data.first->P(), data.first->N()));
 			displaceAlongVector(data.first, normal, gauss);		
 			updateNormal(data.first);
-			
-	//		qDebug() << "Position after push" << data.first->P()[0] << " " << data.first->P()[1] << " " << data.first->P()[2];
-			
+
 		} else if ((latest_event.button == Qt::RightButton) 
 				? displaced_vertices[data.first].second > gauss 
 				: displaced_vertices[data.first].second < gauss) 
