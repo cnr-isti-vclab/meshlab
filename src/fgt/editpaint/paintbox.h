@@ -146,7 +146,11 @@ public slots:
 	void on_hardness_slider_valueChanged(int){refreshBrushPreview();}
 	void on_size_slider_valueChanged(int){refreshBrushPreview();}
 	void on_clone_source_load_button_clicked(){loadClonePixmap();}
-
+	void on_mesh_displacement_slider_valueChanged(int val){displacement_spin_box->setValue((double)val);}
+	void on_displacement_spin_box_valueChanged(double val){mesh_displacement_slider->setValue((int)val);}
+	void on_noise_slider_valueChanged(int val){noise_box->setValue((double)val);}
+	void on_noise_box_valueChanged(double val){noise_slider->setValue((int)val);}
+		
 	void setPixmapDelta(double x, double y);
 	void movePixmapDelta(double x, double y);
 };

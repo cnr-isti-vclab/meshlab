@@ -120,6 +120,7 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	buffer_height = glarea->curSiz.height();
 	glarea->setMouseTracking(true);
 	
+	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));
 }
 
 void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) 
@@ -1032,21 +1033,6 @@ Q_EXPORT_PLUGIN(EditPaintPlugin)
 
 /*********OpenGL Drawing Routines************/
 
-/**
- * Draw a red vertex
- */
-/*void drawVertex(CVertexO* vp)
-{
-	glPushAttrib(GL_COLOR_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
-	glColor3f(1.0f, 0.0f, 1.0f);
-	glPointSize(6.0);
-	glBegin(GL_POINTS);
-		glVertex((*vp).P());
-	glEnd();
-	glEnable(GL_DEPTH_TEST);
-	glPopAttrib();
-}*/
 
 /** 
  * draws the xor-line 
@@ -1080,113 +1066,6 @@ void drawLine(GLArea * gla, QPoint & start, QPoint & cur) {
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 }
-
-
-/**
- * Draw a circle projected on the surface of the mesh oriented with
- * the avarage normal. This will eventually substitute drawPercentualCircle
- */
-/*void drawNormalPercentualCircle(GLArea * , QPoint &glcur, MeshModel &m, GLfloat* ,
-		double* mvmatrix, double* prmatrix, GLint* vmatrix, float )
-{
-	glPushAttrib(GL_ENABLE_BIT);
-	glEnable(GL_DEPTH_TEST);
-	
-	GLdouble x, y, z;
-	GLdouble sx, sy, sz;
-	sx = glcur.x();
-	sy = glcur.y();
-	GLfloat _z;
-	
-	glReadPixels((int)sx, (int)sy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &_z); sz = _z;
-	
-//	std::cout << "2D: " << sx << " " << sy << " " << sz << std::endl;
-		
-//	if (GL_FALSE == gluUnProject(sx, sy, sz, mvmatrix, prmatrix, vmatrix, &x, &y, &z)) std::cout << "false";
-	
-//	std::cout << "3D: " << x << " " << y << " " << z << std::endl;
-	
-//	gluProject(x, y, z, mvmatrix, prmatrix, vmatrix, &sx, &sy, &sz);
-	
-//	std::cout << "re2D: " << sx << " " << sy << " " << sz << std::endl;
-	
-	glPushAttrib(GL_COLOR_BUFFER_BIT);  //---Begin of Point Drawing
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glPointSize(6.0);
-	glBegin(GL_POINTS);
-		glColor3f(1.0f, 0.0f, 0.0f); //red
-	//	glVertex3d(x, y, z);
-	glEnd();
-	glEnable(GL_DEPTH_TEST);
-	glPopAttrib(); //---End of Point Drawing
-		
-	CFaceO * fp = NULL;
-
-	CFaceO::NormalType normal;
-	
-	GLdouble tx, ty, tz;
-
-	if (GLPickTri<CMeshO>::PickNearestFace(glcur.x(), glcur.y(), m.cm, fp)) 
-	{
-		double MULT = 0.1 * m.cm.bbox.Diag();
-		if (fp->HasFaceNormal()){
-			normal = fp->N();
-			MULT /= normal.Norm();
-			tx = x + MULT * normal.Ext(0); ty = y + MULT * normal.Ext(1); tz = z + MULT * normal.Ext(2);
-		//	std::cout << "displaced point: " << tx << " " << ty << " " << tz << std::endl;
-			glPushAttrib(GL_COLOR_BUFFER_BIT);  //---Begin of Point Drawing
-			glDisable(GL_DEPTH_TEST);
-			glDisable(GL_LIGHTING);
-			glEnable(GL_LINE_SMOOTH);
-			glBegin(GL_LINES);
-				glColor3f(1.0f, 0.0f, 0.0f); //red
-				glVertex3d(x, y, z);
-				glColor3f(1.0f, 1.0f, 0.0f); //red
-				glVertex3d(tx, ty, tz);
-			glEnd();
-			glEnable(GL_DEPTH_TEST);
-			glPopAttrib(); //---End of Point Drawing	
-			
-		}else
-		{
-	//		std::cout << "face doesn't have normal!" <<std::endl;
-		}
-	}else
-	{
-	//	std::cout << "couldn't pick face!" <<std::endl;
-	}
-	
-	
-	
-	CMeshO::VertexPointer vp;
-	
-	if (getVertexAtMouse(m, vp, glcur, mvmatrix, prmatrix, vmatrix)){ 
-	//	glColor3f(1.0f, 0.0f, 1.0f);
-	//	drawVertex(vp);	
-	//	std::cout << "vertex: " << (*vp).P()[0] << " " << (*vp).P()[1] << " " << (*vp).P()[2] << std::endl;
-		
-		glPushAttrib(GL_COLOR_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
-		glPointSize(6.0);
-		glBegin(GL_POINTS);
-			glColor3f(1.0f, 0.0f, 1.0f); //pink
-			glVertex3d((*vp).P()[0], (*vp).P()[1], (*vp).P()[2]);
-		glEnd();
-		glEnable(GL_DEPTH_TEST);
-		glPopAttrib();
-
-	//	calcCoord((*vp).P()[0], (*vp).P()[1], (*vp).P()[2], inv_mvmatrix, &x, &y, &z);
-	
-	//	std::cout << "vertex*inv_matrix3D: " << x << " " << y << " " << z << std::endl;
-		
-		gluProject((*vp).P()[0], (*vp).P()[1], (*vp).P()[2], mvmatrix, prmatrix, vmatrix, &sx, &sy, &sz);
-	//	std::cout << "vertex2D: " << (int)sx << " " << (int)sy << " " << sz << std::endl;
-	}
-	
-	glPopAttrib();
-} */
 
 void drawSimplePolyLine(GLArea * gla, QPoint & cur, float scale, vector<QPointF> * points)
 {
@@ -1380,6 +1259,8 @@ void generatePolygon(std::vector<QPointF> & vertices, int sides, int segments)
 		vertices.erase(vertices.begin(), vertices.begin() + sides);
 	}
 }
+
+//TODO This should be done statically
 
 /**
  * Generates the same circle points that Gfrei's algorithm does

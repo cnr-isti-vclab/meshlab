@@ -369,28 +369,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="mesh_sculpt_button" >
-        <property name="text" >
-         <string>...</string>
-        </property>
-        <property name="icon" >
-         <iconset resource="meshlab.qrc" >:/images/sculpt-22.png</iconset>
-        </property>
-        <property name="iconSize" >
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="checkable" >
-         <bool>true</bool>
-        </property>
-        <property name="autoExclusive" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="mesh_add_button" >
         <property name="enabled" >
          <bool>true</bool>
@@ -962,13 +940,23 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="0" column="1" >
           <widget class="QSlider" name="mesh_displacement_slider" >
+           <property name="sliderPosition" >
+            <number>4</number>
+           </property>
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
          <item row="0" column="2" >
-          <widget class="QSpinBox" name="spinBox" />
+          <widget class="QDoubleSpinBox" name="displacement_spin_box" >
+           <property name="decimals" >
+            <number>3</number>
+           </property>
+           <property name="value" >
+            <double>4.000</double>
+           </property>
+          </widget>
          </item>
          <item row="1" column="0" >
           <widget class="QLabel" name="label_8" >
@@ -1091,7 +1079,7 @@ p, li { white-space: pre-wrap; }
             <number>100</number>
            </property>
            <property name="value" >
-            <number>47</number>
+            <number>50</number>
            </property>
           </widget>
          </item>
@@ -1212,10 +1200,20 @@ p, li { white-space: pre-wrap; }
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
+           <property name="sliderPosition" >
+            <number>2</number>
+           </property>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="noise_box" />
+          <widget class="QDoubleSpinBox" name="noise_box">
+           <property name="decimals" >
+            <number>3</number>
+           </property>
+           <property name="value" >
+            <double>2.000</double>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -1472,38 +1470,6 @@ p, li { white-space: pre-wrap; }
   <include location="meshlab.qrc" />
  </resources>
  <connections>
-  <connection>
-   <sender>mesh_displacement_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>spinBox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>251</x>
-     <y>545</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>308</x>
-     <y>550</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>spinBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>mesh_displacement_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>308</x>
-     <y>550</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>251</x>
-     <y>545</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>opacity_slider</sender>
    <signal>valueChanged(int)</signal>
@@ -1793,22 +1759,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>mesh_sculpt_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mesh_displacement_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>36</x>
-     <y>409</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>230</x>
-     <y>587</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>mesh_add_button</sender>
    <signal>toggled(bool)</signal>
    <receiver>mesh_displacement_frame</receiver>
@@ -1857,22 +1807,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>mesh_sculpt_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>pen_extra_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>21</x>
-     <y>407</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>217</x>
-     <y>759</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>mesh_add_button</sender>
    <signal>toggled(bool)</signal>
    <receiver>pen_extra_frame</receiver>
@@ -1885,22 +1819,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel" >
      <x>122</x>
      <y>759</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_sculpt_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mesh_displacement_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>20</x>
-     <y>409</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>123</x>
-     <y>587</y>
     </hint>
    </hints>
   </connection>
@@ -1953,22 +1871,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>mesh_sculpt_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>pressure_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>35</x>
-     <y>409</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>121</x>
-     <y>1097</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>mesh_add_button</sender>
    <signal>toggled(bool)</signal>
    <receiver>pressure_frame</receiver>
@@ -1980,22 +1882,6 @@ p, li { white-space: pre-wrap; }
     </hint>
     <hint type="destinationlabel" >
      <x>129</x>
-     <y>1097</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>mesh_sculpt_button</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>pressure_frame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>21</x>
-     <y>407</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>123</x>
      <y>1097</y>
     </hint>
    </hints>
@@ -2157,38 +2043,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel" >
      <x>308</x>
      <y>938</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>noise_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>noise_box</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>251</x>
-     <y>805</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>308</x>
-     <y>808</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>noise_box</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>noise_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>308</x>
-     <y>808</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>251</x>
-     <y>805</y>
     </hint>
    </hints>
   </connection>
