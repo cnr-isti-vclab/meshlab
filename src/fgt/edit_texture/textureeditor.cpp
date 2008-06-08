@@ -77,10 +77,8 @@ void TextureEditor::ResetLayout()
 void TextureEditor::SmoothTextureCoordinates()
 {
 	// Set up the smooth function
-	float alpha = -1;
-	if (ui.checkBox->isChecked()) alpha = ui.spinBoxAlfa->value();
 	for (int i = 0; i < ui.spinBoxIteration->value(); i++)
-		SmoothTextureWEdgeCoords(model->cm, alpha);
+		SmoothTextureWEdgeCoords(model->cm);
 	area->update();
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->update();
 }
@@ -166,6 +164,7 @@ void TextureEditor::on_unifySetButton_clicked()
 void TextureEditor::on_smoothButton_clicked()
 {
 	// Apply the smooth
+	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
 	SmoothTextureCoordinates();
 }
 
@@ -202,11 +201,4 @@ void TextureEditor::on_tabWidget_currentChanged(int index)
 	((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->ChangeMode(button);
 	if (mode != -1) ((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->ChangeSelectMode(mode);
 	ui.labelName->setText(((RenderArea*)ui.tabWidget->widget(index)->childAt(MARGIN,MARGIN))->GetTextureName());
-}
-
-void TextureEditor::on_checkBox_stateChanged()
-{
-	bool s = ui.checkBox->isChecked();
-	ui.label_5->setEnabled(s);
-	ui.spinBoxAlfa->setEnabled(s);
 }

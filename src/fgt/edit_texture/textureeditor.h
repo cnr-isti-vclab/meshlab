@@ -50,7 +50,6 @@ class TextureEditor : public QWidget
 		void on_flipVButton_clicked();
 		void on_unify2Button_clicked();
 		void on_unifySetButton_clicked();
-		void on_checkBox_stateChanged();
 		void on_browseButton_clicked();
 
 	public slots:
@@ -64,48 +63,59 @@ class TextureEditor : public QWidget
 
 // Da mettere in VCG
 template<class MESH_TYPE>
-void SmoothTextureWEdgeCoords(MESH_TYPE &m, float alpha)
+void SmoothTextureWEdgeCoords(MESH_TYPE &m)
 {
 	assert(m.HasPerWedgeTexCoord());
-
-	vcg::SimpleTempData<typename MESH_TYPE::VertContainer, int> div(m.vert);
-	vcg::SimpleTempData<typename MESH_TYPE::VertContainer, Point2f > sum(m.vert);
-
-	for (typename MESH_TYPE::VertexIterator v = m.vert.begin(); v != m.vert.end(); v++) 
+	
+	for (int i = 0; i < m.face.size(); i++)
 	{
-		sum[v] = Point2f(0,0);
-		div[v] = 0;
-	}
-
-	for (typename MESH_TYPE::FaceIterator f = m.face.begin(); f != m.face.end(); f++)
-	{
-		for (int i = 0; i < 3; i++)
+		if (!m.face[i].IsV())
 		{
-			div[f->V(i)] += 2; 
-			sum[f->V(i)].X() = sum[f->V(i)].X() + f->WT((i+1)%3).u() + f->WT((i+2)%3).u();
-			sum[f->V(i)].Y() = sum[f->V(i)].Y() + f->WT((i+1)%3).v() + f->WT((i+2)%3).v();
-		}
-	}
+			vcg::SimpleTempData<typename MESH_TYPE::VertContainer, int> div(m.vert);
+			vcg::SimpleTempData<typename MESH_TYPE::VertContainer, Point2f > sum(m.vert);
 
-	for (typename MESH_TYPE::FaceIterator v = m.face.begin(); v != m.face.end(); v++)
-	{
-		for (int i = 0; i < 3; i++)
-		{
-			if (div[v->V(i)]>0)
+			for (typename MESH_TYPE::VertexIterator v = m.vert.begin(); v != m.vert.end(); v++) 
 			{
-				if (alpha == -1)
+				sum[v] = Point2f(0,0);
+				div[v] = 0;
+			}
+
+			vector<CFaceO*> Q = vector<CFaceO*>();
+			Q.push_back(&m.face[i]);
+			int index = 0;
+			m.face[i].SetV();
+			while (index < Q.size())
+			{
+				for (int j = 0; j < 3; j++)
 				{
-					v->WT(i).u() = sum[v->V(i)].X()/div[v->V(i)];
-					v->WT(i).v() = sum[v->V(i)].Y()/div[v->V(i)];
+					CFaceO* p = Q[index]->FFp(j);
+					if (!p->IsV())
+					{
+						p->SetV();
+						Q.push_back(p);
+					}
+					div[Q[index]->V(j)] += 2;
+					sum[Q[index]->V(j)].X() = sum[Q[index]->V(j)].X() + Q[index]->WT((j+1)%3).u() + Q[index]->WT((j+2)%3).u();
+					sum[Q[index]->V(j)].Y() = sum[Q[index]->V(j)].Y() + Q[index]->WT((j+1)%3).v() + Q[index]->WT((j+2)%3).v();
 				}
-				else
+				index++;
+			}
+			index = 0;
+			while (index < Q.size())
+			{
+				for (int y = 0; y < 3; y++)
 				{
-					v->WT(i).u() = sum[v->V(i)].X()*alpha;
-					v->WT(i).v() = sum[v->V(i)].Y()*alpha;
-				}
+					if (div[Q[index]->V(y)]>0)
+					{
+						Q[index]->WT(y).u() = sum[Q[index]->V(y)].X()/div[Q[index]->V(y)];
+						Q[index]->WT(y).v() = sum[Q[index]->V(y)].Y()/div[Q[index]->V(y)];
+					}
+				}	
+				index++;
 			}
 		}
 	}
+	for (typename MESH_TYPE::FaceIterator f = m.face.begin(); f != m.face.end(); f++) f->ClearV();
 }
 
 };

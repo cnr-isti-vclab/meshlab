@@ -838,10 +838,10 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 				UpdateSelectionAreaV(0,0);
 			}
 		}
-		else 
+		if (selected) 
 		{
 			RecalculateSelectionArea();
-			UpdateSelectionArea(0,0);
+			//UpdateSelectionArea(0,0);
 		}
 		originR.moveCenter(ToScreenSpace(origin.x(), origin.y()));
 		initVX = viewport.X(); initVY = viewport.Y();
@@ -1741,17 +1741,30 @@ void RenderArea::RecalculateSelectionArea()
 	{
 		if ((*fi).IsUserBit(selBit) && !(*fi).IsD())
 		{
-			QVector<QPoint> t = QVector<QPoint>(); 
-			t.push_back(ToScreenSpace((*fi).WT(0).u(), (*fi).WT(0).v()));
-			t.push_back(ToScreenSpace((*fi).WT(1).u(), (*fi).WT(1).v()));
-			t.push_back(ToScreenSpace((*fi).WT(2).u(), (*fi).WT(2).v()));
-			QRegion r = QRegion(QPolygon(t));
-			UpdateBoundingArea(r.boundingRect().topLeft(), r.boundingRect().bottomRight());
+			QPoint a = ToScreenSpace((*fi).WT(0).u(), (*fi).WT(0).v());
+			QPoint b = ToScreenSpace((*fi).WT(1).u(), (*fi).WT(1).v());
+			QPoint c = ToScreenSpace((*fi).WT(2).u(), (*fi).WT(2).v());
+			// >> There's a BUG IN QREGION: I can't create a region if points are too near!!!! <<
+			if (a.x() < selStart.x()) selStart.setX(a.x());
+			if (b.x() < selStart.x()) selStart.setX(b.x());
+			if (c.x() < selStart.x()) selStart.setX(c.x());
+			if (a.y() < selStart.y()) selStart.setY(a.y());
+			if (b.y() < selStart.y()) selStart.setY(b.y());
+			if (c.y() < selStart.y()) selStart.setY(c.y());
+			if (a.x() > selEnd.x()) selEnd.setX(a.x());
+			if (b.x() > selEnd.x()) selEnd.setX(b.x());
+			if (c.x() > selEnd.x()) selEnd.setX(c.x());
+			if (a.y() > selEnd.y()) selEnd.setY(a.y());
+			if (b.y() > selEnd.y()) selEnd.setY(b.y());
+			if (c.y() > selEnd.y()) selEnd.setY(c.y());
 		}
 	}
 	if (selected)
 	{
-		selection = QRect(selStart, selEnd);
+		if (selStart.x() < selEnd.x() && selStart.y() < selEnd.y())
+		{
+			selection = QRect(selStart, selEnd);
+		}
 		UpdateSelectionArea(0,0);
 	}
 }
