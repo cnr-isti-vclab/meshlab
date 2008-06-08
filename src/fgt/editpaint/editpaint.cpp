@@ -254,6 +254,8 @@ void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla)
 			 *     ON BRUSH DOWN     *
 			 *************************/
 			
+			paintbox->setUndoStack(glarea);
+			
 			switch (current_type)
 			{
 				case COLOR_PAINT:

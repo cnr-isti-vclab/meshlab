@@ -27,7 +27,17 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 {
 	setupUi(this);
 	
-	setUndoStack(new QUndoStack(this));	
+	stacks = new QUndoGroup(this);
+	
+	QIcon undo = undo_button->icon();
+	undo_button->setDefaultAction(stacks->createUndoAction(undo_button));
+	undo_button->defaultAction()->setIcon(undo);
+
+	QIcon redo = redo_button->icon();
+	redo_button->setDefaultAction(stacks->createRedoAction(redo_button));
+	redo_button->defaultAction()->setIcon(redo);
+	
+	setUndoStack(parent);	
 	
 	active = COLOR_PAINT;
 	gradient_frame->setHidden(true);
@@ -63,17 +73,13 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	refreshBrushPreview();
 }
 
-void Paintbox::setUndoStack(QUndoStack * qus)
+void Paintbox::setUndoStack(QWidget * parent)
 {
-	stack = qus;
-	
-	QIcon undo = undo_button->icon();
-	undo_button->setDefaultAction(stack->createUndoAction(undo_button));
-	undo_button->defaultAction()->setIcon(undo);
-
-	QIcon redo = redo_button->icon();
-	redo_button->setDefaultAction(stack->createRedoAction(redo_button));
-	redo_button->defaultAction()->setIcon(redo);
+	if (stack_association.contains(parent))
+		stacks->setActiveStack(stack_association[parent]);
+	else
+		stack_association.insert(parent, new QUndoStack(parent));
+		stacks->setActiveStack(stack_association[parent]);
 }
 
 void Paintbox::on_default_colors_clicked()
@@ -97,13 +103,7 @@ void Paintbox::setClonePixmap(QImage & image)
 	item->setPos(0, 0);
 	clone_source_view->centerOn(0, 0);
 }
-/*	
-void Paintbox::setPixmapCenter(qreal x, qreal y)
-{
-	item->setPos(x , y );
-	clone_source_view->centerOn(0, 0);
-}
-*/
+
 void Paintbox::setPixmapDelta(double x, double y)
 {
 	item_delta.setX(x);

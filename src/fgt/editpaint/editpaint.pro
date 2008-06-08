@@ -7,6 +7,6 @@ HEADERS = cloneview.h \
 SOURCES = paintbox.cpp \
     editpaint.cpp \
     $$GLEWCODE
-TARGET = zpaint
+TARGET = editpaint
 RESOURCES = meshlab.qrc
 FORMS = paintbox.ui

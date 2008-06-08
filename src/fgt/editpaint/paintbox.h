@@ -59,7 +59,11 @@ class Paintbox : public QWidget, private Ui::Paintbox
 
 private:
 	ToolType active; //the active tool for each page
-	QUndoStack * stack;
+//	QUndoStack * stack;
+	
+	QHash<QWidget *, QUndoStack *> stack_association;
+	
+	QUndoGroup * stacks;
 	
 	ToolType previous_type;
 
@@ -70,7 +74,7 @@ private:
 public:	
 	Paintbox(QWidget * parent = 0, Qt::WindowFlags flags = 0);
 	
-	inline void pushCommand(QUndoCommand* c) {stack->push(c);}
+	inline void pushCommand(QUndoCommand* c) {stacks->activeStack()->push(c);}
 	
 	inline QColor getForegroundColor() {return foreground_frame->getColor();}
 	inline QColor getBackgroundColor() {return background_frame->getColor();}
@@ -96,10 +100,10 @@ public:
 	inline bool getPressureOpacity() {return opacity_box->isChecked();}
 	inline int getDisplacement() {return mesh_displacement_slider->value();}
 	inline int getDirection() {return mesh_displacement_direction->currentIndex();}
-	inline QUndoStack * getUndoStack() {return stack;}
+	inline QUndoStack * getUndoStack() {return stacks->activeStack();}
 	
 	
-	void setUndoStack(QUndoStack * qus);
+	void setUndoStack(QWidget * parent);
 	
 	void setForegroundColor(QColor & c);
 	void setBackgroundColor(QColor & c);
