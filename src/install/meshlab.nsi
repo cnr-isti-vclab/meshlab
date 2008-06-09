@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.1.0"
+!define PRODUCT_VERSION "1.2.0 alpha"
 !define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -41,9 +41,10 @@
 !insertmacro MUI_LANGUAGE "English"
 
 ; MUI end ------
+!define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabSetup_v110.exe"
+OutFile "MeshLabSetup_v120ALPHA_${NOW}.exe"
 InstallDir "$PROGRAMFILES\VCG\MeshLab"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -60,12 +61,14 @@ Section "MainSection" SEC01
   File "..\meshlab\shaders\*.gdp"
   File "..\meshlab\shaders\*.vert"
   SetOutPath "$INSTDIR\plugins"
-  ; IO Plugins (5)
+  ; IO Plugins (7)
   File "..\meshlab\plugins\baseio.dll"
   File "..\meshlab\plugins\epoch_io.dll"
   File "..\meshlab\plugins\colladaio.dll"
   File "..\meshlab\plugins\meshio.dll"
-  File "..\meshlab\plugins\u3d_io.dll"
+  File "..\meshlab\plugins\io_u3d.dll"
+  File "..\meshlab\plugins\io_x3d.dll"
+  File "..\meshlab\plugins\io_tri.dll"
   ; filter plugins (10)
   File "..\meshlab\plugins\cleanfilter.dll"
   File "..\meshlab\plugins\meshfilter.dll"
@@ -76,15 +79,25 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\filtergeodesic.dll"
   File "..\meshlab\plugins\filtercreateiso.dll"
   File "..\meshlab\plugins\filterborder.dll"
-  File "..\meshlab\plugins\filter_poisson.dll"
+  File "..\meshlab\plugins\filter_aging.dll"
   File "..\meshlab\plugins\filter_ao.dll"
+  File "..\meshlab\plugins\filter_poisson.dll"
+  File "..\meshlab\plugins\filter_quality.dll"
+  File "..\meshlab\plugins\filter_sampling.dll"
+  File "..\meshlab\plugins\filter_splitter.dll"
+  File "..\meshlab\plugins\filter_trioptimize.dll"
+  File "..\meshlab\plugins\filter_unsharp.dll"
   ; edit plugins (6)
   File "..\meshlab\plugins\editalign.dll"
   File "..\meshlab\plugins\editmeasure.dll"
   File "..\meshlab\plugins\editpaint.dll"
   File "..\meshlab\plugins\editslice.dll"
-  File "..\meshlab\plugins\meshedit.dll"
   File "..\meshlab\plugins\sampleedit.dll"
+  File "..\meshlab\plugins\edit_morpher.dll"
+  File "..\meshlab\plugins\edit_pickpoints.dll"
+  File "..\meshlab\plugins\edit_quality.dll"
+  File "..\meshlab\plugins\edit_select.dll"
+  File "..\meshlab\plugins\edit_texture.dll"
   ; decorate plugins (2)
   File "..\meshlab\plugins\meshdecorate.dll"
   File "..\meshlab\plugins\sampledecoration.dll"
@@ -202,7 +215,7 @@ SectionEnd
 !define TEMP1 $R0 ;Temp variable
 
 ReserveFile "${NSISDIR}\Plugins\InstallOptions.dll"
-ReserveFile "fileassociation_nsis.ini"
+; ReserveFile "fileassociation_nsis.ini"
 
 ;Order of pages
 ; la prox linea se scommnentata serve ad abilitare il loading di una pagine aggiuntiva
@@ -235,7 +248,7 @@ Function .onInit
   ;$PLUGINSDIR will automatically be removed when the installer closes
 
   InitPluginsDir
-  File /oname=$PLUGINSDIR\fileassociation_nsis.ini "fileassociation_nsis.ini"
+;  File /oname=$PLUGINSDIR\fileassociation_nsis.ini "fileassociation_nsis.ini"
 
 FunctionEnd
 
