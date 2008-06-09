@@ -22,16 +22,16 @@ public :
 	}
 	
 	virtual void mousePressEvent(QMouseEvent * event) {
-		start_pos = event->posF();
-		last_pos.setX(event->posF().x()); last_pos.setY(event->posF().y());}
+		start_pos = QPointF(event->pos());
+		last_pos.setX(event->pos().x()); last_pos.setY(event->pos().y());}
 	
 	virtual void mouseMoveEvent ( QMouseEvent * event)
 	{
 		if (!(event->buttons() & Qt::LeftButton)) return;
 		QGraphicsItem * item = itemAt(event->pos());
 		if (item != NULL) 
-			if (!crosshair->isAncestorOf(item)) item->moveBy(event->posF().x() - last_pos.x(), event->posF().y() - last_pos.y());
-		last_pos.setX(event->posF().x()); last_pos.setY(event->posF().y());
+			if (!crosshair->isAncestorOf(item)) item->moveBy(event->pos().x() - last_pos.x(), event->pos().y() - last_pos.y());
+		last_pos.setX(event->pos().x()); last_pos.setY(event->pos().y());
 	//	emit positionChanged(last_pos.x() - start_pos.x(), last_pos.y() - start_pos.y());
 	}
 	
