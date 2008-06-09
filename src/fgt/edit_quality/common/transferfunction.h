@@ -172,6 +172,7 @@ private:
 enum DEFAULT_TRANSFER_FUNCTIONS
 {
 	GREY_SCALE_TF = 0,
+	MESHLAB_RGB_TF,
 	RGB_TF,
 	RED_SCALE_TF,
 	GREEN_SCALE_TF,
@@ -182,7 +183,7 @@ enum DEFAULT_TRANSFER_FUNCTIONS
 
 //code of the default startup Transfer Function
 //When the plugin is launched, a TF is built using this code
-#define STARTUP_TF_TYPE		RGB_TF
+#define STARTUP_TF_TYPE		MESHLAB_RGB_TF
 
 
 //Representation of a Transfer Function as a set of channels

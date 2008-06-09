@@ -298,6 +298,28 @@ TransferFunction::TransferFunction(DEFAULT_TRANSFER_FUNCTIONS code)
 		_channels[BLUE_CHANNEL].addKey(0.0f,0.0f);
 		_channels[BLUE_CHANNEL].addKey(1.0f,1.0f);
 		break;
+	case MESHLAB_RGB_TF:
+		_channels[RED_CHANNEL].addKey(0.0f,0.0f);
+		_channels[RED_CHANNEL].addKey(0.125f,0.0f);
+		_channels[RED_CHANNEL].addKey(0.375f,0.0f);
+		_channels[RED_CHANNEL].addKey(0.625f,1.0f);
+		_channels[RED_CHANNEL].addKey(0.875f,1.0f);
+		_channels[RED_CHANNEL].addKey(1.0f,0.5f);
+
+		_channels[GREEN_CHANNEL].addKey(0.0f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.125f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(0.375f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(0.625f,1.0f);
+		_channels[GREEN_CHANNEL].addKey(0.875f,0.0f);
+		_channels[GREEN_CHANNEL].addKey(1.0f,0.0f);
+
+		_channels[BLUE_CHANNEL].addKey(0.0f,0.5f);
+		_channels[BLUE_CHANNEL].addKey(0.125f,1.0f);
+		_channels[BLUE_CHANNEL].addKey(0.375f,1.0f);
+		_channels[BLUE_CHANNEL].addKey(0.625f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(0.875f,0.0f);
+		_channels[BLUE_CHANNEL].addKey(1.0f,0.0f);
+		break;
 	case RGB_TF:
 		_channels[RED_CHANNEL].addKey(0.0f,1.0f);
 		_channels[RED_CHANNEL].addKey(0.5f,0.0f);
@@ -404,6 +426,7 @@ void TransferFunction::initTF()
 
 	//setting default transfer functions names
 	defaultTFs[GREY_SCALE_TF] = "Grey Scale";
+	defaultTFs[MESHLAB_RGB_TF] = "Meshlab RGB";
 	defaultTFs[RGB_TF] = "RGB";
 	defaultTFs[RED_SCALE_TF] = "Red Scale";
 	defaultTFs[GREEN_SCALE_TF] = "Green Scale";
