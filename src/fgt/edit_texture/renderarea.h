@@ -59,6 +59,7 @@ class RenderArea : public QGLWidget
 		void UnifySet();
 		void ResetPosition();
 		QString GetTextureName();
+		void RecalculateSelectionArea();
 
 	protected:
 		void paintEvent(QPaintEvent *event);
@@ -145,7 +146,6 @@ class RenderArea : public QGLWidget
 		void HandleRotate(QPoint e);
 		void RotateComponent(float theta);
 		void ScaleComponent(float percentX, float percentY);
-		void RecalculateSelectionArea();
 		void UpdateSelectionArea(int x, int y);
 		void UpdateSelectionAreaV(int x, int y);
 		void UpdateVertexSelection();

@@ -69,7 +69,7 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m)
 	
 	for (int i = 0; i < m.face.size(); i++)
 	{
-		if (!m.face[i].IsV())
+		if (!m.face[i].IsV() && m.face[i].IsS())
 		{
 			vcg::SimpleTempData<typename MESH_TYPE::VertContainer, int> div(m.vert);
 			vcg::SimpleTempData<typename MESH_TYPE::VertContainer, Point2f > sum(m.vert);
@@ -89,7 +89,7 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m)
 				for (int j = 0; j < 3; j++)
 				{
 					CFaceO* p = Q[index]->FFp(j);
-					if (!p->IsV())
+					if (!p->IsV() && p->IsS())
 					{
 						p->SetV();
 						Q.push_back(p);

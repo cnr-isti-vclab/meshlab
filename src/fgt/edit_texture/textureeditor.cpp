@@ -80,6 +80,7 @@ void TextureEditor::SmoothTextureCoordinates()
 	for (int i = 0; i < ui.spinBoxIteration->value(); i++)
 		SmoothTextureWEdgeCoords(model->cm);
 	area->update();
+	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->RecalculateSelectionArea();
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->update();
 }
 

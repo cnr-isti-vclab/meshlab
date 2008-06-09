@@ -503,8 +503,6 @@
           </widget>
          </item>
         </layout>
-        <zorder>labelName</zorder>
-        <zorder>browseButton</zorder>
        </widget>
       </item>
       <item row="1" column="0" colspan="2" >
@@ -520,22 +518,9 @@
           <number>9</number>
          </property>
          <item>
-          <widget class="QLabel" name="label" >
+          <widget class="QLabel" name="label_2" >
            <property name="text" >
-            <string>Number of iteration:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="spinBoxIteration" >
-           <property name="minimum" >
-            <number>1</number>
-           </property>
-           <property name="maximum" >
-            <number>10</number>
-           </property>
-           <property name="value" >
-            <number>1</number>
+            <string>Smooth selected faces</string>
            </property>
           </widget>
          </item>
@@ -551,6 +536,26 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label" >
+           <property name="text" >
+            <string>Number of iteration</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBoxIteration" >
+           <property name="minimum" >
+            <number>1</number>
+           </property>
+           <property name="maximum" >
+            <number>10</number>
+           </property>
+           <property name="value" >
+            <number>1</number>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="smoothButton" >
