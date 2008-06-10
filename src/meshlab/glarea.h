@@ -438,7 +438,7 @@ public:
 	float clipRatioNear;
 	float nearPlane;
 	float farPlane;
-
+  float pointSize;
 private:
 	float cfps;
 	float lastTime;

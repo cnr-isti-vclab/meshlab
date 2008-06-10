@@ -130,6 +130,7 @@ GLArea::GLArea(QWidget *parent)
 	clipRatioNear = 1;
 	nearPlane = .2f;
 	farPlane = 5.f;
+	pointSize = 2.0f;
 	layerDialog = new LayerDialog(this);
 	
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
@@ -688,9 +689,13 @@ void GLArea::wheelEvent(QWheelEvent*e)
 	float notch = e->delta()/ float(WHEEL_STEP);
   switch(e->modifiers())
   {
-    case Qt::ShiftModifier + Qt::ControlModifier : clipRatioFar  *= powf(1.2f, notch); break;
-    case Qt::ControlModifier                     : clipRatioNear *= powf(1.2f, notch); break;
-    case Qt::ShiftModifier                       : fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
+    case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  *= powf(1.2f, notch); break;
+    case Qt::ControlModifier											: clipRatioNear *= powf(1.2f, notch); break;
+    case Qt::AltModifier													: pointSize = math::Clamp(pointSize*powf(1.2f, notch),0.01f,150.0f);
+			foreach(MeshModel * mp, meshDoc.meshList) 
+				mp->glw.SetHintParamf(GLW::HNPPointSize,pointSize);
+			break;
+    case Qt::ShiftModifier												: fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f); break;
     default:
       trackball.MouseWheel( e->delta()/ float(WHEEL_STEP)); 
       break;
