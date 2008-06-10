@@ -18,7 +18,7 @@ public:
 	{
 		QPalette palette = Colorframe::palette();
 		QColor temp = palette.color(QPalette::Normal, QPalette::Window);
-		temp = QColorDialog::getColor();
+		temp = QColorDialog::getColor(temp);
 		if (temp.isValid()){
 			setColor(temp);
 			update();
