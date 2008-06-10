@@ -1,5 +1,7 @@
 #include <QtGui>
  #include <QList>
+#include <QListWidgetItem>
+#include <QListWidget>
 #include <PhotoTexturingDialog.h>
 #include <meshlab/mainwindow.h>
 #include <wrap/gl/trimesh.h>
@@ -31,7 +33,7 @@ PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTextu
 	connect(ui.assignImagePushButton, SIGNAL(clicked()),this,SLOT(assignImage()));
 	connect(ui.calculateTexturesPushButton, SIGNAL(clicked()),this,SLOT(calculateTextures()));
 	connect(ui.combineTexturesPushButton, SIGNAL(clicked()),this,SLOT(combineTextures()));
-	connect(ui.selectCurrentTextureComboBox, SIGNAL(activated(int )),this,SLOT(selectCurrentTexture(int )));
+	connect(ui.textureListWidget, SIGNAL(itemClicked(QListWidgetItem* )),this,SLOT(selectCurrentTexture()));
 	
 	connect(ui.applyPushButton, SIGNAL(clicked()),this,SLOT(apply()));
 	connect(ui.closePushButton, SIGNAL(clicked()),this,SLOT(close()));
@@ -84,8 +86,8 @@ void PhotoTexturingDialog::update(){
 	int rowcount = photoTexturer->cameras.size();
 	ui.cameraTableWidget->setRowCount((rowcount));
 	int i;
-	int currentIdx = ui.selectCurrentTextureComboBox->currentIndex();
-	ui.selectCurrentTextureComboBox->clear();
+	int currentIdx = ui.textureListWidget->currentRow();
+	ui.textureListWidget->clear();
 	for (i=0;i<rowcount;i++){
 		QString camname;
 		QString imagename;
@@ -97,11 +99,14 @@ void PhotoTexturingDialog::update(){
 		QTableWidgetItem *textureImageItem = new QTableWidgetItem(imagename);
 		ui.cameraTableWidget->setItem(i, 1, textureImageItem);
 		if (cam->calculatedTextures){
-			ui.selectCurrentTextureComboBox->addItem(camname,QVariant(i));
+			QListWidgetItem *newItem = new QListWidgetItem;
+			newItem->setText(camname);
+			//newItem->setData(QVariant(i));
+			ui.textureListWidget->addItem(newItem);
 		}
 	}
-	if (currentIdx < ui.selectCurrentTextureComboBox->count()){
-		ui.selectCurrentTextureComboBox->setCurrentIndex(currentIdx);
+	if (currentIdx < ui.textureListWidget->count()){
+		ui.textureListWidget->setCurrentRow(currentIdx);
 	}
 	ui.cameraTableWidget->resizeColumnsToContents();
 
@@ -135,8 +140,9 @@ void PhotoTexturingDialog::calculateTextures(){
 	updateMainWindowMenus();
 }
 
-void PhotoTexturingDialog::selectCurrentTexture(int index){
-	int icam = ui.selectCurrentTextureComboBox->itemData(index).toInt();
+void PhotoTexturingDialog::selectCurrentTexture(){
+	int icam = ui.textureListWidget->currentRow();
+
 	photoTexturer->applyTextureToMesh(mesh,icam);
 	setGLAreaTextureMode(vcg::GLW::TMPerWedgeMulti);
 	glarea->update();
@@ -146,6 +152,7 @@ void PhotoTexturingDialog::combineTextures(){
 	FilterParameterSet combineParamSet;
 	combineParamSet.addInt("width",1024,"Image width:","");
 	combineParamSet.addInt("height",1024,"Image height:","");
+	combineParamSet.addInt("edgeStretchingPasses",2,"Edge Stretching Passes:","");
 	//combineParamSet.addBool("saveImages",true,"Save all images","");
 	//combineParamSet.addBool("sameFolder",true,"Same folder as mesh","");
 	//buildParameterSet(alignParamSet, defaultAP);
@@ -153,7 +160,7 @@ void PhotoTexturingDialog::combineTextures(){
 	GenericParamDialog ad(this,&combineParamSet,"Texture Baking Parameters");
 	int result=ad.exec();
 	if (result == 1){
-		photoTexturer->combineTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"));
+		photoTexturer->combineTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"),combineParamSet.getInt("edgeStretchingPasses"));
 	}
 	update();
 }

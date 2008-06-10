@@ -1,15 +1,12 @@
 <ui version="4.0" >
  <class>photoTexturingDialog</class>
  <widget class="QDialog" name="photoTexturingDialog" >
-  <property name="windowModality" >
-   <enum>Qt::NonModal</enum>
-  </property>
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>400</height>
+    <height>360</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -21,13 +18,13 @@
   <property name="minimumSize" >
    <size>
     <width>560</width>
-    <height>400</height>
+    <height>360</height>
    </size>
   </property>
   <property name="maximumSize" >
    <size>
     <width>560</width>
-    <height>400</height>
+    <height>360</height>
    </size>
   </property>
   <property name="windowTitle" >
@@ -39,7 +36,7 @@
      <x>10</x>
      <y>0</y>
      <width>541</width>
-     <height>391</height>
+     <height>351</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" >
@@ -60,16 +57,58 @@
       <property name="checkable" >
        <bool>false</bool>
       </property>
-      <widget class="QWidget" name="" >
+      <widget class="QWidget" name="layoutWidget" >
        <property name="geometry" >
         <rect>
-         <x>20</x>
-         <y>30</y>
-         <width>511</width>
-         <height>251</height>
+         <x>370</x>
+         <y>20</y>
+         <width>161</width>
+         <height>221</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" >
+       <layout class="QVBoxLayout" >
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <property name="topMargin" >
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_2" >
+          <property name="text" >
+           <string>Textures:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="textureListWidget" />
+        </item>
+        <item>
+         <widget class="QPushButton" name="calculateTexturesPushButton" >
+          <property name="text" >
+           <string>Calculate UV Coords.</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="combineTexturesPushButton" >
+          <property name="text" >
+           <string>Combine Textures</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>351</width>
+         <height>221</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" >
         <item>
          <widget class="QTableWidget" name="cameraTableWidget" >
           <property name="sizePolicy" >
@@ -97,7 +136,10 @@
          </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" >
+         <layout class="QHBoxLayout" >
+          <property name="spacing" >
+           <number>6</number>
+          </property>
           <item>
            <widget class="QPushButton" name="addCameraPushButton" >
             <property name="text" >
@@ -118,56 +160,6 @@
              <string>Assign Image</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <spacer>
-            <property name="orientation" >
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" >
-             <size>
-              <width>187</width>
-              <height>16</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="calculateTexturesPushButton" >
-            <property name="text" >
-             <string>Calculate Textures</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_3" >
-            <property name="text" >
-             <string>Current Texture:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="selectCurrentTextureComboBox" />
-          </item>
-          <item>
-           <widget class="QPushButton" name="combineTexturesPushButton" >
-            <property name="text" >
-             <string>Combine Textures</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer>
-            <property name="orientation" >
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" >
-             <size>
-              <width>187</width>
-              <height>16</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>
@@ -212,7 +204,14 @@
       <item>
        <widget class="QPushButton" name="applyPushButton" >
         <property name="text" >
-         <string>Apply</string>
+         <string>Apply Texture to Mesh</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="cancelPushButton" >
+        <property name="text" >
+         <string>Restore Original Texture</string>
         </property>
        </widget>
       </item>
@@ -220,13 +219,6 @@
        <widget class="QPushButton" name="closePushButton" >
         <property name="text" >
          <string>Close</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cancelPushButton" >
-        <property name="text" >
-         <string>Cancel</string>
         </property>
        </widget>
       </item>

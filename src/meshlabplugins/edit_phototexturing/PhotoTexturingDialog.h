@@ -39,7 +39,7 @@ private slots:
 	
 	void assignImage();
 	void calculateTextures();
-	void selectCurrentTexture(int index);
+	void selectCurrentTexture();
 	void combineTextures();
 	void apply();
 	void close();
