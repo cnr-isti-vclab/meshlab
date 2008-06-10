@@ -12,7 +12,7 @@ extern "C" {
 class TsaiCameraCalibration: public CameraCalibration{
 public:
 	
-	virtual TsaiCameraCalibration();
+	TsaiCameraCalibration();
 	virtual ~TsaiCameraCalibration();
 	virtual void loadCalibration(QString);
 	virtual void loadFromXml(QDomElement *xml_cam);
