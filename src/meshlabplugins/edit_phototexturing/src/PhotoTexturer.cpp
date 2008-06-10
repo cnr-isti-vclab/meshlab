@@ -9,7 +9,7 @@
 
 #include <src/PhotoTexturer.h>
 #include <src/UVFaceTexture.h>
-#include <src/Kai/KaiCameraCalibration.h>
+#include <src/CameraCalibration.h>
 
 #include<vcg/complex/trimesh/allocate.h>
 #include <src/QuadTree/QuadTreeNode.h>
