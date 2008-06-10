@@ -272,7 +272,7 @@ void PhotoTexturer::applyTextureToMesh(MeshModel *m,int camIdx){
 	}
 }
 
-void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, QuadTreeNode &qtree,int res_x, int res_y){
+void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, QuadTreeNode &qtree,QImage &image){
 	//qDebug() <<"unprojectToOriginalTextureMap";
 	
 	//checks if the MeshModel has original uv coordinates and camera projected uv coordinates. 
@@ -284,8 +284,9 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 		QString camname = camera->name;
 		
 		//creates a new RGBA image for saving the new texture
-		QImage image(res_x, res_y, QImage::Format_ARGB32);
-		
+		//QImage image(res_x, res_y, QImage::Format_ARGB32);
+		int res_x = image.width();
+		int res_y = image.height();
 		//loading the texture corresponding to the camera
 		QImage tmp_texture(camera->textureImage);
 		
@@ -306,7 +307,6 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 				//sets the current pixel to black with an alpha value of 0
 				cpixel = QColor(0, 0, 0, 0);
 				image.setPixel(x,res_y-(y+1), cpixel.rgba());
-				
 				found = false;
 				//searches the QuadTree for matching faces
 				QList<QuadTreeLeaf*> list; 
@@ -337,14 +337,108 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 				}
 			}
 		}
-		QString filename = QString(m->fileName.c_str());
-		filename = filename + "_" + camera->name + ".png";
-		image.save(filename,"PNG");
 	}
 	//qDebug() <<"unprojectToOriginalTextureMap DONE";
 }
 
-void PhotoTexturer::combineTextures(MeshModel *m, int width, int height){
+void PhotoTexturer::getSurrundingMeanColor(QImage &image, int x, int y, QColor &surcolor){
+	//qDebug()<<"getSurrundingMeanColor: "<<x<<y;
+	int width = image.width();
+	int height = image.height();
+	if((x>=0) && (x< width) && (y>=0) && (y< height)){
+		QColor c[8];
+		c[0] = QColor(0,0,0,0);
+		c[1] = QColor(0,0,0,0);
+		c[2] = QColor(0,0,0,0);
+		c[3] = QColor(0,0,0,0);
+		c[4] = QColor(0,0,0,0);
+		c[5] = QColor(0,0,0,0);
+		c[6] = QColor(0,0,0,0);
+		c[7] = QColor(0,0,0,0);
+		if((x-1>=0) && (x-1< width) && (y-1>=0) && (y-1< height)){
+			c[0]=QColor::fromRgba(image.pixel(x-1,y-1));
+		}
+		
+		if((x>=0) && (x< width) && (y-1>=0) && (y-1< height)){
+			c[1]=QColor::fromRgba(image.pixel(x,y-1));
+		}
+		if((x+1>=0) && (x+1< width) && (y-1>=0) && (y-1< height)){
+			c[2]=QColor::fromRgba(image.pixel(x+1,y-1));
+		}
+		if((x+1>=0) && (x+1< width) && (y>=0) && (y< height)){
+			c[3]=QColor::fromRgba(image.pixel(x+1,y));
+		}
+		if((x+1>=0) && (x+1< width) && (y+1>=0) && (y+1< height)){
+			c[4]=QColor::fromRgba(image.pixel(x+1,y+1));
+		}
+		if((x>=0) && (x< width) && (y+1>=0) && (y+1< height)){
+			c[5]=QColor::fromRgba(image.pixel(x,y+1));
+		}
+		if((x-1>=0) && (x-1< width) && (y+1>=0) && (y+1< height)){
+			c[6]=QColor::fromRgba(image.pixel(x-1,y+1));
+		}
+		if((x-1>=0) && (x-1< width) && (y>=0) && (y< height)){
+			c[7]=QColor::fromRgba(image.pixel(x-1,y));
+		}
+		int i;
+		int r=0;
+		int g=0;
+		int b=0;
+		int count=0;
+		for(i=0;i<8;i++){
+			if(c[i].alpha()==255){
+				r+=c[i].red();
+				g+=c[i].green();
+				b+=c[i].blue();
+				count++;
+			}
+		}
+		if(count>0){
+			surcolor.setRed(r/count);
+			surcolor.setGreen(g/count);
+			surcolor.setBlue(b/count);
+			surcolor.setAlpha(255);
+		}else{
+			surcolor.setRed(0);
+			surcolor.setGreen(0);
+			surcolor.setBlue(0);
+			surcolor.setAlpha(0);
+		}
+
+	}
+	
+	
+}
+
+
+void PhotoTexturer::edgeTextureStretching(QImage &image, int pass){
+	if(pass>0){
+		int count = 0;
+		while(pass>0){
+			//qDebug()<< "edgeTextureStretching pass:" <<++count; 
+			QImage tmp_image = image.copy(0,0,image.width(),image.height());
+			int x;
+			int y;
+			for(y=0;y<image.height();y++){
+				for(x=0;x<image.width();x++){
+					QColor test = QColor::fromRgba(image.pixel(x,y));
+
+					if(test.alpha()==0){
+						QColor surcolor;
+						getSurrundingMeanColor(tmp_image,x,y,surcolor);
+						image.setPixel(x,y,surcolor.rgba());
+					}
+				}
+			}
+			
+			
+			pass--;
+		}
+	}
+}
+
+
+void PhotoTexturer::combineTextures(MeshModel *m, int width, int height, int ets){
 	
 	QList<QuadTreeLeaf*> *list = new QList<QuadTreeLeaf*>();
 	CMeshO::PerFaceAttributeHandle<UVFaceTexture*> oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*>(m->cm,ORIGINALUVTEXTURECOORDS);
@@ -361,7 +455,13 @@ void PhotoTexturer::combineTextures(MeshModel *m, int width, int height){
 	//qDebug()<< "buildQuadTree DONE";
 	int i;
 	for (i=0;i<cameras.size();i++){
-		unprojectToOriginalTextureMap(m,cameras.at(i),qtree,width,height);
+		Camera *camera = cameras.at(i);
+		QImage image = QImage(width,height,QImage::Format_ARGB32);
+		unprojectToOriginalTextureMap(m,camera,qtree,image);
+		edgeTextureStretching(image,ets);
+		QString filename = QString(m->fileName.c_str());
+		filename = filename + "_" + camera->name + ".png";
+		image.save(filename,"PNG");
 	}
 	
 	

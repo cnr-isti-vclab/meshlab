@@ -83,7 +83,7 @@ public:
 	 * Combines the textures calculated be each camera to one texture.
 	 * A new texture image will be created with the dimensions of (width x height).  
 	 */
-	void combineTextures(MeshModel *m,int width, int height);
+	void combineTextures(MeshModel *m,int width, int height, int ets);
 	
 private: 
 	
@@ -98,8 +98,12 @@ private:
 	 * Unprojects a calculated texture of a camera to the original texture of the mesh to a new
 	 * texture image (dimension res_x, res_y).
 	 */
-	void unprojectToOriginalTextureMap(MeshModel *m, Camera* camera,QuadTreeNode &qtree, int res_x, int res_y);
+	void unprojectToOriginalTextureMap(MeshModel *m, Camera* camera,QuadTreeNode &qtree, QImage &image);
 
+	
+	void getSurrundingMeanColor(QImage &image, int x, int y, QColor &surcolor);
+	
+	void edgeTextureStretching(QImage &image, int pass);
 };
 
 #endif /*PHOTOTEXTURER_H_*/
