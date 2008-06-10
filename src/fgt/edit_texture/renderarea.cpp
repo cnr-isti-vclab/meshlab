@@ -213,10 +213,8 @@ void RenderArea::paintEvent(QPaintEvent *)
 					for (int j = 0; j < 3; j++)
 					{	
 						if(areaUV.contains(QPointF(model->cm.face[i].WT(j).u(), model->cm.face[i].WT(j).v())) && model->cm.face[i].V(j)->IsUserBit(selVertBit))
-						{
 							DrawCircle(QPoint((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - posVX/zoom,
-								AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - posVY/zoom));
-						}
+								(AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y())))) * AREADIM) - posVY/zoom));
 					}
 					glColor3f(0,0,0);
 					glEnable(GL_COLOR_LOGIC_OP);
@@ -311,14 +309,8 @@ void RenderArea::paintEvent(QPaintEvent *)
 				// The rectangle of editing
 				painter.setPen(QPen(QBrush(Qt::yellow),2));
 				painter.setBrush(QBrush(Qt::NoBrush));
-				if (mode == Edit)
-				{
-					painter.drawRect(QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height()));
-				}
-				else 
-				{
-					painter.drawRect(QRect(selection.x() - posVX, selection.y() - posVY, selection.width(), selection.height()));
-				}
+				if (mode == Edit) painter.drawRect(QRect(selection.x() - posX, selection.y() - posY, selection.width(), selection.height()));
+				else painter.drawRect(QRect(selection.x() - posVX, selection.y() - posVY, selection.width(), selection.height()));
 
 				if (mode == Edit || (mode == EditVert && VCount > 1))
 				{
@@ -398,9 +390,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 			{
 				painter.setPen(QPen(QBrush(Qt::red),2));
 				for (unsigned k = 0; k < drawnPath1.size()-1; k++)
-				{
 					painter.drawLine(ToScreenSpace(drawnPath1[k].X(), drawnPath1[k].Y()), ToScreenSpace(drawnPath1[k+1].X(),drawnPath1[k+1].Y()));
-				}
 			}
 		}
 		glDisable(GL_LOGIC_OP);
@@ -703,10 +693,7 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 						selRect[3].moveTopLeft(QPoint(selection.bottomRight().x() - posVX, selection.bottomRight().y() - posVY));
 					}
 				}
-				else if (pressed > NOSEL && pressed < selRect.size())  
-				{
-					HandleRotate(e->pos());
-				}
+				else if (pressed > NOSEL && pressed < selRect.size()) HandleRotate(e->pos());
 				else if (pressed == ORIGINRECT)
 				{
 					orX = tpanX - e->x();
@@ -810,43 +797,23 @@ void RenderArea::wheelEvent(QWheelEvent*e)
 	// Handle the zoom for any mode
 	int cwx = viewport.X() - (this->visibleRegion().boundingRect().width()/zoom)/2;
 	int cwy = viewport.Y() - (this->visibleRegion().boundingRect().height()/zoom)/2;
-	bool scale = false;
-	if (e->delta() > 0) 
+	if (e->delta() > 0) zoom /= 0.75; 
+	else zoom *= 0.75; 
+	// Change the viewport, putting the center of the screen on the mouseposition
+	cwx += (this->visibleRegion().boundingRect().width()/zoom)/2;
+	cwy += (this->visibleRegion().boundingRect().height()/zoom)/2;
+	viewport = Point2f(cwx, cwy);
+	ResetTrack(false);
+	tb->Scale(zoom);
+	if (selectedV) 
 	{
-		zoom /= 0.75; 
-		scale = true;
+		if (mode == UnifyVert) UpdateUnify();
+		else UpdateVertexSelection();
 	}
-	else
-	{ 
-		zoom *= 0.75; 
-		scale = true; 
-	}
-	if (scale)
-	{
-		// Change the viewport, putting the center of the screen on the mouseposition
-		cwx += (this->visibleRegion().boundingRect().width()/zoom)/2;
-		cwy += (this->visibleRegion().boundingRect().height()/zoom)/2;
-		viewport = Point2f(cwx, cwy);
-		ResetTrack(false);
-		tb->Scale(zoom);
-		if (selectedV) 
-		{
-			if (mode == UnifyVert) UpdateUnify();
-			else
-			{
-				UpdateVertexSelection();
-				UpdateSelectionAreaV(0,0);
-			}
-		}
-		if (selected) 
-		{
-			RecalculateSelectionArea();
-			//UpdateSelectionArea(0,0);
-		}
-		originR.moveCenter(ToScreenSpace(origin.x(), origin.y()));
-		initVX = viewport.X(); initVY = viewport.Y();
-		this->update();
-	}
+	else if (selected) RecalculateSelectionArea();
+	originR.moveCenter(ToScreenSpace(origin.x(), origin.y()));
+	initVX = viewport.X(); initVY = viewport.Y();
+	this->update();
 }
 
 void RenderArea::keyPressEvent(QKeyEvent *e)
@@ -1327,16 +1294,13 @@ void RenderArea::SelectConnectedComponent(QPoint e)
 			}
 		}
 	}
-
+	// Select all the adjacentfaces
 	while (index < Q.size())
 	{
 		for (int j = 0; j < 3; j++)
 		{
 			CFaceO* p = Q[index]->FFp(j);
-			if (!p->IsUserBit(selBit) && (
-				(Q[index]->WT(0) == p->WT(0) || Q[index]->WT(0) == p->WT(1) || Q[index]->WT(0) == p->WT(2)) || 
-				(Q[index]->WT(1) == p->WT(0) || Q[index]->WT(1) == p->WT(1) || Q[index]->WT(1) == p->WT(2)) || 
-				(Q[index]->WT(2) == p->WT(0) || Q[index]->WT(2) == p->WT(1) || Q[index]->WT(2) == p->WT(2))))
+			if (!p->IsUserBit(selBit))
 			{
 				p->SetUserBit(selBit);
 				Q.push_back(p);
@@ -1731,9 +1695,9 @@ void RenderArea::HandleRotate(QPoint e)
 	this->update();
 }
 
+// Find the new size of the selection rectangle after an edit
 void RenderArea::RecalculateSelectionArea()
 {
-	// Find the new size of the selection rectangle after a rotation or a scale
 	selStart = QPoint(MAX,MAX);
 	selEnd = QPoint(-MAX,-MAX);
 	CMeshO::FaceIterator fi;
@@ -1759,12 +1723,9 @@ void RenderArea::RecalculateSelectionArea()
 			if (c.y() > selEnd.y()) selEnd.setY(c.y());
 		}
 	}
-	if (selected)
+	if (selected && selStart.x() < selEnd.x() && selStart.y() < selEnd.y())
 	{
-		if (selStart.x() < selEnd.x() && selStart.y() < selEnd.y())
-		{
-			selection = QRect(selStart, selEnd);
-		}
+		selection = QRect(selStart, selEnd);
 		UpdateSelectionArea(0,0);
 	}
 }
@@ -1804,7 +1765,7 @@ void RenderArea::UpdateVertexSelection()
 			for (int j = 0; j < 3; j++)
 			{
 				QPoint tmp = ToScreenSpace((*fi).WT(j).u(), (*fi).WT(j).v());
-				if ((*fi).V(j)->IsUserBit(selVertBit))
+				if ((*fi).V(j)->IsUserBit(selVertBit) && areaUV.contains(QPointF((*fi).WT(j).u(), (*fi).WT(j).v())))
 				{
 					UpdateBoundingArea(tmp,tmp);
 					if (!selectedV) selectedV = true;
@@ -1816,6 +1777,7 @@ void RenderArea::UpdateVertexSelection()
 	QPointF a = ToUVSpace(selection.x(), selection.y());
 	QPointF b = ToUVSpace(selection.bottomRight().x(),selection.bottomRight().y());
 	areaUV = QRectF(a, QSizeF(b.x()-a.x(), b.y()-a.y()));
+	UpdateSelectionAreaV(0,0);
 }
 
 void RenderArea::UpdateUnify()

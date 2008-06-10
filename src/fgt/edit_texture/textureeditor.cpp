@@ -95,6 +95,7 @@ void TextureEditor::on_moveButton_clicked()
 void TextureEditor::on_connectedButton_clicked()
 {
 	ResetLayout();
+	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeSelectMode(SELECTCONNECTED);
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->ChangeMode(SELECTMODE);
 	ui.connectedButton->setChecked(true);

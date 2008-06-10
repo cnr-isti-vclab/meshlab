@@ -52,7 +52,7 @@ const PluginInfo &EditTexturePlugin::Info()
 {
 	static PluginInfo ai; 
 	ai.Date=tr(__DATE__);
-	ai.Version = tr("1.1.3");
+	ai.Version = tr("1.1.4");
 	ai.Author = ("Riccardo Dini");
     return ai;
 }
