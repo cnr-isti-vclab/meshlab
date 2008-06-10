@@ -1,0 +1,30 @@
+<!DOCTYPE photoTexturing>
+<photoTexturing>
+ <camera textureImage="face_cam4.png" name="cam4" >
+  <calibration type="TSAI" >
+   <sensor Cx="1944.03" Cy="1295.71" sx="0.993844" dpx="0.00571" dpy="0.00571" />
+   <cc f="92.8513" p1="8.49469e-313" p2="1.17796e-269" kappa1="-1.23636e-05" />
+   <translation x="-296.046" y="53.1621" z="1684.21" />
+   <rotation x="-151.522" y="1.06854" z="0.905053" />
+   <matrix r1="0.999701" r2="0.004994" r3="-0.023922" r4="0.015793" r5="-0.879034" r6="0.476498" r7="-0.018648" r8="-0.476733" r9="-0.87885" />
+  </calibration>
+ </camera>
+ <camera textureImage="face_cam5.png" name="cam5" >
+  <calibration type="TSAI" >
+   <sensor Cx="1945.21" Cy="1295.6" sx="1.00104" dpx="0.00571" dpy="0.00571" />
+   <cc f="54.4938" p1="8.48798e-314" p2="2.122e-314" kappa1="0.000135252" />
+   <translation x="369.841" y="-207.352" z="1175.7" />
+   <rotation x="-177.462" y="-26.9713" z="178.456" />
+   <matrix r1="-0.89091" r2="0.006841" r3="-0.454128" r4="0.024015" r5="0.999197" r6="-0.032062" r7="0.453544" r8="-0.03947" r9="-0.89036" />
+  </calibration>
+ </camera>
+ <camera textureImage="face_cam6.png" name="cam6" >
+  <calibration type="TSAI" >
+   <sensor Cx="2080.4" Cy="1236.62" sx="1.00613" dpx="0.00571" dpy="0.00571" />
+   <cc f="91.1388" p1="1.67638e-312" p2="3.40905e-322" kappa1="-1.7522e-05" />
+   <translation x="281.287" y="-269.67" z="1496.65" />
+   <rotation x="156.558" y="2.25825" z="179.784" />
+   <matrix r1="-0.999216" r2="-0.012222" r3="0.037648" r4="0.003761" r5="0.917513" r6="0.397687" r7="-0.039404" r8="0.397517" r9="-0.916748" />
+  </calibration>
+ </camera>
+</photoTexturing>
