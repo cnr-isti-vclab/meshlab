@@ -63,13 +63,13 @@ class TextureEditor : public QWidget
 
 // Da mettere in VCG
 template<class MESH_TYPE>
-void SmoothTextureWEdgeCoords(MESH_TYPE &m)
+void SmoothTextureWEdgeCoords(MESH_TYPE &m, bool smoothWholeModel)
 {
 	assert(m.HasPerWedgeTexCoord());
 	
 	for (int i = 0; i < m.face.size(); i++)
 	{
-		if (!m.face[i].IsV() && m.face[i].IsS())
+		if (!m.face[i].IsV() && (smoothWholeModel || m.face[i].IsS()))
 		{
 			vcg::SimpleTempData<typename MESH_TYPE::VertContainer, int> div(m.vert);
 			vcg::SimpleTempData<typename MESH_TYPE::VertContainer, Point2f > sum(m.vert);
@@ -84,12 +84,13 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m)
 			Q.push_back(&m.face[i]);
 			int index = 0;
 			m.face[i].SetV();
+			// First iteration: calculate the alpha for each WT
 			while (index < Q.size())
 			{
 				for (int j = 0; j < 3; j++)
 				{
 					CFaceO* p = Q[index]->FFp(j);
-					if (!p->IsV() && p->IsS())
+					if (!p->IsV() && (smoothWholeModel || p->IsS()))
 					{
 						p->SetV();
 						Q.push_back(p);
@@ -101,6 +102,7 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m)
 				index++;
 			}
 			index = 0;
+			// Second iteration: apply the smooth
 			while (index < Q.size())
 			{
 				for (int y = 0; y < 3; y++)
@@ -113,6 +115,7 @@ void SmoothTextureWEdgeCoords(MESH_TYPE &m)
 				}	
 				index++;
 			}
+			if (!smoothWholeModel) break;
 		}
 	}
 	for (typename MESH_TYPE::FaceIterator f = m.face.begin(); f != m.face.end(); f++) f->ClearV();

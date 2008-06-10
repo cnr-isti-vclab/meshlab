@@ -78,7 +78,7 @@ void TextureEditor::SmoothTextureCoordinates()
 {
 	// Set up the smooth function
 	for (int i = 0; i < ui.spinBoxIteration->value(); i++)
-		SmoothTextureWEdgeCoords(model->cm);
+		SmoothTextureWEdgeCoords(model->cm, ui.radioButtonWhole->isChecked());
 	area->update();
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->RecalculateSelectionArea();
 	((RenderArea*)ui.tabWidget->currentWidget()->childAt(MARGIN,MARGIN))->update();
