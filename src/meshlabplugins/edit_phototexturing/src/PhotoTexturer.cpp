@@ -240,8 +240,8 @@ void PhotoTexturer::calculateMeshTextureForCamera(Camera* cam,MeshModel *m){
 			double u,v;
 			cam->calibration->getUVforPoint((*fi).V(i)->P()[0],(*fi).V(i)->P()[1],(*fi).V(i)->P()[2],&u,&v);
 
-			ft->u[i] = u/imgw;
-			ft->v[i] = 1.0-v/imgh;	
+			ft->u[i] = u/cam->resolution[0];
+			ft->v[i] = 1.0-v/cam->resolution[1];	
 		}
 		ft->textureindex =tindx;
 		ft->faceIndex = count;

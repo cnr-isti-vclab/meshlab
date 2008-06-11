@@ -19,6 +19,9 @@ public:
 	static const QString XML_CAMERA;
 	static const QString XML_NAME;
 	static const QString XML_IMAGE;
+	static const QString XML_RESOLUTION_X;
+	static const QString XML_RESOLUTION_Y;
+	
 	
 	bool calculatedTextures;
 	QString name;
@@ -26,6 +29,7 @@ public:
 	QString textureImage;
 	CameraSensor sensor;
 	CameraCalibration *calibration;
+	int resolution[2];
 	
 	Camera();
 	~Camera();

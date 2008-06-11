@@ -1,5 +1,5 @@
 <!DOCTYPE camera>
-<camera textureImage="" name="cam6" >
+<camera textureImage="" name="cam6" resolutionX="3888" resolutionY="2592">
 	<calibration type="TSAI" >
 		<sensor dpx="0.00571" dpy="0.00571" Cx="2080.402673" Cy="1236.617046" sx="1.006128"/>
 		<cc f="91.138789" kappa1="-1.752203e-05 " p1="" p2=""/>
