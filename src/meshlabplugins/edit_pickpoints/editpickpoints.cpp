@@ -12,6 +12,7 @@
 #include <meshlab/mainwindow.h>
 
 #include <wrap/gl/picking.h>
+#include <wrap/gl/pick.h>
 
 using namespace vcg;
 
@@ -74,7 +75,6 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 		pickPointsDialog->setCurrentMeshModel(glArea->mm());
 	}
 	
-	
 	//We have to calculate the position here because it doesnt work in the mouseEvent functions for some reason
 	Point3f pickedPoint;
 	if (movePoint && Pick<Point3f>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint)){
@@ -82,7 +82,6 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 					currentMousePosition.x(),
 					currentMousePosition.y(),
 					pickedPoint[0], pickedPoint[1], pickedPoint[2]);
-			
 			
 			//let the dialog know that this was the pointed picked incase it wants the information
 			pickPointsDialog->moveThisPoint(pickedPoint);
@@ -94,18 +93,32 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 				currentMousePosition.x(),
 				currentMousePosition.y(),
 				pickedPoint[0], pickedPoint[1], pickedPoint[2]);
+	
 		
-		pickPointsDialog->addPoint(pickedPoint);
+		//find the normal of the face we just clicked
+		CFaceO *face;
+		bool result = GLPickTri<CMeshO>::PickNearestFace(currentMousePosition.x(),gla->height()-currentMousePosition.y(),
+				mm.cm, face);
+			
+		if(!result){
+			qDebug() << "find nearest face failed!";
+		}
+			
+		CFaceO::NormalType faceNormal = face->N();
+		qDebug() << "found face normal: " << faceNormal[0] << faceNormal[1] << faceNormal[2];
+			
+		
+		pickPointsDialog->addPoint(pickedPoint, faceNormal);
 		
 		addPoint = false;
 	}
 	
-	drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector());
+	drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector(), mm.cm.bbox);
 }
 
 void EditPickPointsPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gla )
 {
-	qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ...";
+	//qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ...";
 	
 	//set this so redraw can use it
 	glArea = gla;
@@ -126,7 +139,7 @@ void EditPickPointsPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *
 
 void EditPickPointsPlugin::EndEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gla)
 {
-	qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ...";
+	//qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ...";
 	// some cleaning at the end.
 	
 	//now that were are ending tell the dialog there is no longer a model to edit
@@ -208,8 +221,12 @@ void EditPickPointsPlugin::mouseReleaseEvent(QAction *,
 
 
 void EditPickPointsPlugin::drawPickedPoints(
-		std::vector<PickedPointTreeWidgetItem*> &pointVector)
+		std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox)
 {
+	vcg::Point3f size = boundingBox.Dim();
+	//how we scale the object indicating the normal at each selected point
+	float scaleFactor = (size[0]+size[1]+size[2])/90.0;
+
 	//qDebug() << "draw picked points ";
 	
 	glPushAttrib(GL_ENABLE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
@@ -218,26 +235,37 @@ void EditPickPointsPlugin::drawPickedPoints(
 	glDepthFunc(GL_ALWAYS);
 	
 	//set point attributes
-	glPointSize(3.0);
-	glColor(Color4b::Blue);
+	glPointSize(4.0);
 	
-	for(int i=0; i<pointVector.size(); ++i)
+	for(int i = 0; i < pointVector.size(); ++i)
 	{
 		PickedPointTreeWidgetItem * item = pointVector[i];
 		//if the point has been set (it may not be if a template has been loaded)
 		if(item->isSet()){
 			Point3f point = item->getPoint();
+			
+			Point3f normal = item->getNormal();
+			
+			glColor(Color4b::Blue);
+			
 			glBegin(GL_POINTS);
 				glVertex(point);
 			glEnd();
+			
+			glColor(Color4b::Green);
+			
+			glBegin(GL_LINES);
+				glVertex(point);
+				glVertex(point+(normal*scaleFactor));
+			glEnd();
+			
+			glColor(Color4b::Red);
 			
 			assert(glArea);
 			glArea->renderText(point[0], point[1], point[2], QString(item->getName()) );
 		}
 	}
 	glPopAttrib();	
-	
-	glArea->update();
 }
 
 

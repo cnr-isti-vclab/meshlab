@@ -7,18 +7,26 @@
 
 #include <math.h>
 
+#include <meshlab/stdpardialog.h>
+#include <meshlab/meshmodel.h>
+
+//#include <vcg/complex/trimesh/closest.h>
+//#include <vcg/space/index/grid_static_ptr.h>
+
 #include "editpickpoints.h"
 #include "pickpointsDialog.h"
-
-#include <meshlab/stdpardialog.h>
 
 using namespace vcg;
 
 int PickedPointTreeWidgetItem::pointCounter = 0;
 
 PickedPointTreeWidgetItem::PickedPointTreeWidgetItem(
-		Point3f intputPoint) : QTreeWidgetItem(1001) {
+		Point3f intputPoint, CFaceO::NormalType faceNormal) : QTreeWidgetItem(1001) {
 	point = intputPoint;
+	
+	normal[0] = faceNormal[0];
+	normal[1] = faceNormal[1];
+	normal[2] = faceNormal[2];
 	
 	QString tempString;
 	tempString.setNum(pointCounter);
@@ -75,8 +83,19 @@ void PickedPointTreeWidgetItem::setPoint(Point3f intputPoint){
 	isPointSet = true;
 }
 
+void PickedPointTreeWidgetItem::setNormal(CFaceO::NormalType faceNormal)
+{
+	normal[0] = faceNormal[0];
+	normal[1] = faceNormal[1];
+	normal[2] = faceNormal[2];
+}
+
 vcg::Point3f PickedPointTreeWidgetItem::getPoint(){
 	return point;
+}
+
+vcg::Point3f PickedPointTreeWidgetItem::getNormal(){
+	return normal;
 }
 
 void PickedPointTreeWidgetItem::clearPoint(){
@@ -146,7 +165,7 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	
 }
 
-PickedPointTreeWidgetItem * PickPointsDialog::addPoint(Point3f point){
+PickedPointTreeWidgetItem * PickPointsDialog::addPoint(Point3f point, CFaceO::NormalType faceNormal){
 	
 	PickedPointTreeWidgetItem *widgetItem;
 	if(currentMode == ADD_POINT){
@@ -161,8 +180,8 @@ PickedPointTreeWidgetItem * PickPointsDialog::addPoint(Point3f point){
 					dynamic_cast<PickedPointTreeWidgetItem *>(item);
 
 				widgetItem->setPoint(point);
+				widgetItem->setNormal(faceNormal);
 				
-
 				item = ui.pickedPointsTreeWidget->itemBelow(widgetItem);
 				if(NULL != item){
 					//set the next item to be selected
@@ -175,7 +194,7 @@ PickedPointTreeWidgetItem * PickPointsDialog::addPoint(Point3f point){
 			}
 		} else {
 			widgetItem =
-				new PickedPointTreeWidgetItem(point);
+				new PickedPointTreeWidgetItem(point, faceNormal);
 		
 			pickedPointTreeWidgetItemVector.push_back(widgetItem);
 	
@@ -188,6 +207,7 @@ PickedPointTreeWidgetItem * PickPointsDialog::addPoint(Point3f point){
 		//test to see if there is actually a highlighted item
 		if(NULL != itemToMove){
 			itemToMove->setPoint(point);
+			itemToMove->setNormal(faceNormal);
 		}
 	}
 	return widgetItem;
@@ -232,7 +252,38 @@ void PickPointsDialog::moveThisPoint(Point3f point){
 }
 
 void PickPointsDialog::addPoint(Point3f point, QString name){
-	PickedPointTreeWidgetItem *widgetItem = addPoint(point);
+	/*
+		if(NULL != meshModel)
+		{	
+			CMeshO::ScalarType maxDistance = meshModel->cm.bbox.Diag()/100.0f;
+			
+			Point3f closestPoint;
+			
+			vcg::face::PointDistanceFunctor PDistFunct;
+			
+			//closest point??
+			Point3f closestPt;
+			
+			trimesh::FaceTmark<CMeshO> markerFunction;
+			markerFunction.SetMesh(&meshModel->cm);
+			
+			GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> grid;
+			grid.Set(meshModel->cm.face.begin(), meshModel->cm.face.end());
+			
+			CMeshO::FaceType *face = 0;		
+			face = grid.GetClosest(PDistFunct,markerFunction,point,maxDistance,maxDistance,closestPoint);
+			
+			if(NULL != face)
+			{
+				CMeshO::FaceType::NormalType faceNormal = face->N();
+				widgetItem->setNormal(faceNormal);
+				
+				//TODO now add htis point to the item below
+			} else
+				qDebug() << "no face found for point: " << name;	
+		}*/
+	
+	PickedPointTreeWidgetItem *widgetItem = addPoint(point, vcg::Point3f());
 	widgetItem->setName(name);
 }
 
@@ -398,7 +449,7 @@ void PickPointsDialog::removeHighlightedPoint(){
 		}
 		
 		//redraw without deleted point
-		parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
+		parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
 	} else
 	{
 		qDebug("no item picked");
@@ -436,7 +487,7 @@ void PickPointsDialog::renameHighlightedPoint(){
 			pickedItem->setName(name);
 		
 			//redraw with new point name
-			parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
+			parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
 		}
 		
 	}
@@ -471,11 +522,10 @@ PickedPoints * PickPointsDialog::getPickedPoints()
 }
 
 void PickPointsDialog::loadPoints(QString filename){
-	//clear the points tree
-	clearAllPointsFromTreeWidget();
-	
-	qDebug() << "load " << filename;
-	
+	//clear the points tree and template in case it was loaded
+	clearPickPointsTemplate();
+		
+	//get the points from file
 	PickedPoints pickedPoints;
 	pickedPoints.open(filename);
 	
@@ -484,20 +534,11 @@ void PickPointsDialog::loadPoints(QString filename){
 	for(int i = 0; i < points->size(); i++){
 		PickedPoint *pickedPoint = points->at(i);
 		
-		PickedPointTreeWidgetItem *item =
-			new PickedPointTreeWidgetItem(pickedPoint->point);
-			
-		qDebug() << "name of widget " << pickedPoint->name;
-		item->setName(pickedPoint->name);
-		
-		pickedPointTreeWidgetItemVector.push_back(item);
-
-		ui.pickedPointsTreeWidget->addTopLevelItem(item);
-		
+		addPoint(pickedPoint->point, pickedPoint->name);		
 	}
 	
 	//redraw with new point name
-	parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
+	parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
 }
 
 void PickPointsDialog::savePointsToFile(){
@@ -618,7 +659,7 @@ void PickPointsDialog::removePointFromTemplate()
 		delete pickedItem;
 			
 		//redraw without deleted point
-		parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
+		parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
 	} else
 	{
 		qDebug("no item picked");

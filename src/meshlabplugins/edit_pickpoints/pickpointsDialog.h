@@ -10,6 +10,8 @@
 
 #include <meshlab/meshmodel.h>
 
+//#include <vcg/space/index/grid_static_ptr.h>
+
 #include "pickedPoints.h"
 #include "ui_pickpointsDialog.h"
 #include "pickPointsTemplate.h"
@@ -18,11 +20,11 @@ class EditPickPointsPlugin;
 
 class PickedPointTreeWidgetItem : public QTreeWidgetItem
 {
-
+	
 public:
 	//used when a point has just been picked and
 	//gives it an integer name
-	PickedPointTreeWidgetItem(vcg::Point3f intputPoint);
+	PickedPointTreeWidgetItem(vcg::Point3f intputPoint, CFaceO::NormalType faceNormal);
 	
 	//used when a pont has not been picked yet at all
 	//as when this tree widget item is created by loading
@@ -38,8 +40,14 @@ public:
 	//change the point
 	void setPoint(vcg::Point3f intputPoint);
 	
+	//set the normal
+	void setNormal(CFaceO::NormalType faceNormal);
+	
 	//return the Point3f
 	vcg::Point3f getPoint();
+	
+	//get the normal
+	vcg::Point3f getNormal();
 	
 	//clear the ponint datas
 	void clearPoint();
@@ -53,6 +61,9 @@ public:
 private:
 	//the point
 	vcg::Point3f point;
+	
+	//the normal of this point
+	vcg::Point3f normal;
 	
 	//tells us if the point is set
 	bool isPointSet;
@@ -71,7 +82,7 @@ public:
 	
 	
 	//add a point that was just picked(could be moving a point)
-	PickedPointTreeWidgetItem * addPoint(vcg::Point3f point);
+	PickedPointTreeWidgetItem * addPoint(vcg::Point3f point, CFaceO::NormalType faceNormal);
 	
 	//we need to move the point closest to this one
 	void moveThisPoint(vcg::Point3f point);
@@ -132,7 +143,7 @@ private:
 	//the template we have loaded
 	bool templateLoaded;
 	
-	//we need this in order to save to the meta data and get the filename
+	//we need this in order to save to the meta data and get the filename, etc
 	MeshModel *meshModel;
 	
 private slots:

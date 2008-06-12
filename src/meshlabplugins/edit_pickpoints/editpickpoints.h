@@ -49,7 +49,8 @@ public:
 
 	//basically copied from void AlignPairWidget::drawPickedPoints in editalign plugin
 	//Draws all the picked points on the screen
-	void drawPickedPoints(std::vector<PickedPointTreeWidgetItem*> &pointVector);
+	//boundingBox - gives some indication how to scale the normal flags
+	void drawPickedPoints(std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox);
 	
 private:
 	//the list of possible actions
