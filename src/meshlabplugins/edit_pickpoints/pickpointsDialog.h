@@ -97,6 +97,9 @@ private:
 	//get the points from the UI
 	PickedPoints * getPickedPoints();
 	
+	//load the points from a file
+	void loadPoints(QString filename);
+		
 	//allows the ability to save to metaData only even if the ui says save to a file
 	void savePointsToMetaData(PickedPoints *pickedPoints);
 		
@@ -145,8 +148,8 @@ private slots:
 	//save the points to a file
 	void savePointsToFile();
 	
-	//load the points from a file
-	void loadPoints();
+	//ask the user for the filename and then load the pionts
+	void askUserForFileAndLoadPoints();
 	
 	//remove all the points and start over when ui button
 	//is pressed
@@ -155,7 +158,7 @@ private slots:
 	//save the point names currently listed as a template
 	void savePointTemplate();
 	
-	//load a point template
+	//ask user for which template and then load a point template
 	void askUserForFileAndloadTemplate();
 	
 	//clear the loaded template if one is loaded
@@ -165,6 +168,8 @@ private slots:
 	//mode the default is to now allow extra points
 	void addPointToTemplate();
 	
+	//remove the selected point from the template
+	void removePointFromTemplate();
 	
 };
 

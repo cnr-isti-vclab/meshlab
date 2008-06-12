@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>525</height>
+    <width>459</width>
+    <height>560</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -18,7 +18,7 @@
      <x>10</x>
      <y>10</y>
      <width>441</width>
-     <height>501</height>
+     <height>541</height>
     </rect>
    </property>
    <property name="frameShape" >
@@ -32,7 +32,7 @@
      <rect>
       <x>20</x>
       <y>370</y>
-      <width>411</width>
+      <width>401</width>
       <height>30</height>
      </rect>
     </property>
@@ -165,24 +165,126 @@
     <property name="geometry" >
      <rect>
       <x>10</x>
-      <y>430</y>
+      <y>410</y>
       <width>421</width>
-      <height>61</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="title" >
      <string>Template Controls</string>
     </property>
-    <widget class="QWidget" name="layoutWidget" >
+    <widget class="QCheckBox" name="defaultTemplateCheckBox" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Save this as your default template</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>111</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Template Name:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="templateNameLabel" >
+     <property name="geometry" >
+      <rect>
+       <x>110</x>
+       <y>80</y>
+       <width>291</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="palette" >
+      <palette>
+       <active>
+        <colorrole role="WindowText" >
+         <brush brushstyle="SolidPattern" >
+          <color alpha="255" >
+           <red>0</red>
+           <green>0</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="WindowText" >
+         <brush brushstyle="SolidPattern" >
+          <color alpha="255" >
+           <red>0</red>
+           <green>0</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="WindowText" >
+         <brush brushstyle="SolidPattern" >
+          <color alpha="255" >
+           <red>127</red>
+           <green>125</green>
+           <blue>123</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="text" >
+      <string>TextLabel</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="" >
+     <property name="geometry" >
+      <rect>
+       <x>220</x>
+       <y>20</y>
+       <width>191</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2" >
+      <item>
+       <widget class="QPushButton" name="addPointToTemplateButton" >
+        <property name="text" >
+         <string>Add Point</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="removePointFromTemplateButton" >
+        <property name="text" >
+         <string>Remove Point</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="" >
      <property name="geometry" >
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>404</width>
+       <width>201</width>
        <height>30</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" >
+     <layout class="QHBoxLayout" name="horizontalLayout" >
       <item>
        <widget class="QPushButton" name="saveTemplateButton" >
         <property name="text" >
@@ -204,28 +306,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="addPointToTemplateButton" >
-        <property name="text" >
-         <string>Add Point to Template</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
-   </widget>
-   <widget class="QCheckBox" name="defaultTemplateCheckBox" >
-    <property name="geometry" >
-     <rect>
-      <x>130</x>
-      <y>410</y>
-      <width>211</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Save this as your default template</string>
-    </property>
    </widget>
   </widget>
  </widget>

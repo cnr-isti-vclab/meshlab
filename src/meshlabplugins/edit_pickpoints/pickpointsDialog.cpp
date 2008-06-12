@@ -127,6 +127,7 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	
 	//start with no template
 	templateLoaded = false;
+	ui.templateNameLabel->setText("No Template Loaded");
 	
 	currentMode = ADD_POINT;
 	
@@ -135,13 +136,14 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	connect(ui.renamePointButton, SIGNAL(clicked()), this, SLOT(renameHighlightedPoint()));
 	connect(ui.pickPointModeRadioButton, SIGNAL(toggled(bool)), this, SLOT(togglePickMode(bool)));
 	connect(ui.saveButton, SIGNAL(clicked()), this, SLOT(savePointsToFile()));
-	connect(ui.loadPointsButton, SIGNAL(clicked()), this, SLOT(loadPoints()));
+	connect(ui.loadPointsButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndLoadPoints()));
 	connect(ui.clearButton, SIGNAL(clicked()), this, SLOT(clearPoints()));
 	connect(ui.saveTemplateButton, SIGNAL(clicked()), this, SLOT(savePointTemplate()));
 	connect(ui.loadTemplateButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndloadTemplate()));
 	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearPickPointsTemplate()));
 	connect(ui.addPointToTemplateButton, SIGNAL(clicked()), this, SLOT(addPointToTemplate()));
-
+	connect(ui.removePointFromTemplateButton, SIGNAL(clicked()), this, SLOT(removePointFromTemplate()));
+	
 }
 
 PickedPointTreeWidgetItem * PickPointsDialog::addPoint(Point3f point){
@@ -257,14 +259,14 @@ void PickPointsDialog::clearAllPointsFromTreeWidget(){
 	ui.pickedPointsTreeWidget->clear();
 		
 	PickedPointTreeWidgetItem::pointCounter = 0;
+	
+	togglePickMode(true);
 }
 
 
 void PickPointsDialog::loadPickPointsTemplate(QString filename){
 	//clear the points tree
 	clearAllPointsFromTreeWidget();
-		
-	qDebug() << "load " << filename;
 	
 	std::vector<QString> pointNameVector;
 	
@@ -284,6 +286,7 @@ void PickPointsDialog::loadPickPointsTemplate(QString filename){
 		ui.pickedPointsTreeWidget->setCurrentItem(pickedPointTreeWidgetItemVector.at(0));
 	}
 	
+	ui.templateNameLabel->setText(QFileInfo(filename).fileName());
 	templateLoaded = true;
 }
 
@@ -296,12 +299,12 @@ PickPointsDialog::Mode PickPointsDialog::getMode(){
 }
 
 void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
-	qDebug() << "about to save any points we had before ";
+	//qDebug() << "about to save any points we had before ";
 	
 	//save any points we did have
 	savePointsToMetaData(getPickedPoints());
 	
-	qDebug() << "done saving points about to clear ";
+	//qDebug() << "done saving points about to clear ";
 	
 	clearPoints();
 	
@@ -323,22 +326,13 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 		PickedPoints *pickedPoints = static_cast<PickedPoints *>(value);
 		
 		if(NULL != pickedPoints){
-			
-			
 			std::vector<PickedPoint*> * pickedPointVector = pickedPoints->getPickedPointVector();
-			
-			qDebug() << "Found " <<  pickedPointVector->size() << " points so load them";
 			
 			PickedPoint *point;
 			for(int i = 0; i < pickedPointVector->size(); i++){
 				point = pickedPointVector->at(i);
-				
-				qDebug() << "about to add point " << i ;
-				
 				addPoint(point->point, point->name);
 			}
-			
-			qDebug() << "about to draw the ponits ";
 			
 			//draw any points that may have been loaded
 			parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
@@ -346,11 +340,20 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 			qDebug() << "problem with cast!!";
 		}
 		
-	} else {*/
+	} else {
 	
+		QString filename = PickedPoints::getSuggestedPickedPointsFileName(*meshModel);
+		QFile file(filename);
+		
+		if(file.exists()){
+			loadPoints(filename);
+		} else 
+		{
+	*/
 	//try loading the default template if there are not saved points already
 	tryLoadingDefaultTemplate();
-	
+		
+	//	}
 	//}
 }
 
@@ -378,19 +381,21 @@ void PickPointsDialog::removeHighlightedPoint(){
 		PickedPointTreeWidgetItem* pickedItem =
 			dynamic_cast<PickedPointTreeWidgetItem *>(item);
 		
-		QString name = pickedItem->getName();
-		//qDebug("Remove \n");
-		//qDebug() << name;
-
-		std::vector<PickedPointTreeWidgetItem*>::iterator iterator;
-		iterator = std::find(pickedPointTreeWidgetItemVector.begin(),
-				pickedPointTreeWidgetItemVector.end(),
-				pickedItem);
-		//remove item from vector
-		pickedPointTreeWidgetItemVector.erase(iterator);
+		if(templateLoaded)
+			pickedItem->clearPoint();
+		else 
+		{
+			//remove the point completely
+			std::vector<PickedPointTreeWidgetItem*>::iterator iterator;
+			iterator = std::find(pickedPointTreeWidgetItemVector.begin(),
+					pickedPointTreeWidgetItemVector.end(),
+					pickedItem);
+			//remove item from vector
+			pickedPointTreeWidgetItemVector.erase(iterator);
 				
-		//free memory used by widget
-		delete pickedItem;
+			//free memory used by widget
+			delete pickedItem;
+		}
 		
 		//redraw without deleted point
 		parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
@@ -465,6 +470,36 @@ PickedPoints * PickPointsDialog::getPickedPoints()
 	return pickedPoints;
 }
 
+void PickPointsDialog::loadPoints(QString filename){
+	//clear the points tree
+	clearAllPointsFromTreeWidget();
+	
+	qDebug() << "load " << filename;
+	
+	PickedPoints pickedPoints;
+	pickedPoints.open(filename);
+	
+	std::vector<PickedPoint*> *points = pickedPoints.getPickedPointVector();
+	
+	for(int i = 0; i < points->size(); i++){
+		PickedPoint *pickedPoint = points->at(i);
+		
+		PickedPointTreeWidgetItem *item =
+			new PickedPointTreeWidgetItem(pickedPoint->point);
+			
+		qDebug() << "name of widget " << pickedPoint->name;
+		item->setName(pickedPoint->name);
+		
+		pickedPointTreeWidgetItemVector.push_back(item);
+
+		ui.pickedPointsTreeWidget->addTopLevelItem(item);
+		
+	}
+	
+	//redraw with new point name
+	parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
+}
+
 void PickPointsDialog::savePointsToFile(){
 	
 	PickedPoints *pickedPoints = getPickedPoints();
@@ -493,38 +528,11 @@ void PickPointsDialog::savePointsToMetaData(PickedPoints *pickedPoints)
 	}	
 }
 
-void PickPointsDialog::loadPoints(){
-	//clear the points tree
-	clearAllPointsFromTreeWidget();
-	
+void PickPointsDialog::askUserForFileAndLoadPoints()
+{
 	QString filename = QFileDialog::getOpenFileName(this,tr("Load File"),".", "*"+PickedPoints::fileExtension);
-		
-	qDebug() << "load " << filename;
-	
-	PickedPoints pickedPoints;
-	pickedPoints.open(filename);
-	
-	std::vector<PickedPoint*> *points = pickedPoints.getPickedPointVector();
-	
-	for(int i = 0; i < points->size(); i++){
-		PickedPoint *pickedPoint = points->at(i);
-		
-		PickedPointTreeWidgetItem *item =
-			new PickedPointTreeWidgetItem(pickedPoint->point);
-			
-		qDebug() << "name of widget " << pickedPoint->name;
-		item->setName(pickedPoint->name);
-		
-		pickedPointTreeWidgetItemVector.push_back(item);
-
-		ui.pickedPointsTreeWidget->addTopLevelItem(item);
-		
-	}
-	
-	//redraw with new point name
-	parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
+	loadPoints(filename);
 }
-
 
 void PickPointsDialog::savePointTemplate(){
 	std::vector<QString> pointNameVector;
@@ -547,6 +555,7 @@ void PickPointsDialog::savePointTemplate(){
 	PickPointsTemplate::save(filename, &pointNameVector);
 
 	templateLoaded = true;
+	ui.templateNameLabel->setText(QFileInfo(filename).fileName());
 	
 	if(ui.defaultTemplateCheckBox->isChecked())
 	{
@@ -563,12 +572,16 @@ void PickPointsDialog::askUserForFileAndloadTemplate()
 
 void PickPointsDialog::clearPickPointsTemplate(){
 	templateLoaded = false;
+	ui.templateNameLabel->setText("No Template Loaded");
+	
+	togglePickMode(true);
 	
 	//clear the points?
 	clearPoints();
 }
 
-void PickPointsDialog::addPointToTemplate(){
+void PickPointsDialog::addPointToTemplate()
+{
 	if(templateLoaded){
 		PickedPointTreeWidgetItem *widgetItem =
 			new PickedPointTreeWidgetItem("new point");
@@ -580,4 +593,36 @@ void PickPointsDialog::addPointToTemplate(){
 		//select the newest item
 		ui.pickedPointsTreeWidget->setCurrentItem(widgetItem);
 	}
+}
+
+void PickPointsDialog::removePointFromTemplate()
+{
+	//get highlighted point
+	QTreeWidgetItem *item = ui.pickedPointsTreeWidget->currentItem();
+	
+	//test to see if there is actually a highlighted item
+	if(NULL != item && templateLoaded){
+		PickedPointTreeWidgetItem* pickedItem =
+				dynamic_cast<PickedPointTreeWidgetItem *>(item);
+			
+		QString name = pickedItem->getName();
+
+		std::vector<PickedPointTreeWidgetItem*>::iterator iterator;
+		iterator = std::find(pickedPointTreeWidgetItemVector.begin(),
+				pickedPointTreeWidgetItemVector.end(),
+				pickedItem);
+		//remove item from vector
+		pickedPointTreeWidgetItemVector.erase(iterator);
+					
+		//free memory used by widget
+		delete pickedItem;
+			
+		//redraw without deleted point
+		parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
+	} else
+	{
+		qDebug("no item picked");
+	}
+		
+
 }
