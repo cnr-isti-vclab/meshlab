@@ -16,7 +16,7 @@
 
 
 //Define Constants
-const QString PickPointsTemplate::fileExtension = ".xml";
+const QString PickPointsTemplate::fileExtension = ".pptpl";
 const QString PickPointsTemplate::rootName = "PickPointsTemplate";
 const QString PickPointsTemplate::pointElementName = "point";
 const QString PickPointsTemplate::pointName = "name";
@@ -91,5 +91,5 @@ bool PickPointsTemplate::load(QString filename,
 
 QString PickPointsTemplate::getDefaultTemplateFileName()
 {
-	return QDir::homePath() + "/.pickPointsTemplate.xml";
+	return QDir::homePath() + "/.pickPointsTemplate" + fileExtension;
 }
