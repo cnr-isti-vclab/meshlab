@@ -17,7 +17,7 @@
 #include <QtXml/QDomNode>
 
 //Define Constants
-const QString PickedPoints::fileExtension = ".xml";
+const QString PickedPoints::fileExtension = ".pp";
 const QString PickedPoints::rootName = "PickedPoints";
 const QString PickedPoints::pointElementName = "point";
 const QString PickedPoints::pointName = "name";
