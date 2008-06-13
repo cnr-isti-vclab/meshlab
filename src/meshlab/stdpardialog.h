@@ -157,7 +157,7 @@ public:
 class EnumWidget : public QHBoxLayout
 {
 	  Q_OBJECT
-		
+protected:	
 		QComboBox *enumCombo;
 		QLabel *enumLabel;
 	public:
@@ -173,10 +173,12 @@ class EnumWidget : public QHBoxLayout
 /// Widget to select a Layer the current one
 class MeshEnumWidget : public EnumWidget
 {
+private:
+	MeshDocument *md;
 public:
 		MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument &md);
-		inline int getMesh() {return getEnum();}
-		inline void  setMesh(int newEnum) {setEnum(newEnum);}
+		inline MeshModel * getMesh();
+		inline void  setMesh(MeshModel * newMesh);
 };
 
 

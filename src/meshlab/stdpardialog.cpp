@@ -451,11 +451,15 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 		  case FilterParameter::PARENUM:
 			  curParSet.setEnum(sname,((EnumWidget *)stdfieldwidgets[i])->getEnum());
 			  break;
+		  case FilterParameter::PARMESH:
+			  curParSet.setMesh(sname,((MeshEnumWidget *)stdfieldwidgets[i])->getMesh());
+			  break;
 		  case FilterParameter::PARFLOATLIST:
 			  FilterParameter *p = curParSet.findParameter(sname);
 			  p->fieldVal = ((QVariantListWidget *)stdfieldwidgets[i])->getList();
 			  break;
-
+			default:
+				assert(0);
 		  }
 	  }
 }
@@ -605,21 +609,26 @@ void EnumWidget::setEnum(int newEnum)
 /******************************************/ 
 //MeshEnumWidget Implementation
 /******************************************/ 
-MeshEnumWidget::MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument &md)
+MeshEnumWidget::MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument &_md)
 { 
+	md=&_md;
 	QStringList meshNames;
 	int defaultMeshIndex=-1;
-	for(int i=0;i<md.meshList.size();++i)
+	for(int i=0;i<md->meshList.size();++i)
 	 {
-		QString shortName(QFileInfo(md.meshList.at(i)->fileName.c_str()).fileName());
+		QString shortName(QFileInfo(md->meshList.at(i)->fileName.c_str()).fileName());
 		meshNames.push_back(shortName);
-		if(md.meshList.at(i) == defaultMesh) defaultMeshIndex = i;
+		if(md->meshList.at(i) == defaultMesh) defaultMeshIndex = i;
 	 }
 	assert(defaultMeshIndex != -1);
 	
 	Init(p,defaultMeshIndex,meshNames);
 }
 
+MeshModel *MeshEnumWidget::getMesh()
+{
+	return md->meshList.at(enumCombo->currentIndex());
+}
 /****************************************** 
  QVariantListWidget Implementation
 ******************************************/
