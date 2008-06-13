@@ -74,6 +74,8 @@ private:
 	//we need this in order to redraw the points
 	GLArea *glArea;
 
+	//model we currently have
+	MeshModel *currentModel;
 };
 	
 #endif

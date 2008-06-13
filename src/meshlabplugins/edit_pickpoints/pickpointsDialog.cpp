@@ -9,6 +9,7 @@
 
 #include <meshlab/stdpardialog.h>
 #include <meshlab/meshmodel.h>
+#include <meshlab/glarea.h>
 
 //#include <vcg/complex/trimesh/closest.h>
 //#include <vcg/space/index/grid_static_ptr.h>
@@ -143,6 +144,7 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	//set to nothing for now
 	itemToMove = 0;
 	meshModel = 0;
+	_glArea = 0;
 	
 	//start with no template
 	templateLoaded = false;
@@ -156,11 +158,11 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	connect(ui.pickPointModeRadioButton, SIGNAL(toggled(bool)), this, SLOT(togglePickMode(bool)));
 	connect(ui.saveButton, SIGNAL(clicked()), this, SLOT(savePointsToFile()));
 	connect(ui.loadPointsButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndLoadPoints()));
-	connect(ui.clearButton, SIGNAL(clicked()), this, SLOT(clearPoints()));
+	connect(ui.clearButton, SIGNAL(clicked()), this, SLOT(clearPointsButtonClicked()));
 	connect(ui.saveTemplateButton, SIGNAL(clicked()), this, SLOT(savePointTemplate()));
 	connect(ui.loadTemplateButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndloadTemplate()));
-	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearPickPointsTemplate()));
-	connect(ui.addPointToTemplateButton, SIGNAL(clicked()), this, SLOT(addPointToTemplate()));
+	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearPickPointsTemplate()) );
+	connect(ui.addPointToTemplateButton, SIGNAL(clicked()), this, SLOT(addPointToTemplate()) );
 	connect(ui.removePointFromTemplateButton, SIGNAL(clicked()), this, SLOT(removePointFromTemplate()));
 	
 }
@@ -287,8 +289,8 @@ void PickPointsDialog::addPoint(Point3f point, QString name){
 	widgetItem->setName(name);
 }
 
-void PickPointsDialog::clearPoints(){
-	if(templateLoaded){
+void PickPointsDialog::clearPoints(bool clearOnlyXYZ){
+	if(clearOnlyXYZ){
 		//when using templates just clear the points that were picked but not the names
 		for(int i = 0; i < pickedPointTreeWidgetItemVector.size(); i++){
 			pickedPointTreeWidgetItemVector.at(i)->clearPoint();
@@ -300,24 +302,26 @@ void PickPointsDialog::clearPoints(){
 		}
 		
 	} else {
-		clearAllPointsFromTreeWidget();
+		pickedPointTreeWidgetItemVector.clear();
+				
+		ui.pickedPointsTreeWidget->clear();
+				
+		PickedPointTreeWidgetItem::pointCounter = 0;
 	}
-}
-
-void PickPointsDialog::clearAllPointsFromTreeWidget(){
-	pickedPointTreeWidgetItemVector.clear();
-		
-	ui.pickedPointsTreeWidget->clear();
-		
-	PickedPointTreeWidgetItem::pointCounter = 0;
 	
+	//draw without any points that may have been cleared
+	parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
+	assert(_glArea);
+	_glArea->update();
+	
+	//set to pick mode
 	togglePickMode(true);
 }
 
 
 void PickPointsDialog::loadPickPointsTemplate(QString filename){
 	//clear the points tree
-	clearAllPointsFromTreeWidget();
+	clearPoints(false);
 	
 	std::vector<QString> pointNameVector;
 	
@@ -350,24 +354,14 @@ PickPointsDialog::Mode PickPointsDialog::getMode(){
 }
 
 void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
-	//qDebug() << "about to save any points we had before ";
-	
-	//save any points we did have
-	savePointsToMetaData(getPickedPoints());
+	meshModel = newMeshModel;
+	assert(meshModel);
 	
 	//qDebug() << "done saving points about to clear ";
-	
-	clearPoints();
-	
-	meshModel = newMeshModel;
-	
-	//dont bother with the rest if mesh model is null
-	if(NULL == meshModel){
-		return;
-	}
+	clearPoints(false);
 	
 	//make sure we start in pick mode
-	ui.pickPointModeRadioButton->setChecked(true);
+	togglePickMode(true);
 	
 	/*
 	//Load the points from meta data if they are there
@@ -386,7 +380,9 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 			}
 			
 			//draw any points that may have been loaded
-			parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector);
+			parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
+			assert(_glArea);
+			_glArea->update();
 		} else {
 			qDebug() << "problem with cast!!";
 		}
@@ -408,8 +404,9 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 	//}
 }
 
-MeshModel* PickPointsDialog::getCurrentMeshModel(){
-	return meshModel;
+void PickPointsDialog::setGLArea(GLArea *glArea)
+{
+	_glArea = glArea;
 }
 
 //loads the default template if there is one
@@ -450,6 +447,8 @@ void PickPointsDialog::removeHighlightedPoint(){
 		
 		//redraw without deleted point
 		parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
+		assert(_glArea);
+		_glArea->update();
 	} else
 	{
 		qDebug("no item picked");
@@ -488,6 +487,8 @@ void PickPointsDialog::renameHighlightedPoint(){
 		
 			//redraw with new point name
 			parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
+			assert(_glArea);
+			_glArea->update();
 		}
 		
 	}
@@ -539,6 +540,8 @@ void PickPointsDialog::loadPoints(QString filename){
 	
 	//redraw with new point name
 	parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
+	assert(_glArea);
+	_glArea->update();
 }
 
 void PickPointsDialog::savePointsToFile(){
@@ -557,16 +560,16 @@ void PickPointsDialog::savePointsToFile(){
 		pickedPoints->save(filename);
 	}
 	
-	savePointsToMetaData(pickedPoints);
+	savePointsToMetaData();
 }
 
-void PickPointsDialog::savePointsToMetaData(PickedPoints *pickedPoints)
+void PickPointsDialog::savePointsToMetaData()
 {
 	//save the points to the metadata
-	if(NULL != meshModel){
-		//meshModel->metaData.insert(PickedPoints::getKey(), pickedPoints);
+	//if(NULL != meshModel){
+		//meshModel->metaData.insert(PickedPoints::getKey(), getPickedPoints());
 		//qDebug() << "saved points";
-	}	
+	//}	
 }
 
 void PickPointsDialog::askUserForFileAndLoadPoints()
@@ -593,6 +596,11 @@ void PickPointsDialog::savePointTemplate(){
 	{
 		filename = QFileDialog::getSaveFileName(this,tr("Save File"),".", "*"+PickPointsTemplate::fileExtension);
 	}
+	
+	//add the extension if the user forgot it
+	if(!filename.endsWith(PickPointsTemplate::fileExtension))
+		filename = filename + PickPointsTemplate::fileExtension;
+	
 	PickPointsTemplate::save(filename, &pointNameVector);
 
 	templateLoaded = true;
@@ -611,14 +619,21 @@ void PickPointsDialog::askUserForFileAndloadTemplate()
 	loadPickPointsTemplate(filename);
 }
 
+void PickPointsDialog::clearPointsButtonClicked()
+{
+	//if the template is loaded clear only xyz values
+	clearPoints(templateLoaded);
+}
+
 void PickPointsDialog::clearPickPointsTemplate(){
+	//clear the points only if there was a template
+	if(templateLoaded)
+		clearPoints(false);
+	
 	templateLoaded = false;
 	ui.templateNameLabel->setText("No Template Loaded");
 	
-	togglePickMode(true);
 	
-	//clear the points?
-	clearPoints();
 }
 
 void PickPointsDialog::addPointToTemplate()
@@ -660,6 +675,8 @@ void PickPointsDialog::removePointFromTemplate()
 			
 		//redraw without deleted point
 		parentPlugin->drawPickedPoints(pickedPointTreeWidgetItemVector, meshModel->cm.bbox);
+		assert(_glArea);
+		_glArea->update();
 	} else
 	{
 		qDebug("no item picked");

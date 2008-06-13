@@ -9,6 +9,7 @@
 #include <QtGui>
 
 #include <meshlab/meshmodel.h>
+#include <meshlab/glarea.h>
 
 //#include <vcg/space/index/grid_static_ptr.h>
 
@@ -101,8 +102,12 @@ public:
 	//sets the currentMesh we are working with
 	void setCurrentMeshModel(MeshModel *newMeshModel);
 	
-	//return the current mesh model
-	MeshModel* getCurrentMeshModel();
+	//set the glarea we are going to update
+	void setGLArea(GLArea *glArea);
+	
+	//allows the ability to save to metaData only even if the ui says save to a file
+	void savePointsToMetaData();
+		
 	
 private:
 	//get the points from the UI
@@ -111,17 +116,14 @@ private:
 	//load the points from a file
 	void loadPoints(QString filename);
 		
-	//allows the ability to save to metaData only even if the ui says save to a file
-	void savePointsToMetaData(PickedPoints *pickedPoints);
-		
-	//makes the picked point tree widget empty
-	void clearAllPointsFromTreeWidget();
-	
 	//loads the default template if there is one
 	void tryLoadingDefaultTemplate();
 	
 	//load a point template
 	void loadPickPointsTemplate(QString filename);
+	
+	//if true only remove coord (keep template), if false remove all points from tree widget (start over)
+	void clearPoints(bool clearOnlyXYZValues);
 	
 	//the current mode of the GUI
 	Mode currentMode;
@@ -146,6 +148,9 @@ private:
 	//we need this in order to save to the meta data and get the filename, etc
 	MeshModel *meshModel;
 	
+	//the glarea to update
+	GLArea *_glArea;
+	
 private slots:
 	//remove the point highlighted in the pickedPointTree
 	void removeHighlightedPoint();
@@ -162,9 +167,8 @@ private slots:
 	//ask the user for the filename and then load the pionts
 	void askUserForFileAndLoadPoints();
 	
-	//remove all the points and start over when ui button
-	//is pressed
-	void clearPoints();
+	//clear the points when the clear button is clicked
+	void clearPointsButtonClicked();
 	
 	//save the point names currently listed as a template
 	void savePointTemplate();

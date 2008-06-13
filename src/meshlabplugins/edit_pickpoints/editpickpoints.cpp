@@ -28,6 +28,7 @@ EditPickPointsPlugin::EditPickPointsPlugin(){
 	movePoint = false;
 	
 	pickPointsDialog = 0;
+	currentModel = 0;
 }
 
 //Constants
@@ -70,9 +71,17 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 	
 	
 	//make sure we picking points on the right meshes!
-	if(gla != glArea || glArea->mm() != pickPointsDialog->getCurrentMeshModel()){
-		//also test to see which mesh is picked currently
-		pickPointsDialog->setCurrentMeshModel(glArea->mm());
+	if(&mm != currentModel){
+		//now that were are ending tell the dialog to save any points it has to metadata
+		pickPointsDialog->savePointsToMetaData();
+		
+		qDebug() << "new mesh so reset pick points";
+		//set the gla to be updated (i dont think it should ever be different
+		pickPointsDialog->setGLArea(gla);
+			
+		//set the new mesh model
+		pickPointsDialog->setCurrentMeshModel(&mm);
+		currentModel = &mm;
 	}
 	
 	//We have to calculate the position here because it doesnt work in the mouseEvent functions for some reason
@@ -102,15 +111,18 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 			
 		if(!result){
 			qDebug() << "find nearest face failed!";
+		} else
+		{
+			CFaceO::NormalType faceNormal = face->N();
+			qDebug() << "found face normal: " << faceNormal[0] << faceNormal[1] << faceNormal[2];
+			
+			//if we didnt find a face then dont add the point because the user was probably 
+			//clicking on another mesh opened inside the glarea
+			pickPointsDialog->addPoint(pickedPoint, faceNormal);
 		}
-			
-		CFaceO::NormalType faceNormal = face->N();
-		qDebug() << "found face normal: " << faceNormal[0] << faceNormal[1] << faceNormal[2];
-			
-		
-		pickPointsDialog->addPoint(pickedPoint, faceNormal);
 		
 		addPoint = false;
+		
 	}
 	
 	drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector(), mm.cm.bbox);
@@ -129,6 +141,11 @@ void EditPickPointsPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *
 		pickPointsDialog = new PickPointsDialog(this, gla->window());
 	}
 	
+	currentModel = &mm;
+	
+	//set the gla to be updated
+	pickPointsDialog->setGLArea(gla);
+	
 	//set the current mesh
 	pickPointsDialog->setCurrentMeshModel(&mm);
 	
@@ -142,8 +159,8 @@ void EditPickPointsPlugin::EndEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gl
 	//qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ...";
 	// some cleaning at the end.
 	
-	//now that were are ending tell the dialog there is no longer a model to edit
-	pickPointsDialog->setCurrentMeshModel(NULL);
+	//now that were are ending tell the dialog to save any points it has to metadata
+	pickPointsDialog->savePointsToMetaData();
 
 	//remove the dialog from the screen
 	pickPointsDialog->hide();
