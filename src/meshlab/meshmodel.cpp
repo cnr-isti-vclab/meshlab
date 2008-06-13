@@ -68,11 +68,24 @@ Removed Optional Face Normal and added some initalization after opening
 
 ****************************************************************************/
 
-#include "meshmodel.h"
 #include <QString>
 #include <QtGlobal>
+#include <QFileInfo>
+#include "meshmodel.h"
 #include <wrap/gl/math.h>
 using namespace vcg;
+
+MeshModel *MeshDocument::getMesh(const char *name)
+{ 
+	foreach(MeshModel *mmp, meshList)
+			{
+				QString shortName( QFileInfo(mmp->fileName.c_str()).fileName() );
+				if(shortName == name) return mmp;
+			}
+	assert(0);
+	return 0;
+}
+
 
 bool MeshModel::Render(GLW::DrawMode _dm, GLW::ColorMode _cm, GLW::TextureMode _tm)
 {

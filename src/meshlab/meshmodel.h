@@ -20,77 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.45  2008/04/04 10:03:13  cignoni
-BIG CHANGE: now also the vertex vector has optional components (mark, and curvature components)
-Removed the dangerous 'using namespace' (never put them in .h files!)
-
-Revision 1.44  2008/01/28 13:00:53  cignoni
-added delMesh method
-
-Revision 1.43  2007/12/11 17:14:43  cignoni
-removed uselss include ocf for vertex
-
-Revision 1.42  2007/10/23 07:50:41  cignoni
-added vertex normals to the default of a mesh. Added trBBox function
-
-Revision 1.41  2007/10/02 07:59:32  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.40  2007/09/07 12:01:10  ldpmatic
-Avoiding gcc's warning
-
-Revision 1.39  2007/07/24 07:16:51  cignoni
-moved matrix inside mesh class and added safe init at construction time
-
-Revision 1.38  2007/07/13 15:16:48  cignoni
-Corrected bug on bbox of multiple meshes
-
-Revision 1.37  2007/07/10 07:19:29  cignoni
-** Serious Changes **
-again on the MeshDocument, the management of multiple meshes, layers, and per mesh transformation
-
-Revision 1.36  2007/06/01 10:04:21  ponchio
-!   !=  ~
-
-Revision 1.35  2007/06/01 09:19:24  cignoni
-Added MeshDocument and computation of VertexBorderFlags when asking border flags
-
-Revision 1.34  2007/04/16 09:24:37  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing...
-
-Revision 1.33  2007/03/20 16:22:34  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.32  2007/03/14 22:59:34  cignoni
-Texture -> TexCoord name change
-
-Revision 1.31  2007/03/03 02:03:26  cignoni
-Reformatted lower bar, added number of selected faces. Updated about dialog
-
-Revision 1.30  2007/01/11 10:40:48  cignoni
-added a safety test in restorecolor
-
-Revision 1.29  2006/11/29 01:03:38  cignoni
-Edited some comments
-
-Revision 1.28  2006/11/07 09:03:40  cignoni
-Added clearDataMask
-
-Revision 1.27  2006/10/15 23:45:51  cignoni
-Added orderedEdge constructor for gcc compiling of quadric simplifciation stuff
-
-Revision 1.26  2006/10/10 21:16:13  cignoni
-Added VF optional component
-
-Revision 1.25  2006/09/22 06:28:02  granzuglia
-abstract pointer to fileformat's dependent additional info added
-
-****************************************************************************/
 
 #ifndef MESHMODEL_H
 #define MESHMODEL_H
@@ -115,6 +44,7 @@ abstract pointer to fileformat's dependent additional info added
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/additionalinfo.h>
 #include <QList>
+#include <QString>
 
 class CEdge;   
 class CFaceO;
@@ -374,7 +304,13 @@ MeshDocument()
 			foreach(MeshModel *mmp, meshList)
 					delete mmp;
    }
-	 
+	MeshModel *getMesh(int i)
+	{ 
+		return meshList.at(i);
+	}
+	
+	MeshModel *getMesh(const char *name);
+	
 	void setCurrentMesh(unsigned int i)
 	{
 	  assert(i < (unsigned int)meshList.size());
@@ -392,19 +328,24 @@ MeshDocument()
 	int size() const {return meshList.size();}
 	bool busy;    // used in processing. To disable access to the mesh by the rendering thread
 
-	MeshModel *addNewMesh(const char *meshName)
+	MeshModel *addNewMesh(const char *meshName,MeshModel *newMesh=0)
 	{
-		MeshModel *newMesh=new MeshModel(meshName);
+		QString newName=meshName;
+		for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
+		{
+			QString shortName( (*mmi)->fileName.c_str() );
+			if(shortName == newName) 
+				newName = newName+"_copy";
+		}
+		if(newMesh==0) 
+			newMesh=new MeshModel(qPrintable(newName));
+		else 
+			newMesh->fileName = qPrintable(newName);
 		meshList.push_back(newMesh);
 		currentMesh=meshList.back();
 		return newMesh;
 	}
 	
-	void addMesh(MeshModel *newMesh)
-	{
-		meshList.push_back(newMesh);
-		currentMesh=meshList.back();
-	}
 
   bool delMesh(MeshModel *mmToDel)
 	{
