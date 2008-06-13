@@ -496,10 +496,8 @@ void MainWindow::startFilter()
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		qDebug("MeshCreation");
-		int mask = 0;
-		MeshModel *mm= new MeshModel();	
 		GLArea *gla=new GLArea(mdiarea);
-		gla->meshDoc.addMesh(mm);			
+		MeshModel *mm=gla->meshDoc.addNewMesh("untitled.ply");			
 		gla->setFileName("untitled.ply");
 		mdiarea->addSubWindow(gla);
 		if(mdiarea->isVisible()) gla->showMaximized();
@@ -890,10 +888,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						gla=new GLArea(mdiarea);
 						newGla =true;
 					}
-					gla->meshDoc.addMesh(mm);
+					gla->meshDoc.addNewMesh(qPrintable(fileName),mm);
 					
 					gla->mm()->ioMask |= mask;				// store mask into model structure
-					gla->setFileName(fileName);
+					gla->setFileName(mm->fileName.c_str());
 					if(newGla){
 						mdiarea->addSubWindow(gla);
 					}
