@@ -20,11 +20,75 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+
 #ifndef EDITHOLEPLUGIN_H
 #define EDITHOLEPLUGIN_H
 
 #include <QObject>
 #include <QList>
-#include <QDockWidget>
+#include <QStringList>
+#include "fillerDialog.h"
+#include "fgtHole.h"
+#include <meshlab/meshmodel.h>
+#include <meshlab/interfaces.h>
+#include "vcg/simplex/face/pos.h"
+#include "vcg/complex/trimesh/base.h"
 
+
+class EditHolePlugin : public QObject, public MeshEditInterface
+{
+	Q_OBJECT
+	Q_INTERFACES(MeshEditInterface)
+	QList <QAction *> actionList;
+	
+public:
+	typedef vector<FgtHole<CMeshO> > HoleVector;
+	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
+	typedef vector<HolePatch<CMeshO> > PatchVector;
+
+	EditHolePlugin();
+    virtual ~EditHolePlugin();
+	virtual const QString Info(QAction *);
+    virtual const PluginInfo &Info();
+	virtual void  StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void  EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void  Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void  mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+    virtual void  mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+    virtual void  mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual QList<QAction *> actions() const ;
+	
+	
+private:
+	// vector of first POS for each hole
+	HoleVector holeList;
+	PatchVector patchVector;
+	GLArea * gla;
+	MeshModel* mesh;
+    FillerDialog *dialogFiller;
+	bool isListUpdate;
+   
+	bool hasPick;
+	QPoint cur;
+	CFaceO* pickedFace;
+
+	void resetHoleList();
+	void markBorders();
+	void drawHoles();
+	void drawPatches();
+	void updateUI();
+	int findHoleFromBorderFace(CMeshO::FacePointer bFace);
+	void toggleSelection(int holeIndex);
+	
+private Q_SLOTS:
+	void refreshSelection();
+	void refreshHoles();
+	void fill();
+	void ApplyFilling();
+	void upGlA();
+	
+signals:
+	void SGN_SuspendEditToggle();
+
+};
 #endif
