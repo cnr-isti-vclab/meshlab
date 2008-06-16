@@ -25,7 +25,7 @@
 
 #include <QWidget>
 #include <QtGui/QDockWidget>
-#include "ui_fillerDialog.h"
+#include "ui_edit_hole.h"
 
 class FillerDialog : public QDockWidget
 {
@@ -33,7 +33,7 @@ class FillerDialog : public QDockWidget
 
 public:
 	FillerDialog(QWidget *parent = 0);
-	//~FillerDialog();
+	~FillerDialog(){};
 	
 	
 Q_SIGNALS:
