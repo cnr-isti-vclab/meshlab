@@ -43,13 +43,18 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 	*/
 	enum { 
     FP_CREASE_CUT, 
+		FP_LAPLACIAN_SMOOTH, 
+		FP_HC_LAPLACIAN_SMOOTH,
+		FP_SD_LAPLACIAN_SMOOTH, 
+		FP_TWO_STEP_SMOOTH, 
 		FP_FACE_NORMAL_SMOOTHING,
 		FP_FACE_NORMAL_NORMALIZE,
 		FP_VERTEX_QUALITY_SMOOTHING,
 		FP_UNSHARP_NORMAL,
 		FP_UNSHARP_GEOMETRY,
 		FP_UNSHARP_COLOR,
-		FP_RECOMPUTE_VERTEX_NORMAL
+		FP_RECOMPUTE_VERTEX_NORMAL,
+		FP_RECOMPUTE_FACE_NORMAL
   } ;
 	
 	/* default values for standard parameters' values of the plugin actions */
