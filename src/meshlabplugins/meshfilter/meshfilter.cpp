@@ -103,10 +103,6 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_REMOVE_DUPLICATED_VERTEX<< 
     FP_REMOVE_FACES_BY_AREA<<
     FP_REMOVE_FACES_BY_EDGE<<
-    FP_LAPLACIAN_SMOOTH<< 
-    FP_HC_LAPLACIAN_SMOOTH<<
-		FP_SD_LAPLACIAN_SMOOTH<< 
-    FP_TWO_STEP_SMOOTH<< 
     FP_CLUSTERING<< 
     FP_QUADRIC_SIMPLIFICATION<<
 	  FP_QUADRIC_TEXCOORD_SIMPLIFICATION<<
@@ -154,12 +150,10 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_LOOP_SS :
     case FP_MIDPOINT :
          return MeshFilterInterface::Remeshing; 
-		case FP_SD_LAPLACIAN_SMOOTH:
-		case FP_HC_LAPLACIAN_SMOOTH:
-		case FP_LAPLACIAN_SMOOTH:
-		case FP_TWO_STEP_SMOOTH:
-			return MeshFilterInterface::Smoothing; 
-
+		case FP_NORMAL_EXTRAPOLATION:
+		case FP_INVERT_FACES:
+		case FP_REORIENT :
+				 return MeshFilterInterface::Normal;
 
     default : return MeshFilterInterface::Generic;
   }
@@ -176,10 +170,6 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 	case FP_REMOVE_DUPLICATED_VERTEX :		return QString("Remove Duplicated Vertex");
 	case FP_REMOVE_FACES_BY_AREA :     		return QString("Remove Zero Area Faces");
 	case FP_REMOVE_FACES_BY_EDGE :				return QString("Remove Faces with edges longer than...");
-  case FP_LAPLACIAN_SMOOTH :						return QString("Laplacian Smooth");
-  case FP_HC_LAPLACIAN_SMOOTH :					return QString("HC Laplacian Smooth");
-  case FP_SD_LAPLACIAN_SMOOTH :					return QString("ScaleDependent Laplacian Smooth");
-  case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
 	case FP_QUADRIC_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation");
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :      return QString("Quadric Edge Collapse Decimation (with texture)");
 	case FP_CLUSTERING :	                return QString("Clustering decimation");
@@ -219,10 +209,6 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
     case FP_REMOVE_FACES_BY_AREA : 			return tr("Removes null faces (the one with area equal to zero)");  
     case FP_REMOVE_FACES_BY_EDGE : 			return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");  
     case FP_REMOVE_NON_MANIFOLD : 			return tr("Remove non manifold edges by removing some of the faces incident on non manifold edges");  
-    case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");  
-    case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Muller");  
-    case FP_SD_LAPLACIAN_SMOOTH : 			return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, based on the Fujiwara extended umbrella operator");  
-    case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals");  
     case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");  
     case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
@@ -257,10 +243,6 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_MIDPOINT :      
     case FP_CLOSE_HOLES :
            return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
-    case FP_HC_LAPLACIAN_SMOOTH:  
-    case FP_SD_LAPLACIAN_SMOOTH:  
-    case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_BORDERFLAG;
-    case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
     case FP_REORIENT:             return MeshModel::MM_FACETOPO;
     case FP_REMOVE_UNREFERENCED_VERTEX:
     case FP_REMOVE_DUPLICATED_VERTEX:
@@ -328,19 +310,6 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values.");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		  break;
-		case FP_TWO_STEP_SMOOTH:
-			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
-			parlst.addFloat("normalThr", (float) 60,"Feature Angle Threshold (deg)", "Specify a threshold angle for features that you want to be preserved.\nFeatures forming angles LARGER than the specified threshold will be preserved.");
-			parlst.addInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "Number of iteration of normal smoothing step. The larger the better and (the slower)");
-      parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
-		break;
-		case FP_LAPLACIAN_SMOOTH:
-		case FP_SD_LAPLACIAN_SMOOTH:
-			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
-			maxVal = m.cm.bbox.Diag();
-		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"delta", "");
-      parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
-		break;
 			 }
 }
 
@@ -358,9 +327,6 @@ bool ExtraMeshFilterPlugin::autoDialog(QAction *action)
 		case FP_MIDPOINT : 
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
-		case FP_TWO_STEP_SMOOTH:
-		case FP_LAPLACIAN_SMOOTH:
-		case FP_SD_LAPLACIAN_SMOOTH:
 		  return true;
   	 }
   return false;
@@ -492,47 +458,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 			
 //			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	  }
-
-	if(ID(filter) == (FP_LAPLACIAN_SMOOTH))
-	  {
-		int stepSmoothNum = par.getInt("stepSmoothNum");
-			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      if(cnt>0) tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,true);
-      else tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,1,false);
-			 Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
-	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
-	  }
-
-	if(ID(filter) == (FP_SD_LAPLACIAN_SMOOTH))
-	  {
-			int stepSmoothNum = par.getInt("stepSmoothNum");
-			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-			tri::Smooth<CMeshO>::VertexCoordLaplacianAngleWeighted(m.cm,stepSmoothNum,cnt>0);
-			Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
-	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
-	  }
-
-	if(ID(filter) == (FP_HC_LAPLACIAN_SMOOTH))
-	  {
-			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      tri::Smooth<CMeshO>::VertexCoordLaplacianHC(m.cm,1,cnt>0);
-      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
-	  }
-
-  if(ID(filter) == (FP_TWO_STEP_SMOOTH))
-	  {
-			tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			
-			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-			int stepSmoothNum = par.getInt("stepSmoothNum");
-			float normalThr   = cos(math::ToRad(par.getFloat("normalThr")));
-      int stepNormalNum = par.getInt("stepNormalNum");
-      bool selectedFlag = par.getBool("Selected");
-      //size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
-      tri::Smooth<CMeshO>::VertexCoordPasoDobleFast(m.cm, stepSmoothNum, normalThr, stepNormalNum,selectedFlag);
-      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
 
  	if(ID(filter) == (FP_CLUSTERING))
