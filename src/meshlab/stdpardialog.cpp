@@ -492,7 +492,7 @@ void MeshlabStdDialog::closeClick()
 
 	  //absSB->setMinimum(m_min);
 	  absSB->setMaximum(m_max*2);
-	  absSB->setDecimals(3);
+	  absSB->setDecimals(5);
 	  absSB->setSingleStep((m_max-m_min)/20.0);
 	  absSB->setValue(defaultv);
 
