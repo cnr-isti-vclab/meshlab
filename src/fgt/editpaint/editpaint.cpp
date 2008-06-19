@@ -604,6 +604,8 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 			updateNormal(data.first);
 						
 		}
+
+		delete zbuffer; zbuffer = NULL;
 	}
 }
 
