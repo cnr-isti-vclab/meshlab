@@ -454,10 +454,10 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 		  case FilterParameter::PARMESH:
 			  curParSet.setMesh(sname,((MeshEnumWidget *)stdfieldwidgets[i])->getMesh());
 			  break;
-		  case FilterParameter::PARFLOATLIST:
+		  case FilterParameter::PARFLOATLIST: {
 			  FilterParameter *p = curParSet.findParameter(sname);
 			  p->fieldVal = ((QVariantListWidget *)stdfieldwidgets[i])->getList();
-			  break;
+			  break; }
 			default:
 				assert(0);
 		  }
