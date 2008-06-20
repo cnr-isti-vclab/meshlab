@@ -454,10 +454,9 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 		  case FilterParameter::PARMESH:
 			  curParSet.setMesh(sname,((MeshEnumWidget *)stdfieldwidgets[i])->getMesh());
 			  break;
-		  case FilterParameter::PARFLOATLIST: {
-			  FilterParameter *p = curParSet.findParameter(sname);
-			  p->fieldVal = ((QVariantListWidget *)stdfieldwidgets[i])->getList();
-			  break; }
+		  case FilterParameter::PARFLOATLIST:
+			  curParSet.findParameter(sname)->fieldVal = ((QVariantListWidget *)stdfieldwidgets[i])->getList();
+			  break;
 			default:
 				assert(0);
 		  }
@@ -492,7 +491,7 @@ void MeshlabStdDialog::closeClick()
 
 	  //absSB->setMinimum(m_min);
 	  absSB->setMaximum(m_max*2);
-	  absSB->setDecimals(5);
+	  absSB->setDecimals(3);
 	  absSB->setSingleStep((m_max-m_min)/20.0);
 	  absSB->setValue(defaultv);
 
