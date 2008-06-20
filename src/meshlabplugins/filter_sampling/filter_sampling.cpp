@@ -37,6 +37,7 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/simplex/face/distance.h>
@@ -54,8 +55,11 @@ SampleFilterDocPlugin::SampleFilterDocPlugin()
 { 
 	typeList 
 			<< FP_ELEMENT_SAMPLING 
-		  << FP_MONTECARLO_SAMPLING
+			<< FP_MONTECARLO_SAMPLING
+			<< FP_SIMILAR_SAMPLING
+			<< FP_SUBDIV_SAMPLING
 			<< FP_HAUSDORFF_DISTANCE
+			<< FP_TEXEL_SAMPLING
 	;
   
   foreach(FilterIDType tt , types())
@@ -69,7 +73,10 @@ const QString SampleFilterDocPlugin::filterName(FilterIDType filterId)
   switch(filterId) {
 		case FP_ELEMENT_SAMPLING    :  return QString("Mesh Element Sampling"); 
 		case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling"); 
+		case FP_SIMILAR_SAMPLING :  return QString("Similar Triangle Sampling"); 
+		case FP_SUBDIV_SAMPLING :  return QString("Regular Sudiv. Sampling"); 
 		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
+		case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling"); 
 		default : assert(0); 
 	}
 }
@@ -80,8 +87,11 @@ const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
 		case FP_ELEMENT_SAMPLING    :  return QString("Create a new layer populated with a point sampling of the current mesh, a sample for each element of the mesh is generated"); 
-		case FP_MONTECARLO_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way"); 
+		case FP_MONTECARLO_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh."); 
+		case FP_SIMILAR_SAMPLING		:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle it is subdivided into similar triangles and the internal vertices of these triangles are considered. Distribution is biased by the shape of the triangles."); 
+		case FP_SUBDIV_SAMPLING			:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle"); 
 		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
+		case FP_TEXEL_SAMPLING      :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated"); 
 		default : assert(0); 
 	}
 }
@@ -115,11 +125,25 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action, MeshDocument & md,
 										 "Quality Weighted Sampling",
 										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
 											break;
+		case FP_SIMILAR_SAMPLING :  
+		case FP_SUBDIV_SAMPLING :  
+ 		  parlst.addInt ("SampleNum",
+										 std::max(100000,md.mm()->cm.vn),
+											"Number of samples",
+											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
+
+			break;
 		case FP_ELEMENT_SAMPLING :  
 			parlst.addEnum("Sampling", 0, 
 									QStringList() << "VertexSampling" << "Edge Sampling" << "Face Sampling", 
 									tr("Element to sample:"), 
 									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
+			break;
+		case FP_TEXEL_SAMPLING :  
+ 		  parlst.addInt ("TextureSize",
+											256,
+											"Texture Size",
+											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)");
 			break;
 		case FP_HAUSDORFF_DISTANCE :  
 			{
@@ -136,7 +160,12 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action, MeshDocument & md,
 											"Target Mesh",
 											"The mesh that is sampled for the comparison.");
 			
-			parlst.addBool ("Symmetric",
+		parlst.addBool ("SaveSample",
+											false,
+											"Save Samples",
+											"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");
+											
+		parlst.addBool ("Symmetric",
 											target,
 											"Symmetric",
 											"Perform the test in both ways (target to base and base to target).");
@@ -178,9 +207,10 @@ class HausdorffSampler
 {
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 public:
-	HausdorffSampler(CMeshO* _m,CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 )
+  
+	HausdorffSampler(CMeshO* _m=0,CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 )
 	{
-		Init(_m,_sampleMesh,_closestMesh);
+		init(_m,_sampleMesh,_closestMesh);
 	};
 
 	CMeshO *m;           /// the mesh for which we search the closest points. 
@@ -192,38 +222,53 @@ public:
 	// Parameters
 		double          max_dist;
     double          mean_dist;
-    double          RMS_dist;   /// from the wikipedia defintion == sqrt(Sum(distances^2)/n) 
+    double          RMS_dist;   /// from the wikipedia defintion RMS DIST is sqrt(Sum(distances^2)/n), here we store Sum(distances^2)
     double          volume;
     double          area_S1;
 		Histogramf hist;
     // globals
     int             n_total_samples;
     int             n_samples;
-		bool saveSample;
 		float dist_upper_bound;
 		typedef trimesh::FaceTmark<CMeshO> MarkerFace;
 		MarkerFace markerFunctor;
 	
- 	void Init(CMeshO *_m,CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 )
+		
+		float getMeanDist() const { return mean_dist / n_total_samples; }
+		float getMaxDist() const { return max_dist ; }
+		float getRMSDist() const { return sqrt(RMS_dist / n_total_samples); }
+	
+ 	void init(CMeshO *_m,CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 )
 	{
 		m=_m;
 		samplePtMesh =_sampleMesh;
 		closestPtMesh = _closestMesh;
-		unifGrid.Set(m->face.begin(),m->face.end());
-		markerFunctor.SetMesh(m);
+		if(m) 
+		{
+			unifGrid.Set(m->face.begin(),m->face.end());
+			markerFunctor.SetMesh(m);
+			hist.SetRange(0.0, m->bbox.Diag()/100.0, 100);
+		}
 		max_dist = 0;
 		mean_dist =0;
 		RMS_dist = 0;  
-		n_total_samples = 0;
-		saveSample=false;
-		
-		hist.SetRange(0.0, m->bbox.Diag()/100.0, 100);
+		n_total_samples = 0;		
 	}
-	
+
 void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType interp) 
 {
-		Point3f startPt = f.P(0)*interp[0] + f.P(1)*interp[1] +f.P(2)*interp[2]; // point to be sampled
+	Point3f startPt = f.P(0)*interp[0] + f.P(1)*interp[1] +f.P(2)*interp[2]; // point to be sampled
+	AddSample(startPt);
+}
 
+void AddVert(const CMeshO::VertexType &p) 
+{
+	AddSample(p.cP());
+}
+
+
+void AddSample(const CMeshO::CoordType &startPt) 
+{	
 		// the results
     Point3f       closestPt,      normf, bestq, ip;
 		float dist = dist_upper_bound;
@@ -275,43 +320,111 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 			
 			switch(par.getEnum("Sampling"))
 				{
-					case 0 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllVertex(curMM->cm,mps); break;
-					case 1 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllEdge(curMM->cm,mps);break;
-					case 2 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllFace(curMM->cm,mps);break;
+					case 0 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllVertex(curMM->cm,mps);	break;
+					case 1 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllEdge(curMM->cm,mps);		break;
+					case 2 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllFace(curMM->cm,mps);		break;
 				}
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);		
 		}
-			break;
+		break;
+		case FP_TEXEL_SAMPLING :  
+				{
+					MeshModel *curMM= md.mm();				
+					MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+					
+					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+				}
+		break;
 		case FP_MONTECARLO_SAMPLING :  
-			{
-				MeshModel *mm= new MeshModel("Sampled Mesh");	
-				MeshModel *curMM= md.mm();				
-				MyPointSampler mps(&(mm->cm));
-				md.addMesh(mm); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-				if(par.getBool("Weighted")) tri::SurfaceSampling<CMeshO,MyPointSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
-				else tri::SurfaceSampling<CMeshO,MyPointSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
-				vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-				Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
-			}
+		{
+			
+			MeshModel *curMM= md.mm();				
+			MeshModel *mm= md.addNewMesh("Montecarlo Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+			
+			MyPointSampler mps(&(mm->cm));
+			if(par.getBool("Weighted")) 
+					   tri::SurfaceSampling<CMeshO,MyPointSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+			else tri::SurfaceSampling<CMeshO,MyPointSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+			
+			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
+		}
 			break;
+		case FP_SUBDIV_SAMPLING :  
+		{
+			MeshModel *curMM= md.mm();				
+			MeshModel *mm= md.addNewMesh("Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+			
+			MyPointSampler mps(&(mm->cm));
+			tri::SurfaceSampling<CMeshO,MyPointSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"));
+			
+			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
+		}
+			break;
+		case FP_SIMILAR_SAMPLING :  
+		{
+			MeshModel *curMM= md.mm();				
+			MeshModel *mm= md.addNewMesh("Similar Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+			
+			MyPointSampler mps(&(mm->cm));
+			tri::SurfaceSampling<CMeshO,MyPointSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"));
+			
+			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
+		}
+			break;
+			
 		case FP_HAUSDORFF_DISTANCE : 
 			{
-			MeshModel* mm0 = par.getMesh("BaseMesh");
-			MeshModel* mm1 = par.getMesh("TargetMesh");
-			mm1->updateDataMask(MeshModel::MM_FACEMARK);
-			MeshModel *samplePtMesh = md.addNewMesh("Sample Point Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-			MeshModel *closestPtMesh = md.addNewMesh("Closest Point Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-				
-			HausdorffSampler hs(&(mm1->cm),&(samplePtMesh->cm),&(closestPtMesh->cm));
-			hs.dist_upper_bound = mm1->cm.bbox.Diag()/100;
+			MeshModel* mm0 = par.getMesh("BaseMesh");  // this is sampled mesh 
+			MeshModel* mm1 = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample. 
+			bool saveSampleFlag=par.getBool("SaveSample");
+			bool vertexSamplingFlag;
+			bool edgeSamplingFlag;
+			bool faceSamplingFlag;
 
-			tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 			
-			vcg::tri::UpdateBounding<CMeshO>::Box(samplePtMesh->cm);
-			vcg::tri::UpdateBounding<CMeshO>::Box(closestPtMesh->cm);
+			mm1->updateDataMask(MeshModel::MM_FACEMARK);
+			tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm1->cm);
+			tri::UpdateFlags<CMeshO>::FaceProjection(mm1->cm);
+
+			MeshModel *samplePtMesh =0; 
+			MeshModel *closestPtMesh =0; 
+		  HausdorffSampler hs;
+			if(saveSampleFlag)
+				{
+					closestPtMesh=md.addNewMesh("Hausdorff Closest Points"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+					samplePtMesh=md.addNewMesh("Hausdorff Sample Point"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
+					hs.init(&(mm1->cm),&(samplePtMesh->cm),&(closestPtMesh->cm));
+				}
+			else hs.init(&(mm1->cm));
+				
+			hs.dist_upper_bound = mm1->cm.bbox.Diag()/10;
+			
+			qDebug("Sampled  mesh has %7i vert %7i face",mm0->cm.vn,mm0->cm.fn);
+			qDebug("Searched mesh has %7i vert %7i face",mm1->cm.vn,mm1->cm.fn);
+
+			tri::SurfaceSampling<CMeshO,HausdorffSampler>::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
+			//tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
+			//tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
+				
+			Log(0,"Hausdorf Distance computed");						
+			Log(0,"      max : %f   Sample %i",hs.getMaxDist(),hs.n_total_samples);						
+			Log(0,"     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
+			qDebug("Hausdorf Distance computed");						
+			qDebug("      max : %f   Sample %i",hs.getMaxDist(),hs.n_total_samples);						
+			qDebug("     mean : %f   RMS : %f",hs.getMeanDist(),hs.getRMSDist());						
+			
+			if(saveSampleFlag)
+				{
+					tri::UpdateBounding<CMeshO>::Box(samplePtMesh->cm);
+					tri::UpdateBounding<CMeshO>::Box(closestPtMesh->cm);
+				}
 			}
 			break;
+		default : assert(0);
 		}
 		
 	return true;
