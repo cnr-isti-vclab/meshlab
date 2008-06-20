@@ -140,47 +140,30 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action, MeshDocument & md,
 									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
 			break;
 		case FP_TEXEL_SAMPLING :  
- 		  parlst.addInt ("TextureSize",
-											256,
-											"Texture Size",
+ 		  parlst.addInt (	"TextureSize", 256, "Texture Size",
 											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)");
+ 		  parlst.addBool(	"TextureSpace", false, "UV Space Sampling",
+											"The generated texel samples have their UV coords as point positions. The resulting point set is has a square domain, the texels/points, even if on a flat domain retain the original vertex normal to help a better perception of the original provenience.");
 			break;
 		case FP_HAUSDORFF_DISTANCE :  
 			{
 				MeshModel *target= md.mm();
 				foreach (target, md.meshList) 
 						if (target != md.mm())  break;
-		 
-			parlst.addMesh ("BaseMesh",
-											md.mm(),
-											"Base Mesh",
-											"The mesh that is used to be compared to.");
-			parlst.addMesh ("TargetMesh",
-											target,
-											"Target Mesh",
-											"The mesh that is sampled for the comparison.");
-			
-		parlst.addBool ("SaveSample",
-											false,
-											"Save Samples",
-											"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");
-											
-		parlst.addBool ("Symmetric",
-											target,
-											"Symmetric",
-											"Perform the test in both ways (target to base and base to target).");
-			
-			parlst.addInt ("SampleNum",
-											md.mm()->cm.vn,
-											"Number of samples",
-											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-											
-			parlst.addBool("Weighted",
-										 false,
-										 "Quality Weighted Sampling",
+		    
+				parlst.addMesh ("BaseMesh", md.mm(), "Base Mesh",
+												"The mesh that is used to be compared to.");
+				parlst.addMesh ("TargetMesh", target, "Target Mesh",
+												"The mesh that is sampled for the comparison.");
+				parlst.addBool ("SaveSample", false, "Save Samples",
+												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+				parlst.addBool ("Symmetric", target, "Symmetric",
+												"Perform the test in both ways (target to base and base to target).");
+				parlst.addInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
+												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
+				parlst.addBool("Weighted", false, "Quality Weighted Sampling",
 										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
-											break;
-			}
+			} break;
 		default : assert(0); 
 	}
 }
@@ -188,17 +171,28 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action, MeshDocument & md,
 class MyPointSampler
 {
 	public:
-	MyPointSampler(CMeshO* _m){m=_m;};
+	MyPointSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;};
 	CMeshO *m;
+	bool uvSpaceFlag;
 	void AddVert(const CMeshO::VertexType &p) 
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 		m->vert.back().ImportLocal(p);
 	}
+	
 	void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 		m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
+		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
+	}
+	
+	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const Point2i &tp)
+	{
+		tri::Allocator<CMeshO>::AddVertices(*m,1);
+
+		if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0); 
+							 else m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
 	}
 }; // end class MyPointSampler
@@ -332,7 +326,9 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 				{
 					MeshModel *curMM= md.mm();				
 					MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-					
+					MyPointSampler mps(&(mm->cm));
+					mps.uvSpaceFlag = par.getBool("TextureSpace");
+					tri::SurfaceSampling<CMeshO,MyPointSampler>::Texture(curMM->cm,mps,par.getInt("TextureSize"));
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 				}
 		break;
