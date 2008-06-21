@@ -42,9 +42,10 @@ class EditHolePlugin : public QObject, public MeshEditInterface
 	QList <QAction *> actionList;
 	
 public:
-	typedef vector<FgtHole<CMeshO> > HoleVector;
+	typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
+	typedef std::vector< FgtHole<CMeshO> > HoleVector;
 	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
-	typedef vector<HolePatch<CMeshO> > PatchVector;
+	//typedef std::vector<HolePatch<CMeshO> > PatchVector;
 
 	EditHolePlugin();
     virtual ~EditHolePlugin();
@@ -61,10 +62,9 @@ public:
 	
 private:
 	// vector of first POS for each hole
-	HoleVector holeList;
-	PatchVector patchVector;
+	HoleVector holes;
 	GLArea * gla;
-	MeshModel* mesh;
+	MeshModel *mesh;
     FillerDialog *dialogFiller;
 	bool isListUpdate;
    
@@ -72,10 +72,9 @@ private:
 	QPoint cur;
 	CFaceO* pickedFace;
 
-	void resetHoleList();
+	void resetHoles();
 	void markBorders();
-	void drawHoles();
-	void drawPatches();
+	void drawHoles() const;
 	void updateUI();
 	int findHoleFromBorderFace(CMeshO::FacePointer bFace);
 	void toggleSelection(int holeIndex);

@@ -28,7 +28,7 @@
 #include <meshlab/glarea.h>
 #include "edit_hole.h"
 #include "fgtHole.h"
-#include "holePatch.h"
+//#include "holePatch.h"
 //#include <qstring.h>
 
 #include <wrap/gl/pick.h>
@@ -166,7 +166,7 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 		// guardo se nella faccia più vicina uno dei vertici è di bordo
 		if( pickedFace != 0 )
 		{
-			int selIndex = HoleFinder<CMeshO>::FindHoleFromBorderFace(pickedFace, holeList);
+			int selIndex = FgtHole<CMeshO>::FindHoleFromBorderFace(pickedFace, holes);
 			if(selIndex>=0) toggleSelection(selIndex);
 			pickedFace = 0;
 		}
@@ -184,12 +184,8 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 	}
 	*/
 
-	glPopAttrib();
-
-	drawPatches();
-
+	glPopAttrib();	
 	glPopMatrix();
-
 
 	gla->update();	
  }
@@ -207,9 +203,9 @@ void EditHolePlugin::upGlA()
 	gla->update();	 
 }
 
-void EditHolePlugin::resetHoleList()
+void EditHolePlugin::resetHoles()
 {
-	if(mesh ==0)
+	if(mesh == 0)
 		return;
 
 	mesh->clearDataMask( MeshModel::MM_BORDERFLAG | MeshModel::MM_FACETOPO );
@@ -231,9 +227,9 @@ void EditHolePlugin::refreshSelection()
 {
 	for(int i=0; i<dialogFiller->ui.hListW->count(); ++i)
 		if( dialogFiller->ui.hListW->item(i)->isSelected() )
-			holeList.at(i).isSelected = true;
+			holes.at(i).isSelected = true;
 		else
-			holeList.at(i).isSelected = false;
+			holes.at(i).isSelected = false;
 }
 
 
@@ -242,11 +238,11 @@ void EditHolePlugin::markBorders()
 	if(isListUpdate || mesh==0)
 		return; // evito di ricalcolare gli hole quando non necessario, visto che costa
 
-	holeList.clear();
+	holes.clear();
 	mesh->updateDataMask(MeshModel::MM_FACETOPO);
 	mesh->updateDataMask(MeshModel::MM_BORDERFLAG);
 
-	HoleFinder<CMeshO>::GetHoles(mesh->cm, holeList);
+	FgtHole<CMeshO>::GetMeshHoles(mesh->cm, holes);
 	//HoleFinder<CMeshO>::GetBoundHoles(mesh->cm, holeList);
 	isListUpdate = true;
 }
@@ -257,11 +253,11 @@ void EditHolePlugin::markBorders()
 void EditHolePlugin::updateUI()
 {
 	//Si aggiorna nel dialogo la lista dei buchi
-	HoleVector::const_iterator it = holeList.begin();
+	HoleVector::const_iterator it = holes.begin();
 
 	dialogFiller->ui.hListW->clear();
 	int i = 0;
-	for( ; it!=holeList.end(); ++it) {
+	for( ; it != holes.end(); ++it) {
 		++i;
 		dialogFiller->ui.hListW->addItem( QString("Hole_%1").arg( i ));
 	}
@@ -274,7 +270,7 @@ void EditHolePlugin::toggleSelection(int holeIndex)
 }
 
 
-void EditHolePlugin::drawHoles()
+void EditHolePlugin::drawHoles() const
 {
 	glLineWidth(2.0f);
 	glDepthFunc(GL_ALWAYS);
@@ -282,62 +278,35 @@ void EditHolePlugin::drawHoles()
 	glDepthMask(GL_FALSE);
 	glDisable(GL_LIGHTING);
 
-	HoleVector::iterator it;
+	HoleVector::const_iterator it = holes.begin();
 	// scorro tutti i buchi
-	for(it=holeList.begin(); it!=holeList.end(); ++it)
+	for( ; it != holes.end(); ++it)
 	{
-		if( (*it).isSelected )
+		if( it->isSelected )
 			glColor(Color4b::DarkGreen);
 		else
 			glColor(Color4b::DarkRed);
-
-		(*it).Draw();
+		it->Draw();
 	}
 
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST); 
 	glDepthFunc(GL_LESS);
 
-	for(it=holeList.begin(); it!=holeList.end(); ++it)
+	for(it = holes.begin(); it != holes.end(); ++it)
 	{
-		if( (*it).isSelected )
+		if( it->isSelected )
 			glColor(Color4b::Green);
 		else
 			glColor(Color4b::Red);
-
-		(*it).Draw();
+		it->Draw();
 	}	
-}
-
-void EditHolePlugin::drawPatches()
-{
-	/*
-	glLineWidth(0.5f);
-	glDepthFunc(GL_ALWAYS);
-	glDisable(GL_DEPTH_TEST); 
-	glDepthMask(GL_FALSE);
-	glEnable(GL_LIGHTING);
-	*/
-
-	glLineWidth(1.0f);
-
-	// scorro tutti i buchi
-	PatchVector::iterator it;
-	for(it=patchVector.begin(); it!=patchVector.end(); ++it)
-		it->Draw(  );
-	/*
-	glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST); 
-//	glDepthFunc(GL_LESS);
-	*/
-
-	
 }
 
 
 void EditHolePlugin::refreshHoles()
 {
-	resetHoleList();
+	resetHoles();
 	markBorders();
 	updateUI();
 }
@@ -418,14 +387,13 @@ void EditHolePlugin::ApplyFilling()
  void EditHolePlugin::fill()
  {	 
 	dialogFiller->hide();
-	HoleVector::iterator it = holeList.begin();
-	for( ; it != holeList.end(); it++ )
+	HoleVector::iterator it = holes.begin();
+	for( ; it != holes.end(); it++ )
 	{
 		if( it->isSelected )
 		{
-			HolePatch<CMeshO> hPatch;
-			HoleFiller<CMeshO>::GreedyFilling( (*it), hPatch);
-			patchVector.push_back( hPatch );
+
+			// TO DO: RIEMPIMENTO USANDO INFO DEL FGTHOLE
 		}
 	}
 
