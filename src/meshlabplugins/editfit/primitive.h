@@ -18,7 +18,6 @@ protected:
 	double												*parameters;					//Lista parametri delle primitiva.
 	int														numParameters;				//Numero parametri primitiva.
 	vcg::Matrix44f								orientation;					//Posizione ed orientamento della primitiva, la ricava il costruttore dal gesto2d e gesto3d.
-	//vcg::Point3f									position;							//Il baricentro della primitiva.
 	CMeshO												*TotMesh;							//La Mesh intera serve per la GetClosestVertex.
 	CMeshO												*selectionMesh;				//La sotto Mesh
 	std::vector<vcg::Point2i>			*gesture2D;						//Il gesto2D fatto dall'utente sulla primiva.
@@ -28,7 +27,8 @@ protected:
 	GridType											*grid;							  //La sotto mesh nella struttura di ricerca griglia statica.
 	std::vector<std::vector<vcg::Point3f> >			DebugSampling;
 	std::vector<std::vector<vcg::Point3f> >			DebugNear;
-	std::vector<vcg::Point3f>			TempNear;
+	std::vector<std::vector<vcg::Point3f> >			DebugMesh;
+	
 
 
 public:
@@ -56,7 +56,7 @@ inline Primitive::Primitive(std::vector<vcg::Point2i> *_gesture2D,std::vector<vc
 
 inline void Primitive::EvaluateError(double* par,int m_dat,double* fvec,void *data,NLMin<Primitive>::lm_status_type *status){
 	Sampling(par);
-	DebugSampling.push_back(cloudSampling);			//<---per debug
+	//DebugSampling.push_back(cloudSampling);			//<---per debug
 	for(int i=0;i<m_dat;i++){
 		fvec[i]=(double)vcg::Distance(cloudSampling[i],cloudNearPoints[i]);
 	}
@@ -65,7 +65,10 @@ inline void Primitive::EvaluateError(double* par,int m_dat,double* fvec,void *da
 inline void Primitive::Minimize(){
 	InitSampling(parameters);					//Inizializza il vettore cloudSampling e cloudNearPoints
 	RigidTranformation();							//
-	NonLinearMinimization();					//
+	RigidTranformation();							//
+	RigidTranformation();							//
+	RigidTranformation();							//
+	//NonLinearMinimization();					//
 }
 inline void Primitive::RigidTranformation(){
 	//Inizializzo il vettore di punti vicini al sampling sulla mesh.
@@ -81,12 +84,16 @@ inline void Primitive::RigidTranformation(){
 	UpdateMesh_and_Grid(tmp);
 }
 inline void Primitive::UpdateMesh_and_Grid(const vcg::Matrix44f &m){
+	std::vector<vcg::Point3f>			TempMesh;										//<------Debug
 	for(int i=0;i<(int)selectionMesh->vert.size();i++){
 		selectionMesh->vert[i].P()=m*selectionMesh->vert[i].P();
+		TempMesh.push_back(selectionMesh->vert[i].P());					//<------Debug
 	}
+	DebugMesh.push_back(TempMesh);														//<------Debug
 	delete grid;
 	grid= new GridType;
 	grid->Set<CMeshO::VertexIterator>(selectionMesh->vert.begin(),selectionMesh->vert.end());
+	/*Il sampling rimane fisso si muove solo la sottoMesh*/
 }
 inline void Primitive::NonLinearMinimization(){
 	NLMin<Primitive> nlm;
