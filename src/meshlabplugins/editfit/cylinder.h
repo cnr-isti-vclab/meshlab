@@ -71,7 +71,8 @@ inline Cylinder::Cylinder(std::vector<vcg::Point2i> *_gesture2D,std::vector<vcg:
 				vi = vcg::tri::Allocator<CMeshO>::AddVertices(*selectionMesh,1);
 				(*vi).P() = BoxSelection.m*p;
 			}
-		}	
+		}
+		DebugMesh.push_back(cloudSelection);			//<------Debug
 		//Costruisco la griglia della sotto mesh
 		selectionMesh->vert.EnableMark();	
 		grid->Set<CMeshO::VertexIterator>(selectionMesh->vert.begin(),selectionMesh->vert.end());
@@ -157,9 +158,9 @@ inline void Cylinder::Draw(){
 	
 	
 	//Disegno la cloudSampling
-	std::vector<vcg::Point3f>::iterator i;
 	glPushMatrix();
-		vcg::glMultMatrix(BoxSelection.mi);
+		//vcg::glMultMatrix(BoxSelection.mi);
+		std::vector<vcg::Point3f>::iterator i;
 		for(i=cloudSampling.begin();i<cloudSampling.end();++i){
 			glColor3f(1,0,1);
 			glPointSize(3);
@@ -169,6 +170,21 @@ inline void Cylinder::Draw(){
 		}	
 	glPopMatrix();
 	
+
+	glPushMatrix();
+		//vcg::glMultMatrix(BoxSelection.mi);
+		for(int i=0;i<DebugMesh.size();i++){
+			for(int j=0;j<DebugMesh[i].size();j++){
+				glPointSize(1);
+				glBegin(GL_POINTS);
+					glColor3f(1,0.5,0.25);
+					glVertex(DebugMesh[i][j]);
+				glEnd();
+			}
+		}	
+	glPopMatrix();
+
+
 
 
 	/*  
