@@ -159,6 +159,7 @@ class RenderArea : public QGLWidget
 		void UpdateUnify();
 		vector<CVertexO*> FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN);
 		void UpdateUnifyTopology();
+		void SetUpRegion(QPoint a, QPoint b, QPoint c);
 
 	signals:
 		void UpdateModel();
