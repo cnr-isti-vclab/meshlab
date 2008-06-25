@@ -88,8 +88,8 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 	if(oldArcF!=NULL)
 		{ 
 			assert(oldArcF->a == currentArc);
-			oldArcF->setBackground(0,QBrush());	
-			oldArcB->setBackground(0,QBrush());	
+			oldArcF->setBackground(3,QBrush());	
+			oldArcB->setBackground(3,QBrush());	
 		}
 	
 	// if we clicked twice on the same arc deselect it
@@ -103,8 +103,8 @@ void AlignDialog::setCurrentArc(vcg::AlignPair::Result *_currentArc)
 	if(newArcB!=NULL)
 		{ 
 			assert(newArcB->a == _currentArc);
-			newArcB->setBackground(0,QBrush(QColor("#d0ffff")));				
-			newArcF->setBackground(0,QBrush(QColor("#c0ffff")));				
+			newArcB->setBackground(3,QBrush(QColor("#d0ffff")));				
+			newArcF->setBackground(3,QBrush(QColor("#c0ffff")));				
 		}
 
 	currentArc=_currentArc;
@@ -117,12 +117,12 @@ void AlignDialog::updateCurrentNodeBackground()
 	assert(meshTree);
 
 	if(lastCurrentNode && M2T[lastCurrentNode])
-		 M2T[lastCurrentNode]->setBackground(0,QBrush());	
+		 M2T[lastCurrentNode]->setBackground(3,QBrush());	
 	
 	MeshTreeWidgetItem *newNodeItem= M2T[currentNode()];
 	if(newNodeItem!=NULL)
 		{ 
-			newNodeItem->setBackground(0,QBrush(QColor(Qt::lightGray)));			
+			newNodeItem->setBackground(3,QBrush(QColor(Qt::lightGray)));			
 			lastCurrentNode=	currentNode();
 		}
 }
@@ -156,11 +156,16 @@ void AlignDialog::updateButtons()
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
 {
 		QString meshName = QFileInfo(meshNode->m->fileName.c_str()).fileName();
-		if(meshNode->glued)  	meshName+="*";
 
 		QString labelText;
-		labelText.sprintf("%s - %i",qPrintable(meshName),meshNode->id); 
-		setText(0, labelText);
+		setText(0, QString::number(meshNode->id));		
+		if(meshNode->glued)  	setText(2, "*");
+		if(meshNode->m->visible)  setIcon(1,QIcon(":/layer_eye_open.png"));
+											else setIcon(1,QIcon(":/layer_eye_close.png"));
+		
+		labelText.sprintf("%s",qPrintable(meshName)); 
+		setText(3, labelText);
+
 		n=meshNode;
 		a=0;
 }
@@ -178,7 +183,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, vcg::AlignPair::Resul
 			.arg((*A).err,  6,'f',3)
 			.arg((*A).ap.SampleNum,6)
 			.arg((*A).as.LastSampleUsed() );
-			setText(0,buf);
+			setText(3,buf);
 			
 			QFont fixedFont("Courier");
 			std::vector<vcg::AlignPair::Stat::IterInfo> &I= (*A).as.I;
@@ -186,16 +191,16 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshTree* meshTree, vcg::AlignPair::Resul
 			buf.sprintf("Iter - MinD -  Error - Sample - Used - DistR - BordR - AnglR  ");
 			//          " 12   123456  1234567   12345  12345   12345   12345   12345
 			itemArcIter = new QTreeWidgetItem(this);
-			itemArcIter->setFont(0,fixedFont);
-			itemArcIter->setText(0,buf);
+			itemArcIter->setFont(3,fixedFont);
+			itemArcIter->setText(3,buf);
 			for(int qi=0;qi<I.size();++qi)
 			{
 				buf.sprintf(" %02i   %6.2f  %7.4f   %05i  %05i  %5i  %5i  %5i",
 										qi, I[qi].MinDistAbs, I[qi].pcl50,
 										I[qi].SampleTested,I[qi].SampleUsed,I[qi].DistanceDiscarded,I[qi].BorderDiscarded,I[qi].AngleDiscarded );
 				itemArcIter = new QTreeWidgetItem(this);
-				itemArcIter->setFont(0,fixedFont);
-				itemArcIter->setText(0,buf);
+				itemArcIter->setFont(3,fixedFont);
+				itemArcIter->setText(3,buf);
 			}
 }
 
@@ -213,7 +218,7 @@ void AlignDialog::rebuildTree()
 	 		MeshTreeWidgetItem *item=new MeshTreeWidgetItem(meshList.value(i));
 		 // if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));				
 		  M2T[meshList.value(i)]=item;
-		  ui.alignTreeWidget->insertTopLevelItem(0,item);
+		  ui.alignTreeWidget->insertTopLevelItem(i,item);
 	}
 	
   // Second part add the arcs to the tree
@@ -232,6 +237,9 @@ void AlignDialog::rebuildTree()
 		item = new MeshTreeWidgetItem(meshTree, A, parent);
 		A2Tb[A]=item;
 	}
+	ui.alignTreeWidget->resizeColumnToContents(0);
+	ui.alignTreeWidget->resizeColumnToContents(1);
+	ui.alignTreeWidget->resizeColumnToContents(2);
 	assert(currentNode());
 	updateCurrentNodeBackground();
 	updateButtons();
@@ -241,14 +249,21 @@ void AlignDialog::rebuildTree()
 void AlignDialog::onClickItem(QTreeWidgetItem * item, int column )
 {
 //  int row = item->data(1,Qt::DisplayRole).toInt();
-  
 	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
 	if(!mItem) return; // user clicked on a iteration info (neither a node nor an arc) 
 	
 	MeshNode * nn= mItem->n;
 	if(nn) {
-		gla->meshDoc.setCurrentMesh(nn->id);
-		updateCurrentNodeBackground();
+		if(column==1)
+					{
+						nn->m->visible = ! nn->m->visible;
+						if(nn->m->visible) mItem->setIcon(1,QIcon(":/layer_eye_open.png"));
+													else mItem->setIcon(1,QIcon(":/layer_eye_close.png"));
+					}
+		else {
+						gla->meshDoc.setCurrentMesh(nn->id);
+						updateCurrentNodeBackground();
+					}
 	} else {
 		assert(mItem->a);
 		setCurrentArc(mItem->a);
