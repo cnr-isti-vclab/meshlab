@@ -22,6 +22,8 @@ public:
 	void Sampling(double *par);
 	void InitSampling(double *par);
 	void Draw();
+	void DrawNormal();
+	void DrawDebug();
 	~Cylinder();
 };
 
@@ -59,7 +61,7 @@ inline Cylinder::Cylinder(std::vector<vcg::Point2i> *_gesture2D,std::vector<vcg:
 		vcg::Point3f max(+diameter/2.0,+parameters[0]/2.0,+diameter/2.0);
 		BoxSelection=vcg::Obox3f(min,max,frame);
 		//Ho trovato posizione ed orientamento
-		//orientation=BoxSelection.mi;
+		orientation=BoxSelection.mi;
 		//Trovo tutti i punti allinterno dell BoxSelection serve per la Density.
 		for(int i=0;i<(int)TotMesh->vert.size();i++){
 			vcg::Point3f p=TotMesh->vert[i].P();
@@ -143,6 +145,11 @@ inline void Cylinder::Density(){
 }
 
 inline void Cylinder::Draw(){
+	DrawNormal();
+	//DrawDebug();
+}
+
+inline void Cylinder::DrawNormal(){
 	glPushAttrib(GL_DEPTH_BUFFER_BIT|GL_ENABLE_BIT|GL_LINE_BIT|GL_POINT_BIT|GL_CURRENT_BIT|GL_LIGHTING_BIT|GL_COLOR_BUFFER_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
@@ -151,7 +158,7 @@ inline void Cylinder::Draw(){
 
 	//Disegno l'oriented boundingBox della selezione
 	glPushMatrix();
-		vcg::glMultMatrix(BoxSelection.mi);
+		vcg::glMultMatrix(BoxSelection.mi);								//<------TRASFORMAZIONI
 		glColor3f(1.0,1.0,0);
 		vcg::glBoxWire(BoxSelection);
 	glPopMatrix();
@@ -159,7 +166,7 @@ inline void Cylinder::Draw(){
 	
 	//Disegno la cloudSampling
 	glPushMatrix();
-		//vcg::glMultMatrix(BoxSelection.mi);
+		vcg::glMultMatrix(orientation);										//<------TRASFORMAZIONI
 		std::vector<vcg::Point3f>::iterator i;
 		for(i=cloudSampling.begin();i<cloudSampling.end();++i){
 			glColor3f(1,0,1);
@@ -169,95 +176,24 @@ inline void Cylinder::Draw(){
 			glEnd();
 		}	
 	glPopMatrix();
-	
 
-	glPushMatrix();
-		//vcg::glMultMatrix(BoxSelection.mi);
-		for(int i=0;i<DebugMesh.size();i++){
-			for(int j=0;j<DebugMesh[i].size();j++){
-				glPointSize(1);
-				glBegin(GL_POINTS);
-					glColor3f(1,0.5,0.25);
-					glVertex(DebugMesh[i][j]);
-				glEnd();
-			}
-		}	
-	glPopMatrix();
-
-
-
-
-	/*  
+	/*
 	//Disegno la cloudNearPoints
-	//glDisable(GL_DEPTH_TEST);
 	glPushMatrix();
-		vcg::glMultMatrix(BoxSelection.mi);
-		for(i=cloudNearPoints.begin();i<cloudNearPoints.end();++i){
+	vcg::glMultMatrix(orientation);										//<------TRASFORMAZIONI
+		for(int i=0;i<cloudNearPoints.size();i++){
 			glColor3f(0,1,1);
-			glPointSize(2);
-			glBegin(GL_POINTS);
-				glVertex(*i);
-			glEnd();
-		}	
-	glPopMatrix();
-	//glEnable(GL_DEPTH_TEST);
-	*/
-	
-
-	
-	//Disegno la selectionMesh
-/*
-	glPushMatrix();
-		vcg::glMultMatrix(BoxSelection.mi);
-		for(int j=0;j<(int)selectionMesh->vert.size();j++){
-			glColor3f(1,0.5,0.25);
 			glPointSize(3);
 			glBegin(GL_POINTS);
-				glVertex(selectionMesh->vert[j].P());
+				glVertex(cloudNearPoints[i]);				
 			glEnd();
-		}	
-	glPopMatrix();	
-*/
-
-	//Disegno debug
-/*
-	glPushMatrix();
-		vcg::glMultMatrix(BoxSelection.mi);
-		for(int i=12;i<13;i++){
-			for(int j=0;j<DebugSampling[i].size();j++){
-				glPointSize(1);
-				glBegin(GL_LINES);
-					glColor3f(1,0,1);
-					glVertex(DebugSampling[i][j]);
-					glColor3f(0,1,1);
-					glVertex(DebugNear[i][j]);
-				glEnd();
-			}
-		}	
+		}
 	glPopMatrix();
-*/	
 
-	/*
-	glPushMatrix();
-		//vcg::glMultMatrix(BoxSelection.mi);
-		for(int i=0;i<DebugSampling.size();i++){
-			for(int j=0;j<DebugSampling[i].size();j++){
-				glPointSize(1);
-				glBegin(GL_POINTS);
-					glColor3f(1,0,1);
-					glVertex(DebugSampling[i][j]);
-					//glColor3f(0,1,1);
-					//glVertex(DebugNear[i][j]);
-				glEnd();
-			}
-		}	
-	glPopMatrix();
-	*/
 
-	/*
-	//line:
+	//Disegno Le linee:
 	glPushMatrix();
-	vcg::glMultMatrix(BoxSelection.mi);
+	vcg::glMultMatrix(orientation);										//<------TRASFORMAZIONI
 		for(int i=0;i<cloudNearPoints.size();i++){
 			glPointSize(1);
 			glBegin(GL_LINES);
@@ -269,6 +205,108 @@ inline void Cylinder::Draw(){
 		}
 	glPopMatrix();
 	*/
+
+
+	glPopAttrib();
+}
+
+inline void Cylinder::DrawDebug(){
+	glPushAttrib(GL_DEPTH_BUFFER_BIT|GL_ENABLE_BIT|GL_LINE_BIT|GL_POINT_BIT|GL_CURRENT_BIT|GL_LIGHTING_BIT|GL_COLOR_BUFFER_BIT);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_COLOR_MATERIAL);
+	glDisable(GL_BLEND);
+
+	//Disegno la cloudSampling
+		std::vector<vcg::Point3f>::iterator i;
+		for(i=cloudSampling.begin();i<cloudSampling.end();++i){
+			glColor3f(1,0,1);
+			glPointSize(3);
+			glBegin(GL_POINTS);
+				glVertex(*i);
+			glEnd();
+		}	
+
+	//Disegno la cloudNearPoints
+		for(int i=0;i<cloudNearPoints.size();i++){
+			glColor3f(0,1,1);
+			glPointSize(3);
+			glBegin(GL_POINTS);
+				glVertex(cloudNearPoints[i]);				
+			glEnd();
+		}
+
+	
+	
+/*
+	for(int i=0;i<DebugMesh.size();i++){
+			for(int j=0;j<DebugMesh[i].size();j++){
+				glPointSize(1);
+				glBegin(GL_POINTS);
+					glColor3f(1,0.5,0.25);
+					glVertex(DebugMesh[i][j]);
+				glEnd();
+			}
+		}	
+*/
+
+
+
+	/*  
+	//Disegno la cloudNearPoints
+	//glDisable(GL_DEPTH_TEST);
+	for(i=cloudNearPoints.begin();i<cloudNearPoints.end();++i){
+			glColor3f(0,1,1);
+			glPointSize(2);
+			glBegin(GL_POINTS);
+				glVertex(*i);
+			glEnd();
+		}	
+	//glEnable(GL_DEPTH_TEST);
+	*/
+	
+
+	
+	//Disegno la selectionMesh
+/*
+	for(int j=0;j<(int)selectionMesh->vert.size();j++){
+			glColor3f(1,0.5,0.25);
+			glPointSize(3);
+			glBegin(GL_POINTS);
+				glVertex(selectionMesh->vert[j].P());
+			glEnd();
+		}	
+*/
+
+	/*
+	//Disegno debug
+	for(int i=0;i<DebugSampling.size();i++){
+			for(int j=0;j<DebugSampling[i].size();j++){
+				glPointSize(1);
+				glBegin(GL_POINTS);
+					glColor3f(1,0,1);
+					glVertex(DebugSampling[i][j]);
+					//glColor3f(0,1,1);
+					//glVertex(DebugNear[i][j]);
+				glEnd();
+			}
+		}	
+	*/
+
+	
+	//line:
+	for(int i=0;i<cloudNearPoints.size();i++){
+			glPointSize(1);
+			glBegin(GL_LINES);
+				glColor3f(0,1,1);
+				glVertex(cloudNearPoints[i]);				
+				glColor3f(1,0,1);
+				glVertex(cloudSampling[i]);					
+			glEnd();
+		}
+	
+
+
 	glPopAttrib();
 }
 

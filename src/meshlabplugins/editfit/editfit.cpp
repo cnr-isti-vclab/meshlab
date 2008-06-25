@@ -224,7 +224,7 @@ void  EditFitPlugin::DrawGesture3D(){
 	std::vector<vcg::Point3f>::iterator i;
 	for(i=gesture3D.begin();i<gesture3D.end();++i){
 		glColor3f(0,1.0,0);
-		glPointSize(5);
+		glPointSize(2);
 		glBegin(GL_POINTS);
 		glVertex(*i);
 		glEnd();
