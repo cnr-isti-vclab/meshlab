@@ -212,7 +212,8 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     CP_COLOR_NON_MANIFOLD_VERTEX <<
     CP_SMOOTH <<
     //CP_COLOR_NON_TOPO_COHERENT <<
-    CP_RESTORE_ORIGINAL;
+    CP_RESTORE_ORIGINAL << 
+		CP_RANDOM_FACE;
     
   FilterIDType tt;
   foreach(tt , types())
@@ -237,6 +238,8 @@ const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) {
     case CP_COLOR_NON_TOPO_COHERENT:  return QString("Color edges topologically non coherent");
     case CP_SMOOTH:                   return QString("Smooth Color");
     case CP_RESTORE_ORIGINAL:         return QString("Restore Color");
+		case CP_RANDOM_FACE:         return QString("Random Face Color");
+			
     default: assert(0);
   }
   return QString("error!");
@@ -260,6 +263,8 @@ const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId)
     case CP_SMOOTH :                 return tr("Apply laplacian smooth for colors.");
     case CP_RESTORE_ORIGINAL :       return tr("Restore original per vertex color.");
     case CP_COLOR_NON_TOPO_COHERENT :return tr("Color edges topologically non coherent.");
+		case CP_RANDOM_FACE:         return QString("Colorize Faces randomly. If internal edges are present they are used");
+
     default: assert(0); 
   }
   return QString();
@@ -286,10 +291,11 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_SELFINTERSECT_SELECT:
 		case CP_SELFINTERSECT_COLOR:
 		            return MeshModel::MM_FACEMARK | MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
-    case CP_BORDER:                   return MeshModel::MM_BORDERFLAG;
+    case CP_BORDER:             return MeshModel::MM_BORDERFLAG;
     case CP_TEXBORDER:                   return MeshModel::MM_FACETOPO;
     case CP_COLOR_NON_MANIFOLD_FACE:       
     case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACETOPO;
+    case CP_RANDOM_FACE:       return MeshModel::MM_FACETOPO;
     case CP_SMOOTH:                   
     case CP_RESTORE_ORIGINAL:         
     case CP_MAP_QUALITY_INTO_COLOR:   return 0;
@@ -453,7 +459,10 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
   case CP_BORDER:
     vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
     break;
-  case CP_TEXBORDER:
+	case CP_RANDOM_FACE:
+    vcg::tri::UpdateColor<CMeshO>::MultiFaceRandom(m.cm);
+    break;
+	case CP_TEXBORDER:
 		vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
@@ -500,6 +509,7 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
 		case   CP_SELFINTERSECT_SELECT: return MeshFilterInterface::Selection;
     case   CP_SELFINTERSECT_COLOR:
     case   CP_TRIANGLE_QUALITY:
+		case   CP_RANDOM_FACE:	
                return MeshFilterInterface::FaceColoring; 
     default: assert(0);
               return MeshFilterInterface::Generic;
