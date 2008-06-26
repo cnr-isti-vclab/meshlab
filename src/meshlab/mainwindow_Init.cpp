@@ -259,7 +259,7 @@ void MainWindow::createActions()
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 	
-	openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open inside..."), this);
+	openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open as new layer..."), this);
 	connect(openInAct, SIGNAL(triggered()), this, SLOT(openIn()));
 	
 	openProjectAct = new QAction(QIcon(":/images/openPrj.png"),tr("&Open project..."), this);
@@ -620,7 +620,9 @@ void MainWindow::loadPlugins()
         QAction *filterAction;
         foreach(filterAction, iFilter->actions())
         {
-          filterMap[filterAction->text()]=filterAction;
+					qDebug("Processing action %s",qPrintable(filterAction->text()) );
+					qDebug("          (%s)", qPrintable(iFilter->filterInfo(filterAction)) );
+					filterMap[filterAction->text()]=filterAction;
           filterAction->setToolTip(iFilter->filterInfo(filterAction));
           connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
           switch(iFilter->getClass(filterAction))
