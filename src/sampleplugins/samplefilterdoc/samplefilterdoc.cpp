@@ -109,29 +109,39 @@ void SampleFilterDocPlugin::initParameterSet(QAction *action,MeshDocument & /*m*
 }
 
 // The Real Core Function doing the actual mesh processing.
-// Move Vertex of a random quantity
 bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-	MeshModel *destMesh=md.meshList.front();
-	foreach(MeshModel *mmp, md.meshList)
-	{
-		tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
-		mmp->cm.Tr.SetIdentity();
-		if(mmp!=md.meshList.front())	
-				tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
+	
+	switch(ID(filter)) {
+		case FP_FLATTEN :
+		{
+			MeshModel *destMesh=md.meshList.front();
+			foreach(MeshModel *mmp, md.meshList)
+			{
+				tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
+				mmp->cm.Tr.SetIdentity();
+				if(mmp!=md.meshList.front())	
+						tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
+			}
+			
+			while(md.meshList.size()>1)
+				md.delMesh(md.meshList.back());
+			
+			// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
+			if(par.getBool("MergeVertices"))	
+			{
+				int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(md.mm()->cm);
+				Log(GLLogStream::Info, "Removed %d duplicated vertices", delvert);
+				if (delvert != 0) 
+					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(md.mm()->cm);
+			}
+
+			// Log function dump textual info in the lower part of the MeshLab screen. 
+			Log(0,"Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
+				
+		} break;
+		default: assert (0);
 	}
-	
-	while(md.meshList.size()>1)
-		md.delMesh(md.meshList.back());
-	
-		// Log function dump textual info in the lower part of the MeshLab screen. 
-	Log(0,"Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
-
-	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
-	if(par.getBool("MergeVertices"))	
-
-//	vcg::tri:/Users/cignoni/Documents/devel/meshlab/src/sampleplugins/samplefilterdoc/build/samplefilterdoc_debug.build/Debug/libsamplefilterdoc_debug.build/Objects-normal/i386/samplefilterdoc.o reference to undefined ___glewDeleteBuffersARB
-//:UpdateBounding<CMeshO>::Box(m.cm);  
 	return true;
 }
 
