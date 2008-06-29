@@ -94,7 +94,7 @@
 
 //#include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
-
+#include <vcg/complex/trimesh/update/texture.h>
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/import_dae.h>
@@ -178,7 +178,13 @@ bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, M
   //std::string filename = fileName.toUtf8().data();
 	std::string ex = formatName.toUtf8().data();
 	int result;
-	
+    
+	// Collada exporting function do not manage very correctly the case
+    // of null texture index faces (e.g. faces that have no texture and have a default -1 tex index.
+    // so we convert it to a more standard mesh adding a fake notexture.png texture.
+ 
+	tri::UpdateTexture<CMeshO>::WedgeTexRemoveNull(m.cm,"notexture.png");
+
 	//if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end())
 		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
 	//else 
