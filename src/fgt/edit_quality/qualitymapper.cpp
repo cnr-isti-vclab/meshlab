@@ -128,6 +128,8 @@ void QualityMapperPlugin::Decorate(QAction*, MeshModel&, GLArea*)
 	glColor4f(.3f,.3f,.3f,.3f);
 	glBegin(GL_QUAD_STRIP);
 
+	if ( _qualityMapperDialog == 0 )
+		return;
 
 	float maxQuality = _qualityMapperDialog->maxQuality();
 	float minQuality = _qualityMapperDialog->minQuality();

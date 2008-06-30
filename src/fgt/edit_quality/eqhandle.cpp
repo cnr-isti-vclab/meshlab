@@ -189,7 +189,7 @@ Method invoked by spinbox value changing. Updates the position of the associated
 */
 void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 {
-	// Min and Max quality values are normally the values of the min e max spinboxes, but they are different if a handle is "outside" the histogram
+	// Min and Max quality values are normally the values of the min e max spinboxes, but they are different if an handle is "outside" the histogram
 	float maxQ = (_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value() > _chartInfo->maxX)?_handlesPointer[RIGHT_HANDLE]->_spinBoxPointer->value():_chartInfo->maxX;
 	float minQ = (_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value()  < _chartInfo->minX)?_handlesPointer[LEFT_HANDLE]->_spinBoxPointer->value() :_chartInfo->minX;
 	qreal newHandleX;
@@ -202,6 +202,7 @@ void EqHandle::setXBySpinBoxValueChanged(double spinBoxValue)
 		{
 			*_midHandlePercentilePosition = calculateMidHandlePercentilePosition(newHandleX);
 			moveMidHandle();
+			emit positionChanged();  // for redrawing transferFunctionScene and moving midHandle
 		}
 		break;
 	case LEFT_HANDLE:

@@ -403,14 +403,14 @@ void QualityMapperDialog::initEqualizerSpinboxes()
 
 	ui.minSpinBox->setDecimals(decimals);
 	ui.minSpinBox->setValue(_histogram_info->minX);
-	//ui.minSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
-	ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
+	ui.minSpinBox->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+	//ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
 	ui.minSpinBox->setSingleStep(singleStep);
 
 	ui.maxSpinBox->setDecimals(decimals);
 	ui.maxSpinBox->setValue(_histogram_info->maxX);
-	//ui.maxSpinBox->setRange(_histogram_info->minX, _histogram_info->maxX);
-	ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
+	ui.maxSpinBox->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+	//ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
 	ui.maxSpinBox->setSingleStep(singleStep);
 
 	ui.midSpinBox->setDecimals(decimals);
@@ -694,7 +694,7 @@ void QualityMapperDialog::drawTransferFunction()
 		channelType = (*_transferFunction)[c].getType();
 		//converting channel code in the proper color
 		TYPE_2_COLOR(channelType, channelColor);
-		//pen colo is set to proper color
+		//pen color is set to proper color
 		drawingPen.setColor( channelColor );
 		//z order for lines
 		zValue = ((c + 1)*2.0f);
@@ -970,12 +970,12 @@ void QualityMapperDialog::moveAheadChannel( TF_CHANNELS channelCode )
 }
 
 /*
-Redraws histogram background of transfer funtion scene and updates x-quality Label
+Redraws histogram background of transfer function scene and updates x-quality Label
 */
 void QualityMapperDialog::on_EQHandle_moved()
 {
 	if ( _transferFunction )
-		// Redrawing histogram background of transfer funtion scene
+		// Redrawing histogram background of transfer function scene
 		this->drawTransferFunctionBG();
 
 	if ( _currentTfHandle )
@@ -1348,10 +1348,12 @@ void QualityMapperDialog::setEqualizerParameters(EQUALIZER_INFO data)
 
 	// Resetting equalizerHistogram spinboxes values
 	ui.minSpinBox->setValue(data.minQualityVal);
-	ui.minSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
+	ui.minSpinBox->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+	//ui.minSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
 
 	ui.maxSpinBox->setValue(data.maxQualityVal);
-	ui.maxSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
+	ui.maxSpinBox->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+	//ui.maxSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
 
 	ui.midSpinBox->setValue(((ui.maxSpinBox->value() - ui.minSpinBox->value()) * data.midQualityPercentage) + ui.minSpinBox->value());
 	ui.midSpinBox->setRange(ui.minSpinBox->value(), ui.maxSpinBox->value());
@@ -1387,7 +1389,11 @@ void QualityMapperDialog::on_midSpinBox_valueChanged(double)
 	if ( _signalDir != LABEL2SPINBOX )
 		ui.midPercentageLine->blockSignals( true );
 	QString val;
-	val.setNum( 100.0f * absolute2RelativeValf( ui.midSpinBox->value() - ui.minSpinBox->value(), ui.maxSpinBox->value() - ui.minSpinBox->value() ), 'g', 4 );
+	if ((ui.maxSpinBox->value() - ui.minSpinBox->value()) > 0)
+		val.setNum( 100.0f * absolute2RelativeValf( ui.midSpinBox->value() - ui.minSpinBox->value(), ui.maxSpinBox->value() - ui.minSpinBox->value() ), 'g', 4 );
+	else
+		val.setNum( 50.0f );
+
 	ui.midPercentageLine->setText( val );
 	if ( _signalDir != LABEL2SPINBOX )
 		ui.midPercentageLine->blockSignals( false );
@@ -1402,11 +1408,12 @@ void QualityMapperDialog::on_midPercentageLine_editingFinished()
 
 	_signalDir = LABEL2SPINBOX;
 
+
 	if ( _signalDir != SPINBOX2LABEL )
 		ui.midSpinBox->blockSignals( true );
 	if ((conversionPossible) && (numericValue>=0) && (numericValue<=100) )
 	{
-		ui.midSpinBox->setValue( relative2AbsoluteValf(numericValue, ui.maxSpinBox->value() - ui.minSpinBox->value()) / 100.0f );
+		ui.midSpinBox->setValue( ui.minSpinBox->value() + relative2AbsoluteValf(numericValue, ui.maxSpinBox->value() - ui.minSpinBox->value()) / 100.0f );
 		_equalizerHandles[MID_HANDLE]->setXBySpinBoxValueChanged(ui.midSpinBox->value());
 	}
 	else

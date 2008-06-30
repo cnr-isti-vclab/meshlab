@@ -44,6 +44,18 @@
            <layout class="QVBoxLayout" >
             <item>
              <widget class="QGraphicsView" name="transferFunctionView" >
+              <property name="minimumSize" >
+               <size>
+                <width>350</width>
+                <height>200</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>350</width>
+                <height>200</height>
+               </size>
+              </property>
               <property name="autoFillBackground" >
                <bool>true</bool>
               </property>
@@ -323,6 +335,18 @@
            <layout class="QVBoxLayout" >
             <item>
              <widget class="QGraphicsView" name="equalizerGraphicsView" >
+              <property name="minimumSize" >
+               <size>
+                <width>350</width>
+                <height>200</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>350</width>
+                <height>200</height>
+               </size>
+              </property>
               <property name="autoFillBackground" >
                <bool>true</bool>
               </property>

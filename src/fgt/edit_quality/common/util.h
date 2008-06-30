@@ -51,21 +51,13 @@ float relative2QualityValf(float relative_val, float min_q, float max_q, float e
 struct CHART_INFO
 {
 	QGraphicsView *qgv;
-	inline float leftBorder() { return qgv->width() - CANVAS_BORDER_DISTANCE; } 
-	inline float rightBorder()      { return  CANVAS_BORDER_DISTANCE; } 
-	inline float upperBorder()  { return  CANVAS_BORDER_DISTANCE; } 
-	inline float lowerBorder() 		 { return qgv->height() - CANVAS_BORDER_DISTANCE; } 
-	inline float chartWidth() 		{ return   rightBorder() - leftBorder(); }
-	inline float chartHeight()  { return  lowerBorder() - upperBorder(); }
-	int	numOfItems;
-	int	yScaleStep;
-	inline float dX() {return chartWidth() / (float)numOfItems; }
-	inline float dY() {return chartHeight() / (float)numOfItems; }
 
 	float minX;
 	float maxX;
 	float minY;
 	float maxY;
+	int	numOfItems;
+	int	yScaleStep;
 
 	CHART_INFO(QGraphicsView *_qgv,float min_X=0.0f, float max_X=0.0f, float min_Y=0.0f, float max_Y=0.0f )
 	{
@@ -82,6 +74,16 @@ struct CHART_INFO
 		minY = min_Y;
 		maxY = max_Y;
 	}
+
+	inline float leftBorder() { return /*qgv->width() - */CANVAS_BORDER_DISTANCE; } 
+	inline float rightBorder()      { return qgv->width() - CANVAS_BORDER_DISTANCE; } 
+	inline float upperBorder()  { return  CANVAS_BORDER_DISTANCE; } 
+	inline float lowerBorder() 		 { return qgv->height() - CANVAS_BORDER_DISTANCE; } 
+	inline float chartWidth() 		{ return   rightBorder() - leftBorder(); }
+	inline float chartHeight()  { return  lowerBorder() - upperBorder(); }
+
+	inline float dX() {return chartWidth() / (float)numOfItems; }
+	inline float dY() {return chartHeight() / (float)numOfItems; }
 };
 
 
