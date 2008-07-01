@@ -337,12 +337,15 @@ public:
   	{
       foreach( FilterIDType tt, types())
         if( a->text() == this->filterName(tt) ) return tt;
-          assert(0);
-      return 0;
+			
+			
+			qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
+			assert(0);
+      return -1;
     }
 	 
-	 virtual const QString filterInfo(QAction *a){return filterInfo(ID(a));};
-	 virtual const QString filterName(QAction *a){return filterName(ID(a));};
+	 virtual const QString filterInfo(QAction *a){return this->filterInfo(ID(a));};
+	 virtual const QString filterName(QAction *a){return this->filterName(ID(a));};
 	 
     virtual QList<QAction *> actions() const { return actionList;}
 	  virtual QList<FilterIDType> &types() { return typeList;}
