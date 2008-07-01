@@ -53,6 +53,8 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File "..\meshlab\release\meshlab.exe"
+  File "..\meshlabserver\release\meshlabserver.exe"
+
   CreateDirectory "$SMPROGRAMS\MeshLab"
   CreateShortCut "$SMPROGRAMS\MeshLab\MeshLab.lnk" "$INSTDIR\meshlab.exe"
   CreateShortCut "$DESKTOP\MeshLab.lnk" "$INSTDIR\meshlab.exe"
@@ -69,32 +71,40 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\io_u3d.dll"
   File "..\meshlab\plugins\io_x3d.dll"
   File "..\meshlab\plugins\io_tri.dll"
-  ; filter plugins (10)
+  ; filter plugins (17)
   File "..\meshlab\plugins\cleanfilter.dll"
   File "..\meshlab\plugins\meshfilter.dll"
   File "..\meshlab\plugins\meshcolorize.dll"
   File "..\meshlab\plugins\meshselect.dll"
   File "..\meshlab\plugins\samplefilter.dll"
+  
   File "..\meshlab\plugins\samplefilterdoc.dll"
   File "..\meshlab\plugins\filtergeodesic.dll"
   File "..\meshlab\plugins\filtercreateiso.dll"
   File "..\meshlab\plugins\filterborder.dll"
   File "..\meshlab\plugins\filter_aging.dll"
+
   File "..\meshlab\plugins\filter_ao.dll"
   File "..\meshlab\plugins\filter_poisson.dll"
   File "..\meshlab\plugins\filter_quality.dll"
   File "..\meshlab\plugins\filter_sampling.dll"
   File "..\meshlab\plugins\filter_splitter.dll"
+
   File "..\meshlab\plugins\filter_trioptimize.dll"
   File "..\meshlab\plugins\filter_unsharp.dll"
-  ; edit plugins (6)
+  ; edit plugins (13)
   File "..\meshlab\plugins\editalign.dll"
   File "..\meshlab\plugins\editmeasure.dll"
   File "..\meshlab\plugins\editpaint.dll"
+  File "..\meshlab\plugins\editrgbtri.dll"
+  File "..\meshlab\plugins\editsegment.dll"
+
   File "..\meshlab\plugins\editslice.dll"
+  File "..\meshlab\plugins\editstraightener.dll"
   File "..\meshlab\plugins\sampleedit.dll"
   File "..\meshlab\plugins\edit_morpher.dll"
   File "..\meshlab\plugins\edit_pickpoints.dll"
+
   File "..\meshlab\plugins\edit_quality.dll"
   File "..\meshlab\plugins\edit_select.dll"
   File "..\meshlab\plugins\edit_texture.dll"
