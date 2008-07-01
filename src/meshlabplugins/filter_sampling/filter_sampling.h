@@ -31,15 +31,15 @@ add sampleplugins
 
 ****************************************************************************/
 
-#ifndef SAMPLEFILTERSPLUGIN_H
-#define SAMPLEFILTERSPLUGIN_H
+#ifndef FILTERDOCSAMPLINGPLUGIN_H
+#define FILTERDOCSAMPLINGPLUGIN_H
 
 #include <QObject>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
-class SampleFilterDocPlugin : public QObject, public MeshFilterInterface
+class FilterDocSampling : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
@@ -51,10 +51,12 @@ public:
 				FP_SUBDIV_SAMPLING,
 				FP_SIMILAR_SAMPLING,
 				FP_HAUSDORFF_DISTANCE,
-				FP_TEXEL_SAMPLING
+				FP_TEXEL_SAMPLING,
+				FP_VERTEX_RESAMPLING,
+				FP_OFFSET_SURFACE
 			} ;
 
-	SampleFilterDocPlugin();
+	FilterDocSampling();
 	
 	virtual const QString filterName(FilterIDType filter);
 	virtual const QString filterInfo(FilterIDType filter);
@@ -62,7 +64,8 @@ public:
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual bool applyFilter(QAction *filter, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) { assert(0); return false;} ;
+	virtual const int getRequirements(QAction *action);
+	virtual bool applyFilter(QAction * /* filter */, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
 };
 
 #endif

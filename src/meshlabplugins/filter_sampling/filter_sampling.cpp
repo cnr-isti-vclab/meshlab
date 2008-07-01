@@ -40,6 +40,7 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/trimesh/create/resampler.h>
 #include <vcg/simplex/face/distance.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/space/index/grid_static_ptr.h>
@@ -47,131 +48,16 @@ $Log: samplefilter.cpp,v $
 
 using namespace vcg;
 using namespace std;
-// Constructor usually performs only two simple tasks of filling the two lists 
-//  - typeList: with all the possible id of the filtering actions
-//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
-SampleFilterDocPlugin::SampleFilterDocPlugin() 
-{ 
-	typeList 
-			<< FP_ELEMENT_SAMPLING 
-			<< FP_MONTECARLO_SAMPLING
-			<< FP_SIMILAR_SAMPLING
-			<< FP_SUBDIV_SAMPLING
-			<< FP_HAUSDORFF_DISTANCE
-			<< FP_TEXEL_SAMPLING
-	;
-  
-  foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
-}
+/* 
+The Samplers; these classes are used to provide the callback used in the sampling process. 
+*/ 
 
-// ST() must return the very short string describing each filtering action 
-// (this string is used also to define the menu entry)
-const QString SampleFilterDocPlugin::filterName(FilterIDType filterId) 
-{
-  switch(filterId) {
-		case FP_ELEMENT_SAMPLING    :  return QString("Mesh Element Sampling"); 
-		case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling"); 
-		case FP_SIMILAR_SAMPLING :  return QString("Similar Triangle Sampling"); 
-		case FP_SUBDIV_SAMPLING :  return QString("Regular Sudiv. Sampling"); 
-		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
-		case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling"); 
-		default : assert(0); 
-	}
-}
 
-// Info() must return the longer string describing each filtering action 
-// (this string is used in the About plugin dialog)
-const QString SampleFilterDocPlugin::filterInfo(FilterIDType filterId)
-{
-  switch(filterId) {
-		case FP_ELEMENT_SAMPLING    :  return QString("Create a new layer populated with a point sampling of the current mesh, a sample for each element of the mesh is generated"); 
-		case FP_MONTECARLO_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh."); 
-		case FP_SIMILAR_SAMPLING		:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle it is subdivided into similar triangles and the internal vertices of these triangles are considered. Distribution is biased by the shape of the triangles."); 
-		case FP_SUBDIV_SAMPLING			:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle"); 
-		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
-		case FP_TEXEL_SAMPLING      :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated"); 
-		default : assert(0); 
-	}
-}
-
-const PluginInfo &SampleFilterDocPlugin::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.0");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
- }
-
-// This function define the needed parameters for each filter. Return true if the filter has some parameters
-// it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
-// - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void SampleFilterDocPlugin::initParameterSet(QAction *action, MeshDocument & md, FilterParameterSet & parlst) 
-{
-	 switch(ID(action))	 {
-		case FP_MONTECARLO_SAMPLING :  
- 		  parlst.addInt ("SampleNum",
-											md.mm()->cm.vn,
-											"Number of samples",
-											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-			parlst.addBool("Weighted",
-										 false,
-										 "Quality Weighted Sampling",
-										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
-											break;
-		case FP_SIMILAR_SAMPLING :  
-		case FP_SUBDIV_SAMPLING :  
- 		  parlst.addInt ("SampleNum",
-										 std::max(100000,md.mm()->cm.vn),
-											"Number of samples",
-											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-
-			break;
-		case FP_ELEMENT_SAMPLING :  
-			parlst.addEnum("Sampling", 0, 
-									QStringList() << "VertexSampling" << "Edge Sampling" << "Face Sampling", 
-									tr("Element to sample:"), 
-									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
-			break;
-		case FP_TEXEL_SAMPLING :  
- 		  parlst.addInt (	"TextureSize", 256, "Texture Size",
-											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)");
- 		  parlst.addBool(	"TextureSpace", false, "UV Space Sampling",
-											"The generated texel samples have their UV coords as point positions. The resulting point set is has a square domain, the texels/points, even if on a flat domain retain the original vertex normal to help a better perception of the original provenience.");
-			break;
-		case FP_HAUSDORFF_DISTANCE :  
-			{
-				MeshModel *target= md.mm();
-				foreach (target, md.meshList) 
-						if (target != md.mm())  break;
-		    
-				parlst.addMesh ("BaseMesh", md.mm(), "Base Mesh",
-												"The mesh that is used to be compared to.");
-				parlst.addMesh ("TargetMesh", target, "Target Mesh",
-												"The mesh that is sampled for the comparison.");
-				parlst.addBool ("SaveSample", false, "Save Samples",
-												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
-				parlst.addBool ("Symmetric", target, "Symmetric",
-												"Perform the test in both ways (target to base and base to target).");
-				parlst.addInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
-												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
-				parlst.addBool("Weighted", false, "Quality Weighted Sampling",
-										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
-			} break;
-		default : assert(0); 
-	}
-}
-
-class MyPointSampler
+class BaseSampler
 {
 	public:
-	MyPointSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;};
+	BaseSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;};
 	CMeshO *m;
 	bool uvSpaceFlag;
 	void AddVert(const CMeshO::VertexType &p) 
@@ -195,8 +81,13 @@ class MyPointSampler
 							 else m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
 	}
-}; // end class MyPointSampler
+}; // end class BaseSampler
 
+
+/* This sampler is used to perform compute the Hausdorf measuring.
+ * It keep internally the spatial inedexing structure used to find the closest point 
+ * and the partial integration results needed to compute the average and rms error values.
+ */
 class HausdorffSampler
 {
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
@@ -302,7 +193,244 @@ void AddSample(const CMeshO::CoordType &startPt)
 }; // end class HausdorffSampler
 
 
-bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
+/* This sampler is used to transfer the detail of a mesh onto another one. 
+ * the 
+ * It keep internally the spatial inedexing structure used to find the closest point 
+ * 
+ */
+class RedetailSampler
+{
+	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+public:
+  
+	RedetailSampler(CMeshO* _m=0)
+	{
+		init(_m);
+	};
+
+	CMeshO *m;           /// the mesh for which we search the closest points. 
+
+	MetroMeshGrid   unifGrid;
+
+	// Parameters
+		typedef trimesh::FaceTmark<CMeshO> MarkerFace;
+		MarkerFace markerFunctor;
+	
+	bool coordFlag;
+	bool colorFlag;
+	bool qualityFlag;
+	float dist_upper_bound;
+ 	void init(CMeshO *_m)
+	{
+		coordFlag=false;
+		colorFlag=false;
+		m=_m;
+		if(m) 
+		{
+			unifGrid.Set(m->face.begin(),m->face.end());
+			markerFunctor.SetMesh(m);
+		}
+	}
+	
+void AddVert(CMeshO::VertexType &p) 
+{
+		// the results
+    Point3f       closestPt,      normf, bestq, ip;
+		float dist = dist_upper_bound;
+		const CMeshO::CoordType &startPt= p.cP();
+    // compute distance between startPt and the mesh S2
+		CMeshO::FaceType   *nearestF=0;
+		vcg::face::PointDistanceBaseFunctor PDistFunct;
+		dist=dist_upper_bound;
+	  
+		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+    if(dist == dist_upper_bound) return ;																				
+
+		Point3f interp;
+		bool ret = InterpolationParameters(*nearestF,closestPt, interp[0], interp[1], interp[2]);
+    assert(ret);
+		interp[2]=1.0-interp[1]-interp[0];
+																			 
+		if(coordFlag) p.P()=closestPt;
+		if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
+		//if(qualityFlag) p.Q()=closestQuality;
+		}
+}; // end class RedetailSampler
+
+
+
+
+
+// Constructor usually performs only two simple tasks of filling the two lists 
+//  - typeList: with all the possible id of the filtering actions
+//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
+
+FilterDocSampling::FilterDocSampling() 
+{ 
+	typeList 
+			<< FP_ELEMENT_SAMPLING 
+			<< FP_MONTECARLO_SAMPLING
+			<< FP_SIMILAR_SAMPLING
+			<< FP_SUBDIV_SAMPLING
+			<< FP_HAUSDORFF_DISTANCE
+			<< FP_TEXEL_SAMPLING
+			<< FP_VERTEX_RESAMPLING
+			<< FP_OFFSET_SURFACE
+	;
+  
+  foreach(FilterIDType tt , types())
+	  actionList << new QAction(filterName(tt), this);
+}
+
+// ST() must return the very short string describing each filtering action 
+// (this string is used also to define the menu entry)
+const QString FilterDocSampling::filterName(FilterIDType filterId) 
+{
+  switch(filterId) {
+		case FP_ELEMENT_SAMPLING    :  return QString("Mesh Element Sampling"); 
+		case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling"); 
+		case FP_SIMILAR_SAMPLING :  return QString("Similar Triangle Sampling"); 
+		case FP_SUBDIV_SAMPLING :  return QString("Regular Sudiv. Sampling"); 
+		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
+		case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling"); 
+		case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer"); 
+		case FP_OFFSET_SURFACE  :  return QString("Resample Offset"); 
+		
+		default : assert(0); return QString("unknown filter!!!!");
+	}
+}
+
+// Info() must return the longer string describing each filtering action 
+// (this string is used in the About plugin dialog)
+const QString FilterDocSampling::filterInfo(FilterIDType filterId)
+{
+  switch(filterId) {
+		case FP_ELEMENT_SAMPLING    :  return QString("Create a new layer populated with a point sampling of the current mesh, a sample for each element of the mesh is generated"); 
+		case FP_MONTECARLO_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh."); 
+		case FP_SIMILAR_SAMPLING		:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle it is subdivided into similar triangles and the internal vertices of these triangles are considered. Distribution is biased by the shape of the triangles."); 
+		case FP_SUBDIV_SAMPLING			:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle"); 
+		case FP_HAUSDORFF_DISTANCE  :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh."); 
+		case FP_TEXEL_SAMPLING      :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated"); 
+		case FP_VERTEX_RESAMPLING		:  return QString("Vertex Attribute Transfer"); 
+		case FP_OFFSET_SURFACE			:  return QString("Create a new mesh that is a resampled offsetted version of the current one"); 
+			
+		default : assert(0); return QString("unknown filter!!!!");
+
+	}
+}
+const int FilterDocSampling::getRequirements(QAction *action)
+{
+  switch(ID(action))
+  {
+    case FP_OFFSET_SURFACE:
+    case FP_HAUSDORFF_DISTANCE :	return  MeshModel::MM_FACEMARK;
+    default: assert(0);
+  }
+  return 0;
+}
+
+const PluginInfo &FilterDocSampling::pluginInfo()
+{
+   static PluginInfo ai;
+   ai.Date=tr(__DATE__);
+	 ai.Version = tr("1.0");
+	 ai.Author = ("Paolo Cignoni");
+   return ai;
+ }
+
+// This function define the needed parameters for each filter. Return true if the filter has some parameters
+// it is called every time, so you can set the default value of parameters according to the mesh
+// For each parameter you need to define, 
+// - the name of the parameter, 
+// - the string shown in the dialog 
+// - the default value
+// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
+void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, FilterParameterSet & parlst) 
+{
+	 switch(ID(action))	 {
+		case FP_MONTECARLO_SAMPLING :  
+ 		  parlst.addInt ("SampleNum",
+											md.mm()->cm.vn,
+											"Number of samples",
+											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
+			parlst.addBool("Weighted",
+										 false,
+										 "Quality Weighted Sampling",
+										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
+											break;
+		case FP_SIMILAR_SAMPLING :  
+		case FP_SUBDIV_SAMPLING :  
+ 		  parlst.addInt ("SampleNum",
+										 std::max(100000,md.mm()->cm.vn),
+											"Number of samples",
+											"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
+
+			break;
+		case FP_ELEMENT_SAMPLING :  
+			parlst.addEnum("Sampling", 0, 
+									QStringList() << "VertexSampling" << "Edge Sampling" << "Face Sampling", 
+									tr("Element to sample:"), 
+									tr("Choose what mesh element has to be used for the sampling. A point sample will be added for each one of the chosen elements")); 		
+			break;
+		case FP_TEXEL_SAMPLING :  
+ 		  parlst.addInt (	"TextureSize", 256, "Texture Size",
+											"A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)");
+ 		  parlst.addBool(	"TextureSpace", false, "UV Space Sampling",
+											"The generated texel samples have their UV coords as point positions. The resulting point set is has a square domain, the texels/points, even if on a flat domain retain the original vertex normal to help a better perception of the original provenience.");
+			break;
+		case FP_HAUSDORFF_DISTANCE :  
+			{
+				MeshModel *target= md.mm();
+				foreach (target, md.meshList) 
+						if (target != md.mm())  break;
+		    
+				parlst.addMesh ("BaseMesh", md.mm(), "Base Mesh",
+												"The mesh that is used to be compared to.");
+				parlst.addMesh ("TargetMesh", target, "Target Mesh",
+												"The mesh that is sampled for the comparison.");
+				parlst.addBool ("SaveSample", false, "Save Samples",
+												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+				parlst.addBool ("Symmetric", target, "Symmetric",
+												"Perform the test in both ways (target to base and base to target).");
+				parlst.addInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
+												"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt.");
+				parlst.addBool("Weighted", false, "Quality Weighted Sampling",
+										 "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices.");
+			} break;
+		case FP_VERTEX_RESAMPLING:
+		{
+				MeshModel *target= md.mm();
+				foreach (target, md.meshList) 
+						if (target != md.mm())  break;
+						
+				parlst.addMesh ("SourceMesh", md.mm(), "Source Mesh",
+												"The mesh that contains the source data that we want to transfer.");
+				parlst.addMesh ("TargetMesh", target, "Target Mesh",
+												"The mesh whose vertexes will receive the data from the source.");
+				parlst.addBool ("GeomTransfer", false, "Transfer Geometry",
+												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+				parlst.addBool ("ColorTransfer", true, "Transfer Color",
+												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+				parlst.addBool ("QualityTransfer", false, "Transfer quality",
+												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+		} break; 
+		case FP_OFFSET_SURFACE :
+		{
+				
+			parlst.addAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
+				tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag."));
+			
+			parlst.addAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
+												tr("Offset"), tr("Offset of the created surface. If 0, the created surface passes on the originating itself."));
+			
+			
+		} break; 
+
+		default : assert(0); 
+	}
+}
+
+bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
 	switch(ID(action))
 		{
@@ -310,13 +438,13 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 		{
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-			MyPointSampler mps(&(mm->cm));
+			BaseSampler mps(&(mm->cm));
 			
 			switch(par.getEnum("Sampling"))
 				{
-					case 0 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllVertex(curMM->cm,mps);	break;
-					case 1 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllEdge(curMM->cm,mps);		break;
-					case 2 :	tri::SurfaceSampling<CMeshO,MyPointSampler>::AllFace(curMM->cm,mps);		break;
+					case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllVertex(curMM->cm,mps);	break;
+					case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllEdge(curMM->cm,mps);		break;
+					case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
 				}
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);		
@@ -326,9 +454,9 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 				{
 					MeshModel *curMM= md.mm();				
 					MeshModel *mm= md.addNewMesh("Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
-					MyPointSampler mps(&(mm->cm));
+					BaseSampler mps(&(mm->cm));
 					mps.uvSpaceFlag = par.getBool("TextureSpace");
-					tri::SurfaceSampling<CMeshO,MyPointSampler>::Texture(curMM->cm,mps,par.getInt("TextureSize"));
+					tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,par.getInt("TextureSize"));
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 				}
 		break;
@@ -338,10 +466,10 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Montecarlo Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 			
-			MyPointSampler mps(&(mm->cm));
+			BaseSampler mps(&(mm->cm));
 			if(par.getBool("Weighted")) 
-					   tri::SurfaceSampling<CMeshO,MyPointSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
-			else tri::SurfaceSampling<CMeshO,MyPointSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+					   tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+			else tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
@@ -352,8 +480,8 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 			
-			MyPointSampler mps(&(mm->cm));
-			tri::SurfaceSampling<CMeshO,MyPointSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"));
+			BaseSampler mps(&(mm->cm));
+			tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
@@ -364,8 +492,8 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 			MeshModel *curMM= md.mm();				
 			MeshModel *mm= md.addNewMesh("Similar Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 			
-			MyPointSampler mps(&(mm->cm));
-			tri::SurfaceSampling<CMeshO,MyPointSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"));
+			BaseSampler mps(&(mm->cm));
+			tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"));
 			
 			vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 			Log(0,"Sampling created a new mesh of %i points",md.mm()->cm.vn);						
@@ -420,10 +548,50 @@ bool SampleFilterDocPlugin::applyFilter(QAction *action, MeshDocument &md, Filte
 				}
 			}
 			break;
+		case	 FP_VERTEX_RESAMPLING :
+		{
+			MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
+			MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample. 
+			
+			srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
+			tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
+			tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
+
+		  RedetailSampler rs;
+			rs.init(&(srcMesh->cm));
+				
+			rs.dist_upper_bound = trgMesh->cm.bbox.Diag()/10;
+			rs.colorFlag=par.getBool("ColorTransfer");
+			rs.coordFlag=par.getBool("GeomTransfer");
+
+			qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
+			qDebug("Target  mesh has %7i vert %7i face",trgMesh->cm.vn,trgMesh->cm.fn);
+
+			tri::SurfaceSampling<CMeshO,RedetailSampler>::VertexUniform(trgMesh->cm,rs,trgMesh->cm.vn);
+			
+			if(rs.coordFlag) tri::UpdateNormals<CMeshO>::PerFaceNormalized(trgMesh->cm);
+			
+		} break;
+		case FP_OFFSET_SURFACE :
+		{
+			float voxelSize = par.getAbsPerc("CellSize");
+			float offsetThr = par.getAbsPerc("Offset");
+			
+			MeshModel *baseMesh= md.mm();				
+			MeshModel *offsetMesh =md.addNewMesh("Offset mesh"); 			
+			baseMesh->updateDataMask(MeshModel::MM_FACEMARK);	
+			
+			Point3i volumeDim;
+			BestDim( baseMesh->cm.bbox, voxelSize, volumeDim );
+
+			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeDim, voxelSize*2.5, offsetThr,cb);
+    tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
+		tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
+		
+		} break;
 		default : assert(0);
 		}
-		
 	return true;
 }
 
-Q_EXPORT_PLUGIN(SampleFilterDocPlugin)
+Q_EXPORT_PLUGIN(FilterDocSampling)
