@@ -403,13 +403,13 @@ void QualityMapperDialog::initEqualizerSpinboxes()
 
 	ui.minSpinBox->setDecimals(decimals);
 	ui.minSpinBox->setValue(_histogram_info->minX);
-	ui.minSpinBox->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+	ui.minSpinBox->setRange(numeric_limits<int>::min(), _histogram_info->maxX);
 	//ui.minSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
 	ui.minSpinBox->setSingleStep(singleStep);
 
 	ui.maxSpinBox->setDecimals(decimals);
 	ui.maxSpinBox->setValue(_histogram_info->maxX);
-	ui.maxSpinBox->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+	ui.maxSpinBox->setRange(_histogram_info->minX, numeric_limits<int>::max());
 	//ui.maxSpinBox->setRange(2*_histogram_info->minX - _histogram_info->maxX, 2*_histogram_info->maxX - _histogram_info->minX);
 	ui.maxSpinBox->setSingleStep(singleStep);
 
@@ -1348,11 +1348,11 @@ void QualityMapperDialog::setEqualizerParameters(EQUALIZER_INFO data)
 
 	// Resetting equalizerHistogram spinboxes values
 	ui.minSpinBox->setValue(data.minQualityVal);
-	ui.minSpinBox->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+	ui.minSpinBox->setRange(numeric_limits<int>::min(), data.maxQualityVal);
 	//ui.minSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
 
 	ui.maxSpinBox->setValue(data.maxQualityVal);
-	ui.maxSpinBox->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+	ui.maxSpinBox->setRange(data.minQualityVal, numeric_limits<int>::max());
 	//ui.maxSpinBox->setRange(2*data.minQualityVal - data.maxQualityVal, 2*data.maxQualityVal - data.minQualityVal);
 
 	ui.midSpinBox->setValue(((ui.maxSpinBox->value() - ui.minSpinBox->value()) * data.midQualityPercentage) + ui.minSpinBox->value());
@@ -1397,6 +1397,11 @@ void QualityMapperDialog::on_midSpinBox_valueChanged(double)
 	ui.midPercentageLine->setText( val );
 	if ( _signalDir != LABEL2SPINBOX )
 		ui.midPercentageLine->blockSignals( false );
+/*
+
+	if (ui.previewButton->isChecked())
+		on_applyButton_clicked();
+*/
 
 	_signalDir = UNKNOWN_DIRECTION;
 }
@@ -1420,6 +1425,11 @@ void QualityMapperDialog::on_midPercentageLine_editingFinished()
 		QMessageBox::warning(this, tr("Wrong text value"), tr("The value inserted in the text area has a bad range value or is of a not compatible type"), QMessageBox::Ok); 
 	if ( _signalDir != SPINBOX2LABEL )
 		ui.midSpinBox->blockSignals( false );
+
+	/*
+		if (ui.previewButton->isChecked())
+				on_applyButton_clicked();*/
+		
 
 	_signalDir = UNKNOWN_DIRECTION;
 }

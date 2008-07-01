@@ -1,2 +1,2 @@
-17.00 31/01/2008	(UCCIO) implementare la rimozione del BG della TF (UCCIO)
+0.11 02/07/2008		fixed bug abount minspinbox and max spinbox ranges
 
