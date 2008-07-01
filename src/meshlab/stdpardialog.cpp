@@ -489,13 +489,13 @@ void MeshlabStdDialog::closeClick()
 	  absSB = new QDoubleSpinBox(p);
 	  percSB = new QDoubleSpinBox(p);
 
-	  //absSB->setMinimum(m_min);
+	  absSB->setMinimum(m_min);
 	  absSB->setMaximum(m_max*2);
 	  absSB->setDecimals(3);
 	  absSB->setSingleStep((m_max-m_min)/20.0);
 	  absSB->setValue(defaultv);
 
-	  percSB->setMinimum(0);
+	  percSB->setMinimum(-200);
 	  percSB->setMaximum(200);
 		percSB->setSingleStep(0.5);
 	  percSB->setValue((100*(defaultv - m_min))/(m_max - m_min));
