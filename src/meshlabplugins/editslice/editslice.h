@@ -66,8 +66,7 @@ private:
 	bool isDragging;
 	GLArea * gla;
 	MeshModel m;
-    bool first;
-	vcg::Box3f b;
+  vcg::Box3f b;
 	SVGPro *svgpro;
 	float edgeMax;
 SVGProperties pr;

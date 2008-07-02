@@ -31,7 +31,7 @@ using namespace vcg;
 
 
 ExtraMeshSlidePlugin::ExtraMeshSlidePlugin() {
- first=false;
+ dialogsliceobj=0;
  isDragging=false;
  QAction* editslice = new QAction(QIcon(":/images/iconslice.png"),"Slice mesh geometry", this);
  actionList << editslice;
@@ -232,10 +232,9 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr){
  }
  void ExtraMeshSlidePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla ){
 	 gla->update();
-	 if(!first){
+	 if(!dialogsliceobj){
 		 dialogsliceobj=new dialogslice(gla->window());
 		 dialogsliceobj->show();
-		 first=true;
 		 dialogsliceobj->setAllowedAreas(Qt::NoDockWidgetArea);
 		 this->m=m;
 		 QObject::connect(dialogsliceobj, SIGNAL(exportMesh()), this,SLOT(SlotExportButton()));
