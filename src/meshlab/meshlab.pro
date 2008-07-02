@@ -82,6 +82,11 @@ QT           += network
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
 
+# the following line is to hide the hundred of warnings about the deprecated 
+# old printf are all around the code
+win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE 
+
+
 DEFINES += GLEW_STATIC
 
 INCLUDEPATH += . .. ../../../vcglib ../../../code/lib/glew/include
