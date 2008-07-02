@@ -188,7 +188,22 @@ public:
 		// If your plugins/action has no GlobalParameter, do nothing.
 	virtual void initGlobalParameterSet(QString /*format*/, FilterParameterSet & /*globalparam*/) {}
 	
-	
+	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
+	// it is called by the framework AFTER the mesh is already loaded to perform more or less standard processing on the mesh.
+	// typical example: unifying vertices in stl models. 
+	// If you do not need any additional processing do nothing.
+	virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, FilterParameterSet & /*par*/) {}
+
+  // This is the corresponding function that is called after the mesh is loaded with the initialized parameters 
+	virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const FilterParameterSet &/*par*/){}
+
+	// This function is called to initialize the list of additional parameters that a SAVING filter could require 
+	// it is called by the framework after the mesh is loaded to perform more or less standard processing on the mesh.
+	// typical example: ascii or binary format for ply or stl 
+	// If you do not need any additional parameter simply do nothing.
+	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, FilterParameterSet & /*par*/) {}
+
+
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
     
   virtual bool open(
@@ -204,8 +219,18 @@ public:
 			const QString &fileName,
       MeshModel &m, 
       const int mask,       // a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
-      vcg::CallBackPos *cb=0,
+      const FilterParameterSet & par,
+			vcg::CallBackPos *cb=0,
       QWidget *parent= 0)=0 ; 
+
+	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
+	/// io plugins should avoid using QMessageBox for reporting errors. 
+	/// Failure should put some meaningful information inside the errorMessage string.
+	virtual const QString &errorMsg() {return this->errorMessage;}
+	
+	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
+	QString errorMessage;
+
 };
 
 /* this is used to callback the executeFilter() function
@@ -330,6 +355,7 @@ public:
 	void setLog(GLLogStream *log) { this->log = log ; }
 		
 	/// This function is invoked by the framework when the apply filter fails to give some info to the user about the fiter failure
+	/// Filters should avoid using QMessageBox for reporting errors. 
 	/// Failing filters should put some meaningful information inside the errorMessage string.
 	const QString &errorMsg() {return this->errorMessage;}
 
