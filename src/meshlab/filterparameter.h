@@ -166,7 +166,7 @@ public:
 	// The data is just a list of Parameters
   //QMap<QString, FilterParameter *> paramMap;  
 	QList<FilterParameter> paramList;  
-	
+	bool isEmpty() const {return paramList.isEmpty();} 
 	// Members 
 
 	void addBool     (QString name, bool      defaultVal, QString desc=QString(), QString tooltip=QString());
@@ -180,17 +180,17 @@ public:
 	void addMesh     (QString name, MeshModel* m,  QString desc=QString(), QString tooltip=QString());		
 	void addFloatList(QString name, QList<float> &defaultValue, QString desc=QString(), QString tooltip=QString());
 		
-	bool				getBool(QString name);
-	int					getInt(QString name);
-	float				getFloat(QString name);
-	QString			getString(QString name);
-	vcg::Matrix44f		getMatrix44(QString name);
-	QColor		  getColor(QString name);
-	float		    getAbsPerc(QString name);
-  	int					getEnum(QString name);
+	bool				getBool(QString name) const;
+	int					getInt(QString name) const;
+	float				getFloat(QString name) const;
+	QString			getString(QString name) const;
+	vcg::Matrix44f		getMatrix44(QString name) const;
+	QColor		  getColor(QString name) const;
+	float		    getAbsPerc(QString name) const;
+  int					getEnum(QString name) const;
 
-	MeshModel*  getMesh(QString name);
-	QList<float> getFloatList(QString name);
+	MeshModel*  getMesh(QString name) const;
+	QList<float> getFloatList(QString name) const;
 	
 	void setBool(QString name, bool newVal) ;
 	void setInt(QString name, int newVal) ;
@@ -204,6 +204,7 @@ public:
 	void setFloatList(QString name, QList<float> &newValue);
 
 	FilterParameter *findParameter(QString name);
+  const FilterParameter *findParameter(QString name) const;
 
 	//remove a parameter from the set by name
 	void removeParameter(QString name);
