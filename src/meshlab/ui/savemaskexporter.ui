@@ -5,27 +5,30 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>610</width>
-    <height>240</height>
+    <width>638</width>
+    <height>293</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Dialog</string>
   </property>
   <layout class="QVBoxLayout" >
-   <property name="margin" >
-    <number>9</number>
-   </property>
-   <property name="spacing" >
-    <number>6</number>
-   </property>
    <item>
     <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
      <property name="spacing" >
       <number>6</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
      </property>
      <item>
       <widget class="QGroupBox" name="groupBox" >
@@ -33,11 +36,20 @@
         <string>Vert</string>
        </property>
        <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>8</number>
-        </property>
         <property name="spacing" >
          <number>6</number>
+        </property>
+        <property name="leftMargin" >
+         <number>8</number>
+        </property>
+        <property name="topMargin" >
+         <number>8</number>
+        </property>
+        <property name="rightMargin" >
+         <number>8</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>8</number>
         </property>
         <item>
          <widget class="QCheckBox" name="check_iom_vertflags" >
@@ -83,11 +95,20 @@
         <string>Face</string>
        </property>
        <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>8</number>
-        </property>
         <property name="spacing" >
          <number>6</number>
+        </property>
+        <property name="leftMargin" >
+         <number>8</number>
+        </property>
+        <property name="topMargin" >
+         <number>8</number>
+        </property>
+        <property name="rightMargin" >
+         <number>8</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>8</number>
         </property>
         <item>
          <widget class="QCheckBox" name="check_iom_faceflags" >
@@ -123,14 +144,23 @@
      <item>
       <widget class="QGroupBox" name="groupBox_3" >
        <property name="title" >
-        <string>Wedg</string>
+        <string>Wedge</string>
        </property>
        <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>8</number>
-        </property>
         <property name="spacing" >
          <number>6</number>
+        </property>
+        <property name="leftMargin" >
+         <number>8</number>
+        </property>
+        <property name="topMargin" >
+         <number>8</number>
+        </property>
+        <property name="rightMargin" >
+         <number>8</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>8</number>
         </property>
         <item>
          <widget class="QCheckBox" name="check_iom_wedgcolor" >
@@ -162,11 +192,20 @@
         <string>Texture Name</string>
        </property>
        <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>8</number>
-        </property>
         <property name="spacing" >
          <number>6</number>
+        </property>
+        <property name="leftMargin" >
+         <number>8</number>
+        </property>
+        <property name="topMargin" >
+         <number>8</number>
+        </property>
+        <property name="rightMargin" >
+         <number>8</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>8</number>
         </property>
         <item>
          <widget class="QListWidget" name="listTextureName" />
@@ -184,19 +223,36 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
+    <widget class="QGroupBox" name="saveParBox" >
+     <property name="title" >
+      <string>Additional Parameters</string>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" native="1" name="layoutWidget" />
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
      <property name="spacing" >
       <number>6</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
      </property>
      <item>
       <widget class="QRadioButton" name="AllButton" >
        <property name="sizePolicy" >
-        <sizepolicy>
-         <hsizetype>5</hsizetype>
-         <vsizetype>0</vsizetype>
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -209,9 +265,7 @@
      <item>
       <widget class="QRadioButton" name="NoneButton" >
        <property name="sizePolicy" >
-        <sizepolicy>
-         <hsizetype>5</hsizetype>
-         <vsizetype>0</vsizetype>
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -262,9 +316,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QWidget" native="1" name="layoutWidget" />
    </item>
   </layout>
  </widget>

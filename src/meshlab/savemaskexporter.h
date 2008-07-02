@@ -64,6 +64,8 @@
 #include <wrap/io_trimesh/io_mask.h>
 
 #include "meshmodel.h"
+#include "filterparameter.h"
+#include "stdpardialog.h"
 #include "ui_savemaskexporter.h"
 //
 // Each file format exposes:
@@ -79,7 +81,7 @@ class SaveMaskExporterDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits);
+	SaveMaskExporterDialog(QWidget *parent, MeshModel *m, int capability, int defaultBits, FilterParameterSet *par);
 	
 	void InitDialog();
 	void SetTextureName();
@@ -101,27 +103,8 @@ private:
 	int type;
 	int capability;
 	int defaultBits;
+	FilterParameterSet *par;
+	StdParFrame *stdParFrame;
 };//end class
-
-namespace vcg {
-namespace tri {
-namespace io {
-	
-	class SaveMaskToExporter
-	{
-	public:	
-
-		inline static int GetMaskToExporter(MeshModel *m, int capability, int defaultBit)
-		{
-			SaveMaskExporterDialog dialog(new QWidget(),m,capability,defaultBit);
-			dialog.exec();
-			int newmask = dialog.GetNewMask();
-			dialog.close();
-			return newmask;
-		}
-	};
-} // end Namespace tri
-} // end Namespace io
-} // end Namespace vcg
 
 #endif

@@ -85,10 +85,12 @@
 #include <Qt>
 #include <QtGui>
 
+
 #include "savemaskexporter.h"
 #include "changetexturename.h"
 
-SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits): QDialog(parent),m(m),capability(capability),defaultBits(defaultBits)
+SaveMaskExporterDialog::SaveMaskExporterDialog(QWidget *parent,MeshModel *m,int capability,int defaultBits, FilterParameterSet *par): 
+QDialog(parent),m(m),capability(capability),defaultBits(defaultBits),par(par)
 {
 	InitDialog();
 }
@@ -103,7 +105,16 @@ void SaveMaskExporterDialog::InitDialog()
 	connect(ui.AllButton,SIGNAL(clicked()),this,SLOT(SlotSelectionAllButton()));
 	connect(ui.NoneButton,SIGNAL(clicked()),this,SLOT(SlotSelectionNoneButton()));
 	ui.renametextureButton->setDisabled(true);
-	
+
+  stdParFrame = new StdParFrame(this);
+	stdParFrame->loadFrameContent(*par);
+  QVBoxLayout *vbox = new QVBoxLayout(this);
+	vbox->addWidget(stdParFrame);
+	ui.saveParBox->setLayout(vbox);
+
+	// Show the additional parameters only for formats that have some.
+	if(par->isEmpty()) ui.saveParBox->hide();
+								else ui.saveParBox->show();
 	//all - none
 	ui.AllButton->setChecked(true);
 	//ui.NoneButton->setChecked(true);
@@ -226,6 +237,7 @@ void SaveMaskExporterDialog::SlotOkButton()
 	for(unsigned int i=0;i<m->cm.textures.size();i++)
 		m->cm.textures[i] = ui.listTextureName->item(i)->text().toStdString();
 	this->mask=newmask;
+	stdParFrame->readValues(*par);
 }
 
 void SaveMaskExporterDialog::SlotCancelButton()
