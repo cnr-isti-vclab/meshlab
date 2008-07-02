@@ -101,7 +101,8 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0) // all the importers return 0 on success
 		{
-			QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
+			//QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 	}
@@ -111,11 +112,12 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		if (result != 0) // all the importers return 0 on success
 		{
 			QMessageBox::warning(parent, tr("STL Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result)));
+			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterSTL<CMeshO>::ErrorMsg(result));
 			return false;
 		}
-    int retVal=QMessageBox::question ( parent, tr("STL File Importing"),tr("Do you want to unify duplicated vertices?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No );
-    if(retVal==QMessageBox::Yes )
-      tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+    //int retVal=QMessageBox::question ( parent, tr("STL File Importing"),tr("Do you want to unify duplicated vertices?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No );
+    //if(retVal==QMessageBox::Yes )
+    //  tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 	}
   else
   {
@@ -143,16 +145,16 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
+bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet & par, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
   string filename = QFile::encodeName(fileName).constData ();
   //string filename = fileName.toUtf8().data();
 	string ex = formatName.toUtf8().data();
-	
+	bool binaryFlag = par.getBool("Binary");
 	if(formatName.toUpper() == tr("PLY"))
 	{
-		int result = vcg::tri::io::ExporterPLY<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+		int result = vcg::tri::io::ExporterPLY<CMeshO>::Save(m.cm,filename.c_str(),mask,binaryFlag,cb);
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterPLY<CMeshO>::ErrorMsg(result)));
@@ -162,7 +164,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
 	}
 	if(formatName.toUpper() == tr("STL"))
 	{
-		int result = vcg::tri::io::ExporterSTL<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+		int result = vcg::tri::io::ExporterSTL<CMeshO>::Save(m.cm,filename.c_str(),binaryFlag);
 		if(result!=0)
 		{
 			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterSTL<CMeshO>::ErrorMsg(result)));
@@ -204,7 +206,6 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 {
 	if(format.toUpper() == tr("PLY")){
 		capability = vcg::tri::io::ExporterPLY<CMeshO>::GetExportMaskCapability();
-		int notiomflags =  (~MeshModel::IOM_FLAGS);
 		// For the default bits of the ply format disable flags and normals that usually are not useful.
 		defaultBits=capability;
 		defaultBits &= (~MeshModel::IOM_FLAGS);
@@ -215,6 +216,26 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 		defaultBits=capability;
 	}
 }
+
+void BaseMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet &par) 
+{
+	if(format.toUpper() == tr("STL"))
+		par.addBool("Unify",true, "Unify Duplicated Vertices",
+								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
+}
+void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/, FilterParameterSet &par) 
+{
+	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
+		par.addBool("Binary",true, "Binary encoding",
+								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
+}
+void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const FilterParameterSet &par) 
+{
+	if(format.toUpper() == tr("STL"))
+		if(par.getBool("Unify"))
+			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+}
+
 
 const PluginInfo &BaseMeshIOPlugin::Info()
 {
