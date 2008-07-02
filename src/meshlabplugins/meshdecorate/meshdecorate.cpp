@@ -518,7 +518,7 @@ void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QGLWidget *gla, QFont 
 	glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
-	glColor3f(.4,.4,.4);
+	glColor3f(.4f,.4f,.4f);
 	if(isMeshOk[&m])
 	{
 				for(size_t i=0;i<m.cm.face.size();++i)
@@ -537,7 +537,7 @@ void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QGLWidget *gla, QFont q
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
-	glColor3f(.4,.4,.4);
+	glColor3f(.4f,.4f,.4f);
 	assert(isMeshOk.contains(&m));
 	if(isMeshOk[&m])
 			{

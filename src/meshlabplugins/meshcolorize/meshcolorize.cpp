@@ -295,7 +295,7 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_TEXBORDER:                   return MeshModel::MM_FACETOPO;
     case CP_COLOR_NON_MANIFOLD_FACE:       
     case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACETOPO;
-    case CP_RANDOM_FACE:       return MeshModel::MM_FACETOPO;
+    case CP_RANDOM_FACE:       return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
     case CP_SMOOTH:                   
     case CP_RESTORE_ORIGINAL:         
     case CP_MAP_QUALITY_INTO_COLOR:   return 0;
@@ -403,8 +403,8 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
       
       Histogramf H;
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
-      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,H.Percentile(0.1),H.Percentile(0.9));
-      Log(GLLogStream::Info, "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1),H.Percentile(0.9));
+      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
+      Log(GLLogStream::Info, "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
     break;
     }  
   case CP_TRIANGLE_QUALITY:
