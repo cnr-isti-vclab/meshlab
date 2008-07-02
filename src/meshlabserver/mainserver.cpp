@@ -184,7 +184,8 @@ bool Save(MeshModel &mm, QString fileName)
 	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 	
 	int mask = 0;
-	if (!pCurrentIOPlugin->save(extension, fileName, mm ,mask,0,0/*gla*/))
+	FilterParameterSet savingPar;
+	if (!pCurrentIOPlugin->save(extension, fileName, mm ,mask, savingPar,0,0/*gla*/))
   {
     printf("Failed saving\n");
     return false;

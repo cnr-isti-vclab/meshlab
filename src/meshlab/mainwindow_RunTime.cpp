@@ -999,13 +999,22 @@ bool MainWindow::saveAs()
 		int capability=0,defaultBits=0;
 		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
 		
-		int mask = vcg::tri::io::SaveMaskToExporter::GetMaskToExporter(this->GLA()->mm(), capability,defaultBits);
+		// optional saving parameters (like ascii/binary encoding)
+		FilterParameterSet savePar;
+
+		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
+		
+		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar);
+		maskDialog.exec();
+		int mask = maskDialog.GetNewMask();
+		maskDialog.close();
+
 		if(mask == -1) 
 			return false;
 			
 		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  	
 		qb->show();
-		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,QCallBack,this);
+		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
 		qb->reset();
 		qApp->restoreOverrideCursor();	
 
