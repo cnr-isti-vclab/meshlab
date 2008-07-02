@@ -754,9 +754,9 @@ bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel
 }
 
 
-bool EpochIO::save(const QString &/*formatName*/,const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, vcg::CallBackPos * /*cb*/, QWidget *parent)
+bool EpochIO::save(const QString &/*formatName*/,const QString &/*fileName*/, MeshModel &/*m*/, const int /*mask*/, const FilterParameterSet &, vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
-	QMessageBox::warning(parent, "Unknow type", "file's extension not supported!!!");
+	QMessageBox::warning(parent, "Unknown type", "file's extension not supported!!!");
 	return false;
 }
 

@@ -56,7 +56,7 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return result;
 }
 
-bool TriIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
+bool TriIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
 {
 	assert(0);
 	return false;

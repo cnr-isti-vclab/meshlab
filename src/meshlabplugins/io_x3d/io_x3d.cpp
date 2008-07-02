@@ -171,7 +171,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 }
 
 
-bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
+bool IoX3DPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file:\n%1\n\nError details: %2";
 	string filename = QFile::encodeName(fileName).constData ();

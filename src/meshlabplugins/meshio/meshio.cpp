@@ -212,7 +212,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
 	return true;
 }
 
-bool ExtraMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
+bool ExtraMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();

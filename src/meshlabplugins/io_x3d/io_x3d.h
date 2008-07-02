@@ -50,7 +50,7 @@ public:
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent);
+	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb, QWidget *parent);
 };
 
 #endif

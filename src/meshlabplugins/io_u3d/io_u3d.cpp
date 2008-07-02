@@ -40,7 +40,7 @@ QString U3DIOPlugin::computePluginsPath()
 }
 
 
-bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos */*cb*/, QWidget *parent)
+bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos */*cb*/, QWidget *parent)
 {
   vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
