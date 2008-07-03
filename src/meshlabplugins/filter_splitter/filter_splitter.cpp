@@ -154,4 +154,15 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 	return true;
 }
 
+const FilterSplitterPlugin::FilterClass FilterSplitterPlugin::getClass(QAction *a)
+{
+  switch(ID(a))
+  {
+    case FP_SPLITSELECT :
+      return MeshFilterInterface::Layer;     
+    default : 
+			return MeshFilterInterface::Generic;
+  }
+}
+
 Q_EXPORT_PLUGIN(FilterSplitterPlugin)

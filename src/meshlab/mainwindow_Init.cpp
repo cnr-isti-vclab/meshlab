@@ -522,6 +522,7 @@ void MainWindow::createMenus()
 	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing"));
 	filterMenuQuality = filterMenu->addMenu(tr("Quality"));
 	filterMenuNormal = filterMenu->addMenu(tr("Normal and Orientation"));
+	filterMenuLayer = filterMenu->addMenu(tr("Layer"));
 	
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
@@ -642,6 +643,8 @@ void MainWindow::loadPlugins()
               		filterMenuNormal->addAction(filterAction); break;
             case MeshFilterInterface::Quality : 
               		filterMenuQuality->addAction(filterAction); break;
+						case MeshFilterInterface::Layer : 
+              		filterMenuLayer->addAction(filterAction); break;
 						case MeshFilterInterface::MeshCreation : 
               		fileMenuNew->addAction(filterAction); break;
             case MeshFilterInterface::Generic : 

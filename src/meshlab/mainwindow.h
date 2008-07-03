@@ -352,6 +352,7 @@ private:
   QMenu *filterMenuSmoothing;
   QMenu *filterMenuQuality;
 	QMenu *filterMenuNormal;
+  QMenu *filterMenuLayer;
 
 	QMenu *editMenu;
 

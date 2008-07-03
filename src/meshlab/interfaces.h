@@ -289,7 +289,7 @@ class MeshFilterInterface
 {
 public:
   typedef int FilterIDType;
-	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring, MeshCreation, Smoothing, Quality, Normal} ;
+	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring, MeshCreation, Smoothing, Quality, Layer, Normal} ;
 	virtual ~MeshFilterInterface() {}
 
 	// The longer string describing each filtering action 

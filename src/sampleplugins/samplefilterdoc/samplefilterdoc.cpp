@@ -145,4 +145,15 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, Filte
 	return true;
 }
 
+const SampleFilterDocPlugin::FilterClass SampleFilterDocPlugin::getClass(QAction *a)
+{
+  switch(ID(a))
+  {
+    case FP_FLATTEN :
+      return MeshFilterInterface::Layer;     
+    default : 
+			return MeshFilterInterface::Generic;
+  }
+}
+
 Q_EXPORT_PLUGIN(SampleFilterDocPlugin)
