@@ -43,6 +43,7 @@ FilterUnsharp::FilterUnsharp()
     FP_HC_LAPLACIAN_SMOOTH<<
 		FP_SD_LAPLACIAN_SMOOTH<< 
     FP_TWO_STEP_SMOOTH<< 
+    FP_TAUBIN_SMOOTH<< 
 		FP_VERTEX_QUALITY_SMOOTHING<<
 		FP_FACE_NORMAL_SMOOTHING<<
 		FP_UNSHARP_NORMAL<<
@@ -72,6 +73,7 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
 		case FP_HC_LAPLACIAN_SMOOTH :					return QString("HC Laplacian Smooth");
 		case FP_SD_LAPLACIAN_SMOOTH :					return QString("ScaleDependent Laplacian Smooth");
 		case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
+		case FP_TAUBIN_SMOOTH :							return QString("Taubin Smooth");
 		case FP_CREASE_CUT :							return QString("Cut mesh along crease");
   	case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normal"); 
   	case FP_FACE_NORMAL_SMOOTHING:	  return QString("Smooth Face Normals"); 
@@ -95,6 +97,7 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
     case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Muller");  
     case FP_SD_LAPLACIAN_SMOOTH : 			return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, based on the Fujiwara extended umbrella operator");  
     case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals");  
+    case FP_TAUBIN_SMOOTH :							return tr("The $lambda-mu$ taubin smoothing, it make two steps of smoothing, forth and back, for each iteration");  
 		case FP_CREASE_CUT:									return tr("Cut the mesh along crease edges, duplicating the vertices as necessary."); 
 		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
 		case FP_VERTEX_QUALITY_SMOOTHING:	  return tr("Smooth Face Normals without touching the position of the vertices."); 
@@ -120,6 +123,7 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 			case FP_HC_LAPLACIAN_SMOOTH:
 			case FP_LAPLACIAN_SMOOTH:
 			case FP_TWO_STEP_SMOOTH:
+			case FP_TAUBIN_SMOOTH:
 			case FP_FACE_NORMAL_SMOOTHING:	  
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_NORMAL:				
@@ -152,6 +156,7 @@ const int FilterUnsharp::getRequirements(QAction *action)
   {
 		case FP_HC_LAPLACIAN_SMOOTH:  
     case FP_SD_LAPLACIAN_SMOOTH:  
+    case FP_TAUBIN_SMOOTH:  
     case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_BORDERFLAG;
     case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
 		case FP_UNSHARP_GEOMETRY:	
@@ -175,6 +180,7 @@ bool FilterUnsharp::autoDialog(QAction *action)
 	{
 			case FP_TWO_STEP_SMOOTH:
 			case FP_LAPLACIAN_SMOOTH:
+			case FP_TAUBIN_SMOOTH:
 			case FP_SD_LAPLACIAN_SMOOTH:
 			case FP_UNSHARP_GEOMETRY:		
 			case FP_UNSHARP_COLOR:	
@@ -205,6 +211,12 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 		parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 		break;
 		case FP_LAPLACIAN_SMOOTH:
+			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
+			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
+			break;
+		case FP_TAUBIN_SMOOTH:
+			parlst.addFloat("lambda", (float) 0.5,"Lambda", "The lambda parameter of the Taubin Smoothing algorithm");
+			parlst.addFloat("mu", (float) -0.53,"mu", "The mu parameter of the Taubin Smoothing algorithm");
 			parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
 			parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
 			break;
@@ -273,7 +285,19 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
       tri::Smooth<CMeshO>::VertexCoordPasoDobleFast(m.cm, stepSmoothNum, normalThr, stepNormalNum,selectedFlag);
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
 	  }
-					
+		break;
+	case FP_TAUBIN_SMOOTH :
+	  {
+			int stepSmoothNum = par.getInt("stepSmoothNum");
+			float lambda=par.getFloat("lambda");
+			float mu=par.getFloat("mu");
+
+			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      tri::Smooth<CMeshO>::VertexCoordTaubin(m.cm,stepSmoothNum,lambda,mu,cnt>0);
+			Log(GLLogStream::Info, "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+	  }
+			break;
 	case FP_RECOMPUTE_FACE_NORMAL : 
 			tri::UpdateNormals<CMeshO>::PerFace(m.cm);
 			break;
