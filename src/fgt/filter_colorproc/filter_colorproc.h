@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -38,24 +38,21 @@ class FilterColorProc : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 	public:
-		enum {FP_DIRT} ;
-		
+		enum { CP_COLOR_FILLING,CP_TRESHOLDING,CP_BRIGHTNESS,CP_CONTRAST,CP_GAMMA };
+
 		FilterColorProc();
 		~FilterColorProc();
 
+        virtual const FilterClass getClass(QAction *);
 		virtual const QString filterName(FilterIDType filter);
 		virtual const QString filterInfo(FilterIDType filter);
 		virtual const PluginInfo &pluginInfo();
 
 		virtual const int getRequirements(QAction *);
 
-		virtual bool autoDialog(QAction *) {return false;}
-		virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/){};
+		virtual bool autoDialog(QAction *) {return true;}
+		virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-
-
-	protected:
-		const int defaultDustTon;
 };
 
 
