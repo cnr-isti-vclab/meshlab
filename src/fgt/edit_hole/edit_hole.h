@@ -28,11 +28,12 @@
 #include <QList>
 #include <QStringList>
 #include "fillerDialog.h"
-#include "fgtHole.h"
+//#include "fgtHole.h"
+#include "holeListModel.h"
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include "vcg/simplex/face/pos.h"
-#include "vcg/complex/trimesh/base.h"
+//#include "vcg/simplex/face/pos.h"
+//#include "vcg/complex/trimesh/base.h"
 
 
 class EditHolePlugin : public QObject, public MeshEditInterface
@@ -61,26 +62,21 @@ public:
 	
 	
 private:
-	// vector of first POS for each hole
-	HoleVector holes;
+	HoleListModel *holesModel;
 	GLArea * gla;
 	MeshModel *mesh;
     FillerDialog *dialogFiller;
-	bool isListUpdate;
-   
+	
 	bool hasPick;
 	QPoint cur;
 	CFaceO* pickedFace;
 
-	void resetHoles();
 	void markBorders();
 	void drawHoles() const;
-	void updateUI();
 	int findHoleFromBorderFace(CMeshO::FacePointer bFace);
 	void toggleSelection(int holeIndex);
 	
 private Q_SLOTS:
-	void refreshSelection();
 	void refreshHoles();
 	void fill();
 	void ApplyFilling();

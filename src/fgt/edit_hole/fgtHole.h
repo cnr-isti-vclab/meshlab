@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 #include <float.h>
+#include <GL/glew.h>
 #include "vcg/simplex/face/pos.h"
 #include "vcg/space/point3.h"
 #include "vcg/complex/trimesh/hole.h"
@@ -52,12 +53,15 @@ public:
 	typedef typename vcg::tri::Hole<MESH> vcgHole;
 	typedef typename vcgHole::Info HoleInfo;
 	typedef typename std::vector< FgtHole<MESH> > HoleVector;
+	
 
-	FgtHole(HoleInfo hi)
+	FgtHole(HoleInfo &hi)
 	{
 		holeInfo = hi;
 		UpdateVertexCoords();
+		size = holeInfo.Perimeter();
 		isSelected = false;
+		isFilled = false;
 		isAccepted = false;
 	};
 
@@ -115,7 +119,7 @@ public:
 
 	/* Inspect a mesh to find its holes.
 	*/
-	static void GetMeshHoles(MESH &mesh, std::vector< FgtHole<MESH> >&ret) 
+	static void GetMeshHoles(MESH &mesh, HoleVector &ret) 
 	{
 		ret.clear();
 		std::vector<HoleInfo> vhi;
@@ -157,7 +161,9 @@ public:
 public:
 	HoleInfo holeInfo;
 	std::vector<CoordType*> vertexCoords;
+	float size;
 	bool isSelected;
+	bool isFilled;
 	bool isAccepted;
 };
 

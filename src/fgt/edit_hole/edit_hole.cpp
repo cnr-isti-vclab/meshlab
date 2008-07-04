@@ -28,6 +28,8 @@
 #include <meshlab/glarea.h>
 #include "edit_hole.h"
 #include "fgtHole.h"
+#include "holeListModel.h"
+
 //#include "holePatch.h"
 //#include <qstring.h>
 
@@ -38,11 +40,11 @@ using namespace vcg;
 
 
 EditHolePlugin::EditHolePlugin() {
-	isListUpdate = false;
 	QAction* editFill = new QAction(QIcon(":/images/icon_filler.png"),"Fill Hole", this);
 	actionList << editFill;
 	QAction *editAction;
 	dialogFiller = 0;
+	holesModel = 0;
 
 	foreach(editAction, actionList)
 		editAction->setCheckable(true);
@@ -127,12 +129,15 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	{
 		this->mesh = &m;
 		this->gla = gla;
-		isListUpdate = false;
+		if(holesModel != 0)
+			delete holesModel;
+		holesModel = new HoleListModel(&m);		
 	}
 
 	if( !dialogFiller )
 	{
 		dialogFiller=new FillerDialog(gla->window());
+		dialogFiller->ui.holeTree->setModel( holesModel );
 		dialogFiller->show();
 		dialogFiller->setAllowedAreas(Qt::NoDockWidgetArea);
 		connect(dialogFiller, SIGNAL(SGN_ProcessFilling()), this,SLOT(fill()));
@@ -143,8 +148,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 		connect(this, SIGNAL(SGN_SuspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 		connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );		
 	}
-	markBorders();
-	updateUI();
+		
 	Decorate(0, m, gla);
 		
 	SGN_SuspendEditToggle();
@@ -156,7 +160,7 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 	glMultMatrix(mesh->cm.Tr);
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	drawHoles();
+	holesModel->drawHoles();
 
 	if(hasPick )
 	{
@@ -165,12 +169,10 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 		GLPickTri<CMeshO>::PickNearestFace(cur.x(), gla->curSiz.height() - cur.y(), m.cm, pickedFace, 4, 4);
 		// guardo se nella faccia più vicina uno dei vertici è di bordo
 		if( pickedFace != 0 )
-		{
-			int selIndex = FgtHole<CMeshO>::FindHoleFromBorderFace(pickedFace, holes);
-			if(selIndex>=0) toggleSelection(selIndex);
-			pickedFace = 0;
-		}
+			holesModel->toggleSelectionHoleFromBorderFace(pickedFace);		
 	}
+
+
 
 	/*
 	if( pickedFace != 0 )
@@ -203,113 +205,11 @@ void EditHolePlugin::upGlA()
 	gla->update();	 
 }
 
-void EditHolePlugin::resetHoles()
-{
-	if(mesh == 0)
-		return;
-
-	mesh->clearDataMask( MeshModel::MM_BORDERFLAG | MeshModel::MM_FACETOPO );
-	
-	CMeshO::FaceIterator fi = mesh->cm.face.begin();
-	for( ; fi!=mesh->cm.face.end(); ++fi)
-	{
-		if( (*fi).V(0)->IsV() )
-			(*fi).V(0)->ClearV();
-		if( (*fi).V(1)->IsV() )
-			(*fi).V(1)->ClearV();
-		if( (*fi).V(2)->IsV() )
-			(*fi).V(2)->ClearV();
-	}
-	isListUpdate = false;	
-}
-
-void EditHolePlugin::refreshSelection()
-{
-	for(int i=0; i<dialogFiller->ui.hListW->count(); ++i)
-		if( dialogFiller->ui.hListW->item(i)->isSelected() )
-			holes.at(i).isSelected = true;
-		else
-			holes.at(i).isSelected = false;
-}
-
-
-void EditHolePlugin::markBorders()
-{
-	if(isListUpdate || mesh==0)
-		return; // evito di ricalcolare gli hole quando non necessario, visto che costa
-
-	holes.clear();
-	mesh->updateDataMask(MeshModel::MM_FACETOPO);
-	mesh->updateDataMask(MeshModel::MM_BORDERFLAG);
-
-	FgtHole<CMeshO>::GetMeshHoles(mesh->cm, holes);
-	//HoleFinder<CMeshO>::GetBoundHoles(mesh->cm, holeList);
-	isListUpdate = true;
-}
-
-
-
-
-void EditHolePlugin::updateUI()
-{
-	//Si aggiorna nel dialogo la lista dei buchi
-	HoleVector::const_iterator it = holes.begin();
-
-	dialogFiller->ui.hListW->clear();
-	int i = 0;
-	for( ; it != holes.end(); ++it) {
-		++i;
-		dialogFiller->ui.hListW->addItem( QString("Hole_%1").arg( i ));
-	}
-}
-
-void EditHolePlugin::toggleSelection(int holeIndex)
-{
-	QListWidgetItem* itm = dialogFiller->ui.hListW->item(holeIndex);
-	itm->setSelected(!itm->isSelected() );
-}
-
-
-void EditHolePlugin::drawHoles() const
-{
-	glLineWidth(2.0f);
-	glDepthFunc(GL_ALWAYS);
-	glDisable(GL_DEPTH_TEST); 
-	glDepthMask(GL_FALSE);
-	glDisable(GL_LIGHTING);
-
-	HoleVector::const_iterator it = holes.begin();
-	// scorro tutti i buchi
-	for( ; it != holes.end(); ++it)
-	{
-		if( it->isSelected )
-			glColor(Color4b::DarkGreen);
-		else
-			glColor(Color4b::DarkRed);
-		it->Draw();
-	}
-
-	glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST); 
-	glDepthFunc(GL_LESS);
-
-	for(it = holes.begin(); it != holes.end(); ++it)
-	{
-		if( it->isSelected )
-			glColor(Color4b::Green);
-		else
-			glColor(Color4b::Red);
-		it->Draw();
-	}	
-}
-
-
 void EditHolePlugin::refreshHoles()
 {
-	resetHoles();
-	markBorders();
-	updateUI();
+	holesModel->updateModel();
 }
+
 
 /** Insert into mesh data structure the primiteves used to fill the hole
  */
@@ -387,6 +287,7 @@ void EditHolePlugin::ApplyFilling()
  void EditHolePlugin::fill()
  {	 
 	dialogFiller->hide();
+	/*
 	HoleVector::iterator it = holes.begin();
 	for( ; it != holes.end(); it++ )
 	{
@@ -396,7 +297,7 @@ void EditHolePlugin::ApplyFilling()
 			// TO DO: RIEMPIMENTO USANDO INFO DEL FGTHOLE
 		}
 	}
-
+*/
     dialogFiller->show();
  }
 

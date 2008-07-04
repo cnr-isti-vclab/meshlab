@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
+* This program is free software; you can redistribute it and/or modify      *   
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -20,46 +20,60 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#ifndef HOLELISTMODEL_H
+#define HOLELISTMODEL_H
 
-#include "fillerDialog.h"
+#include <QWidget>
+#include <QtGui>
+#include "fgtHole.h"
+#include <meshlab/meshmodel.h>
+#include <meshlab/interfaces.h>
+#include "vcg/simplex/face/pos.h"
+#include "vcg/complex/trimesh/base.h"
+#include "vcg/space/color4.h"
 
-FillerDialog::FillerDialog(QWidget *parent)
-	: QDockWidget(parent)
-{	
-	ui.setupUi(this);
-	this->setWidget(ui.frame);
-	ui.holeTree->setSortingEnabled(true);
-	ui.holeTree->setAlternatingRowColors(true);
+
+enum FillerState
+{
+	Selection, Filled
+};
+
+class HoleListModel : public QAbstractItemModel
+{
+	Q_OBJECT
+
+public:
+	typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
+	typedef FgtHole<CMeshO>  HoleType;
+	typedef std::vector< HoleType > HoleVector;
+	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
+
+	HoleListModel(MeshModel *m, QObject *parent = 0);
+
+	inline int rowCount(const QModelIndex &parent = QModelIndex()) const { return holes.size(); };
+	inline int columnCount(const QModelIndex &parent = QModelIndex()) const 
+	{
+		if(state == FillerState::Selection) return 3;
+		else return 4; 
+	};
 	
-	QPoint p=parent->mapToGlobal(QPoint(0,0));
-	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
-	this->setFloating(true);
-}
+	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+	QModelIndex parent(const QModelIndex &child) const { return QModelIndex(); };
 
-FillerDialog::~FillerDialog() {}
+    QVariant data(const QModelIndex &index, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+	
+	//Qt::ItemFlags flags(const QModelIndex &index) const;
 
+	inline void setState(FillerState s) { state = s; };
+	void toggleSelectionHoleFromBorderFace(CFaceO *bface);
+	void updateModel();
+	void drawHoles() const;
 
-void FillerDialog::closeEvent ( QCloseEvent * event )
-{
-  emit SGN_Closing();
-}
+private:
+	MeshModel *mesh;
+	HoleVector holes;
+	FillerState state;
+};
 
-void FillerDialog::on_hListW_itemSelectionChanged()
-{
-	emit SGN_UpdateHoleSelection();
-}
-
-void FillerDialog::on_fillButton_clicked()
-{
-	emit SGN_ProcessFilling();
-}
-
-void FillerDialog::on_refreshButton_clicked()
-{
-	emit SGN_RefreshHoles();
-}
-
-void FillerDialog::on_applyButton_clicked()
-{
-	emit SGN_Apply();
-}
+#endif

@@ -119,18 +119,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="hListW" >
-       <property name="maximumSize" >
-        <size>
-         <width>200</width>
-         <height>200</height>
-        </size>
+      <widget class="QTreeView" name="holeTree" >
+       <property name="textElideMode" >
+        <enum>Qt::ElideNone</enum>
        </property>
-       <property name="editTriggers" >
-        <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::NoEditTriggers|QAbstractItemView::SelectedClicked</set>
+       <property name="rootIsDecorated" >
+        <bool>false</bool>
        </property>
-       <property name="selectionMode" >
-        <enum>QAbstractItemView::MultiSelection</enum>
+       <property name="itemsExpandable" >
+        <bool>false</bool>
        </property>
       </widget>
      </item>

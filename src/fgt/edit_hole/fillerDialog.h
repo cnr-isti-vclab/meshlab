@@ -25,6 +25,8 @@
 
 #include <QWidget>
 #include <QtGui/QDockWidget>
+#include <QtGui/QStandardItemModel>
+#include <QtGui/QSortFilterProxyModel>
 #include "ui_edit_hole.h"
 
 class FillerDialog : public QDockWidget
@@ -33,9 +35,9 @@ class FillerDialog : public QDockWidget
 
 public:
 	FillerDialog(QWidget *parent = 0);
-	~FillerDialog(){};
+	~FillerDialog();
 	
-	
+
 Q_SIGNALS:
 	void SGN_UpdateHoleSelection();
 	void SGN_RefreshHoles();

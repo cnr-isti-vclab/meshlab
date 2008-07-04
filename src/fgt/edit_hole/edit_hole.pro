@@ -2,6 +2,7 @@ include (../../shared.pri)
 
 HEADERS       = edit_hole.h \
 		    fillerDialog.h \
+		    holeListModel.h \
 		    holePatch.h \
 		    fgtHole.h \
 		    $$VCGDIR/wrap/gui/trackball.h
@@ -9,6 +10,7 @@ HEADERS       = edit_hole.h \
 
 SOURCES       = edit_hole.cpp \
 		    fillerDialog.cpp\
+		    holeListModel.cpp \
 		    ../../meshlab/meshmodel.cpp \
 		    $$VCGDIR/wrap/gui/trackball.cpp \
 		    $$VCGDIR/wrap/gui/trackmode.cpp \
