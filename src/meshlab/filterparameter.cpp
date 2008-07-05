@@ -210,7 +210,7 @@ void FilterParameterSet::addMatrix44 (QString name, Matrix44f defaultVal, QStrin
 }
 
 
-void FilterParameterSet::setMatrix44(QString name, Matrix44f newVal)
+void FilterParameterSet::setMatrix44(QString , Matrix44f )
 {
 	assert(0);
 }
