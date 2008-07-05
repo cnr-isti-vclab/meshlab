@@ -179,8 +179,8 @@ namespace ui
       pimpl_->band_buffer_ = pimpl_->foreground_;
       int x(std::min(e->pos().x(), pimpl_->start_point_.x()));
       int y(std::min(e->pos().y(), pimpl_->start_point_.y()));
-      int w(std::abs(e->pos().x() - pimpl_->start_point_.x()));
-      int h(std::abs(e->pos().y() - pimpl_->start_point_.y()));
+      int w(std::abs((float)e->pos().x() - pimpl_->start_point_.x()));
+      int h(std::abs((float)e->pos().y() - pimpl_->start_point_.y()));
 
       pimpl_->rubber_band_ = QRect(x, y, w, h);
       update();

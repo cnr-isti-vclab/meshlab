@@ -1,5 +1,6 @@
 #ifndef VCG_SCALARIMAGE_H
 #define VCG_SCALARIMAGE_H
+#include <algorithm>
 #include <assert.h>
 #include <vcg/space/color4.h>
 /*
