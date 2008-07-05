@@ -883,6 +883,18 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla*/))
 					delete mm;
 				else{
+					// After opening the mesh lets ask to the io plugin if this format
+					// requires some optional, or userdriven post-opening processing.
+					// and in that case ask for the required parameters and then 
+					// ask to the plugin to perform that processing
+					FilterParameterSet par;
+					pCurrentIOPlugin->initOpenParameter(extension, *mm, par);					
+					if(!par.isEmpty())
+						{
+							GenericParamDialog postOpenDialog(this, &par, tr("Post-Open Processing"));
+							postOpenDialog.exec();
+							pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
+						}
 					bool newGla = false;
 					if(gla==0){
 						gla=new GLArea(mdiarea);
