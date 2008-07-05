@@ -30,7 +30,10 @@ FillerDialog::FillerDialog(QWidget *parent)
 	this->setWidget(ui.frame);
 	ui.holeTree->setSortingEnabled(true);
 	ui.holeTree->setAlternatingRowColors(true);
-	
+	ui.holeTree->setColumnWidth(0, 80);
+	ui.holeTree->setColumnWidth(1, 60);
+	ui.holeTree->setColumnWidth(2, 60);
+
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
 	this->setFloating(true);

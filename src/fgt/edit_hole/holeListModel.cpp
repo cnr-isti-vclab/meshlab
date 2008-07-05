@@ -91,25 +91,41 @@ void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
 	emit dataChanged( index(ind, 2), index(ind, 2) );
 }
 
-/** Implementazione QAbstractItemModel class **/
+
+/************* Implementazione QAbstractItemModel class *****************/
+
 
 QVariant HoleListModel::data(const QModelIndex &index, int role) const
 {
-	if(!index.isValid() || role != Qt::DisplayRole)
+	if(!index.isValid() )
 		return QVariant();
 	
-	switch(index.column())
+	if(role == Qt::DisplayRole)
 	{
-	case 0:
-		return QString("Hole_%1").arg(index.row());
-	case 1:
-		return holes.at(index.row()).size;
-	case 2:
-		return holes.at(index.row()).isSelected;
-	case 3:
-		return holes.at(index.row()).isFilled;
+		switch(index.column())
+		{
+		case 0:
+			return holes[index.row()].name;
+		case 1:
+			return holes.at(index.row()).size;		
+		}
 	}
-	
+	else if (role == Qt::CheckStateRole)
+	{
+		bool checked;
+		if(index.column() == 2)
+			checked = checked = holes[index.row()].isSelected;
+		else if(index.column() == 3 && state == FillerState::Filled)
+			checked = holes[index.row()].isAccepted;
+		else
+			return QVariant();
+		
+		if(checked)
+			return Qt::Checked;
+		else
+			return Qt::Unchecked;
+	}
+
 	return QVariant();
 }
 
@@ -168,15 +184,52 @@ QModelIndex HoleListModel::index(int row, int column, const QModelIndex &parent)
 	return createIndex(row,column, 0);
 }
 
-/*
+
 Qt::ItemFlags HoleListModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid())
+	Qt::ItemFlags ret = QAbstractItemModel::flags(index);
+    
+	if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-	if(index.column()>1)
-		return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable ;
-	else
-		return QAbstractItemModel::flags(index);
+	if(index.column() == 1 && state == FillerState::Filled)
+		return ret;
+	else if(index.column() > 1)
+		ret = ret | Qt::ItemIsUserCheckable ;
+	else if(index.column() == 0)
+		ret = ret | Qt::ItemIsEditable;
+		
+	return ret;
 }
-*/
+
+bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, int role )
+{	
+	if(!index.isValid())
+		return false;
+
+	if(role == Qt::EditRole && index.column() == 0)
+	{
+		QString newName = value.toString().trimmed();
+		if(newName != "")
+		{
+			holes[index.row()].name = newName;
+			emit dataChanged(index, index);
+			return true;
+		}
+	}
+	else if(role == Qt::CheckStateRole)
+	{
+		if(index.column() == 2 && state == FillerState::Selection)
+		{
+			holes[index.row()].isSelected = !holes[index.row()].isSelected;
+			return true;
+		}
+		else if(index.column() == 2 && state == FillerState::Selection)
+		{
+			holes[index.row()].isSelected = !holes[index.row()].isSelected;
+			return true;
+		}
+			
+	}
+	return false;
+}

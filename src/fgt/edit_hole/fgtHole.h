@@ -55,13 +55,14 @@ public:
 	typedef typename std::vector< FgtHole<MESH> > HoleVector;
 	
 
-	FgtHole(HoleInfo &hi)
+	FgtHole(HoleInfo &hi, QString holeName)
 	{
 		holeInfo = hi;
 		UpdateVertexCoords();
 		size = holeInfo.Perimeter();
+		name = holeName;
 		isSelected = false;
-		isFilled = false;
+		isCompenetrating = false;
 		isAccepted = false;
 	};
 
@@ -128,10 +129,12 @@ public:
 		int UBIT = vcgHole::GetInfo(mesh, false, vhi);
 		
 		std::vector<HoleInfo>::iterator itH = vhi.begin();
+		int i=0;
 		for( ; itH != vhi.end(); itH++)
 		{
-			FgtHole<MESH> newHole(*itH);
-			ret.push_back(newHole);		
+			FgtHole<MESH> newHole(*itH, QString("Hole_%1").arg(i));
+			ret.push_back(newHole);
+			i++;
 		}
 	}
 
@@ -162,8 +165,9 @@ public:
 	HoleInfo holeInfo;
 	std::vector<CoordType*> vertexCoords;
 	float size;
+	QString name;
 	bool isSelected;
-	bool isFilled;
+	bool isCompenetrating;
 	bool isAccepted;
 };
 
