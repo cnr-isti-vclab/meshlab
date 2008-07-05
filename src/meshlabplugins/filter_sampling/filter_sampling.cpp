@@ -203,13 +203,15 @@ class RedetailSampler
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 public:
   
-	RedetailSampler(CMeshO* _m=0)
+	RedetailSampler()
 	{
-		init(_m);
+		m=0;		
 	};
-
-	CMeshO *m;           /// the mesh for which we search the closest points. 
-
+ 
+	CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc). 
+	CallBackPos *cb;
+	int sampleNum;  // the expected number of samples. Used only for the callback
+	int sampleCnt;
 	MetroMeshGrid   unifGrid;
 
 	// Parameters
@@ -220,10 +222,13 @@ public:
 	bool colorFlag;
 	bool qualityFlag;
 	float dist_upper_bound;
- 	void init(CMeshO *_m)
+ 	void init(CMeshO *_m, CallBackPos *_cb=0,int targetSz)
 	{
 		coordFlag=false;
 		colorFlag=false;
+		cb=_cb;
+		sampleNum = targetSz;
+		sampleCnt=0;
 		m=_m;
 		if(m) 
 		{
@@ -231,9 +236,11 @@ public:
 			markerFunctor.SetMesh(m);
 		}
 	}
-	
+// this function is called for each vertex of the target mesh.
+// and retrieve the closest point on the source mesh.
 void AddVert(CMeshO::VertexType &p) 
 {
+		assert(m);
 		// the results
     Point3f       closestPt,      normf, bestq, ip;
 		float dist = dist_upper_bound;
@@ -242,7 +249,7 @@ void AddVert(CMeshO::VertexType &p)
 		CMeshO::FaceType   *nearestF=0;
 		vcg::face::PointDistanceBaseFunctor PDistFunct;
 		dist=dist_upper_bound;
-	  
+	  if(cb) cb(sampleCnt++*100/sampleNum,"Resampling vertices");
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
     if(dist == dist_upper_bound) return ;																				
 
@@ -253,6 +260,7 @@ void AddVert(CMeshO::VertexType &p)
 																			 
 		if(coordFlag) p.P()=closestPt;
 		if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
+		
 		//if(qualityFlag) p.Q()=closestQuality;
 		}
 }; // end class RedetailSampler
@@ -322,8 +330,15 @@ const int FilterDocSampling::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-    case FP_OFFSET_SURFACE:
+    case FP_VERTEX_RESAMPLING :
+		case FP_OFFSET_SURFACE:
     case FP_HAUSDORFF_DISTANCE :	return  MeshModel::MM_FACEMARK;
+		case FP_ELEMENT_SAMPLING    :   
+		case FP_MONTECARLO_SAMPLING :    
+		case FP_SIMILAR_SAMPLING :   
+		case FP_SUBDIV_SAMPLING :   
+		case FP_TEXEL_SAMPLING  :  return 0;
+
     default: assert(0);
   }
   return 0;
@@ -558,9 +573,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
 
 		  RedetailSampler rs;
-			rs.init(&(srcMesh->cm));
+			rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
 				
-			rs.dist_upper_bound = trgMesh->cm.bbox.Diag()/10;
+			rs.dist_upper_bound = trgMesh->cm.bbox.Diag()/50;
 			rs.colorFlag=par.getBool("ColorTransfer");
 			rs.coordFlag=par.getBool("GeomTransfer");
 
