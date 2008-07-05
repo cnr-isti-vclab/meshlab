@@ -29,7 +29,7 @@ using namespace vcg;
 HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	: QAbstractItemModel(parent)	
 {		
-	state = FillerState::Selection;
+	state = HoleListModel::Selection;
 	mesh = m;
 	updateModel();
 }
@@ -115,7 +115,7 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 		bool checked;
 		if(index.column() == 2)
 			checked = checked = holes[index.row()].isSelected;
-		else if(index.column() == 3 && state == FillerState::Filled)
+		else if(index.column() == 3 && state == HoleListModel::Filled)
 			checked = holes[index.row()].isAccepted;
 		else
 			return QVariant();
@@ -141,17 +141,17 @@ QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int
 		case 1:
 			return tr("Size");
 		case 2:
-			if(state == FillerState::Selection)
+			if(state == HoleListModel::Selection)
 				return tr("Select");
 			else 
 				return tr("Fill");
 		case 3:
-			if(state == FillerState::Filled)
+			if(state == HoleListModel::Filled)
 				return tr("Comp.");
 		}
 	}
     
-	if (orientation == Qt::Horizontal && role == Qt::ToolTip && state==FillerState::Filled)
+	if (orientation == Qt::Horizontal && role == Qt::ToolTip && state==HoleListModel::Filled)
 		return tr("Compenetration");	
 
 	return QVariant();
@@ -192,7 +192,7 @@ Qt::ItemFlags HoleListModel::flags(const QModelIndex &index) const
 	if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-	if(index.column() == 1 && state == FillerState::Filled)
+	if(index.column() == 1 && state == HoleListModel::Filled)
 		return ret;
 	else if(index.column() > 1)
 		ret = ret | Qt::ItemIsUserCheckable ;
@@ -219,12 +219,12 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 	}
 	else if(role == Qt::CheckStateRole)
 	{
-		if(index.column() == 2 && state == FillerState::Selection)
+		if(index.column() == 2 && state == HoleListModel::Selection)
 		{
 			holes[index.row()].isSelected = !holes[index.row()].isSelected;
 			return true;
 		}
-		else if(index.column() == 2 && state == FillerState::Selection)
+		else if(index.column() == 2 && state == HoleListModel::Selection)
 		{
 			holes[index.row()].isSelected = !holes[index.row()].isSelected;
 			return true;

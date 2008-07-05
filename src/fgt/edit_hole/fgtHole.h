@@ -89,7 +89,7 @@ public:
 	{
 		glBegin(GL_LINE_LOOP);
 
-		std::vector<CoordType*>::const_iterator it = vertexCoords.begin();
+		typename std::vector<CoordType*>::const_iterator it = vertexCoords.begin();
 		for( ; it != vertexCoords.end() ; it++) 
 			glVertex( **it );
 		
@@ -128,7 +128,7 @@ public:
 		//prendo la lista di info(sugli hole) tutte le facce anche le non selezionate
 		int UBIT = vcgHole::GetInfo(mesh, false, vhi);
 		
-		std::vector<HoleInfo>::iterator itH = vhi.begin();
+		typename std::vector<HoleInfo>::iterator itH = vhi.begin();
 		int i=0;
 		for( ; itH != vhi.end(); itH++)
 		{
@@ -148,7 +148,7 @@ public:
 			return -1;
 
 		int index = 0;
-		HoleVector::const_iterator hit = holes.begin();
+		typename HoleVector::const_iterator hit = holes.begin();
 		
 		//scorro i buchi della mesh
 		for( ; hit != holes.end(); ++hit)

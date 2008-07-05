@@ -33,17 +33,17 @@
 #include "vcg/space/color4.h"
 
 
-enum FillerState
-{
-	Selection, Filled
-};
 
 class HoleListModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
+	enum FillerState
+	{
+		Selection, Filled
+	};
+typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
 	typedef FgtHole<CMeshO>  HoleType;
 	typedef std::vector< HoleType > HoleVector;
 	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
@@ -53,7 +53,7 @@ public:
 	inline int rowCount(const QModelIndex &parent = QModelIndex()) const { return holes.size(); };
 	inline int columnCount(const QModelIndex &parent = QModelIndex()) const 
 	{
-		if(state == FillerState::Selection) return 3;
+		if(state == HoleListModel::Selection) return 3;
 		else return 4; 
 	};
 	
