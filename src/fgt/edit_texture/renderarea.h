@@ -160,6 +160,27 @@ class RenderArea : public QGLWidget
 		vector<CVertexO*> FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN);
 		void UpdateUnifyTopology();
 		void SetUpRegion(QPoint a, QPoint b, QPoint c);
+		
+		void drawSelectedVertexes(int faceindex);
+		void drawSelectedFaces(int faceindex);
+		void drawEdge(int faceindex);
+		void drawUnifyVertexes();
+		void drawBackground();
+		void drawAxis(QPainter *painter);
+		void drawSelectionRectangle(QPainter *painter);
+		void drawEditRectangle(QPainter *painter);
+		void drawUnifyRectangles(QPainter *painter);
+		void resetUnifyData();
+		void handleUnifySelection(CMeshO::FaceIterator fi, int j);
+
+		void handlePressView(QMouseEvent *e);
+		void handlePressEdit(QMouseEvent *e);
+		void handlePressSelect(QMouseEvent *e);
+		void handleReleaseView(QMouseEvent *e);
+		void handleReleaseEdit(QMouseEvent *e);
+		void handleReleaseSelect(QMouseEvent *e);
+		void handleMoveEdit(QMouseEvent *e);
+		void handleMoveSelect(QMouseEvent *e);
 
 	signals:
 		void UpdateModel();
