@@ -196,7 +196,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       int b = math::Clamp<int>(par.getInt("b"), 0, 255);
       Color4b new_col = Color4b(r,g,b,1);
 
-      int  v_num = Filling(m, new_col);
+      int  v_num = FilterColorProc::filling(m, new_col);
 
       if(v_num==0)
       {
@@ -210,7 +210,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     {
       float treshold = math::Clamp(par.getFloat("treshold"), 0.0f, 255.0f);
 
-      int  v_num = Tresholding(m, treshold);
+      int  v_num = FilterColorProc::tresholding(m, treshold);
 
       if(v_num==0)
       {
@@ -224,7 +224,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     {
       int brightness = math::Clamp<int>(par.getInt("brightness"), -255, 255);
 
-      int  v_num = Brighting(m, brightness);
+      int  v_num = FilterColorProc::brighting(m, brightness);
 
       if(v_num==0)
       {
@@ -238,7 +238,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     {
       float factor = math::Clamp<float>(par.getFloat("factor"), 1.0f/6.0f, 6.0f);
 
-      int  v_num = Contrast(m, factor);
+      int  v_num = FilterColorProc::contrast(m, factor);
 
       if(v_num==0)
       {
@@ -253,7 +253,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       int brightness = math::Clamp<int>(par.getInt("brightness"), -255, 255);
       float factor = math::Clamp<float>(par.getFloat("factor"), 1.0f/6.0f, 6.0f);
 
-      int  v_num = ContrastBrightness(m, factor, brightness);
+      int  v_num = FilterColorProc::contrastBrightness(m, factor, brightness);
 
       if(v_num==0)
       {
@@ -267,7 +267,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     {
       float gamma = math::Clamp<float>(par.getFloat("gamma"), 0.5f, 1.5f);  //valori sensati???
 
-      int  v_num = Gamma(m, gamma);
+      int  v_num = FilterColorProc::gamma(m, gamma);
 
       if(v_num==0)
       {
@@ -279,7 +279,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_INVERT :
     {
-      int  v_num = Invert(m);
+      int  v_num = FilterColorProc::invert(m);
 
       if(v_num==0)
       {
@@ -297,7 +297,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       int  out_min = par.getInt("out_min");
       int  out_max = par.getInt("out_max");
 
-      int  v_num = Levels(m, gamma, in_min, in_max, out_min, out_max);
+      int  v_num = FilterColorProc::levels(m, gamma, in_min, in_max, out_min, out_max);
 
       if(v_num==0)
       {
@@ -318,7 +318,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
 
       ColorSpace<unsigned char>::HSLtoRGB( (double)hue, (double)saturation, (double)luminance, r, g, b);
       Color4b color = Color4b((int)(r*255), (int)(g*255), (int)(b*255), 1);
-      int  v_num = Colourisation(m, color, intensity);
+      int  v_num = FilterColorProc::colourisation(m, color, intensity);
 
       if(v_num==0)
       {
