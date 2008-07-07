@@ -222,19 +222,20 @@ public:
 	bool colorFlag;
 	bool qualityFlag;
 	float dist_upper_bound;
- 	void init(CMeshO *_m, CallBackPos *_cb=0,int targetSz)
+ 	void init(CMeshO *_m, CallBackPos *_cb=0, int targetSz=0)
 	{
 		coordFlag=false;
 		colorFlag=false;
-		cb=_cb;
-		sampleNum = targetSz;
-		sampleCnt=0;
 		m=_m;
 		if(m) 
 		{
 			unifGrid.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
 		}
+		// sampleNum and sampleCnt are used only for the progress callback.
+		cb=_cb;
+		sampleNum = targetSz; 
+		sampleCnt=0;
 	}
 // this function is called for each vertex of the target mesh.
 // and retrieve the closest point on the source mesh.
