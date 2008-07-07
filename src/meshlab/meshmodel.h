@@ -114,25 +114,35 @@ It contains a single vcg mesh object with some additional information for keepin
 class MeshModel : public vcg::tri::io::Mask
 {
 public:
-
- 	enum FilterReq {  MM_NONE          = 0x0000,
-                    MM_BORDERFLAG    = 0x0001,
-                    MM_FACETOPO      = 0x0002,
-                    MM_WEDGTEXCOORD  = 0x0004,
-                    MM_FACECOLOR     = 0x0008,
-                    MM_FACEMARK      = 0x0010,
-                    MM_VERTMARK      = 0x0020,
-                    MM_VERTFACETOPO  = 0x0040,
-										MM_CURV          = 0x0080,
-										MM_CURVDIR       = 0x0100,
-                    MM_ALL           = 0xffff} ;
+/* This enum specify the various mesh elements.
+	It is used for 
+	*/
+ 	enum MeshElement {  
+		MM_NONE						= 0x0000,
+		MM_VERTCOORD			= 0x0001,
+		MM_VERTNORMAL			= 0x0002,
+		MM_VERTCOLOR			= 0x0004,
+		MM_VERTQUALITY		= 0x0008,
+		MM_VERTGEOM = MM_VERTCOORD | MM_VERTNORMAL,
+		MM_VERTMARK				= 0x0010,
+		MM_VERTFACETOPO		= 0x0020,
+		MM_VERTCONTAINER	= 0x0040,
+		MM_VERTFLAG				= 0x0080,
+		MM_BORDERFLAG			= 0x0100,
+		MM_FACECOLOR			= 0x0200,
+		MM_FACEMARK				= 0x0400,
+		MM_FACETOPO				= 0x0800,
+		MM_WEDGTEXCOORD		= 0x1000,
+		MM_CURV						= 0x2000,
+		MM_CURVDIR				= 0x4000,
+		MM_ALL						= 0xffff
+	} ;
 
 
   CMeshO cm;
 
 public:
   vcg::GlTrimesh<CMeshO> glw;
-  std::vector<vcg::Color4b> originalVertexColor;
 	std::string fileName;
 
   // Bitmask denoting what fields are currently kept updated in mesh
@@ -160,23 +170,6 @@ public:
   bool Render(vcg::GLW::DrawMode dm, vcg::GLW::ColorMode cm, vcg::GLW::TextureMode tm);
   bool RenderSelectedFaces();
 
-  inline void storeVertexColor()
-  {
-    originalVertexColor.resize(cm.vert.size());
-    std::vector<vcg::Color4b>::iterator ci;
-	  CMeshO::VertexIterator vi;
-	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
-      (*ci)=(*vi).C();
-  }
-  inline void restoreVertexColor()
-  {
-    if(originalVertexColor.empty()) return;
-    if(originalVertexColor.size() != cm.vert.size()) return;
-    std::vector<vcg::Color4b>::iterator ci;
-	  CMeshO::VertexIterator vi;
-	  for(vi=cm.vert.begin(),ci=originalVertexColor.begin();vi!=cm.vert.end();++vi,++ci) 
-      (*vi).C()=(*ci);
-  }
 	
 // This function is roughly equivalent to the updateDataMask,
 // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
@@ -386,6 +379,48 @@ MeshDocument()
  }
 	private:
 		MeshModel *currentMesh;	
+};
+
+/* 
+
+*/
+class MeshModelState
+{
+	public:
+	int changeMask; // a bit mask indicating What have been changed.
+	MeshModel *m; // the mesh which the changes refers to.
+	std::vector<vcg::Color4b> vertColor;
+	std::vector<vcg::Point3f> vertCoord;
+	std::vector<vcg::Point3f> vertNormal;
+		
+	void create(int _mask, MeshModel* _m)
+	{
+		m=_m;
+		changeMask=_mask;
+		if(changeMask & MeshModel::MM_VERTCOLOR)
+		 {
+			 vertColor.resize(m->cm.vert.size());
+			 std::vector<vcg::Color4b>::iterator ci;
+			 CMeshO::VertexIterator vi;
+			 for(vi=m->cm.vert.begin(),ci=vertColor.begin();vi!=m->cm.vert.end();++vi,++ci) 
+				 if(!(*vi).IsD()) (*ci)=(*vi).C();
+		 }
+	}
+	
+	bool apply(MeshModel *_m)
+	{
+	  if(_m != m) return false;	
+		if(changeMask & MeshModel::MM_VERTCOLOR)
+		{
+			if(vertColor.size() != m->cm.vert.size()) return false;
+			std::vector<vcg::Color4b>::iterator ci;
+			CMeshO::VertexIterator vi;
+			for(vi=m->cm.vert.begin(),ci=vertColor.begin();vi!=m->cm.vert.end();++vi,++ci) 
+					if(!(*vi).IsD()) (*vi).C()=(*ci);
+		}
+  }
+		
+	bool isValid(MeshModel *m);
 };
 
 #endif
