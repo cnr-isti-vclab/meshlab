@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2004-2008                                                \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -19,55 +19,6 @@
 * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
 * for more details.                                                         *
 *                                                                           *
-****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.14  2008/01/28 13:01:26  cignoni
-added missing include matrix44
-
-Revision 1.13  2008/01/04 00:43:15  cignoni
-Changed findParameter (now it returns a pointer) and completed string parameter
-
-Revision 1.12  2007/11/19 17:09:20  ponchio
-added enum value. [untested].
-
-Revision 1.11  2007/11/05 12:03:01  cignoni
-added color as a possible parameter
-
-Revision 1.10  2007/10/24 10:34:26  ponchio
-removed extra FilterParameterSet:: in findParameter(QString name);
-
-Revision 1.9  2007/10/02 07:59:34  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.8  2007/06/25 13:31:55  zifnab1974
-passing char* instead of const char* is about to be deprecated in gcc
-
-Revision 1.7  2007/03/27 12:20:13  cignoni
-Revamped logging iterface, changed function names in automatic parameters, better selection handling
-
-Revision 1.6  2007/02/09 09:09:39  pirosu
-Added ToolTip support for standard parameters
-
-Revision 1.5  2007/02/08 23:45:26  pirosu
-merged srcpar and par in the GetStdParameters() function
-
-Revision 1.4  2006/12/27 21:41:41  pirosu
-Added improvements for the standard plugin window:
-split of the apply button in two buttons:ok and apply
-added support for parameters with absolute and percentage values
-
-Revision 1.3  2006/12/13 17:37:02  pirosu
-Added standard plugin window support
-
-Revision 1.2  2006/06/18 20:40:06  cignoni
-Completed Open/Save of scripts
-
-Revision 1.1  2006/06/15 21:24:35  cignoni
-First ver
-
-
 ****************************************************************************/
 
 #ifndef MESHLAB_FILTERPARAMETER_H
@@ -116,7 +67,8 @@ class FilterParameter
 		PARCOLOR = 7,
 		PARENUM = 8,
 		PARMESH = 9,
-		PARFLOATLIST = 10
+		PARFLOATLIST = 10,
+		PARDYNFLOAT = 11,
 	};
 	
 	QString  fieldName;
@@ -127,8 +79,9 @@ class FilterParameter
 	// The type of the parameter
   int fieldType;  
   
-	float min;
+	float min;  // used by the AbsPerc and DynFloat types
   float max;
+	int mask; // used by the DynFloat types
 	void *pointerVal;
 	QStringList enumValues;
 	
@@ -136,6 +89,7 @@ class FilterParameter
 	//needed because min, max, enumValues complicate things
 	void setValue(const FilterParameter &inputParameter)
 	{
+		assert(fieldType == inputParameter.fieldType);
 		fieldVal = inputParameter.fieldVal;
 		min = inputParameter.min;
 		max = inputParameter.max;
@@ -179,19 +133,21 @@ public:
 	void addEnum     (QString name, int defaultVal, QStringList values, QString desc=QString(), QString tooltip=QString());
 	void addMesh     (QString name, MeshModel* m,  QString desc=QString(), QString tooltip=QString());		
 	void addFloatList(QString name, QList<float> &defaultValue, QString desc=QString(), QString tooltip=QString());
+	void addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, int changeMask, QString desc=QString(), QString tooltip=QString());
 		
 	bool				getBool(QString name) const;
 	int					getInt(QString name) const;
 	float				getFloat(QString name) const;
 	QString			getString(QString name) const;
 	vcg::Matrix44f		getMatrix44(QString name) const;
-	QColor		  getColor(QString name) const;
-	float		    getAbsPerc(QString name) const;
-  int					getEnum(QString name) const;
-
-	MeshModel*  getMesh(QString name) const;
+	QColor		   getColor(QString name) const;
+	vcg::Color4b getColor4b(QString name) const;
+	float		     getAbsPerc(QString name) const;
+  int					 getEnum(QString name) const;	
+	MeshModel*   getMesh(QString name) const;
 	QList<float> getFloatList(QString name) const;
-	
+	float        getDynamicFloat(QString name) const;
+
 	void setBool(QString name, bool newVal) ;
 	void setInt(QString name, int newVal) ;
 	void setFloat(QString name, float newVal);
@@ -202,7 +158,10 @@ public:
 	void setEnum(QString name, int newVal);
 	void setMesh(QString name, MeshModel* newVal);
 	void setFloatList(QString name, QList<float> &newValue);
+	void setDynamicFloat(QString name, float newVal);
 
+	int getDynamicFloatMask();
+	
 	FilterParameter *findParameter(QString name);
   const FilterParameter *findParameter(QString name) const;
 

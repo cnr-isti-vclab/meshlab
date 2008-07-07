@@ -58,6 +58,16 @@ void FilterParameterSet::removeParameter(QString name){
 	paramList.removeAll(*findParameter(name));
 }
 
+int FilterParameterSet::getDynamicFloatMask()
+{
+	int maskFound=0;
+		QList<FilterParameter>::const_iterator fpli;
+	for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
+		if((*fpli).fieldType==FilterParameter::PARDYNFLOAT)
+			maskFound |= (*fpli).mask;
+	
+	return maskFound;
+}
 
 //--------------------------------------
 
@@ -139,6 +149,13 @@ void  FilterParameterSet::addColor(QString name, QColor defaultVal, QString desc
 	p.fieldType=FilterParameter::PARCOLOR;
 	paramList.push_back(p);		
 }
+
+Color4b FilterParameterSet::getColor4b(QString name) const
+{
+	QColor c=getColor(name);
+	return Color4b(c.red(),c.green(),c.blue(),255);
+}
+
 QColor FilterParameterSet::getColor(QString name) const
 {
 	const FilterParameter *p=findParameter(name);
@@ -321,6 +338,7 @@ void FilterParameterSet::setMesh(QString name, MeshModel * newVal)
 	p->pointerVal= newVal;
 }
 
+/* ---- */ 
 
 void FilterParameterSet::setFloatList(QString name, QList<float> &newValue)
 {
@@ -337,3 +355,36 @@ void FilterParameterSet::setFloatList(QString name, QList<float> &newValue)
 	p->fieldVal = tempList;
 }
 
+
+/* ---- */
+/* Dynamic Float Memebers*/
+/* ---- */
+
+void FilterParameterSet::addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, int changeMask, QString desc , QString tooltip )
+{
+	FilterParameter p(name,desc,tooltip);
+	assert(defaultVal<=maxVal);
+	assert(defaultVal>=minVal);
+  p.fieldVal=defaultVal;
+	p.fieldType=FilterParameter::PARDYNFLOAT;
+	p.min=minVal;
+	p.max=maxVal;
+	p.mask=changeMask;
+	paramList.push_back(p);	
+}
+
+float FilterParameterSet::getDynamicFloat(QString name) const
+{
+	const FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARDYNFLOAT);
+	return float(p->fieldVal.toDouble());
+}
+
+void  FilterParameterSet::setDynamicFloat(QString name, float newVal)
+{
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARDYNFLOAT);
+	p->fieldVal=QVariant(newVal);	
+}
