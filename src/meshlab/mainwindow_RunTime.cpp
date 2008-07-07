@@ -914,7 +914,6 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						gla->setColorMode(GLW::CMPerFace);
 					if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
 					{
-						gla->mm()->storeVertexColor();
 						gla->setColorMode(GLW::CMPerVert);
 					}
 					renderModeTextureAct->setChecked(false);
