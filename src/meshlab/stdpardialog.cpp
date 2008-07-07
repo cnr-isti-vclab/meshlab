@@ -139,6 +139,12 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		mfi->initParameterSet(action, *mdp, curParSet);	
 		createFrame();
 		loadFrameContent(mdp);
+		int mask = curParSet.getDynamicFloatMask();
+		if(mask)
+		{
+			meshState.create(mask, curModel);
+			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic(int)));
+		}
   }
 
 	void MeshlabStdDialog::clearValues()
@@ -272,6 +278,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 	QColorButton *qcbt;
 	QLayout *layout;
 	MeshEnumWidget *mew;
+	DynamicFloatWidget *dfw;
 	
 	QList<FilterParameter> &parList =curParSet.paramList;
 	
@@ -366,7 +373,6 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				gridLayout->addLayout(mew,i,1,Qt::AlignTop);				
 				stdfieldwidgets.push_back(mew);
 				
-				
 				break;
 
 
@@ -398,7 +404,18 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				}			
 				break;
 
-
+			case FilterParameter::PARDYNFLOAT : 
+				ql = new QLabel(fpi.fieldDesc ,this);
+				ql->setToolTip(fpi.fieldToolTip);	
+				
+				dfw = new DynamicFloatWidget(this,float(fpi.fieldVal.toDouble()),fpi.min,fpi.max,fpi.mask);
+				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+				gridLayout->addLayout(dfw,i,1,Qt::AlignTop);
+				
+				stdfieldwidgets.push_back(dfw);
+				connect(dfw,SIGNAL(valueChanged(int)),this,SIGNAL( dynamicFloatChanged(int) ));
+				break;
+				
 			default: assert(0);
 		} //end case
 	} // end for each parameter
@@ -457,6 +474,9 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 		  case FilterParameter::PARFLOATLIST:
 			  curParSet.findParameter(sname)->fieldVal = ((QVariantListWidget *)stdfieldwidgets[i])->getList();
 			  break;
+		  case FilterParameter::PARDYNFLOAT:
+			  curParSet.findParameter(sname)->fieldVal = ((DynamicFloatWidget *)stdfieldwidgets[i])->getValue();
+			  break;
 			default:
 				assert(0);
 		  }
@@ -470,6 +490,15 @@ void MeshlabStdDialog::applyClick()
 	QAction *q = curAction;
 	stdParFrame->readValues(curParSet);
 	curmwi->executeFilter(q,curParSet);		
+}
+
+void MeshlabStdDialog::applyDynamic(int mask)
+{
+	QAction *q = curAction;
+	stdParFrame->readValues(curParSet);
+	// Restore the 
+	meshState.apply(curModel);
+	curmwi->executeFilter(q,curParSet);
 }
 
 /* click event for the close button of the standard plugin window */
@@ -753,3 +782,56 @@ void GenericParamDialog::getAccept()
 	stdParFrame->readValues(*curParSet);
 	accept();
 }
+
+
+/******************************************/ 
+// DynamicFloatWidget Implementation
+/******************************************/ 
+DynamicFloatWidget::DynamicFloatWidget(QWidget *p, double defaultv, double _minVal, double _maxVal, int _mask):QGridLayout(NULL)
+{
+	mask = _mask;
+	minVal = _minVal;
+	minVal = _maxVal;
+	valueLE = new QLineEdit(p);
+	valueSlider = new QSlider(Qt::Horizontal,p);
+	
+	valueSlider->setMinimum(0);
+	valueSlider->setMaximum(100);
+	valueSlider->setValue(floatToInt(defaultv));
+	valueLE->setValidator(new QDoubleValidator (minVal, maxVal, 5, valueLE));
+	valueLE->setText(QString::number(defaultv));
+	
+	this->addWidget(valueLE,0,0,Qt::AlignHCenter);
+	this->addWidget(valueSlider,0,1,Qt::AlignHCenter);
+				
+	connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
+	connect(valueSlider,SIGNAL(valueChanged(int)),this,SLOT(setValue(int)));
+}
+
+DynamicFloatWidget::~DynamicFloatWidget()
+{
+}
+
+float DynamicFloatWidget::getValue() 
+{
+	return float(valueLE->text().toDouble());
+}
+void DynamicFloatWidget::setValue(int  newVal) 
+{
+	this->setValue(intToFloat(newVal));
+}
+
+void DynamicFloatWidget::setValue()            
+{
+	this->setValue(float(valueLE->text().toDouble()));
+}
+
+void DynamicFloatWidget::setValue(float newVal)
+{
+	if(newVal == float(valueLE->text().toDouble()))
+			valueSlider->setValue(floatToInt(newVal));
+	else 
+		valueLE->setText(QString::number(newVal));
+	emit valueChanged(mask);
+}
+

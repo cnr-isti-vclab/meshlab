@@ -136,6 +136,37 @@ protected:
 };
 
 
+class DynamicFloatWidget : public QGridLayout
+{
+	Q_OBJECT
+	
+public:
+  DynamicFloatWidget(QWidget *p, double defaultv, double minVal, double maxVal, int mask);
+  ~DynamicFloatWidget();
+	
+  float getValue();
+	void  setValue(float val, float minV, float maxV);
+	
+	public slots:
+		void setValue(float newv);
+		void setValue(int newv);
+		void setValue();
+	
+	signals:
+		void valueChanged(int mask);
+	
+protected:
+	QLineEdit *valueLE;
+	QSlider   *valueSlider;
+  float minVal;
+  float maxVal;
+	int mask;
+private :
+	float intToFloat(int val) { return minVal+float(val)/100.0f*(maxVal-minVal);} 
+  int floatToInt(float val) { return int (100.0f*(val-minVal)/(maxVal-minVal)); }
+};
+
+
 class StdParFrame : public QFrame
 {
 	Q_OBJECT
@@ -151,6 +182,8 @@ public:
 	QVector<void *> stdfieldwidgets;
 	QVector<QLabel *> helpList;
 
+signals:
+		void dynamicFloatChanged(int mask);
 };
 
 /// Widget to select an entry from a list
@@ -229,8 +262,10 @@ public:
 };
 
 
-// standard plugin window
-//class MeshlabStdDialog : public QDialog
+// This is the dialog used to ask parameters for the MeshLab filters.
+// This dialog is automatically configurated starting from the parameter asked by a given filter. 
+// It can handle dynamic parameters that modify only partially a given mesh. 
+
 class MeshlabStdDialog : public QDockWidget
 {
 	  Q_OBJECT
@@ -249,11 +284,13 @@ private slots:
 	void closeClick();
   void resetValues();
   void toggleHelp();
+	void applyDynamic(int mask);
 
 protected:
 	QFrame *qf;
 	StdParFrame *stdParFrame;
 	QAction *curAction;
+	MeshModelState meshState;
 public:
 	MeshModel *curModel;
 	MeshDocument * curMeshDoc;
