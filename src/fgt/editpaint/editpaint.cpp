@@ -599,7 +599,6 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 			displaced_vertices[data.first].second = gauss;
 			Point3f temp = displaced_vertices[data.first].first;
 			data.first->P()[0]=temp[0]; data.first->P()[1]=temp[1]; data.first->P()[2]=temp[2];
-			paintbox->getUndoStack()->push(new SinglePositionUndo(data.first, data.first->P(), data.first->N()));
 			displaceAlongVector(data.first, normal, gauss);	
 			updateNormal(data.first);
 						
@@ -687,16 +686,16 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 			
 		} else if (painted_vertices[data.first].second < (int)(op * opac)) 
 		{
+			painted_vertices[data.first].second = (int)(op * opac);
+			Color4b temp = painted_vertices[data.first].first;
+			data.first->C()[0]=temp[0]; data.first->C()[1]=temp[1]; data.first->C()[2]=temp[2];
+			
 			if (paintbox->getCurrentType() == COLOR_CLONE) 
 				if (!accessCloneBuffer(data.second.position.x(), data.second.position.y(), color)) return;
 			
 			if (paintbox->getCurrentType() == COLOR_NOISE)
 				computeNoiseColor(data.first, color);
-			
-			painted_vertices[data.first].second = (int)(op * opac);
-			Color4b temp = painted_vertices[data.first].first;
-			data.first->C()[0]=temp[0]; data.first->C()[1]=temp[1]; data.first->C()[2]=temp[2];
-			
+
 			paintbox->getUndoStack()->push(new SingleColorUndo(data.first, data.first->C()));
 			
 			applyColor(data.first, color, (int)(op * opac) );	
@@ -708,7 +707,11 @@ inline void EditPaintPlugin::computeNoiseColor(CVertexO * vert, vcg::Color4b & c
 {
 	float scaler = noise_scale; //parameter TODO to be cahced
 	
-	double noise = vcg::math::Abs(vcg::math::Perlin::Noise(vert->P()[0] * scaler, vert->P()[1] * scaler, vert->P()[2] * scaler));
+	double noise;
+	//if "veins on"
+//	noise = vcg::math::Abs(vcg::math::Perlin::Noise(vert->P()[0] * scaler, vert->P()[1] * scaler, vert->P()[2] * scaler));
+	//else
+	noise = (vcg::math::Perlin::Noise(vert->P()[0] * scaler, vert->P()[1] * scaler, vert->P()[2] * scaler)+ 1) /2;
 
 	Color4b forecolor(paintbox->getForegroundColor().red(), paintbox->getForegroundColor().green(), paintbox->getForegroundColor().blue(), paintbox->getForegroundColor().alpha());
 
