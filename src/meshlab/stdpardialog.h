@@ -162,8 +162,8 @@ protected:
   float maxVal;
 	int mask;
 private :
-	float intToFloat(int val) { return minVal+float(val)/100.0f*(maxVal-minVal);} 
-  int floatToInt(float val) { return int (100.0f*(val-minVal)/(maxVal-minVal)); }
+	float intToFloat(int val);  
+	int floatToInt(float val);
 };
 
 

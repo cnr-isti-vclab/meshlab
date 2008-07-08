@@ -485,11 +485,22 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 
 
 /* click event for the apply button of the standard plugin window */
+// If the filter has some dynamic parameters
+// - before applying the filter restore the original state of the mesh.
+// - after applying the filter reget the state of the mesh.
+
 void MeshlabStdDialog::applyClick()
 {
 	QAction *q = curAction;
 	stdParFrame->readValues(curParSet);
+
+	int mask = curParSet.getDynamicFloatMask(); 
+	if(mask)	meshState.apply(curModel);
+
 	curmwi->executeFilter(q,curParSet);		
+	
+	if(mask)	meshState.create(mask, curModel);
+		
 }
 
 void MeshlabStdDialog::applyDynamic(int mask)
@@ -505,6 +516,8 @@ void MeshlabStdDialog::applyDynamic(int mask)
 
 void MeshlabStdDialog::closeClick()
 {
+	int mask = curParSet.getDynamicFloatMask(); 
+	if(mask)	meshState.apply(curModel);
 	this->hide();
 }
 
@@ -791,7 +804,7 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, double defaultv, double _minV
 {
 	mask = _mask;
 	minVal = _minVal;
-	minVal = _maxVal;
+	maxVal = _maxVal;
 	valueLE = new QLineEdit(p);
 	valueSlider = new QSlider(Qt::Horizontal,p);
 	
@@ -833,5 +846,13 @@ void DynamicFloatWidget::setValue(float newVal)
 	else 
 		valueLE->setText(QString::number(newVal));
 	emit valueChanged(mask);
+}
+float DynamicFloatWidget::intToFloat(int val) 
+{ 
+	return minVal+float(val)/100.0f*(maxVal-minVal);
+} 
+int DynamicFloatWidget::floatToInt(float val) 
+{
+	return int (100.0f*(val-minVal)/(maxVal-minVal)); 
 }
 
