@@ -93,17 +93,12 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     }
 
     //Apply the tresholding filter, with the given treshold, to the mesh.
-    static int tresholding(MeshModel &m, float treshold)
+    static int tresholding(MeshModel &m, float treshold, vcg::Color4b c1 = vcg::Color4<unsigned char>::Black, vcg::Color4b c2 = vcg::Color4<unsigned char>::White)
     {
       int counter=0;
 
-      //security check: arrays of differents sizes means that something wrong copying
-      //original colors. we can't work out the filter...
-      assert(m.cm.vert.size()==m.originalVertexColor.size());
-
-      std::vector<vcg::Color4b>::iterator ci;
       CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin(),ci=m.originalVertexColor.begin();vi!=m.cm.vert.end();++vi,++ci) //scan all the vertex...
+      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
       {
         if(!(*vi).IsD()) //if it has not been deleted...
         {
@@ -111,19 +106,19 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           {
             if((*vi).IsS()) //if this vertex has been selected, do transormation
             {
-              float value = compute_lightness((*ci));
+              float value = compute_lightness((*vi).C());
 
-              if(value<=treshold) (*vi).C() = vcg::Color4b(0,0,0,1);
-              else (*vi).C() = vcg::Color4b(255,255,255,1);
+              if(value<=treshold) (*vi).C() = c1;
+              else (*vi).C() = c2;
               ++counter;
             }
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            float value = compute_lightness((*ci));
+            float value = compute_lightness((*vi).C());
 
-            if(value<=treshold) (*vi).C() = vcg::Color4b(0,0,0,1);
-            else (*vi).C() = vcg::Color4b(255,255,255,1);
+            if(value<=treshold) (*vi).C() = c1;
+            else (*vi).C() = c2;
             ++counter;
           }
         }
@@ -146,13 +141,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     {
       int counter=0;
 
-      //security check: arrays of differents sizes means that something wrong copying
-      //original colors. we can't work out the filter...
-      assert(m.cm.vert.size()==m.originalVertexColor.size());
-
-      std::vector<vcg::Color4b>::iterator ci;
       CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin(),ci=m.originalVertexColor.begin();vi!=m.cm.vert.end();++vi,++ci) //scan all the vertex...
+      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
       {
         if(!(*vi).IsD()) //if it has not been deleted...
         {
@@ -160,13 +150,13 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           {
             if((*vi).IsS()) //if this vertex has been selected, do transormation
             {
-              (*vi).C() = color_add((*ci),amount);
+              (*vi).C() = color_add((*vi).C(),amount);
               ++counter;
             }
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            (*vi).C() = color_add((*ci),amount);
+            (*vi).C() = color_add((*vi).C(),amount);
             ++counter;
           }
         }
@@ -175,18 +165,9 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     }
 
     //Adds an integer amount to rgb components of the color.
-    static vcg::Color4b color_add(vcg::Color4b c, int amount, int rgb_mask = 0)
+    static vcg::Color4b color_add(vcg::Color4b c, int amount)
     {
-      int r, g, b;
-      if(rgb_mask==0)
-      {
-        r= value_add(c[0], amount);
-        g= value_add(c[1], amount);
-        b= value_add(c[2], amount);
-
-      }
-      return vcg::Color4b(r,g,b,1);
-      //return vcg::Color4b( value_add(c[0], amount), value_add(c[1], amount), value_add(c[2], amount), 1 );
+      return vcg::Color4b( value_add(c[0], amount), value_add(c[1], amount), value_add(c[2], amount), 1 );
     }
 
     static int value_add(int value, int amount)
@@ -198,13 +179,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     {
       int counter=0;
 
-      //security check: arrays of differents sizes means that something wrong copying
-      //original colors. we can't work out the filter...
-      assert(m.cm.vert.size()==m.originalVertexColor.size());
-
-      std::vector<vcg::Color4b>::iterator ci;
       CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin(),ci=m.originalVertexColor.begin();vi!=m.cm.vert.end();++vi,++ci) //scan all the vertex...
+      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
       {
         if(!(*vi).IsD()) //if it has not been deleted...
         {
@@ -212,13 +188,13 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           {
             if((*vi).IsS()) //if this vertex has been selected, do transormation
             {
-              (*vi).C() = color_mul((*ci),factor);
+              (*vi).C() = color_mul((*vi).C(),factor);
               ++counter;
             }
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            (*vi).C() = color_mul((*ci),factor);
+            (*vi).C() = color_mul((*vi).C(),factor);
             ++counter;
           }
         }
@@ -242,13 +218,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     {
       int counter=0;
 
-      //security check: arrays of differents sizes means that something wrong copying
-      //original colors. we can't work out the filter...
-      assert(m.cm.vert.size()==m.originalVertexColor.size());
-
-      std::vector<vcg::Color4b>::iterator ci;
       CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin(),ci=m.originalVertexColor.begin();vi!=m.cm.vert.end();++vi,++ci) //scan all the vertex...
+      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
       {
         if(!(*vi).IsD()) //if it has not been deleted...
         {
@@ -256,13 +227,13 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           {
             if((*vi).IsS()) //if this vertex has been selected, do transormation
             {
-              (*vi).C() = color_mul_add((*ci),factor,amount);
+              (*vi).C() = color_mul_add((*vi).C(),factor,amount);
               ++counter;
             }
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            (*vi).C() = color_mul_add((*ci),factor,amount);
+            (*vi).C() = color_mul_add((*vi).C(),factor,amount);
             ++counter;
           }
         }
@@ -288,13 +259,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     {
       int counter=0;
 
-      //security check: arrays of differents sizes means that something wrong copying
-      //original colors. we can't work out the filter...
-      assert(m.cm.vert.size()==m.originalVertexColor.size());
-
-      std::vector<vcg::Color4b>::iterator ci;
       CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin(),ci=m.originalVertexColor.begin();vi!=m.cm.vert.end();++vi,++ci) //scan all the vertex...
+      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
       {
         if(!(*vi).IsD()) //if it has not been deleted...
         {
@@ -302,13 +268,13 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           {
             if((*vi).IsS()) //if this vertex has been selected, do transormation
             {
-              (*vi).C() = color_pow((*ci),gamma);
+              (*vi).C() = color_pow((*vi).C(),gamma);
               ++counter;
             }
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            (*vi).C() = color_pow((*ci),gamma);
+            (*vi).C() = color_pow((*vi).C(),gamma);
             ++counter;
           }
         }
@@ -371,13 +337,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     {
       int counter=0;
 
-      //security check: arrays of differents sizes means that something wrong copying
-      //original colors. we can't work out the filter...
-      assert(m.cm.vert.size()==m.originalVertexColor.size());
-
-      std::vector<vcg::Color4b>::iterator ci;
       CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin(),ci=m.originalVertexColor.begin();vi!=m.cm.vert.end();++vi,++ci) //scan all the vertex...
+      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
       {
         if(!(*vi).IsD()) //if it has not been deleted...
         {
@@ -385,13 +346,13 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           {
             if((*vi).IsS()) //if this vertex has been selected, do transormation
             {
-              (*vi).C() = color_levels((*ci),gamma, in_min, in_max, out_min, out_max);
+              (*vi).C() = color_levels((*vi).C(),gamma, in_min, in_max, out_min, out_max);
               ++counter;
             }
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            (*vi).C() = color_levels((*ci),gamma, in_min, in_max, out_min, out_max);
+            (*vi).C() = color_levels((*vi).C(),gamma, in_min, in_max, out_min, out_max);
             ++counter;
           }
         }
@@ -409,7 +370,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     static int value_levels(int value, float gamma, int in_min, int in_max, int out_min, int out_max)
     {
       // normalize
-      value = (value-in_min) / (in_max - in_min);
+      if(in_max == in_min) value = 0;
+      else value = (value-in_min) / (in_max - in_min);
       // transform gamma
       value = (int)(pow(value,gamma));
       // rescale range and clamp
@@ -420,13 +382,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     {
       int counter=0;
 
-      //security check: arrays of differents sizes means that something wrong copying
-      //original colors. we can't work out the filter...
-      assert(m.cm.vert.size()==m.originalVertexColor.size());
-
-      std::vector<vcg::Color4b>::iterator ci;
       CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin(),ci=m.originalVertexColor.begin();vi!=m.cm.vert.end();++vi,++ci) //scan all the vertex...
+      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
       {
         if(!(*vi).IsD()) //if it has not been deleted...
         {
@@ -434,13 +391,13 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           {
             if((*vi).IsS()) //if this vertex has been selected, do transormation
             {
-              (*vi).C() = color_apply_diff((*ci), c, intensity);
+              (*vi).C() = color_apply_diff((*vi).C(), c, intensity);
               ++counter;
             }
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            (*vi).C() = color_apply_diff((*ci), c,intensity);
+            (*vi).C() = color_apply_diff((*vi).C(), c,intensity);
             ++counter;
           }
         }

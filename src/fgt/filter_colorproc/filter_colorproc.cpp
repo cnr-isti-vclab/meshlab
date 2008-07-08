@@ -81,15 +81,15 @@ const QString FilterColorProc::filterInfo(FilterIDType filterId)
 {
   switch(filterId)
   {
-    case CP_FILLING : return "Fill the whole mesh with a color choosed by the user.";
-    case CP_TRESHOLDING : return "All the vertex of the mesh above a certain threshold level becomes white, others black. Treshold = 255 -> all black; Treshold = 0 -> all white;";
-    case CP_BRIGHTNESS : return "Adds or subtracts luminance to the mesh. Brightness = 255 -> all white; Brightness = -255 -> all black;";
-    case CP_CONTRAST : return "Contrast";
-    case CP_CONTR_BRIGHT : return "Contrast and Brightness";
-    case CP_GAMMA : return "Gamma";
-    case CP_INVERT : return "Invert the colors of the mesh.";
-    case CP_LEVELS : return "Levels";
-    case CP_COLOURISATION : return "Colourisation";
+    case CP_FILLING : return "Fills the mesh with a color choosed by the user.";
+    case CP_TRESHOLDING : return "Reduces the mesh to two colors according to a treshold.";
+    case CP_BRIGHTNESS : return "Sets the brightness of the mesh.";
+    case CP_CONTRAST : return "Sets the contrast of the mesh.";
+    case CP_CONTR_BRIGHT : return "Sets brightness and contrast of the mesh.";
+    case CP_GAMMA : return "Provides standard gamma correction.";
+    case CP_INVERT : return "Inverts the colors of the mesh.";
+    case CP_LEVELS : return "Sets colors levels.";
+    case CP_COLOURISATION : return "Colors the mesh.";
     default: assert(0);
   }
   return QString("error!");
@@ -112,62 +112,60 @@ const int FilterColorProc::getRequirements(QAction *action)
 
 void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameterSet & par)
 {
-  //first of all make a copy of color per vertex. This is done to undo
-  //the filters changes, but also to allow that filters always work on
-  //the original colors, avoiding sum of sequential transformation
-  m.storeVertexColor();
-
 	switch(ID(a))
   {
     case CP_FILLING:
     {
-			int r = 255, g = 255, b = 255;
-			par.addInt("r", r, "Red:", "Set the <b><i>Red</b></i> component of the color.");
-			par.addInt("g", g, "Green:", "Set the <b><i>Green</b></i> component of the color.");
-			par.addInt("b", b, "Blue:", "Set the <b><i>Blue</b></i> component of the color.");
+			float r = 255.0f, g = 255.0f, b = 255.0f;
+			par.addDynamicFloat("r", r, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR ,"Red:", "Sets the red component of the color.");
+			par.addDynamicFloat("g", g, 0, 255, MeshModel::MM_VERTCOLOR ,"Green:", "Sets the green component of the color.");
+			par.addDynamicFloat("b", b, 0, 255, MeshModel::MM_VERTCOLOR ,"Blue:", "Sets the blue component of the color.");
 			break;
 		}
     case CP_TRESHOLDING:
     {
       float treshold = 128.0f;
-      par.addFloat("treshold", treshold, "Treshold:", "Set the treshold between shadows (black) and lights (white).");
+      QColor color1 = QColor(0,0,0), color2 = QColor(255,255,255);
+      par.addColor("color1", color1, "Color 1:", "Sets the color to apply below the treshold.");
+      par.addColor("color2", color2, "Color 2:", "Sets the color to apply above the treshold.");
+      par.addDynamicFloat("treshold", treshold, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Treshold:", "Colors above the threshold becomes Color 2, others Color 1.");
+
       break;
     }
     case CP_BRIGHTNESS:
     {
-      int brightness = 0;
-      par.addInt("brightness", brightness, "Brightness:", "Set the amount of brightness (or darkness) that will be added to the color.");
+      float brightness = 0.0f;
+      par.addDynamicFloat("brightness", brightness, -255.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;");
       break;
     }
     case CP_CONTRAST:
     {
       float factor = 1.0f;
-      par.addFloat("factor", factor, "Contrast factor:", "Set the amount of contrast of the mesh.");
+      par.addDynamicFloat("factor", factor, 0.2f, 5.0f, MeshModel::MM_VERTCOLOR, "Contrast factor:", "Sets the amount of contrast of the mesh.");
       break;
     }
     case CP_CONTR_BRIGHT:
     {
-      int brightness = 0;
+      float brightness = 0.0f;
       float factor = 1.0f;
-      par.addInt("brightness", brightness, "Brightness:", "Set the amount of brightness (or darkness) that will be added to the color.");
-      par.addFloat("factor", factor, "Contrast factor:", "Set the amount of contrast of the mesh.");
+      par.addDynamicFloat("brightness", brightness, -255.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;");
+      par.addDynamicFloat("factor", factor, 0.2f, 5.0f, MeshModel::MM_VERTCOLOR, "Contrast factor:", "Sets the amount of contrast of the mesh.");
       break;
     }
     case CP_GAMMA :
     {
       float gamma = 1.0f;
-      par.addFloat("gamma", gamma, "Gamma:", "Provides standard Gamma correction, according to the relation: display_intensity = pixel_value^gamma.");
+      par.addDynamicFloat("gamma", gamma, 0.5f, 1.5f, MeshModel::MM_VERTCOLOR, "Gamma:", "Sets the values of the exponent gamma.");
       break;
     }
     case CP_LEVELS:
     {
-			int in_min = 0, in_max = 255, out_min = 0, out_max = 255;
-			float gamma = 1;
-			par.addInt("in_min", in_min, "Input min:", "");
-			par.addInt("in_max", in_max, "Input max:", "");
-			par.addInt("out_min", out_min, "Output min:", "");
-			par.addInt("out_max", out_max, "Output max:", "");
-			par.addFloat("gamma", gamma, "Gamma:", "");
+			float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
+			par.addDynamicFloat("in_min", in_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Black input level:", "");
+			par.addDynamicFloat("in_max", in_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White input level:", "");
+			par.addDynamicFloat("out_min", out_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Black output level:", "");
+			par.addDynamicFloat("out_max", out_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White output level:", "");
+			par.addDynamicFloat("gamma", gamma, 0.2f, 1.5f, MeshModel::MM_VERTCOLOR, "Gamma:", "");
 			break;
 		}
 		case CP_COLOURISATION:
@@ -175,10 +173,10 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
 		  float intensity = 1.0f;
       double hue, luminance, saturation;
 			ColorSpace<unsigned char>::RGBtoHSL(1.0, 1.0, 1.0, hue, saturation, luminance);
-			par.addFloat("hue", (float)hue, "Hue:", "Change the <b><i>Hue</b></i> of the mesh.");
-			par.addFloat("saturation", (float)saturation, "Saturation:", "Change the <b><i>Saturation</b></i> of the mesh.");
-			par.addFloat("luminance", (float)luminance, "Luminance:", "Change the <b><i>Luminance</b></i> of the mesh.");
-			par.addFloat("intensity", intensity, "Intensity:", "");
+			par.addDynamicFloat("hue", (float)hue, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Hue:", "Changes the hue of the mesh.");
+			par.addDynamicFloat("saturation", (float)saturation, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Saturation:", "Changes the saturation of the mesh.");
+			par.addDynamicFloat("luminance", (float)luminance, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Luminance:", "Changes the luminance of the mesh.");
+			par.addDynamicFloat("intensity", intensity, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Intensity:", "Sets the intensity with which the color it's blended to the mesh.");
 			break;
     }
     default: assert(0);
@@ -191,9 +189,9 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
   {
     case CP_FILLING:
     {
-      int r = math::Clamp<int>(par.getInt("r"), 0, 255);
-      int g = math::Clamp<int>(par.getInt("g"), 0, 255);
-      int b = math::Clamp<int>(par.getInt("b"), 0, 255);
+      int r = (int)par.getDynamicFloat("r");
+      int g = (int)par.getDynamicFloat("g");
+      int b = (int)par.getDynamicFloat("b");
       Color4b new_col = Color4b(r,g,b,1);
 
       int  v_num = FilterColorProc::filling(m, new_col);
@@ -208,9 +206,12 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_TRESHOLDING:
     {
-      float treshold = math::Clamp(par.getFloat("treshold"), 0.0f, 255.0f);
-
-      int  v_num = FilterColorProc::tresholding(m, treshold);
+      float treshold = par.getDynamicFloat("treshold");
+      QColor temp = par.getColor("color1");
+      Color4b c1 = Color4b(temp.red(), temp.green(),temp.blue(), 1);
+      temp = par.getColor("color2");
+      Color4b c2 = Color4b(temp.red(), temp.green(),temp.blue(), 1);
+      int  v_num = FilterColorProc::tresholding(m, treshold, c1, c2);
 
       if(v_num==0)
       {
@@ -222,7 +223,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_BRIGHTNESS:
     {
-      int brightness = math::Clamp<int>(par.getInt("brightness"), -255, 255);
+      int brightness = (int)par.getDynamicFloat("brightness");
 
       int  v_num = FilterColorProc::brighting(m, brightness);
 
@@ -236,7 +237,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_CONTRAST:
     {
-      float factor = math::Clamp<float>(par.getFloat("factor"), 1.0f/6.0f, 6.0f);
+      float factor = par.getDynamicFloat("factor");
 
       int  v_num = FilterColorProc::contrast(m, factor);
 
@@ -250,8 +251,8 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_CONTR_BRIGHT:
     {
-      int brightness = math::Clamp<int>(par.getInt("brightness"), -255, 255);
-      float factor = math::Clamp<float>(par.getFloat("factor"), 1.0f/6.0f, 6.0f);
+      int brightness = (int)par.getDynamicFloat("brightness");
+      float factor = par.getDynamicFloat("factor");
 
       int  v_num = FilterColorProc::contrastBrightness(m, factor, brightness);
 
@@ -265,7 +266,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_GAMMA :
     {
-      float gamma = math::Clamp<float>(par.getFloat("gamma"), 0.5f, 1.5f);  //valori sensati???
+      float gamma = par.getDynamicFloat("gamma");
 
       int  v_num = FilterColorProc::gamma(m, gamma);
 
@@ -291,11 +292,11 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_LEVELS:
     {
-			float gamma = math::Clamp<float>(par.getFloat("gamma"), 0.5f, 1.5f);  //valori sensati???
-      int  in_min = par.getInt("in_min");
-      int  in_max = par.getInt("in_max");
-      int  out_min = par.getInt("out_min");
-      int  out_max = par.getInt("out_max");
+			float gamma = par.getDynamicFloat("gamma");
+      int  in_min = (int)par.getDynamicFloat("in_min");
+      int  in_max = (int)par.getDynamicFloat("in_max");
+      int  out_min = (int)par.getDynamicFloat("out_min");
+      int  out_max = (int)par.getDynamicFloat("out_max");
 
       int  v_num = FilterColorProc::levels(m, gamma, in_min, in_max, out_min, out_max);
 
@@ -309,10 +310,10 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
 		}
 		case CP_COLOURISATION:
 		{
-			float luminance = math::Clamp<float>(par.getFloat("luminance"), 0.0f, 1.0f);
-			float saturation = math::Clamp<float>(par.getFloat("saturation"), 0.0f, 1.0f);
-      float hue = math::Clamp<float>(par.getFloat("hue"), 0.0f, 1.0f);
-      float intensity = math::Clamp<float>(par.getFloat("intensity"), 0.0f, 1.0f);
+			float luminance = par.getDynamicFloat("luminance");
+			float saturation = par.getDynamicFloat("saturation");
+      float hue = par.getDynamicFloat("hue");
+      float intensity = par.getDynamicFloat("intensity");
 
       double r, g, b;
 
