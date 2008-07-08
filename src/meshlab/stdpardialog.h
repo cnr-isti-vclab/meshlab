@@ -148,7 +148,6 @@ public:
 	void  setValue(float val, float minV, float maxV);
 	
 	public slots:
-		void setValue(float newv);
 		void setValue(int newv);
 		void setValue();
 	

@@ -829,24 +829,22 @@ float DynamicFloatWidget::getValue()
 {
 	return float(valueLE->text().toDouble());
 }
+
 void DynamicFloatWidget::setValue(int  newVal) 
 {
-	this->setValue(intToFloat(newVal));
+	if(floatToInt(float(valueLE->text().toDouble())) != newVal)
+	{
+		valueLE->setText(QString::number(intToFloat(newVal)));
+	}
 }
 
 void DynamicFloatWidget::setValue()            
 {
-	this->setValue(float(valueLE->text().toDouble()));
-}
-
-void DynamicFloatWidget::setValue(float newVal)
-{
-	if(newVal == float(valueLE->text().toDouble()))
-			valueSlider->setValue(floatToInt(newVal));
-	else 
-		valueLE->setText(QString::number(newVal));
+	float newValLE=float(valueLE->text().toDouble());
+	valueSlider->setValue(floatToInt(newValLE));
 	emit valueChanged(mask);
 }
+
 float DynamicFloatWidget::intToFloat(int val) 
 { 
 	return minVal+float(val)/100.0f*(maxVal-minVal);
