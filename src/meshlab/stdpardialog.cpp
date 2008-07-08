@@ -134,6 +134,12 @@ void StdParFrame::resetValues(FilterParameterSet &curParSet)
 						((QVariantListWidget *)stdfieldwidgets.at(i))->setList(list);
 					}
 					break;
+				case FilterParameter::PARDYNFLOAT: 
+				{
+					float initVal = (float)fpi.fieldVal.toDouble();
+					((DynamicFloatWidget *)stdfieldwidgets.at(i))->setValue(initVal);
+				}
+					break;
 				default: assert(0);
 
 			}
@@ -768,6 +774,12 @@ DynamicFloatWidget::~DynamicFloatWidget()
 float DynamicFloatWidget::getValue() 
 {
 	return float(valueLE->text().toDouble());
+}
+
+void DynamicFloatWidget::setValue(float  newVal) 
+{
+	if( QString::number(intToFloat(newVal)) != valueLE->text())
+		 valueLE->setText(QString::number(intToFloat(newVal)));
 }
 
 void DynamicFloatWidget::setValue(int  newVal) 

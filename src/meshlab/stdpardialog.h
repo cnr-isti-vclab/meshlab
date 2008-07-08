@@ -150,7 +150,8 @@ public:
 	public slots:
 		void setValue(int newv);
 		void setValue();
-	
+		void setValue(float newValue);
+
 	signals:
 		void valueChanged(int mask);
 	
