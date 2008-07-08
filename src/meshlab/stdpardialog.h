@@ -277,19 +277,21 @@ public:
 	void loadFrameContent(MeshDocument *mdPt=0);
 
 	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi);
-
+	bool isDynamic();
 private slots:
 	void applyClick();
 	void closeClick();
   void resetValues();
   void toggleHelp();
-	void applyDynamic(int mask);
+	void togglePreview();
+	void applyDynamic();
 
 protected:
 	QFrame *qf;
 	StdParFrame *stdParFrame;
 	QAction *curAction;
 	MeshModelState meshState;
+	QCheckBox *previewCB;
 public:
 	MeshModel *curModel;
 	MeshDocument * curMeshDoc;

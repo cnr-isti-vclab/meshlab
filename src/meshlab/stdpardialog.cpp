@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * An extendible mesh processor                                    o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005, 2006                                          \/)\/    *
+* Copyright(C) 2005, 2008                                          \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,89 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
 
-$Log$
-Revision 1.26  2008/04/16 12:05:50  cignoni
-option for title of the dialog
-
-Revision 1.25  2008/02/25 14:51:01  ponchio
-added parent window reference durinc creation
-
-Revision 1.24  2008/01/28 13:02:00  cignoni
-added support for filters on collection of meshes (layer filters)
-
-Revision 1.23  2008/01/10 17:16:44  cignoni
-unsaved dialog has a better behaviour
-
-Revision 1.22  2007/12/11 23:56:40  cignoni
-better resizing of dialogs
-
-Revision 1.21  2007/11/30 07:19:09  cignoni
-moved generic dialog to the meshlab base
-
-Revision 1.20  2007/11/20 18:55:32  ponchio
-removed qDebug
-
-Revision 1.18  2007/11/19 17:09:20  ponchio
-added enum value. [untested].
-
-Revision 1.17  2007/11/19 15:51:50  cignoni
-Added frame abstraction for reusing the std dialog mechanism
-
-Revision 1.16  2007/11/09 11:27:27  cignoni
-corrected resizing strategy and hints (still not perfect)
-
-Revision 1.15  2007/11/05 13:34:41  cignoni
-added color and Help
-
-Revision 1.14  2007/10/17 21:23:30  cignoni
-added wordwrapping to the first line of the automatic dialog
-
-Revision 1.13  2007/10/16 11:04:06  cignoni
-better init of the frame
-
-Revision 1.12  2007/10/02 10:03:03  cignoni
-wrong init in a case statement
-
-Revision 1.11  2007/10/02 07:59:35  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.10  2007/04/16 09:22:43  cignoni
-corrected resizing bug in the dialog
-
-Revision 1.9  2007/02/27 23:58:36  cignoni
-Changed apply/ok into apply/close
-
-Revision 1.8  2007/02/10 16:41:18  pirosu
-replaced NULL with empty FilterParameter for filters that don't use the standard plugin window
-
-Revision 1.7  2007/02/09 09:09:40  pirosu
-Added ToolTip support for standard parameters
-
-Revision 1.6  2007/01/19 09:12:59  cignoni
-Better formatting of floating points numbers in the dialog
-
-Revision 1.5  2007/01/13 02:02:28  cignoni
-Changed loadFrameContent to pass the QString not as a reference (to avoid a temp var referencing)
-
-Revision 1.4  2007/01/11 19:51:46  pirosu
-fixed bug for QT 4.1.0/dotnet2003
-removed the request of the window title to the plugin. The action description is used instead.
-
-Revision 1.3  2006/12/27 21:41:41  pirosu
-Added improvements for the standard plugin window:
-split of the apply button in two buttons:ok and apply
-added support for parameters with absolute and percentage values
-
-Revision 1.2  2006/12/13 21:54:35  pirosu
-2 updates for the standard plugin window: 1) it recovers its last size when it is undocked and 2) it closes itself when a filter is applied (only if it is floating)
-
-Revision 1.0  2006/12/13 17:37:02  pirosu
-Added standard plugin window support
-
-****************************************************************************/
 #include<QObject>
 #include "meshmodel.h"
 #include "interfaces.h"
@@ -139,13 +57,19 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		mfi->initParameterSet(action, *mdp, curParSet);	
 		createFrame();
 		loadFrameContent(mdp);
-		int mask = curParSet.getDynamicFloatMask();
-		if(mask)
+		if(isDynamic())
 		{
+			int mask = curParSet.getDynamicFloatMask();
 			meshState.create(mask, curModel);
-			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic(int)));
+			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
 		}
   }
+
+	bool MeshlabStdDialog::isDynamic()	
+	{
+		return (curParSet.getDynamicFloatMask()!= 0);
+	}
+	
 
 	void MeshlabStdDialog::clearValues()
 	{
@@ -245,16 +169,25 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	QPushButton *applyButton = new QPushButton("Apply", qf);
 	QPushButton *defaultButton = new QPushButton("Default", qf);
 	
-	gridLayout->addWidget(helpButton,buttonRow,1,Qt::AlignBottom);
-	gridLayout->addWidget(defaultButton,buttonRow,0,Qt::AlignBottom);
-	gridLayout->addWidget(closeButton,buttonRow+1,0,Qt::AlignBottom);
-	gridLayout->addWidget(applyButton,buttonRow+1,1,Qt::AlignBottom);
+	if(isDynamic()) 
+		{
+			previewCB = new QCheckBox("Preview", qf);
+			gridLayout->addWidget(previewCB,    buttonRow+0,0,Qt::AlignBottom);
+			connect(previewCB,SIGNAL(toggled(bool)),this,SLOT( togglePreview() ));
+		  buttonRow++;
+		}
+	
+	gridLayout->addWidget(helpButton,   buttonRow+0,1,Qt::AlignBottom);
+	gridLayout->addWidget(defaultButton,buttonRow+0,0,Qt::AlignBottom);
+	gridLayout->addWidget(closeButton,  buttonRow+1,0,Qt::AlignBottom);
+	gridLayout->addWidget(applyButton,  buttonRow+1,1,Qt::AlignBottom);
+	
 	
 	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
 	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
 	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
 	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetValues()));
-	
+
 	qf->showNormal();	
 	qf->adjustSize();
 	
@@ -503,13 +436,20 @@ void MeshlabStdDialog::applyClick()
 		
 }
 
-void MeshlabStdDialog::applyDynamic(int mask)
+void MeshlabStdDialog::applyDynamic()
 {
+	if(!previewCB->isChecked()) return;
 	QAction *q = curAction;
 	stdParFrame->readValues(curParSet);
 	// Restore the 
 	meshState.apply(curModel);
 	curmwi->executeFilter(q,curParSet);
+}
+
+void MeshlabStdDialog::togglePreview()
+{	
+	if(previewCB->isChecked()) applyDynamic();
+	else meshState.apply(curModel);
 }
 
 /* click event for the close button of the standard plugin window */
