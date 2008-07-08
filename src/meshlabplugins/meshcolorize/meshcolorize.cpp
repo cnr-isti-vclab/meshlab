@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2004-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -19,164 +19,6 @@
 * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
 * for more details.                                                         *
 *                                                                           *
-****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.50  2008/04/28 15:06:28  cignoni
-removed use of smoothcolor
-
-Revision 1.49  2008/04/22 16:02:51  bernabei
-forced vcg namespace use, as Quality was interpreted by gcc as one of the values of the FilterClass
-enumeration
-
-Revision 1.48  2008/04/07 10:33:56  cignoni
-added texture border colorization filter
-
-Revision 1.47  2008/04/04 13:15:58  cignoni
-Switched to the new vcg library curvature computation method
-
-Revision 1.46  2008/03/19 05:23:01  cignoni
-Added pre-cleaning before computing curvature to avoid degenerate cases
-
-Revision 1.45  2008/02/12 14:20:33  cignoni
-changed the function getParameter into the more meaningful getCustomParameter
-
-Revision 1.44  2008/02/03 23:33:13  cignoni
-Corrected iteration on faces in the face-shape-quality. now respect isD
-
-Revision 1.43  2008/01/11 13:58:21  cignoni
-added selection of self-intersecting faces.
-
-Revision 1.42  2007/12/13 17:02:41  ponchio
-Added a small help.
-
-Revision 1.41  2007/12/02 07:53:51  cignoni
-disambiguated sqrt call
-
-Revision 1.40  2007/11/26 13:33:30  ponchio
-Added Mean Ratio metric for triangle quality.
-
-Revision 1.38  2007/11/20 18:26:52  ponchio
-Added triangle quality with possibiliti to cohose metric.
-
-Revision 1.37  2007/11/19 17:08:54  ponchio
-Added triangle quality.
-
-Revision 1.36  2007/10/02 08:13:52  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.35  2007/06/19 00:30:53  cignoni
-getParameter should return false only in case of aborting a dialog...
-
-Revision 1.34  2007/04/16 09:25:29  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing again...
-
-Revision 1.33  2007/03/20 16:23:09  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.32  2007/02/08 23:46:17  pirosu
-merged srcpar and par in the GetStdParameters() function
-
-Revision 1.31  2006/12/11 23:49:32  cignoni
-removed unimplemented filter non topo coherent
-
-Revision 1.30  2006/12/05 15:37:27  cignoni
-Added rough version of non manifold vertex coloring
-
-Revision 1.29  2006/11/29 00:59:17  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.28  2006/11/07 09:10:32  cignoni
-Removed shorthHelp and added topo_non_coherent (draft)
-
-Revision 1.27  2006/06/18 21:26:56  cignoni
-range color bug for quality/curvature
-
-Revision 1.26  2006/06/16 01:26:42  cignoni
-Debugged Color by quality and default Curvature
-
-Revision 1.25  2006/05/25 04:57:45  cignoni
-Major 0.7 release. A lot of things changed. Colorize interface gone away, Editing and selection start to work.
-Optional data really working. Clustering decimation totally rewrote. History start to work. Filters organized in classes.
-
-Revision 1.24  2006/02/04 09:41:44  vannini
-Better handling of curvature computation for border vertex
-Plugin info updated
-
-Revision 1.23  2006/02/01 16:23:09  vannini
-Added "smooth color" filter
-
-Revision 1.22  2006/01/31 10:54:28  vannini
-curvature<>color mapping now ignores border vertex
-
-Revision 1.21  2006/01/30 17:19:22  vannini
-Added manual values to control min and max Q (mapping curvature to color)
-
-Revision 1.20  2006/01/27 18:27:53  vannini
-code refactoring for curvature colorize
-added colorize equalizer dialog and
-"Colorize by Quality" filter
-some small bugfixes
-removed color_curvature.h in favour of curvature.h
-
-Revision 1.19  2006/01/20 18:17:07  vannini
-added Restore Color
-
-Revision 1.18  2006/01/20 16:25:39  vannini
-Added Absolute Curvature colorize
-
-Revision 1.17  2006/01/20 14:46:44  vannini
-Code refactoring
-Added RMS Curvature colorize
-
-Revision 1.16  2006/01/17 23:46:36  cignoni
-Moved some include from meshmodel.h to here
-
-Revision 1.15  2006/01/13 16:24:16  vannini
-Moved gaussian and mean curvature functions into color_curvature.h
-
-Revision 1.14  2006/01/13 15:22:04  vannini
-colorize:
- -colorize nonmanifold now sets colorPerVertex mode
- -code rewritten to follow naming conventions (as in meshfilter)
- -added help and infos
-
-Revision 1.13  2006/01/13 12:10:31  vannini
-Added logging to mean and gaussian curvautres colorization
-
-Revision 1.12  2006/01/10 15:38:53  vannini
-Added mean curvature colorize
-
-Revision 1.11  2006/01/06 11:15:26  giec
-Added color non manifolt filter.
-
-Revision 1.10  2006/01/04 13:27:53  alemochi
-Added help in plugin dialog
-
-Revision 1.9  2005/12/23 19:34:09  glvertex
-Removed ColorModes (none,pervert,perface)
-
-Revision 1.8  2005/12/19 16:49:14  cignoni
-Added SelfIntersection and Border colorization methods
-
-Revision 1.7  2005/12/12 22:48:42  cignoni
-Added plugin info methods
-
-Revision 1.6  2005/12/08 22:52:50  cignoni
-Added safer min max search
-
-Revision 1.5  2005/12/05 11:37:13  ggangemi
-workaround: added rendermode to compute method
-
-Revision 1.4  2005/12/03 23:23:37  ggangemi
-new interface
-
-Revision 1.3  2005/12/03 22:49:46  cignoni
-Added copyright info
-
 ****************************************************************************/
 #include <QtGui>
 #include <limits>
@@ -212,7 +54,6 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     CP_COLOR_NON_MANIFOLD_VERTEX <<
     CP_SMOOTH <<
     //CP_COLOR_NON_TOPO_COHERENT <<
-    CP_RESTORE_ORIGINAL << 
 		CP_RANDOM_FACE;
     
   FilterIDType tt;
@@ -237,7 +78,6 @@ const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) {
     case CP_COLOR_NON_MANIFOLD_VERTEX:return QString("Color non Manifold Vertices");
     case CP_COLOR_NON_TOPO_COHERENT:  return QString("Color edges topologically non coherent");
     case CP_SMOOTH:                   return QString("Smooth Color");
-    case CP_RESTORE_ORIGINAL:         return QString("Restore Color");
 		case CP_RANDOM_FACE:         return QString("Random Face Color");
 			
     default: assert(0);
@@ -261,7 +101,6 @@ const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId)
     case CP_COLOR_NON_MANIFOLD_FACE: return tr("Colorize the non manifold edges, eg the edges where there are more than two incident faces");
     case CP_COLOR_NON_MANIFOLD_VERTEX:return tr("Colorize only non manifold edges eg. ");
     case CP_SMOOTH :                 return tr("Apply laplacian smooth for colors.");
-    case CP_RESTORE_ORIGINAL :       return tr("Restore original per vertex color.");
     case CP_COLOR_NON_TOPO_COHERENT :return tr("Color edges topologically non coherent.");
 		case CP_RANDOM_FACE:         return QString("Colorize Faces randomly. If internal edges are present they are used");
 
@@ -297,7 +136,6 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACETOPO;
     case CP_RANDOM_FACE:       return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
     case CP_SMOOTH:                   
-    case CP_RESTORE_ORIGINAL:         
     case CP_MAP_QUALITY_INTO_COLOR:   return 0;
     default: assert(0);
   }
@@ -479,9 +317,6 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
   case CP_COLOR_NON_MANIFOLD_VERTEX:
     ColorManifoldVertex<CMeshO>(m.cm);
     break;
-  case CP_RESTORE_ORIGINAL:
-     m.restoreVertexColor();
-     break;
   case CP_SMOOTH:
 		 tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,1);
      break;
@@ -498,7 +333,6 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
     case   CP_COLOR_NON_MANIFOLD_VERTEX:
     case   CP_COLOR_NON_MANIFOLD_FACE:
     case   CP_SMOOTH:
-    case   CP_RESTORE_ORIGINAL:
     case   CP_MAP_QUALITY_INTO_COLOR:
     case   CP_GAUSSIAN:
     case   CP_MEAN:
