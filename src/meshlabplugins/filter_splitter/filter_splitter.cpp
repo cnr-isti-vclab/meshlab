@@ -47,7 +47,9 @@ using namespace vcg;
 // Constructor 
 FilterSplitterPlugin::FilterSplitterPlugin() 
 { 
-	typeList << FP_SPLITSELECT;
+	typeList << 
+	FP_SPLITSELECT <<
+	FP_DUPLICATE;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -58,6 +60,7 @@ const QString FilterSplitterPlugin::filterName(FilterIDType filterId)
 {
   switch(filterId) {
 		case FP_SPLITSELECT :  return QString("Move selection on another layer"); 
+		case FP_DUPLICATE :  return QString("Duplicate current layer"); 
 		default : assert(0); 
 	}
 }
@@ -67,6 +70,7 @@ const QString FilterSplitterPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
 		case FP_SPLITSELECT :  return QString("Selected faces are moved (or duplicated) in a new layer"); 
+		case FP_DUPLICATE :  return QString("Create a new layer containing the same model as the current one");
 		default : assert(0); 
 	}
 }
@@ -75,22 +79,37 @@ const PluginInfo &FilterSplitterPlugin::pluginInfo()
 {
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.0");
+	 ai.Version = tr("1.1");
 	 ai.Author = ("Marco Callieri");
    return ai;
  }
 
-// This function define the needed parameters for each filter. 
-void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument & /*m*/, FilterParameterSet & parlst) 
+// Return true if the specified action has an automatic dialog.
+// return false if the action has no parameters or has an self generated dialog.
+bool FilterSplitterPlugin::autoDialog(QAction *action)
 {
-	 switch(ID(action))	 {
-		case FP_SPLITSELECT :  
- 		  parlst.addBool ("DeleteOriginal",
-											true,
-											"Delete original selection",
-											"Deletes the origianl selected faces, thus splitting the mesh among layers. \n\n"
-											"if false, the selected faces are duplicated in the new layer");
-											break;
+	 switch(ID(action))
+	 {
+		 case FP_SPLITSELECT:
+			 return true;
+	 }
+  return false;
+}
+
+// This function define the needed parameters for each filter. 
+void FilterSplitterPlugin::initParameterSet(QAction *action, MeshDocument &m, FilterParameterSet & parlst) 
+{
+	 switch(ID(action))	 
+	 {
+		case FP_SPLITSELECT :
+			{
+	 		  parlst.addBool ("DeleteOriginal",
+												true,
+												"Delete original selection",
+												"Deletes the original selected faces, thus splitting the mesh among layers. \n\n"
+												"if false, the selected faces are duplicated in the new layer");
+			}
+			break;
 											
 		default : assert(0); 
 	}
@@ -102,55 +121,86 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 	CMeshO::FaceIterator fi;
 	int numFacesSel,numVertSel;
 
-	// creating the new layer
-	// that is the back one
-	MeshModel *mm= new MeshModel();	
-	md.meshList.push_back(mm);	
+	switch(ID(filter))
+  {
+		case FP_SPLITSELECT : 
+		{
+			// creating the new layer
+			// that is the back one
+			MeshModel *mm= new MeshModel();	
+			md.meshList.push_back(mm);	
 
-	MeshModel *destMesh     = md.meshList.back();	// destination = last
-	MeshModel *currentMesh  = md.mm();				// source = current
+			MeshModel *destMesh     = md.meshList.back();	// destination = last
+			MeshModel *currentMesh  = md.mm();				// source = current
 
-	// select all points involved
-	tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
-	tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
+			// select all points involved
+			tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
+			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
 
-	tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, true);
+			tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, true);
 
-	numFacesSel = tri::UpdateSelection<CMeshO>::CountFace(currentMesh->cm);
-	numVertSel  = tri::UpdateSelection<CMeshO>::CountVertex(currentMesh->cm);
+			numFacesSel = tri::UpdateSelection<CMeshO>::CountFace(currentMesh->cm);
+			numVertSel  = tri::UpdateSelection<CMeshO>::CountVertex(currentMesh->cm);
 
-	if(par.getBool("DeleteOriginal"))	// delete original faces
-	{
-		CMeshO::VertexIterator vi;
-		CMeshO::FaceIterator   fi;
-		tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
-		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(currentMesh->cm);  
-		for(fi=currentMesh->cm.face.begin();fi!=currentMesh->cm.face.end();++fi)
-			if(!(*fi).IsD() && (*fi).IsS() )
-				tri::Allocator<CMeshO>::DeleteFace(currentMesh->cm,*fi);
-		for(vi=currentMesh->cm.vert.begin();vi!=currentMesh->cm.vert.end();++vi)
-			if(!(*vi).IsD() && (*vi).IsS() )
-				tri::Allocator<CMeshO>::DeleteVertex(currentMesh->cm,*vi);
+			if(par.getBool("DeleteOriginal"))	// delete original faces
+			{
+				CMeshO::VertexIterator vi;
+				CMeshO::FaceIterator   fi;
+				tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
+				tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(currentMesh->cm);  
+				for(fi=currentMesh->cm.face.begin();fi!=currentMesh->cm.face.end();++fi)
+					if(!(*fi).IsD() && (*fi).IsS() )
+						tri::Allocator<CMeshO>::DeleteFace(currentMesh->cm,*fi);
+				for(vi=currentMesh->cm.vert.begin();vi!=currentMesh->cm.vert.end();++vi)
+					if(!(*vi).IsD() && (*vi).IsS() )
+						tri::Allocator<CMeshO>::DeleteVertex(currentMesh->cm,*vi);
 
-		tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
-		tri::UpdateSelection<CMeshO>::ClearFace(currentMesh->cm);
+				tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
+				tri::UpdateSelection<CMeshO>::ClearFace(currentMesh->cm);
 
-		currentMesh->clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+				currentMesh->clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 
-		Log(0,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+				Log(0,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+			}
+			else								// keep original faces
+			{
+				Log(0,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+			}
+
+			// init new layer
+			destMesh->fileName = "newlayer.ply";								// mesh name
+			tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
+			for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
+				face::ComputeNormalizedNormal(*fi);	
+			tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
+			destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
+		}
+		break;
+
+		case FP_DUPLICATE : 
+		{
+			// creating the new layer
+			// that is the back one
+			MeshModel *mm= new MeshModel();	
+			md.meshList.push_back(mm);	
+
+			MeshModel *destMesh     = md.meshList.back();	// destination = last
+			MeshModel *currentMesh  = md.mm();				// source = current
+
+			tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, false);
+
+			Log(0,"Duplicated current model to layer %i", md.meshList.size());
+
+			// init new layer
+			destMesh->fileName = "newlayer.ply";								// mesh name
+			tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
+			for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
+				face::ComputeNormalizedNormal(*fi);	
+			tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
+			destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
+		}
 	}
-	else								// keep original faces
-	{
-		Log(0,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
-	}
 
-	// init new layer
-	destMesh->fileName = "newlayer.ply";								// mesh name
-	tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
-	for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
-		face::ComputeNormalizedNormal(*fi);	
-	tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
-	destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
 	return true;
 }
 
@@ -160,7 +210,9 @@ const FilterSplitterPlugin::FilterClass FilterSplitterPlugin::getClass(QAction *
   {
     case FP_SPLITSELECT :
       return MeshFilterInterface::Layer;     
-    default : 
+    case FP_DUPLICATE :
+      return MeshFilterInterface::Layer; 
+		default : 
 			return MeshFilterInterface::Generic;
   }
 }

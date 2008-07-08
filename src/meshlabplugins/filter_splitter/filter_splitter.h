@@ -35,14 +35,14 @@ class FilterSplitterPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_SPLITSELECT  } ;
+	enum { FP_SPLITSELECT, FP_DUPLICATE };
 
 	FilterSplitterPlugin();
 	
 	virtual const QString filterName(FilterIDType filter);
 	virtual const QString filterInfo(FilterIDType filter);
 	virtual const PluginInfo &pluginInfo();
-	virtual bool autoDialog(QAction *) {return true;}
+	virtual bool autoDialog(QAction *);
 	virtual const FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
