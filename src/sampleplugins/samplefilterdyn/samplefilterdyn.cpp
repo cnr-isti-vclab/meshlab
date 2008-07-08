@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2004-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -19,19 +19,6 @@
 * GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
 * for more details.                                                         *
 *                                                                           *
-****************************************************************************/
-/****************************************************************************
-  History
-$Log: samplefilter.cpp,v $
-Revision 1.3  2006/11/29 00:59:20  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.2  2006/11/27 06:57:21  cignoni
-Wrong way of using the __DATE__ preprocessor symbol
-
-Revision 1.1  2006/09/25 09:24:39  e_cerisoli
-add samplefilter
-
 ****************************************************************************/
 
 #include <QtGui>
@@ -94,6 +81,11 @@ const PluginInfo &ExtraSampleDynPlugin::pluginInfo()
    return ai;
  }
 
+// The FilterClass describes in which generic class of filters it fits. 
+// This choice affect the submenu in which each filter will be placed 
+// In this case this sample belong to the class of filters that change the vertex colors
+const MeshFilterInterface::FilterClass ExtraSampleDynPlugin::getClass(QAction *) { return MeshFilterInterface::VertexColoring; }
+
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
 // For each parmeter you need to define, 
@@ -101,8 +93,19 @@ const PluginInfo &ExtraSampleDynPlugin::pluginInfo()
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
+// 
+// In this sample a couple of parameter are declared as dynamic. That means that the meshlab framework will automatically 
+// manage the store and restore of the mesh state during the dynamic movement of the filter. 
+// The pluging writer is no more burdened with the task of saving the state but has only to declare what the filter changes 
+// (in this case just the vertex color). When a filter is dynamic (e.g. it has a dynamic float parameter) the meshlab 
+// framework will automatically store that part of the state at the opening of the dialog. When the user drag the slider,
+// the framework will restore the state and then simply call the apply callback of the filter. 
+// So from the point of view of the filter every time you have the freshly new mesh. 
+// 
+// when the user press apply the current stored state is updated. 
+// when the user press close the mesh state is restored to the one before the startup of the filter.
+
 void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
-//void ExtraSamplePlugin::initParList(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	 switch(ID(action))	 {
 		case FP_VERTEX_COLOR_NOISE :  
@@ -110,6 +113,7 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 											 Color4b::Black,
 											"BaseColor",
 											"The base color that is added to the mesh.");
+			
 			parlst.addDynamicFloat("percentage",
 												 0.5, 0, 1,
 												MeshModel::MM_VERTCOLOR,
@@ -117,10 +121,10 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 												"The random color is blended with the current one with the specified alpha");
 														
 			parlst.addDynamicFloat("frequency",
-														 20, 1, 100,
+														 20, 1, 200,
 														 MeshModel::MM_VERTCOLOR,
 														 "Noisy Frequency",
-														 "The random color is blended with the current one with the specified alpha");
+														 "The frequency of the Noise on the mesh. Higher numbers means smaller spots.");
 			break;
 			
 		default : assert(0); 
@@ -128,26 +132,26 @@ void ExtraSampleDynPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 }
 
 // The Real Core Function doing the actual mesh processing.
-// Move Vertex of a random quantity
+// It changes the color of the mesh according to a perlin noise function
 bool ExtraSampleDynPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-	srand(time(NULL)); 
 	const Color4b baseColor = par.getColor4b("baseColor");
 	const float percentage  = par.getDynamicFloat("percentage");
-	const float frequency   = par.getDynamicFloat("frequency");
+	const float frequency   = math::Clamp(par.getDynamicFloat("frequency"),1.f,1000.f);
 
 	CMeshO::VertexIterator vi;
-  qDebug("Dynamic Apply percentage %f frequency %f",percentage,frequency);
+	
+	float scale = frequency/m.cm.bbox.Diag() ;
+	
+  //qDebug("Dynamic Apply percentage %f frequency %f",percentage,frequency);
  	for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
 		if(!(*vi).IsD()) 
 		{
-			float alpha = percentage *  math::Abs(math::Perlin::Noise((*vi).P()[0]/frequency,(*vi).P()[1]/frequency,(*vi).P()[2]/frequency));
+			float alpha = percentage *  (0.5f+math::Perlin::Noise((*vi).P()[0]*scale,(*vi).P()[1]*scale,(*vi).P()[2]*scale));
+			alpha=math::Clamp(alpha,0.0f,1.0f);
 			(*vi).C().lerp ( (*vi).C(), baseColor, alpha);
 		}
-	
-	// Log function dump textual info in the lower part of the MeshLab screen. 
-	Log(0,"Successfully displaced %i vertices",m.cm.vn);
-	
+			
 	return true;
 }
 
