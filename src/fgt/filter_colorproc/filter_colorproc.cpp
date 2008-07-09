@@ -107,7 +107,7 @@ const PluginInfo &FilterColorProc::pluginInfo()
 
 const int FilterColorProc::getRequirements(QAction *action)
 {
-  return 0;
+  return MeshModel::MM_VERTCOLOR;
 }
 
 void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameterSet & par)
@@ -155,7 +155,7 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
     case CP_GAMMA :
     {
       float gamma = 1.0f;
-      par.addDynamicFloat("gamma", gamma, 0.5f, 1.5f, MeshModel::MM_VERTCOLOR, "Gamma:", "Sets the values of the exponent gamma.");
+      par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f, MeshModel::MM_VERTCOLOR, "Gamma:", "Sets the values of the exponent gamma.");
       break;
     }
     case CP_LEVELS:
@@ -165,12 +165,12 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
 			par.addDynamicFloat("in_max", in_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White input level:", "");
 			par.addDynamicFloat("out_min", out_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Black output level:", "");
 			par.addDynamicFloat("out_max", out_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White output level:", "");
-			par.addDynamicFloat("gamma", gamma, 0.2f, 1.5f, MeshModel::MM_VERTCOLOR, "Gamma:", "");
+			par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f, MeshModel::MM_VERTCOLOR, "Gamma:", "");
 			break;
 		}
 		case CP_COLOURISATION:
 		{
-		  float intensity = 1.0f;
+		  float intensity = 0.5f;
       double hue, luminance, saturation;
 			ColorSpace<unsigned char>::RGBtoHSL(1.0, 1.0, 1.0, hue, saturation, luminance);
 			par.addDynamicFloat("hue", (float)hue, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Hue:", "Changes the hue of the mesh.");
@@ -194,14 +194,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       int b = (int)par.getDynamicFloat("b");
       Color4b new_col = Color4b(r,g,b,1);
 
-      int  v_num = FilterColorProc::filling(m, new_col);
-
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
+      vcg::tri::UpdateColor<CMeshO>::Filling(m.cm, new_col, false);
       return true;
     }
     case CP_TRESHOLDING:
@@ -211,34 +204,21 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       Color4b c1 = Color4b(temp.red(), temp.green(),temp.blue(), 1);
       temp = par.getColor("color2");
       Color4b c2 = Color4b(temp.red(), temp.green(),temp.blue(), 1);
-      int  v_num = FilterColorProc::tresholding(m, treshold, c1, c2);
 
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
+      vcg::tri::UpdateColor<CMeshO>::Tresholding(m.cm, treshold, c1, c2, false);
       return true;
     }
     case CP_BRIGHTNESS:
     {
       int brightness = (int)par.getDynamicFloat("brightness");
-			int counter=vcg::tri::UpdateColor<CMeshO>::Brighting(m.cm,brightness,false);
+			vcg::tri::UpdateColor<CMeshO>::Brighting(m.cm, brightness, false);
 	    return true;
     }
     case CP_CONTRAST:
     {
       float factor = par.getDynamicFloat("factor");
 
-      int  v_num = FilterColorProc::contrast(m, factor);
-
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
+      vcg::tri::UpdateColor<CMeshO>::Contrast(m.cm, factor, false);
       return true;
     }
     case CP_CONTR_BRIGHT:
@@ -246,40 +226,19 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       int brightness = (int)par.getDynamicFloat("brightness");
       float factor = par.getDynamicFloat("factor");
 
-      int  v_num = FilterColorProc::contrastBrightness(m, factor, brightness);
-
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
+      vcg::tri::UpdateColor<CMeshO>::ContrastBrightness(m.cm, factor, brightness, false);
       return true;
     }
     case CP_GAMMA :
     {
       float gamma = par.getDynamicFloat("gamma");
 
-      int  v_num = FilterColorProc::gamma(m, gamma);
-
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
+      FilterColorProc::gamma(m, gamma); //move to vcg and refactorize
       return true;
     }
     case CP_INVERT :
     {
-      int  v_num = FilterColorProc::invert(m);
-
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
+      vcg::tri::UpdateColor<CMeshO>::Invert(m.cm, false);
       return true;
     }
     case CP_LEVELS:
@@ -308,17 +267,10 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       float intensity = par.getDynamicFloat("intensity");
 
       double r, g, b;
-
       ColorSpace<unsigned char>::HSLtoRGB( (double)hue, (double)saturation, (double)luminance, r, g, b);
       Color4b color = Color4b((int)(r*255), (int)(g*255), (int)(b*255), 1);
-      int  v_num = FilterColorProc::colourisation(m, color, intensity);
 
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
+      vcg::tri::UpdateColor<CMeshO>::Colourisation(m.cm, color, intensity, false);
       return true;
     }
     default: assert(0);
