@@ -26,7 +26,7 @@ void AOGLWidget::initializeGL ()
 {
 	plugin->initGL(cb,m->cm.vn);
 
-	unsigned int widgetSize = std::max(plugin->maxTexSize, plugin->depthTexSize);
+	unsigned int widgetSize = std::min(plugin->maxTexSize, plugin->depthTexSize);
 
 	setFixedSize(widgetSize,widgetSize);
 }
