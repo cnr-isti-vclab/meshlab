@@ -224,16 +224,8 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     case CP_BRIGHTNESS:
     {
       int brightness = (int)par.getDynamicFloat("brightness");
-
-      int  v_num = FilterColorProc::brighting(m, brightness);
-
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
-      return true;
+			int counter=vcg::tri::UpdateColor<CMeshO>::Brighting(m.cm,brightness,false);
+	    return true;
     }
     case CP_CONTRAST:
     {

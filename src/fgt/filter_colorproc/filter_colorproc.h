@@ -32,6 +32,7 @@
 #include <meshlab/interfaces.h>
 
 #include <math.h>
+#include <vcg/complex/trimesh/update/color.h>
 
 class FilterColorProc : public QObject, public MeshFilterInterface
 {
@@ -139,29 +140,8 @@ class FilterColorProc : public QObject, public MeshFilterInterface
     //Apply the brightness filter, with the given amount, to the mesh.
     static int brighting(MeshModel &m, int amount)
     {
-      int counter=0;
-
-      CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
-      {
-        if(!(*vi).IsD()) //if it has not been deleted...
-        {
-          if(m.cm.sfn!=0) //mesh has a selected region, work just on it
-          {
-            if((*vi).IsS()) //if this vertex has been selected, do transormation
-            {
-              (*vi).C() = color_add((*vi).C(),amount);
-              ++counter;
-            }
-          }
-          else //mesh has not a selected region, transorm all vertex
-          {
-            (*vi).C() = color_add((*vi).C(),amount);
-            ++counter;
-          }
-        }
-      }
-      return counter;
+      int counter=vcg::tri::UpdateColor<CMeshO>::Brighting(m.cm,amount,false);
+			return counter;
     }
 
     //Adds an integer amount to rgb components of the color.
