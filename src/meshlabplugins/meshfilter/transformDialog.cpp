@@ -133,7 +133,7 @@ TransformDialog::TransformDialog() : QDialog() {
 		tableWidget->setRowHeight(i,18);
 		}
 }
-void TransformDialog::showEvent ( QShowEvent * event )
+void TransformDialog::showEvent ( QShowEvent * /* event*/ )
 {
 	for(int i=0;i<4;i++)
 		{
@@ -142,7 +142,7 @@ void TransformDialog::showEvent ( QShowEvent * event )
 		}
 	
 }
-void TransformDialog::resizeEvent ( QResizeEvent * event )
+void TransformDialog::resizeEvent ( QResizeEvent * /*event*/ )
 {
 		for(int i=0;i<4;i++)
 		{
