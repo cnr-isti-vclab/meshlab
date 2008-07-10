@@ -162,21 +162,21 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
     {
 			float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
 			par.addDynamicFloat("in_min", in_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Black input level:", "");
+			par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f, MeshModel::MM_VERTCOLOR, "Gamma:", "");
 			par.addDynamicFloat("in_max", in_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White input level:", "");
 			par.addDynamicFloat("out_min", out_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Black output level:", "");
 			par.addDynamicFloat("out_max", out_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White output level:", "");
-			par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f, MeshModel::MM_VERTCOLOR, "Gamma:", "");
 			break;
 		}
 		case CP_COLOURISATION:
 		{
 		  float intensity = 0.5f;
       double hue, luminance, saturation;
-			ColorSpace<unsigned char>::RGBtoHSL(1.0, 1.0, 1.0, hue, saturation, luminance);
-			par.addDynamicFloat("hue", (float)hue, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Hue:", "Changes the hue of the mesh.");
-			par.addDynamicFloat("saturation", (float)saturation, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Saturation:", "Changes the saturation of the mesh.");
-			par.addDynamicFloat("luminance", (float)luminance, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Luminance:", "Changes the luminance of the mesh.");
-			par.addDynamicFloat("intensity", intensity, 0.0f, 1.0f, MeshModel::MM_VERTCOLOR, "Intensity:", "Sets the intensity with which the color it's blended to the mesh.");
+			ColorSpace<unsigned char>::RGBtoHSL(1.0, 0.0, 0.0, hue, saturation, luminance);
+			par.addDynamicFloat("hue", (float)hue*360, 0.0f, 360.0f, MeshModel::MM_VERTCOLOR, "Hue:", "Changes the hue of the mesh.");
+			par.addDynamicFloat("saturation", (float)saturation*100, 0.0f, 100.0f, MeshModel::MM_VERTCOLOR, "Saturation:", "Changes the saturation of the mesh.");
+			par.addDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f, MeshModel::MM_VERTCOLOR, "Luminance:", "Changes the luminance of the mesh.");
+			par.addDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, MeshModel::MM_VERTCOLOR, "Intensity:", "Sets the intensity with which the color it's blended to the mesh.");
 			break;
     }
     default: assert(0);
@@ -189,56 +189,78 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
   {
     case CP_FILLING:
     {
-      int r = (int)par.getDynamicFloat("r");
-      int g = (int)par.getDynamicFloat("g");
-      int b = (int)par.getDynamicFloat("b");
-      Color4b new_col = Color4b(r,g,b,1);
+      int r = math::Clamp((int)par.getDynamicFloat("r"), 0, 255);
+      int g = math::Clamp((int)par.getDynamicFloat("g"), 0, 255);
+      int b = math::Clamp((int)par.getDynamicFloat("b"), 0, 255);
+      Color4b new_col = Color4b(r,g,b,255);
 
-      vcg::tri::UpdateColor<CMeshO>::Filling(m.cm, new_col, false);
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+
+      vcg::tri::UpdateColor<CMeshO>::Filling(m.cm, new_col, selected);
       return true;
     }
     case CP_TRESHOLDING:
     {
-      float treshold = par.getDynamicFloat("treshold");
+      float treshold = math::Clamp<float>(par.getDynamicFloat("treshold"), 0.0f, 255.0f);
       QColor temp = par.getColor("color1");
-      Color4b c1 = Color4b(temp.red(), temp.green(),temp.blue(), 1);
+      Color4b c1 = Color4b(temp.red(), temp.green(),temp.blue(), 255);
       temp = par.getColor("color2");
-      Color4b c2 = Color4b(temp.red(), temp.green(),temp.blue(), 1);
+      Color4b c2 = Color4b(temp.red(), temp.green(),temp.blue(), 255);
 
-      vcg::tri::UpdateColor<CMeshO>::Tresholding(m.cm, treshold, c1, c2, false);
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+
+      vcg::tri::UpdateColor<CMeshO>::Tresholding(m.cm, treshold, c1, c2, selected);
       return true;
     }
     case CP_BRIGHTNESS:
     {
-      int brightness = (int)par.getDynamicFloat("brightness");
-			vcg::tri::UpdateColor<CMeshO>::Brighting(m.cm, brightness, false);
+      float brightness = math::Clamp<float>(par.getDynamicFloat("brightness"), -255.0f, 255.0f);
+
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+
+			vcg::tri::UpdateColor<CMeshO>::Brighting(m.cm, brightness, selected);
 	    return true;
     }
     case CP_CONTRAST:
     {
-      float factor = par.getDynamicFloat("factor");
+      float factor = math::Clamp<float>(par.getDynamicFloat("factor"), 0.2f, 5.0f);
 
-      vcg::tri::UpdateColor<CMeshO>::Contrast(m.cm, factor, false);
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+
+      vcg::tri::UpdateColor<CMeshO>::Contrast(m.cm, factor, selected);
       return true;
     }
     case CP_CONTR_BRIGHT:
     {
-      int brightness = (int)par.getDynamicFloat("brightness");
-      float factor = par.getDynamicFloat("factor");
+      float brightness = math::Clamp<float>(par.getDynamicFloat("brightness"), -255.0f, 255.0f);
+      float factor = math::Clamp<float>(par.getDynamicFloat("factor"), 0.2f, 5.0f);
 
-      vcg::tri::UpdateColor<CMeshO>::ContrastBrightness(m.cm, factor, brightness, false);
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+
+      vcg::tri::UpdateColor<CMeshO>::ContrastBrightness(m.cm, factor, brightness, selected);
       return true;
     }
     case CP_GAMMA :
     {
-      float gamma = par.getDynamicFloat("gamma");
+      float gamma = math::Clamp(par.getDynamicFloat("gamma"), 0.1f, 5.0f);
 
-      FilterColorProc::gamma(m, gamma); //move to vcg and refactorize
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+
+      vcg::tri::UpdateColor<CMeshO>::Gamma(m.cm, gamma, selected);
       return true;
     }
     case CP_INVERT :
     {
-      vcg::tri::UpdateColor<CMeshO>::Invert(m.cm, false);
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+
+      vcg::tri::UpdateColor<CMeshO>::Invert(m.cm, selected);
       return true;
     }
     case CP_LEVELS:
@@ -249,6 +271,8 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       int  out_min = (int)par.getDynamicFloat("out_min");
       int  out_max = (int)par.getDynamicFloat("out_max");
 
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
       int  v_num = FilterColorProc::levels(m, gamma, in_min, in_max, out_min, out_max);
 
       if(v_num==0)
@@ -261,16 +285,19 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
 		}
 		case CP_COLOURISATION:
 		{
-			float luminance = par.getDynamicFloat("luminance");
-			float saturation = par.getDynamicFloat("saturation");
-      float hue = par.getDynamicFloat("hue");
-      float intensity = par.getDynamicFloat("intensity");
+			float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0f, 1.0f);
+			float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0f, 1.0f);
+      float hue = math::Clamp(par.getDynamicFloat("hue")/360, 0.0f, 1.0f);
+      float intensity = math::Clamp(par.getDynamicFloat("intensity")/100, 0.0f, 1.0f);
 
       double r, g, b;
       ColorSpace<unsigned char>::HSLtoRGB( (double)hue, (double)saturation, (double)luminance, r, g, b);
-      Color4b color = Color4b((int)(r*255), (int)(g*255), (int)(b*255), 1);
+      Color4b color = Color4b((int)(r*255), (int)(g*255), (int)(b*255), 255);
 
-      vcg::tri::UpdateColor<CMeshO>::Colourisation(m.cm, color, intensity, false);
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+
+      vcg::tri::UpdateColor<CMeshO>::Colourisation(m.cm, color, intensity, selected);
       return true;
     }
     default: assert(0);

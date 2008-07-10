@@ -64,47 +64,7 @@ class FilterColorProc : public QObject, public MeshFilterInterface
 		virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb);
 
-    //Apply the gamma correction filter, with the given gamma exponet, to the mesh.
-    static int gamma(MeshModel &m, float gamma)
-    {
-      int counter=0;
 
-      CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) //scan all the vertex...
-      {
-        if(!(*vi).IsD()) //if it has not been deleted...
-        {
-          if(m.cm.sfn!=0) //mesh has a selected region, work just on it
-          {
-            if((*vi).IsS()) //if this vertex has been selected, do transormation
-            {
-              (*vi).C() = color_pow((*vi).C(),gamma);
-              ++counter;
-            }
-          }
-          else //mesh has not a selected region, transorm all vertex
-          {
-            (*vi).C() = color_pow((*vi).C(),gamma);
-            ++counter;
-          }
-        }
-      }
-      return counter;
-    }
-
-    //computes the gamma transformation on a given color, according to new_val = old_val^gamma
-    static vcg::Color4b color_pow(vcg::Color4b c, float exponent)
-    {
-      return vcg::Color4b(
-                          vcg::math::Clamp((int)( value_pow(float(c[0])/255, exponent)*255), 0, 255),
-                          vcg::math::Clamp((int)( value_pow(float(c[1])/255, exponent)*255), 0, 255),
-                          vcg::math::Clamp((int)( value_pow(float(c[2])/255, exponent)*255), 0, 255), 1);
-    }
-
-    static float value_pow(float value, float exponent)
-    {
-        return pow((double)value, exponent);
-    }
 
 
 
