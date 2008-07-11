@@ -198,13 +198,15 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of laplacian face smooth iterations in every run"));
 		break;
 		case FP_UNSHARP_GEOMETRY:
+			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
+			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number ofiterations of laplacian smooth in every run"));
+			break;
 		case FP_UNSHARP_COLOR:
 		parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
+			parlst.addFloat("weightOrig", 1.f, tr("Original Color Weight"), tr("How much the original color is used<br>"));
 		parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number ofiterations of laplacian smooth in every run"));
 			break;
-				
-	
-	case FP_TWO_STEP_SMOOTH:
+		case FP_TWO_STEP_SMOOTH:
 		parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
 		parlst.addFloat("normalThr", (float) 60,"Feature Angle Threshold (deg)", "Specify a threshold angle for features that you want to be preserved.\nFeatures forming angles LARGER than the specified threshold will be preserved.");
 		parlst.addInt  ("stepNormalNum", (int) 20,"Normal Smoothing steps", "Number of iteration of normal smoothing step. The larger the better and (the slower)");
@@ -346,6 +348,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	case FP_UNSHARP_COLOR:			
 			{	
 				float alpha=par.getFloat("weight");
+				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
 				
 				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
@@ -354,14 +357,14 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 					colorOrig[i].Import(m.cm.vert[i].C());
 				
 				tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,smoothIter);
-				
 				for(int i=0;i<m.cm.vn;++i)
 					{ 
 						Color4f colorDelta = colorOrig[i] - Color4f::Construct(m.cm.vert[i].C());		
-						Color4f newCol = 	colorOrig[i] + colorDelta*alpha;	
+						Color4f newCol = 	colorOrig[i]*alphaorig + colorDelta*alpha;	 // Unsharp formula 
 						Clamp(newCol); // Clamp everything in the 0..1 range
 						m.cm.vert[i].C().Import(newCol);
-					}
+						
+						}
 			}	break;
 	default : assert(0);
 	
