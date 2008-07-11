@@ -93,7 +93,7 @@ using namespace std;
 using namespace vcg;
 
 void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool PreserveNormal, bool OptimalPlacement, bool Selected, CallBackPos *cb);
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,float c, CallBackPos *cb);
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,float c, bool optimalPlacement,CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
 {
@@ -286,6 +286,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addInt  ("TargetFaceNum",(int)(m.cm.fn/2),"Target number of faces");
 		  parlst.addFloat("QualityThr",lastqtex_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n");
 		  parlst.addFloat("Extratcoordw",lastqtex_extratw,"Texture Weight","Additional weight for each extra Texture Coordinates for every (selected) vertex");
+		  parlst.addBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. ");
 		  break;
 		case FP_CLOSE_HOLES:
 		  parlst.addInt ("MaxHoleSize",(int)30,"Max size to be closed ","The size is expressed as number of edges composing the hole boundary");
@@ -535,8 +536,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		int TargetFaceNum = par.getInt("TargetFaceNum");		
 		lastqtex_QualityThr = par.getFloat("QualityThr");
 		lastqtex_extratw = par.getFloat("Extratcoordw");
+		lastq_OptimalPlacement = par.getBool("OptimalPlacement");
 
-		QuadricTexSimplification(m.cm,TargetFaceNum,lastqtex_QualityThr,lastqtex_extratw,  cb);
+		QuadricTexSimplification(m.cm,TargetFaceNum,lastqtex_QualityThr,lastqtex_extratw,lastq_OptimalPlacement, cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}

@@ -445,7 +445,9 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 		inline void ComputeMinimal(double vv[5],double v0[5],double v1[5], Quadric5<double> qsum)
 		{	
 			bool rt=qsum.Minimum(vv);
-				if(!rt) { // if the computation of the minimum fails we choose between the two edge points and the middle one.
+			// if the computation of the minimum fails we choose between the two edge points and the middle one.
+			// Switch to this branch also in the case of not using the optimal placement.
+				if(!rt || !Params().OptimalPlacement ) { 
 			
 					vv[0] = (v0[0] + v1[0])/2;
 					vv[1] = (v0[1] + v1[1])/2;
@@ -453,7 +455,12 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 					vv[3] = (v0[3] + v1[3])/2;
 					vv[4] = (v0[4] + v1[4])/2;
 
-					double qvx=qsum.Apply(vv);
+					// In the case of not using the optimal placement we have to be sure that the middle value is discarded.
+					double qvx= std::numeric_limits<float>::max();
+					if(Params().OptimalPlacement)
+						qvx = qsum.Apply(vv);
+					
+
 					double qv0=qsum.Apply(v0);
 					double qv1=qsum.Apply(v1);
 
@@ -482,16 +489,19 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 		inline void ComputeMinimalWithGeoContraints(double vv[5],double v0[5],double v1[5], Quadric5<double> qsum, double geo[5])
 		{
  			bool rt=qsum.MinimumWithGeoContraints(vv,geo);
-				if(!rt) { // if the computation of the minimum fails we choose between the two edge points and the middle one.
-			 
+			// if the computation of the minimum fails we choose between the two edge points and the middle one.
+			// Switch to this branch also in the case of not using the optimal placement.
+			if(!rt || !Params().OptimalPlacement) { 
+					double qvx = std::numeric_limits<float>::max();
 					vv[0] = geo[0];
 					vv[1] = geo[1];
 					vv[2] = geo[2];
-					vv[3] = (v0[3] + v1[3])/2;
-					vv[4] = (v0[4] + v1[4])/2;
-
-					double qvx=qsum.Apply(vv);
-
+					if(Params().OptimalPlacement) 
+						{
+							vv[3] = (v0[3] + v1[3])/2;
+							vv[4] = (v0[4] + v1[4])/2;
+							qvx=qsum.Apply(vv);
+						}
 					vv[3] = v0[3];
 					vv[4] = v0[4];
 
@@ -756,7 +766,7 @@ class MyTriEdgeCollapseQTex: public TriEdgeCollapseQuadricTex< CMeshO, MyTriEdge
             inline MyTriEdgeCollapseQTex(  const EdgeType &p, int i) :TECQ(p,i){}
 };
 
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, float extratexw, CallBackPos *cb)
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, float extratexw, bool optimalPlacement,CallBackPos *cb)
 {
 	math::Quadric<double> QZero;
 	QZero.Zero();
@@ -772,12 +782,8 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, fl
 	MyTriEdgeCollapseQTex::SetDefaultParams();
 
 	MyTriEdgeCollapseQTex::Params().QualityThr=QualityThr;
-	  
 	MyTriEdgeCollapseQTex::Params().ExtraTCoordWeight = extratexw;
-
-
-
-
+	MyTriEdgeCollapseQTex::Params().OptimalPlacement = optimalPlacement;
 
   vcg::LocalOptimization<CMeshO> DeciSession(m);
 	cb(1,"Initializing simplification");
