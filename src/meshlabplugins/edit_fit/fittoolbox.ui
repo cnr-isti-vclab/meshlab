@@ -1,0 +1,152 @@
+<ui version="4.0" >
+ <class>FitToolBoxClass</class>
+ <widget class="QDockWidget" name="FitToolBoxClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>175</width>
+    <height>327</height>
+   </rect>
+  </property>
+  <property name="layoutDirection" >
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <property name="floating" >
+   <bool>true</bool>
+  </property>
+  <property name="features" >
+   <set>QDockWidget::AllDockWidgetFeatures</set>
+  </property>
+  <property name="allowedAreas" >
+   <set>Qt::AllDockWidgetAreas</set>
+  </property>
+  <property name="windowTitle" >
+   <string>FitToolBox</string>
+  </property>
+  <widget class="QWidget" name="widget" >
+   <widget class="QPushButton" name="buttonBox" >
+    <property name="geometry" >
+     <rect>
+      <x>40</x>
+      <y>50</y>
+      <width>75</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Box</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonCylinder" >
+    <property name="geometry" >
+     <rect>
+      <x>40</x>
+      <y>10</y>
+      <width>75</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground" >
+     <bool>true</bool>
+    </property>
+    <property name="text" >
+     <string>Cylinder</string>
+    </property>
+    <property name="flat" >
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>90</y>
+      <width>151</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Debug</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>22</y>
+       <width>134</width>
+       <height>168</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" >
+      <item>
+       <widget class="QCheckBox" name="checkBoxGesture3d" >
+        <property name="text" >
+         <string>Show Gesture3d</string>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxLine" >
+        <property name="text" >
+         <string>Show Lines</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxCloudNearPoints" >
+        <property name="text" >
+         <string>Show CloudNearPoints</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxSelectionMesh" >
+        <property name="text" >
+         <string>Show SelectionMesh</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxCloudSampling" >
+        <property name="text" >
+         <string>Show CloudSampling</string>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxObjectSpace" >
+        <property name="text" >
+         <string>Show in ObjectSpace</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" >
+        <item>
+         <widget class="QCheckBox" name="checkBoxStepMode" >
+          <property name="text" >
+           <string>StepMode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBoxStepMode" />
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <resources/>
+ <connections/>
+</ui>
