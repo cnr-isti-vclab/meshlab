@@ -1982,13 +1982,13 @@ namespace io {
 			findAndParseAttribute(coordList, root, "rotation", "");
 			if(coordList.size() == 4)
 			{
-				tmp.SetRotate(coordList.at(3).toFloat(), vcg::Point3f(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()));
+				tmp.SetRotateRad(coordList.at(3).toFloat(), vcg::Point3f(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()));
 				t *= tmp;
 			}
 			findAndParseAttribute(scale, root, "scaleOrientation", "");
 			if(scale.size() == 4)
 			{
-				tmp.SetRotate(scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
+				tmp.SetRotateRad(scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
 				t *= tmp;
 			}
 			findAndParseAttribute(coordList, root, "scale", "");
@@ -1999,7 +1999,7 @@ namespace io {
 			}
 			if(scale.size() == 4)
 			{
-				tmp.SetRotate(-scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
+				tmp.SetRotateRad(-scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
 				t *= tmp;
 			}
 			if(center.size() == 3)

@@ -345,15 +345,13 @@ void TransformDialog::on_applyButton_clicked() {
 		// SetTranslate, SetScale and SetRotate set initially the identity
 		if (centerRotateRB->isChecked()) // rotate around obj center
 		{
-			Matrix44f transMat = currentMatrix.SetTranslate(  bbox.Center() );
-			// ANGLE MUST BE IN RADIANS !!!!
-			Matrix44f rotMat = currentMatrix.SetRotate(math::ToRad(rotateValDeg), axisPoint);
+			Matrix44f  transMat = currentMatrix.SetTranslate(  bbox.Center() );
+			Matrix44f    rotMat = currentMatrix.SetRotateDeg(rotateValDeg, axisPoint);
 			Matrix44f trans2Mat = currentMatrix.SetTranslate( -  bbox.Center() );
 			currentMatrix = transMat * rotMat * trans2Mat;	
 		} else {
 			
-			// ANGLE MUST BE IN RADIANS !!!!
-			currentMatrix.SetRotate(math::ToRad(rotateValDeg), axisPoint);
+			currentMatrix.SetRotateDeg(rotateValDeg, axisPoint);
 		}
 	}
 	if (whichTransform == TR_SCALE) {
