@@ -64,11 +64,10 @@ class FilterColorProc : public QObject, public MeshFilterInterface
 		virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb);
 
+    enum rgbChMask {ALL_CHANNELS = 7, RED_CHANNEL = 4, GREEN_CHANNEL = 2, BLUE_CHANNEL = 1, NO_CHANNELS = 0 };
 
 
-
-
-    static int levels(MeshModel &m, float gamma, int in_min, int in_max, int out_min, int out_max)
+    static int levels(MeshModel &m, float gamma, float in_min, float in_max, float out_min, float out_max, unsigned char rgbMask)
     {
       int counter=0;
 
@@ -81,13 +80,14 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           {
             if((*vi).IsS()) //if this vertex has been selected, do transormation
             {
-              (*vi).C() = color_levels((*vi).C(),gamma, in_min, in_max, out_min, out_max);
+              (*vi).C() = color_levels((*vi).C(),gamma, in_min, in_max, out_min, out_max, rgbMask);
               ++counter;
             }
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            (*vi).C() = color_levels((*vi).C(),gamma, in_min, in_max, out_min, out_max);
+            if(counter==0)
+            (*vi).C() = color_levels((*vi).C(),gamma, in_min, in_max, out_min, out_max, rgbMask);
             ++counter;
           }
         }
@@ -95,24 +95,27 @@ class FilterColorProc : public QObject, public MeshFilterInterface
       return counter;
     }
 
-    static vcg::Color4b color_levels(vcg::Color4b c, float gamma, int in_min, int in_max, int out_min, int out_max)
+    static vcg::Color4b color_levels(vcg::Color4b c, float gamma, float in_min, float in_max, float out_min, float out_max, unsigned char rgbMask)
     {
-      return vcg::Color4b( value_levels(c[0]/255, gamma, in_min/255, in_max/255, out_min/255, out_max/255),
-                           value_levels(c[1]/255, gamma, in_min/255, in_max/255, out_min/255, out_max/255),
-                           value_levels(c[2]/255, gamma, in_min/255, in_max/255, out_min/255, out_max/255), 1);
+      unsigned char r = c[0], g = c[1], b = c[2];
+      if(rgbMask & RED_CHANNEL) r = value_levels(c[0], gamma, in_min, in_max, out_min, out_max);
+      if(rgbMask & GREEN_CHANNEL) g = value_levels(c[1], gamma, in_min, in_max, out_min, out_max);
+      if(rgbMask & BLUE_CHANNEL) b = value_levels(c[2], gamma, in_min, in_max, out_min, out_max);
+      return vcg::Color4b(r, g, b, 255);
     }
 
-    static int value_levels(int value, float gamma, int in_min, int in_max, int out_min, int out_max)
+    static int value_levels(int value, float gamma, float in_min, float in_max, float out_min, float out_max)
     {
+      float fvalue = value/255.0f;
       // normalize
-      if(in_max == in_min) value = 0;
-      else value = (value-in_min) / (in_max - in_min);
+      if(in_max == in_min) fvalue = 0;
+      else fvalue = vcg::math::Clamp<float>(fvalue - in_min, 0.0f, 1.0f) / vcg::math::Clamp<float>(in_max - in_min, 0.0f, 1.0f);
       // transform gamma
-      value = (int)(pow(value,gamma));
+      fvalue = (pow(fvalue,1/gamma));
       // rescale range
-      value = value * (out_max - out_min) + out_min;
+      fvalue = fvalue * vcg::math::Clamp<float>(out_max - out_min,0.0f,1.0f) + out_min;
       //back in interval [0,255] and clamp
-      return vcg::math::Clamp<int>(value*255, 0, 255);
+      return vcg::math::Clamp<int>((int)(fvalue * 255), 0, 255);
     }
 };
 #endif

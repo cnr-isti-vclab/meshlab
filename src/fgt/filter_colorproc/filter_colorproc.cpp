@@ -166,6 +166,9 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
 			par.addDynamicFloat("in_max", in_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White input level:", "");
 			par.addDynamicFloat("out_min", out_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Black output level:", "");
 			par.addDynamicFloat("out_max", out_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White output level:", "");
+			par.addBool("rCh", true, "Red Channel:", "");
+			par.addBool("gCh", true, "Green Channel:", "");
+			par.addBool("bCh", true, "Blue Channel:", "");
 			break;
 		}
 		case CP_COLOURISATION:
@@ -266,21 +269,21 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     case CP_LEVELS:
     {
 			float gamma = par.getDynamicFloat("gamma");
-      int  in_min = (int)par.getDynamicFloat("in_min");
-      int  in_max = (int)par.getDynamicFloat("in_max");
-      int  out_min = (int)par.getDynamicFloat("out_min");
-      int  out_max = (int)par.getDynamicFloat("out_max");
+      float  in_min = par.getDynamicFloat("in_min")/255;
+      float  in_max = par.getDynamicFloat("in_max")/255;
+      float  out_min = par.getDynamicFloat("out_min")/255;
+      float  out_max = par.getDynamicFloat("out_max")/255;
+
+
+      unsigned char rgbMask = NO_CHANNELS;
+      if(par.getBool("rCh")) rgbMask = rgbMask | RED_CHANNEL;
+      if(par.getBool("gCh")) rgbMask = rgbMask | GREEN_CHANNEL;
+      if(par.getBool("bCh")) rgbMask = rgbMask | BLUE_CHANNEL;
+      if(rgbMask == NO_CHANNELS) rgbMask = ALL_CHANNELS;
 
       bool selected = false;
       if(m.cm.sfn!=0) selected = true;
-      int  v_num = FilterColorProc::levels(m, gamma, in_min, in_max, out_min, out_max);
-
-      if(v_num==0)
-      {
-        errorMessage = "The mesh doesn't contains any vertex.";
-        return false;
-      }
-
+      FilterColorProc::levels(m, gamma, in_min, in_max, out_min, out_max, rgbMask);
       return true;
 		}
 		case CP_COLOURISATION:
