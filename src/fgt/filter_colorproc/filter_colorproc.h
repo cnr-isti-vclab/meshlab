@@ -86,7 +86,6 @@ class FilterColorProc : public QObject, public MeshFilterInterface
           }
           else //mesh has not a selected region, transorm all vertex
           {
-            if(counter==0)
             (*vi).C() = color_levels((*vi).C(),gamma, in_min, in_max, out_min, out_max, rgbMask);
             ++counter;
           }
@@ -113,7 +112,7 @@ class FilterColorProc : public QObject, public MeshFilterInterface
       // transform gamma
       fvalue = (pow(fvalue,1/gamma));
       // rescale range
-      fvalue = fvalue * vcg::math::Clamp<float>(out_max - out_min,0.0f,1.0f) + out_min;
+      fvalue = fvalue * (out_max - out_min) + out_min;
       //back in interval [0,255] and clamp
       return vcg::math::Clamp<int>((int)(fvalue * 255), 0, 255);
     }
