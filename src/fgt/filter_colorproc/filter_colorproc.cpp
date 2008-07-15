@@ -274,16 +274,15 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       float  out_min = par.getDynamicFloat("out_min")/255;
       float  out_max = par.getDynamicFloat("out_max")/255;
 
-
-      unsigned char rgbMask = NO_CHANNELS;
-      if(par.getBool("rCh")) rgbMask = rgbMask | RED_CHANNEL;
-      if(par.getBool("gCh")) rgbMask = rgbMask | GREEN_CHANNEL;
-      if(par.getBool("bCh")) rgbMask = rgbMask | BLUE_CHANNEL;
-      if(rgbMask == NO_CHANNELS) rgbMask = ALL_CHANNELS;
+      unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
+      if(par.getBool("rCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::RED_CHANNEL;
+      if(par.getBool("gCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::GREEN_CHANNEL;
+      if(par.getBool("bCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::BLUE_CHANNEL;
+      if(rgbMask == vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS) rgbMask = vcg::tri::UpdateColor<CMeshO>::ALL_CHANNELS;
 
       bool selected = false;
       if(m.cm.sfn!=0) selected = true;
-      FilterColorProc::levels(m, gamma, in_min, in_max, out_min, out_max, rgbMask);
+      vcg::tri::UpdateColor<CMeshO>::Levels(m.cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
       return true;
 		}
 		case CP_COLOURISATION:
