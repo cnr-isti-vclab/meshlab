@@ -13,7 +13,7 @@ SUBDIRS       = meshfilter \
 				filter_poisson \
 				filter_unsharp \
 				filter_splitter \
-				filter_texture \
+#				filter_texture \
 				filter_sampling \
 				meshcolorize \
 				meshselect \
@@ -21,8 +21,9 @@ SUBDIRS       = meshfilter \
 				edit_select \
 				edit_morpher \
 				edit_pickpoints \
+#				edit_phototexturing \
 				editslice \ 
-				editpaint \
+#				editpaint \
 				editalign \
 				editmeasure\
 				editrgbtri\
@@ -30,6 +31,7 @@ SUBDIRS       = meshfilter \
 				edit_straightener \
 				../sampleplugins/sampleedit \
 				../sampleplugins/samplefilter \
+				../sampleplugins/samplefilterdyn \
 				../sampleplugins/samplefilterdoc \
 				../sampleplugins/sampledecoration \
 				../sampleplugins/filterborder \
@@ -40,4 +42,5 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_quality \
 				../fgt/edit_quality/filter_quality \
 				../fgt/edit_texture\
-				../fgt/editpaint
+				../fgt/editpaint\
+				../fgt/filter_colorproc
