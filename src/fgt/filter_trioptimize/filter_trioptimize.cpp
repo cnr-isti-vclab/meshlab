@@ -27,11 +27,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "laplacianadjust.h"
 #include "filter_trioptimize.h"
 #include "curvedgeflip.h"
 
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/smooth.h>
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/selection.h>
@@ -115,7 +115,10 @@ public:
 //    your filtering actions you can do here by construction the QActions accordingly
 TriOptimizePlugin::TriOptimizePlugin() 
 {
-	typeList << FP_EDGE_FLIP << FP_NEAR_LAPLACIAN_SMOOTH;
+	typeList 
+	<< FP_PLANAR_EDGE_FLIP 
+	<< FP_CURVATURE_EDGE_FLIP 
+	<< FP_NEAR_LAPLACIAN_SMOOTH;
 	
 	foreach(FilterIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
@@ -127,19 +130,18 @@ TriOptimizePlugin::TriOptimizePlugin()
 const QString TriOptimizePlugin::filterName(FilterIDType filterId) 
 {
 	switch (filterId) {
-		case FP_EDGE_FLIP:
-			return tr("Edge flipping optimization");
-		case FP_NEAR_LAPLACIAN_SMOOTH:
-			return tr("Laplacian smooth (surface preserve)");
-		default:
-			assert(0);
+		case FP_PLANAR_EDGE_FLIP:				return tr("Planar flipping optimization");
+		case FP_CURVATURE_EDGE_FLIP:		return tr("Curvature flipping optimization");
+		case FP_NEAR_LAPLACIAN_SMOOTH: 	return tr("Laplacian smooth (surface preserve)");
+		default:		assert(0);
 	}
 }
 
 const int TriOptimizePlugin::getRequirements(QAction *action)
 {
 	switch (ID(action)) {
-		case FP_EDGE_FLIP:
+		case FP_PLANAR_EDGE_FLIP:
+		case FP_CURVATURE_EDGE_FLIP:
 			return MeshModel::MM_FACETOPO |
 			       MeshModel::MM_VERTFACETOPO | 
 			       MeshModel::MM_VERTMARK | 
@@ -156,9 +158,11 @@ const int TriOptimizePlugin::getRequirements(QAction *action)
 const QString TriOptimizePlugin::filterInfo(FilterIDType filterId)
 {
 	switch(filterId) {
-		case FP_EDGE_FLIP:
+		case FP_PLANAR_EDGE_FLIP:
+			return tr("Mesh optimization by edge flipping, to improve local triangle quality");
+		case FP_CURVATURE_EDGE_FLIP:
 			return tr("Mesh optimization by edge flipping, to improve local "
-			           "mesh curvature or triangle quality");
+								"mesh curvature");
 		case FP_NEAR_LAPLACIAN_SMOOTH:
 			return tr("Laplacian smooth without surface modification: move "
 			           "each vertex in the average position of neighbors "
@@ -180,7 +184,8 @@ const PluginInfo &TriOptimizePlugin::pluginInfo()
 const TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(QAction *action)
 {
 	switch(ID(action)) {
-		case FP_EDGE_FLIP:             return MeshFilterInterface::Remeshing;
+		case FP_PLANAR_EDGE_FLIP:             return MeshFilterInterface::Remeshing;
+		case FP_CURVATURE_EDGE_FLIP:             return MeshFilterInterface::Remeshing;
 		case FP_NEAR_LAPLACIAN_SMOOTH: return MeshFilterInterface::Smoothing;
 	}
  return MeshFilterInterface::Generic;
@@ -197,19 +202,11 @@ const TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(QAction *action
 void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m,
                                          FilterParameterSet & parlst)
 {
-	if (ID(action) == FP_EDGE_FLIP) {
-		parlst.addBool("selection", m.cm.sfn > 0, tr("Update selection"),
-				tr("Apply edge flip optimization on selected faces only"));
-		
-		parlst.addBool("cflips", true, tr("Curvature flips"),
-				tr("Do edge flips based on local curvature minimization"));
-		
-		parlst.addBool("pflips", false, tr("Planar flips"),
-				tr("Do edge flips to improve adjacent almost planar faces"));
-		
+	if (ID(action) == FP_CURVATURE_EDGE_FLIP) {
+		parlst.addBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only"));
 		parlst.addAbsPerc("pthreshold", 1.0f, 0.1f, 90.0f,
-				tr("Planar threshold"),
-				tr("angle threshold for planar faces (degrees)"));
+											tr("Planar threshold"),
+											tr("angle threshold for planar faces (degrees)"));
 		
 		QStringList cmetrics;
 		cmetrics.push_back("mean");
@@ -225,7 +222,15 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m,
 			        "3: Absolute curvature:<br>"
 			        "     if(K >= 0) return 2 * H<br>"
 			        "     else return 2 * sqrt(H ^ 2 - A * K)"));
-		
+		}
+	
+		if (ID(action) == FP_PLANAR_EDGE_FLIP) {
+			parlst.addBool("selection", m.cm.sfn > 0, tr("Update selection"), tr("Apply edge flip optimization on selected faces only"));
+
+			parlst.addAbsPerc("pthreshold", 1.0f, 0.1f, 90.0f,
+												tr("Planar threshold"),
+												tr("angle threshold for planar faces (degrees)"));
+			
 		QStringList pmetrics;
 		pmetrics.push_back("area/max side");
 		pmetrics.push_back("inradius/circumradius");
@@ -243,17 +248,14 @@ void TriOptimizePlugin::initParameterSet(QAction *action, MeshModel &m,
 			        "Others<br>"
 			        "4: Fix the Delaunay condition between two faces<br>"
 			        "5: Do the flip to improve local topology<br>"));
+		parlst.addInt("iterations", 1, "Post optimization relax iter", tr("number of a planar laplacian smooth iterations that have to be performed after every run"));
+
 	}
 	
 	if (ID(action) == FP_NEAR_LAPLACIAN_SMOOTH) {
-		parlst.addBool("selection", false, tr("Update selection"),
-				tr("Apply laplacian smooth on selected faces only"));
-		parlst.addAbsPerc("dthreshold", 1.0f, 0.0f, 3.0f,
-				tr("Max Displacement"),
-				tr("maximum mean normal angle displacement (degrees)"
-				   "from old to new faces"));
-		parlst.addInt("iterations", 1, "Iterations",
-				tr("number of laplacian smooth iterations in every run"));
+		parlst.addBool("selection", false, tr("Update selection"),	tr("Apply laplacian smooth on selected faces only"));
+		parlst.addFloat("AngleDeg", 0.0001f,	tr("Max Normal Dev (deg)"),	tr("maximum mean normal angle displacement (degrees) from old to new faces"));
+		parlst.addInt("iterations", 1, "Iterations", tr("number of laplacian smooth iterations in every run"));
 	}
 }
 
@@ -265,10 +267,9 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 {
 	float limit = -std::numeric_limits<float>::epsilon();
 	
-	if (ID(filter) == FP_EDGE_FLIP) {
+	if (ID(filter) == FP_CURVATURE_EDGE_FLIP) {
 		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
-			errorMessage = "Mesh has some not 2-manifold faces,"
-			               " edge flips requires manifoldness";
+			errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
 			return false; // can't continue, mesh can't be processed
 		}
 		
@@ -289,9 +290,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 
 		if (par.getBool("selection")) {
 			// Mark not writable un-selected faces
-			CMeshO::FaceIterator fi;
-			for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
-				if (!(*fi).IsD()) {
+			for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) {
 					if (!(*fi).IsS()) (*fi).ClearW();
 					else (*fi).SetW();
 				}
@@ -300,33 +299,21 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
 
 			// Mark not writable un-selected vertices
-			CMeshO::VertexIterator vi;
-			for (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
-				if (!(*vi).IsD()) {
+			for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi){
 					if (!(*vi).IsS()) (*vi).ClearW();
 					else (*vi).SetW();
 				}
 		}
 
-		if (par.getBool("cflips")) {
 			// VF adjacency needed for edge flips based on vertex curvature 
 			vcg::tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
 			vcg::tri::UpdateTopology<CMeshO>::TestVertexFace(m.cm);
 
 			int metric = par.getEnum("curvtype");
 			switch (metric) {
-				case 0:
-					MeanCEFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimiz.Init<MeanCEFlip>();
-					break;
-				case 1:
-					NSMCEFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimiz.Init<NSMCEFlip>();
-					break;
-				case 2:
-					AbsCEFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimiz.Init<AbsCEFlip>();
-					break;
+				case 0: MeanCEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<MeanCEFlip>(); break;
+				case 1:  NSMCEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<NSMCEFlip>(); 	break;
+				case 2:  AbsCEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<AbsCEFlip>();  break;
 			}
 			
 			// stop when flips become harmful
@@ -334,48 +321,44 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			optimiz.DoOptimization();
 			optimiz.h.clear();
 
-			Log(GLLogStream::Info,
-			    "%d curvature edge flips performed in %.2f sec.",
-			    optimiz.nPerfmormedOps,
-			    (clock() - start) / (float) CLOCKS_PER_SEC);
+			Log(GLLogStream::Info, "%d curvature edge flips performed in %.2f sec.",  optimiz.nPerfmormedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
 		}
-
-		start = clock();
-		if (par.getBool("pflips")) {
+	if (ID(filter) == FP_PLANAR_EDGE_FLIP) {
+		if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) {
+					errorMessage = "Mesh has some not 2-manifold faces, edge flips requires manifoldness";
+					return false; // can't continue, mesh can't be processed
+				}
+		
+		bool selection = par.getBool("selection");
+		
+		tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+		
+		vcg::LocalOptimization<CMeshO> optimiz(m.cm);
+		float pthr = par.getAbsPerc("pthreshold");
+	  time_t	start = clock();
+		
+		
 			int metric = par.getEnum("planartype");
 			switch (metric) {
-				case 0:
-					QEFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimiz.Init<QEFlip>();
-					break;
-				case 1:
-					QRadiiEFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimiz.Init<QRadiiEFlip>();
-					break;
-				case 2:
-					QMeanRatioEFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimiz.Init<QMeanRatioEFlip>();
-					break;
-				case 3:
-					MyTriEFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimiz.Init<MyTriEFlip>();
-					break;
-				case 4:
-					MyTopoEFlip::CoplanarAngleThresholdDeg() = pthr;
-					optimiz.Init<MyTopoEFlip>();
-					break;
+				case 0:          QEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<QEFlip>(); break;
+				case 1:     QRadiiEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<QRadiiEFlip>(); break;
+				case 2: QMeanRatioEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<QMeanRatioEFlip>(); break;
+				case 3:      MyTriEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<MyTriEFlip>(); break;
+				case 4:     MyTopoEFlip::CoplanarAngleThresholdDeg() = pthr; optimiz.Init<MyTopoEFlip>(); 	break;
 			}
-			
 			// stop when flips become harmful
 			optimiz.SetTargetMetric(limit);
 			optimiz.DoOptimization();
 			optimiz.h.clear();
 
-			Log(GLLogStream::Info,
-			    "%d planar edge flips performed in %.2f sec.",
-			    optimiz.nPerfmormedOps,
-			    (clock() - start) / (float) CLOCKS_PER_SEC);
-		}
+			Log(GLLogStream::Info, "%d planar edge flips performed in %.2f sec.", optimiz.nPerfmormedOps, (clock() - start) / (float) CLOCKS_PER_SEC);
+			int iternum = par.getInt("iterations");
+			
+			tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, 0.0001f, selection,cb);
+			
 		
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 
@@ -403,8 +386,8 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshModel &m,
 			vcg::tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 
 		int iternum = par.getInt("iterations");
-		float dthreshold = par.getAbsPerc("dthreshold");
-		LaplacianAdjust(m.cm, iternum, dthreshold, selection);
+		float dthreshold = par.getFloat("AngleDeg");
+		tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, dthreshold, selection,cb);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	}
 
