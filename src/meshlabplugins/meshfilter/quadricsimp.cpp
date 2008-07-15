@@ -95,6 +95,7 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,
 		bool PreserveBoundary, 
 		bool PreserveNormal,
 		bool OptimalPlacement,
+		bool PlanarQuadric,
 		bool Selected, CallBackPos *cb)
 {
   math::Quadric<double> QZero;
@@ -126,7 +127,8 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,
   if(PreserveBoundary && !Selected) 
     MyTriEdgeCollapse::Params().FastPreserveBoundary=true;
 
-    MyTriEdgeCollapse::Params().OptimalPlacement=OptimalPlacement;
+	MyTriEdgeCollapse::Params().OptimalPlacement=OptimalPlacement;
+	MyTriEdgeCollapse::Params().QualityQuadric=PlanarQuadric;
 	//	MyTriEdgeCollapse::Params().OptimalPlacement=true;
 		
   if(PreserveNormal) {

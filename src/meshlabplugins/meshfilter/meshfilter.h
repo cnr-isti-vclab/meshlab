@@ -148,6 +148,7 @@ protected:
 	bool lastq_Selected;
 	bool lastq_PreserveNormal;
 	bool lastq_OptimalPlacement;
+	bool lastq_PlanarQuadric;
 	
 	float lastqtex_QualityThr;
 	float lastqtex_extratw;

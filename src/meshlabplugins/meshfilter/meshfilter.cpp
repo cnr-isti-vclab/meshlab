@@ -92,7 +92,7 @@ Interfaces are changing again...
 using namespace std;
 using namespace vcg;
 
-void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool PreserveNormal, bool OptimalPlacement, bool Selected, CallBackPos *cb);
+void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool PreserveNormal, bool OptimalPlacement, bool PlanarQuadric, bool Selected, CallBackPos *cb);
 void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,float c, bool optimalPlacement,CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
@@ -131,6 +131,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 	lastq_PreserveNormal = false;
 	lastq_OptimalPlacement = true;
 	lastq_Selected = false;
+	lastq_PlanarQuadric = false;
 
 	lastqtex_QualityThr = 0.3f;
 	lastqtex_extratw = 0.0;
@@ -279,6 +280,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries");
 		  parlst.addBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface");
 		  parlst.addBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. ");
+		  parlst.addBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh.");
 		  parlst.addBool ("AutoClean",true,"Post-simplification cleaning","After the simplification an additional set of steps is performed to clean the mesh (unreferenced vertices, bad faces, etc)");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!");
 		  break;
@@ -500,9 +502,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		lastq_PreserveBoundary = par.getBool("PreserveBoundary");
 		lastq_PreserveNormal = par.getBool("PreserveNormal");
 		lastq_OptimalPlacement = par.getBool("OptimalPlacement");
+		lastq_PlanarQuadric = par.getBool("PlanarQuadric");
 		lastq_Selected = par.getBool("Selected");
 
-		QuadricSimplification(m.cm,TargetFaceNum,lastq_QualityThr, lastq_PreserveBoundary,lastq_PreserveNormal, lastq_OptimalPlacement,lastq_Selected,  cb);
+		QuadricSimplification(m.cm,TargetFaceNum,lastq_QualityThr, lastq_PreserveBoundary,lastq_PreserveNormal, lastq_OptimalPlacement,lastq_OptimalPlacement,lastq_Selected,  cb);
 
 		if(par.getBool("AutoClean"))
 		{
