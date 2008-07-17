@@ -122,7 +122,9 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,
                       else (*vi).SetW();
   }
 
-  if(PreserveBoundary && Selected) 
+	MyTriEdgeCollapse::Params().PreserveBoundary=false;
+	MyTriEdgeCollapse::Params().FastPreserveBoundary=false;
+  if(PreserveBoundary && Selected)
     MyTriEdgeCollapse::Params().PreserveBoundary=true;
   if(PreserveBoundary && !Selected) 
     MyTriEdgeCollapse::Params().FastPreserveBoundary=true;

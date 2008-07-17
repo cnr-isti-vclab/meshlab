@@ -94,7 +94,6 @@ public:
 	bool		PreserveTopology; 
 	bool		PreserveBoundary; 
 	bool		MarkComplex;
-	bool		FastPreserveBoundary; 
 	bool		SafeHeapUpdate;
 };
 
@@ -217,16 +216,10 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 	    // Final Clean up after the end of the simplification process
     static void Finalize(TriMeshType &m,HeapType&h_ret)
     {
-	  vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromVF(m);
+			vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromVF(m);
 
       // If we had the boundary preservation we should clean up the writable flags
-      if(Params().FastPreserveBoundary)
-      {
-        typename 	TriMeshType::VertexIterator  vi;
-    	  for(vi=m.vert.begin();vi!=m.vert.end();++vi) 
-          if(!(*vi).IsD()) (*vi).SetW();
-      }
-    	if(Params().PreserveBoundary)
+     	if(Params().PreserveBoundary)
       {
         typename 	std::vector<typename TriMeshType::VertexPointer>::iterator wvi;
         for(wvi=WV().begin();wvi!=WV().end();++wvi)
@@ -566,8 +559,21 @@ class TriEdgeCollapseQuadricTex: public vcg::tri::TriEdgeCollapse< TriMeshType, 
 		EdgeType av0,av1,av01;
 
 			vcg::tri::UpdateTopology<TriMeshType>::VertexFace(m);
-			vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromFF(m);
-
+			vcg::tri::UpdateFlags<TriMeshType>::FaceBorderFromVF(m);
+		
+		if(Params().PreserveBoundary)
+		{
+      WV().clear();
+			for(pf=m.face.begin();pf!=m.face.end();++pf)
+				if( !(*pf).IsD() && (*pf).IsW() )
+					for(int j=0;j<3;++j)
+						if((*pf).IsB(j)) 
+						{
+							if((*pf).V(j)->IsW())  {(*pf).V(j)->ClearW(); WV().push_back((*pf).V(j));}
+							if((*pf).V1(j)->IsW()) {(*pf).V1(j)->ClearW();WV().push_back((*pf).V1(j));}
+						}
+		}
+					
 			InitQuadric(m);
 
 		// Initialize the heap with all the possible collapses 
@@ -766,7 +772,13 @@ class MyTriEdgeCollapseQTex: public TriEdgeCollapseQuadricTex< CMeshO, MyTriEdge
             inline MyTriEdgeCollapseQTex(  const EdgeType &p, int i) :TECQ(p,i){}
 };
 
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, float extratexw, bool optimalPlacement,CallBackPos *cb)
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, 
+															float QualityThr, 
+															float extratexw,  
+															bool PreserveBoundary, 
+															bool optimalPlacement,
+															bool Selected,
+															CallBackPos *cb)
 {
 	math::Quadric<double> QZero;
 	QZero.Zero();
@@ -784,11 +796,25 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, fl
 	MyTriEdgeCollapseQTex::Params().QualityThr=QualityThr;
 	MyTriEdgeCollapseQTex::Params().ExtraTCoordWeight = extratexw;
 	MyTriEdgeCollapseQTex::Params().OptimalPlacement = optimalPlacement;
-
-  vcg::LocalOptimization<CMeshO> DeciSession(m);
+	MyTriEdgeCollapseQTex::Params().PreserveBoundary=PreserveBoundary;
+  if(Selected) // simplify only inside selected faces
+  {
+    // select only the vertices having ALL incident faces selected
+    tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m);
+		
+    // Mark not writable un-selected vertices
+    CMeshO::VertexIterator  vi;
+    for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
+			if(!(*vi).IsS()) (*vi).ClearW();
+			else (*vi).SetW();
+  }
+	
+	vcg::LocalOptimization<CMeshO> DeciSession(m);
 	cb(1,"Initializing simplification");
 	DeciSession.Init<MyTriEdgeCollapseQTex>();
 
+	if(Selected)
+		TargetFaceNum= m.fn - (m.sfn-TargetFaceNum);
 	DeciSession.SetTargetSimplices(TargetFaceNum);
 	DeciSession.SetTimeBudget(0.1f);
 	int startFn=m.fn;
@@ -803,6 +829,13 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, fl
 	};
 
 	DeciSession.Finalize<MyTriEdgeCollapseQTex>();
-  
+	
+	if(Selected) // Clear Writable flags 
+  {
+    CMeshO::VertexIterator  vi;
+    for(vi=m.vert.begin();vi!=m.vert.end();++vi) 
+      if(!(*vi).IsD()) (*vi).SetW();
+  }
+	
 
 }
