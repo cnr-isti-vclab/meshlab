@@ -190,8 +190,8 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
     }
     case CP_DESATURATION:
     {
-      QStringList l; l << "Lightness" << "Mean";
-      par.addEnum("method", 0, l,"Desaturation method:", "Lightness is computed as: (Max(r,g,b)+Min(r,g,b))/2<br>Mean is computed as: (r+g+b)/3");
+      QStringList l; l << "Lightness" << "Luminance" << "Mean";
+      par.addEnum("method", 0, l,"Desaturation method:", "Lightness value is computed as (Max(r,g,b)+Min(r,g,b))/2<br>Luminance value is computed as 0.212*r+0.715*g+0.072*b<br>Mean value is computed as (r+g+b)/3");
       break;
     }
     case CP_EQUALIZE:
