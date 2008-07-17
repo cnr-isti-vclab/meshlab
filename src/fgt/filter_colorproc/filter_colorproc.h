@@ -48,7 +48,9 @@ class FilterColorProc : public QObject, public MeshFilterInterface
            CP_GAMMA,
            CP_LEVELS,
            CP_INVERT,
-           CP_COLOURISATION };
+           CP_COLOURISATION,
+           CP_DESATURATION,
+           CP_EQUALIZE };
 
 		FilterColorProc();
 		~FilterColorProc();

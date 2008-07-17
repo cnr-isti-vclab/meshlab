@@ -45,7 +45,9 @@ FilterColorProc::FilterColorProc()
            << CP_CONTR_BRIGHT
            << CP_GAMMA
            << CP_LEVELS
-           << CP_COLOURISATION;
+           << CP_COLOURISATION
+           << CP_DESATURATION
+           << CP_EQUALIZE;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -72,6 +74,8 @@ const QString FilterColorProc::filterName(FilterIDType filter)
     case CP_INVERT : return "Invert";
     case CP_LEVELS : return "Levels";
     case CP_COLOURISATION : return "Colourisation";
+    case CP_DESATURATION : return "Desaturation";
+    case CP_EQUALIZE : return "Equalize";
     default: assert(0);
   }
   return QString("error!");
@@ -88,8 +92,10 @@ const QString FilterColorProc::filterInfo(FilterIDType filterId)
     case CP_CONTR_BRIGHT : return "Sets brightness and contrast of the mesh.";
     case CP_GAMMA : return "Provides standard gamma correction.";
     case CP_INVERT : return "Inverts the colors of the mesh.";
-    case CP_LEVELS : return "Sets colors levels.";
+    case CP_LEVELS : return "Adjusts colors levels.";
     case CP_COLOURISATION : return "Colors the mesh.";
+    case CP_DESATURATION : return "Desaturates colors according to the selected method.";
+    case CP_EQUALIZE : return "Equalize colors values.";
     default: assert(0);
   }
   return QString("error!");
@@ -181,6 +187,12 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
 			par.addDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f, MeshModel::MM_VERTCOLOR, "Luminance:", "Changes the luminance of the mesh.");
 			par.addDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, MeshModel::MM_VERTCOLOR, "Intensity:", "Sets the intensity with which the color it's blended to the mesh.");
 			break;
+    }
+    case CP_DESATURATION:
+    {
+      QStringList l; l << "Lightness" << "Mean";
+      par.addEnum("method", 0, l,"Desaturation method:", "Lightness is computed as: (Max(r,g,b)+Min(r,g,b))/2<br>Mean is computed as: (r+g+b)/3");
+      break;
     }
     default: assert(0);
 	}
@@ -302,6 +314,21 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       vcg::tri::UpdateColor<CMeshO>::Colourisation(m.cm, color, intensity, selected);
       return true;
     }
+    case CP_DESATURATION:
+    {
+      int method = par.getEnum("method");
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+      vcg::tri::UpdateColor<CMeshO>::Desaturation(m.cm, method, selected);
+      return true;
+    }
+    case CP_EQUALIZE:
+    {
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+      vcg::tri::UpdateColor<CMeshO>::Equalize(m.cm, selected);
+      return true;
+    }
     default: assert(0);
   }
 	return false;
@@ -319,6 +346,8 @@ const MeshFilterInterface::FilterClass FilterColorProc::getClass(QAction *a)
     case CP_GAMMA :
     case CP_INVERT :
     case CP_COLOURISATION :
+    case CP_EQUALIZE :
+    case CP_DESATURATION :
     case CP_LEVELS : return MeshFilterInterface::VertexColoring;
     default: assert(0);
   }
@@ -329,6 +358,7 @@ bool FilterColorProc::autoDialog(QAction *a)
   switch(ID(a))
   {
     case CP_INVERT : return false;
+    case CP_EQUALIZE : return false;
     default : return true;
   }
   assert(0);
