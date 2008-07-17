@@ -57,9 +57,8 @@ public:
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &par, vcg::CallBackPos * cb);
 	virtual void maxFaceSpan(float maxdiffUV[][2], MeshModel &m, int &mat, CMeshO::FaceIterator &fit);
 	virtual void copyTiles(QPixmap images[], QImage tiledimages[], int &numTextures, int &c, float maxdiffUV[][2], MeshModel &m, int &algo, std::vector<Point2i>& sizes, Point2i &size);
-	virtual void positionTextures(bool &made, int &numAtlases, int &sizesIndeces, int &length, std::map<int, int> &whichAtlas, std::vector< std::vector<Point2i> > &splitSizes, Point2i max_size, int &c, std::vector<Point2i> splitsize, std::vector< std::vector<Point2i> > splitPosiz, std::vector<Point2i> splitglobalSizes, std::vector<Point2i> sizes);
-	virtual void createAtlas(QImage &atlas, int &index, int &c, QString &filename, bool &result, int &numAtlases, MeshModel &m, int &length, QPixmap images[], std::vector< std::vector<Point2i> > splitPosiz, std::vector<Point2i> splitglobalSizes);
-	virtual void adjustUVCoords(int &mat, int &c, int &length, CMeshO::FaceIterator &fit, std::vector< std::vector<Point2i> > splitPosiz, std::vector<Point2i> splitglobalSizes, MeshModel &m, float maxdiffUV[][2], std::map<int, int> &whichAtlas, QPixmap images[]);
+	virtual bool createAtlas(int &numTextures, int &c, MeshModel &m, QPixmap images[], std::vector<Point2i> &posiz, Point2i &global_size);
+	virtual void adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator &fit, std::vector<Point2i> &posiz, Point2i &global_size, MeshModel &m, float maxdiffUV[][2], QPixmap images[]);
 };
 
 #endif
