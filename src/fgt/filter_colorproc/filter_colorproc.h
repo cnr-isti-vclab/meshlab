@@ -50,6 +50,7 @@ class FilterColorProc : public QObject, public MeshFilterInterface
            CP_INVERT,
            CP_COLOURISATION,
            CP_DESATURATION,
+           CP_WHITE_BAL,
            CP_EQUALIZE };
 
 		FilterColorProc();

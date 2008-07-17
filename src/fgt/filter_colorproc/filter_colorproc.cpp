@@ -47,7 +47,8 @@ FilterColorProc::FilterColorProc()
            << CP_LEVELS
            << CP_COLOURISATION
            << CP_DESATURATION
-           << CP_EQUALIZE;
+           << CP_EQUALIZE
+           << CP_WHITE_BAL;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -76,6 +77,7 @@ const QString FilterColorProc::filterName(FilterIDType filter)
     case CP_COLOURISATION : return "Colourisation";
     case CP_DESATURATION : return "Desaturation";
     case CP_EQUALIZE : return "Equalize";
+    case CP_WHITE_BAL : return "White Balance";
     default: assert(0);
   }
   return QString("error!");
@@ -96,6 +98,7 @@ const QString FilterColorProc::filterInfo(FilterIDType filterId)
     case CP_COLOURISATION : return "Colors the mesh.";
     case CP_DESATURATION : return "Desaturates colors according to the selected method.";
     case CP_EQUALIZE : return "Equalize colors values.";
+    case CP_WHITE_BAL : return "Enhances white color.";
     default: assert(0);
   }
   return QString("error!");
@@ -190,8 +193,8 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
     }
     case CP_DESATURATION:
     {
-      QStringList l; l << "Lightness" << "Luminance" << "Mean";
-      par.addEnum("method", 0, l,"Desaturation method:", "Lightness value is computed as (Max(r,g,b)+Min(r,g,b))/2<br>Luminance value is computed as 0.212*r+0.715*g+0.072*b<br>Mean value is computed as (r+g+b)/3");
+      QStringList l; l << "Lightness" << "Luminosity" << "Average";
+      par.addEnum("method", 0, l,"Desaturation method:", "Lightness is computed as (Max(r,g,b)+Min(r,g,b))/2<br>Luminosity is computed as 0.212*r + 0.715*g + 0.072*b<br>Average is computed as (r+g+b)/3");
       break;
     }
     case CP_EQUALIZE:
@@ -341,6 +344,13 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
       vcg::tri::UpdateColor<CMeshO>::Equalize(m.cm, rgbMask, selected);
       return true;
     }
+    case CP_WHITE_BAL:
+    {
+      bool selected = false;
+      if(m.cm.sfn!=0) selected = true;
+      vcg::tri::UpdateColor<CMeshO>::WhiteBalance(m.cm, selected);
+      return true;
+    }
     default: assert(0);
   }
 	return false;
@@ -360,6 +370,7 @@ const MeshFilterInterface::FilterClass FilterColorProc::getClass(QAction *a)
     case CP_COLOURISATION :
     case CP_EQUALIZE :
     case CP_DESATURATION :
+    case CP_WHITE_BAL :
     case CP_LEVELS : return MeshFilterInterface::VertexColoring;
     default: assert(0);
   }
@@ -370,6 +381,7 @@ bool FilterColorProc::autoDialog(QAction *a)
   switch(ID(a))
   {
     case CP_INVERT : return false;
+    case CP_WHITE_BAL : return false;
     default : return true;
   }
   assert(0);
