@@ -167,11 +167,11 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
     case CP_LEVELS:
     {
 			float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
-			par.addDynamicFloat("in_min", in_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Black input level:", "");
+			par.addDynamicFloat("in_min", in_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Min input level:", "");
 			par.addDynamicFloat("gamma", gamma, 0.1f, 5.0f, MeshModel::MM_VERTCOLOR, "Gamma:", "");
-			par.addDynamicFloat("in_max", in_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White input level:", "");
-			par.addDynamicFloat("out_min", out_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Black output level:", "");
-			par.addDynamicFloat("out_max", out_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "White output level:", "");
+			par.addDynamicFloat("in_max", in_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Max input level:", "");
+			par.addDynamicFloat("out_min", out_min, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Min output level:", "");
+			par.addDynamicFloat("out_max", out_max, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Max output level:", "");
 			par.addBool("rCh", true, "Red Channel:", "");
 			par.addBool("gCh", true, "Green Channel:", "");
 			par.addBool("bCh", true, "Blue Channel:", "");
@@ -193,6 +193,13 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
       QStringList l; l << "Lightness" << "Mean";
       par.addEnum("method", 0, l,"Desaturation method:", "Lightness is computed as: (Max(r,g,b)+Min(r,g,b))/2<br>Mean is computed as: (r+g+b)/3");
       break;
+    }
+    case CP_EQUALIZE:
+    {
+      par.addBool("rCh", true, "Red Channel:", "Select the red channel.");
+			par.addBool("gCh", true, "Green Channel:", "Select the green channel.");
+			par.addBool("bCh", true, "Blue Channel:", "Select the blue channel.<br><br>If no channels are selected<br>filter works on Lightness.");
+			break;
     }
     default: assert(0);
 	}
@@ -324,9 +331,14 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_EQUALIZE:
     {
+      unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
+      if(par.getBool("rCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::RED_CHANNEL;
+      if(par.getBool("gCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::GREEN_CHANNEL;
+      if(par.getBool("bCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::BLUE_CHANNEL;
+
       bool selected = false;
       if(m.cm.sfn!=0) selected = true;
-      vcg::tri::UpdateColor<CMeshO>::Equalize(m.cm, selected);
+      vcg::tri::UpdateColor<CMeshO>::Equalize(m.cm, rgbMask, selected);
       return true;
     }
     default: assert(0);
@@ -358,7 +370,6 @@ bool FilterColorProc::autoDialog(QAction *a)
   switch(ID(a))
   {
     case CP_INVERT : return false;
-    case CP_EQUALIZE : return false;
     default : return true;
   }
   assert(0);
