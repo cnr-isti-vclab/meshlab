@@ -1,14 +1,14 @@
 /****************************************************************************
 * MeshLab                                                           o o     *
-* An extendible mesh processor                                    o     o   *
+* A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005, 2006                                          \/)\/    *
+* Copyright(C) 2005                                                \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
+* This program is free software; you can redistribute it and/or modify      *   
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -21,167 +21,259 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <Qt>
-#include <QtGui>
-#include "filterborder.h"
 
-#include <vcg/complex/trimesh/update/flag.h>
-#include <vcg/complex/trimesh/clean.h>
+#include <QtGui>
+#include <qfiledialog.h>
+#include <limits>
+#include <math.h>
+#include <stdlib.h>
+#include <qstring.h>
+
+#include "filter_slice.h"
+
+#include <vcg/simplex/vertexplus/base.h>
+#include <vcg/simplex/vertexplus/component_ocf.h>
+#include <vcg/space/point3.h>
+#include <vcg/space/box3.h>
+#include <vcg/space/index/grid_closest.h>
+#include <vcg/complex/intersection.h>
+#include <vcg/complex/edgemesh/update/bounding.h>
+
+#include <wrap/gui/trackball.h>
+
 
 using namespace std;
 using namespace vcg;
 
-FilterBorder::FilterBorder() 
-{
-  typeList << FP_REMOVE_BORDER_FACE 
-	<< FP_CYLINDER_UNWRAP;
- 
-  FilterIDType tt;
-  foreach(tt , types())
-	    actionList << new QAction(filterName(tt), this);
+// Constructor usually performs only two simple tasks of filling the two lists 
+//  - typeList: with all the possible id of the filtering actions
+//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
+ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin () 
+{ 
+	typeList << FP_PLAN;
+  
+  foreach(FilterIDType tt , types())
+	  actionList << new QAction(filterName(tt), this);
 }
 
-FilterBorder::~FilterBorder() {
-	for (int i = 0; i < actionList.count() ; i++ ) 
-		delete actionList.at(i);
-}
-
-const QString FilterBorder::filterName(FilterIDType filter) 
+// ST() must return the very short string describing each filtering action 
+// (this string is used also to define the menu entry)
+const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) 
 {
- switch(filter)
-  {
-	  case FP_REMOVE_BORDER_FACE :						return QString("Remove border faces");
-	  case FP_CYLINDER_UNWRAP :								return QString("Cylindrical Unwrap");
-  	default: assert(0);
-  }
+  switch(filterId) {
+		case FP_PLAN :  return QString("Cross section plan"); 
+		default : assert(0); 
+	}
   return QString("error!");
 }
 
-const QString FilterBorder::filterInfo(FilterIDType filterId)
+// Info() must return the longer string describing each filtering action 
+// (this string is used in the About plugin dialog)
+const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId)
 {
-  switch(filterId)
-  {
-		case FP_REMOVE_BORDER_FACE:	     return tr("Remove all the faces that has at least one border vertex."); 
-		case FP_CYLINDER_UNWRAP:	     return tr("Unwrap a cylindrical object alogn the y axis. It assumes that the object is already well aligned."); 
-  	default: assert(0);
-  }
+ switch(filterId) {
+		case FP_PLAN :  return QString("Provide the cross section of the chosen plan"); 
+		
+		default : assert(0); 
+	}
   return QString("error!");
 }
 
-const FilterBorder::FilterClass FilterBorder::getClass(QAction *a)
-{
-  switch(ID(a))
-  {
-    case FP_REMOVE_BORDER_FACE :
-      return MeshFilterInterface::Cleaning;     
-    default : return MeshFilterInterface::Generic;
-  }
-}
-
-
-const PluginInfo &FilterBorder::pluginInfo()
+const PluginInfo &ExtraFilter_SlicePlugin::pluginInfo()
 {
    static PluginInfo ai;
-   ai.Date=tr( __DATE__ );
-	 ai.Version = tr("0.1");
-	 ai.Author = ("Paolo Cignoni");
+   ai.Date=tr("Jul 2008");
+	 ai.Version = tr("1.0");
+	 ai.Author = ("Couet Julien, with the aid of Nicola Andrenucci editslice's code");
    return ai;
-}
+ }
 
-const int FilterBorder::getRequirements(QAction *action)
+// This function define the needed parameters for each filter. Return true if the filter has some parameters
+// it is called every time, so you can set the default value of parameters according to the mesh
+// For each parmeter you need to define, 
+// - the name of the parameter, 
+// - the string shown in the dialog 
+// - the default value
+// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
+//void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst) 
+void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, FilterParameterSet &parlst)
 {
-  switch(ID(action))
-  {
-		case FP_CYLINDER_UNWRAP:	 
-    case FP_REMOVE_BORDER_FACE :	return MeshModel::MM_BORDERFLAG;
-    default: assert(0);
-  }
-  return 0;
-}
-
-void FilterBorder::initParameterSet(QAction *action,MeshModel &m, FilterParameterSet & parlst)
-{ 
-	pair<float,float> qualityRange;
-  switch(ID(action))
-  {
-    case FP_REMOVE_BORDER_FACE :
-		  parlst.addInt("IterationNum",1,"Iteration","Number of times that the removal of face border is iterated.");
-		  parlst.addBool("DeleteVertices",true,"Delete unreferenced vertices","Remove the vertexes that remains unreferneced after the face removal.");
- 		  break;
-    case  FP_CYLINDER_UNWRAP:
-		  parlst.addBool("Flattening",true,"Auto Flattening","Try to keep the average height constant");
- 		  break;
-		default: assert(0);
-  }
-}
-
-
-
-bool FilterBorder::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
-{
-	CMeshO::FaceIterator fi;
-	CMeshO::VertexIterator vi;
 	switch(ID(filter))
-  {
-		case FP_CYLINDER_UNWRAP:	 
+		 {	
+	
+		  case FP_PLAN :  
+		  {
+ 		   	QStringList metrics;
+				metrics.push_back("XY Cross Section");
+				metrics.push_back("YZ Cross Section");
+				metrics.push_back("ZX Cross Section");
+				parlst.addEnum("Plan", 0, metrics, tr("Plan:"), tr("Choose a cross section plan."));
+				parlst.addFloat("CrossPlanVal", 0.0, "Crossing plan value", "Specify a value of the crossing plan as a float.");
+				parlst.addString("filename", "Slice", "Name of the svg file", "All the svg files are registered in the sample/SvgSample folder of the MEshlab tree."); 		  
+		  }
+		  break;
+											
+		  default : assert(0); 
+	         }
+}
+
+// The Real Core Function doing the actual mesh processing.
+// Move Vertex of a random quantity
+bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &parlst, vcg::CallBackPos *cb)
+{
+	switch(ID(filter))
+	{
+		case FP_PLAN :
 		{
-			for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-				if(!(*vi).IsD()) 
+			int plan = parlst.getEnum("Plan");
+			float PlanVal = parlst.getFloat("CrossPlanVal");
+			fileName = parlst.getString("filename");
+			if (fileName==0) return false;
+    			if (!(fileName.endsWith("svg")))
+			fileName= fileName+".svg";
+			
+			double avg_length; 
+
+			b=m.cm.bbox; //Boundig Box
+			Point3f mi=b.min;
+			Point3f ma=b.max;
+			Point3f centre=b.Center() ;
+			edgeMax=0;
+    			float LX= ma[0]-mi[0];
+			float LY= ma[1]-mi[1];
+			float LZ= ma[2]-mi[2];
+			edgeMax= max(LX, LY);
+			edgeMax=max(edgeMax, LZ); //edgeMax: the longest side of BBox
+
+			pr.setPosition(Point2d(0,0));
+			pr.numCol=1;
+			pr.numRow=1;
+
+			edge_mesh = new n_EdgeMesh();
+			
+			switch(plan)
+			{ 
+				case 0: 
 				{
-					Point3f p = (*vi).P();
-					p.Y()=0;
-					float ro,theta,phi;
-					p.ToPolar(ro,theta,phi);
-					(*vi).P().X()=theta;
-					(*vi).P().Z()=ro;
+					Point3f* dir=new Point3f(0,1,0);   //the plans' normal vector init 
+					Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
+					
+					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
+					pr.setPlane(0, d); 
+
+					mesh_grid = new TriMeshGrid();
+					mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
+
+					float scale = (pr.getViewBox().V(0)*2)/(edgeMax*1.4142) ;
+					pr.setScale(scale);
+
+					Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
+					Plane3f pl;
+					pl.SetDirection(*dir);
+				
+					Point3f off= translation_plans; //translation vector
+					pl.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) + PlanVal);
+			
+					vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+					vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+
+					fileN="./SvgSample/"+fileName.left( fileName.length ()- 4 )+"XY"+".svg";
+					vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(),pr);			
+
+			
+				} 
+				break;
+
+				case 1: 
+				{ 
+					Point3f* dir=new Point3f(0,0,1);   //the plans' normal vector init 
+					Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
+				
+					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
+					pr.setPlane(0, d); 
+
+					mesh_grid = new TriMeshGrid();
+					mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
+					
+					float scale = (pr.getViewBox().V(0)*2)/(edgeMax*1.4142) ;
+					pr.setScale(scale);
+
+					Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
+					Plane3f pl;
+					pl.SetDirection(*dir);
+				
+					Point3f off= translation_plans; //translation vector
+					pl.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) + PlanVal);
+			
+					vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+					vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+
+					fileN="./SvgSample/"+fileName.left( fileName.length ()- 4 )+"YZ"+".svg";
+					vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(),pr);
+        					
+				} 
+				break;
+
+				case 2: 
+				{ 	
+					Point3f* dir=new Point3f(1,0,0);   //the plans' normal vector init 
+					Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
+					
+					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
+					pr.setPlane(0, d); 
+
+					mesh_grid = new TriMeshGrid();
+					mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
+					
+					float scale = (pr.getViewBox().V(0)*2)/(edgeMax*1.4142) ;
+					pr.setScale(scale);
+
+					Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
+					Plane3f pl;
+					pl.SetDirection(*dir);
+				
+					Point3f off= translation_plans; //translation vector
+					pl.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) + PlanVal);
+			
+					vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+					vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+
+					fileN="./SvgSample/"+fileName.left( fileName.length ()- 4 )+"ZX"+".svg";
+					vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(),pr);
 				}
-					return true;
-
+				break;
+					
+				default: assert(0);
+			} 
 		}
-    case FP_REMOVE_BORDER_FACE: 
-	  {
-			tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
-      int IterationNum = par.getInt("IterationNum");		
-      bool DeleteVertices = par.getBool("DeleteVertices");	
-			for(int i=0;i<IterationNum;++i)
-			{
-				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-					if(!(*fi).IsD())
-					{
-						if((*fi).V(0)->IsB() || (*fi).V(1)->IsB() || (*fi).V(2)->IsB() )
-						{
-							 (*fi).V(0)->SetV();
-							 (*fi).V(1)->SetV();
-							 (*fi).V(2)->SetV();
-							 tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
-						}
-					}
-				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-					if(!(*vi).IsD()) 
-						if((*vi).IsV()) (*vi).SetB();
-			}
-			if(DeleteVertices)
-			{
-				for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-					if(!(*fi).IsD())
-					{
-						(*fi).V(0)->ClearV();
-						(*fi).V(1)->ClearV();
-						(*fi).V(2)->ClearV();
-					}
-
-					for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-						if(!(*vi).IsD()) 
-							if((*vi).IsV()) tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
-			}
-
-			m.clearDataMask(MeshModel::MM_BORDERFLAG);
-			m.updateDataMask(MeshModel::MM_BORDERFLAG);
-	  }
+		break;
 	}
 	return true;
 }
 
+const MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction *filter)
+{
+	switch(ID(filter))
+	{
+		case FP_PLAN :
+		{
+			return MeshFilterInterface::Generic; 
+		}
+		break;
+		
+		default: assert(0);
+              	return MeshFilterInterface::Generic;
+	}
+}
 
-Q_EXPORT_PLUGIN(FilterBorder)
+bool ExtraFilter_SlicePlugin::autoDialog(QAction *action)
+{
+  switch(ID(action)) 
+  {
+  case  FP_PLAN: return true;
+	default: return false;
+  }
+}
+
+Q_EXPORT_PLUGIN(ExtraFilter_SlicePlugin)
