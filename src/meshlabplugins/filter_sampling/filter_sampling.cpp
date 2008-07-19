@@ -226,6 +226,7 @@ public:
 	{
 		coordFlag=false;
 		colorFlag=false;
+		qualityFlag=false;
 		m=_m;
 		if(m) 
 		{
@@ -250,7 +251,7 @@ void AddVert(CMeshO::VertexType &p)
 		CMeshO::FaceType   *nearestF=0;
 		vcg::face::PointDistanceBaseFunctor PDistFunct;
 		dist=dist_upper_bound;
-	  if(cb) cb(sampleCnt++*100/sampleNum,"Resampling vertices");
+	  if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
     if(dist == dist_upper_bound) return ;																				
 
@@ -261,8 +262,7 @@ void AddVert(CMeshO::VertexType &p)
 																			 
 		if(coordFlag) p.P()=closestPt;
 		if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
-		
-		//if(qualityFlag) p.Q()=closestQuality;
+		if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
 		}
 }; // end class RedetailSampler
 
@@ -424,11 +424,11 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 				parlst.addMesh ("TargetMesh", target, "Target Mesh",
 												"The mesh whose vertexes will receive the data from the source.");
 				parlst.addBool ("GeomTransfer", false, "Transfer Geometry",
-												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+												"if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh");										
 				parlst.addBool ("ColorTransfer", true, "Transfer Color",
-												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+												"if enabled, the color of each vertex of the target mesh will become the color of the corresponding closest point on the source mesh");										
 				parlst.addBool ("QualityTransfer", false, "Transfer quality",
-												"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with point clouds representing the used samples.");										
+												"if enabled, the quality of each vertex of the target mesh will become the quality of the corresponding closest point on the source mesh");										
 		} break; 
 		case FP_OFFSET_SURFACE :
 		{
@@ -579,6 +579,23 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			rs.dist_upper_bound = trgMesh->cm.bbox.Diag()/50;
 			rs.colorFlag=par.getBool("ColorTransfer");
 			rs.coordFlag=par.getBool("GeomTransfer");
+			rs.qualityFlag=par.getBool("QualityTransfer");
+
+			if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag)
+			{
+				errorMessage = QString("You have to choose at least one attribute to be sampled");
+				return false;
+			}
+			
+			if(rs.colorFlag) {
+					trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
+					trgMesh->ioMask|=MeshModel::IOM_VERTCOLOR;
+			}
+			
+			if(rs.qualityFlag){
+					trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
+					trgMesh->ioMask|=MeshModel::IOM_VERTQUALITY;
+			}
 
 			qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
 			qDebug("Target  mesh has %7i vert %7i face",trgMesh->cm.vn,trgMesh->cm.fn);
@@ -601,9 +618,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			BestDim( baseMesh->cm.bbox, voxelSize, volumeDim );
 
 			tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeDim, voxelSize*2.5, offsetThr,cb);
-    tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
-		tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
-		
+			tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
+			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
 		} break;
 		default : assert(0);
 		}
