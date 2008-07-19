@@ -50,8 +50,10 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		}
 	if(formatName.toUpper() == tr("ASC"))
 		{
-		tri::io::ImporterASC<CMeshO>::Open(m.cm, qPrintable(fileName),cb);
-		return true;
+			mask |= MeshModel::IOM_VERTQUALITY;
+			m.Enable(mask);			
+			tri::io::ImporterASC<CMeshO>::Open(m.cm, qPrintable(fileName),cb);
+			return true;
 		}
 	return result;
 }
