@@ -900,6 +900,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						gla=new GLArea(mdiarea);
 						newGla =true;
 					}
+					gla->meshDoc.busy=true;
 					gla->meshDoc.addNewMesh(qPrintable(fileName),mm);
 					
 					gla->mm()->ioMask |= mask;				// store mask into model structure
