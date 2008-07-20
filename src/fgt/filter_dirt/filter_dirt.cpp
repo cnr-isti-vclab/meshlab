@@ -129,10 +129,10 @@ bool FilterDirt::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &
 	for (int i=0; i<100 && !ottuso && !border; ++i)
 	{
 		//get dust direction over face
-		vcg::Point3f dustDirection = (face->N().Normalize() ^  vcg::Point3f(0,-1,0)) ^ face->N().Normalize();
+		vcg::Point3f dustDirection = (face->N() ^  vcg::Point3f(0,-1,0)) ^ face->N();
 		//check if selected face angle between normal and -Y axe
-		//if (!(vcg::Angle(face->N(),vcg::Point3f(0,-1,0))<M_PI/2))
-		//{
+		if (!(vcg::Angle(face->N(),vcg::Point3f(0,-1,0))<M_PI/2))
+		{
 			//float mediumDistance = mediumVertexDistance(face);
 			//color face for debug
 			if (i==0)
@@ -170,15 +170,15 @@ bool FilterDirt::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &
 			float radius = vcg::PSDist<float>(casualPoint,face->V(minDist1)->P(),face->V(minDist2)->P(),q);
 		
 			v1 = (q-casualPoint).Normalize();
-			v2 = (direction - casualPoint).Normalize();
-			float angle = vcg::math::Acos(v1*v2);
+			v2 = (direction - casualPoint).Normalize();;
+			float angle = vcg::Angle(v1,v2);
 		
 			//find intersection point between casualPoint and direction
 			float tanValue = (float) radius * (sin(angle)/cos(angle));
 			vcg::Point3f v = q - face->V(minDist1)->P();
 			vcg::Point3f subVector = -v.Normalize();
 			subVector *= tanValue;
-			vcg::Point3f intersectionPoint = (v - subVector) + face->V(minDist1)->P();		
+			vcg::Point3f intersectionPoint = (v + subVector) + face->V(minDist1)->P();		
 			
 		
 			int nextFace;
@@ -198,9 +198,14 @@ bool FilterDirt::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &
 			else
 				face = face->FFp(nextFace);
 			
-			//for now i get q, this point isn't right because isn't point incident between dustDirection and face wedge 
-			//but is min distance between p and wedge
 			casualPoint = intersectionPoint;
+		}
+		else
+		{
+			ottuso = true;
+			Log (0, "[%d] trovata faccia ottusa", i);
+			face->C()=vcg::Color4b::Red;
+		}
 	}
 		
 	return true;
