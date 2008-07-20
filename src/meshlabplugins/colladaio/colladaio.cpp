@@ -121,15 +121,15 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 	if(formatName.toUpper() == tr("DAE"))
 	{
 		m.addinfo = NULL;
-		tri::io::AdditionalInfoDAE* info = NULL;
+		tri::io::InfoDAE* info = NULL;
 		if (!tri::io::ImporterDAE<CMeshO>::LoadMask(filename.c_str(), info))
 			return false;
 
 		m.Enable(info->mask);
-		for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
-			m.cm.textures.push_back(info->texturefile[tx].toStdString());
+	//	for(unsigned int tx = 0; tx < info->texturefile.size();++tx)
+	//		m.cm.textures.push_back(info->texturefile[tx].toStdString());
 		
-		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),m.addinfo);
+		int result = vcg::tri::io::ImporterDAE<CMeshO>::Open(m.cm, filename.c_str(),info);
 		
 		if (result != vcg::tri::io::ImporterDAE<CMeshO>::E_NOERROR)
 		{
