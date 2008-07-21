@@ -104,7 +104,7 @@
 using namespace std;
 using namespace vcg;
 
-bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, CallBackPos *cb, QWidget *parent)
 {
 	// initializing mask
   mask = 0;
@@ -170,6 +170,36 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 
 	return true;
 }
+
+void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QString &filename, FilterParameterSet & parlst)
+{
+	QTime t;
+	t.start();
+	
+	QDomDocument* doc = new QDomDocument(filename);
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly))
+				return;
+	if (!doc->setContent(&file)) 
+	{
+				file.close();
+				return;
+	}
+	file.close();
+	
+	QDomNodeList geomList = doc->elementsByTagName("geometry");
+	QStringList idList;
+	for(int i=0;i<geomList.size();++i)
+	{
+		QString idVal = geomList.at(i).toElement().attribute("id");
+		idList.push_back(idVal);
+		qDebug("Node %i geom id = '%s'",i,qPrintable(idVal));
+	}
+	parlst.addEnum("geomnode", 0, idList, tr("geometry nodes"),  tr("dsasdfads"));
+	qDebug("Time elapsed: %d ms", t.elapsed());
+}
+
+
 
 bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const FilterParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
 {

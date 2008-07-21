@@ -878,9 +878,12 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 				
 				qb->show();
+				FilterParameterSet par;
+				pCurrentIOPlugin->initPreOpenParameter(extension, fileName,par);
+				
 				int mask = 0;
 				MeshModel *mm= new MeshModel();	
-				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,QCallBack,this /*gla*/))
+				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,par,QCallBack,this /*gla*/))
 					delete mm;
 				else{
 					// After opening the mesh lets ask to the io plugin if this format

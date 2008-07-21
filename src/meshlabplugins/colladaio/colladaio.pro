@@ -9,7 +9,9 @@ HEADERS       = colladaio.h \
 
 
 SOURCES       = colladaio.cpp \
+		../../meshlab/filterparameter.cpp\
 		$$VCGDIR/wrap/dae/xmldocumentmanaging.cpp
+
 TARGET        = colladaio
 
 QT           += xml opengl

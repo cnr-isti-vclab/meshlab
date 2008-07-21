@@ -189,6 +189,13 @@ public:
 	virtual void initGlobalParameterSet(QString /*format*/, FilterParameterSet & /*globalparam*/) {}
 	
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
+	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
+	// The instanced parameters are then passed to the open at the loading time.
+	// Typical example of use to decide what subportion of a mesh you have to load.
+	// If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
+	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, FilterParameterSet & /*par*/) {}
+	
+	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
 	// it is called by the framework AFTER the mesh is already loaded to perform more or less standard processing on the mesh.
 	// typical example: unifying vertices in stl models. 
 	// If you do not need any additional processing do nothing.
@@ -207,12 +214,13 @@ public:
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
     
   virtual bool open(
-      const QString &format, // the extension of the format e.g. "PLY"
-			const QString &fileName,     // The name of the file to be opened
-      MeshModel &m,          // The mesh that is filled with the file content 
-      int &mask,             // a bit mask reporting what kind of data we have found in the file (per vertex color, texture coords etc)
-      vcg::CallBackPos *cb=0,
-      QWidget *parent=0)=0;
+      const QString &format,					// the extension of the format e.g. "PLY"
+			const QString &fileName,				// The name of the file to be opened
+      MeshModel &m,										// The mesh that is filled with the file content 
+      int &mask,											// a bit mask that will be filled reporting what kind of data we have found in the file (per vertex color, texture coords etc)
+			const FilterParameterSet & par,	// The parameters that have been set up in the initPreOpenParameter()
+      vcg::CallBackPos *cb=0,					// standard callback for reporting progress in the loading
+      QWidget *parent=0)=0;						// you should not use this...
     
   virtual bool save(
       const QString &format, // the extension of the format e.g. "PLY"

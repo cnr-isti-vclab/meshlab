@@ -79,7 +79,7 @@
 using namespace std;
 using namespace vcg;
 
-bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, CallBackPos *cb, QWidget *parent)
 {
 	// initializing mask
 	mask = 0;

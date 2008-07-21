@@ -39,7 +39,7 @@ using namespace vcg;
 
 bool parseTRI(const std::string &filename, CMeshO &m);
 
-bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, CallBackPos *cb, QWidget *parent)
 {
 	bool result;
 	if(formatName.toUpper() == tr("TRI"))
