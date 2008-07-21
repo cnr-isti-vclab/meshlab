@@ -18,7 +18,7 @@ TARGET        = meshio
 INCLUDEPATH += ../../../../code/lib/lib3ds-1.3.0
 
 win32-msvc.net:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds-130s.lib
-win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/msvc8/release/lib3ds-1_3.lib
+win32-msvc2005:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/msvc7/build/release/lib3ds-130s.lib
 win32-g++:LIBS	+= ../../../../code/lib/lib3ds-1.3.0/lib3ds/.libs/lib3ds.a
 
 unix{
