@@ -150,7 +150,6 @@ void FilterTexturePlugin::copyTiles(QPixmap images[], QImage tiledimages[], int 
 	int xPos, yPos;
 	for (c=0; c<numTextures; c++)//iterate through textures, loading each
 	{
-		qDebug() << "@ top of numtextures for loop" << endl;
 		images[c] = QPixmap(m.cm.textures[c].c_str());//loads image, if fails is a null image. will guess extension from file name
 		if (!images[c].isNull())
 		{
@@ -160,11 +159,9 @@ void FilterTexturePlugin::copyTiles(QPixmap images[], QImage tiledimages[], int 
 			maxdiffUV[c][1]++;//this will allow for a UV coordinate of .9 with a span of 2 = 2.9
 			if ((maxdiffUV[c][0]>2) || (maxdiffUV[c][1]>2))//tiling texture, if uv > 1 (or 2 after correction, above) means want it is tiled/repeated
 			{
-				qDebug() << "in iteration of copyTiles" << endl;
 				tiledimages[c] = QImage(maxdiffUV[c][0]*images[c].width(), maxdiffUV[c][1]*images[c].height(), QImage::Format_ARGB32);//doesn't need to be ceiling (ceil function) - doesn't matter if texture is not a complete copy
 				QPainter painter(&tiledimages[c]);//TODO: how move initialization outside of for loop, so can re-use the painter?
 				//now draw into the image however many times necessary
-				qDebug() << "images c width:" << images[c].width() << endl;
 				for (xPos = 0; xPos < maxdiffUV[c][0]*images[c].width(); xPos += images[c].width())//nested for loop in order to fill whole grid, does one column at a time
 				{
 					for (yPos = 0; yPos < maxdiffUV[c][1]*images[c].height(); yPos += images[c].height())
@@ -179,10 +176,8 @@ void FilterTexturePlugin::copyTiles(QPixmap images[], QImage tiledimages[], int 
 					tiledimages[c] = tiledimages[c].scaled(images[c].width(), images[c].height());//resample image to original size
 				}
 				images[c] = QPixmap::fromImage(tiledimages[c]);//not necessary to write file if stays in memory, so just re-assign the QPixmap to the new tiled image
-				qDebug() << "converted image to pixmap" << endl;
 			}
 		}
-		qDebug() << "getting image size" << endl;
 		size = Point2i(images[c].width(), images[c].height());//regardless of whether or not it was tiled, now store the image's dimensions
 		sizes.push_back(size);
 		qDebug() << "copyTiles loaded image into sizes vector: " << m.cm.textures[c].c_str() << "with (potentially tiled) size: " << size[0] << " " << size[1] << endl;	
