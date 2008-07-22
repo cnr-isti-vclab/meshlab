@@ -76,6 +76,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	locked = false;
 	drawnPath =	vector<Point2f>();
 	drawnPath1 = vector<Point2f>();
+	banList = vector<CFaceO*>();
 	drawP = false;
 	drawP1 = false;
 	path =	vector<CVertexO*>();
@@ -189,7 +190,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 		drawAxis(&painter); // and the axis, always in first plane
 		drawSelectionRectangle(&painter); // Draw the rectangle of selection
 		if (mode != UnifyVert) drawEditRectangle(&painter);
-		else drawUnifyRectangles(&painter); // Draw the rectangles for unify	
+		else drawUnifyRectangles(&painter); // Draw the rectangles for unify
 		glDisable(GL_LOGIC_OP);
 	  	glPopAttrib();
 		glPopMatrix();
@@ -208,11 +209,14 @@ void RenderArea::drawSelectedVertexes(int i)
 {
 	glDisable(GL_COLOR_LOGIC_OP);
 	glColor3f(1,0,0);
-	for (int j = 0; j < 3; j++)
-	{	
-		if(areaUV.contains(QPointF(model->cm.face[i].WT(j).u(), model->cm.face[i].WT(j).v())) && model->cm.face[i].V(j)->IsUserBit(selVertBit))
-				DrawCircle(QPoint((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - posVX/zoom,
-					(AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y())))) * AREADIM) - posVY/zoom));
+	if (!isInside(&model->cm.face[i]))
+	{
+		for (int j = 0; j < 3; j++)
+		{	
+			if(areaUV.contains(QPointF(model->cm.face[i].WT(j).u(), model->cm.face[i].WT(j).v())) && model->cm.face[i].V(j)->IsUserBit(selVertBit))
+					DrawCircle(QPoint((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - posVX/zoom,
+						(AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y())))) * AREADIM) - posVY/zoom));
+		}
 	}
 	glColor3f(0,0,0);
 	glEnable(GL_COLOR_LOGIC_OP);
@@ -250,7 +254,7 @@ void RenderArea::drawEdge(int i)
 		}
 		else
 		{
-			if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(), model->cm.face[i].WT(j).v())) && model->cm.face[i].V(j)->IsUserBit(selVertBit))
+			if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(), model->cm.face[i].WT(j).v())) && model->cm.face[i].V(j)->IsUserBit(selVertBit) && !isInside(&model->cm.face[i]))
 				glVertex3f((origin.x() + (cos(degree) * (model->cm.face[i].WT(j).u() - origin.x()) - sin(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM - posVX/zoom,
 						AREADIM - ((origin.y() + (sin(degree) * (model->cm.face[i].WT(j).u() - origin.x()) + cos(degree) * (model->cm.face[i].WT(j).v() - origin.y()))) * AREADIM) - posVY/zoom, 1);
 			else glVertex3f(model->cm.face[i].WT(j).u() * AREADIM , AREADIM - (model->cm.face[i].WT(j).v() * AREADIM), 1);
@@ -895,6 +899,7 @@ void RenderArea::ChangeMode(int modenumber)
 					if (selectMode == Vertex) 
 					{
 						mode = EditVert; selectedV = true;
+						UpdateSelectionAreaV(0,0);
 						for (unsigned i = 0; i < model->cm.face.size(); i++) model->cm.face[i].ClearUserBit(selBit);
 					}
 					else 
@@ -1099,13 +1104,16 @@ void RenderArea::UpdateVertex()
 	// After a move of vertex, re-calculate the new UV coordinates
 	for (unsigned i = 0; i < model->cm.face.size(); i++)
 	{
-		for (unsigned j = 0; j < 3; j++)
+		if (!isInside(&model->cm.face[i]))
 		{
-			if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(),model->cm.face[i].WT(j).v()))
-				&& model->cm.face[i].V(j)->IsUserBit(selVertBit) && !model->cm.face[i].V(j)->IsD())
+			for (unsigned j = 0; j < 3; j++)
 			{
-				model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)posVX/(AREADIM*zoom);
-				model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)posVY/(AREADIM*zoom);
+				if (areaUV.contains(QPointF(model->cm.face[i].WT(j).u(),model->cm.face[i].WT(j).v()))
+					&& model->cm.face[i].V(j)->IsUserBit(selVertBit) && !model->cm.face[i].V(j)->IsD())
+				{
+					model->cm.face[i].WT(j).u() = model->cm.face[i].WT(j).u() - (float)posVX/(AREADIM*zoom);
+					model->cm.face[i].WT(j).v() = model->cm.face[i].WT(j).v() + (float)posVY/(AREADIM*zoom);
+				}
 			}
 		}
 	}
@@ -1184,6 +1192,30 @@ void RenderArea::SelectVertexes()
 					}
 				}
 			}
+		}
+	}
+	if (mode != UnifyVert) CheckVertex();
+}
+
+void RenderArea::CheckVertex()
+{
+	// Search for unselected vertexes in UV Space
+	banList.clear();
+	CMeshO::FaceIterator fi;
+	for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
+	{
+		if ((*fi).WT(0).n() == textNum && !(*fi).IsD())
+		{
+			bool go = false;
+			for (int j = 0; j < 3; j++)
+			{
+				if ((*fi).V(j)->IsUserBit(selVertBit))
+				{
+					if (!areaUV.contains(QPointF((*fi).WT(j).u(), (*fi).WT(j).v()))) go = true;
+					else {go = false; break;}
+				}
+			}	
+			if (go) banList.push_back(&(*fi));
 		}
 	}
 }
@@ -1373,7 +1405,7 @@ void RenderArea::UnifyCouple()
 		{
 			for (unsigned j = 0; j < 3; j++)
 			{
-				if (model->cm.face[i].V(j) == collapse1 || model->cm.face[i].V(j) == collapse2)
+				if (!isInside(&model->cm.face[i]) && (model->cm.face[i].V(j) == collapse1 || model->cm.face[i].V(j) == collapse2))
 				{
 					model->cm.face[i].WT(j).u() = tu;
 					model->cm.face[i].WT(j).v() = tv;
@@ -1456,8 +1488,8 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 	bool finish = false;
 	int notcontrol = -1;
 	int lastadd = 0, lastex = -1;
-	/* Enqueue all the adjacent faces to the vertex.
-	   For each face in queue  (It's a Queue, so I will search first the last added)
+	/* Add all the adjacent faces to the vertex.
+	   For each face in Stack Q  
 	     if the edge is a border one and contains the last added vertex and is on the right
 		    enqueue all adjacent faces to the other vertex
 			add the other vertex to the path
@@ -1891,6 +1923,15 @@ bool RenderArea::isInside(vector<TexCoord2<float> > tmpCoord, TexCoord2<float> a
 	for (unsigned i = 0; i < tmpCoord.size(); i++)
 	{
 		if (tmpCoord[i] == act) return true;
+	}
+	return false;
+}
+
+bool RenderArea::isInside(CFaceO* face)
+{
+	for (int h = 0; h < banList.size(); h++)
+	{
+		if (face == banList[h]) return true;
 	}
 	return false;
 }

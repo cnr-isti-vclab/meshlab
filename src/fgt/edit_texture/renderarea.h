@@ -123,6 +123,7 @@ class RenderArea : public QGLWidget
 		int VCount;				// Vertex counter
 		CVertexO *collapse1,	// Pointer to vertex for collapse
 				 *collapse2;
+		vector<CFaceO*> banList;
 		TexCoord2<float> vc1, vc2;
 		CVertexO *unifyA, *unifyA1, *unifyB, *unifyB1;	// Pointer to unify segment
 		QRect unifyRA, unifyRA1, unifyRB, unifyRB1;
@@ -155,11 +156,13 @@ class RenderArea : public QGLWidget
 		void UpdateBoundingArea(QPoint topLeft, QPoint topRight);
 		void CountVertexes();
 		bool isInside(vector<TexCoord2<float> >, TexCoord2<float>);
+		bool isInside(CFaceO* face);
 		void ShowFaces();
 		void UpdateUnify();
 		vector<CVertexO*> FindPath(CVertexO* begin, CVertexO* end, CFaceO* first, int pathN);
 		void UpdateUnifyTopology();
 		void SetUpRegion(QPoint a, QPoint b, QPoint c);
+		void CheckVertex();
 		
 		void drawSelectedVertexes(int faceindex);
 		void drawSelectedFaces(int faceindex);
