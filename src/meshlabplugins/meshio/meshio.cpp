@@ -82,17 +82,35 @@
 #include <wrap/io_trimesh/import_off.h>
 #include <wrap/io_trimesh/import_ptx.h>
 
-#include <vcg/complex/trimesh/update/bounding.h>
 #include <wrap/io_trimesh/export.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
 
 #include <QMessageBox>
 
 using namespace std;
 using namespace vcg;
 
-bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, CallBackPos *cb, QWidget *parent)
+
+// initialize importing parameters
+void ExtraMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &filename, FilterParameterSet &parlst)
+{
+	if (formatName.toUpper() == tr("PTX"))
+	{
+		parlst.addInt("meshindex",0,"Index of Range Map to be Imported","PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail");
+		parlst.addBool("anglecull",true,"Cull faces by angle","short");
+		parlst.addFloat("angle",85.0,"Angle limit for face culling","short");
+		parlst.addBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead");
+		parlst.addBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]");
+		parlst.addBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
+		parlst.addBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over");		
+		parlst.addBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
+	}
+}
+
+
+bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &parlst, CallBackPos *cb, QWidget *parent)
 {
 	// initializing mask
   mask = 0;
@@ -135,16 +153,35 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
 	}
 	else if (formatName.toUpper() == tr("PTX"))
 	{
-		int result = vcg::tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
+		vcg::tri::io::ImporterPTX<CMeshO>::Info importparams;
+
+		importparams.meshnum = parlst.getInt("meshindex");
+		importparams.anglecull =parlst.getBool("anglecull");
+		importparams.angle = parlst.getFloat("angle");
+		importparams.savecolor = parlst.getBool("usecolor");
+		importparams.pointcull = parlst.getBool("pointcull");
+		importparams.pointsonly = parlst.getBool("pointsonly");
+		importparams.switchside = parlst.getBool("switchside");
+		importparams.flipfaces = parlst.getBool("flipfaces");
+
+		// if color, add to mesh
+		if(importparams.savecolor)
+			importparams.mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+
+		// reflectance is stored in quality
+		importparams.mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+
+		m.Enable(importparams.mask);
+
+		int result = vcg::tri::io::ImporterPTX<CMeshO>::Open(m.cm, filename.c_str(), importparams, cb);
 		if (result == 1)
 		{
 			QMessageBox::warning(parent, tr("PTX Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
-		if (result == 2)
-		{
-			QMessageBox::warning(parent, tr("PTX Opening Error"), error_2MsgFormat.arg(fileName, vcg::tri::io::ImporterPTX<CMeshO>::ErrorMsg(result)));
-		}
+
+		// update mask
+		mask = importparams.mask;
 	}
 	else if (formatName.toUpper() == tr("OFF"))
 	{
