@@ -100,25 +100,47 @@ void FilterTexturePlugin::initParameterSet(QAction *action,MeshModel &m, FilterP
 	}
 }
 //this function determines the maximum u & v coordinates for each texture, by iterating through every face in the model.  this is needed because it is common for models to have UV coordinates outside of the normalized range 0-1 in order to repeat the texture.  this becomes a problem when we try to stitch all the textures together into one texture atlas (the solution is to copy the texture however many times is necessary to encompass the maximum UV coords, or to clip triangles - we currently only support tiling.  to clip triangles you need to look at the refine.h, edgelen class).  if a model of a wall has a texture tiled 30x along the U and 40x along the V, there is no need to tile the texture 30 and 40 times because each triangle will only span over a few copies of the texture, so we tile based on the maximum span of each polygon
-void FilterTexturePlugin::maxFaceSpan(float maxdiffUV[][2], MeshModel &m, int &mat, CMeshO::FaceIterator &fit)//c++ passes arrays by reference, don't need &
+void FilterTexturePlugin::maxFaceSpan(int &c, float maxdiffUV[][2], MeshModel &m, int &mat, CMeshO::FaceIterator &fit)//c++ passes arrays by reference, don't need &
 {
-	float diff1,diff2,diff3;
+	int whole;
+	float dec, diff1,diff2,diff3;//'dec' stores decimal components
 	for (fit=m.cm.face.begin(); fit != m.cm.face.end(); ++fit)//iterate through faces with textures
-	{
+	{	
 		mat = fit->WT(0).N();//fit->cWT the 'c' is for const
 		if (mat!=-1)//only do this for faces with textures
 		{//you have 3 vertices in every triangle, so we determine the difference between the uv coordinates of all 3 combinations to find the maximum
+			
+			//first thing to do is to transform negative UV coords into positive ones, to make life simpler
+			//way to do this is to negate the whole number component, and to do (1-decimal component)
+			//need to do this BEFORE calculate maximum spans (maxdiffUV) otherwise will have incorrect span: ie -1.4 to 0 different distance than 1.6 to 0
+			for (c= 0; c < 3;++c)//UVs are per-vertex
+			{
+				if (fit->WT(c).U()<0)//is negative
+				{
+					whole = int(fit->WT(c).U());//cast to integer.  -0.9 -> 0, or -1.4 -> -1
+					dec = fit->WT(c).U() - whole;//-.9, or -.4
+					fit->WT(c).U() = abs(whole)+(1+dec);//0 + (1+-.9) = 0.1, or 1 + (1+-.4) = 1.6
+				}
+				if (fit->WT(c).V()<0)//is negative
+				{
+					whole = int(fit->WT(c).V());//cast to integer.  -0.9 -> 0, or -1.4 -> -1
+					dec = fit->WT(c).V() - whole;//-.9, or -.4
+					fit->WT(c).V() = abs(whole)+(1+dec);//0 + (1+-.9) = 0.1, or 1 + (1+-.4) = 1.6
+				}
+			}
+			
+			//this way of computing span should work with negative UV coords as well
 			diff1 = fabs(fit->WT(0).U() - fit->WT(1).U());//fabs is floating-point absolute value function call
 			diff2 = fabs(fit->WT(1).U() - fit->WT(2).U());
 			diff3 = fabs(fit->WT(0).U() - fit->WT(2).U());
-			maxdiffUV[mat][0] = max(diff1, diff2);//find the max of the first two
-			maxdiffUV[mat][0] = max(maxdiffUV[mat][0], diff3);//find the max of the third and the result of the previous line
+			//find the max of the first two, then the max of that result and diff3, then the max of that with the previous highest diffUV value
+			//(so end up storing the highest span across all faces that use that material)
+			maxdiffUV[mat][0] = max(maxdiffUV[mat][0],max(max(diff1, diff2),diff3));
 			//now do the same for the v-coordinate
 			diff1 = fabs(fit->WT(0).V() - fit->WT(1).V());
 			diff2 = fabs(fit->WT(1).V() - fit->WT(2).V());
 			diff3 = fabs(fit->WT(0).V() - fit->WT(2).V());
-			maxdiffUV[mat][1] = max(diff1, diff2);
-			maxdiffUV[mat][1] = max(maxdiffUV[mat][1], diff3);
+			maxdiffUV[mat][1] = max(maxdiffUV[mat][1],max(max(diff1, diff2),diff3));
 		}
 	}
 }
@@ -130,32 +152,40 @@ void FilterTexturePlugin::copyTiles(QPixmap images[], QImage tiledimages[], int 
 	{
 		qDebug() << "@ top of numtextures for loop" << endl;
 		images[c] = QPixmap(m.cm.textures[c].c_str());//loads image, if fails is a null image. will guess extension from file name
-		if ((maxdiffUV[c][0]>1) || (maxdiffUV[c][1]>1))//tiling texture, if uv > 1 means want it is tiled/repeated
+		if (!images[c].isNull())
 		{
+			qDebug() << "loaded image" << m.cm.textures[c].c_str() << endl;
+			//we do this for all textures so that even if span is not >1 (in need of tiling) will get span of 2 to allow for uvs from 0.9 to 1.1, etc.
 			maxdiffUV[c][0]++;//incrementing by one unit to allow for the original unit to still be present - so when span is 2, will create an image of 3* the original
 			maxdiffUV[c][1]++;//this will allow for a UV coordinate of .9 with a span of 2 = 2.9
-			tiledimages[c] = QImage(maxdiffUV[c][0]*images[c].width(), maxdiffUV[c][1]*images[c].height(), QImage::Format_ARGB32);//doesn't need to be ceiling (ceil function) - doesn't matter if texture is not a complete copy
-			QPainter painter(&tiledimages[c]);//TODO: how move initialization outside of for loop, so can re-use the painter?
-			//now draw into the image however many times necessary
-			for (xPos = 0; xPos < maxdiffUV[c][0]*images[c].width(); xPos += images[c].width())//nested for loop in order to fill whole grid, does one column at a time
+			if ((maxdiffUV[c][0]>2) || (maxdiffUV[c][1]>2))//tiling texture, if uv > 1 (or 2 after correction, above) means want it is tiled/repeated
 			{
-				for (yPos = 0; yPos < maxdiffUV[c][1]*images[c].height(); yPos += images[c].height())
+				qDebug() << "in iteration of copyTiles" << endl;
+				tiledimages[c] = QImage(maxdiffUV[c][0]*images[c].width(), maxdiffUV[c][1]*images[c].height(), QImage::Format_ARGB32);//doesn't need to be ceiling (ceil function) - doesn't matter if texture is not a complete copy
+				QPainter painter(&tiledimages[c]);//TODO: how move initialization outside of for loop, so can re-use the painter?
+				//now draw into the image however many times necessary
+				qDebug() << "images c width:" << images[c].width() << endl;
+				for (xPos = 0; xPos < maxdiffUV[c][0]*images[c].width(); xPos += images[c].width())//nested for loop in order to fill whole grid, does one column at a time
 				{
-					painter.drawPixmap(xPos, yPos, images[c]);//x & y position to insert top-left corner at, which image to insert
+					for (yPos = 0; yPos < maxdiffUV[c][1]*images[c].height(); yPos += images[c].height())
+					{
+						painter.drawPixmap(xPos, yPos, images[c]);//x & y position to insert top-left corner at, which image to insert
+					}
 				}
+				//painter.~QPainter();//destroys - otherwise will crash if resample tiledimage
+				if (algo==1)//resampled tiles
+				{
+					qDebug() << "resampling" << endl;
+					tiledimages[c] = tiledimages[c].scaled(images[c].width(), images[c].height());//resample image to original size
+				}
+				images[c] = QPixmap::fromImage(tiledimages[c]);//not necessary to write file if stays in memory, so just re-assign the QPixmap to the new tiled image
+				qDebug() << "converted image to pixmap" << endl;
 			}
-			painter.~QPainter();//destroys - otherwise will crash if resample tiledimage
-			if (algo==1)//resampled tiles
-			{
-				qDebug() << "resampling" << endl;
-				tiledimages[c] = tiledimages[c].scaled(images[c].width(), images[c].height());//resample image to original size
-			}
-			images[c] = QPixmap::fromImage(tiledimages[c]);//not necessary to write file if stays in memory, so just re-assign the QPixmap to the new tiled image
-			qDebug() << "converted image to pixmap" << endl;
 		}
+		qDebug() << "getting image size" << endl;
 		size = Point2i(images[c].width(), images[c].height());//regardless of whether or not it was tiled, now store the image's dimensions
 		sizes.push_back(size);
-		qDebug() << "copyTiles loaded image into sizes vector: " << m.cm.textures[c].c_str() << "with (potentially tiled) size: " << size[0] << " " << size[1] << endl;
+		qDebug() << "copyTiles loaded image into sizes vector: " << m.cm.textures[c].c_str() << "with (potentially tiled) size: " << size[0] << " " << size[1] << endl;	
 	}
 }
 
@@ -183,8 +213,7 @@ bool FilterTexturePlugin::createAtlas(int &numTextures, int &c, MeshModel &m, QP
 void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator &fit, std::vector<Point2i> &posiz, Point2i &global_size, MeshModel &m, float maxdiffUV[][2], QPixmap images[])
 {
 	float minU, minV;
-	int minUwhole, minVwhole, whole;//stores whole-number components
-	float dec;//stores decimal components
+	int minUwhole, minVwhole;//stores whole-number components
 	for (fit=m.cm.face.begin(); fit != m.cm.face.end(); ++fit)//iterate through faces with textures
 	{
 		mat = fit->WT(0).N();//fit->cWT the 'c' is for const
@@ -200,24 +229,6 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 			//4 cases depending on whether or not minU/minV is positive or negative - 4 quadrants
 			//can't just flip negative values along an axis - as that would reverse the direction of the triangle's texture
 			
-			//first thing to do is to transform negative UV coords into positive ones, to make life simpler
-			//way to do this is to negate the whole number component, and to do (1-decimal component)
-			for (c= 0; c < 3;++c)//UVs are per-vertex
-			{
-				if (fit->WT(c).U()<0)//is negative
-				{
-					whole = int(fit->WT(c).U());//cast to integer.  -0.9 -> 0, or -1.4 -> -1
-					dec = fit->WT(c).U() - whole;//-.9, or -.4
-					fit->WT(c).U() = abs(whole)+(1+dec);//0 + (1+-.9) = 0.1, or 1 + (1+-.4) = 1.6
-				}
-				if (fit->WT(c).V()<0)//is negative
-				{
-					whole = int(fit->WT(c).V());//cast to integer.  -0.9 -> 0, or -1.4 -> -1
-					dec = fit->WT(c).V() - whole;//-.9, or -.4
-					fit->WT(c).V() = abs(whole)+(1+dec);//0 + (1+-.9) = 0.1, or 1 + (1+-.4) = 1.6
-				}
-			}
-			
 			if ((((fit->WT(0).U() <= maxdiffUV[mat][0]) && (fit->WT(0).V() <= maxdiffUV[mat][1])) && ((fit->WT(1).U() <= maxdiffUV[mat][0]) && (fit->WT(1).V() <= maxdiffUV[mat][1])) && ((fit->WT(2).U() <= maxdiffUV[mat][0]) && (fit->WT(2).V() <= maxdiffUV[mat][1])))){}
 			else//otherwise, need to reposition UV coordinates close to the 0,0 by letting smallest U,V be between 0-1 (by subtracting its whole number component, leaving its decimal) and subtracting its whole number component from the other values (maintaining the offsets between them).  this corrects for UV coords outside the range of the span.  the resulting coordinates (before the last for loop) should be in the span, but not necessarily 0-1
 			{
@@ -227,28 +238,45 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 				//find minimum V
 				minV = min(fit->WT(0).V(), fit->WT(1).V());
 				minV = min(fit->WT(2).V(), minV);
-				//get minimum U's whole number
+				//get minimum U's whole number (equivalent to the floor)
 				minUwhole = int(minU);
 				//get minimum V's whole number
 				minVwhole = int(minV);
+				//float origU, origV;
 
-				//now reposition UVs so that the smallest U,V is in the 0-1 box and others are translated accordingly
+				//now reposition UVs so that the smallest U & V coordinates are in the 0-1 box and others are translated accordingly
+				//because you're minimizing the U & Vs separately, you won't necessarily end up with one vertex in the 0-1 box
 				for (c=0; c<3; ++c)
 				{
+					//origU=fit->WT(c).U();
+					//origV=fit->WT(c).V();
 					fit->WT(c).U() -= minUwhole;
 					fit->WT(c).V() -= minVwhole;
+					/*if ((fit->WT(c).U()>maxdiffUV[mat][0])||(fit->WT(c).V()>maxdiffUV[mat][1]))
+					{
+						qDebug() << "-------------------" << endl;
+						qDebug() << "maxdiffuv:" << maxdiffUV[mat][0] << "," << maxdiffUV[mat][1] << endl;
+						qDebug() << "original u,v:" << origU << "," << origV << endl;
+						qDebug() << "minu,minuwhole,minv,minvwhole:" << minU << "," << minUwhole << "," << minV << "," << minVwhole << endl;
+						qDebug() << "shifted u,v:" << fit->WT(c).U() << "," << fit->WT(c).V() << endl;
+					}*/
 				}
 			}
 				
 			for (c= 0; c < 3;++c)//UVs are per-vertex
 			{
-				fit->WT(c).U() /= maxdiffUV[mat][0];
-				fit->WT(c).V() /= maxdiffUV[mat][1];
+				if (maxdiffUV[mat][0]>1)//so that division by 0 won't yield coordinate of 'inf': infinity, and only do for textures you tiled
+					fit->WT(c).U() /= maxdiffUV[mat][0];
+				if (maxdiffUV[mat][1]>1)
+					fit->WT(c).V() /= maxdiffUV[mat][1];
 				
-				qDebug() << "(modified) U: " << fit->WT(c).U() << "(modified) V: " << fit->WT(c).V() << endl;
+				//these values should all be between 0 & +1, as should the final outputs
+				if ((fit->WT(c).U() > 1)||(fit->WT(c).V() > 1))
+					qDebug() << "atlas's UV coords outside 0-1 range!" << endl;
+				//qDebug() << "(modified) U: " << fit->WT(c).U() << "(modified) V: " << fit->WT(c).V() << endl;
 				fit->WT(c).U() = (fit->WT(c).U()*images[mat].width() + posiz[mat][0])/global_size[0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1)
 				fit->WT(c).V() = (fit->WT(c).V()*images[mat].height() + posiz[mat][1])/global_size[1];//offset V by coord in posiz
-				qDebug() << "new U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
+				//qDebug() << "new U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
 			}
 		}
 	}
@@ -290,12 +318,11 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshModel &m, FilterParam
 	float maxdiffUV[numTextures][2];
 	//2)  iterate through all faces, and for each face do 6 subtractions to figure out the maximum difference (absolute value?) for the U & V coordinates of vertices in that face
 	CMeshO::FaceIterator fit;
-	int mat;
-	maxFaceSpan(maxdiffUV,m,mat,fit);
+	int mat,c;
+	maxFaceSpan(c,maxdiffUV,m,mat,fit);
 	
 	//4)  when done, copy the texture the necessary number of times (as indicated in the array), - do resampling here, if wanted
 	//iterate through all values in maxdiffUV - if either value > 1, tile texture
-	int c;
 	QPixmap images[numTextures];//array of images
 	QImage tiledimages[numTextures];
 	copyTiles(images, tiledimages, numTextures, c, maxdiffUV, m, algo, sizes, size);
