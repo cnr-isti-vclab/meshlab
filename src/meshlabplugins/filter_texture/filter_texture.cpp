@@ -108,8 +108,7 @@ void FilterTexturePlugin::maxFaceSpan(int &c, float maxdiffUV[][2], MeshModel &m
 	{	
 		mat = fit->WT(0).N();//fit->cWT the 'c' is for const
 		if (mat!=-1)//only do this for faces with textures
-		{//you have 3 vertices in every triangle, so we determine the difference between the uv coordinates of all 3 combinations to find the maximum
-			
+		{//you have 3 vertices in every triangle, so we determine the difference between the uv coordinates of all 3 combinations to find the maximum	
 			//first thing to do is to transform negative UV coords into positive ones, to make life simpler
 			//way to do this is to negate the whole number component, and to do (1-decimal component)
 			//need to do this BEFORE calculate maximum spans (maxdiffUV) otherwise will have incorrect span: ie -1.4 to 0 different distance than 1.6 to 0
@@ -260,21 +259,25 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 				
 			for (c= 0; c < 3;++c)//UVs are per-vertex
 			{
-				if (maxdiffUV[mat][0]>1)//so that division by 0 won't yield coordinate of 'inf': infinity, and only do for textures you tiled
-					fit->WT(c).U() /= maxdiffUV[mat][0];
-				if (maxdiffUV[mat][1]>1)
-					fit->WT(c).V() /= maxdiffUV[mat][1];
+				qDebug() << "------------------" << endl;
+				qDebug() << "material " << mat << "position:" << posiz[mat][0] << "," << posiz[mat][1] << endl;
+				qDebug() << "U: " << fit->WT(c).U() << "V: " << fit->WT(c).V() << endl;
+				if (maxdiffUV[mat][0]>2)//so that division by 0 won't yield coordinate of 'inf': infinity, and only do for textures you tiled
+					fit->WT(c).U() /= (maxdiffUV[mat][0]-1);//-1 to correct for incrementing maxdiff to allow for normalized uvs
+				if (maxdiffUV[mat][1]>2)//'2' because maxdiff of 1 means not repeated, but incremented by 1 to allow for normalized uvs
+					fit->WT(c).V() /= (maxdiffUV[mat][1]-1);
+				qDebug() << "new (first division) U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
 				
 				//these values should all be between 0 & +1, as should the final outputs
 				if ((fit->WT(c).U() > 1)||(fit->WT(c).V() > 1))
 					qDebug() << "atlas's UV coords outside 0-1 range!" << endl;
-				//qDebug() << "(modified) U: " << fit->WT(c).U() << "(modified) V: " << fit->WT(c).V() << endl;
 				fit->WT(c).U() = (fit->WT(c).U()*images[mat].width() + posiz[mat][0])/global_size[0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1)
 				fit->WT(c).V() = (fit->WT(c).V()*images[mat].height() + posiz[mat][1])/global_size[1];//offset V by coord in posiz
-				//qDebug() << "new U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
+				qDebug() << "new (second division) U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
 			}
 		}
 	}
+	qDebug() << "global:" << global_size[0] << "," << global_size[1] << endl;
 }
 
 // The Real Core Function doing the actual mesh processing
