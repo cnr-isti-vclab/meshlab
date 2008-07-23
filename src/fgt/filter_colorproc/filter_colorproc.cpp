@@ -204,6 +204,12 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
 			par.addBool("bCh", true, "Blue Channel:", "Select the blue channel.<br><br>If no channels are selected<br>filter works on Lightness.");
 			break;
     }
+    case CP_WHITE_BAL:
+    {
+      par.addBool("auto",true,"Automatic white balance","If checked, an automatic balancing is done, otherwise an unbalanced white color must be chosen");
+      par.addColor("color", QColor(255,255,255),"Unbalanced white: ","The color that is supposed to be white.");
+      break;
+    }
     default: assert(0);
 	}
 }
@@ -346,9 +352,12 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_WHITE_BAL:
     {
+      bool automatic =  par.getBool("auto");
+      QColor tempColor = par.getColor("color");
+      Color4b color = Color4b(tempColor.red(),tempColor.green(),tempColor.blue(), 255);
       bool selected = false;
       if(m.cm.sfn!=0) selected = true;
-      vcg::tri::UpdateColor<CMeshO>::WhiteBalance(m.cm, selected);
+      vcg::tri::UpdateColor<CMeshO>::WhiteBalance(m.cm, automatic, color, selected);
       return true;
     }
     default: assert(0);
@@ -381,7 +390,6 @@ bool FilterColorProc::autoDialog(QAction *a)
   switch(ID(a))
   {
     case CP_INVERT : return false;
-    case CP_WHITE_BAL : return false;
     default : return true;
   }
   assert(0);
