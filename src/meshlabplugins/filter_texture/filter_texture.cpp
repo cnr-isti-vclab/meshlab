@@ -161,9 +161,10 @@ void FilterTexturePlugin::copyTiles(QPixmap images[], QImage tiledimages[], int 
 				tiledimages[c] = QImage(maxdiffUV[c][0]*images[c].width(), maxdiffUV[c][1]*images[c].height(), QImage::Format_ARGB32);//doesn't need to be ceiling (ceil function) - doesn't matter if texture is not a complete copy
 				QPainter painter(&tiledimages[c]);//TODO: how move initialization outside of for loop, so can re-use the painter?
 				//now draw into the image however many times necessary
+				//meshlab considers the (0,0) texture coordinate to be at the bottom-left, not the top-left, so that's where we start drawing
 				for (xPos = 0; xPos < maxdiffUV[c][0]*images[c].width(); xPos += images[c].width())//nested for loop in order to fill whole grid, does one column at a time
 				{
-					for (yPos = 0; yPos < maxdiffUV[c][1]*images[c].height(); yPos += images[c].height())
+					for (yPos = (maxdiffUV[c][1]-1)*images[c].height(); yPos >= 0; yPos -= images[c].height())
 					{
 						painter.drawPixmap(xPos, yPos, images[c]);//x & y position to insert top-left corner at, which image to insert
 					}
@@ -263,9 +264,9 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 				qDebug() << "material " << mat << "position:" << posiz[mat][0] << "," << posiz[mat][1] << endl;
 				qDebug() << "U: " << fit->WT(c).U() << "V: " << fit->WT(c).V() << endl;
 				if (maxdiffUV[mat][0]>2)//so that division by 0 won't yield coordinate of 'inf': infinity, and only do for textures you tiled
-					fit->WT(c).U() /= (maxdiffUV[mat][0]-1);//-1 to correct for incrementing maxdiff to allow for normalized uvs
+					fit->WT(c).U() /= maxdiffUV[mat][0];
 				if (maxdiffUV[mat][1]>2)//'2' because maxdiff of 1 means not repeated, but incremented by 1 to allow for normalized uvs
-					fit->WT(c).V() /= (maxdiffUV[mat][1]-1);
+					fit->WT(c).V() /= maxdiffUV[mat][1];
 				qDebug() << "new (first division) U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
 				
 				//these values should all be between 0 & +1, as should the final outputs
