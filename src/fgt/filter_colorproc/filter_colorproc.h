@@ -41,7 +41,7 @@ class FilterColorProc : public QObject, public MeshFilterInterface
 
 	public:
 		enum { CP_FILLING,
-           CP_TRESHOLDING,
+           CP_THRESHOLDING,
            CP_BRIGHTNESS,
            CP_CONTRAST,
            CP_CONTR_BRIGHT,

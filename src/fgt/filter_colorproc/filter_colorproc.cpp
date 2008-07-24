@@ -39,7 +39,7 @@ FilterColorProc::FilterColorProc()
 {
   typeList << CP_FILLING
            << CP_INVERT
-           << CP_TRESHOLDING
+           << CP_THRESHOLDING
            << CP_BRIGHTNESS
            << CP_CONTRAST
            << CP_CONTR_BRIGHT
@@ -67,7 +67,7 @@ const QString FilterColorProc::filterName(FilterIDType filter)
   switch(filter)
   {
     case CP_FILLING : return "Filling";
-    case CP_TRESHOLDING : return "Tresholding";
+    case CP_THRESHOLDING : return "Thresholding";
     case CP_BRIGHTNESS : return "Brightness";
     case CP_CONTRAST : return "Contrast";
     case CP_CONTR_BRIGHT : return "Contrast and Brightness";
@@ -88,7 +88,7 @@ const QString FilterColorProc::filterInfo(FilterIDType filterId)
   switch(filterId)
   {
     case CP_FILLING : return "Fills the mesh with a color choosed by the user.";
-    case CP_TRESHOLDING : return "Reduces the mesh to two colors according to a treshold.";
+    case CP_THRESHOLDING : return "Reduces the mesh to two colors according to a threshold.";
     case CP_BRIGHTNESS : return "Sets the brightness of the mesh.";
     case CP_CONTRAST : return "Sets the contrast of the mesh.";
     case CP_CONTR_BRIGHT : return "Sets brightness and contrast of the mesh.";
@@ -131,14 +131,13 @@ void FilterColorProc::initParameterSet(QAction *a, MeshModel &m, FilterParameter
 			par.addDynamicFloat("b", b, 0, 255, MeshModel::MM_VERTCOLOR ,"Blue:", "Sets the blue component of the color.");
 			break;
 		}
-    case CP_TRESHOLDING:
+    case CP_THRESHOLDING:
     {
-      float treshold = 128.0f;
+      float threshold = 128.0f;
       QColor color1 = QColor(0,0,0), color2 = QColor(255,255,255);
-      par.addColor("color1", color1, "Color 1:", "Sets the color to apply below the treshold.");
-      par.addColor("color2", color2, "Color 2:", "Sets the color to apply above the treshold.");
-      par.addDynamicFloat("treshold", treshold, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Treshold:", "Colors above the threshold becomes Color 2, others Color 1.");
-
+      par.addColor("color1", color1, "Color 1:", "Sets the color to apply below the threshold.");
+      par.addColor("color2", color2, "Color 2:", "Sets the color to apply above the threshold.");
+      par.addDynamicFloat("threshold", threshold, 0.0f, 255.0f, MeshModel::MM_VERTCOLOR, "Threshold:", "Colors above the threshold becomes Color 2, others Color 1.");
       break;
     }
     case CP_BRIGHTNESS:
@@ -220,29 +219,31 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
   {
     case CP_FILLING:
     {
+      //reads the color components and build the color
       int r = math::Clamp((int)par.getDynamicFloat("r"), 0, 255);
       int g = math::Clamp((int)par.getDynamicFloat("g"), 0, 255);
       int b = math::Clamp((int)par.getDynamicFloat("b"), 0, 255);
       Color4b new_col = Color4b(r,g,b,255);
 
       bool selected = false;
-      if(m.cm.sfn!=0) selected = true;
+      if(m.cm.sfn!=0) selected = true;  //if a region of he mesh is selected, filter works on that.
 
-      vcg::tri::UpdateColor<CMeshO>::Filling(m.cm, new_col, selected);
+      vcg::tri::UpdateColor<CMeshO>::Filling(m.cm, new_col, selected);  //calls the function that does the real job
       return true;
     }
-    case CP_TRESHOLDING:
+    case CP_THRESHOLDING:
     {
-      float treshold = math::Clamp<float>(par.getDynamicFloat("treshold"), 0.0f, 255.0f);
+      //reads threshold, and colors to pass as parameters to the filter...
+      float threshold = math::Clamp<float>(par.getDynamicFloat("threshold"), 0.0f, 255.0f);
       QColor temp = par.getColor("color1");
       Color4b c1 = Color4b(temp.red(), temp.green(),temp.blue(), 255);
       temp = par.getColor("color2");
       Color4b c2 = Color4b(temp.red(), temp.green(),temp.blue(), 255);
 
       bool selected = false;
-      if(m.cm.sfn!=0) selected = true;
+      if(m.cm.sfn!=0) selected = true; //if a region of he mesh is selected, filter works on that.
 
-      vcg::tri::UpdateColor<CMeshO>::Tresholding(m.cm, treshold, c1, c2, selected);
+      vcg::tri::UpdateColor<CMeshO>::Thresholding(m.cm, threshold, c1, c2, selected); //calls the function that does the real job
       return true;
     }
     case CP_BRIGHTNESS:
@@ -296,16 +297,19 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_LEVELS:
     {
+      //reads the parameters...
 			float gamma = par.getDynamicFloat("gamma");
       float  in_min = par.getDynamicFloat("in_min")/255;
       float  in_max = par.getDynamicFloat("in_max")/255;
       float  out_min = par.getDynamicFloat("out_min")/255;
       float  out_max = par.getDynamicFloat("out_max")/255;
 
+      //builds incrementally a bitmask that indicates on which channels the filter works...
       unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
       if(par.getBool("rCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::RED_CHANNEL;
       if(par.getBool("gCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::GREEN_CHANNEL;
       if(par.getBool("bCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::BLUE_CHANNEL;
+      //if no channels are checked, we intend to work on all rgb channels, so...
       if(rgbMask == vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS) rgbMask = vcg::tri::UpdateColor<CMeshO>::ALL_CHANNELS;
 
       bool selected = false;
@@ -315,12 +319,13 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
 		}
 		case CP_COLOURISATION:
 		{
+		  //reads parameters and normalizes their values in [0,1]
 			float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0f, 1.0f);
 			float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0f, 1.0f);
       float hue = math::Clamp(par.getDynamicFloat("hue")/360, 0.0f, 1.0f);
       float intensity = math::Clamp(par.getDynamicFloat("intensity")/100, 0.0f, 1.0f);
 
-      double r, g, b;
+      double r, g, b;   //converts color from HSL to RGB....
       ColorSpace<unsigned char>::HSLtoRGB( (double)hue, (double)saturation, (double)luminance, r, g, b);
       Color4b color = Color4b((int)(r*255), (int)(g*255), (int)(b*255), 255);
 
@@ -340,6 +345,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshModel &m, FilterParameter
     }
     case CP_EQUALIZE:
     {
+      //builds incrementally a bitmask that indicates on which channels the filter works...
       unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
       if(par.getBool("rCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::RED_CHANNEL;
       if(par.getBool("gCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::GREEN_CHANNEL;
@@ -370,7 +376,7 @@ const MeshFilterInterface::FilterClass FilterColorProc::getClass(QAction *a)
   switch(ID(a))
   {
     case CP_FILLING :
-    case CP_TRESHOLDING :
+    case CP_THRESHOLDING :
     case CP_BRIGHTNESS :
     case CP_CONTRAST :
     case CP_CONTR_BRIGHT :
