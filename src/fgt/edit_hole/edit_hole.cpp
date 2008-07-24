@@ -39,6 +39,13 @@
 using namespace vcg;
 
 
+
+
+#include <vcg/complex/trimesh/update/position.h>
+//#include <vcg/complex/trimesh/update/bounding.h>
+//#include <vcg/complex/trimesh/update/selection.h>
+//#include <vcg/space/normal_extrapolation.h>
+
 EditHolePlugin::EditHolePlugin() {
 	QAction* editFill = new QAction(QIcon(":/images/icon_filler.png"),"Fill Hole", this);
 	actionList << editFill;
@@ -111,7 +118,7 @@ void EditHolePlugin::mousePressEvent(QAction *, QMouseEvent * e, MeshModel &m, G
 	}
 }
 
-void EditHolePlugin::mouseMoveEvent     (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+void EditHolePlugin::mouseMoveEvent(QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
 	if( (e->buttons()| Qt::LeftButton) &&
 	    !(e->modifiers() & Qt::ShiftModifier))
@@ -136,15 +143,16 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 
 	if( !dialogFiller )
 	{
+		if(holesModel == 0)
+			holesModel = new HoleListModel(&m);
+
 		dialogFiller=new FillerDialog(gla->window());
 		dialogFiller->ui.holeTree->setModel( holesModel );
 		dialogFiller->show();
 		dialogFiller->setAllowedAreas(Qt::NoDockWidgetArea);
 		connect(dialogFiller, SIGNAL(SGN_ProcessFilling()), this,SLOT(fill()));
-		connect(dialogFiller, SIGNAL(SGN_Apply()), this, SLOT(ApplyFilling()) );
+		connect(dialogFiller, SIGNAL(SGN_CancelFill()), this, SLOT(CancelFilling()) );
 		connect(dialogFiller, SIGNAL(SGN_UpdateGLArea()), this, SLOT(upGlA()));
-		connect(dialogFiller, SIGNAL(SGN_RefreshHoles()), this, SLOT(refreshHoles()));
-		connect(dialogFiller, SIGNAL(SGN_UpdateHoleSelection()), this, SLOT(refreshSelection()));
 		connect(this, SIGNAL(SGN_SuspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 		connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );		
 	}
@@ -162,7 +170,7 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 	
 	holesModel->drawHoles();
 
-	if(hasPick )
+	if(hasPick)
 	{
 		hasPick = false;
 		pickedFace =0;
@@ -172,20 +180,6 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 			holesModel->toggleSelectionHoleFromBorderFace(pickedFace);		
 	}
 
-
-
-	/*
-	if( pickedFace != 0 )
-	{	
-		glColor3f(0, 1, 1);
-		glBegin(GL_TRIANGLES);
-		 glVertex( pickedFace->V(0)->P() );
-		 glVertex( pickedFace->V(1)->P() );
-		 glVertex( pickedFace->V(2)->P() );
-		glEnd();
-	}
-	*/
-
 	glPopAttrib();	
 	glPopMatrix();
 
@@ -194,8 +188,10 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 
  void EditHolePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
 	 if ( dialogFiller!=0) {
-		delete  dialogFiller; 
-		dialogFiller=0;
+		delete  dialogFiller;
+		delete holesModel;
+		dialogFiller = 0;
+		holesModel = 0;
 	 }
  }
 
@@ -204,20 +200,6 @@ void EditHolePlugin::upGlA()
 { 
 	gla->update();	 
 }
-
-void EditHolePlugin::refreshHoles()
-{
-	holesModel->updateModel();
-}
-
-
-/** Insert into mesh data structure the primiteves used to fill the hole
- */
-void EditHolePlugin::ApplyFilling()
-{
-	// TO DO
-}
-
 
 //void EditHolePlugin::DrawPlane(GLArea * gla, MeshModel &m){
 //	 
@@ -284,23 +266,29 @@ void EditHolePlugin::ApplyFilling()
 //	
 // }
 
- void EditHolePlugin::fill()
- {	 
-	dialogFiller->hide();
-	/*
-	HoleVector::iterator it = holes.begin();
-	for( ; it != holes.end(); it++ )
-	{
-		if( it->isSelected )
-		{
+void EditHolePlugin::fill()
+{
+	if(holesModel->getState() == HoleListModel::Selection)
+		holesModel->fill();
+	else
+		holesModel->acceptFilling();
+	
+	if(holesModel->getState() == HoleListModel::Selection)
+		dialogFiller->ui.fillButton->setText("Fill");
+	else 
+		dialogFiller->ui.fillButton->setText("Accept");
 
-			// TO DO: RIEMPIMENTO USANDO INFO DEL FGTHOLE
-		}
-	}
-*/
-    dialogFiller->show();
- }
+	gla->update();
+}
 
 
+/** Insert into mesh data structure the primiteves used to fill the hole
+ */
+void EditHolePlugin::CancelFilling()
+{
+	holesModel->acceptFilling(true);
+	dialogFiller->ui.fillButton->setText("Fill");
+	//mesh->updateDataMask(MeshModel::MM_BORDERFLAG);
+}
  
  Q_EXPORT_PLUGIN(EditHolePlugin)

@@ -26,15 +26,10 @@
 
 #include <QObject>
 #include <QList>
-#include <QStringList>
 #include "fillerDialog.h"
-//#include "fgtHole.h"
 #include "holeListModel.h"
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-//#include "vcg/simplex/face/pos.h"
-//#include "vcg/complex/trimesh/base.h"
-
 
 class EditHolePlugin : public QObject, public MeshEditInterface
 {
@@ -43,11 +38,12 @@ class EditHolePlugin : public QObject, public MeshEditInterface
 	QList <QAction *> actionList;
 	
 public:
-	typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
+	typedef vcg::tri::Hole<CMeshO> vcgHole;
+	typedef vcgHole::Info HoleInfo;
 	typedef std::vector< FgtHole<CMeshO> > HoleVector;
 	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
-	//typedef std::vector<HolePatch<CMeshO> > PatchVector;
-
+	typedef CMeshO::FaceIterator FaceIterator;
+	
 	EditHolePlugin();
     virtual ~EditHolePlugin();
 	virtual const QString Info(QAction *);
@@ -77,9 +73,8 @@ private:
 	void toggleSelection(int holeIndex);
 	
 private Q_SLOTS:
-	void refreshHoles();
 	void fill();
-	void ApplyFilling();
+	void CancelFilling();
 	void upGlA();
 	
 signals:

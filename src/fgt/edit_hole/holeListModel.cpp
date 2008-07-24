@@ -31,36 +31,51 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 {		
 	state = HoleListModel::Selection;
 	mesh = m;
-	updateModel();
+	userBitHole = -1;
+	updateModel();	
+}
+
+void HoleListModel::clearModel()
+{
+	holes.clear();
+
+	if(userBitHole > 0)
+	{
+		//mesh->clearDataMask(userBitHole);
+		CMeshO::FaceIterator fi;
+		for(fi = mesh->cm.face.begin(); fi!=mesh->cm.face.end(); ++fi)
+		{
+			//if(!(*fi).IsD())
+				(*fi).ClearUserBit(userBitHole);
+		}
+	}
 }
 
 void HoleListModel::updateModel()
 {
-	holes.clear();
-
-	//mesh->clearDataMask( MeshModel::MM_BORDERFLAG | MeshModel::MM_FACETOPO );
-
+	clearModel();
+	mesh->clearDataMask(MeshModel::MM_BORDERFLAG);
 	mesh->updateDataMask(MeshModel::MM_FACETOPO);
 	mesh->updateDataMask(MeshModel::MM_BORDERFLAG);
 
-	FgtHole<CMeshO>::GetMeshHoles(mesh->cm, holes);
+	userBitHole = FgtHole<CMeshO>::GetMeshHoles(mesh->cm, holes);
 	emit dataChanged( index(0, 0), index(holes.size(), 2) );
 }
 
 void HoleListModel::drawHoles() const
 {
-
+	// Disegno i contorni del buco
 	glLineWidth(2.0f);
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_DEPTH_TEST); 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_LIGHTING);
 
-	HoleVector::const_iterator it = holes.begin();
 	// scorro tutti i buchi
+	HoleVector::const_iterator it = holes.begin();
 	for( ; it != holes.end(); ++it)
 	{
-		if( it->isSelected )
+		if( it->isSelected && it->isAccepted)
 			glColor(Color4b::DarkGreen);
 		else
 			glColor(Color4b::DarkRed);
@@ -73,10 +88,11 @@ void HoleListModel::drawHoles() const
 
 	for(it = holes.begin(); it != holes.end(); ++it)
 	{
-		if( it->isSelected )
+		if( it->isSelected && it->isAccepted)
 			glColor(Color4b::Green);
 		else
 			glColor(Color4b::Red);
+				
 		it->Draw();
 	}	
 }
@@ -91,6 +107,41 @@ void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
 	emit dataChanged( index(ind, 2), index(ind, 2) );
 }
 
+void HoleListModel::fill()
+{
+	std::vector<CMeshO::FacePointer *> local_facePointer;
+	
+	HoleVector::iterator it = holes.begin();
+	for( ; it != holes.end(); it++ )
+		local_facePointer.push_back(&it->holeInfo.p.f);
+	
+	for(it = holes.begin(); it != holes.end(); it++ )
+	{
+		if( it->isSelected )
+		{
+			it->facesPatch.clear();
+			vcgHole::FillHoleEar<vcg::tri::TrivialEar<CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
+			state = HoleListModel::Filled;
+		}
+	}
+
+	emit layoutChanged();
+}
+
+void HoleListModel::acceptFilling(bool forcedCancel)
+{
+	HoleVector::iterator it = holes.begin();
+	for( ; it != holes.end(); it++ )
+	{
+		if( (it->isSelected && !it->isAccepted) || forcedCancel)
+			it->RestoreHole(mesh->cm);
+	}
+	
+	mesh->clearDataMask(MeshModel::MM_FACETOPO);
+	updateModel();
+	state = HoleListModel::Selection;
+	emit layoutChanged();
+}
 
 /************* Implementazione QAbstractItemModel class *****************/
 
@@ -115,11 +166,18 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 		bool checked;
 		if(index.column() == 2)
 			checked = checked = holes[index.row()].isSelected;
-		else if(index.column() == 3 && state == HoleListModel::Filled)
-			checked = holes[index.row()].isAccepted;
-		else
+		else if(state == HoleListModel::Filled && holes[index.row()].isSelected)
+		{
+			if(index.column() == 3)
+				checked = holes[index.row()].isCompenetrating;
+			else if(index.column() == 4)
+				checked = holes[index.row()].isAccepted;
+			else 
+				return QVariant();
+		}
+		else 
 			return QVariant();
-		
+
 		if(checked)
 			return Qt::Checked;
 		else
@@ -148,10 +206,26 @@ QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int
 		case 3:
 			if(state == HoleListModel::Filled)
 				return tr("Comp.");
+		case 4:
+			if(state == HoleListModel::Filled)
+				return tr("Accept");
 		}
 	}
-    
-	if (orientation == Qt::Horizontal && role == Qt::ToolTip && state==HoleListModel::Filled)
+/*	else if (orientation == Qt::Horizontal && role == Qt::SizeHintRole)
+	{
+		switch(section)
+		{
+		case 0:
+			return 70;
+		case 1:
+			return 70;
+		case 2:
+			return 30;
+		case 3:
+			return 30;
+		}
+	}
+*/	else if (orientation == Qt::Horizontal && role == Qt::ToolTip && state==HoleListModel::Filled && section == 3)
 		return tr("Compenetration");	
 
 	return QVariant();
@@ -160,27 +234,8 @@ QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int
 
 QModelIndex HoleListModel::index(int row, int column, const QModelIndex &parent) const
 {
-	if(row>= holes.size())
+	if(row >= (int)holes.size())
 		return QModelIndex();
-
-	/*void * ptr = 0;
-	switch(column)
-	{
-	case 0:
-		break;
-	case 1:
-		ptr = (void*)&holes->at(row).size;
-		break;
-	case 2:
-		if(state == FillerState::Selection)
-			ptr = (void*)&holes->at(row).isSelected;
-		else
-			ptr = (void*)&holes->at(row).isFilled;
-		break;
-	}
-	
-	if(state == FillerState::Filled && column == 3)
-		ptr = (void*)&holes->at(row).isAccepted;*/
 	return createIndex(row,column, 0);
 }
 
@@ -219,17 +274,19 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 	}
 	else if(role == Qt::CheckStateRole)
 	{
-		if(index.column() == 2 && state == HoleListModel::Selection)
+		if(state == HoleListModel::Selection)
 		{
-			holes[index.row()].isSelected = !holes[index.row()].isSelected;
+			if(index.column() == 2 && state == HoleListModel::Selection)
+			{
+				holes[index.row()].isSelected = !holes[index.row()].isSelected;
+				return true;
+			}			
+		}
+		else if(index.column() == 4)
+		{	// check accept
+			holes[index.row()].isAccepted = !holes[index.row()].isAccepted;
 			return true;
 		}
-		else if(index.column() == 2 && state == HoleListModel::Selection)
-		{
-			holes[index.row()].isSelected = !holes[index.row()].isSelected;
-			return true;
-		}
-			
 	}
 	return false;
 }

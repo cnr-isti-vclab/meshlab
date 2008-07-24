@@ -43,18 +43,22 @@ public:
 	{
 		Selection, Filled
 	};
-typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
+
+	typedef vcg::tri::Hole<CMeshO> vcgHole;
+	typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
 	typedef FgtHole<CMeshO>  HoleType;
 	typedef std::vector< HoleType > HoleVector;
 	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
+	
 
 	HoleListModel(MeshModel *m, QObject *parent = 0);
+	virtual ~HoleListModel() { clearModel(); };
 
 	inline int rowCount(const QModelIndex &parent = QModelIndex()) const { return holes.size(); };
 	inline int columnCount(const QModelIndex &parent = QModelIndex()) const 
 	{
 		if(state == HoleListModel::Selection) return 3;
-		else return 4; 
+		else return 5; 
 	};
 	
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
@@ -67,15 +71,22 @@ typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
 	bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole ); 
 
 
-	inline void setState(FillerState s) { state = s; };
+	inline void setState(HoleListModel::FillerState s) { state = s; emit layoutChanged(); };
 	void toggleSelectionHoleFromBorderFace(CFaceO *bface);
+	void clearModel();
 	void updateModel();
 	void drawHoles() const;
+	void fill();
+	void acceptFilling(bool forcedCancel=false);
+	inline FillerState getState() const { return state; }
 
 private:
 	MeshModel *mesh;
+	FillerState state;	
+
+public:
 	HoleVector holes;
-	FillerState state;
+	int userBitHole;
 };
 
 #endif

@@ -3,7 +3,6 @@ include (../../shared.pri)
 HEADERS       = edit_hole.h \
 		    fillerDialog.h \
 		    holeListModel.h \
-		    holePatch.h \
 		    fgtHole.h \
 		    $$VCGDIR/wrap/gui/trackball.h
 		    

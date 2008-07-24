@@ -39,12 +39,10 @@ public:
 	
 
 Q_SIGNALS:
-	void SGN_UpdateHoleSelection();
-	void SGN_RefreshHoles();
 	void SGN_ProcessFilling(); 
 	void SGN_UpdateGLArea();
 	void SGN_Closing();
-	void SGN_Apply();
+	void SGN_CancelFill();
 
 public:
 	Ui::dialogFillerClass ui;
@@ -52,10 +50,8 @@ public:
 	
 	
 private slots:
-	void on_hListW_itemSelectionChanged();
-	void on_refreshButton_clicked();
 	void on_fillButton_clicked();
-	void on_applyButton_clicked();
+	void on_cancelButton_clicked();
 
 private:
 	virtual void closeEvent( QCloseEvent * event );

@@ -31,7 +31,6 @@
 #include "vcg/simplex/face/pos.h"
 #include "vcg/space/point3.h"
 #include "vcg/complex/trimesh/hole.h"
-//#include "holePatch.h"
 
 
 
@@ -46,13 +45,14 @@ template <class MESH>
 class FgtHole
 {
 public:
-	typedef typename MESH::FaceType FaceType;
-	typedef typename MESH::FacePointer FacePointer;
-    typedef typename MESH::CoordType CoordType;
-	typedef typename vcg::face::Pos<FaceType> PosType;
-	typedef typename vcg::tri::Hole<MESH> vcgHole;
-	typedef typename vcgHole::Info HoleInfo;
-	typedef typename std::vector< FgtHole<MESH> > HoleVector;
+	typedef typename MESH::FaceType					FaceType;
+	typedef typename MESH::FacePointer				FacePointer;
+	typedef typename MESH::FaceIterator				FaceIterator;
+    typedef typename MESH::CoordType				CoordType;
+	typedef typename vcg::face::Pos<FaceType>		PosType;
+	typedef typename vcg::tri::Hole<MESH>			vcgHole;
+	typedef typename vcgHole::Info					HoleInfo;
+	typedef typename std::vector< FgtHole<MESH> >	HoleVector;
 	
 
 	FgtHole(HoleInfo &hi, QString holeName)
@@ -63,7 +63,7 @@ public:
 		name = holeName;
 		isSelected = false;
 		isCompenetrating = false;
-		isAccepted = false;
+		isAccepted = true;
 	};
 
 	~FgtHole() {};
@@ -95,7 +95,6 @@ public:
 		
 		glEnd();
 	};
-	
 
 	
 	/* Check if face is a border face of this hole
@@ -114,13 +113,43 @@ public:
 		return false;
 	}
 
+	/* Restore hole, remove patch applied to mesh
+	*/
+	void RestoreHole(MESH &mesh)
+	{
+		FaceIterator hfit = facesPatch.begin();
+		for( ; hfit != facesPatch.end(); ++hfit)
+		{
+			// facesPatch è un array contenente delle copie delle facce inserite nella mesh
+			// al fine di tappare il buco.
+			// Pertando sfruttando la manifoldness della mesh si arriva a prendere il riferimento 
+			// corrispettiva faccia nelal mesh
+			//FaceType* meshFace = hfit->FFp(0)->FFp(hfit->FFi(0)); 
+			//tri::Allocator<MESH>::DeleteFace(mesh, *meshFace);
+
+			FaceIterator mfit = mesh.face.begin();
+			for( ; mfit != mesh.face.end(); ++mfit)
+			{
+				if(!mfit->IsD())
+				{
+					if( hfit->V(0)->P() == mfit->V(0)->P() &&
+						hfit->V(1)->P() == mfit->V(1)->P() &&
+						hfit->V(2)->P() == mfit->V(2)->P() )
+					{
+						tri::Allocator<MESH>::DeleteFace(mesh, *mfit);
+					}
+				}
+			}
+		}
+		facesPatch.clear();
+	}
 
 
 	/********* Static functions **********/
 
 	/* Inspect a mesh to find its holes.
 	*/
-	static void GetMeshHoles(MESH &mesh, HoleVector &ret) 
+	static int GetMeshHoles(MESH &mesh, HoleVector &ret) 
 	{
 		ret.clear();
 		std::vector<HoleInfo> vhi;
@@ -136,6 +165,7 @@ public:
 			ret.push_back(newHole);
 			i++;
 		}
+		return UBIT;
 	}
 
 	/** Return index into holes vector of hole adjacent to picked face
@@ -164,6 +194,7 @@ public:
 public:
 	HoleInfo holeInfo;
 	std::vector<CoordType*> vertexCoords;
+	std::vector<FaceType> facesPatch;
 	float size;
 	QString name;
 	bool isSelected;
