@@ -112,7 +112,7 @@ void FilterTexturePlugin::maxFaceSpan(int &c, float maxdiffUV[][2], MeshModel &m
 			//first thing to do is to transform negative UV coords into positive ones, to make life simpler
 			//way to do this is to negate the whole number component, and to do (1-decimal component)
 			//need to do this BEFORE calculate maximum spans (maxdiffUV) otherwise will have incorrect span: ie -1.4 to 0 different distance than 1.6 to 0
-			for (c= 0; c < 3;++c)//UVs are per-vertex
+			/*for (c= 0; c < 3;++c)//UVs are per-vertex
 			{
 				if (fit->WT(c).U()<0)//is negative
 				{
@@ -130,7 +130,7 @@ void FilterTexturePlugin::maxFaceSpan(int &c, float maxdiffUV[][2], MeshModel &m
 					fit->WT(c).V() = abs(whole)+(1+dec);//0 + (1+-.9) = 0.1, or 1 + (1+-.4) = 1.6
 					//qDebug() << fit->WT(c).U() << endl;
 				}
-			}
+			}*/
 			
 			//even though uv coordinates are all positive by now, you still need fabs() to ensure result of subtraction is positive
 			diff1 = fabs(fit->WT(0).U() - fit->WT(1).U());//fabs is floating-point absolute value function call
@@ -225,6 +225,7 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 {
 	float minU, minV;
 	int minUwhole, minVwhole;//stores whole-number components
+	bool UwasNegative, VwasNegative;
 	for (fit=m.cm.face.begin(); fit != m.cm.face.end(); ++fit)//iterate through faces with textures
 	{
 		mat = fit->WT(0).N();//fit->cWT the 'c' is for const
@@ -240,7 +241,8 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 			//4 cases depending on whether or not minU/minV is positive or negative - 4 quadrants
 			//can't just flip negative values along an axis - as that would reverse the direction of the triangle's texture
 			
-			if ((((fit->WT(0).U() <= maxdiffUV[mat][0]) && (fit->WT(0).V() <= maxdiffUV[mat][1])) && ((fit->WT(1).U() <= maxdiffUV[mat][0]) && (fit->WT(1).V() <= maxdiffUV[mat][1])) && ((fit->WT(2).U() <= maxdiffUV[mat][0]) && (fit->WT(2).V() <= maxdiffUV[mat][1])))){}
+			//fabs to allow for negative uv coords
+			if ((((fabs(fit->WT(0).U()) <= maxdiffUV[mat][0]) && (fabs(fit->WT(0).V()) <= maxdiffUV[mat][1])) && ((fabs(fit->WT(1).U()) <= maxdiffUV[mat][0]) && (fabs(fit->WT(1).V()) <= maxdiffUV[mat][1])) && ((fabs(fit->WT(2).U()) <= maxdiffUV[mat][0]) && (fabs(fit->WT(2).V()) <= maxdiffUV[mat][1])))){}
 			else//otherwise, need to reposition UV coordinates close to the 0,0 by letting smallest U,V be between 0-1 (by subtracting its whole number component, leaving its decimal) and subtracting its whole number component from the other values (maintaining the offsets between them).  this corrects for UV coords outside the range of the span.  the resulting coordinates (before the last for loop) should be in the span, but not necessarily 0-1
 			{
 				//find minimum U
@@ -249,33 +251,73 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 				//find minimum V
 				minV = min(fit->WT(0).V(), fit->WT(1).V());
 				minV = min(fit->WT(2).V(), minV);
-				//get minimum U's whole number (equivalent to the floor)
-				minUwhole = int(minU);
-				//get minimum V's whole number
-				minVwhole = int(minV);
-				float origU, origV;
+				//float origU, origV;
 
 				//now reposition UVs so that the smallest U & V coordinates are in the 0-1 box and others are translated accordingly
 				//because you're minimizing the U & Vs separately, you won't necessarily end up with one vertex in the 0-1 box
+
+				//4 cases: need to maintain the sign of each coordinate, and the spans between them (by translation)
+				//all 3 coordinates are positive: below
+				//2 are positive, 1 negative: offset negative coordinate to between 0 & -1
+				//1 is positive, 2 negative: offset the least negative coordinate to between 0 & -1
+				//0 is positive, 3 negative: " "
+				//the last 3 (those with at least one negative coord) are in effect the same algorithm, as when there is only one negative coord the least negative coord is that one
+				
+				//do for U, then repeat for V
+				
+				//first case
+				if (fit->WT(0).U()>0 && fit->WT(1).U()>0 && fit->WT(2).U()>0){}
+				else//other 3 cases (with at least one negative coord)
+				{
+					//find the least negative value - you already have the minimum, so just compare all values until find a negative one that's greater than it
+					for (c=0; c<3; ++c)
+					{
+						if (fit->WT(c).U()<0 && fit->WT(c).U()>minU)
+							minU=fit->WT(c).U();
+					}
+					qDebug() << "correcting negative, new minU:" << minU << endl;
+				}
+				minUwhole = int(minU);//get minimum U's whole number (equivalent to the floor)
 				for (c=0; c<3; ++c)
+					fit->WT(c).U() -= minUwhole;//offset by this value
+				
+				
+				//first case
+				if (fit->WT(0).V()>0 && fit->WT(1).V()>0 && fit->WT(2).V()>0){}
+				else//other 3 cases (with at least one negative coord)
+				{
+					//find the least negative value - you already have the minimum, so just compare all values until find a negative one that's greater than it
+					for (c=0; c<3; ++c)
+					{
+						if (fit->WT(c).V()<0 && fit->WT(c).V()>minV)
+							minV=fit->WT(c).V();
+					}
+					qDebug() << "correcting negative, new minV:" << minV << endl;
+				}
+				minVwhole = int(minV);//get minimum V's whole number
+				for (c=0; c<3; ++c)
+					fit->WT(c).V() -= minVwhole;//offset by this value
+				
+				/*for (c=0; c<3; ++c)
 				{
 					//origU=fit->WT(c).U();
 					//origV=fit->WT(c).V();
 					fit->WT(c).U() -= minUwhole;
 					fit->WT(c).V() -= minVwhole;
-					//if ((fit->WT(c).U()>maxdiffUV[mat][0])||(fit->WT(c).V()>maxdiffUV[mat][1]))
-					//{
+					/*if ((fit->WT(c).U()>maxdiffUV[mat][0])||(fit->WT(c).V()>maxdiffUV[mat][1]))
+					{
 						qDebug() << "-------------------" << endl;
 						qDebug() << "maxdiffuv:" << maxdiffUV[mat][0] << "," << maxdiffUV[mat][1] << endl;
 						qDebug() << "original u,v:" << origU << "," << origV << endl;
 						qDebug() << "minu,minuwhole,minv,minvwhole:" << minU << "," << minUwhole << "," << minV << "," << minVwhole << endl;
 						qDebug() << "shifted u,v:" << fit->WT(c).U() << "," << fit->WT(c).V() << endl;
-					//}
-				}
+					}/*
+				}*/
 			}
-				
+			
 			for (c= 0; c < 3;++c)//UVs are per-vertex
 			{
+				UwasNegative=VwasNegative=false;
 				qDebug() << "------------------" << endl;
 				qDebug() << "material " << mat << "position:" << posiz[mat][0] << "," << posiz[mat][1] << endl;
 				qDebug() << "U: " << fit->WT(c).U() << "V: " << fit->WT(c).V() << endl;
@@ -286,12 +328,20 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 					fit->WT(c).V() /= maxdiffUV[mat][1];
 				qDebug() << "new (first division) U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
 				
-				//these values should all be between 0 & +1, as should the final outputs
-				if ((fit->WT(c).U() > 1)||(fit->WT(c).V() > 1))
+				//these values should all be between 0 & 1, as should the final outputs
+				if ((fabs(fit->WT(c).U()) > 1)||(fabs(fit->WT(c).V()) > 1))
 					qDebug() << "atlas's UV coords outside 0-1 range!" << endl;
-				fit->WT(c).U() = (fit->WT(c).U()*images[mat].width() + posiz[mat][0])/global_size[0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1)
+				if (fit->WT(c).U()<0)
+					UwasNegative=true;
+				if (fit->WT(c).V()<0)
+					VwasNegative=true;
+				fit->WT(c).U() = (fabs(fit->WT(c).U())*images[mat].width() + posiz[mat][0])/global_size[0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1)
+				if (UwasNegative)
+					fit->WT(c).U() *= -1;
 				//extra adjustment here because V coordinate is measured from the bottom, whereas the rect packer gives us the position from the top
-				fit->WT(c).V() = (fit->WT(c).V()*images[mat].height() + (global_size[1]-posiz[mat][1]-images[mat].height()))/global_size[1];//offset V by coord in posiz
+				fit->WT(c).V() = (fabs(fit->WT(c).V())*images[mat].height() + (global_size[1]-posiz[mat][1]-images[mat].height()))/global_size[1];//offset V by coord in posiz
+				if (VwasNegative)
+					fit->WT(c).V() *= -1;
 				qDebug() << "new (second division) U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
 			}
 		}
