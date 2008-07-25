@@ -52,7 +52,10 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 		CP_TEXBORDER <<
     CP_COLOR_NON_MANIFOLD_FACE <<
     CP_COLOR_NON_MANIFOLD_VERTEX <<
-    CP_SMOOTH <<
+    CP_VERTEX_SMOOTH <<
+		CP_FACE_SMOOTH <<
+		CP_VERTEX_TO_FACE <<
+		CP_FACE_TO_VERTEX <<
     //CP_COLOR_NON_TOPO_COHERENT <<
 		CP_RANDOM_FACE;
     
@@ -77,7 +80,10 @@ const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) {
     case CP_COLOR_NON_MANIFOLD_FACE:  return QString("Color non Manifold Faces");
     case CP_COLOR_NON_MANIFOLD_VERTEX:return QString("Color non Manifold Vertices");
     case CP_COLOR_NON_TOPO_COHERENT:  return QString("Color edges topologically non coherent");
-    case CP_SMOOTH:                   return QString("Smooth Color");
+    case CP_VERTEX_SMOOTH:                   return QString("Laplacian Smooth Vertex Color");
+    case CP_FACE_SMOOTH:                   return QString("Laplacian Smooth Face Color");
+    case CP_VERTEX_TO_FACE:                   return QString("Vertex to Face color transfer");
+    case CP_FACE_TO_VERTEX:                   return QString("Face to Vertex color transfer");
 		case CP_RANDOM_FACE:         return QString("Random Face Color");
 			
     default: assert(0);
@@ -100,7 +106,10 @@ const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId)
     case CP_TEXBORDER :                 return tr("Colorize only border edges.");
     case CP_COLOR_NON_MANIFOLD_FACE: return tr("Colorize the non manifold edges, eg the edges where there are more than two incident faces");
     case CP_COLOR_NON_MANIFOLD_VERTEX:return tr("Colorize only non manifold edges eg. ");
-    case CP_SMOOTH :                 return tr("Apply laplacian smooth for colors.");
+    case CP_VERTEX_SMOOTH:                   return QString("Laplacian Smooth Vertex Color");
+    case CP_FACE_SMOOTH:                   return QString("Laplacian Smooth Face Color");
+    case CP_VERTEX_TO_FACE:                   return QString("Vertex to Face color transfer");
+    case CP_FACE_TO_VERTEX:                   return QString("Face to Vertex color transfer");
     case CP_COLOR_NON_TOPO_COHERENT :return tr("Color edges topologically non coherent.");
 		case CP_RANDOM_FACE:         return QString("Colorize Faces randomly. If internal edges are present they are used");
 
@@ -135,8 +144,11 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_COLOR_NON_MANIFOLD_FACE:       
     case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACETOPO;
     case CP_RANDOM_FACE:       return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
-    case CP_SMOOTH:                   
     case CP_MAP_QUALITY_INTO_COLOR:   return 0;
+    case CP_VERTEX_SMOOTH:                   return 0;
+    case CP_FACE_SMOOTH:                   return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR ;
+    case CP_VERTEX_TO_FACE:                   return MeshModel::MM_FACECOLOR;
+    case CP_FACE_TO_VERTEX:                   return MeshModel::MM_FACECOLOR;
     default: assert(0);
   }
   return 0;
@@ -192,6 +204,10 @@ bool ExtraMeshColorizePlugin::getCustomParameters(QAction *action, QWidget * par
 void ExtraMeshColorizePlugin::initParameterSet(QAction *a,MeshModel &m, FilterParameterSet & par) {
 	switch(ID(a))
   {
+		case CP_FACE_SMOOTH: 
+		case CP_VERTEX_SMOOTH: 
+			par.addInt("iteration",1,tr("Iteration"),tr("the number ofiteration of the smoothing algorithm"));
+								 break;
 	case CP_TRIANGLE_QUALITY: {
 			QStringList metrics;
 			metrics.push_back("area/max side");
@@ -317,9 +333,33 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
   case CP_COLOR_NON_MANIFOLD_VERTEX:
     ColorManifoldVertex<CMeshO>(m.cm);
     break;
-  case CP_SMOOTH:
-		 tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,1);
-     break;
+  case CP_VERTEX_SMOOTH:
+		{
+		int iteration = par.getInt("iteration");
+		tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,iteration,false,cb);
+		}
+		break;
+  case CP_FACE_SMOOTH:
+		{
+		int iteration = par.getInt("iteration");
+		tri::Smooth<CMeshO>::FaceColorLaplacian(m.cm,iteration,false,cb);
+		}
+		break;
+  case CP_FACE_TO_VERTEX:
+		
+		break;
+  case CP_VERTEX_TO_FACE:
+		{
+			CMeshO::FaceIterator fi;
+			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD()) 
+			{
+				Color4f avg = (Color4f::Construct((*fi).V(0)->C()) + 
+											 Color4f::Construct((*fi).V(1)->C()) + 
+											 Color4f::Construct((*fi).V(2)->C()) )/ 3.0;
+						(*fi).C().Import(avg);
+			}
+		}
+		break;
  }
 	return true;
 }
@@ -332,18 +372,21 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
     case   CP_TEXBORDER:
     case   CP_COLOR_NON_MANIFOLD_VERTEX:
     case   CP_COLOR_NON_MANIFOLD_FACE:
-    case   CP_SMOOTH:
     case   CP_MAP_QUALITY_INTO_COLOR:
     case   CP_GAUSSIAN:
     case   CP_MEAN:
     case   CP_RMS:
     case   CP_ABSOLUTE:
     case   CP_COLOR_NON_TOPO_COHERENT:
+    case   CP_VERTEX_SMOOTH:
+    case   CP_FACE_TO_VERTEX:
         return MeshFilterInterface::VertexColoring; 			
 		case   CP_SELFINTERSECT_SELECT: return MeshFilterInterface::Selection;
     case   CP_SELFINTERSECT_COLOR:
     case   CP_TRIANGLE_QUALITY:
 		case   CP_RANDOM_FACE:	
+    case   CP_FACE_SMOOTH:
+    case   CP_VERTEX_TO_FACE:
                return MeshFilterInterface::FaceColoring; 
     default: assert(0);
               return MeshFilterInterface::Generic;
@@ -352,7 +395,10 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
 
 bool ExtraMeshColorizePlugin::autoDialog(QAction *a) {
 	switch(ID(a)) {
-  case  CP_TRIANGLE_QUALITY: return true;
+  case  CP_TRIANGLE_QUALITY: 
+	 case   CP_VERTEX_SMOOTH:
+   case  CP_FACE_SMOOTH:return true;
+    
 	default: return false;
   }
 }
