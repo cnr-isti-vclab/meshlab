@@ -48,7 +48,8 @@ FilterUnsharp::FilterUnsharp()
 		FP_FACE_NORMAL_SMOOTHING<<
 		FP_UNSHARP_NORMAL<<
 		FP_UNSHARP_GEOMETRY<<
-		FP_UNSHARP_COLOR <<
+		FP_UNSHARP_QUALITY <<
+		FP_UNSHARP_VERTEX_COLOR <<
 		FP_RECOMPUTE_VERTEX_NORMAL <<
 		FP_RECOMPUTE_FACE_NORMAL <<
 		FP_FACE_NORMAL_NORMALIZE	;
@@ -80,7 +81,8 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
   	case FP_VERTEX_QUALITY_SMOOTHING:	return QString("Smooth vertex quality"); 
   	case FP_UNSHARP_NORMAL:				return QString("UnSharp Normals"); 
   	case FP_UNSHARP_GEOMETRY:	    return QString("UnSharp Geometry"); 
-  	case FP_UNSHARP_COLOR:	      return QString("UnSharp Color"); 
+  	case FP_UNSHARP_QUALITY:	    return QString("UnSharp Quality"); 
+  	case FP_UNSHARP_VERTEX_COLOR:	      return QString("UnSharp Color"); 
 	  case FP_RECOMPUTE_VERTEX_NORMAL: return QString("Recompute Vertex Normals"); 
 	  case FP_RECOMPUTE_FACE_NORMAL: return QString("Recompute Face Normals"); 
 
@@ -104,7 +106,8 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
 		case FP_FACE_NORMAL_SMOOTHING:	    return tr("Smooth Face Normals without touching the position of the vertices."); 
   	case FP_UNSHARP_NORMAL:							return tr("Unsharpen the normals, putting in more evidence normal variations"); 
   	case FP_UNSHARP_GEOMETRY:						return tr("Unsharpen the color, putting in more evidence normal variations"); 
-  	case FP_UNSHARP_COLOR:							return tr("Unsharpen the normals, putting in more evidence normal variations"); 
+  	case FP_UNSHARP_QUALITY:	    return QString("UnSharp Quality"); 
+  	case FP_UNSHARP_VERTEX_COLOR:							return tr("Unsharpen the normals, putting in more evidence normal variations"); 
 		case FP_RECOMPUTE_VERTEX_NORMAL:		return tr("Recompute vertex normals as an area weighted average of normal of the incident faces");
 		case FP_RECOMPUTE_FACE_NORMAL:			return tr("Recompute face normals as the normal of the plane of the face");
   	default: assert(0);
@@ -128,7 +131,8 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_NORMAL:				
 			case FP_UNSHARP_GEOMETRY:	    
-			case FP_UNSHARP_COLOR:	     
+			case FP_UNSHARP_QUALITY:	    
+			case FP_UNSHARP_VERTEX_COLOR:	     
 					return 	MeshFilterInterface::Smoothing;
 				
 			case FP_RECOMPUTE_FACE_NORMAL :
@@ -160,8 +164,9 @@ const int FilterUnsharp::getRequirements(QAction *action)
     case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_BORDERFLAG;
     case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
 		case FP_UNSHARP_GEOMETRY:	
+		case FP_UNSHARP_QUALITY:	
 		case FP_VERTEX_QUALITY_SMOOTHING:
-		case FP_UNSHARP_COLOR:	return MeshModel::MM_BORDERFLAG;
+		case FP_UNSHARP_VERTEX_COLOR:	return MeshModel::MM_BORDERFLAG;
     case FP_CREASE_CUT :	return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
 		case FP_UNSHARP_NORMAL:		return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
 		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
@@ -183,7 +188,8 @@ bool FilterUnsharp::autoDialog(QAction *action)
 			case FP_TAUBIN_SMOOTH:
 			case FP_SD_LAPLACIAN_SMOOTH:
 			case FP_UNSHARP_GEOMETRY:		
-			case FP_UNSHARP_COLOR:	
+			case FP_UNSHARP_QUALITY:		
+			case FP_UNSHARP_VERTEX_COLOR:	
 			case FP_UNSHARP_NORMAL:		return true;
 	}
 	return false;
@@ -201,10 +207,15 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
 			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number ofiterations of laplacian smooth in every run"));
 			break;
-		case FP_UNSHARP_COLOR:
-		parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
+		case FP_UNSHARP_VERTEX_COLOR:
+			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
 			parlst.addFloat("weightOrig", 1.f, tr("Original Color Weight"), tr("How much the original color is used<br>"));
-		parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number ofiterations of laplacian smooth in every run"));
+			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run"));
+			break;
+		case FP_UNSHARP_QUALITY:
+			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
+			parlst.addFloat("weightOrig", 1.f, tr("Original Quality Weight"), tr("How much the original quality is used<br>"));
+			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run"));
 			break;
 		case FP_TWO_STEP_SMOOTH:
 		parlst.addInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.");
@@ -345,7 +356,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 				tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);
 				
 			}	break;
-	case FP_UNSHARP_COLOR:			
+	case FP_UNSHARP_VERTEX_COLOR:			
 			{	
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
@@ -366,8 +377,25 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 						
 						}
 			}	break;
+	case FP_UNSHARP_QUALITY:			
+	{	
+				float alpha=par.getFloat("weight");
+				float alphaorig=par.getFloat("weightOrig");
+				int smoothIter = par.getInt("iterations");
+				
+				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+				vector<float> qualityOrig(m.cm.vn);
+				for(int i=0;i<m.cm.vn;++i)
+					qualityOrig[i] = m.cm.vert[i].Q();
+				
+				tri::Smooth<CMeshO>::VertexQualityLaplacian(m.cm, smoothIter);
+				for(int i=0;i<m.cm.vn;++i)
+				{ 
+					float qualityDelta = qualityOrig[i] - m.cm.vert[i].Q();		
+					m.cm.vert[i].Q() = 	qualityOrig[i]*alphaorig + qualityDelta*alpha;	 // Unsharp formula 
+				}
+	}	break;
 	default : assert(0);
-	
 	}
 	
 				
