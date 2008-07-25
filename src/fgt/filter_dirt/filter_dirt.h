@@ -51,14 +51,13 @@ class FilterDirt : public QObject, public MeshFilterInterface
 
 		virtual bool autoDialog(QAction *) {return false;}
 		virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/){};
-		virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-		virtual float FilterDirt::mediumVertexDistance(CFaceO* face);
+		virtual bool applyFilter(QAction*  filter, MeshDocument &md, FilterParameterSet & par, vcg::CallBackPos *cb);
+		virtual bool applyFilter(QAction * /*filter */, MeshModel &, FilterParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
 		virtual const FilterClass getClass(QAction *);
 
 
-
-	/*protected:
-		const int defaultDustTon;*/
+	protected:
+		int defaultGammaTon;
 };
 
 

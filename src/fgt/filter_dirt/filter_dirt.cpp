@@ -24,7 +24,7 @@
 #include <Qt>
 #include <QtGui>
 #include "filter_dirt.h"
-#include <time.h>
+//#include <time.h>
 
 
 #include <vcg/math/base.h>
@@ -34,12 +34,44 @@
 #include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/selection.h> 
 #include <vcg/complex/trimesh/update/color.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/space/triangle3.h>
 
 
 using namespace std;
 using namespace vcg;
 
-FilterDirt::FilterDirt()
+class BaseSampler
+{
+public:
+	BaseSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;};
+	CMeshO *m;
+	bool uvSpaceFlag;
+	void AddVert(const CMeshO::VertexType &p) 
+	{
+		tri::Allocator<CMeshO>::AddVertices(*m,1);
+		m->vert.back().ImportLocal(p);
+	}
+	
+	void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
+	{
+		tri::Allocator<CMeshO>::AddVertices(*m,1);
+		m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
+		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
+	}
+	
+	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const Point2i &tp)
+	{
+		tri::Allocator<CMeshO>::AddVertices(*m,1);
+		
+		if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0); 
+		else m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
+		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
+	}
+}; // end class BaseSampler
+
+FilterDirt::FilterDirt(): defaultGammaTon(1000)
 {
 	
     typeList << 
@@ -77,154 +109,74 @@ const PluginInfo &FilterDirt::pluginInfo()
 	return ai;
 }
 
-const int FilterDirt::getRequirements(QAction *action)
+const int FilterDirt::getRequirements(QAction */*action*/)
 {
 	
 	return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR | MeshModel::MM_FACEMARK;	
 }
 
-bool FilterDirt::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
+bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, FilterParameterSet & /*par*/, vcg::CallBackPos */*cb*/)
 {
-	srand (time(NULL));	
+	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
 	
-	vcg::tri::UpdateColor<CMeshO>::FaceConstant(m.cm,Color4b::White);
+	MarkerFace markerFunctor;
 	
-	CMeshO::FaceIterator fi = m.cm.face.begin();
+	vcg::tri::UpdateColor<CMeshO>::FaceConstant(md.mm()->cm,vcg::Color4b::White); //!DEBUG! painting white for debug
 	
-	CFaceO* face = NULL;
+	MeshModel *curMM= md.mm();				
+	MeshModel *mm= md.addNewMesh("Dust gamma-ton"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 	
-	//for now it take only a random face and check a casual point over
-	do
+	BaseSampler mps(&(mm->cm));
+	vcg::tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm, mps, defaultGammaTon);
+	vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+	
+	//calculate mean of face's edge segment perimeter
+	CMeshO::FaceIterator fi;
+	double perimeterSum;
+	for(fi=curMM->cm.face.begin();fi!=curMM->cm.face.end();++fi)
+	if(!(*fi).IsD())
 	{
-		face = &fi[rand()%m.cm.fn];
+		perimeterSum += vcg::Perimeter((*fi));
 	}
-	while (face->IsD());
 	
-	//find a casual point over face
-	float a = (float)(rand()/(double)RAND_MAX);
-	float b;
-	do
-	{
-		b=(float)(rand()/(double)RAND_MAX);
-	}
-	while (b>(1-a));
+	//calculate single gamma-ton step size
+	float stepSize = (perimeterSum/3)/curMM->cm.fn;
 	
-	//to remove
-	vcg::Point3f deb0 = face->V(0)->P();
-	vcg::Point3f deb1 = face->V(1)->P();
-	vcg::Point3f deb2 = face->V(2)->P();
-	//end to remove part
+		
+	//Main filter cicle	
+	CMeshO::VertexIterator vi;	
+	CMeshO::FaceType   *nearestF=NULL;
+	float maxDist=(*curMM).cm.bbox.Diag()/10, dist;
+	MetroMeshGrid   unifGrid;
+	vcg::Point3f closestPt;
 	
-	vcg::Point3f v1 = face->V(1)->P() - face->V(0)->P();
-	vcg::Point3f v2 = face->V(2)->P() - face->V(0)->P();
-	
-	//find casual point over face with linear span of v1 and v2
-	vcg::Point3f casualPoint = (v1*a) + (v2*b);
-	
-	casualPoint = casualPoint + face->V(0)->P();
-	
-	
-	bool ottuso=false, border=false;
-	
-	for (int i=0; i<100 && !ottuso && !border; ++i)
-	{
-		//get dust direction over face
-		vcg::Point3f dustDirection = (face->N() ^  vcg::Point3f(0,-1,0)) ^ face->N();
-		//check if selected face angle between normal and -Y axe
-		if (!(vcg::Angle(face->N(),vcg::Point3f(0,-1,0))<M_PI/2))
+	//setting up grid for space indexing
+	unifGrid.Set((*curMM).cm.face.begin(),(*curMM).cm.face.end());
+	markerFunctor.SetMesh(&((*curMM).cm));	
+	//for (int i=0; i<100; ++i)
+	//{	
+		for (vi=mm->cm.vert.begin();vi!=mm->cm.vert.end();++vi)
 		{
-			//float mediumDistance = mediumVertexDistance(face);
-			//color face for debug
-			if (i==0)
-				face->C()=vcg::Color4b::Green;
-			else
-				face->C()=vcg::Color4b::Blue;
-		
-			vcg::Point3f direction = dustDirection + casualPoint;		
-		
-			//find wedge incident with dust direction (i'll change this with better function)
-			vcg::Point3f vertDist[3];
-			
-			for (int k=0; k<3; k++)
-				vertDist[k] = face->V(k)->P() - direction;
-			
-			int minDist1=0;		
-			int minDist2=1;
-			for (int k=1; k<3; ++k)
-			{
-				if (vertDist[k].Norm()<vertDist[minDist1].Norm())
-				{
-					minDist2=minDist1;
-					minDist1=k;
-				}
-			}				
-			for (int k=2; k>=0; --k)
-			{
-				if ((k!=minDist1) && (vertDist[k].Norm()<vertDist[minDist2].Norm()))
-					minDist2=k;
-			}		
-			//note: mindist1 is the more neighbor vertex to direction
-			
-			//get point over wedge and select next face
-			vcg::Point3f q;
-			float radius = vcg::PSDist<float>(casualPoint,face->V(minDist1)->P(),face->V(minDist2)->P(),q);
-		
-			v1 = (q-casualPoint).Normalize();
-			v2 = (direction - casualPoint).Normalize();;
-			float angle = vcg::Angle(v1,v2);
-		
-			//find intersection point between casualPoint and direction
-			float tanValue = (float) radius * (sin(angle)/cos(angle));
-			vcg::Point3f v = q - face->V(minDist1)->P();
-			vcg::Point3f subVector = -v.Normalize();
-			subVector *= tanValue;
-			vcg::Point3f intersectionPoint = (v + subVector) + face->V(minDist1)->P();		
-			
-		
-			int nextFace;
-			if ((minDist1 == 0 && minDist2 == 1) || (minDist1 == 1 && minDist2 == 0) )
-				nextFace = 0;
-			else if ((minDist1 == 1 && minDist2 == 2) || (minDist1 == 2 && minDist2 == 1))
-				nextFace = 1;
-			else
-				nextFace = 2;
-			
-			if (face == face->FFp(nextFace))
-			{
-				border = true;
-				Log (0, "[%d] trovato bordo", i);
-				face->C()=vcg::Color4b::Red;
-			}
-			else
-				face = face->FFp(nextFace);
-			
-			casualPoint = intersectionPoint;
+			//get nearest face for every gamma-ton
+			vcg::face::PointDistanceBaseFunctor PDistFunct;
+			//dist=maxDist;
+			vcg::Point3f test = (*vi).P();
+			nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,(*vi).P(),maxDist,dist,closestPt);
+			assert (nearestF)
+			if (!(*nearestF).IsD())
+				(*nearestF).C() = Color4b::Red;
 		}
-		else
-		{
-			ottuso = true;
-			Log (0, "[%d] trovata faccia ottusa", i);
-			face->C()=vcg::Color4b::Red;
-		}
-	}
+	//}//end Main filter cicle
+	
 		
 	return true;
-}
-
-
-
-float FilterDirt::mediumVertexDistance(CFaceO* face)
-{
-	float dist = vcg::Distance<float>(face->V(0)->P(),face->V(1)->P());
-	dist +=vcg::Distance<float>(face->V(1)->P(),face->V(2)->P());
-	dist += vcg::Distance<float>(face->V(0)->P(),face->V(2)->P());
-	return dist/3;
 }
 
 /*!!! I don't understand why if i did't return MeshFilterInterface::FaceColoring all my function call
  to FaceConstant (et simila) don't take effect over the mesh. I've read from Interface.c comment getClass is
  only to decide where my plugin label is in Plugin submenu of meshlab menubar.*/
-const MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *actionId)
+const MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *)
 {
 	return MeshFilterInterface::FaceColoring;
 }
