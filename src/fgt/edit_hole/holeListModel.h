@@ -76,9 +76,10 @@ public:
 	void clearModel();
 	void updateModel();
 	void drawHoles() const;
-	void fill();
+	void fill(bool antiSelfIntersection);
 	void acceptFilling(bool forcedCancel=false);
 	inline FillerState getState() const { return state; }
+	inline MeshModel* getMesh() const { return mesh; }
 
 private:
 	MeshModel *mesh;

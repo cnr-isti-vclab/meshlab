@@ -75,10 +75,15 @@ void HoleListModel::drawHoles() const
 	HoleVector::const_iterator it = holes.begin();
 	for( ; it != holes.end(); ++it)
 	{
-		if( it->isSelected && it->isAccepted)
-			glColor(Color4b::DarkGreen);
+		if( it->isSelected)
+		{
+			if(it->isAccepted)
+				glColor(Color4b::DarkGreen);
+			else
+				glColor(Color4b::DarkRed);
+		}
 		else
-			glColor(Color4b::DarkRed);
+			glColor(Color4b::DarkBlue);
 		it->Draw();
 	}
 
@@ -88,10 +93,15 @@ void HoleListModel::drawHoles() const
 
 	for(it = holes.begin(); it != holes.end(); ++it)
 	{
-		if( it->isSelected && it->isAccepted)
-			glColor(Color4b::Green);
+		if(it->isSelected)
+		{
+			if(it->isAccepted)
+				glColor(Color4b::Green);
+			else
+				glColor(Color4b::Red);
+		}
 		else
-			glColor(Color4b::Red);
+			glColor(Color4b::Blue);
 				
 		it->Draw();
 	}
@@ -99,15 +109,26 @@ void HoleListModel::drawHoles() const
 
 void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
 {
-	int ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes);
-	if(ind == -1)
-		return;
-	holes[ind].isSelected = !holes[ind].isSelected;
-
+	int ind = -1;
+	if(state == HoleListModel::Selection)
+	{
+		ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes);
+		if(ind == -1)
+			return;
+		holes[ind].isSelected = !holes[ind].isSelected;
+	}
+	else
+	{
+		ind = FgtHole<CMeshO>::FindHoleFromHoleFace(bface, holes);
+		if(ind == -1)
+			return;
+		holes[ind].isAccepted = !holes[ind].isAccepted;
+	}
+	
 	emit dataChanged( index(ind, 2), index(ind, 2) );
 }
 
-void HoleListModel::fill()
+void HoleListModel::fill(bool antiSelfIntersection)
 {
 	std::vector<CMeshO::FacePointer *> local_facePointer;
 	
@@ -120,7 +141,13 @@ void HoleListModel::fill()
 		if( it->isSelected )
 		{
 			it->facesPatch.clear();
-			vcgHole::FillHoleEar<vcg::tri::TrivialEar<CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
+			
+			if (antiSelfIntersection)
+				vcgHole::FillHoleEar<tri::SelfIntersectionEar< CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
+			else
+				vcgHole::FillHoleEar<vcg::tri::TrivialEar<CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
+			//tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag);
+
 			state = HoleListModel::Filled;
 		}
 	}

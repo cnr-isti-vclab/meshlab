@@ -45,25 +45,35 @@
    <widget class="QGroupBox" name="groupBox" >
     <property name="geometry" >
      <rect>
-      <x>55</x>
-      <y>260</y>
-      <width>151</width>
-      <height>81</height>
+      <x>25</x>
+      <y>240</y>
+      <width>211</width>
+      <height>101</height>
      </rect>
     </property>
     <property name="title" >
      <string>Option</string>
     </property>
-    <widget class="QWidget" name="layoutWidget" >
+    <widget class="QWidget" name="" >
      <property name="geometry" >
       <rect>
-       <x>17</x>
+       <x>20</x>
        <y>20</y>
-       <width>117</width>
-       <height>51</height>
+       <width>143</width>
+       <height>68</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
+      <item>
+       <widget class="QCheckBox" name="antiSelfIntersection" >
+        <property name="text" >
+         <string>Prevent self intersection</string>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QRadioButton" name="individualRBtm" >
         <property name="text" >
@@ -83,41 +93,6 @@
       </item>
      </layout>
     </widget>
-   </widget>
-   <widget class="QWidget" name="layoutWidget" >
-    <property name="geometry" >
-     <rect>
-      <x>29</x>
-      <y>8</y>
-      <width>202</width>
-      <height>245</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" >
-     <item>
-      <widget class="QLabel" name="label2_2" >
-       <property name="layoutDirection" >
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="text" >
-        <string>Holes into mesh</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QTreeView" name="holeTree" >
-       <property name="textElideMode" >
-        <enum>Qt::ElideNone</enum>
-       </property>
-       <property name="rootIsDecorated" >
-        <bool>false</bool>
-       </property>
-       <property name="itemsExpandable" >
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </widget>
    <widget class="QWidget" name="layoutWidget" >
     <property name="geometry" >
@@ -170,6 +145,38 @@
       </spacer>
      </item>
     </layout>
+   </widget>
+   <widget class="QSplitter" name="splitter" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>241</width>
+      <height>221</height>
+     </rect>
+    </property>
+    <property name="orientation" >
+     <enum>Qt::Vertical</enum>
+    </property>
+    <widget class="QLabel" name="label2_2" >
+     <property name="layoutDirection" >
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text" >
+      <string>Holes into mesh</string>
+     </property>
+    </widget>
+    <widget class="QTreeView" name="holeTree" >
+     <property name="textElideMode" >
+      <enum>Qt::ElideNone</enum>
+     </property>
+     <property name="rootIsDecorated" >
+      <bool>false</bool>
+     </property>
+     <property name="itemsExpandable" >
+      <bool>false</bool>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>

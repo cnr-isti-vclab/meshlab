@@ -138,16 +138,17 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 		this->gla = gla;
 		if(holesModel != 0)
 			delete holesModel;
-		holesModel = new HoleListModel(&m);		
+		holesModel = new HoleListModel(&m);
+		
+		// necessario per evitare di avere 2 istanze del filtro se si cambia mesh
+		// senza chidere il filtro
+		if(dialogFiller != 0)
+			dialogFiller->close();		
 	}
 
 	if( !dialogFiller )
 	{
-		if(holesModel == 0)
-			holesModel = new HoleListModel(&m);
-
 		dialogFiller=new FillerDialog(gla->window());
-		dialogFiller->ui.holeTree->setModel( holesModel );
 		dialogFiller->show();
 		dialogFiller->setAllowedAreas(Qt::NoDockWidgetArea);
 		connect(dialogFiller, SIGNAL(SGN_ProcessFilling()), this,SLOT(fill()));
@@ -156,7 +157,10 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 		connect(this, SIGNAL(SGN_SuspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 		connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );		
 	}
-		
+
+	if(holesModel == 0)
+		holesModel = new HoleListModel(&m);
+	dialogFiller->ui.holeTree->setModel( holesModel );
 	Decorate(0, m, gla);
 		
 	SGN_SuspendEditToggle();
@@ -268,8 +272,9 @@ void EditHolePlugin::upGlA()
 
 void EditHolePlugin::fill()
 {
+	Qt::CheckState asi = dialogFiller->ui.antiSelfIntersection->checkState();
 	if(holesModel->getState() == HoleListModel::Selection)
-		holesModel->fill();
+		holesModel->fill( asi == Qt::CheckState::Checked);
 	else
 		holesModel->acceptFilling();
 	

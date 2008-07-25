@@ -97,21 +97,7 @@ public:
 	};
 
 	
-	/* Check if face is a border face of this hole
-	*/
-	bool HaveBorderFace(FacePointer bFace) const
-	{
-		// per ogni buco della mesh scorro il bordo cercando la faccia richiesta
-		PosType curPos;
-		PosType startPos = curPos = holeInfo.p;
-		do
-		{			
-			if(curPos.F() == bFace) 
-				return true;
-			curPos.NextB();
-		}while( curPos != startPos );	
-		return false;
-	}
+	
 
 	/* Restore hole, remove patch applied to mesh
 	 * Le facce usate come patch sono salvate come copie, pertanto si devono cercare 
@@ -213,7 +199,7 @@ public:
 
 	/** Return index into holes vector of hole adjacent to picked face
 	 */
-	static int FindHoleFromBorderFace(FacePointer bFace, const HoleVector holes)
+	static int FindHoleFromBorderFace(FacePointer bFace, const HoleVector holes) 
 	{ 
 		// BUG: se la faccia selezionata ha due edge di bordo su hole diversi, viene selezionato il primo hole
 		// che si trova nella lista. Sarebbe carino che venisse selezionato l'hole relativo al bordo più vicino al click 
@@ -227,11 +213,60 @@ public:
 		for( ; hit != holes.end(); ++hit)
 		{
 			// for each hole check if face is its border face
-			if(hit->HaveBorderFace(bFace))
+			if(hit->haveBorderFace(bFace))
 				return index;
 			index++;
 		}
 		return -1; // means no find hole
+	}
+
+	/** Return index into holes vector of hole adjacent to picked face
+	 */
+	static int FindHoleFromHoleFace(FacePointer bFace, const HoleVector holes)
+	{
+		int index = 0;
+		typename HoleVector::const_iterator hit = holes.begin();
+		
+		//scorro i buchi della mesh
+		for( ; hit != holes.end(); ++hit)
+		{
+			// for each hole check if face is its border face
+			if(hit->havePatchFace(bFace))
+				return index;
+			index++;
+		}
+		return -1; // means no find hole
+	}
+
+private:
+	/* Check if face is a border face of this hole
+	*/
+	bool haveBorderFace(FacePointer bFace) const
+	{
+		// per ogni buco della mesh scorro il bordo cercando la faccia richiesta
+		PosType curPos;
+		PosType startPos = curPos = holeInfo.p;
+		do
+		{			
+			if(curPos.F() == bFace) 
+				return true;
+			curPos.NextB();
+		}while( curPos != startPos );	
+		return false;
+	}
+
+	/* Check if pFace is a patch face
+	 */
+	bool havePatchFace(FacePointer pFace) const
+	{
+		std::vector<FaceType>::const_iterator it=facesPatch.begin();
+		for( ; it != facesPatch.end(); ++it)
+			if( it->V(0) == pFace->V(0) &&
+				it->V(1) == pFace->V(1) &&
+				it->V(2) == pFace->V(2) )
+				return true;
+
+		return false;
 	}
 
 public:
