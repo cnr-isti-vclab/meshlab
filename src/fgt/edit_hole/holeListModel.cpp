@@ -94,7 +94,7 @@ void HoleListModel::drawHoles() const
 			glColor(Color4b::Red);
 				
 		it->Draw();
-	}	
+	}
 }
 
 void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
@@ -125,6 +125,8 @@ void HoleListModel::fill()
 		}
 	}
 
+	//mesh->clearDataMask(MeshModel::MM_FACETOPO);
+	//mesh->updateDataMask(MeshModel::MM_FACETOPO);
 	emit layoutChanged();
 }
 

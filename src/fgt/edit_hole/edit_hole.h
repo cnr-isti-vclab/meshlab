@@ -68,7 +68,6 @@ private:
 	CFaceO* pickedFace;
 
 	void markBorders();
-	void drawHoles() const;
 	int findHoleFromBorderFace(CMeshO::FacePointer bFace);
 	void toggleSelection(int holeIndex);
 	

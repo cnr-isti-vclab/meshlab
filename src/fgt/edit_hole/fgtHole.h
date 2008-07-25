@@ -93,7 +93,7 @@ public:
 		for( ; it != vertexCoords.end() ; it++) 
 			glVertex( **it );
 		
-		glEnd();
+		glEnd();		
 	};
 
 	
@@ -114,34 +114,77 @@ public:
 	}
 
 	/* Restore hole, remove patch applied to mesh
-	*/
+	 * Le facce usate come patch sono salvate come copie, pertanto si devono cercare 
+	 * le corrispettive facce nella mesh. Per fare questo si parte dal pos iniziale
+	 * contenuta nelle info del "hole", che deve è posizionato su una faccia\edge\vertice
+	 * sul bordo del buco; si testano le facce adiacenti al vertice cercando le facce patch.
+	 * Quando si trova una faccia patch questa viene eliminata dalla mesh e poi si continua la ricerca
+	 * di altre facce patch cercando tra le facce adiacenti ai suoi vertici non ancora viste; in questo 
+	 * modo si scorrono solo le facce interne ed appena esterne al buco riuscendo anche a ripristinare 
+	 * buchi non-manifold.
+	 */
 	void RestoreHole(MESH &mesh)
 	{
-		FaceIterator hfit = facesPatch.begin();
-		for( ; hfit != facesPatch.end(); ++hfit)
-		{
-			// facesPatch è un array contenente delle copie delle facce inserite nella mesh
-			// al fine di tappare il buco.
-			// Pertando sfruttando la manifoldness della mesh si arriva a prendere il riferimento 
-			// corrispettiva faccia nelal mesh
-			//FaceType* meshFace = hfit->FFp(0)->FFp(hfit->FFi(0)); 
-			//tri::Allocator<MESH>::DeleteFace(mesh, *meshFace);
+		if(facesPatch.size() == 0 )
+			return;
 
-			FaceIterator mfit = mesh.face.begin();
-			for( ; mfit != mesh.face.end(); ++mfit)
+		std::vector<FaceType* > meshFaces;
+		std::vector<FaceType* >::iterator mfit;
+		PosType curPos;
+		PosType startPos = curPos = holeInfo.p;
+
+		// scorro le facce adiacenti alla faccia iniziale del buco
+		do
+		{
+			if(!curPos.f->IsV())
 			{
-				if(!mfit->IsD())
+				meshFaces.push_back( curPos.f );
+				curPos.f->SetV();
+			}
+			curPos.FlipF();
+			curPos.FlipE();
+		}while(curPos != startPos);
+
+		// tra le facce adiacenti al buco cerco quelle usate come patch
+		for(int index =0; index < meshFaces.size(); index++ )
+		{
+			FaceType* mf = meshFaces.at(index);
+			FaceIterator hfit = facesPatch.begin();
+			for( ; hfit != facesPatch.end(); ++hfit) 
+			{
+				if( hfit->V(0) == mf->V(0) &&
+					hfit->V(1) == mf->V(1) &&
+					hfit->V(2) == mf->V(2) )
 				{
-					if( hfit->V(0)->P() == mfit->V(0)->P() &&
-						hfit->V(1)->P() == mfit->V(1)->P() &&
-						hfit->V(2)->P() == mfit->V(2)->P() )
+					// trovata faccia patch
+					// inserisco tra le facce da esaminare le facce adiacenti ai vertici della faccia patch
+					for(int i=0; i<3; ++i)
 					{
-						tri::Allocator<MESH>::DeleteFace(mesh, *mfit);
+						PosType initPos(mf, i, mf->V(i) );
+						curPos = initPos;
+						do
+						{
+							if(!curPos.f->IsV() && !curPos.f->IsD())
+							{
+								meshFaces.push_back( curPos.f );
+								curPos.f->SetV();
+							}
+							curPos.FlipF();
+							curPos.FlipE();
+						}while(curPos != initPos); 
 					}
-				}
+
+					// si elimina la faccia patch
+					tri::Allocator<MESH>::DeleteFace(mesh, *mf );
+					facesPatch.erase(hfit);
+					break;
+				}				
 			}
 		}
-		facesPatch.clear();
+		
+		std::vector<FaceType* >::iterator it;
+		for(it = meshFaces.begin() ; it != meshFaces.end(); ++it)
+			(*it)->ClearV();		
 	}
 
 
