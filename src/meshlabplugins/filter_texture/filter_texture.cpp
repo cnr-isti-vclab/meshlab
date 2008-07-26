@@ -132,7 +132,7 @@ void FilterTexturePlugin::maxFaceSpan(int &c, float maxdiffUV[][2], MeshModel &m
 				}
 			}*/
 			
-			//even though uv coordinates are all positive by now, you still need fabs() to ensure result of subtraction is positive
+			//need fabs() to ensure result of subtraction is positive
 			diff1 = fabs(fit->WT(0).U() - fit->WT(1).U());//fabs is floating-point absolute value function call
 			diff2 = fabs(fit->WT(1).U() - fit->WT(2).U());
 			diff3 = fabs(fit->WT(0).U() - fit->WT(2).U());
@@ -194,9 +194,12 @@ void FilterTexturePlugin::copyTiles(QPixmap images[], QImage tiledimages[], int 
 				images[c] = QPixmap::fromImage(tiledimages[c]);//not necessary to write file if stays in memory, so just re-assign the QPixmap to the new tiled image
 			}
 		}
-		size = Point2i(images[c].width(), images[c].height());//regardless of whether or not it was tiled, now store the image's dimensions
-		sizes.push_back(size);
-		qDebug() << "copyTiles loaded image into sizes vector: " << m.cm.textures[c].c_str() << "with (potentially tiled) size: " << size[0] << " " << size[1] << endl;	
+		if (images[c].width()!=0 && images[c].height()!=0)
+		{
+			size = Point2i(images[c].width(), images[c].height());//regardless of whether or not it was tiled, now store the image's dimensions
+			sizes.push_back(size);
+			qDebug() << "copyTiles loaded image into sizes vector: " << m.cm.textures[c].c_str() << "with (potentially tiled) size: " << size[0] << " " << size[1] << endl;		
+		}
 	}
 }
 
@@ -225,7 +228,7 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 {
 	float minU, minV;
 	int minUwhole, minVwhole;//stores whole-number components
-	bool UwasNegative, VwasNegative;
+	//bool UwasNegative, VwasNegative;
 	for (fit=m.cm.face.begin(); fit != m.cm.face.end(); ++fit)//iterate through faces with textures
 	{
 		mat = fit->WT(0).N();//fit->cWT the 'c' is for const
@@ -240,17 +243,28 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 			//negative U coordinate of -.2 equivalent to + U coordinate of 1-.2 = .8
 			//4 cases depending on whether or not minU/minV is positive or negative - 4 quadrants
 			//can't just flip negative values along an axis - as that would reverse the direction of the triangle's texture
+			//cannot clamp values otherwise lose its ability to wrap i.e. repeat
+			
+			//3 ways of rendering values outside 0-1: clamp, wrap, or mirror
+			//CLAMP - any value outside 0-1 gets clamped to 0 or 1
+			//MIRROR - if whole number is odd, is frac(U) and whole number is even, is 1-frac(U), so 1.1 -> 0.9
+			//WRAP - repeat as frac(U), so 1.1 -> 0.1
+			//this assumes we're doing WRAP-around
+			//texture gets 'flipped' whenever the UVs cross-product is negative
 			
 			//fabs to allow for negative uv coords
 			if ((((fabs(fit->WT(0).U()) <= maxdiffUV[mat][0]) && (fabs(fit->WT(0).V()) <= maxdiffUV[mat][1])) && ((fabs(fit->WT(1).U()) <= maxdiffUV[mat][0]) && (fabs(fit->WT(1).V()) <= maxdiffUV[mat][1])) && ((fabs(fit->WT(2).U()) <= maxdiffUV[mat][0]) && (fabs(fit->WT(2).V()) <= maxdiffUV[mat][1])))){}
 			else//otherwise, need to reposition UV coordinates close to the 0,0 by letting smallest U,V be between 0-1 (by subtracting its whole number component, leaving its decimal) and subtracting its whole number component from the other values (maintaining the offsets between them).  this corrects for UV coords outside the range of the span.  the resulting coordinates (before the last for loop) should be in the span, but not necessarily 0-1
 			{
+				qDebug() << "doing adjustment for > maxdiffUV" << endl;
+				
 				//find minimum U
 				minU = min(fit->WT(0).U(), fit->WT(1).U());
 				minU = min(fit->WT(2).U(), minU);
 				//find minimum V
 				minV = min(fit->WT(0).V(), fit->WT(1).V());
 				minV = min(fit->WT(2).V(), minV);
+				//if two points are both minimum values, valid to pick either one
 				//float origU, origV;
 
 				//now reposition UVs so that the smallest U & V coordinates are in the 0-1 box and others are translated accordingly
@@ -259,7 +273,7 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 				//4 cases: need to maintain the sign of each coordinate, and the spans between them (by translation)
 				//all 3 coordinates are positive: below
 				//2 are positive, 1 negative: offset negative coordinate to between 0 & -1
-				//1 is positive, 2 negative: offset the least negative coordinate to between 0 & -1
+				//1 is positive, 2 negative: offset the LEAST negative coordinate to between 0 & -1
 				//0 is positive, 3 negative: " "
 				//the last 3 (those with at least one negative coord) are in effect the same algorithm, as when there is only one negative coord the least negative coord is that one
 				
@@ -317,7 +331,7 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 			
 			for (c= 0; c < 3;++c)//UVs are per-vertex
 			{
-				UwasNegative=VwasNegative=false;
+				//UwasNegative=VwasNegative=false;
 				qDebug() << "------------------" << endl;
 				qDebug() << "material " << mat << "position:" << posiz[mat][0] << "," << posiz[mat][1] << endl;
 				qDebug() << "U: " << fit->WT(c).U() << "V: " << fit->WT(c).V() << endl;
@@ -331,17 +345,17 @@ void FilterTexturePlugin::adjustUVCoords(int &mat, int &c, CMeshO::FaceIterator 
 				//these values should all be between 0 & 1, as should the final outputs
 				if ((fabs(fit->WT(c).U()) > 1)||(fabs(fit->WT(c).V()) > 1))
 					qDebug() << "atlas's UV coords outside 0-1 range!" << endl;
-				if (fit->WT(c).U()<0)
-					UwasNegative=true;
-				if (fit->WT(c).V()<0)
-					VwasNegative=true;
+				//if (fit->WT(c).U()<0)
+				//	UwasNegative=true;
+				//if (fit->WT(c).V()<0)
+				//	VwasNegative=true;
 				fit->WT(c).U() = (fabs(fit->WT(c).U())*images[mat].width() + posiz[mat][0])/global_size[0];//offset U by coord posiz, u*width is pixel, global_size is dimension - for normalizing (between 0 & 1)
-				if (UwasNegative)
-					fit->WT(c).U() *= -1;
+				//if (UwasNegative)
+				//	fit->WT(c).U() *= -1;
 				//extra adjustment here because V coordinate is measured from the bottom, whereas the rect packer gives us the position from the top
 				fit->WT(c).V() = (fabs(fit->WT(c).V())*images[mat].height() + (global_size[1]-posiz[mat][1]-images[mat].height()))/global_size[1];//offset V by coord in posiz
-				if (VwasNegative)
-					fit->WT(c).V() *= -1;
+				//if (VwasNegative)
+				//	fit->WT(c).V() *= -1;
 				qDebug() << "new (second division) U: " << fit->WT(c).U() << "new V: " << fit->WT(c).V() << endl;
 			}
 		}
