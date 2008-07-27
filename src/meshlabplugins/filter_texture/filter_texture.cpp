@@ -185,13 +185,13 @@ void FilterTexturePlugin::copyTiles(QPixmap images[], QImage tiledimages[], int 
 						}
 					}
 				}
-				//painter.~QPainter();//destroys - otherwise will crash if resample tiledimage
 				if (algo==1)//resampled tiles
 				{
 					qDebug() << "resampling" << endl;
-					tiledimages[c] = tiledimages[c].scaled(images[c].width(), images[c].height());//resample image to original size
+					images[c] = QPixmap::fromImage(tiledimages[c].scaled(images[c].width(), images[c].height()));//resample image to original size
 				}
-				images[c] = QPixmap::fromImage(tiledimages[c]);//not necessary to write file if stays in memory, so just re-assign the QPixmap to the new tiled image
+				else
+					images[c] = QPixmap::fromImage(tiledimages[c]);//not necessary to write file if stays in memory, so just re-assign the QPixmap to the new tiled image
 			}
 		}
 		if (images[c].width()!=0 && images[c].height()!=0)
