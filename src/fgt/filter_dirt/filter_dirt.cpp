@@ -71,7 +71,7 @@ public:
 	}*/
 }; // end class BaseSampler
 
-FilterDirt::FilterDirt(): defaultGammaTon(20)
+FilterDirt::FilterDirt(): defaultGammaTon(500)
 {
 	
     typeList << 
@@ -117,8 +117,8 @@ const int FilterDirt::getRequirements(QAction */*action*/)
 
 bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, FilterParameterSet & /*par*/, vcg::CallBackPos */*cb*/)
 {
-	//NOTE: i know this method require a code refactoring. Appling this filter in meshlab you can see 20 gamma-tons start from a position 
-	//(green face) moving down (red face).
+	//NOTE: i know this method require a code refactoring. Appling this filter in meshlab you can see 50 gamma-tons start from a position 
+	//(green face) moving down (red face). In meshlab you can see vertex position using show vertex label.
 	
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
@@ -161,10 +161,12 @@ bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, FilterParam
 	vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(curMM->cm);
 	vcg::tri::UpdateFlags<CMeshO>::FaceProjection(curMM->cm);
 	
+	int iterationNum = (int) curMM->cm.fn/300;
+	
 	for (vi=mm->cm.vert.begin();vi!=mm->cm.vert.end();++vi)	
 	{
 		precedentF=NULL; //Visual Debug Stuff
-		for (int i=0; i<50; ++i)
+		for (int i=0; i<iterationNum; ++i)
 		{
 			//get nearest face for every gamma-ton		
 			vcg::face::PointDistanceBaseFunctor PDistFunct;
@@ -175,14 +177,22 @@ bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, FilterParam
 			//DEBUG STUFF
 			if (i==0) (*nearestF).C() = Color4b::Green;
 			if (precedentF!=nearestF && precedentF!=NULL){ (*nearestF).C() = Color4b::Red;}
-			//END DEBUG STUFF		
-			
-			
 			precedentF = nearestF;
+			//END DEBUG STUFF
+			
 			//get gamma-ton direction over face
 			vcg::Point3f dustDirection = ((*nearestF).N().Normalize() ^  vcg::Point3f(0,-1,0)) ^ (*nearestF).N().Normalize();
+						
+			float angle = vcg::Angle(dustDirection, vcg::Point3f(0,-1,0));			
+			float speed;
+			//if angle>80°
+			if (angle>1.309) //(5*M_PI)/12
+				speed=0;
+			else
+				speed = stepSize * vcg::math::Cos(angle);			
+			
 			dustDirection = dustDirection.Normalize();
-			dustDirection *= stepSize; 
+			dustDirection *= speed; 
 			dustDirection += closestPt;
 			(*vi).P() = dustDirection;		
 		}
