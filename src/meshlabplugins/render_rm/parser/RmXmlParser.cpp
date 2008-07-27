@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -36,8 +36,9 @@ code restyling
 ****************************************************************************/
 
 // Local headers
-#include <GL/glew.h>
 #include "RmXmlParser.h"
+using std::make_pair;
+
 
 RmXmlParser::RmXmlParser()
 {
@@ -53,131 +54,114 @@ RmXmlParser::RmXmlParser(QString filename)
 void RmXmlParser::initializeCodeMapping()
 {
 	// GL_TextureWrapS
-	GlParamType par("GL_CLAMP", GL_CLAMP);
-	mapcode["GL_TextureWrapS1"] = par;
-
-	par.first = "GL_CLAMP_TO_EDGE"; par.second = GL_CLAMP_TO_EDGE;
-	mapcode["GL_TextureWrapS2"] = par;
-
-	par.first = "GL_REPEAT"; par.second = GL_REPEAT;
-	mapcode["GL_TextureWrapS3"] = par;
-
-	par.first = "GL_CLAMP_TO_BORDER"; par.second = GL_CLAMP_TO_BORDER;
-	mapcode["GL_TextureWrapS4"] = par;
-
-	par.first = "GL_MIRRORED_REPEAT"; par.second = GL_MIRRORED_REPEAT;
-	mapcode["GL_TextureWrapS5"] = par;
+	mapcode["GL_TextureWrapS1"] =
+		make_pair("GL_CLAMP", GL_CLAMP);
+	mapcode["GL_TextureWrapS2"] =
+		make_pair("GL_CLAMP_TO_EDGE", GL_CLAMP_TO_EDGE);
+	mapcode["GL_TextureWrapS3"] =
+		make_pair("GL_REPEAT", GL_REPEAT);
+	mapcode["GL_TextureWrapS4"] =
+		make_pair("GL_CLAMP_TO_BORDER", GL_CLAMP_TO_BORDER);
+	mapcode["GL_TextureWrapS5"] =
+		make_pair("GL_MIRRORED_REPEAT", GL_MIRRORED_REPEAT);
 
 	// GL_TextureWrapT
-	mapcode["GL_TextureWrapT1"] = par;
-
-	par.first = "GL_CLAMP_TO_EDGE"; par.second = GL_CLAMP_TO_EDGE;
-	mapcode["GL_TextureWrapT2"] = par;
-
-	par.first = "GL_REPEAT"; par.second = GL_REPEAT;
-	mapcode["GL_TextureWrapT3"] = par;
-
-	par.first = "GL_CLAMP_TO_BORDER"; par.second = GL_CLAMP_TO_BORDER;
-	mapcode["GL_TextureWrapT4"] = par;
-
-	par.first = "GL_MIRRORED_REPEAT"; par.second = GL_MIRRORED_REPEAT;
-	mapcode["GL_TextureWrapT5"] = par;
+	mapcode["GL_TextureWrapT1"] =
+		make_pair("GL_CLAMP", GL_CLAMP);
+	mapcode["GL_TextureWrapT2"] =
+		make_pair("GL_CLAMP_TO_EDGE", GL_CLAMP_TO_EDGE);
+	mapcode["GL_TextureWrapT3"] =
+		make_pair("GL_REPEAT", GL_REPEAT);
+	mapcode["GL_TextureWrapT4"] =
+		make_pair("GL_CLAMP_TO_BORDER", GL_CLAMP_TO_BORDER);
+	mapcode["GL_TextureWrapT5"] =
+		make_pair("GL_MIRRORED_REPEAT", GL_MIRRORED_REPEAT);
 
 	// GL_TextureWrapR
-	mapcode["GL_TextureWrapR1"] = par;
-
-	par.first = "GL_CLAMP_TO_EDGE"; par.second = GL_CLAMP_TO_EDGE;
-	mapcode["GL_TextureWrapR2"] = par;
-
-	par.first = "GL_REPEAT"; par.second = GL_REPEAT;
-	mapcode["GL_TextureWrapR3"] = par;
-
-	par.first = "GL_CLAMP_TO_BORDER"; par.second = GL_CLAMP_TO_BORDER;
-	mapcode["GL_TextureWrapR4"] = par;
-
-	par.first = "GL_MIRRORED_REPEAT"; par.second = GL_MIRRORED_REPEAT;
-	mapcode["GL_TextureWrapR5"] = par;
+	mapcode["GL_TextureWrapR1"] =
+		make_pair("GL_CLAMP", GL_CLAMP);
+	mapcode["GL_TextureWrapR2"] =
+		make_pair("GL_CLAMP_TO_EDGE", GL_CLAMP_TO_EDGE);
+	mapcode["GL_TextureWrapR3"] =
+		make_pair("GL_REPEAT", GL_REPEAT);
+	mapcode["GL_TextureWrapR4"] =
+		make_pair("GL_CLAMP_TO_BORDER", GL_CLAMP_TO_BORDER);
+	mapcode["GL_TextureWrapR5"] =
+		make_pair("GL_MIRRORED_REPEAT", GL_MIRRORED_REPEAT);
 
 
 	// GL_TextureMagnify
-	par.first = "GL_NEAREST"; par.second = GL_NEAREST;
-	mapcode["GL_TextureMagnify0"] = par;
-
-	par.first = "GL_LINEAR"; par.second = GL_LINEAR;
-	mapcode["GL_TextureMagnify1"] = par;
-
+	mapcode["GL_TextureMagnify0"] =
+		make_pair("GL_NEAREST", GL_NEAREST);
+	mapcode["GL_TextureMagnify1"] =
+		make_pair("GL_LINEAR", GL_LINEAR);
 
 	// GL_TextureMinify
-	par.first = "GL_NEAREST"; par.second = GL_NEAREST;
-	mapcode["GL_TextureMinify0"] = par;
-
-	par.first = "GL_LINEAR"; par.second = GL_LINEAR;
-	mapcode["GL_TextureMinify1"] = par;
-
-	par.first = "GL_NEAREST_MIPMAP_NEAREST"; par.second = GL_NEAREST_MIPMAP_NEAREST;
-	mapcode["GL_TextureMinify3"] = par;
-
-	par.first = "GL_NEAREST_MIPMAP_LINEAR"; par.second = GL_NEAREST_MIPMAP_LINEAR;
-	mapcode["GL_TextureMinify4"] = par;
-
-	par.first = "GL_LINEAR_MIPMAP_NEAREST"; par.second = GL_LINEAR_MIPMAP_NEAREST;
-	mapcode["GL_TextureMinify5"] = par;
-
-	par.first = "GL_LINEAR_MIPMAP_LINEAR"; par.second = GL_LINEAR_MIPMAP_LINEAR;
-	mapcode["GL_TextureMinify6"] = par;
+	mapcode["GL_TextureMinify0"] =
+		make_pair("GL_NEAREST", GL_NEAREST);
+	mapcode["GL_TextureMinify1"] =
+		make_pair("GL_LINEAR", GL_LINEAR);
+	mapcode["GL_TextureMinify3"] =
+		make_pair("GL_NEAREST_MIPMAP_NEAREST", GL_NEAREST_MIPMAP_NEAREST);
+	mapcode["GL_TextureMagnify4"] =
+		make_pair("GL_NEAREST_MIPMAP_LINEAR", GL_NEAREST_MIPMAP_LINEAR);
+	mapcode["GL_TextureMinify5"] =
+		make_pair("GL_LINEAR_MIPMAP_NEAREST", GL_LINEAR_MIPMAP_NEAREST);
+	mapcode["GL_TextureMinify6"] =
+		make_pair("GL_LINEAR_MIPMAP_LINEAR", GL_LINEAR_MIPMAP_LINEAR);
 }
 
-QString RmXmlParser::convertGlStateToString(GlState & glstate)
+QString RmXmlParser::convertGlStateToString(GlState &glstate)
 {
 	GlParamType par;
+	std::stringstream strstream;
 
-	std::string str;
-	str = glstate.getName().toStdString();
-
+	strstream << glstate.getName().toStdString();
 	QString strvalue = QString("%1").arg(glstate.getValue());
-	str += strvalue.toStdString();
+	strstream << strvalue.toStdString();
 
-	par = mapcode[str];
+	par = mapcode[strstream.str()];
 	return QString::fromStdString(par.first);
 }
 
-int RmXmlParser::convertGlStateToInt(GlState & glstate)
+int RmXmlParser::convertGlStateToInt(GlState &glstate)
 {
 	GlParamType par;
+	std::stringstream strstream;
 
-	std::string str;
-	str = glstate.getName().toStdString();
-
+	strstream << glstate.getName().toStdString();
 	QString strvalue = QString("%1").arg(glstate.getValue());
-	str += strvalue.toStdString();
-	
-	par = mapcode[str];
+	strstream << strvalue.toStdString();
+
+	par = mapcode[strstream.str()];
 	return par.second;
 }
 
 
-bool RmXmlParser::parse( QString _filename )
+bool RmXmlParser::parse(QString _filename)
 {
-	if( !_filename.isNull() ) setFileName( _filename );
+	if (!_filename.isNull())
+		setFileName(_filename);
 
-	QFile file( filename );
+	QFile file(filename);
 	effects.clear();
 
 	// open the file
-	if( !file.open( QIODevice::ReadOnly | QIODevice::Text )) {
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		error = "Impossible to open the specified file: ";
 		error += filename;
 		return false;
 	}
 
-
 	QString errorMsg;
 	int errorLine, errorColumn;
 
 	// parse the xml document
-	if( !doc.setContent( &file, &errorMsg, &errorLine, &errorColumn ) ) {
-		error = QString( "Xml Parse Error ") + filename;
-		error += QString("(") + QString().setNum(errorLine) + QString(",") + QString().setNum(errorColumn) + QString("): ") + errorMsg;
+	if (!doc.setContent(&file, &errorMsg, &errorLine, &errorColumn)) {
+		error = QString("Xml Parse Error ") + filename;
+		error += QString("(") + QString().setNum(errorLine) +
+		         QString(",") + QString().setNum(errorColumn) +
+		         QString("): ") + errorMsg;
 		return false;
 	}
 
@@ -197,49 +181,50 @@ bool RmXmlParser::parse( QString _filename )
 	 * appear in RmGLPass.
 	 *
 	 * The values of the uniform variable (such as default value, min and max value
-	 * for RmShaderConstant, and the file name for the RmSampler) are kept in tags 
+	 * for RmShaderConstant, and the file name for the RmSampler) are kept in tags
 	 * at the top level of the xml tree, and they have as tagname something like
 	 * RmMatrixVariable, RmVectorVariable, RmFloatVariable, Rm2DTextureVariable,
 	 * RmCubemapVariable etc.. according to the variable type
 	 */
-
-	// we looking for RmOpenGLEffect xml tag
+	// we're looking for RmOpenGLEffect xml tag
 	QDomNodeList list = root.elementsByTagName("RmOpenGLEffect");
-	for( int i = 0; i < list.size(); i++ ) 
-	{
+	for (int i = 0; i < list.size(); i++) {
 		QDomElement effectElement = list.at(i).toElement();
-
-		RmEffect eff(effectElement.attribute("NAME", "name not set" ));
+		RmEffect eff(effectElement.attribute("NAME", "name not set"));
 
 		// each effect has a number (0-n) of RmGLPass.
-		QDomNodeList passlist = effectElement.elementsByTagName( "RmGLPass" );
-		for( int j = 0; j < passlist.size(); j++ ) 
-		{
+		QDomNodeList passlist =
+			effectElement.elementsByTagName("RmGLPass");
 
+		for (int j = 0; j < passlist.size(); j++) {
 			// get the pass name
 			QDomNode passNode = passlist.at(j);
 			QDomElement elp = passNode.toElement();
 			bool ok;
 			int index = elp.attribute("PASS_INDEX").toInt(&ok);
-			RmPass pass( elp.attribute("NAME", "name not set" ), (ok ? index : -1));
+			RmPass pass(elp.attribute("NAME", "name not set"),
+			            (ok ? index : -1));
 
 			// openGL state
-			QDomElement stateEl = passNode.firstChildElement( "RmRenderStateBlock");
-			if( stateEl.isNull() == false ) 
-			{
-				QDomNodeList statelist = stateEl.elementsByTagName( "RmState" );
-				for( int k = 0; k < statelist.size(); k++ ) {
-					GlState s( statelist.at(k).toElement() );
-					if( s.isValid() )
-						pass.addOpenGLState( s );
+			QDomElement stateEl =
+				passNode.firstChildElement("RmRenderStateBlock");
+
+			if(!stateEl.isNull()) {
+				QDomNodeList statelist =
+					stateEl.elementsByTagName("RmState");
+
+				for (int k = 0; k < statelist.size(); k++) {
+					GlState s(statelist.at(k).toElement());
+					if (s.isValid())
+						pass.addOpenGLState(s);
 				}
 			}
 
 			// get the render target
-			QDomElement renderEl = passNode.firstChildElement( "RmRenderTarget" );
-			if( renderEl.isNull() == false ) 
-			{
-				RenderTarget rt( renderEl.attribute("NAME"));
+			QDomElement renderEl =
+				passNode.firstChildElement("RmRenderTarget");
+			if (!renderEl.isNull())	{
+				RenderTarget rt(renderEl.attribute("NAME"));
 				rt.renderToScreen = renderEl.attribute("RENDER_TO_SCREEN") == "TRUE";
 				rt.colorClear = renderEl.attribute("COLOR_CLEAR") == "TRUE";
 				rt.depthClear = renderEl.attribute("DEPTH_CLEAR") == "TRUE";
@@ -247,133 +232,134 @@ bool RmXmlParser::parse( QString _filename )
 				rt.depthClearValue = renderEl.attribute("DEPTH_CLEAR_VALUE").toDouble();
 				pass.setRenderTarget(rt);
 			}
-			
 
 			// get the source code of fragment and vertex program
-			QDomNodeList sourcelist = elp.elementsByTagName( "RmGLShader" );
-			for( int k = 0; k < sourcelist.size(); k++ ) 
-			{
+			QDomNodeList sourcelist =
+				elp.elementsByTagName("RmGLShader");
+			for (int k = 0; k < sourcelist.size(); k++) {
 				QDomNode elnode = sourcelist.at(k);
 				QDomElement elsource = elnode.toElement();
 				QString name = elsource.attribute("NAME");
-				if( name == "Fragment Program" || name == "Fragment Shader" ) 
-				{
-					pass.setFragment( elsource.text() );
-				} 
-				else if( name == "Vertex Program" || name == "Vertex Shader" ) 
-				{
-					pass.setVertex( elsource.text() );
+				if (name == "Fragment Program" ||
+				    name == "Fragment Shader") {
+					pass.setFragment(elsource.text());
+				} else if (name == "Vertex Program" ||
+				           name == "Vertex Shader") {
+					pass.setVertex(elsource.text());
 				}
 			}
 
-			// get the name of constant uniform variables and search 
+			// get the name of constant uniform variables and search
 			// in the whole document for their values
-			QDomNodeList constlist = elp.elementsByTagName( "RmShaderConstant" );
-			for( int k = 0; k < constlist.size(); k++ ) 
-			{
-				QString name = constlist.at(k).toElement().attribute("NAME");
-				UniformVar var = pass.searchFragmentUniformVariable( name );
-				if( var.isNull() == false ) 
-				{
+			QDomNodeList constlist =
+				elp.elementsByTagName("RmShaderConstant");
+			for (int k = 0; k < constlist.size(); k++) {
+				QString name =
+					constlist.at(k).toElement().attribute("NAME");
+				UniformVar var =
+					pass.searchFragmentUniformVariable(name);
+				if (!var.isNull()) {
 					var.getValueFromXmlDocument(root, effectElement);
-					pass.addFragmentUniformVariable(var);
+					pass.addFragmentUniform(var);
 				}
 				var = pass.searchVertexUniformVariable(name);
-				if( var.isNull() == false ) 
-				{
+				if (!var.isNull()) {
 					var.getValueFromXmlDocument(root, effectElement);
-					pass.addVertexUniformVariable(var);
+					pass.addVertexUniform(var);
 				}
 			}
 
-			// and texture uniform variables 
-			QDomNodeList textureObjectList = elp.elementsByTagName( "RmTextureObject" );
-			QDomNodeList samplerlist = elp.elementsByTagName( "RmSampler" );
-			for( int k = 0; k < samplerlist.size(); k++ ) 
-			{
+			// and texture uniform variables
+			QDomNodeList textureObjectList = elp.elementsByTagName("RmTextureObject");
+			QDomNodeList samplerlist = elp.elementsByTagName("RmSampler");
+			for (int k = 0; k < samplerlist.size(); k++) {
 				QString name = samplerlist.at(k).toElement().attribute("NAME");
 				QString textureName;
 				QList<GlState> GLstates;
 
 				// First get the textureObject xml tag relative to this texture
-				for( int q = 0; q < textureObjectList.size(); q++ )
-				{
+				for (int q = 0; q < textureObjectList.size(); q++) {
 					QDomElement textEl = textureObjectList.at(q).toElement();
 					QString toName = textEl.attribute("NAME");
-					if( toName == name ) 
-					{
-						QDomElement trEl = textEl.firstChildElement( "RmTextureReference");
-						if( !trEl.isNull() )
+					if (toName == name) {
+						QDomElement trEl =
+							textEl.firstChildElement("RmTextureReference");
+						if (!trEl.isNull())
 							textureName = trEl.attribute("NAME");
 
 						// save the GlStates
-						QDomNodeList statesList = textEl.elementsByTagName( "RmState" );
-						for( int w = 0; w < statesList.size(); w++ ) // * LOL! i,j,k,q,w used !
-							GLstates.append( statesList.at(w).toElement() );
-
+						QDomNodeList statesList =
+							textEl.elementsByTagName("RmState");
+						for (int w = 0; w < statesList.size(); w++) // * LOL! i,j,k,q,w used !
+							GLstates.append( statesList.at(w).toElement());
 						break;
 					}
 				}
 
 				// then search the variable in the source code
-				UniformVar var = pass.searchFragmentUniformVariable( name );
-				if( var.isNull() == false ) 
-				{
+				UniformVar var = pass.searchFragmentUniformVariable(name);
+				if (!var.isNull()) {
 					var.textureName = textureName;
 					var.textureGLStates = GLstates;
 					var.getValueFromXmlDocument(root, effectElement);
-					pass.addFragmentUniformVariable(var);
+					pass.addFragmentUniform(var);
 				}
 
 				var = pass.searchVertexUniformVariable(name);
-				if( var.isNull() == false ) 
-				{
+				if (!var.isNull()) {
 					var.textureName = textureName;
 					var.textureGLStates = GLstates;
 					var.getValueFromXmlDocument(root, effectElement);
-					pass.addVertexUniformVariable(var);
+					pass.addVertexUniform(var);
 				}
 			}
-
-
 			eff.addPass( pass );
 		}
 		eff.sortPasses();
-
 		effects.append(eff);
 	}
 	return true;
 }
 
-
-
-
-void RmXmlParser::VarDump( bool extendedDump )
+void RmXmlParser::VarDump(bool extendedDump)
 {
 	qDebug() << "";
 	qDebug() << "Dumping:" << filename;
 	qDebug() << "Found" << effects.size() << "RmOpenGLEffect:";
 
-	for( int i = 0; i < effects.size(); i++ ) {
+	for (int i = 0; i < effects.size(); i++) {
 		RmEffect eff = effects[i];
 
 		qDebug() << "  RmEffect" << eff.getName() << "with" << eff.size() << "pass";
-		for( int j = 0; j < eff.size(); j++ ) {
+		for (int j = 0; j < eff.size(); j++) {
 			RmPass pass = eff[j];
 
-			qDebug() << "   " << (pass.hasIndex()? QString(QString().setNum(pass.getIndex()) + "'").toLatin1().data() : QString("").toLatin1().data()) << "Pass" << pass.getName() << "on model"<< pass.getModelReference() << "("<<pass.getModelReferenceFileName().toLatin1().data() <<")";
+			qDebug() << "   "
+			         << (pass.hasIndex()?
+			              QString(QString().setNum(pass.getIndex()) + "'").toLatin1().data() :
+			              QString("").toLatin1().data())
+			         << "Pass" << pass.getName() << "on model"
+			         << pass.getModelReference()
+			         << "(" << pass.getModelReferenceFN().toLatin1().data() << ")";
 
-			if( pass.hasRenderTarget() ) {
+			if (pass.hasRenderTarget()) {
 				RenderTarget rt = pass.getRenderTarget();
-				qDebug() << "          Render Target:" << rt.name << (rt.colorClear ? " (with color clear: " + QString().setNum(rt.clearColorValue) + ")" : "") << (rt.colorClear ? " (with depth clear: " + QString().setNum(rt.depthClearValue) + ")" : "");
+				qDebug() << "          Render Target:"
+				         << rt.name
+				         << (rt.colorClear ?
+				              " (with color clear: " + QString().setNum(rt.clearColorValue) + ")" :
+				              "")
+				         << (rt.colorClear ?
+				              " (with depth clear: " + QString().setNum(rt.depthClearValue) + ")" :
+				              "");
 			}
 
-			if( pass.openGLStatesSize() == 0 )
+			if (pass.openGLStatesSize() == 0)
 				qDebug() << "          with no opengl states set";
 			else {
 				qDebug() << "          with" << pass.openGLStatesSize() << "opengl states set";
 
-				for( int k = 0; k < pass.openGLStatesSize(); k++ )
+				for (int k = 0; k < pass.openGLStatesSize(); k++)
 					qDebug() << "          " << pass.getOpenGLState(k).getName() << " (" << QString().setNum(pass.getOpenGLState(k).getState()).toLatin1().data() << ") =>" << pass.getOpenGLState(k).getValue();
 			}
 
@@ -381,13 +367,13 @@ void RmXmlParser::VarDump( bool extendedDump )
 			qDebug() << "          There are" << pass.fragmentUniformVariableSize() << "uniform variables";
 
 			for( int k = 0; k < pass.fragmentUniformVariableSize(); k++ )
-				pass.getFragmentUniformVariable( k ).VarDump(12, extendedDump);
+				pass.getFragmentUniform( k ).VarDump(12, extendedDump);
 
 			qDebug() << "        - Vertex (" << pass.getVertex().length() << "bytes ): " << pass.getVertex().mid(0, 50).replace( "\n", " " ).replace("\r","") << "...";
 			qDebug() << "          There are" << pass.vertexUniformVariableSize() << "uniform variables";
 
 			for( int k = 0; k < pass.vertexUniformVariableSize(); k++ )
-				pass.getVertexUniformVariable( k ).VarDump(12, extendedDump);
+				pass.getVertexUniform( k ).VarDump(12, extendedDump);
 		}
 	}
 
@@ -396,12 +382,12 @@ void RmXmlParser::VarDump( bool extendedDump )
 
 
 
-QDomElement RmXmlParser::getDomElement( QDomElement & root, QString tagname, QString name )
+QDomElement RmXmlParser::getDomElement(QDomElement &root, QString tagname, QString name)
 {
-	QDomNodeList list = root.elementsByTagName( tagname );
-	for( int i = 0; i < list.size(); i++ ) {
+	QDomNodeList list = root.elementsByTagName(tagname);
+	for (int i = 0; i < list.size(); i++) {
 		QString elName = list.at(i).toElement().attribute("NAME");
-		if( name == elName )
+		if (name == elName)
 			return list.at(i).toElement();
 	}
 

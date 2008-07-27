@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -31,7 +31,6 @@ code restyling
 
 
 ****************************************************************************/
-
 #ifndef RMSHADERDIALOG_H
 #define RMSHADERDIALOG_H
 
@@ -52,8 +51,6 @@ code restyling
 #include <QDoubleSpinBox>
 #include <GL/glew.h>
 #include <QGLWidget>
-
-// Local headers
 #include "parser/RmXmlParser.h"
 #include "parser/RmEffect.h"
 #include "parser/RmPass.h"
@@ -65,16 +62,18 @@ class RmShaderDialog : public QDialog
 {
 	Q_OBJECT
 
-// ctor
 public:
-
-	RmShaderDialog( GLStateHolder * holder, RmXmlParser * parser, QGLWidget* gla, 
-		RenderMode &rm, QWidget *parent = NULL );
+	RmShaderDialog(GLStateHolder *holder, RmXmlParser *parser, QGLWidget *gla,
+	               RenderMode &rm, QWidget *parent = NULL);
 	~RmShaderDialog();
 
-// private data members
-private:
+public slots:
+	void fillDialogWithEffect( int index );
+	void fillTabsWithPass( int index );
+	void clearTabs();
+	void valuesChanged(const QString & varNameAndIndex );
 
+private:
 	Ui_RmShaderDialogClass ui;
 
 	QGridLayout *layoutUniform;
@@ -92,16 +91,5 @@ private:
 	GLStateHolder *holder;
 
 	QSignalMapper *signaler;
-
-// Qt slots
-public slots:
-
-	void fillDialogWithEffect( int index );
-	void fillTabsWithPass( int index );
-	void clearTabs();
-	void valuesChanged(const QString & varNameAndIndex );
-
 };
-
-#endif
-
+#endif /* RMSHADERDIALOG_H */
