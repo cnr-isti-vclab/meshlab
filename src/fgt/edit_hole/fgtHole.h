@@ -115,7 +115,7 @@ public:
 			return;
 
 		std::vector<FaceType* > meshFaces;
-		std::vector<FaceType* >::iterator mfit;
+		typename std::vector<FaceType* >::iterator mfit;
 		PosType curPos;
 		PosType startPos = curPos = holeInfo.p;
 
@@ -161,14 +161,14 @@ public:
 					}
 
 					// si elimina la faccia patch
-					tri::Allocator<MESH>::DeleteFace(mesh, *mf );
+					vcg::tri::Allocator<MESH>::DeleteFace(mesh, *mf );
 					facesPatch.erase(hfit);
 					break;
 				}				
 			}
 		}
 		
-		std::vector<FaceType* >::iterator it;
+		typename std::vector<FaceType* >::iterator it;
 		for(it = meshFaces.begin() ; it != meshFaces.end(); ++it)
 			(*it)->ClearV();		
 	}
@@ -259,7 +259,7 @@ private:
 	 */
 	bool havePatchFace(FacePointer pFace) const
 	{
-		std::vector<FaceType>::const_iterator it=facesPatch.begin();
+		typename std::vector<FaceType>::const_iterator it=facesPatch.begin();
 		for( ; it != facesPatch.end(); ++it)
 			if( it->V(0) == pFace->V(0) &&
 				it->V(1) == pFace->V(1) &&

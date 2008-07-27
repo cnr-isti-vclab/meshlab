@@ -274,7 +274,7 @@ void EditHolePlugin::fill()
 {
 	Qt::CheckState asi = dialogFiller->ui.antiSelfIntersection->checkState();
 	if(holesModel->getState() == HoleListModel::Selection)
-		holesModel->fill( asi == Qt::CheckState::Checked);
+		holesModel->fill( asi == Qt::Checked);
 	else
 		holesModel->acceptFilling();
 	
