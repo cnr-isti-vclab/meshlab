@@ -24,8 +24,6 @@
 #include <Qt>
 #include <QtGui>
 #include "filter_dirt.h"
-//#include <time.h>
-
 
 #include <vcg/math/base.h>
 #include <vcg/complex/trimesh/clean.h>
@@ -34,7 +32,9 @@
 #include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/selection.h> 
 #include <vcg/complex/trimesh/update/color.h>
+#include <vcg/complex/trimesh/update/flag.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/point_sampling.h>
 #include <vcg/space/triangle3.h>
 
@@ -45,14 +45,14 @@ using namespace vcg;
 class BaseSampler
 {
 public:
-	BaseSampler(CMeshO* _m){m=_m; uvSpaceFlag = false;};
+	BaseSampler(CMeshO* _m){m=_m;};
 	CMeshO *m;
-	bool uvSpaceFlag;
-	void AddVert(const CMeshO::VertexType &p) 
+	//bool uvSpaceFlag;
+	/*void AddVert(const CMeshO::VertexType &p) 
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 		m->vert.back().ImportLocal(p);
-	}
+	}*/
 	
 	void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
 	{
@@ -61,17 +61,17 @@ public:
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
 	}
 	
-	void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const Point2i &tp)
+	/*void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const Point2i &tp)
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 		
 		if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0); 
 		else m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
 		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
-	}
+	}*/
 }; // end class BaseSampler
 
-FilterDirt::FilterDirt(): defaultGammaTon(1000)
+FilterDirt::FilterDirt(): defaultGammaTon(20)
 {
 	
     typeList << 
@@ -104,7 +104,7 @@ const PluginInfo &FilterDirt::pluginInfo()
 {
 	static PluginInfo ai; 
 	ai.Date=tr("July 2008");
-	ai.Version = tr("0.2");
+	ai.Version = tr("0.3b");
 	ai.Author = ("Luca Bartoletti");
 	return ai;
 }
@@ -117,6 +117,9 @@ const int FilterDirt::getRequirements(QAction */*action*/)
 
 bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, FilterParameterSet & /*par*/, vcg::CallBackPos */*cb*/)
 {
+	//NOTE: i know this method require a code refactoring. Appling this filter in meshlab you can see 20 gamma-tons start from a position 
+	//(green face) moving down (red face).
+	
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
 	
@@ -128,48 +131,63 @@ bool FilterDirt::applyFilter(QAction * /*filter*/, MeshDocument &md, FilterParam
 	MeshModel *mm= md.addNewMesh("Dust gamma-ton"); // After Adding a mesh to a MeshDocument the new mesh is the current one 
 	
 	BaseSampler mps(&(mm->cm));
-	vcg::tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm, mps, defaultGammaTon);
+	vcg::tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, mps, defaultGammaTon);
 	vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
 	
 	//calculate mean of face's edge segment perimeter
 	CMeshO::FaceIterator fi;
-	double perimeterSum;
+	double perimeterSum=0;
 	for(fi=curMM->cm.face.begin();fi!=curMM->cm.face.end();++fi)
 	if(!(*fi).IsD())
 	{
 		perimeterSum += vcg::Perimeter((*fi));
 	}
 	
-	//calculate single gamma-ton step size
-	float stepSize = (perimeterSum/3)/curMM->cm.fn;
+	//calculate single gamma-ton step size (i want stepSize equal to 1/4 mean edges segment size)
+	float stepSize = (perimeterSum/12)/curMM->cm.fn;
 	
-		
-	//Main filter cicle	
 	CMeshO::VertexIterator vi;	
-	CMeshO::FaceType   *nearestF=NULL;
-	float maxDist=(*curMM).cm.bbox.Diag()/10, dist;
+	CMeshO::FaceType	*nearestF=NULL;
+	CMeshO::FaceType	*precedentF=NULL;
+	float maxDist=(*curMM).cm.bbox.Diag()/3, minDist;
 	MetroMeshGrid   unifGrid;
-	vcg::Point3f closestPt;
+	vcg::Point3f closestPt;	
 	
 	//setting up grid for space indexing
 	unifGrid.Set((*curMM).cm.face.begin(),(*curMM).cm.face.end());
-	markerFunctor.SetMesh(&((*curMM).cm));	
-	//for (int i=0; i<100; ++i)
-	//{	
-		for (vi=mm->cm.vert.begin();vi!=mm->cm.vert.end();++vi)
-		{
-			//get nearest face for every gamma-ton
-			vcg::face::PointDistanceBaseFunctor PDistFunct;
-			//dist=maxDist;
-			vcg::Point3f test = (*vi).P();
-			nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,(*vi).P(),maxDist,dist,closestPt);
-			assert (nearestF)
-			if (!(*nearestF).IsD())
-				(*nearestF).C() = Color4b::Red;
-		}
-	//}//end Main filter cicle
+	markerFunctor.SetMesh(&curMM->cm);	
 	
-		
+	//Require by PointDistance Functor
+	vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(curMM->cm);
+	vcg::tri::UpdateFlags<CMeshO>::FaceProjection(curMM->cm);
+	
+	for (vi=mm->cm.vert.begin();vi!=mm->cm.vert.end();++vi)	
+	{
+		precedentF=NULL; //Visual Debug Stuff
+		for (int i=0; i<50; ++i)
+		{
+			//get nearest face for every gamma-ton		
+			vcg::face::PointDistanceBaseFunctor PDistFunct;
+			nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,(*vi).P(),maxDist,minDist,closestPt);	
+			if (!nearestF) return false;
+			if (minDist == maxDist) return false;			
+					
+			//DEBUG STUFF
+			if (i==0) (*nearestF).C() = Color4b::Green;
+			if (precedentF!=nearestF && precedentF!=NULL){ (*nearestF).C() = Color4b::Red;}
+			//END DEBUG STUFF		
+			
+			
+			precedentF = nearestF;
+			//get gamma-ton direction over face
+			vcg::Point3f dustDirection = ((*nearestF).N().Normalize() ^  vcg::Point3f(0,-1,0)) ^ (*nearestF).N().Normalize();
+			dustDirection = dustDirection.Normalize();
+			dustDirection *= stepSize; 
+			dustDirection += closestPt;
+			(*vi).P() = dustDirection;		
+		}
+	}
+	
 	return true;
 }
 

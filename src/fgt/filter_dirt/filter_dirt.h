@@ -57,7 +57,7 @@ class FilterDirt : public QObject, public MeshFilterInterface
 
 
 	protected:
-		int defaultGammaTon;
+		const int defaultGammaTon;
 };
 
 
