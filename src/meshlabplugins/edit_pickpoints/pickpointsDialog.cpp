@@ -11,6 +11,8 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
 
+#include <vcg/complex/trimesh/allocate.h>
+
 //#include <vcg/complex/trimesh/closest.h>
 //#include <vcg/space/index/grid_static_ptr.h>
 
@@ -357,18 +359,22 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 	meshModel = newMeshModel;
 	assert(meshModel);
 	
-	//qDebug() << "done saving points about to clear ";
+	//clear any points that are still here
 	clearPoints(false);
+	
+	//also clear the template
+	clearPickPointsTemplate();
 	
 	//make sure we start in pick mode
 	togglePickMode(true);
 	
-	/*
 	//Load the points from meta data if they are there
-	MeshMetaDataInterface *value = meshModel->metaData.value(PickedPoints::getKey());
-		
-	if(NULL != value){
-		PickedPoints *pickedPoints = static_cast<PickedPoints *>(value);
+	if(vcg::tri::HasPerMeshAttribute(newMeshModel->cm, PickedPoints::Key))
+	{		
+		CMeshO::PerMeshAttributeHandle<PickedPoints*> ppHandle = 
+				vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*>(newMeshModel->cm, PickedPoints::Key);
+			
+		PickedPoints *pickedPoints = ppHandle();
 		
 		if(NULL != pickedPoints){
 			std::vector<PickedPoint*> * pickedPointVector = pickedPoints->getPickedPointVector();
@@ -396,12 +402,12 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 			loadPoints(filename);
 		} else 
 		{
-	*/
+	
 	//try loading the default template if there are not saved points already
 	tryLoadingDefaultTemplate();
 		
-	//	}
-	//}
+		}
+	}
 }
 
 void PickPointsDialog::setGLArea(GLArea *glArea)
@@ -566,10 +572,16 @@ void PickPointsDialog::savePointsToFile(){
 void PickPointsDialog::savePointsToMetaData()
 {
 	//save the points to the metadata
-	//if(NULL != meshModel){
-		//meshModel->metaData.insert(PickedPoints::getKey(), getPickedPoints());
+	if(NULL != meshModel){
+		CMeshO::PerMeshAttributeHandle<PickedPoints*> ppHandle =
+			(vcg::tri::HasPerMeshAttribute(meshModel->cm, PickedPoints::Key) ?
+				vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*> (meshModel->cm, PickedPoints::Key) :
+				vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<PickedPoints*> (meshModel->cm, PickedPoints::Key) );
+					
+		ppHandle() = getPickedPoints();
+		
 		//qDebug() << "saved points";
-	//}	
+	}	
 }
 
 void PickPointsDialog::askUserForFileAndLoadPoints()

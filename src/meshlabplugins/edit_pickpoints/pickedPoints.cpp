@@ -25,6 +25,9 @@ const QString PickedPoints::xCoordinate = "x";
 const QString PickedPoints::yCoordinate = "y";
 const QString PickedPoints::zCoordinate = "z";
 
+const std::string PickedPoints::Key = "PickedPoints";
+
+
 PickedPoints::PickedPoints(){
 	pointVector = new std::vector<PickedPoint *>();
 }
@@ -156,13 +159,6 @@ void PickedPoints::translatePoints(vcg::Matrix44f &translation)
 		//qDebug() << " point is now x" << temp->point[0] << " y " << temp->point[1] << " z " << temp->point[2];
 	}
 }
-
-/*
-const MeshMetaDataInterface::MetaDataType PickedPoints::getKey()
-{
-	return MeshMetaDataInterface::PICKED_POINTS;
-}
-*/
 
 QString PickedPoints::getSuggestedPickedPointsFileName(const MeshModel &meshModel){
 	QString outputFileName(meshModel.fileName.c_str());

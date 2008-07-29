@@ -33,7 +33,7 @@ public:
 	vcg::Point3f point;
 };
 
-class PickedPoints// : public MeshMetaDataInterface
+class PickedPoints
 {
 public:
 	
@@ -64,8 +64,8 @@ public:
 	//extension of the filetype for Picked Points
 	static const QString fileExtension;
 	
-	//from MeshMetaDataInterface
-	//static const MetaDataType getKey();
+	//for use with per mesh attributes
+	static const std::string Key;
 	
 private:
 	
