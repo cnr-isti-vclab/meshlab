@@ -40,7 +40,6 @@ public:
 
 Q_SIGNALS:
 	void SGN_ProcessFilling(); 
-	void SGN_UpdateGLArea();
 	void SGN_Closing();
 	void SGN_CancelFill();
 

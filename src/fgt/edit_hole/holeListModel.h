@@ -76,6 +76,7 @@ public:
 	void clearModel();
 	void updateModel();
 	void drawHoles() const;
+	void drawCompenetratingFaces() const;
 	void fill(bool antiSelfIntersection);
 	void acceptFilling(bool forcedCancel=false);
 	inline FillerState getState() const { return state; }
@@ -88,6 +89,9 @@ private:
 public:
 	HoleVector holes;
 	int userBitHole;
+
+signals:
+	void SGN_needUpdateGLA();
 };
 
 #endif

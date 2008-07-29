@@ -60,6 +60,7 @@ void HoleListModel::updateModel()
 
 	userBitHole = FgtHole<CMeshO>::GetMeshHoles(mesh->cm, holes);
 	emit dataChanged( index(0, 0), index(holes.size(), 2) );
+	emit SGN_needUpdateGLA();
 }
 
 void HoleListModel::drawHoles() const
@@ -85,6 +86,7 @@ void HoleListModel::drawHoles() const
 		else
 			glColor(Color4b::DarkBlue);
 		it->Draw();
+
 	}
 
 	glDepthMask(GL_TRUE);
@@ -103,8 +105,35 @@ void HoleListModel::drawHoles() const
 		else
 			glColor(Color4b::Blue);
 				
-		it->Draw();
+		it->Draw();		
 	}
+}
+
+void HoleListModel::drawCompenetratingFaces() const
+{
+	//glDisable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
+	glDisable(GL_LIGHTING);
+	glColor3f(0.8, 0.8, 0);
+	HoleVector::const_iterator it = holes.begin();		
+	it = holes.begin();
+	for(it = holes.begin(); it != holes.end(); ++it)
+		if(it->isCompenetrating)
+			it->DrawCompenetratingFace(GL_LINE_LOOP);
+	
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	
+	for(it = holes.begin(); it != holes.end(); ++it)
+		if(it->isCompenetrating)
+			it->DrawCompenetratingFace(GL_TRIANGLES);
+
+	glLineWidth(4.0f);
+	glColor3f(1.0, 1.0, 0);
+	for(it = holes.begin(); it != holes.end(); ++it)
+		if(it->isCompenetrating)
+			it->DrawCompenetratingFace(GL_LINE_LOOP);
+
 }
 
 void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
@@ -126,10 +155,14 @@ void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
 	}
 	
 	emit dataChanged( index(ind, 2), index(ind, 2) );
+	emit SGN_needUpdateGLA();
 }
 
 void HoleListModel::fill(bool antiSelfIntersection)
 {
+	mesh->clearDataMask(MeshModel::MM_FACEMARK);
+	mesh->updateDataMask(MeshModel::MM_FACEMARK);
+
 	std::vector<CMeshO::FacePointer *> local_facePointer;
 	
 	HoleVector::iterator it = holes.begin();
@@ -146,14 +179,11 @@ void HoleListModel::fill(bool antiSelfIntersection)
 				vcgHole::FillHoleEar<tri::SelfIntersectionEar< CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
 			else
 				vcgHole::FillHoleEar<vcg::tri::TrivialEar<CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
-			//tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag);
 
+			it->updateSelfIntersectionState(mesh->cm);
 			state = HoleListModel::Filled;
 		}
 	}
-
-	//mesh->clearDataMask(MeshModel::MM_FACETOPO);
-	//mesh->updateDataMask(MeshModel::MM_FACETOPO);
 	emit layoutChanged();
 }
 
@@ -194,7 +224,7 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 	{
 		bool checked;
 		if(index.column() == 2)
-			checked = checked = holes[index.row()].isSelected;
+			checked = holes[index.row()].isSelected;
 		else if(state == HoleListModel::Filled && holes[index.row()].isSelected)
 		{
 			if(index.column() == 3)
@@ -291,14 +321,14 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 	if(!index.isValid())
 		return false;
 
+	bool ret = false;
 	if(role == Qt::EditRole && index.column() == 0)
 	{
 		QString newName = value.toString().trimmed();
 		if(newName != "")
 		{
 			holes[index.row()].name = newName;
-			emit dataChanged(index, index);
-			return true;
+			ret = true;
 		}
 	}
 	else if(role == Qt::CheckStateRole)
@@ -308,14 +338,20 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 			if(index.column() == 2 && state == HoleListModel::Selection)
 			{
 				holes[index.row()].isSelected = !holes[index.row()].isSelected;
-				return true;
+				ret = true;
 			}			
 		}
 		else if(index.column() == 4)
 		{	// check accept
 			holes[index.row()].isAccepted = !holes[index.row()].isAccepted;
-			return true;
+			ret = true;
 		}
 	}
-	return false;
+	if(ret)
+	{
+		emit dataChanged(index, index);
+		emit SGN_needUpdateGLA();
+	}
+
+	return ret;
 }

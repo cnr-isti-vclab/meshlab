@@ -31,7 +31,9 @@
 #include "vcg/simplex/face/pos.h"
 #include "vcg/space/point3.h"
 #include "vcg/complex/trimesh/hole.h"
-
+#include <vcg/complex/trimesh/closest.h>
+#include <vcg/space/index/grid_static_ptr.h>
+#include "vcg/space/color4.h"
 
 
 /** An hole is a border which visit only 1 time each of its vertexes.
@@ -49,6 +51,7 @@ public:
 	typedef typename MESH::FacePointer				FacePointer;
 	typedef typename MESH::FaceIterator				FaceIterator;
     typedef typename MESH::CoordType				CoordType;
+	typedef typename MESH::ScalarType				ScalarType;
 	typedef typename vcg::face::Pos<FaceType>		PosType;
 	typedef typename vcg::tri::Hole<MESH>			vcgHole;
 	typedef typename vcgHole::Info					HoleInfo;
@@ -88,15 +91,26 @@ public:
 	void Draw() const
 	{
 		glBegin(GL_LINE_LOOP);
-
 		typename std::vector<CoordType*>::const_iterator it = vertexCoords.begin();
 		for( ; it != vertexCoords.end() ; it++) 
 			glVertex( **it );
-		
-		glEnd();		
+		glEnd();
 	};
 
-	
+	void DrawCompenetratingFace(GLenum glmode) const
+	{		
+		glBegin(glmode);
+		typename std::vector<CoordType*>::const_iterator it = vertexCompFace.begin();
+		for( ; it != vertexCompFace.end(); it++)
+		{	
+			 glVertex( **it );
+			 it++;
+			 glVertex( **it );
+			 it++;
+			 glVertex( **it );
+		}
+		glEnd();
+	}
 	
 
 	/* Restore hole, remove patch applied to mesh
@@ -132,7 +146,7 @@ public:
 		}while(curPos != startPos);
 
 		// tra le facce adiacenti al buco cerco quelle usate come patch
-		for(int index =0; index < meshFaces.size(); index++ )
+		for(unsigned int index =0; index < meshFaces.size(); index++ )
 		{
 			FaceType* mf = meshFaces.at(index);
 			FaceIterator hfit = facesPatch.begin();
@@ -172,6 +186,59 @@ public:
 		for(it = meshFaces.begin() ; it != meshFaces.end(); ++it)
 			(*it)->ClearV();		
 	}
+
+	void updateSelfIntersectionState(MESH &mesh)
+	{
+		isCompenetrating = false;
+		
+		GridStaticPtr<FaceType, ScalarType > gM;
+		gM.Set(mesh.face.begin(),mesh.face.end());
+
+		std::vector<FaceType*> inBox;
+		Box3< ScalarType> bbox;
+		FaceIterator fi = facesPatch.begin();
+		for( ; fi!=facesPatch.end(); ++fi)
+		{
+			// prendo le facce che intersecano il bounding box di *fi
+			(*fi).GetBBox(bbox);
+			vcg::trimesh::GetInBoxFace(mesh, gM, bbox,inBox);
+
+			std::vector<FaceType*>::iterator fib;
+			for(fib=inBox.begin();fib!=inBox.end();++fib)
+			{
+				// tra le facce che hanno i boundingbox intersecanti non considero come compenetranti
+				//    - la faccia corrispondente della mesh a quella della patch
+				//    - facce che condividono un edge o anche un vertice
+				
+				bool adj=false;
+
+				for (int i=0; i<3 && !adj; i++)
+					for (int j=0;j<3;j++)
+						if (fi->V(i) == (*fib)->V(j))
+						{
+							adj = true;
+							break;							
+						}
+
+				if(!adj)
+				{
+					// i due triangoli non sono adiacenti
+					bool comp = vcg::Intersection<FaceType>(*fi, **fib );
+					if(comp)
+					{						
+						vertexCompFace.push_back(&(fi->V(0)->P()));
+						vertexCompFace.push_back(&(fi->V(1)->P()));
+						vertexCompFace.push_back(&(fi->V(2)->P()));
+
+						isCompenetrating = true;
+						//return;
+					}
+				} // if (c==0)
+			} // for inbox...
+			inBox.clear();
+		}
+	}
+
 
 
 	/********* Static functions **********/
@@ -272,6 +339,7 @@ private:
 public:
 	HoleInfo holeInfo;
 	std::vector<CoordType*> vertexCoords;
+	std::vector<CoordType*> vertexCompFace;
 	std::vector<FaceType> facesPatch;
 	float size;
 	QString name;

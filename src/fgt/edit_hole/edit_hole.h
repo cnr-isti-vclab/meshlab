@@ -63,13 +63,10 @@ private:
 	MeshModel *mesh;
     FillerDialog *dialogFiller;
 	
+	bool toDraw;
 	bool hasPick;
 	QPoint cur;
 	CFaceO* pickedFace;
-
-	void markBorders();
-	int findHoleFromBorderFace(CMeshO::FacePointer bFace);
-	void toggleSelection(int holeIndex);
 	
 private Q_SLOTS:
 	void fill();
