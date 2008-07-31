@@ -72,6 +72,7 @@ private Q_SLOTS:
 	void fill();
 	void CancelFilling();
 	void upGlA();
+	void resizeViewColumn();
 	
 signals:
 	void SGN_SuspendEditToggle();

@@ -28,8 +28,6 @@ FillerDialog::FillerDialog(QWidget *parent)
 {	
 	ui.setupUi(this);
 	this->setWidget(ui.frame);
-	ui.holeTree->setSortingEnabled(true);
-	ui.holeTree->setAlternatingRowColors(true);
 	
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );

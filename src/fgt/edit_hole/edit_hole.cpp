@@ -42,6 +42,7 @@ using namespace vcg;
 
 
 #include <vcg/complex/trimesh/update/position.h>
+
 //#include <vcg/complex/trimesh/update/bounding.h>
 //#include <vcg/complex/trimesh/update/selection.h>
 //#include <vcg/space/normal_extrapolation.h>
@@ -136,7 +137,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	connect(dialogFiller, SIGNAL(SGN_CancelFill()), this, SLOT(CancelFilling()) );
 	connect(this, SIGNAL(SGN_SuspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 	connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
-	
+	connect(dialogFiller->ui.holeTree->header(), SIGNAL(sectionCountChanged(int, int)), this, SLOT(resizeViewColumn()) );
 	if(holesModel != 0)
 		delete holesModel;
 	holesModel = new HoleListModel(&m);
@@ -185,7 +186,14 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 
 void EditHolePlugin::upGlA()
 { 
-	gla->update();	 
+	gla->update();
+}
+
+void EditHolePlugin::resizeViewColumn()
+{
+
+	dialogFiller->ui.holeTree->header()->resizeSections(QHeaderView::ResizeToContents);
+	//dialogFiller->ui.holeTree->row
 }
 
 void EditHolePlugin::fill()

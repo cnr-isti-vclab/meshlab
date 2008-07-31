@@ -24,6 +24,7 @@
 #define HOLELISTMODEL_H
 
 #include <QWidget>
+#include <QHeaderView>
 #include <QtGui>
 #include "fgtHole.h"
 #include <meshlab/meshmodel.h>
@@ -57,8 +58,8 @@ public:
 	inline int rowCount(const QModelIndex &parent = QModelIndex()) const { return holes.size(); };
 	inline int columnCount(const QModelIndex &parent = QModelIndex()) const 
 	{
-		if(state == HoleListModel::Selection) return 3;
-		else return 5; 
+		if(state == HoleListModel::Selection) return 4;
+		else return 6;
 	};
 	
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
@@ -92,6 +93,7 @@ public:
 
 signals:
 	void SGN_needUpdateGLA();
+
 };
 
 #endif

@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>261</width>
-    <height>390</height>
+    <width>300</width>
+    <height>381</height>
    </rect>
   </property>
   <property name="sizeIncrement" >
@@ -32,9 +32,21 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>261</width>
-     <height>401</height>
+     <width>300</width>
+     <height>400</height>
     </rect>
+   </property>
+   <property name="sizePolicy" >
+    <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize" >
+    <size>
+     <width>90</width>
+     <height>110</height>
+    </size>
    </property>
    <property name="frameShape" >
     <enum>QFrame::StyledPanel</enum>
@@ -45,16 +57,16 @@
    <widget class="QGroupBox" name="groupBox" >
     <property name="geometry" >
      <rect>
-      <x>25</x>
+      <x>60</x>
       <y>240</y>
-      <width>211</width>
-      <height>101</height>
+      <width>181</width>
+      <height>100</height>
      </rect>
     </property>
     <property name="title" >
      <string>Option</string>
     </property>
-    <widget class="QWidget" name="" >
+    <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
        <x>20</x>
@@ -97,8 +109,8 @@
    <widget class="QWidget" name="layoutWidget" >
     <property name="geometry" >
      <rect>
-      <x>24</x>
-      <y>350</y>
+      <x>45</x>
+      <y>347</y>
       <width>212</width>
       <height>25</height>
      </rect>
@@ -151,14 +163,32 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>241</width>
-      <height>221</height>
+      <width>280</width>
+      <height>231</height>
      </rect>
+    </property>
+    <property name="sizePolicy" >
+     <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
     </property>
     <property name="orientation" >
      <enum>Qt::Vertical</enum>
     </property>
     <widget class="QLabel" name="label2_2" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize" >
+      <size>
+       <width>80</width>
+       <height>15</height>
+      </size>
+     </property>
      <property name="layoutDirection" >
       <enum>Qt::LeftToRight</enum>
      </property>
@@ -167,6 +197,24 @@
      </property>
     </widget>
     <widget class="QTreeView" name="holeTree" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize" >
+      <size>
+       <width>80</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="alternatingRowColors" >
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
      <property name="textElideMode" >
       <enum>Qt::ElideNone</enum>
      </property>
@@ -175,6 +223,9 @@
      </property>
      <property name="itemsExpandable" >
       <bool>false</bool>
+     </property>
+     <property name="sortingEnabled" >
+      <bool>true</bool>
      </property>
     </widget>
    </widget>

@@ -32,7 +32,7 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	state = HoleListModel::Selection;
 	mesh = m;
 	userBitHole = -1;
-	updateModel();	
+	updateModel();
 }
 
 void HoleListModel::clearModel()
@@ -114,24 +114,24 @@ void HoleListModel::drawCompenetratingFaces() const
 	//glDisable(GL_DEPTH_TEST);
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
-	glColor3f(0.8, 0.8, 0);
+	glColor3f(0.8f, 0.8f, 0.f);
 	HoleVector::const_iterator it = holes.begin();		
 	it = holes.begin();
 	for(it = holes.begin(); it != holes.end(); ++it)
-		if(it->isCompenetrating)
+		if(it->isCompenetrating())
 			it->DrawCompenetratingFace(GL_LINE_LOOP);
 	
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	
 	for(it = holes.begin(); it != holes.end(); ++it)
-		if(it->isCompenetrating)
+		if(it->isCompenetrating())
 			it->DrawCompenetratingFace(GL_TRIANGLES);
 
 	glLineWidth(4.0f);
-	glColor3f(1.0, 1.0, 0);
+	glColor3f(1.0f, 1.0f, 0.f);
 	for(it = holes.begin(); it != holes.end(); ++it)
-		if(it->isCompenetrating)
+		if(it->isCompenetrating())
 			it->DrawCompenetratingFace(GL_LINE_LOOP);
 
 }
@@ -154,7 +154,7 @@ void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
 		holes[ind].isAccepted = !holes[ind].isAccepted;
 	}
 	
-	emit dataChanged( index(ind, 2), index(ind, 2) );
+	emit dataChanged( index(ind, 3), index(ind, 3) );
 	emit SGN_needUpdateGLA();
 }
 
@@ -217,19 +217,28 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 		case 0:
 			return holes[index.row()].name;
 		case 1:
-			return holes.at(index.row()).size;		
+			return holes.at(index.row()).getEdgeCount();
+		case 2:
+			return QString("%1").arg(holes.at(index.row()).getPerimeter(), 0, 'f', 5);
 		}
+	}
+	else if (role == Qt::TextAlignmentRole)
+	{
+		if(index.column() < 4)
+			return Qt::AlignLeft;
+		else
+			return Qt::AlignCenter;
 	}
 	else if (role == Qt::CheckStateRole)
 	{
 		bool checked;
-		if(index.column() == 2)
+		if(index.column() == 3)
 			checked = holes[index.row()].isSelected;
 		else if(state == HoleListModel::Filled && holes[index.row()].isSelected)
 		{
-			if(index.column() == 3)
-				checked = holes[index.row()].isCompenetrating;
-			else if(index.column() == 4)
+			if(index.column() == 4)
+				checked = holes[index.row()].isCompenetrating();
+			else if(index.column() == 5)
 				checked = holes[index.row()].isAccepted;
 			else 
 				return QVariant();
@@ -242,7 +251,7 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 		else
 			return Qt::Unchecked;
 	}
-
+	
 	return QVariant();
 }
 
@@ -256,35 +265,44 @@ QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int
 		case 0:
 			return tr("Hole");
 		case 1:
-			return tr("Size");
+			return tr("Edges");
 		case 2:
+			return tr("Perimeter");
+		case 3:
 			if(state == HoleListModel::Selection)
 				return tr("Select");
 			else 
 				return tr("Fill");
-		case 3:
+		case 4:
 			if(state == HoleListModel::Filled)
 				return tr("Comp.");
-		case 4:
+		case 5:
 			if(state == HoleListModel::Filled)
 				return tr("Accept");
 		}
 	}
-/*	else if (orientation == Qt::Horizontal && role == Qt::SizeHintRole)
+	else if (orientation == Qt::Horizontal && role == Qt::SizeHintRole)
 	{
 		switch(section)
 		{
 		case 0:
-			return 70;
+			return QSize(63, 20);
 		case 1:
-			return 70;
+			return QSize(38, 20);
 		case 2:
-			return 30;
+			return QSize(55, 20);
 		case 3:
-			return 30;
+			if(state == HoleListModel::Filled)
+				return QSize(20, 20);
+			else
+				return QSize(50, 20);
+		case 4:
+			return QSize(38, 20);
+		case 5:
+			return QSize(42, 20);
 		}
 	}
-*/	else if (orientation == Qt::Horizontal && role == Qt::ToolTip && state==HoleListModel::Filled && section == 3)
+	else if (orientation == Qt::Horizontal && role == Qt::ToolTip && state==HoleListModel::Filled && section == 4)
 		return tr("Compenetration");	
 
 	return QVariant();
@@ -335,13 +353,13 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 	{
 		if(state == HoleListModel::Selection)
 		{
-			if(index.column() == 2 && state == HoleListModel::Selection)
+			if(index.column() == 3 && state == HoleListModel::Selection)
 			{
 				holes[index.row()].isSelected = !holes[index.row()].isSelected;
 				ret = true;
 			}			
 		}
-		else if(index.column() == 4)
+		else if(index.column() == 5)
 		{	// check accept
 			holes[index.row()].isAccepted = !holes[index.row()].isAccepted;
 			ret = true;

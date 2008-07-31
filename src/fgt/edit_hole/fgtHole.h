@@ -62,10 +62,9 @@ public:
 	{
 		holeInfo = hi;
 		UpdateVertexCoords();
-		size = holeInfo.Perimeter();
+		perimeter = holeInfo.Perimeter();
 		name = holeName;
 		isSelected = false;
-		isCompenetrating = false;
 		isAccepted = true;
 	};
 
@@ -87,6 +86,14 @@ public:
 	   
 	};
 
+	inline int getEdgeCount() const
+	{ return vertexCoords.size(); };
+
+	inline float getPerimeter() const
+	{ return perimeter; };
+
+	inline bool isCompenetrating() const
+	{ return  vertexCompFace.size()>0; };
 
 	void Draw() const
 	{
@@ -189,8 +196,6 @@ public:
 
 	void updateSelfIntersectionState(MESH &mesh)
 	{
-		isCompenetrating = false;
-		
 		GridStaticPtr<FaceType, ScalarType > gM;
 		gM.Set(mesh.face.begin(),mesh.face.end());
 
@@ -230,8 +235,6 @@ public:
 						vertexCompFace.push_back(&(fi->V(1)->P()));
 						vertexCompFace.push_back(&(fi->V(2)->P()));
 
-						isCompenetrating = true;
-						//return;
 					}
 				} // if (c==0)
 			} // for inbox...
@@ -338,14 +341,15 @@ private:
 
 public:
 	HoleInfo holeInfo;
-	std::vector<CoordType*> vertexCoords;
-	std::vector<CoordType*> vertexCompFace;
 	std::vector<FaceType> facesPatch;
-	float size;
 	QString name;
 	bool isSelected;
-	bool isCompenetrating;
 	bool isAccepted;
+
+private:
+	std::vector<CoordType*> vertexCoords;
+	std::vector<CoordType*> vertexCompFace;
+	float perimeter;
 };
 
 
