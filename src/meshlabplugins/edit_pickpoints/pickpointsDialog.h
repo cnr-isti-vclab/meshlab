@@ -125,6 +125,9 @@ private:
 	//if true only remove coord (keep template), if false remove all points from tree widget (start over)
 	void clearPoints(bool clearOnlyXYZValues);
 	
+	//clears the template, does not ask the user anything
+	void clearTemplate();
+	
 	//the current mode of the GUI
 	Mode currentMode;
 	
@@ -176,8 +179,9 @@ private slots:
 	//ask user for which template and then load a point template
 	void askUserForFileAndloadTemplate();
 	
-	//clear the loaded template if one is loaded
-	void clearPickPointsTemplate();
+	//clear the loaded template if one is loaded when the user clicks the clear
+	//template button
+	void clearTemplateButtonClicked();
 	
 	//Add a point to the loaded template.  When in template 
 	//mode the default is to now allow extra points

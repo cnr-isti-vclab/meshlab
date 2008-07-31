@@ -163,7 +163,7 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	connect(ui.clearButton, SIGNAL(clicked()), this, SLOT(clearPointsButtonClicked()));
 	connect(ui.saveTemplateButton, SIGNAL(clicked()), this, SLOT(savePointTemplate()));
 	connect(ui.loadTemplateButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndloadTemplate()));
-	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearPickPointsTemplate()) );
+	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearTemplateButtonClicked()) );
 	connect(ui.addPointToTemplateButton, SIGNAL(clicked()), this, SLOT(addPointToTemplate()) );
 	connect(ui.removePointFromTemplateButton, SIGNAL(clicked()), this, SLOT(removePointFromTemplate()));
 	
@@ -321,6 +321,16 @@ void PickPointsDialog::clearPoints(bool clearOnlyXYZ){
 }
 
 
+void PickPointsDialog::clearTemplate()
+{
+	//clear the points only if there was a template
+	if(templateLoaded)
+		clearPoints(false);
+	
+	templateLoaded = false;
+	ui.templateNameLabel->setText("No Template Loaded");	
+}
+
 void PickPointsDialog::loadPickPointsTemplate(QString filename){
 	//clear the points tree
 	clearPoints(false);
@@ -363,7 +373,7 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel){
 	clearPoints(false);
 	
 	//also clear the template
-	clearPickPointsTemplate();
+	clearTemplate();
 	
 	//make sure we start in pick mode
 	togglePickMode(true);
@@ -530,7 +540,7 @@ PickedPoints * PickPointsDialog::getPickedPoints()
 
 void PickPointsDialog::loadPoints(QString filename){
 	//clear the points tree and template in case it was loaded
-	clearPickPointsTemplate();
+	clearTemplate();
 		
 	//get the points from file
 	PickedPoints pickedPoints;
@@ -633,19 +643,28 @@ void PickPointsDialog::askUserForFileAndloadTemplate()
 
 void PickPointsDialog::clearPointsButtonClicked()
 {
-	//if the template is loaded clear only xyz values
-	clearPoints(templateLoaded);
+	
+	QMessageBox messageBox(QMessageBox::Question, "Pick Points", "Are you sure you want to clear all points?",
+	       		QMessageBox::Yes|QMessageBox::No, this);
+	int returnValue = messageBox.exec();
+
+	if(returnValue == QMessageBox::Yes)
+	{
+		//if the template is loaded clear only xyz values
+		clearPoints(templateLoaded);
+	}
 }
 
-void PickPointsDialog::clearPickPointsTemplate(){
-	//clear the points only if there was a template
-	if(templateLoaded)
-		clearPoints(false);
+void PickPointsDialog::clearTemplateButtonClicked(){
 	
-	templateLoaded = false;
-	ui.templateNameLabel->setText("No Template Loaded");
-	
-	
+	QMessageBox messageBox(QMessageBox::Question, "Pick Points", "Are you sure you want to clear the template and any picked points?",
+		   		QMessageBox::Yes|QMessageBox::No, this);
+	int returnValue = messageBox.exec();
+
+	if(returnValue == QMessageBox::Yes)
+	{
+		clearTemplate();
+	}
 }
 
 void PickPointsDialog::addPointToTemplate()
