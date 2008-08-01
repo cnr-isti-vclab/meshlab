@@ -96,4 +96,35 @@ signals:
 
 };
 
+
+class HoleSorterFilter: public QSortFilterProxyModel
+{
+	Q_OBJECT
+
+public:
+	HoleSorterFilter(QObject *parent = 0): QSortFilterProxyModel(parent){};
+	virtual ~HoleSorterFilter() { };
+
+	bool lessThan(const QModelIndex &left, const QModelIndex &right) const
+	{
+		if(left.column() == 0)
+			return left.data().toString() < right.data().toString();
+		else if(left.column() == 1 || left.column() == 2)
+			return left.data().toDouble() < right.data().toDouble();
+
+		// check box
+		if(!left.data(Qt::CheckStateRole).isValid() && right.data(Qt::CheckStateRole).isValid())
+			return false;
+		else if(!right.data(Qt::CheckStateRole).isValid() && left.data(Qt::CheckStateRole).isValid())
+			return true;
+
+		if(left.data(Qt::CheckStateRole) == Qt::Unchecked && right.data(Qt::CheckStateRole) == Qt::Checked)
+			return false;
+		else 
+			return true;
+	};
+
+};
+
+
 #endif

@@ -139,10 +139,16 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
 	connect(dialogFiller->ui.holeTree->header(), SIGNAL(sectionCountChanged(int, int)), this, SLOT(resizeViewColumn()) );
 	if(holesModel != 0)
+	{
+		delete holeSorter;
 		delete holesModel;
+	}
 	holesModel = new HoleListModel(&m);
 	connect(holesModel, SIGNAL(SGN_needUpdateGLA()), this, SLOT(upGlA()) );
-	dialogFiller->ui.holeTree->setModel( holesModel );
+	holeSorter = new HoleSorterFilter(); 
+	holeSorter->setSourceModel(holesModel);
+	dialogFiller->ui.holeTree->setModel( holeSorter );
+	
 	Decorate(0, m, gla);
 	gla->update();	
 }

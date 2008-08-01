@@ -59,6 +59,7 @@ public:
 	
 private:
 	HoleListModel *holesModel;
+	HoleSorterFilter* holeSorter;
 	GLArea * gla;
 	MeshModel *mesh;
     FillerDialog *dialogFiller;
