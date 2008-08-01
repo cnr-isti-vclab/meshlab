@@ -27,10 +27,10 @@ FillerDialog::FillerDialog(QWidget *parent)
 	: QDockWidget(parent)
 {	
 	ui.setupUi(this);
-	this->setWidget(ui.frame);
+	this->setWidget(ui.frame_main);
 	
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
-	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
+	this->setGeometry(p.x()+(parent->width()-width()),p.y()+58,width(),height() );
 	this->setFloating(true);
 }
 

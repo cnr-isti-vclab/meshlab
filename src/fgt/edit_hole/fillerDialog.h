@@ -44,7 +44,7 @@ Q_SIGNALS:
 	void SGN_CancelFill();
 
 public:
-	Ui::dialogFillerClass ui;
+	Ui::FillerWidget ui;
 	QWidget* parent;
 	
 	

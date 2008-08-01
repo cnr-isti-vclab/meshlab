@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>dialogFillerClass</class>
- <widget class="QWidget" name="dialogFillerClass" >
+ <class>FillerWidget</class>
+ <widget class="QWidget" name="FillerWidget" >
   <property name="windowModality" >
    <enum>Qt::NonModal</enum>
   </property>
@@ -8,230 +8,397 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>381</height>
+    <width>302</width>
+    <height>318</height>
    </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>0</width>
+    <height>318</height>
+   </size>
   </property>
   <property name="sizeIncrement" >
    <size>
-    <width>5</width>
-    <height>2</height>
+    <width>0</width>
+    <height>0</height>
    </size>
   </property>
-  <property name="mouseTracking" >
-   <bool>false</bool>
+  <property name="contextMenuPolicy" >
+   <enum>Qt::DefaultContextMenu</enum>
   </property>
-  <property name="focusPolicy" >
-   <enum>Qt::NoFocus</enum>
+  <property name="windowTitle" >
+   <string>Edit Hole</string>
   </property>
-  <property name="layoutDirection" >
-   <enum>Qt::LeftToRight</enum>
-  </property>
-  <widget class="QFrame" name="frame" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>300</width>
-     <height>400</height>
-    </rect>
+  <layout class="QVBoxLayout" >
+   <property name="leftMargin" >
+    <number>9</number>
    </property>
-   <property name="sizePolicy" >
-    <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
+   <property name="topMargin" >
+    <number>9</number>
    </property>
-   <property name="minimumSize" >
-    <size>
-     <width>90</width>
-     <height>110</height>
-    </size>
-   </property>
-   <property name="frameShape" >
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow" >
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QGroupBox" name="groupBox" >
-    <property name="geometry" >
-     <rect>
-      <x>60</x>
-      <y>240</y>
-      <width>181</width>
-      <height>100</height>
-     </rect>
-    </property>
-    <property name="title" >
-     <string>Option</string>
-    </property>
-    <widget class="QWidget" name="layoutWidget" >
-     <property name="geometry" >
-      <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>143</width>
-       <height>68</height>
-      </rect>
+   <item>
+    <widget class="QFrame" name="frame_main" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
      </property>
      <layout class="QVBoxLayout" >
+      <property name="spacing" >
+       <number>2</number>
+      </property>
+      <property name="leftMargin" >
+       <number>0</number>
+      </property>
+      <property name="topMargin" >
+       <number>0</number>
+      </property>
+      <property name="rightMargin" >
+       <number>0</number>
+      </property>
+      <property name="bottomMargin" >
+       <number>0</number>
+      </property>
       <item>
-       <widget class="QCheckBox" name="antiSelfIntersection" >
-        <property name="text" >
-         <string>Prevent self intersection</string>
+       <widget class="QFrame" name="frame_list" >
+        <property name="minimumSize" >
+         <size>
+          <width>200</width>
+          <height>150</height>
+         </size>
         </property>
-        <property name="checked" >
-         <bool>true</bool>
+        <property name="sizeIncrement" >
+         <size>
+          <width>5</width>
+          <height>5</height>
+         </size>
         </property>
+        <property name="baseSize" >
+         <size>
+          <width>5</width>
+          <height>5</height>
+         </size>
+        </property>
+        <property name="styleSheet" >
+         <string>backgound:black</string>
+        </property>
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" >
+         <property name="spacing" >
+          <number>2</number>
+         </property>
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" >
+           <property name="leftMargin" >
+            <number>9</number>
+           </property>
+           <property name="topMargin" >
+            <number>9</number>
+           </property>
+           <property name="rightMargin" >
+            <number>9</number>
+           </property>
+           <property name="bottomMargin" >
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label2_2" >
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>80</width>
+               <height>15</height>
+              </size>
+             </property>
+             <property name="layoutDirection" >
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="text" >
+              <string>Holes into mesh</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTreeView" name="holeTree" >
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>180</width>
+               <height>130</height>
+              </size>
+             </property>
+             <property name="sizeIncrement" >
+              <size>
+               <width>5</width>
+               <height>4</height>
+              </size>
+             </property>
+             <property name="baseSize" >
+              <size>
+               <width>5</width>
+               <height>5</height>
+              </size>
+             </property>
+             <property name="alternatingRowColors" >
+              <bool>true</bool>
+             </property>
+             <property name="selectionMode" >
+              <enum>QAbstractItemView::NoSelection</enum>
+             </property>
+             <property name="textElideMode" >
+              <enum>Qt::ElideNone</enum>
+             </property>
+             <property name="rootIsDecorated" >
+              <bool>false</bool>
+             </property>
+             <property name="itemsExpandable" >
+              <bool>false</bool>
+             </property>
+             <property name="sortingEnabled" >
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="individualRBtm" >
-        <property name="text" >
-         <string>Individual Fill</string>
+       <widget class="QFrame" name="frame_option" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="checked" >
-         <bool>true</bool>
+        <property name="minimumSize" >
+         <size>
+          <width>200</width>
+          <height>98</height>
+         </size>
         </property>
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" >
+         <property name="spacing" >
+          <number>2</number>
+         </property>
+         <property name="leftMargin" >
+          <number>9</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>9</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QGroupBox" name="groupBox_2" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize" >
+            <size>
+             <width>175</width>
+             <height>90</height>
+            </size>
+           </property>
+           <property name="title" >
+            <string>Option</string>
+           </property>
+           <widget class="QRadioButton" name="individualRBtm" >
+            <property name="geometry" >
+             <rect>
+              <x>20</x>
+              <y>45</y>
+              <width>141</width>
+              <height>18</height>
+             </rect>
+            </property>
+            <property name="text" >
+             <string>Individual Fill</string>
+            </property>
+            <property name="checked" >
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="antiSelfIntersection" >
+            <property name="geometry" >
+             <rect>
+              <x>21</x>
+              <y>21</y>
+              <width>141</width>
+              <height>18</height>
+             </rect>
+            </property>
+            <property name="text" >
+             <string>Prevent self intersection</string>
+            </property>
+            <property name="checked" >
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="bridgeRBtm" >
+            <property name="geometry" >
+             <rect>
+              <x>20</x>
+              <y>60</y>
+              <width>141</width>
+              <height>18</height>
+             </rect>
+            </property>
+            <property name="text" >
+             <string>Create Bridge</string>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="bridgeRBtm" >
-        <property name="text" >
-         <string>Create Bridge</string>
+       <widget class="QFrame" name="frame_command" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
+        <property name="minimumSize" >
+         <size>
+          <width>200</width>
+          <height>33</height>
+         </size>
+        </property>
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" >
+         <property name="spacing" >
+          <number>2</number>
+         </property>
+         <property name="leftMargin" >
+          <number>9</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>9</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>9</number>
+         </property>
+         <item>
+          <widget class="QSplitter" name="splitter" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QPushButton" name="fillButton" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize" >
+             <size>
+              <width>70</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="maximumSize" >
+             <size>
+              <width>70</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="text" >
+             <string>Fill</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="cancelButton" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize" >
+             <size>
+              <width>70</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="maximumSize" >
+             <size>
+              <width>70</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="text" >
+             <string>Cancel</string>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
     </widget>
-   </widget>
-   <widget class="QWidget" name="layoutWidget" >
-    <property name="geometry" >
-     <rect>
-      <x>45</x>
-      <y>347</y>
-      <width>212</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" >
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" >
-        <size>
-         <width>21</width>
-         <height>23</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="fillButton" >
-       <property name="text" >
-        <string>Fill</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="cancelButton" >
-       <property name="text" >
-        <string>Cancel</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" >
-        <size>
-         <width>21</width>
-         <height>23</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QSplitter" name="splitter" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>280</width>
-      <height>231</height>
-     </rect>
-    </property>
-    <property name="sizePolicy" >
-     <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="orientation" >
-     <enum>Qt::Vertical</enum>
-    </property>
-    <widget class="QLabel" name="label2_2" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize" >
-      <size>
-       <width>80</width>
-       <height>15</height>
-      </size>
-     </property>
-     <property name="layoutDirection" >
-      <enum>Qt::LeftToRight</enum>
-     </property>
-     <property name="text" >
-      <string>Holes into mesh</string>
-     </property>
-    </widget>
-    <widget class="QTreeView" name="holeTree" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize" >
-      <size>
-       <width>80</width>
-       <height>50</height>
-      </size>
-     </property>
-     <property name="alternatingRowColors" >
-      <bool>true</bool>
-     </property>
-     <property name="selectionMode" >
-      <enum>QAbstractItemView::NoSelection</enum>
-     </property>
-     <property name="textElideMode" >
-      <enum>Qt::ElideNone</enum>
-     </property>
-     <property name="rootIsDecorated" >
-      <bool>false</bool>
-     </property>
-     <property name="itemsExpandable" >
-      <bool>false</bool>
-     </property>
-     <property name="sortingEnabled" >
-      <bool>true</bool>
-     </property>
-    </widget>
-   </widget>
-  </widget>
+   </item>
+  </layout>
  </widget>
- <layoutdefault spacing="6" margin="11" />
  <resources/>
  <connections/>
 </ui>
