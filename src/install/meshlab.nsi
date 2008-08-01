@@ -92,6 +92,7 @@ Section "MainSection" SEC01
 
   File "..\meshlab\plugins\filter_trioptimize.dll"
   File "..\meshlab\plugins\filter_unsharp.dll"
+  File "..\meshlab\plugins\filter_colorproc.dll"
   ; edit plugins (13)
   File "..\meshlab\plugins\editalign.dll"
   File "..\meshlab\plugins\editmeasure.dll"
