@@ -9,9 +9,11 @@
 #include <wrap/gl/pick.h>
 #include <wrap/gl/picking.h>
 #include<limits>
+#include <meshlab/interfaces.h>
 
 #include <vcg/complex/trimesh/update/topology.h>
 #include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/clean.h>
 
 using namespace vcg;
 
@@ -175,8 +177,14 @@ void EditTexturePlugin::Decorate(QAction *, MeshModel &m, GLArea *gla)
 void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
 {
 	// Set up the model
-	if (!m.cm.face.IsFFAdjacencyEnabled()) m.cm.face.EnableFFAdjacency();
+	m.cm.face.EnableFFAdjacency();
 	if (vcg::tri::HasPerWedgeTexCoord(m.cm)) vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
+	if(vcg::tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) && !HasCollapsedTextCoords(m)) degenerate = false;
+	else 
+	{
+		gla->log.Logf(GLLogStream::Info,"WARNING: This mesh has a degenerate texture parametrization!");
+		degenerate = true;
+	}
 
 	FaceSel.clear();
 	CMeshO::FaceIterator ff;
@@ -194,7 +202,7 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 	// Create an istance of the interface
 	if (widget == 0) 
 	{ 
-		widget = new TextureEditor(gla->window(), &m, gla);
+		widget = new TextureEditor(gla->window(), &m, gla, degenerate);
 		dock = new QDockWidget(gla->window());
 		dock->setAllowedAreas(Qt::NoDockWidgetArea);
 		dock->setWidget(widget);
@@ -266,6 +274,25 @@ void EditTexturePlugin::InitTexture(MeshModel &m)
 			widget->AddRenderArea(m.cm.textures[i].c_str(), &m, i);
 	}
 	else widget->AddEmptyRenderArea();
+}
+
+
+// DA METTERE IN Clean.h
+/**
+Chek if the parametrization is valid
+*/
+bool EditTexturePlugin::HasCollapsedTextCoords(MeshModel &m)
+{
+	if(!HasPerWedgeTexCoord(m.cm)) return true;
+	for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+	{
+		if(!(*fi).IsD()) 
+		{
+			if( (*fi).WT(0).P() == (*fi).WT(1).P() || (*fi).WT(0).P() == (*fi).WT(2).P() || (*fi).WT(1).P() == (*fi).WT(2).P()) 
+				return true;
+		}
+	}
+	return false;
 }
 
 Q_EXPORT_PLUGIN(EditTexturePlugin)

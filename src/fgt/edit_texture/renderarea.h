@@ -60,6 +60,7 @@ class RenderArea : public QGLWidget
 		void ResetPosition();
 		QString GetTextureName();
 		void RecalculateSelectionArea();
+		void SetDegenerate(bool deg);
 
 	protected:
 		void paintEvent(QPaintEvent *event);
@@ -130,7 +131,7 @@ class RenderArea : public QGLWidget
 		QPoint uvertA, uvertB, uvertA1, uvertB1;
 		float tua, tva, tub, tvb, tua1, tva1, tub1, tvb1;
 		CFaceO *firstface, *firstface1;
-		bool locked;
+		bool locked, degenerate;
 		GLuint id;
 
 		vector<CVertexO*> path, path1;			// Set of vertex of the path

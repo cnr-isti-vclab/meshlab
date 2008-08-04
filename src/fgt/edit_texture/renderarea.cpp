@@ -46,6 +46,7 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 	panX = 0; panY = 0;
 	oldPX = 0; oldPY = 0;
 	posVX = 0; posVY = 0;
+	degenerate = false;
 
 	brush = QBrush(Qt::green);
 	mode = View;
@@ -133,6 +134,12 @@ void RenderArea::setTexture(QString path)
 QString RenderArea::GetTextureName()
 {
 	return fileName;
+}
+
+// Inform the render area that the model has degenerate coordinates
+void RenderArea::SetDegenerate(bool deg)
+{
+	degenerate = deg;
 }
 
 void RenderArea::paintEvent(QPaintEvent *)
@@ -1309,7 +1316,7 @@ void RenderArea::SelectConnectedComponent(QPoint e)
 		for (int j = 0; j < 3; j++)
 		{
 			CFaceO* p = Q[index]->FFp(j);
-			if (!p->IsUserBit(selBit))
+			if (p != 0 && !p->IsUserBit(selBit))
 			{
 				p->SetUserBit(selBit);
 				Q.push_back(p);

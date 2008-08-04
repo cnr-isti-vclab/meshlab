@@ -20,7 +20,7 @@ class TextureEditor : public QWidget
 	Q_OBJECT
 
 	public:
-		TextureEditor(QWidget *parent = 0, MeshModel *m = 0, GLArea *gla = 0);
+		TextureEditor(QWidget *parent = 0, MeshModel *m = 0, GLArea *gla = 0, bool degenere = false);
 		~TextureEditor();
 
 		void AddRenderArea(QString texture, MeshModel *m, unsigned ind);
@@ -34,6 +34,7 @@ class TextureEditor : public QWidget
 		void SmoothTextureCoordinates();
 		MeshModel *model;	// Ref to the model (for upate)
 		GLArea *area;		// Ref to the GLArea (for refresh)
+		bool degenere;
 
 	private slots:
 		void on_tabWidget_currentChanged(int index);

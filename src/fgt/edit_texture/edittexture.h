@@ -52,9 +52,13 @@ class EditTexturePlugin : public QObject, public MeshEditInterface
 
 		void DrawXORRect(GLArea * gla);
 		void InitTexture(MeshModel &m);
+		bool HasCollapsedTextCoords(MeshModel &m);
+
+		bool degenerate;
 	
 	signals:
 		void setSelectionRendering(bool);
+
 };
 
 #endif

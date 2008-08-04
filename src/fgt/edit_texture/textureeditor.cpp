@@ -5,11 +5,12 @@
 
 static int countPage = 1;	// Number of Tab in the texture's TabWidgets
 
-TextureEditor::TextureEditor(QWidget *parent, MeshModel *m, GLArea *gla) : QWidget(parent)
+TextureEditor::TextureEditor(QWidget *parent, MeshModel *m, GLArea *gla, bool deg) : QWidget(parent)
 {
 	ui.setupUi(this);
 	area = gla;
 	model = m;
+	degenere = deg;
 	QObject::connect(this, SIGNAL(updateTexture(void)), gla, SLOT(updateTexture(void)));
 }
 
@@ -37,6 +38,7 @@ void TextureEditor::AddRenderArea(QString texture, MeshModel *m, unsigned index)
 		ra->show();
 		ui.labelName->setText(texture);
 	}
+	ra->SetDegenerate(degenere);
 	countPage++;
 	QObject::connect(ra, SIGNAL(UpdateModel()),this, SLOT(UpdateModel()));
 }
