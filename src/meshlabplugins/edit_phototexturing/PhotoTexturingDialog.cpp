@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -30,7 +30,7 @@
 #include <meshlab/stdpardialog.h>
 
 PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTexturer* texturer,MeshModel &m,GLArea *gla): QDialog() {
-	
+
 	connect(this,SIGNAL(updateGLAreaTextures()),gla,SLOT(updateTexture()));
 	connect(this,SIGNAL(setGLAreaTextureMode(vcg::GLW::TextureMode)),gla,SLOT(setTextureMode(vcg::GLW::TextureMode)));
 	connect(this,SIGNAL(updateMainWindowMenus()),gla,SIGNAL(updateMainWindowMenus()));
@@ -38,15 +38,15 @@ PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTextu
 	ptPlugin = plugin;
 	photoTexturer = texturer;
 	PhotoTexturingDialog::ui.setupUi(this);
-	
+
 	mesh = &m;
 	glarea = gla;
-	
+
 	//setting up the headers for the tblewidget
 	QStringList headers;
 	headers << "Camera" << "Image";
 	ui.cameraTableWidget->setHorizontalHeaderLabels(headers);
-	
+
 	connect(ui.configurationLoadPushButton, SIGNAL(clicked()),this,SLOT(loadConfigurationFile()));
 	connect(ui.configurationSavePushButton, SIGNAL(clicked()),this,SLOT(saveConfigurationFile()));
 	connect(ui.addCameraPushButton, SIGNAL(clicked()),this,SLOT(addCamera()));
@@ -56,15 +56,15 @@ PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTextu
 	connect(ui.calculateTexturesPushButton, SIGNAL(clicked()),this,SLOT(calculateTextures()));
 	connect(ui.combineTexturesPushButton, SIGNAL(clicked()),this,SLOT(combineTextures()));
 	connect(ui.textureListWidget, SIGNAL(itemClicked(QListWidgetItem* )),this,SLOT(selectCurrentTexture()));
-	
+
 	connect(ui.applyPushButton, SIGNAL(clicked()),this,SLOT(apply()));
 	connect(ui.closePushButton, SIGNAL(clicked()),this,SLOT(close()));
 	connect(ui.cancelPushButton, SIGNAL(clicked()),this,SLOT(cancel()));
-	
+
 	photoTexturer->storeOriginalTextureCoordinates(mesh);
-	
+
 	update();
-	
+
 }
 
 
@@ -85,6 +85,7 @@ void PhotoTexturingDialog::saveConfigurationFile(){
 }
 
 void PhotoTexturingDialog::addCamera(){
+	//QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai *.kai)");
 	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai)");
 	photoTexturer->addCamera(filename);
 	update();
@@ -101,7 +102,7 @@ void PhotoTexturingDialog::removeCamera(){
 		photoTexturer->removeCamera(row);
 		update();
 	}
-	
+
 }
 
 void PhotoTexturingDialog::update(){
@@ -132,13 +133,13 @@ void PhotoTexturingDialog::update(){
 	}
 	ui.cameraTableWidget->resizeColumnsToContents();
 
-	
+
 	if (vcg::tri::HasPerFaceAttribute(mesh->cm,PhotoTexturer::ORIGINALUVTEXTURECOORDS) && vcg::tri::HasPerFaceAttribute(mesh->cm,PhotoTexturer::CAMERAUVTEXTURECOORDS)){
 		ui.combineTexturesPushButton->setDisabled(false);
 	}else{
 		ui.combineTexturesPushButton->setDisabled(true);
 	}
-	
+
 }
 void PhotoTexturingDialog::assignImage(){
 	QString filename = QFileDialog::getOpenFileName(this,tr("Select Image File"),".", "Images (*.png *.jpg *.bmp)");
@@ -150,15 +151,15 @@ void PhotoTexturingDialog::assignImage(){
 		cam->textureImage = filename;
 		update();
 	}
-	
+
 }
 void PhotoTexturingDialog::calculateTextures(){
 	photoTexturer->calculateMeshTextureForAllCameras(mesh);
 	glarea->update();
 	update();
-	
+
 	updateGLAreaTextures();
-	
+
 	updateMainWindowMenus();
 }
 
@@ -178,7 +179,7 @@ void PhotoTexturingDialog::combineTextures(){
 	//combineParamSet.addBool("saveImages",true,"Save all images","");
 	//combineParamSet.addBool("sameFolder",true,"Same folder as mesh","");
 	//buildParameterSet(alignParamSet, defaultAP);
-							
+
 	GenericParamDialog ad(this,&combineParamSet,"Texture Baking Parameters");
 	int result=ad.exec();
 	if (result == 1){
@@ -188,7 +189,7 @@ void PhotoTexturingDialog::combineTextures(){
 }
 
 void PhotoTexturingDialog::apply(){
-	
+
 }
 void PhotoTexturingDialog::close(){
 	//glarea->endEdit();

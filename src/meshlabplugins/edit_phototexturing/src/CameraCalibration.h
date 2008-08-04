@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -29,36 +29,48 @@
 #include <QtXml/QDomNode>
 
 //#include <src/Camera.h>
-#include <src/CameraCalibrationData.h> 
+#include <src/CameraCalibrationData.h>
 #include <meshlab/meshmodel.h>
 class CameraCalibration{
 public:
-	
+
 	static const QString XML_CALIBRATION;
 	static const QString XML_TYPE;
-	
+
+	double cameraPosition[3];
+	double cameraDirection[3];
+
 	//virtual CameraCalibration();
-	virtual ~CameraCalibration(){};
+	virtual ~CameraCalibration(){
+		cameraPosition[0]=0.0;
+		cameraPosition[1]=0.0;
+		cameraPosition[2]=0.0;
+
+		cameraDirection[0]=0.0;
+		cameraDirection[1]=0.0;
+		cameraDirection[2]=-1.0;
+
+	};
 	virtual void loadCalibration(QString ){};
 	virtual void loadFromXml(QDomElement *xml_cam){
-		
+
 	};
 	virtual void saveAsXml(QDomDocument* doc,QDomElement *root){
-		
+
 	};
 	virtual void getUVforPoint(double x, double y, double z, double *u, double *v){
-		
+
 	};
 	virtual void calibrate(QList<CameraCalibrationData*> &ccd ){
-		
+
 	};
-	
+
 	virtual void calibrateToTsai(MeshModel *mm){
-		
+
 	};
 //private:
 	//Camera *camera;
-	
+
 };
 
 #endif /*CAMERACALIBRATION_H_*/
