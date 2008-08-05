@@ -196,11 +196,11 @@ public:
 
 	void updateSelfIntersectionState(MESH &mesh)
 	{
-		GridStaticPtr<FaceType, ScalarType > gM;
+		vcg::GridStaticPtr<FaceType, ScalarType > gM;
 		gM.Set(mesh.face.begin(),mesh.face.end());
 
 		std::vector<FaceType*> inBox;
-		Box3< ScalarType> bbox;
+		vcg::Box3< ScalarType> bbox;
 		FaceIterator fi = facesPatch.begin();
 		for( ; fi!=facesPatch.end(); ++fi)
 		{
@@ -208,7 +208,7 @@ public:
 			(*fi).GetBBox(bbox);
 			vcg::trimesh::GetInBoxFace(mesh, gM, bbox,inBox);
 
-			std::vector<FaceType*>::iterator fib;
+			typename std::vector<FaceType*>::iterator fib;
 			for(fib=inBox.begin();fib!=inBox.end();++fib)
 			{
 				// tra le facce che hanno i boundingbox intersecanti non considero come compenetranti
