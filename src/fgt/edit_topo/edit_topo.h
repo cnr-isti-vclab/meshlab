@@ -22,11 +22,11 @@
  ****************************************************************************/
 /****************************************************************************
   History
-$Log: edit_retoptool.h,v $
+$Log: edit_topo.h,v $
 ****************************************************************************/
 
-#ifndef edit_retoptool_H
-#define edit_retoptool_H
+#ifndef edit_topo_H
+#define edit_topo_H
 
 #include <QList>
 
@@ -44,7 +44,7 @@ $Log: edit_retoptool.h,v $
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/color.h>
 
-#include "edit_retoptooldialog.h"
+#include "edit_topodialog.h"
 
 
 struct Vtx
@@ -78,23 +78,35 @@ struct Edg
 		return ( ((v[0] != b.v[0])&&(v[0] != b.v[1])) 
 					||	((v[1] != b.v[0])&&(v[1] != b.v[1])) );
 	}
+
+	inline bool containsVtx(const Vtx &vt) const
+	{
+		bool toRet = false;
+			for(int j=0; j<2; j++)
+				if(v[j] == vt)
+					toRet = true;
+
+		return toRet;
+	}
 };
 
 struct Fce
 {
 	Edg e[3];
 
+	bool selected;
+
     inline bool operator == (const Fce &f) const
     {
-		return (contains(f.e[0]) && contains(f.e[1]) && contains(f.e[2]));
+		return (containsEdg(f.e[0]) && containsEdg(f.e[1]) && containsEdg(f.e[2]));
 	}
 
     inline bool operator != (const Fce &f) const
     {
-		return (!(contains(f.e[0]) && contains(f.e[1]) && contains(f.e[2])));
+		return (!(containsEdg(f.e[0]) && containsEdg(f.e[1]) && containsEdg(f.e[2])));
 	}
 
-	inline bool contains (const Edg &ed) const
+	inline bool containsEdg(const Edg &ed) const
 	{
 		bool toRet = false;
 		for(int i=0; i<3; i++)
@@ -103,18 +115,29 @@ struct Fce
 
 		return toRet;
 	}
+
+	inline bool containsVtx(const Vtx &vt) const
+	{
+		bool toRet = false;
+		for(int i=0; i<3; i++)
+			for(int j=0; j<2; j++)
+				if(e[i].v[j] == vt)
+					toRet = true;
+
+		return toRet;
+	}
 };
 
 
-class edit_retoptool : public QObject, public MeshEditInterface
+class edit_topo : public QObject, public MeshEditInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
 
 	
 public:
-	edit_retoptool();
-	virtual ~edit_retoptool();
+	edit_topo();
+	virtual ~edit_topo();
 
 	virtual const QString Info(QAction *);
 	virtual const PluginInfo &Info();
@@ -158,6 +181,7 @@ public:
 	bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value);
 	int  getNearest(QPointF center, QPointF *points,int num);
 	float distancePointSegment(QPointF p, QPointF segmentP1,QPointF segmentP2);
+	float distancePointPoint(QPointF P1, QPointF P2);
 
 	void drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla);
 	
@@ -184,7 +208,7 @@ private:
 	QList <QAction *> actionList;
 
 
-	edit_retoptooldialog *edit_retoptooldialogobj;
+	edit_topodialog *edit_topodialogobj;
 };
 
 #endif

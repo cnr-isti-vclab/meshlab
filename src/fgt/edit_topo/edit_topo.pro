@@ -1,19 +1,19 @@
 include (../../shared.pri)
 
-FORMS 			+= 	edit_retoptooldialog.ui
+FORMS 			+= 	edit_topodialog.ui
 
-HEADERS       	= 	edit_retoptool.h \
-					edit_retoptooldialog.h \
-					edit_retoptoolmeshbuilder.h
+HEADERS       	= 	edit_topo.h \
+					edit_topodialog.h \
+					edit_topomeshbuilder.h
 
-SOURCES      	= 	edit_retoptool.cpp \
-					edit_retoptooldialog.cpp \
-					edit_retoptoolmeshbuilder.cpp \
+SOURCES      	= 	edit_topo.cpp \
+					edit_topodialog.cpp \
+					edit_topomeshbuilder.cpp \
 					$$GLEWCODE 
 				
-TARGET        	= 	edit_retoptool
+TARGET        	= 	edit_topo
 
 QT           	+= 	opengl
 
-RESOURCES     	= 	edit_retoptool.qrc
+RESOURCES     	= 	edit_topo.qrc
 

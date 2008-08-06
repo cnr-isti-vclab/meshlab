@@ -1,5 +1,5 @@
-#ifndef edit_retoptoolDIALOG_H
-#define edit_retoptoolDIALOG_H
+#ifndef edit_topoDIALOG_H
+#define edit_topoDIALOG_H
 
 
 
@@ -8,7 +8,7 @@
 #include <QtGui/QApplication>
 #include <meshlab/interfaces.h>
 
-#include "ui_edit_retoptooldialog.h"
+#include "ui_edit_topodialog.h"
 
 using namespace std;
 using namespace vcg;
@@ -25,13 +25,13 @@ typedef enum
 	} UtensType;
 
 
-class edit_retoptooldialog : public QDockWidget
+class edit_topodialog : public QDockWidget
 {
 	Q_OBJECT
 		
 	public:
-		edit_retoptooldialog(QWidget *parent = 0);
-		~edit_retoptooldialog();
+		edit_topodialog(QWidget *parent = 0);
+		~edit_topodialog();
 			
 		UtensType utensil;
 		void insertVertexInTable(QString c1, QString c2, QString c3, QString c4);
@@ -53,7 +53,7 @@ class edit_retoptooldialog : public QDockWidget
 		void setBarVal(int val);
 
 	private:
-		Ui::edit_retoptooldialog ui;
+		Ui::edit_topodialog ui;
 		QWidget* parent;
 	
 	private slots:

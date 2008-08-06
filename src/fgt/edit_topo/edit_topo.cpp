@@ -22,10 +22,10 @@
  ****************************************************************************/
 /****************************************************************************
   History
-$Log: edit_retoptool.cpp,v $
+$Log: edit_topo.cpp,v $
 ****************************************************************************/
-#include "edit_retoptool.h"
-#include "edit_retoptoolmeshbuilder.h"
+#include "edit_topo.h"
+#include "edit_topomeshbuilder.h"
 
 
 
@@ -39,9 +39,22 @@ using namespace vcg;
 //
 // --- Plugin specific methods ---
 //
-edit_retoptool::edit_retoptool() 
+
+inline bool pointInTriangle(const QPointF &p, const QPointF &a,
+														const QPointF &b, const QPointF &c) {
+															float fab=(p.y()-a.y())*(b.x()-a.x()) - (p.x()-a.x())*(b.y()-a.y());
+															float fbc=(p.y()-c.y())*(a.x()-c.x()) - (p.x()-c.x())*(a.y()-c.y());
+															float fca=(p.y()-b.y())*(c.x()-b.x()) - (p.x()-b.x())*(c.y()-b.y());
+															if (fab*fbc>0 && fbc*fca>0)
+																return true;
+															return false;
+}
+
+
+
+edit_topo::edit_topo() 
 {
-	edit_retoptooldialogobj=0;
+	edit_topodialogobj=0;
 	reDraw = false;
 	click = false;
 
@@ -63,24 +76,24 @@ edit_retoptool::edit_retoptool()
 }
 
 
-edit_retoptool::~edit_retoptool() 
+edit_topo::~edit_topo() 
 {
 	stack.clear();
 }
 
 
-QList<QAction *> edit_retoptool::actions() const 
+QList<QAction *> edit_topo::actions() const 
 {
   return actionList;
 }
 
-const QString edit_retoptool::Info(QAction *action) 
+const QString edit_topo::Info(QAction *action) 
 {
   if( action->text() != tr("ReTop Tool") ) assert (0);
   return tr("Allow to re-top a model");
 }
 
-const PluginInfo &edit_retoptool::Info() 
+const PluginInfo &edit_topo::Info() 
 {
    static PluginInfo ai; 
    ai.Date=tr(__DATE__);
@@ -88,7 +101,7 @@ const PluginInfo &edit_retoptool::Info()
    ai.Author = ("dani");
    return ai;
 }
-void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
+void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 {
 	updateMatrixes();
 	// onClick
@@ -97,7 +110,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 		click=false;
 
 		// Original Vertex selection mode (yellow pointer)
-		if(edit_retoptooldialogobj->utensil==U_VTX_SEL)
+		if(edit_topodialogobj->utensil==U_VTX_SEL)
 		{
 			CVertexO * temp_vert=0;
 			if (getVertexAtMouse(m, temp_vert))
@@ -120,7 +133,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 					{
 						stack.push_back(temp);
 						lastPoint = temp;				
-						edit_retoptooldialogobj->insertVertexInTable(lastPoint.vName, QString("%1").arg(lastPoint.V.X()), QString("%1").arg(lastPoint.V.Y()), QString("%1").arg(lastPoint.V.Z()));
+						edit_topodialogobj->insertVertexInTable(lastPoint.vName, QString("%1").arg(lastPoint.V.X()), QString("%1").arg(lastPoint.V.Y()), QString("%1").arg(lastPoint.V.Z()));
 					}
 					else nameVtxCount--;
 				}
@@ -129,7 +142,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 		// Free vertex selection (no pointer)
-		if(edit_retoptooldialogobj->utensil==U_VTX_SEL_FREE)
+		if(edit_topodialogobj->utensil==U_VTX_SEL_FREE)
 		{
 			Point3f temp_vert;
 			if (Pick(mousePos.x(), mouseRealY, temp_vert))
@@ -152,7 +165,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 					{
 						stack.push_back(temp);
 						lastPoint = temp;				
-						edit_retoptooldialogobj->insertVertexInTable(lastPoint.vName, QString("%1").arg(lastPoint.V.X()), QString("%1").arg(lastPoint.V.Y()), QString("%1").arg(lastPoint.V.Z()));
+						edit_topodialogobj->insertVertexInTable(lastPoint.vName, QString("%1").arg(lastPoint.V.X()), QString("%1").arg(lastPoint.V.Y()), QString("%1").arg(lastPoint.V.Z()));
 					}
 					else nameVtxCount--;
 				}
@@ -161,18 +174,48 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 		// Remove selected vertex mode (Yellow pointer)
-		if(edit_retoptooldialogobj->utensil==U_VTX_DEL)
+		if(edit_topodialogobj->utensil==U_VTX_DEL)
 		{
 			Vtx vtx = getVisibleVertexNearestToMouse(stack);
 
 			if(vtx.V != Point3f(0,0,0))
 			{
+				// Vertex del
 				for(int i=0; i<stack.count(); i++)
 					if(stack.at(i) == vtx)
 					{
 						stack.removeAt(i);
-						edit_retoptooldialogobj->removeVertexInTable(QString("%1").arg(vtx.V.X()), QString("%1").arg(vtx.V.Y()), QString("%1").arg(vtx.V.Z()));
+						edit_topodialogobj->removeVertexInTable(QString("%1").arg(vtx.V.X()), QString("%1").arg(vtx.V.Y()), QString("%1").arg(vtx.V.Z()));
 					}
+
+				int EtoDel = 0;
+				int FtoDel = 0;
+
+				// And delete all the edges and faces where it's present
+				for(int e=0; e<Estack.count(); e++)
+					if(Estack.at(e).containsVtx(vtx))
+						EtoDel++;
+				for(int e=0; e<Fstack.count(); e++)
+					if(Fstack.at(e).containsVtx(vtx))
+						FtoDel++;
+
+				for(int i=0; i<EtoDel; i++)
+				{	bool del = false;
+					for(int e=0; e<Estack.count(); e++)
+						if((Estack.at(e).containsVtx(vtx))&&(!del))
+						{
+							Estack.removeAt(e);
+							del = true;
+						}}
+
+				for(int i=0; i<FtoDel; i++)
+				{	bool del = false;			
+					for(int f=0; f<Fstack.count(); f++)
+						if((Fstack.at(f).containsVtx(vtx))&&(!del))
+						{
+							Fstack.removeAt(f);
+							del = true;
+						}}
 
 				if(stack.count()==0)
 					nameVtxCount = 0;
@@ -181,7 +224,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 		// Edge mode (vertex connection)
-		if(edit_retoptooldialogobj->utensil==U_VTX_CONNECT)
+		if(edit_topodialogobj->utensil==U_VTX_CONNECT)
 		{
 			if(connectStart.V==Point3f(0,0,0))
 			{
@@ -206,7 +249,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 					if(!Estack.contains(added))
 					{
 						Estack.push_back(added);
-						edit_retoptooldialogobj->insertConnectionInTable(connectStart.vName, connectEnd.vName);
+						edit_topodialogobj->insertConnectionInTable(connectStart.vName, connectEnd.vName);
 
 						QList<Edg> endStack;
 						QList<Edg> staStack;
@@ -252,6 +295,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 									toAdd.e[0] = added;
 									toAdd.e[1] = edgSta;
 									toAdd.e[2] = edgEnd;
+									toAdd.selected = true;
 
 									if(!Fstack.contains(toAdd))
 									{
@@ -263,7 +307,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 												if(!vNames.contains(toAdd.e[n].v[m].vName))
 													vNames.push_back(toAdd.e[n].v[m].vName);
 
-										edit_retoptooldialogobj->insertFaceInTable(vNames.at(0), vNames.at(1), vNames.at(2));
+										edit_topodialogobj->insertFaceInTable(vNames.at(0), vNames.at(1), vNames.at(2));
 									}
 								}							
 							}						
@@ -277,6 +321,103 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 				}
 			}
 		}
+
+		// Face Select/Deselect		
+		if(edit_topodialogobj->utensil==U_FCE_SEL)
+		{
+			Fce nearest;
+			bool got = false;
+			double tx,ty,tz;
+			int at = 0;
+			for(int f=0; f<Fstack.count(); f++)
+			{
+				Fce fc = Fstack.at(f);
+	
+				QList<Vtx> allv;
+				for(int e=0; e<3; e++)
+					for(int v=0; v<2; v++)
+						if(!allv.contains(fc.e[e].v[v]))
+							allv.push_back(fc.e[e].v[v]);
+
+				
+				gluProject(allv.at(0).V.X(),allv.at(0).V.Y(),allv.at(0).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p0 = QPointF(tx, ty);
+				gluProject(allv.at(1).V.X(),allv.at(1).V.Y(),allv.at(1).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p1 = QPointF(tx, ty);
+				gluProject(allv.at(2).V.X(),allv.at(2).V.Y(),allv.at(2).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p2 = QPointF(tx, ty);
+
+				QPoint p = QPoint(mousePos.x(), mouseRealY);
+
+				if(pointInTriangle(p, p0, p1, p2))
+				{
+					nearest = fc;
+					got = true;
+					at = f;
+				}
+			}
+
+			if(got)
+			{
+				Fstack.removeAt(at);
+				nearest.selected=!nearest.selected;
+				Fstack.push_back(nearest);
+			}		
+		}
+
+
+
+
+	// edge deselection mode
+	if(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
+	{
+		Edg minE;
+		float bestD = -1;
+		bool found = false;
+		double tx,ty,tz;
+		int at=0;
+
+		for(int i=0; i<Estack.count(); i++)
+		{
+			Edg e = Estack.at(i);
+			
+			gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+			QPointF p0 = QPointF(tx, ty);
+			gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+			QPointF p1 = QPointF(tx, ty);
+
+			float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
+			if((dist < bestD)||(bestD==-1))
+			{
+				bestD = dist;
+				minE = e;
+				found = true;
+				at=i;
+			}
+		}
+
+		// Remove the edge from his stack, and also from the faces stack
+		if(found)
+		{
+			Estack.removeAt(at);
+			int toDel = 0;
+
+			for(int f=0; f<Fstack.count(); f++)
+				if(Fstack.at(f).containsEdg(minE))
+					toDel++;
+			
+			for(int i=0; i<toDel; i++)
+			{	bool del = false;
+				for(int f=0; f<Fstack.count(); f++)
+					if((Fstack.at(f).containsEdg(minE))&&(!del))
+					{
+						Fstack.removeAt(f);
+						del = true;
+					}}
+		}
+	}
+
+
 
 
 
@@ -293,8 +434,9 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 	// Even if there's something selected: show vtx	
-	if(edit_retoptooldialogobj->utensil==U_FCE_SEL)
+	if(edit_topodialogobj->utensil==U_FCE_SEL)
 	{
+		// DEBUG
 		if(in.count()!=0)
 		{
 			for(int i=0; i<in.count(); i++)
@@ -305,24 +447,87 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 			for(int i=0; i<out.count(); i++)
 				drawPoint(m, 2.0f, Color4b::Yellow, Color4b::Yellow, out.at(i));
 		}	
+		// /DEBUG
 
-		if(Estack.count()!=0)
+		if(Fstack.count()!=0)
 		{
-			for(int i=0; i<Estack.count(); i++)
+			bool got = false;
+			Fce nearest;
+			for(int i=0; i<Fstack.count(); i++)
 			{
-				Edg e = Estack.at(i);
-				Vtx p1 = e.v[0];
-				Vtx p2 = e.v[1];
+				Fce f = Fstack.at(i);
 
-				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Green, p1.V, p2.V);
+				QList<Vtx> allv;
+				for(int e=0; e<3; e++)
+					for(int v=0; v<2; v++)
+						if(!allv.contains(f.e[e].v[v]))
+							allv.push_back(f.e[e].v[v]);
+
+				if(f.selected)
+				{
+					drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Green, allv.at(0).V, allv.at(1).V);
+					drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Green, allv.at(1).V, allv.at(2).V);
+					drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Green, allv.at(2).V, allv.at(0).V);	
+
+					Point3f mid = (allv.at(0).V + allv.at(1).V + allv.at(2).V) / 3;
+					drawPoint(m, 5.0f, Color4b::DarkGreen, Color4b::Green, mid);
+				}
+				else
+				{
+					drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Red, allv.at(0).V, allv.at(1).V);
+					drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Red, allv.at(1).V, allv.at(2).V);
+					drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Red, allv.at(2).V, allv.at(0).V);	
+				}
+			}
+
+			double tx,ty,tz;
+			for(int f=0; f<Fstack.count(); f++)
+			{
+				Fce fc = Fstack.at(f);
+	
+				QList<Vtx> allv;
+				for(int e=0; e<3; e++)
+					for(int v=0; v<2; v++)
+						if(!allv.contains(fc.e[e].v[v]))
+							allv.push_back(fc.e[e].v[v]);
+
+				
+				gluProject(allv.at(0).V.X(),allv.at(0).V.Y(),allv.at(0).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p0 = QPointF(tx, ty);
+				gluProject(allv.at(1).V.X(),allv.at(1).V.Y(),allv.at(1).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p1 = QPointF(tx, ty);
+				gluProject(allv.at(2).V.X(),allv.at(2).V.Y(),allv.at(2).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p2 = QPointF(tx, ty);
+
+				QPoint p = QPoint(mousePos.x(), mouseRealY);
+
+				if(pointInTriangle(p, p0, p1, p2))
+				{
+					nearest = fc;
+					got = true;
+				}
+			}
+
+			if(got)
+			{
+				QList<Vtx> allv;
+				for(int e=0; e<3; e++)
+					for(int v=0; v<2; v++)
+						if(!allv.contains(nearest.e[e].v[v]))
+							allv.push_back(nearest.e[e].v[v]);
+
+				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(0).V, allv.at(1).V);
+				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(1).V, allv.at(2).V);
+				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(2).V, allv.at(0).V);	
 			}
 		}
-
 	}
+
+
 	
-	if((edit_retoptooldialogobj->utensil==U_VTX_CONNECT)||(edit_retoptooldialogobj->utensil==U_VTX_SEL)
-		||(edit_retoptooldialogobj->utensil==U_VTX_SEL_FREE)||(edit_retoptooldialogobj->utensil==U_VTX_DEL)
-		||(edit_retoptooldialogobj->utensil==U_VTX_CONNECT)||(edit_retoptooldialogobj->utensil==U_VTX_DE_CONNECT))
+	if((edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_SEL)
+		||(edit_topodialogobj->utensil==U_VTX_SEL_FREE)||(edit_topodialogobj->utensil==U_VTX_DEL)
+		||(edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_DE_CONNECT))
 	{
 		if(stack.count()!=0)
 			drawPoint(m, 3.0f, Color4b::DarkRed, Color4b::Red, stack);
@@ -343,27 +548,9 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 		}
 	}
 
-	// select/deselect existing facese
-	if(edit_retoptooldialogobj->utensil==U_FCE_SEL)
-	{
-		if(Fstack.count()!=0)
-		{
-			for(int f=0; f<Fstack.count(); f++)
-			{
-				Fce fa = Fstack.at(f);
-				for(int ed=0; ed<3; ed++)
-				{
-					Edg e = fa.e[ed];
-					Vtx p1 = e.v[0];
-					Vtx p2 = e.v[1];
-					drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Red, p1.V, p2.V);					
-				}
-			}		
-		}		
-	}
 
 	// Yellow pointer (vertex selection)
-	if(edit_retoptooldialogobj->utensil==U_VTX_SEL)
+	if(edit_topodialogobj->utensil==U_VTX_SEL)
 	{
 		Point3f p = Point3f(0,0,0);
 
@@ -380,7 +567,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 	// Vertex de-selection (Yellow pointeR)
-	if((edit_retoptooldialogobj->utensil==U_VTX_DEL)&&(stack.count()!=0))
+	if((edit_topodialogobj->utensil==U_VTX_DEL)&&(stack.count()!=0))
 	{
 		Vtx vtx = getVisibleVertexNearestToMouse(stack);
 
@@ -390,7 +577,7 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 	// edge mode (vtx connection)
-	if(edit_retoptooldialogobj->utensil==U_VTX_CONNECT)
+	if(edit_topodialogobj->utensil==U_VTX_CONNECT)
 	{
 		if(connectStart.V==Point3f(0,0,0) && connectEnd.V==Point3f(0,0,0))
 		{
@@ -416,55 +603,33 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	}
 
 	// edge deselection mode
-	if(edit_retoptooldialogobj->utensil==U_VTX_DE_CONNECT)
+	if(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
 	{
-		// Get the vtx closest to the mouse
-		Vtx vtx = getVisibleVertexNearestToMouse(stack);		
+		Edg minE;
+		float bestD = -1;
+		bool found = false;
+		double tx,ty,tz;
 
-		// Get all edges he howns
-		QList<Edg> nearEdge;
 		for(int i=0; i<Estack.count(); i++)
 		{
 			Edg e = Estack.at(i);
-			if((e.v[0] == vtx)||(e.v[1] == vtx))
-				nearEdge.push_back(e);
-		}
+			
+			gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+			QPointF p0 = QPointF(tx, ty);
+			gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+			QPointF p1 = QPointF(tx, ty);
 
-		if(nearEdge.count()>1)
-		{
-			Edg e = nearEdge.at(0);
-
-			double x1, x2, y1, y2, tz;
-
-			gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &x1,&y1,&tz);
-			gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &x2,&y2,&tz);
-
-			float bestD = distancePointSegment(QPointF(mousePos.x(),mouseRealY), QPointF(x1,y1), QPointF(x2,y2));
-			Edg bestE = e;
-
-			for(int i=1; i<nearEdge.count(); i++)
+			float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
+			if((dist < bestD)||(bestD==-1))
 			{
-				e = nearEdge.at(i);
-				gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &x1,&y1,&tz);
-				gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &x2,&y2,&tz);
-
-				float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), QPointF(x1,y1), QPointF(x2,y2));
-
-				if(dist < bestD)
-				{
-					bestD = dist;
-					bestE = e;		
-				}
+				bestD = dist;
+				minE = e;
+				found = true;
 			}
-			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, bestE.v[0].V, bestE.v[1].V);
-		}
-		else if (nearEdge.count()==1)
-		{
-			Edg e = nearEdge.at(0);
-			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, e.v[0].V, e.v[1].V);
 		}
 
-
+		if(found)
+			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
 	}
 }
 
@@ -508,32 +673,32 @@ void edit_retoptool::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 
-void edit_retoptool::StartEdit(QAction *, MeshModel &m, GLArea *parent)
+void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *parent)
 {	
 	parentGla = parent;
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
 
-	if (edit_retoptooldialogobj==0)
-		edit_retoptooldialogobj=new edit_retoptooldialog(parent->window());
+	if (edit_topodialogobj==0)
+		edit_topodialogobj=new edit_topodialog(parent->window());
 
 	parent->setMouseTracking(true);
-	edit_retoptooldialogobj->show();
+	edit_topodialogobj->show();
 
-	connect(edit_retoptooldialogobj, SIGNAL( mesh_create() ),
+	connect(edit_topodialogobj, SIGNAL( mesh_create() ),
           this, SLOT( on_mesh_create() ) );
 
-	connect(edit_retoptooldialogobj, SIGNAL( fuffa() ),
+	connect(edit_topodialogobj, SIGNAL( fuffa() ),
           this, SLOT( on_fuffa() ) );
 }
 
-void edit_retoptool::EndEdit(QAction *, MeshModel &, GLArea *)
+void edit_topo::EndEdit(QAction *, MeshModel &, GLArea *)
 {
 	
 }
 
 
 
-void edit_retoptool::on_mesh_create()
+void edit_topo::on_mesh_create()
 {
 	in.clear();
 	out.clear();
@@ -547,33 +712,77 @@ void edit_retoptool::on_mesh_create()
 
 	RetopMeshBuilder * rm = new RetopMeshBuilder(currentMesh);
 
+	double dist = currentMesh->cm.bbox.Diag()/50; //trgMesh ???//edit_topodialogobj->dist(0);
+	rm->init(&(currentMesh->cm), dist);
+
+
+// DEBUG: Force MY vertex params
+/*
+	Vtx v1;
+	v1.V = Point3f(	-2.81, 7.59, -1496.97);
+	v1.vName = QString("V0");
+
+	Vtx v2;
+	v2.V = Point3f(-11.42, -100.35, -1503.1);
+	v2.vName = QString("V1");
+
+	Vtx v3;
+	v3.V = Point3f(	29.21, -47.72, -1517.43);
+	v3.vName = QString("V2");
+
+	Edg e1;
+	e1.v[0] = v1;
+	e1.v[1] = v2;
+
+	Edg e2;
+	e2.v[0] = v2;
+	e2.v[1] = v3;
+
+	Edg e3;
+	e3.v[0] = v3;
+	e3.v[1] = v1;
+
+	Fce f;
+	f.e[0] = e1;
+	f.e[1] = e2;
+	f.e[2] = e3;
+
+	stack.clear();
+	stack.push_back(v1);stack.push_back(v2);stack.push_back(v3);
+	Estack.clear();
+	Estack.push_back(e1);Estack.push_back(e2);Estack.push_back(e3);
+	Fstack.clear();
+	Fstack.push_back(f);*/
+	// /DEBUG!!!!!
 
 	// Mesh creation
-	if(edit_retoptooldialogobj->isRadioButtonSimpleChecked())
+
+
+	if(edit_topodialogobj->isRadioButtonSimpleChecked())
 		rm->createBasicMesh(*m, Fstack, stack);
 	else
 	{
-		int iter = edit_retoptooldialogobj->getIterations();
-		int dist1 = edit_retoptooldialogobj->dist(1);
-		int dist2 = edit_retoptooldialogobj->dist(2); 
-		rm->createRefinedMesh(*m, iter, Fstack, edit_retoptooldialogobj, dist1, dist2);
+		int iter = edit_topodialogobj->getIterations();
+		int dist1 = edit_topodialogobj->dist(1);
+		int dist2 = edit_topodialogobj->dist(2); 
+		rm->createRefinedMesh(*m, iter, Fstack, edit_topodialogobj, dist1, dist2);
 	}
+
 	// Color sampling
-	if(edit_retoptooldialogobj->isCheckBoxTrColorChecked())
+	if(edit_topodialogobj->isCheckBoxTrColorChecked())
 	{
 		// TODO Color sampling
 	}
 
-//	rm->draww(stack);
-
-
 //	in = rm->Lin;
 //	out = rm->Lout;
 
-	delete rm;
+//	delete rm;
 	m->fileName = "Retopology.ply";
 	tri::UpdateBounding<CMeshO>::Box(m->cm);	// updates bounding box
 	m->cm.Tr = currentMesh->cm.Tr;				// copy transformation
+
+	parentGla->update();
 }
 
 
@@ -585,8 +794,12 @@ void edit_retoptool::on_mesh_create()
 
 
 // DEBUG!!!
-void edit_retoptool::on_fuffa()
-{/*
+void edit_topo::on_fuffa()
+{
+	parentGla->update();
+
+	
+	/*
 //			MeshModel *trgMesh     = parentGla->meshDoc.meshList.back();	// destination = last
 //			MeshModel *srcMesh = parentGla->meshDoc.mm();		// source = current		
 
@@ -674,14 +887,14 @@ void edit_retoptool::on_fuffa()
 //
 // --- Plugin events methods ---
 //
-void edit_retoptool::mousePressEvent(QAction *, QMouseEvent * event, MeshModel &m, GLArea * gla) 
+void edit_topo::mousePressEvent(QAction *, QMouseEvent * event, MeshModel &m, GLArea * gla) 
 {
 	mousePos=event->pos();
 	click=false;
 	gla->update();
 }
 
-void edit_retoptool::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla)
+void edit_topo::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla)
 {
 	mousePos=event->pos();
 	mouseRealY = gla->curSiz.height() - mousePos.y();
@@ -689,11 +902,12 @@ void edit_retoptool::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &m,
 	gla->update();
 }
 
-void edit_retoptool::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &, GLArea * gla)
+void edit_topo::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &, GLArea * gla)
 {
 	click=true;
 	gla->update();
 	mousePos=event->pos();
+	reDraw=true;
 }
 
 
@@ -712,7 +926,7 @@ void edit_retoptool::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel 
 //
 // --- Mesh coords methods ---
 //
-int edit_retoptool::getNearest(QPointF center, QPointF *points,int num) {
+int edit_topo::getNearest(QPointF center, QPointF *points,int num) {
 		int nearestInd=0;
 		float dist=fabsf(center.x()-points[0].x())*fabsf(center.x()-points[0].x())+fabsf(center.y()-points[0].y())*fabsf(center.y()-points[0].y());
 		for (int lauf=1; lauf<num; lauf++) {
@@ -726,12 +940,12 @@ int edit_retoptool::getNearest(QPointF center, QPointF *points,int num) {
 		return nearestInd;
 	}
 
-bool edit_retoptool::getFaceAtMouse(MeshModel &m, CMeshO::FacePointer& val) {
+bool edit_topo::getFaceAtMouse(MeshModel &m, CMeshO::FacePointer& val) {
 	QPoint mid=QPoint(mousePos.x(), mouseRealY);
 	return (GLPickTri<CMeshO>::PickNearestFace(mid.x(), mid.y(), m.cm, val,2,2));
 }
 
-bool edit_retoptool::getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value) {
+bool edit_topo::getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value) {
 	CFaceO * temp=0;
 
 	QPoint mid=QPoint(mousePos.x(), mouseRealY);
@@ -757,7 +971,7 @@ bool isVertexVisible(Point3f v)
 }
 
 
-Vtx edit_retoptool::getVisibleVertexNearestToMouse(QList<Vtx> list)
+Vtx edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list)
 {
 	int pCount = list.count();
 	Vtx found; 
@@ -813,7 +1027,7 @@ Vtx edit_retoptool::getVisibleVertexNearestToMouse(QList<Vtx> list)
 }
 
 
-float edit_retoptool::distancePointSegment(QPointF p, QPointF segmentP1,QPointF segmentP2)
+float edit_topo::distancePointSegment(QPointF p, QPointF segmentP1,QPointF segmentP2)
 {
 	float x0, y0, x1, x2, y1, y2, m, q;
 	
@@ -829,12 +1043,16 @@ float edit_retoptool::distancePointSegment(QPointF p, QPointF segmentP1,QPointF 
 	x0 = p.x();
 	y0 = p.y();
 
-	return ((y0 - m*x0 -q) / (sqrt(1 + m*m)));
+	return abs((y0 - m*x0 -q) / (sqrt(1 + m*m)));
+}
+float edit_topo::distancePointPoint(QPointF P1, QPointF P2)
+{ 	
+	return sqrt(pow((P1.x()-P2.x()),2)+pow((P1.y()-P2.y()),2));
 }
 //
 // --- Plugin decorations methods ---
 //
-void edit_retoptool::drawLabel(QList<Vtx> list)
+void edit_topo::drawLabel(QList<Vtx> list)
 {
 	
 	QVector<Vtx> v = list.toVector();
@@ -848,7 +1066,7 @@ void edit_retoptool::drawLabel(QList<Vtx> list)
 
 }
 
-void edit_retoptool::drawLabel(Vtx v)
+void edit_topo::drawLabel(Vtx v)
 {
 	double tx,ty,tz;
 
@@ -857,7 +1075,7 @@ void edit_retoptool::drawLabel(Vtx v)
 }
 
 
-void edit_retoptool::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b colorFront, Point3f p)
+void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b colorFront, Point3f p)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
@@ -893,7 +1111,7 @@ void edit_retoptool::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Col
 }
 
 
-void edit_retoptool::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b colorFront, QList<Vtx> list)
+void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b colorFront, QList<Vtx> list)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
@@ -933,7 +1151,7 @@ void edit_retoptool::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Col
 }
 
 
-void edit_retoptool::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorBack, Color4b colorFront, Point3f p1, Point3f p2)
+void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorBack, Color4b colorFront, Point3f p1, Point3f p2)
 {
 	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
 	glDisable(GL_LIGHTING);
@@ -973,7 +1191,7 @@ void edit_retoptool::drawLine(MeshModel &m, float pSize, float lSize, Color4b co
 
 
 
-void edit_retoptool::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla)
+void edit_topo::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla)
 {
     glPointSize(3.0f);
 	
@@ -994,4 +1212,4 @@ void edit_retoptool::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla
 
 
 
-Q_EXPORT_PLUGIN(edit_retoptool)
+Q_EXPORT_PLUGIN(edit_topo)

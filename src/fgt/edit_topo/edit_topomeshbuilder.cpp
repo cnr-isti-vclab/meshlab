@@ -22,11 +22,11 @@
  ****************************************************************************/
 /****************************************************************************
   History
-$Log: edit_retoptoolmeshbuuilder.h,v $
+$Log: edit_topomeshbuuilder.h,v $
 ****************************************************************************/
 
 
-#include "edit_retoptoolmeshbuilder.h"
+#include "edit_topomeshbuilder.h"
 
 
 RetopMeshBuilder::RetopMeshBuilder(MeshModel *originalMeshModel)
@@ -46,6 +46,13 @@ RetopMeshBuilder::RetopMeshBuilder(MeshModel *originalMeshModel)
 };
 
 
+void RetopMeshBuilder::init(CMeshO *_m, double dist)
+{
+	sampler.init(_m);
+	sampler.dist_upper_bound = dist;
+}
+
+
 Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, float dist2)
 {
 	Point3f closestPt;
@@ -61,12 +68,22 @@ Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, flo
 	float dist = dist_upper_bound;
 	const CMeshO::CoordType &startPt= toCheck;
     
+
+    Point3f normf, bestq, ip;
 	CMeshO::FaceType *nearestF=0;	
 	vcg::face::PointDistanceBaseFunctor PDistFunct;
 
 	nearestF = unifGrid.GetClosest(PDistFunct, markerFunctor, startPt, dist_upper_bound, dist, closestPt);
 
+	//nearestF = trimesh::GetClosestFace<CMeshO, MetroMeshGrid>(m, unifGrid, startPt, dist_upper_bound, dist,normf, bestq, ip);
 	
+	Lout.push_back(normf);
+		Lout.push_back(bestq);
+			Lout.push_back(ip);		
+
+			closestPt = ip;
+
+
 	/*
 	unifGrid.GetClosest(OBJPOINTDISTFUNCTOR &_getPointDistance,
 						OBJMARKER &_marker,
@@ -106,11 +123,11 @@ Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, flo
 	//	Lout.push_back(closestPt);												 
 
 //	Lout.push_back(closestPt);
-if(nearestF!=0){
+/*if(nearestF!=0){
 	Lout.push_back(nearestF->V(0)->P());
 		Lout.push_back(nearestF->V(1)->P());
 			Lout.push_back(nearestF->V(2)->P()); 
-	}
+	}*/
 	return closestPt;
 }
 
@@ -159,6 +176,9 @@ if(nearestF!=0){
 	{
 		Fce fce = nFstack[f];
 		
+		if(fce.selected)
+		{
+
 		QList<Vtx> allV;
 		for(int i=0; i<3; i++)
 			for(int j=0; j<2; j++)
@@ -173,10 +193,12 @@ if(nearestF!=0){
 		(*fi).V(1) = ivp.at(ivpId1);
 		(*fi).V(2) = ivp.at(ivpId2);
 		f++;
+
+		}
 	}
 }
 
- void RetopMeshBuilder::createRefinedMesh(MeshModel &out, int iterations, QList<Fce> Fstack, edit_retoptooldialog *dialog, int d1, int d2)
+ void RetopMeshBuilder::createRefinedMesh(MeshModel &out, int iterations, QList<Fce> Fstack, edit_topodialog *dialog, int d1, int d2)
 {
 	dialog->setBarMax(pow((float)(Fstack.count() * 4), (float)iterations) );
 	
@@ -199,8 +221,11 @@ if(nearestF!=0){
 	for(int it=0; it<iterations; it++)
 	{
 		for(int f=0; f<tempFstack.count(); f++)
-		{
+		{		
 			Fce fc = tempFstack.at(f);
+
+			if(fc.selected)
+			{
 
 			QList<Vtx> allVert;
 			for(int e=0; e<3; e++)
@@ -225,20 +250,50 @@ if(nearestF!=0){
 			Point3f av1 = allVert.at(1).V;
 			Point3f av2 = allVert.at(2).V;
 
-			if(it!=0)
-			{
+			//if(it!=0)
+			{/*
 				Point3f Rv0 = getClosestPoint(av0, d1, d2); av0 = Rv0;
 				Point3f Rv1 = getClosestPoint(av1, d1, d2); av1 = Rv1;
-				Point3f Rv2 = getClosestPoint(av2, d1, d2); av2 = Rv2;
+				Point3f Rv2 = getClosestPoint(av2, d1, d2); av2 = Rv2;*/
+
+				Lin.push_back(av0);
+				Lin.push_back(av1);
+				Lin.push_back(av2);
+
+				sampler.sample(av0);
+				Point3f Rv0 = av0;
+				sampler.sample(av1);
+				Point3f Rv1 = av1;
+				sampler.sample(av2);
+				Point3f Rv2 = av2;
+
+				Lout.push_back(Rv0);
+				Lout.push_back(Rv1);
+				Lout.push_back(Rv2);
 			}
 
 			Point3f nv0P = (av0+av1)/2;
 			Point3f nv1P = (av1+av2)/2;
 			Point3f nv2P = (av2+av0)/2;
 
-			Point3f Rnv0 = getClosestPoint(nv0P, d1, d2);
+			/*Point3f Rnv0 = getClosestPoint(nv0P, d1, d2);
 			Point3f Rnv1 = getClosestPoint(nv1P, d1, d2);
-			Point3f Rnv2 = getClosestPoint(nv2P, d1, d2);
+			Point3f Rnv2 = getClosestPoint(nv2P, d1, d2);*/
+
+				Lin.push_back(nv0P);
+				Lin.push_back(nv1P);
+				Lin.push_back(nv2P);
+
+			sampler.sample(nv0P);
+			Point3f Rnv0 = nv0P;
+			sampler.sample(nv1P);
+			Point3f Rnv1 = nv1P;
+			sampler.sample(nv2P);
+			Point3f Rnv2 = nv2P;
+
+				Lout.push_back(Rnv0);
+				Lout.push_back(Rnv1);
+				Lout.push_back(Rnv2);
 
 			Vtx v0, v1, v2;
 			v0.V = av0; v0.vName = QString("%1").arg(vtxId++);
@@ -291,6 +346,8 @@ if(nearestF!=0){
 			newFstack.push_back(fnv0nv1nv2);
 
 			dialog->setBarVal(vtxId);
+
+			}
 		}
 
 		for(int j=0; j<newFstack.count(); j++)
@@ -352,3 +409,18 @@ Point3f mid = (p0+p1)/2;
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

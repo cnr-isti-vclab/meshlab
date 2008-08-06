@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>edit_retoptooldialog</class>
- <widget class="QWidget" name="edit_retoptooldialog" >
+ <class>edit_topodialog</class>
+ <widget class="QWidget" name="edit_topodialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -103,7 +103,7 @@
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">Existing vertex selection&lt;/p>&lt;/body>&lt;/html></string>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">Existing verices selection&lt;/p>&lt;/body>&lt;/html></string>
      </property>
      <property name="text" >
       <string>...</string>
@@ -142,7 +142,7 @@ p, li { white-space: pre-wrap; }
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Selected vertex eraser&lt;/p>&lt;/body>&lt;/html></string>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Selected vertices eraser&lt;/p>&lt;/body>&lt;/html></string>
      </property>
      <property name="text" >
       <string>...</string>
@@ -203,6 +203,25 @@ p, li { white-space: pre-wrap; }
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QLabel" name="label_6" >
+     <property name="geometry" >
+      <rect>
+       <x>160</x>
+       <y>0</y>
+       <width>261</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-size:10pt; color:#ff0000;">Insert each vertex by clicking over the mesh. &lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; color:#ff0000;">You can feely select points, or even use the &lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; color:#ff0000;">original mesh vertices.&lt;/p>&lt;/body>&lt;/html></string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="pageVertexConnect" >
     <property name="geometry" >
@@ -230,7 +249,7 @@ p, li { white-space: pre-wrap; }
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">Edge creation by vertex selection&lt;/p>&lt;/body>&lt;/html></string>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">Edge creation by vertex connection&lt;/p>&lt;/body>&lt;/html></string>
      </property>
      <property name="text" >
       <string>...</string>
@@ -269,7 +288,7 @@ p, li { white-space: pre-wrap; }
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Delete edge&lt;/p>&lt;/body>&lt;/html></string>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Connected edge removal&lt;/p>&lt;/body>&lt;/html></string>
      </property>
      <property name="text" >
       <string>...</string>
@@ -323,6 +342,25 @@ p, li { white-space: pre-wrap; }
       </property>
      </column>
     </widget>
+    <widget class="QLabel" name="label_5" >
+     <property name="geometry" >
+      <rect>
+       <x>120</x>
+       <y>0</y>
+       <width>311</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-size:10pt; color:#ff0000;">Connect each vertex with the desired topology &lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; color:#ff0000;">(only triangular connections will be available for&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; color:#ff0000;"> the retopology process).&lt;/p>&lt;/body>&lt;/html></string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="pageFaceSelect" >
     <property name="geometry" >
@@ -340,9 +378,9 @@ p, li { white-space: pre-wrap; }
      <property name="geometry" >
       <rect>
        <x>10</x>
-       <y>90</y>
+       <y>120</y>
        <width>421</width>
-       <height>181</height>
+       <height>171</height>
       </rect>
      </property>
      <property name="maximumSize" >
@@ -376,23 +414,27 @@ p, li { white-space: pre-wrap; }
     <widget class="QGroupBox" name="groupBox" >
      <property name="geometry" >
       <rect>
-       <x>120</x>
-       <y>0</y>
-       <width>311</width>
-       <height>80</height>
+       <x>10</x>
+       <y>60</y>
+       <width>421</width>
+       <height>51</height>
       </rect>
-     </property>
-     <property name="title" >
-      <string> Retopology mesh generation </string>
      </property>
      <widget class="QPushButton" name="ButtonMeshCreate" >
       <property name="geometry" >
        <rect>
-        <x>250</x>
-        <y>50</y>
-        <width>51</width>
+        <x>304</x>
+        <y>27</y>
+        <width>97</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="toolTip" >
+       <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Creates the retpologized mesh as a new document layer&lt;/p>&lt;/body>&lt;/html></string>
       </property>
       <property name="text" >
        <string>Create</string>
@@ -401,11 +443,18 @@ p, li { white-space: pre-wrap; }
      <widget class="QRadioButton" name="radioButtonSimple" >
       <property name="geometry" >
        <rect>
-        <x>10</x>
-        <y>20</y>
+        <x>20</x>
+        <y>10</y>
         <width>111</width>
         <height>18</height>
        </rect>
+      </property>
+      <property name="toolTip" >
+       <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Simple mesh generation: the new mesh will have exactly the topology you see&lt;/p>&lt;/body>&lt;/html></string>
       </property>
       <property name="text" >
        <string>Simple mesh</string>
@@ -417,11 +466,18 @@ p, li { white-space: pre-wrap; }
      <widget class="QRadioButton" name="radioButtonRef" >
       <property name="geometry" >
        <rect>
-        <x>10</x>
-        <y>50</y>
+        <x>20</x>
+        <y>30</y>
         <width>181</width>
         <height>18</height>
        </rect>
+      </property>
+      <property name="toolTip" >
+       <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Refined mesh: the new mesh will be created with local interpolation over the existing mesh. You can specify the number of iterations involved in the process. PAY ATTENTION: a number of iterations higher than 4 may slow down your system.&lt;/p>&lt;/body>&lt;/html></string>
       </property>
       <property name="text" >
        <string>Refined mesh, with iterations: </string>
@@ -430,11 +486,18 @@ p, li { white-space: pre-wrap; }
      <widget class="QCheckBox" name="checkBoxTrColor" >
       <property name="geometry" >
        <rect>
-        <x>200</x>
-        <y>20</y>
+        <x>304</x>
+        <y>9</y>
         <width>101</width>
         <height>16</height>
        </rect>
+      </property>
+      <property name="toolTip" >
+       <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Sample existing mesh color over the new mesh&lt;/p>&lt;/body>&lt;/html></string>
       </property>
       <property name="text" >
        <string>Transfer color</string>
@@ -443,9 +506,9 @@ p, li { white-space: pre-wrap; }
      <widget class="QSpinBox" name="TextEditIterations" >
       <property name="geometry" >
        <rect>
-        <x>200</x>
-        <y>50</y>
-        <width>41</width>
+        <x>220</x>
+        <y>27</y>
+        <width>50</width>
         <height>20</height>
        </rect>
       </property>
@@ -457,108 +520,70 @@ p, li { white-space: pre-wrap; }
       </property>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox_2" >
-     <property name="geometry" >
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>111</width>
-       <height>80</height>
-      </rect>
-     </property>
-     <property name="title" >
-      <string> Face selection </string>
-     </property>
-     <widget class="QToolButton" name="ButtonSelectFace" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>30</y>
-        <width>41</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="toolTip" >
-       <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">Edge creation by vertex selection&lt;/p>&lt;/body>&lt;/html></string>
-      </property>
-      <property name="text" >
-       <string>...</string>
-      </property>
-      <property name="icon" >
-       <iconset resource="../../fgt/editpaint/meshlab.qrc" >
-        <normaloff>:/images/paintbrush-22.png</normaloff>:/images/paintbrush-22.png</iconset>
-      </property>
-      <property name="iconSize" >
-       <size>
-        <width>24</width>
-        <height>24</height>
-       </size>
-      </property>
-      <property name="checkable" >
-       <bool>true</bool>
-      </property>
-      <property name="checked" >
-       <bool>true</bool>
-      </property>
-      <property name="autoExclusive" >
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QToolButton" name="ButtonSelectFace_2" >
-      <property name="geometry" >
-       <rect>
-        <x>60</x>
-        <y>30</y>
-        <width>41</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="toolTip" >
-       <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">Edge creation by vertex selection&lt;/p>&lt;/body>&lt;/html></string>
-      </property>
-      <property name="text" >
-       <string>...</string>
-      </property>
-      <property name="icon" >
-       <iconset resource="../../fgt/editpaint/meshlab.qrc" >
-        <normaloff>:/images/paintbrush-22.png</normaloff>:/images/paintbrush-22.png</iconset>
-      </property>
-      <property name="iconSize" >
-       <size>
-        <width>24</width>
-        <height>24</height>
-       </size>
-      </property>
-      <property name="checkable" >
-       <bool>true</bool>
-      </property>
-      <property name="checked" >
-       <bool>true</bool>
-      </property>
-      <property name="autoExclusive" >
-       <bool>true</bool>
-      </property>
-     </widget>
-    </widget>
     <widget class="QProgressBar" name="progressBar" >
      <property name="geometry" >
       <rect>
        <x>10</x>
-       <y>280</y>
+       <y>296</y>
        <width>421</width>
-       <height>23</height>
+       <height>16</height>
       </rect>
      </property>
      <property name="value" >
       <number>0</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2" >
+     <property name="geometry" >
+      <rect>
+       <x>20</x>
+       <y>0</y>
+       <width>411</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-size:10pt; color:#ff0000;">The new mesh will be created by selecting the desired faces and the&lt;/span>&lt;/p>
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; color:#ff0000;">&lt;/p>&lt;/body>&lt;/html></string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3" >
+     <property name="geometry" >
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>411</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-size:10pt; color:#ff0000;">retopology mode (for refined mesh, more than 4 iterations may slow&lt;/span>&lt;/p>
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; color:#ff0000;">&lt;/p>&lt;/body>&lt;/html></string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4" >
+     <property name="geometry" >
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>411</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-size:10pt; color:#ff0000;">down your system)&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
      </property>
     </widget>
    </widget>
