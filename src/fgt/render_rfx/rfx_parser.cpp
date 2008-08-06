@@ -145,7 +145,7 @@ bool RfxParser::Parse()
 					unif->SetTU(tu++);
 					theGLPass->AddUniform(unif);
 
-					QDomNodeList statelist = state.elementsByTagName("RmState");
+					QDomNodeList statelist = to.elementsByTagName("RmState");
 					AppendGLStates(theGLPass, statelist, RfxState::RFX_SAMPLERSTATE);
 				}
 			}

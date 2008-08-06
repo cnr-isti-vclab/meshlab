@@ -43,5 +43,5 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_quality/filter_quality \
 				../fgt/edit_texture\
 				../fgt/editpaint\
-				../fgt/filter_colorproc
+				../fgt/filter_colorproc \ 
 				../fgt/render_rfx
