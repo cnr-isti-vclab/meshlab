@@ -42,10 +42,9 @@
 #include <vcg/complex/edgemesh/base.h>
 #include <vcg/simplex/edge/edge.h>
 
-#include <wrap/gui/trackball.h>
 #include <wrap/io_edgemesh/export_svg.h>
 
-#include "svgpro.h"
+//#include "svgpro.h"
 
 
 typedef CMeshO n_Mesh;
@@ -59,6 +58,7 @@ class n_Edge    : public vcg::Edge<n_Edge, n_Vertex> {};
 class n_EdgeMesh: public vcg::edge::EdgeMesh< std::vector<n_Vertex>, std::vector<n_Edge> > {};
 
 typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
+typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
 typedef vcg::edge::EdgeMesh<std::vector<n_Vertex>,std::vector<n_Edge> > Edge_Mesh;
 typedef vcg::edge::io::SVGProperties SVGProperties;
 
@@ -69,7 +69,6 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 
 public:
 	enum { FP_PLAN };
-	vcg::Trackball trackball_slice;
 
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};
@@ -89,7 +88,7 @@ private:
 	std::vector< TriMeshGrid::Cell *> intersected_cells;
 	std::vector<vcg::Point3f> point_Vector;
 	SVGProperties pr;
-	QString fileName, fileN;
+	QString fileName, fileN, Number, number, StepNumber, folderN;
 	vcg::Box3f b;
 	float edgeMax;
 };

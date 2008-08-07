@@ -26,6 +26,8 @@
 #include <qfiledialog.h>
 #include <limits>
 #include <math.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <stdlib.h>
 #include <qstring.h>
 
@@ -38,8 +40,6 @@
 #include <vcg/space/index/grid_closest.h>
 #include <vcg/complex/intersection.h>
 #include <vcg/complex/edgemesh/update/bounding.h>
-
-#include <wrap/gui/trackball.h>
 
 
 using namespace std;
@@ -85,7 +85,7 @@ const PluginInfo &ExtraFilter_SlicePlugin::pluginInfo()
    static PluginInfo ai;
    ai.Date=tr("Jul 2008");
 	 ai.Version = tr("1.0");
-	 ai.Author = ("Couet Julien, with the aid of Nicola Andrenucci editslice's code");
+	 ai.Author = ("Couet Julien");
    return ai;
  }
 
@@ -110,7 +110,10 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 				metrics.push_back("ZX Cross Section");
 				parlst.addEnum("Plan", 0, metrics, tr("Plan:"), tr("Choose a cross section plan."));
 				parlst.addFloat("CrossPlanVal", 0.0, "Crossing plan value", "Specify a value of the crossing plan as a float.");
-				parlst.addString("filename", "Slice", "Name of the svg file", "All the svg files are registered in the sample/SvgSample folder of the MEshlab tree."); 		  
+				parlst.addString("filename", "Slice", "Name of the svg files and of the folder contaning them", "It is automatically created in the Sample folder of the Meshlab tree");
+				parlst.addBool ("SelAlone",m.cm.sfn>0,"Allow automatic cross section plans of the object, each plan is stored in a svg file");
+				parlst.addBool ("SelAll",m.cm.sfn>0,"Allow automatic cross section plans of the object,all plans are concatenated in a same svg file");
+				parlst.addFloat("CrossStepVal", 0.0, "Step crossing plan value", "Specify a value of the Step crossing plan, should be used with the bool selection.");			 		  
 		  }
 		  break;
 											
@@ -126,121 +129,202 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 	{
 		case FP_PLAN :
 		{
-			int plan = parlst.getEnum("Plan");
+			int plan = parlst.getEnum("Plan");	
+			int i=0;
+			bool selAlone = parlst.getBool("SelAlone");
+			bool selAll = parlst.getBool("SelAll");
+			float StepVal = parlst.getFloat("CrossStepVal");
 			float PlanVal = parlst.getFloat("CrossPlanVal");
+			Number = QString::number(PlanVal);
+			number = QString::number(StepVal);
 			fileName = parlst.getString("filename");
+			folderN = fileName;
+			const char *folderName = fileName.toLatin1();
+			mkdir(folderName, 0777);
 			if (fileName==0) return false;
     			if (!(fileName.endsWith("svg")))
 			fileName= fileName+".svg";
-			
 			double avg_length; 
-
 			b=m.cm.bbox; //Boundig Box
 			Point3f mi=b.min;
 			Point3f ma=b.max;
-			Point3f centre=b.Center() ;
-			edgeMax=0;
-    			float LX= ma[0]-mi[0];
-			float LY= ma[1]-mi[1];
-			float LZ= ma[2]-mi[2];
-			edgeMax= max(LX, LY);
-			edgeMax=max(edgeMax, LZ); //edgeMax: the longest side of BBox
-
-			pr.setPosition(Point2d(0,0));
+			Point3f center=b.Center() ;
+			edgeMax= max((ma[0]-mi[0]), (ma[1]-mi[1]));
+			edgeMax=max(edgeMax, (ma[2]-mi[2])); //edgeMax: the longest side of BBox
 			pr.numCol=1;
 			pr.numRow=1;
-
-			edge_mesh = new n_EdgeMesh();
+			mesh_grid = new TriMeshGrid();
+			mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
 			
 			switch(plan)
 			{ 
 				case 0: 
 				{
-					Point3f* dir=new Point3f(0,1,0);   //the plans' normal vector init 
-					Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
-					
+					Point3f* dir=new Point3f(0,0,1);   //the plans' normal vector init 
 					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
-					pr.setPlane(0, d); 
-
-					mesh_grid = new TriMeshGrid();
-					mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
-
-					float scale = (pr.getViewBox().V(0)*2)/(edgeMax*1.4142) ;
+					pr.setPlane(0, d);
+						
+					float scale = (pr.getViewBox().V(0))/(edgeMax*2) ;
 					pr.setScale(scale);
-
-					Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
 					Plane3f pl;
 					pl.SetDirection(*dir);
-				
-					Point3f off= translation_plans; //translation vector
-					pl.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) + PlanVal);
-			
-					vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-					vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
 
-					fileN="./SvgSample/"+fileName.left( fileName.length ()- 4 )+"XY"+".svg";
-					vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(),pr);			
+				       		if( (!selAll && !selAlone) || ((selAll || selAlone) && StepVal == 0.0) )
+						{
+							edge_mesh = new n_EdgeMesh();
+							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ PlanVal);
+							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_XY_"+Number+".svg";
+							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[1], ma[0], ma[1], center[1], center[0]);				
+						}
 
-			
+						if(selAlone && !selAll && StepVal != 0.0)
+						{							
+							while((mi[2]+i*StepVal) <= ma[2])
+							{
+								edge_mesh = new n_EdgeMesh();
+								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[2] + (i*StepVal));
+								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+								StepNumber = QString::number(mi[2] + (i*StepVal));
+								fileN="./"+folderN+"/" + fileName.left( fileName.length ()- 4 ) + "_XY_" + StepNumber + ".svg";
+								vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[1], ma[0], ma[1], center[1], center[0]);
+								i++;
+							}	
+						}
+
+						if(selAll && !selAlone && StepVal != 0.0)
+						{
+							edge_mesh = new n_EdgeMesh();
+							fileN="./"+folderN+"/" + fileName.left( fileName.length ()- 4 ) + "_XY_" + number + ".svg";
+
+							while((mi[2]+i*StepVal) <= ma[2])
+							{	
+								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[2] + (i*StepVal));
+								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+								i++;	
+							}
+							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[1], ma[0], ma[1], center[1], center[0]);		
+						}
+						
+						if(selAll && selAlone)
+							return false;	
 				} 
 				break;
 
 				case 1: 
-				{ 
-					Point3f* dir=new Point3f(0,0,1);   //the plans' normal vector init 
-					Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
-				
+				{
+					Point3f* dir=new Point3f(1,0,0);   //the plans' normal vector init 
 					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
-					pr.setPlane(0, d); 
-
-					mesh_grid = new TriMeshGrid();
-					mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
-					
-					float scale = (pr.getViewBox().V(0)*2)/(edgeMax*1.4142) ;
+					pr.setPlane(0, d);
+						
+					float scale = (pr.getViewBox().V(0))/(edgeMax*2) ;
 					pr.setScale(scale);
-
-					Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
 					Plane3f pl;
 					pl.SetDirection(*dir);
-				
-					Point3f off= translation_plans; //translation vector
-					pl.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) + PlanVal);
-			
-					vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-					vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
 
-					fileN="./SvgSample/"+fileName.left( fileName.length ()- 4 )+"YZ"+".svg";
-					vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(),pr);
-        					
+				       		if( (!selAll && !selAlone) || ((selAll || selAlone) && StepVal == 0.0) )
+						{
+							edge_mesh = new n_EdgeMesh();
+							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ PlanVal);
+							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_YZ_"+Number+".svg";
+							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[2], mi[1], ma[2], ma[1], center[2], center[1]);		
+						}
+
+						if(selAlone && !selAll && StepVal != 0.0)
+						{							
+							while((mi[0]+i*StepVal) <= ma[0])
+							{
+								edge_mesh = new n_EdgeMesh();
+								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[0] + (i*StepVal));
+								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+								StepNumber = QString::number(mi[2] + (i*StepVal));
+								fileN="./"+folderN+"/" + fileName.left( fileName.length ()- 4 ) + "_YZ_" + StepNumber + ".svg";
+								vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[2], mi[1], ma[2], ma[1], center[2], center[1]);
+								i++;
+							}	
+						}
+
+						if(selAll && !selAlone && StepVal != 0.0)
+						{
+							edge_mesh = new n_EdgeMesh();
+							fileN="./"+folderN+"/" + fileName.left( fileName.length ()- 4 ) + "_YZ_" + number + ".svg";
+
+							while((mi[0]+i*StepVal) <= ma[0])
+							{
+									
+								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[0] + (i*StepVal));
+								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+								i++;	
+							}
+							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[2], mi[1], ma[2], ma[1], center[2], center[1]);	
+						}
+						
+						if(selAll && selAlone)
+							return false;	
 				} 
 				break;
 
 				case 2: 
 				{ 	
-					Point3f* dir=new Point3f(1,0,0);   //the plans' normal vector init 
-					Point3f translation_plans=trackball_slice.track.tra;  //vettore di translazione dei piani
-					
+					Point3f* dir=new Point3f(0,1,0);   //the plans' normal vector init 
 					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
-					pr.setPlane(0, d); 
-
-					mesh_grid = new TriMeshGrid();
-					mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
-					
-					float scale = (pr.getViewBox().V(0)*2)/(edgeMax*1.4142) ;
+					pr.setPlane(0, d);
+						
+					float scale = (pr.getViewBox().V(0))/(edgeMax*2) ;
 					pr.setScale(scale);
-
-					Point3f rotationCenter=m.cm.bbox.Center(); //the point where the plans rotate
 					Plane3f pl;
 					pl.SetDirection(*dir);
-				
-					Point3f off= translation_plans; //translation vector
-					pl.SetOffset( (rotationCenter.X()*dir->X() )+ (rotationCenter.Y()*dir->Y()) +(rotationCenter.Z()*dir->Z())+ (off*(*dir)) + PlanVal);
-			
-					vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-					vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
 
-					fileN="./SvgSample/"+fileName.left( fileName.length ()- 4 )+"ZX"+".svg";
-					vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(),pr);
+				       		if( (!selAll && !selAlone) || ((selAll || selAlone) && StepVal == 0.0) )
+						{
+							edge_mesh = new n_EdgeMesh();
+							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + PlanVal);
+							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_ZX_"+Number+".svg";
+							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[2], ma[0], ma[2], center[0], center[2]);		
+						}
+
+						if(selAlone && !selAll && StepVal != 0.0)
+						{							
+							while((mi[1]+i*StepVal) <= ma[1])
+							{
+								edge_mesh = new n_EdgeMesh();
+								pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + mi[1] + (i*StepVal));
+								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
+								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+								StepNumber = QString::number(mi[1] + (i*StepVal));
+								fileN="./"+folderN+"/"+fileName.left(fileName.length()-4)+"_ZX_"+StepNumber+".svg";
+								vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[2], ma[0], ma[2], center[0], center[2]);
+								i++;
+							}	
+						}
+
+						if(selAll && !selAlone && StepVal != 0.0)
+						{
+							edge_mesh = new n_EdgeMesh();
+							fileN="./"+folderN+"/"+fileName.left(fileName.length()-4)+"_ZX_"+number+".svg";
+
+							while((mi[1]+i*StepVal) <= ma[1])
+							{
+									
+								pl.SetOffset((center.X()*dir->X() )+(center.Y()*dir->Y())+(center.Z()*dir->Z())+ mi[1] + (i*StepVal));
+								vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl, *edge_mesh, avg_length, mesh_grid, intersected_cells);
+								vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+								i++;	
+							}
+							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[2], ma[0], ma[2], center[0], center[2]);	
+						}
+						
+						if(selAll && selAlone)
+							return false;	
 				}
 				break;
 					

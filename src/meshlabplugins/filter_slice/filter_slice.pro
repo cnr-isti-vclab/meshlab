@@ -1,20 +1,18 @@
 include (../../shared.pri)
 
-HEADERS       = filter_slice.h \
-		svgpro.h
+HEADERS       = filter_slice.h
+
 		
  
 SOURCES       = filter_slice.cpp \
 		$$GLEWCODE \
-                $$VCGDIR/wrap/gui/trackball.cpp \
-                $$VCGDIR/wrap/gui/trackmode.cpp \
-		svgpro.cpp \
+#	svgpro.cpp \
 		../../meshlab/filterparameter.cpp
 		
 
 TARGET        = filter_slice
 
-FORMS	      = svgpro.ui
+#FORMS	      = svgpro.ui
 
 QT           += opengl
 
