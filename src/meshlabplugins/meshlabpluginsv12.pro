@@ -1,3 +1,6 @@
+# This Project file contains all the stable plugins ready for the deployment in version 1.2 
+# Plugins should be added here only when they are reasonably complete and stable. 
+
 TEMPLATE      = subdirs
 SUBDIRS       = meshfilter \
 				baseio\
@@ -43,5 +46,4 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_quality/filter_quality \
 				../fgt/edit_texture\
 				../fgt/editpaint\
-				../fgt/filter_colorproc \ 
-				../fgt/render_rfx
+				../fgt/filter_colorproc 
