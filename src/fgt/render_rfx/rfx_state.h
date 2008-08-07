@@ -60,7 +60,7 @@ public:
 
 private:
 	void SetTextureEnvironment(GLint);
-	void SetGLEnvironment();
+	void SetGLEnvironment() { /* STUB */ };
 	GLint GLWrapMode();
 	GLint GLFilterMode();
 
