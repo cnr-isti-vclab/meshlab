@@ -78,7 +78,7 @@ void RfxGLPass::CompileAndLink(QGLContext *ctx)
 	glLinkProgram(shaderProgram);
 
 	// TODO: improve compile/link error handling - integration with qt dialog
-	int res;
+	GLint res;
 	glGetObjectParameterivARB(shaderProgram, GL_OBJECT_LINK_STATUS_ARB, &res);
 	if (!res) {
 		printInfoLog(shaderProgram);
@@ -98,8 +98,8 @@ void RfxGLPass::CompileAndLink(QGLContext *ctx)
 #include <cstdlib>
 void RfxGLPass::printInfoLog(GLhandleARB obj)
 {
-	int infologLength = 0;
-	int charsWritten  = 0;
+	GLint infologLength = 0;
+	GLsizei charsWritten  = 0;
 	char *infoLog;
 
 	glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infologLength);
