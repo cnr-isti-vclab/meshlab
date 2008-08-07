@@ -258,7 +258,7 @@ void RfxParser::AppendGLStates(RfxGLPass *theGLPass, QDomNodeList statelist,
 		QDomElement stateEl = statelist.at(j).toElement();
 		RfxState *glstate = new RfxState(statetype);
 		glstate->SetState(stateEl.attribute("STATE").toInt());
-		glstate->SetValue(stateEl.attribute("VALUE").toInt());
+		glstate->SetValue(stateEl.attribute("VALUE").toFloat());
 
 		if (statetype == RfxState::RFX_RENDERSTATE)
 			theGLPass->AddGLState(glstate);
@@ -281,6 +281,9 @@ void RfxParser::ParseUniforms(const QString &source)
 		QStringList decl = txtSource.mid(unif, declLen).split(QRegExp("\\s+"));
 		position = semicol;
 
+		// store mappings between uniform declarations and their types
+		// for easy lookup.
+		// (eg: uniformType["MyTexture"] = "sampler2D")
 		enum declContent {UNIFORM, TYPE, IDENTIFIER};
 		uniformType[decl[IDENTIFIER]] = decl[TYPE];
 	}

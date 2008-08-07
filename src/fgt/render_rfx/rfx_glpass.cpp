@@ -99,7 +99,7 @@ void RfxGLPass::CompileAndLink(QGLContext *ctx)
 void RfxGLPass::printInfoLog(GLhandleARB obj)
 {
 	GLint infologLength = 0;
-	GLsizei charsWritten  = 0;
+	GLsizei charsWritten = 0;
 	char *infoLog;
 
 	glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infologLength);

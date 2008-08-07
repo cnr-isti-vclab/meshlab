@@ -142,6 +142,10 @@ void RfxUniform::LoadTexture(QGLContext *ctx)
 		else
 			textureId = ctx->bindTexture(Tex, textureTarget);
 
+		// set texture states
+		foreach (RfxState *state, textureStates)
+			state->SetEnvironment(textureTarget);
+
 		if (texUnit < GL_MAX_TEXTURE_COORDS)
 			textureLoaded = true;
 	}

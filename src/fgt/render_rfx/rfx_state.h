@@ -24,11 +24,19 @@
 #ifndef RFX_STATE_H_
 #define RFX_STATE_H_
 
+#include <GL/glew.h>
+
 class RfxState
 {
 public:
 	enum StateType {
 		RFX_RENDERSTATE, RFX_SAMPLERSTATE
+	};
+
+	enum TextureStateRfx {
+		GL_TextureWrapS = 1, GL_TextureWrapT, GL_TextureWrapR,
+		GL_TextureMinify, GL_TextureMagnify, GL_TextureBorderColor,
+		GL_TextureMaxAnisotropyEXT, GL_TextureLODBias = 12
 	};
 
 	enum TextureWrapRfx {
@@ -47,11 +55,17 @@ public:
 	virtual ~RfxState() {}
 
 	void SetState(int _state) { state = _state; }
-	void SetValue(int _val) { value = _val; }
+	void SetValue(float _val) { value = _val; }
+	void SetEnvironment(GLint);
 
 private:
+	void SetTextureEnvironment(GLint);
+	void SetGLEnvironment();
+	GLint GLWrapMode();
+	GLint GLFilterMode();
+
 	int state;
-	int value;
+	float value;
 	StateType type;
 };
 
