@@ -418,7 +418,29 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	}
 
 
+		if(edit_topodialogobj->utensil==U_DND)
+		{
+			drag_stack.clear();
+			if(!drag_click)
+			{
+				drag_click = true;
 
+				Vtx vtx = getVisibleVertexNearestToMouse(stack);
+				drag_vtx = vtx;
+
+				for(int f=0; f<Fstack.count(); f++)
+				{
+					Fce fc = Fstack.at(f);
+					if(fc.containsVtx(vtx))
+						drag_stack.push_back(fc);
+				}
+			}
+			else
+			{
+				drag_click = false;
+				// Recalculate the mesh (only for involved face? mmm...)			
+			}
+		}
 
 
 
@@ -434,6 +456,48 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 	// Even if there's something selected: show vtx	
+
+
+	if(edit_topodialogobj->utensil==U_DND)
+	{
+		if(drag_click)
+		{
+			Point3f pmouse;
+			if(Pick(mousePos.x(), mouseRealY, pmouse))
+			{			
+				for(int i=0; i<drag_stack.count(); i++)
+				{
+					Fce fc = drag_stack.at(i);
+
+					QList<Vtx> allv;
+					for(int e=0; e<3; e++)
+						for(int v=0; v<2; v++)
+							if(!allv.contains(fc.e[e].v[v]))
+								allv.push_back(fc.e[e].v[v]);
+
+					QVector<Vtx> v = allv.toVector();
+				
+					for(int i=0; i<3; i++)
+						if(v[i] == drag_vtx)
+							v[i].V = pmouse;
+
+					drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Yellow, v[0].V, v[1].V);
+					drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Yellow, v[1].V, v[2].V);
+					drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Yellow, v[2].V, v[0].V);
+				}
+			}
+		}
+		else
+		{
+			Vtx vtx = getVisibleVertexNearestToMouse(stack);
+
+			if(vtx.V != Point3f(0,0,0))
+				drawPoint(m, 4.0f, Color4b::Yellow, Color4b::Yellow, vtx.V);
+
+		}
+	}
+
+
 	if(edit_topodialogobj->utensil==U_FCE_SEL)
 	{
 		// DEBUG
@@ -527,7 +591,8 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	
 	if((edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_SEL)
 		||(edit_topodialogobj->utensil==U_VTX_SEL_FREE)||(edit_topodialogobj->utensil==U_VTX_DEL)
-		||(edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_DE_CONNECT))
+		||(edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
+		||(edit_topodialogobj->utensil==U_DND))
 	{
 		if(stack.count()!=0)
 			drawPoint(m, 3.0f, Color4b::DarkRed, Color4b::Red, stack);
@@ -712,7 +777,7 @@ void edit_topo::on_mesh_create()
 
 	RetopMeshBuilder * rm = new RetopMeshBuilder(currentMesh);
 
-	double dist = currentMesh->cm.bbox.Diag()/50; //trgMesh ???//edit_topodialogobj->dist(0);
+	float dist = currentMesh->cm.bbox.Diag()/10; //trgMesh ???//edit_topodialogobj->dist(0);
 	rm->init(&(currentMesh->cm), dist);
 
 
@@ -1043,7 +1108,7 @@ float edit_topo::distancePointSegment(QPointF p, QPointF segmentP1,QPointF segme
 	x0 = p.x();
 	y0 = p.y();
 
-	return fabs((y0 - m*x0 -q) / (sqrt(1 + m*m)));
+	return abs((y0 - m*x0 -q) / (sqrt(1 + m*m)));
 }
 float edit_topo::distancePointPoint(QPointF P1, QPointF P2)
 { 	

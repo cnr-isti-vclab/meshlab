@@ -227,3 +227,14 @@ void edit_topodialog::on_toolBox_currentChanged(int i)
 	};
 		emit fuffa();
 }
+
+void edit_topodialog::on_groupBox_2_toggled(bool)
+{
+
+}
+
+void edit_topodialog::on_ButtonConnectVertex_2_clicked()
+{
+	utensil = U_DND;
+	emit fuffa();
+}

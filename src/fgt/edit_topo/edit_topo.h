@@ -155,6 +155,7 @@ public:
 	int nameVtxCount;
 	bool reDraw;
 	bool click;
+	bool drag_click;
 	CMeshO::FacePointer currentFacePointer;
 	
 
@@ -167,6 +168,9 @@ public:
 	QList<Vtx> stack;
 	QList<Edg> Estack;
 	QList<Fce> Fstack;
+
+	QList<Fce> drag_stack;
+	Vtx drag_vtx;
 
 	QList<Point3f> in;
 	QList<Point3f> out;

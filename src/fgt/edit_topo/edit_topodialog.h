@@ -21,7 +21,8 @@ typedef enum
 		U_VTX_DEL,
 		U_VTX_CONNECT,
 		U_VTX_DE_CONNECT,		
-		U_FCE_SEL
+		U_FCE_SEL,
+		U_DND
 	} UtensType;
 
 
@@ -57,6 +58,8 @@ class edit_topodialog : public QDockWidget
 		QWidget* parent;
 	
 	private slots:
+	void on_ButtonConnectVertex_2_clicked();
+	void on_groupBox_2_toggled(bool);
 
 		// 1) Vtx selection
 		void on_ButtonSelectVertex_clicked();
