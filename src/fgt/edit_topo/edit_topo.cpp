@@ -1108,7 +1108,7 @@ float edit_topo::distancePointSegment(QPointF p, QPointF segmentP1,QPointF segme
 	x0 = p.x();
 	y0 = p.y();
 
-	return abs((y0 - m*x0 -q) / (sqrt(1 + m*m)));
+	return fabs((y0 - m*x0 -q) / (sqrt(1 + m*m)));
 }
 float edit_topo::distancePointPoint(QPointF P1, QPointF P2)
 { 	
