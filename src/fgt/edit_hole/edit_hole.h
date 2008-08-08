@@ -70,13 +70,14 @@ private:
 	CFaceO* pickedFace;
 	
 private Q_SLOTS:
-	void fill();
-	void CancelFilling();
 	void upGlA();
 	void resizeViewColumn();
-	
-signals:
-	void SGN_SuspendEditToggle();
-
+	void fill();
+	void bridge();
+	void cancelFill();
+	void acceptFill();
+	void cancelBridge();
+	void acceptBridge();
+	void skipTab(int index);
 };
 #endif

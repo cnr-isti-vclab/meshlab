@@ -35,17 +35,9 @@
 
 #include <wrap/gl/pick.h>
 #include <vcg/complex/trimesh/hole.h>
-
-using namespace vcg;
-
-
-
-
 #include <vcg/complex/trimesh/update/position.h>
 
-//#include <vcg/complex/trimesh/update/bounding.h>
-//#include <vcg/complex/trimesh/update/selection.h>
-//#include <vcg/space/normal_extrapolation.h>
+using namespace vcg;
 
 EditHolePlugin::EditHolePlugin() {
 	QAction* editFill = new QAction(QIcon(":/images/icon_filler.png"),"Fill Hole", this);
@@ -133,10 +125,16 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	dialogFiller=new FillerDialog(gla->window());
 	dialogFiller->show();
 	dialogFiller->setAllowedAreas(Qt::NoDockWidgetArea);
-	connect(dialogFiller, SIGNAL(SGN_ProcessFilling()), this,SLOT(fill()));
-	connect(dialogFiller, SIGNAL(SGN_CancelFill()), this, SLOT(CancelFilling()) );
-	connect(this, SIGNAL(SGN_SuspendEditToggle()),gla,SLOT(suspendEditToggle()) );
+	
+	connect(dialogFiller->ui.operationTab, SIGNAL(currentChanged(int)), this, SLOT(skipTab(int)) );
+	connect(dialogFiller->ui.fillButton, SIGNAL(clicked()), this,SLOT(fill()));
+	connect(dialogFiller->ui.bridgeButton, SIGNAL(clicked()), this, SLOT(bridge()) );
+	connect(dialogFiller->ui.acceptFillBtn, SIGNAL(clicked()), this, SLOT(acceptFill()) );
+	connect(dialogFiller->ui.cancelFillBtn, SIGNAL(clicked()), this, SLOT(cancelFill()) );
+	connect(dialogFiller->ui.acceptBridgeBtn, SIGNAL(clicked()), this, SLOT(acceptBridge()) );
+	connect(dialogFiller->ui.cancelBridgeBtn, SIGNAL(clicked()), this, SLOT(cancelBridge()) );
 	connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
+
 	connect(dialogFiller->ui.holeTree->header(), SIGNAL(sectionCountChanged(int, int)), this, SLOT(resizeViewColumn()) );
 	if(holesModel != 0)
 	{
@@ -169,7 +167,17 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 		GLPickTri<CMeshO>::PickNearestFace(cur.x(), gla->curSiz.height() - cur.y(), m.cm, pickedFace, 4, 4);
 		// guardo se nella faccia più vicina uno dei vertici è di bordo
 		if( pickedFace != 0 )
-			holesModel->toggleSelectionHoleFromBorderFace(pickedFace);		
+		{
+			switch(holesModel->getState())
+			{
+			case HoleListModel::Selection:
+				holesModel->toggleSelectionHoleFromBorderFace(pickedFace);
+				break;
+			case HoleListModel::Filled:
+				holesModel->toggleAcceptanceHoleFromPatchFace(pickedFace);
+				break;
+			}
+		}
 	}
 
 	glPopAttrib();	
@@ -197,37 +205,76 @@ void EditHolePlugin::upGlA()
 
 void EditHolePlugin::resizeViewColumn()
 {
-
 	dialogFiller->ui.holeTree->header()->resizeSections(QHeaderView::ResizeToContents);
-	//dialogFiller->ui.holeTree->row
 }
 
 void EditHolePlugin::fill()
 {
 	Qt::CheckState asi = dialogFiller->ui.antiSelfIntersection->checkState();
-	if(holesModel->getState() == HoleListModel::Selection)
-		holesModel->fill( asi == Qt::Checked);
-	else
-	{
-		holesModel->acceptFilling();
-		gla->setWindowModified(true);
-	}
-
-	if(holesModel->getState() == HoleListModel::Selection)
-		dialogFiller->ui.fillButton->setText("Fill");
-	else 
-		dialogFiller->ui.fillButton->setText("Accept");
-
+	holesModel->fill( asi == Qt::Checked);
 	gla->update();
 }
 
+void EditHolePlugin::acceptFill()
+{
+	holesModel->acceptFilling();
+	gla->setWindowModified(true);
+}
 
-/** Insert into mesh data structure the primiteves used to fill the hole
- */
-void EditHolePlugin::CancelFilling()
+void EditHolePlugin::cancelFill()
 {
 	holesModel->acceptFilling(true);
-	dialogFiller->ui.fillButton->setText("Fill");
 }
- 
+
+void EditHolePlugin::bridge()
+{
+	bool autobridge = dialogFiller->ui.autoBridgeRBtm->isChecked();
+	if(!autobridge)
+	{
+		if(holesModel->getState() != HoleListModel::ManualBridging)
+		{
+			holesModel->setStartBridging();
+			dialogFiller->clickStartBridging();
+		}
+		else
+		{
+			holesModel->setEndBridging();
+			dialogFiller->clickEndBridging();
+		}
+	}
+	else
+	{
+		holesModel->setEndBridging();
+		dialogFiller->clickEndBridging();
+	}
+	
+	// TO DO...
+	gla->update();
+}
+
+void EditHolePlugin::acceptBridge()
+{
+	holesModel->acceptBrdging();
+	gla->setWindowModified(true);
+}
+
+void EditHolePlugin::cancelBridge()
+{
+	holesModel->acceptBrdging(true);
+}
+
+void EditHolePlugin::skipTab(int index)
+{
+	if(holesModel->getState() == HoleListModel::Selection)
+		return;
+
+	if(index == 0)
+	{
+		cancelBridge();
+		dialogFiller->clickEndBridging();
+	}
+	else
+		cancelFill();
+}
+
  Q_EXPORT_PLUGIN(EditHolePlugin)

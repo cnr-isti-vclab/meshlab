@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>318</height>
+    <width>315</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -21,7 +21,7 @@
   <property name="minimumSize" >
    <size>
     <width>0</width>
-    <height>318</height>
+    <height>300</height>
    </size>
   </property>
   <property name="sizeIncrement" >
@@ -115,13 +115,13 @@
          <item>
           <layout class="QVBoxLayout" >
            <property name="leftMargin" >
-            <number>9</number>
+            <number>0</number>
            </property>
            <property name="topMargin" >
-            <number>9</number>
+            <number>0</number>
            </property>
            <property name="rightMargin" >
-            <number>9</number>
+            <number>0</number>
            </property>
            <property name="bottomMargin" >
             <number>0</number>
@@ -210,7 +210,7 @@
         <property name="minimumSize" >
          <size>
           <width>200</width>
-          <height>98</height>
+          <height>140</height>
          </size>
         </property>
         <property name="frameShape" >
@@ -220,176 +220,309 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QHBoxLayout" >
-         <property name="spacing" >
-          <number>2</number>
-         </property>
-         <property name="leftMargin" >
-          <number>9</number>
-         </property>
-         <property name="topMargin" >
-          <number>0</number>
-         </property>
-         <property name="rightMargin" >
-          <number>9</number>
-         </property>
          <property name="bottomMargin" >
           <number>0</number>
          </property>
          <item>
-          <widget class="QGroupBox" name="groupBox_2" >
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QTabWidget" name="operationTab" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize" >
             <size>
-             <width>175</width>
-             <height>90</height>
+             <width>185</width>
+             <height>130</height>
             </size>
            </property>
-           <property name="title" >
-            <string>Option</string>
+           <property name="currentIndex" >
+            <number>0</number>
            </property>
-           <widget class="QRadioButton" name="individualRBtm" >
-            <property name="geometry" >
-             <rect>
-              <x>20</x>
-              <y>45</y>
-              <width>141</width>
-              <height>18</height>
-             </rect>
-            </property>
-            <property name="text" >
-             <string>Individual Fill</string>
-            </property>
-            <property name="checked" >
-             <bool>true</bool>
-            </property>
+           <property name="elideMode" >
+            <enum>Qt::ElideNone</enum>
+           </property>
+           <widget class="QWidget" name="fillTab" >
+            <attribute name="title" >
+             <string>Fill</string>
+            </attribute>
+            <widget class="QPushButton" name="fillButton" >
+             <property name="geometry" >
+              <rect>
+               <x>56</x>
+               <y>35</y>
+               <width>70</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text" >
+              <string>Fill</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="antiSelfIntersection" >
+             <property name="geometry" >
+              <rect>
+               <x>20</x>
+               <y>10</y>
+               <width>141</width>
+               <height>18</height>
+              </rect>
+             </property>
+             <property name="text" >
+              <string>Prevent self intersection</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="cancelFillBtn" >
+             <property name="enabled" >
+              <bool>true</bool>
+             </property>
+             <property name="geometry" >
+              <rect>
+               <x>95</x>
+               <y>70</y>
+               <width>70</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text" >
+              <string>Cancel</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="acceptFillBtn" >
+             <property name="enabled" >
+              <bool>true</bool>
+             </property>
+             <property name="geometry" >
+              <rect>
+               <x>15</x>
+               <y>70</y>
+               <width>70</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text" >
+              <string>Accept</string>
+             </property>
+            </widget>
            </widget>
-           <widget class="QCheckBox" name="antiSelfIntersection" >
-            <property name="geometry" >
-             <rect>
-              <x>21</x>
-              <y>21</y>
-              <width>141</width>
-              <height>18</height>
-             </rect>
-            </property>
-            <property name="text" >
-             <string>Prevent self intersection</string>
-            </property>
-            <property name="checked" >
-             <bool>true</bool>
-            </property>
-           </widget>
-           <widget class="QRadioButton" name="bridgeRBtm" >
-            <property name="geometry" >
-             <rect>
-              <x>20</x>
-              <y>60</y>
-              <width>141</width>
-              <height>18</height>
-             </rect>
-            </property>
-            <property name="text" >
-             <string>Create Bridge</string>
-            </property>
+           <widget class="QWidget" name="bridgeTab" >
+            <attribute name="title" >
+             <string>Bridge</string>
+            </attribute>
+            <widget class="QPushButton" name="bridgeButton" >
+             <property name="geometry" >
+              <rect>
+               <x>100</x>
+               <y>23</y>
+               <width>70</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text" >
+              <string>Start</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="autoBridgeRBtm" >
+             <property name="geometry" >
+              <rect>
+               <x>10</x>
+               <y>12</y>
+               <width>72</width>
+               <height>18</height>
+              </rect>
+             </property>
+             <property name="text" >
+              <string>Automatic</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="manualBridgeRBtm" >
+             <property name="geometry" >
+              <rect>
+               <x>10</x>
+               <y>36</y>
+               <width>72</width>
+               <height>18</height>
+              </rect>
+             </property>
+             <property name="text" >
+              <string>Manual</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="acceptBridgeBtn" >
+             <property name="enabled" >
+              <bool>true</bool>
+             </property>
+             <property name="geometry" >
+              <rect>
+               <x>15</x>
+               <y>70</y>
+               <width>70</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text" >
+              <string>Accept</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="cancelBridgeBtn" >
+             <property name="enabled" >
+              <bool>true</bool>
+             </property>
+             <property name="geometry" >
+              <rect>
+               <x>95</x>
+               <y>70</y>
+               <width>70</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize" >
+              <size>
+               <width>70</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text" >
+              <string>Cancel</string>
+             </property>
+            </widget>
            </widget>
           </widget>
          </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="frame_command" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize" >
-         <size>
-          <width>200</width>
-          <height>33</height>
-         </size>
-        </property>
-        <property name="frameShape" >
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow" >
-         <enum>QFrame::Raised</enum>
-        </property>
-        <layout class="QHBoxLayout" >
-         <property name="spacing" >
-          <number>2</number>
-         </property>
-         <property name="leftMargin" >
-          <number>9</number>
-         </property>
-         <property name="topMargin" >
-          <number>0</number>
-         </property>
-         <property name="rightMargin" >
-          <number>9</number>
-         </property>
-         <property name="bottomMargin" >
-          <number>9</number>
-         </property>
          <item>
-          <widget class="QSplitter" name="splitter" >
+          <spacer>
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <widget class="QPushButton" name="fillButton" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize" >
-             <size>
-              <width>70</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="text" >
-             <string>Fill</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="cancelButton" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize" >
-             <size>
-              <width>70</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="text" >
-             <string>Cancel</string>
-            </property>
-           </widget>
-          </widget>
+           <property name="sizeHint" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>

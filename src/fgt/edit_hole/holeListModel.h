@@ -42,7 +42,7 @@ class HoleListModel : public QAbstractItemModel
 public:
 	enum FillerState
 	{
-		Selection, Filled
+		Selection, ManualBridging, Bridged, Filled
 	};
 
 	typedef vcg::tri::Hole<CMeshO> vcgHole;
@@ -74,22 +74,27 @@ public:
 
 	inline void setState(HoleListModel::FillerState s) { state = s; emit layoutChanged(); };
 	void toggleSelectionHoleFromBorderFace(CFaceO *bface);
+	void toggleAcceptanceHoleFromPatchFace(CFaceO *bface);
 	void clearModel();
 	void updateModel();
 	void drawHoles() const;
 	void drawCompenetratingFaces() const;
 	void fill(bool antiSelfIntersection);
 	void acceptFilling(bool forcedCancel=false);
-	inline FillerState getState() const { return state; }
-	inline MeshModel* getMesh() const { return mesh; }
+	void acceptBrdging(bool forcedCancel=false);
+	inline FillerState getState() const { return state; };
+	inline MeshModel* getMesh() const { return mesh; };
+	inline int getUserBitHole() const { return userBitHole; };
+	inline void setStartBridging() { state = HoleListModel::ManualBridging ; };
+	inline void setEndBridging() { state = HoleListModel::Bridged; };
 
 private:
 	MeshModel *mesh;
 	FillerState state;	
+	int userBitHole;
 
 public:
 	HoleVector holes;
-	int userBitHole;
 
 signals:
 	void SGN_needUpdateGLA();

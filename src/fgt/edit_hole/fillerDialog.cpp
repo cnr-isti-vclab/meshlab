@@ -39,15 +39,24 @@ FillerDialog::~FillerDialog() {}
 
 void FillerDialog::closeEvent ( QCloseEvent * event )
 {
-  emit SGN_Closing();
+	emit SGN_Closing();
 }
 
-void FillerDialog::on_fillButton_clicked()
+void FillerDialog::clickStartBridging()
 {
-	emit SGN_ProcessFilling();
+	ui.bridgeButton->setText("End");
+	ui.manualBridgeRBtm->setEnabled(false);
+	ui.autoBridgeRBtm->setEnabled(false);
+	ui.acceptBridgeBtn->setEnabled(false);
+	ui.cancelBridgeBtn->setEnabled(false);
+	
 }
 
-void FillerDialog::on_cancelButton_clicked()
+void FillerDialog::clickEndBridging()
 {
-	emit SGN_CancelFill();
+	ui.bridgeButton->setText("Start");
+	ui.manualBridgeRBtm->setEnabled(true);
+	ui.autoBridgeRBtm->setEnabled(true);
+	ui.acceptBridgeBtn->setEnabled(true);
+	ui.cancelBridgeBtn->setEnabled(true);
 }

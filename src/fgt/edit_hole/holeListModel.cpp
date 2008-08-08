@@ -139,24 +139,29 @@ void HoleListModel::drawCompenetratingFaces() const
 void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
 {
 	int ind = -1;
-	if(state == HoleListModel::Selection)
-	{
-		ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes);
-		if(ind == -1)
-			return;
-		holes[ind].isSelected = !holes[ind].isSelected;
-	}
-	else
-	{
-		ind = FgtHole<CMeshO>::FindHoleFromHoleFace(bface, holes);
-		if(ind == -1)
-			return;
-		holes[ind].isAccepted = !holes[ind].isAccepted;
-	}
+	ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes);
+	if(ind == -1)
+		return;
+	holes[ind].isSelected = !holes[ind].isSelected;
 	
 	emit dataChanged( index(ind, 3), index(ind, 3) );
 	emit SGN_needUpdateGLA();
 }
+
+void HoleListModel::toggleAcceptanceHoleFromPatchFace(CFaceO *bface)
+{
+	int ind = -1;
+	assert(state == HoleListModel::Filled);
+	ind = FgtHole<CMeshO>::FindHoleFromHoleFace(bface, holes);
+	if(ind == -1)
+		return;
+	holes[ind].isAccepted = !holes[ind].isAccepted;
+
+	emit dataChanged( index(ind, 5), index(ind, 5) );	
+	emit SGN_needUpdateGLA();
+}
+
+
 
 void HoleListModel::fill(bool antiSelfIntersection)
 {
@@ -189,6 +194,7 @@ void HoleListModel::fill(bool antiSelfIntersection)
 
 void HoleListModel::acceptFilling(bool forcedCancel)
 {
+	assert(state == HoleListModel::Filled);
 	HoleVector::iterator it = holes.begin();
 	for( ; it != holes.end(); it++ )
 	{
@@ -201,6 +207,27 @@ void HoleListModel::acceptFilling(bool forcedCancel)
 	state = HoleListModel::Selection;
 	emit layoutChanged();
 }
+
+
+void HoleListModel::acceptBrdging(bool forcedCancel)
+{
+	assert(state == HoleListModel::Bridged);
+	HoleVector::iterator it = holes.begin();
+	for( ; it != holes.end(); it++ )
+	{
+		if( (it->isSelected && !it->isAccepted) || forcedCancel)
+		{
+			//To DO
+			//it->RestoreBridge(mesh->cm);
+		}
+	}
+	
+	mesh->clearDataMask(MeshModel::MM_FACETOPO);
+	updateModel();
+	state = HoleListModel::Selection;
+	emit layoutChanged();
+}
+
 
 /************* Implementazione QAbstractItemModel class *****************/
 
@@ -324,12 +351,11 @@ Qt::ItemFlags HoleListModel::flags(const QModelIndex &index) const
 	if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-	if(index.column() == 1 && state == HoleListModel::Filled)
-		return ret;
-	else if(index.column() > 1)
-		ret = ret | Qt::ItemIsUserCheckable ;
-	else if(index.column() == 0)
+	if(index.column() == 0)
 		ret = ret | Qt::ItemIsEditable;
+	else if( (index.column() == 3 && state == HoleListModel::Selection) ||
+			 (index.column() == 5 && state == HoleListModel::Filled) )
+		return Qt::ItemIsUserCheckable;
 		
 	return ret;
 }

@@ -37,20 +37,16 @@ public:
 	FillerDialog(QWidget *parent = 0);
 	~FillerDialog();
 	
+	void clickStartBridging();
+	void clickEndBridging();
+	
 
 Q_SIGNALS:
-	void SGN_ProcessFilling(); 
 	void SGN_Closing();
-	void SGN_CancelFill();
-
+	
 public:
 	Ui::FillerWidget ui;
 	QWidget* parent;
-	
-	
-private slots:
-	void on_fillButton_clicked();
-	void on_cancelButton_clicked();
 
 private:
 	virtual void closeEvent( QCloseEvent * event );
