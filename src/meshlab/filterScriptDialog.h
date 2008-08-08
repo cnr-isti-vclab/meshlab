@@ -46,6 +46,10 @@ public:
   void setScript(FilterScript *scr);
 
 private slots:
+	//will do all things that need to be done before the script runs then trigger the running of the script
+	//specifically with the PARMESH type we need to to set the mesh pointer based on the int given
+	void applyScript();
+
 	void clearScript();	
 	void saveScript();	
 	void openScript();	

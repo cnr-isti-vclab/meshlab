@@ -69,6 +69,8 @@ class FilterParameter
 		PARMESH = 9,
 		PARFLOATLIST = 10,
 		PARDYNFLOAT = 11,
+		PAROPENFILENAME = 12,
+		PARSAVEFILENAME = 13
 	};
 	
 	QString  fieldName;
@@ -131,10 +133,29 @@ public:
 	void addColor    (QString name, QColor defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addAbsPerc  (QString name, float     defaultVal, float minVal, float maxVal,  QString desc=QString(), QString tooltip=QString());
 	void addEnum     (QString name, int defaultVal, QStringList values, QString desc=QString(), QString tooltip=QString());
-	void addMesh     (QString name, MeshModel* m,  QString desc=QString(), QString tooltip=QString());		
+	void addMesh     (QString name, MeshModel* m,  QString desc=QString(), QString tooltip=QString());
+	
+	//make the default the mesh that is at the given position in the mesh document
+	//if the filter is run in a script and has added a mesh for a position that does not exist in the MeshDocument, then the 
+	//script will fail to run.  this is useful for filters that need more than one mesh to work.
+	void addMesh     (QString name, int position,  QString desc=QString(), QString tooltip=QString());
+	
+	/*  A way to collect an arbitrary number of floats. Useful if you want the user to input an array of numbers */
 	void addFloatList(QString name, QList<float> &defaultValue, QString desc=QString(), QString tooltip=QString());
 	void addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, int changeMask, QString desc=QString(), QString tooltip=QString());
+	
+	/*  A way to use the built in QT file picker widget: QFileDialog::getOpenFileName
+	 *  - QString extension - the regular exprssion used to decide what files to display in QT's file picker window
+	 */
+	void addOpenFileName(QString name, QString defaultVal, QString extension=QString(".*"), QString desc=QString(), QString tooltip=QString());
+	
+	/*  A way to use the built in QT file picker widget: QFileDialog::getSaveFileName
+	 *  - QString extension - the regular exprssion used to decide what files to display in QT's file picker window
+	 */
+	void addSaveFileName(QString name, QString defaultVal, QString extension=QString(".*"), QString desc=QString(), QString tooltip=QString());
 		
+	
+	
 	bool				getBool(QString name) const;
 	int					getInt(QString name) const;
 	float				getFloat(QString name) const;
@@ -147,7 +168,9 @@ public:
 	MeshModel*   getMesh(QString name) const;
 	QList<float> getFloatList(QString name) const;
 	float        getDynamicFloat(QString name) const;
-
+	QString getOpenFileName(QString name) const;
+	QString getSaveFileName(QString name) const;
+	
 	void setBool(QString name, bool newVal) ;
 	void setInt(QString name, int newVal) ;
 	void setFloat(QString name, float newVal);
@@ -156,10 +179,14 @@ public:
 	void setColor(QString name, QColor newVal);
 	void setAbsPerc(QString name, float newVal);
 	void setEnum(QString name, int newVal);
-	void setMesh(QString name, MeshModel* newVal);
+	
+	//position is the position of this mesh in the MeshDocument, this is needed for saving this parameter to a script
+	void setMesh(QString name, MeshModel* newVal, int position = 0);
 	void setFloatList(QString name, QList<float> &newValue);
 	void setDynamicFloat(QString name, float newVal);
-
+	void setOpenFileName(QString name, QString newVal);
+	void setSaveFileName(QString name, QString newVal);
+	
 	int getDynamicFloatMask();
 	
 	FilterParameter *findParameter(QString name);

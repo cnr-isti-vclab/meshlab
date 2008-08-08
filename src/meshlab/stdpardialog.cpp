@@ -128,6 +128,19 @@ void StdParFrame::resetValues(FilterParameterSet &curParSet)
 				case FilterParameter::PARENUM:
 					((EnumWidget *)stdfieldwidgets.at(i))->setEnum(fpi.fieldVal.toUInt());
 					break;
+				case FilterParameter::PARMESH:
+					if(NULL != fpi.pointerVal)
+						((MeshEnumWidget *)stdfieldwidgets.at(i))->setMesh((MeshModel *)(fpi.pointerVal));
+					else
+					{
+						int index = fpi.fieldVal.toInt();
+						//if a mesh exists at this index leave it otherwise pick 0
+						if(index >= ((MeshEnumWidget *)stdfieldwidgets.at(i))->getSize() ) index = 0;
+						
+						((MeshEnumWidget *)stdfieldwidgets.at(i))->setEnum(index);
+						
+					}
+					break;
 				case FilterParameter::PARFLOATLIST: 
 					{
 						QList<QVariant> list = fpi.fieldVal.toList();
@@ -139,6 +152,10 @@ void StdParFrame::resetValues(FilterParameterSet &curParSet)
 					float initVal = (float)fpi.fieldVal.toDouble();
 					((DynamicFloatWidget *)stdfieldwidgets.at(i))->setValue(initVal);
 				}
+					break;
+				case FilterParameter::PAROPENFILENAME:
+				case FilterParameter::PARSAVEFILENAME:
+					((GetFileNameWidget *)stdfieldwidgets.at(i))->setFileName(fpi.fieldVal.toString());
 					break;
 				default: assert(0);
 
@@ -303,17 +320,26 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				break;
 
 			case FilterParameter::PARMESH:
-				assert(mdPt);
-				ql = new QLabel(fpi.fieldDesc,this);
-				ql->setToolTip(fpi.fieldToolTip);	
-				
-				mew = new MeshEnumWidget(this, (MeshModel *)(fpi.pointerVal), *mdPt);
-				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
-				gridLayout->addLayout(mew,i,1,Qt::AlignTop);				
-				stdfieldwidgets.push_back(mew);
-				
+				{	
+					assert(mdPt);
+					ql = new QLabel(fpi.fieldDesc,this);
+					ql->setToolTip(fpi.fieldToolTip);	
+					
+					//if there was no pointer try to use the position value to find the mesh in the mesh document
+					if(NULL == (fpi.pointerVal)){
+						int position = fpi.fieldVal.toInt();
+						if(position > 0 && position < mdPt->meshList.size())
+							mew = new MeshEnumWidget(this, mdPt->getMesh(position), *mdPt);
+						else
+							mew = new MeshEnumWidget(this, mdPt->getMesh(0), *mdPt);
+					} else 
+						mew = new MeshEnumWidget(this, (MeshModel *)(fpi.pointerVal), *mdPt);
+					
+					gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+					gridLayout->addLayout(mew,i,1,Qt::AlignTop);				
+					stdfieldwidgets.push_back(mew);
+				}	
 				break;
-
 
 			case FilterParameter::PARFLOATLIST:
 				{
@@ -342,7 +368,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 					stdfieldwidgets.push_back(layout);
 				}			
 				break;
-
+			
 			case FilterParameter::PARDYNFLOAT : 
 				ql = new QLabel(fpi.fieldDesc ,this);
 				ql->setToolTip(fpi.fieldToolTip);	
@@ -353,6 +379,40 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				
 				stdfieldwidgets.push_back(dfw);
 				connect(dfw,SIGNAL(valueChanged(int)),this,SIGNAL( dynamicFloatChanged(int) ));
+				break;
+				
+			case FilterParameter::PAROPENFILENAME:
+				{
+					ql = new QLabel(fpi.fieldDesc,this);
+					ql->setToolTip(fpi.fieldToolTip);	
+										
+					QString defaultFileName = fpi.fieldVal.toString();
+					
+					GetFileNameWidget *fileNameWidget = new GetFileNameWidget(
+							this, defaultFileName, true, fpi.enumValues.back());
+								
+					gridLayout->addWidget(ql, i, 0, Qt::AlignTop);
+					gridLayout->addLayout(fileNameWidget, i, 1, Qt::AlignTop);
+														
+					stdfieldwidgets.push_back(fileNameWidget);
+				}
+				break;
+				
+			case FilterParameter::PARSAVEFILENAME:
+				{
+					ql = new QLabel(fpi.fieldDesc,this);
+					ql->setToolTip(fpi.fieldToolTip);	
+									
+					QString defaultFileName = fpi.fieldVal.toString();
+					
+					GetFileNameWidget *fileNameWidget = new GetFileNameWidget(
+							this, defaultFileName, false, fpi.enumValues.back());
+											
+					gridLayout->addWidget(ql, i, 0, Qt::AlignTop);
+					gridLayout->addLayout(fileNameWidget, i, 1, Qt::AlignTop);
+														
+					stdfieldwidgets.push_back(fileNameWidget);
+				}
 				break;
 				
 			default: assert(0);
@@ -408,14 +468,20 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 			  curParSet.setEnum(sname,((EnumWidget *)stdfieldwidgets[i])->getEnum());
 			  break;
 		  case FilterParameter::PARMESH:
-			  curParSet.setMesh(sname,((MeshEnumWidget *)stdfieldwidgets[i])->getMesh());
+			  curParSet.setMesh(sname,((MeshEnumWidget *)stdfieldwidgets[i])->getMesh(), ((MeshEnumWidget *)stdfieldwidgets[i])->getEnum());
 			  break;
 		  case FilterParameter::PARFLOATLIST:
 			  curParSet.findParameter(sname)->fieldVal = ((QVariantListWidget *)stdfieldwidgets[i])->getList();
 			  break;
-		  case FilterParameter::PARDYNFLOAT:
+		 case FilterParameter::PARDYNFLOAT:
 			  curParSet.findParameter(sname)->fieldVal = ((DynamicFloatWidget *)stdfieldwidgets[i])->getValue();
 			  break;
+		 case FilterParameter::PAROPENFILENAME:
+			 curParSet.setOpenFileName(sname, ((GetFileNameWidget *)stdfieldwidgets[i])->getFileName());
+			 break;
+		 case FilterParameter::PARSAVEFILENAME:
+		 	curParSet.setSaveFileName(sname, ((GetFileNameWidget *)stdfieldwidgets[i])->getFileName());
+		 	break;
 			default:
 				assert(0);
 		  }
@@ -592,6 +658,10 @@ void EnumWidget::setEnum(int newEnum)
 	enumCombo->setCurrentIndex(newEnum);
 }
 
+int EnumWidget::getSize()
+{
+	return enumCombo->count();
+}
 
 /******************************************/ 
 //MeshEnumWidget Implementation
@@ -600,22 +670,35 @@ MeshEnumWidget::MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument 
 { 
 	md=&_md;
 	QStringList meshNames;
-	int defaultMeshIndex=-1;
+	
+	//make the default mesh Index be 0
+	int defaultMeshIndex = 0;
+
 	for(int i=0;i<md->meshList.size();++i)
 	 {
 		QString shortName(QFileInfo(md->meshList.at(i)->fileName.c_str()).fileName());
 		meshNames.push_back(shortName);
 		if(md->meshList.at(i) == defaultMesh) defaultMeshIndex = i;
 	 }
-	assert(defaultMeshIndex != -1);
-	
+
 	Init(p,defaultMeshIndex,meshNames);
 }
 
-MeshModel *MeshEnumWidget::getMesh()
+MeshModel * MeshEnumWidget::getMesh()
 {
 	return md->meshList.at(enumCombo->currentIndex());
 }
+
+void MeshEnumWidget::setMesh(MeshModel * newMesh)
+{
+	for(int i=0; i < md->meshList.size(); ++i)
+	{
+		if(md->meshList.at(i) == newMesh) setEnum(i);
+	}
+}
+		
+
+
 /****************************************** 
  QVariantListWidget Implementation
 ******************************************/
@@ -687,14 +770,64 @@ void QVariantListWidget::removeRow()
 	}
 }
 
-GenericParamDialog::GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title) :QDialog(p)
+/****************************************** 
+ GetFileNameButton Implementation
+******************************************/
+GetFileNameWidget::GetFileNameWidget(QWidget *parent,
+		QString &defaultString, bool getOpenFileName, QString fileExtension) : QVBoxLayout(parent)
 {
-		stdParFrame=NULL;
-		curParSet=_curParSet;
-		createFrame();
-		if(!title.isEmpty())
-				setWindowTitle(title);
+	_fileName = defaultString;
+	_fileExtension = fileExtension;
+	
+	_getOpenFileName = getOpenFileName;
+	
+	launchFileNameDialogButton = new QPushButton(QString("Get FileName"), parent);
+	fileNameLabel = new QLabel(_fileName, parent);
+	
+	addWidget(launchFileNameDialogButton);
+	addWidget(fileNameLabel);
+	
+	connect(launchFileNameDialogButton, SIGNAL(clicked()), this, SLOT(launchGetFileNameDialog()));
 }
+
+GetFileNameWidget::~GetFileNameWidget()
+{
+	delete launchFileNameDialogButton;
+}
+
+QString GetFileNameWidget::getFileName()
+{
+	return _fileName;
+}
+
+void GetFileNameWidget::launchGetFileNameDialog()
+{
+	QString temp;
+	if(_getOpenFileName){
+		temp = QFileDialog::getOpenFileName(parentWidget(), tr("Select File"),".", "*"+_fileExtension);	
+	} else
+		temp = QFileDialog::getSaveFileName(parentWidget(), tr("Select File"),".", "*"+_fileExtension);
+	
+	if(temp != ""){
+		_fileName = temp;
+		fileNameLabel->setText(QFileInfo(_fileName).fileName());
+	}
+}
+
+void GetFileNameWidget::setFileName(QString newName){
+	_fileName = newName;
+}
+
+GenericParamDialog::GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title, MeshDocument *_meshDocument)
+ : QDialog(p) {
+	stdParFrame=NULL;
+	curParSet=_curParSet;
+	meshDocument = _meshDocument;
+	createFrame();
+	if(!title.isEmpty())
+		setWindowTitle(title);
+}
+
 
 // update the values of the widgets with the values in the paramlist;
 void GenericParamDialog::resetValues()
@@ -716,7 +849,7 @@ void GenericParamDialog::createFrame()
 	setLayout(vboxLayout);
 	
 	stdParFrame = new StdParFrame(this);
-	stdParFrame->loadFrameContent(*curParSet);
+	stdParFrame->loadFrameContent(*curParSet, meshDocument);
   layout()->addWidget(stdParFrame);
 
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);

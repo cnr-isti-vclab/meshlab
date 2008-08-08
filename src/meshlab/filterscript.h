@@ -28,9 +28,16 @@ private:
 	static const QString Type;
 	static const QString Value;
 	static const QString Item;
+	static const QString Min;
+	static const QString Max;
+	static const QString Mask;
 	
 	//constants for the type names
+	static const QString MeshPointer;
 	static const QString FloatList;
+	static const QString DynamicFloat;
+	static const QString OpenFileName;
+	static const QString SaveFileName; 
   
 };
 

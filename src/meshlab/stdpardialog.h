@@ -199,6 +199,9 @@ protected:
 		void Init(QWidget *p, int newEnum, QStringList values);
 		int getEnum();
 		void  setEnum(int newEnum);	
+		
+		//returns the number of items in the list 
+		int getSize();
 };
 
 
@@ -209,9 +212,10 @@ class MeshEnumWidget : public EnumWidget
 private:
 	MeshDocument *md;
 public:
-		MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument &md);
-		inline MeshModel * getMesh();
-		inline void  setMesh(MeshModel * newMesh);
+	MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument &md);
+		
+	MeshModel * getMesh();
+	void setMesh(MeshModel * newMesh);
 };
 
 
@@ -239,6 +243,42 @@ private:
 	
 };
 
+class GetFileNameWidget : public QVBoxLayout
+{
+	Q_OBJECT
+public:
+	GetFileNameWidget(QWidget *parent, QString &defaultString, bool getOpenFileName, QString fileExtension = QString("*.*"));
+	
+	~GetFileNameWidget();
+	
+	//set the values this widget lists
+	QString getFileName();
+	
+	//set the name to be something else
+	void setFileName(QString newName);
+	
+public slots:
+	//add a new row for input at the end
+	void launchGetFileNameDialog();
+	
+private:
+	
+	//open or save filename
+	bool _getOpenFileName;
+	
+	//label to display the current value of _filename
+	QLabel *fileNameLabel;
+	
+	//button to launch the get filename dialog
+	QPushButton *launchFileNameDialogButton;
+	
+	//the filename colected by the fileName dialog 
+	QString _fileName;
+	
+	//the extension of the files to look for
+	QString _fileExtension;
+	
+};
 
 // This class provide a modal dialog box for asking a generic parameter set
 // It can be used by anyone needing for some values in a structred form and having some integrated help
@@ -246,7 +286,7 @@ class GenericParamDialog: public QDialog
 {
 	Q_OBJECT 
 public:
-  GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title=QString()); 
+  GenericParamDialog(QWidget *p, FilterParameterSet *_curParSet, QString title=QString(), MeshDocument *_meshDocument = 0);
 	
 	FilterParameterSet *curParSet;
 	StdParFrame *stdParFrame;
@@ -259,6 +299,10 @@ public:
 	
 	//reset the values on the gui back to the ones originally given to the dialog
 	void resetValues();
+	
+private:
+	MeshDocument *meshDocument;
+	
 };
 
 

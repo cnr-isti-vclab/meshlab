@@ -71,9 +71,17 @@ const QString FilterScript::Value = "value";
 
 //chose "val" since it is already used and should be replaced by a constant
 const QString FilterScript::Item = "val";
+
+const QString FilterScript::Min = "min";
+const QString FilterScript::Max = "max";
+const QString FilterScript::Mask = "mask";
 	
 //constants for the type names
+const QString FilterScript::MeshPointer = "MeshPointer";
 const QString FilterScript::FloatList = "FloatList";
+const QString FilterScript::DynamicFloat = "DynamicFloat";
+const QString FilterScript::OpenFileName = "OpenFileName";
+const QString FilterScript::SaveFileName = "SaveFileName";
 
 bool FilterScript::save(QString filename)
 {
@@ -138,17 +146,46 @@ bool FilterScript::save(QString filename)
           parElem.setAttribute(QString("val")+QString::number(i),matrixVals[i].toString());
       }
 
+      if((*jj).fieldType == FilterParameter::PARMESH)
+      {
+    	  parElem.setAttribute(Type, MeshPointer);
+    	  //this is the mesh's position in the mesh document that was used
+    	  parElem.setAttribute(Value,((*jj).fieldVal.toString()));
+      }
+      
       if((*jj).fieldType == FilterParameter::PARFLOATLIST)
       {
-    	parElem.setAttribute(Type,FloatList);
+    	parElem.setAttribute(Type, FloatList);
     	QList<QVariant> values = (*jj).fieldVal.toList();
     	for(int i=0; i < values.size(); ++i)
     	{
     	  QDomElement listElement = doc.createElement(Item);
-    	  listElement.setAttribute(Value,values[i].toString());
+    	  listElement.setAttribute(Value, values[i].toString());
           parElem.appendChild(listElement);
         }
       }
+      
+      if((*jj).fieldType == FilterParameter::PARDYNFLOAT)
+      {
+    	  parElem.setAttribute(Type, DynamicFloat);
+    	  parElem.setAttribute(Value, (*jj).fieldVal.toString());
+    	  parElem.setAttribute(Min, QString::number((*jj).min));
+    	  parElem.setAttribute(Max, QString::number((*jj).max));
+    	  parElem.setAttribute(Mask,QString::number((*jj).mask));
+      }          
+    	          
+      if((*jj).fieldType == FilterParameter::PAROPENFILENAME)
+      {
+    	  parElem.setAttribute(Type, OpenFileName);
+    	  parElem.setAttribute(Value, (*jj).fieldVal.toString());
+      }
+      
+      if((*jj).fieldType == FilterParameter::PARSAVEFILENAME)
+      {
+        parElem.setAttribute(Type, SaveFileName);
+        parElem.setAttribute(Value, (*jj).fieldVal.toString());
+      }
+      
       
       tag.appendChild(parElem);
     }
@@ -202,6 +239,7 @@ bool FilterScript::open(QString filename)
                         	par.addEnum(name,np.attribute("value").toInt(),list);
                         }
                       
+                        if(type == MeshPointer)  par.addMesh(name, np.attribute(Value).toInt());
                         if(type == FloatList)
                         {
                     	  QList<float> values;
@@ -213,6 +251,10 @@ bool FilterScript::open(QString filename)
                           }
                     	  par.addFloatList(name,values);
                         }
+                        
+                        if(type == DynamicFloat)  par.addDynamicFloat(name, np.attribute(Value).toFloat(), np.attribute(Min).toFloat(), np.attribute(Max).toFloat(), np.attribute(Mask).toInt());
+                        if(type == OpenFileName)  par.addOpenFileName(name, np.attribute(Value));
+                        if(type == SaveFileName)  par.addSaveFileName(name, np.attribute(Value));
                    }
                    actionList.append(qMakePair(name,par));
              }

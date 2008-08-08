@@ -313,33 +313,6 @@ QList<float> FilterParameterSet::getFloatList(QString name) const
 	return floatList;
 }
 
-
-/* ---- */
-
-void FilterParameterSet::addMesh (QString name, MeshModel *defaultVal, QString desc, QString tooltip) {
-	FilterParameter p(name,desc,tooltip);
-  p.pointerVal= defaultVal;
-	p.fieldType=FilterParameter::PARMESH;
-	paramList.push_back(p);	
-}
-
-MeshModel * FilterParameterSet::getMesh(QString name) const {
-	const FilterParameter *p=findParameter(name);
-	assert(p);
-	assert(p->fieldType == FilterParameter::PARMESH);
-	return (MeshModel *)(p->pointerVal);
-}
-
-void FilterParameterSet::setMesh(QString name, MeshModel * newVal)
-{
-	FilterParameter *p=findParameter(name);
-	assert(p);
-	assert(p->fieldType == FilterParameter::PARMESH);
-	p->pointerVal= newVal;
-}
-
-/* ---- */ 
-
 void FilterParameterSet::setFloatList(QString name, QList<float> &newValue)
 {
 	FilterParameter *p = findParameter(name);
@@ -355,6 +328,40 @@ void FilterParameterSet::setFloatList(QString name, QList<float> &newValue)
 	p->fieldVal = tempList;
 }
 
+/* ---- */
+
+void FilterParameterSet::addMesh (QString name, MeshModel *defaultVal, QString desc, QString tooltip) {
+	FilterParameter p(name,desc,tooltip);
+  p.pointerVal= defaultVal;
+	p.fieldType=FilterParameter::PARMESH;
+	paramList.push_back(p);	
+}
+
+//make the default the mesh that is at the given position in the mesh document
+void FilterParameterSet::addMesh(QString name, int position,  QString desc, QString tooltip)
+{
+	FilterParameter p(name,desc,tooltip);
+	p.fieldVal = position;
+	p.pointerVal = NULL;
+	p.fieldType = FilterParameter::PARMESH;
+	paramList.push_back(p);	
+}
+
+MeshModel * FilterParameterSet::getMesh(QString name) const {
+	const FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARMESH);
+	return (MeshModel *)(p->pointerVal);
+}
+
+void FilterParameterSet::setMesh(QString name, MeshModel * newVal, int position)
+{
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARMESH);
+	p->fieldVal = position;
+	p->pointerVal= newVal;
+}
 
 /* ---- */
 /* Dynamic Float Memebers*/
@@ -387,4 +394,64 @@ void  FilterParameterSet::setDynamicFloat(QString name, float newVal)
 	assert(p);
 	assert(p->fieldType == FilterParameter::PARDYNFLOAT);
 	p->fieldVal=QVariant(newVal);	
+}
+
+/* PAROPENFILENAME */
+
+void FilterParameterSet::addOpenFileName(QString name, QString defaultVal, QString extension, QString desc, QString tooltip)
+{
+	FilterParameter p(name,desc,tooltip);
+	p.fieldVal = defaultVal; 
+	p.fieldType = FilterParameter::PAROPENFILENAME;
+	
+	//add the extension to this unused variable because i think it is cleaner than adding another variable not used anywhere else
+	p.enumValues.push_back(extension);
+	
+	paramList.push_back(p);
+}
+
+QString FilterParameterSet::getOpenFileName(QString name) const
+{
+	const FilterParameter *p = findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PAROPENFILENAME);
+	return p->fieldVal.toString();
+}
+
+void FilterParameterSet::setOpenFileName(QString name, QString newVal)
+{
+	FilterParameter *p = findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PAROPENFILENAME);
+	p->fieldVal = QVariant(newVal);	
+}
+
+/* PARSAVEFILENAME */
+
+void FilterParameterSet::addSaveFileName(QString name, QString defaultVal, QString extension, QString desc, QString tooltip)
+{
+	FilterParameter p(name,desc,tooltip);
+	p.fieldVal = defaultVal; 
+	p.fieldType = FilterParameter::PARSAVEFILENAME;
+		
+	//add the extension to this unused variable because i think it is cleaner than adding another variable not used anywhere else
+	p.enumValues.push_back(extension);
+	
+	paramList.push_back(p);
+}
+
+QString FilterParameterSet::getSaveFileName(QString name) const
+{
+	const FilterParameter *p = findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARSAVEFILENAME);
+	return p->fieldVal.toString();
+}
+
+void FilterParameterSet::setSaveFileName(QString name, QString newVal)
+{
+	FilterParameter *p = findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARSAVEFILENAME);
+	p->fieldVal = QVariant(newVal);	
 }
