@@ -115,7 +115,8 @@ void RfxGLPass::printInfoLog(GLhandleARB obj)
 void RfxGLPass::Start()
 {
 	// set gl states
-	// TODO
+	foreach (RfxState *state, rfxStates)
+		state->SetEnvironment(0);
 
 	// use shader program
 	glUseProgram(shaderProgram);

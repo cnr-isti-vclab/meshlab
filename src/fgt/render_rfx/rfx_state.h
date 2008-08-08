@@ -39,6 +39,24 @@ public:
 		GL_TextureMaxAnisotropyEXT, GL_TextureLODBias = 12
 	};
 
+	enum RenderStateRfx {
+		GL_CurrentColor = 1, GL_SecondaryColor,
+		GL_ClearColor = 4, GL_ClearDepth, GL_ShadeModel, GL_FrontFace, GL_CullMode,
+		GL_EdgeFlag,
+		GL_DepthNear = 14, GL_DepthFar, GL_FogColor = 17, GL_FogDensity, GL_FogStart,
+		GL_FogEnd, GL_FogMode, GL_PointSize, GL_PointMin, GL_PointMax, GL_PointSmooth,
+		GL_LineWidth, GL_LineSmooth, GL_PolyFrontMode, GL_PolyBackMode, GL_PolySmooth,
+		GL_PolyOffsetFactor, GL_PolyOffsetUnits, GL_PolyOffsetPoint, GL_PolyOffsetLine,
+		GL_PolyOffsetFill,
+		GL_AlphaEnable = 41, GL_AlphaFunction, GL_AlphaReference, GL_DepthEnable,
+		GL_DepthFunction, GL_BlendEnable, GL_BlendColor, GL_BlendSourceRGB,
+		GL_BlendDestRGB, GL_BlendSourceAlpha, GL_BlendDestAlpha, GL_BlendEquation,
+		GL_WriteMaskColor, GL_WriteMaskDepth, GL_VertexProgramTwoSideARB,
+		GL_StencilEnable, GL_StencilFunction, GL_StencilValueMask, GL_StencilReference,
+		GL_StencilFail, GL_StencilPassDepthFail, GL_StencilPassDepthPass,
+		GL_WriteMaskStencil, GL_ClearStencil
+	};
+
 	enum TextureWrapRfx {
 		GL_CLAMP_RFX = 1, GL_CLAMP_TO_EDGE_RFX, GL_REPEAT_RFX,
 		GL_CLAMP_TO_BORDER_RFX, GL_MIRRORED_REPEAT_RFX
@@ -48,6 +66,17 @@ public:
 		GL_NEAREST_RFX, GL_LINEAR_RFX, GL_NEAREST_MIPMAP_NEAREST_RFX,
 		GL_NEAREST_MIPMAP_LINEAR_RFX, GL_LINEAR_MIPMAP_NEAREST_RFX,
 		GL_LINEAR_MIPMAP_LINEAR_RFX
+	};
+
+	enum FunctionRfx {
+		NEVER_RFX = 1, LESS_RFX, EQUAL_RFX, LESS_EQUAL_RFX, GREATER_RFX,
+		NOT_EQUAL_RFX, GREATER_EQUAL_RFX, ALWAYS_RFX
+	};
+
+	enum ColorRfx {
+		ZERO = 1, ONE, SRC_COLOR, INV_SRC_COLOR, DEST_COLOR, INV_DEST_COLOR,
+		SRC_ALPHA, INV_SRC_ALPHA, DEST_ALPHA, INV_DEST_ALPHA, CONST_COLOR,
+		INV_CONST_COLOR, CONST_ALPHA, INV_CONST_ALPHA, SRC_ALPHA_SATURATE
 	};
 
 	RfxState() {}
@@ -60,9 +89,12 @@ public:
 
 private:
 	void SetTextureEnvironment(GLint);
-	void SetGLEnvironment() { /* STUB */ };
+	void SetGLEnvironment();
 	GLint GLWrapMode();
 	GLint GLFilterMode();
+	GLint GLFunctionMode();
+	GLint GLColorMode();
+	void GLEnableDisable(GLint);
 
 	int state;
 	float value;

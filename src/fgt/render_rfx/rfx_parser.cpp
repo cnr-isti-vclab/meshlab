@@ -258,7 +258,12 @@ void RfxParser::AppendGLStates(RfxGLPass *theGLPass, QDomNodeList statelist,
 		QDomElement stateEl = statelist.at(j).toElement();
 		RfxState *glstate = new RfxState(statetype);
 		glstate->SetState(stateEl.attribute("STATE").toInt());
-		glstate->SetValue(stateEl.attribute("VALUE").toFloat());
+
+		QString attrValue = stateEl.attribute("VALUE");
+		if (attrValue == "TRUE" || attrValue == "FALSE") // BOOL type
+			glstate->SetValue(((attrValue == "TRUE")? 1.0f : 0.0f));
+		else // FLOAT or ENUM type
+			glstate->SetValue(attrValue.toFloat());
 
 		if (statetype == RfxState::RFX_RENDERSTATE)
 			theGLPass->AddGLState(glstate);
