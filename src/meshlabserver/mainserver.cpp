@@ -142,7 +142,11 @@ bool Open(MeshModel &mm, QString fileName)
 	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 	
 	int mask = 0;
-	if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,0,0/*gla*/))
+	
+	FilterParameterSet prePar;
+	pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
+	
+	if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
   {
     printf("Failed loading\n");
     return false;
