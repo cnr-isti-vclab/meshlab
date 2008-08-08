@@ -62,7 +62,7 @@ ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
 const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
-		case FP_PLAN :  return QString("Cross section plan"); 
+		case FP_PLAN :  return QString("Cross section plane"); 
 		default : assert(0); 
 	}
   return QString("error!");
@@ -73,8 +73,8 @@ const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId)
 const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId)
 {
  switch(filterId) {
-		case FP_PLAN :  return QString("Provide the cross section of the chosen plan"); 
-		
+		case FP_PLAN :  return QString("Export a cross section of the object and of the associated bounding box relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0)."); 
+	
 		default : assert(0); 
 	}
   return QString("error!");
@@ -105,15 +105,15 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 		  case FP_PLAN :  
 		  {
  		   	QStringList metrics;
-				metrics.push_back("XY Cross Section");
-				metrics.push_back("YZ Cross Section");
-				metrics.push_back("ZX Cross Section");
-				parlst.addEnum("Plan", 0, metrics, tr("Plan:"), tr("Choose a cross section plan."));
-				parlst.addFloat("CrossPlanVal", 0.0, "Crossing plan value", "Specify a value of the crossing plan as a float.");
+				metrics.push_back("XY Axis");
+				metrics.push_back("YZ Axis");
+				metrics.push_back("ZX Axis");
+				parlst.addEnum("Plan", 0, metrics, tr("Axis:"), tr("Choose a cross section axis."));
+				parlst.addFloat("CrossPlanVal", 0.0, "Cross plane offset", "Specify a n offset of the cross-plane as a float.");
 				parlst.addString("filename", "Slice", "Name of the svg files and of the folder contaning them", "It is automatically created in the Sample folder of the Meshlab tree");
-				parlst.addBool ("SelAlone",m.cm.sfn>0,"Allow automatic cross section plans of the object, each plan is stored in a svg file");
-				parlst.addBool ("SelAll",m.cm.sfn>0,"Allow automatic cross section plans of the object,all plans are concatenated in a same svg file");
-				parlst.addFloat("CrossStepVal", 0.0, "Step crossing plan value", "Specify a value of the Step crossing plan, should be used with the bool selection.");			 		  
+				parlst.addBool ("SelAlone",m.cm.sfn>0,"Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file");
+				parlst.addBool ("SelAll",m.cm.sfn>0,"Automatically generate a series of cross-sections along the whole length of the object and store each plane in a single SVG file");
+				parlst.addFloat("CrossStepVal", 0.0, "Step value for automatically generating cross-sections", "Should be used with the bool selection above.");			 		  
 		  }
 		  break;
 											
@@ -169,7 +169,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 					Plane3f pl;
 					pl.SetDirection(*dir);
 
-				       		if( (!selAll && !selAlone) || ((selAll || selAlone) && StepVal == 0.0) )
+				       		if(!selAll && !selAlone)
 						{
 							edge_mesh = new n_EdgeMesh();
 							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ PlanVal);
@@ -209,7 +209,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[1], ma[0], ma[1], center[1], center[0]);		
 						}
 						
-						if(selAll && selAlone)
+						if( (selAll && selAlone)  || ((selAll || selAlone) && StepVal == 0.0) )
 							return false;	
 				} 
 				break;
@@ -225,7 +225,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 					Plane3f pl;
 					pl.SetDirection(*dir);
 
-				       		if( (!selAll && !selAlone) || ((selAll || selAlone) && StepVal == 0.0) )
+				       		if(!selAll && !selAlone)
 						{
 							edge_mesh = new n_EdgeMesh();
 							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ PlanVal);
@@ -266,7 +266,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[2], mi[1], ma[2], ma[1], center[2], center[1]);	
 						}
 						
-						if(selAll && selAlone)
+						if( (selAll && selAlone)  || ((selAll || selAlone) && StepVal == 0.0) )
 							return false;	
 				} 
 				break;
@@ -282,7 +282,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 					Plane3f pl;
 					pl.SetDirection(*dir);
 
-				       		if( (!selAll && !selAlone) || ((selAll || selAlone) && StepVal == 0.0) )
+				       		if(!selAll && !selAlone)
 						{
 							edge_mesh = new n_EdgeMesh();
 							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + PlanVal);
@@ -323,7 +323,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 							vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr, mi[0], mi[2], ma[0], ma[2], center[0], center[2]);	
 						}
 						
-						if(selAll && selAlone)
+						if( (selAll && selAlone) || ((selAll || selAlone) && StepVal == 0.0) )
 							return false;	
 				}
 				break;
