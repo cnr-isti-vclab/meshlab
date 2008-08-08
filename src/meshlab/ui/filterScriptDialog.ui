@@ -12,7 +12,7 @@
   <property name="windowTitle" >
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
      <x>10</x>
@@ -133,22 +133,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>okButton</sender>
-   <signal>clicked()</signal>
-   <receiver>scriptDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>278</x>
-     <y>253</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>96</x>
-     <y>254</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>cancelButton</sender>
    <signal>clicked()</signal>
