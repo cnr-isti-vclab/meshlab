@@ -79,12 +79,12 @@ const QString FilterUnsharp::filterName(FilterIDType filter)
   	case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normal"); 
   	case FP_FACE_NORMAL_SMOOTHING:	  return QString("Smooth Face Normals"); 
   	case FP_VERTEX_QUALITY_SMOOTHING:	return QString("Smooth vertex quality"); 
-  	case FP_UNSHARP_NORMAL:				return QString("UnSharp Normals"); 
-  	case FP_UNSHARP_GEOMETRY:	    return QString("UnSharp Geometry"); 
-  	case FP_UNSHARP_QUALITY:	    return QString("UnSharp Quality"); 
-  	case FP_UNSHARP_VERTEX_COLOR:	      return QString("UnSharp Color"); 
-	  case FP_RECOMPUTE_VERTEX_NORMAL: return QString("Recompute Vertex Normals"); 
-	  case FP_RECOMPUTE_FACE_NORMAL: return QString("Recompute Face Normals"); 
+  	case FP_UNSHARP_NORMAL:						return QString("UnSharp Mask Normals"); 
+  	case FP_UNSHARP_GEOMETRY:					return QString("UnSharp Mask Geometry"); 
+  	case FP_UNSHARP_QUALITY:					return QString("UnSharp Mask Quality"); 
+  	case FP_UNSHARP_VERTEX_COLOR:	    return QString("UnSharp Mask Color"); 
+	  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Recompute Vertex Normals"); 
+	  case FP_RECOMPUTE_FACE_NORMAL:		return QString("Recompute Face Normals"); 
 
   	default: assert(0);
   }
@@ -104,10 +104,10 @@ const QString FilterUnsharp::filterInfo(FilterIDType filterId)
 		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
 		case FP_VERTEX_QUALITY_SMOOTHING:	  return tr("Smooth Face Normals without touching the position of the vertices."); 
 		case FP_FACE_NORMAL_SMOOTHING:	    return tr("Smooth Face Normals without touching the position of the vertices."); 
-  	case FP_UNSHARP_NORMAL:							return tr("Unsharpen the normals, putting in more evidence normal variations"); 
-  	case FP_UNSHARP_GEOMETRY:						return tr("Unsharpen the color, putting in more evidence normal variations"); 
-  	case FP_UNSHARP_QUALITY:	    return QString("UnSharp Quality"); 
-  	case FP_UNSHARP_VERTEX_COLOR:							return tr("Unsharpen the normals, putting in more evidence normal variations"); 
+  	case FP_UNSHARP_NORMAL:							return tr("Unsharp mask filtering of the normals, putting in more evidence normal variations"); 
+  	case FP_UNSHARP_GEOMETRY:						return tr("Unsharp mask filtering of geometric shape, putting in more evidence ridges and valleys variations"); 
+  	case FP_UNSHARP_QUALITY:						return tr("Unsharp mask filtering of the quality field"); 
+  	case FP_UNSHARP_VERTEX_COLOR:				return tr("Unsharp mask filtering of the color, putting in more evidence color edge variations"); 
 		case FP_RECOMPUTE_VERTEX_NORMAL:		return tr("Recompute vertex normals as an area weighted average of normal of the incident faces");
 		case FP_RECOMPUTE_FACE_NORMAL:			return tr("Recompute face normals as the normal of the plane of the face");
   	default: assert(0);
@@ -200,21 +200,23 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshModel &m, FilterParame
 	{
 		case FP_UNSHARP_NORMAL: 
 			parlst.addBool("recalc", false, tr("Recompute Normals"), tr("Recompute normals from scratch before the unsharp masking"));
-			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
+			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
+			parlst.addFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation.<br> Usually you should not need to change the default 1.0 value."));
 			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of laplacian face smooth iterations in every run"));
 		break;
 		case FP_UNSHARP_GEOMETRY:
-			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
+			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
+			parlst.addFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value."));
 			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number ofiterations of laplacian smooth in every run"));
 			break;
 		case FP_UNSHARP_VERTEX_COLOR:
-			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
-			parlst.addFloat("weightOrig", 1.f, tr("Original Color Weight"), tr("How much the original color is used<br>"));
+			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
+			parlst.addFloat("weightOrig", 1.f, tr("Original Color Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value."));
 			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run"));
 			break;
 		case FP_UNSHARP_QUALITY:
-			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the weight in the unsharp equation: <br> <i> orig + weight (orig - lowpass)<i><br>"));
-			parlst.addFloat("weightOrig", 1.f, tr("Original Quality Weight"), tr("How much the original quality is used<br>"));
+			parlst.addFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>"));
+			parlst.addFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation<br> Usually you should not need to change the default 1.0 value."));
 			parlst.addInt("iterations", 5, "Smooth Iterations", 	tr("number of iterations of laplacian smooth in every run"));
 			break;
 		case FP_TWO_STEP_SMOOTH:
@@ -324,6 +326,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	case FP_UNSHARP_NORMAL:			
 			{	
 				float alpha=par.getFloat("weight");
+				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
 				
 				tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
@@ -341,6 +344,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	case FP_UNSHARP_GEOMETRY:			
 			{	
 				float alpha=par.getFloat("weight");
+				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
 				
 				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
@@ -351,7 +355,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 				tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,smoothIter);
 				
 				for(int i=0;i<m.cm.vn;++i)
-					m.cm.vert[i].P()=geomOrig[i] + (geomOrig[i] - m.cm.vert[i].P())*alpha;				
+					m.cm.vert[i].P()=geomOrig[i]*alphaorig + (geomOrig[i] - m.cm.vert[i].P())*alpha;				
 					
 				tri::UpdateNormals<CMeshO>::PerVertexPerFace(m.cm);
 				
