@@ -558,7 +558,7 @@ EpochIO::EpochIO()
     delete epochDialog;
   }
 
-bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool EpochIO::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const FilterParameterSet & /*par*/, CallBackPos *cb, QWidget *parent)
 {
   EpochReconstruction er;
 	
