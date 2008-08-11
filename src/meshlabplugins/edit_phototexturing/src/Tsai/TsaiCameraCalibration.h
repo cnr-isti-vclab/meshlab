@@ -11,7 +11,7 @@ extern "C" {
 
 class TsaiCameraCalibration: public CameraCalibration{
 public:
-	
+
 	TsaiCameraCalibration();
 	virtual ~TsaiCameraCalibration();
 	virtual void loadCalibration(QString);
@@ -19,8 +19,9 @@ public:
 	virtual void saveAsXml(QDomDocument* doc,QDomElement *root);
 	virtual void getUVforPoint(double x, double y, double z, double *u, double *v);
 	virtual void calibrate(QList<CameraCalibrationData*> &ccd );
-	
-private:
+	void calibrate(QList<CameraCalibrationData*> &ccd, bool optimize);
+	virtual CameraCalibration* calibrateToTsai(MeshModel *mm, bool optimize);
+//private:
 	struct camera_parameters cam_para;
 	struct calibration_constants calib_const;
 };

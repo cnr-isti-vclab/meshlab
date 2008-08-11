@@ -6,7 +6,7 @@
 
 
 TsaiCameraCalibration::TsaiCameraCalibration(){
-
+	type = "TSAI";
 }
 TsaiCameraCalibration::~TsaiCameraCalibration(){
 
@@ -189,6 +189,10 @@ void TsaiCameraCalibration::saveAsXml(QDomDocument* doc,QDomElement *root){
 }
 
 void TsaiCameraCalibration::calibrate(QList<CameraCalibrationData*> &ccd ){
+	calibrate(ccd, true);
+}
+
+void TsaiCameraCalibration::calibrate(QList<CameraCalibrationData*> &ccd, bool optimize){
 
 	initialize_eos400D_parms();
 
@@ -222,12 +226,45 @@ void TsaiCameraCalibration::calibrate(QList<CameraCalibrationData*> &ccd ){
 		}
 	}
 
-	noncoplanar_calibration_with_full_optimization ();
-
-	//noncoplanar_calibration ();
+	//
+	if(optimize){
+		noncoplanar_calibration_with_full_optimization ();
+	}else{
+		noncoplanar_calibration ();
+	}
 	//print_cp_cc_data (stderr, &cp, &cc);
-	//print_error_stats (stderr);
+	print_error_stats (stderr);
 	//dump_cp_cc_data (stdout, &cp, &cc);
+	cam_para.Cx = cp.Cx;
+	cam_para.Cy = cp.Cy;
+	cam_para.Ncx = cp.Ncx;
+	cam_para.Nfx = cp.Nfx;
+	cam_para.dpx = cp.dpx;
+	cam_para.dpy = cp.dpy;
+	cam_para.dx = cp.dx;
+	cam_para.dy = cp.dy;
+	cam_para.sx = cp.sx;
+
+	calib_const.Rx = cc.Rx;
+	calib_const.Ry = cc.Ry;
+	calib_const.Rz = cc.Rz;
+	calib_const.Tx = cc.Tx;
+	calib_const.Ty = cc.Ty;
+	calib_const.Tz = cc.Tz;
+	calib_const.f = cc.f;
+	calib_const.kappa1 = cc.kappa1;
+	calib_const.p1 = cc.p1;
+	calib_const.p2 = cc.p2;
+	calib_const.r1 = cc.r1;
+	calib_const.r2 = cc.r2;
+	calib_const.r3 = cc.r3;
+	calib_const.r4 = cc.r4;
+	calib_const.r5 = cc.r5;
+	calib_const.r6 = cc.r6;
+	calib_const.r7 = cc.r7;
+	calib_const.r8 = cc.r8;
+	calib_const.r9 = cc.r9;
+
 
 
 	double dmatrix[16];
@@ -265,6 +302,24 @@ void TsaiCameraCalibration::calibrate(QList<CameraCalibrationData*> &ccd ){
 
 	printf("camera position: %f\t%f\t%f\t%f\n",cam_pos[0],cam_pos[1],cam_pos[2],cam_pos[3]);
 
+	double dcam_cam_direction[] = {0.0,0.0,1.0,1.0};
+	vcg::Point4<double> cam_cam_direction = vcg::Point4<double>(dcam_cam_direction);
+
+	vcg::Point4<double> cam_direction = invmatrix*cam_cam_direction;
+	cam_direction -= cam_pos;
+	printf("camera direction: %f\t%f\t%f\t%f\n",cam_direction[0],cam_direction[1],cam_direction[2],cam_direction[3]);
+
+	cameraPosition[0]=cam_pos[0];
+	cameraPosition[1]=cam_pos[1];
+	cameraPosition[2]=cam_pos[2];
+
+	cameraDirection[0]=cam_direction[0];
+	cameraDirection[1]=cam_direction[1];
+	cameraDirection[2]=cam_direction[2];
+}
+
+CameraCalibration* TsaiCameraCalibration::calibrateToTsai(MeshModel *mm, bool optimize){
+	return this;
 }
 
 
