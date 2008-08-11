@@ -189,9 +189,12 @@ public:
 			}
 		}
 		
+		facesPatch.clear();
+		vertexCompFace.clear();
+		isAccepted = true;
 		typename std::vector<FaceType* >::iterator it;
 		for(it = meshFaces.begin() ; it != meshFaces.end(); ++it)
-			(*it)->ClearV();		
+			(*it)->ClearV();	
 	}
 
 	void updateSelfIntersectionState(MESH &mesh)

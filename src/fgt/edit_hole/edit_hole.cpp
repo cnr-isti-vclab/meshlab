@@ -210,6 +210,9 @@ void EditHolePlugin::resizeViewColumn()
 
 void EditHolePlugin::fill()
 {
+	if(holesModel->getState() == HoleListModel::Filled)
+		holesModel->acceptFilling(true);
+
 	Qt::CheckState asi = dialogFiller->ui.antiSelfIntersection->checkState();
 	holesModel->fill( asi == Qt::Checked);
 	gla->update();
@@ -217,13 +220,17 @@ void EditHolePlugin::fill()
 
 void EditHolePlugin::acceptFill()
 {
-	holesModel->acceptFilling();
-	gla->setWindowModified(true);
+	if(holesModel->getState() == HoleListModel::Filled)
+	{
+		holesModel->acceptFilling();
+		gla->setWindowModified(true);
+	}
 }
 
 void EditHolePlugin::cancelFill()
 {
-	holesModel->acceptFilling(true);
+	if(holesModel->getState() == HoleListModel::Filled)
+		holesModel->acceptFilling(true);
 }
 
 void EditHolePlugin::bridge()

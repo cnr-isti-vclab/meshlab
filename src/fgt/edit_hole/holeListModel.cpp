@@ -194,17 +194,26 @@ void HoleListModel::fill(bool antiSelfIntersection)
 
 void HoleListModel::acceptFilling(bool forcedCancel)
 {
-	assert(state == HoleListModel::Filled);
+	std::vector<HoleVector::iterator> holeToErase;
 	HoleVector::iterator it = holes.begin();
-	for( ; it != holes.end(); it++ )
+	while( it != holes.end() )
 	{
 		if( (it->isSelected && !it->isAccepted) || forcedCancel)
 			it->RestoreHole(mesh->cm);
+		else if( it->isSelected && it->isAccepted )
+		{
+			it = holes.erase(it);
+			continue;
+		}
+		it++;
 	}
 	
 	mesh->clearDataMask(MeshModel::MM_FACETOPO);
-	updateModel();
-	state = HoleListModel::Selection;
+	mesh->updateDataMask(MeshModel::MM_FACETOPO);
+	
+	state = HoleListModel::Selection;		
+	emit dataChanged( index(0, 0), index(holes.size(), 2) );
+	emit SGN_needUpdateGLA();	
 	emit layoutChanged();
 }
 
