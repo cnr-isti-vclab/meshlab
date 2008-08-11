@@ -418,6 +418,7 @@ class MeshModelState
 			for(vi=m->cm.vert.begin(),ci=vertColor.begin();vi!=m->cm.vert.end();++vi,++ci) 
 					if(!(*vi).IsD()) (*vi).C()=(*ci);
 		}
+		return true;
   }
 		
 	bool isValid(MeshModel *m);
