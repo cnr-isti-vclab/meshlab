@@ -136,6 +136,29 @@ protected:
 };
 
 
+
+/// Widget to enter a Point3f, it provides handy method for getting useful vectors
+
+class Point3fWidget : public QGridLayout
+{
+	Q_OBJECT
+	
+public:
+  Point3fWidget(QWidget *p, vcg::Point3f defaultv, GLArea *gla);
+  ~Point3fWidget();
+	
+  vcg::Point3f getValue();
+	void  setValue(vcg::Point3f val);
+	
+public slots:
+	void getViewDir(); 
+		
+protected:
+	QLineEdit * coordSB[3];
+	GLArea *gla;
+	QPushButton *getViewButton;
+};
+
 class DynamicFloatWidget : public QGridLayout
 {
 	Q_OBJECT
@@ -166,12 +189,17 @@ private :
 	int floatToInt(float val);
 };
 
-
+/* 
+This class is used to automatically create a frame from a set of parameters. 
+it is used mostly for creating the main dialog of the filters, but it is used also 
+in the creation of the additional saving options, post and pre opening processing 
+and for general parameter setting in edit plugins (e.g. look at the aligment parameters)
+*/
 class StdParFrame : public QFrame
 {
 	Q_OBJECT
 public:
-	StdParFrame(QWidget *p);
+	StdParFrame(QWidget *p, GLArea *gla=0);
 
 	void loadFrameContent(FilterParameterSet &curParSet,MeshDocument *mdPt = 0);
 	void readValues(FilterParameterSet &curParSet);
@@ -181,7 +209,9 @@ public:
 	
 	QVector<void *> stdfieldwidgets;
 	QVector<QLabel *> helpList;
-
+private: 
+		GLArea *gla; // used for having a link to the glarea that spawned the parameter asking.
+	
 signals:
 		void dynamicFloatChanged(int mask);
 };
@@ -342,6 +372,7 @@ public:
 	MeshDocument * curMeshDoc;
 	MeshFilterInterface *curmfi;
 	MainWindowInterface *curmwi;
+	GLArea * curgla;
 	FilterParameterSet curParSet;
 	
 };

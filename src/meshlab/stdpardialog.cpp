@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 //#include "plugindialog.h"
 #include "stdpardialog.h"
-
+using namespace vcg;
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 :QDockWidget(QString("Plugin"), p)
 {
@@ -36,10 +36,11 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 		clearValues();
 }
 
-StdParFrame::StdParFrame(QWidget *p)
+StdParFrame::StdParFrame(QWidget *p, GLArea *curr_gla)
 //:QDialog(p)
 :QFrame(p)
 {
+	gla=curr_gla;
 }
 
 
@@ -52,7 +53,11 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		curParSet.clear();
 		curModel = mm;
 		curMeshDoc = mdp;
-		
+//		MainWindow * mwp = dynamic_cast<MainWindow *>(mwi);
+		MainWindow * mwp = (MainWindow *)(mwi);
+		//		MainWindow * mwp = qobject_cast<MainWindow *>(mwi);
+		if(mwp)		curgla=mwp->GLA();
+				 else curgla=0;
 		
 		mfi->initParameterSet(action, *mdp, curParSet);	
 		createFrame();
@@ -181,7 +186,7 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	ql->setWordWrap(true);
 	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
 	
-	stdParFrame = new StdParFrame(this);
+	stdParFrame = new StdParFrame(this,curgla);
 	stdParFrame->loadFrameContent(curParSet,mdPt);
   gridLayout->addWidget(stdParFrame,1,0,1,2);
 
@@ -235,6 +240,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 	QLayout *layout;
 	MeshEnumWidget *mew;
 	DynamicFloatWidget *dfw;
+	Point3fWidget *p3w;
 	
 	QList<FilterParameter> &parList =curParSet.paramList;
 	
@@ -381,6 +387,26 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				connect(dfw,SIGNAL(valueChanged(int)),this,SIGNAL( dynamicFloatChanged(int) ));
 				break;
 				
+
+			case FilterParameter::PARPOINT3F : 
+			{
+				ql = new QLabel(fpi.fieldDesc ,this);
+				ql->setToolTip(fpi.fieldToolTip);	
+
+				Point3f point;
+				QList<QVariant> pointVals = fpi.fieldVal.toList();
+				assert(pointVals.size()==3);
+				for(int ii=0;ii<3;++ii)
+				point[ii]=pointVals[ii].toDouble();				
+				
+				p3w = new Point3fWidget(this,point,gla);
+				gridLayout->addWidget(ql,i,0,Qt::AlignTop);
+				gridLayout->addLayout(p3w,i,1,Qt::AlignTop);				
+				stdfieldwidgets.push_back(p3w);
+			}
+				break;
+				
+
 			case FilterParameter::PAROPENFILENAME:
 				{
 					ql = new QLabel(fpi.fieldDesc,this);
@@ -415,6 +441,7 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 				}
 				break;
 				
+
 			default: assert(0);
 		} //end case
 	} // end for each parameter
@@ -482,7 +509,10 @@ void StdParFrame::readValues(FilterParameterSet &curParSet)
 		 case FilterParameter::PARSAVEFILENAME:
 		 	curParSet.setSaveFileName(sname, ((GetFileNameWidget *)stdfieldwidgets[i])->getFileName());
 		 	break;
-			default:
+		 case FilterParameter::PARPOINT3F:
+			 curParSet.setPoint3f(sname,((Point3fWidget *)stdfieldwidgets[i])->getValue());
+			 break;
+		 default:
 				assert(0);
 		  }
 	  }
@@ -595,6 +625,52 @@ void AbsPercWidget::setValue(float val, float minV, float maxV)
 	absSB->setValue (val);
 	m_min=minV;
 	m_max=maxV;
+}
+
+/******************************************/ 
+// Point3fWidget Implementation
+/******************************************/ 
+Point3fWidget::Point3fWidget(QWidget *p, Point3f defaultv, GLArea *gla_curr):QGridLayout(NULL)
+{
+	gla=gla_curr;
+	for(int i =0;i<3;++i)
+		{
+			coordSB[i]= new QLineEdit(p);	
+			coordSB[i]->setValidator(new QDoubleValidator(p));
+			coordSB[i]->setAlignment(Qt::AlignRight);			
+			this->addWidget(coordSB[i],0,i,Qt::AlignHCenter);
+		}
+	this->setValue(defaultv);
+	if(gla) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
+		{	
+			getViewButton = new QPushButton(tr("Get View Dir"),p);
+			this->addWidget(getViewButton,0,3,Qt::AlignHCenter);
+			connect(getViewButton,SIGNAL(clicked()),this,SLOT(getViewDir()));
+		}
+}
+
+Point3fWidget::~Point3fWidget()
+{
+	for(int i =0;i<3;++i)
+		{
+			delete coordSB[i];
+		}
+}
+
+void Point3fWidget::getViewDir()
+{
+	setValue(gla->getViewDir());
+}
+
+void Point3fWidget::setValue(Point3f newVal)
+{
+	for(int i =0;i<3;++i)
+		coordSB[i]->setText(QString::number(newVal[i],'g',4));
+}	
+
+vcg::Point3f Point3fWidget::getValue()
+{
+	return Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat());
 }
 
 /******************************************/ 
