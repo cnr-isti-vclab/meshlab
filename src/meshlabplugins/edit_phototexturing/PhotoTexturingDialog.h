@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -33,7 +33,7 @@
 #include "ui_photoTexturingDialog.h"
 
 class PhotoTexturingDialog: public QDialog, Ui::photoTexturingDialog{
-	
+
 Q_OBJECT
 
 private:
@@ -42,24 +42,25 @@ private:
 	Ui::photoTexturingDialog ui;
 	MeshEditInterface *ptPlugin;
 	PhotoTexturer *photoTexturer;
-	
+
 	signals:
 		void updateGLAreaTextures();
 		void setGLAreaDrawMode(vcg::GLW::DrawMode mode);
 		void setGLAreaColorMode(vcg::GLW::ColorMode mode);
 		void setGLAreaTextureMode(vcg::GLW::TextureMode mode);
-		
+
 		void updateMainWindowMenus();
-		
+
 private slots:
 	//void browseCalibrationFile();
 	void loadConfigurationFile();
 	void saveConfigurationFile();
+	void exportCamerasToMaxScript();
 	void addCamera();
 	void removeCamera();
-	
+
 	void update();
-	
+
 	void assignImage();
 	void calculateTextures();
 	void selectCurrentTexture();
@@ -67,11 +68,11 @@ private slots:
 	void apply();
 	void close();
 	void cancel();
-	
+
 public:
 	PhotoTexturingDialog(MeshEditInterface*, PhotoTexturer*,MeshModel &m, GLArea *gla);
 	~PhotoTexturingDialog();
-	
+
 };
 
 #endif /*PHOTOTEXTURINGDIALOG_H_*/

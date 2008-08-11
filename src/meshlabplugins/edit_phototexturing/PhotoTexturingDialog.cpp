@@ -49,6 +49,8 @@ PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTextu
 
 	connect(ui.configurationLoadPushButton, SIGNAL(clicked()),this,SLOT(loadConfigurationFile()));
 	connect(ui.configurationSavePushButton, SIGNAL(clicked()),this,SLOT(saveConfigurationFile()));
+	connect(ui.exportToMaxScriptPushButton, SIGNAL(clicked()),this,SLOT(exportCamerasToMaxScript()));
+
 	connect(ui.addCameraPushButton, SIGNAL(clicked()),this,SLOT(addCamera()));
 	connect(ui.removeCameraPushButton, SIGNAL(clicked()),this,SLOT(removeCamera()));
 
@@ -85,8 +87,8 @@ void PhotoTexturingDialog::saveConfigurationFile(){
 }
 
 void PhotoTexturingDialog::addCamera(){
-	//QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai *.kai)");
-	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai)");
+	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai *.kai)");
+	//QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai)");
 	photoTexturer->addCamera(filename);
 	update();
 	ui.cameraTableWidget->selectRow(ui.cameraTableWidget->rowCount()-1);
@@ -176,6 +178,8 @@ void PhotoTexturingDialog::combineTextures(){
 	combineParamSet.addInt("width",1024,"Image width:","");
 	combineParamSet.addInt("height",1024,"Image height:","");
 	combineParamSet.addInt("edgeStretchingPasses",2,"Edge Stretching Passes:","");
+	combineParamSet.addFloat("min_angle",80.0,"Minimum angle:","");
+
 	//combineParamSet.addBool("saveImages",true,"Save all images","");
 	//combineParamSet.addBool("sameFolder",true,"Same folder as mesh","");
 	//buildParameterSet(alignParamSet, defaultAP);
@@ -183,7 +187,7 @@ void PhotoTexturingDialog::combineTextures(){
 	GenericParamDialog ad(this,&combineParamSet,"Texture Baking Parameters");
 	int result=ad.exec();
 	if (result == 1){
-		photoTexturer->combineTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"),combineParamSet.getInt("edgeStretchingPasses"));
+		photoTexturer->combineTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"),combineParamSet.getInt("edgeStretchingPasses"),combineParamSet.getFloat("min_angle"));
 	}
 	update();
 }
@@ -198,4 +202,9 @@ void PhotoTexturingDialog::close(){
 void PhotoTexturingDialog::cancel(){
 	photoTexturer->restoreOriginalTextureCoordinates(mesh);
 	glarea->update();
+}
+
+void PhotoTexturingDialog::exportCamerasToMaxScript(){
+	QString filename = QFileDialog::getSaveFileName(this,tr("Select MaxScript File"),".", "*.ms");
+	photoTexturer->exportMaxScript(filename,mesh);
 }

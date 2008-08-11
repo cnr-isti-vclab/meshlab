@@ -37,8 +37,11 @@ public:
 	static const QString XML_CALIBRATION;
 	static const QString XML_TYPE;
 
+	QString type;
+
 	double cameraPosition[3];
 	double cameraDirection[3];
+	int resolution[2];
 
 	//virtual CameraCalibration();
 	virtual ~CameraCalibration(){
@@ -65,9 +68,10 @@ public:
 
 	};
 
-	virtual void calibrateToTsai(MeshModel *mm){
+	virtual  CameraCalibration* calibrateToTsai(MeshModel *mm, bool optimize){
 
 	};
+
 //private:
 	//Camera *camera;
 

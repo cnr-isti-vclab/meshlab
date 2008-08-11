@@ -32,6 +32,7 @@
 #include <src/PhotoTexturer.h>
 #include <src/UVFaceTexture.h>
 #include <src/CameraCalibration.h>
+#include <src/Tsai/TsaiCameraCalibration.h>
 
 #include<vcg/complex/trimesh/allocate.h>
 #include <src/QuadTree/QuadTreeNode.h>
@@ -292,7 +293,7 @@ void PhotoTexturer::applyTextureToMesh(MeshModel *m,int camIdx){
 		for(fi=m->cm.face.begin(); fi!=m->cm.face.end(); ++fi) {
 			int i;
 			UVFaceTexture* ft = ih[fi][cameras.at(camIdx)->name];
-			if(ft->faceAngleToCamera<=80.0){
+			if(ft->faceAngleToCamera<=90.0){
 				for (i=0;i<3;i++){
 					(*fi).WT(i).u() = ft->u[i];
 					(*fi).WT(i).v() = ft->v[i];
@@ -304,13 +305,15 @@ void PhotoTexturer::applyTextureToMesh(MeshModel *m,int camIdx){
 					(*fi).WT(i).v() = 0.0;
 					(*fi).WT(i).n() = 0;
 				}
+
 			}
+
 			k++;
 		}
 	}
 }
 
-void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, QuadTreeNode &qtree,QImage &image){
+void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, QuadTreeNode &qtree,QImage &image, float min_angle){
 	//qDebug() <<"unprojectToOriginalTextureMap";
 
 	//checks if the MeshModel has original uv coordinates and camera projected uv coordinates.
@@ -332,7 +335,7 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 
 		int x;
 		int y;
-		CMeshO::FaceIterator fi;
+		//CMeshO::FaceIterator fi;
 		bool found = false;
 
 		//goes pixelwise over the whole new texture image and looks if it lies inside
@@ -352,7 +355,6 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 				int ns = list.size();
 
 				if (ns>0){
-					bool fount = false;
 					int idx = 0;
 					while(!found && idx <ns){
 						UVFaceTexture* tmp;
@@ -371,9 +373,24 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 						*/
 						ct->getUVatBarycentricCoords(u,v,a,b,c);
 
+						CFaceO f;
+						f = m->cm.face.at(tmp->faceIndex);
+						//calculate normal vector for pixel
+						double n1, n2,n3;
+						n1 = a*f.V(0)->N()[0]+ b*f.V(1)->N()[0]+c*f.V(2)->N()[0];
+						n2 = a*f.V(0)->N()[1]+ b*f.V(1)->N()[1]+c*f.V(2)->N()[1];
+						n3 = a*f.V(0)->N()[2]+ b*f.V(1)->N()[2]+c*f.V(2)->N()[2];
+
+						double angle = ((-1*camera->calibration->cameraDirection[0])*n1)
+										+((-1*camera->calibration->cameraDirection[1])*n2)
+										+((-1*camera->calibration->cameraDirection[2])*n3);
+						angle = acos(angle);
+						angle = (angle/M_PI)*180.0;
+
 						int ix = (int)(((double)tmp_texture.width())*u);
 						int iy = tmp_texture.height()-(int)(((double)tmp_texture.height())*v);
-						if (ct->faceAngleToCamera <=90.0){
+						//if (ct->faceAngleToCamera <=min_angle){
+						if (angle <=min_angle){
 							found = true;
 							//calculating alpha value of the pixel by using the angle
 							//between camera and face
@@ -381,7 +398,8 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 							//ialpha = 255;
 							if(ix>=0 && ix<tmp_texture.width() && iy>=0 && iy<tmp_texture.height()){
 								cpixel = QColor(tmp_texture.pixel(ix,iy));
-								cpixel.setAlpha(ialpha);
+								//cpixel.setAlpha(ialpha);
+								cpixel.setAlpha(255);
 								image.setPixel(x,res_y-(y+1), cpixel.rgba());
 							}else{
 
@@ -495,7 +513,7 @@ void PhotoTexturer::edgeTextureStretching(QImage &image, int pass){
 }
 
 
-void PhotoTexturer::combineTextures(MeshModel *m, int width, int height, int ets){
+void PhotoTexturer::combineTextures(MeshModel *m, int width, int height, int ets, float min_angle){
 
 	QList<QuadTreeLeaf*> *list = new QList<QuadTreeLeaf*>();
 	CMeshO::PerFaceAttributeHandle<UVFaceTexture*> oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*>(m->cm,ORIGINALUVTEXTURECOORDS);
@@ -514,11 +532,55 @@ void PhotoTexturer::combineTextures(MeshModel *m, int width, int height, int ets
 	for (i=0;i<cameras.size();i++){
 		Camera *camera = cameras.at(i);
 		QImage image = QImage(width,height,QImage::Format_ARGB32);
-		unprojectToOriginalTextureMap(m,camera,qtree,image);
+		unprojectToOriginalTextureMap(m,camera,qtree,image, min_angle);
 		edgeTextureStretching(image,ets);
 		QString filename = QString(m->fileName.c_str());
+		//filename = filename + "_" + camera->name + ".tiff";
+		//image.save(filename,"TIFF");
 		filename = filename + "_" + camera->name + ".png";
 		image.save(filename,"PNG");
+	}
+
+
+}
+
+void PhotoTexturer::exportMaxScript(QString filename,MeshModel *mm){
+
+	QFile* ms = new QFile(filename);
+	if (ms->open(QIODevice::WriteOnly)){
+	     QTextStream out(ms);
+	     out << "(\n";
+	     int i;
+	     for (i=0;i<cameras.size();i++){
+	    	 Camera* cam = cameras.at(i);
+	    	 //TsaiCameraCalibration* tsai = dynamic_cast<TsaiCameraCalibration*>(cam->calibration);
+	    	 TsaiCameraCalibration* tsai = dynamic_cast<TsaiCameraCalibration*>(cam->calibration->calibrateToTsai(mm,false));
+	    	 if (tsai!=NULL){
+	    		 out << "-- kappa1: "<< tsai->calib_const.kappa1<<"\n";
+	    		 out << "-- Cx: "<< tsai->cam_para.Cx << "\tCy: "<<tsai->cam_para.Cy<<"\n";
+	    		 out << "-- sx: "<< tsai->cam_para.sx<<"\n";
+	    		 out << "-- p1: "<< tsai->calib_const.p1 << "\tp2: "<<tsai->calib_const.p2<<"\n";
+	    		 out << "\n";
+	    		 out << "r1 = [" << tsai->calib_const.r1<<",\t"<< -tsai->calib_const.r4<<",\t"<<-tsai->calib_const.r7<<"]\n";
+	    		 out << "r2 = [" << tsai->calib_const.r2<<",\t"<< -tsai->calib_const.r5<<",\t"<<-tsai->calib_const.r8<<"]\n";
+	    		 out << "r3 = [" << tsai->calib_const.r3<<",\t"<< -tsai->calib_const.r6<<",\t"<<-tsai->calib_const.r9<<"]\n";
+	    		 out << "r4 = [" << tsai->calib_const.Tx<<",\t"<< -tsai->calib_const.Ty<<",\t"<<-tsai->calib_const.Tz<<"]\n";
+
+	    		 out<< "m = matrix3 r1 r2 r3 r4\n";
+
+	    		 out << "setRendApertureWidth ("<< tsai->cam_para.dpx * cam->resolution[0]<<")\n";//  -- horizontal size of sensor/filmback
+	    		 out << "renderPixelAspect = " << tsai->cam_para.dpx/tsai->cam_para.dpy<<"\n"; //     -- non-square pixels?
+	    		 out << "renderWidth = "<< cam->resolution[0] <<"\n";
+	    		 out << "renderHeight = "<< cam->resolution[1] <<"\n";
+
+	    		 out << "freecamera name:\""<< cam->name <<"\" fov:(cameraFOV.MMtoFOV "<<tsai->calib_const.f<<") transform:(inverse m)\n";
+	    		 out << "\n\n";
+	    	 }
+	     }
+	     out << ")\n";
+
+	}else{
+		qDebug()<< "Could not open max script file." <<filename;
 	}
 
 

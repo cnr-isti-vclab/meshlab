@@ -195,6 +195,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="exportToMaxScriptPushButton" >
+          <property name="text" >
+           <string>export to MaxScript</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
