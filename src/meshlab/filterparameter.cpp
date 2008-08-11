@@ -232,7 +232,44 @@ void FilterParameterSet::setMatrix44(QString , Matrix44f )
 	assert(0);
 }
 
+//--------------------------------------
 
+Point3f		FilterParameterSet::getPoint3f(QString name) const
+{
+	const FilterParameter *p=findParameter(name);
+	
+	assert(p);
+	assert(p->fieldType==FilterParameter::PARPOINT3F);
+	assert(p->fieldVal.type()==QVariant::List);
+	
+	Point3f point;
+	QList<QVariant> pointVals = p->fieldVal.toList();
+	assert(pointVals.size()==3);
+	for(int i=0;i<3;++i)
+		point[i]=pointVals[i].toDouble();
+	return point;
+}
+void FilterParameterSet::addPoint3f (QString name, Point3f defaultVal, QString desc, QString tooltip)
+{
+	FilterParameter p(name,desc,tooltip);
+	
+	QList<QVariant> pointVals;
+	for(int i=0;i<3;++i)
+		pointVals.append(defaultVal[i]);
+	p.fieldVal=pointVals;
+	p.fieldType=FilterParameter::PARPOINT3F;
+	paramList.push_back(p);		
+}
+void  FilterParameterSet::setPoint3f(QString name, Point3f newVal)
+{
+	FilterParameter *p=findParameter(name);
+	assert(p);
+	assert(p->fieldType == FilterParameter::PARPOINT3F);
+	QList<QVariant> pointVals;
+	for(int i=0;i<3;++i)
+		pointVals.append(newVal[i]);
+	p->fieldVal=pointVals;
+}
 //--------------------------------------
 
 void FilterParameterSet::addAbsPerc (QString name, float defaultVal, float minVal, float maxVal, QString desc, QString tooltip)
@@ -364,7 +401,7 @@ void FilterParameterSet::setMesh(QString name, MeshModel * newVal, int position)
 }
 
 /* ---- */
-/* Dynamic Float Memebers*/
+/* Dynamic Float Members*/
 /* ---- */
 
 void FilterParameterSet::addDynamicFloat(QString name, float defaultVal, float minVal, float maxVal, int changeMask, QString desc , QString tooltip )

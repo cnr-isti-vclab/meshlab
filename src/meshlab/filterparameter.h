@@ -70,7 +70,8 @@ class FilterParameter
 		PARFLOATLIST = 10,
 		PARDYNFLOAT = 11,
 		PAROPENFILENAME = 12,
-		PARSAVEFILENAME = 13
+		PARSAVEFILENAME = 13,
+		PARPOINT3F = 14
 	};
 	
 	QString  fieldName;
@@ -130,6 +131,7 @@ public:
 	void addFloat    (QString name, float     defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addString   (QString name, QString   defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addMatrix44 (QString name, vcg::Matrix44f defaultVal, QString desc=QString(), QString tooltip=QString());
+	void addPoint3f   (QString name, vcg::Point3f defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addColor    (QString name, QColor defaultVal, QString desc=QString(), QString tooltip=QString());
 	void addAbsPerc  (QString name, float     defaultVal, float minVal, float maxVal,  QString desc=QString(), QString tooltip=QString());
 	void addEnum     (QString name, int defaultVal, QStringList values, QString desc=QString(), QString tooltip=QString());
@@ -161,6 +163,7 @@ public:
 	float				getFloat(QString name) const;
 	QString			getString(QString name) const;
 	vcg::Matrix44f		getMatrix44(QString name) const;
+	vcg::Point3f getPoint3f(QString name) const;
 	QColor		   getColor(QString name) const;
 	vcg::Color4b getColor4b(QString name) const;
 	float		     getAbsPerc(QString name) const;
@@ -176,6 +179,7 @@ public:
 	void setFloat(QString name, float newVal);
 	void setString(QString name, QString newVal);
 	void setMatrix44(QString name, vcg::Matrix44f newVal);
+	void setPoint3f(QString name, vcg::Point3f newVal);
 	void setColor(QString name, QColor newVal);
 	void setAbsPerc(QString name, float newVal);
 	void setEnum(QString name, int newVal);
