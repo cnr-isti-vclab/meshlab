@@ -520,7 +520,7 @@ void MainWindow::startFilter()
 	if(iFilter->autoDialog(action))
 	{
 		/// Start the automatic dialog with the collected parameters
-		stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this);
+		stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this,GLA());
   }
 	else if(iFilter->customDialog(action))
 	{

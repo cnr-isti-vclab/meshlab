@@ -378,6 +378,18 @@ public:
 	float lastRenderingTime() { return lastTime;}
 
 	float getFov() { return fov; }
+// the following pair of slot/signal implements a very simple message passing mechanism.
+// a widget that has a pointer to the glarea call the sendViewDir() slot and 
+// setup a connect to recive the transmitViewDir signal that actually contains the point3f.
+// See the Point3fWidget code.
+signals :
+		void transmitViewDir(vcg::Point3f dir);
+public slots:
+		void sendViewDir() {
+			vcg::Point3f dir= getViewDir();
+			emit transmitViewDir(dir);
+		}
+public:
 	vcg::Point3f getViewDir() {
 		vcg::Matrix44f rotM; 
 		trackball.track.rot.ToMatrix(rotM); 

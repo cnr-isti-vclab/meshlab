@@ -36,7 +36,7 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 		clearValues();
 }
 
-StdParFrame::StdParFrame(QWidget *p, GLArea *curr_gla)
+StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla)
 //:QDialog(p)
 :QFrame(p)
 {
@@ -45,7 +45,7 @@ StdParFrame::StdParFrame(QWidget *p, GLArea *curr_gla)
 
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindowInterface *mwi)
+void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindowInterface *mwi, QWidget *gla)
   {
 		curAction=action;
 		curmfi=mfi;
@@ -55,9 +55,7 @@ void MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		curMeshDoc = mdp;
 //		MainWindow * mwp = dynamic_cast<MainWindow *>(mwi);
 		MainWindow * mwp = (MainWindow *)(mwi);
-		//		MainWindow * mwp = qobject_cast<MainWindow *>(mwi);
-		if(mwp)		curgla=mwp->GLA();
-				 else curgla=0;
+		curgla=gla;
 		
 		mfi->initParameterSet(action, *mdp, curParSet);	
 		createFrame();
@@ -630,9 +628,9 @@ void AbsPercWidget::setValue(float val, float minV, float maxV)
 /******************************************/ 
 // Point3fWidget Implementation
 /******************************************/ 
-Point3fWidget::Point3fWidget(QWidget *p, Point3f defaultv, GLArea *gla_curr):QGridLayout(NULL)
+Point3fWidget::Point3fWidget(QWidget *p, Point3f defaultv, QWidget *gla_curr):QGridLayout(NULL)
 {
-	gla=gla_curr;
+//	gla=gla_curr;
 	for(int i =0;i<3;++i)
 		{
 			coordSB[i]= new QLineEdit(p);	
@@ -641,11 +639,12 @@ Point3fWidget::Point3fWidget(QWidget *p, Point3f defaultv, GLArea *gla_curr):QGr
 			this->addWidget(coordSB[i],0,i,Qt::AlignHCenter);
 		}
 	this->setValue(defaultv);
-	if(gla) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
+	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 		{	
 			getViewButton = new QPushButton(tr("Get View Dir"),p);
 			this->addWidget(getViewButton,0,3,Qt::AlignHCenter);
-			connect(getViewButton,SIGNAL(clicked()),this,SLOT(getViewDir()));
+			connect(getViewButton,SIGNAL(clicked()),gla_curr,SLOT(sendViewDir()));
+			connect(gla_curr,SIGNAL(transmitViewDir(vcg::Point3f)),this,SLOT(setValue(vcg::Point3f)));
 		}
 }
 
@@ -655,11 +654,6 @@ Point3fWidget::~Point3fWidget()
 		{
 			delete coordSB[i];
 		}
-}
-
-void Point3fWidget::getViewDir()
-{
-	setValue(gla->getViewDir());
 }
 
 void Point3fWidget::setValue(Point3f newVal)

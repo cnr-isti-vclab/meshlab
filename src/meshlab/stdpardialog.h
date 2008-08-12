@@ -137,25 +137,24 @@ protected:
 
 
 
-/// Widget to enter a Point3f, it provides handy method for getting useful vectors
+/// Widget to enter a Point3f, 
+/// if at the creation you provide a pointer to a GLArea (the mesh viewing window) 
+/// the widget exposes a button for getting the current view directiont 
 
 class Point3fWidget : public QGridLayout
 {
 	Q_OBJECT
 	
 public:
-  Point3fWidget(QWidget *p, vcg::Point3f defaultv, GLArea *gla);
+  Point3fWidget(QWidget *p, vcg::Point3f defaultv, QWidget *gla);
   ~Point3fWidget();
 	
-  vcg::Point3f getValue();
-	void  setValue(vcg::Point3f val);
-	
-public slots:
-	void getViewDir(); 
+	vcg::Point3f getValue();
+	public slots:
+	void  setValue(vcg::Point3f val);	
 		
 protected:
 	QLineEdit * coordSB[3];
-	GLArea *gla;
 	QPushButton *getViewButton;
 };
 
@@ -199,7 +198,7 @@ class StdParFrame : public QFrame
 {
 	Q_OBJECT
 public:
-	StdParFrame(QWidget *p, GLArea *gla=0);
+	StdParFrame(QWidget *p, QWidget *gla=0);
 
 	void loadFrameContent(FilterParameterSet &curParSet,MeshDocument *mdPt = 0);
 	void readValues(FilterParameterSet &curParSet);
@@ -210,7 +209,7 @@ public:
 	QVector<void *> stdfieldwidgets;
 	QVector<QLabel *> helpList;
 private: 
-		GLArea *gla; // used for having a link to the glarea that spawned the parameter asking.
+	QWidget *gla; // used for having a link to the glarea that spawned the parameter asking.
 	
 signals:
 		void dynamicFloatChanged(int mask);
@@ -351,7 +350,7 @@ public:
 	void createFrame();
 	void loadFrameContent(MeshDocument *mdPt=0);
 
-	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi);
+	void showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isDynamic();
 private slots:
 	void applyClick();
@@ -372,7 +371,7 @@ public:
 	MeshDocument * curMeshDoc;
 	MeshFilterInterface *curmfi;
 	MainWindowInterface *curmwi;
-	GLArea * curgla;
+	QWidget * curgla;
 	FilterParameterSet curParSet;
 	
 };
