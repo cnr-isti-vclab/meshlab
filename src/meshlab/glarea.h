@@ -378,6 +378,13 @@ public:
 	float lastRenderingTime() { return lastTime;}
 
 	float getFov() { return fov; }
+	vcg::Point3f getViewDir() {
+		vcg::Matrix44f rotM; 
+		trackball.track.rot.ToMatrix(rotM); 
+		//vcg::Matrix44f::Invert(rotM);
+		vcg::Invert(rotM);
+		return rotM*vcg::Point3f(0,0,1);
+	}
 
 	bool	infoAreaVisible;		// Draws the lower info area ?
 	bool  suspendedEditor;
