@@ -8,6 +8,7 @@ HEADERS       = editalign.h \
 		align/AlignPair.h \
 		align/AlignGlobal.h \
                 align/OccupancyGrid.h \
+                align/align_parameter.h \
 		../../meshlab/stdpardialog.h \
 		 $$VCGDIR/wrap/gui/trackball.h\
                  $$VCGDIR/wrap/gui/trackmode.h\
@@ -20,6 +21,7 @@ SOURCES       = editalign.cpp \
                 align/AlignPair.cpp \
                 align/AlignGlobal.cpp \
                 align/OccupancyGrid.cpp \
+                align/align_parameter.cpp \
 		../../meshlab/meshmodel.cpp \
 		../../meshlab/stdpardialog.cpp \
 		../../meshlab/filterparameter.cpp \

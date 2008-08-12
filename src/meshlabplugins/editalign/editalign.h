@@ -87,10 +87,6 @@ public:
 
 public:
 	vcg::AlignPair::Param defaultAP;  // default alignment parameters
-	
-
-	void retrieveParameterSet(FilterParameterSet &fps , vcg::AlignPair::Param &app);
-	void buildParameterSet(FilterParameterSet &fps , vcg::AlignPair::Param &app);
 
 public slots:
 		void process();
