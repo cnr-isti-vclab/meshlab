@@ -230,7 +230,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
     {
       float RangeMin = par.getFloat("RangeMin");	
       float RangeMax = par.getFloat("RangeMax");		
-      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,RangeMin,RangeMax);
+      tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,RangeMin,RangeMax);
       break;
     }
   case CP_GAUSSIAN:
@@ -257,7 +257,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
       
       Histogramf H;
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
-      tri::UpdateColor<CMeshO>::VertexQuality(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
+      tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
       Log(GLLogStream::Info, "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
     break;
     }  

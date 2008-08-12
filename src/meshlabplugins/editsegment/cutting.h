@@ -521,7 +521,7 @@ namespace vcg {
 
 			Histogramf H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(*mesh,H);
-			tri::UpdateColor<CMeshO>::VertexQuality(*mesh,H.Percentile(0.1f),H.Percentile(0.9f));
+			tri::UpdateColor<CMeshO>::VertexQualityRamp(*mesh,H.Percentile(0.1f),H.Percentile(0.9f));
 		}
 
 		void Reset() {

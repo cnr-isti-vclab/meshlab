@@ -114,7 +114,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshModel &m, FilterParameterS
 	if(filter->text() == filterName(FP_QUALITY_GEODESIC) )
 	  {
 		tri::UpdateQuality<CMeshO>::VertexGeodesicFromBorder(m.cm);
-		tri::UpdateColor<CMeshO>::VertexQuality(m.cm);
+		tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm);
 	  }
 	return true;
 }
