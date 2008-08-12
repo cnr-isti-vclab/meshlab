@@ -39,6 +39,7 @@ public:
 	void CompileAndLink(QGLContext *);
 	void Start();
 	void Stop() { glUseProgram(0); }
+	RfxGLPass* getPass(int pass) { return shader_pass.at(pass); }
 
 private:
 	QList<RfxGLPass*> shader_pass;

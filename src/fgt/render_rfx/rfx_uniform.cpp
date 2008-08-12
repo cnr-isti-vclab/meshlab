@@ -68,37 +68,40 @@ void RfxUniform::SetValue(float _value[16])
 	case INT:
 	case BOOL:
 	case FLOAT:
-		value = _value[0];
+		value = new float;
+		*value = _value[0];
 		break;
 
 	case VEC2:
 	case IVEC2:
 	case BVEC2:
-		memcpy(vec2, _value, sizeof(float) * 2);
+		value = new float[2];
+		memcpy(value, _value, sizeof(float) * 2);
 		break;
 
 	case VEC3:
 	case IVEC3:
 	case BVEC3:
-		memcpy(vec3, _value, sizeof(float) * 3);
+		value = new float[3];
+		memcpy(value, _value, sizeof(float) * 3);
 		break;
 
 	case VEC4:
 	case IVEC4:
 	case BVEC4:
-		memcpy(vec4, _value, sizeof(float) * 4);
-		break;
-
 	case MAT2:
-		memcpy(mat2, _value, sizeof(float) * 4);
+		value = new float[4];
+		memcpy(value, _value, sizeof(float) * 4);
 		break;
 
 	case MAT3:
-		memcpy(mat3, _value, sizeof(float) * 9);
+		value = new float[9];
+		memcpy(value, _value, sizeof(float) * 9);
 		break;
 
 	case MAT4:
-		memcpy(mat4, _value, sizeof(float) * 16);
+		value = new float[16];
+		memcpy(value, _value, sizeof(float) * 16);
 		break;
 
 	default:
@@ -111,7 +114,8 @@ void RfxUniform::SetValue(const QString &texFileName)
 {
 	textureFile = texFileName;
 	if (!QFileInfo(textureFile).exists()) {
-		qDebug("WARNING: texture file (%s) not found.", textureFile.toStdString().c_str());
+		//This console warning is no longer necessary, there's a dialog
+		// qDebug("WARNING: texture file (%s) not found", textureFile.toStdString().c_str());
 		textureNotFound = true;
 	}
 }
@@ -156,50 +160,50 @@ void RfxUniform::PassToShader()
 	switch (type) {
 	case INT:
 	case BOOL:
-		glUniform1i(location, value);
+		glUniform1i(location, *value);
 		break;
 
 	case FLOAT:
-		glUniform1f(location, value);
+		glUniform1f(location, *value);
 		break;
 
 	case IVEC2:
 	case BVEC2:
-		glUniform2i(location, vec2[0], vec2[1]);
+		glUniform2i(location, value[0], value[1]);
 		break;
 
 	case VEC2:
-		glUniform2f(location, vec2[0], vec2[1]);
+		glUniform2f(location, value[0], value[1]);
 		break;
 
 	case IVEC3:
 	case BVEC3:
-		glUniform3i(location, vec3[0], vec3[1], vec3[2]);
+		glUniform3i(location, value[0], value[1], value[2]);
 		break;
 
 	case VEC3:
-		glUniform3f(location, vec3[0], vec3[1], vec3[2]);
+		glUniform3f(location, value[0], value[1], value[2]);
 		break;
 
 	case IVEC4:
 	case BVEC4:
-		glUniform4i(location, vec4[0], vec4[1], vec4[2], vec4[3]);
+		glUniform4i(location, value[0], value[1], value[2], value[3]);
 		break;
 
 	case VEC4:
-		glUniform4f(location, vec4[0], vec4[1], vec4[2], vec4[3]);
+		glUniform4f(location, value[0], value[1], value[2], value[3]);
 		break;
 
 	case MAT2:
-		glUniformMatrix2fv(location, 1, GL_FALSE, mat2);
+		glUniformMatrix2fv(location, 1, GL_FALSE, value);
 		break;
 
 	case MAT3:
-		glUniformMatrix3fv(location, 1, GL_FALSE, mat3);
+		glUniformMatrix3fv(location, 1, GL_FALSE, value);
 		break;
 
 	case MAT4:
-		glUniformMatrix4fv(location, 1, GL_FALSE, mat4);
+		glUniformMatrix4fv(location, 1, GL_FALSE, value);
 		break;
 
 	case SAMPLER2D:

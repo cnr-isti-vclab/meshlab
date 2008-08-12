@@ -24,6 +24,7 @@
 #ifndef RFX_STATE_H_
 #define RFX_STATE_H_
 
+#include <QString>
 #include <GL/glew.h>
 
 class RfxState
@@ -63,7 +64,7 @@ public:
 	};
 
 	enum TextureFilterRfx {
-		GL_NEAREST_RFX, GL_LINEAR_RFX, GL_NEAREST_MIPMAP_NEAREST_RFX,
+		GL_NEAREST_RFX, GL_LINEAR_RFX, GL_NEAREST_MIPMAP_NEAREST_RFX = 3,
 		GL_NEAREST_MIPMAP_LINEAR_RFX, GL_LINEAR_MIPMAP_NEAREST_RFX,
 		GL_LINEAR_MIPMAP_LINEAR_RFX
 	};
@@ -80,12 +81,15 @@ public:
 	};
 
 	RfxState() {}
-	RfxState(StateType type, int state = -1, int value = -1);
+	RfxState(StateType type, int state = -1, unsigned long value = -1);
 	virtual ~RfxState() {}
 
 	void SetState(int _state) { state = _state; }
-	void SetValue(float _val) { value = _val; }
+	void SetValue(unsigned long _val) { value = _val; }
 	void SetEnvironment(GLint);
+
+	QString GetTextureState() { return TextureStatesStrings[state - 1]; }
+	QString GetTextureValue();
 
 private:
 	void SetTextureEnvironment(GLint);
@@ -94,11 +98,15 @@ private:
 	GLint GLFilterMode();
 	GLint GLFunctionMode();
 	GLint GLColorMode();
+	GLfloat* DecodeColor();
 	void GLEnableDisable(GLint);
 
 	int state;
-	float value;
+	unsigned long value;
 	StateType type;
+	static const char *TextureStatesStrings[];
+	static const char *TextureWrapStrings[];
+	static const char *TextureFilterStrings[];
 };
 
 #endif /* RFX_STATE_H_ */

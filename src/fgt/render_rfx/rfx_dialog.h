@@ -21,73 +21,73 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef RFX_UNIFORM_H_
-#define RFX_UNIFORM_H_
+#ifndef RFX_DIALOG_H_
+#define RFX_DIALOG_H_
 
-#include <QString>
-#include <QList>
-#include <QFileInfo>
-#include <GL/glew.h>
-#include <QGLWidget>
-#include "rfx_state.h"
-
-class RfxUniform
+/* syntax highlighter for vertex and fragment editor */
+#include <QSyntaxHighlighter>
+class GLSLSynHlighter : public QSyntaxHighlighter
 {
 public:
-	enum UniformType {
-		INT, FLOAT, BOOL,
-		VEC2, VEC3, VEC4,
-		IVEC2, IVEC3, IVEC4,
-		BVEC2, BVEC3, BVEC4,
-		MAT2, MAT3, MAT4,
-		SAMPLER1D, SAMPLER2D, SAMPLER3D, SAMPLERCUBE,
-		SAMPLER1DSHADOW, SAMPLER2DSHADOW,
-		TOTAL_TYPES
-	};
+	GLSLSynHlighter(QTextDocument *parent = 0);
 
-	RfxUniform(const QString&, const QString&);
-	virtual ~RfxUniform();
-
-	void AddGLState(RfxState *s) { textureStates.append(s); }
-	void UpdateUniformLocation(GLuint programId);
-	void LoadTexture(QGLContext *);
-	void PassToShader();
-
-	void SetValue(float[16]);
-	void SetValue(const QString&);
-	void SetTU(GLint tu) { texUnit = tu; }
-	float* GetValue() { return value; }
-	GLint GetTU() { return texUnit; }
-
-	QString GetName() { return identifier; }
-	UniformType GetType() { return type; }
-	bool isTexture() { return (type > MAT4); }
-	bool isTextureLoaded() { return textureLoaded; }
-	bool isTextureFound() { return !textureNotFound; }
-	QString& GetTextureFName() { return textureFile; }
-
-	static UniformType GetUniformType(const QString&);
-	static QString GetTypeString(UniformType u) { return UniformTypeString[u]; }
-	QListIterator<RfxState*> StatesIterator()
-	{
-		return QListIterator<RfxState*>(textureStates);
-	}
+protected:
+	void highlightBlock(const QString &text);
 
 private:
-	QString identifier;
-	UniformType type;
-	float *value;
+	struct HighlightingRule
+	{
+		QRegExp pattern;
+		QTextCharFormat format;
+	};
+	QVector<HighlightingRule> highlightingRules;
 
-	bool textureLoaded;
-	bool textureNotFound;
-	QList<RfxState*> textureStates;
-	QString textureFile;
-	GLuint textureId;
-	GLint textureTarget;
-	GLint texUnit;
-	GLint location;
+	QTextCharFormat kwordsFormat;
+	QTextCharFormat builtinsFormat;
+	QTextCharFormat functionFormat;
+	QTextCharFormat singleLineCommentFormat;
+	QTextCharFormat multiLineCommentFormat;
 
-	static const char *UniformTypeString[];
+	QRegExp commentStartExpression;
+	QRegExp commentEndExpression;
 };
 
-#endif /* RFX_UNIFORM_H_ */
+
+/* Shader Properties dialog */
+#include <cassert>
+#include <QMap>
+#include <QLabel>
+#include <QPicture>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QHeaderView>
+#include "ui_rfx_dialog.h"
+#include "rfx_shader.h"
+
+class RfxDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	RfxDialog(RfxShader*, QAction*, QWidget *parent = 0);
+	virtual ~RfxDialog();
+
+	enum DialogTabs { ALL_TABS = -1, UNIFORM_TAB, TEXTURE_TAB, GLSTATE_TAB };
+
+public slots:
+	void UniformSelected(int);
+	void TextureSelected(int);
+
+private:
+	void DrawIFace(RfxUniform*, int rows, int columns);
+	void CleanTab(int);
+
+	Ui::Dialog ui;
+	QMultiMap<int, QWidget*> widgetsByTab;
+	RfxShader *shader;
+	GLSLSynHlighter *vertHL;
+	GLSLSynHlighter *fragHL;
+};
+#endif /* RFX_DIALOG_H_ */

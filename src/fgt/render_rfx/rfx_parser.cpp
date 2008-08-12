@@ -236,19 +236,32 @@ float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType V
 }
 
 QString RfxParser::TextureFromRfx(const QString& VarName,
-                                         RfxUniform::UniformType VarType)
+                                        RfxUniform::UniformType VarType)
 {
 	QString elementName = UniformToRfx[VarType];
+	QString filePath = "/not/found";
 
 	QDomElement varNode;
 	QDomNodeList candidates = root.elementsByTagName(elementName);
 
-	for (int i = 0; i < candidates.size(); ++i)
-		if (candidates.at(i).toElement().attribute("NAME") == VarName)
-			return candidates.at(i).toElement().attribute("FILE_NAME");
+	for (int i = 0; i < candidates.size(); ++i) {
+		varNode = candidates.at(i).toElement();
+		if (varNode.attribute("NAME") == VarName) {
+			// _NOTE_
+			// RM stores a relative path ".." using Windows separator "\", and
+			// it looks like Qt do not recognize this combination as a path
+			// so QFileInfo and QDir just give up.
+			//
+			// We replace every '\' with '/', THEN make an absolute path from
+			// the string.
 
+			QFileInfo thefile(varNode.attribute("FILE_NAME").replace('\\', '/'));
+			thefile.makeAbsolute();
+			filePath = thefile.filePath();
+		}
+	}
 
-	return "/not/found/...";
+	return filePath;
 }
 
 void RfxParser::AppendGLStates(RfxGLPass *theGLPass, QDomNodeList statelist,
@@ -258,12 +271,7 @@ void RfxParser::AppendGLStates(RfxGLPass *theGLPass, QDomNodeList statelist,
 		QDomElement stateEl = statelist.at(j).toElement();
 		RfxState *glstate = new RfxState(statetype);
 		glstate->SetState(stateEl.attribute("STATE").toInt());
-
-		QString attrValue = stateEl.attribute("VALUE");
-		if (attrValue == "TRUE" || attrValue == "FALSE") // BOOL type
-			glstate->SetValue(((attrValue == "TRUE")? 1.0f : 0.0f));
-		else // FLOAT or ENUM type
-			glstate->SetValue(attrValue.toFloat());
+		glstate->SetValue(stateEl.attribute("VALUE").toULong());
 
 		if (statetype == RfxState::RFX_RENDERSTATE)
 			theGLPass->AddGLState(glstate);

@@ -27,6 +27,24 @@ RenderRFX::RenderRFX()
 {
 	shadersSupported = false;
 	shaderPass = -1;
+	dialog = NULL;
+}
+
+RenderRFX::~RenderRFX()
+{
+	if (dialog) {
+		dialog->close();
+		delete dialog;
+	}
+
+	foreach (QAction *a, actionList)
+		delete a;
+	actionList.clear();
+
+	QMapIterator<QString, RfxShader*> it(shaderList);
+	while (it.hasNext())
+		delete it.value();
+	shaderList.clear();
 }
 
 QList<QAction*> RenderRFX::actions()
@@ -86,6 +104,11 @@ void RenderRFX::Init(QAction *action, MeshModel &/*mesh*/,
 	assert(actionList.contains(action));
 	RfxShader *shader = shaderList[action->text()];
 
+	if (dialog) {
+		dialog->close();
+		delete dialog;
+	}
+
 	parent->makeCurrent();
 	GLenum err = glewInit();
 	if (GLEW_OK == err) {
@@ -93,7 +116,10 @@ void RenderRFX::Init(QAction *action, MeshModel &/*mesh*/,
 			shadersSupported = true;
 
 			shader->CompileAndLink((QGLContext *)parent);
-			// TODO: show qt dialog
+
+			dialog = new RfxDialog(shader, action, parent);
+			dialog->move(0, 100);
+			dialog->show();
 		}
 	}
 

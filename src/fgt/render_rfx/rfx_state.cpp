@@ -23,7 +23,28 @@
 
 #include "rfx_state.h"
 
-RfxState::RfxState(StateType _type, int _state, int _value)
+// static members initialization
+const char *RfxState::TextureStatesStrings[] = {
+	"GL_TEXTURE_WRAP_S", "GL_TEXTURE_WRAP_T", "GL_TEXTURE_WRAP_R",
+	"GL_TEXTURE_MIN_FILTER", "GL_TEXTURE_MAG_FILTER",
+	"GL_TEXTURE_BORDER_COLOR", "GL_TEXTURE_MAX_ANISOTROPY_EXT",
+	"GL_TEXTURE_LOD_BIAS"
+};
+
+const char *RfxState::TextureWrapStrings[] = {
+	"GL_CLAMP", "GL_CLAMP_TO_EDGE", "GL_REPEAT", "GL_CLAMP_TO_BORDER",
+	"GL_MIRRORED_REPEAT"
+};
+
+// the empty string in 3rd position is for compatibility with RM enum
+const char *RfxState::TextureFilterStrings[] = {
+	"GL_NEAREST", "GL_LINEAR", "", "GL_NEAREST_MIPMAP_NEAREST",
+	"GL_NEAREST_MIPMAP_LINEAR", "GL_LINEAR_MIPMAP_NEAREST",
+	"GL_LINEAR_MIPMAP_LINEAR"
+};
+
+
+RfxState::RfxState(StateType _type, int _state, unsigned long _value)
 	: state(_state), value(_value), type(_type)
 {
 }
@@ -57,7 +78,7 @@ void RfxState::SetTextureEnvironment(GLint target)
 		break;
 
 	case GL_TextureBorderColor:
-		// TODO
+		glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, DecodeColor());
 		break;
 
 	case GL_TextureMaxAnisotropyEXT:
@@ -177,11 +198,25 @@ inline GLint RfxState::GLColorMode()
 void RfxState::SetGLEnvironment()
 {
 	switch (state) {
-	case GL_CurrentColor:
-	case GL_SecondaryColor:
-	case GL_ClearColor:
-		//TODO
+	case GL_CurrentColor: {
+		GLfloat *res = DecodeColor();
+		glColor3f(res[0], res[1], res[2]);
+		delete res;
+	}
+
+	case GL_SecondaryColor: {
+		GLfloat *res = DecodeColor();
+		glSecondaryColor3f(res[0], res[1], res[2]);
+		delete res;
 		break;
+	}
+
+	case GL_ClearColor: {
+		GLfloat *res = DecodeColor();
+		glClearColor(res[0], res[1], res[2], res[3]);
+		delete res;
+		break;
+	}
 
 	case GL_ClearDepth:
 		glClearDepth(value);
@@ -220,9 +255,10 @@ void RfxState::SetGLEnvironment()
 		break;
 	}
 
-	case GL_FogColor:
-		// TODO
+	case GL_FogColor: {
+		glFogfv(GL_FOG_COLOR, DecodeColor());
 		break;
+	}
 
 	case GL_FogDensity:
 		glFogi(GL_FOG_DENSITY, value);
@@ -261,11 +297,11 @@ void RfxState::SetGLEnvironment()
 		break;
 
 	case GL_PointMin:
-		glPointParameterfv(GL_POINT_SIZE_MIN, &value);
+		glPointParameteriv(GL_POINT_SIZE_MIN, (GLint *)&value);
 		break;
 
 	case GL_PointMax:
-		glPointParameterfv(GL_POINT_SIZE_MAX_ARB, &value);
+		glPointParameteriv(GL_POINT_SIZE_MAX_ARB, (GLint *)&value);
 		break;
 
 	case GL_PointSmooth:
@@ -350,9 +386,12 @@ void RfxState::SetGLEnvironment()
 		GLEnableDisable(GL_BLEND);
 		break;
 
-	case GL_BlendColor:
-		// TODO
+	case GL_BlendColor: {
+		GLfloat *res = DecodeColor();
+		glBlendColor(res[0], res[1], res[2], res[3]);
+		delete res;
 		break;
+	}
 
 	case GL_BlendSourceRGB:
 	case GL_BlendDestRGB:
@@ -462,10 +501,67 @@ void RfxState::SetGLEnvironment()
 	}
 }
 
+GLfloat* RfxState::DecodeColor()
+{
+	// decodes a color stored in a 32bit integer
+	// [32bits = 8bits (0-255) * 4 channels (RGBA)]
+	// and returns a 4-float array within [0, 1] range
+
+	enum Offsets { _R = 1, _G = 256, _B = 65536, _A = 16777216 };
+	long val = value;
+	GLfloat *color = new GLfloat[4];
+
+	// keep values in range [0, 255] to simplify assignment
+	color[3] = (val > _A)?                    (short)(val / _A) : 0;
+	color[2] = (val -= (_A * color[3]) > _B)? (short)(val / _B) : 0;
+	color[1] = (val -= (_B * color[2]) > _G)? (short)(val / _G) : 0;
+	color[0] = (val -= (_G * color[1]) > _R)? (short)(val / _R) : 0;
+
+	// now normalize in [0, 1] space
+	for (int i = 0; i < 4; ++i)
+		color[i] /= 255.0f;
+
+	return color;
+}
+
 inline void RfxState::GLEnableDisable(GLint GLmode)
 {
 	if (value)
 		glEnable(GLmode);
 	else
 		glDisable(GLmode);
+}
+
+/***
+ * conversion from enum to strings for gui use
+ */
+QString RfxState::GetTextureValue()
+{
+	switch (state) {
+	case GL_TextureWrapS:
+	case GL_TextureWrapT:
+	case GL_TextureWrapR:
+		return TextureWrapStrings[value - 1];
+
+	case GL_TextureMinify:
+	case GL_TextureMagnify:
+		return TextureFilterStrings[value];
+
+	case GL_TextureBorderColor: {
+		float *thecol = DecodeColor();
+		return "(" + QString().setNum(thecol[0]) + ", "
+		           + QString().setNum(thecol[1]) + ", "
+		           + QString().setNum(thecol[2]) + ", "
+		           + QString().setNum(thecol[3]) + ")";
+	}
+
+	case GL_TextureMaxAnisotropyEXT:
+		return QString().setNum(value);
+
+	case GL_TextureLODBias:
+		return QString().setNum(value);
+
+	default:
+		return "";
+	}
 }

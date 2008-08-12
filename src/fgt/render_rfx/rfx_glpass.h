@@ -39,11 +39,19 @@ public:
 	virtual ~RfxGLPass();
 
 	void SetShaderSource(const QString &source, bool isFragment);
+	const QString& GetVertexSource() { return vert; }
+	const QString& GetFragmentSource() { return frag; }
 	int GetPassIndex() { return passIndex; }
 	void SetPassIndex(int passidx) { passIndex = passidx; }
 	void AddGLState(RfxState *s) { rfxStates.append(s); }
 	void AddUniform(RfxUniform *u) { shaderUniforms.append(u); }
 	RfxUniform* GetLastUniform() { return shaderUniforms.last(); }
+	QListIterator<RfxUniform*> UniformsIterator()
+	{
+		return QListIterator<RfxUniform*>(shaderUniforms);
+	}
+	RfxUniform* getUniform(int uniIdx) { return shaderUniforms.at(uniIdx); }
+	RfxUniform* getUniform(const QString& uniIdx);
 	void CompileAndLink(QGLContext *);
 	void Start();
 

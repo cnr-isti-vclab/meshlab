@@ -26,11 +26,13 @@
 
 #include <GL/glew.h>
 #include <QGLWidget>
+#include <QMapIterator>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include "rfx_uniform.h"
 #include "rfx_shader.h"
 #include "rfx_parser.h"
+#include "rfx_dialog.h"
 
 class RenderRFX : public QObject, public MeshRenderInterface
 {
@@ -39,6 +41,7 @@ class RenderRFX : public QObject, public MeshRenderInterface
 
 public:
 	RenderRFX();
+	~RenderRFX();
 	virtual void Init(QAction*, MeshModel&, RenderMode&, QGLWidget*);
 	virtual void Render(QAction*, MeshModel&, RenderMode&, QGLWidget*);
 	virtual bool isSupported()         { return shadersSupported; }
@@ -54,5 +57,6 @@ private:
 	QMap<QString, RfxShader*> shaderList;
 	int shaderPass;
 	QString shaderDir;
+	RfxDialog *dialog;
 };
 #endif /* RENDERRFX_H */

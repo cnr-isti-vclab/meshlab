@@ -126,3 +126,13 @@ void RfxGLPass::Start()
 		uni->PassToShader();
 	}
 }
+
+RfxUniform* RfxGLPass::getUniform(const QString& uniIdx)
+{
+	foreach (RfxUniform *u, shaderUniforms) {
+		if (u->GetName() == uniIdx)
+			return u;
+	}
+
+	return NULL;
+}

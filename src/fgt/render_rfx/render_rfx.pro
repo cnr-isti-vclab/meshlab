@@ -7,7 +7,8 @@ HEADERS       = render_rfx.h  \
                 rfx_glpass.h  \
                 rfx_uniform.h \
                 rfx_state.h   \
-                rfx_parser.h
+                rfx_parser.h  \
+                rfx_dialog.h
 
 SOURCES       = render_rfx.cpp  \
                 rfx_shader.cpp  \
@@ -15,6 +16,9 @@ SOURCES       = render_rfx.cpp  \
                 rfx_uniform.cpp \
                 rfx_state.cpp   \
                 rfx_parser.cpp  \
+                rfx_dialog.cpp  \
                 $$GLEWCODE
+
+FORMS         = rfx_dialog.ui
 
 TARGET        = render_rfx
