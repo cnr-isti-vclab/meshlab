@@ -100,7 +100,7 @@
 
 #include "cleanfilter.h"
 #include "remove_small_cc.h"
-
+#include "align_tools.h"
 
 //#include <wrap/io_trimesh/io_mask.h>
 #include <vcg/complex/trimesh/create/platonic.h>
@@ -117,8 +117,8 @@ using namespace vcg;
 
 CleanFilter::CleanFilter() 
 {
-  typeList << FP_REBUILD_SURFACE << FP_REMOVE_WRT_Q << FP_REMOVE_ISOLATED_COMPLEXITY << FP_REMOVE_ISOLATED_DIAMETER;
- 
+  typeList << FP_REBUILD_SURFACE << FP_REMOVE_WRT_Q << FP_REMOVE_ISOLATED_COMPLEXITY << FP_REMOVE_ISOLATED_DIAMETER << FP_ALIGN_WITH_PICKED_POINTS;
+
   FilterIDType tt;
   foreach(tt , types())
 	    actionList << new QAction(filterName(tt), this);
@@ -143,6 +143,7 @@ const QString CleanFilter::filterName(FilterIDType filter)
 	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
+	  case FP_ALIGN_WITH_PICKED_POINTS :	return QString("Align Mesh using Picked Points");
   	default: assert(0);
   }
   return QString("error!");
@@ -156,6 +157,7 @@ const QString CleanFilter::filterInfo(FilterIDType filterId)
 		case FP_REMOVE_ISOLATED_COMPLEXITY:	 return tr("Remove isolated connected components composed by a limited number of triangles"); 
 		case FP_REMOVE_ISOLATED_DIAMETER:	 return tr("Remove isolated connected components whose diameter is smaller than the specified constant"); 
 		case FP_REMOVE_WRT_Q:	     return tr("Remove all the vertices with a quality lower smaller than the specified constant"); 
+		case FP_ALIGN_WITH_PICKED_POINTS: return tr("Align this mesh with another that has corresponding picked points.");
   	default: assert(0);
   }
   return QString("error!");
@@ -192,6 +194,8 @@ const int CleanFilter::getRequirements(QAction *action)
 	  case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
         return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_FACEMARK;
+    case FP_ALIGN_WITH_PICKED_POINTS:
+    	return MeshModel::MM_NONE;
     default: assert(0);
   }
   return 0;
@@ -217,11 +221,12 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
 			qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
 		  parlst.addAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:");
 		  break;
+    case FP_ALIGN_WITH_PICKED_POINTS :
+    	AlignTools::buildParameterSet(parlst);
+    	break;
 	default: assert(0);
   }
 }
-
-
 
 bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos * cb) 
 {
@@ -282,6 +287,13 @@ bool CleanFilter::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet 
 			Log(GLLogStream::Info,"Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
 
 	  }
+
+	if(filter->text() == filterName(FP_ALIGN_WITH_PICKED_POINTS) )
+	{
+		bool result = AlignTools::setupThenAlign(m, par);
+		if(!result) return false;
+	}
+
 	return true;
 }
 

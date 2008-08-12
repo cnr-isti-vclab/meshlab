@@ -83,7 +83,8 @@ class CleanFilter : public QObject, public MeshFilterInterface
     FP_REBUILD_SURFACE, 
     FP_REMOVE_ISOLATED_COMPLEXITY, 
     FP_REMOVE_ISOLATED_DIAMETER, 
-    FP_REMOVE_WRT_Q
+    FP_REMOVE_WRT_Q,
+    FP_ALIGN_WITH_PICKED_POINTS
   } ;
 	
 	/* default values for standard parameters' values of the plugin actions */
@@ -106,9 +107,6 @@ class CleanFilter : public QObject, public MeshFilterInterface
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-
-
-	protected:
 	
 };
 
