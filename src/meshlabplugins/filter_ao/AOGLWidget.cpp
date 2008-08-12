@@ -34,7 +34,7 @@ void AOGLWidget::initializeGL ()
 void AOGLWidget::paintGL ()
 {
 	qDebug("Start Painting window size %i %i", width(), height());
-	plugin->processGL(this,*m);
+	plugin->processGL(this,*m,*viewDirVec);
 	hide();
 	qDebug("End Painting");
 }

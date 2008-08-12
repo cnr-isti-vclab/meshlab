@@ -39,6 +39,7 @@ class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface
 
 // Attributes
 protected:
+	std::vector<vcg::Point3f> viewDirVec;
 	vcg::Point3f cameraDir;
 	GLuint  fboDepth,
 	        fboResult,
@@ -85,8 +86,7 @@ public:
 	void  initTextures          (void);
 	void  initGL                (vcg::CallBackPos *cb,
 	                             unsigned int numVertices);
-	bool  processGL             (AOGLWidget *glw,
-	                             MeshModel &m);
+	bool  processGL             (AOGLWidget *glw,	MeshModel &m, std::vector<vcg::Point3f> &posVect);
 	bool  checkFramebuffer();
 
 	void  vertexCoordsToTexture (MeshModel &m);

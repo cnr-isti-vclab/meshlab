@@ -42,6 +42,7 @@ public:
 	AmbientOcclusionPlugin * plugin;
 	vcg::CallBackPos *cb;
 	MeshModel *m;
+	std::vector<vcg::Point3f> *viewDirVec;
 	
 public slots:
 	protected:

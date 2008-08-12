@@ -20,43 +20,12 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-
-$Log$
-Revision 1.32  2008/04/04 14:08:13  cignoni
-Solved namespace ambiguities caused by the removal of a silly 'using namespace' in meshmodel.h
-
-Revision 1.31  2008/02/12 14:39:56  mischitelli
-- Disabled the FP16 path since needs rewriting good part of the code: need time!
-- GPU version works only with FP32 blending capable hardware: aka Shader Model 4.0!
-- CPU version should work anyway
-
-Revision 1.30  2008/02/11 18:55:21  mischitelli
-- Small changes for improved ATI support
-
-Revision 1.29  2008/02/11 18:09:50  mischitelli
-- Improved portability on systems with less powerful hardware
-- Added a fallback to FP16 blending for hardware that doesn't support it on FP32 render targets.
-
-Revision 1.28  2008/02/10 09:39:38  cignoni
-changed fopen_s into fopen to allow again compiling with non microsfot compilers
-
-Revision 1.27  2008/02/09 17:55:19  mischitelli
-- Introducing rendering to multiple render targets. In order to allow more vertices to be processed by the hardware, MRTs became a necessity. In this way we can multiply by 4 or even by 8 (GF 8xxx +) the maximum number of vertices processed.
-- Texture size for vertices and normals are choosen automatically, picking the smallest one possible in order to greatly speeding up the calculations.
-- Max textures size is now 2048 for a couple of reasons..
-- Small bugs fixed
-
-
-****************************************************************************/
-
-
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
 
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
@@ -64,6 +33,7 @@ Revision 1.27  2008/02/09 17:55:19  mischitelli
 #include <vcg/space/box3.h>
 #include <vcg/math/gen_normal.h>
 #include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 
@@ -157,10 +127,16 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 	switch(ID(action))
 	{
 		case FP_AMBIENT_OCCLUSION:
+			parlst.addFloat("dirBias",0,"Directional Bias [0..1]","The balance between a uniform and a directionally biased set of lighting direction<br>:"
+											" - 0 means light came only uniformly from any direction<br>"
+											" - 1 means that all the light cames from the specified cone of directions <br>"
+											" - other values mix the two set of lighting directions ");
+			parlst.addInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time");
+			parlst.addPoint3f("coneDir",Point3f(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time");
+			parlst.addFloat("coneAngle",30,"Cone amplitude", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time");
 			parlst.addBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x");
 			parlst.addBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs");
 			parlst.addInt ("depthTexSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance");
-			parlst.addInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time");
 			break;
 		default: assert(0);
 	}
@@ -174,16 +150,40 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	depthTexArea = depthTexSize*depthTexSize;
 	numViews = par.getInt("reqViews");
 	errInit = false;
+	float dirBias = par.getFloat("dirBias");
+	Point3f coneDir = par.getPoint3f("coneDir");
+	float coneAngle = par.getFloat("coneAngle");
+	
+
+	std::vector<Point3f> unifDirVec;
+	GenNormal<float>::Uniform(numViews,unifDirVec);
+	
+	std::vector<Point3f> coneDirVec;
+	GenNormal<float>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
+	
+	std::random_shuffle(unifDirVec.begin(),unifDirVec.end());
+	std::random_shuffle(coneDirVec.begin(),coneDirVec.end());
+
+	int unifNum = floor(unifDirVec.size() * (1.0 - dirBias ));
+	int coneNum = floor(coneDirVec.size() * (dirBias ));
+									
+	
+	viewDirVec.clear();
+	viewDirVec.insert(viewDirVec.end(),unifDirVec.begin(),unifDirVec.begin()+unifNum);
+	viewDirVec.insert(viewDirVec.end(),coneDirVec.begin(),coneDirVec.begin()+coneNum);
+	
+	numViews = viewDirVec.size();
 
 	AOGLWidget *qWidget = new AOGLWidget(0,this);
 	qWidget->cb = cb;
 	qWidget->m = &m;
+	qWidget->viewDirVec = &viewDirVec;
 	qWidget->show();  //Ugly, but HAVE to be shown in order for it to work!
 	
 	return !errInit;
 }
 	
-bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m)
+bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Point3f> &posVect)
 {
 	if (errInit)
 		return false;
@@ -197,7 +197,6 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m)
  	GLfloat *occlusion = new GLfloat[m.cm.vn];
 	typedef std::vector<vcg::Point3f> vectP3f;
 	vectP3f::iterator vi;
-	static vectP3f posVect;
 
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
@@ -231,15 +230,7 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m)
 	//(to keep view directions always the same)
 	//or if the user changed the number of requested views
 	static bool first = true;
-	static int lastViews = numViews;
-	if (first || (lastViews!=numViews))
-	{
-		first = false;
-		lastViews = numViews;
-		GenNormal<float>::Uniform(numViews,posVect);
-		numViews = posVect.size();
-	}
-
+	
 	tInitElapsed = tInit.elapsed();
 	
 	int c=0;
@@ -298,7 +289,7 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m)
 	}
 	else
 		applyOcclusionSW(m, occlusion);
-
+	tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
 	Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
 
@@ -327,7 +318,7 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m)
 	glDeleteTextures(1, &depthBufferTex);
 
 	if (useVBO)
-		m.glw.ClearHint(vcg::GLW::HNUseVBO);
+	m.glw.ClearHint(vcg::GLW::HNUseVBO);
 
 	delete [] occlusion;
 
@@ -765,8 +756,7 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 		
 		if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
 		{
-			vn = m.cm.vert[i].N();
-			occlusion[i] += max(vn*cameraDir, 0.0f);
+			occlusion[i] += max(m.cm.vert[i].cN()*cameraDir, 0.0f);
 		}
 	}
 
@@ -774,9 +764,9 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 }
 void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 {
-	const unsigned int maxmax = maxTexSize*maxTexSize;
+	const unsigned int texelNum = maxTexSize*maxTexSize;
 
-	GLfloat *result = new GLfloat[maxmax*4];
+	GLfloat *result = new GLfloat[texelNum*4];
 
 	unsigned int nVert=0;
 	float maxvalue = 0.0f, minvalue = 100000.0f;
@@ -786,31 +776,10 @@ void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT+n);
 		glReadPixels(0, 0, maxTexSize, maxTexSize, GL_RGBA, GL_FLOAT, result);   //usare GL_RED
 
-		nVert = ( n+1 == numTexPages) ? (m.cm.vn % maxmax) : maxmax;
+		nVert = ( n+1 == numTexPages) ? (m.cm.vn % texelNum) : texelNum;
 
 		for (unsigned int i = 0; i < nVert; i++)
-		{
-			if (result[i*4] < minvalue)
-				minvalue = result[i*4];
-
-			if (result[i*4] > maxvalue)
-				maxvalue = result[i*4];
-
-			m.cm.vert[maxmax*n+i].Q() = result[i*4];
-		}
-
-	}
-
-	float scale = 255.0f / (maxvalue - minvalue);
-	char scaledValue = 0;
-
-	for (int i = 0; i < m.cm.vn; i++)
-	{
-		scaledValue = (char)((m.cm.vert[i].Q() - minvalue) * scale);
-
-		m.cm.vert[i].C()[0] = scaledValue;
-		m.cm.vert[i].C()[1] = scaledValue;
-		m.cm.vert[i].C()[2] = scaledValue;
+			m.cm.vert[texelNum*n+i].Q() = result[i*4];
 	}
 	
 	delete [] result;
@@ -818,30 +787,8 @@ void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 
 void AmbientOcclusionPlugin::applyOcclusionSW(MeshModel &m, GLfloat *aoValues)
 {
-	float maxvalue = 0.0f, minvalue = 100000.0f;
-	for (int i=0; i < m.cm.vn; i++)
-	{
-		if (aoValues[i] < minvalue)
-			minvalue = aoValues[i];
-
-		if (aoValues[i] > maxvalue)
-			maxvalue = aoValues[i];
-	}
-
-	float scale = 255.0f / (maxvalue - minvalue);
-	char scaledValue = 0;
-
 	for (int i = 0; i < m.cm.vn; i++)
-	{
 		m.cm.vert[i].Q() = aoValues[i];
-
-		scaledValue = (char)((m.cm.vert[i].Q() - minvalue) * scale);
-
-		m.cm.vert[i].C()[0] = scaledValue;
-		m.cm.vert[i].C()[1] = scaledValue;
-		m.cm.vert[i].C()[2] = scaledValue;
-	}
-
 }
 
 void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f, GLuint &pr)
