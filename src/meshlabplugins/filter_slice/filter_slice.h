@@ -68,7 +68,7 @@ class ExtraFilter_SlicePlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_PLAN };
+	enum { FP_PLANE };
 
 	ExtraFilter_SlicePlugin();
 	~ExtraFilter_SlicePlugin(){};

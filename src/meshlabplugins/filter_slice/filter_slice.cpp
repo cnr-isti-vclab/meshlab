@@ -51,7 +51,7 @@ using namespace vcg;
 
 ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin () 
 { 
-	typeList << FP_PLAN;
+	typeList << FP_PLANE;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -62,7 +62,7 @@ ExtraFilter_SlicePlugin::ExtraFilter_SlicePlugin ()
 const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
-		case FP_PLAN :  return QString("Cross section plane"); 
+		case FP_PLANE :  return QString("Cross section plane"); 
 		default : assert(0); 
 	}
   return QString("error!");
@@ -73,7 +73,7 @@ const QString ExtraFilter_SlicePlugin::filterName(FilterIDType filterId)
 const QString ExtraFilter_SlicePlugin::filterInfo(FilterIDType filterId)
 {
  switch(filterId) {
-		case FP_PLAN :  return QString("Export a cross section of the object and of the associated bounding box relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0)."); 
+		case FP_PLANE :  return QString("Export a cross section of the object and of the associated bounding box relative to one of the XY, YZ or ZX axes in svg format. By default, the cross-section goes through the middle of the object (Cross plane offset == 0)."); 
 	
 		default : assert(0); 
 	}
@@ -102,18 +102,18 @@ void ExtraFilter_SlicePlugin::initParameterSet(QAction *filter, MeshModel &m, Fi
 	switch(ID(filter))
 		 {	
 	
-		  case FP_PLAN :  
+		  case FP_PLANE :  
 		  {
  		   	QStringList metrics;
 				metrics.push_back("XY Axis");
 				metrics.push_back("YZ Axis");
 				metrics.push_back("ZX Axis");
-				parlst.addEnum("Plan", 0, metrics, tr("Axis:"), tr("Choose a cross section axis."));
-				parlst.addFloat("CrossPlanVal", 0.0, "Cross plane offset", "Specify a n offset of the cross-plane as a float.");
-				parlst.addString("filename", "Slice", "Name of the svg files and of the folder contaning them", "It is automatically created in the Sample folder of the Meshlab tree");
-				parlst.addBool ("SelAlone",m.cm.sfn>0,"Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file");
-				parlst.addBool ("SelAll",m.cm.sfn>0,"Automatically generate a series of cross-sections along the whole length of the object and store each plane in a single SVG file");
-				parlst.addFloat("CrossStepVal", 0.0, "Step value for automatically generating cross-sections", "Should be used with the bool selection above.");			 		  
+				parlst.addEnum("plane", 0, metrics, tr("Axis:"), tr("Choose a cross section axis."));
+				parlst.addFloat("CrossplaneVal", 0.0, "Cross plane offset", "Specify an offset of the cross-plane as a float. The offset corresponds to the distance between the center of the object and the point where the plan crosses it. By default (Cross plane offset == 0), the plane crosses the center of the object, so the offset can be positive or negetive");
+				parlst.addString("filename", "Slice", "Name of the svg files and of the folder contaning them, it is automatically created in the Sample folder of the Meshlab tree");
+				parlst.addBool ("SelAlone",m.cm.sfn>0,"Automatically generate a series of cross-sections along the whole length of the object and store each plane in a separate SVG file. The distance between each plane is given by the step value below");
+				parlst.addBool ("SelAll",m.cm.sfn>0,"Automatically generate a series of cross-sections along the whole length of the object and store each plane in a same SVG file. All the planes are surimposed. The distance between each plane is given by the step value below");
+				parlst.addFloat("CrossStepVal", 0.0, "Step value between each plane for automatically generating cross-sections. Should be used with the bool selection above.");			 		  
 		  }
 		  break;
 											
@@ -127,15 +127,15 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 {
 	switch(ID(filter))
 	{
-		case FP_PLAN :
+		case FP_PLANE :
 		{
-			int plan = parlst.getEnum("Plan");	
+			int plane = parlst.getEnum("plane");	
 			int i=0;
 			bool selAlone = parlst.getBool("SelAlone");
 			bool selAll = parlst.getBool("SelAll");
 			float StepVal = parlst.getFloat("CrossStepVal");
-			float PlanVal = parlst.getFloat("CrossPlanVal");
-			Number = QString::number(PlanVal);
+			float planeVal = parlst.getFloat("CrossplaneVal");
+			Number = QString::number(planeVal);
 			number = QString::number(StepVal);
 			fileName = parlst.getString("filename");
 			folderN = fileName;
@@ -156,15 +156,15 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			mesh_grid = new TriMeshGrid();
 			mesh_grid->Set(m.cm.face.begin() ,m.cm.face.end());
 			
-			switch(plan)
+			switch(plane)
 			{ 
 				case 0: 
 				{
-					Point3f* dir=new Point3f(0,0,1);   //the plans' normal vector init 
+					Point3f* dir=new Point3f(0,0,1);   //the planes' normal vector init 
 					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
 					pr.setPlane(0, d);
 						
-					float scale = (pr.getViewBox().V(0))/(edgeMax*2) ;
+					float scale = (pr.getViewBox().V(0))/(edgeMax*2);
 					pr.setScale(scale);
 					Plane3f pl;
 					pl.SetDirection(*dir);
@@ -172,7 +172,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 				       		if(!selAll && !selAlone)
 						{
 							edge_mesh = new n_EdgeMesh();
-							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ PlanVal);
+							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ planeVal);
 							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
 							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
 							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_XY_"+Number+".svg";
@@ -216,7 +216,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 
 				case 1: 
 				{
-					Point3f* dir=new Point3f(1,0,0);   //the plans' normal vector init 
+					Point3f* dir=new Point3f(1,0,0);   //the planes' normal vector init 
 					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
 					pr.setPlane(0, d);
 						
@@ -228,7 +228,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 				       		if(!selAll && !selAlone)
 						{
 							edge_mesh = new n_EdgeMesh();
-							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ PlanVal);
+							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z())+ planeVal);
 							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
 							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
 							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_YZ_"+Number+".svg";
@@ -273,11 +273,11 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 
 				case 2: 
 				{ 	
-					Point3f* dir=new Point3f(0,1,0);   //the plans' normal vector init 
+					Point3f* dir=new Point3f(0,1,0);   //the planes' normal vector init 
 					Point3d d((*dir).X(),(*dir).Y(), (*dir).Z());
 					pr.setPlane(0, d);
 						
-					float scale = (pr.getViewBox().V(0))/(edgeMax*2) ;
+					float scale = (pr.getViewBox().V(0))/(edgeMax*2);
 					pr.setScale(scale);
 					Plane3f pl;
 					pl.SetDirection(*dir);
@@ -285,7 +285,7 @@ bool ExtraFilter_SlicePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 				       		if(!selAll && !selAlone)
 						{
 							edge_mesh = new n_EdgeMesh();
-							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + PlanVal);
+							pl.SetOffset( (center.X()*dir->X() )+ (center.Y()*dir->Y()) +(center.Z()*dir->Z()) + planeVal);
 							vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(pl , *edge_mesh, avg_length, mesh_grid, intersected_cells);
 							vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
 							fileN="./"+folderN+"/"+fileName.left( fileName.length ()- 4 )+"_ZX_"+Number+".svg";
@@ -340,7 +340,7 @@ const MeshFilterInterface::FilterClass ExtraFilter_SlicePlugin::getClass(QAction
 {
 	switch(ID(filter))
 	{
-		case FP_PLAN :
+		case FP_PLANE :
 		{
 			return MeshFilterInterface::Generic; 
 		}
@@ -355,7 +355,7 @@ bool ExtraFilter_SlicePlugin::autoDialog(QAction *action)
 {
   switch(ID(action)) 
   {
-  case  FP_PLAN: return true;
+  case  FP_PLANE: return true;
 	default: return false;
   }
 }
