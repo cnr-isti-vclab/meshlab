@@ -25,12 +25,6 @@
 $Log: edit_topo.cpp,v $
 ****************************************************************************/
 #include "edit_topo.h"
-#include "edit_topomeshbuilder.h"
-
-
-
-
-
 
 
 
@@ -57,10 +51,14 @@ edit_topo::edit_topo()
 	edit_topodialogobj=0;
 	reDraw = false;
 	click = false;
+	first_model_generated=false;
 
 	nameVtxCount = 0;
 	stack.clear();
 	Estack.clear();
+
+	drag_click=false;
+	drag_stack.clear();	
 
 	lastPoint.V = Point3f(0,0,0);
 	lastPoint.vName = "--";
@@ -70,7 +68,7 @@ edit_topo::edit_topo()
 	connectEnd.V = Point3f(0,0,0);
 	connectEnd.vName = "--";
 
-	actionList << new QAction(QIcon(":/images/icon_measure.png"), "Re-Topology Tool", this);
+	actionList << new QAction(QIcon(":/images/icon_topo.png"), "Re-Topology Tool", this);
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true);
 }
@@ -79,6 +77,10 @@ edit_topo::edit_topo()
 edit_topo::~edit_topo() 
 {
 	stack.clear();
+	Estack.clear();
+	Fstack.clear();
+	delete edit_topodialogobj;
+	edit_topodialogobj = 0;
 }
 
 
@@ -98,7 +100,7 @@ const PluginInfo &edit_topo::Info()
    static PluginInfo ai; 
    ai.Date=tr(__DATE__);
    ai.Version = tr("0.1");
-   ai.Author = ("dani");
+   ai.Author = ("Paolo Cignoni, Daniele Bonetta");
    return ai;
 }
 void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
@@ -132,8 +134,8 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 					if(!contained)
 					{
 						stack.push_back(temp);
-						lastPoint = temp;				
-						edit_topodialogobj->insertVertexInTable(lastPoint.vName, QString("%1").arg(lastPoint.V.X()), QString("%1").arg(lastPoint.V.Y()), QString("%1").arg(lastPoint.V.Z()));
+						lastPoint = temp;						
+						edit_topodialogobj->updateVtxTable(stack);
 					}
 					else nameVtxCount--;
 				}
@@ -164,8 +166,8 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 					if(!contained)
 					{
 						stack.push_back(temp);
-						lastPoint = temp;				
-						edit_topodialogobj->insertVertexInTable(lastPoint.vName, QString("%1").arg(lastPoint.V.X()), QString("%1").arg(lastPoint.V.Y()), QString("%1").arg(lastPoint.V.Z()));
+						lastPoint = temp;						
+						edit_topodialogobj->updateVtxTable(stack);
 					}
 					else nameVtxCount--;
 				}
@@ -185,7 +187,7 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 					if(stack.at(i) == vtx)
 					{
 						stack.removeAt(i);
-						edit_topodialogobj->removeVertexInTable(QString("%1").arg(vtx.V.X()), QString("%1").arg(vtx.V.Y()), QString("%1").arg(vtx.V.Z()));
+						edit_topodialogobj->updateVtxTable(stack);
 					}
 
 				int EtoDel = 0;
@@ -249,7 +251,7 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 					if(!Estack.contains(added))
 					{
 						Estack.push_back(added);
-						edit_topodialogobj->insertConnectionInTable(connectStart.vName, connectEnd.vName);
+						edit_topodialogobj->updateEdgTable(Estack);
 
 						QList<Edg> endStack;
 						QList<Edg> staStack;
@@ -307,7 +309,7 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 												if(!vNames.contains(toAdd.e[n].v[m].vName))
 													vNames.push_back(toAdd.e[n].v[m].vName);
 
-										edit_topodialogobj->insertFaceInTable(vNames.at(0), vNames.at(1), vNames.at(2));
+										edit_topodialogobj->updateFceTable(Fstack);
 									}
 								}							
 							}						
@@ -414,33 +416,99 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 						Fstack.removeAt(f);
 						del = true;
 					}}
+
+			edit_topodialogobj->updateVtxTable(stack);
+			edit_topodialogobj->updateFceTable(Fstack);
+			edit_topodialogobj->updateEdgTable(Estack);
 		}
 	}
 
 
-		if(edit_topodialogobj->utensil==U_DND)
+	// Vertex moove mode
+	if(edit_topodialogobj->utensil==U_DND)
+	{
+		drag_stack.clear();
+		if(!drag_click)
 		{
-			drag_stack.clear();
-			if(!drag_click)
-			{
-				drag_click = true;
+			drag_click = true;
 
-				Vtx vtx = getVisibleVertexNearestToMouse(stack);
-				drag_vtx = vtx;
+			Vtx vtx = getVisibleVertexNearestToMouse(stack);
+			drag_vtx = vtx;
 
-				for(int f=0; f<Fstack.count(); f++)
-				{
-					Fce fc = Fstack.at(f);
-					if(fc.containsVtx(vtx))
-						drag_stack.push_back(fc);
-				}
-			}
-			else
+			for(int f=0; f<Fstack.count(); f++)
 			{
-				drag_click = false;
-				// Recalculate the mesh (only for involved face? mmm...)			
+				Fce fc = Fstack.at(f);
+				if(fc.containsVtx(vtx))
+					drag_stack.push_back(fc);
 			}
 		}
+		else
+		{
+			drag_click = false;
+
+			// Get new vertex coords
+			Point3f temp_vert;
+			if (Pick(mousePos.x(), mouseRealY, temp_vert))
+			{
+//					if(temp_vert != lastPoint.V)
+//					{
+					Vtx newV;
+					newV.V = temp_vert;
+					newV.vName = drag_vtx.vName;
+//					}								
+
+					// Remove the old vtx from vtx stack
+				for(int v=0; v<stack.count(); v++)
+					if(stack.at(v)==drag_vtx)
+						stack.removeAt(v);
+
+				stack.push_back(newV);
+
+				int edgToRemove=0;	
+				for(int e=0; e<Estack.count(); e++)
+					if(Estack.at(e).containsVtx(drag_vtx))
+						edgToRemove++;
+
+				for(int i=0; i<edgToRemove; i++)
+					for(int e=0; e<Estack.count(); e++)
+						if(Estack.at(e).containsVtx(drag_vtx))
+						{
+							Edg newE = Estack.at(e);
+							if(newE.v[0].V==drag_vtx.V)
+								newE.v[0]=newV;
+							if(newE.v[1].V==drag_vtx.V)
+								newE.v[1]=newV;
+							Estack.removeAt(e);
+							Estack.push_back(newE);
+						}
+
+				int fceToRemove=0;
+				for(int f=0; f<Fstack.count(); f++)
+					if(Fstack.at(f).containsVtx(drag_vtx))
+						fceToRemove++;
+
+				for(int i=0; i<fceToRemove; i++)
+					for(int f=0; f<Fstack.count(); f++)
+						if(Fstack.at(f).containsVtx(drag_vtx))
+						{
+							Fce newF = Fstack.at(f);
+							for(int e=0; e<3; e++)
+								for(int v=0; v<2; v++)
+									if(newF.e[e].v[v].V == drag_vtx.V)
+										newF.e[e].v[v] = newV;
+							Fstack.removeAt(f);
+							Fstack.push_back(newF);
+						}
+
+				edit_topodialogobj->updateVtxTable(stack);
+				edit_topodialogobj->updateFceTable(Fstack);
+				edit_topodialogobj->updateEdgTable(Estack);
+				
+				if(first_model_generated)
+					on_mesh_create();
+			}		
+		}
+	}
 
 
 
@@ -456,6 +524,40 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 	// Even if there's something selected: show vtx	
+
+
+	if((edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
+			||(edit_topodialogobj->utensil==U_DND))
+	{
+		if(stack.count()!=0)
+			drawPoint(m, 3.0f, Color4b::DarkRed, Color4b::Red, stack);
+
+		if(stack.count()!=0)
+			drawLabel(stack);
+
+		if(Estack.count()!=0)
+		{
+			for(int i=0; i<Estack.count(); i++)
+			{
+				Edg e = Estack.at(i);
+				Vtx p1 = e.v[0];
+				Vtx p2 = e.v[1];
+
+				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Green, p1.V, p2.V);
+			}
+		}
+	}
+
+	if((edit_topodialogobj->utensil==U_VTX_SEL_FREE)||(edit_topodialogobj->utensil==U_VTX_DEL)
+		||(edit_topodialogobj->utensil==U_VTX_SEL))
+	{
+		if(stack.count()!=0)
+			drawPoint(m, 3.0f, Color4b::DarkRed, Color4b::Red, stack);
+
+		if(stack.count()!=0)
+			drawLabel(stack);	
+	}
+
 
 
 	if(edit_topodialogobj->utensil==U_DND)
@@ -583,32 +685,6 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(0).V, allv.at(1).V);
 				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(1).V, allv.at(2).V);
 				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(2).V, allv.at(0).V);	
-			}
-		}
-	}
-
-
-	
-	if((edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_SEL)
-		||(edit_topodialogobj->utensil==U_VTX_SEL_FREE)||(edit_topodialogobj->utensil==U_VTX_DEL)
-		||(edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
-		||(edit_topodialogobj->utensil==U_DND))
-	{
-		if(stack.count()!=0)
-			drawPoint(m, 3.0f, Color4b::DarkRed, Color4b::Red, stack);
-
-		if(stack.count()!=0)
-			drawLabel(stack);
-
-		if(Estack.count()!=0)
-		{
-			for(int i=0; i<Estack.count(); i++)
-			{
-				Edg e = Estack.at(i);
-				Vtx p1 = e.v[0];
-				Vtx p2 = e.v[1];
-
-				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Green, p1.V, p2.V);
 			}
 		}
 	}
@@ -743,6 +819,11 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *parent)
 	parentGla = parent;
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
 
+	// Init uniform grid
+	float dist = m.cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
+	rm.init(&m, dist);
+
+
 	if (edit_topodialogobj==0)
 		edit_topodialogobj=new edit_topodialog(parent->window());
 
@@ -758,7 +839,11 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *parent)
 
 void edit_topo::EndEdit(QAction *, MeshModel &, GLArea *)
 {
-	
+	stack.clear();
+	Estack.clear();
+	Fstack.clear();
+	delete edit_topodialogobj;
+	edit_topodialogobj = 0;
 }
 
 
@@ -768,17 +853,18 @@ void edit_topo::on_mesh_create()
 	in.clear();
 	out.clear();
 
+	if(first_model_generated)
+	{
+		parentGla->meshDoc.meshList.pop_back();
+	}
 
-	MeshModel *mm= new MeshModel();	
-	parentGla->meshDoc.meshList.push_back(mm);	
+	MeshModel *mm= new MeshModel();
+	parentGla->meshDoc.meshList.push_back(mm);
+	first_model_generated = true;
+
 
 	MeshModel *m     = parentGla->meshDoc.meshList.back();	// destination = last
 	MeshModel *currentMesh  = parentGla->meshDoc.mm();		// source = current		
-
-	RetopMeshBuilder * rm = new RetopMeshBuilder(currentMesh);
-
-	float dist = currentMesh->cm.bbox.Diag()/10; //trgMesh ???//edit_topodialogobj->dist(0);
-	rm->init(&(currentMesh->cm), dist);
 
 
 // DEBUG: Force MY vertex params
@@ -823,14 +909,17 @@ void edit_topo::on_mesh_create()
 	// Mesh creation
 
 
+	float dist = m->cm.bbox.Diag()/10; //trgMesh ???//edit_topodialogobj->dist(0);
+
+
 	if(edit_topodialogobj->isRadioButtonSimpleChecked())
-		rm->createBasicMesh(*m, Fstack, stack);
+		rm.createBasicMesh(*m, Fstack, stack);
 	else
 	{
 		int iter = edit_topodialogobj->getIterations();
 		int dist1 = edit_topodialogobj->dist(1);
 		int dist2 = edit_topodialogobj->dist(2); 
-		rm->createRefinedMesh(*m, iter, Fstack, edit_topodialogobj, dist1, dist2);
+		rm.createRefinedMesh(*m, *currentMesh, dist, iter, Fstack, stack, edit_topodialogobj);
 	}
 
 	// Color sampling
@@ -839,13 +928,7 @@ void edit_topo::on_mesh_create()
 		// TODO Color sampling
 	}
 
-//	in = rm->Lin;
-//	out = rm->Lout;
-
-//	delete rm;
-	m->fileName = "Retopology.ply";
-	tri::UpdateBounding<CMeshO>::Box(m->cm);	// updates bounding box
-	m->cm.Tr = currentMesh->cm.Tr;				// copy transformation
+	m->cm.Tr = currentMesh->cm.Tr;	
 
 	parentGla->update();
 }

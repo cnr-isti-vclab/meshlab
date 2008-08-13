@@ -46,123 +46,116 @@ int edit_topodialog::dist(int d)
 	return toret;
 }
 
-void edit_topodialog::removeVertexInTable(QString vName)
+
+void edit_topodialog::updateVtxTable(QList<Vtx> list)
 {
 	QTableWidget *w =ui.Vtable;
 
-	int row=-1;
-	for(int i = 0; i<(w->rowCount()); i++)
-		if(w->item(i,0)->text() == vName)
-			row = i;
-	if(row!=-1)
-		w->removeRow(row);
-}
+	int n=w->rowCount();
+	for(int i=0; i<n; i++)
+		w->removeRow(0);
 
-//
-// Vertex list table
-//
-void edit_topodialog::removeVertexInTable(QString vx, QString vy, QString vz)
-{
-	QTableWidget *w =ui.Vtable;
+	for(int i=0; i<list.count(); i++)
+	{
+		Vtx v = list.at(i);
+		QString c1 = v.vName;
+		QString c2 = QString("%1").arg(v.V.X());
+		QString c3 = QString("%1").arg(v.V.Y());
+		QString c4 = QString("%1").arg(v.V.Z());
 
-	int row=-1;
-	for(int i = 0; i<(w->rowCount()); i++)
-		if((w->item(i,1)->text() == vx)&&(w->item(i,2)->text() == vy)&&(w->item(i,3)->text() == vz))
-			row = i;
-	if(row!=-1)
-		w->removeRow(row);
-}
-
-
-void edit_topodialog::insertVertexInTable(QString c1, QString c2, QString c3, QString c4)
-{
-	QTableWidget *w =ui.Vtable;
-
-	QTableWidgetItem *Item1 = new QTableWidgetItem((c1));
-	QTableWidgetItem *Item2 = new QTableWidgetItem((c2));
-	QTableWidgetItem *Item3 = new QTableWidgetItem((c3));
-    QTableWidgetItem *Item4 = new QTableWidgetItem((c4));
+		QTableWidgetItem *Item1 = new QTableWidgetItem((c1));
+		QTableWidgetItem *Item2 = new QTableWidgetItem((c2));
+		QTableWidgetItem *Item3 = new QTableWidgetItem((c3));
+		QTableWidgetItem *Item4 = new QTableWidgetItem((c4));
     
-	Item1->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    Item2->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    Item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	Item4->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		Item1->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		Item2->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+	    Item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		Item4->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-
-    int row = w->rowCount();
-    w->insertRow(row);
-	w->setRowHeight(row, 17);
-    w->setItem(row, 0, Item1);
-    w->setItem(row, 1, Item2);	
-    w->setItem(row, 2, Item3);	
-    w->setItem(row, 3, Item4);	
+	    int row = w->rowCount();
+		w->insertRow(row);
+		w->setRowHeight(row, 17);
+		w->setItem(row, 0, Item1);
+	    w->setItem(row, 1, Item2);	
+		w->setItem(row, 2, Item3);	
+	    w->setItem(row, 3, Item4);	
+	}
 }
 
-//
-// Vertex connections list table
-//
-void edit_topodialog::removeConnectionInTable(QString c1, QString c2)
+
+void edit_topodialog::updateEdgTable(QList<Edg> list)
 {
 	QTableWidget *w =ui.Etable;
 
-	int row=-1;
-	for(int i = 0; i<(w->rowCount()); i++)
-		if((w->item(i,0)->text() == c1) && (w->item(i,1)->text() == c2))
-			row = i;
-	if(row!=-1)
-		w->removeRow(row);
-}
+	int n=w->rowCount();
+	for(int i=0; i<n; i++)
+		w->removeRow(0);
 
-void edit_topodialog::insertConnectionInTable(QString c1, QString c2)
-{
-	QTableWidget *w =ui.Etable;
-
-	QTableWidgetItem *Item1 = new QTableWidgetItem((c1));
-	QTableWidgetItem *Item2 = new QTableWidgetItem((c2));
+	for(int i=0; i<list.count(); i++)
+	{
+		Edg e = list.at(i);
+		QString c1=e.v[0].vName;
+		QString c2=e.v[1].vName;
+		QTableWidgetItem *Item1 = new QTableWidgetItem((c1));
+		QTableWidgetItem *Item2 = new QTableWidgetItem((c2));
     
-	Item1->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    Item2->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		Item1->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		Item2->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-	w->setColumnWidth(0,200);
-	w->setColumnWidth(1,200);
+		w->setColumnWidth(0,150);
+		w->setColumnWidth(1,150);
 
-    int row = w->rowCount();	
-	w->insertRow(row);
-	w->setRowHeight(row, 17);
-    w->setItem(row, 0, Item1);
-    w->setItem(row, 1, Item2);	
+	    int row = w->rowCount();	
+		w->insertRow(row);
+		w->setRowHeight(row, 17);
+		w->setItem(row, 0, Item1);
+		w->setItem(row, 1, Item2);	
+	}
 }
 
 
-
-
-void edit_topodialog::insertFaceInTable(QString v1, QString v2, QString v3)
+void edit_topodialog::updateFceTable(QList<Fce> list)
 {
 	QTableWidget *w =ui.Ftable;
+	int n=w->rowCount();
+	for(int i=0; i<n; i++)
+		w->removeRow(0);
 
-	QTableWidgetItem *Item1 = new QTableWidgetItem((v1));
-	QTableWidgetItem *Item2 = new QTableWidgetItem((v2));
-	QTableWidgetItem *Item3 = new QTableWidgetItem((v3));
+	for(int i=0; i<list.count(); i++)
+	{
+		Fce f = list.at(i);
+
+		QList<Vtx> allv;
+		for(int e=0; e<3; e++)
+			for(int v=0; v<2; v++)
+				if(!allv.contains(f.e[e].v[v]))
+					allv.push_back(f.e[e].v[v]);
+
+		QString v1 = allv.at(0).vName;
+		QString v2 = allv.at(1).vName;
+		QString v3 = allv.at(2).vName;
+
+		QTableWidgetItem *Item1 = new QTableWidgetItem((v1));
+		QTableWidgetItem *Item2 = new QTableWidgetItem((v2));
+		QTableWidgetItem *Item3 = new QTableWidgetItem((v3));
     
-	Item1->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    Item2->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	Item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		Item1->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+	    Item2->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		Item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-	w->setColumnWidth(0,133);
-	w->setColumnWidth(1,133);
-	w->setColumnWidth(2,133);
+		w->setColumnWidth(0,133);
+		w->setColumnWidth(1,133);
+		w->setColumnWidth(2,133);
 
-    int row = w->rowCount();	
-	w->insertRow(row);
-	w->setRowHeight(row, 17);
-    w->setItem(row, 0, Item1);
-    w->setItem(row, 1, Item2);
-    w->setItem(row, 2, Item3);
+	    int row = w->rowCount();	
+		w->insertRow(row);
+		w->setRowHeight(row, 17);
+		w->setItem(row, 0, Item1);
+	    w->setItem(row, 1, Item2);
+		w->setItem(row, 2, Item3);
+	}
 }
-
-void edit_topodialog::removeFaceInTable(QString v1, QString v2, QString v3)
-{}
-
 
 void edit_topodialog::on_ButtonClose_clicked()
 {
@@ -185,7 +178,6 @@ void edit_topodialog::on_ButtonDeSelectVertex_clicked()
 {
 	utensil = U_VTX_DEL;	emit fuffa();
 }
-
 
 
 void edit_topodialog::on_ButtonConnectVertex_clicked()

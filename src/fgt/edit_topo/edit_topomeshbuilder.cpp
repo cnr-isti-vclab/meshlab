@@ -24,114 +24,23 @@
   History
 $Log: edit_topomeshbuuilder.h,v $
 ****************************************************************************/
+#include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/color.h>
 
 
 #include "edit_topomeshbuilder.h"
+#include <vcg/complex/trimesh/refine.h>
 
-
-RetopMeshBuilder::RetopMeshBuilder(MeshModel *originalMeshModel)
+void RetopMeshBuilder::init(MeshModel *_mm, float dist)
 {
-	Lin.clear();
-	Lout.clear();
-
-	m2 = originalMeshModel;
-
-	m = &m2->cm;
-
-	m2->updateDataMask(MeshModel::MM_FACEMARK);
-	unifGrid.Set(m->face.begin(), m->face.end());
-	unifGrid.ComputeDimAndVoxel();
-	markerFunctor.SetMesh(m);
-
-};
-
-
-void RetopMeshBuilder::init(CMeshO *_m, double dist)
-{
-	sampler.init(_m);
-	sampler.dist_upper_bound = dist;
+	_mm->updateDataMask(MeshModel::MM_FACEMARK);
+	midSampler = new NearestMidPoint<CMeshO>();
+	midSampler->init(&_mm->cm, dist);
 }
 
-
-Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, float dist2)
-{
-	Point3f closestPt;
-//	CMeshO *m = &m2.cm;
-//	m2.updateDataMask(MeshModel::MM_FACEMARK);
-
-	Lin.push_back(toCheck);
-
-//	unifGrid.Set(m->face.begin(), m->face.end());
-//	markerFunctor.SetMesh(m);
-
-	float dist_upper_bound =m->bbox.Diag()/50;
-	float dist = dist_upper_bound;
-	const CMeshO::CoordType &startPt= toCheck;
-    
-
-    Point3f normf, bestq, ip;
-	CMeshO::FaceType *nearestF=0;	
-	vcg::face::PointDistanceBaseFunctor PDistFunct;
-
-	nearestF = unifGrid.GetClosest(PDistFunct, markerFunctor, startPt, dist_upper_bound, dist, closestPt);
-
-	//nearestF = trimesh::GetClosestFace<CMeshO, MetroMeshGrid>(m, unifGrid, startPt, dist_upper_bound, dist,normf, bestq, ip);
-	
-	Lout.push_back(normf);
-		Lout.push_back(bestq);
-			Lout.push_back(ip);		
-
-			closestPt = ip;
-
-
-	/*
-	unifGrid.GetClosest(OBJPOINTDISTFUNCTOR &_getPointDistance,
-						OBJMARKER &_marker,
-						GridStaticPtr<OBJTYPE,FLT>::CoordType &_p,
-						GridStaticPtr<OBJTYPE,FLT>::ScalarType &_maxDist,
-						GridStaticPtr<OBJTYPE,FLT>::ScalarType &_minDist,
-						GridStaticPtr<OBJTYPE,FLT>::CoordType &_closestPt );
-
-
-	unifGrid.DoRay( OBJRAYSECTFUNCTOR &_rayintersector,
-					OBJMARKER &_marker,
-					vcg::Ray3<scalar> &_ray, 
-					GridStaticPtr<OBJTYPE,FLT>::ScalarType &_maxDist,
-					GridStaticPtr<OBJTYPE,FLT>::ScalarType &_t ); */
-						
-					
-
-//	closestPt = startPt;
-//	nearestF = unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist1,dist2,closestPt);
-/*	
-	QList<CFaceO*> fce;
-	QList<Point3f> punti;
-	QList<float> dizt;
-*/
-//	unifGrid.GetKClosest(PDistFunct, markerFunctor, 100, startPt, 1000, fce, dizt, punti);
-
-
-//	for(int i=0; i <punti.count(); i++)
-//		Lout.push_back(punti.at(i));
-
-
-
-	//	Point3f interp;
-	//	bool ret = InterpolationParameters(*nearestF,closestPt, interp[0], interp[1], interp[2]);
-
-	//	interp[2]=1.0-interp[1]-interp[0];
-	//	Lout.push_back(closestPt);												 
-
-//	Lout.push_back(closestPt);
-/*if(nearestF!=0){
-	Lout.push_back(nearestF->V(0)->P());
-		Lout.push_back(nearestF->V(1)->P());
-			Lout.push_back(nearestF->V(2)->P()); 
-	}*/
-	return closestPt;
-}
-
- void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<Vtx> Vstack) 
+void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<Vtx> Vstack) 
 {
 	// Vertex names compact
 	QVector<Vtx> nStack(Vstack.count());
@@ -153,11 +62,16 @@ Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, flo
 
 		v.vName = QString("%1").arg(i);
 		nStack[i]=v;
-	}
+	} 
+
+	int allFce = 0;
+	for(int i=0; i<nFstack.count(); i++)
+		if(nFstack.at(i).selected)
+			allFce++;
 
 	out.cm.Clear();
 	vcg::tri::Allocator<CMeshO>::AddVertices(out.cm, nStack.count());
-	vcg::tri::Allocator<CMeshO>::AddFaces(out.cm, nFstack.count());
+	vcg::tri::Allocator<CMeshO>::AddFaces(out.cm, allFce);
   
 	QVector<CMeshO::VertexPointer> ivp(Vstack.count());
 
@@ -195,22 +109,83 @@ Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, flo
 		f++;
 
 		}
-	}
+	} 
+
+
+	out.updateDataMask(MeshModel::MM_FACETOPO);
+
+	bool oriented,orientable;
+    tri::Clean<CMeshO>::IsOrientedMesh(out.cm, oriented,orientable); 
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(out.cm);
+	vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(out.cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(out.cm);
+
+	out.clearDataMask(MeshModel::MM_FACETOPO);
+
+/*	DEBUG
+	out.cm.Clear();
+	vcg::tri::Allocator<CMeshO>::AddVertices(out.cm, 6);
+	vcg::tri::Allocator<CMeshO>::AddFaces(out.cm, 5);
+
+
+	QVector<CMeshO::VertexPointer> ivp(6);
+
+	CMeshO::VertexIterator vi;	
+
+	vi=out.cm.vert.begin(); 
+
+	ivp[0] = &*vi; (*vi).P() = Point3f(-0.053,		0.104,		0.040); ++vi;
+	ivp[1] = &*vi; (*vi).P() = Point3f(-0.031,		0.113,		0.034); ++vi;
+	ivp[2] = &*vi; (*vi).P() = Point3f(-0.031,		0.094,		0.044); ++vi;
+	ivp[3] = &*vi; (*vi).P() = Point3f(-0.012,		0.105,		0.043); ++vi;
+	ivp[4] = &*vi; (*vi).P() = Point3f(-0.046,		0.082,		0.043); ++vi;
+	ivp[5] = &*vi; (*vi).P() = Point3f(-0.017,		0.084,		0.057);
+
+	CMeshO::FaceIterator fi;
+	fi=out.cm.face.begin();
+
+	(*fi).V(0) = ivp[0]; (*fi).V(1) = ivp[2]; (*fi).V(2) = ivp[4]; fi++;
+	(*fi).V(0) = ivp[0]; (*fi).V(1) = ivp[1]; (*fi).V(2) = ivp[2]; fi++;
+	(*fi).V(0) = ivp[3]; (*fi).V(1) = ivp[2]; (*fi).V(2) = ivp[1]; fi++;
+	(*fi).V(0) = ivp[3]; (*fi).V(1) = ivp[5]; (*fi).V(2) = ivp[2]; fi++;
+	(*fi).V(0) = ivp[4]; (*fi).V(1) = ivp[2]; (*fi).V(2) = ivp[5]; 
+*/
 }
 
- void RetopMeshBuilder::createRefinedMesh(MeshModel &out, int iterations, QList<Fce> Fstack, edit_topodialog *dialog, int d1, int d2)
+
+
+ void RetopMeshBuilder::createRefinedMesh(MeshModel &out, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog)
 {
-	dialog->setBarMax(pow((float)(Fstack.count() * 4), (float)iterations) );
-	
-	
+	dialog->setBarMax(iterations++);//pow((float)(Fstack.count() * 4), (float)iterations) );
+
+	createBasicMesh(out, Fstack, stack);
+
+	out.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+	if(tri::Clean<CMeshO>::IsTwoManifoldFace(out.cm))
+		for(int i=0; i<iterations; i++)
+		{
+			out.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+			Refine<CMeshO,NearestMidPoint<CMeshO>>(out.cm, *midSampler /*MyMidPoint<CMeshO>()*/, 0, false, 0);
+	//		Refine<CMeshO,MidPoint<CMeshO>>(out.cm, MidPoint<CMeshO>(), 0, false, 0);
+			out.clearDataMask( MeshModel::MM_VERTFACETOPO);
+			dialog->setBarVal(i);
+		}
+
+	out.fileName = "Retopology.ply";
+	tri::UpdateBounding<CMeshO>::Box(out.cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(out.cm);
+
+
+
+
+	/* DEBUG-OLD
 	// foreach "iterations"
 		// Foreach face
 			// Foreach vertex: calculate mid points
 			// Foreach midpoint: calculate real position over the orignial mesh (with unif grid???)
 			// Create the new data structure for vtx and edges
 	// At the end make a old-good createSimpleMesh call, with the new structures (Fstack and Vstack), et voilà!
-
-
+	
 	int vtxId = 0;
 
 	QList<Fce> newFstack, tempFstack;
@@ -233,28 +208,28 @@ Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, flo
 					if(!allVert.contains(fc.e[e].v[v]))
 						allVert.push_back(fc.e[e].v[v]);
 
-				/*
-					New vertex naming convention:
-
-						v0 
-						/\
-					   /  \
-				   nv0/----\nv2
-					 / \  / \
-					/	\/   \	
-				 v1/----------\v2
-						nv1
-				*/
+//				
+//					New vertex naming convention:
+//
+//						v0 
+//						/\
+//					   /  \
+//				   nv0/----\nv2
+//					 / \  / \
+//					/	\/   \	
+//				 v1/----------\v2
+//						nv1
+//				
 
 			Point3f av0 = allVert.at(0).V;
 			Point3f av1 = allVert.at(1).V;
 			Point3f av2 = allVert.at(2).V;
 
 			//if(it!=0)
-			{/*
-				Point3f Rv0 = getClosestPoint(av0, d1, d2); av0 = Rv0;
-				Point3f Rv1 = getClosestPoint(av1, d1, d2); av1 = Rv1;
-				Point3f Rv2 = getClosestPoint(av2, d1, d2); av2 = Rv2;*/
+			{
+//				Point3f Rv0 = getClosestPoint(av0, d1, d2); av0 = Rv0;
+//				Point3f Rv1 = getClosestPoint(av1, d1, d2); av1 = Rv1;
+//				Point3f Rv2 = getClosestPoint(av2, d1, d2); av2 = Rv2;
 
 				Lin.push_back(av0);
 				Lin.push_back(av1);
@@ -276,9 +251,9 @@ Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, flo
 			Point3f nv1P = (av1+av2)/2;
 			Point3f nv2P = (av2+av0)/2;
 
-			/*Point3f Rnv0 = getClosestPoint(nv0P, d1, d2);
-			Point3f Rnv1 = getClosestPoint(nv1P, d1, d2);
-			Point3f Rnv2 = getClosestPoint(nv2P, d1, d2);*/
+//			Point3f Rnv0 = getClosestPoint(nv0P, d1, d2);
+//			Point3f Rnv1 = getClosestPoint(nv1P, d1, d2);
+//			Point3f Rnv2 = getClosestPoint(nv2P, d1, d2);
 
 				Lin.push_back(nv0P);
 				Lin.push_back(nv1P);
@@ -362,64 +337,8 @@ Point3f RetopMeshBuilder::getClosestPoint(vcg::Point3f toCheck, float dist1, flo
 	createBasicMesh(out, tempFstack, tempVstack);
 
 	dialog->setBarVal(0);
-
-}
-
-
-
-
-void RetopMeshBuilder::draww(QList<Vtx> Vstack)
-{
-
-
-	Point3f	p0 = Vstack.at(0).V;
-	Point3f p1 = Vstack.at(1).V;
-//	rds->Set(p0, p1);
-
-	Lin.push_back(Vstack.at(0).V);
-	Lin.push_back(Vstack.at(1).V);
-
-	/*
-	CMeshO::FaceType *nearestF=0;
-
-    nearestF =	unifGrid.DoRay(fff, markerFunctor, *rds, 1000, t); */
-
-
-	Point3f punto;
-//	rds->ClosestPoint(punto);
-
-Point3f mid = (p0+p1)/2;
-
-	Line3f *line;
-	line->Set(mid,p1);
-
-//	line->Normalize();
-
-	if(vcg::IntersectionRayMesh<CMeshO, float>(m, *line, punto))
-
-
-
-
-/*
-	Lout.push_back(nearestF->V(0)->P());
-	Lout.push_back(nearestF->V(1)->P());
-	Lout.push_back(nearestF->V(2)->P());
 */
-	Lout.push_back(punto);
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

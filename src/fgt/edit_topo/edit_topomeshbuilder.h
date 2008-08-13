@@ -14,9 +14,6 @@
 
 #include <vcg/complex/intersection.h>
 
-#include "edit_topo.h"
-
-
 
 #include <vcg/simplex/vertexplus/base.h>
 #include <vcg/simplex/vertexplus/component.h>
@@ -28,51 +25,41 @@ using namespace std;
 using namespace vcg;
 
 
+#include "edit_topodialog.h"
 
 
 
 
 
-class Sampler
+
+
+
+
+
+
+template<class MESH_TYPE>
+class NearestMidPoint : public   std::unary_function<face::Pos<typename MESH_TYPE::FaceType> ,  typename MESH_TYPE::CoordType >
 {
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 public:
-  
-	Sampler()
-	{
-		m=0;		
-	};
- 
-	CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc). 
 
-	int sampleNum;  // the expected number of samples. Used only for the callback
-	int sampleCnt;
-	MetroMeshGrid   unifGrid;
-
-	// Parameters
-	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
-	MarkerFace markerFunctor;
-	
-	float dist_upper_bound;
- 	void init(CMeshO *_m)
+ 	void init(CMeshO *_m, float dist)
 	{
 		m=_m;
 		if(m) 
 		{
 			unifGrid.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
+			dist_upper_bound = dist;
 		}
 	}
 
-	// this function is called for each vertex of the target mesh.
-	// and retrieve the closest point on the source mesh.
-	void sample(Point3f &p) 
+
+	void operator()(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType>  ep)
 	{
-		assert(m);
-		// the results
 		Point3f       closestPt,      normf, bestq, ip;
 		float dist = dist_upper_bound;
-		const CMeshO::CoordType &startPt= p;
+		const CMeshO::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
 		
 		// compute distance between startPt and the mesh S2
 		CMeshO::FaceType   *nearestF=0;
@@ -82,20 +69,76 @@ public:
 	  
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
 
-		if(dist == dist_upper_bound) return ;																				
+		if(dist == dist_upper_bound) 
+		{
+			if( MESH_TYPE::HasPerVertexNormal())
+				nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
+
+			if( MESH_TYPE::HasPerVertexColor())
+				nv.C().lerp(ep.f->V(ep.z)->C(),ep.f->V1(ep.z)->C(),.5f);
+		
+			if( MESH_TYPE::HasPerVertexQuality())
+				nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
+
+			nv.P()= startPt; return; 
+		}
 
 		Point3f interp;
-		bool ret = InterpolationParameters(*nearestF, closestPt, interp[0], interp[1], interp[2]);
-		assert(ret);
-		interp[2]=1.0-interp[1]-interp[0];
+		if(InterpolationParameters(*nearestF, closestPt, interp[0], interp[1], interp[2]))
+		//assert(ret);
+			interp[2]=1.0-interp[1]-interp[0];
 																			 
-		p = closestPt; // (nearestF->V(0)->P() + nearestF->V(1)->P() + nearestF->V(2)->P()) /3; //->V(0)->P();//closestPt;
-		/*if(colorFlag)*/ 
-	//		p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
-//		if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
+		nv.P()= closestPt; 
+
+		if( MESH_TYPE::HasPerVertexNormal())
+			nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
+
+		if( MESH_TYPE::HasPerVertexColor())
+			nv.C().lerp(ep.f->V(ep.z)->C(),ep.f->V1(ep.z)->C(),.5f);
+		
+		if( MESH_TYPE::HasPerVertexQuality())
+			nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
+		
 	}
 
+	Color4<typename MESH_TYPE::ScalarType> WedgeInterp(Color4<typename MESH_TYPE::ScalarType> &c0, Color4<typename MESH_TYPE::ScalarType> &c1)
+	{
+		Color4<typename MESH_TYPE::ScalarType> cc;
+		return cc.lerp(c0,c1,0.5f);
+	}
+
+	template<class FL_TYPE>
+	TexCoord2<FL_TYPE,1> WedgeInterp(TexCoord2<FL_TYPE,1> &t0, TexCoord2<FL_TYPE,1> &t1)
+	{
+		TexCoord2<FL_TYPE,1> tmp;
+		assert(t0.n()== t1.n());
+		tmp.n()=t0.n(); 
+		tmp.t()=(t0.t()+t1.t())/2.0;
+		return tmp;
+	}
+
+private:
+ 
+	CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc). 
+
+	MetroMeshGrid   unifGrid;
+
+	// Parameters
+	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
+	MarkerFace markerFunctor;
+	
+	float dist_upper_bound;
 };
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -113,34 +156,20 @@ public:
 class RetopMeshBuilder
 {
 public:
-
-	Sampler sampler;
+	NearestMidPoint<CMeshO> * midSampler;
 
 	QList<Point3f> Lin;
 	QList<Point3f> Lout;
 
-	RetopMeshBuilder(MeshModel *originalMeshModel);
-	void init(CMeshO *_m, double dist);
-
-	Point3f getClosestPoint(vcg::Point3f toCheck, float dist1, float dist2);//(MeshModel &m2, vcg::Point3f toCheck, QList<Fce> Flist);
+	RetopMeshBuilder() {};
+	void init(MeshModel *_m, float dist);
 
 	void createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<Vtx> Vstack);
-	void createRefinedMesh(MeshModel &out, int iterations, QList<Fce> Fstack, edit_topodialog *dialog, int d1, int d2);
-
-	void draww(QList<Vtx> Vstack);
+	void createRefinedMesh(MeshModel &out, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog);
 
 private:
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
-//	typedef GridStaticPtr<CFace, CMesh::ScalarType > MetroMeshGrid;
-	MetroMeshGrid   unifGrid;
-	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
-	MarkerFace markerFunctor;
-
-
-
-MeshModel *m2;
-CMeshO *m;
- };
+};
 
 
 

@@ -26,6 +26,90 @@ typedef enum
 	} UtensType;
 
 
+struct Vtx
+{
+	Point3f V;
+	QString vName;
+
+    inline bool operator == (const Vtx &b) const
+    {
+		return ((V==b.V) && (vName==b.vName));
+    }
+
+    inline bool operator != (const Vtx &b) const
+    {
+		return ((V!=b.V) || (vName!=b.vName));
+    }
+};
+
+struct Edg
+{
+	Vtx v[2];
+
+    inline bool operator == (const Edg &b) const
+    {
+		return (((v[0]==b.v[0]) && (v[1]==b.v[1]))
+				||((v[1]==b.v[0]) && (v[0]==b.v[1])));
+    }
+
+    inline bool operator != (const Edg &b) const
+    {
+		return ( ((v[0] != b.v[0])&&(v[0] != b.v[1])) 
+					||	((v[1] != b.v[0])&&(v[1] != b.v[1])) );
+	}
+
+	inline bool containsVtx(const Vtx &vt) const
+	{
+		bool toRet = false;
+			for(int j=0; j<2; j++)
+				if(v[j] == vt)
+					toRet = true;
+
+		return toRet;
+	}
+};
+
+struct Fce
+{
+	Edg e[3];
+
+	bool selected;
+
+    inline bool operator == (const Fce &f) const
+    {
+		return (containsEdg(f.e[0]) && containsEdg(f.e[1]) && containsEdg(f.e[2]));
+	}
+
+    inline bool operator != (const Fce &f) const
+    {
+		return (!(containsEdg(f.e[0]) && containsEdg(f.e[1]) && containsEdg(f.e[2])));
+	}
+
+	inline bool containsEdg(const Edg &ed) const
+	{
+		bool toRet = false;
+		for(int i=0; i<3; i++)
+			if(e[i]==ed)
+				toRet=true;
+
+		return toRet;
+	}
+
+	inline bool containsVtx(const Vtx &vt) const
+	{
+		bool toRet = false;
+		for(int i=0; i<3; i++)
+			for(int j=0; j<2; j++)
+				if(e[i].v[j] == vt)
+					toRet = true;
+
+		return toRet;
+	}
+};
+
+
+
+
 class edit_topodialog : public QDockWidget
 {
 	Q_OBJECT
@@ -35,15 +119,10 @@ class edit_topodialog : public QDockWidget
 		~edit_topodialog();
 			
 		UtensType utensil;
-		void insertVertexInTable(QString c1, QString c2, QString c3, QString c4);
-		void removeVertexInTable(QString vName);
-		void removeVertexInTable(QString vx, QString vy, QString vz);
 
-		void insertConnectionInTable(QString c1, QString c2);
-		void removeConnectionInTable(QString c1, QString c2);
-
-		void insertFaceInTable(QString v1, QString v2, QString v3);
-		void removeFaceInTable(QString v1, QString v2, QString v3);
+		void updateVtxTable(QList<Vtx> list);
+		void updateEdgTable(QList<Edg> list);
+		void updateFceTable(QList<Fce> list);
 
 		bool isRadioButtonSimpleChecked();
 		bool isCheckBoxTrColorChecked();

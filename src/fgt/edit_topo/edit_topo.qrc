@@ -1,6 +1,13 @@
 <RCC>
     <qresource prefix="/" >
-	<file>images/icon_measure.png</file>
+		<file>images/icon_topo.png</file>
         <file>images/cur_measure.png</file>
+        <file>images/ico_exist_v_select.png</file>
+        <file>images/ico_fce_sel.png</file>
+        <file>images/ico_free_v_select.png</file>
+        <file>images/ico_undo_v_select.png</file>
+        <file>images/ico_v_connect.png</file>
+        <file>images/ico_v_deconnect.png</file>
+        <file>images/ico_v_move.png</file>
     </qresource>
 </RCC>
