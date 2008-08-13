@@ -24,14 +24,14 @@
   History
 $Log: edit_topomeshbuuilder.h,v $
 ****************************************************************************/
-#include <vcg/complex/trimesh/append.h>
-#include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/complex/trimesh/update/color.h>
 
 
 #include "edit_topomeshbuilder.h"
 #include <vcg/complex/trimesh/refine.h>
+#include <vcg/complex/trimesh/append.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/color.h>
 
 void RetopMeshBuilder::init(MeshModel *_mm, float dist)
 {
@@ -40,7 +40,7 @@ void RetopMeshBuilder::init(MeshModel *_mm, float dist)
 	midSampler->init(&_mm->cm, dist);
 }
 
-void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<Vtx> Vstack) 
+void RetopMeshBuilder::createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QList<Vtx> Vstack) 
 {
 	// Vertex names compact
 	QVector<Vtx> nStack(Vstack.count());
@@ -69,15 +69,15 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<
 		if(nFstack.at(i).selected)
 			allFce++;
 
-	out.cm.Clear();
-	vcg::tri::Allocator<CMeshO>::AddVertices(out.cm, nStack.count());
-	vcg::tri::Allocator<CMeshO>::AddFaces(out.cm, allFce);
+	outMesh.cm.Clear();
+	vcg::tri::Allocator<CMeshO>::AddVertices(outMesh.cm, nStack.count());
+	vcg::tri::Allocator<CMeshO>::AddFaces(outMesh.cm, allFce);
   
 	QVector<CMeshO::VertexPointer> ivp(Vstack.count());
 
 	int v =0;
 	CMeshO::VertexIterator vi;	
-	for(vi=out.cm.vert.begin(); vi!=out.cm.vert.end(); vi++)
+	for(vi=outMesh.cm.vert.begin(); vi!=outMesh.cm.vert.end(); vi++)
 	{
 		ivp[v] = &*vi;
 		(*vi).P() = Point3f(nStack[v].V.X(), nStack[v].V.Y(), nStack[v].V.Z());
@@ -86,7 +86,7 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<
 
 	int f = 0;
 	CMeshO::FaceIterator fi;
-	for(fi=out.cm.face.begin(); fi!=out.cm.face.end(); fi++)
+	for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 	{
 		Fce fce = nFstack[f];
 		
@@ -112,27 +112,27 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<
 	} 
 
 
-	out.updateDataMask(MeshModel::MM_FACETOPO);
+	outMesh.updateDataMask(MeshModel::MM_FACETOPO);
 
 	bool oriented,orientable;
-    tri::Clean<CMeshO>::IsOrientedMesh(out.cm, oriented,orientable); 
-	vcg::tri::UpdateTopology<CMeshO>::FaceFace(out.cm);
-	vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(out.cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(out.cm);
+    tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable); 
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
+	vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
 
-	out.clearDataMask(MeshModel::MM_FACETOPO);
+	outMesh.clearDataMask(MeshModel::MM_FACETOPO);
 
 /*	DEBUG
-	out.cm.Clear();
-	vcg::tri::Allocator<CMeshO>::AddVertices(out.cm, 6);
-	vcg::tri::Allocator<CMeshO>::AddFaces(out.cm, 5);
+	outMesh.cm.Clear();
+	vcg::tri::Allocator<CMeshO>::AddVertices(outMesh.cm, 6);
+	vcg::tri::Allocator<CMeshO>::AddFaces(outMesh.cm, 5);
 
 
 	QVector<CMeshO::VertexPointer> ivp(6);
 
 	CMeshO::VertexIterator vi;	
 
-	vi=out.cm.vert.begin(); 
+	vi=outMesh.cm.vert.begin(); 
 
 	ivp[0] = &*vi; (*vi).P() = Point3f(-0.053,		0.104,		0.040); ++vi;
 	ivp[1] = &*vi; (*vi).P() = Point3f(-0.031,		0.113,		0.034); ++vi;
@@ -142,7 +142,7 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<
 	ivp[5] = &*vi; (*vi).P() = Point3f(-0.017,		0.084,		0.057);
 
 	CMeshO::FaceIterator fi;
-	fi=out.cm.face.begin();
+	fi=outMesh.cm.face.begin();
 
 	(*fi).V(0) = ivp[0]; (*fi).V(1) = ivp[2]; (*fi).V(2) = ivp[4]; fi++;
 	(*fi).V(0) = ivp[0]; (*fi).V(1) = ivp[1]; (*fi).V(2) = ivp[2]; fi++;
@@ -154,26 +154,26 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<
 
 
 
- void RetopMeshBuilder::createRefinedMesh(MeshModel &out, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog)
+ void RetopMeshBuilder::createRefinedMesh(MeshModel &outMesh, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog)
 {
 	dialog->setBarMax(iterations++);//pow((float)(Fstack.count() * 4), (float)iterations) );
 
-	createBasicMesh(out, Fstack, stack);
+	createBasicMesh(outMesh, Fstack, stack);
 
-	out.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-	if(tri::Clean<CMeshO>::IsTwoManifoldFace(out.cm))
+	outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+	if(tri::Clean<CMeshO>::IsTwoManifoldFace(outMesh.cm))
 		for(int i=0; i<iterations; i++)
 		{
-			out.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-			Refine<CMeshO,NearestMidPoint<CMeshO>>(out.cm, *midSampler /*MyMidPoint<CMeshO>()*/, 0, false, 0);
-	//		Refine<CMeshO,MidPoint<CMeshO>>(out.cm, MidPoint<CMeshO>(), 0, false, 0);
-			out.clearDataMask( MeshModel::MM_VERTFACETOPO);
+			outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+			Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler /*MyMidPoint<CMeshO>()*/, 0, false, 0);
+	//		Refine<CMeshO,MidPoint<CMeshO>>(outMesh.cm, MidPoint<CMeshO>(), 0, false, 0);
+			outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
 			dialog->setBarVal(i);
 		}
 
-	out.fileName = "Retopology.ply";
-	tri::UpdateBounding<CMeshO>::Box(out.cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(out.cm);
+	outMesh.fileName = "Retopology.ply";
+	tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
 
 
 
@@ -334,7 +334,7 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<
 		newVstack.clear(); newFstack.clear();
 	}
 
-	createBasicMesh(out, tempFstack, tempVstack);
+	createBasicMesh(outMesh, tempFstack, tempVstack);
 
 	dialog->setBarVal(0);
 */

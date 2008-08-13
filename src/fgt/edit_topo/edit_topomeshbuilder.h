@@ -4,22 +4,14 @@
 
 #include <QList>
 
-#include <vcg/complex/trimesh/clean.h>
-#include <vcg/complex/trimesh/update/bounding.h>
-#include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/complex/trimesh/closest.h>
-
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
 #include <vcg/complex/intersection.h>
-
-
-#include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertexplus/component.h>
-#include <vcg/simplex/faceplus/base.h>
-#include <vcg/simplex/faceplus/component.h>
-#include <vcg/simplex/faceplus/component_rt.h>
+#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/space/index/grid_static_ptr.h>
+#include <vcg/complex/trimesh/closest.h>
 
 using namespace std;
 using namespace vcg;
