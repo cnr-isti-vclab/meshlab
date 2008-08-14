@@ -140,6 +140,7 @@ public:
 	//make the default the mesh that is at the given position in the mesh document
 	//if the filter is run in a script and has added a mesh for a position that does not exist in the MeshDocument, then the 
 	//script will fail to run.  this is useful for filters that need more than one mesh to work.
+	//if position is set to -1 no mesh will be chosen by default and a blank option will be put in the Enum
 	void addMesh     (QString name, int position,  QString desc=QString(), QString tooltip=QString());
 	
 	/*  A way to collect an arbitrary number of floats. Useful if you want the user to input an array of numbers */
