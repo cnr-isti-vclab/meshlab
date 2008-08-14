@@ -94,23 +94,23 @@ void loadPlugins(FILE *fp=0)
 		QObject *plugin = loader.instance();
 		
 		if (plugin) {		
-		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-		  if (iFilter){ 
-	        QAction *filterAction;
-	        foreach(filterAction, iFilter->actions())
-						{
-							filterMap[filterAction->text()]=filterAction;
-							//if(fp)
-							 printf( "*'''%s''': %s\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
-						}
-	        printf("Loaded %i filtering actions form %s\n",filterMap.size(),qPrintable(fileName));
-	       }
-		  MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-		  if (iIO)	meshIOPlugins.push_back(iIO);
+			MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+			if (iFilter){ 
+				QAction *filterAction;
+				int oldSize = filterMap.size();
+				foreach(filterAction, iFilter->actions())
+				{
+					filterMap[filterAction->text()]=filterAction;
+					 //printf( "*'''%s''': %s\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
+				}
+				printf("Loaded %i filtering actions form %s\n", filterMap.size() - oldSize, qPrintable(fileName));
+			}
+			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
+			if (iIO)	meshIOPlugins.push_back(iIO);
 		}
 	}
-   printf("Total %i filtering actions\n",filterMap.size());
-   printf("Total %i io plugins\n",meshIOPlugins.size());
+	printf("Total %i filtering actions\n", filterMap.size());
+	printf("Total %i io plugins\n", meshIOPlugins.size());
 }
 
 bool Open(MeshModel &mm, QString fileName)
@@ -159,7 +159,7 @@ bool Open(MeshModel &mm, QString fileName)
 
 */
 
-bool Save(MeshModel &mm, QString fileName)
+bool Save(MeshModel *mm, QString fileName)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
@@ -188,8 +188,12 @@ bool Save(MeshModel &mm, QString fileName)
 	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
 	
 	int mask = 0;
-	FilterParameterSet savingPar;
-	if (!pCurrentIOPlugin->save(extension, fileName, mm ,mask, savingPar,0,0/*gla*/))
+	
+	// optional saving parameters (like ascii/binary encoding)
+	FilterParameterSet savePar;
+	pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
+	
+	if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask, savePar))
   {
     printf("Failed saving\n");
     return false;
@@ -198,7 +202,9 @@ bool Save(MeshModel &mm, QString fileName)
 }
 
 
-bool Script(MeshModel& mm, QString scriptfile){
+bool Script(MeshDocument &meshDocument, QString scriptfile){
+	
+	MeshModel &mm = *meshDocument.mm();
 	
 	FilterScript scriptPtr;
 	
@@ -209,78 +215,161 @@ bool Script(MeshModel& mm, QString scriptfile){
 	
 	FilterScript::iterator ii;
 	for(ii = scriptPtr.actionList.begin();ii!= scriptPtr.actionList.end();++ii){
-		FilterParameterSet &par=(*ii).second;
+		FilterParameterSet &par = (*ii).second;
 		QString &name = (*ii).first;
 		printf("filter: %s\n",qPrintable((*ii).first));
 		
 		QAction *action = filterMap[ (*ii).first];
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 		iFilter->setLog(NULL);
-		int req=iFilter->getRequirements(action);
+		int req = iFilter->getRequirements(action);
 		mm.updateDataMask(req);
 
-		bool ret = iFilter->applyFilter( action, mm, (*ii).second, NULL);
-
+		
+		
+		//make sure the PARMESH parameters are initialized
+		FilterParameterSet &parameterSet = (*ii).second;
+		for(int i = 0; i < parameterSet.paramList.size(); i++)
+		{	
+			//get a modifieable reference
+			FilterParameter &parameter = parameterSet.paramList[i];
+				
+			//if this is a mesh paramter and the index is valid
+			if(parameter.fieldType == FilterParameter::PARMESH)
+			{  
+				if(	parameter.fieldVal.toInt() < meshDocument.size() && 
+					parameter.fieldVal.toInt() >= 0  )
+				{
+					parameter.pointerVal = meshDocument.getMesh(parameter.fieldVal.toInt());					
+				} else
+				{
+					printf("Meshes loaded: %i, meshes asked for: %i \n", meshDocument.size(), parameter.fieldVal.toInt() );
+					printf("One of the filters in the script needs more meshes than you have loaded.\n");
+					exit(-1);
+				}
+			}
+		}
+		
+		bool ret = iFilter->applyFilter( action, meshDocument, (*ii).second, NULL);
 		//iFilter->applyFilter( action, mm, (*ii).second, QCallBack );
 		//GLA()->log.Logf(GLLogStream::Info,"Re-Applied filter %s",qPrintable((*ii).first));
-
+		
+		if(!ret)
+		{
+			printf("Problem with filter: %s\n",qPrintable((*ii).first));
+			return false;
+		}
 	}
 	
+	return true;
 }
 
 void Usage()
 {
-  printf(
-		"\nUsage:\n"
-		"         meshlabserver arg1 arg2 ...  \n"
+	printf("\nUsage:\n"
+		"    meshlabserver arg1 arg2 ...  \n"
 		"where args can be: \n"
-		" -i filename  mesh that has to be loaded\n" 
-		" -o filename  mesh where to write the result\n"
-	  " -s filename  script to be applied\n"
+		" -i [filename...]  mesh(s) that has to be loaded\n" 
+		" -o [filename...]  mesh(s) where to write the result(s)\n"
+		" -s filename  script to be applied\n"
 		"\nNotes:\n\n"
-		"There must be exactly one input mesh and at most one output mesh.\n"
-		"Script is optional and must be in the format saved by MeshLab.\n"
+		"There can be multiple meshes loaded and the order they are listed matters because \n"
+		"filters that use meshes as parameters choose the mesh based on the order.\n"
+		"The number of output meshes must be either one or equal to the number of input meshes.\n"
+		"If the number of output meshes is one then only the first mesh in the input list is saved.\n"
 		"The format of the output mesh is guessed by the used extension.\n"
+		"Script is optional and must be in the format saved by MeshLab.\n"
 		);
+	
 	exit(-1);
-
 }
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);  
+	MeshDocument meshDocument;
+	QStringList meshNamesIn, meshNamesOut;
+	QString scriptName;
+	
+	if(argc < 3) Usage();
+	
+	printf("Loading Plugins:\n");
 	loadPlugins();
-	MeshModel mm;
-	QString meshNameIn,meshNameOut,scriptName;
-	if(argc<3) Usage();
-	int i=1;
-	while(i<argc)
+	
+	int i = 1;
+	while(i < argc)
 	{
-		if(argv[i][0] !='-') Usage();
+		if(argv[i][0] != '-') Usage();
 		switch(argv[i][1])
-			{
-        case 'i' :  meshNameIn= argv[i+1];printf("Input mesh  %s\n",qPrintable(meshNameIn)); i+=2; break; 
-        case 'o' :  meshNameOut=argv[i+1];printf("output mesh  %s\n",qPrintable(meshNameOut));i+=2; break; 
-        case 's' :  scriptName= argv[i+1];printf("script %s\n",qPrintable(scriptName));i+=2; break; 
-			}
-	}
-		if(meshNameIn.isEmpty()) {
-			printf("No input mesh\n"); exit(-1);
-		}
-		if(meshNameOut.isEmpty()) {
-			printf("No output mesh\n"); exit(-1);
-		}
-		
-		Open(mm,meshNameIn);
-		printf("Mesh loaded is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
-		
-		if(!scriptName.isEmpty())
 		{
-			printf("Apply FilterScript:\n");
-			Script(mm,scriptName);
+			case 'i' :  
+				while(argv[i+1][0] != '-')
+				{
+					meshNamesIn << argv[i+1];
+					printf("Input mesh  %s\n", qPrintable(meshNamesIn.last() ));
+					i++;
+				}
+				i++; 
+				break; 
+			case 'o' :  
+				while(argv[i+1][0] != '-')
+				{
+					meshNamesOut << argv[i+1];
+					printf("output mesh  %s\n", qPrintable(meshNamesOut.last()));
+					i++;
+				}
+				i++; 
+				break; 
+			case 's' :  
+				scriptName = argv[i+1];
+				printf("script %s\n", qPrintable(scriptName));
+				i += 2;
+				break; 
 		}
-		
-		Save(mm,meshNameOut);    
-		printf("Mesh saved is %i vn %i fn\n",mm.cm.vn,mm.cm.fn);
+	}
+	
+	if(meshNamesIn.isEmpty()) {
+		printf("No input mesh\n"); exit(-1);
+	} else
+	{
+		for(int i = 0; i < meshNamesIn.size(); i++)
+		{
+			MeshModel *mm = new MeshModel( meshNamesIn.at(i).toStdString().c_str() );
+			Open(*mm, meshNamesIn.at(i));
+			printf("Mesh %s loaded has %i vn %i fn\n", mm->fileName.c_str(), mm->cm.vn, mm->cm.fn);
+
+			//now add it to the document
+			meshDocument.addNewMesh(mm->fileName.c_str(), mm);
+		}
+		//the first mesh is the one the script is applied to
+		meshDocument.setCurrentMesh(0);
+	}
+				
+	if(!scriptName.isEmpty())
+	{		
+		printf("Apply FilterScript:\n");
+		bool returnValue = Script(meshDocument, scriptName);
+		if(!returnValue)
+		{
+			printf("Failed to apply FilterScript\n");
+			exit(-1);
+		}
+	} else 
+		printf("No Script to apply.");
+	
+	//if there is not one name or an equal number of in and out names then exit 
+	if(meshNamesOut.isEmpty() )
+		printf("No output mesh names given."); 
+	else if(meshNamesOut.size() != 1 && meshNamesOut.size() != meshNamesIn.size() ) {
+		printf("Wrong number of output mesh names given\n"); 
+		exit(-1);
+	} else 
+	{
+		for(int i = 0; i < meshNamesOut.size(); i++)
+		{
+			Save(meshDocument.getMesh(i), meshNamesOut.at(i));
+			printf("Mesh %s saved with: %i vn %i fn\n", qPrintable(meshNamesOut.at(i)), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
+		}
+	}		
 }
 
