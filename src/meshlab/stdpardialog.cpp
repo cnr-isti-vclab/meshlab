@@ -329,15 +329,20 @@ void StdParFrame::loadFrameContent(FilterParameterSet &curParSet,MeshDocument *m
 					ql = new QLabel(fpi.fieldDesc,this);
 					ql->setToolTip(fpi.fieldToolTip);	
 					
+					MeshModel *defaultModel = 0;
+					int position = fpi.fieldVal.toInt();
+						
 					//if there was no pointer try to use the position value to find the mesh in the mesh document
-					if(NULL == (fpi.pointerVal)){
-						int position = fpi.fieldVal.toInt();
-						if(position > 0 && position < mdPt->meshList.size())
-							mew = new MeshEnumWidget(this, mdPt->getMesh(position), *mdPt);
-						else
-							mew = new MeshEnumWidget(this, mdPt->getMesh(0), *mdPt);
-					} else 
-						mew = new MeshEnumWidget(this, (MeshModel *)(fpi.pointerVal), *mdPt);
+					if(NULL == (fpi.pointerVal) && 
+							position >= 0 &&
+							position < mdPt->meshList.size() )
+					{
+						//get the model from the position in the meshDocument
+						defaultModel = mdPt->getMesh(position);
+					} else //use the pointer provided 
+						defaultModel = (MeshModel *)(fpi.pointerVal);
+					
+					mew = new MeshEnumWidget(this, defaultModel, *mdPt);
 					
 					gridLayout->addWidget(ql,i,0,Qt::AlignTop);
 					gridLayout->addLayout(mew,i,1,Qt::AlignTop);				
@@ -742,7 +747,7 @@ MeshEnumWidget::MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument 
 	QStringList meshNames;
 	
 	//make the default mesh Index be 0
-	int defaultMeshIndex = 0;
+	int defaultMeshIndex = -1;
 
 	for(int i=0;i<md->meshList.size();++i)
 	 {
@@ -751,12 +756,22 @@ MeshEnumWidget::MeshEnumWidget(QWidget *p, MeshModel *defaultMesh, MeshDocument 
 		if(md->meshList.at(i) == defaultMesh) defaultMeshIndex = i;
 	 }
 
+	//add a blank choice because there is no default available
+	if(defaultMeshIndex == -1)
+	{
+		meshNames.push_back("");
+		defaultMeshIndex = meshNames.size()-1;  //have the blank choice be shown
+	}	
 	Init(p,defaultMeshIndex,meshNames);
 }
 
 MeshModel * MeshEnumWidget::getMesh()
 {
-	return md->meshList.at(enumCombo->currentIndex());
+	//test to make sure index is in bounds
+	int index = enumCombo->currentIndex();
+	if(index < md->meshList.size() && index > -1)
+		return md->meshList.at(enumCombo->currentIndex());
+	else return NULL;
 }
 
 void MeshEnumWidget::setMesh(MeshModel * newMesh)
