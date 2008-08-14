@@ -1942,7 +1942,7 @@ namespace io {
 			findAndParseAttribute(coordList, elem, "rotation", "");
 			if(coordList.size() == 1)
 			{
-				tmp.Rotate(math::ToDeg(coordList.at(0).toFloat()), vcg::Point3f(0, 0, 1));
+				tmp.SetRotateDeg(math::ToDeg(coordList.at(0).toFloat()), vcg::Point3f(0, 0, 1));
 				matrix *= tmp;
 			}
 			if (center.size() == 2)
