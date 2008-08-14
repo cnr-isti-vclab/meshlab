@@ -65,7 +65,7 @@ void AlignTools::buildParameterSet(FilterParameterSet & parlst)
 			"The mesh that will move to fit close to the Stuck Mesh.");
 }
 
-bool AlignTools::setupThenAlign(MeshModel &mm, FilterParameterSet & par)
+bool AlignTools::setupThenAlign(MeshModel &/*mm*/, FilterParameterSet & par)
 {
 	//mesh that wont move
 	MeshModel *stuckModel = par.getMesh(StuckMesh);
@@ -89,7 +89,7 @@ bool AlignTools::setupThenAlign(MeshModel &mm, FilterParameterSet & par)
 		if(vcg::tri::HasPerMeshAttribute(stuckModel->cm, PickedPoints::Key) )
 		{
 			CMeshO::PerMeshAttributeHandle<PickedPoints*> ppHandle =
-					vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*>(mm.cm, PickedPoints::Key);
+					vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*>(stuckModel->cm, PickedPoints::Key);
 	
 			stuckPickedPoints = ppHandle();
 	
@@ -122,7 +122,7 @@ bool AlignTools::setupThenAlign(MeshModel &mm, FilterParameterSet & par)
 		if(vcg::tri::HasPerMeshAttribute(modelToMove->cm, PickedPoints::Key) )
 		{
 			CMeshO::PerMeshAttributeHandle<PickedPoints*> ppHandle =
-					vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*>(mm.cm, PickedPoints::Key);
+					vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*>(modelToMove->cm, PickedPoints::Key);
 	
 			modelToMovePickedPoints = ppHandle();
 	
