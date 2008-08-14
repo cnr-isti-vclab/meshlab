@@ -1,6 +1,7 @@
 include (../../shared.pri)
 
-HEADERS       = cleanfilter.h 
+HEADERS       = cleanfilter.h \
+		../../meshlab/filterparameter.h
 
 SOURCES       = cleanfilter.cpp\ 
 		../../meshlab/filterparameter.cpp
