@@ -10,6 +10,7 @@ HEADERS       = editalign.h \
                 align/OccupancyGrid.h \
                 align/align_parameter.h \
 		../../meshlab/stdpardialog.h \
+		../../meshlab/filterparameter.h \
 		 $$VCGDIR/wrap/gui/trackball.h\
                  $$VCGDIR/wrap/gui/trackmode.h\
                  $$VCGDIR/wrap/gl/trimesh.h
