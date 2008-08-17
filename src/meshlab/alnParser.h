@@ -110,7 +110,7 @@ static bool SaveALN(const char *alnfile, std::vector<std::string> &names, std::v
     return false;
   }
 
-  fprintf(fp,"%i\n",names.size());
+  fprintf(fp,"%i\n",(int)names.size());
   for(int i=0;i < static_cast<int>(names.size());++i)
   {
     fprintf(fp,"%s\n",names[i].c_str());

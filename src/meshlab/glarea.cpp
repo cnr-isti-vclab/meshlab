@@ -324,7 +324,7 @@ void GLArea::paintGL()
     glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 		glColor3f(1,1,0);
     glDisable(GL_LIGHTING);
-	  const int lineNum=3;
+	  const unsigned int lineNum=3;
 		glBegin(GL_LINES);
     for(unsigned int i=0;i<=lineNum;++i)
       for(unsigned int j=0;j<=lineNum;++j) {

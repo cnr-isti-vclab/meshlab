@@ -81,7 +81,7 @@ void GLLogStream::Logf(int Level, const char * f, ... )
 	Log(Level,buf);
 }
 
-void GLLogStream::Save(int Level, const char * filename )
+void GLLogStream::Save(int /*Level*/, const char * filename )
 {
 	FILE *fp=fopen(filename,"wb");
 	list<pair <int,string> > ::iterator li;
@@ -92,7 +92,7 @@ void GLLogStream::Save(int Level, const char * filename )
 
 void  GLLogStream::glDraw(QGLWidget *qgl, int Level, int nlines,float vSpacing,QFont font)
 {
-	if(  nlines>S.size()) nlines = S.size();
+	if( nlines > (int)S.size() ) nlines = S.size();
 	list<pair <int,string> > ::iterator li;
 	li=S.begin();
 

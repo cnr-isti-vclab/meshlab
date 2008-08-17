@@ -215,7 +215,7 @@ public slots:
 		 
 	bool open(QString fileName=QString(), GLArea *gla=0);
 	bool openIn(QString fileName=QString());
-	bool openProject(QString fileName=QString(), GLArea *gla=0);
+	bool openProject(QString fileName=QString());
 	void saveProject();
 	void setCurrent(int meshId);
 	void delCurrentMesh();

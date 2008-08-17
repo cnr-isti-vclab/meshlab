@@ -497,7 +497,7 @@ void MainWindow::startFilter()
 	{
 		qDebug("MeshCreation");
 		GLArea *gla=new GLArea(mdiarea);
-		MeshModel *mm=gla->meshDoc.addNewMesh("untitled.ply");			
+		gla->meshDoc.addNewMesh("untitled.ply");			
 		gla->setFileName("untitled.ply");
 		mdiarea->addSubWindow(gla);
 		if(mdiarea->isVisible()) gla->showMaximized();
@@ -802,7 +802,7 @@ void MainWindow::saveProject()
 
 }
 
-bool MainWindow::openProject(QString fileName, GLArea *gla)
+bool MainWindow::openProject(QString fileName)
 {
 	bool openRes=true;
 	if (fileName.isEmpty())
@@ -848,7 +848,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 	foreach(fileName,fileNameList)
 	{
 			QFileInfo fi(fileName);
-			if(fi.suffix().toLower()=="aln") openProject(fileName, NULL);
+			if(fi.suffix().toLower()=="aln") openProject(fileName);
 			else
 			{					
 				if(!fi.exists()) 	{	
