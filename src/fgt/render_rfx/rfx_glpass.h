@@ -50,6 +50,10 @@ public:
 	{
 		return QListIterator<RfxUniform*>(shaderUniforms);
 	}
+	QListIterator<RfxState*> StatesIterator()
+	{
+		return QListIterator<RfxState*>(rfxStates);
+	}
 	RfxUniform* getUniform(int uniIdx) { return shaderUniforms.at(uniIdx); }
 	RfxUniform* getUniform(const QString& uniIdx);
 	void CompileAndLink(QGLContext *);

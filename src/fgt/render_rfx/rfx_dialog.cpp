@@ -27,6 +27,8 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 	: QDialog(parent)
 {
 	shader = s;
+	mGLWin = (QGLContext *)parent;
+	selectedPass = 0;
 
 	ui.setupUi(this);
 	setWindowTitle("RenderRfx [" + a->text() + "]");
@@ -34,7 +36,7 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 	// TODO: passes selection combobox
 
 	/* Uniforms */
-	QListIterator<RfxUniform*> it = s->getPass(0)->UniformsIterator();
+	QListIterator<RfxUniform*> it = s->getPass(selectedPass)->UniformsIterator();
 	int unifCount = -1; // keep track of uniform index
 	while (it.hasNext()) {
 		unifCount++;
@@ -57,8 +59,9 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 		        SLOT(UniformSelected(int)));
 	}
 
+
 	/* Textures */
-	it = s->getPass(0)->UniformsIterator();
+	it = s->getPass(selectedPass)->UniformsIterator();
 	unifCount = -1;
 	while (it.hasNext()) {
 		unifCount++;
@@ -81,10 +84,36 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 		        SLOT(TextureSelected(int)));
 	}
 
-	/* States */
-	// TODO
 
-	/* Vertex/Fragment Editor */
+	/* States */
+	ui.glStatesTable->clear();
+	ui.glStatesTable->setRowCount(0);
+	ui.glStatesTable->setColumnCount(2);
+	ui.glStatesTable->horizontalHeader()->setStretchLastSection(true);
+	ui.glStatesTable->horizontalHeader()->hide();
+	ui.glStatesTable->verticalHeader()->hide();
+	QListIterator<RfxState*> sit = s->getPass(selectedPass)->StatesIterator();
+	int rowidx = 0;
+	while (sit.hasNext()) {
+		RfxState *r = sit.next();
+
+		// QTableWidget will take ownership of objects, do not delete them.
+		QTableWidgetItem *c0 = new QTableWidgetItem(r->GetRenderState());
+		c0->setFlags(Qt::ItemIsSelectable);
+		QTableWidgetItem *c1 = new QTableWidgetItem(r->GetRenderValue());
+		c1->setFlags(Qt::ItemIsSelectable);
+
+		ui.glStatesTable->insertRow(rowidx);
+		ui.glStatesTable->setItem(rowidx, 0, c0);
+		ui.glStatesTable->setItem(rowidx, 1, c1);
+		ui.glStatesTable->resizeRowToContents(rowidx);
+		++rowidx;
+	}
+	ui.glStatesTable->resizeColumnToContents(0);
+	ui.glStatesTable->resizeColumnToContents(1);
+
+
+	/* Vertex/Fragment source view */
 	QFont fixedfont;
 	fixedfont.setFamily("Courier");
 	fixedfont.setFixedPitch(true);
@@ -94,8 +123,8 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 
 	vertHL = new GLSLSynHlighter(ui.textVert->document());
 	fragHL = new GLSLSynHlighter(ui.textFrag->document());
-	ui.textVert->setPlainText(s->getPass(0)->GetVertexSource());
-	ui.textFrag->setPlainText(s->getPass(0)->GetFragmentSource());
+	ui.textVert->setPlainText(s->getPass(selectedPass)->GetVertexSource());
+	ui.textFrag->setPlainText(s->getPass(selectedPass)->GetFragmentSource());
 }
 
 RfxDialog::~RfxDialog()
@@ -112,7 +141,7 @@ void RfxDialog::UniformSelected(int idx)
 		return;
 
 	int uniIndex = ui.comboUniforms->itemData(idx).toInt();
-	RfxUniform *uni = shader->getPass(0)->getUniform(uniIndex);
+	RfxUniform *uni = shader->getPass(selectedPass)->getUniform(uniIndex);
 	assert(uni);
 
 	ui.BoxUnifProps->setTitle(uni->GetName());
@@ -122,37 +151,37 @@ void RfxDialog::UniformSelected(int idx)
 	case RfxUniform::INT:
 	case RfxUniform::FLOAT:
 	case RfxUniform::BOOL:
-		DrawIFace(uni, 1, 1);
+		DrawIFace(uni, uniIndex, 1, 1);
 		break;
 
 	case RfxUniform::VEC2:
 	case RfxUniform::IVEC2:
 	case RfxUniform::BVEC2:
-		DrawIFace(uni, 1, 2);
+		DrawIFace(uni, uniIndex, 1, 2);
 		break;
 
 	case RfxUniform::VEC3:
 	case RfxUniform::IVEC3:
 	case RfxUniform::BVEC3:
-		DrawIFace(uni, 1, 3);
+		DrawIFace(uni, uniIndex, 1, 3);
 		break;
 
 	case RfxUniform::VEC4:
 	case RfxUniform::IVEC4:
 	case RfxUniform::BVEC4:
-		DrawIFace(uni, 1, 4);
+		DrawIFace(uni, uniIndex, 1, 4);
 		break;
 
 	case RfxUniform::MAT2:
-		DrawIFace(uni, 2, 2);
+		DrawIFace(uni, uniIndex, 2, 2);
 		break;
 
 	case RfxUniform::MAT3:
-		DrawIFace(uni, 3, 3);
+		DrawIFace(uni, uniIndex, 3, 3);
 		break;
 
 	case RfxUniform::MAT4:
-		DrawIFace(uni, 4, 4);
+		DrawIFace(uni, uniIndex, 4, 4);
 		break;
 
 	default:
@@ -160,13 +189,14 @@ void RfxDialog::UniformSelected(int idx)
 	}
 }
 
-void RfxDialog::DrawIFace(RfxUniform *u, int rows, int columns)
+void RfxDialog::DrawIFace(RfxUniform *u, int uidx, int rows, int columns)
 {
 	enum controlType { INT_CTRL, FLOAT_CTRL, BOOL_CTRL };
 	float *val = u->GetValue();
 	controlType ctrl;
 	QWidget *controls[rows * columns];
 	QGridLayout *uniLayout = ((QGridLayout*)ui.BoxUnifProps->layout());
+	QSignalMapper *valMapper = new QSignalMapper(this);
 
 	switch (u->GetType()) {
 	case RfxUniform::INT:
@@ -204,25 +234,39 @@ void RfxDialog::DrawIFace(RfxUniform *u, int rows, int columns)
 			switch (ctrl) {
 			case INT_CTRL:
 				controls[arrayIdx] = new QSpinBox();
+				((QSpinBox*)controls[arrayIdx])->setRange(INT_MIN, INT_MAX);
 				((QSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
+				connect(controls[arrayIdx], SIGNAL(valueChanged(int)),
+				        valMapper, SLOT(map()));
 				break;
 			case FLOAT_CTRL:
 				controls[arrayIdx] = new QDoubleSpinBox();
+				((QDoubleSpinBox*)controls[arrayIdx])->setRange(DBL_MIN, DBL_MAX);
 				((QDoubleSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
+				connect(controls[arrayIdx], SIGNAL(valueChanged(double)),
+				        valMapper, SLOT(map()));
 				break;
 			case BOOL_CTRL:
 				controls[arrayIdx] = new QComboBox();
-				((QComboBox*)controls[arrayIdx])->addItem("TRUE");
 				((QComboBox*)controls[arrayIdx])->addItem("FALSE");
-				if (val[arrayIdx])
+				((QComboBox*)controls[arrayIdx])->addItem("TRUE");
+				if (!val[arrayIdx])
 					((QComboBox*)controls[arrayIdx])->setCurrentIndex(0);
+				connect(controls[arrayIdx], SIGNAL(currentIndexChanged(int)),
+						valMapper, SLOT(map()));
 				break;
 			}
 
+			valMapper->setMapping(controls[arrayIdx],
+			                      QString().setNum(uidx) + '-' +
+			                      QString().setNum(arrayIdx));
+			valMapper->setParent(controls[arrayIdx]);
 			uniLayout->addWidget(controls[arrayIdx], i, j);
 			widgetsByTab.insert(UNIFORM_TAB, controls[arrayIdx]);
 		}
 	}
+	connect(valMapper, SIGNAL(mapped(const QString&)), this,
+	        SLOT(ChangeValue(const QString&)));
 }
 
 void RfxDialog::CleanTab(int tabIdx)
@@ -249,14 +293,70 @@ void RfxDialog::CleanTab(int tabIdx)
 	}
 }
 
+void RfxDialog::ChangeTexture(int unifIdx)
+{
+	int uniIndex = ui.comboTextures->itemData(unifIdx).toInt();
+	RfxUniform *uni = shader->getPass(selectedPass)->getUniform(uniIndex);
+	assert(uni);
+
+	QString fname = QFileDialog::getOpenFileName(this,
+	                                             tr("Choose Texture"),
+	                                             uni->GetTextureFName());
+	if (!fname.isEmpty()) {
+		uni->SetValue(fname);
+		uni->LoadTexture(mGLWin);
+
+		// generate a currentIndexChanged event
+		ui.comboTextures->setCurrentIndex(0);
+		ui.comboTextures->setCurrentIndex(ui.comboTextures->findData(unifIdx));
+	}
+}
+
+void RfxDialog::ChangeValue(const QString& val)
+{
+	QStringList unif = val.split('-');
+	float *oldVal = shader->getPass(selectedPass)->getUniform(unif[0].toInt())->GetValue();
+	float newVal = -1.0f;
+
+	// parent of SignalMapper has been set to appropriate QWidget type
+	QObject *sender = QObject::sender()->parent();
+	assert(sender);
+
+	QComboBox *cbox = dynamic_cast<QComboBox*>(sender);
+	if (cbox != NULL) {
+		newVal = cbox->currentIndex();
+	} else {
+		QSpinBox *sbox = dynamic_cast<QSpinBox*>(sender);
+		if (sbox != NULL) {
+			newVal = sbox->value();
+		} else {
+			QDoubleSpinBox *dsbox = dynamic_cast<QDoubleSpinBox*>(sender);
+			if (dsbox != NULL)
+				newVal = dsbox->value();
+			else
+				return;
+		}
+	}
+
+	oldVal[unif[1].toInt()] = newVal;
+}
+
 void RfxDialog::TextureSelected(int idx)
 {
+	disconnect(ui.btnChangeTexture, 0, 0, 0);
+
 	if (idx <= 0)
 		return;
 
 	int uniIndex = ui.comboTextures->itemData(idx).toInt();
-	RfxUniform *uni = shader->getPass(0)->getUniform(uniIndex);
+	RfxUniform *uni = shader->getPass(selectedPass)->getUniform(uniIndex);
 	assert(uni);
+
+	// connect Change Texture button
+	QSignalMapper *sigMap = new QSignalMapper(this);
+	connect(ui.btnChangeTexture, SIGNAL(clicked()), sigMap, SLOT(map()));
+	sigMap->setMapping(ui.btnChangeTexture, uniIndex);
+	connect(sigMap, SIGNAL(mapped(int)), this, SLOT(ChangeTexture(int)));
 
 	ui.BoxTextureProps->setTitle(uni->GetName());
 

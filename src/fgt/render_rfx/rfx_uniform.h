@@ -85,6 +85,7 @@ private:
 	GLuint textureId;
 	GLint textureTarget;
 	GLint texUnit;
+	GLint maxTexUnits;
 	GLint location;
 
 	static const char *UniformTypeString[];

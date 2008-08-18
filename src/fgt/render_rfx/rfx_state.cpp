@@ -24,6 +24,40 @@
 #include "rfx_state.h"
 
 // static members initialization
+
+// the empty strings are "padding" for compatibility with RM enum
+const char *RfxState::RenderStatesStrings[] = {
+	"GL_CurrentColor", "GL_SecondaryColor", "", "GL_ClearColor",
+	"GL_ClearDepth", "GL_ShadeModel", "GL_FrontFace", "GL_CullMode",
+	"GL_EdgeFlag",
+	"GL_DepthNear", "GL_DepthFar", "", "GL_FogColor", "GL_FogDensity", "GL_FogStart",
+	"GL_FogEnd", "GL_FogMode", "GL_PointSize", "GL_PointMin", "GL_PointMax",
+	"GL_PointSmooth", "GL_LineWidth", "GL_LineSmooth", "GL_PolyFrontMode",
+	"GL_PolyBackMode", "GL_PolySmooth", "GL_PolyOffsetFactor",
+	"GL_PolyOffsetUnits", "GL_PolyOffsetPoint", "GL_PolyOffsetLine",
+	"GL_PolyOffsetFill",
+	"GL_AlphaEnable", "GL_AlphaFunction", "GL_AlphaReference",
+	"GL_DepthEnable", "GL_DepthFunction", "GL_BlendEnable", "GL_BlendColor",
+	"GL_BlendSourceRGB", "GL_BlendDestRGB", "GL_BlendSourceAlpha",
+	"GL_BlendDestAlpha", "GL_BlendEquation", "GL_WriteMaskColor", "GL_WriteMaskDepth",
+	"GL_VertexProgramTwoSideARB", "GL_StencilEnable", "GL_StencilFunction",
+	"GL_StencilValueMask", "GL_StencilReference", "GL_StencilFail",
+	"GL_StencilPassDepthFail", "GL_StencilPassDepthPass", "GL_WriteMaskStencil",
+	"GL_ClearStencil"
+};
+
+const char *RfxState::RenderFunctionStrings[] = {
+	"NEVER", "LESS", "EQUAL", "LESS_EQUAL", "GREATER", "NOT_EQUAL",
+	"GREATER_EQUAL", "ALWAYS"
+};
+
+const char *RfxState::RenderColorStrings[] = {
+	"ZERO", "ONE", "SRC_COLOR", "INV_SRC_COLOR", "DEST_COLOR",
+	"INV_DEST_COLOR", "SRC_ALPHA", "INV_SRC_ALPHA", "DEST_ALPHA",
+	"INV_DEST_ALPHA", "CONST_COLOR", "INV_CONST_COLOR", "CONST_ALPHA",
+	"INV_CONST_ALPHA", "SRC_ALPHA_SATURATE"
+};
+
 const char *RfxState::TextureStatesStrings[] = {
 	"GL_TEXTURE_WRAP_S", "GL_TEXTURE_WRAP_T", "GL_TEXTURE_WRAP_R",
 	"GL_TEXTURE_MIN_FILTER", "GL_TEXTURE_MAG_FILTER",
@@ -533,7 +567,7 @@ inline void RfxState::GLEnableDisable(GLint GLmode)
 }
 
 /***
- * conversion from enum to strings for gui use
+ * conversion functions from enum to strings for gui use
  */
 QString RfxState::GetTextureValue()
 {
@@ -548,18 +582,188 @@ QString RfxState::GetTextureValue()
 		return TextureFilterStrings[value];
 
 	case GL_TextureBorderColor: {
-		float *thecol = DecodeColor();
-		return "(" + QString().setNum(thecol[0]) + ", "
-		           + QString().setNum(thecol[1]) + ", "
-		           + QString().setNum(thecol[2]) + ", "
-		           + QString().setNum(thecol[3]) + ")";
+		return ColorToString(DecodeColor());
 	}
 
 	case GL_TextureMaxAnisotropyEXT:
-		return QString().setNum(value);
-
 	case GL_TextureLODBias:
 		return QString().setNum(value);
+
+	default:
+		return "";
+	}
+}
+
+QString RfxState::GetRenderState()
+{
+	// enum values are not contiguous, so play with offsets
+	// when looking up in strings table
+
+	if (state < 10)
+		return RenderStatesStrings[state - 1];
+	else if (state > 13 && state < 36)
+		return RenderStatesStrings[9 + (state - 14)];
+	else if (state > 40)
+		return RenderStatesStrings[31 + (state - 41)];
+	else
+		return "";
+}
+
+QString RfxState::GetRenderValue()
+{
+	switch (state) {
+	case GL_CurrentColor:
+	case GL_SecondaryColor:
+	case GL_ClearColor:
+	case GL_FogColor:
+	case GL_BlendColor:
+		return ColorToString(DecodeColor());
+
+	case GL_ClearDepth:
+	case GL_DepthNear:
+	case GL_DepthFar:
+	case GL_FogDensity:
+	case GL_FogStart:
+	case GL_FogEnd:
+	case GL_PointSize:
+	case GL_PointMin:
+	case GL_PointMax:
+	case GL_LineWidth:
+	case GL_PolyOffsetFactor:
+	case GL_PolyOffsetUnits:
+	case GL_AlphaReference:
+	case GL_StencilValueMask:
+	case GL_StencilReference:
+	case GL_ClearStencil:
+	case GL_WriteMaskStencil:
+		return QString().setNum(value);
+
+	case GL_EdgeFlag:
+	case GL_PointSmooth:
+	case GL_LineSmooth:
+	case GL_PolySmooth:
+	case GL_PolyOffsetPoint:
+	case GL_PolyOffsetLine:
+	case GL_PolyOffsetFill:
+	case GL_AlphaEnable:
+	case GL_DepthEnable:
+	case GL_BlendEnable:
+	case GL_WriteMaskDepth:
+	case GL_VertexProgramTwoSideARB:
+	case GL_StencilEnable:
+		return (value == 1)? "TRUE" : "FALSE";
+
+	case GL_ShadeModel:
+		return (value == 1)? "FLAT_SHADE" : "SMOOTH_SHADE";
+
+	case GL_FrontFace:
+		return (value == 1)? "CCW" : "CW";
+
+	case GL_CullMode:
+		switch (value) {
+		case 1:
+			return "NONE";
+		case 2:
+			return "FRONT";
+		case 3:
+			return "BACK";
+		case 4:
+			return "FRONT_AND_BACK";
+		default:
+			return "";
+		}
+
+	case GL_FogMode:
+		switch (value) {
+		case 1:
+			return "NONE";
+		case 2:
+			return "LINEAR";
+		case 3:
+			return "EXP";
+		case 4:
+			return "EXP2";
+		default:
+			return "";
+		}
+
+	case GL_PolyFrontMode:
+	case GL_PolyBackMode:
+		return (value == 1)? "POINTS" : ((value == 2)? "LINES" : "FILL");
+
+	case GL_AlphaFunction:
+	case GL_DepthFunction:
+	case GL_StencilFunction:
+		return RenderFunctionStrings[value - 1];
+
+	case GL_BlendSourceRGB:
+	case GL_BlendDestRGB:
+	case GL_BlendSourceAlpha:
+	case GL_BlendDestAlpha:
+		return RenderColorStrings[value - 1];
+
+	case GL_BlendEquation:
+		switch (value) {
+		case 1:
+			return "ADD";
+		case 2:
+			return "SUBTRACT";
+		case 3:
+			return "REV_SUBTRACT";
+		case 4:
+			return "MIN";
+		case 5:
+			return "MAX";
+		default:
+			return "";
+		}
+
+	case GL_StencilFail:
+	case GL_StencilPassDepthFail:
+	case GL_StencilPassDepthPass:
+		switch (value) {
+		case GL_ZERO:
+			return "ZERO";
+		case GL_KEEP:
+			return "KEEP";
+		case GL_REPLACE:
+			return "REPLACE";
+		case GL_INCR:
+			return "INCR";
+		case GL_DECR:
+			return "DECR";
+		case GL_INVERT:
+			return "INVERT";
+		case GL_INCR_WRAP:
+			return "INCR_WRAP";
+		case GL_DECR_WRAP:
+			return "DECR_WRAP";
+		default:
+			return "";
+		}
+
+	case GL_WriteMaskColor: {
+		GLint val = (GLint)value;
+		QString retCol;
+		if (val > 8) {
+			retCol.append("ALPHA ");
+			val -= 8;
+		}
+		if (val > 4) {
+			retCol.append("BLUE ");
+			val -= 4;
+		}
+		if (val > 2) {
+			retCol.append("GREEN ");
+			val -= 2;
+		}
+		if (val > 1) {
+			retCol.append("RED");
+			val -= 1;
+		}
+
+		return retCol;
+	}
 
 	default:
 		return "";

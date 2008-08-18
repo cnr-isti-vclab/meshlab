@@ -113,15 +113,15 @@ void RfxUniform::SetValue(float _value[16])
 void RfxUniform::SetValue(const QString &texFileName)
 {
 	textureFile = texFileName;
-	if (!QFileInfo(textureFile).exists()) {
-		//This console warning is no longer necessary, there's a dialog
-		// qDebug("WARNING: texture file (%s) not found", textureFile.toStdString().c_str());
-		textureNotFound = true;
-	}
 }
 
 void RfxUniform::LoadTexture(QGLContext *ctx)
 {
+	if (!QFileInfo(textureFile).exists()) {
+		textureNotFound = true;
+		return;
+	}
+
 	switch (type) {
 	case SAMPLER2D:
 		textureTarget = GL_TEXTURE_2D;
@@ -136,21 +136,16 @@ void RfxUniform::LoadTexture(QGLContext *ctx)
 		return;
 	}
 
-	if (textureNotFound)
-		return;
-
 	QImage Tex;
 	if (Tex.load(textureFile) && ctx != NULL) {
-		if (textureFile.endsWith(".dds"))
-			textureId = ctx->bindTexture(textureFile);
-		else
-			textureId = ctx->bindTexture(Tex, textureTarget);
+		textureId = ctx->bindTexture(Tex, textureTarget);
 
 		// set texture states
 		foreach (RfxState *state, textureStates)
 			state->SetEnvironment(textureTarget);
 
-		if (texUnit < GL_MAX_TEXTURE_COORDS)
+		glGetIntegerv(GL_MAX_TEXTURE_COORDS, &maxTexUnits);
+		if (texUnit < maxTexUnits)
 			textureLoaded = true;
 	}
 }

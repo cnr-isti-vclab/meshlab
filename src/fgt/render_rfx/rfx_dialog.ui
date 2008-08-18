@@ -125,7 +125,17 @@
              </layout>
             </item>
             <item row="2" column="0" >
-             <widget class="QTableWidget" name="TexStatesTable" />
+             <widget class="QTableWidget" name="TexStatesTable" >
+              <property name="autoScroll" >
+               <bool>false</bool>
+              </property>
+              <property name="wordWrap" >
+               <bool>false</bool>
+              </property>
+              <property name="columnCount" >
+               <number>0</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -133,13 +143,23 @@
         </widget>
        </item>
       </layout>
-      <zorder>comboTextures</zorder>
-      <zorder>BoxTextureProps</zorder>
      </widget>
      <widget class="QWidget" name="tabStates" >
       <attribute name="title" >
        <string>GL States</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_10" >
+       <item row="0" column="0" >
+        <widget class="QTableWidget" name="glStatesTable" >
+         <property name="autoScroll" >
+          <bool>false</bool>
+         </property>
+         <property name="wordWrap" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="tabVertex" >
       <attribute name="title" >

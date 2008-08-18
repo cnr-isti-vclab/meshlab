@@ -90,6 +90,8 @@ public:
 
 	QString GetTextureState() { return TextureStatesStrings[state - 1]; }
 	QString GetTextureValue();
+	QString GetRenderState();
+	QString GetRenderValue();
 
 private:
 	void SetTextureEnvironment(GLint);
@@ -99,14 +101,24 @@ private:
 	GLint GLFunctionMode();
 	GLint GLColorMode();
 	GLfloat* DecodeColor();
+	QString ColorToString(float *thecol)
+	{ return "("
+		+ QString().setNum(thecol[0]) + ", "
+		+ QString().setNum(thecol[1]) + ", "
+		+ QString().setNum(thecol[2]) + ", "
+		+ QString().setNum(thecol[3]) + ")";
+	}
 	void GLEnableDisable(GLint);
 
 	int state;
 	unsigned long value;
 	StateType type;
 	static const char *TextureStatesStrings[];
+	static const char *RenderStatesStrings[];
 	static const char *TextureWrapStrings[];
 	static const char *TextureFilterStrings[];
+	static const char *RenderFunctionStrings[];
+	static const char *RenderColorStrings[];
 };
 
 #endif /* RFX_STATE_H_ */

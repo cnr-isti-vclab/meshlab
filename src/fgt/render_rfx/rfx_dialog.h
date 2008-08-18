@@ -55,6 +55,8 @@ private:
 
 /* Shader Properties dialog */
 #include <cassert>
+#include <climits>
+#include <cfloat>
 #include <QMap>
 #include <QLabel>
 #include <QPicture>
@@ -63,6 +65,8 @@ private:
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QHeaderView>
+#include <QSignalMapper>
+#include <QFileDialog>
 #include "ui_rfx_dialog.h"
 #include "rfx_shader.h"
 
@@ -79,13 +83,17 @@ public:
 public slots:
 	void UniformSelected(int);
 	void TextureSelected(int);
+	void ChangeTexture(int);
+	void ChangeValue(const QString&);
 
 private:
-	void DrawIFace(RfxUniform*, int rows, int columns);
+	void DrawIFace(RfxUniform*, int idx, int rows, int columns);
 	void CleanTab(int);
 
 	Ui::Dialog ui;
+	QGLContext *mGLWin;
 	QMultiMap<int, QWidget*> widgetsByTab;
+	int selectedPass;
 	RfxShader *shader;
 	GLSLSynHlighter *vertHL;
 	GLSLSynHlighter *fragHL;
