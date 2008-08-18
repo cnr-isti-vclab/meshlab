@@ -34,8 +34,7 @@ using namespace vcg;
 // --- Plugin specific methods ---
 //
 
-inline bool pointInTriangle(const QPointF &p, const QPointF &a,
-														const QPointF &b, const QPointF &c) {
+inline bool pointInTriangle(const QPointF &p, const QPointF &a, const QPointF &b, const QPointF &c) {
 															float fab=(p.y()-a.y())*(b.x()-a.x()) - (p.x()-a.x())*(b.y()-a.y());
 															float fbc=(p.y()-c.y())*(a.x()-c.x()) - (p.x()-c.x())*(a.y()-c.y());
 															float fca=(p.y()-b.y())*(c.x()-b.x()) - (p.x()-b.x())*(c.y()-b.y());
@@ -111,7 +110,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	{
 		click=false;
 
-		// Original Vertex selection mode (yellow pointer)
+		//---
+		// Existing vertex selection mode (yellow pointer)
+		//---
 		if(edit_topodialogobj->utensil==U_VTX_SEL)
 		{
 			CVertexO * temp_vert=0;
@@ -143,7 +144,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 		}
 
 
+		//---
 		// Free vertex selection (no pointer)
+		//---
 		if(edit_topodialogobj->utensil==U_VTX_SEL_FREE)
 		{
 			Point3f temp_vert;
@@ -175,7 +178,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 		}
 
 
+		//---
 		// Remove selected vertex mode (Yellow pointer)
+		//---
 		if(edit_topodialogobj->utensil==U_VTX_DEL)
 		{
 			Vtx vtx = getVisibleVertexNearestToMouse(stack);
@@ -225,7 +230,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 		}
 
 
+		//---
 		// Edge mode (vertex connection)
+		//---
 		if(edit_topodialogobj->utensil==U_VTX_CONNECT)
 		{
 			if(connectStart.V==Point3f(0,0,0))
@@ -240,6 +247,7 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 			else
 			{
 				Vtx vtx = getVisibleVertexNearestToMouse(stack);
+
 				if((vtx.V != Point3f(0,0,0))&&(vtx.V != connectStart.V))
 				{
 					connectEnd.V = vtx.V;
@@ -324,7 +332,10 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 			}
 		}
 
+
+		//---
 		// Face Select/Deselect		
+		//---
 		if(edit_topodialogobj->utensil==U_FCE_SEL)
 		{
 			Fce nearest;
@@ -368,150 +379,320 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 		}
 
 
-
-
-	// edge deselection mode
-	if(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
-	{
-		Edg minE;
-		float bestD = -1;
-		bool found = false;
-		double tx,ty,tz;
-		int at=0;
-
-		for(int i=0; i<Estack.count(); i++)
+		//---
+		// edge deselection mode
+		//---
+		if(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
 		{
-			Edg e = Estack.at(i);
-			
-			gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-			QPointF p0 = QPointF(tx, ty);
-			gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-			QPointF p1 = QPointF(tx, ty);
-
-			float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
-			if((dist < bestD)||(bestD==-1))
+			Edg minE;
+			// Remove the edge from his stack, and also from the faces stack
+			if(getVisibleEdgeNearestToMouse(Estack, minE))
 			{
-				bestD = dist;
-				minE = e;
-				found = true;
-				at=i;
-			}
-		}
+				for(int at=0; at<Estack.count(); at++)
+					if(Estack.at(at)==minE)
+						Estack.removeAt(at);
 
-		// Remove the edge from his stack, and also from the faces stack
-		if(found)
-		{
-			Estack.removeAt(at);
-			int toDel = 0;
-
-			for(int f=0; f<Fstack.count(); f++)
-				if(Fstack.at(f).containsEdg(minE))
-					toDel++;
-			
-			for(int i=0; i<toDel; i++)
-			{	bool del = false;
+				int toDel = 0;
 				for(int f=0; f<Fstack.count(); f++)
-					if((Fstack.at(f).containsEdg(minE))&&(!del))
-					{
-						Fstack.removeAt(f);
-						del = true;
-					}}
-
-			edit_topodialogobj->updateVtxTable(stack);
-			edit_topodialogobj->updateFceTable(Fstack);
-			edit_topodialogobj->updateEdgTable(Estack);
-		}
-	}
-
-
-	// Vertex moove mode
-	if(edit_topodialogobj->utensil==U_DND)
-	{
-		drag_stack.clear();
-		if(!drag_click)
-		{
-			drag_click = true;
-
-			Vtx vtx = getVisibleVertexNearestToMouse(stack);
-			drag_vtx = vtx;
-
-			for(int f=0; f<Fstack.count(); f++)
-			{
-				Fce fc = Fstack.at(f);
-				if(fc.containsVtx(vtx))
-					drag_stack.push_back(fc);
-			}
-		}
-		else
-		{
-			drag_click = false;
-
-			// Get new vertex coords
-			Point3f temp_vert;
-			if (Pick(mousePos.x(), mouseRealY, temp_vert))
-			{
-//					if(temp_vert != lastPoint.V)
-//					{
-					Vtx newV;
-					newV.V = temp_vert;
-					newV.vName = drag_vtx.vName;
-//					}								
-
-					// Remove the old vtx from vtx stack
-				for(int v=0; v<stack.count(); v++)
-					if(stack.at(v)==drag_vtx)
-						stack.removeAt(v);
-
-				stack.push_back(newV);
-
-				int edgToRemove=0;	
-				for(int e=0; e<Estack.count(); e++)
-					if(Estack.at(e).containsVtx(drag_vtx))
-						edgToRemove++;
-
-				for(int i=0; i<edgToRemove; i++)
-					for(int e=0; e<Estack.count(); e++)
-						if(Estack.at(e).containsVtx(drag_vtx))
-						{
-							Edg newE = Estack.at(e);
-							if(newE.v[0].V==drag_vtx.V)
-								newE.v[0]=newV;
-							if(newE.v[1].V==drag_vtx.V)
-								newE.v[1]=newV;
-							Estack.removeAt(e);
-							Estack.push_back(newE);
-						}
-
-				int fceToRemove=0;
-				for(int f=0; f<Fstack.count(); f++)
-					if(Fstack.at(f).containsVtx(drag_vtx))
-						fceToRemove++;
-
-				for(int i=0; i<fceToRemove; i++)
+					if(Fstack.at(f).containsEdg(minE))
+						toDel++;
+			
+				for(int i=0; i<toDel; i++)
+				{	bool del = false;
 					for(int f=0; f<Fstack.count(); f++)
-						if(Fstack.at(f).containsVtx(drag_vtx))
+						if((Fstack.at(f).containsEdg(minE))&&(!del))
 						{
-							Fce newF = Fstack.at(f);
-							for(int e=0; e<3; e++)
-								for(int v=0; v<2; v++)
-									if(newF.e[e].v[v].V == drag_vtx.V)
-										newF.e[e].v[v] = newV;
 							Fstack.removeAt(f);
-							Fstack.push_back(newF);
-						}
+							del = true;
+						}}
 
 				edit_topodialogobj->updateVtxTable(stack);
 				edit_topodialogobj->updateFceTable(Fstack);
 				edit_topodialogobj->updateEdgTable(Estack);
+			}
+		}
+
+
+		//---
+		// Vertex moove mode
+		//---
+		if(edit_topodialogobj->utensil==U_DND)
+		{
+			drag_stack.clear();
+			if(!drag_click)
+			{
+				drag_click = true;
+
+				Vtx vtx = getVisibleVertexNearestToMouse(stack);
+				drag_vtx = vtx;
+
+				for(int f=0; f<Fstack.count(); f++)
+				{
+					Fce fc = Fstack.at(f);
+					if(fc.containsVtx(vtx))
+						drag_stack.push_back(fc);
+				}
+			}
+			else
+			{
+				drag_click = false;
+
+				// Get new vertex coords
+				Point3f temp_vert;
+				if (Pick(mousePos.x(), mouseRealY, temp_vert))
+				{
+					Vtx newV;
+					newV.V = temp_vert;
+					newV.vName = drag_vtx.vName;
+
+					for(int v=0; v<stack.count(); v++)
+						if(stack.at(v)==drag_vtx)
+							stack.removeAt(v);
+
+					stack.push_back(newV);
+
+					int edgToRemove=0;	
+					for(int e=0; e<Estack.count(); e++)
+						if(Estack.at(e).containsVtx(drag_vtx))
+							edgToRemove++;
+
+					for(int i=0; i<edgToRemove; i++)
+						for(int e=0; e<Estack.count(); e++)
+							if(Estack.at(e).containsVtx(drag_vtx))
+							{
+								Edg newE = Estack.at(e);
+								if(newE.v[0].V==drag_vtx.V)
+									newE.v[0]=newV;
+								if(newE.v[1].V==drag_vtx.V)
+									newE.v[1]=newV;
+								Estack.removeAt(e);
+								Estack.push_back(newE);
+							}
+
+					int fceToRemove=0;
+					for(int f=0; f<Fstack.count(); f++)
+						if(Fstack.at(f).containsVtx(drag_vtx))
+							fceToRemove++;
+
+					for(int i=0; i<fceToRemove; i++)
+						for(int f=0; f<Fstack.count(); f++)
+							if(Fstack.at(f).containsVtx(drag_vtx))
+							{
+								Fce newF = Fstack.at(f);
+								for(int e=0; e<3; e++)
+									for(int v=0; v<2; v++)
+										if(newF.e[e].v[v].V == drag_vtx.V)
+											newF.e[e].v[v] = newV;
+								Fstack.removeAt(f);
+								Fstack.push_back(newF);
+							}
+
+					edit_topodialogobj->updateVtxTable(stack);
+					edit_topodialogobj->updateFceTable(Fstack);
+					edit_topodialogobj->updateEdgTable(Estack);
 				
-				if(first_model_generated)
-					on_mesh_create();
+					if(first_model_generated)
+						on_mesh_create();
+				}		
+			}
+		}
+
+
+		//---
+		// edge split mode
+		//---
+		if(edit_topodialogobj->utensil==U_EDG_SPLIT)
+		{
+			Edg minE;
+			if(getVisibleEdgeNearestToMouse(Estack, minE))
+			{
+				Vtx newVtx;
+				Point3f new3f;
+				
+				double tx,ty,tz;
+				gluProject(minE.v[0].V.X(),minE.v[0].V.Y(),minE.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p0 = QPointF(tx, ty);
+				gluProject(minE.v[1].V.X(),minE.v[1].V.Y(),minE.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p1 = QPointF(tx, ty);
+
+				QPointF Qmid = (p1 + p0)/2;
+
+				if(Pick(Qmid.x(), Qmid.y(), new3f))
+				{
+					newVtx.V = new3f;
+					newVtx.vName = QString("V%1").arg(nameVtxCount++);
+				
+					int fCount = 0;
+					for(int f=0; f<Fstack.count(); f++)
+						if(Fstack.at(f).containsEdg(minE))
+							fCount++;
+				
+					for(int i=0; i<fCount; i++)
+					{
+						bool found=false;
+						for(int f=0; ((f<Fstack.count())&&(!found)); f++)
+						{
+							Fce fc = Fstack.at(f);
+							if(fc.containsEdg(minE))
+							{
+								Fce newF1 = fc;
+								Fce newF2 = fc;
+
+								Vtx oldV1 = minE.v[0];
+								Vtx oldV2 = minE.v[1];
+
+								// Edit new face 01
+								for(int e=0; e<3; e++)
+									for(int v=0; v<2; v++)
+										if(newF1.e[e].v[v]==oldV1)
+											newF1.e[e].v[v]=newVtx;
+
+								// Edit new face 02
+								for(int e=0; e<3; e++)
+									for(int v=0; v<2; v++)
+										if(newF2.e[e].v[v]==oldV2)
+											newF2.e[e].v[v]=newVtx;
+	
+								Edg newEdgMid;
+								QList<Vtx> allv;
+								for(int e=0; e<3; e++)
+									for(int v=0; v<2; v++)
+										if(!allv.contains(fc.e[e].v[v]))
+											allv.push_back(fc.e[e].v[v]);
+							
+								Vtx oldVtx;
+								for(int i=0; i<allv.count(); i++)
+									if((allv.at(i)!=oldV1)&&(allv.at(i)!=oldV2))
+										oldVtx=allv.at(i);
+							
+								newEdgMid.v[0]=oldVtx;
+								newEdgMid.v[1]=newVtx;
+	
+								Estack.push_back(newEdgMid);
+								Fstack.removeAt(f);
+								Fstack.push_back(newF1);
+								Fstack.push_back(newF2);
+
+								found = true;
+							}
+						}
+					}
+	
+					Edg newEdg1 = minE;
+					Edg newEdg2 = minE;
+
+					newEdg1.v[0] = newVtx;
+					newEdg2.v[1] = newVtx;
+
+					for(int e=0; e<Estack.count(); e++)
+						if(Estack.at(e)==minE)
+							Estack.removeAt(e);
+
+					Estack.push_back(newEdg1);
+					Estack.push_back(newEdg2);
+
+					stack.push_back(newVtx);
+
+					edit_topodialogobj->updateVtxTable(stack);
+					edit_topodialogobj->updateFceTable(Fstack);
+					edit_topodialogobj->updateEdgTable(Estack);
+				}
 			}		
 		}
-	}
 
 
+		//---
+		// edge collapse mode
+		//---
+		if(edit_topodialogobj->utensil==U_EDG_COLLAPSE)
+		{
+			Edg toColl;
+			if(getVisibleEdgeNearestToMouse(Estack, toColl))
+			{
+				Vtx oldVtx1 = toColl.v[0];
+				Vtx oldVtx2 = toColl.v[1];
 
+				Vtx newVtx;
+				Point3f new3f;
+				
+				double tx,ty,tz;
+				gluProject(oldVtx1.V.X(),oldVtx1.V.Y(),oldVtx1.V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p0 = QPointF(tx, ty);
+				gluProject(oldVtx2.V.X(),oldVtx2.V.Y(),oldVtx2.V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p1 = QPointF(tx, ty);
+
+				QPointF Qmid = (p1 + p0)/2;
+
+				if(Pick(Qmid.x(), Qmid.y(), new3f))
+				{
+					newVtx.V = new3f;
+					newVtx.vName = QString("V%1").arg(nameVtxCount++);
+
+					// Remove faces containing the coll edge
+					int times = 0;
+					for(int f=0; f<Fstack.count(); f++)
+						if(Fstack.at(f).containsEdg(toColl))
+							times++;
+
+					for(int i=0; i<times; i++)
+						for(int f=0; f<Fstack.count(); f++)
+							if(Fstack.at(f).containsEdg(toColl))
+								Fstack.removeAt(f);	
+
+					// Update faces stack with the new vertex
+					times = 0;
+					for(int f=0; f<Fstack.count(); f++)
+						if(Fstack.at(f).containsVtx(oldVtx1)||Fstack.at(f).containsVtx(oldVtx2))
+							times++;
+
+					for(int i=0; i<times; i++)
+						for(int f=0; f<Fstack.count(); f++)
+							if(Fstack.at(f).containsVtx(oldVtx1)||Fstack.at(f).containsVtx(oldVtx2))
+							{
+								Fce fc = Fstack.at(f);
+								for(int e=0; e<3; e++)
+									for(int v=0; v<2; v++)
+										if((fc.e[e].v[v]==oldVtx1)||(fc.e[e].v[v]==oldVtx2))
+											fc.e[e].v[v] = newVtx;
+
+								Fstack.removeAt(f);
+								Fstack.push_back(fc);
+							}
+
+					// Update edges stack
+					times = 0;
+					for(int e=0; e<Estack.count(); e++)
+						if(Estack.at(e).containsVtx(oldVtx1)||Estack.at(e).containsVtx(oldVtx2))
+							times++;
+
+					for(int i=0; i<times; i++)
+						for(int e=0; e<Estack.count(); e++)					
+							if(Estack.at(e).containsVtx(oldVtx1)||Estack.at(e).containsVtx(oldVtx2))
+							{
+								Edg ed = Estack.at(e);
+								for(int v=0; v<2; v++)
+									if((ed.v[v]==oldVtx1)||(ed.v[v]==oldVtx2))
+										ed.v[v]=newVtx;
+
+								Estack.removeAt(e);
+								if(!Estack.contains(ed))
+									if(ed.v[0]!=ed.v[1])
+										Estack.push_back(ed);
+							}					
+
+					// Update vtx stack;
+					for(int i=0; i<2; i++)
+						for(int v=0; v<stack.count(); v++)
+							if((stack.at(v)==oldVtx1)||(stack.at(v)==oldVtx2))
+								stack.removeAt(v);
+					stack.push_back(newVtx);
+
+					edit_topodialogobj->updateVtxTable(stack);
+					edit_topodialogobj->updateFceTable(Fstack);
+					edit_topodialogobj->updateEdgTable(Estack);
+				}
+			}
+		}
 	}// end if click
 
 	
@@ -519,15 +700,15 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	
 	
 	
-	// Decorations... //
+	/*** Decorations ***/
 	
 
-
-	// Even if there's something selected: show vtx	
-
-
+	//---
+	// Even if there's something selected: show edges	
+	//---
 	if((edit_topodialogobj->utensil==U_VTX_CONNECT)||(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
-			||(edit_topodialogobj->utensil==U_DND))
+			||(edit_topodialogobj->utensil==U_DND)||(edit_topodialogobj->utensil==U_EDG_SPLIT)
+			||(edit_topodialogobj->utensil==U_EDG_COLLAPSE))
 	{
 		if(stack.count()!=0)
 			drawPoint(m, 3.0f, Color4b::DarkRed, Color4b::Red, stack);
@@ -548,6 +729,10 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 		}
 	}
 
+
+	//---
+	// First step: show only vertices
+	//---
 	if((edit_topodialogobj->utensil==U_VTX_SEL_FREE)||(edit_topodialogobj->utensil==U_VTX_DEL)
 		||(edit_topodialogobj->utensil==U_VTX_SEL))
 	{
@@ -559,7 +744,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	}
 
 
-
+	//---
+	// Drag and drop vertices mode
+	//---
 	if(edit_topodialogobj->utensil==U_DND)
 	{
 		if(drag_click)
@@ -600,6 +787,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	}
 
 
+	//---
+	// Face selection mode
+	//---
 	if(edit_topodialogobj->utensil==U_FCE_SEL)
 	{
 		// DEBUG
@@ -690,7 +880,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	}
 
 
+	//---
 	// Yellow pointer (vertex selection)
+	//---
 	if(edit_topodialogobj->utensil==U_VTX_SEL)
 	{
 		Point3f p = Point3f(0,0,0);
@@ -707,7 +899,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	}
 
 
+	//---
 	// Vertex de-selection (Yellow pointeR)
+	//---
 	if((edit_topodialogobj->utensil==U_VTX_DEL)&&(stack.count()!=0))
 	{
 		Vtx vtx = getVisibleVertexNearestToMouse(stack);
@@ -717,7 +911,9 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 	}
 
 
+	//---
 	// edge mode (vtx connection)
+	//---
 	if(edit_topodialogobj->utensil==U_VTX_CONNECT)
 	{
 		if(connectStart.V==Point3f(0,0,0) && connectEnd.V==Point3f(0,0,0))
@@ -743,35 +939,42 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 		}
 	}
 
+
+	//---
 	// edge deselection mode
+	//---
 	if(edit_topodialogobj->utensil==U_VTX_DE_CONNECT)
 	{
 		Edg minE;
-		float bestD = -1;
-		bool found = false;
-		double tx,ty,tz;
-
-		for(int i=0; i<Estack.count(); i++)
-		{
-			Edg e = Estack.at(i);
-			
-			gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-			QPointF p0 = QPointF(tx, ty);
-			gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-			QPointF p1 = QPointF(tx, ty);
-
-			float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
-			if((dist < bestD)||(bestD==-1))
-			{
-				bestD = dist;
-				minE = e;
-				found = true;
-			}
-		}
-
-		if(found)
+		if(getVisibleEdgeNearestToMouse(Estack, minE))
 			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
 	}
+
+
+	//---
+	// edge split mode
+	//---
+	if(edit_topodialogobj->utensil==U_EDG_SPLIT)
+	{
+		Edg minE;
+		if(getVisibleEdgeNearestToMouse(Estack, minE))
+			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
+	}
+
+
+	//---
+	// edge collapse mode
+	//---
+	if(edit_topodialogobj->utensil==U_EDG_COLLAPSE)
+	{
+		Edg minE;
+		if(getVisibleEdgeNearestToMouse(Estack, minE))
+			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
+	}
+
+
+
+
 }
 
 
@@ -820,7 +1023,7 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *parent)
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
 
 	// Init uniform grid
-	float dist = m.cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
+	double dist = m.cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
 	rm.init(&m, dist);
 
 
@@ -909,23 +1112,24 @@ void edit_topo::on_mesh_create()
 	// Mesh creation
 
 
-	float dist = m->cm.bbox.Diag()/10; //trgMesh ???//edit_topodialogobj->dist(0);
+	double dist = m->cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
 
 
-	if(edit_topodialogobj->isRadioButtonSimpleChecked())
-		rm.createBasicMesh(*m, Fstack, stack);
+	if(edit_topodialogobj->isDEBUG())
+	{
+		rm.Lin.clear();
+		rm.Lout.clear();
+
+		int iter = edit_topodialogobj->getIterations();
+		rm.midSampler->dist_upper_bound = edit_topodialogobj->dist();
+		rm.createRefinedMesh(*m, *currentMesh, dist, iter, Fstack, stack, edit_topodialogobj, true);
+		in = rm.Lin;
+		out = rm.Lout;
+	}
 	else
 	{
 		int iter = edit_topodialogobj->getIterations();
-		int dist1 = edit_topodialogobj->dist(1);
-		int dist2 = edit_topodialogobj->dist(2); 
-		rm.createRefinedMesh(*m, *currentMesh, dist, iter, Fstack, stack, edit_topodialogobj);
-	}
-
-	// Color sampling
-	if(edit_topodialogobj->isCheckBoxTrColorChecked())
-	{
-		// TODO Color sampling
+		rm.createRefinedMesh(*m, *currentMesh, dist, iter, Fstack, stack, edit_topodialogobj, false);
 	}
 
 	m->cm.Tr = currentMesh->cm.Tr;	
@@ -1175,6 +1379,99 @@ Vtx edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list)
 }
 
 
+bool edit_topo::getVisibleEdgeNearestToMouse(QList<Edg> listE, Edg &ret)
+{
+
+			Fce nearest;
+			bool got = false;
+			double tx,ty,tz;
+			int at = 0;
+			for(int f=0; f<Fstack.count(); f++)
+			{
+				Fce fc = Fstack.at(f);
+	
+				QList<Vtx> allv;
+				for(int e=0; e<3; e++)
+					for(int v=0; v<2; v++)
+						if(!allv.contains(fc.e[e].v[v]))
+							allv.push_back(fc.e[e].v[v]);
+
+				
+				gluProject(allv.at(0).V.X(),allv.at(0).V.Y(),allv.at(0).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p0 = QPointF(tx, ty);
+				gluProject(allv.at(1).V.X(),allv.at(1).V.Y(),allv.at(1).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p1 = QPointF(tx, ty);
+				gluProject(allv.at(2).V.X(),allv.at(2).V.Y(),allv.at(2).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+				QPointF p2 = QPointF(tx, ty);
+
+				QPoint p = QPoint(mousePos.x(), mouseRealY);
+
+				if(pointInTriangle(p, p0, p1, p2))
+				{
+					nearest = fc;
+					got = true;
+					at = f;
+				}
+			}
+
+			if(got)
+			{
+				Edg minE;
+				float bestD = -1;
+				bool found = false;
+				double tx,ty,tz;
+
+				for(int i=0; i<3; i++)
+				{
+					Edg e = nearest.e[i];
+		
+					gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+					QPointF p0 = QPointF(tx, ty);
+					gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+					QPointF p1 = QPointF(tx, ty);
+
+					float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
+					if((dist < bestD)||(bestD==-1))
+					{
+						bestD = dist;
+						minE = e;
+						found = true;
+					}
+				}
+	
+				ret = minE;
+				return found;
+			}
+
+			return false;
+
+
+/*	Edg minE;
+	float bestD = -1;
+	bool found = false;
+	double tx,ty,tz;
+
+	for(int i=0; i<listE.count(); i++)
+	{
+		Edg e = listE.at(i);
+		
+		gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+		QPointF p0 = QPointF(tx, ty);
+		gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+		QPointF p1 = QPointF(tx, ty);
+
+		float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
+		if((dist < bestD)||(bestD==-1))
+		{
+			bestD = dist;
+			minE = e;
+			found = true;
+		}
+	}
+	
+	ret = minE;
+	return found; */
+}
 float edit_topo::distancePointSegment(QPointF p, QPointF segmentP1,QPointF segmentP2)
 {
 	float x0, y0, x1, x2, y1, y2, m, q;
@@ -1305,14 +1602,15 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorBa
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 	glDepthMask(false);
+
 	glLineWidth(lSize);
 	glPointSize(pSize);
-  
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
     glEnable(GL_POINT_SMOOTH);
-    glColor(colorFront);
+    glColor(colorBack);
     glBegin(GL_LINES);
 		glVertex(p1);
 		glVertex(p2);
@@ -1322,9 +1620,11 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorBa
 		glVertex(p2);
     glEnd();    
 	glDisable(GL_DEPTH_TEST);
-//    glLineWidth(0.7);
-//    glPointSize(1.4);
-    glColor(colorBack);
+
+	glLineWidth(0.7);
+    glPointSize(1.4);
+  
+	//glColor(colorFront);
     glBegin(GL_LINES);
 		glVertex(p1);
 		glVertex(p2);
@@ -1336,7 +1636,6 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorBa
   
 	glPopAttrib();
 }
-
 
 
 void edit_topo::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla)

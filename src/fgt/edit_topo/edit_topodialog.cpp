@@ -14,19 +14,9 @@ edit_topodialog::~edit_topodialog()
 { }
 
 
-bool edit_topodialog::isRadioButtonSimpleChecked()
-{
-	return ui.radioButtonSimple->isChecked();
-}
-
 int edit_topodialog::getIterations()
 {
 	return ui.TextEditIterations->value();
-}
-
-bool edit_topodialog::isCheckBoxTrColorChecked()
-{
-	return ui.checkBoxTrColor->isChecked();
 }
 
 void edit_topodialog::setBarMax(int val)
@@ -39,12 +29,23 @@ void edit_topodialog::setBarVal(int val)
 	ui.progressBar->setValue(val);
 }
 
-int edit_topodialog::dist(int d)
+
+// DEBUG
+double edit_topodialog::dist()
 {
-	int toret =0;//ui.plainTextEdit->toPlainText().toInt();
+	double toret = ui.TextEditIterations_2->value() / 10;
 
 	return toret;
 }
+
+bool edit_topodialog::isDEBUG()
+{
+//	int toret =0;//ui.plainTextEdit->toPlainText().toInt();
+
+	return ui.checkBox->isChecked();
+}
+
+// END DEBUG
 
 
 void edit_topodialog::updateVtxTable(QList<Vtx> list)
@@ -220,13 +221,20 @@ void edit_topodialog::on_toolBox_currentChanged(int i)
 		emit fuffa();
 }
 
-void edit_topodialog::on_groupBox_2_toggled(bool)
-{
-
-}
-
 void edit_topodialog::on_ButtonConnectVertex_2_clicked()
 {
 	utensil = U_DND;
+	emit fuffa();
+}
+
+void edit_topodialog::on_ButtonConnectVertex_4_clicked()
+{
+	utensil = U_EDG_COLLAPSE;
+	emit fuffa();
+}
+
+void edit_topodialog::on_ButtonConnectVertex_5_clicked()
+{
+	utensil = U_EDG_SPLIT;
 	emit fuffa();
 }

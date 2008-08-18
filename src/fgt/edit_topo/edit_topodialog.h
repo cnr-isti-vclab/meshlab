@@ -20,7 +20,9 @@ typedef enum
 		U_VTX_SEL_FREE,
 		U_VTX_DEL,
 		U_VTX_CONNECT,
-		U_VTX_DE_CONNECT,		
+		U_VTX_DE_CONNECT,
+		U_EDG_SPLIT,
+		U_EDG_COLLAPSE,
 		U_FCE_SEL,
 		U_DND
 	} UtensType;
@@ -124,10 +126,10 @@ class edit_topodialog : public QDockWidget
 		void updateEdgTable(QList<Edg> list);
 		void updateFceTable(QList<Fce> list);
 
-		bool isRadioButtonSimpleChecked();
-		bool isCheckBoxTrColorChecked();
 		int getIterations();
-		int dist(int d);
+		double dist();
+
+		bool isDEBUG();
 
 		void setBarMax(int val);
 		void setBarVal(int val);
@@ -136,25 +138,21 @@ class edit_topodialog : public QDockWidget
 		Ui::edit_topodialog ui;
 		QWidget* parent;
 	
+	// Events
 	private slots:
-	void on_ButtonConnectVertex_2_clicked();
-	void on_groupBox_2_toggled(bool);
+		void on_ButtonConnectVertex_5_clicked();
+		void on_ButtonConnectVertex_4_clicked();
+		void on_ButtonConnectVertex_2_clicked();
 
-		// 1) Vtx selection
 		void on_ButtonSelectVertex_clicked();
 		void on_ButtonSelectVertexFree_clicked();
 		void on_ButtonDeSelectVertex_clicked();
-		// 2) Vtx connection
 		void on_ButtonConnectVertex_clicked();
 		void on_ButtonDeConnectVertex_clicked();
-		// 3) Face selection
 		void on_toolBox_currentChanged(int i);
 
 		void on_ButtonSelectFace_clicked();	
 		void on_ButtonMeshCreate_clicked();
-
-
-		// Altro
 		void on_ButtonClose_clicked();
 
 	signals:

@@ -35,7 +35,11 @@ class NearestMidPoint : public   std::unary_function<face::Pos<typename MESH_TYP
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 public:
 
- 	void init(CMeshO *_m, float dist)
+	bool DEBUG;
+	QList<Point3f> * LinMid;
+	QList<Point3f> * LoutMid;
+
+ 	void init(CMeshO *_m, double dist)
 	{
 		m=_m;
 		if(m) 
@@ -58,8 +62,18 @@ public:
 		vcg::face::PointDistanceBaseFunctor PDistFunct;
 		
 		dist=dist_upper_bound;
+
+		if(DEBUG)
+			LinMid->push_back(startPt);
 	  
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
+/*
+		if(DEBUG)
+			LinMid->push_back(nearestF->V(0)->P());
+		if(DEBUG)
+			LinMid->push_back(nearestF->V(1)->P());
+		if(DEBUG)
+			LinMid->push_back(nearestF->V(2)->P());*/
 
 		if(dist == dist_upper_bound) 
 		{
@@ -72,7 +86,11 @@ public:
 			if( MESH_TYPE::HasPerVertexQuality())
 				nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
 
-			nv.P()= startPt; return; 
+			nv.P()= startPt;
+			/*
+			if(DEBUG)
+				LoutMid->push_back(closestPt);	*/		
+			return; 
 		}
 
 		Point3f interp;
@@ -90,6 +108,9 @@ public:
 		
 		if( MESH_TYPE::HasPerVertexQuality())
 			nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
+
+		if(DEBUG)
+			LoutMid->push_back(closestPt);
 		
 	}
 
@@ -109,6 +130,7 @@ public:
 		return tmp;
 	}
 
+	double dist_upper_bound;
 private:
  
 	CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc). 
@@ -119,7 +141,6 @@ private:
 	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
 	MarkerFace markerFunctor;
 	
-	float dist_upper_bound;
 };
 
 
@@ -154,13 +175,14 @@ public:
 	QList<Point3f> Lout;
 
 	RetopMeshBuilder() {};
-	void init(MeshModel *_m, float dist);
+	void init(MeshModel *_m, double dist);
 
-	void createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<Vtx> Vstack);
-	void createRefinedMesh(MeshModel &out, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog);
+	void createRefinedMesh(MeshModel &out, MeshModel &in, double dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog, bool DEBUG);
 
 private:
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+
+	void createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<Vtx> Vstack);
 };
 
 

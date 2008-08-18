@@ -33,7 +33,7 @@ $Log: edit_topomeshbuuilder.h,v $
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/color.h>
 
-void RetopMeshBuilder::init(MeshModel *_mm, float dist)
+void RetopMeshBuilder::init(MeshModel *_mm, double dist)
 {
 	_mm->updateDataMask(MeshModel::MM_FACEMARK);
 	midSampler = new NearestMidPoint<CMeshO>();
@@ -154,9 +154,14 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QL
 
 
 
- void RetopMeshBuilder::createRefinedMesh(MeshModel &outMesh, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog)
+ void RetopMeshBuilder::createRefinedMesh(MeshModel &outMesh, MeshModel &in, double dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog, bool DEBUG)
 {
 	dialog->setBarMax(iterations++);//pow((float)(Fstack.count() * 4), (float)iterations) );
+
+	midSampler->DEBUG = DEBUG;
+
+	midSampler->LinMid = &Lin;
+	midSampler->LoutMid = &Lout;
 
 	createBasicMesh(outMesh, Fstack, stack);
 
@@ -174,7 +179,6 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QL
 	outMesh.fileName = "Retopology.ply";
 	tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
-
 
 
 

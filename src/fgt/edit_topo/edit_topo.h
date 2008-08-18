@@ -84,8 +84,6 @@ public:
 	double projmatrix[16]; //projection
 	GLint viewport[4]; //viewport
 
-	//Vtx *stack;	
-	//Vtx stack[30];
 	QList<Vtx> stack;
 	QList<Edg> Estack;
 	QList<Fce> Fstack;
@@ -117,6 +115,7 @@ public:
 	void drawLabel(Vtx v);
 
 	Vtx getVisibleVertexNearestToMouse(QList<Vtx> list);
+	bool getVisibleEdgeNearestToMouse(QList<Edg> listE, Edg &ret);
 
 	inline void updateMatrixes() {
 		glGetIntegerv(GL_VIEWPORT, viewport);
