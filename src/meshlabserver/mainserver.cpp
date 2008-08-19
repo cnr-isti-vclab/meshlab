@@ -63,6 +63,7 @@ Added copyright info
 #include "../meshlab/interfaces.h"
 #include "../meshlab/filterScriptDialog.h"
 #include "../meshlab/plugin_support.h"
+#include <vcg/complex/trimesh/update/bounding.h>
 
 QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
 std::vector<MeshIOInterface*> meshIOPlugins;
@@ -151,6 +152,8 @@ bool Open(MeshModel &mm, QString fileName)
     printf("Failed loading\n");
     return false;
   }
+	vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);
+
   return true;
 }
 /*
