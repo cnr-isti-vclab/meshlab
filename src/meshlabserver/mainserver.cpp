@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 		switch(argv[i][1])
 		{
 			case 'i' :  
-				while(argv[i+1][0] != '-')
+				while( ((i+1) < argc) && argv[i+1][0] != '-')
 				{
 					meshNamesIn << argv[i+1];
 					printf("Input mesh  %s\n", qPrintable(meshNamesIn.last() ));
@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
 				i++; 
 				break; 
 			case 'o' :  
-				while(argv[i+1][0] != '-')
+				while( ((i+1) < argc) && argv[i+1][0] != '-')
 				{
 					meshNamesOut << argv[i+1];
 					printf("output mesh  %s\n", qPrintable(meshNamesOut.last()));
