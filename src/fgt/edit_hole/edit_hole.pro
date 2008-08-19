@@ -4,6 +4,7 @@ HEADERS       = edit_hole.h \
 		    fillerDialog.h \
 		    holeListModel.h \
 		    fgtHole.h \
+		    fgtBridge.h \
 		    $$VCGDIR/wrap/gui/trackball.h
 		    
 

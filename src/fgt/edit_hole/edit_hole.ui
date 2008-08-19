@@ -9,7 +9,7 @@
     <x>0</x>
     <y>0</y>
     <width>315</width>
-    <height>400</height>
+    <height>470</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -210,7 +210,7 @@
         <property name="minimumSize" >
          <size>
           <width>200</width>
-          <height>140</height>
+          <height>200</height>
          </size>
         </property>
         <property name="frameShape" >
@@ -247,7 +247,7 @@
            <property name="minimumSize" >
             <size>
              <width>185</width>
-             <height>130</height>
+             <height>200</height>
             </size>
            </property>
            <property name="currentIndex" >
@@ -264,7 +264,7 @@
              <property name="geometry" >
               <rect>
                <x>56</x>
-               <y>35</y>
+               <y>105</y>
                <width>70</width>
                <height>23</height>
               </rect>
@@ -291,22 +291,6 @@
               <string>Fill</string>
              </property>
             </widget>
-            <widget class="QCheckBox" name="antiSelfIntersection" >
-             <property name="geometry" >
-              <rect>
-               <x>20</x>
-               <y>10</y>
-               <width>141</width>
-               <height>18</height>
-              </rect>
-             </property>
-             <property name="text" >
-              <string>Prevent self intersection</string>
-             </property>
-             <property name="checked" >
-              <bool>true</bool>
-             </property>
-            </widget>
             <widget class="QPushButton" name="cancelFillBtn" >
              <property name="enabled" >
               <bool>true</bool>
@@ -314,7 +298,7 @@
              <property name="geometry" >
               <rect>
                <x>95</x>
-               <y>70</y>
+               <y>139</y>
                <width>70</width>
                <height>23</height>
               </rect>
@@ -348,7 +332,7 @@
              <property name="geometry" >
               <rect>
                <x>15</x>
-               <y>70</y>
+               <y>139</y>
                <width>70</width>
                <height>23</height>
               </rect>
@@ -373,6 +357,124 @@
              </property>
              <property name="text" >
               <string>Accept</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="trivialRBtn" >
+             <property name="geometry" >
+              <rect>
+               <x>32</x>
+               <y>10</y>
+               <width>50</width>
+               <height>18</height>
+              </rect>
+             </property>
+             <property name="text" >
+              <string>Trivial</string>
+             </property>
+             <property name="checked" >
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="minWRBtn" >
+             <property name="geometry" >
+              <rect>
+               <x>32</x>
+               <y>30</y>
+               <width>100</width>
+               <height>18</height>
+              </rect>
+             </property>
+             <property name="text" >
+              <string>Minimum Weigth</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="selfIntersRBtn" >
+             <property name="geometry" >
+              <rect>
+               <x>32</x>
+               <y>50</y>
+               <width>110</width>
+               <height>18</height>
+              </rect>
+             </property>
+             <property name="text" >
+              <string>Self Intersection</string>
+             </property>
+             <property name="checked" >
+              <bool>true</bool>
+             </property>
+            </widget>
+            <widget class="QSlider" name="diedralWeightSld" >
+             <property name="geometry" >
+              <rect>
+               <x>50</x>
+               <y>70</y>
+               <width>71</width>
+               <height>26</height>
+              </rect>
+             </property>
+             <property name="maximum" >
+              <number>100</number>
+             </property>
+             <property name="sliderPosition" >
+              <number>50</number>
+             </property>
+             <property name="tracking" >
+              <bool>true</bool>
+             </property>
+             <property name="orientation" >
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="invertedAppearance" >
+              <bool>true</bool>
+             </property>
+             <property name="tickPosition" >
+              <enum>QSlider::TicksBelow</enum>
+             </property>
+             <property name="tickInterval" >
+              <number>0</number>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label" >
+             <property name="geometry" >
+              <rect>
+               <x>21</x>
+               <y>70</y>
+               <width>27</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="font" >
+              <font>
+               <pointsize>7</pointsize>
+              </font>
+             </property>
+             <property name="text" >
+              <string>Angle</string>
+             </property>
+             <property name="textFormat" >
+              <enum>Qt::AutoText</enum>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_2" >
+             <property name="geometry" >
+              <rect>
+               <x>126</x>
+               <y>70</y>
+               <width>32</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="font" >
+              <font>
+               <pointsize>7</pointsize>
+              </font>
+             </property>
+             <property name="text" >
+              <string>Shape</string>
+             </property>
+             <property name="textFormat" >
+              <enum>Qt::AutoText</enum>
              </property>
             </widget>
            </widget>
@@ -533,5 +635,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>trivialRBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>diedralWeightSld</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>123</x>
+     <y>300</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>152</x>
+     <y>364</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

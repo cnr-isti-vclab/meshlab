@@ -27,6 +27,7 @@
 #include <QHeaderView>
 #include <QtGui>
 #include "fgtHole.h"
+#include "fgtBridge.h"
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 #include "vcg/simplex/face/pos.h"
@@ -45,10 +46,17 @@ public:
 		Selection, ManualBridging, Bridged, Filled
 	};
 
+	enum FillerMode
+	{
+		Trivial, MinimumWeight, SelfIntersection
+	};
+
 	typedef vcg::tri::Hole<CMeshO> vcgHole;
 	typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
 	typedef FgtHole<CMeshO>  HoleType;
 	typedef std::vector< HoleType > HoleVector;
+	typedef FgtBridge<CMeshO>  BridgeType;
+	typedef std::vector< BridgeType > BridgeVector;
 	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
 	
 
@@ -72,29 +80,34 @@ public:
 	bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole ); 
 
 
-	inline void setState(HoleListModel::FillerState s) { state = s; emit layoutChanged(); };
-	void toggleSelectionHoleFromBorderFace(CFaceO *bface);
-	void toggleAcceptanceHoleFromPatchFace(CFaceO *bface);
+	inline int getUserBitHole() const { return userBitHole; };
 	void clearModel();
 	void updateModel();
 	void drawHoles() const;
 	void drawCompenetratingFaces() const;
-	void fill(bool antiSelfIntersection);
+	
+	inline void setState(HoleListModel::FillerState s) { state = s; emit layoutChanged(); };
+	inline FillerState getState() const { return state; };
+	void toggleSelectionHoleFromBorderFace(CFaceO *bface);
+	void toggleAcceptanceHoleFromPatchFace(CFaceO *bface);
+	void fill(HoleListModel::FillerMode mode);
 	void acceptFilling(bool forcedCancel=false);
 	void acceptBrdging(bool forcedCancel=false);
-	inline FillerState getState() const { return state; };
 	inline MeshModel* getMesh() const { return mesh; };
-	inline int getUserBitHole() const { return userBitHole; };
+	
 	inline void setStartBridging() { state = HoleListModel::ManualBridging ; };
 	inline void setEndBridging() { state = HoleListModel::Bridged; };
+	void addBridgeFace(CFaceO *pickedFace);
 
 private:
 	MeshModel *mesh;
 	FillerState state;	
 	int userBitHole;
+	BridgeType *curBridge;
 
 public:
 	HoleVector holes;
+	BridgeVector bridges;
 
 signals:
 	void SGN_needUpdateGLA();

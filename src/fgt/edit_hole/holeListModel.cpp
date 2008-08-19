@@ -32,12 +32,14 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	state = HoleListModel::Selection;
 	mesh = m;
 	userBitHole = -1;
+	curBridge = 0;
 	updateModel();
 }
 
 void HoleListModel::clearModel()
 {
 	holes.clear();
+	bridges.clear();
 
 	if(userBitHole > 0)
 	{
@@ -161,15 +163,40 @@ void HoleListModel::toggleAcceptanceHoleFromPatchFace(CFaceO *bface)
 	emit SGN_needUpdateGLA();
 }
 
+void HoleListModel::addBridgeFace(CFaceO *pickedFace)
+{
+	const HoleType *hole;
+	PosType pos;
+	if (!FgtBridge<CMeshO>::FindHoleFaceFrom(pickedFace, holes, &hole, pos))
+		return;
+	
+	if(curBridge == 0)
+		curBridge = new BridgeType(hole, pos);
+	else
+	{
+		std::vector<CMeshO::FacePointer *> local_facePointer;
+		HoleVector::iterator it = holes.begin();
+		for( ; it != holes.end(); it++ )
+			local_facePointer.push_back(&it->holeInfo.p.f);
+		
+		curBridge->setDestination(hole, pos);
+		
+		local_facePointer.push_back(&curBridge->posA.f);
+		local_facePointer.push_back(&curBridge->posB.f);
 
+		curBridge->create(mesh->cm, local_facePointer);
+		bridges.push_back(*curBridge);
+		delete curBridge;
+		curBridge = 0;
+	}
+}
 
-void HoleListModel::fill(bool antiSelfIntersection)
+void HoleListModel::fill(HoleListModel::FillerMode mode)
 {
 	mesh->clearDataMask(MeshModel::MM_FACEMARK);
 	mesh->updateDataMask(MeshModel::MM_FACEMARK);
 
 	std::vector<CMeshO::FacePointer *> local_facePointer;
-	
 	HoleVector::iterator it = holes.begin();
 	for( ; it != holes.end(); it++ )
 		local_facePointer.push_back(&it->holeInfo.p.f);
@@ -180,11 +207,18 @@ void HoleListModel::fill(bool antiSelfIntersection)
 		{
 			it->facesPatch.clear();
 			
-			if (antiSelfIntersection)
-				vcgHole::FillHoleEar<tri::SelfIntersectionEar< CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
-			else
+			switch(mode)
+			{
+			case HoleListModel::Trivial:
 				vcgHole::FillHoleEar<vcg::tri::TrivialEar<CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
-
+				break;
+			case HoleListModel::MinimumWeight:
+				vcgHole::FillHoleEar<vcg::tri::MinimumWeightEar<CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
+				break;
+			case HoleListModel::SelfIntersection:
+				vcgHole::FillHoleEar<tri::SelfIntersectionEar< CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
+				break;
+			}
 			it->updateSelfIntersectionState(mesh->cm);
 			state = HoleListModel::Filled;
 		}

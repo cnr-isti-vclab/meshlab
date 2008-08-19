@@ -36,12 +36,7 @@
 #include "vcg/space/color4.h"
 
 
-/** An hole is a border which visit only 1 time each of its vertexes.
- *  To visit entire hole we need to iterate the skipping of position on next border from an init position (firstPos)
- *  until we return over this one.
- *  This data structure store, to avoid to enter in other hole, store a list of "patches". 
- *  A patch is a couple of position current position and next position. This patches in hole allow to move over right
- *  border when walking the border we find an non manifold vertex.
+/** An hole type
  */
 template <class MESH>
 class FgtHole
@@ -272,7 +267,7 @@ public:
 
 	/** Return index into holes vector of hole adjacent to picked face
 	 */
-	static int FindHoleFromBorderFace(FacePointer bFace, const HoleVector holes) 
+	static int FindHoleFromBorderFace(FacePointer bFace, const HoleVector &holes) 
 	{ 
 		// BUG: se la faccia selezionata ha due edge di bordo su hole diversi, viene selezionato il primo hole
 		// che si trova nella lista. Sarebbe carino che venisse selezionato l'hole relativo al bordo più vicino al click 

@@ -79,5 +79,6 @@ private Q_SLOTS:
 	void cancelBridge();
 	void acceptBridge();
 	void skipTab(int index);
+	void updateDWeight(int val);
 };
 #endif

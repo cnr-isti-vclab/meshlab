@@ -50,7 +50,6 @@ public:
 
 private:
 	virtual void closeEvent( QCloseEvent * event );
-
 };
 
 #endif

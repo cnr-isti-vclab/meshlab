@@ -133,6 +133,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	connect(dialogFiller->ui.cancelFillBtn, SIGNAL(clicked()), this, SLOT(cancelFill()) );
 	connect(dialogFiller->ui.acceptBridgeBtn, SIGNAL(clicked()), this, SLOT(acceptBridge()) );
 	connect(dialogFiller->ui.cancelBridgeBtn, SIGNAL(clicked()), this, SLOT(cancelBridge()) );
+	connect(dialogFiller->ui.diedralWeightSld, SIGNAL(valueChanged(int)), this, SLOT(updateDWeight(int)));
 	connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
 
 	connect(dialogFiller->ui.holeTree->header(), SIGNAL(sectionCountChanged(int, int)), this, SLOT(resizeViewColumn()) );
@@ -176,6 +177,9 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 			case HoleListModel::Filled:
 				holesModel->toggleAcceptanceHoleFromPatchFace(pickedFace);
 				break;
+			case HoleListModel::ManualBridging:
+				holesModel->addBridgeFace(pickedFace);
+				break;
 			}
 		}
 	}
@@ -208,13 +212,22 @@ void EditHolePlugin::resizeViewColumn()
 	dialogFiller->ui.holeTree->header()->resizeSections(QHeaderView::ResizeToContents);
 }
 
+void EditHolePlugin::updateDWeight(int val)
+{
+	vcg::tri::MinimumWeightEar<CMeshO>::DiedralWeight() = (float)val / 50;
+}
+
 void EditHolePlugin::fill()
 {
 	if(holesModel->getState() == HoleListModel::Filled)
 		holesModel->acceptFilling(true);
 
-	Qt::CheckState asi = dialogFiller->ui.antiSelfIntersection->checkState();
-	holesModel->fill( asi == Qt::Checked);
+	if( dialogFiller->ui.trivialRBtn->isChecked())
+		holesModel->fill( HoleListModel::Trivial);
+	else if( dialogFiller->ui.minWRBtn->isChecked())
+		holesModel->fill( HoleListModel::MinimumWeight);
+	else
+		holesModel->fill( HoleListModel::SelfIntersection);
 	gla->update();
 }
 
