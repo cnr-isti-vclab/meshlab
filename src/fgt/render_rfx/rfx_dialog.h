@@ -85,6 +85,8 @@ public slots:
 	void TextureSelected(int);
 	void ChangeTexture(int);
 	void ChangeValue(const QString&);
+	void extendRange(double);
+	void extendRange(int);
 
 private:
 	void DrawIFace(RfxUniform*, int idx, int rows, int columns);

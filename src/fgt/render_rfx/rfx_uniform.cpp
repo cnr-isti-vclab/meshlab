@@ -120,6 +120,8 @@ void RfxUniform::LoadTexture(QGLContext *ctx)
 	if (!QFileInfo(textureFile).exists()) {
 		textureNotFound = true;
 		return;
+	} else {
+		textureNotFound = false;
 	}
 
 	switch (type) {
@@ -136,17 +138,19 @@ void RfxUniform::LoadTexture(QGLContext *ctx)
 		return;
 	}
 
-	QImage Tex;
-	if (Tex.load(textureFile) && ctx != NULL) {
+	glGetIntegerv(GL_MAX_TEXTURE_COORDS, &maxTexUnits);
+	QImage Tex(textureFile);
+
+	if (!Tex.isNull() && ctx != NULL && texUnit < maxTexUnits) {
 		textureId = ctx->bindTexture(Tex, textureTarget);
 
 		// set texture states
 		foreach (RfxState *state, textureStates)
 			state->SetEnvironment(textureTarget);
 
-		glGetIntegerv(GL_MAX_TEXTURE_COORDS, &maxTexUnits);
-		if (texUnit < maxTexUnits)
-			textureLoaded = true;
+		textureLoaded = true;
+	} else {
+		textureLoaded = false;
 	}
 }
 

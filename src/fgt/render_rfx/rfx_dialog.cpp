@@ -234,17 +234,21 @@ void RfxDialog::DrawIFace(RfxUniform *u, int uidx, int rows, int columns)
 			switch (ctrl) {
 			case INT_CTRL:
 				controls[arrayIdx] = new QSpinBox();
-				((QSpinBox*)controls[arrayIdx])->setRange(INT_MIN, INT_MAX);
+				((QSpinBox*)controls[arrayIdx])->setRange(-99, 99);
 				((QSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
 				connect(controls[arrayIdx], SIGNAL(valueChanged(int)),
 				        valMapper, SLOT(map()));
+				connect(controls[arrayIdx], SIGNAL(valueChanged(int)), this,
+				        SLOT(extendRange(int)));
 				break;
 			case FLOAT_CTRL:
 				controls[arrayIdx] = new QDoubleSpinBox();
-				((QDoubleSpinBox*)controls[arrayIdx])->setRange(DBL_MIN, DBL_MAX);
+				((QDoubleSpinBox*)controls[arrayIdx])->setRange(-99.0, 99.0);
 				((QDoubleSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
 				connect(controls[arrayIdx], SIGNAL(valueChanged(double)),
 				        valMapper, SLOT(map()));
+				connect(controls[arrayIdx], SIGNAL(valueChanged(double)), this,
+				        SLOT(extendRange(double)));
 				break;
 			case BOOL_CTRL:
 				controls[arrayIdx] = new QComboBox();
@@ -290,6 +294,28 @@ void RfxDialog::CleanTab(int tabIdx)
 			delete toDelete.at(i);
 		}
 		widgetsByTab.remove(tabIdx);
+	}
+}
+
+void RfxDialog::extendRange(double newVal)
+{
+	QDoubleSpinBox *sender = (QDoubleSpinBox*)QObject::sender();
+	if (newVal == sender->minimum() || newVal == sender->maximum()) {
+		if (newVal == sender->minimum())
+			sender->setMinimum(newVal - 50);
+		else
+			sender->setMaximum(newVal + 50);
+	}
+}
+
+void RfxDialog::extendRange(int newVal)
+{
+	QSpinBox *sender = (QSpinBox*)QObject::sender();
+	if (newVal == sender->minimum() || newVal == sender->maximum()) {
+		if (newVal == sender->minimum())
+			sender->setMinimum(newVal - 50);
+		else
+			sender->setMaximum(newVal + 50);
 	}
 }
 

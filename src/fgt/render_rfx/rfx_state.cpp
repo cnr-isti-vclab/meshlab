@@ -331,11 +331,11 @@ void RfxState::SetGLEnvironment()
 		break;
 
 	case GL_PointMin:
-		glPointParameteriv(GL_POINT_SIZE_MIN, (GLint *)&value);
+		glPointParameterf(GL_POINT_SIZE_MIN, value);
 		break;
 
 	case GL_PointMax:
-		glPointParameteriv(GL_POINT_SIZE_MAX_ARB, (GLint *)&value);
+		glPointParameterf(GL_POINT_SIZE_MAX_ARB, value);
 		break;
 
 	case GL_PointSmooth:
