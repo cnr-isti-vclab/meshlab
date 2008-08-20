@@ -81,8 +81,8 @@ bool RfxParser::Parse()
 			continue;
 
 		RfxGLPass *theGLPass = new RfxGLPass();
-		int passindex = glpass.attribute("PASS_INDEX").toInt();
-		theGLPass->SetPassIndex(passindex);
+		theGLPass->SetPassName(glpass.attribute("NAME"));
+		theGLPass->SetPassIndex(glpass.attribute("PASS_INDEX").toInt());
 
 		// OpenGL states if any
 		QDomElement state;
@@ -155,6 +155,7 @@ bool RfxParser::Parse()
 		rfxShader->AddGLPass(theGLPass);
 	}
 
+	rfxShader->SortPasses();
 	return true;
 }
 
@@ -247,17 +248,16 @@ QString RfxParser::TextureFromRfx(const QString& VarName,
 	for (int i = 0; i < candidates.size(); ++i) {
 		varNode = candidates.at(i).toElement();
 		if (varNode.attribute("NAME") == VarName) {
-			// _NOTE_
-			// RM stores a relative path ".." using Windows separator "\", and
-			// it looks like Qt do not recognize this combination as a path
-			// so QFileInfo and QDir just give up.
-			//
-			// We replace every '\' with '/', THEN make an absolute path from
-			// the string.
 
-			QFileInfo thefile(varNode.attribute("FILE_NAME").replace('\\', '/'));
-			thefile.makeAbsolute();
-			filePath = thefile.filePath();
+			// start from rfx file directory
+			QDir fDir(QFileInfo(*rmShader).absolutePath());
+
+			// ... get relative path to texture file
+			QString fName(varNode.attribute("FILE_NAME").replace('\\', '/'));
+
+			// then join together and return the absolute path
+			QFileInfo thefile(fDir, fName);
+			filePath = thefile.canonicalFilePath();
 		}
 	}
 

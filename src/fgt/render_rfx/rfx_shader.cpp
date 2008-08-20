@@ -39,7 +39,20 @@ RfxShader::~RfxShader()
 void RfxShader::AddGLPass(RfxGLPass *pass)
 {
 	shader_pass.append(pass);
-	// TODO: reorder passes by their idx
+}
+
+void RfxShader::SortPasses()
+{
+	int minVal = shader_pass.at(0)->GetPassIndex();
+	int minIdx = 0;
+
+	for (int i = 0; i < shader_pass.size(); ++i) {
+		if (shader_pass.at(i)->GetPassIndex() < minVal) {
+			shader_pass.swap(i, minIdx);
+			minIdx = i;
+			minVal = shader_pass.at(i)->GetPassIndex();
+		}
+	}
 }
 
 void RfxShader::CompileAndLink(QGLContext *ctx)

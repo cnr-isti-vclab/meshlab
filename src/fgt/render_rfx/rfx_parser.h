@@ -28,6 +28,7 @@
 #include <QRegExp>
 #include <QStringList>
 #include <QDomDocument>
+#include <QDir>
 #include "rfx_shader.h"
 #include "rfx_glpass.h"
 

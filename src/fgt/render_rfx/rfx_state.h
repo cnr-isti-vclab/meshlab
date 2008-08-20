@@ -81,7 +81,7 @@ public:
 	};
 
 	RfxState() {}
-	RfxState(StateType type, int state = -1, unsigned long value = -1);
+	RfxState(StateType type, int state = 0, unsigned long value = 0);
 	virtual ~RfxState() {}
 
 	void SetState(int _state) { state = _state; }

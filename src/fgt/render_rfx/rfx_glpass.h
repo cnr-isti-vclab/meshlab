@@ -43,6 +43,8 @@ public:
 	const QString& GetFragmentSource() { return frag; }
 	int GetPassIndex() { return passIndex; }
 	void SetPassIndex(int passidx) { passIndex = passidx; }
+	const QString& GetPassName() { return passName; }
+	void SetPassName(const QString &n) { passName = n; }
 	void AddGLState(RfxState *s) { rfxStates.append(s); }
 	void AddUniform(RfxUniform *u) { shaderUniforms.append(u); }
 	RfxUniform* GetLastUniform() { return shaderUniforms.last(); }
@@ -62,6 +64,8 @@ public:
 private:
 	QString vert;
 	QString frag;
+
+	QString passName;
 	int passIndex;
 
 	GLuint shaderProgram;

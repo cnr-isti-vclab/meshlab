@@ -36,6 +36,7 @@ public:
 	virtual ~RfxShader();
 
 	void AddGLPass(RfxGLPass*);
+	void SortPasses();
 	void CompileAndLink(QGLContext *);
 	void Start();
 	void Stop() { glUseProgram(0); }

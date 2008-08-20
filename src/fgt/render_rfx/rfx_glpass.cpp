@@ -47,6 +47,9 @@ void RfxGLPass::SetShaderSource(const QString &source, bool isFragment)
 
 void RfxGLPass::CompileAndLink(QGLContext *ctx)
 {
+	if (frag.isEmpty() || vert.isEmpty())
+		return;
+
 	GLubyte *ShaderSource;
 	GLint ShaderStrlen;
 
