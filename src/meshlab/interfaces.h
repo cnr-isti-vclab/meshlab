@@ -20,117 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.77  2008/04/22 16:15:45  bernabei
-By default, tablet events are treated as mouse events
-
-Revision 1.76  2008/04/22 14:54:39  bernabei
-Added support for tablet events
-
-Revision 1.75  2008/04/18 17:36:37  cignoni
-added some filter classes (smoothing, normal, quality)
-
-Revision 1.74  2008/04/11 10:07:39  cignoni
-added another class (smoothing)
-made more uniform naming of start/end function for decoration
-
-Revision 1.73  2008/02/28 10:33:21  cignoni
-Added errorMsg  exchange mechaninsm to the interface of filter plugins to allow the passage of error reports between the filter and the framework.
-
-Revision 1.72  2008/02/15 08:22:24  cignoni
-removed unused param from virtual empty functions
-
-Revision 1.71  2008/02/12 14:20:33  cignoni
-changed the function getParameter into the more meaningful getCustomParameter
-
-Revision 1.70  2008/02/05 18:04:59  benedetti
-added keyReleaseEvent and keyPressEvent to MeshEditInterface
-
-Revision 1.69  2008/01/28 13:02:00  cignoni
-added support for filters on collection of meshes (layer filters)
-
-Revision 1.68  2008/01/04 18:23:24  cignoni
-Corrected a wrong type (glwidget instead of glarea) in the decoration callback.
-
-Revision 1.67  2008/01/04 16:39:30  cignoni
-corrected comment
-
-Revision 1.66  2008/01/04 00:46:28  cignoni
-Changed the decoration framework. Now it accept a, global, parameter set. Added static calls for finding important directories in a OS independent way.
-
-Revision 1.65  2007/12/13 10:30:24  cignoni
-Harmless adding the interface for global preferences parameters for plugins. Still to be implemented
-
-Revision 1.64  2007/12/13 00:18:28  cignoni
-added meshCreation class of filter, and the corresponding menu new under file
-
-Revision 1.63  2007/11/26 07:35:26  cignoni
-Yet another small cosmetic change to the interface of the io filters.
-
-Revision 1.62  2007/11/25 09:48:39  cignoni
-Changed the interface of the io filters. Now also a default bit set for the capabilities has to specified
-
-Revision 1.61  2007/10/09 13:02:08  fuscof
-Initial implementation of multipass rendering.
-Please note that MeshRenderInterface has been modified to get the number of rendering passes.
-
-Revision 1.60  2007/10/09 12:07:39  corsini
-fix missing return value
-
-Revision 1.59  2007/10/02 07:59:37  cignoni
-New filter interface. Hopefully more clean and easy to use.
-
-Revision 1.58  2007/07/10 06:46:26  cignoni
-better comments
-
-Revision 1.57  2007/05/16 15:03:21  cignoni
-better comments
-
-Revision 1.56  2007/04/16 09:24:37  cignoni
-** big change **
-Added Layers managemnt.
-Interfaces are changing...
-
-Revision 1.55  2007/03/27 12:20:16  cignoni
-Revamped logging iterface, changed function names in automatic parameters, better selection handling
-
-Revision 1.54  2007/02/28 00:02:12  cignoni
-Added missing virtual destructors
-
-Revision 1.53  2007/02/08 23:45:26  pirosu
-merged srcpar and par in the GetStdParameters() function
-
-Revision 1.52  2007/01/11 19:51:46  pirosu
-fixed bug for QT 4.1.0/dotnet2003
-removed the request of the window title to the plugin. The action description is used instead.
-
-Revision 1.51  2006/12/27 21:41:41  pirosu
-Added improvements for the standard plugin window:
-split of the apply button in two buttons:ok and apply
-added support for parameters with absolute and percentage values
-
-Revision 1.50  2006/12/13 17:37:02  pirosu
-Added standard plugin window support
-
-Revision 1.49  2006/11/29 00:55:36  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
-
-Revision 1.48  2006/11/07 14:56:23  zifnab1974
-Changes for compilation with gcc 3.4.6 on linux AMD64
-
-Revision 1.47  2006/11/07 09:03:17  cignoni
-Removed short help
-Slightly changed the Decorate interface
-
-Revision 1.46  2006/06/27 08:07:42  cignoni
-Restructured plugins interface for simplifying the server
-
-Revision 1.45  2006/06/15 13:05:57  cignoni
-added Filter History Dialogs
-
-****************************************************************************/
 
 #ifndef MESHLAB_INTERFACES_H
 #define MESHLAB_INTERFACES_H
@@ -297,15 +186,39 @@ class MeshFilterInterface
 {
 public:
   typedef int FilterIDType;
-	enum FilterClass { Generic, Selection, Cleaning, Remeshing, FaceColoring, VertexColoring, MeshCreation, Smoothing, Quality, Layer, Normal} ;
+	
+	// The FilterClass enum represents the set of keywords that must be used to categorize a filter.
+	// Each filter can belong to one or more filtering class, or-ed togheter. 
+	// The filter class 
+	
+	enum FilterClass 
+	{ 
+			Generic          =0x0000, 
+			Selection        =0x0001, // Filters that select or de-select something
+			Cleaning         =0x0002, // Filters that can be used to clean meshes (duplicated vertices etc)
+			Remeshing        =0x0004, 
+			FaceColoring     =0x0008, 
+			VertexColoring   =0x0010, 
+			MeshCreation     =0x0020, 
+			Smoothing        =0x0040, 
+			Quality          =0x0080, 
+			Layer            =0x0100, 
+			Normal           =0x0200,
+		  Sampling         =0x0400,
+		  Texture          =0x0800,
+	};
+	
 	virtual ~MeshFilterInterface() {}
 
-	// The longer string describing each filtering action 
-	// (this string is used in the About plugin dialog)
+	// The longer string describing each filtering action. 
+	// This string is printed in the top of the parameter window 
+	// so it should be at least one or two paragraphs long.
+	// you can use simple html formatting tags (like <br> <b> and <i>) to improve readability.
+	// This string is used in the About plugin dialog and by meshlabserver to create the filter list page.
 	virtual const QString filterInfo(FilterIDType filter)=0;
 	
-	// The very short string describing each filtering action 
-	// (this string is used also to define the menu entry)
+	// The very short string (a few words) describing each filtering action 
+	// This string is used also to define the menu entry
 	virtual const QString filterName(FilterIDType filter)=0;
 
 	// Generic Info about the plugin version and author.
@@ -318,7 +231,7 @@ public:
 
 	// The FilterClass describes in which generic class of filters it fits. 
 	// This choice affect the submenu in which each filter will be placed 
-	// For example filters that perform an action only on the selection will be placed in the Selection Class �
+	// For example filters that perform an action only on the selection will be placed in the Selection Class
 	virtual const FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
 	
 	// The filters can have some additional requirements on the mesh capabiliteis. 
