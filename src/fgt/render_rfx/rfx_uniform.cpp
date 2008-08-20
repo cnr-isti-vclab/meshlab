@@ -159,7 +159,7 @@ void RfxUniform::PassToShader()
 	switch (type) {
 	case INT:
 	case BOOL:
-		glUniform1i(location, *value);
+		glUniform1i(location, (GLint)*value);
 		break;
 
 	case FLOAT:
@@ -168,7 +168,7 @@ void RfxUniform::PassToShader()
 
 	case IVEC2:
 	case BVEC2:
-		glUniform2i(location, value[0], value[1]);
+		glUniform2i(location, (GLint)value[0], (GLint)value[1]);
 		break;
 
 	case VEC2:
@@ -177,7 +177,7 @@ void RfxUniform::PassToShader()
 
 	case IVEC3:
 	case BVEC3:
-		glUniform3i(location, value[0], value[1], value[2]);
+		glUniform3i(location, (GLint)value[0], (GLint)value[1], (GLint)value[2]);
 		break;
 
 	case VEC3:
@@ -186,7 +186,7 @@ void RfxUniform::PassToShader()
 
 	case IVEC4:
 	case BVEC4:
-		glUniform4i(location, value[0], value[1], value[2], value[3]);
+		glUniform4i(location, (GLint)value[0], (GLint)value[1], (GLint)value[2], (GLint)value[3]);
 		break;
 
 	case VEC4:

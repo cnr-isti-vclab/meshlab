@@ -235,7 +235,7 @@ void RfxDialog::DrawIFace(RfxUniform *u, int uidx, int rows, int columns)
 			case INT_CTRL:
 				controls[arrayIdx] = new QSpinBox();
 				((QSpinBox*)controls[arrayIdx])->setRange(-99, 99);
-				((QSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
+				((QSpinBox*)controls[arrayIdx])->setValue((int)val[arrayIdx]);
 				connect(controls[arrayIdx], SIGNAL(valueChanged(int)),
 				        valMapper, SLOT(map()));
 				connect(controls[arrayIdx], SIGNAL(valueChanged(int)), this,
@@ -329,12 +329,12 @@ void RfxDialog::ChangeTexture(int unifIdx)
 	                                             tr("Choose Texture"),
 	                                             uni->GetTextureFName());
 	if (!fname.isEmpty()) {
-		uni->SetValue(fname);
+		uni->SetValue(QDir::fromNativeSeparators(fname));
 		uni->LoadTexture(mGLWin);
 
 		// generate a currentIndexChanged event
 		ui.comboTextures->setCurrentIndex(0);
-		ui.comboTextures->setCurrentIndex(ui.comboTextures->findData(unifIdx));
+		ui.comboTextures->setCurrentIndex(unifIdx);
 	}
 }
 
@@ -381,7 +381,7 @@ void RfxDialog::TextureSelected(int idx)
 	// connect Change Texture button
 	QSignalMapper *sigMap = new QSignalMapper(this);
 	connect(ui.btnChangeTexture, SIGNAL(clicked()), sigMap, SLOT(map()));
-	sigMap->setMapping(ui.btnChangeTexture, uniIndex);
+	sigMap->setMapping(ui.btnChangeTexture, idx);
 	connect(sigMap, SIGNAL(mapped(int)), this, SLOT(ChangeTexture(int)));
 
 	ui.BoxTextureProps->setTitle(uni->GetName());
