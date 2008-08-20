@@ -144,24 +144,6 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 		mask = info->mask;
 	}
 	
-	// verify if texture files are present - NOT NECESSARY AS WHEN LOAD TEXTURES IN GLAREA.CPP WILL TELL YOU IF NULL
-	/*QString missingTextureFilesMsg = "The following texture files were not found:\n";
-	bool someTextureNotFound = false;
-	for ( unsigned textureIdx = 0; textureIdx < m.cm.textures.size(); ++textureIdx)
-	{
-		FILE* pFile = fopen (m.cm.textures[textureIdx].c_str(), "r");
-		if (pFile == NULL)
-		{
-			missingTextureFilesMsg.append("\n");
-			missingTextureFilesMsg.append(m.cm.textures[textureIdx].c_str());
-			someTextureNotFound = true;
-		}
-		else
-			fclose (pFile);
-	}
-	if (someTextureNotFound)
-		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);*/
-
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	if (!normalsUpdated) 
 		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
@@ -212,8 +194,8 @@ bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, M
 	// Collada exporting function do not manage very correctly the case
     // of null texture index faces (e.g. faces that have no texture and have a default -1 tex index.
     // so we convert it to a more standard mesh adding a fake notexture.png texture.
- 
-	tri::UpdateTexture<CMeshO>::WedgeTexRemoveNull(m.cm,"notexture.png");
+	if(tri::HasPerWedgeTexCoord(m.cm))
+			tri::UpdateTexture<CMeshO>::WedgeTexRemoveNull(m.cm,"notexture.png");
 
 	//if (std::find(_mp.begin(),_mp.end(),&m) == _mp.end())
 		result = vcg::tri::io::ExporterDAE<CMeshO>::Save(m.cm,filename.c_str(),mask);
