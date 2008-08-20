@@ -41,6 +41,8 @@ FilterParameter *FilterParameterSet::findParameter(QString name)
 		if((*fpli).fieldName==name)
 				return &*fpli;
 		
+	qDebug("FilterParameter Warning: Unable to find a parameter with name '%s',\n"
+				 "      Please check types and names of the parameter in the calling filter",qPrintable(name));
 	return 0;
 }
 
@@ -51,6 +53,8 @@ const FilterParameter *FilterParameterSet::findParameter(QString name) const
 		if((*fpli).fieldName==name)
 				return &*fpli;
 		
+	qDebug("FilterParameter Warning: Unable to find a parameter with name '%s',\n"
+				 "      Please check types and names of the parameter in the calling filter",qPrintable(name));
 	return 0;
 }
 
