@@ -20,43 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log$
-Revision 1.8  2008/02/10 15:22:57  cignoni
-slightly revised the way of parameter passing
-
-Revision 1.7  2008/01/22 14:18:27  sherholz
-Added support for .mlx filter scripts
-
-Revision 1.6  2007/04/16 10:02:15  cignoni
-Again on the cm() ->cm issue
-
-Revision 1.5  2007/03/20 16:22:35  cignoni
-Big small change in accessing mesh interface. First step toward layers
-
-Revision 1.4  2006/12/05 15:19:18  cignoni
-added a missing return
-
-Revision 1.3  2006/10/15 20:31:38  cignoni
-Added saving of the mesh
-
-Revision 1.2  2006/06/27 08:08:12  cignoni
-First working version. now it loads all the needed plugins and a mesh!
-
-Revision 1.1  2006/06/19 15:11:50  cignoni
-Initial Rel
-
-Revision 1.4  2006/02/01 12:45:29  glvertex
-- Solved openig bug when running by command line
-
-Revision 1.3  2005/12/01 02:24:50  davide_portelli
-Mainwindow Splitted----->[ mainwindow_Init.cpp ]&&[ mainwindow_RunTime.cpp ]
-
-Revision 1.2  2005/11/21 12:12:54  cignoni
-Added copyright info
-
-****************************************************************************/
 
 #include <QApplication>
 #include "../meshlab/meshmodel.h"
@@ -102,9 +65,9 @@ void loadPlugins(FILE *fp=0)
 				foreach(filterAction, iFilter->actions())
 				{
 					filterMap[filterAction->text()]=filterAction;
-					 //printf( "*'''%s''': %s\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
+					 if(fp) fprintf(fp, "*<b><i>%s</i></b> <br>%s\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
 				}
-				printf("Loaded %i filtering actions form %s\n", filterMap.size() - oldSize, qPrintable(fileName));
+				//printf("Loaded %i filtering actions form %s\n", filterMap.size() - oldSize, qPrintable(fileName));
 			}
 			MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
 			if (iIO)	meshIOPlugins.push_back(iIO);
@@ -274,7 +237,8 @@ void Usage()
 		"where args can be: \n"
 		" -i [filename...]  mesh(s) that has to be loaded\n" 
 		" -o [filename...]  mesh(s) where to write the result(s)\n"
-		" -s filename  script to be applied\n"
+		" -s filename		    script to be applied\n"
+		" -d filename       dump on a text file a list of all the filtering fucntion\n" 		 
 		"\nNotes:\n\n"
 		"There can be multiple meshes loaded and the order they are listed matters because \n"
 		"filters that use meshes as parameters choose the mesh based on the order.\n"
@@ -293,12 +257,8 @@ int main(int argc, char *argv[])
 	MeshDocument meshDocument;
 	QStringList meshNamesIn, meshNamesOut;
 	QString scriptName;
-	
+	FILE *filterFP=0;
 	if(argc < 3) Usage();
-	
-	printf("Loading Plugins:\n");
-	loadPlugins();
-	
 	int i = 1;
 	while(i < argc)
 	{
@@ -324,12 +284,29 @@ int main(int argc, char *argv[])
 				i++; 
 				break; 
 			case 's' :  
+				if( argc <= i+1 ) {
+					printf("Missing script name\n");  
+					exit(-1);
+				}
 				scriptName = argv[i+1];
 				printf("script %s\n", qPrintable(scriptName));
 				i += 2;
 				break; 
+			case 'd' :
+				if( argc <= i+1 ) {
+					printf("Missing dump name\n");  
+					exit(-1);
+				}
+				filterFP=fopen(argv[i+1],"w");
+			 i+=2;
+			 break;
+											 
 		}
 	}
+	
+	printf("Loading Plugins:\n");
+	loadPlugins(filterFP);
+	
 	
 	if(meshNamesIn.isEmpty()) {
 		printf("No input mesh\n"); exit(-1);
