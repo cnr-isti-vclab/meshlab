@@ -119,7 +119,7 @@ bool FilterScript::save(QString filename)
         parElem.setAttribute("value",(*jj).fieldVal.toString());
       }
       if((*jj).fieldType == FilterParameter::PARABSPERC) {
-        parElem.setAttribute("type","AbsPec");
+        parElem.setAttribute("type","AbsPerc");
         parElem.setAttribute("value",(*jj).fieldVal.toString());
         parElem.setAttribute("min",QString::number((*jj).min));
         parElem.setAttribute("max",QString::number((*jj).max));
@@ -228,7 +228,7 @@ bool FilterScript::open(QString filename)
                         if(type=="Int")     par.addInt(name,np.attribute("value").toInt());
                         if(type=="Float")   par.addFloat(name,np.attribute("value").toDouble());
                         if(type=="String")  par.addString(name,np.attribute("value"));
-                        if(type=="AbsPec")  par.addAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat());
+                        if(type=="AbsPerc")  par.addAbsPerc(name,np.attribute("value").toFloat(),np.attribute("min").toFloat(),np.attribute("max").toFloat());
                         if(type=="Color")	par.addColor(name,QColor::QColor(np.attribute("rgb").toUInt()));
                         if(type=="Matrix44")par.addMatrix44(name,getMatrix(&np));                        
                         if(type=="Enum"){
