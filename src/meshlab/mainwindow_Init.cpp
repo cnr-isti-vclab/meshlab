@@ -621,36 +621,35 @@ void MainWindow::loadPlugins()
         QAction *filterAction;
         foreach(filterAction, iFilter->actions())
         {
-					qDebug("Processing action %s",qPrintable(filterAction->text()) );
-					qDebug("          (%s)", qPrintable(iFilter->filterInfo(filterAction)) );
+					//qDebug("Processing action %s",qPrintable(filterAction->text()) );
+					//qDebug("          (%s)", qPrintable(iFilter->filterInfo(filterAction)) );
 					filterMap[filterAction->text()]=filterAction;
           filterAction->setToolTip(iFilter->filterInfo(filterAction));
           connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
-          switch(iFilter->getClass(filterAction))
-          {
-            case MeshFilterInterface::FaceColoring : 
-            case MeshFilterInterface::VertexColoring : 
-              		filterMenuColorize->addAction(filterAction); break;
-            case MeshFilterInterface::Selection : 
-              		filterMenuSelect->addAction(filterAction); break;
-            case MeshFilterInterface::Cleaning : 
-              		filterMenuClean->addAction(filterAction); break;
-            case MeshFilterInterface::Remeshing : 
-              		filterMenuRemeshing->addAction(filterAction); break;
-            case MeshFilterInterface::Smoothing : 
-              		filterMenuSmoothing->addAction(filterAction); break;
-            case MeshFilterInterface::Normal : 
-              		filterMenuNormal->addAction(filterAction); break;
-            case MeshFilterInterface::Quality : 
-              		filterMenuQuality->addAction(filterAction); break;
-						case MeshFilterInterface::Layer : 
-              		filterMenuLayer->addAction(filterAction); break;
-						case MeshFilterInterface::MeshCreation : 
-              		fileMenuNew->addAction(filterAction); break;
-            case MeshFilterInterface::Generic : 
-            default:
-              		filterMenu->addAction(filterAction); break;
-          }  
+          int filterClass = iFilter->getClass(filterAction);
+          
+          if( (filterClass & MeshFilterInterface::FaceColoring) || 
+              (filterClass & MeshFilterInterface::VertexColoring) ) 
+              		filterMenuColorize->addAction(filterAction); 
+					if(filterClass & MeshFilterInterface::Selection) 
+              		filterMenuSelect->addAction(filterAction);
+					if(filterClass &  MeshFilterInterface::Cleaning ) 
+              		filterMenuClean->addAction(filterAction);
+					if(filterClass &  MeshFilterInterface::Remeshing ) 
+              		filterMenuRemeshing->addAction(filterAction);
+					if(filterClass &  MeshFilterInterface::Smoothing ) 
+              		filterMenuSmoothing->addAction(filterAction);
+					if(filterClass &  MeshFilterInterface::Normal ) 
+              		filterMenuNormal->addAction(filterAction);
+					if(filterClass &  MeshFilterInterface::Quality ) 
+              		filterMenuQuality->addAction(filterAction);
+					if(filterClass &  MeshFilterInterface::Layer ) 
+              		filterMenuLayer->addAction(filterAction);
+					if(filterClass & MeshFilterInterface::MeshCreation ) 
+              		fileMenuNew->addAction(filterAction);
+					if(filterClass == 0) //  MeshFilterInterface::Generic : 
+									filterMenu->addAction(filterAction);
+            
 					if(!filterAction->icon().isNull())
 										filterToolBar->addAction(filterAction);
         }
@@ -790,7 +789,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 
 }
 
-void MainWindow::connectionDone(bool status)
+void MainWindow::connectionDone(bool /* status */)
 {
 	QString answer=myLocalBuf.data();
 	if(answer.left(3)==QString("NEW"))
@@ -809,7 +808,7 @@ void MainWindow::submitBug()
 	QMessageBox mb(QMessageBox::NoIcon,tr("MeshLab"),tr("MeshLab"),QMessageBox::NoButton, this);
 	//mb.setWindowTitle(tr("MeshLab"));
 	QPushButton *submitBug = mb.addButton("Submit Bug",QMessageBox::AcceptRole);
-	QPushButton *abortButton = mb.addButton(QMessageBox::Cancel);
+	mb.addButton(QMessageBox::Cancel);
 	mb.setText(tr("If Meshlab closed in unexpected way (e.g. it crashed badly) and"
 						 "if you are able to repeat the bug, please consider to submit a report using the SourceForge tracking system.\n"
 						  ) );
