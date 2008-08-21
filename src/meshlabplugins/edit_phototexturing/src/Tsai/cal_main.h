@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -20,10 +20,10 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/* 
-  This file derives from the public domain tsai lib. 
-  The original author of the Tsai lib released it saying that it could be 
-  modified and re-distributed as needed, 
+/*
+  This file derives from the public domain tsai lib.
+  The original author of the Tsai lib released it saying that it could be
+  modified and re-distributed as needed,
 */
 
 /*******************************************************************************\
@@ -108,7 +108,7 @@ void sincos();
 #define MAXFEV                       (1000*n)
 #define EPSFCN                       1.0E-16     /* Do not set to zero! */
 #define MODE                         1           /* variables are scalled internally */
-#define FACTOR                       100.0 
+#define FACTOR                       100.0
 
 /*******************************************************************************\
 *										*
