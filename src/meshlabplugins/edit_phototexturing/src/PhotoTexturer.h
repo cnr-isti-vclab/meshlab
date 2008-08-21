@@ -28,8 +28,9 @@
 #include <vector>
 #include <meshlab/meshmodel.h>
 #include <src/Camera.h>
-
+#include <src/TextureFilter.h>
 #include <src/QuadTree/QuadTreeNode.h>
+#include <src/TextureMerger.h>
 /*
  * The PhotoTexturer class can be used to calculate textures for a
  * given mesh by using calibrated cameras.
@@ -105,10 +106,14 @@ public:
 	 * Combines the textures calculated be each camera to one texture.
 	 * A new texture image will be created with the dimensions of (width x height).
 	 */
-	void combineTextures(MeshModel *m,int width, int height, int ets, float min_angle);
+	void combineTextures(MeshModel *m, int width, int height, int ets, bool enable_angle_map, int angle_weight,int angle_map_sharpness, double min_angle,bool enable_distance_map, int distance_weight);
 
 
 	void exportMaxScript(QString filename,MeshModel *mm);
+
+	void convertToTsaiCamera(int camIdx, bool optimize, QString filename,MeshModel *mm);
+
+	QImage mergeTextureImagesWinnerTakesAll(int imgWidth, int imgHeight, QList<QImage> imgList);
 
 private:
 
@@ -123,8 +128,7 @@ private:
 	 * Unprojects a calculated texture of a camera to the original texture of the mesh to a new
 	 * texture image (dimension res_x, res_y).
 	 */
-	void unprojectToOriginalTextureMap(MeshModel *m, Camera* camera,QuadTreeNode &qtree, QImage &image, float min_angle);
-
+	void unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, QuadTreeNode &qtree, ImageFilterContainer *container ,bool use_distance_filter, int distance_weight, bool use_angle_filter, int angle_weight , int angle_map_sharpness, double min_angle, int imgResX, int imgResY);
 
 	void getSurrundingMeanColor(QImage &image, int x, int y, QColor &surcolor);
 

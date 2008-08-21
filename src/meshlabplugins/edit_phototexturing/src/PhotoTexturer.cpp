@@ -32,6 +32,8 @@
 #include <src/PhotoTexturer.h>
 #include <src/UVFaceTexture.h>
 #include <src/CameraCalibration.h>
+#include <src/TextureFilter.h>
+#include <src/TextureMerger.h>
 #include <src/Tsai/TsaiCameraCalibration.h>
 
 #include<vcg/complex/trimesh/allocate.h>
@@ -313,8 +315,9 @@ void PhotoTexturer::applyTextureToMesh(MeshModel *m,int camIdx){
 	}
 }
 
-void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, QuadTreeNode &qtree,QImage &image, float min_angle){
-	//qDebug() <<"unprojectToOriginalTextureMap";
+
+void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera* camera, QuadTreeNode &qtree, ImageFilterContainer *container ,bool use_distance_filter, int distance_weight, bool use_angle_filter, int angle_weight , int angle_map_sharpness, double min_angle, int imgResX, int imgResY){
+	qDebug() <<"unprojectToOriginalTextureMap"<< min_angle;
 
 	//checks if the MeshModel has original uv coordinates and camera projected uv coordinates.
 	if (vcg::tri::HasPerFaceAttribute(m->cm,ORIGINALUVTEXTURECOORDS) && vcg::tri::HasPerFaceAttribute(m->cm,CAMERAUVTEXTURECOORDS)){
@@ -326,8 +329,18 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 
 		//creates a new RGBA image for saving the new texture
 		//QImage image(res_x, res_y, QImage::Format_ARGB32);
-		int res_x = image.width();
-		int res_y = image.height();
+
+		container->image = new QImage(imgResX,imgResY,QImage::Format_ARGB32);
+		TextureFilter *distance_filter = NULL;
+		TextureFilter *angle_filter = NULL;
+
+		if(use_angle_filter){
+			angle_filter = new TextureFilter(imgResX,imgResY,angle_weight);
+		}
+		if (use_distance_filter){
+			distance_filter = new TextureFilter(imgResX,imgResY,distance_weight);
+		}
+
 		//loading the texture corresponding to the camera
 		QImage tmp_texture(camera->textureImage);
 
@@ -342,16 +355,16 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 		//a texture face of the original texture coordinates. If the pixel lies inside
 		//a textured face it looks in the corresponding camera texture for the color value
 		//of this pixel and stores it at the current pixel position in the new texture image.
-		for (y=0;y<res_y;y++){
-			for (x=0;x<res_x;x++){
+		for (y=0;y<imgResY;y++){
+			for (x=0;x<imgResX;x++){
 
 				//sets the current pixel to black with an alpha value of 0
 				cpixel = QColor(0, 0, 0, 0);
-				image.setPixel(x,res_y-(y+1), cpixel.rgba());
+				container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
 				found = false;
 				//searches the QuadTree for matching faces
 				QList<QuadTreeLeaf*> list;
-				qtree.getLeafs(((double)x/(double)(res_x-1)),((double)y/(double)(res_y-1)),list);
+				qtree.getLeafs(((double)x/(double)(imgResX-1)),((double)y/(double)(imgResY-1)),list);
 				int ns = list.size();
 
 				if (ns>0){
@@ -364,58 +377,90 @@ void PhotoTexturer::unprojectToOriginalTextureMap(MeshModel *m, Camera *camera, 
 						double a,b,c,d;
 						UVFaceTexture* ct = cth[tmp->faceIndex][camname];
 
-						tmp->getBarycentricCoordsForUV(((double)x/(double)(res_x-1)),((double)y/(double)(res_y-1)),a,b,c,d);
-						/*
-						if (ct->isInside(((double)x/(double)(res_x-1)),((double)y/(double)(res_y-1)))){
-							cpixel = QColor(255, 0, 0, 255);
-							image.setPixel(x,res_y-(y+1), cpixel.rgba());
-						}
-						*/
+						tmp->getBarycentricCoordsForUV(((double)x/(double)(imgResX-1)),((double)y/(double)(imgResY-1)),a,b,c,d);
+
 						ct->getUVatBarycentricCoords(u,v,a,b,c);
-
-						CFaceO f;
-						f = m->cm.face.at(tmp->faceIndex);
-						//calculate normal vector for pixel
-						double n1, n2,n3;
-						n1 = a*f.V(0)->N()[0]+ b*f.V(1)->N()[0]+c*f.V(2)->N()[0];
-						n2 = a*f.V(0)->N()[1]+ b*f.V(1)->N()[1]+c*f.V(2)->N()[1];
-						n3 = a*f.V(0)->N()[2]+ b*f.V(1)->N()[2]+c*f.V(2)->N()[2];
-
-						double angle = ((-1*camera->calibration->cameraDirection[0])*n1)
-										+((-1*camera->calibration->cameraDirection[1])*n2)
-										+((-1*camera->calibration->cameraDirection[2])*n3);
-						angle = acos(angle);
-						angle = (angle/M_PI)*180.0;
-
 						int ix = (int)(((double)tmp_texture.width())*u);
 						int iy = tmp_texture.height()-(int)(((double)tmp_texture.height())*v);
-						//if (ct->faceAngleToCamera <=min_angle){
-						if (angle <=min_angle){
+
+						if(ix>=0 && ix<tmp_texture.width() && iy>=0 && iy<tmp_texture.height()){
+
 							found = true;
 							//calculating alpha value of the pixel by using the angle
-							//between camera and face
-							int ialpha = (int)((1.0-(ct->faceAngleToCamera/180.0))*255.0);
-							//ialpha = 255;
-							if(ix>=0 && ix<tmp_texture.width() && iy>=0 && iy<tmp_texture.height()){
-								cpixel = QColor(tmp_texture.pixel(ix,iy));
-								//cpixel.setAlpha(ialpha);
-								cpixel.setAlpha(255);
-								image.setPixel(x,res_y-(y+1), cpixel.rgba());
-							}else{
+
+							cpixel = QColor(tmp_texture.pixel(ix,iy));
+							cpixel.setAlpha(255);
+							container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
+
+							CFaceO f;
+							f = m->cm.face.at(tmp->faceIndex);
+							double angle = 0.0;
+							if(use_angle_filter){
+								//calculate normal vector for pixel
+								double n1, n2,n3;
+								n1 = a*f.V(0)->N()[0]+ b*f.V(1)->N()[0]+c*f.V(2)->N()[0];
+								n2 = a*f.V(0)->N()[1]+ b*f.V(1)->N()[1]+c*f.V(2)->N()[1];
+								n3 = a*f.V(0)->N()[2]+ b*f.V(1)->N()[2]+c*f.V(2)->N()[2];
+
+								angle = ((-1*camera->calibration->cameraDirection[0])*n1)
+												+((-1*camera->calibration->cameraDirection[1])*n2)
+												+((-1*camera->calibration->cameraDirection[2])*n3);
+
+								//qDebug() << "angle["<<ix<<"]["<<iy<<"]: " <<angle;
 
 
+								angle = acos(angle);
+								angle = (angle/M_PI)*180.0;
+
+								if(angle<= min_angle){
+									angle = (angle/180.0)*M_PI;
+									angle = sin(angle);
+									angle = pow(angle,angle_map_sharpness);
+
+									angle_filter->setValue(x,imgResY-(y+1),angle);
+								}
 							}
+
+							if(use_distance_filter){
+								//calculate distance for pixel
+								double p1, p2,p3;
+								p1 = a*f.V(0)->P()[0]+ b*f.V(1)->P()[0]+c*f.V(2)->P()[0];
+								p2 = a*f.V(0)->P()[1]+ b*f.V(1)->P()[1]+c*f.V(2)->P()[1];
+								p3 = a*f.V(0)->P()[2]+ b*f.V(1)->P()[2]+c*f.V(2)->P()[2];
+
+								double distance = sqrt(pow(p1-camera->calibration->cameraPosition[0],2)+pow(p2-camera->calibration->cameraPosition[1],2)+pow(p3-camera->calibration->cameraPosition[2],2));
+
+								distance_filter->setValue(x,imgResY-(y+1),distance);
+							}
+
+							if (angle<= min_angle){
+								cpixel = QColor(tmp_texture.pixel(ix,iy));
+								cpixel.setAlpha(255);
+
+							}else{
+								cpixel = QColor(0,0,0,0);
+								//cpixel.setAlpha(255);
+							}
+							container->image->setPixel(x,imgResY-(y+1), cpixel.rgba());
+						}else{
+
+
 						}
+						//}
 						idx++;
 					}
 
 				}
 			}
 		}
+		if(use_angle_filter){
+			container->addFilter(angle_filter);
+		}
+		if(use_distance_filter){
+			container->addFilter(distance_filter);
+		}
 	}
-	//qDebug() <<"unprojectToOriginalTextureMap DONE";
 }
-
 void PhotoTexturer::getSurrundingMeanColor(QImage &image, int x, int y, QColor &surcolor){
 	//qDebug()<<"getSurrundingMeanColor: "<<x<<y;
 	int width = image.width();
@@ -459,12 +504,14 @@ void PhotoTexturer::getSurrundingMeanColor(QImage &image, int x, int y, QColor &
 		int r=0;
 		int g=0;
 		int b=0;
+		int a=0;
 		int count=0;
 		for(i=0;i<8;i++){
-			if(c[i].alpha()==255){
+			if(c[i].alpha()>0){
 				r+=c[i].red();
 				g+=c[i].green();
 				b+=c[i].blue();
+				a+= c[i].alpha();
 				count++;
 			}
 		}
@@ -472,6 +519,7 @@ void PhotoTexturer::getSurrundingMeanColor(QImage &image, int x, int y, QColor &
 			surcolor.setRed(r/count);
 			surcolor.setGreen(g/count);
 			surcolor.setBlue(b/count);
+			surcolor.setAlpha(a/count);
 			surcolor.setAlpha(255);
 		}else{
 			surcolor.setRed(0);
@@ -499,6 +547,7 @@ void PhotoTexturer::edgeTextureStretching(QImage &image, int pass){
 					QColor test = QColor::fromRgba(image.pixel(x,y));
 
 					if(test.alpha()==0){
+						//qDebug()<< "alpha == 0";
 						QColor surcolor;
 						getSurrundingMeanColor(tmp_image,x,y,surcolor);
 						image.setPixel(x,y,surcolor.rgba());
@@ -513,7 +562,7 @@ void PhotoTexturer::edgeTextureStretching(QImage &image, int pass){
 }
 
 
-void PhotoTexturer::combineTextures(MeshModel *m, int width, int height, int ets, float min_angle){
+void PhotoTexturer::combineTextures(MeshModel *m, int width, int height, int ets, bool enable_angle_map, int angle_weight,int angle_map_sharpness,double min_angle, bool enable_distance_map, int distance_weight){
 
 	QList<QuadTreeLeaf*> *list = new QList<QuadTreeLeaf*>();
 	CMeshO::PerFaceAttributeHandle<UVFaceTexture*> oth = vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<UVFaceTexture*>(m->cm,ORIGINALUVTEXTURECOORDS);
@@ -529,19 +578,69 @@ void PhotoTexturer::combineTextures(MeshModel *m, int width, int height, int ets
 
 	//qDebug()<< "buildQuadTree DONE";
 	int i;
+	TextureMerger texMerger = TextureMerger();
+
 	for (i=0;i<cameras.size();i++){
+		ImageFilterContainer *ifc = new ImageFilterContainer();
 		Camera *camera = cameras.at(i);
-		QImage image = QImage(width,height,QImage::Format_ARGB32);
-		unprojectToOriginalTextureMap(m,camera,qtree,image, min_angle);
-		edgeTextureStretching(image,ets);
-		QString filename = QString(m->fileName.c_str());
-		//filename = filename + "_" + camera->name + ".tiff";
-		//image.save(filename,"TIFF");
-		filename = filename + "_" + camera->name + ".png";
-		image.save(filename,"PNG");
+		qDebug()<<"unprojectToOriginalTextureMap";
+		unprojectToOriginalTextureMap(m,camera,qtree,ifc, enable_distance_map, distance_weight, enable_angle_map,angle_weight,angle_map_sharpness,min_angle,width,height);
+		texMerger.ifcList.push_back(ifc);
 	}
+	texMerger.normalizeFilterContainerList();
+	QImage image = texMerger.mergeTextureImagesWinnerTakesAll(width,height);
+	edgeTextureStretching(image,ets);
+	QString filename = QString(m->fileName.c_str());
+	filename = filename + "_merged.png";
 
+	image.save(filename,"PNG");
+	//delete image;
+}
 
+QImage PhotoTexturer::mergeTextureImagesWinnerTakesAll(int imgWidth, int imgHeight, QList<QImage> imgList){
+	QImage image = QImage(imgWidth,imgHeight,QImage::Format_RGB32);
+	int x;
+	int y;
+	for(x=0; x<imgWidth;x++){
+		for(y=0;y<imgHeight;y++){
+			QColor cpixel = QColor(0, 0, 0, 0);
+			int i;
+			for(i=0;i<imgList.size();i++){
+				QImage tmpImg = imgList.at(i);
+				QColor tmpPixel = QColor::fromRgba(tmpImg.pixel(x,y));
+				if(cpixel.alpha()<tmpPixel.alpha()){
+					cpixel = QColor(tmpPixel);
+				}
+			}
+			image.setPixel(x,y,cpixel.rgba());
+
+		}
+	}
+	return image;
+}
+
+void PhotoTexturer::convertToTsaiCamera(int camIdx, bool optimize, QString filename,MeshModel *mm){
+	if(camIdx>=0 && camIdx< cameras.size()){
+		Camera* newCam = new Camera();
+		Camera* oldCam = cameras.at(camIdx);
+
+		newCam->name = oldCam->name;
+		newCam->resolution[0] = oldCam->resolution[0];
+		newCam->resolution[1] = oldCam->resolution[1];
+		newCam->textureImage = oldCam->textureImage;
+		newCam->calibration = oldCam->calibration->calibrateToTsai(mm,optimize);
+
+		QDomDocument doc(Camera::XML_CAMERA);
+
+		newCam->saveAsXml(&doc,NULL);
+
+		QFile file(filename);
+		file.open(QIODevice::WriteOnly);
+		QTextStream qstream(&file);
+		doc.save(qstream,1);
+		file.close();
+
+	}
 }
 
 void PhotoTexturer::exportMaxScript(QString filename,MeshModel *mm){

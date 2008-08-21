@@ -58,7 +58,11 @@ void Camera::saveAsXml(QDomDocument* doc,QDomElement *root){
 
 	calibration->saveAsXml(doc,&xml_cam);
 
-	root->appendChild(xml_cam);
+	if (root == NULL){
+		doc->appendChild(xml_cam);
+	}else{
+		root->appendChild(xml_cam);
+	}
 
 }
 
@@ -84,6 +88,10 @@ void Camera::loadFromXml(QDomElement *xml_cam){
 
 		}*/else{
 
+		}
+		if(calibration!=NULL){
+			calibration->resolution[0] = resolution[0];
+			calibration->resolution[1] = resolution[1];
 		}
 	}else{
 		//qDebug("no calibration child in xmlfile \n");
