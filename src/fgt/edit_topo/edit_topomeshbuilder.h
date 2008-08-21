@@ -10,8 +10,14 @@
 #include <vcg/complex/intersection.h>
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/complex/trimesh/closest.h>
+
+#include <vcg/space/index/grid_static_ptr.h>
+#include <vcg/space/index/aabb_binary_tree/aabb_binary_tree.h>
+#include <vcg/space/index/octree.h>
+#include <vcg/space/index/spatial_hashing.h>
 
 using namespace std;
 using namespace vcg;
@@ -33,13 +39,17 @@ template<class MESH_TYPE>
 class NearestMidPoint : public   std::unary_function<face::Pos<typename MESH_TYPE::FaceType> ,  typename MESH_TYPE::CoordType >
 {
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+
+	//  typedef AABBBinaryTreeIndex<CMeshO::FaceType, typename CMeshO::ScalarType, vcg::EmptyClass> MetroMeshGrid;
+	//typedef Octree<CMeshO::FaceType, typename CMeshO::ScalarType> MetroMeshGrid;
+
 public:
 
 	bool DEBUG;
 	QList<Point3f> * LinMid;
 	QList<Point3f> * LoutMid;
 
- 	void init(CMeshO *_m, double dist)
+ 	void init(CMeshO *_m, float dist)
 	{
 		m=_m;
 		if(m) 
@@ -47,70 +57,98 @@ public:
 			unifGrid.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
 			dist_upper_bound = dist;
+
 		}
 	}
 
 
+
 	void operator()(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType>  ep)
 	{
-		Point3f       closestPt,      normf, bestq, ip;
+		Point3f closestPt, closestPt1, closestPt2, normf, bestq, ip;
+
 		float dist = dist_upper_bound;
-		const CMeshO::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
-		
-		// compute distance between startPt and the mesh S2
-		CMeshO::FaceType   *nearestF=0;
 		vcg::face::PointDistanceBaseFunctor PDistFunct;
+
+
+//		dist=dist_upper_bound;
+//		const CMeshO::CoordType &p1 = ep.f->V(ep.z)->P();
+//		unifGrid.GetClosest(PDistFunct,markerFunctor,p1,dist_upper_bound,dist,closestPt1);
+
+//		dist=dist_upper_bound;
+//		const CMeshO::CoordType &p2 = ep.f->V1(ep.z)->P();
+//		unifGrid.GetClosest(PDistFunct,markerFunctor,p2,dist_upper_bound,dist,closestPt2);
+
+//		const CMeshO::CoordType &startPt= ( p1 + p2 ) / 2.0;
+
+		const CMeshO::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
+
+		CMeshO::FaceType *nearestF=0;
 		
 		dist=dist_upper_bound;
 
-		if(DEBUG)
-			LinMid->push_back(startPt);
+	//	if(DEBUG)
+	//		LinMid->push_back(startPt);
 	  
+//		nearestF =  trimesh::GetClosestFace<CMeshO, MetroMeshGrid>(*m, unifGrid, startPt, dist_upper_bound, dist,  normf, bestq, ip);
+
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
-/*
-		if(DEBUG)
-			LinMid->push_back(nearestF->V(0)->P());
-		if(DEBUG)
-			LinMid->push_back(nearestF->V(1)->P());
-		if(DEBUG)
-			LinMid->push_back(nearestF->V(2)->P());*/
+
+
+
+		QString x1 = " Dist "+ QString("%1").arg(dist) +" Dist up "+ QString("%1").arg(dist_upper_bound);
+		qDebug(x1.toLatin1());
+		QString x = " x "+ QString("%1").arg(startPt.X())+ " y "+QString("%1").arg(startPt.Y()) + " z " + QString("%1").arg(startPt.Z());
+		qDebug(x.toLatin1());
+
+										 
 
 		if(dist == dist_upper_bound) 
 		{
-			if( MESH_TYPE::HasPerVertexNormal())
-				nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
+	//		if( MESH_TYPE::HasPerVertexNormal())
+	//			nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
 
-			if( MESH_TYPE::HasPerVertexColor())
-				nv.C().lerp(ep.f->V(ep.z)->C(),ep.f->V1(ep.z)->C(),.5f);
+//			if( MESH_TYPE::HasPerVertexColor())
+//				nv.C().lerp(ep.f->V(ep.z)->C(),ep.f->V1(ep.z)->C(),.5f);
 		
-			if( MESH_TYPE::HasPerVertexQuality())
-				nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
+//			if( MESH_TYPE::HasPerVertexQuality())
+//				nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
 
 			nv.P()= startPt;
 			/*
 			if(DEBUG)
 				LoutMid->push_back(closestPt);	*/		
 			return; 
-		}
+		} 
 
-		Point3f interp;
-		if(InterpolationParameters(*nearestF, closestPt, interp[0], interp[1], interp[2]))
-		//assert(ret);
-			interp[2]=1.0-interp[1]-interp[0];
-																			 
+
 		nv.P()= closestPt; 
 
-		if( MESH_TYPE::HasPerVertexNormal())
-			nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
+		Point3f interp;
+		if(InterpolationParameters(*nearestF, closestPt, interp[0], interp[1], interp[2])) {
+		//assert(ret);
+			interp[2]=1.0-interp[1]-interp[0];
 
-		if( MESH_TYPE::HasPerVertexColor())
-			nv.C().lerp(ep.f->V(ep.z)->C(),ep.f->V1(ep.z)->C(),.5f);
+
+
+
+
+		nv.P()= closestPt; 
+
+	//	if( MESH_TYPE::HasPerVertexNormal())
+	//		nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
+			nv.N()= ((nearestF->V(0)->N()/*+nearestF->V(1)->N()+nearestF->V(2)->N())/3*/)).Normalize();
+
+//		if( MESH_TYPE::HasPerVertexColor())
+			nv.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
 		
-		if( MESH_TYPE::HasPerVertexQuality())
-			nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
+//		if( MESH_TYPE::HasPerVertexQuality())
+			nv.Q() = nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
 
 		if(DEBUG)
 			LoutMid->push_back(closestPt);
+
+		}
 		
 	}
 
@@ -130,7 +168,7 @@ public:
 		return tmp;
 	}
 
-	double dist_upper_bound;
+	float dist_upper_bound;
 private:
  
 	CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc). 
@@ -139,8 +177,7 @@ private:
 
 	// Parameters
 	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
-	MarkerFace markerFunctor;
-	
+	MarkerFace markerFunctor;	
 };
 
 
@@ -180,7 +217,7 @@ public:
 	void createRefinedMesh(MeshModel &out, MeshModel &in, double dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog, bool DEBUG);
 
 private:
-	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
+//	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 
 	void createBasicMesh(MeshModel &out, QList<Fce> Fstack, QList<Vtx> Vstack);
 };

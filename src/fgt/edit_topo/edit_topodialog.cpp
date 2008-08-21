@@ -33,7 +33,7 @@ void edit_topodialog::setBarVal(int val)
 // DEBUG
 double edit_topodialog::dist()
 {
-	double toret = ui.TextEditIterations_2->value() / 10;
+	double toret = ui.TextEditIterations_2->value();
 
 	return toret;
 }

@@ -28,6 +28,21 @@ $Log: edit_topo.cpp,v $
 
 
 
+#include <vcg/complex/trimesh/clean.h>
+#include <vcg/complex/trimesh/update/position.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/flag.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/point_sampling.h>
+#include <vcg/complex/trimesh/create/resampler.h>
+#include <vcg/simplex/face/distance.h>
+#include <vcg/complex/trimesh/update/color.h>
+
+
+
+
+
+
 using namespace std;
 using namespace vcg;
 //
@@ -541,17 +556,15 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 								Vtx oldV1 = minE.v[0];
 								Vtx oldV2 = minE.v[1];
 
-								// Edit new face 01
+								// Edit new face 01 and 02
 								for(int e=0; e<3; e++)
 									for(int v=0; v<2; v++)
+									{
 										if(newF1.e[e].v[v]==oldV1)
 											newF1.e[e].v[v]=newVtx;
-
-								// Edit new face 02
-								for(int e=0; e<3; e++)
-									for(int v=0; v<2; v++)
 										if(newF2.e[e].v[v]==oldV2)
 											newF2.e[e].v[v]=newVtx;
+									}
 	
 								Edg newEdgMid;
 								QList<Vtx> allv;
@@ -561,7 +574,7 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 											allv.push_back(fc.e[e].v[v]);
 							
 								Vtx oldVtx;
-								for(int i=0; i<allv.count(); i++)
+								for(int i=0; i<3; i++)
 									if((allv.at(i)!=oldV1)&&(allv.at(i)!=oldV2))
 										oldVtx=allv.at(i);
 							
@@ -1023,8 +1036,14 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *parent)
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
 
 	// Init uniform grid
-	double dist = m.cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
+	float dist = m.cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
+
+	m.updateDataMask(MeshModel::MM_FACEMARK);
+	tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
+	tri::UpdateFlags<CMeshO>::FaceProjection(m.cm);
+
 	rm.init(&m, dist);
+
 
 
 	if (edit_topodialogobj==0)
@@ -1110,6 +1129,8 @@ void edit_topo::on_mesh_create()
 	// /DEBUG!!!!!
 
 	// Mesh creation
+
+
 
 
 	double dist = m->cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
