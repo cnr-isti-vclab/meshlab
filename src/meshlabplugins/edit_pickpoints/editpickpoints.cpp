@@ -14,7 +14,11 @@
 #include <wrap/gl/picking.h>
 #include <wrap/gl/pick.h>
 
+#include <math.h>
+
 using namespace vcg;
+
+#define PI 3.14159265
 
 
 EditPickPointsPlugin::EditPickPointsPlugin(){
@@ -75,12 +79,8 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 		//now that were are ending tell the dialog to save any points it has to metadata
 		pickPointsDialog->savePointsToMetaData();
 		
-		qDebug() << "new mesh so reset pick points";
-		//set the gla to be updated (i dont think it should ever be different
-		pickPointsDialog->setGLArea(gla);
-			
 		//set the new mesh model
-		pickPointsDialog->setCurrentMeshModel(&mm);
+		pickPointsDialog->setCurrentMeshModel(&mm, gla);
 		currentModel = &mm;
 	}
 	
@@ -114,7 +114,7 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 		} else
 		{
 			CFaceO::NormalType faceNormal = face->N();
-			qDebug() << "found face normal: " << faceNormal[0] << faceNormal[1] << faceNormal[2];
+			//qDebug() << "found face normal: " << faceNormal[0] << faceNormal[1] << faceNormal[2];
 			
 			//if we didnt find a face then dont add the point because the user was probably 
 			//clicking on another mesh opened inside the glarea
@@ -143,11 +143,8 @@ void EditPickPointsPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *
 	
 	currentModel = &mm;
 	
-	//set the gla to be updated
-	pickPointsDialog->setGLArea(gla);
-	
 	//set the current mesh
-	pickPointsDialog->setCurrentMeshModel(&mm);
+	pickPointsDialog->setCurrentMeshModel(&mm, gla);
 	
 	//show the dialog
 	pickPointsDialog->show();
@@ -185,7 +182,6 @@ void EditPickPointsPlugin::mousePressEvent(QAction *, QMouseEvent *event, MeshMo
 		//set flag that we need to add a new point
 		movePoint = true;	
 	}
-
 }
 
 void EditPickPointsPlugin::mouseMoveEvent(QAction *, QMouseEvent *event, MeshModel &mm, GLArea *gla ) 
@@ -209,7 +205,6 @@ void EditPickPointsPlugin::mouseMoveEvent(QAction *, QMouseEvent *event, MeshMod
 		//set flag that we need to add a new point
 		addPoint = true;	
 	}
-		
 }
 
 void EditPickPointsPlugin::mouseReleaseEvent(QAction *,
@@ -231,58 +226,164 @@ void EditPickPointsPlugin::mouseReleaseEvent(QAction *,
 	
 		//set flag that we need to add a new point
 		addPoint = true;	
-	}
-	
-		
+	}		
 }
-
 
 void EditPickPointsPlugin::drawPickedPoints(
 		std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox)
 {
+	assert(glArea);
+	
 	vcg::Point3f size = boundingBox.Dim();
 	//how we scale the object indicating the normal at each selected point
 	float scaleFactor = (size[0]+size[1]+size[2])/90.0;
 
-	//qDebug() << "draw picked points ";
+	//qDebug() << "scaleFactor: " << scaleFactor;
 	
-	glPushAttrib(GL_ENABLE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_LIGHTING);
-	//glDisable(GL_TEXTURE);  //caused error but does not seem to be needed
+	glPushAttrib(GL_ENABLE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_COLOR_MATERIAL);
+	
+	// enable color tracking
+	glEnable(GL_COLOR_MATERIAL);
+	
+	//draw the things that we always want to show, like the names 
 	glDepthFunc(GL_ALWAYS);
+	glDisable(GL_DEPTH_TEST); 
+	glDepthMask(GL_FALSE);
 	
 	//set point attributes
-	glPointSize(4.0);
+	glPointSize(4.5);
+	bool showNormal = pickPointsDialog->showNormal();
+	bool showPin = pickPointsDialog->drawNormalAsPin();
 	
 	for(int i = 0; i < pointVector.size(); ++i)
 	{
 		PickedPointTreeWidgetItem * item = pointVector[i];
 		//if the point has been set (it may not be if a template has been loaded)
-		if(item->isSet()){
+		if(item->isActive()){
 			Point3f point = item->getPoint();
-			
-			Point3f normal = item->getNormal();
-			
 			glColor(Color4b::Blue);
-			
-			glBegin(GL_POINTS);
-				glVertex(point);
-			glEnd();
-			
-			glColor(Color4b::Green);
-			
-			glBegin(GL_LINES);
-				glVertex(point);
-				glVertex(point+(normal*scaleFactor));
-			glEnd();
-			
-			glColor(Color4b::Red);
-			
-			assert(glArea);
 			glArea->renderText(point[0], point[1], point[2], QString(item->getName()) );
+			
+			//draw the dot if we arnt showing the normal or showing the normal as a line
+			if(!showNormal || !showPin)
+			{
+				//glColor(Color4b::Blue);
+				glBegin(GL_POINTS);
+					glVertex(point);
+				glEnd();
+			}	
 		}
 	}
-	glPopAttrib();	
+
+
+	//now draw the things that we want drawn if they are not ocluded 
+	//we can see in bright red
+	glDepthFunc(GL_LESS);
+	glEnable(GL_DEPTH_TEST); 
+	glDepthMask(GL_TRUE);
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	glMatrixMode(GL_MODELVIEW);
+	
+	Point3f yaxis;
+	yaxis[0] = 0;
+	yaxis[1] = 1;
+	yaxis[2] = 0;
+	
+	for(int i = 0; i < pointVector.size(); ++i)
+	{
+		PickedPointTreeWidgetItem * item = pointVector[i];
+		//if the point has been set (it may not be if a template has been loaded)
+		if(item->isActive()){
+			Point3f point = item->getPoint();
+			
+			if(showNormal)
+			{
+				Point3f normal = item->getNormal();
+			
+				if(showPin)
+				{
+					//dot product
+					float angle = (Angle(normal,yaxis) * 180.0 / PI);
+					
+					//cross product
+					Point3f axis = yaxis^normal;
+					//qDebug() << "angle: " << angle << " x" << axis[0] << " y" << axis[1] << " z" << axis[2];
+	
+					//green and a little clear
+					glColor4f(0.0f, 1.0f, 0.0f, 0.75f);
+					//glColor(Color4b::Green);
+		
+					glPushMatrix();
+					
+					//move the pin to where it needs to be
+					glTranslatef(point[0], point[1], point[2]);
+					glRotatef(angle, axis[0], axis[1], axis[2]);
+					glScalef(0.2*scaleFactor, 1.5*scaleFactor, 0.2*scaleFactor);
+					
+					glBegin(GL_TRIANGLES);
+						
+						//front
+						glNormal3f(0, -1, 1);
+						glVertex3f(0,0,0);
+						glVertex3f(1,1,1);
+						glVertex3f(-1,1,1);
+						
+						//right
+						glNormal3f(1, -1, 0);
+						glVertex3f(0,0,0);
+						glVertex3f(1,1,-1);
+						glVertex3f(1,1,1);
+						
+						//left
+						glNormal3f(-1, -1, 0);
+						glVertex3f(0,0,0);
+						glVertex3f(-1,1,1);
+						glVertex3f(-1,1,-1);
+						
+						//back
+						glNormal3f(0, -1, -1);
+						glVertex3f(0,0,0);
+						glVertex3f(-1,1,-1);
+						glVertex3f(1,1,-1);
+						
+						//top
+						glNormal3f(0, 1, 0);
+						glVertex3f(1,1,1);
+						glVertex3f(1,1,-1);
+						glVertex3f(-1,1,-1);
+						
+						glNormal3f(0, 1, 0);
+						glVertex3f(1,1,1);
+						glVertex3f(-1,1,-1);
+						glVertex3f(-1,1,1);
+						
+					glEnd();
+					
+					glPopMatrix();
+				} else
+				{
+					glColor(Color4b::Green);
+					
+					glBegin(GL_LINES);
+						glVertex(point);
+						glVertex(point+(normal*scaleFactor));
+					glEnd();
+				}
+			}
+			
+			glColor(Color4b::Red);
+			glArea->renderText(point[0], point[1], point[2], QString(item->getName()) );	
+		}
+	}
+	
+	glDisable(GL_BLEND);
+	glDisable(GL_COLOR_MATERIAL);
+	glDisable(GL_DEPTH_TEST);
+	
+	glPopAttrib();
 }
 
 

@@ -11,13 +11,13 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/glarea.h>
 
-//#include <vcg/space/index/grid_static_ptr.h>
-
 #include "pickedPoints.h"
 #include "ui_pickpointsDialog.h"
 #include "pickPointsTemplate.h"
 
 class EditPickPointsPlugin;
+
+class GetClosestFace;
 
 class PickedPointTreeWidgetItem : public QTreeWidgetItem
 {
@@ -25,12 +25,8 @@ class PickedPointTreeWidgetItem : public QTreeWidgetItem
 public:
 	//used when a point has just been picked and
 	//gives it an integer name
-	PickedPointTreeWidgetItem(vcg::Point3f intputPoint, CFaceO::NormalType faceNormal);
-	
-	//used when a pont has not been picked yet at all
-	//as when this tree widget item is created by loading
-	//a template
-	PickedPointTreeWidgetItem(QString name);
+	PickedPointTreeWidgetItem(vcg::Point3f &intputPoint, CMeshO::FaceType::NormalType &faceNormal,
+			QString name, bool _active);
 	
 	//set the name
 	void setName(QString name);
@@ -38,11 +34,8 @@ public:
 	//return the name of the point
 	QString getName();
 	
-	//change the point
-	void setPoint(vcg::Point3f intputPoint);
-	
-	//set the normal
-	void setNormal(CFaceO::NormalType faceNormal);
+	//change the point and normal
+	void setPointAndNormal(vcg::Point3f &intputPoint, CMeshO::FaceType::NormalType &faceNormal);
 	
 	//return the Point3f
 	vcg::Point3f getPoint();
@@ -52,12 +45,16 @@ public:
 	
 	//clear the ponint datas
 	void clearPoint();
-	
+		
 	//return if the point is set
-	bool isSet();
+	bool isActive();
+
+	//set the checkbox and active value
+	void setActive(bool value);
 	
-	//basically just so we have a unique default name for new points that are picked
-	static int pointCounter;
+	//only for use within the checkbox calls to toggle the active variable
+	//when it is toggled
+	void toggleActive(bool value);
 	
 private:
 	//the point
@@ -66,8 +63,9 @@ private:
 	//the normal of this point
 	vcg::Point3f normal;
 	
-	//tells us if the point is set
-	bool isPointSet;
+	//whether this point is active
+	//inactive points are not drawn and when saved this is indicated
+	bool active;
 };
 
 
@@ -79,18 +77,17 @@ public:
 	PickPointsDialog(EditPickPointsPlugin *plugin,
 			QWidget *parent = 0);
 
+	~PickPointsDialog();
+	
 	enum Mode { ADD_POINT, MOVE_POINT };
 	
 	
 	//add a point that was just picked(could be moving a point)
-	PickedPointTreeWidgetItem * addPoint(vcg::Point3f point, CFaceO::NormalType faceNormal);
+	void addPoint(vcg::Point3f point, CMeshO::FaceType::NormalType faceNormal);
 	
 	//we need to move the point closest to this one
 	void moveThisPoint(vcg::Point3f point);
-	
-	//add a new point and call it something 
-	void addPoint(vcg::Point3f point, QString name);
-	
+		
 	//return the vector
 	//useful if you want to draw the points
 	std::vector<PickedPointTreeWidgetItem*>& getPickedPointTreeWidgetItemVector();
@@ -98,20 +95,30 @@ public:
 	//return the mode of this ui
 	PickPointsDialog::Mode getMode();
 	
-	
 	//sets the currentMesh we are working with
-	void setCurrentMeshModel(MeshModel *newMeshModel);
-	
-	//set the glarea we are going to update
-	void setGLArea(GLArea *glArea);
+	void setCurrentMeshModel(MeshModel *, GLArea *gla);
 	
 	//allows the ability to save to metaData only even if the ui says save to a file
 	void savePointsToMetaData();
-		
+	
+	bool showNormal();
+	
+	bool drawNormalAsPin();
+
+public slots:	
+	//redraw the points on the screen
+	void redrawPoints();
 	
 private:
 	//get the points from the UI
 	PickedPoints * getPickedPoints();
+	
+	//add a new point and call it something 
+	//bool present tells us if the point has been picked yet
+	void addPoint(vcg::Point3f &point, QString &name,  bool present);
+	
+	//handle everything involved with adding a point to the tree widget
+	void addTreeWidgetItemForPoint(vcg::Point3f &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present);
 	
 	//load the points from a file
 	void loadPoints(QString filename);
@@ -126,7 +133,10 @@ private:
 	void clearPoints(bool clearOnlyXYZValues);
 	
 	//clears the template, does not ask the user anything
-	void clearTemplate();
+	void clearTemplate();	
+	
+	//set the TemplateName
+	void setTemplateName(QString name);
 	
 	//the current mode of the GUI
 	Mode currentMode;
@@ -148,11 +158,20 @@ private:
 	//the template we have loaded
 	bool templateLoaded;
 	
+	//the template that was used to pick these points
+	//will be "" if not template was used or the template was invalidated (by a modification for example)
+	QString templateName;
+	
 	//we need this in order to save to the meta data and get the filename, etc
 	MeshModel *meshModel;
 	
 	//the glarea to update
 	GLArea *_glArea;
+	
+	GetClosestFace *getClosestFace;
+	
+	//basically just so we have a unique default name for new points that are picked
+	int pointCounter;
 	
 private slots:
 	//remove the point highlighted in the pickedPointTree
@@ -189,6 +208,31 @@ private slots:
 	
 	//remove the selected point from the template
 	void removePointFromTemplate();
+};
+
+//because QT is really dumb and TreeWidgetItems can recieve signals
+class TreeCheckBox : public QCheckBox 
+{
+	Q_OBJECT
+public:
+	TreeCheckBox(QWidget * parent, PickedPointTreeWidgetItem *_twi, PickPointsDialog *_ppd) : QCheckBox(parent)
+	{
+		twi = _twi;
+		ppd = _ppd;
+	}
+
+public slots:
+	void toggleAndDraw ( bool checked )
+	{
+		//qDebug() << "toggled!";
+		twi->toggleActive(checked);
+		ppd->redrawPoints();
+	}
+	
+private:
+	PickedPointTreeWidgetItem *twi;
+	
+	PickPointsDialog *ppd;
 	
 };
 

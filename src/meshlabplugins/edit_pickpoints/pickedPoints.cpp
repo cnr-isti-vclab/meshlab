@@ -19,11 +19,14 @@
 //Define Constants
 const QString PickedPoints::fileExtension = ".pp";
 const QString PickedPoints::rootName = "PickedPoints";
+const QString PickedPoints::templateElementName = "templateName";
 const QString PickedPoints::pointElementName = "point";
-const QString PickedPoints::pointName = "name";
+const QString PickedPoints::name = "name";
+const QString PickedPoints::active = "active";
 const QString PickedPoints::xCoordinate = "x";
 const QString PickedPoints::yCoordinate = "y";
 const QString PickedPoints::zCoordinate = "z";
+const QString PickedPoints::False = "false";
 
 const std::string PickedPoints::Key = "PickedPoints";
 
@@ -51,12 +54,18 @@ bool PickedPoints::open(QString filename){
 	    {
 			qDebug() << "About to read a " << rootName << " xml document";
 			
+			QDomElement element = root.firstChildElement(templateElementName);
+			if(!element.isNull()) templateName = element.attribute(name);
+			else templateName = "";
+			
+			qDebug() << "Template loaded: " << templateName;
+			
 			for(QDomElement element = root.firstChildElement(pointElementName);
 				!element.isNull();
 				element = element.nextSiblingElement(pointElementName))
 			{
-				QString name = element.attribute(pointName);
-				qDebug() << "Reading point with name " << name;
+				QString pointName = element.attribute(name);
+				qDebug() << "Reading point with name " << pointName;
 				
 				QString x = element.attribute(xCoordinate);
 				QString y = element.attribute(yCoordinate);
@@ -64,7 +73,11 @@ bool PickedPoints::open(QString filename){
 				
 				vcg::Point3f point(x.toFloat(), y.toFloat(), z.toFloat());
 				
-				addPoint(name, point);
+				QString presentString = element.attribute(active);
+				bool present = true;
+				if(False == presentString) present = false;
+				
+				addPoint(pointName, point, present);
 				
 			}
 	    } else {
@@ -88,17 +101,28 @@ bool PickedPoints::save(QString filename){
 	QDomElement root = doc.createElement(rootName);
 	doc.appendChild(root);
 	
+	//put in the template name
+	QDomElement tag = doc.createElement(templateElementName);
+	tag.setAttribute(name, templateName);
+	root.appendChild(tag);
+		
 	//create an element for each point
 	for (int i = 0; i < pointVector->size(); ++i) {
 		PickedPoint *pickedPoint = pointVector->at(i);
 		
 		QDomElement tag = doc.createElement(pointElementName);
-		tag.setAttribute(pointName,  pickedPoint->name);
+		
 		vcg::Point3f point = pickedPoint->point;
 		
 		tag.setAttribute(xCoordinate, point[0] );
 		tag.setAttribute(yCoordinate, point[1] );
 		tag.setAttribute(zCoordinate, point[2] );
+		
+		//if the point is not present indicate this
+		if(!pickedPoint->present)
+			tag.setAttribute(active, QString(False));
+			
+		tag.setAttribute(name,  pickedPoint->name);
 		
 		//append the element to the root
 		root.appendChild(tag);
@@ -113,14 +137,11 @@ bool PickedPoints::save(QString filename){
 	return true;	 
 }
 
-void PickedPoints::addPoint(QString name, vcg::Point3f point){
-	if(NULL != pointVector){
-		PickedPoint *pickedPoint = new PickedPoint(name,point);
-		pointVector->push_back(pickedPoint);
-	} else
-	{
-		qDebug("NULL pointVector!");
-	}
+void PickedPoints::addPoint(QString name, vcg::Point3f point, bool present){
+	assert(pointVector);
+		
+	PickedPoint *pickedPoint = new PickedPoint(name, point, present);
+	pointVector->push_back(pickedPoint);
 }
 
 std::vector<PickedPoint*> * PickedPoints::getPickedPointVector()
@@ -172,3 +193,12 @@ QString PickedPoints::getSuggestedPickedPointsFileName(const MeshModel &meshMode
 	return outputFileName;
 }
 
+void PickedPoints::setTemplateName(QString name)
+{
+	templateName = name;
+}
+
+const QString & PickedPoints::getTemplateName()
+{
+	return templateName;
+}
