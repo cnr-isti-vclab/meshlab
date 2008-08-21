@@ -8,6 +8,8 @@ SOURCES += 	photoTexturing.cpp \
 			src/UVFaceTexture.cpp \
 			src/Camera.cpp \
 			src/CameraCalibration.cpp \
+			src/TextureFilter.cpp \
+			src/TextureMerger.cpp \
 			src/Tsai/TsaiCameraCalibration.cpp \
 			src/Tsai/matrix/matrix.c \
 			src/Tsai/minpack/lmdif.c \ 
@@ -21,8 +23,8 @@ SOURCES += 	photoTexturing.cpp \
 			src/Tsai/cal_util.c \
 			src/Tsai/cal_main.c \
 			src/Tsai/cal_eval.c \ 
-#			src/Kai/KaiCameraCalibration.cpp \
-#			src/Kai/Polynom3_444.cpp \
+			#src/Kai/KaiCameraCalibration.cpp \
+			src/Kai/Polynom3_444.cpp \
 			src/QuadTree/QuadTreeNode.cpp \
 			$$VCGDIR/wrap/gui/trackball.cpp\
 			$$VCGDIR/wrap/gui/trackmode.cpp \

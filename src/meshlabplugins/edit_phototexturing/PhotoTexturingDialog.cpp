@@ -50,6 +50,7 @@ PhotoTexturingDialog::PhotoTexturingDialog(MeshEditInterface* plugin, PhotoTextu
 	connect(ui.configurationLoadPushButton, SIGNAL(clicked()),this,SLOT(loadConfigurationFile()));
 	connect(ui.configurationSavePushButton, SIGNAL(clicked()),this,SLOT(saveConfigurationFile()));
 	connect(ui.exportToMaxScriptPushButton, SIGNAL(clicked()),this,SLOT(exportCamerasToMaxScript()));
+	connect(ui.convertToTsaiCameraPushButton, SIGNAL(clicked()),this,SLOT(convertToTsaiCamera()));
 
 	connect(ui.addCameraPushButton, SIGNAL(clicked()),this,SLOT(addCamera()));
 	connect(ui.removeCameraPushButton, SIGNAL(clicked()),this,SLOT(removeCamera()));
@@ -87,8 +88,8 @@ void PhotoTexturingDialog::saveConfigurationFile(){
 }
 
 void PhotoTexturingDialog::addCamera(){
-	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai *.kai)");
-	//QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai)");
+	//QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai *.kai)");
+	QString filename = QFileDialog::getOpenFileName(this,tr("Select Calibration File"),".", "Cameras (*.tsai)");
 	photoTexturer->addCamera(filename);
 	update();
 	ui.cameraTableWidget->selectRow(ui.cameraTableWidget->rowCount()-1);
@@ -178,7 +179,13 @@ void PhotoTexturingDialog::combineTextures(){
 	combineParamSet.addInt("width",1024,"Image width:","");
 	combineParamSet.addInt("height",1024,"Image height:","");
 	combineParamSet.addInt("edgeStretchingPasses",2,"Edge Stretching Passes:","");
-	combineParamSet.addFloat("min_angle",80.0,"Minimum angle:","");
+	combineParamSet.addBool("enable_angle_map",true,"Enable angle map:","");
+	combineParamSet.addInt("angle_map_weight",2,"Angle map weight:","");
+	combineParamSet.addFloat("min_angle",80,"Min angle:","");
+
+	combineParamSet.addInt("angle_map_sharpness",2,"Angle map sharpness:","");
+	combineParamSet.addBool("enable_distance_map",true,"Enable distance map:","");
+	combineParamSet.addInt("distance_map_weight",1,"Distance map weight:","");
 
 	//combineParamSet.addBool("saveImages",true,"Save all images","");
 	//combineParamSet.addBool("sameFolder",true,"Same folder as mesh","");
@@ -187,7 +194,7 @@ void PhotoTexturingDialog::combineTextures(){
 	GenericParamDialog ad(this,&combineParamSet,"Texture Baking Parameters");
 	int result=ad.exec();
 	if (result == 1){
-		photoTexturer->combineTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"),combineParamSet.getInt("edgeStretchingPasses"),combineParamSet.getFloat("min_angle"));
+		photoTexturer->combineTextures(mesh,combineParamSet.getInt("width"),combineParamSet.getInt("height"),combineParamSet.getInt("edgeStretchingPasses"),combineParamSet.getBool("enable_angle_map"),combineParamSet.getInt("angle_map_weight"),combineParamSet.getInt("angle_map_sharpness"),combineParamSet.getFloat("min_angle"),combineParamSet.getBool("enable_distance_map"),combineParamSet.getInt("distance_map_weight"));
 	}
 	update();
 }
@@ -207,4 +214,30 @@ void PhotoTexturingDialog::cancel(){
 void PhotoTexturingDialog::exportCamerasToMaxScript(){
 	QString filename = QFileDialog::getSaveFileName(this,tr("Select MaxScript File"),".", "*.ms");
 	photoTexturer->exportMaxScript(filename,mesh);
+}
+
+void PhotoTexturingDialog::convertToTsaiCamera(){
+	QString filename = QFileDialog::getSaveFileName(this,tr("Select Tsai Calibration File"),".", "*.tsai");
+	QList <QTableWidgetItem*>list = ui.cameraTableWidget->selectedItems();
+
+	bool optimize;
+	QMessageBox messageBox(QMessageBox::Question, "Convert to Tsai Camera", "Use optimization mode for Tsai calibration?",
+			QMessageBox::Yes|QMessageBox::No , this);
+	messageBox.setWindowModality(Qt::WindowModal);
+	int returnValue = messageBox.exec();
+
+	if(returnValue == QMessageBox::No)
+	{
+		optimize = false;
+	} else{
+		optimize = true;
+	}
+
+	if (list.size()>0){
+		QTableWidgetItem* item = list.at(0);
+		int row = item->row();
+		photoTexturer->convertToTsaiCamera(row,optimize,filename,mesh);
+	}
+
+
 }

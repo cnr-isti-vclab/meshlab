@@ -61,6 +61,8 @@ private slots:
 
 	void update();
 
+	void convertToTsaiCamera();
+
 	void assignImage();
 	void calculateTextures();
 	void selectCurrentTexture();
