@@ -67,11 +67,24 @@ bool RfxParser::Parse()
 		return false;
 
 	root = document.documentElement();
-	QDomElement OGLEffect = root.elementsByTagName("RmOpenGLEffect").at(0).toElement();
+	QDomElement OGLEffect =
+		root.elementsByTagName("RmOpenGLEffect").at(0).toElement();
 
 	// no <RmOpenGLEffect> found, parsing failed
 	if (OGLEffect.isNull())
 		return false;
+
+	// before looping between passes, check for renderable textures
+	QDomNodeList rtex = root.elementsByTagName("RmRenderableTexture");
+	for (int i = 0; i < rtex.size(); ++i) {
+		QDomElement rtEl = rtex.at(i).toElement();
+
+		RfxRenderTarget *rt = new RfxRenderTarget(rtEl.attribute("NAME"));
+		//rt->SetSize(rtEl.attribute("WIDTH").toInt(),
+		//            rtEl.attribute("HEIGHT").toInt());
+
+		rfxShader->AddRT(rt);
+	}
 
 	QDomNodeList list = OGLEffect.elementsByTagName("RmGLPass");
 	for (int i = 0; i < list.size(); ++i) {
@@ -89,10 +102,39 @@ bool RfxParser::Parse()
 		state = glpass.firstChildElement("RmRenderStateBlock");
 		if (!state.isNull()) {
 			QDomNodeList statelist = state.elementsByTagName("RmState");
-			AppendGLStates(theGLPass, statelist, RfxState::RFX_RENDERSTATE);
+			QList<RfxState*> rslist = ParseGLStates(statelist,
+			                                        RfxState::RFX_RENDERSTATE);
+			foreach (RfxState *rs, rslist)
+				theGLPass->AddGLState(rs);
 		}
 
-		// TODO: add rendertarget for multiple pass support
+		// RenderTarget if this pass renders to texture
+		QDomElement eRT = glpass.firstChildElement("RmRenderTarget");
+		if (!eRT.isNull()) {
+			int idx = rfxShader->FindRT(eRT.attribute("NAME"));
+			if (idx != -1) {
+				RfxRenderTarget *rt = rfxShader->GetRT(idx);
+
+				// we need pass number
+				int pass = theGLPass->GetPassIndex();
+
+				// depth clear value
+				float depthClear = -1.0f;
+				if (eRT.attribute("DEPTH_CLEAR") == "TRUE")
+					depthClear = eRT.attribute("DEPTH_CLEAR_VALUE").toFloat();
+
+				// and color clear
+				float *colorClear = NULL;
+				if (eRT.attribute("COLOR_CLEAR") == "TRUE") {
+					long pColor = eRT.attribute("COLOR_CLEAR_VALUE").toLong();
+					colorClear = RfxState::DecodeColor(pColor);
+				}
+
+				rt->SetClear(pass, depthClear, colorClear);
+				theGLPass->SetRenderToTexture(true);
+				theGLPass->LinkRenderTarget(rt);
+			}
+		}
 
 		// shader sources
 		QDomNodeList sources = glpass.elementsByTagName("RmGLShader");
@@ -102,7 +144,7 @@ bool RfxParser::Parse()
 
 			theGLPass->SetShaderSource(source.text(), isPixel);
 
-			// (also check for uniforms declaration, will save some time later)
+			// also check for uniforms declaration, will save some time later
 			ParseUniforms(source.text());
 		}
 
@@ -129,24 +171,55 @@ bool RfxParser::Parse()
 		for (int j = 0; j < samplist.size(); ++j) {
 			QString TOString = samplist.at(j).toElement().attribute("NAME");
 
-			QDomNodeList TOList = glpass.elementsByTagName("RmTextureObject");
+			QDomNodeList TOList =
+				glpass.elementsByTagName("RmTextureObject");
 			for (int k = 0; k < TOList.size(); k++) {
 				QDomElement to = TOList.at(k).toElement();
 				if (to.attribute("NAME") == TOString) {
-					QDomElement tr = to.firstChildElement("RmTextureReference");
+					QDomElement tr =
+						to.firstChildElement("RmTextureReference");
 					QString texName = tr.attribute("NAME");
 
-					// check that this uniform is used in shaders, else ignore it
+					// check that this uniform is used in shaders
 					if (!uniformType.contains(TOString))
 						break;
 
-					RfxUniform *unif = new RfxUniform(TOString, uniformType[TOString]);
-					unif->SetValue(TextureFromRfx(texName, unif->GetType()));
-					unif->SetTU(tu++);
-					theGLPass->AddUniform(unif);
+					RfxUniform *unif = new RfxUniform(TOString,
+					                                  uniformType[TOString]);
 
+					// set texture unit to use
+					unif->SetTU(tu++);
+
+					// texture maybe from a file or a renderable one
+					int rtIdx;
+					QString txPath = TextureFromRfx(texName, unif->GetType());
+					if (txPath.startsWith("RT:")) {
+						rtIdx = txPath.split(":").at(1).toInt();
+						unif->SetValue(rfxShader->GetRT(rtIdx));
+					} else {
+						unif->SetValue(txPath);
+					}
+
+					// set any sampler state
 					QDomNodeList statelist = to.elementsByTagName("RmState");
-					AppendGLStates(theGLPass, statelist, RfxState::RFX_SAMPLERSTATE);
+					QList<RfxState*> rslist =
+						ParseGLStates(statelist, RfxState::RFX_SAMPLERSTATE);
+
+					// if texture is renderable add states directly to RT class
+					// since it's the one that will glGen the texture
+					if (unif->isRenderable()) {
+						RfxRenderTarget *rt = rfxShader->GetRT(rtIdx);
+						int pass = theGLPass->GetPassIndex();
+
+						foreach (RfxState *rs, rslist)
+							rt->AddGLState(pass, rs);
+					} else {
+						foreach (RfxState *rs, rslist)
+							unif->AddGLState(rs);
+					}
+
+					// add uniform to pass
+					theGLPass->AddUniform(unif);
 				}
 			}
 		}
@@ -245,7 +318,8 @@ QString RfxParser::TextureFromRfx(const QString& VarName,
 	QDomElement varNode;
 	QDomNodeList candidates = root.elementsByTagName(elementName);
 
-	for (int i = 0; i < candidates.size(); ++i) {
+	int i;
+	for (i = 0; i < candidates.size(); ++i) {
 		varNode = candidates.at(i).toElement();
 		if (varNode.attribute("NAME") == VarName) {
 
@@ -258,26 +332,43 @@ QString RfxParser::TextureFromRfx(const QString& VarName,
 			// then join together and return the absolute path
 			QFileInfo thefile(fDir, fName);
 			filePath = thefile.canonicalFilePath();
+
+			break;
 		}
+	}
+
+	// if nothing was found and we're looking for a sampler2D, maybe it's
+	// a RmRenderableTexture
+	// ***
+	// note that we quit previous loop with break, so the only reason
+	// for i being equal candidates.size() is that nothing was found
+	if (i == candidates.size() && VarType == RfxUniform::SAMPLER2D) {
+		int rt = rfxShader->FindRT(VarName);
+
+		// convention: if texture is a renderable texture, pass
+		// "RT:<index in list>" string to uniform class
+		if (rt != -1)
+			filePath = "RT:" + QString().setNum(rt);
 	}
 
 	return filePath;
 }
 
-void RfxParser::AppendGLStates(RfxGLPass *theGLPass, QDomNodeList statelist,
-                               RfxState::StateType statetype)
+QList<RfxState*> RfxParser::ParseGLStates(QDomNodeList statelist,
+                                           RfxState::StateType statetype)
 {
-	for (int j = 0; j < statelist.size(); ++j) {
-		QDomElement stateEl = statelist.at(j).toElement();
+	QList<RfxState*> glStates;
+
+	for (int i = 0; i < statelist.size(); ++i) {
+		QDomElement stateEl = statelist.at(i).toElement();
 		RfxState *glstate = new RfxState(statetype);
 		glstate->SetState(stateEl.attribute("STATE").toInt());
-		glstate->SetValue(stateEl.attribute("VALUE").toULong());
+		glstate->SetValue(stateEl.attribute("VALUE").toLong());
 
-		if (statetype == RfxState::RFX_RENDERSTATE)
-			theGLPass->AddGLState(glstate);
-		else if (statetype == RfxState::RFX_SAMPLERSTATE)
-			theGLPass->GetLastUniform()->AddGLState(glstate);
+		glStates.append(glstate);
 	}
+
+	return glStates;
 }
 
 void RfxParser::ParseUniforms(const QString &source)

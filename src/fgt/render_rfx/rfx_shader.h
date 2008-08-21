@@ -28,6 +28,7 @@
 #include "rfx_glpass.h"
 #include "rfx_state.h"
 #include "rfx_uniform.h"
+#include "rfx_rendertarget.h"
 
 class RfxShader
 {
@@ -35,15 +36,19 @@ public:
 	RfxShader();
 	virtual ~RfxShader();
 
-	void AddGLPass(RfxGLPass*);
+	void AddRT(RfxRenderTarget *rt) { renderTargets.append(rt); }
+	RfxRenderTarget* GetRT(int idx) { return renderTargets.at(idx); }
+	int FindRT(const QString&);
+	void AddGLPass(RfxGLPass *pass) { shaderPasses.append(pass); }
+	RfxGLPass* GetPass(int idx) { return shaderPasses.at(idx); }
 	void SortPasses();
 	void CompileAndLink(QGLContext *);
 	void Start();
 	void Stop() { glUseProgram(0); }
-	RfxGLPass* getPass(int pass) { return shader_pass.at(pass); }
 
 private:
-	QList<RfxGLPass*> shader_pass;
+	QList<RfxGLPass*> shaderPasses;
+	QList<RfxRenderTarget*> renderTargets;
 };
 
 #endif /* RFX_SHADER_H_ */

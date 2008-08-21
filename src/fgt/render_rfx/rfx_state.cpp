@@ -78,7 +78,7 @@ const char *RfxState::TextureFilterStrings[] = {
 };
 
 
-RfxState::RfxState(StateType _type, int _state, unsigned long _value)
+RfxState::RfxState(StateType _type, int _state, long _value)
 	: state(_state), value(_value), type(_type)
 {
 }
@@ -112,7 +112,7 @@ void RfxState::SetTextureEnvironment(GLint target)
 		break;
 
 	case GL_TextureBorderColor:
-		glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, DecodeColor());
+		glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, DecodeColor(value));
 		break;
 
 	case GL_TextureMaxAnisotropyEXT:
@@ -233,20 +233,20 @@ void RfxState::SetGLEnvironment()
 {
 	switch (state) {
 	case GL_CurrentColor: {
-		GLfloat *res = DecodeColor();
+		GLfloat *res = DecodeColor(value);
 		glColor3f(res[0], res[1], res[2]);
 		delete res;
 	}
 
 	case GL_SecondaryColor: {
-		GLfloat *res = DecodeColor();
+		GLfloat *res = DecodeColor(value);
 		glSecondaryColor3f(res[0], res[1], res[2]);
 		delete res;
 		break;
 	}
 
 	case GL_ClearColor: {
-		GLfloat *res = DecodeColor();
+		GLfloat *res = DecodeColor(value);
 		glClearColor(res[0], res[1], res[2], res[3]);
 		delete res;
 		break;
@@ -290,7 +290,7 @@ void RfxState::SetGLEnvironment()
 	}
 
 	case GL_FogColor: {
-		glFogfv(GL_FOG_COLOR, DecodeColor());
+		glFogfv(GL_FOG_COLOR, DecodeColor(value));
 		break;
 	}
 
@@ -421,7 +421,7 @@ void RfxState::SetGLEnvironment()
 		break;
 
 	case GL_BlendColor: {
-		GLfloat *res = DecodeColor();
+		GLfloat *res = DecodeColor(value);
 		glBlendColor(res[0], res[1], res[2], res[3]);
 		delete res;
 		break;
@@ -535,23 +535,30 @@ void RfxState::SetGLEnvironment()
 	}
 }
 
-GLfloat* RfxState::DecodeColor()
+GLfloat* RfxState::DecodeColor(long val)
 {
 	// decodes a color stored in a 32bit integer
-	// [32bits = 8bits (0-255) * 4 channels (RGBA)]
-	// and returns a 4-float array within [0, 1] range
+	// RM seems to "pack" an RGBA color this way:
+	// R: (0, 255) * 2^0  +
+	// G: (0, 255) * 2^8  +
+	// B: (0, 255) * 2^16 +
+	// A: (-1, -128) U (0, 127) * 2^24
 
 	enum Offsets { _R = 1, _G = 256, _B = 65536, _A = 16777216 };
-	long val = value;
 	GLfloat *color = new GLfloat[4];
 
-	// keep values in range [0, 255] to simplify assignment
-	color[3] = (val > _A)?                    (short)(val / _A) : 0;
-	color[2] = (val -= (_A * color[3]) > _B)? (short)(val / _B) : 0;
+	// Alpha needs special care due to its range.
+	// remove Alpha component from value and remap in range [0, 255]
+	color[3] = (val % _A == 0)? (short)(val / _A) : 0;
+	val -= (long)(_A * color[3] * ((color[3] < 0)? -1 : 1));
+	color[3] += ((color[3] < 0)? 256.0f : 0.0f);
+
+	// R, G and B components are easier to parse
+	color[2] = (val > _B)?                    (short)(val / _B) : 0;
 	color[1] = (val -= (_B * color[2]) > _G)? (short)(val / _G) : 0;
 	color[0] = (val -= (_G * color[1]) > _R)? (short)(val / _R) : 0;
 
-	// now normalize in [0, 1] space
+	// now normalize in [0, 1] range
 	for (int i = 0; i < 4; ++i)
 		color[i] /= 255.0f;
 
@@ -582,7 +589,7 @@ QString RfxState::GetTextureValue()
 		return TextureFilterStrings[value];
 
 	case GL_TextureBorderColor: {
-		return ColorToString(DecodeColor());
+		return ColorToString(DecodeColor(value));
 	}
 
 	case GL_TextureMaxAnisotropyEXT:
@@ -617,7 +624,7 @@ QString RfxState::GetRenderValue()
 	case GL_ClearColor:
 	case GL_FogColor:
 	case GL_BlendColor:
-		return ColorToString(DecodeColor());
+		return ColorToString(DecodeColor(value));
 
 	case GL_ClearDepth:
 	case GL_DepthNear:

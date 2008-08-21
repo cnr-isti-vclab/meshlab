@@ -51,25 +51,25 @@ void RfxGLPass::CompileAndLink(QGLContext *ctx)
 		return;
 
 	GLubyte *ShaderSource;
-	GLint ShaderStrlen;
+	GLint ShaderLen;
 
 	// compile vertex shader
 	ShaderSource = (GLubyte *)new char[vert.length() + 1];
 	memcpy(ShaderSource, vert.toLocal8Bit().data(), vert.length());
-	ShaderStrlen = (GLint) vert.length();
+	ShaderLen = (GLint) vert.length();
 
 	GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertShader, 1, (const GLcharARB **)&ShaderSource, &ShaderStrlen);
+	glShaderSource(vertShader, 1, (const GLchar **)&ShaderSource, &ShaderLen);
 	glCompileShader(vertShader);
 
 	delete[] ShaderSource;
 	ShaderSource = (GLubyte *)new char[frag.length() + 1];
 	memcpy(ShaderSource, frag.toLocal8Bit().data(), frag.length());
-	ShaderStrlen = (GLint) frag.length();
+	ShaderLen = (GLint) frag.length();
 
 	// compile fragment shader
 	GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragShader, 1, (const GLcharARB **)&ShaderSource, &ShaderStrlen);
+	glShaderSource(fragShader, 1, (const GLchar **)&ShaderSource, &ShaderLen);
 	glCompileShader(fragShader);
 
 	delete[] ShaderSource;
@@ -121,12 +121,16 @@ void RfxGLPass::Start()
 	foreach (RfxState *state, rfxStates)
 		state->SetEnvironment(0);
 
-	// use shader program
-	glUseProgram(shaderProgram);
+	// if this pass has no glsl sources,
+	// keep using glsl program of the previous pass
+	if (!frag.isEmpty() && !vert.isEmpty()) {
 
-	// pass uniforms
-	foreach (RfxUniform *uni, shaderUniforms) {
-		uni->PassToShader();
+		glUseProgram(shaderProgram);
+
+		// pass uniforms
+		foreach (RfxUniform *uni, shaderUniforms) {
+			uni->PassToShader();
+		}
 	}
 }
 

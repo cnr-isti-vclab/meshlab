@@ -34,8 +34,8 @@
 class RfxGLPass
 {
 public:
-	RfxGLPass() : passIndex(-1) {}
-	RfxGLPass(int passidx) : passIndex(passidx) {}
+	RfxGLPass() : passIndex(-1) { useRenderTarget = false; }
+	RfxGLPass(int passidx) : passIndex(passidx) { useRenderTarget = false; }
 	virtual ~RfxGLPass();
 
 	void SetShaderSource(const QString &source, bool isFragment);
@@ -47,7 +47,10 @@ public:
 	void SetPassName(const QString &n) { passName = n; }
 	void AddGLState(RfxState *s) { rfxStates.append(s); }
 	void AddUniform(RfxUniform *u) { shaderUniforms.append(u); }
-	RfxUniform* GetLastUniform() { return shaderUniforms.last(); }
+	void SetRenderToTexture(bool t) { useRenderTarget = t; }
+	bool wantsRenderTarget() { return useRenderTarget; }
+	void LinkRenderTarget(RfxRenderTarget *_rt) { rt = _rt; }
+	RfxRenderTarget* GetRenderTarget() { assert(useRenderTarget); return rt; }
 	QListIterator<RfxUniform*> UniformsIterator()
 	{
 		return QListIterator<RfxUniform*>(shaderUniforms);
@@ -67,6 +70,8 @@ private:
 
 	QString passName;
 	int passIndex;
+	bool useRenderTarget;
+	RfxRenderTarget *rt;
 
 	GLuint shaderProgram;
 	bool shaderLinked;

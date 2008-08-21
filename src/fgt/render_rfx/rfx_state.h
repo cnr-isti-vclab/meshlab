@@ -81,17 +81,19 @@ public:
 	};
 
 	RfxState() {}
-	RfxState(StateType type, int state = 0, unsigned long value = 0);
+	RfxState(StateType type, int state = -1, long value = -1);
 	virtual ~RfxState() {}
 
 	void SetState(int _state) { state = _state; }
-	void SetValue(unsigned long _val) { value = _val; }
+	void SetValue(long _val) { value = _val; }
 	void SetEnvironment(GLint);
 
 	QString GetTextureState() { return TextureStatesStrings[state - 1]; }
 	QString GetTextureValue();
 	QString GetRenderState();
 	QString GetRenderValue();
+
+	static GLfloat* DecodeColor(long);
 
 private:
 	void SetTextureEnvironment(GLint);
@@ -100,7 +102,6 @@ private:
 	GLint GLFilterMode();
 	GLint GLFunctionMode();
 	GLint GLColorMode();
-	GLfloat* DecodeColor();
 	QString ColorToString(float *thecol)
 	{ return "("
 		+ QString().setNum(thecol[0]) + ", "
@@ -111,7 +112,7 @@ private:
 	void GLEnableDisable(GLint);
 
 	int state;
-	unsigned long value;
+	long value;
 	StateType type;
 	static const char *TextureStatesStrings[];
 	static const char *RenderStatesStrings[];

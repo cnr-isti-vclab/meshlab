@@ -29,6 +29,7 @@ RfxUniform::RfxUniform(const QString &_name, const QString &_type)
 	type = GetUniformType(_type);
 	textureLoaded = false;
 	textureNotFound = false;
+	textureRendered = false;
 }
 
 RfxUniform::~RfxUniform()
@@ -117,6 +118,14 @@ void RfxUniform::SetValue(const QString &texFileName)
 
 void RfxUniform::LoadTexture(QGLContext *ctx)
 {
+	if (textureRendered) {
+		textureNotFound = false;
+		textureLoaded = true;
+		textureTarget = GL_TEXTURE_2D;
+
+		return;
+	}
+
 	if (!QFileInfo(textureFile).exists()) {
 		textureNotFound = true;
 		return;
@@ -209,6 +218,10 @@ void RfxUniform::PassToShader()
 	case SAMPLER3D:
 	case SAMPLERCUBE:
 		if (textureLoaded) {
+
+			if (textureRendered)
+				textureId = rTarget->GetTexture();
+
 			glActiveTexture(GL_TEXTURE0 + texUnit);
 			glEnable(textureTarget);
 			glBindTexture(textureTarget, textureId);

@@ -36,7 +36,7 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 	// TODO: passes selection combobox
 
 	/* Uniforms */
-	QListIterator<RfxUniform*> it = s->getPass(selectedPass)->UniformsIterator();
+	QListIterator<RfxUniform*> it = s->GetPass(selectedPass)->UniformsIterator();
 	int unifCount = -1; // keep track of uniform index
 	while (it.hasNext()) {
 		unifCount++;
@@ -61,7 +61,7 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 
 
 	/* Textures */
-	it = s->getPass(selectedPass)->UniformsIterator();
+	it = s->GetPass(selectedPass)->UniformsIterator();
 	unifCount = -1;
 	while (it.hasNext()) {
 		unifCount++;
@@ -70,7 +70,9 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 			continue;
 		ui.comboTextures->addItem("[" +
 		                          RfxUniform::GetTypeString(uni->GetType()) +
-		                          "] " + uni->GetName(),
+		                          "] " +
+		                          ((uni->isRenderable())? " (RT) " : "") +
+		                          uni->GetName(),
 		                          unifCount);
 	}
 
@@ -92,7 +94,7 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 	ui.glStatesTable->horizontalHeader()->setStretchLastSection(true);
 	ui.glStatesTable->horizontalHeader()->hide();
 	ui.glStatesTable->verticalHeader()->hide();
-	QListIterator<RfxState*> sit = s->getPass(selectedPass)->StatesIterator();
+	QListIterator<RfxState*> sit = s->GetPass(selectedPass)->StatesIterator();
 	int rowidx = 0;
 	while (sit.hasNext()) {
 		RfxState *r = sit.next();
@@ -123,8 +125,8 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 
 	vertHL = new GLSLSynHlighter(ui.textVert->document());
 	fragHL = new GLSLSynHlighter(ui.textFrag->document());
-	ui.textVert->setPlainText(s->getPass(selectedPass)->GetVertexSource());
-	ui.textFrag->setPlainText(s->getPass(selectedPass)->GetFragmentSource());
+	ui.textVert->setPlainText(s->GetPass(selectedPass)->GetVertexSource());
+	ui.textFrag->setPlainText(s->GetPass(selectedPass)->GetFragmentSource());
 }
 
 RfxDialog::~RfxDialog()
@@ -141,7 +143,7 @@ void RfxDialog::UniformSelected(int idx)
 		return;
 
 	int uniIndex = ui.comboUniforms->itemData(idx).toInt();
-	RfxUniform *uni = shader->getPass(selectedPass)->getUniform(uniIndex);
+	RfxUniform *uni = shader->GetPass(selectedPass)->getUniform(uniIndex);
 	assert(uni);
 
 	ui.BoxUnifProps->setTitle(uni->GetName());
@@ -322,7 +324,7 @@ void RfxDialog::extendRange(int newVal)
 void RfxDialog::ChangeTexture(int unifIdx)
 {
 	int uniIndex = ui.comboTextures->itemData(unifIdx).toInt();
-	RfxUniform *uni = shader->getPass(selectedPass)->getUniform(uniIndex);
+	RfxUniform *uni = shader->GetPass(selectedPass)->getUniform(uniIndex);
 	assert(uni);
 
 	QString fname = QFileDialog::getOpenFileName(this,
@@ -341,7 +343,7 @@ void RfxDialog::ChangeTexture(int unifIdx)
 void RfxDialog::ChangeValue(const QString& val)
 {
 	QStringList unif = val.split('-');
-	float *oldVal = shader->getPass(selectedPass)->getUniform(unif[0].toInt())->GetValue();
+	float *oldVal = shader->GetPass(selectedPass)->getUniform(unif[0].toInt())->GetValue();
 	float newVal = -1.0f;
 
 	// parent of SignalMapper has been set to appropriate QWidget type
@@ -375,7 +377,7 @@ void RfxDialog::TextureSelected(int idx)
 		return;
 
 	int uniIndex = ui.comboTextures->itemData(idx).toInt();
-	RfxUniform *uni = shader->getPass(selectedPass)->getUniform(uniIndex);
+	RfxUniform *uni = shader->GetPass(selectedPass)->getUniform(uniIndex);
 	assert(uni);
 
 	// connect Change Texture button
@@ -399,7 +401,10 @@ void RfxDialog::TextureSelected(int idx)
 
 	CleanTab(TEXTURE_TAB);
 
-	ui.EditTexFile->setText(uni->GetTextureFName());
+	if (uni->isRenderable())
+		ui.EditTexFile->setText("");
+	else
+		ui.EditTexFile->setText(uni->GetTextureFName());
 
 	QLabel *fname = new QLabel();
 	ui.infoTexLayout->addWidget(fname);
@@ -412,6 +417,7 @@ void RfxDialog::TextureSelected(int idx)
 	} else {
 		fname->setText("<span style=\"color:darkgreen;\">Texture loaded</span>");
 
+		// TODO: check if texture is renderable
 		QImage texQt;
 		if (texQt.load(uni->GetTextureFName())) {
 			QLabel *tSize = new QLabel();
@@ -481,7 +487,8 @@ void RfxDialog::TextureSelected(int idx)
 			widgetsByTab.insert(TEXTURE_TAB, tFormat);
 
 			// try to get a preview
-			ui.lblPreview->setPixmap(QPixmap::fromImage(texQt).scaled(QSize(100, 100), Qt::KeepAspectRatio));
+			ui.lblPreview->setPixmap(QPixmap::fromImage(texQt).scaled(QSize(100, 100),
+			                                                          Qt::KeepAspectRatio));
 		}
 
 		QLabel *tunit = new QLabel();

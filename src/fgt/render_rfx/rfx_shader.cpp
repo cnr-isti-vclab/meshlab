@@ -29,40 +29,56 @@ RfxShader::RfxShader()
 
 RfxShader::~RfxShader()
 {
-	foreach (RfxGLPass *pass, shader_pass) {
+	foreach (RfxGLPass *pass, shaderPasses) {
 		delete pass;
 		pass = 0;
 	}
-	shader_pass.clear();
+	shaderPasses.clear();
 }
 
-void RfxShader::AddGLPass(RfxGLPass *pass)
+int RfxShader::FindRT(const QString& theName)
 {
-	shader_pass.append(pass);
+	for (int i = 0; i < renderTargets.size(); ++i)
+		if (renderTargets.at(i)->GetName() == theName)
+			return i;
+
+	return -1;
 }
 
 void RfxShader::SortPasses()
 {
-	int minVal = shader_pass.at(0)->GetPassIndex();
+	int minVal = shaderPasses.at(0)->GetPassIndex();
 	int minIdx = 0;
 
-	for (int i = 0; i < shader_pass.size(); ++i) {
-		if (shader_pass.at(i)->GetPassIndex() < minVal) {
-			shader_pass.swap(i, minIdx);
+	for (int i = 0; i < shaderPasses.size(); ++i) {
+		if (shaderPasses.at(i)->GetPassIndex() < minVal) {
+			shaderPasses.swap(i, minIdx);
 			minIdx = i;
-			minVal = shader_pass.at(i)->GetPassIndex();
+			minVal = shaderPasses.at(i)->GetPassIndex();
 		}
 	}
 }
 
 void RfxShader::CompileAndLink(QGLContext *ctx)
 {
-	foreach (RfxGLPass *pass, shader_pass)
+	foreach (RfxGLPass *pass, shaderPasses)
 		pass->CompileAndLink(ctx);
 }
 
 void RfxShader::Start()
 {
-	// TODO: add support for multiple pass shader
-	shader_pass.first()->Start();
+	foreach (RfxGLPass *pass, shaderPasses) {
+		RfxRenderTarget *rt = NULL;
+		if (pass->wantsRenderTarget()) {
+			rt = pass->GetRenderTarget();
+			int passIdx = pass->GetPassIndex();
+			if (rt->Setup(passIdx))
+				rt->Bind(passIdx);
+		}
+
+		pass->Start();
+
+		if (rt != NULL)
+			rt->Unbind();
+	}
 }

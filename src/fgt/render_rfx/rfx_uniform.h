@@ -30,6 +30,7 @@
 #include <GL/glew.h>
 #include <QGLWidget>
 #include "rfx_state.h"
+#include "rfx_rendertarget.h"
 
 class RfxUniform
 {
@@ -55,6 +56,7 @@ public:
 
 	void SetValue(float[16]);
 	void SetValue(const QString&);
+	void SetValue(RfxRenderTarget *_rt) { rTarget = _rt; textureRendered = true; }
 	void SetTU(GLint tu) { texUnit = tu; }
 	float* GetValue() { return value; }
 	GLint GetTU() { return texUnit; }
@@ -64,6 +66,7 @@ public:
 	bool isTexture() { return (type > MAT4); }
 	bool isTextureLoaded() { return textureLoaded; }
 	bool isTextureFound() { return !textureNotFound; }
+	bool isRenderable() { return textureRendered; }
 	QString& GetTextureFName() { return textureFile; }
 
 	static UniformType GetUniformType(const QString&);
@@ -80,6 +83,8 @@ private:
 
 	bool textureLoaded;
 	bool textureNotFound;
+	bool textureRendered;
+	RfxRenderTarget *rTarget;
 	QList<RfxState*> textureStates;
 	QString textureFile;
 	GLuint textureId;

@@ -31,6 +31,7 @@
 #include <QDir>
 #include "rfx_shader.h"
 #include "rfx_glpass.h"
+#include "rfx_rendertarget.h"
 
 class RfxParser
 {
@@ -41,7 +42,7 @@ public:
 	RfxShader* GetShader() { return rfxShader; }
 
 private:
-	void AppendGLStates(RfxGLPass*, QDomNodeList, RfxState::StateType);
+	QList<RfxState*> ParseGLStates(QDomNodeList, RfxState::StateType);
 	void ParseUniforms(const QString&);
 	float* ValueFromRfx(const QString&, RfxUniform::UniformType);
 	QString TextureFromRfx(const QString&, RfxUniform::UniformType);
