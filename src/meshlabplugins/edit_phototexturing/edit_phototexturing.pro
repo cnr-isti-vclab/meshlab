@@ -24,7 +24,7 @@ SOURCES += 	photoTexturing.cpp \
 			src/Tsai/cal_main.c \
 			src/Tsai/cal_eval.c \ 
 			#src/Kai/KaiCameraCalibration.cpp \
-			src/Kai/Polynom3_444.cpp \
+			#src/Kai/Polynom3_444.cpp \
 			src/QuadTree/QuadTreeNode.cpp \
 			$$VCGDIR/wrap/gui/trackball.cpp\
 			$$VCGDIR/wrap/gui/trackmode.cpp \
