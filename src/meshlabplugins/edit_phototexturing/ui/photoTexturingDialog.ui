@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>560</width>
+    <width>580</width>
     <height>360</height>
    </rect>
   </property>
@@ -17,13 +17,13 @@
   </property>
   <property name="minimumSize" >
    <size>
-    <width>560</width>
+    <width>580</width>
     <height>360</height>
    </size>
   </property>
   <property name="maximumSize" >
    <size>
-    <width>560</width>
+    <width>580</width>
     <height>360</height>
    </size>
   </property>
@@ -35,7 +35,7 @@
     <rect>
      <x>10</x>
      <y>0</y>
-     <width>541</width>
+     <width>561</width>
      <height>351</height>
     </rect>
    </property>
@@ -60,7 +60,7 @@
       <widget class="QWidget" name="layoutWidget" >
        <property name="geometry" >
         <rect>
-         <x>370</x>
+         <x>390</x>
          <y>20</y>
          <width>161</width>
          <height>221</height>
@@ -104,7 +104,7 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>351</width>
+         <width>377</width>
          <height>221</height>
         </rect>
        </property>
@@ -158,6 +158,13 @@
            <widget class="QPushButton" name="assignImagePushButton" >
             <property name="text" >
              <string>Assign Image</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="convertToTsaiCameraPushButton" >
+            <property name="text" >
+             <string>Convert to Tsai</string>
             </property>
            </widget>
           </item>
