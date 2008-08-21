@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -23,18 +23,41 @@
 #include <QtGui>
 #include "QuadTreeNode.h"
 
-QuadTreeNode::QuadTreeNode(double x, double y,double w, double h){	
+QuadTreeNode::QuadTreeNode(double x, double y,double w, double h){
 	qx=x;
 	qy=y;
 	qw=w;
 	qh=h;
 	endOfTree = false;
+	qchildren[0] = NULL;
+	qchildren[1] = NULL;
+	qchildren[2] = NULL;
+	qchildren[3] = NULL;
+	qleafs = NULL;
 }
 
-	
-QuadTreeNode::~QuadTreeNode(){		
+
+QuadTreeNode::~QuadTreeNode(){
+	//qDebug() << "QuadTreeNode::~QuadTreeNode()";
+	if(qchildren[0]!= NULL){
+		delete qchildren[0];
+	}
+	if(qchildren[1]!= NULL){
+		delete qchildren[1];
+	}
+	if(qchildren[2]!= NULL){
+		delete qchildren[2];
+	}
+	if(qchildren[3]!= NULL){
+		delete qchildren[3];
+	}
+
+	if (qleafs!=NULL){
+		qleafs->clear();
+		delete qleafs;
+	}
 }
-	
+
 void QuadTreeNode::buildQuadTree(QList<QuadTreeLeaf*> *list, double min_width, double min_height){
 	qDebug()<< "min_width: "<<min_width << "min_height:" <<min_height;
 	buildQuadTree(list,min_width, min_height,MAX_LEAFS,MAX_DEPTH);
@@ -59,7 +82,7 @@ void QuadTreeNode::buildQuadTree(QList<QuadTreeLeaf*> *list, double min_width, d
 		QuadTreeLeaf* tmp;
 		for (i=0;i<list->size();i++){
 			tmp=list->at(i);
-			
+
 			if(tmp->isInside(qchildren[0]->qx,qchildren[0]->qy,qchildren[0]->qw,qchildren[0]->qh)){
 				q0list->push_back(tmp);
 			}
@@ -88,18 +111,18 @@ void QuadTreeNode::buildQuadTree(QList<QuadTreeLeaf*> *list, double min_width, d
 void QuadTreeNode::getLeafs(double x, double y,QList <QuadTreeLeaf*> &list){
 
 	if (endOfTree){
-		
+
 		int i;
 		QuadTreeLeaf* tmp;
 		for(i=0;i<qleafs->size();i++){
-			
+
 			tmp = qleafs->at(i);
 			if(tmp->isInside(x,y)){
 				list.push_back(tmp);
 			}
 		}
 		//qDebug()<< "qleafs" << qleafs->size() << "list" << list->size();
-	}else{	
+	}else{
 		int i;
 		bool found = false;
 		for (i=0;i<4;i++){
