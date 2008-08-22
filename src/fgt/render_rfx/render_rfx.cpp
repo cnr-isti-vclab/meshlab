@@ -115,7 +115,7 @@ void RenderRFX::Init(QAction *action, MeshModel &/*mesh*/,
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
 			shadersSupported = true;
 
-			shader->CompileAndLink((QGLContext *)parent);
+			shader->CompileAndLink();
 
 			dialog = new RfxDialog(shader, action, parent);
 			dialog->move(0, 100);
@@ -140,7 +140,7 @@ void RenderRFX::Render(QAction *action, MeshModel &/*mesh*/,
 	glGetError();
 }
 
-const PluginInfo &RenderRFX::Info()
+const PluginInfo& RenderRFX::Info()
 {
 	static PluginInfo ai;
 	ai.Date    = tr("July 2008");

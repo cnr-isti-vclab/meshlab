@@ -53,7 +53,7 @@ public:
 
 	void AddGLState(RfxState *s) { textureStates.append(s); }
 	void UpdateUniformLocation(GLuint programId);
-	void LoadTexture(QGLContext *);
+	void LoadTexture();
 	void PassToShader();
 
 	void SetValue(float[16]);

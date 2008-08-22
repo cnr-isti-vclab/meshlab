@@ -107,6 +107,9 @@ void RfxRenderTarget::Bind(int pass)
 
 void RfxRenderTarget::Unbind()
 {
+	if (!qfbo)
+		return;
+
 	qfbo->release();
 
 	glPopAttrib();

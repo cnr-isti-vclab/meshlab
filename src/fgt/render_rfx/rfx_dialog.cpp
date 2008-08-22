@@ -27,7 +27,7 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 	: QDialog(parent)
 {
 	shader = s;
-	mGLWin = (QGLContext *)parent;
+	mGLWin = (QGLContext*)parent;
 
 	ui.setupUi(this);
 	setWindowTitle("RenderRfx [" + a->text() + "]");
@@ -377,7 +377,7 @@ void RfxDialog::ChangeTexture(int unifIdx)
 	                                             uni->GetTextureFName());
 	if (!fname.isEmpty()) {
 		uni->SetValue(QDir::fromNativeSeparators(fname));
-		uni->LoadTexture(mGLWin);
+		uni->LoadTexture();
 
 		// generate a currentIndexChanged event
 		ui.comboTextures->setCurrentIndex(0);
@@ -462,7 +462,6 @@ void RfxDialog::TextureSelected(int idx)
 	} else {
 		fname->setText("<span style=\"color:darkgreen;\">Texture loaded</span>");
 
-		// TODO: check if texture is renderable
 		QImage texQt;
 		bool loaded;
 		if (uni->isRenderable()) {
@@ -542,7 +541,8 @@ void RfxDialog::TextureSelected(int idx)
 			// try to get a preview
 			QPixmap prvw = QPixmap::fromImage(texQt);
 			if (!prvw.isNull())
-				ui.lblPreview->setPixmap(prvw.scaled(QSize(100, 100)));
+				ui.lblPreview->setPixmap(prvw.scaled(QSize(100, 100),
+				                                     Qt::KeepAspectRatio));
 		}
 
 		QLabel *tunit = new QLabel();

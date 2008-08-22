@@ -62,7 +62,7 @@ public:
 	}
 	RfxUniform* getUniform(int uniIdx) { return shaderUniforms.at(uniIdx); }
 	RfxUniform* getUniform(const QString& uniIdx);
-	void CompileAndLink(QGLContext *);
+	void CompileAndLink();
 	void Start();
 
 private:

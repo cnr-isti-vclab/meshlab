@@ -45,7 +45,7 @@ void RfxGLPass::SetShaderSource(const QString &source, bool isFragment)
 		vert = source;
 }
 
-void RfxGLPass::CompileAndLink(QGLContext *ctx)
+void RfxGLPass::CompileAndLink()
 {
 	if (frag.isEmpty() || vert.isEmpty())
 		return;
@@ -90,7 +90,7 @@ void RfxGLPass::CompileAndLink(QGLContext *ctx)
 		// and load textures
 		shaderLinked = true;
 		foreach (RfxUniform *uni, shaderUniforms) {
-			uni->LoadTexture(ctx);
+			uni->LoadTexture();
 			uni->UpdateUniformLocation(shaderProgram);
 		}
 	}

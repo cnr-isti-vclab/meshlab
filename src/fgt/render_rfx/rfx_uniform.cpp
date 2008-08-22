@@ -116,7 +116,7 @@ void RfxUniform::SetValue(const QString &texFileName)
 	textureFile = texFileName;
 }
 
-void RfxUniform::LoadTexture(QGLContext *ctx)
+void RfxUniform::LoadTexture()
 {
 	if (textureRendered) {
 		textureNotFound = false;
@@ -148,8 +148,9 @@ void RfxUniform::LoadTexture(QGLContext *ctx)
 	}
 
 	glGetIntegerv(GL_MAX_TEXTURE_COORDS, &maxTexUnits);
+	QGLContext *ctx = const_cast<QGLContext*>(QGLContext::currentContext());
 
-	// TODO: add support for more texture type for platform where QT is
+	// TODO: add support for more texture type for platforms where QT is
 	//       shipped already compiled (ie win), since by default QImage
 	//       only supports: BMP, GIF, JPG, PNG, PBM, PPM, TIFF and XPM
 	QImage Tex(textureFile);

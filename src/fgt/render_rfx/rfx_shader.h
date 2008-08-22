@@ -46,7 +46,7 @@ public:
 	{
 		return QListIterator<RfxGLPass*>(shaderPasses);
 	}
-	void CompileAndLink(QGLContext *);
+	void CompileAndLink();
 	void Start();
 	void Stop() { glUseProgram(0); }
 

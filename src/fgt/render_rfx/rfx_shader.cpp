@@ -54,10 +54,10 @@ void RfxShader::SortPasses()
 				shaderPasses.swap(j, j + 1);
 }
 
-void RfxShader::CompileAndLink(QGLContext *ctx)
+void RfxShader::CompileAndLink()
 {
 	foreach (RfxGLPass *pass, shaderPasses)
-		pass->CompileAndLink(ctx);
+		pass->CompileAndLink();
 }
 
 void RfxShader::Start()
