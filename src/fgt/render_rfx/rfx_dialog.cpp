@@ -28,15 +28,46 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 {
 	shader = s;
 	mGLWin = (QGLContext *)parent;
-	selectedPass = 0;
 
 	ui.setupUi(this);
 	setWindowTitle("RenderRfx [" + a->text() + "]");
 
-	// TODO: passes selection combobox
+	/* Passes */
+	QListIterator<RfxGLPass*> pit = s->PassesIterator();
+	while (pit.hasNext()) {
+		RfxGLPass *pass = pit.next();
+		ui.comboPasses->addItem("Pass #" +
+								QString().setNum(pass->GetPassIndex()) +
+								" " + pass->GetPassName() + " ");
+	}
+	// start from first pass
+	connect(ui.comboPasses, SIGNAL(currentIndexChanged(int)), this,
+			SLOT(PassSelected(int)));
+	selPass = 0;
+	ui.comboPasses->setCurrentIndex(0);
 
+	QFont fixedfont;
+	fixedfont.setFamily("Courier");
+	fixedfont.setFixedPitch(true);
+	fixedfont.setPointSize(10);
+	ui.textVert->setFont(fixedfont);
+	ui.textFrag->setFont(fixedfont);
+
+	vertHL = new GLSLSynHlighter(ui.textVert->document());
+	fragHL = new GLSLSynHlighter(ui.textFrag->document());
+
+	setupTabs();
+}
+
+void RfxDialog::setupTabs()
+{
 	/* Uniforms */
-	QListIterator<RfxUniform*> it = s->GetPass(selectedPass)->UniformsIterator();
+	ui.comboUniforms->clear();
+	ui.comboUniforms->setEnabled(true);
+	disconnect(ui.comboUniforms);
+	ui.BoxUnifProps->setTitle("");
+
+	QListIterator<RfxUniform*> it = shader->GetPass(selPass)->UniformsIterator();
 	int unifCount = -1; // keep track of uniform index
 	while (it.hasNext()) {
 		unifCount++;
@@ -44,9 +75,9 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 		if (uni->isTexture())
 			continue;
 		ui.comboUniforms->addItem("[" +
-		                          RfxUniform::GetTypeString(uni->GetType()) +
-		                          "] " + uni->GetName(),
-		                          unifCount);
+								  RfxUniform::GetTypeString(uni->GetType()) +
+								  "] " + uni->GetName(),
+								  unifCount);
 	}
 
 	if (ui.comboUniforms->count() == 0) {
@@ -56,12 +87,16 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 		ui.comboUniforms->insertItem(0, "Select...");
 		ui.comboUniforms->setCurrentIndex(0);
 		connect(ui.comboUniforms, SIGNAL(currentIndexChanged(int)), this,
-		        SLOT(UniformSelected(int)));
+				SLOT(UniformSelected(int)));
 	}
 
 
 	/* Textures */
-	it = s->GetPass(selectedPass)->UniformsIterator();
+	ui.comboTextures->clear();
+	ui.comboTextures->setEnabled(true);
+	disconnect(ui.comboTextures);
+
+	it = shader->GetPass(selPass)->UniformsIterator();
 	unifCount = -1;
 	while (it.hasNext()) {
 		unifCount++;
@@ -69,11 +104,11 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 		if (!uni->isTexture())
 			continue;
 		ui.comboTextures->addItem("[" +
-		                          RfxUniform::GetTypeString(uni->GetType()) +
-		                          "] " +
-		                          ((uni->isRenderable())? " (RT) " : "") +
-		                          uni->GetName(),
-		                          unifCount);
+								  RfxUniform::GetTypeString(uni->GetType()) +
+								  "] " +
+								  ((uni->isRenderable())? " (RT) " : "") +
+								  uni->GetName(),
+								  unifCount);
 	}
 
 	if (ui.comboTextures->count() == 0) {
@@ -83,8 +118,19 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 		ui.comboTextures->insertItem(0, "Select...");
 		ui.comboTextures->setCurrentIndex(0);
 		connect(ui.comboTextures, SIGNAL(currentIndexChanged(int)), this,
-		        SLOT(TextureSelected(int)));
+				SLOT(TextureSelected(int)));
 	}
+
+	disconnect(ui.btnChangeTexture);
+	ui.BoxTextureProps->setTitle("");
+	ui.EditTexFile->clear();
+	ui.TexStatesTable->clear();
+	ui.TexStatesTable->setRowCount(0);
+	ui.TexStatesTable->setColumnCount(2);
+	ui.TexStatesTable->horizontalHeader()->setStretchLastSection(true);
+	ui.TexStatesTable->horizontalHeader()->hide();
+	ui.TexStatesTable->verticalHeader()->hide();
+	ui.lblPreview->clear();
 
 
 	/* States */
@@ -94,7 +140,7 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 	ui.glStatesTable->horizontalHeader()->setStretchLastSection(true);
 	ui.glStatesTable->horizontalHeader()->hide();
 	ui.glStatesTable->verticalHeader()->hide();
-	QListIterator<RfxState*> sit = s->GetPass(selectedPass)->StatesIterator();
+	QListIterator<RfxState*> sit = shader->GetPass(selPass)->StatesIterator();
 	int rowidx = 0;
 	while (sit.hasNext()) {
 		RfxState *r = sit.next();
@@ -116,17 +162,8 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 
 
 	/* Vertex/Fragment source view */
-	QFont fixedfont;
-	fixedfont.setFamily("Courier");
-	fixedfont.setFixedPitch(true);
-	fixedfont.setPointSize(10);
-	ui.textVert->setFont(fixedfont);
-	ui.textFrag->setFont(fixedfont);
-
-	vertHL = new GLSLSynHlighter(ui.textVert->document());
-	fragHL = new GLSLSynHlighter(ui.textFrag->document());
-	ui.textVert->setPlainText(s->GetPass(selectedPass)->GetVertexSource());
-	ui.textFrag->setPlainText(s->GetPass(selectedPass)->GetFragmentSource());
+	ui.textVert->setPlainText(shader->GetPass(selPass)->GetVertexSource());
+	ui.textFrag->setPlainText(shader->GetPass(selPass)->GetFragmentSource());
 }
 
 RfxDialog::~RfxDialog()
@@ -137,17 +174,24 @@ RfxDialog::~RfxDialog()
 	CleanTab(ALL_TABS);
 }
 
+void RfxDialog::PassSelected(int idx)
+{
+	selPass = idx;
+	setupTabs();
+	CleanTab(ALL_TABS);
+}
+
 void RfxDialog::UniformSelected(int idx)
 {
 	if (idx <= 0)
 		return;
 
 	int uniIndex = ui.comboUniforms->itemData(idx).toInt();
-	RfxUniform *uni = shader->GetPass(selectedPass)->getUniform(uniIndex);
+	RfxUniform *uni = shader->GetPass(selPass)->getUniform(uniIndex);
 	assert(uni);
 
-	ui.BoxUnifProps->setTitle(uni->GetName());
 	CleanTab(UNIFORM_TAB);
+	ui.BoxUnifProps->setTitle(uni->GetName());
 
 	switch (uni->GetType()) {
 	case RfxUniform::INT:
@@ -279,6 +323,7 @@ void RfxDialog::CleanTab(int tabIdx)
 {
 	// deletes all widgets from specified tab or, if tabIdx == -1
 	// removes all widgets from all tabs
+	// (this applies to *dynamically created* widgets only)
 
 	if (tabIdx == ALL_TABS) {
 		QMapIterator<int, QWidget*> it(widgetsByTab);
@@ -324,7 +369,7 @@ void RfxDialog::extendRange(int newVal)
 void RfxDialog::ChangeTexture(int unifIdx)
 {
 	int uniIndex = ui.comboTextures->itemData(unifIdx).toInt();
-	RfxUniform *uni = shader->GetPass(selectedPass)->getUniform(uniIndex);
+	RfxUniform *uni = shader->GetPass(selPass)->getUniform(uniIndex);
 	assert(uni);
 
 	QString fname = QFileDialog::getOpenFileName(this,
@@ -343,7 +388,7 @@ void RfxDialog::ChangeTexture(int unifIdx)
 void RfxDialog::ChangeValue(const QString& val)
 {
 	QStringList unif = val.split('-');
-	float *oldVal = shader->GetPass(selectedPass)->getUniform(unif[0].toInt())->GetValue();
+	float *oldVal = shader->GetPass(selPass)->getUniform(unif[0].toInt())->GetValue();
 	float newVal = -1.0f;
 
 	// parent of SignalMapper has been set to appropriate QWidget type
@@ -371,13 +416,13 @@ void RfxDialog::ChangeValue(const QString& val)
 
 void RfxDialog::TextureSelected(int idx)
 {
-	disconnect(ui.btnChangeTexture, 0, 0, 0);
+	disconnect(ui.btnChangeTexture);
 
 	if (idx <= 0)
 		return;
 
 	int uniIndex = ui.comboTextures->itemData(idx).toInt();
-	RfxUniform *uni = shader->GetPass(selectedPass)->getUniform(uniIndex);
+	RfxUniform *uni = shader->GetPass(selPass)->getUniform(uniIndex);
 	assert(uni);
 
 	// connect Change Texture button
@@ -402,7 +447,7 @@ void RfxDialog::TextureSelected(int idx)
 	CleanTab(TEXTURE_TAB);
 
 	if (uni->isRenderable())
-		ui.EditTexFile->setText("");
+		ui.EditTexFile->clear();
 	else
 		ui.EditTexFile->setText(uni->GetTextureFName());
 
@@ -419,7 +464,15 @@ void RfxDialog::TextureSelected(int idx)
 
 		// TODO: check if texture is renderable
 		QImage texQt;
-		if (texQt.load(uni->GetTextureFName())) {
+		bool loaded;
+		if (uni->isRenderable()) {
+			texQt = uni->GetRTTexture();
+			loaded = !texQt.isNull();
+		} else {
+			loaded = texQt.load(uni->GetTextureFName());
+		}
+
+		if (loaded) {
 			QLabel *tSize = new QLabel();
 			tSize->setText("Dimensions: " +
 					       QString().setNum(texQt.width()) + " x " +
@@ -487,8 +540,9 @@ void RfxDialog::TextureSelected(int idx)
 			widgetsByTab.insert(TEXTURE_TAB, tFormat);
 
 			// try to get a preview
-			ui.lblPreview->setPixmap(QPixmap::fromImage(texQt).scaled(QSize(100, 100),
-			                                                          Qt::KeepAspectRatio));
+			QPixmap prvw = QPixmap::fromImage(texQt);
+			if (!prvw.isNull())
+				ui.lblPreview->setPixmap(prvw.scaled(QSize(100, 100)));
 		}
 
 		QLabel *tunit = new QLabel();

@@ -78,9 +78,10 @@ public:
 	RfxDialog(RfxShader*, QAction*, QWidget *parent = 0);
 	virtual ~RfxDialog();
 
-	enum DialogTabs { ALL_TABS = -1, UNIFORM_TAB, TEXTURE_TAB, GLSTATE_TAB };
+	enum DialogTabs { UNIFORM_TAB, TEXTURE_TAB, ALL_TABS };
 
 public slots:
+	void PassSelected(int);
 	void UniformSelected(int);
 	void TextureSelected(int);
 	void ChangeTexture(int);
@@ -89,13 +90,14 @@ public slots:
 	void extendRange(int);
 
 private:
+	void setupTabs();
 	void DrawIFace(RfxUniform*, int idx, int rows, int columns);
 	void CleanTab(int);
 
 	Ui::Dialog ui;
 	QGLContext *mGLWin;
 	QMultiMap<int, QWidget*> widgetsByTab;
-	int selectedPass;
+	int selPass;
 	RfxShader *shader;
 	GLSLSynHlighter *vertHL;
 	GLSLSynHlighter *fragHL;

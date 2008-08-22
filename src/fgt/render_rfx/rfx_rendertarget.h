@@ -24,9 +24,12 @@
 #ifndef RFX_RENDERTARGET_H_
 #define RFX_RENDERTARGET_H_
 
+#include <cassert>
 #include <QString>
 #include <QMap>
+#include <QImage>
 #include <GL/glew.h>
+#include <QGLFramebufferObject>
 #include "rfx_state.h"
 
 class RfxRenderTarget
@@ -39,18 +42,18 @@ public:
 	void SetClear(int pass, float depthClear, float *colorClear);
 	void AddGLState(int p, RfxState *s) { passStates[p].append(s); }
 	const QString& GetName() { return name; }
-	GLuint GetTexture() { return texture; }
+	GLuint GetTexture() { return qfbo->texture(); }
+	QImage GetQImage() { return qfbo->toImage(); }
 	bool Setup(int pass);
 	void Bind(int pass);
 	void Unbind();
 
 private:
+	QGLFramebufferObject *qfbo;
+
 	QString name;
 	int width;
 	int height;
-	GLuint texture;
-	GLuint fbo;
-	GLuint depthbuffer;
 
 	struct RTOptions {
 		GLint clearMask;

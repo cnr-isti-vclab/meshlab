@@ -80,8 +80,8 @@ bool RfxParser::Parse()
 		QDomElement rtEl = rtex.at(i).toElement();
 
 		RfxRenderTarget *rt = new RfxRenderTarget(rtEl.attribute("NAME"));
-		//rt->SetSize(rtEl.attribute("WIDTH").toInt(),
-		//            rtEl.attribute("HEIGHT").toInt());
+		rt->SetSize(rtEl.attribute("WIDTH").toInt(),
+		            rtEl.attribute("HEIGHT").toInt());
 
 		rfxShader->AddRT(rt);
 	}
@@ -191,7 +191,7 @@ bool RfxParser::Parse()
 					unif->SetTU(tu++);
 
 					// texture maybe from a file or a renderable one
-					int rtIdx;
+					int rtIdx = -1;
 					QString txPath = TextureFromRfx(texName, unif->GetType());
 					if (txPath.startsWith("RT:")) {
 						rtIdx = txPath.split(":").at(1).toInt();
@@ -223,6 +223,8 @@ bool RfxParser::Parse()
 				}
 			}
 		}
+		// clear uniform list for next pass
+		uniformType.clear();
 
 		// finally add to the pass list
 		rfxShader->AddGLPass(theGLPass);
@@ -331,7 +333,7 @@ QString RfxParser::TextureFromRfx(const QString& VarName,
 
 			// then join together and return the absolute path
 			QFileInfo thefile(fDir, fName);
-			filePath = thefile.canonicalFilePath();
+			filePath = thefile.absoluteFilePath();
 
 			break;
 		}

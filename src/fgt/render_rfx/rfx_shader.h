@@ -42,6 +42,10 @@ public:
 	void AddGLPass(RfxGLPass *pass) { shaderPasses.append(pass); }
 	RfxGLPass* GetPass(int idx) { return shaderPasses.at(idx); }
 	void SortPasses();
+	QListIterator<RfxGLPass*> PassesIterator()
+	{
+		return QListIterator<RfxGLPass*>(shaderPasses);
+	}
 	void CompileAndLink(QGLContext *);
 	void Start();
 	void Stop() { glUseProgram(0); }

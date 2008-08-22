@@ -24,9 +24,11 @@
 #ifndef RFX_UNIFORM_H_
 #define RFX_UNIFORM_H_
 
+#include <cassert>
 #include <QString>
 #include <QList>
 #include <QFileInfo>
+#include <QImage>
 #include <GL/glew.h>
 #include <QGLWidget>
 #include "rfx_state.h"
@@ -68,6 +70,7 @@ public:
 	bool isTextureFound() { return !textureNotFound; }
 	bool isRenderable() { return textureRendered; }
 	QString& GetTextureFName() { return textureFile; }
+	QImage GetRTTexture() { assert(rTarget); return rTarget->GetQImage(); }
 
 	static UniformType GetUniformType(const QString&);
 	static QString GetTypeString(UniformType u) { return UniformTypeString[u]; }

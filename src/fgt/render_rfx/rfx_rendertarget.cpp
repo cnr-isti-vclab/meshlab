@@ -28,15 +28,12 @@ RfxRenderTarget::RfxRenderTarget(const QString& rtName)
 	name = rtName;
 	width = 0;
 	height = 0;
-	texture = 0;
-	fbo = 0;
 }
 
 RfxRenderTarget::~RfxRenderTarget()
 {
-	glDeleteRenderbuffersEXT(1, &depthbuffer);
-	glDeleteTextures(1, &texture);
-	glDeleteFramebuffersEXT(1, &fbo);
+	if (qfbo)
+		delete qfbo;
 }
 
 void RfxRenderTarget::SetClear(int pass, float depthClear, float *colorClear)
@@ -69,18 +66,9 @@ bool RfxRenderTarget::Setup(int pass)
 		return false;
 	}
 
-	// create depth renderbuffer
-	glGenRenderbuffersEXT(1, &depthbuffer);
-	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthbuffer);
-	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT,
-	                         width, height);
+	qfbo = new QGLFramebufferObject(width, height, QGLFramebufferObject::Depth);
 
-	// create empty texture
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  width, height, 0, GL_RGBA,
-				 GL_UNSIGNED_BYTE, NULL);
-
+	glBindTexture(GL_TEXTURE_2D, qfbo->texture());
 	// set texture state based on the first uniform that will use RT
 	QList<int> k = passStates.keys();
 	for (int i = 0; i < k.size(); ++i) {
@@ -90,21 +78,13 @@ bool RfxRenderTarget::Setup(int pass)
 		}
 	}
 
-	// create FBO and attach depth and color buffer
-	glGenFramebuffersEXT(1, &fbo);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-	                             GL_RENDERBUFFER_EXT, depthbuffer);
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-	                          GL_TEXTURE_2D, texture, 0);
-
-	// check if everything went ok
-	GLint status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-	return (status == GL_FRAMEBUFFER_COMPLETE_EXT);
+	return qfbo->isValid();
 }
 
 void RfxRenderTarget::Bind(int pass)
 {
+	assert(qfbo->isValid());
+
 	bool colClear = passOptions.value(pass).colorClear;
 	bool depClear = passOptions.value(pass).depthClear;
 
@@ -116,16 +96,19 @@ void RfxRenderTarget::Bind(int pass)
 	if (depClear)
 		glClearDepth(passOptions.value(pass).depthClearVal);
 
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+	qfbo->bind();
+
+	glPushAttrib(GL_VIEWPORT_BIT);
+	glViewport(0, 0, width, height);
 
 	if (colClear || depClear)
 		glClear(passOptions.value(pass).clearMask);
-	glPushAttrib(GL_VIEWPORT_BIT);
-	glViewport(0, 0, width, height);
 }
 
 void RfxRenderTarget::Unbind()
 {
+	qfbo->release();
+
 	glPopAttrib();
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }

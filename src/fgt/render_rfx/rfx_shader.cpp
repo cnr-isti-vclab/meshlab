@@ -47,16 +47,11 @@ int RfxShader::FindRT(const QString& theName)
 
 void RfxShader::SortPasses()
 {
-	int minVal = shaderPasses.at(0)->GetPassIndex();
-	int minIdx = 0;
-
-	for (int i = 0; i < shaderPasses.size(); ++i) {
-		if (shaderPasses.at(i)->GetPassIndex() < minVal) {
-			shaderPasses.swap(i, minIdx);
-			minIdx = i;
-			minVal = shaderPasses.at(i)->GetPassIndex();
-		}
-	}
+	for (int i = 0; i < shaderPasses.size() - 1; ++i)
+		for (int j = 0; j < shaderPasses.size() - 1 - i; ++j)
+			if (shaderPasses.at(j + 1)->GetPassIndex()
+			    < shaderPasses.at(j)->GetPassIndex())
+				shaderPasses.swap(j, j + 1);
 }
 
 void RfxShader::CompileAndLink(QGLContext *ctx)

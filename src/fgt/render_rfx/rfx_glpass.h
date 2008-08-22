@@ -24,6 +24,7 @@
 #ifndef RFX_GLPASS_H_
 #define RFX_GLPASS_H_
 
+#include <cassert>
 #include <QString>
 #include <QList>
 #include <GL/glew.h>
