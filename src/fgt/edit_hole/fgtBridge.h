@@ -47,7 +47,7 @@ public:
 	typedef typename MESH::FaceIterator				FaceIterator;
 	typedef typename vcg::face::Pos<FaceType>		PosType;
 
-	typedef typename FgtHole<MESH>					HoleType;
+	typedef FgtHole<MESH>					HoleType;
 	typedef typename std::vector< FgtHole<MESH> >	HoleVector;
 	/*
     typedef typename MESH::CoordType				CoordType;
@@ -66,7 +66,7 @@ public:
 		face1 = face2 = 0;
 	};
 
-	void FgtBridge::setDestination(const HoleType *hole_B, PosType pos_B)
+	void setDestination(const HoleType *hole_B, PosType pos_B)
 	{
 		assert(pos_B.IsBorder());
 		holeB = hole_B;
@@ -83,7 +83,7 @@ public:
 	{
 		// prima faccia del bridge
 		//FaceIterator f = tri::Allocator<MESH>::AddFaces(mesh, 2, app);
-		FaceIterator f = tri::Allocator<MESH>::AddFaces(mesh, 1, app);
+		FaceIterator f = vcg::tri::Allocator<MESH>::AddFaces(mesh, 1, app);
 		(*f).V(0) = posA.f->V1( posA.z );
 		(*f).V(1) = posA.f->V0( posA.z );
 		(*f).V(2) = posB.f->V0( posB.z );
