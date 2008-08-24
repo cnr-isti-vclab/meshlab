@@ -294,10 +294,10 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 	}
 	else if (role == Qt::TextAlignmentRole)
 	{
-		if(index.column() < 4)
-			return Qt::AlignLeft;
-		else
-			return Qt::AlignCenter;
+		if(index.column() == 0)   return Qt::AlignLeft; 
+		if(index.column() == 1 || 
+			 index.column() == 2)   return Qt::AlignRight;
+		return Qt::AlignCenter;
 	}
 	else if (role == Qt::CheckStateRole)
 	{

@@ -259,7 +259,7 @@ public:
 		int i=0;
 		for( ; itH != vhi.end(); itH++)
 		{
-			FgtHole<MESH> newHole(*itH, QString("Hole_%1").arg(i));
+			FgtHole<MESH> newHole(*itH, QString("Hole_%1").arg(i,3,10,QChar('0')));
 			ret.push_back(newHole);
 			i++;
 		}
