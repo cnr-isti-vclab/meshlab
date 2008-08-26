@@ -171,14 +171,12 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QL
 		{
 			outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 			Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler /*MyMidPoint<CMeshO>()*/, 0, false, 0);
-	//		Refine<CMeshO,MidPoint<CMeshO>>(outMesh.cm, MidPoint<CMeshO>(), 0, false, 0);
 			outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
 			dialog->setBarVal(i);
 		}
 
 	outMesh.fileName = "Retopology.ply";
 	tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
-//	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
 
 	outMesh.updateDataMask(MeshModel::MM_FACETOPO);
 

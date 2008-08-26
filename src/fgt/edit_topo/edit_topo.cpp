@@ -1030,10 +1030,10 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 
-void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *parent)
+void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *gla)
 {	
-	parentGla = parent;
-	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
+	parentGla = gla;
+	gla->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
 
 	// Init uniform grid
 	float dist = m.cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
@@ -1046,11 +1046,31 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *parent)
 
 
 
-	if (edit_topodialogobj==0)
-		edit_topodialogobj=new edit_topodialog(parent->window());
+	/*if (edit_topodialogobj==0)
+		edit_topodialogobj=new edit_topodialog(parent->window()); */
 
-	parent->setMouseTracking(true);
-	edit_topodialogobj->show();
+// Create an istance of the interface
+	if (edit_topodialogobj == 0) 
+	{ 
+		edit_topodialogobj = new edit_topodialog(gla->window()); 
+		dock = new QDockWidget(gla->window());
+		dock->setAllowedAreas(Qt::NoDockWidgetArea);
+		dock->setWidget(edit_topodialogobj);
+		QPoint p = gla->window()->mapToGlobal(QPoint(0,0));
+		dock->setGeometry(-5+p.x()+gla->window()->width()-edit_topodialogobj->width(),p.y(),edit_topodialogobj->width(),edit_topodialogobj->height());
+		dock->setFloating(true);
+	}
+	dock->setVisible(true);
+	dock->layout()->update();	
+
+	// Initialize the texture using the intere model
+	// InitTexture(m);
+
+	gla->update();
+
+
+	gla->setMouseTracking(true);
+//	edit_topodialogobj->show();
 
 	connect(edit_topodialogobj, SIGNAL( mesh_create() ),
           this, SLOT( on_mesh_create() ) );

@@ -2,10 +2,9 @@
 
 
 
-edit_topodialog::edit_topodialog(QWidget *parent) : QDockWidget(parent)
+edit_topodialog::edit_topodialog(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
-	this->setFloating(true);
 	utensil = U_VTX_SEL_FREE;
 	ui.toolBox->setCurrentIndex(0);
 }

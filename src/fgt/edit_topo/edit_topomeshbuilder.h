@@ -137,7 +137,7 @@ public:
 
 	//	if( MESH_TYPE::HasPerVertexNormal())
 	//		nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
-			nv.N()= ((nearestF->V(0)->N()/*+nearestF->V(1)->N()+nearestF->V(2)->N())/3*/)).Normalize();
+			nv.N()= (nearestF->V(0)->N()+nearestF->V(1)->N()).Normalize();//+nearestF->V(2)->N());///3));//.Normalize();
 
 //		if( MESH_TYPE::HasPerVertexColor())
 			nv.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);

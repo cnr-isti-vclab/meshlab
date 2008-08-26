@@ -133,6 +133,9 @@ private:
 
 
 	edit_topodialog *edit_topodialogobj;
+
+//	TextureEditor* widget;
+	QDockWidget* dock;
 };
 
 #endif

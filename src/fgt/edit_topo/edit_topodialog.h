@@ -3,7 +3,7 @@
 
 
 
-#include <QDockWidget>
+#include <QWidget>
 
 #include <QtGui/QApplication>
 #include <meshlab/interfaces.h>
@@ -112,7 +112,7 @@ struct Fce
 
 
 
-class edit_topodialog : public QDockWidget
+class edit_topodialog : public QWidget
 {
 	Q_OBJECT
 		
@@ -136,7 +136,7 @@ class edit_topodialog : public QDockWidget
 
 	private:
 		Ui::edit_topodialog ui;
-		QWidget* parent;
+	//	GLArea* parent;
 	
 	// Events
 	private slots:
