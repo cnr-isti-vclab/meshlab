@@ -132,8 +132,10 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
 			case FP_UNSHARP_NORMAL:				
 			case FP_UNSHARP_GEOMETRY:	    
 			case FP_UNSHARP_QUALITY:	    
-			case FP_UNSHARP_VERTEX_COLOR:	     
 					return 	MeshFilterInterface::Smoothing;
+
+			case FP_UNSHARP_VERTEX_COLOR:	     
+					return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Smoothing | MeshFilterInterface::VertexColoring);
 				
 			case FP_RECOMPUTE_FACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
