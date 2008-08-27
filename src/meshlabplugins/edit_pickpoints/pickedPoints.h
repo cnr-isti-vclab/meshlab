@@ -47,7 +47,7 @@ public:
 	bool open(QString filename);
 	
 	//save 
-	bool save(QString filename);
+	bool save(QString filename, QString dataFileName);
 
 	//add a point to the map
 	void addPoint(QString name, vcg::Point3f point, bool present);
@@ -89,7 +89,18 @@ private:
 	//root name of the xml document
 	static const QString rootName;
 	
-	//the templateName
+	static const QString documentDataElementName;
+	
+	static const QString dateTimeElementName;
+	
+	static const QString date;
+	
+	static const QString time;
+	
+	//the file the points were placed on
+	static const QString dataFileElementName;
+	
+	//the templateName if one was used
 	static const QString templateElementName;
 	
 	//point element's name
@@ -114,8 +125,13 @@ private:
 	//points z coord
 	static const QString zCoordinate;
 	
+	//to indicate whether the point is active
+	static const QString True;
+	
 	//to indicate whether the point is inactive
 	static const QString False;
+	
+	
 	
 
 	

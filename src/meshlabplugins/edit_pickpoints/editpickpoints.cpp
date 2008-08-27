@@ -240,7 +240,7 @@ void EditPickPointsPlugin::drawPickedPoints(
 
 	//qDebug() << "scaleFactor: " << scaleFactor;
 	
-	glPushAttrib(GL_ENABLE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_COLOR_MATERIAL);
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	
 	// enable color tracking
 	glEnable(GL_COLOR_MATERIAL);

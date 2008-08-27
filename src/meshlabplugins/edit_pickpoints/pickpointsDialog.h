@@ -118,7 +118,7 @@ private:
 	void addPoint(vcg::Point3f &point, QString &name,  bool present);
 	
 	//handle everything involved with adding a point to the tree widget
-	void addTreeWidgetItemForPoint(vcg::Point3f &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present);
+	PickedPointTreeWidgetItem * addTreeWidgetItemForPoint(vcg::Point3f &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present);
 	
 	//load the points from a file
 	void loadPoints(QString filename);
@@ -180,6 +180,9 @@ private slots:
 	//rename the point highlighted in the pickedPointTree
 	void renameHighlightedPoint();
 	
+	//clear the point highlighted in the pickedPointTree
+	void clearHighlightedPoint();
+	
 	//move the point  highlighted in the pickedPointTree
 	void togglePickMode(bool checked);
 	
@@ -205,9 +208,6 @@ private slots:
 	//Add a point to the loaded template.  When in template 
 	//mode the default is to now allow extra points
 	void addPointToTemplate();
-	
-	//remove the selected point from the template
-	void removePointFromTemplate();
 };
 
 //because QT is really dumb and TreeWidgetItems can recieve signals

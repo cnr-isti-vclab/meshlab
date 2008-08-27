@@ -201,17 +201,17 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	getClosestFace = new GetClosestFace();
 	
 	//signals and slots
-	connect(ui.removeHighlightedButton, SIGNAL(clicked()), this, SLOT(removeHighlightedPoint()));
+	connect(ui.removePointButton, SIGNAL(clicked()), this, SLOT(removeHighlightedPoint()));
 	connect(ui.renamePointButton, SIGNAL(clicked()), this, SLOT(renameHighlightedPoint()));
+	connect(ui.clearPointButton, SIGNAL(clicked()), this, SLOT(clearHighlightedPoint()));
 	connect(ui.pickPointModeRadioButton, SIGNAL(toggled(bool)), this, SLOT(togglePickMode(bool)));
 	connect(ui.saveButton, SIGNAL(clicked()), this, SLOT(savePointsToFile()));
 	connect(ui.loadPointsButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndLoadPoints()));
-	connect(ui.clearButton, SIGNAL(clicked()), this, SLOT(clearPointsButtonClicked()));
+	connect(ui.removeAllPointsButton, SIGNAL(clicked()), this, SLOT(clearPointsButtonClicked()));
 	connect(ui.saveTemplateButton, SIGNAL(clicked()), this, SLOT(savePointTemplate()));
 	connect(ui.loadTemplateButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndloadTemplate()));
 	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearTemplateButtonClicked()) );
 	connect(ui.addPointToTemplateButton, SIGNAL(clicked()), this, SLOT(addPointToTemplate()) );
-	connect(ui.removePointFromTemplateButton, SIGNAL(clicked()), this, SLOT(removePointFromTemplate()));
 	
 	connect(ui.showNormalCheckBox, SIGNAL(clicked()), this, SLOT(redrawPoints()));
 	connect(ui.pinRadioButton, SIGNAL(clicked()), this, SLOT(redrawPoints()));
@@ -350,7 +350,7 @@ void PickPointsDialog::addPoint(vcg::Point3f &point, QString &name, bool present
 	}
 }
 
-void PickPointsDialog::addTreeWidgetItemForPoint(vcg::Point3f &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present)
+PickedPointTreeWidgetItem * PickPointsDialog::addTreeWidgetItemForPoint(vcg::Point3f &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present)
 {
 	PickedPointTreeWidgetItem *widgetItem =
 			new PickedPointTreeWidgetItem(point, faceNormal, name, present);
@@ -372,6 +372,8 @@ void PickPointsDialog::addTreeWidgetItemForPoint(vcg::Point3f &point, QString &n
 	//PickedPointTreeWidgetItem and draws all the points.  dont do this before
 	//set checked or you will have all points that should be drawn, not drawn
 	connect(checkBox, SIGNAL(toggled(bool)), checkBox, SLOT(toggleAndDraw(bool)) );
+	
+	return widgetItem;
 }
 
 void PickPointsDialog::clearPoints(bool clearOnlyXYZ){
@@ -433,7 +435,10 @@ void PickPointsDialog::loadPickPointsTemplate(QString filename){
 	for(int i = 0; i < pointNameVector.size(); i++){
 		vcg::Point3f point;
 		vcg::Point3f faceNormal;
-		addTreeWidgetItemForPoint(point, pointNameVector.at(i), faceNormal, false);
+		PickedPointTreeWidgetItem *widgetItem = 
+			addTreeWidgetItemForPoint(point, pointNameVector.at(i), faceNormal, false);
+		widgetItem->clearPoint();
+		
 	}
 	
 	//select the first item in the list if it exists
@@ -541,21 +546,17 @@ void PickPointsDialog::removeHighlightedPoint(){
 		PickedPointTreeWidgetItem* pickedItem =
 			dynamic_cast<PickedPointTreeWidgetItem *>(item);
 		
-		if(templateLoaded)
-			pickedItem->clearPoint();
-		else 
-		{
-			//remove the point completely
-			std::vector<PickedPointTreeWidgetItem*>::iterator iterator;
-			iterator = std::find(pickedPointTreeWidgetItemVector.begin(),
-					pickedPointTreeWidgetItemVector.end(),
-					pickedItem);
-			//remove item from vector
-			pickedPointTreeWidgetItemVector.erase(iterator);
-				
-			//free memory used by widget
-			delete pickedItem;
-		}
+		
+		//remove the point completely
+		std::vector<PickedPointTreeWidgetItem*>::iterator iterator;
+		iterator = std::find(pickedPointTreeWidgetItemVector.begin(),
+				pickedPointTreeWidgetItemVector.end(),
+				pickedItem);
+		//remove item from vector
+		pickedPointTreeWidgetItemVector.erase(iterator);
+			
+		//free memory used by widget
+		delete pickedItem;
 		
 		//redraw without deleted point
 		redrawPoints();
@@ -600,6 +601,26 @@ void PickPointsDialog::renameHighlightedPoint(){
 	}
 }
 
+void PickPointsDialog::clearHighlightedPoint()
+{
+	//get highlighted point
+	QTreeWidgetItem *item = ui.pickedPointsTreeWidget->currentItem();
+	
+	//test to see if there is actually a highlighted item
+	if(NULL != item){
+		PickedPointTreeWidgetItem* pickedItem =
+			dynamic_cast<PickedPointTreeWidgetItem *>(item);
+		
+		pickedItem->clearPoint();
+		
+		//redraw without deleted point
+		redrawPoints();
+	} else
+	{
+		qDebug("no item picked");
+	}
+}
+	
 void PickPointsDialog::togglePickMode(bool checked){
 	//qDebug() << "Toggle pick mode " << checked;
 	if(checked){
@@ -665,7 +686,7 @@ void PickPointsDialog::savePointsToFile()
 		}
 		QString filename = QFileDialog::getSaveFileName(this,tr("Save File"),suggestion, "*"+PickedPoints::fileExtension);
 	
-		pickedPoints->save(filename);
+		pickedPoints->save(filename, QString(meshModel->fileName.c_str()));
 	}
 	
 	savePointsToMetaData();
@@ -760,47 +781,14 @@ void PickPointsDialog::clearTemplateButtonClicked(){
 void PickPointsDialog::addPointToTemplate()
 {
 	//
-	templateLoaded = true;
-	
+	if(!templateLoaded)
+		setTemplateName("new Template");
 	
 	vcg::Point3f point;
 	vcg::Point3f faceNormal;
 	QString name("new point");
-	addTreeWidgetItemForPoint(point, name, faceNormal, false);
+	PickedPointTreeWidgetItem *widgetItem =
+		addTreeWidgetItemForPoint(point, name, faceNormal, false);
+	widgetItem->clearPoint();
 
 }
-
-void PickPointsDialog::removePointFromTemplate()
-{
-	//get highlighted point
-	QTreeWidgetItem *item = ui.pickedPointsTreeWidget->currentItem();
-	
-	//test to see if there is actually a highlighted item
-	if(NULL != item && templateLoaded){
-		PickedPointTreeWidgetItem* pickedItem =
-				dynamic_cast<PickedPointTreeWidgetItem *>(item);
-			
-		QString name = pickedItem->getName();
-
-		std::vector<PickedPointTreeWidgetItem*>::iterator iterator;
-		iterator = std::find(pickedPointTreeWidgetItemVector.begin(),
-				pickedPointTreeWidgetItemVector.end(),
-				pickedItem);
-		//remove item from vector
-		pickedPointTreeWidgetItemVector.erase(iterator);
-					
-		//free memory used by widget
-		delete pickedItem;
-			
-		//redraw without deleted point
-		redrawPoints();
-		
-		//invalidate the current template
-		setTemplateName("");
-		
-	} else
-	{
-		qDebug("no item picked");
-	}
-}
-

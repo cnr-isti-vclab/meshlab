@@ -19,14 +19,22 @@
 //Define Constants
 const QString PickedPoints::fileExtension = ".pp";
 const QString PickedPoints::rootName = "PickedPoints";
+
+const QString PickedPoints::documentDataElementName = "DocumentData";
+const QString PickedPoints::dateTimeElementName = "Date_Time";
+const QString PickedPoints::date = "date";
+const QString PickedPoints::time = "time";
+const QString PickedPoints::dataFileElementName = "DataFileName";
 const QString PickedPoints::templateElementName = "templateName";
+
 const QString PickedPoints::pointElementName = "point";
 const QString PickedPoints::name = "name";
 const QString PickedPoints::active = "active";
 const QString PickedPoints::xCoordinate = "x";
 const QString PickedPoints::yCoordinate = "y";
 const QString PickedPoints::zCoordinate = "z";
-const QString PickedPoints::False = "false";
+const QString PickedPoints::True = "1";
+const QString PickedPoints::False = "0";
 
 const std::string PickedPoints::Key = "PickedPoints";
 
@@ -54,9 +62,12 @@ bool PickedPoints::open(QString filename){
 	    {
 			qDebug() << "About to read a " << rootName << " xml document";
 			
-			QDomElement element = root.firstChildElement(templateElementName);
-			if(!element.isNull()) templateName = element.attribute(name);
-			else templateName = "";
+			templateName = "";
+			QDomElement dataElement = root.firstChildElement(documentDataElementName);
+			if(!dataElement.isNull()){
+				QDomElement templateElement = dataElement.firstChildElement(templateElementName);
+				if(!templateElement.isNull()) templateName = templateElement.attribute(name);
+			} 
 			
 			qDebug() << "Template loaded: " << templateName;
 			
@@ -96,15 +107,28 @@ bool PickedPoints::open(QString filename){
 
 
 
-bool PickedPoints::save(QString filename){
+bool PickedPoints::save(QString filename, QString dataFileName){
 	QDomDocument doc(rootName);
 	QDomElement root = doc.createElement(rootName);
 	doc.appendChild(root);
 	
 	//put in the template name
-	QDomElement tag = doc.createElement(templateElementName);
-	tag.setAttribute(name, templateName);
-	root.appendChild(tag);
+	QDomElement dataTag = doc.createElement(documentDataElementName);
+	root.appendChild(dataTag);
+	
+	//put in the template name
+	QDomElement data = doc.createElement(dateTimeElementName);
+	data.setAttribute(date, QDate::currentDate().toString(Qt::ISODate));
+	data.setAttribute(time, QTime::currentTime().toString(Qt::ISODate));
+	dataTag.appendChild(data);
+	
+	data = doc.createElement(dataFileElementName);
+	data.setAttribute(name, dataFileName);
+	dataTag.appendChild(data);
+	
+	data = doc.createElement(templateElementName);
+	data.setAttribute(name, templateName);
+	dataTag.appendChild(data);
 		
 	//create an element for each point
 	for (int i = 0; i < pointVector->size(); ++i) {
