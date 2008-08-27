@@ -1,163 +1,103 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>ShaderDialogClass</class>
- <widget class="QDialog" name="ShaderDialogClass" >
+ <widget class="QWidget" name="ShaderDialogClass" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>442</width>
-    <height>355</height>
+    <width>601</width>
+    <height>541</height>
    </rect>
   </property>
-  <property name="sizePolicy" >
-   <sizepolicy>
-    <hsizetype>0</hsizetype>
-    <vsizetype>0</vsizetype>
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
-  <property name="minimumSize" >
-   <size>
-    <width>442</width>
-    <height>355</height>
-   </size>
-  </property>
-  <property name="maximumSize" >
-   <size>
-    <width>442</width>
-    <height>355</height>
-   </size>
-  </property>
-  <property name="focusPolicy" >
-   <enum>Qt::StrongFocus</enum>
-  </property>
   <property name="windowTitle" >
-   <string>ShaderDialog</string>
+   <string>Form</string>
   </property>
-  <property name="windowIcon" >
-   <iconset>..\..\..\..\..\meshlab\src\meshlab\images\eye16.png</iconset>
-  </property>
-  <widget class="QWidget" name="layoutWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>21</x>
-     <y>321</y>
-     <width>406</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" >
-    <property name="margin" >
-     <number>0</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <spacer>
-      <property name="orientation" >
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" >
-       <size>
-        <width>321</width>
-        <height>25</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
-     <widget class="QPushButton" name="okButton" >
-      <property name="text" >
-       <string>Ok</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QTabWidget" name="tabWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>421</width>
-     <height>301</height>
-    </rect>
-   </property>
-   <property name="currentIndex" >
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="uvTab" >
-    <attribute name="title" >
-     <string>Uniform Variables</string>
-    </attribute>
-    <widget class="QWidget" name="varListLayer" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>171</width>
-       <height>20</height>
-      </rect>
+  <layout class="QVBoxLayout" name="verticalLayout_2" >
+   <item>
+    <widget class="QFrame" name="frame" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
      </property>
-     <layout class="QHBoxLayout" >
-      <property name="margin" >
-       <number>0</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout" >
+      <item>
+       <widget class="QTabWidget" name="tabWidget" >
+        <property name="currentIndex" >
+         <number>3</number>
+        </property>
+        <widget class="QWidget" name="uvTab" >
+         <attribute name="title" >
+          <string>Uniform Variables</string>
+         </attribute>
+         <widget class="QWidget" name="varListLayer" >
+          <property name="geometry" >
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>171</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" />
+         </widget>
+        </widget>
+        <widget class="QWidget" name="textureTab" >
+         <attribute name="title" >
+          <string>Textures</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="glTab" >
+         <attribute name="title" >
+          <string>OpenGL Status</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="vpTab" >
+         <attribute name="title" >
+          <string>Vertex Program</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_2" >
+          <item>
+           <widget class="QTextBrowser" name="vpTextBrowser" />
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="fpTab" >
+         <attribute name="title" >
+          <string>Fragment Program</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout" >
+          <item>
+           <widget class="QTextBrowser" name="fpTextBrowser" />
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="bottomRowLayout" >
+        <item>
+         <spacer name="spacer" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="okButton" >
+          <property name="text" >
+           <string>Close Shader</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
-   </widget>
-   <widget class="QWidget" name="textureTab" >
-    <attribute name="title" >
-     <string>Textures</string>
-    </attribute>
-   </widget>
-   <widget class="QWidget" name="glTab" >
-    <attribute name="title" >
-     <string>OpenGL Status</string>
-    </attribute>
-   </widget>
-   <widget class="QWidget" name="vpTab" >
-    <attribute name="title" >
-     <string>Vertex Program</string>
-    </attribute>
-    <widget class="QTextBrowser" name="vpTextBrowser" >
-     <property name="geometry" >
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>421</width>
-       <height>281</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="fpTab" >
-    <attribute name="title" >
-     <string>Fragment Program</string>
-    </attribute>
-    <widget class="QTextBrowser" name="fpTextBrowser" >
-     <property name="geometry" >
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>421</width>
-       <height>281</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-  </widget>
+   </item>
+  </layout>
  </widget>
- <layoutdefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
  <resources/>
  <connections/>
 </ui>

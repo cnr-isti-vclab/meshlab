@@ -116,17 +116,20 @@ void MeshShaderRenderPlugin::initActionList() {
 		shadersDir.cdUp();
 #elif defined(Q_OS_MAC)
 	if (shadersDir.dirName() == "MacOS") {
-		for(int i=0;i<4;++i){
-			shadersDir.cdUp();
+		for(int i=0;i<6;++i){
 			if(shadersDir.exists("shaders")) break;
+			shadersDir.cdUp();
 		}
 	}
 #endif
 	bool ret=shadersDir.cd("shaders");
   if(!ret) 
-    QMessageBox::information(0, "MeshLAb",
-      "Unable to find the shaders directory.\n"
-        "No shaders will be loaded.");
+		{
+			QMessageBox::information(0, "MeshLab",
+															 "Unable to find the shaders directory.\n"
+															 "No shaders will be loaded.");
+		}
+	qDebug("Shader directory found '%s', and it contains %i gdp files",qPrintable(shadersDir.path()),shadersDir.entryList(QStringList("*.gdp")).size());
 
 
 	QDomDocument doc;

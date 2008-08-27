@@ -8,13 +8,17 @@
 using namespace vcg;
 
 ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QWidget *parent)
-: QDialog(parent)
+: QDockWidget(parent)
 {
 	ui.setupUi(this);
+  this->setWidget(ui.frame);
+	this->setFeatures(QDockWidget::AllDockWidgetFeatures);
+	this->setAllowedAreas(Qt::LeftDockWidgetArea);
+	this->setFloating(true);
+
 	shaderInfo = sInfo;
 	glarea = gla;
 	rendMode = &rm;
-
 	colorSignalMapper = new QSignalMapper(this);
 	valueSignalMapper = new QSignalMapper(this);
 
@@ -209,7 +213,7 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QW
 	//End of Vertex and Fragment Program Tabs Section
 
 
-	this->setWindowFlags(Qt::WindowStaysOnTopHint);
+//	this->setWindowFlags(Qt::WindowStaysOnTopHint);
 	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(accept()));
 
 

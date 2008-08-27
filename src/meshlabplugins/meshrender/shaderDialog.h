@@ -1,25 +1,14 @@
 #ifndef SHADERDIALOG_H
 #define SHADERDIALOG_H
 
-#include <QDialog>
-#include <QLabel>
-#include <QDir>
-#include <QColorDialog>
-#include <QSignalMapper>
-#include <QLineEdit>
-#include <QSlider>
-#include <QGridLayout>
-#include <QCheckBox>
 #include <map>
 #include <GL/glew.h>
-#include <QGLWidget>
 #include <meshlab/meshmodel.h>
-
+#include <QtGui>
 #include "shaderStructs.h"
 #include "ui_shaderDialog.h"
-//#include <meshlab/glarea.h>
 
-class ShaderDialog : public QDialog
+class ShaderDialog : public QDockWidget
 {
     Q_OBJECT
 
