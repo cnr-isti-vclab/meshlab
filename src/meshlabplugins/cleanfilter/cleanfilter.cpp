@@ -139,7 +139,7 @@ const QString CleanFilter::filterName(FilterIDType filter)
 {
  switch(filter)
   {
-	  case FP_REBUILD_SURFACE :								return QString("Build surface from points");
+	  case FP_REBUILD_SURFACE :								return QString("Ball Pivoting Surface Reconstruction");
 	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
@@ -153,7 +153,10 @@ const QString CleanFilter::filterInfo(FilterIDType filterId)
 {
   switch(filterId)
   {
-		case FP_REBUILD_SURFACE :	return QString("Merge"); 
+		case FP_REBUILD_SURFACE :	return QString("Reconstruct a surface using the <b>Ball Pivoting Algorithm<b> (Bernardini et al. 1999). \n"
+																						 "Starting with a seed triangle, the BPA algorithm  pivots a ball around an edge "
+																						 "(i.e. it revolves around the edge while keeping in contact with the edge’s endpoints) "
+																						 "until it touches another point, forming another triangle. The process continues until all reachable edges have been tried."); 
 		case FP_REMOVE_ISOLATED_COMPLEXITY:	 return tr("Remove isolated connected components composed by a limited number of triangles"); 
 		case FP_REMOVE_ISOLATED_DIAMETER:	 return tr("Remove isolated connected components whose diameter is smaller than the specified constant"); 
 		case FP_REMOVE_WRT_Q:	     return tr("Remove all the vertices with a quality lower smaller than the specified constant"); 
@@ -207,9 +210,9 @@ void CleanFilter::initParameterSet(QAction *action,MeshModel &m, FilterParameter
   switch(ID(action))
   {
     case FP_REBUILD_SURFACE :
-		  parlst.addAbsPerc("BallRadius",(float)maxDiag1,0,m.cm.bbox.Diag(),"Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled.");
-		  parlst.addFloat("Clustering",30.0f," Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it.");		  parlst.addFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling");
-		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch");
+		  parlst.addAbsPerc("BallRadius",(float)maxDiag1,0,m.cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled.");
+		  parlst.addFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it.");		  parlst.addFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling");
+		  parlst.addBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius.");
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
 		  parlst.addAbsPerc("MinComponentDiag",m.cm.bbox.Diag()/10.0,0,m.cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one");
