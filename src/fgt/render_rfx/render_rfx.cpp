@@ -66,7 +66,7 @@ void RenderRFX::initActionList()
 		shadersDir.cdUp();
 #elif defined(Q_OS_MAC)
 	if (shadersDir.dirName() == "MacOS") {
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 6; ++i) {
 			shadersDir.cdUp();
 			if (shadersDir.exists("shadersrm"))
 				break;
