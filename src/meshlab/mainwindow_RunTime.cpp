@@ -226,19 +226,30 @@ void MainWindow::updateRecentFileActions()
 	separatorAct->setVisible(numRecentFiles > 0);
 }
 
+// creates the standard plugin window
+void MainWindow::createStdPluginWnd()
+{
+	//checks if a MeshlabStdDialog is already open and closes it
+	if (stddialog!=0){
+		stddialog->close();
+		delete stddialog;
+	}
+	stddialog = new MeshlabStdDialog(this);
+	stddialog->setAllowedAreas (    Qt::RightDockWidgetArea);
+	addDockWidget(Qt::RightDockWidgetArea,stddialog);
+	//stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
+	stddialog->setFloating(true);
+	stddialog->hide();
+}
+
 // When we switch the current model (and we change the active window)
 // we have to close the stddialog.
 // this one is called when user switch current window.
 void MainWindow::updateStdDialog()
 {
-	if(stddialog==0) return;
-	if(stddialog->isHidden()) return;
-	if(GLA()==0) 
-	{
+	if(stddialog!=0 && stddialog->curModel != GLA()->mm()){
 		stddialog->close();
-		return;
 	}
-	if(stddialog->curModel != GLA()->mm()) stddialog->close();
 }
 
 void MainWindow::updateWindowMenu()
@@ -250,9 +261,9 @@ void MainWindow::updateWindowMenu()
 	windowsMenu->addAction(windowsCascadeAct);
 	windowsMenu->addAction(windowsNextAct);
 	windowsNextAct->setEnabled(mdiarea-> subWindowList().size()>1);
-	
+
 	QList<QMdiSubWindow*> windows = mdiarea->subWindowList();
-	
+
 	if(windows.size() > 0)
 			windowsMenu->addSeparator();
 
@@ -293,9 +304,9 @@ void MainWindow::updateMenus()
 	logMenu->setEnabled(active);
 	windowsMenu->setEnabled(active);
 	preferencesMenu->setEnabled(active);
-	
+
 	renderToolBar->setEnabled(active);
-	
+
 	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 	if(active){
@@ -310,7 +321,7 @@ void MainWindow::updateMenus()
 					case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
 				default: break;
 				}
-				colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm()->cm)); 
+				colorModePerFaceAct->setEnabled(HasPerFaceColor(GLA()->mm()->cm));
 				switch (rm.colorMode)
 				{
 					case GLW::CMNone:			colorModeNoneAct->setChecked(true);	      break;
@@ -332,32 +343,32 @@ void MainWindow::updateMenus()
 
 
 				// Management of the editing toolbar
-				// when you enter in a editing mode you can toggle between editing 
+				// when you enter in a editing mode you can toggle between editing
 				// and camera moving by esc;
 				// you exit from editing mode by pressing again the editing button
 				// When you are in a editing mode all the other editing are disabled.
-				
+
 				foreach (QAction *a,editActionList)
 						 {
-								a->setChecked(false); 
-								a->setEnabled( GLA()->getEditAction() == NULL ); 
+								a->setChecked(false);
+								a->setEnabled( GLA()->getEditAction() == NULL );
 						 }
 
 				suspendEditModeAct->setChecked(GLA()->suspendedEditor);
 				suspendEditModeAct->setDisabled(GLA()->getEditAction() == NULL);
 
-				if(GLA()->getEditAction())   
+				if(GLA()->getEditAction())
 						{
 								GLA()->getEditAction()->setChecked(! GLA()->suspendedEditor);
 								GLA()->getEditAction()->setEnabled(true);
 						}
-				
+
 				showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 				showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 				backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
 				renderModeTextureAct->setEnabled(GLA()->mm() && !GLA()->mm()->cm.textures.empty());
 				renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
-				
+
 				setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
 				setLightAct->setChecked(rm.lighting);
 
@@ -366,25 +377,25 @@ void MainWindow::updateMenus()
 				setSelectionRenderingAct->setChecked(rm.selectedFaces);
 
 				foreach (QAction *a,decoratorActionList){a->setChecked(false);a->setEnabled(true);}
-				
+
 				if(GLA()->iDecoratorsList){
 					pair<QAction *,FilterParameterSet *> p;
 					foreach (p,*GLA()->iDecoratorsList){p.first->setChecked(true);}
 				}
-				
+
 	} // if active
 	else
 	{
-		foreach (QAction *a,editActionList)					
-		{			
-				a->setEnabled(false); 
+		foreach (QAction *a,editActionList)
+		{
+				a->setEnabled(false);
 		}
 		foreach (QAction *a,decoratorActionList)
-				a->setEnabled(false); 
+				a->setEnabled(false);
 
 	}
-	
-	if(GLA()) 
+
+	if(GLA())
 	{
 		showLayerDlgAct->setChecked(GLA()->layerDialog->isVisible());
 		//if(GLA()->layerDialog->isVisible())
@@ -398,7 +409,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 	event->accept();
 }
 
-void MainWindow::dropEvent ( QDropEvent * event )  
+void MainWindow::dropEvent ( QDropEvent * event )
 {
   //qDebug("dropEvent: %s",event->format());
 	const QMimeData * data = event->mimeData();
@@ -418,17 +429,17 @@ void MainWindow::dropEvent ( QDropEvent * event )
 void MainWindow::delCurrentMesh()
 {
 	GLA()->meshDoc.delMesh(GLA()->meshDoc.mm());
-	stddialog->hide();
+	//stddialog->hide();
 	GLA()->updateGL();
-	updateMenus();	
+	updateMenus();
 }
 
-// Called when we change layer 
+// Called when we change layer
 void MainWindow::setCurrent(int meshId)
 {
 	GLA()->meshDoc.setCurrentMesh(meshId);
-	updateMenus();	
-	stddialog->hide();
+	updateMenus();
+	//stddialog->hide();
 }
 
 void MainWindow::updateGL()
@@ -438,7 +449,7 @@ void MainWindow::updateGL()
 
 void MainWindow::endEdit()
 {
-	GLA()->endEdit(); 
+	GLA()->endEdit();
 }
 void MainWindow::applyLastFilter()
 {
@@ -449,7 +460,7 @@ void MainWindow::showFilterScript()
 {
   FilterScriptDialog dialog(this);
 	dialog.setScript(&(GLA()->filterHistory));
-	if (dialog.exec()==QDialog::Accepted) 
+	if (dialog.exec()==QDialog::Accepted)
 	{
 			runFilterScript();
       return ;
@@ -488,74 +499,76 @@ void MainWindow::startFilter()
 
 	if(GLA() == NULL && iFilter->getClass(action) != MeshFilterInterface::MeshCreation) return;
 
-  // In order to avoid that a filter changes something assumed by the current editing tool, 
+  // In order to avoid that a filter changes something assumed by the current editing tool,
 	// before actually starting the filter we close the current editing tool (if any).
 	GLA()->endEdit();
 	updateMenus();
-	
+
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
 	{
 		qDebug("MeshCreation");
 		GLArea *gla=new GLArea(mdiarea);
-		gla->meshDoc.addNewMesh("untitled.ply");			
+		gla->meshDoc.addNewMesh("untitled.ply");
 		gla->setFileName("untitled.ply");
 		mdiarea->addSubWindow(gla);
 		if(mdiarea->isVisible()) gla->showMaximized();
 	}
 	// Ask for filter requirements (eg a filter can need topology, border flags etc)
   // and statisfy them
-	
-	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
+
+	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
   int req=iFilter->getRequirements(action);
   GLA()->mm()->updateDataMask(req);
-  qApp->restoreOverrideCursor();	
-	
+  qApp->restoreOverrideCursor();
+
 	// (2) Ask for filter parameters (e.g. user defined threshold that could require a widget)
   // bool ret=iFilter->getStdParameters(action, GLA(),*(GLA()->mm()), *par);
 	FilterParameterSet parList;
-  
+
 	//Hide the std dialog just in case to avoid that two different filters runs mixed
-	stddialog->hide();
-  
+	//stddialog->hide();
+
 	if(iFilter->autoDialog(action))
 	{
+
+		createStdPluginWnd();
 		/// Start the automatic dialog with the collected parameters
 		stddialog->showAutoDialog(iFilter, GLA()->mm(), &(GLA()->meshDoc), action, this,GLA());
-  }
+	}
 	else if(iFilter->customDialog(action))
 	{
 		// Start the custom dialog with the collected parameters
 		// the filter should try to mimics the behaviour of the autodialog.
 		// invoking hte execute filter function of the mainwindow each time that the user press apply
 		iFilter->getCustomParameters(action, GLA(),*(GLA()->mm()), parList, this);
-  }	
+  }
 	else executeFilter(action,parList);
 }
 
-/* 
-	callback function that actually start the chosen filter. 
-  it is called once the parameters have been filled. 
-	It can be called 
-	from the automatic dialog 
-	from the user defined dialog 
+/*
+	callback function that actually start the chosen filter.
+  it is called once the parameters have been filled.
+	It can be called
+	from the automatic dialog
+	from the user defined dialog
 */
 void MainWindow::executeFilter(QAction *action, FilterParameterSet &params)
 {
 
-	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());  
-	
+	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
+
   // (3) save the current filter and its parameters in the history
   GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
 
   qb->show();
   iFilter->setLog(&(GLA()->log));
-  // (4) Apply the Filter 
+  // (4) Apply the Filter
 	bool ret;
-  qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  
+  qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	GLA()->meshDoc.busy=true;
 	ret=iFilter->applyFilter(action,   GLA()->meshDoc, params, QCallBack);
 	GLA()->meshDoc.busy=false;
-  qApp->restoreOverrideCursor();	
+  qApp->restoreOverrideCursor();
 
   // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
@@ -564,7 +577,7 @@ void MainWindow::executeFilter(QAction *action, FilterParameterSet &params)
 		GLA()->log.Logf(GLLogStream::Info,"Applied filter %s",qPrintable(action->text()));
 		GLA()->setWindowModified(true);
 		GLA()->setLastAppliedFilter(action);
-		lastFilterAct->setText(QString("Apply filter ") + action->text());  
+		lastFilterAct->setText(QString("Apply filter ") + action->text());
 		lastFilterAct->setEnabled(true);
 	}
   else // filter has failed. show the message error.
@@ -590,18 +603,18 @@ if(iFilter->getClass(action)==MeshFilterInterface::Selection )
 }
 
 // Edit Mode Managment
-// At any point there can be a single editing plugin active. 
-// When a plugin is active it intercept the mouse actions. 
-// Each active editing tools 
+// At any point there can be a single editing plugin active.
+// When a plugin is active it intercept the mouse actions.
+// Each active editing tools
 //
 //
 
-	
+
 void MainWindow::suspendEditMode()
 {
    // return if no window is open
-  if(!GLA()) return;  
-	
+  if(!GLA()) return;
+
 	// return if no editing action is currently ongoing
   if(!GLA()->getEditAction()) return;
 
@@ -611,7 +624,7 @@ void MainWindow::suspendEditMode()
 void MainWindow::applyEditMode()
 {
 	if(!GLA()) { //prevents crash without mesh
-		QAction *action = qobject_cast<QAction *>(sender()); 
+		QAction *action = qobject_cast<QAction *>(sender());
 		action->setChecked(false);
 		return;
 	}
@@ -622,7 +635,7 @@ void MainWindow::applyEditMode()
 		{
 		  if(action==GLA()->getEditAction()) // We have double pressed the same action and that means disable that actioon
 			{
-				if(GLA()->suspendedEditor) 
+				if(GLA()->suspendedEditor)
 				{
 					suspendEditMode();
 					return;
@@ -634,7 +647,7 @@ void MainWindow::applyEditMode()
 			assert(0); // it should be impossible to start an action without having ended the previous one.
 			return;
 		}
-		
+
 	MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
   GLA()->setEdit(iEdit,action);
 //  GLA()->setLastAppliedEdit(action);
@@ -647,8 +660,8 @@ void MainWindow::applyEditMode()
 
 void MainWindow::applyRenderMode()
 {
-	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal 
-	
+	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
+
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
 	iRenderTemp->Init(action,*(GLA()->mm()),GLA()->getCurrentRenderMode(),GLA());
@@ -674,7 +687,7 @@ void MainWindow::applyRenderMode()
 
 void MainWindow::applyDecorateMode()
 {
-	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal 
+	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
 
 	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
 	if(GLA()->iDecoratorsList==0)
@@ -685,20 +698,20 @@ void MainWindow::applyDecorateMode()
 	foreach(p,*GLA()->iDecoratorsList)
 	{
 		if(p.first->text()==action->text()){
-			delete p.second; 
+			delete p.second;
 		  //p.second=0;
 			GLA()->iDecoratorsList->remove(p);
 			GLA()->log.Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
 			found=true;
-		} 
+		}
 	}
-	
+
 	if(!found){
 	  FilterParameterSet * decoratorParams = new FilterParameterSet();
 		iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
 		iDecorateTemp->StartDecorate(action,*GLA()->mm(),GLA());
 		GLA()->iDecoratorsList->push_back(make_pair(action,decoratorParams));
-		
+
 		GLA()->log.Logf(GLLogStream::Info,"Enable Decorate mode %s",qPrintable(action->text()));
 	}
 	GLA()->update();
@@ -709,7 +722,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
   int static lastPos=-1;
 	if(pos==lastPos) return true;
 	lastPos=pos;
-	
+
   static QTime currTime;
 	if(currTime.elapsed()< 100) return true;
 	currTime.start();
@@ -722,7 +735,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	return true;
 }
 
-void MainWindow::setLight()			     
+void MainWindow::setLight()
 {
 	GLA()->setLight(!GLA()->getCurrentRenderMode().lighting);
 	updateMenus();
@@ -744,7 +757,7 @@ void MainWindow::setLightingProperties()
 {
 	// retrieve current lighting settings
 	GLLightSetting GLlightsetting = GLA()->getLightSettings();
-	
+
 	// customize them
 	LightingDialog dlg(GLlightsetting, this);
 	if (dlg.exec() == QDialog::Accepted)
@@ -776,7 +789,7 @@ bool MainWindow::openIn(QString /* fileName */)
 	GLA()->layerDialog->setVisible(false);
 	bool ret= open(QString(),GLA());
 	GLA()->layerDialog->setVisible(wasLayerVisible);
-	return ret;	
+	return ret;
 }
 
 void MainWindow::saveProject()
@@ -785,18 +798,18 @@ void MainWindow::saveProject()
 	QString fileName = QFileDialog::getSaveFileName(this,tr("Save Project File"),"untitled.aln", tr("*.aln"));
 	qDebug("Saving aln file %s\n",qPrintable(fileName));
 	if (fileName.isEmpty()) return;
-	
+
 	MeshDocument &meshDoc=GLA()->meshDoc;
 	vector<string> meshNameVector;
 	vector<Matrix44f> transfVector;
 
-  foreach(MeshModel * mp, meshDoc.meshList) 
+  foreach(MeshModel * mp, meshDoc.meshList)
 	{
 		meshNameVector.push_back(mp->fileName.c_str());
 		transfVector.push_back(mp->cm.Tr);
 	}
 	bool ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
-	
+
 	if(!ret)
 	 QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save project file %1\n").arg(fileName));
 
@@ -809,7 +822,7 @@ bool MainWindow::openProject(QString fileName)
 	    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"),".", "*.aln");
 	if (fileName.isEmpty()) return false;
 	vector<RangeMap> rmv;
-	
+
 	ALNParser::ParseALN(rmv,qPrintable(fileName));
 	// this change of dir is needed for subsequent textures/materials loading
 	QFileInfo fi(fileName);
@@ -820,7 +833,7 @@ bool MainWindow::openProject(QString fileName)
 	{
 		if(ir==rmv.begin()) openRes = open((*ir).filename.c_str());
 		else								openRes = open((*ir).filename.c_str(),GLA());
-		
+
 		GLA()->mm()->cm.Tr=(*ir).trasformation;
 	}
 	return true;
@@ -830,11 +843,11 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
-	
+
 	// HashTable storing all supported formats togheter with
 	// the (1-based) index  of first plugin which is able to open it
 	QHash<QString, int> allKnownFormats;
-	
+
 	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,IMPORT);
 	filters.push_back("ALN project ( *.aln)");
 	filters.front().chop(1);
@@ -844,19 +857,19 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 		fileNameList = QFileDialog::getOpenFileNames(this,tr("Open File"),".", filters.join("\n"));
 	else fileNameList.push_back(fileName);
 	if (fileNameList.isEmpty())	return false;
-	
+
 	foreach(fileName,fileNameList)
 	{
 			QFileInfo fi(fileName);
 			if(fi.suffix().toLower()=="aln") openProject(fileName);
 			else
-			{					
-				if(!fi.exists()) 	{	
+			{
+				if(!fi.exists()) 	{
 					QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 does not exist.";
 					QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
 					return false;
 				}
-				if(!fi.isReadable()) 	{	
+				if(!fi.isReadable()) 	{
 					QString errorMsgFormat = "Unable to open file:\n\"%1\"\n\nError details: file %1 is not readable.";
 					QMessageBox::critical(this, tr("Meshlab Opening Error"), errorMsgFormat.arg(fileName));
 					return false;
@@ -864,19 +877,19 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 
 				// this change of dir is needed for subsequent textures/materials loading
 				QDir::setCurrent(fi.absoluteDir().absolutePath());
-				
+
 				QString extension = fi.suffix();
-				
+
 				// retrieving corresponding IO plugin
 				int idx = allKnownFormats[extension.toLower()];
 				if (idx == 0)
-				{	
+				{
 					QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
 					QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
 					return false;
 				}
 				MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-				
+
 				qb->show();
 				FilterParameterSet prePar;
 				pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
@@ -885,18 +898,18 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					GenericParamDialog preOpenDialog(this, &prePar, tr("Pre-Open Options"));
 					preOpenDialog.exec();
 				}
-				
+
 				int mask = 0;
-				MeshModel *mm= new MeshModel();	
+				MeshModel *mm= new MeshModel();
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,prePar,QCallBack,this /*gla*/))
 					delete mm;
 				else{
 					// After opening the mesh lets ask to the io plugin if this format
 					// requires some optional, or userdriven post-opening processing.
-					// and in that case ask for the required parameters and then 
+					// and in that case ask for the required parameters and then
 					// ask to the plugin to perform that processing
 					FilterParameterSet par;
-					pCurrentIOPlugin->initOpenParameter(extension, *mm, par);					
+					pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 					if(!par.isEmpty())
 						{
 							GenericParamDialog postOpenDialog(this, &par, tr("Post-Open Processing"));
@@ -910,7 +923,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					}
 					gla->meshDoc.busy=true;
 					gla->meshDoc.addNewMesh(qPrintable(fileName),mm);
-					
+
 					gla->mm()->ioMask |= mask;				// store mask into model structure
 					gla->setFileName(mm->fileName.c_str());
 					if(newGla){
@@ -918,7 +931,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					}
 					if(mdiarea->isVisible()) gla->showMaximized();
 					setCurrentFile(fileName);
-					
+
 					if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
 						gla->setColorMode(GLW::CMPerFace);
 					if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
@@ -934,9 +947,9 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 						GLA()->setTextureMode(GLW::TMPerWedgeMulti);
 					}
 					if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-								vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);																																			 
-					else 
-								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);																																			 
+								vcg::tri::UpdateNormals<CMeshO>::PerFace(mm->cm);
+					else
+								vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
 					vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 					if(gla->mm()->cm.fn==0){
 						gla->setDrawMode(vcg::GLW::DMPoints);
@@ -945,8 +958,8 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 					updateMenus();
 					int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
 					int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-					
-					if(delVertNum>0 || delFaceNum>0 ) 
+
+					if(delVertNum>0 || delFaceNum>0 )
 						QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
 					GLA()->meshDoc.busy=false;
 				}
@@ -965,7 +978,7 @@ void MainWindow::openRecentFile()
 
 void MainWindow::reload()
 {
-	// Discards changes and reloads current file 
+	// Discards changes and reloads current file
 	// save current file name
 	QString file = GLA()->getFileName();
 
@@ -978,11 +991,11 @@ void MainWindow::reload()
 
 
 bool MainWindow::saveAs()
-{	
+{
 	QStringList filters;
-	
+
 	QHash<QString, int> allKnownFormats;
-	
+
 	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,EXPORT);
 
 	QString fileName;
@@ -990,11 +1003,11 @@ bool MainWindow::saveAs()
 	if (fileName.isEmpty())
 				//fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
 					fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->fileName.c_str(), filters.join("\n"));
-	
+
 	bool ret = false;
 
 	QStringList fs = fileName.split(".");
-	
+
 	if(!fileName.isEmpty() && fs.size() < 2)
 	{
 		QMessageBox::warning(new QWidget(),"Save Error","You must specify file extension!!");
@@ -1005,7 +1018,7 @@ bool MainWindow::saveAs()
 	{
 		QString extension = fileName;
 		extension.remove(0, fileName.lastIndexOf('.')+1);
-	
+
 		QStringListIterator itFilter(filters);
 
 		int idx = allKnownFormats[extension.toLower()];
@@ -1015,33 +1028,33 @@ bool MainWindow::saveAs()
 			return false;
 		}
 		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-		
+
 		int capability=0,defaultBits=0;
 		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
-		
+
 		// optional saving parameters (like ascii/binary encoding)
 		FilterParameterSet savePar;
 
 		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
-		
+
 		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar);
 		maskDialog.exec();
 		int mask = maskDialog.GetNewMask();
 		maskDialog.close();
 
-		if(mask == -1) 
+		if(mask == -1)
 			return false;
-			
-		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));	  	
+
+		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 		qb->show();
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
 		qb->reset();
-		qApp->restoreOverrideCursor();	
+		qApp->restoreOverrideCursor();
 
     QSettings settings;
     int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
     settings.setValue("savedMeshCounter",savedMeshCounter+1);
-	}	
+	}
   GLA()->setWindowModified(false);
 	return ret;
 }
@@ -1050,11 +1063,11 @@ bool MainWindow::saveSnapshot()
 {
 
 	SaveSnapshotDialog dialog(this);
-	
+
 	SnapshotSetting ss = GLA()->getSnapshotSetting();
 	dialog.setValues(ss);
 
-	if (dialog.exec()==QDialog::Accepted) 
+	if (dialog.exec()==QDialog::Accepted)
 	{
 		ss=dialog.getValues();
 		GLA()->setSnapshotSetting(ss);
@@ -1076,7 +1089,7 @@ void MainWindow::about()
 
 void MainWindow::aboutPlugins()
 {
-	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath())); 
+	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
 	PluginDialog dialog(pluginsDir.absolutePath(), pluginFileNames, this);
 	dialog.exec();
 }
@@ -1111,7 +1124,7 @@ void MainWindow::setCustomize()
 	CustomDialog dialog(this);
 	ColorSetting cs=GLA()->getCustomSetting();
 	dialog.loadCurrentSetting(cs.bColorBottom,cs.bColorTop,cs.lColor,GLA()->getLogLevel());
-	if (dialog.exec()==QDialog::Accepted) 
+	if (dialog.exec()==QDialog::Accepted)
 	{
 		// If press Ok set the selected colors in glArea
 		cs.bColorBottom=dialog.getBkgBottomColor();
@@ -1119,7 +1132,7 @@ void MainWindow::setCustomize()
 		cs.lColor=dialog.getLogAreaColor();
     GLA()->setCustomSetting(cs);
 		GLA()->setLogLevel(dialog.getLogLevel());
-	}	
+	}
 }
 
 void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
@@ -1132,7 +1145,7 @@ void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
 void MainWindow::renderTexture()
 {
 	QAction *a = qobject_cast<QAction* >(sender());
-	GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);	
+	GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);
 }
 
 

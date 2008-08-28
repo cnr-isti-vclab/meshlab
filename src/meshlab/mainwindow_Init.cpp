@@ -194,8 +194,8 @@ Added short key lastFilter
 #include "mainwindow.h"
 #include "glarea.h"
 #include "plugindialog.h"
-#include "customDialog.h"	
-#include "saveSnapshotDialog.h"	
+#include "customDialog.h"
+#include "saveSnapshotDialog.h"
 #include "ui_congratsDialog.h"
 
 QProgressBar *MainWindow::qb;
@@ -206,7 +206,7 @@ MainWindow::MainWindow()
 	mdiarea = new QMdiArea(this),
 	//setCentralWidget(workspace);
 	setCentralWidget(mdiarea);
-	windowMapper = new QSignalMapper(this);	
+	windowMapper = new QSignalMapper(this);
 	// Permette di passare da una finestra all'altra e tenere aggiornato il workspace
 	connect(windowMapper, SIGNAL(mapped(QWidget*)),this, SLOT(wrapSetActiveSubWindow(QWidget *)));
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
@@ -221,7 +221,7 @@ MainWindow::MainWindow()
 	createActions();
 	createMenus();
 	createToolBars();
-	createStdPluginWnd();
+	stddialog = 0;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(appName());
@@ -234,22 +234,11 @@ MainWindow::MainWindow()
 	//qb->reset();
 	statusBar()->addPermanentWidget(qb,0);
 	updateMenus();
-  
+
 	//qb->setAutoClose(true);
 	//qb->setMinimumDuration(0);
 	//qb->reset();
 }
-
-// creates the standard plugin window
-void MainWindow::createStdPluginWnd()
-{
-	stddialog = new MeshlabStdDialog(this);
-	stddialog->setAllowedAreas (    Qt::NoDockWidgetArea );
-	addDockWidget(Qt::RightDockWidgetArea,stddialog);
-	stddialog->setFloating(true);
-	stddialog->hide();
-}
-
 
 void MainWindow::createActions()
 {
@@ -258,10 +247,10 @@ void MainWindow::createActions()
 	openAct->setShortcutContext(Qt::ApplicationShortcut);
 	openAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-	
+
 	openInAct = new QAction(QIcon(":/images/open.png"),tr("&Open as new layer..."), this);
 	connect(openInAct, SIGNAL(triggered()), this, SLOT(openIn()));
-	
+
 	openProjectAct = new QAction(QIcon(":/images/openPrj.png"),tr("&Open project..."), this);
 	connect(openProjectAct, SIGNAL(triggered()), this, SLOT(openProject()));
 
@@ -280,10 +269,10 @@ void MainWindow::createActions()
 	saveAsAct->setShortcutContext(Qt::ApplicationShortcut);
 	saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-	
+
 	saveProjectAct = new QAction(QIcon(":/images/savePrj.png"),tr("&Save Project..."), this);
 	connect(saveProjectAct, SIGNAL(triggered()), this, SLOT(saveProject()));
-	
+
 	saveSnapshotAct = new QAction(QIcon(":/images/snapshot.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
 
@@ -292,19 +281,19 @@ void MainWindow::createActions()
 		recentFileActs[i]->setVisible(false);
 		connect(recentFileActs[i], SIGNAL(triggered()),this, SLOT(openRecentFile()));
 	}
-	
+
 	exitAct = new QAction(tr("E&xit"), this);
 	exitAct->setShortcut(Qt::CTRL+Qt::Key_Q);
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////////////////////
 	renderModeGroupAct = new QActionGroup(this);
-	
+
 	renderBboxAct	  = new QAction(QIcon(":/images/bbox.png"),tr("&Bounding box"), renderModeGroupAct);
 	renderBboxAct->setCheckable(true);
 	connect(renderBboxAct, SIGNAL(triggered()), this, SLOT(renderBbox()));
-	
-	
+
+
 	renderModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), renderModeGroupAct);
 	renderModePointsAct->setCheckable(true);
 	connect(renderModePointsAct, SIGNAL(triggered()), this, SLOT(renderPoint()));
@@ -396,7 +385,7 @@ void MainWindow::createActions()
 	resetTrackBallAct->setShortcutContext(Qt::ApplicationShortcut);
 	resetTrackBallAct->setShortcut(Qt::CTRL+Qt::Key_H);
 	connect(resetTrackBallAct, SIGNAL(triggered()), this, SLOT(resetTrackBall()));
-	
+
 	showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
 	showLayerDlgAct->setCheckable(true);
 	showLayerDlgAct->setChecked(true);
@@ -429,11 +418,11 @@ void MainWindow::createActions()
 	lastFilterAct->setShortcut(Qt::CTRL+Qt::Key_L);
 	lastFilterAct->setEnabled(false);
 	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
-	
+
 	showFilterScriptAct = new QAction(tr("Show current filter script"),this);
 	showFilterScriptAct->setEnabled(true);
 	connect(showFilterScriptAct, SIGNAL(triggered()), this, SLOT(showFilterScript()));
-	
+
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
@@ -447,7 +436,7 @@ void MainWindow::createActions()
 
 	onlineHelpAct = new QAction(tr("Online &Documentation"), this);
 	connect(onlineHelpAct, SIGNAL(triggered()), this, SLOT(helpOnline()));
-	
+
 	submitBugAct = new QAction(tr("Submit Bug"), this);
 	connect(submitBugAct, SIGNAL(triggered()), this, SLOT(submitBug()));
 
@@ -496,20 +485,20 @@ void MainWindow::createMenus()
 	fileMenu->addAction(saveProjectAct);
 
 	fileMenuNew = fileMenu->addMenu(tr("New"));
-	
+
 	fileMenu->addSeparator();
 	fileMenu->addAction(saveSnapshotAct);
 	separatorAct = fileMenu->addSeparator();
-	
+
 	for (int i = 0; i < MAXRECENTFILES; ++i) fileMenu->addAction(recentFileActs[i]);
 	updateRecentFileActions();
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
-	
+
 	//////////////////// Menu Edit //////////////////////////////////////////////////////////////////////////
 	editMenu = menuBar()->addMenu(tr("&Edit"));
 	editMenu->addAction(suspendEditModeAct);
-	
+
   //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	filterMenu->addAction(lastFilterAct);
@@ -523,7 +512,7 @@ void MainWindow::createMenus()
 	filterMenuQuality = filterMenu->addMenu(tr("Quality"));
 	filterMenuNormal = filterMenu->addMenu(tr("Normal and Orientation"));
 	filterMenuLayer = filterMenu->addMenu(tr("Layer"));
-	
+
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
 
@@ -541,8 +530,8 @@ void MainWindow::createMenus()
 
 	// Color SUBmenu
 	colorModeMenu = renderMenu->addMenu(tr("&Color"));
-	
-	colorModeGroupAct = new QActionGroup(this);	colorModeGroupAct->setExclusive(true); 
+
+	colorModeGroupAct = new QActionGroup(this);	colorModeGroupAct->setExclusive(true);
 
 	colorModeNoneAct = new QAction(QString("&None"),colorModeGroupAct);
 	colorModeNoneAct->setCheckable(true);
@@ -551,9 +540,9 @@ void MainWindow::createMenus()
 	colorModePerVertexAct = new QAction(QString("Per &Vertex"),colorModeGroupAct);
 	colorModePerVertexAct->setCheckable(true);
 
-	colorModePerFaceAct = new QAction(QString("Per &Face"),colorModeGroupAct); 
+	colorModePerFaceAct = new QAction(QString("Per &Face"),colorModeGroupAct);
 	colorModePerFaceAct->setCheckable(true);
-	
+
 
 	colorModeMenu->addAction(colorModeNoneAct);
 	colorModeMenu->addAction(colorModePerVertexAct);
@@ -574,7 +563,7 @@ void MainWindow::createMenus()
 	trackBallMenu = viewMenu->addMenu(tr("&Trackball"));
 	trackBallMenu->addAction(showTrackBallAct);
 	trackBallMenu->addAction(resetTrackBallAct);
-	
+
 	logMenu = viewMenu->addMenu(tr("&Info"));
 	logMenu->addAction(showInfoPaneAct);
 
@@ -582,7 +571,7 @@ void MainWindow::createMenus()
 	toolBarMenu->addAction(showToolbarStandardAct);
 	toolBarMenu->addAction(showToolbarRenderAct);
 	connect(toolBarMenu,SIGNAL(aboutToShow()),this,SLOT(updateMenus()));
-	
+
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
@@ -608,16 +597,16 @@ void MainWindow::loadPlugins()
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
 	qApp->addLibraryPath(getPluginDirPath());
 	qApp->addLibraryPath(getBaseDirPath());
-	
-	qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath())); 
+
+	qDebug( "Current Plugins Dir: %s ",qPrintable(pluginsDir.absolutePath()));
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
 		QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
 		QObject *plugin = loader.instance();
 
-		if (plugin) {		
+		if (plugin) {
 		  MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 			if (iFilter)
-      { 
+      {
         QAction *filterAction;
         foreach(filterAction, iFilter->actions())
         {
@@ -627,29 +616,29 @@ void MainWindow::loadPlugins()
           filterAction->setToolTip(iFilter->filterInfo(filterAction));
           connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
           int filterClass = iFilter->getClass(filterAction);
-          
-          if( (filterClass & MeshFilterInterface::FaceColoring) || 
-              (filterClass & MeshFilterInterface::VertexColoring) ) 
-              		filterMenuColorize->addAction(filterAction); 
-					if(filterClass & MeshFilterInterface::Selection) 
+
+          if( (filterClass & MeshFilterInterface::FaceColoring) ||
+              (filterClass & MeshFilterInterface::VertexColoring) )
+              		filterMenuColorize->addAction(filterAction);
+					if(filterClass & MeshFilterInterface::Selection)
               		filterMenuSelect->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Cleaning ) 
+					if(filterClass &  MeshFilterInterface::Cleaning )
               		filterMenuClean->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Remeshing ) 
+					if(filterClass &  MeshFilterInterface::Remeshing )
               		filterMenuRemeshing->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Smoothing ) 
+					if(filterClass &  MeshFilterInterface::Smoothing )
               		filterMenuSmoothing->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Normal ) 
+					if(filterClass &  MeshFilterInterface::Normal )
               		filterMenuNormal->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Quality ) 
+					if(filterClass &  MeshFilterInterface::Quality )
               		filterMenuQuality->addAction(filterAction);
-					if(filterClass &  MeshFilterInterface::Layer ) 
+					if(filterClass &  MeshFilterInterface::Layer )
               		filterMenuLayer->addAction(filterAction);
-					if(filterClass & MeshFilterInterface::MeshCreation ) 
+					if(filterClass & MeshFilterInterface::MeshCreation )
               		fileMenuNew->addAction(filterAction);
-					if(filterClass == 0) //  MeshFilterInterface::Generic : 
+					if(filterClass == 0) //  MeshFilterInterface::Generic :
 									filterMenu->addAction(filterAction);
-            
+
 					if(!filterAction->icon().isNull())
 										filterToolBar->addAction(filterAction);
         }
@@ -720,18 +709,18 @@ void MainWindow::setCurrentFile(const QString &fileName)
 
 	settings.setValue("totalKV",          settings.value("totalKV",0).toInt()           + (GLA()->mm()->cm.vn)/1000);
 	settings.setValue("loadedMeshCounter",settings.value("loadedMeshCounter",0).toInt() + 1);
-  
-	int loadedMeshCounter    = settings.value("loadedMeshCounter",20).toInt(); 
+
+	int loadedMeshCounter    = settings.value("loadedMeshCounter",20).toInt();
 	int connectionInterval   = settings.value("connectionInterval",20).toInt();
 	int lastComunicatedValue = settings.value("lastComunicatedValue",0).toInt();
-  
+
 	if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
   {
 #if not defined(__DISABLE_AUTO_STATS__)
 		checkForUpdates(false);
-#endif		
-		int congratsMeshCounter = settings.value("congratsMeshCounter",0).toInt(); 
-		if(loadedMeshCounter > congratsMeshCounter + 100 ) 
+#endif
+		int congratsMeshCounter = settings.value("congratsMeshCounter",0).toInt();
+		if(loadedMeshCounter > congratsMeshCounter + 100 )
 			{
 				QFile txtFile(":/images/100mesh.html");
 				txtFile.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -742,13 +731,13 @@ void MainWindow::setCurrentFile(const QString &fileName)
 				QDialog *congratsDialog = new QDialog();
 				Ui::CongratsDialog temp;
 				temp.setupUi(congratsDialog);
-				
+
 				temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
 				temp.congratsTextEdit->setHtml(tttt);
 				congratsDialog->exec();
 				if(congratsDialog->result()==QDialog::Accepted)
 					QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
-			}	
+			}
 	}
 }
 
@@ -770,11 +759,11 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 
 #ifdef _DEBUG_PHP
     QString BaseCommand("/~cignoni/meshlab_d.php");
-#else 
+#else
     QString BaseCommand("/~cignoni/meshlab.php");
 #endif
 
-#ifdef Q_WS_WIN    
+#ifdef Q_WS_WIN
     QString OS="Win";
 #elif defined( Q_WS_MAC)
     QString OS="Mac";
@@ -785,7 +774,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
     idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
     bool ret=myLocalBuf.open(QBuffer::WriteOnly);
     if(!ret) QMessageBox::information(this,"Meshlab",QString("Failed opening of internal buffer"));
-    idGet=httpReq->get(message,&myLocalBuf);     // id == 2  
+    idGet=httpReq->get(message,&myLocalBuf);     // id == 2
 
 }
 
@@ -795,12 +784,12 @@ void MainWindow::connectionDone(bool /* status */)
 	if(answer.left(3)==QString("NEW"))
 		QMessageBox::information(this,"MeshLab Version Checking",answer.remove(0,3));
 	else if (VerboseCheckingFlag) QMessageBox::information(this,"MeshLab Version Checking","Your MeshLab version is the most recent one.");
-						
+
 	myLocalBuf.close();
 	QSettings settings;
 	int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
 	settings.setValue("lastComunicatedValue",loadedMeshCounter);
-}	
+}
 
 
 void MainWindow::submitBug()
@@ -822,9 +811,9 @@ void MainWindow::submitBug()
 
 	mb.exec();
 
-	if (mb.clickedButton() == submitBug) 
+	if (mb.clickedButton() == submitBug)
 		QDesktopServices::openUrl(QUrl("http://sourceforge.net/tracker/?func=add&group_id=149444&atid=774731"));
-					 
+
 }
 
 void MainWindow::wrapSetActiveSubWindow(QWidget* window){
