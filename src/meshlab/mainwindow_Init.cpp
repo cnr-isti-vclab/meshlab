@@ -264,10 +264,15 @@ void MainWindow::createActions()
 	reloadAct->setShortcut(Qt::CTRL+Qt::Key_R);
 	connect(reloadAct, SIGNAL(triggered()), this, SLOT(reload()));
 
+	saveAct = new QAction(QIcon(":/images/save.png"),tr("&Save"), this);
+	saveAct->setShortcutContext(Qt::ApplicationShortcut);
+	saveAct->setShortcut(Qt::CTRL+Qt::Key_S);
+	connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
-	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("&Save As..."), this);
+
+	saveAsAct = new QAction(QIcon(":/images/save.png"),tr("Save As..."), this);
 	saveAsAct->setShortcutContext(Qt::ApplicationShortcut);
-	saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
+	//saveAsAct->setShortcut(Qt::CTRL+Qt::Key_S);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
 	saveProjectAct = new QAction(QIcon(":/images/savePrj.png"),tr("&Save Project..."), this);
@@ -453,7 +458,7 @@ void MainWindow::createToolBars()
 	mainToolBar->setIconSize(QSize(32,32));
 	mainToolBar->addAction(openAct);
 	mainToolBar->addAction(reloadAct);
-	mainToolBar->addAction(saveAsAct);
+	mainToolBar->addAction(saveAct);
 	mainToolBar->addAction(saveSnapshotAct);
 	mainToolBar->addAction(showLayerDlgAct);
 
@@ -481,6 +486,7 @@ void MainWindow::createMenus()
 	fileMenu->addAction(openProjectAct);
 	fileMenu->addAction(closeAct);
 	fileMenu->addAction(reloadAct);
+	fileMenu->addAction(saveAct);
 	fileMenu->addAction(saveAsAct);
 	fileMenu->addAction(saveProjectAct);
 

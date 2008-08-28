@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -212,7 +212,7 @@ public:
    const QString appVer() const {return tr("1.2.0b"); }
 
 public slots:
-		 
+
 	bool open(QString fileName=QString(), GLArea *gla=0);
 	bool openIn(QString fileName=QString());
 	bool openProject(QString fileName=QString());
@@ -226,9 +226,10 @@ private slots:
 
 	//////////// Slot Menu File //////////////////////
 	void reload();
-	void openRecentFile();							
+	void openRecentFile();
 	bool saveAs();
-	bool saveSnapshot(); 
+	bool save();
+	bool saveSnapshot();
 	///////////Slot Menu Edit ////////////////////////
 	void applyEditMode();
 	void suspendEditMode();
@@ -273,21 +274,21 @@ private slots:
 	void setCustomize();
 	///////////Slot Menu Help ////////////////////////
 	void about();
-	void aboutPlugins();	
+	void aboutPlugins();
 	void helpOnline();
 	void helpOnscreen();
 	void submitBug();
 	void checkForUpdates(bool verboseFlag=true);
-	 
+
 	///////////Slot General Purpose ////////////////////////
 
 	void dropEvent ( QDropEvent * event );
 	void dragEnterEvent(QDragEnterEvent *);
 	void connectionDone(bool status);
-	
+
 	///////////Solt Wrapper for QMdiArea //////////////////
 	void wrapSetActiveSubWindow(QWidget* window);
-	
+
 private:
 	void createStdPluginWnd();
 	void createActions();
@@ -295,8 +296,8 @@ private:
 	void createToolBars();
 	void loadPlugins();
 	void keyPressEvent(QKeyEvent *);
-	void updateRecentFileActions();				
-	void setCurrentFile(const QString &fileName);			
+	void updateRecentFileActions();
+	void setCurrentFile(const QString &fileName);
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
 	//void LoadKnownFilters(QStringList &filters, QHash<QString, int> &allKnownFormats, int type);
 
@@ -306,8 +307,8 @@ private:
 	int idHost;
 	int idGet;
 	bool VerboseCheckingFlag;
-	
-	MeshlabStdDialog *stddialog;	  
+
+	MeshlabStdDialog *stddialog;
 	static QProgressBar *qb;
 	QMdiArea *mdiarea;
 	QSignalMapper *windowMapper;
@@ -322,11 +323,11 @@ private:
 public:
 	GLArea *GLA() const {
 	  if(mdiarea->currentSubWindow()==0) return 0;
-	  GLArea *glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow()); 
+	  GLArea *glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow());
 	  if(glw) return glw;
 	  glw = qobject_cast<GLArea *>(mdiarea->currentSubWindow()->widget());
 	  assert(glw);
-	  return glw;	
+	  return glw;
 	}
   QMap<QString, QAction *> filterMap; // a map to retrieve an action from a name. Used for playing filter scripts.
   static QStatusBar *&globalStatusBar()
@@ -334,7 +335,7 @@ public:
     static QStatusBar *_qsb=0;
     return _qsb;
   }
-private:	
+private:
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;
@@ -362,7 +363,7 @@ private:
 	QMenu *renderModeMenu;
 	QMenu *lightingModeMenu;
 	QMenu *colorModeMenu;
-	
+
 	//View Menu and SubMenu //////
 	QMenu *viewMenu;
 	QMenu *trackBallMenu;
@@ -370,7 +371,7 @@ private:
 	QMenu *toolBarMenu;
 	//////////////////////////////
 	QMenu *windowsMenu;
-	QMenu *preferencesMenu; 
+	QMenu *preferencesMenu;
 	QMenu *helpMenu;
 
 
@@ -379,13 +380,13 @@ private:
 	QAction *openInAct,*openProjectAct;
 	QAction *closeAct;
 	QAction *reloadAct;
-	QAction *saveAsAct,*saveProjectAct;
+	QAction *saveAct,*saveAsAct,*saveProjectAct;
 	QAction *saveSnapshotAct;
 	QAction *lastFilterAct;
 	QAction *runFilterScriptAct;
 	QAction *showFilterScriptAct;
 	QAction *recentFileActs[MAXRECENTFILES];
-	QAction *separatorAct;										
+	QAction *separatorAct;
 	QAction *exitAct;
 	/////////// Actions Menu Edit  /////////////////////
   QAction *suspendEditModeAct;

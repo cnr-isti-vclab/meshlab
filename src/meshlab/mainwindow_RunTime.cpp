@@ -247,8 +247,13 @@ void MainWindow::createStdPluginWnd()
 // this one is called when user switch current window.
 void MainWindow::updateStdDialog()
 {
-	if(stddialog!=0 && stddialog->curModel != GLA()->mm()){
-		stddialog->close();
+	qDebug()<<"MainWindow::updateStdDialog()";
+	if(stddialog!=0){
+		if(GLA()!=0){
+			if(stddialog->curModel != GLA()->mm()){
+				stddialog->close();
+			}
+		}
 	}
 }
 
@@ -294,6 +299,7 @@ void MainWindow::updateMenus()
 	openInAct->setEnabled(active);
 	closeAct->setEnabled(active);
 	reloadAct->setEnabled(active);
+	saveAct->setEnabled(active);
 	saveAsAct->setEnabled(active);
 	saveSnapshotAct->setEnabled(active);
 	filterMenu->setEnabled(active && !filterMenu->actions().isEmpty());
@@ -981,7 +987,6 @@ void MainWindow::reload()
 	// Discards changes and reloads current file
 	// save current file name
 	QString file = GLA()->getFileName();
-
 	// close current window
 	mdiarea->closeActiveSubWindow();
 
@@ -989,8 +994,7 @@ void MainWindow::reload()
 	open(file);
 }
 
-
-bool MainWindow::saveAs()
+bool MainWindow::save()
 {
 	QStringList filters;
 
@@ -999,10 +1003,7 @@ bool MainWindow::saveAs()
 	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,EXPORT);
 
 	QString fileName;
-
-	if (fileName.isEmpty())
-				//fileName = QFileDialog::getSaveFileName(this,tr("Save File"),".", filters.join("\n"));
-					fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->fileName.c_str(), filters.join("\n"));
+	fileName = QString(GLA()->mm()->fileName.c_str());
 
 	bool ret = false;
 
@@ -1050,12 +1051,85 @@ bool MainWindow::saveAs()
 		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
 		qb->reset();
 		qApp->restoreOverrideCursor();
+		this->GLA()->mm()->fileName = fileName.toStdString();
 
-    QSettings settings;
-    int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
-    settings.setValue("savedMeshCounter",savedMeshCounter+1);
+		QSettings settings;
+		int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
+		settings.setValue("savedMeshCounter",savedMeshCounter+1);
+		GLA()->setWindowModified(false);
 	}
-  GLA()->setWindowModified(false);
+	return ret;
+}
+
+
+
+bool MainWindow::saveAs()
+{
+	QStringList filters;
+
+	QHash<QString, int> allKnownFormats;
+
+	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,EXPORT);
+
+	QString fileName;
+
+	if (fileName.isEmpty())
+		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->fileName.c_str(), filters.join("\n"));
+
+	bool ret = false;
+
+	QStringList fs = fileName.split(".");
+
+	if(!fileName.isEmpty() && fs.size() < 2)
+	{
+		QMessageBox::warning(new QWidget(),"Save Error","You must specify file extension!!");
+		return ret;
+	}
+
+	if (!fileName.isEmpty())
+	{
+		QString extension = fileName;
+		extension.remove(0, fileName.lastIndexOf('.')+1);
+
+		QStringListIterator itFilter(filters);
+
+		int idx = allKnownFormats[extension.toLower()];
+		if (idx == 0)
+		{
+			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
+			return false;
+		}
+		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
+
+		int capability=0,defaultBits=0;
+		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
+
+		// optional saving parameters (like ascii/binary encoding)
+		FilterParameterSet savePar;
+
+		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
+
+		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar);
+		maskDialog.exec();
+		int mask = maskDialog.GetNewMask();
+		maskDialog.close();
+
+		if(mask == -1)
+			return false;
+
+		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
+		qb->show();
+		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
+		qb->reset();
+		qApp->restoreOverrideCursor();
+		GLA()->mm()->fileName = fileName.toStdString();
+		GLA()->setFileName(fileName);
+		QSettings settings;
+		int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
+		settings.setValue("savedMeshCounter",savedMeshCounter+1);
+		GLA()->setWindowModified(false);
+
+	}
 	return ret;
 }
 
