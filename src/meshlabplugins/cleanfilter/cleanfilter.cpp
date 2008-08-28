@@ -153,9 +153,9 @@ const QString CleanFilter::filterInfo(FilterIDType filterId)
 {
   switch(filterId)
   {
-		case FP_REBUILD_SURFACE :	return QString("Reconstruct a surface using the <b>Ball Pivoting Algorithm<b> (Bernardini et al. 1999). \n"
+		case FP_REBUILD_SURFACE :	return QString("Reconstruct a surface using the <b>Ball Pivoting Algorithm</b> (Bernardini et al. 1999). <br>"
 																						 "Starting with a seed triangle, the BPA algorithm  pivots a ball around an edge "
-																						 "(i.e. it revolves around the edge while keeping in contact with the edge’s endpoints) "
+																						 "(i.e. it revolves around the edge while keeping in contact with the edge endpoints) "
 																						 "until it touches another point, forming another triangle. The process continues until all reachable edges have been tried."); 
 		case FP_REMOVE_ISOLATED_COMPLEXITY:	 return tr("Remove isolated connected components composed by a limited number of triangles"); 
 		case FP_REMOVE_ISOLATED_DIAMETER:	 return tr("Remove isolated connected components whose diameter is smaller than the specified constant"); 
