@@ -247,7 +247,6 @@ void MainWindow::createStdPluginWnd()
 // this one is called when user switch current window.
 void MainWindow::updateStdDialog()
 {
-	qDebug()<<"MainWindow::updateStdDialog()";
 	if(stddialog!=0){
 		if(GLA()!=0){
 			if(stddialog->curModel != GLA()->mm()){
@@ -996,74 +995,15 @@ void MainWindow::reload()
 
 bool MainWindow::save()
 {
-	QStringList filters;
-
-	QHash<QString, int> allKnownFormats;
-
-	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,EXPORT);
-
 	QString fileName;
 	fileName = QString(GLA()->mm()->fileName.c_str());
 
-	bool ret = false;
-
-	QStringList fs = fileName.split(".");
-
-	if(!fileName.isEmpty() && fs.size() < 2)
-	{
-		QMessageBox::warning(new QWidget(),"Save Error","You must specify file extension!!");
-		return ret;
-	}
-
-	if (!fileName.isEmpty())
-	{
-		QString extension = fileName;
-		extension.remove(0, fileName.lastIndexOf('.')+1);
-
-		QStringListIterator itFilter(filters);
-
-		int idx = allKnownFormats[extension.toLower()];
-		if (idx == 0)
-		{
-			QMessageBox::warning(this, "Unknown type", "File extension not supported!");
-			return false;
-		}
-		MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-
-		int capability=0,defaultBits=0;
-		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
-
-		// optional saving parameters (like ascii/binary encoding)
-		FilterParameterSet savePar;
-
-		pCurrentIOPlugin->initSaveParameter(extension,*(this->GLA()->mm()),savePar);
-
-		SaveMaskExporterDialog maskDialog(new QWidget(),this->GLA()->mm(),capability,defaultBits,&savePar);
-		maskDialog.exec();
-		int mask = maskDialog.GetNewMask();
-		maskDialog.close();
-
-		if(mask == -1)
-			return false;
-
-		qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-		qb->show();
-		ret = pCurrentIOPlugin->save(extension, fileName, *this->GLA()->mm() ,mask,savePar,QCallBack,this);
-		qb->reset();
-		qApp->restoreOverrideCursor();
-		this->GLA()->mm()->fileName = fileName.toStdString();
-
-		QSettings settings;
-		int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
-		settings.setValue("savedMeshCounter",savedMeshCounter+1);
-		GLA()->setWindowModified(false);
-	}
-	return ret;
+	return saveAs(fileName);
+	
 }
 
 
-
-bool MainWindow::saveAs()
+bool MainWindow::saveAs(QString fileName)
 {
 	QStringList filters;
 
@@ -1071,7 +1011,7 @@ bool MainWindow::saveAs()
 
 	LoadKnownFilters(meshIOPlugins, filters, allKnownFormats,EXPORT);
 
-	QString fileName;
+	//QString fileName;
 
 	if (fileName.isEmpty())
 		fileName = QFileDialog::getSaveFileName(this,tr("Save File"),GLA()->mm()->fileName.c_str(), filters.join("\n"));

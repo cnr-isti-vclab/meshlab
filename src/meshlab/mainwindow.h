@@ -227,7 +227,7 @@ private slots:
 	//////////// Slot Menu File //////////////////////
 	void reload();
 	void openRecentFile();
-	bool saveAs();
+	bool saveAs(QString fileName = QString());
 	bool save();
 	bool saveSnapshot();
 	///////////Slot Menu Edit ////////////////////////
