@@ -252,9 +252,9 @@ bool AlignTools::align(MeshModel *stuckModel, PickedPoints *stuckPickedPoints,
 				modelToMoveGLArea->update();
 			}
 
-			QMessageBox messageBox(QMessageBox::Question, "MeshLab", "Do you want accept this alignment?",
-					QMessageBox::Yes|QMessageBox::No, parentWidget);
-			int returnValue = messageBox.exec();
+			int returnValue = QMessageBox::question(parentWidget,
+					"MeshLab", "Do you want accept this alignment?",
+					QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
 
 			//if we added the other model in for comparing
 			if(removeMeshAddedForQuestion)
