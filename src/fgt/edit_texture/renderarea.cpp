@@ -173,7 +173,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 				if (model->cm.face[i].WT(0).v() < minY || model->cm.face[i].WT(1).v() < minY || model->cm.face[i].WT(2).v() < minY)	minY--;
 
 				drawEdge(i); // Draw the edge of faces
-				if (selected && model->cm.face[i].IsUserBit(selBit)) drawSelectedFaces(i); // Draw the selected faces
+				//if (selected && model->cm.face[i].IsUserBit(selBit)) drawSelectedFaces(i); // Draw the selected faces
 				if (selectedV && mode != UnifyVert)	drawSelectedVertexes(i); // Draw the selected vertex
 			}
 		}
@@ -204,6 +204,17 @@ void RenderArea::paintEvent(QPaintEvent *)
 		glMatrixMode(GL_PROJECTION);
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
+		
+		// Draw blend object
+		glDepthMask(GL_FALSE);
+		glLogicOp(GL_AND);
+		glEnable(GL_BLEND); 
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+		for (unsigned i = 0; i < model->cm.face.size(); i++)
+			if (selected && model->cm.face[i].IsUserBit(selBit)) drawSelectedFaces(i); // Draw the selected faces
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
 	}
 	else painter.drawText(this->visibleRegion().boundingRect().width()/2 - FMETRICX, this->visibleRegion().boundingRect().height()/2 - FMETRICY, tr("NO TEXTURE"));
 
@@ -231,8 +242,6 @@ void RenderArea::drawSelectedVertexes(int i)
 
 void RenderArea::drawSelectedFaces(int i)
 {
-	glLogicOp(GL_AND);
-	glColor3f(1,0,0);
 	glBegin(GL_TRIANGLES);
 	for (int j = 0; j < 3; j++)
 	{
