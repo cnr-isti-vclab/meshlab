@@ -186,6 +186,7 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	//init some variables
 	
 	//set to nothing for now
+	lastPointToMove = 0;
 	itemToMove = 0;
 	meshModel = 0;
 	_glArea = 0;
@@ -198,13 +199,17 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	
 	currentMode = ADD_POINT;
 	
+	recordPointForUndo = false;
+	
 	getClosestFace = new GetClosestFace();
 	
 	//signals and slots
 	connect(ui.removePointButton, SIGNAL(clicked()), this, SLOT(removeHighlightedPoint()));
 	connect(ui.renamePointButton, SIGNAL(clicked()), this, SLOT(renameHighlightedPoint()));
 	connect(ui.clearPointButton, SIGNAL(clicked()), this, SLOT(clearHighlightedPoint()));
-	connect(ui.pickPointModeRadioButton, SIGNAL(toggled(bool)), this, SLOT(togglePickMode(bool)));
+	connect(ui.pickPointModeRadioButton, SIGNAL(toggled(bool)), this, SLOT(togglePickMode(bool)) );
+	connect(ui.movePointRadioButton, SIGNAL(toggled(bool)), this, SLOT(toggleMoveMode(bool)) );
+	connect(ui.selectPointRadioButton, SIGNAL(toggled(bool)), this, SLOT(toggleSelectMode(bool)) );
 	connect(ui.saveButton, SIGNAL(clicked()), this, SLOT(savePointsToFile()));
 	connect(ui.loadPointsButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndLoadPoints()));
 	connect(ui.removeAllPointsButton, SIGNAL(clicked()), this, SLOT(clearPointsButtonClicked()));
@@ -212,6 +217,7 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	connect(ui.loadTemplateButton, SIGNAL(clicked()), this, SLOT(askUserForFileAndloadTemplate()));
 	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearTemplateButtonClicked()) );
 	connect(ui.addPointToTemplateButton, SIGNAL(clicked()), this, SLOT(addPointToTemplate()) );
+	connect(ui.undoButton, SIGNAL(clicked()), this, SLOT(undo()));
 	
 	connect(ui.showNormalCheckBox, SIGNAL(clicked()), this, SLOT(redrawPoints()));
 	connect(ui.pinRadioButton, SIGNAL(clicked()), this, SLOT(redrawPoints()));
@@ -223,8 +229,8 @@ PickPointsDialog::~PickPointsDialog()
 	delete getClosestFace;
 }
 
-void PickPointsDialog::addPoint(Point3f point, CMeshO::FaceType::NormalType faceNormal){
-	
+void PickPointsDialog::addMoveSelectPoint(Point3f point, CMeshO::FaceType::NormalType faceNormal)
+{
 	if(currentMode == ADD_POINT)
 	{
 		QTreeWidgetItem *item = 0;
@@ -249,7 +255,7 @@ void PickPointsDialog::addPoint(Point3f point, CMeshO::FaceType::NormalType face
 			} else
 			{
 				//if we just picked the last point go into move mode
-				togglePickMode(false);
+				toggleMoveMode(true);
 			}
 		} else {
 			//use a number as the default name
@@ -263,13 +269,32 @@ void PickPointsDialog::addPoint(Point3f point, CMeshO::FaceType::NormalType face
 	{
 		//test to see if there is actually a highlighted item
 		if(NULL != itemToMove){
+			//for undo
+			if(recordPointForUndo)
+			{
+				lastPointToMove = itemToMove;
+				lastPointPosition = lastPointToMove->getPoint();
+				lastPointNormal = lastPointToMove->getNormal();
+				recordPointForUndo = false;
+			}
+			
+			//now change the point
 			itemToMove->setPointAndNormal(point, faceNormal);
 			itemToMove->setActive(true);
+			ui.pickedPointsTreeWidget->setCurrentItem(itemToMove);
 		}
+	} else if(currentMode == SELECT_POINT)
+	{
+		ui.pickedPointsTreeWidget->setCurrentItem(itemToMove);
 	}
 }
 
-void PickPointsDialog::moveThisPoint(Point3f point){
+void PickPointsDialog::recordNextPointForUndo()
+{
+	recordPointForUndo = true;
+}
+
+void PickPointsDialog::selectOrMoveThisPoint(Point3f point){
 	qDebug() << "point is: " << point[0] << " " << point[1] << " " << point[2];
 	
 	//the item closest to the given point
@@ -463,6 +488,9 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, GLArea *gla)
 	_glArea = gla;
 	assert(_glArea);
 	
+	//make sure undo is cleared
+	lastPointToMove = 0;
+	
 	//clear any points that are still here
 	clearPoints(false);
 	
@@ -622,16 +650,34 @@ void PickPointsDialog::clearHighlightedPoint()
 }
 	
 void PickPointsDialog::togglePickMode(bool checked){
-	//qDebug() << "Toggle pick mode " << checked;
 	if(checked){
+		//qDebug() << "pick mode";
 		currentMode = ADD_POINT;
 		//make sure radio button reflects this change
 		ui.pickPointModeRadioButton->setChecked(true);
-	} else {
+	}
+}
+
+void PickPointsDialog::toggleMoveMode(bool checked)
+{
+	if(checked)
+	{
+		//qDebug() << "move mode";
 		currentMode = MOVE_POINT;
-		//make sure radio button reflects the change
+		//make sure the radio button reflects this change
 		ui.movePointRadioButton->setChecked(true);
 	}
+}
+
+void PickPointsDialog::toggleSelectMode(bool checked)
+{
+	if(checked)
+	{
+		//qDebug() << "select mode";
+		currentMode = SELECT_POINT;
+		//make radio button reflect the change
+		ui.selectPointRadioButton->setChecked(true);
+	}	
 }
 
 PickedPoints * PickPointsDialog::getPickedPoints()
@@ -726,11 +772,15 @@ void PickPointsDialog::savePointTemplate(){
 	
 	//default if for the filename to be that of the default template
 	QString filename = PickPointsTemplate::getDefaultTemplateFileName();
-	qDebug() << "default " << filename;
+
 	if(!ui.defaultTemplateCheckBox->isChecked())
 	{
 		filename = QFileDialog::getSaveFileName(this,tr("Save File"), templateName, "*"+PickPointsTemplate::fileExtension);
+		
+		//if the user pushes cancel dont do anything
+		if("" == filename) return;
 	}
+	
 	
 	//add the extension if the user forgot it
 	if(!filename.endsWith(PickPointsTemplate::fileExtension))
@@ -791,4 +841,21 @@ void PickPointsDialog::addPointToTemplate()
 		addTreeWidgetItemForPoint(point, name, faceNormal, false);
 	widgetItem->clearPoint();
 
+}
+
+void PickPointsDialog::undo()
+{
+	if(NULL != lastPointToMove)
+	{		
+		vcg::Point3f tempPoint = lastPointToMove->getPoint();
+		vcg::Point3f tempNormal = lastPointToMove->getNormal();
+
+		lastPointToMove->setPointAndNormal(lastPointPosition, lastPointNormal);
+		
+		//set things so you can undo back if need be
+		lastPointPosition = tempPoint;
+		lastPointNormal = tempNormal;
+		
+		redrawPoints();
+	}
 }

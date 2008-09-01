@@ -62,11 +62,11 @@ private:
 	//the current place the mouse clicked
 	QPoint currentMousePosition;
 
-	//flag that tells the decorate function whether to add the latest point
-	bool addPoint;
+	//flag that tells the decorate function whether to notify the dialog of this point
+	bool registerPoint;
 	
 	//flag that tells the decorate function whether we are moving points
-	bool movePoint;
+	bool moveSelectPoint;
 	
 	//the gui dialog for this plugin
 	PickPointsDialog *pickPointsDialog;

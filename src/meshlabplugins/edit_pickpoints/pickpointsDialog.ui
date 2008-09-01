@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>528</width>
-    <height>628</height>
+    <height>618</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -18,7 +18,7 @@
      <x>0</x>
      <y>10</y>
      <width>521</width>
-     <height>611</height>
+     <height>601</height>
     </rect>
    </property>
    <property name="frameShape" >
@@ -70,7 +70,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>201</width>
+      <width>291</width>
       <height>51</height>
      </rect>
     </property>
@@ -106,24 +106,30 @@
       <string>Move Point</string>
      </property>
     </widget>
+    <widget class="QRadioButton" name="selectPointRadioButton" >
+     <property name="geometry" >
+      <rect>
+       <x>190</x>
+       <y>20</y>
+       <width>91</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Select Point</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="layoutWidget" >
     <property name="geometry" >
      <rect>
-      <x>220</x>
-      <y>10</y>
-      <width>211</width>
+      <x>320</x>
+      <y>13</y>
+      <width>171</width>
       <height>51</height>
      </rect>
     </property>
     <layout class="QGridLayout" >
-     <item row="0" column="0" >
-      <widget class="QPushButton" name="saveButton" >
-       <property name="text" >
-        <string>Save</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0" >
       <widget class="QPushButton" name="loadPointsButton" >
        <property name="text" >
@@ -131,13 +137,23 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="0" >
+      <widget class="QPushButton" name="saveButton" >
+       <property name="text" >
+        <string>Save</string>
+       </property>
+      </widget>
+     </item>
     </layout>
+    <zorder>loadPointsButton</zorder>
+    <zorder>saveButton</zorder>
+    <zorder>saveButton_2</zorder>
    </widget>
    <widget class="QGroupBox" name="groupBox_2" >
     <property name="geometry" >
      <rect>
       <x>10</x>
-      <y>410</y>
+      <y>420</y>
       <width>431</width>
       <height>111</height>
      </rect>
@@ -221,7 +237,7 @@
       <string>TextLabel</string>
      </property>
     </widget>
-    <widget class="QWidget" name="" >
+    <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
        <x>10</x>
@@ -266,7 +282,7 @@
     <property name="geometry" >
      <rect>
       <x>10</x>
-      <y>530</y>
+      <y>540</y>
       <width>431</width>
       <height>51</height>
      </rect>
@@ -327,7 +343,7 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QWidget" name="" >
+   <widget class="QWidget" name="layoutWidget" >
     <property name="geometry" >
      <rect>
       <x>10</x>
@@ -367,7 +383,24 @@
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="undoButton" >
+    <property name="geometry" >
+     <rect>
+      <x>450</x>
+      <y>370</y>
+      <width>51</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Undo
+last
+move</string>
+    </property>
+   </widget>
   </widget>
+  <zorder>frame</zorder>
+  <zorder>saveButton</zorder>
  </widget>
  <resources/>
  <connections/>

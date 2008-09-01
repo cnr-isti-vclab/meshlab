@@ -79,14 +79,13 @@ public:
 
 	~PickPointsDialog();
 	
-	enum Mode { ADD_POINT, MOVE_POINT };
+	enum Mode { ADD_POINT, MOVE_POINT, SELECT_POINT };
 	
+	//do soemthing with the point that was just picked(could be add,moving or select)
+	void addMoveSelectPoint(vcg::Point3f point, CMeshO::FaceType::NormalType faceNormal);
 	
-	//add a point that was just picked(could be moving a point)
-	void addPoint(vcg::Point3f point, CMeshO::FaceType::NormalType faceNormal);
-	
-	//we need to move the point closest to this one
-	void moveThisPoint(vcg::Point3f point);
+	//we need to move the point closest to this one or select it depending on the mode
+	void selectOrMoveThisPoint(vcg::Point3f point);
 		
 	//return the vector
 	//useful if you want to draw the points
@@ -104,6 +103,9 @@ public:
 	bool showNormal();
 	
 	bool drawNormalAsPin();
+	
+	//set flag that says the next value will overwite one we may want to jump back to
+	void recordNextPointForUndo();
 
 public slots:	
 	//redraw the points on the screen
@@ -173,6 +175,12 @@ private:
 	//basically just so we have a unique default name for new points that are picked
 	int pointCounter;
 	
+	//variables needed for undo
+	PickedPointTreeWidgetItem *lastPointToMove;
+	vcg::Point3f lastPointPosition;
+	vcg::Point3f lastPointNormal;
+	bool recordPointForUndo;
+	
 private slots:
 	//remove the point highlighted in the pickedPointTree
 	void removeHighlightedPoint();
@@ -183,8 +191,14 @@ private slots:
 	//clear the point highlighted in the pickedPointTree
 	void clearHighlightedPoint();
 	
-	//move the point  highlighted in the pickedPointTree
+	//change mode to pick mode
 	void togglePickMode(bool checked);
+	
+	//change mode to move mode
+	void toggleMoveMode(bool checked);
+	
+	//change mode to select mode
+	void toggleSelectMode(bool checked);
 	
 	//save the points to a file
 	void savePointsToFile();
@@ -208,6 +222,9 @@ private slots:
 	//Add a point to the loaded template.  When in template 
 	//mode the default is to now allow extra points
 	void addPointToTemplate();
+	
+	//undo the last move
+	void undo();
 };
 
 //because QT is really dumb and TreeWidgetItems can recieve signals

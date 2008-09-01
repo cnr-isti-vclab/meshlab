@@ -28,8 +28,8 @@ EditPickPointsPlugin::EditPickPointsPlugin(){
 	    editAction->setCheckable(true);
 	
 	//initialize to false so we dont end up collection some weird point in the beginning
-	addPoint = false;
-	movePoint = false;
+	registerPoint = false;
+	moveSelectPoint = false;
 	
 	pickPointsDialog = 0;
 	currentModel = 0;
@@ -86,22 +86,22 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 	
 	//We have to calculate the position here because it doesnt work in the mouseEvent functions for some reason
 	Point3f pickedPoint;
-	if (movePoint && Pick<Point3f>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint)){
-			qDebug("Found point for move %i %i -> %f %f %f",
+	if (moveSelectPoint && Pick<Point3f>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint)){
+			/* qDebug("Found point for move %i %i -> %f %f %f",
 					currentMousePosition.x(),
 					currentMousePosition.y(),
-					pickedPoint[0], pickedPoint[1], pickedPoint[2]);
+					pickedPoint[0], pickedPoint[1], pickedPoint[2]); */
 			
 			//let the dialog know that this was the pointed picked incase it wants the information
-			pickPointsDialog->moveThisPoint(pickedPoint);
+			pickPointsDialog->selectOrMoveThisPoint(pickedPoint);
 			
-			movePoint = false;
-	} else if(addPoint && Pick<Point3f>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint)) 
+			moveSelectPoint = false;
+	} else if(registerPoint && Pick<Point3f>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint)) 
 	{
-		qDebug("Found point for add %i %i -> %f %f %f",
+		/* qDebug("Found point for add %i %i -> %f %f %f",
 				currentMousePosition.x(),
 				currentMousePosition.y(),
-				pickedPoint[0], pickedPoint[1], pickedPoint[2]);
+				pickedPoint[0], pickedPoint[1], pickedPoint[2]); */
 	
 		
 		//find the normal of the face we just clicked
@@ -118,10 +118,10 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 			
 			//if we didnt find a face then dont add the point because the user was probably 
 			//clicking on another mesh opened inside the glarea
-			pickPointsDialog->addPoint(pickedPoint, faceNormal);
+			pickPointsDialog->addMoveSelectPoint(pickedPoint, faceNormal);
 		}
 		
-		addPoint = false;
+		registerPoint = false;
 		
 	}
 	
@@ -175,12 +175,14 @@ void EditPickPointsPlugin::mousePressEvent(QAction *, QMouseEvent *event, MeshMo
 	}
 	
 	if(Qt::RightButton == event->button() && 
-			pickPointsDialog->getMode() == PickPointsDialog::MOVE_POINT){
+			pickPointsDialog->getMode() != PickPointsDialog::ADD_POINT){
 	
 		currentMousePosition = event->pos();
 	
+		pickPointsDialog->recordNextPointForUndo();
+		
 		//set flag that we need to add a new point
-		movePoint = true;	
+		moveSelectPoint = true;	
 	}
 }
 
@@ -196,14 +198,14 @@ void EditPickPointsPlugin::mouseMoveEvent(QAction *, QMouseEvent *event, MeshMod
 	}
 	
 	if(Qt::RightButton & event->buttons() && 
-			pickPointsDialog->getMode() == PickPointsDialog::MOVE_POINT){
+			pickPointsDialog->getMode() != PickPointsDialog::ADD_POINT){
 			
 		//qDebug() << "mouse move left button and move mode: ";
 		
 		currentMousePosition = event->pos();
 	
 		//set flag that we need to add a new point
-		addPoint = true;	
+		registerPoint = true;	
 	}
 }
 
@@ -225,7 +227,7 @@ void EditPickPointsPlugin::mouseReleaseEvent(QAction *,
 		currentMousePosition = event->pos();
 	
 		//set flag that we need to add a new point
-		addPoint = true;	
+		registerPoint = true;	
 	}		
 }
 
