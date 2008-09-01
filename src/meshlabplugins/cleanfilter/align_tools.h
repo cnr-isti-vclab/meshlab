@@ -27,7 +27,8 @@ public:
 	static const QString UseICP;
 	static const QString StuckMesh;
 	static const QString MeshToMove;
-
+	static const std::string TransformAppliedKey;
+	
 	//make the default parameter set for this filter
 	static void buildParameterSet(FilterParameterSet & parlst);
 
