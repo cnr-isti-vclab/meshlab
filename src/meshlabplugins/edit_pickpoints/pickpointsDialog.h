@@ -181,6 +181,8 @@ private:
 	vcg::Point3f lastPointNormal;
 	bool recordPointForUndo;
 	
+	QString templateWorkingDirectory;
+	
 private slots:
 	//remove the point highlighted in the pickedPointTree
 	void removeHighlightedPoint();

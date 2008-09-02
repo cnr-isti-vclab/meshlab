@@ -449,7 +449,8 @@ void PickPointsDialog::setTemplateName(QString name)
 	}
 }
 
-void PickPointsDialog::loadPickPointsTemplate(QString filename){
+void PickPointsDialog::loadPickPointsTemplate(QString filename)
+{
 	//clear the points tree
 	clearPoints(false);
 	
@@ -472,6 +473,7 @@ void PickPointsDialog::loadPickPointsTemplate(QString filename){
 	}
 	
 	setTemplateName(QFileInfo(filename).fileName());
+	templateWorkingDirectory = filename;
 }
 
 std::vector<PickedPointTreeWidgetItem*>& PickPointsDialog::getPickedPointTreeWidgetItemVector(){
@@ -732,10 +734,12 @@ void PickPointsDialog::savePointsToFile()
 		}
 		QString filename = QFileDialog::getSaveFileName(this,tr("Save File"),suggestion, "*"+PickedPoints::fileExtension);
 	
-		pickedPoints->save(filename, QString(meshModel->fileName.c_str()));
-	}
-	
-	savePointsToMetaData();
+		if("" != filename)
+		{
+			pickedPoints->save(filename, QString(meshModel->fileName.c_str()));
+			savePointsToMetaData();
+		}
+	}	
 }
 
 void PickPointsDialog::savePointsToMetaData()
@@ -755,8 +759,13 @@ void PickPointsDialog::savePointsToMetaData()
 
 void PickPointsDialog::askUserForFileAndLoadPoints()
 {
-	QString filename = QFileDialog::getOpenFileName(this,tr("Load File"),".", "*"+PickedPoints::fileExtension);
-	loadPoints(filename);
+	QString suggestion(".");
+	if(NULL != meshModel)
+		suggestion = PickedPoints::getSuggestedPickedPointsFileName(*meshModel);
+	
+	QString filename = QFileDialog::getOpenFileName(this, tr("Load File"),suggestion, "*"+PickedPoints::fileExtension);
+	
+	if("" != filename)	loadPoints(filename);
 }
 
 void PickPointsDialog::savePointTemplate(){
@@ -775,10 +784,11 @@ void PickPointsDialog::savePointTemplate(){
 
 	if(!ui.defaultTemplateCheckBox->isChecked())
 	{
-		filename = QFileDialog::getSaveFileName(this,tr("Save File"), templateName, "*"+PickPointsTemplate::fileExtension);
+		filename = QFileDialog::getSaveFileName(this, tr("Save File"), templateWorkingDirectory, "*"+PickPointsTemplate::fileExtension);
 		
 		//if the user pushes cancel dont do anything
 		if("" == filename) return;
+		else templateWorkingDirectory = filename;
 	}
 	
 	
@@ -798,8 +808,8 @@ void PickPointsDialog::savePointTemplate(){
 
 void PickPointsDialog::askUserForFileAndloadTemplate()
 {
-	QString filename = QFileDialog::getOpenFileName(this,tr("Load File"),".", "*"+PickPointsTemplate::fileExtension);
-	loadPickPointsTemplate(filename);
+	QString filename = QFileDialog::getOpenFileName(this,tr("Load File"),templateWorkingDirectory, "*"+PickPointsTemplate::fileExtension);
+	if("" != filename) loadPickPointsTemplate(filename);
 }
 
 void PickPointsDialog::clearPointsButtonClicked()
