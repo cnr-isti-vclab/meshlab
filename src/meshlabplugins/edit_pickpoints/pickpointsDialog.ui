@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>528</width>
-    <height>618</height>
+    <height>628</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -18,7 +18,7 @@
      <x>0</x>
      <y>10</y>
      <width>521</width>
-     <height>601</height>
+     <height>611</height>
     </rect>
    </property>
    <property name="frameShape" >
@@ -123,9 +123,9 @@
    <widget class="QWidget" name="layoutWidget" >
     <property name="geometry" >
      <rect>
-      <x>320</x>
-      <y>13</y>
-      <width>171</width>
+      <x>310</x>
+      <y>10</y>
+      <width>181</width>
       <height>51</height>
      </rect>
     </property>
@@ -145,9 +145,6 @@
       </widget>
      </item>
     </layout>
-    <zorder>loadPointsButton</zorder>
-    <zorder>saveButton</zorder>
-    <zorder>saveButton_2</zorder>
    </widget>
    <widget class="QGroupBox" name="groupBox_2" >
     <property name="geometry" >
@@ -399,8 +396,6 @@ move</string>
     </property>
    </widget>
   </widget>
-  <zorder>frame</zorder>
-  <zorder>saveButton</zorder>
  </widget>
  <resources/>
  <connections/>
