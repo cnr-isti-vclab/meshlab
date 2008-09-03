@@ -32,7 +32,7 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	state = HoleListModel::Selection;
 	mesh = m;
 	userBitHole = -1;
-	curBridge = 0;
+	pickedHole = 0;
 	updateModel();
 }
 
@@ -40,7 +40,7 @@ void HoleListModel::clearModel()
 {
 	holes.clear();
 	bridges.clear();
-
+	
 	if(userBitHole > 0)
 	{
 		//mesh->clearDataMask(userBitHole);
@@ -51,6 +51,7 @@ void HoleListModel::clearModel()
 				(*fi).ClearUserBit(userBitHole);
 		}
 	}
+	pickedHole = 0;
 }
 
 void HoleListModel::updateModel()
@@ -91,6 +92,15 @@ void HoleListModel::drawHoles() const
 
 	}
 
+	if(pickedHole != 0)
+	{
+		glColor(Color4b::Yellow);
+		glBegin(GL_LINES);
+			glVertex( pickedPos.f->V0(pickedPos.z)->P() );
+			glVertex( pickedPos.f->V1(pickedPos.z)->P() );
+		glEnd();
+	}
+
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST); 
 	glDepthFunc(GL_LESS);
@@ -108,7 +118,7 @@ void HoleListModel::drawHoles() const
 			glColor(Color4b::Blue);
 				
 		it->Draw();		
-	}
+	}	
 }
 
 void HoleListModel::drawCompenetratingFaces() const
@@ -163,31 +173,37 @@ void HoleListModel::toggleAcceptanceHoleFromPatchFace(CFaceO *bface)
 	emit SGN_needUpdateGLA();
 }
 
-void HoleListModel::addBridgeFace(CFaceO *pickedFace)
+void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 {
 	const HoleType *hole;
 	PosType pos;
-	if (!FgtBridge<CMeshO>::FindHoleFaceFrom(pickedFace, holes, &hole, pos))
+	if (!FgtBridge<CMeshO>::FindBridgeSideFromFace(pickedFace, pickedX, pickedY, holes, &hole, pos))
 		return;
 	
-	if(curBridge == 0)
-		curBridge = new BridgeType(hole, pos);
+	if(pickedHole == 0)
+	{
+		pickedHole = (HoleType *)hole;
+		pickedPos = pos;
+	}
+	if(pickedFace == pickedPos.f)
+	{
+		pickedPos = pos;
+	}
 	else
 	{
+		BridgeType curBridge(pickedHole, pickedPos, hole, pos);
+		
 		std::vector<CMeshO::FacePointer *> local_facePointer;
 		HoleVector::iterator it = holes.begin();
 		for( ; it != holes.end(); it++ )
 			local_facePointer.push_back(&it->holeInfo.p.f);
 		
-		curBridge->setDestination(hole, pos);
-		
-		local_facePointer.push_back(&curBridge->posA.f);
-		local_facePointer.push_back(&curBridge->posB.f);
+		local_facePointer.push_back(&curBridge.posA.f);
+		local_facePointer.push_back(&curBridge.posB.f);
 
-		curBridge->create(mesh->cm, local_facePointer);
-		bridges.push_back(*curBridge);
-		delete curBridge;
-		curBridge = 0;
+		if(curBridge.create(mesh, local_facePointer) )
+			bridges.push_back(curBridge);
+		pickedHole = 0;
 	}
 }
 
@@ -252,21 +268,21 @@ void HoleListModel::acceptFilling(bool forcedCancel)
 }
 
 
-void HoleListModel::acceptBrdging(bool forcedCancel)
+void HoleListModel::acceptBridging(bool accept)
 {
-	assert(state == HoleListModel::Bridged);
-	HoleVector::iterator it = holes.begin();
-	for( ; it != holes.end(); it++ )
+	if(accept)
 	{
-		if( (it->isSelected && !it->isAccepted) || forcedCancel)
-		{
-			//To DO
-			//it->RestoreBridge(mesh->cm);
-		}
+		mesh->clearDataMask(MeshModel::MM_FACETOPO);
+		updateModel();
 	}
-	
-	mesh->clearDataMask(MeshModel::MM_FACETOPO);
-	updateModel();
+	else
+	{
+		BridgeVector::iterator bit = bridges.begin();
+		for( ; bit != bridges.end(); ++bit)
+			bit->remove(mesh->cm);
+		bridges.clear();
+	}
+
 	state = HoleListModel::Selection;
 	emit layoutChanged();
 }

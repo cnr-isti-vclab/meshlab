@@ -51,13 +51,13 @@ public:
 		Trivial, MinimumWeight, SelfIntersection
 	};
 
-	typedef vcg::tri::Hole<CMeshO> vcgHole;
-	typedef vcg::tri::Hole<CMeshO>::Info HoleInfo;
-	typedef FgtHole<CMeshO>  HoleType;
-	typedef std::vector< HoleType > HoleVector;
-	typedef FgtBridge<CMeshO>  BridgeType;
-	typedef std::vector< BridgeType > BridgeVector;
-	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
+	typedef vcg::tri::Hole<CMeshO>				vcgHole;
+	typedef vcg::tri::Hole<CMeshO>::Info		HoleInfo;
+	typedef FgtHole<CMeshO>						HoleType;
+	typedef std::vector< HoleType >				HoleVector;
+	typedef FgtBridge<CMeshO>					BridgeType;
+	typedef std::vector< BridgeType >			BridgeVector;
+	typedef vcg::face::Pos<CMeshO::FaceType>	PosType;
 	
 
 	HoleListModel(MeshModel *m, QObject *parent = 0);
@@ -92,18 +92,19 @@ public:
 	void toggleAcceptanceHoleFromPatchFace(CFaceO *bface);
 	void fill(HoleListModel::FillerMode mode);
 	void acceptFilling(bool forcedCancel=false);
-	void acceptBrdging(bool forcedCancel=false);
+	void acceptBridging(bool accept=true);
 	inline MeshModel* getMesh() const { return mesh; };
 	
 	inline void setStartBridging() { state = HoleListModel::ManualBridging ; };
-	inline void setEndBridging() { state = HoleListModel::Bridged; };
-	void addBridgeFace(CFaceO *pickedFace);
+	inline void setEndBridging() { state = HoleListModel::Bridged; pickedHole = 0; };
+	void addBridgeFace(CFaceO *pickedFace, int pickX, int pickY);
 
 private:
 	MeshModel *mesh;
 	FillerState state;	
 	int userBitHole;
-	BridgeType *curBridge;
+	HoleType *pickedHole;
+	PosType pickedPos;
 
 public:
 	HoleVector holes;

@@ -165,7 +165,8 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 	{
 		hasPick = false;
 		pickedFace =0;
-		GLPickTri<CMeshO>::PickNearestFace(cur.x(), gla->curSiz.height() - cur.y(), m.cm, pickedFace, 4, 4);
+		int inverseY = gla->curSiz.height() - cur.y();
+		GLPickTri<CMeshO>::PickNearestFace(cur.x(), inverseY, m.cm, pickedFace, 4, 4);
 		// guardo se nella faccia più vicina uno dei vertici è di bordo
 		if( pickedFace != 0 )
 		{
@@ -178,7 +179,7 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 				holesModel->toggleAcceptanceHoleFromPatchFace(pickedFace);
 				break;
 			case HoleListModel::ManualBridging:
-				holesModel->addBridgeFace(pickedFace);
+				holesModel->addBridgeFace(pickedFace, cur.x(), inverseY);
 				break;
 			}
 		}
@@ -274,13 +275,15 @@ void EditHolePlugin::bridge()
 
 void EditHolePlugin::acceptBridge()
 {
-	holesModel->acceptBrdging();
+	holesModel->acceptBridging();
 	gla->setWindowModified(true);
+	gla->update();
 }
 
 void EditHolePlugin::cancelBridge()
 {
-	holesModel->acceptBrdging(true);
+	holesModel->acceptBridging(false);
+	gla->update();
 }
 
 void EditHolePlugin::skipTab(int index)
