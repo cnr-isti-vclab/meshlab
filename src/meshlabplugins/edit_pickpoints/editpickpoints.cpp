@@ -269,7 +269,8 @@ void EditPickPointsPlugin::drawPickedPoints(
 			//draw the dot if we arnt showing the normal or showing the normal as a line
 			if(!showNormal || !showPin)
 			{
-				//glColor(Color4b::Blue);
+				if(item->isSelected() ) glColor(Color4b::Green);
+				
 				glBegin(GL_POINTS);
 					glVertex(point);
 				glEnd();
@@ -314,8 +315,8 @@ void EditPickPointsPlugin::drawPickedPoints(
 					Point3f axis = yaxis^normal;
 					//qDebug() << "angle: " << angle << " x" << axis[0] << " y" << axis[1] << " z" << axis[2];
 	
-					//green and a little clear
-					glColor4f(0.0f, 1.0f, 0.0f, 0.75f);
+					//bluegreen and a little clear
+					glColor4f(0.0f, 1.0f, 0.0f, 0.7f);
 					//glColor(Color4b::Green);
 		
 					glPushMatrix();
@@ -352,6 +353,11 @@ void EditPickPointsPlugin::drawPickedPoints(
 						glVertex3f(1,1,-1);
 						
 						//top
+						
+						//if it is selected color it green
+						if(item->isSelected() )	glColor4f(0.0f, 0.0f, 1.0f, 0.7f);
+						
+						
 						glNormal3f(0, 1, 0);
 						glVertex3f(1,1,1);
 						glVertex3f(1,1,-1);
@@ -361,6 +367,9 @@ void EditPickPointsPlugin::drawPickedPoints(
 						glVertex3f(1,1,1);
 						glVertex3f(-1,1,-1);
 						glVertex3f(-1,1,1);
+						
+						//change back
+						if(item->isSelected() )	glColor4f(0.0f, 1.0f, 0.0f, 0.7f);
 						
 					glEnd();
 					

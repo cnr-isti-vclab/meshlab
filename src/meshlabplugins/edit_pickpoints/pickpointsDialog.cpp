@@ -218,6 +218,8 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	connect(ui.clearTemplateButton, SIGNAL(clicked()), this, SLOT(clearTemplateButtonClicked()) );
 	connect(ui.addPointToTemplateButton, SIGNAL(clicked()), this, SLOT(addPointToTemplate()) );
 	connect(ui.undoButton, SIGNAL(clicked()), this, SLOT(undo()));
+	connect(ui.pickedPointsTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, 
+			SLOT(redrawPoints()) );
 	
 	connect(ui.showNormalCheckBox, SIGNAL(clicked()), this, SLOT(redrawPoints()));
 	connect(ui.pinRadioButton, SIGNAL(clicked()), this, SLOT(redrawPoints()));
