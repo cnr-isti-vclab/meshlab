@@ -703,7 +703,7 @@ void  QColorButton::setColor(QColor newColor)
 void QColorButton::pickColor()
 {
 	 QColor newColor=QColorDialog::getColor(QColor(255,255,255,255));
-	 setColor(newColor);
+	 if(newColor.isValid()) setColor(newColor);
 }
 
 /******************************************/
