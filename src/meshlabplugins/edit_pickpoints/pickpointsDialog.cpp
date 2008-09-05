@@ -617,6 +617,8 @@ void PickPointsDialog::renameHighlightedPoint(){
 		parameterSet.addString(newName, name, "New Name", "Enter the new name");
 	
 		GenericParamDialog getNameDialog(this,&parameterSet);
+		getNameDialog.setWindowModality(Qt::WindowModal);
+		getNameDialog.hide();
 		
 		//display dialog
 		int result = getNameDialog.exec();
