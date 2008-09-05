@@ -114,6 +114,7 @@ void StdParFrame::resetValues(FilterParameterSet &curParSet)
 			{
 				case FilterParameter::PARBOOL:
 					if(fpi.fieldVal.toBool()) ((QCheckBox *)stdfieldwidgets.at(i))->setCheckState(Qt::Checked);
+					else ((QCheckBox *)stdfieldwidgets.at(i))->setCheckState(Qt::Unchecked);
 					break;
 				case FilterParameter::PARFLOAT:
 					((QLineEdit *)stdfieldwidgets.at(i))->setText(QString::number(fpi.fieldVal.toDouble(),'g',3));
