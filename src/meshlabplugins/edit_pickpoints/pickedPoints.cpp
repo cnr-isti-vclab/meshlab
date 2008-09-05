@@ -21,7 +21,7 @@ const QString PickedPoints::fileExtension = ".pp";
 const QString PickedPoints::rootName = "PickedPoints";
 
 const QString PickedPoints::documentDataElementName = "DocumentData";
-const QString PickedPoints::dateTimeElementName = "Date_Time";
+const QString PickedPoints::dateTimeElementName = "DateTime";
 const QString PickedPoints::date = "date";
 const QString PickedPoints::time = "time";
 const QString PickedPoints::dataFileElementName = "DataFileName";
@@ -143,9 +143,11 @@ bool PickedPoints::save(QString filename, QString dataFileName){
 		tag.setAttribute(zCoordinate, point[2] );
 		
 		//if the point is not present indicate this
-		if(!pickedPoint->present)
+		if(pickedPoint->present)
+			tag.setAttribute(active, QString(True));
+		else 
 			tag.setAttribute(active, QString(False));
-			
+		
 		tag.setAttribute(name,  pickedPoint->name);
 		
 		//append the element to the root
