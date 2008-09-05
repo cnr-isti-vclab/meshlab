@@ -97,6 +97,8 @@ private:
 	
 	static const QString time;
 	
+	static const QString userElementName;
+	
 	//the file the points were placed on
 	static const QString dataFileElementName;
 	

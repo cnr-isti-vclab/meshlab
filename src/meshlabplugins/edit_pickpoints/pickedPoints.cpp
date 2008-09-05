@@ -24,6 +24,7 @@ const QString PickedPoints::documentDataElementName = "DocumentData";
 const QString PickedPoints::dateTimeElementName = "DateTime";
 const QString PickedPoints::date = "date";
 const QString PickedPoints::time = "time";
+const QString PickedPoints::userElementName = "User";
 const QString PickedPoints::dataFileElementName = "DataFileName";
 const QString PickedPoints::templateElementName = "templateName";
 
@@ -121,6 +122,16 @@ bool PickedPoints::save(QString filename, QString dataFileName){
 	data.setAttribute(date, QDate::currentDate().toString(Qt::ISODate));
 	data.setAttribute(time, QTime::currentTime().toString(Qt::ISODate));
 	dataTag.appendChild(data);
+
+	char *user = 0;
+	user = getenv("USERNAME"); //windows xp/vista
+	if(NULL == user) user = getenv("LOGNAME"); //linux and maybe apple? 
+	if(NULL != user)
+	{
+		data = doc.createElement(userElementName);
+		data.setAttribute(name, QString(user));
+		dataTag.appendChild(data);
+	}
 	
 	data = doc.createElement(dataFileElementName);
 	data.setAttribute(name, dataFileName);
