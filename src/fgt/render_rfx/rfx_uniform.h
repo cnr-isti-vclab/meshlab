@@ -33,6 +33,7 @@
 #include <QGLWidget>
 #include "rfx_state.h"
 #include "rfx_rendertarget.h"
+#include "rfx_textureloader.h"
 
 class RfxUniform
 {
