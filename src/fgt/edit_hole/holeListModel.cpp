@@ -38,19 +38,13 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 
 void HoleListModel::clearModel()
 {
+	HoleVector::iterator it;
+	for(it=holes.begin(); it!=holes.end(); it++)
+		it->ResetFlag();
+
 	holes.clear();
 	bridges.clear();
 	
-	if(userBitHole > 0)
-	{
-		//mesh->clearDataMask(userBitHole);
-		CMeshO::FaceIterator fi;
-		for(fi = mesh->cm.face.begin(); fi!=mesh->cm.face.end(); ++fi)
-		{
-			//if(!(*fi).IsD())
-				(*fi).ClearUserBit(userBitHole);
-		}
-	}
 	pickedHole = 0;
 }
 
@@ -79,9 +73,9 @@ void HoleListModel::drawHoles() const
 	HoleVector::const_iterator it = holes.begin();
 	for( ; it != holes.end(); ++it)
 	{
-		if( it->isSelected)
+		if( it->IsSelected())
 		{
-			if(it->isAccepted)
+			if(it->IsAccepted())
 				glColor(Color4b::DarkGreen);
 			else
 				glColor(Color4b::DarkRed);
@@ -107,9 +101,9 @@ void HoleListModel::drawHoles() const
 
 	for(it = holes.begin(); it != holes.end(); ++it)
 	{
-		if(it->isSelected)
+		if(it->IsSelected())
 		{
-			if(it->isAccepted)
+			if(it->IsAccepted())
 				glColor(Color4b::Green);
 			else
 				glColor(Color4b::Red);
@@ -130,44 +124,50 @@ void HoleListModel::drawCompenetratingFaces() const
 	HoleVector::const_iterator it = holes.begin();		
 	it = holes.begin();
 	for(it = holes.begin(); it != holes.end(); ++it)
-		if(it->isCompenetrating())
+		if(it->IsCompenetrating())
 			it->DrawCompenetratingFace(GL_LINE_LOOP);
 	
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	
 	for(it = holes.begin(); it != holes.end(); ++it)
-		if(it->isCompenetrating())
+		if(it->IsCompenetrating())
 			it->DrawCompenetratingFace(GL_TRIANGLES);
 
 	glLineWidth(4.0f);
 	glColor3f(1.0f, 1.0f, 0.f);
 	for(it = holes.begin(); it != holes.end(); ++it)
-		if(it->isCompenetrating())
+		if(it->IsCompenetrating())
 			it->DrawCompenetratingFace(GL_LINE_LOOP);
 
 }
 
 void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
 {
-	int ind = -1;
-	ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes);
-	if(ind == -1)
+	assert(FgtHole<CMeshO>::IsHoleBorderFace(*bface));
+	HoleVector::iterator h;
+	int ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes, h);
+	if( ind == -1)
 		return;
-	holes[ind].isSelected = !holes[ind].isSelected;
+	h->SetSelect( !h->IsSelected() );
 	
 	emit dataChanged( index(ind, 3), index(ind, 3) );
 	emit SGN_needUpdateGLA();
 }
 
-void HoleListModel::toggleAcceptanceHoleFromPatchFace(CFaceO *bface)
+void HoleListModel::toggleAcceptanceHole(CFaceO *bface)
 {
-	int ind = -1;
 	assert(state == HoleListModel::Filled);
-	ind = FgtHole<CMeshO>::FindHoleFromHoleFace(bface, holes);
+	HoleVector::iterator h;
+	int ind = -1;
+	if(FgtHole<CMeshO>::IsHoleBorderFace(*bface))
+		ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes, h);
+	else if(FgtHole<CMeshO>::IsPatchFace(*bface))
+		ind = FgtHole<CMeshO>::FindHoleFromPatchFace(bface, holes, h);
+
 	if(ind == -1)
 		return;
-	holes[ind].isAccepted = !holes[ind].isAccepted;
+	h->SetAccepted( !h->IsAccepted() );
 
 	emit dataChanged( index(ind, 5), index(ind, 5) );	
 	emit SGN_needUpdateGLA();
@@ -194,10 +194,17 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 		BridgeType curBridge(pickedHole, pickedPos, hole, pos);
 		
 		std::vector<CMeshO::FacePointer *> local_facePointer;
-		HoleVector::iterator it = holes.begin();
-		for( ; it != holes.end(); it++ )
-			local_facePointer.push_back(&it->holeInfo.p.f);
+		HoleVector::iterator it;
+		for(it = holes.begin(); it != holes.end(); it++ )
+			local_facePointer.push_back(&it->p.f);
 		
+		BridgeVector::iterator bit = bridges.begin();
+		for( ; bit != bridges.end(); ++bit)
+		{
+			local_facePointer.push_back(&bit->bridgeFace[0]);
+			local_facePointer.push_back(&bit->bridgeFace[1]);			
+		}
+
 		local_facePointer.push_back(&curBridge.posA.f);
 		local_facePointer.push_back(&curBridge.posB.f);
 
@@ -207,60 +214,59 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 	}
 }
 
-void HoleListModel::fill(HoleListModel::FillerMode mode)
+void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 {
 	mesh->clearDataMask(MeshModel::MM_FACEMARK);
 	mesh->updateDataMask(MeshModel::MM_FACEMARK);
 
 	std::vector<CMeshO::FacePointer *> local_facePointer;
-	HoleVector::iterator it = holes.begin();
-	for( ; it != holes.end(); it++ )
-		local_facePointer.push_back(&it->holeInfo.p.f);
+	
+	HoleVector::iterator it;
+	for(it = holes.begin(); it != holes.end(); it++ )
+		local_facePointer.push_back(&it->p.f);
 	
 	for(it = holes.begin(); it != holes.end(); it++ )
-	{
-		if( it->isSelected )
+		if( it->IsSelected() )
 		{
-			it->facesPatch.clear();
-			
-			switch(mode)
-			{
-			case HoleListModel::Trivial:
-				vcgHole::FillHoleEar<vcg::tri::TrivialEar<CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
-				break;
-			case HoleListModel::MinimumWeight:
-				vcgHole::FillHoleEar<vcg::tri::MinimumWeightEar<CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
-				break;
-			case HoleListModel::SelfIntersection:
-				vcgHole::FillHoleEar<tri::SelfIntersectionEar< CMeshO> >(mesh->cm, it->holeInfo, userBitHole, local_facePointer, &(it->facesPatch));
-				break;
-			}
-			it->updateSelfIntersectionState(mesh->cm);
+			it->Fill(mode, mesh->cm, local_facePointer);		
 			state = HoleListModel::Filled;
-		}
-	}
+		}	
+
+	//mesh->clearDataMask(MeshModel::MM_FACETOPO);
+	//mesh->updateDataMask(MeshModel::MM_FACETOPO);
+	
+
+	//if( FgtHole<CMeshO>::FillHoles(mode, mesh, holes, local_facePointer) >0)
+	//	state = HoleListModel::Filled;
+
 	emit layoutChanged();
 }
 
-void HoleListModel::acceptFilling(bool forcedCancel)
+void HoleListModel::acceptFilling(bool accept)
 {
-	std::vector<HoleVector::iterator> holeToErase;
 	HoleVector::iterator it = holes.begin();
 	while( it != holes.end() )
-	{
-		if( (it->isSelected && !it->isAccepted) || forcedCancel)
-			it->RestoreHole(mesh->cm);
-		else if( it->isSelected && it->isAccepted )
+	{	
+		if( it->IsFilled() )
 		{
-			it = holes.erase(it);
-			continue;
+			if( (it->IsSelected() && !it->IsAccepted()) || !accept)
+			{
+				if( it->IsFilled() )
+					it->RestoreHole(mesh->cm);
+			}
+			else if( it->IsSelected() && it->IsAccepted() )
+			{
+				it->ResetFlag();
+				it = holes.erase(it);
+				continue;
+			}
 		}
 		it++;
 	}
 	
 	mesh->clearDataMask(MeshModel::MM_FACETOPO);
 	mesh->updateDataMask(MeshModel::MM_FACETOPO);
-	
+		
 	state = HoleListModel::Selection;		
 	emit dataChanged( index(0, 0), index(holes.size(), 2) );
 	emit SGN_needUpdateGLA();	
@@ -272,6 +278,7 @@ void HoleListModel::acceptBridging(bool accept)
 {
 	if(accept)
 	{
+		assert(false); // Sistemare evitare di aggiornare tutto il modello
 		mesh->clearDataMask(MeshModel::MM_FACETOPO);
 		updateModel();
 	}
@@ -303,9 +310,9 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 		case 0:
 			return holes[index.row()].name;
 		case 1:
-			return holes.at(index.row()).getEdgeCount();
+			return holes.at(index.row()).Size();
 		case 2:
-			return QString("%1").arg(holes.at(index.row()).getPerimeter(), 0, 'f', 5);
+			return QString("%1").arg(holes.at(index.row()).Perimeter(), 0, 'f', 5);
 		}
 	}
 	else if (role == Qt::TextAlignmentRole)
@@ -319,13 +326,13 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 	{
 		bool checked;
 		if(index.column() == 3)
-			checked = holes[index.row()].isSelected;
-		else if(state == HoleListModel::Filled && holes[index.row()].isSelected)
+			checked = holes[index.row()].IsSelected();
+		else if(state == HoleListModel::Filled && holes[index.row()].IsSelected())
 		{
 			if(index.column() == 4)
-				checked = holes[index.row()].isCompenetrating();
+				checked = holes[index.row()].IsCompenetrating();
 			else if(index.column() == 5)
-				checked = holes[index.row()].isAccepted;
+				checked = holes[index.row()].IsAccepted();
 			else 
 				return QVariant();
 		}
@@ -440,13 +447,13 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 		{
 			if(index.column() == 3 && state == HoleListModel::Selection)
 			{
-				holes[index.row()].isSelected = !holes[index.row()].isSelected;
+				holes[index.row()].SetSelect( !holes[index.row()].IsSelected() );
 				ret = true;
 			}			
 		}
 		else if(index.column() == 5)
 		{	// check accept
-			holes[index.row()].isAccepted = !holes[index.row()].isAccepted;
+			holes[index.row()].SetAccepted( !holes[index.row()].IsAccepted() );
 			ret = true;
 		}
 	}

@@ -46,11 +46,6 @@ public:
 		Selection, ManualBridging, Bridged, Filled
 	};
 
-	enum FillerMode
-	{
-		Trivial, MinimumWeight, SelfIntersection
-	};
-
 	typedef vcg::tri::Hole<CMeshO>				vcgHole;
 	typedef vcg::tri::Hole<CMeshO>::Info		HoleInfo;
 	typedef FgtHole<CMeshO>						HoleType;
@@ -58,7 +53,8 @@ public:
 	typedef FgtBridge<CMeshO>					BridgeType;
 	typedef std::vector< BridgeType >			BridgeVector;
 	typedef vcg::face::Pos<CMeshO::FaceType>	PosType;
-	
+	typedef std::vector< PosType >				PosVector;
+	typedef PosVector::iterator					PosIterator;
 
 	HoleListModel(MeshModel *m, QObject *parent = 0);
 	virtual ~HoleListModel() { clearModel(); };
@@ -89,9 +85,9 @@ public:
 	inline void setState(HoleListModel::FillerState s) { state = s; emit layoutChanged(); };
 	inline FillerState getState() const { return state; };
 	void toggleSelectionHoleFromBorderFace(CFaceO *bface);
-	void toggleAcceptanceHoleFromPatchFace(CFaceO *bface);
-	void fill(HoleListModel::FillerMode mode);
-	void acceptFilling(bool forcedCancel=false);
+	void toggleAcceptanceHole(CFaceO *bface);
+	void fill(FgtHole<CMeshO>::FillerMode mode);
+	void acceptFilling(bool accept=true);
 	void acceptBridging(bool accept=true);
 	inline MeshModel* getMesh() const { return mesh; };
 	

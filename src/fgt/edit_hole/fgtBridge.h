@@ -235,6 +235,8 @@ public:
 		if( vcg::face::BorderCount(*bFace) == 0 )
 			return false;
 
+		assert(false); // Da Rivedere
+/*
 		typename HoleVector::const_iterator hit = holes.begin();
 		*retHole = 0;
 		
@@ -243,17 +245,17 @@ public:
 		{
 			// for each hole check if face is its border face
 			// per ogni buco della mesh scorro il bordo cercando la faccia richiesta
-			PosType curPos;
-			PosType startPos = curPos = hit->holeInfo.p;
+			PosType curPos = hit->StartPos();
 
 			// if a bridge is previously build from/to startPos edge, it don't know where start
 			// walking over hole border
-			if(!startPos.IsBorder())
+			//if(!hit->StartPos().IsBorder())
+			if(!curPos.IsBorder())
 				continue;
 
 			do
 			{			
-				if(curPos.F() == bFace) 
+				if(curPos.f == bFace) 
 				{
 					*retHole = &*hit;
 					if( vcg::face::BorderCount(*bFace) == 1 )
@@ -263,8 +265,9 @@ public:
 					return true;
 				}
 				curPos.NextB();
-			}while( curPos != startPos );
+			}while( curPos != hit->StartPos() );
 		}
+*/
 		return false; // means no find hole
 	};
 
@@ -359,10 +362,10 @@ private:
 private:
 	const HoleType *holeA;		// info about left side of bridge	
 	const HoleType *holeB;		// info about right side of bridge
-	
+		
+public:
 	FaceType* bridgeFace[2];	// 2 faces rapresenting bridge
 	
-public:
 	PosType posA;
 	PosType posB;
 

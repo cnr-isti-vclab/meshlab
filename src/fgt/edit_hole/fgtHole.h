@@ -35,176 +35,212 @@
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include "vcg/space/color4.h"
-
+#include <meshlab/meshmodel.h>
 
 /** An hole type
  */
 template <class MESH>
-class FgtHole
+class FgtHole : public vcg::tri::Hole<MESH>::Info
 {
 public:
+
+	enum FillerMode
+	{
+		Trivial, MinimumWeight, SelfIntersection
+	};
+
 	typedef typename MESH::FaceType					FaceType;
 	typedef typename MESH::FacePointer				FacePointer;
+	typedef typename std::vector<FacePointer>		FacePointerVector;
 	typedef typename MESH::FaceIterator				FaceIterator;
     typedef typename MESH::CoordType				CoordType;
+	typedef typename MESH::VertexType				VertexType;
 	typedef typename MESH::ScalarType				ScalarType;
 	typedef typename vcg::face::Pos<FaceType>		PosType;
+	typedef typename std::vector<PosType>			PosVector;
+	typedef typename PosVector::iterator			PosIterator;
 	typedef typename vcg::tri::Hole<MESH>			vcgHole;
 	typedef typename vcgHole::Info					HoleInfo;
 	typedef typename std::vector< FgtHole<MESH> >	HoleVector;
+	typedef typename HoleVector::iterator			HoleIterator;
 	
 
-	FgtHole(HoleInfo &hi, QString holeName)
+	FgtHole(HoleInfo &hi, QString holeName) : 
+		HoleInfo(hi.p, hi.size, hi.bb)
 	{
-		holeInfo = hi;
-		UpdateVertexCoords();
-		perimeter = holeInfo.Perimeter();
 		name = holeName;
-		isSelected = false;
-		isAccepted = true;
+		filled = false;
+		comp = false;
+		accepted = true;
+		selected = false;
+		init();
 	};
 
 	~FgtHole() {};
 
-	/* From hole Info update vector of vertex coord
-	 */
-	void UpdateVertexCoords()
+	inline int Size() const { return size; };
+	inline ScalarType Perimeter() const	{ return perimeter; };
+	inline bool IsFilled() const { return filled; };
+	inline bool IsSelected() const { return selected; };
+	inline void SetSelect(bool value) { selected = value;	};
+	inline bool IsCompenetrating() const { return filled && comp; };
+	inline bool IsAccepted() const { return !filled || accepted; };
+	inline void SetAccepted(bool val) { accepted = val; };
+	inline bool IsNonManifold() const { return nmPos.size()>0; };
+
+	inline void SetStartPos(PosType initP)
 	{
-		vertexCoords.clear();
-		// scorro i vertici del buco e ne salvo il puntatore in un vettore
-		PosType curPos;
-		PosType startPos = curPos = holeInfo.p;
-		do
-		{
-			vertexCoords.push_back( &(curPos.v->P()) );
-			curPos.NextB();
-		}while(curPos != startPos);
-	   
+		assert(false); //TO DO
+		assert(IsBorder(init));
+		p = initP;
 	};
-
-	inline int getEdgeCount() const
-	{ return vertexCoords.size(); };
-
-	inline float getPerimeter() const
-	{ return perimeter; };
-
-	inline bool isCompenetrating() const
-	{ return  vertexCompFace.size()>0; };
 
 	void Draw() const
 	{
+		std::vector<VertexType*>::const_iterator it = vertexes.begin();
 		glBegin(GL_LINE_LOOP);
-		typename std::vector<CoordType*>::const_iterator it = vertexCoords.begin();
-		for( ; it != vertexCoords.end() ; it++) 
-			glVertex( **it );
+		for( ; it != vertexes.end(); it++)
+			glVertex( (*it)->P() );
 		glEnd();
 	};
 
 	void DrawCompenetratingFace(GLenum glmode) const
-	{		
+	{
+		assert(IsCompenetrating());
+		
+		std::vector<FacePointer> patch;
+		getPatchFaces(patch);
+		std::vector<FacePointer>::const_iterator it;
+		
 		glBegin(glmode);
-		typename std::vector<CoordType*>::const_iterator it = vertexCompFace.begin();
-		for( ; it != vertexCompFace.end(); it++)
-		{	
-			 glVertex( **it );
-			 it++;
-			 glVertex( **it );
-			 it++;
-			 glVertex( **it );
-		}
+		for( it=patch.begin(); it != patch.end(); it++)
+			if((*it)->IsUserBit(PatchCompFlag))
+			{
+				glVertex( (*it)->V(0)->P() );
+				glVertex( (*it)->V(1)->P() );
+				glVertex( (*it)->V(2)->P() );
+			}
+		
 		glEnd();
 	}
-	
 
-	/* Restore hole, remove patch applied to mesh
-	 * Le facce usate come patch sono salvate come copie, pertanto si devono cercare 
-	 * le corrispettive facce nella mesh. Per fare questo si parte dal pos iniziale
-	 * contenuta nelle info del "hole", che deve è posizionato su una faccia\edge\vertice
-	 * sul bordo del buco; si testano le facce adiacenti al vertice cercando le facce patch.
-	 * Quando si trova una faccia patch questa viene eliminata dalla mesh e poi si continua la ricerca
-	 * di altre facce patch cercando tra le facce adiacenti ai suoi vertici non ancora viste; in questo 
-	 * modo si scorrono solo le facce interne ed appena esterne al buco riuscendo anche a ripristinare 
-	 * buchi non-manifold.
-	 */
-	void RestoreHole(MESH &mesh)
+	/* Reset flag used by plugin to mark this hole and its patch */
+	void ResetFlag()
 	{
-		if(facesPatch.size() == 0 )
-			return;
-
-		std::vector<FaceType* > meshFaces;
-		typename std::vector<FaceType* >::iterator mfit;
-		PosType curPos;
-		PosType startPos = curPos = holeInfo.p;
-
-		// scorro le facce adiacenti alla faccia iniziale del buco
-		do
+		if(filled)
 		{
-			if(!curPos.f->IsV())
+			std::vector<FacePointer> patch;
+			getPatchFaces(patch);
+			std::vector<FacePointer>::iterator it;
+			for( it=patch.begin(); it != patch.end(); it++)
 			{
-				meshFaces.push_back( curPos.f );
-				curPos.f->SetV();
-			}
-			curPos.FlipF();
-			curPos.FlipE();
-		}while(curPos != startPos);
-
-		// tra le facce adiacenti al buco cerco quelle usate come patch
-		for(unsigned int index =0; index < meshFaces.size(); index++ )
-		{
-			FaceType* mf = meshFaces.at(index);
-			FaceIterator hfit = facesPatch.begin();
-			for( ; hfit != facesPatch.end(); ++hfit) 
-			{
-				if( hfit->V(0) == mf->V(0) &&
-					hfit->V(1) == mf->V(1) &&
-					hfit->V(2) == mf->V(2) )
+				(*it)->ClearUserBit(HolePatchFlag);
+				(*it)->ClearUserBit(PatchCompFlag);
+				for(int i=0; i<3; i++)
 				{
-					// trovata faccia patch
-					// inserisco tra le facce da esaminare le facce adiacenti ai vertici della faccia patch
-					for(int i=0; i<3; ++i)
-					{
-						PosType initPos(mf, i, mf->V(i) );
-						curPos = initPos;
-						do
-						{
-							if(!curPos.f->IsV() && !curPos.f->IsD())
-							{
-								meshFaces.push_back( curPos.f );
-								curPos.f->SetV();
-							}
-							curPos.FlipF();
-							curPos.FlipE();
-						}while(curPos != initPos); 
-					}
-
-					// si elimina la faccia patch
-					vcg::tri::Allocator<MESH>::DeleteFace(mesh, *mf );
-					facesPatch.erase(hfit);
-					break;
-				}				
+					FacePointer adjF = (*it)->FFp(i);
+					adjF->ClearUserBit(HoleFlag);
+				}
 			}
 		}
-		
-		facesPatch.clear();
-		vertexCompFace.clear();
-		isAccepted = true;
-		typename std::vector<FaceType* >::iterator it;
-		for(it = meshFaces.begin() ; it != meshFaces.end(); ++it)
-			(*it)->ClearV();	
-	}
+		else
+		{
+			// we can walk the border to find hole's faces
+			PosType curPos = p;
+			do{
+				curPos.f->ClearUserBit(HoleFlag);			
+				curPos.NextB();
+			}while( curPos != p );
+		}
+	};
 
-	void updateSelfIntersectionState(MESH &mesh)
+
+	/* Restore hole, remove patch faces applied to mesh to fill this hole*/
+	void RestoreHole(MESH &mesh)
 	{
+		assert(filled);
+		std::vector<FaceType*> patches;
+		getPatchFaces(patches);
+		filled = false;
+		
+		std::vector<FaceType*>::iterator it;
+		for(it = patches.begin(); it!=patches.end(); it++)
+		{
+			assert(IsPatchFace(**it));
+			if(!(**it).IsD())
+				vcg::tri::Allocator<MESH>::DeleteFace(mesh, **it);
+		}		
+	};
+
+	void Fill(FillerMode mode, MESH &mesh, std::vector<FacePointer *> &local_facePointer)
+	{
+		switch(mode)
+		{
+		case FgtHole<MESH>::Trivial:
+			vcgHole::FillHoleEar<vcg::tri::TrivialEar<MESH> >(mesh, *this, HolePatchFlag, local_facePointer);
+			break;
+		case FgtHole<MESH>::MinimumWeight:
+			vcgHole::FillHoleEar<vcg::tri::MinimumWeightEar<MESH> >(mesh, *this, HolePatchFlag, local_facePointer);
+			break;
+		case FgtHole<MESH>::SelfIntersection:
+			vcgHole::FillHoleEar<tri::SelfIntersectionEar<MESH> >(mesh, *this, HolePatchFlag, local_facePointer);
+			break;
+		}
+
+		filled = true;
+		accepted = true;
+		comp = false;
+		updatePatchState(mesh);		
+	};
+
+	
+private:
+
+	/*  Walking the hole storing border pos and finding non manifold vertex */
+	void init()
+	{
+		assert(!IsFilled());
+		perimeter = HoleInfo::Perimeter();
+		isNonManifold = false;
+		PosType curPos = p;
+		do{
+			vertexes.push_back(curPos.v);
+			if(curPos.v->IsV())
+				isNonManifold = true;
+			else
+				curPos.v->SetV();			
+			curPos.NextB();
+		}while( curPos != p );
+		
+		curPos = p;
+		do{
+			curPos.v->ClearV();			
+			curPos.NextB();
+		}while( curPos != p );
+	};
+
+	/* test its auto compenetration	*/
+	void updatePatchState(MESH &mesh)
+	{
+		assert(filled);
+		comp = false;
 		vcg::GridStaticPtr<FaceType, ScalarType > gM;
 		gM.Set(mesh.face.begin(),mesh.face.end());
 
 		std::vector<FaceType*> inBox;
 		vcg::Box3< ScalarType> bbox;
-		FaceIterator fi = facesPatch.begin();
-		for( ; fi!=facesPatch.end(); ++fi)
+		FacePointerVector patches;
+		getPatchFaces(patches);
+
+		FacePointerVector::iterator pi = patches.begin();
+		for( ; pi!=patches.end(); ++pi)
 		{
+			//assert(!IsHoleBorderFace(*pbi->f));//*****
+			FacePointer f = *pi;
+			f->SetUserBit(HolePatchFlag);
+
 			// prendo le facce che intersecano il bounding box di *fi
-			(*fi).GetBBox(bbox);
+			f->GetBBox(bbox);
 			vcg::trimesh::GetInBoxFace(mesh, gM, bbox,inBox);
 
 			typename std::vector<FaceType*>::iterator fib;
@@ -218,138 +254,192 @@ public:
 
 				for (int i=0; i<3 && !adj; i++)
 					for (int j=0;j<3;j++)
-						if (fi->V(i) == (*fib)->V(j))
+						if (f->V(i) == (*fib)->V(j))
 						{
 							adj = true;
 							break;							
 						}
-
+					
 				if(!adj)
-				{
-					// i due triangoli non sono adiacenti
-					bool comp = vcg::Intersection<FaceType>(*fi, **fib );
-					if(comp)
-					{						
-						vertexCompFace.push_back(&(fi->V(0)->P()));
-						vertexCompFace.push_back(&(fi->V(1)->P()));
-						vertexCompFace.push_back(&(fi->V(2)->P()));
-
-					}
-				} // if (c==0)
+					if( vcg::Intersection<FaceType>(*f, **fib ))
+					{
+						comp = true;
+						f->SetUserBit(PatchCompFlag);
+						continue;
+					}			
 			} // for inbox...
 			inBox.clear();
 		}
+	};
+
+	void getPatchFaces(std::vector<FacePointer> &patches) const
+	{
+		assert(filled);
+		patches.clear();		
+		std::vector<FacePointer> stack;		
+		PosType pos = p;
+		pos.FlipF();
+		assert(IsPatchFace(*pos.f));  //rimuovere
+		pos.f->SetV();
+		stack.push_back(pos.f);
+		while(stack.size()>0)
+		{
+			FacePointer f = stack.back();
+			stack.pop_back();
+			patches.push_back(f);
+
+			//visito le facce patch adiacenti ai vertici di questa faccia patch
+			for(int v=0; v<3; v++)
+			{
+				pos = PosType(f, v);
+				do{
+					pos.FlipF();
+					pos.FlipE();
+					if(IsPatchFace(*pos.f) && !pos.f->IsV())
+					{
+						pos.f->SetV();
+						stack.push_back(pos.f);
+					}
+				}while(pos.f != f);
+			}
+		}
+
+		std::vector<FacePointer>::iterator it;
+		for(it=patches.begin(); it!=patches.end(); ++it)
+			(*it)->ClearV();
+	};
+	
+	/* Check if face is a border face of this hole */
+	bool haveBorderFace(FacePointer bFace) const
+	{
+		// per essere una faccia del bordo di questo hole deve avere almeno 2 vertici 
+		// conenuti nella lista di vertici del buco
+		assert(IsHoleBorderFace(*bFace));
+		std::vector<VertexType*>::const_iterator it;
+		int find = 0;
+		for(it = vertexes.begin(); it!=vertexes.end(); it++)
+			if(bFace->V(0) == *it || bFace->V(1) == *it || bFace->V(2) == *it)
+				find++;
+		
+		if(find>1) return true;
+		else return false;
 	}
 
-
+	/* Check if pFace is a patch face of this hole */
+	bool havePatchFace(FacePointer pFace) const
+	{
+		// essendo chiuso con Ear ogni faccia patch ha in comune al suo buco almeno un vertice
+		assert( IsPatchFace(*pFace) );
+		assert(filled);
+		std::vector<VertexType*>::const_iterator it;
+		for(it = vertexes.begin(); it!=vertexes.end(); it++)
+			if(pFace->V(0) == *it || pFace->V(1) == *it || pFace->V(2) == *it)
+				return true;
+		return false;
+	};
 
 	/********* Static functions **********/
+public:
 
-	/* Inspect a mesh to find its holes.
-	*/
+	static inline bool IsHoleBorderFace(FaceType &face)
+	{ return face.IsUserBit(HoleFlag); };
+
+	static inline bool IsPatchFace(FaceType &face)
+	{ return face.IsUserBit(HolePatchFlag); };
+
+	/* Inspect a mesh to find its holes. */
 	static int GetMeshHoles(MESH &mesh, HoleVector &ret) 
 	{
 		ret.clear();
 		std::vector<HoleInfo> vhi;
 		
 		//prendo la lista di info(sugli hole) tutte le facce anche le non selezionate
-		int UBIT = vcgHole::GetInfo(mesh, false, vhi);
-		
+		if(HoleFlag != -1)
+		{
+			//assert(false); // Da Vedere... bisogna resettare anche le facce?
+			FaceType::DeleteBitFlag(PatchCompFlag);
+			FaceType::DeleteBitFlag(HolePatchFlag);
+			FaceType::DeleteBitFlag(HoleFlag);
+		}
+
+		HoleFlag = vcgHole::GetInfo(mesh, false, vhi);
+		HolePatchFlag = FaceType::NewBitFlag();
+		PatchCompFlag = FaceType::NewBitFlag();
+
 		typename std::vector<HoleInfo>::iterator itH = vhi.begin();
 		int i=0;
 		for( ; itH != vhi.end(); itH++)
 		{
-			FgtHole<MESH> newHole(*itH, QString("Hole_%1").arg(i,3,10,QChar('0')));
-			ret.push_back(newHole);
+			ret.push_back(FgtHole<MESH>(*itH, QString("Hole_%1").arg(i,3,10,QChar('0')) ));
 			i++;
 		}
-		return UBIT;
+		return HoleFlag;
 	}
 
-	/** Return index into holes vector of hole adjacent to picked face
+	/** Return index of hole adjacent to picked face into holes vector.
+	 *  Also return the iterator on correct position.
 	 */
-	static int FindHoleFromBorderFace(FacePointer bFace, const HoleVector &holes) 
+	static int FindHoleFromBorderFace(FacePointer bFace, HoleVector &holes, typename HoleIterator &it) 
 	{ 
-		// BUG: se la faccia selezionata ha due edge di bordo su hole diversi, viene selezionato il primo hole
-		// che si trova nella lista. Sarebbe carino che venisse selezionato l'hole relativo al bordo più vicino al click 
-		if( vcg::face::BorderCount(*bFace) == 0 )
-			return -1;
-
+		assert(IsHoleBorderFace(*bFace));
 		int index = 0;
-		typename HoleVector::const_iterator hit = holes.begin();
-		
-		//scorro i buchi della mesh
+		typename HoleIterator hit = holes.begin();
 		for( ; hit != holes.end(); ++hit)
 		{
-			// for each hole check if face is its border face
 			if(hit->haveBorderFace(bFace))
+			{
+				it = hit;
 				return index;
+			}
 			index++;
 		}
-		return -1; // means no find hole
+		it = holes.end();	// invalid iterator
+		return -1;
 	}
 
-	/** Return index into holes vector of hole adjacent to picked face
-	 */
-	static int FindHoleFromHoleFace(FacePointer bFace, const HoleVector holes)
+	/** Return index into holes vector of hole adjacent to picked face */
+	static int FindHoleFromPatchFace(FacePointer bFace, HoleVector &holes, 
+		typename HoleIterator &it)
 	{
+		assert(bFace->IsUserBit(HolePatchFlag));
 		int index = 0;
-		typename HoleVector::const_iterator hit = holes.begin();
-		
-		//scorro i buchi della mesh
+		typename HoleIterator hit = holes.begin();
 		for( ; hit != holes.end(); ++hit)
 		{
 			// for each hole check if face is its border face
-			if(hit->havePatchFace(bFace))
-				return index;
+			if(hit->IsFilled())
+				if(hit->havePatchFace(bFace))
+				{
+					it = hit;
+					return index;
+				}
 			index++;
 		}
+		it = holes.end();	// invalid iterator
 		return -1; // means no find hole
-	}
+	};
 
-private:
-	/* Check if face is a border face of this hole
-	*/
-	bool haveBorderFace(FacePointer bFace) const
-	{
-		// per ogni buco della mesh scorro il bordo cercando la faccia richiesta
-		PosType curPos;
-		PosType startPos = curPos = holeInfo.p;
-		do
-		{			
-			if(curPos.F() == bFace) 
-				return true;
-			curPos.NextB();
-		}while( curPos != startPos );	
-		return false;
-	}
-
-	/* Check if pFace is a patch face
-	 */
-	bool havePatchFace(FacePointer pFace) const
-	{
-		typename std::vector<FaceType>::const_iterator it=facesPatch.begin();
-		for( ; it != facesPatch.end(); ++it)
-			if( it->V(0) == pFace->V(0) &&
-				it->V(1) == pFace->V(1) &&
-				it->V(2) == pFace->V(2) )
-				return true;
-
-		return false;
-	}
 
 public:
-	HoleInfo holeInfo;
-	std::vector<FaceType> facesPatch;
+	static int HoleFlag;
+	static int HolePatchFlag;
+	static int PatchCompFlag;
+	
 	QString name;
-	bool isSelected;
-	bool isAccepted;
-
+	
 private:
-	std::vector<CoordType*> vertexCoords;
-	std::vector<CoordType*> vertexCompFace;
-	float perimeter;
+	bool filled;
+	bool comp;
+	bool accepted;
+	bool selected;
+	bool isNonManifold;
+	ScalarType perimeter;
+
+	std::vector<VertexType*> vertexes;
 };
 
+int FgtHole<CMeshO>::HoleFlag = -1;
+int FgtHole<CMeshO>::HolePatchFlag = -1;
+int FgtHole<CMeshO>::PatchCompFlag = -1;
 
 #endif

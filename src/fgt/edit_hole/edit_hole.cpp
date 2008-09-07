@@ -173,10 +173,11 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 			switch(holesModel->getState())
 			{
 			case HoleListModel::Selection:
-				holesModel->toggleSelectionHoleFromBorderFace(pickedFace);
+				if(FgtHole<CMeshO>::IsHoleBorderFace(*pickedFace))
+					holesModel->toggleSelectionHoleFromBorderFace(pickedFace);
 				break;
 			case HoleListModel::Filled:
-				holesModel->toggleAcceptanceHoleFromPatchFace(pickedFace);
+				holesModel->toggleAcceptanceHole(pickedFace);
 				break;
 			case HoleListModel::ManualBridging:
 				holesModel->addBridgeFace(pickedFace, cur.x(), inverseY);
@@ -191,7 +192,7 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 
  void EditHolePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
 	 if(holesModel->getState() == HoleListModel::Filled)
-		holesModel->acceptFilling(true);
+		holesModel->acceptFilling(false);
 	
 	 if ( dialogFiller!=0) {
 		delete  dialogFiller;
@@ -221,14 +222,14 @@ void EditHolePlugin::updateDWeight(int val)
 void EditHolePlugin::fill()
 {
 	if(holesModel->getState() == HoleListModel::Filled)
-		holesModel->acceptFilling(true);
+		holesModel->acceptFilling(false);
 
 	if( dialogFiller->ui.trivialRBtn->isChecked())
-		holesModel->fill( HoleListModel::Trivial);
+		holesModel->fill( FgtHole<CMeshO>::Trivial);
 	else if( dialogFiller->ui.minWRBtn->isChecked())
-		holesModel->fill( HoleListModel::MinimumWeight);
+		holesModel->fill( FgtHole<CMeshO>::MinimumWeight);
 	else
-		holesModel->fill( HoleListModel::SelfIntersection);
+		holesModel->fill( FgtHole<CMeshO>::SelfIntersection);
 	gla->update();
 }
 
@@ -244,7 +245,7 @@ void EditHolePlugin::acceptFill()
 void EditHolePlugin::cancelFill()
 {
 	if(holesModel->getState() == HoleListModel::Filled)
-		holesModel->acceptFilling(true);
+		holesModel->acceptFilling(false);
 }
 
 void EditHolePlugin::bridge()
