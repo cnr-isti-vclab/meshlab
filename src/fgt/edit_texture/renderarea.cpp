@@ -210,7 +210,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 		glLogicOp(GL_AND);
 		glEnable(GL_BLEND); 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+		glColor4f(1.0f, 0.0f, 0.0f, 0.7f);
 		for (unsigned i = 0; i < model->cm.face.size(); i++)
 			if (selected && model->cm.face[i].IsUserBit(selBit)) drawSelectedFaces(i); // Draw the selected faces
 		glDepthMask(GL_TRUE);

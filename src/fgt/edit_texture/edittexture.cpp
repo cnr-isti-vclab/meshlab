@@ -182,7 +182,7 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 	if(vcg::tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) && !HasCollapsedTextCoords(m)) degenerate = false;
 	else 
 	{
-		gla->log.Logf(GLLogStream::Info,"WARNING: This mesh has a degenerate texture parametrization!");
+		gla->log.Logf(GLLogStream::Info,"WARNING: This mesh has a degenerated texture parametrization!");
 		degenerate = true;
 	}
 
