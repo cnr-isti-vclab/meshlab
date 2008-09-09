@@ -12,7 +12,8 @@ HEADERS       = render_rfx.h             \
                 rfx_rendertarget.h       \
                 rfx_textureloader.h      \
                 plugins/rfx_qimage.h     \
-                plugins/rfx_dds.h
+                plugins/rfx_dds.h        \
+                plugins/rfx_tga.h
 
 SOURCES       = render_rfx.cpp           \
                 rfx_shader.cpp           \
@@ -25,6 +26,7 @@ SOURCES       = render_rfx.cpp           \
                 rfx_textureloader.cpp    \
                 plugins/rfx_qimage.cpp   \
                 plugins/rfx_dds.cpp      \
+                plugins/rfx_tga.cpp      \
                 $$GLEWCODE
 
 FORMS         = rfx_dialog.ui

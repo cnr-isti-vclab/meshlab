@@ -26,9 +26,7 @@
 
 #include <QFile>
 #include <GL/glew.h>
-#include <algorithm>
 #include "rfx_textureloader.h"
-#include "dds_spec.h"
 
 class RfxDDSPlugin : public RfxTextureLoaderPlugin
 {
@@ -49,6 +47,79 @@ private:
 	unsigned int depth;
 	unsigned int mipCount;
 };
+
+struct DDPIXELFORMAT {
+	unsigned int dwSize;
+	unsigned int dwFlags;
+	unsigned int dwFourCC;
+	unsigned int dwRGBBitCount;
+	unsigned int dwRBitMask;
+	unsigned int dwGBitMask;
+	unsigned int dwBBitMask;
+	unsigned int dwAlphaBitMask;
+};
+
+struct DDSCAPS2 {
+	unsigned int dwCaps1;
+	unsigned int dwCaps2;
+	unsigned int dwReserved[2];
+};
+
+// DDS Header as found in MS reference:
+// http://msdn.microsoft.com/en-us/library/bb943981(VS.85).aspx
+struct DDSHeader {
+	unsigned int dwMagic;
+	unsigned int dwSize;
+	unsigned int dwFlags;
+	unsigned int dwHeight;
+	unsigned int dwWidth;
+	unsigned int dwPitchOrLinearSize;
+	unsigned int dwDepth;
+	unsigned int dwMipMapCount;
+	unsigned int dwReserved1[11];
+	DDPIXELFORMAT ddpfPixelFormat;
+	DDSCAPS2 ddsCaps;
+	unsigned int dwReserved2;
+};
+
+//  DDSHeader.dwFlags
+#define DDSD_CAPS                   0x00000001
+#define DDSD_HEIGHT                 0x00000002
+#define DDSD_WIDTH                  0x00000004
+#define DDSD_PITCH                  0x00000008
+#define DDSD_PIXELFORMAT            0x00001000
+#define DDSD_MIPMAPCOUNT            0x00020000
+#define DDSD_LINEARSIZE             0x00080000
+#define DDSD_DEPTH                  0x00800000
+
+//  DDSHeader.ddpfPixelFormat.dwFlags
+#define DDPF_ALPHAPIXELS            0x00000001
+#define DDPF_ALPHA                  0x00000002
+#define DDPF_FOURCC                 0x00000004
+#define DDPF_INDEXED                0x00000020
+#define DDPF_RGB                    0x00000040
+#define DDPF_COMPRESSED             0x00000080
+#define DDPF_LUMINANCE              0x00020000
+
+//  DDSHeader.ddpfPixelFormat.dwFourCC
+#define FOURCC_DXT1                 0x31545844
+#define FOURCC_DXT3                 0x33545844
+#define FOURCC_DXT5                 0x35545844
+
+//  DDSHeader.ddsCaps.dwCaps1
+#define DDSCAPS_COMPLEX             0x00000008
+#define DDSCAPS_TEXTURE             0x00001000
+#define DDSCAPS_MIPMAP              0x00400000
+
+//  DDSHeader.ddsCaps.dwCaps2
+#define DDSCAPS2_CUBEMAP            0x00000200
+#define DDSCAPS2_CUBEMAP_POSITIVEX  0x00000400
+#define DDSCAPS2_CUBEMAP_NEGATIVEX  0x00000800
+#define DDSCAPS2_CUBEMAP_POSITIVEY  0x00001000
+#define DDSCAPS2_CUBEMAP_NEGATIVEY  0x00002000
+#define DDSCAPS2_CUBEMAP_POSITIVEZ  0x00004000
+#define DDSCAPS2_CUBEMAP_NEGATIVEZ  0x00008000
+#define DDSCAPS2_VOLUME             0x00200000
 
 REGISTER_PLUGIN(RfxDDSPlugin)
 

@@ -37,12 +37,10 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 	f.read((char*)&ddsh, sizeof(DDSHeader));
 	f.seek(ddsh.dwSize + 4);
 
-	if (strncmp((char*)&ddsh.dwMagic, "DDS ", 4) != 0 ||
-	    ddsh.dwSize != 124 ||
-	    !(ddsh.dwFlags & DDSD_PIXELFORMAT) ||
-	    !(ddsh.dwFlags & DDSD_CAPS)) {
+	if (strncmp((char*)&ddsh.dwMagic, "DDS ", 4) != 0 || ddsh.dwSize != 124 ||
+	    !(ddsh.dwFlags & DDSD_PIXELFORMAT) || !(ddsh.dwFlags & DDSD_CAPS)) {
 
-		qDebug("DDS Plugin: DDS sanity check failed!\n");
+		f.close();
 		return 0;
 	}
 
@@ -59,21 +57,13 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 	height = ddsh.dwHeight;
 	depth = (ddsh.dwDepth <= 0)? 1 : ddsh.dwDepth;
 
-	qDebug("DDS Plugin: found %dx%d (depth: %d) %s %s texture (%d mipmap levels)",
-			width, height, depth,
-			(texTarget == GL_TEXTURE_2D)? "2D" : ((texTarget == GL_TEXTURE_3D)? "3D" : "Cubemap"),
-			(compressed)? "compressed" : "uncompressed",
-			mipCount);
-
 	short blockBytes = 0;
 	short components = 0;
 	if (compressed) {
-
 		// texture compression support needed
-		if (!GLEW_ARB_texture_compression || !GLEW_EXT_texture_compression_s3tc) {
-			qDebug("DDS Plugin: Texture compression not supported!");
+		if (!GLEW_ARB_texture_compression ||
+		    !GLEW_EXT_texture_compression_s3tc)
 			return 0;
-		}
 
 		switch (ddsh.ddpfPixelFormat.dwFourCC) {
 		case FOURCC_DXT1:
@@ -89,8 +79,7 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 			blockBytes = 16;
 			break;
 		default:
-			qDebug("DDS Plugin: unsupported FourCC mode 0x%X",
-			       ddsh.ddpfPixelFormat.dwFourCC);
+			f.close();
 			return 0;
 		}
 
@@ -110,7 +99,7 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 			components = ddsh.ddpfPixelFormat.dwRGBBitCount / 8;
 
 		} else {
-			qDebug("DDS Plugin: unsupported uncompressed mode");
+			f.close();
 			return 0;
 		}
 	}
@@ -138,55 +127,64 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 
 		for (unsigned int lev = 0; lev < mipCount; ++lev) {
 
+			// calculate size of data to read based on texture type
 			size = d * (compressed) ?
-				((w + 3) / 4) * ((h + 3) / 4) * blockBytes:
+				((w + 3) / 4) * ((h + 3) / 4) * blockBytes :
 				w * h * components;
 
 			GLubyte *pixels = new GLubyte[size];
 			f.read((char*)pixels, size);
 			f.seek(f.pos() + size);
 
-			if (compressed) {
-				switch (texTarget) {
-				case GL_TEXTURE_2D:
-					glCompressedTexImage2D(GL_TEXTURE_2D, lev, texFormat, w, h, 0, size, pixels);
-					break;
-				case GL_TEXTURE_3D:
-					glCompressedTexImage3D(GL_TEXTURE_3D, lev, texFormat, w, h, d, 0, size, pixels);
-					break;
-				case GL_TEXTURE_CUBE_MAP:
-					glCompressedTexImage2D(cubeFace, lev, texFormat, w, h, 0, size, pixels);
-					break;
-				}
-			} else {
-				switch (texTarget) {
-				case GL_TEXTURE_2D:
-					glTexImage2D(GL_TEXTURE_2D, lev, components, w, h, 0, texFormat, GL_UNSIGNED_BYTE, pixels);
-					break;
-				case GL_TEXTURE_3D:
-					glTexImage3D(GL_TEXTURE_3D, lev, components, w, h, d, 0, texFormat, GL_UNSIGNED_BYTE, pixels);
-					break;
-				case GL_TEXTURE_CUBE_MAP:
-					glTexImage2D(cubeFace, lev, components, w, h, 0, texFormat, GL_UNSIGNED_BYTE, pixels);
-					break;
-				}
+			switch (texTarget) {
+
+			case GL_TEXTURE_2D:
+				if (compressed)
+					glCompressedTexImage2D(GL_TEXTURE_2D, lev, texFormat,
+					                       w, h, 0, size, pixels);
+				else
+					glTexImage2D(GL_TEXTURE_2D, lev, components, w, h, 0,
+					             texFormat, GL_UNSIGNED_BYTE, pixels);
+				break;
+
+			case GL_TEXTURE_3D:
+				if (compressed)
+					glCompressedTexImage3D(GL_TEXTURE_3D, lev, texFormat,
+				                           w, h, d, 0, size, pixels);
+				else
+					glTexImage3D(GL_TEXTURE_3D, lev, components, w, h, d,
+					             0, texFormat, GL_UNSIGNED_BYTE, pixels);
+				break;
+
+			case GL_TEXTURE_CUBE_MAP:
+				if (compressed)
+					glCompressedTexImage2D(cubeFace, lev, texFormat, w, h,
+					                       0, size, pixels);
+				else
+					glTexImage2D(cubeFace, lev, components, w, h, 0, texFormat,
+					             GL_UNSIGNED_BYTE, pixels);
+				break;
 			}
 
 			// half size for each mip-map level
-			if ((w /= 2) == 0)
+			w /= 2;
+			h /= 2;
+			d /= 2;
+
+			if (w == 0)
 				w = 1;
-			if ((h /= 2) == 0)
+			if (h == 0)
 				h = 1;
-			if ((d /= 2) == 0)
+			if (d == 0)
 				d = 1;
 
 			delete[] pixels;
 		}
 	}
 
-	glTexParameteri(texTarget, GL_TEXTURE_MAX_LEVEL, mipCount - 1);
-
 	f.close();
+
+	glTexParameteri(texTarget, GL_TEXTURE_MAX_LEVEL, mipCount - 1);
 
 	return tex;
 }
