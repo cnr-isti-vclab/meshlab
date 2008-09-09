@@ -50,6 +50,7 @@ struct TGAHeader {
 
 #define TGA_RAW_INDEXED     0x1
 #define TGA_RAW_RGB         0x2
+#define TGA_RAW_GREYSCALE   0x3
 #define TGA_RLE_INDEXED     0x9
 #define TGA_RLE_RGB         0xA
 
@@ -74,6 +75,7 @@ private:
 	int height;
 	int imageSize;
 	TGAHeader tgah;
+	int texType;
 	GLuint tex;
 	GLubyte *pixels;
 };

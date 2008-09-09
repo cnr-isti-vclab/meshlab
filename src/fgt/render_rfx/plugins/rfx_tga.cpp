@@ -69,6 +69,10 @@ GLuint RfxTGAPlugin::Load(const QString &fName, QList<RfxState*> &states)
 	// only raw rgb mode is supported a.t.m.
 	switch (tgah.ImageType) {
 	case TGA_RAW_RGB:
+	case TGA_RAW_GREYSCALE:
+		texType = (tgah.ImageType == TGA_RAW_RGB)?
+			((tgah.PixelDepth == 32)? GL_RGBA : GL_RGB) :
+			GL_LUMINANCE;
 		f.seek(f.pos() + tgah.IDLength);
 		f.read((char*)pixels, imageSize);
 		break;
@@ -80,35 +84,35 @@ GLuint RfxTGAPlugin::Load(const QString &fName, QList<RfxState*> &states)
 
 	// convert BGR to RGB
 	unsigned char *pixPtr = pixels;
-	unsigned char pTmp;
+	unsigned char tmp;
 	long totPixels = width * height;
-	short pixelSize = tgah.PixelDepth / 8;
+	short bpp = tgah.PixelDepth / 8;
 
 	// swap R and B pixels with good old tmp = a; a = b; b = tmp; method :)
 	for (int i = 0; i < totPixels; ++i) {
-		pTmp = *pixPtr;              // B -> temp
-		*pixPtr = *(pixPtr + 2);     // R -> B
-		*(pixPtr + 2) = pTmp;        // B -> oldR
+		tmp       = pixPtr[0];     // B -> temp
+		pixPtr[0] = pixPtr[2];     // R -> B
+		pixPtr[2] = tmp;           // B -> oldR
 
-		pixPtr += pixelSize;         // next pixel
+		pixPtr += bpp;             // next pixel
 	}
 
 	// do we have to vertically flip image?
-	if (!(tgah.ImageDescriptor & 0x20)) {
+	if (tgah.ImageDescriptor & 0x20) {
 
 		// already declared vars - reusing
-		//unsigned char pTmp;
-		//short pixelSize = tgah.PixelDepth / 8;
+		//unsigned char tmp;
+		//short bpp = tgah.PixelDepth / 8;
 
-		int lineLen = width * (pixelSize);
+		int lineLen = width * bpp;
 		unsigned char *line1 = pixels;
-		unsigned char *line2 = &pixels[lineLen * (height - 1)];
+		unsigned char *line2 = pixels + (height - 1) * lineLen;
 
 		for (; line1 < line2; line2 -= (lineLen * 2)) {
 			for (int i = 0; i < lineLen; ++i, ++line1, ++line2) {
-				pTmp = *line1;
+				tmp    = *line1;
 				*line1 = *line2;
-				*line2 = pTmp;
+				*line2 = tmp;
 			}
 		}
 	}
@@ -123,8 +127,8 @@ GLuint RfxTGAPlugin::Load(const QString &fName, QList<RfxState*> &states)
 	foreach (RfxState *s, states)
 		s->SetEnvironment(GL_TEXTURE_2D);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, bpp, width, height, 0,
+	             texType, GL_UNSIGNED_BYTE, pixels);
 
 	delete[] pixels;
 	f.close();
@@ -137,7 +141,7 @@ bool RfxTGAPlugin::CheckHeader()
 	if (tgah.ColorMapType != TGA_RGB)
 		return false;
 
-	if (tgah.ImageType != TGA_RAW_RGB)
+	if (tgah.ImageType != TGA_RAW_RGB && tgah.ImageType != TGA_RAW_GREYSCALE)
 		return false;
 
 	width = tgah.Width - tgah.XOffset;
