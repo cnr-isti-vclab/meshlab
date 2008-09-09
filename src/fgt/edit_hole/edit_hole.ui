@@ -482,74 +482,14 @@
             <attribute name="title" >
              <string>Bridge</string>
             </attribute>
-            <widget class="QPushButton" name="bridgeButton" >
-             <property name="geometry" >
-              <rect>
-               <x>100</x>
-               <y>23</y>
-               <width>70</width>
-               <height>23</height>
-              </rect>
-             </property>
-             <property name="sizePolicy" >
-              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize" >
-              <size>
-               <width>70</width>
-               <height>23</height>
-              </size>
-             </property>
-             <property name="maximumSize" >
-              <size>
-               <width>70</width>
-               <height>23</height>
-              </size>
-             </property>
-             <property name="text" >
-              <string>Start</string>
-             </property>
-            </widget>
-            <widget class="QRadioButton" name="autoBridgeRBtm" >
-             <property name="geometry" >
-              <rect>
-               <x>10</x>
-               <y>12</y>
-               <width>72</width>
-               <height>18</height>
-              </rect>
-             </property>
-             <property name="text" >
-              <string>Automatic</string>
-             </property>
-             <property name="checked" >
-              <bool>true</bool>
-             </property>
-            </widget>
-            <widget class="QRadioButton" name="manualBridgeRBtm" >
-             <property name="geometry" >
-              <rect>
-               <x>10</x>
-               <y>36</y>
-               <width>72</width>
-               <height>18</height>
-              </rect>
-             </property>
-             <property name="text" >
-              <string>Manual</string>
-             </property>
-            </widget>
-            <widget class="QPushButton" name="acceptBridgeBtn" >
+            <widget class="QPushButton" name="clearBridgeBtn" >
              <property name="enabled" >
               <bool>true</bool>
              </property>
              <property name="geometry" >
               <rect>
-               <x>15</x>
-               <y>70</y>
+               <x>53</x>
+               <y>116</y>
                <width>70</width>
                <height>23</height>
               </rect>
@@ -573,42 +513,62 @@
               </size>
              </property>
              <property name="text" >
-              <string>Accept</string>
+              <string>Clear</string>
              </property>
             </widget>
-            <widget class="QPushButton" name="cancelBridgeBtn" >
-             <property name="enabled" >
-              <bool>true</bool>
-             </property>
+            <widget class="QWidget" name="" >
              <property name="geometry" >
               <rect>
-               <x>95</x>
-               <y>70</y>
-               <width>70</width>
-               <height>23</height>
+               <x>-1</x>
+               <y>19</y>
+               <width>181</width>
+               <height>81</height>
               </rect>
              </property>
-             <property name="sizePolicy" >
-              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize" >
-              <size>
-               <width>70</width>
-               <height>23</height>
-              </size>
-             </property>
-             <property name="maximumSize" >
-              <size>
-               <width>70</width>
-               <height>23</height>
-              </size>
-             </property>
-             <property name="text" >
-              <string>Cancel</string>
-             </property>
+             <layout class="QGridLayout" >
+              <item row="0" column="0" >
+               <widget class="QRadioButton" name="autoBridgeRBtm" >
+                <property name="text" >
+                 <string>Automatic</string>
+                </property>
+                <property name="checked" >
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" >
+               <widget class="QRadioButton" name="manualBridgeRBtm" >
+                <property name="text" >
+                 <string>Manual</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0" >
+               <widget class="QPushButton" name="bridgeButton" >
+                <property name="sizePolicy" >
+                 <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize" >
+                 <size>
+                  <width>70</width>
+                  <height>23</height>
+                 </size>
+                </property>
+                <property name="maximumSize" >
+                 <size>
+                  <width>70</width>
+                  <height>23</height>
+                 </size>
+                </property>
+                <property name="text" >
+                 <string>Start</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </widget>
           </widget>

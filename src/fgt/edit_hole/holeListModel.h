@@ -43,7 +43,7 @@ class HoleListModel : public QAbstractItemModel
 public:
 	enum FillerState
 	{
-		Selection, ManualBridging, Bridged, Filled
+		Selection, ManualBridging, Filled
 	};
 
 	typedef vcg::tri::Hole<CMeshO>				vcgHole;
@@ -88,24 +88,26 @@ public:
 	void toggleAcceptanceHole(CFaceO *bface);
 	void fill(FgtHole<CMeshO>::FillerMode mode);
 	void acceptFilling(bool accept=true);
-	void acceptBridging(bool accept=true);
+	void removeBridges();
 	inline MeshModel* getMesh() const { return mesh; };
 	
-	inline void setStartBridging() { state = HoleListModel::ManualBridging ; };
-	inline void setEndBridging() { state = HoleListModel::Bridged; pickedHole = 0; };
+	inline void setStartBridging() 
+	{ 
+		assert(state != HoleListModel::Filled);
+		state = HoleListModel::ManualBridging ; 
+	};
+	inline void setEndBridging() { state = HoleListModel::Selection; pickedAbutment.f = 0; };
 	void addBridgeFace(CFaceO *pickedFace, int pickX, int pickY);
 
 private:
 	MeshModel *mesh;
 	FillerState state;	
 	int userBitHole;
-	HoleType *pickedHole;
-	PosType pickedPos;
-
+	BridgeAbutment<CMeshO> pickedAbutment;
+	
 public:
 	HoleVector holes;
-	BridgeVector bridges;
-
+	
 signals:
 	void SGN_needUpdateGLA();
 

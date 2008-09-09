@@ -32,7 +32,7 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	state = HoleListModel::Selection;
 	mesh = m;
 	userBitHole = -1;
-	pickedHole = 0;
+	pickedAbutment.SetNull();
 	updateModel();
 }
 
@@ -43,9 +43,7 @@ void HoleListModel::clearModel()
 		it->ResetFlag();
 
 	holes.clear();
-	bridges.clear();
-	
-	pickedHole = 0;
+	pickedAbutment.SetNull();
 }
 
 void HoleListModel::updateModel()
@@ -86,12 +84,12 @@ void HoleListModel::drawHoles() const
 
 	}
 
-	if(pickedHole != 0)
+	if(!pickedAbutment.IsNull())
 	{
 		glColor(Color4b::Yellow);
 		glBegin(GL_LINES);
-			glVertex( pickedPos.f->V0(pickedPos.z)->P() );
-			glVertex( pickedPos.f->V1(pickedPos.z)->P() );
+			glVertex( pickedAbutment.f->V0(pickedAbutment.z)->P() );
+			glVertex( pickedAbutment.f->V1(pickedAbutment.z)->P() );
 		glEnd();
 	}
 
@@ -175,50 +173,30 @@ void HoleListModel::toggleAcceptanceHole(CFaceO *bface)
 
 void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 {
-	const HoleType *hole;
-	PosType pos;
-	if (!FgtBridge<CMeshO>::FindBridgeSideFromFace(pickedFace, pickedX, pickedY, holes, &hole, pos))
+	BridgeAbutment<CMeshO> picked;
+	if (!FgtBridge<CMeshO>::FindBridgeAbutmentFromPick(pickedFace, pickedX, pickedY, holes, picked))
 		return;
 	
-	if(pickedHole == 0)
-	{
-		pickedHole = (HoleType *)hole;
-		pickedPos = pos;
-	}
-	if(pickedFace == pickedPos.f)
-	{
-		pickedPos = pos;
-	}
+	if(pickedAbutment.f == 0 || pickedAbutment.f == picked.f)
+		pickedAbutment = picked;
 	else
 	{
-		BridgeType curBridge(pickedHole, pickedPos, hole, pos);
-		
 		std::vector<CMeshO::FacePointer *> local_facePointer;
 		HoleVector::iterator it;
 		for(it = holes.begin(); it != holes.end(); it++ )
-			local_facePointer.push_back(&it->p.f);
-		
-		BridgeVector::iterator bit = bridges.begin();
-		for( ; bit != bridges.end(); ++bit)
-		{
-			local_facePointer.push_back(&bit->bridgeFace[0]);
-			local_facePointer.push_back(&bit->bridgeFace[1]);			
-		}
+			local_facePointer.push_back(&it->p.f);		
 
-		local_facePointer.push_back(&curBridge.posA.f);
-		local_facePointer.push_back(&curBridge.posB.f);
+		local_facePointer.push_back(&pickedAbutment.f);
+		local_facePointer.push_back(&picked.f);
+		FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, mesh->cm, holes, local_facePointer);
+		pickedAbutment.SetNull();
 
-		if(curBridge.create(mesh, local_facePointer) )
-			bridges.push_back(curBridge);
-		pickedHole = 0;
+		emit layoutChanged();
 	}
 }
 
 void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 {
-	mesh->clearDataMask(MeshModel::MM_FACEMARK);
-	mesh->updateDataMask(MeshModel::MM_FACEMARK);
-
 	std::vector<CMeshO::FacePointer *> local_facePointer;
 	
 	HoleVector::iterator it;
@@ -231,13 +209,6 @@ void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 			it->Fill(mode, mesh->cm, local_facePointer);		
 			state = HoleListModel::Filled;
 		}	
-
-	//mesh->clearDataMask(MeshModel::MM_FACETOPO);
-	//mesh->updateDataMask(MeshModel::MM_FACETOPO);
-	
-
-	//if( FgtHole<CMeshO>::FillHoles(mode, mesh, holes, local_facePointer) >0)
-	//	state = HoleListModel::Filled;
 
 	emit layoutChanged();
 }
@@ -274,21 +245,8 @@ void HoleListModel::acceptFilling(bool accept)
 }
 
 
-void HoleListModel::acceptBridging(bool accept)
+void HoleListModel::removeBridges()
 {
-	if(accept)
-	{
-		assert(false); // Sistemare evitare di aggiornare tutto il modello
-		mesh->clearDataMask(MeshModel::MM_FACETOPO);
-		updateModel();
-	}
-	else
-	{
-		BridgeVector::iterator bit = bridges.begin();
-		for( ; bit != bridges.end(); ++bit)
-			bit->remove(mesh->cm);
-		bridges.clear();
-	}
 
 	state = HoleListModel::Selection;
 	emit layoutChanged();
@@ -362,10 +320,10 @@ QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int
 		case 2:
 			return tr("Perimeter");
 		case 3:
-			if(state == HoleListModel::Selection)
-				return tr("Select");
-			else 
+			if(state == HoleListModel::Filled)
 				return tr("Fill");
+			else 
+				return tr("Select");
 		case 4:
 			if(state == HoleListModel::Filled)
 				return tr("Comp.");

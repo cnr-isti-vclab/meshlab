@@ -73,8 +73,22 @@ public:
 		comp = false;
 		accepted = true;
 		selected = false;
-		init();
+		perimeter = HoleInfo::Perimeter();
+		findNonManifoldness();
 	};
+
+	FgtHole(PosType startPos, QString holeName)
+	{
+		assert(startPos.IsBorder());
+		name = holeName;
+		filled = false;
+		comp = false;
+		accepted = true;
+		selected = false;
+		p = startPos;
+		updateInfo();		
+	};
+
 
 	~FgtHole() {};
 
@@ -90,9 +104,10 @@ public:
 
 	inline void SetStartPos(PosType initP)
 	{
-		assert(false); //TO DO
-		assert(IsBorder(init));
+		assert(!IsFilled());
+		assert(initP.IsBorder());
 		p = initP;
+		updateInfo();
 	};
 
 	void Draw() const
@@ -124,9 +139,13 @@ public:
 		glEnd();
 	}
 
-	/* Reset flag used by plugin to mark this hole and its patch */
+	/*  Reset flag used by this plugin to mark this hole and its patch. 
+	 *  Bridges face can finded along the hole and it needs look at adjacent face because
+	 *  a bridge could be build from other bridge face.
+	 */
 	void ResetFlag()
 	{
+		std::vector<FacePointer> bridgesFaces;
 		if(filled)
 		{
 			std::vector<FacePointer> patch;
@@ -140,6 +159,8 @@ public:
 				{
 					FacePointer adjF = (*it)->FFp(i);
 					adjF->ClearUserBit(HoleFlag);
+					if(IsBridgeFace(*adjF))
+						bridgesFaces.push_back(adjF);
 				}
 			}
 		}
@@ -148,10 +169,26 @@ public:
 			// we can walk the border to find hole's faces
 			PosType curPos = p;
 			do{
-				curPos.f->ClearUserBit(HoleFlag);			
+				curPos.f->ClearUserBit(HoleFlag);
+				if( IsBridgeFace(*curPos.f))
+					bridgesFaces.push_back(curPos.f);
 				curPos.NextB();
 			}while( curPos != p );
 		}
+
+		while(bridgesFaces.size()>0)
+		{
+			FacePointer f = bridgesFaces.back();
+			bridgesFaces.pop_back();
+			f->ClearUserBit(BridgeFlag);
+			for(int i=0; i<3; i++)
+			{
+				FacePointer adjF = f->FFp(i);
+				if(IsBridgeFace(*adjF) && !IsHoleBorderFace(*adjF))
+					bridgesFaces.push_back(adjF);
+			}
+		}
+
 	};
 
 
@@ -196,11 +233,41 @@ public:
 	
 private:
 
+	/*  Walking the hole computing vcgHole::Info data */
+	void updateInfo()
+	{
+		vertexes.clear();
+		assert(!IsFilled());
+		isNonManifold = false;
+		PosType curPos = p;
+		bb.SetNull();
+		size = 0;
+		do{
+			curPos.f->SetUserBit(HoleFlag);
+			bb.Add(curPos.v->cP());
+			++size;
+			vertexes.push_back(curPos.v);
+			if(curPos.v->IsV())
+				isNonManifold = true;
+			else
+				curPos.v->SetV();			
+			curPos.NextB();
+			assert(curPos.IsBorder());
+		}while( curPos != p );
+		
+		curPos = p;
+		do{
+			curPos.v->ClearV();			
+			curPos.NextB();
+		}while( curPos != p );
+
+		perimeter = HoleInfo::Perimeter();
+	};
+
 	/*  Walking the hole storing border pos and finding non manifold vertex */
-	void init()
+	void findNonManifoldness()
 	{
 		assert(!IsFilled());
-		perimeter = HoleInfo::Perimeter();
 		isNonManifold = false;
 		PosType curPos = p;
 		do{
@@ -347,6 +414,10 @@ public:
 	static inline bool IsPatchFace(FaceType &face)
 	{ return face.IsUserBit(HolePatchFlag); };
 
+	static inline bool IsBridgeFace(FaceType &face)
+	{ return face.IsUserBit(BridgeFlag); };
+	
+
 	/* Inspect a mesh to find its holes. */
 	static int GetMeshHoles(MESH &mesh, HoleVector &ret) 
 	{
@@ -356,15 +427,16 @@ public:
 		//prendo la lista di info(sugli hole) tutte le facce anche le non selezionate
 		if(HoleFlag != -1)
 		{
-			//assert(false); // Da Vedere... bisogna resettare anche le facce?
 			FaceType::DeleteBitFlag(PatchCompFlag);
 			FaceType::DeleteBitFlag(HolePatchFlag);
 			FaceType::DeleteBitFlag(HoleFlag);
+			FaceType::DeleteBitFlag(BridgeFlag);
 		}
 
 		HoleFlag = vcgHole::GetInfo(mesh, false, vhi);
 		HolePatchFlag = FaceType::NewBitFlag();
 		PatchCompFlag = FaceType::NewBitFlag();
+		BridgeFlag = FaceType::NewBitFlag();
 
 		typename std::vector<HoleInfo>::iterator itH = vhi.begin();
 		int i=0;
@@ -419,12 +491,12 @@ public:
 		return -1; // means no find hole
 	};
 
-
 public:
 	static int HoleFlag;
 	static int HolePatchFlag;
 	static int PatchCompFlag;
-	
+	static int BridgeFlag;
+
 	QString name;
 	
 private:
@@ -441,5 +513,6 @@ private:
 int FgtHole<CMeshO>::HoleFlag = -1;
 int FgtHole<CMeshO>::HolePatchFlag = -1;
 int FgtHole<CMeshO>::PatchCompFlag = -1;
+int FgtHole<CMeshO>::BridgeFlag = -1;
 
 #endif

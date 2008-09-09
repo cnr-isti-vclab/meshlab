@@ -47,8 +47,7 @@ void FillerDialog::clickStartBridging()
 	ui.bridgeButton->setText("End");
 	ui.manualBridgeRBtm->setEnabled(false);
 	ui.autoBridgeRBtm->setEnabled(false);
-	ui.acceptBridgeBtn->setEnabled(false);
-	ui.cancelBridgeBtn->setEnabled(false);
+	ui.clearBridgeBtn->setEnabled(false);
 	
 }
 
@@ -57,6 +56,5 @@ void FillerDialog::clickEndBridging()
 	ui.bridgeButton->setText("Start");
 	ui.manualBridgeRBtm->setEnabled(true);
 	ui.autoBridgeRBtm->setEnabled(true);
-	ui.acceptBridgeBtn->setEnabled(true);
-	ui.cancelBridgeBtn->setEnabled(true);
+	ui.clearBridgeBtn->setEnabled(true);
 }

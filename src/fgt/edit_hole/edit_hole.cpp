@@ -29,10 +29,6 @@
 #include "edit_hole.h"
 #include "fgtHole.h"
 #include "holeListModel.h"
-
-//#include "holePatch.h"
-//#include <qstring.h>
-
 #include <wrap/gl/pick.h>
 #include <vcg/complex/trimesh/hole.h>
 #include <vcg/complex/trimesh/update/position.h>
@@ -82,7 +78,6 @@ const PluginInfo &EditHolePlugin::Info()
 
 void EditHolePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
-	 //gla->trackball.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
 }
 
 void EditHolePlugin::mousePressEvent(QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
@@ -97,15 +92,6 @@ void EditHolePlugin::mousePressEvent(QAction *, QMouseEvent * e, MeshModel &m, G
 
 void EditHolePlugin::mouseMoveEvent(QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
-	/*
-	if( (e->buttons()| Qt::LeftButton) &&
-	    !(e->modifiers() & Qt::ShiftModifier))
-	{
-		//gla->trackball.MouseMove(e->x(),gla->height()-e->y());
-		
-	}
-	gla->update();
-	*/
 }
 
 void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
@@ -120,6 +106,9 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	{
 		this->mesh = &m;
 		this->gla = gla;
+
+		mesh->clearDataMask(MeshModel::MM_FACEMARK);
+		mesh->updateDataMask(MeshModel::MM_FACEMARK);
 	}
 
 	dialogFiller=new FillerDialog(gla->window());
@@ -131,8 +120,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	connect(dialogFiller->ui.bridgeButton, SIGNAL(clicked()), this, SLOT(bridge()) );
 	connect(dialogFiller->ui.acceptFillBtn, SIGNAL(clicked()), this, SLOT(acceptFill()) );
 	connect(dialogFiller->ui.cancelFillBtn, SIGNAL(clicked()), this, SLOT(cancelFill()) );
-	connect(dialogFiller->ui.acceptBridgeBtn, SIGNAL(clicked()), this, SLOT(acceptBridge()) );
-	connect(dialogFiller->ui.cancelBridgeBtn, SIGNAL(clicked()), this, SLOT(cancelBridge()) );
+	connect(dialogFiller->ui.clearBridgeBtn, SIGNAL(clicked()), this, SLOT(clearBridge()) );
 	connect(dialogFiller->ui.diedralWeightSld, SIGNAL(valueChanged(int)), this, SLOT(updateDWeight(int)));
 	connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
 
@@ -268,22 +256,17 @@ void EditHolePlugin::bridge()
 	{
 		holesModel->setEndBridging();
 		dialogFiller->clickEndBridging();
+
 	}
 	
 	// TO DO...
 	gla->update();
 }
 
-void EditHolePlugin::acceptBridge()
-{
-	holesModel->acceptBridging();
-	gla->setWindowModified(true);
-	gla->update();
-}
 
-void EditHolePlugin::cancelBridge()
+void EditHolePlugin::clearBridge()
 {
-	holesModel->acceptBridging(false);
+	holesModel->removeBridges();
 	gla->update();
 }
 
@@ -294,7 +277,7 @@ void EditHolePlugin::skipTab(int index)
 
 	if(index == 0)
 	{
-		cancelBridge();
+		holesModel->setEndBridging();
 		dialogFiller->clickEndBridging();
 	}
 	else
