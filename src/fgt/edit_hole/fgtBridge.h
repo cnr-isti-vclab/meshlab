@@ -64,6 +64,7 @@ public:
 	typedef typename MESH::FacePointer				FacePointer;
 	typedef typename MESH::FaceIterator				FaceIterator;
 	typedef typename vcg::face::Pos<FaceType>		PosType;
+	typedef typename std::vector<PosType>			PosVector;
 
 	typedef typename FgtHole<MESH>					HoleType;
 	typedef typename std::vector< FgtHole<MESH> >	HoleVector;
@@ -100,15 +101,117 @@ public:
 		return true;
 	};
 
-	void RemoveBrdiges(MESH &mesh, HoleVector &holes)
+	
+	static void RemoveBridges(MESH  &mesh, HoleVector &holes)
 	{
-		// TO DO
-		/*std::vector<HoleType*> bridgedHoles;
-		vcg::tri::Allocator<MESH>::DeleteFace(mesh, *bridgeFace[0]);
-		vcg::tri::Allocator<MESH>::DeleteFace(mesh, *bridgeFace[1]);
-		*/
-	}
+		HoleType* h;
 
+		// vettore usato per contenere tutte le facce di bridge trovate a partire da un hole
+		std::vector<FacePointer> bridgeFaces;
+
+		// vettore usato per contenere tutti gli half-edge adiacenti alle facce dei bridge che sono anche
+		PosVector adjBorderPos;
+
+		for(int i=0; i<holes.size(); i++ )
+		{
+			h = &holes.at(i);
+			PosType curPos;
+			curPos = h->p;
+			if( FgtHole<MESH>::IsBridgeFace(*h->p.f) )
+			{
+				getBridgeInfo(*h, bridgeFaces, adjBorderPos );
+				std::vector<FacePointer>::iterator fit;
+				for(fit=bridgeFaces.begin(); fit!=bridgeFaces.end(); fit++ )
+				{
+					// aggiorno la topologia della faccia della mesh adiacente al bridge
+					// la faccia "dove poggia la spalla del ponte"
+					for(int e=0; e<3; e++)
+					{	
+						if(!IsBorder(**fit, e))
+						{
+							FacePointer adjF = (*fit)->FFp(e);
+							if(!FgtHole<MESH>::IsBridgeFace(*adjF))
+							{								
+								int adjEI = (*fit)->FFi(e);
+								adjF->FFp( adjEI ) = adjF;
+								adjF->FFi( adjEI ) = adjEI;
+								assert(IsBorder(*adjF, adjEI));
+							}
+						}
+					}
+
+					// se la faccia bridge in esame si affaccia su un'altro hole rispetto 
+					// a quello in esame rimuovo anche quell'hole
+					if(FgtHole<MESH>::IsHoleBorderFace(**fit))
+					{
+						HoleVector::iterator hit;
+						if(FgtHole<MESH>::FindHoleFromBorderFace(*fit, holes, hit) != -1)
+						{
+							if(&*hit != h)
+							{
+								assert(!hit->IsFilled());
+								holes.erase(hit);
+							}
+						}
+					}
+					if( !(*fit)->IsD() )
+						vcg::tri::Allocator<MESH>::DeleteFace(mesh, **fit);
+				}
+				
+				// ho staccato le facce bridge dalla mesh e rimosso gli hole adiacenti al bridge
+				// adesso aggiorno l'hole ed re-inserisco eventuali hole che si sono formati 
+				// dalla rimozione del bridge (il bridge legava più hole distinti)
+				
+				PosType initPos;
+				PosVector::iterator it = adjBorderPos.begin();
+				
+				initPos = *it;
+				curPos = initPos;
+				do{
+					curPos.f->SetV();
+					curPos.NextB();
+					assert(curPos.IsBorder());
+				}while(curPos != initPos);
+				h->SetStartPos(initPos);
+		
+				//guardo quali facce adiacenti ai bridge, salvate da adjBorderPos,
+				// non fanno parte dell'hole in esame
+				it++;
+				for( ; it!=adjBorderPos.end(); it++)
+				{
+					assert( it->IsBorder() );
+					if(!it->f->IsV())
+					{
+						curPos = initPos = *it;
+						do{
+							curPos.f->SetV();
+							curPos.NextB();
+							assert(curPos.IsBorder());
+						}while(curPos != initPos);
+						
+						// ho trovato una faccia di un'altro buco
+						FgtHole<MESH> newHole(initPos, QString("Hole_%1").arg(holes.size(),3,10,QChar('0')) );
+						if(h->IsSelected())
+							newHole.SetSelect(true);
+						holes.push_back( newHole );
+					}
+				}
+
+				// resetto falg visited sulle facce degli hole interessati
+				for(it=adjBorderPos.begin(); it!=adjBorderPos.end(); it++)
+				{
+					if(!it->f->IsV())
+						continue;
+					curPos = initPos = *it;
+					do{
+						curPos.f->ClearV();
+						curPos.NextB();
+						assert(curPos.IsBorder());
+					}while(curPos != initPos);
+				}
+			}
+		}		
+	}
 
 	/** Return boolean indicatind if face is a face of an hole of the list.
 	 *  Also return a pointer to appartenent hole and pos finded
@@ -221,7 +324,10 @@ private:
 	{
 		PosType newP0, newP1;
 		build(mesh, sideA, sideB, newP0, newP1, app);
-
+		
+		newP0.f->SetUserBit(FgtHole<MESH>::BridgeFlag);
+		newP1.f->SetUserBit(FgtHole<MESH>::BridgeFlag);
+		
 		sideA.h->SetStartPos(newP0);
 		FgtHole<MESH> newHole(newP1, QString("Hole_%1").arg(holes.size(),3,10,QChar('0')) );
 		if(sideA.h->IsSelected())
@@ -232,16 +338,25 @@ private:
 	static void unifyHolesWithBridge(BridgeAbutment<MESH> &sideA, BridgeAbutment<MESH> &sideB,  MESH &mesh,
 		HoleVector &holes, std::vector<FacePointer *> &app)
 	{
+		assert(FgtHole<MESH>::IsHoleBorderFace(*sideA.f));
+		assert(FgtHole<MESH>::IsHoleBorderFace(*sideB.f));
+
 		PosType newP0, newP1;
 		build(mesh, sideA, sideB, newP0, newP1, app);
+		newP0.f->SetUserBit(FgtHole<MESH>::BridgeFlag);
+		newP1.f->SetUserBit(FgtHole<MESH>::BridgeFlag);
 
 		sideA.h->SetStartPos(newP0);
 		if(sideB.h->IsSelected())
 			sideA.h->SetSelect(true);
 
-		HoleVector::iterator h;
-		FgtHole<MESH>::FindHoleFromBorderFace(sideB.f, holes, h);
-		holes.erase(h);
+		HoleVector::iterator hit;
+		for(hit=holes.begin(); hit!=holes.end(); ++hit)
+			if(&*hit == sideB.h)
+			{
+				holes.erase(hit);
+				break;
+			}
 	};
 
 
@@ -349,7 +464,7 @@ private:
 		pos1.f=f1; pos1.z=sideEdgeIndex; pos1.v=pos1.f->V(sideEdgeIndex);
 	};
 
-		static PosType getClosestPos(FaceType* face, int x, int y)
+	static PosType getClosestPos(FaceType* face, int x, int y)
 	{
 		double mvmatrix[16], projmatrix[16];
 		int viewport[4];
@@ -385,6 +500,71 @@ private:
 		}
 		return PosType(face, nearest, face->V(nearest) );
 	};
+
+
+	/*  Starting from an hole look for faces added to mesh as bridge jumping also into
+	 *  adjacent hole from bridge finded
+	 *  Put into bridgeFaces all faces added to mesh as bridge
+	 *  Put into adjBorderPos the border half-edge next to the border side of a bridge
+	 */
+	static void getBridgeInfo(HoleType &h, std::vector<FacePointer> &bridgeFaces, 
+		std::vector<PosType> &adjBorderPos)
+	{
+		assert(!h.IsFilled());
+		assert(FgtHole<MESH>::IsHoleBorderFace(*h.p.f));
+		PosType curPos;
+		bridgeFaces.clear();
+		adjBorderPos.clear();
+
+		bridgeFaces.push_back(h.p.f);
+		h.p.f->SetV();
+
+		// in tmp ci sono le facce aggiunte da dei bridge
+		for(int k=0; k<bridgeFaces.size(); k++)
+		{
+			/*guardo le facce adiacenti le stacco dalla mesh e
+			   - se sono Bridge e Border: cerco il loro hole e lo elimino dalla lista
+				 questo buco sarà inglobato da quello inziale 
+			   - se sono solo bridge (conseguenza di bridge da facce bridge) le rimuovo semplicemente
+			   - altrimenti non faccio niente
+			*/
+			FacePointer vf = bridgeFaces.at(k);
+			assert(vf->IsV());
+
+			// indice dell'edge della faccia che è adicente alla mesh
+			for(int e=0; e<3; e++)
+			{
+				FacePointer adjF = vf->FFp(e);						
+				if(adjF == vf) // e è l'indice di un edge di bordo
+				{
+					curPos = PosType(vf, e);
+					curPos.NextB();
+					adjBorderPos.push_back(curPos);
+					
+					// scorro il bordo in cerca di altre possibili facce bridge
+					// e mi tengo un riferimento alla nuova posizione iniziale che avrà l'hole
+					do{
+						if( FgtHole<MESH>::IsBridgeFace(*curPos.f) && !curPos.f->IsV())
+						{
+							curPos.f->SetV();
+							bridgeFaces.push_back(curPos.f);
+						}
+						curPos.NextB();
+					}while(curPos.f != vf);
+
+				}
+				else if(FgtHole<MESH>::IsBridgeFace(*adjF) )
+				{
+					if(!adjF->IsV())
+					{
+						adjF->SetV();
+						bridgeFaces.push_back(adjF);
+					}
+				}										
+			}
+		} //for(int k=0; k<bridgeFaces.size(); k++)
+	};
+
 
 };
 

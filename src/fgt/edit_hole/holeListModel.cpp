@@ -247,7 +247,7 @@ void HoleListModel::acceptFilling(bool accept)
 
 void HoleListModel::removeBridges()
 {
-
+	FgtBridge<CMeshO>::RemoveBridges(mesh->cm, holes);
 	state = HoleListModel::Selection;
 	emit layoutChanged();
 }

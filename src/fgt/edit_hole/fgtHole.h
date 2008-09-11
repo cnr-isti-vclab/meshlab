@@ -243,6 +243,7 @@ private:
 		bb.SetNull();
 		size = 0;
 		do{
+			assert(!curPos.f->IsD());
 			curPos.f->SetUserBit(HoleFlag);
 			bb.Add(curPos.v->cP());
 			++size;
