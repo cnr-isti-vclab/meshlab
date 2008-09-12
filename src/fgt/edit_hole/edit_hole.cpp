@@ -41,7 +41,7 @@ EditHolePlugin::EditHolePlugin() {
 	QAction *editAction;
 	dialogFiller = 0;
 	holesModel = 0;
-
+	
 	foreach(editAction, actionList)
 		editAction->setCheckable(true);
 
@@ -111,6 +111,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 		mesh->updateDataMask(MeshModel::MM_FACEMARK);
 	}
 
+	bridgeOptSldVal = 50;
 	dialogFiller=new FillerDialog(gla->window());
 	dialogFiller->show();
 	dialogFiller->setAllowedAreas(Qt::NoDockWidgetArea);
@@ -121,7 +122,9 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	connect(dialogFiller->ui.acceptFillBtn, SIGNAL(clicked()), this, SLOT(acceptFill()) );
 	connect(dialogFiller->ui.cancelFillBtn, SIGNAL(clicked()), this, SLOT(cancelFill()) );
 	connect(dialogFiller->ui.clearBridgeBtn, SIGNAL(clicked()), this, SLOT(clearBridge()) );
+	connect(dialogFiller->ui.selfHoleChkB, SIGNAL(stateChanged(int)), this, SLOT(chekSingleBridgeOpt()) );
 	connect(dialogFiller->ui.diedralWeightSld, SIGNAL(valueChanged(int)), this, SLOT(updateDWeight(int)));
+	connect(dialogFiller->ui.bridgeParamSld, SIGNAL(valueChanged(int)), this, SLOT(updateBridgeSldValue(int)));
 	connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
 
 	connect(dialogFiller->ui.holeTree->header(), SIGNAL(sectionCountChanged(int, int)), this, SLOT(resizeViewColumn()) );
@@ -142,6 +145,9 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 
 void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 {
+	if(holesModel==0)
+		return;
+
 	glPushMatrix();
 	glMultMatrix(mesh->cm.Tr);
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
@@ -182,6 +188,8 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 	 if(holesModel->getState() == HoleListModel::Filled)
 		holesModel->acceptFilling(false);
 	
+	 FgtHole<CMeshO>::DeleteFlag();
+
 	 if ( dialogFiller!=0) {
 		delete  dialogFiller;
 		delete holesModel;
@@ -236,6 +244,11 @@ void EditHolePlugin::cancelFill()
 		holesModel->acceptFilling(false);
 }
 
+void EditHolePlugin::updateBridgeSldValue(int val)
+{
+	bridgeOptSldVal = val;
+}
+
 void EditHolePlugin::bridge()
 {
 	bool autobridge = dialogFiller->ui.autoBridgeRBtm->isChecked();
@@ -254,15 +267,17 @@ void EditHolePlugin::bridge()
 	}
 	else
 	{
-		holesModel->setEndBridging();
-		dialogFiller->clickEndBridging();
-
+		bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
+		holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
 	}
 	
-	// TO DO...
 	gla->update();
 }
 
+void EditHolePlugin::chekSingleBridgeOpt()
+{
+	dialogFiller->clickSingleHoleBridgeOpt();
+}
 
 void EditHolePlugin::clearBridge()
 {

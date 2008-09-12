@@ -121,25 +121,9 @@ public:
 			{
 				getBridgeInfo(*h, bridgeFaces, adjBorderPos );
 				std::vector<FacePointer>::iterator fit;
+
 				for(fit=bridgeFaces.begin(); fit!=bridgeFaces.end(); fit++ )
 				{
-					// aggiorno la topologia della faccia della mesh adiacente al bridge
-					// la faccia "dove poggia la spalla del ponte"
-					for(int e=0; e<3; e++)
-					{	
-						if(!IsBorder(**fit, e))
-						{
-							FacePointer adjF = (*fit)->FFp(e);
-							if(!FgtHole<MESH>::IsBridgeFace(*adjF))
-							{								
-								int adjEI = (*fit)->FFi(e);
-								adjF->FFp( adjEI ) = adjF;
-								adjF->FFi( adjEI ) = adjEI;
-								assert(IsBorder(*adjF, adjEI));
-							}
-						}
-					}
-
 					// se la faccia bridge in esame si affaccia su un'altro hole rispetto 
 					// a quello in esame rimuovo anche quell'hole
 					if(FgtHole<MESH>::IsHoleBorderFace(**fit))
@@ -154,6 +138,27 @@ public:
 							}
 						}
 					}
+				}
+
+				for(fit=bridgeFaces.begin(); fit!=bridgeFaces.end(); fit++ )
+				{
+					// rimuovo le facce bridge ed aggiorno la topologia della faccia della 
+					// mesh adiacente al bridge la faccia "dove poggia la spalla del ponte"
+					for(int e=0; e<3; e++)
+					{	
+						if(!IsBorder(**fit, e))
+						{
+							FacePointer adjF = (*fit)->FFp(e);
+							if(!FgtHole<MESH>::IsBridgeFace(*adjF))
+							{								
+								int adjEI = (*fit)->FFi(e);
+								adjF->FFp( adjEI ) = adjF;
+								adjF->FFi( adjEI ) = adjEI;
+								assert(IsBorder(*adjF, adjEI));
+							}
+						}
+					}
+					
 					if( !(*fit)->IsD() )
 						vcg::tri::Allocator<MESH>::DeleteFace(mesh, **fit);
 				}
@@ -245,6 +250,159 @@ public:
 		}	
 		
 		return true; // means no find hole
+	};
+
+	
+	/*  Per scegliere la miglior combinazione di edge all'interno di un hole, teto la qualità dei 
+	 *  triangoli ottenuti da tutte le possibili combinazioni che rispettino il concetto di bridge
+	 *  ovvero che non siano adiacenti o con 1 edge che li divide
+	 */
+	static void AutoSelfBridging(MESH &mesh, HoleVector &holes, std::vector<FacePointer *> &app, double dist_coeff=0.0)
+	{
+		int nh = holes.size();
+		for(int h=0; h<nh; ++h)
+		{
+			HoleType &thehole = holes.at(h);
+			if(!thehole.IsSelected() || thehole.Size()<6 )
+				continue;
+			assert(!thehole.IsFilled());
+
+			ScalarType maxQuality = -1;
+			BridgeAbutment<MESH> sideA, sideB;
+
+			// si scorre l'edge di partenza
+			for(int i=0; i<thehole.Size();i++)
+			{
+				// posiziono il primo edge, la prima spalla del ponte 
+				PosType initP = thehole.p;
+				for(int j=0; j<i; j++)
+					initP.NextB();
+				
+				// posiziono il secondo edge, la seconda spalla del ponte
+				PosType endP = initP;
+				endP.NextB();endP.NextB();					
+				for(int j=3; j<=thehole.Size()/2; j++)
+				{	
+					endP.NextB();
+
+					// mi assicuro di non scegliere di fare un ponte dove ne è già esistente uno
+					if( endP.f->FFp(0) == initP.f ||
+						endP.f->FFp(1) == initP.f ||
+						endP.f->FFp(2) == initP.f )
+						continue;
+
+					VertexType* vA0 = initP.f->V0( initP.z ); // first vertex of pos' 1-edge 
+					VertexType* vA1 = initP.f->V1( initP.z ); // second vertex of pos' 1-edge
+					VertexType* vB0 = endP.f->V0( endP.z ); // first vertex of pos' 2-edge 
+					VertexType* vB1 = endP.f->V1( endP.z ); // second vertex of pos' 2-edge 
+
+					// solution A 
+					Triangle3<ScalarType> bfA0(vA1->P(), vA0->P(), vB0->P());
+					Triangle3<ScalarType> bfA1(vB1->P(), vB0->P(), vA0->P());
+
+					// solution B
+					Triangle3<ScalarType> bfB0(vA1->P(), vA0->P(), vB1->P());
+					Triangle3<ScalarType> bfB1(vB1->P(), vB0->P(), vA1->P());
+
+					ScalarType oldq = maxQuality;
+					ScalarType q = bfA0.QualityFace()+ bfA1.QualityFace() + dist_coeff * j;
+					if(  q > maxQuality)
+						maxQuality = q;
+					q = bfB0.QualityFace()+ bfB1.QualityFace() + dist_coeff * j;
+					if(  q > maxQuality)
+						maxQuality = q;
+
+					if(oldq < maxQuality)
+					{
+						sideA = BridgeAbutment<MESH>(initP.f, initP.z, &thehole);
+						sideB = BridgeAbutment<MESH>(endP.f, endP.z, &thehole);
+					}					
+				}// scansione del edge di arrivo
+			}// scansione dell'edge di partenza
+
+			assert(vcg::face::IsBorder<FaceType>(*sideA.f, sideA.z));
+			assert(vcg::face::IsBorder<FaceType>(*sideB.f, sideB.z));
+
+			app.push_back(&sideA.f);
+			app.push_back(&sideB.f);
+			subdivideHoleWithBridge(sideA, sideB, mesh, holes, app);
+			app.pop_back(); app.pop_back();
+			app.push_back(&holes.back().p.f);
+		} //scansione degli holes
+	};
+
+
+	static void AutoMultiBridging(MESH &mesh, HoleVector &holes, std::vector<FacePointer *> &app, double dist_coeff=0.0)
+	{
+		BridgeAbutment<MESH> sideA, sideB;
+		std::vector<HoleType*> selectedHoles;
+		std::vector<HoleType*>::iterator shit1, shit2; 
+		HoleVector::iterator hit;
+		do{
+			sideA.SetNull();
+			sideB.SetNull();
+
+			// prendo gli hole selezionati
+			selectedHoles.clear();
+			for(hit=holes.begin(); hit!=holes.end(); hit++)
+				if(hit->IsSelected())
+					selectedHoles.push_back(&*hit);
+			
+			if(selectedHoles.size() < 2)
+				return;
+
+			// cerco la miglior combinazione tra le facce di un hole con quelle di un'altro
+
+			ScalarType maxQuality = -1;
+			for(shit1=selectedHoles.begin(); shit1!=selectedHoles.end(); shit1++)
+				for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
+				{
+					PosType ph1=(*shit1)->p;
+					PosType ph2=(*shit2)->p;
+
+					do{	//scansione edge di bordo del primo buco
+						do{
+							VertexType* vA0 = ph1.f->V0( ph1.z ); // first vertex of pos' 1-edge 
+							VertexType* vA1 = ph1.f->V1( ph1.z ); // second vertex of pos' 1-edge
+							VertexType* vB0 = ph2.f->V0( ph2.z ); // first vertex of pos' 2-edge 
+							VertexType* vB1 = ph2.f->V1( ph2.z ); // second vertex of pos' 2-edge 
+
+							// solution A 
+							Triangle3<ScalarType> bfA0(vA1->P(), vA0->P(), vB0->P());
+							Triangle3<ScalarType> bfA1(vB1->P(), vB0->P(), vA0->P());
+
+							// solution B
+							Triangle3<ScalarType> bfB0(vA1->P(), vA0->P(), vB1->P());
+							Triangle3<ScalarType> bfB1(vB1->P(), vB0->P(), vA1->P());
+
+							ScalarType oldq = maxQuality;
+							ScalarType q = bfA0.QualityFace()+ bfA1.QualityFace();
+							if(  q > maxQuality)
+								maxQuality = q;
+							q = bfB0.QualityFace()+ bfB1.QualityFace();
+							if(  q > maxQuality)
+								maxQuality = q;
+
+							if(oldq < maxQuality)
+							{
+								sideA = BridgeAbutment<MESH>(ph1.f, ph1.z, *shit1);
+								sideB = BridgeAbutment<MESH>(ph2.f, ph2.z, *shit2);
+							}
+
+							ph2.NextB();
+						}while(ph2 != (*shit2)->p);
+
+						ph1.NextB();
+					}while(ph1 != (*shit1)->p);
+				} // for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
+
+			// adesso ho la miglior coppia di edge si deve creare il bridge
+			assert(!sideA.IsNull() && !sideB.IsNull());
+			app.push_back(&sideA.f);
+			app.push_back(&sideB.f);
+			unifyHolesWithBridge(sideA, sideB, mesh, holes, app);
+
+		}while(true);
 	};
 
 
@@ -539,11 +697,21 @@ private:
 				{
 					curPos = PosType(vf, e);
 					curPos.NextB();
-					adjBorderPos.push_back(curPos);
 					
+					bool adjPosAdded = false;
+
 					// scorro il bordo in cerca di altre possibili facce bridge
 					// e mi tengo un riferimento alla nuova posizione iniziale che avrà l'hole
 					do{
+						if(!adjPosAdded && !FgtHole<MESH>::IsBridgeFace(*curPos.f) )
+						{
+							// aggiungo l'haf-edge adiacente al bridge assicurandomi che non sia
+							// una faccia bridge e quindi valida anche dopo l'eliminazione delle
+							// facce bridge
+							adjBorderPos.push_back(curPos);
+							adjPosAdded = true;
+						}
+					
 						if( FgtHole<MESH>::IsBridgeFace(*curPos.f) && !curPos.f->IsV())
 						{
 							curPos.f->SetV();

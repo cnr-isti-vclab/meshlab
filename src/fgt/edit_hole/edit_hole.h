@@ -68,6 +68,7 @@ private:
 	bool hasPick;
 	QPoint cur;
 	CFaceO* pickedFace;
+	int bridgeOptSldVal;
 	
 private Q_SLOTS:
 	void upGlA();
@@ -79,5 +80,7 @@ private Q_SLOTS:
 	void clearBridge();
 	void skipTab(int index);
 	void updateDWeight(int val);
+	void updateBridgeSldValue(int val);
+	void chekSingleBridgeOpt();
 };
 #endif

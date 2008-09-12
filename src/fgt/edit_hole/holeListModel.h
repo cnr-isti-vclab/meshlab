@@ -91,6 +91,8 @@ public:
 	void removeBridges();
 	inline MeshModel* getMesh() const { return mesh; };
 	
+	void autoBridge(bool singleHole=false, double distCoeff=0);
+
 	inline void setStartBridging() 
 	{ 
 		assert(state != HoleListModel::Filled);

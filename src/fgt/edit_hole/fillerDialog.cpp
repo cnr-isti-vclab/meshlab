@@ -58,3 +58,11 @@ void FillerDialog::clickEndBridging()
 	ui.autoBridgeRBtm->setEnabled(true);
 	ui.clearBridgeBtn->setEnabled(true);
 }
+
+void FillerDialog::clickSingleHoleBridgeOpt()
+{
+	bool check = ui.selfHoleChkB->isChecked();
+	ui.label_sld_sx->setEnabled(check);
+	ui.label_sld_dx->setEnabled(check);
+	ui.bridgeParamSld->setEnabled(check);
+}

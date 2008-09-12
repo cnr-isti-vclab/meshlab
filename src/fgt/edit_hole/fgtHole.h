@@ -383,14 +383,15 @@ private:
 		// per essere una faccia del bordo di questo hole deve avere almeno 2 vertici 
 		// conenuti nella lista di vertici del buco
 		assert(IsHoleBorderFace(*bFace));
-		std::vector<VertexType*>::const_iterator it;
-		int find = 0;
-		for(it = vertexes.begin(); it!=vertexes.end(); it++)
-			if(bFace->V(0) == *it || bFace->V(1) == *it || bFace->V(2) == *it)
-				find++;
-		
-		if(find>1) return true;
-		else return false;
+		assert(!filled);
+
+		PosType curPos = p;
+		do{
+			if(curPos.f == bFace)
+				return true;
+			curPos.NextB();
+		}while( curPos != p );
+		return false;
 	}
 
 	/* Check if pFace is a patch face of this hole */
@@ -422,18 +423,11 @@ public:
 	/* Inspect a mesh to find its holes. */
 	static int GetMeshHoles(MESH &mesh, HoleVector &ret) 
 	{
+		assert(HoleFlag ==-1);
 		ret.clear();
 		std::vector<HoleInfo> vhi;
-		
+				
 		//prendo la lista di info(sugli hole) tutte le facce anche le non selezionate
-		if(HoleFlag != -1)
-		{
-			FaceType::DeleteBitFlag(PatchCompFlag);
-			FaceType::DeleteBitFlag(HolePatchFlag);
-			FaceType::DeleteBitFlag(HoleFlag);
-			FaceType::DeleteBitFlag(BridgeFlag);
-		}
-
 		HoleFlag = vcgHole::GetInfo(mesh, false, vhi);
 		HolePatchFlag = FaceType::NewBitFlag();
 		PatchCompFlag = FaceType::NewBitFlag();
@@ -459,11 +453,30 @@ public:
 		typename HoleIterator hit = holes.begin();
 		for( ; hit != holes.end(); ++hit)
 		{
-			if(hit->haveBorderFace(bFace))
+			if(!hit->IsFilled())
 			{
-				it = hit;
-				return index;
+				if(hit->haveBorderFace(bFace))
+				{
+					it = hit;
+					return index;
+				}
 			}
+			else
+			{
+				// l'hole è riempito, non c'è più il bordo, nextB() non funzionerebbe
+				// prendo la faccia patch adiacente e cerco quella, in questo modo non ho bisogno
+				int i=0;
+				for( ; i<3; i++)
+					if(IsPatchFace(*bFace->FFp(i)))
+						break;
+				if(i<3)
+					if(hit->havePatchFace(bFace->FFp(i)))
+					{
+						it = hit;
+						return index;
+					}
+			}
+
 			index++;
 		}
 		it = holes.end();	// invalid iterator
@@ -491,6 +504,15 @@ public:
 		it = holes.end();	// invalid iterator
 		return -1; // means no find hole
 	};
+
+	static void DeleteFlag()
+	{
+		FaceType::DeleteBitFlag(BridgeFlag); BridgeFlag=-1;
+		FaceType::DeleteBitFlag(PatchCompFlag); PatchCompFlag=-1;
+		FaceType::DeleteBitFlag(HolePatchFlag); HolePatchFlag=-1;
+		FaceType::DeleteBitFlag(HoleFlag); HoleFlag=-1;
+	}
+
 
 public:
 	static int HoleFlag;

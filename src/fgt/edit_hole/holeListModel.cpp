@@ -28,7 +28,7 @@ using namespace vcg;
 
 HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	: QAbstractItemModel(parent)	
-{		
+{	
 	state = HoleListModel::Selection;
 	mesh = m;
 	userBitHole = -1;
@@ -119,8 +119,7 @@ void HoleListModel::drawCompenetratingFaces() const
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_LIGHTING);
 	glColor3f(0.8f, 0.8f, 0.f);
-	HoleVector::const_iterator it = holes.begin();		
-	it = holes.begin();
+	HoleVector::const_iterator it;
 	for(it = holes.begin(); it != holes.end(); ++it)
 		if(it->IsCompenetrating())
 			it->DrawCompenetratingFace(GL_LINE_LOOP);
@@ -244,6 +243,19 @@ void HoleListModel::acceptFilling(bool accept)
 	emit layoutChanged();
 }
 
+void HoleListModel::autoBridge(bool singleHole, double distCoeff)
+{
+	std::vector<CMeshO::FacePointer *> loc_fp;
+	HoleVector::iterator it = holes.begin();
+	for( ; it != holes.end(); it++ )
+		loc_fp.push_back(&it->p.f);		
+
+	if(singleHole)
+		FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, loc_fp, distCoeff);
+	else
+		FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, loc_fp, distCoeff);
+	emit layoutChanged();
+}
 
 void HoleListModel::removeBridges()
 {

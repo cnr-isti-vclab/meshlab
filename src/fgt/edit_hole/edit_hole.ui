@@ -9,7 +9,7 @@
     <x>0</x>
     <y>0</y>
     <width>315</width>
-    <height>470</height>
+    <height>445</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -488,8 +488,8 @@
              </property>
              <property name="geometry" >
               <rect>
-               <x>53</x>
-               <y>116</y>
+               <x>55</x>
+               <y>144</y>
                <width>70</width>
                <height>23</height>
               </rect>
@@ -516,59 +516,185 @@
               <string>Clear</string>
              </property>
             </widget>
-            <widget class="QWidget" name="" >
+            <widget class="QGroupBox" name="groupBox" >
              <property name="geometry" >
               <rect>
-               <x>-1</x>
-               <y>19</y>
-               <width>181</width>
-               <height>81</height>
+               <x>10</x>
+               <y>3</y>
+               <width>160</width>
+               <height>131</height>
               </rect>
              </property>
-             <layout class="QGridLayout" >
-              <item row="0" column="0" >
-               <widget class="QRadioButton" name="autoBridgeRBtm" >
-                <property name="text" >
-                 <string>Automatic</string>
-                </property>
-                <property name="checked" >
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0" >
-               <widget class="QRadioButton" name="manualBridgeRBtm" >
-                <property name="text" >
-                 <string>Manual</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0" >
-               <widget class="QPushButton" name="bridgeButton" >
-                <property name="sizePolicy" >
-                 <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize" >
-                 <size>
-                  <width>70</width>
-                  <height>23</height>
-                 </size>
-                </property>
-                <property name="maximumSize" >
-                 <size>
-                  <width>70</width>
-                  <height>23</height>
-                 </size>
-                </property>
-                <property name="text" >
-                 <string>Start</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title" >
+              <string>GroupBox</string>
+             </property>
+             <widget class="QCheckBox" name="selfHoleChkB" >
+              <property name="geometry" >
+               <rect>
+                <x>38</x>
+                <y>38</y>
+                <width>111</width>
+                <height>18</height>
+               </rect>
+              </property>
+              <property name="text" >
+               <string>Self hole Bridge</string>
+              </property>
+              <property name="checked" >
+               <bool>false</bool>
+              </property>
+             </widget>
+             <widget class="QRadioButton" name="autoBridgeRBtm" >
+              <property name="geometry" >
+               <rect>
+                <x>20</x>
+                <y>19</y>
+                <width>70</width>
+                <height>18</height>
+               </rect>
+              </property>
+              <property name="text" >
+               <string>Automatic</string>
+              </property>
+              <property name="checked" >
+               <bool>true</bool>
+              </property>
+             </widget>
+             <widget class="QRadioButton" name="manualBridgeRBtm" >
+              <property name="geometry" >
+               <rect>
+                <x>20</x>
+                <y>79</y>
+                <width>70</width>
+                <height>18</height>
+               </rect>
+              </property>
+              <property name="text" >
+               <string>Manual</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="bridgeButton" >
+              <property name="geometry" >
+               <rect>
+                <x>45</x>
+                <y>100</y>
+                <width>70</width>
+                <height>23</height>
+               </rect>
+              </property>
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize" >
+               <size>
+                <width>70</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text" >
+               <string>Start</string>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_sld_dx" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="geometry" >
+               <rect>
+                <x>111</x>
+                <y>56</y>
+                <width>32</width>
+                <height>20</height>
+               </rect>
+              </property>
+              <property name="font" >
+               <font>
+                <pointsize>7</pointsize>
+               </font>
+              </property>
+              <property name="text" >
+               <string>1/2 hole</string>
+              </property>
+              <property name="textFormat" >
+               <enum>Qt::AutoText</enum>
+              </property>
+             </widget>
+             <widget class="QLabel" name="label_sld_sx" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="geometry" >
+               <rect>
+                <x>28</x>
+                <y>56</y>
+                <width>27</width>
+                <height>20</height>
+               </rect>
+              </property>
+              <property name="font" >
+               <font>
+                <pointsize>7</pointsize>
+               </font>
+              </property>
+              <property name="text" >
+               <string>Shape</string>
+              </property>
+              <property name="textFormat" >
+               <enum>Qt::AutoText</enum>
+              </property>
+             </widget>
+             <widget class="QSlider" name="bridgeParamSld" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="geometry" >
+               <rect>
+                <x>56</x>
+                <y>56</y>
+                <width>51</width>
+                <height>21</height>
+               </rect>
+              </property>
+              <property name="layoutDirection" >
+               <enum>Qt::RightToLeft</enum>
+              </property>
+              <property name="maximum" >
+               <number>100</number>
+              </property>
+              <property name="sliderPosition" >
+               <number>50</number>
+              </property>
+              <property name="tracking" >
+               <bool>true</bool>
+              </property>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="invertedAppearance" >
+               <bool>true</bool>
+              </property>
+              <property name="tickPosition" >
+               <enum>QSlider::TicksBelow</enum>
+              </property>
+              <property name="tickInterval" >
+               <number>0</number>
+              </property>
+             </widget>
             </widget>
            </widget>
           </widget>
@@ -609,6 +735,70 @@
     <hint type="destinationlabel" >
      <x>152</x>
      <y>364</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoBridgeRBtm</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>selfHoleChkB</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>136</x>
+     <y>315</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>165</x>
+     <y>335</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoBridgeRBtm</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>bridgeParamSld</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>131</x>
+     <y>289</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>159</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoBridgeRBtm</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label_sld_dx</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>131</x>
+     <y>289</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>204</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoBridgeRBtm</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label_sld_sx</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>131</x>
+     <y>289</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>119</x>
+     <y>327</y>
     </hint>
    </hints>
   </connection>

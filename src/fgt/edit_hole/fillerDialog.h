@@ -39,6 +39,7 @@ public:
 	
 	void clickStartBridging();
 	void clickEndBridging();
+	void clickSingleHoleBridgeOpt();
 	
 
 Q_SIGNALS:
