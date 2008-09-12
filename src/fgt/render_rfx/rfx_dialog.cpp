@@ -467,7 +467,7 @@ void RfxDialog::TextureSelected(int idx)
 		if (uni->isRenderable())
 			texQt = uni->GetRTTexture();
 		else
-			texQt = RfxTextureLoader::LoadImage(uni->GetTextureFName());
+			texQt = RfxTextureLoader::LoadAsQImage(uni->GetTextureFName());
 		loaded = !texQt.isNull();
 
 		if (loaded) {
@@ -540,7 +540,7 @@ void RfxDialog::TextureSelected(int idx)
 			// try to get a preview
 			QPixmap prvw = QPixmap::fromImage(texQt);
 			if (!prvw.isNull())
-				ui.lblPreview->setPixmap(prvw.scaled(QSize(150, 150),
+				ui.lblPreview->setPixmap(prvw.scaled(QSize(100, 100),
 				                                     Qt::KeepAspectRatio));
 		}
 

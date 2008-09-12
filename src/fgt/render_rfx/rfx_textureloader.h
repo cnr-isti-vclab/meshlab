@@ -73,7 +73,7 @@ class RfxTextureLoader
 {
 public:
 	static bool LoadTexture(const QString &fName, QList<RfxState*> &states, GLuint *tex);
-	static QImage LoadImage(const QString &fName);
+	static QImage LoadAsQImage(const QString &fName);
 	static void RegisterPlugin(RfxTextureLoaderPlugin*);
 	static void UnregisterPlugin(RfxTextureLoaderPlugin*);
 

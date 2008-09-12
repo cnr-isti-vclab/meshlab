@@ -38,7 +38,7 @@ bool RfxTextureLoader::LoadTexture(const QString& fName, QList<RfxState*> &state
 	return false;
 }
 
-QImage RfxTextureLoader::LoadImage(const QString& fName)
+QImage RfxTextureLoader::LoadAsQImage(const QString& fName)
 {
 	QByteArray ext = QFileInfo(fName).suffix().toLower().toLocal8Bit();
 
