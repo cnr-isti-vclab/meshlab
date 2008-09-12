@@ -28,6 +28,25 @@ QList<QByteArray> RfxTGAPlugin::supportedFormats()
 	return QList<QByteArray>() << "tga";
 }
 
+GLubyte* RfxTGAPlugin::LoadAsImage(const QString &f, int *w, int *h)
+{
+	QList<RfxState*> e = QList<RfxState*>();
+	GLuint newTex = Load(f, e);
+
+	if (newTex == 0) {
+		*w = 0;
+		*h = 0;
+		return NULL;
+	}
+
+	*w = width;
+	*h = height;
+	unsigned char *img = new unsigned char[width * height * 4];
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+	glDeleteTextures(1, &newTex);
+	return img;
+}
+
 GLuint RfxTGAPlugin::Load(const QString &fName, QList<RfxState*> &states)
 {
 	QFile f(fName);
@@ -92,7 +111,7 @@ GLuint RfxTGAPlugin::Load(const QString &fName, QList<RfxState*> &states)
 	for (int i = 0; i < totPixels; ++i) {
 		tmp       = pixPtr[0];     // B -> temp
 		pixPtr[0] = pixPtr[2];     // R -> B
-		pixPtr[2] = tmp;           // B -> oldR
+		pixPtr[2] = tmp;           // temp -> R
 
 		pixPtr += bpp;             // next pixel
 	}

@@ -464,12 +464,11 @@ void RfxDialog::TextureSelected(int idx)
 
 		QImage texQt;
 		bool loaded;
-		if (uni->isRenderable()) {
+		if (uni->isRenderable())
 			texQt = uni->GetRTTexture();
-			loaded = !texQt.isNull();
-		} else {
-			loaded = texQt.load(uni->GetTextureFName());
-		}
+		else
+			texQt = RfxTextureLoader::LoadImage(uni->GetTextureFName());
+		loaded = !texQt.isNull();
 
 		if (loaded) {
 			QLabel *tSize = new QLabel();
@@ -541,7 +540,7 @@ void RfxDialog::TextureSelected(int idx)
 			// try to get a preview
 			QPixmap prvw = QPixmap::fromImage(texQt);
 			if (!prvw.isNull())
-				ui.lblPreview->setPixmap(prvw.scaled(QSize(100, 100),
+				ui.lblPreview->setPixmap(prvw.scaled(QSize(150, 150),
 				                                     Qt::KeepAspectRatio));
 		}
 

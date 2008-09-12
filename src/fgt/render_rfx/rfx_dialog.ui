@@ -97,12 +97,6 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_3" >
                    <item>
                     <widget class="QLabel" name="lblPreview" >
-                     <property name="maximumSize" >
-                      <size>
-                       <width>100</width>
-                       <height>100</height>
-                      </size>
-                     </property>
                      <property name="frameShape" >
                       <enum>QFrame::NoFrame</enum>
                      </property>

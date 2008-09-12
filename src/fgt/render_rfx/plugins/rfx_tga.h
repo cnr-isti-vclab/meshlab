@@ -65,6 +65,7 @@ public:
 	virtual ~RfxTGAPlugin() {};
 	virtual QList<QByteArray> supportedFormats();
 	virtual GLuint Load(const QString&, QList<RfxState*>&);
+	virtual GLubyte* LoadAsImage(const QString &f, int *w, int *h);
 	virtual const QString PluginName() { return QString("TGA Plugin"); }
 
 private:

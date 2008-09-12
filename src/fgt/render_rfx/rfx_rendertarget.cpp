@@ -111,7 +111,5 @@ void RfxRenderTarget::Unbind()
 		return;
 
 	qfbo->release();
-
 	glPopAttrib();
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }

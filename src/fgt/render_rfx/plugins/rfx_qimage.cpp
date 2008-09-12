@@ -39,10 +39,44 @@ QList<QByteArray> RfxQImagePlugin::supportedFormats()
 	return fmts;
 }
 
+GLubyte* RfxQImagePlugin::LoadAsImage(const QString &f, int *w, int *h)
+{
+	if (LoadRGBAQImage(f)) {
+		*w = img.width();
+		*h = img.height();
+		return img.bits();
+	} else {
+		*w = 0;
+		*h = 0;
+		return NULL;
+	}
+}
+
 GLuint RfxQImagePlugin::Load(const QString &fName, QList<RfxState*> &states)
 {
-	if (!img.load(fName))
+	if (!LoadRGBAQImage(fName))
 		return 0;
+
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	// default parameters if no states set
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	foreach (RfxState *s, states)
+		s->SetEnvironment(GL_TEXTURE_2D);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, img.width(), img.height(), 0,
+	             GL_RGBA, GL_UNSIGNED_BYTE, img.bits());
+
+	return tex;
+}
+
+bool RfxQImagePlugin::LoadRGBAQImage(const QString &fName)
+{
+	if (!img.load(fName))
+		return false;
 
 	// mirror and convert to RGBA
 	img = img.convertToFormat(QImage::Format_ARGB32);
@@ -60,18 +94,5 @@ GLuint RfxQImagePlugin::Load(const QString &fName, QList<RfxState*> &states)
 		img = img.rgbSwapped();
 	}
 
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-
-	// default parameters if no states set
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	foreach (RfxState *s, states)
-		s->SetEnvironment(GL_TEXTURE_2D);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, img.width(), img.height(), 0,
-	             GL_RGBA, GL_UNSIGNED_BYTE, img.bits());
-
-	return tex;
+	return true;
 }

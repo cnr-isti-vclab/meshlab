@@ -25,6 +25,7 @@
 #define RFX_DDS_H_
 
 #include <QFile>
+#include <QDataStream>
 #include <GL/glew.h>
 #include "rfx_textureloader.h"
 
@@ -35,9 +36,33 @@ public:
 	virtual ~RfxDDSPlugin() {}
 	virtual QList<QByteArray> supportedFormats();
 	virtual GLuint Load(const QString&, QList<RfxState*>&);
+	virtual GLubyte* LoadAsImage(const QString &f, int *w, int *h);
 	virtual const QString PluginName() { return QString("DDS Plugin"); }
 
 private:
+	struct DXTColBlock {
+		short col0;
+		short col1;
+		char row[4];
+	};
+
+	struct DXT3AlphaBlock {
+		short row[4];
+	};
+
+	struct DXT5AlphaBlock {
+		char alpha0;
+		char alpha1;
+		char row[6];
+	};
+
+	void flipImg(char *image, int width, int height, int depth, int size);
+	void swap(void *byte1, void *byte2, int size);
+	void flip_blocks_dxtc1(DXTColBlock *line, int numBlocks);
+	void flip_blocks_dxtc3(DXTColBlock *line, int numBlocks);
+	void flip_blocks_dxtc5(DXTColBlock *line, int numBlocks);
+	void flip_dxt5_alpha(DXT5AlphaBlock *block);
+
 	GLuint tex;
 	int texTarget;
 	int texFormat;

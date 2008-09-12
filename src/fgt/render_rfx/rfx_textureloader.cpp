@@ -38,6 +38,43 @@ bool RfxTextureLoader::LoadTexture(const QString& fName, QList<RfxState*> &state
 	return false;
 }
 
+QImage RfxTextureLoader::LoadImage(const QString& fName)
+{
+	QByteArray ext = QFileInfo(fName).suffix().toLower().toLocal8Bit();
+
+	if (plugins && plugins->contains(ext)) {
+		int width = 0;
+		int height = 0;
+		unsigned char *pixels = NULL;
+
+		pixels = plugins->value(ext)->LoadAsImage(fName, &width, &height);
+		if (pixels == NULL)
+			return QImage();
+
+		QImage img = QImage(width, height, QImage::Format_ARGB32);
+		memcpy(img.bits(), pixels, (width * height * 4));
+		delete[] pixels;
+
+		/* code from Qt4 QGLFramebufferObject::toImage() method */
+		if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+			// OpenGL gives RGBA; Qt wants ARGB
+			uint *p = (uint*)img.bits();
+			uint *end = p + width * height;
+			while (p < end) {
+				uint a = *p << 24;
+				*p = (*p >> 8) | a;
+				p++;
+			}
+		} else {
+			// OpenGL gives ABGR (i.e. RGBA backwards); Qt wants ARGB
+			img = img.rgbSwapped();
+		}
+		return img.mirrored();
+	}
+
+	return QImage();
+}
+
 void RfxTextureLoader::RegisterPlugin(RfxTextureLoaderPlugin *p)
 {
 	assert(p);

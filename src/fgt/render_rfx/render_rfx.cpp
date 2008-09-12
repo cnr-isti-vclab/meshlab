@@ -82,6 +82,9 @@ void RenderRFX::initActionList()
 		return;
 	}
 	shaderDir = shadersDir.path();
+	qDebug("Shader directory found '%s', and it contains %i rfx files",
+	       qPrintable(shadersDir.path()),
+	       shadersDir.entryList(QStringList("*.rfx")).size());
 
 	// validate each .rfx file found and add to actionList
 	// (this is actually just a sanity check)

@@ -28,6 +28,7 @@
 #include <QString>
 #include <QMap>
 #include <QFileInfo>
+#include <QImage>
 #include <GL/glew.h>
 #include "rfx_state.h"
 
@@ -45,7 +46,12 @@ public:
 
 	// plugin should load and bind texture and return its id as returned by
 	// glGenTexture(), or 0 if something went wrong with loading
-	virtual GLuint Load(const QString&, QList<RfxState*>&) = 0;
+	virtual GLuint Load(const QString &f, QList<RfxState*> &s) = 0;
+
+	// plugin should be able to return a 2D image of texture in ARGB32 format
+	// (w and h are pointers and not references to emphasize that they will be
+	// modified - in fact they will contain width and height of image -)
+	virtual GLubyte* LoadAsImage(const QString &f, int *w, int *h) = 0;
 
 	// returns plugin name
 	virtual const QString PluginName() = 0;
@@ -67,6 +73,7 @@ class RfxTextureLoader
 {
 public:
 	static bool LoadTexture(const QString &fName, QList<RfxState*> &states, GLuint *tex);
+	static QImage LoadImage(const QString &fName);
 	static void RegisterPlugin(RfxTextureLoaderPlugin*);
 	static void UnregisterPlugin(RfxTextureLoaderPlugin*);
 
