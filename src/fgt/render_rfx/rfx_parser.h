@@ -46,6 +46,7 @@ private:
 	void ParseUniforms(const QString&);
 	float* ValueFromRfx(const QString&, RfxUniform::UniformType);
 	QString TextureFromRfx(const QString&, RfxUniform::UniformType);
+	QString GetSemantic(const QString& VarName, RfxUniform::UniformType VarType);
 
 	QMap<QString, QString> uniformType;
 	QFile *rmShader;

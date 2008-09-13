@@ -25,6 +25,7 @@
 
 RfxUniform::RfxUniform(const QString &_name, const QString &_type)
 {
+	value = NULL;
 	identifier = _name;
 	type = GetUniformType(_type);
 	textureLoaded = false;
@@ -34,6 +35,12 @@ RfxUniform::RfxUniform(const QString &_name, const QString &_type)
 
 RfxUniform::~RfxUniform()
 {
+	if (value) {
+		if (type == INT || type == BOOL || type == FLOAT)
+			delete value;
+		else
+			delete[] value;
+	}
 }
 
 void RfxUniform::UpdateUniformLocation(GLuint programId)

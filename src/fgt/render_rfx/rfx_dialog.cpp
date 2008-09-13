@@ -191,7 +191,9 @@ void RfxDialog::UniformSelected(int idx)
 	assert(uni);
 
 	CleanTab(UNIFORM_TAB);
-	ui.BoxUnifProps->setTitle(uni->GetName());
+	ui.BoxUnifProps->setTitle(uni->GetName() +
+	                          ((uni->GetSemantic().isNull())? "" :
+	                            " [Predefined: " + uni->GetSemantic() + "]" ));
 
 	switch (uni->GetType()) {
 	case RfxUniform::INT:
@@ -311,6 +313,10 @@ void RfxDialog::DrawIFace(RfxUniform *u, int uidx, int rows, int columns)
 			                      QString().setNum(uidx) + '-' +
 			                      QString().setNum(arrayIdx));
 			valMapper->setParent(controls[arrayIdx]);
+
+			if (!u->GetSemantic().isNull())
+				controls[arrayIdx]->setDisabled(true);
+
 			uniLayout->addWidget(controls[arrayIdx], i, j);
 			widgetsByTab.insert(UNIFORM_TAB, controls[arrayIdx]);
 		}

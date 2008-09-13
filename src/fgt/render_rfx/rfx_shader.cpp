@@ -34,6 +34,12 @@ RfxShader::~RfxShader()
 		pass = 0;
 	}
 	shaderPasses.clear();
+
+	foreach (RfxRenderTarget *rt, renderTargets) {
+		delete rt;
+		rt = 0;
+	}
+	renderTargets.clear();
 }
 
 int RfxShader::FindRT(const QString& theName)
@@ -71,9 +77,77 @@ void RfxShader::Start()
 				rt->Bind(passIdx);
 		}
 
+		UpdateSemanticUniforms(pass->GetPassIndex());
 		pass->Start();
 
 		if (rt != NULL)
 			rt->Unbind();
 	}
+}
+
+void RfxShader::UpdateSemanticUniforms(int passIdx)
+{
+	QMapIterator<SemanticValue, RfxUniform*> it(semUniforms);
+	float params[16];
+	float *unifVal;
+
+	while (it.hasNext()) {
+		it.next();
+
+		switch (it.key()) {
+		case VIEWPORTWIDTH:
+			glGetFloatv(GL_VIEWPORT, params);
+			unifVal = it.value()->GetValue();
+			*unifVal = params[2] - params[0];
+			break;
+		case VIEWPORTHEIGHT:
+			glGetFloatv(GL_VIEWPORT, params);
+			unifVal = it.value()->GetValue();
+			*unifVal = params[3] - params[1];
+			break;
+		case VIEWPORTDIMENSIONS:
+			glGetFloatv(GL_VIEWPORT, params);
+			unifVal = it.value()->GetValue();
+			*unifVal = params[2] - params[0];
+			*(unifVal + 1) = params[3] - params[1];
+			break;
+		case VIEWPORTWIDTHINVERSE:
+			glGetFloatv(GL_VIEWPORT, params);
+			unifVal = it.value()->GetValue();
+			*unifVal = 1.0f / (params[2] - params[0]);
+			break;
+		case VIEWPORTHEIGHTINVERSE:
+			glGetFloatv(GL_VIEWPORT, params);
+			unifVal = it.value()->GetValue();
+			*unifVal = 1.0f / (params[3] - params[1]);
+			break;
+		case INVERSEVIEWPORTDIMENSIONS:
+			glGetFloatv(GL_VIEWPORT, params);
+			unifVal = it.value()->GetValue();
+			*unifVal = 1.0f / (params[2] - params[0]);
+			*(unifVal + 1) = 1.0f / (params[3] - params[1]);
+			break;
+		case PASSINDEX:
+			unifVal = it.value()->GetValue();
+			*unifVal = passIdx;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+// static member initialization - keep in sync with SemanticValue enum
+const char *RfxShader::semantic[] = {
+	"ViewportWidth", "ViewportHeight", "ViewportDimensions", "ViewportWidthInverse",
+	"ViewportHeightInverse", "InverseViewportDimensions", "PassIndex"
+};
+bool RfxShader::AddSemanticUniform(RfxUniform *u, const QString &sem)
+{
+	for (int i = 0; i < TOT_SEMANTICS; ++i)
+		if (semantic[i] == sem) {
+			semUniforms.insert((SemanticValue)i , u);
+			return true;
+		}
+	return false;
 }

@@ -79,6 +79,8 @@ public:
 	{
 		return QListIterator<RfxState*>(textureStates);
 	}
+	void SetSemantic(const QString& sem) { semantic = sem; }
+	QString GetSemantic() { return semantic; }
 
 private:
 	QString identifier;
@@ -96,6 +98,7 @@ private:
 	GLint texUnit;
 	GLint maxTexUnits;
 	GLint location;
+	QString semantic;
 
 	static const char *UniformTypeString[];
 };

@@ -33,6 +33,13 @@
 class RfxShader
 {
 public:
+	enum SemanticValue {
+		VIEWPORTWIDTH, VIEWPORTHEIGHT, VIEWPORTDIMENSIONS, VIEWPORTWIDTHINVERSE,
+		VIEWPORTHEIGHTINVERSE, INVERSEVIEWPORTDIMENSIONS, PASSINDEX,
+		TOT_SEMANTICS
+	};
+
+
 	RfxShader();
 	virtual ~RfxShader();
 
@@ -40,7 +47,9 @@ public:
 	RfxRenderTarget* GetRT(int idx) { return renderTargets.at(idx); }
 	int FindRT(const QString&);
 	void AddGLPass(RfxGLPass *pass) { shaderPasses.append(pass); }
+	bool AddSemanticUniform(RfxUniform*, const QString&);
 	RfxGLPass* GetPass(int idx) { return shaderPasses.at(idx); }
+	QString GetSemantic(RfxUniform*);
 	void SortPasses();
 	QListIterator<RfxGLPass*> PassesIterator()
 	{
@@ -51,8 +60,12 @@ public:
 	void Stop() { glUseProgram(0); }
 
 private:
+	void UpdateSemanticUniforms(int);
+
 	QList<RfxGLPass*> shaderPasses;
 	QList<RfxRenderTarget*> renderTargets;
+	QMultiMap<SemanticValue, RfxUniform*> semUniforms;
+	static const char *semantic[];
 };
 
 #endif /* RFX_SHADER_H_ */

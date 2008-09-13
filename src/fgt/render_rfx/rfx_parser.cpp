@@ -162,6 +162,12 @@ bool RfxParser::Parse()
 			unif->SetValue(parsedValue);
 			delete parsedValue;
 
+			QString sem = GetSemantic(varName, unif->GetType());
+			if (!sem.isNull()) {
+				if (rfxShader->AddSemanticUniform(unif, sem))
+					unif->SetSemantic(sem);
+			}
+
 			theGLPass->AddUniform(unif);
 		}
 
@@ -259,6 +265,35 @@ const short RfxParser::UniformToElements[] = {
 		-1, -1
 };
 
+QString RfxParser::GetSemantic(const QString& VarName, RfxUniform::UniformType VarType)
+{
+	QString elementName = UniformToRfx[VarType];
+
+	// first thing first find the DOM Node of declared var
+	QDomElement varNode;
+	QDomNodeList candidates = root.elementsByTagName(elementName);
+
+	for (int i = 0; i < candidates.size(); ++i)
+		if (candidates.at(i).toElement().attribute("NAME") == VarName)
+			varNode = candidates.at(i).toElement();
+
+	// if we're looking for a vec4, it could be in a RmColorVariable,
+	// so try a second search if the first was unsuccessful
+	if (VarType == RfxUniform::VEC4 && varNode.isNull()) {
+		candidates = root.elementsByTagName("RmColorVariable");
+
+		for (int i = 0; i < candidates.size(); ++i)
+			if (candidates.at(i).toElement().attribute("NAME") == VarName)
+				varNode = candidates.at(i).toElement();
+	}
+
+	if (!varNode.isNull())
+		if (varNode.attribute("VARIABLE_SEMANTIC") != "")
+			return varNode.attribute("VARIABLE_SEMANTIC");
+
+	return QString();
+}
+
 float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType VarType)
 {
 	// read a bool, int or float vector (max 4 elements)
@@ -291,20 +326,22 @@ float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType V
 				varNode = candidates.at(i).toElement();
 	}
 
-	// retrieve values stored in XML
-	for (int i = 0; i < elementNum; ++i) {
-		QString attrValue = "VALUE";
-		if (elementNum > 1)
-			attrValue.append("_").append(QString().setNum(i));
+	if (!varNode.isNull()) {
+		// retrieve values stored in XML
+		for (int i = 0; i < elementNum; ++i) {
+			QString attrValue = "VALUE";
+			if (elementNum > 1)
+				attrValue.append("_").append(QString().setNum(i));
 
-		// now if value is bool, toFloat() will hardly success in its
-		// conversion, so help out a bit
-		QString val = varNode.attribute(attrValue);
-		bool ok = false;
-		if (val == "TRUE" || val == "FALSE")
-			result[i] = (val == "TRUE") ? 1.0f : 0.0f;
-		else {
-			result[i] = val.toFloat(&ok);
+			// now if value is bool, toFloat() will hardly success in its
+			// conversion, so help out a bit
+			QString val = varNode.attribute(attrValue);
+			bool ok = false;
+			if (val == "TRUE" || val == "FALSE")
+				result[i] = (val == "TRUE") ? 1.0f : 0.0f;
+			else {
+				result[i] = val.toFloat(&ok);
+			}
 		}
 	}
 
