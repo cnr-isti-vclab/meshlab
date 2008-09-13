@@ -86,7 +86,7 @@ public:
 
 	void SetState(int _state) { state = _state; }
 	void SetValue(long _val) { value = _val; }
-	void SetEnvironment(GLint);
+	void SetEnvironment(GLint texTarget = 0);
 
 	QString GetTextureState() { return TextureStatesStrings[state - 1]; }
 	QString GetTextureValue();

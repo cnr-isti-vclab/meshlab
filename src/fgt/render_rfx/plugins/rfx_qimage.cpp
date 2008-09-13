@@ -61,8 +61,13 @@ GLuint RfxQImagePlugin::Load(const QString &fName, QList<RfxState*> &states)
 	glBindTexture(GL_TEXTURE_2D, tex);
 
 	// default parameters if no states set
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (GLEW_SGIS_generate_mipmap) {
+		glHint(GL_GENERATE_MIPMAP_HINT_SGIS, GL_NICEST);
+		glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	} else
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	foreach (RfxState *s, states)
 		s->SetEnvironment(GL_TEXTURE_2D);

@@ -119,7 +119,7 @@ void RfxGLPass::Start()
 {
 	// set gl states
 	foreach (RfxState *state, rfxStates)
-		state->SetEnvironment(0);
+		state->SetEnvironment();
 
 	// if this pass has no glsl sources,
 	// keep using glsl program of the previous pass

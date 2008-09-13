@@ -236,13 +236,18 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 	glBindTexture(texTarget, tex);
 
 	// default parameters if no states set
+	glTexParameteri(texTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	if (mipCount > 1) {
 		glTexParameteri(texTarget, GL_GENERATE_MIPMAP, GL_FALSE);
 		glTexParameteri(texTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	} else {
-		glTexParameteri(texTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		if (GLEW_SGIS_generate_mipmap) {
+			glHint(GL_GENERATE_MIPMAP_HINT_SGIS, GL_NICEST);
+			glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		} else
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
-	glTexParameteri(texTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	if (texTarget == GL_TEXTURE_CUBE_MAP) {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
