@@ -178,6 +178,17 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QL
 	outMesh.fileName = "Retopology.ply";
 	tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
 
+	CMeshO::FaceIterator fi;
+	for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
+	{
+		(*fi).N()=Point3f(0,0,0);
+		(*fi).N()=((fi->V(0)->N() + fi->V(1)->N() + fi->V(2)->N())/3);
+	}
+
+	//vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(outMesh.cm);
+
+
+/*
 	outMesh.updateDataMask(MeshModel::MM_FACETOPO);
 
 	bool oriented,orientable;
@@ -186,7 +197,7 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QL
 	vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
 	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
 
-	outMesh.clearDataMask(MeshModel::MM_FACETOPO);
+	outMesh.clearDataMask(MeshModel::MM_FACETOPO); */
 
 	/* DEBUG-OLD
 	// foreach "iterations"

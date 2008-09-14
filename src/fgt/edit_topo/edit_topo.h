@@ -100,6 +100,7 @@ public:
 	Vtx connectStart;
 	Vtx connectEnd;
 	
+	bool isVertexVisible(Point3f v);
 	bool getFaceAtMouse(MeshModel &m,CMeshO::FacePointer& val);
 	bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value);
 	int  getNearest(QPointF center, QPointF *points,int num);
@@ -114,7 +115,7 @@ public:
 	void drawLabel(QList<Vtx> list);
 	void drawLabel(Vtx v);
 
-	Vtx getVisibleVertexNearestToMouse(QList<Vtx> list);
+	bool getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out);
 	bool getVisibleEdgeNearestToMouse(QList<Edg> listE, Edg &ret);
 
 	inline void updateMatrixes() {
@@ -131,10 +132,29 @@ private:
 	GLArea *parentGla;
 	QList <QAction *> actionList;
 
+	void editAddVertex(MeshModel &m);
+	void editAddVertexFree();
+	void editDeleteVertex();
+	void editConnectVertex();
+	void editSelectFace();
+	void editDeconnectEdge();
+	void editDragAndDropVertex();
+	void editEdgeSplit();
+	void editEdgeCollapse();
+
+	void editDecoStandard(MeshModel &m);
+	void editDecoOnlyVertex(MeshModel &m);
+	void editDecoDragAndDropVertex(MeshModel &m);
+	void editDecoFaceSelect(MeshModel &m);
+	void editDecoVertexSelect(MeshModel &m);
+	void editDecoDeleteVertexConnect(MeshModel &m);
+	void editDecoDeleteVertexSelect(MeshModel &m);
+	void editDecoDeleteVertexDeconnect(MeshModel &m);
+	void editDecoCollapse(MeshModel &m);
+	void editDecoSplit(MeshModel &m);
 
 	edit_topodialog *edit_topodialogobj;
 
-//	TextureEditor* widget;
 	QDockWidget* dock;
 };
 

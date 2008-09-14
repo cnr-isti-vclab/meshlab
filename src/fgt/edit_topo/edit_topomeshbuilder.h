@@ -71,17 +71,17 @@ public:
 		vcg::face::PointDistanceBaseFunctor PDistFunct;
 
 
-//		dist=dist_upper_bound;
-//		const CMeshO::CoordType &p1 = ep.f->V(ep.z)->P();
-//		unifGrid.GetClosest(PDistFunct,markerFunctor,p1,dist_upper_bound,dist,closestPt1);
+		dist=dist_upper_bound;
+		const CMeshO::CoordType &p1 = ep.f->V(ep.z)->P();
+		unifGrid.GetClosest(PDistFunct,markerFunctor,p1,dist_upper_bound,dist,closestPt1);
 
-//		dist=dist_upper_bound;
-//		const CMeshO::CoordType &p2 = ep.f->V1(ep.z)->P();
-//		unifGrid.GetClosest(PDistFunct,markerFunctor,p2,dist_upper_bound,dist,closestPt2);
+		dist=dist_upper_bound;
+		const CMeshO::CoordType &p2 = ep.f->V1(ep.z)->P();
+		unifGrid.GetClosest(PDistFunct,markerFunctor,p2,dist_upper_bound,dist,closestPt2);
 
-//		const CMeshO::CoordType &startPt= ( p1 + p2 ) / 2.0;
+		const CMeshO::CoordType &startPt= ( p1 + p2 ) / 2.0;
 
-		const CMeshO::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
+	//	const CMeshO::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
 
 		CMeshO::FaceType *nearestF=0;
 		
@@ -90,8 +90,6 @@ public:
 	//	if(DEBUG)
 	//		LinMid->push_back(startPt);
 	  
-//		nearestF =  trimesh::GetClosestFace<CMeshO, MetroMeshGrid>(*m, unifGrid, startPt, dist_upper_bound, dist,  normf, bestq, ip);
-
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
 
 
@@ -115,6 +113,7 @@ public:
 //				nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
 
 			nv.P()= startPt;
+
 			/*
 			if(DEBUG)
 				LoutMid->push_back(closestPt);	*/		
@@ -136,8 +135,11 @@ public:
 		nv.P()= closestPt; 
 
 	//	if( MESH_TYPE::HasPerVertexNormal())
-	//		nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
-			nv.N()= (nearestF->V(0)->N()+nearestF->V(1)->N()).Normalize();//+nearestF->V(2)->N());///3));//.Normalize();
+//			nv.N()= (ep.f->V(ep.z)->N()+ep.f->V1(ep.z)->N()).Normalize();
+
+			nv.N()= ((nearestF->V(0)->N() + nearestF->V(1)->N() + nearestF->V(2)->N())/3).Normalize();
+
+		//	nv.N()= nearestF->N();//+nearestF->V(2)->N());///3));//.Normalize();
 
 //		if( MESH_TYPE::HasPerVertexColor())
 			nv.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
