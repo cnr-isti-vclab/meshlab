@@ -468,85 +468,43 @@ void RfxDialog::TextureSelected(int idx)
 	} else {
 		fname->setText("<span style=\"color:darkgreen;\">Texture loaded</span>");
 
-		QImage texQt;
+		ImageInfo ii;
 		bool loaded;
-		if (uni->isRenderable())
-			texQt = uni->GetRTTexture();
-		else
-			texQt = RfxTextureLoader::LoadAsQImage(uni->GetTextureFName());
-		loaded = !texQt.isNull();
+		if (uni->isRenderable()) {
+			ii.preview = uni->GetRTTexture();
+			ii.texType = "Render Target";
+			ii.width = (ii.preview.isNull())? 0 : ii.preview.width();
+			ii.height = (ii.preview.isNull())? 0 : ii.preview.height();
+			ii.depth = 1;
+			ii.format = "";
+		} else {
+			ii = RfxTextureLoader::LoadAsQImage(uni->GetTextureFName());
+		}
+		loaded = !ii.preview.isNull();
 
 		if (loaded) {
 			QLabel *tSize = new QLabel();
 			tSize->setText("Dimensions: " +
-					       QString().setNum(texQt.width()) + " x " +
-			               QString().setNum(texQt.height()));
+					       QString().setNum(ii.width) + " x " +
+			               QString().setNum(ii.height) +
+			               ((ii.depth > 1)? " x " + QString().setNum(ii.depth) : ""));
 			ui.infoTexLayout->addWidget(tSize);
 			widgetsByTab.insert(TEXTURE_TAB, tSize);
 
-			QString TexImgformat = "Unknown";
-			switch (texQt.format()) {
-			case QImage::Format_Invalid:
-				TexImgformat = "Unknown";
-				break;
-			case QImage::Format_Mono:
-				TexImgformat = "MONO";
-				break;
-			case QImage::Format_MonoLSB:
-				TexImgformat = "MONOLSB";
-				break;
-			case QImage::Format_Indexed8:
-				TexImgformat = "INDEXED8";
-				break;
-			case QImage::Format_RGB32:
-				TexImgformat = "RGB32";
-				break;
-			case QImage::Format_ARGB32:
-				TexImgformat = "ARGB32";
-				break;
-			case QImage::Format_ARGB32_Premultiplied:
-				TexImgformat = "ARGB32_PREMULTIPLIED";
-				break;
-			case QImage::Format_RGB16:
-				TexImgformat = "RGB16";
-				break;
-			case QImage::Format_ARGB8565_Premultiplied:
-				TexImgformat = "ARGB8565_PREMULTIPLIED";
-				break;
-			case QImage::Format_RGB666:
-				TexImgformat = "RGB666";
-				break;
-			case QImage::Format_ARGB6666_Premultiplied:
-				TexImgformat = "ARGB666_PREMULTIPLIED";
-				break;
-			case QImage::Format_RGB555:
-				TexImgformat = "RGB555";
-				break;
-			case QImage::Format_ARGB8555_Premultiplied:
-				TexImgformat = "ARGB8555_PREMULTIPLIED";
-				break;
-			case QImage::Format_RGB888:
-				TexImgformat = "RGB888";
-				break;
-			case QImage::Format_RGB444:
-				TexImgformat = "RGB444";
-				break;
-			case QImage::Format_ARGB4444_Premultiplied:
-				TexImgformat = "ARGB4444";
-				break;
-			default:
-				break;
-			}
+			QLabel *tType = new QLabel();
+			tType->setText("Type: " + ii.texType);
+			ui.infoTexLayout->addWidget(tType);
+			widgetsByTab.insert(TEXTURE_TAB, tType);
+
 			QLabel *tFormat = new QLabel();
-			tFormat->setText("Format: " + QString().setNum(texQt.depth()) +
-			                 " bit " + TexImgformat);
+			tFormat->setText("Format: " + ii.format);
 			ui.infoTexLayout->addWidget(tFormat);
 			widgetsByTab.insert(TEXTURE_TAB, tFormat);
 
 			// try to get a preview
-			QPixmap prvw = QPixmap::fromImage(texQt);
+			QPixmap prvw = QPixmap::fromImage(ii.preview);
 			if (!prvw.isNull())
-				ui.lblPreview->setPixmap(prvw.scaled(QSize(100, 100),
+				ui.lblPreview->setPixmap(prvw.scaled(QSize(120, 120),
 				                                     Qt::KeepAspectRatio));
 		}
 

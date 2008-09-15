@@ -32,6 +32,19 @@
 #include <GL/glew.h>
 #include "rfx_state.h"
 
+/*
+ * ImageInfo - contains a texture preview (ie unfolded cubemaps) and texture
+ *             properties
+ */
+struct ImageInfo {
+	QImage preview;
+	int width;
+	int height;
+	int depth;
+	QString format;
+	QString texType;
+};
+
 /******************************************************************************
  * RfxTextureLoaderPlugin: abstract class that defines a plugin for the       *
  *                         Texture Loader.                                    *
@@ -48,10 +61,8 @@ public:
 	// glGenTexture(), or 0 if something went wrong with loading
 	virtual GLuint Load(const QString &f, QList<RfxState*> &s) = 0;
 
-	// plugin should be able to return a 2D image of texture in ARGB32 format
-	// (w and h are pointers and not references to emphasize that they will be
-	// modified - in fact they will contain width and height of image -)
-	virtual GLubyte* LoadAsImage(const QString &f, int *w, int *h) = 0;
+	// plugin should be able to read texture into a QImage
+	virtual ImageInfo LoadAsQImage(const QString &f) = 0;
 
 	// returns plugin name
 	virtual const QString PluginName() = 0;
@@ -73,7 +84,7 @@ class RfxTextureLoader
 {
 public:
 	static bool LoadTexture(const QString &fName, QList<RfxState*> &states, GLuint *tex);
-	static QImage LoadAsQImage(const QString &fName);
+	static ImageInfo LoadAsQImage(const QString &fName);
 	static void RegisterPlugin(RfxTextureLoaderPlugin*);
 	static void UnregisterPlugin(RfxTextureLoaderPlugin*);
 

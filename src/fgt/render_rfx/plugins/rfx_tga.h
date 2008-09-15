@@ -65,18 +65,28 @@ public:
 	virtual ~RfxTGAPlugin() {};
 	virtual QList<QByteArray> supportedFormats();
 	virtual GLuint Load(const QString&, QList<RfxState*>&);
-	virtual GLubyte* LoadAsImage(const QString &f, int *w, int *h);
+	virtual ImageInfo LoadAsQImage(const QString &f);
 	virtual const QString PluginName() { return QString("TGA Plugin"); }
 
 private:
-	bool CheckHeader();
-	void LoadRawData();
+	bool CheckHeader(const char*);
+	GLint GetOGLFormat();
+	void rgbSwapped(unsigned char*);
+	void FlipV(unsigned char*);
+	unsigned char* LoadImageData(const QString &);
 
+	// image data
 	int width;
 	int height;
+	int bpp;
+	int imageType;
 	int imageSize;
-	TGAHeader tgah;
+	int headerSize;
+	bool needsVFlip;
+
+	// gl data
 	int texType;
+	GLint texFormat;
 	GLuint tex;
 	GLubyte *pixels;
 };

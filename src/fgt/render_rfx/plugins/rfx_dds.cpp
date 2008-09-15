@@ -28,209 +28,77 @@ QList<QByteArray> RfxDDSPlugin::supportedFormats()
 	return QList<QByteArray>() << "dds";
 }
 
-GLubyte* RfxDDSPlugin::LoadAsImage(const QString &f, int *w, int *h)
+ImageInfo RfxDDSPlugin::LoadAsQImage(const QString &f)
 {
-	QList<RfxState*> e = QList<RfxState*>();
-	GLuint newtex = Load(f, e);
+	Q_UNUSED(f)
 
-	if (newtex == 0) {
-		*w = 0;
-		*h = 0;
-		return NULL;
-	}
+	ImageInfo ii;
 
-	*w = 0;
-	*h = 0;
-	int imgSize = 0;
+/*	STUB
 
-	// 2d texture is read as is, cubemap is unfolded and for volume textures
-	// we read only one "slice"
+	unsigned char *pixelData = LoadImageData(f);
+	if (!pixelData)
+		return ii;
+
+	// 2D texture is read as is
+	// Cubemap is unfolded and layed horizontally this way -+--
+	// if Volume texture only one "slice" is read
+	int w;
+	int h;
 	switch (texTarget) {
 	case GL_TEXTURE_2D:
-		imgSize = width * height * 4; /* RGBA = 4 components */
-		*w = width;
-		*h = height;
-		break;
-	case GL_TEXTURE_CUBE_MAP:
-		*w = width * 4;
-		*h = height * 3;
-		imgSize = (width * 4) * (height * 3) * 4;
+		w = width;
+		h = height;
+		ii.texType = "2D Texture";
 		break;
 	case GL_TEXTURE_3D:
-		*w = width;
-		*h = height;
-		imgSize = width * height * 4; /* RGBA = 4 components */
+		w = width;
+		h = height;
+		ii.texType = "Volume Texture";
+		break;
+	case GL_TEXTURE_CUBE_MAP:
+		w = (width * 4);
+		h = (height * 3);
+		ii.texType = "Cubemap Texture";
 		break;
 	default:
-		return NULL;
+		return ii;
 	}
+	ii.width = width;
+	ii.height = height;
+	ii.depth = depth;
 
-	unsigned char *img = new unsigned char[imgSize];
-
-	switch (texTarget) {
-	case GL_TEXTURE_2D:
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-		break;
-	case GL_TEXTURE_CUBE_MAP: {
-
-		/*
-		 * we want cubemap "unfolded" this way so we'll get each cubemap face
-		 * and copy into the bigger image in the right position
-		 *  _ _ _ _
-		 * |_|X|_|_|
-		 * |X|X|X|X|
-		 * |_|X|_|_|
-		 */
-
-		// fill whole area with transparent color first
-		memset(img, 0x0, imgSize);
-
-		// offsets for each cube face
-		// (expressed in number of blocks in the 4 * 3 dst rectangle)
-		//
-		//                       X+ X- Y+ Y- Z+ Z-
-		const int woffsets[6] = {2, 0, 1, 1, 1, 3};
-		const int hoffsets[6] = {1, 1, 0, 2, 1, 1};
-
-		// not that we really need to define these, but they clarify
-		// a bit next instructions :)
-		const int bpp = 4;
-		int cubefaceSize = width * height * bpp;
-
-		unsigned char *cfaceImg = new unsigned char[cubefaceSize];
-		for (int i = 0; i < 6; ++i) {
-			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA,
-			              GL_UNSIGNED_BYTE, cfaceImg);
-
-			// cubemaps use DX coord system. We have to vertically flip image.
-			unsigned char tmp;
-			int lineLen = width * bpp;
-			unsigned char *line1 = cfaceImg;
-			unsigned char *line2 = cfaceImg + (height - 1) * lineLen;
-
-			for (; line1 < line2; line2 -= (lineLen * 2)) {
-				for (int j = 0; j < lineLen; ++j, ++line1, ++line2) {
-					tmp    = *line1;
-					*line1 = *line2;
-					*line2 = tmp;
-				}
-			}
-
-			// then copy cubemap face into the bigger unfolded image
-			unsigned char *imgPtr = img;
-			unsigned char *facePtr = cfaceImg;
-
-			// calculate where we want to copy the cubemap face
-			imgPtr += ((woffsets[i] * width) +
-			           (hoffsets[i] * width * 4 * height)) * bpp;
-
-			// we have to copy 'height' lines
-			for (unsigned int i = 0; i < height; ++i) {
-
-				// copy the whole cubemap scanline
-				memcpy(imgPtr, facePtr, (width * bpp));
-
-				// advance to next scanline both in cubemap face and
-				imgPtr += (width * bpp * 4);
-				facePtr += (width * bpp);
-			}
+	if (isCompressed) {
+		switch (texFormat) {
+		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+			ii.format = "DXT1 Compressed RGB";
+			break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+			ii.format = "DXT1 Compressed RGBA";
+			break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+			ii.format = "DXT3 Compressed RGBA";
+			break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+			ii.format = "DXT5 Compressed RGBA";
+			break;
+		default:
+			return ii;
 		}
-		delete[] cfaceImg;
-		break;
-	}
-	case GL_TEXTURE_3D: {
-		unsigned char *realImg = new unsigned char[imgSize * depth];
-		glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_UNSIGNED_BYTE, realImg);
-		memcpy(img, realImg, imgSize);
-		delete[] realImg;
-		break;
-	}
-	default:
-		return NULL;
+	} else {
+
 	}
 
-	// take care of deleting texture
-	glDeleteTextures(1, &newtex);
-	return img;
+	QImage img(w, h, QImage::Format_RGB32);
+*/
+	return ii;
 }
 
 GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 {
-	QFile f(fName);
-	f.open(QIODevice::ReadOnly);
-
-	DDSHeader ddsh;
-	f.read((char*)&ddsh, sizeof(DDSHeader));
-	f.seek(ddsh.dwSize + 4);
-
-	if (strncmp((char*)&ddsh.dwMagic, "DDS ", 4) != 0 || ddsh.dwSize != 124 ||
-	    !(ddsh.dwFlags & DDSD_PIXELFORMAT) || !(ddsh.dwFlags & DDSD_CAPS)) {
-
-		f.close();
+	unsigned char *pixels = LoadImageData(fName);
+	if (!pixels)
 		return 0;
-	}
-
-	// find out texture type
-	texTarget = GL_TEXTURE_2D;
-	if (ddsh.ddsCaps.dwCaps2 & DDSCAPS2_CUBEMAP)
-		texTarget = GL_TEXTURE_CUBE_MAP;
-	if ((ddsh.ddsCaps.dwCaps2 & DDSCAPS2_VOLUME) && (ddsh.dwDepth > 0))
-		texTarget = GL_TEXTURE_3D;
-
-	compressed = (ddsh.ddpfPixelFormat.dwFlags & DDPF_FOURCC);
-	mipCount = (ddsh.dwFlags & DDSD_MIPMAPCOUNT) ? ddsh.dwMipMapCount : 1;
-	width = ddsh.dwWidth;
-	height = ddsh.dwHeight;
-	depth = (ddsh.dwDepth <= 0)? 1 : ddsh.dwDepth;
-
-	short blockBytes = 0;
-	short components = 0;
-	if (compressed) {
-		// texture compression support needed
-		if (!GLEW_ARB_texture_compression ||
-		    !GLEW_EXT_texture_compression_s3tc) {
-			f.close();
-			return 0;
-		}
-
-		switch (ddsh.ddpfPixelFormat.dwFourCC) {
-		case FOURCC_DXT1:
-			texFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-			blockBytes = 8;
-			break;
-		case FOURCC_DXT3:
-			texFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			blockBytes = 16;
-			break;
-		case FOURCC_DXT5:
-			texFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-			blockBytes = 16;
-			break;
-		default:
-			f.close();
-			return 0;
-		}
-
-	} else {
-		if (ddsh.ddpfPixelFormat.dwFlags & DDPF_LUMINANCE) {
-			if (ddsh.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS)
-				texFormat = GL_LUMINANCE_ALPHA;
-			else
-				texFormat = GL_LUMINANCE;
-			components = ddsh.ddpfPixelFormat.dwRGBBitCount / 8;
-
-		} else if (ddsh.ddpfPixelFormat.dwFlags & DDPF_RGB) {
-			if (ddsh.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS)
-				texFormat = GL_RGBA;
-			else
-				texFormat = GL_RGB;
-			components = ddsh.ddpfPixelFormat.dwRGBBitCount / 8;
-
-		} else {
-			f.close();
-			return 0;
-		}
-	}
 
 	glGenTextures(1, &tex);
 	glBindTexture(texTarget, tex);
@@ -258,7 +126,8 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 	foreach (RfxState *s, states)
 		s->SetEnvironment(texTarget);
 
-	for (int i = 0; i < ((texTarget == GL_TEXTURE_CUBE_MAP)? 6 : 1); ++i) {
+	int offset = 0;
+	for (int i = 0; i < ((isCubemap)? 6 : 1); ++i) {
 
 		// mipmap generation have to be disabled for each face of the cubemap
 		if ((texTarget == GL_TEXTURE_CUBE_MAP) && mipCount > 1)
@@ -270,69 +139,195 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 		int d = depth;
 		int size;
 
-		for (unsigned int lev = 0; lev < mipCount; ++lev) {
+		// invert Y-pos and Y-neg faces of cubemap
+		if (i == 2) // cubeFace == GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+			cubeFace = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+
+		if (i == 3) // cubeFace == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+			cubeFace = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+
+		for (int lev = 0; lev < mipCount; ++lev) {
 
 			// calculate size of data to read based on texture type
-			size = ((compressed)?
-			         (((w + 3) / 4) * ((h + 3) / 4) * blockBytes) :
+			size = ((isCompressed)?
+			         (((w + 3) / 4) * ((h + 3) / 4) * components) :
 			         (w * h * components)) * d;
 
-			GLubyte *pixels = new GLubyte[size];
-			f.read((char*)pixels, size);
-			f.seek(f.pos() + size);
-
 			// vertically flip block if not a cubemap texture
-			if (texTarget != GL_TEXTURE_CUBE_MAP)
+			if (!isCubemap)
 				flipImg((char*)pixels, w, h, d, size);
 
 			switch (texTarget) {
 			case GL_TEXTURE_2D:
-			case GL_TEXTURE_CUBE_MAP:
-				if (compressed) {
-					glCompressedTexImage2D(((texTarget == GL_TEXTURE_2D)?
-					                         GL_TEXTURE_2D : cubeFace),
-					                       lev, texFormat, w, h, 0,
-					                       size, pixels);
+			case GL_TEXTURE_CUBE_MAP: {
+				int target = (isCubemap)? cubeFace : GL_TEXTURE_2D;
+
+				if (isCompressed) {
+					glCompressedTexImage2D(target, lev, texFormat, w, h, 0,
+					                       size, pixels + offset);
 				} else {
-					glTexImage2D(((texTarget == GL_TEXTURE_2D)?
-	                               GL_TEXTURE_2D : cubeFace),
-	                             lev, components, w, h, 0,
-					             texFormat, GL_UNSIGNED_BYTE, pixels);
+					glTexImage2D(target, lev, components, w, h, 0,
+					             texFormat, GL_UNSIGNED_BYTE, pixels + offset);
 				}
 				break;
-
+			}
 			case GL_TEXTURE_3D:
-				if (compressed) {
+				if (isCompressed) {
 					glCompressedTexImage3D(GL_TEXTURE_3D, lev, texFormat,
-				                           w, h, d, 0, size, pixels);
+				                           w, h, d, 0, size, pixels + offset);
 				} else {
 					glTexImage3D(GL_TEXTURE_3D, lev, components, w, h, d,
-					             0, texFormat, GL_UNSIGNED_BYTE, pixels);
+					             0, texFormat, GL_UNSIGNED_BYTE, pixels + offset);
 				}
 				break;
 			}
 
 			// half size for each mip-map level
-			w /= 2;
-			h /= 2;
-			d /= 2;
-
-			if (w < 1)
-				w = 1;
-			if (h < 1)
-				h = 1;
-			if (d < 1)
-				d = 1;
-
-			delete[] pixels;
+			w = qMax(w / 2, 1);
+			h = qMax(h / 2, 1);
+			d = qMax(d / 2, 1);
+			offset += size;
 		}
 	}
 
-	f.close();
-
+	delete[] pixels;
 	glTexParameteri(texTarget, GL_TEXTURE_MAX_LEVEL, mipCount - 1);
 
 	return tex;
+}
+
+unsigned char* RfxDDSPlugin::LoadImageData(const QString &fName)
+{
+	QFile f(fName);
+	f.open(QIODevice::ReadOnly);
+
+	DDSHeader ddsh;
+	f.read((char*)&ddsh, sizeof(DDSHeader));
+	f.seek(ddsh.dwSize + 4);
+
+	if (!ValidateHeader(ddsh)) {
+		f.close();
+		return NULL;
+	}
+
+	// set appropriate texture type
+	texTarget = GL_TEXTURE_2D;
+	if (isCubemap)
+		texTarget = GL_TEXTURE_CUBE_MAP;
+	if (isVolume)
+		texTarget = GL_TEXTURE_3D;
+
+	if (!GetOGLFormat(ddsh)) {
+		f.close();
+		return NULL;
+	}
+
+	int totalImgSize = ComputeImageSize();
+	unsigned char *pData = new unsigned char[totalImgSize];
+	f.read((char*)pData, totalImgSize);
+	f.close();
+
+	return pData;
+}
+
+int RfxDDSPlugin::ComputeImageSize()
+{
+	int sz = 0;
+	for (int i = 0; i < ((isCubemap)? 6 : 1); ++i) {
+		int w = width;
+		int h = height;
+		int d = qMax(depth, 1);
+		for (int j = 0; j < mipCount; ++j) {
+			if (isCompressed) {
+				sz += ((w + 3) / 4) * ((h + 3) / 4) * d * components;
+			} else {
+				sz += w * h * d * components;
+			}
+			w = qMax(w / 2, 1);
+			h = qMax(h / 2, 1);
+			d = qMax(d / 2, 1);
+		}
+	}
+
+	return sz;
+}
+
+bool RfxDDSPlugin::ValidateHeader(DDSHeader &header)
+{
+	if (strncmp((char*)&header.dwMagic, "DDS ", 4))
+		return false;
+
+	if (header.dwSize != 124)
+		return false;
+
+	if (!(header.dwFlags & DDSD_PIXELFORMAT) || !(header.dwFlags & DDSD_CAPS))
+		return false;
+
+	isCompressed = header.ddpfPixelFormat.dwFlags & DDPF_FOURCC;
+	isCubemap = header.ddsCaps.dwCaps2 & DDSCAPS2_CUBEMAP;
+	isVolume = header.ddsCaps.dwCaps2 & DDSCAPS2_VOLUME;
+
+	width = header.dwWidth;
+	height = header.dwHeight;
+	if (width < 1 || height < 1)
+		return false;
+
+	depth = qMax(1u, header.dwDepth);
+	mipCount = (header.dwFlags & DDSD_MIPMAPCOUNT) ? header.dwMipMapCount : 1;
+
+	return true;
+}
+
+bool RfxDDSPlugin::GetOGLFormat(DDSHeader &header)
+{
+	if (isCompressed) {
+		// texture compression support needed
+		// TODO: unpack block data when no hw support is present
+		if (!GLEW_ARB_texture_compression ||
+		    !GLEW_EXT_texture_compression_s3tc) {
+			return false;
+		}
+
+		// OGL only supports DXT1, DXT3 and DXT5 compressed data
+		switch (header.ddpfPixelFormat.dwFourCC) {
+		case FOURCC_DXT1:
+			texFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+			components = 8;
+			break;
+		case FOURCC_DXT3:
+			texFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			components = 16;
+			break;
+		case FOURCC_DXT5:
+			texFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			components = 16;
+			break;
+		default:
+			return false;
+		}
+
+	} else {
+
+		if (header.ddpfPixelFormat.dwFlags & DDPF_LUMINANCE) {
+			if (header.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS)
+				texFormat = GL_LUMINANCE_ALPHA;
+			else
+				texFormat = GL_LUMINANCE;
+
+		} else if (header.ddpfPixelFormat.dwFlags & DDPF_RGB) {
+			if (header.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS)
+				texFormat = GL_RGBA;
+			else
+				texFormat = GL_RGB;
+
+		} else {
+			return false;
+		}
+
+		components = header.ddpfPixelFormat.dwRGBBitCount / 8;
+	}
+
+	return true;
 }
 
 /*
@@ -344,7 +339,7 @@ void RfxDDSPlugin::flipImg(char *image, int width, int height, int depth, int si
 	int linesize;
 	int offset;
 
-	if (!compressed) {
+	if (!isCompressed) {
 		assert(depth > 0);
 
 		int imagesize = size / depth;
@@ -449,39 +444,25 @@ void RfxDDSPlugin::flip_dxt5_alpha(DXT5AlphaBlock *block)
 	int bits = 0;
 	memcpy(&bits, &block->row[0], 3);
 
-	gBits[0][0] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[0][1] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[0][2] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[0][3] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[1][0] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[1][1] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[1][2] = (char)(bits & mask);
-	bits >>= 3;
+	gBits[0][0] = (char)(bits & mask); bits >>= 3;
+	gBits[0][1] = (char)(bits & mask); bits >>= 3;
+	gBits[0][2] = (char)(bits & mask); bits >>= 3;
+	gBits[0][3] = (char)(bits & mask); bits >>= 3;
+	gBits[1][0] = (char)(bits & mask); bits >>= 3;
+	gBits[1][1] = (char)(bits & mask); bits >>= 3;
+	gBits[1][2] = (char)(bits & mask); bits >>= 3;
 	gBits[1][3] = (char)(bits & mask);
 
 	bits = 0;
 	memcpy(&bits, &block->row[3], 3);
 
-	gBits[2][0] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[2][1] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[2][2] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[2][3] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[3][0] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[3][1] = (char)(bits & mask);
-	bits >>= 3;
-	gBits[3][2] = (char)(bits & mask);
-	bits >>= 3;
+	gBits[2][0] = (char)(bits & mask); bits >>= 3;
+	gBits[2][1] = (char)(bits & mask); bits >>= 3;
+	gBits[2][2] = (char)(bits & mask); bits >>= 3;
+	gBits[2][3] = (char)(bits & mask); bits >>= 3;
+	gBits[3][0] = (char)(bits & mask); bits >>= 3;
+	gBits[3][1] = (char)(bits & mask); bits >>= 3;
+	gBits[3][2] = (char)(bits & mask); bits >>= 3;
 	gBits[3][3] = (char)(bits & mask);
 
 	int *pBits = ((int*) &(block->row[0]));
@@ -535,14 +516,12 @@ void RfxDDSPlugin::flip_blocks_dxtc5(DXTColBlock *line, int numBlocks)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// swap to sections of memory
+// swap two sections of memory
 void RfxDDSPlugin::swap(void *byte1, void *byte2, int size)
 {
-	unsigned char *tmp = new unsigned char[size];
+	unsigned char tmp[size];
 
-	memcpy(tmp, byte1, size);
+	memcpy(&tmp, byte1, size);
 	memcpy(byte1, byte2, size);
-	memcpy(byte2, tmp, size);
-
-	delete[] tmp;
+	memcpy(byte2, &tmp, size);
 }

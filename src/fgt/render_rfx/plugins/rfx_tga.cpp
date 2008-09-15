@@ -28,113 +28,56 @@ QList<QByteArray> RfxTGAPlugin::supportedFormats()
 	return QList<QByteArray>() << "tga";
 }
 
-GLubyte* RfxTGAPlugin::LoadAsImage(const QString &f, int *w, int *h)
+ImageInfo RfxTGAPlugin::LoadAsQImage(const QString &f)
 {
-	QList<RfxState*> e = QList<RfxState*>();
-	GLuint newTex = Load(f, e);
+	ImageInfo iInfo;
 
-	if (newTex == 0) {
-		*w = 0;
-		*h = 0;
-		return NULL;
+	unsigned char *pBits = LoadImageData(f);
+	if (!pBits)
+		return iInfo;
+
+	iInfo.width = width;
+	iInfo.height = height;
+	iInfo.depth = 1;
+	iInfo.texType = "2D Texture";
+	if (imageType == TGA_RAW_RGB) {
+		if (bpp == 4)
+			iInfo.format = "32bpp RGBA";
+		else if (bpp == 3)
+			iInfo.format = "24bpp RGB";
+	} else if (imageType == TGA_RAW_GREYSCALE) {
+		iInfo.format = "8bpp B/W";
+	} else {
+		return iInfo;
 	}
 
-	*w = width;
-	*h = height;
-	unsigned char *img = new unsigned char[width * height * 4];
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-	glDeleteTextures(1, &newTex);
-	return img;
+	QImage img(width, height, QImage::Format_RGB32);
+	for (int i = 0; i < height; ++i) {
+		QRgb *scanline = (QRgb*)img.scanLine(i);
+
+		if (imageType == TGA_RAW_GREYSCALE) {
+			for (int j = 0; j < width; ++j) {
+				scanline[j] = qRgb(*pBits, *pBits, *pBits);
+				++pBits;
+			}
+		} else if (imageType == TGA_RAW_RGB) {
+			for (int j = 0; j < width; ++j) {
+				scanline[j] = qRgb(pBits[0], pBits[1], pBits[2]);
+				pBits += bpp;
+			}
+		}
+	}
+	iInfo.preview = img.mirrored();
+
+	return iInfo;
 }
 
 GLuint RfxTGAPlugin::Load(const QString &fName, QList<RfxState*> &states)
 {
-	QFile f(fName);
-	f.open(QIODevice::ReadOnly);
+	pixels = LoadImageData(fName);
 
-	// parse tga header
-	// we use '18' directly instead of sizeof(TGAHeader) due to potential padding
-	// problems (eg. sizeof(TGAHeader) could be 20)
-	unsigned char *head = new unsigned char[18];
-	f.read((char*)head, 18);
-	f.seek(18);
-
-	// fill header struct (getting rid of padding and endianness issues)
-	tgah.IDLength = head[0];
-	tgah.ColorMapType = head[1];
-	tgah.ImageType = head[2];
-	memcpy(&tgah.CMapStart, &head[3], 2);
-	memcpy(&tgah.CMapLength, &head[5], 2);
-	tgah.CMapDepth = head[7];
-	memcpy(&tgah.XOffset, &head[8], 2);
-	memcpy(&tgah.YOffset, &head[10], 2);
-	memcpy(&tgah.Width, &head[12], 2);
-	memcpy(&tgah.Height, &head[14], 2);
-	tgah.PixelDepth = head[16];
-	tgah.ImageDescriptor = head[17];
-
-	delete[] head;
-
-	// sanity checks
-	if (!CheckHeader()) {
-		f.close();
+	if (pixels == NULL)
 		return 0;
-	}
-
-	// compute image size in bytes
-	imageSize = width * height * (tgah.PixelDepth / 8);
-	pixels = new GLubyte[imageSize];
-
-	// only raw rgb mode is supported a.t.m.
-	switch (tgah.ImageType) {
-	case TGA_RAW_RGB:
-	case TGA_RAW_GREYSCALE:
-		texType = (tgah.ImageType == TGA_RAW_RGB)?
-			((tgah.PixelDepth == 32)? GL_RGBA : GL_RGB) :
-			GL_LUMINANCE;
-		f.seek(f.pos() + tgah.IDLength);
-		f.read((char*)pixels, imageSize);
-		break;
-	default:
-		delete[] pixels;
-		f.close();
-		return 0;
-	}
-
-	// convert BGR to RGB
-	unsigned char *pixPtr = pixels;
-	unsigned char tmp;
-	long totPixels = width * height;
-	short bpp = tgah.PixelDepth / 8;
-
-	// swap R and B pixels with good old tmp = a; a = b; b = tmp; method :)
-	for (int i = 0; i < totPixels; ++i) {
-		tmp       = pixPtr[0];     // B -> temp
-		pixPtr[0] = pixPtr[2];     // R -> B
-		pixPtr[2] = tmp;           // temp -> R
-
-		pixPtr += bpp;             // next pixel
-	}
-
-	// do we have to vertically flip image?
-	if (tgah.ImageDescriptor & 0x20) {
-
-		// already declared vars - reusing
-		//unsigned char tmp;
-		//short bpp = tgah.PixelDepth / 8;
-
-		int lineLen = width * bpp;
-		unsigned char *line1 = pixels;
-		unsigned char *line2 = pixels + (height - 1) * lineLen;
-
-		for (; line1 < line2; line2 -= (lineLen * 2)) {
-			for (int i = 0; i < lineLen; ++i, ++line1, ++line2) {
-				tmp    = *line1;
-				*line1 = *line2;
-				*line2 = tmp;
-			}
-		}
-	}
 
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
@@ -153,29 +96,147 @@ GLuint RfxTGAPlugin::Load(const QString &fName, QList<RfxState*> &states)
 		s->SetEnvironment(GL_TEXTURE_2D);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, bpp, width, height, 0,
-	             texType, GL_UNSIGNED_BYTE, pixels);
+	             texFormat, GL_UNSIGNED_BYTE, pixels);
 
 	delete[] pixels;
-	f.close();
-
 	return tex;
 }
 
-bool RfxTGAPlugin::CheckHeader()
+unsigned char* RfxTGAPlugin::LoadImageData(const QString &fName)
 {
+	QFile f(fName);
+	f.open(QIODevice::ReadOnly);
+
+	// read tga header
+	// we use '18' directly instead of sizeof(TGAHeader) due to potential padding
+	// problems (eg. sizeof(TGAHeader) could be 20)
+	char *head = new char[18];
+	f.read(head, 18);
+	f.seek(headerSize);
+
+	// sanity checks
+	if (!CheckHeader(head)) {
+		delete[] head;
+		f.close();
+		return NULL;
+	}
+	delete[] head;
+
+	// compute image size in bytes and read whole pixel data
+	unsigned char *pData = new unsigned char[imageSize];
+	f.read((char*)pData, imageSize);
+	f.close();
+
+	// determine OpenGL texture internal format
+	texFormat = GetOGLFormat();
+
+	// convert BGR to RGB
+	if (imageType == TGA_RAW_RGB)
+		rgbSwapped(pData);
+
+	// do we have to vertically flip image?
+	if (needsVFlip)
+		FlipV(pData);
+
+	return pData;
+}
+
+// swap R and B components
+void RfxTGAPlugin::rgbSwapped(unsigned char *imgData)
+{
+	unsigned char *pixPtr = imgData;
+	long int nPix = width * height;
+	unsigned char tmp;
+
+	// swap R and B pixels with good old tmp = a; a = b; b = tmp; method :)
+	for (int i = 0; i < nPix; ++i) {
+		tmp       = pixPtr[0];     // B -> temp
+		pixPtr[0] = pixPtr[2];     // R -> B
+		pixPtr[2] = tmp;           // temp -> R
+
+		pixPtr += bpp;             // next pixel
+	}
+}
+
+// vertically flip image
+void RfxTGAPlugin::FlipV(unsigned char *imgData)
+{
+	unsigned char tmp;
+
+	int lineLen = width * bpp;
+	unsigned char *line1 = imgData;
+	unsigned char *line2 = imgData + (height - 1) * lineLen;
+
+	for (; line1 < line2; line2 -= (lineLen * 2)) {
+		for (int i = 0; i < lineLen; ++i, ++line1, ++line2) {
+			tmp    = *line1;
+			*line1 = *line2;
+			*line2 = tmp;
+		}
+	}
+}
+
+// return texture internal format based on image colors
+GLint RfxTGAPlugin::GetOGLFormat()
+{
+	switch (imageType) {
+	case TGA_RAW_RGB:
+		switch (bpp) {
+		case 4:
+			return GL_RGBA;
+		case 3:
+			return GL_RGB;
+		default:
+			return 0;
+		}
+		break;
+	case TGA_RAW_GREYSCALE:
+		return GL_LUMINANCE;
+		break;
+	default:
+		return 0;
+	}
+}
+
+// check header correctness and if image type is supported
+bool RfxTGAPlugin::CheckHeader(const char *head)
+{
+	// fill header struct (getting rid of padding and endianness issues)
+	TGAHeader tgah;
+	tgah.IDLength = head[0];
+	tgah.ColorMapType = head[1];
+	tgah.ImageType = head[2];
+	memcpy(&tgah.CMapStart, &head[3], 2);
+	memcpy(&tgah.CMapLength, &head[5], 2);
+	tgah.CMapDepth = head[7];
+	memcpy(&tgah.XOffset, &head[8], 2);
+	memcpy(&tgah.YOffset, &head[10], 2);
+	memcpy(&tgah.Width, &head[12], 2);
+	memcpy(&tgah.Height, &head[14], 2);
+	tgah.PixelDepth = head[16];
+	tgah.ImageDescriptor = head[17];
+
+	headerSize = 18 + tgah.IDLength;
+
 	if (tgah.ColorMapType != TGA_RGB)
 		return false;
 
 	if (tgah.ImageType != TGA_RAW_RGB && tgah.ImageType != TGA_RAW_GREYSCALE)
 		return false;
+	imageType = tgah.ImageType;
 
 	width = tgah.Width - tgah.XOffset;
 	height = tgah.Height - tgah.YOffset;
+	bpp = tgah.PixelDepth / 8;
 	if (width < 1 || height < 1)
 		return false;
 
-	if (tgah.ImageDescriptor > 0x20)
-		return false;
+	imageSize = width * height * bpp;
+
+	if (tgah.ImageDescriptor & 0x20)
+		needsVFlip = true;
+	else
+		needsVFlip = false;
 
 	return true;
 }

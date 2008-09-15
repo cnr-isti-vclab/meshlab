@@ -35,7 +35,7 @@ public:
 	virtual ~RfxQImagePlugin() {}
 	virtual QList<QByteArray> supportedFormats();
 	virtual GLuint Load(const QString&, QList<RfxState*>&);
-	virtual GLubyte* LoadAsImage(const QString &f, int *w, int *h);
+	virtual ImageInfo LoadAsQImage(const QString &f);
 	virtual const QString PluginName() { return QString("QImage Plugin"); }
 
 private:

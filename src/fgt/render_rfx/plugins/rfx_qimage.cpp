@@ -39,17 +39,67 @@ QList<QByteArray> RfxQImagePlugin::supportedFormats()
 	return fmts;
 }
 
-GLubyte* RfxQImagePlugin::LoadAsImage(const QString &f, int *w, int *h)
+ImageInfo RfxQImagePlugin::LoadAsQImage(const QString &f)
 {
-	if (LoadRGBAQImage(f)) {
-		*w = img.width();
-		*h = img.height();
-		return img.bits();
-	} else {
-		*w = 0;
-		*h = 0;
-		return NULL;
+	ImageInfo iInfo;
+	if (!iInfo.preview.load(f))
+		return iInfo;
+
+	iInfo.width = iInfo.preview.width();
+	iInfo.height = iInfo.preview.height();
+	iInfo.depth = 1;
+	iInfo.texType = "2D Texture";
+
+	QString TexImgformat = "Unknown";
+	switch (iInfo.preview.format()) {
+	case QImage::Format_Invalid:
+		TexImgformat = "Unknown";
+		break;
+	case QImage::Format_Mono:
+	case QImage::Format_MonoLSB:
+		TexImgformat = "1bpp B/W";
+		break;
+	case QImage::Format_Indexed8:
+		TexImgformat = "8bpp Indexed";
+		break;
+	case QImage::Format_RGB32:
+	case QImage::Format_RGB888:
+		TexImgformat = "24bpp RGB";
+		break;
+	case QImage::Format_ARGB32:
+	case QImage::Format_ARGB32_Premultiplied:
+		TexImgformat = "32bpp ARGB";
+		break;
+	case QImage::Format_RGB16:
+		TexImgformat = "16bpp RGB (5-6-5)";
+		break;
+	case QImage::Format_ARGB8565_Premultiplied:
+		TexImgformat = "24bpp ARGB (8-5-6-5)";
+		break;
+	case QImage::Format_RGB666:
+		TexImgformat = "24bpp RGB (6-6-6)";
+		break;
+	case QImage::Format_ARGB6666_Premultiplied:
+		TexImgformat = "24bpp ARGB (6-6-6-6)";
+		break;
+	case QImage::Format_RGB555:
+		TexImgformat = "16bpp RGB (5-5-5)";
+		break;
+	case QImage::Format_ARGB8555_Premultiplied:
+		TexImgformat = "24bpp ARGB (8-5-5-5)";
+		break;
+	case QImage::Format_RGB444:
+		TexImgformat = "16bpp RGB (4-4-4)";
+		break;
+	case QImage::Format_ARGB4444_Premultiplied:
+		TexImgformat = "16bpp ARGB (4-4-4-4)";
+		break;
+	default:
+		break;
 	}
+	iInfo.format = TexImgformat;
+
+	return iInfo;
 }
 
 GLuint RfxQImagePlugin::Load(const QString &fName, QList<RfxState*> &states)
