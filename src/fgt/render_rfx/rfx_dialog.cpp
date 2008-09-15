@@ -64,7 +64,7 @@ void RfxDialog::setupTabs()
 	/* Uniforms */
 	ui.comboUniforms->clear();
 	ui.comboUniforms->setEnabled(true);
-	disconnect(ui.comboUniforms);
+	disconnect(ui.comboUniforms, 0, 0, 0);
 	ui.BoxUnifProps->setTitle("");
 
 	QListIterator<RfxUniform*> it = shader->GetPass(selPass)->UniformsIterator();
@@ -94,7 +94,7 @@ void RfxDialog::setupTabs()
 	/* Textures */
 	ui.comboTextures->clear();
 	ui.comboTextures->setEnabled(true);
-	disconnect(ui.comboTextures);
+	disconnect(ui.comboTextures, 0, 0, 0);
 
 	it = shader->GetPass(selPass)->UniformsIterator();
 	unifCount = -1;
@@ -121,7 +121,7 @@ void RfxDialog::setupTabs()
 				SLOT(TextureSelected(int)));
 	}
 
-	disconnect(ui.btnChangeTexture);
+	disconnect(ui.btnChangeTexture, 0, 0, 0);
 	ui.BoxTextureProps->setTitle("");
 	ui.EditTexFile->clear();
 	ui.TexStatesTable->clear();
@@ -422,7 +422,7 @@ void RfxDialog::ChangeValue(const QString& val)
 
 void RfxDialog::TextureSelected(int idx)
 {
-	disconnect(ui.btnChangeTexture);
+	disconnect(ui.btnChangeTexture, 0, 0, 0);
 
 	if (idx <= 0)
 		return;
@@ -503,9 +503,14 @@ void RfxDialog::TextureSelected(int idx)
 
 			// try to get a preview
 			QPixmap prvw = QPixmap::fromImage(ii.preview);
-			if (!prvw.isNull())
-				ui.lblPreview->setPixmap(prvw.scaled(QSize(120, 120),
+			if (!prvw.isNull()) {
+				QSize scaledSize(120, 120);
+				if (ii.texType == "Cubemap Texture")
+					scaledSize.setWidth(200);
+
+				ui.lblPreview->setPixmap(prvw.scaled(scaledSize,
 				                                     Qt::KeepAspectRatio));
+			}
 		}
 
 		QLabel *tunit = new QLabel();

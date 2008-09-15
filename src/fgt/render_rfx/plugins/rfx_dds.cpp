@@ -30,14 +30,14 @@ QList<QByteArray> RfxDDSPlugin::supportedFormats()
 
 ImageInfo RfxDDSPlugin::LoadAsQImage(const QString &f)
 {
-	Q_UNUSED(f)
-
 	ImageInfo ii;
+	QList<RfxState*> e = QList<RfxState*>();
 
-/*	STUB
+	// instead of reading raw pixels (which may be compressed)
+	// let opengl load texture and then read it back with glGetTexImage
+	GLuint newtex = Load(f, e);
 
-	unsigned char *pixelData = LoadImageData(f);
-	if (!pixelData)
+	if (!newtex)
 		return ii;
 
 	// 2D texture is read as is
@@ -86,11 +86,107 @@ ImageInfo RfxDDSPlugin::LoadAsQImage(const QString &f)
 			return ii;
 		}
 	} else {
-
+		switch (texFormat) {
+		case GL_LUMINANCE_ALPHA:
+		case GL_LUMINANCE:
+			ii.format = QString().setNum(components * 8) + "bpp B/W";
+			break;
+		case GL_RGBA:
+			ii.format = "32bpp RGBA";
+			break;
+		case GL_RGB:
+			ii.format = "24bpp RGB";
+			break;
+		default:
+			return ii;
+		}
 	}
 
-	QImage img(w, h, QImage::Format_RGB32);
-*/
+	QImage img(w, h, QImage::Format_ARGB32);
+
+	switch (texTarget) {
+	case GL_TEXTURE_2D: {
+		unsigned char *tempBuf = new unsigned char[w * h * 3];
+		unsigned char *tempBufPtr = tempBuf;
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBuf);
+		for (int i = 0; i < h; ++i) {
+			QRgb *scanLine = (QRgb*)img.scanLine(i);
+			for (int j = 0; j < w; ++j) {
+				scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
+				tempBufPtr += 3;
+			}
+		}
+		delete[] tempBuf;
+		break;
+	}
+	case GL_TEXTURE_CUBE_MAP: {
+
+		//
+		// we want cubemap "unfolded" this way so we'll get each cubemap face
+		// and copy into the bigger image in the right position
+		//  _ _ _ _
+		// |_|X|_|_|
+		// |X|X|X|X|
+		// |_|X|_|_|
+		//
+
+		// fill whole area with transparent color first
+		img.fill(0x0);
+
+		// offsets for each cube face
+		// (expressed in number of blocks in the 4 * 3 dst rectangle)
+		//
+		//                       X+ X- Y+ Y- Z+ Z-
+		const int woffsets[6] = {2, 0, 1, 1, 1, 3};
+		const int hoffsets[6] = {1, 1, 0, 2, 1, 1};
+
+		int cubefaceSize = width * height * 3;
+		unsigned char *cfaceImg = new unsigned char[cubefaceSize];
+		for (int i = 0; i < 6; ++i) {
+
+			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
+			              GL_UNSIGNED_BYTE, cfaceImg);
+
+			// copy cubemap face into the bigger unfolded image
+			unsigned char *facePtr = cfaceImg;
+			int yPos = hoffsets[i] * height;
+			int xOffset = woffsets[i] * width;
+
+			// we have to copy 'height' lines
+			for (int y = 0; y < height; ++y) {
+				QRgb *dst = (QRgb*)img.scanLine(yPos + y) + xOffset;
+				for (int x = 0; x < width; ++x) {
+					dst[x] = qRgb(facePtr[0], facePtr[1], facePtr[2]);
+					facePtr += 3;
+				}
+			}
+		}
+		delete[] cfaceImg;
+		break;
+	}
+
+	case GL_TEXTURE_3D: {
+		unsigned char *realImg = new unsigned char[w * h * 3 * depth];
+		unsigned char *realImgPtr = realImg;
+		glGetTexImage(GL_TEXTURE_3D, 0, GL_RGB, GL_UNSIGNED_BYTE, realImg);
+		for (int i = 0; i < h; ++i) {
+			QRgb *scanLine = (QRgb*)img.scanLine(i);
+			for (int j = 0; j < w; ++j) {
+				scanLine[j] = qRgb(realImgPtr[0], realImgPtr[1], realImgPtr[2]);
+				realImgPtr += 3;
+			}
+		}
+		delete[] realImg;
+		break;
+	}
+	default:
+		return ii;
+	}
+
+	// delete texture
+	glDeleteTextures(1, &newtex);
+
+	ii.preview = img;
 	return ii;
 }
 
@@ -138,13 +234,6 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 		int h = height;
 		int d = depth;
 		int size;
-
-		// invert Y-pos and Y-neg faces of cubemap
-		if (i == 2) // cubeFace == GL_TEXTURE_CUBE_MAP_POSITIVE_Y
-			cubeFace = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-
-		if (i == 3) // cubeFace == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
-			cubeFace = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
 
 		for (int lev = 0; lev < mipCount; ++lev) {
 
