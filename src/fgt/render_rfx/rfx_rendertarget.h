@@ -47,6 +47,8 @@ public:
 	bool Setup(int pass);
 	void Bind(int pass);
 	void Unbind();
+	void UseViewPortDim(bool useVD) { vportdim = useVD; }
+	void GenMipmaps(bool genMip) { mipmaps = genMip; }
 
 private:
 	QGLFramebufferObject *qfbo;
@@ -54,6 +56,8 @@ private:
 	QString name;
 	int width;
 	int height;
+	bool mipmaps;
+	bool vportdim;
 
 	struct RTOptions {
 		GLint clearMask;

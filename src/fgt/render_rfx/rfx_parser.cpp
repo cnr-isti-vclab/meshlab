@@ -83,6 +83,9 @@ bool RfxParser::Parse()
 		rt->SetSize(rtEl.attribute("WIDTH").toInt(),
 		            rtEl.attribute("HEIGHT").toInt());
 
+		rt->UseViewPortDim(rtEl.attribute("USE_VIEWPORT_DIMENSIONS") == "TRUE");
+		rt->GenMipmaps(rtEl.attribute("GENERATE_MIPMAPS") == "TRUE");
+
 		rfxShader->AddRT(rt);
 	}
 

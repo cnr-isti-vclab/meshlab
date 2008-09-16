@@ -41,6 +41,10 @@ RfxUniform::~RfxUniform()
 		else
 			delete[] value;
 	}
+
+	// render targets are deleted by rfx_shader
+	if (textureLoaded && !textureRendered)
+		glDeleteTextures(1, &textureId);
 }
 
 void RfxUniform::UpdateUniformLocation(GLuint programId)

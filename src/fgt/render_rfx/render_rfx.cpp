@@ -28,6 +28,7 @@ RenderRFX::RenderRFX()
 	shadersSupported = false;
 	shaderPass = -1;
 	dialog = NULL;
+	activeShader = NULL;
 }
 
 RenderRFX::~RenderRFX()
@@ -40,11 +41,6 @@ RenderRFX::~RenderRFX()
 	foreach (QAction *a, actionList)
 		delete a;
 	actionList.clear();
-
-	QMapIterator<QString, RfxShader*> it(shaderList);
-	while (it.hasNext())
-		delete it.value();
-	shaderList.clear();
 }
 
 QList<QAction*> RenderRFX::actions()
@@ -87,7 +83,7 @@ void RenderRFX::initActionList()
 	       shadersDir.entryList(QStringList("*.rfx")).size());
 
 	// validate each .rfx file found and add to actionList
-	// (this is actually just a sanity check)
+	// (this is actually just a sanity check, shaders created are deleted immediately)
 	foreach (QString fileName, shadersDir.entryList(QDir::Files)) {
 		if (fileName.endsWith(".rfx")) {
 			RfxParser theParser(shadersDir.absoluteFilePath(fileName));
@@ -95,17 +91,28 @@ void RenderRFX::initActionList()
 				QAction *action = new QAction(fileName, this);
 				action->setCheckable(false);
 				actionList.append(action);
-				shaderList[fileName] = theParser.GetShader();
+				delete theParser.GetShader();
 			}
 		}
 	}
 }
 
-void RenderRFX::Init(QAction *action, MeshModel &/*mesh*/,
-                     RenderMode &/*rmode*/, QGLWidget *parent)
+void RenderRFX::Init(QAction *action, MeshModel &mesh,
+                     RenderMode &rmode, QGLWidget *parent)
 {
+	Q_UNUSED(mesh)
+	Q_UNUSED(rmode)
+
 	assert(actionList.contains(action));
-	RfxShader *shader = shaderList[action->text()];
+	if (activeShader) {
+		delete activeShader;
+		activeShader = NULL;
+	}
+
+	// parse shader file we're going to use
+	RfxParser theParser(QDir(shaderDir).absoluteFilePath(action->text()));
+	assert(theParser.Parse());
+	activeShader = theParser.GetShader();
 
 	if (dialog) {
 		dialog->close();
@@ -118,9 +125,9 @@ void RenderRFX::Init(QAction *action, MeshModel &/*mesh*/,
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
 			shadersSupported = true;
 
-			shader->CompileAndLink();
+			activeShader->CompileAndLink();
 
-			dialog = new RfxDialog(shader, action, parent);
+			dialog = new RfxDialog(activeShader, action, parent);
 			dialog->move(0, 100);
 			dialog->show();
 		}
@@ -130,13 +137,15 @@ void RenderRFX::Init(QAction *action, MeshModel &/*mesh*/,
 	glGetError();
 }
 
-void RenderRFX::Render(QAction *action, MeshModel &/*mesh*/,
-                       RenderMode &rmode, QGLWidget */*parent*/)
+void RenderRFX::Render(QAction *action, MeshModel &mesh,
+                       RenderMode &rmode, QGLWidget *parent)
 {
-	assert(actionList.contains(action));
-	RfxShader *shader = shaderList[action->text()];
+	Q_UNUSED(mesh)
+	Q_UNUSED(parent)
 
-	shader->Start();
+	assert(activeShader);
+
+	activeShader->Start();
 	rmode.textureMode = vcg::GLW::TMPerVert;
 
 	// clear errors, if any

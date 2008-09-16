@@ -35,8 +35,8 @@
 class RfxGLPass
 {
 public:
-	RfxGLPass() : passIndex(-1) { useRenderTarget = false; }
-	RfxGLPass(int passidx) : passIndex(passidx) { useRenderTarget = false; }
+	RfxGLPass() : passIndex(-1) { useRenderTarget = false; shaderLinked = false; }
+	RfxGLPass(int passidx) : passIndex(passidx) { useRenderTarget = false; shaderLinked = false; }
 	virtual ~RfxGLPass();
 
 	void SetShaderSource(const QString &source, bool isFragment);

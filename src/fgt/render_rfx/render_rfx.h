@@ -54,9 +54,9 @@ private:
 
 	bool shadersSupported;
 	QList<QAction*> actionList;
-	QMap<QString, RfxShader*> shaderList;
 	int shaderPass;
 	QString shaderDir;
 	RfxDialog *dialog;
+	RfxShader *activeShader;
 };
 #endif /* RENDERRFX_H */

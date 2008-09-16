@@ -25,9 +25,12 @@
 
 RfxRenderTarget::RfxRenderTarget(const QString& rtName)
 {
+	qfbo = NULL;
 	name = rtName;
 	width = 0;
 	height = 0;
+	mipmaps = false;
+	vportdim = false;
 }
 
 RfxRenderTarget::~RfxRenderTarget()
@@ -66,8 +69,17 @@ bool RfxRenderTarget::Setup(int pass)
 		return false;
 	}
 
+	// if "use viewport dimensions" at this point we have a gl context
+	if (vportdim) {
+		GLfloat dims[4];
+		glGetFloatv(GL_VIEWPORT, dims);
+		width = (int)dims[2];
+		height = (int)dims[3];
+	}
+
 	qfbo = new QGLFramebufferObject(width, height, QGLFramebufferObject::Depth);
 
+	/*
 	glBindTexture(GL_TEXTURE_2D, qfbo->texture());
 	// set texture state based on the first uniform that will use RT
 	QList<int> k = passStates.keys();
@@ -77,6 +89,7 @@ bool RfxRenderTarget::Setup(int pass)
 				s->SetEnvironment(GL_TEXTURE_2D);
 		}
 	}
+	*/
 
 	return qfbo->isValid();
 }
@@ -103,12 +116,22 @@ void RfxRenderTarget::Bind(int pass)
 
 	if (colClear || depClear)
 		glClear(passOptions.value(pass).clearMask);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 }
 
 void RfxRenderTarget::Unbind()
 {
 	if (!qfbo)
 		return;
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 
 	qfbo->release();
 	glPopAttrib();

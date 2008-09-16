@@ -70,14 +70,15 @@ void RfxShader::Start()
 {
 	foreach (RfxGLPass *pass, shaderPasses) {
 		RfxRenderTarget *rt = NULL;
+		int passIdx = pass->GetPassIndex();
+
 		if (pass->wantsRenderTarget()) {
 			rt = pass->GetRenderTarget();
-			int passIdx = pass->GetPassIndex();
 			if (rt->Setup(passIdx))
 				rt->Bind(passIdx);
 		}
 
-		UpdateSemanticUniforms(pass->GetPassIndex());
+		UpdateSemanticUniforms(passIdx);
 		pass->Start();
 
 		if (rt != NULL)
@@ -93,44 +94,90 @@ void RfxShader::UpdateSemanticUniforms(int passIdx)
 
 	while (it.hasNext()) {
 		it.next();
+		unifVal = it.value()->GetValue();
 
 		switch (it.key()) {
+
+		// viewport data
 		case VIEWPORTWIDTH:
 			glGetFloatv(GL_VIEWPORT, params);
-			unifVal = it.value()->GetValue();
 			*unifVal = params[2] - params[0];
 			break;
 		case VIEWPORTHEIGHT:
 			glGetFloatv(GL_VIEWPORT, params);
-			unifVal = it.value()->GetValue();
 			*unifVal = params[3] - params[1];
 			break;
 		case VIEWPORTDIMENSIONS:
 			glGetFloatv(GL_VIEWPORT, params);
-			unifVal = it.value()->GetValue();
 			*unifVal = params[2] - params[0];
 			*(unifVal + 1) = params[3] - params[1];
 			break;
 		case VIEWPORTWIDTHINVERSE:
 			glGetFloatv(GL_VIEWPORT, params);
-			unifVal = it.value()->GetValue();
 			*unifVal = 1.0f / (params[2] - params[0]);
 			break;
 		case VIEWPORTHEIGHTINVERSE:
 			glGetFloatv(GL_VIEWPORT, params);
-			unifVal = it.value()->GetValue();
 			*unifVal = 1.0f / (params[3] - params[1]);
 			break;
 		case INVERSEVIEWPORTDIMENSIONS:
 			glGetFloatv(GL_VIEWPORT, params);
-			unifVal = it.value()->GetValue();
 			*unifVal = 1.0f / (params[2] - params[0]);
 			*(unifVal + 1) = 1.0f / (params[3] - params[1]);
 			break;
+
+		// pass index
 		case PASSINDEX:
-			unifVal = it.value()->GetValue();
 			*unifVal = passIdx;
 			break;
+
+		// view parameters
+		case VIEWDIRECTION:
+		case VIEWPOSITION:
+		case VIEWSIDEVECTOR:
+		case VIEWUPVECTOR:
+		case FOV:
+		case NEARCLIPPLANE:
+		case FARCLIPPLANE:
+			break;
+
+		// view matrices
+		case WORLD:
+		case WORLDTRANSPOSE:
+		case WORLDINVERSE:
+		case WORLDINVERSETRANSPOSE:
+			break;
+
+		case VIEW:
+		case VIEWTRANSPOSE:
+		case VIEWINVERSE:
+		case VIEWINVERSETRANSPOSE:
+			break;
+
+		case WORLDVIEW:
+		case WORLDVIEWTRANSPOSE:
+		case WORLDVIEWINVERSE:
+		case WORLDVIEWINVERSETRANSPOSE:
+			break;
+
+		case PROJECTION:
+		case PROJECTIONTRANSPOSE:
+		case PROJECTIONINVERSE:
+		case PROJECTIONINVERSETRANSPOSE:
+			break;
+
+		case VIEWPROJECTION:
+		case VIEWPROJECTIONTRANSPOSE:
+		case VIEWPROJECTIONINVERSE:
+		case VIEWPROJECTIONINVERSETRANSPOSE:
+			break;
+
+		case WORLDVIEWPROJECTION:
+		case WORLDVIEWPROJECTIONTRANSPOSE:
+		case WORLDVIEWPROJECTIONINVERSE:
+		case WORLDVIEWPROJECTIONINVERSETRANSPOSE:
+			break;
+
 		default:
 			break;
 		}
@@ -140,7 +187,15 @@ void RfxShader::UpdateSemanticUniforms(int passIdx)
 // static member initialization - keep in sync with SemanticValue enum
 const char *RfxShader::semantic[] = {
 	"ViewportWidth", "ViewportHeight", "ViewportDimensions", "ViewportWidthInverse",
-	"ViewportHeightInverse", "InverseViewportDimensions", "PassIndex"
+	"ViewportHeightInverse", "InverseViewportDimensions",
+	"PassIndex",
+	"ViewDirection", "ViewPosition", "ViewSideVector", "ViewUpVector", "FOV", "NearClipPlane", "FarClipPlane",
+	"View", "ViewTranspose", "ViewInverse", "ViewInverseTranspose",
+	"Projection", "ProjectionTranspose", "ProjectionInverse", "ProjectionInverseTranspose",
+	"ViewProjection", "ViewProjectionTranspose", "ViewProjectionInverse", "ViewProjectionInverseTranspose",
+	"World", "WorldTranspose", "WorldInverse", "WorldInverseTranspose",
+	"WorldView", "WorldViewTranspose", "WorldViewInverse", "WorldViewInverseTranspose",
+	"WorldViewProjection", "WorldViewProjectionTranspose", "WorldViewProjectionInverse", "WorldViewProjectionInverseTranspose"
 };
 bool RfxShader::AddSemanticUniform(RfxUniform *u, const QString &sem)
 {
