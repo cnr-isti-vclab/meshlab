@@ -196,6 +196,14 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	QPushButton *applyButton = new QPushButton("Apply", qf);
 	QPushButton *defaultButton = new QPushButton("Default", qf);
 
+#ifdef Q_WS_MAC
+	// Hack needed on mac for correct sizes of button in the bottom of the dialog.
+	helpButton->setMinimumSize(100, 25);
+	closeButton->setMinimumSize(100,25);
+	applyButton->setMinimumSize(100,25);
+	defaultButton->setMinimumSize(100, 25);
+#endif 	
+
 	if(isDynamic())
 		{
 			previewCB = new QCheckBox("Preview", qf);
