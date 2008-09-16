@@ -87,17 +87,17 @@ public:
 		accepted = true;
 		selected = false;
 		isBridged=false;
-		p = startPos;
+		this->p = startPos;
 		updateInfo();		
 	};
 
 
 	~FgtHole() {};
 
-	inline int Size() const { return size; };
-	inline ScalarType Perimeter() const	{ return perimeter; };
-	inline bool IsFilled() const { return filled; };
-	inline bool IsSelected() const { return selected; };
+	inline int Size() const { return this->size; };
+	inline ScalarType Perimeter() const	{ return this->perimeter; };
+	inline bool IsFilled() const { return this->filled; };
+	inline bool IsSelected() const { return this->selected; };
 	inline void SetSelect(bool value) { selected = value;	};
 	inline bool IsCompenetrating() const { return filled && comp; };
 	inline bool IsAccepted() const { return !filled || accepted; };
@@ -110,13 +110,13 @@ public:
 	{
 		assert(!IsFilled());
 		assert(initP.IsBorder());
-		p = initP;
+		this->p = initP;
 		updateInfo();
 	};
 
 	void Draw() const
 	{
-		std::vector<VertexType*>::const_iterator it = vertexes.begin();
+		typename std::vector<VertexType*>::const_iterator it = vertexes.begin();
 		glBegin(GL_LINE_LOOP);
 		for( ; it != vertexes.end(); it++)
 			glVertex( (*it)->P() );
@@ -129,7 +129,7 @@ public:
 		
 		std::vector<FacePointer> patch;
 		getPatchFaces(patch);
-		std::vector<FacePointer>::const_iterator it;
+		typename std::vector<FacePointer>::const_iterator it;
 		
 		glBegin(glmode);
 		for( it=patch.begin(); it != patch.end(); it++)
@@ -154,7 +154,7 @@ public:
 		{
 			std::vector<FacePointer> patch;
 			getPatchFaces(patch);
-			std::vector<FacePointer>::iterator it;
+			typename std::vector<FacePointer>::iterator it;
 			for( it=patch.begin(); it != patch.end(); it++)
 			{
 				(*it)->ClearUserBit(HolePatchFlag);
@@ -204,7 +204,7 @@ public:
 		getPatchFaces(patches);
 		filled = false;
 		
-		std::vector<FaceType*>::iterator it;
+		typename std::vector<FaceType*>::iterator it;
 		for(it = patches.begin(); it!=patches.end(); it++)
 		{
 			assert(IsPatchFace(**it));
@@ -378,7 +378,7 @@ private:
 			}
 		}
 
-		std::vector<FacePointer>::iterator it;
+		typename std::vector<FacePointer>::iterator it;
 		for(it=patches.begin(); it!=patches.end(); ++it)
 			(*it)->ClearV();
 	};
@@ -406,7 +406,7 @@ private:
 		// essendo chiuso con Ear ogni faccia patch ha in comune al suo buco almeno un vertice
 		assert( IsPatchFace(*pFace) );
 		assert(filled);
-		std::vector<VertexType*>::const_iterator it;
+		typename std::vector<VertexType*>::const_iterator it;
 		for(it = vertexes.begin(); it!=vertexes.end(); it++)
 			if(pFace->V(0) == *it || pFace->V(1) == *it || pFace->V(2) == *it)
 				return true;
@@ -452,11 +452,11 @@ public:
 	/** Return index of hole adjacent to picked face into holes vector.
 	 *  Also return the iterator on correct position.
 	 */
-	static int FindHoleFromBorderFace(FacePointer bFace, HoleVector &holes, typename HoleIterator &it) 
+	static int FindHoleFromBorderFace(FacePointer bFace, HoleVector &holes, HoleIterator &it) 
 	{ 
 		assert(IsHoleBorderFace(*bFace));
 		int index = 0;
-		typename HoleIterator hit = holes.begin();
+		 HoleIterator hit = holes.begin();
 		for( ; hit != holes.end(); ++hit)
 		{
 			if(!hit->IsFilled())
@@ -469,7 +469,7 @@ public:
 			}
 			else
 			{
-				// l'hole è riempito, non c'è più il bordo, nextB() non funzionerebbe
+				// l'hole Ã‹ riempito, non c'Ã‹ piË˜ il bordo, nextB() non funzionerebbe
 				// prendo la faccia patch adiacente e cerco quella, in questo modo non ho bisogno
 				int i=0;
 				for( ; i<3; i++)
@@ -490,8 +490,7 @@ public:
 	}
 
 	/** Return index into holes vector of hole adjacent to picked face */
-	static int FindHoleFromPatchFace(FacePointer bFace, HoleVector &holes, 
-		typename HoleIterator &it)
+	static int FindHoleFromPatchFace(FacePointer bFace, HoleVector &holes, HoleIterator &it)
 	{
 		assert(bFace->IsUserBit(HolePatchFlag));
 		int index = 0;
@@ -521,7 +520,7 @@ public:
 
 	static void AddFaceReference(HoleVector& holes, std::vector<FacePointer*> &facesReferences)
 	{
-		HoleVector::iterator it = holes.begin();
+		typename HoleVector::iterator it = holes.begin();
 		for( ; it!=holes.end(); it++)
 			facesReferences.push_back(&it->p.f);
 	}
