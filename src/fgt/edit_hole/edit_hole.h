@@ -78,6 +78,7 @@ private Q_SLOTS:
 	void cancelFill();
 	void acceptFill();
 	void clearBridge();
+	void closeNMHoles();
 	void skipTab(int index);
 	void updateDWeight(int val);
 	void updateBridgeSldValue(int val);

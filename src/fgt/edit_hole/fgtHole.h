@@ -73,6 +73,7 @@ public:
 		comp = false;
 		accepted = true;
 		selected = false;
+		isBridged=false;
 		perimeter = HoleInfo::Perimeter();
 		findNonManifoldness();
 	};
@@ -85,6 +86,7 @@ public:
 		comp = false;
 		accepted = true;
 		selected = false;
+		isBridged=false;
 		p = startPos;
 		updateInfo();		
 	};
@@ -100,7 +102,9 @@ public:
 	inline bool IsCompenetrating() const { return filled && comp; };
 	inline bool IsAccepted() const { return !filled || accepted; };
 	inline void SetAccepted(bool val) { accepted = val; };
-	inline bool IsNonManifold() const { return nmPos.size()>0; };
+	inline bool IsNonManifold() const { return isNonManifold; };
+	inline bool IsBridged() const { return isBridged; };
+	inline void SetBridged(bool val){ isBridged=val; };
 
 	inline void SetStartPos(PosType initP)
 	{
@@ -236,12 +240,13 @@ private:
 	/*  Walking the hole computing vcgHole::Info data */
 	void updateInfo()
 	{
-		vertexes.clear();
 		assert(!IsFilled());
+		vertexes.clear();		
 		isNonManifold = false;
-		PosType curPos = p;
 		bb.SetNull();
 		size = 0;
+
+		PosType curPos = p;		
 		do{
 			assert(!curPos.f->IsD());
 			curPos.f->SetUserBit(HoleFlag);
@@ -251,7 +256,8 @@ private:
 			if(curPos.v->IsV())
 				isNonManifold = true;
 			else
-				curPos.v->SetV();			
+				curPos.v->SetV();
+			
 			curPos.NextB();
 			assert(curPos.IsBorder());
 		}while( curPos != p );
@@ -344,7 +350,7 @@ private:
 	{
 		assert(filled);
 		patches.clear();		
-		std::vector<FacePointer> stack;		
+		std::vector<FacePointer> stack;
 		PosType pos = p;
 		pos.FlipF();
 		assert(IsPatchFace(*pos.f));  //rimuovere
@@ -513,6 +519,12 @@ public:
 		FaceType::DeleteBitFlag(HoleFlag); HoleFlag=-1;
 	}
 
+	static void AddFaceReference(HoleVector& holes, std::vector<FacePointer*> &facesReferences)
+	{
+		HoleVector::iterator it = holes.begin();
+		for( ; it!=holes.end(); it++)
+			facesReferences.push_back(&it->p.f);
+	}
 
 public:
 	static int HoleFlag;
@@ -528,6 +540,7 @@ private:
 	bool accepted;
 	bool selected;
 	bool isNonManifold;
+	bool isBridged;
 	ScalarType perimeter;
 
 	std::vector<VertexType*> vertexes;

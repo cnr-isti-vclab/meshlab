@@ -181,13 +181,10 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 	else
 	{
 		std::vector<CMeshO::FacePointer *> local_facePointer;
-		HoleVector::iterator it;
-		for(it = holes.begin(); it != holes.end(); it++ )
-			local_facePointer.push_back(&it->p.f);		
-
 		local_facePointer.push_back(&pickedAbutment.f);
 		local_facePointer.push_back(&picked.f);
-		FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, mesh->cm, holes, local_facePointer);
+
+		FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, mesh->cm, holes, &local_facePointer);
 		pickedAbutment.SetNull();
 
 		emit layoutChanged();
@@ -199,8 +196,7 @@ void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 	std::vector<CMeshO::FacePointer *> local_facePointer;
 	
 	HoleVector::iterator it;
-	for(it = holes.begin(); it != holes.end(); it++ )
-		local_facePointer.push_back(&it->p.f);
+	FgtHole<CMeshO>::AddFaceReference(holes, local_facePointer);
 	
 	for(it = holes.begin(); it != holes.end(); it++ )
 		if( it->IsSelected() )
@@ -245,15 +241,14 @@ void HoleListModel::acceptFilling(bool accept)
 
 void HoleListModel::autoBridge(bool singleHole, double distCoeff)
 {
-	std::vector<CMeshO::FacePointer *> loc_fp;
-	HoleVector::iterator it = holes.begin();
-	for( ; it != holes.end(); it++ )
-		loc_fp.push_back(&it->p.f);		
-
 	if(singleHole)
-		FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, loc_fp, distCoeff);
+		FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, distCoeff);
 	else
-		FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, loc_fp, distCoeff);
+		FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, distCoeff);
+
+	mesh->clearDataMask(MeshModel::MM_FACETOPO);
+	mesh->updateDataMask(MeshModel::MM_FACETOPO);
+
 	emit layoutChanged();
 }
 
@@ -261,6 +256,15 @@ void HoleListModel::removeBridges()
 {
 	FgtBridge<CMeshO>::RemoveBridges(mesh->cm, holes);
 	state = HoleListModel::Selection;
+	emit layoutChanged();
+}
+
+void HoleListModel::closeNonManifolds()
+{
+	FgtBridge<CMeshO>::CloseNonManifoldVertex(mesh->cm, holes);
+	mesh->clearDataMask(MeshModel::MM_FACETOPO);
+	mesh->updateDataMask(MeshModel::MM_FACETOPO);
+	
 	emit layoutChanged();
 }
 

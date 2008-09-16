@@ -122,6 +122,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	connect(dialogFiller->ui.acceptFillBtn, SIGNAL(clicked()), this, SLOT(acceptFill()) );
 	connect(dialogFiller->ui.cancelFillBtn, SIGNAL(clicked()), this, SLOT(cancelFill()) );
 	connect(dialogFiller->ui.clearBridgeBtn, SIGNAL(clicked()), this, SLOT(clearBridge()) );
+	connect(dialogFiller->ui.nmCloseBtn, SIGNAL(clicked()), this, SLOT(closeNMHoles()) );
 	connect(dialogFiller->ui.selfHoleChkB, SIGNAL(stateChanged(int)), this, SLOT(chekSingleBridgeOpt()) );
 	connect(dialogFiller->ui.diedralWeightSld, SIGNAL(valueChanged(int)), this, SLOT(updateDWeight(int)));
 	connect(dialogFiller->ui.bridgeParamSld, SIGNAL(valueChanged(int)), this, SLOT(updateBridgeSldValue(int)));
@@ -284,6 +285,13 @@ void EditHolePlugin::clearBridge()
 	holesModel->removeBridges();
 	gla->update();
 }
+
+void EditHolePlugin::closeNMHoles()
+{
+	holesModel->closeNonManifolds();
+	gla->update();
+}
+
 
 void EditHolePlugin::skipTab(int index)
 {

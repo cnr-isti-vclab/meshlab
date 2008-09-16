@@ -48,7 +48,7 @@ void FillerDialog::clickStartBridging()
 	ui.manualBridgeRBtm->setEnabled(false);
 	ui.autoBridgeRBtm->setEnabled(false);
 	ui.clearBridgeBtn->setEnabled(false);
-	
+	ui.nmCloseBtn->setEnabled(false);
 }
 
 void FillerDialog::clickEndBridging()
@@ -57,6 +57,7 @@ void FillerDialog::clickEndBridging()
 	ui.manualBridgeRBtm->setEnabled(true);
 	ui.autoBridgeRBtm->setEnabled(true);
 	ui.clearBridgeBtn->setEnabled(true);
+	ui.nmCloseBtn->setEnabled(true);
 }
 
 void FillerDialog::clickSingleHoleBridgeOpt()

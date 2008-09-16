@@ -89,6 +89,7 @@ public:
 	void fill(FgtHole<CMeshO>::FillerMode mode);
 	void acceptFilling(bool accept=true);
 	void removeBridges();
+	void closeNonManifolds();
 	inline MeshModel* getMesh() const { return mesh; };
 	
 	void autoBridge(bool singleHole=false, double distCoeff=0);
