@@ -218,6 +218,8 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	qf->showNormal();
 	qf->adjustSize();
 
+	//set the minimum size so it will shrink down to the right size	after the help is toggled
+	this->setMinimumSize(qf->sizeHint());
 	this->showNormal();
 	this->adjustSize();
 }
@@ -464,6 +466,8 @@ void StdParFrame::toggleHelp()
 void MeshlabStdDialog::toggleHelp()
 {
 	stdParFrame->toggleHelp();
+	qf->updateGeometry();	
+	qf->adjustSize();
 	this->updateGeometry();
 	this->adjustSize();
 }
@@ -950,6 +954,8 @@ void GenericParamDialog::createFrame()
 
 	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
 
+	//set the minimum size so it will shrink down to the right size	after the help is toggled
+	this->setMinimumSize(stdParFrame->sizeHint());
 	this->showNormal();
 	this->adjustSize();
 }
