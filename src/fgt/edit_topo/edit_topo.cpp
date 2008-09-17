@@ -141,6 +141,7 @@ const PluginInfo &edit_topo::Info()
 
 
 
+/************************************************************************************/
 //
 // -- Edit Methods
 //
@@ -235,6 +236,7 @@ void edit_topo::editDeleteVertex()
 				if((Estack.at(e).containsVtx(vtx))&&(!del))
 				{
 					Estack.removeAt(e);
+					edit_topodialogobj->updateEdgTable(Estack);
 					del = true;
 				}}
 
@@ -244,6 +246,7 @@ void edit_topo::editDeleteVertex()
 				if((Fstack.at(f).containsVtx(vtx))&&(!del))
 				{
 					Fstack.removeAt(f);
+					edit_topodialogobj->updateFceTable(Fstack);
 					del = true;
 				}}
 			if(stack.count()==0)
@@ -1144,8 +1147,8 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *gla)
 	connect(edit_topodialogobj, SIGNAL( mesh_create() ),
           this, SLOT( on_mesh_create() ) );
 
-	connect(edit_topodialogobj, SIGNAL( fuffa() ),
-          this, SLOT( on_fuffa() ) );
+	connect(edit_topodialogobj, SIGNAL( update_request() ),
+          this, SLOT( on_update_request() ) );
 }
 
 void edit_topo::EndEdit(QAction *, MeshModel &, GLArea *)
@@ -1181,7 +1184,10 @@ void edit_topo::EndEdit(QAction *, MeshModel &, GLArea *)
 }
 
 
-
+/************************************************************************************/
+//
+// --- Slot implementation methods ---
+//
 void edit_topo::on_mesh_create()
 {
 	in.clear();
@@ -1243,18 +1249,12 @@ void edit_topo::on_mesh_create()
 	// Mesh creation
 
 
-
-
-	double dist = m->cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
-
-
 	if(edit_topodialogobj->isDEBUG())
 	{
 		rm.Lin.clear();
 		rm.Lout.clear();
-
-		int iter = edit_topodialogobj->getIterations();
-		rm.midSampler->dist_upper_bound = edit_topodialogobj->dist();
+    	int iter = edit_topodialogobj->getIterations();
+		float dist = edit_topodialogobj->dist()/100;
 		rm.createRefinedMesh(*m, *currentMesh, dist, iter, Fstack, stack, edit_topodialogobj, true);
 		in = rm.Lin;
 		out = rm.Lout;
@@ -1262,6 +1262,7 @@ void edit_topo::on_mesh_create()
 	else
 	{
 		int iter = edit_topodialogobj->getIterations();
+		float dist = edit_topodialogobj->dist()/100;
 		rm.createRefinedMesh(*m, *currentMesh, dist, iter, Fstack, stack, edit_topodialogobj, false);
 	}
 
@@ -1278,8 +1279,7 @@ void edit_topo::on_mesh_create()
 
 
 
-// DEBUG!!!
-void edit_topo::on_fuffa()
+void edit_topo::on_update_request()
 {
 	parentGla->update();
 
@@ -1369,6 +1369,7 @@ void edit_topo::on_fuffa()
 */
 
 }
+/************************************************************************************/
 //
 // --- Plugin events methods ---
 //
@@ -1389,10 +1390,20 @@ void edit_topo::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &m, GLAr
 
 void edit_topo::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &, GLArea * gla)
 {
-	click=true;
+	if(event->button() == Qt::LeftButton)
+	{
+		click=true;
+		reDraw=true;
+	}
+	else if(event->button() == Qt::RightButton)
+	{
+		connectStart.V=Point3f(0,0,0);
+
+		drag_stack.clear();
+		drag_click = false;	
+	}
 	gla->update();
 	mousePos=event->pos();
-	reDraw=true;
 }
 
 
@@ -1408,6 +1419,7 @@ void edit_topo::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &, GL
 
 
 
+/************************************************************************************/
 //
 // --- Mesh coords methods ---
 //
@@ -1680,6 +1692,7 @@ float edit_topo::distancePointPoint(QPointF P1, QPointF P2)
 { 	
 	return sqrt(pow((P1.x()-P2.x()),2)+pow((P1.y()-P2.y()),2));
 }
+/************************************************************************************/
 //
 // --- Plugin decorations methods ---
 //

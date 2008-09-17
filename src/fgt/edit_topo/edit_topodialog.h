@@ -156,8 +156,8 @@ class edit_topodialog : public QWidget
 		void on_ButtonClose_clicked();
 
 	signals:
-		void mesh_create();;
-		void fuffa();
+		void mesh_create();
+		void update_request();
 };
 
 #endif

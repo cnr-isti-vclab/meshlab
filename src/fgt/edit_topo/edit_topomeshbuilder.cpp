@@ -154,12 +154,13 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QL
 
 
 
- void RetopMeshBuilder::createRefinedMesh(MeshModel &outMesh, MeshModel &in, double dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog, bool DEBUG)
+ void RetopMeshBuilder::createRefinedMesh(MeshModel &outMesh, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog, bool DEBUG)
 {
-	dialog->setBarMax(iterations++);//pow((float)(Fstack.count() * 4), (float)iterations) );
+	dialog->setBarMax(iterations+1);  //pow((float)(Fstack.count() * 4), (float)iterations) );
 
 	midSampler->DEBUG = DEBUG;
 
+	midSampler->distPerc=dist;
 	midSampler->LinMid = &Lin;
 	midSampler->LoutMid = &Lout;
 
@@ -183,9 +184,13 @@ void RetopMeshBuilder::createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QL
 	{
 		(*fi).N()=Point3f(0,0,0);
 		(*fi).N()=((fi->V(0)->N() + fi->V(1)->N() + fi->V(2)->N())/3);
-	}
+		
+		(*fi).ClearS();
 
-	//vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(outMesh.cm);
+		for(int i=0; i<3; i++)
+			if((*fi).V(i)->IsS())
+				(*fi).SetS();
+	}
 
 
 /*

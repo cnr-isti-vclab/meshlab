@@ -126,7 +126,7 @@ public:
 
 public slots:
 	void on_mesh_create();
-	void on_fuffa();
+	void on_update_request();
 
 private:
 	GLArea *parentGla;

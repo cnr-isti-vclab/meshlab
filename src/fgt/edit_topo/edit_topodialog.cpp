@@ -9,43 +9,25 @@ edit_topodialog::edit_topodialog(QWidget *parent) : QWidget(parent)
 	ui.toolBox->setCurrentIndex(0);
 }
 
-edit_topodialog::~edit_topodialog() 
-{ }
-
+edit_topodialog::~edit_topodialog(){ }
 
 int edit_topodialog::getIterations()
-{
-	return ui.TextEditIterations->value();
-}
+{ return ui.TextEditIterations->value(); }
 
 void edit_topodialog::setBarMax(int val)
-{
-	ui.progressBar->setMaximum(val);
-}
+{ ui.progressBar->setMaximum(val); }
 
 void edit_topodialog::setBarVal(int val)
+{ ui.progressBar->setValue(val); }
+
+float edit_topodialog::dist()
 {
-	ui.progressBar->setValue(val);
-}
-
-
-// DEBUG
-double edit_topodialog::dist()
-{
-	double toret = ui.TextEditIterations_2->value();
-
+	float toret = ui.TextEditIterations_2->value();
 	return toret;
 }
 
 bool edit_topodialog::isDEBUG()
-{
-//	int toret =0;//ui.plainTextEdit->toPlainText().toInt();
-
-	return ui.checkBox->isChecked();
-}
-
-// END DEBUG
-
+{ return ui.checkBox->isChecked(); }
 
 void edit_topodialog::updateVtxTable(QList<Vtx> list)
 {
@@ -83,7 +65,6 @@ void edit_topodialog::updateVtxTable(QList<Vtx> list)
 	}
 }
 
-
 void edit_topodialog::updateEdgTable(QList<Edg> list)
 {
 	QTableWidget *w =ui.Etable;
@@ -113,7 +94,6 @@ void edit_topodialog::updateEdgTable(QList<Edg> list)
 		w->setItem(row, 1, Item2);	
 	}
 }
-
 
 void edit_topodialog::updateFceTable(QList<Fce> list)
 {
@@ -160,80 +140,66 @@ void edit_topodialog::updateFceTable(QList<Fce> list)
 void edit_topodialog::on_ButtonClose_clicked()
 {
 	this->close();
-	utensil = U_NONE;		emit fuffa();
+	utensil = U_NONE; emit update_request();
 }
 
 void edit_topodialog::on_ButtonSelectVertex_clicked()
 {
-	utensil = U_VTX_SEL;	emit fuffa();
+	utensil = U_VTX_SEL; emit update_request();
 }
 
 void edit_topodialog::on_ButtonSelectVertexFree_clicked()
 {
-	utensil = U_VTX_SEL_FREE;	emit fuffa();
+	utensil = U_VTX_SEL_FREE; emit update_request();
 }
-
 
 void edit_topodialog::on_ButtonDeSelectVertex_clicked()
 {
-	utensil = U_VTX_DEL;	emit fuffa();
+	utensil = U_VTX_DEL; emit update_request();
 }
-
 
 void edit_topodialog::on_ButtonConnectVertex_clicked()
 {
-	utensil = U_VTX_CONNECT;	emit fuffa();
+	utensil = U_VTX_CONNECT; emit update_request();
 }
 
 void edit_topodialog::on_ButtonDeConnectVertex_clicked()
 {
-	utensil = U_VTX_DE_CONNECT;	emit fuffa();
+	utensil = U_VTX_DE_CONNECT; emit update_request();
 }
-
 
 void edit_topodialog::on_ButtonSelectFace_clicked()
 {
-	utensil = U_FCE_SEL;
-	emit fuffa();
+	utensil = U_FCE_SEL; emit update_request();
 }
+
 void edit_topodialog::on_ButtonMeshCreate_clicked()
 {
 	emit mesh_create();
 }
 
-
-
 void edit_topodialog::on_toolBox_currentChanged(int i)
 {
 	switch(i) 
 	{
-		case 0:
-			utensil = U_VTX_SEL_FREE;
-			break;
-		case 1:
-			utensil = U_VTX_CONNECT;
-			break;
-		case 2:
-			utensil = U_FCE_SEL;
-			break;
+		case 0: utensil = U_VTX_SEL_FREE; break;
+		case 1:	utensil = U_VTX_CONNECT; break;
+		case 2:	utensil = U_FCE_SEL; break;
 	};
-		emit fuffa();
+	emit update_request();
 }
 
 void edit_topodialog::on_ButtonConnectVertex_2_clicked()
 {
-	utensil = U_DND;
-	emit fuffa();
+	utensil = U_DND; emit update_request();
 }
 
 void edit_topodialog::on_ButtonConnectVertex_4_clicked()
 {
-	utensil = U_EDG_COLLAPSE;
-	emit fuffa();
+	utensil = U_EDG_COLLAPSE; emit update_request();
 }
 
 void edit_topodialog::on_ButtonConnectVertex_5_clicked()
 {
-	utensil = U_EDG_SPLIT;
-	emit fuffa();
+	utensil = U_EDG_SPLIT; emit update_request();
 }
