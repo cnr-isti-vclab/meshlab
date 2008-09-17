@@ -41,6 +41,7 @@
 
 using namespace vcg;
 
+const QString AlignTools::FilterName = "Align Mesh using Picked Points";
 const QString AlignTools::UseMarkers = "UseM";
 const QString AlignTools::AllowScaling = "AllowScaling";
 const QString AlignTools::UseICP = "UseICP";

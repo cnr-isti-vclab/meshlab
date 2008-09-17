@@ -143,7 +143,7 @@ const QString CleanFilter::filterName(FilterIDType filter)
 	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
 	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
 	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
-	  case FP_ALIGN_WITH_PICKED_POINTS :	return QString("Align Mesh using Picked Points");
+	  case FP_ALIGN_WITH_PICKED_POINTS :	return AlignTools::FilterName;
   	default: assert(0);
   }
   return QString("error!");

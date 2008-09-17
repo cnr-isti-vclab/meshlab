@@ -22,6 +22,7 @@ class AlignTools : public QObject
 	Q_OBJECT
 
 public:
+	static const QString FilterName;
 	static const QString UseMarkers;
 	static const QString AllowScaling;
 	static const QString UseICP;
