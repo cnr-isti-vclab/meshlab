@@ -5,9 +5,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
-    <height>196</height>
+    <width>753</width>
+    <height>208</height>
    </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>753</width>
+    <height>208</height>
+   </size>
   </property>
   <property name="windowTitle" >
    <string>Form</string>
@@ -17,9 +29,21 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>521</width>
-     <height>171</height>
+     <width>731</width>
+     <height>181</height>
     </rect>
+   </property>
+   <property name="sizePolicy" >
+    <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize" >
+    <size>
+     <width>731</width>
+     <height>181</height>
+    </size>
    </property>
    <property name="frameShape" >
     <enum>QFrame::StyledPanel</enum>
@@ -72,9 +96,15 @@
      <rect>
       <x>290</x>
       <y>10</y>
-      <width>221</width>
+      <width>421</width>
       <height>151</height>
      </rect>
+    </property>
+    <property name="sizePolicy" >
+     <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
     </property>
     <property name="columnCount" >
      <number>2</number>
@@ -96,7 +126,7 @@
       <x>10</x>
       <y>130</y>
       <width>190</width>
-      <height>25</height>
+      <height>30</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" >
@@ -133,7 +163,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="" >
+   <widget class="QWidget" name="layoutWidget" >
     <property name="geometry" >
      <rect>
       <x>12</x>
