@@ -119,8 +119,7 @@ void MorpherDialog::verifyKeepChanges()
 	if(ret == QMessageBox::No)
 	{
 		//set the morph back to zero
-		ui.morphSlider->setSliderPosition(0);
-		recalculateMorph();
+		recalculateMorph(0);
 	}
 }
 
@@ -189,19 +188,17 @@ void MorpherDialog::pickDestMesh(){
 void MorpherDialog::sliderChanged(int newValue){
 	//qDebug() << "Slider is changed to " << newValue;
 	ui.sliderValueLabel->setNum(newValue);
-	recalculateMorph();
+	recalculateMorph(newValue);
 }
 
-void MorpherDialog::recalculateMorph(){
+void MorpherDialog::recalculateMorph(int newValue){
 	//if two models are not selected return
 	if(NULL == sourceMeshModel || NULL == destMeshModel){
 		qDebug() << "trying to calculate with a null model";
 		return;
 	}
-	
-	//qDebug() << "Slider is now at " << ui.morphSlider->value() ; 
 
-	float morphRatio = ui.morphSlider->value()/100.0;
+	float morphRatio = newValue/100.0;
 	//qDebug() << "Ratio is: " << morphRatio;
 	
 	//make sure this will be a valid morph and that we didnt loose any vertices

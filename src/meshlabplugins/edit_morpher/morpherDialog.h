@@ -82,7 +82,7 @@ private slots:
 	void sliderChanged(int newValue);
 	
 	//the user indicated that they want to recalculate the morph
-	void recalculateMorph();
+	void recalculateMorph(int newValue);
 	
 	inline float Abs(float x ) { return x > 0. ? x : -x; }
 	
