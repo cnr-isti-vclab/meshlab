@@ -63,7 +63,10 @@ public:
 	typedef typename vcgHole::Info					HoleInfo;
 	typedef typename std::vector< FgtHole<MESH> >	HoleVector;
 	typedef typename HoleVector::iterator			HoleIterator;
-	
+	typedef typename vcg::tri::TrivialEar<MESH>		TrivialEar;
+	typedef typename vcg::tri::MinimumWeightEar<MESH>	MinimumWeightEar;
+	typedef typename vcg::tri::SelfIntersectionEar<MESH>	SelfIntersectionEar;
+	typedef typename std::vector<FacePointer * >		FaceReferencePointerVector;
 
 	FgtHole(HoleInfo &hi, QString holeName) : 
 		HoleInfo(hi.p, hi.size, hi.bb)
@@ -133,7 +136,7 @@ public:
 		
 		glBegin(glmode);
 		for( it=patch.begin(); it != patch.end(); it++)
-			if((*it)->IsUserBit(PatchCompFlag))
+			if((*it)->IsUserBit(PatchCompFlag()))
 			{
 				glVertex( (*it)->V(0)->P() );
 				glVertex( (*it)->V(1)->P() );
@@ -157,12 +160,12 @@ public:
 			typename std::vector<FacePointer>::iterator it;
 			for( it=patch.begin(); it != patch.end(); it++)
 			{
-				(*it)->ClearUserBit(HolePatchFlag);
-				(*it)->ClearUserBit(PatchCompFlag);
+				(*it)->ClearUserBit(HolePatchFlag());
+				(*it)->ClearUserBit(PatchCompFlag());
 				for(int i=0; i<3; i++)
 				{
 					FacePointer adjF = (*it)->FFp(i);
-					adjF->ClearUserBit(HoleFlag);
+					adjF->ClearUserBit(HoleFlag());
 					if(IsBridgeFace(*adjF))
 						bridgesFaces.push_back(adjF);
 				}
@@ -171,20 +174,20 @@ public:
 		else
 		{
 			// we can walk the border to find hole's faces
-			PosType curPos = p;
+			PosType curPos = this->p;
 			do{
-				curPos.f->ClearUserBit(HoleFlag);
+				curPos.f->ClearUserBit(HoleFlag());
 				if( IsBridgeFace(*curPos.f))
 					bridgesFaces.push_back(curPos.f);
 				curPos.NextB();
-			}while( curPos != p );
+			}while( curPos != this->p );
 		}
 
 		while(bridgesFaces.size()>0)
 		{
 			FacePointer f = bridgesFaces.back();
 			bridgesFaces.pop_back();
-			f->ClearUserBit(BridgeFlag);
+			f->ClearUserBit(BridgeFlag());
 			for(int i=0; i<3; i++)
 			{
 				FacePointer adjF = f->FFp(i);
@@ -213,21 +216,21 @@ public:
 		}		
 	};
 
-	void Fill(FillerMode mode, MESH &mesh, std::vector<FacePointer *> &local_facePointer)
+	void Fill(FillerMode mode, MESH &mesh, FaceReferencePointerVector &local_facePointer)
 	{
 		switch(mode)
 		{
 		case FgtHole<MESH>::Trivial:
-			vcgHole::FillHoleEar<vcg::tri::TrivialEar<MESH> >(mesh, *this, HolePatchFlag, local_facePointer);
+			vcgHole::FillHoleEar< TrivialEar >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		case FgtHole<MESH>::MinimumWeight:
-			vcgHole::FillHoleEar<vcg::tri::MinimumWeightEar<MESH> >(mesh, *this, HolePatchFlag, local_facePointer);
+			vcgHole::FillHoleEar<MinimumWeightEar >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		case FgtHole<MESH>::SelfIntersection:
-			vcgHole::FillHoleEar<tri::SelfIntersectionEar<MESH> >(mesh, *this, HolePatchFlag, local_facePointer);
+			vcgHole::FillHoleEar<SelfIntersectionEar >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		}
-
+		
 		filled = true;
 		accepted = true;
 		comp = false;
@@ -243,15 +246,15 @@ private:
 		assert(!IsFilled());
 		vertexes.clear();		
 		isNonManifold = false;
-		bb.SetNull();
-		size = 0;
+		this->bb.SetNull();
+		this->size = 0;
 
-		PosType curPos = p;		
+		PosType curPos = this->p;		
 		do{
 			assert(!curPos.f->IsD());
-			curPos.f->SetUserBit(HoleFlag);
-			bb.Add(curPos.v->cP());
-			++size;
+			curPos.f->SetUserBit(HoleFlag());
+			this->bb.Add(curPos.v->cP());
+			++this->size;
 			vertexes.push_back(curPos.v);
 			if(curPos.v->IsV())
 				isNonManifold = true;
@@ -260,13 +263,13 @@ private:
 			
 			curPos.NextB();
 			assert(curPos.IsBorder());
-		}while( curPos != p );
+		}while( curPos != this->p );
 		
-		curPos = p;
+		curPos = this->p;
 		do{
 			curPos.v->ClearV();			
 			curPos.NextB();
-		}while( curPos != p );
+		}while( curPos != this->p );
 
 		perimeter = HoleInfo::Perimeter();
 	};
@@ -276,7 +279,7 @@ private:
 	{
 		assert(!IsFilled());
 		isNonManifold = false;
-		PosType curPos = p;
+		PosType curPos = this->p;
 		do{
 			vertexes.push_back(curPos.v);
 			if(curPos.v->IsV())
@@ -284,13 +287,13 @@ private:
 			else
 				curPos.v->SetV();			
 			curPos.NextB();
-		}while( curPos != p );
+		}while( curPos != this->p );
 		
-		curPos = p;
+		curPos = this->p;
 		do{
 			curPos.v->ClearV();			
 			curPos.NextB();
-		}while( curPos != p );
+		}while( curPos != this->p );
 	};
 
 	/* test its auto compenetration	*/
@@ -306,12 +309,12 @@ private:
 		FacePointerVector patches;
 		getPatchFaces(patches);
 
-		FacePointerVector::iterator pi = patches.begin();
+		typename FacePointerVector::iterator pi = patches.begin();
 		for( ; pi!=patches.end(); ++pi)
 		{
 			//assert(!IsHoleBorderFace(*pbi->f));//*****
 			FacePointer f = *pi;
-			f->SetUserBit(HolePatchFlag);
+			f->SetUserBit(HolePatchFlag());
 
 			// prendo le facce che intersecano il bounding box di *fi
 			f->GetBBox(bbox);
@@ -338,7 +341,7 @@ private:
 					if( vcg::Intersection<FaceType>(*f, **fib ))
 					{
 						comp = true;
-						f->SetUserBit(PatchCompFlag);
+						f->SetUserBit(PatchCompFlag());
 						continue;
 					}			
 			} // for inbox...
@@ -351,7 +354,7 @@ private:
 		assert(filled);
 		patches.clear();		
 		std::vector<FacePointer> stack;
-		PosType pos = p;
+		PosType pos = this->p;
 		pos.FlipF();
 		assert(IsPatchFace(*pos.f));  //rimuovere
 		pos.f->SetV();
@@ -391,12 +394,12 @@ private:
 		assert(IsHoleBorderFace(*bFace));
 		assert(!filled);
 
-		PosType curPos = p;
+		PosType curPos = this->p;
 		do{
 			if(curPos.f == bFace)
 				return true;
 			curPos.NextB();
-		}while( curPos != p );
+		}while( curPos != this->p );
 		return false;
 	}
 
@@ -417,27 +420,27 @@ private:
 public:
 
 	static inline bool IsHoleBorderFace(FaceType &face)
-	{ return face.IsUserBit(HoleFlag); };
+	{ return face.IsUserBit(HoleFlag()); };
 
 	static inline bool IsPatchFace(FaceType &face)
-	{ return face.IsUserBit(HolePatchFlag); };
+	{ return face.IsUserBit(HolePatchFlag()); };
 
 	static inline bool IsBridgeFace(FaceType &face)
-	{ return face.IsUserBit(BridgeFlag); };
+	{ return face.IsUserBit(BridgeFlag()); };
 	
 
 	/* Inspect a mesh to find its holes. */
 	static int GetMeshHoles(MESH &mesh, HoleVector &ret) 
 	{
-		assert(HoleFlag ==-1);
+		assert(HoleFlag() ==-1);
 		ret.clear();
 		std::vector<HoleInfo> vhi;
 				
 		//prendo la lista di info(sugli hole) tutte le facce anche le non selezionate
-		HoleFlag = vcgHole::GetInfo(mesh, false, vhi);
-		HolePatchFlag = FaceType::NewBitFlag();
-		PatchCompFlag = FaceType::NewBitFlag();
-		BridgeFlag = FaceType::NewBitFlag();
+		HoleFlag() = vcgHole::GetInfo(mesh, false, vhi);
+		HolePatchFlag() = FaceType::NewBitFlag();
+		PatchCompFlag() = FaceType::NewBitFlag();
+		BridgeFlag() = FaceType::NewBitFlag();
 
 		typename std::vector<HoleInfo>::iterator itH = vhi.begin();
 		int i=0;
@@ -446,7 +449,7 @@ public:
 			ret.push_back(FgtHole<MESH>(*itH, QString("Hole_%1").arg(i,3,10,QChar('0')) ));
 			i++;
 		}
-		return HoleFlag;
+		return HoleFlag();
 	}
 
 	/** Return index of hole adjacent to picked face into holes vector.
@@ -492,9 +495,9 @@ public:
 	/** Return index into holes vector of hole adjacent to picked face */
 	static int FindHoleFromPatchFace(FacePointer bFace, HoleVector &holes, HoleIterator &it)
 	{
-		assert(bFace->IsUserBit(HolePatchFlag));
+		assert(bFace->IsUserBit(HolePatchFlag()));
 		int index = 0;
-		typename HoleIterator hit = holes.begin();
+		HoleIterator hit = holes.begin();
 		for( ; hit != holes.end(); ++hit)
 		{
 			// for each hole check if face is its border face
@@ -512,10 +515,10 @@ public:
 
 	static void DeleteFlag()
 	{
-		FaceType::DeleteBitFlag(BridgeFlag); BridgeFlag=-1;
-		FaceType::DeleteBitFlag(PatchCompFlag); PatchCompFlag=-1;
-		FaceType::DeleteBitFlag(HolePatchFlag); HolePatchFlag=-1;
-		FaceType::DeleteBitFlag(HoleFlag); HoleFlag=-1;
+		FaceType::DeleteBitFlag(BridgeFlag()); BridgeFlag()=-1;
+		FaceType::DeleteBitFlag(PatchCompFlag()); PatchCompFlag()=-1;
+		FaceType::DeleteBitFlag(HolePatchFlag()); HolePatchFlag()=-1;
+		FaceType::DeleteBitFlag(HoleFlag()); HoleFlag()=-1;
 	}
 
 	static void AddFaceReference(HoleVector& holes, std::vector<FacePointer*> &facesReferences)
@@ -526,10 +529,10 @@ public:
 	}
 
 public:
-	static int HoleFlag;
-	static int HolePatchFlag;
-	static int PatchCompFlag;
-	static int BridgeFlag;
+	static int& HoleFlag() 		{static int _hf=-1; return _hf;};
+	static int& HolePatchFlag()	{static int _pf=-1; return _pf; };
+	static int& PatchCompFlag()	{static int _pcf=-1; return _pcf; };
+	static int& BridgeFlag()	{static int _bf=-1; return _bf; };
 
 	QString name;
 	
@@ -544,10 +547,5 @@ private:
 
 	std::vector<VertexType*> vertexes;
 };
-
-int FgtHole<CMeshO>::HoleFlag = -1;
-int FgtHole<CMeshO>::HolePatchFlag = -1;
-int FgtHole<CMeshO>::PatchCompFlag = -1;
-int FgtHole<CMeshO>::BridgeFlag = -1;
 
 #endif

@@ -65,13 +65,13 @@ public:
 	typedef typename MESH::FaceIterator				FaceIterator;
 	typedef typename vcg::face::Pos<FaceType>		PosType;
 	typedef typename std::vector<PosType>			PosVector;
-
-	typedef typename FgtHole<MESH>					HoleType;
-	typedef typename std::vector< FgtHole<MESH> >	HoleVector;
+	typedef FgtHole<MESH>							HoleType;
+	typedef typename std::vector<HoleType>			HoleVector;
 	
 	typedef typename MESH::VertexType				VertexType;
 	typedef typename MESH::CoordType				CoordType;
 	typedef typename MESH::ScalarType				ScalarType;
+	typedef typename vcg::Triangle3<ScalarType>		TriangleType;
 
 
 /****	Static functions	******/
@@ -121,14 +121,14 @@ public:
 		getBridgeInfo(holes, bridgeFaces, adjBorderPos);
 
 		// elimino gli hole relativi alle facce bridge trovate,
-		std::vector<FacePointer>::iterator fit;
+		typename std::vector<FacePointer>::iterator fit;
 		for(fit=bridgeFaces.begin(); fit!=bridgeFaces.end(); fit++ )
 		{
 			// se la faccia bridge in esame si affaccia su un'altro hole rispetto 
 			// a quello in esame rimuovo anche quell'hole
 			if(FgtHole<MESH>::IsHoleBorderFace(**fit))
 			{
-				HoleVector::iterator hit;
+				typename HoleVector::iterator hit;
 				if(FgtHole<MESH>::FindHoleFromBorderFace(*fit, holes, hit) != -1)
 				{
 					assert(!hit->IsFilled());
@@ -142,11 +142,11 @@ public:
 		// elimino anche gli hole trovati dalle facce adiacenti, solo quelle che però sono di bordo, 
 		// ovvero facce di hole derivanti da chiusura di vertici non manifold, che però non hanno
 		// edge bridged sul loro bordo
-		std::vector<PosType>::iterator pit;
+		typename std::vector<PosType>::iterator pit;
 		for(pit=adjBorderPos.begin(); pit!=adjBorderPos.end(); pit++)
 			if(FgtHole<MESH>::IsHoleBorderFace(*pit->f))
 			{
-				HoleVector::iterator hit;
+				typename HoleVector::iterator hit;
 				if(FgtHole<MESH>::FindHoleFromBorderFace(pit->f, holes, hit) != -1)
 				{
 					assert(!hit->IsFilled());
@@ -182,7 +182,7 @@ public:
 		// per ogni faccia adiacente al bridge scorro il buco marcando le facce visitate
 		// in modo da scoprire quali facce vengono si affacciano su buchi nuovi				
 		PosType initPos;
-		PosVector::iterator it;
+		typename PosVector::iterator it;
 		for( it=adjBorderPos.begin(); it!=adjBorderPos.end(); it++)
 		{
 			assert( it->IsBorder() );
@@ -302,12 +302,12 @@ public:
 					VertexType* vB1 = endP.f->V1( endP.z ); // second vertex of pos' 2-edge 
 
 					// solution A 
-					Triangle3<ScalarType> bfA0(vA1->P(), vA0->P(), vB0->P());
-					Triangle3<ScalarType> bfA1(vB1->P(), vB0->P(), vA0->P());
+					TriangleType bfA0(vA1->P(), vA0->P(), vB0->P());
+					TriangleType bfA1(vB1->P(), vB0->P(), vA0->P());
 
 					// solution B
-					Triangle3<ScalarType> bfB0(vA1->P(), vA0->P(), vB1->P());
-					Triangle3<ScalarType> bfB1(vB1->P(), vB0->P(), vA1->P());
+					TriangleType bfB0(vA1->P(), vA0->P(), vB1->P());
+					TriangleType bfB1(vB1->P(), vB0->P(), vA1->P());
 
 					ScalarType oldq = maxQuality;
 					ScalarType q = bfA0.QualityFace()+ bfA1.QualityFace() + dist_coeff * j;
@@ -357,8 +357,8 @@ public:
 		std::vector<FacePointer *> tmpFaceRef;
 		BridgeAbutment<MESH> sideA, sideB;
 		std::vector<HoleType*> selectedHoles;
-		std::vector<HoleType*>::iterator shit1, shit2; 
-		HoleVector::iterator hit;
+		typename std::vector<HoleType*>::iterator shit1, shit2; 
+		typename HoleVector::iterator hit;
 		do{
 			sideA.SetNull();
 			sideB.SetNull();
@@ -389,12 +389,12 @@ public:
 							VertexType* vB1 = ph2.f->V1( ph2.z ); // second vertex of pos' 2-edge 
 
 							// solution A 
-							Triangle3<ScalarType> bfA0(vA1->P(), vA0->P(), vB0->P());
-							Triangle3<ScalarType> bfA1(vB1->P(), vB0->P(), vA0->P());
+							TriangleType bfA0(vA1->P(), vA0->P(), vB0->P());
+							TriangleType bfA1(vB1->P(), vB0->P(), vA0->P());
 
 							// solution B
-							Triangle3<ScalarType> bfB0(vA1->P(), vA0->P(), vB1->P());
-							Triangle3<ScalarType> bfB1(vB1->P(), vB0->P(), vA1->P());
+							TriangleType bfB0(vA1->P(), vA0->P(), vB1->P());
+							TriangleType bfB1(vB1->P(), vB0->P(), vA1->P());
 
 							ScalarType oldq = maxQuality;
 							ScalarType q = bfA0.QualityFace()+ bfA1.QualityFace();
@@ -530,7 +530,7 @@ public:
 					}
 
 					ComputeNormal(*fit);
-					fit->SetUserBit(FgtHole<MESH>::BridgeFlag);
+					fit->SetUserBit(FgtHole<MESH>::BridgeFlag());
 						
 					if(dist==2)
 					{
@@ -587,16 +587,16 @@ private:
 
 	/* Compute distance between bridge side to allow no bridge adjacent hole border	
 	 *
-	 *			\ / B \	/			\ / B \ /		|
-	 *			 +-----+---			 +-----+---		|	  ---+------+------		---+------+--------
-	 *			/|					/| f1 /|		|		  \ A  /				\ A  /|\
-	 *		   / |				   / |   / |		|		   \  /		  			 \  / | \
-	 *		   C |  hole		   C |  /  | hole	|	  hole	\/  hole	  hole	  \/  |  \  hole
-	 *		   \ |				   \ | /   |		|		    /\					  /\f0|   \
-	 *			\|					\|/ f0 |		|		   /  \					 /  \ | f1 \
-	 *			 +-----+---		 	 +-----+---		|	 	  / B  \				/ B  \|     \
-	 *			/ \ A /	\			/ \ A / \		|	  ---+------+------		---+------+------+---
-	 *                            NO GOOD BRIDGE	|							   NO GOOD BRIDGE
+	 *                              \ / B \ /                           \ / B \ /		|
+	 *                               +-----+---                           +-----+---		|	  ---+------+------		   ---+------+--------
+	 *			/|                                      /| f1  /|		|		  \ A  /		        \ A  / |\
+	 *                          /   |                                     / |    /  |		|		   \  /			         \  /   |  \
+	 *                            C |  hole                           C |  /    | hole             |	    hole   \/    hole             hole    \/    |    \  hole
+	 *                            \  |                                   \  | /     |		|		    /\	                               /\f0|     \
+	 *                              \|                                     \|/ f0 |		|		   /  \	                              /  \   | f1  \
+	 *                               +-----+---		 	 +-----+---		|	 	  / B  \                            / B  \  |        \
+	 *                              / \ A / \			/ \ A / \		|	  ---+------+------		---+------+------+---
+	 *                                                                NO GOOD BRIDGE	|					   NO GOOD BRIDGE
 	 */
 	static bool testAbutmentDistance(const BridgeAbutment<MESH> &sideA, const BridgeAbutment<MESH> &sideB)
 	{
@@ -651,8 +651,8 @@ private:
 		PosType newP0, newP1;
 		build(mesh, sideA, sideB, newP0, newP1, app);
 		
-		newP0.f->SetUserBit(FgtHole<MESH>::BridgeFlag);
-		newP1.f->SetUserBit(FgtHole<MESH>::BridgeFlag);
+		newP0.f->SetUserBit(FgtHole<MESH>::BridgeFlag());
+		newP1.f->SetUserBit(FgtHole<MESH>::BridgeFlag());
 		
 		sideA.h->SetStartPos(newP0);
 		sideA.h->SetBridged(true);
@@ -671,15 +671,15 @@ private:
 
 		PosType newP0, newP1;
 		build(mesh, sideA, sideB, newP0, newP1, app);
-		newP0.f->SetUserBit(FgtHole<MESH>::BridgeFlag);
-		newP1.f->SetUserBit(FgtHole<MESH>::BridgeFlag);
+		newP0.f->SetUserBit(FgtHole<MESH>::BridgeFlag());
+		newP1.f->SetUserBit(FgtHole<MESH>::BridgeFlag());
 
 		sideA.h->SetStartPos(newP0);
 		if(sideB.h->IsSelected())
 			sideA.h->SetSelect(true);
 		sideA.h->SetBridged(true);
 
-		HoleVector::iterator hit;
+		typename HoleVector::iterator hit;
 		for(hit=holes.begin(); hit!=holes.end(); ++hit)
 			if(&*hit == sideB.h)
 			{
@@ -713,21 +713,21 @@ private:
 		VertexType* vB1 = sideB.f->V1( sideB.z ); // second vertex of pos' 2-edge 
 
 		// solution A 
-		Triangle3<ScalarType> bfA0(vA1->P(), vA0->P(), vB0->P());
-		Triangle3<ScalarType> bfA1(vB1->P(), vB0->P(), vA0->P());
+		TriangleType bfA0(vA1->P(), vA0->P(), vB0->P());
+		TriangleType bfA1(vB1->P(), vB0->P(), vA0->P());
 
 		// solution B
-		Triangle3<ScalarType> bfB0(vA1->P(), vA0->P(), vB1->P());
-		Triangle3<ScalarType> bfB1(vB1->P(), vB0->P(), vA1->P());
+		TriangleType bfB0(vA1->P(), vA0->P(), vB1->P());
+		TriangleType bfB1(vB1->P(), vB0->P(), vA1->P());
 
 		FaceIterator fit = vcg::tri::Allocator<MESH>::AddFaces(mesh, 2, app);
 		FacePointer f0 = &*fit;
 		FacePointer f1 = &*(fit+1);
 
-		sideA.f->ClearUserBit(FgtHole<MESH>::HoleFlag);
-		sideB.f->ClearUserBit(FgtHole<MESH>::HoleFlag);
-		f0->SetUserBit(FgtHole<MESH>::HoleFlag);
-		f1->SetUserBit(FgtHole<MESH>::HoleFlag);
+		sideA.f->ClearUserBit(FgtHole<MESH>::HoleFlag());
+		sideB.f->ClearUserBit(FgtHole<MESH>::HoleFlag());
+		f0->SetUserBit(FgtHole<MESH>::HoleFlag());
+		f1->SetUserBit(FgtHole<MESH>::HoleFlag());
 
 		// the index of edge adjacent between new 2 face, is the same for both new faces
 		int adjEdgeIndex = -1;		
@@ -839,7 +839,7 @@ private:
 	{
 		//scorro gli hole
 		PosType curPos;
-		HoleVector::iterator hit;
+		typename HoleVector::iterator hit;
 		for(hit=holes.begin(); hit!=holes.end(); ++hit)
 		{
 			assert(!hit->IsFilled());
@@ -916,14 +916,13 @@ private:
 		}
 
 		// risetto i flag V sia per le facce bridge che quelle adiacenti
-		std::vector<FacePointer>::iterator bfit;
+		typename std::vector<FacePointer>::iterator bfit;
 		for(bfit=bridgeFaces.begin(); bfit!=bridgeFaces.end(); bfit++)
 			(*bfit)->ClearV();
 
-		std::vector<PosType>::iterator pit;
+		typename std::vector<PosType>::iterator pit;
 		for(pit=adjBridgePos.begin(); pit!=adjBridgePos.end(); pit++)
 			pit->f->ClearV();
 	};	
 };
-
 #endif
