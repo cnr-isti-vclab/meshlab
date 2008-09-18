@@ -384,6 +384,7 @@ void RfxDialog::ChangeTexture(int unifIdx)
 	if (!fname.isEmpty()) {
 		uni->SetValue(QDir::fromNativeSeparators(fname));
 		uni->LoadTexture();
+		uni->PassToShader();
 
 		// generate a currentIndexChanged event
 		ui.comboTextures->setCurrentIndex(0);
@@ -394,7 +395,8 @@ void RfxDialog::ChangeTexture(int unifIdx)
 void RfxDialog::ChangeValue(const QString& val)
 {
 	QStringList unif = val.split('-');
-	float *oldVal = shader->GetPass(selPass)->getUniform(unif[0].toInt())->GetValue();
+	RfxUniform *uni = shader->GetPass(selPass)->getUniform(unif[0].toInt());
+	float *oldVal = uni->GetValue();
 	float newVal = -1.0f;
 
 	// parent of SignalMapper has been set to appropriate QWidget type
@@ -418,6 +420,7 @@ void RfxDialog::ChangeValue(const QString& val)
 	}
 
 	oldVal[unif[1].toInt()] = newVal;
+	uni->PassToShader();
 }
 
 void RfxDialog::TextureSelected(int idx)

@@ -184,6 +184,8 @@ void RfxShader::UpdateSemanticUniforms(int passIdx)
 		default:
 			break;
 		}
+
+		it.value()->PassToShader();
 	}
 }
 
