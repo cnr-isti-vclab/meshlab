@@ -1236,7 +1236,7 @@ void main(void)
    </RmOpenGLEffect>
    <RmFloatVariable NAME="shell_distance" API="" ARTIST_EDITABLE="TRUE" VARIABLE_SEMANTIC="" VALUE="0.300000" MIN="0.000000" MAX="1.000000" CLAMP="TRUE"/>
    <RmFloatVariable NAME="pass_index" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="PassIndex" VALUE="15.000000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
-   <Rm2DTextureVariable NAME="Fur" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" FILE_NAME="..\textures\fur.png" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="Fur" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" FILE_NAME="..\textures\Fur.png" ORIGIN="0"/>
    <RmStreamMap NAME="streamMap_PNT" API="">
     <RmStream NAME="" API="" STRIDE="32">
      <RmStreamChannel NAME="TexCoord_0" API="" DATA_SIZE="8" DATA_TYPE="1" REGISTER="0" USAGE="5" USAGE_INDEX="0" ATTRIBUTE_NAME="rm_TexCoord0"/>
