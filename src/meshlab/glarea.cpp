@@ -376,43 +376,50 @@ void GLArea::paintGL()
 
 	if(!meshDoc.busy)
 	{
-		// render the current meshes
-		if (iRenderer && currentShader)
-		{
+		int totPasses = 1;
+		if (iRenderer) {
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
-			iRenderer->Render(currentShader, *mm(), rm, this); 
+			totPasses = iRenderer->passNum();
 		}
 
-		// handle the other meshes
-		foreach(MeshModel * mp, meshDoc.meshList) 
-		{
-			if(mp->visible)
-				mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-		}
-
-		if(iEdit)
-			iEdit->Decorate(currentEditor,*mm(),this);
-
-		if(iRenderer) 
-		{
-			glPopAttrib();
-			glUseProgramObjectARB(0);
-		}
-
-		// Draw the selection
-		if(rm.selectedFaces)  mm()->RenderSelectedFaces();
-
-		if(iDecoratorsList)
-		{
-			pair<QAction *,FilterParameterSet *> p;
-			//assert(decorInterface);
-			foreach(p,*iDecoratorsList)
-			{
-				MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p.first->parent());
-				assert(decorInterface);
-				decorInterface->Decorate(p.first,*mm(),p.second,this,qFont);
+		do {
+			// render the current meshes
+			if (iRenderer && currentShader) {
+				iRenderer->Render(currentShader, *mm(), rm, this);
 			}
-		}
+
+			// handle the other meshes
+			foreach(MeshModel * mp, meshDoc.meshList) 
+			{
+				if(mp->visible)
+					mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+			}
+
+		} while (--totPasses);
+	
+			if(iRenderer) 
+			{
+				glPopAttrib();
+				glUseProgramObjectARB(0);
+			}
+
+			if(iEdit)
+				iEdit->Decorate(currentEditor,*mm(),this);
+	
+			// Draw the selection
+			if(rm.selectedFaces)  mm()->RenderSelectedFaces();
+	
+			if(iDecoratorsList)
+			{
+				pair<QAction *,FilterParameterSet *> p;
+				//assert(decorInterface);
+				foreach(p,*iDecoratorsList)
+				{
+					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p.first->parent());
+					assert(decorInterface);
+					decorInterface->Decorate(p.first,*mm(),p.second,this,qFont);
+				}
+			}
 	} ///end if busy 
 	
 	// ...and take a snapshot
