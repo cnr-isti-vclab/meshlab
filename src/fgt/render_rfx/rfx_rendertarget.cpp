@@ -49,22 +49,27 @@ RfxRenderTarget::~RfxRenderTarget()
 void RfxRenderTarget::SetClear(int pass, float depthClear, float *colorClear)
 {
 	passOptions[pass].clearMask = 0;
+	passOptions[pass].colorClear = false;
+	passOptions[pass].depthClear = false;
 
 	// valid depth clear values are [0, 1]
 	// -1.0 disable depth clear
-	if (depthClear == -1.0) {
-		passOptions[pass].depthClear = false;
-	} else {
+	if (depthClear != -1.0) {
+		passOptions[pass].depthClear = true;
+
 		passOptions[pass].depthClearVal = depthClear;
 		passOptions[pass].clearMask |= GL_DEPTH_BUFFER_BIT;
 	}
 
 	// color should be a 4-elements array.
 	// NULL disable color clear
-	if (colorClear == NULL) {
-		passOptions[pass].colorClear = false;
-	} else {
-		passOptions[pass].colorClearVal = colorClear;
+	if (colorClear != NULL) {
+		passOptions[pass].colorClear = true;
+
+		passOptions[pass].colorClearVal[0] = colorClear[0];
+		passOptions[pass].colorClearVal[1] = colorClear[1];
+		passOptions[pass].colorClearVal[2] = colorClear[2];
+		passOptions[pass].colorClearVal[3] = colorClear[3];
 		passOptions[pass].clearMask |= GL_COLOR_BUFFER_BIT;
 	}
 }
@@ -136,7 +141,7 @@ void RfxRenderTarget::Bind(int pass)
 	bool depClear = passOptions.value(pass).depthClear;
 
 	if (colClear) {
-		GLfloat *cols = passOptions.value(pass).colorClearVal;
+		const float *cols = passOptions.value(pass).colorClearVal;
 		glClearColor(cols[0], cols[1], cols[2], cols[3]);
 	}
 
@@ -148,18 +153,8 @@ void RfxRenderTarget::Bind(int pass)
 	glPushAttrib(GL_VIEWPORT_BIT);
 	glViewport(0, 0, width, height);
 
-	// FORCE glClear, we're reusing an old and dirty fbo
-	// (do not force anything if clearing already requested in options)
-	if (reusing) {
-		glClearColor(0.0, 0.0, 0.0, 1.0);
-		glClearDepth(1.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		reusing = false;
-	}
-
-	if (colClear || depClear) {
+	if (colClear || depClear)
 		glClear(passOptions.value(pass).clearMask);
-	}
 }
 
 void RfxRenderTarget::Unbind()

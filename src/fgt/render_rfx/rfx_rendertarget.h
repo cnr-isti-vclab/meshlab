@@ -67,7 +67,7 @@ private:
 		bool depthClear;
 		float depthClearVal;
 		bool colorClear;
-		float *colorClearVal;
+		float colorClearVal[4];
 	};
 	QMap<int, RTOptions> passOptions;
 	QMap<int, QList<RfxState*> > passStates;

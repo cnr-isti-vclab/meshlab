@@ -129,7 +129,7 @@ bool RfxParser::Parse()
 				// and color clear
 				float *colorClear = NULL;
 				if (eRT.attribute("COLOR_CLEAR") == "TRUE") {
-					long pColor = eRT.attribute("COLOR_CLEAR_VALUE").toLong();
+					long pColor = eRT.attribute("CLEAR_COLOR_VALUE").toLong();
 					colorClear = RfxState::DecodeColor(pColor);
 				}
 

@@ -554,9 +554,9 @@ GLfloat* RfxState::DecodeColor(long val)
 	color[3] += ((color[3] < 0)? 256.0f : 0.0f);
 
 	// R, G and B components are easier to parse
-	color[2] = (val > _B)?                    (short)(val / _B) : 0;
-	color[1] = (val -= (_B * color[2]) > _G)? (short)(val / _G) : 0;
-	color[0] = (val -= (_G * color[1]) > _R)? (short)(val / _R) : 0;
+	color[2] = (val > _B)?                           (short)(val / _B) : 0;
+	color[1] = ((val -= (int)(_B * color[2])) > _G)? (short)(val / _G) : 0;
+	color[0] = ((val -= (int)(_G * color[1])) > _R)? (short)(val)      : 0;
 
 	// now normalize in [0, 1] range
 	for (int i = 0; i < 4; ++i)
