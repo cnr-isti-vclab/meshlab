@@ -66,11 +66,17 @@ void RfxShader::CompileAndLink()
 		pass->CompileAndLink();
 }
 
-void RfxShader::Start()
+void RfxShader::Start(int passIdx)
 {
-	foreach (RfxGLPass *pass, shaderPasses) {
+	if (passIdx >= 0 && passIdx < shaderPasses.size()) {
+
+		RfxGLPass *pass = shaderPasses.at(passIdx);
 		RfxRenderTarget *rt = NULL;
-		int passIdx = pass->GetPassIndex();
+
+		if (passIdx - 1 >= 0 && shaderPasses.at(passIdx - 1)->wantsRenderTarget()) {
+			rt = shaderPasses.at(passIdx - 1)->GetRenderTarget();
+			rt->Unbind();
+		}
 
 		if (pass->wantsRenderTarget()) {
 			rt = pass->GetRenderTarget();
@@ -80,9 +86,6 @@ void RfxShader::Start()
 
 		UpdateSemanticUniforms(passIdx);
 		pass->Start();
-
-		if (rt != NULL)
-			rt->Unbind();
 	}
 }
 

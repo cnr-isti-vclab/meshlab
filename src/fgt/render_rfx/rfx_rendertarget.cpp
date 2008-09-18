@@ -25,18 +25,25 @@
 
 RfxRenderTarget::RfxRenderTarget(const QString& rtName)
 {
-	qfbo = NULL;
 	name = rtName;
 	width = 0;
 	height = 0;
+	fbo = 0;
+	depTex = 0;
+	colTex = 0;
 	mipmaps = false;
 	vportdim = false;
+	initOk = false;
+	reusing = false;
 }
 
 RfxRenderTarget::~RfxRenderTarget()
 {
-	if (qfbo)
-		delete qfbo;
+	if (initOk) {
+		glDeleteFramebuffersEXT(1, &fbo);
+		glDeleteRenderbuffersEXT(1, &depTex);
+		glDeleteTextures(1, &colTex);
+	}
 }
 
 void RfxRenderTarget::SetClear(int pass, float depthClear, float *colorClear)
@@ -69,6 +76,15 @@ bool RfxRenderTarget::Setup(int pass)
 		return false;
 	}
 
+	if (initOk) {
+		// already initialized. mark as "reused" to force glClear-ing
+		reusing = true;
+		return true;
+	}
+
+	glGenFramebuffersEXT(1, &fbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
 	// if "use viewport dimensions" at this point we have a gl context
 	if (vportdim) {
 		GLfloat dims[4];
@@ -77,10 +93,27 @@ bool RfxRenderTarget::Setup(int pass)
 		height = (int)dims[3];
 	}
 
-	qfbo = new QGLFramebufferObject(width, height, QGLFramebufferObject::Depth);
+	// depth buffer
+	glGenRenderbuffersEXT(1, &depTex);
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depTex);
+	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, width, height);
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depTex);
 
-	/*
-	glBindTexture(GL_TEXTURE_2D, qfbo->texture());
+	// color buffer
+	glGenTextures(1, &colTex);
+	glBindTexture(GL_TEXTURE_2D, colTex);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (mipmaps && GLEW_SGIS_generate_mipmap) {
+		glHint(GL_GENERATE_MIPMAP_HINT_SGIS, GL_NICEST);
+		glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	} else
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8,  width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, colTex, 0);
+
 	// set texture state based on the first uniform that will use RT
 	QList<int> k = passStates.keys();
 	for (int i = 0; i < k.size(); ++i) {
@@ -89,14 +122,15 @@ bool RfxRenderTarget::Setup(int pass)
 				s->SetEnvironment(GL_TEXTURE_2D);
 		}
 	}
-	*/
 
-	return qfbo->isValid();
+	initOk = (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	return initOk;
 }
 
 void RfxRenderTarget::Bind(int pass)
 {
-	assert(qfbo->isValid());
+	assert(initOk);
 
 	bool colClear = passOptions.value(pass).colorClear;
 	bool depClear = passOptions.value(pass).depthClear;
@@ -109,30 +143,53 @@ void RfxRenderTarget::Bind(int pass)
 	if (depClear)
 		glClearDepth(passOptions.value(pass).depthClearVal);
 
-	qfbo->bind();
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
 	glPushAttrib(GL_VIEWPORT_BIT);
 	glViewport(0, 0, width, height);
 
-	if (colClear || depClear)
-		glClear(passOptions.value(pass).clearMask);
+	// FORCE glClear, we're reusing an old and dirty fbo
+	// (do not force anything if clearing already requested in options)
+	if (reusing) {
+		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClearDepth(1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		reusing = false;
+	}
 
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	if (colClear || depClear) {
+		glClear(passOptions.value(pass).clearMask);
+	}
 }
 
 void RfxRenderTarget::Unbind()
 {
-	if (!qfbo)
+	if (!initOk)
 		return;
 
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-
-	qfbo->release();
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	glPopAttrib();
+}
+
+QImage RfxRenderTarget::GetQImage()
+{
+	if (!initOk)
+		return QImage();
+
+	QImage img(width, height, QImage::Format_RGB32);
+
+	unsigned char *tempBuf = new unsigned char[width * height * 3];
+	unsigned char *tempBufPtr = tempBuf;
+	glBindTexture(GL_TEXTURE_2D, colTex);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tempBufPtr);
+	for (int i = 0; i < height; ++i) {
+		QRgb *scanLine = (QRgb*)img.scanLine(i);
+		for (int j = 0; j < width; ++j) {
+			scanLine[j] = qRgb(tempBufPtr[0], tempBufPtr[1], tempBufPtr[2]);
+			tempBufPtr += 3;
+		}
+	}
+	delete[] tempBuf;
+
+	return img.mirrored();
 }

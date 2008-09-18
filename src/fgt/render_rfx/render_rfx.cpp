@@ -27,6 +27,7 @@ RenderRFX::RenderRFX()
 {
 	shadersSupported = false;
 	shaderPass = -1;
+	totPass = -1;
 	dialog = NULL;
 	activeShader = NULL;
 }
@@ -113,6 +114,7 @@ void RenderRFX::Init(QAction *action, MeshModel &mesh,
 	RfxParser theParser(QDir(shaderDir).absoluteFilePath(action->text()));
 	assert(theParser.Parse());
 	activeShader = theParser.GetShader();
+	assert(activeShader);
 
 	if (dialog) {
 		dialog->close();
@@ -126,6 +128,8 @@ void RenderRFX::Init(QAction *action, MeshModel &mesh,
 			shadersSupported = true;
 
 			activeShader->CompileAndLink();
+			totPass = activeShader->GetTotalPasses();
+			shaderPass = 0;
 
 			dialog = new RfxDialog(activeShader, action, parent);
 			dialog->move(0, 100);
@@ -133,22 +137,24 @@ void RenderRFX::Init(QAction *action, MeshModel &mesh,
 		}
 	}
 
-	// clear errors, if any
 	glGetError();
 }
 
 void RenderRFX::Render(QAction *action, MeshModel &mesh,
                        RenderMode &rmode, QGLWidget *parent)
 {
+	Q_UNUSED(action)
 	Q_UNUSED(mesh)
 	Q_UNUSED(parent)
 
 	assert(activeShader);
 
-	activeShader->Start();
-	rmode.textureMode = vcg::GLW::TMPerVert;
+	activeShader->Start(shaderPass++);
+	rmode.textureMode = vcg::GLW::TMPerWedge;
 
-	// clear errors, if any
+	if (shaderPass >= totPass)
+		shaderPass = 0;
+
 	glGetError();
 }
 

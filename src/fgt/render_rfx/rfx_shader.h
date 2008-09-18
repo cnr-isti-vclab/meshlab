@@ -59,13 +59,14 @@ public:
 	bool AddSemanticUniform(RfxUniform*, const QString&);
 	RfxGLPass* GetPass(int idx) { return shaderPasses.at(idx); }
 	QString GetSemantic(RfxUniform*);
+	int GetTotalPasses() { return shaderPasses.size(); }
 	void SortPasses();
 	QListIterator<RfxGLPass*> PassesIterator()
 	{
 		return QListIterator<RfxGLPass*>(shaderPasses);
 	}
 	void CompileAndLink();
-	void Start();
+	void Start(int);
 	void Stop() { glUseProgram(0); }
 
 private:

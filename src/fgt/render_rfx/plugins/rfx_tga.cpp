@@ -189,10 +189,10 @@ GLint RfxTGAPlugin::GetOGLFormat()
 		default:
 			return 0;
 		}
-		break;
+
 	case TGA_RAW_GREYSCALE:
 		return GL_LUMINANCE;
-		break;
+
 	default:
 		return 0;
 	}

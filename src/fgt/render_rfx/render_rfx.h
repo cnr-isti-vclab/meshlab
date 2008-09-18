@@ -46,7 +46,7 @@ public:
 	virtual void Render(QAction*, MeshModel&, RenderMode&, QGLWidget*);
 	virtual bool isSupported()         { return shadersSupported; }
 	virtual QList<QAction*> actions();
-	virtual int passNum()              { return shaderPass; }
+	virtual int passNum()              { return totPass; }
 	virtual const PluginInfo &Info();
 
 private:
@@ -55,6 +55,7 @@ private:
 	bool shadersSupported;
 	QList<QAction*> actionList;
 	int shaderPass;
+	int totPass;
 	QString shaderDir;
 	RfxDialog *dialog;
 	RfxShader *activeShader;

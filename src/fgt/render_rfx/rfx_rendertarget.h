@@ -29,7 +29,6 @@
 #include <QMap>
 #include <QImage>
 #include <GL/glew.h>
-#include <QGLFramebufferObject>
 #include "rfx_state.h"
 
 class RfxRenderTarget
@@ -42,8 +41,8 @@ public:
 	void SetClear(int pass, float depthClear, float *colorClear);
 	void AddGLState(int p, RfxState *s) { passStates[p].append(s); }
 	const QString& GetName() { return name; }
-	GLuint GetTexture() { return qfbo->texture(); }
-	QImage GetQImage() { return qfbo->toImage(); }
+	GLuint GetTexture() { return colTex; }
+	QImage GetQImage();
 	bool Setup(int pass);
 	void Bind(int pass);
 	void Unbind();
@@ -51,13 +50,17 @@ public:
 	void GenMipmaps(bool genMip) { mipmaps = genMip; }
 
 private:
-	QGLFramebufferObject *qfbo;
+	GLuint fbo;
+	GLuint colTex;
+	GLuint depTex;
 
 	QString name;
 	int width;
 	int height;
 	bool mipmaps;
 	bool vportdim;
+	bool initOk;
+	bool reusing;
 
 	struct RTOptions {
 		GLint clearMask;
