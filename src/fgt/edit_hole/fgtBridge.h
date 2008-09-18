@@ -796,7 +796,7 @@ private:
 	static PosType getClosestPos(FaceType* face, int x, int y)
 	{
 		double mvmatrix[16], projmatrix[16];
-		int viewport[4];
+		GLint viewport[4];
 		double rx, ry, rz;
 		vcg::Point2d vertex[3];
 		vcg::Point2d point((double)x, (double)y);
