@@ -33,6 +33,7 @@
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/selection.h>
 
 #include <string>
 
@@ -94,6 +95,8 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 			parlst.addString("condSelect"," ", "boolean function",
 							 "you can use: ( ) and or < > = \
 							 x,y,z for vertex coord, nx, ny, nz for normal coord, r, g, b for color and q for quality");
+			parlst.addBool("strictSelect",true,"Strict face selection", "If checked a face is selected if <b>ALL</b> its vertices are selected. <br>"
+										 "If unchecked a face is selected if <b>at least one</b> of its vertices is selected");
 			break;
 		default : assert(0); 
 	}
@@ -157,6 +160,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 		} else (*vi).ClearS();
 	}
 
+	if(par.getBool("strictSelect"))
+			tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm); 
+  else  
+			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
+	
 	Log(GLLogStream::Info, "selected %d vertices in %.2f sec.", numvert, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 	return true;
