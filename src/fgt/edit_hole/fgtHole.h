@@ -220,14 +220,14 @@ public:
 	{
 		switch(mode)
 		{
-		case FgtHole<MESH>::Trivial:
-			vcgHole::FillHoleEar< TrivialEar >(mesh, *this, HolePatchFlag(), local_facePointer);
+		case FgtHole<CMeshO>::Trivial:
+				vcg::tri::Hole<CMeshO>::FillHoleEar< vcg::tri::TrivialEar<CMeshO> >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		case FgtHole<MESH>::MinimumWeight:
-			vcgHole::FillHoleEar<MinimumWeightEar >(mesh, *this, HolePatchFlag(), local_facePointer);
+			vcg::tri::Hole<CMeshO>::FillHoleEar<MinimumWeightEar >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		case FgtHole<MESH>::SelfIntersection:
-			vcgHole::FillHoleEar<SelfIntersectionEar >(mesh, *this, HolePatchFlag(), local_facePointer);
+			vcg::tri::Hole<CMeshO>::FillHoleEar<SelfIntersectionEar >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		}
 		
