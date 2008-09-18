@@ -122,9 +122,11 @@ public:
 private:
 	bool ValidateHeader(DDSHeader&);
 	bool GetOGLFormat(DDSHeader&);
+	bool DXT1CheckAlpha(unsigned char*, int);
 	int ComputeImageSize();
 	unsigned char* LoadImageData(const QString&);
-
+	void flipImg(char *image, int width, int height, int depth, int size);
+	void swap(void *byte1, void *byte2, int size);
 
 	struct DXTColBlock {
 		short col0;
@@ -142,8 +144,6 @@ private:
 		char row[6];
 	};
 
-	void flipImg(char *image, int width, int height, int depth, int size);
-	void swap(void *byte1, void *byte2, int size);
 	void flip_blocks_dxtc1(DXTColBlock *line, int numBlocks);
 	void flip_blocks_dxtc3(DXTColBlock *line, int numBlocks);
 	void flip_blocks_dxtc5(DXTColBlock *line, int numBlocks);

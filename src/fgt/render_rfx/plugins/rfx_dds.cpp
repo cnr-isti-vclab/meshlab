@@ -196,6 +196,10 @@ GLuint RfxDDSPlugin::Load(const QString &fName, QList<RfxState*> &states)
 	if (!pixels)
 		return 0;
 
+	if (texFormat == GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
+		if (DXT1CheckAlpha(pixels, ((width + 3) / 4) * ((height + 3) / 4) * 8))
+			texFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+
 	glGenTextures(1, &tex);
 	glBindTexture(texTarget, tex);
 
@@ -417,6 +421,21 @@ bool RfxDDSPlugin::GetOGLFormat(DDSHeader &header)
 	}
 
 	return true;
+}
+
+bool RfxDDSPlugin::DXT1CheckAlpha(unsigned char *blocks, int size)
+{
+	DXTColBlock *colBlock(reinterpret_cast<DXTColBlock*>(blocks));
+	unsigned char byte;
+
+	for (unsigned i = 0, n = (size / 8); i < n; i++)
+		if (colBlock[i].col0 <= colBlock[i].col1)
+			for (unsigned j = 0; j < 4; j++, byte = colBlock[i].row[j])
+				for (unsigned p = 0; p < 4; p++, byte >>= 2)
+					if ((byte & 3) == 3)
+						return true;
+
+	return false;
 }
 
 /*
