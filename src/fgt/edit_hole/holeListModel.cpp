@@ -229,10 +229,7 @@ void HoleListModel::acceptFilling(bool accept)
 		}
 		it++;
 	}
-	
-	mesh->clearDataMask(MeshModel::MM_FACETOPO);
-	mesh->updateDataMask(MeshModel::MM_FACETOPO);
-		
+			
 	state = HoleListModel::Selection;		
 	emit dataChanged( index(0, 0), index(holes.size(), 2) );
 	emit SGN_needUpdateGLA();	
@@ -245,9 +242,6 @@ void HoleListModel::autoBridge(bool singleHole, double distCoeff)
 		FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, distCoeff);
 	else
 		FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, distCoeff);
-
-	mesh->clearDataMask(MeshModel::MM_FACETOPO);
-	mesh->updateDataMask(MeshModel::MM_FACETOPO);
 
 	emit layoutChanged();
 }
@@ -262,9 +256,6 @@ void HoleListModel::removeBridges()
 void HoleListModel::closeNonManifolds()
 {
 	FgtBridge<CMeshO>::CloseNonManifoldVertex(mesh->cm, holes);
-	mesh->clearDataMask(MeshModel::MM_FACETOPO);
-	mesh->updateDataMask(MeshModel::MM_FACETOPO);
-	
 	emit layoutChanged();
 }
 

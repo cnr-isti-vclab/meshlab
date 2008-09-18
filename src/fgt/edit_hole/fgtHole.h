@@ -211,15 +211,30 @@ public:
 		for(it = patches.begin(); it!=patches.end(); it++)
 		{
 			assert(IsPatchFace(**it));
+			for(int e=0; e<3; e++)
+			{	
+				if(!IsBorder(**it, e))
+				{
+					FacePointer adjF = (*it)->FFp(e);
+					if(!FgtHole<MESH>::IsPatchFace(*adjF))
+					{								
+						int adjEI = (*it)->FFi(e);
+						adjF->FFp( adjEI ) = adjF;
+						adjF->FFi( adjEI ) = adjEI;
+						assert(IsBorder(*adjF, adjEI));
+					}
+				}
+			}
 			if(!(**it).IsD())
 				vcg::tri::Allocator<MESH>::DeleteFace(mesh, **it);
-		}		
+		}
+		updateInfo();
 	};
 
 	void Fill(FillerMode mode, MESH &mesh, FaceReferencePointerVector &local_facePointer)
 	{
 		switch(mode)
-		{
+		{	
 		case FgtHole<CMeshO>::Trivial:
 				vcg::tri::Hole<CMeshO>::FillHoleEar< vcg::tri::TrivialEar<CMeshO> >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
@@ -230,6 +245,11 @@ public:
 			vcg::tri::Hole<CMeshO>::FillHoleEar<SelfIntersectionEar >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		}
+		
+		// hole filling leaves V flag to border vertex
+		typename std::vector<VertexType*>::const_iterator it = vertexes.begin();
+		for( ;it!=vertexes.end(); it++)
+				(*it)->ClearV();
 		
 		filled = true;
 		accepted = true;

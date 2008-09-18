@@ -109,8 +109,6 @@ public:
 	
 	static void RemoveBridges(MESH  &mesh, HoleVector &holes)
 	{
-		HoleType* h;
-
 		// vettore usato per contenere tutte le facce di bridge trovate a partire da un hole
 		std::vector<FacePointer> bridgeFaces;
 
@@ -186,12 +184,17 @@ public:
 		for( it=adjBorderPos.begin(); it!=adjBorderPos.end(); it++)
 		{
 			assert( it->IsBorder() );
+			bool sel=it->f->IsS();
+			it->f->ClearS();
+
 			if(it->f->IsV())
 				continue;
 			
 			curPos = initPos = *it;
 			do{
 				curPos.f->SetV();
+				sel = sel || curPos.f->IsS();
+				curPos.f->ClearS();
 				curPos.NextB();
 				assert(curPos.IsBorder());
 			}while(curPos != initPos);
@@ -199,8 +202,7 @@ public:
 			
 			// ho trovato una faccia di un'altro buco
 			FgtHole<MESH> newHole(initPos, QString("Hole_%1").arg(holes.size(),3,10,QChar('0')) );
-			if(h->IsSelected())
-				newHole.SetSelect(true);
+			newHole.SetSelect(sel);
 			holes.push_back( newHole );
 		}
 
@@ -659,7 +661,7 @@ private:
 		FgtHole<MESH> newHole(newP1, QString("Hole_%1").arg(holes.size(),3,10,QChar('0')) );
 		if(sideA.h->IsSelected())
 			newHole.SetSelect(true);
-		sideA.h->SetBridged(true);
+		newHole.SetBridged(true);
 		holes.push_back( newHole );
 	};
 
@@ -834,6 +836,8 @@ private:
 	/*  Starting from an hole look for faces added to mesh as bridge jumping also into
 	 *  adjacent hole from bridge finded
 	 *  Put into bridgeFaces all faces added to mesh as bridge
+	 *  Put into adjBridgePos half-edges located over the edge which will become border edge after bridge face removing
+	 *  also mark with flag S the faces related to adjBridgePos
 	 */
 	static void getBridgeInfo(HoleVector &holes, std::vector<FacePointer> &bridgeFaces, std::vector<PosType> &adjBridgePos)
 	{
@@ -849,11 +853,17 @@ private:
 
 			// il buco può essere bridged senza essere posizioneto con p su una faccia bridge
 			// come nel caso della chiusura di vertici non manifold, un hole sarà marchiato
-			// bridged ma non avrà sul suo bordo edge di facce bridge
-			if(!FgtHole<MESH>::IsBridgeFace(*hit->p.f) && !hit->p.f->IsV())
+			// bridged ma non avrà sul suo bordo edge di facce bridge poiche il vertice non manifold viene
+			// chiuso con un solo triangolo 
+			if(!FgtHole<MESH>::IsBridgeFace(*hit->p.f) )
 			{
-				hit->p.f->SetV();
-				adjBridgePos.push_back(PosType(hit->p.f, hit->p.z));
+				if(hit->IsSelected())
+					hit->p.f->SetS();
+				if(!hit->p.f->IsV())
+				{
+					hit->p.f->SetV();
+					adjBridgePos.push_back(PosType(hit->p.f, hit->p.z));
+				}
 			}
 
 
@@ -868,10 +878,15 @@ private:
 					lastF = cp2.f;
 					cp2.FlipE();
 					cp2.FlipF();
-					if(FgtHole<MESH>::IsBridgeFace(*cp2.f) && !cp2.f->IsV())
+					if(FgtHole<MESH>::IsBridgeFace(*cp2.f) )
 					{
-						cp2.f->SetV();
-						bridgeFaces.push_back(cp2.f);
+						if(hit->IsSelected()) 
+							cp2.f->SetS();
+						if(!cp2.f->IsV())
+						{
+							cp2.f->SetV();
+							bridgeFaces.push_back(cp2.f);
+						}
 					}
 				}while(lastF != cp2.f);				
 
@@ -899,10 +914,15 @@ private:
 					lastPos = curPos;
 					curPos.FlipE();
 					curPos.FlipF();
-					if(FgtHole<MESH>::IsBridgeFace(*curPos.f) && !curPos.f->IsV())
+					if(FgtHole<MESH>::IsBridgeFace(*curPos.f))
 					{
-						curPos.f->SetV();
-						bridgeFaces.push_back(curPos.f);
+						if(vf->IsS()) 
+							curPos.f->SetS();
+						if(!curPos.f->IsV())
+						{
+							curPos.f->SetV();
+							bridgeFaces.push_back(curPos.f);
+						}
 					}
 				}while(curPos.f != lastPos.f && curPos.f != vf);
 
@@ -910,6 +930,8 @@ private:
 				if(!FgtHole<MESH>::IsBridgeFace(*adjF) && !adjF->IsV())
 				{
 					adjF->SetV();
+					if(vf->IsS()) adjF->SetS();
+					else adjF->ClearS();
 					adjBridgePos.push_back(PosType(adjF, vf->FFi(e)));
 				}
 			}
