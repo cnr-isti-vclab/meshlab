@@ -233,17 +233,16 @@ public:
 
 	void Fill(FillerMode mode, MESH &mesh, FaceReferencePointerVector &local_facePointer)
 	{
-		vcgHole vh;
 		switch(mode)
 		{	
-		case FgtHole<CMeshO>::Trivial:
-				vh.template FillHoleEar< vcg::tri::TrivialEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
+		case FgtHole<MESH>::Trivial:
+				vcgHole::template FillHoleEar< vcg::tri::TrivialEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		case FgtHole<MESH>::MinimumWeight:
-			vh.template FillHoleEar< vcg::tri::MinimumWeightEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
+				vcgHole::template FillHoleEar< vcg::tri::MinimumWeightEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		case FgtHole<MESH>::SelfIntersection:
-			vh.template FillHoleEar< vcg::tri::SelfIntersectionEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
+				vcgHole::template FillHoleEar< vcg::tri::SelfIntersectionEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		}
 		
