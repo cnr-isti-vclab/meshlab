@@ -506,7 +506,7 @@ void MainWindow::startFilter()
 
   // In order to avoid that a filter changes something assumed by the current editing tool,
 	// before actually starting the filter we close the current editing tool (if any).
-	GLA()->endEdit();
+	if(GLA()) GLA()->endEdit();
 	updateMenus();
 
 	if(iFilter->getClass(action) == MeshFilterInterface::MeshCreation)
