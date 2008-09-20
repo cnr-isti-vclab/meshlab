@@ -98,7 +98,7 @@ void EditTexturePlugin::mouseMoveEvent (QAction *,QMouseEvent * event, MeshModel
 {
     prev = cur;
     cur = event->pos();
-	int curT;
+	/*int curT;
 	static int lastRendering;
 	if (isDragging)
 	{
@@ -118,7 +118,19 @@ void EditTexturePlugin::mouseMoveEvent (QAction *,QMouseEvent * event, MeshModel
 			glDrawBuffer(GL_BACK);
 			glFlush();
 	    }
-	}
+	}*/
+	if(gla->lastRenderingTime() < 200 )
+    {
+		gla->update();
+    }
+    else
+	{
+		gla->makeCurrent();
+		glDrawBuffer(GL_FRONT);
+		DrawXORRect(gla);
+		glDrawBuffer(GL_BACK);
+		glFlush();
+    }
 }
   
 void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
@@ -136,13 +148,13 @@ void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshMod
 
 void EditTexturePlugin::Decorate(QAction *, MeshModel &m, GLArea *gla)
 {
-	QPoint mid, wid;
-	vector<CMeshO::FacePointer> NewFaceSel;
-	vector<CMeshO::FacePointer>::iterator fpi;
-	CMeshO::FaceIterator fi;
-	
 	if (isDragging)
 	{
+		QPoint mid, wid;
+		vector<CMeshO::FacePointer> NewFaceSel;
+		vector<CMeshO::FacePointer>::iterator fpi;
+		CMeshO::FaceIterator fi;
+
 		DrawXORRect(gla);
 		mid = (start + cur)/2;
 	    mid.setY(gla->curSiz.height() - mid.y());
@@ -153,7 +165,10 @@ void EditTexturePlugin::Decorate(QAction *, MeshModel &m, GLArea *gla)
 		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) 
 			if(!(*fi).IsD()) (*fi).ClearS();
 
+		glPushMatrix();
+		glMultMatrix(m.cm.Tr);
 		GLPickTri<CMeshO>::PickFace(mid.x(), mid.y(), m.cm, NewFaceSel, wid.x(), wid.y());
+		glPopMatrix();
 
 		switch(selMode)
 		{
@@ -178,12 +193,15 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 {
 	// Set up the model
 	m.cm.face.EnableFFAdjacency();
-	if (vcg::tri::HasPerWedgeTexCoord(m.cm)) vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
-	if(vcg::tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) && !HasCollapsedTextCoords(m)) degenerate = false;
-	else 
+	if (vcg::tri::HasPerWedgeTexCoord(m.cm)) 
 	{
-		gla->log.Logf(GLLogStream::Info,"WARNING: This mesh has a degenerated texture parametrization!");
-		degenerate = true;
+		vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
+		if(vcg::tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) && !HasCollapsedTextCoords(m)) degenerate = false;
+		else 
+		{
+			gla->log.Logf(GLLogStream::Info,"WARNING: This mesh has a degenerated texture parametrization!");
+			degenerate = true;
+		}
 	}
 
 	FaceSel.clear();

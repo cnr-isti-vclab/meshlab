@@ -29,9 +29,10 @@ RenderArea::RenderArea(QWidget *parent, QString textureName, MeshModel *m, unsig
 			image = QImage(textureName);
 			int bestW = pow(2.0,floor(::log(double(image.width()))/::log(2.0)));
 			int bestH = pow(2.0,floor(::log(double(image.height()))/::log(2.0)));
-			QImage imgGL=image.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+			QImage imgGL = image.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+			QImage tmpGL = QGLWidget::convertToGLFormat(imgGL);
 			glGenTextures(1, &id);
-			image = imgGL;
+			image = QImage(tmpGL).mirrored(false, true);
 		}
 		else textureName = QString();
 	}
@@ -153,7 +154,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 	tb->GetView();
 	tb->Apply(true);
 	maxX = 0; maxY = 0; minX = 0; minY = 0;
-
+	
 	if (model->cm.HasPerWedgeTexCoord() && image != QImage())
 	{
 	    glEnable(GL_COLOR_LOGIC_OP);
@@ -173,15 +174,20 @@ void RenderArea::paintEvent(QPaintEvent *)
 				if (model->cm.face[i].WT(0).v() < minY || model->cm.face[i].WT(1).v() < minY || model->cm.face[i].WT(2).v() < minY)	minY--;
 
 				drawEdge(i); // Draw the edge of faces
+				glDisable(GL_COLOR_LOGIC_OP);
+				glColor3f(1.0f, 0.0f, 0.0f);
 				//if (selected && model->cm.face[i].IsUserBit(selBit)) drawSelectedFaces(i); // Draw the selected faces
 				if (selectedV && mode != UnifyVert)	drawSelectedVertexes(i); // Draw the selected vertex
+				glEnable(GL_COLOR_LOGIC_OP);
+
 			}
 		}
 		if (mode == UnifyVert) drawUnifyVertexes();
+		
 		glDisable(GL_LOGIC_OP);
 		glDisable(GL_COLOR_LOGIC_OP);
-
 		if (minX != 0 || minY != 0 || maxX != 0 || maxY != 0) drawBackground(); // Draw the background behind the model
+
 		// 2D
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
@@ -299,7 +305,7 @@ void RenderArea::drawBackground()
 {
 	glColor3f(1,1,1);
 	glBindTexture(GL_TEXTURE_2D, id);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, image.width(), image.height(), GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
@@ -660,7 +666,7 @@ void RenderArea::handleReleaseSelect(QMouseEvent *e)
 void RenderArea::mouseMoveEvent(QMouseEvent *e)
 {
 	int sx = (e->x() - oldX)/zoom, sy = (e->y() - oldY)/zoom;
-	if((e->buttons() & Qt::LeftButton))
+	if((e->buttons() & Qt::LeftButton) && image != QImage())
 	{
 		if (mode == View)
 		{
@@ -671,13 +677,13 @@ void RenderArea::mouseMoveEvent(QMouseEvent *e)
 		else if (mode == Edit || mode == EditVert)	handleMoveEdit(e);
 		else if (mode == Select || mode == UnifyVert) handleMoveSelect(e);
 	}
-	else if((e->buttons() & Qt::MidButton)) // Pan
+	else if((e->buttons() & Qt::MidButton) && image != QImage()) // Pan
 	{
 		tb->Translate(Point3f(- oldX + e->x(), - oldY + e->y(), zoom));
 		viewport = Point2f(tmpX + sx, tmpY + sy);
 		this->update();
 	}
-	else // No click
+	else if (image != QImage())// No click
 	{
 		if (mode == Edit || mode == EditVert)
 		{
@@ -803,26 +809,29 @@ void RenderArea::mouseDoubleClickEvent(QMouseEvent *e)
 
 void RenderArea::wheelEvent(QWheelEvent*e)
 {
-	// Handle the zoom for any mode
-	int cwx = viewport.X() - (this->visibleRegion().boundingRect().width()/zoom)/2;
-	int cwy = viewport.Y() - (this->visibleRegion().boundingRect().height()/zoom)/2;
-	if (e->delta() > 0) zoom /= 0.75; 
-	else zoom *= 0.75; 
-	// Change the viewport, putting the center of the screen on the mouseposition
-	cwx += (this->visibleRegion().boundingRect().width()/zoom)/2;
-	cwy += (this->visibleRegion().boundingRect().height()/zoom)/2;
-	viewport = Point2f(cwx, cwy);
-	ResetTrack(false);
-	tb->Scale(zoom);
-	if (selectedV) 
+	if (image != QImage())
 	{
-		if (mode == UnifyVert) UpdateUnify();
-		else UpdateVertexSelection();
+		// Handle the zoom for any mode
+		int cwx = viewport.X() - (this->visibleRegion().boundingRect().width()/zoom)/2;
+		int cwy = viewport.Y() - (this->visibleRegion().boundingRect().height()/zoom)/2;
+		if (e->delta() > 0) zoom /= 0.75; 
+		else zoom *= 0.75; 
+		// Change the viewport, putting the center of the screen on the mouseposition
+		cwx += (this->visibleRegion().boundingRect().width()/zoom)/2;
+		cwy += (this->visibleRegion().boundingRect().height()/zoom)/2;
+		viewport = Point2f(cwx, cwy);
+		ResetTrack(false);
+		tb->Scale(zoom);
+		if (selectedV) 
+		{
+			if (mode == UnifyVert) UpdateUnify();
+			else UpdateVertexSelection();
+		}
+		else if (selected) RecalculateSelectionArea();
+		originR.moveCenter(ToScreenSpace(origin.x(), origin.y()));
+		initVX = viewport.X(); initVY = viewport.Y();
+		this->update();
 	}
-	else if (selected) RecalculateSelectionArea();
-	originR.moveCenter(ToScreenSpace(origin.x(), origin.y()));
-	initVX = viewport.X(); initVY = viewport.Y();
-	this->update();
 }
 
 void RenderArea::keyPressEvent(QKeyEvent *e)
@@ -850,6 +859,8 @@ void RenderArea::RemapClamp()
 	}
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
 	ResetTrack(true);
+	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+	selection = QRect();
 	this->update();
 	emit UpdateModel();
 }
@@ -877,6 +888,8 @@ void RenderArea::RemapMod()
 	}
 	panX = 0; panY = 0; tpanX = 0; tpanY = 0; oldPX = 0; oldPY = 0;
 	ResetTrack(true);
+	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
+	selection = QRect();
 	this->update();
 	emit UpdateModel();
 }
