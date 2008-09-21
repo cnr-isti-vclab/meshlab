@@ -119,8 +119,8 @@ const PluginInfo &edit_topo::Info()
 {
    static PluginInfo ai; 
    ai.Date=tr(__DATE__);
-   ai.Version = tr("0.1");
-   ai.Author = ("Paolo Cignoni, Daniele Bonetta");
+   ai.Version = tr("1.0");
+   ai.Author = ("daniele bonetta");
    return ai;
 }
 
@@ -1194,16 +1194,15 @@ void edit_topo::on_mesh_create()
 	out.clear();
 
 	if(first_model_generated)
-	{
 		parentGla->meshDoc.meshList.pop_back();
-	}
+	
 
 	MeshModel *mm= new MeshModel();
 	parentGla->meshDoc.meshList.push_back(mm);
 	first_model_generated = true;
 
 
-	MeshModel *m     = parentGla->meshDoc.meshList.back();	// destination = last
+	MeshModel *m = parentGla->meshDoc.meshList.back();	// destination = last
 	MeshModel *currentMesh  = parentGla->meshDoc.mm();		// source = current		
 
 

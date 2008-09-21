@@ -127,7 +127,7 @@ class edit_topodialog : public QWidget
 		void updateFceTable(QList<Fce> list);
 
 		int getIterations();
-		double dist();
+		float dist();
 
 		bool isDEBUG();
 

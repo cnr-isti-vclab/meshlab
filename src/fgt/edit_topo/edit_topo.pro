@@ -8,8 +8,7 @@ HEADERS       	= 	edit_topo.h \
 
 SOURCES      	= 	edit_topo.cpp \
 					edit_topodialog.cpp \
-					edit_topomeshbuilder.cpp \
-					$$GLEWCODE 
+					$$GLEWCODE
 				
 TARGET        	= 	edit_topo
 
