@@ -547,7 +547,7 @@ void MainWindow::startFilter()
 		// invoking hte execute filter function of the mainwindow each time that the user press apply
 		iFilter->getCustomParameters(action, GLA(),*(GLA()->mm()), parList, this);
   }
-	else executeFilter(action,parList);
+	else executeFilter(action, parList, false);
 }
 
 /*
@@ -557,13 +557,13 @@ void MainWindow::startFilter()
 	from the automatic dialog
 	from the user defined dialog
 */
-void MainWindow::executeFilter(QAction *action, FilterParameterSet &params)
+void MainWindow::executeFilter(QAction *action, FilterParameterSet &params, bool isPreview)
 {
 
 	MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
 
   // (3) save the current filter and its parameters in the history
-  GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
+	if(!isPreview) GLA()->filterHistory.actionList.append(qMakePair(action->text(),params));
 
   qb->show();
   iFilter->setLog(&(GLA()->log));

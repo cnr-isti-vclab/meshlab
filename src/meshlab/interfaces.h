@@ -137,7 +137,8 @@ public:
 class MainWindowInterface
 {
 public:
-	virtual void executeFilter(QAction *, FilterParameterSet &){};
+	//isPreview tells whether this execution is being used to produce or preview a result
+	virtual void executeFilter(QAction *, FilterParameterSet &, bool /* isPreview */){};
 	virtual ~MainWindowInterface(){};
 	
 	// This function is to find the dir where all the deployed stuff reside. 
@@ -268,7 +269,7 @@ public:
 	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw) 
 	{
 		assert(mw);
-		mw->executeFilter(action,params);
+		mw->executeFilter(action, params, false);
 		return true;
 	}	
 

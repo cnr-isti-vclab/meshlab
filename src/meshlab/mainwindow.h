@@ -204,7 +204,7 @@ class MainWindow : public QMainWindow, MainWindowInterface
 
 public:
 	// callback function to execute a filter
-  void executeFilter(QAction *action,FilterParameterSet &srcpar);
+	void executeFilter(QAction *action, FilterParameterSet &srcpar, bool isPreview);
 
   MainWindow();
    static bool QCallBack(const int pos, const char * str);

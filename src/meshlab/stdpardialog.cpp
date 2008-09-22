@@ -548,7 +548,7 @@ void MeshlabStdDialog::applyClick()
 	int mask = curParSet.getDynamicFloatMask();
 	if(mask)	meshState.apply(curModel);
 
-	curmwi->executeFilter(q,curParSet);
+	curmwi->executeFilter(q, curParSet, false);
 
 	if(mask)	meshState.create(mask, curModel);
 
@@ -561,7 +561,7 @@ void MeshlabStdDialog::applyDynamic()
 	stdParFrame->readValues(curParSet);
 	// Restore the
 	meshState.apply(curModel);
-	curmwi->executeFilter(q,curParSet);
+	curmwi->executeFilter(q, curParSet, true);
 }
 
 void MeshlabStdDialog::togglePreview()
