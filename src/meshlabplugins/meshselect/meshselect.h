@@ -52,7 +52,8 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 		FP_SELECT_DILATE, 
 		FP_SELECT_BORDER_FACES,
 		FP_SELECT_BY_QUALITY,
-		FP_SELECT_BY_RANGE
+		FP_SELECT_BY_RANGE,
+		FP_SELECT_BY_COLOR
 	} ;
 
 	SelectionFilterPlugin();
