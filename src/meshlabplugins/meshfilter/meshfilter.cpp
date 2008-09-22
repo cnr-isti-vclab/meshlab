@@ -368,7 +368,7 @@ bool ExtraMeshFilterPlugin::getCustomParameters(QAction *action, QWidget * /*par
 					
       	Matrix44f matrixDlg = transformDialog->getTransformation();
         params.addMatrix44("Transform",matrixDlg);
-				mw->executeFilter(action,params);
+				mw->executeFilter(action,params, false);
         break;
       } 		
    default :assert(0);

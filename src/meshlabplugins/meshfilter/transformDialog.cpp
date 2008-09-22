@@ -386,7 +386,7 @@ void TransformDialog::on_applyButton_clicked() {
 	Matrix44f matrixDlg = getTransformation();
   FilterParameterSet params;
 	params.addMatrix44("Transform",matrixDlg);
-	curmwi->executeFilter(curact,params);
+	curmwi->executeFilter(curact,params, false);
   updateMatrixWidget();
 //	accept();
 	
