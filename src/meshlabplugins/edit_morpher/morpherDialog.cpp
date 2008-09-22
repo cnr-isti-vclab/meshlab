@@ -41,6 +41,7 @@ MorpherDialog::MorpherDialog(MorpherPlugin *plugin,
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );	
 	
 	glArea = 0;
+	areaToUpdate = 0;
 	sourceVertexVector = 0;
 	sourceMeshModel = 0;
 	destMeshModel = 0;
@@ -50,6 +51,7 @@ MorpherDialog::MorpherDialog(MorpherPlugin *plugin,
 		
 	ui.layerTreeWidget->setHeaderLabels(headerNames);
 
+	connectedToWorkspace = false;
 	
 	
 	//signals and slots
@@ -82,9 +84,23 @@ void MorpherDialog::setCurrentGLArea(GLArea *gla){
 	//now clear the tree start over
 	ui.layerTreeWidget->clear();
 	
-	//get the current items
-	QList<MeshModel *> &meshList = gla->meshDoc.meshList;
-	qDebug("Items in list: %d", meshList.size());
+	
+	//if we arnt connected to the workspace connect
+	if(!connectedToWorkspace){
+		QWidget * parent = gla->parentWidget()->parentWidget()->parentWidget();
+		
+		connect(this, SIGNAL(getMeshList(QMap<MeshModel *, GLArea*> &)), parent, SLOT(getAllMeshModels(QMap<MeshModel *, GLArea*> &)));
+			
+		//now that we have connected once we dont need to do it again because that will
+		//create duplicate signals
+		connectedToWorkspace = true;
+	}
+	
+	modelToAreaMap.clear();
+		
+	emit getMeshList(modelToAreaMap);
+		
+	QList<MeshModel*> meshList = modelToAreaMap.keys();
 	
 	for(int i=0; i<meshList.size(); ++i)
 	{
@@ -155,6 +171,8 @@ void MorpherDialog::pickSourceMesh(){
 			
 			sourceMeshModel = tempModel;
 		
+			areaToUpdate = modelToAreaMap[sourceMeshModel];
+			
 			//now copy all the vertices
 			sourceVertexVector = new std::vector<CVertexO>(tempModel->cm.vert);
 			
@@ -267,7 +285,8 @@ void MorpherDialog::recalculateMorph(int newValue){
 		}
 
 		//update the scene to show the new vertex positions
-		glArea->update();
+		assert(areaToUpdate);
+		areaToUpdate->update();
 		
 	} else {
 		sourceMeshModel = 0;

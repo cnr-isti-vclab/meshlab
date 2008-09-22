@@ -66,8 +66,7 @@ void MorpherPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla)
 
 void MorpherPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gla )
 {
-	qDebug() << "Start Morpher: \n" << mm.fileName.c_str() << " ...";
-	
+	//qDebug() << "Start Morpher: \n" << mm.fileName.c_str() << " ...";
 	
 	//Creat GUI window
 	if(morpherDialog == 0)
@@ -81,13 +80,21 @@ void MorpherPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gla )
 	//show the dialog
 	morpherDialog->show();
 	
+	//suspend edit mode!
+	connect(this, SIGNAL(suspendEditToggle()), gla, SLOT(suspendEditToggle()));
+	emit suspendEditToggle();
+	
 }
 
-void MorpherPlugin::EndEdit(QAction * /*mode*/, MeshModel &mm, GLArea * /*parent*/)
+void MorpherPlugin::EndEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gla)
 {
 	// some cleaning at the end.
 	//qDebug() << "EndEdit: cleaning everything" << mm.fileName.c_str() << " ...";
 
+	//unsuspend edit mode
+	//emit suspendEditToggle(); //<- doesnt solve the problem of double clicking on the morpher button
+	disconnect(this, SIGNAL(suspendEditToggle()), gla, SLOT(suspendEditToggle()));
+	
 	//this will ask the user if they want to keep the changes
 	morpherDialog->verifyKeepChanges();
 	
@@ -104,8 +111,7 @@ void MorpherPlugin::mouseMoveEvent(QAction *, QMouseEvent *event, MeshModel &mm,
 	//qDebug() << "Mouse move event: "<< mm.fileName.c_str() << " ...";
 }
 
-void MorpherPlugin::mouseReleaseEvent(QAction *,
-		QMouseEvent *event, MeshModel &mm, GLArea * gla)
+void MorpherPlugin::mouseReleaseEvent(QAction *, QMouseEvent *event, MeshModel &mm, GLArea * gla)
 {
 	//qDebug() << "mouse release event: " << mm.fileName.c_str() << " ...";
 }

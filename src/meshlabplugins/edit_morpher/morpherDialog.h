@@ -58,12 +58,24 @@ private:
 	
 	GLArea *glArea;
 	
+	GLArea *areaToUpdate;
+	
 	//a copy of the source's vertices so that we know where we started out the morph
 	std::vector<CVertexO> * sourceVertexVector;
 	
 	MeshModel * sourceMeshModel;
 	
 	MeshModel * destMeshModel;
+	
+	//tells whether we have connected to the workspace
+	bool connectedToWorkspace;
+	
+	//map of all mesh models to glareas
+	QMap<MeshModel *, GLArea*> modelToAreaMap;
+	
+signals:
+	//used to get the list of meshes form the workspace
+	void getMeshList(QMap<MeshModel *, GLArea*> &map);
 	
 private slots:
 	//triggered when the spin box changes the start value

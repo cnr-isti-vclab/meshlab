@@ -59,7 +59,9 @@ private:
 	
 	//the gui dialog for this plugin
 	MorpherDialog *morpherDialog;
-	
+
+signals:
+	void suspendEditToggle();
 
 };
 	
