@@ -191,7 +191,7 @@ bool ExtraMeshColorizePlugin::getCustomParameters(QAction *action, QWidget * par
 			
       par.addFloat("RangeMin",FinalRange.minV);
       par.addFloat("RangeMax",FinalRange.maxV);      
-			mw->executeFilter(action,par);
+			mw->executeFilter(action,par, false);
 
 			return true;
 		}
