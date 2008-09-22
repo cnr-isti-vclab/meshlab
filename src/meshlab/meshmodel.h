@@ -135,6 +135,7 @@ public:
 		MM_WEDGTEXCOORD		= 0x1000,
 		MM_CURV						= 0x2000,
 		MM_CURVDIR				= 0x4000,
+		MM_FACESELECTION			= 0x8000,
 		MM_ALL						= 0xffff
 	} ;
 
@@ -392,7 +393,8 @@ class MeshModelState
 	std::vector<vcg::Color4b> vertColor;
 	std::vector<vcg::Point3f> vertCoord;
 	std::vector<vcg::Point3f> vertNormal;
-		
+	std::vector<bool> faceSelection;	
+	
 	void create(int _mask, MeshModel* _m)
 	{
 		m=_m;
@@ -404,7 +406,26 @@ class MeshModelState
 			 CMeshO::VertexIterator vi;
 			 for(vi=m->cm.vert.begin(),ci=vertColor.begin();vi!=m->cm.vert.end();++vi,++ci) 
 				 if(!(*vi).IsD()) (*ci)=(*vi).C();
-		 }
+		} else if(changeMask & MeshModel::MM_VERTCOORD)
+		{
+			vertCoord.resize(m->cm.vert.size());
+			std::vector<vcg::Point3f>::iterator ci;
+			CMeshO::VertexIterator vi;
+			 for(vi=m->cm.vert.begin(),ci=vertCoord.begin();vi!=m->cm.vert.end();++vi,++ci) 
+				 if(!(*vi).IsD()) (*ci)=(*vi).P();
+		} else if(changeMask & MeshModel::MM_FACESELECTION)
+		{
+			faceSelection.resize(m->cm.face.size());
+			std::vector<bool>::iterator ci;
+			CMeshO::FaceIterator fi;
+			for(fi = m->cm.face.begin(), ci=faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+			{
+				if((*fi).IsS())
+					(*ci) = true;
+				else
+					(*ci) = false;
+			}
+		}
 	}
 	
 	bool apply(MeshModel *_m)
@@ -416,7 +437,26 @@ class MeshModelState
 			std::vector<vcg::Color4b>::iterator ci;
 			CMeshO::VertexIterator vi;
 			for(vi=m->cm.vert.begin(),ci=vertColor.begin();vi!=m->cm.vert.end();++vi,++ci) 
-					if(!(*vi).IsD()) (*vi).C()=(*ci);
+				if(!(*vi).IsD()) (*vi).C()=(*ci);
+		} else if(changeMask & MeshModel::MM_VERTCOORD)
+		{
+			if(vertCoord.size() != m->cm.vert.size()) return false;
+			std::vector<vcg::Point3f>::iterator ci;
+			CMeshO::VertexIterator vi;
+			for(vi=m->cm.vert.begin(),ci=vertCoord.begin();vi!=m->cm.vert.end();++vi,++ci) 
+				if(!(*vi).IsD()) (*vi).P()=(*ci);
+		} else if(changeMask & MeshModel::MM_FACESELECTION)
+		{
+			if(faceSelection.size() != m->cm.face.size()) return false;
+			std::vector<bool>::iterator ci;
+			CMeshO::FaceIterator fi;
+			for(fi = m->cm.face.begin(), ci=faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+			{
+				if((*ci))
+					(*fi).SetS();
+				else
+					(*fi).ClearS();
+			}
 		}
 		return true;
   }
