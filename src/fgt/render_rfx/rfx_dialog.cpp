@@ -293,6 +293,7 @@ void RfxDialog::DrawIFace(RfxUniform *u, int uidx, int rows, int columns)
 				controls[arrayIdx] = new QDoubleSpinBox();
 				((QDoubleSpinBox*)controls[arrayIdx])->setRange(-99.0, 99.0);
 				((QDoubleSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
+				((QDoubleSpinBox*)controls[arrayIdx])->setDecimals(4);
 				connect(controls[arrayIdx], SIGNAL(valueChanged(double)),
 				        valMapper, SLOT(map()));
 				connect(controls[arrayIdx], SIGNAL(valueChanged(double)), this,
@@ -397,7 +398,7 @@ void RfxDialog::ChangeValue(const QString& val)
 	QStringList unif = val.split('-');
 	RfxUniform *uni = shader->GetPass(selPass)->getUniform(unif[0].toInt());
 	float *oldVal = uni->GetValue();
-	float newVal = -1.0f;
+	float newVal = 0.0f;
 
 	// parent of SignalMapper has been set to appropriate QWidget type
 	QObject *sender = QObject::sender()->parent();
