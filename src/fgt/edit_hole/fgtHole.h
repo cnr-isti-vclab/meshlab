@@ -66,7 +66,6 @@ public:
 	typedef typename vcg::tri::TrivialEar<MESH>		TrivialEar;
 	typedef typename vcg::tri::MinimumWeightEar<MESH>	MinimumWeightEar;
 	typedef typename vcg::tri::SelfIntersectionEar<MESH>	SelfIntersectionEar;
-	typedef typename std::vector<FacePointer * >		FaceReferencePointerVector;
 
 	FgtHole(HoleInfo &hi, QString holeName) : 
 		HoleInfo(hi.p, hi.size, hi.bb)
@@ -231,7 +230,7 @@ public:
 		updateInfo();
 	};
 
-	void Fill(FillerMode mode, MESH &mesh, FaceReferencePointerVector &local_facePointer)
+	void Fill(FillerMode mode, MESH &mesh, std::vector<FacePointer * > &local_facePointer)
 	{
 		switch(mode)
 		{	
@@ -242,7 +241,27 @@ public:
 				vcgHole::template FillHoleEar< vcg::tri::MinimumWeightEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
 		case FgtHole<MESH>::SelfIntersection:
-				vcgHole::template FillHoleEar< vcg::tri::SelfIntersectionEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
+				std::vector<FacePointer * > vfp = local_facePointer;
+				SelfIntersectionEar::AdjacencyRing().clear();
+				PosType ip = this->p;
+				do
+				{
+					PosType inp = ip;
+					do
+					{
+						inp.FlipE();
+						inp.FlipF();
+						SelfIntersectionEar::AdjacencyRing().push_back(inp.f);
+					} while(!inp.IsBorder());
+					ip.NextB();
+				}while(ip != this->p);
+
+				typename std::vector<FacePointer>::iterator fpi = SelfIntersectionEar::AdjacencyRing().begin();
+        for( ; fpi != SelfIntersectionEar::AdjacencyRing().end(); ++fpi)
+					vfp.push_back( &*fpi );
+
+				vcgHole::template FillHoleEar< SelfIntersectionEar >(mesh, *this, HolePatchFlag(), vfp);
+				SelfIntersectionEar::AdjacencyRing().clear();
 			break;
 		}
 		
@@ -254,7 +273,7 @@ public:
 		filled = true;
 		accepted = true;
 		comp = false;
-		updatePatchState(mesh);		
+		updatePatchState(mesh);
 	};
 
 	
@@ -346,24 +365,12 @@ private:
 				// tra le facce che hanno i boundingbox intersecanti non considero come compenetranti
 				//    - la faccia corrispondente della mesh a quella della patch
 				//    - facce che condividono un edge o anche un vertice
-				
-				bool adj=false;
-
-				for (int i=0; i<3 && !adj; i++)
-					for (int j=0;j<3;j++)
-						if (f->V(i) == (*fib)->V(j))
-						{
-							adj = true;
-							break;							
-						}
-					
-				if(!adj)
-					if( vcg::Intersection<FaceType>(*f, **fib ))
-					{
-						comp = true;
-						f->SetUserBit(PatchCompFlag());
-						continue;
-					}			
+				if(vcg::tri::Clean<MESH>::TestIntersection(f, *fib ))
+				{
+					comp = true;
+					f->SetUserBit(PatchCompFlag());
+					continue;
+				}
 			} // for inbox...
 			inBox.clear();
 		}

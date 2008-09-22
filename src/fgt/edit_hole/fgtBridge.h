@@ -625,13 +625,14 @@ private:
 		{
 			// tra i 2 edge ci deve essere almeno 2 edge che li separino
 			// pertanto cerco un edge che condivide un vertice con enrambi
-			int dist=0;
 			PosType initPos(sideA.f, sideA.z);
 			PosType curPos=initPos;
+			
 			VertexType* va0=sideA.f->V0(sideA.z);
 			VertexType* va1=sideA.f->V1(sideA.z);
 			VertexType* vb0=sideB.f->V0(sideB.z);
 			VertexType* vb1=sideB.f->V1(sideB.z);
+			
 			do{
 				VertexType* cv0=curPos.f->V0(curPos.z);
 				VertexType* cv1=curPos.f->V1(curPos.z);
