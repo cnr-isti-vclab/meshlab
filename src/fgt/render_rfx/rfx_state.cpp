@@ -549,8 +549,17 @@ GLfloat* RfxState::DecodeColor(long val)
 
 	// Alpha needs special care due to its range.
 	// remove Alpha component from value and remap in range [0, 255]
-	color[3] = (val % _A == 0)? (short)(val / _A) : 0;
-	val -= (long)(_A * color[3] * ((color[3] < 0)? -1 : 1));
+	if (val > 0) {
+		color[3] = (val % _A == 0)? (short)(val / _A) : 0;
+	} else {
+		color[3] = 0.0f;
+		long negVal = val;
+		while (negVal < 0) {
+			color[3] -= 1.0f;
+			negVal += _A;
+		}
+	}
+	val -= (long)(_A * color[3]);
 	color[3] += ((color[3] < 0)? 256.0f : 0.0f);
 
 	// R, G and B components are easier to parse
