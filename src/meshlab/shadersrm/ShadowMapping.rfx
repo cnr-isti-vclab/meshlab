@@ -970,7 +970,7 @@
        <RmStringVariable NAME="Editing Shader" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
 Vertex Program]]></RmTextDataBlock></RmStringVariable>
        <RmStringVariable NAME="Editing Pass" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
-Platform]]></RmTextDataBlock></RmStringVariable>
+Depth]]></RmTextDataBlock></RmStringVariable>
        <RmIntegerVariable NAME="Y" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="6" MIN="-10" MAX="10" CLAMP="FALSE"/>
        <RmIntegerVariable NAME="Width" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="690" MIN="-10" MAX="10" CLAMP="FALSE"/>
        <RmIntegerVariable NAME="Height" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="702" MIN="-10" MAX="10" CLAMP="FALSE"/>
@@ -1065,7 +1065,7 @@ Platform]]></RmTextDataBlock></RmStringVariable>
     </RmRegistryBranch>
     <RmRegistryBranch NAME="WORKSPACE" API="" XML_VERSION="RenderMonkey 1.71">
      <RmStringVariable NAME="LAST_SAVE" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
-23/9/2008 12:59:12]]></RmTextDataBlock></RmStringVariable>
+23/9/2008 13:34:15]]></RmTextDataBlock></RmStringVariable>
      <RmStringVariable NAME="VERSION" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
 RenderMonkey Version 1.81 (build 280)]]></RmTextDataBlock></RmStringVariable>
      <RmStringVariable NAME="XML_VERSION" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC=""><RmTextDataBlock TYPE="TEXT"><![CDATA[
@@ -1076,9 +1076,7 @@ C:\Documents and Settings\BELiAL\Desktop\]]></RmTextDataBlock></RmStringVariable
    </RmRegistryBranch>
   </RmRegistryBranch>
   <RmOpenGLEffect NAME="ShadowMapping" API="OpenGL" ACTIVE_CAMERA="">
-   <RmVectorVariable NAME="lightPosition" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE_0="10.000000" VALUE_1="100.000000" VALUE_2="30.000000" VALUE_3="1.000000" MIN="-10.000000" MAX="10.000000" CLAMP="FALSE" NORMALIZE="FALSE"/>
-   <RmFloatVariable NAME="farPlane" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="FarClipPlane" VALUE="1000.000000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
-   <RmVectorVariable NAME="viewPosition" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="ViewPosition" VALUE_0="128.172836" VALUE_1="826.381104" VALUE_2="139.066772" VALUE_3="1.000000" MIN="-10.000000" MAX="10.000000" CLAMP="FALSE" NORMALIZE="FALSE"/>
+   <RmVectorVariable NAME="lightPosition" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE_0="20.000000" VALUE_1="110.000000" VALUE_2="50.000000" VALUE_3="1.000000" MIN="-10.000000" MAX="10.000000" CLAMP="FALSE" NORMALIZE="FALSE"/>
    <RmFloatVariable NAME="Ka" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0.200000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
    <RmFloatVariable NAME="Ks" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0.520000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
    <RmFloatVariable NAME="Kd" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0.700000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
@@ -1100,8 +1098,6 @@ C:\Documents and Settings\BELiAL\Desktop\]]></RmTextDataBlock></RmStringVariable
     <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
 uniform vec4 viewPosition;
 uniform vec4 lightPosition;
-uniform mat4 matViewProjection;
-uniform float farPlane;
 
 varying vec3 lightVecDist;
 
@@ -1122,9 +1118,6 @@ void main(void)
    normalVec = eNorm;
    lightVec = eLight.xyz - ePos.xyz;
    viewVec = /* (0,0,0) - we're in eye space */ - ePos.xyz;
-   
-   // nonetheless we also need world space light vector
-   lightVecDist = (lightPosition.xyz - gl_Vertex.xyz) * (1.0 / farPlane);
 
    // reproduce gluLookAt() behaviour
    vec3 newZ = normalize(-lightPosition.xyz);
@@ -1181,6 +1174,9 @@ void main(void)
                          );
 
    gl_TexCoord[1] = texAdjTrSc * lPos;
+   
+   // we also need world space light vector
+   lightVecDist = (lightPosition.xyz - gl_Vertex.xyz) * (1.0 / zFar);
 }]]></RmShaderCode></RmGLShader>
     <RmGLShader NAME="Fragment Program" API="OpenGL" PIXEL_SHADER="TRUE"><RmShaderCode TYPE="TEXT"><![CDATA[
 uniform sampler2D shadowMap;
@@ -1241,17 +1237,15 @@ void main(void)
     <RmSampler NAME="modelTexture" API="" REGISTER="-1"/>
     <RmSampler NAME="shadowMap" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="Ks" API="" REGISTER="-1"/>
-    <RmShaderConstant NAME="farPlane" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="lightPosition" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="Ka" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="Kd" API="" REGISTER="-1"/>
    </RmGLPass>
-   <RmGLPassUglyOnMeshlabWithNoMultipleMeshes NAME="Platform" API="OpenGL" PASS_INDEX="2" ENABLED="TRUE">
+   <RmGLPass NAME="Platform" API="OpenGL" PASS_INDEX="2" ENABLED="FALSE">
     <RmModelReference NAME="Disc" API=""/>
     <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
 uniform vec4 viewPosition;
 uniform vec4 lightPosition;
-uniform float farPlane;
 
 varying vec3 lightVecDist;
 
@@ -1277,9 +1271,6 @@ void main(void)
    lightVec = eLight.xyz - ePos.xyz;
    viewVec = /* (0,0,0) - we're in eye space */ - ePos.xyz;
    
-   // nonetheless we also need world space light vector
-   lightVecDist = (lightPosition.xyz - gl_Vertex.xyz) * (1.0 / farPlane);
-
    // reproduce gluLookAt() behaviour
    vec3 newZ = normalize(-lightPosition.xyz);
    vec3 newX = cross(newZ, vec3(0.0, 1.0, 0.0));
@@ -1336,6 +1327,9 @@ void main(void)
                          );
 
    gl_TexCoord[1] = texAdjTrSc * lPos;
+   
+   // we also need world space light vector
+   lightVecDist = (lightPosition.xyz - gl_Vertex.xyz) * (1.0 / zFar);
 }]]></RmShaderCode></RmGLShader>
     <RmGLShader NAME="Fragment Program" API="OpenGL" PIXEL_SHADER="TRUE"><RmShaderCode TYPE="TEXT"><![CDATA[
 uniform sampler2D shadowMap;
@@ -1403,17 +1397,15 @@ void main(void)
     <RmSampler NAME="modelTexture" API="" REGISTER="-1"/>
     <RmSampler NAME="modelTextureBump" API="" REGISTER="-1"/>
     <RmSampler NAME="shadowMap" API="" REGISTER="-1"/>
-    <RmShaderConstant NAME="farPlane" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="lightPosition" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="Ka" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="Kd" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="Ks" API="" REGISTER="-1"/>
-   </RmGLPassUglyOnMeshlabWithNoMultipleMeshes>
+   </RmGLPass>
    <RmGLPass NAME="Depth" API="OpenGL" PASS_INDEX="0" ENABLED="TRUE">
     <RmModelReference NAME="Model" API=""/>
     <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
 uniform vec4 lightPosition;
-uniform float farPlane;
 
 varying vec3 lightVec;
 
@@ -1461,7 +1453,7 @@ void main(void)
                  gl_Vertex;
    
    // we need vertex distance from light source
-   lightVec = (lightPosition.xyz - gl_Vertex.xyz) * (1.0 / farPlane);   
+   lightVec = (lightPosition.xyz - gl_Vertex.xyz) * (1.0 / zFar);   
 }]]></RmShaderCode></RmGLShader>
     <RmGLShader NAME="Fragment Program" API="OpenGL" PIXEL_SHADER="TRUE"><RmShaderCode TYPE="TEXT"><![CDATA[
 varying vec3 lightVec;
@@ -1472,7 +1464,6 @@ void main(void)
 }]]></RmShaderCode></RmGLShader>
     <RmRenderTarget NAME="shadowTex" API="" INDEX="0" RENDER_TO_SCREEN="FALSE" COLOR_CLEAR="TRUE" DEPTH_CLEAR="TRUE" CLEAR_COLOR_VALUE="-1" DEPTH_CLEAR_VALUE="1.000000"/>
     <RmStreamMapReference NAME="Stream Mapping" API=""/>
-    <RmShaderConstant NAME="farPlane" API="" REGISTER="-1"/>
     <RmShaderConstant NAME="lightPosition" API="" REGISTER="-1"/>
    </RmGLPass>
   </RmOpenGLEffect>
