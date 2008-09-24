@@ -49,29 +49,62 @@ public:
 	inline void SetNull() { f=0; };
 	inline bool IsNull() const { return f==0; };
 
-	typename MESH::FacePointer f;	
-	int z;					// edge index
+	typename MESH::FacePointer f;
+	int z;
 	FgtHole<MESH>* h;
 };
 
-/** Object rapresent connection between two border edges of different faces. 
+/** Object rapresent connection between two border edges of different faces.
+ *  Connection consists in 2 face adjcent each other over an edge and adjcent 
+ *  with a mesh face over another edge, so both faces have a border edge.
+ * 
+ *  Bridge can connect 2 edge belong the same hole, result are 2 new holes.
+ *  In this case bridge could be adjacent to mesh if edge are next, so this 
+ *  bridge could not been build.
+ *
+ *  Bridge can also connect 2 or more different holes in only one hole.
+ * 
+ *                   \ / B \ /                  \ / B \ /
+ *             +------+-----+------+      +------+-----+------+
+ *             |                   |			|      |\ f0 |      |
+ *             |                   |			|      | \   |      |
+ *             |       hole        |      | hole |  \  | hole |
+ *             |                   |      |      |   \ |      |
+ *             |                   |      |      | f1 \|      |
+ *             +------+-----+------+      +------+-----+------+
+ *                   / \ A / \                  / \ A / \      
+ *                                             GOOD BRIDGE
+ *                             f0 and f1 are adjacent only with one mesh face
+ *
+ *
+ *   \ / B \ /       \ / B \ /           |
+ *    +-----+---      +-----+---         |       ---+------+------      ---+------+--------
+ *   /|              /| f1 /|            |           \ A  /                 \ A  /|\
+ *  / |             / |   / |            |            \  /                   \  / | \
+ *  C |  hole       C |  /  | hole       |        hole \/    hole     hole    \/  |  \  hole
+ *  \ |             \ | /   |            |             /\                     /\f0|   \
+ *   \|              \|/ f0 |            |            /  \                   /  \ | f1 \
+ *    +-----+---      +-----+---         |           / B  \                 / B  \|     \
+ *   / \ A / \       / \ A / \           |       ---+------+------      ---+------+------+---
+ *                  NO GOOD BRIDGE	     |                                 NO GOOD BRIDGE
+ *               f1 adjacent to B and C                                f0 adjacent to A and B
  */
 template <class MESH>
 class FgtBridge
 {
 public:
-	typedef typename MESH::FaceType					FaceType;
-	typedef typename MESH::FacePointer				FacePointer;
-	typedef typename MESH::FaceIterator				FaceIterator;
+	typedef typename MESH::FaceType							FaceType;
+	typedef typename MESH::FacePointer					FacePointer;
+	typedef typename MESH::FaceIterator					FaceIterator;
 	typedef typename vcg::face::Pos<FaceType>		PosType;
-	typedef typename std::vector<PosType>			PosVector;
-	typedef FgtHole<MESH>							HoleType;
+	typedef typename std::vector<PosType>				PosVector;
+	typedef FgtHole<MESH>												HoleType;
 	typedef typename std::vector<HoleType>			HoleVector;
 	
-	typedef typename MESH::VertexType				VertexType;
-	typedef typename MESH::CoordType				CoordType;
-	typedef typename MESH::ScalarType				ScalarType;
-	typedef typename vcg::Triangle3<ScalarType>		TriangleType;
+	typedef typename MESH::VertexType						VertexType;
+	typedef typename MESH::CoordType						CoordType;
+	typedef typename MESH::ScalarType						ScalarType;
+	typedef typename vcg::Triangle3<ScalarType>	TriangleType;
 
 
 /****	Static functions	******/
@@ -81,7 +114,6 @@ public:
 	 *  If the bridge is inside the same hole it cannot be adjacent the hole border, 
 	 *  this means fill another sub hole.
 	 */
-	
 	static bool CreateBridge(BridgeAbutment<MESH> &sideA, BridgeAbutment<MESH> &sideB,  MESH &mesh, 
 		HoleVector &holes, std::vector<FacePointer *> *app=0)
 	{
@@ -106,24 +138,24 @@ public:
 		return true;
 	};
 
-	
+	/* Remove all face marked as Bridge. */
 	static void RemoveBridges(MESH  &mesh, HoleVector &holes)
 	{
-		// vettore usato per contenere tutte le facce di bridge trovate a partire da un hole
+		// contains bridge faces reached navigating the holes.
 		std::vector<FacePointer> bridgeFaces;
 
-		// vettore usato per contenere tutti gli half-edge adiacenti alle facce dei bridge che sono anche
+		// contains all half-edge located over non-bridge face and over edge shared with bridge face.
+		// these half-edges will become border edge when bridge faces are removed.
 		PosVector adjBorderPos;
 
 		PosType curPos;
 		getBridgeInfo(holes, bridgeFaces, adjBorderPos);
 
-		// elimino gli hole relativi alle facce bridge trovate,
+		// remove all holes which have a bridge face on its border and
+		// remove all bridge face
 		typename std::vector<FacePointer>::iterator fit;
 		for(fit=bridgeFaces.begin(); fit!=bridgeFaces.end(); fit++ )
 		{
-			// se la faccia bridge in esame si affaccia su un'altro hole rispetto 
-			// a quello in esame rimuovo anche quell'hole
 			if(FgtHole<MESH>::IsHoleBorderFace(**fit))
 			{
 				typename HoleVector::iterator hit;
@@ -137,9 +169,8 @@ public:
 				vcg::tri::Allocator<MESH>::DeleteFace(mesh, **fit);
 		}
 
-		// elimino anche gli hole trovati dalle facce adiacenti, solo quelle che però sono di bordo, 
-		// ovvero facce di hole derivanti da chiusura di vertici non manifold, che però non hanno
-		// edge bridged sul loro bordo
+		// remove also hole which have on its border faces finded from half-edge adjacent to bridge face
+		// these holes will be reinsert at the end
 		typename std::vector<PosType>::iterator pit;
 		for(pit=adjBorderPos.begin(); pit!=adjBorderPos.end(); pit++)
 			if(FgtHole<MESH>::IsHoleBorderFace(*pit->f))
@@ -152,9 +183,7 @@ public:
 				}
 			}
 
-		
-		// rimuovo le facce bridge ed aggiorno la topologia della faccia della 
-		// mesh adiacente al bridge la faccia "dove poggia la spalla del ponte"					
+		// update mesh topology after bridge faces removal, restore border
 		for(fit=bridgeFaces.begin(); fit!=bridgeFaces.end(); fit++ )
 		{
 			for(int e=0; e<3; e++)
@@ -173,12 +202,10 @@ public:
 			}
 		}
 		
-		// ho staccato le facce bridge dalla mesh e rimosso gli hole adiacenti al bridge
-		// adesso aggiorno l'hole ed re-inserisco eventuali hole che si sono formati 
-		// dalla rimozione del bridge (il bridge legava più hole distinti)
 		
-		// per ogni faccia adiacente al bridge scorro il buco marcando le facce visitate
-		// in modo da scoprire quali facce vengono si affacciano su buchi nuovi				
+		// update hole list inserting holes touched by bridge
+		// use adjBorderPos element as start pos to walk over the border, if walking doesn't
+		// visit some adjBorderPos element means this belongo to other hole.
 		PosType initPos;
 		typename PosVector::iterator it;
 		for( it=adjBorderPos.begin(); it!=adjBorderPos.end(); it++)
@@ -199,8 +226,6 @@ public:
 				assert(curPos.IsBorder());
 			}while(curPos != initPos);
 			
-			
-			// ho trovato una faccia di un'altro buco
 			FgtHole<MESH> newHole(initPos, QString("Hole_%1").arg(holes.size(),3,10,QChar('0')) );
 			newHole.SetSelect(sel);
 			holes.push_back( newHole );
@@ -220,8 +245,9 @@ public:
 		}				
 	};
 
-	/** Return boolean indicatind if face is a face of an hole of the list.
-	 *  Also return a pointer to appartenent hole and pos finded
+	/** Return boolean indicatind if the picking have select a border face which can be used
+	 *  as abutment for a bridge. If true it also return BridgeAbutment allowing to know 
+	 *  border edge and its relative hole.
 	 */
 	static bool FindBridgeAbutmentFromPick(FacePointer bFace, int pickedX, int pickedY, 
 		HoleVector &holes, BridgeAbutment<MESH> &pickedResult) 
@@ -240,18 +266,20 @@ public:
 		pickedResult.f = bFace;
 		if( vcg::face::BorderCount(*bFace) == 1 )
 		{
+			// it choose the only one border edge
 			for(int i=0; i<3; i++)
 				if(vcg::face::IsBorder<FaceType>(*bFace, i))
 					pickedResult.z = i;				
 		}
 		else
 		{
+			// looking for the closest border edge to pick point
 			PosType retPos = getClosestPos(bFace, pickedX, pickedY);
 			pickedResult.f = retPos.f;
 			pickedResult.z = retPos.z;
 		}	
 		
-		return true; // means no find hole
+		return true;
 	};
 
 	
@@ -538,6 +566,7 @@ public:
 					{
 						// il buco da chiudere è formato solo da 3 edge e quidni viene completamente chiuso
 						// senza possibilità di ripristinarlo, tanto la soluzione di riempimento è solo una
+						fit->SetUserBit(FgtHole<MESH>::HolePatchFlag());
 						fit->FFp(1) = p2.f;
 						fit->FFi(1) = p2.z;
 						p2.f->FFp(p2.z) = &*fit;
@@ -588,17 +617,7 @@ public:
 private:
 
 	/* Compute distance between bridge side to allow no bridge adjacent hole border	
-	 *
-	 *                              \ / B \ /                           \ / B \ /		|
-	 *                               +-----+---                           +-----+---		|	  ---+------+------		   ---+------+--------
-	 *			/|                                      /| f1  /|		|		  \ A  /		        \ A  / |\
-	 *                          /   |                                     / |    /  |		|		   \  /			         \  /   |  \
-	 *                            C |  hole                           C |  /    | hole             |	    hole   \/    hole             hole    \/    |    \  hole
-	 *                            \  |                                   \  | /     |		|		    /\	                               /\f0|     \
-	 *                              \|                                     \|/ f0 |		|		   /  \	                              /  \   | f1  \
-	 *                               +-----+---		 	 +-----+---		|	 	  / B  \                            / B  \  |        \
-	 *                              / \ A / \			/ \ A / \		|	  ---+------+------		---+------+------+---
-	 *                                                                NO GOOD BRIDGE	|					   NO GOOD BRIDGE
+	
 	 */
 	static bool testAbutmentDistance(const BridgeAbutment<MESH> &sideA, const BridgeAbutment<MESH> &sideB)
 	{

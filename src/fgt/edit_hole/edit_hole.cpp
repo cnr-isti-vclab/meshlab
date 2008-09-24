@@ -187,8 +187,9 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 
  void EditHolePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
 	 if(holesModel->getState() == HoleListModel::Filled)
-		holesModel->acceptFilling(false);
-	
+	 	 holesModel->acceptFilling(false);
+	 holesModel->removeBridges();
+
 	 FgtHole<CMeshO>::DeleteFlag();
 
 	 if ( dialogFiller!=0) {

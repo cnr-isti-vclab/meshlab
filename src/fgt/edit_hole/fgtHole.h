@@ -37,7 +37,25 @@
 #include "vcg/space/color4.h"
 #include <meshlab/meshmodel.h>
 
-/** An hole type
+/** An hole type, extends vcg::tri::Hole<MESH>::Info adding more information as filling, selection,
+ *  filing autocompenetration and non manifoldness. This class also allow to fill (and restore) an 
+ *  hole using different criteria.
+ *  
+ *  FgtHole uses flags to mark interesting face, so surfing the hole faces is driven by face-face
+ *  ajacency and flag meaning. Hole face are flagged as:
+ *    - HoleBorderFace: face which initially (before filling) have 1/2 border edge.
+ *    - HolePatchFace: faces added to fill the hole
+ *    - PatchCompFace: patch faces which are selfintersected with mesh.
+ *    - BridgeFace: faces added to edit hole (unify 2 holes, subdivide an hole, partitioning a
+ *      non-manifold hole in more manifold ones)
+ *    - BridgeFace + HolePatchFace: this combo is used to individuate faces added to subdivide
+ *      a non manifold hole and also close a non manifold hole, ie an hole made up from only 3 edge
+ *     
+ *        --------+-------+----+-----|     --------+-------+----+------|    
+ *         hole   /\ hole /\  hole   |       hole  /\  f0  /\ f1| hole |  f0: BridgeFace + PatchFace
+ *           A   /  \  A /  \   A    |         A  /  \    /  \  |   B  |  f1: BridgeFace
+ *              /    \  /    \       |           /    \  /    \ |      |
+ *       ______/      \/      \______|    ______/      \/      \|______|
  */
 template <class MESH>
 class FgtHole : public vcg::tri::Hole<MESH>::Info
@@ -49,22 +67,22 @@ public:
 		Trivial, MinimumWeight, SelfIntersection
 	};
 
-	typedef typename MESH::FaceType					FaceType;
-	typedef typename MESH::FacePointer				FacePointer;
-	typedef typename std::vector<FacePointer>		FacePointerVector;
-	typedef typename MESH::FaceIterator				FaceIterator;
-    typedef typename MESH::CoordType				CoordType;
-	typedef typename MESH::VertexType				VertexType;
-	typedef typename MESH::ScalarType				ScalarType;
-	typedef typename vcg::face::Pos<FaceType>		PosType;
-	typedef typename std::vector<PosType>			PosVector;
-	typedef typename PosVector::iterator			PosIterator;
-	typedef typename vcg::tri::Hole<MESH>			vcgHole;
-	typedef typename vcgHole::Info					HoleInfo;
-	typedef typename std::vector< FgtHole<MESH> >	HoleVector;
-	typedef typename HoleVector::iterator			HoleIterator;
-	typedef typename vcg::tri::TrivialEar<MESH>		TrivialEar;
-	typedef typename vcg::tri::MinimumWeightEar<MESH>	MinimumWeightEar;
+	typedef typename MESH::FaceType												FaceType;
+	typedef typename MESH::FacePointer										FacePointer;
+	typedef typename std::vector<FacePointer>							FacePointerVector;
+	typedef typename MESH::FaceIterator										FaceIterator;
+  typedef typename MESH::CoordType											CoordType;
+	typedef typename MESH::VertexType											VertexType;
+	typedef typename MESH::ScalarType											ScalarType;
+	typedef typename vcg::face::Pos<FaceType>							PosType;
+	typedef typename std::vector<PosType>									PosVector;
+	typedef typename PosVector::iterator									PosIterator;
+	typedef typename vcg::tri::Hole<MESH>									vcgHole;
+	typedef typename vcgHole::Info												HoleInfo;
+	typedef typename std::vector< FgtHole<MESH> >					HoleVector;
+	typedef typename HoleVector::iterator									HoleIterator;
+	typedef typename vcg::tri::TrivialEar<MESH>						TrivialEar;
+	typedef typename vcg::tri::MinimumWeightEar<MESH>			MinimumWeightEar;
 	typedef typename vcg::tri::SelfIntersectionEar<MESH>	SelfIntersectionEar;
 
 	FgtHole(HoleInfo &hi, QString holeName) : 
@@ -75,7 +93,7 @@ public:
 		comp = false;
 		accepted = true;
 		selected = false;
-		isBridged=false;
+		isBridged = false;
 		perimeter = HoleInfo::Perimeter();
 		findNonManifoldness();
 	};
@@ -88,11 +106,10 @@ public:
 		comp = false;
 		accepted = true;
 		selected = false;
-		isBridged=false;
+		isBridged = false;
 		this->p = startPos;
 		updateInfo();		
 	};
-
 
 	~FgtHole() {};
 
@@ -145,9 +162,9 @@ public:
 		glEnd();
 	}
 
-	/*  Reset flag used by this plugin to mark this hole and its patch. 
+	/*  Reset flags used by this plugin to mark this hole and its patch. 
 	 *  Bridges face can finded along the hole and it needs look at adjacent face because
-	 *  a bridge could be build from other bridge face.
+	 *  a bridge could be build from other border face.
 	 */
 	void ResetFlag()
 	{
@@ -161,6 +178,11 @@ public:
 			{
 				(*it)->ClearUserBit(HolePatchFlag());
 				(*it)->ClearUserBit(PatchCompFlag());
+
+				// si conferma il filling della faccia BridgedFace+PatchFace aggiunta 
+				// dalla partizione per ottenere hole non manifold
+				(*it)->ClearUserBit(BridgeFlag());
+
 				for(int i=0; i<3; i++)
 				{
 					FacePointer adjF = (*it)->FFp(i);
@@ -172,7 +194,7 @@ public:
 		}
 		else
 		{
-			// we can walk the border to find hole's faces
+			// we can walk the border to find hole's faces added by bridges
 			PosType curPos = this->p;
 			do{
 				curPos.f->ClearUserBit(HoleFlag());
@@ -198,7 +220,7 @@ public:
 	};
 
 
-	/* Restore hole, remove patch faces applied to mesh to fill this hole*/
+	/* Restore hole, remove patch faces applied to mesh to fill this hole. */
 	void RestoreHole(MESH &mesh)
 	{
 		assert(filled);
@@ -209,6 +231,8 @@ public:
 		typename std::vector<FaceType*>::iterator it;
 		for(it = patches.begin(); it!=patches.end(); it++)
 		{
+			if(IsBridgeFace(**it)) continue;
+
 			assert(IsPatchFace(**it));
 			for(int e=0; e<3; e++)
 			{	

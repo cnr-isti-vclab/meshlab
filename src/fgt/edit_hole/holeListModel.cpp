@@ -159,7 +159,7 @@ void HoleListModel::toggleAcceptanceHole(CFaceO *bface)
 	int ind = -1;
 	if(FgtHole<CMeshO>::IsHoleBorderFace(*bface))
 		ind = FgtHole<CMeshO>::FindHoleFromBorderFace(bface, holes, h);
-	else if(FgtHole<CMeshO>::IsPatchFace(*bface))
+	else if(FgtHole<CMeshO>::IsPatchFace(*bface) && !FgtHole<CMeshO>::IsBridgeFace(*bface))
 		ind = FgtHole<CMeshO>::FindHoleFromPatchFace(bface, holes, h);
 
 	if(ind == -1)
