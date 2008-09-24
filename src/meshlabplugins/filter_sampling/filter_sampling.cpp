@@ -160,7 +160,7 @@ void AddSample(const CMeshO::CoordType &startPt)
 
     // compute distance between startPt and the mesh S2
 		CMeshO::FaceType   *nearestF=0;
-		vcg::face::PointDistanceBaseFunctor PDistFunct;
+		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 		dist=dist_upper_bound;
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
 
@@ -249,7 +249,7 @@ void AddVert(CMeshO::VertexType &p)
 		const CMeshO::CoordType &startPt= p.cP();
     // compute distance between startPt and the mesh S2
 		CMeshO::FaceType   *nearestF=0;
-		vcg::face::PointDistanceBaseFunctor PDistFunct;
+		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 		dist=dist_upper_bound;
 	  if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);

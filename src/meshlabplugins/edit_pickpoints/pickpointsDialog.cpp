@@ -61,7 +61,7 @@ public:
 
 		// compute distance between startPt and the mesh S2
 		CMeshO::FaceType   *nearestF=0;
-		vcg::face::PointDistanceBaseFunctor PDistFunct;
+		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 		dist=dist_upper_bound;
 		
 		nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
