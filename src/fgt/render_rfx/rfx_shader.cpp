@@ -66,6 +66,16 @@ void RfxShader::CompileAndLink()
 		pass->CompileAndLink();
 }
 
+QStringList RfxShader::GetCompilationLog()
+{
+	QList<QString> theLog;
+	foreach (RfxGLPass *pass, shaderPasses)
+		theLog.append("Compiling pass " + pass->GetPassName() + "... " +
+		              pass->GetCompilationLog());
+
+	return theLog;
+}
+
 void RfxShader::Start(int passIdx)
 {
 	if (passIdx >= 0 && passIdx < shaderPasses.size()) {

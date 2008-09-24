@@ -64,10 +64,12 @@ public:
 	RfxUniform* getUniform(const QString& uniIdx);
 	void CompileAndLink();
 	void Start();
+	const QString GetCompilationLog() { return compileLog; }
 
 private:
 	QString vert;
 	QString frag;
+	QString compileLog;
 
 	QString passName;
 	int passIndex;
@@ -80,7 +82,7 @@ private:
 	QList<RfxState*> rfxStates;
 	QList<RfxUniform*> shaderUniforms;
 
-	void printInfoLog(GLhandleARB);
+	void FillInfoLog(GLhandleARB);
 };
 
 #endif /* RFX_GLPASS_H_ */

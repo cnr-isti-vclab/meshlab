@@ -56,6 +56,9 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
 	vertHL = new GLSLSynHlighter(ui.textVert->document());
 	fragHL = new GLSLSynHlighter(ui.textFrag->document());
 
+	// fill log once for dialog, since it reports status for all passes
+	ui.textLog->setPlainText(s->GetCompilationLog().join("\n"));
+
 	setupTabs();
 }
 

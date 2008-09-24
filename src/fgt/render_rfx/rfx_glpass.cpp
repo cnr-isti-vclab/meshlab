@@ -47,8 +47,10 @@ void RfxGLPass::SetShaderSource(const QString &source, bool isFragment)
 
 void RfxGLPass::CompileAndLink()
 {
-	if (frag.isEmpty() || vert.isEmpty())
+	if (frag.isEmpty() || vert.isEmpty()) {
+		compileLog = "OK (No sources)";
 		return;
+	}
 
 	GLubyte *ShaderSource;
 	GLint ShaderLen;
@@ -80,12 +82,13 @@ void RfxGLPass::CompileAndLink()
 	glAttachShader(shaderProgram, fragShader);
 	glLinkProgram(shaderProgram);
 
-	// TODO: improve compile/link error handling - integration with qt dialog
 	GLint res;
 	glGetObjectParameterivARB(shaderProgram, GL_OBJECT_LINK_STATUS_ARB, &res);
 	if (!res) {
-		printInfoLog(shaderProgram);
+		FillInfoLog(shaderProgram);
 	} else {
+		compileLog = "OK";
+
 		// shader link successful. update uniform locations
 		// and load textures
 		shaderLinked = true;
@@ -96,10 +99,7 @@ void RfxGLPass::CompileAndLink()
 	}
 }
 
-// DEBUGGING for random shader compilation errors
-// TODO: improve error handling
-#include <cstdlib>
-void RfxGLPass::printInfoLog(GLhandleARB obj)
+void RfxGLPass::FillInfoLog(GLhandleARB obj)
 {
 	GLint infologLength = 0;
 	GLsizei charsWritten = 0;
@@ -110,7 +110,10 @@ void RfxGLPass::printInfoLog(GLhandleARB obj)
 	if (infologLength > 0) {
 		infoLog = new char[infologLength];
 		glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
-			qDebug("%s\n",infoLog);
+
+		compileLog = "FAILED\n";
+		compileLog.append(infoLog);
+
 		delete[] infoLog;
 	}
 }

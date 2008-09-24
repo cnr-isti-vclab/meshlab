@@ -207,6 +207,26 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabCompileLog" >
+      <attribute name="title" >
+       <string>Log</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_11" >
+       <item row="0" column="0" >
+        <widget class="QPlainTextEdit" name="textLog" >
+         <property name="lineWrapMode" >
+          <enum>QPlainTextEdit::NoWrap</enum>
+         </property>
+         <property name="readOnly" >
+          <bool>true</bool>
+         </property>
+         <property name="plainText" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item row="0" column="0" >

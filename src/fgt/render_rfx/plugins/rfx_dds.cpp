@@ -426,11 +426,11 @@ bool RfxDDSPlugin::GetOGLFormat(DDSHeader &header)
 bool RfxDDSPlugin::DXT1CheckAlpha(unsigned char *blocks, int size)
 {
 	DXTColBlock *colBlock(reinterpret_cast<DXTColBlock*>(blocks));
-	unsigned char byte;
+	unsigned char byte = colBlock[0].row[0];
 
 	for (unsigned i = 0, n = (size / 8); i < n; i++)
 		if (colBlock[i].col0 <= colBlock[i].col1)
-			for (unsigned j = 0; j < 4; j++, byte = colBlock[i].row[j])
+			for (unsigned j = 0; j < 4; byte = colBlock[i].row[++j])
 				for (unsigned p = 0; p < 4; p++, byte >>= 2)
 					if ((byte & 3) == 3)
 						return true;

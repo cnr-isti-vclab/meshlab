@@ -68,6 +68,7 @@ public:
 	void CompileAndLink();
 	void Start(int);
 	void Stop() { glUseProgram(0); }
+	QStringList GetCompilationLog();
 
 private:
 	void UpdateSemanticUniforms(int);
