@@ -18,6 +18,7 @@ SUBDIRS       = meshfilter \
 				filter_splitter \
 #				filter_texture \
 				filter_sampling \
+				filter_autoalign \
 				meshcolorize \
 				meshselect \
 				meshdecorate \ 
