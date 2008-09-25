@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <meshlab/meshmodel.h>
 #include <QtGui>
+#include <QGLWidget>
 #include "shaderStructs.h"
 #include "ui_shaderDialog.h"
 

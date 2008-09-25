@@ -1,6 +1,5 @@
 #include "shaderDialog.h"
 #include <QTextStream>
-#include <QGLWidget>
 #include <QFileDialog>
 #include <QMessageBox>
 #define DECFACTOR 100000.0f
