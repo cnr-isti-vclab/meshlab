@@ -22,7 +22,6 @@ SUBDIRS       = meshfilter \
 				meshselect \
 				meshdecorate \ 
 				edit_select \
-				edit_morpher \
 				edit_pickpoints \
 #				edit_phototexturing \
 				editslice \ 
