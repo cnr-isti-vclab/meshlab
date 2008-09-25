@@ -94,8 +94,8 @@ void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, Filt
 								"This param represents the % distance for the local search algorithm used for new vertices allocation. Generally, 0.25-0.30 is a good value");
 
 			parlst.addMesh(	"userMesh", md.mm(), 
-							"New topology mesh",
-							"This mesh will be used as the new base topology");
+							"Topology mesh",
+							"This mesh will be used as the new base topology, and will be replaced by the new mesh");
 
 			parlst.addMesh( "inMesh", target,
 							"Original mesh",
@@ -108,20 +108,21 @@ void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, Filt
 
 bool FilterTopoPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
+	RetopMeshBuilder rm;
 
 	MeshModel *userMesh = par.getMesh("userMesh");
 	MeshModel *inMesh = par.getMesh("inMesh");
 	int it = par.getInt("it");
 	float dist = par.getAbsPerc("dist");
 
-	MeshModel * outM = par.getMesh("userMesh"); // = *doc->addNewMesh("Retopped.ply");
+	MeshModel * outM = par.getMesh("userMesh");
 
-	bool r = RetopMeshBuilder::applyTopoMesh(*userMesh, *inMesh, it, dist, *outM);
-/*
-	if(r)
-	{
-		doc->meshList.push_back
-	} */
+	inMesh->updateDataMask(MeshModel::MM_FACEMARK);
+	tri::UpdateNormals<CMeshO>::PerFaceNormalized(inMesh->cm);
+	tri::UpdateFlags<CMeshO>::FaceProjection(inMesh->cm);
+
+	rm.init(inMesh, dist);
+	rm.applyTopoMesh(*userMesh, *inMesh, it, dist, *outM);
 
 	return true;
 }

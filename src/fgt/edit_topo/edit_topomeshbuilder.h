@@ -65,7 +65,7 @@ public:
 		Point3f closestPt, closestPt1, closestPt2, normf, bestq, ip;
 
 		float dist = dist_upper_bound;
-		vcg::face::PointDistanceBaseFunctor PDistFunct;
+		vcg::face::PointDistanceBaseFunctor<float> PDistFunct;
 
 /*		const CMeshO::CoordType &p1 = ep.f->V(ep.z)->P();
 		unifGrid.GetClosest(PDistFunct,markerFunctor,p1,dist_upper_bound,dist,closestPt1);
@@ -220,7 +220,7 @@ public:
 		midSampler->DEBUG = DEBUG;
 
 		midSampler->distPerc = dist;
-		midSampler->LinMid = &Lin;
+		midSampler->LinMid = &Lin;	
 		midSampler->LoutMid = &Lout;
 
 		createBasicMesh(outMesh, Fstack, stack);
@@ -267,21 +267,20 @@ public:
 	//
 	//
 	//********************************************************************************************//
-	static bool applyTopoMesh(MeshModel &userTopoMesh, MeshModel &inModel, int it, float dist, MeshModel &outMesh)
+	bool applyTopoMesh(MeshModel &userTopoMesh, MeshModel &inModel, int it, float dist, MeshModel &outMesh)
 	{
-		NearestMidPoint<CMeshO> * midSamp;
+		midSampler->DEBUG = false;
 
-		inModel.updateDataMask(MeshModel::MM_FACEMARK);
-		midSamp = new NearestMidPoint<CMeshO>();
-		midSamp->init(&inModel.cm, dist);
-		midSamp->DEBUG = false;
+		midSampler->distPerc = dist; /*
+		midSampler->LinMid = &Lin;	
+		midSampler->LoutMid = &Lout; */
 
-	//	vcg::tri::Append<CMeshO, CMeshO>::Mesh(userTopoMesh.cm, outMesh.cm);
+//		createBasicMesh(outMesh, Fstack, stack);
 
 		outMesh.updateDataMask(MeshModel::MM_FACETOPO);
 
 		bool oriented,orientable;
-		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable);
+		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable); 
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
 		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
@@ -289,16 +288,16 @@ public:
 		outMesh.clearDataMask(MeshModel::MM_FACETOPO);
 
 
-		userTopoMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+
+		outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 		if(tri::Clean<CMeshO>::IsTwoManifoldFace(outMesh.cm))
-		{
 			for(int i=0; i<it; i++)
 			{
 				outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSamp, 0, false, 0);
-				outMesh.clearDataMask(MeshModel::MM_VERTFACETOPO);
+				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler /*MyMidPoint<CMeshO>()*/, 0, false, 0);
+				outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
+		//		dialog->setBarVal(i);
 			}
-		}else return false;
 
 		outMesh.fileName = "Retopology.ply";
 		tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
@@ -314,9 +313,12 @@ public:
 			for(int i=0; i<3; i++)
 				if((*fi).V(i)->IsS())
 					(*fi).SetS();
-		}
-	
+		}		
+		
 		return true;
+
+
+
 	}
 
 
