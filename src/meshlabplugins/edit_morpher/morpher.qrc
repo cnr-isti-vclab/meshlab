@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/" >
-		<file>images/morpher.png</file>
-    </qresource>
-</RCC>
