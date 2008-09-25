@@ -585,12 +585,12 @@ public:
 	static int& HolePatchFlag()	{static int _pf=-1; return _pf; };
 	static int& PatchCompFlag()	{static int _pcf=-1; return _pcf; };
 	static int& BridgeFlag()	{static int _bf=-1; return _bf; };
-	static void ResetHoleId() { _holeId=0; };
-	static int GetHoleId() { return ++_holeId; };
+	static void ResetHoleId() { HoleId()=0; };
+	static int GetHoleId() { return ++HoleId(); };
 	QString name;
 	
 private:
-	static int _holeId;
+	static int &HoleId(){static int _holeId=0; return _holeId;};
 	bool filled;
 	bool comp;
 	bool accepted;
@@ -602,5 +602,4 @@ private:
 	std::vector<VertexType*> vertexes;
 };
 
-int FgtHole<CMeshO>::_holeId = 0;
 #endif
