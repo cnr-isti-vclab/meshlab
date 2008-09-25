@@ -62,8 +62,8 @@ public:
 	inline int rowCount(const QModelIndex &parent = QModelIndex()) const { return holes.size(); };
 	inline int columnCount(const QModelIndex &parent = QModelIndex()) const 
 	{
-		if(state == HoleListModel::Selection) return 4;
-		else return 6;
+		if(state == HoleListModel::Selection) return 5;
+		else return 7;
 	};
 	
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;

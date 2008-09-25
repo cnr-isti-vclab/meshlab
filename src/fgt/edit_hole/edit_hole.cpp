@@ -49,12 +49,7 @@ EditHolePlugin::EditHolePlugin() {
 	hasPick = false;
 }
 
-EditHolePlugin::~EditHolePlugin() {
-	if ( dialogFiller!=0) { 
-		delete  dialogFiller; 
-		dialogFiller=0;
-	}
-}
+EditHolePlugin::~EditHolePlugin() {}
 
 QList<QAction *> EditHolePlugin::actions() const {
 	return actionList;
@@ -96,6 +91,13 @@ void EditHolePlugin::mouseMoveEvent(QAction *,QMouseEvent * e, MeshModel &/*m*/,
 
 void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 {	
+	m.updateDataMask(MeshModel::MM_FACETOPO);
+	if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) 
+	{
+		QMessageBox::critical(0, tr("Manifoldness Failure"), QString("Hole's managing requires manifoldness."));
+		return; // can't continue, mesh can't be processed
+	}
+
 	// necessario per evitare di avere 2 istanze del filtro se si cambia mesh
 	// senza chidere il filtro
 	if(dialogFiller != 0)
@@ -122,7 +124,6 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	connect(dialogFiller->ui.acceptFillBtn, SIGNAL(clicked()), this, SLOT(acceptFill()) );
 	connect(dialogFiller->ui.cancelFillBtn, SIGNAL(clicked()), this, SLOT(cancelFill()) );
 	connect(dialogFiller->ui.clearBridgeBtn, SIGNAL(clicked()), this, SLOT(clearBridge()) );
-	connect(dialogFiller->ui.nmCloseBtn, SIGNAL(clicked()), this, SLOT(closeNMHoles()) );
 	connect(dialogFiller->ui.selfHoleChkB, SIGNAL(stateChanged(int)), this, SLOT(chekSingleBridgeOpt()) );
 	connect(dialogFiller->ui.diedralWeightSld, SIGNAL(valueChanged(int)), this, SLOT(updateDWeight(int)));
 	connect(dialogFiller->ui.bridgeParamSld, SIGNAL(valueChanged(int)), this, SLOT(updateBridgeSldValue(int)));
@@ -186,6 +187,9 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
  }
 
  void EditHolePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
+	 if(holesModel == 0)	// means editing is not started
+		 return;
+
 	 if(holesModel->getState() == HoleListModel::Filled)
 	 	 holesModel->acceptFilling(false);
 	 holesModel->removeBridges();
@@ -193,10 +197,13 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 	 FgtHole<CMeshO>::DeleteFlag();
 
 	 if ( dialogFiller!=0) {
-		delete  dialogFiller;
+		delete dialogFiller;
 		delete holesModel;
+		delete holeSorter;
 		dialogFiller = 0;
 		holesModel = 0;
+		holeSorter = 0;
+		gla = 0;
 		mesh = 0;
 	 }
  }
@@ -253,8 +260,7 @@ void EditHolePlugin::updateBridgeSldValue(int val)
 
 void EditHolePlugin::bridge()
 {
-	bool autobridge = dialogFiller->ui.autoBridgeRBtm->isChecked();
-	if(!autobridge)
+	if( dialogFiller->ui.manualBridgeRBtm->isChecked() )
 	{
 		if(holesModel->getState() != HoleListModel::ManualBridging)
 		{
@@ -267,11 +273,13 @@ void EditHolePlugin::bridge()
 			dialogFiller->clickEndBridging();
 		}
 	}
-	else
+	else if( dialogFiller->ui.autoBridgeRBtm->isChecked() )
 	{
 		bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
 		holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
 	}
+	else
+		holesModel->closeNonManifolds();	
 	
 	gla->update();
 }
@@ -284,12 +292,6 @@ void EditHolePlugin::chekSingleBridgeOpt()
 void EditHolePlugin::clearBridge()
 {
 	holesModel->removeBridges();
-	gla->update();
-}
-
-void EditHolePlugin::closeNMHoles()
-{
-	holesModel->closeNonManifolds();
 	gla->update();
 }
 

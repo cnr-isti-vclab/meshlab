@@ -58,11 +58,11 @@ public:
 	
 	
 private:
-	HoleListModel *holesModel;
-	HoleSorterFilter* holeSorter;
-	GLArea * gla;
+	HoleListModel	*holesModel;
+	HoleSorterFilter *holeSorter;
+	GLArea *gla;
 	MeshModel *mesh;
-    FillerDialog *dialogFiller;
+  FillerDialog *dialogFiller;
 	
 	bool toDraw;
 	bool hasPick;
@@ -78,7 +78,6 @@ private Q_SLOTS:
 	void cancelFill();
 	void acceptFill();
 	void clearBridge();
-	void closeNMHoles();
 	void skipTab(int index);
 	void updateDWeight(int val);
 	void updateBridgeSldValue(int val);

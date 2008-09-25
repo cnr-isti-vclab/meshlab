@@ -226,7 +226,7 @@ public:
 				assert(curPos.IsBorder());
 			}while(curPos != initPos);
 			
-			FgtHole<MESH> newHole(initPos, QString("Hole_%1").arg(holes.size(),3,10,QChar('0')) );
+			FgtHole<MESH> newHole(initPos, QString("Hole_%1").arg(HoleType::GetHoleId(),3,10,QChar('0')) );
 			newHole.SetSelect(sel);
 			holes.push_back( newHole );
 		}
@@ -577,7 +577,7 @@ public:
 						fit->FFp(1) = &*fit;
 						fit->FFi(1) = 1;
 
-						HoleType newhole(PosType(&*fit, 1), QString("Hole_%1").arg(holes.size(),3,10,QChar('0')));
+						HoleType newhole(PosType(&*fit, 1), QString("Hole_%1").arg(HoleType::GetHoleId(),3,10,QChar('0')));
 						if(h->IsSelected())
 							newhole.SetSelect(true);
 						newhole.SetBridged(true);
@@ -678,7 +678,7 @@ private:
 		
 		sideA.h->SetStartPos(newP0);
 		sideA.h->SetBridged(true);
-		FgtHole<MESH> newHole(newP1, QString("Hole_%1").arg(holes.size(),3,10,QChar('0')) );
+		FgtHole<MESH> newHole(newP1, QString("Hole_%1").arg(HoleType::GetHoleId(),3,10,QChar('0')) );
 		if(sideA.h->IsSelected())
 			newHole.SetSelect(true);
 		newHole.SetBridged(true);

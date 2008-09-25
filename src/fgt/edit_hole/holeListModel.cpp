@@ -291,12 +291,14 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 	{
 		bool checked;
 		if(index.column() == 3)
+			checked = holes[index.row()].IsNonManifold();
+		else if(index.column() == 4)
 			checked = holes[index.row()].IsSelected();
 		else if(state == HoleListModel::Filled && holes[index.row()].IsSelected())
 		{
-			if(index.column() == 4)
+			if(index.column() == 5)
 				checked = holes[index.row()].IsCompenetrating();
-			else if(index.column() == 5)
+			else if(index.column() == 6)
 				checked = holes[index.row()].IsAccepted();
 			else 
 				return QVariant();
@@ -316,7 +318,7 @@ QVariant HoleListModel::data(const QModelIndex &index, int role) const
 
 QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+  if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
 	{
 		switch(section)
 		{
@@ -327,14 +329,16 @@ QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int
 		case 2:
 			return tr("Perimeter");
 		case 3:
+			return tr("Non Manif.");
+		case 4:
 			if(state == HoleListModel::Filled)
 				return tr("Fill");
 			else 
 				return tr("Select");
-		case 4:
+		case 5:
 			if(state == HoleListModel::Filled)
 				return tr("Comp.");
-		case 5:
+		case 6:
 			if(state == HoleListModel::Filled)
 				return tr("Accept");
 		}
@@ -350,13 +354,15 @@ QVariant HoleListModel::headerData(int section, Qt::Orientation orientation, int
 		case 2:
 			return QSize(55, 20);
 		case 3:
+			return QSize(60, 20);
+		case 4:
 			if(state == HoleListModel::Filled)
 				return QSize(20, 20);
 			else
 				return QSize(50, 20);
-		case 4:
-			return QSize(38, 20);
 		case 5:
+			return QSize(38, 20);
+		case 6:
 			return QSize(42, 20);
 		}
 	}
@@ -380,13 +386,14 @@ Qt::ItemFlags HoleListModel::flags(const QModelIndex &index) const
 	Qt::ItemFlags ret = QAbstractItemModel::flags(index);
     
 	if (!index.isValid())
-        return Qt::ItemIsEnabled;
+		return Qt::ItemIsEnabled;
 
 	if(index.column() == 0)
 		ret = ret | Qt::ItemIsEditable;
-	else if( (index.column() == 3 && state == HoleListModel::Selection) ||
-			 (index.column() == 5 && state == HoleListModel::Filled) )
-		return Qt::ItemIsUserCheckable;
+	else if( (index.column() == 4 && state == HoleListModel::Selection) ||
+					 (index.column() == 6 && state == HoleListModel::Filled) )
+		return Qt::ItemIsUserCheckable | Qt::ItemIsEnabled;
+		//return ret = ret | Qt::ItemIsUserCheckable ;
 		
 	return ret;
 }
@@ -410,13 +417,13 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 	{
 		if(state == HoleListModel::Selection)
 		{
-			if(index.column() == 3 && state == HoleListModel::Selection)
+			if(index.column() == 4 && state == HoleListModel::Selection)
 			{
 				holes[index.row()].SetSelect( !holes[index.row()].IsSelected() );
 				ret = true;
 			}			
 		}
-		else if(index.column() == 5)
+		else if(index.column() == 6)
 		{	// check accept
 			holes[index.row()].SetAccepted( !holes[index.row()].IsAccepted() );
 			ret = true;

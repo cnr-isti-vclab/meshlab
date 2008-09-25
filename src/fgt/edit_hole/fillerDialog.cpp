@@ -48,16 +48,28 @@ void FillerDialog::clickStartBridging()
 	ui.manualBridgeRBtm->setEnabled(false);
 	ui.autoBridgeRBtm->setEnabled(false);
 	ui.clearBridgeBtn->setEnabled(false);
-	ui.nmCloseBtn->setEnabled(false);
+	ui.selfHoleChkB->setEnabled(false);
+	ui.CloseNMHoleRBtm->setEnabled(false);
+	ui.label_sld_dx->setEnabled(false);
+	ui.label_sld_sx->setEnabled(false);
+	ui.bridgeParamSld->setEnabled(false);
 }
 
 void FillerDialog::clickEndBridging()
 {
-	ui.bridgeButton->setText("Start");
+	ui.bridgeButton->setText("Apply");
 	ui.manualBridgeRBtm->setEnabled(true);
 	ui.autoBridgeRBtm->setEnabled(true);
 	ui.clearBridgeBtn->setEnabled(true);
-	ui.nmCloseBtn->setEnabled(true);
+	ui.selfHoleChkB->setEnabled(true);
+	ui.CloseNMHoleRBtm->setEnabled(true);
+
+	if(ui.selfHoleChkB->isChecked())
+	{
+		ui.bridgeParamSld->setEnabled(true);
+		ui.label_sld_dx->setEnabled(true);
+		ui.label_sld_sx->setEnabled(true);
+	}
 }
 
 void FillerDialog::clickSingleHoleBridgeOpt()

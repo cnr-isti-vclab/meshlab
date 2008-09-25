@@ -493,11 +493,12 @@ public:
 		PatchCompFlag() = FaceType::NewBitFlag();
 		BridgeFlag() = FaceType::NewBitFlag();
 
+		ResetHoleId();
 		typename std::vector<HoleInfo>::iterator itH = vhi.begin();
 		int i=0;
 		for( ; itH != vhi.end(); itH++)
 		{
-			ret.push_back(FgtHole<MESH>(*itH, QString("Hole_%1").arg(i,3,10,QChar('0')) ));
+			ret.push_back(FgtHole<MESH>(*itH, QString("Hole_%1").arg(GetHoleId(),3,10,QChar('0')) ));
 			i++;
 		}
 		return HoleFlag();
@@ -584,10 +585,12 @@ public:
 	static int& HolePatchFlag()	{static int _pf=-1; return _pf; };
 	static int& PatchCompFlag()	{static int _pcf=-1; return _pcf; };
 	static int& BridgeFlag()	{static int _bf=-1; return _bf; };
-
+	static void ResetHoleId() { _holeId=0; };
+	static int GetHoleId() { return ++_holeId; };
 	QString name;
 	
 private:
+	static int _holeId;
 	bool filled;
 	bool comp;
 	bool accepted;
@@ -599,4 +602,5 @@ private:
 	std::vector<VertexType*> vertexes;
 };
 
+int FgtHole<CMeshO>::_holeId = 0;
 #endif
