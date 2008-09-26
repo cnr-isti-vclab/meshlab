@@ -383,7 +383,8 @@ MeshDocument()
 };
 
 /* 
-
+	A class designed to save aspects of the state of a mesh, such as vertex colors,
+	and then be able to restore them later
 */
 class MeshModelState
 {
@@ -400,25 +401,38 @@ class MeshModelState
 		m=_m;
 		changeMask=_mask;
 		if(changeMask & MeshModel::MM_VERTCOLOR)
-		 {
-			 vertColor.resize(m->cm.vert.size());
-			 std::vector<vcg::Color4b>::iterator ci;
-			 CMeshO::VertexIterator vi;
-			 for(vi=m->cm.vert.begin(),ci=vertColor.begin();vi!=m->cm.vert.end();++vi,++ci) 
-				 if(!(*vi).IsD()) (*ci)=(*vi).C();
-		} else if(changeMask & MeshModel::MM_VERTCOORD)
+		{
+			vertColor.resize(m->cm.vert.size());
+			std::vector<vcg::Color4b>::iterator ci;
+			CMeshO::VertexIterator vi;
+			for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+				if(!(*vi).IsD()) (*ci)=(*vi).C();
+		}
+		
+		if(changeMask & MeshModel::MM_VERTCOORD)
 		{
 			vertCoord.resize(m->cm.vert.size());
 			std::vector<vcg::Point3f>::iterator ci;
 			CMeshO::VertexIterator vi;
-			 for(vi=m->cm.vert.begin(),ci=vertCoord.begin();vi!=m->cm.vert.end();++vi,++ci) 
+			for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
 				 if(!(*vi).IsD()) (*ci)=(*vi).P();
-		} else if(changeMask & MeshModel::MM_FACESELECTION)
+		} 
+		
+		if(changeMask & MeshModel::MM_VERTNORMAL)
+		{
+			vertNormal.resize(m->cm.vert.size());
+			std::vector<vcg::Point3f>::iterator ci;
+			CMeshO::VertexIterator vi;
+			for(vi = m->cm.vert.begin(), ci = vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+				 if(!(*vi).IsD()) (*ci)=(*vi).N();
+		}
+		
+		if(changeMask & MeshModel::MM_FACESELECTION)
 		{
 			faceSelection.resize(m->cm.face.size());
 			std::vector<bool>::iterator ci;
 			CMeshO::FaceIterator fi;
-			for(fi = m->cm.face.begin(), ci=faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+			for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
 			{
 				if((*fi).IsS())
 					(*ci) = true;
@@ -436,21 +450,41 @@ class MeshModelState
 			if(vertColor.size() != m->cm.vert.size()) return false;
 			std::vector<vcg::Color4b>::iterator ci;
 			CMeshO::VertexIterator vi;
-			for(vi=m->cm.vert.begin(),ci=vertColor.begin();vi!=m->cm.vert.end();++vi,++ci) 
+			for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
 				if(!(*vi).IsD()) (*vi).C()=(*ci);
-		} else if(changeMask & MeshModel::MM_VERTCOORD)
+		}
+		
+		if(changeMask & MeshModel::MM_VERTCOORD)
 		{
 			if(vertCoord.size() != m->cm.vert.size()) return false;
 			std::vector<vcg::Point3f>::iterator ci;
 			CMeshO::VertexIterator vi;
-			for(vi=m->cm.vert.begin(),ci=vertCoord.begin();vi!=m->cm.vert.end();++vi,++ci) 
+			for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
 				if(!(*vi).IsD()) (*vi).P()=(*ci);
-		} else if(changeMask & MeshModel::MM_FACESELECTION)
+		} 
+		
+		if(changeMask & MeshModel::MM_VERTNORMAL)
+		{
+			if(vertNormal.size() != m->cm.vert.size()) return false;
+			std::vector<vcg::Point3f>::iterator ci;
+			CMeshO::VertexIterator vi;
+			for(vi = m->cm.vert.begin(), ci=vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci) 
+				if(!(*vi).IsD()) (*vi).N()=(*ci);
+			
+			//now reset the face normals
+			for(int i = 0; i < m->cm.face.size(); ++i)
+			{
+				// computing face normal from position of face vertices
+				vcg::face::ComputeNormalizedNormal(m->cm.face[i]);
+			}
+		} 
+		
+		if(changeMask & MeshModel::MM_FACESELECTION)
 		{
 			if(faceSelection.size() != m->cm.face.size()) return false;
 			std::vector<bool>::iterator ci;
 			CMeshO::FaceIterator fi;
-			for(fi = m->cm.face.begin(), ci=faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+			for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
 			{
 				if((*ci))
 					(*fi).SetS();
