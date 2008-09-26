@@ -13,6 +13,7 @@ SUBDIRS       = meshfilter \
 				meshrender \
 				cleanfilter \
 				filter_ao \ 
+				filter_morph \
 				filter_poisson \
 				filter_unsharp \
 				filter_splitter \
