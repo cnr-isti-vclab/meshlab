@@ -281,11 +281,11 @@ public:
 		
 		return true;
 	};
-
 	
-	/*  Per scegliere la miglior combinazione di edge all'interno di un hole, teto la qualità dei 
-	 *  triangoli ottenuti da tutte le possibili combinazioni che rispettino il concetto di bridge
-	 *  ovvero che non siano adiacenti o con 1 edge che li divide
+
+	/*  Build a bridge inner to the same hole. It chooses the best bridge computing quality 
+	 *  of 2 faces and similarity (as number of edge) of two next hole. Bridge is build follow
+	 *  bridge's rule, bridge must have 2 border edge. exist between edge sharing a vertex or 
 	 */
 	static void AutoSelfBridging(MESH &mesh, HoleVector &holes, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
 	{

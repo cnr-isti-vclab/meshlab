@@ -49,7 +49,21 @@ EditHolePlugin::EditHolePlugin() {
 	hasPick = false;
 }
 
-EditHolePlugin::~EditHolePlugin() {}
+EditHolePlugin::~EditHolePlugin()
+{
+	FgtHole<CMeshO>::DeleteFlag();
+	if ( dialogFiller !=0 )
+	{
+		delete dialogFiller;
+		delete holesModel;
+		delete holeSorter;
+		dialogFiller = 0;
+		holesModel = 0;
+		holeSorter = 0;
+		gla = 0;
+		mesh = 0;
+	}
+}
 
 QList<QAction *> EditHolePlugin::actions() const {
 	return actionList;

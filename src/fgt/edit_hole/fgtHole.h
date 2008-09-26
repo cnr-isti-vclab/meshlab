@@ -162,9 +162,9 @@ public:
 		glEnd();
 	}
 
-	/*  Reset flags used by this plugin to mark this hole and its patch. 
+	/*  Reset flags used by this plugin to unmark this hole and its patch. 
 	 *  Bridges face can finded along the hole and it needs look at adjacent face because
-	 *  a bridge could be build from other border face.
+	 *  a bridge could be build from other bridge face.
 	 */
 	void ResetFlag()
 	{
@@ -231,6 +231,7 @@ public:
 		typename std::vector<FaceType*>::iterator it;
 		for(it = patches.begin(); it!=patches.end(); it++)
 		{
+			// BridgeFaceFlag+PathcHoleFlag is special case
 			if(IsBridgeFace(**it)) continue;
 
 			assert(IsPatchFace(**it));
@@ -251,7 +252,6 @@ public:
 			if(!(**it).IsD())
 				vcg::tri::Allocator<MESH>::DeleteFace(mesh, **it);
 		}
-		updateInfo();
 	};
 
 	void Fill(FillerMode mode, MESH &mesh, std::vector<FacePointer * > &local_facePointer)
@@ -289,7 +289,7 @@ public:
 			break;
 		}
 		
-		// hole filling leaves V flag to border vertex
+		// hole filling leaves V flag to border vertex... resetting!
 		typename std::vector<VertexType*>::const_iterator it = vertexes.begin();
 		for( ;it!=vertexes.end(); it++)
 				(*it)->ClearV();
@@ -303,7 +303,7 @@ public:
 	
 private:
 
-	/*  Walking the hole computing vcgHole::Info data */
+	/*  Walking the hole computing vcgHole::Info data and other info */
 	void updateInfo()
 	{
 		assert(!IsFilled());
@@ -337,7 +337,7 @@ private:
 		perimeter = HoleInfo::Perimeter();
 	};
 
-	/*  Walking the hole storing border pos and finding non manifold vertex */
+	/*  Walking the hole storing vertexes and finding non manifold one */
 	void findNonManifoldness()
 	{
 		assert(!IsFilled());
@@ -359,7 +359,7 @@ private:
 		}while( curPos != this->p );
 	};
 
-	/* test its auto compenetration	*/
+	/* set patch flag and auto-compenetration	flag when needed */
 	void updatePatchState(MESH &mesh)
 	{
 		assert(filled);
@@ -375,11 +375,9 @@ private:
 		typename FacePointerVector::iterator pi = patches.begin();
 		for( ; pi!=patches.end(); ++pi)
 		{
-			//assert(!IsHoleBorderFace(*pbi->f));//*****
 			FacePointer f = *pi;
-			f->SetUserBit(HolePatchFlag());
-
-			// prendo le facce che intersecano il bounding box di *fi
+			
+			// prendo le facce che intersecano il bounding box di f
 			f->GetBBox(bbox);
 			vcg::trimesh::GetInBoxFace(mesh, gM, bbox,inBox);
 
@@ -400,6 +398,9 @@ private:
 		}
 	};
 
+	/* First patch face is the adjacent one to initial Pos ("p" field of Hole::Info)
+	 * Other patch face are found looking adjacent face on each vertex of known patch faces.
+	 */
 	void getPatchFaces(std::vector<FacePointer> &patches) const
 	{
 		assert(filled);
@@ -407,7 +408,7 @@ private:
 		std::vector<FacePointer> stack;
 		PosType pos = this->p;
 		pos.FlipF();
-		assert(IsPatchFace(*pos.f));  //rimuovere
+		assert(IsPatchFace(*pos.f));
 		pos.f->SetV();
 		stack.push_back(pos.f);
 		while(stack.size()>0)
@@ -505,44 +506,40 @@ public:
 	}
 
 	/** Return index of hole adjacent to picked face into holes vector.
-	 *  Also return the iterator on correct position.
+	 *  Also return the iterator on correct position in holes list.
 	 */
 	static int FindHoleFromBorderFace(FacePointer bFace, HoleVector &holes, HoleIterator &it) 
-	{ 
+	{
 		assert(IsHoleBorderFace(*bFace));
 		int index = 0;
-		 HoleIterator hit = holes.begin();
-		for( ; hit != holes.end(); ++hit)
+
+		// it know if bFace is adjacent to patchFace
+		FacePointer adjF = 0;
+		for( int i=0; i<3; i++)
+			if(IsPatchFace(*bFace->FFp(i)) && !IsBridgeFace(*bFace->FFp(i)))
+				adjF = bFace->FFp(i);
+		
+		HoleIterator hit = holes.begin();			
+		if(adjF == 0)
 		{
-			if(!hit->IsFilled())
+			// border face belong to an hole not filled
+			for( ; hit != holes.end(); ++hit)
 			{
-				if(hit->haveBorderFace(bFace))
-				{
-					it = hit;
-					return index;
-				}
-			}
-			else
-			{
-				// l'hole Ë riempito, non c'Ë pi˘ il bordo, nextB() non funzionerebbe
-				// prendo la faccia patch adiacente e cerco quella, in questo modo non ho bisogno
-				int i=0;
-				for( ; i<3; i++)
-					if(IsPatchFace(*bFace->FFp(i)))
-						break;
-				if(i<3)
-					if(hit->havePatchFace(bFace->FFp(i)))
+				if(!hit->IsFilled())
+					if(hit->haveBorderFace(bFace))
 					{
 						it = hit;
 						return index;
 					}
+				index++;
 			}
-
-			index++;
+			it = holes.end();	// invalid iterator
+			return -1;
 		}
-		it = holes.end();	// invalid iterator
-		return -1;
+		else // bFace belong filled hole, adjF is its patch
+			return FindHoleFromPatchFace(adjF, holes, it);		
 	}
+
 
 	/** Return index into holes vector of hole adjacent to picked face */
 	static int FindHoleFromPatchFace(FacePointer bFace, HoleVector &holes, HoleIterator &it)
@@ -567,10 +564,10 @@ public:
 
 	static void DeleteFlag()
 	{
-		FaceType::DeleteBitFlag(BridgeFlag()); BridgeFlag()=-1;
+		FaceType::DeleteBitFlag(BridgeFlag());		BridgeFlag()=-1;
 		FaceType::DeleteBitFlag(PatchCompFlag()); PatchCompFlag()=-1;
 		FaceType::DeleteBitFlag(HolePatchFlag()); HolePatchFlag()=-1;
-		FaceType::DeleteBitFlag(HoleFlag()); HoleFlag()=-1;
+		FaceType::DeleteBitFlag(HoleFlag());			HoleFlag()=-1;
 	}
 
 	static void AddFaceReference(HoleVector& holes, std::vector<FacePointer*> &facesReferences)

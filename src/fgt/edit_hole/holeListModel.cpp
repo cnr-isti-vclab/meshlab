@@ -148,7 +148,7 @@ void HoleListModel::toggleSelectionHoleFromBorderFace(CFaceO *bface)
 		return;
 	h->SetSelect( !h->IsSelected() );
 	
-	emit dataChanged( index(ind, 3), index(ind, 3) );
+	emit dataChanged( index(ind, 4), index(ind, 4) );
 	emit SGN_needUpdateGLA();
 }
 
@@ -166,7 +166,7 @@ void HoleListModel::toggleAcceptanceHole(CFaceO *bface)
 		return;
 	h->SetAccepted( !h->IsAccepted() );
 
-	emit dataChanged( index(ind, 5), index(ind, 5) );	
+	emit dataChanged( index(ind, 6), index(ind, 6) );	
 	emit SGN_needUpdateGLA();
 }
 
