@@ -29,22 +29,30 @@
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
+#include "muParser.h"
+
 class FilterFunctionPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshFilterInterface)
 
+protected:
+	double x,y,z,nx,ny,nz,r,g,b,q;
+
 public:
-	enum { FF_SELECTION } ;
+	enum { FF_VERT_SELECTION, FF_GEOM_FUNC, FF_COLOR_FUNC, FF_GRID } ;
 
 	FilterFunctionPlugin();
 	
 	virtual const QString filterName(FilterIDType filter);
 	virtual const QString filterInfo(FilterIDType filter);
 	virtual const PluginInfo &pluginInfo();
+	virtual const FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *) {return true;}
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
+	virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	void setParserVariables(mu::Parser &p);
 };
 
 #endif
