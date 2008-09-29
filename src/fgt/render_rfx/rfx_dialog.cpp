@@ -222,7 +222,7 @@ void RfxDialog::AddUniformBox(RfxUniform *uni, int uniIndex)
 		return;
 	}
 
-	ui.tabUniform->layout()->addWidget(boxUni);
+	ui.scrollUniformsContents->layout()->addWidget(boxUni);
 	widgetsByTab.insert(UNIFORM_TAB, boxUni);
 }
 
