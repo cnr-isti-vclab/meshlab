@@ -67,10 +67,11 @@ private:
 #include <QHeaderView>
 #include <QSignalMapper>
 #include <QFileDialog>
+#include <QtGui>
 #include "ui_rfx_dialog.h"
 #include "rfx_shader.h"
 
-class RfxDialog : public QDialog
+class RfxDialog : public QDockWidget
 {
 	Q_OBJECT
 
@@ -82,7 +83,6 @@ public:
 
 public slots:
 	void PassSelected(int);
-	void UniformSelected(int);
 	void TextureSelected(int);
 	void ChangeTexture(int);
 	void ChangeValue(const QString&);
@@ -91,10 +91,11 @@ public slots:
 
 private:
 	void setupTabs();
-	void DrawIFace(RfxUniform*, int idx, int rows, int columns);
+	void AddUniformBox(RfxUniform*, int);
+	void DrawIFace(QGroupBox*, RfxUniform*, int idx, int rows, int columns);
 	void CleanTab(int);
 
-	Ui::Dialog ui;
+	Ui::RfxDock ui;
 	QGLContext *mGLWin;
 	QMultiMap<int, QWidget*> widgetsByTab;
 	int selPass;

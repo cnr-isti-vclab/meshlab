@@ -158,6 +158,26 @@ void RenderRFX::Render(QAction *action, MeshModel &mesh,
 	glGetError();
 }
 
+void RenderRFX::Finalize(QAction *act, MeshModel &mesh, GLArea *gla)
+{
+	Q_UNUSED(act)
+	Q_UNUSED(mesh)
+	Q_UNUSED(gla)
+
+	// close any open dialog
+	if (dialog) {
+		dialog->close();
+		delete dialog;
+		dialog = NULL;
+	}
+
+	// ... and delete any active shader
+	if (activeShader) {
+		delete activeShader;
+		activeShader = NULL;
+	}
+}
+
 const PluginInfo& RenderRFX::Info()
 {
 	static PluginInfo ai;
