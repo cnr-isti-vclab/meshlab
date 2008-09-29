@@ -303,7 +303,7 @@ const QString FilterDocSampling::filterName(FilterIDType filterId)
 		case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance"); 
 		case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling"); 
 		case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer"); 
-		case FP_OFFSET_SURFACE  :  return QString("Resample Offset"); 
+		case FP_OFFSET_SURFACE  :  return QString("Uniform Mesh Resampling"); 
 		
 		default : assert(0); return QString("unknown filter!!!!");
 	}
@@ -320,8 +320,12 @@ const QString FilterDocSampling::filterInfo(FilterIDType filterId)
 		case FP_SUBDIV_SAMPLING			:  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle"); 
 		case FP_HAUSDORFF_DISTANCE  :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh."); 
 		case FP_TEXEL_SAMPLING      :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated"); 
-		case FP_VERTEX_RESAMPLING		:  return QString("Vertex Attribute Transfer"); 
-		case FP_OFFSET_SURFACE			:  return QString("Create a new mesh that is a resampled offsetted version of the current one"); 
+		case FP_VERTEX_RESAMPLING		:  return QString("Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>"
+																									"For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>"
+																									"The algorithm assumes that the two meshes are reasonably similar and aligned."); 
+		case FP_OFFSET_SURFACE			:  return QString("Create a new mesh that is a resampled version of the current one.<br>"
+																									"The resampling is done by building a uniform volumetric representation where each voxel contains the signed distance from the original surface. "
+																									"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume. "); 
 			
 		default : assert(0); return QString("unknown filter!!!!");
 
@@ -434,10 +438,13 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Fil
 		{
 				
 			parlst.addAbsPerc("CellSize", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
-				tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag."));
+				tr("Precision"), tr("Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger."));
 			
 			parlst.addAbsPerc("Offset", 0.0, -md.mm()->cm.bbox.Diag()/5.0f, md.mm()->cm.bbox.Diag()/5.0f,
-												tr("Offset"), tr("Offset of the created surface. If 0, the created surface passes on the originating itself."));
+												tr("Offset"), tr("Offset of the created surface (i.e. distance of the created surface from the original one).<br>"
+																				 "If offset is zero, the created surface passes on the original mesh itself. "
+																				 "Values greater than zero mean an external surface, and lower than zero mean an internal surface.<br> "
+																				 "In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation."));
 			
 			
 		} break; 
