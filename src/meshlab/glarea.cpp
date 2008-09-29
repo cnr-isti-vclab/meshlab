@@ -147,6 +147,13 @@ GLArea::GLArea(QWidget *parent)
 
 
 }
+
+GLArea::~GLArea()
+{
+	// warn any iRender plugin that we're deleting glarea
+	if (iRenderer)
+		iRenderer->Finalize(currentShader, *mm(), this);
+}
 		
 
 /*

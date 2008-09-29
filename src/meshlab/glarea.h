@@ -263,7 +263,7 @@ class GLArea : public QGLWidget
 
 public:
 	GLArea(QWidget *parent = 0);
-	~GLArea(){}
+	~GLArea();
 
 private:
 public:
