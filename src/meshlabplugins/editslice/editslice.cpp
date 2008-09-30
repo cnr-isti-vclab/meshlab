@@ -168,7 +168,7 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 			double avg_length;  
 			edge_mesh = new n_EdgeMesh();
 			vcg::Intersection<n_Mesh, n_EdgeMesh, n_Mesh::ScalarType, TriMeshGrid>(p , *edge_mesh, avg_length, mesh_grid, intersected_cells);
-			vcg::edge::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
+			vcg::edg::UpdateBounding<n_EdgeMesh>::Box(*edge_mesh);
 		
 			
 			if (!dialogsliceobj->getExportOption()){
@@ -179,7 +179,7 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 			   pr.numCol=1;
 			   pr.numRow=1;
 			   
-			   vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr);
+			   vcg::edg::io::ExporterSVG<n_EdgeMesh>::Save(edge_mesh, fileN.toLatin1().data(), pr);
 		
 			}
 			else{
@@ -191,7 +191,7 @@ void ExtraMeshSlidePlugin::RestoreDefault(){
 	
 	if(EvportVector){
 		
-		vcg::edge::io::ExporterSVG<n_EdgeMesh>::Save(&ev, fileName.toLatin1().data(),pr);
+		vcg::edg::io::ExporterSVG<n_EdgeMesh>::Save(&ev, fileName.toLatin1().data(),pr);
         //Free memory allocated
 		
 		vector<n_EdgeMesh*>::iterator it;
