@@ -25,7 +25,7 @@ class GetClosestFace
 {
 
 typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
-typedef trimesh::FaceTmark<CMeshO> MarkerFace;
+typedef tri::FaceTmark<CMeshO> MarkerFace;
 
 public:
 	
