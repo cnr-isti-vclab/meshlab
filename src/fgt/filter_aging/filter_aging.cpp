@@ -364,7 +364,7 @@ bool GeometryAgingPlugin::faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceTyp
 	do {
 		// test current face intersections
 		p.f->GetBBox(bbox);
-		trimesh::GetInBoxFace(m, gM, bbox, inBox);
+		tri::GetInBoxFace(m, gM, bbox, inBox);
 		std::vector<CFaceO*>::iterator fib;
 		for(fib=inBox.begin(); fib!=inBox.end(); fib++)
 			if(*fib != p.f)
