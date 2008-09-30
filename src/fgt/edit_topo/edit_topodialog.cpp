@@ -19,7 +19,10 @@ void edit_topodialog::setBarMax(int val)
 
 void edit_topodialog::setBarVal(int val)
 { ui.progressBar->setValue(val); }
-
+void edit_topodialog::setStatusLabel(QString txt)
+{
+	ui.labelStatusDesc->setText(txt);
+}
 float edit_topodialog::dist()
 {
 	float toret = ui.TextEditIterations_2->value();
@@ -28,6 +31,9 @@ float edit_topodialog::dist()
 
 bool edit_topodialog::isDEBUG()
 { return ui.checkBox->isChecked(); }
+
+bool edit_topodialog::drawLabels()
+{return ui.checkBox_2->isChecked(); }
 
 void edit_topodialog::updateVtxTable(QList<Vtx> list)
 {
@@ -182,9 +188,28 @@ void edit_topodialog::on_toolBox_currentChanged(int i)
 {
 	switch(i) 
 	{
-		case 0: utensil = U_VTX_SEL_FREE; break;
-		case 1:	utensil = U_VTX_CONNECT; break;
-		case 2:	utensil = U_FCE_SEL; break;
+		case 0:
+			{
+				utensil = U_VTX_SEL_FREE; 
+				ui.ButtonSelectVertexFree->setChecked(true);
+				ui.ButtonSelectVertex->setChecked(false);
+				ui.ButtonDeSelectVertex->setChecked(false);
+				break;
+			}
+		case 1:	
+			{
+				utensil = U_VTX_CONNECT;
+				ui.ButtonConnectVertex->setChecked(true);
+				ui.ButtonConnectVertex_2->setChecked(false);
+				ui.ButtonDeConnectVertex->setChecked(false);
+				ui.ButtonConnectVertex_4->setChecked(false);
+				ui.ButtonConnectVertex_5->setChecked(false);
+				break;
+			}
+		case 2:	
+			{
+				utensil = U_FCE_SEL; break;
+			}
 	};
 	emit update_request();
 }

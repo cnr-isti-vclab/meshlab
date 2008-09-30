@@ -503,9 +503,9 @@ void edit_topo::editDragAndDropVertex()
 			edit_topodialogobj->updateVtxTable(stack);
 			edit_topodialogobj->updateFceTable(Fstack);
 			edit_topodialogobj->updateEdgTable(Estack);
-		
+		/* Uncomment if you want the mesh to be auto-recreated
 			if(first_model_generated)
-				on_mesh_create();
+				on_mesh_create();*/
 		}		
 	}
 }
@@ -721,7 +721,7 @@ void edit_topo::editDecoStandard(MeshModel &m)
 			Vtx p1 = e.v[0];
 			Vtx p2 = e.v[1];
 
-			drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Red, p1.V, p2.V);
+			drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, p1.V, p2.V);
 		}
 	}
 }
@@ -806,9 +806,9 @@ void edit_topo::editDecoFaceSelect(MeshModel &m)
 
 			if(f.selected)
 			{
-				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Red, allv.at(0).V, allv.at(1).V);
-				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Red, allv.at(1).V, allv.at(2).V);
-				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Red, allv.at(2).V, allv.at(0).V);	
+				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(0).V, allv.at(1).V);
+				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(1).V, allv.at(2).V);
+				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(2).V, allv.at(0).V);	
 
 				Point3f mid = (allv.at(0).V + allv.at(1).V + allv.at(2).V) / 3;
 				if(isVertexVisible(allv.at(0).V)&&isVertexVisible(allv.at(1).V)&&isVertexVisible(allv.at(2).V))
@@ -816,9 +816,9 @@ void edit_topo::editDecoFaceSelect(MeshModel &m)
 			}
 			else
 			{
-				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Red, allv.at(0).V, allv.at(1).V);
-				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Red, allv.at(1).V, allv.at(2).V);
-				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Red, allv.at(2).V, allv.at(0).V);	
+				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Black, allv.at(0).V, allv.at(1).V);
+				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Black, allv.at(1).V, allv.at(2).V);
+				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Black, allv.at(2).V, allv.at(0).V);	
 			}
 		}
 
@@ -1205,19 +1205,19 @@ void edit_topo::on_mesh_create()
 	MeshModel *m = parentGla->meshDoc.meshList.back();	// destination = last
 	MeshModel *currentMesh  = parentGla->meshDoc.mm();		// source = current		
 
-
-// DEBUG: Force MY vertex params
 /*
+// DEBUG: Force MY vertex params
+
 	Vtx v1;
-	v1.V = Point3f(	-2.81, 7.59, -1496.97);
+	v1.V = Point3f(	-17.81, 116.59, 37.97);
 	v1.vName = QString("V0");
 
 	Vtx v2;
-	v2.V = Point3f(-11.42, -100.35, -1503.1);
+	v2.V = Point3f(-28.42, 94.35, 45.1);
 	v2.vName = QString("V1");
 
 	Vtx v3;
-	v3.V = Point3f(	29.21, -47.72, -1517.43);
+	v3.V = Point3f(	-47.21, 116.72, 31.43);
 	v3.vName = QString("V2");
 
 	Edg e1;
@@ -1242,9 +1242,9 @@ void edit_topo::on_mesh_create()
 	Estack.clear();
 	Estack.push_back(e1);Estack.push_back(e2);Estack.push_back(e3);
 	Fstack.clear();
-	Fstack.push_back(f);*/
+	Fstack.push_back(f);
 	// /DEBUG!!!!!
-
+*/
 	// Mesh creation
 
 
@@ -1715,67 +1715,56 @@ void edit_topo::drawLabel(QList<Vtx> list)
 
 void edit_topo::drawLabel(Vtx v)
 {
-
-	/* OLD STYLE
-	double tx,ty,tz;
-
-	if(isVertexVisible(v.V))
+	if(isVertexVisible(v.V)&&(edit_topodialogobj->drawLabels()))
 	{
+		double tx,ty,tz;
 		gluProject(v.V.X(),v.V.Y(),v.V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-		parentGla->renderText(tx+5, (parentGla->curSiz.height() - 5 - ty), v.vName, QFont());
-	} *****/
+		int x,y;
+		x = tx+5;
+		y=(parentGla->curSiz.height() - 5 - ty);
 
-	if(isVertexVisible(v.V))
-	{
+		// new style
+		QString text = v.vName;
+		QFont font;
+		font.setFamily("Helvetica");
+		font.setPixelSize(10);
+		QFontMetrics fm(font);
+		QRect brec=fm.boundingRect(text);
+		glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT );
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	double tx,ty,tz;
-	gluProject(v.V.X(),v.V.Y(),v.V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-	int x,y;
-	x = tx+5;
-	y=(parentGla->curSiz.height() - 5 - ty);
-
-// new style
-	QString text = v.vName;
-	QFont font;
-  font.setFamily("Helvetica");
-  font.setPixelSize(10);
-  QFontMetrics fm(font);
-  QRect brec=fm.boundingRect(text);
-  glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT );
-  glDisable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  gluOrtho2D(0,parentGla->width(),parentGla->height(),0);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  glColor4f(0,0,0,0.5);
-  glBegin(GL_QUADS);
-    glVertex2f(x+brec.left(),y+brec.bottom());
-    glVertex2f(x+brec.right(),y+brec.bottom());
-    glVertex2f(x+brec.right(),y+brec.top());
-    glVertex2f(x+brec.left(),y+brec.top());
-  glEnd();
-  int offset=2;
-  glColor4f(0,0,0,0.2);
-  glBegin(GL_QUADS);
-    glVertex2f(x+brec.left()-offset,y+brec.bottom()+offset);
-    glVertex2f(x+brec.right()+offset,y+brec.bottom()+offset);
-    glVertex2f(x+brec.right()+offset,y+brec.top()-offset);
-    glVertex2f(x+brec.left()-offset,y+brec.top()-offset);
-  glEnd();
-  glColor3f(1,1,1);
-  parentGla->renderText(x,y, text,QFont());
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
-  glPopAttrib();
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluOrtho2D(0,parentGla->width(),parentGla->height(),0);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glColor4f(0,0,0,0.6);
+		glBegin(GL_QUADS);
+		glVertex2f(x+brec.left(),y+brec.bottom());
+		glVertex2f(x+brec.right(),y+brec.bottom());
+		glVertex2f(x+brec.right(),y+brec.top());
+		glVertex2f(x+brec.left(),y+brec.top());
+		glEnd();
+		int offset=2;
+		glColor4f(0,0,0,0.3);
+		glBegin(GL_QUADS);
+			glVertex2f(x+brec.left()-offset,y+brec.bottom()+offset);
+			glVertex2f(x+brec.right()+offset,y+brec.bottom()+offset);
+			glVertex2f(x+brec.right()+offset,y+brec.top()-offset);
+			glVertex2f(x+brec.left()-offset,y+brec.top()-offset);
+		glEnd();
+		glColor3f(1,1,1);
+		parentGla->renderText(x,y, text,QFont());
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+		glPopAttrib();
 	}
 
 }
@@ -1883,7 +1872,6 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFr
 			glVertex(p2);
 		glEnd();    
 		glDisable(GL_DEPTH_TEST);
-	//	glColor(colorBack);
 	    glLineWidth(0.7);
 	    glPointSize(1.4);
 	    glBegin(GL_LINES);
@@ -1922,9 +1910,9 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFr
 			glVertex(p2);
 		glEnd();    
 		glDisable(GL_DEPTH_TEST);
-		//glColor(colorBack);
-		glLineWidth(0.7);
-		glPointSize(0.4);
+
+		glLineWidth(0.5);
+		glPointSize(0.3);
 		glBegin(GL_LINES);
 			glVertex(p1);
 			glVertex(p2);

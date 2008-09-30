@@ -237,6 +237,16 @@ p, li { white-space: pre-wrap; }
          </column>
         </widget>
        </item>
+       <item row="1" column="2" colspan="2" >
+        <widget class="QCheckBox" name="checkBox_2" >
+         <property name="text" >
+          <string>  Show vertex labels</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="pageVertexConnect" >
@@ -556,6 +566,9 @@ p, li { white-space: pre-wrap; }
       <layout class="QGridLayout" name="gridLayout" >
        <item row="0" column="0" >
         <widget class="QToolButton" name="ButtonConnectVertex_6" >
+         <property name="enabled" >
+          <bool>false</bool>
+         </property>
          <property name="minimumSize" >
           <size>
            <width>39</width>
@@ -582,11 +595,8 @@ p, li { white-space: pre-wrap; }
            <height>24</height>
           </size>
          </property>
-         <property name="checkable" >
-          <bool>true</bool>
-         </property>
          <property name="checked" >
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="autoExclusive" >
           <bool>true</bool>
@@ -615,9 +625,9 @@ p, li { white-space: pre-wrap; }
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" color:#000000;">Iterations level and mesh generation:&lt;/span>&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#ff0000;">now specify the number of iterations you want to adopt for the retopology generation. This value indicates the number of steps performed by the generation algorithm in order to obtain the best quality level as possible. Zero iterations, for example, will generate a flat mesh exaclty the same as the basic mesh you have selected; while three iterations will generate a more refined new mesh model.&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#ff0000;">Please note that iterations values higher than 4 may slow down your system.&lt;/p>&lt;/body>&lt;/html></string>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" color:#000000;">Iterations number and mesh generation:&lt;/span>&lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#ff0000;">now specify the number of iterations and the % of distance for closest point search. &lt;/p>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#ff0000;">The first parameter indicates the number of steps performed by the retopology algorithm in order to obtain the highest quality. Zero iterations, for example, will generate a flat mesh exaclty the same as the basic mesh you have selected; while four iterations will generate a more refined model (values higher than 5 may slow down your system). The second parameter indicates the maximum distance for the closest vertex search over the existing mesh (expressed as a % of the originals edge's lenght). Ten percent, for example, will force the algorithm to generate the new model with each vertex far at least the 10% of the original's edge lenght.&lt;/p>&lt;/body>&lt;/html></string>
          </property>
          <property name="wordWrap" >
           <bool>true</bool>
@@ -631,7 +641,7 @@ p, li { white-space: pre-wrap; }
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-size:9pt; color:#000000;">Iterations level:&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-size:9pt; color:#000000;">Iterations number:&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
          </property>
         </widget>
        </item>
@@ -641,7 +651,7 @@ p, li { white-space: pre-wrap; }
           <number>10</number>
          </property>
          <property name="value" >
-          <number>3</number>
+          <number>4</number>
          </property>
         </widget>
        </item>
@@ -665,7 +675,17 @@ p, li { white-space: pre-wrap; }
           <number>100</number>
          </property>
          <property name="value" >
-          <number>30</number>
+          <number>27</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="3" >
+        <widget class="QCheckBox" name="checkBox" >
+         <property name="text" >
+          <string>Draw auto-filled vertices</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -708,7 +728,7 @@ p, li { white-space: pre-wrap; }
          </column>
         </widget>
        </item>
-       <item row="5" column="0" colspan="5" >
+       <item row="5" column="0" colspan="4" >
         <widget class="QProgressBar" name="progressBar" >
          <property name="minimumSize" >
           <size>
@@ -725,15 +745,30 @@ p, li { white-space: pre-wrap; }
          <property name="value" >
           <number>0</number>
          </property>
+         <property name="textVisible" >
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="3" >
-        <widget class="QCheckBox" name="checkBox" >
-         <property name="text" >
-          <string>Draw retopology output vertex</string>
+       <item row="5" column="4" >
+        <widget class="QLabel" name="labelStatusDesc" >
+         <property name="font" >
+          <font>
+           <family>MS Shell Dlg 2</family>
+           <pointsize>9</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+           <underline>false</underline>
+           <strikeout>false</strikeout>
+          </font>
          </property>
-         <property name="checked" >
-          <bool>true</bool>
+         <property name="text" >
+          <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt;">Ready&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
          </property>
         </widget>
        </item>

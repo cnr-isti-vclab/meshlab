@@ -130,15 +130,15 @@ class edit_topodialog : public QWidget
 		float dist();
 
 		bool isDEBUG();
+		bool drawLabels();
 
 		void setBarMax(int val);
 		void setBarVal(int val);
+		void setStatusLabel(QString txt);
 
 	private:
 		Ui::edit_topodialog ui;
-	//	GLArea* parent;
-	
-	// Events
+
 	private slots:
 		void on_ButtonConnectVertex_5_clicked();
 		void on_ButtonConnectVertex_4_clicked();

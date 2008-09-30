@@ -25,7 +25,8 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/color.h>
-
+#include <vcg/complex/trimesh/smooth.h>
+#include <vcg/complex/trimesh/update/selection.h>
 
 using namespace std;
 using namespace vcg;
@@ -86,8 +87,6 @@ public:
 //					ScalarType & _minDist, 
 //					CoordType & _closestPt)
 
-		// Incremental distance 
-
 		Point3f p1 = ep.f->V(ep.z)->P();
 		Point3f p2 = ep.f->V1(ep.z)->P();
 		float incDist = sqrt(sqr(p1.X()-p2.X())+sqr(p1.Y()-p2.Y())+sqr(p1.Z()-p2.Z()));
@@ -102,13 +101,7 @@ public:
 										dist, 
 										closestPt);
 
-/*		QString x1 = " Dist "+ QString("%1").arg(dist) +" Dist up "+ QString("%1").arg(dist_upper_bound);
-		qDebug(x1.toLatin1());
-		QString x = " x "+ QString("%1").arg(startPt.X())+ " y "+QString("%1").arg(startPt.Y()) + " z " + QString("%1").arg(startPt.Z());
-		qDebug(x.toLatin1()); */
-								
 		// If the closest point has not been found, then, softly, use the original vertex and say: laplacian smooth is needed!
-
 		if(dist == dist_upper_bound) 
 		{
 			nv.P()= startPt;
@@ -118,9 +111,8 @@ public:
 
 			nv.SetS();
 
-			qDebug(" ---> get <--- ");
-			if(DEBUG)
-				LoutMid->push_back(startPt);
+			qDebug("Unable to find closest!");
+			if(DEBUG) LoutMid->push_back(startPt);
 		}
 		else
 		{
@@ -129,7 +121,6 @@ public:
 			Point3f interp;
 			if(InterpolationParameters(*nearestF, closestPt, interp[0], interp[1], interp[2]))
 			{
-//				assert(ret);
 				interp[2]=1.0-interp[1]-interp[0];
 
 				nv.P()= closestPt; 
@@ -215,32 +206,47 @@ public:
 
 	void createRefinedMesh(MeshModel &outMesh, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog, bool DEBUG)
 	{
-		dialog->setBarMax(iterations+1);  //pow((float)(Fstack.count() * 4), (float)iterations) );
+		dialog->setBarMax(iterations);
+		dialog->setStatusLabel("Init topo");
 
 		midSampler->DEBUG = DEBUG;
-
 		midSampler->distPerc = dist;
 		midSampler->LinMid = &Lin;	
 		midSampler->LoutMid = &Lout;
 
 		createBasicMesh(outMesh, Fstack, stack);
 
+		qDebug("Basic mesh init done");
+		dialog->setStatusLabel("Done");
+
+		CMeshO::FaceIterator fi;
+		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
+		{(*fi).ClearS(); for(int i=0; i<3; i++) (*fi).V(i)->ClearS(); }
+
 		outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 		if(tri::Clean<CMeshO>::IsTwoManifoldFace(outMesh.cm))
 			for(int i=0; i<iterations; i++)
 			{
+				dialog->setStatusLabel("Iter: "+QString("%1").arg(i+1));
+
 				outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler /*MyMidPoint<CMeshO>()*/, 0, false, 0);
+				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler, 0, false, 0);
 				outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
-				dialog->setBarVal(i);
+				dialog->setBarVal(i+1);
+				qDebug("Iteration done");
 			}
 
 		outMesh.fileName = "Retopology.ply";
 		tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
 
-		CMeshO::FaceIterator fi;
+		dialog->setStatusLabel("Normals");
+
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{
+			(*fi).V(0)->N() = ((*fi).V(1)->N()+(*fi).V(2)->N())/2;
+			(*fi).V(1)->N() = ((*fi).V(0)->N()+(*fi).V(2)->N())/2;
+			(*fi).V(2)->N() = ((*fi).V(1)->N()+(*fi).V(0)->N())/2;
+
 			(*fi).N()=Point3f(0,0,0);
 			(*fi).N()=((fi->V(0)->N() + fi->V(1)->N() + fi->V(2)->N())/3);
 		
@@ -250,6 +256,34 @@ public:
 				if((*fi).V(i)->IsS())
 					(*fi).SetS();
 		}
+		qDebug("Normals updated");
+
+		dialog->setStatusLabel("Fitting");
+
+		for(int i=0; i<(1+(int)(iterations/4)); i++)
+	//	for(int i=0; i<2; i++)
+		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
+			if((*fi).IsS())
+				for(int i=0; i<3; i++)
+				{
+					(*fi).FFp(i)->SetS();
+//					for(int j=0; j<3; j++)
+//						(*fi).FFp(i)->FFp(j)->SetS();
+				}
+	
+		qDebug("Vtxs selection updated");
+
+		dialog->setStatusLabel("Lapl smooth");
+
+		//tri::Smooth<CMeshO>::VertexCoordLaplacianHC(outMesh.cm,3,true);
+
+		size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
+
+		qDebug("tri::UpdateSelection<CMeshO>::VertexFromFaceStrict");
+
+		tri::Smooth<CMeshO>::VertexCoordLaplacian(outMesh.cm,3,true,0);
+		dialog->setStatusLabel("Done");
+		qDebug("tri::Smooth<CMeshO>::VertexCoordLaplacian");
 	}
 
 
