@@ -323,9 +323,9 @@ bool AlignPair::Align(
 						double error=StartMinDist;
 						Point3d n(0,0,0),q,ip;
             double maxd= std::numeric_limits<double>::max();
-           // f=vcg::trimesh::GetClosestFace<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, q);
-					  f=vcg::trimesh::GetClosestFace<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, q,n,ip);
-            //trimesh::Closest(*fix, movvert[i], u, error, n, q, f, ip);
+           // f=vcg::tri::GetClosestFace<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, q);
+					  f=vcg::tri::GetClosestFace<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, q,n,ip);
+            //tri::Closest(*fix, movvert[i], u, error, n, q, f, ip);
 						  //MinDistPoint(*fix, movvert[i], u, error, n, q ,f, ip);  
 						ii.SampleTested++;
 						if(error>=StartMinDist) {
