@@ -115,7 +115,7 @@ public:
     int             n_total_samples;
     int             n_samples;
 		float dist_upper_bound;
-		typedef trimesh::FaceTmark<CMeshO> MarkerFace;
+		typedef tri::FaceTmark<CMeshO> MarkerFace;
 		MarkerFace markerFunctor;
 	
 		
@@ -215,7 +215,7 @@ public:
 	MetroMeshGrid   unifGrid;
 
 	// Parameters
-		typedef trimesh::FaceTmark<CMeshO> MarkerFace;
+		typedef tri::FaceTmark<CMeshO> MarkerFace;
 		MarkerFace markerFunctor;
 	
 	bool coordFlag;
