@@ -30,7 +30,7 @@
 
 #include <vcg/simplex/vertexplus/base.h>
 #include <vcg/simplex/vertexplus/component_ocf.h>
-#include <vcg/simplex/edge/edge.h>
+#include <vcg/simplex/edgeplus/base.h>
 #include <vcg/simplex/faceplus/base.h>
 #include <vcg/simplex/faceplus/component_ocf.h>
 #include <vcg/simplex/face/topology.h>
@@ -53,31 +53,32 @@ class CVertexO;
 //Vert Mem Occupancy  --- 40b ---
 
 class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO, 
-	vcg::vert::InfoOcf,      /* 4b */
-  vcg::vert::Coord3f,     /* 12b */ 
-  vcg::vert::BitFlags,    /*  4b */
-  vcg::vert::Normal3f,    /* 12b */
-  vcg::vert::Qualityf,    /*  4b */
-  vcg::vert::Color4b,      /*  4b */
-  vcg::vert::VFAdjOcf,    /*  0b */
-  vcg::vert::MarkOcf,     /*  0b */
-  vcg::vert::CurvaturefOcf, /*  0b */
-  vcg::vert::CurvatureDirfOcf  /*  0b */
+	vcg::vertex::InfoOcf,      /* 4b */
+  vcg::vertex::Coord3f,     /* 12b */ 
+  vcg::vertex::BitFlags,    /*  4b */
+  vcg::vertex::Normal3f,    /* 12b */
+  vcg::vertex::Qualityf,    /*  4b */
+  vcg::vertex::Color4b,      /*  4b */
+  vcg::vertex::VFAdjOcf,    /*  0b */
+  vcg::vertex::MarkOcf,     /*  0b */
+  vcg::vertex::CurvaturefOcf, /*  0b */
+  vcg::vertex::CurvatureDirfOcf  /*  0b */
   >{ 
 };
 
-  
-class CEdge : public vcg::Edge<CEdge,CVertexO> {
+
+class CEdge : public vcg::EdgeSimp2<CVertexO,CEdge,CFaceO, vcg::edge::EVAdj> {
 public:
-  inline CEdge() {};
-  inline CEdge( CVertexO * v0, CVertexO * v1):vcg::Edge<CEdge,CVertexO>(v0,v1){};
-  static inline CEdge OrderedEdge(VertexType* v0,VertexType* v1){
+	inline CEdge(){};
+  inline CEdge( CVertexO * v0, CVertexO * v1){ V(0)= v0 ; V(1)= v1;};
+  static inline CEdge OrderedEdge(CVertexO* v0,CVertexO* v1){
    if(v0<v1) return CEdge(v0,v1);
    else return CEdge(v1,v0);
-  }
+	}
+};
 
   //inline CEdge( Edge<CEdge,CVertexO> &e):Edge<CEdge,CVertexO>(e){};
-};
+
 
 //Face Mem Occupancy  --- 32b ---
 
@@ -93,7 +94,7 @@ class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
       vcg::face::WedgeTexCoordfOcf      /* 0b */
     > {};
 
-class CMeshO    : public vcg::tri::TriMesh< vcg::vert::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > {
+class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > {
 public :
 	int sfn; //The number of selected faces.
   vcg::Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
