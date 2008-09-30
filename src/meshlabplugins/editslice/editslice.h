@@ -13,24 +13,26 @@
 
 #include <vcg/space/index/grid_static_ptr.h>
 
-#include <vcg/simplex/vertex/vertex.h>
+#include <vcg/simplex/vertexplus/base.h>
+#include <vcg/simplex/vertexplus/component.h>
 #include <vcg/complex/edgemesh/base.h>
-#include <vcg/simplex/edge/edge.h>
+#include <vcg/simplex/edgeplus/base.h>
+#include <vcg/simplex/edgeplus/component.h>
 #include <wrap/io_edgemesh/export_svg.h>
 
 typedef CMeshO n_Mesh;
 
 class n_Face;
 class n_Edge;
-class n_Vertex  : public vcg::Vertex<float, n_Edge, n_Face> {};
-class n_Edge    : public vcg::Edge<n_Edge, n_Vertex> {};
+class n_Vertex  : public vcg::VertexSimp2<n_Vertex, n_Edge, n_Face, vcg::vertex::Coord3f, vcg::vertex::BitFlags> {};
+class n_Edge    : public vcg::EdgeSimp2<n_Vertex,n_Edge, n_Vertex, vcg::edge::VertexRef> {};
 
 
-class n_EdgeMesh: public vcg::edge::EdgeMesh< std::vector<n_Vertex>, std::vector<n_Edge> > {};
+class n_EdgeMesh: public vcg::edg::EdgeMesh< std::vector<n_Vertex>, std::vector<n_Edge> > {};
 
 typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType> TriMeshGrid;
-typedef vcg::edge::EdgeMesh<std::vector<n_Vertex>,std::vector<n_Edge> > Edge_Mesh;
-typedef vcg::edge::io::SVGProperties SVGProperties;
+typedef vcg::edg::EdgeMesh<std::vector<n_Vertex>,std::vector<n_Edge> > Edge_Mesh;
+typedef vcg::edg::io::SVGProperties SVGProperties;
 
 
 
