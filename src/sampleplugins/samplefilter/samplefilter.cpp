@@ -66,7 +66,7 @@ ExtraSamplePlugin::ExtraSamplePlugin()
 const QString ExtraSamplePlugin::filterName(FilterIDType filterId) 
 {
   switch(filterId) {
-		case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement"); 
+		case FP_MOVE_VERTEX :  return QString("Sample Filter Name"); 
 		default : assert(0); 
 	}
 }
@@ -76,7 +76,7 @@ const QString ExtraSamplePlugin::filterName(FilterIDType filterId)
 const QString ExtraSamplePlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_MOVE_VERTEX :  return QString("Randomly move each vertex of the mesh of a small amount"); 
+		case FP_MOVE_VERTEX :  return QString("Sample Filter Info: long explanation of what the filter does"); 
 		default : assert(0); 
 	}
 }
