@@ -26,6 +26,7 @@
 FillerDialog::FillerDialog(QWidget *parent)
 	: QDockWidget(parent)
 {	
+	someBridge = false;
 	ui.setupUi(this);
 	this->setWidget(ui.frame_main);
 	
@@ -44,12 +45,12 @@ void FillerDialog::closeEvent ( QCloseEvent * event )
 
 void FillerDialog::clickStartBridging()
 {
-	ui.bridgeButton->setText("End");
-	ui.manualBridgeRBtm->setEnabled(false);
-	ui.autoBridgeRBtm->setEnabled(false);
+	ui.manualBridgeBtn->setText("End");
+	ui.acceptBridgeBtn->setEnabled(false);
+	ui.autoBridgeBtn->setEnabled(false);
 	ui.clearBridgeBtn->setEnabled(false);
 	ui.selfHoleChkB->setEnabled(false);
-	ui.CloseNMHoleRBtm->setEnabled(false);
+	ui.nmHoleClosureBtn->setEnabled(false);
 	ui.label_sld_dx->setEnabled(false);
 	ui.label_sld_sx->setEnabled(false);
 	ui.bridgeParamSld->setEnabled(false);
@@ -57,12 +58,13 @@ void FillerDialog::clickStartBridging()
 
 void FillerDialog::clickEndBridging()
 {
-	ui.bridgeButton->setText("Apply");
-	ui.manualBridgeRBtm->setEnabled(true);
-	ui.autoBridgeRBtm->setEnabled(true);
-	ui.clearBridgeBtn->setEnabled(true);
+	ui.manualBridgeBtn->setText("Start Manual Bridging");
+	ui.autoBridgeBtn->setEnabled(true);
 	ui.selfHoleChkB->setEnabled(true);
-	ui.CloseNMHoleRBtm->setEnabled(true);
+	ui.nmHoleClosureBtn->setEnabled(true);
+	
+	ui.clearBridgeBtn->setEnabled(someBridge);
+	ui.acceptBridgeBtn->setEnabled(someBridge);
 
 	if(ui.selfHoleChkB->isChecked())
 	{
@@ -78,4 +80,11 @@ void FillerDialog::clickSingleHoleBridgeOpt()
 	ui.label_sld_sx->setEnabled(check);
 	ui.label_sld_dx->setEnabled(check);
 	ui.bridgeParamSld->setEnabled(check);
+}
+
+void FillerDialog::SLOT_ExistBridge(bool exist)
+{
+	someBridge = exist;
+	ui.clearBridgeBtn->setEnabled(exist);
+	ui.acceptBridgeBtn->setEnabled(exist);
 }

@@ -139,7 +139,7 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QLabel" name="label2_2" >
+            <widget class="QLabel" name="label_1" >
              <property name="sizePolicy" >
               <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
                <horstretch>0</horstretch>
@@ -577,198 +577,7 @@
              <string>Bridge</string>
             </attribute>
             <layout class="QGridLayout" >
-             <item row="0" column="0" >
-              <spacer>
-               <property name="orientation" >
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" >
-                <size>
-                 <width>0</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="0" column="1" >
-              <widget class="QFrame" name="frame" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize" >
-                <size>
-                 <width>140</width>
-                 <height>120</height>
-                </size>
-               </property>
-               <property name="frameShape" >
-                <enum>QFrame::StyledPanel</enum>
-               </property>
-               <property name="frameShadow" >
-                <enum>QFrame::Raised</enum>
-               </property>
-               <widget class="QRadioButton" name="autoBridgeRBtm" >
-                <property name="geometry" >
-                 <rect>
-                  <x>0</x>
-                  <y>0</y>
-                  <width>111</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text" >
-                 <string>Automatic</string>
-                </property>
-                <property name="checked" >
-                 <bool>true</bool>
-                </property>
-               </widget>
-               <widget class="QRadioButton" name="manualBridgeRBtm" >
-                <property name="geometry" >
-                 <rect>
-                  <x>0</x>
-                  <y>70</y>
-                  <width>138</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text" >
-                 <string>Manual</string>
-                </property>
-               </widget>
-               <widget class="QSlider" name="bridgeParamSld" >
-                <property name="enabled" >
-                 <bool>false</bool>
-                </property>
-                <property name="geometry" >
-                 <rect>
-                  <x>39</x>
-                  <y>40</y>
-                  <width>51</width>
-                  <height>21</height>
-                 </rect>
-                </property>
-                <property name="layoutDirection" >
-                 <enum>Qt::RightToLeft</enum>
-                </property>
-                <property name="maximum" >
-                 <number>100</number>
-                </property>
-                <property name="sliderPosition" >
-                 <number>50</number>
-                </property>
-                <property name="tracking" >
-                 <bool>true</bool>
-                </property>
-                <property name="orientation" >
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="invertedAppearance" >
-                 <bool>true</bool>
-                </property>
-                <property name="tickPosition" >
-                 <enum>QSlider::TicksBelow</enum>
-                </property>
-                <property name="tickInterval" >
-                 <number>0</number>
-                </property>
-               </widget>
-               <widget class="QLabel" name="label_sld_sx" >
-                <property name="enabled" >
-                 <bool>false</bool>
-                </property>
-                <property name="geometry" >
-                 <rect>
-                  <x>10</x>
-                  <y>40</y>
-                  <width>27</width>
-                  <height>20</height>
-                 </rect>
-                </property>
-                <property name="font" >
-                 <font>
-                  <pointsize>7</pointsize>
-                 </font>
-                </property>
-                <property name="text" >
-                 <string>Shape</string>
-                </property>
-                <property name="textFormat" >
-                 <enum>Qt::AutoText</enum>
-                </property>
-               </widget>
-               <widget class="QRadioButton" name="CloseNMHoleRBtm" >
-                <property name="geometry" >
-                 <rect>
-                  <x>0</x>
-                  <y>100</y>
-                  <width>138</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text" >
-                 <string>Close Non Manifold hole</string>
-                </property>
-               </widget>
-               <widget class="QLabel" name="label_sld_dx" >
-                <property name="enabled" >
-                 <bool>false</bool>
-                </property>
-                <property name="geometry" >
-                 <rect>
-                  <x>95</x>
-                  <y>40</y>
-                  <width>32</width>
-                  <height>20</height>
-                 </rect>
-                </property>
-                <property name="font" >
-                 <font>
-                  <pointsize>7</pointsize>
-                 </font>
-                </property>
-                <property name="text" >
-                 <string>1/2 hole</string>
-                </property>
-                <property name="textFormat" >
-                 <enum>Qt::AutoText</enum>
-                </property>
-               </widget>
-               <widget class="QCheckBox" name="selfHoleChkB" >
-                <property name="geometry" >
-                 <rect>
-                  <x>20</x>
-                  <y>20</y>
-                  <width>111</width>
-                  <height>18</height>
-                 </rect>
-                </property>
-                <property name="text" >
-                 <string>Self hole Bridge</string>
-                </property>
-                <property name="checked" >
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </widget>
-             </item>
-             <item row="0" column="2" >
-              <spacer>
-               <property name="orientation" >
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" >
-                <size>
-                 <width>0</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="1" column="0" colspan="3" >
+             <item row="0" column="0" colspan="3" >
               <layout class="QHBoxLayout" >
                <item>
                 <spacer>
@@ -777,14 +586,360 @@
                  </property>
                  <property name="sizeHint" >
                   <size>
-                   <width>0</width>
+                   <width>10</width>
                    <height>20</height>
                   </size>
                  </property>
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="bridgeButton" >
+                <widget class="QGroupBox" name="groupBox" >
+                 <property name="sizePolicy" >
+                  <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                   <horstretch>2</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize" >
+                  <size>
+                   <width>160</width>
+                   <height>73</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize" >
+                  <size>
+                   <width>250</width>
+                   <height>73</height>
+                  </size>
+                 </property>
+                 <property name="title" >
+                  <string>Automatic bridging</string>
+                 </property>
+                 <property name="alignment" >
+                  <set>Qt::AlignLeading</set>
+                 </property>
+                 <layout class="QGridLayout" >
+                  <property name="topMargin" >
+                   <number>3</number>
+                  </property>
+                  <property name="bottomMargin" >
+                   <number>3</number>
+                  </property>
+                  <property name="verticalSpacing" >
+                   <number>2</number>
+                  </property>
+                  <item row="0" column="0" colspan="2" >
+                   <layout class="QHBoxLayout" >
+                    <property name="spacing" >
+                     <number>5</number>
+                    </property>
+                    <item>
+                     <widget class="QCheckBox" name="selfHoleChkB" >
+                      <property name="sizePolicy" >
+                       <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text" >
+                       <string>Self hole Bridge</string>
+                      </property>
+                      <property name="checked" >
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer>
+                      <property name="orientation" >
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" >
+                       <size>
+                        <width>0</width>
+                        <height>16</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="autoBridgeBtn" >
+                      <property name="minimumSize" >
+                       <size>
+                        <width>40</width>
+                        <height>23</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize" >
+                       <size>
+                        <width>70</width>
+                        <height>23</height>
+                       </size>
+                      </property>
+                      <property name="layoutDirection" >
+                       <enum>Qt::LeftToRight</enum>
+                      </property>
+                      <property name="text" >
+                       <string>Build</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item row="1" column="0" >
+                   <layout class="QHBoxLayout" >
+                    <item>
+                     <widget class="QLabel" name="label_sld_sx" >
+                      <property name="enabled" >
+                       <bool>false</bool>
+                      </property>
+                      <property name="sizePolicy" >
+                       <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="font" >
+                       <font>
+                        <pointsize>7</pointsize>
+                       </font>
+                      </property>
+                      <property name="text" >
+                       <string>Shape</string>
+                      </property>
+                      <property name="textFormat" >
+                       <enum>Qt::AutoText</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSlider" name="bridgeParamSld" >
+                      <property name="enabled" >
+                       <bool>false</bool>
+                      </property>
+                      <property name="minimumSize" >
+                       <size>
+                        <width>80</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="sizeIncrement" >
+                       <size>
+                        <width>2</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="layoutDirection" >
+                       <enum>Qt::RightToLeft</enum>
+                      </property>
+                      <property name="maximum" >
+                       <number>100</number>
+                      </property>
+                      <property name="sliderPosition" >
+                       <number>50</number>
+                      </property>
+                      <property name="tracking" >
+                       <bool>true</bool>
+                      </property>
+                      <property name="orientation" >
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="invertedAppearance" >
+                       <bool>true</bool>
+                      </property>
+                      <property name="tickPosition" >
+                       <enum>QSlider::TicksBelow</enum>
+                      </property>
+                      <property name="tickInterval" >
+                       <number>0</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_sld_dx" >
+                      <property name="enabled" >
+                       <bool>false</bool>
+                      </property>
+                      <property name="sizePolicy" >
+                       <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="font" >
+                       <font>
+                        <pointsize>7</pointsize>
+                       </font>
+                      </property>
+                      <property name="text" >
+                       <string>1/2 hole</string>
+                      </property>
+                      <property name="textFormat" >
+                       <enum>Qt::AutoText</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item row="1" column="1" >
+                   <spacer>
+                    <property name="orientation" >
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" >
+                     <size>
+                      <width>0</width>
+                      <height>16</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <spacer>
+                 <property name="orientation" >
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" >
+                  <size>
+                   <width>10</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="0" >
+              <spacer>
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" >
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="1" column="1" >
+              <widget class="QPushButton" name="manualBridgeBtn" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                 <horstretch>2</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize" >
+                <size>
+                 <width>140</width>
+                 <height>23</height>
+                </size>
+               </property>
+               <property name="maximumSize" >
+                <size>
+                 <width>170</width>
+                 <height>23</height>
+                </size>
+               </property>
+               <property name="sizeIncrement" >
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text" >
+                <string>Start manual bridging</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2" >
+              <spacer>
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" >
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="2" column="0" >
+              <spacer>
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" >
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="2" column="1" >
+              <widget class="QPushButton" name="nmHoleClosureBtn" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize" >
+                <size>
+                 <width>140</width>
+                 <height>23</height>
+                </size>
+               </property>
+               <property name="maximumSize" >
+                <size>
+                 <width>170</width>
+                 <height>23</height>
+                </size>
+               </property>
+               <property name="text" >
+                <string>Close NonManifold Hole</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2" >
+              <spacer>
+               <property name="orientation" >
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" >
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="3" column="0" colspan="3" >
+              <layout class="QHBoxLayout" >
+               <item>
+                <spacer>
+                 <property name="orientation" >
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" >
+                  <size>
+                   <width>16</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="acceptBridgeBtn" >
+                 <property name="enabled" >
+                  <bool>false</bool>
+                 </property>
                  <property name="sizePolicy" >
                   <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
                    <horstretch>0</horstretch>
@@ -799,12 +954,12 @@
                  </property>
                  <property name="maximumSize" >
                   <size>
-                   <width>140</width>
+                   <width>90</width>
                    <height>23</height>
                   </size>
                  </property>
                  <property name="text" >
-                  <string>Apply</string>
+                  <string>Accept</string>
                  </property>
                 </widget>
                </item>
@@ -824,7 +979,7 @@
                <item>
                 <widget class="QPushButton" name="clearBridgeBtn" >
                  <property name="enabled" >
-                  <bool>true</bool>
+                  <bool>false</bool>
                  </property>
                  <property name="sizePolicy" >
                   <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
@@ -840,7 +995,7 @@
                  </property>
                  <property name="maximumSize" >
                   <size>
-                   <width>140</width>
+                   <width>90</width>
                    <height>23</height>
                   </size>
                  </property>
@@ -856,7 +1011,7 @@
                  </property>
                  <property name="sizeHint" >
                   <size>
-                   <width>0</width>
+                   <width>16</width>
                    <height>20</height>
                   </size>
                  </property>
@@ -891,6 +1046,38 @@
     <hint type="destinationlabel" >
      <x>152</x>
      <y>364</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>trivialRBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>171</x>
+     <y>272</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>109</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>trivialRBtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label_2</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>171</x>
+     <y>272</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>231</x>
+     <y>349</y>
     </hint>
    </hints>
   </connection>

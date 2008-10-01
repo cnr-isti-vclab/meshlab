@@ -88,6 +88,7 @@ public:
 	void toggleAcceptanceHole(CFaceO *bface);
 	void fill(FgtHole<CMeshO>::FillerMode mode);
 	void acceptFilling(bool accept=true);
+	void acceptBridges();
 	void removeBridges();
 	void closeNonManifolds();
 	inline MeshModel* getMesh() const { return mesh; };
@@ -111,8 +112,9 @@ private:
 public:
 	HoleVector holes;
 	
-signals:
+Q_SIGNALS:
 	void SGN_needUpdateGLA();
+	void SGN_ExistBridge(bool exist);
 
 };
 

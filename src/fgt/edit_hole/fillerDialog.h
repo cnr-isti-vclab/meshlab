@@ -45,12 +45,18 @@ public:
 Q_SIGNALS:
 	void SGN_Closing();
 	
+public Q_SLOTS:
+	void SLOT_ExistBridge(bool exist);
+
 public:
 	Ui::FillerWidget ui;
 	QWidget* parent;
 
 private:
 	virtual void closeEvent( QCloseEvent * event );
+
+private:
+	bool someBridge;
 };
 
 #endif

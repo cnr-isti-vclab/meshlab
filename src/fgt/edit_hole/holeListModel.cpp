@@ -184,10 +184,15 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 		local_facePointer.push_back(&pickedAbutment.f);
 		local_facePointer.push_back(&picked.f);
 
-		FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, mesh->cm, holes, &local_facePointer);
-		pickedAbutment.SetNull();
+		if(FgtBridge<CMeshO>::CreateBridge(pickedAbutment, picked, mesh->cm, holes, &local_facePointer))
+		{
+			emit SGN_ExistBridge(true);
+			emit layoutChanged();
+		}
+		else
+			QMessageBox::warning(0, tr("Bridge autocompenetration"), QString("Bridge is compenetrating with mesh."));
 
-		emit layoutChanged();
+		pickedAbutment.SetNull();		
 	}
 }
 
@@ -238,24 +243,35 @@ void HoleListModel::acceptFilling(bool accept)
 
 void HoleListModel::autoBridge(bool singleHole, double distCoeff)
 {
+	FgtBridge<CMeshO>::RemoveBridges(mesh->cm, holes);
+	int nb=0;
 	if(singleHole)
-		FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, distCoeff);
+		nb = FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, distCoeff);
 	else
-		FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, distCoeff);
+		nb = FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, distCoeff);
 
+	emit SGN_ExistBridge( nb>0 );
 	emit layoutChanged();
 }
 
 void HoleListModel::removeBridges()
 {
 	FgtBridge<CMeshO>::RemoveBridges(mesh->cm, holes);
-	state = HoleListModel::Selection;
+	emit SGN_ExistBridge(false);
 	emit layoutChanged();
+}
+
+void HoleListModel::acceptBridges()
+{
+	FgtBridge<CMeshO>::AcceptBridges(holes);
+	state = HoleListModel::Selection;
+	emit SGN_ExistBridge(false);
 }
 
 void HoleListModel::closeNonManifolds()
 {
-	FgtBridge<CMeshO>::CloseNonManifoldVertex(mesh->cm, holes);
+	if (FgtBridge<CMeshO>::CloseNonManifoldVertex(mesh->cm, holes) > 0 )
+		emit SGN_ExistBridge(true);
 	emit layoutChanged();
 }
 

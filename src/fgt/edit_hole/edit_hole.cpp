@@ -134,15 +134,18 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	
 	connect(dialogFiller->ui.operationTab, SIGNAL(currentChanged(int)), this, SLOT(skipTab(int)) );
 	connect(dialogFiller->ui.fillButton, SIGNAL(clicked()), this,SLOT(fill()));
-	connect(dialogFiller->ui.bridgeButton, SIGNAL(clicked()), this, SLOT(bridge()) );
 	connect(dialogFiller->ui.acceptFillBtn, SIGNAL(clicked()), this, SLOT(acceptFill()) );
 	connect(dialogFiller->ui.cancelFillBtn, SIGNAL(clicked()), this, SLOT(cancelFill()) );
+	
+	connect(dialogFiller->ui.manualBridgeBtn, SIGNAL(clicked()), this, SLOT(manualBridge()) );
+	connect(dialogFiller->ui.autoBridgeBtn, SIGNAL(clicked()), this, SLOT(autoBridge()) );
+	connect(dialogFiller->ui.nmHoleClosureBtn, SIGNAL(clicked()), this, SLOT(closeNMHoles()) );
+	connect(dialogFiller->ui.acceptBridgeBtn, SIGNAL(clicked()), this, SLOT(acceptBridges()) );
 	connect(dialogFiller->ui.clearBridgeBtn, SIGNAL(clicked()), this, SLOT(clearBridge()) );
 	connect(dialogFiller->ui.selfHoleChkB, SIGNAL(stateChanged(int)), this, SLOT(chekSingleBridgeOpt()) );
 	connect(dialogFiller->ui.diedralWeightSld, SIGNAL(valueChanged(int)), this, SLOT(updateDWeight(int)));
 	connect(dialogFiller->ui.bridgeParamSld, SIGNAL(valueChanged(int)), this, SLOT(updateBridgeSldValue(int)));
 	connect(dialogFiller, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
-
 	connect(dialogFiller->ui.holeTree->header(), SIGNAL(sectionCountChanged(int, int)), this, SLOT(resizeViewColumn()) );
 	if(holesModel != 0)
 	{
@@ -151,6 +154,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	}
 	holesModel = new HoleListModel(&m);
 	connect(holesModel, SIGNAL(SGN_needUpdateGLA()), this, SLOT(upGlA()) );
+	connect(holesModel, SIGNAL(SGN_ExistBridge(bool)), dialogFiller, SLOT(SLOT_ExistBridge(bool)) );	
 	holeSorter = new HoleSorterFilter(); 
 	holeSorter->setSourceModel(holesModel);
 	dialogFiller->ui.holeTree->setModel( holeSorter );
@@ -272,35 +276,45 @@ void EditHolePlugin::updateBridgeSldValue(int val)
 	bridgeOptSldVal = val;
 }
 
-void EditHolePlugin::bridge()
-{
-	if( dialogFiller->ui.manualBridgeRBtm->isChecked() )
+void EditHolePlugin::manualBridge()
+{	
+	if(holesModel->getState() != HoleListModel::ManualBridging)
 	{
-		if(holesModel->getState() != HoleListModel::ManualBridging)
-		{
-			holesModel->setStartBridging();
-			dialogFiller->clickStartBridging();
-		}
-		else
-		{
-			holesModel->setEndBridging();
-			dialogFiller->clickEndBridging();
-		}
-	}
-	else if( dialogFiller->ui.autoBridgeRBtm->isChecked() )
-	{
-		bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
-		holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
+		holesModel->setStartBridging();
+		dialogFiller->clickStartBridging();
 	}
 	else
-		holesModel->closeNonManifolds();	
+	{
+		holesModel->setEndBridging();
+		dialogFiller->clickEndBridging();
+	}
 	
 	gla->update();
 }
 
+void EditHolePlugin::autoBridge()
+{
+	bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
+	holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
+	gla->update();
+}
+
+void EditHolePlugin::closeNMHoles()
+{
+	holesModel->closeNonManifolds();
+	gla->update();
+}
+
+
 void EditHolePlugin::chekSingleBridgeOpt()
 {
 	dialogFiller->clickSingleHoleBridgeOpt();
+}
+
+void EditHolePlugin::acceptBridges()
+{
+	holesModel->acceptBridges();
+	gla->update();
 }
 
 void EditHolePlugin::clearBridge()

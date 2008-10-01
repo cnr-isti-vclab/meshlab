@@ -128,14 +128,36 @@ public:
 		if(sideA.h == sideB.h)
 		{
 			if( testAbutmentDistance(sideA, sideB))
-				subdivideHoleWithBridge(sideA, sideB, mesh, holes, tmpFaceRef);
+				return subdivideHoleWithBridge(sideA, sideB, mesh, holes, tmpFaceRef);
 			else
 				return false;
 		}
 		else
-			unifyHolesWithBridge(sideA, sideB, mesh, holes, tmpFaceRef);
+			return unifyHolesWithBridge(sideA, sideB, mesh, holes, tmpFaceRef);
+	};
 
-		return true;
+	static void AcceptBridges(HoleVector &holes)
+	{
+		// contains bridge faces reached navigating the holes.
+		std::vector<FacePointer> bridgeFaces;
+
+		// contains all half-edge located over non-bridge face and over edge shared with bridge face.
+		// these half-edges will become border edge when bridge faces are removed.
+		PosVector adjBorderPos;
+
+		PosType curPos;
+		getBridgeInfo(holes, bridgeFaces, adjBorderPos);
+		typename std::vector<FacePointer>::iterator fit;
+		for(fit=bridgeFaces.begin(); fit!=bridgeFaces.end(); fit++ )
+		{
+			(*fit)->ClearUserBit( FgtHole<MESH>::HolePatchFlag() );
+			(*fit)->ClearUserBit( FgtHole<MESH>::PatchCompFlag() );
+			(*fit)->ClearUserBit( FgtHole<MESH>::BridgeFlag() );
+		}
+		
+		typename HoleVector::iterator it = holes.begin();
+		for( ; it!=holes.end(); it++ )
+			it->SetBridged(false);
 	};
 
 	/* Remove all face marked as Bridge. */
@@ -201,8 +223,7 @@ public:
 				}
 			}
 		}
-		
-		
+				
 		// update hole list inserting holes touched by bridge
 		// use adjBorderPos element as start pos to walk over the border, if walking doesn't
 		// visit some adjBorderPos element means this belongo to other hole.
@@ -286,9 +307,14 @@ public:
 	/*  Build a bridge inner to the same hole. It chooses the best bridge computing quality 
 	 *  of 2 faces and similarity (as number of edge) of two next hole. Bridge is build follow
 	 *  bridge's rule, bridge must have 2 border edge. exist between edge sharing a vertex or 
+	 *  Return number of bridge builded.
 	 */
-	static void AutoSelfBridging(MESH &mesh, HoleVector &holes, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
+	static int AutoSelfBridging(MESH &mesh, HoleVector &holes, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
 	{
+		int nb = 0;
+		vcg::GridStaticPtr<FaceType, ScalarType > gM;
+		gM.Set(mesh.face.begin(),mesh.face.end());
+		
 		std::vector<FacePointer *> tmpFaceRef;
 		HoleType* oldRef = 0;
 		BridgeAbutment<MESH> sideA, sideB;
@@ -326,31 +352,45 @@ public:
 					if(!testAbutmentDistance(a,b))
 						continue;
 
+					ScalarType oldq = maxQuality;
+
 					VertexType* vA0 = initP.f->V0( initP.z ); // first vertex of pos' 1-edge 
 					VertexType* vA1 = initP.f->V1( initP.z ); // second vertex of pos' 1-edge
 					VertexType* vB0 = endP.f->V0( endP.z ); // first vertex of pos' 2-edge 
 					VertexType* vB1 = endP.f->V1( endP.z ); // second vertex of pos' 2-edge 
 
 					// solution A 
-					TriangleType bfA0(vA1->P(), vA0->P(), vB0->P());
-					TriangleType bfA1(vB1->P(), vB0->P(), vA0->P());
+					FaceType bfA0;
+					bfA0.V(0) = vA1; bfA0.V(1) = vA0;	bfA0.V(2) = vB0;
+
+					FaceType bfA1;
+					bfA1.V(0) = vB1; bfA1.V(1) = vB0; bfA1.V(2) = vA0;
+					
+					if( !HoleType::TestFaceMeshCompenetration(mesh, gM, &bfA0) &&
+							!HoleType::TestFaceMeshCompenetration(mesh, gM, &bfA1) )
+					{
+						ScalarType Aq = QualityFace(bfA0)+ QualityFace(bfA1) + dist_coeff * j;
+						if(  Aq > maxQuality)
+							maxQuality = Aq;
+					}
 
 					// solution B
-					TriangleType bfB0(vA1->P(), vA0->P(), vB1->P());
-					TriangleType bfB1(vB1->P(), vB0->P(), vA1->P());
+					FaceType bfB0;
+					bfB0.V(0) = vA1; bfB0.V(1) = vA0;	bfB0.V(2) = vB1;
 
-					ScalarType oldq = maxQuality;
-					ScalarType q = bfA0.QualityFace()+ bfA1.QualityFace() + dist_coeff * j;
-					if(  q > maxQuality)
-						maxQuality = q;
-					q = bfB0.QualityFace()+ bfB1.QualityFace() + dist_coeff * j;
-					if(  q > maxQuality)
-						maxQuality = q;
-
+					FaceType bfB1;
+					bfB1.V(0) = vB1; bfB1.V(1) = vB0; bfB1.V(2) = vA1;
+					
+					if( !HoleType::TestFaceMeshCompenetration(mesh, gM, &bfB0) &&
+							!HoleType::TestFaceMeshCompenetration(mesh, gM, &bfB1) )
+					{						
+						ScalarType Bq = QualityFace(bfB0)+ QualityFace(bfB1) + dist_coeff * j;
+						if(  Bq > maxQuality)
+							maxQuality = Bq;
+					}
+					
 					if(oldq < maxQuality)
 					{
-						//sideA = BridgeAbutment<MESH>(initP.f, initP.z, &thehole);
-						//sideB = BridgeAbutment<MESH>(endP.f, endP.z, &thehole);
 						sideA.f=initP.f; sideA.z=initP.z; sideA.h=&thehole;
 						sideB.f=endP.f; sideB.z=endP.z; sideB.h=&thehole;
 					}					
@@ -374,16 +414,27 @@ public:
 				oldRef = &*holes.begin();				
 			}
 
-			subdivideHoleWithBridge(sideA, sideB, mesh, holes, tmpFaceRef);
-			// la subdivideHole.. aggiunge un hole pertanto bisogna aggiornare anche la lista di 
-			// reference a facce
-			tmpFaceRef.push_back(&holes.back().p.f);
+			if(subdivideHoleWithBridge(sideA, sideB, mesh, holes, tmpFaceRef) )
+			{
+				nb++;
+				gM.Set(mesh.face.begin(),mesh.face.end());
+				// la subdivideHole.. aggiunge un hole pertanto bisogna aggiornare anche la lista di 
+				// reference a facce
+				tmpFaceRef.push_back(&holes.back().p.f);
+			}
+			
 		} //scansione degli holes
+		return nb;
 	};
 
 
-	static void AutoMultiBridging(MESH &mesh, HoleVector &holes, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
+	/*  Return number of bridges builded.
+	 */
+	static int AutoMultiBridging(MESH &mesh, HoleVector &holes, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
 	{
+		int nb = 0;
+		vcg::GridStaticPtr<FaceType, ScalarType > gM;
+		
 		std::vector<FacePointer *> tmpFaceRef;
 		BridgeAbutment<MESH> sideA, sideB;
 		std::vector<HoleType*> selectedHoles;
@@ -400,10 +451,10 @@ public:
 					selectedHoles.push_back(&*hit);
 			
 			if(selectedHoles.size() < 2)
-				return;
-
+				return nb;
+			gM.Set(mesh.face.begin(),mesh.face.end());
+		
 			// cerco la miglior combinazione tra le facce di un hole con quelle di un'altro
-
 			ScalarType maxQuality = -1;
 			for(shit1=selectedHoles.begin(); shit1!=selectedHoles.end(); shit1++)
 				for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
@@ -418,21 +469,37 @@ public:
 							VertexType* vB0 = ph2.f->V0( ph2.z ); // first vertex of pos' 2-edge 
 							VertexType* vB1 = ph2.f->V1( ph2.z ); // second vertex of pos' 2-edge 
 
+							ScalarType oldq = maxQuality;
+
 							// solution A 
-							TriangleType bfA0(vA1->P(), vA0->P(), vB0->P());
-							TriangleType bfA1(vB1->P(), vB0->P(), vA0->P());
+							FaceType bfA0;
+							bfA0.V(0) = vA1; bfA0.V(1) = vA0;	bfA0.V(2) = vB0;
+
+							FaceType bfA1;
+							bfA1.V(0) = vB1; bfA1.V(1) = vB0; bfA1.V(2) = vA0;
+							
+							if( !HoleType::TestFaceMeshCompenetration(mesh, gM, &bfA0) &&
+									!HoleType::TestFaceMeshCompenetration(mesh, gM, &bfA1) )
+							{
+								ScalarType Aq = QualityFace(bfA0)+ QualityFace(bfA1);
+								if(  Aq > maxQuality)
+									maxQuality = Aq;
+							}
 
 							// solution B
-							TriangleType bfB0(vA1->P(), vA0->P(), vB1->P());
-							TriangleType bfB1(vB1->P(), vB0->P(), vA1->P());
+							FaceType bfB0;
+							bfB0.V(0) = vA1; bfB0.V(1) = vA0;	bfB0.V(2) = vB1;
 
-							ScalarType oldq = maxQuality;
-							ScalarType q = bfA0.QualityFace()+ bfA1.QualityFace();
-							if(  q > maxQuality)
-								maxQuality = q;
-							q = bfB0.QualityFace()+ bfB1.QualityFace();
-							if(  q > maxQuality)
-								maxQuality = q;
+							FaceType bfB1;
+							bfB1.V(0) = vB1; bfB1.V(1) = vB0; bfB1.V(2) = vA1;
+							
+							if( !HoleType::TestFaceMeshCompenetration(mesh, gM, &bfB0) &&
+									!HoleType::TestFaceMeshCompenetration(mesh, gM, &bfB1) )
+							{						
+								ScalarType Bq = QualityFace(bfB0)+ QualityFace(bfB1);
+								if(  Bq > maxQuality)
+									maxQuality = Bq;
+							}
 
 							if(oldq < maxQuality)
 							{
@@ -459,18 +526,24 @@ public:
 			FgtHole<MESH>::AddFaceReference(holes, tmpFaceRef);
 			tmpFaceRef.push_back(&sideA.f);
 			tmpFaceRef.push_back(&sideB.f);
-			unifyHolesWithBridge(sideA, sideB, mesh, holes, tmpFaceRef);
-
+			
+			if(unifyHolesWithBridge(sideA, sideB, mesh, holes, tmpFaceRef))
+				nb++;
+			
 		}while(true);
+		return nb;
 	};
 
 
 
-	/* 
-	*/
-	static void CloseNonManifoldVertex(MESH &mesh, HoleVector &holes, std::vector<FacePointer *> *app=0)
+	/* Walk over selected non-manifold holes, find vertex visited more times,
+	 * add face adjacent to non-manifold vertex.
+	 * Return number of faces added.
+	 */
+	static int CloseNonManifoldVertex(MESH &mesh, HoleVector &holes, std::vector<FacePointer *> *app=0)
 	{
 		int startNholes = holes.size();
+		int nf = 0;
 
 		// i riferimenti alle facce presenti nella lista di hole vengono gestiti qui perchè
 		// questo metodo può fare inserimenti sulla lista di hole e quindi provocarne il riallocamento
@@ -507,6 +580,7 @@ public:
 					tmpFaceRef.push_back(&p0.f);
 					tmpFaceRef.push_back(&curPos.f);
 					FaceIterator fit = vcg::tri::Allocator<MESH>::AddFaces(mesh, 1, tmpFaceRef);
+					nf++;
 					tmpFaceRef.pop_back();
 					tmpFaceRef.pop_back();
 
@@ -608,7 +682,7 @@ public:
 			//forzo l'aggiornamento delle info dell'hole
 			h->SetStartPos(h->p);
 			h->SetBridged(true);			
-
+			return nf;
 		}// for(int i=0; i<startNholes...
 	};
 
@@ -617,7 +691,6 @@ public:
 private:
 
 	/* Compute distance between bridge side to allow no bridge adjacent hole border	
-	
 	 */
 	static bool testAbutmentDistance(const BridgeAbutment<MESH> &sideA, const BridgeAbutment<MESH> &sideB)
 	{
@@ -667,11 +740,12 @@ private:
 		return true;
 	};
 
-	static void subdivideHoleWithBridge(BridgeAbutment<MESH> &sideA, BridgeAbutment<MESH> &sideB, MESH &mesh,
+	static bool subdivideHoleWithBridge(BridgeAbutment<MESH> &sideA, BridgeAbutment<MESH> &sideB, MESH &mesh,
 		HoleVector &holes, std::vector<FacePointer *> &app)
 	{
 		PosType newP0, newP1;
-		build(mesh, sideA, sideB, newP0, newP1, app);
+		if( !build(mesh, sideA, sideB, newP0, newP1, app) )
+			return false;
 		
 		newP0.f->SetUserBit(FgtHole<MESH>::BridgeFlag());
 		newP1.f->SetUserBit(FgtHole<MESH>::BridgeFlag());
@@ -683,16 +757,19 @@ private:
 			newHole.SetSelect(true);
 		newHole.SetBridged(true);
 		holes.push_back( newHole );
+		return true;
 	};
 
-	static void unifyHolesWithBridge(BridgeAbutment<MESH> &sideA, BridgeAbutment<MESH> &sideB,  MESH &mesh,
+	static bool unifyHolesWithBridge(BridgeAbutment<MESH> &sideA, BridgeAbutment<MESH> &sideB,  MESH &mesh,
 		HoleVector &holes, std::vector<FacePointer *> &app)
 	{
 		assert(FgtHole<MESH>::IsHoleBorderFace(*sideA.f));
 		assert(FgtHole<MESH>::IsHoleBorderFace(*sideB.f));
 
 		PosType newP0, newP1;
-		build(mesh, sideA, sideB, newP0, newP1, app);
+		if( !build(mesh, sideA, sideB, newP0, newP1, app) )
+			return false;
+
 		newP0.f->SetUserBit(FgtHole<MESH>::BridgeFlag());
 		newP1.f->SetUserBit(FgtHole<MESH>::BridgeFlag());
 
@@ -708,6 +785,7 @@ private:
 				holes.erase(hit);
 				break;
 			}
+		return true;
 	};
 
 
@@ -718,16 +796,19 @@ private:
 	 *
 	 *	Connect 2 different face adding 2 face between its edge.
 	 *					 
-	 *		/|    |\				 /|¯¯¯/|\			 /|\¯¯¯|\
-	 *	   / |    | \		--\		/ |	 / | \	  or	/ |	\  | \
-	 *	   \ |    | /		--/		\ |	/  | /			\ |  \ | /
-	 *		\|    |/				 \|/___|/			 \|___\|/
+	 *	 /|    |\            /|¯¯¯/|\        /|\¯¯¯|\
+	 *	/ |    | \    --\   / |	 / | \  or  / |	\  | \
+	 *	\ |    | /    --/   \ |	/  | /      \ |  \ | /
+	 *	 \|    |/	           \|/___|/        \|___\|/
 	 *
 	 * Return  the pos located into new 2 faces added over its border edge 
 	*/
-	static void build(MESH &mesh, BridgeAbutment<MESH> &sideA, BridgeAbutment<MESH> &sideB,
+	static bool build(MESH &mesh, BridgeAbutment<MESH> &sideA, BridgeAbutment<MESH> &sideB,
 		PosType &pos0, PosType &pos1, std::vector<FacePointer *> &app)
 	{	
+		vcg::GridStaticPtr<FaceType, ScalarType > gM;
+		gM.Set(mesh.face.begin(),mesh.face.end());
+		
 		// prima faccia del bridge
 		VertexType* vA0 = sideA.f->V0( sideA.z ); // first vertex of pos' 1-edge 
 		VertexType* vA1 = sideA.f->V1( sideA.z ); // second vertex of pos' 1-edge
@@ -735,12 +816,35 @@ private:
 		VertexType* vB1 = sideB.f->V1( sideB.z ); // second vertex of pos' 2-edge 
 
 		// solution A 
-		TriangleType bfA0(vA1->P(), vA0->P(), vB0->P());
-		TriangleType bfA1(vB1->P(), vB0->P(), vA0->P());
+		FaceType bfA0;
+		bfA0.V(0) = vA1; bfA0.V(1) = vA0;	bfA0.V(2) = vB0;
 
+		FaceType bfA1;
+		bfA1.V(0) = vB1; bfA1.V(1) = vB0; bfA1.V(2) = vA0;
+		
+		ScalarType Aq;
+		if( HoleType::TestFaceMeshCompenetration(mesh, gM, &bfA0) ||
+			  HoleType::TestFaceMeshCompenetration(mesh, gM, &bfA1) )
+			Aq = -1;
+		else
+			Aq = QualityFace(bfA0)+ QualityFace(bfA1);
+		
 		// solution B
-		TriangleType bfB0(vA1->P(), vA0->P(), vB1->P());
-		TriangleType bfB1(vB1->P(), vB0->P(), vA1->P());
+		FaceType bfB0;
+		bfB0.V(0) = vA1; bfB0.V(1) = vA0;	bfB0.V(2) = vB1;
+
+		FaceType bfB1;
+		bfB1.V(0) = vB1; bfB1.V(1) = vB0; bfB1.V(2) = vA1;
+
+		ScalarType Bq;
+		if( HoleType::TestFaceMeshCompenetration(mesh, gM, &bfB0) ||
+			  HoleType::TestFaceMeshCompenetration(mesh, gM, &bfB1) )
+			Bq = -1;
+		else
+			Bq = QualityFace(bfB0)+ QualityFace(bfB1);
+
+		if(Aq == -1 && Bq == -1)
+			return false;
 
 		FaceIterator fit = vcg::tri::Allocator<MESH>::AddFaces(mesh, 2, app);
 		FacePointer f0 = &*fit;
@@ -757,7 +861,7 @@ private:
 		// the index of edge adjacent between new 2 face, is the same for both new faces
 		int sideEdgeIndex = -1;
 
-		if( bfA0.QualityFace()+ bfA1.QualityFace() > bfB0.QualityFace()+ bfB1.QualityFace() )
+		if( Aq > Bq )
 		{
 			f0->V(0) = vA1;
 			f0->V(1) = vA0;
@@ -813,6 +917,7 @@ private:
 		// Set the returned value
 		pos0.f=f0; pos0.z=sideEdgeIndex; pos0.v=pos0.f->V(sideEdgeIndex);
 		pos1.f=f1; pos1.z=sideEdgeIndex; pos1.v=pos1.f->V(sideEdgeIndex);
+		return true;
 	};
 
 	static PosType getClosestPos(FaceType* face, int x, int y)

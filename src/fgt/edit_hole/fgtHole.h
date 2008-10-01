@@ -376,25 +376,11 @@ private:
 		for( ; pi!=patches.end(); ++pi)
 		{
 			FacePointer f = *pi;
-			
-			// prendo le facce che intersecano il bounding box di f
-			f->GetBBox(bbox);
-			vcg::trimesh::GetInBoxFace(mesh, gM, bbox,inBox);
-
-			typename std::vector<FaceType*>::iterator fib;
-			for(fib=inBox.begin();fib!=inBox.end();++fib)
+			if(TestFaceMeshCompenetration(mesh, gM, f))
 			{
-				// tra le facce che hanno i boundingbox intersecanti non considero come compenetranti
-				//    - la faccia corrispondente della mesh a quella della patch
-				//    - facce che condividono un edge o anche un vertice
-				if(vcg::tri::Clean<MESH>::TestIntersection(f, *fib ))
-				{
-					comp = true;
-					f->SetUserBit(PatchCompFlag());
-					continue;
-				}
-			} // for inbox...
-			inBox.clear();
+				comp = true;
+				f->SetUserBit(PatchCompFlag());
+			}			
 		}
 	};
 
@@ -576,6 +562,24 @@ public:
 		for( ; it!=holes.end(); it++)
 			facesReferences.push_back(&it->p.f);
 	}
+
+	static bool TestFaceMeshCompenetration(MESH &mesh, vcg::GridStaticPtr<FaceType, ScalarType > &gM,
+			const FacePointer f)
+	{
+		std::vector<FaceType*> inBox;
+		vcg::Box3< ScalarType> bbox;
+
+		f->GetBBox(bbox);
+		vcg::trimesh::GetInBoxFace(mesh, gM, bbox,inBox);
+
+		typename std::vector<FaceType*>::iterator fib;
+		for(fib=inBox.begin();fib!=inBox.end();++fib)
+			if(vcg::tri::Clean<MESH>::TestIntersection( *fib, f ))
+				return true;
+		
+		return false;
+	};
+
 
 public:
 	static int& HoleFlag() 		{static int _hf=-1; return _hf;};

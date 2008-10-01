@@ -45,15 +45,15 @@ public:
 	typedef CMeshO::FaceIterator FaceIterator;
 	
 	EditHolePlugin();
-    virtual ~EditHolePlugin();
+	virtual ~EditHolePlugin();
 	virtual const QString Info(QAction *);
-    virtual const PluginInfo &Info();
+	virtual const PluginInfo &Info();
 	virtual void  StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void  EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void  Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void  mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void  mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void  mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void  EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void  Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void  mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void  mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void  mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual QList<QAction *> actions() const ;
 	
 	
@@ -74,9 +74,12 @@ private Q_SLOTS:
 	void upGlA();
 	void resizeViewColumn();
 	void fill();
-	void bridge();
+	void manualBridge();
+	void autoBridge();
+	void closeNMHoles();
 	void cancelFill();
 	void acceptFill();
+	void acceptBridges();
 	void clearBridge();
 	void skipTab(int index);
 	void updateDWeight(int val);
