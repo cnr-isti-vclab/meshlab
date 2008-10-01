@@ -155,11 +155,18 @@ void RfxShader::UpdateSemanticUniforms(int passIdx)
 			break;
 
 		// view matrices
+		// as per rendermonkey documentation, world matrix is the identity one
 		case WORLD:
 		case WORLDTRANSPOSE:
 		case WORLDINVERSE:
-		case WORLDINVERSETRANSPOSE:
+		case WORLDINVERSETRANSPOSE: {
+			float id[16] = {1.0, 0.0, 0.0, 0.0,
+			                0.0, 1.0, 0.0, 0.0,
+			                0.0, 0.0, 1.0, 0.0,
+			                0.0, 0.0, 0.0, 1.0};
+			memcpy(unifVal, id, sizeof(float) * 16);
 			break;
+		}
 
 		case VIEW:
 		case VIEWTRANSPOSE:

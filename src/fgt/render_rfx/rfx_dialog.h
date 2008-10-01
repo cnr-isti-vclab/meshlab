@@ -76,7 +76,7 @@ class RfxDialog : public QDockWidget
 	Q_OBJECT
 
 public:
-	RfxDialog(RfxShader*, QAction*, QWidget *parent = 0);
+	RfxDialog(RfxShader*, QAction*, QGLWidget *parent = 0);
 	virtual ~RfxDialog();
 
 	enum DialogTabs { UNIFORM_TAB, TEXTURE_TAB, ALL_TABS };
@@ -92,11 +92,11 @@ public slots:
 private:
 	void setupTabs();
 	void AddUniformBox(RfxUniform*, int);
-	void DrawIFace(QGroupBox*, RfxUniform*, int idx, int rows, int columns);
+	void DrawIFace(QGridLayout*, RfxUniform*, int idx, int rows, int columns);
 	void CleanTab(int);
 
 	Ui::RfxDock ui;
-	QGLContext *mGLWin;
+	QGLWidget *mGLWin;
 	QMultiMap<int, QWidget*> widgetsByTab;
 	int selPass;
 	RfxShader *shader;

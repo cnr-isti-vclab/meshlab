@@ -23,19 +23,19 @@
 
 #include "rfx_dialog.h"
 
-RfxDialog::RfxDialog(RfxShader *s, QAction *a, QWidget *parent)
+RfxDialog::RfxDialog(RfxShader *s, QAction *a, QGLWidget *parent)
 	: QDockWidget(parent)
 {
 	shader = s;
-	mGLWin = (QGLContext*)parent;
+	mGLWin = parent;
 
 	ui.setupUi(this);
 	setWindowTitle("RenderRfx [" + a->text() + "]");
 
-	this->setWidget(ui.RfxDockContents);
-	this->setFeatures(QDockWidget::AllDockWidgetFeatures);
-	this->setAllowedAreas(Qt::LeftDockWidgetArea);
-	this->setFloating(true);
+	setWidget(ui.RfxDockContents);
+	setFeatures(QDockWidget::AllDockWidgetFeatures);
+	setAllowedAreas(Qt::LeftDockWidgetArea);
+	setFloating(true);
 
 	/* Passes */
 	QListIterator<RfxGLPass*> pit = s->PassesIterator();
@@ -175,64 +175,73 @@ void RfxDialog::AddUniformBox(RfxUniform *uni, int uniIndex)
 {
 	assert(uni);
 
-	QGroupBox *boxUni = new QGroupBox();
-	boxUni->setLayout(new QGridLayout());
-	boxUni->setTitle(uni->GetName() +
-	                 ((uni->GetSemantic().isNull())? "" :
-	                 " [Predefined: " + uni->GetSemantic() + "]" ));
+	QLabel *lblUni = new QLabel();
+	if (uni->GetSemantic().isNull())
+		lblUni->setText(uni->GetName());
+	else
+		lblUni->setText(uni->GetName() +
+		                "<span style=\"color:darkgreen;\">" +
+		                "<br/> [P: " + uni->GetSemantic() +
+		                "]</span>");
+
+	QGridLayout *gridUni = new QGridLayout();
 
 	switch (uni->GetType()) {
 	case RfxUniform::INT:
 	case RfxUniform::FLOAT:
 	case RfxUniform::BOOL:
-		DrawIFace(boxUni, uni, uniIndex, 1, 1);
+		DrawIFace(gridUni, uni, uniIndex, 1, 1);
 		break;
 
 	case RfxUniform::VEC2:
 	case RfxUniform::IVEC2:
 	case RfxUniform::BVEC2:
-		DrawIFace(boxUni, uni, uniIndex, 1, 2);
+		DrawIFace(gridUni, uni, uniIndex, 1, 2);
 		break;
 
 	case RfxUniform::VEC3:
 	case RfxUniform::IVEC3:
 	case RfxUniform::BVEC3:
-		DrawIFace(boxUni, uni, uniIndex, 1, 3);
+		DrawIFace(gridUni, uni, uniIndex, 1, 3);
 		break;
 
 	case RfxUniform::VEC4:
 	case RfxUniform::IVEC4:
 	case RfxUniform::BVEC4:
-		DrawIFace(boxUni, uni, uniIndex, 1, 4);
+		DrawIFace(gridUni, uni, uniIndex, 1, 4);
 		break;
 
 	case RfxUniform::MAT2:
-		DrawIFace(boxUni, uni, uniIndex, 2, 2);
+		DrawIFace(gridUni, uni, uniIndex, 2, 2);
 		break;
 
 	case RfxUniform::MAT3:
-		DrawIFace(boxUni, uni, uniIndex, 3, 3);
+		DrawIFace(gridUni, uni, uniIndex, 3, 3);
 		break;
 
 	case RfxUniform::MAT4:
-		DrawIFace(boxUni, uni, uniIndex, 4, 4);
+		DrawIFace(gridUni, uni, uniIndex, 4, 4);
 		break;
 
 	default:
 		return;
 	}
 
-	ui.scrollUniformsContents->layout()->addWidget(boxUni);
-	widgetsByTab.insert(UNIFORM_TAB, boxUni);
+	QHBoxLayout *boxContent = new QHBoxLayout();
+	boxContent->addWidget(lblUni);
+	boxContent->addLayout(gridUni);
+
+	((QVBoxLayout*)ui.scrollUniformsContents->layout())->addLayout(boxContent);
+	widgetsByTab.insert(UNIFORM_TAB, lblUni);
 }
 
-void RfxDialog::DrawIFace(QGroupBox *parent, RfxUniform *u, int uidx, int rows, int columns)
+void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows, int columns)
 {
 	enum controlType { INT_CTRL, FLOAT_CTRL, BOOL_CTRL };
 	float *val = u->GetValue();
 	controlType ctrl;
 	QWidget *controls[rows * columns];
-	QGridLayout *uniLayout = ((QGridLayout*)parent->layout());
+	QGridLayout *uniLayout = parent;
 	QSignalMapper *valMapper = new QSignalMapper(this);
 
 	switch (u->GetType()) {
@@ -283,6 +292,7 @@ void RfxDialog::DrawIFace(QGroupBox *parent, RfxUniform *u, int uidx, int rows, 
 				((QDoubleSpinBox*)controls[arrayIdx])->setRange(-99.0, 99.0);
 				((QDoubleSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
 				((QDoubleSpinBox*)controls[arrayIdx])->setDecimals(4);
+				((QDoubleSpinBox*)controls[arrayIdx])->setSingleStep(0.01);
 				connect(controls[arrayIdx], SIGNAL(valueChanged(double)),
 				        valMapper, SLOT(map()));
 				connect(controls[arrayIdx], SIGNAL(valueChanged(double)), this,
@@ -302,14 +312,15 @@ void RfxDialog::DrawIFace(QGroupBox *parent, RfxUniform *u, int uidx, int rows, 
 			valMapper->setMapping(controls[arrayIdx],
 			                      QString().setNum(uidx) + '-' +
 			                      QString().setNum(arrayIdx));
-			valMapper->setParent(controls[arrayIdx]);
 
 			if (!u->GetSemantic().isNull())
 				controls[arrayIdx]->setDisabled(true);
 
 			uniLayout->addWidget(controls[arrayIdx], i, j);
+			widgetsByTab.insert(UNIFORM_TAB, controls[arrayIdx]);
 		}
 	}
+
 	connect(valMapper, SIGNAL(mapped(const QString&)), this,
 	        SLOT(ChangeValue(const QString&)));
 }
@@ -374,6 +385,7 @@ void RfxDialog::ChangeTexture(int unifIdx)
 		uni->SetValue(QDir::fromNativeSeparators(fname));
 		uni->LoadTexture();
 		uni->PassToShader();
+		mGLWin->updateGL();
 
 		// generate a currentIndexChanged event
 		ui.comboTextures->setCurrentIndex(0);
@@ -388,8 +400,7 @@ void RfxDialog::ChangeValue(const QString& val)
 	float *oldVal = uni->GetValue();
 	float newVal = 0.0f;
 
-	// parent of SignalMapper has been set to appropriate QWidget type
-	QObject *sender = QObject::sender()->parent();
+	QObject *sender = ((QSignalMapper*)QObject::sender())->mapping(val);
 	assert(sender);
 
 	QComboBox *cbox = dynamic_cast<QComboBox*>(sender);
@@ -410,6 +421,7 @@ void RfxDialog::ChangeValue(const QString& val)
 
 	oldVal[unif[1].toInt()] = newVal;
 	uni->PassToShader();
+	mGLWin->updateGL();
 }
 
 void RfxDialog::TextureSelected(int idx)
