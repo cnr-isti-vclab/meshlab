@@ -764,8 +764,6 @@ $Revision$
    <RmGLPass NAME="Single Pass" PASS_INDEX="0" ENABLED="TRUE">
     <RmModelReference NAME="Elephant"/>
     <RmGLShader NAME="Vertex Program" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
-uniform vec4 view_position;
-
 varying vec3 vNormal;
 varying vec3 vViewVec;
 
@@ -774,8 +772,8 @@ void main(void)
    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 
    // World-space lighting
-   vNormal = gl_Normal;
-   vViewVec = view_position.xyz - gl_Vertex.xyz;
+   vNormal = gl_NormalMatrix * gl_Normal;
+   vViewVec = -vec3(gl_ModelViewMatrix * gl_Vertex);
 
    
 }]]></RmShaderCode></RmGLShader>
@@ -787,7 +785,7 @@ varying vec3 vViewVec;
 
 void main(void)
 {
-   float v = 0.5 * (1.0 + dot(normalize(vViewVec), vNormal));
+   float v = 0.5 * (1.0 + dot(normalize(vViewVec), normalize(vNormal)));
    gl_FragColor = v * color;
 
 }]]></RmShaderCode></RmGLShader>

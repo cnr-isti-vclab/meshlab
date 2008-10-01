@@ -977,26 +977,19 @@ $Revision$
     <RmGLPass NAME="Single Pass" API="OpenGL" PASS_INDEX="0" ENABLED="TRUE">
      <RmModelReference NAME="Teapot" API=""/>
      <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
-uniform vec4 view_position;
-
 varying vec3  vNormal;
-varying vec3  vLight;
 varying vec3  vView;
 
 
 void main(void)
 {
    // Output transformed vertex position: 
-   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;   
+   gl_Position = ftransform();   
 
-   vNormal = gl_Normal;
+   vNormal = gl_NormalMatrix * gl_Normal;
 
    // Compute the view vector: 
-   vView = normalize( view_position.xyz - gl_Vertex.xyz );
-
-   // Compute vectors to the ights from the current vertex position
-   vLight = normalize(gl_LightSource[0].position.xyz - gl_Vertex.xyz);
-
+   vView = -vec3(gl_ModelViewMatrix * gl_Vertex);
 }]]></RmShaderCode></RmGLShader>
      <RmGLShader NAME="Fragment Program" API="OpenGL" PIXEL_SHADER="TRUE"><RmShaderCode TYPE="TEXT"><![CDATA[
 uniform sampler2D Outline;
@@ -1004,17 +997,16 @@ uniform vec4 Material;
 
 
 varying vec3  vNormal;
-varying vec3  vLight;
 varying vec3  vView;
 
 void main(void)
 {
    vec3 norm = normalize (vNormal);
   
-   vec2 texCoord = vec2(1.0 - dot (norm, normalize(vView)), 0.5);
+   vec2 texCoord = vec2(1.0 - dot(norm, normalize(vView)), 0.5);
    vec3 outline = texture2D(Outline, texCoord).xyz;
 
-   float lighting = (dot (normalize (vLight), norm) * 0.5 + 0.5);
+   float lighting = (dot(vec3(gl_LightSource[0].position), norm) * 0.5 + 0.5);
    lighting = max(0.0, lighting);                    
 
    gl_FragColor = vec4(outline,1.0) * vec4(lighting) * Material; 

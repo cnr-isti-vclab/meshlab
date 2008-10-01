@@ -965,8 +965,6 @@ Lighting ( diffuse ) factor is used to determine the weight of  each texture
     <RmGLPass NAME="Single Pass" API="OpenGL" PASS_INDEX="0" ENABLED="TRUE">
      <RmModelReference NAME="Teapot" API=""/>
      <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
-uniform vec4 lightDir;
-
 varying vec2 vTexCoord;
 varying vec3 vHatchWeights0;
 varying vec3 vHatchWeights1;
@@ -979,7 +977,7 @@ void main(void)
    vec3 posW    = gl_NormalMatrix * gl_Vertex.xyz;
    vec3 normalW = normalize(gl_NormalMatrix * gl_Normal);
 
-   float  diffuse = min(1.0,max(0.0,dot(lightDir.xyz,normalW)));
+   float  diffuse = min(1.0,max(0.0,dot(gl_LightSource[0].position.xyz,normalW)));
    diffuse = diffuse * diffuse;
    diffuse = diffuse * diffuse;
 
