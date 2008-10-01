@@ -1033,22 +1033,19 @@ uniform float Ks;
 varying vec3 normalVec;
 varying vec3 viewVec;
 
-const vec3 lightVec = vec3(0.4, 0.4, 0.8);
-
 void main(void)
 {
    vec4 baseColor = texture2D(base, gl_TexCoord[0].st);
    vec3 bumpPert = texture2D(bump, gl_TexCoord[0].st).rgb;
 
-   vec3 nLight = normalize(lightVec);
+   vec3 nLight = normalize(gl_LightSource[0].position);
    vec3 nView = normalize(viewVec);
-   vec3 nNormal = normalize(normalVec + bumpPert);
+   vec3 nNormal = normalize(normalize(normalVec) + normalize(bumpPert));
 
    float diffuse = clamp(dot(nLight, nNormal), 0.0, 1.0);
-   float specular = pow(clamp(dot(reflect(-normalize(nView), nNormal), nLight),0.0, 1.0), 16.0);
+   float specular = pow(clamp(dot(reflect(-nView, nNormal), nLight),0.0, 1.0), 16.0);
 
-   gl_FragColor = Ka * baseColor +
-                  Kd * diffuse * baseColor + Ks * specular;
+   gl_FragColor = Kd * diffuse * baseColor + Ks * specular;
 }]]></RmShaderCode></RmGLShader>
     <RmStreamMapReference NAME="Stream Mapping" API=""/>
     <RmTextureObject NAME="base" API="OpenGL" STATE_INDEX="0" VERTEX_TEXTURE="FALSE">
