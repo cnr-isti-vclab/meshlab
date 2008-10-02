@@ -38,9 +38,17 @@ class FilterFunctionPlugin : public QObject, public MeshFilterInterface
 
 protected:
 	double x,y,z,nx,ny,nz,r,g,b,q;
+	double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
 
 public:
-	enum { FF_VERT_SELECTION, FF_GEOM_FUNC, FF_COLOR_FUNC, FF_GRID } ;
+	enum { FF_VERT_SELECTION, 
+		   FF_FACE_SELECTION, 
+		   FF_GEOM_FUNC, 
+		   FF_FACE_COLOR, 
+		   FF_VERT_COLOR, 
+		   FF_VERT_QUALITY, 
+		   FF_FACE_QUALITY, 
+		   FF_GRID } ;
 
 	FilterFunctionPlugin();
 	
@@ -52,7 +60,8 @@ public:
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	void setParserVariables(mu::Parser &p);
+	void setPerVertexVariables(mu::Parser &p);
+	void setPerFaceVariables(mu::Parser &p);
 };
 
 #endif
