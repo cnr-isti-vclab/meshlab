@@ -101,9 +101,12 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		int result = vcg::tri::io::ImporterPLY<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0) // all the importers return 0 on success
 		{
-			//QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
-			errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result));
-			return false;
+			if(vcg::tri::io::ImporterPLY<CMeshO>::ErrorCritical(result) )
+			{
+				//QMessageBox::warning(parent, tr("PLY Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result)));
+				errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterPLY<CMeshO>::ErrorMsg(result));
+				return false;
+			}
 		}
 	}
 	else if (formatName.toUpper() == tr("STL"))
