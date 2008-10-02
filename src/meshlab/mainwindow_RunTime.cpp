@@ -907,7 +907,10 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				int mask = 0;
 				MeshModel *mm= new MeshModel();
 				if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,prePar,QCallBack,this /*gla*/))
+				{
+					QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text
 					delete mm;
+				}
 				else{
 					// After opening the mesh lets ask to the io plugin if this format
 					// requires some optional, or userdriven post-opening processing.
@@ -970,7 +973,7 @@ bool MainWindow::open(QString fileName, GLArea *gla)
 				}
 			}
 	}// end foreach file of the input list
-	GLA()->update();
+	if(GLA()) GLA()->update();
 	qb->reset();
 	return true;
 }
