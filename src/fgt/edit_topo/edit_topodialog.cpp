@@ -34,6 +34,9 @@ bool edit_topodialog::isDEBUG()
 
 bool edit_topodialog::drawLabels()
 {return ui.checkBox_2->isChecked(); }
+bool edit_topodialog::drawEdges()
+{return ui.checkBox_3->isChecked(); }
+
 
 void edit_topodialog::updateVtxTable(QList<Vtx> list)
 {

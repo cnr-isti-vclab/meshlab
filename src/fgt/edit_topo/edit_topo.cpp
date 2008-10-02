@@ -809,9 +809,9 @@ void edit_topo::editDecoFaceSelect(MeshModel &m)
 				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(0).V, allv.at(1).V);
 				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(1).V, allv.at(2).V);
 				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(2).V, allv.at(0).V);	
-
+				
 				Point3f mid = (allv.at(0).V + allv.at(1).V + allv.at(2).V) / 3;
-				if(isVertexVisible(allv.at(0).V)&&isVertexVisible(allv.at(1).V)&&isVertexVisible(allv.at(2).V))
+				if(isVertexVisible(allv.at(0).V, _md)&&isVertexVisible(allv.at(1).V, _md)&&isVertexVisible(allv.at(2).V, _md))
 					drawPoint(m, 5.0f, Color4b::DarkGreen, Color4b::Green, mid);
 			}
 			else
@@ -1116,6 +1116,7 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *gla)
 
 	rm.init(&m, dist);
 
+	_md = 0.03;// m.cm.bbox.Diag()/100;
 
 
 	/*if (edit_topodialogobj==0)
@@ -1281,92 +1282,6 @@ void edit_topo::on_mesh_create()
 void edit_topo::on_update_request()
 {
 	parentGla->update();
-
-	
-	/*
-//			MeshModel *trgMesh     = parentGla->meshDoc.meshList.back();	// destination = last
-//			MeshModel *srcMesh = parentGla->meshDoc.mm();		// source = current		
-
-			MeshModel *m2      = parentGla->meshDoc.mm();		// source = current		
-			MeshModel *m1	 = parentGla->meshDoc.meshList.back();	// destination = last
-
-	CMeshO *m = &m2->cm;
-
-	m2->updateDataMask(MeshModel::MM_FACEMARK);
-
-	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
-	MetroMeshGrid   unifGrid;
-
-	// Parameters
-	typedef trimesh::FaceTmark<CMeshO> MarkerFace;
-	MarkerFace markerFunctor;
-	
-
-	unifGrid.Set(m->face.begin(), m->face.end());
-
-	markerFunctor.SetMesh(m);
-
-
-	CMeshO::FaceIterator fi;
-	//for(fi=m1->cm.face.begin(); fi!=m1->cm.face.end(); fi++)
-	for(int fuffa = 0; fuffa<1; fuffa++)
-	{
-
-	/*CMeshO::VertexIterator vi = m1->cm.vert.begin();
-	CMeshO::VertexType &p1 =  (*vi); vi++;
-	CMeshO::VertexType &p2 = (*vi); 
-
-	Point3f punto ;
-
-	for(int i=0; i<3; i++)
-	{
-
-		if(i==0)
-		{
-			p1 = *fi->V(0);
-			p2 = *fi->V(1);
-			punto = (stack.at(0).V + stack.at(1).V)/2;
-		}
-		if(i==1)
-		{
-			p1 = *fi->V(1);
-			p2 = *fi->V(2);
-			punto = (stack.at(1).V + stack.at(2).V)/2;
-		}
-		if(i==2)
-		{
-			p1 = *fi->V(0);
-			p2 = *fi->V(2);
-			punto = (stack.at(0).V + stack.at(2).V)/2;
-		}
-
-
-
-	float dist_upper_bound =m->bbox.Diag()/50;
-	// the results
-	Point3f closestPt, normf, bestq, ip;
-	float dist = dist_upper_bound;
-
-	//Point3f punto = stack.at(0).V //((p1.P() + p2.P()) /2);
-
-	const CMeshO::CoordType &startPt= punto;
-
-
-	in.push_back(punto);
-    
-	CMeshO::FaceType   *nearestF=0;
-	vcg::face::PointDistanceBaseFunctor PDistFunct;
-
-	
-	nearestF =  unifGrid.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
-
-
-	out.push_back(closestPt);
-
-	}
-	}
-*/
-
 }
 /************************************************************************************/
 //
@@ -1461,16 +1376,8 @@ bool edit_topo::getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value) {
 
 
 
-bool edit_topo::isVertexVisible(Point3f v)
+bool edit_topo::isVertexVisible(Point3f v, MeshModel &m)
 {
-	float   pix;
-	double tx,ty,tz;
-
-	gluProject(v.X(),v.Y(),v.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-	glReadPixels(tx,ty,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&pix);
-
-	float ff = fabs(fabs(tz) - fabs(pix));
-
 	/*QString x;
 	x = "ToCheck: tz.."+ QString("%1").arg(tz);
 	qDebug(x.toLatin1());
@@ -1480,7 +1387,34 @@ bool edit_topo::isVertexVisible(Point3f v)
 	qDebug(x.toLatin1()); */
 
 	// 0.03 is good enought...
-	return (ff < 0.05);
+
+	double minD = m.cm.bbox.Diag()/100;
+
+	return isVertexVisible(v, minD);
+}
+
+bool edit_topo::isVertexVisible(Point3f v, double mD)
+{
+	float   pix;
+	double tx,ty,tz;
+
+	gluProject(v.X(),v.Y(),v.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+	glReadPixels(tx,ty,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&pix);
+
+	float ff = fabs(tz - pix);//fabs(fabs(tz) - fabs(pix));
+	float ff2 = fabs(fabs(tz) - fabs(pix));
+
+	QString x;
+	x = QString(" ff= %1").arg(ff)+QString(" ff2= %1").arg(pix)+QString(" pix= %1").arg(pix/ff2);
+
+	qDebug(x.toLatin1());
+
+
+
+
+
+
+	return ((ff < 0.003) && (pix<0.713));   //mD); //0.05);
 }
 
 
@@ -1497,7 +1431,7 @@ bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
 		{
 			Point3f p = list.at(0).V;
 			minDist = sqrt( sqr(t.X()-p.X()) + sqr(t.Y()-p.Y()) + sqr(t.Z()-p.Z()) );
-			found = isVertexVisible(p);
+			found = isVertexVisible(p, _md);
 			out = list.at(0);
 
 			for(int i=1; i<list.count(); i++)
@@ -1505,7 +1439,7 @@ bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
 				p = list.at(i).V;
 				float dist = sqrt( sqr(t.X()-p.X()) + sqr(t.Y()-p.Y()) + sqr(t.Z()-p.Z()) );
 
-				if((dist < minDist)&&(isVertexVisible(p)))
+				if((dist < minDist)&&(isVertexVisible(p, _md)))
 				{
 					minDist = dist;
 					minIdx = i;
@@ -1715,7 +1649,9 @@ void edit_topo::drawLabel(QList<Vtx> list)
 
 void edit_topo::drawLabel(Vtx v)
 {
-	if(isVertexVisible(v.V)&&(edit_topodialogobj->drawLabels()))
+
+
+	if(isVertexVisible(v.V, _md)&&(edit_topodialogobj->drawLabels()))
 	{
 		double tx,ty,tz;
 		gluProject(v.V.X(),v.V.Y(),v.V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
@@ -1846,9 +1782,43 @@ void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b 
 }
 
 
+
+
+QVector<Point3f> vectSub(int part, Point3f p1, Point3f p2)
+{
+	if(part==2)
+	{
+		QVector<Point3f> toRet(3);
+		toRet[0]=p1;
+		toRet[1]=(p1+p2)/2;
+		toRet[2]=p2;
+		return toRet;
+	}
+	else
+	{
+		QVector<Point3f> L;
+		QVector<Point3f> R;
+
+		int np=(int)(part/2);
+
+		L = vectSub(np, p1, (p1+p2)/2);
+		R = vectSub(np, (p1+p2)/2, p2);
+		
+		QVector<Point3f> toRet;
+		for(int i=0; i<L.size(); i++)
+			if(!toRet.contains(L.at(i)))
+				toRet.push_back(L.at(i));
+		for(int i=0; i<R.size(); i++)
+			if(!toRet.contains(R.at(i)))
+				toRet.push_back(R.at(i));
+
+		return toRet;
+	}
+}
+
 void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFront, Color4b colorBack, Point3f p1, Point3f p2)
 {
-	if(isVertexVisible(p1)&&isVertexVisible(p2))
+/*	if(isVertexVisible(p1, _md)&&isVertexVisible(p2, _md))
 	{
 		// Drawing of the current line
 		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
@@ -1888,7 +1858,7 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFr
 	}
 	else
 	{
-		// Drawing of the current line
+		// Drawing of the hidden line
 		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
@@ -1900,117 +1870,171 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFr
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_POINT_SMOOTH);
-		glColor(colorBack);  
-		glBegin(GL_LINES);
-			glVertex(p1);
-			glVertex(p2);
-		glEnd();
-		glBegin(GL_POINTS);
-			glVertex(p1);
-			glVertex(p2);
-		glEnd();    
+		glColor(colorBack);
+
+		// Fill the intermed. points to draw a dotted line
+		QVector<Point3f> trattP;
+		int part = 2;
+		float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
+		if(dist>10) part*=2;
+		if(dist>50) part*=2;
+		if(dist>100) part*=2;
+		if(dist>400) part*=2;
+
+		Point3f pp1;// = p1;
+		Point3f pp2;// = (p2+p1)/2;
+
+		trattP = vectSub(part, p1, p2);
+
+		for(int i=0; i<(trattP.size()-1); i+=2)
+		{
+			pp1 = trattP[i];
+			pp2 = trattP[i+1];
+
+			glBegin(GL_LINES);
+				glVertex(pp1);
+				glVertex(pp2);
+			glEnd();
+			glBegin(GL_POINTS);
+				glVertex(pp1);
+				glVertex(pp2);
+			glEnd();
+
 		glDisable(GL_DEPTH_TEST);
 
 		glLineWidth(0.5);
 		glPointSize(0.3);
 		glBegin(GL_LINES);
-			glVertex(p1);
-			glVertex(p2);
+			glVertex(pp1);
+			glVertex(pp2);
 		glEnd();
 		glBegin(GL_POINTS);
-			glVertex(p1);
-			glVertex(p2);
+			glVertex(pp1);
+			glVertex(pp2);
 		glEnd(); 
-
+	}
 		glPopAttrib();
 		// assert(!glGetError());		
 	}
+*/
+		
+	// Drawing of the current line
 
-/*
-  glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
-  glDepthMask(false);
-  glLineWidth(2.5);
-  glPointSize(5.0);
+if(isVertexVisible(p1, _md)&&isVertexVisible(p2, _md))
+{
 
-   glEnable(GL_BLEND);
-   glEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POINT_SMOOTH);
-    glColor(colorBack);
-    glBegin(GL_LINES);
-      glVertex(p1);
-      glVertex(p2);
-    glEnd();
-    glBegin(GL_POINTS);
-      glVertex(p1);
-      glVertex(p2);
-    glEnd();    
-    glDisable(GL_DEPTH_TEST);
-
-	glColor(colorFront);
-    glBegin(GL_LINES);
-      glVertex(p1);
-      glVertex(p2);
-    glEnd();
-    glBegin(GL_POINTS);
-      glVertex(p1);
-      glVertex(p2);
-    glEnd();
- 
-
-  glPopAttrib(); */
-
-
-
-
-
-
-
-
-
-
-
-/*	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
+	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 	glDepthMask(false);
-
-	glLineWidth(lSize);
-	glPointSize(pSize);
-
+	glLineWidth(2.5);
+	glPointSize(1.4);
+  
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POINT_SMOOTH);
-    glColor(colorBack);
-    glBegin(GL_LINES);
+	glEnable(GL_POINT_SMOOTH);
+	glColor(colorFront);
+	glBegin(GL_LINES);
 		glVertex(p1);
 		glVertex(p2);
 	glEnd();
-    glBegin(GL_POINTS);
+	glBegin(GL_POINTS);
 		glVertex(p1);
 		glVertex(p2);
-    glEnd();    
-	glDisable(GL_DEPTH_TEST);
+	glEnd();    
 
-	glLineWidth(0.7);
-    glPointSize(1.4);
-  
-	//glColor(colorFront);
-    glBegin(GL_LINES);
-		glVertex(p1);
-		glVertex(p2);
-    glEnd();
-    glBegin(GL_POINTS);
-		glVertex(p1);
-		glVertex(p2);
-    glEnd();
-  
-	glPopAttrib();*/
+	// Fill the intermed. points to draw a dotted line
+	QVector<Point3f> trattP;
+	int part = 32;
+	float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
+	if(dist>10) part*=2;
+	if(dist>50) part*=2;
+	if(dist>100) part*=2;
+	if(dist>400) part*=2;
+
+	Point3f pp1;// = p1;
+	Point3f pp2;// = (p2+p1)/2;
+
+	trattP = vectSub(part, p1, p2);
+
+//	glColor(colorBack);
+
+	for(int i=0; i<(trattP.size()-1); i+=2)
+	{
+		pp1 = trattP[i];
+		pp2 = trattP[i+1];
+
+		glDisable(GL_DEPTH_TEST);
+
+		glLineWidth(0.5);
+		glPointSize(0.3);
+		glBegin(GL_LINES);
+			glVertex(pp1);
+			glVertex(pp2);
+		glEnd();
+		glBegin(GL_POINTS);
+			glVertex(pp1);
+			glVertex(pp2);
+		glEnd(); 
+	}
+	glPopAttrib();
+
 }
+else if(edit_topodialogobj->drawEdges())
+{
+
+	
+	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glDepthMask(false);
+	glLineWidth(1.5);
+	glPointSize(0.4);
+  
+
+	// Fill the intermed. points to draw a dotted line
+	QVector<Point3f> trattP;
+	int part = 8;
+	float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
+	if(dist>10) part*=2;
+	if(dist>50) part*=2;
+	if(dist>100) part*=2;
+	if(dist>400) part*=2;
+
+	Point3f pp1;// = p1;
+	Point3f pp2;// = (p2+p1)/2;
+
+	trattP = vectSub(part, p1, p2);
+
+	glColor(colorBack);
+
+	for(int i=0; i<(trattP.size()-1); i+=2)
+	{
+		pp1 = trattP[i];
+		pp2 = trattP[i+1];
+
+		glDisable(GL_DEPTH_TEST);
+
+		glBegin(GL_LINES);
+			glVertex(pp1);
+			glVertex(pp2);
+		glEnd();
+		glBegin(GL_POINTS);
+			glVertex(pp1);
+			glVertex(pp2);
+		glEnd(); 
+	}
+	glPopAttrib();
+
+
+}
+
+
+
+}
+
+
 
 
 void edit_topo::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla)

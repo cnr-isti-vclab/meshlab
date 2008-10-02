@@ -131,6 +131,7 @@ class edit_topodialog : public QWidget
 
 		bool isDEBUG();
 		bool drawLabels();
+		bool drawEdges();
 
 		void setBarMax(int val);
 		void setBarVal(int val);

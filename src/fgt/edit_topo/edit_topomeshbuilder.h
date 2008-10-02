@@ -75,7 +75,7 @@ public:
 		unifGrid.GetClosest(PDistFunct,markerFunctor,p2,dist_upper_bound,dist,closestPt2);
 		const CMeshO::CoordType &startPt= ( p1 + p2 ) / 2.0;	*/
 
-		const typename MESH_TYPE::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
+		const MESH_TYPE::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
 		CMeshO::FaceType *nearestF=0;
 		
 		dist=dist_upper_bound;

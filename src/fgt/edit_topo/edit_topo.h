@@ -100,7 +100,9 @@ public:
 	Vtx connectStart;
 	Vtx connectEnd;
 	
-	bool isVertexVisible(Point3f v);
+	double _md;
+	bool isVertexVisible(Point3f v, MeshModel &m);
+	bool isVertexVisible(Point3f v, double mD);
 	bool getFaceAtMouse(MeshModel &m,CMeshO::FacePointer& val);
 	bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value);
 	int  getNearest(QPointF center, QPointF *points,int num);
