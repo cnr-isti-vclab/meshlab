@@ -589,14 +589,19 @@ void MeshlabStdDialog::closeClick()
 	  absSB = new QDoubleSpinBox(p);
 	  percSB = new QDoubleSpinBox(p);
 
-	  absSB->setMinimum(m_min);
+	  absSB->setMinimum(m_min-(m_max-m_min));
 	  absSB->setMaximum(m_max*2);
-	  absSB->setDecimals(3);
-	  absSB->setSingleStep((m_max-m_min)/20.0);
+	  absSB->setAlignment(Qt::AlignRight);
+		int decimals= 6-ceil(log10(fabs(m_max-m_min)) ) ;
+	//qDebug("range is (%f %f) %f ",m_max,m_min,fabs(m_max-m_min));
+	//qDebug("log range is %f ",log10(fabs(m_max-m_min)));
+	  absSB->setDecimals(decimals);
+	  absSB->setSingleStep((m_max-m_min)/100.0);
 	  absSB->setValue(defaultv);
 
 	  percSB->setMinimum(-200);
 	  percSB->setMaximum(200);
+	  percSB->setAlignment(Qt::AlignRight);
 		percSB->setSingleStep(0.5);
 	  percSB->setValue((100*(defaultv - m_min))/(m_max - m_min));
 		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
@@ -652,6 +657,12 @@ Point3fWidget::Point3fWidget(QWidget *p, Point3f defaultv, QWidget *gla_curr):QG
 	for(int i =0;i<3;++i)
 		{
 			coordSB[i]= new QLineEdit(p);
+			QFont baseFont=coordSB[i]->font();
+			if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
+															  else baseFont.setPointSize(baseFont.pointSize()*3/4);
+			coordSB[i]->setFont(baseFont);
+			coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
+			coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/3);
 			coordSB[i]->setValidator(new QDoubleValidator(p));
 			coordSB[i]->setAlignment(Qt::AlignRight);
 			this->addWidget(coordSB[i],0,i,Qt::AlignHCenter);
