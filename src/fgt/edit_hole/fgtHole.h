@@ -570,7 +570,7 @@ public:
 		vcg::Box3< ScalarType> bbox;
 
 		f->GetBBox(bbox);
-		vcg::trimesh::GetInBoxFace(mesh, gM, bbox,inBox);
+		vcg::tri::GetInBoxFace(mesh, gM, bbox,inBox);
 
 		typename std::vector<FaceType*>::iterator fib;
 		for(fib=inBox.begin();fib!=inBox.end();++fib)
