@@ -42,13 +42,18 @@ class NearestMidPoint : public   std::unary_function<face::Pos<typename MESH_TYP
 {
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 
-	//  typedef AABBBinaryTreeIndex<CMeshO::FaceType, typename CMeshO::ScalarType, vcg::EmptyClass> MetroMeshGrid;
-	//	typedef Octree<CMeshO::FaceType, typename CMeshO::ScalarType> MetroMeshGrid;
 
 public:
 	bool DEBUG;
 	QList<Point3f> * LinMid;
 	QList<Point3f> * LoutMid;
+
+
+	MetroMeshGrid   unifGrid;
+
+	typedef tri::FaceTmark<MESH_TYPE> MarkerFace;
+	MarkerFace markerFunctor;	
+
 
  	void init(MESH_TYPE *_m, float dist)
 	{
@@ -68,24 +73,10 @@ public:
 		float dist = dist_upper_bound;
 		vcg::face::PointDistanceBaseFunctor<float> PDistFunct;
 
-/*		const CMeshO::CoordType &p1 = ep.f->V(ep.z)->P();
-		unifGrid.GetClosest(PDistFunct,markerFunctor,p1,dist_upper_bound,dist,closestPt1);
-		dist=dist_upper_bound;
-		const CMeshO::CoordType &p2 = ep.f->V1(ep.z)->P();
-		unifGrid.GetClosest(PDistFunct,markerFunctor,p2,dist_upper_bound,dist,closestPt2);
-		const CMeshO::CoordType &startPt= ( p1 + p2 ) / 2.0;	*/
-
 		const MESH_TYPE::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
 		CMeshO::FaceType *nearestF=0;
 		
 		dist=dist_upper_bound;
-	  
-//		GetClosest(	OBJPOINTDISTFUNCTOR & _getPointDistance, 
-//					OBJMARKER & _marker, 
-//					const CoordType & _p, 
-//					const ScalarType & _maxDist,
-//					ScalarType & _minDist, 
-//					CoordType & _closestPt)
 
 		Point3f p1 = ep.f->V(ep.z)->P();
 		Point3f p2 = ep.f->V1(ep.z)->P();
@@ -154,10 +145,7 @@ public:
 
 private: 
 	CMeshO *m; 
-	MetroMeshGrid   unifGrid;
 
-	typedef tri::FaceTmark<MESH_TYPE> MarkerFace;
-	MarkerFace markerFunctor;	
 };
 
 
@@ -217,7 +205,7 @@ public:
 		createBasicMesh(outMesh, Fstack, stack);
 
 		qDebug("Basic mesh init done");
-		dialog->setStatusLabel("Done");
+		dialog->setStatusLabel("Done");	
 
 		CMeshO::FaceIterator fi;
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
@@ -233,7 +221,6 @@ public:
 				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler, 0, false, 0);
 				outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
 				dialog->setBarVal(i+1);
-				qDebug("Iteration done");
 			}
 
 		outMesh.fileName = "Retopology.ply";
@@ -243,47 +230,25 @@ public:
 
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{
-			(*fi).V(0)->N() = ((*fi).V(1)->N()+(*fi).V(2)->N())/2;
-			(*fi).V(1)->N() = ((*fi).V(0)->N()+(*fi).V(2)->N())/2;
-			(*fi).V(2)->N() = ((*fi).V(1)->N()+(*fi).V(0)->N())/2;
-
-			(*fi).N()=Point3f(0,0,0);
 			(*fi).N()=((fi->V(0)->N() + fi->V(1)->N() + fi->V(2)->N())/3);
-		
 			(*fi).ClearS();
 
 			for(int i=0; i<3; i++)
 				if((*fi).V(i)->IsS())
 					(*fi).SetS();
 		}
-		qDebug("Normals updated");
-
-		dialog->setStatusLabel("Fitting");
 
 		for(int i=0; i<(1+(int)(iterations/4)); i++)
-	//	for(int i=0; i<2; i++)
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 			if((*fi).IsS())
 				for(int i=0; i<3; i++)
-				{
 					(*fi).FFp(i)->SetS();
-//					for(int j=0; j<3; j++)
-//						(*fi).FFp(i)->FFp(j)->SetS();
-				}
 	
-		qDebug("Vtxs selection updated");
-
 		dialog->setStatusLabel("Lapl smooth");
 
-		//tri::Smooth<CMeshO>::VertexCoordLaplacianHC(outMesh.cm,3,true);
-
 		size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
-
-		qDebug("tri::UpdateSelection<CMeshO>::VertexFromFaceStrict");
-
 		tri::Smooth<CMeshO>::VertexCoordLaplacian(outMesh.cm,3,true,0);
 		dialog->setStatusLabel("Done");
-		qDebug("tri::Smooth<CMeshO>::VertexCoordLaplacian");
 	}
 
 
@@ -305,12 +270,7 @@ public:
 	{
 		midSampler->DEBUG = false;
 
-		midSampler->distPerc = dist; /*
-		midSampler->LinMid = &Lin;	
-		midSampler->LoutMid = &Lout; */
-
-//		createBasicMesh(outMesh, Fstack, stack);
-
+		midSampler->distPerc = dist; 
 		outMesh.updateDataMask(MeshModel::MM_FACETOPO);
 
 		bool oriented,orientable;
@@ -321,38 +281,46 @@ public:
 
 		outMesh.clearDataMask(MeshModel::MM_FACETOPO);
 
-
+		CMeshO::FaceIterator fi;
+		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
+		{(*fi).ClearS(); for(int i=0; i<3; i++) (*fi).V(i)->ClearS(); }
 
 		outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 		if(tri::Clean<CMeshO>::IsTwoManifoldFace(outMesh.cm))
+		{
 			for(int i=0; i<it; i++)
 			{
 				outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler /*MyMidPoint<CMeshO>()*/, 0, false, 0);
+				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler, 0, false, 0);
 				outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
-		//		dialog->setBarVal(i);
 			}
+		}
+		else return false;
 
 		outMesh.fileName = "Retopology.ply";
 		tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
 
-		CMeshO::FaceIterator fi;
+
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{
-			(*fi).N()=Point3f(0,0,0);
 			(*fi).N()=((fi->V(0)->N() + fi->V(1)->N() + fi->V(2)->N())/3);
-		
 			(*fi).ClearS();
 
 			for(int i=0; i<3; i++)
 				if((*fi).V(i)->IsS())
 					(*fi).SetS();
-		}		
-		
+		}
+
+		for(int i=0; i<(1+(int)(it/4)); i++)
+		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
+			if((*fi).IsS())
+				for(int i=0; i<3; i++)
+					(*fi).FFp(i)->SetS();
+	
+		size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
+		tri::Smooth<CMeshO>::VertexCoordLaplacian(outMesh.cm,3,true,0);
+
 		return true;
-
-
-
 	}
 
 
@@ -360,7 +328,6 @@ public:
 private:
 	void createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QList<Vtx> Vstack)
 	{
-		// Vertex names compact
 		QVector<Vtx> nStack(Vstack.count());
 		QVector<Fce> nFstack(Fstack.count()); nFstack = Fstack.toVector();
 		for(int i=0; i<Vstack.count(); i++)
@@ -399,6 +366,27 @@ private:
 		{
 			ivp[v] = &*vi;
 			(*vi).P() = Point3f(nStack[v].V.X(), nStack[v].V.Y(), nStack[v].V.Z());
+
+
+			Point3f closestPt;
+			vcg::face::PointDistanceBaseFunctor<float> PDistFunct;
+
+			const CMeshO::CoordType &startPt = (*vi).P();
+			CMeshO::FaceType *nearestF=0;
+	
+			float d1 = 1000;
+			float d2 = 1000;
+
+			nearestF =  midSampler->unifGrid.GetClosest(PDistFunct, 
+											midSampler->markerFunctor, 
+											startPt, 
+											d1, 
+											d2, 
+											closestPt);
+
+			(*vi).C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),.5f);
+			(*vi).N() = ((nearestF->V(0)->N() + nearestF->V(1)->N() + nearestF->V(2)->N())/3).Normalize();
+
 			++v;
 		}
 
@@ -433,7 +421,6 @@ private:
 		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable); 
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
 		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
 
 		outMesh.clearDataMask(MeshModel::MM_FACETOPO);
 	}

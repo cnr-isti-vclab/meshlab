@@ -1414,13 +1414,59 @@ bool edit_topo::isVertexVisible(Point3f v, double mD)
 
 
 
-	return ((ff < 0.003) && (pix<0.713));   //mD); //0.05);
+	return ((ff < 0.003)); //&& (pix<0.713));   //mD); //0.05);
 }
 
 
 bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
-{	
+{
 	bool found = false;
+	double minDist = 100000;
+	int minIdx = -1;
+	Point3f t;
+
+	QList<Vtx> visib;
+
+	for(int i=0; i<list.count(); i++)
+		if(isVertexVisible(list.at(i).V, _md))
+			visib.push_back(list.at(i));
+
+	QPoint mPos = QPoint(mousePos.x(), mouseRealY);
+	for(int i=0; i<visib.count(); i++)
+	{
+		Point3f p = visib.at(i).V;
+		double tx,ty,tz;
+		gluProject(p.X(),p.Y(),p.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+
+		QPoint qp = QPoint(tx, ty);
+		double dx = fabs((double)(qp.x() - mPos.x()));
+		double dy = fabs((double)(qp.y() - mPos.y()));
+
+		//double dist = (dy > dx) ? 0.41*dx+0.941246*dy : 0.41*dy+0.941246*dx;
+
+		double dist = sqrt((double)(sqr(qp.x() - mPos.x()) + sqr(qp.y() - mPos.y())));
+			
+		if(dist<minDist)
+		{
+			minDist = dist;
+			minIdx = i;
+			found = true;						
+		}
+	}
+
+	if(found)
+	{
+		for(int j=0; j<list.count(); j++)
+			if(list.at(j).vName==visib.at(minIdx).vName)
+			{
+				out = list.at(j);
+				return true;
+			}
+	}
+	return false;
+
+
+/*	bool found = false;
 	float minDist = 0;
 	int minIdx = 0;
 	Point3f t;
@@ -1450,62 +1496,6 @@ bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
 		}
 
 	}
-	return found;
-
-/*	int pCount = list.count();
-	Vtx found; 
-	found.V = Point3f(0,0,0);
-	QPoint mid = QPoint(mousePos.x(), mouseRealY);
-	double tx,ty,tz;
-
-	QPointF * point;
-	int pointCount = 0;
-	point = new QPointF[pCount];
-
-	for (int i=0; i<pCount; i++) 
-	{
-		Vtx p = list.at(i);
-		
-		if(isVertexVisible(p.V))
-		{
-			gluProject(p.V.X(),p.V.Y(),p.V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);		
-			point[i] = QPointF(tx, ty);
-			pointCount++;
-		}
-		else
-		{
-			point[i] = QPointF(0,0);
-		} 
-	}
-
-	QString x;
-	x = "ToCheck: tz.."+ QString("%1").arg(pointCount);
-	qDebug(x.toLatin1());
-
-	if(pointCount>0)
-	{
-		QPointF * realPoint;
-		realPoint = new QPointF[pointCount];
-		int j=0;
-
-		for(int i =0; i<pCount; i++)
-		{
-			if(point[i]!= QPointF(0,0))
-			{
-				realPoint[j] = point[i]; 
-				j++;
-			}
-		}
-
-		int nr = getNearest(mid, realPoint, j);
-		if(nr < (pointCount))
-		{
-			found = list.at(nr);
-		}
-	}
-	point = NULL;
-	delete[] point;
-
 	return found;*/
 }
 
@@ -1919,119 +1909,101 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFr
 */
 		
 	// Drawing of the current line
-
-if(isVertexVisible(p1, _md)&&isVertexVisible(p2, _md))
-{
-
-	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
-	glDepthMask(false);
-	glLineWidth(2.5);
-	glPointSize(1.4);
-  
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POINT_SMOOTH);
-	glColor(colorFront);
-	glBegin(GL_LINES);
-		glVertex(p1);
-		glVertex(p2);
-	glEnd();
-	glBegin(GL_POINTS);
-		glVertex(p1);
-		glVertex(p2);
-	glEnd();    
-
-	// Fill the intermed. points to draw a dotted line
-	QVector<Point3f> trattP;
-	int part = 32;
-	float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
-	if(dist>10) part*=2;
-	if(dist>50) part*=2;
-	if(dist>100) part*=2;
-	if(dist>400) part*=2;
-
-	Point3f pp1;// = p1;
-	Point3f pp2;// = (p2+p1)/2;
-
-	trattP = vectSub(part, p1, p2);
-
-//	glColor(colorBack);
-
-	for(int i=0; i<(trattP.size()-1); i+=2)
+	if(isVertexVisible(p1, _md)&&isVertexVisible(p2, _md))
 	{
-		pp1 = trattP[i];
-		pp2 = trattP[i+1];
-
-		glDisable(GL_DEPTH_TEST);
-
-		glLineWidth(0.5);
-		glPointSize(0.3);
+		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		glDepthMask(false);
+		glLineWidth(2.5);
+		glPointSize(1.4);
+  
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_POINT_SMOOTH);
+		glColor(colorFront);
 		glBegin(GL_LINES);
-			glVertex(pp1);
-			glVertex(pp2);
+			glVertex(p1);
+			glVertex(p2);
 		glEnd();
 		glBegin(GL_POINTS);
-			glVertex(pp1);
-			glVertex(pp2);
-		glEnd(); 
+			glVertex(p1);
+			glVertex(p2);
+		glEnd();    
+
+		// Fill the intermed. points to draw a dotted line
+		QVector<Point3f> trattP;
+		int part = 32;
+		float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
+		if(dist>10) part*=2;
+		if(dist>50) part*=2;
+		if(dist>100) part*=2;
+		if(dist>400) part*=2;
+
+		Point3f pp1, pp2;
+		trattP = vectSub(part, p1, p2);
+
+		for(int i=0; i<(trattP.size()-1); i+=2)
+		{
+			pp1 = trattP[i];
+			pp2 = trattP[i+1];
+
+			glDisable(GL_DEPTH_TEST);
+
+			glLineWidth(0.5);
+			glPointSize(0.3);
+			glBegin(GL_LINES);
+				glVertex(pp1);
+				glVertex(pp2);
+			glEnd();
+			glBegin(GL_POINTS);
+				glVertex(pp1);
+				glVertex(pp2);
+			glEnd(); 
+		}
+		glPopAttrib();
 	}
-	glPopAttrib();
+	else if(edit_topodialogobj->drawEdges())
+	{
+		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		glDepthMask(false);
+		glLineWidth(1.5);
+		glPointSize(0.4);
 
-}
-else if(edit_topodialogobj->drawEdges())
-{
-
+		// Fill the intermed. points to draw a dotted line
+		QVector<Point3f> trattP;
+		int part = 8;
+		float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
+		if(dist>10) part*=2;
+		if(dist>50) part*=2;
+		if(dist>100) part*=2;
+		if(dist>400) part*=2;
 	
-	glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
-	glDepthMask(false);
-	glLineWidth(1.5);
-	glPointSize(0.4);
-  
-
-	// Fill the intermed. points to draw a dotted line
-	QVector<Point3f> trattP;
-	int part = 8;
-	float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
-	if(dist>10) part*=2;
-	if(dist>50) part*=2;
-	if(dist>100) part*=2;
-	if(dist>400) part*=2;
-
-	Point3f pp1;// = p1;
-	Point3f pp2;// = (p2+p1)/2;
-
-	trattP = vectSub(part, p1, p2);
-
-	glColor(colorBack);
-
-	for(int i=0; i<(trattP.size()-1); i+=2)
-	{
-		pp1 = trattP[i];
-		pp2 = trattP[i+1];
-
+		Point3f pp1, pp2;	
+		trattP = vectSub(part, p1, p2);
+	
+		glColor(colorBack);
 		glDisable(GL_DEPTH_TEST);
 
-		glBegin(GL_LINES);
-			glVertex(pp1);
-			glVertex(pp2);
-		glEnd();
-		glBegin(GL_POINTS);
-			glVertex(pp1);
-			glVertex(pp2);
-		glEnd(); 
+		for(int i=0; i<(trattP.size()-1); i+=2)
+		{
+			pp1 = trattP[i];
+			pp2 = trattP[i+1];
+
+			glBegin(GL_LINES);
+				glVertex(pp1);
+				glVertex(pp2);
+			glEnd();
+			glBegin(GL_POINTS);
+				glVertex(pp1);
+				glVertex(pp2);
+			glEnd(); 
+		}
+		glPopAttrib();
 	}
-	glPopAttrib();
-
-
-}
-
-
-
 }
 
 

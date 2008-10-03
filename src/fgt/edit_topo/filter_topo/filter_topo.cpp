@@ -59,7 +59,7 @@ const QString FilterTopoPlugin::filterName(FilterIDType filterId)
 const QString FilterTopoPlugin::filterInfo(FilterIDType filterId)
 {
   switch(filterId) {
-		case FP_RE_TOPO :  return QString("Creates a new mesh from a basic topology model applyed to an high resolution model"); 
+		case FP_RE_TOPO :  return QString("Creates a new mesh from a basic topology model applied to an high resolution model"); 
 		default : assert(0); 
 	}
 }
@@ -122,9 +122,8 @@ bool FilterTopoPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParamete
 	tri::UpdateFlags<CMeshO>::FaceProjection(inMesh->cm);
 
 	rm.init(inMesh, dist);
-	rm.applyTopoMesh(*userMesh, *inMesh, it, dist, *outM);
-
-	return true;
+	
+	return rm.applyTopoMesh(*userMesh, *inMesh, it, dist, *outM);
 }
 
 Q_EXPORT_PLUGIN(FilterTopoPlugin)
