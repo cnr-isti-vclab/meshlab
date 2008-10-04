@@ -64,30 +64,40 @@ RfxDialog::RfxDialog(RfxShader *s, QAction *a, QGLWidget *parent)
 	// fill log once for dialog, since it reports status for all passes
 	ui.textLog->setPlainText(s->GetCompilationLog().join("\n"));
 
+
+	// uniform tab will contain every uniform from every pass
+	/* Uniforms */
+	pit = s->PassesIterator();
+	while (pit.hasNext()) {
+		RfxGLPass *pass = pit.next();
+
+		QListIterator<RfxUniform*> it = pass->UniformsIterator();
+		int unifCount = -1; // keep track of uniform index
+		while (it.hasNext()) {
+			unifCount++;
+			RfxUniform *uni = it.next();
+			if (uni->isTexture())
+				continue;
+
+			AddUniformBox(uni, unifCount);
+		}
+
+		++selPass;
+	}
+	selPass = 0;
+
 	setupTabs();
 }
 
 void RfxDialog::setupTabs()
 {
-	/* Uniforms */
-	QListIterator<RfxUniform*> it = shader->GetPass(selPass)->UniformsIterator();
-	int unifCount = -1; // keep track of uniform index
-	while (it.hasNext()) {
-		unifCount++;
-		RfxUniform *uni = it.next();
-		if (uni->isTexture())
-			continue;
-
-		AddUniformBox(uni, unifCount);
-	}
-
 	/* Textures */
 	ui.comboTextures->clear();
 	ui.comboTextures->setEnabled(true);
 	disconnect(ui.comboTextures, 0, 0, 0);
 
-	it = shader->GetPass(selPass)->UniformsIterator();
-	unifCount = -1;
+	QListIterator<RfxUniform*> it = shader->GetPass(selPass)->UniformsIterator();
+	int unifCount = -1;
 	while (it.hasNext()) {
 		unifCount++;
 		RfxUniform *uni = it.next();
@@ -176,13 +186,18 @@ void RfxDialog::AddUniformBox(RfxUniform *uni, int uniIndex)
 	assert(uni);
 
 	QLabel *lblUni = new QLabel();
-	if (uni->GetSemantic().isNull())
-		lblUni->setText(uni->GetName());
-	else
-		lblUni->setText(uni->GetName() +
-		                "<span style=\"color:darkgreen;\">" +
-		                "<br/> [P: " + uni->GetSemantic() +
-		                "]</span>");
+	QString lblText;
+
+	lblText.append(QString("(Pass #%1) ").arg(selPass));
+	lblText.append(uni->GetName());
+
+	if (!uni->GetSemantic().isNull()) {
+		lblText.append("<span style=\"color:darkgreen;\"><br/> [P: ");
+		lblText.append(uni->GetSemantic());
+		lblText.append("]</span>");
+	}
+
+	lblUni->setText(lblText);
 
 	QGridLayout *gridUni = new QGridLayout();
 
@@ -232,7 +247,6 @@ void RfxDialog::AddUniformBox(RfxUniform *uni, int uniIndex)
 	boxContent->addLayout(gridUni);
 
 	((QVBoxLayout*)ui.scrollUniformsContents->layout())->addLayout(boxContent);
-	widgetsByTab.insert(UNIFORM_TAB, lblUni);
 }
 
 void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows, int columns)
@@ -311,13 +325,13 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 
 			valMapper->setMapping(controls[arrayIdx],
 			                      QString().setNum(uidx) + '-' +
-			                      QString().setNum(arrayIdx));
+			                      QString().setNum(arrayIdx)  + '-' +
+			                      QString().setNum(selPass));
 
 			if (!u->GetSemantic().isNull())
 				controls[arrayIdx]->setDisabled(true);
 
 			uniLayout->addWidget(controls[arrayIdx], i, j);
-			widgetsByTab.insert(UNIFORM_TAB, controls[arrayIdx]);
 		}
 	}
 
@@ -396,7 +410,7 @@ void RfxDialog::ChangeTexture(int unifIdx)
 void RfxDialog::ChangeValue(const QString& val)
 {
 	QStringList unif = val.split('-');
-	RfxUniform *uni = shader->GetPass(selPass)->getUniform(unif[0].toInt());
+	RfxUniform *uni = shader->GetPass(unif[2].toInt())->getUniform(unif[0].toInt());
 	float *oldVal = uni->GetValue();
 	float newVal = 0.0f;
 
