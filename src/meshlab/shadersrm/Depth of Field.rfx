@@ -1109,7 +1109,6 @@ void main(void)
     <RmModelReference NAME="Radeon" API=""/>
     <RmGLShader NAME="Fragment Program" API="OpenGL" PIXEL_SHADER="TRUE"><RmShaderCode TYPE="TEXT"><![CDATA[
 uniform sampler2D Base;
-uniform vec4 lightDir;
 uniform float Ks;
 uniform float Kd;
 
@@ -1122,7 +1121,7 @@ void main(void)
    vec3 base = texture2D(Base, gl_TexCoord[0].st).rgb;
    
    vec3 nNormal = normalize(vNormal);
-   vec3 nLight = normalize(lightDir);
+   vec3 nLight = normalize(gl_LightSource[0].position.xyz);
 
    // Basic lighting
    float diffuse = clamp(dot(nLight, nNormal), 0.0, 1.0);

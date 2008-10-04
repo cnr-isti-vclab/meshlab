@@ -1147,7 +1147,6 @@ void main(void)
 }]]></RmShaderCode></RmGLShader>
      <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
 uniform float  SpecularContribution;
-uniform vec3   LightPosition;
 uniform float  ScaleFactor;
 
 varying float  LightIntensity;
@@ -1158,7 +1157,7 @@ void main()
 {
     vec3  ecPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
     vec3  tnorm      = normalize(gl_NormalMatrix * gl_Normal);
-    vec3  lightVec   = normalize(LightPosition - ecPosition);
+    vec3  lightVec   = normalize(gl_LightSource[0].position.xyz - ecPosition);
     vec3  reflectVec = reflect(-lightVec, tnorm);
     vec3  viewVec    = normalize(-ecPosition);
     float diffuse    = max(dot(lightVec, tnorm), 0.0);
