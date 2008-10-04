@@ -17,6 +17,7 @@ SUBDIRS       = meshfilter \
 				filter_poisson \
 				filter_unsharp \
 				filter_splitter \
+				filter_rangemap \
 #				filter_texture \
 				filter_sampling \
 				filter_autoalign \

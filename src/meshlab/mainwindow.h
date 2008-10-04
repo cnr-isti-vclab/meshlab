@@ -354,6 +354,7 @@ private:
   QMenu *filterMenuQuality;
 	QMenu *filterMenuNormal;
   QMenu *filterMenuLayer;
+  QMenu *filterMenuRangeMap;
 
 	QMenu *editMenu;
 

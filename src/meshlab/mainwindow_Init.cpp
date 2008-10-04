@@ -518,6 +518,7 @@ void MainWindow::createMenus()
 	filterMenuQuality = filterMenu->addMenu(tr("Quality"));
 	filterMenuNormal = filterMenu->addMenu(tr("Normal and Orientation"));
 	filterMenuLayer = filterMenu->addMenu(tr("Layer"));
+	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
 	renderMenu		= menuBar()->addMenu(tr("&Render"));
@@ -642,6 +643,8 @@ void MainWindow::loadPlugins()
               		filterMenuLayer->addAction(filterAction);
 					if(filterClass & MeshFilterInterface::MeshCreation )
               		fileMenuNew->addAction(filterAction);
+					if(filterClass & MeshFilterInterface::RangeMap )
+              		filterMenuRangeMap->addAction(filterAction);
 					if(filterClass == 0) //  MeshFilterInterface::Generic :
 									filterMenu->addAction(filterAction);
 

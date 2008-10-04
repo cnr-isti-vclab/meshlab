@@ -207,6 +207,7 @@ public:
 			Normal           =0x0200,
 		  Sampling         =0x0400,
 		  Texture          =0x0800,
+		  RangeMap         =0x1000, // filters specific for range map processing
 	};
 	
 	virtual ~MeshFilterInterface() {}
