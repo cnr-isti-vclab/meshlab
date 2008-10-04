@@ -36,6 +36,7 @@
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/selection.h>
 #include <vcg/complex/trimesh/create/platonic.h>
+#include <vcg/complex/trimesh/update/color.h>
 
 #include "filter_func.h"
 #include "muParser.h"
@@ -54,6 +55,7 @@ FilterFunctionPlugin::FilterFunctionPlugin()
 		<< FF_VERT_COLOR
 		<< FF_VERT_QUALITY
 		<< FF_FACE_QUALITY
+		<< FF_DEF_ATTRIB
 		<< FF_GRID;
   
 	foreach(FilterIDType tt , types())
@@ -71,6 +73,7 @@ const QString FilterFunctionPlugin::filterName(FilterIDType filterId)
 		case FF_FACE_QUALITY : return QString("Per-Face Quality Function");
 		case FF_VERT_COLOR : return QString("Per-Vertex Color Function");
 		case FF_VERT_QUALITY : return QString("Per-Vertex Quality Function");
+		case FF_DEF_ATTRIB : return QString("Define New Per-Vertex Attribute");
 		case FF_GRID : return QString("Grid Generator");
 		default : assert(0); 
 	}
@@ -125,6 +128,13 @@ const QString FilterFunctionPlugin::filterInfo(FilterIDType filterId)
 									     "<b>q0,q1,q2</b> for <b>quality</b>.<br>"
 									     "(,),=,<<,>> are allowed.");
 
+		case FF_DEF_ATTRIB : return tr("Add a new Per-Vertex attribute to current mesh.<br>"
+								       "You can specify custom name and a function to generate attribute's value<br>"
+									   "It's possibile to use per-vertex variables in the expression:<br>"
+									   "x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality) "
+									   "and <b>all</b> custom attribute already defined by user.<br>"
+									   "<font color=\"#FF0000\">name specified below can be used in other filter function</font>");
+
 		case FF_GRID : return tr("Generate a new 2D Grid mesh with number of vertices on X and Y axis specified by user with absolute length/height.<br>"
 						         "It's possibile to center Grid on origin.");
 		default : assert(0); 
@@ -145,7 +155,7 @@ const PluginInfo &FilterFunctionPlugin::pluginInfo()
 {
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.3");
+	 ai.Version = tr("0.4");
 	 ai.Author = ("Giuseppe Alemanno");
    return ai;
  }
@@ -158,6 +168,7 @@ const int FilterFunctionPlugin::getRequirements(QAction *action)
 	case FF_GEOM_FUNC :
 	case FF_VERT_COLOR :
 	case FF_VERT_QUALITY :
+	case FF_DEF_ATTRIB :
 	case FF_GRID : return 0;
 	case FF_FACE_SELECTION :
 	case FF_FACE_QUALITY :
@@ -206,9 +217,11 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 			break;
 
 		case FF_FACE_QUALITY:
-			parlst.addString("q0","", "func q0 = ", "function to generate new quality for <b>first</b> vertex of every face");
-			parlst.addString("q1","", "func q1 = ", "function to generate new quality for <b>second</b> vertex of every face");
-			parlst.addString("q2","", "func q2 = ", "function to generate new quality for <b>third</b> vertex of every face");
+			parlst.addString("q0","", "func q0 = ", "function to generate new Quality for <b>first</b> vertex of every face");
+			parlst.addString("q1","", "func q1 = ", "function to generate new Quality for <b>second</b> vertex of every face");
+			parlst.addString("q2","", "func q2 = ", "function to generate new Quality for <b>third</b> vertex of every face");
+			parlst.addBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]");
+			parlst.addBool("map",false,"map into color", "if checked map quality generated values into per-vertex color");
 			break;
 
 		case FF_VERT_COLOR:
@@ -218,7 +231,14 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 			break;
 
 		case FF_VERT_QUALITY:
-			parlst.addString("q","", "func q = ", "function to evaluate to generate new Quality for every vertex");
+			parlst.addString("q","", "func q = ", "function to generate new Quality for every vertex");
+			parlst.addBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]");
+			parlst.addBool("map",false,"map into color", "if checked map quality generated values into per-vertex color");
+			break;
+
+		case FF_DEF_ATTRIB:
+			parlst.addString("name","","Name", "the name of new attribute. you can access attribute in other filters through this name");
+			parlst.addString("expr","","Function =", "function to calculate custom attribute value for each vertex");
 			break;
 
 		case FF_GRID :
@@ -271,6 +291,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 					b = (*vi).C()[2];  // color B
 
 					q = (*vi).Q();     // quality
+
+					// if user-defined attributes exist (vector is not empty) 
+					//  set variables to explicit value obtained through attribute's handler
+					for(int i = 0; i < (int) attrValue.size(); i++)
+						attrValue[i] = handlers[i][vi];
 
 					bool selected = false;
 
@@ -431,6 +456,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 
 					q = (*vi).Q();     // quality
 
+					// if user-defined attributes exist (vector is not empty) 
+					//  set variables to explicit value obtained through attribute's handler
+					for(int i = 0; i < (int) attrValue.size(); i++)
+						attrValue[i] = handlers[i][vi];
+
 					// every function is evaluated by different parser.
 					// errorMessage dialog contains errors for func x, func y and func z
 					try { newx = p1.Eval(); } 
@@ -512,6 +542,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 
 					q = (*vi).Q();     // quality
 
+					// if user-defined attributes exist (vector is not empty) 
+					//  set variables to explicit value obtained through attribute's handler
+					for(int i = 0; i < (int) attrValue.size(); i++)
+						attrValue[i] = handlers[i][vi];
+
 					// every function is evaluated by different parser.
 					// errorMessage dialog contains errors for func r, func g and func b
 					try { newr = p1.Eval(); } 
@@ -578,6 +613,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 
 					q = (*vi).Q();     // quality
 
+					// if user-defined attributes exist (vector is not empty) 
+					//  set variables to explicit value obtained through attribute's handler
+					for(int i = 0; i < (int) attrValue.size(); i++)
+						attrValue[i] = handlers[i][vi];
+
 					// use parser to evaluate function specified above
 					// in case of fail, errorMessage dialog contains details of parser's error
 					try { 
@@ -586,6 +626,33 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 						errorMessage = e.GetMsg().c_str();
   						return false;
 					}
+				}
+
+				// normalize quality with values in [0..1] 
+				if(par.getBool("normalize"))
+				{
+					std::pair<double,double> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);	
+					p.DefineVar("minq",&minmax.first);
+					p.DefineVar("maxq",&minmax.second);
+					p.SetExpr("(q-minq)/(maxq-minq)");
+					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) 
+					{
+						q = (*vi).Q();
+						try {
+							(*vi).Q() = p.Eval();
+						} catch(Parser::exception_type &e) {
+							errorMessage = e.GetMsg().c_str();
+  							return false;
+						}
+					}
+				}
+
+				// map quality into per-vertex color
+				if(par.getBool("map")) 
+				{
+					std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);			
+					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+						(*vi).C().ColorRamp(minmax.first,minmax.second,(*vi).Q());
 				}
 
 				// if succeded log stream contains number of vertices and time elapsed
@@ -807,8 +874,104 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 					(*fi).V(2)->Q() = newq2;
 				}
 
-				// if succeded log stream contains number of vertices processed and time elapsed
+				// normalize quality with values in [0..1]
+				if(par.getBool("normalize"))
+				{
+					Parser p;
+					p.DefineVar("q",&q);
+					std::pair<double,double> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);	
+					p.DefineVar("minq",&minmax.first);
+					p.DefineVar("maxq",&minmax.second);
+					p.SetExpr("(q-minq)/(maxq-minq)");
+					CMeshO::VertexIterator vi;
+					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) 
+					{
+						q = (*vi).Q();
+						try {
+							(*vi).Q() = p.Eval();
+						} catch(Parser::exception_type &e) {
+							errorMessage = e.GetMsg().c_str();
+  							return false;
+						}
+					}
+				}
+
+				// map quality into per-vertex color
+				if(par.getBool("map")) 
+				{
+					std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);		
+					CMeshO::VertexIterator vi;
+					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+						(*vi).C().ColorRamp(minmax.first,minmax.second,(*vi).Q());
+				}
+
+				// if succeded log stream contains number of faces processed and time elapsed
 				Log(GLLogStream::Info, "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
+
+				return true;
+			}
+		break;
+
+		case FF_DEF_ATTRIB :
+			{
+				std::string name = par.getString("name").toStdString();
+				std::string expr = par.getString("expr").toStdString();
+
+				// add per-vertex attribute with type float and name specified by user
+				if(tri::HasPerVertexAttribute(m.cm,name)) 
+				{
+					errorMessage = "attribute already exists"; 
+					return false;
+				}
+				CMeshO::PerVertexAttributeHandle<float> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<float> (m.cm,name);
+				
+				Parser p;
+				setPerVertexVariables(p);
+				p.SetExpr(expr);
+
+				time_t start = clock();
+
+				// perform calculation of attribute's value with function specified by user
+				CMeshO::VertexIterator vi;
+				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+				{
+					x = (*vi).P()[0]; // coord x
+					y = (*vi).P()[1]; // coord y
+					z = (*vi).P()[2]; // coord z
+		
+					nx = (*vi).N()[0]; // normal coord x
+					ny = (*vi).N()[1]; // normal coord y
+					nz = (*vi).N()[2]; // normal coord z
+
+					r = (*vi).C()[0];  // color R
+					g = (*vi).C()[1];  // color G
+					b = (*vi).C()[2];  // color B
+
+					q = (*vi).Q();     // quality
+
+					// if user-defined attributes already exist 
+					//  set variables to explicit value obtained through attribute's handler
+					for(int i = 0; i < (int) attrValue.size(); i++)
+						attrValue[i] = handlers[i][vi];
+
+					// add new user-defined attribute
+					try {
+						h[vi] = p.Eval();
+					} catch(Parser::exception_type &e) {
+						errorMessage = e.GetMsg().c_str();
+  						return false;
+					}
+				}
+
+				// add string, double and handler to vector.
+				// vectors keep tracks of new attributes and let muparser use explicit variables
+				// it can be possibile to use custom attributes in other filters
+				attrNames.push_back(name);
+				attrValue.push_back(0);
+				handlers.push_back(h);
+
+				// if succeded log stream contains number of vertices processed and time elapsed
+				Log(GLLogStream::Info, "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 				return true;
 			}
@@ -909,6 +1072,11 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p)
 	p.DefineVar("g", &g);
 	p.DefineVar("b", &b);
 	p.DefineVar("q", &q);
+
+	// define var for user-defined attributes (if any exists)
+	// if vector is empty, code won't be executed
+	for(int i = 0; i < (int) attrNames.size(); i++)
+		p.DefineVar(attrNames[i],&attrValue[i]);
 }
 
 // Function explicitely define parser variables to perform Per-Face filter action
@@ -961,6 +1129,11 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p)
 	p.DefineVar("r", &r);
 	p.DefineVar("g", &g);
 	p.DefineVar("b", &b);
+
+	// define var for user-defined attributes (if any exists)
+	// if vector is empty, code won't be executed
+	for(int i = 0; i < (int) attrNames.size(); i++)
+		p.DefineVar(attrNames[i],&attrValue[i]);
 }
 
 Q_EXPORT_PLUGIN(FilterFunctionPlugin)
