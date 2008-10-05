@@ -81,6 +81,10 @@ public:
 	}
 	void SetSemantic(const QString& sem) { semantic = sem; }
 	QString GetSemantic() { return semantic; }
+	bool HasMinMax() { return (minVal != 0.0 || maxVal != 0.0); }
+	float GetMinRange() { return minVal; }
+	float GetMaxRange() { return maxVal; }
+	void SetValRange(float _min, float _max) { minVal = _min; maxVal = _max; }
 
 private:
 	QString identifier;
@@ -99,6 +103,9 @@ private:
 	GLint maxTexUnits;
 	GLint location;
 	QString semantic;
+
+	float minVal;
+	float maxVal;
 
 	static const char *UniformTypeString[];
 };

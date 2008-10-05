@@ -163,6 +163,10 @@ bool RfxParser::Parse()
 			RfxUniform *unif = new RfxUniform(varName, uniformType[varName]);
 			float *parsedValue = ValueFromRfx(varName, unif->GetType());
 			unif->SetValue(parsedValue);
+
+			if (parsedValue[16] != 0.0 || parsedValue[17] != 0.0)
+				unif->SetValRange(parsedValue[16], parsedValue[17]);
+
 			delete parsedValue;
 
 			QString sem = GetSemantic(varName, unif->GetType());
@@ -301,10 +305,11 @@ float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType V
 {
 	// read a bool, int or float vector (max 4 elements)
 	// or a float matrix (max 16 elements).
-	float *result = new float[16];
+	// values 17 and 18 are reserved for min and max values (if present)
+	float *result = new float[18];
 
 	// initialization (unnecessary?)
-	for (int i = 0; i < 16; ++i)
+	for (int i = 0; i < 18; ++i)
 		result[i] = 0.0f;
 
 	// use lookup table to init data
@@ -325,8 +330,11 @@ float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType V
 		candidates = root.elementsByTagName("RmColorVariable");
 
 		for (int i = 0; i < candidates.size(); ++i)
-			if (candidates.at(i).toElement().attribute("NAME") == VarName)
+			if (candidates.at(i).toElement().attribute("NAME") == VarName) {
 				varNode = candidates.at(i).toElement();
+				result[16] = 0.0;
+				result[17] = 1.0;
+			}
 	}
 
 	if (!varNode.isNull()) {
@@ -346,6 +354,11 @@ float* RfxParser::ValueFromRfx(const QString& VarName, RfxUniform::UniformType V
 				result[i] = val.toFloat(&ok);
 			}
 		}
+
+		if (!varNode.attribute("MIN").isNull())
+			result[16] = varNode.attribute("MIN").toFloat();
+		if (!varNode.attribute("MAX").isNull())
+			result[17] = varNode.attribute("MAX").toFloat();
 	}
 
 	return result;

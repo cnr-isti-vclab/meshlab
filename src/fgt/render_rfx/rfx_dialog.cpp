@@ -302,15 +302,36 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 				        SLOT(extendRange(int)));
 				break;
 			case FLOAT_CTRL:
-				controls[arrayIdx] = new QDoubleSpinBox();
-				((QDoubleSpinBox*)controls[arrayIdx])->setRange(-99.0, 99.0);
-				((QDoubleSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
-				((QDoubleSpinBox*)controls[arrayIdx])->setDecimals(4);
-				((QDoubleSpinBox*)controls[arrayIdx])->setSingleStep(0.01);
-				connect(controls[arrayIdx], SIGNAL(valueChanged(double)),
-				        valMapper, SLOT(map()));
-				connect(controls[arrayIdx], SIGNAL(valueChanged(double)), this,
-				        SLOT(extendRange(double)));
+				if (u->HasMinMax()) {
+					controls[arrayIdx] = new QSlider();
+					((QSlider*)controls[arrayIdx])->setTickPosition(QSlider::NoTicks);
+					((QSlider*)controls[arrayIdx])->setOrientation(Qt::Horizontal);
+
+					// since qslider only deals with integers, do a little conversion
+					// of values
+					// keep as much as 5 decimal values, others will be lost in conversion
+					const float DECTOINT = 10000.0f;
+					int valAsInt = (int)(val[arrayIdx] * DECTOINT);
+					int tickAsInt = (int)(((u->GetMaxRange() - u->GetMinRange()) * 0.01) * DECTOINT);
+
+					((QSlider*)controls[arrayIdx])->setTickInterval(tickAsInt);
+					((QSlider*)controls[arrayIdx])->setRange((int)(u->GetMinRange() * DECTOINT),
+					                                         (int)(u->GetMaxRange() * DECTOINT));
+					((QSlider*)controls[arrayIdx])->setValue(valAsInt);
+
+					connect(controls[arrayIdx], SIGNAL(valueChanged(int)), valMapper, SLOT(map()));
+
+				} else {
+					controls[arrayIdx] = new QDoubleSpinBox();
+					((QDoubleSpinBox*)controls[arrayIdx])->setRange(-99.0, 99.0);
+					((QDoubleSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
+					((QDoubleSpinBox*)controls[arrayIdx])->setDecimals(4);
+					((QDoubleSpinBox*)controls[arrayIdx])->setSingleStep(0.01);
+					connect(controls[arrayIdx], SIGNAL(valueChanged(double)),
+							valMapper, SLOT(map()));
+					connect(controls[arrayIdx], SIGNAL(valueChanged(double)), this,
+							SLOT(extendRange(double)));
+				}
 				break;
 			case BOOL_CTRL:
 				controls[arrayIdx] = new QComboBox();
@@ -426,10 +447,16 @@ void RfxDialog::ChangeValue(const QString& val)
 			newVal = sbox->value();
 		} else {
 			QDoubleSpinBox *dsbox = dynamic_cast<QDoubleSpinBox*>(sender);
-			if (dsbox != NULL)
+			if (dsbox != NULL) {
 				newVal = dsbox->value();
-			else
-				return;
+			} else {
+				QSlider *qslide = dynamic_cast<QSlider*>(sender);
+				const float INTTODEC = 0.0001f;
+				if (qslide != NULL)
+					newVal = qslide->value() * INTTODEC;
+				else
+					return;
+			}
 		}
 	}
 
