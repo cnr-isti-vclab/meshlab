@@ -73,7 +73,7 @@ public:
 		float dist = dist_upper_bound;
 		vcg::face::PointDistanceBaseFunctor<float> PDistFunct;
 
-		const MESH_TYPE::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
+		const typename MESH_TYPE::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
 		CMeshO::FaceType *nearestF=0;
 		
 		dist=dist_upper_bound;
