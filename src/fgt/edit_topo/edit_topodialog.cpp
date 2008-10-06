@@ -1,7 +1,5 @@
 #include "edit_topodialog.h"
 
-
-
 edit_topodialog::edit_topodialog(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -11,33 +9,9 @@ edit_topodialog::edit_topodialog(QWidget *parent) : QWidget(parent)
 
 edit_topodialog::~edit_topodialog(){ }
 
-int edit_topodialog::getIterations()
-{ return ui.TextEditIterations->value(); }
-
-void edit_topodialog::setBarMax(int val)
-{ ui.progressBar->setMaximum(val); }
-
-void edit_topodialog::setBarVal(int val)
-{ ui.progressBar->setValue(val); }
-void edit_topodialog::setStatusLabel(QString txt)
-{
-	ui.labelStatusDesc->setText(txt);
-}
-float edit_topodialog::dist()
-{
-	float toret = ui.TextEditIterations_2->value();
-	return toret;
-}
-
-bool edit_topodialog::isDEBUG()
-{ return ui.checkBox->isChecked(); }
-
-bool edit_topodialog::drawLabels()
-{return ui.checkBox_2->isChecked(); }
-bool edit_topodialog::drawEdges()
-{return ui.checkBox_3->isChecked(); }
-
-
+//
+// Update vertices table
+//
 void edit_topodialog::updateVtxTable(QList<Vtx> list)
 {
 	QTableWidget *w =ui.Vtable;
@@ -74,6 +48,9 @@ void edit_topodialog::updateVtxTable(QList<Vtx> list)
 	}
 }
 
+//
+// Update edges table
+//
 void edit_topodialog::updateEdgTable(QList<Edg> list)
 {
 	QTableWidget *w =ui.Etable;
@@ -104,6 +81,9 @@ void edit_topodialog::updateEdgTable(QList<Edg> list)
 	}
 }
 
+//
+// Update faces table
+//
 void edit_topodialog::updateFceTable(QList<Fce> list)
 {
 	QTableWidget *w =ui.Ftable;
@@ -146,47 +126,9 @@ void edit_topodialog::updateFceTable(QList<Fce> list)
 	}
 }
 
-void edit_topodialog::on_ButtonClose_clicked()
-{
-	this->close();
-	utensil = U_NONE; emit update_request();
-}
-
-void edit_topodialog::on_ButtonSelectVertex_clicked()
-{
-	utensil = U_VTX_SEL; emit update_request();
-}
-
-void edit_topodialog::on_ButtonSelectVertexFree_clicked()
-{
-	utensil = U_VTX_SEL_FREE; emit update_request();
-}
-
-void edit_topodialog::on_ButtonDeSelectVertex_clicked()
-{
-	utensil = U_VTX_DEL; emit update_request();
-}
-
-void edit_topodialog::on_ButtonConnectVertex_clicked()
-{
-	utensil = U_VTX_CONNECT; emit update_request();
-}
-
-void edit_topodialog::on_ButtonDeConnectVertex_clicked()
-{
-	utensil = U_VTX_DE_CONNECT; emit update_request();
-}
-
-void edit_topodialog::on_ButtonSelectFace_clicked()
-{
-	utensil = U_FCE_SEL; emit update_request();
-}
-
-void edit_topodialog::on_ButtonMeshCreate_clicked()
-{
-	emit mesh_create();
-}
-
+//
+// Switched between user case 1,2 and 3
+//
 void edit_topodialog::on_toolBox_currentChanged(int i)
 {
 	switch(i) 
@@ -217,17 +159,71 @@ void edit_topodialog::on_toolBox_currentChanged(int i)
 	emit update_request();
 }
 
-void edit_topodialog::on_ButtonConnectVertex_2_clicked()
+void edit_topodialog::on_ButtonClose_clicked()
 {
-	utensil = U_DND; emit update_request();
+	this->close();
+	utensil = U_NONE; emit update_request();
 }
+
+void edit_topodialog::on_ButtonSelectVertex_clicked()
+{ utensil = U_VTX_SEL; emit update_request(); }
+
+void edit_topodialog::on_ButtonSelectVertexFree_clicked()
+{ utensil = U_VTX_SEL_FREE; emit update_request(); }
+
+void edit_topodialog::on_ButtonDeSelectVertex_clicked()
+{ utensil = U_VTX_DEL; emit update_request(); }
+
+void edit_topodialog::on_ButtonConnectVertex_clicked()
+{ utensil = U_VTX_CONNECT; emit update_request(); }
+
+void edit_topodialog::on_ButtonDeConnectVertex_clicked()
+{ utensil = U_VTX_DE_CONNECT; emit update_request(); }
+
+void edit_topodialog::on_ButtonSelectFace_clicked()
+{ utensil = U_FCE_SEL; emit update_request(); }
+
+void edit_topodialog::on_ButtonMeshCreate_clicked()
+{ emit mesh_create(); }
+
+int edit_topodialog::getIterations()
+{ return ui.TextEditIterations->value(); }
+
+void edit_topodialog::setBarMax(int val)
+{ ui.progressBar->setMaximum(val); }
+
+void edit_topodialog::setBarVal(int val)
+{ ui.progressBar->setValue(val); }
+
+void edit_topodialog::setStatusLabel(QString txt)
+{ ui.labelStatusDesc->setText(txt); }
+
+float edit_topodialog::dist()
+{ return ui.TextEditIterations_2->value(); }
+
+bool edit_topodialog::isDEBUG()
+{ return ui.checkBox->isChecked(); }
+
+bool edit_topodialog::drawLabels()
+{return ui.checkBox_2->isChecked(); }
+
+bool edit_topodialog::drawEdges()
+{return ui.checkBox_3->isChecked(); }
+
+void edit_topodialog::on_ButtonConnectVertex_2_clicked()
+{ utensil = U_DND; emit update_request(); }
 
 void edit_topodialog::on_ButtonConnectVertex_4_clicked()
-{
-	utensil = U_EDG_COLLAPSE; emit update_request();
-}
+{ utensil = U_EDG_COLLAPSE; emit update_request(); }
 
 void edit_topodialog::on_ButtonConnectVertex_5_clicked()
-{
-	utensil = U_EDG_SPLIT; emit update_request();
-}
+{ utensil = U_EDG_SPLIT; emit update_request(); }
+
+void edit_topodialog::on_checkBox_stateChanged(int)
+{ emit update_request(); }
+
+void edit_topodialog::on_checkBox_3_stateChanged(int)
+{ emit update_request(); }
+
+void edit_topodialog::on_checkBox_2_stateChanged(int)
+{ emit update_request(); }

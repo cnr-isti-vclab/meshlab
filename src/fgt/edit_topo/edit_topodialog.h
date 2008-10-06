@@ -13,6 +13,85 @@
 using namespace std;
 using namespace vcg;
 
+
+//**************************************************************
+//	struct Vtx
+//		this simple struct is used to manage user defined
+//		vertices stack
+//
+struct Vtx
+{
+	Point3f V;
+	QString vName;
+
+    inline bool operator == (const Vtx &b) const
+    { return ((V==b.V) && (vName==b.vName)); }
+    inline bool operator != (const Vtx &b) const
+    { return ((V!=b.V) || (vName!=b.vName)); }
+};
+
+
+//**************************************************************
+//	struct Edg
+//		this simple struct is used to manage user defined
+//		edges stack
+//
+struct Edg
+{
+	Vtx v[2];
+
+    inline bool operator == (const Edg &b) const
+    { return (((v[0]==b.v[0]) && (v[1]==b.v[1]))||((v[1]==b.v[0]) && (v[0]==b.v[1]))); }
+    inline bool operator != (const Edg &b) const
+    { return ( ((v[0] != b.v[0])&&(v[0] != b.v[1]))||((v[1] != b.v[0])&&(v[1] != b.v[1])) ); }
+
+	inline bool containsVtx(const Vtx &vt) const
+	{
+		bool toRet = false;
+			for(int j=0; j<2; j++)
+				if(v[j] == vt)
+					toRet = true;
+		return toRet;
+	}
+};
+
+//**************************************************************
+//	struct Fce
+//		this simple struct is used to manage user defined
+//		faces stack
+//
+struct Fce
+{
+	Edg e[3];
+	bool selected;
+
+    inline bool operator == (const Fce &f) const
+    { return (containsEdg(f.e[0]) && containsEdg(f.e[1]) && containsEdg(f.e[2])); }
+    inline bool operator != (const Fce &f) const
+    { return (!(containsEdg(f.e[0]) && containsEdg(f.e[1]) && containsEdg(f.e[2]))); }
+
+	inline bool containsEdg(const Edg &ed) const
+	{
+		bool toRet = false;
+		for(int i=0; i<3; i++)
+			if(e[i]==ed)
+				toRet=true;
+
+		return toRet;
+	}
+	inline bool containsVtx(const Vtx &vt) const
+	{
+		bool toRet = false;
+		for(int i=0; i<3; i++)
+			for(int j=0; j<2; j++)
+				if(e[i].v[j] == vt)
+					toRet = true;
+
+		return toRet;
+	}
+};
+
+// All ui edit modes
 typedef enum 
 	{
 		U_NONE,
@@ -28,90 +107,10 @@ typedef enum
 	} UtensType;
 
 
-struct Vtx
-{
-	Point3f V;
-	QString vName;
-
-    inline bool operator == (const Vtx &b) const
-    {
-		return ((V==b.V) && (vName==b.vName));
-    }
-
-    inline bool operator != (const Vtx &b) const
-    {
-		return ((V!=b.V) || (vName!=b.vName));
-    }
-};
-
-struct Edg
-{
-	Vtx v[2];
-
-    inline bool operator == (const Edg &b) const
-    {
-		return (((v[0]==b.v[0]) && (v[1]==b.v[1]))
-				||((v[1]==b.v[0]) && (v[0]==b.v[1])));
-    }
-
-    inline bool operator != (const Edg &b) const
-    {
-		return ( ((v[0] != b.v[0])&&(v[0] != b.v[1])) 
-					||	((v[1] != b.v[0])&&(v[1] != b.v[1])) );
-	}
-
-	inline bool containsVtx(const Vtx &vt) const
-	{
-		bool toRet = false;
-			for(int j=0; j<2; j++)
-				if(v[j] == vt)
-					toRet = true;
-
-		return toRet;
-	}
-};
-
-struct Fce
-{
-	Edg e[3];
-
-	bool selected;
-
-    inline bool operator == (const Fce &f) const
-    {
-		return (containsEdg(f.e[0]) && containsEdg(f.e[1]) && containsEdg(f.e[2]));
-	}
-
-    inline bool operator != (const Fce &f) const
-    {
-		return (!(containsEdg(f.e[0]) && containsEdg(f.e[1]) && containsEdg(f.e[2])));
-	}
-
-	inline bool containsEdg(const Edg &ed) const
-	{
-		bool toRet = false;
-		for(int i=0; i<3; i++)
-			if(e[i]==ed)
-				toRet=true;
-
-		return toRet;
-	}
-
-	inline bool containsVtx(const Vtx &vt) const
-	{
-		bool toRet = false;
-		for(int i=0; i<3; i++)
-			for(int j=0; j<2; j++)
-				if(e[i].v[j] == vt)
-					toRet = true;
-
-		return toRet;
-	}
-};
-
-
-
-
+//**************************************************************
+//	class edit_topodialog
+//		Qt Ui class
+//
 class edit_topodialog : public QWidget
 {
 	Q_OBJECT
@@ -122,17 +121,21 @@ class edit_topodialog : public QWidget
 			
 		UtensType utensil;
 
+		// Vertices, edges and faces table update
 		void updateVtxTable(QList<Vtx> list);
 		void updateEdgTable(QList<Edg> list);
 		void updateFceTable(QList<Fce> list);
-
+		
+		// Text 
 		int getIterations();
 		float dist();
 
+		// Checkbox
 		bool isDEBUG();
 		bool drawLabels();
 		bool drawEdges();
 
+		// Status bar
 		void setBarMax(int val);
 		void setBarVal(int val);
 		void setStatusLabel(QString txt);
@@ -141,6 +144,9 @@ class edit_topodialog : public QWidget
 		Ui::edit_topodialog ui;
 
 	private slots:
+	void on_checkBox_2_stateChanged(int);
+	void on_checkBox_3_stateChanged(int);
+	void on_checkBox_stateChanged(int);
 		void on_ButtonConnectVertex_5_clicked();
 		void on_ButtonConnectVertex_4_clicked();
 		void on_ButtonConnectVertex_2_clicked();

@@ -40,26 +40,17 @@ $Log: edit_topo.cpp,v $
 
 
 
-
-
-
 using namespace std;
 using namespace vcg;
 //
-// --- Plugin specific methods ---
+// --- "Edit plugin" specific methods ---
 //
 
-inline bool pointInTriangle(const QPointF &p, const QPointF &a, const QPointF &b, const QPointF &c) {
-															float fab=(p.y()-a.y())*(b.x()-a.x()) - (p.x()-a.x())*(b.y()-a.y());
-															float fbc=(p.y()-c.y())*(a.x()-c.x()) - (p.x()-c.x())*(a.y()-c.y());
-															float fca=(p.y()-b.y())*(c.x()-b.x()) - (p.x()-b.x())*(c.y()-b.y());
-															if (fab*fbc>0 && fbc*fca>0)
-																return true;
-															return false;
-}
 
 
-
+//
+//	Edit plugin constructor
+//
 edit_topo::edit_topo() 
 {
 	edit_topodialogobj=0;
@@ -87,7 +78,9 @@ edit_topo::edit_topo()
 		editAction->setCheckable(true);
 }
 
-
+//
+//	Edit plugin destructor
+//
 edit_topo::~edit_topo() 
 {
 	stack.clear();
@@ -102,7 +95,6 @@ edit_topo::~edit_topo()
 	}
 
 }
-
 
 QList<QAction *> edit_topo::actions() const 
 {
@@ -128,22 +120,19 @@ const PluginInfo &edit_topo::Info()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /************************************************************************************/
 //
-// -- Edit Methods
+// -- Edit topology Methods:
+//		Those methods are used by the plugin to edit
+//		the new topology defined by the user
+//		
+//		All of the methods here are directly used to build
+//		the base topology mesh as defined by the user
+//
+
+//
+//	Adds a vertex to the new topo vertices list
+//		The new vertex will be selected from one of the existing mesh
 //
 void edit_topo::editAddVertex(MeshModel &m)
 {
@@ -174,7 +163,10 @@ void edit_topo::editAddVertex(MeshModel &m)
 	}	
 }
 
-
+//
+//	Adds a vertex to the new topo vertices list
+//		The new vertex is freely selected over the existing mesh
+//
 void edit_topo::editAddVertexFree()
 {
 	Point3f temp_vert;
@@ -205,13 +197,16 @@ void edit_topo::editAddVertexFree()
 	}
 }
 
-
+//
+//	Removes a vertex from the new topo vertices list
+//		The operation will affect also Edges and Faces lists
+//
 void edit_topo::editDeleteVertex()
 {
 	Vtx vtx;
 	if(getVisibleVertexNearestToMouse(stack, vtx))
 	{
-		// Vertex del
+		// Remove vertex from Vert list
 		for(int i=0; i<stack.count(); i++)
 			if(stack.at(i) == vtx)
 			{
@@ -222,7 +217,7 @@ void edit_topo::editDeleteVertex()
 		int EtoDel = 0;
 		int FtoDel = 0;
 
-		// And delete all the edges and faces where it's present
+		// And delete all the edges and faces where this vertex is present
 		for(int e=0; e<Estack.count(); e++)
 			if(Estack.at(e).containsVtx(vtx))
 				EtoDel++;
@@ -254,12 +249,17 @@ void edit_topo::editDeleteVertex()
 		}
 }
 
-
+//
+//	Connects two vertices and creates a new edge
+//		The operation will also create a new face in the faces list
+//		if the selected edge is connected to other two edges
+//
 void edit_topo::editConnectVertex()
 {
 	if(connectStart.V==Point3f(0,0,0))
 	{
 		Vtx vtx;
+		// First click
 		if(getVisibleVertexNearestToMouse(stack, vtx))
 		{
 			connectStart.V = vtx.V;
@@ -269,6 +269,7 @@ void edit_topo::editConnectVertex()
 	else
 	{	
 		Vtx vtx;
+		// Second click (insert the edge in the Ed. list)
 		if(getVisibleVertexNearestToMouse(stack, vtx))
 		if(vtx.V != connectStart.V)
 		{
@@ -287,7 +288,7 @@ void edit_topo::editConnectVertex()
 				QList<Edg> staStack;
 				Edg _3rd;
 
-				//--> Check if the "just now" selected edge is connected to others, and creates a new face
+				//--> Check if the "just now" selected edge is connected to others. Then, create a new face
 				for(int i=0; i<Estack.count(); i++)
 				{
 					Edg ed = Estack.at(i);
@@ -352,8 +353,9 @@ void edit_topo::editConnectVertex()
 }
 
 
-
-
+//
+//	Selects or deselects the face selected by the user
+//
 void edit_topo::editSelectFace()
 {
 	Fce nearest;
@@ -394,7 +396,11 @@ void edit_topo::editSelectFace()
 	}		
 }
 
-
+//
+//	Removes an edge from the edge's list
+//		The operation will also remove each face using that
+//		edge (if present), but will not remove any vertex
+//
 void edit_topo::editDeconnectEdge()
 {
 	Edg minE;
@@ -425,12 +431,18 @@ void edit_topo::editDeconnectEdge()
 }
 
 
-
+//
+//	Manage the drag&drop process used to move a vertex to a new
+//		position as selected with mouse
+//		The method will delete old vertex and insert a new vertex,
+//		and also adjourn each edge/face that is using it
+//
 void edit_topo::editDragAndDropVertex()
 {
 	drag_stack.clear();
 	if(!drag_click)
 	{
+		// First click: select vertex
 		drag_click = true;
 
 		Vtx vtx;
@@ -450,12 +462,14 @@ void edit_topo::editDragAndDropVertex()
 	}
 	else
 	{
+		// second click: new vertex position
 		drag_click = false;
 
 		// Get new vertex coords
 		Point3f temp_vert;
 		if (Pick(mousePos.x(), mouseRealY, temp_vert))
 		{
+			// remove the old vertex
 			Vtx newV;
 			newV.V = temp_vert;
 			newV.vName = drag_vtx.vName;
@@ -463,12 +477,16 @@ void edit_topo::editDragAndDropVertex()
 				if(stack.at(v)==drag_vtx)
 					stack.removeAt(v);
 
+			// add the new vertex
 			stack.push_back(newV);
-			int edgToRemove=0;	
+
+			// count the number of edges involved
+			int edgToRemove=0;
 			for(int e=0; e<Estack.count(); e++)
 				if(Estack.at(e).containsVtx(drag_vtx))
 					edgToRemove++;
-
+			
+			// edit each edge
 			for(int i=0; i<edgToRemove; i++)
 				for(int e=0; e<Estack.count(); e++)
 					if(Estack.at(e).containsVtx(drag_vtx))
@@ -482,11 +500,13 @@ void edit_topo::editDragAndDropVertex()
 						Estack.push_back(newE);
 					}
 
+			// count faces number
 			int fceToRemove=0;
 			for(int f=0; f<Fstack.count(); f++)
 				if(Fstack.at(f).containsVtx(drag_vtx))
 					fceToRemove++;
 
+			// update faces with new vertex and edges
 			for(int i=0; i<fceToRemove; i++)
 				for(int f=0; f<Fstack.count(); f++)
 					if(Fstack.at(f).containsVtx(drag_vtx))
@@ -503,7 +523,8 @@ void edit_topo::editDragAndDropVertex()
 			edit_topodialogobj->updateVtxTable(stack);
 			edit_topodialogobj->updateFceTable(Fstack);
 			edit_topodialogobj->updateEdgTable(Estack);
-		/* Uncomment if you want the mesh to be auto-recreated
+
+		/* Uncomment this if you want the mesh to be auto-recreated
 			if(first_model_generated)
 				on_mesh_create();*/
 		}		
@@ -511,6 +532,12 @@ void edit_topo::editDragAndDropVertex()
 }
 
 
+//
+//	Split an edge on its mid point
+//		The process will remove the original edge and add two new
+//		faces. This will also add a new vertex and create (eventually)
+//		two new faces.
+//
 void edit_topo::editEdgeSplit()
 {
 	Edg minE;
@@ -608,7 +635,10 @@ void edit_topo::editEdgeSplit()
 	}		
 }
 
-
+//
+//	Collapse an edge over its mid point
+//		This will also remove faces using the old edge
+//
 void edit_topo::editEdgeCollapse()
 {
 	Edg toColl;
@@ -704,11 +734,22 @@ void edit_topo::editEdgeCollapse()
 /************************************************************************************/
 //
 // -- Decoration Plugin methods
+//			Those methods are used by the plugin to draw decorations
+//			on each plugin's user states
+//
+//			Each method declared here is used only in decorations functions,
+//			so, each method here will be called by the Decorate() func
+
+
+//
+//	Standard decoration mode
+//		Draws points and edges as defined by the user.
+//		And, also, vertices labels
 //
 void edit_topo::editDecoStandard(MeshModel &m)
 {
 	if(stack.count()!=0)
-		drawPoint(m, 3.0f, Color4b::DarkRed, Color4b::Red, stack);
+		drawPoint(m, 3.0f, Color4b::Red, stack);
 
 	if(stack.count()!=0)
 		drawLabel(stack);
@@ -721,21 +762,29 @@ void edit_topo::editDecoStandard(MeshModel &m)
 			Vtx p1 = e.v[0];
 			Vtx p2 = e.v[1];
 
-			drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, p1.V, p2.V);
+			drawLine(Color4b::Blue, Color4b::Black, p1.V, p2.V);
 		}
 	}
 }
 
-
+//
+//	Only vertices deco mode
+//		Draws only vertices and labels, but not edges
+//
 void edit_topo::editDecoOnlyVertex(MeshModel &m)
 {
 	if(stack.count()!=0)
-		drawPoint(m, 3.0f, Color4b::DarkRed, Color4b::Red, stack);
+		drawPoint(m, 3.0f, Color4b::Red, stack);
 
 	if(stack.count()!=0)
 		drawLabel(stack);
 }
 
+//
+//	Drag and drop mode decorations
+//		Before click: standard vertex selection pointer (yellow)
+//		After select: draw each new edge with yellow lines
+//
 void edit_topo::editDecoDragAndDropVertex(MeshModel &m)
 {
 	if(drag_click)
@@ -759,9 +808,9 @@ void edit_topo::editDecoDragAndDropVertex(MeshModel &m)
 					if(v[i] == drag_vtx)
 						v[i].V = pmouse;
 
-				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Yellow, v[0].V, v[1].V);
-				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Yellow, v[1].V, v[2].V);
-				drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Yellow, v[2].V, v[0].V);
+				drawLine(Color4b::Yellow, Color4b::Yellow, v[0].V, v[1].V);
+				drawLine(Color4b::Yellow, Color4b::Yellow, v[1].V, v[2].V);
+				drawLine(Color4b::Yellow, Color4b::Yellow, v[2].V, v[0].V);
 			}
 		}
 	}
@@ -769,27 +818,30 @@ void edit_topo::editDecoDragAndDropVertex(MeshModel &m)
 	{
 		Vtx vtx;
 		if(getVisibleVertexNearestToMouse(stack, vtx))
-			drawPoint(m, 4.0f, Color4b::Yellow, Color4b::Yellow, vtx.V);
+			drawPoint(m, 4.0f, Color4b::Yellow, vtx.V);
 
 	}
 }
 
-
+//
+//	Face selection decoration mode
+//		Draws each face (no vertices, no labels) in blue,
+//		and the face nearest to the mouse in yellow (and, so, 
+//		face will be selectable)
+//
+//	This method will also draw the "auto" elaborated vertices
+//	as defined by the edit topo algorithm
+//
 void edit_topo::editDecoFaceSelect(MeshModel &m)
 {
-	// DEBUG
-	if(in.count()!=0)
-	{
-		for(int i=0; i<in.count(); i++)
-			drawPoint(m, 4.0f, Color4b::White, Color4b::White, in.at(i));
-	}
+	// Draw auto-generated new mesh vertices
 	if(out.count()!=0)
 	{
 		for(int i=0; i<out.count(); i++)
-			drawPoint(m, 2.0f, Color4b::Yellow, Color4b::Yellow, out.at(i));
-	}	
-	// /DEBUG
+			drawPoint(m, 2.0f, Color4b::Yellow, out.at(i));
+	}
 
+	// Draw selected faces in blue, non selected in black, and mouse nearest in yellow
 	if(Fstack.count()!=0)
 	{
 		bool got = false;
@@ -806,19 +858,19 @@ void edit_topo::editDecoFaceSelect(MeshModel &m)
 
 			if(f.selected)
 			{
-				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(0).V, allv.at(1).V);
-				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(1).V, allv.at(2).V);
-				drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Black, allv.at(2).V, allv.at(0).V);	
+				drawLine(Color4b::Blue, Color4b::Black, allv.at(0).V, allv.at(1).V);
+				drawLine(Color4b::Blue, Color4b::Black, allv.at(1).V, allv.at(2).V);
+				drawLine(Color4b::Blue, Color4b::Black, allv.at(2).V, allv.at(0).V);	
 				
 				Point3f mid = (allv.at(0).V + allv.at(1).V + allv.at(2).V) / 3;
-				if(isVertexVisible(allv.at(0).V, _md)&&isVertexVisible(allv.at(1).V, _md)&&isVertexVisible(allv.at(2).V, _md))
-					drawPoint(m, 5.0f, Color4b::DarkGreen, Color4b::Green, mid);
+				if(isVertexVisible(allv.at(0).V)&&isVertexVisible(allv.at(1).V)&&isVertexVisible(allv.at(2).V))
+					drawPoint(m, 5.0f, Color4b::Green, mid);
 			}
 			else
 			{
-				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Black, allv.at(0).V, allv.at(1).V);
-				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Black, allv.at(1).V, allv.at(2).V);
-				drawLine(m, 2.0f, 3.0f, Color4b::DarkRed, Color4b::Black, allv.at(2).V, allv.at(0).V);	
+				drawLine(Color4b::DarkRed, Color4b::Black, allv.at(0).V, allv.at(1).V);
+				drawLine(Color4b::DarkRed, Color4b::Black, allv.at(1).V, allv.at(2).V);
+				drawLine(Color4b::DarkRed, Color4b::Black, allv.at(2).V, allv.at(0).V);	
 			}
 		}
 
@@ -856,14 +908,17 @@ void edit_topo::editDecoFaceSelect(MeshModel &m)
 					if(!allv.contains(nearest.e[e].v[v]))
 						allv.push_back(nearest.e[e].v[v]);
 
-			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(0).V, allv.at(1).V);
-			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(1).V, allv.at(2).V);
-			drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Red, allv.at(2).V, allv.at(0).V);	
+			drawLine(Color4b::Yellow, Color4b::Red, allv.at(0).V, allv.at(1).V);
+			drawLine(Color4b::Yellow, Color4b::Red, allv.at(1).V, allv.at(2).V);
+			drawLine(Color4b::Yellow, Color4b::Red, allv.at(2).V, allv.at(0).V);	
 		}
 	}
 }
 
-
+//
+//	Vertex selection decoration
+//		Draws in yellow the selectable vertex (the selectable vertex is the nearest to the mouse)
+//
 void edit_topo::editDecoVertexSelect(MeshModel &m)
 {
 	Point3f p = Point3f(0,0,0);
@@ -875,63 +930,83 @@ void edit_topo::editDecoVertexSelect(MeshModel &m)
 	if (getVertexAtMouse(m, temp_vert))
 	{
 		cursorPoint = temp_vert->P();
-		drawPoint(m, 4.0f, Color4b::DarkGreen, Color4b::Yellow, cursorPoint);
+		drawPoint(m, 4.0f, Color4b::Yellow, cursorPoint);
 	}
 }
 
+//
+//	Vertex deletion decoration
+//		Draws in yellow the deletable vertex (the deletable vertex is the nearest to the mouse)
+//
 void edit_topo::editDecoDeleteVertexSelect(MeshModel &m)
 {
 	Vtx vtx;
 	if(getVisibleVertexNearestToMouse(stack, vtx))
-		drawPoint(m, 4.0f, Color4b::DarkGreen, Color4b::Green, vtx.V);
+		drawPoint(m, 4.0f, Color4b::Green, vtx.V);
 }
 
+//
+//	Edge deletion decoration
+//		Draws in yellow the deletable edge
+//
 void edit_topo::editDecoDeleteVertexConnect(MeshModel &m)
 {
 	if(connectStart.V==Point3f(0,0,0) && connectEnd.V==Point3f(0,0,0))
 	{
 		Vtx vtx;
 		if(getVisibleVertexNearestToMouse(stack, vtx))
-			drawPoint(m, 4.0f, Color4b::DarkGreen, Color4b::Green, vtx.V);			
+			drawPoint(m, 4.0f, Color4b::Green, vtx.V);			
 	}
 
 	if(connectStart.V!=Point3f(0,0,0) && connectEnd.V==Point3f(0,0,0))
 	{
-		drawPoint(m, 4.0f, Color4b::LightBlue, Color4b::Blue, connectStart.V);
+		drawPoint(m, 4.0f, Color4b::LightBlue, connectStart.V);
 
 		Vtx vtx;
 		if(getVisibleVertexNearestToMouse(stack, vtx))
 		{
-			drawPoint(m, 4.0f, Color4b::DarkGreen, Color4b::Green, vtx.V);
-			drawLine(m, 2.0f, 3.0f, Color4b::Blue, Color4b::Green, connectStart.V, vtx.V);
+			drawPoint(m, 4.0f, Color4b::Green, vtx.V);
+			drawLine(Color4b::Blue, Color4b::Green, connectStart.V, vtx.V);
 		}
 	}
 }
 
-void edit_topo::editDecoDeleteVertexDeconnect(MeshModel &m)
+//
+//	Edge deletion decoration
+//
+void edit_topo::editDecoDeleteVertexDeconnect(MeshModel &)
 {
 	Edg minE;
 	if(getVisibleEdgeNearestToMouse(Estack, minE))
-		drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
+		drawLine(Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
 }
 
-void edit_topo::editDecoSplit(MeshModel &m)
+//
+//	Split selection decoration
+//		Draws in yellow the splittable edge
+//
+void edit_topo::editDecoSplit(MeshModel &)
 {
 	Edg minE;
 	if(getVisibleEdgeNearestToMouse(Estack, minE))
-		drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
+		drawLine(Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
 }
 
-void edit_topo::editDecoCollapse(MeshModel &m)
+//
+//	Collapse selection decoration
+//		Draws in yellow the collapse able edge
+//
+void edit_topo::editDecoCollapse(MeshModel &)
 {
 	Edg minE;
 	if(getVisibleEdgeNearestToMouse(Estack, minE))
-		drawLine(m, 2.0f, 3.0f, Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
+		drawLine(Color4b::Yellow, Color4b::Green, minE.v[0].V, minE.v[1].V);
 }
 
-
-
-void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
+//
+//	Main decoration method
+//
+void edit_topo::Decorate(QAction *, MeshModel &m, GLArea *)
 {
 	updateMatrixes();
 	// onClick
@@ -1067,62 +1142,29 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea * gla)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//
+//	Plugin init
+//
 void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *gla)
 {	
 	parentGla = gla;
 	gla->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
 
 	// Init uniform grid
-	float dist = m.cm.bbox.Diag();//10; //trgMesh ???//edit_topodialogobj->dist(0);
+	float dist = m.cm.bbox.Diag();
 
+	// Init data masks
 	m.updateDataMask(MeshModel::MM_FACEMARK);
 	tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
 	tri::UpdateFlags<CMeshO>::FaceProjection(m.cm);
 
+	// Init retopology model builder object
 	rm.init(&m, dist);
 
-	_md = 0.03;// m.cm.bbox.Diag()/100;
+	// Init miminum visible distance param (used only for labels rendering)
+	_md = 0.03;
 
-
-	/*if (edit_topodialogobj==0)
-		edit_topodialogobj=new edit_topodialog(parent->window()); */
-
-// Create an istance of the interface
+	// Init ui
 	if (edit_topodialogobj == 0) 
 	{ 
 		edit_topodialogobj = new edit_topodialog(gla->window()); 
@@ -1136,15 +1178,10 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *gla)
 	dock->setVisible(true);
 	dock->layout()->update();	
 
-	// Initialize the texture using the intere model
-	// InitTexture(m);
-
 	gla->update();
-
-
 	gla->setMouseTracking(true);
-//	edit_topodialogobj->show();
 
+	// Connect slots
 	connect(edit_topodialogobj, SIGNAL( mesh_create() ),
           this, SLOT( on_mesh_create() ) );
 
@@ -1152,6 +1189,9 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *gla)
           this, SLOT( on_update_request() ) );
 }
 
+//
+//	End edit
+//
 void edit_topo::EndEdit(QAction *, MeshModel &, GLArea *)
 {
 	stack.clear();
@@ -1188,10 +1228,16 @@ void edit_topo::EndEdit(QAction *, MeshModel &, GLArea *)
 /************************************************************************************/
 //
 // --- Slot implementation methods ---
+//		Those two methods are invoked by the gui
+//
+
+//
+//	"Create new mesh" click
+//		This method calls the retopology algoritm, and creates
+//		the new mesh using the user defined new topology
 //
 void edit_topo::on_mesh_create()
 {
-	in.clear();
 	out.clear();
 
 	if(first_model_generated)
@@ -1203,98 +1249,60 @@ void edit_topo::on_mesh_create()
 	first_model_generated = true;
 
 
-	MeshModel *m = parentGla->meshDoc.meshList.back();	// destination = last
-	MeshModel *currentMesh  = parentGla->meshDoc.mm();		// source = current		
+	MeshModel *m = parentGla->meshDoc.meshList.back();	// destination = new mesh
+	MeshModel *currentMesh  = parentGla->meshDoc.mm();	// source = current	mesh
 
-/*
-// DEBUG: Force MY vertex params
-
-	Vtx v1;
-	v1.V = Point3f(	-17.81, 116.59, 37.97);
-	v1.vName = QString("V0");
-
-	Vtx v2;
-	v2.V = Point3f(-28.42, 94.35, 45.1);
-	v2.vName = QString("V1");
-
-	Vtx v3;
-	v3.V = Point3f(	-47.21, 116.72, 31.43);
-	v3.vName = QString("V2");
-
-	Edg e1;
-	e1.v[0] = v1;
-	e1.v[1] = v2;
-
-	Edg e2;
-	e2.v[0] = v2;
-	e2.v[1] = v3;
-
-	Edg e3;
-	e3.v[0] = v3;
-	e3.v[1] = v1;
-
-	Fce f;
-	f.e[0] = e1;
-	f.e[1] = e2;
-	f.e[2] = e3;
-
-	stack.clear();
-	stack.push_back(v1);stack.push_back(v2);stack.push_back(v3);
-	Estack.clear();
-	Estack.push_back(e1);Estack.push_back(e2);Estack.push_back(e3);
-	Fstack.clear();
-	Fstack.push_back(f);
-	// /DEBUG!!!!!
-*/
-	// Mesh creation
-
-
+	// if debug value is true, the algorithm will respond with all the
+	// auto generated vertices.
+	// The isDEBUG value is forced by the "Draw auto-filled vertices" gui checkbox
 	if(edit_topodialogobj->isDEBUG())
 	{
-		rm.Lin.clear();
 		rm.Lout.clear();
     	int iter = edit_topodialogobj->getIterations();
 		float dist = edit_topodialogobj->dist()/100;
-		rm.createRefinedMesh(*m, *currentMesh, dist, iter, Fstack, stack, edit_topodialogobj, true);
-		in = rm.Lin;
+
+		// Retopology algorithm call
+		rm.createRefinedMesh(*m, /* *currentMesh,*/ dist, iter, Fstack, stack, edit_topodialogobj, true);
 		out = rm.Lout;
 	}
 	else
 	{
 		int iter = edit_topodialogobj->getIterations();
 		float dist = edit_topodialogobj->dist()/100;
-		rm.createRefinedMesh(*m, *currentMesh, dist, iter, Fstack, stack, edit_topodialogobj, false);
+
+		// Retopology algorithm call
+		rm.createRefinedMesh(*m, /* *currentMesh, */ dist, iter, Fstack, stack, edit_topodialogobj, false);
 	}
 
-	m->cm.Tr = currentMesh->cm.Tr;	
-
+	m->cm.Tr = currentMesh->cm.Tr;
 	parentGla->update();
 }
 
 
-
-
-
-
-
-
-
+//
+//	General update requested by some gui functions
+//
 void edit_topo::on_update_request()
 {
 	parentGla->update();
 }
+
+
+
+
+
 /************************************************************************************/
 //
 // --- Plugin events methods ---
 //
-void edit_topo::mousePressEvent(QAction *, QMouseEvent * event, MeshModel &m, GLArea * gla) 
+void edit_topo::mousePressEvent(QAction *, QMouseEvent * event, MeshModel &, GLArea * gla) 
 {
 	mousePos=event->pos();
 	click=false;
 	gla->update();
 }
 
-void edit_topo::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla)
+void edit_topo::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &, GLArea * gla)
 {
 	mousePos=event->pos();
 	mouseRealY = gla->curSiz.height() - mousePos.y();
@@ -1335,35 +1343,55 @@ void edit_topo::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &, GL
 
 /************************************************************************************/
 //
-// --- Mesh coords methods ---
+// --- New topology mesh methods ---
+//			Those methods are used by the edit plugin 
+//			to elaborate topology related operations
 //
-int edit_topo::getNearest(QPointF center, QPointF *points,int num) {
-		int nearestInd=0;
-		float dist=fabsf(center.x()-points[0].x())*fabsf(center.x()-points[0].x())+fabsf(center.y()-points[0].y())*fabsf(center.y()-points[0].y());
-		for (int lauf=1; lauf<num; lauf++) {
-			float temp=fabsf(center.x()-points[lauf].x())*fabsf(center.x()-points[lauf].x())+
+
+
+//
+//	Get nearest 2d point of the given array
+//	Returns: array index
+int edit_topo::getNearest(QPointF center, QPointF *points,int num) 
+{
+	int nearestInd=0;
+	float dist=fabsf(center.x()-points[0].x())*fabsf(center.x()-points[0].x())+fabsf(center.y()-points[0].y())*fabsf(center.y()-points[0].y());
+	for (int lauf=1; lauf<num; lauf++) 
+	{
+		float temp=fabsf(center.x()-points[lauf].x())*fabsf(center.x()-points[lauf].x())+
 				fabsf(center.y()-points[lauf].y())*fabsf(center.y()-points[lauf].y());
-			if (temp<dist) {
+		if (temp<dist) 
+		{
 				nearestInd=lauf;
 				dist=temp;
-			}
 		}
-		return nearestInd;
 	}
+	return nearestInd;
+}
 
-bool edit_topo::getFaceAtMouse(MeshModel &m, CMeshO::FacePointer& val) {
+//
+//	Get nearest 3d face over the meshmodel
+//	Returns: true if found, and facepointer
+bool edit_topo::getFaceAtMouse(MeshModel &m, CMeshO::FacePointer& val) 
+{
 	QPoint mid=QPoint(mousePos.x(), mouseRealY);
 	return (GLPickTri<CMeshO>::PickNearestFace(mid.x(), mid.y(), m.cm, val,2,2));
 }
 
-bool edit_topo::getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value) {
+//
+//	Get existing nearest 3d vertex on the given mesh model
+//	Returns: true if found, and vertexpointer value
+bool edit_topo::getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value) 
+{
 	CFaceO * temp=0;
 
 	QPoint mid=QPoint(mousePos.x(), mouseRealY);
 	double tx,ty,tz;
-	if (getFaceAtMouse(m,temp)) {
+	if (getFaceAtMouse(m,temp)) 
+	{
 		QPointF point[3];
-		for (int lauf=0; lauf<3; lauf++) {
+		for (int lauf=0; lauf<3; lauf++) 
+		{
 			gluProject(temp->V(lauf)->P()[0],temp->V(lauf)->P()[1],temp->V(lauf)->P()[2],mvmatrix,projmatrix,viewport,&tx,&ty,&tz);
 			point[lauf]=QPointF(tx,ty);
 		}
@@ -1374,26 +1402,12 @@ bool edit_topo::getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value) {
 }
 
 
-
-
-bool edit_topo::isVertexVisible(Point3f v, MeshModel &m)
-{
-	/*QString x;
-	x = "ToCheck: tz.."+ QString("%1").arg(tz);
-	qDebug(x.toLatin1());
-	x = "_Picked: pix."+ QString("%1").arg(pix);
-	qDebug(x.toLatin1());
-	x =  "ffffff: "+ QString("%1").arg(ff);
-	qDebug(x.toLatin1()); */
-
-	// 0.03 is good enought...
-
-	double minD = m.cm.bbox.Diag()/100;
-
-	return isVertexVisible(v, minD);
-}
-
-bool edit_topo::isVertexVisible(Point3f v, double mD)
+//
+//	Check if the given vertex is visible on the current user view
+//			This method is used for rendering vertices labels, and
+//			rendering edges/faces
+//	Returns: true if visible
+bool edit_topo::isVertexVisible(Point3f v)
 {
 	float   pix;
 	double tx,ty,tz;
@@ -1401,23 +1415,14 @@ bool edit_topo::isVertexVisible(Point3f v, double mD)
 	gluProject(v.X(),v.Y(),v.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
 	glReadPixels(tx,ty,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&pix);
 
-	float ff = fabs(tz - pix);//fabs(fabs(tz) - fabs(pix));
-	float ff2 = fabs(fabs(tz) - fabs(pix));
+	float ff = fabs(tz - pix);
 
-	QString x;
-	x = QString(" ff= %1").arg(ff)+QString(" ff2= %1").arg(pix)+QString(" pix= %1").arg(pix/ff2);
-
-	qDebug(x.toLatin1());
-
-
-
-
-
-
-	return ((ff < 0.003)); //&& (pix<0.713));   //mD); //0.05);
+	return ((ff < 0.003));
 }
 
-
+//
+//	Get visible vertex nearest to mouse position (from a given vertices list)
+//	Returns: true if visible
 bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
 {
 	bool found = false;
@@ -1428,7 +1433,7 @@ bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
 	QList<Vtx> visib;
 
 	for(int i=0; i<list.count(); i++)
-		if(isVertexVisible(list.at(i).V, _md))
+		if(isVertexVisible(list.at(i).V))
 			visib.push_back(list.at(i));
 
 	QPoint mPos = QPoint(mousePos.x(), mouseRealY);
@@ -1439,9 +1444,10 @@ bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
 		gluProject(p.X(),p.Y(),p.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
 
 		QPoint qp = QPoint(tx, ty);
-		double dx = fabs((double)(qp.x() - mPos.x()));
-		double dy = fabs((double)(qp.y() - mPos.y()));
 
+		// faster distance
+		//double dx = fabs((double)(qp.x() - mPos.x()));
+		//double dy = fabs((double)(qp.y() - mPos.y()));
 		//double dist = (dy > dx) ? 0.41*dx+0.941246*dy : 0.41*dy+0.941246*dx;
 
 		double dist = sqrt((double)(sqr(qp.x() - mPos.x()) + sqr(qp.y() - mPos.y())));
@@ -1464,135 +1470,89 @@ bool edit_topo::getVisibleVertexNearestToMouse(QList<Vtx> list, Vtx &out)
 			}
 	}
 	return false;
-
-
-/*	bool found = false;
-	float minDist = 0;
-	int minIdx = 0;
-	Point3f t;
-
-	if(list.count()>0)
-	{
-		if(Pick(mousePos.x(), mouseRealY, t))
-		{
-			Point3f p = list.at(0).V;
-			minDist = sqrt( sqr(t.X()-p.X()) + sqr(t.Y()-p.Y()) + sqr(t.Z()-p.Z()) );
-			found = isVertexVisible(p, _md);
-			out = list.at(0);
-
-			for(int i=1; i<list.count(); i++)
-			{
-				p = list.at(i).V;
-				float dist = sqrt( sqr(t.X()-p.X()) + sqr(t.Y()-p.Y()) + sqr(t.Z()-p.Z()) );
-
-				if((dist < minDist)&&(isVertexVisible(p, _md)))
-				{
-					minDist = dist;
-					minIdx = i;
-					out = list.at(i);
-					found = true;
-				}
-			}
-		}
-
-	}
-	return found;*/
 }
 
-
+//
+//	Get visible edge nearest to mouse (from a given edges list)
+//	Returns: true if found
 bool edit_topo::getVisibleEdgeNearestToMouse(QList<Edg> listE, Edg &ret)
 {
-
-			Fce nearest;
-			bool got = false;
-			double tx,ty,tz;
-			int at = 0;
-			for(int f=0; f<Fstack.count(); f++)
-			{
-				Fce fc = Fstack.at(f);
-	
-				QList<Vtx> allv;
-				for(int e=0; e<3; e++)
-					for(int v=0; v<2; v++)
-						if(!allv.contains(fc.e[e].v[v]))
-							allv.push_back(fc.e[e].v[v]);
-
-				
-				gluProject(allv.at(0).V.X(),allv.at(0).V.Y(),allv.at(0).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-				QPointF p0 = QPointF(tx, ty);
-				gluProject(allv.at(1).V.X(),allv.at(1).V.Y(),allv.at(1).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-				QPointF p1 = QPointF(tx, ty);
-				gluProject(allv.at(2).V.X(),allv.at(2).V.Y(),allv.at(2).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-				QPointF p2 = QPointF(tx, ty);
-
-				QPoint p = QPoint(mousePos.x(), mouseRealY);
-
-				if(pointInTriangle(p, p0, p1, p2))
-				{
-					nearest = fc;
-					got = true;
-					at = f;
-				}
-			}
-
-			if(got)
-			{
-				Edg minE;
-				float bestD = -1;
-				bool found = false;
-				double tx,ty,tz;
-
-				for(int i=0; i<3; i++)
-				{
-					Edg e = nearest.e[i];
-		
-					gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-					QPointF p0 = QPointF(tx, ty);
-					gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-					QPointF p1 = QPointF(tx, ty);
-
-					float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
-					if((dist < bestD)||(bestD==-1))
-					{
-						bestD = dist;
-						minE = e;
-						found = true;
-					}
-				}
-	
-				ret = minE;
-				return found;
-			}
-
-			return false;
-
-
-/*	Edg minE;
-	float bestD = -1;
-	bool found = false;
+	Fce nearest;
+	bool got = false;
 	double tx,ty,tz;
-
-	for(int i=0; i<listE.count(); i++)
+	int at = 0;
+	for(int f=0; f<Fstack.count(); f++)
 	{
-		Edg e = listE.at(i);
-		
-		gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-		QPointF p0 = QPointF(tx, ty);
-		gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-		QPointF p1 = QPointF(tx, ty);
+		Fce fc = Fstack.at(f);
+	
+		QList<Vtx> allv;
+		for(int e=0; e<3; e++)
+			for(int v=0; v<2; v++)
+				if(!allv.contains(fc.e[e].v[v]))
+					allv.push_back(fc.e[e].v[v]);
 
-		float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
-		if((dist < bestD)||(bestD==-1))
+		gluProject(allv.at(0).V.X(),allv.at(0).V.Y(),allv.at(0).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+		QPointF p0 = QPointF(tx, ty);
+		gluProject(allv.at(1).V.X(),allv.at(1).V.Y(),allv.at(1).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+		QPointF p1 = QPointF(tx, ty);
+		gluProject(allv.at(2).V.X(),allv.at(2).V.Y(),allv.at(2).V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+		QPointF p2 = QPointF(tx, ty);
+
+		QPoint p = QPoint(mousePos.x(), mouseRealY);
+
+		if(pointInTriangle(p, p0, p1, p2))
 		{
-			bestD = dist;
-			minE = e;
-			found = true;
+			nearest = fc;
+			got = true;
+			at = f;
 		}
 	}
-	
-	ret = minE;
-	return found; */
+
+	if(got)
+	{
+		Edg minE;
+		float bestD = -1;
+		bool found = false;
+		double tx,ty,tz;
+
+		for(int i=0; i<3; i++)
+		{
+			Edg e = nearest.e[i];
+			gluProject(e.v[0].V.X(),e.v[0].V.Y(),e.v[0].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+			QPointF p0 = QPointF(tx, ty);
+			gluProject(e.v[1].V.X(),e.v[1].V.Y(),e.v[1].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
+			QPointF p1 = QPointF(tx, ty);
+
+			float dist = distancePointSegment(QPointF(mousePos.x(),mouseRealY), p1, p0);
+			if((dist < bestD)||(bestD==-1))
+			{
+				bestD = dist;
+				minE = e;
+				found = true;
+			}
+		}
+
+		ret = minE;
+		return found;
+	}
+	return false;
 }
+
+//
+//	Checks if the given point is in the given triangle
+//
+bool edit_topo::pointInTriangle(const QPointF &p, const QPointF &a, const QPointF &b, const QPointF &c) 
+{
+	float fab=(p.y()-a.y())*(b.x()-a.x()) - (p.x()-a.x())*(b.y()-a.y());
+	float fbc=(p.y()-c.y())*(a.x()-c.x()) - (p.x()-c.x())*(a.y()-c.y());
+	float fca=(p.y()-b.y())*(c.x()-b.x()) - (p.x()-b.x())*(c.y()-b.y());
+
+	return (fab*fbc>0 && fbc*fca>0);
+}
+
+//
+//	2d distance p-seg
+//
 float edit_topo::distancePointSegment(QPointF p, QPointF segmentP1,QPointF segmentP2)
 {
 	float x0, y0, x1, x2, y1, y2, m, q;
@@ -1611,37 +1571,46 @@ float edit_topo::distancePointSegment(QPointF p, QPointF segmentP1,QPointF segme
 
 	return fabs((y0 - m*x0 -q) / (sqrt(1 + m*m)));
 }
+
+//
+//	2d distance p-p
+//
 float edit_topo::distancePointPoint(QPointF P1, QPointF P2)
 { 	
 	return sqrt(pow((P1.x()-P2.x()),2)+pow((P1.y()-P2.y()),2));
 }
+
+
+
+
+
+
+
 /************************************************************************************/
 //
-// --- Plugin decorations methods ---
+// --- Plugin rendering methods ---
+//		Those methods are used by the plugin to draw labels
+//		vertices, edges, faces, ... in opengl
+
+//
+//	Draws user selected vertices labels
 //
 void edit_topo::drawLabel(QList<Vtx> list)
 {
 	
 	QVector<Vtx> v = list.toVector();
 	int pCount = list.count();
-	double tx,ty,tz;
-	for(int i=0; i<pCount; i++)
-	{
-		drawLabel(list.at(i));
-	/*OLD STYLE	if(isVertexVisible(v[i].V))
-		{
-			gluProject(v[i].V.X(),v[i].V.Y(),v[i].V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
-			parentGla->renderText(tx+5, (parentGla->curSiz.height() - 5 - ty), v[i].vName, QFont());
-		} */
-	}
 
+	for(int i=0; i<pCount; i++)
+		drawLabel(list.at(i));
 }
 
+//
+//	Draws user selected vertex label
+//
 void edit_topo::drawLabel(Vtx v)
 {
-
-
-	if(isVertexVisible(v.V, _md)&&(edit_topodialogobj->drawLabels()))
+	if(isVertexVisible(v.V)&&(edit_topodialogobj->drawLabels()))
 	{
 		double tx,ty,tz;
 		gluProject(v.V.X(),v.V.Y(),v.V.Z(), mvmatrix,projmatrix,viewport, &tx,&ty,&tz);
@@ -1669,7 +1638,7 @@ void edit_topo::drawLabel(Vtx v)
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
-		glColor4f(0,0,0,0.6);
+		glColor4f(0,0,0,0.6f);
 		glBegin(GL_QUADS);
 		glVertex2f(x+brec.left(),y+brec.bottom());
 		glVertex2f(x+brec.right(),y+brec.bottom());
@@ -1677,7 +1646,7 @@ void edit_topo::drawLabel(Vtx v)
 		glVertex2f(x+brec.left(),y+brec.top());
 		glEnd();
 		int offset=2;
-		glColor4f(0,0,0,0.3);
+		glColor4f(0,0,0,0.3f);
 		glBegin(GL_QUADS);
 			glVertex2f(x+brec.left()-offset,y+brec.bottom()+offset);
 			glVertex2f(x+brec.right()+offset,y+brec.bottom()+offset);
@@ -1692,11 +1661,12 @@ void edit_topo::drawLabel(Vtx v)
 		glPopMatrix();
 		glPopAttrib();
 	}
-
 }
 
-
-void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b colorFront, Point3f p)
+//
+//	Draws a point
+//
+void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorFront, Point3f p)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
@@ -1714,7 +1684,7 @@ void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b 
 		glVertex(p);
 		glVertex(p);
 	glEnd(); 
-			
+/*			
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST); 
 	glDepthFunc(GL_LESS);
@@ -1726,13 +1696,15 @@ void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b 
 		glVertex(cursorPoint);
 		glVertex(cursorPoint);
 	glEnd();
-		
+*/		
 	glPopAttrib();
 	glPopMatrix();
 }
 
-
-void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b colorFront, QList<Vtx> list)
+//
+//	Draws all vertices
+//
+void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorFront, QList<Vtx> list)
 {
 	glPushMatrix();
 	glMultMatrix(m.cm.Tr);
@@ -1743,7 +1715,7 @@ void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b 
 	glDepthMask(GL_FALSE);
 		
 	glDisable(GL_LIGHTING);
-	glColor(colorBack);
+	glColor(colorFront);
 		
 	glPointSize(pSize);
 	
@@ -1760,7 +1732,7 @@ void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b 
 	glDepthFunc(GL_LESS);
 	glColor(Color4b::White);
 		
-	glPointSize(1.3);
+	glPointSize(1.3f);
 
 	glBegin(GL_POINTS);
 		for(int i=0; i<pCount; i++)
@@ -1771,9 +1743,9 @@ void edit_topo::drawPoint(MeshModel &m, float pSize, Color4b colorBack, Color4b 
 	glPopMatrix();
 }
 
-
-
-
+//
+//	Creates recursively the dotted line points
+//
 QVector<Point3f> vectSub(int part, Point3f p1, Point3f p2)
 {
 	if(part==2)
@@ -1806,117 +1778,20 @@ QVector<Point3f> vectSub(int part, Point3f p1, Point3f p2)
 	}
 }
 
-void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFront, Color4b colorBack, Point3f p1, Point3f p2)
-{
-/*	if(isVertexVisible(p1, _md)&&isVertexVisible(p2, _md))
-	{
-		// Drawing of the current line
-		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-		glDepthMask(false);
-		glLineWidth(2.5);
-		glPointSize(1.4);
-  
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_POINT_SMOOTH);
-		glColor(colorFront);  
-		glBegin(GL_LINES);
-			glVertex(p1);
-			glVertex(p2);
-		glEnd();
-		glBegin(GL_POINTS);
-			glVertex(p1);
-			glVertex(p2);
-		glEnd();    
-		glDisable(GL_DEPTH_TEST);
-	    glLineWidth(0.7);
-	    glPointSize(1.4);
-	    glBegin(GL_LINES);
-			glVertex(p1);
-			glVertex(p2);
-		glEnd();
-		glBegin(GL_POINTS);
-			glVertex(p1);
-			glVertex(p2);
-		glEnd();
-  
-		glPopAttrib();
- // assert(!glGetError());
-	}
-	else
-	{
-		// Drawing of the hidden line
-		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-		glDepthMask(false);
-		glLineWidth(0.3);
-		glPointSize(0.4);
-  
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_POINT_SMOOTH);
-		glColor(colorBack);
-
-		// Fill the intermed. points to draw a dotted line
-		QVector<Point3f> trattP;
-		int part = 2;
-		float dist = sqrt( sqr(p1.X()-p2.X()) + sqr(p1.Y()-p2.Y()) + sqr(p1.Z()-p2.Z()) );
-		if(dist>10) part*=2;
-		if(dist>50) part*=2;
-		if(dist>100) part*=2;
-		if(dist>400) part*=2;
-
-		Point3f pp1;// = p1;
-		Point3f pp2;// = (p2+p1)/2;
-
-		trattP = vectSub(part, p1, p2);
-
-		for(int i=0; i<(trattP.size()-1); i+=2)
-		{
-			pp1 = trattP[i];
-			pp2 = trattP[i+1];
-
-			glBegin(GL_LINES);
-				glVertex(pp1);
-				glVertex(pp2);
-			glEnd();
-			glBegin(GL_POINTS);
-				glVertex(pp1);
-				glVertex(pp2);
-			glEnd();
-
-		glDisable(GL_DEPTH_TEST);
-
-		glLineWidth(0.5);
-		glPointSize(0.3);
-		glBegin(GL_LINES);
-			glVertex(pp1);
-			glVertex(pp2);
-		glEnd();
-		glBegin(GL_POINTS);
-			glVertex(pp1);
-			glVertex(pp2);
-		glEnd(); 
-	}
-		glPopAttrib();
-		// assert(!glGetError());		
-	}
-*/
-		
+//
+//	Draws a line (used for edges and faces)
+//
+void edit_topo::drawLine(Color4b colorFront, Color4b colorBack, Point3f p1, Point3f p2)
+{		
 	// Drawing of the current line
-	if(isVertexVisible(p1, _md)&&isVertexVisible(p2, _md))
+	if(isVertexVisible(p1)&&isVertexVisible(p2))
 	{
 		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
 		glDepthMask(false);
-		glLineWidth(2.5);
-		glPointSize(1.4);
+		glLineWidth(2.5f);
+		glPointSize(1.4f);
   
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -1951,8 +1826,8 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFr
 
 			glDisable(GL_DEPTH_TEST);
 
-			glLineWidth(0.5);
-			glPointSize(0.3);
+			glLineWidth(0.5f);
+			glPointSize(0.3f);
 			glBegin(GL_LINES);
 				glVertex(pp1);
 				glVertex(pp2);
@@ -1970,8 +1845,8 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFr
 		glDisable(GL_LIGHTING);
 		glDisable(GL_TEXTURE_2D);
 		glDepthMask(false);
-		glLineWidth(1.5);
-		glPointSize(0.4);
+		glLineWidth(1.5f);
+		glPointSize(0.4f);
 
 		// Fill the intermed. points to draw a dotted line
 		QVector<Point3f> trattP;
@@ -2006,10 +1881,10 @@ void edit_topo::drawLine(MeshModel &m, float pSize, float lSize, Color4b colorFr
 	}
 }
 
-
-
-
-void edit_topo::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla)
+//
+//	Draws a triangle
+//
+void edit_topo::drawFace(CMeshO::FacePointer fp)
 {
     glPointSize(3.0f);
 	

@@ -19,7 +19,6 @@
 #include <vcg/space/index/octree.h>
 #include <vcg/space/index/spatial_hashing.h>
 
-
 #include <vcg/complex/trimesh/refine.h>
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/update/normal.h>
@@ -31,60 +30,90 @@
 using namespace std;
 using namespace vcg;
 
-
 #include "edit_topodialog.h"
 
 
 
 
+//**************************************************************
+//	template class NearestMidPoint
+//		This class is used by the retopology algorithm
+//		to obtain the closest point to each "ideal" new
+//		mesh vertex
+//
+//	The operator () is called by the standard vcg "Refine<,>"
+//	method to obtain the new vertices coordinates
+//
+//	Because of the great reuse of that operator, this class
+//  needs to be initialized with the original "source" model.
+//	This can be done by calling the "init" method
+//
 template<class MESH_TYPE>
-class NearestMidPoint : public   std::unary_function<face::Pos<typename MESH_TYPE::FaceType> ,  typename MESH_TYPE::CoordType >
+class NearestMidPoint : public std::unary_function<face::Pos<typename MESH_TYPE::FaceType>, typename MESH_TYPE::CoordType>
 {
 	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
 
-
 public:
+	// if DEBUG value is true, the class will fill 
+	// the LoutMid QList with ALL the "failed" vertices.
+	// So, LoutMid will contain all vertices that have not
+	// been found by the UnifGrid.GetClosest() function
 	bool DEBUG;
-	QList<Point3f> * LinMid;
 	QList<Point3f> * LoutMid;
 
-
+	// Uniform grid, init by the "init()" method
 	MetroMeshGrid   unifGrid;
 
+	// Marker
 	typedef tri::FaceTmark<MESH_TYPE> MarkerFace;
 	MarkerFace markerFunctor;	
 
-
- 	void init(MESH_TYPE *_m, float dist)
+	// All of the data structures used by the retopology algo have 
+	// to be initialized *before* the function call.
+	//
+	// This is necessary in order to reduce comput time
+	void init(MESH_TYPE *_m, float dist)
 	{
 		m=_m;
 		if(m) 
 		{
+			// Set up uniform grid
 			unifGrid.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
 			dist_upper_bound = dist;
 		}
 	}
 
+	// Standard operator called by Refine<>
+	// 
+	// If you want to change the way new vertices are generated
+	// you have to modify the "VertexTypr nv" output coords
 	void operator()(typename MESH_TYPE::VertexType &nv, face::Pos<typename MESH_TYPE::FaceType>  ep)
 	{
-		Point3f closestPt, closestPt1, closestPt2, normf, bestq, ip;
+		Point3f closestPt, normf, bestq, ip;
 
 		float dist = dist_upper_bound;
 		vcg::face::PointDistanceBaseFunctor<float> PDistFunct;
 
+		// startPt is the point from where the "GetClosest" query will start
 		const typename MESH_TYPE::CoordType &startPt= (ep.f->V(ep.z)->P()+ep.f->V1(ep.z)->P())/2.0;
 		CMeshO::FaceType *nearestF=0;
 		
+		// in "dist" will be returned the closest point distance from startPt
 		dist=dist_upper_bound;
 
 		Point3f p1 = ep.f->V(ep.z)->P();
 		Point3f p2 = ep.f->V1(ep.z)->P();
 		float incDist = sqrt(sqr(p1.X()-p2.X())+sqr(p1.Y()-p2.Y())+sqr(p1.Z()-p2.Z()));
+
+		// distPerc is the % distance used to evaluate the maximum query distance
 		incDist = incDist * distPerc;
 
+		// dist_ upper_bound is the maximum query distance, evaluated 
+		// with a % factor given by the user
 		dist_upper_bound = incDist;
 
+		// Query the uniform grid and get the original mesh's point nearest to startPt
 		nearestF =  unifGrid.GetClosest(PDistFunct, 
 										markerFunctor, 
 										startPt, 
@@ -92,7 +121,9 @@ public:
 										dist, 
 										closestPt);
 
-		// If the closest point has not been found, then, softly, use the original vertex and say: laplacian smooth is needed!
+		// Output distance has not changed: no closest point found.
+		// The original "ideal" point will be used, and then will be
+		// smoothed with laplacian smooth algorithm
 		if(dist == dist_upper_bound) 
 		{
 			nv.P()= startPt;
@@ -100,16 +131,21 @@ public:
 			nv.C().lerp(ep.f->V(ep.z)->C(),ep.f->V1(ep.z)->C(),.5f);
 			nv.Q() = ((ep.f->V(ep.z)->Q()+ep.f->V1(ep.z)->Q())) / 2.0;
 
+			// Mark it as selected to smooth it
 			nv.SetS();
 
-			qDebug("Unable to find closest!");
+			qDebug("Unable to find closest point. Marked for smoothing");
+
+			// If debug mode is on, the point will be drawn in meshlab
 			if(DEBUG) LoutMid->push_back(startPt);
 		}
+		// distance has changed: got the closest point
 		else
 		{
 			nv.P()= closestPt; 
 
 			Point3f interp;
+			// Try to interpolate vertex colors and normals
 			if(InterpolationParameters(*nearestF, closestPt, interp[0], interp[1], interp[2]))
 			{
 				interp[2]=1.0-interp[1]-interp[0];
@@ -124,12 +160,14 @@ public:
 		}
 	}
 
+	// Color interpolation called by Refine<,>
 	Color4<typename MESH_TYPE::ScalarType> WedgeInterp(Color4<typename MESH_TYPE::ScalarType> &c0, Color4<typename MESH_TYPE::ScalarType> &c1)
 	{
 		Color4<typename MESH_TYPE::ScalarType> cc;
 		return cc.lerp(c0,c1,0.5f);
 	}
 
+	// Color interpolation called by Refine<,>
 	template<class FL_TYPE>
 	TexCoord2<FL_TYPE,1> WedgeInterp(TexCoord2<FL_TYPE,1> &t0, TexCoord2<FL_TYPE,1> &t1)
 	{
@@ -140,12 +178,12 @@ public:
 		return tmp;
 	}
 
-	float dist_upper_bound; // maximum upper distance (deprecated. See below "distPerc")
+	float dist_upper_bound; // maximum upper distance (See below "distPerc")
 	float distPerc; // distance for getClosest() is evalutated as a % of the edge's length (float from 0.01 to 0.99)
 
-private: 
+private:
+	// Internal mesh model
 	CMeshO *m; 
-
 };
 
 
@@ -158,32 +196,23 @@ private:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//**************************************************************
+//	class RetopMeshBuilder
+//		This class contains the retopology algorithm,
+//		and is used for "edit" and "filter" plugin modes
+//
 class RetopMeshBuilder
 {
 public:
+	// Mid point sampler object, used by "Refine" in the retopo process
 	NearestMidPoint<CMeshO> * midSampler;
 
-	QList<Point3f> Lin;
+	// This list will be filled (in debug mode) with all the "not found" closest vertices
 	QList<Point3f> Lout;
 
 	RetopMeshBuilder() {};
+
+	// init mid point sampler object
 	void init(MeshModel *_mm, double dist)
 	{
 		_mm->updateDataMask(MeshModel::MM_FACEMARK);
@@ -191,20 +220,22 @@ public:
 		midSampler->init(&_mm->cm, dist);
 	}
 
-
-	void createRefinedMesh(MeshModel &outMesh, MeshModel &in, float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog, bool DEBUG)
+	//
+	// Creates the retopology mesh in edit mode (edit_topo plugin)
+	//
+	void createRefinedMesh(MeshModel &outMesh, /*MeshModel &in,*/ float dist, int iterations, QList<Fce> Fstack, QList<Vtx> stack, edit_topodialog *dialog, bool DEBUG)
 	{
 		dialog->setBarMax(iterations);
 		dialog->setStatusLabel("Init topo");
 
 		midSampler->DEBUG = DEBUG;
 		midSampler->distPerc = dist;
-		midSampler->LinMid = &Lin;	
 		midSampler->LoutMid = &Lout;
 
+		// Create a "flat" mesh from the user defined topology defined
+		// in faces stack "Fstack" and vertices stack "stack"
 		createBasicMesh(outMesh, Fstack, stack);
 
-		qDebug("Basic mesh init done");
 		dialog->setStatusLabel("Done");	
 
 		CMeshO::FaceIterator fi;
@@ -217,8 +248,16 @@ public:
 			{
 				dialog->setStatusLabel("Iter: "+QString("%1").arg(i+1));
 
+				// This is che core point of the retopology plugin:
+				//	here "Refine" is called with "NearestMidPoint" and "midSampler"
+				//		- midSampler uses an uniform grid to get the closest point
+				//		  for each given vertex, and "builds" the new mesh by adapting
+				//		  it over the existing "in" meshmodel
+				//	If the midSampler fails (for example if a hole is found), each 
+				//  vertex is marked with SetS() and will be smoothed later
+				//
 				outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler, 0, false, 0);
+				Refine<CMeshO, NearestMidPoint<CMeshO>>(outMesh.cm, *midSampler, 0, false, 0);
 				outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
 				dialog->setBarVal(i+1);
 			}
@@ -228,6 +267,7 @@ public:
 
 		dialog->setStatusLabel("Normals");
 
+		// Recalculate new model's face normals and select faces with selected vertices
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{
 			(*fi).N()=((fi->V(0)->N() + fi->V(1)->N() + fi->V(2)->N())/3);
@@ -238,6 +278,7 @@ public:
 					(*fi).SetS();
 		}
 
+		// Expand selected faces to obtain a more refined smooth
 		for(int i=0; i<(1+(int)(iterations/4)); i++)
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 			if((*fi).IsS())
@@ -246,7 +287,8 @@ public:
 	
 		dialog->setStatusLabel("Lapl smooth");
 
-		size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
+		// Laplacian smooth for selected faces
+		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
 		tri::Smooth<CMeshO>::VertexCoordLaplacian(outMesh.cm,3,true,0);
 		dialog->setStatusLabel("Done");
 	}
@@ -317,7 +359,7 @@ public:
 				for(int i=0; i<3; i++)
 					(*fi).FFp(i)->SetS();
 	
-		size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
+		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
 		tri::Smooth<CMeshO>::VertexCoordLaplacian(outMesh.cm,3,true,0);
 
 		return true;
@@ -326,8 +368,10 @@ public:
 
 
 private:
+	// Creates the flat initial mesh from the user defined topology
 	void createBasicMesh(MeshModel &outMesh, QList<Fce> Fstack, QList<Vtx> Vstack)
 	{
+		// Elaborate topology relations
 		QVector<Vtx> nStack(Vstack.count());
 		QVector<Fce> nFstack(Fstack.count()); nFstack = Fstack.toVector();
 		for(int i=0; i<Vstack.count(); i++)
@@ -344,7 +388,6 @@ private:
 			
 				nFstack[j]=f;
 			}
-
 			v.vName = QString("%1").arg(i);
 			nStack[i]=v;
 		} 
@@ -354,6 +397,7 @@ private:
 			if(nFstack.at(i).selected)
 				allFce++;
 
+		// Allocate the new mesh
 		outMesh.cm.Clear();
 		vcg::tri::Allocator<CMeshO>::AddVertices(outMesh.cm, nStack.count());
 		vcg::tri::Allocator<CMeshO>::AddFaces(outMesh.cm, allFce);
@@ -367,16 +411,15 @@ private:
 			ivp[v] = &*vi;
 			(*vi).P() = Point3f(nStack[v].V.X(), nStack[v].V.Y(), nStack[v].V.Z());
 
-
 			Point3f closestPt;
 			vcg::face::PointDistanceBaseFunctor<float> PDistFunct;
 
 			const CMeshO::CoordType &startPt = (*vi).P();
 			CMeshO::FaceType *nearestF=0;
 	
-			float d1 = 1000;
-			float d2 = 1000;
+			float d1,d2; d1 = d2 = 1000;
 
+			// Use the sampler to get original vertices normals
 			nearestF =  midSampler->unifGrid.GetClosest(PDistFunct, 
 											midSampler->markerFunctor, 
 											startPt, 
@@ -413,10 +456,10 @@ private:
 				(*fi).V(2) = ivp.at(ivpId2);
 				f++;
 			}
-		} 
-
+		}
 		outMesh.updateDataMask(MeshModel::MM_FACETOPO);
 
+		// Re-orient new mesh
 		bool oriented,orientable;
 		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable); 
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
@@ -424,7 +467,6 @@ private:
 
 		outMesh.clearDataMask(MeshModel::MM_FACETOPO);
 	}
-
 };
 
 
