@@ -7,6 +7,7 @@ HEADERS       = edittexture.h \
 SOURCES       = edittexture.cpp \
 		textureeditor.cpp \
 		renderarea.cpp \
+		../../meshlab/GLLogStream.cpp\ 
 		$$VCGDIR/wrap/gui/trackball.cpp \
 		$$VCGDIR/wrap/gui/trackmode.cpp \
 		$$GLEWCODE
