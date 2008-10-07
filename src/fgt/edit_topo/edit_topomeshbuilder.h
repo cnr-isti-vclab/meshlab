@@ -257,7 +257,7 @@ public:
 				//  vertex is marked with SetS() and will be smoothed later
 				//
 				outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-				Refine<CMeshO, NearestMidPoint<CMeshO>>(outMesh.cm, *midSampler, 0, false, 0);
+				Refine<CMeshO, NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler, 0, false, 0);
 				outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
 				dialog->setBarVal(i+1);
 			}
