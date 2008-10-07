@@ -14,3 +14,4 @@ INCLUDEPATH += ../../../../code/lib/muparser/include
 
 win32-msvc2005:LIBS += ../../../../code/lib/muparser/lib/muparser.lib
 mac:LIBS            += ../../../../code/lib/muparser/lib/libmuparser.a
+win32-g++:LIBS		 += ../../../../code/lib/muparser/lib/libmuparser.a
