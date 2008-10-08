@@ -111,7 +111,7 @@ void MlsSurface<Scalar>::computeVertexRaddi()
 	KdTree<Scalar> knn(mPoints);
 	knn.setMaxNofNeighbors(nbNeighbors);
 	mAveragePointSpacing = 0;
-	for (uint i = 0; i< mPoints.size(); i++)
+	for (size_t i = 0; i< mPoints.size(); i++)
 	{
 		knn.doQueryK(mPoints[i]);
 		mRadii[i] = 2. * sqrt(knn.getNeighborSquaredDistance(0)/Scalar(knn.getNofFoundNeighbors()));
@@ -131,7 +131,7 @@ void MlsSurface<Scalar>::computeNeighborhood(const VectorType& x, bool computeDe
 		const_cast<BallTree<Scalar>*>(mBallTree)->setRadiusScale(mFilterScale);
 	}
 	mBallTree->computeNeighbors(x, &mNeighborhood);
-	uint nofSamples = mNeighborhood.size();
+	size_t nofSamples = mNeighborhood.size();
 
 	// compute spatial weights and partial derivatives
 	mCachedWeights.resize(nofSamples);
@@ -140,7 +140,7 @@ void MlsSurface<Scalar>::computeNeighborhood(const VectorType& x, bool computeDe
 	else
 		mCachedWeightGradients.clear();
 
-	for (uint i=0; i<nofSamples; i++)
+	for (size_t i=0; i<nofSamples; i++)
 	{
 		int id = mNeighborhood.index(i);
 		Scalar s = 1./(mRadii[id]*mFilterScale);
