@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -100,18 +100,18 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 		 - FP -> Filter Plugin
 		 - name of the plugin separated by _
 	*/
-	enum {  FP_LOOP_SS, 
-          FP_BUTTERFLY_SS, 
+	enum {  FP_LOOP_SS,
+          FP_BUTTERFLY_SS,
           FP_REMOVE_UNREFERENCED_VERTEX,
-				  FP_REMOVE_DUPLICATED_VERTEX, 
+				  FP_REMOVE_DUPLICATED_VERTEX,
           FP_REMOVE_FACES_BY_AREA,
 				  FP_REMOVE_FACES_BY_EDGE,
           FP_REMOVE_NON_MANIFOLD,
-          FP_CLUSTERING, 
+          FP_CLUSTERING,
           FP_QUADRIC_SIMPLIFICATION,
           FP_QUADRIC_TEXCOORD_SIMPLIFICATION,
           FP_NORMAL_EXTRAPOLATION,
-          FP_MIDPOINT, 
+          FP_MIDPOINT,
           FP_REORIENT ,
           FP_INVERT_FACES,
 				  FP_TRANSFORM,
@@ -120,8 +120,8 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
           FP_CLOSE_HOLES
           } ;
 
-	 
-  
+
+
 	ExtraMeshFilterPlugin();
 	~ExtraMeshFilterPlugin();
 	virtual const QString filterName(FilterIDType filter);
@@ -130,18 +130,18 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
   virtual const FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *) ;
 	virtual bool customDialog(QAction *filter);
-	
+
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual bool getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &/*m*/, FilterParameterSet & params, MainWindowInterface *mw);
   virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	
+
 protected:
 
 
 	TransformDialog *transformDialog;
 //	GenericELDialog *genericELD;
-	
+
 
 	float lastq_QualityThr;
 	bool lastq_PreserveBoundary;
@@ -149,7 +149,7 @@ protected:
 	bool lastq_PreserveNormal;
 	bool lastq_OptimalPlacement;
 	bool lastq_PlanarQuadric;
-	
+
 	float lastqtex_QualityThr;
 	float lastqtex_extratw;
 };

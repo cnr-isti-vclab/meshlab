@@ -95,18 +95,18 @@ using namespace vcg;
 void QuadricSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr, bool PreserveBoundary, bool PreserveNormal, bool OptimalPlacement, bool PlanarQuadric, bool Selected, CallBackPos *cb);
 void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, float QualityThr,float c, bool PreserveBoundary, bool optimalPlacement, bool Selected,CallBackPos *cb);
 
-ExtraMeshFilterPlugin::ExtraMeshFilterPlugin() 
+ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
 {
-  typeList << FP_LOOP_SS<< 
-    FP_BUTTERFLY_SS<< 
+  typeList << FP_LOOP_SS<<
+    FP_BUTTERFLY_SS<<
     FP_REMOVE_UNREFERENCED_VERTEX<<
-    FP_REMOVE_DUPLICATED_VERTEX<< 
+    FP_REMOVE_DUPLICATED_VERTEX<<
     FP_REMOVE_FACES_BY_AREA<<
     FP_REMOVE_FACES_BY_EDGE<<
-    FP_CLUSTERING<< 
+    FP_CLUSTERING<<
     FP_QUADRIC_SIMPLIFICATION<<
 	  FP_QUADRIC_TEXCOORD_SIMPLIFICATION<<
-    FP_MIDPOINT<< 
+    FP_MIDPOINT<<
     FP_REORIENT <<
     FP_INVERT_FACES<<
     FP_REMOVE_NON_MANIFOLD<<
@@ -114,15 +114,15 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin()
     FP_CLOSE_HOLES<<
 		FP_FREEZE_TRANSFORM<<
 		FP_TRANSFORM;
-  
+
   FilterIDType tt;
-  
-  foreach(tt , types())
-	    actionList << new QAction(filterName(tt), this);
-	
+
+	foreach(tt , types())
+		actionList << new QAction(filterName(tt), this);
+
 	//genericELD = new GenericELDialog();
 	//genericELD->hide();
-	
+
 	transformDialog = new TransformDialog();
 	transformDialog->hide();
 
@@ -146,11 +146,11 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
     case FP_REMOVE_FACES_BY_AREA:
     case FP_REMOVE_FACES_BY_EDGE :
     case FP_REMOVE_NON_MANIFOLD:
-      return MeshFilterInterface::Cleaning; 
+      return MeshFilterInterface::Cleaning;
     case FP_BUTTERFLY_SS :
     case FP_LOOP_SS :
     case FP_MIDPOINT :
-         return MeshFilterInterface::Remeshing; 
+         return MeshFilterInterface::Remeshing;
 		case FP_NORMAL_EXTRAPOLATION:
 		case FP_INVERT_FACES:
 		case FP_REORIENT :
@@ -161,7 +161,7 @@ const ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction
 }
 
 
-const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) 
+const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 {
  switch(filter)
   {
@@ -182,8 +182,8 @@ const QString ExtraMeshFilterPlugin::filterName(FilterIDType filter)
 	case FP_REMOVE_NON_MANIFOLD:	        return QString("Remove Non Manifold Faces");
 	case FP_NORMAL_EXTRAPOLATION:	        return QString("Compute normals for point sets");
 	case FP_CLOSE_HOLES:	          return QString("Close Holes");
-          
-    
+
+
 	default: assert(0);
   }
   return QString("error!");
@@ -202,23 +202,23 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
 {
   switch(filterID)
   {
-    case FP_LOOP_SS :                   return tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");  
-    case FP_BUTTERFLY_SS :  			      return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");  
-    case FP_MIDPOINT : 			            return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint");  
-    case FP_REMOVE_UNREFERENCED_VERTEX: return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");  
-    case FP_REMOVE_DUPLICATED_VERTEX : 	return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");  
-    case FP_REMOVE_FACES_BY_AREA : 			return tr("Removes null faces (the one with area equal to zero)");  
-    case FP_REMOVE_FACES_BY_EDGE : 			return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");  
-    case FP_REMOVE_NON_MANIFOLD : 			return tr("Remove non manifold edges by removing some of the faces incident on non manifold edges");  
-    case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");  
-    case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
-    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");          
-    case FP_REORIENT : 			            return tr("Re-orient in a consistent way all the faces of the mesh");  
-    case FP_INVERT_FACES : 			        return tr("Invert faces orientation, flip the normal of the mesh");  
-    case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");  
-    case FP_FREEZE_TRANSFORM : 	        return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh");  
-    case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces"); 
-    case FP_CLOSE_HOLES :         return tr("Close holes smaller than a given threshold"); 
+    case FP_LOOP_SS :                   return tr("Apply Loop's Subdivision Surface algorithm. It is an approximate method which subdivide each triangle in four faces. It works for every triangle and has rules for extraordinary vertices");
+    case FP_BUTTERFLY_SS :  			      return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes");
+    case FP_MIDPOINT : 			            return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint");
+    case FP_REMOVE_UNREFERENCED_VERTEX: return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
+    case FP_REMOVE_DUPLICATED_VERTEX : 	return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
+    case FP_REMOVE_FACES_BY_AREA : 			return tr("Removes null faces (the one with area equal to zero)");
+    case FP_REMOVE_FACES_BY_EDGE : 			return tr("Remove from the mesh all triangles whose have an edge with lenght greater or equal than a threshold");
+    case FP_REMOVE_NON_MANIFOLD : 			return tr("Remove non manifold edges by removing some of the faces incident on non manifold edges");
+    case FP_CLUSTERING : 			          return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
+    case FP_QUADRIC_SIMPLIFICATION: 		return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
+    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
+    case FP_REORIENT : 			            return tr("Re-orient in a consistent way all the faces of the mesh");
+    case FP_INVERT_FACES : 			        return tr("Invert faces orientation, flip the normal of the mesh");
+    case FP_TRANSFORM : 	              return tr("Apply transformation, you can rotate, translate or scale the mesh");
+    case FP_FREEZE_TRANSFORM : 	        return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh");
+    case FP_NORMAL_EXTRAPOLATION :      return tr("Compute the normals of the vertices of a  mesh without exploiting the triangle connectivity, useful for dataset with no faces");
+    case FP_CLOSE_HOLES :         return tr("Close holes smaller than a given threshold");
 		default : assert(0);
 	}
   return QString();
@@ -240,8 +240,8 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
   {
     case FP_REMOVE_NON_MANIFOLD:
     case FP_LOOP_SS :
-    case FP_BUTTERFLY_SS : 
-    case FP_MIDPOINT :      
+    case FP_BUTTERFLY_SS :
+    case FP_MIDPOINT :
     case FP_CLOSE_HOLES :
            return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
     case FP_REORIENT:             return MeshModel::MM_FACETOPO;
@@ -257,21 +257,21 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_QUADRIC_SIMPLIFICATION:
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_VERTMARK ;
-    default: assert(0); 
+    default: assert(0);
   }
   return 0;
 }
 
 
-// this function builds and intializes with the default values (that can depend on the current mesh or selection) 
-// the list of parameters that a filter requires. 
-// return 
-//		true if has some parameters 
+// this function builds and intializes with the default values (that can depend on the current mesh or selection)
+// the list of parameters that a filter requires.
+// return
+//		true if has some parameters
 //		false is has no params
 void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &parlst)
 {
 	float maxVal;
-	
+
 	switch(ID(action))
 	 {
 		case FP_QUADRIC_SIMPLIFICATION:
@@ -299,8 +299,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 		  parlst.addBool("SelfIntersection",true,"Prevent creation of selfIntersecting faces","When closing an holes it tries to prevent the creation of faces that intersect faces adjacent to the boundary of the hole. It is an heuristic, non intersetcting hole filling can be NP-complete.");
 		  break;
 		case FP_LOOP_SS:
-		case FP_BUTTERFLY_SS: 
-		case FP_MIDPOINT: 
+		case FP_BUTTERFLY_SS:
+		case FP_MIDPOINT:
 		  maxVal = m.cm.bbox.Diag();
 		  parlst.addAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the edges <b>longer</b> than this threshold will be refined.<br>Setting this value to zero will force an uniform refinement.");
 		  parlst.addBool ("Selected",m.cm.sfn>0,"Affect only selected faces");
@@ -328,8 +328,8 @@ bool ExtraMeshFilterPlugin::autoDialog(QAction *action)
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		case FP_CLOSE_HOLES:
 		case FP_LOOP_SS :
-		case FP_BUTTERFLY_SS : 
-		case FP_MIDPOINT : 
+		case FP_BUTTERFLY_SS :
+		case FP_MIDPOINT :
 		case FP_REMOVE_FACES_BY_EDGE:
 		case FP_CLUSTERING:
 		  return true;
@@ -346,8 +346,8 @@ bool ExtraMeshFilterPlugin::customDialog(QAction *action)
   return false;
 }
 
-// this function is called to fill the parameter list 
-// It is called only for filters that have a not empty list of parameters and 
+// this function is called to fill the parameter list
+// It is called only for filters that have a not empty list of parameters and
 // that do not use the autogenerated dialog, but want a personalized dialog.
 
 bool ExtraMeshFilterPlugin::getCustomParameters(QAction *action, QWidget * /*parent*/, MeshModel &m, FilterParameterSet & params, MainWindowInterface *mw)
@@ -361,16 +361,16 @@ bool ExtraMeshFilterPlugin::getCustomParameters(QAction *action, QWidget * /*par
 				transformDialog->setAction(action);
 				transformDialog->show();
 				transformDialog->resize(transformDialog->size());
-				
+
 		    int continueValue = transformDialog->exec();
  		    if (continueValue == QDialog::Rejected)
  			    return false;
-					
+
       	Matrix44f matrixDlg = transformDialog->getTransformation();
         params.addMatrix44("Transform",matrixDlg);
 				mw->executeFilter(action,params, false);
         break;
-      } 		
+      }
    default :assert(0);
   }
   return true;
@@ -386,13 +386,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
       return false; // can't continue, mesh can't be processed
     }
- 
-    bool  selected  = par.getBool("Selected");	
-    float threshold = par.getAbsPerc("Threshold");		
+
+    bool  selected  = par.getBool("Selected");
+    float threshold = par.getAbsPerc("Threshold");
 
     switch(ID(filter)) {
       case FP_LOOP_SS :
-        RefineOddEvenE<CMeshO, OddPointLoop<CMeshO>, EvenPointLoop<CMeshO> >
+        RefineOddEven<CMeshO, OddPointLoop<CMeshO>, EvenPointLoop<CMeshO> >
           (m.cm, OddPointLoop<CMeshO>(), EvenPointLoop<CMeshO>(), threshold, selected, cb);
         break;
       case FP_BUTTERFLY_SS :
@@ -403,14 +403,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
         Refine<CMeshO,MidPoint<CMeshO> >
           (m.cm, MidPoint<CMeshO>(), threshold, selected, cb);
     }
-	
+
 	 m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 	 vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
   }
 	if (ID(filter) == FP_REMOVE_FACES_BY_EDGE ) {
-    bool selected  = par.getBool("Selected");	
-    float threshold = par.getAbsPerc("Threshold");	
-		int delFaceNum;	
+    bool selected  = par.getBool("Selected");
+    float threshold = par.getAbsPerc("Threshold");
+		int delFaceNum;
 	  if(selected) delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<true>(m.cm,0,threshold );
          else    delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<false>(m.cm,0,threshold );
     m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
@@ -441,11 +441,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	if(ID(filter) == (FP_REMOVE_NON_MANIFOLD) )
 	  {
 	    int nonManif=tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
-	    
+
 			if(nonManif) Log(GLLogStream::Info, "Removed %d Non Manifold Faces", nonManif);
 							else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
-							
-			 m.clearDataMask(MeshModel::MM_BORDERFLAG);				
+
+			 m.clearDataMask(MeshModel::MM_BORDERFLAG);
 	  }
 
 	if(ID(filter) == (FP_REORIENT) )
@@ -457,18 +457,18 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 					return false; // can't continue, mesh can't be processed
 			}
 
-	    tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable); 
+	    tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 			vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
-			
+
 //			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
  	if(ID(filter) == (FP_CLUSTERING))
 	  {
-      bool selected  = par.getBool("Selected");	
-      float threshold = par.getAbsPerc("Threshold");		
+      bool selected  = par.getBool("Selected");
+      float threshold = par.getAbsPerc("Threshold");
 				vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > Grid;
 				Grid.Init(m.cm.bbox,100000,threshold);
 				Grid.Add(m.cm);
@@ -477,7 +477,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 	  }
 
-	if (ID(filter) == (FP_INVERT_FACES) ) 
+	if (ID(filter) == (FP_INVERT_FACES) )
 	{
 	  tri::Clean<CMeshO>::FlipMesh(m.cm);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
@@ -491,15 +491,15 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		m.cm.Tr.SetIdentity();
 	}
 	if (ID(filter) == (FP_TRANSFORM) ) {
-			Matrix44f matrixPar= par.getMatrix44("Transform");		
-			Log(GLLogStream::Info, qPrintable(transformDialog->getLog()) ); 		
+			Matrix44f matrixPar= par.getMatrix44("Transform");
+			Log(GLLogStream::Info, qPrintable(transformDialog->getLog()) );
 			m.cm.Tr=matrixPar;
 	}
 
 
 	if (ID(filter) == (FP_QUADRIC_SIMPLIFICATION) ) {
-  
-		int TargetFaceNum = par.getInt("TargetFaceNum");		
+
+		int TargetFaceNum = par.getInt("TargetFaceNum");
 		lastq_QualityThr = par.getFloat("QualityThr");
 		lastq_PreserveBoundary = par.getBool("PreserveBoundary");
 		lastq_PreserveNormal = par.getBool("PreserveNormal");
@@ -514,14 +514,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 			int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
 			if(nullFaces) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d null faces", nullFaces);
 			int deldupvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-			if(deldupvert) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);			
+			if(deldupvert) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			if(delvert) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
-			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);			
+			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 			tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		}
-		
+
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 		tri::UpdateBounding<CMeshO>::Box(m.cm);
 	}
@@ -537,8 +537,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       errorMessage = "Mesh has some inconsistent tex coords (some faces without texture)"; // text
       return false; // can't continue, mesh can't be processed
     }
-		
-		int TargetFaceNum = par.getInt("TargetFaceNum");		
+
+		int TargetFaceNum = par.getInt("TargetFaceNum");
 		lastqtex_QualityThr = par.getFloat("QualityThr");
 		lastqtex_extratw = par.getFloat("Extratcoordw");
 		lastq_OptimalPlacement = par.getBool("OptimalPlacement");
@@ -557,28 +557,28 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	if(ID(filter) == (FP_CLOSE_HOLES))
 	  {
       size_t OriginalSize= m.cm.face.size();
-      int MaxHoleSize = par.getInt("MaxHoleSize");		
+      int MaxHoleSize = par.getInt("MaxHoleSize");
 	    bool SelectedFlag = par.getBool("Selected");
       bool SelfIntersectionFlag = par.getBool("SelfIntersection");
       bool NewFaceSelectedFlag = par.getBool("NewFaceSelected");
-		  
-      if( SelfIntersectionFlag ) 
-          tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag);		
-      else 
+
+      if( SelfIntersectionFlag )
+          tri::Hole<CMeshO>::EarCuttingIntersectionFill<tri::SelfIntersectionEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag);
+      else
           tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m.cm,MaxHoleSize,SelectedFlag,cb);
 
       assert(tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m.cm));
-      tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);	    
+      tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 
-      // hole filling filter does not correctly update the border flags (but the topology is still ok!) 
+      // hole filling filter does not correctly update the border flags (but the topology is still ok!)
       m.clearDataMask(MeshModel::MM_BORDERFLAG);
       if(NewFaceSelectedFlag)
       {
-        tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   
+        tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
         for(size_t i=OriginalSize;i<m.cm.face.size();++i)
           if(!m.cm.face[i].IsD()) m.cm.face[i].SetS();
       }
-      //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	    
+      //tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 	  }
 
 	return true;
