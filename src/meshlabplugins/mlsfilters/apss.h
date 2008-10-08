@@ -26,6 +26,8 @@
 
 #include "mlssurface.h"
 
+namespace GaelMls {
+
 template<typename _Scalar>
 class APSS : public MlsSurface<_Scalar>
 {
@@ -52,7 +54,13 @@ class APSS : public MlsSurface<_Scalar>
 		typedef _Scalar Scalar;
 		typedef vcg::Point3<Scalar> VectorType;
 
-		APSS(const MeshModel& m);
+    template<typename MeshType>
+		APSS(const MeshType& m)
+      : Base(m)
+    {
+      mSphericalParameter = 1;
+      mAccurateGradient = false;
+    }
 
 		virtual Scalar potential(const VectorType& x) const;
 		virtual VectorType gradient(const VectorType& x) const;
@@ -81,5 +89,7 @@ class APSS : public MlsSurface<_Scalar>
 		mutable LScalar mRadius;
 		mutable Status mStatus;
 };
+
+}
 
 #endif

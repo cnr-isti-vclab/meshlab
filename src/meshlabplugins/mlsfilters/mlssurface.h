@@ -24,10 +24,11 @@
 #ifndef MLSSURFACE_H
 #define MLSSURFACE_H
 
-#include <meshlab/meshmodel.h>
 #include "balltree.h"
 #include <vcg/space/box3.h>
 #include <iostream>
+
+namespace GaelMls {
 
 template<typename _Scalar>
 class MlsSurface
@@ -36,7 +37,30 @@ class MlsSurface
 		typedef _Scalar Scalar;
 		typedef vcg::Point3<Scalar> VectorType;
 
-		MlsSurface(const MeshModel& m);
+    template<typename MeshType>
+		MlsSurface(const MeshType& mesh)
+    {
+      mCachedQueryPointIsOK = false;
+
+      mPoints.resize(mesh.vert.size());
+      mNormals.resize(mesh.vert.size());
+      mRadii.resize(mesh.vert.size());
+      mAABB.Set(mesh.vert[0].cP());
+      for (int i = 0; i< mesh.vert.size(); i++)
+      {
+        mPoints[i] = /*vcg::vector_cast<Scalar>*/(mesh.vert[i].cP());
+        mNormals[i] = /*vcg::vector_cast<Scalar>*/(mesh.vert[i].cN());
+        mAABB.Add(mesh.vert[i].cP());
+      }
+
+      // compute radii using a basic meshless density estimator
+      computeVertexRaddi();
+
+      mFilterScale = 4.0;
+      mMaxNofProjectionIterations = 20;
+      mProjectionAccuracy = 1e-4;
+      mBallTree = 0;
+    }
 
 		virtual Scalar potential(const VectorType& x) const = 0;
 		virtual VectorType gradient(const VectorType& x) const = 0;
@@ -74,7 +98,7 @@ class MlsSurface
 		class DummyObjectMarker {};
 
 	protected:
-		const MeshModel& mMesh;
+		//const MeshType& mMesh;
 		std::vector<VectorType> mPoints;
 		std::vector<VectorType> mNormals;
 		std::vector<Scalar> mRadii;
@@ -96,5 +120,7 @@ class MlsSurface
 		mutable std::vector<Scalar>  mCachedWeights;
 		mutable std::vector<VectorType>  mCachedWeightGradients;
 };
+
+} // namespace
 
 #endif // MLSSURFACE_H

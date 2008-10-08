@@ -26,16 +26,18 @@
 #include "vcg_addons.h"
 #include <iostream>
 
-template<typename _Scalar>
-RIMLS<_Scalar>::RIMLS(const MeshModel& m)
-  : Base(m)
-{
-  mSigmaR = 0;
-  mSigmaN = 0.8;
-  mRefittingThreshold = 1e-3;
-  mMinRefittingIters = 1;
-  mMaxRefittingIters = 3;
-}
+namespace GaelMls {
+
+// template<typename _Scalar>
+// RIMLS<_Scalar>::RIMLS(const MeshModel& m)
+//   : Base(m)
+// {
+//   mSigmaR = 0;
+//   mSigmaN = 0.8;
+//   mRefittingThreshold = 1e-3;
+//   mMinRefittingIters = 1;
+//   mMaxRefittingIters = 3;
+// }
 
 template<typename Scalar>
 void RIMLS<Scalar>::setSigmaR(Scalar v)
@@ -124,7 +126,7 @@ template<typename Scalar>
 bool RIMLS<Scalar>::computePotentialAndGradient(const VectorType& x) const
 {
 		Base::computeNeighborhood(x, true);
-		uint nofSamples = mNeighborhood.size();
+		unsigned int nofSamples = mNeighborhood.size();
 
     if (nofSamples<1)
     {
@@ -154,7 +156,7 @@ bool RIMLS<Scalar>::computePotentialAndGradient(const VectorType& x) const
         potential = 0.;
         Scalar sumW = 0.;
 
-        for (uint i=0; i<nofSamples; i++)
+        for (unsigned int i=0; i<nofSamples; i++)
         {
             int id = mNeighborhood.index(i);
             VectorType diff = source - mPoints[id];
@@ -203,3 +205,6 @@ bool RIMLS<Scalar>::computePotentialAndGradient(const VectorType& x) const
 
 template class RIMLS<float>;
 // template class RIMLS<double>;
+
+}
+

@@ -26,6 +26,8 @@
 
 #include "mlssurface.h"
 
+namespace GaelMls {
+
 template<typename _Scalar>
 class RIMLS : public MlsSurface<_Scalar>
 {
@@ -50,7 +52,16 @@ class RIMLS : public MlsSurface<_Scalar>
 		typedef _Scalar Scalar;
 		typedef vcg::Point3<Scalar> VectorType;
 
-		RIMLS(const MeshModel& m);
+    template<typename MeshType>
+    RIMLS(const MeshType& mesh)
+      : Base(mesh)
+    {
+      mSigmaR = 0;
+      mSigmaN = 0.8;
+      mRefittingThreshold = 1e-3;
+      mMinRefittingIters = 1;
+      mMaxRefittingIters = 3;
+    }
 
 		virtual Scalar potential(const VectorType& x) const;
 		virtual VectorType gradient(const VectorType& x) const;
@@ -97,5 +108,7 @@ class RIMLS : public MlsSurface<_Scalar>
 //     // mutable std::vector<Scalar>  mCachedWeightDerivatives;
 //     mutable std::vector<VectorType>  mCachedWeightGradients;
 };
+
+}
 
 #endif

@@ -28,31 +28,33 @@
 #include <limits>
 #include <vcg/space/index/octree.h>
 
-template<typename _Scalar>
-MlsSurface<_Scalar>::MlsSurface(const MeshModel& m)
-	: mMesh(m)
-{
-	mCachedQueryPointIsOK = false;
+namespace GaelMls {
 
-	mPoints.resize(m.cm.vert.size());
-	mNormals.resize(m.cm.vert.size());
-	mRadii.resize(m.cm.vert.size());
-	mAABB.Set(mMesh.cm.vert[0].cP());
-	for (uint i = 0; i< m.cm.vert.size(); i++)
-	{
-		mPoints[i] = /*vcg::vector_cast<Scalar>*/(mMesh.cm.vert[i].cP());
-		mNormals[i] = /*vcg::vector_cast<Scalar>*/(mMesh.cm.vert[i].cN());
-		mAABB.Add(mMesh.cm.vert[i].cP());
-	}
-
-	// compute radii using a basic meshless density estimator
-	computeVertexRaddi();
-
-	mFilterScale = 4.0;
-	mMaxNofProjectionIterations = 20;
-	mProjectionAccuracy = 1e-4;
-	mBallTree = 0;
-}
+// template<typename _Scalar>
+// MlsSurface<_Scalar>::MlsSurface(const MeshModel& m)
+// 	: mMesh(m)
+// {
+// 	mCachedQueryPointIsOK = false;
+// 
+// 	mPoints.resize(m.cm.vert.size());
+// 	mNormals.resize(m.cm.vert.size());
+// 	mRadii.resize(m.cm.vert.size());
+// 	mAABB.Set(mMesh.cm.vert[0].cP());
+// 	for (uint i = 0; i< m.cm.vert.size(); i++)
+// 	{
+// 		mPoints[i] = /*vcg::vector_cast<Scalar>*/(mMesh.cm.vert[i].cP());
+// 		mNormals[i] = /*vcg::vector_cast<Scalar>*/(mMesh.cm.vert[i].cN());
+// 		mAABB.Add(mMesh.cm.vert[i].cP());
+// 	}
+// 
+// 	// compute radii using a basic meshless density estimator
+// 	computeVertexRaddi();
+// 
+// 	mFilterScale = 4.0;
+// 	mMaxNofProjectionIterations = 20;
+// 	mProjectionAccuracy = 1e-4;
+// 	mBallTree = 0;
+// }
 
 template<typename Scalar>
 void MlsSurface<Scalar>::setFilterScale(Scalar v)
@@ -158,3 +160,5 @@ void MlsSurface<Scalar>::computeNeighborhood(const VectorType& x, bool computeDe
 
 template class MlsSurface<float>;
 // template class MlsSurface<double>;
+
+}

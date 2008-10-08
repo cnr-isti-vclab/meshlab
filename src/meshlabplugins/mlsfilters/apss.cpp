@@ -26,13 +26,15 @@
 #include "vcg_addons.h"
 #include <iostream>
 
-template<typename _Scalar>
-APSS<_Scalar>::APSS(const MeshModel& m)
-  : Base(m)
-{
-  mSphericalParameter = 1;
-  mAccurateGradient = false;
-}
+namespace GaelMls {
+
+// template<typename _Scalar>
+// APSS<_Scalar>::APSS(const MeshModel& m)
+//   : Base(m)
+// {
+//   mSphericalParameter = 1;
+//   mAccurateGradient = false;
+// }
 
 template<typename Scalar>
 void APSS<Scalar>::setSphericalParameter(Scalar v)
@@ -164,7 +166,7 @@ template<typename Scalar>
 bool APSS<Scalar>::fit(const VectorType& x) const
 {
 	Base::computeNeighborhood(x, true);
-	uint nofSamples = mNeighborhood.size();
+	unsigned int nofSamples = mNeighborhood.size();
 
 	if (nofSamples==0)
 	{
@@ -185,7 +187,7 @@ bool APSS<Scalar>::fit(const VectorType& x) const
 	LScalar sumDotPN = 0.;
 	LScalar sumDotPP = 0.;
 	LScalar sumW = 0.;
-	for (uint i=0; i<nofSamples; i++)
+	for (unsigned int i=0; i<nofSamples; i++)
 	{
 		int id = mNeighborhood.index(i);
 		LVector p(mPoints[id].X(), mPoints[id].Y(), mPoints[id].Z());
@@ -240,3 +242,5 @@ bool APSS<Scalar>::fit(const VectorType& x) const
 
 template class APSS<float>;
 // template class APSS<double>;
+
+}

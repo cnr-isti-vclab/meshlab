@@ -49,6 +49,8 @@
 #include "vcg_addons.h"
 #include "../meshfilter/refine_loop.h"
 
+using namespace GaelMls;
+
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
@@ -427,9 +429,9 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 	APSS<float>* apss = 0;
 
 	if (id & _RIMLS_)
-		mls = rimls = new RIMLS<float>(*pPoints);
+		mls = rimls = new RIMLS<float>(pPoints->cm);
 	else if (id & _APSS_)
-		mls = apss = new APSS<float>(*pPoints);
+		mls = apss = new APSS<float>(pPoints->cm);
 	else
 	{
 		assert(0);
