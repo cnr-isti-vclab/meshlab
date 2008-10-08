@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2008                                                \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -73,6 +73,9 @@ const PluginInfo &FilterTopoPlugin::pluginInfo()
    return ai;
  }
 
+//
+// Filter interface start up
+//
 void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, FilterParameterSet & parlst) 
 {
 	MeshModel *target= md.mm();
@@ -83,20 +86,20 @@ void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, Filt
 
 	 switch(ID(action))	 {
 		case FP_RE_TOPO :  
-
+			// Iterations editbox
 			parlst.addInt(	"it", 
 							4,
 							"Number of refinement iterations used to build the new mesh", 
 							"As higher is this value, as well defined will be the new mesh. Consider that more than 5 iterations may slow down your system");
-
+			// Distance editbox
 			parlst.addAbsPerc(	"dist", 0.3f, 0.01f, 0.99f, 
 								"Incremental distance %", 
 								"This param represents the % distance for the local search algorithm used for new vertices allocation. Generally, 0.25-0.30 is a good value");
-
+			// Topology mesh list
 			parlst.addMesh(	"userMesh", md.mm(), 
 							"Topology mesh",
 							"This mesh will be used as the new base topology, and will be replaced by the new mesh");
-
+			// Original mesh list
 			parlst.addMesh( "inMesh", target,
 							"Original mesh",
 							"The new mesh will be elaborated using this model");
@@ -106,23 +109,34 @@ void FilterTopoPlugin::initParameterSet(QAction *action, MeshDocument & md, Filt
 	}
 }
 
+//
+// Apply filter
+//
 bool FilterTopoPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
+	// To run the retopology algorithm an istance of RetopoMeshBuilder is needed
 	RetopMeshBuilder rm;
 
+	// Load topology mesh
 	MeshModel *userMesh = par.getMesh("userMesh");
+	// Load (input) original mesh
 	MeshModel *inMesh = par.getMesh("inMesh");
+	// Load iterations value
 	int it = par.getInt("it");
+	// Load distance value
 	float dist = par.getAbsPerc("dist");
 
+	// Destination meshmodel: retopology mesh will replace flat topology mesh
 	MeshModel * outM = par.getMesh("userMesh");
 
+	// Prepare mesh
 	inMesh->updateDataMask(MeshModel::MM_FACEMARK);
 	tri::UpdateNormals<CMeshO>::PerFaceNormalized(inMesh->cm);
 	tri::UpdateFlags<CMeshO>::FaceProjection(inMesh->cm);
 
+	// Init the retopology builder with original input mesh and distance value
 	rm.init(inMesh, dist);
-	
+	// Apply the algorithm
 	return rm.applyTopoMesh(*userMesh, *inMesh, it, dist, *outM);
 }
 

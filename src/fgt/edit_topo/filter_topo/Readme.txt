@@ -1,4 +1,4 @@
-To compile this filter, those files are needed:
+To compile this filter, these files are needed:
 
  - "edit_topomeshbuilder.h" 
 

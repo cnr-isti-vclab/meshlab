@@ -1,3 +1,26 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2008                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
 
 #ifndef edit_topomeshbuilder_H
 #define edit_topomeshbuilder_H
@@ -310,19 +333,21 @@ public:
 	//********************************************************************************************//
 	bool applyTopoMesh(MeshModel &userTopoMesh, MeshModel &inModel, int it, float dist, MeshModel &outMesh)
 	{
+		// turn off debug mode
 		midSampler->DEBUG = false;
 
 		midSampler->distPerc = dist; 
 		outMesh.updateDataMask(MeshModel::MM_FACETOPO);
 
+		// Update topology for in mesh, to be sure that the model can be refined
 		bool oriented,orientable;
 		tri::Clean<CMeshO>::IsOrientedMesh(outMesh.cm, oriented,orientable); 
 		vcg::tri::UpdateTopology<CMeshO>::FaceFace(outMesh.cm);
 		vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(outMesh.cm);
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(outMesh.cm);
-
 		outMesh.clearDataMask(MeshModel::MM_FACETOPO);
 
+		// Clear faces and vertices selection
 		CMeshO::FaceIterator fi;
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{(*fi).ClearS(); for(int i=0; i<3; i++) (*fi).V(i)->ClearS(); }
@@ -333,6 +358,8 @@ public:
 			for(int i=0; i<it; i++)
 			{
 				outMesh.updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+
+				// Call refine to build the retopologized mesh. Important note: "midSampler" needs to be initialized before
 				Refine<CMeshO,NearestMidPoint<CMeshO> >(outMesh.cm, *midSampler, 0, false, 0);
 				outMesh.clearDataMask( MeshModel::MM_VERTFACETOPO);
 			}
@@ -342,7 +369,7 @@ public:
 		outMesh.fileName = "Retopology.ply";
 		tri::UpdateBounding<CMeshO>::Box(outMesh.cm);
 
-
+		// compute face normals, and select faces for not found vertices (to smooth them)
 		for(fi=outMesh.cm.face.begin(); fi!=outMesh.cm.face.end(); fi++)
 		{
 			(*fi).N()=((fi->V(0)->N() + fi->V(1)->N() + fi->V(2)->N())/3);
@@ -359,6 +386,7 @@ public:
 				for(int i=0; i<3; i++)
 					(*fi).FFp(i)->SetS();
 	
+		// Laplacian smooth for not-found vertices
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(outMesh.cm);
 		tri::Smooth<CMeshO>::VertexCoordLaplacian(outMesh.cm,3,true,0);
 
