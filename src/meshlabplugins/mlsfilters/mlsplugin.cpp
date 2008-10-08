@@ -59,8 +59,8 @@ MlsPlugin::MlsPlugin()
 {
 	typeList
 		<< FP_RIMLS_PROJECTION << FP_APSS_PROJECTION
-		<< FP_RIMLS_AFRONT << FP_APSS_AFRONT
-		<< FP_RIMLS_MCUBE << FP_APSS_MCUBE;
+// 		<< FP_RIMLS_AFRONT << FP_APSS_AFRONT
+		/*<< FP_RIMLS_MCUBE << FP_APSS_MCUBE*/;
 
 // 	initFilterList(this);
 	foreach(FilterIDType tt , types())
@@ -73,11 +73,11 @@ const QString MlsPlugin::filterName(FilterIDType filterId)
 {
 	switch(filterId) {
 		case FP_APSS_PROJECTION 	: return QString("Point Set/MLS projection/APSS");
-		case FP_RIMLS_PROJECTION 	: return QString("Point Set/MLS projection/RIMLS");
+		case FP_RIMLS_PROJECTION 	: return QString("Point Set/MLS projection/#####");
 		case FP_APSS_AFRONT 			: return QString("Point Set/MLS meshing/APSS Advancing Front");
-		case FP_RIMLS_AFRONT 			: return QString("Point Set/MLS meshing/RIMLS Advancing Front");
+		case FP_RIMLS_AFRONT 			: return QString("Point Set/MLS meshing/##### Advancing Front");
 		case FP_APSS_MCUBE 				: return QString("Point Set/MLS meshing/APSS Marching Cubes");
-		case FP_RIMLS_MCUBE 			: return QString("Point Set/MLS meshing/RIMLS Marching Cubes");
+		case FP_RIMLS_MCUBE 			: return QString("Point Set/MLS meshing/##### Marching Cubes");
 		default : assert(0);
 	}
 }
@@ -88,14 +88,15 @@ const QString MlsPlugin::filterInfo(FilterIDType filterId)
 {
 	switch(filterId) {
 		case FP_RIMLS_PROJECTION :  return QString(
-			"Project a point cloud or a mesh onto its own robust implicit moving least squares (RIMLS) representation.\n"
-			"This filter can be used for aggresive smoothing while preserving sharp features.\n"
+			"Project a mesh (or a point set) onto the MLS surface defined by itself or another point set."
+			"This is the ##### MLS variant.\n"
 		);
 		case FP_APSS_PROJECTION :  return QString(
-			"Project a point cloud or a mesh onto its own algebraic point set surfaces (APSS) representation.\n"
+			"Project a mesh (or a point set) onto the MLS surface defined by itself or another point set."
+			"This is the algebraic point set surfaces (APSS) variant.\n"
 			"See [Guennebaud and Gross, Algebraic Point Set Surfaces, Siggraph 2007]\n"
 			"and [Guennebaud et al., Dynamic Sampling and Rendering of APSS, Eurographics 2008]\n"
-			"for all the details.\n"
+			"for all the details about APSS.\n"
 		);
 		case FP_RIMLS_AFRONT :  return QString(
 			"Advancing front meshing of the RIMLS surface.\n"
@@ -137,8 +138,8 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 
 	if (id & _PROJECTION_)
 	{
-		parlst.addMesh( "ControlMesh", target, "Control Mesh",
-										"The mesh/point set which defines the MLS surface.");
+		parlst.addMesh( "ControlMesh", target, "Point set",
+										"The point set (or mesh) which defines the MLS surface.");
 		parlst.addMesh( "ProxyMesh", target, "Proxy Mesh",
 										"The mesh that will be projected/resampled onto the MLS surface.");
 		parlst.addBool( "SelectionOnly",
