@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>167</width>
-    <height>269</height>
+    <width>236</width>
+    <height>335</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -15,26 +15,34 @@
   <widget class="QTabWidget" name="tabWidget" >
    <property name="geometry" >
     <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>181</width>
-     <height>271</height>
+     <x>10</x>
+     <y>10</y>
+     <width>211</width>
+     <height>291</height>
     </rect>
    </property>
    <property name="currentIndex" >
     <number>0</number>
    </property>
    <widget class="QWidget" name="tab" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>207</width>
+      <height>263</height>
+     </rect>
+    </property>
     <attribute name="title" >
      <string>Basic</string>
     </attribute>
-    <widget class="QWidget" name="" >
+    <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
        <x>10</x>
        <y>18</y>
-       <width>138</width>
-       <height>184</height>
+       <width>151</width>
+       <height>231</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
@@ -43,16 +51,7 @@
         <property name="spacing" >
          <number>6</number>
         </property>
-        <property name="leftMargin" >
-         <number>0</number>
-        </property>
-        <property name="topMargin" >
-         <number>0</number>
-        </property>
-        <property name="rightMargin" >
-         <number>0</number>
-        </property>
-        <property name="bottomMargin" >
+        <property name="margin" >
          <number>0</number>
         </property>
         <item>
@@ -140,16 +139,24 @@
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>207</width>
+      <height>263</height>
+     </rect>
+    </property>
     <attribute name="title" >
      <string>Advanced</string>
     </attribute>
-    <widget class="QWidget" name="" >
+    <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
        <x>12</x>
        <y>12</y>
-       <width>138</width>
-       <height>170</height>
+       <width>171</width>
+       <height>231</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
@@ -321,16 +328,24 @@
     </widget>
    </widget>
    <widget class="QWidget" name="debugTab" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>207</width>
+      <height>263</height>
+     </rect>
+    </property>
     <attribute name="title" >
      <string>Debug</string>
     </attribute>
-    <widget class="QWidget" name="" >
+    <widget class="QWidget" name="layoutWidget" >
      <property name="geometry" >
       <rect>
        <x>10</x>
        <y>20</y>
        <width>141</width>
-       <height>54</height>
+       <height>64</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" >
