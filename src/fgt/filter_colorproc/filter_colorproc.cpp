@@ -66,18 +66,18 @@ const QString FilterColorProc::filterName(FilterIDType filter)
 {
   switch(filter)
   {
-    case CP_FILLING : return "Filling";
-    case CP_THRESHOLDING : return "Thresholding";
-    case CP_BRIGHTNESS : return "Brightness";
-    case CP_CONTRAST : return "Contrast";
-    case CP_CONTR_BRIGHT : return "Contrast and Brightness";
-    case CP_GAMMA : return "Gamma";
-    case CP_INVERT : return "Invert";
-    case CP_LEVELS : return "Levels";
-    case CP_COLOURISATION : return "Colourisation";
-    case CP_DESATURATION : return "Desaturation";
-    case CP_EQUALIZE : return "Equalize";
-    case CP_WHITE_BAL : return "White Balance";
+    case CP_FILLING : return "Vertex Color Filling";
+    case CP_THRESHOLDING : return "Vertex Color Thresholding";
+    case CP_BRIGHTNESS : return "Vertex Color Brightness";
+    case CP_CONTRAST : return "Vertex Color Contrast";
+    case CP_CONTR_BRIGHT : return "Vertex Color Contrast and Brightness";
+    case CP_GAMMA : return "Vertex Color Gamma Correction";
+    case CP_INVERT : return "Vertex Color Invert";
+    case CP_LEVELS : return "Vertex Color Levels Adjoustement";
+    case CP_COLOURISATION : return "Vertex Color Colourisation";
+    case CP_DESATURATION : return "Vertex Color Desaturation";
+    case CP_EQUALIZE : return "Equalize Vertex Color ";
+    case CP_WHITE_BAL : return "Vertex Color White Balance";
     default: assert(0);
   }
   return QString("error!");
@@ -87,18 +87,18 @@ const QString FilterColorProc::filterInfo(FilterIDType filterId)
 {
   switch(filterId)
   {
-    case CP_FILLING : return "Fills the mesh with a color choosed by the user.";
-    case CP_THRESHOLDING : return "Reduces the mesh to two colors according to a threshold.";
-    case CP_BRIGHTNESS : return "Sets the brightness of the mesh.";
-    case CP_CONTRAST : return "Sets the contrast of the mesh.";
-    case CP_CONTR_BRIGHT : return "Sets brightness and contrast of the mesh.";
-    case CP_GAMMA : return "Provides standard gamma correction.";
-    case CP_INVERT : return "Inverts the colors of the mesh.";
-    case CP_LEVELS : return "Adjusts colors levels.";
-    case CP_COLOURISATION : return "Colors the mesh.";
-    case CP_DESATURATION : return "Desaturates colors according to the selected method.";
-    case CP_EQUALIZE : return "Equalize colors values.";
-    case CP_WHITE_BAL : return "Enhances white color.";
+    case CP_FILLING : return "Fills the color of the vertexes of the mesh  with a color choosed by the user.";
+    case CP_THRESHOLDING : return "Reduces the color the vertexes of the mesh to two colors according to a threshold.";
+    case CP_BRIGHTNESS : return "Change the color the vertexes of the mesh adjusting the overall brightness of the mesh.";
+    case CP_CONTRAST : return "Change the color the vertexes of the mesh adjusting the contrast of the mesh.";
+    case CP_CONTR_BRIGHT : return "Change the color the vertexes of the mesh adjusting both brightness and contrast of the mesh.";
+    case CP_GAMMA : return "Provides standard gamma correction for adjusting the color the vertexes of the mesh.";
+    case CP_INVERT : return "Inverts the colors of the vertexes of the mesh.";
+    case CP_LEVELS : return "The filter allows adjustment of color levels. It is a custom way to map an interval of color into another one. The user can set the input minimum and maximum levels, gamma and the output minimum and maximum levels (many tools call them respectively input black point, white point, gray point, output black point and white point).";
+    case CP_COLOURISATION : return "Allows the application of a color to the mesh. In spite of the Fill operation, the color is blended with the mesh according to a given intensity. .";
+    case CP_DESATURATION : return "The filter desaturates the colors of the mesh. This provides a simple way to convert a mesh in gray tones. The user can choose the desaturation method to apply; they are based on Lightness, Luminosity and Average.";
+    case CP_EQUALIZE : return "The filter equalizes the colors histogram. It is a kind of automatic regulation of contrast; the colors histogram is expanded to fit all the range of colors.";
+    case CP_WHITE_BAL : return "The filter provides a standard white balance transformation. It is done correcting the RGB channels with a factor such that, the brighter color in the mesh, that is supposed to be white, becomes really white.";
     default: assert(0);
   }
   return QString("error!");
