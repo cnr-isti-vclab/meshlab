@@ -1,5 +1,5 @@
-# This Project file contains all the stable plugins ready for the deployment in version 1.2 
-# Plugins should be added here only when they are reasonably complete and stable. 
+# This Project file contains all the stable plugins ready for the deployment in version 1.2
+# Plugins should be added here only when they are reasonably complete and stable.
 
 TEMPLATE      = subdirs
 SUBDIRS       = meshfilter \
@@ -12,7 +12,7 @@ SUBDIRS       = meshfilter \
 				io_x3d \
 				meshrender \
 				cleanfilter \
-				filter_ao \ 
+				filter_ao \
 				filter_morph \
 				filter_poisson \
 				filter_unsharp \
@@ -23,11 +23,11 @@ SUBDIRS       = meshfilter \
 				filter_autoalign \
 				meshcolorize \
 				meshselect \
-				meshdecorate \ 
+				meshdecorate \
 				edit_select \
 				edit_pickpoints \
 #				edit_phototexturing \
-				editslice \ 
+				editslice \
 #				editpaint \
 				editalign \
 				editmeasure\
@@ -48,4 +48,7 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_quality/filter_quality \
 				../fgt/edit_texture\
 				../fgt/editpaint\
-				../fgt/filter_colorproc 
+				../fgt/filter_colorproc \
+        mlsfilters \
+				io_gts \
+				io_expe
