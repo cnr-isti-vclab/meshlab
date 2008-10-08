@@ -76,7 +76,7 @@ const PluginInfo &RangeMapPlugin::pluginInfo()
 {
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.1");
+	 ai.Version = tr("1.2");
 	 ai.Author = ("Marco Callieri");
    return ai;
  }
@@ -137,7 +137,7 @@ bool RangeMapPlugin::applyFilter(QAction *filter, MeshDocument &m, FilterParamet
 
 			if(usecam)
 			{
-
+				viewpoint = m.mm()->cm.shot.GetViewPoint();
 			}
 
 			// angle threshold in radians
@@ -150,7 +150,7 @@ bool RangeMapPlugin::applyFilter(QAction *filter, MeshDocument &m, FilterParamet
 					viewray = viewpoint - (((*fi).V(0)->P() + (*fi).V(1)->P() + (*fi).V(2)->P()) / 3.0);
 					viewray.Normalize();
 
-					if((viewray * (*fi).N()) < limit)
+					if((viewray * (*fi).N().Normalize()) < limit)
 						fi->SetS();
 				}
 
@@ -167,7 +167,7 @@ const RangeMapPlugin::FilterClass RangeMapPlugin::getClass(QAction *a)
   switch(ID(a))
   {
     	case FP_SELECTBYANGLE :
-      	return MeshFilterInterface::RangeMap;     
+				return MeshFilterInterface::FilterClass(MeshFilterInterface::RangeMap + MeshFilterInterface::Selection);     
 	default : 
 		return MeshFilterInterface::Generic;
   }
