@@ -371,7 +371,7 @@ namespace vcg {
 					FaceType * tmp_face = edgeFaceQueue.front();
 					edgeFaceQueue.pop();
 					float prod[3];   
-					float max_prod = std::numeric_limits<float>::min();
+					float max_prod = -std::numeric_limits<float>::max();
 					int max_faceid = -1;
 					for (int i=0; i<3; ++i) {
 						prod[i] = (tmp_face->N().Normalize()) * (tmp_face->FFp(i)->N().Normalize());
@@ -448,7 +448,7 @@ namespace vcg {
 					FaceType * tmp_face = edgeFaceQueue.front();
 					edgeFaceQueue.pop();
 					float prod[3];   
-					float max_prod = std::numeric_limits<float>::min();
+					float max_prod = - std::numeric_limits<float>::max();
 					int max_faceid = -1;
 					for (int i=0; i<3; ++i) {
 						prod[i] = (tmp_face->N().Normalize()) * (tmp_face->FFp(i)->N().Normalize());
