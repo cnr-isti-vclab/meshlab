@@ -27,6 +27,7 @@
 #include <vcg/space/point3.h>
 #include <vcg/space/box3.h>
 
+namespace GaelMls {
 
 template<typename _Scalar>
 class Neighborhood
@@ -111,5 +112,7 @@ class BallTree
 
     Node* mRootNode;
 };
+
+}
 
 #endif

@@ -24,6 +24,8 @@
 #include "balltree.h"
 #include "vcg_addons.h"
 
+namespace GaelMls {
+
 template<typename _Scalar>
 BallTree<_Scalar>::BallTree(const std::vector<VectorType>& points, const std::vector<Scalar>& radii)
   : mPoints(points), mRadii(radii), mRadiusScale(1.), mTreeIsUptodate(false)
@@ -157,3 +159,5 @@ void BallTree<_Scalar>::buildNode(Node& node, std::vector<int>& indices, AxisAli
 
 template class BallTree<float>;
 template class BallTree<double>;
+
+}
