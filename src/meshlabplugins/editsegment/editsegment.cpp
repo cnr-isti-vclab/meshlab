@@ -326,7 +326,11 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 	parent->update();
 }
 void EditSegment::EndEdit(QAction * mode, MeshModel & m, GLArea * parent) {
-	qDebug() << "Mesh Segmentation End Edit" << endl;
+	//qDebug() << "Mesh Segmentation End Edit" << endl;
+	delete meshCutDialog;
+	meshCutDialog = 0;
+	delete meshcut_dock;
+	meshcut_dock = 0;
 }
 void EditSegment::Decorate(QAction * ac, MeshModel & m, GLArea * gla) {
 	if (!glarea_map.contains(gla)) {
