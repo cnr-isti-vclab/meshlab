@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -38,9 +38,9 @@
 #include <meshlab/meshmodel.h>
 
 /** An hole type, extends vcg::tri::Hole<MESH>::Info adding more information as filling, selection,
- *  filing autocompenetration and non manifoldness. This class also allow to fill (and restore) an 
+ *  filing autocompenetration and non manifoldness. This class also allow to fill (and restore) an
  *  hole using different criteria.
- *  
+ *
  *  FgtHole uses flags to mark interesting face, so surfing the hole faces is driven by face-face
  *  ajacency and flag meaning. Hole face are flagged as:
  *    - HoleBorderFace: face which initially (before filling) have 1/2 border edge.
@@ -50,8 +50,8 @@
  *      non-manifold hole in more manifold ones)
  *    - BridgeFace + HolePatchFace: this combo is used to individuate faces added to subdivide
  *      a non manifold hole and also close a non manifold hole, ie an hole made up from only 3 edge
- *     
- *        --------+-------+----+-----|     --------+-------+----+------|    
+ *
+ *        --------+-------+----+-----|     --------+-------+----+------|
  *         hole   /\ hole /\  hole   |       hole  /\  f0  /\ f1| hole |  f0: BridgeFace + PatchFace
  *           A   /  \  A /  \   A    |         A  /  \    /  \  |   B  |  f1: BridgeFace
  *              /    \  /    \       |           /    \  /    \ |      |
@@ -62,6 +62,19 @@ class FgtHole : public vcg::tri::Hole<MESH>::Info
 {
 public:
 
+private:
+  enum State
+  {
+    NONE      = 0x0000,
+    SELECTED  = 0x0001,
+    FILLED    = 0x0002,
+    ACCEPTED  = 0x0004,
+    COMPENET  = 0x0008,
+    NONMANIF  = 0x0010,
+    BRIDGED   = 0x0020
+  };
+
+public:
 	enum FillerMode
 	{
 		Trivial, MinimumWeight, SelfIntersection
@@ -85,15 +98,11 @@ public:
 	typedef typename vcg::tri::MinimumWeightEar<MESH>			MinimumWeightEar;
 	typedef typename vcg::tri::SelfIntersectionEar<MESH>	SelfIntersectionEar;
 
-	FgtHole(HoleInfo &hi, QString holeName) : 
+	FgtHole(HoleInfo &hi, QString holeName) :
 		HoleInfo(hi.p, hi.size, hi.bb)
 	{
 		name = holeName;
-		filled = false;
-		comp = false;
-		accepted = true;
-		selected = false;
-		isBridged = false;
+		_state = ACCEPTED;
 		perimeter = HoleInfo::Perimeter();
 		findNonManifoldness();
 	};
@@ -102,28 +111,36 @@ public:
 	{
 		assert(startPos.IsBorder());
 		name = holeName;
-		filled = false;
-		comp = false;
-		accepted = true;
-		selected = false;
-		isBridged = false;
+		_state = ACCEPTED;
 		this->p = startPos;
-		updateInfo();		
+		updateInfo();
 	};
 
 	~FgtHole() {};
 
 	inline int Size() const { return this->size; };
 	inline ScalarType Perimeter() const	{ return this->perimeter; };
-	inline bool IsFilled() const { return this->filled; };
-	inline bool IsSelected() const { return this->selected; };
-	inline void SetSelect(bool value) { selected = value;	};
-	inline bool IsCompenetrating() const { return filled && comp; };
-	inline bool IsAccepted() const { return !filled || accepted; };
-	inline void SetAccepted(bool val) { accepted = val; };
-	inline bool IsNonManifold() const { return isNonManifold; };
-	inline bool IsBridged() const { return isBridged; };
-	inline void SetBridged(bool val){ isBridged=val; };
+	inline bool IsFilled() const { return (_state & FILLED) != 0; };
+	inline bool IsSelected() const { return (_state & SELECTED) != 0; };
+	inline void SetSelect(bool val)
+	{
+	  if(val) _state |= SELECTED;
+	  else _state &= (~SELECTED);
+  };
+	inline bool IsCompenetrating() const { return IsFilled() && (_state & COMPENET) != 0; };
+	inline bool IsAccepted() const { return !IsFilled() || ( (_state & ACCEPTED) != 0); };
+	inline void SetAccepted(bool val)
+	{
+	  if(val) _state |= ACCEPTED;
+	  else _state &= (~ACCEPTED);
+  };
+	inline bool IsNonManifold() const { return (_state & NONMANIF) != 0; };
+	inline bool IsBridged() const { return (_state & BRIDGED) != 0;; };
+	inline void SetBridged(bool val)
+	{
+	  if(val) _state |= BRIDGED;
+	  else _state &= (~BRIDGED);
+  };
 
 	inline void SetStartPos(PosType initP)
 	{
@@ -145,47 +162,52 @@ public:
 	void DrawCompenetratingFace(GLenum glmode) const
 	{
 		assert(IsCompenetrating());
-		
-		std::vector<FacePointer> patch;
-		getPatchFaces(patch);
+
+		//std::vector<FacePointer> patch;
+		//getPatchFaces(patch);
 		typename std::vector<FacePointer>::const_iterator it;
-		
+
 		glBegin(glmode);
-		for( it=patch.begin(); it != patch.end(); it++)
+		for( it=patches.begin(); it != patches.end(); it++)
 			if((*it)->IsUserBit(PatchCompFlag()))
 			{
 				glVertex( (*it)->V(0)->P() );
 				glVertex( (*it)->V(1)->P() );
 				glVertex( (*it)->V(2)->P() );
 			}
-		
+
 		glEnd();
 	}
 
-	/*  Reset flags used by this plugin to unmark this hole and its patch. 
+	/*  Reset flags used by this plugin to unmark this hole and its patch.
 	 *  Bridges face can finded along the hole and it needs look at adjacent face because
 	 *  a bridge could be build from other bridge face.
 	 */
 	void ResetFlag()
 	{
 		std::vector<FacePointer> bridgesFaces;
-		if(filled)
+		if( IsFilled() )
 		{
-			std::vector<FacePointer> patch;
-			getPatchFaces(patch);
+			//std::vector<FacePointer> patch;
+			//getPatchFaces(patch);
 			typename std::vector<FacePointer>::iterator it;
-			for( it=patch.begin(); it != patch.end(); it++)
-			{
-				(*it)->ClearUserBit(HolePatchFlag());
-				(*it)->ClearUserBit(PatchCompFlag());
 
-				// si conferma il filling della faccia BridgedFace+PatchFace aggiunta 
+			//for( it=patches.begin(); it != patches.end(); it++)
+			//{
+			while(patches.size()>0)
+			{
+			  FacePointer f = patches.back();
+        patches.pop_back();
+				f->ClearUserBit(HolePatchFlag());
+				f->ClearUserBit(PatchCompFlag());
+
+				// si conferma il filling della faccia BridgedFace+PatchFace aggiunta
 				// dalla partizione per ottenere hole non manifold
-				(*it)->ClearUserBit(BridgeFlag());
+				f->ClearUserBit(BridgeFlag());
 
 				for(int i=0; i<3; i++)
 				{
-					FacePointer adjF = (*it)->FFp(i);
+					FacePointer adjF = f->FFp(i);
 					adjF->ClearUserBit(HoleFlag());
 					if(IsBridgeFace(*adjF))
 						bridgesFaces.push_back(adjF);
@@ -216,32 +238,30 @@ public:
 					bridgesFaces.push_back(adjF);
 			}
 		}
-
 	};
 
 
 	/* Restore hole, remove patch faces applied to mesh to fill this hole. */
 	void RestoreHole(MESH &mesh)
 	{
-		assert(filled);
-		std::vector<FaceType*> patches;
-		getPatchFaces(patches);
-		filled = false;
-		
+		assert( IsFilled() );
+		//std::vector<FaceType*> patches;
+		//getPatchFaces(patches);
+		_state &= (~FILLED);
 		typename std::vector<FaceType*>::iterator it;
 		for(it = patches.begin(); it!=patches.end(); it++)
 		{
-			// BridgeFaceFlag+PathcHoleFlag is special case
+			// PathcHoleFlag+BridgeFaceFlag is special case
 			if(IsBridgeFace(**it)) continue;
 
 			assert(IsPatchFace(**it));
 			for(int e=0; e<3; e++)
-			{	
+			{
 				if(!IsBorder(**it, e))
 				{
 					FacePointer adjF = (*it)->FFp(e);
 					if(!FgtHole<MESH>::IsPatchFace(*adjF))
-					{								
+					{
 						int adjEI = (*it)->FFi(e);
 						adjF->FFp( adjEI ) = adjF;
 						adjF->FFi( adjEI ) = adjEI;
@@ -252,12 +272,13 @@ public:
 			if(!(**it).IsD())
 				vcg::tri::Allocator<MESH>::DeleteFace(mesh, **it);
 		}
+		patches.clear();
 	};
 
 	void Fill(FillerMode mode, MESH &mesh, std::vector<FacePointer * > &local_facePointer)
 	{
 		switch(mode)
-		{	
+		{
 		case FgtHole<MESH>::Trivial:
 				vcgHole::template FillHoleEar< vcg::tri::TrivialEar<MESH> >(mesh, *this, HolePatchFlag(), local_facePointer);
 			break;
@@ -288,31 +309,31 @@ public:
 				SelfIntersectionEar::AdjacencyRing().clear();
 			break;
 		}
-		
+
 		// hole filling leaves V flag to border vertex... resetting!
 		typename std::vector<VertexType*>::const_iterator it = vertexes.begin();
 		for( ;it!=vertexes.end(); it++)
 				(*it)->ClearV();
-		
-		filled = true;
-		accepted = true;
-		comp = false;
+
+		_state |= FILLED;
+		_state |= ACCEPTED;
+		_state &= (~COMPENET);
 		updatePatchState(mesh);
 	};
 
-	
+
 private:
 
 	/*  Walking the hole computing vcgHole::Info data and other info */
 	void updateInfo()
 	{
 		assert(!IsFilled());
-		vertexes.clear();		
-		isNonManifold = false;
+		vertexes.clear();
+		_state &= (~NONMANIF);
 		this->bb.SetNull();
 		this->size = 0;
 
-		PosType curPos = this->p;		
+		PosType curPos = this->p;
 		do{
 			assert(!curPos.f->IsD());
 			curPos.f->SetUserBit(HoleFlag());
@@ -320,17 +341,18 @@ private:
 			++this->size;
 			vertexes.push_back(curPos.v);
 			if(curPos.v->IsV())
-				isNonManifold = true;
+				_state |= NONMANIF;
+				//isNonManifold = true;
 			else
 				curPos.v->SetV();
-			
+
 			curPos.NextB();
 			assert(curPos.IsBorder());
 		}while( curPos != this->p );
-		
+
 		curPos = this->p;
 		do{
-			curPos.v->ClearV();			
+			curPos.v->ClearV();
 			curPos.NextB();
 		}while( curPos != this->p );
 
@@ -341,20 +363,21 @@ private:
 	void findNonManifoldness()
 	{
 		assert(!IsFilled());
-		isNonManifold = false;
+		_state &= (~NONMANIF);
 		PosType curPos = this->p;
 		do{
 			vertexes.push_back(curPos.v);
 			if(curPos.v->IsV())
-				isNonManifold = true;
+				//isNonManifold = true;
+				_state |= NONMANIF;
 			else
-				curPos.v->SetV();			
+				curPos.v->SetV();
 			curPos.NextB();
 		}while( curPos != this->p );
-		
+
 		curPos = this->p;
 		do{
-			curPos.v->ClearV();			
+			curPos.v->ClearV();
 			curPos.NextB();
 		}while( curPos != this->p );
 	};
@@ -362,35 +385,35 @@ private:
 	/* set patch flag and auto-compenetration	flag when needed */
 	void updatePatchState(MESH &mesh)
 	{
-		assert(filled);
-		comp = false;
+		assert( IsFilled() );
+		_state &= (~COMPENET);
 		vcg::GridStaticPtr<FaceType, ScalarType > gM;
 		gM.Set(mesh.face.begin(),mesh.face.end());
 
 		std::vector<FaceType*> inBox;
 		vcg::Box3< ScalarType> bbox;
-		FacePointerVector patches;
-		getPatchFaces(patches);
-
+		//FacePointerVector patches;
+		//getPatchFaces(patches);
+    getPatchFaces();
 		typename FacePointerVector::iterator pi = patches.begin();
 		for( ; pi!=patches.end(); ++pi)
 		{
 			FacePointer f = *pi;
 			if(TestFaceMeshCompenetration(mesh, gM, f))
 			{
-				comp = true;
+				_state |= COMPENET;
 				f->SetUserBit(PatchCompFlag());
-			}			
+			}
 		}
 	};
 
 	/* First patch face is the adjacent one to initial Pos ("p" field of Hole::Info)
 	 * Other patch face are found looking adjacent face on each vertex of known patch faces.
 	 */
-	void getPatchFaces(std::vector<FacePointer> &patches) const
+	void getPatchFaces()
 	{
-		assert(filled);
-		patches.clear();		
+		assert( IsFilled() );
+		patches.clear();
 		std::vector<FacePointer> stack;
 		PosType pos = this->p;
 		pos.FlipF();
@@ -423,14 +446,12 @@ private:
 		for(it=patches.begin(); it!=patches.end(); ++it)
 			(*it)->ClearV();
 	};
-	
+
 	/* Check if face is a border face of this hole */
 	bool haveBorderFace(FacePointer bFace) const
 	{
-		// per essere una faccia del bordo di questo hole deve avere almeno 2 vertici 
-		// conenuti nella lista di vertici del buco
 		assert(IsHoleBorderFace(*bFace));
-		assert(!filled);
+		assert( !IsFilled() );
 
 		PosType curPos = this->p;
 		do{
@@ -444,9 +465,10 @@ private:
 	/* Check if pFace is a patch face of this hole */
 	bool havePatchFace(FacePointer pFace) const
 	{
-		// essendo chiuso con Ear ogni faccia patch ha in comune al suo buco almeno un vertice
 		assert( IsPatchFace(*pFace) );
-		assert(filled);
+		assert( IsFilled() );
+
+		// follow algorithm used to fill with EAR, each faces added share at least e vertex with hole
 		typename std::vector<VertexType*>::const_iterator it;
 		for(it = vertexes.begin(); it!=vertexes.end(); it++)
 			if(pFace->V(0) == *it || pFace->V(1) == *it || pFace->V(2) == *it)
@@ -465,15 +487,15 @@ public:
 
 	static inline bool IsBridgeFace(FaceType &face)
 	{ return face.IsUserBit(BridgeFlag()); };
-	
+
 
 	/* Inspect a mesh to find its holes. */
-	static int GetMeshHoles(MESH &mesh, HoleVector &ret) 
+	static int GetMeshHoles(MESH &mesh, HoleVector &ret)
 	{
 		assert(HoleFlag() ==-1);
 		ret.clear();
 		std::vector<HoleInfo> vhi;
-				
+
 		//prendo la lista di info(sugli hole) tutte le facce anche le non selezionate
 		HoleFlag() = vcgHole::GetInfo(mesh, false, vhi);
 		HolePatchFlag() = FaceType::NewBitFlag();
@@ -494,7 +516,7 @@ public:
 	/** Return index of hole adjacent to picked face into holes vector.
 	 *  Also return the iterator on correct position in holes list.
 	 */
-	static int FindHoleFromBorderFace(FacePointer bFace, HoleVector &holes, HoleIterator &it) 
+	static int FindHoleFromBorderFace(FacePointer bFace, HoleVector &holes, HoleIterator &it)
 	{
 		assert(IsHoleBorderFace(*bFace));
 		int index = 0;
@@ -504,8 +526,8 @@ public:
 		for( int i=0; i<3; i++)
 			if(IsPatchFace(*bFace->FFp(i)) && !IsBridgeFace(*bFace->FFp(i)))
 				adjF = bFace->FFp(i);
-		
-		HoleIterator hit = holes.begin();			
+
+		HoleIterator hit = holes.begin();
 		if(adjF == 0)
 		{
 			// border face belong to an hole not filled
@@ -523,14 +545,14 @@ public:
 			return -1;
 		}
 		else // bFace belong filled hole, adjF is its patch
-			return FindHoleFromPatchFace(adjF, holes, it);		
+			return FindHoleFromPatchFace(adjF, holes, it);
 	}
 
 
 	/** Return index into holes vector of hole adjacent to picked face */
 	static int FindHoleFromPatchFace(FacePointer bFace, HoleVector &holes, HoleIterator &it)
 	{
-		assert(bFace->IsUserBit(HolePatchFlag()));
+		assert(IsPatchFace(*bFace));
 		int index = 0;
 		HoleIterator hit = holes.begin();
 		for( ; hit != holes.end(); ++hit)
@@ -560,8 +582,13 @@ public:
 	{
 		typename HoleVector::iterator it = holes.begin();
 		for( ; it!=holes.end(); it++)
-			facesReferences.push_back(&it->p.f);
-	}
+		{
+		  facesReferences.push_back(&it->p.f);
+		  typename FacePointerVector::iterator fit;
+		  for(fit=it->patches.begin(); fit!=it->patches.end(); fit++)
+        facesReferences.push_back(&(*fit));
+		}
+  }
 
 	static bool TestFaceMeshCompenetration(MESH &mesh, vcg::GridStaticPtr<FaceType, ScalarType > &gM,
 			const FacePointer f)
@@ -576,7 +603,7 @@ public:
 		for(fib=inBox.begin();fib!=inBox.end();++fib)
 			if(vcg::tri::Clean<MESH>::TestIntersection( *fib, f ))
 				return true;
-		
+
 		return false;
 	};
 
@@ -589,18 +616,14 @@ public:
 	static void ResetHoleId() { HoleId()=0; };
 	static int GetHoleId() { return ++HoleId(); };
 	QString name;
-	
+
 private:
 	static int &HoleId(){static int _holeId=0; return _holeId;};
-	bool filled;
-	bool comp;
-	bool accepted;
-	bool selected;
-	bool isNonManifold;
-	bool isBridged;
+	int _state;
 	ScalarType perimeter;
 
 	std::vector<VertexType*> vertexes;
+	std::vector<FacePointer> patches;
 };
 
 #endif

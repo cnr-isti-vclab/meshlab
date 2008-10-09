@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -34,8 +34,6 @@
 #include "vcg/complex/trimesh/base.h"
 #include "vcg/space/color4.h"
 
-
-
 class HoleListModel : public QAbstractItemModel
 {
 	Q_OBJECT
@@ -46,34 +44,34 @@ public:
 		Selection, ManualBridging, Filled
 	};
 
-	typedef vcg::tri::Hole<CMeshO>				vcgHole;
-	typedef vcg::tri::Hole<CMeshO>::Info		HoleInfo;
-	typedef FgtHole<CMeshO>						HoleType;
-	typedef std::vector< HoleType >				HoleVector;
-	typedef FgtBridge<CMeshO>					BridgeType;
-	typedef std::vector< BridgeType >			BridgeVector;
+	typedef vcg::tri::Hole<CMeshO>            vcgHole;
+	typedef vcg::tri::Hole<CMeshO>::Info	    HoleInfo;
+	typedef FgtHole<CMeshO>						        HoleType;
+	typedef std::vector< HoleType >				    HoleVector;
+	typedef FgtBridge<CMeshO>					        BridgeType;
+	typedef std::vector< BridgeType >			    BridgeVector;
 	typedef vcg::face::Pos<CMeshO::FaceType>	PosType;
-	typedef std::vector< PosType >				PosVector;
-	typedef PosVector::iterator					PosIterator;
+	typedef std::vector< PosType >				    PosVector;
+	typedef PosVector::iterator					      PosIterator;
 
 	HoleListModel(MeshModel *m, QObject *parent = 0);
 	virtual ~HoleListModel() { clearModel(); };
 
 	inline int rowCount(const QModelIndex &parent = QModelIndex()) const { return holes.size(); };
-	inline int columnCount(const QModelIndex &parent = QModelIndex()) const 
+	inline int columnCount(const QModelIndex &parent = QModelIndex()) const
 	{
 		if(state == HoleListModel::Selection) return 5;
 		else return 7;
 	};
-	
+
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
 	QModelIndex parent(const QModelIndex &child) const { return QModelIndex(); };
 
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-	
+  QVariant data(const QModelIndex &index, int role) const;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+
 	Qt::ItemFlags flags(const QModelIndex &index) const;
-	bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole ); 
+	bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
 
 
 	inline int getUserBitHole() const { return userBitHole; };
@@ -81,7 +79,7 @@ public:
 	void updateModel();
 	void drawHoles() const;
 	void drawCompenetratingFaces() const;
-	
+
 	inline void setState(HoleListModel::FillerState s) { state = s; emit layoutChanged(); };
 	inline FillerState getState() const { return state; };
 	void toggleSelectionHoleFromBorderFace(CFaceO *bface);
@@ -92,26 +90,33 @@ public:
 	void removeBridges();
 	void closeNonManifolds();
 	inline MeshModel* getMesh() const { return mesh; };
-	
+
 	void autoBridge(bool singleHole=false, double distCoeff=0);
 
-	inline void setStartBridging() 
-	{ 
+	inline void setStartBridging()
+	{
 		assert(state != HoleListModel::Filled);
-		state = HoleListModel::ManualBridging ; 
+		state = HoleListModel::ManualBridging ;
 	};
 	inline void setEndBridging() { state = HoleListModel::Selection; pickedAbutment.f = 0; };
 	void addBridgeFace(CFaceO *pickedFace, int pickX, int pickY);
 
+	void countSelected();
+  inline int SelectionCount() const { return nSelected; };
+  inline int HolesCount() const { return holes.size(); };
+  inline int AcceptedCount() const { return nAccepted; };
+	inline bool PickedAbutment() const {return !pickedAbutment.IsNull(); };
 private:
 	MeshModel *mesh;
-	FillerState state;	
+	FillerState state;
 	int userBitHole;
 	BridgeAbutment<CMeshO> pickedAbutment;
-	
+	int nSelected;
+	int nAccepted;
+
 public:
 	HoleVector holes;
-	
+
 Q_SIGNALS:
 	void SGN_needUpdateGLA();
 	void SGN_ExistBridge(bool exist);
@@ -142,7 +147,7 @@ public:
 
 		if(left.data(Qt::CheckStateRole) == Qt::Unchecked && right.data(Qt::CheckStateRole) == Qt::Checked)
 			return false;
-		else 
+		else
 			return true;
 	};
 

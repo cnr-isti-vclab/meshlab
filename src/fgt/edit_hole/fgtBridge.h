@@ -690,17 +690,17 @@ public:
 
 private:
 
-	/* Compute distance between bridge side to allow no bridge adjacent hole border	
+	/*  Compute distance between bridge side to allow no bridge adjacent to hole border. 
+	 *  A bridge must have 2 border faces.
 	 */
 	static bool testAbutmentDistance(const BridgeAbutment<MESH> &sideA, const BridgeAbutment<MESH> &sideB)
 	{
 		if(sideA.h != sideB.h) return true;
 
+		// at least 2 edges have to be between 2 bridge side.
 		if(!sideA.h->IsNonManifold())
-		{
-			// mi assicuro che il prossimo edge di bordo A partire in entrambi i sensi non
-			// condivida vertici con l'edge di bordo B, questo mi garantisce che nei casi non manifold
-			// c'è almeno 2 edge di bordo che dividono A e B
+		{			 
+			// so adjacent edges of a side haven't to share a vertex with other side.
 			PosType pos(sideA.f, sideA.z);
 			assert(pos.IsBorder());
 			pos.NextB();
@@ -715,8 +715,7 @@ private:
 		}
 		else
 		{
-			// tra i 2 edge ci deve essere almeno 2 edge che li separino
-			// pertanto cerco un edge che condivide un vertice con enrambi
+			// if exist a face which share a vertex with each side bridge cannot be built
 			PosType initPos(sideA.f, sideA.z);
 			PosType curPos=initPos;
 			
@@ -729,7 +728,7 @@ private:
 				VertexType* cv0=curPos.f->V0(curPos.z);
 				VertexType* cv1=curPos.f->V1(curPos.z);
 				if(	cv0 == va0 || cv1 == va0 ||
-					cv0 == va1 || cv1 == va1 )
+					  cv0 == va1 || cv1 == va1 )
 					if( cv0 == vb0 || cv1 == vb0 ||
 					    cv0 == vb1 || cv1 == vb1 )
 						return false;
@@ -843,6 +842,7 @@ private:
 		else
 			Bq = QualityFace(bfB0)+ QualityFace(bfB1);
 
+		// both solution are compentrating with mesh
 		if(Aq == -1 && Bq == -1)
 			return false;
 
@@ -902,7 +902,7 @@ private:
 		sideB.f->FFp(sideB.z) = f1;
 		sideB.f->FFi(sideB.z) = 0;
 
-		// edges adiacenti tra le 2 facce appena inserite
+		// edges adiacenti tra le 2 facce appena inserite, edge "condiviso"
 		f0->FFp(adjEdgeIndex) = f1;	
 		f0->FFi(adjEdgeIndex) = adjEdgeIndex;
 		f1->FFp(adjEdgeIndex) = f0;
@@ -959,27 +959,30 @@ private:
 
 
 	/*  Starting from an hole look for faces added to mesh as bridge jumping also into
-	 *  adjacent hole from bridge finded
+	 *  holes finded crossing bridges. If bridges'll be removed these holes could belong to the same hole.
 	 *  Put into bridgeFaces all faces added to mesh as bridge
-	 *  Put into adjBridgePos half-edges located over the edge which will become border edge after bridge face removing
-	 *  also mark with flag S the faces related to adjBridgePos
+	 *  Put into adjBridgePos half-edges located over the edge which will become border edge 
+	 *  after bridge face removing also mark with flag S the faces related to adjBridgePos
 	 */
 	static void getBridgeInfo(HoleVector &holes, std::vector<FacePointer> &bridgeFaces, std::vector<PosType> &adjBridgePos)
 	{
 		//scorro gli hole
 		PosType curPos;
 		typename HoleVector::iterator hit;
+		bridgeFaces.clear();
+		adjBridgePos.clear();
+
+
 		for(hit=holes.begin(); hit!=holes.end(); ++hit)
 		{
 			assert(!hit->IsFilled());
 			if(!hit->IsBridged())
 				continue;
 
-
-			// il buco può essere bridged senza essere posizioneto con p su una faccia bridge
-			// come nel caso della chiusura di vertici non manifold, un hole sarà marchiato
-			// bridged ma non avrà sul suo bordo edge di facce bridge poiche il vertice non manifold viene
-			// chiuso con un solo triangolo 
+			// an hole could be "bridged" but haven't a boorder face which is also bridged. 
+			// This happens after non-manifold closure, it adds only a face to a side of non.manifold vertex,
+			// so a resultant "sub-hole" haven't bridged+border face.
+			// To know this hole is connected to other hole from bridge, we add its half-edge on adjBorderPos.
 			if(!FgtHole<MESH>::IsBridgeFace(*hit->p.f) )
 			{
 				if(hit->IsSelected())
@@ -991,9 +994,7 @@ private:
 				}
 			}
 
-
-			// scorro il bordo, per ogni vertice guardo le facce a lui adicentie e se sono BRIDGE le
-			// inserisco in lista
+			// walk over the hole border, for each vertex scan its vertex-adjacent faces looking for Bridge faces.
 			curPos = hit->p;
 			do{
 				assert(curPos.IsBorder());
@@ -1019,20 +1020,19 @@ private:
 			}while(curPos != hit->p);
 		}//for(hit=holes.begin(); hit!=holes.end(); ++hit)
 
-		// Ho preso le facce bridge adiacenti ai vertici degli hole
-		// adesso gardo intorno a queste facce se ce ne sono altre, magari dovute
-		// a bridge consecutivi o chiusure nonmanifold di buchi a 3 facce
-
+		// in bridgesFaces there are all bridge faces adjacent to each vertex of holes already scanned
+		// now inspect these faces, their adjacent (to vertex) faces could be bridge face but not already seen.
+		// Eg. consecutive bridge, non-manifold closure...
 		for(int k=0; k<bridgeFaces.size(); k++)
 		{
 			FacePointer vf = bridgeFaces.at(k);
 			assert(vf->IsV());
 
-			// per ogni faccia trovata cerco altre facce bridge tra quelle adiacenti
-			// ai loro vertici. In più trovo gli half-edge che diventeranno di bordo una volta rimosse
-			// le facce
+			// for each faces found look for other bridge faces walking on its adjacent faces.
+			// Also look for half-edges between patch and border face, they'll be on border face.
 			for(int e=0; e<3; e++)
 			{
+				// look for other bridge faces
 				curPos = PosType(vf, e);
 				PosType lastPos;
 				do{
@@ -1051,6 +1051,7 @@ private:
 					}
 				}while(curPos.f != lastPos.f && curPos.f != vf);
 
+				// look for half-edge
 				FacePointer adjF = vf->FFp(e);
 				if(!FgtHole<MESH>::IsBridgeFace(*adjF) && !adjF->IsV())
 				{
@@ -1060,9 +1061,9 @@ private:
 					adjBridgePos.push_back(PosType(adjF, vf->FFi(e)));
 				}
 			}
-		}
+		} // holes scan
 
-		// risetto i flag V sia per le facce bridge che quelle adiacenti
+		// restting of flag V
 		typename std::vector<FacePointer>::iterator bfit;
 		for(bfit=bridgeFaces.begin(); bfit!=bridgeFaces.end(); bfit++)
 			(*bfit)->ClearV();

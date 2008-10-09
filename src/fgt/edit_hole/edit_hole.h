@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -36,14 +36,14 @@ class EditHolePlugin : public QObject, public MeshEditInterface
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
 	QList <QAction *> actionList;
-	
+
 public:
-	typedef vcg::tri::Hole<CMeshO> vcgHole;
-	typedef vcgHole::Info HoleInfo;
-	typedef std::vector< FgtHole<CMeshO> > HoleVector;
-	typedef vcg::face::Pos<CMeshO::FaceType> PosType;
-	typedef CMeshO::FaceIterator FaceIterator;
-	
+	typedef vcg::tri::Hole<CMeshO>            vcgHole;
+	typedef vcgHole::Info                     HoleInfo;
+	typedef std::vector< FgtHole<CMeshO> >    HoleVector;
+	typedef vcg::face::Pos<CMeshO::FaceType>  PosType;
+	typedef CMeshO::FaceIterator              FaceIterator;
+
 	EditHolePlugin();
 	virtual ~EditHolePlugin();
 	virtual const QString Info(QAction *);
@@ -55,21 +55,23 @@ public:
 	virtual void  mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual void  mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	virtual QList<QAction *> actions() const ;
-	
-	
+
+private:
+	void setInfoLabel();
+
 private:
 	HoleListModel	*holesModel;
 	HoleSorterFilter *holeSorter;
 	GLArea *gla;
 	MeshModel *mesh;
   FillerDialog *dialogFiller;
-	
+
 	bool toDraw;
 	bool hasPick;
 	QPoint cur;
 	CFaceO* pickedFace;
 	int bridgeOptSldVal;
-	
+
 private Q_SLOTS:
 	void upGlA();
 	void resizeViewColumn();

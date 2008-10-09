@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -41,7 +41,7 @@ EditHolePlugin::EditHolePlugin() {
 	QAction *editAction;
 	dialogFiller = 0;
 	holesModel = 0;
-	
+
 	foreach(editAction, actionList)
 		editAction->setCheckable(true);
 
@@ -69,20 +69,20 @@ QList<QAction *> EditHolePlugin::actions() const {
 	return actionList;
 }
 
-const QString EditHolePlugin::Info(QAction *action) 
+const QString EditHolePlugin::Info(QAction *action)
 {
   if( action->text() != tr("Fill mesh's hole") ) assert (0);
 
 	return tr("Allow fill one or more hole into place");
 }
-const PluginInfo &EditHolePlugin::Info() 
+const PluginInfo &EditHolePlugin::Info()
 {
-   static PluginInfo ai; 
+   static PluginInfo ai;
    ai.Date=tr(__DATE__);
 	 ai.Version = tr("0.1");
 	 ai.Author = ("Michele Vannoni");
    return ai;
- } 
+ }
 
 
 void EditHolePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
@@ -104,9 +104,9 @@ void EditHolePlugin::mouseMoveEvent(QAction *,QMouseEvent * e, MeshModel &/*m*/,
 }
 
 void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
-{	
+{
 	m.updateDataMask(MeshModel::MM_FACETOPO);
-	if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) ) 
+	if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) )
 	{
 		QMessageBox::critical(0, tr("Manifoldness Failure"), QString("Hole's managing requires manifoldness."));
 		return; // can't continue, mesh can't be processed
@@ -116,7 +116,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	// senza chidere il filtro
 	if(dialogFiller != 0)
 		EndEdit(0, m, gla);
-	
+
 	// if plugin restart with another mesh, recomputing of hole is forced
 	if(mesh != &m)
 	{
@@ -131,12 +131,12 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	dialogFiller=new FillerDialog(gla->window());
 	dialogFiller->show();
 	dialogFiller->setAllowedAreas(Qt::NoDockWidgetArea);
-	
+
 	connect(dialogFiller->ui.operationTab, SIGNAL(currentChanged(int)), this, SLOT(skipTab(int)) );
 	connect(dialogFiller->ui.fillButton, SIGNAL(clicked()), this,SLOT(fill()));
 	connect(dialogFiller->ui.acceptFillBtn, SIGNAL(clicked()), this, SLOT(acceptFill()) );
 	connect(dialogFiller->ui.cancelFillBtn, SIGNAL(clicked()), this, SLOT(cancelFill()) );
-	
+
 	connect(dialogFiller->ui.manualBridgeBtn, SIGNAL(clicked()), this, SLOT(manualBridge()) );
 	connect(dialogFiller->ui.autoBridgeBtn, SIGNAL(clicked()), this, SLOT(autoBridge()) );
 	connect(dialogFiller->ui.nmHoleClosureBtn, SIGNAL(clicked()), this, SLOT(closeNMHoles()) );
@@ -154,13 +154,13 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	}
 	holesModel = new HoleListModel(&m);
 	connect(holesModel, SIGNAL(SGN_needUpdateGLA()), this, SLOT(upGlA()) );
-	connect(holesModel, SIGNAL(SGN_ExistBridge(bool)), dialogFiller, SLOT(SLOT_ExistBridge(bool)) );	
-	holeSorter = new HoleSorterFilter(); 
+	connect(holesModel, SIGNAL(SGN_ExistBridge(bool)), dialogFiller, SLOT(SLOT_ExistBridge(bool)) );
+	holeSorter = new HoleSorterFilter();
 	holeSorter->setSourceModel(holesModel);
 	dialogFiller->ui.holeTree->setModel( holeSorter );
-	
+
 	Decorate(0, m, gla);
-	gla->update();	
+	upGlA();
 }
 
 void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
@@ -171,10 +171,10 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 	glPushMatrix();
 	glMultMatrix(mesh->cm.Tr);
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	holesModel->drawCompenetratingFaces();
 	holesModel->drawHoles();
-	
+
 	if(hasPick)
 	{
 		hasPick = false;
@@ -184,6 +184,7 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 		// guardo se nella faccia più vicina uno dei vertici è di bordo
 		if( pickedFace != 0 )
 		{
+			bool oldAbutmentPresence;
 			switch(holesModel->getState())
 			{
 			case HoleListModel::Selection:
@@ -194,13 +195,21 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 				holesModel->toggleAcceptanceHole(pickedFace);
 				break;
 			case HoleListModel::ManualBridging:
+				oldAbutmentPresence = holesModel->PickedAbutment();
 				holesModel->addBridgeFace(pickedFace, cur.x(), inverseY);
+				if(holesModel->PickedAbutment() != oldAbutmentPresence)
+				{
+					if(oldAbutmentPresence == true)
+						gla->setCursor(QCursor(QPixmap(":/images/bridgeCursor.png", "PNG"), 1, 1));
+					else
+						gla->setCursor(QCursor(QPixmap(":/images/bridgeCursor1.png", "PNG"), 1, 1));
+				}
 				break;
 			}
 		}
 	}
 
-	glPopAttrib();	
+	glPopAttrib();
 	glPopMatrix();
  }
 
@@ -228,9 +237,26 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 
 
 void EditHolePlugin::upGlA()
-{ 
+{
 	gla->update();
+	setInfoLabel();
 }
+
+void  EditHolePlugin::setInfoLabel()
+{
+  int ns =  holesModel->SelectionCount();
+  int nh = holesModel->HolesCount();
+  QString infoStr;
+  if(holesModel->getState() == HoleListModel::Filled)
+  {
+    int na = holesModel->AcceptedCount();
+    infoStr = QString("Filled: %1/%2; Accepted: %3").arg(ns).arg(nh).arg(na);
+  }
+  else
+    infoStr = QString("Selected: %1/%2").arg(ns).arg(nh);
+  dialogFiller->ui.infoLbl->setText(infoStr);
+};
+
 
 void EditHolePlugin::resizeViewColumn()
 {
@@ -244,6 +270,7 @@ void EditHolePlugin::updateDWeight(int val)
 
 void EditHolePlugin::fill()
 {
+  gla->meshDoc.busy=true;
 	if(holesModel->getState() == HoleListModel::Filled)
 		holesModel->acceptFilling(false);
 
@@ -253,14 +280,17 @@ void EditHolePlugin::fill()
 		holesModel->fill( FgtHole<CMeshO>::MinimumWeight);
 	else
 		holesModel->fill( FgtHole<CMeshO>::SelfIntersection);
-	gla->update();
+  gla->meshDoc.busy=false;
+	upGlA();
 }
 
 void EditHolePlugin::acceptFill()
 {
 	if(holesModel->getState() == HoleListModel::Filled)
 	{
-		holesModel->acceptFilling();
+	  gla->meshDoc.busy=true;
+		holesModel->acceptFilling(true);
+		gla->meshDoc.busy=false;
 		gla->setWindowModified(true);
 	}
 }
@@ -277,18 +307,19 @@ void EditHolePlugin::updateBridgeSldValue(int val)
 }
 
 void EditHolePlugin::manualBridge()
-{	
+{
 	if(holesModel->getState() != HoleListModel::ManualBridging)
 	{
 		holesModel->setStartBridging();
 		dialogFiller->clickStartBridging();
+		gla->setCursor(QCursor(QPixmap(":/images/bridgeCursor.png", "PNG"), 1, 1));
 	}
 	else
 	{
 		holesModel->setEndBridging();
 		dialogFiller->clickEndBridging();
+		gla->setCursor(QCursor());		
 	}
-	
 	gla->update();
 }
 
@@ -296,13 +327,13 @@ void EditHolePlugin::autoBridge()
 {
 	bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
 	holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
-	gla->update();
+	upGlA();
 }
 
 void EditHolePlugin::closeNMHoles()
 {
 	holesModel->closeNonManifolds();
-	gla->update();
+	upGlA();
 }
 
 
@@ -314,13 +345,13 @@ void EditHolePlugin::chekSingleBridgeOpt()
 void EditHolePlugin::acceptBridges()
 {
 	holesModel->acceptBridges();
-	gla->update();
+	upGlA();
 }
 
 void EditHolePlugin::clearBridge()
 {
 	holesModel->removeBridges();
-	gla->update();
+	upGlA();
 }
 
 
