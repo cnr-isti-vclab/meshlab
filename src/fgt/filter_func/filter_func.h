@@ -30,6 +30,7 @@
 #include <meshlab/interfaces.h>
 
 #include "muParser.h"
+#include "filter_refine.h"
 
 class FilterFunctionPlugin : public QObject, public MeshFilterInterface
 {
@@ -39,9 +40,12 @@ class FilterFunctionPlugin : public QObject, public MeshFilterInterface
 protected:
 	double x,y,z,nx,ny,nz,r,g,b,q;
 	double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
-	std::vector<std::string> attrNames;
-	std::vector<double> attrValue;
-	std::vector<CMeshO::PerVertexAttributeHandle<float> > handlers;
+	std::vector<std::string> v_attrNames;
+	std::vector<double> v_attrValue;
+	std::vector<std::string> f_attrNames;
+	std::vector<double> f_attrValue;
+	std::vector<CMeshO::PerVertexAttributeHandle<float> > vhandlers;
+	std::vector<CMeshO::PerFaceAttributeHandle<float> > fhandlers;
 
 public:
 	enum { FF_VERT_SELECTION, 
@@ -51,10 +55,13 @@ public:
 		   FF_VERT_COLOR, 
 		   FF_VERT_QUALITY, 
 		   FF_FACE_QUALITY, 
-		   FF_DEF_ATTRIB,
-		   FF_GRID } ;
+		   FF_DEF_VERT_ATTRIB,
+		   FF_DEF_FACE_ATTRIB,
+		   FF_GRID,
+		   FF_REFINE } ;
 
 	FilterFunctionPlugin();
+	~FilterFunctionPlugin();
 	
 	virtual const QString filterName(FilterIDType filter);
 	virtual const QString filterInfo(FilterIDType filter);
@@ -64,9 +71,14 @@ public:
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, FilterParameterSet & /*parent*/);
 	virtual const int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	void showParserError(char* s, mu::Parser::exception_type &e);
+	void normalizeQuality(MeshModel &m);
+	void mapQualityIntoColor(MeshModel &m);
+	void setAttributes(CMeshO::VertexIterator &vi);
+	void setAttributes(CMeshO::FaceIterator &fi);
 	void setPerVertexVariables(mu::Parser &p);
 	void setPerFaceVariables(mu::Parser &p);
-	void setCustomAttributes(mu::Parser &p);
+
 };
 
 #endif

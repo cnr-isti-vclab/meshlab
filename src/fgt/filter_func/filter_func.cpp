@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -55,11 +53,19 @@ FilterFunctionPlugin::FilterFunctionPlugin()
 		<< FF_VERT_COLOR
 		<< FF_VERT_QUALITY
 		<< FF_FACE_QUALITY
-		<< FF_DEF_ATTRIB
-		<< FF_GRID;
+		<< FF_DEF_VERT_ATTRIB
+		<< FF_DEF_FACE_ATTRIB
+		<< FF_GRID
+		<< FF_REFINE;
   
 	foreach(FilterIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
+}
+
+FilterFunctionPlugin::~FilterFunctionPlugin()
+{
+	for (int i = 0; i < actionList.count() ; i++ )
+		delete actionList.at(i);
 }
 
 // short string describing each filtering action 
@@ -73,8 +79,10 @@ const QString FilterFunctionPlugin::filterName(FilterIDType filterId)
 		case FF_FACE_QUALITY : return QString("Per-Face Quality Function");
 		case FF_VERT_COLOR : return QString("Per-Vertex Color Function");
 		case FF_VERT_QUALITY : return QString("Per-Vertex Quality Function");
-		case FF_DEF_ATTRIB : return QString("Define New Per-Vertex Attribute");
+		case FF_DEF_VERT_ATTRIB : return QString("Define New Per-Vertex Attribute");
+		case FF_DEF_FACE_ATTRIB : return QString("Define New Per-Face Attribute");
 		case FF_GRID : return QString("Grid Generator");
+		case FF_REFINE : return QString("Refine User-Defined");
 		default : assert(0); 
 	}
 	return QString("error!");
@@ -128,25 +136,50 @@ const QString FilterFunctionPlugin::filterInfo(FilterIDType filterId)
 									     "<b>q0,q1,q2</b> for <b>quality</b>.<br>"
 									     "(,),=,<<,>> are allowed.");
 
-		case FF_DEF_ATTRIB : return tr("Add a new Per-Vertex attribute to current mesh.<br>"
+		case FF_DEF_VERT_ATTRIB : return tr("Add a new Per-Vertex attribute to current mesh.<br>"
 								       "You can specify custom name and a function to generate attribute's value<br>"
-									   "It's possibile to use per-vertex variables in the expression:<br>"
+									   "It's possible to use per-vertex variables in the expression:<br>"
 									   "x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality) "
 									   "and <b>all</b> custom attribute already defined by user.<br>"
 									   "<font color=\"#FF0000\">name specified below can be used in other filter function</font>");
 
+		case FF_DEF_FACE_ATTRIB : return tr("Add a new Per-Face attribute to current mesh.<br>"
+									   "You can specify custom name and a function to generate attribute's value<br>"
+									   "It's possible to use per-face variables in the expression:<br>"
+									   "<b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>"
+									   "and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,"
+									   "<b>q0,q1,q2</b> for <b>quality</b>.<br>"
+									   "<font color=\"#FF0000\">name specified below can be used in other filter function</font>");
+
 		case FF_GRID : return tr("Generate a new 2D Grid mesh with number of vertices on X and Y axis specified by user with absolute length/height.<br>"
-						         "It's possibile to center Grid on origin.");
+						         "It's possible to center Grid on origin.");
+
+		case FF_REFINE : return tr("Refine current mesh with user defined parameters.<br>"
+							       "Specify a Boolean Function needed to select which edges will be cut for refinement purpose.<br>"
+								   "Each edge is identified with first and second vertex.<br>"
+								   "Arguments accepted are first and second vertex attributes:<br>"
+								   "<b>x0,y0,z0</b> <b>x1,y1,z1</b> for coord <b>nx0,ny0,nz0</b> <b>nx1,ny1,nz1</b> for normal<br>"
+								   "<b>r0,g0,b0</b> <b>r1,g1,b1</b> for color <b>q0</b> <b>q1</b> for quality.<br><br>"
+								   "Coords for new vertex on edge are generated with function x,y and z<br>"
+								   "You can use <b>x0,y0,z0</b> and <b>x1,y1,z1</b><br>");
+
 		default : assert(0); 
 	}
-	return QString("error!");
+	return QString("filter not found!");
 }
 
 const FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {
+    case FF_FACE_SELECTION : 
+	case FF_VERT_SELECTION : return MeshFilterInterface::Selection;
+	case FF_FACE_QUALITY :
+	case FF_VERT_QUALITY : return MeshFilterInterface::Quality;
+    case FF_VERT_COLOR:	return MeshFilterInterface::VertexColoring;
+	case FF_FACE_COLOR: return MeshFilterInterface::FaceColoring;
     case FF_GRID      : return MeshFilterInterface::MeshCreation;
+	case FF_REFINE    : return MeshFilterInterface::Remeshing; 
     default			  : return MeshFilterInterface::Generic;
   }
 }
@@ -155,7 +188,7 @@ const PluginInfo &FilterFunctionPlugin::pluginInfo()
 {
    static PluginInfo ai;
    ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.4");
+	 ai.Version = tr("0.5");
 	 ai.Author = ("Giuseppe Alemanno");
    return ai;
  }
@@ -168,11 +201,14 @@ const int FilterFunctionPlugin::getRequirements(QAction *action)
 	case FF_GEOM_FUNC :
 	case FF_VERT_COLOR :
 	case FF_VERT_QUALITY :
-	case FF_DEF_ATTRIB :
+	case FF_DEF_VERT_ATTRIB :
 	case FF_GRID : return 0;
+	case FF_DEF_FACE_ATTRIB :
 	case FF_FACE_SELECTION :
 	case FF_FACE_QUALITY :
     case FF_FACE_COLOR : return MeshModel::MM_FACECOLOR;
+	case FF_REFINE : 
+		return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_VERTMARK;
     default: assert(0);
   }
   return 0;
@@ -225,9 +261,9 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 			break;
 
 		case FF_VERT_COLOR:
-			parlst.addString("r","", "func r = ", "function to generate Red component. Expected Range 0-255");
-			parlst.addString("g","", "func g = ", "function to generate Green component. Expected Range 0-255");
-			parlst.addString("b","", "func b = ", "function to generate Blue component. Expected Range 0-255");
+			parlst.addString("x","", "func r = ", "function to generate Red component. Expected Range 0-255");
+			parlst.addString("y","", "func g = ", "function to generate Green component. Expected Range 0-255");
+			parlst.addString("z","", "func b = ", "function to generate Blue component. Expected Range 0-255");
 			break;
 
 		case FF_VERT_QUALITY:
@@ -236,7 +272,12 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 			parlst.addBool("map",false,"map into color", "if checked map quality generated values into per-vertex color");
 			break;
 
-		case FF_DEF_ATTRIB:
+		case FF_DEF_VERT_ATTRIB:
+			parlst.addString("name","","Name", "the name of new attribute. you can access attribute in other filters through this name");
+			parlst.addString("expr","","Function =", "function to calculate custom attribute value for each vertex");
+			break;
+
+		case FF_DEF_FACE_ATTRIB:
 			parlst.addString("name","","Name", "the name of new attribute. you can access attribute in other filters through this name");
 			parlst.addString("expr","","Function =", "function to calculate custom attribute value for each vertex");
 			break;
@@ -250,6 +291,13 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 						   "Grid is first generated and than moved into origin (using muparser lib to perform fast calc on every vertex)");
 			break;
 
+		case FF_REFINE :
+			parlst.addString("condSelect","","boolean function","type a boolean function that will be evaluated on every edge");
+			parlst.addString("x","","x =","function to generate x coord of new vertex in [x0,x1].<br>For example (x0+x1)/2");
+			parlst.addString("y","","y =","function to generate x coord of new vertex in [y0,y1].<br>For example (y0+y1)/2");
+			parlst.addString("z","","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2");
+			break;
+
 		default : assert(0); 
 	}
 }
@@ -261,14 +309,13 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 	switch(ID(filter)) {
 		case FF_VERT_SELECTION :
 			{
-				QString select = par.getString("condSelect");
+				std::string expr = par.getString("condSelect").toStdString();
 			
 				// muparser initialization and explicitely define parser variables
 				Parser p;
 				setPerVertexVariables(p);
 
 				// set expression inserted by user as string (required by muparser)
-				std::string expr = select.toStdString();
 				p.SetExpr(expr);
 
 				int numvert = 0;
@@ -278,24 +325,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::VertexIterator vi;
 				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				{
-					x = (*vi).P()[0]; // coord x
-					y = (*vi).P()[1]; // coord y
-					z = (*vi).P()[2]; // coord z
-		
-					nx = (*vi).N()[0]; // normal coord x
-					ny = (*vi).N()[1]; // normal coord y
-					nz = (*vi).N()[2]; // normal coord z
-
-					r = (*vi).C()[0];  // color R
-					g = (*vi).C()[1];  // color G
-					b = (*vi).C()[2];  // color B
-
-					q = (*vi).Q();     // quality
-
-					// if user-defined attributes exist (vector is not empty) 
-					//  set variables to explicit value obtained through attribute's handler
-					for(int i = 0; i < (int) attrValue.size(); i++)
-						attrValue[i] = handlers[i][vi];
+					setAttributes(vi);
 
 					bool selected = false;
 
@@ -346,49 +376,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::FaceIterator fi;
 				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				{
-					x0 = (*fi).V(0)->P()[0];
-					y0 = (*fi).V(0)->P()[1];
-					z0 = (*fi).V(0)->P()[2];
-
-					x1 = (*fi).V(1)->P()[0];
-					y1 = (*fi).V(1)->P()[1];
-					z1 = (*fi).V(1)->P()[2];
-
-					x2 = (*fi).V(2)->P()[0];
-					y2 = (*fi).V(2)->P()[1];
-					z2 = (*fi).V(2)->P()[2];
-
-					nx0 = (*fi).V(0)->N()[0];
-					ny0 = (*fi).V(0)->N()[1];
-					nz0 = (*fi).V(0)->N()[2];
-
-					nx1 = (*fi).V(1)->N()[0];
-					ny1 = (*fi).V(1)->N()[1];
-					nz1 = (*fi).V(1)->N()[2];
-
-					nx2 = (*fi).V(2)->N()[0];
-					ny2 = (*fi).V(2)->N()[1];
-					nz2 = (*fi).V(2)->N()[2];
-
-					r0 = (*fi).V(0)->C()[0];
-					g0 = (*fi).V(0)->C()[1];
-					b0 = (*fi).V(0)->C()[2];
-
-					r1 = (*fi).V(1)->C()[0];
-					g1 = (*fi).V(1)->C()[1];
-					b1 = (*fi).V(1)->C()[2];
-
-					r2 = (*fi).V(2)->C()[0];
-					g2 = (*fi).V(2)->C()[1];
-					b2 = (*fi).V(2)->C()[2];
-
-					q0 = (*fi).V(0)->Q();
-					q1 = (*fi).V(1)->Q();
-					q2 = (*fi).V(2)->Q();
-					
-					r = (*fi).C()[0];
-					g = (*fi).C()[1];
-					b = (*fi).C()[2];
+					setAttributes(fi);
 
 					bool selected = false;
 
@@ -416,10 +404,12 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 		break;
 
 		case FF_GEOM_FUNC :
+		case FF_VERT_COLOR:
 			{
-				QString func_x = par.getString("x");
-				QString func_y = par.getString("y");
-				QString func_z = par.getString("z");
+				// FF_VERT_COLOR : x = r, y = g, z = b
+				std::string func_x = par.getString("x").toStdString();
+				std::string func_y = par.getString("y").toStdString();
+				std::string func_z = par.getString("z").toStdString();
 
 				// muparser initialization and explicitely define parser variables
 				// function for x,y and z must use different parser and variables
@@ -429,70 +419,55 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				setPerVertexVariables(p2);
 				setPerVertexVariables(p3);
 
-				p1.SetExpr(func_x.toStdString());
-				p2.SetExpr(func_y.toStdString());
-				p3.SetExpr(func_z.toStdString());
+				p1.SetExpr(func_x);
+				p2.SetExpr(func_y);
+				p3.SetExpr(func_z);
 
-				CMeshO::VertexIterator vi;
 				double newx,newy,newz;
 				errorMessage = "";
 
 				time_t start = clock();
 
 				// every parser variables is related to vertex coord and attributes.
+				CMeshO::VertexIterator vi;
 				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				{
-					x = (*vi).P()[0]; // coord x
-					y = (*vi).P()[1]; // coord y
-					z = (*vi).P()[2]; // coord z
-
-					nx = (*vi).N()[0]; // normal coord x
-					ny = (*vi).N()[1]; // normal coord y
-					nz = (*vi).N()[2]; // normal coord z
-
-					r = (*vi).C()[0];  // color R
-					g = (*vi).C()[1];  // color G
-					b = (*vi).C()[2];  // color B
-
-					q = (*vi).Q();     // quality
-
-					// if user-defined attributes exist (vector is not empty) 
-					//  set variables to explicit value obtained through attribute's handler
-					for(int i = 0; i < (int) attrValue.size(); i++)
-						attrValue[i] = handlers[i][vi];
+					setAttributes(vi);
 
 					// every function is evaluated by different parser.
 					// errorMessage dialog contains errors for func x, func y and func z
 					try { newx = p1.Eval(); } 
 					catch(Parser::exception_type &e) {
-						errorMessage += "func x: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("1st func : ",e);
 					}
 
 					try { newy = p2.Eval(); } 
 					catch(Parser::exception_type &e) {
-						errorMessage += "func y: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("2nd func : ",e);
 					}
 
 					try { newz = p3.Eval(); } 
 					catch(Parser::exception_type &e) {
-						errorMessage += "func z: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("3rd func : ",e);
 					}
 					if(errorMessage != "") return false;
 
-					// set new vertex coord for this iteration
-					(*vi).P() = Point3f(newx,newy,newz);
+					if(ID(filter) == FF_GEOM_FUNC) 
+						// set new vertex coord for this iteration
+						(*vi).P() = Point3f(newx,newy,newz); 
+
+					if(ID(filter) == FF_VERT_COLOR)
+						// set new color for this iteration
+						(*vi).C() = Color4b(newx,newy,newz,255);
+
 			    }
 
-				// update bounding box, normalize normals
-				tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-				tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
-				tri::UpdateBounding<CMeshO>::Box(m.cm);
+				if(ID(filter) == FF_GEOM_FUNC) {
+					// update bounding box, normalize normals
+					tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+					tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
+					tri::UpdateBounding<CMeshO>::Box(m.cm);
+				}
 
 				// if succeded log stream contains number of vertices processed and time elapsed
 				Log(GLLogStream::Info, "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
@@ -500,123 +475,24 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				return true;
 			}
 		break;
-
-		case FF_VERT_COLOR:
-			{
-				QString func_r = par.getString("r");
-				QString func_g = par.getString("g");
-				QString func_b = par.getString("b");
-
-				// muparser initialization and explicitely define parser variables
-				// function for x,y and z must use different parser and variables
-				Parser p1,p2,p3;
-
-				setPerVertexVariables(p1);
-				setPerVertexVariables(p2);
-				setPerVertexVariables(p3);
-
-				p1.SetExpr(func_r.toStdString());
-				p2.SetExpr(func_g.toStdString());
-				p3.SetExpr(func_b.toStdString());
-
-				CMeshO::VertexIterator vi;
-				double newr,newg,newb;
-				errorMessage = "";
-
-				time_t start = clock();
-
-				// every parser variables is related to vertex coord and attributes.
-				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
-				{
-					x = (*vi).P()[0]; // coord x
-					y = (*vi).P()[1]; // coord y
-					z = (*vi).P()[2]; // coord z
-
-					nx = (*vi).N()[0]; // normal coord x
-					ny = (*vi).N()[1]; // normal coord y
-					nz = (*vi).N()[2]; // normal coord z
-
-					r = (*vi).C()[0];  // color R
-					g = (*vi).C()[1];  // color G
-					b = (*vi).C()[2];  // color B
-
-					q = (*vi).Q();     // quality
-
-					// if user-defined attributes exist (vector is not empty) 
-					//  set variables to explicit value obtained through attribute's handler
-					for(int i = 0; i < (int) attrValue.size(); i++)
-						attrValue[i] = handlers[i][vi];
-
-					// every function is evaluated by different parser.
-					// errorMessage dialog contains errors for func r, func g and func b
-					try { newr = p1.Eval(); } 
-					catch(Parser::exception_type &e) {
-						errorMessage += "func r: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
-					}
-
-					try { newg = p2.Eval(); } 
-					catch(Parser::exception_type &e) {
-						errorMessage += "func g: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
-					}
-
-					try { newb = p3.Eval(); } 
-					catch(Parser::exception_type &e) {
-						errorMessage += "func b: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
-					}
-					if(errorMessage != "") return false;
-
-					// set new color for this iteration
-					(*vi).C() = Color4b(newr,newg,newb,255);
-			    }
-
-				// if succeded log stream contains number of vertices processed and time elapsed
-				Log(GLLogStream::Info, "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
-
-				return true;
-			}
-		break;
-
+		
 		case FF_VERT_QUALITY:
 			{
-				QString func_q = par.getString("q");
+				std::string func_q = par.getString("q").toStdString();
 				
 				// muparser initialization and define custom variables
 				Parser p;
 				setPerVertexVariables(p);
 
 				// set expression to calc with parser
-				p.SetExpr(func_q.toStdString());
-
-				time_t start = clock();
+				p.SetExpr(func_q);
 
 				// every parser variables is related to vertex coord and attributes.
+				time_t start = clock();
 				CMeshO::VertexIterator vi;
 				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				{
-					x = (*vi).P()[0]; // coord x
-					y = (*vi).P()[1]; // coord y
-					z = (*vi).P()[2]; // coord z
-		
-					nx = (*vi).N()[0]; // normal coord x
-					ny = (*vi).N()[1]; // normal coord y
-					nz = (*vi).N()[2]; // normal coord z
-
-					r = (*vi).C()[0];  // color R
-					g = (*vi).C()[1];  // color G
-					b = (*vi).C()[2];  // color B
-
-					q = (*vi).Q();     // quality
-
-					// if user-defined attributes exist (vector is not empty) 
-					//  set variables to explicit value obtained through attribute's handler
-					for(int i = 0; i < (int) attrValue.size(); i++)
-						attrValue[i] = handlers[i][vi];
+					setAttributes(vi);
 
 					// use parser to evaluate function specified above
 					// in case of fail, errorMessage dialog contains details of parser's error
@@ -629,31 +505,10 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				}
 
 				// normalize quality with values in [0..1] 
-				if(par.getBool("normalize"))
-				{
-					std::pair<double,double> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);	
-					p.DefineVar("minq",&minmax.first);
-					p.DefineVar("maxq",&minmax.second);
-					p.SetExpr("(q-minq)/(maxq-minq)");
-					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) 
-					{
-						q = (*vi).Q();
-						try {
-							(*vi).Q() = p.Eval();
-						} catch(Parser::exception_type &e) {
-							errorMessage = e.GetMsg().c_str();
-  							return false;
-						}
-					}
-				}
-
+				if(par.getBool("normalize")) normalizeQuality(m);
+				
 				// map quality into per-vertex color
-				if(par.getBool("map")) 
-				{
-					std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);			
-					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
-						(*vi).C().ColorRamp(minmax.first,minmax.second,(*vi).Q());
-				}
+				if(par.getBool("map")) mapQualityIntoColor(m);
 
 				// if succeded log stream contains number of vertices and time elapsed
 				Log(GLLogStream::Info, "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
@@ -664,10 +519,9 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 
 		case FF_FACE_COLOR:
 			{
-				// NOTE: you have to manually set Render -> Color -> Per Face
-				QString func_r = par.getString("r");
-				QString func_g = par.getString("g");
-				QString func_b = par.getString("b");
+				std::string func_r = par.getString("r").toStdString();
+				std::string func_g = par.getString("g").toStdString();
+				std::string func_b = par.getString("b").toStdString();
 
 				// muparser initialization and explicitely define parser variables
 				// every function must uses own parser and variables
@@ -677,9 +531,9 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				setPerFaceVariables(p2);
 				setPerFaceVariables(p3);
 
-				p1.SetExpr(func_r.toStdString());
-				p2.SetExpr(func_g.toStdString());
-				p3.SetExpr(func_b.toStdString());
+				p1.SetExpr(func_r);
+				p2.SetExpr(func_g);
+				p3.SetExpr(func_b);
 
 				// RGB is related to every face
 				CMeshO::FaceIterator fi;
@@ -691,72 +545,23 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				// every parser variables is related to face attributes.
 				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				{
-					x0 = (*fi).V(0)->P()[0];
-					y0 = (*fi).V(0)->P()[1];
-					z0 = (*fi).V(0)->P()[2];
-
-					x1 = (*fi).V(1)->P()[0];
-					y1 = (*fi).V(1)->P()[1];
-					z1 = (*fi).V(1)->P()[2];
-
-					x2 = (*fi).V(2)->P()[0];
-					y2 = (*fi).V(2)->P()[1];
-					z2 = (*fi).V(2)->P()[2];
-
-					nx0 = (*fi).V(0)->N()[0];
-					ny0 = (*fi).V(0)->N()[1];
-					nz0 = (*fi).V(0)->N()[2];
-
-					nx1 = (*fi).V(1)->N()[0];
-					ny1 = (*fi).V(1)->N()[1];
-					nz1 = (*fi).V(1)->N()[2];
-
-					nx2 = (*fi).V(2)->N()[0];
-					ny2 = (*fi).V(2)->N()[1];
-					nz2 = (*fi).V(2)->N()[2];
-
-					r0 = (*fi).V(0)->C()[0];
-					g0 = (*fi).V(0)->C()[1];
-					b0 = (*fi).V(0)->C()[2];
-
-					r1 = (*fi).V(1)->C()[0];
-					g1 = (*fi).V(1)->C()[1];
-					b1 = (*fi).V(1)->C()[2];
-
-					r2 = (*fi).V(2)->C()[0];
-					g2 = (*fi).V(2)->C()[1];
-					b2 = (*fi).V(2)->C()[2];
-
-					q0 = (*fi).V(0)->Q();
-					q1 = (*fi).V(1)->Q();
-					q2 = (*fi).V(2)->Q();
-					
-					r = (*fi).C()[0];
-					g = (*fi).C()[1];
-					b = (*fi).C()[2];
-
+					setAttributes(fi);
 
 					// evaluate functions to generate new color
 					// in case of fail, error dialog contains details of parser's error
 					try { newr = p1.Eval(); }
 					catch(Parser::exception_type &e) {
-						errorMessage += "func r: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("func r: ",e);
 					}
 
 					try { newg = p2.Eval(); }
 					catch(Parser::exception_type &e) {
-						errorMessage += "func g: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("func g: ",e);
 					}
 
 					try { newb = p3.Eval(); }
 					catch(Parser::exception_type &e) {
-						errorMessage += "func b: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("func b: ",e);
 					}
 
 					if(errorMessage != "") return false;
@@ -775,9 +580,9 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 
 		case FF_FACE_QUALITY:
 			{
-				QString func_q0 = par.getString("q0");
-				QString func_q1 = par.getString("q1");
-				QString func_q2 = par.getString("q2");
+				std::string func_q0 = par.getString("q0").toStdString();
+				std::string func_q1 = par.getString("q1").toStdString();
+				std::string func_q2 = par.getString("q2").toStdString();
 
 				// muparser initialization and define custom variables
 				Parser p1,p2,p3;
@@ -786,124 +591,44 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				setPerFaceVariables(p3);
 				
 				// set expression to calc with parser
-				p1.SetExpr(func_q0.toStdString());
-				p2.SetExpr(func_q1.toStdString());
-				p3.SetExpr(func_q2.toStdString());
+				p1.SetExpr(func_q0);
+				p2.SetExpr(func_q1);
+				p3.SetExpr(func_q2);
 
 				time_t start = clock();
-				
-				// three different function for quality of every vertex of a face
-				CMeshO::FaceIterator fi;
-				double newq0, newq1, newq2;
+				errorMessage = "";
 
 				// every parser variables is related to face attributes.
+				CMeshO::FaceIterator fi;
 				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				{
-					x0 = (*fi).V(0)->P()[0];
-					y0 = (*fi).V(0)->P()[1];
-					z0 = (*fi).V(0)->P()[2];
-
-					x1 = (*fi).V(1)->P()[0];
-					y1 = (*fi).V(1)->P()[1];
-					z1 = (*fi).V(1)->P()[2];
-
-					x2 = (*fi).V(2)->P()[0];
-					y2 = (*fi).V(2)->P()[1];
-					z2 = (*fi).V(2)->P()[2];
-
-					nx0 = (*fi).V(0)->N()[0];
-					ny0 = (*fi).V(0)->N()[1];
-					nz0 = (*fi).V(0)->N()[2];
-
-					nx1 = (*fi).V(1)->N()[0];
-					ny1 = (*fi).V(1)->N()[1];
-					nz1 = (*fi).V(1)->N()[2];
-
-					nx2 = (*fi).V(2)->N()[0];
-					ny2 = (*fi).V(2)->N()[1];
-					nz2 = (*fi).V(2)->N()[2];
-
-					r0 = (*fi).V(0)->C()[0];
-					g0 = (*fi).V(0)->C()[1];
-					b0 = (*fi).V(0)->C()[2];
-
-					r1 = (*fi).V(1)->C()[0];
-					g1 = (*fi).V(1)->C()[1];
-					b1 = (*fi).V(1)->C()[2];
-
-					r2 = (*fi).V(2)->C()[0];
-					g2 = (*fi).V(2)->C()[1];
-					b2 = (*fi).V(2)->C()[2];
-
-					q0 = (*fi).V(0)->Q();
-					q1 = (*fi).V(1)->Q();
-					q2 = (*fi).V(2)->Q();
-					
-					r = (*fi).C()[0];
-					g = (*fi).C()[1];
-					b = (*fi).C()[2];
+					setAttributes(fi);
 
 					// evaluate functions to generate new quality
 					// in case of fail, error dialog contains details of parser's error
-					try { newq0 = p1.Eval(); }
+					try { (*fi).V(0)->Q() = p1.Eval(); }
 					catch(Parser::exception_type &e) {
-						errorMessage += "func q0: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("func q0: ",e);
 					}
 
-					try { newq1 = p2.Eval(); }
+					try { (*fi).V(1)->Q() = p2.Eval(); }
 					catch(Parser::exception_type &e) {
-						errorMessage += "func q1: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("func q1: ",e);
 					}
 
-					try { newq2 = p3.Eval(); }
+					try { (*fi).V(2)->Q() = p3.Eval(); }
 					catch(Parser::exception_type &e) {
-						errorMessage += "func q2: ";
-						errorMessage += e.GetMsg().c_str();
-						errorMessage += "\n";
+						showParserError("func q2: ",e);
 					}
 
 					if(errorMessage != "") return false;
-
-					//set new quality for every vertex of a face
-					(*fi).V(0)->Q() = newq0;
-					(*fi).V(1)->Q() = newq1;
-					(*fi).V(2)->Q() = newq2;
 				}
 
 				// normalize quality with values in [0..1]
-				if(par.getBool("normalize"))
-				{
-					Parser p;
-					p.DefineVar("q",&q);
-					std::pair<double,double> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);	
-					p.DefineVar("minq",&minmax.first);
-					p.DefineVar("maxq",&minmax.second);
-					p.SetExpr("(q-minq)/(maxq-minq)");
-					CMeshO::VertexIterator vi;
-					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) 
-					{
-						q = (*vi).Q();
-						try {
-							(*vi).Q() = p.Eval();
-						} catch(Parser::exception_type &e) {
-							errorMessage = e.GetMsg().c_str();
-  							return false;
-						}
-					}
-				}
+				if(par.getBool("normalize")) normalizeQuality(m);
 
 				// map quality into per-vertex color
-				if(par.getBool("map")) 
-				{
-					std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);		
-					CMeshO::VertexIterator vi;
-					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
-						(*vi).C().ColorRamp(minmax.first,minmax.second,(*vi).Q());
-				}
+				if(par.getBool("map")) mapQualityIntoColor(m);
 
 				// if succeded log stream contains number of faces processed and time elapsed
 				Log(GLLogStream::Info, "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
@@ -912,7 +637,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 			}
 		break;
 
-		case FF_DEF_ATTRIB :
+		case FF_DEF_VERT_ATTRIB :
 			{
 				std::string name = par.getString("name").toStdString();
 				std::string expr = par.getString("expr").toStdString();
@@ -924,7 +649,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 					return false;
 				}
 				CMeshO::PerVertexAttributeHandle<float> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<float> (m.cm,name);
-				
+
 				Parser p;
 				setPerVertexVariables(p);
 				p.SetExpr(expr);
@@ -935,24 +660,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::VertexIterator vi;
 				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				{
-					x = (*vi).P()[0]; // coord x
-					y = (*vi).P()[1]; // coord y
-					z = (*vi).P()[2]; // coord z
-		
-					nx = (*vi).N()[0]; // normal coord x
-					ny = (*vi).N()[1]; // normal coord y
-					nz = (*vi).N()[2]; // normal coord z
-
-					r = (*vi).C()[0];  // color R
-					g = (*vi).C()[1];  // color G
-					b = (*vi).C()[2];  // color B
-
-					q = (*vi).Q();     // quality
-
-					// if user-defined attributes already exist 
-					//  set variables to explicit value obtained through attribute's handler
-					for(int i = 0; i < (int) attrValue.size(); i++)
-						attrValue[i] = handlers[i][vi];
+					setAttributes(vi);
 
 					// add new user-defined attribute
 					try {
@@ -965,13 +673,61 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 
 				// add string, double and handler to vector.
 				// vectors keep tracks of new attributes and let muparser use explicit variables
-				// it can be possibile to use custom attributes in other filters
-				attrNames.push_back(name);
-				attrValue.push_back(0);
-				handlers.push_back(h);
+				// it's possibile to use custom attributes in other filters
+				v_attrNames.push_back(name);
+				v_attrValue.push_back(0);
+				vhandlers.push_back(h);
 
 				// if succeded log stream contains number of vertices processed and time elapsed
 				Log(GLLogStream::Info, "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
+
+				return true;
+			}
+		break;
+
+		case FF_DEF_FACE_ATTRIB :
+			{
+				std::string name = par.getString("name").toStdString();
+				std::string expr = par.getString("expr").toStdString();
+				
+				// add per-face attribute with type float and name specified by user
+				if(tri::HasPerFaceAttribute(m.cm,name)) 
+				{
+					errorMessage = "attribute already exists"; 
+					return false;
+				}
+				CMeshO::PerFaceAttributeHandle<float> h = tri::Allocator<CMeshO>::AddPerFaceAttribute<float> (m.cm,name);
+				
+				Parser p;
+				setPerFaceVariables(p);
+				p.SetExpr(expr);
+
+				time_t start = clock();
+
+				// every parser variables is related to face attributes.
+				CMeshO::FaceIterator fi;
+				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+				{
+					setAttributes(fi);
+
+					// add new user-defined attribute
+					try {
+						h[fi] = p.Eval();
+					} catch(Parser::exception_type &e) {
+						errorMessage = e.GetMsg().c_str();
+  						return false;
+					}
+				}
+
+				// add string, double and handler to vector.
+				// vectors keep tracks of new attributes and let muparser use explicit variables
+				// it's possibile to use custom attributes in other filters
+				f_attrNames.push_back(name);
+				f_attrValue.push_back(0);
+				fhandlers.push_back(h);
+
+				// if succeded log stream contains number of vertices processed and time elapsed
+				Log(GLLogStream::Info, "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
 				return true;
 			}
@@ -997,57 +753,59 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				// if "centered on origin" is checked than move generated Grid in (0,0,0)
 				if(par.getBool("center")) 
 				{
-					// move x and y using parser
-					Parser p1,p2;
-					double x,y;
+					// move x and y
 					double halfw = double(w-1)/2;
 					double halfh = double(h-1)/2;
 					double wld = wl/double(w);
 					double hld = hl/float(h);
 
-					p1.DefineVar("x",&x);
-					p1.DefineVar("y",&y);
-					p1.DefineVar("wld",&wld);
-					p1.DefineVar("hld",&hld);
-					p1.DefineVar("halfw",&halfw);
-					p1.DefineVar("halfh",&halfh);
-
-					p2.DefineVar("x",&x);
-					p2.DefineVar("y",&y);
-					p2.DefineVar("wld",&wld);
-					p2.DefineVar("hld",&hld);
-					p2.DefineVar("halfw",&halfw);
-					p2.DefineVar("halfh",&halfh);
-
-					// calc new x and new y
-					p1.SetExpr("x - (wld * halfw)");
-					p2.SetExpr("y - (hld * halfh)");
-					
 					CMeshO::VertexIterator vi;
 					for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 					{
-						x = (*vi).P()[0];
-						y = (*vi).P()[1];
-
-						try {
-							(*vi).P()[0] = p1.Eval();
-						} catch(Parser::exception_type &e) {
-							errorMessage = e.GetMsg().c_str();
-  							return false;
-						}
-						try {
-							(*vi).P()[1] = p2.Eval();
-						} catch(Parser::exception_type &e) {
-							errorMessage = e.GetMsg().c_str();
-							return false;
-						}
+						(*vi).P()[0] = (*vi).P()[0] - (wld * halfw);
+						(*vi).P()[1] = (*vi).P()[1] - (hld * halfh);
 					}
 				}
-
 				// update bounding box, normals
 				tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	
 				tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
 				tri::UpdateBounding<CMeshO>::Box(m.cm);
+				
+				return true;
+			}
+		break;
+
+		case FF_REFINE :
+			{
+				std::string condSelect = par.getString("condSelect").toStdString();
+				
+				std::string expr1 = par.getString("x").toStdString();
+				std::string expr2 = par.getString("y").toStdString();
+				std::string expr3 = par.getString("z").toStdString();
+
+				bool errorMidPoint = false;
+				bool errorEdgePred = false;
+				std::string msg = "";
+
+				// check parsing errors while creating two func obj
+				// display error message
+				MidPointCustom<CMeshO> mid = MidPointCustom<CMeshO>(expr1,expr2,expr3,errorMidPoint,msg);
+				CustomEdge<CMeshO> edge = CustomEdge<CMeshO>(condSelect,errorEdgePred,msg);
+				if(errorMidPoint || errorEdgePred) 
+				{
+					errorMessage = msg.c_str();
+					return false;
+				}
+
+				// Refine current mesh.
+				// Only edge specified with CustomEdge pred are selected
+				//  and the new vertex is choosen with MidPointCustom created above
+				RefineE<CMeshO, MidPointCustom<CMeshO>, CustomEdge<CMeshO> >
+					(m.cm, mid, edge, false, cb);
+
+				m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_VERTMARK);
+				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+
 				return true;
 			}
 		break;
@@ -1057,9 +815,118 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 	return false;
 }
 
-/* Function explicitely define parser variables to perform per-vertex filter action
-   x, y, z for vertex coord, nx, ny, nz for normal coord, r, g ,b for color
-   and q for quality */
+// display parsing error in dialog
+void FilterFunctionPlugin::showParserError(char* s, Parser::exception_type &e)
+{
+	errorMessage += s;
+	errorMessage += e.GetMsg().c_str();
+	errorMessage += "\n";
+}
+
+// normalize vertex quality in range [0..1]
+void FilterFunctionPlugin::normalizeQuality(MeshModel &m)
+{
+	std::pair<double,double> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);	
+	CMeshO::VertexIterator vi;
+	for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) 
+		(*vi).Q() = ((*vi).Q() - minmax.first)/(minmax.second - minmax.first);
+}
+
+// map current vertex quality in color for each vertex
+void FilterFunctionPlugin::mapQualityIntoColor(MeshModel &m)
+{
+	std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);	
+	CMeshO::VertexIterator vi;
+	for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+		(*vi).C().ColorRamp(minmax.first,minmax.second,(*vi).Q());
+}
+
+// set per-vertex attributes associated to parser variables
+void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator &vi)
+{
+	x = (*vi).P()[0]; // coord x
+	y = (*vi).P()[1]; // coord y
+	z = (*vi).P()[2]; // coord z
+
+	nx = (*vi).N()[0]; // normal coord x
+	ny = (*vi).N()[1]; // normal coord y
+	nz = (*vi).N()[2]; // normal coord z
+
+	r = (*vi).C()[0];  // color R
+	g = (*vi).C()[1];  // color G
+	b = (*vi).C()[2];  // color B
+
+	q = (*vi).Q();     // quality
+
+	// if user-defined attributes exist (vector is not empty) 
+	//  set variables to explicit value obtained through attribute's handler
+	for(int i = 0; i < (int) v_attrValue.size(); i++)
+		v_attrValue[i] = vhandlers[i][vi];	
+}
+
+// set per-face attributes associated to parser variables
+void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi)
+{
+	// set attributes for First vertex
+	// coords, normal coords, quality
+	x0 = (*fi).V(0)->P()[0];
+	y0 = (*fi).V(0)->P()[1];
+	z0 = (*fi).V(0)->P()[2];
+
+	nx0 = (*fi).V(0)->N()[0];
+	ny0 = (*fi).V(0)->N()[1];
+	nz0 = (*fi).V(0)->N()[2];
+
+	r0 = (*fi).V(0)->C()[0];
+	g0 = (*fi).V(0)->C()[1];
+	b0 = (*fi).V(0)->C()[2];
+
+	q0 = (*fi).V(0)->Q();
+	q1 = (*fi).V(1)->Q();
+	q2 = (*fi).V(2)->Q();
+
+	// set attributes for Second vertex
+	// coords, normal coords, quality
+	x1 = (*fi).V(1)->P()[0];
+	y1 = (*fi).V(1)->P()[1];
+	z1 = (*fi).V(1)->P()[2];
+
+	nx1 = (*fi).V(1)->N()[0];
+	ny1 = (*fi).V(1)->N()[1];
+	nz1 = (*fi).V(1)->N()[2];
+
+	r1 = (*fi).V(1)->C()[0];
+	g1 = (*fi).V(1)->C()[1];
+	b1 = (*fi).V(1)->C()[2];
+
+	// set attributes for Third vertex
+	// coords, normal coords, quality
+	x2 = (*fi).V(2)->P()[0];
+	y2 = (*fi).V(2)->P()[1];
+	z2 = (*fi).V(2)->P()[2];
+
+	nx2 = (*fi).V(2)->N()[0];
+	ny2 = (*fi).V(2)->N()[1];
+	nz2 = (*fi).V(2)->N()[2];
+
+	r2 = (*fi).V(2)->C()[0];
+	g2 = (*fi).V(2)->C()[1];
+	b2 = (*fi).V(2)->C()[2];
+
+	// set face color attributes
+	r = (*fi).C()[0];
+	g = (*fi).C()[1];
+	b = (*fi).C()[2];
+
+	// if user-defined attributes exist (vector is not empty) 
+	//  set variables to explicit value obtained through attribute's handler
+	for(int i = 0; i < (int) f_attrValue.size(); i++)
+		f_attrValue[i] = fhandlers[i][fi];
+}
+
+// Function explicitely define parser variables to perform per-vertex filter action
+// x, y, z for vertex coord, nx, ny, nz for normal coord, r, g ,b for color
+// and q for quality 
 void FilterFunctionPlugin::setPerVertexVariables(Parser &p)
 {
 	p.DefineVar("x", &x);
@@ -1075,8 +942,8 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p)
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed
-	for(int i = 0; i < (int) attrNames.size(); i++)
-		p.DefineVar(attrNames[i],&attrValue[i]);
+	for(int i = 0; i < (int) v_attrNames.size(); i++)
+		p.DefineVar(v_attrNames[i],&v_attrValue[i]);
 }
 
 // Function explicitely define parser variables to perform Per-Face filter action
@@ -1132,8 +999,8 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p)
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed
-	for(int i = 0; i < (int) attrNames.size(); i++)
-		p.DefineVar(attrNames[i],&attrValue[i]);
+	for(int i = 0; i < (int) f_attrNames.size(); i++)
+		p.DefineVar(f_attrNames[i],&f_attrValue[i]);
 }
 
 Q_EXPORT_PLUGIN(FilterFunctionPlugin)
