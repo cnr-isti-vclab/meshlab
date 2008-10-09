@@ -8,7 +8,7 @@
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\4.3.3"
+!define QT_BASE "C:\Qt\4.4.1"
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -58,10 +58,20 @@ Section "MainSection" SEC01
   CreateDirectory "$SMPROGRAMS\MeshLab"
   CreateShortCut "$SMPROGRAMS\MeshLab\MeshLab.lnk" "$INSTDIR\meshlab.exe"
   CreateShortCut "$DESKTOP\MeshLab.lnk" "$INSTDIR\meshlab.exe"
+  CreateShortCut "$SMPROGRAMS\MeshLabServer.lnk" "cmd.exe"
+
+  ;Let's delete all the dangerous stuff from previous releases.
+  Delete "$INSTDIR\qt*.dll"
+  Delete "$INSTDIR\ming*.dll"
+  Delete "$INSTDIR\plugins\*.dll"
+  Delete "$INSTDIR\imageformats\*.dll"
+  
   SetOutPath "$INSTDIR\shaders"
   File "..\meshlab\shaders\*.frag"
   File "..\meshlab\shaders\*.gdp"
   File "..\meshlab\shaders\*.vert"
+  SetOutPath "$INSTDIR\shadersrm"
+  File "..\meshlab\shadersrm\*.rfx"
   SetOutPath "$INSTDIR\plugins"
   ; IO Plugins (7)
   File "..\meshlab\plugins\baseio.dll"
@@ -71,7 +81,7 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\io_u3d.dll"
   File "..\meshlab\plugins\io_x3d.dll"
   File "..\meshlab\plugins\io_tri.dll"
-  ; filter plugins (17)
+  ; filter plugins (18)
   File "..\meshlab\plugins\cleanfilter.dll"
   File "..\meshlab\plugins\meshfilter.dll"
   File "..\meshlab\plugins\meshcolorize.dll"
@@ -93,6 +103,12 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\filter_trioptimize.dll"
   File "..\meshlab\plugins\filter_unsharp.dll"
   File "..\meshlab\plugins\filter_colorproc.dll"
+  File "..\meshlab\plugins\filter_func.dll"
+  File "..\meshlab\plugins\filter_rangemap.dll"
+
+  File "..\meshlab\plugins\filter_morph.dll"
+  File "..\meshlab\plugins\filter_autoalign.dll"
+
   ; edit plugins (13)
   File "..\meshlab\plugins\editalign.dll"
   File "..\meshlab\plugins\editmeasure.dll"
@@ -103,17 +119,21 @@ Section "MainSection" SEC01
   File "..\meshlab\plugins\editslice.dll"
   File "..\meshlab\plugins\editstraightener.dll"
   File "..\meshlab\plugins\sampleedit.dll"
-  File "..\meshlab\plugins\edit_morpher.dll"
   File "..\meshlab\plugins\edit_pickpoints.dll"
-
   File "..\meshlab\plugins\edit_quality.dll"
+  
   File "..\meshlab\plugins\edit_select.dll"
   File "..\meshlab\plugins\edit_texture.dll"
+  File "..\meshlab\plugins\edit_hole.dll"
+  File "..\meshlab\plugins\edit_topo.dll"
+
   ; decorate plugins (2)
   File "..\meshlab\plugins\meshdecorate.dll"
   File "..\meshlab\plugins\sampledecoration.dll"
   ; render plugins (1)
   File "..\meshlab\plugins\meshrender.dll"
+  File "..\meshlab\plugins\render_rfx.dll"
+
   
   ; All the U3D binary stuff
   SetOutPath "$INSTDIR\plugins\U3D_W32"
@@ -125,6 +145,12 @@ Section "MainSection" SEC01
 
   SetOutPath "$INSTDIR\textures"
   File "..\meshlab\textures\chrome.png"
+  File "..\meshlab\textures\*.dds"
+  File "..\meshlab\textures\fur.png"
+  File "..\meshlab\textures\glyphmosaic.png"
+  File "..\meshlab\textures\NPR Metallic Outline.tga"
+  File "..\meshlab\textures\hatch*.jpg"
+
   SetOutPath "$INSTDIR\textures\cubemaps"
   File "..\meshlab\textures\cubemaps\uffizi*.jpg"
   SetOutPath "$INSTDIR\samples"
