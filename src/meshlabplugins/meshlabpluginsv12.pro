@@ -1,5 +1,4 @@
-# This Project file contains all the stable plugins ready for the deployment in version 1.2
-# Plugins should be added here only when they are reasonably complete and stable.
+# This Project file contains all the stable plugins ready for the deployment in version 1.2 
 
 TEMPLATE      = subdirs
 SUBDIRS       = meshfilter \
@@ -49,6 +48,11 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_texture\
 				../fgt/editpaint\
 				../fgt/filter_colorproc \
-        mlsfilters \
-				io_gts \
+				../fgt/edit_hole \
+				../fgt/edit_topo \
+				../fgt/render_rfx \
+				../fgt/filter_func \
+				mlsfilters\
+				io_gts\
 				io_expe
+
