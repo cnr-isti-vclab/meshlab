@@ -227,7 +227,7 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 	switch(ID(action))	 {
 
 		case FF_VERT_SELECTION :
-			parlst.addString("condSelect","", "boolean function",
+			parlst.addString("condSelect","(q < 0)", "boolean function",
 							 "type a boolean function that will be evaluated in order to select a subset of vertices<br>"
 							 "example: (y > 0) and (ny > 0)");
 
@@ -236,50 +236,50 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 			break;
 
 		case FF_FACE_SELECTION :
-			parlst.addString("condSelect","", "boolean function",
+			parlst.addString("condSelect","(fi == 0)", "boolean function",
 							 "type a boolean function that will be evaluated in order to select a subset of faces<br>");
 			break;
 
 		case FF_GEOM_FUNC :
-			parlst.addString("x","", "func x = ", "insert function to generate new coord for x");
-			parlst.addString("y","", "func y = ", "insert function to generate new coord for y");
-			parlst.addString("z","", "func z = ", "insert function to generate new coord for z");
+			parlst.addString("x","x", "func x = ", "insert function to generate new coord for x");
+			parlst.addString("y","y", "func y = ", "insert function to generate new coord for y");
+			parlst.addString("z","sin(x+y)", "func z = ", "insert function to generate new coord for z");
 			break;
 
 		case FF_FACE_COLOR:
-			parlst.addString("r","", "func r = ", "function to generate Red component. Expected Range 0-255");
-			parlst.addString("g","", "func g = ", "function to generate Green component. Expected Range 0-255");
-			parlst.addString("b","", "func b = ", "function to generate Blue component. Expected Range 0-255");
+			parlst.addString("r","255", "func r = ", "function to generate Red component. Expected Range 0-255");
+			parlst.addString("g","0", "func g = ", "function to generate Green component. Expected Range 0-255");
+			parlst.addString("b","255", "func b = ", "function to generate Blue component. Expected Range 0-255");
 			break;
 
 		case FF_FACE_QUALITY:
-			parlst.addString("q0","", "func q0 = ", "function to generate new Quality for <b>first</b> vertex of every face");
-			parlst.addString("q1","", "func q1 = ", "function to generate new Quality for <b>second</b> vertex of every face");
-			parlst.addString("q2","", "func q2 = ", "function to generate new Quality for <b>third</b> vertex of every face");
+			parlst.addString("q0","x0+y0+z0", "func q0 = ", "function to generate new Quality for <b>first</b> vertex of every face");
+			parlst.addString("q1","v1i", "func q1 = ", "function to generate new Quality for <b>second</b> vertex of every face");
+			parlst.addString("q2","max(x2,y2,z2)", "func q2 = ", "function to generate new Quality for <b>third</b> vertex of every face");
 			parlst.addBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]");
 			parlst.addBool("map",false,"map into color", "if checked map quality generated values into per-vertex color");
 			break;
 
 		case FF_VERT_COLOR:
-			parlst.addString("x","", "func r = ", "function to generate Red component. Expected Range 0-255");
-			parlst.addString("y","", "func g = ", "function to generate Green component. Expected Range 0-255");
-			parlst.addString("z","", "func b = ", "function to generate Blue component. Expected Range 0-255");
+			parlst.addString("x","255", "func r = ", "function to generate Red component. Expected Range 0-255");
+			parlst.addString("y","255", "func g = ", "function to generate Green component. Expected Range 0-255");
+			parlst.addString("z","0", "func b = ", "function to generate Blue component. Expected Range 0-255");
 			break;
 
 		case FF_VERT_QUALITY:
-			parlst.addString("q","", "func q = ", "function to generate new Quality for every vertex");
+			parlst.addString("q","vi", "func q = ", "function to generate new Quality for every vertex");
 			parlst.addBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]");
 			parlst.addBool("map",false,"map into color", "if checked map quality generated values into per-vertex color");
 			break;
 
 		case FF_DEF_VERT_ATTRIB:
-			parlst.addString("name","","Name", "the name of new attribute. you can access attribute in other filters through this name");
-			parlst.addString("expr","","Function =", "function to calculate custom attribute value for each vertex");
+			parlst.addString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name");
+			parlst.addString("expr","x","Function =", "function to calculate custom attribute value for each vertex");
 			break;
 
 		case FF_DEF_FACE_ATTRIB:
-			parlst.addString("name","","Name", "the name of new attribute. you can access attribute in other filters through this name");
-			parlst.addString("expr","","Function =", "function to calculate custom attribute value for each vertex");
+			parlst.addString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name");
+			parlst.addString("expr","fi","Function =", "function to calculate custom attribute value for each vertex");
 			break;
 
 		case FF_GRID :
@@ -292,10 +292,10 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, Filter
 			break;
 
 		case FF_REFINE :
-			parlst.addString("condSelect","","boolean function","type a boolean function that will be evaluated on every edge");
-			parlst.addString("x","","x =","function to generate x coord of new vertex in [x0,x1].<br>For example (x0+x1)/2");
-			parlst.addString("y","","y =","function to generate x coord of new vertex in [y0,y1].<br>For example (y0+y1)/2");
-			parlst.addString("z","","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2");
+			parlst.addString("condSelect","(q0 >= 0 and q1 >= 0)","boolean function","type a boolean function that will be evaluated on every edge");
+			parlst.addString("x","(x0+x1)/2","x =","function to generate x coord of new vertex in [x0,x1].<br>For example (x0+x1)/2");
+			parlst.addString("y","(y0+y1)/2","y =","function to generate x coord of new vertex in [y0,y1].<br>For example (y0+y1)/2");
+			parlst.addString("z","(z0+z1)/2","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2");
 			break;
 
 		default : assert(0); 
@@ -325,7 +325,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::VertexIterator vi;
 				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				{
-					setAttributes(vi);
+					setAttributes(vi,m.cm);
 
 					bool selected = false;
 
@@ -376,7 +376,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::FaceIterator fi;
 				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				{
-					setAttributes(fi);
+					setAttributes(fi,m.cm);
 
 					bool selected = false;
 
@@ -432,7 +432,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::VertexIterator vi;
 				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				{
-					setAttributes(vi);
+					setAttributes(vi,m.cm);
 
 					// every function is evaluated by different parser.
 					// errorMessage dialog contains errors for func x, func y and func z
@@ -492,7 +492,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::VertexIterator vi;
 				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				{
-					setAttributes(vi);
+					setAttributes(vi,m.cm);
 
 					// use parser to evaluate function specified above
 					// in case of fail, errorMessage dialog contains details of parser's error
@@ -545,7 +545,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				// every parser variables is related to face attributes.
 				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				{
-					setAttributes(fi);
+					setAttributes(fi,m.cm);
 
 					// evaluate functions to generate new color
 					// in case of fail, error dialog contains details of parser's error
@@ -602,7 +602,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::FaceIterator fi;
 				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				{
-					setAttributes(fi);
+					setAttributes(fi,m.cm);
 
 					// evaluate functions to generate new quality
 					// in case of fail, error dialog contains details of parser's error
@@ -660,7 +660,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::VertexIterator vi;
 				for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
 				{
-					setAttributes(vi);
+					setAttributes(vi,m.cm);
 
 					// add new user-defined attribute
 					try {
@@ -708,7 +708,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPara
 				CMeshO::FaceIterator fi;
 				for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 				{
-					setAttributes(fi);
+					setAttributes(fi,m.cm);
 
 					// add new user-defined attribute
 					try {
@@ -842,7 +842,7 @@ void FilterFunctionPlugin::mapQualityIntoColor(MeshModel &m)
 }
 
 // set per-vertex attributes associated to parser variables
-void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator &vi)
+void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator &vi, CMeshO &m)
 {
 	x = (*vi).P()[0]; // coord x
 	y = (*vi).P()[1]; // coord y
@@ -858,6 +858,8 @@ void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator &vi)
 
 	q = (*vi).Q();     // quality
 
+	v = vi - m.vert.begin(); // zero based index of current vertex
+
 	// if user-defined attributes exist (vector is not empty) 
 	//  set variables to explicit value obtained through attribute's handler
 	for(int i = 0; i < (int) v_attrValue.size(); i++)
@@ -865,7 +867,7 @@ void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator &vi)
 }
 
 // set per-face attributes associated to parser variables
-void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi)
+void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 {
 	// set attributes for First vertex
 	// coords, normal coords, quality
@@ -918,6 +920,14 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi)
 	g = (*fi).C()[1];
 	b = (*fi).C()[2];
 
+	// zero based index of face
+	f = fi - m.face.begin();
+
+	// zero based index of its vertices
+	v0i = ((*fi).V(0) - &m.vert[0]);
+	v1i = ((*fi).V(1) - &m.vert[0]);
+	v2i = ((*fi).V(2) - &m.vert[0]);
+	
 	// if user-defined attributes exist (vector is not empty) 
 	//  set variables to explicit value obtained through attribute's handler
 	for(int i = 0; i < (int) f_attrValue.size(); i++)
@@ -939,6 +949,7 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p)
 	p.DefineVar("g", &g);
 	p.DefineVar("b", &b);
 	p.DefineVar("q", &q);
+	p.DefineVar("vi",&v);
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed
@@ -996,6 +1007,12 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p)
 	p.DefineVar("r", &r);
 	p.DefineVar("g", &g);
 	p.DefineVar("b", &b);
+
+	// index
+	p.DefineVar("fi",&f);
+	p.DefineVar("v0i",&v0i);
+	p.DefineVar("v1i",&v1i);
+	p.DefineVar("v2i",&v2i);
 
 	// define var for user-defined attributes (if any exists)
 	// if vector is empty, code won't be executed

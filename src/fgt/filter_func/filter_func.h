@@ -40,6 +40,7 @@ class FilterFunctionPlugin : public QObject, public MeshFilterInterface
 protected:
 	double x,y,z,nx,ny,nz,r,g,b,q;
 	double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,r1,g1,b1,r2,g2,b2,q0,q1,q2;
+	double v,f,v0i,v1i,v2i;
 	std::vector<std::string> v_attrNames;
 	std::vector<double> v_attrValue;
 	std::vector<std::string> f_attrNames;
@@ -74,8 +75,8 @@ public:
 	void showParserError(char* s, mu::Parser::exception_type &e);
 	void normalizeQuality(MeshModel &m);
 	void mapQualityIntoColor(MeshModel &m);
-	void setAttributes(CMeshO::VertexIterator &vi);
-	void setAttributes(CMeshO::FaceIterator &fi);
+	void setAttributes(CMeshO::VertexIterator &vi,CMeshO &m);
+	void setAttributes(CMeshO::FaceIterator &fi,CMeshO &m);
 	void setPerVertexVariables(mu::Parser &p);
 	void setPerFaceVariables(mu::Parser &p);
 
