@@ -34,7 +34,6 @@ RfxRenderTarget::RfxRenderTarget(const QString& rtName)
 	mipmaps = false;
 	vportdim = false;
 	initOk = false;
-	reusing = false;
 }
 
 RfxRenderTarget::~RfxRenderTarget()
@@ -81,11 +80,8 @@ bool RfxRenderTarget::Setup(int pass)
 		return false;
 	}
 
-	if (initOk) {
-		// already initialized. mark as "reused" to force glClear-ing
-		reusing = true;
+	if (initOk)
 		return true;
-	}
 
 	glGenFramebuffersEXT(1, &fbo);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);

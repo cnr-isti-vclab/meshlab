@@ -60,7 +60,6 @@ private:
 	bool mipmaps;
 	bool vportdim;
 	bool initOk;
-	bool reusing;
 
 	struct RTOptions {
 		GLint clearMask;

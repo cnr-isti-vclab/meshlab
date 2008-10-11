@@ -293,7 +293,7 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 			int arrayIdx = j + (i * rows);
 			switch (ctrl) {
 			case INT_CTRL:
-				controls[arrayIdx] = new QSpinBox();
+				controls[arrayIdx] = new QSpinBox(this);
 				((QSpinBox*)controls[arrayIdx])->setRange(-99, 99);
 				((QSpinBox*)controls[arrayIdx])->setValue((int)val[arrayIdx]);
 				connect(controls[arrayIdx], SIGNAL(valueChanged(int)),
@@ -303,7 +303,7 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 				break;
 			case FLOAT_CTRL:
 				if (u->HasMinMax()) {
-					controls[arrayIdx] = new QSlider();
+					controls[arrayIdx] = new QSlider(this);
 					((QSlider*)controls[arrayIdx])->setTickPosition(QSlider::NoTicks);
 					((QSlider*)controls[arrayIdx])->setOrientation(Qt::Horizontal);
 
@@ -318,11 +318,12 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 					((QSlider*)controls[arrayIdx])->setRange((int)(u->GetMinRange() * DECTOINT),
 					                                         (int)(u->GetMaxRange() * DECTOINT));
 					((QSlider*)controls[arrayIdx])->setValue(valAsInt);
+					((QSlider*)controls[arrayIdx])->setToolTip(QString().setNum(val[arrayIdx]));
 
 					connect(controls[arrayIdx], SIGNAL(valueChanged(int)), valMapper, SLOT(map()));
 
 				} else {
-					controls[arrayIdx] = new QDoubleSpinBox();
+					controls[arrayIdx] = new QDoubleSpinBox(this);
 					((QDoubleSpinBox*)controls[arrayIdx])->setRange(-99.0, 99.0);
 					((QDoubleSpinBox*)controls[arrayIdx])->setValue(val[arrayIdx]);
 					((QDoubleSpinBox*)controls[arrayIdx])->setDecimals(4);
@@ -334,7 +335,7 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 				}
 				break;
 			case BOOL_CTRL:
-				controls[arrayIdx] = new QComboBox();
+				controls[arrayIdx] = new QComboBox(this);
 				((QComboBox*)controls[arrayIdx])->addItem("FALSE");
 				((QComboBox*)controls[arrayIdx])->addItem("TRUE");
 				if (!val[arrayIdx])
@@ -452,10 +453,12 @@ void RfxDialog::ChangeValue(const QString& val)
 			} else {
 				QSlider *qslide = dynamic_cast<QSlider*>(sender);
 				const float INTTODEC = 0.0001f;
-				if (qslide != NULL)
+				if (qslide != NULL) {
 					newVal = qslide->value() * INTTODEC;
-				else
+					qslide->setToolTip(QString().setNum(newVal));
+				} else {
 					return;
+				}
 			}
 		}
 	}
