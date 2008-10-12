@@ -23,6 +23,9 @@
 
 #include "rfx_dialog.h"
 
+const float DECTOINT = 10000.0f;
+const float INTTODEC = 0.0001f;
+
 RfxDialog::RfxDialog(RfxShader *s, QAction *a, QGLWidget *parent)
 	: QDockWidget(parent)
 {
@@ -256,6 +259,8 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 	controlType ctrl;
 	QWidget *controls[rows * columns];
 	QGridLayout *uniLayout = parent;
+	QHBoxLayout *sliderEditLayout = NULL;
+	bool multipleControls = false;
 	QSignalMapper *valMapper = new QSignalMapper(this);
 
 	switch (u->GetType()) {
@@ -310,7 +315,6 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 					// since qslider only deals with integers, do a little conversion
 					// of values
 					// keep as much as 5 decimal values, others will be lost in conversion
-					const float DECTOINT = 10000.0f;
 					int valAsInt = (int)(val[arrayIdx] * DECTOINT);
 					int tickAsInt = (int)(((u->GetMaxRange() - u->GetMinRange()) * 0.01) * DECTOINT);
 
@@ -321,6 +325,27 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 					((QSlider*)controls[arrayIdx])->setToolTip(QString().setNum(val[arrayIdx]));
 
 					connect(controls[arrayIdx], SIGNAL(valueChanged(int)), valMapper, SLOT(map()));
+
+					// as per request, if value is a single float, also show a qlineedit to allow
+					// more accurate settings.
+					if (u->GetType() == RfxUniform::FLOAT) {
+
+						QLineEdit *slideValue = new QLineEdit();
+						slideValue->setAlignment(Qt::AlignRight);
+						slideValue->setText(QString().setNum(val[arrayIdx]));
+
+						QSignalMapper *yaMapper = new QSignalMapper();
+						connect(controls[arrayIdx], SIGNAL(valueChanged(int)), yaMapper, SLOT(map()));
+						connect(slideValue, SIGNAL(editingFinished()), yaMapper, SLOT(map()));
+						yaMapper->setMapping(controls[arrayIdx], slideValue);
+						yaMapper->setMapping(slideValue, controls[arrayIdx]);
+						connect(yaMapper, SIGNAL(mapped(QWidget*)), this, SLOT(mapSliderLineEdit(QWidget*)));
+
+						multipleControls = true;
+						sliderEditLayout = new QHBoxLayout();
+						sliderEditLayout->addWidget(controls[arrayIdx]);
+						sliderEditLayout->addWidget(slideValue);
+					}
 
 				} else {
 					controls[arrayIdx] = new QDoubleSpinBox(this);
@@ -353,12 +378,44 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 			if (!u->GetSemantic().isNull())
 				controls[arrayIdx]->setDisabled(true);
 
-			uniLayout->addWidget(controls[arrayIdx], i, j);
+			if (multipleControls)
+				uniLayout->addLayout(sliderEditLayout, i, j);
+			else
+				uniLayout->addWidget(controls[arrayIdx], i, j);
+			multipleControls = false;
 		}
 	}
 
 	connect(valMapper, SIGNAL(mapped(const QString&)), this,
 	        SLOT(ChangeValue(const QString&)));
+}
+
+void RfxDialog::mapSliderLineEdit(QWidget *w)
+{
+	QObject *theSender = ((QSignalMapper*)QObject::sender())->mapping(w);
+
+	QSlider *qslide = dynamic_cast<QSlider*>(theSender);
+	if (qslide != NULL) {
+		((QLineEdit*)w)->setText(QString().setNum((float)(qslide->value()) * INTTODEC));
+	} else {
+		// we assume it's a QLineEdit (avoid a costly and useless dynamic_cast)
+		// let's do some more checks since qlineedit input is not limited in range
+		bool res = false;
+		float val = ((QLineEdit*)theSender)->text().toFloat(&res);
+		qslide = ((QSlider*)w);
+
+		// we only accept float values
+		if (!res)
+			return;
+
+		// if value is beyond min or max, just set min/max
+		if (val > qslide->maximum() * INTTODEC)
+			qslide->setValue(qslide->maximum());
+		else if (val < qslide->minimum() * INTTODEC)
+			qslide->setValue(qslide->minimum());
+		else
+			qslide->setValue((int)(val * DECTOINT));
+	}
 }
 
 void RfxDialog::CleanTab(int tabIdx)
@@ -452,7 +509,6 @@ void RfxDialog::ChangeValue(const QString& val)
 				newVal = dsbox->value();
 			} else {
 				QSlider *qslide = dynamic_cast<QSlider*>(sender);
-				const float INTTODEC = 0.0001f;
 				if (qslide != NULL) {
 					newVal = qslide->value() * INTTODEC;
 					qslide->setToolTip(QString().setNum(newVal));

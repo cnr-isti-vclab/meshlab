@@ -88,6 +88,7 @@ public slots:
 	void ChangeValue(const QString&);
 	void extendRange(double);
 	void extendRange(int);
+	void mapSliderLineEdit(QWidget*);
 
 private:
 	void setupTabs();
