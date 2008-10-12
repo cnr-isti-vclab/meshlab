@@ -260,14 +260,15 @@ void HoleListModel::acceptFilling(bool accept)
 	emit layoutChanged();
 }
 
-void HoleListModel::autoBridge(bool singleHole, double distCoeff)
+void HoleListModel::autoBridge(bool singleHole, double distCoeff, QLabel *infoLabel)
 {
 	FgtBridge<CMeshO>::RemoveBridges(mesh->cm, holes);
+	
 	int nb=0;
 	if(singleHole)
-		nb = FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, distCoeff);
+		nb = FgtBridge<CMeshO>::AutoSelfBridging(mesh->cm, holes, infoLabel, distCoeff, 0);
 	else
-		nb = FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, distCoeff);
+		nb = FgtBridge<CMeshO>::AutoMultiBridging(mesh->cm, holes, infoLabel, distCoeff, 0);
 
 	countSelected();
 

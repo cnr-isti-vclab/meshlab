@@ -35,7 +35,6 @@
 #include <vcg/complex/trimesh/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include "vcg/space/color4.h"
-#include <meshlab/meshmodel.h>
 
 /** An hole type, extends vcg::tri::Hole<MESH>::Info adding more information as filling, selection,
  *  filing autocompenetration and non manifoldness. This class also allow to fill (and restore) an

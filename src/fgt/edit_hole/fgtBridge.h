@@ -25,11 +25,11 @@
 #define BRIDGE_H
 
 #include <utility>
-#include <meshlab/meshmodel.h>
 #include <vcg/simplex/face/topology.h>
 #include "vcg/space/line2.h"
 #include "vcg/space/triangle3.h"
 #include "fgtHole.h"
+#include "meshlab/mainwindow.h"
 
 
 /* Struct rappresenting the mesh edge where the bridge starts/ends. */
@@ -303,14 +303,22 @@ public:
 		return true;
 	};
 	
+	typedef void ProgressBridgingCallback(int v);
 
 	/*  Build a bridge inner to the same hole. It chooses the best bridge computing quality 
 	 *  of 2 faces and similarity (as number of edge) of two next hole. Bridge is build follow
 	 *  bridge's rule, bridge must have 2 border edge. exist between edge sharing a vertex or 
 	 *  Return number of bridge builded.
 	 */
-	static int AutoSelfBridging(MESH &mesh, HoleVector &holes, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
+	static int AutoSelfBridging(MESH &mesh, HoleVector &holes, QLabel *infoLabel=0, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
 	{
+		QTime timer;
+		if(infoLabel != 0)
+		{
+			infoLabel->setText(QString("Auto-bridging: %1%").arg(0) );
+			infoLabel->repaint();
+			timer.start();
+		}
 		int nb = 0;
 		vcg::GridStaticPtr<FaceType, ScalarType > gM;
 		gM.Set(mesh.face.begin(),mesh.face.end());
@@ -335,7 +343,7 @@ public:
 			{
 				// posiziono il secondo edge, la seconda spalla del ponte
 				PosType endP = initP;
-				endP.NextB();endP.NextB();					
+				endP.NextB();endP.NextB();
 				for(int j=3; j<=thehole.Size()/2; j++)
 				{	
 					endP.NextB();
@@ -393,7 +401,18 @@ public:
 					{
 						sideA.f=initP.f; sideA.z=initP.z; sideA.h=&thehole;
 						sideB.f=endP.f; sideB.z=endP.z; sideB.h=&thehole;
-					}					
+					}
+
+					if(timer.elapsed() > 800)
+					{
+						float progress = (float)(((float)( ((float)j/(thehole.Size()-3)) + i) / thehole.Size()) + h) / nh;
+							//h + ((float)i/thehole.Size()) ) / nh  );
+						infoLabel->setText(QString("Auto-bridging: %1%").arg((int)(progress*100)) );
+						infoLabel->repaint();
+						timer.restart();
+					}
+
+
 				}// scansione del edge di arrivo
 				
 				initP.NextB();
@@ -430,8 +449,16 @@ public:
 
 	/*  Return number of bridges builded.
 	 */
-	static int AutoMultiBridging(MESH &mesh, HoleVector &holes, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
+	static int AutoMultiBridging(MESH &mesh, HoleVector &holes, QLabel* infoLabel=0, double dist_coeff=0.0, std::vector<FacePointer *> *app=0 )
 	{
+		QTime timer;
+		if(infoLabel != 0)
+		{
+			infoLabel->setText(QString("Auto-bridging: %1%").arg(0) );
+			infoLabel->repaint();
+			timer.start();
+		}
+
 		int nb = 0;
 		vcg::GridStaticPtr<FaceType, ScalarType > gM;
 		
@@ -440,10 +467,14 @@ public:
 		std::vector<HoleType*> selectedHoles;
 		typename std::vector<HoleType*>::iterator shit1, shit2; 
 		typename HoleVector::iterator hit;
+		
+		int nIteration = -1;
+		int iteration = 0;
+		// iterate, unify holes, until selected hole is only one
 		do{
 			sideA.SetNull();
 			sideB.SetNull();
-
+			
 			// prendo gli hole selezionati
 			selectedHoles.clear();
 			for(hit=holes.begin(); hit!=holes.end(); hit++)
@@ -453,15 +484,23 @@ public:
 			if(selectedHoles.size() < 2)
 				return nb;
 			gM.Set(mesh.face.begin(),mesh.face.end());
-		
-			// cerco la miglior combinazione tra le facce di un hole con quelle di un'altro
-			ScalarType maxQuality = -1;
+			
+			float casesViewed = 0, cases2View = 0;
 			for(shit1=selectedHoles.begin(); shit1!=selectedHoles.end(); shit1++)
+				for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
+					cases2View += (*shit1)->Size() * (*shit2)->Size();
+
+			if(nIteration == -1)
+				nIteration = selectedHoles.size()-1;
+
+			// cerco la miglior combinazione tra le facce di un hole con quelle di un'altro
+			ScalarType maxQuality = -1;			
+			for(shit1=selectedHoles.begin(); shit1!=selectedHoles.end(); shit1++)
+			{				
 				for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
 				{
 					PosType ph1=(*shit1)->p;
 					PosType ph2=(*shit2)->p;
-
 					do{	//scansione edge di bordo del primo buco
 						do{
 							VertexType* vA0 = ph1.f->V0( ph1.z ); // first vertex of pos' 1-edge 
@@ -507,12 +546,21 @@ public:
 								sideB = BridgeAbutment<MESH>(ph2.f, ph2.z, *shit2);
 							}
 
+							if(timer.elapsed() > 800)
+							{
+								int progress = ( (100 * ( iteration +(casesViewed/cases2View)))/nIteration );
+								infoLabel->setText(QString("Auto-bridging: %1%").arg(progress) );
+								infoLabel->repaint();
+								timer.restart();
+							}
+							casesViewed++;
 							ph2.NextB();
-						}while(ph2 != (*shit2)->p);
-
+						}while(ph2 != (*shit2)->p);				
+						
 						ph1.NextB();
-					}while(ph1 != (*shit1)->p);
-				} // for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)
+					}while(ph1 != (*shit1)->p);					
+				} // for(shit2=shit1+1; shit2!=selectedHoles.end(); shit2++)							
+			}
 
 			// adesso ho la miglior coppia di edge si deve creare il bridge
 			assert(!sideA.IsNull() && !sideB.IsNull());
@@ -530,6 +578,7 @@ public:
 			if(unifyHolesWithBridge(sideA, sideB, mesh, holes, tmpFaceRef))
 				nb++;
 			
+			iteration ++;
 		}while(true);
 		return nb;
 	};

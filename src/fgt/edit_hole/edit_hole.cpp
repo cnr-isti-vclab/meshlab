@@ -30,10 +30,9 @@
 #include "fgtHole.h"
 #include "holeListModel.h"
 #include <wrap/gl/pick.h>
-#include <vcg/complex/trimesh/hole.h>
-#include <vcg/complex/trimesh/update/position.h>
 
 using namespace vcg;
+
 
 EditHolePlugin::EditHolePlugin() {
 	QAction* editFill = new QAction(QIcon(":/images/icon_filler.png"),"Fill Hole", this);
@@ -326,7 +325,7 @@ void EditHolePlugin::manualBridge()
 void EditHolePlugin::autoBridge()
 {
 	bool singleHole = dialogFiller->ui.selfHoleChkB->isChecked();
-	holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017);
+	holesModel->autoBridge(singleHole, bridgeOptSldVal*0.0017, dialogFiller->ui.infoLbl);
 	upGlA();
 }
 

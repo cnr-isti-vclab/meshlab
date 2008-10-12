@@ -91,7 +91,7 @@ public:
 	void closeNonManifolds();
 	inline MeshModel* getMesh() const { return mesh; };
 
-	void autoBridge(bool singleHole=false, double distCoeff=0);
+	void autoBridge(bool singleHole=false, double distCoeff=0, QLabel *infoLabel=0);
 
 	inline void setStartBridging()
 	{
