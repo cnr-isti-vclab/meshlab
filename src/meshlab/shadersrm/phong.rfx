@@ -1038,10 +1038,8 @@ void main( void )
    vec3  fvViewDirection  = normalize( ViewDirection );
    float fRDotV           = max( 0.0, dot( fvReflection, fvViewDirection ) );
    
-   vec4  fvBaseColor      = gl_FrontMaterial.diffuse;
-   
-   vec4  fvTotalAmbient   = fvAmbient * fvBaseColor; 
-   vec4  fvTotalDiffuse   = fvDiffuse * fNDotL * fvBaseColor; 
+   vec4  fvTotalAmbient   = fvAmbient * gl_FrontMaterial.ambient;
+   vec4  fvTotalDiffuse   = fvDiffuse * fNDotL * gl_FrontMaterial.diffuse;
    vec4  fvTotalSpecular  = fvSpecular * ( pow( fRDotV, fSpecularPower ) );
   
    gl_FragColor = ( fvTotalAmbient + fvTotalDiffuse + fvTotalSpecular );

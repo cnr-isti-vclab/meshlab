@@ -341,6 +341,9 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 						yaMapper->setMapping(slideValue, controls[arrayIdx]);
 						connect(yaMapper, SIGNAL(mapped(QWidget*)), this, SLOT(mapSliderLineEdit(QWidget*)));
 
+						if (!u->GetSemantic().isNull())
+							slideValue->setDisabled(true);
+
 						multipleControls = true;
 						sliderEditLayout = new QHBoxLayout();
 						sliderEditLayout->addWidget(controls[arrayIdx]);
