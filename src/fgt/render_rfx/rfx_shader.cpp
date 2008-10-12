@@ -206,18 +206,23 @@ void RfxShader::UpdateSemanticUniforms(int passIdx)
 	}
 }
 
-// static member initialization - keep in sync with SemanticValue enum
+// static member initialization - keep in sync with SemanticValue enum in rfx_shader.h
 const char *RfxShader::semantic[] = {
 	"ViewportWidth", "ViewportHeight", "ViewportDimensions", "ViewportWidthInverse",
 	"ViewportHeightInverse", "InverseViewportDimensions",
 	"PassIndex",
-	"ViewDirection", "ViewPosition", "ViewSideVector", "ViewUpVector", "FOV", "NearClipPlane", "FarClipPlane",
-	"View", "ViewTranspose", "ViewInverse", "ViewInverseTranspose",
-	"Projection", "ProjectionTranspose", "ProjectionInverse", "ProjectionInverseTranspose",
-	"ViewProjection", "ViewProjectionTranspose", "ViewProjectionInverse", "ViewProjectionInverseTranspose",
-	"World", "WorldTranspose", "WorldInverse", "WorldInverseTranspose",
-	"WorldView", "WorldViewTranspose", "WorldViewInverse", "WorldViewInverseTranspose",
-	"WorldViewProjection", "WorldViewProjectionTranspose", "WorldViewProjectionInverse", "WorldViewProjectionInverseTranspose"
+	UNIMPLEMENTED("ViewDirection"), UNIMPLEMENTED("ViewPosition"), UNIMPLEMENTED("ViewSideVector"),
+	UNIMPLEMENTED("ViewUpVector"), UNIMPLEMENTED("FOV"), UNIMPLEMENTED("NearClipPlane"),
+	UNIMPLEMENTED("FarClipPlane"), UNIMPLEMENTED("View"), UNIMPLEMENTED("ViewTranspose"),
+	UNIMPLEMENTED("ViewInverse"), UNIMPLEMENTED("ViewInverseTranspose"), UNIMPLEMENTED("Projection"),
+	UNIMPLEMENTED("ProjectionTranspose"), UNIMPLEMENTED("ProjectionInverse"),
+	UNIMPLEMENTED("ProjectionInverseTranspose"), UNIMPLEMENTED("ViewProjection"),
+	UNIMPLEMENTED("ViewProjectionTranspose"), UNIMPLEMENTED("ViewProjectionInverse"),
+	UNIMPLEMENTED("ViewProjectionInverseTranspose"), "World", "WorldTranspose", "WorldInverse",
+	"WorldInverseTranspose", UNIMPLEMENTED("WorldView"), UNIMPLEMENTED("WorldViewTranspose"),
+	UNIMPLEMENTED("WorldViewInverse"), UNIMPLEMENTED("WorldViewInverseTranspose"),
+	UNIMPLEMENTED("WorldViewProjection"), UNIMPLEMENTED("WorldViewProjectionTranspose"),
+	UNIMPLEMENTED("WorldViewProjectionInverse"), UNIMPLEMENTED("WorldViewProjectionInverseTranspose")
 };
 bool RfxShader::AddSemanticUniform(RfxUniform *u, const QString &sem)
 {
