@@ -1096,9 +1096,6 @@ C:\Documents and Settings\BELiAL\Desktop\]]></RmTextDataBlock></RmStringVariable
    <RmGLPass NAME="Object" API="OpenGL" PASS_INDEX="1" ENABLED="TRUE">
     <RmModelReference NAME="Model" API=""/>
     <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
-uniform vec4 viewPosition;
-uniform vec4 lightPosition;
-
 varying vec3 lightVecDist;
 
 varying vec3 normalVec;
@@ -1109,6 +1106,8 @@ void main(void)
 {
    gl_Position = ftransform();
    gl_TexCoord[0] = gl_MultiTexCoord0;
+
+   vec4 lightPosition = gl_ModelViewMatrixInverse * gl_LightSource[0].position * 2.0;
 
    // lighting is performed in eye space
    vec4 ePos = gl_ModelViewMatrix * gl_Vertex;
@@ -1244,7 +1243,6 @@ void main(void)
    <RmGLPass NAME="Platform" API="OpenGL" PASS_INDEX="2" ENABLED="FALSE">
     <RmModelReference NAME="Disc" API=""/>
     <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
-uniform vec4 viewPosition;
 uniform vec4 lightPosition;
 
 varying vec3 lightVecDist;
@@ -1405,13 +1403,14 @@ void main(void)
    <RmGLPass NAME="Depth" API="OpenGL" PASS_INDEX="0" ENABLED="TRUE">
     <RmModelReference NAME="Model" API=""/>
     <RmGLShader NAME="Vertex Program" API="OpenGL" PIXEL_SHADER="FALSE"><RmShaderCode TYPE="TEXT"><![CDATA[
-uniform vec4 lightPosition;
-
 varying vec3 lightVec;
 
 
 void main(void)
 {
+   vec4 lightPosition = gl_ModelViewMatrixInverse * gl_LightSource[0].position * 2.0;
+
+
    // reproduce gluLookAt() behavior
    vec3 newZ = normalize(-lightPosition.xyz);
    vec3 newX = cross(newZ, vec3(0.0, 1.0, 0.0));
