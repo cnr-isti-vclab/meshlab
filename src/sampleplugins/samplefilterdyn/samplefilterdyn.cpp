@@ -72,15 +72,6 @@ const QString ExtraSampleDynPlugin::filterInfo(FilterIDType filterId)
 	}
 }
 
-const PluginInfo &ExtraSampleDynPlugin::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.0");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
- }
-
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // In this case this sample belong to the class of filters that change the vertex colors
