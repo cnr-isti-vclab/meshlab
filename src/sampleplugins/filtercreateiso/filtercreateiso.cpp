@@ -87,16 +87,6 @@ const FilterCreateIso::FilterClass FilterCreateIso::getClass(QAction *a)
   }
 }
 
-
-const PluginInfo &FilterCreateIso::pluginInfo()
-{
-	static PluginInfo ai;
-	ai.Date=tr( __DATE__ );
-	 ai.Version = tr("0.1");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
-}
-
 const int FilterCreateIso::getRequirements(QAction *action)
 {
   switch(ID(action))
