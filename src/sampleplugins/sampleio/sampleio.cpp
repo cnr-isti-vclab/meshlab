@@ -91,13 +91,4 @@ void SampleIOPlugin::GetExportMaskCapability(QString &format, int &capability, i
 	return;
 }
 
-const PluginInfo &SampleIOPlugin::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr("September 2006");
-	ai.Version = tr("0.6");
-	ai.Author = ("Elisa Cerisoli, Paolo Cignoni");
-	return ai;
- }
- 
 Q_EXPORT_PLUGIN(SampleIOPlugin)
