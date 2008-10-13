@@ -100,15 +100,6 @@ const QString FilterDirt::filterInfo(FilterIDType filterId)
 	return QString("Simulate dirt accumolation over the mesh");
 }
 
-const PluginInfo &FilterDirt::pluginInfo() 
-{
-	static PluginInfo ai; 
-	ai.Date=tr("July 2008");
-	ai.Version = tr("0.3b");
-	ai.Author = ("Luca Bartoletti");
-	return ai;
-}
-
 const int FilterDirt::getRequirements(QAction */*action*/)
 {
 	
