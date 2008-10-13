@@ -26,8 +26,6 @@ $Log: edit_topo.cpp,v $
 ****************************************************************************/
 #include "edit_topo.h"
 
-
-
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/position.h>
 #include <vcg/complex/trimesh/update/normal.h>
@@ -37,8 +35,6 @@ $Log: edit_topo.cpp,v $
 #include <vcg/complex/trimesh/create/resampler.h>
 #include <vcg/simplex/face/distance.h>
 #include <vcg/complex/trimesh/update/color.h>
-
-
 
 using namespace std;
 using namespace vcg;
@@ -72,10 +68,6 @@ edit_topo::edit_topo()
 	connectStart.vName = "--";
 	connectEnd.V = Point3f(0,0,0);
 	connectEnd.vName = "--";
-
-	actionList << new QAction(QIcon(":/images/icon_topo.png"), "Re-Topology Tool", this);
-	foreach(QAction *editAction, actionList)
-		editAction->setCheckable(true);
 }
 
 //
@@ -96,29 +88,10 @@ edit_topo::~edit_topo()
 
 }
 
-QList<QAction *> edit_topo::actions() const 
+const QString edit_topo::Info() 
 {
-  return actionList;
-}
-
-const QString edit_topo::Info(QAction *action) 
-{
-  if( action->text() != tr("ReTop Tool") ) assert (0);
   return tr("Allow to re-top a model");
 }
-
-const PluginInfo &edit_topo::Info() 
-{
-   static PluginInfo ai; 
-   ai.Date=tr(__DATE__);
-   ai.Version = tr("1.0");
-   ai.Author = ("daniele bonetta");
-   return ai;
-}
-
-
-
-
 
 /************************************************************************************/
 //
@@ -1006,7 +979,7 @@ void edit_topo::editDecoCollapse(MeshModel &)
 //
 //	Main decoration method
 //
-void edit_topo::Decorate(QAction *, MeshModel &m, GLArea *)
+void edit_topo::Decorate(MeshModel &m, GLArea *)
 {
 	updateMatrixes();
 	// onClick
@@ -1137,15 +1110,10 @@ void edit_topo::Decorate(QAction *, MeshModel &m, GLArea *)
 		editDecoCollapse(m);
 }
 
-
-
-
-
-
 //
 //	Plugin init
 //
-void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *gla)
+void edit_topo::StartEdit(MeshModel &m, GLArea *gla)
 {	
 	parentGla = gla;
 	gla->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
@@ -1192,7 +1160,7 @@ void edit_topo::StartEdit(QAction *, MeshModel &m, GLArea *gla)
 //
 //	End edit
 //
-void edit_topo::EndEdit(QAction *, MeshModel &, GLArea *)
+void edit_topo::EndEdit(MeshModel &, GLArea *)
 {
 	stack.clear();
 	Estack.clear();
@@ -1295,14 +1263,14 @@ void edit_topo::on_update_request()
 //
 // --- Plugin events methods ---
 //
-void edit_topo::mousePressEvent(QAction *, QMouseEvent * event, MeshModel &, GLArea * gla) 
+void edit_topo::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea * gla) 
 {
 	mousePos=event->pos();
 	click=false;
 	gla->update();
 }
 
-void edit_topo::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &, GLArea * gla)
+void edit_topo::mouseMoveEvent(QMouseEvent * event, MeshModel &m, GLArea * gla)
 {
 	mousePos=event->pos();
 	mouseRealY = gla->curSiz.height() - mousePos.y();
@@ -1310,7 +1278,7 @@ void edit_topo::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &, GLAre
 	gla->update();
 }
 
-void edit_topo::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &, GLArea * gla)
+void edit_topo::mouseReleaseEvent(QMouseEvent * event, MeshModel &, GLArea * gla)
 {
 	if(event->button() == Qt::LeftButton)
 	{
@@ -1329,18 +1297,6 @@ void edit_topo::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &, GL
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /************************************************************************************/
 //
 // --- New topology mesh methods ---
@@ -1352,8 +1308,7 @@ void edit_topo::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &, GL
 //
 //	Get nearest 2d point of the given array
 //	Returns: array index
-int edit_topo::getNearest(QPointF center, QPointF *points,int num) 
-{
+int edit_topo::getNearest(QPointF center, QPointF *points,int num) {
 	int nearestInd=0;
 	float dist=fabsf(center.x()-points[0].x())*fabsf(center.x()-points[0].x())+fabsf(center.y()-points[0].y())*fabsf(center.y()-points[0].y());
 	for (int lauf=1; lauf<num; lauf++) 
@@ -1579,12 +1534,6 @@ float edit_topo::distancePointPoint(QPointF P1, QPointF P2)
 { 	
 	return sqrt(pow((P1.x()-P2.x()),2)+pow((P1.y()-P2.y()),2));
 }
-
-
-
-
-
-
 
 /************************************************************************************/
 //
@@ -1894,15 +1843,3 @@ void edit_topo::drawFace(CMeshO::FacePointer fp)
 		glVertex(fp->P(2));
 	glEnd();
 }
-
-
-
-
-
-
-
-
-
-
-
-Q_EXPORT_PLUGIN(edit_topo)

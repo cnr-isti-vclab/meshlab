@@ -61,15 +61,13 @@ public:
 	edit_topo();
 	virtual ~edit_topo();
 
-	virtual const QString Info(QAction *);
-	virtual const PluginInfo &Info();
-	virtual void StartEdit(QAction *, MeshModel &, GLArea *);
-	virtual void EndEdit(QAction *, MeshModel &, GLArea *);
-	virtual void Decorate(QAction *, MeshModel &, GLArea *);
-	virtual void mousePressEvent (QAction *, QMouseEvent *, MeshModel &, GLArea * );
-	virtual void mouseMoveEvent (QAction *, QMouseEvent *, MeshModel &, GLArea * );
-	virtual void mouseReleaseEvent (QAction *, QMouseEvent *event, MeshModel &, GLArea * );
-	virtual QList<QAction *> actions() const;
+	static const QString Info();
+	virtual void StartEdit(MeshModel &, GLArea *);
+	virtual void EndEdit(MeshModel &, GLArea *);
+	virtual void Decorate(MeshModel &, GLArea *);
+	virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
+	virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
+	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &, GLArea * );
 	
 	// Mouse position tracking
 	QPoint mousePos;
@@ -152,7 +150,6 @@ public slots:
 
 private:
 	GLArea *parentGla;
-	QList <QAction *> actionList;
 
 	double mvmatrix[16]; 
 	double projmatrix[16]; 
