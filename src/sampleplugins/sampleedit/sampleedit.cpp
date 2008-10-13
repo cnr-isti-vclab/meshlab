@@ -38,42 +38,22 @@ using namespace vcg;
 
 SampleEditPlugin::SampleEditPlugin() {
 	qFont.setFamily("Helvetica");
-	qFont.setPixelSize(10);
-	
-	actionList << new QAction(QIcon(":/images/icon_info.png"),"Get Info", this);
-  foreach(QAction *editAction, actionList)
-    editAction->setCheckable(true);      
+	qFont.setPixelSize(10);    
 }
 
-QList<QAction *> SampleEditPlugin::actions() const {
-	return actionList;
-}
-
-
-const QString SampleEditPlugin::Info(QAction *action) 
+const QString SampleEditPlugin::Info() 
 {
-  if( action->text() != tr("Get Info") ) assert (0);
-
 	return tr("Return detailed info about a picked face of the model.");
 }
-
-const PluginInfo &SampleEditPlugin::Info() 
-{
-   static PluginInfo ai; 
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.0");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
-} 
  
-void SampleEditPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+void SampleEditPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
 	gla->update();
 	cur=event->pos();
 	haveToPick=true;
 }
   
-void SampleEditPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
+void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla)
 {
 	if(haveToPick)
 	{
@@ -132,11 +112,8 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * g
 		}
 }
 
-void SampleEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla )
+void SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *gla )
 {
   curFacePtr=0;
 	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 }
-
-
-Q_EXPORT_PLUGIN(SampleEditPlugin)

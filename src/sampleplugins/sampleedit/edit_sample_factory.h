@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,41 +21,36 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef SAMPLEEDITPLUGIN_H
-#define SAMPLEEDITPLUGIN_H
 
+#ifndef SampleEditFactoryPLUGIN_H
+#define SampleEditFactoryPLUGIN_H
+
+#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QStringList>
 #include <QList>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-class SampleEditPlugin : public QObject, public MeshEditInterface
+class SampleEditFactory : public QObject, public MeshEditInterfaceFactory
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
-		
+	Q_INTERFACES(MeshEditInterfaceFactory)
+
 public:
-    SampleEditPlugin();
-    virtual ~SampleEditPlugin() {}
+	SampleEditFactory();
+	virtual ~SampleEditFactory() { delete editSample; }
 
-    static const QString Info();
-
-    virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
-    virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-		
-	void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea * gla);
-
-    QPoint cur;
-	QFont qFont;
-    bool haveToPick;
-	CMeshO::FacePointer curFacePtr;
-
+	//gets a list of actions available from this plugin
+	virtual QList<QAction *> actions() const;
+	
+	//get the edit tool for the given action
+	virtual MeshEditInterface* getMeshEditInterface(QAction *);
+    
+	//get the description for the given action
+	virtual const QString getEditToolDescription(QAction *);
+	
+private:
+	QList <QAction *> actionList;
+	
+	QAction *editSample;
 };
 
 #endif

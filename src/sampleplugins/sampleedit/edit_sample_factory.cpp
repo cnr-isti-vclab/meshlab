@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,41 +21,37 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef SAMPLEEDITPLUGIN_H
-#define SAMPLEEDITPLUGIN_H
+#include "edit_sample_factory.h"
+#include "sampleedit.h"
 
-#include <QObject>
-#include <QStringList>
-#include <QList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-class SampleEditPlugin : public QObject, public MeshEditInterface
+SampleEditFactory::SampleEditFactory()
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
-		
-public:
-    SampleEditPlugin();
-    virtual ~SampleEditPlugin() {}
+	editSample = new QAction(QIcon(":/images/icon_info.png"),"Get Info", this);
+	
+	actionList << editSample;
+	
+	foreach(QAction *editAction, actionList)
+		editAction->setCheckable(true); 	
+}
+	
+//gets a list of actions available from this plugin
+QList<QAction *> SampleEditFactory::actions() const
+{
+	return actionList;
+}
 
-    static const QString Info();
+//get the edit tool for the given action
+MeshEditInterface* SampleEditFactory::getMeshEditInterface(QAction *action)
+{
+	if(action == editSample)
+	{
+		return new SampleEditPlugin();
+	} else assert(0); //should never be asked for an action that isnt here
+}
 
-    virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
-    virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-		
-	void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea * gla);
+const QString SampleEditFactory::getEditToolDescription(QAction *)
+{
+	return SampleEditPlugin::Info();
+}
 
-    QPoint cur;
-	QFont qFont;
-    bool haveToPick;
-	CMeshO::FacePointer curFacePtr;
-
-};
-
-#endif
+Q_EXPORT_PLUGIN(SampleEditFactory)
