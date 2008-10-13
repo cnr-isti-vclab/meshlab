@@ -184,15 +184,6 @@ const FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *
   }
 }
 
-const PluginInfo &FilterFunctionPlugin::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.5");
-	 ai.Author = ("Giuseppe Alemanno");
-   return ai;
- }
-
 const int FilterFunctionPlugin::getRequirements(QAction *action)
 {
   switch(ID(action))
