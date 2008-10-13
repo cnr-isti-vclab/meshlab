@@ -37,37 +37,16 @@ using namespace vcg;
 
 QualityMapperPlugin::QualityMapperPlugin()
 {
-	//setting-up plugin
-	actionList << new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper", this);
-	QAction *editAction;
-	foreach(editAction, actionList)
-		editAction->setCheckable(true);
-
 	//initializing dialog pointer
 	_qualityMapperDialog = 0;
 }
 
-QList<QAction *> QualityMapperPlugin::actions() const
-{	return actionList;	}
-
-
-const QString QualityMapperPlugin::Info(QAction *action) 
+const QString QualityMapperPlugin::Info() 
 {
-	if( action->text() != tr("Get Info") ) assert (0);
-
 	return tr("Colorize mesh vertexes by Quality");
 }
 
-const PluginInfo &QualityMapperPlugin::Info() 
-{
-	static PluginInfo ai; 
-	ai.Date=tr("Jan 2008");
-	ai.Version = tr("1.0");
-	ai.Author = ("Alessandro Maione, Federico Bellucci");
-	return ai;
-} 
-
-void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel& m, GLArea *gla )
+void QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
 {
 	if(_qualityMapperDialog==0)
 		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla);
@@ -76,7 +55,7 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel& m, GLArea *gla )
 	//bool ret = _qualityMapperDialog->initEqualizerHistogram();
 	if ( !_qualityMapperDialog->initEqualizerHistogram() )
 	{
-		EndEdit(mode, m, gla);
+		EndEdit(m, gla);
 		return;
 	}
 
@@ -89,7 +68,7 @@ void QualityMapperPlugin::StartEdit(QAction *mode, MeshModel& m, GLArea *gla )
 	connect(_qualityMapperDialog, SIGNAL(closingDialog()),gla,SLOT(endEdit()) );
 }
 
-void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
+void QualityMapperPlugin::EndEdit(MeshModel &, GLArea * )
 {
 	//if a dialog exists, it's time to destroy it
 	if ( _qualityMapperDialog )
@@ -102,7 +81,7 @@ void QualityMapperPlugin::EndEdit(QAction * , MeshModel &, GLArea * )
 	}
 }
 
-void QualityMapperPlugin::Decorate(QAction*, MeshModel&, GLArea*)
+void QualityMapperPlugin::Decorate(MeshModel&, GLArea*)
 {
 // Draw a vertical bar 
 // Enter in 2D screen Mode again
@@ -157,6 +136,3 @@ void QualityMapperPlugin::Decorate(QAction*, MeshModel&, GLArea*)
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 }
-
-Q_EXPORT_PLUGIN(QualityMapperPlugin)
-

@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,48 +20,39 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
-Revision 1.0 2008/02/20 Alessandro Maione, Federico Bellucci
-FIRST RELEASE
 
-****************************************************************************/
+#include "edit_quality_factory.h"
+#include "qualitymapper.h"
 
-#ifndef _QUALITY_MAPPER_PLUGIN_H_
-#define _QUALITY_MAPPER_PLUGIN_H_
-
-#include <QObject>
-#include <QAction>
-#include <QList>
-
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-//#include <vcg/complex/trimesh/update/color.h>
-#include "qualitymapperdialog.h"
-
-//This class defines the plugin interface
-class QualityMapperPlugin : public QObject, public MeshEditInterface
+QualityMapperFactory::QualityMapperFactory()
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshEditInterface)
+	//setting-up plugin
+	editQuality = new QAction(QIcon(":/images/qualitymapper.png"),"Quality Mapper", this);
+	
+	actionList << editQuality;
+	
+	foreach(QAction *editAction, actionList)
+		editAction->setCheckable(true); 	
+}
+	
+//gets a list of actions available from this plugin
+QList<QAction *> QualityMapperFactory::actions() const
+{
+	return actionList;
+}
 
-private:
-	QualityMapperDialog *_qualityMapperDialog;
+//get the edit tool for the given action
+MeshEditInterface* QualityMapperFactory::getMeshEditInterface(QAction *action)
+{
+	if(action == editQuality)
+	{
+		return new QualityMapperPlugin();
+	} else assert(0); //should never be asked for an action that isnt here
+}
 
-public:
-    QualityMapperPlugin(void);
-    ~QualityMapperPlugin(void){};
+const QString QualityMapperFactory::getEditToolDescription(QAction *)
+{
+	return QualityMapperPlugin::Info();
+}
 
-	static const QString Info();
-    virtual void StartEdit(MeshModel&, GLArea*);
-    virtual void EndEdit(MeshModel&, GLArea*);
-    virtual void Decorate(MeshModel&, GLArea*);
-    virtual void mousePressEvent(QMouseEvent*, MeshModel&, GLArea*) {};
-    virtual void mouseMoveEvent(QMouseEvent*, MeshModel&, GLArea*) {};
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel&, GLArea*){};
-
-	QPoint cur;
-	bool haveToPick;
-};
-
-#endif
+Q_EXPORT_PLUGIN(QualityMapperFactory)

@@ -1,6 +1,7 @@
 include (../../shared.pri)
 
 HEADERS       = common/const_types.h \
+		edit_quality_factory.h \
 		qualitymapper.h \
 		qualitymapperdialog.h \
 		common/transferfunction.h \
@@ -10,7 +11,8 @@ HEADERS       = common/const_types.h \
 		eqhandle.h \
 		tfhandle.h
 
-SOURCES       = qualitymapper.cpp\
+SOURCES       = edit_quality_factory.cpp \
+		qualitymapper.cpp\
 		qualitymapperdialog.cpp\
 		common/transferfunction.cpp\
 		common/util.cpp \
