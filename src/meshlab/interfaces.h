@@ -42,14 +42,6 @@ class MeshModel;
 class RenderMode;
 class GLArea;
 
-class PluginInfo
-{
-public:
-  QString Date;
-  QString Version;
-  QString Author;
-};
-
 
 // The basic interface for opening and saving a mesh.
 // The plugins for opening and saving different mesh types must be derived from this class.
@@ -67,7 +59,6 @@ public:
 	};
 
   virtual ~MeshIOInterface() {}
-  virtual const PluginInfo &Info()=0;
 	
 	virtual QList<Format> importFormats() const = 0;
 	virtual QList<Format> exportFormats() const = 0;
@@ -222,9 +213,6 @@ public:
 	// The very short string (a few words) describing each filtering action 
 	// This string is used also to define the menu entry
 	virtual const QString filterName(FilterIDType filter)=0;
-
-	// Generic Info about the plugin version and author.
-	virtual const PluginInfo &pluginInfo()=0;
 	
 	// This function is called by the framework, for each action at the loading of the plugins.
 	// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
@@ -343,7 +331,6 @@ public:
 		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual bool isSupported() = 0;
-		virtual const PluginInfo &Info()=0;
 		virtual QList<QAction *> actions() = 0;
     virtual int passNum() = 0;
 };
@@ -357,7 +344,6 @@ public:
     virtual ~MeshDecorateInterface() {}
 
     virtual const QString Info(QAction *)=0;
-    virtual const PluginInfo &Info()=0;
 
 		// This function is called by the framework, for each action at the loading of the plugins.
 		// it allows to add a list of global persistent parameters that can be changed from the meshlab itself.
@@ -398,33 +384,68 @@ Editing tools are exclusive (only one at a time) and can grab the mouse events a
 class MeshEditInterface
 {
 public:
-    virtual ~MeshEditInterface() {}
-		virtual QList<QAction *> actions() const = 0;
-    virtual const QString Info(QAction *)=0;
-    virtual const PluginInfo &Info()=0;
+	virtual ~MeshEditInterface() {}
+	
+	//should return a sentence describing what the editing tool does
+	static const QString Info();
 
-    // Called when the user press the first time the button 
-		virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+	// Called when the user press the first time the button 
+	virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
+	virtual void StartEdit(MeshDocument &md, GLArea *parent)
+	{
+		assert(NULL != md.mm());
+		StartEdit(*(md.mm()), parent);
+	}
 		
-		// Called when the user press the second time the button 
-		virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
+	// Called when the user press the second time the button 
+	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
     
-		virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) = 0;
-    virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
-	  virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
-	  virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
-//	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
-    virtual void keyReleaseEvent    (QAction *, QKeyEvent *, MeshModel &/*m*/, GLArea *){};
-    virtual void keyPressEvent      (QAction *, QKeyEvent *, MeshModel &/*m*/, GLArea *){};
-    virtual void tabletEvent		(QAction *, QTabletEvent * e, MeshModel &/*m*/, GLArea *){e->ignore();};
+	// Called when the user changes the selected layer
+	//by default it calls end edit with the layer that was selected and start with the new layer that is
+	//selected.  This ensures that plugins who dont support layers do not get sent pointers to meshes
+	//they are not expecting
+	virtual void LayerChanged(MeshDocument &md, MeshModel &oldMeshModel, GLArea *parent)
+	{
+		EndEdit(oldMeshModel, parent);
+		StartEdit(md, parent);
+	}
+		
+	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/) = 0;
+	virtual void mousePressEvent  (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
+	virtual void mouseMoveEvent   (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
+	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
+	//virtual void wheelEvent     (QWheelEvent*e, MeshModel &/*m*/, GLArea * );
+	virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *){};
+	virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *){};
+	virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *){e->ignore();};
+};
+
+
+/* MeshEditInterfaceFactory
+ * 
+ */
+class MeshEditInterfaceFactory
+{
+public:
+	virtual ~MeshEditInterfaceFactory() {}
+	
+	//gets a list of actions available from this plugin
+	virtual QList<QAction *> actions() const = 0;
+	
+	//get the edit tool for the given action
+	virtual MeshEditInterface* getMeshEditInterface(QAction *) = 0;
+	
+	//get the description for the given action
+	virtual const QString getEditToolDescription(QAction *)=0;
 
 };
+
 
 Q_DECLARE_INTERFACE(MeshIOInterface,						"vcg.meshlab.MeshIOInterface/1.0")
 Q_DECLARE_INTERFACE(MeshFilterInterface,				"vcg.meshlab.MeshFilterInterface/1.0")
 Q_DECLARE_INTERFACE(MeshRenderInterface,				"vcg.meshlab.MeshRenderInterface/1.0")
 Q_DECLARE_INTERFACE(MeshDecorateInterface,			"vcg.meshlab.MeshDecorateInterface/1.0")
 Q_DECLARE_INTERFACE(MeshEditInterface,					"vcg.meshlab.MeshEditInterface/1.0")
-
+Q_DECLARE_INTERFACE(MeshEditInterfaceFactory,			"vcg.meshlab.MeshEditInterfaceFactory/1.0")
 
 #endif
