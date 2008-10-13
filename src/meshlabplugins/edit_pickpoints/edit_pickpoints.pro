@@ -1,12 +1,14 @@
 include (../../shared.pri)
 
-HEADERS      += editpickpoints.h \
+HEADERS      += edit_pickpoints_factory.h \
+				editpickpoints.h \
 				pickpointsDialog.h \
 				pickedPoints.h \
 				pickPointsTemplate.h \
 				../../meshlab/stdpardialog.h
 
-SOURCES      += editpickpoints.cpp \
+SOURCES      += edit_pickpoints_factory.cpp \
+				editpickpoints.cpp \
 				pickpointsDialog.cpp \
 				pickedPoints.cpp \
 				pickPointsTemplate.cpp \

@@ -27,25 +27,18 @@ public:
 	
 	//destructor
 	virtual ~EditPickPointsPlugin() {
-		//free memory for each action
-		foreach(QAction *editAction, actionList)
-			delete editAction;
-		
 		//free memory used by the gui
 		delete pickPointsDialog;
 	}
-
-	virtual QList<QAction *> actions() const ;
 	
-	virtual const QString Info(QAction *);
-	virtual const PluginInfo &Info();
+	static const QString Info();
 
-	virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void mousePressEvent(QAction *, QMouseEvent *event, MeshModel &, GLArea * ) ;
-	virtual void mouseMoveEvent(QAction *, QMouseEvent *event, MeshModel &, GLArea * ) ;
-	virtual void mouseReleaseEvent(QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void mousePressEvent(QMouseEvent *event, MeshModel &, GLArea * ) ;
+	virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &, GLArea * ) ;
+	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
 	//basically copied from void AlignPairWidget::drawPickedPoints in editalign plugin
 	//Draws all the picked points on the screen
@@ -53,12 +46,6 @@ public:
 	void drawPickedPoints(std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox);
 	
 private:
-	//the list of possible actions
-	QList <QAction *> actionList;
-	
-	//constant for the name of the action for picking points
-	static const char* pickPointsActionName;
-	
 	//the current place the mouse clicked
 	QPoint currentMousePosition;
 

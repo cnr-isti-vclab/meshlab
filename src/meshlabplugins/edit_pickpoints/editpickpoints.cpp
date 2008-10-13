@@ -21,12 +21,8 @@ using namespace vcg;
 #define PI 3.14159265
 
 
-EditPickPointsPlugin::EditPickPointsPlugin(){
-	actionList << new QAction(QIcon(":/images/pickpoints.png"), pickPointsActionName, this);
-	
-	foreach(QAction *editAction, actionList)
-	    editAction->setCheckable(true);
-	
+EditPickPointsPlugin::EditPickPointsPlugin()
+{
 	//initialize to false so we dont end up collection some weird point in the beginning
 	registerPoint = false;
 	moveSelectPoint = false;
@@ -37,35 +33,14 @@ EditPickPointsPlugin::EditPickPointsPlugin(){
 
 //Constants
 
-//name of the actions
-const char* EditPickPointsPlugin::pickPointsActionName = "PickPoints";
 
-
-
-//just returns the action list
-QList<QAction *> EditPickPointsPlugin::actions() const {
-	return actionList;
-}
-
-const QString EditPickPointsPlugin::Info(QAction *action) 
+const QString EditPickPointsPlugin::Info() 
 {
-	if( action->text() != tr(pickPointsActionName) )
-		assert (0);
-  	
 	return tr("Pick and save 3D points on the mesh");
 }
 
-const PluginInfo &EditPickPointsPlugin::Info() 
-{
-	static PluginInfo ai; 
-	ai.Date=tr(__DATE__);
-	ai.Version = tr("1.0");
-	ai.Author = ("Oscar Barney");
-	return ai;
-} 
-
 //called
-void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla)
+void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla)
 {
 	//qDebug() << "Decorate " << mm.fileName.c_str() << " ...";
 	
@@ -128,7 +103,7 @@ void EditPickPointsPlugin::Decorate(QAction * /*ac*/, MeshModel &mm, GLArea *gla
 	drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector(), mm.cm.bbox);
 }
 
-void EditPickPointsPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gla )
+void EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
 {
 	//qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ...";
 	
@@ -151,7 +126,7 @@ void EditPickPointsPlugin::StartEdit(QAction * /*mode*/, MeshModel &mm, GLArea *
 	
 }
 
-void EditPickPointsPlugin::EndEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gla)
+void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea *gla)
 {
 	//qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ...";
 	// some cleaning at the end.
@@ -163,7 +138,7 @@ void EditPickPointsPlugin::EndEdit(QAction * /*mode*/, MeshModel &mm, GLArea *gl
 	pickPointsDialog->hide();
 }
 
-void EditPickPointsPlugin::mousePressEvent(QAction *, QMouseEvent *event, MeshModel &mm, GLArea *gla )
+void EditPickPointsPlugin::mousePressEvent(QMouseEvent *event, MeshModel &mm, GLArea *gla )
 {
 	//qDebug() << "mouse press Pick Points: " << mm.fileName.c_str() << " ...";
 
@@ -186,7 +161,7 @@ void EditPickPointsPlugin::mousePressEvent(QAction *, QMouseEvent *event, MeshMo
 	}
 }
 
-void EditPickPointsPlugin::mouseMoveEvent(QAction *, QMouseEvent *event, MeshModel &mm, GLArea *gla ) 
+void EditPickPointsPlugin::mouseMoveEvent(QMouseEvent *event, MeshModel &mm, GLArea *gla ) 
 {
 	//qDebug() << "mousemove pick Points: " << mm.fileName.c_str() << " ...";
 	
@@ -209,8 +184,7 @@ void EditPickPointsPlugin::mouseMoveEvent(QAction *, QMouseEvent *event, MeshMod
 	}
 }
 
-void EditPickPointsPlugin::mouseReleaseEvent(QAction *,
-		QMouseEvent *event, MeshModel &mm, GLArea * gla)
+void EditPickPointsPlugin::mouseReleaseEvent(QMouseEvent *event, MeshModel &mm, GLArea * gla)
 {
 	//qDebug() << "mouseRelease Pick Points: " << mm.fileName.c_str() << " ...";
 	
@@ -396,6 +370,3 @@ void EditPickPointsPlugin::drawPickedPoints(
 	
 	glPopAttrib();
 }
-
-
-Q_EXPORT_PLUGIN(EditPickPointsPlugin)
