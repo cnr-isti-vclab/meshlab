@@ -1,6 +1,7 @@
 include (../../shared.pri)
 
-HEADERS = rgbt.h \
+HEADERS = edit_rgbtri_factory.h \
+          rgbt.h \
           widgetRgbT.h \
           topologicalOp.h \
           rgbInfo.h \
@@ -10,7 +11,8 @@ HEADERS = rgbt.h \
           modButterfly.h \
           subdialog.h
           
-SOURCES = rgbt.cpp \
+SOURCES = edit_rgbtri_factory.cpp \
+          rgbt.cpp \
           widgetRgbT.cpp \
           rgbPrimitives.cpp \
           controlPoint.cpp \

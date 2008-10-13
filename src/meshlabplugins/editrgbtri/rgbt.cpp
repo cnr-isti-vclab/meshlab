@@ -49,10 +49,6 @@ RgbTPlugin::RgbTPlugin()
 	rgbInfo = 0;
 	widgetRgbT=0;
 	to = 0;
-	actionList << new QAction(QIcon(":/images/rgbt.png"),"Rgb Triangulations Plugin", this);
-	QAction *editAction;
-	foreach(editAction, actionList)
-	editAction->setCheckable(true);
 	isDragging = false;
 	//qDebug() << "RgbTPlugin"<< endl;
 	ie = 0;
@@ -65,26 +61,12 @@ RgbTPlugin::~RgbTPlugin()
 	//qDebug() << "~RgbTPlugin"<< endl;
 }
 
-QList<QAction *> RgbTPlugin::actions() const
-{
-	return actionList;
-}
-
-const QString RgbTPlugin::Info(QAction */*action*/)
+const QString RgbTPlugin::Info()
 {
 	return tr("Selective Mesh Refinement with Rgb Triangulations");
 }
 
-const PluginInfo &RgbTPlugin::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.3");
-	ai.Author = ("Daniele Panozzo");
-	return ai;
-}
-
-void RgbTPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent)
+void RgbTPlugin::StartEdit(MeshModel &m, GLArea * parent)
 {
 	// select the type of subdivison surface
 	SubDialog sd;
@@ -176,7 +158,7 @@ void RgbTPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent)
 		}
 
 		// this is called only when we change editor or we want to close it.
-		void RgbTPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/)
+		void RgbTPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 		{
 			//qDebug() <<"RgbTPlugin::ENDEDIT"<<endl;
 
@@ -189,8 +171,7 @@ void RgbTPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent)
 			}
 		}
 
-		void RgbTPlugin::mousePressEvent(QAction * /*ac*/, QMouseEvent *event,
-		MeshModel &m, GLArea * gla)
+		void RgbTPlugin::mousePressEvent(QMouseEvent *event, MeshModel &m, GLArea * gla)
 		{
 			cur=event->pos();
 			isDragging = true;
@@ -225,8 +206,7 @@ void RgbTPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent)
 			}
 		}
 
-		void RgbTPlugin::mouseMoveEvent(QAction *, QMouseEvent * event,
-		MeshModel &/*m*/, GLArea *gla)
+		void RgbTPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea *gla)
 		{
 			isDragging = true;
 			cur=event->pos();
@@ -245,8 +225,7 @@ void RgbTPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent)
 			gla->update();
 		}
 
-		void RgbTPlugin::mouseReleaseEvent(QAction *, QMouseEvent *event,
-		MeshModel &/*m*/, GLArea *gla)
+		void RgbTPlugin::mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *gla)
 		{
 			if (widgetRgbT->tool == TOOL_BRUSH || (widgetRgbT->tool == TOOL_ERASER))
 			{
@@ -303,7 +282,7 @@ void RgbTPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent)
 		}
 
 		/** only in decorare it is possible to obtain the correct zbuffer values and the other opengl stuff */
-		void RgbTPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
+		void RgbTPlugin::Decorate(MeshModel &m, GLArea * gla)
 		{
 			if (!widgetRgbT) 
 				return; // it is possible that the widget is not altready build when decorate il called
@@ -658,7 +637,5 @@ void RgbTPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent)
 		    return false;
 		}
 		
-		Q_EXPORT_PLUGIN(RgbTPlugin)
-
 	}
 
