@@ -342,7 +342,7 @@ public slots:
 	void endEdit(){	
 		if(iEdit && currentEditor) 
 		{
-			iEdit->EndEdit(currentEditor,*mm(),this);
+			iEdit->EndEdit(*mm(),this);
 		}
 		iEdit= 0; 
 		currentEditor=0; 
@@ -370,9 +370,27 @@ signals:
 	void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
 
   
+public slots:
+
+	// Called when we change layer, notifies the edit tool if one is open
+	void setCurrentlyActiveLayer(int meshId);
+	
 public:
-	void      setEdit(MeshEditInterface *edit, QAction *editor){	iEdit = edit; currentEditor=editor;}
-	QAction * getEditAction() { return currentEditor; }
+	
+	//call when the editor changes
+	void setCurrentEditAction(QAction *editAction);
+	
+	//get the currently active edit action
+	QAction * getCurrentEditAction() { return currentEditor; }
+	
+	//get the currently active mesh editor
+	MeshEditInterface * getCurrentMeshEditor() { return iEdit; }
+	
+	//see if this glAarea has a MESHEditInterface for this action
+	bool editorExistsForAction(QAction *editAction){ return actionToMeshEditMap.contains(editAction); }
+	
+	//add a MeshEditInterface for the given action
+	void addMeshEditor(QAction *editAction, MeshEditInterface *editor){ actionToMeshEditMap.insert(editAction, editor); }
 	
 	void closeEvent(QCloseEvent *event);
 	float lastRenderingTime() { return lastTime;}
@@ -444,6 +462,7 @@ private:
 	MeshEditInterface *iEdit;
 	QAction *currentEditor;
 	QAction *suspendedEditRef; // reference to last Editing Mode Used 
+	QMap<QAction*, MeshEditInterface*> actionToMeshEditMap;
 
 public:
 	RenderMode rm;

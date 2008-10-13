@@ -670,7 +670,7 @@ void MainWindow::loadPlugins()
 			MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 			if (iRender)
 			  addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));
-
+/*
 			MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
 			QAction *editAction;
 			if (iEdit)
@@ -682,8 +682,32 @@ void MainWindow::loadPlugins()
           connect(editAction,SIGNAL(triggered()),this,SLOT(applyEditMode()));
           editActionList.push_back(editAction);
         }
-      pluginFileNames += fileName;
-		}
+*/		
+			MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+			QAction *editAction = 0;
+			if(iEditFactory)
+			{
+				//qDebug() << "Here with filename:" << fileName;
+				
+				foreach(editAction, iEditFactory->actions())
+				{
+					editMenu->addAction(editAction);
+					if(!editAction->icon().isNull())
+					{
+						editToolBar->addAction(editAction);
+					} else qDebug() << "action was null";
+					
+					connect(editAction, SIGNAL(triggered()), this, SLOT(applyEditMode()));
+					editActionList.push_back(editAction);
+				}
+			}
+			
+			pluginFileNames += fileName;
+		} else
+		{
+			qDebug() << "error loading plugin with filename:" << fileName;
+			qDebug() << loader.errorString();
+        }
 	}
 	filterMenu->setEnabled(!filterMenu->actions().isEmpty() && mdiarea->activeSubWindow());
 

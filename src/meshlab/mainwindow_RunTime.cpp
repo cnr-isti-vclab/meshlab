@@ -356,16 +356,16 @@ void MainWindow::updateMenus()
 				foreach (QAction *a,editActionList)
 						 {
 								a->setChecked(false);
-								a->setEnabled( GLA()->getEditAction() == NULL );
+								a->setEnabled( GLA()->getCurrentEditAction() == NULL );
 						 }
 
 				suspendEditModeAct->setChecked(GLA()->suspendedEditor);
-				suspendEditModeAct->setDisabled(GLA()->getEditAction() == NULL);
+				suspendEditModeAct->setDisabled(GLA()->getCurrentEditAction() == NULL);
 
-				if(GLA()->getEditAction())
+				if(GLA()->getCurrentEditAction())
 						{
-								GLA()->getEditAction()->setChecked(! GLA()->suspendedEditor);
-								GLA()->getEditAction()->setEnabled(true);
+								GLA()->getCurrentEditAction()->setChecked(! GLA()->suspendedEditor);
+								GLA()->getCurrentEditAction()->setEnabled(true);
 						}
 
 				showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
@@ -437,14 +437,6 @@ void MainWindow::delCurrentMesh()
 	//stddialog->hide();
 	GLA()->updateGL();
 	updateMenus();
-}
-
-// Called when we change layer
-void MainWindow::setCurrent(int meshId)
-{
-	GLA()->meshDoc.setCurrentMesh(meshId);
-	updateMenus();
-	//stddialog->hide();
 }
 
 void MainWindow::updateGL()
@@ -621,7 +613,7 @@ void MainWindow::suspendEditMode()
   if(!GLA()) return;
 
 	// return if no editing action is currently ongoing
-  if(!GLA()->getEditAction()) return;
+  if(!GLA()->getCurrentEditAction()) return;
 
 	GLA()->suspendEditToggle();
 	updateMenus();
@@ -636,9 +628,9 @@ void MainWindow::applyEditMode()
 
 	QAction *action = qobject_cast<QAction *>(sender());
 
-	if(GLA()->getEditAction()) //prevents multiple buttons pushed
+	if(GLA()->getCurrentEditAction()) //prevents multiple buttons pushed
 		{
-		  if(action==GLA()->getEditAction()) // We have double pressed the same action and that means disable that actioon
+		  if(action==GLA()->getCurrentEditAction()) // We have double pressed the same action and that means disable that actioon
 			{
 				if(GLA()->suspendedEditor)
 				{
@@ -653,14 +645,18 @@ void MainWindow::applyEditMode()
 			return;
 		}
 
-	MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(action->parent());
-  GLA()->setEdit(iEdit,action);
-//  GLA()->setLastAppliedEdit(action);
+	//if this GLArea does not have an instance of this action's MeshEdit tool then give it one
+	if(!GLA()->editorExistsForAction(action))
+	{
+		MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(action->parent());
+		MeshEditInterface *iEdit = iEditFactory->getMeshEditInterface(action);
+		GLA()->addMeshEditor(action, iEdit);
+	}		
+	GLA()->setCurrentEditAction(action);
 
-  iEdit->StartEdit(action,*(GLA()->mm()),GLA());
-	GLA()->log.Logf(GLLogStream::Info,"Started Mode %s",qPrintable (action->text()));
-  //GLA()->setSelectionRendering(true);
-  updateMenus();
+	//setSelectionRendering(true);
+	
+	updateMenus();
 }
 
 void MainWindow::applyRenderMode()

@@ -42,28 +42,30 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDialog(parent)
 	gla=qobject_cast<GLArea *>(parent);
 	mw=qobject_cast<MainWindow *>(gla->parentWidget()->parentWidget());
 	
-	connect(	ui.layerTableWidget, SIGNAL(cellClicked(int, int)) , this,  SLOT(toggleStatus(int,int)) );
-	connect(	ui.addButton,    SIGNAL(clicked()) , mw,  SLOT(openIn()) );
-	connect(	ui.deleteButton, SIGNAL(clicked()) , mw,  SLOT(delCurrentMesh()) );
+	connect(ui.layerTableWidget, SIGNAL(cellClicked(int, int)), this, SLOT(toggleStatus(int,int)) );
+	connect(ui.addButton, SIGNAL(clicked()), mw, SLOT(openIn()) );
+	connect(ui.deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );
 
 	//connect(	ui.deleteButton, SIGNAL(cellClicked(int, int)) , this,  SLOT(openIn(int,int)) );
 }
 void LayerDialog::toggleStatus(int row, int col)
 {
-  switch(col)
+	switch(col)
 	{ 
 		case 0 :
-		    mw->setCurrent(row);
-				updateTable();
-				break;
+			//the user has chosen to switch the layer
+			gla->meshDoc.setCurrentMesh(row);
+			break;
 		case 1 : 
 		{
+			//the user has clicke on one of the eyes
 			QList<MeshModel *> &meshList=gla->meshDoc.meshList;
 			if(meshList.at(row)->visible)  meshList.at(row)->visible = false;
-			else   meshList.at(row)->visible = true;
-			updateTable();	
+			else   meshList.at(row)->visible = true;	
 		}
 	}
+	//make sure the right row is colored or that they right eye is drawn (open or closed)
+	updateTable();
 	gla->update();
 }
 
@@ -77,7 +79,7 @@ void LayerDialog::updateTable()
 {
 	if(!isVisible()) return;
 	QList<MeshModel *> &meshList=gla->meshDoc.meshList;
-	qDebug("Items in list: %d", meshList.size());
+	//qDebug("Items in list: %d", meshList.size());
 	ui.layerTableWidget->clear();
 	ui.layerTableWidget->setColumnCount(3);
 	ui.layerTableWidget->setRowCount(meshList.size());
@@ -88,7 +90,7 @@ void LayerDialog::updateTable()
 	for(int i=0;i<meshList.size();++i)
 	 {
     QTableWidgetItem *item;
-		qDebug("Filename %s", meshList.at(i)->fileName.c_str());
+		//qDebug("Filename %s", meshList.at(i)->fileName.c_str());
 		
 		item = new QTableWidgetItem(QFileInfo(meshList.at(i)->fileName.c_str()).fileName());
 		if(meshList.at(i)==gla->mm()) {

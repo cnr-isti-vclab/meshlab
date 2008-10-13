@@ -133,6 +133,8 @@ GLArea::GLArea(QWidget *parent)
 	pointSize = 2.0f;
 	layerDialog = new LayerDialog(this);
 	
+	connect((const MeshDocument*)&meshDoc, SIGNAL(currentMeshChanged(int)), this, SLOT(setCurrentlyActiveLayer(int)));
+	
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -411,7 +413,7 @@ void GLArea::paintGL()
 			}
 
 			if(iEdit)
-				iEdit->Decorate(currentEditor,*mm(),this);
+				iEdit->Decorate(*mm(),this);
 	
 			// Draw the selection
 			if(rm.selectedFaces)  mm()->RenderSelectedFaces();
@@ -597,6 +599,29 @@ void GLArea::saveSnapshot()
 	update();
 }
 
+void GLArea::setCurrentlyActiveLayer(int meshId)
+{
+	qDebug() << "setCurrent: " << meshId;
+	
+	//get the mesh that was current before this change
+	MeshModel *outgoingMeshModel = meshDoc.mm();
+		
+	//if we have an edit tool open, notify it that the current layer has changed
+	if(iEdit) iEdit->LayerChanged(meshDoc, *outgoingMeshModel, this);	
+}
+
+void GLArea::setCurrentEditAction(QAction *editAction)
+{
+	assert(editAction);
+	currentEditor = editAction;
+	
+	iEdit = actionToMeshEditMap.value(currentEditor); 
+	assert(iEdit); 
+	iEdit->StartEdit(meshDoc, this);
+
+	log.Logf(GLLogStream::Info,"Started Mode %s", qPrintable(currentEditor->text()));
+}
+
 
 void GLArea::closeEvent(QCloseEvent *event)
 {
@@ -614,14 +639,14 @@ void GLArea::closeEvent(QCloseEvent *event)
 			return;
 		}
 	}
-  if(getEditAction()) endEdit();	
+  if(getCurrentEditAction()) endEdit();	
 	event->accept();
 }
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
 	e->ignore();
-	if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(currentEditor,e,*mm(),this);
+	if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
 	else{
       if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
       if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
@@ -632,7 +657,7 @@ void GLArea::keyReleaseEvent ( QKeyEvent * e )
 void GLArea::keyPressEvent ( QKeyEvent * e )
 {
 	e->ignore();
-	if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(currentEditor,e,*mm(),this);
+	if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
 	else{
       if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
       if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
@@ -646,7 +671,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 	setFocus();
 	
   if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
-		  iEdit->mousePressEvent(currentEditor,e,*mm(),this);
+		  iEdit->mousePressEvent(e,*mm(),this);
   else {          
 	    if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) && 
           (e->button()==Qt::LeftButton) )
@@ -663,7 +688,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 { 
       if( (iEdit && !suspendedEditor) && !(e->buttons() & Qt::MidButton) )
-    		  	iEdit->mouseMoveEvent(currentEditor,e,*mm(),this);
+    		  	iEdit->mouseMoveEvent(e,*mm(),this);
       else {
 		    if (isDefaultTrackBall()) 
 			{
@@ -680,7 +705,7 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
   //clearFocus();
 	activeDefaultTrackball=true;
 	if( (iEdit && !suspendedEditor) && (e->button() != Qt::MidButton) )
-			iEdit->mouseReleaseEvent(currentEditor,e,*mm(),this);
+			iEdit->mouseReleaseEvent(e,*mm(),this);
     else {
           if (isDefaultTrackBall()) trackball.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	        else trackball_light.MouseUp(e->x(),height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
@@ -693,7 +718,7 @@ void GLArea::mouseReleaseEvent(QMouseEvent*e)
 //Processing of tablet events, interesting only for painting plugins
 void GLArea::tabletEvent(QTabletEvent*e)
 {
-	if(iEdit && !suspendedEditor) iEdit->tabletEvent(currentEditor,e,*mm(),this);
+	if(iEdit && !suspendedEditor) iEdit->tabletEvent(e,*mm(),this);
 	else e->ignore();
 }
 

@@ -183,7 +183,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 									foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
     									addItems(pluginItem,Templist);
 								}
-								MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
+								MeshEditInterfaceFactory *iEdit = qobject_cast<MeshEditInterfaceFactory *>(plugin);
 								if (iEdit){
 									QStringList Templist;
 									foreach(QAction *a,iEdit->actions()){Templist.push_back(a->text());}
@@ -219,47 +219,39 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int ncolumn)
 	if (plugin) {
 		MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
 		if (iMeshIO){
-			if (item->parent()==NULL)
-			{
-				labelInfo->setText(QString("Author: ")+iMeshIO->Info().Author+QString(" Date: ")+iMeshIO->Info().Date+QString(" Version: ")+iMeshIO->Info().Version);
+			foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
+				QString formats;
+				foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
+				if (actionName==formats) labelInfo->setText(f.description);
 			}
-			else
-			{
-				foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
-					QString formats;
-					foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
-					if (actionName==formats) labelInfo->setText(f.description);
-				}
-				foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
-					QString formats;
-					foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
-					if (actionName==formats) labelInfo->setText(f.description);
-				}
+			foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+				QString formats;
+				foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
+				if (actionName==formats) labelInfo->setText(f.description);
 			}
 		}
 		MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
 		if (iDecorate)
 		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iDecorate->Info().Author+QString(" Date: ")+iDecorate->Info().Date+QString(" Version: ")+iDecorate->Info().Version);
-			else foreach(QAction *a,iDecorate->actions())
+			foreach(QAction *a,iDecorate->actions())
 				if (actionName==a->text()) labelInfo->setText(iDecorate->Info(a));
 		}
 		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
 		if (iFilter)
 		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iFilter->pluginInfo().Author+QString(" Date: ")+iFilter->pluginInfo().Date+QString(" Version: ")+iFilter->pluginInfo().Version);
-			else foreach(QAction *a,iFilter->actions())
+			foreach(QAction *a,iFilter->actions())
 							if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
 		}
 		MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 		if (iRender){
 		}
-		MeshEditInterface *iEdit = qobject_cast<MeshEditInterface *>(plugin);
-		if (iEdit)
+		MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+		if (iEditFactory)
 		{
-			if (item->parent()==NULL) labelInfo->setText(QString("Author: ")+iEdit->Info().Author+QString(" Date: ")+iEdit->Info().Date+QString(" Version: ")+iEdit->Info().Version);
-			else foreach(QAction *a,iEdit->actions())
-				if (actionName==a->text()) labelInfo->setText(iEdit->Info(a));
+			foreach(QAction *a, iEditFactory->actions())
+			{
+				if(iEditFactory) labelInfo->setText(iEditFactory->getEditToolDescription(a));
+			}
 		}
 	}
 }	

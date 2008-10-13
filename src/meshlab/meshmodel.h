@@ -45,6 +45,7 @@
 #include <wrap/io_trimesh/additionalinfo.h>
 #include <QList>
 #include <QString>
+#include <QObject>
 
 class CEdge;   
 class CFaceO;
@@ -285,20 +286,26 @@ public:
     }
 };
 
-class MeshDocument
+class MeshDocument : public QObject
 {
-public :
-MeshDocument()
+	Q_OBJECT
+
+public:
+	
+	MeshDocument(): QObject()
 	{
 		currentMesh = NULL;
 		busy=false;
 	}
- 
- ~MeshDocument()
-		{
-			foreach(MeshModel *mmp, meshList)
-					delete mmp;
-   }
+
+	//deletes each meshModel
+	~MeshDocument()
+	{
+		foreach(MeshModel *mmp, meshList)
+			delete mmp;
+	}
+
+	//returns the mesh ata given position in the list
 	MeshModel *getMesh(int i)
 	{ 
 		return meshList.at(i);
@@ -306,58 +313,26 @@ MeshDocument()
 	
 	MeshModel *getMesh(const char *name);
 	
-	void setCurrentMesh(unsigned int i)
-	{
-	  assert(i < (unsigned int)meshList.size());
-		currentMesh=meshList.at(i);
-	}
+	//set the current mesh to be the one at index i
+	void setCurrentMesh(unsigned int i);
 	
 	MeshModel *mm() {
 		return currentMesh;
 	}
-/// The very important member:
-/// The list of MeshModels. 
 	
-  QList<MeshModel *> meshList;	
+	/// The very important member:
+	/// The list of MeshModels. 
+	QList<MeshModel *> meshList;	
 	
 	int size() const {return meshList.size();}
 	bool busy;    // used in processing. To disable access to the mesh by the rendering thread
 
-	MeshModel *addNewMesh(const char *meshName,MeshModel *newMesh=0)
-	{
-		QString newName=meshName;
-		for(QList<MeshModel*>::iterator mmi=meshList.begin();mmi!=meshList.end();++mmi)
-		{
-			QString shortName( (*mmi)->fileName.c_str() );
-			if(shortName == newName) 
-				newName = newName+"_copy";
-		}
-		if(newMesh==0) 
-			newMesh=new MeshModel(qPrintable(newName));
-		else 
-			newMesh->fileName = qPrintable(newName);
-		meshList.push_back(newMesh);
-		currentMesh=meshList.back();
-		return newMesh;
-	}
+	//add a new mesh with the given name
+	MeshModel *addNewMesh(const char *meshName,MeshModel *newMesh=0);
 	
-
-  bool delMesh(MeshModel *mmToDel)
-	{
-		if(meshList.size()==1) return false; 
-		QMutableListIterator<MeshModel *> i(meshList);
-		while (i.hasNext()) {
-     MeshModel *md = i.next();
-     if (md==mmToDel) 
-		  {
-         i.remove();
-				 delete mmToDel;
-			}
-		}
-		if(currentMesh == mmToDel) setCurrentMesh(0);
-		return true;
- }
-		
+	//remove the mesh from the list and delete it from memory
+	bool delMesh(MeshModel *mmToDel);
+			
   int vn() /// Sum of all the vertices of all the meshes
 	{ 
 			int tot=0;
@@ -379,8 +354,14 @@ MeshDocument()
 			FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
 		return FullBBox;
  }
+ 		
 	private:
-		MeshModel *currentMesh;	
+		MeshModel *currentMesh;
+
+	signals:
+		//when ever the current mesh changed this will send out the index of the newest mesh
+		void currentMeshChanged(int index);
+
 };
 
 /* 
