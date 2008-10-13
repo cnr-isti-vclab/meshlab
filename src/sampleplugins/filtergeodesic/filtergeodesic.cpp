@@ -87,16 +87,6 @@ const FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
   }
 }
 
-
-const PluginInfo &FilterGeodesic::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr( __DATE__ );
-	 ai.Version = tr("0.1");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
-}
-
 const int FilterGeodesic::getRequirements(QAction *action)
 {
   switch(ID(action))

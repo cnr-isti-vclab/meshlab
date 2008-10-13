@@ -63,7 +63,6 @@ class FilterGeodesic : public QObject, public MeshFilterInterface
 
 	virtual const QString filterName(FilterIDType filter);
 	virtual const QString filterInfo(FilterIDType filter);
-	virtual const PluginInfo &pluginInfo();
 
   virtual const FilterClass getClass(QAction *);
   virtual const int getRequirements(QAction *);
