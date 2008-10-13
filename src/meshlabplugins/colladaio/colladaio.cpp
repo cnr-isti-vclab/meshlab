@@ -244,13 +244,4 @@ void ColladaIOPlugin::GetExportMaskCapability(QString &format, int &capability, 
 	assert(0);
 }
 
-const PluginInfo &ColladaIOPlugin::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr("June 2006");
-	ai.Version = tr("0.1");
-	ai.Author = ("Guido Ranzuglia");
-	return ai;
- }
-
 Q_EXPORT_PLUGIN(ColladaIOPlugin)
