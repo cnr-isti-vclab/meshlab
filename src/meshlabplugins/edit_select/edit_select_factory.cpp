@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,47 +20,38 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef EDITPLUGIN_H
-#define EDITPLUGIN_H
 
-#include <QObject>
-#include <QStringList>
-#include <QList>
+#include "edit_select_factory.h"
+#include "edit_select.h"
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-class ExtraMeshEditPlugin : public QObject, public MeshEditInterface
+EditSelectFactory::EditSelectFactory()
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
-			
-public:
-    ExtraMeshEditPlugin();
+	editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a region", this);
+	
+	actionList << editSelect;
+	
+	foreach(QAction *editAction, actionList)
+		editAction->setCheckable(true); 	
+}
+	
+//gets a list of actions available from this plugin
+QList<QAction *> EditSelectFactory::actions() const
+{
+	return actionList;
+}
 
-    virtual ~ExtraMeshEditPlugin() {}
+//get the edit tool for the given action
+MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
+{
+	if(action == editSelect)
+	{
+		return new ExtraMeshEditPlugin();
+	} else assert(0); //should never be asked for an action that isnt here
+}
 
-    static const QString Info();
-    virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+const QString EditSelectFactory::getEditToolDescription(QAction *)
+{
+	return ExtraMeshEditPlugin::Info();
+}
 
-    QPoint start;
-    QPoint cur;
-    QPoint prev;
-    bool isDragging;
-    std::vector<CMeshO::FacePointer> LastSel;
-    
-signals:
-	void setSelectionRendering(bool);
-
-private:
-  typedef enum {SMAdd, SMClear,SMSub} SelMode;
-  SelMode selMode;
-  void DrawXORRect(GLArea * gla, bool doubleDraw);
-};
-
-#endif
+Q_EXPORT_PLUGIN(EditSelectFactory)

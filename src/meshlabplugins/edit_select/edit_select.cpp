@@ -34,37 +34,16 @@ using namespace std;
 using namespace vcg;
 
 ExtraMeshEditPlugin::ExtraMeshEditPlugin() {
-  isDragging=false;
-
-	actionList << new QAction(QIcon(":/images/select_face.png"),"Select Faces in a region", this);
-  QAction *editAction;
-  foreach(editAction, actionList)
-    editAction->setCheckable(true);
-      
+  isDragging=false;      
 }
 
-QList<QAction *> ExtraMeshEditPlugin::actions() const {
-	return actionList;
-}
-
-
-const QString ExtraMeshEditPlugin::Info(QAction *action) 
+const QString ExtraMeshEditPlugin::Info() 
 {
-  if( action->text() != tr("Select Faces in a region") ) assert (0);
-
 	return tr("Interactive selection of faces inside a dragged rectangle in screen space");
 }
 
-const PluginInfo &ExtraMeshEditPlugin::Info() 
+void ExtraMeshEditPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea * gla)
 {
-   static PluginInfo ai; 
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.5");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
- } 
-  void ExtraMeshEditPlugin::mousePressEvent    (QAction *, QMouseEvent * event, MeshModel &m, GLArea * gla)
-  {
     LastSel.clear();
 		
     if(event->modifiers() == Qt::ControlModifier || 
@@ -85,7 +64,7 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
     return;
   }
   
-  void ExtraMeshEditPlugin::mouseMoveEvent     (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+  void ExtraMeshEditPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
   {
     prev=cur;
     cur=event->pos();
@@ -105,12 +84,13 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
     }
   }
   
-  void ExtraMeshEditPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+  void ExtraMeshEditPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
   {
     gla->update();
     prev=cur;
     cur=event->pos();
   }
+
   void ExtraMeshEditPlugin::DrawXORRect(GLArea * gla, bool doubleDraw)
   {  
     glMatrixMode(GL_PROJECTION);
@@ -152,7 +132,8 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
 	  glMatrixMode(GL_MODELVIEW);
 
   }
-  void ExtraMeshEditPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
+
+  void ExtraMeshEditPlugin::Decorate(MeshModel &m, GLArea * gla)
   {
     if(isDragging)
     {
@@ -212,7 +193,7 @@ const PluginInfo &ExtraMeshEditPlugin::Info()
 
   }
 
-void ExtraMeshEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
+void ExtraMeshEditPlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
  LastSel.clear();
  CMeshO::FaceIterator fi;
@@ -227,7 +208,3 @@ void ExtraMeshEditPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gl
  setSelectionRendering(true);
 
 }
-
-
-
-Q_EXPORT_PLUGIN(ExtraMeshEditPlugin)

@@ -1,7 +1,12 @@
 include (../../shared.pri)
 
-HEADERS       = edit_select.h 
-SOURCES       = edit_select.cpp $$GLEWCODE
+HEADERS       = edit_select_factory.h \
+				edit_select.h 
+
+SOURCES       = edit_select_factory.cpp \
+				edit_select.cpp \
+				$$GLEWCODE
+
 TARGET        = edit_select
 
 QT           += opengl
