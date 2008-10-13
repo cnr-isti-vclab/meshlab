@@ -52,15 +52,6 @@ const QString SampleMeshDecoratePlugin::Info(QAction *action)
   assert(0);
   return QString();
  }
-
- const PluginInfo &SampleMeshDecoratePlugin::Info()
-{
-   static PluginInfo ai;
-   ai.Date=tr("Dec 2007");
-	 ai.Author=tr("Paolo Cignoni");
-	 ai.Version=tr("1.0");
-   return ai;
- }
  
 void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *, FilterParameterSet *parset) 
 {

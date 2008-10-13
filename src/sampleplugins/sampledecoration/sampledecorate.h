@@ -44,7 +44,6 @@ class SampleMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
   virtual const QString Info(QAction *);
-  virtual const PluginInfo &Info();
   
   enum {
     DP_SHOW_CUBEMAPPED_ENV,
