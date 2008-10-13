@@ -15,21 +15,17 @@ class EditTexturePlugin : public QObject, public MeshEditInterface
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
 	
-	QList <QAction *> actionList;
-		
 	public:
 		EditTexturePlugin();
 		virtual ~EditTexturePlugin();
 
-		virtual const QString Info(QAction *);
-		virtual const PluginInfo &Info();
-		virtual void StartEdit(QAction * , MeshModel & , GLArea * );
-		virtual void EndEdit(QAction * , MeshModel & , GLArea * );
-	    virtual void Decorate(QAction * , MeshModel &m , GLArea * );
-		virtual void mousePressEvent (QAction *, QMouseEvent *event, MeshModel & , GLArea * );
-	    virtual void mouseMoveEvent (QAction *, QMouseEvent *event, MeshModel & , GLArea * );
-		virtual void mouseReleaseEvent (QAction *, QMouseEvent *event, MeshModel & , GLArea * );
-		virtual QList<QAction *> actions() const ;
+		static const QString Info();
+		virtual void StartEdit(MeshModel & , GLArea * );
+		virtual void EndEdit(MeshModel & , GLArea * );
+	    virtual void Decorate(MeshModel &m , GLArea * );
+		virtual void mousePressEvent(QMouseEvent *event, MeshModel & , GLArea * );
+	    virtual void mouseMoveEvent(QMouseEvent *event, MeshModel & , GLArea * );
+		virtual void mouseReleaseEvent (QMouseEvent *event, MeshModel & , GLArea * );
 	    
 	private:
 		typedef enum {	SMAdd,		// Enumeration for mouse actions

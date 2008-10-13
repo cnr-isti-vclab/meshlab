@@ -21,12 +21,8 @@ EditTexturePlugin::EditTexturePlugin()
 {
 	isDragging = false;
 	widget = 0;
-	pluginName = QString("Texture Parametrization Tool");
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(14);
-	actionList << new QAction(QIcon(":/images/edit_texture.png"),pluginName, this);
-	QAction *editAction;
-	foreach(editAction, actionList) editAction->setCheckable(true);
 }
 
 EditTexturePlugin::~EditTexturePlugin() 
@@ -39,27 +35,12 @@ EditTexturePlugin::~EditTexturePlugin()
 	}
 }
 
-QList<QAction *> EditTexturePlugin::actions() const 
+const QString EditTexturePlugin::Info() 
 {
-	return actionList;
-}
-
-const QString EditTexturePlugin::Info(QAction *action) 
-{
-	if(action->text() != pluginName) assert (0);
 	return tr("Edit texture coordinates of the selected area");
 }
 
-const PluginInfo &EditTexturePlugin::Info() 
-{
-	static PluginInfo ai; 
-	ai.Date=tr(__DATE__);
-	ai.Version = tr("1.1.4");
-	ai.Author = ("Riccardo Dini");
-    return ai;
-}
-
-void EditTexturePlugin::mousePressEvent (QAction *, QMouseEvent * event, MeshModel &m, GLArea * gla)
+void EditTexturePlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea * gla)
 {
 	isDragging = true;
 
@@ -94,7 +75,7 @@ void EditTexturePlugin::mousePressEvent (QAction *, QMouseEvent * event, MeshMod
 	return;
 }
   
-void EditTexturePlugin::mouseMoveEvent (QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+void EditTexturePlugin::mouseMoveEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
     prev = cur;
     cur = event->pos();
@@ -133,7 +114,7 @@ void EditTexturePlugin::mouseMoveEvent (QAction *,QMouseEvent * event, MeshModel
     }
 }
   
-void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+void EditTexturePlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
     prev = cur;
     cur = event->pos();
@@ -146,7 +127,7 @@ void EditTexturePlugin::mouseReleaseEvent(QAction *,QMouseEvent * event, MeshMod
 	gla->update();
 }
 
-void EditTexturePlugin::Decorate(QAction *, MeshModel &m, GLArea *gla)
+void EditTexturePlugin::Decorate(MeshModel &m, GLArea *gla)
 {
 	if (isDragging)
 	{
@@ -189,7 +170,7 @@ void EditTexturePlugin::Decorate(QAction *, MeshModel &m, GLArea *gla)
 	}
 }
 
-void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla )
+void EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
 	// Set up the model
 	m.cm.face.EnableFFAdjacency();
@@ -237,7 +218,7 @@ void EditTexturePlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea *gla 
 	gla->update();
 }
 
-void EditTexturePlugin::EndEdit(QAction * , MeshModel &m , GLArea * )
+void EditTexturePlugin::EndEdit(MeshModel &m , GLArea * )
 {
 	// Delete the widget
 	for (unsigned i = 0; i < m.cm.face.size(); i++) m.cm.face[i].ClearS();
@@ -312,5 +293,3 @@ bool EditTexturePlugin::HasCollapsedTextCoords(MeshModel &m)
 	}
 	return false;
 }
-
-Q_EXPORT_PLUGIN(EditTexturePlugin)
