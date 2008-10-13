@@ -178,13 +178,4 @@ void RenderRFX::Finalize(QAction *act, MeshModel &mesh, GLArea *gla)
 	}
 }
 
-const PluginInfo& RenderRFX::Info()
-{
-	static PluginInfo ai;
-	ai.Date    = tr("July 2008");
-	ai.Version = tr("0.1");
-	ai.Author  = "Carlo Casta";
-	return ai;
-}
-
 Q_EXPORT_PLUGIN(RenderRFX)

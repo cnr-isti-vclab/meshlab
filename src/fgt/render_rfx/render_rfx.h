@@ -48,7 +48,6 @@ public:
 	bool isSupported()         { return shadersSupported; }
 	QList<QAction*> actions();
 	int passNum()              { return totPass; }
-	const PluginInfo &Info();
 
 private:
 	void initActionList();
