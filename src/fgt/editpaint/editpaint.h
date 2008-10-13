@@ -60,23 +60,20 @@ enum PaintOptions {
 class EditPaintPlugin : public QObject, public MeshEditInterface {
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
-	QList <QAction *> actionList;
 
 public:
 	EditPaintPlugin();
 	virtual ~EditPaintPlugin();
-	
-	virtual const QString Info(QAction *);
-	virtual const PluginInfo &Info();
-	
-	virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	virtual void tabletEvent		(QAction *, QTabletEvent *, MeshModel & , GLArea *);
-	virtual QList<QAction *> actions() const ;
+
+	static const QString Info();
+
+	virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void tabletEvent(QTabletEvent *, MeshModel & , GLArea *);
 
 public slots:
 	void update();

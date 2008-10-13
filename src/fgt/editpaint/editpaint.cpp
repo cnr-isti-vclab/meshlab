@@ -39,10 +39,6 @@ using namespace vcg;
 
 EditPaintPlugin::EditPaintPlugin() 
 {
-	actionList << new QAction(QIcon(":/images/paintbrush-22.png"),"Z-painting", this);
-	QAction *editAction;
-	foreach(editAction, actionList)
-	editAction->setCheckable(true);
 	zbuffer = NULL;
 	color_buffer = NULL;
 	clone_zbuffer = NULL;
@@ -54,24 +50,11 @@ EditPaintPlugin::EditPaintPlugin()
 
 EditPaintPlugin::~EditPaintPlugin() {}
 
-QList<QAction *> EditPaintPlugin::actions() const {
-	return actionList;
-}
-
-const QString EditPaintPlugin::Info(QAction *action) {
-	if( action->text() != tr("Z-painting") ) assert (0);
+const QString EditPaintPlugin::Info() {
 	return tr("Improved Painting");
 }
 
-const PluginInfo &EditPaintPlugin::Info() {
-	static PluginInfo ai; 
-	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.2");
-	ai.Author = ("Daniele Bernabei & Andreas Gfrei");
-	return ai;
-} 
-
-void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent) 
+void EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent) 
 {
 	dock = new QDockWidget(parent->window());
 	paintbox = new Paintbox(dock);
@@ -123,7 +106,7 @@ void EditPaintPlugin::StartEdit(QAction *, MeshModel& m, GLArea * parent)
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));
 }
 
-void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) 
+void EditPaintPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/) 
 {
 	QObject::disconnect(paintbox, SIGNAL(undo()), this, SLOT(update()));
 	QObject::disconnect(paintbox, SIGNAL(redo()), this, SLOT(update()));
@@ -134,26 +117,26 @@ void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*p
 	delete dock;
 }
 
-void EditPaintPlugin::mousePressEvent(QAction * , QMouseEvent * event, MeshModel &, GLArea * gla) 
+void EditPaintPlugin::mousePressEvent(QMouseEvent * event, MeshModel &, GLArea * gla) 
 {
 	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
 	pushInputEvent(event->type(), event->pos(), event->modifiers(), 1, event->button(), gla);	
 	gla->update();
 }
 
-void EditPaintPlugin::mouseMoveEvent(QAction *, QMouseEvent* event, MeshModel & , GLArea * gla) 
+void EditPaintPlugin::mouseMoveEvent(QMouseEvent* event, MeshModel & , GLArea * gla) 
 {
 	pushInputEvent(event->type(), event->pos(), event->modifiers(), latest_event.pressure, latest_event.button, gla);
 	gla->update();
 }
 
-void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &, GLArea * gla) 
+void EditPaintPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &, GLArea * gla) 
 {
 	pushInputEvent(event->type(), event->pos(), event->modifiers(), 0, event->button(), gla);
 	gla->update();
 }
 
-void EditPaintPlugin::tabletEvent(QAction *, QTabletEvent * event, MeshModel & , GLArea * gla)
+void EditPaintPlugin::tabletEvent(QTabletEvent * event, MeshModel & , GLArea * gla)
 {
 	event->accept();
 	pushInputEvent(event->type(), event->pos(), event->modifiers(), event->pressure(), latest_event.button, gla);
@@ -204,7 +187,7 @@ void EditPaintPlugin::setBrushSettings(int size, int opacity, int hardness)
  * method and not where mouse events are processed.
  *
  */
-void EditPaintPlugin::Decorate(QAction*, MeshModel &m, GLArea * gla) 
+void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla) 
 {	
 	glarea = gla;
 	
@@ -1032,10 +1015,6 @@ void EditPaintPlugin::update()
 {
 	glarea->update();
 }
-
-
-Q_EXPORT_PLUGIN(EditPaintPlugin)
-
 
 
 /*********OpenGL Drawing Routines************/
