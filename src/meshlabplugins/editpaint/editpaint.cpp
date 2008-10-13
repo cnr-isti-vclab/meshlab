@@ -77,10 +77,6 @@ EditPaintPlugin::EditPaintPlugin() {
 	paintbox=0;
 	pixels=0;
 	pressed=0;
-	actionList << new QAction(QIcon(":/images/pinsel.png"),"Vertex painting, Face selection and smoothing", this);
-	QAction *editAction;
-	foreach(editAction, actionList)
-	editAction->setCheckable(true);
 }
 
 /** the destructor is never called */
@@ -89,23 +85,9 @@ EditPaintPlugin::~EditPaintPlugin() {
 	qDebug() << "~EditPaint" << endl;
 }
 
-
-QList<QAction *> EditPaintPlugin::actions() const {
-	return actionList;
-}
-
-const QString EditPaintPlugin::Info(QAction *action) {
-	if( action->text() != tr("Vertex painting, Face selection and smoothing") ) assert (0);
+const QString EditPaintPlugin::Info() {
 	return tr("Paint on your mesh, select and smooth faces, all with a pen-like tool.");
 }
-
-const PluginInfo &EditPaintPlugin::Info() {
-	static PluginInfo ai; 
-	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.1");
-	ai.Author = ("Andreas Gfrei");
-	return ai;
-} 
 
 /** an undo==1 or a redo was called */
 void EditPaintPlugin::undo(int value) {
@@ -119,7 +101,7 @@ void EditPaintPlugin::undo(int value) {
 	paintbox->setRedo(color_undo[current_gla]->hasRedo());
 }
 
-void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * parent) {
+void EditPaintPlugin::StartEdit(MeshModel &m, GLArea * parent) {
 	parent->setCursor(QCursor(QPixmap(":/images/cursor_paint.png"),1,1));	
     first=true;
 	pressed=0;
@@ -159,7 +141,7 @@ void EditPaintPlugin::StartEdit(QAction * /*mode*/, MeshModel &m, GLArea * paren
 }
 
 // this is called only when we change editor or we want to close it.
-void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/) {
+void EditPaintPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/) {
 	qDebug() <<"EditPaintPlugin::ENDEDIT"<<endl;
 	if (paintbox!=0) { 
 			delete paintbox; 
@@ -169,7 +151,7 @@ void EditPaintPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*p
 	 }
 }
 
-void EditPaintPlugin::mousePressEvent(QAction * ac, QMouseEvent * event, MeshModel &m, GLArea * gla) {
+void EditPaintPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea * gla) {
 	//qDebug() << "pressStart" << endl;
 	has_track=gla->isTrackBallVisible();
 	gla->showTrackBall(false);
@@ -197,7 +179,7 @@ void EditPaintPlugin::mousePressEvent(QAction * ac, QMouseEvent * event, MeshMod
 	curSel.clear();
 }
 
-void EditPaintPlugin::mouseMoveEvent(QAction *,QMouseEvent * event, MeshModel &/*m*/, GLArea * gla) {
+void EditPaintPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla) {
 	if (!isDragging) prev=cur; /** to prevent losses when two mouseEvents occur befor one decorate */
 	cur=event->pos();
 	isDragging = true;
@@ -213,7 +195,7 @@ void EditPaintPlugin::pushUndo(GLArea * gla) {
 	paintbox->setRedo(color_undo[gla]->hasRedo());
 }
   
-void EditPaintPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &m, GLArea * gla) {
+void EditPaintPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &m, GLArea * gla) {
 	gla->showTrackBall(has_track);
 	pushUndo(gla);
 	visited_vertexes.clear();
@@ -927,7 +909,7 @@ void EditPaintPlugin::fillGradient(MeshModel & m,GLArea * gla) {
 }
 
 /** only in decorare it is possible to obtain the correct zbuffer values and the other opengl stuff */
-void EditPaintPlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla) {
+void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla) {
 	updateMatrixes();
 	QPoint mid=QPoint(cur.x(),gla->curSiz.height()-  cur.y());
 	int utensil=paintbox->paintUtensil();
@@ -1185,5 +1167,3 @@ void ColorUndo::redo() {
 	delete temp;
 	undos.push_back(temp_undo);
 }
-
-Q_EXPORT_PLUGIN(EditPaintPlugin)

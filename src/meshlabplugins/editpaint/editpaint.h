@@ -64,23 +64,19 @@ struct Vert_Data_3{
 class EditPaintPlugin : public QObject, public MeshEditInterface {
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
-	QList <QAction *> actionList;
 
 public:
 	EditPaintPlugin();
 	virtual ~EditPaintPlugin();
 	
-	virtual const QString Info(QAction *);
-	virtual const PluginInfo &Info();
+	static const QString Info(QAction *);
 	
-	virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	virtual void mouseMoveEvent     (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	virtual void mouseReleaseEvent  (QAction *,QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	//	  virtual void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
-	virtual QList<QAction *> actions() const ;
+	virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
 private:
 	QPoint start; // mousepos at press
