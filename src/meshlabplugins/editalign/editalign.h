@@ -41,8 +41,6 @@ class EditAlignPlugin : public QObject, public MeshEditInterface
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
 	
-  QList <QAction *> actionList;
-	
 	enum 
 	{
 		ALIGN_IDLE = 0x01,
@@ -58,17 +56,14 @@ public:
 			mode=ALIGN_IDLE;
 		}
 
-    virtual const QString Info(QAction *);
-    virtual const PluginInfo &Info();
+    static const QString Info();
 
-    virtual void StartEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void Decorate(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * ) ;
-    virtual void mouseMoveEvent     (QAction *, QMouseEvent *, MeshModel &, GLArea * ) ;
-    virtual void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-
-		virtual QList<QAction *> actions() const ;
+    virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+    virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
+    virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
+    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
 		QFont qFont;
   	int mode;			

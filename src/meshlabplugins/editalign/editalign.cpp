@@ -42,38 +42,18 @@ using namespace vcg;
 EditAlignPlugin::EditAlignPlugin() {
   alignDialog=0;
 	qFont.setFamily("Helvetica");
-	qFont.setPixelSize(10);
-	
-	actionList << new QAction(QIcon(":/images/icon_align.png"), "Align", this);
-  foreach(QAction *editAction, actionList)
-    editAction->setCheckable(true);      
+	qFont.setPixelSize(10);      
 		
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 }
 
-QList<QAction *> EditAlignPlugin::actions() const {
-	return actionList;
-}
-
-
-const QString EditAlignPlugin::Info(QAction *action) 
+const QString EditAlignPlugin::Info() 
 {
-  if( action->text() != tr("Align") ) assert (0);
-
 	return tr("Allow to align different layers toghether.");
 }
 
-const PluginInfo &EditAlignPlugin::Info() 
-{
-   static PluginInfo ai; 
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.0");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
-} 
-
-void EditAlignPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
+void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 {
 	switch(mode)
 	 {
@@ -106,7 +86,8 @@ void EditAlignPlugin::Decorate(QAction * /*ac*/, MeshModel &m, GLArea * gla)
 		}
 	}
 }
-void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla )
+
+void EditAlignPlugin::StartEdit(MeshModel &_mm, GLArea *_gla )
 {
 	md=&_gla->meshDoc;
 	gla=_gla;
@@ -152,7 +133,7 @@ void EditAlignPlugin::StartEdit(QAction * /*mode*/, MeshModel &_mm, GLArea *_gla
 	suspendEditToggle();
 }
 
-void EditAlignPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/)
+void EditAlignPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 {
 // some cleaning at the end.
 qDebug("EndEdit: cleaning everything");
@@ -312,7 +293,7 @@ void EditAlignPlugin::recalcCurrentArc()
 }
 
 
-void EditAlignPlugin::mousePressEvent    (QAction *, QMouseEvent *e, MeshModel &, GLArea * )
+void EditAlignPlugin::mousePressEvent(QMouseEvent *e, MeshModel &, GLArea * )
 {
 	if(mode==ALIGN_MOVE)
 	{
@@ -321,7 +302,7 @@ void EditAlignPlugin::mousePressEvent    (QAction *, QMouseEvent *e, MeshModel &
 	}
 }
 
-void EditAlignPlugin::mouseMoveEvent     (QAction *, QMouseEvent *e, MeshModel &, GLArea * ) 
+void EditAlignPlugin::mouseMoveEvent(QMouseEvent *e, MeshModel &, GLArea * ) 
 {
 	if(mode==ALIGN_MOVE)
 	{
@@ -331,7 +312,7 @@ void EditAlignPlugin::mouseMoveEvent     (QAction *, QMouseEvent *e, MeshModel &
 	
 }
 
-void EditAlignPlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+void EditAlignPlugin::mouseReleaseEvent(QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
 	if(mode==ALIGN_MOVE)
 	{
@@ -365,10 +346,7 @@ switch(mode)
 	}
 }
 
-
-
-
-void EditAlignPlugin::DrawArc( vcg::AlignPair::Result *A )
+void EditAlignPlugin::DrawArc(vcg::AlignPair::Result *A )
 {	
 	unsigned int i;
 	AlignPair::Result &r=*A;
@@ -429,5 +407,3 @@ void EditAlignPlugin::DrawArc( vcg::AlignPair::Result *A )
 		glPopAttrib(); 
 
 }
-
-Q_EXPORT_PLUGIN(EditAlignPlugin)

@@ -1,6 +1,7 @@
 include (../../shared.pri)
 
-HEADERS       = editalign.h \
+HEADERS       = edit_align_factory.h \
+                editalign.h \
                 meshtree.h \
                 alignDialog.h \
 		AlignPairDialog.h \
@@ -9,13 +10,15 @@ HEADERS       = editalign.h \
 		align/AlignGlobal.h \
                 align/OccupancyGrid.h \
                 align/align_parameter.h \
+		../../meshlab/meshmodel.h \
 		../../meshlab/stdpardialog.h \
 		../../meshlab/filterparameter.h \
 		 $$VCGDIR/wrap/gui/trackball.h\
                  $$VCGDIR/wrap/gui/trackmode.h\
                  $$VCGDIR/wrap/gl/trimesh.h
 
-SOURCES       = editalign.cpp \
+SOURCES       = edit_align_factory.cpp \
+                editalign.cpp \
                 meshtree.cpp \
                 alignDialog.cpp \
 		AlignPairWidget.cpp \
