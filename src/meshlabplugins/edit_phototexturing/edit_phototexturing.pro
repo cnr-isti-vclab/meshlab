@@ -2,7 +2,8 @@ include (../../shared.pri)
 
 HEADERS       = photoTexturing.h
 
-SOURCES += 	photoTexturing.cpp \
+SOURCES += 	edit_phototex_factory.cpp \
+			photoTexturing.cpp \
 			PhotoTexturingDialog.cpp \
 			src/PhotoTexturer.cpp \
 			src/UVFaceTexture.cpp \
@@ -33,7 +34,8 @@ SOURCES += 	photoTexturing.cpp \
 			../../meshlab/stdpardialog.cpp 
 
 
-HEADERS += 	src/PhotoTexturer.h \
+HEADERS += 	edit_phototex_factory.h \
+			src/PhotoTexturer.h \
 			src/Camera.h \
 			src/CameraCalibration.h\
 			PhotoTexturingDialog.h \

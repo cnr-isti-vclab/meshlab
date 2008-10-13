@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,48 +20,38 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef PHOTOTEXTURING_H
-#define PHOTOTEXTURING_H
 
+
+#ifndef EditPhotoTexFactoryPLUGIN_H
+#define EditPhotoTexFactoryPLUGIN_H
+
+#include <meshlab/interfaces.h>
 #include <QObject>
-#include <QStringList>
 #include <QList>
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
-
-#include <PhotoTexturingDialog.h>
-#include <src/PhotoTexturer.h>
-
-class PhotoTexturingPlugin : public QObject, public MeshEditInterface {
+class EditPhotoTexFactory : public QObject, public MeshEditInterfaceFactory
+{
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(MeshEditInterfaceFactory)
 
 public:
-	PhotoTexturingPlugin();
-	virtual ~PhotoTexturingPlugin() {
-	}
+	EditPhotoTexFactory();
+	virtual ~EditPhotoTexFactory() { delete editPhotoTex; }
 
-	static const QString Info();
-
-	virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/){};
+	//gets a list of actions available from this plugin
+	virtual QList<QAction *> actions() const;
 	
-	virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea *);
-	virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea *);
-	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
-
-	void drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla);
+	//get the edit tool for the given action
+	virtual MeshEditInterface* getMeshEditInterface(QAction *);
+    
+	//get the description for the given action
+	virtual const QString getEditToolDescription(QAction *);
 	
-	GLArea *glArea;
-	PhotoTexturingDialog *ptDialog;
-	PhotoTexturer *photoTexturer;
-	QFont qFont;
-private: 
-	signals:
+private:
+	QList <QAction *> actionList;
 	
-	void suspendEditToggle();
+	QAction *editPhotoTex;
+	
 };
 
 #endif

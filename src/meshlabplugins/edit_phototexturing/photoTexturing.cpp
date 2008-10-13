@@ -20,10 +20,7 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-/****************************************************************************
- History
- $Log: meshedit.cpp,v $
- ****************************************************************************/
+
 #include <QtGui>
 
 #include <math.h>
@@ -33,9 +30,9 @@
 #include <PhotoTexturingDialog.h>
 #include "photoTexturing.h"
 
-
 using namespace std;
 using namespace vcg;
+
 /**
  * The PhotoTexturingPlugin is an edit plugin, which allows to texture a mesh using
  * a calibrated camera and a corresponding image. It is also possible to use more 
@@ -45,38 +42,19 @@ using namespace vcg;
 PhotoTexturingPlugin::PhotoTexturingPlugin() {
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);
-	actionList << new QAction(QIcon(":/images/icon_pt.png"),"Photo Texturing", this);
-	foreach(QAction *editAction, actionList)
-	editAction->setCheckable(true);
-	
+		
 	ptDialog = NULL;
 	glArea = NULL;
 	// inits the PhotoTexturer
 	photoTexturer = new PhotoTexturer();
 }
 
-QList<QAction *> PhotoTexturingPlugin::actions() const {
-	return actionList;
-}
-
-const QString PhotoTexturingPlugin::Info(QAction *action) {
-	if (action->text() != tr("Photo Texturing") )
-		assert (0);
-
+const QString PhotoTexturingPlugin::Info() {
 	return tr("Generates a texture for a mesh using a calibrated camera and a photo made by this camera.");
 }
 
-const PluginInfo &PhotoTexturingPlugin::Info() {
-	static PluginInfo ai;
-	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.5 beta");
-	ai.Author = ("Sebastian Herholz");
-	return ai;
-}
-
-
-void PhotoTexturingPlugin::StartEdit(QAction * /*mode*/, MeshModel &m,
-		GLArea *gla) {	
+void PhotoTexturingPlugin::StartEdit(MeshModel &m, GLArea *gla)
+{	
 	//Creat GUI window
 	if(ptDialog == NULL)
 	{
@@ -91,10 +69,9 @@ void PhotoTexturingPlugin::StartEdit(QAction * /*mode*/, MeshModel &m,
 	
 	//show the dialog
 	ptDialog->show();
-
 }
 
-void PhotoTexturingPlugin::mousePressEvent(QAction *, QMouseEvent *e, MeshModel &mm, GLArea *glArea)
+void PhotoTexturingPlugin::mousePressEvent(QMouseEvent *e, MeshModel &mm, GLArea *glArea)
 {
 	//just passes throgh the mouse events to the GLArea
 	e->accept();
@@ -105,7 +82,7 @@ void PhotoTexturingPlugin::mousePressEvent(QAction *, QMouseEvent *e, MeshModel 
 	glArea->update();
 }
 
-void PhotoTexturingPlugin::mouseMoveEvent(QAction *, QMouseEvent *e, MeshModel &, GLArea *glArea)
+void PhotoTexturingPlugin::mouseMoveEvent(QMouseEvent *e, MeshModel &, GLArea *glArea)
 { 
 	//just passes throgh the mouse move events to the GLArea
 	if(e->buttons() | Qt::LeftButton) 
@@ -121,7 +98,7 @@ void PhotoTexturingPlugin::mouseMoveEvent(QAction *, QMouseEvent *e, MeshModel &
 }
 
 // When mouse is released we set the correct mouse curson
-void PhotoTexturingPlugin::mouseReleaseEvent(QAction *, QMouseEvent *e, MeshModel &, GLArea *glArea)
+void PhotoTexturingPlugin::mouseReleaseEvent(QMouseEvent *e, MeshModel &, GLArea *glArea)
 {
           if (glArea->isDefaultTrackBall()) glArea->trackball.MouseUp(e->x(),glArea->height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
 	        else glArea->trackball_light.MouseUp(e->x(),glArea->height()-e->y(), QT2VCG(e->button(),e->modifiers()) );
@@ -131,11 +108,9 @@ void PhotoTexturingPlugin::mouseReleaseEvent(QAction *, QMouseEvent *e, MeshMode
           glArea->update();
 }
 
-void PhotoTexturingPlugin::EndEdit(QAction * /*mode*/, MeshModel &/*m*/, GLArea *gla){
+void PhotoTexturingPlugin::EndEdit(MeshModel &/*m*/, GLArea *gla){
 	//gla->reloadTexture();
 	ptDialog->hide();
 	//delete ptDialog;
 	//ptDialog = NULL;
 }
-
-Q_EXPORT_PLUGIN(PhotoTexturingPlugin)

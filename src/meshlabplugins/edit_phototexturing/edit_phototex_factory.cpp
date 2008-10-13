@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -20,48 +20,38 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef PHOTOTEXTURING_H
-#define PHOTOTEXTURING_H
 
-#include <QObject>
-#include <QStringList>
-#include <QList>
+#include "edit_photoTex_factory.h"
+#include "photoTexturing.h"
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+EditPhotoTexFactory::EditPhotoTexFactory()
+{
+	editPhotoTex = new QAction(QIcon(":/images/icon_pt.png"),"Photo Texturing", this);
 
-#include <PhotoTexturingDialog.h>
-#include <src/PhotoTexturer.h>
-
-class PhotoTexturingPlugin : public QObject, public MeshEditInterface {
-	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
-
-public:
-	PhotoTexturingPlugin();
-	virtual ~PhotoTexturingPlugin() {
-	}
-
-	static const QString Info();
-
-	virtual void StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/){};
+	actionList << editPhotoTex;
 	
-	virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea *);
-	virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea *);
-	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
-
-	void drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * gla);
+	foreach(QAction *editAction, actionList)
+		editAction->setCheckable(true); 	
+}
 	
-	GLArea *glArea;
-	PhotoTexturingDialog *ptDialog;
-	PhotoTexturer *photoTexturer;
-	QFont qFont;
-private: 
-	signals:
-	
-	void suspendEditToggle();
-};
+//gets a list of actions available from this plugin
+QList<QAction *> EditPhotoTexFactory::actions() const
+{
+	return actionList;
+}
 
-#endif
+//get the edit tool for the given action
+MeshEditInterface* EditPhotoTexFactory::getMeshEditInterface(QAction *action)
+{
+	if(action == editPhotoTex)
+	{
+		return new PhotoTexturingPlugin();
+	} else assert(0); //should never be asked for an action that isnt here
+}
+
+const QString EditPhotoTexFactory::getEditToolDescription(QAction *)
+{
+	return PhotoTexturingPlugin::Info();
+}
+
+Q_EXPORT_PLUGIN(EditPhotoTexFactory)
