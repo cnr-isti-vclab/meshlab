@@ -178,16 +178,6 @@ const CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
   }
 }
 
-
-const PluginInfo &CleanFilter::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr( __DATE__ );
-	 ai.Version = tr("0.1");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
-}
-
 const int CleanFilter::getRequirements(QAction *action)
 {
   switch(ID(action))
