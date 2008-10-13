@@ -104,16 +104,6 @@ const QString FilterColorProc::filterInfo(FilterIDType filterId)
   return QString("error!");
 }
 
-
-const PluginInfo &FilterColorProc::pluginInfo()
-{
-  static PluginInfo ai;
-  ai.Date=tr( __DATE__ );
-  ai.Version = tr("0.1");
-  ai.Author = ("Francesco Tonarelli");
-  return ai;
-}
-
 const int FilterColorProc::getRequirements(QAction *action)
 {
   return MeshModel::MM_VERTCOLOR;
