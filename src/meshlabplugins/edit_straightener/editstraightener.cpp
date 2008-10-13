@@ -59,41 +59,23 @@ first version
 using namespace vcg;
 
 EditStraightener::EditStraightener()
-:actionList(),dialog(NULL),dialog_dock(NULL),
+:dialog(NULL),dialog_dock(NULL),
 gla(NULL),mm(NULL),refsize(0),currentmode(ES_Normal),
 origin(NULL),old_origin(NULL),dragged_origin(NULL),
 dragged_mesh(NULL),drawned_axes(NULL),undosystem(NULL),draw_bbox(true)
+{}
+
+const QString EditStraightener::Info() 
 {
-  actionList << new QAction(QIcon(":/images/icon_straightener.png"),"Straighten up a mesh", this);
-  foreach(QAction *editAction, actionList)
-    editAction->setCheckable(true);
+	return tr("Change the coordinate frame of a mesh.");
 }
 
-QList<QAction *> EditStraightener::actions() const {
-  return actionList;
-}
-
-const QString EditStraightener::Info(QAction *action) 
-{
-  if( action->text() != tr("Straighten up a mesh") ) assert (0);
-  return tr("Change the coordinate frame of a mesh.");
-}
-
-const PluginInfo &EditStraightener::Info() 
-{
-  static PluginInfo ai; 
-  ai.Date=tr(__DATE__);
-  ai.Version = tr("1.0");
-  ai.Author = ("Luca Benedetti");
-  return ai;
-}
-
-void EditStraightener::StartEdit(QAction *a, MeshModel &m, GLArea *g )
+void EditStraightener::StartEdit(MeshModel &m, GLArea *g )
 {
   //cleanup:
   gla=NULL;
   mm=NULL;
-  EndEdit(a,m,g);
+  EndEdit(m,g);
   gla = g;
   mm = &m;
   assert( (gla!=NULL) && (mm != NULL)); 
@@ -166,7 +148,7 @@ void EditStraightener::StartEdit(QAction *a, MeshModel &m, GLArea *g )
   assert(origin!=NULL);
 }
 
-void EditStraightener::EndEdit(QAction *, MeshModel &, GLArea *)
+void EditStraightener::EndEdit(MeshModel &, GLArea *)
 {
   if (dialog!=NULL) { delete dialog; dialog=NULL; }
   if (dialog_dock!=NULL) { delete dialog_dock; dialog_dock=NULL; }
@@ -185,7 +167,7 @@ void EditStraightener::EndEdit(QAction *, MeshModel &, GLArea *)
   mm=NULL;
 }
 
-void EditStraightener::Decorate(QAction *, MeshModel &, GLArea *)
+void EditStraightener::Decorate(MeshModel &, GLArea *)
 {
   dialog->updateSfn(mm->cm.sfn);
 
@@ -304,7 +286,7 @@ void EditStraightener::Decorate(QAction *, MeshModel &, GLArea *)
   assert(!glGetError());
 }
 
-void EditStraightener::mousePressEvent(QAction *, QMouseEvent *e, MeshModel &, GLArea * )
+void EditStraightener::mousePressEvent(QMouseEvent *e, MeshModel &, GLArea * )
 {
   switch (currentmode) {
     case ES_FreehandAxisDragging:
@@ -319,7 +301,7 @@ void EditStraightener::mousePressEvent(QAction *, QMouseEvent *e, MeshModel &, G
   gla->update();
 }
 
-void EditStraightener::mouseMoveEvent(QAction *, QMouseEvent *e, MeshModel &, GLArea * )
+void EditStraightener::mouseMoveEvent(QMouseEvent *e, MeshModel &, GLArea * )
 {
   switch (currentmode) {
     case ES_FreehandAxisDragging:
@@ -337,7 +319,7 @@ void EditStraightener::mouseMoveEvent(QAction *, QMouseEvent *e, MeshModel &, GL
   gla->update();
 }
 
-void EditStraightener::mouseReleaseEvent(QAction *,QMouseEvent *e, MeshModel &, GLArea *)
+void EditStraightener::mouseReleaseEvent(QMouseEvent *e, MeshModel &, GLArea *)
 {
   switch (currentmode) {
     case ES_FreehandAxisDragging:
@@ -355,7 +337,7 @@ void EditStraightener::mouseReleaseEvent(QAction *,QMouseEvent *e, MeshModel &, 
   gla->update();  
 }
 
-void EditStraightener::keyReleaseEvent (QAction *, QKeyEvent * e, MeshModel &, GLArea *)
+void EditStraightener::keyReleaseEvent (QKeyEvent * e, MeshModel &, GLArea *)
 {
   int button = 0;
   if (e->key () == Qt::Key_Control){
@@ -382,7 +364,7 @@ void EditStraightener::keyReleaseEvent (QAction *, QKeyEvent * e, MeshModel &, G
 }
 
 
-void EditStraightener::keyPressEvent (QAction *, QKeyEvent * e, MeshModel &, GLArea *)
+void EditStraightener::keyPressEvent (QKeyEvent * e, MeshModel &, GLArea *)
 {
   int button;
   if (e->key () == Qt::Key_Control){
@@ -902,5 +884,3 @@ void UndoSystem::limitmarks()
     undotype_vec.pop_front();
   }
 }
-
-Q_EXPORT_PLUGIN(EditStraightener)

@@ -4,21 +4,23 @@ include (../../shared.pri)
 TARGET = editstraightener
 
 # Lib sources
-SOURCES += $$VCGDIR/wrap/gui/trackball.cpp
-SOURCES += $$VCGDIR/wrap/gui/trackmode.cpp 
-SOURCES += $$VCGDIR/wrap/gui/coordinateframe.cpp 
-SOURCES += $$VCGDIR/wrap/gui/activecoordinateframe.cpp 
-SOURCES += $$VCGDIR/wrap/gui/rubberband.cpp 
+SOURCES += $$VCGDIR/wrap/gui/trackball.cpp \
+			$$VCGDIR/wrap/gui/trackmode.cpp \
+			$$VCGDIR/wrap/gui/coordinateframe.cpp \
+			$$VCGDIR/wrap/gui/activecoordinateframe.cpp \
+			$$VCGDIR/wrap/gui/rubberband.cpp \ 
+			$$GLEWCODE
 
-# Compile glew
-SOURCES += $$GLEWCODE
-QT += opengl
 # Input
-HEADERS += editstraightener.h
-HEADERS += editstraightenerdialog.h
+HEADERS  += edit_straightener_factory.h \
+			editstraightener.h \
+			editstraightenerdialog.h
 
-SOURCES += editstraightener.cpp
-SOURCES += editstraightenerdialog.cpp
+SOURCES  += edit_straightener_factory.cpp \
+			editstraightener.cpp \
+			editstraightenerdialog.cpp
+			
+QT += opengl
 
 FORMS += editstraightener.ui
 

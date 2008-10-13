@@ -62,8 +62,7 @@ class UndoSystem;
 
 /*!
   @brief The straightener editing plugin.
-  
-  
+
  */
 class EditStraightener : public QObject, public MeshEditInterface
 {
@@ -73,17 +72,16 @@ class EditStraightener : public QObject, public MeshEditInterface
 public:
   EditStraightener(); 
   virtual ~EditStraightener() {}
-  virtual QList<QAction *> actions() const ;
-  virtual const QString Info(QAction *);
-  virtual const PluginInfo &Info();
-  virtual void StartEdit (QAction *, MeshModel &, GLArea * );
-  virtual void EndEdit (QAction *, MeshModel &, GLArea * );
-  virtual void Decorate (QAction *, MeshModel &, GLArea * );
-  virtual void mousePressEvent (QAction *, QMouseEvent *, MeshModel &, GLArea * );
-  virtual void mouseMoveEvent (QAction *, QMouseEvent *, MeshModel &, GLArea * );
-  virtual void mouseReleaseEvent (QAction *, QMouseEvent *, MeshModel &, GLArea * );
-  virtual void keyReleaseEvent (QAction *, QKeyEvent *,   MeshModel &, GLArea * );
-  virtual void keyPressEvent (QAction *, QKeyEvent *,   MeshModel &, GLArea * );
+
+  static const QString Info();
+  virtual void StartEdit(MeshModel &, GLArea * );
+  virtual void EndEdit(MeshModel &, GLArea * );
+  virtual void Decorate(MeshModel &, GLArea * );
+  virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
+  virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
+  virtual void mouseReleaseEvent(QMouseEvent *, MeshModel &, GLArea * );
+  virtual void keyReleaseEvent(QKeyEvent *,   MeshModel &, GLArea * );
+  virtual void keyPressEvent(QKeyEvent *,   MeshModel &, GLArea * );
 
 private:
   //types:
@@ -93,7 +91,6 @@ private:
                  ES_FreehandMeshDragging = 3
                } EditStraightenerMode;
   // data:
-  QList <QAction *> actionList;
   EditStraightenerDialog *dialog;
   QDockWidget *dialog_dock;
   GLArea* gla;
