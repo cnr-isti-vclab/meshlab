@@ -239,14 +239,4 @@ void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, c
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 }
 
-
-const PluginInfo &BaseMeshIOPlugin::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr("January 2006");
-	ai.Version = tr("1.0");
-	ai.Author = ("Paolo Cignoni");
-	return ai;
- }
-
 Q_EXPORT_PLUGIN(BaseMeshIOPlugin)
