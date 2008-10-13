@@ -80,18 +80,6 @@ const QString GeometryAgingPlugin::filterInfo(FilterIDType filterId)
 	}
 }
 
-
-/* Returns plugin info */
-const PluginInfo &GeometryAgingPlugin::pluginInfo() 
-{
-	static PluginInfo ai;
-	ai.Date = tr(__DATE__);
-	ai.Version = tr("0.1");
-	ai.Author = tr("Marco Fais");
-	return ai;
- }
-
-
 /* Initializes the list of parameters (called by the auto dialog framework) */
 void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &params)
 {
