@@ -33,15 +33,9 @@ using namespace vcg;
 ExtraMeshSlidePlugin::ExtraMeshSlidePlugin() {
  dialogsliceobj=0;
  isDragging=false;
- QAction* editslice = new QAction(QIcon(":/images/iconslice.png"),"Slice mesh geometry", this);
- actionList << editslice;
- QAction *editAction;
+
  trackball_slice.center=Point3f(0, 0, 0);
- trackball_slice.radius= 50;
-  
-  foreach(editAction, actionList)
-    editAction->setCheckable(true);
- 
+ trackball_slice.radius= 50; 
 }
 
 ExtraMeshSlidePlugin::~ExtraMeshSlidePlugin() {
@@ -52,10 +46,8 @@ if ( dialogsliceobj!=0) {
 			 }
 	
 }
-QList<QAction *> ExtraMeshSlidePlugin::actions() const {
-	return actionList;
-}
- Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
+
+Trackball::Button QT2VCG(Qt::MouseButton qtbt,  Qt::KeyboardModifiers modifiers)
 {
 
 	int vcgbt=Trackball::BUTTON_NONE;
@@ -69,37 +61,25 @@ QList<QAction *> ExtraMeshSlidePlugin::actions() const {
 	return Trackball::Button(vcgbt);
 }
 
-const QString ExtraMeshSlidePlugin::Info(QAction *action) 
+const QString ExtraMeshSlidePlugin::Info() 
 {
-  if( action->text() != tr("Slice mesh geometry") ) assert (0);
-
 	return tr("Interactive selection of plane intersec with mesh");
 }
-const PluginInfo &ExtraMeshSlidePlugin::Info() 
-{
-   static PluginInfo ai; 
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.1");
-	 ai.Author = ("Nicola Andrenucci");
-   return ai;
- } 
 
-
-void ExtraMeshSlidePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+void ExtraMeshSlidePlugin::mouseReleaseEvent(QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
 	 trackball_slice.MouseUp(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()));
 }
 
-void ExtraMeshSlidePlugin::mousePressEvent    (QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
+void ExtraMeshSlidePlugin::mousePressEvent(QMouseEvent * e, MeshModel &m, GLArea * gla)
  {  
-
 	  if (  (e->button()==Qt::LeftButton)         &&
 		  !(e->modifiers() & Qt::ShiftModifier) )
 		  trackball_slice.MouseDown(e->x(),gla->height()-e->y(),QT2VCG(e->button(), e->modifiers()) );
 	 gla->update();
  }
 
-void ExtraMeshSlidePlugin::mouseMoveEvent     (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+void ExtraMeshSlidePlugin::mouseMoveEvent(QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
  {
   if( (e->buttons()| Qt::LeftButton) &&
 	  !(e->modifiers() & Qt::ShiftModifier))
@@ -211,7 +191,7 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr){
 	 pr->setViewBox(Point2d(sv->getViewBoxWidth(), sv->getViewBoxHeight()));
 	
 } 
- void ExtraMeshSlidePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
+ void ExtraMeshSlidePlugin::Decorate(MeshModel &m, GLArea * gla)
  {   
 	 
 	 this->gla=gla;
@@ -222,7 +202,7 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr){
 	 DrawPlane(this->gla,this->m);
    
  }
- void ExtraMeshSlidePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
+ void ExtraMeshSlidePlugin::EndEdit(MeshModel &m, GLArea *gla ){
 	if ( dialogsliceobj!=0) { 
 			delete  dialogsliceobj; 
 			
@@ -230,7 +210,7 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr){
 			
 	 }
  }
- void ExtraMeshSlidePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla ){
+ void ExtraMeshSlidePlugin::StartEdit(MeshModel &m, GLArea *gla ){
 	 gla->update();
 	 if(!dialogsliceobj){
 		 dialogsliceobj=new dialogslice(gla->window());
@@ -314,7 +294,3 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr){
 		 isDragging=false;
 		 gla->update();}
  }
-
-
- 
- Q_EXPORT_PLUGIN(ExtraMeshSlidePlugin)

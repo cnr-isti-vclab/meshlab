@@ -1,10 +1,12 @@
 include (../../shared.pri)
 
-HEADERS =	editslice.h \
+HEADERS =	edit_slice_factory.h \
+			editslice.h \
 			slicedialog.h\
 			svgpro.h
 
-SOURCES       = editslice.cpp \
+SOURCES       = edit_slice_factory.cpp \
+				editslice.cpp \
 				slicedialog.cpp\
 				$$GLEWCODE \
                 $$VCGDIR/wrap/gui/trackball.cpp \
