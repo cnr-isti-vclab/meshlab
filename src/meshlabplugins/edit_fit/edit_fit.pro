@@ -3,13 +3,15 @@ include (../../shared.pri)
 # Lib name
 TARGET        = edit_fit
 
-HEADERS       = editfit.h\
+HEADERS       = edit_fit_factory.h \
+				editfit.h\
 				cylinder.h\
 				box.h\
 				primitive.h\
 				fittoolbox.h
 				 
-SOURCES       = editfit.cpp\
+SOURCES       = edit_fit_factory.cpp \
+				editfit.cpp\
   				fittoolbox.cpp\
   				primitive.cpp\
 				$$GLEWCODE				

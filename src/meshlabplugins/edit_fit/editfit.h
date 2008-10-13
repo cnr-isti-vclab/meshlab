@@ -62,29 +62,25 @@ $Log: editfit.h,v $
 #include "box.h"
 #include "fittoolbox.h"
 
-
-
 class EditFitPlugin : public QObject, public MeshEditInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(MeshEditInterface)
 
 enum { CYLINDER, BOX };
 
 public:
 	EditFitPlugin();
 	~EditFitPlugin();
-	const QString Info(QAction *);
-	const PluginInfo &Info();
-	QList<QAction *> actions() const ;
+	static const QString Info();
 
-	void StartEdit(QAction *, MeshModel &, GLArea *);
-	void EndEdit  (QAction *, MeshModel &, GLArea *);
-	void Decorate (QAction *, MeshModel &, GLArea *);
+	void StartEdit(MeshModel &, GLArea *);
+	void EndEdit(MeshModel &, GLArea *);
+	void Decorate(MeshModel &, GLArea *);
 
-	void mousePressEvent   (QAction *, QMouseEvent *, MeshModel &, GLArea *);
-	void mouseMoveEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea *);
-	void mouseReleaseEvent (QAction *, QMouseEvent *, MeshModel &, GLArea *);
+	void mousePressEvent(QMouseEvent *, MeshModel &, GLArea *);
+	void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea *);
+	void mouseReleaseEvent(QMouseEvent *, MeshModel &, GLArea *);
 
 public slots:
 	void change_buttonCylinder();
@@ -103,7 +99,7 @@ private:
 	FitToolBox																				 *toolBox;								
 	QFont																							 qFont;
 	vcg::Point2i																			 lastPoint;								//L'ultimo punto 2d
-	QList <QAction *>																	 actionList;
+
 	std::vector<vcg::Point2i>													 gesture2D;								//La selezione dei punti 2d
 	std::vector<vcg::Point3f>													 gesture3D;								//La selezione dei punti 3d
 	std::vector<Primitive *>													 listaPrimitive;

@@ -27,30 +27,19 @@ $Log: editfit.cpp,v $
 #include "editfit.h"
 
 using namespace vcg;
-EditFitPlugin::EditFitPlugin():startGesture(false),pickMode(false){
-	actionList << new QAction(QIcon(":/images/icon_measure.png"),"Fitting Tool", this);
-	foreach(QAction *editAction, actionList)
-		editAction->setCheckable(true);
+
+EditFitPlugin::EditFitPlugin():startGesture(false),pickMode(false)
+{
 	toolBox=NULL;
 	showGesture3D=true;
 }
 
-QList<QAction *> EditFitPlugin::actions() const {
-	return actionList;
-}
-const QString EditFitPlugin::Info(QAction *action){
-	if( action->text() != tr("Fitting Tool") ) assert (0);
+const QString EditFitPlugin::Info()
+{
 	return tr("Allow to fit some primitive.");
 }
-const PluginInfo &EditFitPlugin::Info(){
-	static PluginInfo ai; 
-	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.1");
-	ai.Author = ("Davide Portelli");
-	return ai;
-}
 
-void  EditFitPlugin::StartEdit(QAction *, MeshModel &, GLArea * gla){
+void  EditFitPlugin::StartEdit(MeshModel &, GLArea * gla){
 	//Disabilito lo swap automatico del double buffering
 	//e lo gestisco io direttamente con gla->swapBuffers().
 	if(toolBox==NULL){
@@ -65,7 +54,7 @@ void  EditFitPlugin::StartEdit(QAction *, MeshModel &, GLArea * gla){
 	gla->update();
 	glewInit();
 }
-void  EditFitPlugin::EndEdit  (QAction *, MeshModel &, GLArea *){
+void  EditFitPlugin::EndEdit(MeshModel &, GLArea *){
 	if(toolBox!=NULL){ 
 		delete	toolBox; 
 		toolBox=NULL;	
@@ -77,7 +66,7 @@ void  EditFitPlugin::EndEdit  (QAction *, MeshModel &, GLArea *){
 	listaPrimitive.clear();
 }
 
-void  EditFitPlugin::mousePressEvent    (QAction *, QMouseEvent *ev, MeshModel &, GLArea *){
+void  EditFitPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &, GLArea *){
 	if(ev->button()==Qt::LeftButton){
 		startGesture=true;
 		vcg::Point2<int> tmp(ev->x(),ev->y());
@@ -87,7 +76,7 @@ void  EditFitPlugin::mousePressEvent    (QAction *, QMouseEvent *ev, MeshModel &
 		listaPrimitive.clear();
 	}
 }
-void  EditFitPlugin::mouseMoveEvent		  (QAction *, QMouseEvent *ev, MeshModel &, GLArea * gla){
+void  EditFitPlugin::mouseMoveEvent(QMouseEvent *ev, MeshModel &, GLArea * gla){
 	if(startGesture){
 		vcg::Point2<int> newPoint(ev->x(),ev->y());
 		LineRasterDDA(lastPoint.X(),lastPoint.Y(),newPoint.X(),newPoint.Y());
@@ -95,7 +84,7 @@ void  EditFitPlugin::mouseMoveEvent		  (QAction *, QMouseEvent *ev, MeshModel &,
 	}
 	gla->update();
 }
-void  EditFitPlugin::mouseReleaseEvent  (QAction *, QMouseEvent *ev, MeshModel &, GLArea * gla){
+void  EditFitPlugin::mouseReleaseEvent(QMouseEvent *ev, MeshModel &, GLArea * gla){
 	if(ev->button()==Qt::LeftButton){
 		startGesture=false;
 		pickMode=true;
@@ -103,7 +92,7 @@ void  EditFitPlugin::mouseReleaseEvent  (QAction *, QMouseEvent *ev, MeshModel &
 	//DrawInPickingMode(gla);
 	//ProcessPick(gla);
 }
-void  EditFitPlugin::Decorate (QAction *, MeshModel &, GLArea * gla){
+void  EditFitPlugin::Decorate(MeshModel &, GLArea * gla){
 	if(pickMode){
 		DrawInPickingMode(gla);
 		//ProcessPick(gla);
@@ -195,7 +184,7 @@ void  EditFitPlugin::DrawInPickingMode(GLArea * gla){
 	glPointSize(1);
 	glDrawBuffer(GL_BACK);
 	/*Disegno ogni punto con un colore diverso partendo da RGBA==(0,0,0,0)
-	fino al massimo RGBA==(255,255,255,254) perchè (255,255,255,255) è 
+	fino al massimo RGBA==(255,255,255,254) perchï¿½ (255,255,255,255) ï¿½ 
 	lo sfondo.Quindi al massimo posso distingure 4294967295 punti*
 }
 */
@@ -203,7 +192,7 @@ void  EditFitPlugin::DrawInPickingMode(GLArea * gla){
 void  EditFitPlugin::DrawInPickingMode(GLArea * gla){
 	
 	/*Disegno ogni punto con un colore diverso partendo da RGBA==(0,0,0,0)
-	fino al massimo RGBA==(255,255,255,254) perchè (255,255,255,255) è 
+	fino al massimo RGBA==(255,255,255,254) perchï¿½ (255,255,255,255) ï¿½ 
 	lo sfondo.Quindi al massimo posso distingure 4294967295 punti*/
 
 	QGLFramebufferObject framebuffer(gla->width(),gla->height(),QGLFramebufferObject::Depth,GL_TEXTURE_RECTANGLE_EXT);
@@ -246,7 +235,7 @@ void  EditFitPlugin::ProcessPick  (const QImage &img,GLArea * gla){
 
 	unsigned int z;
 	//Visto che in drawInPickingMode disegno pixel grossi 5, inserirei sempre lo stesso punto3D
-	//perchè per piu pixel ha sempre lo stesso colore, per questo uso last.
+	//perchï¿½ per piu pixel ha sempre lo stesso colore, per questo uso last.
 	unsigned int last=std::numeric_limits<unsigned int>::max();		//sarebbe 4294967295;
 	for(int i=0;i<(int)gesture2D.size();i++){
 		QRgb k=img.pixel(gesture2D[i].X(),gesture2D[i].Y());
@@ -281,7 +270,7 @@ void  EditFitPlugin::ProcessPick  (const QImage &img,GLArea * gla){
 void  EditFitPlugin::ProcessPick  (GLArea * gla){
 	unsigned int k=0;
 	//Visto che in drawInPickingMode disegno pixel grossi 5, inserirei sempre lo stesso punto3D
-	//perchè per piu pixel ha sempre lo stesso colore, per questo uso last.
+	//perchï¿½ per piu pixel ha sempre lo stesso colore, per questo uso last.
 	unsigned int last=std::numeric_limits<unsigned int>::max();		//sarebbe 4294967295;
 	glReadBuffer(GL_BACK);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -396,4 +385,3 @@ void EditFitPlugin::change_checkBoxGesture3d(bool b){
 void EditFitPlugin::slot_UpdateGlArea(){
 	//gla->update();
 }
-Q_EXPORT_PLUGIN(EditFitPlugin)
