@@ -1,11 +1,14 @@
 include (../../shared.pri)
 
-HEADERS = 	editsegment.h \
+HEADERS = edit_segment_factory.h \ 	
+		editsegment.h \
 		cutting.h \
 		curvaturetensor.h \
 		meshcutdialog.h \
 		colorpicker.h
-SOURCES = 	editsegment.cpp \
+		
+SOURCES = edit_segment_factory.cpp \
+		editsegment.cpp \
 		$$GLEWCODE \
 		meshcutdialog.cpp \
 		colorpiker.cpp

@@ -231,9 +231,6 @@ Color4b toVcgColor(QColor c) {
 	return Color4b(c.red(), c.green(), c.blue(), 255);
 }
 EditSegment::EditSegment() {
-	QAction* qaction = new QAction(QIcon(":/images/editsegment.png"),"Mesh Segmentation", this);
-	qaction->setCheckable(true);
-	actionList << qaction;
 	pixels = 0;
 	pen.radius = 5;
 	pen.backface = false;
@@ -254,25 +251,13 @@ EditSegment::EditSegment() {
 EditSegment::~EditSegment() {
 	delete meshCut;
 }
-QList<QAction * > EditSegment::actions() const {
-	return actionList;
-}
 
-const QString EditSegment::Info(QAction *action) {
-	if (action->text() != tr("Mesh Segmentation") )
-		assert(0);
+const QString EditSegment::Info()
+{
 	return tr("Segment the mesh by selecting the foreground and background");
 }
 
-const PluginInfo &EditSegment::Info() {
-	static PluginInfo ai;
-	ai.Date=tr(__DATE__);
-	ai.Version = tr("0.1");
-	ai.Author = ("Giorgio Gangemi");
-	return ai;
-}
-
-void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
+void EditSegment::StartEdit(MeshModel & m, GLArea * parent) {
 	parent->setCursor(QCursor(
 		QPixmap(":/images/editsegment_cursor.png", "PNG"), 1, 1));
 
@@ -325,14 +310,15 @@ void EditSegment::StartEdit(QAction * mode, MeshModel & m, GLArea * parent) {
 
 	parent->update();
 }
-void EditSegment::EndEdit(QAction * mode, MeshModel & m, GLArea * parent) {
+
+void EditSegment::EndEdit(MeshModel & m, GLArea * parent) {
 	//qDebug() << "Mesh Segmentation End Edit" << endl;
 	delete meshCutDialog;
 	meshCutDialog = 0;
 	delete meshcut_dock;
 	meshcut_dock = 0;
 }
-void EditSegment::Decorate(QAction * ac, MeshModel & m, GLArea * gla) {
+void EditSegment::Decorate(MeshModel & m, GLArea * gla) {
 	if (!glarea_map.contains(gla)) {
 		glarea_map.insert(gla, new MeshCutting<CMeshO>(&m.cm));
 	}
@@ -388,7 +374,7 @@ void EditSegment::Decorate(QAction * ac, MeshModel & m, GLArea * gla) {
 	}
 }
 
-void EditSegment::mousePressEvent(QAction *, QMouseEvent *event, MeshModel & m,	GLArea * gla) {
+void EditSegment::mousePressEvent(QMouseEvent *event, MeshModel & m,	GLArea * gla) {
 	//if (event->button() == Qt::MidButton) {
 	//gla->trackball.MouseDown(event->x(),gla->height()-event->y(), QT2VCG(event->button(), event->modifiers() ) );
 	//} else {
@@ -412,7 +398,7 @@ void EditSegment::mousePressEvent(QAction *, QMouseEvent *event, MeshModel & m,	
 	currentSelection.clear();
 	//}
 }
-void EditSegment::mouseReleaseEvent(QAction *, QMouseEvent *event, MeshModel & m, GLArea * gla) {
+void EditSegment::mouseReleaseEvent(QMouseEvent *event, MeshModel & m, GLArea * gla) {
 	//if (event->button() == Qt::MidButton) {
 	//gla->trackball.MouseUp(event->x(),gla->height()-event->y(), QT2VCG(event->button(), event->modifiers() ) );
 	//} else {
@@ -431,7 +417,7 @@ void EditSegment::mouseReleaseEvent(QAction *, QMouseEvent *event, MeshModel & m
 	pressed = false;
 	//}
 }
-void EditSegment::mouseMoveEvent(QAction *, QMouseEvent *event, MeshModel & m, GLArea * gla) {
+void EditSegment::mouseMoveEvent(QMouseEvent *event, MeshModel & m, GLArea * gla) {
 	//if (event->button() == Qt::MidButton) {
 	//gla->trackball.MouseMove(event->x(),gla->height()-event->y());
 	//gla->setCursorTrack(gla->trackball.current_mode);
@@ -555,5 +541,3 @@ void EditSegment::ResetSlot() {
 		glarea->update();
 	}
 }
-
-Q_EXPORT_PLUGIN(EditSegment)

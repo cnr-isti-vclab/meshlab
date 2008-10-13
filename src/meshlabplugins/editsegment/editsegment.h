@@ -27,8 +27,8 @@ struct Penn {
 
 class EditSegment : public QObject, public MeshEditInterface {
 	Q_OBJECT
-		Q_INTERFACES(MeshEditInterface)
-		QList <QAction *> actionList;
+	Q_INTERFACES(MeshEditInterface)
+
 private: 
 	bool show_trackball;
 	bool first;
@@ -71,17 +71,14 @@ public:
 	EditSegment();
 	~EditSegment();
 
-	const QString Info(QAction *);
-	const PluginInfo &Info();
+	static const QString Info();
 
-	void StartEdit(QAction * /*mode*/, MeshModel & /*m*/, GLArea * /*parent*/);
-	void EndEdit	(QAction * /*mode*/, MeshModel & /*m*/, GLArea * /*parent*/);
-	void Decorate	(QAction * /*mode*/, MeshModel & /*m*/, GLArea * /*parent*/);
-	void mousePressEvent    (QAction *, QMouseEvent *event, MeshModel & /*m*/, GLArea * );
-	void mouseMoveEvent     (QAction *, QMouseEvent *event, MeshModel & /*m*/, GLArea * );
-	void mouseReleaseEvent  (QAction *, QMouseEvent *event, MeshModel & /*m*/, GLArea * );
-	//void wheelEvent         (QAction *QWheelEvent*e, MeshModel &/*m*/, GLArea * );
-	QList<QAction *> actions() const ;
+	void StartEdit(MeshModel & /*m*/, GLArea * /*parent*/);
+	void EndEdit(MeshModel & /*m*/, GLArea * /*parent*/);
+	void Decorate(MeshModel & /*m*/, GLArea * /*parent*/);
+	void mousePressEvent(QMouseEvent *event, MeshModel & /*m*/, GLArea * );
+	void mouseMoveEvent(QMouseEvent *event, MeshModel & /*m*/, GLArea * );
+	void mouseReleaseEvent(QMouseEvent *event, MeshModel & /*m*/, GLArea * );
 
 public slots:
 	void MeshCutSlot();
