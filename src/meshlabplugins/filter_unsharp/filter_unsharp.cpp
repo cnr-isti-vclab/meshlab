@@ -146,16 +146,6 @@ const FilterUnsharp::FilterClass FilterUnsharp::getClass(QAction *a)
   }
 }
 
-
-const PluginInfo &FilterUnsharp::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr( __DATE__ );
-	 ai.Version = tr("0.1");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
-}
-
 const int FilterUnsharp::getRequirements(QAction *action)
 {
   switch(ID(action))

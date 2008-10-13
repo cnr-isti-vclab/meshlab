@@ -224,16 +224,6 @@ const QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID)
   return QString();
 }
 
-
-const PluginInfo &ExtraMeshFilterPlugin::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.5");
-	 ai.Author = ("Paolo Cignoni, Mario Latronico, Andrea Venturi, Marco Pirosu");
-   return ai;
- }
-
 const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
 {
   switch(ID(action))

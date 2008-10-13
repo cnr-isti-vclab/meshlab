@@ -278,15 +278,6 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   return QString();
  }
 
- const PluginInfo &SelectionFilterPlugin::pluginInfo() 
-{
-   static PluginInfo ai; 
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.5");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
- } 
-
 const int SelectionFilterPlugin::getRequirements(QAction *action)
 {
  switch(ID(action))

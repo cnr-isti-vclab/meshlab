@@ -142,7 +142,6 @@ public:
 
   void initActionList();
 
-	virtual const PluginInfo &Info();
 	virtual bool isSupported() {return supported;}
 	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
 	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);

@@ -72,7 +72,6 @@ public:
 	
 	virtual const QString     filterName      (FilterIDType filter);
 	virtual const QString     filterInfo      (FilterIDType filter);
-	virtual const PluginInfo &pluginInfo();
 	virtual const int         getRequirements (QAction *action);
 	virtual       bool        autoDialog      (QAction *) {return true;}
 	virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::VertexColoring; };

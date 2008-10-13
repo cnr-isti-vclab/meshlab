@@ -152,17 +152,4 @@ void U3DIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 	assert(0);
 }
 
-const PluginInfo &U3DIOPlugin::Info()
-{	
-	static PluginInfo ai;
-  ai.Date=tr("October 2007");
-	ai.Version = tr("0.1");
-	ai.Author = ("Guido Ranzuglia");
-	return ai;
- }
-
-
-
-
-
 Q_EXPORT_PLUGIN(U3DIOPlugin)

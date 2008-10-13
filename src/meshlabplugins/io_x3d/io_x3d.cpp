@@ -224,15 +224,5 @@ void IoX3DPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 	}
 	assert(0);
 }
-
-
-const PluginInfo &IoX3DPlugin::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr("February 2008");
-	ai.Version = tr("0.1");
-	ai.Author = ("Gianpaolo Palma");
-	return ai;
- }
  
 Q_EXPORT_PLUGIN(IoX3DPlugin)

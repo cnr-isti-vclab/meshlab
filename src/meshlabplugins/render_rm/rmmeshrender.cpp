@@ -44,14 +44,6 @@ code restyling
 
 static int vp[4];
 
-const PluginInfo& RmMeshShaderRenderPlugin::Info() {
-	static PluginInfo ai;
-	ai.Date=tr("September 2007");
-	ai.Version = "1.0";
-	ai.Author = "Fusco Francesco, Giacomo Galilei";
-	return ai;
-}
-
 RmMeshShaderRenderPlugin::~RmMeshShaderRenderPlugin()
 {
 	QMapIterator<QString, RmXmlParser*> i(rmsources);

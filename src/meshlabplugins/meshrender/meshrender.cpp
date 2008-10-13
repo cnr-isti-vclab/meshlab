@@ -524,14 +524,4 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QG
 	glGetError();
 }
 
-
-const PluginInfo &MeshShaderRenderPlugin::Info() 
-{
-	static PluginInfo ai; 
-	ai.Date=tr("February 2006");
-	ai.Version = tr("1.0");
-	ai.Author = ("Giorgio Gangemi");
-	return ai;
-}
-
 Q_EXPORT_PLUGIN(MeshShaderRenderPlugin)

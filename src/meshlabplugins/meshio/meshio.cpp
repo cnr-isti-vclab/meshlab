@@ -330,13 +330,4 @@ void ExtraMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability
 	return;
 }
 
-const PluginInfo &ExtraMeshIOPlugin::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr("Oct 2007");
-	ai.Version = tr("0.7");
-	ai.Author = ("Paolo Cignoni, Andrea Buzzelli, Elisa Cerisoli, Federico Mazzanti");
-	return ai;
- }
-
 Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)

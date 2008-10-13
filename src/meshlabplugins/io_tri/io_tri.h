@@ -43,7 +43,6 @@ class TriIOPlugin : public QObject, public MeshIOInterface
 public:
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;
-	virtual const PluginInfo &Info();
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const FilterParameterSet &, vcg::CallBackPos *cb=0, QWidget *parent=0);

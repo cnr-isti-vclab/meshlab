@@ -64,7 +64,6 @@ public:
   ~EpochIO();
   v3dImportDialog *epochDialog;
   QString lastFileName;
-  const PluginInfo &Info();
   void GetExportMaskCapability(QString &, int &, int &) const {assert(0); return ;} 
 
 	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask,const FilterParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);

@@ -60,7 +60,6 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
 	~SelectionFilterPlugin();
 	virtual const QString filterInfo(FilterIDType filter);
   virtual const QString filterName(FilterIDType filter);
-	virtual const PluginInfo &pluginInfo();
   
   virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::Selection;};
   void initParameterSet(QAction *action, MeshModel &m, FilterParameterSet &parlst);

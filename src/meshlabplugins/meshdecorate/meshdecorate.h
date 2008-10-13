@@ -111,7 +111,6 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
   virtual const QString Info(QAction *);
-  virtual const PluginInfo &Info();
   
   enum {
     DP_SHOW_FACE_NORMALS,

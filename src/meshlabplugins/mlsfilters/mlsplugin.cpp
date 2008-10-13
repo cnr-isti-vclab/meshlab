@@ -114,14 +114,6 @@ const QString MlsPlugin::filterInfo(FilterIDType filterId)
 	}
 }
 
-const PluginInfo& MlsPlugin::pluginInfo()
-{
-	static PluginInfo ai;
-	ai.Date=tr("October 2008");
-	ai.Version = tr("0.1");
-	ai.Author = ("Gael Guennebaud");
-	return ai;
-}
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh

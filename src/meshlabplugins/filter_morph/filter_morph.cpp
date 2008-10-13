@@ -61,16 +61,6 @@ const FilterMorph::FilterClass FilterMorph::getClass(QAction *a)
 	}
 }
 
-
-const PluginInfo &FilterMorph::pluginInfo()
-{
-	static PluginInfo ai;
-	ai.Date=tr( __DATE__ );
-	ai.Version = tr("0.1");
-	ai.Author = ("Oscar Barney");//, thanks to: Paolo Cignoni");
-	return ai;
-}
-
 const int FilterMorph::getRequirements(QAction *action)
 {
 	switch(ID(action))

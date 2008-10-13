@@ -142,13 +142,4 @@ void ExpeIOPlugin::GetExportMaskCapability(QString &format, int &capability, int
 	return;
 }
 
-const PluginInfo &ExpeIOPlugin::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr("Oct 2008");
-	ai.Version = tr("0.1");
-	ai.Author = ("Gael Guennebaud");
-	return ai;
-}
-
 Q_EXPORT_PLUGIN(ExpeIOPlugin)

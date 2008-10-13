@@ -147,15 +147,6 @@ const QString ExtraMeshDecoratePlugin::Info(QAction *action)
   return QString();
  }
 
- const PluginInfo &ExtraMeshDecoratePlugin::Info()
-{
-   static PluginInfo ai;
-   ai.Date=tr("January 2006");
-	 ai.Author=tr("Paolo Cignoni &  Alessio Mochi, Davide Portelli, Daniele Vacca ");
-	 ai.Version=tr("0.6");
-   return ai;
- }
-
 const QString ExtraMeshDecoratePlugin::ST(FilterIDType filter) const
 {
   switch(filter)

@@ -58,7 +58,7 @@ public:
 	//virtual const QString filterName(FilterIDType filter) {return filterNames(filter);}
   virtual const QString filterName(FilterIDType filter);
   virtual const QString filterInfo(FilterIDType filter);
-  virtual const PluginInfo &pluginInfo();
+
   virtual bool autoDialog(QAction *) {return true;}
   virtual void initParameterSet(QAction *,MeshDocument &md, FilterParameterSet &parent);
   virtual const int getRequirements(QAction *action);

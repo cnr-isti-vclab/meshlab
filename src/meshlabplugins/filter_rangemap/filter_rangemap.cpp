@@ -72,15 +72,6 @@ const QString RangeMapPlugin::filterInfo(FilterIDType filterId)
 	}
 }
 
-const PluginInfo &RangeMapPlugin::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.2");
-	 ai.Author = ("Marco Callieri");
-   return ai;
- }
-
 // Return true if the specified action has an automatic dialog.
 // return false if the action has no parameters or has an self generated dialog.
 bool RangeMapPlugin::autoDialog(QAction *action)

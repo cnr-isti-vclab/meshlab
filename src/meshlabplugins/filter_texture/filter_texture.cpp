@@ -71,15 +71,6 @@ const QString FilterTexturePlugin::filterInfo(FilterIDType filterId)
 	}
 }
 
-const PluginInfo &FilterTexturePlugin::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.0");
-	 ai.Author = ("Imran Akbar - skunkwerk@gmail.com");
-   return ai;
- }
-
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
 // For each parmeter you need to define, 

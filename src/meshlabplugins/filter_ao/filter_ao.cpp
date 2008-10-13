@@ -107,15 +107,6 @@ const QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId)
 	return QString("");
 }
 
-const PluginInfo &AmbientOcclusionPlugin::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.0");
-	 ai.Author = ("Michele Mischitelli, Massimiliano Corsini");
-   return ai;
- }
-
 const int AmbientOcclusionPlugin::getRequirements(QAction *action)
 {
 	//no requirements needed

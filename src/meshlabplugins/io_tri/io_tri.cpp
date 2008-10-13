@@ -94,17 +94,6 @@ void TriIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
   capability=defaultBits=0;
 	return;
 }
-
-const PluginInfo &TriIOPlugin::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr("Feb 2008");
-	ai.Version = tr("0.2");
-	ai.Author = ("Paolo Cignoni");
-	return ai;
- }
- 
- 
  
 static inline void readbeOne(void * ptr,unsigned int sz,FILE* f) {
   unsigned char* array = new unsigned char[sz];

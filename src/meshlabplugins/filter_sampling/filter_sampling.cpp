@@ -349,15 +349,6 @@ const int FilterDocSampling::getRequirements(QAction *action)
   return 0;
 }
 
-const PluginInfo &FilterDocSampling::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.0");
-	 ai.Author = ("Paolo Cignoni");
-   return ai;
- }
-
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
 // For each parameter you need to define, 

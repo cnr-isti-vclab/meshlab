@@ -49,7 +49,7 @@ public:
 	~RmMeshShaderRenderPlugin();
 
 	QList<QAction*> actions();
-	virtual const PluginInfo &Info();
+
 	virtual bool isSupported() { return holder.isSupported(); }
 	virtual void Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);
 	virtual void Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla);

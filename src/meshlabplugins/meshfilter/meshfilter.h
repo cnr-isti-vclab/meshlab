@@ -126,7 +126,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 	~ExtraMeshFilterPlugin();
 	virtual const QString filterName(FilterIDType filter);
   virtual const QString filterInfo(FilterIDType filter);
-	virtual const PluginInfo &pluginInfo();
+
   virtual const FilterClass getClass(QAction *);
 	virtual bool autoDialog(QAction *) ;
 	virtual bool customDialog(QAction *filter);

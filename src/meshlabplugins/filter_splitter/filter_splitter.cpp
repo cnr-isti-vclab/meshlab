@@ -75,15 +75,6 @@ const QString FilterSplitterPlugin::filterInfo(FilterIDType filterId)
 	}
 }
 
-const PluginInfo &FilterSplitterPlugin::pluginInfo()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("1.1");
-	 ai.Author = ("Marco Callieri");
-   return ai;
- }
-
 // Return true if the specified action has an automatic dialog.
 // return false if the action has no parameters or has an self generated dialog.
 bool FilterSplitterPlugin::autoDialog(QAction *action)

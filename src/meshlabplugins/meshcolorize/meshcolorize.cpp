@@ -117,15 +117,6 @@ const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId)
   }
   return QString();
 }
-const PluginInfo &ExtraMeshColorizePlugin::pluginInfo() 
-{
-  static PluginInfo ai; 
-  ai.Date=tr("Oct 2006");
-  ai.Version = tr("1.1");
-  ai.Author = ("Paolo Cignoni, Francesco Vannini, Giorgio Gangemi, Andrea Venturi");
-  return ai;
-}
-
 
 const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
 {

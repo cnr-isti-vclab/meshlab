@@ -767,15 +767,6 @@ QList<MeshIOInterface::Format> EpochIO::importFormats() const
 	return formatList;
 };
 
-const PluginInfo &EpochIO::Info()
-{
-	static PluginInfo ai;
-	ai.Date=tr("March 2006");
-	ai.Version = tr("0.1");
-	ai.Author = ("Paolo Cignoni");
-	return ai;
- }
-
 QIcon *EpochModel::getIcon()
 {
   QString iconName(textureName);
