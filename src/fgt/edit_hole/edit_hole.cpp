@@ -35,15 +35,9 @@ using namespace vcg;
 
 
 EditHolePlugin::EditHolePlugin() {
-	QAction* editFill = new QAction(QIcon(":/images/icon_filler.png"),"Fill Hole", this);
-	actionList << editFill;
-	QAction *editAction;
 	dialogFiller = 0;
 	holesModel = 0;
-
-	foreach(editAction, actionList)
-		editAction->setCheckable(true);
-
+	
 	pickedFace = 0;
 	hasPick = false;
 }
@@ -64,31 +58,16 @@ EditHolePlugin::~EditHolePlugin()
 	}
 }
 
-QList<QAction *> EditHolePlugin::actions() const {
-	return actionList;
-}
-
-const QString EditHolePlugin::Info(QAction *action)
+const QString EditHolePlugin::Info() 
 {
-  if( action->text() != tr("Fill mesh's hole") ) assert (0);
-
 	return tr("Allow fill one or more hole into place");
 }
-const PluginInfo &EditHolePlugin::Info()
-{
-   static PluginInfo ai;
-   ai.Date=tr(__DATE__);
-	 ai.Version = tr("0.1");
-	 ai.Author = ("Michele Vannoni");
-   return ai;
- }
 
-
-void EditHolePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+void EditHolePlugin::mouseReleaseEvent(QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
 }
 
-void EditHolePlugin::mousePressEvent(QAction *, QMouseEvent * e, MeshModel &m, GLArea * gla)
+void EditHolePlugin::mousePressEvent(QMouseEvent * e, MeshModel &m, GLArea * gla)
 {
 	if ( (e->button()==Qt::LeftButton) )
 	{
@@ -98,11 +77,11 @@ void EditHolePlugin::mousePressEvent(QAction *, QMouseEvent * e, MeshModel &m, G
 	}
 }
 
-void EditHolePlugin::mouseMoveEvent(QAction *,QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
+void EditHolePlugin::mouseMoveEvent(QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
 }
 
-void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
+void EditHolePlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
 	m.updateDataMask(MeshModel::MM_FACETOPO);
 	if ( !tri::Clean<CMeshO>::IsTwoManifoldFace(m.cm) )
@@ -114,7 +93,7 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	// necessario per evitare di avere 2 istanze del filtro se si cambia mesh
 	// senza chidere il filtro
 	if(dialogFiller != 0)
-		EndEdit(0, m, gla);
+		EndEdit(m, gla);
 
 	// if plugin restart with another mesh, recomputing of hole is forced
 	if(mesh != &m)
@@ -158,11 +137,11 @@ void EditHolePlugin::StartEdit(QAction * , MeshModel &m, GLArea *gla )
 	holeSorter->setSourceModel(holesModel);
 	dialogFiller->ui.holeTree->setModel( holeSorter );
 
-	Decorate(0, m, gla);
+	Decorate(m, gla);
 	upGlA();
 }
 
-void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
+void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
 {
 	if(holesModel==0)
 		return;
@@ -180,7 +159,7 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 		pickedFace =0;
 		int inverseY = gla->curSiz.height() - cur.y();
 		GLPickTri<CMeshO>::PickNearestFace(cur.x(), inverseY, m.cm, pickedFace, 4, 4);
-		// guardo se nella faccia più vicina uno dei vertici è di bordo
+		// guardo se nella faccia piï¿½ vicina uno dei vertici ï¿½ di bordo
 		if( pickedFace != 0 )
 		{
 			bool oldAbutmentPresence;
@@ -212,7 +191,7 @@ void EditHolePlugin::Decorate(QAction * ac, MeshModel &m, GLArea * gla)
 	glPopMatrix();
  }
 
- void EditHolePlugin::EndEdit(QAction * , MeshModel &m, GLArea *gla ){
+ void EditHolePlugin::EndEdit(MeshModel &m, GLArea *gla ){
 	 if(holesModel == 0)	// means editing is not started
 		 return;
 
@@ -367,5 +346,3 @@ void EditHolePlugin::skipTab(int index)
 	else
 		cancelFill();
 }
-
- Q_EXPORT_PLUGIN(EditHolePlugin)

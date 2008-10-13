@@ -1,13 +1,15 @@
 include (../../shared.pri)
 
-HEADERS       = edit_hole.h \
+HEADERS       = edit_hole_factory.h \
+		    edit_hole.h \
 		    fillerDialog.h \
 		    holeListModel.h \
 		    fgtHole.h \
 		    fgtBridge.h \
+		    ../../meshlab/meshmodel.h
 
-
-SOURCES       = edit_hole.cpp \
+SOURCES       = edit_hole_factory.cpp \
+		    edit_hole.cpp \
 		    fillerDialog.cpp\
 		    holeListModel.cpp \
 		    ../../meshlab/meshmodel.cpp \
