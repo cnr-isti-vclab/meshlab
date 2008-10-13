@@ -33,32 +33,14 @@ using namespace vcg;
 
 EditMeasurePlugin::EditMeasurePlugin()
  :rubberband(Color4b(255,170,85,255)),was_ready(false)
+{}
+
+const QString EditMeasurePlugin::Info() 
 {
-  actionList << new QAction(QIcon(":/images/icon_measure.png"),"Measuring Tool", this);
-  foreach(QAction *editAction, actionList)
-    editAction->setCheckable(true);
+	return tr("Allow to measure distances between points of a model");
 }
 
-QList<QAction *> EditMeasurePlugin::actions() const {
-  return actionList;
-}
-
-const QString EditMeasurePlugin::Info(QAction *action) 
-{
-  if( action->text() != tr("Measuring Tool") ) assert (0);
-  return tr("Allow to measure distances between points of a model");
-}
-
-const PluginInfo &EditMeasurePlugin::Info() 
-{
-   static PluginInfo ai; 
-   ai.Date=tr(__DATE__);
-   ai.Version = tr("1.1");
-   ai.Author = ("Paolo Cignoni, Luca Benedetti");
-   return ai;
-}
-
-void EditMeasurePlugin::mousePressEvent    (QAction *, QMouseEvent *, MeshModel &, GLArea * gla)
+void EditMeasurePlugin::mousePressEvent(QMouseEvent *, MeshModel &, GLArea * gla)
 {
   if(was_ready||rubberband.IsReady()){
     rubberband.Reset();
@@ -67,19 +49,19 @@ void EditMeasurePlugin::mousePressEvent    (QAction *, QMouseEvent *, MeshModel 
   gla->update();
 }
 
-void EditMeasurePlugin::mouseMoveEvent  (QAction *,QMouseEvent * event, MeshModel &, GLArea * gla)
+void EditMeasurePlugin::mouseMoveEvent(QMouseEvent * event, MeshModel &, GLArea * gla)
 {
   rubberband.Drag(event->pos());
   gla->update();
 }
 
-void EditMeasurePlugin::mouseReleaseEvent  (QAction *,QMouseEvent * event, MeshModel &, GLArea * gla)
+void EditMeasurePlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &, GLArea * gla)
 {
   rubberband.Pin(event->pos());
   gla->update();
 }
 
-void EditMeasurePlugin::Decorate(QAction *, MeshModel &, GLArea * gla)
+void EditMeasurePlugin::Decorate(MeshModel &, GLArea * gla)
 {
   rubberband.Render(gla);
   if(rubberband.IsReady()){
@@ -93,7 +75,7 @@ void EditMeasurePlugin::Decorate(QAction *, MeshModel &, GLArea * gla)
   assert(!glGetError());
 }
 
-void EditMeasurePlugin::StartEdit(QAction *, MeshModel &, GLArea *gla )
+void EditMeasurePlugin::StartEdit(MeshModel &, GLArea *gla )
 {
   gla->setCursor(QCursor(QPixmap(":/images/cur_measure.png"),15,15));	
   connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
@@ -101,10 +83,8 @@ void EditMeasurePlugin::StartEdit(QAction *, MeshModel &, GLArea *gla )
   rubberband.Reset();
 }
 
-void EditMeasurePlugin::EndEdit(QAction *, MeshModel &, GLArea *)
+void EditMeasurePlugin::EndEdit(MeshModel &, GLArea *)
 {
   was_ready = false;
   rubberband.Reset();
 }
-
-Q_EXPORT_PLUGIN(EditMeasurePlugin)

@@ -1,10 +1,15 @@
 include (../../shared.pri)
 
-HEADERS       = editmeasure.h 
+HEADERS       = edit_measure_factory.h \
+				editmeasure.h 
 
-SOURCES       = editmeasure.cpp \
-		$$GLEWCODE \
-		$$VCGDIR/wrap/gui/rubberband.cpp
+SOURCES       = edit_measure_factory.cpp \
+				editmeasure.cpp \
+				$$GLEWCODE \
+				$$VCGDIR/wrap/gui/rubberband.cpp
+				
 TARGET        = editmeasure
+
 QT           += opengl
+
 RESOURCES     = editmeasure.qrc
