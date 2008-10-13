@@ -172,15 +172,6 @@ const QString TriOptimizePlugin::filterInfo(FilterIDType filterId)
 	}
 }
 
-const PluginInfo &TriOptimizePlugin::pluginInfo()
-{
-	static PluginInfo ai;
-	ai.Date = tr(__DATE__);
-	ai.Version = tr("1.0");
-	ai.Author = ("Michele Onnis");
-	return ai;
-}
-
 const TriOptimizePlugin::FilterClass TriOptimizePlugin::getClass(QAction *action)
 {
 	switch(ID(action)) {
