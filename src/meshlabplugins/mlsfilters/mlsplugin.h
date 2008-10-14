@@ -40,8 +40,8 @@ public:
 		_RIMLS_ 			= 0x1,
 		_APSS_				= 0x2,
 		_PROJECTION_ 	= 0x1000,
-		_AFRONT_			= 0X2000,
-		_MCUBE_				= 0X4000,
+		_AFRONT_			= 0x2000,
+		_MCUBE_				= 0x4000,
 
 		FP_RIMLS_PROJECTION = _RIMLS_ | _PROJECTION_,
 		FP_APSS_PROJECTION	= _APSS_  | _PROJECTION_,
@@ -50,7 +50,9 @@ public:
 		FP_APSS_AFRONT	= _APSS_  | _AFRONT_,
 
 		FP_RIMLS_MCUBE	= _RIMLS_ | _MCUBE_,
-		FP_APSS_MCUBE		= _APSS_  | _MCUBE_
+		FP_APSS_MCUBE		= _APSS_  | _MCUBE_,
+    
+    FP_RADIUS_FROM_DENSITY = 0x10000
 	};
 
   MlsPlugin();
@@ -58,7 +60,7 @@ public:
 	//virtual const QString filterName(FilterIDType filter) {return filterNames(filter);}
   virtual const QString filterName(FilterIDType filter);
   virtual const QString filterInfo(FilterIDType filter);
-
+  const FilterClass getClass(QAction *a);
   virtual bool autoDialog(QAction *) {return true;}
   virtual void initParameterSet(QAction *,MeshDocument &md, FilterParameterSet &parent);
   virtual const int getRequirements(QAction *action);

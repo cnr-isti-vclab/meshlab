@@ -222,9 +222,9 @@ class ImporterExpePTS
 					}
 					else if(propertyName=="radius")
 					{
-						// TODO
-// 						loadmask |= Mask::IOM_VERTRADIUS;
-// 						fileProperties.back().hasProperty = mesh.HasVertRadius();
+						loadmask |= Mask::IOM_VERTRADIUS;
+            // FIXME check dynamically if the radius is enabled
+ 						fileProperties.back().hasProperty = VertexType::HasRadius();
 					}
 					else if(propertyName=="normal")
 					{
@@ -324,7 +324,7 @@ class ImporterExpePTS
 							else if(fileProperties[k].name=="radius")
 							{
 								bool ok = true;
-								// TODO v_iter->R() = line[k].toFloat(&ok);
+								v_iter->R() = line[k].toFloat(&ok);
 								if (!ok)
 								{
 									std::cerr << "Error parsing radius " << line[k].toLocal8Bit().data() << "\n";
@@ -390,7 +390,7 @@ class ImporterExpePTS
 						}
 						else if(fileProperties[k].name=="radius")
 						{
-							// TODO
+							v_iter->R() = *reinterpret_cast<float*>(&data[b]);
 						}
 						else if(fileProperties[k].name=="color")
 						{

@@ -22,12 +22,11 @@
 ****************************************************************************/
 
 #include "balltree.h"
-#include "vcg_addons.h"
 
 namespace GaelMls {
 
 template<typename _Scalar>
-BallTree<_Scalar>::BallTree(const std::vector<VectorType>& points, const std::vector<Scalar>& radii)
+BallTree<_Scalar>::BallTree(const ConstDataWrapper<VectorType>& points, const ConstDataWrapper<Scalar>& radii)
   : mPoints(points), mRadii(radii), mRadiusScale(1.), mTreeIsUptodate(false)
 {
   mRootNode = 0;
@@ -81,8 +80,8 @@ void BallTree<_Scalar>::rebuild(void)
     for (unsigned int i=0 ; i<mPoints.size() ; ++i)
     {
         indices[i] = i;
-        aabb.min = Min(aabb.min, CwiseAdd(mPoints.at(i), -mRadii.at(i)*mRadiusScale));
-        aabb.max = Max(aabb.max, CwiseAdd(mPoints.at(i),  mRadii.at(i)*mRadiusScale));
+        aabb.min = Min(aabb.min, CwiseAdd(mPoints[i], -mRadii[i]*mRadiusScale));
+        aabb.max = Max(aabb.max, CwiseAdd(mPoints[i],  mRadii[i]*mRadiusScale));
     }
     buildNode(*mRootNode, indices, aabb, 0);
     

@@ -28,68 +28,67 @@
 
 namespace GaelMls {
 
-template<typename _Scalar>
-class APSS : public MlsSurface<_Scalar>
+template<typename _MeshType>
+class APSS : public MlsSurface<_MeshType>
 {
-		typedef MlsSurface<_Scalar> Base;
+    typedef MlsSurface<_MeshType> Base;
 
-		using Base::mCachedQueryPointIsOK;
-		using Base::mCachedQueryPoint;
-		using Base::mNeighborhood;
-		using Base::mCachedWeights;
-		using Base::mCachedWeightGradients;
-		using Base::mBallTree;
-		using Base::mPoints;
-		using Base::mRadii;
-		using Base::mNormals;
-		using Base::mFilterScale;
-		using Base::mMaxNofProjectionIterations;
-		using Base::mAveragePointSpacing;
-		using Base::mProjectionAccuracy;
+    typedef typename Base::Scalar Scalar;
+    typedef typename Base::VectorType VectorType;
+    typedef _MeshType MeshType;
+    using Base::mCachedQueryPointIsOK;
+    using Base::mCachedQueryPoint;
+    using Base::mNeighborhood;
+    using Base::mCachedWeights;
+    using Base::mCachedWeightGradients;
+    using Base::mBallTree;
+    using Base::mPoints;
+    using Base::mFilterScale;
+    using Base::mMaxNofProjectionIterations;
+    using Base::mAveragePointSpacing;
+    using Base::mProjectionAccuracy;
 
-		enum Status {ASS_SPHERE, ASS_PLANE, ASS_UNDETERMINED};
+    enum Status {ASS_SPHERE, ASS_PLANE, ASS_UNDETERMINED};
 
-	public:
+  public:
 
-		typedef _Scalar Scalar;
-		typedef vcg::Point3<Scalar> VectorType;
-
-    template<typename MeshType>
-		APSS(const MeshType& m)
+    APSS(const MeshType& m)
       : Base(m)
     {
       mSphericalParameter = 1;
       mAccurateGradient = false;
     }
 
-		virtual Scalar potential(const VectorType& x) const;
-		virtual VectorType gradient(const VectorType& x) const;
-		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0) const;
+    virtual Scalar potential(const VectorType& x, int* errorMask = 0) const;
+    virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const;
+    virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const;
 
-		void setSphericalParameter(Scalar v);
-		void setAccurateGradient(bool on);
+    void setSphericalParameter(Scalar v);
+    void setAccurateGradient(bool on);
 
-	protected:
-		bool fit(const VectorType& x) const;
+  protected:
+    bool fit(const VectorType& x) const;
 
-	protected:
-		bool mAccurateGradient;
-		Scalar mSphericalParameter;
+  protected:
+    bool mAccurateGradient;
+    Scalar mSphericalParameter;
 
-		// use double precision anyway
-		typedef double LScalar;
-		typedef vcg::Point3<LScalar> LVector;
+    // use double precision anyway
+    typedef double LScalar;
+    typedef vcg::Point3<LScalar> LVector;
 
-		// cached algerbaic sphere coefficients
-		mutable LScalar uConstant;
-		mutable LVector uLinear;
-		mutable LScalar uQuad;
+    // cached algebraic sphere coefficients
+    mutable LScalar uConstant;
+    mutable LVector uLinear;
+    mutable LScalar uQuad;
 
-		mutable LVector mCenter;
-		mutable LScalar mRadius;
-		mutable Status mStatus;
+    mutable LVector mCenter;
+    mutable LScalar mRadius;
+    mutable Status mStatus;
 };
 
 }
+
+#include "apss.tpp"
 
 #endif

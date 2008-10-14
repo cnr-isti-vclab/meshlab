@@ -5,7 +5,7 @@ include(../../shared.pri)
 HEADERS = rimls.h mlsplugin.h \
 			../../meshlab/meshmodel.h
 
-SOURCES =  balltree.cpp kdtree.cpp mlssurface.cpp rimls.cpp apss.cpp mlsplugin.cpp \
+SOURCES =  balltree.cpp kdtree.cpp mlsplugin.cpp \
 	../../meshlab/filterparameter.cpp \
 	../../meshlab/meshmodel.cpp \
 	$$GLEWCODE
@@ -13,4 +13,5 @@ SOURCES =  balltree.cpp kdtree.cpp mlssurface.cpp rimls.cpp apss.cpp mlsplugin.c
 TARGET = mlsfilters
 
 CONFIG       += opengl
+CONFIG       += warn_off
 

@@ -28,33 +28,30 @@
 
 namespace GaelMls {
 
-template<typename _Scalar>
-class RIMLS : public MlsSurface<_Scalar>
+template<typename _MeshType>
+class RIMLS : public MlsSurface<_MeshType>
 {
-		typedef MlsSurface<_Scalar> Base;
+    typedef _MeshType MeshType;
+    typedef MlsSurface<_MeshType> Base;
 
-		using Base::mCachedQueryPointIsOK;
-		using Base::mCachedQueryPoint;
-		using Base::mNeighborhood;
-		using Base::mCachedWeights;
-		using Base::mCachedWeightGradients;
-		using Base::mBallTree;
-		using Base::mPoints;
-		using Base::mRadii;
-		using Base::mNormals;
-		using Base::mFilterScale;
-		using Base::mMaxNofProjectionIterations;
-		using Base::mAveragePointSpacing;
-		using Base::mProjectionAccuracy;
+    typedef typename Base::Scalar Scalar;
+    typedef typename Base::VectorType VectorType;
+    using Base::mCachedQueryPointIsOK;
+    using Base::mCachedQueryPoint;
+    using Base::mNeighborhood;
+    using Base::mCachedWeights;
+    using Base::mCachedWeightGradients;
+    using Base::mBallTree;
+    using Base::mPoints;
+    using Base::mFilterScale;
+    using Base::mMaxNofProjectionIterations;
+    using Base::mAveragePointSpacing;
+    using Base::mProjectionAccuracy;
 
-	public:
+  public:
 
-		typedef _Scalar Scalar;
-		typedef vcg::Point3<Scalar> VectorType;
-
-    template<typename MeshType>
-    RIMLS(const MeshType& mesh)
-      : Base(mesh)
+    RIMLS(const MeshType& points)
+      : Base(points)
     {
       mSigmaR = 0;
       mSigmaN = 0.8;
@@ -63,52 +60,34 @@ class RIMLS : public MlsSurface<_Scalar>
       mMaxRefittingIters = 3;
     }
 
-		virtual Scalar potential(const VectorType& x) const;
-		virtual VectorType gradient(const VectorType& x) const;
-		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0) const;
+    virtual Scalar potential(const VectorType& x, int* errorMask = 0) const;
+    virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const;
+    virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const;
 
-//     void setFilterScale(Scalar v);
-		void setSigmaR(Scalar v);
-		void setSigmaN(Scalar v);
-		void setRefittingThreshold(Scalar v);
-		void setMinRefittingIters(int n);
-		void setMaxRefittingIters(int n);
-//     void setMaxProjectionIters(int n);
-//     void setProjectionAccuracy(Scalar v);
+    void setSigmaR(Scalar v);
+    void setSigmaN(Scalar v);
+    void setRefittingThreshold(Scalar v);
+    void setMinRefittingIters(int n);
+    void setMaxRefittingIters(int n);
 
-	protected:
-//     void computeVertexRaddi();
-		bool computePotentialAndGradient(const VectorType& x) const;
+  protected:
+    bool computePotentialAndGradient(const VectorType& x) const;
 
-	protected:
-//     const MeshModel& mMesh;
-//     std::vector<VectorType> mPoints;
-//     std::vector<VectorType> mNormals;
-//     std::vector<Scalar> mRadii;
-//
-//     BallTree<Scalar>* mBallTree;
+  protected:
 
-		int mMinRefittingIters;
-		int mMaxRefittingIters;
-//     int mMaxNofProjectionIterations;
-		Scalar mRefittingThreshold;
-//     Scalar mFilterScale;
-		Scalar mSigmaN;
-		Scalar mSigmaR;
-//     Scalar mAveragePointSpacing;
-//     Scalar mProjectionAccuracy;
+    int mMinRefittingIters;
+    int mMaxRefittingIters;
+    Scalar mRefittingThreshold;
+    Scalar mSigmaN;
+    Scalar mSigmaR;
 
-		// cached values:
-//     mutable bool mCachedQueryPointIsOK;
-//     mutable VectorType mCachedQueryPoint;
-		mutable VectorType mCachedGradient;
-		mutable Scalar mCachedPotential;
-//     mutable Neighborhood<Scalar> mNeighborhood;
-//     mutable std::vector<Scalar>  mCachedWeights;
-//     // mutable std::vector<Scalar>  mCachedWeightDerivatives;
-//     mutable std::vector<VectorType>  mCachedWeightGradients;
+    // cached values:
+    mutable VectorType mCachedGradient;
+    mutable Scalar mCachedPotential;
 };
 
 }
+
+#include "rimls.tpp"
 
 #endif

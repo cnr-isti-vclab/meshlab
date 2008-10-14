@@ -23,7 +23,7 @@
 
 #include "rimls.h"
 #include "kdtree.h"
-#include "vcg_addons.h"
+#include "mlsutils.h"
 #include <iostream>
 
 namespace GaelMls {
@@ -39,65 +39,75 @@ namespace GaelMls {
 //   mMaxRefittingIters = 3;
 // }
 
-template<typename Scalar>
-void RIMLS<Scalar>::setSigmaR(Scalar v)
+template<typename _MeshType>
+void RIMLS<_MeshType>::setSigmaR(Scalar v)
 {
   mSigmaR = v;
   mCachedQueryPointIsOK = false;
 }
 
-template<typename Scalar>
-void RIMLS<Scalar>::setSigmaN(Scalar v)
+template<typename _MeshType>
+void RIMLS<_MeshType>::setSigmaN(Scalar v)
 {
   mSigmaN = v;
   mCachedQueryPointIsOK = false;
 }
 
-template<typename Scalar>
-void RIMLS<Scalar>::setRefittingThreshold(Scalar v)
+template<typename _MeshType>
+void RIMLS<_MeshType>::setRefittingThreshold(Scalar v)
 {
   mRefittingThreshold = v;
   mCachedQueryPointIsOK = false;
 }
 
-template<typename Scalar>
-void RIMLS<Scalar>::setMinRefittingIters(int n)
+template<typename _MeshType>
+void RIMLS<_MeshType>::setMinRefittingIters(int n)
 {
   mMinRefittingIters = n;
   mCachedQueryPointIsOK = false;
 }
 
-template<typename Scalar>
-void RIMLS<Scalar>::setMaxRefittingIters(int n)
+template<typename _MeshType>
+void RIMLS<_MeshType>::setMaxRefittingIters(int n)
 {
   mMaxRefittingIters = n;
   mCachedQueryPointIsOK = false;
 }
 
-template<typename Scalar>
-Scalar RIMLS<Scalar>::potential(const VectorType& x) const
+template<typename _MeshType>
+typename RIMLS<_MeshType>::Scalar RIMLS<_MeshType>::potential(const VectorType& x, int* errorMask) const
 {
   if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
   {
-    computePotentialAndGradient(x);
+    if (!computePotentialAndGradient(x))
+    {
+      if (errorMask)
+        *errorMask = MLS_TOO_FAR;
+      return Base::InvalidValue;
+    }
   }
 
   return mCachedPotential;
 }
 
-template<typename Scalar>
-typename RIMLS<Scalar>::VectorType RIMLS<Scalar>::gradient(const VectorType& x) const
+template<typename _MeshType>
+typename RIMLS<_MeshType>::VectorType RIMLS<_MeshType>::gradient(const VectorType& x, int* errorMask) const
 {
   if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
   {
-    computePotentialAndGradient(x);
+    if (!computePotentialAndGradient(x))
+    {
+      if (errorMask)
+        *errorMask = MLS_TOO_FAR;
+      return VectorType(0,0,0);
+    }
   }
 
   return mCachedGradient;
 }
 
-template<typename Scalar>
-typename RIMLS<Scalar>::VectorType RIMLS<Scalar>::project(const VectorType& x, VectorType* pNormal) const
+template<typename _MeshType>
+typename RIMLS<_MeshType>::VectorType RIMLS<_MeshType>::project(const VectorType& x, VectorType* pNormal, int* errorMask) const
 {
   int iterationCount = 0;
   VectorType position = x;
@@ -107,7 +117,9 @@ typename RIMLS<Scalar>::VectorType RIMLS<Scalar>::project(const VectorType& x, V
   do {
       if (!computePotentialAndGradient(position))
       {
-        std::cerr << " proj failed\n";
+        if (errorMask)
+          *errorMask = MLS_TOO_FAR;
+        //std::cerr << " proj failed\n";
         return x;
       }
 
@@ -116,14 +128,18 @@ typename RIMLS<Scalar>::VectorType RIMLS<Scalar>::project(const VectorType& x, V
       delta = mCachedPotential;
       position = position - normal*delta;
   } while ( fabs(delta)>epsilon && ++iterationCount<mMaxNofProjectionIterations);
+
+  if (iterationCount>=mMaxNofProjectionIterations && errorMask)
+    *errorMask = MLS_TOO_MANY_ITERS;
+  
   if (pNormal)
     *pNormal = normal;
 
   return position;
 }
 
-template<typename Scalar>
-bool RIMLS<Scalar>::computePotentialAndGradient(const VectorType& x) const
+template<typename _MeshType>
+bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 {
 		Base::computeNeighborhood(x, true);
 		unsigned int nofSamples = mNeighborhood.size();
@@ -133,6 +149,7 @@ bool RIMLS<Scalar>::computePotentialAndGradient(const VectorType& x) const
         mCachedGradient.Zero();
         mCachedQueryPoint = x;
         mCachedPotential  = 1e9;
+        mCachedQueryPointIsOK = false;
         return false;
     }
 
@@ -159,8 +176,8 @@ bool RIMLS<Scalar>::computePotentialAndGradient(const VectorType& x) const
         for (unsigned int i=0; i<nofSamples; i++)
         {
             int id = mNeighborhood.index(i);
-            VectorType diff = source - mPoints[id];
-            VectorType normal = mNormals[id];
+            VectorType diff = source - mPoints[id].cP();
+            VectorType normal = mPoints[id].cN();
             Scalar f = Dot(diff, normal);
 
             Scalar refittingWeight = 1;
@@ -203,7 +220,7 @@ bool RIMLS<Scalar>::computePotentialAndGradient(const VectorType& x) const
     return true;
 }
 
-template class RIMLS<float>;
+// template class RIMLS<float>;
 // template class RIMLS<double>;
 
 }

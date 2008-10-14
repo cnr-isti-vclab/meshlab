@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -54,17 +54,18 @@ class CVertexO;
 //Vert Mem Occupancy  --- 40b ---
 
 class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO, 
-	vcg::vertex::InfoOcf,      /* 4b */
-  vcg::vertex::Coord3f,     /* 12b */ 
-  vcg::vertex::BitFlags,    /*  4b */
-  vcg::vertex::Normal3f,    /* 12b */
-  vcg::vertex::Qualityf,    /*  4b */
-  vcg::vertex::Color4b,      /*  4b */
-  vcg::vertex::VFAdjOcf,    /*  0b */
-  vcg::vertex::MarkOcf,     /*  0b */
-  vcg::vertex::CurvaturefOcf, /*  0b */
-  vcg::vertex::CurvatureDirfOcf  /*  0b */
-  >{ 
+  vcg::vertex::InfoOcf,           /*  4b */
+  vcg::vertex::Coord3f,           /* 12b */
+  vcg::vertex::BitFlags,          /*  4b */
+  vcg::vertex::Normal3f,          /* 12b */
+  vcg::vertex::Qualityf,          /*  4b */
+  vcg::vertex::Color4b,           /*  4b */
+  vcg::vertex::VFAdjOcf,          /*  0b */
+  vcg::vertex::MarkOcf,           /*  0b */
+  vcg::vertex::CurvaturefOcf,     /*  0b */
+  vcg::vertex::CurvatureDirfOcf,  /*  0b */
+  vcg::vertex::RadiusfOcf         /*  0b */
+  >{
 };
 
 
@@ -93,7 +94,8 @@ class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
       vcg::face::Color4bOcf,           /* 0b */
       vcg::face::FFAdjOcf,             /* 0b */
       vcg::face::VFAdjOcf,             /* 0b */
-      vcg::face::WedgeTexCoordfOcf      /* 0b */
+      vcg::face::WedgeTexCoordfOcf,    /* 0b */
+      vcg::face::QualityfOcf           /* 0b */
     > {};
 
 class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > {
@@ -140,7 +142,8 @@ public:
 		MM_CURV						= 0x004000,
 		MM_CURVDIR				= 0x008000,
 		MM_FACESELECTION  = 0x010000,
-		MM_ALL						= 0xffff
+		MM_VERTRADIUS     = 0x020000,
+		MM_ALL						= 0xffffff
 	} ;
 
 
@@ -163,7 +166,7 @@ public:
   //abstract pointer to fileformat's dependent additional info
   AdditionalInfo* addinfo;
 
-  MeshModel(const char *meshName=0) {    
+  MeshModel(const char *meshName=0) {
     glw.m=&cm; 
     currentDataMask=MM_NONE;
     ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS | IOM_VERTNORMAL;
@@ -176,13 +179,13 @@ public:
   bool RenderSelectedFaces();
 
 	
-// This function is roughly equivalent to the updateDataMask,
-// but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
+  // This function is roughly equivalent to the updateDataMask,
+  // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
   void Enable(int openingFileMask)
   {
    if( openingFileMask & IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
    if( openingFileMask & IOM_FACECOLOR    ) updateDataMask(MM_FACECOLOR);
-	 
+	 if( openingFileMask & IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
   }
 
   // Ogni filtro dichiara
@@ -197,69 +200,74 @@ public:
   // Enable optional fields that could be needed
   void updateDataMask(int neededDataMask)
   {
-   if( ( (neededDataMask & MM_FACETOPO)!=0) && (currentDataMask& MM_FACETOPO)==0)			
-   {
-    cm.face.EnableFFAdjacency();
-    currentDataMask |= MM_FACETOPO;
-	  vcg::tri::UpdateTopology<CMeshO>::FaceFace(cm);
-   }
-   if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && (currentDataMask& MM_VERTFACETOPO)==0)			
-   {
-		cm.vert.EnableVFAdjacency();
-    cm.face.EnableVFAdjacency();
-    currentDataMask |= MM_VERTFACETOPO;
-	  vcg::tri::UpdateTopology<CMeshO>::VertexFace(cm);
-   }
-   if( ( (neededDataMask & MM_BORDERFLAG)!=0) && (currentDataMask& MM_BORDERFLAG)==0)			
-   {
-     if(currentDataMask& MM_FACETOPO) vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
-     else vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
-		 vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
-
-     currentDataMask |= MM_BORDERFLAG;
-   }
-   if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0) && (currentDataMask& MM_WEDGTEXCOORD)==0)			
-   {
-    cm.face.EnableWedgeTex();
-    currentDataMask |= MM_WEDGTEXCOORD;
-   }
-   if( ( (neededDataMask & MM_FACECOLOR)!=0) && (currentDataMask& MM_FACECOLOR)==0)			
-   {
-    cm.face.EnableColor();
-    currentDataMask |= MM_FACECOLOR;
-   } 
-   if( ( (neededDataMask & MM_FACEMARK)!=0) && (currentDataMask& MM_FACEMARK)==0)			
-   {
-    cm.face.EnableMark();
-    currentDataMask |= MM_FACEMARK;
-   }
-	 if( ( (neededDataMask & MM_FACEQUALITY)!=0) && (currentDataMask & MM_FACEQUALITY)==0)			
+		if( ( (neededDataMask & MM_FACETOPO)!=0) && (currentDataMask& MM_FACETOPO)==0)
+		{
+			cm.face.EnableFFAdjacency();
+			currentDataMask |= MM_FACETOPO;
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(cm);
+		}
+		if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && (currentDataMask& MM_VERTFACETOPO)==0)
+		{
+			cm.vert.EnableVFAdjacency();
+			cm.face.EnableVFAdjacency();
+			currentDataMask |= MM_VERTFACETOPO;
+			vcg::tri::UpdateTopology<CMeshO>::VertexFace(cm);
+		}
+		if( ( (neededDataMask & MM_BORDERFLAG)!=0) && (currentDataMask& MM_BORDERFLAG)==0)
+		{
+			if(currentDataMask& MM_FACETOPO) vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
+			else vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
+			vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
+			currentDataMask |= MM_BORDERFLAG;
+		}
+		if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0) && (currentDataMask& MM_WEDGTEXCOORD)==0)
+		{
+			cm.face.EnableWedgeTex();
+			currentDataMask |= MM_WEDGTEXCOORD;
+		}
+		if( ( (neededDataMask & MM_FACECOLOR)!=0) && (currentDataMask& MM_FACECOLOR)==0)
+		{
+			cm.face.EnableColor();
+			currentDataMask |= MM_FACECOLOR;
+		}
+		if( ( (neededDataMask & MM_FACEQUALITY)!=0) && (currentDataMask & MM_FACEQUALITY)==0)
 		{
 			cm.face.EnableQuality();
 			currentDataMask |= MM_FACEQUALITY;
 		}
-		
-	 if( ( (neededDataMask & MM_VERTMARK)!=0) && (currentDataMask& MM_VERTMARK)==0)			
+
+		if( ( (neededDataMask & MM_FACEMARK)!=0) && (currentDataMask& MM_FACEMARK)==0)
+		{
+			cm.face.EnableMark();
+			currentDataMask |= MM_FACEMARK;
+		}
+		if( ( (neededDataMask & MM_VERTMARK)!=0) && (currentDataMask& MM_VERTMARK)==0)
 		{
 			cm.vert.EnableMark();
 			currentDataMask |= MM_VERTMARK;
 		}
-		if( ( (neededDataMask & MM_CURV)!=0) && (currentDataMask& MM_CURV)==0)			
+		
+		if( ( (neededDataMask & MM_CURV)!=0) && (currentDataMask& MM_CURV)==0)
 		{
 			cm.vert.EnableCurvature();
 			currentDataMask |= MM_CURV;
 		}
-		if( ( (neededDataMask & MM_CURVDIR)!=0) && (currentDataMask& MM_CURVDIR)==0)			
+		if( ( (neededDataMask & MM_CURVDIR)!=0) && (currentDataMask& MM_CURVDIR)==0)
 		{
 			cm.vert.EnableCurvatureDir();
 			currentDataMask |= MM_CURVDIR;
 		}
+		if( ( (neededDataMask & MM_VERTRADIUS)!=0) && (currentDataMask& MM_VERTRADIUS)==0)
+		{
+			cm.vert.EnableRadius();
+			currentDataMask |= MM_VERTRADIUS;
+		}
   }
 
-   void clearDataMask(int neededDataMask)
-   {
-     currentDataMask = currentDataMask & (~neededDataMask);
-   }
+  void clearDataMask(int neededDataMask)
+  {
+    currentDataMask = currentDataMask & (~neededDataMask);
+  }
 };
 
 
@@ -272,7 +280,7 @@ public:
 
     bool lighting;
     bool backFaceCull;
-    bool doubleSideLighting;  
+    bool doubleSideLighting;
     bool fancyLighting;
     bool castShadow;
     bool selectedFaces;
@@ -348,7 +356,7 @@ public:
 					tot+= mmp->cm.vn;
 			return tot;
 	}
-	int fn() { 
+	int fn() {
 			int tot=0;
 			foreach(MeshModel *mmp, meshList)
 					tot+= mmp->cm.fn;

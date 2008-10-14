@@ -26,6 +26,7 @@
 
 #include <vcg/space/point3.h>
 #include <vcg/space/box3.h>
+#include "mlsutils.h"
 
 namespace GaelMls {
 
@@ -57,7 +58,7 @@ class BallTree
     typedef _Scalar Scalar;
     typedef vcg::Point3<Scalar> VectorType;
     
-    BallTree(const std::vector<VectorType>& points, const std::vector<Scalar>& radii);
+    BallTree(const ConstDataWrapper<VectorType>& points, const ConstDataWrapper<Scalar>& radii);
 
     void computeNeighbors(const VectorType& x, Neighborhood<Scalar>* pNei) const;
 
@@ -101,8 +102,8 @@ class BallTree
     void queryNode(Node& node, Neighborhood<Scalar>* pNei) const;
     
   protected:
-    const std::vector<VectorType>& mPoints;
-    const std::vector<Scalar>& mRadii;
+    ConstDataWrapper<VectorType> mPoints;
+    ConstDataWrapper<Scalar> mRadii;
     Scalar mRadiusScale;
 
     int mMaxTreeDepth;

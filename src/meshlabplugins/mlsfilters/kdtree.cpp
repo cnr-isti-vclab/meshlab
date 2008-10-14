@@ -22,18 +22,21 @@
 ****************************************************************************/
 
 #include "kdtree.h"
-#include "vcg_addons.h"
 #include <limits>
 #include <iostream>
 
 template<typename Scalar>
-KdTree<Scalar>::KdTree(const std::vector<VectorType>& points, unsigned int nofPointsPerCell, unsigned int maxDepth)
-  : mPoints(points)
+KdTree<Scalar>::KdTree(const ConstDataWrapper<VectorType>& points, unsigned int nofPointsPerCell, unsigned int maxDepth)
+  : mPoints(points.size())
 {
   // compute the AABB of the input
+  mPoints[0] = points[0];
   mAABB.Set(mPoints[0]);
   for (unsigned int i=1 ; i<mPoints.size() ; ++i)
+  {
+    mPoints[i] = points[i];
     mAABB.Add(mPoints[i]);
+  }
 
   mNodes.reserve(4*mPoints.size()/nofPointsPerCell);
   mNodes.resize(1);

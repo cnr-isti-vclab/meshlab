@@ -26,7 +26,7 @@
 
 #include <vcg/space/point3.h>
 #include <vcg/space/box3.h>
-
+#include "mlsutils.h"
 #include "priorityqueue.h"
 #include <vector>
 
@@ -67,7 +67,7 @@ public:
 
 public:
 
-  KdTree(const std::vector<VectorType>& points, unsigned int nofPointsPerCell = 16, unsigned int maxDepth = 64);
+  KdTree(const ConstDataWrapper<VectorType>& points, unsigned int nofPointsPerCell = 16, unsigned int maxDepth = 64);
 
   ~KdTree();
 

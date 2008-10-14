@@ -24,6 +24,28 @@
 #ifndef VCGADDONS_H
 #define VCGADDONS_H
 
+template<typename _DataType>
+class ConstDataWrapper
+{
+public:
+    typedef _DataType DataType;
+    inline ConstDataWrapper()
+      : mpData(0), mStride(0), mSize(0)
+    {}
+    inline ConstDataWrapper(const DataType* pData, int size, int stride = sizeof(DataType))
+      : mpData(reinterpret_cast<const unsigned char*>(pData)), mStride(stride), mSize(size)
+    {}
+    inline const DataType& operator[] (int i) const
+    {
+      return *reinterpret_cast<const DataType*>(mpData + i*mStride);
+    }
+    inline int size() const { return mSize; }
+protected:
+    const unsigned char* mpData;
+    int mStride;
+    int mSize;
+};
+
 namespace vcg {
 
 template <typename Scalar>
@@ -75,7 +97,7 @@ inline int MinCoeffId(Point3<Scalar> const & p)
 }
 
 template <typename ToType, typename Scalar>
-inline Point3<ToType> vector_cast(const Point3<Scalar>& p)
+inline Point3<ToType> Point3Cast(const Point3<Scalar>& p)
 {
   return Point3<ToType>(p.X(), p.Y(), p.Z());
 }

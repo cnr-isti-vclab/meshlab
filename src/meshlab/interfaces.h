@@ -185,20 +185,21 @@ public:
 	
 	enum FilterClass 
 	{ 
-			Generic          =0x0000, 
-			Selection        =0x0001, // Filters that select or de-select something
-			Cleaning         =0x0002, // Filters that can be used to clean meshes (duplicated vertices etc)
-			Remeshing        =0x0004, 
-			FaceColoring     =0x0008, 
-			VertexColoring   =0x0010, 
-			MeshCreation     =0x0020, 
-			Smoothing        =0x0040, 
-			Quality          =0x0080, 
-			Layer            =0x0100, 
-			Normal           =0x0200,
-		  Sampling         =0x0400,
-		  Texture          =0x0800,
-		  RangeMap         =0x1000, // filters specific for range map processing
+			Generic          =0x00000, 
+			Selection        =0x00001, // Filters that select or de-select something
+			Cleaning         =0x00002, // Filters that can be used to clean meshes (duplicated vertices etc)
+			Remeshing        =0x00004, 
+			FaceColoring     =0x00008, 
+			VertexColoring   =0x00010, 
+			MeshCreation     =0x00020, 
+			Smoothing        =0x00040, 
+			Quality          =0x00080, 
+			Layer            =0x00100, 
+			Normal           =0x00200,
+		  Sampling         =0x00400,
+		  Texture          =0x00800,
+		  RangeMap         =0x01000, // filters specific for range map processing
+      PointSet         =0x02000
 	};
 	
 	virtual ~MeshFilterInterface() {}

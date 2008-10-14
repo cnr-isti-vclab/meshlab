@@ -68,7 +68,9 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 		int loadMask;
 		if (!vcg::tri::io::ImporterExpePTS<CMeshO>::LoadMask(filename.c_str(),loadMask))
 			return false;
+    //std::cout << "loadMask = " << loadMask << "\n";
 		m.Enable(loadMask);
+    
 
 		int result = vcg::tri::io::ImporterExpePTS<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
 		if (result != 0)

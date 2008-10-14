@@ -29,9 +29,9 @@ SUBDIRS       = meshfilter \
 				editslice \
 #				editpaint \
 				editalign \
-				editmeasure\
-				editrgbtri\
-				editsegment\
+				editmeasure \
+				editrgbtri \
+				editsegment \
 				edit_straightener \
 				../sampleplugins/sampleedit \
 				../sampleplugins/samplefilter \

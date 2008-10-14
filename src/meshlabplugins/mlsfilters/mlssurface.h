@@ -30,31 +30,48 @@
 
 namespace GaelMls {
 
-template<typename _Scalar>
+enum {
+  MLS_OK,
+  MLS_TOO_FAR,
+  MLS_TOO_MANY_ITERS,
+
+  MLS_GRADIENT_ACCURATE,
+  MLS_GRADIENT_APPROX,
+  MLS_GRADIENT_FINITEDIFF
+};
+
+template<typename MeshType>
 class MlsSurface
 {
-	public:
-		typedef _Scalar Scalar;
-		typedef vcg::Point3<Scalar> VectorType;
+  public:
+    typedef typename MeshType::ScalarType Scalar;
+    typedef vcg::Point3<Scalar> VectorType;
+    typedef typename MeshType::VertContainer PointsType;
 
-    template<typename MeshType>
-		MlsSurface(const MeshType& mesh)
+    MlsSurface(const MeshType& mesh)
+      : mMesh(mesh), mPoints(mesh.vert)
     {
       mCachedQueryPointIsOK = false;
 
-      mPoints.resize(mesh.vert.size());
-      mNormals.resize(mesh.vert.size());
-      mRadii.resize(mesh.vert.size());
-      mAABB.Set(mesh.vert[0].cP());
-      for (int i = 0; i< mesh.vert.size(); i++)
-      {
-        mPoints[i] = /*vcg::vector_cast<Scalar>*/(mesh.vert[i].cP());
-        mNormals[i] = /*vcg::vector_cast<Scalar>*/(mesh.vert[i].cN());
-        mAABB.Add(mesh.vert[i].cP());
-      }
+      mAABB = mesh.bbox;
+
+//       mPoints.resize(mesh.vert.size());
+//       mNormals.resize(mesh.vert.size());
+//       mRadii.resize(mesh.vert.size());
+//       mAABB.Set(mesh.vert[0].cP());
+//       for (int i = 0; i< mesh.vert.size(); i++)
+//       {
+//         mPoints[i] = /*vcg::vector_cast<Scalar>*/(mesh.vert[i].cP());
+//         mNormals[i] = /*vcg::vector_cast<Scalar>*/(mesh.vert[i].cN());
+//         mAABB.Add(mesh.vert[i].cP());
+//       }
 
       // compute radii using a basic meshless density estimator
-      computeVertexRaddi();
+      if (!mPoints.RadiusEnabled)
+      {
+        const_cast<PointsType&>(mPoints).EnableRadius();
+        computeVertexRaddi();
+      }
 
       mFilterScale = 4.0;
       mMaxNofProjectionIterations = 20;
@@ -62,65 +79,92 @@ class MlsSurface
       mBallTree = 0;
     }
 
-		virtual Scalar potential(const VectorType& x) const = 0;
-		virtual VectorType gradient(const VectorType& x) const = 0;
-		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0) const = 0;
+    /** \returns the value of the reconstructed scalar field at point \a x */
+    virtual Scalar potential(const VectorType& x, int* errorMask = 0) const = 0;
+    /** \returns the gradient of the reconstructed scalar field at point \a x */
+    virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const = 0;
+    /** \returns the projection of point x onto the MLS surface, and optionnaly returns the normal in \a pNormal */
+    virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const = 0;
 
-		void setFilterScale(Scalar v);
-		void setMaxProjectionIters(int n);
-		void setProjectionAccuracy(Scalar v);
+    /** set the scale of the spatial filter */
+    void setFilterScale(Scalar v);
+    /** set the maximum number of iterations during the projection */
+    void setMaxProjectionIters(int n);
+    /** set the threshold factor to detect convergence of the iterations */
+    void setProjectionAccuracy(Scalar v);
 
-		const std::vector<VectorType>& points() const { return mPoints; }
-		const std::vector<VectorType>& normals() const { return mNormals; }
-		const std::vector<Scalar>& radii() const { return mRadii; }
-		const vcg::Box3<Scalar>& boundingBox() const { return mAABB; }
+    inline const MeshType& mesh() const { return mMesh; }
+    /** a shortcut for mesh().vert */
+    inline const PointsType& points() const { return mPoints; }
+    
+    inline ConstDataWrapper<VectorType> positions() const
+    {
+      return ConstDataWrapper<VectorType>(&mPoints[0].cP(), mPoints.size(),
+                                          size_t(&mPoints[1].cP()[0]) - size_t(&mPoints[0].cP()[0]));
+    }
+    inline ConstDataWrapper<VectorType> normals() const
+    {
+      return ConstDataWrapper<VectorType>(&mPoints[0].cN(), mPoints.size(),
+                                          size_t(&mPoints[1].cN()[0]) - size_t(&mPoints[0].cN()[0]));
+    }
+    inline ConstDataWrapper<Scalar> radii() const
+    {
+      return ConstDataWrapper<Scalar>(&mPoints[0].cR(), mPoints.size(),
+                                      size_t(&mPoints[1].cR()) - size_t(&mPoints[0].cR()));
+    }
+    const vcg::Box3<Scalar>& boundingBox() const { return mAABB; }
 
-	protected:
-		void computeNeighborhood(const VectorType& x, bool computeDerivatives) const;
-		void computeVertexRaddi();
+  protected:
+    void computeNeighborhood(const VectorType& x, bool computeDerivatives) const;
+    void computeVertexRaddi();
 
-		struct PointToPointSqDist
-		{
-			inline bool operator()(const VectorType &a, const VectorType &b, Scalar& refD2, VectorType &q) const
-			{
+    struct PointToPointSqDist
+    {
+      inline bool operator()(const VectorType &a, const VectorType &b, Scalar& refD2, VectorType &q) const
+      {
 // 				std::cout << a.X() << a.Y() << a.Z() << "  -  " << b.X() << b.Y() << b.Z() <<
 // 					" => " <<  vcg::Distance(a, b) << " < " << refD2 << "\n";
-				Scalar d2 = vcg::SquaredDistance(a, b);
-				if (d2>refD2)
-					return false;
+        Scalar d2 = vcg::SquaredDistance(a, b);
+        if (d2>refD2)
+          return false;
 
-				refD2 = d2;
-				q = a;
-				return true;
-			}
-		};
+        refD2 = d2;
+        q = a;
+        return true;
+      }
+    };
 
-		class DummyObjectMarker {};
+    class DummyObjectMarker {};
 
-	protected:
-		//const MeshType& mMesh;
-		std::vector<VectorType> mPoints;
-		std::vector<VectorType> mNormals;
-		std::vector<Scalar> mRadii;
-		vcg::Box3<Scalar> mAABB;
+  protected:
+    const MeshType& mMesh;
+    const PointsType& mPoints;
+// 		std::vector<VectorType> mPoints;
+// 		std::vector<VectorType> mNormals;
+// 		std::vector<Scalar> mRadii;
+    vcg::Box3<Scalar> mAABB;
 
-		BallTree<Scalar>* mBallTree;
+    BallTree<Scalar>* mBallTree;
 
-		int mMaxNofProjectionIterations;
-		Scalar mFilterScale;
-		Scalar mAveragePointSpacing;
-		Scalar mProjectionAccuracy;
+    int mMaxNofProjectionIterations;
+    Scalar mFilterScale;
+    Scalar mAveragePointSpacing;
+    Scalar mProjectionAccuracy;
 
-		// cached values:
-		mutable bool mCachedQueryPointIsOK;
-		mutable VectorType mCachedQueryPoint;
+    // cached values:
+    mutable bool mCachedQueryPointIsOK;
+    mutable VectorType mCachedQueryPoint;
 //     mutable VectorType mCachedGradient;
 //     mutable Scalar mCachedPotential;
-		mutable Neighborhood<Scalar> mNeighborhood;
-		mutable std::vector<Scalar>  mCachedWeights;
-		mutable std::vector<VectorType>  mCachedWeightGradients;
+    mutable Neighborhood<Scalar> mNeighborhood;
+    mutable std::vector<Scalar>  mCachedWeights;
+    mutable std::vector<VectorType>  mCachedWeightGradients;
+
+    static const Scalar InvalidValue = 12345679810.11121314151617;
 };
 
 } // namespace
+
+#include "mlssurface.tpp"
 
 #endif // MLSSURFACE_H
