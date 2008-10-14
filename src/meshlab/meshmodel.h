@@ -94,8 +94,7 @@ class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
       vcg::face::Color4bOcf,           /* 0b */
       vcg::face::FFAdjOcf,             /* 0b */
       vcg::face::VFAdjOcf,             /* 0b */
-      vcg::face::WedgeTexCoordfOcf,    /* 0b */
-      vcg::face::QualityfOcf           /* 0b */
+      vcg::face::WedgeTexCoordfOcf     /* 0b */
     > {};
 
 class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > {
