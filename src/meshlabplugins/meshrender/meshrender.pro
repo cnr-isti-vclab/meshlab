@@ -1,10 +1,11 @@
 include (../../shared.pri)
 
-HEADERS       = meshrender.h textfile.h shaderStructs.h shaderDialog.h
+HEADERS       = meshrender.h textfile.h shaderStructs.h shaderDialog.h ../../meshlab/meshmodel.h
 SOURCES       = meshrender.cpp \
 		textfile.cpp \  
 		shaderDialog.cpp \
-		$$GLEWCODE
+		$$GLEWCODE \
+		../../meshlab/meshmodel.cpp
 
 TARGET        = meshrender
 

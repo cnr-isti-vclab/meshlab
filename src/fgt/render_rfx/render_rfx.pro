@@ -13,7 +13,8 @@ HEADERS       = render_rfx.h             \
                 rfx_textureloader.h      \
                 plugins/rfx_qimage.h     \
                 plugins/rfx_dds.h        \
-                plugins/rfx_tga.h
+                plugins/rfx_tga.h				 \
+                ../../meshlab/meshmodel.h
 
 SOURCES       = render_rfx.cpp           \
                 rfx_shader.cpp           \
@@ -27,7 +28,8 @@ SOURCES       = render_rfx.cpp           \
                 plugins/rfx_qimage.cpp   \
                 plugins/rfx_dds.cpp      \
                 plugins/rfx_tga.cpp      \
-                $$GLEWCODE
+                $$GLEWCODE							 \
+                ../../meshlab/meshmodel.cpp
 
 FORMS         = rfx_dialog.ui
 

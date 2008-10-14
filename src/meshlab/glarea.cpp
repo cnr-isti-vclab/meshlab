@@ -401,7 +401,10 @@ void GLArea::paintGL()
 			foreach(MeshModel * mp, meshDoc.meshList) 
 			{
 				if(mp->visible)
-					mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+					if (iRenderer)
+						iRenderer->Draw(currentShader, *mp, rm, this);
+					else
+						mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
 			}
 
 		} while (--totPasses);

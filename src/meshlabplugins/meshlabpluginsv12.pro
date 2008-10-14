@@ -52,7 +52,8 @@ SUBDIRS       = meshfilter \
 				../fgt/edit_topo \
 				../fgt/render_rfx \
 				../fgt/filter_func \
-				mlsfilters\
-				io_gts\
-				io_expe
+				mlsfilters \
+				io_gts \
+				io_expe \
+				splatrenderer
 

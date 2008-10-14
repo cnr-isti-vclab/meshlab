@@ -330,6 +330,11 @@ public:
 		
     virtual void Init(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){};
 		virtual void Render(QAction * /*mode*/, MeshModel &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
+		
+		virtual void Draw(QAction * /*mode*/, MeshModel &m, RenderMode &rm, QGLWidget * /*parent*/)
+		{
+			m.Render(rm.drawMode,rm.colorMode,rm.textureMode);
+		}
 		virtual void Finalize(QAction * /*mode*/, MeshModel &/*m*/, GLArea * /*parent*/){};
 		virtual bool isSupported() = 0;
 		virtual QList<QAction *> actions() = 0;
