@@ -304,6 +304,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLW
 	if (sDialog) {
 		sDialog->close();
 		delete sDialog;
+		sDialog=0;
 	}
 
   gla->makeCurrent();
