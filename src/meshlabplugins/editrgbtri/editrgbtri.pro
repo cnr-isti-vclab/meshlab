@@ -28,6 +28,8 @@ TARGET = editrgbtri
 # Enable/Disable face coloring
 #DEFINES += RGBCOLOR
 
+DEFINES += NDEBUG
+
 QT += opengl
 RESOURCES = editrgbtri.qrc
 FORMS += widgetRgbT.ui subDialog.ui

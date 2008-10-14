@@ -342,7 +342,7 @@ void ModButterfly::rotate(RgbVertexC& v, Pos& pos,int angle)
 		pos.FlipF();
 	}
 	//std::cerr << " ----- result : " << angle << std::endl;
-	assert(angle == 0);
+	//assert(angle == 0);
 }
 
 ModButterfly::RgbVertexC ModButterfly::move(RgbVertexC& v, Pos& pos, int level)
