@@ -160,7 +160,7 @@ class MlsSurface
     mutable std::vector<Scalar>  mCachedWeights;
     mutable std::vector<VectorType>  mCachedWeightGradients;
 
-    static const Scalar InvalidValue = 12345679810.11121314151617;
+	static const Scalar InvalidValue() { return 12345679810.11121314151617;};
 };
 
 } // namespace

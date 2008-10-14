@@ -59,7 +59,7 @@ typename APSS<_MeshType>::Scalar APSS<_MeshType>::potential(const VectorType& x,
     {
       if (errorMask)
         *errorMask = MLS_TOO_FAR;
-      return Base::InvalidValue;
+      return Base::InvalidValue();
     }
   }
 

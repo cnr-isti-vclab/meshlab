@@ -83,7 +83,7 @@ typename RIMLS<_MeshType>::Scalar RIMLS<_MeshType>::potential(const VectorType& 
     {
       if (errorMask)
         *errorMask = MLS_TOO_FAR;
-      return Base::InvalidValue;
+      return Base::InvalidValue();
     }
   }
 
