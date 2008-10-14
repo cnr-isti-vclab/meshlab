@@ -601,7 +601,7 @@ void GLArea::saveSnapshot()
 
 void GLArea::setCurrentlyActiveLayer(int meshId)
 {
-	qDebug() << "setCurrent: " << meshId;
+	//qDebug() << "setCurrent: " << meshId;
 	
 	//get the mesh that was current before this change
 	MeshModel *outgoingMeshModel = meshDoc.mm();
