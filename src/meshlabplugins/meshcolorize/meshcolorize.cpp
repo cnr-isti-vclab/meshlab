@@ -56,6 +56,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
 		CP_FACE_SMOOTH <<
 		CP_VERTEX_TO_FACE <<
 		CP_FACE_TO_VERTEX <<
+		CP_TEXTURE_TO_VERTEX <<
     //CP_COLOR_NON_TOPO_COHERENT <<
 		CP_RANDOM_FACE;
     
@@ -84,6 +85,7 @@ const QString ExtraMeshColorizePlugin::filterName(FilterIDType c) {
     case CP_FACE_SMOOTH:                   return QString("Laplacian Smooth Face Color");
     case CP_VERTEX_TO_FACE:                   return QString("Vertex to Face color transfer");
     case CP_FACE_TO_VERTEX:                   return QString("Face to Vertex color transfer");
+	case CP_TEXTURE_TO_VERTEX:                   return QString("Texture to Vertex color transfer");
 		case CP_RANDOM_FACE:         return QString("Random Face Color");
 			
     default: assert(0);
@@ -110,6 +112,7 @@ const QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId)
     case CP_FACE_SMOOTH:                   return QString("Laplacian Smooth Face Color");
     case CP_VERTEX_TO_FACE:                   return QString("Vertex to Face color transfer");
     case CP_FACE_TO_VERTEX:                   return QString("Face to Vertex color transfer");
+    case CP_TEXTURE_TO_VERTEX:                   return QString("Texture to Vertex color transfer");
     case CP_COLOR_NON_TOPO_COHERENT :return tr("Color edges topologically non coherent.");
 		case CP_RANDOM_FACE:         return QString("Colorize Faces randomly. If internal edges are present they are used");
 
@@ -139,7 +142,9 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_VERTEX_SMOOTH:                   return 0;
     case CP_FACE_SMOOTH:                   return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR ;
     case CP_VERTEX_TO_FACE:                   return MeshModel::MM_FACECOLOR;
-    case CP_FACE_TO_VERTEX:                   return MeshModel::MM_FACECOLOR;
+    case CP_FACE_TO_VERTEX:                   return MeshModel::MM_VERTCOLOR;
+	case CP_TEXTURE_TO_VERTEX:                   return MeshModel::MM_FACECOLOR;
+
     default: assert(0);
   }
   return 0;
@@ -337,6 +342,27 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 		}
 		break;
   case CP_FACE_TO_VERTEX:
+		{
+		}
+		break;
+  case CP_TEXTURE_TO_VERTEX:
+		{
+			if(!HasPerWedgeTexCoord(m.cm)) break;
+			CMeshO::FaceIterator fi; int cont=0;
+			QImage tex(m.cm.textures[0].c_str());
+			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD()) 
+			{
+				for (int i=0; i<3; i++)
+				{
+					vcg::Point2f newcoord;
+					newcoord=(*fi).WT(i).P();
+					QRgb val = tex.pixel(newcoord[0]*tex.width(),(1-newcoord[1])*tex.height()-1);
+					//Color4f col(val[0],qGreen(val),0,0);
+					(*fi).V(i)->C().SetRGB(qRed(val),qGreen(val),qBlue(val));
+					
+				}
+			}
+	    }
 		
 		break;
   case CP_VERTEX_TO_FACE:
@@ -371,8 +397,10 @@ const MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction
     case   CP_COLOR_NON_TOPO_COHERENT:
     case   CP_VERTEX_SMOOTH:
     case   CP_FACE_TO_VERTEX:
-        return MeshFilterInterface::VertexColoring; 			
-		case   CP_SELFINTERSECT_SELECT: return MeshFilterInterface::Selection;
+        return MeshFilterInterface::VertexColoring; 	
+	case   CP_TEXTURE_TO_VERTEX:
+		return MeshFilterInterface::VertexColoring; 
+	case   CP_SELFINTERSECT_SELECT: return MeshFilterInterface::Selection;
     case   CP_SELFINTERSECT_COLOR:
     case   CP_TRIANGLE_QUALITY:
 		case   CP_RANDOM_FACE:	
