@@ -58,7 +58,7 @@ Section "MainSection" SEC01
   CreateDirectory "$SMPROGRAMS\MeshLab"
   CreateShortCut "$SMPROGRAMS\MeshLab\MeshLab.lnk" "$INSTDIR\meshlab.exe"
   CreateShortCut "$DESKTOP\MeshLab.lnk" "$INSTDIR\meshlab.exe"
-  CreateShortCut "$SMPROGRAMS\MeshLabServer.lnk" "cmd.exe"
+  CreateShortCut "$SMPROGRAMS\MeshLab\MeshLabServer.lnk" "cmd.exe"
 
   ;Let's delete all the dangerous stuff from previous releases.
   Delete "$INSTDIR\qt*.dll"
