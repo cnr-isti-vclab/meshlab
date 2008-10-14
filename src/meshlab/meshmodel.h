@@ -88,6 +88,7 @@ class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
       vcg::face::VertexRef,            /*12b */
       vcg::face::BitFlags,             /* 4b */
       vcg::face::Normal3f,             /*12b */
+      vcg::face::QualityfOcf,          /* 0b */
       vcg::face::MarkOcf,              /* 0b */
       vcg::face::Color4bOcf,           /* 0b */
       vcg::face::FFAdjOcf,             /* 0b */
@@ -120,24 +121,25 @@ public:
 	It is used for 
 	*/
  	enum MeshElement {  
-		MM_NONE						= 0x0000,
-		MM_VERTCOORD			= 0x0001,
-		MM_VERTNORMAL			= 0x0002,
-		MM_VERTCOLOR			= 0x0004,
-		MM_VERTQUALITY		= 0x0008,
+		MM_NONE						= 0x000000,
+		MM_VERTCOORD			= 0x000001,
+		MM_VERTNORMAL			= 0x000002,
+		MM_VERTCOLOR			= 0x000004,
+		MM_VERTQUALITY		= 0x000008,
 		MM_VERTGEOM = MM_VERTCOORD | MM_VERTNORMAL,
-		MM_VERTMARK				= 0x0010,
-		MM_VERTFACETOPO		= 0x0020,
-		MM_VERTCONTAINER	= 0x0040,
-		MM_VERTFLAG				= 0x0080,
-		MM_BORDERFLAG			= 0x0100,
-		MM_FACECOLOR			= 0x0200,
-		MM_FACEMARK				= 0x0400,
-		MM_FACETOPO				= 0x0800,
-		MM_WEDGTEXCOORD		= 0x1000,
-		MM_CURV						= 0x2000,
-		MM_CURVDIR				= 0x4000,
-		MM_FACESELECTION			= 0x8000,
+		MM_VERTMARK				= 0x000010,
+		MM_VERTFACETOPO		= 0x000020,
+		MM_VERTCONTAINER	= 0x000040,
+		MM_VERTFLAG				= 0x000080,
+		MM_BORDERFLAG			= 0x000100,
+		MM_FACECOLOR			= 0x000200,
+		MM_FACEQUALITY		= 0x000400,
+		MM_FACEMARK				= 0x000800,
+		MM_FACETOPO				= 0x001000,
+		MM_WEDGTEXCOORD		= 0x002000,
+		MM_CURV						= 0x004000,
+		MM_CURVDIR				= 0x008000,
+		MM_FACESELECTION  = 0x010000,
 		MM_ALL						= 0xffff
 	} ;
 
@@ -231,6 +233,12 @@ public:
     cm.face.EnableMark();
     currentDataMask |= MM_FACEMARK;
    }
+	 if( ( (neededDataMask & MM_FACEQUALITY)!=0) && (currentDataMask & MM_FACEQUALITY)==0)			
+		{
+			cm.face.EnableQuality();
+			currentDataMask |= MM_FACEQUALITY;
+		}
+		
 	 if( ( (neededDataMask & MM_VERTMARK)!=0) && (currentDataMask& MM_VERTMARK)==0)			
 		{
 			cm.vert.EnableMark();
