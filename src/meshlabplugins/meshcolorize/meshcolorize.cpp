@@ -319,9 +319,9 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
     vcg::tri::UpdateColor<CMeshO>::VertexBorderFlag(m.cm);
 		
 		// Just to be sure restore standard topology and border flags 
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
-    vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-		vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+		tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+    tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+		tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
     break;
   case CP_COLOR_NON_MANIFOLD_FACE:
     ColorManifoldFace<CMeshO>(m.cm);
@@ -342,13 +342,15 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 		}
 		break;
   case CP_FACE_TO_VERTEX:
-		{
-		}
+		 tri::UpdateColor<CMeshO>::VertexFromFace(m.cm);
 		break;
+	 case CP_VERTEX_TO_FACE:
+		 tri::UpdateColor<CMeshO>::FaceFromVertex(m.cm);
+		 break;
   case CP_TEXTURE_TO_VERTEX:
 		{
 			if(!HasPerWedgeTexCoord(m.cm)) break;
-			CMeshO::FaceIterator fi; int cont=0;
+			CMeshO::FaceIterator fi; 
 			QImage tex(m.cm.textures[0].c_str());
 			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD()) 
 			{
@@ -364,18 +366,6 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			}
 	    }
 		
-		break;
-  case CP_VERTEX_TO_FACE:
-		{
-			CMeshO::FaceIterator fi;
-			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD()) 
-			{
-				Color4f avg = (Color4f::Construct((*fi).V(0)->C()) + 
-											 Color4f::Construct((*fi).V(1)->C()) + 
-											 Color4f::Construct((*fi).V(2)->C()) )/ 3.0;
-						(*fi).C().Import(avg);
-			}
-		}
 		break;
  }
 	return true;
