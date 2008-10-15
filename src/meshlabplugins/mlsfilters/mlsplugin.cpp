@@ -516,6 +516,8 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 				//UpdateFaceNormalFromVertex(m.cm);
 				if (k!=0)
 				{
+					mesh->updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+					
 					vcg::tri::UpdateNormals<CMeshO>::PerFace(mesh->cm);
 					vcg::tri::UpdateNormals<CMeshO>::NormalizeFace(mesh->cm);
 					//vcg::RefineE<CMeshO,vcg::MidPoint<CMeshO> >(m.cm, vcg::MidPoint<CMeshO>(), edgePred, false, cb);
