@@ -2,7 +2,6 @@
 // #version 110
 // #extension all : enable
 
-// turn "on" optimizations
 #pragma optimize(on)
 
 #ifndef EXPE_EWA_HINT
@@ -12,10 +11,6 @@
 #ifndef EXPE_DEPTH_INTERPOLATION
     #define EXPE_DEPTH_INTERPOLATION 0
 #endif
-
-#define EXPE_DEFERRED_SHADING
-
-#define EXPE_DEPTH_CORRECTION
 
 //--------------------------------------------------------------------------------
 // shared variables
@@ -50,9 +45,10 @@ uniform vec2 halfVp;
 uniform float oneOverEwaRadius;
 
 
-// for backface shading
-// #undef EXPE_EARLY_BACK_FACE_CULLING
-// #define EXPE_EWA_HINT 2
+#ifdef EXPE_BACKFACE_SHADING
+	#undef EXPE_EARLY_BACK_FACE_CULLING
+	//#define EXPE_EWA_HINT 2
+#endif
 
 //--------------------------------------------------------------------------------
 // Visibility Splatting
@@ -103,7 +99,7 @@ void VisibilityVP(void)
     #endif
 
     #ifndef EXPE_EARLY_BACK_FACE_CULLING
-    oPos.w = oPos.w * (dotpn<0. ? 1 : 0);
+    oPos.w = oPos.w * (dotpn<0.0 ? 1.0 : 0.0);
     #else
     }
     #endif
@@ -136,9 +132,9 @@ void VisibilityFP(void)
     #if (EXPE_EWA_HINT>0)
     vec2 d2 = oneOverEwaRadius*gl_FragCoord.xy - scaledFragCenter2d; // MAD
     float r2d = dot(d2,d2); // DP3
-    gl_FragColor = min(r2d,r2*scaleSquaredDistance);
+    gl_FragColor = vec4(min(r2d,r2*scaleSquaredDistance));
     #else
-    gl_FragColor = r2*scaleSquaredDistance;
+    gl_FragColor = vec4(r2*scaleSquaredDistance);
     #endif
 
     #ifdef EXPE_DEPTH_CORRECTION
@@ -151,11 +147,10 @@ void VisibilityFP(void)
 
 #ifdef __AttributeVP__
 
-// #define EXPE_LIGHTING
 vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)
 {
 	vec3 ldir = normalize(gl_LightSource[0].position.xyz);
-	return color * 0.75 * clamp(dot(normal,ldir),0.0,1.0);
+	return color * 0.85 * clamp(dot(normal,ldir),0.0,1.0);
 }
 
 varying vec2 scaledFragCenter2d;
@@ -178,16 +173,13 @@ void AttributeVP(void)
     {
     #endif
 
-    // for backface shading
-//     if(dotpn>0.)
-//     {
-//         dotpn = -dotpn;
-//         normal = -normal;
-//     }
-    // end back face shading
-
-    //vec3 p = ePos.xyz / ePos.w;
-    //float pz1 = 1./p.z;
+    #ifdef EXPE_BACKFACE_SHADING
+    if(dotpn>0.)
+    {
+        dotpn = -dotpn;
+        normal = -normal;
+    }
+    #endif
 
     float radius = gl_MultiTexCoord2.x * expeRadiusScale;
 
@@ -209,7 +201,6 @@ void AttributeVP(void)
     #ifdef EXPE_DEFERRED_SHADING
         fragNormal.xyz = normal.xyz;
         gl_FrontColor = gl_Color;
-        //gl_FrontColor = meshlabLighting(gl_Color, ePos.xyz, normal.xyz);
     #else
         // Output color
         #ifdef EXPE_LIGHTING
@@ -219,17 +210,14 @@ void AttributeVP(void)
         #endif
     #endif
 
-    //oPos = gl_ModelViewProjectionMatrix * gl_Vertex;
-    oPos = gl_ProjectionMatrix * ePos;
+    oPos = gl_ModelViewProjectionMatrix * gl_Vertex;
 
     #if (EXPE_EWA_HINT>0)
     scaledFragCenter2d = ((oPos.xy/oPos.w)+1.0)*halfVp*oneOverEwaRadius;
     #endif
 
-//     pointSize.w = dot(mvpt[3], gl_Vertex);
-
     #ifndef EXPE_EARLY_BACK_FACE_CULLING
-    oPos.w = oPos.w * (dotpn<0. ? 1 : 0);
+    oPos.w = oPos.w * (dotpn<0. ? 1.0 : 0.0);
     #else
     }
     #endif
@@ -256,6 +244,8 @@ uniform vec2 depthParameterCast;
 
 void AttributeFP(void)
 {
+// gl_FragColor = vec4(1,1,1,1);
+#if 1
     vec3 qOne = rayCastParameter1 * gl_FragCoord.xyz + rayCastParameter2; // MAD
     float oneOverDepth = dot(qOne,fragNoverCdotN); // DP3
     float depth = (1.0/oneOverDepth); // RCP
@@ -299,6 +289,7 @@ void AttributeFP(void)
     gl_FragColor.rgb = gl_Color.rgb; // MOV
     gl_FragColor.w = weight;
     #endif
+#endif
 }
 
 #endif

@@ -24,24 +24,14 @@
 #ifndef SPLATRENDERER_H
 #define SPLATRENDERER_H
 
-#include <QDir>
 #include <QObject>
 #include <QAction>
-#include <QList>
-#include <QFile>
 #include <QString>
-#include <QApplication>
-#include <QMap>
 #include <map>
-#include <vector>
-#include <QImage>
 
 #include <GL/glew.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
-#include <vcg/space/point2.h>
-#include <vcg/space/point3.h>
-#include <vcg/space/point4.h>
 #include <wrap/gl/shaders.h>
 class QGLFramebufferObject;
 
@@ -53,14 +43,27 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 	bool mIsSupported;
 	QList <QAction *> actionList;
 
+	enum {
+		DEFERRED_SHADING_BIT	= 0x000001,
+		DEPTH_CORRECTION_BIT	= 0x000002,
+		OUTPUT_DEPTH_BIT			= 0x000004,
+		BACKFACE_SHADING_BIT	= 0x000008,
+		FLOAT_BUFFER_BIT			= 0x000010
+	};
+	int mFlags;
+	int mCachedFlags;
+	int mRenderBufferMask;
+	int mSupportedMask;
+
 	int mCurrentPass;
 	int mBindedPass;
 	GLuint mNormalTextureID;
 	ProgramVF mShaders[3];
+	QString mShaderSrcs[6];
 	QGLFramebufferObject* mRenderBuffer;
-	bool mOutputDepth;
-	bool mDeferredShading;
-	bool mFloatingPointAccuracy;
+	float mCachedMV[16];
+	float mCachedProj[16];
+	int mCachedVP[4];
 
 	struct UniformParameters
 	{
@@ -74,26 +77,20 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 		vcg::Point2f depthParameterCast;
 
 		void loadTo(Program& prg);
-		void update();
+		void update(float* mv, float* proj, int* vp);
 	};
 
 	UniformParameters mParams;
 
 	QString loadSource(const QString& func,const QString& file);
+	void configureShaders();
+	void updateRenderBuffer();
 	void enablePass(int n);
 	void drawSplats(MeshModel &m, RenderMode &rm);
 
 public:
 
-	SplatRendererPlugin()
-	{
-		mNormalTextureID = 0;
-		mOutputDepth = false;
-		mIsSupported = false;
-		mRenderBuffer = 0;
-		mDeferredShading = true;
-		mFloatingPointAccuracy = true;
-	}
+	SplatRendererPlugin();
 
 	QList<QAction *> actions ()
 	{

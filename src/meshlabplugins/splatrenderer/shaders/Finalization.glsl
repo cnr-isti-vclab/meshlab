@@ -1,4 +1,6 @@
 
+#extension GL_ARB_texture_rectangle : enable
+
 #ifndef EXPE_DEPTH_INTERPOLATION
     #define EXPE_DEPTH_INTERPOLATION 0
 #endif
@@ -6,8 +8,6 @@
 #ifndef EXPE_OUTPUT_DEPTH
     #define EXPE_OUTPUT_DEPTH 0
 #endif
-
-#define EXPE_DEFERRED_SHADING
 
 // avoid an annoying bug with the nvidia driver 87XX serie.
 #define epsilon 0.000001
@@ -25,7 +25,7 @@ void Finalization(void)
 {
     vec4 color = texture2DRect(ColorWeight, gl_FragCoord.st - viewport.xy + epsilon);
     #ifdef EXPE_OUTPUT_DEPTH
-    //gl_FragDepth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
+    gl_FragDepth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
     #endif
     discard(color.w<0.01);
     gl_FragColor = color/color.w;
@@ -37,7 +37,7 @@ void Finalization(void)
 vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)
 {
 	vec3 ldir = normalize(gl_LightSource[0].position.xyz);
-	return color * 0.75 * clamp(dot(normal,ldir),0.0,1.0);
+	return color * 0.85 * clamp(dot(normal,ldir),0.0,1.0);
 }
 
 uniform vec2 unproj;
@@ -78,7 +78,7 @@ void Finalization(void)
 //         depth = unproj.y/(2.0*depth+unproj.x-1.0);
 //     #endif
 
-    vec3 normal = normaldepth;
+    vec3 normal = normaldepth.xyz;
 //     #if EXPE_DEPTH_INTERPOLATION!=0
 //     normal.z = sqrt(1. - dot(vec3(normal.xy,0),vec3(normal.xy,0)));
 //     #endif
