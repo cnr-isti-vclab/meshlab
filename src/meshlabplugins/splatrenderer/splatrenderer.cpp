@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -25,12 +25,12 @@
 
 #include <math.h>
 #include <stdlib.h>
-
+#include <iostream>
 #include "splatrenderer.h"
 #include <QGLWidget>
 #include <QTextStream>
 #include <wrap/gl/trimesh.h>
-#include <iostream>
+#include <QGLFramebufferObject>
 
 using namespace std;
 using namespace vcg;
@@ -53,48 +53,155 @@ QString SplatRendererPlugin::loadSource(const QString& func,const QString& filen
 	res = stream.readAll();
 	f.close();
 	res = QString("#define __%1__\n").arg(func) + res;
-	std::cout << func.toAscii().data() << " loaded : \n" << res.toAscii().data() << "\n";
+// 	std::cout << func.toAscii().data() << " loaded : \n" << res.toAscii().data() << "\n";
 	return res;
 }
 
 void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla)
 {
+	mIsSupported = true;
 	gla->makeCurrent();
 	// FIXME this should be done in meshlab !!!
 	glewInit();
 
 	mShaders[0].SetSources(loadSource("VisibilityVP","Raycasting.glsl").toAscii().data(),
-												 loadSource("VisibilityFP","Raycasting.glsl").toAscii().data());
+												loadSource("VisibilityFP","Raycasting.glsl").toAscii().data());
+	mShaders[0].prog.Link();
+	std::cout << "Linked visibility shader:\n"
+		<< mShaders[0].vshd.InfoLog() << "\n"
+		<< mShaders[0].fshd.InfoLog() << "\n"
+		<< mShaders[0].prog.InfoLog() << "\n";
+
 	mShaders[1].SetSources(loadSource("AttributeVP","Raycasting.glsl").toAscii().data(),
-												 loadSource("AttributeFP","Raycasting.glsl").toAscii().data());
-// 	mShaders[2].SetSources(loadSource("FinalizationVP","Raycasting.glsl").toAscii().data(),
-// 												 loadSource("FinalizationFP","Raycasting.glsl").toAscii().data());
+												loadSource("AttributeFP","Raycasting.glsl").toAscii().data());
+	mShaders[1].prog.Link();
+	std::cout << "Linked attribute shader:\n" << mShaders[1].prog.InfoLog() << "\n";
+
+	mShaders[2].SetSources(0,loadSource("Finalization","Finalization.glsl").toAscii().data());
+	mShaders[2].prog.Link();
+	std::cout << "Linked finalization shader:\n" << mShaders[2].prog.InfoLog() << "\n";
 
 	// create a floating point FBO
-	//QGLFramebufferObject
-	
+	int vp[4];
+	glGetIntegerv(GL_VIEWPORT, vp);
+	if ( (!mRenderBuffer)
+		|| (mRenderBuffer->width()!=vp[2])
+		|| (mRenderBuffer->height()!=vp[3]))
+	{
+		delete mRenderBuffer;
+		mRenderBuffer = new QGLFramebufferObject(vp[2], vp[3], QGLFramebufferObject::Depth);
+	}
+
 	mCurrentPass = 2;
 	mBindedPass = -1;
 }
 
 void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget * /* gla */)
 {
-	mCurrentPass = (mCurrentPass++) % 3;
+	mShaders[mCurrentPass].prog.Unbind();
+
+	mCurrentPass = (mCurrentPass+1) % 3;
+
+	if (mCurrentPass==0)
+		mParams.update();
+
+	if (mCurrentPass==2)
+	{
+		return;
+		// finalization
+		enablePass(mCurrentPass);
+		float projmat[16];
+		GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    glGetFloatv(GL_PROJECTION_MATRIX,projmat);
+
+		// switch to normalized 2D rendering mode
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+
+		mShaders[2].prog.Uniform("unproj", projmat[10], projmat[14]);
+		mShaders[2].prog.Uniform("viewport",viewport[0],viewport[1],viewport[2],viewport[3]);
+
+    // bind the FBO's textures
+		// FIXME let's assume the unique texture is in GL_TEXTURE0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mRenderBuffer->texture());
+// 		glBind
+//     gpu.bindSampler(*(mSplattingBuffer->getSampler("ColorWeight")));
+
+
+		// draw a quad covering the whole screen
+    vcg::Point3f viewVec(1./projmat[0], 1./projmat[5], -1);
+    if (!mOutputDepth)
+		{
+			glDisable(GL_DEPTH_TEST);
+			glDepthMask(GL_FALSE);
+		}
+    glBegin(GL_QUADS);
+			glColor3f(1, 0, 0);
+			glTexCoord3f(viewVec.X(),viewVec.Y(),viewVec.Z());
+			glMultiTexCoord2f(GL_TEXTURE1,1.,1.);
+			glVertex3f(1,1,0);
+
+			glColor3f(1, 1, 0);
+			glTexCoord3f(-viewVec.X(),viewVec.Y(),viewVec.Z());
+			glMultiTexCoord2f(GL_TEXTURE1,0.,1.);
+			glVertex3f(-1,1,0);
+
+			glColor3f(0, 1, 1);
+			glTexCoord3f(-viewVec.X(),-viewVec.Y(),viewVec.Z());
+			glMultiTexCoord2f(GL_TEXTURE1,0.,0.);
+			glVertex3f(-1,-1,0);
+
+			glColor3f(1, 0, 1);
+			glTexCoord3f(viewVec.X(),-viewVec.Y(),viewVec.Z());
+			glMultiTexCoord2f(GL_TEXTURE1,1.,0.);
+			glVertex3f(1,-1,0);
+    glEnd();
+    if (!mOutputDepth)
+    {
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+    }
+    //gpu.unbindSampler(*(mSplattingBuffer->getSampler("ColorWeight")));
+//     if (mDeferredShading)
+//         gpu.unbindSampler(*(mSplattingBuffer->getSampler("NormalWeight")));
+//     if ((mDeferredShading && mDepthInterpolationMode==DIM_None) || mOutputDepth)
+//         gpu.unbindSampler(*(mSplattingBuffer->getSampler("Depth")));
+
+		// restore matrices
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+	}
+	else
+	{
+		mParams.loadTo(mShaders[mCurrentPass].prog);
+		enablePass(mCurrentPass);
+	}
 }
 
 void SplatRendererPlugin::Draw(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget * gla)
 {
-	if (mCurrentPass==2)
-		return;
-
 	if (m.cm.vert.RadiusEnabled)
 	{
-		//enablePass(mCurrentPass);
-		drawSplats(m, rm);
+		if (mCurrentPass==2)
+			return;
+
+		enablePass(mCurrentPass);
+		if (mCurrentPass==1)
+			drawSplats(m, rm);
 	}
-	else
+	else if (mCurrentPass==2)
 	{
-		mBindedPass = -1;
+//     mOtherMesh.push_back(&m);
+		// restore states
+// 		mBindedPass = -1;
 		MeshRenderInterface::Draw(a, m, rm, gla);
 	}
 }
@@ -103,18 +210,35 @@ void SplatRendererPlugin::enablePass(int n)
 {
 	if (mBindedPass!=n)
 	{
-		mShaders[n].Bind();
+		if (mBindedPass>=0)
+			mShaders[mBindedPass].prog.Unbind();
+		mShaders[n].prog.Bind();
 		mBindedPass = n;
 
 		// set GL states
 		if (n==0)
 		{
+			glAlphaFunc(GL_LESS,1);
+			glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+			glDepthMask(GL_TRUE);
+			glDisable(GL_BLEND);
+			glEnable(GL_ALPHA_TEST);
+			glEnable(GL_DEPTH_TEST);
 		}
 		if (n==1)
 		{
+			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+			glBlendFuncSeparate(GL_ONE,GL_ONE, GL_SRC_ALPHA, GL_ONE);
+			glDepthMask(GL_FALSE);
+			glEnable(GL_BLEND);
+			glEnable(GL_DEPTH_TEST);
 		}
 		if (n==2)
 		{
+			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+			glDepthMask(GL_TRUE);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_BLEND);
 		}
 	}
 }
@@ -150,7 +274,7 @@ void SplatRendererPlugin::drawSplats(MeshModel &m, RenderMode &rm)
 
 		return;
 	}
-	
+
 	// bind the radius
 	glClientActiveTexture(GL_TEXTURE2);
 	glTexCoordPointer(
@@ -169,5 +293,37 @@ void SplatRendererPlugin::drawSplats(MeshModel &m, RenderMode &rm)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glClientActiveTexture(GL_TEXTURE0);
 }
-	
+
+void SplatRendererPlugin::UniformParameters::update()
+{
+	float mv[16];
+	float proj[16];
+	int vp[4];
+	glGetFloatv(GL_MODELVIEW_MATRIX, mv);
+	glGetFloatv(GL_PROJECTION_MATRIX, proj);
+	glGetIntegerv(GL_VIEWPORT, vp);
+
+	radiusScale = 1.0; // FIXME
+	preComputeRadius = -std::max(proj[0]*vp[2], proj[5]*vp[3]);
+	depthOffset = 1.; // FIXME
+	oneOverEwaRadius = 0.70710678118654;
+	halfVp = Point2f(0.5*vp[2], 0.5*vp[3]);
+	rayCastParameter1 = Point3f(2./(proj[0]*vp[2]), 2./(proj[5]*vp[3]), 0);
+	rayCastParameter2 = Point3f(-1./proj[0], -1./proj[5], -1.);
+	depthParameterCast = Point2f(0.5*proj[14], 0.5*0.5*proj[10]);
+}
+
+void SplatRendererPlugin::UniformParameters::loadTo(Program& prg)
+{
+	prg.Bind();
+	prg.Uniform("expeRadiusScale",radiusScale);
+	prg.Uniform("expePreComputeRadius",preComputeRadius);
+	prg.Uniform("expeDepthOffset",depthOffset);
+	prg.Uniform("oneOverEwaRadius",oneOverEwaRadius);
+	prg.Uniform("halfVp",halfVp);
+	prg.Uniform("rayCastParameter1",rayCastParameter1);
+	prg.Uniform("rayCastParameter2",rayCastParameter2);
+	prg.Uniform("depthParameterCast",depthParameterCast);
+}
+
 Q_EXPORT_PLUGIN(SplatRendererPlugin)

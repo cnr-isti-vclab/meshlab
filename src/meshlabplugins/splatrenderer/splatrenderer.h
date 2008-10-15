@@ -39,8 +39,11 @@
 #include <GL/glew.h>
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
+#include <vcg/space/point2.h>
+#include <vcg/space/point3.h>
+#include <vcg/space/point4.h>
 #include <wrap/gl/shaders.h>
-
+class QGLFramebufferObject;
 
 class SplatRendererPlugin : public QObject, public MeshRenderInterface
 {
@@ -53,6 +56,25 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 	int mCurrentPass;
 	int mBindedPass;
 	ProgramVF mShaders[3];
+	QGLFramebufferObject* mRenderBuffer;
+	bool mOutputDepth;
+
+	struct UniformParameters
+	{
+		float radiusScale;
+		float preComputeRadius;
+		float depthOffset;
+		float oneOverEwaRadius;
+		vcg::Point2f halfVp;
+		vcg::Point3f rayCastParameter1;
+		vcg::Point3f rayCastParameter2;
+		vcg::Point2f depthParameterCast;
+
+		void loadTo(Program& prg);
+		void update();
+	};
+
+	UniformParameters mParams;
 
 	QString loadSource(const QString& func,const QString& file);
 	void enablePass(int n);
@@ -62,7 +84,9 @@ public:
 
 	SplatRendererPlugin()
 	{
+		mOutputDepth = false;
 		mIsSupported = false;
+		mRenderBuffer = 0;
 	}
 
 	QList<QAction *> actions ()
