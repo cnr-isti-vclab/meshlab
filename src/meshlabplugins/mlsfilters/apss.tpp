@@ -28,234 +28,313 @@
 
 namespace GaelMls {
 
-// template<typename _Scalar>
-// APSS<_Scalar>::APSS(const MeshModel& m)
-//   : Base(m)
-// {
-//   mSphericalParameter = 1;
-//   mAccurateGradient = false;
-// }
-
 template<typename _MeshType>
 void APSS<_MeshType>::setSphericalParameter(Scalar v)
 {
-  mSphericalParameter = v;
-  mCachedQueryPointIsOK = false;
-}
-
-template<typename _MeshType>
-void APSS<_MeshType>::setAccurateGradient(bool on)
-{
-  mAccurateGradient = on;
-  mCachedQueryPointIsOK = false;
+	mSphericalParameter = v;
+	mCachedQueryPointIsOK = false;
 }
 
 template<typename _MeshType>
 typename APSS<_MeshType>::Scalar APSS<_MeshType>::potential(const VectorType& x, int* errorMask) const
 {
-//   if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
-  {
-    if (!fit(x))
-    {
-      if (errorMask)
-        *errorMask = MLS_TOO_FAR;
-      return Base::InvalidValue();
-    }
-  }
+	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
+	{
+		if (!fit(x))
+		{
+			if (errorMask)
+				*errorMask = MLS_TOO_FAR;
+			return Base::InvalidValue();
+		}
+	}
 
-  LVector lx(x.X(), x.Y(), x.Z());
+	LVector lx(x.X(), x.Y(), x.Z());
 
-  if (mStatus==ASS_SPHERE)
-  {
-    Scalar aux = vcg::Norm(lx - mCenter) - mRadius;
-    if (uQuad<0.)
-      aux = -aux;
-    return aux;
-  }
-  else if (mStatus==ASS_PLANE)
-    return vcg::Dot(lx,uLinear) + uConstant;
-  else
-  {
-    return uConstant + vcg::Dot(lx,uLinear) + uQuad * vcg::SquaredNorm(lx);
-  }
+	if (mStatus==ASS_SPHERE)
+	{
+		Scalar aux = vcg::Norm(lx - mCenter) - mRadius;
+		if (uQuad<0.)
+			aux = -aux;
+		return aux;
+	}
+	else if (mStatus==ASS_PLANE)
+		return vcg::Dot(lx,uLinear) + uConstant;
+	else
+	{
+		return uConstant + vcg::Dot(lx,uLinear) + uQuad * vcg::SquaredNorm(lx);
+	}
 }
 
 template<typename _MeshType>
 typename APSS<_MeshType>::VectorType APSS<_MeshType>::gradient(const VectorType& x, int* errorMask) const
 {
-  if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
-  {
-    if (!fit(x))
-    {
-      if (errorMask)
-        *errorMask = MLS_TOO_FAR;
-      return VectorType(0,0,0);
-    }
-  }
+	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
+	{
+		if (!fit(x))
+		{
+			if (errorMask)
+				*errorMask = MLS_TOO_FAR;
+			return VectorType(0,0,0);
+		}
+	}
 
-  LVector lx(x.X(), x.Y(), x.Z());
-  if (mStatus==ASS_PLANE)
-    return VectorType(uLinear.X(), uLinear.Y(), uLinear.Z());
-  else
-  {
-    LVector g = uLinear + lx * (Scalar(2) * uQuad);
-    return VectorType(g.X(), g.Y(), g.Z());
-  }
+	if (mGradientHint==MLS_GRADIENT_ACCURATE)
+	{
+		VectorType grad;
+		mlsGradient(x,grad);
+		return grad;
+	}
+	else
+	{
+		LVector lx(x.X(), x.Y(), x.Z());
+		if (mStatus==ASS_PLANE)
+			return VectorType(uLinear.X(), uLinear.Y(), uLinear.Z());
+		else
+		{
+			LVector g = uLinear + lx * (Scalar(2) * uQuad);
+			return VectorType(g.X(), g.Y(), g.Z());
+		}
+	}
 }
 
 template<typename _MeshType>
 typename APSS<_MeshType>::VectorType APSS<_MeshType>::project(const VectorType& x, VectorType* pNormal, int* errorMask) const
 {
-  int iterationCount = 0;
-  LVector lx(x.X(), x.Y(), x.Z());
-  LVector position = lx;
-  LVector normal;
-  LVector previousPosition;
-  LScalar delta2;
-  LScalar epsilon2 = mAveragePointSpacing * mProjectionAccuracy;
-  epsilon2 = epsilon2 * epsilon2;
-  do {
-      if (!fit(VectorType(position.X(), position.Y(), position.Z())))
-      {
-        if (errorMask)
-          *errorMask = MLS_TOO_FAR;
-        //std::cout << " proj failed\n";
-        return x;
-      }
+	int iterationCount = 0;
+	LVector lx(x.X(), x.Y(), x.Z());
+	LVector position = lx;
+	LVector normal;
+	LVector previousPosition;
+	LScalar delta2;
+	LScalar epsilon2 = mAveragePointSpacing * mProjectionAccuracy;
+	epsilon2 = epsilon2 * epsilon2;
+	do {
+			if (!fit(VectorType(position.X(), position.Y(), position.Z())))
+			{
+				if (errorMask)
+					*errorMask = MLS_TOO_FAR;
+				//std::cout << " proj failed\n";
+				return x;
+			}
 
-      previousPosition = position;
-      // local projection
-      if (mStatus==ASS_SPHERE)
-      {
-        normal = lx - mCenter;
-        normal.Normalize();
-        position = mCenter + normal * mRadius;
+			previousPosition = position;
+			// local projection
+			if (mStatus==ASS_SPHERE)
+			{
+				normal = lx - mCenter;
+				normal.Normalize();
+				position = mCenter + normal * mRadius;
 
-        normal = uLinear + position * (LScalar(2) * uQuad);
-        normal.Normalize();
-      }
-      else if (mStatus==ASS_PLANE)
-      {
-        normal = uLinear;
-        position = lx - uLinear * (vcg::Dot(lx,uLinear) + uConstant);
-      }
-      else
-      {
-        // Newton iterations
-        LVector grad;
-        LVector dir = uLinear+lx*(2.*uQuad);
-        LScalar ilg = 1./vcg::Norm(dir);
-        dir *= ilg;
-        LScalar ad = uConstant + vcg::Dot(uLinear,lx) + uQuad * vcg::SquaredNorm(lx);
-        LScalar delta = -ad*std::min<Scalar>(ilg,1.);
-        LVector p = lx + dir*delta;
-        for (int i=0 ; i<2 ; ++i)
-        {
-          grad = uLinear+p*(2.*uQuad);
-          ilg = 1./vcg::Norm(grad);
-          delta = -(uConstant + vcg::Dot(uLinear,p) + uQuad * vcg::SquaredNorm(p))*std::min<Scalar>(ilg,1.);
-          p += dir*delta;
-        }
-        position = p;
+				normal = uLinear + position * (LScalar(2) * uQuad);
+				normal.Normalize();
+			}
+			else if (mStatus==ASS_PLANE)
+			{
+				normal = uLinear;
+				position = lx - uLinear * (vcg::Dot(lx,uLinear) + uConstant);
+			}
+			else
+			{
+				// Newton iterations
+				LVector grad;
+				LVector dir = uLinear+lx*(2.*uQuad);
+				LScalar ilg = 1./vcg::Norm(dir);
+				dir *= ilg;
+				LScalar ad = uConstant + vcg::Dot(uLinear,lx) + uQuad * vcg::SquaredNorm(lx);
+				LScalar delta = -ad*std::min<Scalar>(ilg,1.);
+				LVector p = lx + dir*delta;
+				for (int i=0 ; i<2 ; ++i)
+				{
+					grad = uLinear+p*(2.*uQuad);
+					ilg = 1./vcg::Norm(grad);
+					delta = -(uConstant + vcg::Dot(uLinear,p) + uQuad * vcg::SquaredNorm(p))*std::min<Scalar>(ilg,1.);
+					p += dir*delta;
+				}
+				position = p;
 
-        normal = uLinear + position * (Scalar(2) * uQuad);
-        normal.Normalize();
-      }
+				normal = uLinear + position * (Scalar(2) * uQuad);
+				normal.Normalize();
+			}
 
-      delta2 = vcg::SquaredNorm(previousPosition - position);
-  } while ( delta2>epsilon2 && ++iterationCount<mMaxNofProjectionIterations);
-  if (pNormal)
-  {
-    for (int k=0; k<3; ++k)
-      (*pNormal)[k] = normal[k];
-  }
+			delta2 = vcg::SquaredNorm(previousPosition - position);
+	} while ( delta2>epsilon2 && ++iterationCount<mMaxNofProjectionIterations);
 
-  if (iterationCount>=mMaxNofProjectionIterations && errorMask)
-      *errorMask = MLS_TOO_MANY_ITERS;
+	if (pNormal)
+	{
+		if (mGradientHint==MLS_GRADIENT_ACCURATE)
+		{
+			VectorType grad;
+			mlsGradient(vcg::Point3Cast<Scalar>(position), grad);
+			grad.Normalize();
+			*pNormal = grad;
+		}
+		else
+		{
+			for (int k=0; k<3; ++k)
+				(*pNormal)[k] = normal[k];
+		}
+	}
 
-  return VectorType(position.X(), position.Y(), position.Z());
+	if (iterationCount>=mMaxNofProjectionIterations && errorMask)
+			*errorMask = MLS_TOO_MANY_ITERS;
+
+	return VectorType(position.X(), position.Y(), position.Z());
 }
 
 template<typename _MeshType>
 bool APSS<_MeshType>::fit(const VectorType& x) const
 {
-  Base::computeNeighborhood(x, true);
-  unsigned int nofSamples = mNeighborhood.size();
+	Base::computeNeighborhood(x, true);
+	unsigned int nofSamples = mNeighborhood.size();
 
-  if (nofSamples==0)
-  {
-    mCachedQueryPointIsOK = false;
-    return false;
-  }
-  else if (nofSamples==1)
-  {
-    int id = mNeighborhood.index(0);
-    LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
-    LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+	if (nofSamples==0)
+	{
+		mCachedQueryPointIsOK = false;
+		return false;
+	}
+	else if (nofSamples==1)
+	{
+		int id = mNeighborhood.index(0);
+		LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
+		LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
 
-    uLinear = n;
-    uConstant = -vcg::Dot(p, uLinear);
-    uQuad = 0;
-    mStatus = ASS_PLANE;
-    return true;
-  }
+		uLinear = n;
+		uConstant = -vcg::Dot(p, uLinear);
+		uQuad = 0;
+		mStatus = ASS_PLANE;
+		return true;
+	}
 
-  LVector sumP; sumP.Zero();
-  LVector sumN; sumN.Zero();
-  LScalar sumDotPN = 0.;
-  LScalar sumDotPP = 0.;
-  LScalar sumW = 0.;
-  for (unsigned int i=0; i<nofSamples; i++)
-  {
-    int id = mNeighborhood.index(i);
-    LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
-    LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
-    LScalar w = mCachedWeights.at(i);
+	LVector sumP; sumP.Zero();
+	LVector sumN; sumN.Zero();
+	LScalar sumDotPN = 0.;
+	LScalar sumDotPP = 0.;
+	LScalar sumW = 0.;
+	for (unsigned int i=0; i<nofSamples; i++)
+	{
+		int id = mNeighborhood.index(i);
+		LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
+		LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+		LScalar w = mCachedWeights.at(i);
 
-    sumP += p * w;
-    sumN += n * w;
-    sumDotPN += w * vcg::Dot(n,p);
-    sumDotPP += w * vcg::SquaredNorm(p);
-    sumW += w;
-  }
+		sumP += p * w;
+		sumN += n * w;
+		sumDotPN += w * vcg::Dot(n,p);
+		sumDotPP += w * vcg::SquaredNorm(p);
+		sumW += w;
+	}
 
-  LScalar invSumW = Scalar(1)/sumW;
-  LScalar aux4 = mSphericalParameter * LScalar(0.5) *
-                (sumDotPN - invSumW*vcg::Dot(sumP,sumN))
-                /(sumDotPP - invSumW*vcg::SquaredNorm(sumP));
-  uLinear = (sumN-sumP*(Scalar(2)*aux4))*invSumW;
-  uConstant = -invSumW*(Dot(uLinear,sumP) + sumDotPP*aux4);
-  uQuad = aux4;
+	LScalar invSumW = Scalar(1)/sumW;
+	LScalar aux4 = mSphericalParameter * LScalar(0.5) *
+								(sumDotPN - invSumW*vcg::Dot(sumP,sumN))
+								/(sumDotPP - invSumW*vcg::SquaredNorm(sumP));
+	uLinear = (sumN-sumP*(Scalar(2)*aux4))*invSumW;
+	uConstant = -invSumW*(Dot(uLinear,sumP) + sumDotPP*aux4);
+	uQuad = aux4;
 
-  // finalize
+	// finalize
+	if (fabs(uQuad)>1e-7)
+	{
+		mStatus = ASS_SPHERE;
+		LScalar b = 1./uQuad;
+		mCenter = uLinear*(-0.5*b);
+		mRadius = sqrt( vcg::SquaredNorm(mCenter) - b*uConstant );
+	}
+	else if (uQuad==0.)
+	{
+		mStatus = ASS_PLANE;
+		LScalar s = LScalar(1)/vcg::Norm(uLinear);
+		uLinear *= s;
+		uConstant *= s;
+	}
+	else
+	{
+		mStatus = ASS_UNDETERMINED;
+		// normalize the gradient
+		LScalar f = 1./sqrt(vcg::SquaredNorm(uLinear) - Scalar(4)*uConstant*uQuad);
+		uConstant *= f;
+		uLinear *= f;
+		uQuad *= f;
+	}
 
-  if (fabs(uQuad)>1e-7)
-  {
-    mStatus = ASS_SPHERE;
-    LScalar b = 1./uQuad;
-    mCenter = uLinear*(-0.5*b);
-    mRadius = sqrt( vcg::SquaredNorm(mCenter) - b*uConstant );
-  }
-  else if (uQuad==0.)
-  {
-    mStatus = ASS_PLANE;
-    LScalar s = LScalar(1)/vcg::Norm(uLinear);
-    uLinear *= s;
-    uConstant *= s;
-  }
-  else
-  {
-    mStatus = ASS_UNDETERMINED;
-    // normalize the gradient
-    LScalar f = 1./sqrt(vcg::SquaredNorm(uLinear) - Scalar(4)*uConstant*uQuad);
-    uConstant *= f;
-    uLinear *= f;
-    uQuad *= f;
-  }
+	// cache some values to be used by the mls gradient
+	mCachedSumP = sumP;
+	mCachedSumN = sumN;
+	mCachedSumW = sumW;
+	mCachedSumDotPP = sumDotPP;
+	mCachedSumDotPN = sumDotPN;
 
-  mCachedQueryPoint = x;
-  mCachedQueryPointIsOK = true;
-  return true;
+	mCachedQueryPoint = x;
+	mCachedQueryPointIsOK = true;
+	return true;
+}
+
+template<typename _MeshType>
+bool APSS<_MeshType>::mlsGradient(const VectorType& x, VectorType& grad) const
+{
+	unsigned int nofSamples = mNeighborhood.size();
+
+	LVector sumP; sumP.Zero();
+	LVector sumN; sumN.Zero();
+	LScalar sumDotPN = 0.;
+	LScalar sumDotPP = 0.;
+	LScalar sumW = 0.;
+	for (unsigned int i=0; i<nofSamples; i++)
+	{
+		int id = mNeighborhood.index(i);
+		LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
+		LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+		LScalar w = mCachedWeights.at(i);
+
+		sumP += p * w;
+		sumN += n * w;
+		sumDotPN += w * vcg::Dot(n,p);
+		sumDotPP += w * vcg::SquaredNorm(p);
+		sumW += w;
+	}
+	LScalar invSumW = 1.f/sumW;
+
+	for (uint k=0 ; k<3 ; ++k)
+	{
+		LVector dSumP; dSumP.Zero();
+		LVector dSumN; dSumN.Zero();
+		LScalar dSumDotPN = 0.;
+		LScalar dSumDotPP = 0.;
+		LScalar dSumW = 0.;
+		for (unsigned int i=0; i<nofSamples; i++)
+		{
+			int id = mNeighborhood.index(i);
+			LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
+			LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+			LScalar w = mCachedWeights.at(i);
+			LScalar dw = mCachedWeightGradients.at(i)[k];
+
+			dSumW += dw;
+			dSumP += p*dw;
+			dSumN += n*dw;
+			dSumDotPN += dw * vcg::Dot(n,p);
+			dSumDotPP += dw * vcg::SquaredNorm(p);
+		}
+
+		LScalar dVecU0;
+		LVector dVecU13;
+		LScalar dVecU4;
+
+		LScalar nume = sumDotPN - invSumW * vcg::Dot(sumP, sumN);
+		LScalar deno = sumDotPP - invSumW * vcg::Dot(sumP, sumP);
+		LScalar dNume = dSumDotPN - invSumW*invSumW*( sumW*(vcg::Dot(dSumP,sumN) + vcg::Dot(sumP,dSumN)) - dSumW*vcg::Dot(sumP,sumN));
+		LScalar dDeno = dSumDotPP - invSumW*invSumW*( 2.*sumW*vcg::Dot(dSumP,sumP)                - dSumW*vcg::Dot(sumP,sumP));
+
+		dVecU4 = mSphericalParameter * 0.5 * (deno * dNume - dDeno * nume)/(deno*deno);
+
+		dVecU13 = ((dSumN - (dSumP*uQuad + sumP*dVecU4)*2.0) - uLinear * dSumW) * invSumW;
+
+		dVecU0 = -invSumW*( vcg::Dot(dVecU13,sumP) + dVecU4*sumDotPP + vcg::Dot(uLinear,dSumP) + uQuad*dSumDotPP + dSumW*uConstant);
+
+		grad[k] = dVecU0 + vcg::Dot(dVecU13,vcg::Point3Cast<LScalar>(x)) + dVecU4*vcg::SquaredNorm(x) + uLinear[k] + 2.*x[k]*uQuad;
+	}
+
+	return true;
 }
 
 // template class APSS<float>;

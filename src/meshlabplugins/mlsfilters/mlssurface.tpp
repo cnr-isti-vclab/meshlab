@@ -59,106 +59,113 @@ namespace GaelMls {
 template<typename _MeshType>
 void MlsSurface<_MeshType>::setFilterScale(Scalar v)
 {
-  mFilterScale = v;
-  mCachedQueryPointIsOK = false;
-  if (mBallTree)
-    mBallTree->setRadiusScale(mFilterScale);
+	mFilterScale = v;
+	mCachedQueryPointIsOK = false;
+	if (mBallTree)
+		mBallTree->setRadiusScale(mFilterScale);
 }
 
 template<typename _MeshType>
 void MlsSurface<_MeshType>::setMaxProjectionIters(int n)
 {
-  mMaxNofProjectionIterations = n;
-  mCachedQueryPointIsOK = false;
+	mMaxNofProjectionIterations = n;
+	mCachedQueryPointIsOK = false;
 }
 
 template<typename _MeshType>
 void MlsSurface<_MeshType>::setProjectionAccuracy(Scalar v)
 {
-  mProjectionAccuracy = v;
-  mCachedQueryPointIsOK = false;
+	mProjectionAccuracy = v;
+	mCachedQueryPointIsOK = false;
+}
+
+template<typename _MeshType>
+void MlsSurface<_MeshType>::setGradientHint(int h)
+{
+	mGradientHint = h;
+	mCachedQueryPointIsOK = false;
 }
 
 template<typename _MeshType>
 void MlsSurface<_MeshType>::computeVertexRaddi()
 {
-  #if 0
-  int nbNeighbors = 16;
-  vcg::Octree<VectorType, Scalar> knn;
-  knn.Set(mPoints.begin(), mPoints.end());
-  std::vector<VectorType*> nearest_objects;
-  std::vector<VectorType> nearest_points;
-  std::vector<Scalar> sqDistances;
-  mAveragePointSpacing = 0;
-  for (uint i = 0; i< mPoints.size(); i++)
-  {
-    DummyObjectMarker dom;
-    PointToPointSqDist dfunc;
-    Scalar max_dist2 = 1e9;//std::numeric_limits<Scalar>::max();
-    knn.GetKClosest(dfunc, dom, nbNeighbors, mPoints[i],
-                    max_dist2, nearest_objects, sqDistances, nearest_points);
+	#if 0
+	int nbNeighbors = 16;
+	vcg::Octree<VectorType, Scalar> knn;
+	knn.Set(mPoints.begin(), mPoints.end());
+	std::vector<VectorType*> nearest_objects;
+	std::vector<VectorType> nearest_points;
+	std::vector<Scalar> sqDistances;
+	mAveragePointSpacing = 0;
+	for (uint i = 0; i< mPoints.size(); i++)
+	{
+		DummyObjectMarker dom;
+		PointToPointSqDist dfunc;
+		Scalar max_dist2 = 1e9;//std::numeric_limits<Scalar>::max();
+		knn.GetKClosest(dfunc, dom, nbNeighbors, mPoints[i],
+										max_dist2, nearest_objects, sqDistances, nearest_points);
 // 		for (int j=0; i<sqDistances.size(); ++j)
 // 			std::cout << sqDistances[j] << " ";
 // 		std::cout << "$\n";
-    mRadii[i] = 2. * sqrt(sqDistances.at(0)/nearest_objects.size());
-    mAveragePointSpacing += mRadii[i];
-  }
-  mAveragePointSpacing /= Scalar(mPoints.size());
+		mRadii[i] = 2. * sqrt(sqDistances.at(0)/nearest_objects.size());
+		mAveragePointSpacing += mRadii[i];
+	}
+	mAveragePointSpacing /= Scalar(mPoints.size());
 
-  #else
+	#else
 
-  int nbNeighbors = 16;
+	int nbNeighbors = 16;
 
-  assert(mPoints.size()>=2);
-  KdTree<Scalar> knn(positions());
-  
-  knn.setMaxNofNeighbors(nbNeighbors);
-  mAveragePointSpacing = 0;
-  for (size_t i = 0; i< mPoints.size(); i++)
-  {
-    knn.doQueryK(mPoints[i].cP());
-    const_cast<PointsType&>(mPoints)[i].R() = 2. * sqrt(knn.getNeighborSquaredDistance(0)/Scalar(knn.getNofFoundNeighbors()));
-    mAveragePointSpacing += mPoints[i].cR();
-  }
-  mAveragePointSpacing /= Scalar(mPoints.size());
+	assert(mPoints.size()>=2);
+	KdTree<Scalar> knn(positions());
 
-  #endif
+	knn.setMaxNofNeighbors(nbNeighbors);
+	mAveragePointSpacing = 0;
+	for (size_t i = 0; i< mPoints.size(); i++)
+	{
+		knn.doQueryK(mPoints[i].cP());
+		const_cast<PointsType&>(mPoints)[i].R() = 2. * sqrt(knn.getNeighborSquaredDistance(0)/Scalar(knn.getNofFoundNeighbors()));
+		mAveragePointSpacing += mPoints[i].cR();
+	}
+	mAveragePointSpacing /= Scalar(mPoints.size());
+
+	#endif
 }
 
 template<typename _MeshType>
 void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool computeDerivatives) const
 {
-  if (!mBallTree)
-  {
-    const_cast<BallTree<Scalar>*&>(mBallTree) = new BallTree<Scalar>(positions(), radii());
-    const_cast<BallTree<Scalar>*>(mBallTree)->setRadiusScale(mFilterScale);
-  }
-  mBallTree->computeNeighbors(x, &mNeighborhood);
-  size_t nofSamples = mNeighborhood.size();
+	if (!mBallTree)
+	{
+		const_cast<BallTree<Scalar>*&>(mBallTree) = new BallTree<Scalar>(positions(), radii());
+		const_cast<BallTree<Scalar>*>(mBallTree)->setRadiusScale(mFilterScale);
+	}
+	mBallTree->computeNeighbors(x, &mNeighborhood);
+	size_t nofSamples = mNeighborhood.size();
 
-  // compute spatial weights and partial derivatives
-  mCachedWeights.resize(nofSamples);
-  if (computeDerivatives)
-    mCachedWeightGradients.resize(nofSamples);
-  else
-    mCachedWeightGradients.clear();
+	// compute spatial weights and partial derivatives
+	mCachedWeights.resize(nofSamples);
+	if (computeDerivatives)
+		mCachedWeightGradients.resize(nofSamples);
+	else
+		mCachedWeightGradients.clear();
 
-  for (size_t i=0; i<nofSamples; i++)
-  {
-    int id = mNeighborhood.index(i);
-    Scalar s = 1./(mPoints[id].cR()*mFilterScale);
-    s = s*s;
-    Scalar w = Scalar(1) - mNeighborhood.squaredDistance(i) * s;
-    if (w<0)
-      w = 0;
-    Scalar aux = w;
-    w = w * w;
-    w = w * w;
-    mCachedWeights[i] = w;
+	for (size_t i=0; i<nofSamples; i++)
+	{
+		int id = mNeighborhood.index(i);
+		Scalar s = 1./(mPoints[id].cR()*mFilterScale);
+		s = s*s;
+		Scalar w = Scalar(1) - mNeighborhood.squaredDistance(i) * s;
+		if (w<0)
+			w = 0;
+		Scalar aux = w;
+		w = w * w;
+		w = w * w;
+		mCachedWeights[i] = w;
 
-    if (computeDerivatives)
-      mCachedWeightGradients[i] = (x - mPoints[id].cP()) * (-4. * 2. * s * aux * aux * aux);
-  }
+		if (computeDerivatives)
+			mCachedWeightGradients[i] = (x - mPoints[id].cP()) * (-4. * 2. * s * aux * aux * aux);
+	}
 }
 
 // template class MlsSurface<float>;

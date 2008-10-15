@@ -31,59 +31,59 @@ namespace GaelMls {
 template<typename _MeshType>
 class RIMLS : public MlsSurface<_MeshType>
 {
-    typedef _MeshType MeshType;
-    typedef MlsSurface<_MeshType> Base;
+		typedef _MeshType MeshType;
+		typedef MlsSurface<_MeshType> Base;
 
-    typedef typename Base::Scalar Scalar;
-    typedef typename Base::VectorType VectorType;
-    using Base::mCachedQueryPointIsOK;
-    using Base::mCachedQueryPoint;
-    using Base::mNeighborhood;
-    using Base::mCachedWeights;
-    using Base::mCachedWeightGradients;
-    using Base::mBallTree;
-    using Base::mPoints;
-    using Base::mFilterScale;
-    using Base::mMaxNofProjectionIterations;
-    using Base::mAveragePointSpacing;
-    using Base::mProjectionAccuracy;
+		typedef typename Base::Scalar Scalar;
+		typedef typename Base::VectorType VectorType;
+		using Base::mCachedQueryPointIsOK;
+		using Base::mCachedQueryPoint;
+		using Base::mNeighborhood;
+		using Base::mCachedWeights;
+		using Base::mCachedWeightGradients;
+		using Base::mBallTree;
+		using Base::mPoints;
+		using Base::mFilterScale;
+		using Base::mMaxNofProjectionIterations;
+		using Base::mAveragePointSpacing;
+		using Base::mProjectionAccuracy;
 
-  public:
+	public:
 
-    RIMLS(const MeshType& points)
-      : Base(points)
-    {
-      mSigmaR = 0;
-      mSigmaN = 0.8;
-      mRefittingThreshold = 1e-3;
-      mMinRefittingIters = 1;
-      mMaxRefittingIters = 3;
-    }
+		RIMLS(const MeshType& points)
+			: Base(points)
+		{
+			mSigmaR = 0;
+			mSigmaN = 0.8;
+			mRefittingThreshold = 1e-3;
+			mMinRefittingIters = 1;
+			mMaxRefittingIters = 3;
+		}
 
-    virtual Scalar potential(const VectorType& x, int* errorMask = 0) const;
-    virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const;
-    virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const;
+		virtual Scalar potential(const VectorType& x, int* errorMask = 0) const;
+		virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const;
+		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const;
 
-    void setSigmaR(Scalar v);
-    void setSigmaN(Scalar v);
-    void setRefittingThreshold(Scalar v);
-    void setMinRefittingIters(int n);
-    void setMaxRefittingIters(int n);
+		void setSigmaR(Scalar v);
+		void setSigmaN(Scalar v);
+		void setRefittingThreshold(Scalar v);
+		void setMinRefittingIters(int n);
+		void setMaxRefittingIters(int n);
 
-  protected:
-    bool computePotentialAndGradient(const VectorType& x) const;
+	protected:
+		bool computePotentialAndGradient(const VectorType& x) const;
 
-  protected:
+	protected:
 
-    int mMinRefittingIters;
-    int mMaxRefittingIters;
-    Scalar mRefittingThreshold;
-    Scalar mSigmaN;
-    Scalar mSigmaR;
+		int mMinRefittingIters;
+		int mMaxRefittingIters;
+		Scalar mRefittingThreshold;
+		Scalar mSigmaN;
+		Scalar mSigmaR;
 
-    // cached values:
-    mutable VectorType mCachedGradient;
-    mutable Scalar mCachedPotential;
+		// cached values:
+		mutable VectorType mCachedGradient;
+		mutable Scalar mCachedPotential;
 };
 
 }

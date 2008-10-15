@@ -31,12 +31,12 @@
 
 class MlsPlugin : public QObject, public MeshFilterInterface
 {
-  Q_OBJECT
-  Q_INTERFACES(MeshFilterInterface)
+	Q_OBJECT
+	Q_INTERFACES(MeshFilterInterface)
 
 public:
 
-  enum {
+	enum {
 		_RIMLS_ 			= 0x1,
 		_APSS_				= 0x2,
 		_PROJECTION_ 	= 0x1000,
@@ -51,22 +51,22 @@ public:
 
 		FP_RIMLS_MCUBE	= _RIMLS_ | _MCUBE_,
 		FP_APSS_MCUBE		= _APSS_  | _MCUBE_,
-    
-    FP_RADIUS_FROM_DENSITY = 0x10000
+
+		FP_RADIUS_FROM_DENSITY = 0x10000
 	};
 
-  MlsPlugin();
+	MlsPlugin();
 
 	//virtual const QString filterName(FilterIDType filter) {return filterNames(filter);}
-  virtual const QString filterName(FilterIDType filter);
-  virtual const QString filterInfo(FilterIDType filter);
-  const FilterClass getClass(QAction *a);
-  virtual bool autoDialog(QAction *) {return true;}
-  virtual void initParameterSet(QAction *,MeshDocument &md, FilterParameterSet &parent);
-  virtual const int getRequirements(QAction *action);
-  virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet &parent, vcg::CallBackPos *cb) ;
-  virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &parent, vcg::CallBackPos *cb)
-  {assert(0);}
+	virtual const QString filterName(FilterIDType filter);
+	virtual const QString filterInfo(FilterIDType filter);
+	const FilterClass getClass(QAction *a);
+	virtual bool autoDialog(QAction *) {return true;}
+	virtual void initParameterSet(QAction *,MeshDocument &md, FilterParameterSet &parent);
+	virtual const int getRequirements(QAction *action);
+	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet &parent, vcg::CallBackPos *cb) ;
+	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &parent, vcg::CallBackPos *cb)
+	{assert(0);}
 };
 
 #endif

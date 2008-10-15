@@ -29,94 +29,94 @@
 template <typename Index, typename Weight>
 class HeapMaxPriorityQueue
 {
-  struct Element
-  {
-      Weight weight;
-      Index index;
-  };
+	struct Element
+	{
+			Weight weight;
+			Index index;
+	};
 
 public:
 
-  HeapMaxPriorityQueue(void)
-  {
-    mElements = 0;
-    mMaxSize = 0;
-  }
+	HeapMaxPriorityQueue(void)
+	{
+		mElements = 0;
+		mMaxSize = 0;
+	}
 
-  inline void setMaxSize(int maxSize)
-  {
-    if (mMaxSize!=maxSize)
-    {
-      mMaxSize = maxSize;
-      delete[] mElements;
-      mElements = new Element[mMaxSize];
-      mpOffsetedElements = (mElements-1);
-    }
-    init();
-  }
+	inline void setMaxSize(int maxSize)
+	{
+		if (mMaxSize!=maxSize)
+		{
+			mMaxSize = maxSize;
+			delete[] mElements;
+			mElements = new Element[mMaxSize];
+			mpOffsetedElements = (mElements-1);
+		}
+		init();
+	}
 
-  inline void init() { mCount = 0; }
+	inline void init() { mCount = 0; }
 
-  inline bool isFull() const { return mCount == mMaxSize; }
+	inline bool isFull() const { return mCount == mMaxSize; }
 
-  /** returns number of elements inserted in queue
-  */
-  inline int getNofElements() const { return mCount; }
+	/** returns number of elements inserted in queue
+	*/
+	inline int getNofElements() const { return mCount; }
 
-  inline Weight getWeight(int i) const { return mElements[i].weight; }
-  inline Index  getIndex(int i) const { return mElements[i].index; }
+	inline Weight getWeight(int i) const { return mElements[i].weight; }
+	inline Index  getIndex(int i) const { return mElements[i].index; }
 
-  inline Weight getTopWeight() const { return mElements[0].weight; }
+	inline Weight getTopWeight() const { return mElements[0].weight; }
 
-  inline void insert(Index index, Weight weight)
-  {
-    if (mCount==mMaxSize)
-    {
-      if (weight<mElements[0].weight)
-      {
-        register int j, k;
-        j = 1;
-        k = 2;
-        while (k <= mMaxSize)
-        {
-          Element* z = &(mpOffsetedElements[k]);
-          if ((k < mMaxSize) && (z->weight < mpOffsetedElements[k+1].weight))
-            z = &(mpOffsetedElements[++k]);
+	inline void insert(Index index, Weight weight)
+	{
+		if (mCount==mMaxSize)
+		{
+			if (weight<mElements[0].weight)
+			{
+				register int j, k;
+				j = 1;
+				k = 2;
+				while (k <= mMaxSize)
+				{
+					Element* z = &(mpOffsetedElements[k]);
+					if ((k < mMaxSize) && (z->weight < mpOffsetedElements[k+1].weight))
+						z = &(mpOffsetedElements[++k]);
 
-          if(weight >= z->weight)
-            break;
-          mpOffsetedElements[j] = *z;
-          j = k;
-          k = 2 * j;
-        }
-        mpOffsetedElements[j].weight = weight;
-        mpOffsetedElements[j].index = index;
-      }
-    }
-    else
-    {
-      int i, j;
-      i = ++mCount;
-      while (i >= 2)
-      {
-        j = i >> 1;
-        Element& y = mpOffsetedElements[j];
-        if(weight <= y.weight)
-          break;
-        mpOffsetedElements[i] = y;
-        i = j;
-      }
-      mpOffsetedElements[i].index = index;
-      mpOffsetedElements[i].weight = weight;
-    }
-  }
+					if(weight >= z->weight)
+						break;
+					mpOffsetedElements[j] = *z;
+					j = k;
+					k = 2 * j;
+				}
+				mpOffsetedElements[j].weight = weight;
+				mpOffsetedElements[j].index = index;
+			}
+		}
+		else
+		{
+			int i, j;
+			i = ++mCount;
+			while (i >= 2)
+			{
+				j = i >> 1;
+				Element& y = mpOffsetedElements[j];
+				if(weight <= y.weight)
+					break;
+				mpOffsetedElements[i] = y;
+				i = j;
+			}
+			mpOffsetedElements[i].index = index;
+			mpOffsetedElements[i].weight = weight;
+		}
+	}
 
 protected:
 
-  int mCount;
-  int mMaxSize;
-  Element* mElements;
-  Element* mpOffsetedElements;
+	int mCount;
+	int mMaxSize;
+	Element* mElements;
+	Element* mpOffsetedElements;
 };
 
 #endif

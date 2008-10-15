@@ -35,68 +35,68 @@ class KdTree
 {
 public:
 
-  typedef _Scalar Scalar;
-  typedef vcg::Point3<Scalar> VectorType;
-  typedef vcg::Box3<Scalar> AxisAlignedBoxType;
+	typedef _Scalar Scalar;
+	typedef vcg::Point3<Scalar> VectorType;
+	typedef vcg::Box3<Scalar> AxisAlignedBoxType;
 
-  struct Node
-  {
-    union {
-      struct {
-        Scalar splitValue;
-        unsigned int firstChildId:24;
-        unsigned int dim:2;
-        unsigned int leaf:1;
-      };
-      struct {
-        unsigned int start;
-        unsigned short size;
-      };
-    };
-  };
-  typedef std::vector<Node> NodeList;
+	struct Node
+	{
+		union {
+			struct {
+				Scalar splitValue;
+				unsigned int firstChildId:24;
+				unsigned int dim:2;
+				unsigned int leaf:1;
+			};
+			struct {
+				unsigned int start;
+				unsigned short size;
+			};
+		};
+	};
+	typedef std::vector<Node> NodeList;
 
-  inline const NodeList& _getNodes(void) { return mNodes; }
-  inline const std::vector<VectorType>& _getPoints(void) { return mPoints; }
+	inline const NodeList& _getNodes(void) { return mNodes; }
+	inline const std::vector<VectorType>& _getPoints(void) { return mPoints; }
 
-  void setMaxNofNeighbors(unsigned int k);
-  inline int getNofFoundNeighbors(void) { return mNeighborQueue.getNofElements(); }
-  inline const VectorType& getNeighbor(int i) { return mPoints[ mNeighborQueue.getIndex(i) ]; }
-  inline unsigned int getNeighborId(int i) { return mNeighborQueue.getIndex(i); }
-  inline float getNeighborSquaredDistance(int i) { return mNeighborQueue.getWeight(i); }
+	void setMaxNofNeighbors(unsigned int k);
+	inline int getNofFoundNeighbors(void) { return mNeighborQueue.getNofElements(); }
+	inline const VectorType& getNeighbor(int i) { return mPoints[ mNeighborQueue.getIndex(i) ]; }
+	inline unsigned int getNeighborId(int i) { return mNeighborQueue.getIndex(i); }
+	inline float getNeighborSquaredDistance(int i) { return mNeighborQueue.getWeight(i); }
 
 public:
 
-  KdTree(const ConstDataWrapper<VectorType>& points, unsigned int nofPointsPerCell = 16, unsigned int maxDepth = 64);
+	KdTree(const ConstDataWrapper<VectorType>& points, unsigned int nofPointsPerCell = 16, unsigned int maxDepth = 64);
 
-  ~KdTree();
+	~KdTree();
 
-  void doQueryK(const VectorType& p);
-
-protected:
-
-  // element of the stack
-  struct QueryNode
-  {
-      QueryNode() {}
-      QueryNode(unsigned int id) : nodeId(id) {}
-      unsigned int nodeId;  // id of the next node
-      Scalar sq;            // squared distance to the next node
-  };
-
-  // used to build the tree: split the subset [start..end[ according to dim and splitValue,
-  // and returns the index of the first element of the second subset
-  unsigned int split(int start, int end, unsigned int dim, float splitValue);
-
-  void createTree(unsigned int nodeId, unsigned int start, unsigned int end, unsigned int level, unsigned int targetCellsize, unsigned int targetMaxDepth);
+	void doQueryK(const VectorType& p);
 
 protected:
 
-  AxisAlignedBoxType mAABB;
-  NodeList mNodes;
-  std::vector<VectorType> mPoints;
-  HeapMaxPriorityQueue<int,Scalar> mNeighborQueue;
-  QueryNode mNodeStack[64];
+	// element of the stack
+	struct QueryNode
+	{
+			QueryNode() {}
+			QueryNode(unsigned int id) : nodeId(id) {}
+			unsigned int nodeId;  // id of the next node
+			Scalar sq;            // squared distance to the next node
+	};
+
+	// used to build the tree: split the subset [start..end[ according to dim and splitValue,
+	// and returns the index of the first element of the second subset
+	unsigned int split(int start, int end, unsigned int dim, float splitValue);
+
+	void createTree(unsigned int nodeId, unsigned int start, unsigned int end, unsigned int level, unsigned int targetCellsize, unsigned int targetMaxDepth);
+
+protected:
+
+	AxisAlignedBoxType mAABB;
+	NodeList mNodes;
+	std::vector<VectorType> mPoints;
+	HeapMaxPriorityQueue<int,Scalar> mNeighborQueue;
+	QueryNode mNodeStack[64];
 };
 
 #endif

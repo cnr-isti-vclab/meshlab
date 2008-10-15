@@ -42,100 +42,100 @@ namespace GaelMls {
 template<typename _MeshType>
 void RIMLS<_MeshType>::setSigmaR(Scalar v)
 {
-  mSigmaR = v;
-  mCachedQueryPointIsOK = false;
+	mSigmaR = v;
+	mCachedQueryPointIsOK = false;
 }
 
 template<typename _MeshType>
 void RIMLS<_MeshType>::setSigmaN(Scalar v)
 {
-  mSigmaN = v;
-  mCachedQueryPointIsOK = false;
+	mSigmaN = v;
+	mCachedQueryPointIsOK = false;
 }
 
 template<typename _MeshType>
 void RIMLS<_MeshType>::setRefittingThreshold(Scalar v)
 {
-  mRefittingThreshold = v;
-  mCachedQueryPointIsOK = false;
+	mRefittingThreshold = v;
+	mCachedQueryPointIsOK = false;
 }
 
 template<typename _MeshType>
 void RIMLS<_MeshType>::setMinRefittingIters(int n)
 {
-  mMinRefittingIters = n;
-  mCachedQueryPointIsOK = false;
+	mMinRefittingIters = n;
+	mCachedQueryPointIsOK = false;
 }
 
 template<typename _MeshType>
 void RIMLS<_MeshType>::setMaxRefittingIters(int n)
 {
-  mMaxRefittingIters = n;
-  mCachedQueryPointIsOK = false;
+	mMaxRefittingIters = n;
+	mCachedQueryPointIsOK = false;
 }
 
 template<typename _MeshType>
 typename RIMLS<_MeshType>::Scalar RIMLS<_MeshType>::potential(const VectorType& x, int* errorMask) const
 {
-  if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
-  {
-    if (!computePotentialAndGradient(x))
-    {
-      if (errorMask)
-        *errorMask = MLS_TOO_FAR;
-      return Base::InvalidValue();
-    }
-  }
+	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
+	{
+		if (!computePotentialAndGradient(x))
+		{
+			if (errorMask)
+				*errorMask = MLS_TOO_FAR;
+			return Base::InvalidValue();
+		}
+	}
 
-  return mCachedPotential;
+	return mCachedPotential;
 }
 
 template<typename _MeshType>
 typename RIMLS<_MeshType>::VectorType RIMLS<_MeshType>::gradient(const VectorType& x, int* errorMask) const
 {
-  if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
-  {
-    if (!computePotentialAndGradient(x))
-    {
-      if (errorMask)
-        *errorMask = MLS_TOO_FAR;
-      return VectorType(0,0,0);
-    }
-  }
+	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
+	{
+		if (!computePotentialAndGradient(x))
+		{
+			if (errorMask)
+				*errorMask = MLS_TOO_FAR;
+			return VectorType(0,0,0);
+		}
+	}
 
-  return mCachedGradient;
+	return mCachedGradient;
 }
 
 template<typename _MeshType>
 typename RIMLS<_MeshType>::VectorType RIMLS<_MeshType>::project(const VectorType& x, VectorType* pNormal, int* errorMask) const
 {
-  int iterationCount = 0;
-  VectorType position = x;
-  VectorType normal;
-  Scalar delta;
-  Scalar epsilon = mAveragePointSpacing * mProjectionAccuracy;
-  do {
-      if (!computePotentialAndGradient(position))
-      {
-        if (errorMask)
-          *errorMask = MLS_TOO_FAR;
-        //std::cerr << " proj failed\n";
-        return x;
-      }
+	int iterationCount = 0;
+	VectorType position = x;
+	VectorType normal;
+	Scalar delta;
+	Scalar epsilon = mAveragePointSpacing * mProjectionAccuracy;
+	do {
+			if (!computePotentialAndGradient(position))
+			{
+				if (errorMask)
+					*errorMask = MLS_TOO_FAR;
+				//std::cerr << " proj failed\n";
+				return x;
+			}
 
-      normal = mCachedGradient;
-      normal.Normalize();
-      delta = mCachedPotential;
-      position = position - normal*delta;
-  } while ( fabs(delta)>epsilon && ++iterationCount<mMaxNofProjectionIterations);
+			normal = mCachedGradient;
+			normal.Normalize();
+			delta = mCachedPotential;
+			position = position - normal*delta;
+	} while ( fabs(delta)>epsilon && ++iterationCount<mMaxNofProjectionIterations);
 
-  if (iterationCount>=mMaxNofProjectionIterations && errorMask)
-    *errorMask = MLS_TOO_MANY_ITERS;
-  
-  if (pNormal)
-    *pNormal = normal;
+	if (iterationCount>=mMaxNofProjectionIterations && errorMask)
+		*errorMask = MLS_TOO_MANY_ITERS;
 
-  return position;
+	if (pNormal)
+		*pNormal = normal;
+
+	return position;
 }
 
 template<typename _MeshType>
@@ -144,80 +144,80 @@ bool RIMLS<_MeshType>::computePotentialAndGradient(const VectorType& x) const
 		Base::computeNeighborhood(x, true);
 		unsigned int nofSamples = mNeighborhood.size();
 
-    if (nofSamples<1)
-    {
-        mCachedGradient.Zero();
-        mCachedQueryPoint = x;
-        mCachedPotential  = 1e9;
-        mCachedQueryPointIsOK = false;
-        return false;
-    }
+		if (nofSamples<1)
+		{
+				mCachedGradient.Zero();
+				mCachedQueryPoint = x;
+				mCachedPotential  = 1e9;
+				mCachedQueryPointIsOK = false;
+				return false;
+		}
 
-    VectorType source     = x;
-    VectorType grad; grad.Zero();
-    VectorType previousGrad;
-    VectorType sumN; sumN.Zero();
-    Scalar potential      = 0.;
-    Scalar invSigma2      = Scalar(1) / (mSigmaN*mSigmaN);
-    Scalar invSigmaR2     = 0;
-    if (mSigmaR>0)
-      invSigmaR2 = Scalar(1) / (mSigmaR*mSigmaR);
+		VectorType source     = x;
+		VectorType grad; grad.Zero();
+		VectorType previousGrad;
+		VectorType sumN; sumN.Zero();
+		Scalar potential      = 0.;
+		Scalar invSigma2      = Scalar(1) / (mSigmaN*mSigmaN);
+		Scalar invSigmaR2     = 0;
+		if (mSigmaR>0)
+			invSigmaR2 = Scalar(1) / (mSigmaR*mSigmaR);
 
-    int iterationCount = 0;
-    do
-    {
-        previousGrad = grad;
-        VectorType sumGradWeight; sumGradWeight.Zero();
-        VectorType sumGradWeightPotential; sumGradWeightPotential.Zero();
-        sumN.Zero();
-        potential = 0.;
-        Scalar sumW = 0.;
+		int iterationCount = 0;
+		do
+		{
+				previousGrad = grad;
+				VectorType sumGradWeight; sumGradWeight.Zero();
+				VectorType sumGradWeightPotential; sumGradWeightPotential.Zero();
+				sumN.Zero();
+				potential = 0.;
+				Scalar sumW = 0.;
 
-        for (unsigned int i=0; i<nofSamples; i++)
-        {
-            int id = mNeighborhood.index(i);
-            VectorType diff = source - mPoints[id].cP();
-            VectorType normal = mPoints[id].cN();
-            Scalar f = Dot(diff, normal);
+				for (unsigned int i=0; i<nofSamples; i++)
+				{
+						int id = mNeighborhood.index(i);
+						VectorType diff = source - mPoints[id].cP();
+						VectorType normal = mPoints[id].cN();
+						Scalar f = Dot(diff, normal);
 
-            Scalar refittingWeight = 1;
-            if (iterationCount > 0)
-            {
-                refittingWeight = exp(-vcg::SquaredNorm(normal - previousGrad) * invSigma2);
+						Scalar refittingWeight = 1;
+						if (iterationCount > 0)
+						{
+								refittingWeight = exp(-vcg::SquaredNorm(normal - previousGrad) * invSigma2);
 //                 if (mSigmaR>0)
 //                 {
 //                     Scalar residual = (ddotn - potentialPrev) / mRadii.at(id);
 //                     refittingWeight *= exp(-residual*residual * invSigmaR2);
 //                 }
-            }
-            Scalar w = mCachedWeights.at(i) * refittingWeight;
-            VectorType gw = mCachedWeightGradients.at(i) * refittingWeight;
+						}
+						Scalar w = mCachedWeights.at(i) * refittingWeight;
+						VectorType gw = mCachedWeightGradients.at(i) * refittingWeight;
 
-            sumGradWeight += gw;
-            sumGradWeightPotential += gw * f;
-            sumN += normal * w;
-            potential += w * f;
-            sumW += w;
-        }
+						sumGradWeight += gw;
+						sumGradWeightPotential += gw * f;
+						sumN += normal * w;
+						potential += w * f;
+						sumW += w;
+				}
 
-        if(sumW==0.)
-        {
-            return false;
-        }
+				if(sumW==0.)
+				{
+						return false;
+				}
 
-        potential /= sumW;
-        grad = (-sumGradWeight*potential + sumGradWeightPotential + sumN) * (1./sumW);
+				potential /= sumW;
+				grad = (-sumGradWeight*potential + sumGradWeightPotential + sumN) * (1./sumW);
 
-        iterationCount++;
+				iterationCount++;
 
-    } while ( (iterationCount < mMinRefittingIters)
-         || ( vcg::SquaredNorm(grad - previousGrad) > mRefittingThreshold && iterationCount < mMaxRefittingIters) );
+		} while ( (iterationCount < mMinRefittingIters)
+				|| ( vcg::SquaredNorm(grad - previousGrad) > mRefittingThreshold && iterationCount < mMaxRefittingIters) );
 
-    mCachedGradient   = grad;
-    mCachedPotential  = potential;
-    mCachedQueryPoint = x;
-    mCachedQueryPointIsOK = true;
-    return true;
+		mCachedGradient   = grad;
+		mCachedPotential  = potential;
+		mCachedQueryPoint = x;
+		mCachedQueryPointIsOK = true;
+		return true;
 }
 
 // template class RIMLS<float>;

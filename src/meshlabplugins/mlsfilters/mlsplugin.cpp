@@ -155,14 +155,16 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 	parlst.addFloat("FilterScale",
 									2.0,
 									"MLS - Filter scale",
-									"Scale of the spatial low pass filter.");
+									"Scale of the spatial low pass filter.\n"
+									"It is relative to the radius (local point spacing) of the vertices.");
 	parlst.addFloat("ProjectionAccuracy",
 									1e-4,
-									"Projection - Accuracy",
-									"Threshold value used to stop the projections. This value is scaled by the mean point spacing to get the actual threshold.");
+									"Projection - Accuracy (adv)",
+									"Threshold value used to stop the projections.\n"
+									"This value is scaled by the mean point spacing to get the actual threshold.");
 	parlst.addInt(  "MaxProjectionIters",
 									15,
-									"Projection - Max iterations",
+									"Projection - Max iterations (adv)",
 									"Max number of iterations for the projection.");
 
 	if (id & _APSS_)
@@ -175,7 +177,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 										"while others real values might give interresting results, but take care with extreme"
 										"settings !");
 		parlst.addBool( "AccurateNormal",
-										false,
+										true,
 										"Accurate normals",
 										"If checked, use the accurate MLS gradient instead of the local approximation"
 										"to compute the normals.");
@@ -186,7 +188,9 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 		parlst.addFloat("SigmaN",
 										0.75,
 										"MLS - Sharpness",
-										"Filter width used in the normal refitting weight. Typical value range between 0.5 (sharp) to 2 (smooth).");
+										"Width of the filter used by the normal refitting weight."
+										"This weight function is a Gaussian on the distance between two unit vectors:"
+										"the current gradient and the input normal. Therefore, typical value range between 0.5 (sharp) to 2 (smooth).");
 		parlst.addInt(  "MaxRefittingIters",
 										3,
 										"MLS - Max fitting iterations",
@@ -202,7 +206,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 		parlst.addFloat("ThAngleInDegree",
 										2,
 										"Refinement - Crease angle (degree)",
-										"Threshold angle between two faces controlling the refienment.");
+										"Threshold angle between two faces controlling the refinement.");
 	}
 
 	if (id & _AFRONT_)
@@ -495,7 +499,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		if (apss)
 		{
 			apss->setSphericalParameter(par.getFloat("SphericalParameter"));
-			apss->setAccurateGradient(par.getBool("AccurateNormal"));
+			apss->setGradientHint(par.getBool("AccurateNormal") ? GaelMls::MLS_GRADIENT_ACCURATE : GaelMls::MLS_GRADIENT_APPROX);
 		}
 
 		MeshModel * mesh = 0;
@@ -517,7 +521,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 				if (k!=0)
 				{
 					mesh->updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-					
+
 					vcg::tri::UpdateNormals<CMeshO>::PerFace(mesh->cm);
 					vcg::tri::UpdateNormals<CMeshO>::NormalizeFace(mesh->cm);
 					//vcg::RefineE<CMeshO,vcg::MidPoint<CMeshO> >(m.cm, vcg::MidPoint<CMeshO>(), edgePred, false, cb);
