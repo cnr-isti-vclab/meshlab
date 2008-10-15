@@ -34,12 +34,6 @@ void Finalization(void)
 
 #else
 
-vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)
-{
-	vec3 ldir = normalize(gl_LightSource[0].position.xyz);
-	return color * 0.85 * clamp(dot(normal,ldir),0.0,1.0);
-}
-
 uniform vec2 unproj;
 
 uniform sampler2DRect ColorWeight;
@@ -62,46 +56,29 @@ void Finalization(void)
     vec4 normaldepth = texture2DRect(NormalWeight, gl_FragCoord.st + epsilon);
 
     normaldepth.xyz = normaldepth.xyz/normaldepth.w;
-//     gl_FragColor.rgb = meshlabLighting(color, vec3(0,0,0), normaldepth.xyz);
-//     gl_FragColor.w = 1;
-#if 1
-//     #ifdef EXPE_OUTPUT_DEPTH
-//     gl_FragDepth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
-//     #endif
 
-//     #if EXPE_DEPTH_INTERPOLATION==2
-//         float depth = -normaldepth.z;
-//     #elif EXPE_DEPTH_INTERPOLATION==1
-//         float depth = unproj.y/(2.0*normaldepth.z+unproj.x-1.0);
-//     #else
-//         float depth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
-//         depth = unproj.y/(2.0*depth+unproj.x-1.0);
-//     #endif
-
-    vec3 normal = normaldepth.xyz;
-//     #if EXPE_DEPTH_INTERPOLATION!=0
-//     normal.z = sqrt(1. - dot(vec3(normal.xy,0),vec3(normal.xy,0)));
-//     #endif
-    normal = normalize(normal);
-    //vec3 eyePos = gl_TexCoord[0].xyz*depth;
-    vec3 eyePos;
-
-    vec4 shadedColor;
-//     #if defined (EXPE_LIGHTING)
-//         shadedColor = expeLighting(color, eyePos, normal);
-//     #else
-        shadedColor = meshlabLighting(color, eyePos, normal);
-//     #endif
-
-    #ifdef EXPE_REFLEXION
-    vec3 reflexionVector = expeComputeReflexionVector(viewVec, normal);
-    vec3 envColor = half3(expeComputeReflectedColor(reflexionVector));
-    shadedColor.xyz *= envColor;
+    #if (EXPE_OUTPUT_DEPTH==1)
+    gl_FragDepth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
     #endif
 
-    gl_FragColor = shadedColor;
+    #if EXPE_DEPTH_INTERPOLATION==2
+        float depth = -normaldepth.z;
+    #elif EXPE_DEPTH_INTERPOLATION==1
+        float depth = unproj.y/(2.0*normaldepth.z+unproj.x-1.0);
+    #else
+        float depth = texture2DRect(Depth, gl_FragCoord.st + epsilon).x;
+        depth = unproj.y/(2.0*depth+unproj.x-1.0);
+    #endif
+
+    vec3 normal = normaldepth.xyz;
+    #if EXPE_DEPTH_INTERPOLATION!=0
+    normal.z = sqrt(1. - dot(vec3(normal.xy,0),vec3(normal.xy,0)));
+    #endif
+    normal = normalize(normal);
+    vec3 eyePos = gl_TexCoord[0].xyz * depth;
+    
+    gl_FragColor = meshlabLighting(color, eyePos, normal);
     gl_FragColor.a = 1.0;
-#endif
 }
 
 #endif

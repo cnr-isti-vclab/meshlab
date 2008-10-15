@@ -147,11 +147,11 @@ void VisibilityFP(void)
 
 #ifdef __AttributeVP__
 
-vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)
-{
-	vec3 ldir = normalize(gl_LightSource[0].position.xyz);
-	return color * 0.85 * clamp(dot(normal,ldir),0.0,1.0);
-}
+// vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)
+// {
+// 	vec3 ldir = normalize(gl_LightSource[0].position.xyz);
+// 	return color * 0.85 * clamp(dot(normal,ldir),0.0,1.0);
+// }
 
 varying vec2 scaledFragCenter2d;
 

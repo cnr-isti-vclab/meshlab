@@ -58,6 +58,7 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 	int mCurrentPass;
 	int mBindedPass;
 	GLuint mNormalTextureID;
+	GLuint mDepthTextureID;
 	ProgramVF mShaders[3];
 	QString mShaderSrcs[6];
 	QGLFramebufferObject* mRenderBuffer;

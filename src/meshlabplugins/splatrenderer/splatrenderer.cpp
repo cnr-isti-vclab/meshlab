@@ -45,10 +45,11 @@ using namespace vcg;
 SplatRendererPlugin::SplatRendererPlugin()
 {
 	mNormalTextureID = 0;
+	mDepthTextureID = 0;
 	mIsSupported = false;
 	mRenderBuffer = 0;
 
-	mFlags = DEFERRED_SHADING_BIT | DEPTH_CORRECTION_BIT | FLOAT_BUFFER_BIT;
+	mFlags = DEFERRED_SHADING_BIT | DEPTH_CORRECTION_BIT | FLOAT_BUFFER_BIT | OUTPUT_DEPTH_BIT;
 	mCachedFlags = ~mFlags;
 	// union of bits which controls the render buffer
 	mRenderBufferMask = DEFERRED_SHADING_BIT | FLOAT_BUFFER_BIT;
@@ -74,7 +75,6 @@ QString SplatRendererPlugin::loadSource(const QString& func,const QString& filen
 	res = QString("#define __%1__ 1\n").arg(func)
 			+ QString("#define %1 main\n").arg(func)
 			+ res;
-// 	std::cout << func.toAscii().data() << " loaded : \n" << res.toAscii().data() << "\n";
 	return res;
 }
 
@@ -86,14 +86,26 @@ void SplatRendererPlugin::configureShaders()
 	if (mFlags & DEPTH_CORRECTION_BIT)
 		defines += "#define EXPE_DEPTH_CORRECTION\n";
 	if (mFlags & OUTPUT_DEPTH_BIT)
-		defines += "#define EXPE_OUTPUT_DEPTH\n";
+		defines += "#define EXPE_OUTPUT_DEPTH 1\n";
 	if (mFlags & BACKFACE_SHADING_BIT)
 		defines += "#define EXPE_BACKFACE_SHADING\n";
+
+	QString shading =
+"vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)"
+"{"
+"	normal = normalize(normal);"
+"	vec3 lightVec = normalize(gl_LightSource[0].position.xyz);"
+"	vec3 halfVec = normalize( lightVec - normalize(eyePos) );"
+"	float aux_dot = dot(normal,lightVec);"
+"	float diffuseCoeff = clamp(aux_dot, 0.0, 1.0);"
+" float specularCoeff = aux_dot>0.0 ? clamp(pow(clamp(dot(halfVec, normal),0.0,1.0),gl_FrontMaterial.shininess), 0.0, 1.0) : 0.0;"
+"	return vec4(color.rgb * ( gl_FrontLightProduct[0].ambient.rgb + diffuseCoeff * gl_FrontLightProduct[0].diffuse.rgb) + specularCoeff * gl_FrontLightProduct[0].specular.rgb, 1.0);"
+"}\n";
 	
 	for (int k=0;k<3;++k)
 	{
-		QString vsrc = defines + mShaderSrcs[k*2+0];
-		QString fsrc = defines + mShaderSrcs[k*2+1];
+		QString vsrc = shading + defines + mShaderSrcs[k*2+0];
+		QString fsrc = shading + defines + mShaderSrcs[k*2+1];
 		mShaders[k].SetSources(mShaderSrcs[k*2+0]!="" ? vsrc.toAscii().data() : 0,
 													 mShaderSrcs[k*2+1]!="" ? fsrc.toAscii().data() : 0);
 		mShaders[k].prog.Link();
@@ -119,8 +131,19 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 	}
 	if (GLEW_ARB_texture_float)
 		mSupportedMask |= FLOAT_BUFFER_BIT;
-	if (GL_ATI_draw_buffers)
+	else
+		std::cerr << "Splatting: warning floating point textures are not supported.\n";
+	
+	if (GLEW_ARB_draw_buffers)
 		mSupportedMask |= DEFERRED_SHADING_BIT;
+	else
+		std::cerr << "Splatting: warning deferred shading is not supported.\n";
+	
+	if (GLEW_ARB_shadow)
+		mSupportedMask |= OUTPUT_DEPTH_BIT;
+	else
+		std::cerr << "Splatting: warning copy of the depth buffer is not supported.\n";
+	
 	mFlags = mFlags & mSupportedMask;
 
 	// load shader source
@@ -145,11 +168,14 @@ void SplatRendererPlugin::updateRenderBuffer()
 	{
 		delete mRenderBuffer;
 		GLenum fmt = (mFlags&FLOAT_BUFFER_BIT) ? GL_RGBA16F_ARB : GL_RGBA;
-		mRenderBuffer = new QGLFramebufferObject(mCachedVP[2], mCachedVP[3], QGLFramebufferObject::Depth, GL_TEXTURE_RECTANGLE_ARB, fmt);
+		mRenderBuffer = new QGLFramebufferObject(mCachedVP[2], mCachedVP[3],
+				(mFlags&OUTPUT_DEPTH_BIT) ? QGLFramebufferObject::NoAttachment : QGLFramebufferObject::Depth,
+				GL_TEXTURE_RECTANGLE_ARB, fmt);
+		
 		GL_TEST_ERR
 		if (mFlags&DEFERRED_SHADING_BIT)
 		{
-			// add a second floating point render target for the normals
+			// in deferred shading mode we need an additional buffer to accumulate the normals
 			if (mNormalTextureID==0)
 				glGenTextures(1,&mNormalTextureID);
 			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mNormalTextureID);
@@ -158,6 +184,22 @@ void SplatRendererPlugin::updateRenderBuffer()
 			glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			mRenderBuffer->bind();
 			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_RECTANGLE_ARB, mNormalTextureID, 0);
+			mRenderBuffer->release();
+			GL_TEST_ERR
+		}
+
+		if (mFlags&OUTPUT_DEPTH_BIT)
+		{
+			// to output the depth values to the final depth buffer we need to
+			// attach a depth buffer as a texture
+			if (mDepthTextureID==0)
+				glGenTextures(1,&mDepthTextureID);
+			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mDepthTextureID);
+			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT24_ARB, mCachedVP[2], mCachedVP[3], 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+			glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			mRenderBuffer->bind();
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, mDepthTextureID, 0);
 			mRenderBuffer->release();
 			GL_TEST_ERR
 		}
@@ -192,6 +234,13 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 			s = pow(s,0.3);
 		mParams.radiusScale *= s;
 		GL_TEST_ERR
+
+		// FIXME since meshlab does not set any material properties, let's define some here
+		glDisable(GL_COLOR_MATERIAL);
+		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 64);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, vcg::Point4f(0.3, 0.3, 0.3, 1.).V());
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vcg::Point4f(0.6, 0.6, 0.6, 1.).V());
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, vcg::Point4f(0.5, 0.5, 0.5, 1.).V());
 	}
 	
 	if (mCurrentPass==2)
@@ -212,31 +261,40 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glPushMatrix();
 		glLoadIdentity();
 		GL_TEST_ERR
-		if (mFlags&DEFERRED_SHADING_BIT)
-		{
-			mShaders[2].prog.Uniform("unproj", mCachedProj[10], mCachedProj[14]);
-			mShaders[2].prog.Uniform("NormalWeight",1.0f);
-		}
+
 		mShaders[2].prog.Uniform("viewport",float(mCachedVP[0]),float(mCachedVP[1]),float(mCachedVP[2]),float(mCachedVP[3]));
-		mShaders[2].prog.Uniform("ColorWeight",0.0f);
-		
-    // bind the FBO's textures
-		GL_TEST_ERR
+		mShaders[2].prog.Uniform("ColorWeight",0); // this is a texture unit
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mRenderBuffer->texture());
+		GL_TEST_ERR
+		
 		if (mFlags&DEFERRED_SHADING_BIT)
 		{
+			GL_TEST_ERR
+			mShaders[2].prog.Uniform("unproj", mCachedProj[10], mCachedProj[14]);
+			mShaders[2].prog.Uniform("NormalWeight",1); // this is a texture unit
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mNormalTextureID);
+			GL_TEST_ERR
 		}
 
-		// draw a quad covering the whole screen
-    vcg::Point3f viewVec(1./mCachedProj[0], 1./mCachedProj[5], -1);
-    if (!(mFlags&OUTPUT_DEPTH_BIT))
+		if (mFlags&OUTPUT_DEPTH_BIT)
+		{
+			GL_TEST_ERR
+			mShaders[2].prog.Uniform("Depth",2); // this is a texture unit
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mDepthTextureID);
+			GL_TEST_ERR
+		}
+		else
 		{
 			glDisable(GL_DEPTH_TEST);
 			glDepthMask(GL_FALSE);
 		}
+
+		// draw a quad covering the whole screen
+    vcg::Point3f viewVec(1./mCachedProj[0], 1./mCachedProj[5], -1);
+
 		GL_TEST_ERR
     glBegin(GL_QUADS);
 			glColor3f(1, 0, 0);
