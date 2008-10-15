@@ -35,6 +35,13 @@
 using namespace std;
 using namespace vcg;
 
+#define GL_TEST_ERR\
+        {\
+            GLenum eCode;\
+            if((eCode=glGetError())!=GL_NO_ERROR)\
+                std::cerr << "OpenGL error : " <<  gluErrorString(eCode) << " in " <<  __FILE__ << " : " << __LINE__ << std::endl;\
+        }
+        
 void SplatRendererPlugin::initActionList()
 {
 	actionList << new QAction("Splatting", this);
@@ -52,7 +59,9 @@ QString SplatRendererPlugin::loadSource(const QString& func,const QString& filen
 	QTextStream stream(&f);
 	res = stream.readAll();
 	f.close();
-	res = QString("#define __%1__\n").arg(func) + res;
+	res = QString("#define __%1__ 1\n").arg(func)
+			+ QString("#define %1 main\n").arg(func)
+			+ res;
 // 	std::cout << func.toAscii().data() << " loaded : \n" << res.toAscii().data() << "\n";
 	return res;
 }
@@ -65,15 +74,15 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 	glewInit();
 
 	mShaders[0].SetSources(loadSource("VisibilityVP","Raycasting.glsl").toAscii().data(),
-												loadSource("VisibilityFP","Raycasting.glsl").toAscii().data());
+												 loadSource("VisibilityFP","Raycasting.glsl").toAscii().data());
 	mShaders[0].prog.Link();
 	std::cout << "Linked visibility shader:\n"
-		<< mShaders[0].vshd.InfoLog() << "\n"
-		<< mShaders[0].fshd.InfoLog() << "\n"
+// 		<< mShaders[0].vshd.InfoLog() << "\n"
+// 		<< mShaders[0].fshd.InfoLog() << "\n"
 		<< mShaders[0].prog.InfoLog() << "\n";
 
 	mShaders[1].SetSources(loadSource("AttributeVP","Raycasting.glsl").toAscii().data(),
-												loadSource("AttributeFP","Raycasting.glsl").toAscii().data());
+												 loadSource("AttributeFP","Raycasting.glsl").toAscii().data());
 	mShaders[1].prog.Link();
 	std::cout << "Linked attribute shader:\n" << mShaders[1].prog.InfoLog() << "\n";
 
@@ -89,7 +98,22 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 		|| (mRenderBuffer->height()!=vp[3]))
 	{
 		delete mRenderBuffer;
-		mRenderBuffer = new QGLFramebufferObject(vp[2], vp[3], QGLFramebufferObject::Depth);
+		mRenderBuffer = new QGLFramebufferObject(vp[2], vp[3], QGLFramebufferObject::Depth, GL_TEXTURE_RECTANGLE_ARB, GL_RGBA16F_ARB);
+		GL_TEST_ERR
+		if (mDeferredShading)
+		{
+			// add a second floating point render target for the normals
+			if (mNormalTextureID==0)
+				glGenTextures(1,&mNormalTextureID);
+			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mNormalTextureID);
+			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA16F_ARB, vp[2], vp[3], 0, GL_RGBA, GL_FLOAT, 0);
+			glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			mRenderBuffer->bind();
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_TEXTURE_RECTANGLE_ARB, mNormalTextureID, 0);
+			mRenderBuffer->release();
+			GL_TEST_ERR
+		}
 	}
 
 	mCurrentPass = 2;
@@ -107,7 +131,11 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 
 	if (mCurrentPass==2)
 	{
-		return;
+		GL_TEST_ERR
+		mRenderBuffer->release();
+		if (mDeferredShading)
+			glDrawBuffer(GL_BACK);
+		//return;
 		// finalization
 		enablePass(mCurrentPass);
 		float projmat[16];
@@ -122,14 +150,27 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
-
-		mShaders[2].prog.Uniform("unproj", projmat[10], projmat[14]);
-		mShaders[2].prog.Uniform("viewport",viewport[0],viewport[1],viewport[2],viewport[3]);
-
+		GL_TEST_ERR
+		if (mDeferredShading)
+		{
+			mShaders[2].prog.Uniform("unproj", projmat[10], projmat[14]);
+			mShaders[2].prog.Uniform("NormalWeight",1);
+		}
+		GL_TEST_ERR
+		mShaders[2].prog.Uniform("viewport",float(viewport[0]),float(viewport[1]),float(viewport[2]),float(viewport[3]));
+		GL_TEST_ERR
+		mShaders[2].prog.Uniform("ColorWeight",0);
+		
     // bind the FBO's textures
 		// FIXME let's assume the unique texture is in GL_TEXTURE0
+		GL_TEST_ERR
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mRenderBuffer->texture());
+		if (mDeferredShading)
+		{
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mNormalTextureID);
+		}
 // 		glBind
 //     gpu.bindSampler(*(mSplattingBuffer->getSampler("ColorWeight")));
 
@@ -141,6 +182,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 			glDisable(GL_DEPTH_TEST);
 			glDepthMask(GL_FALSE);
 		}
+		GL_TEST_ERR
     glBegin(GL_QUADS);
 			glColor3f(1, 0, 0);
 			glTexCoord3f(viewVec.X(),viewVec.Y(),viewVec.Z());
@@ -162,6 +204,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 			glMultiTexCoord2f(GL_TEXTURE1,1.,0.);
 			glVertex3f(1,-1,0);
     glEnd();
+    GL_TEST_ERR
     if (!mOutputDepth)
     {
         glEnable(GL_DEPTH_TEST);
@@ -178,11 +221,29 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
+		GL_TEST_ERR
 	}
 	else
 	{
+		GL_TEST_ERR
 		mParams.loadTo(mShaders[mCurrentPass].prog);
+		if (mCurrentPass==0)
+		{
+			GLint vp[4];
+    	glGetIntegerv(GL_VIEWPORT, vp);
+			mRenderBuffer->bind();
+			if (mDeferredShading)
+			{
+				GLenum buf[2] = {GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};
+				glDrawBuffersATI(2, buf);
+			}
+			glViewport(vp[0],vp[1],vp[2],vp[3]);
+			glClearColor(0,0,0,0);
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		}
+		GL_TEST_ERR
 		enablePass(mCurrentPass);
+		GL_TEST_ERR
 	}
 }
 
@@ -193,9 +254,12 @@ void SplatRendererPlugin::Draw(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 		if (mCurrentPass==2)
 			return;
 
+	GL_TEST_ERR
 		enablePass(mCurrentPass);
-		if (mCurrentPass==1)
+// 		if (mCurrentPass==0)
+		GL_TEST_ERR
 			drawSplats(m, rm);
+			GL_TEST_ERR
 	}
 	else if (mCurrentPass==2)
 	{
@@ -218,6 +282,11 @@ void SplatRendererPlugin::enablePass(int n)
 		// set GL states
 		if (n==0)
 		{
+			glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+			glEnable(GL_POINT_SPRITE_ARB);
+			glDisable(GL_POINT_SMOOTH);
+			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+			
 			glAlphaFunc(GL_LESS,1);
 			glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 			glDepthMask(GL_TRUE);
@@ -227,11 +296,17 @@ void SplatRendererPlugin::enablePass(int n)
 		}
 		if (n==1)
 		{
+			glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+			glEnable(GL_POINT_SPRITE_ARB);
+			glDisable(GL_POINT_SMOOTH);
+			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+			
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-			glBlendFuncSeparate(GL_ONE,GL_ONE, GL_SRC_ALPHA, GL_ONE);
+			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE,GL_ONE);
 			glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
+			glDisable(GL_ALPHA_TEST);
 		}
 		if (n==2)
 		{
@@ -303,14 +378,21 @@ void SplatRendererPlugin::UniformParameters::update()
 	glGetFloatv(GL_PROJECTION_MATRIX, proj);
 	glGetIntegerv(GL_VIEWPORT, vp);
 
-	radiusScale = 1.0; // FIXME
-	preComputeRadius = -std::max(proj[0]*vp[2], proj[5]*vp[3]);
-	depthOffset = 1.; // FIXME
+	// get the scale
+	float scale = vcg::Point3f(mv[0],mv[1],mv[2]).Norm();
+	glScalef(1./scale, 1./scale, 1./scale);
+	glGetFloatv(GL_MODELVIEW_MATRIX, mv);
+	scale = vcg::Point3f(mv[0],mv[1],mv[2]).Norm();
+// 	std::cout << scale << "\n";
+
+	radiusScale = 1.0;
+	preComputeRadius = - scale * std::max(proj[0]*vp[2], proj[5]*vp[3]);
+	depthOffset = 2.0;
 	oneOverEwaRadius = 0.70710678118654;
 	halfVp = Point2f(0.5*vp[2], 0.5*vp[3]);
-	rayCastParameter1 = Point3f(2./(proj[0]*vp[2]), 2./(proj[5]*vp[3]), 0);
-	rayCastParameter2 = Point3f(-1./proj[0], -1./proj[5], -1.);
-	depthParameterCast = Point2f(0.5*proj[14], 0.5*0.5*proj[10]);
+	rayCastParameter1 = Point3f(2./(proj[0]*vp[2]), 2./(proj[5]*vp[3]), 0.0);
+	rayCastParameter2 = Point3f(-1./proj[0], -1./proj[5], -1.0);
+	depthParameterCast = Point2f(0.5*proj[14], 0.5-0.5*proj[10]);
 }
 
 void SplatRendererPlugin::UniformParameters::loadTo(Program& prg)

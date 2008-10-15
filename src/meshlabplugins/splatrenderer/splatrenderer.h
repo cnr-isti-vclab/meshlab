@@ -55,9 +55,12 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 
 	int mCurrentPass;
 	int mBindedPass;
+	GLuint mNormalTextureID;
 	ProgramVF mShaders[3];
 	QGLFramebufferObject* mRenderBuffer;
 	bool mOutputDepth;
+	bool mDeferredShading;
+	bool mFloatingPointAccuracy;
 
 	struct UniformParameters
 	{
@@ -84,9 +87,12 @@ public:
 
 	SplatRendererPlugin()
 	{
+		mNormalTextureID = 0;
 		mOutputDepth = false;
 		mIsSupported = false;
 		mRenderBuffer = 0;
+		mDeferredShading = true;
+		mFloatingPointAccuracy = true;
 	}
 
 	QList<QAction *> actions ()

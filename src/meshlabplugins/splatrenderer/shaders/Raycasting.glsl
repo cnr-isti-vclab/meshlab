@@ -5,16 +5,6 @@
 // turn "on" optimizations
 #pragma optimize(on)
 
-
-// #ifndef __GLSL_CG_DATA_TYPES
-//     #error cg data type not defined
-    #define half float
-    #define half2 vec2
-    #define half3 vec3
-    #define half4 vec4
-// #endif
-
-
 #ifndef EXPE_EWA_HINT
     #define EXPE_EWA_HINT 0
 #endif
@@ -25,12 +15,14 @@
 
 #define EXPE_DEFERRED_SHADING
 
+#define EXPE_DEPTH_CORRECTION
+
 //--------------------------------------------------------------------------------
 // shared variables
 //--------------------------------------------------------------------------------
 
 // custom vertex attributes
-attribute float radius;
+//attribute float radius;
 
 #ifdef CLIPPED_SPLAT
 attribute vec3 secondNormal;
@@ -50,7 +42,7 @@ varying vec3 fragNoverCdotN;
 varying vec3 fragCenter;
 varying float scaleSquaredDistance;
 
-#ifdef EXPE_DEPTH_CORRECTION_VISIBILITY
+#ifdef EXPE_DEPTH_CORRECTION
 varying float depthOffset;
 #endif
 
@@ -86,7 +78,7 @@ void VisibilityVP(void)
     {
     #endif
 
-    radius =  radius * expeRadiusScale;
+    float radius = gl_MultiTexCoord2.x * expeRadiusScale;
 
     vec4 pointSize;
     pointSize.x = radius * expePreComputeRadius / ePos.z;
@@ -97,7 +89,7 @@ void VisibilityVP(void)
     fragCenter = ePos.xyz;
     fragNoverCdotN = normal/dot(ePos.xyz,normal);
 
-    #ifndef EXPE_DEPTH_CORRECTION_VISIBILITY
+    #ifndef EXPE_DEPTH_CORRECTION
     ePos.xyz += normalize(ePos.xyz) * expeDepthOffset * radius;
     #else
     //ePos.xyz += normalize(ePos.xyz) * expeDepthOffset * radius;
@@ -149,9 +141,7 @@ void VisibilityFP(void)
     gl_FragColor = r2*scaleSquaredDistance;
     #endif
 
-
-
-    #ifdef EXPE_DEPTH_CORRECTION_VISIBILITY
+    #ifdef EXPE_DEPTH_CORRECTION
     oneOverDepth = 1.0/(-depth+depthOffset);
     gl_FragDepth = depthParameterCast.x * oneOverDepth + depthParameterCast.y; // MAD
     #endif
@@ -162,10 +152,11 @@ void VisibilityFP(void)
 #ifdef __AttributeVP__
 
 // #define EXPE_LIGHTING
-// vec4 expeLighting(vec4 color, vec3 eyePos, vec3 normal, vec3 shadowCoeff)
-// {
-//     return color * clamp(normal.x,0.f,1.f) + 0.5*clamp(normal.y,0.f,1.f);
-// }
+vec4 meshlabLighting(vec4 color, vec3 eyePos, vec3 normal)
+{
+	vec3 ldir = normalize(gl_LightSource[0].position.xyz);
+	return color * 0.75 * clamp(dot(normal,ldir),0.0,1.0);
+}
 
 varying vec2 scaledFragCenter2d;
 
@@ -198,13 +189,12 @@ void AttributeVP(void)
     //vec3 p = ePos.xyz / ePos.w;
     //float pz1 = 1./p.z;
 
-    radius = radius * expeRadiusScale;
+    float radius = gl_MultiTexCoord2.x * expeRadiusScale;
 
     vec4 pointSize;
     pointSize.x = radius * expePreComputeRadius / ePos.z;
 
     #if (EXPE_EWA_HINT>0)
-    //gl_PointSize = max(2, pointSize.x);
     gl_PointSize = max(2.0, pointSize.x);
     #else
     gl_PointSize = max(1.0, pointSize.x);
@@ -219,16 +209,18 @@ void AttributeVP(void)
     #ifdef EXPE_DEFERRED_SHADING
         fragNormal.xyz = normal.xyz;
         gl_FrontColor = gl_Color;
+        //gl_FrontColor = meshlabLighting(gl_Color, ePos.xyz, normal.xyz);
     #else
         // Output color
         #ifdef EXPE_LIGHTING
         gl_FrontColor = expeLighting(gl_Color, ePos.xyz, normal.xyz, 1.);
         #else
-        gl_FrontColor = gl_Color;
+        gl_FrontColor = meshlabLighting(gl_Color, ePos.xyz, normal.xyz);
         #endif
     #endif
 
-    oPos = gl_ModelViewProjectionMatrix * gl_Vertex;
+    //oPos = gl_ModelViewProjectionMatrix * gl_Vertex;
+    oPos = gl_ProjectionMatrix * ePos;
 
     #if (EXPE_EWA_HINT>0)
     scaledFragCenter2d = ((oPos.xy/oPos.w)+1.0)*halfVp*oneOverEwaRadius;
@@ -279,11 +271,11 @@ void AttributeFP(void)
     weight = weight*weight;
     #else
     //float weight = texture1D(Kernel1dMap, r2*scaleSquaredDistance).a; // MUL + TEX
-    float weight = clamp(1.-r2*scaleSquaredDistance,0,1);
+    float weight = clamp(1.-r2*scaleSquaredDistance,0.0,1.0);
     weight = weight*weight;
     #endif
 
-    #ifdef EXPE_DEPTH_CORRECTION_ATTRIB
+    #ifdef EXPE_DEPTH_CORRECTION
     gl_FragDepth = depthParameterCast.x * oneOverDepth + depthParameterCast.y; // MAD
     #endif
 
@@ -296,7 +288,7 @@ void AttributeFP(void)
     #if EXPE_DEPTH_INTERPOLATION==2 // linear space
         gl_FragData[1].z = -depth; // MOV
     #elif EXPE_DEPTH_INTERPOLATION==1 // window space
-        #ifdef EXPE_DEPTH_CORRECTION_ATTRIB
+        #ifdef EXPE_DEPTH_CORRECTION
         gl_FragData[1].z = gl_FragDepth;
         #else
         gl_FragData[1].z = gl_FragCoord.z;
@@ -307,7 +299,6 @@ void AttributeFP(void)
     gl_FragColor.rgb = gl_Color.rgb; // MOV
     gl_FragColor.w = weight;
     #endif
-
 }
 
 #endif
