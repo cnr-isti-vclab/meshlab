@@ -205,7 +205,14 @@ PickPointsDialog::PickPointsDialog(EditPickPointsPlugin *plugin,
 	
 	//signals and slots
 	connect(ui.removePointButton, SIGNAL(clicked()), this, SLOT(removeHighlightedPoint()));
+
+	//rename when rename button clicked
 	connect(ui.renamePointButton, SIGNAL(clicked()), this, SLOT(renameHighlightedPoint()));
+	
+	//rename on double click of point
+	connect(ui.pickedPointsTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
+			this, SLOT(renameHighlightedPoint() ) );
+	
 	connect(ui.clearPointButton, SIGNAL(clicked()), this, SLOT(clearHighlightedPoint()));
 	connect(ui.pickPointModeRadioButton, SIGNAL(toggled(bool)), this, SLOT(togglePickMode(bool)) );
 	connect(ui.movePointRadioButton, SIGNAL(toggled(bool)), this, SLOT(toggleMoveMode(bool)) );
