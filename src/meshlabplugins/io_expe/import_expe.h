@@ -236,6 +236,11 @@ class ImporterExpePTS
 						loadmask |= Mask::IOM_VERTCOLOR;
 						fileProperties.back().hasProperty = tri::HasPerVertexColor(mesh);
 					}
+					else
+					{
+						// unsupported property
+						fileProperties.back().hasProperty = false;
+					}
 					pointSize += propertySize;
 				}
 				else if(command=="nofpoints")
