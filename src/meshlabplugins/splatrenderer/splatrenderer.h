@@ -63,7 +63,7 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 	QGLFramebufferObject* mRenderBuffer;
 	float mCachedMV[16];
 	float mCachedProj[16];
-	int mCachedVP[4];
+	GLint mCachedVP[4];
 
 	struct UniformParameters
 	{
@@ -77,7 +77,7 @@ class SplatRendererPlugin : public QObject, public MeshRenderInterface
 		vcg::Point2f depthParameterCast;
 
 		void loadTo(Program& prg);
-		void update(float* mv, float* proj, int* vp);
+		void update(float* mv, float* proj, GLint* vp);
 	};
 
 	UniformParameters mParams;

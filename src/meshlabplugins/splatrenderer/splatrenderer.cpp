@@ -215,10 +215,10 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		if (mFlags&DEFERRED_SHADING_BIT)
 		{
 			mShaders[2].prog.Uniform("unproj", mCachedProj[10], mCachedProj[14]);
-			mShaders[2].prog.Uniform("NormalWeight",1);
+			mShaders[2].prog.Uniform("NormalWeight",1.0f);
 		}
 		mShaders[2].prog.Uniform("viewport",float(mCachedVP[0]),float(mCachedVP[1]),float(mCachedVP[2]),float(mCachedVP[3]));
-		mShaders[2].prog.Uniform("ColorWeight",0);
+		mShaders[2].prog.Uniform("ColorWeight",0.0f);
 		
     // bind the FBO's textures
 		GL_TEST_ERR
@@ -283,7 +283,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 			if (mFlags&DEFERRED_SHADING_BIT)
 			{
 				GLenum buf[2] = {GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};
-				glDrawBuffersATI(2, buf);
+				glDrawBuffersARB(2, buf);
 			}
 			glViewport(mCachedVP[0],mCachedVP[1],mCachedVP[2],mCachedVP[3]);
 			glClearColor(0,0,0,0);
@@ -405,7 +405,7 @@ void SplatRendererPlugin::drawSplats(MeshModel &m, RenderMode &rm)
 	glClientActiveTexture(GL_TEXTURE0);
 }
 
-void SplatRendererPlugin::UniformParameters::update(float* mv, float* proj, int* vp)
+void SplatRendererPlugin::UniformParameters::update(float* mv, float* proj, GLint* vp)
 {
 	// extract the uniform scale
 	float scale = vcg::Point3f(mv[0],mv[1],mv[2]).Norm();
