@@ -35,7 +35,7 @@
 #include <vcg/complex/trimesh/clean.h>
 #include <vcg/complex/trimesh/update/color.h>
 #include <vcg/complex/trimesh/update/normal.h>
-#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/quality.h>
 
 #include <wrap/gl/trimesh.h>
 
@@ -66,7 +66,9 @@ static GLuint vs, fs, shdrID;
 
 AmbientOcclusionPlugin::AmbientOcclusionPlugin() 
 { 
-	typeList << FP_AMBIENT_OCCLUSION;
+	typeList 
+	<< FP_VERT_AMBIENT_OCCLUSION
+	<< FP_FACE_AMBIENT_OCCLUSION;
 	
 	foreach(FilterIDType tt , types())
 		actionList << new QAction(filterName(tt), this);
@@ -89,7 +91,8 @@ const QString AmbientOcclusionPlugin::filterName(FilterIDType filterId)
 {
 	switch(filterId)
 	{
-		case FP_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion"); 
+		case FP_VERT_AMBIENT_OCCLUSION :  return QString("Vertex Ambient Occlusion"); 
+		case FP_FACE_AMBIENT_OCCLUSION :  return QString("Face Ambient Occlusion"); 
 		default : assert(0); 
 	}
 	
@@ -100,7 +103,8 @@ const QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId)
 {
 	switch(filterId)
 	{
-		case FP_AMBIENT_OCCLUSION :  return QString("Generates environment occlusions values for the loaded mesh"); 
+		case FP_VERT_AMBIENT_OCCLUSION :  return QString("Generates environment occlusions values for the loaded mesh"); 
+		case FP_FACE_AMBIENT_OCCLUSION :  return QString("Generates environment occlusions values for the loaded mesh"); 
 		default : assert(0); 
 	}
 
@@ -117,7 +121,8 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 {
 	switch(ID(action))
 	{
-		case FP_AMBIENT_OCCLUSION:
+		case FP_FACE_AMBIENT_OCCLUSION:
+		case FP_VERT_AMBIENT_OCCLUSION:
 			parlst.addFloat("dirBias",0,"Directional Bias [0..1]","The balance between a uniform and a directionally biased set of lighting direction<br>:"
 											" - 0 means light came only uniformly from any direction<br>"
 											" - 1 means that all the light cames from the specified cone of directions <br>"
@@ -134,7 +139,9 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Fil
 }
 bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSet & par, vcg::CallBackPos *cb)
 {
-	assert(filter->text() == filterName(FP_AMBIENT_OCCLUSION));
+	if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION ) perFace=true;
+	else perFace = false;
+	
 	useGPU = par.getBool("useGPU");
 	useVBO = par.getBool("useVBO");
 	depthTexSize = par.getInt("depthTexSize");
@@ -145,7 +152,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPa
 	Point3f coneDir = par.getPoint3f("coneDir");
 	float coneAngle = par.getFloat("coneAngle");
 	
-
+	if(perFace) {
+		m.cm.face.EnableQuality();
+		m.cm.face.EnableColor();
+	}
 	std::vector<Point3f> unifDirVec;
 	GenNormal<float>::Uniform(numViews,unifDirVec);
 	
@@ -185,12 +195,11 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 	tInit.start();
 	tAll.start();
 
- 	GLfloat *occlusion = new GLfloat[m.cm.vn];
-	typedef std::vector<vcg::Point3f> vectP3f;
-	vectP3f::iterator vi;
+	vector<vcg::Point3f>::iterator vi;
 
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
+	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -203,6 +212,8 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 		m.glw.Update();
 	}
 	
+	tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0);
+	
 	if(useGPU)
 	{	
 		vertexCoordsToTexture( m );
@@ -210,21 +221,14 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);  //final.rgba = min(2^31, src.rgba*1 + dest.rgba*1);
 	}
-	else
-	{
-		//Yes, the loop down there is needed
-		for (int j=0; j<m.cm.vn; ++j)
-			occlusion[j] = 0.0f;
-	}
 
-	//Generates the views to be used just the first time
-	//(to keep view directions always the same)
-	//or if the user changed the number of requested views
-	static bool first = true;
 	
 	tInitElapsed = tInit.elapsed();
+	vector<Point3f> faceCenterVec;
 	
-	int c=0;
+	for(int i=0;i<m.cm.fn;i++)
+		faceCenterVec.push_back(Barycenter(m.cm.face[i]));
+	
 	for (vi = posVect.begin(); vi != posVect.end(); vi++)
 	{
 		setCamera(*vi, m.cm.bbox);
@@ -242,7 +246,7 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			glColorMask(0, 0, 0, 0);
-				renderMesh(m);
+			m.glw.DrawFill<GLW::NMNone, GLW::CMNone, GLW::TMNone>();
 			glColorMask(1, 1, 1, 1);
 
 			glDisable(GL_POLYGON_OFFSET_FILL);
@@ -254,20 +258,18 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 		}
 		else
 		{
-			if(glIsEnabled(GL_BLEND))
-				glDisable(GL_BLEND);
-
+			glDisable(GL_BLEND);
 			glClear(GL_DEPTH_BUFFER_BIT);
-
 			// FIRST PASS - fill depth buffer
 			glColorMask(0, 0, 0, 0);
-				renderMesh(m);
+			m.glw.DrawFill<GLW::NMNone, GLW::CMNone, GLW::TMNone>();
 			glColorMask(1, 1, 1, 1);
 
 			glDisable(GL_POLYGON_OFFSET_FILL);
 
 			// SECOND PASS - use depth buffer to check occlusion
-			generateOcclusionSW(m, occlusion);
+			if(perFace) generateFaceOcclusionSW(m,faceCenterVec);
+			else generateOcclusionSW(m);
 		}
 
 	}
@@ -278,9 +280,10 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
 	}
-	else
-		applyOcclusionSW(m, occlusion);
-	tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
+
+	if(perFace) tri::UpdateColor<CMeshO>::FaceQualityGray(m.cm);
+	else tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
+	
 	Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
 
@@ -311,14 +314,8 @@ bool AmbientOcclusionPlugin::processGL(AOGLWidget *aogl, MeshModel &m, vector<Po
 	if (useVBO)
 	m.glw.ClearHint(vcg::GLW::HNUseVBO);
 
-	delete [] occlusion;
-
 	return true;
 } 
-void AmbientOcclusionPlugin::renderMesh(MeshModel &m)
-{
-	m.glw.DrawFill<vcg::GLW::NMNone, vcg::GLW::CMNone, vcg::GLW::TMNone>();
-}
 
 void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertices)
 {
@@ -717,7 +714,7 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 	glUseProgram(0);
 }
 
-void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusion)
+void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m)
 {
 	GLdouble resCoords[3];
 	GLdouble mvMatrix_f[16];
@@ -732,12 +729,9 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 	glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
 	cameraDir.Normalize();
-
-	Point3<CMeshO::ScalarType> vp;
-	Point3<CMeshO::ScalarType> vn;
 	for (int i=0; i<m.cm.vn; ++i)
 	{
-		vp = m.cm.vert[i].P();
+		Point3<CMeshO::ScalarType> &vp = m.cm.vert[i].P();
 		gluProject(vp.X(), vp.Y(), vp.Z(),
 				   (const GLdouble *) mvMatrix_f, (const GLdouble *) prMatrix_f, (const GLint *) viewpSize,
 				   &resCoords[0], &resCoords[1], &resCoords[2] );
@@ -747,12 +741,46 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m, GLfloat *occlusio
 		
 		if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
 		{
-			occlusion[i] += max(m.cm.vert[i].cN()*cameraDir, 0.0f);
+			 m.cm.vert[i].Q() += max(m.cm.vert[i].cN()*cameraDir, 0.0f);
 		}
 	}
 
 	delete [] dFloat;
 }
+
+void AmbientOcclusionPlugin::generateFaceOcclusionSW(MeshModel &m, vector<Point3f> & faceCenterVec)
+{
+	GLdouble resCoords[3];
+	GLdouble mvMatrix_f[16];
+	GLdouble prMatrix_f[16];
+	GLint viewpSize[4];
+	GLfloat *dFloat = new GLfloat[depthTexArea];
+	glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix_f);
+	glGetDoublev(GL_PROJECTION_MATRIX, prMatrix_f);
+	glGetIntegerv(GL_VIEWPORT, viewpSize);
+
+	glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
+
+	cameraDir.Normalize();
+	for (uint i=0; i<faceCenterVec.size(); ++i)
+	{
+		Point3<CMeshO::ScalarType> &vp = faceCenterVec[i];
+		gluProject(vp.X(), vp.Y(), vp.Z(),
+							 (const GLdouble *) mvMatrix_f, (const GLdouble *) prMatrix_f, (const GLint *) viewpSize,
+							 &resCoords[0], &resCoords[1], &resCoords[2] );
+		
+		int x = floor(resCoords[0]);
+		int y = floor(resCoords[1]);
+		
+		if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
+		{
+			m.cm.face[i].Q() += max(m.cm.face[i].cN()*cameraDir, 0.0f);
+		}
+	}
+
+delete [] dFloat;
+}
+
 void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 {
 	const unsigned int texelNum = maxTexSize*maxTexSize;
@@ -760,7 +788,6 @@ void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 	GLfloat *result = new GLfloat[texelNum*4];
 
 	unsigned int nVert=0;
-	float maxvalue = 0.0f, minvalue = 100000.0f;
 
 	for (unsigned int n=0; n<numTexPages; ++n)
 	{
@@ -776,11 +803,6 @@ void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
 	delete [] result;
 }
 
-void AmbientOcclusionPlugin::applyOcclusionSW(MeshModel &m, GLfloat *aoValues)
-{
-	for (int i = 0; i < m.cm.vn; i++)
-		m.cm.vert[i].Q() = aoValues[i];
-}
 
 void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f, GLuint &pr)
 {	

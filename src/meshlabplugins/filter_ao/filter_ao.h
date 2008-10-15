@@ -58,23 +58,32 @@ protected:
 
 	bool useGPU,
 	     useVBO,
-		 errInit;
+		   errInit;
+	bool perFace;
 public:
 	unsigned int depthTexSize,
 	             maxTexSize;
 
 // Methods
 public:
-	enum { FP_AMBIENT_OCCLUSION  } ;
+	enum { FP_VERT_AMBIENT_OCCLUSION,
+         FP_FACE_AMBIENT_OCCLUSION } ;
 
 	AmbientOcclusionPlugin();
 	~AmbientOcclusionPlugin();
 	
 	virtual const QString     filterName      (FilterIDType filter);
-	virtual const QString     filterInfo      (FilterIDType filter);
+	virtual const QString			filterInfo(FilterIDType filterId);
+
 	virtual const int         getRequirements (QAction *action);
 	virtual       bool        autoDialog      (QAction *) {return true;}
-	virtual const FilterClass getClass(QAction *) {return MeshFilterInterface::VertexColoring; };
+	
+	virtual const FilterClass getClass(QAction *filter) 
+	{
+		if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION) return MeshFilterInterface::FaceColoring;
+	   	else return MeshFilterInterface::VertexColoring; 
+	};
+	
 	virtual       void        initParameterSet(QAction *,
 	                                           MeshModel &/*m*/,
 	                                           FilterParameterSet & /*parent*/);
@@ -90,13 +99,13 @@ public:
 
 	void  vertexCoordsToTexture (MeshModel &m);
 
-	void  renderMesh            (MeshModel &m);
 	void  setCamera             (vcg::Point3f camDir,
 	                             vcg::Box3f &meshBBox);
 
 	void  generateOcclusionHW   ();
-	void  generateOcclusionSW   (MeshModel &m,
-	                             GLfloat *occlusion);
+	void  generateOcclusionSW   (MeshModel &m);
+	void  generateFaceOcclusionSW(MeshModel &m, std::vector<vcg::Point3f> & faceCenterVec);
+
 
 	void  applyOcclusionHW      (MeshModel &m);
 	void  applyOcclusionSW      (MeshModel &m,
