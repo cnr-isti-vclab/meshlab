@@ -51,6 +51,8 @@
 #include "mlsutils.h"
 #include "../meshfilter/refine_loop.h"
 
+#include "smallcomponentselection.h"
+
 using namespace GaelMls;
 
 // Constructor usually performs only two simple tasks of filling the two lists
@@ -63,7 +65,8 @@ MlsPlugin::MlsPlugin()
 		<< FP_RIMLS_PROJECTION << FP_APSS_PROJECTION
 // 		<< FP_RIMLS_AFRONT << FP_APSS_AFRONT
 		<< FP_RIMLS_MCUBE << FP_APSS_MCUBE
-		<< FP_RADIUS_FROM_DENSITY;
+		<< FP_RADIUS_FROM_DENSITY
+		<< FP_SELECT_SMALL_COMPONENTS;
 
 // 	initFilterList(this);
 	foreach(FilterIDType tt , types())
@@ -75,20 +78,26 @@ MlsPlugin::MlsPlugin()
 const QString MlsPlugin::filterName(FilterIDType filterId)
 {
 	switch(filterId) {
-		case FP_APSS_PROJECTION     : return QString("MLS projection/APSS");
-		case FP_RIMLS_PROJECTION    : return QString("MLS projection/#####");
-		case FP_APSS_AFRONT         : return QString("MLS meshing/APSS Advancing Front");
-		case FP_RIMLS_AFRONT        : return QString("MLS meshing/##### Advancing Front");
-		case FP_APSS_MCUBE          : return QString("MLS meshing/APSS Marching Cubes");
-		case FP_RIMLS_MCUBE         : return QString("MLS meshing/##### Marching Cubes");
-		case FP_RADIUS_FROM_DENSITY : return QString("Estimate radius from density");
+		case FP_APSS_PROJECTION         : return QString("MLS projection (APSS)");
+		case FP_RIMLS_PROJECTION        : return QString("MLS projection (#####)");
+		case FP_APSS_AFRONT             : return QString("MLS meshing/APSS Advancing Front");
+		case FP_RIMLS_AFRONT            : return QString("MLS meshing/##### Advancing Front");
+		case FP_APSS_MCUBE              : return QString("Marching Cubes (APSS)");
+		case FP_RIMLS_MCUBE             : return QString("Marching Cubes (#####)");
+		case FP_RADIUS_FROM_DENSITY     : return QString("Estimate radius from density");
+		case FP_SELECT_SMALL_COMPONENTS : return QString("Small component selection");
 		default : assert(0);
 	}
 }
 
-
 const MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
 {
+	int id = ID(a);
+	if (id == FP_SELECT_SMALL_COMPONENTS)
+	{
+		return MeshFilterInterface::Selection;
+	}
+	
 	return MeshFilterInterface::PointSet;
 }
 
@@ -96,35 +105,41 @@ const MeshFilterInterface::FilterClass MlsPlugin::getClass(QAction *a)
 // (this string is used in the About plugin dialog)
 const QString MlsPlugin::filterInfo(FilterIDType filterId)
 {
-	switch(filterId) {
-		case FP_RIMLS_PROJECTION :  return QString(
-			"Project a mesh (or a point set) onto the MLS surface defined by itself or another point set."
-			"This is the ##### MLS variant.\n"
-		);
-		case FP_APSS_PROJECTION :  return QString(
-			"Project a mesh (or a point set) onto the MLS surface defined by itself or another point set."
-			"This is the algebraic point set surfaces (APSS) variant.\n"
+	QString str = "";
+	if (filterId & _PROJECTION_)
+	{
+		str += "Project a mesh (or a point set) onto the MLS surface defined by itself or another point set.\n";
+	}
+
+	if (filterId & _MCUBE_)
+	{
+		str +=
+			"Extract the iso-surface (as a mesh) of a MLS surface defined by the current point set (or mesh)"
+			"using the marching cubes algorithm.\n";
+	}
+
+	if (filterId & _APSS_)
+	{
+		str +=
+			"\nThis is the <i>algebraic point set surfaces</i> (APSS) variant which is based on"
+			"the local fitting of algebraic spheres. It requires points equipped with oriented normals.\n"
 			"See [Guennebaud and Gross, Algebraic Point Set Surfaces, Siggraph 2007]\n"
 			"and [Guennebaud et al., Dynamic Sampling and Rendering of APSS, Eurographics 2008]\n"
-			"for all the details about APSS.\n"
-		);
-		case FP_RIMLS_AFRONT :  return QString(
-			"Advancing front meshing of the RIMLS surface.\n"
-		);
-		case FP_APSS_AFRONT :  return QString(
-			"Advancing front meshing of the APSS surface."
-		);
-		case FP_RIMLS_MCUBE :  return QString(
-			"Marching cubes meshing of the RIMLS surface.\n"
-		);
-		case FP_APSS_MCUBE :  return QString(
-			"Marching cubes meshing of the APSS surface."
-		);
-		case FP_RADIUS_FROM_DENSITY :  return QString(
-			"Estimate the local point spacing (aka radius) around each vertex using a basic estimate of the local density."
-		);
-		default : assert(0);
+			"for all the details about APSS.\n";
 	}
+
+	if (filterId & _RIMLS_)
+	{
+		str +=
+			"\nThis is the ##### MLS variant.\n";
+	}
+
+	if (filterId == FP_RADIUS_FROM_DENSITY)
+		str = "Estimate the local point spacing (aka radius) around each vertex using a basic estimate of the local density.";
+	else if (filterId == FP_SELECT_SMALL_COMPONENTS)
+		str = "Select the small disconnected components of a mesh.";
+
+	return str;
 }
 
 
@@ -141,6 +156,28 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 	int id = ID(action);
 	MeshModel *target = md.mm();
 
+	if (id == FP_SELECT_SMALL_COMPONENTS)
+	{
+		parlst.addFloat("NbFaceRatio",
+										0.1,
+										"Small component ratio",
+										"This ratio (between 0 and 1) defines the meaning of <i>small</i> as the threshold ratio between the number of faces"
+										"of the largest component and the other ones. A larger value will select more components.");
+		parlst.addBool( "NonClosedOnly",
+										false,
+										"Select only non closed components",
+										"");
+		return;
+	}
+	else if (id == FP_RADIUS_FROM_DENSITY)
+	{
+		parlst.addInt("NbNeighbors",
+									16,
+									"Number of neighbors",
+									"Number of neighbors used to estimate the local density. Larger values lead to smoother variations.");
+		return;
+	}
+
 	if (id & _PROJECTION_)
 	{
 		parlst.addMesh( "ControlMesh", target, "Point set",
@@ -153,20 +190,23 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 										"If checked, only selected vertices will be projected.");
 	}
 
-	parlst.addFloat("FilterScale",
-									2.0,
-									"MLS - Filter scale",
-									"Scale of the spatial low pass filter.\n"
-									"It is relative to the radius (local point spacing) of the vertices.");
-	parlst.addFloat("ProjectionAccuracy",
-									1e-4,
-									"Projection - Accuracy (adv)",
-									"Threshold value used to stop the projections.\n"
-									"This value is scaled by the mean point spacing to get the actual threshold.");
-	parlst.addInt(  "MaxProjectionIters",
-									15,
-									"Projection - Max iterations (adv)",
-									"Max number of iterations for the projection.");
+	if ( (id & _APSS_) || (id & _RIMLS_) )
+	{
+		parlst.addFloat("FilterScale",
+										2.0,
+										"MLS - Filter scale",
+										"Scale of the spatial low pass filter.\n"
+										"It is relative to the radius (local point spacing) of the vertices.");
+		parlst.addFloat("ProjectionAccuracy",
+										1e-4,
+										"Projection - Accuracy (adv)",
+										"Threshold value used to stop the projections.\n"
+										"This value is scaled by the mean point spacing to get the actual threshold.");
+		parlst.addInt(  "MaxProjectionIters",
+										15,
+										"Projection - Max iterations (adv)",
+										"Max number of iterations for the projection.");
+	}
 
 	if (id & _APSS_)
 	{
@@ -419,7 +459,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		{
 			points.EnableRadius();
 		}
-		int nbNeighbors = 16;
+		int nbNeighbors = par.getInt("NbNeighbors");
 
 		assert(points.size()>=2);
 		KdTree<float> knn(ConstDataWrapper<vcg::Point3f>(&points[0].cP(), points.size(),
@@ -431,6 +471,14 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			knn.doQueryK(points[i].cP());
 			points[i].R() = 2. * sqrt(knn.getNeighborSquaredDistance(0)/float(knn.getNofFoundNeighbors()));
 		}
+	}
+	else if (id == FP_SELECT_SMALL_COMPONENTS)
+	{
+		MeshModel* mesh = md.mm();
+		mesh->updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+		bool nonClosedOnly = par.getBool("NonClosedOnly");
+		float ratio = par.getFloat("NbFaceRatio");
+		vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, ratio, nonClosedOnly);
 	}
 	else
 	{
@@ -562,98 +610,11 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			// extra zero detection and removal
 			{
 				mesh->updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-				std::vector< std::vector<CFaceO*> > regions;
-
-				bool nonClosedOnly = false;
-				int faceSeed = 0;
-				for(;;)
-				{
-					// find the first free border
-					bool foundSeed = false;
-					while (faceSeed<mesh->cm.face.size())
-					{
-						CFaceO& f = mesh->cm.face[faceSeed];
-						if (!f.IsS())
-						{
-							if (nonClosedOnly)
-							{
-								for (int k=0; k<3; ++k)
-									if (f.IsB(k))
-									{
-										foundSeed = true;
-										break;
-									}
-							}
-							else
-								foundSeed = true;
-							if (foundSeed)
-								break;
-						}
-						++faceSeed;
-					}
-					if (!foundSeed) // no more seed, stop
-						break;
-					
-					// expand the region from this face...
-					regions.resize(regions.size()+1);
-					std::vector<CFaceO*> activefaces;
-					activefaces.push_back(&mesh->cm.face[faceSeed]);
-					while (!activefaces.empty())
-					{
-						CFaceO* f = activefaces.back();
-						activefaces.pop_back();
-						if (f->IsS())
-							continue;
-
-						f->SetS();
-						regions.back().push_back(f);
-						for (int k=0; k<3; ++k)
-						{
-							if (f->IsB(k))
-								continue;
-							CFaceO* of = f->FFp(k);
-							if (!of->IsS())
-								activefaces.push_back(of);
-						}
-					}
-					++faceSeed;
-				}
-
-				//
-				vcg::tri::UpdateSelection<CMeshO>::ClearFace(mesh->cm);
-				int total_selected = 0;
-				int maxComponent = 0;
-				for (int i=0; i<regions.size(); ++i)
-				{
-					//std::cout << "Component " << i << " -> " << regions[i].size() << "\n";
-					total_selected += regions[i].size();
-					maxComponent = std::max<int>(maxComponent,regions[i].size());
-				}
-				int remaining = mesh->cm.face.size() - total_selected;
-				int th = std::max(maxComponent,remaining)/10;
-				for (int i=0; i<regions.size(); ++i)
-				{
-					if (regions[i].size()<th)
-					{
-						for (int j=0; j<regions[i].size(); ++j)
-							regions[i][j]->SetS();
-					}
-				}
-
-				// delete the selection (face and vertices)
-				{
-					CMeshO::FaceIterator fi;
-					CMeshO::VertexIterator vi;
-					tri::UpdateSelection<CMeshO>::ClearVertex(mesh->cm);
-					tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(mesh->cm);
-					for(fi=mesh->cm.face.begin();fi!=mesh->cm.face.end();++fi)
-						if (!(*fi).IsD() && (*fi).IsS() )
-							tri::Allocator<CMeshO>::DeleteFace(mesh->cm,*fi);
-					for(vi=mesh->cm.vert.begin();vi!=mesh->cm.vert.end();++vi)
-						if (!(*vi).IsD() && (*vi).IsS() )
-							tri::Allocator<CMeshO>::DeleteVertex(mesh->cm,*vi);
-					mesh->clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
-				}
+				// selection...
+				vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, 0.1);
+				// deletion...
+				vcg::tri::SmallComponent<CMeshO>::DeleteFaceVert(mesh->cm);
+				mesh->clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 			}
 
 			Log(0, "Marching cubes MLS meshing done.");

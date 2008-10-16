@@ -47,14 +47,14 @@ private:
 
 	struct GridElement
 	{
-			VectorType position;
-			ScalarType value;
+		VectorType position;
+		ScalarType value;
 	};
 
 	template <typename T>
 	inline bool IsFinite(T value)
 	{
-			return (value>=-std::numeric_limits<T>::max()) && (value<=std::numeric_limits<T>::max());
+		return (value>=-std::numeric_limits<T>::max()) && (value<=std::numeric_limits<T>::max());
 	}
 
 public:
@@ -100,14 +100,8 @@ public:
 			return;
 		}
 
-
 		mCache = new GridElement[(mMaxBlockSize)*(mMaxBlockSize)*(mMaxBlockSize)];
-
-//     QueryGrid* closestGrid = new QueryGrid(&(mpMesh->editVertices()), 7, diag.maxComponent(), false);
-//     closestGrid->setMaxNofNeighbors(1);
-
 		ScalarType step = vcg::MaxCoeff(diag)/ScalarType(resolution);
-		//eps = mClusteringThreshold * step;
 
 		unsigned int nofCells[3];
 		unsigned int nofBlocks[3];
@@ -154,8 +148,8 @@ public:
 					GridElement& el = mCache[(ci[2]*mMaxBlockSize + ci[1])*mMaxBlockSize + ci[0]];
 					el.position = origin + VectorType(ci[0],ci[1],ci[2]) * step;
 					el.value = mpSurface->potential(el.position);
-// 					if (!mpSurface->isInDomain(el.position))
-// 						el.value = invalidValue;
+					if (!mpSurface->isInDomain(el.position))
+						el.value = invalidValue;
 				}
 			}
 
