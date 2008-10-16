@@ -242,7 +242,8 @@ Section Uninstall
   RMDir "$INSTDIR"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}" "${PRODUCT_DIR_REGKEY_S}"
+  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}" 
+  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY_S}"
   SetAutoClose true
 SectionEnd
 
