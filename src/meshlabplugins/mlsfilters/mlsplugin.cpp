@@ -41,8 +41,9 @@
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/create/advancing_front.h>
 #include <vcg/complex/trimesh/create/marching_cubes.h>
-#include <apps/sample/trimesh_isosurface/simple_volume.h>
-#include <apps/sample/trimesh_isosurface/trivial_walker.h>
+// #include <apps/sample/trimesh_isosurface/simple_volume.h>
+// #include <apps/sample/trimesh_isosurface/trivial_walker.h>
+#include "mlsmarchingcube.h"
 
 #include "mlsplugin.h"
 #include "rimls.h"
@@ -61,7 +62,7 @@ MlsPlugin::MlsPlugin()
 	typeList
 		<< FP_RIMLS_PROJECTION << FP_APSS_PROJECTION
 // 		<< FP_RIMLS_AFRONT << FP_APSS_AFRONT
-		/*<< FP_RIMLS_MCUBE << FP_APSS_MCUBE*/
+		<< FP_RIMLS_MCUBE << FP_APSS_MCUBE
 		<< FP_RADIUS_FROM_DENSITY;
 
 // 	initFilterList(this);
@@ -211,14 +212,6 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 
 	if (id & _AFRONT_)
 	{
-// 		parlst.addInt(  "MaxSubdivisions",
-// 										0,
-// 										"Refinement - Max subdivisions",
-// 										"");
-// 		parlst.addFloat("ThAngleInDegree",
-// 										2,
-// 										"Refinement - Crease angle (degree)",
-// 										"");
 	}
 
 	if (id & _MCUBE_)
@@ -232,13 +225,6 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 
 const int MlsPlugin::getRequirements(QAction *action)
 {
-// 	switch(ID(action))
-// 	{
-// 		case RIMLS_PROJECTION:
-// 		case APSS_PROJECTION:
-// 					return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
-// 		default: assert(0);
-// 	}
 	return 0;
 }
 
@@ -251,7 +237,7 @@ struct EdgeAnglePredicate
 	Scalar thCosAngle;
 	bool operator()(vcg::face::Pos<typename MESH_TYPE::FaceType> ep) const
 	{
-		// FIXME why the following fails:
+		// FIXME why does the following fails:
 //     vcg::face::Pos<typename MESH_TYPE::FaceType> op = ep;
 //     op.FlipF();
 //     if (op.f)
@@ -555,49 +541,126 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		{
 			using namespace vcg;
 			// create a new mesh
-			mesh = md.addNewMesh("afront mesh");
+			mesh = md.addNewMesh("mc_mesh");
 
-			vcg::SimpleVolume<vcg::SimpleVoxel> volume;
-			typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel> >	MlsWalker;
-			typedef vcg::tri::MarchingCubes<CMeshO, MlsWalker>	MlsMarchingCubes;
+			typedef vcg::tri::MlsWalker<CMeshO,MlsSurface<CMeshO> > MlsWalker;
+			typedef vcg::tri::MarchingCubes<CMeshO, MlsWalker> MlsMarchingCubes;
 			MlsWalker walker;
+			walker.resolution = par.getInt("Resolution");
 
-			vcg::Box3<float> aabb = mls->boundingBox();
-			vcg::Point3f diag = aabb.max-aabb.min;
-			aabb.min -= diag * 0.1;
-			aabb.max += diag * 0.1;
-			diag = aabb.max-aabb.min;
-			const int gridSize = par.getInt("Resolution");
-			volume.Init(Point3i(gridSize,gridSize,gridSize));
-			for(int i=0;i<gridSize;i++)
+			// iso extraction
+			MlsMarchingCubes mc(mesh->cm, walker);
+			walker.BuildMesh<MlsMarchingCubes>(mesh->cm, *mls, mc, cb);
+
+			// accurate projection
+			for (unsigned int i = 0; i< mesh->cm.vert.size(); i++)
 			{
-				for(int j=0;j<gridSize;j++)
+				cb(1+98*i/mesh->cm.vert.size(), "MLS projection...");
+				mesh->cm.vert[i].P() = mls->project(mesh->cm.vert[i].P(), &mesh->cm.vert[i].N());
+			}
+
+			// extra zero detection and removal
+			{
+				mesh->updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+				std::vector< std::vector<CFaceO*> > regions;
+
+				bool nonClosedOnly = false;
+				int faceSeed = 0;
+				for(;;)
 				{
-					for(int k=0;k<gridSize;k++)
+					// find the first free border
+					bool foundSeed = false;
+					while (faceSeed<mesh->cm.face.size())
 					{
-						Point3f p =
-							Point3f(diag.X()*float(i)/float(gridSize),
-											diag.Y()*float(j)/float(gridSize),
-											diag.Z()*float(k)/float(gridSize)) + aabb.min;
-						volume.Val(i,j,k) = mls->potential(p);
-	// 					std::cout << volume.Val(i,j,k) << " ";
+						CFaceO& f = mesh->cm.face[faceSeed];
+						if (!f.IsS())
+						{
+							if (nonClosedOnly)
+							{
+								for (int k=0; k<3; ++k)
+									if (f.IsB(k))
+									{
+										foundSeed = true;
+										break;
+									}
+							}
+							else
+								foundSeed = true;
+							if (foundSeed)
+								break;
+						}
+						++faceSeed;
 					}
+					if (!foundSeed) // no more seed, stop
+						break;
+					
+					// expand the region from this face...
+					regions.resize(regions.size()+1);
+					std::vector<CFaceO*> activefaces;
+					activefaces.push_back(&mesh->cm.face[faceSeed]);
+					while (!activefaces.empty())
+					{
+						CFaceO* f = activefaces.back();
+						activefaces.pop_back();
+						if (f->IsS())
+							continue;
+
+						f->SetS();
+						regions.back().push_back(f);
+						for (int k=0; k<3; ++k)
+						{
+							if (f->IsB(k))
+								continue;
+							CFaceO* of = f->FFp(k);
+							if (!of->IsS())
+								activefaces.push_back(of);
+						}
+					}
+					++faceSeed;
+				}
+
+				//
+				vcg::tri::UpdateSelection<CMeshO>::ClearFace(mesh->cm);
+				int total_selected = 0;
+				int maxComponent = 0;
+				for (int i=0; i<regions.size(); ++i)
+				{
+					//std::cout << "Component " << i << " -> " << regions[i].size() << "\n";
+					total_selected += regions[i].size();
+					maxComponent = std::max<int>(maxComponent,regions[i].size());
+				}
+				int remaining = mesh->cm.face.size() - total_selected;
+				int th = std::max(maxComponent,remaining)/10;
+				for (int i=0; i<regions.size(); ++i)
+				{
+					if (regions[i].size()<th)
+					{
+						for (int j=0; j<regions[i].size(); ++j)
+							regions[i][j]->SetS();
+					}
+				}
+
+				// delete the selection (face and vertices)
+				{
+					CMeshO::FaceIterator fi;
+					CMeshO::VertexIterator vi;
+					tri::UpdateSelection<CMeshO>::ClearVertex(mesh->cm);
+					tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(mesh->cm);
+					for(fi=mesh->cm.face.begin();fi!=mesh->cm.face.end();++fi)
+						if (!(*fi).IsD() && (*fi).IsS() )
+							tri::Allocator<CMeshO>::DeleteFace(mesh->cm,*fi);
+					for(vi=mesh->cm.vert.begin();vi!=mesh->cm.vert.end();++vi)
+						if (!(*vi).IsD() && (*vi).IsS() )
+							tri::Allocator<CMeshO>::DeleteVertex(mesh->cm,*vi);
+					mesh->clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
 				}
 			}
 
-			MlsMarchingCubes mc(mesh->cm, walker);
-			walker.BuildMesh<MlsMarchingCubes>(mesh->cm, volume, mc, (gridSize*gridSize)/10);
-
-	// 		vcg::tri::MarchingCubeMLS<CMeshO> mcubes(mesh->cm, *mls);
-	// 		mcubes.BuildMesh(cb);
-	// 		afront._SeedFace();
-	// 		for (int i=0; i<20120; ++i)
-	// 			afront.AddFace();
 			Log(0, "Marching cubes MLS meshing done.");
 		}
 
 		delete mls;
-		if (par.getMesh("ControlMesh")!=pPoints)
+		if ( (id & _PROJECTION_) && par.getMesh("ControlMesh")!=pPoints)
 		{
 			delete pPoints;
 		}

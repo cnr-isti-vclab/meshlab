@@ -61,6 +61,18 @@ inline Point3<Scalar> Max(Point3<Scalar> const & p1, Point3<Scalar> const & p2)
 }
 
 template <typename Scalar>
+inline Scalar MaxCoeff(Point3<Scalar> const & p)
+{
+	return std::max(std::max(p.X(), p.Y()), p.Z());
+}
+
+template <typename Scalar>
+inline Scalar MinCoeff(Point3<Scalar> const & p)
+{
+	return std::min(std::min(p.X(), p.Y()), p.Z());
+}
+
+template <typename Scalar>
 inline Scalar Dot(Point3<Scalar> const & p1, Point3<Scalar> const & p2)
 {
 	return p1.X() * p2.X() + p1.Y() * p2.Y() + p1.Z() * p2.Z();

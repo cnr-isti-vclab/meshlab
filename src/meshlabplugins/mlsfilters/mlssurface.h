@@ -67,6 +67,10 @@ class MlsSurface
 			mProjectionAccuracy = 1e-4;
 			mBallTree = 0;
 			mGradientHint = MLS_GRADIENT_APPROX;
+
+			mDomainMinNofNeighbors = 4;
+			mDomainRadiusScale = 1.6;
+			mDomainNormalScale = 0.85;
 		}
 
 		/** \returns the value of the reconstructed scalar field at point \a x */
@@ -75,6 +79,8 @@ class MlsSurface
 		virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const = 0;
 		/** \returns the projection of point x onto the MLS surface, and optionnaly returns the normal in \a pNormal */
 		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const = 0;
+		/** \returns whether \a x is inside the restricted surface definition domain */
+		virtual bool isInDomain(const VectorType& x) const;
 
 		/** set the scale of the spatial filter */
 		void setFilterScale(Scalar v);
@@ -108,6 +114,8 @@ class MlsSurface
 																			size_t(&mPoints[1].cR()) - size_t(&mPoints[0].cR()));
 		}
 		const vcg::Box3<Scalar>& boundingBox() const { return mAABB; }
+
+		static const Scalar InvalidValue() { return 12345679810.11121314151617; }
 
 	protected:
 		void computeNeighborhood(const VectorType& x, bool computeDerivatives) const;
@@ -144,14 +152,16 @@ class MlsSurface
 		Scalar mAveragePointSpacing;
 		Scalar mProjectionAccuracy;
 
+		int mDomainMinNofNeighbors;
+		float mDomainRadiusScale;
+		float mDomainNormalScale;
+
 		// cached values:
 		mutable bool mCachedQueryPointIsOK;
 		mutable VectorType mCachedQueryPoint;
 		mutable Neighborhood<Scalar> mNeighborhood;
 		mutable std::vector<Scalar>  mCachedWeights;
 		mutable std::vector<VectorType>  mCachedWeightGradients;
-
-	static const Scalar InvalidValue() { return 12345679810.11121314151617;};
 };
 
 } // namespace

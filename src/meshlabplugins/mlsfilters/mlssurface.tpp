@@ -168,6 +168,47 @@ void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool comput
 	}
 }
 
+template<typename _MeshType>
+bool MlsSurface<_MeshType>::isInDomain(const VectorType& x) const
+{
+	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
+	{
+		computeNeighborhood(x, false);
+	}
+	int nb = mNeighborhood.size();
+	if (nb<mDomainMinNofNeighbors)
+		return false;
+
+	int i=0;
+	bool out = true;
+	bool hasNormal = true;
+	if ((mDomainNormalScale==1.f) || (!hasNormal))
+	{
+		while (out && i<nb)
+		{
+			int id = mNeighborhood.index(i);
+			Scalar rs2 = mPoints[id].cR() * mDomainRadiusScale;
+			rs2 = rs2*rs2;
+			out = mNeighborhood.squaredDistance(i) > rs2;
+			++i;
+		}
+	}
+	else
+	{
+		Scalar s = 1./(mDomainNormalScale*mDomainNormalScale) - 1.f;
+		while (out && i<nb)
+		{
+			int id = mNeighborhood.index(i);
+			Scalar rs2 = mPoints[id].cR() * mDomainRadiusScale;
+			rs2 = rs2*rs2;
+			Scalar dn = vcg::Dot(mPoints[id].cN(), x-mPoints[id].cP());
+			out = (mNeighborhood.squaredDistance(i) + s*dn*dn) > rs2;
+			++i;
+		}
+	}
+	return !out;
+}
+
 // template class MlsSurface<float>;
 // template class MlsSurface<double>;
 
