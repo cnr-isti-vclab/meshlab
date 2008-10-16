@@ -6,6 +6,7 @@
 
 #include <QtGui>
 #include "filter_morph.h"
+#include <vcg/complex/trimesh/allocate.h>
 
 using namespace vcg;
 
@@ -106,6 +107,16 @@ bool FilterMorph::applyFilter(QAction *filter, MeshModel &mm, FilterParameterSet
 			return false;
 		}
 		
+		//compact the vectors if they dont match up
+		if(mm.cm.vn != mm.cm.vert.size() )
+			vcg::tri::Allocator<CMeshO>::CompactVertexVector(mm.cm); 
+		if(mm.cm.fn != mm.cm.face.size() )
+			vcg::tri::Allocator<CMeshO>::CompactFaceVector(mm.cm); 
+		if(targetModel->cm.vn != targetModel->cm.vert.size() )
+			vcg::tri::Allocator<CMeshO>::CompactVertexVector(targetModel->cm); 
+		if(targetModel->cm.fn != targetModel->cm.face.size() )
+			vcg::tri::Allocator<CMeshO>::CompactFaceVector(targetModel->cm);
+
 		float percentage = par.getDynamicFloat(PercentMorph);
 		
 		tools.calculateMorph(percentage, &mm, targetModel);
