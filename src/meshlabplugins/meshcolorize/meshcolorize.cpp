@@ -356,10 +356,8 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshModel &m, FilterP
 			{
 				for (int i=0; i<3; i++)
 				{
-					vcg::Point2f newcoord;
-					newcoord=(*fi).WT(i).P();
+					vcg::Point2f newcoord((*fi).WT(i).P().X()-(int)(*fi).WT(i).P().X(),(*fi).WT(i).P().Y()-(int)(*fi).WT(i).P().Y());
 					QRgb val = tex.pixel(newcoord[0]*tex.width(),(1-newcoord[1])*tex.height()-1);
-					//Color4f col(val[0],qGreen(val),0,0);
 					(*fi).V(i)->C().SetRGB(qRed(val),qGreen(val),qBlue(val));
 					
 				}
