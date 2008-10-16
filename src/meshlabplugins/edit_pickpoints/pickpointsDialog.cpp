@@ -664,6 +664,8 @@ void PickPointsDialog::clearHighlightedPoint()
 	
 void PickPointsDialog::togglePickMode(bool checked){
 	if(checked){
+		QApplication::setOverrideCursor( QCursor(Qt::ArrowCursor) );
+		
 		//qDebug() << "pick mode";
 		currentMode = ADD_POINT;
 		//make sure radio button reflects this change
@@ -675,6 +677,8 @@ void PickPointsDialog::toggleMoveMode(bool checked)
 {
 	if(checked)
 	{
+		QApplication::setOverrideCursor( QCursor(Qt::SizeAllCursor) );
+		
 		//qDebug() << "move mode";
 		currentMode = MOVE_POINT;
 		//make sure the radio button reflects this change
@@ -686,6 +690,8 @@ void PickPointsDialog::toggleSelectMode(bool checked)
 {
 	if(checked)
 	{
+		QApplication::setOverrideCursor( QCursor(Qt::PointingHandCursor) );
+		
 		//qDebug() << "select mode";
 		currentMode = SELECT_POINT;
 		//make radio button reflect the change

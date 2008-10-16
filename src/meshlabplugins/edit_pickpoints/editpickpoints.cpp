@@ -29,6 +29,8 @@ EditPickPointsPlugin::EditPickPointsPlugin()
 	
 	pickPointsDialog = 0;
 	currentModel = 0;
+	
+	overrideCursorShape = 0;
 }
 
 //Constants
@@ -107,6 +109,11 @@ void EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
 {
 	//qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ...";
 	
+	//get the cursor
+	QCursor *cursor = QApplication::overrideCursor();	
+	if(cursor) overrideCursorShape = cursor->shape();
+	else overrideCursorShape = Qt::ArrowCursor;
+	
 	//set this so redraw can use it
 	glArea = gla;
 	
@@ -123,7 +130,6 @@ void EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
 	
 	//show the dialog
 	pickPointsDialog->show();
-	
 }
 
 void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea *gla)
@@ -136,6 +142,8 @@ void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea *gla)
 
 	//remove the dialog from the screen
 	pickPointsDialog->hide();
+	
+	QApplication::setOverrideCursor( QCursor(overrideCursorShape) );
 }
 
 void EditPickPointsPlugin::mousePressEvent(QMouseEvent *event, MeshModel &mm, GLArea *gla )

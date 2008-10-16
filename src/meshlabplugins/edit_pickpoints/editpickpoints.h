@@ -63,6 +63,8 @@ private:
 
 	//model we currently have
 	MeshModel *currentModel;
+	
+	int overrideCursorShape;
 };
 	
 #endif
