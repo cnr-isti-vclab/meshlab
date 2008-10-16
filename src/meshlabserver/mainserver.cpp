@@ -125,7 +125,7 @@ bool Open(MeshModel &mm, QString fileName)
 
 */
 
-bool Save(MeshModel *mm, QString fileName)
+bool Save(MeshModel *mm, int mask, QString fileName)
 {
 	// Opening files in a transparent form (IO plugins contribution is hidden to user)
 	QStringList filters;
@@ -152,8 +152,6 @@ bool Save(MeshModel *mm, QString fileName)
 		return false;
 	}
 	MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-	
-	int mask = 0;
 	
 	// optional saving parameters (like ascii/binary encoding)
 	FilterParameterSet savePar;
@@ -238,7 +236,12 @@ void Usage()
 		" -i [filename...]  mesh(s) that has to be loaded\n" 
 		" -o [filename...]  mesh(s) where to write the result(s)\n"
 		" -s filename		    script to be applied\n"
-		" -d filename       dump on a text file a list of all the filtering fucntion\n" 		 
+		" -d filename       dump on a text file a list of all the filtering fucntion\n" 
+		" -om options       data to save in the output files: vc -> vertex colors, vf -> vertex flags, vq -> vertex quality, vn-> vertex normals, vt -> vertex texture coords, "
+		" fc -> face colors, ff -> face flags, fq -> face quality, fn-> face normals, "
+		" wc -> wedge colors, wn-> wedge normals, wt -> wedge texture coords \n"
+		"Example:\n"
+		"	'meshlabserver -i input.obj -o output.ply -s meshclean.mlx -om vc fq wn'\n"
 		"\nNotes:\n\n"
 		"There can be multiple meshes loaded and the order they are listed matters because \n"
 		"filters that use meshes as parameters choose the mesh based on the order.\n"
@@ -258,6 +261,7 @@ int main(int argc, char *argv[])
 	QStringList meshNamesIn, meshNamesOut;
 	QString scriptName;
 	FILE *filterFP=0;
+	int mask=0;
 	if(argc < 3) Usage();
 	int i = 1;
 	while(i < argc)
@@ -274,15 +278,159 @@ int main(int argc, char *argv[])
 				}
 				i++; 
 				break; 
-			case 'o' :  
-				while( ((i+1) < argc) && argv[i+1][0] != '-')
+			case 'o' : 
 				{
-					meshNamesOut << argv[i+1];
-					printf("output mesh  %s\n", qPrintable(meshNamesOut.last()));
-					i++;
-				}
-				i++; 
+				if (argv[i][2]==0)
+				{
+					while( ((i+1) < argc) && argv[i+1][0] != '-')
+					{
+						meshNamesOut << argv[i+1];
+						printf("output mesh  %s\n", qPrintable(meshNamesOut.last()));
+						i++;
+					}
+					i++; 
 				break; 
+				}
+				else if (argv[i][2]=='m')
+				{
+					printf("Output mask:\n");
+					while( ((i+1) < argc) && argv[i+1][0] != '-')
+					{
+						switch (argv[i+1][0])
+						{
+						case 'v' :
+						{
+							switch (argv[i+1][1])
+							{
+								case 'c' :
+								{
+									printf("vertex color, ");
+									mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+									i++;
+									break;
+								}
+								case 'f' :
+								{
+									printf("vertex flags, ");
+									mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;
+									i++;
+									break;
+								}
+								case 'n' :
+								{
+									printf("vertex normals, ");
+									mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;
+									i++;
+									break;
+								}
+								case 'q' :
+								{
+									printf("vertex quality, ");
+									mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+									i++;
+									break;
+								}
+								case 't' :
+								{
+									printf("vertex tex coords, ");
+									mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+									i++;
+									break;
+								}
+								default :
+								{
+									i++;
+									break;
+								}
+							}
+							break;
+						}
+						case 'f' :
+						{
+							switch (argv[i+1][1])
+							{
+								case 'c' :
+								{
+									printf("face color, ");
+									mask |= vcg::tri::io::Mask::IOM_FACECOLOR;
+									i++;
+									break;
+								}
+								case 'f' :
+								{
+									printf("face flags, ");
+									mask |= vcg::tri::io::Mask::IOM_FACEFLAGS;
+									i++;
+									break;
+								}
+								case 'n' :
+								{
+									printf("face normals, ");
+									mask |= vcg::tri::io::Mask::IOM_FACENORMAL;
+									i++;
+									break;
+								}
+								case 'q' :
+								{
+									printf("face quality, ");
+									mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
+									i++;
+									break;
+								}
+								default :
+								{
+									i++;
+									break;
+								}
+							}
+							break;
+						}
+						case 'w' :
+						{
+							switch (argv[i+1][1])
+							{
+								case 'c' :
+								{
+									printf("wedge color, ");
+									mask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;
+									i++;
+									break;
+								}
+								case 'n' :
+								{
+									printf("wedge normals, ");
+									mask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;
+									i++;
+									break;
+								}
+								case 't' :
+								{
+									printf("wedge tex coords, ");
+									mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+									i++;
+									break;
+								}
+								default :
+								{
+									i++;
+									break;
+								}
+							}
+							break;
+						}
+						default:
+						{
+							i++;
+							break;
+						}
+						}
+						
+				}
+				i++;
+				break;
+				}
+
+			}
 			case 's' :  
 				if( argc <= i+1 ) {
 					printf("Missing script name\n");  
@@ -347,7 +495,7 @@ int main(int argc, char *argv[])
 	{
 		for(int i = 0; i < meshNamesOut.size(); i++)
 		{
-			Save(meshDocument.getMesh(i), meshNamesOut.at(i));
+			Save(meshDocument.getMesh(i), mask, meshNamesOut.at(i));
 			printf("Mesh %s saved with: %i vn %i fn\n", qPrintable(meshNamesOut.at(i)), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
 		}
 	}		
