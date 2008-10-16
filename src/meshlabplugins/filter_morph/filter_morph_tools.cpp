@@ -25,6 +25,16 @@ void MorphTools::calculateMorph(float percentage, MeshModel *sourceMeshModel, Me
 		return;
 	}
 	
+	//if the input data is bad
+	if(size_t(sourceMeshModel->cm.vn) != sourceMeshModel->cm.vert.size() 
+			|| size_t(sourceMeshModel->cm.fn) != sourceMeshModel->cm.face.size() 
+			|| size_t(destMeshModel->cm.vn) != destMeshModel->cm.vert.size()
+			|| size_t(destMeshModel->cm.fn) != destMeshModel->cm.face.size() )
+	{
+		qDebug() << "bad input to calculateMorph, vertex or face vectors not compressed";
+		return;
+	}
+	
 	float morphRatio = percentage/100.0;
 	//qDebug() << "Ratio is: " << morphRatio;
 	
@@ -34,12 +44,11 @@ void MorphTools::calculateMorph(float percentage, MeshModel *sourceMeshModel, Me
 	{
 		std::vector<CVertexO> &destVertexVector = destMeshModel->cm.vert;
 		
-		std::vector<CVertexO> *sourceVertexVector = new std::vector<CVertexO>(sourceMeshModel->cm.vert);
 		std::vector<CVertexO> &vertexToChangeVector = sourceMeshModel->cm.vert;
 		
 		//TODO figure out what to do with the source vertex vector!!!
 		
-		for(int i=0; i < sourceVertexVector->size(); i++)
+		for(int i=0; i < vertexToChangeVector.size(); i++)
 		{
 		/*
 			qDebug() << "before changing x: " << vertexToChangeVector.at(i).P()[0]
@@ -49,13 +58,13 @@ void MorphTools::calculateMorph(float percentage, MeshModel *sourceMeshModel, Me
 		*/
 			
 			//get new x
-			vertexToChangeVector.at(i).P()[0] = calcNewPoint(sourceVertexVector->at(i).P()[0],
+			vertexToChangeVector.at(i).P()[0] = calcNewPoint(vertexToChangeVector.at(i).P()[0],
 								destVertexVector.at(i).P()[0], morphRatio);
 			//get new y
-			vertexToChangeVector.at(i).P()[1] = calcNewPoint(sourceVertexVector->at(i).P()[1],
+			vertexToChangeVector.at(i).P()[1] = calcNewPoint(vertexToChangeVector.at(i).P()[1],
 								destVertexVector.at(i).P()[1], morphRatio);
 			//get new z
-			vertexToChangeVector.at(i).P()[2] = calcNewPoint(sourceVertexVector->at(i).P()[2],
+			vertexToChangeVector.at(i).P()[2] = calcNewPoint(vertexToChangeVector.at(i).P()[2],
 								destVertexVector.at(i).P()[2], morphRatio);
 		/*
 			qDebug() << "after changing x: " << vertexToChangeVector.at(i).P()[0]
@@ -65,23 +74,20 @@ void MorphTools::calculateMorph(float percentage, MeshModel *sourceMeshModel, Me
 			
 			//now adjust the normals
 			//get new x for normal
-			vertexToChangeVector.at(i).N()[0] = calcNewPoint(sourceVertexVector->at(i).N()[0],
+			vertexToChangeVector.at(i).N()[0] = calcNewPoint(vertexToChangeVector.at(i).N()[0],
 								destVertexVector.at(i).N()[0], morphRatio);
 			//get new y for normal
-			vertexToChangeVector.at(i).N()[1] = calcNewPoint(sourceVertexVector->at(i).N()[1],
+			vertexToChangeVector.at(i).N()[1] = calcNewPoint(vertexToChangeVector.at(i).N()[1],
 								destVertexVector.at(i).N()[1], morphRatio);
 			//get new z for normal
-			vertexToChangeVector.at(i).N()[2] = calcNewPoint(sourceVertexVector->at(i).N()[2],
+			vertexToChangeVector.at(i).N()[2] = calcNewPoint(vertexToChangeVector.at(i).N()[2],
 								destVertexVector.at(i).N()[2], morphRatio);
 			
 			//normalize the normal
 			vertexToChangeVector.at(i).N().Normalize();
 		}
 		
-		//qDebug() << "NOW, fix face normals for the mesh so that the lighting is correct";
-		
-		assert(sourceMeshModel->cm.face.size()==size_t(sourceMeshModel->cm.fn));
-		
+		//qDebug() << "NOW, fix face normals for the mesh so that the lighting is correct";		
 		for(int i=0; i<sourceMeshModel->cm.face.size(); ++i)
 		{
 			//NOTE: this if/else is coppied from vcg library's import_obj.h line 559
