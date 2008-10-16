@@ -80,6 +80,7 @@ QString SplatRendererPlugin::loadSource(const QString& func,const QString& filen
 
 void SplatRendererPlugin::configureShaders()
 {
+	const char* passNames[3] = {"Visibility","Attribute","Finalization"};
 	QString defines = "";
 	if (mFlags & DEFERRED_SHADING_BIT)
 		defines += "#define EXPE_DEFERRED_SHADING\n";
@@ -101,7 +102,7 @@ void SplatRendererPlugin::configureShaders()
 " float specularCoeff = aux_dot>0.0 ? clamp(pow(clamp(dot(halfVec, normal),0.0,1.0),gl_FrontMaterial.shininess), 0.0, 1.0) : 0.0;"
 "	return vec4(color.rgb * ( gl_FrontLightProduct[0].ambient.rgb + diffuseCoeff * gl_FrontLightProduct[0].diffuse.rgb) + specularCoeff * gl_FrontLightProduct[0].specular.rgb, 1.0);"
 "}\n";
-	
+
 	for (int k=0;k<3;++k)
 	{
 		QString vsrc = shading + defines + mShaderSrcs[k*2+0];
@@ -109,15 +110,27 @@ void SplatRendererPlugin::configureShaders()
 		mShaders[k].SetSources(mShaderSrcs[k*2+0]!="" ? vsrc.toAscii().data() : 0,
 													 mShaderSrcs[k*2+1]!="" ? fsrc.toAscii().data() : 0);
 		mShaders[k].prog.Link();
+		if (mShaderSrcs[k*2+0]!="")
+		{
+			std::string compileinfo = mShaders[k].vshd.InfoLog();
+			if (compileinfo.size()>0)
+				std::cout << "Vertex shader info (" << passNames[k] << ":\n" << compileinfo << "\n";
+		}
+		if (mShaderSrcs[k*2+1]!="")
+		{
+			std::string compileinfo = mShaders[k].fshd.InfoLog();
+			if (compileinfo.size()>0)
+				std::cout << "Fragment shader info (" << passNames[k] << ":\n" << compileinfo << "\n";
+		}
 		std::string linkinfo = mShaders[k].prog.InfoLog();
 		if (linkinfo.size()>0)
-			std::cout << "Linked shader:\n" << linkinfo << "\n";
+			std::cout << "Link info (" << passNames[k] << ":\n" << linkinfo << "\n";
 	}
 }
 
 void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidget *gla)
 {
-	mIsSupported = true;	
+	mIsSupported = true;
 	gla->makeCurrent();
 	// FIXME this should be done in meshlab !!! ??
 	glewInit();
@@ -133,17 +146,17 @@ void SplatRendererPlugin::Init(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 		mSupportedMask |= FLOAT_BUFFER_BIT;
 	else
 		std::cerr << "Splatting: warning floating point textures are not supported.\n";
-	
+
 	if (GLEW_ARB_draw_buffers)
 		mSupportedMask |= DEFERRED_SHADING_BIT;
 	else
 		std::cerr << "Splatting: warning deferred shading is not supported.\n";
-	
+
 	if (GLEW_ARB_shadow)
 		mSupportedMask |= OUTPUT_DEPTH_BIT;
 	else
 		std::cerr << "Splatting: warning copy of the depth buffer is not supported.\n";
-	
+
 	mFlags = mFlags & mSupportedMask;
 
 	// load shader source
@@ -171,7 +184,7 @@ void SplatRendererPlugin::updateRenderBuffer()
 		mRenderBuffer = new QGLFramebufferObject(mCachedVP[2], mCachedVP[3],
 				(mFlags&OUTPUT_DEPTH_BIT) ? QGLFramebufferObject::NoAttachment : QGLFramebufferObject::Depth,
 				GL_TEXTURE_RECTANGLE_ARB, fmt);
-		
+
 		GL_TEST_ERR
 		if (mFlags&DEFERRED_SHADING_BIT)
 		{
@@ -220,14 +233,14 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glGetFloatv(GL_MODELVIEW_MATRIX, mCachedMV);
     glGetFloatv(GL_PROJECTION_MATRIX, mCachedProj);
 		GL_TEST_ERR
-		
+
 		updateRenderBuffer(); GL_TEST_ERR
 		if (mCachedFlags != mFlags)
 			configureShaders();
 
 		GL_TEST_ERR
 		mCachedFlags = mFlags;
-		
+
 		mParams.update(mCachedMV, mCachedProj, mCachedVP);
 		float s = m.glw.GetHintParamf(GLW::HNPPointSize);
 		if (s>1)
@@ -242,7 +255,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, vcg::Point4f(0.6, 0.6, 0.6, 1.).V());
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, vcg::Point4f(0.5, 0.5, 0.5, 1.).V());
 	}
-	
+
 	if (mCurrentPass==2)
 	{
 		// this is the last pass: normalization by the sum of weights + deferred shading
@@ -267,7 +280,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB,mRenderBuffer->texture());
 		GL_TEST_ERR
-		
+
 		if (mFlags&DEFERRED_SHADING_BIT)
 		{
 			GL_TEST_ERR
@@ -384,7 +397,7 @@ void SplatRendererPlugin::enablePass(int n)
 			glEnable(GL_POINT_SPRITE_ARB);
 			glDisable(GL_POINT_SMOOTH);
 			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-			
+
 			glAlphaFunc(GL_LESS,1);
 			glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 			glDepthMask(GL_TRUE);
@@ -398,7 +411,7 @@ void SplatRendererPlugin::enablePass(int n)
 			glEnable(GL_POINT_SPRITE_ARB);
 			glDisable(GL_POINT_SMOOTH);
 			glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-			
+
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE,GL_ONE);
 			glDepthMask(GL_FALSE);
