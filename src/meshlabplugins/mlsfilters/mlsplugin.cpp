@@ -108,30 +108,31 @@ const QString MlsPlugin::filterInfo(FilterIDType filterId)
 	QString str = "";
 	if (filterId & _PROJECTION_)
 	{
-		str += "Project a mesh (or a point set) onto the MLS surface defined by itself or another point set.\n";
+		str += "Project a mesh (or a point set) onto the MLS surface defined by itself or another point set.<br>";
 	}
 
 	if (filterId & _MCUBE_)
 	{
 		str +=
 			"Extract the iso-surface (as a mesh) of a MLS surface defined by the current point set (or mesh)"
-			"using the marching cubes algorithm.\n";
+			"using the marching cubes algorithm. The coarse extraction is followed by an accurate projection"
+			"step onto the MLS, and an extra zero removal procedure.<br>";
 	}
 
 	if (filterId & _APSS_)
 	{
 		str +=
-			"\nThis is the <i>algebraic point set surfaces</i> (APSS) variant which is based on"
-			"the local fitting of algebraic spheres. It requires points equipped with oriented normals.\n"
-			"See [Guennebaud and Gross, Algebraic Point Set Surfaces, Siggraph 2007]\n"
-			"and [Guennebaud et al., Dynamic Sampling and Rendering of APSS, Eurographics 2008]\n"
-			"for all the details about APSS.\n";
+			"<br>This is the <i>algebraic point set surfaces</i> (APSS) variant which is based on"
+			"the local fitting of algebraic spheres. It requires points equipped with oriented normals.<br>"
+			"See [Guennebaud and Gross, Algebraic Point Set Surfaces, Siggraph 2007]"
+			"and [Guennebaud et al., Dynamic Sampling and Rendering of APSS, Eurographics 2008]"
+			"for all the details about APSS.";
 	}
 
 	if (filterId & _RIMLS_)
 	{
 		str +=
-			"\nThis is the ##### MLS variant.\n";
+			"<br>This is the ##### MLS variant.";
 	}
 
 	if (filterId == FP_RADIUS_FROM_DENSITY)
@@ -259,7 +260,8 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 		parlst.addInt(  "Resolution",
 										200,
 										"Grid Resolution",
-										"");
+										"The resolution of the grid on which we run the marching cubes."
+										"This marching cube is memory friendly, so you can safely set large values up to 1000 or even more.");
 	}
 }
 

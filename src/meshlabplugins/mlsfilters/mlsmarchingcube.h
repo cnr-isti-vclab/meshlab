@@ -164,8 +164,7 @@ public:
 				bool out =false;
 				for (int k=0; k<8 && (!out); ++k)
 					out = out || (!IsFinite(mCache[cellId+offsets[k]].value))
-										|| mCache[cellId+offsets[k]].value==invalidValue
-										|| mCache[cellId+offsets[k]].value>=1000;
+										|| mCache[cellId+offsets[k]].value==invalidValue;
 
 				if (!out)
 				{
