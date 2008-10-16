@@ -677,7 +677,7 @@ void PickPointsDialog::toggleMoveMode(bool checked)
 {
 	if(checked)
 	{
-		QApplication::setOverrideCursor( QCursor(Qt::SizeAllCursor) );
+		QApplication::setOverrideCursor( QCursor(Qt::ClosedHandCursor) );
 		
 		//qDebug() << "move mode";
 		currentMode = MOVE_POINT;
