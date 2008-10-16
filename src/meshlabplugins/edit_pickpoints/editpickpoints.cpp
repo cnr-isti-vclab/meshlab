@@ -143,7 +143,7 @@ void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea *gla)
 	//remove the dialog from the screen
 	pickPointsDialog->hide();
 	
-	QApplication::setOverrideCursor( QCursor(overrideCursorShape) );
+	QApplication::setOverrideCursor( QCursor((Qt::CursorShape)overrideCursorShape) );
 }
 
 void EditPickPointsPlugin::mousePressEvent(QMouseEvent *event, MeshModel &mm, GLArea *gla )
