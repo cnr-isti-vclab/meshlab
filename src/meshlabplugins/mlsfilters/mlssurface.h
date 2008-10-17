@@ -26,6 +26,7 @@
 
 #include "balltree.h"
 #include <vcg/space/box3.h>
+#include <vcg/math/matrix33.h>
 #include <iostream>
 
 namespace GaelMls {
@@ -34,10 +35,11 @@ enum {
 	MLS_OK,
 	MLS_TOO_FAR,
 	MLS_TOO_MANY_ITERS,
+	MLS_NOT_SUPPORTED,
 
-	MLS_GRADIENT_ACCURATE,
-	MLS_GRADIENT_APPROX,
-	MLS_GRADIENT_FINITEDIFF
+	MLS_DERIVATIVE_ACCURATE,
+	MLS_DERIVATIVE_APPROX,
+	MLS_DERIVATIVE_FINITEDIFF
 };
 
 template<typename MeshType>
@@ -46,6 +48,7 @@ class MlsSurface
 	public:
 		typedef typename MeshType::ScalarType Scalar;
 		typedef vcg::Point3<Scalar> VectorType;
+		typedef vcg::Matrix33<Scalar> MatrixType;
 		typedef typename MeshType::VertContainer PointsType;
 
 		MlsSurface(const MeshType& mesh)
@@ -66,7 +69,8 @@ class MlsSurface
 			mMaxNofProjectionIterations = 20;
 			mProjectionAccuracy = 1e-4;
 			mBallTree = 0;
-			mGradientHint = MLS_GRADIENT_APPROX;
+			mGradientHint = MLS_DERIVATIVE_ACCURATE;
+			mHessianHint = MLS_DERIVATIVE_ACCURATE;
 
 			mDomainMinNofNeighbors = 4;
 			mDomainRadiusScale = 2.;
@@ -75,12 +79,29 @@ class MlsSurface
 
 		/** \returns the value of the reconstructed scalar field at point \a x */
 		virtual Scalar potential(const VectorType& x, int* errorMask = 0) const = 0;
-		/** \returns the gradient of the reconstructed scalar field at point \a x */
+		
+		/** \returns the gradient of the reconstructed scalar field at point \a x
+			*
+			* The method used to compute the gradient can be controlled with setGradientHint().
+			*/
 		virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const = 0;
+		
+		/** \returns the hessian matrix of the reconstructed scalar field at point \a x
+			*
+			* The method used to compute the hessian matrix can be controlled with setHessianHint().
+			*/
+		virtual MatrixType hessian(const VectorType& x, int* errorMask = 0) const
+		{ if (errorMask) *errorMask = MLS_NOT_SUPPORTED; return MatrixType(); }
+		
 		/** \returns the projection of point x onto the MLS surface, and optionnaly returns the normal in \a pNormal */
 		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const = 0;
+		
 		/** \returns whether \a x is inside the restricted surface definition domain */
 		virtual bool isInDomain(const VectorType& x) const;
+
+		/** \returns the mean curvature from the gradient vector and Hessian matrix.
+			*/
+		Scalar meanCurvature(const VectorType& gradient, const MatrixType& hessian) const;
 
 		/** set the scale of the spatial filter */
 		void setFilterScale(Scalar v);
@@ -88,11 +109,18 @@ class MlsSurface
 		void setMaxProjectionIters(int n);
 		/** set the threshold factor to detect convergence of the iterations */
 		void setProjectionAccuracy(Scalar v);
+		
 		/** set a hint on how to compute the gradient
 			*
-			* Possible values are MLS_GRADIENT_ACCURATE, MLS_GRADIENT_APPROX, MLS_GRADIENT_FINITEDIFF
+			* Possible values are MLS_DERIVATIVE_ACCURATE, MLS_DERIVATIVE_APPROX, MLS_DERIVATIVE_FINITEDIFF
 			*/
 		void setGradientHint(int h);
+
+		/** set a hint on how to compute the hessian matrix
+			*
+			* Possible values are MLS_DERIVATIVE_ACCURATE, MLS_DERIVATIVE_APPROX, MLS_DERIVATIVE_FINITEDIFF
+			*/
+		void setHessianHint(int h);
 
 		inline const MeshType& mesh() const { return mMesh; }
 		/** a shortcut for mesh().vert */
@@ -120,6 +148,7 @@ class MlsSurface
 	protected:
 		void computeNeighborhood(const VectorType& x, bool computeDerivatives) const;
 		void computeVertexRaddi();
+		void requestSecondDerivatives() const;
 
 		struct PointToPointSqDist
 		{
@@ -144,6 +173,7 @@ class MlsSurface
 		const PointsType& mPoints;
 		vcg::Box3<Scalar> mAABB;
 		int mGradientHint;
+		int mHessianHint;
 
 		BallTree<Scalar>* mBallTree;
 
@@ -160,8 +190,9 @@ class MlsSurface
 		mutable bool mCachedQueryPointIsOK;
 		mutable VectorType mCachedQueryPoint;
 		mutable Neighborhood<Scalar> mNeighborhood;
-		mutable std::vector<Scalar>  mCachedWeights;
-		mutable std::vector<VectorType>  mCachedWeightGradients;
+		mutable std::vector<Scalar> mCachedWeights;
+		mutable std::vector<VectorType> mCachedWeightGradients;
+		mutable std::vector<Scalar> mCachedWeightSecondDerivatives;
 };
 
 } // namespace

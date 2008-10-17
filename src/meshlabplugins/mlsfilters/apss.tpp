@@ -78,7 +78,7 @@ typename APSS<_MeshType>::VectorType APSS<_MeshType>::gradient(const VectorType&
 		}
 	}
 
-	if (mGradientHint==MLS_GRADIENT_ACCURATE)
+	if (mGradientHint==MLS_DERIVATIVE_ACCURATE)
 	{
 		VectorType grad;
 		mlsGradient(x,grad);
@@ -95,6 +95,40 @@ typename APSS<_MeshType>::VectorType APSS<_MeshType>::gradient(const VectorType&
 			return VectorType(g.X(), g.Y(), g.Z());
 		}
 	}
+}
+
+template<typename _MeshType>
+typename APSS<_MeshType>::MatrixType APSS<_MeshType>::hessian(const VectorType& x, int* errorMask) const
+{
+	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
+	{
+		if (!fit(x))
+		{
+			if (errorMask)
+				*errorMask = MLS_TOO_FAR;
+			return MatrixType();
+		}
+	}
+
+	MatrixType hessian;
+	if (Base::mHessianHint==MLS_DERIVATIVE_ACCURATE)
+	{
+		mlsHessian(x, hessian);
+	}
+	else
+	{
+		// this is very approximate !!
+		Scalar c = Scalar(2) * uQuad;
+		for (int i=0; i<3; ++i)
+		for (int j=0; j<3; ++j)
+		{
+			if (i==j)
+				hessian[i][j] = c;
+			else
+				hessian[i][j] = 0;
+		}
+	}
+	return hessian;
 }
 
 template<typename _MeshType>
@@ -161,7 +195,7 @@ typename APSS<_MeshType>::VectorType APSS<_MeshType>::project(const VectorType& 
 
 	if (pNormal)
 	{
-		if (mGradientHint==MLS_GRADIENT_ACCURATE)
+		if (mGradientHint==MLS_DERIVATIVE_ACCURATE)
 		{
 			VectorType grad;
 			mlsGradient(vcg::Point3Cast<Scalar>(position), grad);
@@ -293,7 +327,6 @@ bool APSS<_MeshType>::mlsGradient(const VectorType& x, VectorType& grad) const
 			int id = mNeighborhood.index(i);
 			LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
 			LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
-			LScalar w = mCachedWeights.at(i);
 			LScalar dw = mCachedWeightGradients.at(i)[k];
 
 			dSumW += dw;
@@ -302,6 +335,12 @@ bool APSS<_MeshType>::mlsGradient(const VectorType& x, VectorType& grad) const
 			dSumDotPN += dw * vcg::Dot(n,p);
 			dSumDotPP += dw * vcg::SquaredNorm(p);
 		}
+
+		mCachedGradSumP[k] = dSumP;
+		mCachedGradSumN[k] = dSumN;
+		mCachedGradSumDotPN[k] = dSumDotPN;
+		mCachedGradSumDotPP[k] = dSumDotPP;
+		mCachedGradSumW[k] = dSumW;
 
 		LScalar dVecU0;
 		LVector dVecU13;
@@ -313,14 +352,119 @@ bool APSS<_MeshType>::mlsGradient(const VectorType& x, VectorType& grad) const
 		LScalar dDeno = dSumDotPP - invSumW*invSumW*( 2.*sumW*vcg::Dot(dSumP,sumP)                       - dSumW*vcg::Dot(sumP,sumP));
 
 		dVecU4 = mSphericalParameter * 0.5 * (deno * dNume - dDeno * nume)/(deno*deno);
-
 		dVecU13 = ((dSumN - (dSumP*uQuad + sumP*dVecU4)*2.0) - uLinear * dSumW) * invSumW;
-
 		dVecU0 = -invSumW*( vcg::Dot(dVecU13,sumP) + dVecU4*sumDotPP + vcg::Dot(uLinear,dSumP) + uQuad*dSumDotPP + dSumW*uConstant);
 
 		grad[k] = dVecU0 + vcg::Dot(dVecU13,vcg::Point3Cast<LScalar>(x)) + dVecU4*vcg::SquaredNorm(x) + uLinear[k] + 2.*x[k]*uQuad;
 	}
 
+	return true;
+}
+
+template<typename _MeshType>
+bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
+{
+	this->requestSecondDerivatives();
+
+	// TODO call mlsGradient first
+	VectorType grad;
+	mlsGradient(x,grad);
+	
+	uint nofSamples = mNeighborhood.size();
+	
+	const LVector& sumP = mCachedSumP;
+	const LVector& sumN = mCachedSumN;
+	const LScalar& sumDotPN = mCachedSumDotPN;
+	const LScalar& sumDotPP = mCachedSumDotPP;
+	const LScalar& sumW = mCachedSumW;
+	const LScalar invSumW = 1.f/sumW;
+
+	for (uint k=0 ; k<3 ; ++k)
+	{
+		const LVector& dSumP = mCachedGradSumP[k];
+		const LVector& dSumN = mCachedGradSumN[k];
+		const LScalar& dSumDotPN = mCachedGradSumDotPN[k];
+		const LScalar& dSumDotPP = mCachedGradSumDotPP[k];
+		const LScalar& dSumW = mCachedGradSumW[k];
+		
+		LScalar dVecU0;
+		LVector dVecU13;
+		LScalar dVecU4;
+
+		LScalar nume = sumDotPN - invSumW * vcg::Dot(sumP, sumN);
+		LScalar deno = sumDotPP - invSumW * vcg::Dot(sumP, sumP);
+		LScalar dNume = dSumDotPN - invSumW*invSumW*( sumW*(vcg::Dot(dSumP,sumN) + vcg::Dot(sumP,dSumN)) - dSumW*vcg::Dot(sumP,sumN));
+		LScalar dDeno = dSumDotPP - invSumW*invSumW*( 2.*sumW*vcg::Dot(dSumP,sumP)                       - dSumW*vcg::Dot(sumP,sumP));
+
+		dVecU4 = mSphericalParameter * 0.5 * (deno * dNume - dDeno * nume)/(deno*deno);
+		dVecU13 = ((dSumN - (dSumP*uQuad + sumP*dVecU4)*2.0) - uLinear * dSumW) * invSumW;
+		dVecU0 = -invSumW*( vcg::Dot(dVecU13,sumP) + dVecU4*sumDotPP + vcg::Dot(uLinear,dSumP) + uQuad*dSumDotPP + dSumW*uConstant);
+		
+		// second order derivatives
+		for (uint j=0 ; j<3 ; ++j)
+		{
+			LVector d2SumP; d2SumP.Zero();
+			LVector d2SumN; d2SumN.Zero();
+			LScalar d2SumDotPN = 0.;
+			LScalar d2SumDotPP = 0.;
+			LScalar d2SumW = 0.;
+			for (unsigned int i=0; i<nofSamples; i++)
+			{
+				int id = mNeighborhood.index(i);
+				LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
+				LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+				LScalar dw = mCachedWeightGradients.at(i)[k];
+				LScalar d2w = (2.*(x[k]-p[k]))*(2.*(x[j]-p[j])) * mCachedWeightSecondDerivatives.at(i);
+
+				if (j==k)
+					d2w += 2.*dw;
+
+				d2SumW += d2w;
+				d2SumP += p*d2w;
+				d2SumN += n*d2w;
+				d2SumDotPN += d2w * vcg::Dot(n,p);
+				d2SumDotPP += d2w * vcg::Dot(p,p);
+			}
+
+			LScalar d2u0;
+			LVector d2u13;
+			LScalar d2u4;
+
+			LScalar d2Nume = d2SumDotPN - invSumW*invSumW*invSumW*invSumW*(
+					- 2.*sumW*dSumW*( sumW*(vcg::Dot(dSumP,sumN)+vcg::Dot(sumP,dSumN)) - dSumW* vcg::Dot(sumP,sumN))
+					+    sumW*sumW*( dSumW*(vcg::Dot(dSumP,sumN)+vcg::Dot(sumP,dSumN))
+													+ sumW*(vcg::Dot(d2SumP,sumN)	+ vcg::Dot(sumP,d2SumN) + 2.*vcg::Dot(dSumP,dSumN))
+													- d2SumW*vcg::Dot(sumP,sumN)
+													- dSumW*(vcg::Dot(dSumP,sumN)+vcg::Dot(sumP,dSumN)) ));
+			// simplify to:
+			/*LocalFloat d2Nume = d2SumDotPN - invSumW*invSumW*invSumW*invSumW*(
+							2.*sumW*dSumW * ( sumW*(dSumP.dot(sumN)+sumP.dot(dSumN)) - dSumW*sumP.dot(sumN))
+					+   sumW*(d2SumP.dot(sumN) + sumP.dot(d2SumN) + 2.*dSumP.dot(dSumN))
+					-   d2SumW*sumP.dot(sumN));*/
+
+			LScalar d2Deno = d2SumDotPP - invSumW*invSumW*invSumW*invSumW*(
+					-   2.*sumW*dSumW * ( 2.*sumW*vcg::Dot(dSumP,sumP) - dSumW*vcg::Dot(sumP,sumP))
+					+   sumW*sumW*(   2.*dSumW*(vcg::Dot(dSumP,sumP)) + 2.*sumW*(vcg::Dot(dSumP,dSumP)+vcg::Dot(d2SumP,sumP))
+													- d2SumW*vcg::Dot(sumP,sumP) - dSumW*(2.*vcg::Dot(dSumP,sumP))) );
+			// could also be simplified ^^
+
+			LScalar deno2 = deno*deno;
+			d2u4 = mSphericalParameter * 0.5 * (deno2*(deno*d2Nume - d2Deno*nume) - 2.*deno*dDeno*(deno * dNume - dDeno * nume))/(deno2*deno2);
+
+			d2u13 = ( -dVecU13*dSumW + ( d2SumN - (dSumP*(2.0*dVecU4) + d2SumP*uQuad + sumP*d2u4)*2.0 ) - uLinear*d2SumW - dVecU13*dSumW)*invSumW;
+
+			d2u0 = - invSumW*( -dSumW*dVecU4 + ( vcg::Dot(dVecU13,dSumP) + vcg::Dot(d2u13,sumP)
+												+ d2u4*sumDotPP + dVecU4*dSumDotPP + vcg::Dot(uLinear,d2SumP) + vcg::Dot(dVecU13,dSumP)
+					   + dVecU4*dSumDotPP + uQuad*d2SumDotPP + d2SumW*uConstant + dSumW*dVecU0) );
+
+			hessian[j][k] =
+							dVecU13[j] + 2.*dVecU4*x[j]
+						+ d2u0 + vcg::Dot(d2u13,vcg::Point3Cast<LScalar>(x)) + d2u4*vcg::Dot(x,x)
+						+ dVecU13[k] + (j==k ? 2.*uQuad : 0.) + 2.*x[k]*dVecU4;
+
+		}
+	}
+	
 	return true;
 }
 

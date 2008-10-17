@@ -87,6 +87,13 @@ void MlsSurface<_MeshType>::setGradientHint(int h)
 }
 
 template<typename _MeshType>
+void MlsSurface<_MeshType>::setHessianHint(int h)
+{
+	mHessianHint = h;
+	mCachedQueryPointIsOK = false;
+}
+
+template<typename _MeshType>
 void MlsSurface<_MeshType>::computeVertexRaddi()
 {
 	#if 0
@@ -166,6 +173,38 @@ void MlsSurface<_MeshType>::computeNeighborhood(const VectorType& x, bool comput
 		if (computeDerivatives)
 			mCachedWeightGradients[i] = (x - mPoints[id].cP()) * (-4. * 2. * s * aux * aux * aux);
 	}
+}
+
+template<typename _MeshType>
+void MlsSurface<_MeshType>::requestSecondDerivatives() const
+{
+	//if (!mSecondDerivativeUptodate)
+	{
+		size_t nofSamples = mNeighborhood.size();
+		if (nofSamples>mCachedWeightSecondDerivatives.size())
+			mCachedWeightSecondDerivatives.resize(nofSamples+10);
+
+		{
+			for (size_t i=0 ; i<nofSamples ; ++i)
+			{
+				int id = mNeighborhood.index(i);
+				Scalar s = 1./(mPoints[id].cR()*mFilterScale);
+				s = s*s;
+				Scalar x2 = s * mNeighborhood.squaredDistance(i);
+				x2 = 1.0 - x2;
+				mCachedWeightSecondDerivatives[i] = (4. * 3. * x2 * x2) * s*s;
+			}
+		}
+		//mSecondDerivativeUptodate = true;
+	}
+}
+
+template<typename _MeshType>
+typename MlsSurface<_MeshType>::Scalar
+MlsSurface<_MeshType>::meanCurvature(const VectorType& gradient, const MatrixType& hessian) const
+{
+	Scalar gl = gradient.Norm();
+	return (gl*gl*hessian.Trace() - vcg::Dot(gradient, VectorType(hessian * gradient))) / (2.*gl*gl*gl);
 }
 
 template<typename _MeshType>

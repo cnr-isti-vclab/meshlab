@@ -535,7 +535,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		if (apss)
 		{
 			apss->setSphericalParameter(par.getFloat("SphericalParameter"));
-			apss->setGradientHint(par.getBool("AccurateNormal") ? GaelMls::MLS_GRADIENT_ACCURATE : GaelMls::MLS_GRADIENT_APPROX);
+			apss->setGradientHint(par.getBool("AccurateNormal") ? GaelMls::MLS_DERIVATIVE_ACCURATE : GaelMls::MLS_DERIVATIVE_APPROX);
 		}
 
 		MeshModel * mesh = 0;

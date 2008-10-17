@@ -35,12 +35,14 @@ class APSS : public MlsSurface<_MeshType>
 
 		typedef typename Base::Scalar Scalar;
 		typedef typename Base::VectorType VectorType;
+		typedef typename Base::MatrixType MatrixType;
 		typedef _MeshType MeshType;
 		using Base::mCachedQueryPointIsOK;
 		using Base::mCachedQueryPoint;
 		using Base::mNeighborhood;
 		using Base::mCachedWeights;
 		using Base::mCachedWeightGradients;
+		using Base::mCachedWeightSecondDerivatives;
 		using Base::mBallTree;
 		using Base::mPoints;
 		using Base::mFilterScale;
@@ -61,6 +63,7 @@ class APSS : public MlsSurface<_MeshType>
 
 		virtual Scalar potential(const VectorType& x, int* errorMask = 0) const;
 		virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const;
+		virtual  MatrixType hessian(const VectorType& x, int* errorMask) const;
 		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const;
 
 		void setSphericalParameter(Scalar v);
@@ -68,6 +71,7 @@ class APSS : public MlsSurface<_MeshType>
 	protected:
 		bool fit(const VectorType& x) const;
 		bool mlsGradient(const VectorType& x, VectorType& grad) const;
+		bool mlsHessian(const VectorType& x, MatrixType& hessian) const;
 
 	protected:
 		Scalar mSphericalParameter;
@@ -90,6 +94,12 @@ class APSS : public MlsSurface<_MeshType>
 		mutable LScalar mCachedSumDotPP;
 		mutable LScalar mCachedSumDotPN;
 		mutable LScalar mCachedSumW;
+
+		mutable LVector mCachedGradSumP[3];
+		mutable LVector mCachedGradSumN[3];
+		mutable LScalar mCachedGradSumDotPN[3];
+		mutable LScalar mCachedGradSumDotPP[3];
+		mutable LScalar mCachedGradSumW[3];
 };
 
 }
