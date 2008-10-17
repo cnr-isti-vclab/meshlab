@@ -132,27 +132,25 @@ void BallTree<_Scalar>::buildNode(Node& node, std::vector<int>& indices, AxisAli
 	std::vector<int> iLeft, iRight;
 	split(indices, aabbLeft, aabbRight, iLeft,iRight);
 
+	// we don't need the index list anymore
+	indices.clear();
+
 	{
-			// we don't need the index list anymore
-			indices.clear();
+		// left child
+		//mNodes.resize(mNodes.size()+1);
+		Node* pChild = new Node();
+		node.children[0] = pChild;
+		pChild->leaf = 0;
+		buildNode(*pChild, iLeft, aabbLeft, level+1);
+	}
 
-			{
-					// left child
-					//mNodes.resize(mNodes.size()+1);
-					Node* pChild = new Node();
-					node.children[0] = pChild;
-					pChild->leaf = 0;
-					buildNode(*pChild, iLeft, aabbLeft, level+1);
-			}
-
-			{
-					// right child
-					//mNodes.resize(mNodes.size()+1);
-					Node* pChild = new Node();
-					node.children[1] = pChild;
-					pChild->leaf = 0;
-					buildNode(*pChild, iRight, aabbRight, level+1);
-			}
+	{
+		// right child
+		//mNodes.resize(mNodes.size()+1);
+		Node* pChild = new Node();
+		node.children[1] = pChild;
+		pChild->leaf = 0;
+		buildNode(*pChild, iRight, aabbRight, level+1);
 	}
 }
 

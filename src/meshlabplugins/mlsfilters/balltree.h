@@ -68,28 +68,28 @@ class BallTree
 
 		struct Node
 		{
-				~Node()
+			~Node()
+			{
+				if (!leaf)
 				{
-						if (!leaf)
-						{
-								delete children[0];
-								delete children[1];
-						}
-						else
-						{
-								delete[] indices;
-						}
+					delete children[0];
+					delete children[1];
 				}
-				Scalar splitValue;
-				unsigned char dim:2;
-				unsigned char leaf:1;
-				union {
-						Node* children[2];
-						struct {
-								unsigned int* indices;
-								unsigned int size;
-						};
+				else
+				{
+					delete[] indices;
+				}
+			}
+			Scalar splitValue;
+			unsigned char dim:2;
+			unsigned char leaf:1;
+			union {
+				Node* children[2];
+				struct {
+					unsigned int* indices;
+					unsigned int size;
 				};
+			};
 		};
 
 		typedef std::vector<int> IndexArray;

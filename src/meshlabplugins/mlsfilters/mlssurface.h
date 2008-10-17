@@ -69,8 +69,8 @@ class MlsSurface
 			mGradientHint = MLS_GRADIENT_APPROX;
 
 			mDomainMinNofNeighbors = 4;
-			mDomainRadiusScale = 1.6;
-			mDomainNormalScale = 0.85;
+			mDomainRadiusScale = 2.;
+			mDomainNormalScale = 1.;
 		}
 
 		/** \returns the value of the reconstructed scalar field at point \a x */

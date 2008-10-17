@@ -109,54 +109,54 @@ typename APSS<_MeshType>::VectorType APSS<_MeshType>::project(const VectorType& 
 	LScalar epsilon2 = mAveragePointSpacing * mProjectionAccuracy;
 	epsilon2 = epsilon2 * epsilon2;
 	do {
-			if (!fit(VectorType(position.X(), position.Y(), position.Z())))
-			{
-				if (errorMask)
-					*errorMask = MLS_TOO_FAR;
-				//std::cout << " proj failed\n";
-				return x;
-			}
+		if (!fit(VectorType(position.X(), position.Y(), position.Z())))
+		{
+			if (errorMask)
+				*errorMask = MLS_TOO_FAR;
+			//std::cout << " proj failed\n";
+			return x;
+		}
 
-			previousPosition = position;
-			// local projection
-			if (mStatus==ASS_SPHERE)
-			{
-				normal = lx - mCenter;
-				normal.Normalize();
-				position = mCenter + normal * mRadius;
+		previousPosition = position;
+		// local projection
+		if (mStatus==ASS_SPHERE)
+		{
+			normal = lx - mCenter;
+			normal.Normalize();
+			position = mCenter + normal * mRadius;
 
-				normal = uLinear + position * (LScalar(2) * uQuad);
-				normal.Normalize();
-			}
-			else if (mStatus==ASS_PLANE)
+			normal = uLinear + position * (LScalar(2) * uQuad);
+			normal.Normalize();
+		}
+		else if (mStatus==ASS_PLANE)
+		{
+			normal = uLinear;
+			position = lx - uLinear * (vcg::Dot(lx,uLinear) + uConstant);
+		}
+		else
+		{
+			// Newton iterations
+			LVector grad;
+			LVector dir = uLinear+lx*(2.*uQuad);
+			LScalar ilg = 1./vcg::Norm(dir);
+			dir *= ilg;
+			LScalar ad = uConstant + vcg::Dot(uLinear,lx) + uQuad * vcg::SquaredNorm(lx);
+			LScalar delta = -ad*std::min<Scalar>(ilg,1.);
+			LVector p = lx + dir*delta;
+			for (int i=0 ; i<2 ; ++i)
 			{
-				normal = uLinear;
-				position = lx - uLinear * (vcg::Dot(lx,uLinear) + uConstant);
+				grad = uLinear+p*(2.*uQuad);
+				ilg = 1./vcg::Norm(grad);
+				delta = -(uConstant + vcg::Dot(uLinear,p) + uQuad * vcg::SquaredNorm(p))*std::min<Scalar>(ilg,1.);
+				p += dir*delta;
 			}
-			else
-			{
-				// Newton iterations
-				LVector grad;
-				LVector dir = uLinear+lx*(2.*uQuad);
-				LScalar ilg = 1./vcg::Norm(dir);
-				dir *= ilg;
-				LScalar ad = uConstant + vcg::Dot(uLinear,lx) + uQuad * vcg::SquaredNorm(lx);
-				LScalar delta = -ad*std::min<Scalar>(ilg,1.);
-				LVector p = lx + dir*delta;
-				for (int i=0 ; i<2 ; ++i)
-				{
-					grad = uLinear+p*(2.*uQuad);
-					ilg = 1./vcg::Norm(grad);
-					delta = -(uConstant + vcg::Dot(uLinear,p) + uQuad * vcg::SquaredNorm(p))*std::min<Scalar>(ilg,1.);
-					p += dir*delta;
-				}
-				position = p;
+			position = p;
 
-				normal = uLinear + position * (Scalar(2) * uQuad);
-				normal.Normalize();
-			}
+			normal = uLinear + position * (Scalar(2) * uQuad);
+			normal.Normalize();
+		}
 
-			delta2 = vcg::SquaredNorm(previousPosition - position);
+		delta2 = vcg::SquaredNorm(previousPosition - position);
 	} while ( delta2>epsilon2 && ++iterationCount<mMaxNofProjectionIterations);
 
 	if (pNormal)
@@ -274,25 +274,12 @@ bool APSS<_MeshType>::mlsGradient(const VectorType& x, VectorType& grad) const
 {
 	unsigned int nofSamples = mNeighborhood.size();
 
-	LVector sumP; sumP.Zero();
-	LVector sumN; sumN.Zero();
-	LScalar sumDotPN = 0.;
-	LScalar sumDotPP = 0.;
-	LScalar sumW = 0.;
-	for (unsigned int i=0; i<nofSamples; i++)
-	{
-		int id = mNeighborhood.index(i);
-		LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
-		LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
-		LScalar w = mCachedWeights.at(i);
-
-		sumP += p * w;
-		sumN += n * w;
-		sumDotPN += w * vcg::Dot(n,p);
-		sumDotPP += w * vcg::SquaredNorm(p);
-		sumW += w;
-	}
-	LScalar invSumW = 1.f/sumW;
+	const LVector& sumP = mCachedSumP;
+	const LVector& sumN = mCachedSumN;
+	const LScalar& sumDotPN = mCachedSumDotPN;
+	const LScalar& sumDotPP = mCachedSumDotPP;
+	const LScalar& sumW = mCachedSumW;
+	const LScalar invSumW = 1.f/sumW;
 
 	for (uint k=0 ; k<3 ; ++k)
 	{
@@ -323,7 +310,7 @@ bool APSS<_MeshType>::mlsGradient(const VectorType& x, VectorType& grad) const
 		LScalar nume = sumDotPN - invSumW * vcg::Dot(sumP, sumN);
 		LScalar deno = sumDotPP - invSumW * vcg::Dot(sumP, sumP);
 		LScalar dNume = dSumDotPN - invSumW*invSumW*( sumW*(vcg::Dot(dSumP,sumN) + vcg::Dot(sumP,dSumN)) - dSumW*vcg::Dot(sumP,sumN));
-		LScalar dDeno = dSumDotPP - invSumW*invSumW*( 2.*sumW*vcg::Dot(dSumP,sumP)                - dSumW*vcg::Dot(sumP,sumP));
+		LScalar dDeno = dSumDotPP - invSumW*invSumW*( 2.*sumW*vcg::Dot(dSumP,sumP)                       - dSumW*vcg::Dot(sumP,sumP));
 
 		dVecU4 = mSphericalParameter * 0.5 * (deno * dNume - dDeno * nume)/(deno*deno);
 
