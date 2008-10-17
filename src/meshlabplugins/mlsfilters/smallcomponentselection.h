@@ -42,7 +42,7 @@ public:
 
 	static int Select(MeshType &m, float nbFaceRatio = 0.1, bool nonClosedOnly = false)
 	{
-		assert(m.HasFFAdjacency() && "The small component selection procedure requires face to face adjacency.");
+		assert(tri::HasFFAdjacency(m) && "The small component selection procedure requires face to face adjacency.");
 
 		// the different components as a list of face pointer
 		std::vector< std::vector<FacePointer> > components;
