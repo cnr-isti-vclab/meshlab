@@ -196,10 +196,6 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
 			QMessageBox::warning(parent, tr("OFF Opening Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ImporterOFF<CMeshO>::ErrorMsg(result)));
 			return false;
 		}
-
-		CMeshO::FaceIterator fi = m.cm.face.begin();
-		for (; fi != m.cm.face.end(); ++fi)
-			face::ComputeNormalizedNormal(*fi);
 	}
 	else if (formatName.toUpper() == tr("3DS"))
 	{
