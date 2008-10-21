@@ -67,7 +67,7 @@ public:
 	virtual const int getRequirements(QAction *action);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, FilterParameterSet &parent, vcg::CallBackPos *cb) ;
 	virtual bool applyFilter(QAction *filter, MeshModel &m, FilterParameterSet &parent, vcg::CallBackPos *cb)
-	{assert(0);}
+	{assert(0); return false;}
 };
 
 #endif
