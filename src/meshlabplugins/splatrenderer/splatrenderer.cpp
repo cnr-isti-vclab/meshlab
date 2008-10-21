@@ -244,7 +244,7 @@ void SplatRendererPlugin::Render(QAction *a, MeshModel &m, RenderMode &rm, QGLWi
 		mParams.update(mCachedMV, mCachedProj, mCachedVP);
 		float s = m.glw.GetHintParamf(GLW::HNPPointSize);
 		if (s>1)
-			s = pow(s,0.3);
+			s = pow(s,0.3f);
 		mParams.radiusScale *= s;
 		GL_TEST_ERR
 
