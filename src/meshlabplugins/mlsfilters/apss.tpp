@@ -66,6 +66,25 @@ typename APSS<_MeshType>::Scalar APSS<_MeshType>::potential(const VectorType& x,
 }
 
 template<typename _MeshType>
+typename APSS<_MeshType>::Scalar APSS<_MeshType>::approxMeanCurvature(const VectorType& x, int* errorMask) const
+{
+	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)
+	{
+		if (!fit(x))
+		{
+			if (errorMask)
+				*errorMask = MLS_TOO_FAR;
+			return Base::InvalidValue();
+		}
+	}
+
+	if (mStatus==ASS_SPHERE)
+		return (uQuad>0.?1.0:-1.0)/mRadius;
+	else
+		return 0.;
+}
+
+template<typename _MeshType>
 typename APSS<_MeshType>::VectorType APSS<_MeshType>::gradient(const VectorType& x, int* errorMask) const
 {
 	if ((!mCachedQueryPointIsOK) || mCachedQueryPoint!=x)

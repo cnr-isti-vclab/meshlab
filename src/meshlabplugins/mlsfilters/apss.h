@@ -63,8 +63,11 @@ class APSS : public MlsSurface<_MeshType>
 
 		virtual Scalar potential(const VectorType& x, int* errorMask = 0) const;
 		virtual VectorType gradient(const VectorType& x, int* errorMask = 0) const;
-		virtual  MatrixType hessian(const VectorType& x, int* errorMask) const;
+		virtual MatrixType hessian(const VectorType& x, int* errorMask) const;
 		virtual VectorType project(const VectorType& x, VectorType* pNormal = 0, int* errorMask = 0) const;
+
+		/** \returns the approximation of the mean curvature obtained from the radius of the fitted sphere */
+		virtual Scalar approxMeanCurvature(const VectorType& x, int* errorMask = 0) const;
 
 		void setSphericalParameter(Scalar v);
 

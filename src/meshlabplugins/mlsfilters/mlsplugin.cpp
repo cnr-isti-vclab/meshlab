@@ -41,8 +41,7 @@
 #include <vcg/complex/trimesh/append.h>
 #include <vcg/complex/trimesh/create/advancing_front.h>
 #include <vcg/complex/trimesh/create/marching_cubes.h>
-// #include <apps/sample/trimesh_isosurface/simple_volume.h>
-// #include <apps/sample/trimesh_isosurface/trivial_walker.h>
+#include <vcg/complex/trimesh/update/quality.h>
 #include "mlsmarchingcube.h"
 
 #include "mlsplugin.h"
@@ -54,6 +53,7 @@
 #include "smallcomponentselection.h"
 
 using namespace GaelMls;
+using namespace vcg;
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -65,6 +65,7 @@ MlsPlugin::MlsPlugin()
 		<< FP_RIMLS_PROJECTION << FP_APSS_PROJECTION
 // 		<< FP_RIMLS_AFRONT << FP_APSS_AFRONT
 		<< FP_RIMLS_MCUBE << FP_APSS_MCUBE
+		<< FP_RIMLS_COLORIZE << FP_APSS_COLORIZE
 		<< FP_RADIUS_FROM_DENSITY
 		<< FP_SELECT_SMALL_COMPONENTS;
 
@@ -84,6 +85,8 @@ const QString MlsPlugin::filterName(FilterIDType filterId)
 		case FP_RIMLS_AFRONT            : return QString("MLS meshing/##### Advancing Front");
 		case FP_APSS_MCUBE              : return QString("Marching Cubes (APSS)");
 		case FP_RIMLS_MCUBE             : return QString("Marching Cubes (#####)");
+		case FP_APSS_COLORIZE           : return QString("Colorize curvature (APSS)");
+		case FP_RIMLS_COLORIZE          : return QString("Colorize curvature (#####)");
 		case FP_RADIUS_FROM_DENSITY     : return QString("Estimate radius from density");
 		case FP_SELECT_SMALL_COMPONENTS : return QString("Small component selection");
 		default : assert(0);
@@ -117,6 +120,11 @@ const QString MlsPlugin::filterInfo(FilterIDType filterId)
 			"Extract the iso-surface (as a mesh) of a MLS surface defined by the current point set (or mesh)"
 			"using the marching cubes algorithm. The coarse extraction is followed by an accurate projection"
 			"step onto the MLS, and an extra zero removal procedure.<br>";
+	}
+
+	if (filterId & _COLORIZE_)
+	{
+		str += "Colorize the vertices of a mesh or point set using the curfvature of the underlying surface.<br>";
 	}
 
 	if (filterId & _APSS_)
@@ -179,7 +187,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 		return;
 	}
 
-	if (id & _PROJECTION_)
+	if ((id & _PROJECTION_) || (id & _COLORIZE_))
 	{
 		parlst.addMesh( "ControlMesh", target, "Point set",
 										"The point set (or mesh) which defines the MLS surface.");
@@ -218,7 +226,8 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 										"1 to a pure spherical fit, values between 0 and 1 gives intermediate results,"
 										"while others real values might give interresting results, but take care with extreme"
 										"settings !");
-		parlst.addBool( "AccurateNormal",
+		if (!(id & _COLORIZE_))
+			parlst.addBool( "AccurateNormal",
 										true,
 										"Accurate normals",
 										"If checked, use the accurate MLS gradient instead of the local approximation"
@@ -253,6 +262,14 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, FilterParame
 
 	if (id & _AFRONT_)
 	{
+	}
+
+	if ((id & _COLORIZE_) && (id & _APSS_))
+	{
+		parlst.addBool( "ApproxCurvature",
+										false,
+										"Approx curvature",
+										"If checked, use the radius of the fitted sphere as an approximation of the mean curvature.");
 	}
 
 	if (id & _MCUBE_)
@@ -291,144 +308,6 @@ struct EdgeAnglePredicate
 	}
 };
 
-#if 0
-namespace vcg {
-namespace tri {
-
-template <class MeshType> class AdvancingMLS : public AdvancingFront<MeshType> {
-public:
-	typedef typename MeshType::VertexType     VertexType;
-	typedef typename MeshType::VertexIterator VertexIterator;
-	typedef typename MeshType::FaceType       FaceType;
-	typedef typename MeshType::FaceIterator   FaceIterator;
-
-	typedef typename MeshType::ScalarType     ScalarType;
-	typedef typename MeshType::VertexType::CoordType   VectorType;
-
-	typedef MlsSurface<ScalarType> MlsType;
-
-	AdvancingMLS(MeshType &_mesh, MlsType& mls)
-		: AdvancingFront<MeshType>(_mesh), mMls(mls)
-	{}
-	bool _SeedFace() {return this->SeedFace();}
-	bool Seed(int &v0, int &v1, int &v2)
-	{
-		// pick the first poin and build a face around
-		VectorType p0 = mMls.points()[0];
-		VectorType n0 = mMls.normals()[0];
-		ScalarType r0 = mMls.radii()[0];
-
-		p0 = mMls.project(p0, &n0);
-		VectorType vu = vcg::Cross(n0,VectorType(0,1,0));
-		if (Norm(vu)<0.1)
-			vu = Cross(n0,VectorType(0,0,1));
-		vu.Normalize();
-		VectorType vv = Cross(n0, vu);
-		VertexType v[3];
-		v[0].P() = VectorType(p0[0], p0[1], p0[2]);
-		v[0].N() = n0;
-		v[1].P() = mMls.project(v[0].P() + vu * r0, &v[1].N());
-		v[2].P() = mMls.project(v[0].P() + vu * (r0*0.5) + vv * (r0*sqrt(3)*0.5), &v[2].N() );
-
-		std::cout << r0 << " "
-			<< vcg::Distance(v[0].P(), v[1].P()) << " "
-			<< vcg::Distance(v[1].P(), v[2].P()) << " "
-			<< vcg::Distance(v[2].P(), v[0].P()) << "\n";
-
-		v[0].ClearFlags();
-		v[1].ClearFlags();
-		v[2].ClearFlags();
-
-		v0 = this->mesh.vert.size();
-		AddVertex(v[0]);
-		v1 = this->mesh.vert.size();
-		AddVertex(v[1]);
-		v2 = this->mesh.vert.size();
-		AddVertex(v[2]);
-
-		std::cout << "seed created\n";
-
-		return true;
-	}
-
-	int Place(FrontEdge &e, std::list<FrontEdge>::iterator &touch)
-	{
-		VectorType p[3];
-		p[0] = this->mesh.vert[e.v0].P();
-		p[1] = this->mesh.vert[e.v1].P();
-		p[2] = this->mesh.vert[e.v2].P();
-		VectorType point = p[0] + p[1] - p[2];
-		ScalarType scale = 0.33 * (vcg::Distance(p[0], p[1]) + vcg::Distance(p[1], p[2]) + vcg::Distance(p[0], p[2]));
-		std::cout
-		<< vcg::Distance(p[0], p[1]) << " "
-		<< vcg::Distance(p[1], p[2]) << " "
-		<< vcg::Distance(p[2], p[0]) << "\n";
-
-		// project p2 on the tangent plane
-		VectorType m = (p[0]+p[1])*0.5;
-		VectorType n0 = this->mesh.vert[e.v0].N() + this->mesh.vert[e.v1].N();
-		n0.Normalize();
-// 		VectorType h = vcg::Cross(p[0]-p[1],n0);
-// 		h.Normalize();
-// 		VectorType pp2 = p[2] - n0 * (vcg::Dot(p[2]-m,n0));
-// 		if (vcg::Dot(pp2-m, h)>0)
-// 			h = -h;
-// 		VectorType point = m + h * (scale*sqrt(3)*0.5);
-
-		point = mMls.project(point, &n0);
-
-		int vn = this->mesh.vert.size();
-		// find closest
-		int minId = -1;
-		ScalarType minD2 = 0.5*scale;
-		ScalarType bm = 1.4*scale;
-		bm = bm * bm;
-		minD2 = minD2*minD2;
-		for(int i = 0; i < this->mesh.vert.size(); i++)
-		{
-			ScalarType d2 = (this->mesh.vert[i].P() - point).SquaredNorm();
-			if (d2<minD2 && i!= e.v0 && i!=e.v1 && i!=e.v2 && this->mesh.vert[i].IsB()
-					&& (this->mesh.vert[i].P() - m).SquaredNorm() < bm )
-			{
-				minId = i;
-				minD2 = d2;
-			}
-		}
-		if (minId>=0)
-		{
-// 			if((this->mesh.vert[i].P() - point).Norm() < 0.5*scale && i!= e.v0 && i!=e.v1 && i!=e.v2) {
-				std::cout << "reuse existing vertex\n";
-				vn = minId;
-				//find the border
-				//assert(this->mesh.vert[i].IsB());
-				for(std::list<FrontEdge>::iterator k = this->front.begin(); k != this->front.end(); k++)
-					if((*k).v0 == vn) touch = k;
-				for(std::list<FrontEdge>::iterator k = this->deads.begin(); k != this->deads.end(); k++)
-					if((*k).v0 == vn) touch = k;
-// 				break;
-// 			}
-		}
-		else //if(vn == this->mesh.vert.size())
-		{
-		std::cout << "create new vertex\n";
-			VertexType v;
-			v.P() = point;//mMls.project(point, &v.N());
-			v.N() = n0;
-			v.ClearFlags();
-			AddVertex(v);
-		}
-		return vn;
-	}
-
-	MlsType& mMls;
-// 	ScalarType r;
-};
-
-}
-}
-
-#endif
-
 /** compute the normal of a face as the average of its vertices */
 template<typename MeshType>
 void UpdateFaceNormalFromVertex(MeshType& m)
@@ -453,7 +332,6 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 {
 	int id = ID(filter);
 
-	// get source and dest meshes
 	if (id == FP_RADIUS_FROM_DENSITY)
 	{
 		CMeshO::VertContainer& points = md.mm()->cm.vert;
@@ -535,7 +413,8 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 		if (apss)
 		{
 			apss->setSphericalParameter(par.getFloat("SphericalParameter"));
-			apss->setGradientHint(par.getBool("AccurateNormal") ? GaelMls::MLS_DERIVATIVE_ACCURATE : GaelMls::MLS_DERIVATIVE_APPROX);
+			if (!(id & _COLORIZE_))
+				apss->setGradientHint(par.getBool("AccurateNormal") ? GaelMls::MLS_DERIVATIVE_ACCURATE : GaelMls::MLS_DERIVATIVE_APPROX);
 		}
 
 		MeshModel * mesh = 0;
@@ -576,6 +455,61 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 
 			Log(0, "Successfully projected %i vertices", mesh->cm.vn);
 		}
+		else if (id & _COLORIZE_)
+		{
+			mesh = par.getMesh("ProxyMesh");
+			
+			bool selectionOnly = par.getBool("SelectionOnly");
+			bool approx = apss && par.getBool("ApproxCurvature");
+			
+			int size = mesh->cm.vert.size();
+			//std::vector<float> curvatures(size);
+			float minc=1e9, maxc=-1e9, minabsc=1e9;
+			vcg::Point3f grad;
+			vcg::Matrix33f hess;
+			// pass 1: computes curvatures and statistics
+			for (unsigned int i = 0; i< size; i++)
+			{
+				cb(1+98*i/pPoints->cm.vert.size(), "MLS colorization...");
+
+				if ( (!selectionOnly) || (pPoints->cm.vert[i].IsS()) )
+				{
+// 					grad = mls->gradient(mesh->cm.vert[i].P());
+// 					hess = mls->hessian(mesh->cm.vert[i].P());
+// 					curvatures[i] = mls->meanCurvature(grad,hess);
+					//float c = mesh->cm.vert[i].Q() = mls->meanCurvature(grad,hess);
+					float c = 0;
+					if (approx)
+						c = mesh->cm.vert[i].Q() = apss->approxMeanCurvature(mesh->cm.vert[i].P());
+					else
+					{
+						grad = mls->gradient(mesh->cm.vert[i].P());
+						hess = mls->hessian(mesh->cm.vert[i].P());
+						c = mesh->cm.vert[i].Q() = mls->meanCurvature(grad,hess);
+					}
+					minc = std::min(c,minc);
+					maxc = std::max(c,maxc);
+					minabsc = std::min(fabsf(c),minabsc);
+				}
+			}
+			// pass 2: convert the curvature to color
+			cb(99, "Curvature to color...");
+			float d = maxc-minc;
+			minc += 0.1*d;
+			maxc -= 0.1*d;
+
+			vcg::Histogramf H;
+      vcg::tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(mesh->cm,H);
+      vcg::tri::UpdateColor<CMeshO>::VertexQualityRamp(mesh->cm,H.Percentile(0.01f),H.Percentile(0.99f));
+// 			for (unsigned int i = 0; i< size; i++)
+// 			{
+// 				if ( (!selectionOnly) || (mesh->cm.vert[i].IsS()) )
+// 				{
+// // 					float c = curvatures[i];
+// 					mesh->cm.vert[i].C().ColorRamp(minc,maxc, mesh->cm.vert[i].Q());
+// 				}
+// 			}
+		}
 	// 	else if (id & _AFRONT_)
 	// 	{
 	// 		// create a new mesh
@@ -589,7 +523,6 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 	// 	}
 		else if (id & _MCUBE_)
 		{
-			using namespace vcg;
 			// create a new mesh
 			mesh = md.addNewMesh("mc_mesh");
 
@@ -628,10 +561,13 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 			delete pPoints;
 		}
 
-		cb(99, "Update face normals...");
-		vcg::tri::UpdateNormals<CMeshO>::PerFace(mesh->cm);
-		cb(100, "Update box...");
-		vcg::tri::UpdateBounding<CMeshO>::Box(mesh->cm);
+		if (mesh)
+		{
+			cb(99, "Update face normals...");
+			vcg::tri::UpdateNormals<CMeshO>::PerFace(mesh->cm);
+			cb(100, "Update box...");
+			vcg::tri::UpdateBounding<CMeshO>::Box(mesh->cm);
+		}
 
 	} // end MLS based stuff
 
