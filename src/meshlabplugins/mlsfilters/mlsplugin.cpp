@@ -355,7 +355,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 	else if (id == FP_SELECT_SMALL_COMPONENTS)
 	{
 		MeshModel* mesh = md.mm();
-		mesh->updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+		mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 		bool nonClosedOnly = par.getBool("NonClosedOnly");
 		float ratio = par.getFloat("NbFaceRatio");
 		vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, ratio, nonClosedOnly);
@@ -435,7 +435,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 				//UpdateFaceNormalFromVertex(m.cm);
 				if (k!=0)
 				{
-					mesh->updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+					mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 
 					vcg::tri::UpdateNormals<CMeshO>::PerFace(mesh->cm);
 					vcg::tri::UpdateNormals<CMeshO>::NormalizeFace(mesh->cm);
@@ -544,12 +544,12 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, FilterParameterSe
 
 			// extra zero detection and removal
 			{
-				mesh->updateDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+				mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 				// selection...
 				vcg::tri::SmallComponent<CMeshO>::Select(mesh->cm, 0.1);
 				// deletion...
 				vcg::tri::SmallComponent<CMeshO>::DeleteFaceVert(mesh->cm);
-				mesh->clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+				mesh->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			}
 
 			Log(0, "Marching cubes MLS meshing done.");
