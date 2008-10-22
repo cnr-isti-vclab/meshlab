@@ -91,9 +91,9 @@ void RangeMapPlugin::initParameterSet(QAction *action, MeshDocument &m, FilterPa
 	 {
 		case FP_SELECTBYANGLE :
 			{
-				parlst.addFloat("anglelimit",
-												75.0f,
-												"angle threshold",
+				parlst.addDynamicFloat("anglelimit",
+															 75.0f, 0.0f, 180.0f, MeshModel::MM_FACEFLAGSELECT,
+												"angle threshold (deg)",
 												"faces with normal at higher angle w.r.t. the view direction are selected");
 	 		  parlst.addBool ("usecamera",
 												false,
@@ -123,22 +123,24 @@ bool RangeMapPlugin::applyFilter(QAction *filter, MeshDocument &m, FilterParamet
 			Point3f viewpoint = par.getPoint3f("viewpoint");	
 
 			// if usecamera but mesh does not have one
-			if((usecam)&&((m.mm()->ioMask & MeshModel::IOM_CAMERA)==0)) 
+			if( usecam && !m.mm()->hasDataMask(MeshModel::MM_CAMERA) ) 
+			{
+				errorMessage = "Mesh has not a camera that can be used to compute view direction. Please set a view direction."; // text
 				return false;
-
+			}
 			if(usecam)
 			{
 				viewpoint = m.mm()->cm.shot.GetViewPoint();
 			}
 
 			// angle threshold in radians
-			float limit = cos( par.getFloat("anglelimit")*3.14159265358979323846/180.0 );
+			float limit = cos( math::ToRad(par.getDynamicFloat("anglelimit")) );
 			Point3f viewray;
 
 			for(fi=m.mm()->cm.face.begin();fi!=m.mm()->cm.face.end();++fi)
 				if(!(*fi).IsD())
 				{
-					viewray = viewpoint - (((*fi).V(0)->P() + (*fi).V(1)->P() + (*fi).V(2)->P()) / 3.0);
+					viewray = viewpoint - Barycenter(*fi);
 					viewray.Normalize();
 
 					if((viewray * (*fi).N().Normalize()) < limit)
