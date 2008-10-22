@@ -1073,7 +1073,7 @@ void main( void )
    
    ViewDirection  = -vec3(gl_ModelViewMatrix * gl_Vertex);
  //  LightDirection = gl_LightSource[0].position.xyz + ViewDirection.xyz;
-   LightDirection = gl_LightSource[0].position;
+   LightDirection = gl_LightSource[0].position.xyz;
    Normal         = gl_NormalMatrix * gl_Normal;  
    Cs = gl_Color;
 }]]></RmShaderCode></RmGLShader>
