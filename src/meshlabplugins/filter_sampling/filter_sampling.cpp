@@ -587,12 +587,12 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 			
 			if(rs.colorFlag) {
 					trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
-					trgMesh->ioMask|=MeshModel::IOM_VERTCOLOR;
+					//trgMesh->ioMask|=MeshModel::IOM_VERTCOLOR;
 			}
 			
 			if(rs.qualityFlag){
 					trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
-					trgMesh->ioMask|=MeshModel::IOM_VERTQUALITY;
+					//trgMesh->ioMask|=MeshModel::IOM_VERTQUALITY;
 			}
 
 			qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
@@ -623,5 +623,22 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, FilterPar
 		}
 	return true;
 }
+const MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
+{
+  switch(ID(action))
+  {
+    case FP_VERTEX_RESAMPLING :
+    case FP_HAUSDORFF_DISTANCE :	
+		case FP_ELEMENT_SAMPLING    :   
+		case FP_MONTECARLO_SAMPLING :    
+		case FP_SIMILAR_SAMPLING :   
+		case FP_SUBDIV_SAMPLING :   
+		case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling;
+		case FP_OFFSET_SURFACE: return FilterDocSampling::Remeshing;
+    default: assert(0);
+  }
+  return FilterClass(0);
+}
+
 
 Q_EXPORT_PLUGIN(FilterDocSampling)
