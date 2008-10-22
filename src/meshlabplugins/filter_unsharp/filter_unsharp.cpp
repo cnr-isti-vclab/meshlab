@@ -153,15 +153,15 @@ const int FilterUnsharp::getRequirements(QAction *action)
 		case FP_HC_LAPLACIAN_SMOOTH:  
     case FP_SD_LAPLACIAN_SMOOTH:  
     case FP_TAUBIN_SMOOTH:  
-    case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_BORDERFLAG;
+    case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_FACEFLAGBORDER;
     case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
 		case FP_UNSHARP_GEOMETRY:	
 		case FP_UNSHARP_QUALITY:	
 		case FP_VERTEX_QUALITY_SMOOTHING:
-		case FP_UNSHARP_VERTEX_COLOR:	return MeshModel::MM_BORDERFLAG;
-    case FP_CREASE_CUT :	return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
-		case FP_UNSHARP_NORMAL:		return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
-		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
+		case FP_UNSHARP_VERTEX_COLOR:	return MeshModel::MM_FACEFLAGBORDER;
+    case FP_CREASE_CUT :	return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
+		case FP_UNSHARP_NORMAL:		return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
+		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
 		case FP_RECOMPUTE_FACE_NORMAL :
 		case FP_RECOMPUTE_VERTEX_NORMAL :
 		case FP_FACE_NORMAL_NORMALIZE:	    return 0; 
@@ -244,7 +244,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	{
 	case FP_CREASE_CUT :
 			 tri::CreaseCut(m.cm, math::ToRad(60.0f));
-			 m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+			 m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			break;
 		
   case FP_FACE_NORMAL_SMOOTHING :

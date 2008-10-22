@@ -91,7 +91,7 @@ const int FilterGeodesic::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-    case FP_QUALITY_GEODESIC :	return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
+    case FP_QUALITY_GEODESIC :	return MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTFLAGBORDER;
     default: assert(0);
   }
   return 0;

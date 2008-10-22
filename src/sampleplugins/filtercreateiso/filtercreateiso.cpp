@@ -91,7 +91,7 @@ const int FilterCreateIso::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-    case FP_CREATEISO :	return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG;
+    case FP_CREATEISO :	return MeshModel::MM_NONE;
     default: assert(0);
   }
   return 0;

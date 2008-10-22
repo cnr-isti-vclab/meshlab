@@ -233,8 +233,8 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_BUTTERFLY_SS :
     case FP_MIDPOINT :
     case FP_CLOSE_HOLES :
-           return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG;
-    case FP_REORIENT:             return MeshModel::MM_FACETOPO;
+           return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
+    case FP_REORIENT:             return MeshModel::MM_FACEFACETOPO;
     case FP_REMOVE_UNREFERENCED_VERTEX:
     case FP_REMOVE_DUPLICATED_VERTEX:
     case FP_REMOVE_FACES_BY_AREA:
@@ -246,7 +246,7 @@ const int ExtraMeshFilterPlugin::getRequirements(QAction *action)
     case FP_INVERT_FACES:         return 0;
     case FP_QUADRIC_SIMPLIFICATION:
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
-		return MeshModel::MM_VERTFACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_VERTMARK ;
+		return MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK ;
     default: assert(0);
   }
   return 0;
@@ -403,7 +403,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 		int delFaceNum;
 	  if(selected) delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<true>(m.cm,0,threshold );
          else    delFaceNum=tri::Clean<CMeshO>::RemoveFaceOutOfRangeEdgeSel<false>(m.cm,0,threshold );
-    m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+    m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 		Log(GLLogStream::Info, "Removed %d faces with and edge longer than %f",delFaceNum,threshold);
 	}
 
@@ -411,7 +411,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 	  {
 	    int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
 	    Log(GLLogStream::Info, "Removed %d null faces", nullFaces);
-      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	  }
 
   if(ID(filter) == (FP_REMOVE_UNREFERENCED_VERTEX) )
@@ -435,7 +435,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 			if(nonManif) Log(GLLogStream::Info, "Removed %d Non Manifold Faces", nonManif);
 							else Log(GLLogStream::Info, "Mesh is two-manifold. Nothing done.", nonManif);
 
-			 m.clearDataMask(MeshModel::MM_BORDERFLAG);
+			 m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
 	  }
 
 	if(ID(filter) == (FP_REORIENT) )
@@ -451,7 +451,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
 			vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
 
-//			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+//			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_BORDERFLAG);
 	    vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 
@@ -464,14 +464,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 				Grid.Add(m.cm);
 				Grid.Extract(m.cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-      m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	  }
 
 	if (ID(filter) == (FP_INVERT_FACES) )
 	{
 	  tri::Clean<CMeshO>::FlipMesh(m.cm);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-    m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+    m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 	}
 
 	if (ID(filter) == (FP_FREEZE_TRANSFORM) ) {
@@ -507,7 +507,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
 			if(deldupvert) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			if(delvert) Log(GLLogStream::Info, "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
-			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 			tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		}
@@ -561,7 +561,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction *filter, MeshModel &m, FilterPar
       tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 
       // hole filling filter does not correctly update the border flags (but the topology is still ok!)
-      m.clearDataMask(MeshModel::MM_BORDERFLAG);
+      m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
       if(NewFaceSelectedFlag)
       {
         tri::UpdateSelection<CMeshO>::ClearFace(m.cm);

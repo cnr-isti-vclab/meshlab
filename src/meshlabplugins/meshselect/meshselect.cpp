@@ -111,9 +111,9 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Filt
 				parlst.addEnum("Mode", 0, mode, tr("Mode:"), tr("The mode of this filter.  Start Over clears the selection completely before selecting based on the color.  Add just adds to the current selection bases on color and subtract takes away from the selection the triangles with a vertex matching the color.") );
 
 				
-				parlst.addDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACESELECTION, tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
-				parlst.addDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACESELECTION, tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
-				parlst.addDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACESELECTION, tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
+				parlst.addDynamicFloat("PercentRH", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACEFLAGSELECT, tr("Variation from Red or Hue"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
+				parlst.addDynamicFloat("PercentGS", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACEFLAGSELECT, tr("Variation from Green or Saturation"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
+				parlst.addDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f, MeshModel::MM_FACEFLAGSELECT, tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") );
 			}
 			break;
 		}
@@ -141,7 +141,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
   case FP_SELECT_DELETE_FACE : 
 		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD() && (*fi).IsS() ) tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
-			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
     break;
   case FP_SELECT_DELETE_FACEVERT : 
 		tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
@@ -152,7 +152,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshModel &m, FilterPar
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
 			if(!(*vi).IsD() && (*vi).IsS() )
 					tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
-			m.clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
     break;
   case FP_SELECT_ALL    : tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
   case FP_SELECT_NONE   : tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   break;
@@ -282,7 +282,7 @@ const int SelectionFilterPlugin::getRequirements(QAction *action)
 {
  switch(ID(action))
   {
-   case FP_SELECT_BORDER_FACES:   return  MeshModel::MM_BORDERFLAG;
+   case FP_SELECT_BORDER_FACES:   return  MeshModel::MM_FACEFLAGBORDER;
    case FP_SELECT_BY_COLOR:		return MeshModel::MM_VERTCOLOR;
   }
 }

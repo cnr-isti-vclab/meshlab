@@ -149,7 +149,7 @@ bool FilterSplitterPlugin::applyFilter(QAction *filter, MeshDocument &md, Filter
 				tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
 				tri::UpdateSelection<CMeshO>::ClearFace(currentMesh->cm);
 
-				currentMesh->clearDataMask(MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG);
+				currentMesh->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 
 				Log(0,"Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
 			}

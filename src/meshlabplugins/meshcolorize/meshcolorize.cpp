@@ -128,19 +128,19 @@ const int ExtraMeshColorizePlugin::getRequirements(QAction *action)
     case CP_GAUSSIAN:                 
     case CP_MEAN:                     
     case CP_RMS:                      
-    case CP_ABSOLUTE:                 return MeshModel::MM_FACETOPO | MeshModel::MM_BORDERFLAG | MeshModel::MM_CURV;
+    case CP_ABSOLUTE:                 return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV;
     case CP_TRIANGLE_QUALITY:         return MeshModel::MM_FACECOLOR;
     case CP_SELFINTERSECT_SELECT:
 		case CP_SELFINTERSECT_COLOR:
-		            return MeshModel::MM_FACEMARK | MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
-    case CP_BORDER:             return MeshModel::MM_BORDERFLAG;
-    case CP_TEXBORDER:                   return MeshModel::MM_FACETOPO;
+		            return MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
+    case CP_BORDER:             return MeshModel::MM_FACEFLAGBORDER;
+    case CP_TEXBORDER:                   return MeshModel::MM_FACEFACETOPO;
     case CP_COLOR_NON_MANIFOLD_FACE:       
-    case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACETOPO;
-    case CP_RANDOM_FACE:       return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR;
+    case CP_COLOR_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACEFACETOPO;
+    case CP_RANDOM_FACE:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
     case CP_MAP_QUALITY_INTO_COLOR:   return 0;
     case CP_VERTEX_SMOOTH:                   return 0;
-    case CP_FACE_SMOOTH:                   return MeshModel::MM_FACETOPO | MeshModel::MM_FACECOLOR ;
+    case CP_FACE_SMOOTH:                   return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR ;
     case CP_VERTEX_TO_FACE:                   return MeshModel::MM_FACECOLOR;
     case CP_FACE_TO_VERTEX:                   return MeshModel::MM_VERTCOLOR;
 	case CP_TEXTURE_TO_VERTEX:                   return MeshModel::MM_FACECOLOR;
