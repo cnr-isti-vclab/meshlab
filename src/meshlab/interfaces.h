@@ -227,7 +227,7 @@ public:
 	
 	// The filters can have some additional requirements on the mesh capabiliteis. 
 	// For example if a filters requires Face-Face Adjacency you shoud re-implement 
-	// this function making it returns MeshModel::MM_FACETOPO. 
+	// this function making it returns MeshModel::MM_FACEFACETOPO. 
 	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
 	virtual const int getRequirements(QAction *){return MeshModel::MM_NONE;}
 

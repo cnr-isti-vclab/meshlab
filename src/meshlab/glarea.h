@@ -425,7 +425,7 @@ protected:
 	void displayInfo();
 	void displayHelp();
 
-	QString GetMeshInfoString(int mask);
+	QString GetMeshInfoString();
 	void paintGL();
 	void resizeGL(int width, int height);
 	void keyReleaseEvent ( QKeyEvent * e ); 

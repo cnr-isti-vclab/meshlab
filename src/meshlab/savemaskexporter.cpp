@@ -162,50 +162,52 @@ int SaveMaskExporterDialog::GetNewMask()
 	false : otherwise.
 
 */
-bool shouldBeChecked(int bit, int capabilityBits, int defaultBits, int meshBits)
+bool SaveMaskExporterDialog::shouldBeChecked(int bit, int capabilityBits, int defaultBits)
 {
-	if( (bit & meshBits) == 0 ) return false;
+	if(!m->hasDataMask(bit)) return false;
+	//if( (bit & meshBits) == 0 ) return false;
 	if( (bit & defaultBits) == 0 ) return false;
 	return true;
 }
 
-bool shouldBeEnabled(int bit, int capabilityBits, int defaultBits, int meshBits)
+bool SaveMaskExporterDialog::shouldBeEnabled(int bit, int capabilityBits, int defaultBits)
 {
 	if( (bit & capabilityBits) == 0 ) return false;
-	if( (bit & meshBits) == 0 ) return false;
+//	if( (bit & meshBits) == 0 ) return false;
+	if(!m->hasDataMask(bit)) return false;
 	return true;
 }
 
-void checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits, int meshBits)
+void SaveMaskExporterDialog::checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits)
 {
- qcb->setEnabled(shouldBeEnabled (bit,capabilityBits, defaultBits,meshBits) );
- qcb->setChecked(shouldBeChecked (bit,capabilityBits, defaultBits,meshBits) );
+ qcb->setEnabled(shouldBeEnabled (bit,capabilityBits, defaultBits) );
+ qcb->setChecked(shouldBeChecked (bit,capabilityBits, defaultBits) );
 }
 
 void SaveMaskExporterDialog::SetMaskCapability()
 {
 	//vert
-	checkAndEnable(ui.check_iom_vertquality,  MeshModel::IOM_VERTQUALITY,  capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_vertflags,    MeshModel::IOM_VERTFLAGS,    capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_vertcolor,    MeshModel::IOM_VERTCOLOR,    capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_verttexcoord, MeshModel::IOM_VERTTEXCOORD, capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_vertnormal,   MeshModel::IOM_VERTNORMAL,   capability, defaultBits, m->ioMask );
+	checkAndEnable(ui.check_iom_vertquality,  MeshModel::IOM_VERTQUALITY,  capability, defaultBits );
+	checkAndEnable(ui.check_iom_vertflags,    MeshModel::IOM_VERTFLAGS,    capability, defaultBits);
+	checkAndEnable(ui.check_iom_vertcolor,    MeshModel::IOM_VERTCOLOR,    capability, defaultBits);
+	checkAndEnable(ui.check_iom_verttexcoord, MeshModel::IOM_VERTTEXCOORD, capability, defaultBits);
+	checkAndEnable(ui.check_iom_vertnormal,   MeshModel::IOM_VERTNORMAL,   capability, defaultBits);
 	
 	//face
-	checkAndEnable(ui.check_iom_facequality, MeshModel::IOM_FACEQUALITY, capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_faceflags,   MeshModel::IOM_FACEFLAGS,   capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_facecolor,   MeshModel::IOM_FACECOLOR,   capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_facenormal,  MeshModel::IOM_FACENORMAL,  capability, defaultBits, m->ioMask );
+	checkAndEnable(ui.check_iom_facequality, MeshModel::IOM_FACEQUALITY, capability, defaultBits );
+	checkAndEnable(ui.check_iom_faceflags,   MeshModel::IOM_FACEFLAGS,   capability, defaultBits );
+	checkAndEnable(ui.check_iom_facecolor,   MeshModel::IOM_FACECOLOR,   capability, defaultBits );
+	checkAndEnable(ui.check_iom_facenormal,  MeshModel::IOM_FACENORMAL,  capability, defaultBits );
 
 	//wedge
-	checkAndEnable(ui.check_iom_wedgcolor,    MeshModel::IOM_WEDGCOLOR,    capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_wedgtexcoord, MeshModel::IOM_WEDGTEXCOORD, capability, defaultBits, m->ioMask );
-	checkAndEnable(ui.check_iom_wedgnormal,   MeshModel::IOM_WEDGNORMAL,   capability, defaultBits, m->ioMask );
+	checkAndEnable(ui.check_iom_wedgcolor,    MeshModel::IOM_WEDGCOLOR,    capability, defaultBits );
+	checkAndEnable(ui.check_iom_wedgtexcoord, MeshModel::IOM_WEDGTEXCOORD, capability, defaultBits );
+	checkAndEnable(ui.check_iom_wedgnormal,   MeshModel::IOM_WEDGNORMAL,   capability, defaultBits );
 
 
-	//camera
-	ui.check_iom_camera->setDisabled( ((capability & MeshModel::IOM_CAMERA)==0) | ((m->ioMask & MeshModel::IOM_CAMERA)==0) );
-	ui.check_iom_camera->setChecked ( ((capability & MeshModel::IOM_CAMERA)!=0) & ((m->ioMask & MeshModel::IOM_CAMERA)!=0) );
+	//camera THIS ONE HAS TO BE CORRECTED !!!! 
+	//ui.check_iom_camera->setDisabled( ((capability & MeshModel::IOM_CAMERA)==0) | ((m->ioMask & MeshModel::IOM_CAMERA)==0) );
+	//ui.check_iom_camera->setChecked ( ((capability & MeshModel::IOM_CAMERA)!=0) & ((m->ioMask & MeshModel::IOM_CAMERA)!=0) );
 
 
 	if(capability == 0)

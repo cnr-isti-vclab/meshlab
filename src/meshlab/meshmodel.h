@@ -118,31 +118,48 @@ It contains a single vcg mesh object with some additional information for keepin
 class MeshModel : public vcg::tri::io::Mask
 {
 public:
-/* This enum specify the various mesh elements.
-	It is used for 
+/* 
+ This enum specify the various simplex components
+ It is used in various parts of the framework:
+ - to know what elements are currently active and therefore can be saved on a file
+ - to know what elements are required by a filter and therefore should be made ready before starting the filter (e.g. if a 
+ - to know what elements are changed by a filter and therefore should be saved/restored in case of dynamic filters with a preview
 	*/
  	enum MeshElement {  
-		MM_NONE						= 0x000000,
-		MM_VERTCOORD			= 0x000001,
-		MM_VERTNORMAL			= 0x000002,
-		MM_VERTCOLOR			= 0x000004,
-		MM_VERTQUALITY		= 0x000008,
-		MM_VERTGEOM = MM_VERTCOORD | MM_VERTNORMAL,
-		MM_VERTMARK				= 0x000010,
-		MM_VERTFACETOPO		= 0x000020,
-		MM_VERTCONTAINER	= 0x000040,
-		MM_VERTFLAG				= 0x000080,
-		MM_BORDERFLAG			= 0x000100,
-		MM_FACECOLOR			= 0x000200,
-		MM_FACEQUALITY		= 0x000400,
-		MM_FACEMARK				= 0x000800,
-		MM_FACETOPO				= 0x001000,
-		MM_WEDGTEXCOORD		= 0x002000,
-		MM_CURV						= 0x004000,
-		MM_CURVDIR				= 0x008000,
-		MM_FACESELECTION  = 0x010000,
-		MM_VERTRADIUS     = 0x020000,
+		MM_NONE							= 0x000000,
+		MM_VERTCOORD				= 0x000001,
+		MM_VERTNORMAL				= 0x000002,
+		MM_VERTFLAG					= 0x000004,
+		MM_VERTCOLOR				= 0x000008,
+		MM_VERTQUALITY			= 0x000010,
+		MM_VERTMARK					= 0x000020,
+		MM_VERTFACETOPO			= 0x000040,
+		MM_VERTCURV					= 0x000080,
+		MM_VERTCURVDIR			= 0x000100,
+		MM_VERTRADIUS				= 0x000200,
+		
+		MM_FACEVERT					= 0x001000,
+		MM_FACENORMAL				= 0x002000,
+		MM_FACEFLAG					= 0x004000,
+		MM_FACECOLOR				= 0x008000,
+		MM_FACEQUALITY			= 0x010000,
+		MM_FACEMARK					= 0x020000,
+		MM_FACEFACETOPO			= 0x040000,
+		MM_WEDGTEXCOORD			= 0x080000,
+		MM_WEDGNORMAL				= 0x100000,
+
+// 	SubParts of bits
+		MM_VERTFLAGSELECT	= 0x01000000,
+		MM_FACEFLAGSELECT	= 0x02000000,
+// This part should be deprecated. 		
+		MM_VERTFLAGBORDER	= 0x04000000,
+		MM_FACEFLAGBORDER	= 0x08000000,
+		
+// Per Mesh Stuff....
+		MM_CAMERA					= 0x10000000,
+		
 		MM_ALL						= 0xffffff
+		
 	} ;
 
 
@@ -152,13 +169,28 @@ public:
   vcg::GlTrimesh<CMeshO> glw;
 	std::string fileName;
 
-  // Bitmask denoting what fields are currently kept updated in mesh
-  // it is composed by OR-ing MM_XXXX enums (defined in the above FilterReq)
+	/*
+  
+	Bitmask denoting what fields are currently used in the mesh 
+  it is composed by MeshElement enums.
+	it should be changed by only mean the following functions:
+	 
+	updateDataMask(neededStuff)
+	clearDataMask(no_needed_stuff)
+	hasDataMask(stuff)
+	
+	Note that if an element is active means that is also allocated 
+	Some unactive elements (vertex color) are usually already allocated
+	other elements (FFAdj or curvature data) not necessarily.
+	 
+	*/
+	
+//private:
   int currentDataMask;
-
+public:
   // Bitmask denoting what fields are loaded/saved
   // it is composed by OR-ing IOM_XXXX enums (defined in tri::io::Mask)
-  int ioMask;
+//  int ioMask;
 	
 	bool visible; // used in rendering; Needed for toggling on and off the meshes
 		
@@ -167,8 +199,14 @@ public:
 
   MeshModel(const char *meshName=0) {
     glw.m=&cm; 
-    currentDataMask=MM_NONE;
-    ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS | IOM_VERTNORMAL;
+    
+		// These data are always active on the mesh
+		currentDataMask = MM_NONE;
+		currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
+		currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
+		
+    //ioMask= IOM_VERTCOORD | IOM_FACEINDEX | IOM_FLAGS | IOM_VERTNORMAL;
+		
     visible=true;
 		cm.Tr.SetIdentity();
 		cm.sfn=0;
@@ -182,90 +220,70 @@ public:
   // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
   void Enable(int openingFileMask)
   {
-   if( openingFileMask & IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
-   if( openingFileMask & IOM_FACECOLOR    ) updateDataMask(MM_FACECOLOR);
-	 if( openingFileMask & IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
-  }
+		if( openingFileMask & IOM_WEDGTEXCOORD ) updateDataMask(MM_WEDGTEXCOORD);
+		if( openingFileMask & IOM_VERTCOLOR    ) updateDataMask(MM_VERTCOLOR);
+		if( openingFileMask & IOM_FACECOLOR    ) updateDataMask(MM_FACECOLOR);
+		if( openingFileMask & IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
+		if( openingFileMask & IOM_CAMERA				) updateDataMask(MM_CAMERA);
+		if( openingFileMask & IOM_VERTQUALITY	) updateDataMask(MM_VERTQUALITY);
+	}
 
-  // Ogni filtro dichiara
-  // 1) di che cosa ha bisogno
-  // 2) che cosa sa aggiornare (di solito quello di cui ha bisogno)
-  // 3) quello che ha cambiato (vertici topologia colore)
-
-  // il framework si preoccupa
-  // 1) prima di invocare il filtro di preparare quel che serve
-  // 2) dopo il filtro di aggiornare quello che non ha aggiornato il filtro
-
-  // Enable optional fields that could be needed
+  bool hasDataMask(int maskToBeTested)
+	{
+		return ((currentDataMask & maskToBeTested)!= 0);
+	}
+	
   void updateDataMask(int neededDataMask)
   {
-		if( ( (neededDataMask & MM_FACETOPO)!=0) && (currentDataMask& MM_FACETOPO)==0)
+		if( ( (neededDataMask & MM_FACEFACETOPO)!=0) && !hasDataMask(MM_FACEFACETOPO) )
 		{
 			cm.face.EnableFFAdjacency();
-			currentDataMask |= MM_FACETOPO;
 			vcg::tri::UpdateTopology<CMeshO>::FaceFace(cm);
 		}
-		if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && (currentDataMask& MM_VERTFACETOPO)==0)
+		if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && !hasDataMask(MM_VERTFACETOPO) )
 		{
 			cm.vert.EnableVFAdjacency();
 			cm.face.EnableVFAdjacency();
-			currentDataMask |= MM_VERTFACETOPO;
 			vcg::tri::UpdateTopology<CMeshO>::VertexFace(cm);
 		}
-		if( ( (neededDataMask & MM_BORDERFLAG)!=0) && (currentDataMask& MM_BORDERFLAG)==0)
+		if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0)	&& !hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.EnableWedgeTex();
+		if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
+		if( ( (neededDataMask & MM_FACEQUALITY)!=0)		&& !hasDataMask(MM_FACEQUALITY))		cm.face.EnableQuality();
+		if( ( (neededDataMask & MM_FACEMARK)!=0)			&& !hasDataMask(MM_FACEMARK))				cm.face.EnableMark();
+		if( ( (neededDataMask & MM_VERTMARK)!=0)			&& !hasDataMask(MM_VERTMARK))				cm.vert.EnableMark();
+		if( ( (neededDataMask & MM_VERTCURV)!=0)			&& !hasDataMask(MM_VERTCURV))				cm.vert.EnableCurvature();
+		if( ( (neededDataMask & MM_VERTCURVDIR)!=0)		&& !hasDataMask(MM_VERTCURVDIR))		cm.vert.EnableCurvatureDir();
+		if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
+
+		
+		if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) || 
+				 ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
 		{
-			if(currentDataMask& MM_FACETOPO) vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
+			if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO)) 
+					 vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
 			else vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
 			vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
-			currentDataMask |= MM_BORDERFLAG;
-		}
-		if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0) && (currentDataMask& MM_WEDGTEXCOORD)==0)
-		{
-			cm.face.EnableWedgeTex();
-			currentDataMask |= MM_WEDGTEXCOORD;
-		}
-		if( ( (neededDataMask & MM_FACECOLOR)!=0) && (currentDataMask& MM_FACECOLOR)==0)
-		{
-			cm.face.EnableColor();
-			currentDataMask |= MM_FACECOLOR;
-		}
-		if( ( (neededDataMask & MM_FACEQUALITY)!=0) && (currentDataMask & MM_FACEQUALITY)==0)
-		{
-			cm.face.EnableQuality();
-			currentDataMask |= MM_FACEQUALITY;
 		}
 
-		if( ( (neededDataMask & MM_FACEMARK)!=0) && (currentDataMask& MM_FACEMARK)==0)
-		{
-			cm.face.EnableMark();
-			currentDataMask |= MM_FACEMARK;
-		}
-		if( ( (neededDataMask & MM_VERTMARK)!=0) && (currentDataMask& MM_VERTMARK)==0)
-		{
-			cm.vert.EnableMark();
-			currentDataMask |= MM_VERTMARK;
-		}
-		
-		if( ( (neededDataMask & MM_CURV)!=0) && (currentDataMask& MM_CURV)==0)
-		{
-			cm.vert.EnableCurvature();
-			currentDataMask |= MM_CURV;
-		}
-		if( ( (neededDataMask & MM_CURVDIR)!=0) && (currentDataMask& MM_CURVDIR)==0)
-		{
-			cm.vert.EnableCurvatureDir();
-			currentDataMask |= MM_CURVDIR;
-		}
-		if( ( (neededDataMask & MM_VERTRADIUS)!=0) && (currentDataMask& MM_VERTRADIUS)==0)
-		{
-			cm.vert.EnableRadius();
-			currentDataMask |= MM_VERTRADIUS;
-		}
-  }
+		currentDataMask |= neededDataMask;
+   }
 
-  void clearDataMask(int neededDataMask)
+  void clearDataMask(int unneededDataMask)
   {
-    currentDataMask = currentDataMask & (~neededDataMask);
+		if( ( (unneededDataMask & MM_VERTFACETOPO)!=0)	&& hasDataMask(MM_VERTFACETOPO)) {cm.face.DisableVFAdjacency();
+																																											cm.vert.DisableVFAdjacency(); }
+		if( ( (unneededDataMask & MM_FACEFACETOPO)!=0)	&& hasDataMask(MM_FACEFACETOPO))	cm.face.DisableFFAdjacency();
+		
+		if( ( (unneededDataMask & MM_WEDGTEXCOORD)!=0)	&& hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.DisableWedgeTex();
+		if( ( (unneededDataMask & MM_FACECOLOR)!=0)			&& hasDataMask(MM_FACECOLOR))			cm.face.DisableColor();
+		if( ( (unneededDataMask & MM_FACEQUALITY)!=0)		&& hasDataMask(MM_FACEQUALITY))		cm.face.DisableQuality();
+		if( ( (unneededDataMask & MM_FACEMARK)!=0)			&& hasDataMask(MM_FACEMARK))			cm.face.DisableMark();
+		if( ( (unneededDataMask & MM_VERTMARK)!=0)			&& hasDataMask(MM_VERTMARK))			cm.vert.DisableMark();
+		if( ( (unneededDataMask & MM_VERTCURV)!=0)			&& hasDataMask(MM_VERTCURV))			cm.vert.DisableCurvature();
+		if( ( (unneededDataMask & MM_VERTCURVDIR)!=0)		&& hasDataMask(MM_VERTCURVDIR))		cm.vert.DisableCurvatureDir();
+		if( ( (unneededDataMask & MM_VERTRADIUS)!=0)		&& hasDataMask(MM_VERTRADIUS))		cm.vert.DisableRadius();
+		
+    currentDataMask = currentDataMask & (~unneededDataMask);
   }
 };
 
@@ -380,13 +398,16 @@ public:
 };
 
 /* 
-	A class designed to save aspects of the state of a mesh, such as vertex colors,
-	and then be able to restore them later
+	A class designed to save partial aspects of the state of a mesh, such as vertex colors, current selections, vertex positions
+	and then be able to restore them later. 
+	This is a fundamental part for the dynamic filters framework. 
+ 
+	Note: not all the MeshElements are supported!! 
 */
 class MeshModelState
 {
 	public:
-	int changeMask; // a bit mask indicating What have been changed.
+	int changeMask; // a bit mask indicating what have been changed. Composed of 
 	MeshModel *m; // the mesh which the changes refers to.
 	std::vector<vcg::Color4b> vertColor;
 	std::vector<vcg::Point3f> vertCoord;
@@ -424,7 +445,7 @@ class MeshModelState
 				 if(!(*vi).IsD()) (*ci)=(*vi).N();
 		}
 		
-		if(changeMask & MeshModel::MM_FACESELECTION)
+		if(changeMask & MeshModel::MM_FACEFLAGSELECT)
 		{
 			faceSelection.resize(m->cm.face.size());
 			std::vector<bool>::iterator ci;
@@ -476,7 +497,7 @@ class MeshModelState
 			}
 		} 
 		
-		if(changeMask & MeshModel::MM_FACESELECTION)
+		if(changeMask & MeshModel::MM_FACEFLAGSELECT)
 		{
 			if(faceSelection.size() != m->cm.face.size()) return false;
 			std::vector<bool>::iterator ci;

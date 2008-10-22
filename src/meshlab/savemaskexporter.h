@@ -105,6 +105,10 @@ private:
 	int defaultBits;
 	FilterParameterSet *par;
 	StdParFrame *stdParFrame;
+	
+	void checkAndEnable(QCheckBox *qcb,int bit, int capabilityBits, int defaultBits);
+	bool shouldBeEnabled(int bit, int capabilityBits, int defaultBits);
+	bool shouldBeChecked(int bit, int capabilityBits, int defaultBits);
 };//end class
 
 #endif

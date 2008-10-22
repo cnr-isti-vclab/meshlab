@@ -163,14 +163,16 @@ GLArea::~GLArea()
 	where:
 	VC = VertColor,VQ = VertQuality,FC = FaceColor,FQ = FaceQuality,WT = WedgTexCoord
 */
-QString GLArea::GetMeshInfoString(int mask)
+QString GLArea::GetMeshInfoString()
 {
 	QString info;
-	if( mask & MeshModel::IOM_VERTQUALITY){info.append("VQ ");}
-	if( mask & MeshModel::IOM_VERTCOLOR){info.append("VC ");}
-	if( mask & MeshModel::IOM_FACEQUALITY){info.append("FQ ");}
-	if( mask & MeshModel::IOM_FACECOLOR){info.append("FC ");}
-	if( mask & MeshModel::IOM_WEDGTEXCOORD){info.append("WT ");}
+	if(mm()->hasDataMask(MeshModel::MM_VERTQUALITY) ) {info.append("VQ ");}
+	if(mm()->hasDataMask(MeshModel::MM_VERTCOLOR) ) {info.append("VC ");}
+	if(mm()->hasDataMask(MeshModel::MM_VERTRADIUS) ) {info.append("VR ");}
+	if(mm()->hasDataMask(MeshModel::MM_FACECOLOR) ) {info.append("FC ");}
+	if(mm()->hasDataMask(MeshModel::MM_WEDGTEXCOORD) ) {info.append("WT ");}
+	if(mm()->hasDataMask(MeshModel::MM_CAMERA) ) {info.append("MC ");}
+
 	return info;
 }
 
@@ -535,9 +537,9 @@ void GLArea::displayInfo()
 		renderText(middleCol,startPos+ 2*lineSpacing,tr("Vertices: %1 (%2)").arg(mm()->cm.vn).arg(meshDoc.vn()),qFont);
 		renderText(middleCol,startPos+ 3*lineSpacing,tr("Faces: %1 (%2)").arg(mm()->cm.fn).arg(meshDoc.fn()),qFont);
 	}
-	if(rm.selectedFaces)  
+	if(rm.selectedFaces || mm()->cm.sfn>0)  
 		 renderText(middleCol,startPos+ 4*lineSpacing,tr("Selected: %1").arg(mm()->cm.sfn),qFont);
-	renderText(rightCol,startPos+ 4*lineSpacing,GetMeshInfoString(mm()->ioMask),qFont);
+	renderText(rightCol,startPos+ 4*lineSpacing,GetMeshInfoString(),qFont);
 
   if(fov>5) renderText(rightCol,startPos+1*lineSpacing,QString("FOV: ")+QString::number((int)fov,10),qFont);
 			 else renderText(rightCol,startPos+1*lineSpacing,QString("FOV: Ortho"),qFont);
