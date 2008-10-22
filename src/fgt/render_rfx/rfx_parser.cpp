@@ -383,11 +383,24 @@ QString RfxParser::TextureFromRfx(const QString& VarName,
 
 			// ... get relative path to texture file
 			QString fName(varNode.attribute("FILE_NAME").replace('\\', '/'));
-
+			
+			// The textures with the special name TEXTURE0.png
+			// are interpreted as 'the current texture of the mesh'
+			// to allow a seamless integration of the shaders with
+			// the textured mesh of meshlab.
+			if(fName==QString("TEXTURE0.PNG"))
+			{
+				QFileInfo thefile(meshTextureName);
+				if(thefile.exists())		qDebug("The texture %s exists.", qPrintable(meshTextureName));
+				filePath = thefile.absoluteFilePath();
+				qDebug("Using the texture of the mesh %s",qPrintable(filePath));
+			}
+			else 
+			{
 			// then join together and return the absolute path
 			QFileInfo thefile(fDir, fName);
 			filePath = thefile.absoluteFilePath();
-
+			}
 			break;
 		}
 	}

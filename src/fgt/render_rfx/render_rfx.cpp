@@ -112,6 +112,11 @@ void RenderRFX::Init(QAction *action, MeshModel &mesh,
 
 	// parse shader file we're going to use
 	RfxParser theParser(QDir(shaderDir).absoluteFilePath(action->text()));
+
+	// Small hack that allow to use the current mesh textures for the shaders.
+	QFileInfo meshBaseDir(mesh.fileName.c_str());
+	theParser.setMeshTexture(meshBaseDir.absolutePath()+"/"+QString(mesh.cm.textures[0].c_str()));
+	
 	assert(theParser.Parse());
 	activeShader = theParser.GetShader();
 	assert(activeShader);

@@ -999,8 +999,8 @@ C:\Documents and Settings\BELiAL\Desktop\]]></RmTextDataBlock></RmStringVariable
    <RmFloatVariable NAME="Ka" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0.200000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
    <RmFloatVariable NAME="Ks" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0.300000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
    <RmFloatVariable NAME="Kd" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" VALUE="0.800000" MIN="-1.000000" MAX="1.000000" CLAMP="FALSE"/>
-   <Rm2DTextureVariable NAME="rockbump" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" FILE_NAME="..\textures\rockbump.tga" ORIGIN="0"/>
-   <Rm2DTextureVariable NAME="rock" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" FILE_NAME="..\textures\rockbump.jpg" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="base" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" FILE_NAME="TEXTURE0.PNG" ORIGIN="0"/>
+   <Rm2DTextureVariable NAME="bump" API="" ARTIST_EDITABLE="FALSE" VARIABLE_SEMANTIC="" FILE_NAME="TEXTURE0.PNG" ORIGIN="0"/>
    <RmStreamMap NAME="Stream Mapping" API="">
     <RmStream NAME="Stream" API="" STRIDE="32">
      <RmStreamChannel NAME="Position_0" API="" DATA_SIZE="12" DATA_TYPE="2" REGISTER="0" USAGE="0" USAGE_INDEX="0" ATTRIBUTE_NAME="rm_Vertex"/>
@@ -1038,9 +1038,10 @@ void main(void)
    vec4 baseColor = texture2D(base, gl_TexCoord[0].st);
    vec3 bumpPert = texture2D(bump, gl_TexCoord[0].st).rgb;
 
-   vec3 nLight = normalize(gl_LightSource[0].position);
+   vec3 nLight = normalize(gl_LightSource[0].position.xyz);
    vec3 nView = normalize(viewVec);
-   vec3 nNormal = normalize(normalize(normalVec) + normalize(bumpPert));
+//   vec3 nNormal = normalize(normalize(normalVec) + normalize(bumpPert));
+   vec3 nNormal = normalize(normalize(bumpPert));
 
    float diffuse = clamp(dot(nLight, nNormal), 0.0, 1.0);
    float specular = pow(clamp(dot(reflect(-nView, nNormal), nLight),0.0, 1.0), 16.0);
@@ -1049,10 +1050,10 @@ void main(void)
 }]]></RmShaderCode></RmGLShader>
     <RmStreamMapReference NAME="Stream Mapping" API=""/>
     <RmTextureObject NAME="base" API="OpenGL" STATE_INDEX="0" VERTEX_TEXTURE="FALSE">
-     <RmTextureReference NAME="rock" API=""/>
+     <RmTextureReference NAME="base" API=""/>
     </RmTextureObject>
     <RmTextureObject NAME="bump" API="OpenGL" STATE_INDEX="1" VERTEX_TEXTURE="FALSE">
-     <RmTextureReference NAME="rockbump" API=""/>
+     <RmTextureReference NAME="bump" API=""/>
     </RmTextureObject>
     <RmSampler NAME="base" API="" REGISTER="-1"/>
     <RmSampler NAME="bump" API="" REGISTER="-1"/>

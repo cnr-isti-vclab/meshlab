@@ -40,7 +40,7 @@ public:
 	virtual ~RfxParser();
 	bool Parse();
 	RfxShader* GetShader() { return rfxShader; }
-
+	void setMeshTexture(QString tn){meshTextureName = tn;}
 private:
 	QList<RfxState*> ParseGLStates(QDomNodeList, RfxState::StateType);
 	void ParseUniforms(const QString&);
@@ -53,7 +53,11 @@ private:
 	QDomDocument document;
 	QDomElement root;
 	RfxShader *rfxShader;
-
+  
+	// the absolute filepath of the texture of the current mesh,
+	// It automatically substitute any texture with the special name "TEXTURE0.PNG"
+	QString meshTextureName;
+	
 	static const char *UniformToRfx[];
 	static const short UniformToElements[];
 };
