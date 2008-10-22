@@ -130,7 +130,14 @@ void PoissonPlugin::initParameterSet(QAction *action,MeshModel &m, FilterParamet
 											"construction is adapted to sampling density. For noise-free samples, small values in the range [1.0 - 5.0] can be used.\n"
 											"For more noisy samples, larger values in the range [15.0 - 20.0] may be needed to provide a smoother, noise-reduced, reconstruction.\n"
 											"The default value is 1.0.");
-	
+			parlst.addFloat ("Offset",
+											 1.0,
+											 "Surface offsetting",
+											 "This floating point value specifies a correction value for the isosurface threshold that is chosen.\n"
+											 "Values < 1 means internal offsetting, >1 external offsetting."
+											 "Good values are in the range 0.5 .. 2.\n"
+											 "The default value is 1.0 (no offsetting).");
+			
 			break;
 											
 		default : assert(0); 
@@ -164,6 +171,7 @@ bool PoissonPlugin::applyFilter(QAction *filter, MeshModel &m, FilterParameterSe
 	pp.Depth=par.getInt("OctDepth");
 	pp.SamplesPerNode = par.getFloat("SamplesPerNode");
 	pp.SolverDivide=par.getInt("SolverDivide");
+	pp.Offset = par.getFloat("Offset");
 	Point3D<float> center;
 	float scale;
 	

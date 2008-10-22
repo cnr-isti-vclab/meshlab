@@ -10,8 +10,13 @@ public:
 		SamplesPerNode=1.0f;		
 		Scale=1.25f;
 		KernelDepth = -1;
+		Offset = 1.0;
 	}
 	bool Verbose,NoResetSamples,NoClipTree,Confidence;
+
+	float Offset; // an hacked offset value. if == 1 no offset. 0.5.. 2 are good values.
+
+	
 	int Depth;
 	int SolverDivide;
 	int IsoDivide;

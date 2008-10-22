@@ -148,6 +148,9 @@ else{
 
 	tree.maxMemoryUsage=0;
 	isoValue=tree.GetIsoValue();
+	printf("IsoValue is %f \n",isoValue);
+  isoValue = isoValue * Par.Offset; 
+	printf("IsoValue is %f \n",isoValue);
 
 	if(Par.IsoDivide){tree.GetMCIsoTriangles(isoValue,Par.IsoDivide,&mesh);}
 	else{tree.GetMCIsoTriangles(isoValue,&mesh);}
